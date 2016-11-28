@@ -6,19 +6,35 @@
 #ifndef _SUPPORT_WIREPROTOCOL_H_
 #define _SUPPORT_WIREPROTOCOL_H_
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
 #if defined(_MSC_VER)
 #pragma pack(push, SUPPORT_WIREPROTOCOL_H_, 4)
 #endif
 
-#include <TinySupport.h>
-#include <tinyhal.h>    //  Needed because of reference to ....  
+// FIXME: xxx_Types.h
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+//#include <TinySupport.h>
+// TinyHAL_Types.h
+typedef unsigned char      UINT8;
+typedef unsigned short int UINT16;
+typedef unsigned int       UINT32;
+typedef unsigned __int64   UINT64;
+
+typedef const char*        LPCSTR;
+
+#ifndef min
+#define min(a,b)  (((a) < (b)) ? (a) : (b))
+#endif
+
+#include <stdio.h>
+#include <string.h>
+
+/////////////////////////////////////////////////////////////////////////////
 
 //
-// Keep these strings less than 7-characters long!! They are stuffed into an 8-byte structure (\0 terminated).
+// Keep these strings less than 7-characters long!!
+// They are stuffed into an 8-byte structure (\0 terminated).
 //
 #define MARKER_DEBUGGER_V1 "MSdbgV1" // Used to identify the debugger at boot time.
 #define MARKER_PACKET_V1   "MSpktV1" // Used to identify the start of a packet.
@@ -55,7 +71,7 @@ struct WP_Flags
 
 struct WP_Packet
 {
-    UINT8  m_signature[ 8 ];
+    UINT8  m_signature[8];
     UINT32 m_crcHeader;
     UINT32 m_crcData;
 
@@ -74,15 +90,15 @@ struct WP_PhysicalLayer
     // TransmitMessage has to be fully buffered, in the sense it should accept all the input and return.
     // Blocking behavior has to be hidden in the driver.
     //
-    bool (*ReceiveBytes   )( void* state, UINT8*& ptr, UINT32 & size );
-    bool (*TransmitMessage)( void* state, const WP_Message* msg      );
+    bool (*ReceiveBytes)(void* state, UINT8*& ptr, UINT32 & size);
+    bool (*TransmitMessage)(void* state, const WP_Message* msg);
 };
 
 struct WP_ApplicationLayer
 {
-    bool (*ProcessHeader )( void* state,  WP_Message* msg );
-    bool (*ProcessPayload)( void* state,  WP_Message* msg );
-    bool (*Release       )( void* state,  WP_Message* msg );
+    bool (*ProcessHeader)(void* state, WP_Message* msg);
+    bool (*ProcessPayload)(void* state, WP_Message* msg);
+    bool (*Release)(void* state, WP_Message* msg);
 };
 
 //--//
@@ -102,45 +118,29 @@ struct WP_Message
 
     static const UINT32 c_PayloadTimeout = 60000000; // 6 secs (100 nsecs units)
 
-    //--//
-
     WP_Controller* m_parent;
-
     WP_Packet      m_header;
     UINT8*         m_payload;
-
-    //--//
 
 private:
     UINT8*         m_pos;
     UINT32         m_size;
     UINT64         m_payloadTicks;
     int            m_rxState;
-    //--//
 
 public:
-    void Initialize( WP_Controller* parent );
-
-    //--//
-
-    void PrepareReception(                                                                        );
-    void PrepareRequest  ( UINT32           cmd, UINT32 flags, UINT32 payloadSize, UINT8* payload );
-    void PrepareReply    ( const WP_Packet& req, UINT32 flags, UINT32 payloadSize, UINT8* payload );
-    void SetPayload      (                                                         UINT8* payload );
-    void Release         (                                                                        );
-#if defined(NETMF_TARGET_BIG_ENDIAN)
-    void SwapEndian      (                                                                        );
-#endif
-
+    void Initialize(WP_Controller* parent);
+    void PrepareReception();
+    void PrepareRequest(UINT32 cmd, UINT32 flags, UINT32 payloadSize, UINT8* payload);
+    void PrepareReply(const WP_Packet& req, UINT32 flags, UINT32 payloadSize, UINT8* payload);
+    void SetPayload(UINT8* payload);
+    void Release();
     bool Process();
-
-    //--//
 
 private:
     bool VerifyHeader ();
     bool VerifyPayload();
-
-    void ReplyBadPacket( UINT32 flags );
+    void ReplyBadPacket(UINT32 flags);
 };
 
 struct WP_Controller
@@ -153,27 +153,22 @@ struct WP_Controller
     WP_Message                 m_inboundMessage;
     UINT16                     m_lastOutboundMessage;
 
-    //--//
 
-    void Initialize( LPCSTR szMarker, const WP_PhysicalLayer* phy, const WP_ApplicationLayer* app, void* state );
-
-    //--//
-
+    void Initialize(LPCSTR szMarker, const WP_PhysicalLayer* phy, const WP_ApplicationLayer* app, void* state);
     bool AdvanceState();
-
-    bool SendProtocolMessage( const WP_Message& msg );
-
-    bool SendProtocolMessage( UINT32 cmd, UINT32 flags = 0, UINT32 payloadSize = 0, UINT8* payload = NULL );
+    bool SendProtocolMessage(const WP_Message& msg);
+    bool SendProtocolMessage(UINT32 cmd, UINT32 flags = 0, UINT32 payloadSize = 0, UINT8* payload = NULL);
 };
 
 //--//
 
 //
-// This structure is never used, its purpose is to generate a compiler error in case the size of any structure changes.
+// This structure is never used, its purpose is to generate
+// a compiler error in case the size of any structure changes.
 //
 struct WP_CompileCheck
 {
-    char buf1[ sizeof(WP_Packet) == 8 * 4 ? 1 : -1 ];
+    char buf1[sizeof(WP_Packet) == 8*4 ? 1 : -1];
 };
 
 //--//
