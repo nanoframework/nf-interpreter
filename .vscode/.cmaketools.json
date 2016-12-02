@@ -1,0 +1,13 @@
+{
+  "variant": {
+    "label": "Debug+STM32F407VG GCC",
+    "keywordSettings": {
+      "buildType": "debug",
+      "linkage": "static"
+    },
+    "description": "Emit debug information without performing optimizations + GCC build for STM32F407VG"
+  },
+  "activeEnvironments": [
+    "Visual C++ 14.0 - amd64_arm"
+  ]
+}
