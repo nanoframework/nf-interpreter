@@ -1,0 +1,10 @@
+# ignore all ZIP files
+*.zip
+
+# ignore stcube_repository folder
+stcube_repository/*
+# except CMakeLists file
+!stcube_repository/CMakeLists.txt
+
+# ignore build folder
+build/*
