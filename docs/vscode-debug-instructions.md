@@ -1,8 +1,8 @@
-# Instructions for debuging nanoFramework native code in VS Code
+# Instructions for debuging **nano Framework** native code in VS Code
 
 **About this document**
 
-This document describes how to debug nanoFramework native code using VS Code.
+This document describes how to debug **nano Framework** native code using VS Code.
 
 <a name="Prerequisites"></a>
 # Prerequisites

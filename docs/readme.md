@@ -1,5 +1,4 @@
-# nanoFramework Documentation
+# **nano Framework** Documentation
 
-[Building nanoFramework] (build-instructions.md)
+[Building **nano Framework**] (build-instructions.md)
 [Debug with VS Code] (vscode-debug-instructions.md)
- 
