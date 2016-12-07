@@ -60,7 +60,7 @@ else()
 endif()
 
 # set toolchain file
-set(CMAKE_TOOLCHAIN_FILE CMake/${CHIP_VENDOR_STM32}_${TOOLCHAIN}.cmake)
+set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.${CHIP_VENDOR_STM32}.${TOOLCHAIN}.cmake)
 
 #########################################
 
