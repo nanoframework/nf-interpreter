@@ -45,7 +45,7 @@ elseif(STM32_SERIES STREQUAL "F7")
 
 elseif(STM32_SERIES STREQUAL "F0")
 
-    list(APPEND CMSIS_COMMON_HEADERS core_cm3.h)
+    list(APPEND CMSIS_COMMON_HEADERS core_cm0.h)
     set(CMSIS_DEVICE_HEADERS stm32f0xx.h system_stm32f0xx.h)
     set(CMSIS_DEVICE_SOURCES system_stm32f0xx.c)
 

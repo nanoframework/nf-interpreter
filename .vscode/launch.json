@@ -2,17 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "nano Framework test",
+            "name": "nano Framework test Discovery 4",
             "type": "cppdbg",
             "request": "launch",
             "miDebuggerPath": "E:/GNU_Tools_ARM_Embedded/5_4_2016q3/bin/arm-none-eabi-gdb.exe",
             "targetArchitecture": "ARM",
-            "program": "e:/GitHub/nf-interpreter/build/nanoFramework.hex",
+            "program": "E:/GitHub/nf-interpreter/build/nanoFramework.hex",
 
             "setupCommands": [
                 {"text": "target extended-remote localhost:3333"},
                 {"text": "monitor reset halt"},
-                {"text": "monitor flash write_image erase \"e:/GitHub/x-nano-framework/build/nanoFramework.hex\" "},
+                {"text": "monitor flash write_image erase \"E:/GitHub/nf-interpreter/build/nanoFramework.hex\" "},
                 {"text": "file e:/GitHub/nf-interpreter/build/source/nanoFramework"},
                 {"text": "monitor reset halt"}
             ],
@@ -23,7 +23,38 @@
 
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "C:/Program Files (x86)/openocd-0.10.0/bin/openocd.exe",
-            "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/bin/scripts/\" -f interface/stlink-v2-1.cfg -f board/stm32f4discovery.cfg",
+            "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/stlink-v2-1.cfg -f board/stm32f4discovery.cfg",
+            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "filterStderr": true,
+            "externalConsole": true,
+            "cwd": "${cwd}"
+        },
+
+        {
+            "name": "nano Framework test Nucleo F091RC",
+            "type": "cppdbg",
+            "request": "launch",
+            "miDebuggerPath": "E:/GNU_Tools_ARM_Embedded/5_4_2016q3/bin/arm-none-eabi-gdb.exe",
+            "targetArchitecture": "ARM",
+            "program": "E:/GitHub/nf-interpreter/build/nanoFramework.hex",
+
+            "setupCommands": [
+                {"text": "target extended-remote localhost:3333"},
+                {"text": "monitor reset halt"},
+                // {"text": "monitor flash set_parallelism_mode 2"},
+                {"text": "monitor flash write_image erase \"E:/GitHub/nf-interpreter/build/nanoFramework.hex\" "},
+                {"text": "file e:/GitHub/nf-interpreter/build/source/nanoFramework"},
+                // {"text": "set *0xE0042004 = (*0xE0042004) | 0x7"},
+                {"text": "monitor reset halt"}
+            ],
+
+            "customLaunchSetupCommands": [
+                {"text": "monitor reset halt"}
+            ],
+
+            "launchCompleteCommand": "exec-continue",
+            "debugServerPath": "C:/Program Files (x86)/openocd-0.10.0/bin/openocd.exe",
+            "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/stlink-v2-1.cfg -f board/st_nucleo_f0.cfg",
             "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
             "filterStderr": true,
             "externalConsole": true,

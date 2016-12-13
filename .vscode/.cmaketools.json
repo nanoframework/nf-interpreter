@@ -1,11 +1,11 @@
 {
   "variant": {
-    "label": "Debug+STM32F407VG GCC",
+    "label": "Debug+STM32F091RC GCC",
     "keywordSettings": {
       "buildType": "debug",
-      "linkage": "static"
+      "linkage": "STM32F091RC_GCC"
     },
-    "description": "Emit debug information without performing optimizations + GCC build for STM32F407VG"
+    "description": "Emit debug information without performing optimizations + GCC build for STM32F091RC"
   },
   "activeEnvironments": [
     "Visual C++ 14.0 - amd64_arm"

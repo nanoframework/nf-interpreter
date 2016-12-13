@@ -3,9 +3,12 @@ if(NOT STM32_SERIES)
     message(FATAL_ERROR "No STM32_SERIES specified")
 endif()
 
+# message(STATUS "--${CMAKE_CURRENT_SOURCE_DIR}/Custom_ROMID.zip--")
+# execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_CURRENT_SOURCE_DIR}/Custom_ROMID.zip" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
 
 # check if series folder already exists 
-if(NOT EXISTS "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_SERIES}")
 
     # ST Cube package folder is missing
 
@@ -83,7 +86,7 @@ if(NOT EXISTS "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}")
     # unzip the package file
     message(STATUS "Unpacking STM32 Cube package. This can take a while...")
     # ZIP output is at the binary directory
-    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_CUBE_PACK_NAME}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_CUBE_PACK_NAME}" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
     # check if package is a patch
     if(PACK_IS_PATCH)
@@ -112,25 +115,35 @@ if(NOT EXISTS "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}")
         # unzip the package file
         message(STATUS "Unpacking STM32 Cube package patch. This can take a while...")
         # ZIP output is at the binary directory
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_CUBE_PACK_NAME}")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_CUBE_PACK_NAME}" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
     endif()
 
-    # rename folder as CMake extract doesn't accept a destination directory
-    file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/stcube")
-    file(RENAME "${PROJECT_BINARY_DIR}/${STM32_CUBE_PACK_FOLDER_NAME}" "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}")
-
-
     # remove folders not required for build
-    FILE(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}/_htmresc")
-    FILE(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}/Documentation")
-    FILE(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}/Utilities/PC_Software")
-    FILE(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}/Utilities/Media")
-    FILE(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}/Projects")
+    FILE(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_CUBE_PACK_FOLDER_NAME}/_htmresc")
+    FILE(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_CUBE_PACK_FOLDER_NAME}/Documentation")
+    FILE(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_CUBE_PACK_FOLDER_NAME}/Utilities/PC_Software")
+    FILE(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_CUBE_PACK_FOLDER_NAME}/Utilities/Media")
+    FILE(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_CUBE_PACK_FOLDER_NAME}/Projects")
 
-else()
-    message(STATUS "STM32 package already available. Skiping download and install.")
+    # rename folder as CMake extract doesn't accept a destination directory
+    file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_CUBE_PACK_FOLDER_NAME}" "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_SERIES}")
+
 endif()
+
+# series folder exists at repo
+
+if(NOT EXISTS "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}")
+    # series folder doesn't exist at build folder so copy it there
+    message(STATUS "STM32 package already available. Skiping download and copying to build directory.")
+
+    # copy series directory to build directory
+    file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/${STM32_SERIES}" DESTINATION "${PROJECT_BINARY_DIR}/stcube")
+else()
+    # series folder already at build folder so we are done here
+    message(STATUS "STM32 package already at build directory. Skiping download and copy.")
+endif()
+
 
 # set ST Cube directory for this family
 set(STM32Cube_DIR "${PROJECT_BINARY_DIR}/stcube/${STM32_SERIES}" CACHE INTERNAL "path to ST Cube package files")
