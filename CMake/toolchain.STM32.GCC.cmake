@@ -147,11 +147,11 @@ function(STM32_SET_FLASH_PARAMS TARGET FLASH_SIZE RAM_SIZE)
     endif()
 
     if(NOT STM32_MIN_STACK_SIZE)
-        set(STM32_MIN_STACK_SIZE "0x200")
+        set(STM32_MIN_STACK_SIZE "0x400")
     endif()
 
     if(NOT STM32_MIN_HEAP_SIZE)
-        set(STM32_MIN_HEAP_SIZE "0")
+        set(STM32_MIN_HEAP_SIZE "0x200")
     endif()
 
     if(NOT STM32_CCRAM_ORIGIN)
@@ -182,18 +182,24 @@ function(STM32_SET_TARGET_PROPERTIES TARGET)
             STM32_GET_CHIP_TYPE(${TARGET_CHIP} TARGET_CHIP_TYPE)
         endif()
     endif()
+
     STM32_SET_CHIP_DEFINITIONS(${TARGET} ${TARGET_CHIP_TYPE})
+    
     if(((NOT STM32_FLASH_SIZE) OR (NOT STM32_RAM_SIZE)) AND (NOT TARGET_CHIP))
         message(FATAL_ERROR "Cannot get STM32_FLASH_SIZE and STM32_RAM_SIZE chip parameters ")
     endif()
+
     if((NOT STM32_FLASH_SIZE) OR (NOT STM32_RAM_SIZE))
         STM32_GET_CHIP_PARAMETERS(${TARGET_CHIP} STM32_FLASH_SIZE STM32_RAM_SIZE)
+        
         if((NOT STM32_FLASH_SIZE) OR (NOT STM32_RAM_SIZE))
             message(FATAL_ERROR "Unknown chip: ${TARGET_CHIP}.")
         endif()
     endif()
+
     STM32_SET_FLASH_PARAMS(${TARGET} ${STM32_FLASH_SIZE} ${STM32_RAM_SIZE})
     message(STATUS "${TARGET_CHIP} has ${STM32_FLASH_SIZE}B of flash memory and ${STM32_RAM_SIZE}B of RAM")
+
 endfunction()
 
 macro(STM32_GENERATE_LIBRARIES NAME SOURCES LIBRARIES)
