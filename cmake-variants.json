@@ -30,7 +30,9 @@
         "settings": {
             "TOOLCHAIN_PREFIX" : "E:/GNU_Tools_ARM_Embedded/5_4_2016q3",
             "TARGET_CHIP" : "STM32F091RC",
-            "PACKAGE_VERSION" : "1.6.0"
+            "PACKAGE_VERSION" : "1.6.0",
+            "RTOS" : "", 
+            "FREERTOS_VERSION" : ""
         },
         "buildType": "Debug"
       },
@@ -40,7 +42,9 @@
         "settings": {
             "TOOLCHAIN_PREFIX" : "E:/GNU_Tools_ARM_Embedded/5_4_2016q3",
             "TARGET_CHIP" : "STM32F407VG",
-            "PACKAGE_VERSION" : "1.13.1"
+            "PACKAGE_VERSION" : "1.13.1",
+            "RTOS" : "", 
+            "FREERTOS_VERSION" : ""
         },
         "buildType": "Debug"
       },

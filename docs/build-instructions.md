@@ -44,6 +44,8 @@ The build script accepts the following parameters (some of them are mandatory).
 - TOOLCHAIN: the toolchain to use in the build. The default (and only option at this time) is GCC.
 - TOOLCHAIN_PREFIX: path to the install directory of the toolchain. E.g.: "E:/GNU_Tools_ARM_Embedded/5_4_2016q3". Mind the forward slash on the path for all platforms.
 - CMAKE_BUILD_TYPE: build type (Debug, Release, etc). The default is Release.
+- RTOS: specifies the RTOS to add to the image. This will download the appropriate files from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS) and mBed RTOS (MBEDRTOS).
+- FREERTOS_VERSION: specifies the FreeRTOS version to grab the source files. It has to match one of the official versions from the FreeRTOS repository. If none is specified it will download the 'trunk' version.
 
 You can specify any generator that is supported in the platform where you are building.
 For more information on this check CMake documentation [here](https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html?highlight=generator).
@@ -53,7 +55,15 @@ For more information on this check CMake documentation [here](https://cmake.org/
 If you are building from the command prompt, just go to your *build* directory and run CMake from there with the appropriate parameters. 
 The following is a working example:
 
-```cmake -DTOOLCHAIN_PREFIX="E:/GNU_Tools_ARM_Embedded/5_4_2016q3" -DTARGET_CHIP=STM32F407VG -DPACKAGE_VERSION=1.13.1 -G "NMake Makefiles" ../```
+```
+cmake \
+-DTOOLCHAIN_PREFIX="E:/GNU_Tools_ARM_Embedded/5_4_2016q3" \
+-DTARGET_CHIP=STM32F407VG \
+-DPACKAGE_VERSION=1.13.1 \
+-RTOS=FREERTOS \
+-FREERTOS_VERSION=9.0.0 \
+-G "NMake Makefiles" ../ 
+```
 
 This will call CMake (on your *build* directory that is assumed to be under the repository root) specifing the location of the toolchain install, targeting STM32F407VG, asking for the ST Cube package version 1.13.1 to be used and that the build files suitable for NMake are to be generated.
 After succesfull completion you'll have the build files ready to be used in the target build tool.
