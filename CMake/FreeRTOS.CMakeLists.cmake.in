@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 2.8.2)
+
+project(FreeRTOS-download NONE)
+
+include(ExternalProject)
+
+# download FreeRTOS source from official SVN repo
+ExternalProject_Add( 
+    FreeRTOS
+    PREFIX FreeRTOS
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
+    SVN_REPOSITORY ${FREERTOS_SVN_REPOSITORY}/FreeRTOS/Source
+    TIMEOUT 10
+    LOG_DOWNLOAD 1
+    # Disable all other steps
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)

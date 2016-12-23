@@ -159,7 +159,7 @@
                                                                               /*  Warning: Must be set to higher priority for HAL_Delay()  */
                                                                               /*  and HAL_GetTick() usage under interrupt context          */
 #define  USE_RTOS                     0     
-#define  PREFETCH_ENABLE              0              
+#define  PREFETCH_ENABLE              1              
 #define  INSTRUCTION_CACHE_ENABLE     0
 #define  DATA_CACHE_ENABLE            0
 /* ########################## Assert Selection ############################## */
