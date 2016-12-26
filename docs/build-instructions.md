@@ -47,6 +47,8 @@ The build script accepts the following parameters (some of them are mandatory).
 - RTOS: specifies the RTOS to add to the image. This will download the appropriate files from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS) and mBed RTOS (MBEDRTOS).
 - FREERTOS_VERSION: specifies the FreeRTOS version to grab the source files. It has to match one of the official versions from the FreeRTOS repository. If none is specified it will download the 'trunk' version.
 
+_Note: the very first build will take more or less time depending on the download speed of the Internet connection of the machine were the build is running. This is because the source code of the RTOS of your choice will be downloaded from its repository. On the subsequent builds this won't happen._
+
 You can specify any generator that is supported in the platform where you are building.
 For more information on this check CMake documentation [here](https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html?highlight=generator).
 

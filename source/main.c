@@ -2,8 +2,11 @@
 #if defined(FREERTOS) || defined(MBEDRTOS)
 
 #include "cmsis_os.h"
+
+#if defined(FREERTOS) 
 #include "FreeRTOS.h"
 #include "task.h"
+#endif
 
 #endif
 
@@ -73,7 +76,10 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   
+// CMSIS RTOS defined
 #if defined(FREERTOS) || defined(MBEDRTOS)
+ 
+#if defined(FREERTOS) 
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
@@ -83,13 +89,21 @@ int main(void)
   /* Start scheduler */
   osKernelStart();
 
+#elif defined(MBEDRTOS)
+
+  /* Create the thread(s) */
+  /* definition and creation of defaultTask */
+  osThreadDef(StartDefaultTask, osPriorityNormal, 128);
+  defaultTaskHandle = osThreadCreate(osThread(StartDefaultTask), NULL);
+
+#endif
+
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   while (1) {}
 
+// no RTOS defined
 #else
-
-  // no RTOS defined
 
   for (;;) {
 
@@ -353,16 +367,26 @@ void Error_Handler(void)
   }
 }
 
+#if defined(FREERTOS) && (!defined(MBEDRTOS))
+
 void SysTick_Handler(void)
 {
 
-#if defined(FREERTOS) || defined(MBEDRTOS)
+#if defined(FREERTOS) 
   osSystickHandler();
+#elif defined(MBEDRTOS)
+
 #else
   HAL_SYSTICK_IRQHandler();
 #endif
 
 }
+
+#endif
+
+#if defined(MBEDRTOS)
+void error(void){}
+#endif
 
 /**
   * @brief  This function handles NMI exception.
