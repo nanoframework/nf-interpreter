@@ -27,7 +27,7 @@ If you are using VS Code as your development platform we suggest that you use th
 <a name="Preparation"></a>
 # Preparation
 
-It's ***highly*** recommended that run the build outside the source tree. This prevents you from clutering the source tree with CMake artifacts, temporary files and like. 
+It's ***highly*** recommended that run the build outside the source tree. This prevents you from cluttering the source tree with CMake artifacts, temporary files and like. 
 In fact this is enforced and checked by the CMake script.
 
 In case you need to clean up or start a fresh build all you have to do is simply delete the contents of the build directory.
@@ -70,7 +70,7 @@ After succesfull completion you'll have the build files ready to be used in the 
 
 ## Building from VS Code (using CMake Tools extension)
 
-we've added the required files and configurations to help you launch your build from VS Code.
+We've added the required files and configurations to help you launch your build from VS Code.
 Follows a brief explanation on the files you might want to tweak.
 
 - settings.json (inside .vscode folder) here you can change the generator that CMage uses to generate the build. The default is ```"cmake.generator": "NMake Makefiles"```.
