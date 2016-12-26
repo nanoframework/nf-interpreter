@@ -86,10 +86,9 @@ int main(void)
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
-  /* Start scheduler */
-  osKernelStart();
-
 #elif defined(MBEDRTOS)
+
+  osKernelInitialize ();
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
@@ -98,6 +97,9 @@ int main(void)
 
 #endif
 
+  /* Start scheduler */
+  osKernelStart();
+  
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   while (1) {}
