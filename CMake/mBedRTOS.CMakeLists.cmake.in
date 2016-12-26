@@ -4,7 +4,7 @@ project(mBedRTOS-download NONE)
 
 include(ExternalProject)
 
-# download FreeRTOS source from official SVN repo
+# download mBed RTOS source from official mBed GitHub repo
     ExternalProject_Add( 
         mBedRTOS
         PREFIX mBedRTOS
