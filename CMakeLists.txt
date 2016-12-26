@@ -45,6 +45,10 @@ string(COMPARE EQUAL "STM32" "${CHIP_VENDOR_STM32}" CHIP_VENDOR_STM32_CHECK)
 if(CHIP_VENDOR_STM32_CHECK)
     # vendor is ST and toolchain is GCC
     message(STATUS "Chip vendor is ST. Chip is STM32.")
+
+    # set CMSIS include directories
+    include_directories(STM32CMSIS_INCLUDE_DIRS)
+
     # set toolchain file for cross-compiling with CMake
     # for this vendor/chip it will be 
 # elseif(CHIP_VENDOR_??_CHECK)
@@ -127,23 +131,60 @@ if(RTOS_FREERTOS_CHECK)
         
     endif()
 
-    # download FreeRTOS source from official SVN repo
+    # need to setup a separate CMake project to download the code from the SVN repository
+    # otherwise it won't be available before the actual build step
+    configure_file("CMake/FreeRTOS.CMakeLists.cmake.in"
+                   "${CMAKE_BINARY_DIR}/FreeRTOS_Download/CMakeLists.txt")
+    
+    # setup CMake project for FreeRTOS download
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
+
+    # run build on FreeRTOS download CMake project to perform the download
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
+    
+    # add FreeRTOS as external project
     ExternalProject_Add( 
         FreeRTOS
         PREFIX FreeRTOS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS-Source
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
         SVN_REPOSITORY ${FREERTOS_SVN_REPOSITORY}/FreeRTOS/Source
         TIMEOUT 10
         LOG_DOWNLOAD 1
         # Disable all other steps
+        INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
-        INSTALL_COMMAND ""
     )
 
     # get source dir for FreeRTOS CMake project
     ExternalProject_Get_Property(FreeRTOS SOURCE_DIR)
-    set(FREERTOS_INCLUDE_DIRS ${FREERTOS_SOURCE_DIR})
+    set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
+
+    # # set FreeRTOS include directory 
+    # include_directories( ${FREERTOS_INCLUDE_DIR})
+
+    # # set include directory of FreeRTOS port according to MCU + toolchain
+    # if(STM32_SERIES STREQUAL "F1")
+    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM1)    
+    # elseif(STM32_SERIES STREQUAL "F2")
+    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM2)    
+    # elseif(STM32_SERIES STREQUAL "F4")
+    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM4)
+    # elseif(STM32_SERIES STREQUAL "F7")
+    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM4)
+    # elseif(STM32_SERIES STREQUAL "F0")
+    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM0)
+    # elseif(STM32_SERIES STREQUAL "L0")
+    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM0)
+    # endif()
+    # include_directories( ${FREERTOS_PORT_INCLUDE_DIR})
+
+    # set CMSIS RTOS include directory
+    include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
 
 #######################
 # mBed RTOS
@@ -160,7 +201,22 @@ elseif(RTOS_MBED_RTOS_CHECK)
       message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
     endif()
 
-    # download FreeRTOS source from official SVN repo
+    # need to setup a separate CMake project to download the code from the SVN repository
+    # otherwise it won't be available before the actual build step
+    configure_file("CMake/mBedRTOS.CMakeLists.cmake.in"
+                   "${CMAKE_BINARY_DIR}/mBedRTOS_Download/CMakeLists.txt")
+    
+    # setup CMake project for mBedRTOS download
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedRTOS_Download")
+
+    # run build on mBedRTOS download CMake project to perform the download
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedRTOS_Download")
+    
+    # download mBedRTOS source from official GitHub repo
     ExternalProject_Add( 
         mBedRTOS
         PREFIX mBed-RTOS
