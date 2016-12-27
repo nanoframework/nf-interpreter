@@ -101,6 +101,16 @@ endif()
 string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
 string(COMPARE EQUAL "MBEDRTOS" "${RTOS}" RTOS_MBED_RTOS_CHECK)
 
+if(RTOS_FREERTOS_CHECK) 
+set(RTOS_FREERTOS_CHECK TRUE)
+set(RTOS_MBED_RTOS_CHECK FALSE)
+endif()
+
+if(RTOS_MBED_RTOS_CHECK) 
+set(RTOS_MBED_RTOS_CHECK TRUE)
+set(RTOS_FREERTOS_CHECK FALSE)
+endif()
+
 #######################
 # FreeRTOS
 if(RTOS_FREERTOS_CHECK)
@@ -220,7 +230,7 @@ elseif(RTOS_MBED_RTOS_CHECK)
     ExternalProject_Add( 
         mBedRTOS
         PREFIX mBed-RTOS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/mBed-RTOS-Source
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/mBedRTOS_Source
         GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os/
         GIT_TAG master  # target master branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
