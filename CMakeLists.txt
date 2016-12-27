@@ -100,15 +100,34 @@ endif()
 
 string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
 string(COMPARE EQUAL "MBEDRTOS" "${RTOS}" RTOS_MBED_RTOS_CHECK)
+string(COMPARE EQUAL "RTXRTOS" "${RTOS}" RTX_RTOS_CHECK)
+string(COMPARE EQUAL "RTXRTOS2" "${RTOS}" RTX_RTOS2_CHECK)
 
 if(RTOS_FREERTOS_CHECK) 
 set(RTOS_FREERTOS_CHECK TRUE)
 set(RTOS_MBED_RTOS_CHECK FALSE)
+set(RTX_RTOS_CHECK FALSE)
+set(RTX_RTOS2_CHECK FALSE)
 endif()
 
 if(RTOS_MBED_RTOS_CHECK) 
 set(RTOS_MBED_RTOS_CHECK TRUE)
 set(RTOS_FREERTOS_CHECK FALSE)
+set(RTX_RTOS_CHECK FALSE)
+set(RTX_RTOS2_CHECK FALSE)
+endif()
+
+if(RTX_RTOS_CHECK) 
+set(RTX_RTOS_CHECK TRUE)
+set(RTOS_FREERTOS_CHECK FALSE)
+set(RTOS_MBED_RTOS_CHECK FALSE)
+endif()
+
+if(RTX_RTOS2_CHECK) 
+set(RTX_RTOS2_CHECK TRUE)
+set(RTX_RTOS_CHECK FALSE)
+set(RTOS_FREERTOS_CHECK FALSE)
+set(RTOS_MBED_RTOS_CHECK FALSE)
 endif()
 
 #######################
@@ -216,17 +235,17 @@ elseif(RTOS_MBED_RTOS_CHECK)
     configure_file("CMake/mBedRTOS.CMakeLists.cmake.in"
                    "${CMAKE_BINARY_DIR}/mBedRTOS_Download/CMakeLists.txt")
     
-    # setup CMake project for mBedRTOS download
+    # setup CMake project for mBed RTOS download
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                     RESULT_VARIABLE result
                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedRTOS_Download")
 
-    # run build on mBedRTOS download CMake project to perform the download
+    # run build on mBed RTOS download CMake project to perform the download
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
                     RESULT_VARIABLE result
                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedRTOS_Download")
     
-    # download mBedRTOS source from official GitHub repo
+    # download mBed RTOS source from official GitHub repo
     ExternalProject_Add( 
         mBedRTOS
         PREFIX mBed-RTOS
@@ -247,9 +266,122 @@ elseif(RTOS_MBED_RTOS_CHECK)
     ExternalProject_Get_Property(mBedRTOS SOURCE_DIR)
     set(MBEDRTOS_INCLUDE_DIRS ${MBEDRTOS_SOURCE_DIR})
 
+    # set update disconnected to prevent updates on builds
+    set_property(DIRECTORY ${MBEDRTOS_SOURCE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1)
+
 #######################
+# RTX RTOS
+elseif(RTX_RTOS_CHECK)
+
+    # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+    include(Hack_SetGitSearchPath)
+
+    # check for Git (needed here for advanced warning to user if it's not installed)
+    find_package(Git)
+
+    #  check if Git was found, if not report to user and abort
+    if(NOT GIT_EXECUTABLE)
+      message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+    endif()
+
+    # need to setup a separate CMake project to download the code from the SVN repository
+    # otherwise it won't be available before the actual build step
+    configure_file("CMake/RTXRTOS.CMakeLists.cmake.in"
+                   "${CMAKE_BINARY_DIR}/RTXRTOS_Download/CMakeLists.txt")
+    
+    # setup CMake project for RTX RTOS download
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
+
+    # run build on RTX RTOS download CMake project to perform the download
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
+    
+    # download RTX RTOS source from official GitHub repo
+    ExternalProject_Add( 
+        RTXRTOS
+        PREFIX RTX-RTOS
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/RTXRTOS_Source
+        GIT_REPOSITORY  https://github.com/ARM-software/CMSIS_5
+        GIT_TAG master  # target master branch
+        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+        TIMEOUT 10
+        LOG_DOWNLOAD 1
+        
+        # Disable all other steps
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+    )
+
+    # get source dir for RTX RTOS CMake project
+    ExternalProject_Get_Property(RTXRTOS SOURCE_DIR)
+    set(RTXRTOS_INCLUDE_DIRS ${RTXRTOS_SOURCE_DIR})
+
+#######################
+# RTX RTOS2
+elseif(RTX_RTOS2_CHECK)
+
+    message(FATAL_ERROR "
+#############################################################
+support for RTX RTOS2 is in the works, please check latter...
+#############################################################")
+
+    # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+    include(Hack_SetGitSearchPath)
+
+    # check for Git (needed here for advanced warning to user if it's not installed)
+    find_package(Git)
+
+    #  check if Git was found, if not report to user and abort
+    if(NOT GIT_EXECUTABLE)
+      message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+    endif()
+
+    # need to setup a separate CMake project to download the code from the SVN repository
+    # otherwise it won't be available before the actual build step
+    configure_file("CMake/RTXRTOS.CMakeLists.cmake.in"
+                   "${CMAKE_BINARY_DIR}/RTXRTOS_Download/CMakeLists.txt")
+    
+    # setup CMake project for RTX RTOS2 download (same as RTX RTOS)
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
+
+    # run build on RTX RTOS2 download CMake project to perform the download
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
+    
+    # download RTX RTOS2 source from official GitHub repo (same as RTX RTOS)
+    ExternalProject_Add( 
+        RTXRTOS2
+        PREFIX RTX-RTOS
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/RTXRTOS_Source
+        GIT_REPOSITORY  https://github.com/ARM-software/CMSIS_5
+        GIT_TAG master  # target master branch
+        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+        TIMEOUT 10
+        LOG_DOWNLOAD 1
+        
+        # Disable all other steps
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+    )
+
+    # get source dir for RTX RTOS2 CMake project
+    ExternalProject_Get_Property(RTXRTOS2 SOURCE_DIR)
+    set(RTXRTOS2_INCLUDE_DIRS ${RTXRTOS2_SOURCE_DIR})
+
+#######################
+
 # no RTOS specifed
 else()
+    
+    set(RTOS TRUE)
 
     message(STATUS "NO RTOS was specified")
 

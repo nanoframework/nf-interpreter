@@ -1,5 +1,5 @@
 // Includes required for CMSIS compatible RTOS
-#if defined(FREERTOS) || defined(MBEDRTOS)
+#if defined(FREERTOS) || defined(MBEDRTOS) || defined(RTXRTOS) || defined(RTXRTOS2)
 
 #include "cmsis_os.h"
 
@@ -55,7 +55,7 @@ TIM_HandleTypeDef        htim1;
 uint32_t                 uwIncrementState = 0;
 
 // thread ID required for CMSIS compatible RTOS
-#if defined(FREERTOS) || defined(MBEDRTOS)
+#if defined(FREERTOS) || defined(MBEDRTOS) || defined(RTXRTOS)
 osThreadId defaultTaskHandle;
 #endif
 
@@ -77,7 +77,7 @@ int main(void)
   MX_GPIO_Init();
   
 // CMSIS RTOS defined
-#if defined(FREERTOS) || defined(MBEDRTOS)
+#if defined(FREERTOS) || defined(MBEDRTOS) || defined(RTXRTOS) || defined(RTXRTOS2)
  
 #if defined(FREERTOS) 
 
@@ -95,16 +95,25 @@ int main(void)
   osThreadDef(StartDefaultTask, osPriorityNormal, 128);
   defaultTaskHandle = osThreadCreate(osThread(StartDefaultTask), NULL);
 
+#elif defined(RTXRTOS) || defined(RTXRTOS2)
+
+  osKernelInitialize ();
+
+  /* Create the thread(s) */
+  /* definition and creation of defaultTask */
+  osThreadDef(StartDefaultTask, osPriorityNormal, 0, 128);
+  defaultTaskHandle = osThreadCreate(osThread(StartDefaultTask), NULL);
+  
 #endif
 
   /* Start scheduler */
   osKernelStart();
-  
+
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   while (1) {}
 
-// no RTOS defined
+// no OS
 #else
 
   for (;;) {
@@ -299,7 +308,7 @@ void MX_GPIO_Init(void)
 
 }
 
-#if defined(FREERTOS) || defined(MBEDRTOS)
+#if defined(FREERTOS) || defined(MBEDRTOS) || defined(RTXRTOS)|| defined(RTXRTOS2)
 /* StartDefaultTask function */
 void StartDefaultTask(void const * argument)
 {
