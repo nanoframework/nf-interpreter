@@ -44,7 +44,7 @@ The build script accepts the following parameters (some of them are mandatory).
 - TOOLCHAIN: the toolchain to use in the build. The default (and only option at this time) is GCC.
 - TOOLCHAIN_PREFIX: path to the install directory of the toolchain. E.g.: "E:/GNU_Tools_ARM_Embedded/5_4_2016q3". Mind the forward slash on the path for all platforms.
 - CMAKE_BUILD_TYPE: build type (Debug, Release, etc). The default is Release.
-- RTOS: specifies the RTOS to add to the image. This will download the appropriate files from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS) and mBed RTOS (MBEDRTOS).
+- RTOS: specifies the RTOS to add to the image. This will download the appropriate files from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS), mBed RTOS (MBEDRTOS) and ARM RTX (RTXRTOS).
 - FREERTOS_VERSION: specifies the FreeRTOS version to grab the source files. It has to match one of the official versions from the FreeRTOS repository. If none is specified it will download the 'trunk' version.
 
 _Note: the very first build will take more or less time depending on the download speed of the Internet connection of the machine were the build is running. This is because the source code of the RTOS of your choice will be downloaded from its repository. On the subsequent builds this won't happen._

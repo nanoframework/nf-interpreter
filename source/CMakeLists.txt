@@ -11,25 +11,55 @@ include_directories(
 )
 
 if(RTOS_FREERTOS_CHECK)
-    # pass the RTOS option to the compiler flags
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${RTOS}")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D${RTOS}")
-    
+   
     find_package(STM32FREERTOS REQUIRED)
     include_directories(${STM32FREERTOS_INCLUDE_DIR})
 
+    # pass the RTOS option to the compiler flags
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${RTOS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D${RTOS}")
+
 elseif(RTOS_MBED_RTOS_CHECK)
+
+    find_package(MBEDRTOS REQUIRED)
+    include_directories(${MBEDRTOS_INCLUDE_DIRS})
+
     # pass the RTOS option to the compiler flags
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D${RTOS} -DTOOLCHAIN_GCC -DTARGET_${TARGET_CHIP} ${MBEDRTOS_COMPILE_OPTIONS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${RTOS} -DTOOLCHAIN_GCC -DTARGET_${TARGET_CHIP} ${MBEDRTOS_COMPILE_OPTIONS}")
 
-    find_package(MBEDRTOS REQUIRED)
-    include_directories(${MBEDRTOS_INCLUDE_DIR})
+elseif(RTX_RTOS_CHECK)
+
+    find_package(RTXRTOS REQUIRED)
+    include_directories(${RTXRTOS_INCLUDE_DIRS})
+
+    # pass the RTOS option to the compiler flags
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D${RTOS} -DTOOLCHAIN_GCC -DTARGET_${TARGET_CHIP} -D__CMSIS_RTOS ${RTXRTOS_COMPILE_OPTIONS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${RTOS} -DTOOLCHAIN_GCC -DTARGET_${TARGET_CHIP} -D__CMSIS_RTOS ${RTXRTOS_COMPILE_OPTIONS}")
+
+elseif(RTX_RTOS2_CHECK)
+
+    find_package(RTXRTOS2 REQUIRED)
+    include_directories(${RTXRTOS2_INCLUDE_DIRS})
+
+    # pass the RTOS option to the compiler flags
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D${RTOS} -DTOOLCHAIN_GCC -DTARGET_${TARGET_CHIP} -D__CMSIS_RTOS ${RTXRTOS2_COMPILE_OPTIONS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${RTOS} -DTOOLCHAIN_GCC -DTARGET_${TARGET_CHIP} -D__CMSIS_RTOS ${RTXRTOS2_COMPILE_OPTIONS}")
+message("fglas: ${CMAKE_C_FLAGS}")
+
+else()
+
+    # pass the NO RTOS option to the compiler flags
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNOROTS ${RTXRTOS_COMPILE_OPTIONS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOROTS ${RTXRTOS_COMPILE_OPTIONS}")
+
 endif()
 
 set(PROJECT_SOURCES
     main.c
-    $<$<BOOL:${RTOS_MBED_RTOS_CHECK}>:RTX_Conf_CM.c>
+    $<$<BOOL:${RTOS_MBED_RTOS_CHECK}>:RTX_Conf_CM_MBED.c>
+    $<$<BOOL:${RTX_RTOS_CHECK}>:RTX_Conf_CM_RTX.c>
+    $<$<BOOL:${RTX_RTOS2_CHECK}>:RTX_Config_RTX2.c>
 )
 
 add_executable(
@@ -41,6 +71,12 @@ add_executable(
     
     # sources for mBed RTOS
     $<$<BOOL:${RTOS_MBED_RTOS_CHECK}>:${MBEDRTOS_SOURCES}>
+    
+    # sources for RTX RTOS
+    $<$<BOOL:${RTX_RTOS_CHECK}>:${RTXRTOS_SOURCES}>
+    
+    # sources for RTX RTOS2
+    $<$<BOOL:${RTX_RTOS2_CHECK}>:${RTXRTOS2_SOURCES}>
 )
 
 STM32_SET_TARGET_PROPERTIES(${CMAKE_PROJECT_NAME})
