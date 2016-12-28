@@ -1,0 +1,122 @@
+# Contributing to **nano Framework**
+
+The **nano Framework** team maintains several guidelines for contributing to the **nano Framework** repos, which are provided below. Many of these are straightforward, while others may seem subjective. A **nano Framework** team member will be happy to explain why a guideline is defined as it is.
+
+## Contribution Guidelines
+
+- [Copyright](#copyright) describes the licensing practices for the project.
+- [General Contribution Guidance](#general-contribution-guidance) describes general contribution guidance, including more subjective stylistic guidelines.
+- [Contribution Bar](#contribution-bar) describes the bar that the team uses to accept changes.
+- [Contribution Workflow](contributing-workflow.md) describes the workflow that the team uses for considering and accepting changes.
+
+## General Contribution Guidance
+
+There are several issues to keep in mind when making a change.
+
+### Typos
+Typos are embarrassing! We will accept most PRs that fix typos. In order to make it easier to review your PR, please focus on a given component with your fixes or on one type of typo across the entire repository. If it's going to take >30 mins to review your PR, then we will probably ask you to chunk it up.
+
+### Commit Messages
+
+Please format commit messages as follows (based on this [excellent post](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)):
+
+```
+Summarize change in 50 characters or less
+
+Provide more detail after the first line. Leave one blank line below the
+summary and wrap all lines at 72 characters or less.
+
+If the change fixes an issue, leave another blank line after the final
+paragraph and indicate which issue is fixed in the specific format
+below.
+
+Fix #42
+```
+
+Also do your best to factor commits appropriately, i.e not too large with unrelated
+things in the same commit, and not too small with the same small change applied N
+times in N different commits. If there was some accidental reformatting or whitespace
+changes during the course of your commits, please rebase them away before submitting
+the PR.
+
+### DOs and DON'Ts
+
+* **DO** follow our C/C++ [coding style](../coding-guidelines/cxx-coding-style.md)
+* **DO** follow our C# [coding style](../coding-guidelines/cs-coding-style.md)
+* **DO** give priority to the current style of the project or file you're changing even if it diverges from the general guidelines.
+* **DO** include tests when adding new features. When fixing bugs, start with
+  adding a test that highlights how the current behavior is broken.
+* **DO** keep the discussions focused. When a new or related topic comes up
+  it's often better to create new issue than to side track the discussion.
+* **DO** blog and tweet (or whatever) about your contributions, frequently!
+
+* **DO NOT** send PRs for style changes. 
+* **DON'T** surprise us with big pull requests. Instead, file an issue and start
+  a discussion so we can agree on a direction before you invest a large amount
+  of time.
+* **DON'T** commit code that you didn't write. If you find code that you think is a good fit to add to **nano Framework**, file an issue and start a discussion before proceeding.
+* **DON'T** submit PRs that alter licensing related files or headers. If you believe there's a problem with them, file an issue and we'll be happy to discuss it.
+* **DON'T** add API additions without filing an issue and discussing with us first. See [API Review Process](api-review-process.md).
+
+### Contribution "Bar"
+
+Project maintainers will merge changes that align with [project priorities](project-priorities.md) and/or improve the product significantly for a broad set of apps. Proposals must also satisfy the published [guidelines for **nano Framework**](#contribution-guidelines).
+
+Maintainers will not merge changes that have narrowly-defined benefits, due to compatibility risk. Changes to the codebase are first reviewed and tested to ensure they are correct for those products and will not inadvertently break applications. We may revert changes if they are found to be breaking.
+
+### Contributing Ports
+
+We encourage adding support for other platforms and/or chip vendors. We have currently ports for STM32 parts in progress and have a lot of momentum behind them. 
+
+Ports have a weaker contribution bar, since they do not contribute to compatibility risk with existing products. For ports, we are primarily looking for functionally correct implementations.
+
+### Copyright
+
+The **nano Framework** copyright is held by it's Contributors.
+
+### Source License
+
+The **nano Framework** project uses multiple licenses for the various project repositories.  Most projects use the [Apache 2 License](https://opensource.org/licenses/Apache-2.0). The [Creative Commons Attribution 4.0 International Public License (CC-BY)](https://creativecommons.org/licenses/by/4.0/) license for documentation.
+
+See the license file at the root of project repositories for the specific license, such as with the following examples:
+
+- [**nano Framework**](https://github.com/nano-framework/nf-interpreter/LICENSE.TXT) [(Apache 2)](https://opensource.org/licenses/Apache-2.0).
+
+### File Headers
+
+The following file header is used for **nano Framework**. Please use it for new files.
+
+```
+// Licensed to the nano Framework Contributors under one or more agreements.
+// The .NET Foundation licenses this file to you under the Apache license.
+// See the LICENSE file in the project root for more information.
+```
+
+<!--- See [class.cpp](../../src/vm/class.cpp) for an example of the header in a C++ file.-->
+<!--- See [List.cs](List.cs) for an example of the header in a C# file.-->
+
+### Copying Files from Other Projects
+
+**nano Framework** uses some files from other projects, typically where a binary distribution does not exist or would be inconvenient.
+
+The following rules must be followed for PRs that include files from another project:
+
+- The license of the file is [permissive](https://en.wikipedia.org/wiki/Permissive_free_software_licence).
+- The license of the file is left intact.
+- The contribution is correctly attributed in the [3rd party notices](../../THIRD-PARTY-NOTICES) file in the repository, as needed.
+
+<!--See [IdnMapping.cs](../../.cs) for an example of a file copied from another project and attributed in the [**nano Framework** 3rd party notices](../../THIRD-PARTY-NOTICES) file. -->
+
+### Porting Files from Other Projects
+
+There are many good algorithms implemented in other languages that would benefit the **nano Framework** project. The rules for porting a Java file to C# , for example, are the same as would be used for copying the same file, as described above.
+
+[Clean-room](https://en.wikipedia.org/wiki/Clean_room_design) implementations of existing algorithms that are not permissively licensed will generally not be accepted. If you want to create or nominate such an implementation, please create an issue to discuss the idea.
+
+<!--### Contributor License Agreement
+
+You must sign a [.NET Foundation Contribution License Agreement (CLA)](http://cla2.dotnetfoundation.org) before your PR will be merged. This is a one-time requirement for projects in the .NET Foundation. You can read more about [Contribution License Agreements (CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement) on Wikipedia.
+
+The agreement: [net-foundation-contribution-license-agreement.pdf](https://cla2.dotnetfoundation.org/cladoc/net-foundation-contribution-license-agreement.pdf)
+
+You don't have to do this up-front. You can simply clone, fork, and submit your pull-request as usual. When your pull-request is created, it is classified by a CLA bot. If the change is trivial (e.g. you just fixed a typo), then the PR is labelled with `cla-not-required`. Otherwise it's classified as `cla-required`. Once you signed a CLA, the current and all future pull-requests will be labelled as `cla-signed`.-->
