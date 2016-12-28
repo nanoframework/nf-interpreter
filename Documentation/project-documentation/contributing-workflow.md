@@ -6,7 +6,7 @@ You can contribute to **nano Framework** with issues and PRs. Simply filing issu
 
 If you are looking at getting your feet wet with some simple (but still beneficial) changes, check out _up-for-grabs_ issues on the [**nano Framework** Interpreter](https://github.com/nano-framework/nf-interpreter/labels/up-for-grabs) repo. 
 
-For new ideas, please always start with an issue before starting development of an implementation. See [project priorities](project-priorities.md) to understand the team's approach to engagement on general improvements to the product. Use [CODE_KEEPERS.TXT](CODE_KEEPERS.TXT) to find relevant maintainers and @ mention them to ask for feedback on your issue.
+For new ideas, please always start with an issue before starting development of an implementation. See [project priorities](project-priorities.md) to understand the team's approach to engagement on general improvements to the product. Use [CODE_KEEPERS.md](CODE_KEEPERS.md) to find relevant maintainers and @ mention them to ask for feedback on your issue.
 
 You do not need to file an issue for trivial changes (e.g. typo fixes). Just create a PR for those changes.
 
@@ -70,7 +70,7 @@ We use and recommend the following workflow:
 1. Create an issue for your work. 
   - You can skip this step for trivial changes.
   - Reuse an existing issue on the topic, if there is one.
-  - Use [CODE_KEEPERS.TXT](CODE_KEEPERS.TXT) to find relevant maintainers and @ mention them to ask for feedback on your issue.
+  - Use [CODE_KEEPERS.md](CODE_KEEPERS.md) to find relevant maintainers and @ mention them to ask for feedback on your issue.
   - Get agreement from the team and the community that your proposed change is a good one.
   - If your change adds a new API, follow the [API Review Process](api-review-process.md). 
   - Clearly state that you are going to take on implementing it, if that's the case. You can request that the issue be assigned to you. Note: The issue filer and the implementer don't have to be the same person.
