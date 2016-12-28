@@ -24,3 +24,7 @@ This repo includes several documents that explain both high-level and low-level 
 ## Testing and Debugging **nano Framework**
 
 - [Debugging **nano Framework** with VS Code](building/vscode-debug-instructions.md)
+
+## CMake Documentation
+
+- [CMake configuration files](cmake-documentation/README.md)
