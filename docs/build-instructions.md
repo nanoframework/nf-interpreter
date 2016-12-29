@@ -38,6 +38,7 @@ In case you need to clean up or start a fresh build all you have to do is simply
 As a suggestion we recommend that you create a directory named *build* in the repository root and run CMake from there.
 
 
+
 <a name="BuildNanoFrameworkImage"></a>
 # Build a **nano Framework** image
 
@@ -107,5 +108,6 @@ To launch the build in VS Code check the status bar at the bottom. Select the bu
 After a sucesfull build you can find the **nano Framework** image files in the *build* directory. Those are:
 - nanoFramework.bin (raw binary format)
 - nanoFramework.hex (Intel hex format)
+- nanoFramework.s19 (Motorola S-record format, equivalent to srec)
 - nanoFramework.lst (source code intermixed with disassembly)
 - nanoFramework.map (image map) 
