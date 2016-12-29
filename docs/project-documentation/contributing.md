@@ -87,9 +87,8 @@ See the license file at the root of project repositories for the specific licens
 The following file header is used for **nano Framework**. Please use it for new files.
 
 ```
-// Licensed to the nano Framework Contributors under one or more agreements.
-// The nano Framework Contributors licenses this file to you under the Apache license.
-// See the LICENSE file in the project root for more information.
+// Copyright 2016 The nano Framework Contributors.
+// See the COPYRIGHT file at the top-level directory of this distribution and at https://github.com/nano-framework/nf-interpreter/COPYRIGHT.md.
 ```
 
 <!--- See [class.cpp](../../src/vm/class.cpp) for an example of the header in a C++ file.-->
