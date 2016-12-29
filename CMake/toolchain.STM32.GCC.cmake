@@ -75,7 +75,7 @@ endif()
 
 # setup Assembler compiler
 SET_COMPILER_VAR(ASM-ATT_COMPILER as)
-
+ 
 # other toolchain configurations  
 set(CMAKE_OBJCOPY ${TOOLCHAIN_BIN_DIR}/arm-none-eabi-objcopy CACHE INTERNAL "objcopy tool")
 set(CMAKE_OBJDUMP ${TOOLCHAIN_BIN_DIR}/arm-none-eabi-objdump CACHE INTERNAL "objdump tool")
@@ -107,7 +107,7 @@ function(STM32_ADD_HEX_BIN_DUMP_TARGETS TARGET)
         set(FILENAME "${TARGET}")
     endif()
 
-    # add targets for HEX,BIN and S19 formats with no output so they will always be built
+    # add targets for HEX, BIN and S19 formats with no output so they will always be built
     add_custom_target(${TARGET}.hex DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Oihex ${FILENAME} ${FILENAME}.hex)
     add_custom_target(${TARGET}.s19 DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Osrec ${FILENAME} ${FILENAME}.s19)
     add_custom_target(${TARGET}.bin DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Obinary ${FILENAME} ${FILENAME}.bin)
