@@ -107,8 +107,9 @@ function(STM32_ADD_HEX_BIN_DUMP_TARGETS TARGET)
         set(FILENAME "${TARGET}")
     endif()
 
-    # add targets for HEX and BIN formats with no output so they will always be built
+    # add targets for HEX,BIN and S19 formats with no output so they will always be built
     add_custom_target(${TARGET}.hex DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Oihex ${FILENAME} ${FILENAME}.hex)
+    add_custom_target(${TARGET}.s19 DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Osrec ${FILENAME} ${FILENAME}.s19)
     add_custom_target(${TARGET}.bin DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Obinary ${FILENAME} ${FILENAME}.bin)
     add_custom_target(${TARGET}.dump DEPENDS ${TARGET} COMMAND ${CMAKE_OBJDUMP} -d -EL -S ${FILENAME} ${FILENAME}.dump)
 endfunction()
