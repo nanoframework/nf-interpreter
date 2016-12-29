@@ -134,83 +134,90 @@ endif()
 # FreeRTOS
 if(RTOS_FREERTOS_CHECK)
 
-    # check for SVN (needed here for advanced warning to user if it's not installed)
-    find_package(Subversion)
-
-    #  check is SVN was found, if not report to user and abort
-    if(NOT Subversion_SVN_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find SVN, make sure you have it installed.")
+    # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_FREERTOS_SOURCE TRUE)
+    if(FREERTOS_SOURCE)
+        if(NOT "${FREERTOS_SOURCE}" STREQUAL "")
+            set(NO_FREERTOS_SOURCE FALSE)
+        endif()
     endif()
 
-    # check if build was requested with a specifc FreeRTOS version
-    if(DEFINED FREERTOS_VERSION)
+    if(NO_FREERTOS_SOURCE)
+        # no FreeRTOS source specified, download it from it's repo
 
-        if("${FREERTOS_VERSION}" STREQUAL "")
-            set(FREERTOS_VERSION_EMPTY TRUE)
+        # check for SVN (needed here for advanced warning to user if it's not installed)
+        find_package(Subversion)
+
+        #  check is SVN was found, if not report to user and abort
+        if(NOT Subversion_SVN_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find SVN, make sure you have it installed.")
         endif()
 
-        if(FREERTOS_VERSION_EMPTY)
-            # no FreeRTOS version actualy specified, must be empty which is fine, we'll grab the code from the trunk
-            message(STATUS "RTOS is: FreeRTOS (latest available code from trunk)")
-            set(FREERTOS_SVN_REPOSITORY "https://svn.code.sf.net/p/freertos/code/trunk")
-        else()
-            message(STATUS "RTOS is: FreeRTOS v${FREERTOS_VERSION}")
-            set(FREERTOS_SVN_REPOSITORY "https://svn.code.sf.net/p/freertos/code/tags/V${FREERTOS_VERSION}")
+        # check if build was requested with a specifc FreeRTOS version
+        if(DEFINED FREERTOS_VERSION)
+
+            if("${FREERTOS_VERSION}" STREQUAL "")
+                set(FREERTOS_VERSION_EMPTY TRUE)
+            endif()
+
+            if(FREERTOS_VERSION_EMPTY)
+                # no FreeRTOS version actualy specified, must be empty which is fine, we'll grab the code from the trunk
+                message(STATUS "RTOS is: FreeRTOS (latest available code from trunk)")
+                set(FREERTOS_SVN_REPOSITORY "https://svn.code.sf.net/p/freertos/code/trunk")
+            else()
+                message(STATUS "RTOS is: FreeRTOS v${FREERTOS_VERSION}")
+                set(FREERTOS_SVN_REPOSITORY "https://svn.code.sf.net/p/freertos/code/tags/V${FREERTOS_VERSION}")
+            endif()
+            
         endif()
+
+        # need to setup a separate CMake project to download the code from the SVN repository
+        # otherwise it won't be available before the actual build step
+        configure_file("CMake/FreeRTOS.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/FreeRTOS_Download/CMakeLists.txt")
         
+        # setup CMake project for FreeRTOS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
+
+        # run build on FreeRTOS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
+        
+        # add FreeRTOS as external project
+        ExternalProject_Add( 
+            FreeRTOS
+            PREFIX FreeRTOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
+            SVN_REPOSITORY ${FREERTOS_SVN_REPOSITORY}/FreeRTOS/Source
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+        # get source dir for FreeRTOS CMake project
+        ExternalProject_Get_Property(FreeRTOS SOURCE_DIR)
+        set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
+
+    else()
+        # FreeRTOS source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${FREERTOS_SOURCE}/")
+            message(STATUS "RTOS is: FreeRTOS (source from: ${FREERTOS_SOURCE})")
+
+            file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
+            set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
+        else()
+            message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
+        endif()
+
     endif()
-
-    # need to setup a separate CMake project to download the code from the SVN repository
-    # otherwise it won't be available before the actual build step
-    configure_file("CMake/FreeRTOS.CMakeLists.cmake.in"
-                   "${CMAKE_BINARY_DIR}/FreeRTOS_Download/CMakeLists.txt")
-    
-    # setup CMake project for FreeRTOS download
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
-
-    # run build on FreeRTOS download CMake project to perform the download
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
-    
-    # add FreeRTOS as external project
-    ExternalProject_Add( 
-        FreeRTOS
-        PREFIX FreeRTOS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
-        SVN_REPOSITORY ${FREERTOS_SVN_REPOSITORY}/FreeRTOS/Source
-        TIMEOUT 10
-        LOG_DOWNLOAD 1
-        # Disable all other steps
-        INSTALL_COMMAND ""
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-    )
-
-    # get source dir for FreeRTOS CMake project
-    ExternalProject_Get_Property(FreeRTOS SOURCE_DIR)
-    set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
-
-    # # set FreeRTOS include directory 
-    # include_directories( ${FREERTOS_INCLUDE_DIR})
-
-    # # set include directory of FreeRTOS port according to MCU + toolchain
-    # if(STM32_SERIES STREQUAL "F1")
-    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM1)    
-    # elseif(STM32_SERIES STREQUAL "F2")
-    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM2)    
-    # elseif(STM32_SERIES STREQUAL "F4")
-    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM4)
-    # elseif(STM32_SERIES STREQUAL "F7")
-    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM4)
-    # elseif(STM32_SERIES STREQUAL "F0")
-    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM0)
-    # elseif(STM32_SERIES STREQUAL "L0")
-    #     set(FREERTOS_PORT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM0)
-    # endif()
-    # include_directories( ${FREERTOS_PORT_INCLUDE_DIR})
 
     # set CMSIS RTOS include directory
     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
@@ -219,55 +226,77 @@ if(RTOS_FREERTOS_CHECK)
 # mBed RTOS
 elseif(RTOS_MBED_RTOS_CHECK)
 
-    # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-    include(Hack_SetGitSearchPath)
-
-    # check for Git (needed here for advanced warning to user if it's not installed)
-    find_package(Git)
-
-    #  check if Git was found, if not report to user and abort
-    if(NOT GIT_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+    # check if MBEDRTOS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_MBEDRTOS_SOURCE TRUE)
+    if(MBEDRTOS_SOURCE)
+        if(NOT "${MBEDRTOS_SOURCE}" STREQUAL "")
+            set(NO_MBEDRTOS_SOURCE FALSE)
+        endif()
     endif()
 
-    # need to setup a separate CMake project to download the code from the SVN repository
-    # otherwise it won't be available before the actual build step
-    configure_file("CMake/mBedRTOS.CMakeLists.cmake.in"
-                   "${CMAKE_BINARY_DIR}/mBedRTOS_Download/CMakeLists.txt")
-    
-    # setup CMake project for mBed RTOS download
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedRTOS_Download")
+    if(NO_MBEDRTOS_SOURCE)
+        # no mBed RTOS source specified, download it from it's repo
 
-    # run build on mBed RTOS download CMake project to perform the download
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedRTOS_Download")
-    
-    # download mBed RTOS source from official GitHub repo
-    ExternalProject_Add( 
-        mBedRTOS
-        PREFIX mBed-RTOS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/mBedRTOS_Source
-        GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os/
-        GIT_TAG master  # target master branch
-        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
-        TIMEOUT 10
-        LOG_DOWNLOAD 1
+        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+        include(Hack_SetGitSearchPath)
+
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        message(STATUS "RTOS is: mBed RTOS (latest available code from GitHub repo)")
+
+        # need to setup a separate CMake project to download the code from the SVN repository
+        # otherwise it won't be available before the actual build step
+        configure_file("CMake/mBedRTOS.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/mBedRTOS_Download/CMakeLists.txt")
         
-        # Disable all other steps
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND ""
-    )
+        # setup CMake project for mBed RTOS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedRTOS_Download")
 
-    # get source dir for mBed RTOS CMake project
-    ExternalProject_Get_Property(mBedRTOS SOURCE_DIR)
-    set(MBEDRTOS_INCLUDE_DIRS ${MBEDRTOS_SOURCE_DIR})
+        # run build on mBed RTOS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedRTOS_Download")
+               
+        # download mBedRTOS source from official GitHub repo
+        ExternalProject_Add( 
+            mBedRTOS
+            PREFIX mBed-RTOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/mBedRTOS_Source
+            GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os/
+            GIT_TAG master  # target master branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+            
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND ""
+        )
 
-    # set update disconnected to prevent updates on builds
-    set_property(DIRECTORY ${MBEDRTOS_SOURCE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1)
+        # get source dir for mBed RTOS CMake project
+        ExternalProject_Get_Property(mBedRTOS SOURCE_DIR)
+        set(MBEDRTOS_INCLUDE_DIRS ${MBEDRTOS_SOURCE_DIR})
+
+        # set update disconnected to prevent updates on builds
+        set_property(DIRECTORY ${MBEDRTOS_SOURCE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1)
+
+    else()
+        # mBed RTOS source was specified
+        message(STATUS "RTOS is: mBed RTOS (source from: ${MBEDRTOS_SOURCE})")
+
+        file(COPY "${MBEDRTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mBedRTOS_Source")
+        set(MBEDRTOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/mBedRTOS_Source)
+
+    endif()
 
 #######################
 # RTX RTOS

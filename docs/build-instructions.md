@@ -23,6 +23,9 @@ If you are using VS Code as your development platform we suggest that you use th
 - [Visual Studio Code](http://code.visualstudio.com/)
 - [CMake Tools](https://marketplace.visualstudio.com/items?itemName=vector-of-bool.cmake-tools)
 
+In case you specify an RTOS and you want its source to be dowloaded from the official repository, you'll need:
+- For FreeRTOS a SVN client. [Tortoise SVN](https://tortoisesvn.net/downloads) seems to be a popular choice for Windows machines.
+- For mBed RTOS a Git client. [GitHub Desktop](https://desktop.github.com/) seems to be a popular choice for Windows machines.
 
 <a name="Preparation"></a>
 # Preparation
@@ -44,8 +47,10 @@ The build script accepts the following parameters (some of them are mandatory).
 - TOOLCHAIN: the toolchain to use in the build. The default (and only option at this time) is GCC.
 - TOOLCHAIN_PREFIX: path to the install directory of the toolchain. E.g.: "E:/GNU_Tools_ARM_Embedded/5_4_2016q3". Mind the forward slash on the path for all platforms.
 - CMAKE_BUILD_TYPE: build type (Debug, Release, etc). The default is Release.
-- RTOS: specifies the RTOS to add to the image. This will download the appropriate files from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS), mBed RTOS (MBEDRTOS) and ARM RTX (RTXRTOS).
-- FREERTOS_VERSION: specifies the FreeRTOS version to grab the source files. It has to match one of the official versions from the FreeRTOS repository. If none is specified it will download the 'trunk' version.
+- RTOS: specifies the RTOS to add to the image. If no source path is specified the source files will be downloaded from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS), mBed RTOS (MBEDRTOS) and ARM RTX (RTXRTOS).
+- FREERTOS_VERSION: specifies the FreeRTOS version to grab the source files. It has to match one of the official versions from the FreeRTOS repository. If none is specified it will download the 'trunk' version. This parameter is ignored if FREERTOS_SOURCE is specified. 
+- FREERTOS_SOURCE: specifies the path for the location of the FreeRTOS source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS must be specified with FREERTOS option. 
+- MBED_SOURCE: specifies the path for the location of the mBed source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS parameter must be specified with MBEDRTOS option. 
 
 _Note: the very first build will take more or less time depending on the download speed of the Internet connection of the machine were the build is running. This is because the source code of the RTOS of your choice will be downloaded from its repository. On the subsequent builds this won't happen._
 
@@ -67,7 +72,22 @@ cmake \
 -G "NMake Makefiles" ../ 
 ```
 
-This will call CMake (on your *build* directory that is assumed to be under the repository root) specifing the location of the toolchain install, targeting STM32F407VG, asking for the ST Cube package version 1.13.1 to be used and that the build files suitable for NMake are to be generated.
+This will call CMake (on your *build* directory that is assumed to be under the repository root) specifing the location of the toolchain install, targeting STM32F407VG, asking for the ST Cube package version 1.13.1 to be used, specifying FreeRTOS v9.0.0 as the RTOS and that the build files suitable for NMake are to be generated.
+
+Another example:
+
+```
+cmake \
+-DTOOLCHAIN_PREFIX="E:/GNU_Tools_ARM_Embedded/5_4_2016q3" \
+-DTARGET_CHIP=STM32F091RC \
+-DPACKAGE_VERSION=1.6.0 \
+-RTOS=MBEDRTOS \
+-MBEDRTOS_SOURCE=E:/GitHub/mbed-os \
+-G "NMake Makefiles" ../ 
+```
+
+This will call CMake (on your *build* directory that is assumed to be under the repository root) specifing the location of the toolchain install, targeting STM32F091RC, asking for the ST Cube package version 1.6.0 to be used, specifying MBEDRTOS as the RTOS, that mBed RTOS sources are located in the designated path (mind the forward slash and no ending slash) and that the build files suitable for NMake are to be generated.
+
 After succesfull completion you'll have the build files ready to be used in the target build tool.
 
 ## Building from VS Code (using CMake Tools extension)
