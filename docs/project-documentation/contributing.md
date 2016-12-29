@@ -80,7 +80,7 @@ The **nano Framework** project uses multiple licenses for the various project re
 
 See the license file at the root of project repositories for the specific license, such as with the following examples:
 
-- [**nano Framework**](https://github.com/nano-framework/nf-interpreter/LICENSE.TXT) [(Apache 2)](https://opensource.org/licenses/Apache-2.0).
+- [**nano Framework**](https://github.com/nano-framework/nf-interpreter/LICENSE.md) [(Apache 2)](https://opensource.org/licenses/Apache-2.0).
 
 ### File Headers
 
@@ -88,7 +88,7 @@ The following file header is used for **nano Framework**. Please use it for new 
 
 ```
 // Licensed to the nano Framework Contributors under one or more agreements.
-// The .NET Foundation licenses this file to you under the Apache license.
+// The nano Framework Contributors licenses this file to you under the Apache license.
 // See the LICENSE file in the project root for more information.
 ```
 
@@ -113,10 +113,12 @@ There are many good algorithms implemented in other languages that would benefit
 
 [Clean-room](https://en.wikipedia.org/wiki/Clean_room_design) implementations of existing algorithms that are not permissively licensed will generally not be accepted. If you want to create or nominate such an implementation, please create an issue to discuss the idea.
 
-<!--### Contributor License Agreement
+### Contributor License Agreement
 
-You must sign a [.NET Foundation Contribution License Agreement (CLA)](http://cla2.dotnetfoundation.org) before your PR will be merged. This is a one-time requirement for projects in the .NET Foundation. You can read more about [Contribution License Agreements (CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement) on Wikipedia.
+You must sign a Contribution License Agreement (CLA) before your PR will be merged. This is a one-time requirement for **nano Framework** projects. You can read more about [Contribution License Agreements (CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement) on Wikipedia.
 
-The agreement: [net-foundation-contribution-license-agreement.pdf](https://cla2.dotnetfoundation.org/cladoc/net-foundation-contribution-license-agreement.pdf)
+There are two agreements, one for individual contributions and other for entity contributions (this one is applicable when you are working on nano Framework at your work place during your work time which, technically, is owned by your employer).
+The individual agreement: [nano-Framework-Individual-Contributor-License-Agreement.pdf](../CLA/nano-Framework-Individual-Contributor-License-Agreement.pdf)
+The entity agreement: [nano-Framework-Entity-Contributor-License-Agreement.pdf](../CLA/nano-Framework-Entity-Contributor-License-Agreement.pdf)
 
-You don't have to do this up-front. You can simply clone, fork, and submit your pull-request as usual. When your pull-request is created, it is classified by a CLA bot. If the change is trivial (e.g. you just fixed a typo), then the PR is labelled with `cla-not-required`. Otherwise it's classified as `cla-required`. Once you signed a CLA, the current and all future pull-requests will be labelled as `cla-signed`.-->
+You don't have to do this up-front. You can simply clone, fork, and submit your pull-request as usual. When your pull-request is created, it is classified by a CLA bot. If the change is trivial (e.g. you just fixed a typo), then the PR is labelled with `cla-not-required`. Otherwise it's classified as `cla-required`. Once you signed a CLA, the current and all future pull-requests will be labelled as `cla-signed`.
