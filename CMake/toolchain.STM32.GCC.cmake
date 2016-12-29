@@ -8,7 +8,7 @@ INCLUDE(CMakeForceCompiler)
 # set STM32 supported series
 # full list would be F0, F1, F2, F3, F4, F7, L0, L1 and L4
 # copy bellow as support is added 
-set(STM32_SUPPORTED_SERIES F0 F4 CACHE INTERNAL "STM32 supported series")
+set(STM32_SUPPORTED_SERIES F0 F4 F7 CACHE INTERNAL "STM32 supported series")
 
 # check for toolchain path
 if(NOT TOOLCHAIN_PREFIX)
