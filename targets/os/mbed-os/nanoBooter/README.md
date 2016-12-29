@@ -49,9 +49,9 @@ This is the nanoBooter example implementation for mbed-os.
 
 7. Deploy binary image `BUILD\<target>\<toolchain>\nanoBooter.bin`
 
-### Impotant notes and limitations
+### Important notes and limitations
 
-* nanoBooter recoginzes and responds only to Ping request,
+* nanoBooter recognizes and responds only to Ping request,
 * The reply is not correctly received in MFDeploy due to invalid CRC,
 * WireProtocol implementation is duplicated at the moment (the source code will be added as proper mbed-os library),
 * Used serial (USART) transport,
