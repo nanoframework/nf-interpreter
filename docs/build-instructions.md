@@ -4,15 +4,14 @@
 
 - [Prerequisites](#Prerequisites)
 - [Preparation](#Preparation)
-- [Build a **nano Framework** image](#BuildNanoFrameworkImage)
-- [**nano Framework** build deliverables](#NanoFrameworkBuildDeliverables)
+- [Build a **nano Framework** image](#Build-a-nano-Framework-Image)
+- [**nano Framework** build deliverables](#nano-Framework-Build-Deliverables)
 
 **About this document**
 
 This document describes how to build an image of **nano Framework** to be flashed in a SoC or MCU.
 The build is based on CMake tool to ease the development in all major platforms.
 
-<a name="Prerequisites"></a>
 # Prerequisites
 
 You'll need:
@@ -27,7 +26,6 @@ In case you specify an RTOS and you want its source to be dowloaded from the off
 - For FreeRTOS a SVN client. [Tortoise SVN](https://tortoisesvn.net/downloads) seems to be a popular choice for Windows machines.
 - For mBed RTOS a Git client. [GitHub Desktop](https://desktop.github.com/) seems to be a popular choice for Windows machines.
 
-<a name="Preparation"></a>
 # Preparation
 
 It's ***highly*** recommended that run the build outside the source tree. This prevents you from cluttering the source tree with CMake artifacts, temporary files and like. 
@@ -39,7 +37,6 @@ As a suggestion we recommend that you create a directory named *build* in the re
 
 
 
-<a name="BuildNanoFrameworkImage"></a>
 # Build a **nano Framework** image
 
 The build script accepts the following parameters (some of them are mandatory).
@@ -102,7 +99,6 @@ Follows a brief explanation on the files you might want to tweak.
 To launch the build in VS Code check the status bar at the bottom. Select the build flavor and then click the build buttom (or hit F7).
 
 
-<a name="NanoFrameworkBuildDeliverables"></a>
 # **nano Framework** build deliverables
 
 After a sucesfull build you can find the **nano Framework** image files in the *build* directory. Those are:
