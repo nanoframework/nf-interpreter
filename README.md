@@ -2,11 +2,21 @@
 
 Welcome to the nano Framework Interpreter repository.
 
-* [Documentation](docs/)
+## How to Engage, Contribute and Provide Feedback
+
+Some of the best ways to contribute are to try things out, file bugs, and join
+in design conversations. If you are having issues, the best way to file a bug
+is at [Issues](https://github.com/nano-framework/nf-interpreter/issues).
+
+Looking for something to work on? The list of [up-for-grabs issues](https://github.com/nano-framework/nf-interpreter/labels/up-for-grabs)
+is a great place to start. Or take a look at our [documentation](docs/).
+
+See some of our guides for more details:
+
+* [Contributing Guide](docs/project-documentation/contributing.md)
+* [Developer Guide](docs/project-documentation/developer-guide.md)
 
 ## Credits
-
-The nano Framework Interpreter is based on [.NET Micro Framework Interpreter](https://github.com/NETMF/netmf-interpreter) project.
 
 The list of contributors to this project can be found at [CONTRIBUTORS](CONTRIBUTORS.md).
 
