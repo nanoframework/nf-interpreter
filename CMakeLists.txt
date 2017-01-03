@@ -30,6 +30,51 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 ######################################################
 
+#######################
+# handle RTOSes choice
+
+# sanity check here for invalid RTOS option
+set(RTOS_SUPPORTED FREERTOS MBEDOS RTXRTOS RTXRTOS2 CACHE INTERNAL "supported RTOS options")
+list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
+if(RTOS_INDEX EQUAL -1)
+    message(FATAL_ERROR "\n\nSorry but ${RTOS} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+endif()
+
+string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
+string(COMPARE EQUAL "MBEDOS"   "${RTOS}" RTOS_MBEDOS_CHECK)
+string(COMPARE EQUAL "RTXRTOS"  "${RTOS}" RTOS_RTX_RTOS_CHECK)
+string(COMPARE EQUAL "RTXRTOS2" "${RTOS}" RTOS_RTX_RTOS2_CHECK)
+
+if(RTOS_FREERTOS_CHECK) 
+set(RTOS_FREERTOS_CHECK TRUE)
+set(RTOS_MBEDOS_CHECK FALSE)
+set(RTOS_RTX_RTOS_CHECK FALSE)
+set(RTOS_RTX_RTOS2_CHECK FALSE)
+endif()
+
+if(RTOS_MBEDOS_CHECK) 
+set(RTOS_MBEDOS_CHECK TRUE)
+set(RTOS_FREERTOS_CHECK FALSE)
+set(RTOS_RTX_RTOS_CHECK FALSE)
+set(RTOS_RTX_RTOS2_CHECK FALSE)
+endif()
+
+if(RTOS_RTX_RTOS_CHECK) 
+set(RTOS_RTX_RTOS_CHECK TRUE)
+set(RTOS_MBEDOS_CHECK FALSE)
+set(RTOS_FREERTOS_CHECK FALSE)
+set(RTOS_RTX_RTOS2_CHECK FALSE)
+endif()
+
+if(RTOS_RTX_RTOS2_CHECK) 
+set(RTOS_RTX_RTOS2_CHECK TRUE)
+set(RTOS_FREERTOS_CHECK FALSE)
+set(RTOS_MBEDOS_CHECK FALSE)
+set(RTOS_RTX_RTOS_CHECK FALSE)
+endif()
+
+#######################
+
 
 ##########################################
 # set default toolchain to GCC
@@ -38,34 +83,43 @@ set(TOOLCHAIN GCC)
 string(TOLOWER TOOLCHAIN_LOWER ${TOOLCHAIN}) 
 ##########################################
 
-# find out the chip vendor in order to move on with the appropriate configuration
-string(REGEX MATCH "^[S][T][M]32" CHIP_VENDOR_STM32 "${TARGET_CHIP}")
-string(COMPARE EQUAL "STM32" "${CHIP_VENDOR_STM32}" CHIP_VENDOR_STM32_CHECK)
+if(RTOS_MBEDOS_CHECK)
 
-if(CHIP_VENDOR_STM32_CHECK)
-    # vendor is ST and toolchain is GCC
-    message(STATUS "Chip vendor is ST. Chip is STM32.")
+    message(STATUS "\nSetting Toolchain file for mBed GCC \n")
+    # set toolchain file
+    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.mBed.${TOOLCHAIN}.cmake)
 
-    # set CMSIS include directories
-    include_directories(STM32CMSIS_INCLUDE_DIRS)
-
-    # set toolchain file for cross-compiling with CMake
-    # for this vendor/chip it will be 
-# elseif(CHIP_VENDOR_??_CHECK)
-#
-#     # vendor is ?? and toolchain is GCC
-#     message("Chip vendor is ??. Chip is ???.")
-#     set(CMAKE_TOOLCHAIN_FILE CMake/???.cmake)
-# 
 else()
-    message(STATUS "\n-- ###############################################\n")
-    message(STATUS "Unknow vendor or chip. Supported vendors/chips:\n-- ST's STM32 (e.g. STM32F407VG)\n")
-    message(STATUS "###############################################\n\n")
-    message(FATAL_ERROR "Unknow vendor or chip in TARGET_CHIP")
-endif()
 
-# set toolchain file
-set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.${CHIP_VENDOR_STM32}.${TOOLCHAIN}.cmake)
+    # find out the chip vendor in order to move on with the appropriate configuration
+    string(REGEX MATCH "^[S][T][M]32" CHIP_VENDOR_STM32 "${TARGET_CHIP}")
+    string(COMPARE EQUAL "STM32" "${CHIP_VENDOR_STM32}" CHIP_VENDOR_STM32_CHECK)
+
+    if(CHIP_VENDOR_STM32_CHECK)
+        # vendor is ST and toolchain is GCC
+        message(STATUS "Chip vendor is ST. Chip is STM32.")
+
+        # set CMSIS include directories
+        include_directories(STM32CMSIS_INCLUDE_DIRS)
+
+        # set toolchain file for cross-compiling with CMake
+        # for this vendor/chip it will be 
+    # elseif(CHIP_VENDOR_??_CHECK)
+    #
+    #     # vendor is ?? and toolchain is GCC
+    #     message("Chip vendor is ??. Chip is ???.")
+    #     set(CMAKE_TOOLCHAIN_FILE CMake/???.cmake)
+    # 
+    else()
+        message(STATUS "\n-- ###############################################\n")
+        message(STATUS "Unknow vendor or chip. Supported vendors/chips:\n-- ST's STM32 (e.g. STM32F407VG)\n")
+        message(STATUS "###############################################\n\n")
+        message(FATAL_ERROR "Unknow vendor or chip in TARGET_CHIP")
+    endif()
+
+    # set toolchain file
+    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.${CHIP_VENDOR_STM32}.${TOOLCHAIN}.cmake)
+endif()
 
 #########################################
 
@@ -82,53 +136,6 @@ message(STATUS "")
 #######################
 
 
-# include CMSIS, HAL and drivers  
-if(CHIP_VENDOR_STM32_CHECK)
-    # vendor is ST, chip is STM32
-
-    # ST Cube package with CMSIS and SMT32 HAL
-    add_subdirectory("stcube_repository")
-
-# elseif(CHIP_VENDOR_??_CHECK)
-#
-#     # vendor is ?? and toolchain is GCC
-#     add_subdirectory("???")
-endif()
-
-#######################
-# handle RTOSes stuff
-
-string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
-string(COMPARE EQUAL "MBEDRTOS" "${RTOS}" RTOS_MBED_RTOS_CHECK)
-string(COMPARE EQUAL "RTXRTOS" "${RTOS}" RTX_RTOS_CHECK)
-string(COMPARE EQUAL "RTXRTOS2" "${RTOS}" RTX_RTOS2_CHECK)
-
-if(RTOS_FREERTOS_CHECK) 
-set(RTOS_FREERTOS_CHECK TRUE)
-set(RTOS_MBED_RTOS_CHECK FALSE)
-set(RTX_RTOS_CHECK FALSE)
-set(RTX_RTOS2_CHECK FALSE)
-endif()
-
-if(RTOS_MBED_RTOS_CHECK) 
-set(RTOS_MBED_RTOS_CHECK TRUE)
-set(RTOS_FREERTOS_CHECK FALSE)
-set(RTX_RTOS_CHECK FALSE)
-set(RTX_RTOS2_CHECK FALSE)
-endif()
-
-if(RTX_RTOS_CHECK) 
-set(RTX_RTOS_CHECK TRUE)
-set(RTOS_FREERTOS_CHECK FALSE)
-set(RTOS_MBED_RTOS_CHECK FALSE)
-endif()
-
-if(RTX_RTOS2_CHECK) 
-set(RTX_RTOS2_CHECK TRUE)
-set(RTX_RTOS_CHECK FALSE)
-set(RTOS_FREERTOS_CHECK FALSE)
-set(RTOS_MBED_RTOS_CHECK FALSE)
-endif()
 
 #######################
 # FreeRTOS
@@ -223,18 +230,18 @@ if(RTOS_FREERTOS_CHECK)
     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
 
 #######################
-# mBed RTOS
-elseif(RTOS_MBED_RTOS_CHECK)
+# mBed OS
+elseif(RTOS_MBEDOS_CHECK)
 
-    # check if MBEDRTOS_SOURCE was specified or if it's empty (default is empty)
-    set(NO_MBEDRTOS_SOURCE TRUE)
-    if(MBEDRTOS_SOURCE)
-        if(NOT "${MBEDRTOS_SOURCE}" STREQUAL "")
-            set(NO_MBEDRTOS_SOURCE FALSE)
+    # check if MBEDOS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_MBEDOS_SOURCE TRUE)
+    if(MBEDOS_SOURCE)
+        if(NOT "${MBEDOS_SOURCE}" STREQUAL "")
+            set(NO_MBEDOS_SOURCE FALSE)
         endif()
     endif()
 
-    if(NO_MBEDRTOS_SOURCE)
+    if(NO_MBEDOS_SOURCE)
         # no mBed RTOS source specified, download it from it's repo
 
         # hack to make the FindGit to work in Windows platforms (check the module comment for details)
@@ -252,24 +259,24 @@ elseif(RTOS_MBED_RTOS_CHECK)
 
         # need to setup a separate CMake project to download the code from the SVN repository
         # otherwise it won't be available before the actual build step
-        configure_file("CMake/mBedRTOS.CMakeLists.cmake.in"
-                    "${CMAKE_BINARY_DIR}/mBedRTOS_Download/CMakeLists.txt")
+        configure_file("CMake/mBedOS.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/mBedOS_Download/CMakeLists.txt")
         
         # setup CMake project for mBed RTOS download
         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedRTOS_Download")
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedOS_Download")
 
         # run build on mBed RTOS download CMake project to perform the download
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedRTOS_Download")
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedOS_Download")
                
-        # download mBedRTOS source from official GitHub repo
+        # download mBedOS source from official GitHub repo
         ExternalProject_Add( 
-            mBedRTOS
-            PREFIX mBed-RTOS
-            SOURCE_DIR ${CMAKE_BINARY_DIR}/mBedRTOS_Source
+            mBedOS
+            PREFIX mBed-OS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/mBedOS_Source
             GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os/
             GIT_TAG master  # target master branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
@@ -283,24 +290,34 @@ elseif(RTOS_MBED_RTOS_CHECK)
         )
 
         # get source dir for mBed RTOS CMake project
-        ExternalProject_Get_Property(mBedRTOS SOURCE_DIR)
-        set(MBEDRTOS_INCLUDE_DIRS ${MBEDRTOS_SOURCE_DIR})
+        # ExternalProject_Get_Property(mBedOS SOURCE_DIR)
+        # set(MBEDOS_INCLUDE_DIRS ${MBEDOS_SOURCE_DIR})
 
         # set update disconnected to prevent updates on builds
-        set_property(DIRECTORY ${MBEDRTOS_SOURCE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1)
+        set_property(DIRECTORY ${MBEDOS_SOURCE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1)
 
     else()
-        # mBed RTOS source was specified
-        message(STATUS "RTOS is: mBed RTOS (source from: ${MBEDRTOS_SOURCE})")
+        # mBed OS source location was specified
 
-        file(COPY "${MBEDRTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mBedRTOS_Source")
-        set(MBEDRTOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/mBedRTOS_Source)
+        if(NOT EXISTS "${PROJECT_BINARY_DIR}/mBedOS_Source")
+            # need to copy srouce to build directory
+            message(STATUS "RTOS is: mBed OS (copying source from: ${MBEDOS_SOURCE})")
+
+            file(COPY "${MBEDOS_SOURCE}/" DESTINATION "${PROJECT_BINARY_DIR}/mBedOS_Source")
+        elseif()
+            # source directory  already at build folder so we are done here
+            message(STATUS "RTOS is: mBed OS (source from: ${MBEDOS_SOURCE} already at build directory)")
+        endif()
+
+        # set(MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source)
 
     endif()
 
+    # find_package(MBEDOPTIONS REQUIRED)
+
 #######################
 # RTX RTOS
-elseif(RTX_RTOS_CHECK)
+elseif(RTOS_RTX_RTOS_CHECK)
 
     # hack to make the FindGit to work in Windows platforms (check the module comment for details)
     include(Hack_SetGitSearchPath)
@@ -351,7 +368,7 @@ elseif(RTX_RTOS_CHECK)
 
 #######################
 # RTX RTOS2
-elseif(RTX_RTOS2_CHECK)
+elseif(RTOS_RTX_RTOS2_CHECK)
 
     message(FATAL_ERROR "
 #############################################################
@@ -410,11 +427,25 @@ support for RTX RTOS2 is in the works, please check latter...
 # no RTOS specifed
 else()
     
-    set(RTOS TRUE)
+    set(NORTOS TRUE)
 
     message(STATUS "NO RTOS was specified")
 
+    # include CMSIS, HAL and drivers  
+    if(CHIP_VENDOR_STM32_CHECK)
+        # vendor is ST, chip is STM32
+
+        # ST Cube package with CMSIS and SMT32 HAL
+        add_subdirectory("stcube_repository")
+
+    # elseif(CHIP_VENDOR_??_CHECK)
+    #
+    #     # vendor is ?? and toolchain is GCC
+    #     add_subdirectory("???")
+    endif()    
+    
 endif()
 
 # add source directory
-add_subdirectory("source")
+#add_subdirectory("source")
+add_subdirectory("targets/os/mbed-os/nanoBooter")
