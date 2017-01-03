@@ -13,7 +13,7 @@
                 {"text": "target extended-remote localhost:3333"},
                 {"text": "monitor reset halt"},
                 {"text": "monitor flash write_image erase \"E:/GitHub/nf-interpreter/build/nanoFramework.hex\" "},
-                {"text": "file e:/GitHub/nf-interpreter/build/source/nanoFramework"},
+                {"text": "file e:/GitHub/nf-interpreter/build/nanoFramework"},
                 {"text": "monitor reset halt"}
             ],
 
@@ -43,7 +43,7 @@
                 {"text": "monitor reset halt"},
                 // {"text": "monitor flash set_parallelism_mode 2"},
                 {"text": "monitor flash write_image erase \"E:/GitHub/nf-interpreter/build/nanoFramework.hex\" "},
-                {"text": "file e:/GitHub/nf-interpreter/build/source/nanoFramework"},
+                {"text": "file E:/GitHub/nf-interpreter/build/nanoFramework"},
                 // {"text": "set *0xE0042004 = (*0xE0042004) | 0x7"},
                 {"text": "monitor reset halt"}
             ],

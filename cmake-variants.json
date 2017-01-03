@@ -31,10 +31,11 @@
             "TOOLCHAIN_PREFIX" : "E:/GNU_Tools_ARM_Embedded/5_4_2016q3",
             "TARGET_CHIP" : "STM32F091RC",
             "PACKAGE_VERSION" : "1.6.0",
-            "RTOS" : "FREERTOS", 
+            "RTOS" : "MBEDOS", 
             "FREERTOS_VERSION" : "9.0.0",
             "FREERTOS_SOURCE" : "",
-            "MBEDRTOS_SOURCE" : ""
+            "MBEDOS_SOURCE" : "",
+            "MBED_TARGET" : ""
         },
         "buildType": "Debug"
       },
@@ -48,7 +49,8 @@
             "RTOS" : "FREERTOS", 
             "FREERTOS_VERSION" : "9.0.0",
             "FREERTOS_SOURCE" : "",
-            "MBEDRTOS_SOURCE" : ""
+            "MBEDOS_SOURCE" : "",
+            "MBED_TARGET" : ""
         },
         "buildType": "Debug"
       },
