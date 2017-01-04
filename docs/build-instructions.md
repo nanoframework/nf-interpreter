@@ -45,11 +45,14 @@ The build script accepts the following parameters (some of them are mandatory).
 - TOOLCHAIN: the toolchain to use in the build. The default (and only option at this time) is GCC.
 - TOOLCHAIN_PREFIX: path to the install directory of the toolchain. E.g.: "E:/GNU_Tools_ARM_Embedded/5_4_2016q3". Mind the forward slash on the path for all platforms.
 - CMAKE_BUILD_TYPE: build type (Debug, Release, etc). The default is Release.
-- RTOS: specifies the RTOS to add to the image. If no source path is specified the source files will be downloaded from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS), mBed RTOS (MBEDRTOS) and ARM RTX (RTXRTOS).
+- RTOS: specifies the RTOS to add to the image. If no source path is specified the source files will be downloaded from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS), mBed RTOS (MBEDRTOS), ChibiOS (CHIBIOS) and ARM RTX (RTXRTOS).
 - FREERTOS_VERSION: specifies the FreeRTOS version to grab the source files. It has to match one of the official versions from the FreeRTOS repository. If none is specified it will download the 'trunk' version. This parameter is ignored if FREERTOS_SOURCE is specified. 
 - FREERTOS_SOURCE: specifies the path for the location of the FreeRTOS source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS must be specified with FREERTOS option. 
 - MBED_SOURCE: specifies the path for the location of the mBed source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS parameter must be specified with MBEDRTOS option. 
 - MBED_TARGET: specifies the mBed OS target. This parameter is mandatory when specifying MBEDRTOS as the RTOS choice parameter above. It has to be a valid target listed in mBed OS _targets.json_ file.
+- CHIBIOS_SOURCE: specifies the path for the location of the ChibiOS source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS parameter must be specified with CHIBIOS option. 
+- CHIBIOS_VERSION: specifies the ChibiOS version to grab the source files. It has to match one of the official versions from the ChibiOS repository. If none is specified it will download the 'trunk' version. This parameter is ignored if CHIBIOS_SOURCE is specified. 
+- CHIBIOS_BOARD: specifies the ChibiOS board. This parameter is mandatory when specifying CHIBIOS as the RTOS choice parameter above. It has to be a valid board listed in ChibiOS boards folder.
 
 _Note: the very first build will take more or less time depending on the download speed of the Internet connection of the machine were the build is running. This is because the source code of the RTOS of your choice will be downloaded from its repository. On the subsequent builds this won't happen._
 

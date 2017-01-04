@@ -34,43 +34,56 @@ endif()
 # handle RTOSes choice
 
 # sanity check here for invalid RTOS option
-set(RTOS_SUPPORTED FREERTOS MBEDOS RTXRTOS RTXRTOS2 CACHE INTERNAL "supported RTOS options")
+set(RTOS_SUPPORTED CHIBIOS FREERTOS MBEDOS RTXRTOS RTXRTOS2 CACHE INTERNAL "supported RTOS options")
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
     message(FATAL_ERROR "\n\nSorry but ${RTOS} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
 endif()
 
+string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
 string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
 string(COMPARE EQUAL "MBEDOS"   "${RTOS}" RTOS_MBEDOS_CHECK)
 string(COMPARE EQUAL "RTXRTOS"  "${RTOS}" RTOS_RTX_RTOS_CHECK)
 string(COMPARE EQUAL "RTXRTOS2" "${RTOS}" RTOS_RTX_RTOS2_CHECK)
 
 if(RTOS_FREERTOS_CHECK) 
-set(RTOS_FREERTOS_CHECK TRUE)
-set(RTOS_MBEDOS_CHECK FALSE)
-set(RTOS_RTX_RTOS_CHECK FALSE)
-set(RTOS_RTX_RTOS2_CHECK FALSE)
+    set(RTOS_FREERTOS_CHECK TRUE)
+    set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_MBEDOS_CHECK FALSE)
+    set(RTOS_RTX_RTOS_CHECK FALSE)
+    set(RTOS_RTX_RTOS2_CHECK FALSE)
 endif()
 
 if(RTOS_MBEDOS_CHECK) 
-set(RTOS_MBEDOS_CHECK TRUE)
-set(RTOS_FREERTOS_CHECK FALSE)
-set(RTOS_RTX_RTOS_CHECK FALSE)
-set(RTOS_RTX_RTOS2_CHECK FALSE)
+    set(RTOS_MBEDOS_CHECK TRUE)
+    set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_FREERTOS_CHECK FALSE)
+    set(RTOS_RTX_RTOS_CHECK FALSE)
+    set(RTOS_RTX_RTOS2_CHECK FALSE)
+endif()
+
+if(RTOS_CHIBIOS_CHECK) 
+    set(RTOS_CHIBIOS_CHECK TRUE)
+    set(RTOS_FREERTOS_CHECK FALSE)
+    set(RTOS_MBEDOS_CHECK FALSE)
+    set(RTOS_RTX_RTOS_CHECK FALSE)
+    set(RTOS_RTX_RTOS2_CHECK FALSE)
 endif()
 
 if(RTOS_RTX_RTOS_CHECK) 
-set(RTOS_RTX_RTOS_CHECK TRUE)
-set(RTOS_MBEDOS_CHECK FALSE)
-set(RTOS_FREERTOS_CHECK FALSE)
-set(RTOS_RTX_RTOS2_CHECK FALSE)
+    set(RTOS_RTX_RTOS_CHECK TRUE)
+    set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_FREERTOS_CHECK FALSE)
+    set(RTOS_MBEDOS_CHECK FALSE)
+    set(RTOS_RTX_RTOS2_CHECK FALSE)
 endif()
 
 if(RTOS_RTX_RTOS2_CHECK) 
-set(RTOS_RTX_RTOS2_CHECK TRUE)
-set(RTOS_FREERTOS_CHECK FALSE)
-set(RTOS_MBEDOS_CHECK FALSE)
-set(RTOS_RTX_RTOS_CHECK FALSE)
+    set(RTOS_RTX_RTOS2_CHECK TRUE)
+    set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_FREERTOS_CHECK FALSE)
+    set(RTOS_MBEDOS_CHECK FALSE)
+    set(RTOS_RTX_RTOS_CHECK FALSE)
 endif()
 
 #######################
@@ -83,9 +96,15 @@ set(TOOLCHAIN GCC)
 string(TOLOWER TOOLCHAIN_LOWER ${TOOLCHAIN}) 
 ##########################################
 
-if(RTOS_MBEDOS_CHECK)
+if(RTOS_CHIBIOS_CHECK)
 
-    message(STATUS "\nSetting Toolchain file for mBed GCC \n")
+    message(STATUS "\nSetting Toolchain file for ChibiOS \n")
+    # set toolchain file
+    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
+
+elseif(RTOS_MBEDOS_CHECK)
+
+    message(STATUS "\nSetting Toolchain file for mBed \n")
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.mBed.${TOOLCHAIN}.cmake)
 
@@ -136,10 +155,103 @@ message(STATUS "")
 #######################
 
 
+#######################
+# ChibiOS
+if(RTOS_CHIBIOS_CHECK)
+
+    # check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_CHIBIOS_SOURCE TRUE)
+    if(CHIBIOS_SOURCE)
+        if(NOT "${CHIBIOS_SOURCE}" STREQUAL "")
+            set(NO_CHIBIOS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_CHIBIOS_SOURCE)
+        # no CHIBIOS source specified, download it from it's repo
+
+        # check for SVN (needed here for advanced warning to user if it's not installed)
+        find_package(Subversion)
+
+        #  check is SVN was found, if not report to user and abort
+        if(NOT Subversion_SVN_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find SVN, make sure you have it installed.")
+        endif()
+
+        # check if build was requested with a specifc ChibiOS version
+        if(DEFINED CHIBIOS_VERSION)
+
+            if("${CHIBIOS_VERSION}" STREQUAL "")
+                set(CHIBIOS_VERSION_EMPTY TRUE)
+            endif()
+
+            if(CHIBIOS_VERSION_EMPTY)
+                # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the trunk
+                message(STATUS "RTOS is: CHIBIOS (latest available code from trunk)")
+                set(CHIBIOS_SVN_REPOSITORY "https://svn.code.sf.net/p/chibios/svn/trunk")
+            else()
+                message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
+                set(CHIBIOS_SVN_REPOSITORY "https://svn.code.sf.net/p/chibios/svn/tags/ver${CHIBIOS_VERSION}")
+            endif()
+            
+        endif()
+
+        # need to setup a separate CMake project to download the code from the SVN repository
+        # otherwise it won't be available before the actual build step
+        configure_file("CMake/CHIBIOS.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/ChibiOS_Download/CMakeLists.txt")
+        
+        # setup CMake project for ChibiOS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS_Download")
+
+        # run build on ChibiOS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS_Download")
+        
+        # add ChibiOS as external project
+        ExternalProject_Add( 
+            ChibiOS
+            PREFIX ChibiOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
+            SVN_REPOSITORY ${CHIBIOS_SVN_REPOSITORY}/os
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+        # get source dir for ChibiOS CMake project
+        ExternalProject_Get_Property(ChibiOS SOURCE_DIR)
+
+    else()
+        # ChibiOS source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${CHIBIOS_SOURCE}/")
+            message(STATUS "RTOS is: ChibiOS (source from: ${CHIBIOS_SOURCE})")
+
+            file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+            set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
+        else()
+            message(FATAL_ERROR "Couldn't find ChibiOS source at ${CHIBIOS_SOURCE}/")
+        endif()
+
+    endif()
+
+    # set CMSIS RTOS include directory
+    include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
+   
+    # add source directory
+    add_subdirectory("targets/os/chibios/nanoBooter")
 
 #######################
 # FreeRTOS
-if(RTOS_FREERTOS_CHECK)
+elseif(RTOS_FREERTOS_CHECK)
 
     # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
     set(NO_FREERTOS_SOURCE TRUE)
@@ -228,6 +340,9 @@ if(RTOS_FREERTOS_CHECK)
 
     # set CMSIS RTOS include directory
     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
+   
+    # add source directory
+    add_subdirectory("source")
 
 #######################
 # mBed OS
@@ -323,6 +438,9 @@ elseif(RTOS_MBEDOS_CHECK)
     endif()
 
     # find_package(MBEDOPTIONS REQUIRED)
+   
+    # add source directory
+    add_subdirectory("targets/os/mbed-os/nanoBooter")
 
 #######################
 # RTX RTOS
@@ -374,6 +492,9 @@ elseif(RTOS_RTX_RTOS_CHECK)
     # get source dir for RTX RTOS CMake project
     ExternalProject_Get_Property(RTXRTOS SOURCE_DIR)
     set(RTXRTOS_INCLUDE_DIRS ${RTXRTOS_SOURCE_DIR})
+   
+    # add source directory
+    add_subdirectory("source")
 
 #######################
 # RTX RTOS2
@@ -430,6 +551,9 @@ support for RTX RTOS2 is in the works, please check latter...
     # get source dir for RTX RTOS2 CMake project
     ExternalProject_Get_Property(RTXRTOS2 SOURCE_DIR)
     set(RTXRTOS2_INCLUDE_DIRS ${RTXRTOS2_SOURCE_DIR})
+   
+    # add source directory
+    add_subdirectory("source")
 
 #######################
 
@@ -452,9 +576,8 @@ else()
     #     # vendor is ?? and toolchain is GCC
     #     add_subdirectory("???")
     endif()    
-    
+   
+    # add source directory
+    add_subdirectory("source")
+ 
 endif()
-
-# add source directory
-#add_subdirectory("source")
-add_subdirectory("targets/os/mbed-os/nanoBooter")
