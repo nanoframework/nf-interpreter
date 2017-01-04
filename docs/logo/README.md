@@ -6,7 +6,7 @@ The **nano Framework** logo was designed by [M. Parvej](https://www.freelancer.c
 
 ## Logo usage
 
-To use the **nano Framework** logo you must first receive written permission from the a team member.
+To use the **nano Framework** logo you must first receive written permission from a team member.
 
 ## **nano Framework** name
 
