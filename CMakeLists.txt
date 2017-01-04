@@ -241,6 +241,15 @@ elseif(RTOS_MBEDOS_CHECK)
         endif()
     endif()
 
+    # check is a target was specified
+    if(MBED_TARGET)
+        if(NOT "${MBEDOS_SOURCE}" STREQUAL "")
+            message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mBed OS is the RTOS option\n\n")
+        endif()
+    else()
+        message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mBed OS is the RTOS option\n\n")
+    endif()
+
     if(NO_MBEDOS_SOURCE)
         # no mBed RTOS source specified, download it from it's repo
 

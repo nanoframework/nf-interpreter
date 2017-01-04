@@ -49,6 +49,7 @@ The build script accepts the following parameters (some of them are mandatory).
 - FREERTOS_VERSION: specifies the FreeRTOS version to grab the source files. It has to match one of the official versions from the FreeRTOS repository. If none is specified it will download the 'trunk' version. This parameter is ignored if FREERTOS_SOURCE is specified. 
 - FREERTOS_SOURCE: specifies the path for the location of the FreeRTOS source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS must be specified with FREERTOS option. 
 - MBED_SOURCE: specifies the path for the location of the mBed source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS parameter must be specified with MBEDRTOS option. 
+- MBED_TARGET: specifies the mBed OS target. This parameter is mandatory when specifying MBEDRTOS as the RTOS choice parameter above. It has to be a valid target listed in mBed OS _targets.json_ file.
 
 _Note: the very first build will take more or less time depending on the download speed of the Internet connection of the machine were the build is running. This is because the source code of the RTOS of your choice will be downloaded from its repository. On the subsequent builds this won't happen._
 
