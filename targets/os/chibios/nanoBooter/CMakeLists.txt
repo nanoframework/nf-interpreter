@@ -14,9 +14,9 @@ include_directories(${CHIBIOS_INCLUDE_DIRS})
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CHIBIOS_COMPILE_OPTIONS} ")
 
 set(PROJECT_SOURCES
-    main.c
-    
-    #WireProtocol.cpp
+    main.cpp
+
+    WireProtocol.cpp
 )
 
 add_executable(

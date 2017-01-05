@@ -63,6 +63,8 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/CMSIS/
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/common/ports/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/common/ports/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/ports/STM32/${CHIBIOS_BOARD_SERIES})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/ports/ARMCMx/cmsis_os)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/various/cpp_wrappers)
 
 # source files and GCC options according to target vendor and series
 
@@ -122,6 +124,13 @@ set(CHIBIOS_SRCS
     chmemcore.c
     chheap.c
     chmempools.c
+
+    # CMSIS
+    cmsis_os.c
+
+    # CPP wrappers
+    ch.cpp
+    syscalls_cpp.cpp
 )
 
 foreach(SRC_FILE ${CHIBIOS_SRCS})
@@ -131,6 +140,8 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/src
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/osal/rt
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/src
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/ports/ARMCMx/cmsis_os
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/various/cpp_wrappers
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
