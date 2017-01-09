@@ -35,16 +35,26 @@ if("${CHIBIOS_TARGET_VENDOR}" STREQUAL "STM")
         CACHE INTERNAL "F0xx series board")
     list(FIND STM32_F0xx_BOARDS ${CHIBIOS_BOARD} STM32_F0xx_BOARDS_INDEX)
     
+    ####################################################
+    # add here all boards with MCU from STM32F4xx series 
+    ####################################################
+    set(STM32_F4xx_BOARDS
+        ST_STM32F4_DISCOVERY 
+        CACHE INTERNAL "F4xx series board")
+    list(FIND STM32_F4xx_BOARDS ${CHIBIOS_BOARD} STM32_F4xx_BOARDS_INDEX)
+
+
+    ####################################################
     if(STM32_F0xx_BOARDS_INDEX GREATER -1)
         set(CHIBIOS_BOARD_SERIES "STM32F0xx")
-
-        include(CHIBIOS_${CHIBIOS_BOARD_SERIES}_sources)
-        include(CHIBIOS_${CHIBIOS_BOARD_SERIES}_GCC_options)
-    
+    elseif(STM32_F4xx_BOARDS_INDEX GREATER -1)
+        set(CHIBIOS_BOARD_SERIES "STM32F4xx")
     else()
         message(FATAL_ERROR "\n\n${CHIBIOS_BOARD} is not on any of the series lists.\nPlease add it to the correct series list and submit a PR.\n\n")
     endif()
 
+    include(CHIBIOS_${CHIBIOS_BOARD_SERIES}_sources)
+    include(CHIBIOS_${CHIBIOS_BOARD_SERIES}_GCC_options)
 
 endif()
 
@@ -60,6 +70,7 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/include
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/ports/ARMCMx)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/ports/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/CMSIS/include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/CMSIS/ST/${CHIBIOS_BOARD_SERIES})
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/common/ports/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/common/ports/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/ports/STM32/${CHIBIOS_BOARD_SERIES})
