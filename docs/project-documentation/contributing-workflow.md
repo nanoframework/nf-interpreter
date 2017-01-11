@@ -63,6 +63,48 @@ Signed-off-by: Joe Smith <joe.smith@email.com>
 The project requires that the name used is your real name. Neither anonymous
 contributions nor those utilizing pseudonyms will be accepted.
 
+Every commit that does not meet the criteria for an [obvious fix](#obvious-fix),
+must have a `Signed-off-by` line.
+
+### Obvious Fix
+
+Very small contributions such as fixing spelling errors, where the contents is
+small enough to not be considered intellectual property, can be submitted without
+a DCO sign-off.
+
+Whenever you invoke the "obvious fix" rule, please say so in your commit message:
+
+```
+Fixed typo in README.
+
+Obvious fix
+```
+
+An obvious fix is a pull request that does not contain creative work. We rely on
+your judgment to determine what is "obvious"; if you are not sure, just ask.
+
+As a rule of thumb, changes are obvious fixes if they do not introduce any new
+functionality or creative thinking. Some examples include the following:
+
+* Spelling/grammar fixes, correcting typos,
+* Cleaning up comments in the code,
+* Changes to white space or formatting,
+* Changes to 'metadata' files like makefile, .config, .gitignore, etc.,
+* Changes in build or installation scripts,
+* Re-ordering contents within a source file,
+* Moving source files from one directory to another, with no changes in the code,
+* Breaking a source file into multiple files, or consolidating multiple source
+    files into one, with no change in code behavior,
+* Changes to words or phrases isolated from their context.
+
+Things that would still require a DCO sign-off before submitting would likely
+include
+
+* Any of the above actions that result in a change of functionality,
+* A new feature,
+* A translation,
+* Extensive or creative comments.
+
 ## PR Feedback
 
 **nano Framework** team and community members will provide feedback on your change. Community feedback is highly valued. You will often see the absence of team feedback if the community has already provided good review feedback. 
