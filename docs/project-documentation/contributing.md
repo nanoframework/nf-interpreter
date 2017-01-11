@@ -4,16 +4,17 @@ The **nano Framework** team maintains several guidelines for contributing to the
 
 ## Contribution Guidelines
 
-- [Copyright](#copyright) describes the licensing practices for the project.
 - [General Contribution Guidance](#general-contribution-guidance) describes general contribution guidance, including more subjective stylistic guidelines.
 - [Contribution Bar](#contribution-bar) describes the bar that the team uses to accept changes.
 - [Contribution Workflow](contributing-workflow.md) describes the workflow that the team uses for considering and accepting changes.
+- [Copyright Notice](#copyright-notice) describes file header copyright notice format.
 
 ## General Contribution Guidance
 
 There are several issues to keep in mind when making a change.
 
 ### Typos
+
 Typos are embarrassing! We will accept most PRs that fix typos. In order to make it easier to review your PR, please focus on a given component with your fixes or on one type of typo across the entire repository. If it's going to take >30 mins to review your PR, then we will probably ask you to chunk it up.
 
 ### Commit Messages
@@ -70,29 +71,25 @@ We encourage adding support for other platforms and/or chip vendors. We have cur
 
 Ports have a weaker contribution bar, since they do not contribute to compatibility risk with existing products. For ports, we are primarily looking for functionally correct implementations.
 
-### Copyright
+### Copyright Notice
 
-The **nano Framework** copyright is held by it's Contributors.
-
-### Source License
-
-The **nano Framework** project uses multiple licenses for the various project repositories.  Most projects use the [Apache 2 License](https://opensource.org/licenses/Apache-2.0). The [Creative Commons Attribution 4.0 International Public License (CC-BY)](https://creativecommons.org/licenses/by/4.0/) license for documentation.
-
-See the license file at the root of project repositories for the specific license, such as with the following examples:
-
-- [**nano Framework**](https://github.com/nano-framework/nf-interpreter/LICENSE.md) [(Apache 2)](https://opensource.org/licenses/Apache-2.0).
-
-### File Headers
-
-The following file header is used for **nano Framework**. Please use it for new files.
-
+The following copyright notice header is used for new files:
 ```
-// Copyright 2016 The nano Framework Contributors.
-// See the COPYRIGHT file at the top-level directory of this distribution and at https://github.com/nano-framework/nf-interpreter/COPYRIGHT.md.
+//
+// Copyright (c) 2017 The nano Framework project contributors
+// See LICENSE file in the project root for full license information.
+//
 ```
 
-<!--- See [class.cpp](../../src/vm/class.cpp) for an example of the header in a C++ file.-->
-<!--- See [List.cs](List.cs) for an example of the header in a C# file.-->
+For source code from .NET Micro Framework the original notice has to be retained
+(note the extra space before 'All'):
+```
+//
+// Copyright (c) 2017 The nano Framework project contributors
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+```
 
 ### Copying Files from Other Projects
 

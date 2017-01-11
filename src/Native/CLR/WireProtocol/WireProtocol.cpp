@@ -1,9 +1,8 @@
-//---------------------------------------------------------------------------
-// Copyright (c) 2016 The nano Framework Interpreter project contributors
+//
+// Copyright (c) 2017 The nano Framework project contributors
 // Copyright (c) Microsoft Corporation.  All rights reserved.
-//---------------------------------------------------------------------------
-
-
+// See LICENSE file in the project root for full license information.
+//
 
 //#include <TinyCLR_Types.h>
 #include <WireProtocol.h>
