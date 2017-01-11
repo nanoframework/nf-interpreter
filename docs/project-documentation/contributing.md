@@ -108,13 +108,3 @@ The following rules must be followed for PRs that include files from another pro
 There are many good algorithms implemented in other languages that would benefit the **nano Framework** project. The rules for porting a Java file to C# , for example, are the same as would be used for copying the same file, as described above.
 
 [Clean-room](https://en.wikipedia.org/wiki/Clean_room_design) implementations of existing algorithms that are not permissively licensed will generally not be accepted. If you want to create or nominate such an implementation, please create an issue to discuss the idea.
-
-### Contributor License Agreement
-
-You must sign a Contribution License Agreement (CLA) before your PR will be merged. This is a one-time requirement for **nano Framework** projects. You can read more about [Contribution License Agreements (CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement) on Wikipedia.
-
-There are two agreements, one for individual contributions and other for entity contributions (this one is applicable when you are working on nano Framework at your work place during your work time which, technically, is owned by your employer).
-The individual agreement: [nano-Framework-Individual-Contributor-License-Agreement.pdf](../CLA/nano-Framework-Individual-Contributor-License-Agreement.pdf)
-The entity agreement: [nano-Framework-Entity-Contributor-License-Agreement.pdf](../CLA/nano-Framework-Entity-Contributor-License-Agreement.pdf)
-
-You don't have to do this up-front. You can simply clone, fork, and submit your pull-request as usual. When your pull-request is created, it is classified by a CLA bot. If the change is trivial (e.g. you just fixed a typo), then the PR is labelled with `cla-not-required`. Otherwise it's classified as `cla-required`. Once you signed a CLA, the current and all future pull-requests will be labelled as `cla-signed`.
