@@ -81,14 +81,26 @@ The following copyright notice header is used for new files:
 //
 ```
 
-For source code from .NET Micro Framework the original notice has to be retained
-(note the extra space before 'All'):
+For a file that is either modification of existing .NET Micro Framework file
+or was created by copying portions of one or more .NET Micro Framework files,
+the original notice has to be retained in the following format:
 ```
 //
 // Copyright (c) 2017 The nano Framework project contributors
-// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Portions << original copyright >>
 // See LICENSE file in the project root for full license information.
 //
+```
+There are several copyright notices in .NET Micro Framework code base,
+so `<< original copyright >>` can be for example
+```
+Copyright (c) Microsoft Corporation.  All rights reserved.
+```
+> Note the extra space before `All`
+
+or
+```
+Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 ```
 
 ### Copying Files from Other Projects
