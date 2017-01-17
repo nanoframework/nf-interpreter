@@ -14,9 +14,12 @@ include_directories(${CHIBIOS_INCLUDE_DIRS})
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CHIBIOS_COMPILE_OPTIONS} ")
 
 set(PROJECT_SOURCES
-    main.cpp
+    # test app
+    main.c
 
-    WireProtocol.cpp
+    # required files to add Wire Protocol
+    WireProtocol_Receiver.c
+    WireProtocol_Commands.c
 )
 
 add_executable(
