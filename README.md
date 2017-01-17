@@ -1,6 +1,6 @@
 # nano Framework Interpreter
 
-Welcome to the nano Framework Interpreter repository! :smille: 
+Welcome to the nano Framework Interpreter repository!
 
 ## How to Engage, Contribute and Provide Feedback
 
@@ -25,9 +25,9 @@ See some of our guides for more details:
 
 The list of contributors to this project can be found at [CONTRIBUTORS](CONTRIBUTORS.md).
 
-## How's behind this project?
+## Who is behind this project?
 
-There are a number of people behind this project. We are mostly embedded systems enthusiasts, passioned for coding and people that like chalenges. 
+There are a number of people behind this project. We are mostly embedded systems enthusiasts, passionate about coding and people that like chalenges. 
 All of us have our daily jobs and we work on this project on our free time.
 This to say that you can always expect an answer from us. Maybe not instantly but in a - hopefully - timely fashion :wink: !
 
