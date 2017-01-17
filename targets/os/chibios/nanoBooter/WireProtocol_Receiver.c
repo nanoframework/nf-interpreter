@@ -7,13 +7,13 @@
 
 #include "WireProtocol_Receiver.h"
 
-uint8_t m_receptionBuffer[256]; // was 2048
-uint32_t m_lastPacketSequence;
+uint8_t receptionBuffer[256]; // was 2048
+uint32_t lastPacketSequence;
 
 
-uint8_t* m_szMarker;
-WP_Message m_inboundMessage;
-uint16_t m_lastOutboundMessage;
+uint8_t* marker;
+WP_Message inboundMessage;
+uint16_t lastOutboundMessage;
 
 ////////////////////////////////////////////////////
 
@@ -61,7 +61,7 @@ void ReceiverThread(void const * argument)
   (void)argument;
 
   // Initialize to a packet sequence number impossible to encounter
-  m_lastPacketSequence = 0x00FEFFFF;
+  lastPacketSequence = 0x00FEFFFF;
 
   while (true) {
 
@@ -73,10 +73,10 @@ void ReceiverThread(void const * argument)
     //////////////////////////////////////////////////////
     if(!sdGetWouldBlock(&SD2))
     {
-        WP_Message_Initialize(&m_inboundMessage);
-        WP_Message_PrepareReception(&m_inboundMessage);
+        WP_Message_Initialize(&inboundMessage);
+        WP_Message_PrepareReception(&inboundMessage);
 
-        WP_Message_Process(&m_inboundMessage);
+        WP_Message_Process(&inboundMessage);
     }
 
     osDelay(500);
@@ -102,11 +102,11 @@ void WP_Message_PrepareReception(WP_Message* message)
 
 void WP_Message_PrepareRequest(WP_Message* message, uint32_t cmd, uint32_t flags, uint32_t payloadSize, uint8_t* payload)
 {
-    memcpy(&message->m_header.m_signature, m_szMarker ? m_szMarker : (uint8_t*)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
+    memcpy(&message->m_header.m_signature, marker ? marker : (uint8_t*)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
 
     message->m_header.m_crcData   = SUPPORT_ComputeCRC(payload, payloadSize, 0);
     message->m_header.m_cmd       = cmd;
-    message->m_header.m_seq       = m_lastOutboundMessage++;
+    message->m_header.m_seq       = lastOutboundMessage++;
     message->m_header.m_seqReply  = 0;
     message->m_header.m_flags     = flags;
     message->m_header.m_size      = payloadSize;
@@ -122,11 +122,11 @@ void WP_Message_PrepareRequest(WP_Message* message, uint32_t cmd, uint32_t flags
 
 void WP_Message_PrepareReply(WP_Message* message, const WP_Packet* req, uint32_t flags, uint32_t payloadSize,  uint8_t* payload)
 {
-    memcpy(&message->m_header.m_signature, m_szMarker ? m_szMarker : (uint8_t*)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
+    memcpy(&message->m_header.m_signature, marker ? marker : (uint8_t*)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
 
     message->m_header.m_crcData   = SUPPORT_ComputeCRC(payload, payloadSize, 0);
     message->m_header.m_cmd       = req->m_cmd;
-    message->m_header.m_seq       = m_lastOutboundMessage++;
+    message->m_header.m_seq       = lastOutboundMessage++;
     message->m_header.m_seqReply  = req->m_seq;
     message->m_header.m_flags     = flags | WP_Flags_c_Reply;
     message->m_header.m_size      = payloadSize;
@@ -346,20 +346,26 @@ bool WP_Message_Process(WP_Message* message)
 
 bool ProcessHeader(WP_Message* message)
 {
-    message->m_payload = m_receptionBuffer;
+    // check for reception buffer overflow 
+    if(message->m_header.m_size > sizeof(receptionBuffer))
+    {
+        return false;
+    }
+
+    message->m_payload = receptionBuffer;
     return true;
 }
 
 bool ProcessPayload(WP_Message* message)
 {
     // Prevent processing duplicate packets
-    if(message->m_header.m_seq == m_lastPacketSequence)
+    if(message->m_header.m_seq == lastPacketSequence)
     {    
         return false;       // Do not even respond to a repeat packet
     }
 
     // save this packet sequence number
-    m_lastPacketSequence = message->m_header.m_seq;
+    lastPacketSequence = message->m_header.m_seq;
 
     if(message->m_header.m_flags & WP_Flags_c_NACK)
     {
