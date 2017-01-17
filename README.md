@@ -6,9 +6,9 @@ Welcome to the nano Framework Interpreter repository! :smille:
 
 Some of the best ways to contribute are to try things out, file bugs, and join in design conversations. 
 If you are having issues or need a clarification about something, instead of opening an issue the best way is to start a conversation in one of our Gitter rooms.
-Please select the one that's most appropriate to the matter you are facing:
-- [Boards/targets configuration](https://gitter.im/nf-interpreter/boards-targets-configuration)
-- [CLR and native code](https://gitter.im/nf-interpreter/CLR-native)
+Please select the one that's most appropriate to the matter you are facing.
+
+[![Join the chat at https://gitter.im/nf-interpreter](https://badges.gitter.im/nf-interpreter/nf-interpreter.svg)](https://gitter.im/nf-interpreter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 If you've find a confirmed issue please open one at [Issues](https://github.com/nano-framework/nf-interpreter/issues).
 We ask you to open an issue only when you have a real and confirmed one. Don't open an issue for support requests or to start a discussion. For that you'll get a better (and quicker!) support/feedback in one of the Gitter rooms.
