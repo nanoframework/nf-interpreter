@@ -1,7 +1,6 @@
 //
 // Copyright (c) 2017 The nano Framework project contributors
-// Some parts are taken from .NET Microframework source code 
-// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
@@ -63,10 +62,10 @@ typedef struct Monitor_Ping_Reply
 // equivalent with .NETMF MFVersion
 typedef struct VersionInfo
 {
-    unsigned short usMajor;
-    unsigned short usMinor;
-    unsigned short usBuild;
-    unsigned short usRevision;
+    uint16_t usMajor;
+    uint16_t usMinor;
+    uint16_t usBuild;
+    uint16_t usRevision;
 
 }VersionInfo;
 
