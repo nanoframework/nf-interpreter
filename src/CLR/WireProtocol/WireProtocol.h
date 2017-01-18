@@ -1,20 +1,26 @@
 //
 // Copyright (c) 2017 The nano Framework project contributors
-// Some parts are taken from .NET Microframework source code 
-// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
 #ifndef _WIREPROTOCOL_H_
 #define _WIREPROTOCOL_H_
 
-#include <ch.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+#ifndef min
+#define min(a,b)  (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
+#endif
 
 #define MARKER_DEBUGGER_V1 "MSdbgV1" // Used to identify the debugger at boot time.
 #define MARKER_PACKET_V1   "MSpktV1" // Used to identify the start of a packet.
-
-struct WP_Packet;
-struct WP_Message;
 
 // enum with Wire Protocol flags
 // backwards compatible with .NETMF
@@ -37,6 +43,18 @@ typedef enum WP_Flags
     WP_Flags_c_NACK        = 0x4000,
     WP_Flags_c_ACK         = 0x8000
 }WP_Flags;
+
+// enum with machine states for Wire Procotol receiver
+typedef enum ReceiveState
+{
+    ReceiveState_Idle             = (1 << 0),
+    ReceiveState_Initialize       = (2 << 0),
+    ReceiveState_WaitingForHeader = (3 << 0),
+    ReceiveState_ReadingHeader    = (4 << 0),
+    ReceiveState_CompleteHeader   = (5 << 0),
+    ReceiveState_ReadingPayload   = (6 << 0),
+    ReceiveState_CompletePayload  = (7 << 0),
+}ReceiveState;
 
 // structure for Wire Protocol packet
 // backwards compatible with .NETMF
@@ -65,11 +83,15 @@ typedef struct WP_Message
     int            m_rxState;
 }WP_Message;
 
-
 // This structure is never used, its purpose is to generate a compiler error in case the size of any structure changes.
 struct WP_CompileCheck
 {
     char buf1[ sizeof(WP_Packet) == 8 * 4 ? 1 : -1 ];
 };
+
+extern uint8_t* marker;
+extern uint16_t lastOutboundMessage;
+extern uint32_t lastPacketSequence;
+extern WP_Message inboundMessage;
 
 #endif // _WIREPROTOCOL_H_

@@ -1,14 +1,12 @@
 //
 // Copyright (c) 2017 The nano Framework project contributors
-// Some parts are taken from .NET Microframework source code 
-// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
 #ifndef _WIREPROTOCOL_COMMANDS_H_
 #define _WIREPROTOCOL_COMMANDS_H_
 
-#include <string.h>
 #include "WireProtocol.h"
 
 //////////////////////////////////////////
@@ -89,14 +87,21 @@ typedef struct Monitor_OemInfo_Reply
 
 }Monitor_OemInfo_Reply;
 
+// structure for Wire Protocol command handler lookup
+typedef struct CommandHandlerLookup
+{
+    // command code goes here
+    uint32_t command;
+    
+    // pointer to handler function 
+    void* handler;
+
+}CommandHandlerLookup;
+
 //////////////////////////////////////////
 // function declarations (commands)
 
 bool Monitor_Ping(WP_Message* message);
 bool Monitor_OemInfo(WP_Message* message);
-
-//////////////////////////////////////////
-// helper functions
-bool NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo);
 
 #endif //_WIREPROTOCOL_COMMANDS_H_

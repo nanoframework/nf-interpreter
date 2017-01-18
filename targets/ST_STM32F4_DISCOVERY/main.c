@@ -7,17 +7,30 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include "WireProtocol_Receiver.h"
+#include "usbcfg.h"
+#include <WireProtocol_ReceiverThread.h>
 
 void BlinkerThread(void const * argument)
 {
   (void)argument;
 
   while (true) {
-    palClearPad(GPIOA, GPIOA_LED_GREEN);
-    osDelay(500);
-    palSetPad(GPIOA, GPIOA_LED_GREEN);
-    osDelay(500);
+      palSetPad(GPIOD, GPIOD_LED3);
+      osDelay(250);
+
+      palClearPad(GPIOD, GPIOD_LED3);
+      palSetPad(GPIOD, GPIOD_LED5);
+      osDelay(250);
+
+      palClearPad(GPIOD, GPIOD_LED5);
+      palSetPad(GPIOD, GPIOD_LED6);
+      osDelay(250);
+
+      palClearPad(GPIOD, GPIOD_LED6);
+      palSetPad(GPIOD, GPIOD_LED4);
+      osDelay(250);
+      
+      palClearPad(GPIOD, GPIOD_LED4);
   }
 }
 osThreadDef(BlinkerThread, osPriorityNormal, 128);
@@ -37,10 +50,17 @@ int main(void) {
   // already enabled.
   osKernelInitialize();
 
-  //   Prepares the Serial driver 2 using UART2
-  sdStart(&SD2, NULL);
-  palSetPadMode(GPIOA, 2, PAL_MODE_ALTERNATE(1)); // USART2 TX
-  palSetPadMode(GPIOA, 3, PAL_MODE_ALTERNATE(1)); // USART2 RX
+  //  Initializes a serial-over-USB CDC driver.
+  sduObjectInit(&SDU1);
+  sduStart(&SDU1, &serusbcfg);
+
+  // Activates the USB driver and then the USB bus pull-up on D+.
+  // Note, a delay is inserted in order to not have to disconnect the cable
+  // after a reset.
+  usbDisconnectBus(serusbcfg.usbp);
+  chThdSleepMilliseconds(1500);
+  usbStart(serusbcfg.usbp, &usbcfg);
+  usbConnectBus(serusbcfg.usbp);
 
   // Creates the blinker thread, it does not start immediately.
   osThreadCreate(osThread(BlinkerThread), NULL);

@@ -1,22 +1,14 @@
 //
 // Copyright (c) 2017 The nano Framework project contributors
-// Some parts are taken from .NET Microframework source code 
-// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-#include "WireProtocol_Receiver.h"
+#include "WireProtocol_Message.h"
 
-uint8_t receptionBuffer[256]; // was 2048
-uint32_t lastPacketSequence;
+uint8_t receptionBuffer[2048];
 
-
-uint8_t* marker;
-WP_Message inboundMessage;
-uint16_t lastOutboundMessage;
-
-////////////////////////////////////////////////////
-
+// defining this array here makes is local helping reduce the image size because of compiler opmitizations
 static const CommandHandlerLookup c_Lookup_Request[] =
 {
     /*******************************************************************************************************************************************************************/
@@ -45,6 +37,7 @@ static const CommandHandlerLookup c_Lookup_Request[] =
 
 ////////////////////////////////////////////////////
 
+// defining this array here makes is local helping reduce the image size because of compiler opmitizations
 static const CommandHandlerLookup c_Lookup_Reply[] =
 {
     /*******************************************************************************************************************************************************************/
@@ -54,37 +47,105 @@ static const CommandHandlerLookup c_Lookup_Reply[] =
     /*******************************************************************************************************************************************************************/
 };
 
-////////////////////////////////////////////////////
+//////////////////////////////////////////
+// helper functions
 
-void ReceiverThread(void const * argument)
+bool ProcessHeader(WP_Message* message)
 {
-  (void)argument;
-
-  // Initialize to a packet sequence number impossible to encounter
-  lastPacketSequence = 0x00FEFFFF;
-
-  while (true) {
-
-    // check if there are any data waiting to be read
-    //////////////////////////////////////////////////////
-    //            PORTING CHANGE REQUIRED HERE          //
-    //////////////////////////////////////////////////////
-    // change here the check for existing data to be read
-    //////////////////////////////////////////////////////
-    if(!sdGetWouldBlock(&SD2))
+    // check for reception buffer overflow 
+    if(message->m_header.m_size > sizeof(receptionBuffer))
     {
-        WP_Message_Initialize(&inboundMessage);
-        WP_Message_PrepareReception(&inboundMessage);
-
-        WP_Message_Process(&inboundMessage);
+        return false;
     }
 
-    osDelay(500);
-  }
+    message->m_payload = receptionBuffer;
+    return true;
 }
 
-////////////////////////////////////////////////////
-// WP_Message
+bool ProcessPayload(WP_Message* message)
+{
+    // Prevent processing duplicate packets
+    if(message->m_header.m_seq == lastPacketSequence)
+    {    
+        return false;       // Do not even respond to a repeat packet
+    }
+
+    // save this packet sequence number
+    lastPacketSequence = message->m_header.m_seq;
+
+    if(message->m_header.m_flags & WP_Flags_c_NACK)
+    {
+        //
+        // Bad packet...
+        //
+        return true;
+    }
+
+    size_t  num;
+    const CommandHandlerLookup* cmd;
+
+    if(message->m_header.m_flags & WP_Flags_c_Reply)
+    {
+        num = ARRAYSIZE(c_Lookup_Reply);
+        cmd =           c_Lookup_Reply;
+    }
+    else
+    {
+        num = ARRAYSIZE(c_Lookup_Request);
+        cmd =           c_Lookup_Request;
+    }
+
+    while(num--)
+    {
+        if(cmd->command == message->m_header.m_cmd)
+        {
+            // execute commadn handler and save the result
+            bool commandHandlerExecuteResult = ((bool* (*)(WP_Message*))cmd->handler)(message);
+
+            ReplyToCommand(message, commandHandlerExecuteResult, false, NULL, 0);
+            return true;
+        }
+
+        cmd++;
+    }
+
+    ReplyToCommand(message, false, false, NULL, 0);
+
+    return true;    
+}
+
+void ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* ptr, int size)
+{
+    WP_Message msgReply;
+    uint32_t     flags = 0;
+
+    //
+    // Make sure we reply only once!
+    //
+    if(message->m_header.m_flags & WP_Flags_c_NonCritical) return;
+    message->m_header.m_flags |= WP_Flags_c_NonCritical;
+
+    //
+    // No caching in the request, no caching in the reply...
+    //
+    if(message->m_header.m_flags & WP_Flags_c_NoCaching) flags |= WP_Flags_c_NoCaching;
+
+    if(fSuccess  ) flags |= WP_Flags_c_ACK;
+    else           flags |= WP_Flags_c_NACK;    
+    if(!fCritical) flags |= WP_Flags_c_NonCritical;
+
+    if(fSuccess == false)
+    {
+        ptr  = NULL;
+        size = 0;
+    }
+
+    WP_Message_Initialize(&msgReply);
+
+    WP_Message_PrepareReply(&msgReply, &message->m_header, flags, size, (uint8_t*)ptr );
+
+    WP_TransmitMessage(&msgReply);
+}
 
 void WP_Message_Initialize(WP_Message* message)
 {
@@ -187,7 +248,7 @@ void WP_Message_ReplyBadPacket(uint32_t flags)
     WP_Message_Initialize(&message);
     WP_Message_PrepareRequest(&message, 0, WP_Flags_c_NonCritical | WP_Flags_c_NACK | flags, 0, NULL);
 
-    SendProtocolMessage(&message);
+    WP_TransmitMessage(&message);
 }
 
 bool WP_Message_Process(WP_Message* message)
@@ -212,7 +273,7 @@ bool WP_Message_Process(WP_Message* message)
 
             case ReceiveState_WaitingForHeader:
                 //TRACE0(TRACE_STATE, "RxState==WaitForHeader\n");
-                if(ReceiveBytes(message->m_pos, &message->m_size) == false)
+                if(WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
                 {
                     // didn't receive the expected amount of bytes, returning false
                     return false;
@@ -251,7 +312,7 @@ bool WP_Message_Process(WP_Message* message)
                 break;
 
             case ReceiveState_ReadingHeader:
-                if(ReceiveBytes(message->m_pos, &message->m_size) == false)
+                if(WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
                 {
                     // didn't receive the expected amount of bytes, returning false
                     return false;
@@ -308,7 +369,7 @@ bool WP_Message_Process(WP_Message* message)
 
             case ReceiveState_ReadingPayload:
                 {
-                    if(ReceiveBytes(message->m_pos, &message->m_size) == false)
+                    if(WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
                     {
                         // didn't receive the expected amount of bytes, returning false
                         return false;
@@ -340,176 +401,6 @@ bool WP_Message_Process(WP_Message* message)
         }
     }
 }
-
-//////////////////////////////////////////
-// helper functions
-
-bool ProcessHeader(WP_Message* message)
-{
-    // check for reception buffer overflow 
-    if(message->m_header.m_size > sizeof(receptionBuffer))
-    {
-        return false;
-    }
-
-    message->m_payload = receptionBuffer;
-    return true;
-}
-
-bool ProcessPayload(WP_Message* message)
-{
-    // Prevent processing duplicate packets
-    if(message->m_header.m_seq == lastPacketSequence)
-    {    
-        return false;       // Do not even respond to a repeat packet
-    }
-
-    // save this packet sequence number
-    lastPacketSequence = message->m_header.m_seq;
-
-    if(message->m_header.m_flags & WP_Flags_c_NACK)
-    {
-        //
-        // Bad packet...
-        //
-        return true;
-    }
-
-    // TODO
-    //LOADER_ENGINE_SETFLAG( this, c_LoaderEngineFlag_ValidConnection );
-
-    size_t  num;
-    const CommandHandlerLookup* cmd;
-
-    if(message->m_header.m_flags & WP_Flags_c_Reply)
-    {
-        num = ARRAYSIZE(c_Lookup_Reply);
-        cmd =           c_Lookup_Reply;
-    }
-    else
-    {
-        num = ARRAYSIZE(c_Lookup_Request);
-        cmd =           c_Lookup_Request;
-    }
-
-    while(num--)
-    {
-        if(cmd->command == message->m_header.m_cmd)
-        {
-            // execute commadn handler and save the result
-            bool commandHandlerExecuteResult = ((bool* (*)(WP_Message*))cmd->handler)(message);
-
-            ReplyToCommand(message, commandHandlerExecuteResult, false, NULL, 0);
-            return true;
-        }
-
-        cmd++;
-    }
-
-    ReplyToCommand(message, false, false, NULL, 0);
-
-    return true;    
-}
-
-void ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* ptr, int size)
-{
-    WP_Message msgReply;
-    uint32_t     flags = 0;
-
-    //
-    // Make sure we reply only once!
-    //
-    if(message->m_header.m_flags & WP_Flags_c_NonCritical) return;
-    message->m_header.m_flags |= WP_Flags_c_NonCritical;
-
-    //
-    // No caching in the request, no caching in the reply...
-    //
-    if(message->m_header.m_flags & WP_Flags_c_NoCaching) flags |= WP_Flags_c_NoCaching;
-
-    if(fSuccess  ) flags |= WP_Flags_c_ACK;
-    else           flags |= WP_Flags_c_NACK;    
-    if(!fCritical) flags |= WP_Flags_c_NonCritical;
-
-    if(fSuccess == false)
-    {
-        ptr  = NULL;
-        size = 0;
-    }
-
-    WP_Message_Initialize(&msgReply);
-
-    WP_Message_PrepareReply(&msgReply, &message->m_header, flags, size, (uint8_t*)ptr );
-
-    SendProtocolMessage(&msgReply);
-}
-
-bool SendProtocolMessage(WP_Message* message)
-{
-    return TransmitMessage(message);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-// These two functions bellow are the ones that need to be ported to new channels when required
-
-bool ReceiveBytes(uint8_t* ptr, uint16_t* size)
-{
-    // save for latter comparison
-    uint16_t requestedSize = *size;
-
-    // sanity check for request of 0 size
-    if(*size)
-    {
-        //////////////////////////////////////////////////////////
-        //               PORTING CHANGE REQUIRED HERE           //
-        //////////////////////////////////////////////////////////
-        // change here to read (size) bytes from the input stream
-        // preferably with read timeout and being able to check 
-        // if the requested number of bytes was actually read
-        //////////////////////////////////////////////////////////
-        
-        // non blocking read from serial port with 100ms timeout
-        volatile size_t read = sdReadTimeout(&SD2, ptr, *size, MS2ST(100));
-
-        ptr  += read;
-        *size -= read;
-
-        // check if the requested read matches the actual read count
-        return (requestedSize == read);
-    }
-
-    return true;
-}
-
-bool TransmitMessage(WP_Message* message)
-{
-    ///////////////////////////////////////////////////////////
-    //              PORTING CHANGE REQUIRED HERE             //
-    ///////////////////////////////////////////////////////////
-    // change here to write (size) bytes to the output stream
-    // preferably with timeout and being able to check 
-    // if the write was sucessfull or at least buffered
-    //////////////////////////////////////////////////////////
-
-    // write header to output stream
-    if(sdWrite(&SD2, (const uint8_t *)&message->m_header, sizeof(message->m_header)) != sizeof(message->m_header)) return false;
-
-    // if there is anything on the payload send it to the output stream
-    if(message->m_header.m_size && message->m_payload)
-    {
-        ///////////////////////////////////////////////////////////
-        //              PORTING CHANGE REQUIRED HERE             //
-        ///////////////////////////////////////////////////////////
-        // see description above
-        //////////////////////////////////////////////////////////
-        if(sdWrite(&SD2, message->m_payload, message->m_header.m_size ) != message->m_header.m_size) return false;
-    }
-
-    return true;    
-}
-///////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////
 // CRC 32 table for use under ZModem protocol, IEEE 802
