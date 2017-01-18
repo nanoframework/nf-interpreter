@@ -346,6 +346,12 @@ bool WP_Message_Process(WP_Message* message)
 
 bool ProcessHeader(WP_Message* message)
 {
+    // check for reception buffer overflow 
+    if(message->m_header.m_size > sizeof(receptionBuffer))
+    {
+        return false;
+    }
+
     message->m_payload = receptionBuffer;
     return true;
 }
