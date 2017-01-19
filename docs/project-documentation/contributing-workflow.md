@@ -16,18 +16,15 @@ Make a quality change. Consider and document (preferably with tests) as many usa
 
 There are several issues to keep in mind when making a change.
 
-<!--Managed Code Compatibility
---------------------------
-Please review [Breaking Changes](https://github.com/dotnet/corefx/blob/master/Documentation/coding-guidelines/breaking-changes.md) before making changes to managed code. Please pay the most attention to changes that affect the [Public Contract](https://github.com/dotnet/corefx/blob/master/Documentation/coding-guidelines/breaking-changes.md#bucket-1-public-contract).-->
-
 ## Typos
+
 Typos are embarrassing! We will accept most PRs that fix typos. In order to make it easier to review your PR, please focus on a given component with your fixes or on one type of typo across the entire repository. If it's going to take >30 mins to review your PR, then we will probably ask you to chunk it up.
 
 ## Coding Style Changes
 
 We would like to have **nano Framework** in full conformance with the style guidelines described here [C/C++ Coding Style](../coding-guidelines/cxx-coding-style.md) and here [C# Coding Style](../coding-guidelines/cs-coding-style.md). We plan to do that with tooling, in a holistic way. In the meantime, please:
 
-* **DO NOT** send PRs for style changes. 
+* **DO NOT** send PRs for style changes.
 * **DO** give priority to the current style of the project or file you're changing even if it diverges from the general guidelines.
 
 ## Commit Messages
@@ -47,11 +44,66 @@ below.
 Fix #42
 ```
 
-Also do your best to factor commits appropriately, i.e not too large with unrelated
+Also do your best to factor commits appropriately, i.e. not too large with unrelated
 things in the same commit, and not too small with the same small change applied N
 times in N different commits. If there was some accidental reformatting or whitespace
 changes during the course of your commits, please rebase them away before submitting
 the PR.
+
+## Developer Certificate of Origin
+
+We have adopted the [Developer Certificate of Origin](http://developercertificate.org/)
+(DCO) and request the developer to include a `Signed-off-by` line in the commit
+message to indicate they understand and agree to the DCO:
+
+```
+Signed-off-by: Joe Smith <joe.smith@email.com>
+```
+
+The project requires that the name used is your real name. Neither anonymous
+contributions nor those utilizing pseudonyms will be accepted.
+
+Every commit that does not meet the criteria for an [obvious fix](#obvious-fix),
+must have a `Signed-off-by` line.
+
+### Obvious Fix
+
+Very small contributions such as fixing spelling errors, where the contents is
+small enough to not be considered intellectual property, can be submitted without
+a DCO sign-off.
+
+Whenever you invoke the "obvious fix" rule, please say so in your commit message:
+
+```
+Fixed typo in README.
+
+Obvious fix
+```
+
+An obvious fix is a pull request that does not contain creative work. We rely on
+your judgment to determine what is "obvious"; if you are not sure, just ask.
+
+As a rule of thumb, changes are obvious fixes if they do not introduce any new
+functionality or creative thinking. Some examples include the following:
+
+* Spelling/grammar fixes, correcting typos,
+* Cleaning up comments in the code,
+* Changes to white space or formatting,
+* Changes to 'metadata' files like makefile, .config, .gitignore, etc.,
+* Changes in build or installation scripts,
+* Re-ordering contents within a source file,
+* Moving source files from one directory to another, with no changes in the code,
+* Breaking a source file into multiple files, or consolidating multiple source
+    files into one, with no change in code behavior,
+* Changes to words or phrases isolated from their context.
+
+Things that would still require a DCO sign-off before submitting would likely
+include
+
+* Any of the above actions that result in a change of functionality,
+* A new feature,
+* A translation,
+* Extensive or creative comments.
 
 ## PR Feedback
 
@@ -80,6 +132,7 @@ We use and recommend the following workflow:
   - Branches are useful since they isolate your changes from incoming changes from upstream. They also enable you to create multiple PRs from the same fork.
 4. Make and commit your changes.
   - Please follow our [Commit Messages](contributing-workflow.md#commit-messages) guidance.
+  - Include `Signed-off-by` line, e.g. `git commit -s`
 5. Add new tests corresponding to your change, if applicable.
 6. Build the repository with your changes.
   - Make sure that the builds are clean.
