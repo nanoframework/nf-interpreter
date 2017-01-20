@@ -1,10 +1,10 @@
 # Contribution Workflow
 
-You can contribute to **nano Framework** with issues and PRs. Simply filing issues for problems you encounter is a great way to contribute. Contributing implementations is greatly appreciated.
+You can contribute to **nanoFramework** with issues and PRs. Simply filing issues for problems you encounter is a great way to contribute. Contributing implementations is greatly appreciated.
 
 ## Getting Started
 
-If you are looking at getting your feet wet with some simple (but still beneficial) changes, check out _up-for-grabs_ issues on the [**nano Framework** Interpreter](https://github.com/nano-framework/nf-interpreter/labels/up-for-grabs) repo. 
+If you are looking at getting your feet wet with some simple (but still beneficial) changes, check out _up-for-grabs_ issues on the [**nanoFramework** Interpreter](https://github.com/nanoframework/nf-interpreter/labels/up-for-grabs) repo. 
 
 For new ideas, please always start with an issue before starting development of an implementation. See [project priorities](project-priorities.md) to understand the team's approach to engagement on general improvements to the product. Use [CODE_KEEPERS.md](CODE_KEEPERS.md) to find relevant maintainers and @ mention them to ask for feedback on your issue.
 
@@ -22,7 +22,7 @@ Typos are embarrassing! We will accept most PRs that fix typos. In order to make
 
 ## Coding Style Changes
 
-We would like to have **nano Framework** in full conformance with the style guidelines described here [C/C++ Coding Style](../coding-guidelines/cxx-coding-style.md) and here [C# Coding Style](../coding-guidelines/cs-coding-style.md). We plan to do that with tooling, in a holistic way. In the meantime, please:
+We would like to have **nanoFramework** in full conformance with the style guidelines described here [C/C++ Coding Style](../coding-guidelines/cxx-coding-style.md) and here [C# Coding Style](../coding-guidelines/cs-coding-style.md). We plan to do that with tooling, in a holistic way. In the meantime, please:
 
 * **DO NOT** send PRs for style changes.
 * **DO** give priority to the current style of the project or file you're changing even if it diverges from the general guidelines.
@@ -107,13 +107,13 @@ include
 
 ## PR Feedback
 
-**nano Framework** team and community members will provide feedback on your change. Community feedback is highly valued. You will often see the absence of team feedback if the community has already provided good review feedback. 
+**nanoFramework** team and community members will provide feedback on your change. Community feedback is highly valued. You will often see the absence of team feedback if the community has already provided good review feedback. 
 
-1 or more **nano Framework** team members will review every PR prior to merge. They will often reply with "LGTM, modulo comments". That means that the PR will be merged once the feedback is resolved. "LGTM" == "looks good to me".
+1 or more **nanoFramework** team members will review every PR prior to merge. They will often reply with "LGTM, modulo comments". That means that the PR will be merged once the feedback is resolved. "LGTM" == "looks good to me".
 
 There are lots of thoughts and [approaches](https://github.com/antlr/antlr4-cpp/blob/master/CONTRIBUTING.md#emoji) for how to efficiently discuss changes. It is best to be clear and explicit with your feedback. Please be patient with people who might not understand the finer details about your approach to feedback.
 
-**nano Framework** project uses many labels for categorizing issues and pull requests. Check [here](labels.md) the full list.
+**nanoFramework** project uses many labels for categorizing issues and pull requests. Check [here](labels.md) the full list.
 
 ## Suggested Workflow
 

@@ -1,6 +1,7 @@
-//---------------------------------------------------------------------------
-// Copyright (c) 2016 The nano Framework Interpreter project contributors
-//---------------------------------------------------------------------------
+//
+// Copyright (c) 2017 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
 
 #include "mbed.h"
 #include <string.h>

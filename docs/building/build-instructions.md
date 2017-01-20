@@ -1,15 +1,15 @@
-# Instructions for building a **nano Framework** image
+# Instructions for building a **nanoFramework** image
 
 ## Table of contents ##
 
 - [Prerequisites](#Prerequisites)
 - [Preparation](#Preparation)
-- [Build a **nano Framework** image](#Build-a-nano-Framework-Image)
-- [**nano Framework** build deliverables](#nano-Framework-Build-Deliverables)
+- [Build a **nanoFramework** image](#Build-a-nanoFramework-Image)
+- [**nanoFramework** build deliverables](#nanoFramework-Build-Deliverables)
 
 **About this document**
 
-This document describes how to build an image of **nano Framework** to be flashed in a SoC or MCU.
+This document describes how to build an image of **nanoFramework** to be flashed in a SoC or MCU.
 The build is based on CMake tool to ease the development in all major platforms.
 
 # Prerequisites
@@ -37,7 +37,7 @@ As a suggestion we recommend that you create a directory named *build* in the re
 
 
 
-# Build a **nano Framework** image
+# Build a **nanoFramework** image
 
 The build script accepts the following parameters (some of them are mandatory).
 - TARGET_CHIP: this is the vendor reference to the chip that you are building the image for. At this time only STM32F4 series are supported. A valid reference here would be STM32F407VG.
@@ -99,9 +99,9 @@ Follows a brief explanation on the files you might want to tweak.
 To launch the build in VS Code check the status bar at the bottom. Select the build flavor and then click the build buttom (or hit F7).
 
 
-# **nano Framework** build deliverables
+# **nanoFramework** build deliverables
 
-After a sucesfull build you can find the **nano Framework** image files in the *build* directory. Those are:
+After a sucesfull build you can find the **nanoFramework** image files in the *build* directory. Those are:
 - nanoFramework.bin (raw binary format)
 - nanoFramework.hex (Intel hex format)
 - nanoFramework.s19 (Motorola S-record format, equivalent to srec)

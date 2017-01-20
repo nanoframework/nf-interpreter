@@ -1,6 +1,6 @@
-# nano Framework Interpreter
+# nanoFramework Interpreter
 
-Welcome to the nano Framework Interpreter repository!
+Welcome to the nanoFramework Interpreter repository!
 
 ## How to Engage, Contribute and Provide Feedback
 
@@ -10,10 +10,10 @@ Please select the one that's most appropriate to the matter you are facing.
 
 [![Join the chat at https://gitter.im/nf-interpreter](https://badges.gitter.im/nf-interpreter/nf-interpreter.svg)](https://gitter.im/nf-interpreter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-If you've find a bug or can't use Gitter please open an issue at [Issues](https://github.com/nano-framework/nf-interpreter/issues).
+If you've find a bug or can't use Gitter please open an issue at [Issues](https://github.com/nanoframework/nf-interpreter/issues).
 We ask you to open an issue only when you have a real and confirmed one. Don't open an issue for support requests or to start a discussion. For that you'll get a better (and quicker!) support/feedback in one of the Gitter rooms.
 
-Looking for something to work on? The list of [up-for-grabs issues](https://github.com/nano-framework/nf-interpreter/labels/up-for-grabs)
+Looking for something to work on? The list of [up-for-grabs issues](https://github.com/nanoframework/nf-interpreter/labels/up-for-grabs)
 is a great place to start. Or take a look at our [documentation](docs/).
 
 See some of our guides for more details:
@@ -33,4 +33,4 @@ This is to say that you can always expect an answer from us. Maybe not instantly
 
 ## License
 
-The nano Framework Interpreter is licensed under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
+The nanoFramework Interpreter is licensed under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
