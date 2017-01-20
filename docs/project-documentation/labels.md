@@ -1,6 +1,6 @@
 # Labels
 
-**nano Framework** project uses many labels for categorizing issues and pull requests.
+**nanoFramework** project uses many labels for categorizing issues and pull requests.
 
 | Label | Meaning on Issue | Meaning on Pull Request |
 | --- | --- | --- |
@@ -26,6 +26,6 @@
 | under review | n/a | The pull request is being reviewed |
 | trivial | The work required to complete this issue is considered to be very simple and it shouldn't pose any significant challenge. It can be completed in a very short time. It doesn't require any particular skills or deep knowledge on the matter or the project.  | n/a |
 | non trivial | The work required to complete this issue is considered to be somewhat complex. It requires a particular skill set or deep knowledge on the matter or about the matter or the project architecture.  | n/a |
-| area-Config-and-Build | The issue is related with the configuration and build of **nano Framework** | The pull request is related with the configuration and build of **nano Framework** |
-| area-Infrastructure-and-Organization | The issue is related with the infrastructure or the overall organization of the **nano Framework** project | The pull request with the infrastructure or the overall organization of the **nano Framework** project |
-| area-Interpreter | The issue is related with the Interpreter component of **nano Framework** | The pull request is related with the Interpreter component of **nano Framework** |
+| area-Config-and-Build | The issue is related with the configuration and build of **nanoFramework** | The pull request is related with the configuration and build of **nanoFramework** |
+| area-Infrastructure-and-Organization | The issue is related with the infrastructure or the overall organization of the **nanoFramework** project | The pull request with the infrastructure or the overall organization of the **nanoFramework** project |
+| area-Interpreter | The issue is related with the Interpreter component of **nanoFramework** | The pull request is related with the Interpreter component of **nanoFramework** |

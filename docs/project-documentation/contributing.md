@@ -1,6 +1,6 @@
-# Contributing to **nano Framework**
+# Contributing to **nanoFramework**
 
-The **nano Framework** team maintains several guidelines for contributing to the **nano Framework** repos, which are provided below. Many of these are straightforward, while others may seem subjective. A **nano Framework** team member will be happy to explain why a guideline is defined as it is.
+The **nanoFramework** team maintains several guidelines for contributing to the **nanoFramework** repos, which are provided below. Many of these are straightforward, while others may seem subjective. A **nanoFramework** team member will be happy to explain why a guideline is defined as it is.
 
 ## Contribution Guidelines
 
@@ -55,13 +55,13 @@ the PR.
 * **DON'T** surprise us with big pull requests. Instead, file an issue and start
   a discussion so we can agree on a direction before you invest a large amount
   of time.
-* **DON'T** commit code that you didn't write. If you find code that you think is a good fit to add to **nano Framework**, file an issue and start a discussion before proceeding.
+* **DON'T** commit code that you didn't write. If you find code that you think is a good fit to add to **nanoFramework**, file an issue and start a discussion before proceeding.
 * **DON'T** submit PRs that alter licensing related files or headers. If you believe there's a problem with them, file an issue and we'll be happy to discuss it.
 * **DON'T** add API additions without filing an issue and discussing with us first. See [API Review Process](api-review-process.md).
 
 ### Contribution "Bar"
 
-Project maintainers will merge changes that align with [project priorities](project-priorities.md) and/or improve the product significantly for a broad set of apps. Proposals must also satisfy the published [guidelines for **nano Framework**](#contribution-guidelines).
+Project maintainers will merge changes that align with [project priorities](project-priorities.md) and/or improve the product significantly for a broad set of apps. Proposals must also satisfy the published [guidelines for **nanoFramework**](#contribution-guidelines).
 
 Maintainers will not merge changes that have narrowly-defined benefits, due to compatibility risk. Changes to the codebase are first reviewed and tested to ensure they are correct for those products and will not inadvertently break applications. We may revert changes if they are found to be breaking.
 
@@ -76,7 +76,7 @@ Ports have a weaker contribution bar, since they do not contribute to compatibil
 The following copyright notice header is used for new files:
 ```
 //
-// Copyright (c) 2017 The nano Framework project contributors
+// Copyright (c) 2017 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 ```
@@ -86,7 +86,7 @@ or was created by copying portions of one or more .NET Micro Framework files,
 the original notice has to be retained in the following format:
 ```
 //
-// Copyright (c) 2017 The nano Framework project contributors
+// Copyright (c) 2017 The nanoFramework project contributors
 // Portions << original copyright >>
 // See LICENSE file in the project root for full license information.
 //
@@ -105,7 +105,7 @@ Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 
 ### Copying Files from Other Projects
 
-**nano Framework** uses some files from other projects, typically where a binary distribution does not exist or would be inconvenient.
+**nanoFramework** uses some files from other projects, typically where a binary distribution does not exist or would be inconvenient.
 
 The following rules must be followed for PRs that include files from another project:
 
@@ -113,10 +113,10 @@ The following rules must be followed for PRs that include files from another pro
 - The license of the file is left intact.
 - The contribution is correctly attributed in the [3rd party notices](../../THIRD-PARTY-NOTICES) file in the repository, as needed.
 
-<!--See [IdnMapping.cs](../../.cs) for an example of a file copied from another project and attributed in the [**nano Framework** 3rd party notices](../../THIRD-PARTY-NOTICES) file. -->
+<!--See [IdnMapping.cs](../../.cs) for an example of a file copied from another project and attributed in the [**nanoFramework** 3rd party notices](../../THIRD-PARTY-NOTICES) file. -->
 
 ### Porting Files from Other Projects
 
-There are many good algorithms implemented in other languages that would benefit the **nano Framework** project. The rules for porting a Java file to C# , for example, are the same as would be used for copying the same file, as described above.
+There are many good algorithms implemented in other languages that would benefit the **nanoFramework** project. The rules for porting a Java file to C# , for example, are the same as would be used for copying the same file, as described above.
 
 [Clean-room](https://en.wikipedia.org/wiki/Clean_room_design) implementations of existing algorithms that are not permissively licensed will generally not be accepted. If you want to create or nominate such an implementation, please create an issue to discuss the idea.

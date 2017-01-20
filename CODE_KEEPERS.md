@@ -1,4 +1,4 @@
-The following is a list of keepers for different areas of the **nano Framework** code. 
+The following is a list of keepers for different areas of the **nanoFramework** code. 
 Each of the keepers is responsible for ensuring that changes in their areas 
 are reviewed, either by themselves or by someone they designate, in 
 addition to being the final word for the architecture and content of an area.
@@ -14,6 +14,6 @@ right person or answer it themselves.
 | Name | GitHub user | Area |
 | --- | --- | --- |
 | José Simões | @josesimoes | Native code build, VS Code Debug and CMake |
-| Stanislav Šimíček | @cw2 | Debug protocol, nano Framework Interpreter |
+| Stanislav Šimíček | @cw2 | Debug protocol, nanoFramework Interpreter |
 
 This list is incomplete, if you need to find other keepers please ping the team to get them filled in.
