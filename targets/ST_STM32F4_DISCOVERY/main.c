@@ -8,7 +8,7 @@
 #include <cmsis_os.h>
 
 #include "usbcfg.h"
-#include "WireProtocol_Receiver.h"
+#include <WireProtocol_ReceiverThread.h>
 
 void BlinkerThread(void const * argument)
 {

@@ -7,20 +7,19 @@ include_directories(
 
 find_package(CHIBIOS REQUIRED)
 include_directories(${CHIBIOS_INCLUDE_DIRS})
+# include dirs for Wire Protocol
+include_directories(${WIRE_PROTOCOL_INCLUDE_DIRS})
+include_directories(${NANOBOOTER_WIRE_PROTOCOL_INCLUDE_DIRS})
 
+# include dirs for ChibiOS nanoFramework interface
+include_directories(${CHIBIOS_NANO_INTERFACE_INCLUDE_DIRS})
 
-# pass the RTOS option to the compiler flags
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CHIBIOS_COMPILE_OPTIONS} ")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CHIBIOS_COMPILE_OPTIONS} ")
+message(">>${NANOBOOTER_WIRE_PROTOCOL_INCLUDE_DIRS}<<")
 
 set(PROJECT_SOURCES
     # test app
     main.c
-    usbcfg.c
-    
-    # required files to add Wire Protocol
-    WireProtocol_Receiver.c
-    WireProtocol_Commands.c
+    usbcfg.c    
 )
 
 add_executable(
@@ -29,6 +28,13 @@ add_executable(
     
     # sources for ChibiOS
     ${CHIBIOS_SOURCES}
+
+    # sources for ChibiOS nanoFramework interface
+    ${CHIBIOS_NANO_INTERFACE_SOURCES}
+
+    # sources for Wire Protocol
+    ${WIRE_PROTOCOL_SOURCES}
+    ${NANOBOOTER_WIRE_PROTOCOL_SOURCES}
  )
 
 CHIBIOS_SET_LINKER_OPTIONS(${CMAKE_PROJECT_NAME})
