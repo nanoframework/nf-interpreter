@@ -29,9 +29,7 @@ bool Monitor_Ping(WP_Message* message)
     if((message->m_header.m_flags & WP_Flags_c_Reply) == 0)
     {
         Monitor_Ping_Reply cmdReply;
-        // TODO 
-        // set flag with NanoBooter or NanoCLR according to the thread we are running
-        cmdReply.m_source = Monitor_Ping_c_Ping_Source_NanoBooter;
+        cmdReply.m_source = Monitor_Ping_c_Ping_Source_NanoCLR;
 
         ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
     }

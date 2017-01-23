@@ -8,7 +8,7 @@
 #define _WIREPROTOCOL_MESSAGE_H_
 
 #include "WireProtocol.h"
-#include "WireProtocol_Commands.h"
+#include "WireProtocol_App_Interface.h"
 
 ////////////////////////////////////////////////////
 // function declarations (related with WP_Message)

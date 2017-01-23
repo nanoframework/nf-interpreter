@@ -9,6 +9,8 @@ find_package(CHIBIOS REQUIRED)
 include_directories(${CHIBIOS_INCLUDE_DIRS})
 # include dirs for Wire Protocol
 include_directories(${WIRE_PROTOCOL_INCLUDE_DIRS})
+include_directories(${NANOBOOTER_WIRE_PROTOCOL_INCLUDE_DIRS})
+
 # include dirs for ChibiOS nanoFramework interface
 include_directories(${CHIBIOS_NANO_INTERFACE_INCLUDE_DIRS})
 
@@ -29,7 +31,8 @@ add_executable(
 
     # sources for Wire Protocol
     ${WIRE_PROTOCOL_SOURCES}    
- )
+    ${NANOBOOTER_WIRE_PROTOCOL_SOURCES}
+)
 
 CHIBIOS_SET_LINKER_OPTIONS(${CMAKE_PROJECT_NAME})
 

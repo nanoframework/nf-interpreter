@@ -62,6 +62,7 @@ message("ChibiOS board MCU series is ${CHIBIOS_BOARD_SERIES}") # debug helper
 
 # set include directories for ChibiOS
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/license)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/ports/common/ARMCMx)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/boards/${CHIBIOS_BOARD})
@@ -75,6 +76,7 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/common/por
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/common/ports/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/ports/STM32/${CHIBIOS_BOARD_SERIES})
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/ports/ARMCMx/cmsis_os)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/common/ports/ARMCMx)
 
 # source files and GCC options according to target vendor and series
 

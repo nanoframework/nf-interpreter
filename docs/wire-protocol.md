@@ -10,6 +10,7 @@
 - [How to add support for a new command](#how-to-add-support-for-a-new-command)
 - [How to add support for new channels](#how-to-add-support-for-new-channels)
 - [HAL interface](#hal-interface)
+- [Application interface](#application-interface)
 
 
 **About this document**
@@ -65,8 +66,8 @@ Follows a high-level description on how the Wire Protocol component works.
 # Wire Protocol Commands
 
 Processing a command is carried in a handler function. 
-The collection of the commands that are implemented resides in ```c_Lookup_Request```. This lookup structure is basically an array with the command code along with a pointer to the respective handler.
-
+The collection of the commands that are implemented is listed in ```c_Lookup_Request```. This lookup structure is basically an array with the command code along with a pointer to the respective handler. It resides in *WireProtocol_App_Interface.c*.
+The actual command implementation resides in *WireProtocol_Commands.c*. 
 
 # How to add support for a new command
 
@@ -104,3 +105,13 @@ Weak implementations of each function are part of the core code.
 An implementation for ChibiOS (including its HAL) is provided as a reference. Please check it at [WireProtocol_HAL_Interface.c](..\src\RTOS\ChibiOS\WireProtocol_HAL_Interface.c).
  
 When porting **nanoFramework** to another RTOS or HAL follow the reference implementation to ease the port work.
+
+# Application interface
+
+The Wire Protocol requires the following functions in order to interface with it's client app.
+Weak implementations of each function are part of the core code.
+
+- ```WP_App_ProcessHeader(...)``` in [WireProtocol_App_Interface.c]()
+- ```WP_App_ProcessPayload(...)``` in [WireProtocol_App_Interface.c]()
+
+Implementations for these are provided for the nanoBooter and the CLR debugger.

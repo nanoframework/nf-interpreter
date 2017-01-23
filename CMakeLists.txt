@@ -248,12 +248,15 @@ if(RTOS_CHIBIOS_CHECK)
    
 
     # add Wire Protocol
-    add_subdirectory("src/CLR/WireProtocol")
+    add_subdirectory("src/Support/WireProtocol")
+
+    # add nanoBooter
+    add_subdirectory("src/nanoBooter")
 
     # add ChibiOS nanoFramework interface
     add_subdirectory("src/RTOS/ChibiOS")
    
-    # add TARGET directory
+    # add TARGET board directory
     add_subdirectory("targets/${CHIBIOS_BOARD}")
 
 #######################
