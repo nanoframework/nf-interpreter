@@ -34,15 +34,15 @@ We've provided a template file [launch.TEMPLATE.json](..\.vscode\launch.TEMPLATE
 Here's what you need to change in order to adapt the template file to your setup and make it more suitable to your working style and preferences.
 - name: here you can name each of the launch configurations to help choosing the appropriate one when launching the debug session. These could be for example: "nanoBooter in Discovery 4", "nanoCLR in Nucleo F091RC", "test featureXYZ in Discovery 4".
 - miDebuggerPath: full path to the gdb executable (this one is inside the GCC tool-chain folder)
-- program: full path to the .hex or .bin output file that results from a successful build
+- program: full path to the .hex output file that results from a successful build
 - setupCommands (third 'text' entry): full path to the final image (same as above)
 - setupCommands (fourth 'text' entry): the same as the program entry above
 - debugServerPath: full path to the OpenOCD executable
 - debugServerArgs: full path to the scripts directory on the OpenOCD installation AND the appropriate .cfg files for the interface and the board.
 
-_Note 1: VS Code parser seems to have trouble parsing and replacing the ${workspaceRoot} for some Open OCD commands. That's the reason why you see there the ${workspaceRoot} variable and in other places the full path were that variable would make sense to be at. Just use what's there to keep Open OCD happy._
+_Note 1: VS Code parser seems to have trouble parsing and replacing the ${workspaceRoot} for some OpenOCD commands. That's the reason why you see there the ${workspaceRoot} variable and in other places the full path were that variable would make sense to be at. Just use what's there to keep OpenOCD happy._
 
-_Note 2: Always mind the forward slash in the paths above, otherwise you'll get into troubles with strange and unclear errors from Open OCD._
+_Note 2: Always mind the forward slash in the paths above, otherwise you'll get into troubles with strange and unclear errors from OpenOCD._
 
 
 # Launch the debug session
