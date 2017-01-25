@@ -262,8 +262,22 @@ if(RTOS_CHIBIOS_CHECK)
     # set CMSIS RTOS include directory
     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
    
-    # add source directory
-    add_subdirectory("targets/os/chibios/nanoBooter")
+    
+    # add target CMSIS OS folders
+    add_subdirectory(targets/CMSIS-OS/common)
+    add_subdirectory(targets/CMSIS-OS/nanoBooter)
+    add_subdirectory(targets/CMSIS-OS/nanoCLR)
+
+    # add target ChibiOS dirs
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/common)
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoBooter)
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoCLR)
+
+    # add Wire Protocol dir
+    add_subdirectory(src/CLR/WireProtocol)
+
+    # add TARGET board directory
+    add_subdirectory("targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
 
 #######################
 # FreeRTOS
