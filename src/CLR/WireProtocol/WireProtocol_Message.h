@@ -9,6 +9,7 @@
 
 #include "WireProtocol.h"
 #include "WireProtocol_App_Interface.h"
+#include "WireProtocol_HAL_Interface.h"
 
 ////////////////////////////////////////////////////
 // function declarations (related with WP_Message)

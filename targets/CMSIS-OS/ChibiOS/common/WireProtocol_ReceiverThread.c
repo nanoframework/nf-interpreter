@@ -6,7 +6,6 @@
 #include <ch.h>
 #include <cmsis_os.h>
 
-#include "WireProtocol.h"
 #include "WireProtocol_HAL_Interface.h"
 
 
@@ -16,9 +15,6 @@
 void ReceiverThread(void const * argument)
 {
   (void)argument;
-
-  // Initialize to a packet sequence number impossible to encounter
-  lastPacketSequence = 0x00FEFFFF;
 
   // loop until thread receives a request to terminate
   while (!chThdShouldTerminateX()) {
