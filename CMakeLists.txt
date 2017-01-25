@@ -170,12 +170,15 @@ if(RTOS_CHIBIOS_CHECK)
     if(NO_CHIBIOS_SOURCE)
         # no CHIBIOS source specified, download it from it's repo
 
-        # check for SVN (needed here for advanced warning to user if it's not installed)
-        find_package(Subversion)
+        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+        include(Hack_SetGitSearchPath)
 
-        #  check is SVN was found, if not report to user and abort
-        if(NOT Subversion_SVN_EXECUTABLE)
-        message(FATAL_ERROR "error: could not find SVN, make sure you have it installed.")
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
         endif()
 
         # check if build was requested with a specifc ChibiOS version
@@ -186,17 +189,28 @@ if(RTOS_CHIBIOS_CHECK)
             endif()
 
             if(CHIBIOS_VERSION_EMPTY)
-                # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the trunk
+                # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from master branch
                 message(STATUS "RTOS is: CHIBIOS (latest available code from trunk)")
-                set(CHIBIOS_SVN_REPOSITORY "https://svn.code.sf.net/p/chibios/svn/trunk")
+                set(CHIBIOS_GIT_TAG "master")
             else()
                 message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
-                set(CHIBIOS_SVN_REPOSITORY "https://svn.code.sf.net/p/chibios/svn/tags/ver${CHIBIOS_VERSION}")
+
+                # branch naming follows the pattern 'stable_16.1.x'
+                # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter 
+                # find 1st dot in version number
+                string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)
+                # find 2nd dot in version number
+                string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX REVERSE)
+                # extract 'short' version  
+                string(SUBSTRING ${CHIBIOS_VERSION} 0 ${CHIBIOS_VERSION_DOT_INDEX} CHIBIOS_SHORT_VERSION)
+
+                # set branch name
+                set(CHIBIOS_GIT_TAG "stable_${CHIBIOS_SHORT_VERSION}.x")
             endif()
             
         endif()
 
-        # need to setup a separate CMake project to download the code from the SVN repository
+        # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
         configure_file("CMake/CHIBIOS.CMakeLists.cmake.in"
                     "${CMAKE_BINARY_DIR}/ChibiOS_Download/CMakeLists.txt")
@@ -216,7 +230,9 @@ if(RTOS_CHIBIOS_CHECK)
             ChibiOS
             PREFIX ChibiOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
-            SVN_REPOSITORY ${CHIBIOS_SVN_REPOSITORY}/os
+            GIT_REPOSITORY  https://github.com/ChibiOS/ChibiOS/
+            GIT_TAG ${CHIBIOS_GIT_TAG}  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
             LOG_DOWNLOAD 1
             # Disable all other steps

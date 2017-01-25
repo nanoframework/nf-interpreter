@@ -1,5 +1,5 @@
 # try to find board
-if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/boards/${CHIBIOS_BOARD})
+if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
     # board found
     message(STATUS "ChibiOS board '${CHIBIOS_BOARD}' found")
 else()
@@ -61,35 +61,39 @@ endif()
 message("ChibiOS board MCU series is ${CHIBIOS_BOARD_SERIES}") # debug helper
 
 # set include directories for ChibiOS
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/ports/common/ARMCMx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/boards/${CHIBIOS_BOARD})
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/osal/rt)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/ports/ARMCMx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/ports/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/CMSIS/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/CMSIS/ST/${CHIBIOS_BOARD_SERIES})
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/common/ports/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/common/ports/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/ports/STM32/${CHIBIOS_BOARD_SERIES})
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/ports/ARMCMx/cmsis_os)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/license)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/common/ARMCMx)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/compilers/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/ext/CMSIS/include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/ext/CMSIS/ST/${CHIBIOS_BOARD_SERIES})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/${CHIBIOS_BOARD_SERIES})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/cmsis_os)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx)
 
 # source files and GCC options according to target vendor and series
 
 
 # source file(s) for board
-list(APPEND CHIBIOS_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/boards/${CHIBIOS_BOARD}/board.c)
+list(APPEND CHIBIOS_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD}/board.c)
 
 # source files for ChibiOS
 set(CHIBIOS_SRCS
     # HAL-OSAL files
     hal.c
     st.c
+    
     hal_buffers.c
     hal_queues.c
     hal_mmcsd.c
+    
     adc.c
     can.c
     dac.c
@@ -129,11 +133,13 @@ set(CHIBIOS_SRCS
     chcond.c
     chevents.c
     chmsg.c
-    chmboxes.c
-    chqueues.c
-    chmemcore.c
+    
     chheap.c
+    chmboxes.c
+    chmemcore.c
     chmempools.c
+
+    chqueues.c
 
     # CMSIS
     cmsis_os.c
@@ -143,10 +149,12 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
     set(CHIBIOS_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(CHIBIOS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/src
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/hal/osal/rt
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/src
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/rt/ports/ARMCMx/cmsis_os
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/src
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/src
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/oslib/src
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/cmsis_os
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/abstractions/cmsis_os
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
