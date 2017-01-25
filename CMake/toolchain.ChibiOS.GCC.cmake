@@ -55,14 +55,14 @@ set(CMAKE_SIZE ${TOOLCHAIN_BIN_DIR}/arm-none-eabi-size CACHE INTERNAL "size tool
 set(CMAKE_DEBUGER ${TOOLCHAIN_BIN_DIR}/arm-none-eabi-gdb CACHE INTERNAL "debuger")
 
 # set debug flags
-set(CMAKE_C_FLAGS_DEBUG "-Og -femit-class-debug-always -g3 -ggdb" CACHE INTERNAL "c compiler flags debug")
-set(CMAKE_CXX_FLAGS_DEBUG "-Og -femit-class-debug-always -g3 -ggdb" CACHE INTERNAL "cxx compiler flags debug")
-set(CMAKE_ASM_FLAGS_DEBUG "-g3 -ggdb" CACHE INTERNAL "asm compiler flags debug")
+set(CMAKE_C_FLAGS_DEBUG " -Og -femit-class-debug-always -g3 -ggdb" CACHE INTERNAL "c compiler flags debug")
+set(CMAKE_CXX_FLAGS_DEBUG " -Og -femit-class-debug-always -g3 -ggdb" CACHE INTERNAL "cxx compiler flags debug")
+set(CMAKE_ASM_FLAGS_DEBUG " -g3 -ggdb" CACHE INTERNAL "asm compiler flags debug")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "" CACHE INTERNAL "linker flags debug")
 
 # set release flags
-set(CMAKE_C_FLAGS_RELEASE "-Os -flto" CACHE INTERNAL "c compiler flags release")
-set(CMAKE_CXX_FLAGS_RELEASE "-Os -flto" CACHE INTERNAL "cxx compiler flags release")
+set(CMAKE_C_FLAGS_RELEASE " -Os -flto" CACHE INTERNAL "c compiler flags release")
+set(CMAKE_CXX_FLAGS_RELEASE " -Os -flto" CACHE INTERNAL "cxx compiler flags release")
 set(CMAKE_ASM_FLAGS_RELEASE "" CACHE INTERNAL "asm compiler flags release")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-flto" CACHE INTERNAL "linker flags release")
 

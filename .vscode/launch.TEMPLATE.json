@@ -13,7 +13,7 @@
                 {"text": "target extended-remote localhost:3333"},
                 {"text": "monitor reset halt"},
                 {"text": "monitor flash write_image erase \"${workspaceRoot}/build/nanoBooter.hex\" "},
-                {"text": "file <path-to-nanoBooter-file-in-the-build-folder-mind-the-forward-slash>"},
+                {"text": "file <path-to-nanoBooter-elf-file-in-the-build-folder-mind-the-forward-slash>"},
                 {"text": "monitor reset halt"}
             ],
 
@@ -42,7 +42,7 @@
                 {"text": "target extended-remote localhost:3333"},
                 {"text": "monitor reset halt"},
                 {"text": "monitor flash write_image erase \"${workspaceRoot}/build/nanoBooter.hex\" "},
-                {"text": "file <path-to-nanoCLR-file-in-the-build-folder-mind-the-forward-slash>"},
+                {"text": "file <path-to-nanoCLR-elf-file-in-the-build-folder-mind-the-forward-slash>"},
                 {"text": "monitor reset halt"}
             ],
 
