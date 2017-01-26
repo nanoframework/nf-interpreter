@@ -1,0 +1,9 @@
+# //
+# // Copyright (c) 2017 The nano Framework project contributors
+# // See LICENSE file in the project root for full license information.
+# //
+
+# append source files required for ChibiOS interface  
+list(APPEND COMMON_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_HAL_Interface.c")
+# make var global
+set(COMMON_PROJECT_SOURCES ${COMMON_PROJECT_SOURCES} CACHE INTERNAL "make global")
