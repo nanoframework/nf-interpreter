@@ -90,7 +90,7 @@ Try to follow this as much as possible when implementing new commands or porting
 # How to add support for new channels
 
 Current Wire Protocol implementation has support for transmission over serial port (UART/USART) and serial over USB (USB CDC device class).
-Support for TCP channel is planned at a latter stage.
+Support for TCP channel is planned at a later stage.
 
 When adding support for new channels the functions ```WP_ReceiveBytes(...)``` and ```WP_TransmitMessage(...)``` in _WireProtocol_HAL_Interface.c_ are the ones that need to be reworked. This implementation is target and board specific so it resides in the board folder. Check the reference implementation for the ST_STM32F4_DISCOVERY board [here](..\targets\CMSIS-OS\ChibiOS\ST_STM32F4_DISCOVERY\common\WireProtocol_HAL_Interface.c). 
 
