@@ -5,8 +5,7 @@
 
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
-
-#include "WireProtocol_Commands.h"
+#include <WireProtocol_MonitorCommands.h>
 
 // Initialize to a packet sequence number impossible to encounter
 static uint32_t lastPacketSequence = 0x00FEFFFF;

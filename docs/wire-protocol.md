@@ -71,13 +71,17 @@ The actual command implementation resides in *WireProtocol_Commands.c*.
 
 # How to add support for a new command
 
-New commands are to be added inside [WireProtocol_Commands.c](..\src\CLR\WireProtocol\WireProtocol_Commands.c).
+There are two groups of commands: monitor commands and debug commands.
 
-Add the function declaration and any required structure and/or type definition in [WireProtocol_Commands.h](..\src\CLR\WireProtocol\WireProtocol_Commands.h).
-The actual code for the command handler function (and any required helper functions or extra processing) goes into [WireProtocol_Commands.c](..\src\CLR\WireProtocol\WireProtocol_Commands.c).
+In order to add a new monitor command you have to:
+- Add the function declaration and any required structure and/or type definition in [WireProtocol_MonitorCommands.h](..\src\CLR\WireProtocol\WireProtocol_MonitorCommands.h)
+- Add a weak prototype in [WireProtocol_MonitorCommands.c](..\src\CLR\WireProtocol\WireProtocol_MonitorCommands.c)
+- The actual code for the command handler function (and any required helper functions or extra processing) is added at target level. For the reference implementation for nanoBooter in ChibiOS check [WireProtocol_MonitorCommands.c](..\targets\CMSIS-OS\ChibiOS\nanoBooter\WireProtocol_MonitorCommands.c)
 
-To add the command to the collection of the supported commands un-comment or add the respective line in the ```c_Lookup_Request``` variable in [WireProtocol_Message.c](..\src\CLR\WireProtocol\WireProtocol_Message.c).
+To add the command to the collection of the supported monitor commands un-comment or add the respective line in the ```c_Lookup_Request``` variable in _WireProtocol_App_Interface.c_ for both [nanoBooter](..\targets\CMSIS-OS\ChibiOS\nanoBooter\WireProtocol_MonitorCommands.c) and/or [nanoCLR](..\targets\CMSIS-OS\ChibiOS\nanoCLR\WireProtocol_MonitorCommands.c).
 Because this declaration uses a macro to add the declaration of a command, make sure the existing naming pattern is _**strictly**_ followed.
+
+This architecture tries to bring flexibility by making it easy to have different monitor commands for nanoBooter and nanoCLR and also having them implemented in different ways, if necessary.
 
 To ease code portability from .NET Micro Framework code base and maintain an understandable implementation the naming has been maintained or minimally adapted from the original C++ code.
 Try to follow this as much as possible when implementing new commands or porting the original C++ code to C.
@@ -88,8 +92,9 @@ Try to follow this as much as possible when implementing new commands or porting
 Current Wire Protocol implementation has support for transmission over serial port (UART/USART) and serial over USB (USB CDC device class).
 Support for TCP channel is planned at a latter stage.
 
-When adding support for new channels the functions ```ReceiveBytes(...)``` and ```TransmitMessage(...)``` in [WireProtocol_HAL_Interface.c](..\src\CLR\WireProtocol\WireProtocol_HAL_Interface.c)) are the ones that need to be reworked.
-On both the relevant part is that they read/write to a serial stream a specified number of bytes. Preferably non blocking calls with a timeout. Please read the comments inside of each of those functions for the details.
+When adding support for new channels the functions ```WP_ReceiveBytes(...)``` and ```WP_TransmitMessage(...)``` in _WireProtocol_HAL_Interface.c_ are the ones that need to be reworked. This implementation is target and board specific so it resides in the board folder. Check the reference implementation for the ST_STM32F4_DISCOVERY board [here](..\targets\CMSIS-OS\ChibiOS\ST_STM32F4_DISCOVERY\common\WireProtocol_HAL_Interface.c). 
+
+On both, the relevant part is that they read/write to a serial stream a specified number of bytes. Preferably non blocking calls with a timeout. Please read the comments inside of each of those functions for the details.
 The last piece that needs to be adjusted is the code inside the ```ReceiverThread(...)``` which is the RTOS thread that is running the Wire Protocol component. That thread is basically a loop with a wait state were the checks for existing data to be read on the input stream. On data available the ```WP_Message_Process(...)``` function is called.
 
 
@@ -102,7 +107,7 @@ Weak implementations of each function are part of the core code.
 - ```WP_ReceiveBytes(...)``` in [WireProtocol_HAL_Interface.c](..\src\CLR\WireProtocol\WireProtocol_HAL_Interface.c)
 - ```WP_CheckAvailableIncomingData(...)``` in [WireProtocol_HAL_Interface.c](..\src\CLR\WireProtocol\WireProtocol_HAL_Interface.c)
 
-An implementation for ChibiOS (including its HAL) is provided as a reference. Please check it at [WireProtocol_HAL_Interface.c](..\src\RTOS\ChibiOS\WireProtocol_HAL_Interface.c).
+An implementation for an STM32F4_DISCOVERY board with ChibiOS (including its HAL) is provided as a reference. Please check it at [WireProtocol_HAL_Interface.c](..\targets\CMSIS-OS\ChibiOS\ST_STM32F4_DISCOVERY\common\WireProtocol_HAL_Interface.c).
  
 When porting **nanoFramework** to another RTOS or HAL follow the reference implementation to ease the port work.
 
@@ -114,4 +119,4 @@ Weak implementations of each function are part of the core code.
 - ```WP_App_ProcessHeader(...)``` in [WireProtocol_App_Interface.c]()
 - ```WP_App_ProcessPayload(...)``` in [WireProtocol_App_Interface.c]()
 
-Implementations for these are provided for the nanoBooter and the CLR debugger.
+Actual implementations of these are to be provided by nanoBooter and nanoCLR. Please check the reference implementation for ChibiOS at [WireProtocol_App_Interface.c](..\targets\CMSIS-OS\ChibiOS\nanoBooter\WireProtocol_App_Interface.c).
