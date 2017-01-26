@@ -22,7 +22,7 @@ _Note: when specifying the location of a local clone make sure that the correct 
 
 ChibiOS HAL is based on _boards_. There collection of supported boards and the respective configurations live in hal/boards directory. 
 
-After successfully finding the board directory CMake tries to figure out the vendor and the series for latter use. Please check the code at [FindCHIBIOS.cmake](../../CMake/Modules/FindCHIBIOS.cmake) for details.
+After successfully finding the board directory CMake tries to figure out the vendor and the series for later use. Please check the code at [FindCHIBIOS.cmake](../../CMake/Modules/FindCHIBIOS.cmake) for details.
 (NOTE: the current code has been validated for STM boards only)
 
 The _FindCHIBIOS.cmake_ includes the specifics for the target series and the respective GCC options.
