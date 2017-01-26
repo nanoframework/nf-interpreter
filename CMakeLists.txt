@@ -104,9 +104,9 @@ if(RTOS_CHIBIOS_CHECK)
 
 elseif(RTOS_MBEDOS_CHECK)
 
-    message(STATUS "\nSetting Toolchain file for mBed \n")
+    message(STATUS "\nSetting Toolchain file for mbed \n")
     # set toolchain file
-    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.mBed.${TOOLCHAIN}.cmake)
+    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.mbed.${TOOLCHAIN}.cmake)
 
 else()
 
@@ -372,7 +372,7 @@ elseif(RTOS_FREERTOS_CHECK)
     add_subdirectory("source")
 
 #######################
-# mBed OS
+# mbed OS
 elseif(RTOS_MBEDOS_CHECK)
 
     # check if MBEDOS_SOURCE was specified or if it's empty (default is empty)
@@ -386,14 +386,14 @@ elseif(RTOS_MBEDOS_CHECK)
     # check is a target was specified
     if(MBED_TARGET)
         if(NOT "${MBEDOS_SOURCE}" STREQUAL "")
-            message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mBed OS is the RTOS option\n\n")
+            message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mbed OS is the RTOS option\n\n")
         endif()
     else()
-        message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mBed OS is the RTOS option\n\n")
+        message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mbed OS is the RTOS option\n\n")
     endif()
 
     if(NO_MBEDOS_SOURCE)
-        # no mBed RTOS source specified, download it from it's repo
+        # no mbed RTOS source specified, download it from it's repo
 
         # hack to make the FindGit to work in Windows platforms (check the module comment for details)
         include(Hack_SetGitSearchPath)
@@ -406,28 +406,28 @@ elseif(RTOS_MBEDOS_CHECK)
         message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
         endif()
 
-        message(STATUS "RTOS is: mBed RTOS (latest available code from GitHub repo)")
+        message(STATUS "RTOS is: mbed RTOS (latest available code from GitHub repo)")
 
         # need to setup a separate CMake project to download the code from the SVN repository
         # otherwise it won't be available before the actual build step
-        configure_file("CMake/mBedOS.CMakeLists.cmake.in"
-                    "${CMAKE_BINARY_DIR}/mBedOS_Download/CMakeLists.txt")
+        configure_file("CMake/mbedOS.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/mbedOS_Download/CMakeLists.txt")
         
-        # setup CMake project for mBed RTOS download
+        # setup CMake project for mbed RTOS download
         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedOS_Download")
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedOS_Download")
 
-        # run build on mBed RTOS download CMake project to perform the download
+        # run build on mbed RTOS download CMake project to perform the download
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mBedOS_Download")
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedOS_Download")
                
-        # download mBedOS source from official GitHub repo
+        # download mbedOS source from official GitHub repo
         ExternalProject_Add( 
-            mBedOS
-            PREFIX mBed-OS
-            SOURCE_DIR ${CMAKE_BINARY_DIR}/mBedOS_Source
+            mbedOS
+            PREFIX mbed-OS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedOS_Source
             GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os/
             GIT_TAG master  # target master branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
@@ -440,27 +440,27 @@ elseif(RTOS_MBEDOS_CHECK)
             INSTALL_COMMAND ""
         )
 
-        # get source dir for mBed RTOS CMake project
-        # ExternalProject_Get_Property(mBedOS SOURCE_DIR)
+        # get source dir for mbed RTOS CMake project
+        # ExternalProject_Get_Property(mbedOS SOURCE_DIR)
         # set(MBEDOS_INCLUDE_DIRS ${MBEDOS_SOURCE_DIR})
 
         # set update disconnected to prevent updates on builds
         set_property(DIRECTORY ${MBEDOS_SOURCE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1)
 
     else()
-        # mBed OS source location was specified
+        # mbed OS source location was specified
 
-        if(NOT EXISTS "${PROJECT_BINARY_DIR}/mBedOS_Source")
+        if(NOT EXISTS "${PROJECT_BINARY_DIR}/mbedOS_Source")
             # need to copy srouce to build directory
-            message(STATUS "RTOS is: mBed OS (copying source from: ${MBEDOS_SOURCE})")
+            message(STATUS "RTOS is: mbed OS (copying source from: ${MBEDOS_SOURCE})")
 
-            file(COPY "${MBEDOS_SOURCE}/" DESTINATION "${PROJECT_BINARY_DIR}/mBedOS_Source")
+            file(COPY "${MBEDOS_SOURCE}/" DESTINATION "${PROJECT_BINARY_DIR}/mbedOS_Source")
         elseif()
             # source directory  already at build folder so we are done here
-            message(STATUS "RTOS is: mBed OS (source from: ${MBEDOS_SOURCE} already at build directory)")
+            message(STATUS "RTOS is: mbed OS (source from: ${MBEDOS_SOURCE} already at build directory)")
         endif()
 
-        # set(MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source)
+        # set(MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source)
 
     endif()
 

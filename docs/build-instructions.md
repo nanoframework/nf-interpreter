@@ -1,15 +1,15 @@
-# Instructions for building a **nano Framework** image
+# Instructions for building **nanoFramework** images
 
 ## Table of contents ##
 
-- [Prerequisites](#Prerequisites)
-- [Preparation](#Preparation)
-- [Build a **nano Framework** image](#Build-a-nano-Framework-Image)
-- [**nano Framework** build deliverables](#nano-Framework-Build-Deliverables)
+- [Prerequisites](#prerequisites)
+- [Preparation](#preparation)
+- [Build a **nanoFramework** image](#build-a-nanoframework-image)
+- [**nanoFramework** build deliverables](#nanoframework-build-deliverables)
 
 **About this document**
 
-This document describes how to build an image of **nano Framework** to be flashed in a SoC or MCU.
+This document describes how to build the required images for **nanoFramework** to be flashed in a SoC or MCU.
 The build is based on CMake tool to ease the development in all major platforms.
 
 # Prerequisites
@@ -22,9 +22,9 @@ If you are using VS Code as your development platform we suggest that you use th
 - [Visual Studio Code](http://code.visualstudio.com/)
 - [CMake Tools](https://marketplace.visualstudio.com/items?itemName=vector-of-bool.cmake-tools)
 
-In case you specify an RTOS and you want its source to be dowloaded from the official repository, you'll need:
+In case you specify an RTOS and you want its source to be downloaded from the official repository, you'll need:
 - For FreeRTOS a SVN client. [Tortoise SVN](https://tortoisesvn.net/downloads) seems to be a popular choice for Windows machines.
-- For mBed RTOS a Git client. [GitHub Desktop](https://desktop.github.com/) seems to be a popular choice for Windows machines.
+- For mbed and ChibiOS a Git client. [GitHub Desktop](https://desktop.github.com/) seems to be a popular choice for Windows machines.
 
 # Preparation
 
@@ -37,7 +37,7 @@ As a suggestion we recommend that you create a directory named *build* in the re
 
 
 
-# Build a **nano Framework** image
+# Build a **nanoFramework** image
 
 The build script accepts the following parameters (some of them are mandatory).
 - TARGET_CHIP: this is the vendor reference to the chip that you are building the image for. At this time only STM32F4 series are supported. A valid reference here would be STM32F407VG.
@@ -45,7 +45,7 @@ The build script accepts the following parameters (some of them are mandatory).
 - TOOLCHAIN: the toolchain to use in the build. The default (and only option at this time) is GCC.
 - TOOLCHAIN_PREFIX: path to the install directory of the toolchain. E.g.: "E:/GNU_Tools_ARM_Embedded/5_4_2016q3". Mind the forward slash on the path for all platforms.
 - CMAKE_BUILD_TYPE: build type (Debug, Release, etc). The default is Release.
-- RTOS: specifies the RTOS to add to the image. If no source path is specified the source files will be downloaded from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS), mBed RTOS (MBEDRTOS), ChibiOS (CHIBIOS) and ARM RTX (RTXRTOS).
+- RTOS: specifies the RTOS to add to the image. If no source path is specified the source files will be downloaded from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS), mbed OS (MBEDRTOS), ChibiOS (CHIBIOS) and ARM RTX (RTXRTOS).
 - FREERTOS_VERSION: specifies the FreeRTOS version to grab the source files. It has to match one of the official versions from the FreeRTOS repository. If none is specified it will download the 'trunk' version. This parameter is ignored if FREERTOS_SOURCE is specified. 
 - FREERTOS_SOURCE: specifies the path for the location of the FreeRTOS source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS must be specified with FREERTOS option. 
 - MBED_SOURCE: specifies the path for the location of the mBed source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS parameter must be specified with MBEDRTOS option. 
@@ -58,6 +58,7 @@ _Note: the very first build will take more or less time depending on the downloa
 
 You can specify any generator that is supported in the platform where you are building.
 For more information on this check CMake documentation [here](https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html?highlight=generator).
+
 
 ## Building from the command prompt
 
@@ -74,7 +75,7 @@ cmake \
 -G "NMake Makefiles" ../ 
 ```
 
-This will call CMake (on your *build* directory that is assumed to be under the repository root) specifing the location of the toolchain install, targeting STM32F407VG, asking for the ST Cube package version 1.13.1 to be used, specifying FreeRTOS v9.0.0 as the RTOS and that the build files suitable for NMake are to be generated.
+This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, targeting STM32F407VG, asking for the ST Cube package version 1.13.1 to be used, specifying FreeRTOS v9.0.0 as the RTOS and that the build files suitable for NMake are to be generated.
 
 Another example:
 
@@ -88,9 +89,10 @@ cmake \
 -G "NMake Makefiles" ../ 
 ```
 
-This will call CMake (on your *build* directory that is assumed to be under the repository root) specifing the location of the toolchain install, targeting STM32F091RC, asking for the ST Cube package version 1.6.0 to be used, specifying MBEDRTOS as the RTOS, that mBed RTOS sources are located in the designated path (mind the forward slash and no ending slash) and that the build files suitable for NMake are to be generated.
+This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, targeting STM32F091RC, asking for the ST Cube package version 1.6.0 to be used, specifying MBEDRTOS as the RTOS, that mBed RTOS sources are located in the designated path (mind the forward slash and no ending slash) and that the build files suitable for NMake are to be generated.
 
-After succesfull completion you'll have the build files ready to be used in the target build tool.
+After successful completion you'll have the build files ready to be used in the target build tool.
+
 
 ## Building from VS Code (using CMake Tools extension)
 
@@ -100,14 +102,23 @@ Follows a brief explanation on the files you might want to tweak.
 - settings.json (inside .vscode folder) here you can change the generator that CMage uses to generate the build. The default is ```"cmake.generator": "NMake Makefiles"```.
 - cmake-variants.json (at the repository root) here you can add several build flavors. You can even add variants to each one. Check the documentation extension [here](https://github.com/vector-of-bool/vscode-cmake-tools/blob/develop/docs/build_variants.md).
 
-To launch the build in VS Code check the status bar at the bottom. Select the build flavor and then click the build buttom (or hit F7).
+To launch the build in VS Code check the status bar at the bottom. Select the build flavor and then click the build button (or hit F7).
 
 
-# **nano Framework** build deliverables
+# **nanoFramework** build deliverables
 
-After a sucesfull build you can find the **nano Framework** image files in the *build* directory. Those are:
-- nanoFramework.bin (raw binary format)
-- nanoFramework.hex (Intel hex format)
-- nanoFramework.s19 (Motorola S-record format, equivalent to srec)
-- nanoFramework.lst (source code intermixed with disassembly)
-- nanoFramework.map (image map) 
+After a successful build you can find the **nanoFramework** image files in the *build* directory. Those are:
+
+- nanoBooter image:
+  - nanoBooter.bin (raw binary format)
+  - nanoBooter.hex (Intel hex format)
+  - nanoBooter.s19 (Motorola S-record format, equivalent to srec)
+  - nanoBooter.lst (source code listing intermixed with disassembly)
+  - nanoBooter.map (image map) 
+
+- nanoCLR image:
+  - nanoCLR.bin (raw binary format)
+  - nanoCLR.hex (Intel hex format)
+  - nanoCLR.s19 (Motorola S-record format, equivalent to srec)
+  - nanoCLR.lst (source code listing intermixed with disassembly)
+  - nanoCLR.map (image map) 

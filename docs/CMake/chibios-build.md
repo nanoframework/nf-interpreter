@@ -3,23 +3,26 @@
 **About this document**
 
 This document describes the purpose and workflow for the CMake configuration files to build ChibiOS from the repository sources.
-Building ChibiOS from sources might be nedded when debugging a **nano Framework** feature that interacts with it.
+Building ChibiOS from sources might be needed when debugging a **nanoFramework** feature that interacts with it.
 
 
 # Purpose
 
 The purpose of the configuration files collections is to create a CMake package for ChibiOS and build it.
 
+
 # Reasoning
 
-The sources from ChibiOS can be downloaded from their SVN repository or, if already available in the build machine, can be copied to the build folder.
-When invoking CMake these options is passed specifying ```RTOS=CHIBIRTOS``` and ```CHIBI_SOURCE=path-to-the-local-repository-folder```.
+The sources from ChibiOS can be downloaded from their GitHub mirror repository or, if already available in the build machine, can be copied to the build folder.
+When invoking CMake these options are passed specifying ```RTOS=CHIBIRTOS``` and ```CHIBI_SOURCE=path-to-the-local-repository-folder```.
+
+_Note: when specifying the location of a local clone make sure that the correct branch is checked out._
 
 # Workflow
 
 ChibiOS HAL is based on _boards_. There collection of supported boards and the respective configurations live in hal/boards directory. 
 
-After succesfully finding the board directory CMake tries to figure out the vendor and the series for latter use. Please check the code at [FindCHIBIOS.cmake](../../CMake/Modules/FindCHIBIOS.cmake) for details.
+After successfully finding the board directory CMake tries to figure out the vendor and the series for latter use. Please check the code at [FindCHIBIOS.cmake](../../CMake/Modules/FindCHIBIOS.cmake) for details.
 (NOTE: the current code has been validated for STM boards only)
 
 The _FindCHIBIOS.cmake_ includes the specifics for the target series and the respective GCC options.
