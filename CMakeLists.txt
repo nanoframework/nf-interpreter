@@ -273,9 +273,6 @@ if(RTOS_CHIBIOS_CHECK)
     add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoBooter)
     add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoCLR)
 
-    # add Wire Protocol dir
-    add_subdirectory(src/CLR/WireProtocol)
-
     # add TARGET board directory
     add_subdirectory("targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
 

@@ -8,6 +8,7 @@
 #define _WIREPROTOCOL_COMMANDS_H_
 
 #include "WireProtocol.h"
+#include "WireProtocol_Message.h"
 
 //////////////////////////////////////////
 // typedefs

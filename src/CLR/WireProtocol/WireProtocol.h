@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
@@ -155,10 +156,5 @@ struct WP_CompileCheck
 {
     char buf1[ sizeof(WP_Packet) == 8 * 4 ? 1 : -1 ];
 };
-
-extern uint8_t* marker;
-extern uint16_t lastOutboundMessage;
-extern uint32_t lastPacketSequence;
-extern WP_Message inboundMessage;
 
 #endif // _WIREPROTOCOL_H_

@@ -4,7 +4,6 @@ list(APPEND WireProtocol_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/WireProtocol
 # source files for Wire Protocol
 set(WireProtocol_SRCS
 
-    WireProtocol.c
     WireProtocol_Message.c
     WireProtocol_MonitorCommands.c
     WireProtocol_HAL_Interface.c

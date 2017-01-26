@@ -7,6 +7,8 @@
 #include "WireProtocol_Message.h"
 
 uint8_t receptionBuffer[2048];
+static uint16_t lastOutboundMessage;
+static uint8_t* marker;
 
 //////////////////////////////////////////
 // helper functions
