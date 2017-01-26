@@ -1,0 +1,62 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "name the launch configuration 1 (booter) here",
+            "type": "cppdbg",
+            "request": "launch",
+            "miDebuggerPath": "<path-to-gdb-insie-the-gcc-toolchain-mind-the-forward-slash>",
+            "targetArchitecture": "ARM",
+            "program": "${workspaceRoot}/build/nanoBooter.hex",
+
+            "setupCommands": [
+                {"text": "target extended-remote localhost:3333"},
+                {"text": "monitor reset halt"},
+                {"text": "monitor flash write_image erase \"${workspaceRoot}/build/nanoBooter.hex\" "},
+                {"text": "file <path-to-nanoBooter-elf-file-in-the-build-folder-mind-the-forward-slash>"},
+                {"text": "monitor reset halt"}
+            ],
+
+            "customLaunchSetupCommands": [
+                {"text": "monitor reset halt"}
+            ],
+
+            "launchCompleteCommand": "exec-continue",
+            "debugServerPath": "C:/Program Files (x86)/openocd-0.10.0/bin/openocd.exe",
+            "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
+            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "filterStderr": true,
+            "externalConsole": true,
+            "cwd": "${cwd}"
+        },
+
+        {
+            "name": "name the launch configuration 2 (CLR) here",
+            "type": "cppdbg",
+            "request": "launch",
+            "miDebuggerPath": "<path-to-gdb-insie-the-gcc-toolchain-mind-the-forward-slash>",
+            "targetArchitecture": "ARM",
+            "program": "${workspaceRoot}/build/nanoCLR.hex",
+
+            "setupCommands": [
+                {"text": "target extended-remote localhost:3333"},
+                {"text": "monitor reset halt"},
+                {"text": "monitor flash write_image erase \"${workspaceRoot}/build/nanoBooter.hex\" "},
+                {"text": "file <path-to-nanoCLR-elf-file-in-the-build-folder-mind-the-forward-slash>"},
+                {"text": "monitor reset halt"}
+            ],
+
+            "customLaunchSetupCommands": [
+                {"text": "monitor reset halt"}
+            ],
+
+            "launchCompleteCommand": "exec-continue",
+            "debugServerPath": "C:/Program Files (x86)/openocd-0.10.0/bin/openocd.exe",
+            "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
+            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "filterStderr": true,
+            "externalConsole": true,
+            "cwd": "${cwd}"
+        }
+    ]
+}
