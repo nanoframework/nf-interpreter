@@ -7,13 +7,13 @@
             "request": "launch",
             "miDebuggerPath": "<path-to-gdb-insie-the-gcc-toolchain-mind-the-forward-slash>",
             "targetArchitecture": "ARM",
-            "program": "${workspaceRoot}/build/nanoBooter.hex",
+            "program": "<path-to-nanoBooter-ELF-file-in-the-build-folder-mind-the-forward-slash>",
 
             "setupCommands": [
                 {"text": "target extended-remote localhost:3333"},
                 {"text": "monitor reset halt"},
-                {"text": "monitor flash write_image erase \"${workspaceRoot}/build/nanoBooter.hex\" "},
-                {"text": "file <path-to-nanoBooter-elf-file-in-the-build-folder-mind-the-forward-slash>"},
+                {"text": "monitor flash write_image erase \"<path-to-nanoBooter-HEX-file-in-the-build-folder-mind-the-forward-slash>\" "},
+                {"text": "file <path-to-nanoBooter-ELF-file-in-the-build-folder-mind-the-forward-slash>"},
                 {"text": "monitor reset halt"}
             ],
 
@@ -36,13 +36,13 @@
             "request": "launch",
             "miDebuggerPath": "<path-to-gdb-insie-the-gcc-toolchain-mind-the-forward-slash>",
             "targetArchitecture": "ARM",
-            "program": "${workspaceRoot}/build/nanoCLR.hex",
+            "program": "<path-to-nanoCLR-ELF-file-in-the-build-folder-mind-the-forward-slash>",
 
             "setupCommands": [
                 {"text": "target extended-remote localhost:3333"},
                 {"text": "monitor reset halt"},
-                {"text": "monitor flash write_image erase \"${workspaceRoot}/build/nanoBooter.hex\" "},
-                {"text": "file <path-to-nanoCLR-elf-file-in-the-build-folder-mind-the-forward-slash>"},
+                {"text": "monitor flash write_image erase \"<path-to-nanoCLR-HEX-file-in-the-build-folder-mind-the-forward-slash>\" "},
+                {"text": "file <path-to-nanoCLR-ELF-file-in-the-build-folder-mind-the-forward-slash>"},
                 {"text": "monitor reset halt"}
             ],
 
