@@ -17,3 +17,10 @@ cmake-variants.json
 
 # ignore cmaketools user preferences file 
 .vscode/.cmaketools.json
+
+# Visual Studio
+
+.vs/
+
+*.suo
+*.user
