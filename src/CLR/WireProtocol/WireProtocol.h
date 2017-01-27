@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nano Framework project contributors
+// Copyright (c) 2017 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -129,7 +129,7 @@ typedef struct VersionInfo
 
 }VersionInfo;
 
-// structure to hold nano Framework release information
+// structure to hold nanoFramework release information
 // equivalent with .NETMF MfReleaseInfo
 typedef struct ReleaseInfo
 {

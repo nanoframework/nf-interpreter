@@ -147,7 +147,7 @@ project(nanoFramework VERSION 0.0.0)
 
 #######################
 message(STATUS "")
-message(STATUS "Building nano Framework version ${PROJECT_VERSION} using build type '${CMAKE_BUILD_TYPE}'.")
+message(STATUS "Building nanoFramework version ${PROJECT_VERSION} using build type '${CMAKE_BUILD_TYPE}'.")
 message(STATUS "Source directory is '${PROJECT_SOURCE_DIR}'.")
 message(STATUS "Build  directory is '${PROJECT_BINARY_DIR}'.")
 message(STATUS "Toolchain is '${TOOLCHAIN}'.")
