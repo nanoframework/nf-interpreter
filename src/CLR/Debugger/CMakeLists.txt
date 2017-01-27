@@ -1,7 +1,7 @@
-# //
-# // Copyright (c) 2017 The nanoFramework project contributors
-# // See LICENSE file in the project root for full license information.
-# //
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
 
 # append Wire Protocol files to source 
 # list(APPEND DEBUGGER_WIRE_PROTOCOL_SOURCES_LIST "${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_Commands.c")

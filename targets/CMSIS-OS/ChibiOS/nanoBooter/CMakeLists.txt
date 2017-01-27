@@ -1,7 +1,7 @@
-# //
-# // Copyright (c) 2017 The nanoFramework project contributors
-# // See LICENSE file in the project root for full license information.
-# //
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
 
 # append target ChibiOS nanoBooter source files 
 list(APPEND TARGET_CHIBIOS_NANOBOOTER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_App_Interface.c")
