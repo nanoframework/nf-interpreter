@@ -1,6 +1,6 @@
 //
 // Copyright (c) 2017 The nanoFramework project contributors
-// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 #ifndef _TINYCLR_MESSAGING_H_
@@ -171,12 +171,6 @@ public:
     static bool Messaging_Send__Reply         ( WP_Message* msg, void* owner );
     static bool Messaging_Reply               ( WP_Message* msg, void* owner );
     static bool Messaging_Reply__Reply        ( WP_Message* msg, void* owner );
-#if defined(NETMF_TARGET_BIG_ENDIAN)
-public:     
-    static void    SwapDebuggingValue ( UINT8* &msg, UINT32 size                          );
-    static void    SwapEndian         ( WP_Message* msg, void* ptr, int size, bool fReply );
-    static UINT32  SwapEndianPattern  ( UINT8* &buffer, UINT32 size, UINT32 count=1       );
-#endif
 };
 
 //--//
