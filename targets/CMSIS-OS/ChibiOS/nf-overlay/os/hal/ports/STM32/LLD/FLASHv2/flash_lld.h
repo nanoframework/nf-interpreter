@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nano Framework project contributors
+// Copyright (c) 2017 The nanoFramework project contributors
 // Portions Copyright (c) 2016 STMicroelectronics.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -14,6 +14,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Driver constants.                                                         //
 ///////////////////////////////////////////////////////////////////////////////
+const uint32_t FLASH_ERASED_WORD = 0xFFFFFFFF;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver pre-compile time settings.                                         //

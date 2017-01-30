@@ -185,13 +185,13 @@ bool flash_lld_isErased(uint32_t startAddress, uint32_t length) {
     __IO uint32_t* cursor = (__IO uint32_t*)startAddress;
     __IO uint32_t* endAddress = (__IO uint32_t*)(startAddress + length);
 
-    // an erased flash address has to read 0xFFFFFFFF
+    // an erased flash address has to read FLASH_ERASED_WORD
     // OK to check by word (32 bits) because the erase is performed by 'page' whose size is word multiple
     while(cursor < endAddress)
     {
-        if(*cursor++ != 0xFFFFFFFF)
+        if(*cursor++ != FLASH_ERASED_WORD)
         {
-            // found an address with something other than 0xFFFFFFFF!!
+            // found an address with something other than FLASH_ERASED_WORD!!
             return false;
         }
     }

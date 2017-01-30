@@ -30,7 +30,7 @@ SMT32FlashDriver STM32FLASH;
 ///////////////////////////////////////////////////////////////////////////////
 
 // Unlock the FLASH control register access
-HAL_StatusTypeDef HAL_FLASH_Unlock(void)
+bool HAL_FLASH_Unlock(void)
 {
   if (HAL_IS_BIT_SET(FLASH->CR, FLASH_CR_LOCK))
   {
@@ -40,19 +40,19 @@ HAL_StatusTypeDef HAL_FLASH_Unlock(void)
   }
   else
   {
-    return HAL_ERROR;
+    return false;
   }
 
-  return HAL_OK; 
+  return true; 
 }
 
 // Locks the FLASH control register access
-HAL_StatusTypeDef HAL_FLASH_Lock(void)
+bool HAL_FLASH_Lock(void)
 {
   /* Set the LOCK Bit to lock the FLASH Registers access */
   SET_BIT(FLASH->CR, FLASH_CR_LOCK);
   
-  return HAL_OK;  
+  return true;  
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
     __IO uint8_t* endAddress = (__IO uint8_t*)(startAddress + length);
 
     // unlock the FLASH
-    if(HAL_FLASH_Unlock() == HAL_OK)
+    if(HAL_FLASH_Unlock())
     {
         // proceed to program the flash by setting the PG Bit
         SET_BIT(FLASH->CR, FLASH_CR_PG);
@@ -113,7 +113,7 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
         CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
         
         // lock the FLASH
-        if(HAL_FLASH_Lock() == HAL_OK)
+        if(HAL_FLASH_Lock())
         {
             // lock succesfull, done here
             return true;
@@ -129,13 +129,13 @@ bool flash_lld_isErased(uint32_t startAddress, uint32_t length) {
     __IO uint32_t* cursor = (__IO uint32_t*)startAddress;
     __IO uint32_t* endAddress = (__IO uint32_t*)(startAddress + length);
 
-    // an erased flash address has to read 0xFFFFFFFF
+    // an erased flash address has to read FLASH_ERASED_WORD
     // OK to check by word (32 bits) because the erase is performed by 'page' whose size is word multiple
     while(cursor < endAddress)
     {
-        if(*cursor++ != 0xFFFFFFFF)
+        if(*cursor++ != FLASH_ERASED_WORD)
         {
-            // found an address with something other than 0xFFFFFFFF!!
+            // found an address with something other than FLASH_ERASED_WORD!!
             return false;
         }
     }
@@ -147,7 +147,7 @@ bool flash_lld_isErased(uint32_t startAddress, uint32_t length) {
 bool flash_lld_erase(uint32_t address) {
 
     // unlock the FLASH
-    if(HAL_FLASH_Unlock() == HAL_OK)
+    if(HAL_FLASH_Unlock())
     {
         // erase the page
         SET_BIT(FLASH->CR, FLASH_CR_PER);
@@ -162,7 +162,7 @@ bool flash_lld_erase(uint32_t address) {
         CLEAR_BIT(FLASH->CR, FLASH_CR_PER);
 
         // lock the FLASH
-        if(HAL_FLASH_Lock() == HAL_OK)
+        if(HAL_FLASH_Lock())
         {
             // lock succesfull, done here
             return true;

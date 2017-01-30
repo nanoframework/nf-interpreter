@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nano Framework project contributors
+// Copyright (c) 2017 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -13,6 +13,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Driver constants.                                                         //
 ///////////////////////////////////////////////////////////////////////////////
+const uint32_t FLASH_ERASED_WORD = 0xFFFFFFFF;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver pre-compile time settings.                                         //
@@ -28,14 +29,6 @@
 
 // From STMicroelectronics Cube HAL 
 // HAL Status structures definition  
-typedef enum 
-{
-  HAL_OK       = 0x00,
-  HAL_ERROR    = 0x01,
-  HAL_BUSY     = 0x02,
-  HAL_TIMEOUT  = 0x03
-} HAL_StatusTypeDef;
-
 typedef struct SMT32FlashDriver {
   
   // pointer to the FLASH Registers 
