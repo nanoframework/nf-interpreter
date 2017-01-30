@@ -97,6 +97,6 @@ int main(void) {
       LaunchCLR(0x08008000);
     }
     
-    osDelay(500);
+    osDelay(500);   
   }
 }

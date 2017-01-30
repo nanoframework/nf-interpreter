@@ -7,6 +7,12 @@
 #include <WireProtocol.h>
 #include <WireProtocol_MonitorCommands.h>
 
+static const int AccessMemory_Check    = 0x00;
+static const int AccessMemory_Read     = 0x01;
+static const int AccessMemory_Write    = 0x02;
+static const int AccessMemory_Erase    = 0x03;
+static const int AccessMemory_Mask     = 0x0F;
+
 //////////////////////////////////////////////////////////////////////
 // helper functions
 
@@ -23,6 +29,11 @@ bool NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
     return true;
 }
 
+static bool AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buffer, int mode)
+{
+    
+    return true;
+}
 
 ////////////////////////////////////////////////////
 
@@ -51,4 +62,29 @@ bool Monitor_OemInfo(WP_Message* message)
     }
 
     return true;
+}
+
+bool Monitor_WriteMemory(WP_Message* message)
+{
+    bool ret;
+    
+    CLR_DBG_Commands_Monitor_WriteMemory* cmd = (CLR_DBG_Commands_Monitor_WriteMemory*)message->m_payload;
+
+    // TODO: not sure if we really need this
+    // if(!m_signedDataState.VerifyContiguousData(cmd->m_address, cmd->m_length))
+    // {
+    //     m_signedDataState.EraseMemoryAndReset();
+        
+    //     return false;
+    // }
+
+    // TODO: not sure if we really need this
+    // TinyBooter_OnStateChange(State_MemoryWrite, (void*)cmd->m_address);
+
+    // assume at RAM, directly use the original address 
+    ret = AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write);
+  
+    ReplyToCommand(message, ret, false, NULL, 0);
+
+    return ret;
 }

@@ -366,6 +366,9 @@
 #define USB_USE_WAIT                FALSE
 #endif
 
+// header for nanoFramework overlay
+#include "halconf_nf.h"
+
 #endif /* _HALCONF_H_ */
 
 /** @} */

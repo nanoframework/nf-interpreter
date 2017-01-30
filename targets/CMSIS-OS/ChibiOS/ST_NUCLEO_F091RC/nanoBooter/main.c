@@ -30,7 +30,7 @@ osThreadDef(BlinkerThread, osPriorityNormal, 128);
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityNormal, 1024);
 
-//  Application entry point.
+// Application entry point.
 int main(void) {
 
   osThreadId blinkerThreadId;

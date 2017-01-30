@@ -329,4 +329,7 @@
  */
 #define STM32_WDG_USE_IWDG                  FALSE
 
+// header for nanoFramework overlay drivers
+#include "mcuconf_nf.h"
+
 #endif /* _MCUCONF_H_ */

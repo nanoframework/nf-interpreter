@@ -113,6 +113,35 @@ if(${CHIBIOS_BOARD} STREQUAL "ST_STM32F4_DISCOVERY")
     set(DEFAULT_LINKER_FILE_NAME "STM32F407xG")
 endif()
 
+
+####################################################################################
+# WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) bellow 
+####################################################################################
+# component STM32_FLASH
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/FLASHv2)
+
+###############################################################################################################################
+# Add above the required include directory(ies) for a new nanoFramework overlay component that you are adding
+# following the template bellow. 
+#
+# list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/<path-here>)
+###############################################################################################################################
+
+
+####################################################################################################
+# WHEN ADDING A NEW CHIBIOS OVERLAY component add the source file(s) specific to this series bellow 
+####################################################################################################
+# component STM32_FLASH
+list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/FLASHv2/flash_lld.c)
+
+##########################################################################################################################
+# Add above ALL the source code file(s) low level driver specif for a series required for a new nanoFramework 
+# overlay component that you are adding following the template bellow. 
+#
+# list(APPEND CHIBIOS_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/<path-here>)
+##########################################################################################################################
+
+
 #######################################################################################################################################
 # this function sets the linker options including the default linker file
 # if the target uses a specific linker file use the function CHIBIOS_SET_LINKER_OPTIONS_AND_FILE

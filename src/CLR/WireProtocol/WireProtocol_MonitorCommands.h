@@ -29,10 +29,20 @@ typedef struct Monitor_OemInfo_Reply
 
 }Monitor_OemInfo_Reply;
 
+typedef struct CLR_DBG_Commands_Monitor_WriteMemory
+{
+    uint32_t address;
+    uint32_t length;
+    uint8_t  data[1];
+
+}CLR_DBG_Commands_Monitor_WriteMemory;
+
+
 //////////////////////////////////////////
 // function declarations (commands)
 
 bool Monitor_Ping(WP_Message* message);
 bool Monitor_OemInfo(WP_Message* message);
+bool Monitor_WriteMemory(WP_Message* message);
 
 #endif //_WIREPROTOCOL_COMMANDS_H_
