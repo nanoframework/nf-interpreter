@@ -84,7 +84,7 @@ enum CLR_OPCODE
 CEE_COUNT,        /* number of instructions and macros pre-defined */
 };
 
-#if defined(__ADSPBLACKFIN__) || defined (__GNUC__) || defined(_ARC) || defined(__RENESAS__)
+#if defined (__GNUC__)
 #define __int64 long long
 #endif
 
@@ -605,7 +605,7 @@ inline CLR_UINT32 CLR_TkFromStream( const CLR_UINT8*& p )
 
 //--//--//--//
 
-#if defined(PLATFORM_BLACKFIN) || defined(__GNUC__) || defined(__RENESAS__)
+#if defined(__GNUC__)
 
 #define TINYCLR_READ_UNALIGNED_UINT8(arg,ip)  arg = *(const CLR_UINT8 *)ip; ip += sizeof(CLR_UINT8 )
 template<typename T> __inline void TINYCLR_READ_UNALIGNED_UINT16(T& arg, CLR_PMETADATA& ip) 
@@ -1136,14 +1136,6 @@ struct CLR_RECORD_RESOURCE
 
 #if defined(_MSC_VER)
 #pragma pack(pop, TINYCLR_TYPES_H)
-#endif
-
-#if defined(GCCOP_V4_2)
-
-extern double fmod(double x, double y);
-extern double floor (double x);
-
-extern void *bsearch(const void *key, const void *base, size_t num, size_t width, int (*compare)(const void *, const void *)) ;
 #endif
 
 #endif // _TINYCLR_TYPES_H_
