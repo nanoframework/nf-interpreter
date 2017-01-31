@@ -30,7 +30,7 @@ SMT32FlashDriver STM32FLASH;
 ///////////////////////////////////////////////////////////////////////////////
 
 // Unlock the FLASH control register access
-static HAL_StatusTypeDef HAL_FLASH_Unlock(void)
+bool HAL_FLASH_Unlock(void)
 {
   if (HAL_IS_BIT_SET(FLASH->CR, FLASH_CR_LOCK))
   {
@@ -40,72 +40,35 @@ static HAL_StatusTypeDef HAL_FLASH_Unlock(void)
   }
   else
   {
-    return HAL_ERROR;
+    return false;
   }
 
-  return HAL_OK; 
+  return true; 
 }
 
 // Locks the FLASH control register access
-static HAL_StatusTypeDef HAL_FLASH_Lock(void)
+bool HAL_FLASH_Lock(void)
 {
   /* Set the LOCK Bit to lock the FLASH Registers access */
   SET_BIT(FLASH->CR, FLASH_CR_LOCK);
   
-  return HAL_OK;  
+  return true;  
 }
 
 static uint8_t GetSector(uint32_t address)
 {
   uint8_t sector = 0;
+  bool sectorInBank2 = false;
+
+  if ((address - FLASH_BASE) >= 0x100000) {
+    sectorInBank2 = true;
+  } 
+
+  // clever algorithm to find out the sector number knowing the address
+  sector = sectorInBank2 ? ((address - 0x100000 - FLASH_BASE) >> 14) : ((address - FLASH_BASE) >> 14);
   
-  if((address < ADDR_FLASH_SECTOR_1) && (address >= ADDR_FLASH_SECTOR_0))
-  {
-    sector = FLASH_SECTOR_0;  
-  }
-  else if((address < ADDR_FLASH_SECTOR_2) && (address >= ADDR_FLASH_SECTOR_1))
-  {
-    sector = FLASH_SECTOR_1;  
-  }
-  else if((address < ADDR_FLASH_SECTOR_3) && (address >= ADDR_FLASH_SECTOR_2))
-  {
-    sector = FLASH_SECTOR_2;  
-  }
-  else if((address < ADDR_FLASH_SECTOR_4) && (address >= ADDR_FLASH_SECTOR_3))
-  {
-    sector = FLASH_SECTOR_3;  
-  }
-  else if((address < ADDR_FLASH_SECTOR_5) && (address >= ADDR_FLASH_SECTOR_4))
-  {
-    sector = FLASH_SECTOR_4;  
-  }
-  else if((address < ADDR_FLASH_SECTOR_6) && (address >= ADDR_FLASH_SECTOR_5))
-  {
-    sector = FLASH_SECTOR_5;  
-  }
-  else if((address < ADDR_FLASH_SECTOR_7) && (address >= ADDR_FLASH_SECTOR_6))
-  {
-    sector = FLASH_SECTOR_6;  
-  }
-  else if((address < ADDR_FLASH_SECTOR_8) && (address >= ADDR_FLASH_SECTOR_7))
-  {
-    sector = FLASH_SECTOR_7;  
-  }
-  else if((address < ADDR_FLASH_SECTOR_9) && (address >= ADDR_FLASH_SECTOR_8))
-  {
-    sector = FLASH_SECTOR_8;  
-  }
-  else if((address < ADDR_FLASH_SECTOR_10) && (address >= ADDR_FLASH_SECTOR_9))
-  {
-    sector = FLASH_SECTOR_9;  
-  }
-  else if((address < ADDR_FLASH_SECTOR_11) && (address >= ADDR_FLASH_SECTOR_10))
-  {
-    sector = FLASH_SECTOR_10;  
-  }
-  else /* (address < FLASH_END_ADDR) && (address >= ADDR_FLASH_SECTOR_11) */
-  {
-    sector = FLASH_SECTOR_11;
+  if (sector >= 4) {
+    sector = (sector >> 3) + 4;
   }
 
   return sector;
@@ -137,7 +100,7 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
     __IO uint8_t* endAddress = (__IO uint8_t*)(startAddress + length);
 
     // unlock the FLASH
-    if(HAL_FLASH_Unlock() == HAL_OK)
+    if(HAL_FLASH_Unlock())
     {
         // proceed to program the flash by setting the PG Bit
         SET_BIT(FLASH->CR, FLASH_CR_PG);
@@ -169,7 +132,7 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
         CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
         
         // lock the FLASH
-        if(HAL_FLASH_Lock() == HAL_OK)
+        if(HAL_FLASH_Lock())
         {
             // lock succesfull, done here
             return true;
@@ -205,7 +168,7 @@ bool flash_lld_erase(uint32_t address) {
     uint32_t tmp_psize = 0;
 
     // unlock the FLASH
-    if(HAL_FLASH_Unlock() == HAL_OK)
+    if(HAL_FLASH_Unlock())
     {
         // get the sector number to erase
         uint8_t sectorNumber = GetSector(address);
@@ -233,7 +196,7 @@ bool flash_lld_erase(uint32_t address) {
         CLEAR_BIT(FLASH->CR, (FLASH_CR_SER | FLASH_CR_SNB));
 
         // lock the FLASH
-        if(HAL_FLASH_Lock() == HAL_OK)
+        if(HAL_FLASH_Lock())
         {
             // lock succesfull, done here
             return true;
