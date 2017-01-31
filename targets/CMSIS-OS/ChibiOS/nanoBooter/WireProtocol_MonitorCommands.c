@@ -4,6 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <cmsis_os.h>
+
 #include <WireProtocol.h>
 #include <WireProtocol_MonitorCommands.h>
 
@@ -87,4 +89,26 @@ bool Monitor_WriteMemory(WP_Message* message)
     ReplyToCommand(message, ret, false, NULL, 0);
 
     return ret;
+}
+
+bool Monitor_Reboot(WP_Message* message)
+{
+    Monitor_Reboot_Command* cmd = (Monitor_Reboot_Command*)message->m_payload;
+
+    ReplyToCommand(message, true, false, NULL, 0);
+
+    if(cmd != NULL)
+    {
+        // only reset if we are not trying to get into the bootloader
+        if((cmd->m_flags & Monitor_Reboot_c_EnterBootloader) != Monitor_Reboot_c_EnterBootloader)
+        {
+            // UNDONE: FIXME: Events_WaitForEvents( 0, 100 );
+
+            // RESET CPU
+            // because ChibiOS relies on CMSIS it's recommended to make use of the CMSIS API
+            NVIC_SystemReset();
+        }
+    }
+
+    return true;
 }

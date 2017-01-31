@@ -17,7 +17,7 @@ static const CommandHandlerLookup c_Lookup_Request[] =
     /*******************************************************************************************************************************************************************/
 #define DEFINE_CMD(cmd) { CLR_DBG_Commands_c_Monitor_##cmd, &Monitor_##cmd }
     DEFINE_CMD(Ping       ),
-    // DEFINE_CMD(Reboot     ),
+    DEFINE_CMD(Reboot     ),
     // //
     // DEFINE_CMD(ReadMemory ),
     DEFINE_CMD(WriteMemory),

@@ -27,3 +27,10 @@ __attribute__((weak)) bool Monitor_WriteMemory(WP_Message* message)
    // default to false
    return false;
 }
+
+// provided as weak to be replaced by actual implementation by application
+__attribute__((weak)) bool Monitor_Reboot(WP_Message* message)
+{
+   // default to false
+   return false;
+}
