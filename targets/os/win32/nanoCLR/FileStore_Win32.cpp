@@ -14,11 +14,7 @@ HRESULT CLR_RT_FileStore::LoadFile( LPCWSTR szFile, CLR_RT_Buffer& vec )
     TINYCLR_HEADER();
 
     FILE* stream;
-#if defined(PLATFORM_WINCE)
-    if((stream=_wfopen(szFile, L"rb"))==0)
-#else
     if(_wfopen_s(&stream, szFile, L"rb" ) != 0)
-#endif
     {
         wprintf( L"Cannot open '%s'!\n", szFile );
         TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -68,11 +64,7 @@ HRESULT CLR_RT_FileStore::SaveFile( LPCWSTR szFile, const CLR_UINT8* buf, size_t
     TINYCLR_HEADER();
     FILE* stream;
 
-#if defined(PLATFORM_WINCE)
-    if((stream=_wfopen(szFile, L"wb"))==0)
-#else
     if(_wfopen_s(&stream, szFile, L"wb" ) != 0)
-#endif
     {
         wprintf( L"Cannot open '%s' for writing!\n", szFile );
         TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -190,9 +182,7 @@ void CLR_RT_FileStore::ExtractTokensFromString( LPCWSTR szLine, CLR_RT_StringVec
         while(szLine[ 0 ])
         {
             WCHAR  token        [ 2048 ];
-#if !defined(PLATFORM_WINCE)
             WCHAR  tokenExpanded[ 2048 ];
-#endif
             bool   fQuote = false;
             size_t pos;
 
@@ -208,14 +198,12 @@ void CLR_RT_FileStore::ExtractTokensFromString( LPCWSTR szLine, CLR_RT_StringVec
 
                 if(fQuote)
                 {
-#if !defined(PLATFORM_WINCE)
                     if(c == '\\')
                     {
                         c = *szLine++;;
                     }
                     else
-#endif
-                        if(c == '"')
+                    if(c == '"')
                     {
                         fQuote = false;
                         continue;
@@ -235,13 +223,8 @@ void CLR_RT_FileStore::ExtractTokensFromString( LPCWSTR szLine, CLR_RT_StringVec
             }
             token[ pos ] = 0;
 
-#if !defined(PLATFORM_WINCE)
             ::ExpandEnvironmentStringsW( token, tokenExpanded, MAXSTRLEN(tokenExpanded) );
             vec.push_back( tokenExpanded );
-#else
-            vec.push_back( token );
-#endif
-
 
             while(szLine[ 0 ] && wcschr( separators, szLine[ 0 ] )) szLine++;
         }

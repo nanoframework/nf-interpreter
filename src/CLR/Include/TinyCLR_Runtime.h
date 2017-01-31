@@ -21,10 +21,6 @@ struct CLR_RADIAN
 
 extern const CLR_RADIAN c_CLR_radians[];
 
-#if defined(PLATFORM_WINCE)
-#include <msxml2.h>         //  Required to import WinCE / XMLDOM stuff....
-#endif
-
 //--//
 
 #if defined(_WIN32)
@@ -3230,30 +3226,11 @@ CT_ASSERT( sizeof(CLR_RT_HeapBlock_Raw)  == sizeof(CLR_RT_HeapBlock) )
 #define    TINYCLR_TRACE_MEMORY_STATS_EXTRA_SIZE  0
 #endif
 
-#if defined(ARM_V3_0) || defined(ARM_V3_1) // arm 3.0 compiler uses 8 bytes for a function pointer
+#if defined(GCC)  // Gcc compiler uses 8 bytes for a function pointer
     CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 20 + TINYCLR_TRACE_MEMORY_STATS_EXTRA_SIZE )
 
-#elif defined(ARM_V1_2)
-    CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 16 + TINYCLR_TRACE_MEMORY_STATS_EXTRA_SIZE )
-
-#elif defined(GCC)  // Gcc compiler uses 8 bytes for a function pointer
-    CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 20 + TINYCLR_TRACE_MEMORY_STATS_EXTRA_SIZE )
-
-#elif defined(GCCOP)  // GccOP compiler uses 8 bytes for a function pointer
-    CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 20 + TINYCLR_TRACE_MEMORY_STATS_EXTRA_SIZE )
-
-#elif defined(PLATFORM_BLACKFIN) // 8 bytes for function pointer
-    CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 20 + TINYCLR_TRACE_MEMORY_STATS_EXTRA_SIZE )
-
-#elif defined(PLATFORM_SH)  // SH.compiler uses 12 bytes for a function pointer
-    CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 24 + TINYCLR_TRACE_MEMORY_STATS_EXTRA_SIZE )
-
-#elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(TINYCLR_TRACE_MEMORY_STATS) 
+#elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(TINYCLR_TRACE_MEMORY_STATS)
     CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 16 + 4 )
-
-#elif defined(PLATFORM_WINCE)
-    CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 16     )
-
 
 #else
 

@@ -10,22 +10,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // PLATFORMS GENERAL DEFINITIONS
-#if defined(_WIN32_WCE)
-#define PLATFORM_WINCE
-#define TINYCLR_STOP() ::DebugBreak()
-#elif defined(_WIN32)
+#if defined(_WIN32)
 #define TINYCLR_STOP() ::DebugBreak()
 #pragma warning( error : 4706 ) // error C4706: assignment within conditional expression
 #elif defined(arm) || defined(__arm) || defined(__GNUC__)
 
 #define PLATFORM_ARM
 #define TINYCLR_STOP() HARD_BREAKPOINT()
-#elif defined(__ADSPBLACKFIN__)
-#define TINYCLR_STOP()
-#define PLATFORM_BLACKFIN
-#elif defined(__RENESAS__)
-#define TINYCLR_STOP()
-#define PLATFORM_SH
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,18 +99,6 @@
 #define TINYCLR_TRACE_MEMORY_STATS
 #endif
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// BLACKFIN
-#if defined(PLATFORM_BLACKFIN)
-#define TINYCLR_TRACE_MEMORY_STATS
-#endif
-
-
-// RENESAS
-#if defined(PLATFORM_SH)
-#define TINYCLR_TRACE_MEMORY_STATS
-#endif
-    
 //-o-//-o-//-o-//-o-//-o-//-o-//
 // RULES AND DEPENDENCIES
 //-o-//-o-//-o-//-o-//-o-//-o-//
@@ -182,7 +161,7 @@
 #define ULONGLONGCONSTANT(v) (v##UI64)
 #endif
 
-#if defined(PLATFORM_ARM) || defined(PLATFORM_BLACKFIN) || defined(PLATFORM_SH)
+#if defined(PLATFORM_ARM)
 #define PROHIBIT_ALL_CONSTRUCTORS(cls)   \
     private:                             \
         cls();                           \
@@ -211,9 +190,7 @@
 // INCLUDES
 #if defined(_WIN32)
 
-#if !defined(PLATFORM_WINCE)
 #define _WIN32_WINNT 0x0501
-#endif
 
 //Unsafe string functions be avoided, but there isn't a safe crt for the arm, so 
 //a bunch of macros, cleanup code needs to be done first
@@ -222,9 +199,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#if !defined(PLATFORM_WINCE)
 #include <crtdbg.h>
-#endif
 
 #include <string>
 #include <list>
@@ -270,22 +245,6 @@
 #if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS) && !defined(TINYCLR_PROFILE_NEW)
 !ERROR "TINYCLR_PROFILER_NEW is required for TINYCLR_PROFILE_NEW_ALLOCATIONS"
 #endif
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if defined(_WIN32_WCE)
-
-#if (_WIN32_WCE == 0x420)
-#define ENUMLOGFONTEXW ENUMLOGFONT
-struct OUTLINETEXTMETRICW;
-#endif //(_WIN32_WCE == 0x420)
-
-extern BOOL IsDebuggerPresent();
-#define swscanf_s(buf,format, ...)              swscanf( buf, format, __VA_ARGS__ )
-#define wcstok_s(strToken, strDelimit, context) wcstok( strToken,strDelimit )
-extern void *bsearch( const void *key, const void *base, size_t num, size_t width, int (*compare)( const void *, const void * ) );
-#endif //#if defined(PLATFORM_WINCE)
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 

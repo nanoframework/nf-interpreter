@@ -16,7 +16,7 @@ UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc);
 
 //--//
 
-#if defined(_WIN32) || defined(WIN32) || defined(_WIN32_WCE)
+#if defined(_WIN32) || defined(WIN32)
 
 bool LZ77_Compress(LPCWSTR inFileText, LPCWSTR outFileText, UINT8* prefix, size_t prefixLength);
 

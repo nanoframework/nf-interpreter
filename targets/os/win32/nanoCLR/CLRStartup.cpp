@@ -167,7 +167,7 @@ struct Settings
 
         TINYCLR_CHECK_HRESULT(LoadKnownAssemblies( TinyClr_Dat_Start, TinyClr_Dat_End ));
 
-#endif // defined(PLATFORM_WINDOWS_EMULATOR) || defined(PLATFORM_WINCE)
+#endif // defined(PLATFORM_WINDOWS_EMULATOR)
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Loading Deployment Assemblies.\r\n" );

@@ -10,16 +10,12 @@
 
 #include <stddef.h>
 
-#if defined(__ADSPBLACKFIN__) || defined (__GNUC__) || defined(_ARC) || defined(__RENESAS__)
+#if defined (__GNUC__)
 #define __int64 long long
 #undef NULL
 #endif
 
-#if defined(__ADSPBLACKFIN__)
-#define PLATFORM_BLACKFIN
-#endif
-
-#if defined(__arm) || defined(PLATFORM_BLACKFIN) || defined(__GNUC__) || defined(_ARC) || defined(__RENESAS__)
+#if defined(__arm) || defined(__GNUC__)
 
 #undef UNICODE
 
@@ -55,19 +51,15 @@ typedef unsigned short     WORD;
 typedef unsigned long      DWORD;
 
 
-#if defined (__RENESAS__)
-typedef unsigned short     wchar_t;
-#endif
-
 typedef wchar_t            WCHAR;
 typedef WCHAR*             LPWSTR;
 typedef const WCHAR*       LPCWSTR;
 
-#endif //defined(__arm) || defined(PLATFORM_BLACKFIN) || defined(__GNUC__) || defined(_ARC) || defined(__RENESAS__) 
+#endif //defined(__arm) || defined(__GNUC__)
 
 #define ARRAYSIZE_CONST_EXPR(x) (sizeof(x)/sizeof(x[0]))
-#if (!defined(_WIN32) && !defined(WIN32) && !defined(_WIN32_WCE))
-#define ARRAYSIZE(x) ARRAYSIZE_CONST_EXPR(x) 
+#if (!defined(_WIN32) && !defined(WIN32))
+#define ARRAYSIZE(x) ARRAYSIZE_CONST_EXPR(x)
 #endif
 #define MAXSTRLEN(x) (ARRAYSIZE(x)-1)
 #define ROUNDTOMULTIPLE(x,y)           ((x + sizeof(y) - 1) & ~(sizeof(y)-1)) // Only works with powers of 2.
@@ -76,7 +68,7 @@ typedef const WCHAR*       LPCWSTR;
 
 //--//
 
-#if !(defined(_WIN32) || defined(WIN32) || defined(_WIN32_WCE)) 
+#if !(defined(_WIN32) || defined(WIN32))
 struct SYSTEMTIME
 {
     WORD wYear;

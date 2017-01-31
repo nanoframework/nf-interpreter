@@ -579,7 +579,7 @@ extern void HAL_AssertEx();
         #define _SIDE_ASSERTE(i) { if(!(i)) HAL_AssertEx(); }
     #endif
 #else
-    #if defined(_DEBUG) && !defined(_WIN32_WCE) && !defined(__RENESAS__)
+    #if defined(_DEBUG)
 #if !defined _ASSERTE
 #error
 #endif

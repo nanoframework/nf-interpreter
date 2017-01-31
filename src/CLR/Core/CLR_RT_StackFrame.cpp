@@ -206,7 +206,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
     //
     if(extraBlocks < 0)
     {
-#if defined(_WIN32) || (defined(PLATFORM_WINCE) && defined(_DEBUG))
+#if defined(_WIN32)
         if(caller->m_evalStackPos > caller->m_evalStackEnd)
         {
             TINYCLR_SET_AND_LEAVE(CLR_E_STACK_OVERFLOW);
@@ -220,7 +220,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
 
         caller->m_evalStackPos = stack->m_arguments;
 
-#if defined(_WIN32) || (defined(PLATFORM_WINCE) && defined(_DEBUG))
+#if defined(_WIN32)
         if(stack->m_arguments < caller->m_evalStack)
         {
             TINYCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);

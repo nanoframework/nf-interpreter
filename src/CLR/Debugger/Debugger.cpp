@@ -956,14 +956,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions( WP_Message* msg, vo
 
 static void GetClrReleaseInfo(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::ClrInfo& clrInfo)
 {
-#if defined(PLATFORM_SH)
-#undef OEMSTR(str) 
-#define OEMSTR(str) # str
-MfReleaseInfo::Init( clrInfo.m_clrReleaseInfo, VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION, OEMSTR(OEMSYSTEMINFOSTRING), hal_strlen_s(OEMSTR(OEMSYSTEMINFOSTRING)) );
-#undef OEMSTR(str)
-#else
     MfReleaseInfo::Init( clrInfo.m_clrReleaseInfo, VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION, OEMSYSTEMINFOSTRING, hal_strlen_s(OEMSYSTEMINFOSTRING) );
-#endif
 
     if ( g_CLR_RT_TypeSystem.m_assemblyMscorlib &&
          g_CLR_RT_TypeSystem.m_assemblyMscorlib->m_header)
@@ -1062,10 +1055,6 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
             reply.u_SoftwareVersion.m_compilerVersion = __GNUC__;
 #elif defined(__ARMCC_VERSION)
             reply.u_SoftwareVersion.m_compilerVersion = __ARMCC_VERSION;
-#elif defined(_ARCVER)
-            reply.u_SoftwareVersion.m_compilerVersion = _ARCVER;
-#elif defined(__RENESAS__)
-            reply.u_SoftwareVersion.m_compilerVersion = __RENESAS_VERSION__;
 #else
             reply.u_SoftwareVersion.m_compilerVersion = -1;
 #endif
