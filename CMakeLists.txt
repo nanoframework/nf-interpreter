@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
 
+# set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
+
 # the following prevents launchin a build in the source tree
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)

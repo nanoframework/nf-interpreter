@@ -5,6 +5,7 @@ set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(CHIBIOS REQUIRED)
+find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
 
 add_subdirectory("common")
@@ -27,10 +28,9 @@ add_executable(
     ${TARGET_CHIBIOS_COMMON_SOURCES}
     ${TARGET_CHIBIOS_NANOBOOTER_SOURCES}
 
-    # ChibiOS sources
     ${CHIBIOS_SOURCES}
+    ${ChibiOSnfOverlay_SOURCES}
 
-    # Wire Protocol sources
     ${WireProtocol_SOURCES}
 )
 
@@ -50,10 +50,9 @@ add_executable(
     ${TARGET_CHIBIOS_COMMON_SOURCES}
     ${TARGET_CHIBIOS_NANOCLR_SOURCES}
 
-    # ChibiOS sources
     ${CHIBIOS_SOURCES}
+    ${ChibiOSnfOverlay_SOURCES}
 
-    # Wire Protocol sources
     ${WireProtocol_SOURCES}
 )
 
@@ -65,6 +64,7 @@ include_directories(
 
     ${WireProtocol_INCLUDE_DIRS}
     ${CHIBIOS_INCLUDE_DIRS}
+    ${ChibiOSnfOverlay_INCLUDE_DIRS}
 
     ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
@@ -102,7 +102,7 @@ CHIBIOS_ADD_HEX_BIN_DUMP_TARGETS(${NANOCLR_PROJECT_NAME}.elf)
 CHIBIOS_PRINT_SIZE_OF_TARGETS(${NANOBOOTER_PROJECT_NAME}.elf)
 CHIBIOS_PRINT_SIZE_OF_TARGETS(${NANOCLR_PROJECT_NAME}.elf)
 
-# set linker flags for DEBUG
+# set extra linker flags for DEBUG
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
 
