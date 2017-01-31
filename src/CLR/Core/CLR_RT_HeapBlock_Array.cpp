@@ -368,3 +368,4 @@ HRESULT CLR_RT_HeapBlock_Array::Copy( CLR_RT_HeapBlock_Array* arraySrc, int inde
 
     TINYCLR_NOCLEANUP();
 }
+

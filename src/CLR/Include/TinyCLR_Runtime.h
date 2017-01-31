@@ -3245,3 +3245,4 @@ CT_ASSERT( sizeof(CLR_RT_HeapBlock_Raw)  == sizeof(CLR_RT_HeapBlock) )
 #endif
 
 #endif // _TINYCLR_RUNTIME_H_
+

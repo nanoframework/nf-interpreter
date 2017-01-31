@@ -229,3 +229,4 @@ void CLR_RT_HeapBlock_Delegate_List::Relocate()
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_GarbageCollector::Heap_Relocate( GetDelegates(), m_length );
 }
+

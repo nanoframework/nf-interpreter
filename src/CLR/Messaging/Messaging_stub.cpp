@@ -64,3 +64,4 @@ void CLR_Messaging::Cleanup()
 {
     NATIVE_PROFILE_CLR_MESSAGING();
 }
+

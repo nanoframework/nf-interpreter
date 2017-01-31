@@ -64,3 +64,4 @@ void CLR_RT_HeapBlock_BinaryBlob::Relocate()
         relocate( this );
     }
 }
+

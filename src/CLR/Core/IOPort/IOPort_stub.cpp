@@ -80,3 +80,4 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::RecoverManagedObject( CLR_RT_Hea
     NATIVE_PROFILE_CLR_IOPORT();
     TINYCLR_FEATURE_STUB_RETURN();
 }
+

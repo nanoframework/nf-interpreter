@@ -566,3 +566,4 @@ HRESULT Library_corlib_native_System_Threading_Thread::Join( CLR_RT_StackFrame& 
 
     TINYCLR_NOCLEANUP();
 }
+

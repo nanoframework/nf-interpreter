@@ -53,3 +53,4 @@ extern "C" {
 #endif // HAL_USE_STM32_FLASH
 
 #endif // HAL_ST_FLASH_H
+

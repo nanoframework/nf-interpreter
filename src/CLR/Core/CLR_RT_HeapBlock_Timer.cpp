@@ -351,3 +351,4 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
 
     TINYCLR_NOCLEANUP();
 }
+

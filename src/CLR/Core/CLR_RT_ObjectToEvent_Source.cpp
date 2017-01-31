@@ -60,3 +60,4 @@ void CLR_RT_ObjectToEvent_Source::Relocate()
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_objectPtr    );
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_referencePtr );
 }
+

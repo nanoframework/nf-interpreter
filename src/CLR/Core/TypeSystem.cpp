@@ -4441,3 +4441,4 @@ LPCSTR CLR_RT_AttributeParser::GetString()
 
     return m_assm->GetString( tk );
 }
+

@@ -32,3 +32,4 @@ __attribute__((weak)) bool WP_TransmitMessage(WP_Message* message)
 __attribute__((weak)) void WP_CheckAvailableIncomingData()
 {
 }
+

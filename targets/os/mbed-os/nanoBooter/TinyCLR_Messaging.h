@@ -193,3 +193,4 @@ extern CLR_Messaging    *g_CLR_Messaging;
 //--//
 
 #endif // _TINYCLR_MESSAGING_H_
+

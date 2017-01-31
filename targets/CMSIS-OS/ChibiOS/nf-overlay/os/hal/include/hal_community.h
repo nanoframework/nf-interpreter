@@ -58,3 +58,4 @@ extern "C" {
 #endif
 
 #endif // HAL_NF_COMMUNITY_H
+

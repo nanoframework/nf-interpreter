@@ -24,3 +24,4 @@ extern SerialUSBDriver SDU1;
 #endif  /* _USBCFG_H_ */
 
 /** @} */
+

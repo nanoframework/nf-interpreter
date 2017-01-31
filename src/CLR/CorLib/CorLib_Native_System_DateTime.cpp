@@ -346,3 +346,4 @@ void Library_corlib_native_System_DateTime::Compress( CLR_RT_StackFrame& stack, 
         *val = Time_FromSystemTime( &st );
     }
 }
+

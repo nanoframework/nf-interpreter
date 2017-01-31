@@ -1083,3 +1083,4 @@ HRESULT Library_corlib_native_System_String::ConvertToCharArray( CLR_RT_StackFra
     NATIVE_PROFILE_CLR_CORE();
     return ConvertToCharArray( stack.Arg0().RecoverString(), ref, array, startIndex, length );
 }
+

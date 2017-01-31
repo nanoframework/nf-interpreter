@@ -59,3 +59,4 @@ CLR_RT_HeapBlock_EndPoint::Message* CLR_RT_HeapBlock_EndPoint::FindMessage( CLR_
 {
     return NULL;
 }
+

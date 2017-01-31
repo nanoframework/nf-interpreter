@@ -74,3 +74,4 @@ void CLR_RT_HeapBlock_Delegate::Relocate()
     NATIVE_PROFILE_CLR_CORE();
     m_object.Relocate__HeapBlock();
 }
+

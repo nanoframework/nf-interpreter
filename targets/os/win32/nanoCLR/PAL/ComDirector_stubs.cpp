@@ -79,3 +79,4 @@ void CPU_ProtectCommunicationGPIOs( BOOL On )
 {
     NATIVE_PROFILE_PAL_COM();
 }
+

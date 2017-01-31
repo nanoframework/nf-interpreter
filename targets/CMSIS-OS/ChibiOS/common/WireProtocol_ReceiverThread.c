@@ -26,3 +26,4 @@ void ReceiverThread(void const * argument)
 
   // nothing to deinitialize or cleanup, so it's safe to return
 }
+

@@ -123,3 +123,4 @@ HRESULT CLR_RT_ByteArrayReader::Skip( UINT32 size )
 
     TINYCLR_NOCLEANUP();
 }
+

@@ -191,3 +191,4 @@ CLR_INT64* Library_corlib_native_System_TimeSpan::GetValuePtr( CLR_RT_HeapBlock&
 
     return NULL;
 }
+

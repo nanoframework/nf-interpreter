@@ -17,3 +17,4 @@ bool WP_App_ProcessHeader(WP_Message* message);
 bool WP_App_ProcessPayload(WP_Message* message);
 
 #endif // _WIREPROTOCOL_APP_INTERFACE_H_
+

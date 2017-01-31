@@ -31,3 +31,4 @@ HRESULT CLR_HW_Hardware::ProcessInterrupts()
     NATIVE_PROFILE_CLR_HARDWARE();
     TINYCLR_SYSTEM_STUB_RETURN();
 }
+

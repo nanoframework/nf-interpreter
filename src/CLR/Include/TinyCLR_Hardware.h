@@ -143,3 +143,4 @@ CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 24)
 //--//
 
 #endif // _TINYCLR_HARDWARE_H_
+

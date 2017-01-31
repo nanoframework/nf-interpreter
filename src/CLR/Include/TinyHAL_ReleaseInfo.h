@@ -71,3 +71,4 @@ unsigned int Solution_GetReleaseInfo(MfReleaseInfo&);
 //--//
 
 #endif // _TINYHAL_RELEASEINFO_H_
+

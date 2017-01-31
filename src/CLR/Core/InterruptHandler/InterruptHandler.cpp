@@ -136,3 +136,4 @@ HRESULT CLR_HW_Hardware::ProcessInterrupts()
 
     TINYCLR_NOCLEANUP();
 }
+

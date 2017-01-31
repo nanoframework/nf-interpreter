@@ -282,3 +282,4 @@ private:
 };
 
 #endif // _TINYCLR_RUNTIME__SERIALIZATION_H_
+

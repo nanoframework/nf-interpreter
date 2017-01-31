@@ -52,3 +52,4 @@ bool Monitor_OemInfo(WP_Message* message)
 
     return true;
 }
+

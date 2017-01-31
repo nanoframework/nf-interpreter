@@ -267,3 +267,4 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::RecoverManagedObject( CLR_RT_Hea
 
     TINYCLR_NOCLEANUP();
 }
+

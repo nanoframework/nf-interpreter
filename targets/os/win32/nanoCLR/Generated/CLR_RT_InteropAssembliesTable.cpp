@@ -54,3 +54,4 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] =
     NULL
 };
 // End of M:\netmf-interpreter\BuildOutput\Windows\le\RAM\release\Windows2\obj\Solutions\Windows2\TinyCLR\CLR_RT_InteropAssembliesTable.cpp
+

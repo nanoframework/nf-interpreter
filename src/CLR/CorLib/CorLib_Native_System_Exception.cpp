@@ -244,3 +244,4 @@ Library_corlib_native_System_Exception::StackTrace* Library_corlib_native_System
 
     return NULL;
 }
+
