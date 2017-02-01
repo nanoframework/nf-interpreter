@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_RUNTIME__SERIALIZATION_H_
-#define _TINYCLR_RUNTIME__SERIALIZATION_H_
+#ifndef _NANOCLR_RUNTIME__SERIALIZATION_H_
+#define _NANOCLR_RUNTIME__SERIALIZATION_H_
 
 struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCATION -
 {
@@ -139,7 +139,7 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
         CLR_RT_TypeDescriptor       m_typeExpected_tmp;
         CLR_RT_TypeDescriptor       m_typeForced_tmp;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         bool                        m_fIsMarshalByRefObject;
 #endif
 
@@ -281,5 +281,5 @@ private:
     static void PrepareForGC( void* data );
 };
 
-#endif // _TINYCLR_RUNTIME__SERIALIZATION_H_
+#endif // _NANOCLR_RUNTIME__SERIALIZATION_H_
 

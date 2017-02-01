@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_APPLICATION_H_
-#define _TINYCLR_APPLICATION_H_
+#ifndef _NANOCLR_APPLICATION_H_
+#define _NANOCLR_APPLICATION_H_
 
 struct CLR_SETTINGS
 {

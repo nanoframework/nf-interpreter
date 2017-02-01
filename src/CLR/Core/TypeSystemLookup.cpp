@@ -45,7 +45,7 @@
 #define DT_NOREL(x)  NULL
 #define DT_REL(x)    (CLR_RT_HeapBlockRelocate)&x
 
-#if defined(WIN32) || defined(TINYCLR_TRACE_MEMORY_STATS)
+#if defined(WIN32) || defined(NANOCLR_TRACE_MEMORY_STATS)
 #define DT_OPT_NAME(x) , #x
 #else
 #define DT_OPT_NAME(x)
@@ -126,7 +126,7 @@ const CLR_RT_DataTypeLookup c_CLR_RT_DataTypeLookup[] =
 
     { DT_REF                                                                  , DT_NA, DT_NA, DT_T(I2C_XACTION         ), DT_CNV(END      ), NULL                       , DT_NOREL(CLR_RT_HeapBlock_I2CXAction                      ) DT_OPT_NAME(I2C_XACTION         ) }, // DATATYPE_I2C_XACTION
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     { DT_REF                                                                  , DT_NA, DT_NA, DT_T(APPDOMAIN_HEAD      ), DT_CNV(END      ), NULL                       , DT_REL  (CLR_RT_AppDomain::Relocate                       ) DT_OPT_NAME(APPDOMAIN_HEAD      ) }, // DATATYPE_APPDOMAIN_HEAD
     { DT_REF                                                           | DT_MT, DT_NA, DT_NA, DT_T(TRANSPARENT_PROXY   ), DT_CNV(END      ), NULL                       , DT_REL  (CLR_RT_HeapBlock::Relocate_TransparentProxy      ) DT_OPT_NAME(TRANSPARENT_PROXY   ) }, // DATATYPE_TRANSPARENT_PROXY
     { DT_REF                                                                  , DT_NA, DT_NA, DT_T(APPDOMAIN_ASSEMBLY  ), DT_CNV(END      ), NULL                       , DT_REL  (CLR_RT_AppDomainAssembly::Relocate               ) DT_OPT_NAME(APPDOMAIN_ASSEMBLY  ) }, // DATATYPE_APPDOMAIN_ASSEMBLY
@@ -180,19 +180,19 @@ const CLR_RT_DataTypeLookup c_CLR_RT_DataTypeLookup[] =
 #define VarPop   0
 #define VarPush  0
 
-#if defined(TINYCLR_OPCODE_NAMES)
+#if defined(NANOCLR_OPCODE_NAMES)
 #define OPDEF_NAME(name) name,
 #else
 #define OPDEF_NAME(name)
 #endif
 
-#if defined(TINYCLR_OPCODE_STACKCHANGES)
+#if defined(NANOCLR_OPCODE_STACKCHANGES)
 #define OPDEF_STACKCHANGE(pop,push) ((pop) << 4) | (push),
 #else
 #define OPDEF_STACKCHANGE(pop,push)
 #endif
 
-#if defined(TINYCLR_OPCODE_PARSER)
+#if defined(NANOCLR_OPCODE_PARSER)
 #define OPDEF_EX(lo,dt,index,flags) , lo, dt, index, flags
 #else
 #define OPDEF_EX(lo,dt,index,flags)
@@ -1669,7 +1669,7 @@ const CLR_RT_OpcodeLookup c_CLR_RT_OpcodeLookup[] =
 
 #undef LoadString // Legacy Windows macro, whatever...
 
-#if defined(TINYCLR_OPCODE_NAMES)
+#if defined(NANOCLR_OPCODE_NAMES)
 #define OPDEF_NAME(name) #name,
 #else
 #define OPDEF_NAME(name)

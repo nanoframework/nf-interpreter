@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Runtime.h>
-#include <TinyCLR_Runtime__HeapBlock.h>
+#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Runtime__HeapBlock.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #if 0
@@ -271,7 +271,7 @@ const WP_ApplicationLayer c_Messaging_app =
 HRESULT CLR_Messaging::CreateInstance()
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     g_CLR_Messaging = (CLR_Messaging*)&g_scratchMessaging[ 0 ];
 
@@ -279,7 +279,7 @@ HRESULT CLR_Messaging::CreateInstance()
 
     int iMsg = 0;
     
-    TINYCLR_FOREACH_MESSAGING_NO_TEMP()
+    NANOCLR_FOREACH_MESSAGING_NO_TEMP()
     {
         g_CLR_Messaging[ iMsg ].Initialize(
             HalSystemConfig.MessagingPorts[ iMsg ], 
@@ -291,9 +291,9 @@ HRESULT CLR_Messaging::CreateInstance()
             );
         iMsg++;
     }
-    TINYCLR_FOREACH_MESSAGING_END();
+    NANOCLR_FOREACH_MESSAGING_END();
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
@@ -350,15 +350,15 @@ void CLR_Messaging::Initialize(
 HRESULT CLR_Messaging::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_FOREACH_MESSAGING(msg)
+    NANOCLR_FOREACH_MESSAGING(msg)
     {
         msg.Cleanup();
     }
-    TINYCLR_FOREACH_MESSAGING_END();
+    NANOCLR_FOREACH_MESSAGING_END();
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 void CLR_Messaging::Cleanup()
@@ -423,7 +423,7 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
         //
         // Only process replies once!
         //
-        TINYCLR_FOREACH_NODE(CachedMessage,cache,m_cacheMaster)
+        NANOCLR_FOREACH_NODE(CachedMessage,cache,m_cacheMaster)
         {
             WP_Packet& req = cache->m_message.m_header;
             WP_Packet& res = msg->            m_header;
@@ -443,14 +443,14 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
                 break;
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
 
         tables     = m_Lookup_Replies;
         tableCount = ARRAYSIZE(m_Lookup_Replies);
     }
     else
     {
-        TINYCLR_FOREACH_NODE(CachedMessage,cache,m_cacheSubordinate)
+        NANOCLR_FOREACH_NODE(CachedMessage,cache,m_cacheSubordinate)
         {
             WP_Packet& req = msg->            m_header;
             WP_Packet& res = cache->m_message.m_header;
@@ -465,7 +465,7 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
                 return true;
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
 
         tables     = m_Lookup_Requests;
         tableCount = ARRAYSIZE(m_Lookup_Requests);
@@ -508,7 +508,7 @@ void CLR_Messaging::PurgeCache()
 void CLR_Messaging::PurgeCache( CLR_RT_DblLinkedList& lst, CLR_INT64 oldest )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    TINYCLR_FOREACH_NODE_BACKWARD(CachedMessage,cache,lst)
+    NANOCLR_FOREACH_NODE_BACKWARD(CachedMessage,cache,lst)
     {
         if(cache->m_lastSeen < oldest || m_cacheTotalSize > c_MaxCacheSize)
         {
@@ -517,7 +517,7 @@ void CLR_Messaging::PurgeCache( CLR_RT_DblLinkedList& lst, CLR_INT64 oldest )
             CLR_RT_Memory::Release( cache );
         }
     }
-    TINYCLR_FOREACH_NODE_BACKWARD_END();
+    NANOCLR_FOREACH_NODE_BACKWARD_END();
 }
 
 bool CLR_Messaging::TransmitMessage( const WP_Message* msg, bool fQueue )
@@ -605,11 +605,11 @@ bool CLR_Messaging::SendEvent( UINT32 cmd, UINT32 payloadSize, UINT8* payload, U
 void CLR_Messaging::BroadcastEvent( UINT32 cmd, UINT32 payloadSize, UINT8* payload, UINT32 flags )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    TINYCLR_FOREACH_MESSAGING(msg)
+    NANOCLR_FOREACH_MESSAGING(msg)
     {
         msg.m_controller.SendProtocolMessage( cmd, flags, payloadSize, payload );        
     }
-    TINYCLR_FOREACH_MESSAGING_END();
+    NANOCLR_FOREACH_MESSAGING_END();
 }
 
 //--//

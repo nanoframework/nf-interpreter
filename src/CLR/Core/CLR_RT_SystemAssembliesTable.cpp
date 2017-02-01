@@ -3,10 +3,10 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Runtime.h>
+#include <nanoCLR_Runtime.h>
 //#include <corlib_native.h>
 //#include <SPOT_native.h>
-//#include "TinyCLR_Interop.h"
+//#include "nanoCLR_Interop.h"
 
 static const CLR_RT_NativeAssemblyData *LookUpAssemblyNativeDataByName
 (

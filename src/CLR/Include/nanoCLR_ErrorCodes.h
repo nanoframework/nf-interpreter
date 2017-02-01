@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_ERRORCODES_H_
-#define _TINYCLR_ERRORCODES_H_
+#ifndef _NANOCLR_ERRORCODES_H_
+#define _NANOCLR_ERRORCODES_H_
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <netmf_errors.h>
@@ -23,5 +23,5 @@
 #define CLR_E_PARSER_UNSUPPORTED_GENERICS           MAKE_HRESULT(SEVERITY_ERROR, 0x0101, 0x0009)
 
 
-#endif // _TINYCLR_ERRORCODES_H_
+#endif // _NANOCLR_ERRORCODES_H_
 

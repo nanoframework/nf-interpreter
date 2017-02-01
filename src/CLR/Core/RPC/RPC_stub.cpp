@@ -3,7 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Runtime.h>
+#include <nanoCLR_Runtime.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,12 +34,12 @@ bool CLR_RT_HeapBlock_EndPoint::Port::Compare( const CLR_RT_HeapBlock_EndPoint::
 
 HRESULT CLR_RT_HeapBlock_EndPoint::CreateInstance( const CLR_RT_HeapBlock_EndPoint::Port& port, CLR_RT_HeapBlock& owner, CLR_RT_HeapBlock& epRef )
 {
-    TINYCLR_FEATURE_STUB_RETURN();
+    NANOCLR_FEATURE_STUB_RETURN();
 }
 
 HRESULT CLR_RT_HeapBlock_EndPoint::ExtractInstance( CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_EndPoint*& endPoint )
 {
-    TINYCLR_FEATURE_STUB_RETURN();
+    NANOCLR_FEATURE_STUB_RETURN();
 }
 
 bool CLR_RT_HeapBlock_EndPoint::ReleaseWhenDeadEx()

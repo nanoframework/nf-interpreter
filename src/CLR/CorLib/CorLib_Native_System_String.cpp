@@ -36,7 +36,7 @@ static const CLR_UINT16 c_WhiteSpaces[] =
 HRESULT Library_corlib_native_System_String::get_Chars___CHAR__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     LPCSTR               szText;
     CLR_RT_UnicodeHelper uh;
@@ -48,8 +48,8 @@ HRESULT Library_corlib_native_System_String::get_Chars___CHAR__I4( CLR_RT_StackF
 
     uh.SetInputUTF8( szText );
 
-    len   = uh.CountNumberOfCharacters()  ; if(len   < 0                ) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-    index = stack.Arg1().NumericByRef().s4; if(index < 0 || index >= len) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    len   = uh.CountNumberOfCharacters()  ; if(len   < 0                ) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    index = stack.Arg1().NumericByRef().s4; if(index < 0 || index >= len) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
     uh.m_outputUTF16      = buf;
     uh.m_outputUTF16_size = MAXSTRLEN(buf);
@@ -62,33 +62,33 @@ HRESULT Library_corlib_native_System_String::get_Chars___CHAR__I4( CLR_RT_StackF
 
     stack.SetResult( buf[ 0 ], DATATYPE_CHAR );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::ToCharArray___SZARRAY_CHAR( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(ToCharArray( stack, 0, -1 ));
+    NANOCLR_SET_AND_LEAVE(ToCharArray( stack, 0, -1 ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::ToCharArray___SZARRAY_CHAR__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(ToCharArray( stack, stack.Arg1().NumericByRef().s4, stack.Arg2().NumericByRef().s4 ));
+    NANOCLR_SET_AND_LEAVE(ToCharArray( stack, stack.Arg1().NumericByRef().s4, stack.Arg2().NumericByRef().s4 ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::get_Length___I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     LPCSTR szText = stack.Arg0().RecoverString(); FAULT_ON_NULL(szText);
 
@@ -96,116 +96,116 @@ HRESULT Library_corlib_native_System_String::get_Length___I4( CLR_RT_StackFrame&
 
     stack.SetResult_I4( uh.CountNumberOfCharacters() );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Split___SZARRAY_STRING__SZARRAY_CHAR( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Split( stack, stack.Arg1(), 0x7FFFFFFF )); /// Sending INT_MAX instead of -1. 
+    NANOCLR_SET_AND_LEAVE(Split( stack, stack.Arg1(), 0x7FFFFFFF )); /// Sending INT_MAX instead of -1. 
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Split___SZARRAY_STRING__SZARRAY_CHAR__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Split( stack, stack.Arg1(), stack.Arg2().NumericByRef().s4 ));
+    NANOCLR_SET_AND_LEAVE(Split( stack, stack.Arg1(), stack.Arg2().NumericByRef().s4 ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Substring___STRING__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Substring( stack, stack.Arg1().NumericByRef().s4, -1 ));
+    NANOCLR_SET_AND_LEAVE(Substring( stack, stack.Arg1().NumericByRef().s4, -1 ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Substring___STRING__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_INT32 length = stack.Arg2().NumericByRef().s4;
 
-    if(length < 0) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    if(length < 0) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
-    TINYCLR_SET_AND_LEAVE(Substring( stack, stack.Arg1().NumericByRef().s4, length ));
+    NANOCLR_SET_AND_LEAVE(Substring( stack, stack.Arg1().NumericByRef().s4, length ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Trim___STRING__SZARRAY_CHAR( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Trim( stack, stack.Arg1().DereferenceArray(), true, true ));
+    NANOCLR_SET_AND_LEAVE(Trim( stack, stack.Arg1().DereferenceArray(), true, true ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::TrimStart___STRING__SZARRAY_CHAR( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Trim( stack, stack.Arg1().DereferenceArray(), true, false ));
+    NANOCLR_SET_AND_LEAVE(Trim( stack, stack.Arg1().DereferenceArray(), true, false ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::TrimEnd___STRING__SZARRAY_CHAR( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Trim( stack, stack.Arg1().DereferenceArray(), false, true ));
+    NANOCLR_SET_AND_LEAVE(Trim( stack, stack.Arg1().DereferenceArray(), false, true ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::_ctor___VOID__SZARRAY_CHAR__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(FromCharArray( stack, stack.Arg2().NumericByRef().s4, stack.Arg3().NumericByRef().s4 ));
+    NANOCLR_SET_AND_LEAVE(FromCharArray( stack, stack.Arg2().NumericByRef().s4, stack.Arg3().NumericByRef().s4 ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::_ctor___VOID__SZARRAY_CHAR( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(FromCharArray( stack, 0, -1 ));
+    NANOCLR_SET_AND_LEAVE(FromCharArray( stack, 0, -1 ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::_ctor___VOID__CHAR__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_UINT16 ch  = stack.Arg1().NumericByRef().u2;
-    int        len = stack.Arg2().NumericByRef().s4; if(len < 0) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    int        len = stack.Arg2().NumericByRef().s4; if(len < 0) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
     {
         CLR_RT_HeapBlock     tmp; tmp.SetObjectReference( NULL );
         CLR_RT_ProtectFromGC gc( tmp );
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( tmp, len, g_CLR_RT_WellKnownTypes.m_Char ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( tmp, len, g_CLR_RT_WellKnownTypes.m_Char ));
 
         {
             CLR_RT_HeapBlock_Array* tmpArray = tmp.DereferenceArray();
@@ -214,328 +214,328 @@ HRESULT Library_corlib_native_System_String::_ctor___VOID__CHAR__I4( CLR_RT_Stac
 
             p = pTmp; while(len--) *p++ = ch;
 
-            TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( stack.Arg0(), pTmp, tmpArray->m_numOfElements ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( stack.Arg0(), pTmp, tmpArray->m_numOfElements ));
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::CompareTo___I4__OBJECT( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Library_corlib_native_System_String::CompareTo___I4__STRING( stack ));
+    NANOCLR_SET_AND_LEAVE(Library_corlib_native_System_String::CompareTo___I4__STRING( stack ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::CompareTo___I4__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock& pThis = stack.Arg0(); // String references are special, they don't point to an object, they are the object. So use stack.Arg0() instead of stack.This()
     CLR_RT_HeapBlock& pArg  = stack.Arg1();
 
     stack.SetResult_I4( CLR_RT_HeapBlock::Compare_Unsigned_Values( pThis, pArg ) );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_String::IndexOf___I4__CHAR( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::IndexOf___I4__CHAR__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar | c_IndexOf__StartIndex ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar | c_IndexOf__StartIndex ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::IndexOf___I4__CHAR__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar | c_IndexOf__StartIndex | c_IndexOf__Count ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar | c_IndexOf__StartIndex | c_IndexOf__Count ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::IndexOfAny___I4__SZARRAY_CHAR( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::IndexOfAny___I4__SZARRAY_CHAR__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars | c_IndexOf__StartIndex ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars | c_IndexOf__StartIndex ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::IndexOfAny___I4__SZARRAY_CHAR__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars | c_IndexOf__StartIndex | c_IndexOf__Count ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars | c_IndexOf__StartIndex | c_IndexOf__Count ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::IndexOf___I4__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::IndexOf___I4__STRING__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String | c_IndexOf__StartIndex ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String | c_IndexOf__StartIndex ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::IndexOf___I4__STRING__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String | c_IndexOf__StartIndex | c_IndexOf__Count ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String | c_IndexOf__StartIndex | c_IndexOf__Count ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::LastIndexOf___I4__CHAR( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar | c_IndexOf__Last ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar | c_IndexOf__Last ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::LastIndexOf___I4__CHAR__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar | c_IndexOf__Last | c_IndexOf__StartIndex ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar | c_IndexOf__Last | c_IndexOf__StartIndex ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::LastIndexOf___I4__CHAR__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar | c_IndexOf__Last | c_IndexOf__StartIndex | c_IndexOf__Count ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__SingleChar | c_IndexOf__Last | c_IndexOf__StartIndex | c_IndexOf__Count ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::LastIndexOfAny___I4__SZARRAY_CHAR( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars | c_IndexOf__Last ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars | c_IndexOf__Last ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::LastIndexOfAny___I4__SZARRAY_CHAR__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars | c_IndexOf__Last | c_IndexOf__StartIndex ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars | c_IndexOf__Last | c_IndexOf__StartIndex ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::LastIndexOfAny___I4__SZARRAY_CHAR__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars | c_IndexOf__Last | c_IndexOf__StartIndex | c_IndexOf__Count ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__MultipleChars | c_IndexOf__Last | c_IndexOf__StartIndex | c_IndexOf__Count ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::LastIndexOf___I4__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String | c_IndexOf__Last ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String | c_IndexOf__Last ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::LastIndexOf___I4__STRING__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String | c_IndexOf__Last | c_IndexOf__StartIndex ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String | c_IndexOf__Last | c_IndexOf__StartIndex ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::LastIndexOf___I4__STRING__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String | c_IndexOf__Last | c_IndexOf__StartIndex | c_IndexOf__Count ));
+    NANOCLR_SET_AND_LEAVE(IndexOf( stack, c_IndexOf__String | c_IndexOf__Last | c_IndexOf__StartIndex | c_IndexOf__Count ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::ToLower___STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(ChangeCase( stack, false ));
+    NANOCLR_SET_AND_LEAVE(ChangeCase( stack, false ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::ToUpper___STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(ChangeCase( stack, true ));
+    NANOCLR_SET_AND_LEAVE(ChangeCase( stack, true ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Trim___STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Trim( stack, NULL, true, true ));
+    NANOCLR_SET_AND_LEAVE(Trim( stack, NULL, true, true ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Equals___STATIC__BOOLEAN__STRING__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     stack.SetResult_Boolean( CLR_RT_HeapBlock::Compare_Unsigned_Values( stack.Arg0(), stack.Arg1() ) == 0 );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_String::op_Equality___STATIC__BOOLEAN__STRING__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Library_corlib_native_System_String::Equals___STATIC__BOOLEAN__STRING__STRING( stack ));
+    NANOCLR_SET_AND_LEAVE(Library_corlib_native_System_String::Equals___STATIC__BOOLEAN__STRING__STRING( stack ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::op_Inequality___STATIC__BOOLEAN__STRING__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CHECK_HRESULT(Library_corlib_native_System_String::Equals___STATIC__BOOLEAN__STRING__STRING( stack ));
+    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_String::Equals___STATIC__BOOLEAN__STRING__STRING( stack ));
 
     stack.NegateResult();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Compare___STATIC__I4__STRING__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     stack.SetResult_I4( CLR_RT_HeapBlock::Compare_Unsigned_Values( stack.Arg0(), stack.Arg1() ) );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_String::Concat___STATIC__STRING__STRING__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Concat( stack, &stack.Arg0(), 2 ));
+    NANOCLR_SET_AND_LEAVE(Concat( stack, &stack.Arg0(), 2 ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Concat___STATIC__STRING__STRING__STRING__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Concat( stack, &stack.Arg0(), 3 ));
+    NANOCLR_SET_AND_LEAVE(Concat( stack, &stack.Arg0(), 3 ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Concat___STATIC__STRING__STRING__STRING__STRING__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Concat( stack, &stack.Arg0(), 4 ));
+    NANOCLR_SET_AND_LEAVE(Concat( stack, &stack.Arg0(), 4 ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Concat___STATIC__STRING__SZARRAY_STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* pArray = stack.Arg0().DereferenceArray(); FAULT_ON_NULL(pArray);
 
-    TINYCLR_SET_AND_LEAVE(Concat( stack, (CLR_RT_HeapBlock*)pArray->GetFirstElement(), pArray->m_numOfElements ));
+    NANOCLR_SET_AND_LEAVE(Concat( stack, (CLR_RT_HeapBlock*)pArray->GetFirstElement(), pArray->m_numOfElements ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -543,7 +543,7 @@ HRESULT Library_corlib_native_System_String::Concat___STATIC__STRING__SZARRAY_ST
 HRESULT Library_corlib_native_System_String::FromCharArray( CLR_RT_StackFrame& stack, int startIndex, int length )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* array;
     CLR_UINT32              len;
@@ -551,7 +551,7 @@ HRESULT Library_corlib_native_System_String::FromCharArray( CLR_RT_StackFrame& s
     array = stack.Arg1().DereferenceArray();
     if (!array || array->m_numOfElements == 0)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.Arg0(), ""));
+        NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.Arg0(), ""));
     }
     else
     {
@@ -561,31 +561,31 @@ HRESULT Library_corlib_native_System_String::FromCharArray( CLR_RT_StackFrame& s
             length = len - startIndex;
 
         if (CLR_RT_HeapBlock_Array::CheckRange(startIndex, length, len) == false) 
-            TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
-        TINYCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.Arg0(), (CLR_UINT16*)array->GetElement(startIndex), length));
+        NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.Arg0(), (CLR_UINT16*)array->GetElement(startIndex), length));
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 
 HRESULT Library_corlib_native_System_String::ToCharArray( CLR_RT_StackFrame& stack, int startIndex, int length )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* array;
 
-    TINYCLR_SET_AND_LEAVE(ConvertToCharArray( stack, stack.PushValueAndClear(), array, startIndex, length ));
+    NANOCLR_SET_AND_LEAVE(ConvertToCharArray( stack, stack.PushValueAndClear(), array, startIndex, length ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::IndexOf( CLR_RT_StackFrame& stack, int mode )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     LPCSTR               szText;
     int                  startIndex;
@@ -630,7 +630,7 @@ HRESULT Library_corlib_native_System_String::IndexOf( CLR_RT_StackFrame& stack, 
     {
         startIndex = stack.Arg2().NumericByRefConst().s4;
 
-        if(startIndex < 0 || startIndex > len) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        if(startIndex < 0 || startIndex > len) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
     else
     {
@@ -641,7 +641,7 @@ HRESULT Library_corlib_native_System_String::IndexOf( CLR_RT_StackFrame& stack, 
     {
         count = stack.Arg3().NumericByRefConst().s4;
 
-        if(startIndex + count > len) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        if(startIndex + count > len) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
     else
     {
@@ -737,20 +737,20 @@ HRESULT Library_corlib_native_System_String::IndexOf( CLR_RT_StackFrame& stack, 
 
     stack.SetResult_I4( pos );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::ChangeCase( CLR_RT_StackFrame& stack, bool fToUpper )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock        refTmp; refTmp.SetObjectReference( NULL );
     CLR_RT_ProtectFromGC    gc( refTmp );
     CLR_RT_HeapBlock_Array* arrayTmp;
     CLR_UINT16*             ptr;
 
-    TINYCLR_CHECK_HRESULT(ConvertToCharArray( stack, refTmp, arrayTmp, 0, -1 ));
+    NANOCLR_CHECK_HRESULT(ConvertToCharArray( stack, refTmp, arrayTmp, 0, -1 ));
 
     ptr = (CLR_UINT16*)arrayTmp->GetFirstElement();
 
@@ -770,23 +770,23 @@ HRESULT Library_corlib_native_System_String::ChangeCase( CLR_RT_StackFrame& stac
         *ptr++ = c;
     }
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( stack.PushValue(), (CLR_UINT16*)arrayTmp->GetFirstElement(), arrayTmp->m_numOfElements ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( stack.PushValue(), (CLR_UINT16*)arrayTmp->GetFirstElement(), arrayTmp->m_numOfElements ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Substring( CLR_RT_StackFrame& stack, int startIndex, int length )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock        refTmp; refTmp.SetObjectReference( NULL );
     CLR_RT_ProtectFromGC    gc( refTmp );
     CLR_RT_HeapBlock_Array* arrayTmp;
 
-    TINYCLR_CHECK_HRESULT(ConvertToCharArray( stack, refTmp, arrayTmp, 0, -1 ));
+    NANOCLR_CHECK_HRESULT(ConvertToCharArray( stack, refTmp, arrayTmp, 0, -1 ));
 
-    if(startIndex < 0 || startIndex > (int)arrayTmp->m_numOfElements) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    if(startIndex < 0 || startIndex > (int)arrayTmp->m_numOfElements) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
     if(length == -1)
     {
@@ -794,19 +794,19 @@ HRESULT Library_corlib_native_System_String::Substring( CLR_RT_StackFrame& stack
     }
     else
     {
-        if(length < 0 || (startIndex + length) > (int)arrayTmp->m_numOfElements) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        if(length < 0 || (startIndex + length) > (int)arrayTmp->m_numOfElements) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
     
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( stack.PushValue(), (CLR_UINT16*)arrayTmp->GetElement( startIndex ), length ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( stack.PushValue(), (CLR_UINT16*)arrayTmp->GetElement( startIndex ), length ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 
 HRESULT Library_corlib_native_System_String::Trim( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock_Array* arrayTrimChars, bool fStart, bool fEnd )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock        refTmp; refTmp.SetObjectReference( NULL );
     CLR_RT_ProtectFromGC    gc( refTmp );
@@ -814,7 +814,7 @@ HRESULT Library_corlib_native_System_String::Trim( CLR_RT_StackFrame& stack, CLR
     CLR_UINT16*             pSrcStart;
     CLR_UINT16*             pSrcEnd;
 
-    TINYCLR_CHECK_HRESULT(ConvertToCharArray( stack, refTmp, arrayTmp, 0, -1 ));
+    NANOCLR_CHECK_HRESULT(ConvertToCharArray( stack, refTmp, arrayTmp, 0, -1 ));
 
     pSrcStart = (CLR_UINT16*)arrayTmp->GetFirstElement();
     pSrcEnd   = &pSrcStart[ arrayTmp->m_numOfElements ];
@@ -872,15 +872,15 @@ HRESULT Library_corlib_native_System_String::Trim( CLR_RT_StackFrame& stack, CLR
     }
 
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( stack.PushValue(), pSrcStart, (CLR_UINT32)(pSrcEnd - pSrcStart) ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( stack.PushValue(), pSrcStart, (CLR_UINT32)(pSrcEnd - pSrcStart) ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::Split( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& chars, int maxStrings )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* arraySrc;
     CLR_RT_HeapBlock_Array* arrayChars;
@@ -890,13 +890,13 @@ HRESULT Library_corlib_native_System_String::Split( CLR_RT_StackFrame& stack, CL
     
     if (maxStrings < 0)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE)
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE)
     }
     else if (maxStrings == 0)
     {
         CLR_RT_HeapBlock& refTarget = stack.PushValue();
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( refTarget, 0, g_CLR_RT_WellKnownTypes.m_String ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( refTarget, 0, g_CLR_RT_WellKnownTypes.m_String ));
 
         arrayDst = refTarget.DereferenceArray();
     }
@@ -921,7 +921,7 @@ HRESULT Library_corlib_native_System_String::Split( CLR_RT_StackFrame& stack, CL
             CLR_RT_HeapBlock     refSrc; refSrc.SetObjectReference( NULL );
             CLR_RT_ProtectFromGC gc( refSrc );
 
-            TINYCLR_CHECK_HRESULT(ConvertToCharArray( stack, refSrc, arraySrc, 0, -1 ));
+            NANOCLR_CHECK_HRESULT(ConvertToCharArray( stack, refSrc, arraySrc, 0, -1 ));
 
             for(int pass=0; pass<2; pass++)
             {
@@ -961,7 +961,7 @@ HRESULT Library_corlib_native_System_String::Split( CLR_RT_StackFrame& stack, CL
                         {
                             CLR_RT_HeapBlock* str = (CLR_RT_HeapBlock*)arrayDst->GetElement( count );
 
-                            TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( *str, pSrcStart, (CLR_UINT32)(pSrc - pSrcStart) ));
+                            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( *str, pSrcStart, (CLR_UINT32)(pSrc - pSrcStart) ));
 
                             pSrcStart = pSrc + 1;
                         }
@@ -975,7 +975,7 @@ HRESULT Library_corlib_native_System_String::Split( CLR_RT_StackFrame& stack, CL
                 {
                     CLR_RT_HeapBlock& refTarget = stack.PushValue();
 
-                    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( refTarget, count, g_CLR_RT_WellKnownTypes.m_String ));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( refTarget, count, g_CLR_RT_WellKnownTypes.m_String ));
 
                     arrayDst = refTarget.DereferenceArray();
                 }
@@ -983,7 +983,7 @@ HRESULT Library_corlib_native_System_String::Split( CLR_RT_StackFrame& stack, CL
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -991,7 +991,7 @@ HRESULT Library_corlib_native_System_String::Split( CLR_RT_StackFrame& stack, CL
 HRESULT Library_corlib_native_System_String::Concat( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock* array, int num )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
  
     CLR_RT_HeapBlock*       ptrSrc;
     LPCSTR                  szTextSrc;
@@ -1041,13 +1041,13 @@ HRESULT Library_corlib_native_System_String::Concat( CLR_RT_StackFrame& stack, C
         }
     }
  
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::ConvertToCharArray( LPCSTR szText, CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_Array*& array, int startIndex, int length )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_UnicodeHelper uh;
     int                  totLength;
@@ -1056,13 +1056,13 @@ HRESULT Library_corlib_native_System_String::ConvertToCharArray( LPCSTR szText, 
 
     uh.SetInputUTF8( szText );
 
-    totLength = uh.CountNumberOfCharacters(); if(totLength < 0) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    totLength = uh.CountNumberOfCharacters(); if(totLength < 0) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
     if(length == -1) length = totLength;
 
-    if(CLR_RT_HeapBlock_Array::CheckRange( startIndex, length, totLength ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    if(CLR_RT_HeapBlock_Array::CheckRange( startIndex, length, totLength ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( ref, length, g_CLR_RT_WellKnownTypes.m_Char ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( ref, length, g_CLR_RT_WellKnownTypes.m_Char ));
 
     array = ref.DereferenceArray();
 
@@ -1075,7 +1075,7 @@ HRESULT Library_corlib_native_System_String::ConvertToCharArray( LPCSTR szText, 
     uh.ConvertFromUTF8( startIndex            , true  );
     uh.ConvertFromUTF8( array->m_numOfElements, false );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_String::ConvertToCharArray( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_Array*& array, int startIndex, int length )

@@ -3,7 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Runtime.h>
+#include <nanoCLR_Runtime.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     g_CLR_DBG_Debuggers = (CLR_DBG_Debugger*)&g_scratchDebugger[0];
-    TINYCLR_SYSTEM_STUB_RETURN();
+    NANOCLR_SYSTEM_STUB_RETURN();
 }
 
 //--//
@@ -40,7 +40,7 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
 HRESULT CLR_DBG_Debugger::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_SYSTEM_STUB_RETURN();
+    NANOCLR_SYSTEM_STUB_RETURN();
 }
 
 void CLR_DBG_Debugger::BroadcastEvent( UINT32 cmd, UINT32 payloadSize, UINT8* payload, UINT32 flags )

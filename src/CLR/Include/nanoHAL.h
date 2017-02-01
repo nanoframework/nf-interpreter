@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TINYHAL_H_
-#define _TINYHAL_H_ 1
+#ifndef _NANOHAL_H_
+#define _NANOHAL_H_ 1
 
 #include <stdio.h>
 #include <string.h>
@@ -33,8 +33,8 @@
 
 
 
-#include <TinyHAL_Types.h>
-#include <TinyHAL_ReleaseInfo.h>
+#include <nanoHAL_Types.h>
+#include <nanoHAL_ReleaseInfo.h>
 
 //#if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
 //#define ENABLE_NATIVE_PROFILER
@@ -616,7 +616,7 @@ extern void HAL_AssertEx();
 // It is not a problem in global scope, but if macro is used inside of struct - it generates warnings.
 // CT_ASSERT_UNIQUE_NAME is the same in essence, but it provides a way to customize the name of the type.
 #define CT_ASSERT_UNIQUE_NAME(e,name) typedef char __CT_ASSERT__##name[(e)?1:-1];
-#define CT_ASSERT(e)                  CT_ASSERT_UNIQUE_NAME(e,tinyclr)
+#define CT_ASSERT(e)                  CT_ASSERT_UNIQUE_NAME(e,nanoclr)
 #endif
 
 
@@ -1517,7 +1517,7 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 //--//
 
 
-#include <TinyPAL.h>
+#include <nanoPAL.h>
 //#include <drivers.h>
 
 /////////////////////////////////////////////////////////////////////
@@ -1624,5 +1624,5 @@ void CPU_Reset();
 
 #define OEMSYSTEMINFOSTRING "OEM"  // UNDONE: FIXME: OEMSYSTEMINFOSTRING
 
-#endif  // _TINYHAL_H_
+#endif  // _NANOHAL_H_
 

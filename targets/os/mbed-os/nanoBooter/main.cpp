@@ -215,11 +215,11 @@ private:
 
         uint32_t pingReplyPayload[2] = 
         {
-            //public const uint c_Ping_Source_TinyCLR = 0x00000000;
-            //public const uint c_Ping_Source_TinyBooter = 0x00000001;
+            //public const uint c_Ping_Source_CLR = 0x00000000;
+            //public const uint c_Ping_Source_Booter = 0x00000001;
             //public const uint c_Ping_Source_Host = 0x00000002;
             
-            1, // Source TinyBooter
+            1, // Source Booter
 
             //public const uint c_Ping_DbgFlag_Stop       = 0x00000001;
             //public const uint c_Ping_DbgFlag_BigEndian  = 0x02000002;

@@ -3,7 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Runtime.h>
+#include <nanoCLR_Runtime.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -15,13 +15,13 @@ HRESULT CLR_Messaging::CreateInstance()
 {
     NATIVE_PROFILE_CLR_MESSAGING();
     g_CLR_Messaging = (CLR_Messaging*)&g_scratchMessaging[0];
-    TINYCLR_SYSTEM_STUB_RETURN();
+    NANOCLR_SYSTEM_STUB_RETURN();
 }
 
 HRESULT CLR_Messaging::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    TINYCLR_SYSTEM_STUB_RETURN();
+    NANOCLR_SYSTEM_STUB_RETURN();
 }
 
 bool CLR_Messaging::SendEvent( UINT32 cmd, UINT32 payloadSize, UINT8* payload, UINT32 flags )

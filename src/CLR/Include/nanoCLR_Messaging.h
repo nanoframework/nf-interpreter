@@ -3,37 +3,31 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+#ifndef _NANOCLR_MESSAGING_H_
+#define _NANOCLR_MESSAGING_H_
 
-#ifndef _TINYCLR_MESSAGING_H_
-#define _TINYCLR_MESSAGING_H_
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#include <TinyCLR_Types.h>
-
+#include <nanoCLR_Types.h>
 #include <WireProtocol.h>
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 #if NUM_MESSAGING > 1
-    #define TINYCLR_FOREACH_MESSAGING(ptr)                                 \
+    #define NANOCLR_FOREACH_MESSAGING(ptr)                                 \
             for(int iMessageT = 0; iMessageT < NUM_MESSAGING; iMessageT++) \
             {                                                              \
                 CLR_Messaging& ptr = g_CLR_Messaging[ iMessageT ];
 
-#define TINYCLR_FOREACH_MESSAGING_NO_TEMP()                                \
+#define NANOCLR_FOREACH_MESSAGING_NO_TEMP()                                \
             for(int iMessageT = 0; iMessageT < NUM_MESSAGING; iMessageT++) \
             {                       
 #else
-    #define TINYCLR_FOREACH_MESSAGING(ptr)                                 \
+    #define NANOCLR_FOREACH_MESSAGING(ptr)                                 \
             {                                                              \
                 CLR_Messaging& ptr = g_CLR_Messaging[ 0 ];            
     
-    #define TINYCLR_FOREACH_MESSAGING_NO_TEMP()                            \
+    #define NANOCLR_FOREACH_MESSAGING_NO_TEMP()                            \
             {                                                                 
 #endif
 
-#define TINYCLR_FOREACH_MESSAGING_END() \
+#define NANOCLR_FOREACH_MESSAGING_END() \
         }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,12 +171,6 @@ public:
     static bool Messaging_Send__Reply         ( WP_Message* msg, void* owner );
     static bool Messaging_Reply               ( WP_Message* msg, void* owner );
     static bool Messaging_Reply__Reply        ( WP_Message* msg, void* owner );
-#if defined(NETMF_TARGET_BIG_ENDIAN)
-public:     
-    static void    SwapDebuggingValue ( UINT8* &msg, UINT32 size                          );
-    static void    SwapEndian         ( WP_Message* msg, void* ptr, int size, bool fReply );
-    static UINT32  SwapEndianPattern  ( UINT8* &buffer, UINT32 size, UINT32 count=1       );
-#endif
 };
 
 //--//
@@ -192,5 +180,5 @@ extern CLR_Messaging    *g_CLR_Messaging;
 
 //--//
 
-#endif // _TINYCLR_MESSAGING_H_
+#endif // _NANOCLR_MESSAGING_H_
 

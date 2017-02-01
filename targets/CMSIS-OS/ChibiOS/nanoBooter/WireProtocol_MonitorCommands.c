@@ -81,7 +81,7 @@ bool Monitor_WriteMemory(WP_Message* message)
     // }
 
     // TODO: not sure if we really need this
-    // TinyBooter_OnStateChange(State_MemoryWrite, (void*)cmd->m_address);
+    // nanoBooter_OnStateChange(State_MemoryWrite, (void*)cmd->m_address);
 
     // assume at RAM, directly use the original address 
     ret = AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write);

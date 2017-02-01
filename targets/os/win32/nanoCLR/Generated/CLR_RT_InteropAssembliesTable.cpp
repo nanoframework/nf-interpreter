@@ -53,5 +53,5 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] =
     //&g_CLR_AssemblyNative_Microsoft_SPOT_Update,
     NULL
 };
-// End of M:\netmf-interpreter\BuildOutput\Windows\le\RAM\release\Windows2\obj\Solutions\Windows2\TinyCLR\CLR_RT_InteropAssembliesTable.cpp
+
 

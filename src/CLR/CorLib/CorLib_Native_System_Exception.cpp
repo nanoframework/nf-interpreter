@@ -46,7 +46,7 @@ static const ExceptionLookup c_ExceptionLookup[] =
 HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array*   pArray;
     StackTrace*               pStackTrace;
@@ -68,9 +68,9 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING( CLR_RT_
         depth = pArray->m_numOfElements / sizeof(StackTrace);        
     }
 
-    if(depth == 0) TINYCLR_SET_AND_LEAVE(stack.SetResult_String(NULL));
+    if(depth == 0) NANOCLR_SET_AND_LEAVE(stack.SetResult_String(NULL));
             
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( tmpArray, depth, g_CLR_RT_WellKnownTypes.m_String ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( tmpArray, depth, g_CLR_RT_WellKnownTypes.m_String ));
 
     pStackTrace = (StackTrace*)pArray->GetFirstElement();
     pBlkString  = (CLR_RT_HeapBlock*)tmpArray.DereferenceArray()->GetFirstElement();
@@ -80,19 +80,19 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING( CLR_RT_
         strName = &buf[ 0 ];
         iName   = MAXSTRLEN(buf) - 2 ;
 
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.BuildMethodName( pStackTrace->m_md, strName, iName ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.BuildMethodName( pStackTrace->m_md, strName, iName ));
         
         memcpy(strName, "\r\n\0", 3);
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( *pBlkString, buf ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( *pBlkString, buf ));
 
         pStackTrace++;
         pBlkString++;
     }            
 
-    TINYCLR_SET_AND_LEAVE(Library_corlib_native_System_String::Concat( stack, (CLR_RT_HeapBlock*)tmpArray.DereferenceArray()->GetFirstElement(), depth ));
+    NANOCLR_SET_AND_LEAVE(Library_corlib_native_System_String::Concat( stack, (CLR_RT_HeapBlock*)tmpArray.DereferenceArray()->GetFirstElement(), depth ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -106,9 +106,9 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING( CLR_RT_
 HRESULT Library_corlib_native_System_Exception::CreateInstance( CLR_RT_HeapBlock& ref, const CLR_RT_TypeDef_Index& cls, HRESULT hrIn, CLR_RT_StackFrame* stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain* appDomainSav = g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( stack->m_appDomain );
 #endif
     
@@ -118,7 +118,7 @@ HRESULT Library_corlib_native_System_Exception::CreateInstance( CLR_RT_HeapBlock
 
     if(FAILED(hr = g_CLR_RT_ExecutionEngine.NewObjectFromIndex( ref, cls )))
     {
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         ref.SetObjectReference( g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->m_outOfMemoryException );
 #else
         ref.SetObjectReference( g_CLR_RT_ExecutionEngine.m_outOfMemoryException );
@@ -137,11 +137,11 @@ HRESULT Library_corlib_native_System_Exception::CreateInstance( CLR_RT_HeapBlock
         (void)SetStackTrace( ref, stack );
     }
         
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomainSav );
 #endif
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_Exception::CreateInstance( CLR_RT_HeapBlock& ref, HRESULT hrIn, CLR_RT_StackFrame* stack )
@@ -166,7 +166,7 @@ HRESULT Library_corlib_native_System_Exception::CreateInstance( CLR_RT_HeapBlock
 HRESULT Library_corlib_native_System_Exception::SetStackTrace( CLR_RT_HeapBlock& ref, CLR_RT_StackFrame* stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(stack)
     {
@@ -175,36 +175,36 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace( CLR_RT_HeapBlock&
         StackTrace*             dst;
         CLR_UINT32              depth;
 
-        if(CLR_RT_ExecutionEngine::IsInstanceOf( ref, g_CLR_RT_WellKnownTypes.m_Exception ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        if(CLR_RT_ExecutionEngine::IsInstanceOf( ref, g_CLR_RT_WellKnownTypes.m_Exception ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
         //--//
 
         obj   = ref.Dereference();
         depth = 0;
 
-        TINYCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,stackSub,stack)
+        NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,stackSub,stack)
         {
             depth++;
         }
-        TINYCLR_FOREACH_NODE_BACKWARD_END();
+        NANOCLR_FOREACH_NODE_BACKWARD_END();
 
         //--//
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( obj[ FIELD__m_stackTrace ], depth * sizeof(StackTrace), g_CLR_RT_WellKnownTypes.m_UInt8 ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( obj[ FIELD__m_stackTrace ], depth * sizeof(StackTrace), g_CLR_RT_WellKnownTypes.m_UInt8 ));
 
         //--//
 
         array = obj[ FIELD__m_stackTrace ].DereferenceArray();
         dst   = (StackTrace*)array->GetFirstElement();
 
-        TINYCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,stackSub,stack)
+        NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,stackSub,stack)
         {
             dst->m_md =              stackSub->m_call;
             dst->m_IP = (CLR_UINT32)(stackSub->m_IP - stackSub->m_IPstart);
 
             dst++;
         }
-        TINYCLR_FOREACH_NODE_BACKWARD_END();
+        NANOCLR_FOREACH_NODE_BACKWARD_END();
 
 #if !defined(BUILD_RTM)
         //shutting down the EE happens by Thread->Abort.  These exceptions are by design, and 
@@ -216,7 +216,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace( CLR_RT_HeapBlock&
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 CLR_RT_HeapBlock* Library_corlib_native_System_Exception::GetTarget( CLR_RT_HeapBlock& ref )

@@ -20,7 +20,7 @@ void CLR_RT_GarbageCollector::MarkStack::Initialize( MarkStackElement* ptr, size
     //
     ptr->ptr = NULL;
     ptr->num = 0;
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
     ptr->appDomain = NULL;
 #endif
 }
@@ -85,7 +85,7 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks( CLR_RT_
                 {
                     stack--;
 
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)                                 
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)                                 
                     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( stack->appDomain );
 #endif
                 }
@@ -153,7 +153,7 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks( CLR_RT_
                 stack->ptr = lst+1;
                 stack->num = num-1;
 
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION) 
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION) 
                 stack->appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 #endif                                        
             }
@@ -177,7 +177,7 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks( CLR_RT_
 
                 //--//
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 case DATATYPE_TRANSPARENT_PROXY:
                     {
                         CLR_RT_AppDomain* appDomain = ptr->TransparentProxyAppDomain();
@@ -191,7 +191,7 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks( CLR_RT_
                             }
                             else
                             {
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION) 
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION) 
                                 (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( ptr->TransparentProxyAppDomain() );
 #endif
                                 sub = ptr->TransparentProxyDereference();

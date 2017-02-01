@@ -10,7 +10,7 @@
 HRESULT CLR_RT_HeapBlock_BinaryBlob::CreateInstance( CLR_RT_HeapBlock& reference, CLR_UINT32 length, CLR_RT_MarkingHandler mark, CLR_RT_RelocationHandler relocate, CLR_UINT32 flags )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_BinaryBlob* obj = Allocate( length, flags ); CHECK_ALLOCATION(obj);
 
@@ -19,7 +19,7 @@ HRESULT CLR_RT_HeapBlock_BinaryBlob::CreateInstance( CLR_RT_HeapBlock& reference
     obj->SetBinaryBlobHandlers( mark, relocate );
     obj->m_assembly = NULL;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 CLR_RT_HeapBlock_BinaryBlob* CLR_RT_HeapBlock_BinaryBlob::Allocate( CLR_UINT32 length, CLR_UINT32 flags )

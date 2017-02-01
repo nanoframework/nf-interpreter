@@ -3,22 +3,22 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Hardware.h>
+#include <nanoCLR_Hardware.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 HRESULT CLR_HW_Hardware::CreateInstance()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
-    TINYCLR_HEADER();
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_HEADER();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT CLR_HW_Hardware::Hardware_Initialize()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
-    TINYCLR_HEADER();
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_HEADER();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
@@ -26,8 +26,8 @@ HRESULT CLR_HW_Hardware::Hardware_Initialize()
 HRESULT CLR_HW_Hardware::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
-    TINYCLR_HEADER();
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_HEADER();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 void CLR_HW_Hardware::Hardware_Cleanup()

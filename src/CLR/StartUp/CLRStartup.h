@@ -8,14 +8,14 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#include <TinyCLR_Runtime.h>
-#include <TinyCLR_Checks.h>
-//#include <TinyCLR_Diagnostics.h>
-//#include <TinyCLR_Graphics.h>
-//#include <TinyCLR_Hardware.h>
-#include <TinyCLR_Application.h>
+#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Checks.h>
+//#include <nanoCLR_Diagnostics.h>
+//#include <nanoCLR_Graphics.h>
+//#include <nanoCLR_Hardware.h>
+#include <nanoCLR_Application.h>
 //
-//#include <TinyCLR_Version.h>
+//#include <nanoCLR_Version.h>
 //
 //#include <CorLib_Native.h>
 //#include <SPOT_Native.h>

@@ -15,7 +15,7 @@ void CLR_RT_HeapBlock::InitializeToZero()
 
 //--//--//--//--//--//
 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
 HRESULT CLR_RT_HeapBlock::SetFloatIEEE754( const CLR_UINT32 arg )
 {
@@ -152,7 +152,7 @@ HRESULT CLR_RT_HeapBlock::SetDoubleIEEE754( const CLR_UINT64& arg )
 HRESULT CLR_RT_HeapBlock::EnsureObjectReference( CLR_RT_HeapBlock*& obj )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     switch(this->DataType())
     {
@@ -161,10 +161,10 @@ HRESULT CLR_RT_HeapBlock::EnsureObjectReference( CLR_RT_HeapBlock*& obj )
         {
             obj = Dereference(); FAULT_ON_NULL(obj);
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
             if(obj->DataType() == DATATYPE_TRANSPARENT_PROXY)
             {
-                TINYCLR_CHECK_HRESULT(obj->TransparentProxyValidate());
+                NANOCLR_CHECK_HRESULT(obj->TransparentProxyValidate());
                 obj = obj->TransparentProxyDereference(); FAULT_ON_NULL(obj);
             }
 #endif
@@ -176,7 +176,7 @@ HRESULT CLR_RT_HeapBlock::EnsureObjectReference( CLR_RT_HeapBlock*& obj )
             case DATATYPE_DATETIME: // Special case.
             case DATATYPE_TIMESPAN: // Special case.
 
-                TINYCLR_SET_AND_LEAVE(S_OK);
+                NANOCLR_SET_AND_LEAVE(S_OK);
             }
         }
         break;
@@ -185,12 +185,12 @@ HRESULT CLR_RT_HeapBlock::EnsureObjectReference( CLR_RT_HeapBlock*& obj )
     case DATATYPE_TIMESPAN: // Special case.
         obj = this;
 
-        TINYCLR_SET_AND_LEAVE(S_OK);
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
-    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -198,78 +198,78 @@ HRESULT CLR_RT_HeapBlock::EnsureObjectReference( CLR_RT_HeapBlock*& obj )
 HRESULT CLR_RT_HeapBlock::SetReflection( const CLR_RT_ReflectionDef_Index& reflex )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     m_id.raw          = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION,0,1);
     m_data.reflection = reflex;
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT CLR_RT_HeapBlock::SetReflection( const CLR_RT_Assembly_Index& assm )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     m_id.raw                        = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION,0,1);
     m_data.reflection.m_kind        = REFLECTION_ASSEMBLY;
     m_data.reflection.m_levels      = 0;
     m_data.reflection.m_data.m_assm = assm;
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT CLR_RT_HeapBlock::SetReflection( const CLR_RT_TypeSpec_Index& sig )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDescriptor desc;
 
-    TINYCLR_CHECK_HRESULT(desc.InitializeFromTypeSpec( sig ));
+    NANOCLR_CHECK_HRESULT(desc.InitializeFromTypeSpec( sig ));
 
     m_id.raw          = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION,0,1);
     m_data.reflection = desc.m_reflex;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::SetReflection( const CLR_RT_TypeDef_Index& cls )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     m_id.raw                        = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION,0,1);
     m_data.reflection.m_kind        = REFLECTION_TYPE;
     m_data.reflection.m_levels      = 0;
     m_data.reflection.m_data.m_type = cls;
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT CLR_RT_HeapBlock::SetReflection( const CLR_RT_FieldDef_Index& fd )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     m_id.raw                         = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION,0,1);
     m_data.reflection.m_kind         = REFLECTION_FIELD;
     m_data.reflection.m_levels       = 0;
     m_data.reflection.m_data.m_field = fd;
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT CLR_RT_HeapBlock::SetReflection( const CLR_RT_MethodDef_Index& md )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_MethodDef_Instance inst;
 
     if(inst.InitializeFromIndex( md ) == false)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     m_id.raw                          = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION,0,1);
@@ -277,25 +277,25 @@ HRESULT CLR_RT_HeapBlock::SetReflection( const CLR_RT_MethodDef_Index& md )
     m_data.reflection.m_levels        = 0;
     m_data.reflection.m_data.m_method = md;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::SetObjectCls( const CLR_RT_TypeDef_Index& cls )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance inst;
 
     if(inst.InitializeFromIndex( cls ) == false)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
     m_data.objectHeader.cls  = cls;
     m_data.objectHeader.lock = NULL;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -303,30 +303,30 @@ HRESULT CLR_RT_HeapBlock::SetObjectCls( const CLR_RT_TypeDef_Index& cls )
 HRESULT CLR_RT_HeapBlock::InitializeArrayReference( CLR_RT_HeapBlock& ref, int index )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* array;
 
     if(ref.DataType() != DATATYPE_OBJECT)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     array = ref.DereferenceArray(); FAULT_ON_NULL(array);
 
     if(array->DataType() != DATATYPE_SZARRAY)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     if(index < 0 || index >= (CLR_INT32)array->m_numOfElements)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
     }
 
     InitializeArrayReferenceDirect( *array, index );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_HeapBlock::InitializeArrayReferenceDirect( CLR_RT_HeapBlock_Array& array, int index )
@@ -366,7 +366,7 @@ void CLR_RT_HeapBlock::FixArrayReferenceForValueTypes()
 HRESULT CLR_RT_HeapBlock::LoadFromReference( CLR_RT_HeapBlock& ref )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock  tmp;
     CLR_RT_HeapBlock* obj;
@@ -393,7 +393,7 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference( CLR_RT_HeapBlock& ref )
             ((CLR_UINT32*)&NumericByRef())[ 0 ] = first;
             ((CLR_UINT32*)&NumericByRef())[ 1 ] = second;
 
-            TINYCLR_SET_AND_LEAVE(S_OK);
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
 
         //
@@ -423,9 +423,9 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference( CLR_RT_HeapBlock& ref )
             if(objT && objT->IsBoxed())
             {
                 CLR_RT_TypeDef_Instance inst;
-                if (objT->DataType() != DATATYPE_VALUETYPE) { TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE); }
+                if (objT->DataType() != DATATYPE_VALUETYPE) { NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE); }
 
-                if(!inst.InitializeFromIndex( objT->ObjectCls() )) { TINYCLR_SET_AND_LEAVE(CLR_E_TYPE_UNAVAILABLE); }
+                if(!inst.InitializeFromIndex( objT->ObjectCls() )) { NANOCLR_SET_AND_LEAVE(CLR_E_TYPE_UNAVAILABLE); }
 
                 if(inst.m_target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
                 {
@@ -436,23 +436,23 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference( CLR_RT_HeapBlock& ref )
     }
     else
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     if(obj->IsAValueType())
     {
-        TINYCLR_SET_AND_LEAVE(g_CLR_RT_ExecutionEngine.CloneObject( *this, *obj ));
+        NANOCLR_SET_AND_LEAVE(g_CLR_RT_ExecutionEngine.CloneObject( *this, *obj ));
     }
 
     this->Assign( *obj );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* obj;
     CLR_DataType      dt = ref.DataType();
@@ -484,7 +484,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
                 if(c_CLR_RT_DataTypeLookup[ this->DataType() ].m_sizeInBytes < sizeArray)
                 {
                     //Not enough precision here.
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
                    
 #if defined(_DEBUG)
@@ -492,7 +492,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
                     CLR_DataType dtElem  = (CLR_DataType)array->m_typeOfElement;
                     CLR_RT_HeapBlock blk;   blk.Assign( *this );
 
-                    TINYCLR_CHECK_HRESULT(blk.Convert( dtElem, false, (c_CLR_RT_DataTypeLookup[ dtElem ].m_flags & CLR_RT_DataTypeLookup::c_Signed) == 0));
+                    NANOCLR_CHECK_HRESULT(blk.Convert( dtElem, false, (c_CLR_RT_DataTypeLookup[ dtElem ].m_flags & CLR_RT_DataTypeLookup::c_Signed) == 0));
 
                     switch(sizeArray)
                     {
@@ -508,14 +508,14 @@ HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
             {                
                 if(obj->DataType() != array->m_typeOfElement)
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
             }
             else
             {
                 if(size != sizeArray)
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
             }
 
@@ -527,7 +527,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
             else if(sizeArray == 1) { ((CLR_UINT8 *)dst)[ 0 ] = (CLR_UINT8 )first;                                               }
             else                    { ((CLR_UINT16*)dst)[ 0 ] = (CLR_UINT16)first;                                               }
 
-            TINYCLR_SET_AND_LEAVE(S_OK);
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
         else
         {
@@ -540,18 +540,18 @@ HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
                 CLR_RT_TypeDescriptor descDst;
                 CLR_RT_TypeDescriptor descDstSub;
 
-                TINYCLR_CHECK_HRESULT(descSrc.InitializeFromObject( *this  ));
-                TINYCLR_CHECK_HRESULT(descDst.InitializeFromObject( *array )); descDst.GetElementType( descDstSub );
+                NANOCLR_CHECK_HRESULT(descSrc.InitializeFromObject( *this  ));
+                NANOCLR_CHECK_HRESULT(descDst.InitializeFromObject( *array )); descDst.GetElementType( descDstSub );
 
                 if(CLR_RT_ExecutionEngine::IsInstanceOf( descSrc, descDstSub ) == false)
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
             }
 
             obj = (CLR_RT_HeapBlock*)dst;
 
-            TINYCLR_SET_AND_LEAVE(obj->Reassign( *this ));            
+            NANOCLR_SET_AND_LEAVE(obj->Reassign( *this ));            
         }
     }
     else if(dt == DATATYPE_BYREF)
@@ -560,7 +560,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
 
         if(obj->DataType() == DATATYPE_VALUETYPE)
         {
-            TINYCLR_SET_AND_LEAVE(ref.Reassign( *this ));
+            NANOCLR_SET_AND_LEAVE(ref.Reassign( *this ));
         }
     }
     else if(c_CLR_RT_DataTypeLookup[ dt ].m_flags & CLR_RT_DataTypeLookup::c_Direct)
@@ -569,18 +569,18 @@ HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
     }
     else
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     obj->Assign( *this );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::Reassign( const CLR_RT_HeapBlock& value )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* obj;
     CLR_RT_HeapBlock  ref;
@@ -599,7 +599,7 @@ HRESULT CLR_RT_HeapBlock::Reassign( const CLR_RT_HeapBlock& value )
             obj = &ref;
         }
 
-        TINYCLR_SET_AND_LEAVE(obj->Reassign( value ));
+        NANOCLR_SET_AND_LEAVE(obj->Reassign( value ));
     }   
     else if(value.DataType() == DATATYPE_BYREF)
     {
@@ -615,13 +615,13 @@ HRESULT CLR_RT_HeapBlock::Reassign( const CLR_RT_HeapBlock& value )
             obj = &ref;
         }
 
-        TINYCLR_SET_AND_LEAVE(this->Reassign( *obj ));
+        NANOCLR_SET_AND_LEAVE(this->Reassign( *obj ));
     }
     else if(this->DataType() == DATATYPE_ARRAY_BYREF)
     {        
-        TINYCLR_CHECK_HRESULT(ref.LoadFromReference( *this     ));
-        TINYCLR_CHECK_HRESULT(ref.Reassign         ( value     ));
-        TINYCLR_SET_AND_LEAVE(ref.StoreToReference ( *this, -1 ));                
+        NANOCLR_CHECK_HRESULT(ref.LoadFromReference( *this     ));
+        NANOCLR_CHECK_HRESULT(ref.Reassign         ( value     ));
+        NANOCLR_SET_AND_LEAVE(ref.StoreToReference ( *this, -1 ));                
     }
     else if(value.DataType() == DATATYPE_ARRAY_BYREF)
     {
@@ -629,8 +629,8 @@ HRESULT CLR_RT_HeapBlock::Reassign( const CLR_RT_HeapBlock& value )
 
         CLR_RT_HeapBlock valueT; valueT.Assign( value );
 
-        TINYCLR_CHECK_HRESULT(ref.LoadFromReference( valueT ));
-        TINYCLR_SET_AND_LEAVE(this->Reassign       ( ref   ));
+        NANOCLR_CHECK_HRESULT(ref.LoadFromReference( valueT ));
+        NANOCLR_SET_AND_LEAVE(this->Reassign       ( ref   ));
     }
     else
     {
@@ -643,19 +643,19 @@ HRESULT CLR_RT_HeapBlock::Reassign( const CLR_RT_HeapBlock& value )
             // CopyValueType will take care of the boxing/unboxing
             if(fDestination != value.IsAReferenceOfThisType(DATATYPE_VALUETYPE))
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
         }
 
         if(fDestination)
         {
-            TINYCLR_SET_AND_LEAVE(g_CLR_RT_ExecutionEngine.CopyValueType( this->Dereference(), value.Dereference() ));
+            NANOCLR_SET_AND_LEAVE(g_CLR_RT_ExecutionEngine.CopyValueType( this->Dereference(), value.Dereference() ));
         }
 
         this->Assign( value );
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_HeapBlock::AssignAndPinReferencedObject( const CLR_RT_HeapBlock& value )
@@ -691,7 +691,7 @@ void CLR_RT_HeapBlock::AssignAndPinReferencedObject( const CLR_RT_HeapBlock& val
 HRESULT CLR_RT_HeapBlock::PerformBoxingIfNeeded()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
 
     // we need to box the optimized value types...
@@ -712,18 +712,18 @@ HRESULT CLR_RT_HeapBlock::PerformBoxingIfNeeded()
     {
         CLR_RT_TypeDescriptor desc;
 
-        TINYCLR_CHECK_HRESULT(desc.InitializeFromObject( *this ));
+        NANOCLR_CHECK_HRESULT(desc.InitializeFromObject( *this ));
 
-        TINYCLR_CHECK_HRESULT(PerformBoxing( desc.m_handlerCls ));
+        NANOCLR_CHECK_HRESULT(PerformBoxing( desc.m_handlerCls ));
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::PerformBoxing( const CLR_RT_TypeDef_Instance& cls )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock  tmp;
     CLR_RT_HeapBlock* obj = this;
@@ -775,20 +775,20 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing( const CLR_RT_TypeDef_Instance& cls )
 
             if(ptr->IsBoxed() || ptr->DataType() != DATATYPE_VALUETYPE)
             {
-                TINYCLR_SET_AND_LEAVE(S_FALSE); // Don't box twice...
+                NANOCLR_SET_AND_LEAVE(S_FALSE); // Don't box twice...
             }
 
-            TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject( *this, *ptr ));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject( *this, *ptr ));
 
             this->Dereference()->Box();
         }
         else
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 /*******************************************************************************************
@@ -809,13 +809,13 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing( const CLR_RT_TypeDef_Instance& cls )
 HRESULT CLR_RT_HeapBlock::PerformUnboxing( const CLR_RT_TypeDef_Instance& cls )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* src;
 
     if(this->DataType() != DATATYPE_OBJECT)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     // Finds the object that keeps the boxed type.
@@ -824,7 +824,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing( const CLR_RT_TypeDef_Instance& cls )
     // Validates that src keeps something boxed and the boxed value is VALUE type. 
     if(src->IsBoxed() == false || src->DataType() != DATATYPE_VALUETYPE)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     // Validates the type of data kept by object corresponds to type in cls.
@@ -837,13 +837,13 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing( const CLR_RT_TypeDef_Instance& cls )
         if ( !( src->DataSize() > 1  && ( src[ 1 ].DataType() == cls.m_target->dataType ) ) )  
         {
             // No luck. The types in src object and specified by cls are different. Need to throw exceptioin.
-            TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }
     }
 
     if(cls.m_target->dataType == DATATYPE_VALUETYPE)
     {
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject( *this, *this ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject( *this, *this ));
 
         this->Dereference()->Unbox();
     }
@@ -854,7 +854,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing( const CLR_RT_TypeDef_Instance& cls )
         this->ChangeDataType( cls.m_target->dataType );
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 CLR_RT_HeapBlock* CLR_RT_HeapBlock::FixBoxingReference()
@@ -1041,7 +1041,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual( const CLR_RT_HeapBlock& pArgLeft, const CLR
             }
             break;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         case DATATYPE_TRANSPARENT_PROXY:
 #endif
         case DATATYPE_OBJECT:
@@ -1214,7 +1214,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values( const CLR_RT_HeapBlock& left, const 
     {
         switch(leftDataType)
         {
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         case DATATYPE_TRANSPARENT_PROXY:
 #endif
         case DATATYPE_OBJECT:
@@ -1311,7 +1311,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values( const CLR_RT_HeapBlock& left, const 
             }
 
             //--//
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
         case DATATYPE_R4:
             if(left.NumericByRefConst().r4 > right.NumericByRefConst().r4) return  1;
@@ -1389,7 +1389,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values( const CLR_RT_HeapBlock& left, const 
             else
             {
                 CLR_Debug::Printf( "\r\n\r\nRUNTIME ERROR: comparing two values of different size: %d vs. %d!!!\r\n\r\n\r\n", leftDataType, rightDataType );
-#if defined(TINYCLR_PROFILE_NEW)
+#if defined(NANOCLR_PROFILE_NEW)
                 g_CLR_PRF_Profiler.DumpHeap();
 #endif
             }
@@ -1404,7 +1404,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values( const CLR_RT_HeapBlock& left, const 
 HRESULT CLR_RT_HeapBlock::NumericAdd( const CLR_RT_HeapBlock& right )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     switch(DataType())
     {
@@ -1417,14 +1417,14 @@ HRESULT CLR_RT_HeapBlock::NumericAdd( const CLR_RT_HeapBlock& right )
     case DATATYPE_U8: m_data.numeric.u8 += right.m_data.numeric.u8; break;
 
     case DATATYPE_R4: 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
     {
         CLR_INT32 orig = (CLR_INT32)m_data.numeric.r4;
         CLR_INT32 rhs  = (CLR_INT32)right.m_data.numeric.r4;
 #endif
         m_data.numeric.r4 += right.m_data.numeric.r4; 
 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
              if(rhs > 0 && orig > 0 && orig > (CLR_INT32)m_data.numeric.r4) { m_data.numeric.r4 =                        0x7FFFFFFF; /*return CLR_E_OUT_OF_RANGE*/ }
         else if(rhs < 0 && orig < 0 && orig < (CLR_INT32)m_data.numeric.r4) { m_data.numeric.r4 = (CLR_INT32)(CLR_UINT32)0x80000000; /*return CLR_E_OUT_OF_RANGE*/ }
     }
@@ -1432,14 +1432,14 @@ HRESULT CLR_RT_HeapBlock::NumericAdd( const CLR_RT_HeapBlock& right )
         break;
 
     case DATATYPE_R8: 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
     {
         CLR_INT64 orig = (CLR_INT64)m_data.numeric.r8;
         CLR_INT64 rhs  = (CLR_INT64)right.m_data.numeric.r8;
 #endif
         m_data.numeric.r8 += right.m_data.numeric.r8; 
 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
              if(rhs > 0 && orig > 0 && orig > (CLR_INT64)m_data.numeric.r8) { m_data.numeric.r8 = (CLR_INT64)ULONGLONGCONSTANT(0x7FFFFFFFFFFFFFFF); /*return CLR_E_OUT_OF_RANGE*/ }
         else if(rhs < 0 && orig < 0 && orig < (CLR_INT64)m_data.numeric.r8) { m_data.numeric.r8 = (CLR_INT64)ULONGLONGCONSTANT(0x8000000000000000); /*return CLR_E_OUT_OF_RANGE*/ }
     }
@@ -1457,16 +1457,16 @@ HRESULT CLR_RT_HeapBlock::NumericAdd( const CLR_RT_HeapBlock& right )
     }
     break;
 
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::NumericSub( const CLR_RT_HeapBlock& right )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     switch(DataType())
     {
@@ -1479,14 +1479,14 @@ HRESULT CLR_RT_HeapBlock::NumericSub( const CLR_RT_HeapBlock& right )
     case DATATYPE_I8: m_data.numeric.s8 -= right.m_data.numeric.s8; break;
 
     case DATATYPE_R4: 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
     {
         CLR_INT32 orig = (CLR_INT32)m_data.numeric.r8;
         CLR_INT32 rhs  = (CLR_INT32)right.m_data.numeric.r4;
 #endif
         m_data.numeric.r4 -= right.m_data.numeric.r4; 
 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
              if(rhs < 0 && orig > 0 && orig > (CLR_INT32)m_data.numeric.r4) { m_data.numeric.r4 =                        0x7FFFFFFF; /*return CLR_E_OUT_OF_RANGE*/ }
         else if(rhs > 0 && orig < 0 && orig < (CLR_INT32)m_data.numeric.r4) { m_data.numeric.r4 = (CLR_INT32)(CLR_UINT32)0x80000000; /*return CLR_E_OUT_OF_RANGE*/ }
     }
@@ -1495,7 +1495,7 @@ HRESULT CLR_RT_HeapBlock::NumericSub( const CLR_RT_HeapBlock& right )
         break;
 
     case DATATYPE_R8: 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
     {
         CLR_INT64 orig = (CLR_INT64)m_data.numeric.r8;
         CLR_INT64 rhs  = (CLR_INT64)right.m_data.numeric.r8;
@@ -1503,7 +1503,7 @@ HRESULT CLR_RT_HeapBlock::NumericSub( const CLR_RT_HeapBlock& right )
 
         m_data.numeric.r8 -= right.m_data.numeric.r8; 
 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
              if(rhs < 0 && orig > 0 && orig > (CLR_INT64)m_data.numeric.r8) { m_data.numeric.r8 = (CLR_INT64)ULONGLONGCONSTANT(0x7FFFFFFFFFFFFFFF); /*return CLR_E_OUT_OF_RANGE*/ }
         else if(rhs > 0 && orig < 0 && orig < (CLR_INT64)m_data.numeric.r8) { m_data.numeric.r8 = (CLR_INT64)ULONGLONGCONSTANT(0x8000000000000000); /*return CLR_E_OUT_OF_RANGE*/ }
     }
@@ -1521,16 +1521,16 @@ HRESULT CLR_RT_HeapBlock::NumericSub( const CLR_RT_HeapBlock& right )
         m_data.arrayReference.index -= right.m_data.numeric.s4 / array->m_sizeOfElement;
     }
     break;
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::NumericMul( const CLR_RT_HeapBlock& right )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     switch(DataType())
     {
@@ -1543,14 +1543,14 @@ HRESULT CLR_RT_HeapBlock::NumericMul( const CLR_RT_HeapBlock& right )
     case DATATYPE_I8: m_data.numeric.s8 = m_data.numeric.s8 * right.m_data.numeric.s8; break;
 
     case DATATYPE_R4: 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
     {
         CLR_INT32 orig = (CLR_INT32)m_data.numeric.r4;
         CLR_INT32 rhs;
 #endif
         m_data.numeric.r4 = m_data.numeric.r4 * right.m_data.numeric.r4; 
 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
         rhs = (CLR_INT32)right.m_data.numeric.r4;
 
         if(orig != 0 && rhs != 0)
@@ -1568,14 +1568,14 @@ HRESULT CLR_RT_HeapBlock::NumericMul( const CLR_RT_HeapBlock& right )
         break;
 
     case DATATYPE_R8: 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
     {
         CLR_INT64 orig = (CLR_INT64)m_data.numeric.r8;
         CLR_INT64 rhs;
 #endif
         m_data.numeric.r8 = m_data.numeric.r8 * right.m_data.numeric.r8; 
 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
         rhs = (CLR_INT64)right.m_data.numeric.r8;
 
         if(orig != 0 && rhs != 0)
@@ -1592,19 +1592,19 @@ HRESULT CLR_RT_HeapBlock::NumericMul( const CLR_RT_HeapBlock& right )
 #endif
         break;
 
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::NumericDiv( const CLR_RT_HeapBlock& right )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    if(right.IsZero()) TINYCLR_SET_AND_LEAVE(CLR_E_DIVIDE_BY_ZERO);
+    if(right.IsZero()) NANOCLR_SET_AND_LEAVE(CLR_E_DIVIDE_BY_ZERO);
 
     switch(DataType())
     {
@@ -1618,18 +1618,18 @@ HRESULT CLR_RT_HeapBlock::NumericDiv( const CLR_RT_HeapBlock& right )
 
     case DATATYPE_R8: m_data.numeric.r8 = m_data.numeric.r8 / right.m_data.numeric.r8; break;
 
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::NumericDivUn( const CLR_RT_HeapBlock& right )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    if(right.IsZero()) TINYCLR_SET_AND_LEAVE(CLR_E_DIVIDE_BY_ZERO);
+    if(right.IsZero()) NANOCLR_SET_AND_LEAVE(CLR_E_DIVIDE_BY_ZERO);
 
     switch(DataType())
     {
@@ -1639,18 +1639,18 @@ HRESULT CLR_RT_HeapBlock::NumericDivUn( const CLR_RT_HeapBlock& right )
     case DATATYPE_I8:
     case DATATYPE_U8:m_data.numeric.u8 = m_data.numeric.u8 / right.m_data.numeric.u8; break;
 
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::NumericRem( const CLR_RT_HeapBlock& right )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    if(right.IsZero()) TINYCLR_SET_AND_LEAVE(CLR_E_DIVIDE_BY_ZERO);
+    if(right.IsZero()) NANOCLR_SET_AND_LEAVE(CLR_E_DIVIDE_BY_ZERO);
 
     switch(DataType())
     {
@@ -1662,7 +1662,7 @@ HRESULT CLR_RT_HeapBlock::NumericRem( const CLR_RT_HeapBlock& right )
 
     case DATATYPE_I8: m_data.numeric.s8 %=                          right.m_data.numeric.s8  ; break;
 
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
     case DATATYPE_R4: m_data.numeric.r4  = fmod( m_data.numeric.r4, right.m_data.numeric.r4 ); break;
 
@@ -1677,18 +1677,18 @@ HRESULT CLR_RT_HeapBlock::NumericRem( const CLR_RT_HeapBlock& right )
 #endif
 
 
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::NumericRemUn( const CLR_RT_HeapBlock& right )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    if(right.IsZero()) TINYCLR_SET_AND_LEAVE(CLR_E_DIVIDE_BY_ZERO);
+    if(right.IsZero()) NANOCLR_SET_AND_LEAVE(CLR_E_DIVIDE_BY_ZERO);
 
     switch(DataType())
     {
@@ -1698,16 +1698,16 @@ HRESULT CLR_RT_HeapBlock::NumericRemUn( const CLR_RT_HeapBlock& right )
     case DATATYPE_I8:
     case DATATYPE_U8: m_data.numeric.u8 %= right.m_data.numeric.u8; break;
 
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::NumericShl( const CLR_RT_HeapBlock& right )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     switch(DataType())
     {
@@ -1717,16 +1717,16 @@ HRESULT CLR_RT_HeapBlock::NumericShl( const CLR_RT_HeapBlock& right )
     case DATATYPE_I8:
     case DATATYPE_U8: m_data.numeric.u8 <<= right.m_data.numeric.u4; break;
 
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::NumericShr( const CLR_RT_HeapBlock& right )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     switch(DataType())
     {
@@ -1738,16 +1738,16 @@ HRESULT CLR_RT_HeapBlock::NumericShr( const CLR_RT_HeapBlock& right )
 
     case DATATYPE_I8: m_data.numeric.s8 >>= right.m_data.numeric.u4; break;
 
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::NumericShrUn( const CLR_RT_HeapBlock& right )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     switch(DataType())
     {
@@ -1757,16 +1757,16 @@ HRESULT CLR_RT_HeapBlock::NumericShrUn( const CLR_RT_HeapBlock& right )
     case DATATYPE_I8:
     case DATATYPE_U8: m_data.numeric.u8 >>= right.m_data.numeric.u4; break;
 
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::NumericNeg()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     switch(DataType())
     {
@@ -1782,10 +1782,10 @@ HRESULT CLR_RT_HeapBlock::NumericNeg()
 
 
 
-    default         : TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    default         : NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1830,7 +1830,7 @@ void CLR_RT_HeapBlock::WriteValue( const CLR_INT64& val, int offset )
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 
 void CLR_RT_HeapBlock::SetTransparentProxyReference( CLR_RT_AppDomain* appDomain, CLR_RT_HeapBlock* ptr)
     {
@@ -1854,19 +1854,19 @@ void CLR_RT_HeapBlock::SetTransparentProxyReference( CLR_RT_AppDomain* appDomain
 HRESULT CLR_RT_HeapBlock::TransparentProxyValidate() const
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_AppDomain* appDomain = TransparentProxyAppDomain  ();
     CLR_RT_HeapBlock* obj       = TransparentProxyDereference();
     
-    if(appDomain == NULL || !appDomain->IsLoaded()) TINYCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_EXITED);
+    if(appDomain == NULL || !appDomain->IsLoaded()) NANOCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_EXITED);
         
     FAULT_ON_NULL(obj);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
-#endif //TINYCLR_APPDOMAINS
+#endif //NANOCLR_APPDOMAINS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CLR_RT_HeapBlock::Relocate__HeapBlock()
@@ -1880,7 +1880,7 @@ void CLR_RT_HeapBlock::Relocate_String()
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_data.string.m_text );
-#if !defined(TINYCLR_NO_ASSEMBLY_STRINGS)
+#if !defined(NANOCLR_NO_ASSEMBLY_STRINGS)
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_data.string.m_assm );
 #endif
 }
@@ -1911,7 +1911,7 @@ void CLR_RT_HeapBlock::Relocate_ArrayRef()
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_data.arrayReference.array );
 }
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 void CLR_RT_HeapBlock::Relocate_TransparentProxy()
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -1921,7 +1921,7 @@ void CLR_RT_HeapBlock::Relocate_TransparentProxy()
 
 //--//
 
-#if defined(TINYCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
+#if defined(NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
 
 void CLR_RT_HeapBlock::Debug_CheckPointer() const
 {
@@ -1942,7 +1942,7 @@ void CLR_RT_HeapBlock::Debug_CheckPointer( void* ptr )
     case 0xABABABAB:
     case 0xADADADAD:
     case 0xDFDFDFDF:
-        TINYCLR_STOP();
+        NANOCLR_STOP();
         break;
     }
 }

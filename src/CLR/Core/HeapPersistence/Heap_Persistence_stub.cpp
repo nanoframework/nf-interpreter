@@ -3,7 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Runtime.h>
+#include <nanoCLR_Runtime.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -241,40 +241,40 @@ CLR_UINT32 CLR_RT_HeapBlock_WeakReference_Identity::ComputeCRC( const CLR_UINT8*
 HRESULT CLR_RT_HeapBlock_WeakReference::CreateInstance( CLR_RT_HeapBlock_WeakReference*& weakref )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     weakref = (CLR_RT_HeapBlock_WeakReference*)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects( DATATYPE_WEAKCLASS, CLR_RT_HeapBlock::HB_InitializeToZero, sizeof(*weakref) );
 
     CHECK_ALLOCATION(weakref);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_WeakReference::SetTarget( CLR_RT_HeapBlock& targetReference )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     //
     // Only classes and value types can be associated with a weak reference!
     //
-    if(targetReference.DataType() != DATATYPE_OBJECT) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if(targetReference.DataType() != DATATYPE_OBJECT) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
     m_targetDirect = targetReference.Dereference();
     
     InsertInPriorityOrder();
     
-    TINYCLR_NOCLEANUP();        
+    NANOCLR_NOCLEANUP();        
 }
 
 HRESULT CLR_RT_HeapBlock_WeakReference::GetTarget( CLR_RT_HeapBlock& targetReference )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     targetReference.SetObjectReference( m_targetDirect );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 void CLR_RT_HeapBlock_WeakReference::InsertInPriorityOrder()
@@ -356,7 +356,7 @@ bool CLR_RT_HeapBlock_WeakReference::PrepareForRecovery( CLR_RT_HeapBlock_Node* 
 void CLR_RT_HeapBlock_WeakReference::RecoverObjects( CLR_RT_DblLinkedList& lstHeap )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,lstHeap)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,lstHeap)
     {
         CLR_RT_HeapBlock_Node* ptr = hc->m_payloadStart;
         CLR_RT_HeapBlock_Node* end = hc->m_payloadEnd;
@@ -368,7 +368,7 @@ void CLR_RT_HeapBlock_WeakReference::RecoverObjects( CLR_RT_DblLinkedList& lstHe
                 CLR_RT_HeapBlock_WeakReference* weak   = (CLR_RT_HeapBlock_WeakReference*)ptr;
                 CLR_RT_HeapBlock*               target = weak->m_targetSerialized;
 
-                TINYCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc2,lstHeap)
+                NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc2,lstHeap)
                 {
                     CLR_RT_HeapBlock_Node* ptr2 = hc2->m_payloadStart;
                     CLR_RT_HeapBlock_Node* end2 = hc2->m_payloadEnd;
@@ -402,7 +402,7 @@ void CLR_RT_HeapBlock_WeakReference::RecoverObjects( CLR_RT_DblLinkedList& lstHe
                         if(ptr2 < end2) break;
                     }
                 }
-                TINYCLR_FOREACH_NODE_END();
+                NANOCLR_FOREACH_NODE_END();
 
                 if(weak)
                 {
@@ -413,6 +413,6 @@ void CLR_RT_HeapBlock_WeakReference::RecoverObjects( CLR_RT_DblLinkedList& lstHe
             ptr += ptr->DataSize();
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 

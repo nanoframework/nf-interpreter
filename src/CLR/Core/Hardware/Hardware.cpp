@@ -3,26 +3,26 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Hardware.h>
+#include <nanoCLR_Hardware.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 HRESULT CLR_HW_Hardware::CreateInstance()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CLEAR(g_CLR_HW_Hardware);
+    NANOCLR_CLEAR(g_CLR_HW_Hardware);
 
     g_CLR_HW_Hardware.m_fInitialized = false;
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT CLR_HW_Hardware::Hardware_Initialize()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_fInitialized == false)
     {
@@ -37,7 +37,7 @@ HRESULT CLR_HW_Hardware::Hardware_Initialize()
         m_DebuggerEventsMask  = 0;
         m_MessagingEventsMask = 0;
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         for(int i = 0; i < HalSystemConfig.c_MaxDebuggers; i++)
         {
             m_DebuggerEventsMask |= ExtractEventFromTransport( HalSystemConfig.DebuggerPorts[ i ] );
@@ -55,7 +55,7 @@ HRESULT CLR_HW_Hardware::Hardware_Initialize()
         m_fInitialized = true;
     }
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
@@ -63,11 +63,11 @@ HRESULT CLR_HW_Hardware::Hardware_Initialize()
 HRESULT CLR_HW_Hardware::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     g_CLR_HW_Hardware.Hardware_Cleanup();
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 void CLR_HW_Hardware::Hardware_Cleanup()
@@ -95,7 +95,7 @@ void CLR_HW_Hardware::ProcessActivity()
         if(!HAL_CONTINUATION::Dequeue_And_Execute()) break;
     }
 
-    TINYCLR_FOREACH_MESSAGING(msg)
+    NANOCLR_FOREACH_MESSAGING(msg)
     {
         if(!msg.IsDebuggerInitialized())
         {
@@ -103,33 +103,33 @@ void CLR_HW_Hardware::ProcessActivity()
         }
         msg.PurgeCache();
     }
-    TINYCLR_FOREACH_MESSAGING_END();
+    NANOCLR_FOREACH_MESSAGING_END();
     
-    TINYCLR_FOREACH_DEBUGGER(dbg)
+    NANOCLR_FOREACH_DEBUGGER(dbg)
     {
         dbg.PurgeCache();
     }
-    TINYCLR_FOREACH_DEBUGGER_END();
+    NANOCLR_FOREACH_DEBUGGER_END();
 
     UINT32 events    = ::Events_Get( m_wakeupEvents );    
     UINT32 eventsCLR = 0;
 
     if(events & m_MessagingEventsMask)
     {
-        TINYCLR_FOREACH_MESSAGING(msg)
+        NANOCLR_FOREACH_MESSAGING(msg)
         {
             msg.ProcessCommands();
         }
-        TINYCLR_FOREACH_MESSAGING_END();
+        NANOCLR_FOREACH_MESSAGING_END();
     }
 
     if(events & m_DebuggerEventsMask)
     {
-        TINYCLR_FOREACH_DEBUGGER(dbg)
+        NANOCLR_FOREACH_DEBUGGER(dbg)
         {
             dbg.ProcessCommands();
         }
-        TINYCLR_FOREACH_DEBUGGER_END();
+        NANOCLR_FOREACH_DEBUGGER_END();
 
 #if defined(PLATFORM_ARM)
         if(CLR_EE_DBG_IS(RebootPending))
@@ -157,9 +157,9 @@ void CLR_HW_Hardware::ProcessActivity()
     //}
 
     if((events & SYSTEM_EVENT_HW_INTERRUPT)
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         || (!CLR_EE_DBG_IS(Stopped) && !g_CLR_HW_Hardware.m_interruptData.m_applicationQueue.IsEmpty())
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         )
     {
         ProcessInterrupts();

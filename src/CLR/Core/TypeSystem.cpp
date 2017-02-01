@@ -16,45 +16,45 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(_WIN32)
-#define TINYCLR_TRACE_DEFAULT(win,arm) (win)
+#define NANOCLR_TRACE_DEFAULT(win,arm) (win)
 #else
-#define TINYCLR_TRACE_DEFAULT(win,arm) (arm)
+#define NANOCLR_TRACE_DEFAULT(win,arm) (arm)
 #endif
 
-#if defined(TINYCLR_TRACE_ERRORS)
-int s_CLR_RT_fTrace_Errors                     = TINYCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_Info);
+#if defined(NANOCLR_TRACE_ERRORS)
+int s_CLR_RT_fTrace_Errors                     = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_Info);
 #endif
 
-#if defined(TINYCLR_TRACE_EXCEPTIONS)
-int s_CLR_RT_fTrace_Exceptions                 = TINYCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_Info);
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
+int s_CLR_RT_fTrace_Exceptions                 = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_Info);
 #endif
 
-#if defined(TINYCLR_TRACE_INSTRUCTIONS)
-int s_CLR_RT_fTrace_Instructions               = TINYCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None,c_CLR_RT_Trace_None);
+#if defined(NANOCLR_TRACE_INSTRUCTIONS)
+int s_CLR_RT_fTrace_Instructions               = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None,c_CLR_RT_Trace_None);
 #endif
 
-#if defined(TINYCLR_GC_VERBOSE)
-int s_CLR_RT_fTrace_Memory                     = TINYCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None,c_CLR_RT_Trace_None);
+#if defined(NANOCLR_GC_VERBOSE)
+int s_CLR_RT_fTrace_Memory                     = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None,c_CLR_RT_Trace_None);
 #endif
 
-#if defined(TINYCLR_TRACE_MEMORY_STATS)
-int s_CLR_RT_fTrace_MemoryStats                = TINYCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_Info);
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+int s_CLR_RT_fTrace_MemoryStats                = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_Info);
 #endif
 
-#if defined(TINYCLR_GC_VERBOSE)
-int s_CLR_RT_fTrace_GC                         = TINYCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None,c_CLR_RT_Trace_None);
+#if defined(NANOCLR_GC_VERBOSE)
+int s_CLR_RT_fTrace_GC                         = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None,c_CLR_RT_Trace_None);
 #endif
 
 #if defined(WIN32)
-int s_CLR_RT_fTrace_SimulateSpeed              = TINYCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_SimulateSpeed              = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_None);
 #endif
 
 #if !defined(BUILD_RTM)
-int s_CLR_RT_fTrace_AssemblyOverhead           = TINYCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_AssemblyOverhead           = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_None);
 #endif
 
 #if defined(WIN32)
-int s_CLR_RT_fTrace_StopOnFAILED               = TINYCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None,c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_StopOnFAILED               = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None,c_CLR_RT_Trace_None);
 #endif
 
 #if defined(WIN32)
@@ -312,7 +312,7 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
     // If you change this method, change "CLR_RT_ExecutionEngine::InitializeLocals" too.
     //
 
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     _ASSERTE(m_count > 0);
 
@@ -331,7 +331,7 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
 
             if(cls.ResolveToken( CLR_TkFromStream( m_sig ), m_assm ) == false)
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
 
             res.m_cls = cls;
@@ -352,10 +352,10 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
                 }
                 if(ptr->DataType() != DATATYPE_REFLECTION)
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
 
-                TINYCLR_CHECK_HRESULT(desc.InitializeFromReflection( ptr->ReflectionDataConst() ));
+                NANOCLR_CHECK_HRESULT(desc.InitializeFromReflection( ptr->ReflectionDataConst() ));
             }
             else
             {
@@ -367,7 +367,7 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
                     break;
                 }
 
-                TINYCLR_CHECK_HRESULT(desc.InitializeFromObject( *ptr ));
+                NANOCLR_CHECK_HRESULT(desc.InitializeFromObject( *ptr ));
             }
 
             desc.m_handlerCls.InitializeFromIndex( desc.m_reflex.m_data.m_type );
@@ -396,7 +396,7 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
             case DATATYPE_BYREF:
                 if(res.m_fByRef)
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
 
                 res.m_fByRef = true;
@@ -416,7 +416,7 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
                         CLR_RT_SignatureParser sub; sub.Initialize_TypeSpec( m_assm, m_assm->GetTypeSpec( CLR_DataFromTk( tk ) ) );
                         int                    extraLevels = res.m_levels;
 
-                        TINYCLR_CHECK_HRESULT(sub.Advance( res ));
+                        NANOCLR_CHECK_HRESULT(sub.Advance( res ));
 
                         res.m_levels += extraLevels;
                     }
@@ -426,24 +426,24 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
 
                         if(cls.ResolveToken( tk, m_assm ) == false)
                         {
-                            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         }
 
                         res.m_cls = cls;
                     }
 
-                    TINYCLR_SET_AND_LEAVE(S_OK);
+                    NANOCLR_SET_AND_LEAVE(S_OK);
                 }
 
             case DATATYPE_OBJECT:
                 res.m_cls = g_CLR_RT_WellKnownTypes.m_Object;
 
-                TINYCLR_SET_AND_LEAVE(S_OK);
+                NANOCLR_SET_AND_LEAVE(S_OK);
 
             case DATATYPE_VOID:
                 res.m_cls = g_CLR_RT_WellKnownTypes.m_Void;
 
-                TINYCLR_SET_AND_LEAVE(S_OK);
+                NANOCLR_SET_AND_LEAVE(S_OK);
 
             default:
                 {
@@ -452,11 +452,11 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
                     if(cls)
                     {
                         res.m_cls = *cls;
-                        TINYCLR_SET_AND_LEAVE(S_OK);
+                        NANOCLR_SET_AND_LEAVE(S_OK);
                     }
                     else
                     {
-                        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
                 }
             }
@@ -464,7 +464,7 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
         break;
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -472,7 +472,7 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
 bool CLR_RT_Assembly_Instance::InitializeFromIndex( const CLR_RT_Assembly_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(TINYCLR_INDEX_IS_VALID(idx))
+    if(NANOCLR_INDEX_IS_VALID(idx))
     {
         m_data = idx.m_data;
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
@@ -499,7 +499,7 @@ void CLR_RT_Assembly_Instance::Clear()
 bool CLR_RT_TypeSpec_Instance::InitializeFromIndex( const CLR_RT_TypeSpec_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(TINYCLR_INDEX_IS_VALID(idx))
+    if(NANOCLR_INDEX_IS_VALID(idx))
     {
         m_data   =                       idx.m_data;
         m_assm   =                       g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ]       ;
@@ -581,7 +581,7 @@ bool CLR_RT_TypeDef_Instance::InitializeFromReflection( const CLR_RT_ReflectionD
 bool CLR_RT_TypeDef_Instance::InitializeFromIndex( const CLR_RT_TypeDef_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(TINYCLR_INDEX_IS_VALID(idx))
+    if(NANOCLR_INDEX_IS_VALID(idx))
     {
         m_data   = idx.m_data;
         m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
@@ -600,7 +600,7 @@ bool CLR_RT_TypeDef_Instance::InitializeFromIndex( const CLR_RT_TypeDef_Index& i
 bool CLR_RT_TypeDef_Instance::InitializeFromMethod( const CLR_RT_MethodDef_Instance& md  )
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(TINYCLR_INDEX_IS_VALID(md))
+    if(NANOCLR_INDEX_IS_VALID(md))
     {
         CLR_IDX idxAssm = md.Assembly();
         CLR_IDX idxType = md.CrossReference().GetOwner();
@@ -621,7 +621,7 @@ bool CLR_RT_TypeDef_Instance::InitializeFromMethod( const CLR_RT_MethodDef_Insta
 bool CLR_RT_TypeDef_Instance::InitializeFromField( const CLR_RT_FieldDef_Instance& fd )
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(TINYCLR_INDEX_IS_VALID(fd))
+    if(NANOCLR_INDEX_IS_VALID(fd))
     {
         CLR_RT_Assembly*          assm     = fd.m_assm;
         const CLR_RECORD_TYPEDEF* td       = (const CLR_RECORD_TYPEDEF*)assm->GetTable( TBL_TypeDef );
@@ -717,7 +717,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken( CLR_UINT32 tk, CLR_RT_Assembly* assm
 bool CLR_RT_TypeDef_Instance::SwitchToParent()
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(TINYCLR_INDEX_IS_VALID(*this))
+    if(NANOCLR_INDEX_IS_VALID(*this))
     {
         CLR_IDX extends = m_target->extends;
 
@@ -749,7 +749,7 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
 bool CLR_RT_TypeDef_Instance::HasFinalizer() const
 {
     NATIVE_PROFILE_CLR_CORE();
-    return TINYCLR_INDEX_IS_VALID(*this) && (CrossReference().m_flags & CLR_RT_TypeDef_CrossReference::TD_CR_HasFinalizer);
+    return NANOCLR_INDEX_IS_VALID(*this) && (CrossReference().m_flags & CLR_RT_TypeDef_CrossReference::TD_CR_HasFinalizer);
 }
 
 //////////////////////////////
@@ -757,7 +757,7 @@ bool CLR_RT_TypeDef_Instance::HasFinalizer() const
 bool CLR_RT_FieldDef_Instance::InitializeFromIndex( const CLR_RT_FieldDef_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(TINYCLR_INDEX_IS_VALID(idx))
+    if(NANOCLR_INDEX_IS_VALID(idx))
     {
         m_data   = idx.m_data;
         m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
@@ -816,7 +816,7 @@ bool CLR_RT_FieldDef_Instance::ResolveToken( CLR_UINT32 tk, CLR_RT_Assembly* ass
 bool CLR_RT_MethodDef_Instance::InitializeFromIndex( const CLR_RT_MethodDef_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(TINYCLR_INDEX_IS_VALID(idx))
+    if(NANOCLR_INDEX_IS_VALID(idx))
     {
         m_data   = idx.m_data;
         m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
@@ -884,11 +884,11 @@ void CLR_RT_TypeDescriptor::TypeDescriptor_Initialize()
 HRESULT CLR_RT_TypeDescriptor::InitializeFromDataType( CLR_DataType dt )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(dt >= DATATYPE_FIRST_INVALID)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
     else
     {
@@ -900,7 +900,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromDataType( CLR_DataType dt )
         {
             if(m_handlerCls.InitializeFromIndex( *dtl.m_cls ) == false)
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
 
             m_reflex.m_kind        = REFLECTION_TYPE;
@@ -909,27 +909,27 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromDataType( CLR_DataType dt )
         }
         else
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromReflection( const CLR_RT_ReflectionDef_Index& reflex )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance inst;
     CLR_UINT32              levels;
 
     if(inst.InitializeFromReflection( reflex, &levels ) == false)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_CHECK_HRESULT(InitializeFromType( inst ));
+    NANOCLR_CHECK_HRESULT(InitializeFromType( inst ));
 
     if(levels)
     {
@@ -938,37 +938,37 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromReflection( const CLR_RT_Reflection
         ConvertToArray();
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromTypeSpec( const CLR_RT_TypeSpec_Index& sig )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeSpec_Instance inst;
     CLR_RT_SignatureParser   parser;
 
     if(inst.InitializeFromIndex( sig ) == false)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     parser.Initialize_TypeSpec( inst.m_assm, inst.m_target );
 
-    TINYCLR_SET_AND_LEAVE(InitializeFromSignatureParser( parser ));
+    NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser( parser ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromType( const CLR_RT_TypeDef_Index& cls )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_handlerCls.InitializeFromIndex( cls ) == false)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
     else
     {
@@ -1009,36 +1009,36 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromType( const CLR_RT_TypeDef_Index& c
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition( const CLR_RT_FieldDef_Instance& fd )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_SignatureParser parser; parser.Initialize_FieldDef( fd.m_assm, fd.m_target );
 
-    TINYCLR_SET_AND_LEAVE(InitializeFromSignatureParser( parser ));
+    NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser( parser ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser( CLR_RT_SignatureParser& parser )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_SignatureParser::Element res;
 
     if(parser.Available() <= 0)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
-    TINYCLR_CHECK_HRESULT(parser.Advance( res ));
+    NANOCLR_CHECK_HRESULT(parser.Advance( res ));
 
-    TINYCLR_CHECK_HRESULT(InitializeFromType( res.m_cls ));
+    NANOCLR_CHECK_HRESULT(InitializeFromType( res.m_cls ));
 
     if(res.m_levels)
     {
@@ -1047,13 +1047,13 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser( CLR_RT_SignaturePa
         ConvertToArray();
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromObject( const CLR_RT_HeapBlock& ref )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     const CLR_RT_HeapBlock* obj = &ref;
     CLR_DataType            dt;
@@ -1068,10 +1068,10 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject( const CLR_RT_HeapBlock& ref
         {
             obj = obj->Dereference(); FAULT_ON_NULL(obj);
         }
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         else if(dt == DATATYPE_TRANSPARENT_PROXY)
         {
-            TINYCLR_CHECK_HRESULT(obj->TransparentProxyValidate());
+            NANOCLR_CHECK_HRESULT(obj->TransparentProxyValidate());
             obj = obj->TransparentProxyDereference();
         }
 #endif
@@ -1101,7 +1101,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject( const CLR_RT_HeapBlock& ref
             {
                 CLR_RT_HeapBlock_Delegate* dlg = (CLR_RT_HeapBlock_Delegate*)obj;
 
-                cls = TINYCLR_INDEX_IS_VALID(dlg->m_cls) ? &dlg->m_cls : &g_CLR_RT_WellKnownTypes.m_Delegate;
+                cls = NANOCLR_INDEX_IS_VALID(dlg->m_cls) ? &dlg->m_cls : &g_CLR_RT_WellKnownTypes.m_Delegate;
             }
             break;
 
@@ -1109,7 +1109,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject( const CLR_RT_HeapBlock& ref
             {
                 CLR_RT_HeapBlock_Delegate_List* dlgLst = (CLR_RT_HeapBlock_Delegate_List*)obj;
 
-                cls = TINYCLR_INDEX_IS_VALID(dlgLst->m_cls) ? &dlgLst->m_cls : &g_CLR_RT_WellKnownTypes.m_MulticastDelegate;
+                cls = NANOCLR_INDEX_IS_VALID(dlgLst->m_cls) ? &dlgLst->m_cls : &g_CLR_RT_WellKnownTypes.m_MulticastDelegate;
             }
             break;
 
@@ -1157,7 +1157,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject( const CLR_RT_HeapBlock& ref
                 {
                     obj = (CLR_RT_HeapBlock*)array->GetElement( obj->ArrayIndex() );
 
-                    TINYCLR_SET_AND_LEAVE(InitializeFromObject( *obj ));
+                    NANOCLR_SET_AND_LEAVE(InitializeFromObject( *obj ));
                 }
 
                 reflex = &array->ReflectionDataConst();
@@ -1168,12 +1168,12 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject( const CLR_RT_HeapBlock& ref
         //--//
 
         default:
-            TINYCLR_SET_AND_LEAVE(InitializeFromDataType( dt ));
+            NANOCLR_SET_AND_LEAVE(InitializeFromDataType( dt ));
         }
 
         if(cls)
         {
-            TINYCLR_CHECK_HRESULT(InitializeFromType( *cls ));
+            NANOCLR_CHECK_HRESULT(InitializeFromType( *cls ));
         }
 
         if(reflex)
@@ -1187,7 +1187,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject( const CLR_RT_HeapBlock& ref
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////
@@ -1249,7 +1249,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractObjectAndDataType( CLR_RT_HeapBlock*& ref,
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     while(true)
     {
@@ -1266,7 +1266,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractObjectAndDataType( CLR_RT_HeapBlock*& ref,
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 
@@ -1274,12 +1274,12 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( const CLR_RT_HeapBloc
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* obj = (CLR_RT_HeapBlock*)&ref;
     CLR_DataType            dt;
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+    NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
     if(dt == DATATYPE_VALUETYPE || dt == DATATYPE_CLASS)
     {
@@ -1299,22 +1299,22 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( const CLR_RT_HeapBloc
         }
     }
 
-    if(TINYCLR_INDEX_IS_INVALID(res))
+    if(NANOCLR_INDEX_IS_INVALID(res))
     {
         CLR_RT_TypeDescriptor desc;
 
-        TINYCLR_CHECK_HRESULT(desc.InitializeFromObject( ref ))
+        NANOCLR_CHECK_HRESULT(desc.InitializeFromObject( ref ))
         
         // If desc.InitializeFromObject( ref ) call succeded, then we use m_handlerCls for res
         res = desc.m_handlerCls;
 
-        if(TINYCLR_INDEX_IS_INVALID(res))
+        if(NANOCLR_INDEX_IS_INVALID(res))
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1480,7 +1480,7 @@ void CLR_RT_Assembly::Assembly_Initialize( CLR_RT_Assembly::Offsets& offsets )
     m_pCrossReference_FieldDef    = (CLR_RT_FieldDef_CrossReference   *)buffer; buffer += offsets.iFieldDef      ;
     m_pCrossReference_MethodDef   = (CLR_RT_MethodDef_CrossReference  *)buffer; buffer += offsets.iMethodDef     ;
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
     m_pStaticFields               = (CLR_RT_HeapBlock                 *)buffer; buffer += offsets.iStaticFields  ;
 
     memset( m_pStaticFields, 0, offsets.iStaticFields );
@@ -1511,13 +1511,13 @@ void CLR_RT_Assembly::Assembly_Initialize( CLR_RT_Assembly::Offsets& offsets )
         }
     }
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     {
         m_pDebuggingInfo_MethodDef = (CLR_RT_MethodDef_DebuggingInfo*)buffer; buffer += offsets.iDebuggingInfoMethods;
 
         memset( m_pDebuggingInfo_MethodDef, 0, offsets.iDebuggingInfoMethods );
     }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 }
 
 HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_RT_Assembly*& assm )
@@ -1526,14 +1526,14 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
     //
     // We have to use this trick, otherwise the C++ compiler will try to all the constructor for Assembly.
     //
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_UINT8        buf[ sizeof(CLR_RT_Assembly) ];
     CLR_RT_Assembly* skeleton = (CLR_RT_Assembly*)buf;
 
-    TINYCLR_CLEAR(*skeleton);
+    NANOCLR_CLEAR(*skeleton);
 
-    if(header->GoodAssembly() == false) TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    if(header->GoodAssembly() == false) NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
 
     skeleton->m_header = header;
 
@@ -1590,16 +1590,16 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
 
         if(skeleton->m_header->numOfPatchedMethods > 0)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_ASSM_PATCHING_NOT_SUPPORTED);
+            NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_PATCHING_NOT_SUPPORTED);
         }
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
         offsets.iStaticFields         = ROUNDTOMULTIPLE(skeleton->m_iStaticFields                * sizeof(CLR_RT_HeapBlock                 ), CLR_UINT32);
 #endif
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         offsets.iDebuggingInfoMethods = ROUNDTOMULTIPLE(skeleton->m_pTablesSize[ TBL_MethodDef ] * sizeof(CLR_RT_MethodDef_DebuggingInfo   ), CLR_UINT32);
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         size_t iTotalRamSize = offsets.iBase           +
                                offsets.iAssemblyRef    +
@@ -1610,13 +1610,13 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
                                offsets.iFieldDef       +
                                offsets.iMethodDef;
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
         iTotalRamSize += offsets.iStaticFields;
 #endif
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         iTotalRamSize += offsets.iDebuggingInfoMethods;
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         //--//
 
@@ -1660,7 +1660,7 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
             CLR_Debug::Printf( "   TypeDef        = %8d bytes (%8d elements)\r\n", offsets.iTypeDef       , skeleton->m_pTablesSize[ TBL_TypeDef     ] );
             CLR_Debug::Printf( "   FieldDef       = %8d bytes (%8d elements)\r\n", offsets.iFieldDef      , skeleton->m_pTablesSize[ TBL_FieldDef    ] );
             CLR_Debug::Printf( "   MethodDef      = %8d bytes (%8d elements)\r\n", offsets.iMethodDef     , skeleton->m_pTablesSize[ TBL_MethodDef   ] );
-#if !defined(TINYCLR_APPDOMAINS) 
+#if !defined(NANOCLR_APPDOMAINS) 
             CLR_Debug::Printf( "   StaticFields   = %8d bytes (%8d elements)\r\n", offsets.iStaticFields  , skeleton->m_iStaticFields                );
 #endif
             CLR_Debug::Printf( "\r\n" );
@@ -1678,7 +1678,7 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
 #endif
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 
@@ -1686,11 +1686,11 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
 HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_RT_Assembly*& assm, LPCWSTR szName )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     std::string strPath;
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance( header, assm ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance( header, assm ));
 
     if(szName != NULL)
     {
@@ -1699,7 +1699,7 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
         assm->m_strPath = new std::string( strPath );
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 #endif
 
@@ -1778,7 +1778,7 @@ void CLR_RT_Assembly::DestroyInstance()
 HRESULT CLR_RT_Assembly::Resolve_TypeRef()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     int i;
 
@@ -1793,7 +1793,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf( "Resolve: unknown scope: %08x\r\n", src->scope );
 #endif
-                TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
             LPCSTR szName = GetString( src->name );
@@ -1803,7 +1803,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
                 CLR_Debug::Printf( "Resolve: unknown type: %s\r\n", szName );
 #endif
 
-                TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
         }
         else
@@ -1811,7 +1811,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
             CLR_RT_Assembly* assm = m_pCrossReference_AssemblyRef[ src->scope ].m_target;
             if(assm == NULL)
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
             LPCSTR szNameSpace = GetString( src->nameSpace );
@@ -1822,18 +1822,18 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
                 CLR_Debug::Printf( "Resolve: unknown type: %s.%s\r\n", szNameSpace, szName );
 #endif
 
-                TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_Assembly::Resolve_FieldRef()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     int i;
 
@@ -1847,7 +1847,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
             CLR_Debug::Printf( "Resolve Field: unknown scope: %08x\r\n", src->container );
 #endif
 
-            TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
         LPCSTR szName = GetString( src->name );
@@ -1858,17 +1858,17 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
             CLR_Debug::Printf( "Resolve: unknown field: %s\r\n", szName );
 #endif
 
-            TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     int i;
 
@@ -1882,13 +1882,13 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             CLR_Debug::Printf( "Resolve Field: unknown scope: %08x\r\n", src->container );
 #endif
 
-            TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
         LPCSTR name = GetString( src->name );
         bool   fGot = false;
 
-        while(TINYCLR_INDEX_IS_VALID(inst))
+        while(NANOCLR_INDEX_IS_VALID(inst))
         {
             if(inst.m_assm->FindMethodDef( inst.m_target, name, this, src->sig, dst->m_target ))
             {
@@ -1910,11 +1910,11 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             CLR_Debug::Printf( "Resolve: unknown method: %s.%s.%s\r\n", qASSM->GetString( qTD->nameSpace ), qASSM->GetString( qTD->name ), name );
 #endif
 
-            TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_Assembly::Resolve_Link()
@@ -1957,7 +1957,7 @@ void CLR_RT_Assembly::Resolve_Link()
                     dst->m_flags |= CLR_RT_TypeDef_CrossReference::TD_CR_HasFinalizer;
                 }
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 if(inst.m_data == g_CLR_RT_WellKnownTypes.m_MarshalByRefObject.m_data)
                 {
                     dst->m_flags |= CLR_RT_TypeDef_CrossReference::TD_CR_IsMarshalByRefObject;
@@ -2001,25 +2001,25 @@ void CLR_RT_Assembly::Resolve_Link()
 
 //--//
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 
 HRESULT CLR_RT_AppDomain::CreateInstance( LPCSTR szName, CLR_RT_AppDomain*& appDomain )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     CLR_RT_HeapBlock name; name.SetObjectReference( NULL );
     CLR_RT_ProtectFromGC gc( name );
 
-    if(!szName || szName[ 0 ] == '\0') TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    if(!szName || szName[ 0 ] == '\0') NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
     //Check to see that the name does not already exist.
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
     {
-        if(!strcmp( appDomain->m_strName->StringText(), szName )) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        if(!strcmp( appDomain->m_strName->StringText(), szName )) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( name, szName ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( name, szName ));
 
     appDomain = EVENTCACHE_EXTRACT_NODE(g_CLR_RT_EventCache,CLR_RT_AppDomain,DATATYPE_APPDOMAIN_HEAD); CHECK_ALLOCATION(appDomain);
 
@@ -2029,7 +2029,7 @@ HRESULT CLR_RT_AppDomain::CreateInstance( LPCSTR szName, CLR_RT_AppDomain*& appD
 
     g_CLR_RT_ExecutionEngine.m_appDomains.LinkAtBack( appDomain );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_AppDomain::RecoverFromGC()
@@ -2078,11 +2078,11 @@ void CLR_RT_AppDomain::AppDomain_Initialize()
 void CLR_RT_AppDomain::AppDomain_Uninitialize()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly,appDomainAssembly,m_appDomainAssemblies)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly,appDomainAssembly,m_appDomainAssemblies)
     {
         appDomainAssembly->DestroyInstance();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 void CLR_RT_AppDomain::DestroyInstance()
@@ -2098,7 +2098,7 @@ void CLR_RT_AppDomain::DestroyInstance()
 HRESULT CLR_RT_AppDomain::LoadAssembly( CLR_RT_Assembly* assm )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_AppDomain*         appDomainSav      = g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( this );
     CLR_RT_AppDomainAssembly* appDomainAssembly = NULL;
@@ -2107,9 +2107,9 @@ HRESULT CLR_RT_AppDomain::LoadAssembly( CLR_RT_Assembly* assm )
     FAULT_ON_NULL( assm );
 
     //check to make sure the assembly is not already loaded
-    if(FindAppDomainAssembly( assm ) != NULL) TINYCLR_SET_AND_LEAVE(S_OK);
+    if(FindAppDomainAssembly( assm ) != NULL) NANOCLR_SET_AND_LEAVE(S_OK);
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     g_CLR_RT_ExecutionEngine.Breakpoint_Assemblies_Loaded();
 #endif
 
@@ -2117,11 +2117,11 @@ HRESULT CLR_RT_AppDomain::LoadAssembly( CLR_RT_Assembly* assm )
     {
         ITERATE_THROUGH_RECORDS(assm,i,AssemblyRef,ASSEMBLYREF)
         {
-            TINYCLR_CHECK_HRESULT(LoadAssembly( dst->m_target ));
+            NANOCLR_CHECK_HRESULT(LoadAssembly( dst->m_target ));
         }
     }
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_AppDomainAssembly::CreateInstance( this, assm, appDomainAssembly ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_AppDomainAssembly::CreateInstance( this, assm, appDomainAssembly ));
 
     if(m_outOfMemoryException == NULL)
     {
@@ -2131,12 +2131,12 @@ HRESULT CLR_RT_AppDomain::LoadAssembly( CLR_RT_Assembly* assm )
 
         _ASSERTE(!strcmp( assm->m_szName, "mscorlib" )); //always the first assembly to be loaded
 
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException ));
 
         m_outOfMemoryException = exception.Dereference();
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(FAILED(hr))
     {
@@ -2148,21 +2148,21 @@ HRESULT CLR_RT_AppDomain::LoadAssembly( CLR_RT_Assembly* assm )
 
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomainSav );
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 
 HRESULT CLR_RT_AppDomain::GetManagedObject( CLR_RT_HeapBlock& res )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_AppDomain* appDomainSav = g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( this );
 
     res.SetObjectReference( NULL );
 
     //Check if a managed object is already present, and use it
-    TINYCLR_FOREACH_NODE(CLR_RT_ObjectToEvent_Source,ref,m_references)
+    NANOCLR_FOREACH_NODE(CLR_RT_ObjectToEvent_Source,ref,m_references)
     {
         CLR_RT_HeapBlock* obj = ref->m_objectPtr;
 
@@ -2173,30 +2173,30 @@ HRESULT CLR_RT_AppDomain::GetManagedObject( CLR_RT_HeapBlock& res )
             //managed appDomain is found.  Use it.
             res.SetObjectReference( ref->m_objectPtr );
 
-            TINYCLR_SET_AND_LEAVE(S_OK);
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     {
         //Create the managed AppDomain in the destination AppDomain
         CLR_RT_HeapBlock*    pRes;
         CLR_RT_ProtectFromGC gc( res );
 
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( res, g_CLR_RT_WellKnownTypes.m_AppDomain ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( res, g_CLR_RT_WellKnownTypes.m_AppDomain ));
 
         pRes = res.Dereference();
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance( this, *pRes, pRes[ Library_corlib_native_System_AppDomain::FIELD__m_appDomain ] ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance( this, *pRes, pRes[ Library_corlib_native_System_AppDomain::FIELD__m_appDomain ] ));
 
         pRes[ Library_corlib_native_System_AppDomain::FIELD__m_friendlyName ].SetObjectReference( m_strName );
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomainSav );
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 CLR_RT_AppDomainAssembly* CLR_RT_AppDomain::FindAppDomainAssembly( CLR_RT_Assembly* assm )
@@ -2207,7 +2207,7 @@ CLR_RT_AppDomainAssembly* CLR_RT_AppDomain::FindAppDomainAssembly( CLR_RT_Assemb
         return m_appDomainAssemblyLastAccess;
     }
 
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly,appDomainAssembly,m_appDomainAssemblies)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly,appDomainAssembly,m_appDomainAssemblies)
     {
         if(appDomainAssembly->m_assembly == assm)
         {
@@ -2216,7 +2216,7 @@ CLR_RT_AppDomainAssembly* CLR_RT_AppDomain::FindAppDomainAssembly( CLR_RT_Assemb
             return appDomainAssembly;
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     return NULL;
 }
@@ -2232,20 +2232,20 @@ void CLR_RT_AppDomain::Relocate()
 HRESULT CLR_RT_AppDomain::VerifyTypeIsLoaded( const CLR_RT_TypeDef_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance inst;
 
-    if(!inst.InitializeFromIndex( idx         )) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER           );
-    if(!FindAppDomainAssembly   ( inst.m_assm )) TINYCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_MARSHAL_EXCEPTION);
+    if(!inst.InitializeFromIndex( idx         )) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER           );
+    if(!FindAppDomainAssembly   ( inst.m_assm )) NANOCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_MARSHAL_EXCEPTION);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_AppDomain::MarshalObject( CLR_RT_HeapBlock& src, CLR_RT_HeapBlock& dst, CLR_RT_AppDomain* appDomainSrc )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     //This function marshals an object from appDomainSrc to 'this' AppDomain
     //If appDomainSrc == NULL, this uses the current AppDomain
@@ -2277,7 +2277,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject( CLR_RT_HeapBlock& src, CLR_RT_HeapBlock
     fSimpleAssign = fSimpleAssign || (dtSrc <= DATATYPE_LAST_PRIMITIVE_TO_MARSHAL);
     fSimpleAssign = fSimpleAssign || (dtSrc == DATATYPE_OBJECT && src.Dereference() == NULL);
 
-#if !defined(TINYCLR_NO_ASSEMBLY_STRINGS)
+#if !defined(NANOCLR_NO_ASSEMBLY_STRINGS)
     fSimpleAssign = fSimpleAssign || (dtSrc == DATATYPE_STRING && !src.StringAssembly());
 #endif
 
@@ -2293,7 +2293,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject( CLR_RT_HeapBlock& src, CLR_RT_HeapBlock
                     {
                         proxySrc = ptr;
 
-                        TINYCLR_CHECK_HRESULT(proxySrc->TransparentProxyValidate());
+                        NANOCLR_CHECK_HRESULT(proxySrc->TransparentProxyValidate());
 
                         idxVerify = proxySrc->TransparentProxyDereference()->ObjectCls();
 
@@ -2324,7 +2324,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject( CLR_RT_HeapBlock& src, CLR_RT_HeapBlock
         }
     }
 
-    TINYCLR_CHECK_HRESULT(appDomainDst->VerifyTypeIsLoaded( idxVerify ));
+    NANOCLR_CHECK_HRESULT(appDomainDst->VerifyTypeIsLoaded( idxVerify ));
 
     if(fSimpleAssign)
     {
@@ -2361,7 +2361,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject( CLR_RT_HeapBlock& src, CLR_RT_HeapBlock
         //but just to be safe, we should prevent it.
 
         CLR_EE_DBG_SET(NoCompaction);
-        TINYCLR_CHECK_HRESULT(CLR_RT_BinaryFormatter::Serialize( blk, src, NULL, CLR_RT_BinaryFormatter::c_Flags_Marshal ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_BinaryFormatter::Serialize( blk, src, NULL, CLR_RT_BinaryFormatter::c_Flags_Marshal ));
 
         (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomainDst );
         hr = CLR_RT_BinaryFormatter::Deserialize( dst, blk, NULL, NULL, CLR_RT_BinaryFormatter::c_Flags_Marshal );
@@ -2369,17 +2369,17 @@ HRESULT CLR_RT_AppDomain::MarshalObject( CLR_RT_HeapBlock& src, CLR_RT_HeapBlock
         CLR_EE_DBG_RESTORE(NoCompaction,fNoCompaction);
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomainSav );
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_RT_AppDomain::MarshalParameters( CLR_RT_HeapBlock* callerArgs, CLR_RT_HeapBlock* calleeArgs, int count, bool fOnReturn, CLR_RT_AppDomain* appDomainSrc )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* src = fOnReturn ? calleeArgs : callerArgs;
     CLR_RT_HeapBlock* dst = fOnReturn ? callerArgs : calleeArgs;
@@ -2398,7 +2398,7 @@ HRESULT CLR_RT_AppDomain::MarshalParameters( CLR_RT_HeapBlock* callerArgs, CLR_R
             {
                 srcObj.Assign( *src->Dereference() );
 
-                TINYCLR_CHECK_HRESULT(MarshalObject( srcObj, dstObj, appDomainSrc ));
+                NANOCLR_CHECK_HRESULT(MarshalObject( srcObj, dstObj, appDomainSrc ));
 
                 //Move the marshaled object back into dst heapblock
                 if(dtDst == DATATYPE_BYREF)
@@ -2423,7 +2423,7 @@ HRESULT CLR_RT_AppDomain::MarshalParameters( CLR_RT_HeapBlock* callerArgs, CLR_R
                     srcObj.LoadFromReference( *src );
                 }
 
-                TINYCLR_CHECK_HRESULT(MarshalObject( srcObj, dstObj, appDomainSrc ));
+                NANOCLR_CHECK_HRESULT(MarshalObject( srcObj, dstObj, appDomainSrc ));
 
                 //Need to copy DstObj onto the heap.
                 dstPtr = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects( DATATYPE_OBJECT, 0, 1 ); FAULT_ON_NULL(dstPtr);
@@ -2440,7 +2440,7 @@ HRESULT CLR_RT_AppDomain::MarshalParameters( CLR_RT_HeapBlock* callerArgs, CLR_R
         {
             if(!fOnReturn)
             {
-                TINYCLR_CHECK_HRESULT(MarshalObject( *src, *dst, appDomainSrc ));
+                NANOCLR_CHECK_HRESULT(MarshalObject( *src, *dst, appDomainSrc ));
             }
         }
 
@@ -2448,21 +2448,21 @@ HRESULT CLR_RT_AppDomain::MarshalParameters( CLR_RT_HeapBlock* callerArgs, CLR_R
         dst++;
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 
 HRESULT CLR_RT_AppDomain::GetAssemblies( CLR_RT_HeapBlock& ref )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     int               count  = 0;
     CLR_RT_HeapBlock* pArray = NULL;
     
     for(int pass=0; pass<2; pass++)
     {
-        TINYCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN( this )
+        NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN( this )
         {
             if(pASSM->m_header->flags & CLR_RECORD_ASSEMBLY::c_Flags_Patch) continue;
 
@@ -2475,7 +2475,7 @@ HRESULT CLR_RT_AppDomain::GetAssemblies( CLR_RT_HeapBlock& ref )
                 CLR_RT_HeapBlock* hbObj;
                 CLR_RT_Assembly_Index idx; idx.Set( pASSM->m_idx );
 
-                TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.m_Assembly));
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.m_Assembly));
                 hbObj = pArray->Dereference();
                 
                 hbObj->SetReflection( idx ); 
@@ -2483,17 +2483,17 @@ HRESULT CLR_RT_AppDomain::GetAssemblies( CLR_RT_HeapBlock& ref )
                 pArray++;
             }
         }
-        TINYCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN_END();
+        NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN_END();
 
         if(pass == 0)
         {
-            TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( ref, count, g_CLR_RT_WellKnownTypes.m_Assembly ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( ref, count, g_CLR_RT_WellKnownTypes.m_Assembly ));
 
             pArray = (CLR_RT_HeapBlock*)ref.DereferenceArray()->GetFirstElement();
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 bool CLR_RT_AppDomain::IsLoaded()
@@ -2507,15 +2507,15 @@ bool CLR_RT_AppDomain::IsLoaded()
 HRESULT CLR_RT_AppDomainAssembly::CreateInstance( CLR_RT_AppDomain* appDomain, CLR_RT_Assembly* assm, CLR_RT_AppDomainAssembly*& appDomainAssembly )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     int size = CONVERTFROMSIZETOHEAPBLOCKS(sizeof(CLR_RT_AppDomainAssembly)) + assm->m_iStaticFields;
 
     appDomainAssembly = EVENTCACHE_EXTRACT_NODE_AS_BLOCKS(g_CLR_RT_EventCache,CLR_RT_AppDomainAssembly,DATATYPE_APPDOMAIN_ASSEMBLY,CLR_RT_HeapBlock::HB_InitializeToZero,size); CHECK_ALLOCATION(appDomainAssembly);
 
-    TINYCLR_CHECK_HRESULT(appDomainAssembly->AppDomainAssembly_Initialize( appDomain, assm ));
+    NANOCLR_CHECK_HRESULT(appDomainAssembly->AppDomainAssembly_Initialize( appDomain, assm ));
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(FAILED(hr))
     {
@@ -2525,13 +2525,13 @@ HRESULT CLR_RT_AppDomainAssembly::CreateInstance( CLR_RT_AppDomain* appDomain, C
         }
     }
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_RT_AppDomainAssembly::AppDomainAssembly_Initialize( CLR_RT_AppDomain* appDomain, CLR_RT_Assembly* assm )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_AppDomain* appDomainSav = g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomain );
 
@@ -2548,7 +2548,7 @@ HRESULT CLR_RT_AppDomainAssembly::AppDomainAssembly_Initialize( CLR_RT_AppDomain
 
     appDomain->m_appDomainAssemblies.LinkAtBack( this );
 
-    TINYCLR_CHECK_HRESULT(assm->Resolve_AllocateStaticFields( m_pStaticFields ));
+    NANOCLR_CHECK_HRESULT(assm->Resolve_AllocateStaticFields( m_pStaticFields ));
 
     if(!CLR_EE_DBG_IS_MASK(State_Initialize,State_Mask))
     {
@@ -2557,7 +2557,7 @@ HRESULT CLR_RT_AppDomainAssembly::AppDomainAssembly_Initialize( CLR_RT_AppDomain
         g_CLR_RT_ExecutionEngine.SpawnStaticConstructor( g_CLR_RT_ExecutionEngine.m_cctorThread );
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(FAILED(hr))
     {
@@ -2566,7 +2566,7 @@ HRESULT CLR_RT_AppDomainAssembly::AppDomainAssembly_Initialize( CLR_RT_AppDomain
 
     g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomainSav );
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 void CLR_RT_AppDomainAssembly::DestroyInstance()
@@ -2583,7 +2583,7 @@ void CLR_RT_AppDomainAssembly::Relocate()
      CLR_RT_GarbageCollector::Heap_Relocate( m_pStaticFields, m_assembly->m_iStaticFields );
 }
 
-#endif //TINYCLR_APPDOMAINS
+#endif //NANOCLR_APPDOMAINS
 
 //--//
 
@@ -2691,7 +2691,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
     TIL( "Microsoft.SPOT.Time"     , "TimeServiceSettings"           , m_TimeServiceSettings                                ),
     TIL( "Microsoft.SPOT.Time"     , "TimeServiceStatus"             , m_TimeServiceStatus                                  ),
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     TIL( "System"                  , "AppDomain"                     , m_AppDomain                                          ),
     TIL( "System"                  , "MarshalByRefObject"            , m_MarshalByRefObject                                 ),
 #endif
@@ -2751,7 +2751,7 @@ void CLR_RT_Assembly::Resolve_TypeDef()
     {
         CLR_RT_TypeDef_Index& dst = *til->ptr;
 
-        if(TINYCLR_INDEX_IS_INVALID(dst))
+        if(NANOCLR_INDEX_IS_INVALID(dst))
         {
             if(til->nameSpace == NULL)
             {
@@ -2790,7 +2790,7 @@ void CLR_RT_Assembly::Resolve_MethodDef()
             CLR_RT_TypeDef_Index&   idxType   = *mil->type;
             CLR_RT_MethodDef_Index& idxMethod = *mil->method;
 
-            if(TINYCLR_INDEX_IS_VALID(idxType) && TINYCLR_INDEX_IS_INVALID(idxMethod))
+            if(NANOCLR_INDEX_IS_VALID(idxType) && NANOCLR_INDEX_IS_INVALID(idxMethod))
             {
                 CLR_RT_TypeDef_Instance instType;
 
@@ -2816,7 +2816,7 @@ void CLR_RT_Assembly::Resolve_MethodDef()
 HRESULT CLR_RT_Assembly::Resolve_AllocateStaticFields( CLR_RT_HeapBlock* pStaticFields )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     const CLR_RECORD_FIELDDEF* fd = GetFieldDef( 0 );
 
@@ -2826,24 +2826,24 @@ HRESULT CLR_RT_Assembly::Resolve_AllocateStaticFields( CLR_RT_HeapBlock* pStatic
         {
             CLR_RT_FieldDef_CrossReference& res = m_pCrossReference_FieldDef[ i ];
 
-            TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference( pStaticFields[ res.m_offset ], fd, this ));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference( pStaticFields[ res.m_offset ], fd, this ));
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_Assembly::PrepareForExecution()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if((m_flags & CLR_RT_Assembly::c_PreparingForExecution) != 0)
     {
         //Circular dependency
         _ASSERTE(FALSE);
 
-        TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
     if((m_flags & CLR_RT_Assembly::c_PreparedForExecution) == 0)
@@ -2858,7 +2858,7 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
 
             if(dst->m_target != NULL)
             {
-                TINYCLR_CHECK_HRESULT(dst->m_target->PrepareForExecution());
+                NANOCLR_CHECK_HRESULT(dst->m_target->PrepareForExecution());
             }
         }
 
@@ -2873,22 +2873,22 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
 #endif
         }
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         //Temporary solution.  All Assemblies get added to the current AppDomain
         //Which assemblies get loaded at boot, and when assemblies get added to AppDomain at runtime is
         //not yet determined/implemented
 
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->LoadAssembly( this ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->LoadAssembly( this ));
 #endif
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     //Only try once.  If this fails, then what?
     m_flags |=  CLR_RT_Assembly::c_PreparedForExecution;
     m_flags &= ~CLR_RT_Assembly::c_PreparingForExecution;
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 //--//
@@ -3124,7 +3124,7 @@ bool CLR_RT_Assembly::FindNextStaticConstructor( CLR_RT_MethodDef_Index& idx )
 HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     const CLR_RECORD_TYPEDEF*      src = GetTypeDef( 0 );
     CLR_RT_TypeDef_CrossReference* dst = m_pCrossReference_TypeDef;
@@ -3136,7 +3136,7 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
         CLR_UINT32              hash = ComputeHashForName( idx, 0 );
 
 
-        while(TINYCLR_INDEX_IS_VALID(inst))
+        while(NANOCLR_INDEX_IS_VALID(inst))
         {
             const CLR_RECORD_TYPEDEF*  target = inst.m_target;
             const CLR_RECORD_FIELDDEF* fd     = inst.m_assm->GetFieldDef( target->iFields_First );
@@ -3148,7 +3148,7 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
                     CLR_RT_SignatureParser          parser; parser.Initialize_FieldDef( inst.m_assm, fd );
                     CLR_RT_SignatureParser::Element res;
 
-                    TINYCLR_CHECK_HRESULT(parser.Advance( res ));
+                    NANOCLR_CHECK_HRESULT(parser.Advance( res ));
 
                     while(res.m_levels-- > 0)
                     {
@@ -3177,7 +3177,7 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
         dst->m_hash = hash ? hash : 0xFFFFFFFF; // Don't allow zero as an hash value!!
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 CLR_UINT32 CLR_RT_Assembly::ComputeHashForName( const CLR_RT_TypeDef_Index& td, CLR_UINT32 hash )
@@ -3210,7 +3210,7 @@ CLR_RT_HeapBlock* CLR_RT_Assembly::GetStaticField( const int index )
 {
     NATIVE_PROFILE_CLR_CORE();
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 
     CLR_RT_AppDomainAssembly* adAssm = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->FindAppDomainAssembly( this );
 
@@ -3231,7 +3231,7 @@ void CLR_RT_Assembly::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_GarbageCollector::Heap_Relocate( m_pStaticFields, m_iStaticFields );
 #endif
 
@@ -3248,7 +3248,7 @@ HRESULT CLR_RT_Assembly::VerifyEndian(CLR_RECORD_ASSEMBLY* header)
     BOOL  localIsBE=false;
     BOOL  assyIsBE=false;
 
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     
     // Is this a Big Endian system?
     if ( 0x12!=*t)
@@ -3263,14 +3263,14 @@ HRESULT CLR_RT_Assembly::VerifyEndian(CLR_RECORD_ASSEMBLY* header)
     
     if (assyIsBE==localIsBE)
     {
-        TINYCLR_SET_AND_LEAVE(S_OK);
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
     else
     {
-        TINYCLR_SET_AND_LEAVE(S_FALSE);
+        NANOCLR_SET_AND_LEAVE(S_FALSE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3278,20 +3278,20 @@ HRESULT CLR_RT_Assembly::VerifyEndian(CLR_RECORD_ASSEMBLY* header)
 void CLR_RT_TypeSystem::TypeSystem_Initialize()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_CLEAR(g_CLR_RT_TypeSystem);
-    TINYCLR_CLEAR(g_CLR_RT_WellKnownTypes);
+    NANOCLR_CLEAR(g_CLR_RT_TypeSystem);
+    NANOCLR_CLEAR(g_CLR_RT_WellKnownTypes);
 }
 
 void CLR_RT_TypeSystem::TypeSystem_Cleanup()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_ASSEMBLY(*this)
+    NANOCLR_FOREACH_ASSEMBLY(*this)
     {
         pASSM->DestroyInstance();
 
         *ppASSM = NULL;
     }
-    TINYCLR_FOREACH_ASSEMBLY_END();
+    NANOCLR_FOREACH_ASSEMBLY_END();
 
     m_assembliesMax = 0;
 }
@@ -3301,7 +3301,7 @@ void CLR_RT_TypeSystem::TypeSystem_Cleanup()
 void CLR_RT_TypeSystem::Link( CLR_RT_Assembly* assm )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_ASSEMBLY_NULL(*this)
+    NANOCLR_FOREACH_ASSEMBLY_NULL(*this)
     {
         *ppASSM = assm;
 
@@ -3313,7 +3313,7 @@ void CLR_RT_TypeSystem::Link( CLR_RT_Assembly* assm )
 
         return;
     }
-    TINYCLR_FOREACH_ASSEMBLY_NULL_END();
+    NANOCLR_FOREACH_ASSEMBLY_NULL_END();
 }
 
 void CLR_RT_TypeSystem::PostLinkageProcessing( CLR_RT_Assembly* assm )
@@ -3333,7 +3333,7 @@ CLR_RT_Assembly* CLR_RT_TypeSystem::FindAssembly( LPCSTR szName, const CLR_RECOR
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    TINYCLR_FOREACH_ASSEMBLY(*this)
+    NANOCLR_FOREACH_ASSEMBLY(*this)
     {
         if(!strcmp(pASSM->m_szName, szName))
         {
@@ -3361,7 +3361,7 @@ CLR_RT_Assembly* CLR_RT_TypeSystem::FindAssembly( LPCSTR szName, const CLR_RECOR
             }
         }
     }
-    TINYCLR_FOREACH_ASSEMBLY_END();
+    NANOCLR_FOREACH_ASSEMBLY_END();
 
     return NULL;
 }
@@ -3372,11 +3372,11 @@ bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR name, LPCSTR nameSpace, CLR_RT_Assem
 
     if(assm)
     {
-        TINYCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(*this)
+        NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(*this)
         {
             if(pASSM->IsSameAssembly( *assm ) && pASSM->FindTypeDef( name, nameSpace, res )) return true;
         }
-        TINYCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN_END();
+        NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN_END();
 
         res.Clear();
         
@@ -3389,11 +3389,11 @@ bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR name, LPCSTR nameSpace, CLR_RT_Assem
 bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR name, LPCSTR nameSpace, CLR_RT_TypeDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(*this)
+    NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(*this)
     {
         if(pASSM->FindTypeDef( name, nameSpace, res )) return true;
     }
-    TINYCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN_END();
+    NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN_END();
 
     res.Clear();
     return false;
@@ -3402,11 +3402,11 @@ bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR name, LPCSTR nameSpace, CLR_RT_TypeD
 bool CLR_RT_TypeSystem::FindTypeDef( CLR_UINT32 hash, CLR_RT_TypeDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(*this)
+    NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(*this)
     {
         if(pASSM->FindTypeDef( hash, res )) return true;
     }
-    TINYCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN_END();
+    NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN_END();
 
     res.Clear();
     return false;
@@ -3616,7 +3616,7 @@ CompareResource( const void* p1, const void* p2 )
 HRESULT CLR_RT_TypeSystem::LocateResourceFile( CLR_RT_Assembly_Instance assm, LPCSTR name, CLR_INT32& idxResourceFile )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_Assembly* pAssm = assm.m_assm;
 
@@ -3626,19 +3626,19 @@ HRESULT CLR_RT_TypeSystem::LocateResourceFile( CLR_RT_Assembly_Instance assm, LP
 
         if(!strcmp( pAssm->GetString( resourceFile->name ), name ))
         {
-            TINYCLR_SET_AND_LEAVE(S_OK);
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
     }
 
     idxResourceFile = -1;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeSystem::LocateResource( CLR_RT_Assembly_Instance assm, CLR_INT32 idxResourceFile, CLR_INT16 id, const CLR_RECORD_RESOURCE*& res, CLR_UINT32& size )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_Assembly* pAssm = assm.m_assm;
     const CLR_RECORD_RESOURCE_FILE* resourceFile;
@@ -3649,7 +3649,7 @@ HRESULT CLR_RT_TypeSystem::LocateResource( CLR_RT_Assembly_Instance assm, CLR_IN
     res  = NULL;
     size = 0;
 
-    if(idxResourceFile < 0 || idxResourceFile >= pAssm->m_pTablesSize[ TBL_ResourcesFiles ]) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    if(idxResourceFile < 0 || idxResourceFile >= pAssm->m_pTablesSize[ TBL_ResourcesFiles ]) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
     resourceFile = pAssm->GetResourceFile( idxResourceFile );
 
@@ -3674,13 +3674,13 @@ HRESULT CLR_RT_TypeSystem::LocateResource( CLR_RT_Assembly_Instance assm, CLR_IN
         size -= (resNext->flags & CLR_RECORD_RESOURCE::FLAGS_PaddingMask);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeSystem::ResolveAll()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     bool fOutput = false;
 
@@ -3689,7 +3689,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
         bool fGot            = false;
         bool fNeedResolution = false;
 
-        TINYCLR_FOREACH_ASSEMBLY(*this)
+        NANOCLR_FOREACH_ASSEMBLY(*this)
         {
             if((pASSM->m_flags & CLR_RT_Assembly::c_Resolved) == 0)
             {
@@ -3701,27 +3701,27 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
 
                     pASSM->m_flags |= CLR_RT_Assembly::c_Resolved;
 
-                    TINYCLR_CHECK_HRESULT(pASSM->Resolve_TypeRef       ());
-                    TINYCLR_CHECK_HRESULT(pASSM->Resolve_FieldRef      ());
-                    TINYCLR_CHECK_HRESULT(pASSM->Resolve_MethodRef     ());
+                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_TypeRef       ());
+                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_FieldRef      ());
+                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_MethodRef     ());
                     /********************/pASSM->Resolve_TypeDef       () ;
                     /********************/pASSM->Resolve_MethodDef     () ;
                     /********************/pASSM->Resolve_Link          () ;
-                    TINYCLR_CHECK_HRESULT(pASSM->Resolve_ComputeHashes ());
+                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_ComputeHashes ());
 
-#if !defined(TINYCLR_APPDOMAINS)
-                    TINYCLR_CHECK_HRESULT(pASSM->Resolve_AllocateStaticFields( pASSM->m_pStaticFields ));
+#if !defined(NANOCLR_APPDOMAINS)
+                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_AllocateStaticFields( pASSM->m_pStaticFields ));
 #endif
 
                     pASSM->m_flags |= CLR_RT_Assembly::c_ResolutionCompleted;
                 }
             }
         }
-        TINYCLR_FOREACH_ASSEMBLY_END();
+        NANOCLR_FOREACH_ASSEMBLY_END();
 
         if(fOutput == true)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_TYPE_UNAVAILABLE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_TYPE_UNAVAILABLE);
         }
 
         if(fGot == false)
@@ -3754,7 +3754,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
             size_t                   iTotalRomSize   = 0 ;
             size_t                   iMetaData       = 0 ;
 
-            TINYCLR_FOREACH_ASSEMBLY(*this)
+            NANOCLR_FOREACH_ASSEMBLY(*this)
             {
                 offsets.iBase                 += ROUNDTOMULTIPLE(sizeof(CLR_RT_Assembly)                                                            , CLR_UINT32);
                 offsets.iAssemblyRef          += ROUNDTOMULTIPLE(pASSM->m_pTablesSize[ TBL_AssemblyRef ] * sizeof(CLR_RT_AssemblyRef_CrossReference), CLR_UINT32);
@@ -3765,13 +3765,13 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 offsets.iFieldDef             += ROUNDTOMULTIPLE(pASSM->m_pTablesSize[ TBL_FieldDef    ] * sizeof(CLR_RT_FieldDef_CrossReference   ), CLR_UINT32);
                 offsets.iMethodDef            += ROUNDTOMULTIPLE(pASSM->m_pTablesSize[ TBL_MethodDef   ] * sizeof(CLR_RT_MethodDef_CrossReference  ), CLR_UINT32);
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
                 offsets.iStaticFields         += ROUNDTOMULTIPLE(pASSM->m_iStaticFields                * sizeof(CLR_RT_HeapBlock                 ), CLR_UINT32);
 #endif
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                 offsets.iDebuggingInfoMethods += ROUNDTOMULTIPLE(pASSM->m_pTablesSize[ TBL_MethodDef ] * sizeof(CLR_RT_MethodDef_DebuggingInfo   ), CLR_UINT32);
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
                 iMetaData += pASSM->m_header->SizeOfTable( TBL_AssemblyRef ) +
                              pASSM->m_header->SizeOfTable( TBL_TypeRef     ) +
@@ -3793,7 +3793,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
 
                 iStaticFields += pASSM->m_iStaticFields;
             }
-            TINYCLR_FOREACH_ASSEMBLY_END();
+            NANOCLR_FOREACH_ASSEMBLY_END();
 
             iTotalRamSize = offsets.iBase           +
                             offsets.iAssemblyRef    +
@@ -3804,7 +3804,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                             offsets.iFieldDef       +
                             offsets.iMethodDef;
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
             iTotalRamSize += offsets.iStaticFields;
 #endif
 
@@ -3818,16 +3818,16 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
             CLR_Debug::Printf( "   FieldDef       = %8d bytes (%8d elements)\r\n", offsets.iFieldDef      , pTablesSize[TBL_FieldDef   ] );
             CLR_Debug::Printf( "   MethodDef      = %8d bytes (%8d elements)\r\n", offsets.iMethodDef     , pTablesSize[TBL_MethodDef  ] );
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
             CLR_Debug::Printf( "   StaticFields   = %8d bytes (%8d elements)\r\n", offsets.iStaticFields  , iStaticFields                );
 #endif
 
             CLR_Debug::Printf( "\r\n" );
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_Debug::Printf( "   DebuggingInfo  = %8d bytes\r\n", offsets.iDebuggingInfoMethods );
             CLR_Debug::Printf( "\r\n" );
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             CLR_Debug::Printf( "   Attributes      = %8d bytes (%8d elements)\r\n", pTablesSize[ TBL_Attributes     ] * sizeof(CLR_RECORD_ATTRIBUTE     ), pTablesSize[ TBL_Attributes     ] );
             CLR_Debug::Printf( "   TypeSpec        = %8d bytes (%8d elements)\r\n", pTablesSize[ TBL_TypeSpec       ] * sizeof(CLR_RECORD_TYPESPEC      ), pTablesSize[ TBL_TypeSpec       ] );
@@ -3843,65 +3843,65 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
 
 #endif
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeSystem::PrepareForExecutionHelper( LPCSTR szAssembly )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_FOREACH_ASSEMBLY(*this)
+    NANOCLR_FOREACH_ASSEMBLY(*this)
     {
         if(!strcmp( szAssembly, pASSM->m_szName ))
         {
-            TINYCLR_CHECK_HRESULT(pASSM->PrepareForExecution());
+            NANOCLR_CHECK_HRESULT(pASSM->PrepareForExecution());
         }
     }
 
-    TINYCLR_FOREACH_ASSEMBLY_END();
+    NANOCLR_FOREACH_ASSEMBLY_END();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeSystem::PrepareForExecution()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_EE_DBG_SET(BreakpointsDisabled);
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
     if(g_CLR_RT_ExecutionEngine.m_outOfMemoryException == NULL)
     {
         CLR_RT_HeapBlock exception;
 
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException ));
 
         g_CLR_RT_ExecutionEngine.m_outOfMemoryException = exception.Dereference();
     }
 #endif
 
     //Load Native to ensure that CultureInfo gets properly initialized
-    TINYCLR_CHECK_HRESULT(PrepareForExecutionHelper( "Microsoft.SPOT.Native" ));
+    NANOCLR_CHECK_HRESULT(PrepareForExecutionHelper( "Microsoft.SPOT.Native" ));
 
-    TINYCLR_FOREACH_ASSEMBLY(*this)
+    NANOCLR_FOREACH_ASSEMBLY(*this)
     {
-        TINYCLR_CHECK_HRESULT(pASSM->PrepareForExecution());
+        NANOCLR_CHECK_HRESULT(pASSM->PrepareForExecution());
     }
-    TINYCLR_FOREACH_ASSEMBLY_END();
+    NANOCLR_FOREACH_ASSEMBLY_END();
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_EE_DBG_CLR(BreakpointsDisabled);
 
     g_CLR_RT_ExecutionEngine.Breakpoint_Assemblies_Loaded();
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 //--//
@@ -3973,13 +3973,13 @@ bool CLR_RT_TypeSystem::MatchSignatureElement( CLR_RT_SignatureParser::Element& 
 HRESULT CLR_RT_TypeSystem::QueueStringToBuffer( LPSTR& szBuffer, size_t& iBuffer, LPCSTR szText )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(szText)
     {
         if(CLR_SafeSprintf( szBuffer, iBuffer, "%s", szText ) == false)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
     }
     else
@@ -3987,7 +3987,7 @@ HRESULT CLR_RT_TypeSystem::QueueStringToBuffer( LPSTR& szBuffer, size_t& iBuffer
         szBuffer[ 0 ] = 0;
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeSystem::BuildTypeName( const CLR_RT_TypeDef_Index& cls, LPSTR& szBuffer, size_t& iBuffer )
@@ -3999,14 +3999,14 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName( const CLR_RT_TypeDef_Index& cls, LPSTR
 HRESULT CLR_RT_TypeSystem::BuildTypeName ( const CLR_RT_TypeDef_Index& cls, LPSTR& szBuffer, size_t& iBuffer, CLR_UINT32 flags, CLR_UINT32 levels )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance   inst;
     CLR_RT_Assembly*          assm;
     const CLR_RECORD_TYPEDEF* td;
     bool fFullName;
 
-    if(inst.InitializeFromIndex( cls ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if(inst.InitializeFromIndex( cls ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
     assm      = inst.m_assm;
     td        = inst.m_target;
@@ -4016,9 +4016,9 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName ( const CLR_RT_TypeDef_Index& cls, LPST
     {
         CLR_RT_TypeDef_Index clsSub; clsSub.Set( inst.Assembly(), td->enclosingType );
 
-        TINYCLR_CHECK_HRESULT(BuildTypeName( clsSub, szBuffer, iBuffer, flags, 0 ));
+        NANOCLR_CHECK_HRESULT(BuildTypeName( clsSub, szBuffer, iBuffer, flags, 0 ));
 
-        TINYCLR_CHECK_HRESULT(QueueStringToBuffer( szBuffer, iBuffer, (flags & CLR_RT_TypeSystem::TYPENAME_NESTED_SEPARATOR_DOT) ? "." : "+" ));
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer( szBuffer, iBuffer, (flags & CLR_RT_TypeSystem::TYPENAME_NESTED_SEPARATOR_DOT) ? "." : "+" ));
     }
 
     if(fFullName && td->nameSpace != CLR_EmptyIndex)
@@ -4027,55 +4027,55 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName ( const CLR_RT_TypeDef_Index& cls, LPST
 
         if(szNameSpace[ 0 ])
         {
-            TINYCLR_CHECK_HRESULT(QueueStringToBuffer( szBuffer, iBuffer, szNameSpace ));
-            TINYCLR_CHECK_HRESULT(QueueStringToBuffer( szBuffer, iBuffer, "."         ));
+            NANOCLR_CHECK_HRESULT(QueueStringToBuffer( szBuffer, iBuffer, szNameSpace ));
+            NANOCLR_CHECK_HRESULT(QueueStringToBuffer( szBuffer, iBuffer, "."         ));
         }
     }
 
-    TINYCLR_CHECK_HRESULT(QueueStringToBuffer( szBuffer, iBuffer, assm->GetString( td->name ) ));
+    NANOCLR_CHECK_HRESULT(QueueStringToBuffer( szBuffer, iBuffer, assm->GetString( td->name ) ));
 
     while(levels-- > 0)
     {
-        TINYCLR_CHECK_HRESULT(QueueStringToBuffer( szBuffer, iBuffer, "[]" ));
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer( szBuffer, iBuffer, "[]" ));
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeSystem::BuildMethodName( const CLR_RT_MethodDef_Index& md, LPSTR& szBuffer, size_t& iBuffer )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_MethodDef_Instance inst;
     CLR_RT_TypeDef_Instance   instOwner;
 
-    if(inst     .InitializeFromIndex ( md   ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-    if(instOwner.InitializeFromMethod( inst ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if(inst     .InitializeFromIndex ( md   ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if(instOwner.InitializeFromMethod( inst ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-    TINYCLR_CHECK_HRESULT(BuildTypeName( instOwner, szBuffer, iBuffer ));
+    NANOCLR_CHECK_HRESULT(BuildTypeName( instOwner, szBuffer, iBuffer ));
 
     CLR_SafeSprintf( szBuffer, iBuffer, "::%s", inst.m_assm->GetString( inst.m_target->name ) );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeSystem::BuildFieldName( const CLR_RT_FieldDef_Index& fd, LPSTR& szBuffer, size_t& iBuffer )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_FieldDef_Instance  inst;
     CLR_RT_TypeDef_Instance   instOwner;
 
-    if(inst     .InitializeFromIndex( fd   ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-    if(instOwner.InitializeFromField( inst ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if(inst     .InitializeFromIndex( fd   ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if(instOwner.InitializeFromField( inst ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-    TINYCLR_CHECK_HRESULT(BuildTypeName( instOwner, szBuffer, iBuffer ));
+    NANOCLR_CHECK_HRESULT(BuildTypeName( instOwner, szBuffer, iBuffer ));
 
     CLR_SafeSprintf( szBuffer, iBuffer, "::%s", inst.m_assm->GetString( inst.m_target->name ) );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -4126,7 +4126,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef( const CLR_RT_TypeDef_Index& cls, c
     const CLR_RECORD_METHODDEF* calleeMDR     = calleeInst.m_target;
     CLR_UINT8                   calleeNumArgs = calleeMDR->numArgs;
 
-    while(TINYCLR_INDEX_IS_VALID(clsInst))
+    while(NANOCLR_INDEX_IS_VALID(clsInst))
     {
         CLR_RT_Assembly*            targetAssm = clsInst.m_assm;
         const CLR_RECORD_TYPEDEF*   targetTDR  = clsInst.m_target;
@@ -4306,12 +4306,12 @@ bool CLR_RT_AttributeEnumerator::MatchNext( const CLR_RT_TypeDef_Instance* instT
 HRESULT CLR_RT_AttributeParser::Initialize( const CLR_RT_AttributeEnumerator& en )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_md.InitializeFromIndex ( en.m_match ) == false ||
        m_td.InitializeFromMethod( m_md       ) == false  )
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     m_parser.Initialize_MethodSignature( m_md.m_assm, m_md.m_target );
@@ -4324,17 +4324,17 @@ HRESULT CLR_RT_AttributeParser::Initialize( const CLR_RT_AttributeEnumerator& en
     m_fixed_Count = m_md.m_target->numArgs - 1;
     m_named_Count = -1;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_AttributeParser::Next( Value*& res )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_currentPos == m_fixed_Count)
     {
-        TINYCLR_READ_UNALIGNED_UINT16(m_named_Count,m_blob);
+        NANOCLR_READ_UNALIGNED_UINT16(m_named_Count,m_blob);
     }
 
     if(m_currentPos < m_fixed_Count)
@@ -4345,11 +4345,11 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
         //
         // attribute contructor support is currently not implemented
         //
-        TINYCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
     else if(m_currentPos < m_fixed_Count + m_named_Count)
     {
-        CLR_UINT32 kind; TINYCLR_READ_UNALIGNED_UINT8(kind,m_blob);
+        CLR_UINT32 kind; NANOCLR_READ_UNALIGNED_UINT8(kind,m_blob);
 
         m_lastValue.m_name = GetString();
 
@@ -4360,7 +4360,7 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
 
             m_lastValue.m_mode = Value::c_NamedField;
 
-            TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.FindFieldDef( m_td, m_lastValue.m_name, fd ));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.FindFieldDef( m_td, m_lastValue.m_name, fd ));
 
             inst.InitializeFromIndex( fd );
 
@@ -4373,17 +4373,17 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
             //
             //attribute contructor support is currently not implemented
             //
-            TINYCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
     }
     else
     {
         res = NULL;
-        TINYCLR_SET_AND_LEAVE(S_OK);
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
 
-    TINYCLR_CHECK_HRESULT(m_parser.Advance( m_res ));
+    NANOCLR_CHECK_HRESULT(m_parser.Advance( m_res ));
 
     res = &m_lastValue;
 
@@ -4419,25 +4419,25 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
         }
         else if(m_res.m_dt == DATATYPE_STRING)
         {
-            CLR_UINT32 tk; TINYCLR_READ_UNALIGNED_UINT16(tk,m_blob);
+            CLR_UINT32 tk; NANOCLR_READ_UNALIGNED_UINT16(tk,m_blob);
 
             CLR_RT_HeapBlock_String::CreateInstance( m_lastValue.m_value, CLR_TkFromType( TBL_Strings, tk ), m_assm );
         }
         else
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
     }
 
     m_lastValue.m_pos = m_currentPos++;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 LPCSTR CLR_RT_AttributeParser::GetString()
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT32 tk; TINYCLR_READ_UNALIGNED_UINT16(tk,m_blob);
+    CLR_UINT32 tk; NANOCLR_READ_UNALIGNED_UINT16(tk,m_blob);
 
     return m_assm->GetString( tk );
 }

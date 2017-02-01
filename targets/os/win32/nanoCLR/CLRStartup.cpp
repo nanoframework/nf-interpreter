@@ -27,7 +27,7 @@ struct Settings
     
     HRESULT Initialize(CLR_SETTINGS params)
     {
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
 
         m_clrOptions = params;
 
@@ -51,7 +51,7 @@ struct Settings
         g_HAL_Configuration_Windows.GraphHeapEnabled         = false;
 #endif
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance());
+        NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance());
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Created EE.\r\n" );
 #endif
@@ -66,7 +66,7 @@ struct Settings
         }
 #endif
 
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.StartHardware());
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.StartHardware());
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Started Hardware.\r\n" );
 #endif
@@ -76,17 +76,17 @@ struct Settings
         m_fInitialized = true;
 
 
-        TINYCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP();
     }
 
     
     HRESULT LoadAssembly( const CLR_RECORD_ASSEMBLY* header, CLR_RT_Assembly*& assm )
     {   
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
         
         const CLR_RT_NativeAssemblyData *pNativeAssmData;
         
-        TINYCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance( header, assm ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance( header, assm ));
         
         // Get handlers for native functions in assembly
         pNativeAssmData = GetAssemblyNativeData( assm->m_szName );
@@ -110,20 +110,20 @@ struct Settings
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
 
-                TINYCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
+                NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
             }
 
             // Assembly has valid pointer to table with native methods. Save it.
             assm->m_nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
         }
         g_CLR_RT_TypeSystem.Link( assm );
-        TINYCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP();
     }
 
 
     HRESULT Load()
     {
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
 
 #if defined(_WIN32)
         CLR_RT_StringVector vec;
@@ -157,7 +157,7 @@ struct Settings
             const CLR_RECORD_ASSEMBLY* header = (CLR_RECORD_ASSEMBLY*)&(*buffer)[0];
 
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem 
-            TINYCLR_CHECK_HRESULT( LoadAssembly( header, assm ) );
+            NANOCLR_CHECK_HRESULT( LoadAssembly( header, assm ) );
         }
 #else     
 
@@ -165,7 +165,7 @@ struct Settings
         CLR_Debug::Printf( "Create TS.\r\n" );
 #endif
 
-        TINYCLR_CHECK_HRESULT(LoadKnownAssemblies( TinyClr_Dat_Start, TinyClr_Dat_End ));
+        NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( nanoClr_Dat_Start, nanoClr_Dat_End ));
 
 #endif // defined(PLATFORM_WINDOWS_EMULATOR)
 
@@ -180,29 +180,29 @@ struct Settings
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Resolving.\r\n" );
 #endif
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
 
         g_CLR_RT_Persistence_Manager.Initialize();
 
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
 
-#if defined(TINYCLR_PROFILE_HANDLER)
+#if defined(NANOCLR_PROFILE_HANDLER)
         CLR_PROF_Handler::Calibrate();
 #endif
 
-        TINYCLR_CLEANUP();
+        NANOCLR_CLEANUP();
 
 #if !defined(BUILD_RTM)
         if(FAILED(hr)) CLR_Debug::Printf( "Error: %08x\r\n", hr );
 #endif
 
-        TINYCLR_CLEANUP_END();
+        NANOCLR_CLEANUP_END();
     }
 
     HRESULT CheckKnownAssembliesForNonXIP( char** start, char** end )
     {
         //--//
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
 
         BlockStorageDevice *device;
         ByteAddress datByteAddress;
@@ -218,7 +218,7 @@ struct Settings
 
                 if ( !device->Read( datByteAddress, datSize, datAssembliesBuffer ))
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
                 }
                 *start = (char *)datAssembliesBuffer;
                 *end = (char *)((UINT32) datAssembliesBuffer + (UINT32)datSize);
@@ -227,19 +227,19 @@ struct Settings
         }
 
         // else data in RAM
-        TINYCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP();
     }
 
 
     HRESULT LoadKnownAssemblies( char* start, char* end )
     {
         //--//
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
         char *assStart = start;
         char *assEnd = end;
         const CLR_RECORD_ASSEMBLY* header;
 
-        TINYCLR_CHECK_HRESULT(CheckKnownAssembliesForNonXIP( &assStart, &assEnd ));
+        NANOCLR_CHECK_HRESULT(CheckKnownAssembliesForNonXIP( &assStart, &assEnd ));
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (UINT32)assStart, (UINT32)assEnd);
 #endif 
@@ -254,18 +254,18 @@ struct Settings
             CLR_RT_Assembly* assm;
 
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem 
-            TINYCLR_CHECK_HRESULT(LoadAssembly( header, assm ));
+            NANOCLR_CHECK_HRESULT(LoadAssembly( header, assm ));
             
             header = (const CLR_RECORD_ASSEMBLY*)ROUNDTOMULTIPLE((size_t)header + header->TotalSize(), CLR_UINT32);
         }
         
-        TINYCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP();
     }
 
 
     HRESULT ContiguousBlockAssemblies( BlockStorageStream stream, BOOL isXIP ) 
     {
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
 
         const CLR_RECORD_ASSEMBLY* header;
         BYTE * assembliesBuffer ;
@@ -302,7 +302,7 @@ struct Settings
                     // release the headerbuffer which has being used and leave
                     CLR_RT_Memory::Release( headerBuffer );
                     
-                    TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
                 }
             }
 
@@ -334,13 +334,13 @@ struct Settings
         }
         if(!isXIP) CLR_RT_Memory::Release( headerBuffer );
         
-        TINYCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP();
     }
 
 
     HRESULT LoadDeploymentAssemblies( UINT32 memoryUsage )
     {
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
 
         BlockStorageStream      stream;
         const BlockDeviceInfo* deviceInfo;
@@ -351,7 +351,7 @@ struct Settings
 #if !defined(BUILD_RTM)
             CLR_Debug::Printf( "ERROR: Could not find device for DEPLOYMENT usage\r\n" );
 #endif            
-            TINYCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
         do
@@ -362,7 +362,7 @@ struct Settings
         }
         while(stream.NextStream());
         
-        TINYCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP();
     }
 
     void Cleanup()
@@ -432,7 +432,7 @@ struct Settings
         CLR_RT_ParseOptions::Command*   cmd;
         CLR_RT_ParseOptions::Parameter* param;
 
-        OPTION_CALL( Cmd_Load, L"-load", L"Loads an assembly formatted for TinyCLR" );
+        OPTION_CALL( Cmd_Load, L"-load", L"Loads an assembly formatted for nanoCLR" );
         PARAM_GENERIC( L"<file>", L"File to load"                                   );
         
         OPTION_CALL( Cmd_LoadDatabase, L"-loadDatabase", L"Loads a set of assemblies" );
@@ -443,7 +443,7 @@ struct Settings
 
     HRESULT CheckAssemblyFormat( CLR_RECORD_ASSEMBLY* header, LPCWSTR src )
     {
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
 
         if(header->GoodAssembly() == false)
         {
@@ -454,40 +454,40 @@ struct Settings
             }
             wprintf( L"\n" );
 
-            TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
-        TINYCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP();
     }
 
     HRESULT Cmd_Load( CLR_RT_ParseOptions::ParameterList* params = NULL )
     {
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
 
         LPCWSTR              szName = PARAM_EXTRACT_STRING( params, 0 );
         CLR_RT_Buffer*       buffer = new CLR_RT_Buffer(); 
         CLR_RECORD_ASSEMBLY* header;
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_FileStore::LoadFile( szName, *buffer ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_FileStore::LoadFile( szName, *buffer ));
 
-        header = (CLR_RECORD_ASSEMBLY*)&(*buffer)[0]; TINYCLR_CHECK_HRESULT(CheckAssemblyFormat( header, szName ));
+        header = (CLR_RECORD_ASSEMBLY*)&(*buffer)[0]; NANOCLR_CHECK_HRESULT(CheckAssemblyFormat( header, szName ));
 
         m_assemblies[szName] = buffer;
 
-        TINYCLR_CLEANUP();
+        NANOCLR_CLEANUP();
 
         if(FAILED(hr))
         {
             delete buffer;
         }
 
-        TINYCLR_CLEANUP_END();
+        NANOCLR_CLEANUP_END();
     }
 
 
     HRESULT Cmd_LoadDatabase( CLR_RT_ParseOptions::ParameterList* params = NULL )
     {
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
 
         if(!m_fInitialized)
         {
@@ -501,7 +501,7 @@ struct Settings
             CLR_RECORD_ASSEMBLY* headerEnd;
             std::wstring         strName;
             
-            TINYCLR_CHECK_HRESULT(CLR_RT_FileStore::LoadFile( szFile, buffer ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_FileStore::LoadFile( szFile, buffer ));
 
             header    = (CLR_RECORD_ASSEMBLY*)&buffer[0              ];
             headerEnd = (CLR_RECORD_ASSEMBLY*)&buffer[buffer.size()-1];
@@ -541,23 +541,23 @@ struct Settings
             }
         }
 
-        TINYCLR_CLEANUP();
+        NANOCLR_CLEANUP();
 
         if(!m_fInitialized)
         {
             CLR_RT_ExecutionEngine::DeleteInstance();
         }
 
-        TINYCLR_CLEANUP_END();
+        NANOCLR_CLEANUP_END();
     }
 
     HRESULT Cmd_Resolve( CLR_RT_ParseOptions::ParameterList* params = NULL )
     {
-        TINYCLR_HEADER();
+        NANOCLR_HEADER();
 
         bool fError = false;
 
-        TINYCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+        NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
         {
             const CLR_RECORD_ASSEMBLYREF* src = (const CLR_RECORD_ASSEMBLYREF*)pASSM->GetTable( TBL_AssemblyRef );
             for(int i=0; i<pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, src++)
@@ -572,13 +572,13 @@ struct Settings
                 }
             }
         }
-        TINYCLR_FOREACH_ASSEMBLY_END();
+        NANOCLR_FOREACH_ASSEMBLY_END();
 
-        if(fError) TINYCLR_SET_AND_LEAVE(CLR_E_ENTRY_NOT_FOUND);
+        if(fError) NANOCLR_SET_AND_LEAVE(CLR_E_ENTRY_NOT_FOUND);
 
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
 
-        TINYCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP();
     }
 #endif //#if defined(_WIN32)
 
@@ -627,7 +627,7 @@ void ClrStartup( CLR_SETTINGS params )
         CLR_RT_Assembly::InitString();
 
 #if !defined(BUILD_RTM)
-        CLR_Debug::Printf( "\r\nTinyCLR (Build %d.%d.%d.%d)\r\n\r\n", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION );
+        CLR_Debug::Printf( "\r\nnanoCLR (Build %d.%d.%d.%d)\r\n\r\n", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION );
 #endif
 
         CLR_RT_Memory::Reset         ();
@@ -660,10 +660,10 @@ void ClrStartup( CLR_SETTINGS params )
 
         if( CLR_EE_DBG_IS_NOT( RebootPending ))
         {
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_EE_DBG_SET_MASK(State_ProgramExited, State_Mask);
             CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, NULL, WP_Flags::c_NonCritical);
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             if(params.EnterDebuggerLoopAfterExit)
             {

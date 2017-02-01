@@ -10,7 +10,7 @@
 HRESULT CLR_RT_HeapBlock_Lock::CreateInstance( CLR_RT_HeapBlock_Lock*& lock, CLR_RT_Thread* th, CLR_RT_HeapBlock& resource )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     lock = EVENTCACHE_EXTRACT_NODE(g_CLR_RT_EventCache,CLR_RT_HeapBlock_Lock,DATATYPE_LOCK_HEAD); CHECK_ALLOCATION(lock);
 
@@ -21,7 +21,7 @@ HRESULT CLR_RT_HeapBlock_Lock::CreateInstance( CLR_RT_HeapBlock_Lock*& lock, CLR
     lock->m_owners  .DblLinkedList_Initialize(); // CLR_RT_DblLinkedList    m_owners;
     lock->m_requests.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList    m_requests;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     lock->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 #endif
 
@@ -45,20 +45,20 @@ HRESULT CLR_RT_HeapBlock_Lock::CreateInstance( CLR_RT_HeapBlock_Lock*& lock, CLR
 
     th->m_locks.LinkAtBack( lock );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_HeapBlock_Lock::DestroyOwner( CLR_RT_SubThread* sth )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock::Owner,owner,m_owners)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock::Owner,owner,m_owners)
     {
         if(owner->m_owningSubThread == sth)
         {
             g_CLR_RT_EventCache.Append_Node( owner );
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     if(m_owners.IsEmpty())
     {
@@ -135,22 +135,22 @@ void CLR_RT_HeapBlock_Lock::ChangeOwner()
 HRESULT CLR_RT_HeapBlock_Lock::IncrementOwnership( CLR_RT_HeapBlock_Lock* lock, CLR_RT_SubThread* sth, const CLR_INT64& timeExpire, bool fForce )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_Thread* th      = sth ->m_owningThread;
     CLR_RT_Thread* thOwner = lock->m_owningThread;
 
     if(thOwner == th)
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock::Owner,owner,lock->m_owners)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock::Owner,owner,lock->m_owners)
         {
             if(owner->m_owningSubThread == sth)
             {
                 owner->m_recursion++;
-                TINYCLR_SET_AND_LEAVE(S_OK);
+                NANOCLR_SET_AND_LEAVE(S_OK);
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
 
         {
             CLR_RT_HeapBlock_Lock::Owner* owner = EVENTCACHE_EXTRACT_NODE(g_CLR_RT_EventCache,Owner,DATATYPE_LOCK_OWNER_HEAD); CHECK_ALLOCATION(owner);
@@ -159,28 +159,28 @@ HRESULT CLR_RT_HeapBlock_Lock::IncrementOwnership( CLR_RT_HeapBlock_Lock* lock, 
             owner->m_recursion       = 1;
 
             lock->m_owners.LinkAtFront( owner );
-            TINYCLR_SET_AND_LEAVE(S_OK);
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
     }
 
     //
     // Create a request and stop the calling thread.
     //
-    TINYCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_LockRequest::CreateInstance( lock, sth, timeExpire, fForce ));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_LockRequest::CreateInstance( lock, sth, timeExpire, fForce ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_Lock::DecrementOwnership( CLR_RT_HeapBlock_Lock* lock, CLR_RT_SubThread* sth )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_Thread* th = sth->m_owningThread;
 
     if(lock && lock->m_owningThread == th)
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock::Owner,owner,lock->m_owners)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock::Owner,owner,lock->m_owners)
         {
             if(owner->m_owningSubThread == sth)
             {
@@ -196,15 +196,15 @@ HRESULT CLR_RT_HeapBlock_Lock::DecrementOwnership( CLR_RT_HeapBlock_Lock* lock, 
                     lock->ChangeOwner();
                 }
 
-                TINYCLR_SET_AND_LEAVE(S_OK);
+                NANOCLR_SET_AND_LEAVE(S_OK);
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
 
-    TINYCLR_SET_AND_LEAVE(CLR_E_LOCK_SYNCHRONIZATION_EXCEPTION);
+    NANOCLR_SET_AND_LEAVE(CLR_E_LOCK_SYNCHRONIZATION_EXCEPTION);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_HeapBlock_Lock::Relocate()

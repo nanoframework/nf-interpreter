@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _SUPPORT_TINYSUPPORT_H_
-#define _SUPPORT_TINYSUPPORT_H_
+#ifndef _SUPPORT_NANOSUPPORT_H_
+#define _SUPPORT_NANOSUPPORT_H_
 
 UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc);
 
@@ -22,5 +22,5 @@ bool LZ77_Compress(LPCWSTR inFileText, LPCWSTR outFileText, UINT8* prefix, size_
 
 #endif
 
-#endif // _SUPPORT_TINYSUPPORT_H_
+#endif // _SUPPORT_NANOSUPPORT_H_
 

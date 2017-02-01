@@ -18,7 +18,7 @@ void CLR_Debug::RedirectToString( std::string* str )
     s_redirectedString = str;
 }
 
-HRESULT TINYCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line )
+HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     switch(hr)
@@ -44,8 +44,8 @@ HRESULT TINYCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFil
 
 #else
 
-#if defined(TINYCLR_TRACE_HRESULT)
-HRESULT TINYCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line )
+#if defined(NANOCLR_TRACE_HRESULT)
+HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     switch(hr)
@@ -316,12 +316,12 @@ CLR_UINT32 CLR_ReadTokenCompressed( const CLR_UINT8*& ip, CLR_OPCODE opcode )
 
     switch(c_CLR_RT_OpcodeLookup[ opcode ].m_opParam)
     {
-        case CLR_OpcodeParam_Field : TINYCLR_READ_UNALIGNED_COMPRESSED_FIELDTOKEN ( arg, ptr ); break;
-        case CLR_OpcodeParam_Method: TINYCLR_READ_UNALIGNED_COMPRESSED_METHODTOKEN( arg, ptr ); break;
-        case CLR_OpcodeParam_Type  : TINYCLR_READ_UNALIGNED_COMPRESSED_TYPETOKEN  ( arg, ptr ); break;
-        case CLR_OpcodeParam_String: TINYCLR_READ_UNALIGNED_COMPRESSED_STRINGTOKEN( arg, ptr ); break;
+        case CLR_OpcodeParam_Field : NANOCLR_READ_UNALIGNED_COMPRESSED_FIELDTOKEN ( arg, ptr ); break;
+        case CLR_OpcodeParam_Method: NANOCLR_READ_UNALIGNED_COMPRESSED_METHODTOKEN( arg, ptr ); break;
+        case CLR_OpcodeParam_Type  : NANOCLR_READ_UNALIGNED_COMPRESSED_TYPETOKEN  ( arg, ptr ); break;
+        case CLR_OpcodeParam_String: NANOCLR_READ_UNALIGNED_COMPRESSED_STRINGTOKEN( arg, ptr ); break;
         case CLR_OpcodeParam_Tok   :
-        case CLR_OpcodeParam_Sig   : TINYCLR_READ_UNALIGNED_UINT32                ( arg, ptr ); break;
+        case CLR_OpcodeParam_Sig   : NANOCLR_READ_UNALIGNED_UINT32                ( arg, ptr ); break;
         default                    : arg = 0;                                                   break;
     }
 
@@ -346,7 +346,7 @@ const CLR_UINT8* CLR_SkipBodyOfOpcode( const CLR_UINT8* ip, CLR_OPCODE opcode )
 
     if(opParam == CLR_OpcodeParam_Switch)
     {
-        CLR_UINT32 numcases; TINYCLR_READ_UNALIGNED_UINT32( numcases, ip );
+        CLR_UINT32 numcases; NANOCLR_READ_UNALIGNED_UINT32( numcases, ip );
 
         ip += numcases * sizeof(CLR_UINT32);
     }
@@ -365,7 +365,7 @@ const CLR_UINT8* CLR_SkipBodyOfOpcodeCompressed( const CLR_UINT8* ip, CLR_OPCODE
 
     if(opParam == CLR_OpcodeParam_Switch)
     {
-        CLR_UINT32 numcases; TINYCLR_READ_UNALIGNED_UINT8(numcases, ip);
+        CLR_UINT32 numcases; NANOCLR_READ_UNALIGNED_UINT8(numcases, ip);
 
         ip += numcases * sizeof(CLR_UINT16);
     }
@@ -391,7 +391,7 @@ const CLR_UINT8* CLR_SkipBodyOfOpcodeCompressed( const CLR_UINT8* ip, CLR_OPCODE
     const CLR_RECORD_##tblNameUC*    p = Get##tblName( idx );\
     CLR_RT_##tblName##_Index         s; s.Set( m_idx, idx )
 
-#if defined(TINYCLR_TRACE_INSTRUCTIONS)
+#if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
 void CLR_RT_Assembly::DumpToken( CLR_UINT32 tk )
 {
@@ -517,7 +517,7 @@ void CLR_RT_Assembly::DumpOpcodeDirect( CLR_RT_MethodDef_Instance& call, CLR_PME
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     CLR_Debug::Printf( "    [%04x:%04x:%08x", pid, (int)(ip - ipStart), (size_t)ip );
 
-    if(TINYCLR_INDEX_IS_VALID(call))
+    if(NANOCLR_INDEX_IS_VALID(call))
     {
         CLR_Debug::Printf( ":" );
         CLR_RT_DUMP::METHOD( call );
@@ -539,21 +539,21 @@ void CLR_RT_Assembly::DumpOpcodeDirect( CLR_RT_MethodDef_Instance& call, CLR_PME
 
         switch(c_CLR_opParamSizeCompressed[ opParam ])
         {
-        case 8: TINYCLR_READ_UNALIGNED_UINT32( argLo, ip ); TINYCLR_READ_UNALIGNED_UINT32( argHi, ip ); CLR_Debug::Printf( "%08X,%08X", argHi, argLo ); break;
-        case 4: TINYCLR_READ_UNALIGNED_UINT32( argLo, ip );                                             CLR_Debug::Printf( "%08X"     ,        argLo ); break;
-        case 2: TINYCLR_READ_UNALIGNED_UINT16( argLo, ip );                                             CLR_Debug::Printf( "%04X"     ,        argLo ); break;
-        case 1: TINYCLR_READ_UNALIGNED_UINT8 ( argLo, ip );                                             CLR_Debug::Printf( "%02X"     ,        argLo ); break;
+        case 8: NANOCLR_READ_UNALIGNED_UINT32( argLo, ip ); NANOCLR_READ_UNALIGNED_UINT32( argHi, ip ); CLR_Debug::Printf( "%08X,%08X", argHi, argLo ); break;
+        case 4: NANOCLR_READ_UNALIGNED_UINT32( argLo, ip );                                             CLR_Debug::Printf( "%08X"     ,        argLo ); break;
+        case 2: NANOCLR_READ_UNALIGNED_UINT16( argLo, ip );                                             CLR_Debug::Printf( "%04X"     ,        argLo ); break;
+        case 1: NANOCLR_READ_UNALIGNED_UINT8 ( argLo, ip );                                             CLR_Debug::Printf( "%02X"     ,        argLo ); break;
         }
     }
 
     CLR_Debug::Printf( "\r\n" );
 }
 
-#endif // defined(TINYCLR_TRACE_INSTRUCTIONS)
+#endif // defined(NANOCLR_TRACE_INSTRUCTIONS)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_TRACE_ERRORS)
+#if defined(NANOCLR_TRACE_ERRORS)
 
 void CLR_RT_DUMP::TYPE( const CLR_RT_TypeDef_Index& cls )
 {
@@ -698,14 +698,14 @@ void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, LPCSTR text )
 #undef PELEMENT_TO_STRING
 }
 
-#endif // defined(TINYCLR_TRACE_ERRORS)
+#endif // defined(NANOCLR_TRACE_ERRORS)
 
 //--//
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_TRACE_EXCEPTIONS)
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
 
 void CLR_RT_DUMP::EXCEPTION( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref )
 {
@@ -828,7 +828,7 @@ LPCSTR CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
     return s_tmp;
 }
 
-#endif // defined(TINYCLR_TRACE_EXCEPTIONS)
+#endif // defined(NANOCLR_TRACE_EXCEPTIONS)
 
 //--//
 

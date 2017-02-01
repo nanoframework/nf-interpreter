@@ -80,7 +80,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 //    {
 //        ConfigurationSector::c_CurrentVersionMajor,
 //        ConfigurationSector::c_CurrentVersionMinor,
-//        ConfigurationSector::c_CurrentVersionTinyBooter,
+//        ConfigurationSector::c_CurrentVersionBooter,
 //        0, // extra
 //    },
 //
@@ -89,7 +89,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 //        0x0,
 //    },
 //
-//    // BooterFlagArray - determines if we enter the tinybooter or not
+//    // BooterFlagArray - determines if we enter the bootloader or not
 //    {
 //        0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,
 //        0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,
@@ -110,7 +110,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 //        0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,
 //    },
 //
-//    //TINYBOOTER_KEY_CONFIG DeploymentKey =
+//    //NANOBOOTER_KEY_CONFIG DeploymentKey =
 //    { 
 //        {// ODM key configuration for programming firmware (non deployment sectors)
 //            { // ODM public key for firware sectors
@@ -381,8 +381,8 @@ BOOL CPU_IsSoftRebootSupported ()
     return TRUE;
 }
 
-char TinyClr_Dat_Start[512*1024];
-char TinyClr_Dat_End  [1       ];
+char nanoClr_Dat_Start[512*1024];
+char nanoClr_Dat_End  [1       ];
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

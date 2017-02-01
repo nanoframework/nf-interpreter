@@ -10,7 +10,7 @@
 HRESULT CLR_RT_ObjectToEvent_Source::CreateInstance( CLR_RT_ObjectToEvent_Destination* event, CLR_RT_HeapBlock& object, CLR_RT_HeapBlock& reference )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_ObjectToEvent_Source* oe = EVENTCACHE_EXTRACT_NODE(g_CLR_RT_EventCache,CLR_RT_ObjectToEvent_Source,DATATYPE_OBJECT_TO_EVENT); CHECK_ALLOCATION(oe);
 
@@ -23,7 +23,7 @@ HRESULT CLR_RT_ObjectToEvent_Source::CreateInstance( CLR_RT_ObjectToEvent_Destin
 
     event->m_references.LinkAtBack( oe );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 CLR_RT_ObjectToEvent_Source* CLR_RT_ObjectToEvent_Source::ExtractInstance( CLR_RT_HeapBlock& reference )

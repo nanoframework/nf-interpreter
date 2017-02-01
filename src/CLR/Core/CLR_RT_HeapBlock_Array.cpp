@@ -10,7 +10,7 @@
 HRESULT CLR_RT_HeapBlock_Array::CreateInstance( CLR_RT_HeapBlock& reference, CLR_UINT32 length, const CLR_RT_ReflectionDef_Index& reflex )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* pArray;
     CLR_RT_TypeDef_Index    cls;
@@ -18,11 +18,11 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance( CLR_RT_HeapBlock& reference, CLR
 
     reference.SetObjectReference( NULL );
 
-    if((CLR_INT32)length < 0) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    if((CLR_INT32)length < 0) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
     if(reflex.m_kind != REFLECTION_TYPE)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     if(reflex.m_levels == 1)
@@ -36,7 +36,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance( CLR_RT_HeapBlock& reference, CLR
 
     if(inst.InitializeFromIndex( cls ) == false)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
     else
     {
@@ -45,23 +45,23 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance( CLR_RT_HeapBlock& reference, CLR
 
         if(dtl.m_sizeInBytes == CLR_RT_DataTypeLookup::c_NA)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
         pArray    = (CLR_RT_HeapBlock_Array*)g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForArray( inst, length, reflex ); CHECK_ALLOCATION(pArray);
 
         reference.SetObjectReference( pArray );
 
-        TINYCLR_SET_AND_LEAVE(pArray->ClearElements( 0, length ));
+        NANOCLR_SET_AND_LEAVE(pArray->ClearElements( 0, length ));
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_Array::CreateInstance( CLR_RT_HeapBlock& reference, CLR_UINT32 length, const CLR_RT_TypeDef_Index& cls )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_ReflectionDef_Index reflex;
 
@@ -69,15 +69,15 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance( CLR_RT_HeapBlock& reference, CLR
     reflex.m_levels      = 1;
     reflex.m_data.m_type = cls;
 
-    TINYCLR_SET_AND_LEAVE(CreateInstance( reference, length, reflex ));
+    NANOCLR_SET_AND_LEAVE(CreateInstance( reference, length, reflex ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_Array::CreateInstance( CLR_RT_HeapBlock& reference, CLR_UINT32 length, CLR_RT_Assembly* assm, CLR_UINT32 tk )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock         ref;
     CLR_RT_TypeDef_Instance  cls;
@@ -89,24 +89,24 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance( CLR_RT_HeapBlock& reference, CLR
     }
     else if(def.ResolveToken( tk, assm ))
     {
-        TINYCLR_CHECK_HRESULT(ref.SetReflection( def ));
+        NANOCLR_CHECK_HRESULT(ref.SetReflection( def ));
     }
     else
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     ref.ReflectionData().m_levels++;
 
-    TINYCLR_SET_AND_LEAVE(CreateInstance( reference, length, ref.ReflectionData() ));
+    NANOCLR_SET_AND_LEAVE(CreateInstance( reference, length, ref.ReflectionData() ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_Array::ClearElements( int index, int length )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     const CLR_RT_ReflectionDef_Index& reflex = ReflectionDataConst();
     CLR_UINT8*                        data   = GetElement( index );
@@ -134,14 +134,14 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements( int index, int length )
 
             if(fAllocate)
             {
-                TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( *ptr, reflex.m_data.m_type ));
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( *ptr, reflex.m_data.m_type ));
             }
 
             ptr++; length--;
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_HeapBlock_Array::Relocate()
@@ -174,7 +174,7 @@ bool CLR_RT_HeapBlock_Array::CheckRange( int index, int length, int numOfElement
 HRESULT CLR_RT_HeapBlock_Array::IndexOf( CLR_RT_HeapBlock_Array* array, CLR_RT_HeapBlock& match, int start, int stop, bool fForward, int& index )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     int numElem = array->m_numOfElements;
     int count;
@@ -183,7 +183,7 @@ HRESULT CLR_RT_HeapBlock_Array::IndexOf( CLR_RT_HeapBlock_Array* array, CLR_RT_H
 
     count = stop - start;
 
-    if(CheckRange( start, count, numElem ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    if(CheckRange( start, count, numElem ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
     if(count > 0)
     {
@@ -210,7 +210,7 @@ HRESULT CLR_RT_HeapBlock_Array::IndexOf( CLR_RT_HeapBlock_Array* array, CLR_RT_H
                     if(memcmp( data, &matchPtr->NumericByRef(), sizeElem ) == 0)
                     {
                         index = pos;
-                        TINYCLR_SET_AND_LEAVE(S_OK);
+                        NANOCLR_SET_AND_LEAVE(S_OK);
                     }
 
                     if(--count == 0) break;
@@ -229,7 +229,7 @@ HRESULT CLR_RT_HeapBlock_Array::IndexOf( CLR_RT_HeapBlock_Array* array, CLR_RT_H
                 if(CLR_RT_HeapBlock::Compare_Unsigned_Values( *dataPtr, match ) == 0)
                 {
                     index = pos;
-                    TINYCLR_SET_AND_LEAVE(S_OK);
+                    NANOCLR_SET_AND_LEAVE(S_OK);
                 }
 
                 if(--count == 0) break;
@@ -242,13 +242,13 @@ HRESULT CLR_RT_HeapBlock_Array::IndexOf( CLR_RT_HeapBlock_Array* array, CLR_RT_H
 
     index = -1;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_Array::Copy( CLR_RT_HeapBlock_Array* arraySrc, int indexSrc, CLR_RT_HeapBlock_Array* arrayDst, int indexDst, int length )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(length)
     {
@@ -261,13 +261,13 @@ HRESULT CLR_RT_HeapBlock_Array::Copy( CLR_RT_HeapBlock_Array* arraySrc, int inde
            length + indexSrc > numElemSrc ||
            length + indexDst > numElemDst  )
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         }
 
         //
         // Copy of an array on itself.
         //
-        if(arraySrc == arrayDst && indexSrc == indexDst) TINYCLR_SET_AND_LEAVE(S_OK);
+        if(arraySrc == arrayDst && indexSrc == indexDst) NANOCLR_SET_AND_LEAVE(S_OK);
 
         if(arraySrc->SameHeader( *arrayDst ))
         {
@@ -301,7 +301,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy( CLR_RT_HeapBlock_Array* arraySrc, int inde
 
                 for(int i=0; i<length; i++, ptrSrc += incr, ptrDst += incr)
                 {
-                    TINYCLR_CHECK_HRESULT(ptrDst->Reassign( *ptrSrc ));
+                    NANOCLR_CHECK_HRESULT(ptrDst->Reassign( *ptrSrc ));
                 }
             }
         }
@@ -312,7 +312,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy( CLR_RT_HeapBlock_Array* arraySrc, int inde
             CLR_RT_HeapBlock*     ptrSrc   = (CLR_RT_HeapBlock*)arraySrc->GetElement( indexSrc );
             CLR_RT_HeapBlock*     ptrDst   = (CLR_RT_HeapBlock*)arrayDst->GetElement( indexDst );
             
-            TINYCLR_CHECK_HRESULT(descDst.InitializeFromObject( *arrayDst )); descDst.GetElementType( descDst );
+            NANOCLR_CHECK_HRESULT(descDst.InitializeFromObject( *arrayDst )); descDst.GetElementType( descDst );
 
             for(int i=0; i<length; i++, ptrSrc++, ptrDst++)
             {
@@ -322,15 +322,15 @@ HRESULT CLR_RT_HeapBlock_Array::Copy( CLR_RT_HeapBlock_Array* arraySrc, int inde
                 }
                 else
                 {
-                    TINYCLR_CHECK_HRESULT(descSrc.InitializeFromObject( *ptrSrc ));
+                    NANOCLR_CHECK_HRESULT(descSrc.InitializeFromObject( *ptrSrc ));
 
                     if(CLR_RT_ExecutionEngine::IsInstanceOf( descSrc, descDst ) == false)
                     {
-                        TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
                     }
                 }
 
-                TINYCLR_CHECK_HRESULT(ptrDst->Reassign( *ptrSrc ));
+                NANOCLR_CHECK_HRESULT(ptrDst->Reassign( *ptrSrc ));
             }
         }
         else
@@ -341,11 +341,11 @@ HRESULT CLR_RT_HeapBlock_Array::Copy( CLR_RT_HeapBlock_Array* arraySrc, int inde
             CLR_RT_HeapBlock      elem; elem.SetObjectReference( NULL );
             CLR_RT_ProtectFromGC  gc( elem ); 
 
-            TINYCLR_CHECK_HRESULT(descDst.InitializeFromObject( *arrayDst )); descDst.GetElementType( descDst );
+            NANOCLR_CHECK_HRESULT(descDst.InitializeFromObject( *arrayDst )); descDst.GetElementType( descDst );
 
             for(int i=0; i<length; i++)
             {
-                ref.InitializeArrayReferenceDirect( *arraySrc, indexSrc++ ); TINYCLR_CHECK_HRESULT(elem.LoadFromReference( ref ));
+                ref.InitializeArrayReferenceDirect( *arraySrc, indexSrc++ ); NANOCLR_CHECK_HRESULT(elem.LoadFromReference( ref ));
 
                 if(elem.DataType() == DATATYPE_OBJECT && elem.Dereference() == NULL)
                 {
@@ -353,19 +353,19 @@ HRESULT CLR_RT_HeapBlock_Array::Copy( CLR_RT_HeapBlock_Array* arraySrc, int inde
                 }
                 else
                 {
-                    TINYCLR_CHECK_HRESULT(descSrc.InitializeFromObject( elem ));
+                    NANOCLR_CHECK_HRESULT(descSrc.InitializeFromObject( elem ));
 
                     if(CLR_RT_ExecutionEngine::IsInstanceOf( descSrc, descDst ) == false)
                     {
-                        TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
                     }
                 }
 
-                ref.InitializeArrayReferenceDirect( *arrayDst, indexDst++ ); TINYCLR_CHECK_HRESULT(elem.StoreToReference( ref, 0 ));
+                ref.InitializeArrayReferenceDirect( *arrayDst, indexDst++ ); NANOCLR_CHECK_HRESULT(elem.StoreToReference( ref, 0 ));
             }
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 

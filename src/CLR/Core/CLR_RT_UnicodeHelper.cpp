@@ -498,7 +498,7 @@ UnicodeString::~UnicodeString()
 HRESULT UnicodeString::Assign( LPCSTR string )
 {
     NATIVE_PROFILE_CLR_IO();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     int byteLength = 0;
 
@@ -509,7 +509,7 @@ HRESULT UnicodeString::Assign( LPCSTR string )
 
     m_length = m_unicodeHelper.CountNumberOfCharacters(); 
    
-    if(m_length < 0) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER); 
+    if(m_length < 0) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER); 
     /// We have m_length >=0 now.
 
     byteLength = (m_length + 1) * sizeof (CLR_UINT16);
@@ -524,7 +524,7 @@ HRESULT UnicodeString::Assign( LPCSTR string )
     /// Note m_length > 0 already (see above), hence m_length >= 0 or a valid index.
     m_wCharArray[ m_length ] = 0;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
     
 void UnicodeString::Release()

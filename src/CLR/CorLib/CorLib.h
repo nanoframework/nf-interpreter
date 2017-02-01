@@ -3,14 +3,14 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_CORLIB_NATIVE_H_
-#define _TINYCLR_CORLIB_NATIVE_H_
+#ifndef _NANOCLR_CORLIB_NATIVE_H_
+#define _NANOCLR_CORLIB_NATIVE_H_
 
-#include <TinyCLR_Runtime.h>
-#include <TinyCLR_Checks.h>
-//#include <TinyCLR_Diagnostics.h>
-//#include <TinyCLR_Graphics.h>
-//#include <TinyCLR_Hardware.h>
+#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Checks.h>
+//#include <nanoCLR_Diagnostics.h>
+//#include <nanoCLR_Graphics.h>
+//#include <nanoCLR_Hardware.h>
 
 #include "CorLib_Native.h"
 

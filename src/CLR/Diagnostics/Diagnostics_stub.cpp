@@ -17,7 +17,7 @@ void CLR_Debug::RedirectToString( std::string* str )
 
 #endif
 
-HRESULT TINYCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line )
+HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     return hr;
@@ -96,7 +96,7 @@ const CLR_UINT8* CLR_SkipBodyOfOpcodeCompressed( const CLR_UINT8* ip, CLR_OPCODE
     return 0;
 }
 
-#if defined(TINYCLR_TRACE_INSTRUCTIONS)
+#if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
 void CLR_RT_Assembly::DumpToken( CLR_UINT32 tk )
 {
@@ -132,7 +132,7 @@ void CLR_RT_Assembly::DumpOpcodeDirect( CLR_RT_MethodDef_Instance& call, CLR_PME
 
 #endif
 
-#if defined(TINYCLR_TRACE_CALLS)
+#if defined(NANOCLR_TRACE_CALLS)
 
 void CLR_RT_Assembly::DumpCall( CLR_RT_StackFrame& stack, bool fPush )
 {
@@ -148,7 +148,7 @@ void CLR_RT_Assembly::DumpCall( CLR_RT_MethodDef_Instance& md, LPCSTR szPrefix )
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_TRACE_ERRORS)
+#if defined(NANOCLR_TRACE_ERRORS)
 
 void CLR_RT_DUMP::TYPE( const CLR_RT_TypeDef_Index& cls )
 {
@@ -179,7 +179,7 @@ void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, LPCSTR text )
 
 //--//
 
-#if defined(TINYCLR_TRACE_EXCEPTIONS)
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
 
 void CLR_RT_DUMP::EXCEPTION( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref )
 {
@@ -203,7 +203,7 @@ LPCSTR CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
 
 //--//
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
 
 void* CLR_PROF_CounterCallChain::Prepare( CLR_PROF_Handler* handler )
 {
@@ -229,14 +229,14 @@ void CLR_PROF_CounterCallChain::Leave()
 
 //--//
 
-#if defined(TINYCLR_PROFILE_HANDLER)
+#if defined(NANOCLR_PROFILE_HANDLER)
 
 void CLR_PROF_Handler::Constructor()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
 void CLR_PROF_Handler::Constructor( CLR_PROF_CounterCallChain& target )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
@@ -285,13 +285,13 @@ CLR_UINT64 CLR_PROF_Handler::ResumeTime( CLR_INT64 t )
     return 0;
 }
 
-#endif //#if defined(TINYCLR_PROFILE_HANDLER)
+#endif //#if defined(NANOCLR_PROFILE_HANDLER)
 
 ////////////////////////////////////////////////////////////////////////////////
 
 //--//
 
-#if defined(TINYCLR_PROFILE_NEW)
+#if defined(NANOCLR_PROFILE_NEW)
 
 CLR_PRF_Profiler g_CLR_PRF_Profiler;
 
@@ -476,5 +476,5 @@ HRESULT CLR_PRF_Profiler::Stream_Flush()
     return S_OK;
 }
 
-#endif //#if defined(TINYCLR_PROFILE_NEW)
+#endif //#if defined(NANOCLR_PROFILE_NEW)
 

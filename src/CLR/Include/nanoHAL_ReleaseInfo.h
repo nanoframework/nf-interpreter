@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYHAL_RELEASEINFO_H_
-#define _TINYHAL_RELEASEINFO_H_ 1
+#ifndef _NANOHAL_RELEASEINFO_H_
+#define _NANOHAL_RELEASEINFO_H_ 1
 
 
 struct MFVersion
@@ -61,8 +61,8 @@ struct HalSystemInfo
 // system and to managed code.
 unsigned int GetHalSystemInfo(HalSystemInfo& systemInfo);
 
-// Solution-specific function; see TinyBooterEntry.cpp in your solution's TinyBooter directory for implementation.
-unsigned int TinyBooter_GetReleaseInfo(MfReleaseInfo& releaseInfo);
+// Solution-specific function; see nanoBooterEntry.cpp in your solution's nanoBooter directory for implementation.
+unsigned int nanoBooter_GetReleaseInfo(MfReleaseInfo& releaseInfo);
 
 // Solution-specific function, provide this to allow access to a vendor-provided
 // informative string and build-time version information.
@@ -70,5 +70,5 @@ unsigned int Solution_GetReleaseInfo(MfReleaseInfo&);
 
 //--//
 
-#endif // _TINYHAL_RELEASEINFO_H_
+#endif // _NANOHAL_RELEASEINFO_H_
 

@@ -12,12 +12,12 @@ CLR_INT64 s_TickMask  = ULONGLONGCONSTANT(0x7FFFFFFFFFFFFFFF);
 HRESULT Library_corlib_native_System_DateTime::_ctor___VOID__I4__I4__I4__I4__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* pArg = &(stack.Arg1());
     SYSTEMTIME        st;
 
-    TINYCLR_CLEAR(st);
+    NANOCLR_CLEAR(st);
     st.wYear         = pArg[ 0 ].NumericByRef().s4;
     st.wMonth        = pArg[ 1 ].NumericByRef().s4;
     st.wDay          = pArg[ 2 ].NumericByRef().s4;
@@ -33,132 +33,132 @@ HRESULT Library_corlib_native_System_DateTime::_ctor___VOID__I4__I4__I4__I4__I4_
         (st.wMonth < 1) || (st.wMonth > 12) ||
         (st.wDay < 1) || (st.wDay > 31)) 
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
     
 
     Compress( stack, st );
 
-    TINYCLR_NOCLEANUP();   
+    NANOCLR_NOCLEANUP();   
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Day___I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     SYSTEMTIME st; Expand( stack, st );
 
     stack.SetResult_I4( st.wDay );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_DayOfWeek___SystemDayOfWeek( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     SYSTEMTIME st; Expand( stack, st );
 
     stack.SetResult_I4( st.wDayOfWeek );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_DayOfYear___I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     SYSTEMTIME st ; 
     INT32 days;
     Expand( stack, st );
 
-    TINYCLR_CHECK_HRESULT(Time_AccDaysInMonth( st.wYear, st.wMonth, &days ));
+    NANOCLR_CHECK_HRESULT(Time_AccDaysInMonth( st.wYear, st.wMonth, &days ));
     days += st.wDay;
 
     stack.SetResult_I4( days );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Hour___I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     SYSTEMTIME st; Expand( stack, st );
 
     stack.SetResult_I4( st.wHour );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Millisecond___I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     SYSTEMTIME st; Expand( stack, st );
 
     stack.SetResult_I4( st.wMilliseconds );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Minute___I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     SYSTEMTIME st; Expand( stack, st );
 
     stack.SetResult_I4( st.wMinute );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Month___I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     SYSTEMTIME st; Expand( stack, st );
 
     stack.SetResult_I4( st.wMonth );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Second___I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     SYSTEMTIME st; Expand( stack, st );
 
     stack.SetResult_I4( st.wSecond );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Year___I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     SYSTEMTIME st; Expand( stack, st );
 
     stack.SetResult_I4( st.wYear );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::ToLocalTime___SystemDateTime( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_INT64*                pThis;
     CLR_INT64*                pRes;
@@ -180,13 +180,13 @@ HRESULT Library_corlib_native_System_DateTime::ToLocalTime___SystemDateTime( CLR
         *pRes = *pThis;
     }
     
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_DateTime::ToUniversalTime___SystemDateTime( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_INT64*                pThis;
     CLR_INT64*                pRes;
@@ -206,13 +206,13 @@ HRESULT Library_corlib_native_System_DateTime::ToUniversalTime___SystemDateTime(
         *pRes = *pThis;
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_INT32 year  = stack.Arg0().NumericByRef().s4;
     CLR_INT32 month = stack.Arg1().NumericByRef().s4;
@@ -222,37 +222,37 @@ HRESULT Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4(
 
     stack.SetResult_I4( days );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Now___STATIC__SystemDateTime( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_INT64* pRes = NewObject( stack );
 
     *pRes = Time_GetLocalTime();
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTime( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_INT64* pRes = NewObject( stack );
 
     *pRes = Time_GetUtcTime() | s_UTCMask;
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTime( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_INT64* pRes = NewObject( stack );
 
@@ -268,7 +268,7 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
         *pRes = Time_FromSystemTime( &st );
     }
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//

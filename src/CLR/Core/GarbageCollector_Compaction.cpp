@@ -10,11 +10,11 @@
 CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
 {
     NATIVE_PROFILE_CLR_CORE();
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     g_CLR_PRF_Profiler.RecordHeapCompactionBegin();
 #endif
     
-#if defined(TINYCLR_TRACE_MEMORY_STATS)
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
     if(s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
         CLR_Debug::Printf( "GC: performing heap compaction...\r\n" );
@@ -32,7 +32,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
     m_numberOfCompactions++;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     g_CLR_PRF_Profiler.RecordHeapCompactionEnd();
 #endif
 
@@ -114,19 +114,19 @@ void CLR_RT_GarbageCollector::Heap_Compact()
             //
             //////////////////////////////////////////////////////
 
-#if TINYCLR_VALIDATE_HEAP >= TINYCLR_VALIDATE_HEAP_4_CompactionPlus
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_4_CompactionPlus
             if(IsBlockInFreeList( g_CLR_RT_ExecutionEngine.m_heap, freeRegion, true ) == false)
             {
                 CLR_Debug::Printf( "'freeRegion' is not in a free list!! %08x\r\n", freeRegion );
 
-                TINYCLR_DEBUG_STOP();
+                NANOCLR_DEBUG_STOP();
             }
 
             if(IsBlockInFreeList( g_CLR_RT_ExecutionEngine.m_heap, currentSource, false ))
             {
                 CLR_Debug::Printf( "'currentSource' is in a free list!! %08x\r\n", currentSource );
 
-                TINYCLR_DEBUG_STOP();
+                NANOCLR_DEBUG_STOP();
             }
 #endif
 
@@ -345,7 +345,7 @@ void CLR_RT_GarbageCollector::Heap_Relocate()
 
         Heap_Relocate_Pass( NULL );
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectRelocation();
 #endif
 
@@ -360,11 +360,11 @@ void CLR_RT_GarbageCollector::Heap_Relocate()
 void CLR_RT_GarbageCollector::Heap_Relocate_Pass( RelocateFtn ftn )
 {
     NATIVE_PROFILE_CLR_CORE();
-#if TINYCLR_VALIDATE_HEAP > TINYCLR_VALIDATE_HEAP_0_None
+#if NANOCLR_VALIDATE_HEAP > NANOCLR_VALIDATE_HEAP_0_None
     m_relocWorker = ftn;
 #endif
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
     {
         CLR_RT_HeapBlock_Node* ptr = hc->m_payloadStart;
         CLR_RT_HeapBlock_Node* end = hc->m_payloadEnd;
@@ -377,7 +377,7 @@ void CLR_RT_GarbageCollector::Heap_Relocate_Pass( RelocateFtn ftn )
             ptr += ptr->DataSize();
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     g_CLR_RT_ExecutionEngine.Relocate();
 }
@@ -400,7 +400,7 @@ void CLR_RT_GarbageCollector::Heap_Relocate( void** ref )
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT8* dst = (CLR_UINT8*)*ref;
 
-#if TINYCLR_VALIDATE_HEAP > TINYCLR_VALIDATE_HEAP_0_None
+#if NANOCLR_VALIDATE_HEAP > NANOCLR_VALIDATE_HEAP_0_None
     if(g_CLR_RT_GarbageCollector.m_relocWorker)
     {
         g_CLR_RT_GarbageCollector.m_relocWorker( ref );
@@ -438,7 +438,7 @@ void CLR_RT_GarbageCollector::Heap_Relocate( void** ref )
     }
 }
 
-#if TINYCLR_VALIDATE_HEAP >= TINYCLR_VALIDATE_HEAP_3_Compaction
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_3_Compaction
 
 bool CLR_RT_GarbageCollector::Relocation_JustCheck( void** ref )
 {

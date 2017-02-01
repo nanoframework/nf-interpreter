@@ -10,7 +10,7 @@
  HRESULT CLR_RT_HeapBlock_Timer::CreateInstance( CLR_UINT32 flags, CLR_RT_HeapBlock& owner, CLR_RT_HeapBlock& tmRef )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Timer* timer = NULL;
 
@@ -32,29 +32,29 @@
 
         g_CLR_RT_ExecutionEngine.m_timers.LinkAtBack( timer );
 
-        TINYCLR_SET_AND_LEAVE(CLR_RT_ObjectToEvent_Source::CreateInstance( timer, owner, tmRef ));
+        NANOCLR_SET_AND_LEAVE(CLR_RT_ObjectToEvent_Source::CreateInstance( timer, owner, tmRef ));
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(FAILED(hr))
     {
         if(timer) timer->ReleaseWhenDead();
     }
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_RT_HeapBlock_Timer::ExtractInstance( CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_Timer*& timer )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_ObjectToEvent_Source* src = CLR_RT_ObjectToEvent_Source::ExtractInstance( ref ); FAULT_ON_NULL(src);
 
     timer = (CLR_RT_HeapBlock_Timer*)src->m_eventPtr;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -208,7 +208,7 @@ bool CLR_RT_HeapBlock_Timer::CheckDisposed( CLR_RT_StackFrame& stack )
 HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_UINT32 flags )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock*       pThis =   stack.This();
     CLR_RT_HeapBlock*       args  = &(stack.Arg1());
@@ -225,7 +225,7 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
     {
         FAULT_ON_NULL(args[ 0 ].DereferenceDelegate());
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Timer::CreateInstance( 0, *pThis, pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_timer ] ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Timer::CreateInstance( 0, *pThis, pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_timer ] ));
 
         pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_callback ].Assign( args[ 0 ] );
         pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_state    ].Assign( args[ 1 ] );
@@ -233,7 +233,7 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
         args += 2;
     }
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Timer::ExtractInstance( pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_timer ], timer ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Timer::ExtractInstance( pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_timer ], timer ));
 
     if(flags & CLR_RT_HeapBlock_Timer::c_ACTION_Create)
     {
@@ -268,11 +268,11 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
         //
         // You cannot change a fixed timer after creation.
         //
-        if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_AnyChange) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_AnyChange) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
         if(flags & CLR_RT_HeapBlock_Timer::c_INPUT_Int32)
         {
-            if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) != 0) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) != 0) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
             timer->m_timeExpire    = args[ 0 ].NumericByRef().s4;
             timer->m_timeFrequency = args[ 1 ].NumericByRef().s4;
@@ -284,7 +284,7 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
         {
             CLR_INT64* pVal;
 
-            if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) != 0) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) != 0) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
             pVal = Library_corlib_native_System_TimeSpan::GetValuePtr( args[ 0 ] ); FAULT_ON_NULL(pVal); 
             if (*pVal == -c_TickPerMillisecond) timer->m_timeExpire = TIMEOUT_INFINITE;
@@ -298,7 +298,7 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
         {
             CLR_INT64* pVal;
 
-            if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) == 0) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) == 0) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
             pVal = Library_corlib_native_System_DateTime::GetValuePtr( args[ 0 ] ); FAULT_ON_NULL(pVal); timer->m_timeExpire    = *pVal;
             pVal = Library_corlib_native_System_TimeSpan::GetValuePtr( args[ 1 ] ); FAULT_ON_NULL(pVal); timer->m_timeFrequency = *pVal;
@@ -324,7 +324,7 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
             }
             else
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
             }
         }
 
@@ -342,13 +342,13 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
             }
             else
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
             }
         }
     }
 
     CLR_RT_ExecutionEngine::InvalidateTimerCache();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 

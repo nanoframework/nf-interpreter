@@ -3,7 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Hardware.h>
+#include <nanoCLR_Hardware.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -13,7 +13,7 @@
 HRESULT CLR_HW_Hardware::ManagedHardware_Initialize()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     
     m_interruptData.m_HalQueue.Initialize( (CLR_HW_Hardware::HalInterruptRecord*)&g_scratchInterruptDispatchingStorage, InterruptRecords() );
 
@@ -21,14 +21,14 @@ HRESULT CLR_HW_Hardware::ManagedHardware_Initialize()
 
     m_interruptData.m_queuedInterrupts = 0;
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 
 }
 
 HRESULT CLR_HW_Hardware::SpawnDispatcher()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     // UNDONE: FIXME: CLR_RT_ApplicationInterrupt* interrupt;
     //CLR_RT_HeapBlock_NativeEventDispatcher* ioPort;
@@ -54,9 +54,9 @@ HRESULT CLR_HW_Hardware::SpawnDispatcher()
 
     //CLR_RT_ProtectFromGC gc1 ( *ioPort );
     //
-    //TINYCLR_SET_AND_LEAVE(ioPort->StartDispatch( interrupt, g_CLR_RT_ExecutionEngine.m_interruptThread ));
+    //NANOCLR_SET_AND_LEAVE(ioPort->StartDispatch( interrupt, g_CLR_RT_ExecutionEngine.m_interruptThread ));
     //
-    //TINYCLR_CLEANUP();
+    //NANOCLR_CLEANUP();
 
     //if(FAILED(hr))
     //{
@@ -65,13 +65,13 @@ HRESULT CLR_HW_Hardware::SpawnDispatcher()
 
     //--m_interruptData.m_queuedInterrupts;
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     while(true)
     {
@@ -104,10 +104,10 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
 
     if(m_interruptData.m_queuedInterrupts == 0)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_NO_INTERRUPT);
+        NANOCLR_SET_AND_LEAVE(CLR_E_NO_INTERRUPT);
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(CLR_E_OUT_OF_MEMORY == hr)
     {
@@ -122,18 +122,18 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
         }
     }    
     
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_HW_Hardware::ProcessInterrupts()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CHECK_HRESULT(TransferAllInterruptsToApplicationQueue());
+    NANOCLR_CHECK_HRESULT(TransferAllInterruptsToApplicationQueue());
 
     SpawnDispatcher();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 

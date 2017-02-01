@@ -3,33 +3,33 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_TYPES_H_
-#define _TINYCLR_TYPES_H_
+#ifndef _NANOCLR_TYPES_H_
+#define _NANOCLR_TYPES_H_
 
-#include <TinyClr_PlatformDef.h>
+#include <nanoClr_PlatformDef.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define FAULT_ON_NULL_HR(ptr,hr) if(!(ptr)                             ) TINYCLR_SET_AND_LEAVE((hr)               )
-#define CHECK_ALLOCATION(ptr)    if(!(ptr)                             ) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY)
-#define CHECK_SIZE_RANGE(len)    if( len > CLR_RT_HeapBlock::HB_MaxSize) TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE )
+#define FAULT_ON_NULL_HR(ptr,hr) if(!(ptr)                             ) NANOCLR_SET_AND_LEAVE((hr)               )
+#define CHECK_ALLOCATION(ptr)    if(!(ptr)                             ) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY)
+#define CHECK_SIZE_RANGE(len)    if( len > CLR_RT_HeapBlock::HB_MaxSize) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE )
 
 #define FIMPLIES(x,y) ((!(x)) || (y))
 #define FINRANGE(val,lo,hi) (((val) >= (lo)) && ((val) <= (hi)))
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define TINYCLR_INTEROP_STUB_RETURN(stack) return stack.NotImplementedStub()
-#define TINYCLR_SYSTEM_STUB_RETURN()       return S_OK
-#define TINYCLR_FEATURE_STUB_RETURN()      return CLR_E_NOTIMPL
+#define NANOCLR_INTEROP_STUB_RETURN(stack) return stack.NotImplementedStub()
+#define NANOCLR_SYSTEM_STUB_RETURN()       return S_OK
+#define NANOCLR_FEATURE_STUB_RETURN()      return CLR_E_NOTIMPL
 
 //////////////////////////////////////////////////
 
-#define TINYCLR_PARAMCHECK_BEGIN()                   \
+#define NANOCLR_PARAMCHECK_BEGIN()                   \
 {                                                    \
     HRESULT hrInner = S_OK;
 
-#define TINYCLR_PARAMCHECK_POINTER(ptr)              \
+#define NANOCLR_PARAMCHECK_POINTER(ptr)              \
     {                                                \
         if(ptr == NULL)                              \
         {                                            \
@@ -37,7 +37,7 @@
         }                                            \
     }
 
-#define TINYCLR_PARAMCHECK_POINTER_AND_SET(ptr,val)  \
+#define NANOCLR_PARAMCHECK_POINTER_AND_SET(ptr,val)  \
     {                                                \
         if(ptr == NULL)                              \
         {                                            \
@@ -49,7 +49,7 @@
         }                                            \
     }
 
-#define TINYCLR_PARAMCHECK_NOTNULL(ptr)              \
+#define NANOCLR_PARAMCHECK_NOTNULL(ptr)              \
     {                                                \
         if(ptr == NULL)                              \
         {                                            \
@@ -57,7 +57,7 @@
         }                                            \
     }
 
-#define TINYCLR_PARAMCHECK_STRING_NOT_EMPTY(ptr)     \
+#define NANOCLR_PARAMCHECK_STRING_NOT_EMPTY(ptr)     \
     {                                                \
         if(ptr == NULL || ptr[ 0 ] == 0)               \
         {                                            \
@@ -65,15 +65,15 @@
         }                                            \
     }
 
-#define TINYCLR_PARAMCHECK_END()                     \
-    { TINYCLR_CHECK_HRESULT(hrInner); }              \
+#define NANOCLR_PARAMCHECK_END()                     \
+    { NANOCLR_CHECK_HRESULT(hrInner); }              \
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(_MSC_VER)
-#pragma pack(push, TINYCLR_TYPES_H, 4)
+#pragma pack(push, NANOCLR_TYPES_H, 4)
 #endif
 
 enum CLR_OPCODE
@@ -110,7 +110,7 @@ typedef const CLR_UINT8* CLR_PMETADATA;
 typedef CLR_INT64        CLR_INT64_TEMP_CAST;
 typedef CLR_UINT64       CLR_UINT64_TEMP_CAST;
 
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 typedef double           CLR_DOUBLE_TEMP_CAST;
 #else
 typedef CLR_INT64        CLR_DOUBLE_TEMP_CAST;
@@ -350,7 +350,7 @@ enum CLR_DataType // KEEP IN SYNC WITH Microsoft.SPOT.DataType!!
 
     DATATYPE_LAST_NONPOINTER            = DATATYPE_TIMESPAN, // This is the last type that doesn't need to be relocated.
     DATATYPE_LAST_PRIMITIVE_TO_PRESERVE = DATATYPE_R8      , // All the above types don't need fix-up on assignment.
-#if defined(TINYCLR_NO_ASSEMBLY_STRINGS)    
+#if defined(NANOCLR_NO_ASSEMBLY_STRINGS)    
     DATATYPE_LAST_PRIMITIVE_TO_MARSHAL  = DATATYPE_STRING,   // All the above types can be marshaled by assignment.
 #else    
     DATATYPE_LAST_PRIMITIVE_TO_MARSHAL  = DATATYPE_TIMESPAN, // All the above types can be marshaled by assignment.
@@ -409,7 +409,7 @@ enum CLR_DataType // KEEP IN SYNC WITH Microsoft.SPOT.DataType!!
     DATATYPE_I2C_XACTION                ,
     DATATYPE_I2C_XACTION_LAST           = DATATYPE_VTU_PORT_LAST + 1,
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     DATATYPE_APPDOMAIN_HEAD             ,
     DATATYPE_TRANSPARENT_PROXY          ,
     DATATYPE_APPDOMAIN_ASSEMBLY         ,
@@ -607,20 +607,20 @@ inline CLR_UINT32 CLR_TkFromStream( const CLR_UINT8*& p )
 
 #if defined(__GNUC__)
 
-#define TINYCLR_READ_UNALIGNED_UINT8(arg,ip)  arg = *(const CLR_UINT8 *)ip; ip += sizeof(CLR_UINT8 )
-template<typename T> __inline void TINYCLR_READ_UNALIGNED_UINT16(T& arg, CLR_PMETADATA& ip) 
+#define NANOCLR_READ_UNALIGNED_UINT8(arg,ip)  arg = *(const CLR_UINT8 *)ip; ip += sizeof(CLR_UINT8 )
+template<typename T> __inline void NANOCLR_READ_UNALIGNED_UINT16(T& arg, CLR_PMETADATA& ip) 
 {
     arg  = (CLR_UINT16)(*(const CLR_UINT8 *)ip)     ; ip += sizeof(CLR_UINT8);
     arg |= (CLR_UINT16)(*(const CLR_UINT8 *)ip) << 8; ip += sizeof(CLR_UINT8);
 }
-template<typename T> __inline void TINYCLR_READ_UNALIGNED_UINT32(T& arg, CLR_PMETADATA& ip) 
+template<typename T> __inline void NANOCLR_READ_UNALIGNED_UINT32(T& arg, CLR_PMETADATA& ip) 
 {
     arg  = (CLR_UINT32)(*(const CLR_UINT8 *)ip)      ; ip += sizeof(CLR_UINT8);
     arg |= (CLR_UINT32)(*(const CLR_UINT8 *)ip) <<  8; ip += sizeof(CLR_UINT8);
     arg |= (CLR_UINT32)(*(const CLR_UINT8 *)ip) << 16; ip += sizeof(CLR_UINT8);
     arg |= (CLR_UINT32)(*(const CLR_UINT8 *)ip) << 24; ip += sizeof(CLR_UINT8);
 }
-template<typename T> __inline void TINYCLR_READ_UNALIGNED_UINT64(T& arg, CLR_PMETADATA& ip) 
+template<typename T> __inline void NANOCLR_READ_UNALIGNED_UINT64(T& arg, CLR_PMETADATA& ip) 
 {
     arg  = (CLR_UINT64)(*(const CLR_UINT8 *)ip)      ; ip += sizeof(CLR_UINT8);
     arg |= (CLR_UINT64)(*(const CLR_UINT8 *)ip) <<  8; ip += sizeof(CLR_UINT8);
@@ -632,14 +632,14 @@ template<typename T> __inline void TINYCLR_READ_UNALIGNED_UINT64(T& arg, CLR_PME
     arg |= (CLR_UINT64)(*(const CLR_UINT8 *)ip) << 56; ip += sizeof(CLR_UINT8);
 }
 
-#define TINYCLR_READ_UNALIGNED_INT8(arg,ip)   arg = *(const CLR_INT8 * )ip; ip += sizeof(CLR_INT8  )
-template<typename T> __inline void TINYCLR_READ_UNALIGNED_INT16(T& arg, CLR_PMETADATA& ip) 
+#define NANOCLR_READ_UNALIGNED_INT8(arg,ip)   arg = *(const CLR_INT8 * )ip; ip += sizeof(CLR_INT8  )
+template<typename T> __inline void NANOCLR_READ_UNALIGNED_INT16(T& arg, CLR_PMETADATA& ip) 
 {
     arg  = (CLR_UINT16)(*(const CLR_UINT8 *)ip)      ; ip += sizeof(CLR_UINT8);
     arg |= (CLR_UINT16)(*(const CLR_UINT8 *)ip) <<  8; ip += sizeof(CLR_UINT8);
     arg  = (CLR_INT16)arg;
 }
-template<typename T> __inline void TINYCLR_READ_UNALIGNED_INT32(T& arg, CLR_PMETADATA& ip) 
+template<typename T> __inline void NANOCLR_READ_UNALIGNED_INT32(T& arg, CLR_PMETADATA& ip) 
 {
     arg  = (CLR_UINT32)(*(const CLR_UINT8 *)ip)      ; ip += sizeof(CLR_UINT8);
     arg |= (CLR_UINT32)(*(const CLR_UINT8 *)ip) <<  8; ip += sizeof(CLR_UINT8);
@@ -647,7 +647,7 @@ template<typename T> __inline void TINYCLR_READ_UNALIGNED_INT32(T& arg, CLR_PMET
     arg |= (CLR_UINT32)(*(const CLR_UINT8 *)ip) << 24; ip += sizeof(CLR_UINT8);
     arg  = (CLR_INT32)arg;
 }
-template<typename T> __inline void TINYCLR_READ_UNALIGNED_INT64(T& arg, CLR_PMETADATA& ip) 
+template<typename T> __inline void NANOCLR_READ_UNALIGNED_INT64(T& arg, CLR_PMETADATA& ip) 
 {
     arg  = (CLR_UINT64)(*(const CLR_UINT8 *)ip)      ; ip += sizeof(CLR_UINT8);
     arg |= (CLR_UINT64)(*(const CLR_UINT8 *)ip) <<  8; ip += sizeof(CLR_UINT8);
@@ -663,60 +663,60 @@ template<typename T> __inline void TINYCLR_READ_UNALIGNED_INT64(T& arg, CLR_PMET
 
 #elif defined(_MSC_VER)
 
-#define TINYCLR_READ_UNALIGNED_UINT8(arg,ip)  arg = *(__declspec(align(1)) const CLR_UINT8 *)ip; ip += sizeof(CLR_UINT8 )
-#define TINYCLR_READ_UNALIGNED_UINT16(arg,ip) arg = *(__declspec(align(1)) const CLR_UINT16*)ip; ip += sizeof(CLR_UINT16)
-#define TINYCLR_READ_UNALIGNED_UINT32(arg,ip) arg = *(__declspec(align(1)) const CLR_UINT32*)ip; ip += sizeof(CLR_UINT32)
-#define TINYCLR_READ_UNALIGNED_UINT64(arg,ip) arg = *(__declspec(align(1)) const CLR_UINT64*)ip; ip += sizeof(CLR_UINT64)
+#define NANOCLR_READ_UNALIGNED_UINT8(arg,ip)  arg = *(__declspec(align(1)) const CLR_UINT8 *)ip; ip += sizeof(CLR_UINT8 )
+#define NANOCLR_READ_UNALIGNED_UINT16(arg,ip) arg = *(__declspec(align(1)) const CLR_UINT16*)ip; ip += sizeof(CLR_UINT16)
+#define NANOCLR_READ_UNALIGNED_UINT32(arg,ip) arg = *(__declspec(align(1)) const CLR_UINT32*)ip; ip += sizeof(CLR_UINT32)
+#define NANOCLR_READ_UNALIGNED_UINT64(arg,ip) arg = *(__declspec(align(1)) const CLR_UINT64*)ip; ip += sizeof(CLR_UINT64)
 
-#define TINYCLR_READ_UNALIGNED_INT8(arg,ip)   arg = *(__declspec(align(1)) const CLR_INT8 * )ip; ip += sizeof(CLR_INT8  )
-#define TINYCLR_READ_UNALIGNED_INT16(arg,ip)  arg = *(__declspec(align(1)) const CLR_INT16* )ip; ip += sizeof(CLR_INT16 )
-#define TINYCLR_READ_UNALIGNED_INT32(arg,ip)  arg = *(__declspec(align(1)) const CLR_INT32* )ip; ip += sizeof(CLR_INT32 )
-#define TINYCLR_READ_UNALIGNED_INT64(arg,ip)  arg = *(__declspec(align(1)) const CLR_INT64* )ip; ip += sizeof(CLR_INT64 )
+#define NANOCLR_READ_UNALIGNED_INT8(arg,ip)   arg = *(__declspec(align(1)) const CLR_INT8 * )ip; ip += sizeof(CLR_INT8  )
+#define NANOCLR_READ_UNALIGNED_INT16(arg,ip)  arg = *(__declspec(align(1)) const CLR_INT16* )ip; ip += sizeof(CLR_INT16 )
+#define NANOCLR_READ_UNALIGNED_INT32(arg,ip)  arg = *(__declspec(align(1)) const CLR_INT32* )ip; ip += sizeof(CLR_INT32 )
+#define NANOCLR_READ_UNALIGNED_INT64(arg,ip)  arg = *(__declspec(align(1)) const CLR_INT64* )ip; ip += sizeof(CLR_INT64 )
 
 //--//
 
-#define TINYCLR_WRITE_UNALIGNED_UINT8(ip,arg)  *(__declspec(align(1)) CLR_UINT8 *)ip = arg; ip += sizeof(CLR_UINT8 )
-#define TINYCLR_WRITE_UNALIGNED_UINT16(ip,arg) *(__declspec(align(1)) CLR_UINT16*)ip = arg; ip += sizeof(CLR_UINT16)
-#define TINYCLR_WRITE_UNALIGNED_UINT32(ip,arg) *(__declspec(align(1)) CLR_UINT32*)ip = arg; ip += sizeof(CLR_UINT32)
-#define TINYCLR_WRITE_UNALIGNED_UINT64(ip,arg) *(__declspec(align(1)) CLR_UINT64*)ip = arg; ip += sizeof(CLR_UINT64)
+#define NANOCLR_WRITE_UNALIGNED_UINT8(ip,arg)  *(__declspec(align(1)) CLR_UINT8 *)ip = arg; ip += sizeof(CLR_UINT8 )
+#define NANOCLR_WRITE_UNALIGNED_UINT16(ip,arg) *(__declspec(align(1)) CLR_UINT16*)ip = arg; ip += sizeof(CLR_UINT16)
+#define NANOCLR_WRITE_UNALIGNED_UINT32(ip,arg) *(__declspec(align(1)) CLR_UINT32*)ip = arg; ip += sizeof(CLR_UINT32)
+#define NANOCLR_WRITE_UNALIGNED_UINT64(ip,arg) *(__declspec(align(1)) CLR_UINT64*)ip = arg; ip += sizeof(CLR_UINT64)
 
-#define TINYCLR_WRITE_UNALIGNED_INT8(ip,arg)   *(__declspec(align(1)) CLR_INT8 * )ip = arg; ip += sizeof(CLR_INT8  )
-#define TINYCLR_WRITE_UNALIGNED_INT16(ip,arg)  *(__declspec(align(1)) CLR_INT16* )ip = arg; ip += sizeof(CLR_INT16 )
-#define TINYCLR_WRITE_UNALIGNED_INT32(ip,arg)  *(__declspec(align(1)) CLR_INT32* )ip = arg; ip += sizeof(CLR_INT32 )
-#define TINYCLR_WRITE_UNALIGNED_INT64(ip,arg)  *(__declspec(align(1)) CLR_INT64* )ip = arg; ip += sizeof(CLR_INT64 )
+#define NANOCLR_WRITE_UNALIGNED_INT8(ip,arg)   *(__declspec(align(1)) CLR_INT8 * )ip = arg; ip += sizeof(CLR_INT8  )
+#define NANOCLR_WRITE_UNALIGNED_INT16(ip,arg)  *(__declspec(align(1)) CLR_INT16* )ip = arg; ip += sizeof(CLR_INT16 )
+#define NANOCLR_WRITE_UNALIGNED_INT32(ip,arg)  *(__declspec(align(1)) CLR_INT32* )ip = arg; ip += sizeof(CLR_INT32 )
+#define NANOCLR_WRITE_UNALIGNED_INT64(ip,arg)  *(__declspec(align(1)) CLR_INT64* )ip = arg; ip += sizeof(CLR_INT64 )
 
 #else // TODO: __packed is compiler specific... Which compiler is this for?
 
-#define TINYCLR_READ_UNALIGNED_UINT8(arg,ip)  arg = *(__packed CLR_UINT8 *)ip; ip += sizeof(CLR_UINT8 )
-#define TINYCLR_READ_UNALIGNED_UINT16(arg,ip) arg = *(__packed CLR_UINT16*)ip; ip += sizeof(CLR_UINT16)
-#define TINYCLR_READ_UNALIGNED_UINT32(arg,ip) arg = *(__packed CLR_UINT32*)ip; ip += sizeof(CLR_UINT32)
-#define TINYCLR_READ_UNALIGNED_UINT64(arg,ip) arg = *(__packed CLR_UINT64*)ip; ip += sizeof(CLR_UINT64)
-#define TINYCLR_READ_UNALIGNED_INT8(arg,ip)   arg = *(__packed CLR_INT8 * )ip; ip += sizeof(CLR_INT8  )
-#define TINYCLR_READ_UNALIGNED_INT16(arg,ip)  arg = *(__packed CLR_INT16* )ip; ip += sizeof(CLR_INT16 )
-#define TINYCLR_READ_UNALIGNED_INT32(arg,ip)  arg = *(__packed CLR_INT32* )ip; ip += sizeof(CLR_INT32 )
-#define TINYCLR_READ_UNALIGNED_INT64(arg,ip)  arg = *(__packed CLR_INT64* )ip; ip += sizeof(CLR_INT64 )
+#define NANOCLR_READ_UNALIGNED_UINT8(arg,ip)  arg = *(__packed CLR_UINT8 *)ip; ip += sizeof(CLR_UINT8 )
+#define NANOCLR_READ_UNALIGNED_UINT16(arg,ip) arg = *(__packed CLR_UINT16*)ip; ip += sizeof(CLR_UINT16)
+#define NANOCLR_READ_UNALIGNED_UINT32(arg,ip) arg = *(__packed CLR_UINT32*)ip; ip += sizeof(CLR_UINT32)
+#define NANOCLR_READ_UNALIGNED_UINT64(arg,ip) arg = *(__packed CLR_UINT64*)ip; ip += sizeof(CLR_UINT64)
+#define NANOCLR_READ_UNALIGNED_INT8(arg,ip)   arg = *(__packed CLR_INT8 * )ip; ip += sizeof(CLR_INT8  )
+#define NANOCLR_READ_UNALIGNED_INT16(arg,ip)  arg = *(__packed CLR_INT16* )ip; ip += sizeof(CLR_INT16 )
+#define NANOCLR_READ_UNALIGNED_INT32(arg,ip)  arg = *(__packed CLR_INT32* )ip; ip += sizeof(CLR_INT32 )
+#define NANOCLR_READ_UNALIGNED_INT64(arg,ip)  arg = *(__packed CLR_INT64* )ip; ip += sizeof(CLR_INT64 )
 
 //--//
 
-#define TINYCLR_WRITE_UNALIGNED_UINT8(ip,arg)  *(__packed CLR_UINT8 *)ip = arg; ip += sizeof(CLR_UINT8 )
-#define TINYCLR_WRITE_UNALIGNED_UINT16(ip,arg) *(__packed CLR_UINT16*)ip = arg; ip += sizeof(CLR_UINT16)
-#define TINYCLR_WRITE_UNALIGNED_UINT32(ip,arg) *(__packed CLR_UINT32*)ip = arg; ip += sizeof(CLR_UINT32)
-#define TINYCLR_WRITE_UNALIGNED_UINT64(ip,arg) *(__packed CLR_UINT64*)ip = arg; ip += sizeof(CLR_UINT64)
+#define NANOCLR_WRITE_UNALIGNED_UINT8(ip,arg)  *(__packed CLR_UINT8 *)ip = arg; ip += sizeof(CLR_UINT8 )
+#define NANOCLR_WRITE_UNALIGNED_UINT16(ip,arg) *(__packed CLR_UINT16*)ip = arg; ip += sizeof(CLR_UINT16)
+#define NANOCLR_WRITE_UNALIGNED_UINT32(ip,arg) *(__packed CLR_UINT32*)ip = arg; ip += sizeof(CLR_UINT32)
+#define NANOCLR_WRITE_UNALIGNED_UINT64(ip,arg) *(__packed CLR_UINT64*)ip = arg; ip += sizeof(CLR_UINT64)
 
-#define TINYCLR_WRITE_UNALIGNED_INT8(ip,arg)   *(__packed CLR_INT8 * )ip = arg; ip += sizeof(CLR_INT8  )
-#define TINYCLR_WRITE_UNALIGNED_INT16(ip,arg)  *(__packed CLR_INT16* )ip = arg; ip += sizeof(CLR_INT16 )
-#define TINYCLR_WRITE_UNALIGNED_INT32(ip,arg)  *(__packed CLR_INT32* )ip = arg; ip += sizeof(CLR_INT32 )
-#define TINYCLR_WRITE_UNALIGNED_INT64(ip,arg)  *(__packed CLR_INT64* )ip = arg; ip += sizeof(CLR_INT64 )
+#define NANOCLR_WRITE_UNALIGNED_INT8(ip,arg)   *(__packed CLR_INT8 * )ip = arg; ip += sizeof(CLR_INT8  )
+#define NANOCLR_WRITE_UNALIGNED_INT16(ip,arg)  *(__packed CLR_INT16* )ip = arg; ip += sizeof(CLR_INT16 )
+#define NANOCLR_WRITE_UNALIGNED_INT32(ip,arg)  *(__packed CLR_INT32* )ip = arg; ip += sizeof(CLR_INT32 )
+#define NANOCLR_WRITE_UNALIGNED_INT64(ip,arg)  *(__packed CLR_INT64* )ip = arg; ip += sizeof(CLR_INT64 )
 
 #endif
 
 //--//
-#define TINYCLR_READ_UNALIGNED_OPCODE(op,ip) op = CLR_OPCODE(*ip++); if(op == CEE_PREFIX1) { opcode = CLR_OPCODE(*ip++ + 256); }
+#define NANOCLR_READ_UNALIGNED_OPCODE(op,ip) op = CLR_OPCODE(*ip++); if(op == CEE_PREFIX1) { opcode = CLR_OPCODE(*ip++ + 256); }
 
-#define TINYCLR_READ_UNALIGNED_COMPRESSED_FIELDTOKEN(arg,ip)  TINYCLR_READ_UNALIGNED_UINT16( arg, ip ); arg = CLR_UncompressFieldToken ( arg )
-#define TINYCLR_READ_UNALIGNED_COMPRESSED_METHODTOKEN(arg,ip) TINYCLR_READ_UNALIGNED_UINT16( arg, ip ); arg = CLR_UncompressMethodToken( arg )
-#define TINYCLR_READ_UNALIGNED_COMPRESSED_TYPETOKEN(arg,ip)   TINYCLR_READ_UNALIGNED_UINT16( arg, ip ); arg = CLR_UncompressTypeToken  ( arg )
-#define TINYCLR_READ_UNALIGNED_COMPRESSED_STRINGTOKEN(arg,ip) TINYCLR_READ_UNALIGNED_UINT16( arg, ip ); arg = CLR_UncompressStringToken( arg )
+#define NANOCLR_READ_UNALIGNED_COMPRESSED_FIELDTOKEN(arg,ip)  NANOCLR_READ_UNALIGNED_UINT16( arg, ip ); arg = CLR_UncompressFieldToken ( arg )
+#define NANOCLR_READ_UNALIGNED_COMPRESSED_METHODTOKEN(arg,ip) NANOCLR_READ_UNALIGNED_UINT16( arg, ip ); arg = CLR_UncompressMethodToken( arg )
+#define NANOCLR_READ_UNALIGNED_COMPRESSED_TYPETOKEN(arg,ip)   NANOCLR_READ_UNALIGNED_UINT16( arg, ip ); arg = CLR_UncompressTypeToken  ( arg )
+#define NANOCLR_READ_UNALIGNED_COMPRESSED_STRINGTOKEN(arg,ip) NANOCLR_READ_UNALIGNED_UINT16( arg, ip ); arg = CLR_UncompressStringToken( arg )
 
 
 //--//
@@ -753,21 +753,21 @@ inline CLR_OPCODE CLR_ReadNextOpcodeCompressed( CLR_PMETADATA& ip )
 
 //--//
 
-#define FETCH_ARG_UINT8(arg,ip)                   CLR_UINT32 arg; TINYCLR_READ_UNALIGNED_UINT8 ( arg, ip )
-#define FETCH_ARG_UINT16(arg,ip)                  CLR_UINT32 arg; TINYCLR_READ_UNALIGNED_UINT16( arg, ip )
-#define FETCH_ARG_UINT32(arg,ip)                  CLR_UINT32 arg; TINYCLR_READ_UNALIGNED_UINT32( arg, ip )
-#define FETCH_ARG_UINT64(arg,ip)                  CLR_UINT64 arg; TINYCLR_READ_UNALIGNED_UINT64( arg, ip )
+#define FETCH_ARG_UINT8(arg,ip)                   CLR_UINT32 arg; NANOCLR_READ_UNALIGNED_UINT8 ( arg, ip )
+#define FETCH_ARG_UINT16(arg,ip)                  CLR_UINT32 arg; NANOCLR_READ_UNALIGNED_UINT16( arg, ip )
+#define FETCH_ARG_UINT32(arg,ip)                  CLR_UINT32 arg; NANOCLR_READ_UNALIGNED_UINT32( arg, ip )
+#define FETCH_ARG_UINT64(arg,ip)                  CLR_UINT64 arg; NANOCLR_READ_UNALIGNED_UINT64( arg, ip )
 
-#define FETCH_ARG_INT8(arg,ip)                    CLR_INT32  arg; TINYCLR_READ_UNALIGNED_INT8 ( arg, ip )
-#define FETCH_ARG_INT16(arg,ip)                   CLR_INT32  arg; TINYCLR_READ_UNALIGNED_INT16( arg, ip )
-#define FETCH_ARG_INT32(arg,ip)                   CLR_INT32  arg; TINYCLR_READ_UNALIGNED_INT32( arg, ip )
-#define FETCH_ARG_INT64(arg,ip)                   CLR_INT64  arg; TINYCLR_READ_UNALIGNED_INT64( arg, ip )
+#define FETCH_ARG_INT8(arg,ip)                    CLR_INT32  arg; NANOCLR_READ_UNALIGNED_INT8 ( arg, ip )
+#define FETCH_ARG_INT16(arg,ip)                   CLR_INT32  arg; NANOCLR_READ_UNALIGNED_INT16( arg, ip )
+#define FETCH_ARG_INT32(arg,ip)                   CLR_INT32  arg; NANOCLR_READ_UNALIGNED_INT32( arg, ip )
+#define FETCH_ARG_INT64(arg,ip)                   CLR_INT64  arg; NANOCLR_READ_UNALIGNED_INT64( arg, ip )
 
-#define FETCH_ARG_COMPRESSED_STRINGTOKEN(arg,ip) CLR_UINT32 arg; TINYCLR_READ_UNALIGNED_COMPRESSED_STRINGTOKEN( arg, ip )
-#define FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip)  CLR_UINT32 arg; TINYCLR_READ_UNALIGNED_COMPRESSED_FIELDTOKEN ( arg, ip )
-#define FETCH_ARG_COMPRESSED_TYPETOKEN(arg,ip)   CLR_UINT32 arg; TINYCLR_READ_UNALIGNED_COMPRESSED_TYPETOKEN  ( arg, ip )
-#define FETCH_ARG_COMPRESSED_METHODTOKEN(arg,ip) CLR_UINT32 arg; TINYCLR_READ_UNALIGNED_COMPRESSED_METHODTOKEN( arg, ip )
-#define FETCH_ARG_TOKEN(arg,ip)                  CLR_UINT32 arg; TINYCLR_READ_UNALIGNED_UINT32                ( arg, ip )
+#define FETCH_ARG_COMPRESSED_STRINGTOKEN(arg,ip) CLR_UINT32 arg; NANOCLR_READ_UNALIGNED_COMPRESSED_STRINGTOKEN( arg, ip )
+#define FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip)  CLR_UINT32 arg; NANOCLR_READ_UNALIGNED_COMPRESSED_FIELDTOKEN ( arg, ip )
+#define FETCH_ARG_COMPRESSED_TYPETOKEN(arg,ip)   CLR_UINT32 arg; NANOCLR_READ_UNALIGNED_COMPRESSED_TYPETOKEN  ( arg, ip )
+#define FETCH_ARG_COMPRESSED_METHODTOKEN(arg,ip) CLR_UINT32 arg; NANOCLR_READ_UNALIGNED_COMPRESSED_METHODTOKEN( arg, ip )
+#define FETCH_ARG_TOKEN(arg,ip)                  CLR_UINT32 arg; NANOCLR_READ_UNALIGNED_UINT32                ( arg, ip )
 
 //--//
 
@@ -785,11 +785,11 @@ extern bool CLR_SafeSprintf ( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, .
 
 #if !defined(BUILD_RTM)
 
-#define TINYCLR_DEBUG_STOP() _ASSERTE(FALSE)
+#define NANOCLR_DEBUG_STOP() _ASSERTE(FALSE)
 
 #else
 
-#define TINYCLR_DEBUG_STOP() CPU_Reset()
+#define NANOCLR_DEBUG_STOP() CPU_Reset()
 
 #endif
 
@@ -1135,8 +1135,8 @@ struct CLR_RECORD_RESOURCE
 
 
 #if defined(_MSC_VER)
-#pragma pack(pop, TINYCLR_TYPES_H)
+#pragma pack(pop, NANOCLR_TYPES_H)
 #endif
 
-#endif // _TINYCLR_TYPES_H_
+#endif // _NANOCLR_TYPES_H_
 

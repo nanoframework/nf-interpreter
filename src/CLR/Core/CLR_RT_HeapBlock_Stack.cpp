@@ -9,13 +9,13 @@
 HRESULT CLR_RT_HeapBlock_Stack::Pop( CLR_RT_HeapBlock*& value )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* array   = GetArray();
     CLR_INT32               size    = GetSize();
     CLR_RT_HeapBlock*       removed;
 
-    if(size == 0) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    if(size == 0) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     
     removed = (CLR_RT_HeapBlock*)array->GetElement( array->m_numOfElements - size );
 
@@ -25,14 +25,14 @@ HRESULT CLR_RT_HeapBlock_Stack::Pop( CLR_RT_HeapBlock*& value )
 
     SetSize( size - 1 );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 // May Trigger GC, but parameter value will be protected
 HRESULT CLR_RT_HeapBlock_Stack::Push( CLR_RT_HeapBlock* value )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* array    = GetArray();
     CLR_INT32               size     = GetSize();
@@ -50,7 +50,7 @@ HRESULT CLR_RT_HeapBlock_Stack::Push( CLR_RT_HeapBlock* value )
 
         capacity *= 2;
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( newArrayHB, capacity, g_CLR_RT_WellKnownTypes.m_Object ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( newArrayHB, capacity, g_CLR_RT_WellKnownTypes.m_Object ));
 
         newArray = newArrayHB.DereferenceArray();
 
@@ -66,37 +66,37 @@ HRESULT CLR_RT_HeapBlock_Stack::Push( CLR_RT_HeapBlock* value )
 
     SetSize( size );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_Stack::Peek( CLR_RT_HeapBlock*& value )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* array = GetArray();
     CLR_INT32               size  = GetSize();
 
-    if(size == 0) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    if(size == 0) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
 
     value = ((CLR_RT_HeapBlock*)array->GetElement( array->m_numOfElements - size ))->Dereference();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_Stack::Clear()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* array = GetArray();
     CLR_INT32               size  = GetSize();
 
-    TINYCLR_CHECK_HRESULT(array->ClearElements( array->m_numOfElements - size, size ));
+    NANOCLR_CHECK_HRESULT(array->ClearElements( array->m_numOfElements - size, size ));
 
     SetSize( 0 );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//

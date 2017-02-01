@@ -16,7 +16,7 @@
 HRESULT CLR_RT_HeapBlock_WaitForObject::CreateInstance( CLR_RT_Thread* caller, const CLR_INT64& timeExpire, CLR_RT_HeapBlock* objects, CLR_UINT32 cObjects, bool fWaitAll )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     //
     // Create a request and stop the calling thread.
@@ -38,9 +38,9 @@ HRESULT CLR_RT_HeapBlock_WaitForObject::CreateInstance( CLR_RT_Thread* caller, c
     caller->m_status               = CLR_RT_Thread::TH_S_Waiting;
     caller->m_waitForObject_Result = CLR_RT_Thread::TH_WAIT_RESULT_INIT;
 
-    TINYCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
+    NANOCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_HeapBlock_WaitForObject::TryWaitForSignal( CLR_RT_Thread* th )
@@ -128,7 +128,7 @@ void CLR_RT_HeapBlock_WaitForObject::SignalObject( CLR_RT_HeapBlock& object )
     NATIVE_PROFILE_CLR_CORE();
     object.SetFlags( CLR_RT_HeapBlock::HB_Signaled );
 
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsWaiting)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsWaiting)
     {
         CLR_RT_HeapBlock_WaitForObject::TryWaitForSignal( th );
 
@@ -140,13 +140,13 @@ void CLR_RT_HeapBlock_WaitForObject::SignalObject( CLR_RT_HeapBlock& object )
             break;
         }        
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 HRESULT CLR_RT_HeapBlock_WaitForObject::WaitForSignal( CLR_RT_StackFrame& stack, const CLR_INT64& timeExpire, CLR_RT_HeapBlock* objects, CLR_UINT32 cObjects, bool fWaitAll )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(stack.m_customState == 0)
     {        
@@ -154,7 +154,7 @@ HRESULT CLR_RT_HeapBlock_WaitForObject::WaitForSignal( CLR_RT_StackFrame& stack,
 
         stack.m_customState = 1;
 
-        if(cObjects > 64) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        if(cObjects > 64) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
         for(CLR_UINT32 i = 0; i < cObjects; i++)
         {
@@ -167,11 +167,11 @@ HRESULT CLR_RT_HeapBlock_WaitForObject::WaitForSignal( CLR_RT_StackFrame& stack,
 
         if(!TryWaitForSignal( stack.m_owningThread, objects, cObjects, fWaitAll ))
         {
-            TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_WaitForObject::CreateInstance( stack.m_owningThread, timeExpire, objects, cObjects, fWaitAll ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_WaitForObject::CreateInstance( stack.m_owningThread, timeExpire, objects, cObjects, fWaitAll ));
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 
