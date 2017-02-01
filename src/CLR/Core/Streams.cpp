@@ -294,3 +294,4 @@ HRESULT CLR_RT_HeapBlock_MemoryStream::WriteArray( const CLR_UINT8* buf, CLR_UIN
 
     TINYCLR_NOCLEANUP();
 }
+

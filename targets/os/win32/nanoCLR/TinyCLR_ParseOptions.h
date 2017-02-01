@@ -134,3 +134,4 @@ struct CLR_RT_ParseOptions
 #endif
 
 #endif // _TINYCLR_PARSEOPTIONS_H_
+

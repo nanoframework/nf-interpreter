@@ -186,3 +186,4 @@ void CLR_RT_HeapBlock_WaitForObject::Relocate()
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_GarbageCollector::Heap_Relocate( GetWaitForObjects(), m_cObjects );
 }
+

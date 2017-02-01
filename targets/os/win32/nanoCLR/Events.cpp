@@ -55,3 +55,4 @@ void Events_SetBoolTimer( BOOL* TimerCompleteFlag, UINT32 MillisecondsFromNow )
 //{
 //    _ASSERTE(FALSE);
 //}
+

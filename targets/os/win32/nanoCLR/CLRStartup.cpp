@@ -700,3 +700,4 @@ void ClrStartup( CLR_SETTINGS params )
         }
     } while( softReboot );
 }
+

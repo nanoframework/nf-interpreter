@@ -163,3 +163,4 @@ extern "C" {
 #endif // HAL_USE_STM32_FLASH
 
 #endif // FLASH_LLD_H
+

@@ -415,3 +415,4 @@ void CLR_RT_HeapBlock_WeakReference::RecoverObjects( CLR_RT_DblLinkedList& lstHe
     }
     TINYCLR_FOREACH_NODE_END();
 }
+

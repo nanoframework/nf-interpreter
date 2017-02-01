@@ -110,3 +110,4 @@ CLR_RT_HeapBlock_String* CLR_RT_HeapBlock_String::GetStringEmpty()
 {
     return g_CLR_RT_TypeSystem.m_assemblyMscorlib->GetStaticField( Library_corlib_native_System_String::FIELD_STATIC__Empty )->DereferenceString(); 
 }
+

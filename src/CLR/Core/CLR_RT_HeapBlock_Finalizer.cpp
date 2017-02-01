@@ -77,3 +77,4 @@ void CLR_RT_HeapBlock_Finalizer::RemoveInstance( CLR_RT_HeapBlock* object, CLR_R
     }
     TINYCLR_FOREACH_NODE_END();
 }
+

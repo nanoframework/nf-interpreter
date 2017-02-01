@@ -1149,3 +1149,4 @@ struct Library_corlib_native_System_Collections_Hashtable__ValueCollection
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib;
 
 #endif // _CORLIB_NATIVE_H_
+

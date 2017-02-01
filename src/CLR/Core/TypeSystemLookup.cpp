@@ -1773,3 +1773,4 @@ const CLR_RT_LogicalOpcodeLookup c_CLR_RT_LogicalOpcodeLookup[] =
 
     OPDEF(Unsupported           , VAL_NONE       ),    // LO_Unsupported               = 0x40,
 };
+

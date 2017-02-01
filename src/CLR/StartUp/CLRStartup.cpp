@@ -18,3 +18,4 @@ void ClrReboot()
     CLR_EE_REBOOT_SET(ClrOnly);
     CLR_EE_DBG_SET(RebootPending);
 }
+

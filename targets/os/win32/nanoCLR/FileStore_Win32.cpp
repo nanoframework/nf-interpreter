@@ -234,3 +234,4 @@ void CLR_RT_FileStore::ExtractTokensFromString( LPCWSTR szLine, CLR_RT_StringVec
         vec.push_back( szLine );
     }
 }
+

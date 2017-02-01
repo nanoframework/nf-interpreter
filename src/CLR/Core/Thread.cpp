@@ -1270,3 +1270,4 @@ HRESULT CLR_RT_Thread::ProcessException()
 
     TINYCLR_NOCLEANUP();
 }
+

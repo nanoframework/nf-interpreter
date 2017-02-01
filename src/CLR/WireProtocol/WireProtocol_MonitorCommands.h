@@ -65,3 +65,4 @@ bool Monitor_WriteMemory(WP_Message* message);
 bool Monitor_Reboot(WP_Message* message);
 
 #endif //_WIREPROTOCOL_COMMANDS_H_
+

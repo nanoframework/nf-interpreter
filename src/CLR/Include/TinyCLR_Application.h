@@ -18,3 +18,4 @@ extern void ClrStartup(CLR_SETTINGS params);
 extern void ClrExit();
 
 #endif
+

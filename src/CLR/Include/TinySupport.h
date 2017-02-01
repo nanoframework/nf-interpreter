@@ -23,3 +23,4 @@ bool LZ77_Compress(LPCWSTR inFileText, LPCWSTR outFileText, UINT8* prefix, size_
 #endif
 
 #endif // _SUPPORT_TINYSUPPORT_H_
+

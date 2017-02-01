@@ -396,3 +396,4 @@ UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc)
 
     return crc;
 }
+

@@ -182,3 +182,4 @@ struct WP_CompileCheck
 #endif
 
 #endif // _SUPPORT_WIREPROTOCOL_H_
+

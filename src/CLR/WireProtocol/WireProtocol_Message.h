@@ -32,3 +32,4 @@ void ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* pt
 uint32_t SUPPORT_ComputeCRC(const void* rgBlock, int nLength, uint32_t crc);
 
 #endif // _WIREPROTOCOL_MESSAGE_H_
+

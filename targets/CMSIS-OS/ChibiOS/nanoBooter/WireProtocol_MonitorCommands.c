@@ -112,3 +112,4 @@ bool Monitor_Reboot(WP_Message* message)
 
     return true;
 }
+

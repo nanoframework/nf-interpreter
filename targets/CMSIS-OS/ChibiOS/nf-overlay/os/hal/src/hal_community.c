@@ -37,3 +37,4 @@ void halCommunityInit(void) {
 }
 
 #endif // HAL_USE_COMMUNITY
+

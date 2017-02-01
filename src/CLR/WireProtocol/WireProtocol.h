@@ -158,3 +158,4 @@ struct WP_CompileCheck
 };
 
 #endif // _WIREPROTOCOL_H_
+

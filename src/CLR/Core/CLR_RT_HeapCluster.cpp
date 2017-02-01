@@ -289,3 +289,4 @@ void CLR_RT_HeapCluster::ValidateBlock( CLR_RT_HeapBlock* ptr )
 }
 
 #endif
+

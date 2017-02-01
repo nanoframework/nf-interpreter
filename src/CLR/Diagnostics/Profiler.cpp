@@ -872,3 +872,4 @@ HRESULT CLR_PRF_Profiler::Stream_Flush()
 }
 
 #endif //#if defined(TINYCLR_PROFILE_NEW)
+

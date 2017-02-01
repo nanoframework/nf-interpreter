@@ -77,3 +77,4 @@ HRESULT CLR_Checks::VerifyUnsupportedInstruction( CLR_OPCODE op )
 
     TINYCLR_NOCLEANUP();
 }
+

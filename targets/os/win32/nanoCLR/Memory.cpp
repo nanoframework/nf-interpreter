@@ -49,3 +49,4 @@ void CustomHeapLocation( UINT8*& BaseAddress, UINT32& SizeInBytes )
     BaseAddress = s_CustomHeap_Start;
     SizeInBytes = s_Memory_Length;
 }
+

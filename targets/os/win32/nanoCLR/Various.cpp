@@ -612,3 +612,4 @@ BOOL Charger_Status( UINT32& Status )
 //{
 //    return HAL_Windows_HasGlobalLock();
 //}
+

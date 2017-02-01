@@ -34,3 +34,4 @@ __attribute__((weak)) bool Monitor_Reboot(WP_Message* message)
    // default to false
    return false;
 }
+

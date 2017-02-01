@@ -112,3 +112,4 @@ bool WP_App_ProcessPayload(WP_Message* message)
 
     return true;    
 }
+

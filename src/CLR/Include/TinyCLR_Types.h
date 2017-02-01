@@ -1139,3 +1139,4 @@ struct CLR_RECORD_RESOURCE
 #endif
 
 #endif // _TINYCLR_TYPES_H_
+

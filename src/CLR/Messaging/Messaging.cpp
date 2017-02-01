@@ -653,3 +653,4 @@ void CLR_Messaging::ReplyToCommand( WP_Message* msg, bool fSuccess, bool fCritic
     NATIVE_PROFILE_CLR_MESSAGING();
     ReplyToCommand( msg, fSuccess, fCritical, NULL, 0 );
 }
+

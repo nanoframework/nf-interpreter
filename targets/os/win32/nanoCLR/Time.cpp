@@ -121,3 +121,4 @@ void HAL_CONTINUATION::Abort()
 //{    
 //    // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->IsExecutionPaused = ClrIsDebuggerStopped();
 //}
+

@@ -70,3 +70,4 @@ bool CLR_RT_ObjectToEvent_Destination::ReleaseWhenDead()
 
     return res;
 }
+

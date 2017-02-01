@@ -26,3 +26,4 @@ HRESULT CLR_RT_HeapBlock_LockRequest::CreateInstance( CLR_RT_HeapBlock_Lock* loc
 
     TINYCLR_NOCLEANUP();
 }
+

@@ -10,3 +10,4 @@
 void ReceiverThread(void const * argument);
 
 #endif //_WIREPROTOCOL_RECEIVERTHREAD_H_
+

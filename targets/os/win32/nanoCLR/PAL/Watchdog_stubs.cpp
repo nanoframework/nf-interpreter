@@ -26,3 +26,4 @@ BOOL Watchdog_LastOccurence( INT64& time, INT64& timeout, UINT32& assembly, UINT
 {
     return FALSE;
 }
+

@@ -217,3 +217,4 @@ void CLR_RT_HeapBlock_Lock::Relocate_Owner()
 {
     NATIVE_PROFILE_CLR_CORE();
 }
+

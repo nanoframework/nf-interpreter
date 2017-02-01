@@ -454,3 +454,4 @@ bool CLR_RT_GarbageCollector::Relocation_JustCheck( void** ref )
 }
 
 #endif
+

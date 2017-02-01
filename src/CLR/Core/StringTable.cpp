@@ -47,3 +47,4 @@ void CLR_RT_Assembly::InitString( std::map<std::string,CLR_OFFSET>& map )
 }
 
 #endif
+
