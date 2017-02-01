@@ -3,15 +3,15 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_RUNTIME_H_
-#define _TINYCLR_RUNTIME_H_
+#ifndef _NANOCLR_RUNTIME_H_
+#define _NANOCLR_RUNTIME_H_
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <TinyCLR_Types.h>
-#include <TinyCLR_Interop.h>
-#include <TinyCLR_ErrorCodes.h>
-#include <TinySupport.h>
+#include <nanoCLR_Types.h>
+#include <nanoCLR_Interop.h>
+#include <nanoCLR_ErrorCodes.h>
+#include <nanoSupport.h>
 
 struct CLR_RADIAN
 {
@@ -50,7 +50,7 @@ typedef CLR_RT_AddressToSymbolMap::iterator  CLR_RT_AddressToSymbolMapIter;
 #endif
 
 #if defined(_MSC_VER)
-#pragma pack(push, TINYCLR_RUNTIME_H, 4)
+#pragma pack(push, NANOCLR_RUNTIME_H, 4)
 #endif
 
 #if defined(_WIN32)
@@ -198,10 +198,10 @@ struct CLR_RT_GarbageCollector;
 
 struct CLR_RT_DblLinkedList;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 struct CLR_RT_AppDomain;
 struct CLR_RT_AppDomainAssembly;
-#endif //TINYCLR_APPDOMAINS
+#endif //NANOCLR_APPDOMAINS
 
 struct CLR_RT_Assembly;
 struct CLR_RT_TypeSystem;
@@ -229,7 +229,7 @@ typedef void (*CLR_RT_HardwareHandler  )();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_PROFILE_HANDLER)
+#if defined(NANOCLR_PROFILE_HANDLER)
 
 struct CLR_PROF_CounterSimple;
 struct CLR_PROF_Counter;
@@ -237,7 +237,7 @@ struct CLR_PROF_Counter_Value;
 struct CLR_PROF_Counter_Value2;
 struct CLR_PROF_Handler;
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
 
 struct CLR_PROF_CounterCallChain
 {
@@ -267,7 +267,7 @@ struct CLR_PROF_Handler
     static const int c_Mode_Ignore    = 0;
     static const int c_Mode_Plain     = 1;
     static const int c_Mode_Simple    = 2;
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
     static const int c_Mode_CallChain = 3;
 #endif
 
@@ -288,7 +288,7 @@ struct CLR_PROF_Handler
 
     CLR_PROF_Handler(                                   ) { Constructor(        ); }
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
     CLR_PROF_Handler( CLR_PROF_CounterCallChain& target ) { Constructor( target ); }
 #endif
 
@@ -306,7 +306,7 @@ struct CLR_PROF_Handler
 
 private:
     void Constructor(                                   );
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
     void Constructor( CLR_PROF_CounterCallChain& target );
 #endif
 
@@ -329,7 +329,7 @@ private:
 
 #endif
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
 
 #define CLR_PROF_HANDLER_CALLCHAIN_VOID(v) CLR_PROF_Handler v
 #define CLR_PROF_HANDLER_CALLCHAIN(v,t)    CLR_PROF_Handler v( t )
@@ -382,7 +382,7 @@ public:
 
     int    Next();
 
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     double NextDouble();
 #else
     CLR_INT64 NextDouble();
@@ -394,7 +394,7 @@ public:
 
 extern void CLR_RT_GetVersion( UINT16* pMajor, UINT16* pMinor, UINT16* pBuild, UINT16* pRevision );
 
-#define TINYCLR_CLEAR(ref) CLR_RT_Memory::ZeroFill( &ref, sizeof(ref) )
+#define NANOCLR_CLEAR(ref) CLR_RT_Memory::ZeroFill( &ref, sizeof(ref) )
 
 //--//
 
@@ -434,8 +434,8 @@ static const int MAXTYPENAMELEN = 256;  // Including terminating null byte. Enfo
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define TINYCLR_INDEX_IS_VALID(idx)   ((idx).m_data != 0)
-#define TINYCLR_INDEX_IS_INVALID(idx) ((idx).m_data == 0)
+#define NANOCLR_INDEX_IS_VALID(idx)   ((idx).m_data != 0)
+#define NANOCLR_INDEX_IS_INVALID(idx) ((idx).m_data == 0)
 
 //
 // IMPORTANT: THE ASSEMBLY IDX IN ALL THE CLR_RT_*_Index STRUCTURES SHOULD ALWAYS BE ENCODED THE SAME WAY!!!
@@ -641,7 +641,7 @@ struct CLR_RT_MethodDef_Patch
     CLR_IDX m_patched;
 };
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 struct CLR_RT_MethodDef_DebuggingInfo
 {
@@ -663,12 +663,12 @@ private:
     void SetResetFlags( bool b, CLR_UINT8 flags )        { if(b) SetFlags( flags ); else ResetFlags( flags ); }
 };
 
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <TinyCLR_Runtime__HeapBlock.h>
+#include <nanoCLR_Runtime__HeapBlock.h>
 
 //TODO: Change this to an extern method that is defined in the HAL
 #if defined(PLATFORM_WINDOWS_EMULATOR)
@@ -824,7 +824,7 @@ struct CLR_RT_SignatureParser
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define TINYCLR_FOREACH_ASSEMBLY(ts)                               \
+#define NANOCLR_FOREACH_ASSEMBLY(ts)                               \
     {                                                              \
         CLR_RT_Assembly** ppASSM = (ts).m_assemblies; \
         size_t iASSM  = (ts).m_assembliesMax;                      \
@@ -833,11 +833,11 @@ struct CLR_RT_SignatureParser
             CLR_RT_Assembly* pASSM = *ppASSM;        \
             if(pASSM)
 
-#define TINYCLR_FOREACH_ASSEMBLY_END()                   \
+#define NANOCLR_FOREACH_ASSEMBLY_END()                   \
         }                                                \
     }
 
-#define TINYCLR_FOREACH_ASSEMBLY_NULL(ts)                          \
+#define NANOCLR_FOREACH_ASSEMBLY_NULL(ts)                          \
     {                                                              \
         CLR_RT_Assembly** ppASSM = (ts).m_assemblies; \
         size_t            iASSM  = ARRAYSIZE((ts).m_assemblies);   \
@@ -846,27 +846,27 @@ struct CLR_RT_SignatureParser
         {                                                          \
             if(*ppASSM == NULL)
 
-#define TINYCLR_FOREACH_ASSEMBLY_NULL_END()                      \
+#define NANOCLR_FOREACH_ASSEMBLY_NULL_END()                      \
         }                                                        \
     }
 
-#if defined(TINYCLR_APPDOMAINS)
-    #define TINYCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN(ad)                                                          \
-            TINYCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly, appDomainAssembly, (ad)->m_appDomainAssemblies)     \
+#if defined(NANOCLR_APPDOMAINS)
+    #define NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN(ad)                                                          \
+            NANOCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly, appDomainAssembly, (ad)->m_appDomainAssemblies)     \
             {                                                                                                  \
                 CLR_RT_Assembly* pASSM = appDomainAssembly->m_assembly;
 
-    #define TINYCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN_END()                                                        \
+    #define NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN_END()                                                        \
             }                                                                                                  \
-            TINYCLR_FOREACH_NODE_END()
+            NANOCLR_FOREACH_NODE_END()
 
-    #define TINYCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(ts)   TINYCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN(g_CLR_RT_ExecutionEngine.GetCurrentAppDomain())
-    #define TINYCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN_END() TINYCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN_END()
+    #define NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(ts)   NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN(g_CLR_RT_ExecutionEngine.GetCurrentAppDomain())
+    #define NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN_END() NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN_END()
 #else
-    #define TINYCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN(ts, ad)       TINYCLR_FOREACH_ASSEMBLY(ts)
-    #define TINYCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN_END()         TINYCLR_FOREACH_ASSEMBLY_END()
-    #define TINYCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(ts)   TINYCLR_FOREACH_ASSEMBLY(ts)
-    #define TINYCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN_END() TINYCLR_FOREACH_ASSEMBLY_END()
+    #define NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN(ts, ad)       NANOCLR_FOREACH_ASSEMBLY(ts)
+    #define NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN_END()         NANOCLR_FOREACH_ASSEMBLY_END()
+    #define NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(ts)   NANOCLR_FOREACH_ASSEMBLY(ts)
+    #define NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN_END() NANOCLR_FOREACH_ASSEMBLY_END()
 #endif
 // This type is needed on PC only for Interop code generation. For device code forward declaration only
 class CLR_RT_VectorOfManagedElements;
@@ -884,13 +884,13 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         size_t iFieldDef;
         size_t iMethodDef;
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
         size_t iStaticFields;
 #endif
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         size_t iDebuggingInfoMethods;
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)       
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)       
     };
 
     //--//
@@ -912,7 +912,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     int                                m_pTablesSize[ TBL_Max ];
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_HeapBlock*                  m_pStaticFields;               // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
 #endif
 
@@ -928,11 +928,11 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     CLR_RT_FieldDef_CrossReference   * m_pCrossReference_FieldDef   ; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodDef_CrossReference  * m_pCrossReference_MethodDef  ; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo  * m_pDebuggingInfo_MethodDef   ; //EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(TINYCLR_TRACE_STACK_HEAVY) && defined(_WIN32)
+#if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(_WIN32)
     int                                m_maxOpcodes;
     int*                               m_stackDepth;
 #endif
@@ -1001,28 +1001,28 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     CLR_PMETADATA GetTable( CLR_TABLESENUM tbl ) { return (CLR_PMETADATA)m_header + m_header->startOfTables[ tbl ]; }
 
-#define TINYCLR_ASSEMBLY_RESOLVE(cls,tbl,idx) (const cls *)((CLR_UINT8*)m_header + m_header->startOfTables[ tbl ] + (sizeof(cls) * idx))
-    const CLR_RECORD_ASSEMBLYREF  * GetAssemblyRef ( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_ASSEMBLYREF  , TBL_AssemblyRef   , i); }
-    const CLR_RECORD_TYPEREF      * GetTypeRef     ( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_TYPEREF      , TBL_TypeRef       , i); }
-    const CLR_RECORD_FIELDREF     * GetFieldRef    ( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_FIELDREF     , TBL_FieldRef      , i); }
-    const CLR_RECORD_METHODREF    * GetMethodRef   ( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODREF    , TBL_MethodRef     , i); }
-    const CLR_RECORD_TYPEDEF      * GetTypeDef     ( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_TYPEDEF      , TBL_TypeDef       , i); }
-    const CLR_RECORD_FIELDDEF     * GetFieldDef    ( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_FIELDDEF     , TBL_FieldDef      , i); }
-    const CLR_RECORD_METHODDEF    * GetMethodDef   ( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODDEF    , TBL_MethodDef     , i); }
-    const CLR_RECORD_ATTRIBUTE    * GetAttribute   ( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_ATTRIBUTE    , TBL_Attributes    , i); }
-    const CLR_RECORD_TYPESPEC     * GetTypeSpec    ( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_TYPESPEC     , TBL_TypeSpec      , i); }
-    const CLR_RECORD_RESOURCE_FILE* GetResourceFile( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_RESOURCE_FILE, TBL_ResourcesFiles, i); }
-    const CLR_RECORD_RESOURCE     * GetResource    ( CLR_IDX    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_RECORD_RESOURCE     , TBL_Resources     , i); }
-    CLR_PMETADATA                   GetResourceData( CLR_UINT32 i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_UINT8               , TBL_ResourcesData , i); }
+#define NANOCLR_ASSEMBLY_RESOLVE(cls,tbl,idx) (const cls *)((CLR_UINT8*)m_header + m_header->startOfTables[ tbl ] + (sizeof(cls) * idx))
+    const CLR_RECORD_ASSEMBLYREF  * GetAssemblyRef ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_ASSEMBLYREF  , TBL_AssemblyRef   , i); }
+    const CLR_RECORD_TYPEREF      * GetTypeRef     ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_TYPEREF      , TBL_TypeRef       , i); }
+    const CLR_RECORD_FIELDREF     * GetFieldRef    ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_FIELDREF     , TBL_FieldRef      , i); }
+    const CLR_RECORD_METHODREF    * GetMethodRef   ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODREF    , TBL_MethodRef     , i); }
+    const CLR_RECORD_TYPEDEF      * GetTypeDef     ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_TYPEDEF      , TBL_TypeDef       , i); }
+    const CLR_RECORD_FIELDDEF     * GetFieldDef    ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_FIELDDEF     , TBL_FieldDef      , i); }
+    const CLR_RECORD_METHODDEF    * GetMethodDef   ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODDEF    , TBL_MethodDef     , i); }
+    const CLR_RECORD_ATTRIBUTE    * GetAttribute   ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_ATTRIBUTE    , TBL_Attributes    , i); }
+    const CLR_RECORD_TYPESPEC     * GetTypeSpec    ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_TYPESPEC     , TBL_TypeSpec      , i); }
+    const CLR_RECORD_RESOURCE_FILE* GetResourceFile( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_RESOURCE_FILE, TBL_ResourcesFiles, i); }
+    const CLR_RECORD_RESOURCE     * GetResource    ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_RESOURCE     , TBL_Resources     , i); }
+    CLR_PMETADATA                   GetResourceData( CLR_UINT32 i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8               , TBL_ResourcesData , i); }
     LPCSTR                          GetString      ( CLR_STRING i );
-    CLR_PMETADATA                   GetSignature   ( CLR_SIG    i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_UINT8               , TBL_Signatures    , i); }
-    CLR_PMETADATA                   GetByteCode    ( CLR_OFFSET i ) { return TINYCLR_ASSEMBLY_RESOLVE(CLR_UINT8               , TBL_ByteCode      , i); }
-#undef TINYCLR_ASSEMBLY_RESOLVE
+    CLR_PMETADATA                   GetSignature   ( CLR_SIG    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8               , TBL_Signatures    , i); }
+    CLR_PMETADATA                   GetByteCode    ( CLR_OFFSET i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8               , TBL_ByteCode      , i); }
+#undef NANOCLR_ASSEMBLY_RESOLVE
 
     //--//
 
 #undef DECL_POSTFIX
-#if defined(TINYCLR_TRACE_INSTRUCTIONS)
+#if defined(NANOCLR_TRACE_INSTRUCTIONS)
 #define DECL_POSTFIX
 #else
 #define DECL_POSTFIX {}
@@ -1103,7 +1103,7 @@ private:
 
 //--//
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 
 struct CLR_RT_AppDomain : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - NO RELOCATION -
 {
@@ -1162,7 +1162,7 @@ struct CLR_RT_AppDomainAssembly : public CLR_RT_HeapBlock_Node //EVENT HEAP - NO
     void Relocate();
 };
 
-#endif //TINYCLR_APPDOMAINS
+#endif //NANOCLR_APPDOMAINS
 
 //--//
 
@@ -1263,7 +1263,7 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_TimeServiceSettings;
     CLR_RT_TypeDef_Index m_TimeServiceStatus;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_RT_TypeDef_Index m_AppDomain;
     CLR_RT_TypeDef_Index m_MarshalByRefObject;
 #endif
@@ -1343,7 +1343,7 @@ struct CLR_RT_DataTypeLookup
     CLR_RT_TypeDef_Index*    m_cls;
     CLR_RT_HeapBlockRelocate m_relocate;
 
-#if defined(_WIN32) || defined(TINYCLR_TRACE_MEMORY_STATS)
+#if defined(_WIN32) || defined(NANOCLR_TRACE_MEMORY_STATS)
     LPCSTR                   m_name;
 #endif   
 };
@@ -1382,11 +1382,11 @@ struct CLR_RT_OpcodeLookup
     static const CLR_UINT16 ATTRIB_HAS_I8                = 0x4000;
     static const CLR_UINT16 ATTRIB_HAS_R8                = 0x8000;
 
-#if defined(TINYCLR_OPCODE_NAMES)
+#if defined(NANOCLR_OPCODE_NAMES)
     LPCSTR             m_name;
 #endif 
 
-#if defined(TINYCLR_OPCODE_STACKCHANGES)
+#if defined(NANOCLR_OPCODE_STACKCHANGES)
     CLR_UINT8          m_stackChanges;
 #endif
 
@@ -1394,19 +1394,19 @@ struct CLR_RT_OpcodeLookup
 
     //--//
 
-#if defined(TINYCLR_OPCODE_PARSER)
+#if defined(NANOCLR_OPCODE_PARSER)
     CLR_LOGICAL_OPCODE m_logicalOpcode;
     CLR_DataType       m_dt;
     CLR_INT8           m_index;
     CLR_UINT16         m_flags;
 #endif
-#if defined(TINYCLR_OPCODE_STACKCHANGES)
+#if defined(NANOCLR_OPCODE_STACKCHANGES)
     CLR_UINT32 StackPop    () const { return m_stackChanges >>   4;    }
     CLR_UINT32 StackPush   () const { return m_stackChanges &  0xF;    }
     CLR_INT32  StackChanges() const { return StackPush() - StackPop(); }
 #endif
 
-#if defined(TINYCLR_OPCODE_NAMES)
+#if defined(NANOCLR_OPCODE_NAMES)
     LPCSTR Name() const { return m_name; }
 #else
     LPCSTR Name() const { return ""; }
@@ -1425,14 +1425,14 @@ struct CLR_RT_LogicalOpcodeLookup
     static const CLR_UINT32 EXCEPTION_IF_ZERO      = 0x00000020;
     static const CLR_UINT32 EXCEPTION_ON_CAST      = 0x00000040;
 
-#if defined(TINYCLR_OPCODE_NAMES)
+#if defined(NANOCLR_OPCODE_NAMES)
     LPCSTR     m_name;
 #endif
 
     CLR_UINT32 m_flags;
 
 
-#if defined(TINYCLR_OPCODE_NAMES)
+#if defined(NANOCLR_OPCODE_NAMES)
     LPCSTR Name() const { return m_name; }
 #else
     LPCSTR Name() const { return ""; }
@@ -1612,9 +1612,9 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     CLR_RT_MethodDef_CrossReference& CrossReference() const { return m_assm->m_pCrossReference_MethodDef[ Method() ]; }
     CLR_UINT32                       Hits()           const { return 0;                                               }
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo& DebuggingInfo() const { return m_assm->m_pDebuggingInfo_MethodDef[ Method() ]; }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };
 
 
@@ -1714,7 +1714,7 @@ struct CLR_RT_TypeDescriptor
     static HRESULT ExtractObjectAndDataType( CLR_RT_HeapBlock*& ref, CLR_DataType& dt );
 };
 
-#include <TinyCLR_Runtime__Serialization.h>
+#include <nanoCLR_Runtime__Serialization.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1737,7 +1737,7 @@ struct CLR_RT_HeapCluster : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELO
     //--//
 
 #undef DECL_POSTFIX
-#if TINYCLR_VALIDATE_HEAP >= TINYCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
 #define DECL_POSTFIX
 #else
 #define DECL_POSTFIX {}
@@ -1751,7 +1751,7 @@ struct CLR_RT_HeapCluster : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELO
 
 //--//
 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 struct CLR_RT_InlineFrame
 {
     CLR_RT_HeapBlock*         m_locals;     
@@ -1858,19 +1858,19 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     };
 
 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     CLR_RT_InlineBuffer*      m_inlineFrame;
 #endif
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_UINT32                m_depth;
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
     CLR_PROF_CounterCallChain m_callchain;
 #endif
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain*         m_appDomain;
 #endif
 
@@ -1886,7 +1886,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 
     void Pop();
 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     bool PushInline( CLR_PMETADATA& ip, CLR_RT_Assembly*& assm, CLR_RT_HeapBlock*& evalPos, CLR_RT_MethodDef_Instance& calleeInst, CLR_RT_HeapBlock* pThis);
     void PopInline  ( );
 
@@ -1896,7 +1896,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 #endif 
     
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     static HRESULT PushAppDomainTransition( CLR_RT_Thread* th, const CLR_RT_MethodDef_Instance& callInst, CLR_RT_HeapBlock* pThis, CLR_RT_HeapBlock* pArgs );
            HRESULT  PopAppDomainTransition(                                                                                                                );
 #endif
@@ -1912,7 +1912,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     void    SetResult_U4     ( CLR_UINT32        val                        );
     void    SetResult_U8     ( CLR_UINT64&       val                        );
 
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     void    SetResult_R4     ( float             val                        );
     void    SetResult_R8     ( double            val                        );
 #else
@@ -2029,7 +2029,7 @@ private:
 
 ////////////////////////////////////////
 
-#if defined(TINYCLR_TRACE_EARLYCOLLECTION)
+#if defined(NANOCLR_TRACE_EARLYCOLLECTION)
 
 struct CLR_RT_AssertEarlyCollection
 {
@@ -2046,15 +2046,15 @@ struct CLR_RT_AssertEarlyCollection
     static void CheckAll( CLR_RT_HeapBlock* ptr );
 };
 
-#define TINYCLR_FAULT_ON_EARLY_COLLECTION(ptr) CLR_RT_AssertEarlyCollection  aec##ptr( ptr )
-#define TINYCLR_CANCEL_EARLY_COLLECTION(ptr)   aec##ptr.Cancel()
-#define TINYCLR_CHECK_EARLY_COLLECTION(ptr)    CLR_RT_AssertEarlyCollection::CheckAll( ptr )
+#define NANOCLR_FAULT_ON_EARLY_COLLECTION(ptr) CLR_RT_AssertEarlyCollection  aec##ptr( ptr )
+#define NANOCLR_CANCEL_EARLY_COLLECTION(ptr)   aec##ptr.Cancel()
+#define NANOCLR_CHECK_EARLY_COLLECTION(ptr)    CLR_RT_AssertEarlyCollection::CheckAll( ptr )
 
 #else
 
-#define TINYCLR_FAULT_ON_EARLY_COLLECTION(ptr)
-#define TINYCLR_CANCEL_EARLY_COLLECTION(ptr)
-#define TINYCLR_CHECK_EARLY_COLLECTION(ptr)
+#define NANOCLR_FAULT_ON_EARLY_COLLECTION(ptr)
+#define NANOCLR_CANCEL_EARLY_COLLECTION(ptr)
+#define NANOCLR_CHECK_EARLY_COLLECTION(ptr)
 
 #endif
 
@@ -2070,7 +2070,7 @@ struct CLR_RT_GarbageCollector
     {
         CLR_RT_HeapBlock* ptr;
         CLR_UINT32        num;
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
         CLR_RT_AppDomain* appDomain;
 #endif
     };
@@ -2122,7 +2122,7 @@ struct CLR_RT_GarbageCollector
     size_t                m_relocCount;
     CLR_UINT8*            m_relocMinimum;
     CLR_UINT8*            m_relocMaximum;
-#if TINYCLR_VALIDATE_HEAP > TINYCLR_VALIDATE_HEAP_0_None
+#if NANOCLR_VALIDATE_HEAP > NANOCLR_VALIDATE_HEAP_0_None
     RelocateFtn           m_relocWorker;
 #endif
 
@@ -2145,7 +2145,7 @@ struct CLR_RT_GarbageCollector
     void Sweep              ();
     void CheckMemoryPressure();
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     void AppDomain_Mark();
 #endif
 
@@ -2170,7 +2170,7 @@ struct CLR_RT_GarbageCollector
 
     //--//
 
-#if TINYCLR_VALIDATE_HEAP >= TINYCLR_VALIDATE_HEAP_3_Compaction
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_3_Compaction
 
     static bool Relocation_JustCheck( void** ref );
 
@@ -2192,7 +2192,7 @@ struct CLR_RT_GarbageCollector
 
 #endif
 
-#if TINYCLR_VALIDATE_HEAP >= TINYCLR_VALIDATE_HEAP_4_CompactionPlus
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_4_CompactionPlus
 
     struct RelocationRecord
     {
@@ -2233,7 +2233,7 @@ struct CLR_RT_GarbageCollector
 
     //--//
 
-#if defined(TINYCLR_GC_VERBOSE)
+#if defined(NANOCLR_GC_VERBOSE)
 
     void GC_Stats( int& resNumberObjects, int& resSizeObjects, int& resNumberEvents, int& resSizeEvents );
 
@@ -2446,7 +2446,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
     CLR_RT_DblLinkedList       m_subThreads;            // EVENT HEAP - NO RELOCATION - list of CLR_RT_SubThread
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     int                        m_scratchPad;
     bool                       m_fHasJMCStepper;
 
@@ -2454,7 +2454,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
                                                       // However, if this thread was spawned on behalf of the debugger to evaluate
                                                       // a property or function call, it points to the object coresponding to the
                                                       // thread that is currently selected in the debugger.
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(ENABLE_NATIVE_PROFILER)
     bool                       m_fNativeProfiled;
@@ -2509,7 +2509,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
     CLR_RT_SubThread*  CurrentSubThread() const { return (CLR_RT_SubThread*)m_subThreads.LastNode(); }
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain* CurrentAppDomain() const { CLR_RT_StackFrame* stack = CurrentFrame(); return stack->Prev() ? stack->m_appDomain : NULL; }
 #endif
 
@@ -2535,7 +2535,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
     void PopEH( CLR_RT_StackFrame* stack, CLR_PMETADATA ip ) { if(m_nestedExceptionsPos) PopEH_Inner( stack, ip ); }
 
-#if defined(TINYCLR_TRACE_CALLS)
+#if defined(NANOCLR_TRACE_CALLS)
     void DumpStack();
 #else
     void DumpStack() {}
@@ -2563,7 +2563,7 @@ extern size_t LinkArraySize   ();
 extern size_t LinkMRUArraySize();
 extern size_t PayloadArraySize();
 extern size_t InterruptRecords();
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 extern size_t InlineBufferCount();
 #endif
 
@@ -2572,7 +2572,7 @@ extern CLR_UINT32 g_scratchVirtualMethodTableLink     [];
 extern CLR_UINT32 g_scratchVirtualMethodTableLinkMRU  [];
 extern CLR_UINT32 g_scratchVirtualMethodPayload       [];
 extern CLR_UINT32 g_scratchInterruptDispatchingStorage[];
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 extern CLR_UINT32 g_scratchInlineBuffer               [];
 #endif
 
@@ -2585,7 +2585,7 @@ struct CLR_RT_EventCache
         CLR_RT_DblLinkedList m_blocks;
     };
 
-#if defined(TINYCLR_USE_AVLTREE_FOR_METHODLOOKUP)
+#if defined(NANOCLR_USE_AVLTREE_FOR_METHODLOOKUP)
 
     struct Payload
     {
@@ -2703,7 +2703,7 @@ struct CLR_RT_EventCache
     BoundedList*            m_events;
 
     VirtualMethodTable      m_lookup_VirtualMethod;
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     CLR_RT_InlineBuffer*    m_inlineBufferStart;
 #endif
 
@@ -2720,7 +2720,7 @@ struct CLR_RT_EventCache
 
     bool FindVirtualMethod( const CLR_RT_TypeDef_Index& cls, const CLR_RT_MethodDef_Index& mdVirtual, CLR_RT_MethodDef_Index& md );
 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     bool GetInlineFrameBuffer(CLR_RT_InlineBuffer** ppBuffer);
     bool FreeInlineBuffer(CLR_RT_InlineBuffer* pBuffer);
 #endif
@@ -2744,7 +2744,7 @@ extern CLR_RT_EventCache g_CLR_RT_EventCache;
 // keep under control the size of the Link and Payload, since we will use externally
 // defined arrays to handle those data structures in the Virtual Method cache
 
-#if defined(TINYCLR_USE_AVLTREE_FOR_METHODLOOKUP)
+#if defined(NANOCLR_USE_AVLTREE_FOR_METHODLOOKUP)
 CT_ASSERT( sizeof(CLR_RT_EventCache::LookupEntry) == 12 )
 #else
 CT_ASSERT( sizeof(CLR_RT_EventCache::Link)        ==  4 )
@@ -2755,13 +2755,13 @@ CT_ASSERT( sizeof(CLR_RT_EventCache::Payload)     == 12 )
 
 //--//
 
-#include <TinyCLR_Debugging.h>
-#include <TinyCLR_Profiling.h>
-//#include <TinyCLR_Messaging.h>
+#include <nanoCLR_Debugging.h>
+#include <nanoCLR_Profiling.h>
+//#include <nanoCLR_Messaging.h>
 
 //--//
 
-#if defined(TINYCLR_TRACE_STACK)
+#if defined(NANOCLR_TRACE_STACK)
 
 //
 // If this is set, no memory allocation should be allowed, it could lead to a GC while in an inconsistent state!!
@@ -2830,7 +2830,7 @@ struct CLR_RT_ExecutionEngine
 
     static const int                    c_fExecution_GC_Pending              = 0x00000001; //Not currently used
     static const int                    c_fExecution_Compaction_Pending      = 0x00000002;
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     static const int                    c_fExecution_UnloadingAppDomain      = 0x00000004;
 #endif
 
@@ -2848,7 +2848,7 @@ struct CLR_RT_ExecutionEngine
     static const int                    c_fProfiling_Enabled                 = 0x00000001;
     static const int                    c_fProfiling_Allocations             = 0x00000002;
     static const int                    c_fProfiling_Calls                   = 0x00000004;
-    static const int                    c_fProfiling_TinyCLRTypes            = 0x00000008;  //Don't dump out certain types, like ASSEMBLY, or THREAD, or BINARY_BLOB, etc.
+    static const int                    c_fProfiling_CLRTypes                = 0x00000008;  //Don't dump out certain types, like ASSEMBLY, or THREAD, or BINARY_BLOB, etc.
     int                                 m_iProfiling_Conditions;
 
     enum
@@ -2857,21 +2857,21 @@ struct CLR_RT_ExecutionEngine
     };
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     static const int                    c_MaxBreakpointsActive               = 5;
 
     size_t                                               m_breakpointsNum;
     CLR_DBG_Commands::Debugging_Execution_BreakpointDef* m_breakpoints;
     CLR_DBG_Commands::Debugging_Execution_BreakpointDef  m_breakpointsActive[ c_MaxBreakpointsActive ];
     size_t                                               m_breakpointsActiveNum;
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(BUILD_RTM) || defined(_WIN32)
     bool m_fPerformGarbageCollection;   //Should the EE do a GC every context switch
     bool m_fPerformHeapCompaction;      //Should the EE do a Compaction following every GC
 #endif
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     static const int                    c_AppDomainId_Invalid                = 0;
 
     CLR_RT_DblLinkedList   m_appDomains;
@@ -2887,7 +2887,7 @@ struct CLR_RT_ExecutionEngine
     void TryToUnloadAppDomains_Helper_Threads   ( CLR_RT_DblLinkedList& threads                 );
     void TryToUnloadAppDomains_Helper_Finalizers( CLR_RT_DblLinkedList& finalizers, bool fAlive );
     bool TryToUnloadAppDomains                  (                                               );
-#endif //TINYCLR_APPDOMAINS
+#endif //NANOCLR_APPDOMAINS
 
 #define CLR_EE_DBG_IS( Cond )             ((g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions &   CLR_RT_ExecutionEngine::c_fDebugger_##Cond) != 0)
 #define CLR_EE_DBG_IS_NOT( Cond )         ((g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions &   CLR_RT_ExecutionEngine::c_fDebugger_##Cond) == 0)
@@ -2995,7 +2995,7 @@ struct CLR_RT_ExecutionEngine
     CLR_RT_Thread*                      m_finalizerThread;      // EVENT HEAP - NO RELOCATION -
     CLR_RT_Thread*                      m_cctorThread;          // EVENT HEAP - NO RELOCATION -
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_HeapBlock*                   m_globalLock;           // OBJECT HEAP - DO RELOCATION -
     CLR_RT_HeapBlock*                   m_outOfMemoryException; // OBJECT HEAP - DO RELOCATION -
 #endif
@@ -3009,7 +3009,7 @@ struct CLR_RT_ExecutionEngine
 
     //--//
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_HeapBlock_Array*             m_scratchPadArray;      // OBJECT HEAP - DO RELOCATION -
 #endif
 
@@ -3113,7 +3113,7 @@ struct CLR_RT_ExecutionEngine
 
     void DebuggerLoop();
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     void SetDebuggingInfoBreakpoints( bool fSet                                                                                                                                  );
     void InstallBreakpoints         ( CLR_DBG_Commands::Debugging_Execution_BreakpointDef* data, size_t num                                                                      );
     void StopOnBreakpoint           ( CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def , CLR_RT_Thread* th                                                               );
@@ -3136,7 +3136,7 @@ struct CLR_RT_ExecutionEngine
     void Breakpoint_Exception            ( CLR_RT_StackFrame* stack, CLR_UINT32 reason, CLR_PMETADATA ip );
     void Breakpoint_Exception_Intercepted( CLR_RT_StackFrame* stack                                      );
     void Breakpoint_Exception_Uncaught   ( CLR_RT_Thread*     th                                         );
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     //--//
 
@@ -3147,7 +3147,7 @@ struct CLR_RT_ExecutionEngine
     void SpawnTimer();
     void SpawnFinalizer();
     void SpawnStaticConstructor( CLR_RT_Thread *&pCctorThread );
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     bool SpawnStaticConstructorHelper( CLR_RT_AppDomain* appDomain, CLR_RT_AppDomainAssembly* appDomainAssembly, const CLR_RT_MethodDef_Index& idx );
 #else
     bool SpawnStaticConstructorHelper( CLR_RT_Assembly* assembly, const CLR_RT_MethodDef_Index& idx );
@@ -3220,16 +3220,16 @@ extern CLR_UINT32             g_buildCRC;
 CT_ASSERT( sizeof(CLR_RT_HeapBlock)      == 12 )
 CT_ASSERT( sizeof(CLR_RT_HeapBlock_Raw)  == sizeof(CLR_RT_HeapBlock) )
 
-#if defined(TINYCLR_TRACE_MEMORY_STATS)
-#define    TINYCLR_TRACE_MEMORY_STATS_EXTRA_SIZE  4
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+#define    NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE  4
 #else
-#define    TINYCLR_TRACE_MEMORY_STATS_EXTRA_SIZE  0
+#define    NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE  0
 #endif
 
 #if defined(GCC)  // Gcc compiler uses 8 bytes for a function pointer
-    CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 20 + TINYCLR_TRACE_MEMORY_STATS_EXTRA_SIZE )
+    CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE )
 
-#elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(TINYCLR_TRACE_MEMORY_STATS)
+#elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(NANOCLR_TRACE_MEMORY_STATS)
     CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 16 + 4 )
 
 #else
@@ -3241,8 +3241,8 @@ CT_ASSERT( sizeof(CLR_RT_HeapBlock_Raw)  == sizeof(CLR_RT_HeapBlock) )
 //--//
 
 #if defined(_MSC_VER)
-#pragma pack(pop, TINYCLR_RUNTIME_H)
+#pragma pack(pop, NANOCLR_RUNTIME_H)
 #endif
 
-#endif // _TINYCLR_RUNTIME_H_
+#endif // _NANOCLR_RUNTIME_H_
 

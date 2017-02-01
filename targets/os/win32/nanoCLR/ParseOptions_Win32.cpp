@@ -155,9 +155,9 @@ bool CLR_RT_ParseOptions::Command::Parse( CLR_RT_StringVector& argv, size_t& pos
 
 HRESULT CLR_RT_ParseOptions::Command::Execute()
 {
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
@@ -182,34 +182,34 @@ CLR_RT_ParseOptions::CLR_RT_ParseOptions()
 
 HRESULT CLR_RT_ParseOptions::ExtractOptionsFromFile( LPCWSTR szFileName )
 {
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_StringVector vec;
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_FileStore::ExtractTokensFromFile( szFileName, vec ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_FileStore::ExtractTokensFromFile( szFileName, vec ));
 
-    TINYCLR_CHECK_HRESULT(ProcessOptions( vec ));
+    NANOCLR_CHECK_HRESULT(ProcessOptions( vec ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ParseOptions::ReprocessOptions()
 {
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(CommandLineArgs.size() == 0)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
     }
 
-    TINYCLR_SET_AND_LEAVE(ProcessOptions( CommandLineArgs ));
+    NANOCLR_SET_AND_LEAVE(ProcessOptions( CommandLineArgs ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ParseOptions::ProcessOptions( CLR_RT_StringVector& argv )
 {
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(CommandLineArgs.size() == 0)
     {
@@ -246,11 +246,11 @@ HRESULT CLR_RT_ParseOptions::ProcessOptions( CLR_RT_StringVector& argv )
                 if(cmd->Parse( argv, i, *this ) == false)
                 {
                     Usage();
-                    TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
                 }
 
 
-                TINYCLR_CHECK_HRESULT(cmd->Execute());
+                NANOCLR_CHECK_HRESULT(cmd->Execute());
                 break;
             }
         }
@@ -260,11 +260,11 @@ HRESULT CLR_RT_ParseOptions::ProcessOptions( CLR_RT_StringVector& argv )
             wprintf( L"Unknown option '%s'\n\n", arg );
 
             Usage();
-            TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_ParseOptions::Usage()

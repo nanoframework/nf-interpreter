@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Runtime.h>
-#include <TinyCLR_Debugging.h>
+#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Debugging.h>
 
 #define DEFINE_CMD(cmd)  {  CLR_DBG_Debugger::Debugging_##cmd, CLR_DBG_Commands::c_Debugging_##cmd }
 #define DEFINE_CMD2(cmd) {  CLR_DBG_Debugger::Monitor_##cmd  , CLR_DBG_Commands::c_Monitor_##cmd   }
@@ -40,7 +40,7 @@ const CLR_Messaging_CommandHandlerLookup c_Debugger_Lookup_Request[] =
 
 
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     DEFINE_CMD(Execution_SetCurrentAppDomain),
     DEFINE_CMD(Execution_Breakpoints        ),
     DEFINE_CMD(Execution_BreakpointStatus   ),
@@ -82,12 +82,12 @@ const CLR_Messaging_CommandHandlerLookup c_Debugger_Lookup_Request[] =
     DEFINE_CMD(Resolve_VirtualMethod     ),
 #endif
     //
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     DEFINE_CMD(Deployment_Status         ),
     DEFINE_CMD(Info_SetJMC               ),
 #endif    
     //
-#if defined(TINYCLR_PROFILE_NEW)
+#if defined(NANOCLR_PROFILE_NEW)
     DEFINE_CMD3(Command),
 #endif
     //

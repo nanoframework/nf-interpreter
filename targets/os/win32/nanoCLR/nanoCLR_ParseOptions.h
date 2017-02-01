@@ -3,10 +3,10 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_PARSEOPTIONS_H_
-#define _TINYCLR_PARSEOPTIONS_H_
+#ifndef _NANOCLR_PARSEOPTIONS_H_
+#define _NANOCLR_PARSEOPTIONS_H_
 
-//#include <TinyCLR_Runtime.h>
+//#include <nanoCLR_Runtime.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -133,5 +133,5 @@ struct CLR_RT_ParseOptions
 
 #endif
 
-#endif // _TINYCLR_PARSEOPTIONS_H_
+#endif // _NANOCLR_PARSEOPTIONS_H_
 

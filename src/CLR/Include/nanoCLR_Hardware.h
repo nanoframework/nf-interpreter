@@ -3,12 +3,12 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_HARDWARE_H_
-#define _TINYCLR_HARDWARE_H_
+#ifndef _NANOCLR_HARDWARE_H_
+#define _NANOCLR_HARDWARE_H_
 
-#include <TinyCLR_Types.h>
-#include <TinyCLR_Runtime.h>
-//#include <TinyCLR_Graphics.h>
+#include <nanoCLR_Types.h>
+#include <nanoCLR_Runtime.h>
+//#include <nanoCLR_Graphics.h>
 
 //--//
 
@@ -36,7 +36,7 @@
 //static const int c_CLR_HW_Button_MAX       = 32;
 
 #if defined(_WIN32)
-#include "TinyCLR_Win32.h"
+#include "nanoCLR_Win32.h"
 #endif
 
 //--//
@@ -142,5 +142,5 @@ CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 24)
 
 //--//
 
-#endif // _TINYCLR_HARDWARE_H_
+#endif // _NANOCLR_HARDWARE_H_
 

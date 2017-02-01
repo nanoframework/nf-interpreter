@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-//#include <TinyCLR_Types.h>
+//#include <nanoCLR_Types.h>
 #include <WireProtocol.h>
 
 // #define TRACE_ERRORS 1

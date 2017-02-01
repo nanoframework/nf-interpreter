@@ -16,24 +16,24 @@ void CLR_RT_ObjectToEvent_Destination::Initialize()
 void CLR_RT_ObjectToEvent_Destination::CheckAll()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_ObjectToEvent_Source,ref,m_references)
+    NANOCLR_FOREACH_NODE(CLR_RT_ObjectToEvent_Source,ref,m_references)
     {
         ref->EnsureObjectIsAlive();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 void CLR_RT_ObjectToEvent_Destination::SignalAll()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_ObjectToEvent_Source,ref,m_references)
+    NANOCLR_FOREACH_NODE(CLR_RT_ObjectToEvent_Source,ref,m_references)
     {
         if(ref->m_objectPtr)
         {
             CLR_RT_HeapBlock_WaitForObject::SignalObject( *ref->m_objectPtr );
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 void CLR_RT_ObjectToEvent_Destination::DetachAll()

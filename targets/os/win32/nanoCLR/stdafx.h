@@ -19,9 +19,9 @@
 // TODO: reference additional headers your program requires here
 
 #include <crtdbg.h>
-#include <TinyCLR_Runtime.h>
-#include <TinyCLR_Hardware.h>
-#include <TinyCLR_Application.h>
+#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Hardware.h>
+#include <nanoCLR_Application.h>
 
-#include "TinyCLR_ParseOptions.h"
+#include "nanoCLR_ParseOptions.h"
 

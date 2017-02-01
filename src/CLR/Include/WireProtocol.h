@@ -14,8 +14,8 @@
 
 // FIXME: xxx_Types.h
 
-//#include <TinySupport.h>
-// TinyHAL_Types.h
+//#include <nanoSupport.h>
+// nanoHAL_Types.h
 typedef unsigned char      UINT8;
 typedef unsigned short int UINT16;
 typedef unsigned int       UINT32;

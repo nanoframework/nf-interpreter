@@ -10,7 +10,7 @@
 HRESULT CLR_RT_HeapBlock_Finalizer::CreateInstance( CLR_RT_HeapBlock* object, const CLR_RT_TypeDef_Instance& inst )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance inst2 = inst;
 
@@ -35,7 +35,7 @@ HRESULT CLR_RT_HeapBlock_Finalizer::CreateInstance( CLR_RT_HeapBlock* object, co
 
                 fin->m_md.Set( inst2.Assembly(), pos );
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 fin->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 #endif
 
@@ -47,7 +47,7 @@ HRESULT CLR_RT_HeapBlock_Finalizer::CreateInstance( CLR_RT_HeapBlock* object, co
     }
     while(inst2.SwitchToParent());
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_HeapBlock_Finalizer::Relocate()
@@ -66,7 +66,7 @@ void CLR_RT_HeapBlock_Finalizer::SuppressFinalize( CLR_RT_HeapBlock* object )
 void CLR_RT_HeapBlock_Finalizer::RemoveInstance( CLR_RT_HeapBlock* object, CLR_RT_DblLinkedList& lst )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,lst)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,lst)
     {
         if(fin->m_object == object)
         {
@@ -75,6 +75,6 @@ void CLR_RT_HeapBlock_Finalizer::RemoveInstance( CLR_RT_HeapBlock* object, CLR_R
             break;
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 

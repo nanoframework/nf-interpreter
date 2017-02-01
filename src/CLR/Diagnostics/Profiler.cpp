@@ -5,14 +5,14 @@
 //
 #include "Diagnostics.h"
 
-#if defined(TINYCLR_PROFILE_NEW)
+#if defined(NANOCLR_PROFILE_NEW)
 
 CLR_PRF_Profiler g_CLR_PRF_Profiler;
 
 HRESULT CLR_PRF_Profiler::CreateInstance()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     g_CLR_PRF_Profiler.m_packetSeqId = 0;
     g_CLR_PRF_Profiler.m_stream = NULL;
@@ -20,9 +20,9 @@ HRESULT CLR_PRF_Profiler::CreateInstance()
         >> CLR_PRF_CMDS::Bits::TimestampShift);
     g_CLR_PRF_Profiler.m_currentAssembly = 0;
     g_CLR_PRF_Profiler.m_currentThreadPID = 0;
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(g_CLR_PRF_Profiler.m_stream, NULL, 0));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(g_CLR_PRF_Profiler.m_stream, NULL, 0));
     
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_PRF_Profiler::DeleteInstance()
@@ -51,23 +51,23 @@ void CLR_PRF_Profiler::SendMemoryLayout()
 HRESULT CLR_PRF_Profiler::DumpHeap()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
     CLR_UINT32 heapSize = 0;
 
-    if(CLR_EE_PRF_IS_NOT(Enabled)) { TINYCLR_SET_AND_LEAVE(S_OK); }
+    if(CLR_EE_PRF_IS_NOT(Enabled)) { NANOCLR_SET_AND_LEAVE(S_OK); }
 
     {
         //Send HeapDump Begin Marker
         m_stream->WriteBits( CLR_PRF_CMDS::c_Profiling_HeapDump_Start, CLR_PRF_CMDS::Bits::CommandHeader );
-        TINYCLR_CHECK_HRESULT(Stream_Send());
+        NANOCLR_CHECK_HRESULT(Stream_Send());
     }
 
     DumpRoots();
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
     {
         CLR_RT_HeapBlock_Node* ptr;
         CLR_UINT32 size;
@@ -81,30 +81,30 @@ HRESULT CLR_PRF_Profiler::DumpHeap()
             }
             DumpObject(ptr);
             //Don't let the stream get too big.
-            TINYCLR_CHECK_HRESULT(Stream_Send());
+            NANOCLR_CHECK_HRESULT(Stream_Send());
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     {
         //Send HeapDump End Marker
         m_stream->WriteBits( CLR_PRF_CMDS::c_Profiling_HeapDump_Stop, CLR_PRF_CMDS::Bits::CommandHeader );
         PackAndWriteBits( heapSize );
-        TINYCLR_CHECK_HRESULT(Stream_Send());
+        NANOCLR_CHECK_HRESULT(Stream_Send());
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     //Flush out all data we've collected. Stopping the device without informing the program is a bad idea.
     Stream_Flush();
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_PRF_Profiler::DumpRoots()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     //Root proto:
     //8bits: CLR_PRF_CMDS::c_Profiling_HeapDump_Root
@@ -113,7 +113,7 @@ HRESULT CLR_PRF_Profiler::DumpRoots()
     //Only when source is Stack??: 32bits: CLR_RT_MethodDef_Index
 
     //Iterate through all the finalizers
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,g_CLR_RT_ExecutionEngine.m_finalizersPending)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,g_CLR_RT_ExecutionEngine.m_finalizersPending)
     {
         _ASSERTE(fin->m_object);
         _ASSERTE(fin->m_object->DataType() != DATATYPE_FREEBLOCK);
@@ -121,9 +121,9 @@ HRESULT CLR_PRF_Profiler::DumpRoots()
 
         DumpRoot(fin->m_object, CLR_PRF_CMDS::RootTypes::Root_Finalizer, 0, NULL);
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,g_CLR_RT_ExecutionEngine.m_finalizersAlive)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,g_CLR_RT_ExecutionEngine.m_finalizersAlive)
     {
         _ASSERTE(fin->m_object);
         _ASSERTE(fin->m_object->DataType() != DATATYPE_FREEBLOCK);
@@ -131,39 +131,39 @@ HRESULT CLR_PRF_Profiler::DumpRoots()
 
         DumpRoot(fin->m_object, CLR_PRF_CMDS::RootTypes::Root_Finalizer, 0, NULL);
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     //Iterate through all the appdomains
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
     {
         DumpRoot(appDomain, CLR_PRF_CMDS::RootTypes::Root_AppDomain, 0, NULL);
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 #endif
 
     //Iterate through all the assemblies.
-    TINYCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+    NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
         DumpRoot( pASSM, CLR_PRF_CMDS::RootTypes::Root_Assembly, 0, NULL );
     }
-    TINYCLR_FOREACH_ASSEMBLY_END();
+    NANOCLR_FOREACH_ASSEMBLY_END();
 
     { //Iterate through all threads.
         CLR_RT_DblLinkedList* threadLists[ 2 ] = { &g_CLR_RT_ExecutionEngine.m_threadsReady, &g_CLR_RT_ExecutionEngine.m_threadsWaiting };
         for(int list = 0; list < 2; list++)
         {
-            TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,*threadLists[ list ])
+            NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,*threadLists[ list ])
             {
                 DumpRoot( th, CLR_PRF_CMDS::RootTypes::Root_Thread, 0, NULL );
             }
-            TINYCLR_FOREACH_NODE_END();
+            NANOCLR_FOREACH_NODE_END();
         }
     }
 
-    TINYCLR_CHECK_HRESULT(Stream_Send());
+    NANOCLR_CHECK_HRESULT(Stream_Send());
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_PRF_Profiler::DumpRoot( CLR_RT_HeapBlock* root, CLR_UINT32 type, CLR_UINT32 flags, CLR_RT_MethodDef_Index* source )
@@ -248,7 +248,7 @@ void CLR_PRF_Profiler::DumpObject( CLR_RT_HeapBlock* ptr )
             case DATATYPE_OBJECT:
             case DATATYPE_BYREF:
             case DATATYPE_ARRAY_BYREF:
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
             case DATATYPE_TRANSPARENT_PROXY:
 #endif
                 {
@@ -260,7 +260,7 @@ void CLR_PRF_Profiler::DumpObject( CLR_RT_HeapBlock* ptr )
             case DATATYPE_VALUETYPE:
                 {
                     CLR_RT_TypeDef_Index idx = ptr->ObjectCls();
-                    _ASSERTE(TINYCLR_INDEX_IS_VALID(idx));
+                    _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
                     PackAndWriteBits( idx );
                     DumpSingleReference( ptr->ObjectLock() );
                     DumpListOfReferences( ptr + 1, ptr->DataSize() - 1 ); //All items in list should have DataSize() == 1 therefore ptr->DataSize() - 1 == number of items in list.
@@ -286,7 +286,7 @@ void CLR_PRF_Profiler::DumpObject( CLR_RT_HeapBlock* ptr )
                 {
                     CLR_RT_Assembly* assembly = (CLR_RT_Assembly*)ptr;
                     DumpSingleReference( assembly->m_pFile );
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
                     DumpListOfReferences( assembly->m_pStaticFields, assembly->m_iStaticFields );
 #endif
                     break;
@@ -413,7 +413,7 @@ void CLR_PRF_Profiler::DumpObject( CLR_RT_HeapBlock* ptr )
             //    }
                 
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         case DATATYPE_APPDOMAIN_HEAD:
             {
                 CLR_RT_AppDomain* appDomain = (CLR_RT_AppDomain*)ptr;
@@ -452,7 +452,7 @@ CLR_RT_HeapBlock* CLR_PRF_Profiler::FindReferencedObject(CLR_RT_HeapBlock* ref)
         case DATATYPE_OBJECT:
             ref = ref->Dereference();
             break;
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         case DATATYPE_TRANSPARENT_PROXY:
             ref = ref->TransparentProxyDereference();
             break;
@@ -502,11 +502,11 @@ void CLR_PRF_Profiler::DumpListOfReferences(CLR_RT_HeapBlock* firstItem, CLR_UIN
 void CLR_PRF_Profiler::DumpListOfReferences(CLR_RT_DblLinkedList& list)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node, ptr, list)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node, ptr, list)
     {
         DumpSingleReference(ptr);
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 //--//
@@ -528,11 +528,11 @@ void CLR_PRF_Profiler::Timestamp()
 
 //--//
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
 HRESULT CLR_PRF_Profiler::RecordContextSwitch(CLR_RT_Thread* nextThread)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     _ASSERTE(nextThread);
 
     CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
@@ -543,16 +543,16 @@ HRESULT CLR_PRF_Profiler::RecordContextSwitch(CLR_RT_Thread* nextThread)
         m_stream->WriteBits( CLR_PRF_CMDS::c_Profiling_Calls_CtxSwitch, CLR_PRF_CMDS::Bits::CommandHeader );
         PackAndWriteBits( nextThread->m_pid );
         m_currentThreadPID = nextThread->m_pid;
-        TINYCLR_CHECK_HRESULT(Stream_Send());
+        NANOCLR_CHECK_HRESULT(Stream_Send());
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_PRF_Profiler::RecordFunctionCall(CLR_RT_Thread* th, CLR_RT_MethodDef_Index md)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     _ASSERTE(th);
 
     if(CLR_EE_PRF_IS(Calls))
@@ -561,7 +561,7 @@ HRESULT CLR_PRF_Profiler::RecordFunctionCall(CLR_RT_Thread* th, CLR_RT_MethodDef
 
         if(th->m_pid != m_currentThreadPID)
         {
-            TINYCLR_CHECK_HRESULT(RecordContextSwitch( th ));
+            NANOCLR_CHECK_HRESULT(RecordContextSwitch( th ));
         }
         else
         {
@@ -583,16 +583,16 @@ HRESULT CLR_PRF_Profiler::RecordFunctionCall(CLR_RT_Thread* th, CLR_RT_MethodDef
             PackAndWriteBits(m_currentAssembly);
         }
         PackAndWriteBits(md.Method());
-        TINYCLR_CHECK_HRESULT(Stream_Send());
+        NANOCLR_CHECK_HRESULT(Stream_Send());
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_PRF_Profiler::RecordFunctionReturn(CLR_RT_Thread* th, CLR_PROF_CounterCallChain& prof)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     _ASSERTE(th);
 
     if(CLR_EE_PRF_IS(Calls))
@@ -601,7 +601,7 @@ HRESULT CLR_PRF_Profiler::RecordFunctionReturn(CLR_RT_Thread* th, CLR_PROF_Count
 
         if(th->m_pid != m_currentThreadPID)
         {
-            TINYCLR_CHECK_HRESULT(RecordContextSwitch( th ));
+            NANOCLR_CHECK_HRESULT(RecordContextSwitch( th ));
         }
         else
         {
@@ -612,16 +612,16 @@ HRESULT CLR_PRF_Profiler::RecordFunctionReturn(CLR_RT_Thread* th, CLR_PROF_Count
 
         m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Calls_Return, CLR_PRF_CMDS::Bits::CommandHeader);
         PackAndWriteBits((CLR_UINT32)(prof.m_time_exclusive >> CLR_PRF_CMDS::Bits::CallTimingShift));
-        TINYCLR_CHECK_HRESULT(Stream_Send());
+        NANOCLR_CHECK_HRESULT(Stream_Send());
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 #endif
 
 //--//
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
 
 void CLR_PRF_Profiler::TrackObjectCreation( CLR_RT_HeapBlock* ptr )
 {
@@ -811,24 +811,24 @@ void CLR_PRF_Profiler::PackAndWriteBits(const CLR_RT_MethodDef_Index& methodDef)
 HRESULT CLR_PRF_Profiler::Stream_Send()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     const int BUFFER_THRESHOLD_BYTES = CLR_RT_HeapBlock_MemoryStream::Buffer::c_PayloadSize * 2 / 3;
     const int BUFFER_THRESHOLD_BITS  = BUFFER_THRESHOLD_BYTES << 3;
 
     if(m_stream->BitsWritten() >= BUFFER_THRESHOLD_BITS)
     {
-        TINYCLR_CHECK_HRESULT(Stream_Flush());
+        NANOCLR_CHECK_HRESULT(Stream_Flush());
     } 
     //else { Stream isn't above threshold; allow to cache. }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_PRF_Profiler::Stream_Flush()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     //These need to be paired; If this function is ever used to send multiple stream types, each should get their own packet sequence id.
     const CLR_UINT32 messageType = CLR_DBG_Commands::c_Profiling_Stream;
@@ -836,7 +836,7 @@ HRESULT CLR_PRF_Profiler::Stream_Flush()
     CLR_UINT8 buffer[ 2*sizeof(CLR_UINT16) + CLR_RT_HeapBlock_MemoryStream::Buffer::c_PayloadSize ];
     CLR_DBG_Commands::Profiling_Stream* packet = (CLR_DBG_Commands::Profiling_Stream*)buffer;
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_MemoryStream::Buffer, ptr, m_stream->m_buffers)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_MemoryStream::Buffer, ptr, m_stream->m_buffers)
     {
         int payloadLength = ptr->m_length;
         if(payloadLength > 0)
@@ -857,19 +857,19 @@ HRESULT CLR_PRF_Profiler::Stream_Flush()
             if(!CLR_EE_DBG_EVENT_SEND(messageType, packetLength, buffer, WP_Flags::c_NonCritical))
             {
                 _ASSERTE(FALSE);
-                TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
         }
 
         //Don't go past the cursor.
         if(ptr == m_stream->m_current) { break; }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     m_stream->Reset();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
-#endif //#if defined(TINYCLR_PROFILE_NEW)
+#endif //#if defined(NANOCLR_PROFILE_NEW)
 

@@ -3,10 +3,10 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_PROFILING_H_
-#define _TINYCLR_PROFILING_H_
+#ifndef _NANOCLR_PROFILING_H_
+#define _NANOCLR_PROFILING_H_
 
-#if defined(TINYCLR_PROFILE_NEW)
+#if defined(NANOCLR_PROFILE_NEW)
 
 /*
  * See RFC2234 for Augmented Backus Naur form documentation.
@@ -21,7 +21,7 @@ pointer  = 32BIT
 datatype = 8BIT
 typedef-idx = 32BIT
 method-idx  = 32BIT
-    TinyCLR Method_Idx value for identifying a specific function
+    nanoCLR Method_Idx value for identifying a specific function
 
 stream-packet = sequence-id length stream-payload
     A chunk of data sent out over the WireProtocol.
@@ -170,13 +170,13 @@ struct CLR_PRF_Profiler
     HRESULT Profiler_Cleanup();
     HRESULT DumpHeap();
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
     HRESULT RecordContextSwitch( CLR_RT_Thread* nextThread );
     HRESULT RecordFunctionCall( CLR_RT_Thread* th, CLR_RT_MethodDef_Index md );
     HRESULT RecordFunctionReturn( CLR_RT_Thread* th, CLR_PROF_CounterCallChain& prof );
 #endif
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     void TrackObjectCreation( CLR_RT_HeapBlock* ptr );
     void TrackObjectDeletion( CLR_RT_HeapBlock* ptr );
     void TrackObjectRelocation();
@@ -214,6 +214,6 @@ private:
 
 extern CLR_PRF_Profiler g_CLR_PRF_Profiler;
 
-#endif //defined(TINYCLR_PROFILE_NEW)
-#endif // _TINYCLR_PROFILING_H_
+#endif //defined(NANOCLR_PROFILE_NEW)
+#endif // _NANOCLR_PROFILING_H_
 

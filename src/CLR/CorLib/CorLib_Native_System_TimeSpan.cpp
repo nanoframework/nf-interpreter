@@ -9,9 +9,9 @@
 HRESULT Library_corlib_native_System_TimeSpan::Equals___BOOLEAN__OBJECT( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CHECK_HRESULT(CompareTo___I4__OBJECT( stack ));
+    NANOCLR_CHECK_HRESULT(CompareTo___I4__OBJECT( stack ));
 
     {
         CLR_RT_HeapBlock& res = stack.TopValue();
@@ -19,13 +19,13 @@ HRESULT Library_corlib_native_System_TimeSpan::Equals___BOOLEAN__OBJECT( CLR_RT_
         res.SetBoolean( res.NumericByRef().s4 == 0 );
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_TimeSpan::ToString___STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     char       rgBuffer[ 128 ];
     LPSTR      szBuffer =           rgBuffer;
@@ -34,48 +34,48 @@ HRESULT Library_corlib_native_System_TimeSpan::ToString___STRING( CLR_RT_StackFr
 
     Time_TimeSpanToStringEx( *val, szBuffer, iBuffer );
 
-    TINYCLR_SET_AND_LEAVE(stack.SetResult_String( rgBuffer ));
+    NANOCLR_SET_AND_LEAVE(stack.SetResult_String( rgBuffer ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_TimeSpan::_ctor___VOID__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* pArgs = &(stack.Arg1());
     CLR_INT64*        val   = GetValuePtr( stack ); FAULT_ON_NULL(val);
 
     ConstructTimeSpan( val, 0, pArgs[ 0 ].NumericByRef().s4, pArgs[ 1 ].NumericByRef().s4, pArgs[ 2 ].NumericByRef().s4, 0 );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_TimeSpan::_ctor___VOID__I4__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* pArgs = &(stack.Arg1());
     CLR_INT64*        val   = GetValuePtr( stack ); FAULT_ON_NULL(val);
 
     ConstructTimeSpan( val, pArgs[ 0 ].NumericByRef().s4, pArgs[ 1 ].NumericByRef().s4, pArgs[ 2 ].NumericByRef().s4, pArgs[ 3 ].NumericByRef().s4, 0 );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_TimeSpan::_ctor___VOID__I4__I4__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* pArgs = &(stack.Arg1());
     CLR_INT64*        val   = GetValuePtr( stack ); FAULT_ON_NULL(val);
 
     ConstructTimeSpan( val, pArgs[ 0 ].NumericByRef().s4, pArgs[ 1 ].NumericByRef().s4, pArgs[ 2 ].NumericByRef().s4, pArgs[ 3 ].NumericByRef().s4, pArgs[ 4 ].NumericByRef().s4 );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void Library_corlib_native_System_TimeSpan::ConstructTimeSpan( CLR_INT64* val, CLR_INT32 days, CLR_INT32 hours, CLR_INT32 minutes, CLR_INT32 seconds, CLR_INT32 msec )
@@ -94,25 +94,25 @@ void Library_corlib_native_System_TimeSpan::ConstructTimeSpan( CLR_INT64* val, C
 HRESULT Library_corlib_native_System_TimeSpan::CompareTo___I4__OBJECT( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* pLeft  = stack.This();
     CLR_RT_HeapBlock* pRight = stack.Arg1().Dereference();
 
     if(pRight)
     {
-        TINYCLR_SET_AND_LEAVE(Compare___STATIC__I4__SystemTimeSpan__SystemTimeSpan( stack ));
+        NANOCLR_SET_AND_LEAVE(Compare___STATIC__I4__SystemTimeSpan__SystemTimeSpan( stack ));
     }
 
     stack.SetResult_I4( 1 );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_TimeSpan::Compare___STATIC__I4__SystemTimeSpan__SystemTimeSpan( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_INT64*       pLeft;
     CLR_INT64*       pRight;
@@ -127,19 +127,19 @@ HRESULT Library_corlib_native_System_TimeSpan::Compare___STATIC__I4__SystemTimeS
 
     stack.SetResult_I4( CLR_RT_HeapBlock::Compare_Signed_Values( resLeft, resRight ) );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_TimeSpan::Equals___STATIC__BOOLEAN__SystemTimeSpan__SystemTimeSpan( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CHECK_HRESULT(Compare___STATIC__I4__SystemTimeSpan__SystemTimeSpan( stack ));
+    NANOCLR_CHECK_HRESULT(Compare___STATIC__I4__SystemTimeSpan__SystemTimeSpan( stack ));
 
     stack.ConvertResultToBoolean();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//

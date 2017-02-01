@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyCLR_Runtime.h>
-#include <TinyCLR_Debugging.h>
+#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Debugging.h>
 
 #include <CorLib_Native.h>
 
@@ -56,7 +56,7 @@ void CLR_DBG_Debugger::Debugger_Discovery()
     //
     CLR_DBG_Commands::Monitor_Ping cmd;
 
-    cmd.m_source = CLR_DBG_Commands::Monitor_Ping::c_Ping_Source_TinyCLR;
+    cmd.m_source = CLR_DBG_Commands::Monitor_Ping::c_Ping_Source_CLR;
 
     while(true)
     {
@@ -100,7 +100,7 @@ void CLR_DBG_Debugger::Debugger_Discovery()
 HRESULT CLR_DBG_Debugger::CreateInstance()
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     int iDebugger = 0;
 
@@ -110,7 +110,7 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
 
     CLR_RT_Memory::ZeroFill( g_CLR_DBG_Debuggers, sizeof(CLR_DBG_Debugger) * NUM_DEBUGGERS );
 
-    TINYCLR_FOREACH_DEBUGGER_NO_TEMP()
+    NANOCLR_FOREACH_DEBUGGER_NO_TEMP()
     {
         if(HalSystemConfig.DebuggerPorts[ iDebugger ] == HalSystemConfig.MessagingPorts[ 0 ])
         {
@@ -121,10 +121,10 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
             g_CLR_DBG_Debuggers[iDebugger].m_messaging = (CLR_Messaging*)&g_scratchDebuggerMessaging[ iDebugger ];
         }
 
-        TINYCLR_CHECK_HRESULT(g_CLR_DBG_Debuggers[ iDebugger ].Debugger_Initialize( HalSystemConfig.DebuggerPorts[ iDebugger ] ));
+        NANOCLR_CHECK_HRESULT(g_CLR_DBG_Debuggers[ iDebugger ].Debugger_Initialize( HalSystemConfig.DebuggerPorts[ iDebugger ] ));
         iDebugger++;
     }
-    TINYCLR_FOREACH_DEBUGGER_END();
+    NANOCLR_FOREACH_DEBUGGER_END();
 
     BlockStorageStream stream;
 
@@ -139,17 +139,17 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
 
     // UNDONE: FIXME: MFUpdate_Initialize();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_DBG_Debugger::Debugger_Initialize( COM_HANDLE port )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     m_messaging->Initialize( port, c_Debugger_Lookup_Request, c_Debugger_Lookup_Request_count, c_Debugger_Lookup_Reply, c_Debugger_Lookup_Reply_count, (void*)this );
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
@@ -157,15 +157,15 @@ HRESULT CLR_DBG_Debugger::Debugger_Initialize( COM_HANDLE port )
 HRESULT CLR_DBG_Debugger::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_FOREACH_DEBUGGER(dbg)
+    NANOCLR_FOREACH_DEBUGGER(dbg)
     {
         dbg.Debugger_Cleanup();
     }
-    TINYCLR_FOREACH_DEBUGGER_END();
+    NANOCLR_FOREACH_DEBUGGER_END();
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 void CLR_DBG_Debugger::Debugger_Cleanup()
@@ -191,46 +191,46 @@ void CLR_DBG_Debugger::PurgeCache()
 void CLR_DBG_Debugger::BroadcastEvent( UINT32 cmd, UINT32 payloadSize, UINT8* payload, UINT32 flags )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_FOREACH_DEBUGGER(dbg)
+    NANOCLR_FOREACH_DEBUGGER(dbg)
     {
         dbg.m_messaging->SendEvent( cmd, payloadSize, payload, flags );
     }
-    TINYCLR_FOREACH_DEBUGGER_END();
+    NANOCLR_FOREACH_DEBUGGER_END();
 }
 
 //--//
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 
 CLR_RT_AppDomain* CLR_DBG_Debugger::GetAppDomainFromID( CLR_UINT32 id )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomain, appDomain, g_CLR_RT_ExecutionEngine.m_appDomains)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain, appDomain, g_CLR_RT_ExecutionEngine.m_appDomains)
     {
         if(appDomain->m_id == id) return appDomain;
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     return NULL;
 }
-#endif //TINYCLR_APPDOMAINS
+#endif //NANOCLR_APPDOMAINS
 
 CLR_RT_Thread* CLR_DBG_Debugger::GetThreadFromPid( CLR_UINT32 pid )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsReady)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsReady)
     {
         if(th->m_pid == pid) return th;
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsWaiting)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsWaiting)
     {
         if(th->m_pid == pid) return th;
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     return NULL;
 }
@@ -238,7 +238,7 @@ CLR_RT_Thread* CLR_DBG_Debugger::GetThreadFromPid( CLR_UINT32 pid )
 HRESULT CLR_DBG_Debugger::CreateListOfThreads( CLR_DBG_Commands::Debugging_Thread_List::Reply*& cmdReply, int& totLen )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_UINT32* pidDst;
     int         num;
@@ -254,25 +254,25 @@ HRESULT CLR_DBG_Debugger::CreateListOfThreads( CLR_DBG_Commands::Debugging_Threa
 
     pidDst = cmdReply->m_pids;
 
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,thSrc,g_CLR_RT_ExecutionEngine.m_threadsReady)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,thSrc,g_CLR_RT_ExecutionEngine.m_threadsReady)
     {
         *pidDst++ = thSrc->m_pid;
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,thSrc,g_CLR_RT_ExecutionEngine.m_threadsWaiting)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,thSrc,g_CLR_RT_ExecutionEngine.m_threadsWaiting)
     {
         *pidDst++ = thSrc->m_pid;
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_DBG_Debugger::CreateListOfCalls( CLR_UINT32 pid, CLR_DBG_Commands::Debugging_Thread_Stack::Reply*& cmdReply, int& totLen )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_Thread* th = GetThreadFromPid( pid ); FAULT_ON_NULL(th);
 
@@ -280,20 +280,20 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls( CLR_UINT32 pid, CLR_DBG_Commands::D
     {
         int num = 0;
 
-        TINYCLR_FOREACH_NODE(CLR_RT_StackFrame,call,th->m_stackFrames)
+        NANOCLR_FOREACH_NODE(CLR_RT_StackFrame,call,th->m_stackFrames)
         {
             if(pass == 1)
             {
                 int tmp = num;
                 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                 if(call->m_inlineFrame)
                 {
                     CLR_DBG_Commands::Debugging_Thread_Stack::Reply::Call& dst = cmdReply->m_data[ tmp++ ];
                     
                     dst.m_md =              call->m_inlineFrame->m_frame.m_call;
                     dst.m_IP = (CLR_UINT32)(call->m_inlineFrame->m_frame.m_IP - call->m_inlineFrame->m_frame.m_IPStart);
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                     dst.m_appDomainID = call->m_appDomain->m_id;
                     dst.m_flags       = call->m_flags;
 #endif
@@ -312,13 +312,13 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls( CLR_UINT32 pid, CLR_DBG_Commands::D
                     dst.m_IP--;
                 }
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 dst.m_appDomainID = call->m_appDomain->m_id;
                 dst.m_flags       = call->m_flags;
 #endif
             }
 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if(call->m_inlineFrame)
             {
                 num++;
@@ -327,7 +327,7 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls( CLR_UINT32 pid, CLR_DBG_Commands::D
 
             num++;
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
 
         if(pass == 0)
         {
@@ -341,10 +341,10 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls( CLR_UINT32 pid, CLR_DBG_Commands::D
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -368,7 +368,7 @@ bool CLR_DBG_Debugger::Monitor_Ping( WP_Message* msg, void* owner )
         // default is to stop the debugger (backwards compatibility)
         fStopOnBoot = (cmd != NULL) && (cmd->m_dbg_flags & CLR_DBG_Commands::Monitor_Ping::c_Ping_DbgFlag_Stop);
 
-        cmdReply.m_source    = CLR_DBG_Commands::Monitor_Ping::c_Ping_Source_TinyCLR;
+        cmdReply.m_source    = CLR_DBG_Commands::Monitor_Ping::c_Ping_Source_CLR;
 
         cmdReply.m_dbg_flags = CLR_EE_DBG_IS(State_ProgramExited) != 0 ? CLR_DBG_Commands::Monitor_Ping::c_Ping_DbgFlag_AppExit : 0;
 
@@ -1006,29 +1006,29 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
     {
         case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags:
 
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_FloatingPoint;
 #endif
 
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_ExceptionFilters;
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_SourceLevelDebugging;
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_IncrementalDeployment;
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_ThreadCreateEx;
 #endif
 
-#if defined(TINYCLR_PROFILE_NEW)
+#if defined(NANOCLR_PROFILE_NEW)
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_Profiling;
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_Profiling_Calls;
 #endif
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_Profiling_Allocations;
 #endif
 #endif
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_AppDomains;
 #endif
 
@@ -1364,7 +1364,7 @@ static CLR_UINT32 s_missingPkts[64];
 
 
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 static bool FillValues( CLR_RT_HeapBlock* ptr, CLR_DBG_Commands::Debugging_Value*& array, size_t num, CLR_RT_HeapBlock* reference, CLR_RT_TypeDef_Instance* pTD )
 {
@@ -1500,7 +1500,7 @@ static bool FillValues( CLR_RT_HeapBlock* ptr, CLR_DBG_Commands::Debugging_Value
 
     case DATATYPE_ENDPOINT_HEAD              :
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     case DATATYPE_APPDOMAIN_HEAD             :
     case DATATYPE_TRANSPARENT_PROXY          :
     case DATATYPE_APPDOMAIN_ASSEMBLY         :
@@ -1535,7 +1535,7 @@ bool CLR_DBG_Debugger::GetValue( WP_Message* msg, CLR_RT_HeapBlock* ptr, CLR_RT_
 bool CLR_DBG_Debugger::Debugging_Execution_SetCurrentAppDomain( WP_Message* msg, void* owner )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_DBG_Debugger* dbg = (CLR_DBG_Debugger*)owner;
     CLR_DBG_Commands::Debugging_Execution_SetCurrentAppDomain* cmd       = (CLR_DBG_Commands::Debugging_Execution_SetCurrentAppDomain*)msg->m_payload;
     CLR_RT_AppDomain*                                          appDomain = dbg->GetAppDomainFromID( cmd->m_id );
@@ -1587,11 +1587,11 @@ bool CLR_DBG_Debugger::Debugging_Execution_BreakpointStatus( WP_Message* msg, vo
 CLR_RT_Assembly* CLR_DBG_Debugger::IsGoodAssembly( CLR_IDX idxAssm )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+    NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
         if(pASSM->m_idx == idxAssm) return pASSM;
     }
-    TINYCLR_FOREACH_ASSEMBLY_END();
+    NANOCLR_FOREACH_ASSEMBLY_END();
 
     return NULL;
 }
@@ -1644,9 +1644,9 @@ CLR_RT_StackFrame* CLR_DBG_Debugger::CheckStackFrame( CLR_UINT32 pid, CLR_UINT32
 
     if(th)
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_StackFrame,call,th->m_stackFrames)
+        NANOCLR_FOREACH_NODE(CLR_RT_StackFrame,call,th->m_stackFrames)
         {
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if(call->m_inlineFrame)
             {
                 if(depth-- == 0) 
@@ -1659,7 +1659,7 @@ CLR_RT_StackFrame* CLR_DBG_Debugger::CheckStackFrame( CLR_UINT32 pid, CLR_UINT32
 
             if(depth-- == 0) return call;
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
 
     return NULL;
@@ -1670,7 +1670,7 @@ CLR_RT_StackFrame* CLR_DBG_Debugger::CheckStackFrame( CLR_UINT32 pid, CLR_UINT32
 static HRESULT Debugging_Thread_Create_Helper( CLR_RT_MethodDef_Index& md, CLR_RT_Thread*& th, CLR_UINT32 pid )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock     ref; ref.SetObjectReference( NULL );
     CLR_RT_ProtectFromGC gc( ref );
@@ -1678,9 +1678,9 @@ static HRESULT Debugging_Thread_Create_Helper( CLR_RT_MethodDef_Index& md, CLR_R
 
     th = NULL;
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( ref, md, NULL ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( ref, md, NULL ));
 
-    TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewThread( th, ref.DereferenceDelegate(), ThreadPriority::Highest, -1 ));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewThread( th, ref.DereferenceDelegate(), ThreadPriority::Highest, -1 ));
     
 
     if (realThread)
@@ -1710,7 +1710,7 @@ static HRESULT Debugging_Thread_Create_Helper( CLR_RT_MethodDef_Index& md, CLR_R
             //
             // Skip return value.
             //
-            TINYCLR_CHECK_HRESULT(parser.Advance( res ));
+            NANOCLR_CHECK_HRESULT(parser.Advance( res ));
 
             //
             // None of the arguments can be ByRef.
@@ -1720,23 +1720,23 @@ static HRESULT Debugging_Thread_Create_Helper( CLR_RT_MethodDef_Index& md, CLR_R
 
                 for(;parser2.Available() > 0;)
                 {
-                    TINYCLR_CHECK_HRESULT(parser2.Advance( res ));
+                    NANOCLR_CHECK_HRESULT(parser2.Advance( res ));
 
                     if(res.m_fByRef)
                     {
-                        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
                 }
             }
 
             for(CLR_UINT8 i=0; i<numArgs; i++, args++)
             {
-                TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference( *args, parser ));
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference( *args, parser ));
             }
         }
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(FAILED(hr))
     {
@@ -1747,7 +1747,7 @@ static HRESULT Debugging_Thread_Create_Helper( CLR_RT_MethodDef_Index& md, CLR_R
         }
     }
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 bool CLR_DBG_Debugger::Debugging_Thread_CreateEx( WP_Message* msg, void* owner )
@@ -1886,22 +1886,22 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get( WP_Message* msg, void* owner )
 
     if(th == NULL) return false;
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     //If we are a thread spawned by the debugger to perform evaluations,
     //return the thread object that correspond to thread that has focus in debugger.
     th = th->m_realThread;
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     //Find an existing managed thread, if it exists
     //making sure to only return the managed object association with the current appdomain
     //to prevent leaking of managed Thread objects across AD boundaries.
 
-    TINYCLR_FOREACH_NODE(CLR_RT_ObjectToEvent_Source,src,th->m_references)
+    NANOCLR_FOREACH_NODE(CLR_RT_ObjectToEvent_Source,src,th->m_references)
     {
         CLR_RT_HeapBlock* pManagedThread = src->m_objectPtr;
         _ASSERTE(pManagedThread != NULL);
         
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         {
             CLR_RT_ObjectToEvent_Source* appDomainSrc = CLR_RT_ObjectToEvent_Source::ExtractInstance( pManagedThread[ Library_corlib_native_System_Threading_Thread::FIELD__m_AppDomain ] );
 
@@ -1920,7 +1920,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get( WP_Message* msg, void* owner )
             break;
         }
     }
-    TINYCLR_FOREACH_NODE_END();    
+    NANOCLR_FOREACH_NODE_END();    
 
     if(!fFound)
     {
@@ -1942,7 +1942,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get( WP_Message* msg, void* owner )
 
             if(SUCCEEDED(CLR_RT_ObjectToEvent_Source::CreateInstance( th, *pRes, pRes[ Library_corlib_native_System_Threading_Thread::FIELD__m_Thread ] )))
             {
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 CLR_RT_ObjectToEvent_Source::CreateInstance( g_CLR_RT_ExecutionEngine.GetCurrentAppDomain(), *pRes, pRes[ Library_corlib_native_System_Threading_Thread::FIELD__m_AppDomain ] );
 #endif
                 fFound = true;
@@ -2014,7 +2014,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info( WP_Message* msg, void* owner )
 
     if((call = dbg->CheckStackFrame( cmd->m_pid, cmd->m_depth, isInline )) != NULL)
     {
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if(isInline)
         {
             cmdReply.m_md               =              call->m_inlineFrame->m_frame.m_call;
@@ -2053,7 +2053,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_SetIP( WP_Message* msg, void* owner )
 
     if((call = dbg->CheckStackFrame( cmd->m_pid, cmd->m_depth, isInline )) != NULL)
     {
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if(isInline)
         {
             dbg->m_messaging->ReplyToCommand( msg, false, false );
@@ -2215,7 +2215,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack( WP_Message* msg, void* owner )
     {
         CLR_RT_HeapBlock* array;
         CLR_UINT32        num;
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         CLR_RT_MethodDef_Instance& md = isInline ? call->m_inlineFrame->m_frame.m_call : call->m_call;
 #else
         CLR_RT_MethodDef_Instance& md = call->m_call;
@@ -2224,7 +2224,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack( WP_Message* msg, void* owner )
         switch(cmd->m_kind)
         {
         case CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument:
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             array = isInline ? call->m_inlineFrame->m_frame.m_args : call->m_arguments;
             num   = isInline ? md.m_target->numArgs                : md.m_target->numArgs;
 #else
@@ -2234,7 +2234,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack( WP_Message* msg, void* owner )
             break;
 
         case CLR_DBG_Commands::Debugging_Value_GetStack::c_Local:
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             array = isInline ? call->m_inlineFrame->m_frame.m_locals : call->m_locals;
             num   = isInline ? md.m_target->numLocals                : md.m_target->numLocals;
 #else
@@ -2244,7 +2244,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack( WP_Message* msg, void* owner )
             break;
 
         case CLR_DBG_Commands::Debugging_Value_GetStack::c_EvalStack:
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             array = isInline ? call->m_inlineFrame->m_frame.m_evalStack                                   : call->m_evalStack;
             num   = isInline ? (CLR_UINT32)(call->m_evalStack - call->m_inlineFrame->m_frame.m_evalStack) : (CLR_UINT32)call->TopValuePosition();
 #else
@@ -2607,9 +2607,9 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray( WP_Message* msg, void* own
     return dbg->GetValue( msg, blk, NULL, NULL );
 }
 
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(TINYCLR_PROFILE_NEW)
+#if defined(NANOCLR_PROFILE_NEW)
 bool CLR_DBG_Debugger::Profiling_Command( WP_Message* msg, void* owner )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
@@ -2670,9 +2670,9 @@ bool CLR_DBG_Debugger::Profiling_FlushStream( WP_Message* msg )
     return true;
 }
 
-#endif //#if defined(TINYCLR_PROFILE_NEW)
+#endif //#if defined(NANOCLR_PROFILE_NEW)
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 //--//
 
@@ -2689,7 +2689,7 @@ struct AnalyzeObject
 static HRESULT AnalyzeObject_Helper( CLR_RT_HeapBlock* ptr, AnalyzeObject& ao )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(ptr && ptr->DataType() == DATATYPE_BYREF) ptr = ptr->Dereference();
 
@@ -2703,7 +2703,7 @@ static HRESULT AnalyzeObject_Helper( CLR_RT_HeapBlock* ptr, AnalyzeObject& ao )
     }
     else
     {
-        TINYCLR_CHECK_HRESULT(ao.m_desc.InitializeFromObject( *ptr ));
+        NANOCLR_CHECK_HRESULT(ao.m_desc.InitializeFromObject( *ptr ));
 
         ao.m_fNull  = false;
         ao.m_fBoxed = (ptr->DataType() == DATATYPE_OBJECT && ptr->Dereference()->IsBoxed());
@@ -2734,40 +2734,40 @@ static HRESULT AnalyzeObject_Helper( CLR_RT_HeapBlock* ptr, AnalyzeObject& ao )
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 static HRESULT Assign_Helper( CLR_RT_HeapBlock* blkDst, CLR_RT_HeapBlock* blkSrc )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     AnalyzeObject        aoDst;
     AnalyzeObject        aoSrc;
     CLR_RT_HeapBlock     srcVal; srcVal.SetObjectReference( NULL );
     CLR_RT_ProtectFromGC gc( srcVal );
 
-    TINYCLR_CHECK_HRESULT(AnalyzeObject_Helper( blkDst, aoDst ));
-    TINYCLR_CHECK_HRESULT(AnalyzeObject_Helper( blkSrc, aoSrc ));
+    NANOCLR_CHECK_HRESULT(AnalyzeObject_Helper( blkDst, aoDst ));
+    NANOCLR_CHECK_HRESULT(AnalyzeObject_Helper( blkSrc, aoSrc ));
 
     if(aoSrc.m_fNull)
     {
         if(aoDst.m_fCanBeNull == false)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
-        TINYCLR_CHECK_HRESULT(srcVal.StoreToReference( *blkDst, 0 ));
+        NANOCLR_CHECK_HRESULT(srcVal.StoreToReference( *blkDst, 0 ));
     }
     else
     {
-        TINYCLR_CHECK_HRESULT(srcVal.LoadFromReference( *blkSrc ));
+        NANOCLR_CHECK_HRESULT(srcVal.LoadFromReference( *blkSrc ));
 
         if(aoDst.m_fNull)
         {
             if(aoSrc.m_fCanBeNull == false)
             {
-                TINYCLR_CHECK_HRESULT(srcVal.PerformBoxing( aoSrc.m_desc.m_handlerCls ));
+                NANOCLR_CHECK_HRESULT(srcVal.PerformBoxing( aoSrc.m_desc.m_handlerCls ));
             }
 
             blkDst->Assign( srcVal );
@@ -2778,22 +2778,22 @@ static HRESULT Assign_Helper( CLR_RT_HeapBlock* blkDst, CLR_RT_HeapBlock* blkSrc
             {
                 if(blkDst->IsAValueType() == false)
                 {
-                    TINYCLR_CHECK_HRESULT(srcVal.PerformBoxing( aoSrc.m_desc.m_handlerCls ));
+                    NANOCLR_CHECK_HRESULT(srcVal.PerformBoxing( aoSrc.m_desc.m_handlerCls ));
                 }
             }
             else
             {
                 if(blkDst->IsAValueType() == true)
                 {
-                    TINYCLR_CHECK_HRESULT(srcVal.PerformUnboxing( aoSrc.m_desc.m_handlerCls ));
+                    NANOCLR_CHECK_HRESULT(srcVal.PerformUnboxing( aoSrc.m_desc.m_handlerCls ));
                 }
             }
 
-            TINYCLR_CHECK_HRESULT(blkDst->Reassign( srcVal ));
+            NANOCLR_CHECK_HRESULT(blkDst->Reassign( srcVal ));
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 
@@ -2822,11 +2822,11 @@ bool CLR_DBG_Debugger::Debugging_TypeSys_Assemblies( WP_Message* msg, void* owne
     CLR_RT_Assembly_Index assemblies[ CLR_RT_TypeSystem::c_MaxAssemblies ];
     int                   num = 0;
 
-    TINYCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+    NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
         assemblies[ num++ ].Set( pASSM->m_idx );
     }
-    TINYCLR_FOREACH_ASSEMBLY_END();
+    NANOCLR_FOREACH_ASSEMBLY_END();
 
     dbg->m_messaging->ReplyToCommand( msg, true, false, assemblies, sizeof(CLR_RT_Assembly_Index) * num );
 
@@ -2836,18 +2836,18 @@ bool CLR_DBG_Debugger::Debugging_TypeSys_Assemblies( WP_Message* msg, void* owne
 bool CLR_DBG_Debugger::Debugging_TypeSys_AppDomains( WP_Message* msg, void* owner )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_DBG_Debugger* dbg = (CLR_DBG_Debugger*)owner;
     int        num                = 0;
     CLR_UINT32 appDomainIDs[ 256 ];
 
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomain, appDomain, g_CLR_RT_ExecutionEngine.m_appDomains)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain, appDomain, g_CLR_RT_ExecutionEngine.m_appDomains)
     {
         appDomainIDs[ num++ ] = appDomain->m_id;
 
         if(num >= ARRAYSIZE(appDomainIDs)) break;
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     dbg->m_messaging->ReplyToCommand( msg, true, false, appDomainIDs, sizeof(CLR_UINT32) * num );
 
@@ -2862,7 +2862,7 @@ bool CLR_DBG_Debugger::Debugging_TypeSys_AppDomains( WP_Message* msg, void* owne
 bool CLR_DBG_Debugger::Debugging_Resolve_AppDomain( WP_Message* msg, void* owner )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_DBG_Debugger* dbg = (CLR_DBG_Debugger*)owner;
     CLR_DBG_Commands::Debugging_Resolve_AppDomain*        cmd           = (CLR_DBG_Commands::Debugging_Resolve_AppDomain*)msg->m_payload;
     CLR_RT_AppDomain*                                     appDomain     = dbg->GetAppDomainFromID( cmd->m_id );
@@ -2886,13 +2886,13 @@ bool CLR_DBG_Debugger::Debugging_Resolve_AppDomain( WP_Message* msg, void* owner
 
         pAssemblyIndex = (CLR_RT_Assembly_Index*)(&cmdReply->m_assemblies);
 
-        TINYCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN(appDomain)
+        NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN(appDomain)
         {
             pAssemblyIndex->Set( pASSM->m_idx );
             pAssemblyIndex++;
             numAssemblies++;
         }
-        TINYCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN_END();
+        NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN_END();
 
         dbg->m_messaging->ReplyToCommand( msg, true, false, cmdReply, sizeof(*cmdReply) + sizeof(CLR_RT_Assembly_Index) * (numAssemblies - 1) );
     }
@@ -3052,11 +3052,11 @@ bool CLR_DBG_Debugger::Debugging_Resolve_VirtualMethod( WP_Message* msg, void* o
 }
 
 
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 //--//
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 bool CLR_DBG_Debugger::Debugging_Deployment_Status( WP_Message* msg, void* owner )
 {
@@ -3250,5 +3250,5 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC( WP_Message* msg, void* owner )
     }
 }
 
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 

@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_RUNTIME__HEAPBLOCK_H_
-#define _TINYCLR_RUNTIME__HEAPBLOCK_H_
+#ifndef _NANOCLR_RUNTIME__HEAPBLOCK_H_
+#define _NANOCLR_RUNTIME__HEAPBLOCK_H_
 
 #ifdef __arm__
 // ARM compiler does not allow anonymous structs by default
@@ -58,9 +58,9 @@ struct CLR_RT_HeapBlock
     friend struct MethodCompiler;
     //--//
 
-#if defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if defined(NANOCLR_EMULATED_FLOATINGPOINT)
 /*********************************************************/
-// Keep  in Sync with tinyhal.h 
+// Keep  in Sync with nanoHAL.h
 //#define HAL_FLOAT_SHIFT          10
 //#define HAL_FLOAT_PRECISION      1000
 //#define HAL_DOUBLE_SHIFT          16
@@ -407,7 +407,7 @@ private:
             } s8;
             //
 
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
             float      r4;
 
@@ -734,7 +734,7 @@ private:
         struct String
         {
             LPCSTR           m_text;
-#if !defined(TINYCLR_NO_ASSEMBLY_STRINGS)
+#if !defined(NANOCLR_NO_ASSEMBLY_STRINGS)
             CLR_RT_Assembly* m_assm;
 #endif
         } string;
@@ -758,7 +758,7 @@ private:
             CLR_RT_HeapBlock_Lock* lock;
         } objectHeader;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         struct TransparentProxy
         {
             CLR_RT_HeapBlock*      ptr;                //points to a DATATYPE_CLASS derived from MBRO
@@ -811,7 +811,7 @@ public:
 
     //--//
 
-#if defined(TINYCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
+#if defined(NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
 
     void        Debug_ClearBlock  ( int   data );
     void        Debug_CheckPointer(            ) const;
@@ -859,7 +859,7 @@ public:
     void SetInteger( const CLR_UINT32  num ) { CLR_RT_HEAPBLOCK_ASSIGN_INTEGER32_UNSIGNED(DATATYPE_U4, num); }
     void SetInteger( const CLR_UINT64& num ) { CLR_RT_HEAPBLOCK_ASSIGN_INTEGER64_UNSIGNED(DATATYPE_U8, num); }
 
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     void SetFloat  ( const float       num ) { CLR_RT_HEAPBLOCK_ASSIGN_FLOAT32           (DATATYPE_R4, num); }
     void SetDouble ( const double      num ) { CLR_RT_HEAPBLOCK_ASSIGN_FLOAT64           (DATATYPE_R8, num); }
     void SetFloatFromBits ( const CLR_UINT32  num ) { SetFloat ( *(const float *)&num ); }
@@ -878,7 +878,7 @@ public:
         m_data.objectReference.ptr = (CLR_RT_HeapBlock*)ptr;
     }
 
-#if defined(TINYCLR_APPDOMAINS)    
+#if defined(NANOCLR_APPDOMAINS)    
     CLR_RT_AppDomain* TransparentProxyAppDomain  () const { return m_data.transparentProxy.appDomain; }
     CLR_RT_HeapBlock* TransparentProxyDereference() const { return Dereference()                    ; }
 
@@ -972,7 +972,7 @@ public:
 
     LPCSTR StringText() const { return m_data.string.m_text; }
 
-#if defined(TINYCLR_NO_ASSEMBLY_STRINGS)
+#if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
     void SetStringText( LPCSTR szText )
     {
         m_data.string.m_text = szText;
@@ -1159,7 +1159,7 @@ public:
     void Relocate_Ref       ();
     void Relocate_ArrayRef  ();
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     void Relocate_TransparentProxy();
 #endif
 
@@ -1171,76 +1171,76 @@ private:
 
 //--//
 
-#define TINYCLR_FOREACH_NODE(cls,ptr,lst)                                                            \
+#define NANOCLR_FOREACH_NODE(cls,ptr,lst)                                                            \
     {                                                                                                \
         cls* ptr;                                                                                    \
         cls* ptr##Next;                                                                              \
                                                                                                      \
         for(ptr = (cls*)(lst).FirstNode(); (ptr##Next = (cls*)ptr->Next()) != NULL; ptr = ptr##Next) \
-        { TINYCLR_FAULT_ON_EARLY_COLLECTION( ptr##Next );
+        { NANOCLR_FAULT_ON_EARLY_COLLECTION( ptr##Next );
 
-#define TINYCLR_FOREACH_NODE__NODECL(cls,ptr,lst)                                                    \
+#define NANOCLR_FOREACH_NODE__NODECL(cls,ptr,lst)                                                    \
     {                                                                                                \
         cls* ptr##Next;                                                                              \
                                                                                                      \
         for(ptr = (cls*)(lst).FirstNode(); (ptr##Next = (cls*)ptr->Next()) != NULL; ptr = ptr##Next) \
-        { TINYCLR_FAULT_ON_EARLY_COLLECTION( ptr##Next );
+        { NANOCLR_FAULT_ON_EARLY_COLLECTION( ptr##Next );
 
-#define TINYCLR_FOREACH_NODE__DIRECT(cls,ptr,startNode)                                              \
+#define NANOCLR_FOREACH_NODE__DIRECT(cls,ptr,startNode)                                              \
     {                                                                                                \
         cls* ptr;                                                                                    \
         cls* ptr##Next;                                                                              \
                                                                                                      \
         for(ptr = (cls*)(startNode); (ptr##Next = (cls*)ptr->Next()) != NULL; ptr = ptr##Next)       \
-        { TINYCLR_FAULT_ON_EARLY_COLLECTION( ptr##Next );
+        { NANOCLR_FAULT_ON_EARLY_COLLECTION( ptr##Next );
 
-#define TINYCLR_FOREACH_NODE_PREPARE_RELOAD(ptr)                                                     \
-            TINYCLR_CANCEL_EARLY_COLLECTION(ptr##Next)
+#define NANOCLR_FOREACH_NODE_PREPARE_RELOAD(ptr)                                                     \
+            NANOCLR_CANCEL_EARLY_COLLECTION(ptr##Next)
 
-#define TINYCLR_FOREACH_NODE_RELOAD(cls,ptr)                                                         \
+#define NANOCLR_FOREACH_NODE_RELOAD(cls,ptr)                                                         \
             ptr##Next = (cls*)ptr->Next()
 
-#define TINYCLR_FOREACH_NODE_RESTART(cls,ptr,lst)                                                    \
+#define NANOCLR_FOREACH_NODE_RESTART(cls,ptr,lst)                                                    \
             ptr##Next = (cls*)(lst).FirstNode(); continue
 
-#define TINYCLR_FOREACH_NODE_END()                                                                   \
+#define NANOCLR_FOREACH_NODE_END()                                                                   \
         }                                                                                            \
     }
 
 
-#define TINYCLR_FOREACH_NODE_BACKWARD(cls,ptr,lst)                                                   \
+#define NANOCLR_FOREACH_NODE_BACKWARD(cls,ptr,lst)                                                   \
     {                                                                                                \
         cls* ptr;                                                                                    \
         cls* ptr##Prev;                                                                              \
                                                                                                      \
         for(ptr = (cls*)(lst).LastNode(); (ptr##Prev = (cls*)ptr->Prev()) != NULL; ptr = ptr##Prev)  \
-        { TINYCLR_FAULT_ON_EARLY_COLLECTION( ptr##Prev );
+        { NANOCLR_FAULT_ON_EARLY_COLLECTION( ptr##Prev );
 
-#define TINYCLR_FOREACH_NODE_BACKWARD__NODECL(cls,ptr,lst)                                           \
+#define NANOCLR_FOREACH_NODE_BACKWARD__NODECL(cls,ptr,lst)                                           \
     {                                                                                                \
         cls* ptr##Prev;                                                                              \
                                                                                                      \
         for(ptr = (cls*)(lst).LastNode(); (ptr##Prev = (cls*)ptr->Prev()) != NULL; ptr = ptr##Prev)  \
-        { TINYCLR_FAULT_ON_EARLY_COLLECTION( ptr##Prev );
+        { NANOCLR_FAULT_ON_EARLY_COLLECTION( ptr##Prev );
 
-#define TINYCLR_FOREACH_NODE_BACKWARD__DIRECT(cls,ptr,startNode)                                     \
+#define NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(cls,ptr,startNode)                                     \
     {                                                                                                \
         cls* ptr;                                                                                    \
         cls* ptr##Prev;                                                                              \
                                                                                                      \
         for(ptr = (cls*)(startNode); (ptr##Prev = (cls*)ptr->Prev()) != NULL; ptr = ptr##Prev)       \
-        { TINYCLR_FAULT_ON_EARLY_COLLECTION( ptr##Prev );
+        { NANOCLR_FAULT_ON_EARLY_COLLECTION( ptr##Prev );
 
-#define TINYCLR_FOREACH_NODE_BACKWARD_RESTART(cls,ptr,lst)                                           \
+#define NANOCLR_FOREACH_NODE_BACKWARD_RESTART(cls,ptr,lst)                                           \
             ptr##Prev = (cls*)(lst).LastNode(); continue
 
-#define TINYCLR_FOREACH_NODE_BACKWARD_PREPARE_RELOAD(ptr)                                            \
-            TINYCLR_CANCEL_EARLY_COLLECTION(ptr##Prev)
+#define NANOCLR_FOREACH_NODE_BACKWARD_PREPARE_RELOAD(ptr)                                            \
+            NANOCLR_CANCEL_EARLY_COLLECTION(ptr##Prev)
 
-#define TINYCLR_FOREACH_NODE_BACKWARD_RELOAD(cls,ptr)                                                \
+#define NANOCLR_FOREACH_NODE_BACKWARD_RELOAD(cls,ptr)                                                \
             ptr##Prev = (cls*)ptr->Prev()
 
-#define TINYCLR_FOREACH_NODE_BACKWARD_END()                                                          \
+#define NANOCLR_FOREACH_NODE_BACKWARD_END()                                                          \
         }                                                                                            \
     }
 
@@ -1272,7 +1272,7 @@ struct CLR_RT_HeapBlock_Node : public CLR_RT_HeapBlock
 
     //--//
 
-#if TINYCLR_VALIDATE_HEAP >= TINYCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
     void ConsistencyCheck_Nodes( CLR_RT_HeapBlock_Node* prev, CLR_RT_HeapBlock_Node* next )
     {
         if( prev &&  next) return;
@@ -1280,7 +1280,7 @@ struct CLR_RT_HeapBlock_Node : public CLR_RT_HeapBlock
 
         CLR_Debug::Printf( "Bad node!!\r\n" );
 
-        TINYCLR_DEBUG_STOP();
+        NANOCLR_DEBUG_STOP();
     }
 
 #else
@@ -1359,7 +1359,7 @@ public:
     CLR_RT_HeapBlock_Node* Head() const { return (CLR_RT_HeapBlock_Node*)((size_t)&m_first - offsetof(CLR_RT_HeapBlock, m_data.nodeLink.nextBlock)); }
     CLR_RT_HeapBlock_Node* Tail() const { return (CLR_RT_HeapBlock_Node*)((size_t)&m_last  - offsetof(CLR_RT_HeapBlock, m_data.nodeLink.prevBlock)); }
 
-#if TINYCLR_VALIDATE_HEAP >= TINYCLR_VALIDATE_HEAP_2_DblLinkedList
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_2_DblLinkedList
     void ValidateList();
 #else
     void ValidateList() {};
@@ -1564,19 +1564,19 @@ struct CLR_RT_HeapBlock_Delegate : public CLR_RT_HeapBlock_Node // OBJECT HEAP -
 {
     CLR_RT_TypeDef_Index   m_cls;
     CLR_RT_MethodDef_Index m_ftn;
-#if defined(TINYCLR_DELEGATE_PRESERVE_STACK)
+#if defined(NANOCLR_DELEGATE_PRESERVE_STACK)
     CLR_UINT32             m_numOfStackFrames;
 #endif
     CLR_RT_HeapBlock       m_object;  // ANY HEAP - DO RELOCATION -
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain*     m_appDomain;
 #endif
 
     //--//
 
     const CLR_RT_MethodDef_Index& DelegateFtn             () const { return m_ftn                              ; }
-#if defined(TINYCLR_DELEGATE_PRESERVE_STACK)
+#if defined(NANOCLR_DELEGATE_PRESERVE_STACK)
     CLR_UINT32                    DelegateNumOfStackFrames() const { return m_numOfStackFrames                 ; }
     CLR_RT_MethodDef_Index*       GetStackFrames()                 { return (CLR_RT_MethodDef_Index*)&this[ 1 ]; }
 #endif
@@ -1696,7 +1696,7 @@ struct CLR_RT_HeapBlock_Lock : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO R
 
     CLR_RT_HeapBlock     m_resource;     // OBJECT HEAP - DO RELOCATION -
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain*    m_appDomain;   // EVENT HEAP - NO RELOCATION -
 #endif
 
@@ -1866,7 +1866,7 @@ struct CLR_RT_HeapBlock_Finalizer : public CLR_RT_HeapBlock_Node // EVENT HEAP -
     CLR_RT_HeapBlock*      m_object;   // OBJECT HEAP - DO RELOCATION -
     CLR_RT_MethodDef_Index m_md;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain*      m_appDomain;
 #endif
 
@@ -2203,7 +2203,7 @@ struct CLR_RT_Persistence_Manager
     //--//
 
 #undef DECL_POSTFIX
-#if defined(TINYCLR_TRACE_PERSISTENCE)
+#if defined(NANOCLR_TRACE_PERSISTENCE)
 #define DECL_POSTFIX
 #else
 #define DECL_POSTFIX {}
@@ -2406,5 +2406,5 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // _TINYCLR_RUNTIME__HEAPBLOCK_H_
+#endif // _NANOCLR_RUNTIME__HEAPBLOCK_H_
 

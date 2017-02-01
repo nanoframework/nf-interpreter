@@ -128,64 +128,64 @@
     <ClInclude Include="Core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Runtime__HeapBlock.h">
+    <ClInclude Include="..\Include\nanoCLR_Runtime__HeapBlock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Types.h">
+    <ClInclude Include="..\Include\nanoCLR_Types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_PlatformDef.h">
+    <ClInclude Include="..\Include\nanoCLR_PlatformDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Runtime.h">
+    <ClInclude Include="..\Include\nanoCLR_Runtime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Interop.h">
+    <ClInclude Include="..\Include\nanoCLR_Interop.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Debugging.h">
+    <ClInclude Include="..\Include\nanoCLR_Debugging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_ErrorCodes.h">
+    <ClInclude Include="..\Include\nanoCLR_ErrorCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\netmf_errors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyHAL.h">
+    <ClInclude Include="..\Include\nanoHAL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Messaging.h">
+    <ClInclude Include="..\Include\nanoCLR_Messaging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyPAL.h">
+    <ClInclude Include="..\Include\nanoPAL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyHAL_ReleaseInfo.h">
+    <ClInclude Include="..\Include\nanoHAL_ReleaseInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Checks.h">
+    <ClInclude Include="..\Include\nanoCLR_Checks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyHAL_Types.h">
+    <ClInclude Include="..\Include\nanoHAL_Types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Runtime__Serialization.h">
+    <ClInclude Include="..\Include\nanoCLR_Runtime__Serialization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinySupport.h">
+    <ClInclude Include="..\Include\nanoSupport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Profiling.h">
+    <ClInclude Include="..\Include\nanoCLR_Profiling.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Hardware.h">
+    <ClInclude Include="..\Include\nanoCLR_Hardware.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Win32.h">
+    <ClInclude Include="..\Include\nanoCLR_Win32.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\TinyCLR_Application.h">
+    <ClInclude Include="..\Include\nanoCLR_Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="corhdr_private.h">

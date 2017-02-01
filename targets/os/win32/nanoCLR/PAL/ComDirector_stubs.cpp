@@ -5,8 +5,8 @@
 //
 #include "..\stdafx.h"
 #include <crtdbg.h>
-#include <TinyHAL.h>
-#include <tinypal.h>
+#include <nanoHAL.h>
+#include <nanoPAL.h>
 
 #define NATIVE_PROFILE_PAL_COM()
 

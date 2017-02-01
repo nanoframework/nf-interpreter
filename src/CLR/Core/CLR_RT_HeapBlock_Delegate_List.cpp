@@ -10,7 +10,7 @@
 HRESULT CLR_RT_HeapBlock_Delegate_List::CreateInstance( CLR_RT_HeapBlock_Delegate_List*& list, CLR_UINT32 length )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Delegate_List) + length * sizeof(CLR_RT_HeapBlock));
 
@@ -21,7 +21,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::CreateInstance( CLR_RT_HeapBlock_Delegat
     list->m_length = length;
     list->m_flags  = 0;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 CLR_RT_HeapBlock* CLR_RT_HeapBlock_Delegate_List::CopyAndCompress( CLR_RT_HeapBlock* src, CLR_RT_HeapBlock* dst, CLR_UINT32 num )
@@ -50,7 +50,7 @@ CLR_RT_HeapBlock* CLR_RT_HeapBlock_Delegate_List::CopyAndCompress( CLR_RT_HeapBl
 HRESULT CLR_RT_HeapBlock_Delegate_List::Change( CLR_RT_HeapBlock& reference, CLR_RT_HeapBlock& delegateSrc, CLR_RT_HeapBlock& delegateTarget, bool fCombine, bool fWeak )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Delegate_List* dlgListSrc;
     CLR_RT_HeapBlock_Delegate_List* dlgListDst;
@@ -67,7 +67,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change( CLR_RT_HeapBlock& reference, CLR
     if(delegateSrc   .DataType() != DATATYPE_OBJECT ||
        delegateTarget.DataType() != DATATYPE_OBJECT  )
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     dlg = delegateTarget.DereferenceDelegate();
@@ -75,7 +75,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change( CLR_RT_HeapBlock& reference, CLR
     if(dlg == NULL)
     {
         reference.SetObjectReference( delegateSrc.DereferenceDelegate() );
-        TINYCLR_SET_AND_LEAVE(S_OK);
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
     if(dlg->DataType() == DATATYPE_DELEGATELIST_HEAD)
@@ -90,7 +90,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change( CLR_RT_HeapBlock& reference, CLR
         {
             if(newDlgs->DataType() == DATATYPE_OBJECT && newDlgs->DereferenceDelegate() != NULL) // The delegate could have been GC'ed.
             {
-                TINYCLR_CHECK_HRESULT(Change( reference, intermediate, *newDlgs, fCombine, fWeak ));
+                NANOCLR_CHECK_HRESULT(Change( reference, intermediate, *newDlgs, fCombine, fWeak ));
 
                 intermediate.Assign( reference );
             }
@@ -119,7 +119,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change( CLR_RT_HeapBlock& reference, CLR
                 break;
 
             default:
-                TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
         }
 
@@ -131,7 +131,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change( CLR_RT_HeapBlock& reference, CLR
                 // Empty input list, copy the delegate.
                 //
                 reference.Assign( delegateTarget );
-                TINYCLR_SET_AND_LEAVE(S_OK);
+                NANOCLR_SET_AND_LEAVE(S_OK);
             }
 
             //--//
@@ -156,19 +156,19 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change( CLR_RT_HeapBlock& reference, CLR
             if(num == oldNum)
             {
                 reference.Assign( delegateSrc ); // Nothing to remove.
-                TINYCLR_SET_AND_LEAVE(S_OK);
+                NANOCLR_SET_AND_LEAVE(S_OK);
             }
 
             if(oldNum == 2 && (dlgListSrc->m_flags & CLR_RT_HeapBlock_Delegate_List::c_Weak) == 0)
             {
                 reference.Assign( oldDlgs[ 1-num ] ); // Convert from a list to delegate.
-                TINYCLR_SET_AND_LEAVE(S_OK);
+                NANOCLR_SET_AND_LEAVE(S_OK);
             }
 
             if(oldNum == 1)
             {
                 reference.SetObjectReference( NULL ); // Oops, empty delegate...
-                TINYCLR_SET_AND_LEAVE(S_OK);
+                NANOCLR_SET_AND_LEAVE(S_OK);
             }
 
             //--//
@@ -176,7 +176,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change( CLR_RT_HeapBlock& reference, CLR
             newNum = oldNum - 1;
         }
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate_List::CreateInstance( dlgListDst, newNum ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate_List::CreateInstance( dlgListDst, newNum ));
 
         dlgListDst->m_cls = dlg->m_cls;
 
@@ -201,27 +201,27 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change( CLR_RT_HeapBlock& reference, CLR
         reference.SetObjectReference( dlgListDst );
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_Delegate_List::Combine( CLR_RT_HeapBlock& reference, CLR_RT_HeapBlock& delegateSrc, CLR_RT_HeapBlock& delegateNew, bool fWeak )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Change( reference, delegateSrc, delegateNew, true, fWeak ));
+    NANOCLR_SET_AND_LEAVE(Change( reference, delegateSrc, delegateNew, true, fWeak ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_Delegate_List::Remove( CLR_RT_HeapBlock& reference, CLR_RT_HeapBlock& delegateSrc, CLR_RT_HeapBlock& delegateOld )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(Change( reference, delegateSrc, delegateOld, false, false ));
+    NANOCLR_SET_AND_LEAVE(Change( reference, delegateSrc, delegateOld, false, false ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_HeapBlock_Delegate_List::Relocate()

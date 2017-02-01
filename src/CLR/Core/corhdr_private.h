@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_CORHDR_H_
-#define _TINYCLR_CORHDR_H_
+#ifndef _NANOCLR_CORHDR_H_
+#define _NANOCLR_CORHDR_H_
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -107,5 +107,5 @@ typedef enum CorSerializationType
 
 /////////////////////////////////////////////////////////////////////////////
 
-#endif // _TINYCLR_CORHDR_H_
+#endif // _NANOCLR_CORHDR_H_
 

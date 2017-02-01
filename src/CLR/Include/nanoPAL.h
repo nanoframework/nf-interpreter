@@ -3,10 +3,10 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYPAL_H_
-#define _TINYPAL_H_ 1
+#ifndef _NANOPAL_H_
+#define _NANOPAL_H_ 1
 
-//#include <tinyhal_types.h>
+//#include <nanoHAL_types.h>
 
 //#include <AsyncProcCalls_decl.h>
 
@@ -321,7 +321,7 @@ extern "C"
 //#include <TimeService_decl.h>
 //#include <TouchPanel_decl.h>
 
-//#include <tinycrt_decl.h>
+//#include <nanocrt_decl.h>
 
 #if defined(PLATFORM_ARM)
 #pragma check_printf_formats   /* hint to the compiler to check f/s/printf format */
@@ -388,5 +388,5 @@ int hal_strncmp_s( const char* str1, const char* str2, size_t num );
 
 //#include <SD_decl.h>
 
-#endif // _TINYPAL_H_
+#endif // _NANOPAL_H_
 

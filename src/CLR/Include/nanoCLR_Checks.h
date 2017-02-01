@@ -3,15 +3,15 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_CHECKS_H_
-#define _TINYCLR_CHECKS_H_
+#ifndef _NANOCLR_CHECKS_H_
+#define _NANOCLR_CHECKS_H_
 
-#include <TinyClr_Runtime.h>
+#include <nanoClr_Runtime.h>
 
 struct CLR_RT_DUMP
 {
 #undef DECL_POSTFIX
-#if defined(TINYCLR_TRACE_ERRORS)
+#if defined(NANOCLR_TRACE_ERRORS)
 #define DECL_POSTFIX
 #else
 #define DECL_POSTFIX {}
@@ -26,7 +26,7 @@ struct CLR_RT_DUMP
     //--//
 
 #undef DECL_POSTFIX
-#if defined(TINYCLR_TRACE_EXCEPTIONS)
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
 #define DECL_POSTFIX
 #else
 #define DECL_POSTFIX {}
@@ -53,5 +53,5 @@ struct CLR_Checks
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // _TINYCLR_CHECKS_H_
+#endif // _NANOCLR_CHECKS_H_
 

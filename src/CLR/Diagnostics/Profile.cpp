@@ -7,7 +7,7 @@
 
 //--//
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
 
 void* CLR_PROF_CounterCallChain::Prepare( CLR_PROF_Handler* handler )
 {
@@ -49,7 +49,7 @@ void CLR_PROF_CounterCallChain::Enter( CLR_RT_StackFrame* stack )
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     CLR_PROF_Handler::SuspendTime();
 
-    TINYCLR_CLEAR(*this);
+    NANOCLR_CLEAR(*this);
 
     m_owningStackFrame = stack;
 
@@ -67,7 +67,7 @@ void CLR_PROF_CounterCallChain::Leave()
 
 //--//
 
-#if defined(TINYCLR_PROFILE_HANDLER)
+#if defined(NANOCLR_PROFILE_HANDLER)
 
          bool              CLR_PROF_Handler::s_initialized;
          CLR_PROF_Handler* CLR_PROF_Handler::s_current;
@@ -114,7 +114,7 @@ void CLR_PROF_Handler::Constructor()
     Init( NULL );
 }
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
 void CLR_PROF_Handler::Constructor( CLR_PROF_CounterCallChain& target )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
@@ -146,7 +146,7 @@ void CLR_PROF_Handler::Destructor()
         {
             switch(m_target_Mode)
             {
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
             case c_Mode_CallChain: ((CLR_PROF_CounterCallChain*)m_target)->Complete( t, this ); break;
 #endif
             }
@@ -212,7 +212,7 @@ void CLR_PROF_Handler::Calibrate()
 
     for(i=0; i<c_training; i++)
     {
-        TINYCLR_CLEAR(tmp);
+        NANOCLR_CLEAR(tmp);
         TestCalibrate( tmp );
 
         CLR_INT64 diff = tmp.m_time_exclusive;
@@ -262,7 +262,7 @@ CLR_UINT64 CLR_PROF_Handler::ResumeTime( CLR_INT64 t )
 
     return ResumeTime();
 }
-#endif //defined(TINYCLR_PROFILE_HANDLER)
+#endif //defined(NANOCLR_PROFILE_HANDLER)
 
 //--//
 

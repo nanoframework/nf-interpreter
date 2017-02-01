@@ -10,7 +10,7 @@
 HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Instance& callInst, CLR_INT32 extraBlocks )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_StackFrame*               stack;
     CLR_RT_StackFrame*               caller;
@@ -35,7 +35,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
     md            = callInstPtr->m_target;
 
     sizeLocals    = md->numLocals;
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod + 1;
 #else
     sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod;
@@ -54,7 +54,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
         CLR_UINT32 memorySize = sizeLocals + sizeEvalStack;
 
         if(extraBlocks > 0             ) memorySize += extraBlocks;
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if(memorySize  < c_MinimumStack)
         {
             sizeEvalStack += c_MinimumStack - memorySize;
@@ -94,10 +94,10 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
                                                             //    void*                  m_customPointer;
                                                             // };
                                                             //
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         stack->m_inlineFrame     = NULL;
 #endif
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
         stack->m_callchain.Enter( stack );                  // CLR_PROF_CounterCallChain m_callchain;
 #endif
                                                             //
@@ -108,7 +108,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
 #endif
         CLR_RT_MethodHandler impl;
 
-#if defined(TINYCLR_APPDOMAINS)        
+#if defined(NANOCLR_APPDOMAINS)        
         stack->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 #endif
 
@@ -131,7 +131,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
         {
             stack->m_nativeMethod = (CLR_RT_MethodHandler)CLR_RT_Thread::Execute_IL;
 
-            if(md->RVA == CLR_EmptyIndex) TINYCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            if(md->RVA == CLR_EmptyIndex) NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 
             stack->m_flags   = CLR_RT_StackFrame::c_MethodKind_Interpreted;
             stack->m_IPstart = assm->GetByteCode( md->RVA );
@@ -150,7 +150,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
 
         th->m_stackFrames.LinkAtBack( stack );
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
         g_CLR_PRF_Profiler.RecordFunctionCall( th, callInst );
 #endif
     }
@@ -170,7 +170,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
         }
     }
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     stack->m_depth = stack->Caller()->Prev() ? stack->Caller()->m_depth + 1 : 0;
 
     if(g_CLR_RT_ExecutionEngine.m_breakpointsNum)
@@ -209,7 +209,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
 #if defined(_WIN32)
         if(caller->m_evalStackPos > caller->m_evalStackEnd)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_STACK_OVERFLOW);
+            NANOCLR_SET_AND_LEAVE(CLR_E_STACK_OVERFLOW);
         }
 #endif
 
@@ -223,7 +223,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
 #if defined(_WIN32)
         if(stack->m_arguments < caller->m_evalStack)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
+            NANOCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
         }
 #endif
     }
@@ -232,13 +232,13 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
         stack->m_arguments = stack->m_evalStackEnd;
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 bool CLR_RT_StackFrame::PushInline( CLR_PMETADATA& ip, CLR_RT_Assembly*& assm, CLR_RT_HeapBlock*& evalPos, CLR_RT_MethodDef_Instance& calleeInst, CLR_RT_HeapBlock* pThis)
 {
     const CLR_RECORD_METHODDEF* md =  calleeInst.m_target;
@@ -303,7 +303,7 @@ bool CLR_RT_StackFrame::PushInline( CLR_PMETADATA& ip, CLR_RT_Assembly*& assm, C
         m_flags |= CLR_RT_StackFrame::c_InlineMethodHasReturnValue;
     }
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     m_depth++;
 
     if(g_CLR_RT_ExecutionEngine.m_breakpointsNum)
@@ -344,7 +344,7 @@ void CLR_RT_StackFrame::PopInline()
     m_inlineFrame = NULL;
     m_flags &= ~(CLR_RT_StackFrame::c_MethodKind_Inlined | CLR_RT_StackFrame::c_InlineMethodHasReturnValue);
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     if(m_owningThread->m_fHasJMCStepper || (m_flags & CLR_RT_StackFrame::c_HasBreakpoint))
     {
         g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop( this, false );
@@ -389,11 +389,11 @@ void CLR_RT_StackFrame::SaveStack(CLR_RT_InlineFrame& frame)
 }
 #endif
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
 {            
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     
     bool fException = false;
     CLR_RT_HeapBlock exception;
@@ -433,7 +433,7 @@ HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
             int cArgs = m_call.m_target->numArgs;
 
             //First marshal the ref parameters                            
-            TINYCLR_CHECK_HRESULT(caller->m_appDomain->MarshalParameters( &caller->m_evalStackPos[ -cArgs ], m_arguments, cArgs, true ));        
+            NANOCLR_CHECK_HRESULT(caller->m_appDomain->MarshalParameters( &caller->m_evalStackPos[ -cArgs ], m_arguments, cArgs, true ));        
                 
             //Now, pop the caller's arguments off the eval stack                
             caller->m_evalStackPos -= cArgs;
@@ -445,7 +445,7 @@ HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
             CLR_RT_HeapBlock& dst = caller->PushValueAndClear();
             CLR_RT_HeapBlock& src = this  ->TopValue ();          
             
-            TINYCLR_CHECK_HRESULT(caller->m_appDomain->MarshalObject( src, dst ));
+            NANOCLR_CHECK_HRESULT(caller->m_appDomain->MarshalObject( src, dst ));
                                                 
             dst.Promote();                    
         }
@@ -453,11 +453,11 @@ HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
     else //Exception
     {        
         //Normal exceptions must be marshaled to the caller's AppDomain
-        TINYCLR_CHECK_HRESULT(caller->m_appDomain->MarshalObject( m_owningThread->m_currentException, exception ));            
+        NANOCLR_CHECK_HRESULT(caller->m_appDomain->MarshalObject( m_owningThread->m_currentException, exception ));            
         fException = true;        
     }
     
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(FAILED(hr) || fException)
     {
@@ -471,13 +471,13 @@ HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
 
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( caller->m_appDomain );   
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_RT_StackFrame::PushAppDomainTransition( CLR_RT_Thread* th, const CLR_RT_MethodDef_Instance& callInst, CLR_RT_HeapBlock* pThis, CLR_RT_HeapBlock* pArgs )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_StackFrame* frame = NULL;
     int cArgs = callInst.m_target->numArgs;
@@ -487,9 +487,9 @@ HRESULT CLR_RT_StackFrame::PushAppDomainTransition( CLR_RT_Thread* th, const CLR
 
     proxy = pThis->Dereference();
     
-    TINYCLR_CHECK_HRESULT(proxy->TransparentProxyValidate());
+    NANOCLR_CHECK_HRESULT(proxy->TransparentProxyValidate());
     
-    TINYCLR_CHECK_HRESULT(Push( th, callInst, cArgs ));
+    NANOCLR_CHECK_HRESULT(Push( th, callInst, cArgs ));
     
     frame  = th->CurrentFrame();    
     
@@ -499,20 +499,20 @@ HRESULT CLR_RT_StackFrame::PushAppDomainTransition( CLR_RT_Thread* th, const CLR
 
     //Marshal the arguments from the caller (on the eval stack) to the callee, unitialized heapblocks that
     //are set up by the extra blocks in CLR_RT_StackFrame::Push
-    TINYCLR_CHECK_HRESULT(frame->m_appDomain->MarshalObject    ( *pThis,  frame->m_arguments[ 0 ]                 ));
-    TINYCLR_CHECK_HRESULT(frame->m_appDomain->MarshalParameters(  pArgs, &frame->m_arguments[ 1 ], cArgs-1, false ));
+    NANOCLR_CHECK_HRESULT(frame->m_appDomain->MarshalObject    ( *pThis,  frame->m_arguments[ 0 ]                 ));
+    NANOCLR_CHECK_HRESULT(frame->m_appDomain->MarshalParameters(  pArgs, &frame->m_arguments[ 1 ], cArgs-1, false ));
 
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( frame->m_appDomain );
 
-    TINYCLR_NOCLEANUP();    
+    NANOCLR_NOCLEANUP();    
 }
 
-#endif //TINYCLR_APPDOMAINS
+#endif //NANOCLR_APPDOMAINS
 
 HRESULT CLR_RT_StackFrame::MakeCall( CLR_RT_MethodDef_Instance md, CLR_RT_HeapBlock* obj, CLR_RT_HeapBlock* args, int nArgs )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     
     const CLR_RECORD_METHODDEF* mdR        = md.m_target;
     bool                        fStatic    =(mdR->flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
@@ -530,7 +530,7 @@ HRESULT CLR_RT_StackFrame::MakeCall( CLR_RT_MethodDef_Instance md, CLR_RT_HeapBl
             
         _SIDE_ASSERTE(owner.InitializeFromMethod( md ));
 
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( tmp, owner ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( tmp, owner ));
         
         obj = &tmp;
                 
@@ -547,7 +547,7 @@ HRESULT CLR_RT_StackFrame::MakeCall( CLR_RT_MethodDef_Instance md, CLR_RT_HeapBl
         argsOffset = 1;
     }
 
-    if(numArgs != nArgs) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);    
+    if(numArgs != nArgs) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);    
            
     //
     // In case the invoked method is abstract or virtual, resolve it to the correct method implementation.
@@ -560,11 +560,11 @@ HRESULT CLR_RT_StackFrame::MakeCall( CLR_RT_MethodDef_Instance md, CLR_RT_HeapBl
         _ASSERTE(obj);
         _ASSERTE(!fStatic);
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( *obj, cls ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( *obj, cls ));
 
         if(g_CLR_RT_EventCache.FindVirtualMethod( cls, md, mdReal ) == false)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
         md.InitializeFromIndex( mdReal );
@@ -572,11 +572,11 @@ HRESULT CLR_RT_StackFrame::MakeCall( CLR_RT_MethodDef_Instance md, CLR_RT_HeapBl
         mdR = md.m_target;
     }
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 
     if(!fStatic && obj->IsTransparentProxy())
     {
-        TINYCLR_CHECK_HRESULT(CLR_RT_StackFrame::PushAppDomainTransition( m_owningThread, md, obj, args ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::PushAppDomainTransition( m_owningThread, md, obj, args ));
 
         stackSub = m_owningThread->CurrentFrame();
         
@@ -585,7 +585,7 @@ HRESULT CLR_RT_StackFrame::MakeCall( CLR_RT_MethodDef_Instance md, CLR_RT_HeapBl
     else
 #endif
     {
-        TINYCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push( m_owningThread, md, md.m_target->numArgs ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push( m_owningThread, md, md.m_target->numArgs ));
 
         stackSub = m_owningThread->CurrentFrame();
 
@@ -600,17 +600,17 @@ HRESULT CLR_RT_StackFrame::MakeCall( CLR_RT_MethodDef_Instance md, CLR_RT_HeapBl
         }
     }
 
-    TINYCLR_CHECK_HRESULT(stackSub->FixCall());
+    NANOCLR_CHECK_HRESULT(stackSub->FixCall());
 
-    TINYCLR_SET_AND_LEAVE(CLR_E_RESTART_EXECUTION);
+    NANOCLR_SET_AND_LEAVE(CLR_E_RESTART_EXECUTION);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_StackFrame::FixCall()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     const CLR_RECORD_METHODDEF* target  = m_call.m_target;
     CLR_UINT8                   numArgs = target->numArgs;
@@ -634,11 +634,11 @@ HRESULT CLR_RT_StackFrame::FixCall()
         //
         // Skip return value.
         //
-        TINYCLR_CHECK_HRESULT(parser.Advance( res ));
+        NANOCLR_CHECK_HRESULT(parser.Advance( res ));
 
         for(;parser.Available() > 0;args++)
         {
-            TINYCLR_CHECK_HRESULT(parser.Advance( res ));
+            NANOCLR_CHECK_HRESULT(parser.Advance( res ));
 
             if(res.m_levels > 0) continue; // Array, no need to fix.
 
@@ -659,11 +659,11 @@ HRESULT CLR_RT_StackFrame::FixCall()
                     }
                     else if(args->Dereference()->ObjectCls().m_data == res.m_cls.m_data)
                     {
-                        TINYCLR_CHECK_HRESULT(args->PerformUnboxing( inst ));
+                        NANOCLR_CHECK_HRESULT(args->PerformUnboxing( inst ));
                     }
                     else
                     {
-                        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
                 }
             }
@@ -672,19 +672,19 @@ HRESULT CLR_RT_StackFrame::FixCall()
             {
                 if(args->IsAReferenceOfThisType( DATATYPE_VALUETYPE ))
                 {
-                    TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject( *args, *args ));
+                    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject( *args, *args ));
                 }
             }
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_StackFrame::HandleSynchronized( bool fAcquire, bool fGlobal )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock   refType;
     CLR_RT_HeapBlock*  obj;
@@ -696,7 +696,7 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized( bool fAcquire, bool fGlobal )
     {
         obj = &ref;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         //With AppDomains enabled, the global lock is no longer global.  It is only global wrt the AppDomain/
         //Do we need a GlobalGlobalLock? (an attribute on GloballySynchronized (GlobalAcrossAppDomain?)
         ppGlobalLock = &g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->m_globalLock;
@@ -715,7 +715,7 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized( bool fAcquire, bool fGlobal )
             //
             // Create an private object to implement global locks.
             //
-            TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( *obj, g_CLR_RT_WellKnownTypes.m_Object ));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( *obj, g_CLR_RT_WellKnownTypes.m_Object ));
 
             *ppGlobalLock = obj->Dereference();
         }
@@ -737,21 +737,21 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized( bool fAcquire, bool fGlobal )
 
     if(fAcquire)
     {
-        TINYCLR_SET_AND_LEAVE(g_CLR_RT_ExecutionEngine.LockObject( *obj, m_owningSubThread, TIMEOUT_INFINITE, false ));
+        NANOCLR_SET_AND_LEAVE(g_CLR_RT_ExecutionEngine.LockObject( *obj, m_owningSubThread, TIMEOUT_INFINITE, false ));
     }
     else
     {
-        TINYCLR_SET_AND_LEAVE(g_CLR_RT_ExecutionEngine.UnlockObject( *obj, m_owningSubThread ));
+        NANOCLR_SET_AND_LEAVE(g_CLR_RT_ExecutionEngine.UnlockObject( *obj, m_owningSubThread ));
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_StackFrame::Pop()
 {
     NATIVE_PROFILE_CLR_CORE();
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
     {
         //
         // This passivates any outstanding handler.
@@ -762,11 +762,11 @@ void CLR_RT_StackFrame::Pop()
     }
 #endif
 
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
     g_CLR_PRF_Profiler.RecordFunctionReturn( m_owningThread, m_callchain );
 #endif
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     if(m_owningThread->m_fHasJMCStepper || (m_flags & c_HasBreakpoint))
     {
         g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop( this, false );
@@ -815,7 +815,7 @@ void CLR_RT_StackFrame::Pop()
 
     if(caller->Prev() != NULL)
     {
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if(caller->m_flags & CLR_RT_StackFrame::c_HasBreakpoint)
         {
             g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step( caller, caller->m_IP );
@@ -856,7 +856,7 @@ void CLR_RT_StackFrame::Pop()
                 {
                     //Do nothing here. Pushing return values onto stack frames that don't expect them are a bad idea.
                 }
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 else if((m_flags & CLR_RT_StackFrame::c_AppDomainTransition) != 0)
                 {   
                     (void)PopAppDomainTransition();             
@@ -881,7 +881,7 @@ void CLR_RT_StackFrame::Pop()
             }
         }
     }
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     else
     {
         int idx = m_owningThread->m_scratchPad;
@@ -963,7 +963,7 @@ void CLR_RT_StackFrame::SetResult( CLR_INT32 val, CLR_DataType dataType )
     top.SetInteger( val, dataType );
 }
 
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
 void CLR_RT_StackFrame::SetResult_R4( float val )
 {
@@ -1052,13 +1052,13 @@ void CLR_RT_StackFrame::SetResult_Object( CLR_RT_HeapBlock* val )
 HRESULT CLR_RT_StackFrame::SetResult_String( LPCSTR val )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock& top = PushValue();
 
-    TINYCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance( top, val ));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance( top, val ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 
@@ -1083,7 +1083,7 @@ void CLR_RT_StackFrame::NegateResult()
 HRESULT CLR_RT_StackFrame::SetupTimeout( CLR_RT_HeapBlock& input, CLR_INT64*& output )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_customState == 0)
     {
@@ -1093,7 +1093,7 @@ HRESULT CLR_RT_StackFrame::SetupTimeout( CLR_RT_HeapBlock& input, CLR_INT64*& ou
         //
         // Initialize timeout and save it on the stack.
         //
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitTimeout( timeExpire, input.NumericByRef().s4 ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitTimeout( timeExpire, input.NumericByRef().s4 ));
 
         ref.SetInteger( timeExpire );
 
@@ -1102,7 +1102,7 @@ HRESULT CLR_RT_StackFrame::SetupTimeout( CLR_RT_HeapBlock& input, CLR_INT64*& ou
 
     output = (CLR_INT64*)&m_evalStack[ 0 ].NumericByRef().s8;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -1111,7 +1111,7 @@ void CLR_RT_StackFrame::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     if(m_inlineFrame)
     {
         CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_inlineFrame->m_frame.m_call.m_assm   );
@@ -1150,16 +1150,16 @@ void CLR_RT_StackFrame::Relocate()
 HRESULT CLR_RT_StackFrame::NotImplementedStub()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_call.m_target->retVal != DATATYPE_VOID)
     {
         SetResult_I4( 0 );
     }
 
-    TINYCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 

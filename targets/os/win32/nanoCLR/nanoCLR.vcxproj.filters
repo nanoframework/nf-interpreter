@@ -30,7 +30,7 @@
     <ClInclude Include="platform_selector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TinyCLR_ParseOptions.h">
+    <ClInclude Include="nanoCLR_ParseOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

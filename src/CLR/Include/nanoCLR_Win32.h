@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_WIN32_H_
-#define _TINYCLR_WIN32_H_
+#ifndef _NANOCLR_WIN32_H_
+#define _NANOCLR_WIN32_H_
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -38,5 +38,5 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // _TINYCLR_WIN32_H_
+#endif // _NANOCLR_WIN32_H_
 

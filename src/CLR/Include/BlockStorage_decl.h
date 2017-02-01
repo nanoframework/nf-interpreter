@@ -194,9 +194,9 @@ public:
     static const UINT32 BLOCKTYPE_FILESYSTEM =                             DATATYPE_RAW         | BlockUsage::FILESYSTEM; // File System
     static const UINT32 BLOCKTYPE_UPDATE     =                  RESERVED | DATATYPE_RAW         | BlockUsage::UPDATE;     // Used for MFUpdate for firmware/assembly/etc updates
 
-    static BOOL IsBlockTinyBooterAgnostic( UINT32 BlockType )
+    static BOOL IsBlocknanoBooterAgnostic( UINT32 BlockType )
     {
-        // The only blocks that should be distinguished by TinyBooter are CONFIG, 
+        // The only blocks that should be distinguished by nanoBooter are CONFIG, 
         // Bootstrap and reserved blocks (DirtyBit is another version of CONFIG).
         if( BlockType == BlockRange::BLOCKTYPE_BOOTSTRAP || 
             BlockType == BlockRange::BLOCKTYPE_CONFIG    ||

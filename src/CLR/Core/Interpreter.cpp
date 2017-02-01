@@ -7,7 +7,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_TRACE_EXCEPTIONS) && defined(_WIN32)
+#if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(_WIN32)
 
 struct BackTrackExecution
 {
@@ -26,7 +26,7 @@ static int                s_trackPos;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_TRACE_STACK)
+#if defined(NANOCLR_TRACE_STACK)
 
 bool g_CLR_RT_fBadStack;
 
@@ -92,7 +92,7 @@ bool CLR_RT_HeapBlock::InitObject()
 HRESULT CLR_RT_HeapBlock::Convert_Internal( CLR_DataType et )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_DataType dt                     = DataType();
     const CLR_RT_DataTypeLookup& dtlSrc = c_CLR_RT_DataTypeLookup[ dt ];
@@ -140,7 +140,7 @@ HRESULT CLR_RT_HeapBlock::Convert_Internal( CLR_DataType et )
     case DATATYPE_R8: scaleIn = 2; break;
 
     default:
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     //--//
@@ -156,7 +156,7 @@ HRESULT CLR_RT_HeapBlock::Convert_Internal( CLR_DataType et )
 
     if(scaleOut != scaleIn)
     {
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
 
         double val = 0;
@@ -222,7 +222,7 @@ HRESULT CLR_RT_HeapBlock::Convert_Internal( CLR_DataType et )
                             //
                             // Uncomment to produce an overflow exception for emulated floating points
                             //
-                            // TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                            // NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
                         }
                     }
                     break;
@@ -238,7 +238,7 @@ HRESULT CLR_RT_HeapBlock::Convert_Internal( CLR_DataType et )
                             //
                             // Uncomment to produce an overflow exception for emulated floating points
                             //
-                            // TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                            // NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
                         }
                     }
                     break;
@@ -256,7 +256,7 @@ HRESULT CLR_RT_HeapBlock::Convert_Internal( CLR_DataType et )
                 //
                 // Uncomment to produce an overflow exception for emulated floating points
                 //
-                //TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                //NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
             }
         }
 #endif
@@ -271,7 +271,7 @@ HRESULT CLR_RT_HeapBlock::Convert_Internal( CLR_DataType et )
     ChangeDataType( et );
     Promote       (    );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -321,7 +321,7 @@ void CLR_RT_Thread::PopEH_Inner( CLR_RT_StackFrame* stack, CLR_PMETADATA ip )
             //
             if(ip && (us.m_currentBlockStart <= ip && ip < us.m_currentBlockEnd)) break;
 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if(stack->m_inlineFrame) break;
 #endif
 
@@ -345,7 +345,7 @@ bool CLR_RT_Thread::FindEhBlock( CLR_RT_StackFrame* stack, CLR_PMETADATA from, C
     //onlyFinallys is true in Phase2, endfinally, leave, etc. to is NULL when we want to leave outside of the current stack frame,
     //or non-NULL and pointing to an IL instruction that we are going to when finally's, if any, are processed.
 
-#if defined(TINYCLR_TRACE_EXCEPTIONS)
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
     if(s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
     {
         if(!onlyFinallys || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
@@ -399,7 +399,7 @@ bool CLR_RT_Thread::FindEhBlock( CLR_RT_StackFrame* stack, CLR_PMETADATA from, C
                 ptrEhExt = &eh;
             }
 
-#if defined(TINYCLR_TRACE_EXCEPTIONS)
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
             if(s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
             {
                 if(to == NULL || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
@@ -431,7 +431,7 @@ bool CLR_RT_Thread::FindEhBlock( CLR_RT_StackFrame* stack, CLR_PMETADATA from, C
                     //
                     if(ptrEhExt->IsFinally() && (!to || (to < ptrEhExt->m_tryStart || to >= ptrEhExt->m_tryEnd)))
                     {
-#if defined(TINYCLR_TRACE_EXCEPTIONS)
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
                         if(s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
                         {
                             CLR_Debug::Printf( "Found match for a 'finally'\r\n" );
@@ -446,7 +446,7 @@ bool CLR_RT_Thread::FindEhBlock( CLR_RT_StackFrame* stack, CLR_PMETADATA from, C
                 {
                     if(ptrEhExt->IsCatchAll())
                     {
-#if defined(TINYCLR_TRACE_EXCEPTIONS)
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
                         if(s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
                         {
                             CLR_Debug::Printf( "Found match for a 'catch all'\r\n" );
@@ -460,7 +460,7 @@ bool CLR_RT_Thread::FindEhBlock( CLR_RT_StackFrame* stack, CLR_PMETADATA from, C
                     {
                         if(ptrEhExt->IsFilter() || CLR_RT_ExecutionEngine::IsInstanceOf( m_currentException, ptrEhExt->m_typeFilter ))
                         {
-#if defined(TINYCLR_TRACE_EXCEPTIONS)
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
                             if(s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
                             {
                                 if (ptrEhExt->IsFilter())
@@ -485,7 +485,7 @@ bool CLR_RT_Thread::FindEhBlock( CLR_RT_StackFrame* stack, CLR_PMETADATA from, C
         }
     }
     
-#if defined(TINYCLR_TRACE_EXCEPTIONS)
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
         if(s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
         {
             if(to == NULL || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
@@ -503,9 +503,9 @@ bool CLR_RT_Thread::FindEhBlock( CLR_RT_StackFrame* stack, CLR_PMETADATA from, C
 HRESULT CLR_RT_Thread::Execute()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain* appDomainSav = g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( this->CurrentAppDomain() );
 #endif
  
@@ -524,9 +524,9 @@ HRESULT CLR_RT_Thread::Execute()
 
     m_timeQuantumExpired = FALSE;
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     _ASSERTE(!CLR_EE_DBG_IS( Stopped ));
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     ::Events_SetBoolTimer( (BOOL*)&m_timeQuantumExpired, CLR_RT_Thread::c_TimeQuantum_Milliseconds );
 
@@ -536,14 +536,14 @@ HRESULT CLR_RT_Thread::Execute()
 
         if(SUCCEEDED(hr))
         {
-            hr = Execute_Inner(); if(SUCCEEDED(hr)) TINYCLR_LEAVE();
+            hr = Execute_Inner(); if(SUCCEEDED(hr)) NANOCLR_LEAVE();
         }
 
         switch(hr)
         {
         case CLR_E_THREAD_WAITING:
         case CLR_E_RESCHEDULE:
-            TINYCLR_LEAVE();
+            NANOCLR_LEAVE();
 
         case CLR_E_PROCESS_EXCEPTION:
             CLR_RT_DUMP::POST_PROCESS_EXCEPTION( m_currentException );
@@ -553,7 +553,7 @@ HRESULT CLR_RT_Thread::Execute()
             stack = CurrentFrame();
             if(stack->Prev() != NULL)
             {           
-#if defined(TINYCLR_TRACE_INSTRUCTIONS) && defined(PLATFORM_WINDOWS_EMULATOR)
+#if defined(NANOCLR_TRACE_INSTRUCTIONS) && defined(PLATFORM_WINDOWS_EMULATOR)
                 for(int i = 0; i < ARRAYSIZE(s_track); i++)
                 {
                     BackTrackExecution& track = s_track[ (s_trackPos+i) % ARRAYSIZE(s_track) ];
@@ -579,24 +579,24 @@ HRESULT CLR_RT_Thread::Execute()
         // Process exception.
         //
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if(CLR_EE_DBG_IS( Stopped )) break;
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         
-        TINYCLR_CHECK_HRESULT(ProcessException());
+        NANOCLR_CHECK_HRESULT(ProcessException());
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if(CLR_EE_DBG_IS( Stopped )) break;
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if(m_currentException.Dereference() != NULL) { break; }
     }
 
-    TINYCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);
+    NANOCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomainSav );
 #endif
     
@@ -604,13 +604,13 @@ HRESULT CLR_RT_Thread::Execute()
 
     ::Events_SetBoolTimer( NULL, 0 );
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_RT_Thread::Execute_Inner()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     while(m_timeQuantumExpired == FALSE && !CLR_EE_DBG_IS( Stopped ))
     {
@@ -627,24 +627,24 @@ HRESULT CLR_RT_Thread::Execute_Inner()
         {
             m_status = CLR_RT_Thread::TH_S_Terminated;
 
-            TINYCLR_SET_AND_LEAVE(CLR_S_THREAD_EXITED); // End of Thread.
+            NANOCLR_SET_AND_LEAVE(CLR_S_THREAD_EXITED); // End of Thread.
         }
 
         if(stack->m_flags & CLR_RT_StackFrame::c_ProcessSynchronize)
         {
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             if(stack->m_flags & CLR_RT_StackFrame::c_InvalidIP)
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             //
             // Thread cannot run if a lock request is still pending...
             //
             if(stack->m_flags & (CLR_RT_StackFrame::c_PendingSynchronizeGlobally | CLR_RT_StackFrame::c_PendingSynchronize))
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
+                NANOCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
             }
 
             if(stack->m_flags & CLR_RT_StackFrame::c_NeedToSynchronizeGlobally)
@@ -658,7 +658,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
                         stack->m_flags |= CLR_RT_StackFrame::c_PendingSynchronizeGlobally;
                     }
 
-                    TINYCLR_LEAVE();
+                    NANOCLR_LEAVE();
                 }
 
                 stack->m_flags |= CLR_RT_StackFrame::c_SynchronizedGlobally;
@@ -675,7 +675,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
                         stack->m_flags |= CLR_RT_StackFrame::c_PendingSynchronize;
                     }
 
-                    TINYCLR_LEAVE();
+                    NANOCLR_LEAVE();
                 }
 
                 stack->m_flags |= CLR_RT_StackFrame::c_Synchronized;
@@ -683,7 +683,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
         }
 
         {
-#if defined(TINYCLR_PROFILE_NEW_CALLS)
+#if defined(NANOCLR_PROFILE_NEW_CALLS)
             CLR_PROF_HANDLER_CALLCHAIN( pm2, stack->m_callchain );
 #endif
 
@@ -739,7 +739,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
                 {          
                     m_status = CLR_RT_Thread::TH_S_Terminated;
 
-                    TINYCLR_SET_AND_LEAVE(CLR_S_THREAD_EXITED); // End of Thread.
+                    NANOCLR_SET_AND_LEAVE(CLR_S_THREAD_EXITED); // End of Thread.
                 }
 
                 if(hr == CLR_E_OUT_OF_MEMORY && (stack->m_flags & CLR_RT_StackFrame::c_CompactAndRestartOnOutOfMemory))
@@ -766,7 +766,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
                 //
                 // CLR_E_RESTART_EXECUTION is used to inject calls to methods from native code.
                 //
-                if(hr != CLR_E_RESTART_EXECUTION) TINYCLR_LEAVE();
+                if(hr != CLR_E_RESTART_EXECUTION) NANOCLR_LEAVE();
             }
             else
             {
@@ -780,21 +780,21 @@ HRESULT CLR_RT_Thread::Execute_Inner()
         }
     }
 
-    TINYCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);
+    NANOCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     #if defined(ENABLE_NATIVE_PROFILER)
     Native_Profiler_Stop();
     #endif
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_RT_Thread::Execute_DelegateInvoke( CLR_RT_StackFrame* stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     const CLR_RECORD_METHODDEF* md;
     CLR_RT_HeapBlock_Delegate*  dlg;
@@ -802,7 +802,7 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke( CLR_RT_StackFrame* stack )
     CLR_RT_HeapBlock*           ptr;
     CLR_UINT32                  num;
 
-    ptr = &stack->m_arguments[ 0 ]; if(ptr->DataType() != DATATYPE_OBJECT) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    ptr = &stack->m_arguments[ 0 ]; if(ptr->DataType() != DATATYPE_OBJECT) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     dlg = ptr->DereferenceDelegate(); FAULT_ON_NULL(dlg);
 
     md = stack->m_call.m_target;
@@ -824,14 +824,14 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke( CLR_RT_StackFrame* stack )
         break;
 
     default:
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     while(true)
     {
         if(stack->m_customState >= num) // We have called all the delegates, let's return.
         {
-            TINYCLR_SET_AND_LEAVE(S_OK);
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
 
         dlg = array[ stack->m_customState++ ].DereferenceDelegate();
@@ -850,16 +850,16 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke( CLR_RT_StackFrame* stack )
         CLR_RT_MethodDef_Instance inst; inst.InitializeFromIndex( dlg->DelegateFtn() );
         bool                      fStaticMethod = (inst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
 
-        TINYCLR_CHECK_HRESULT(stack->MakeCall(inst, fStaticMethod ? NULL : &dlg->m_object, &stack->m_arguments[ 1 ], md->numArgs - 1 ));
+        NANOCLR_CHECK_HRESULT(stack->MakeCall(inst, fStaticMethod ? NULL : &dlg->m_object, &stack->m_arguments[ 1 ], md->numArgs - 1 ));
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_Thread::Execute_IL( CLR_RT_StackFrame* stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_Thread*     th   = stack->m_owningThread;
     CLR_RT_Assembly*   assm = stack->m_call.m_assm;
@@ -872,14 +872,14 @@ HRESULT CLR_RT_Thread::Execute_IL( CLR_RT_StackFrame* stack )
 
     while(true)
     {
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if(th->m_timeQuantumExpired == TRUE)
         {
-            TINYCLR_SET_AND_LEAVE( CLR_S_QUANTUM_EXPIRED );
+            NANOCLR_SET_AND_LEAVE( CLR_S_QUANTUM_EXPIRED );
         }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(TINYCLR_TRACE_EXCEPTIONS) && defined(_WIN32)
+#if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(_WIN32)
         if(s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
         {
             CLR_PROF_HANDLER_SUSPEND_TIME();
@@ -887,11 +887,11 @@ HRESULT CLR_RT_Thread::Execute_IL( CLR_RT_StackFrame* stack )
             BackTrackExecution& track = s_track[ s_trackPos++ ]; s_trackPos %= ARRAYSIZE(s_track);
             int                 depth = 0;
 
-            TINYCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,tmp,stack)
+            NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,tmp,stack)
             {
                 depth++;
             }
-            TINYCLR_FOREACH_NODE_BACKWARD_END();
+            NANOCLR_FOREACH_NODE_BACKWARD_END();
 
             track.m_assm    = assm;
             track.m_call    = stack->m_call;
@@ -910,10 +910,10 @@ HRESULT CLR_RT_Thread::Execute_IL( CLR_RT_StackFrame* stack )
 
 Execute_RestartDecoding:
 
-#if defined(TINYCLR_OPCODE_STACKCHANGES)
+#if defined(NANOCLR_OPCODE_STACKCHANGES)
         if(op != CEE_PREFIX1)
         {
-            TINYCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK( *stack, &evalPos[ 1 ], c_CLR_RT_OpcodeLookup[ op ].StackChanges() ));
+            NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK( *stack, &evalPos[ 1 ], c_CLR_RT_OpcodeLookup[ op ].StackChanges() ));
         }
 #endif
 
@@ -1247,10 +1247,10 @@ Execute_RestartDecoding:
 
                 evalPos++; CHECKSTACK(stack,evalPos);
 
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
                 evalPos[ 0 ].SetFloatFromBits( arg );
 #else
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].SetFloatIEEE754( arg ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].SetFloatIEEE754( arg ));
 #endif
                 break;
             }
@@ -1263,10 +1263,10 @@ Execute_RestartDecoding:
                 FETCH_ARG_UINT64(arg,ip);
 
                 evalPos++; CHECKSTACK(stack,evalPos);
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
                 evalPos[ 0 ].SetDoubleFromBits( arg );
 #else
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].SetDoubleIEEE754( arg ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].SetDoubleIEEE754( arg ));
 #endif
                 break;
             }
@@ -1486,7 +1486,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_LDIND_REF,                  "ldind.ref",        PopI,               PushRef,     InlineNone,         IPrimitive,  1,  0xFF,    0x50,    NEXT)
             // Stack: ... ... <address> -> <value> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( evalPos[ 0 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( evalPos[ 0 ] ));
 
                 goto Execute_LoadAndPromote;
             }
@@ -1521,7 +1521,7 @@ Execute_RestartDecoding:
 
                 evalPos[ 2 ].Promote();
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 2 ].StoreToReference( evalPos[ 1 ], size ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 2 ].StoreToReference( evalPos[ 1 ], size ));
                 break;
             }
 
@@ -1535,7 +1535,7 @@ Execute_RestartDecoding:
             {
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericAdd( evalPos[ 1 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericAdd( evalPos[ 1 ] ));
                 break;
             }
 
@@ -1548,7 +1548,7 @@ Execute_RestartDecoding:
             {
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericSub( evalPos[ 1 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericSub( evalPos[ 1 ] ));
                 break;
             }
 
@@ -1561,7 +1561,7 @@ Execute_RestartDecoding:
             {
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericMul( evalPos[ 1 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericMul( evalPos[ 1 ] ));
                 break;
             }
 
@@ -1572,7 +1572,7 @@ Execute_RestartDecoding:
             {
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericDiv( evalPos[ 1 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericDiv( evalPos[ 1 ] ));
                 break;
             }
 
@@ -1583,7 +1583,7 @@ Execute_RestartDecoding:
             {
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericDivUn( evalPos[ 1 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericDivUn( evalPos[ 1 ] ));
                 break;
             }
 
@@ -1594,7 +1594,7 @@ Execute_RestartDecoding:
             {
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericRem( evalPos[ 1 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericRem( evalPos[ 1 ] ));
                 break;
             }
 
@@ -1605,7 +1605,7 @@ Execute_RestartDecoding:
             {
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericRemUn( evalPos[ 1 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericRemUn( evalPos[ 1 ] ));
                 break;
             }
 
@@ -1649,7 +1649,7 @@ Execute_RestartDecoding:
             {
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericShl( evalPos[ 1 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericShl( evalPos[ 1 ] ));
                 break;
             }
 
@@ -1660,7 +1660,7 @@ Execute_RestartDecoding:
             {
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericShr( evalPos[ 1 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericShr( evalPos[ 1 ] ));
                 break;
             }
 
@@ -1671,7 +1671,7 @@ Execute_RestartDecoding:
             {
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericShrUn( evalPos[ 1 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericShrUn( evalPos[ 1 ] ));
                 break;
             }
 
@@ -1680,7 +1680,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_NEG,                        "neg",              Pop1,               Push1,       InlineNone,         IPrimitive,  1,  0xFF,    0x65,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].NumericNeg());
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].NumericNeg());
                 break;
             }
 
@@ -1701,7 +1701,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_CONV_OVF_I1_UN,             "conv.ovf.i1.un",   Pop1,               PushI,       InlineNone,         IPrimitive,  1,  0xFF,    0x82,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_I1, op != CEE_CONV_I1, op == CEE_CONV_OVF_I1_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_I1, op != CEE_CONV_I1, op == CEE_CONV_OVF_I1_UN ));
                 break;
             }
 
@@ -1712,7 +1712,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_CONV_OVF_I2_UN,             "conv.ovf.i2.un",   Pop1,               PushI,       InlineNone,         IPrimitive,  1,  0xFF,    0x83,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_I2, op != CEE_CONV_I2, op == CEE_CONV_OVF_I2_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_I2, op != CEE_CONV_I2, op == CEE_CONV_OVF_I2_UN ));
                 break;
             }
 
@@ -1723,7 +1723,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_CONV_OVF_I4_UN,             "conv.ovf.i4.un",   Pop1,               PushI,       InlineNone,         IPrimitive,  1,  0xFF,    0x84,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_I4, op != CEE_CONV_I4, op == CEE_CONV_OVF_I4_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_I4, op != CEE_CONV_I4, op == CEE_CONV_OVF_I4_UN ));
                 break;
             }
 
@@ -1736,7 +1736,7 @@ Execute_RestartDecoding:
                 {
                     break; 
                 }
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_I4, op != CEE_CONV_I, op == CEE_CONV_OVF_I_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_I4, op != CEE_CONV_I, op == CEE_CONV_OVF_I_UN ));
                 break;
             }
 
@@ -1747,7 +1747,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_CONV_OVF_I8_UN,             "conv.ovf.i8.un",   Pop1,               PushI8,      InlineNone,         IPrimitive,  1,  0xFF,    0x85,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_I8, op != CEE_CONV_I8, op == CEE_CONV_OVF_I8_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_I8, op != CEE_CONV_I8, op == CEE_CONV_OVF_I8_UN ));
                 break;
             }
 
@@ -1756,7 +1756,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_CONV_R4,                    "conv.r4",          Pop1,               PushR4,      InlineNone,         IPrimitive,  1,  0xFF,    0x6B,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_R4, false, false ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_R4, false, false ));
                 break;
             }
 
@@ -1766,7 +1766,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_CONV_R8,                    "conv.r8",          Pop1,               PushR8,      InlineNone,         IPrimitive,  1,  0xFF,    0x6C,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_R8, false, op == CEE_CONV_R_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_R8, false, op == CEE_CONV_R_UN ));
                 break;
             }
 
@@ -1777,7 +1777,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_CONV_OVF_U1_UN,             "conv.ovf.u1.un",   Pop1,               PushI,       InlineNone,         IPrimitive,  1,  0xFF,    0x86,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_U1, op != CEE_CONV_U1, op == CEE_CONV_OVF_U1_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_U1, op != CEE_CONV_U1, op == CEE_CONV_OVF_U1_UN ));
                 break;
             }
 
@@ -1788,7 +1788,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_CONV_OVF_U2_UN,             "conv.ovf.u2.un",   Pop1,               PushI,       InlineNone,         IPrimitive,  1,  0xFF,    0x87,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_U2, op != CEE_CONV_U2, op == CEE_CONV_OVF_U2_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_U2, op != CEE_CONV_U2, op == CEE_CONV_OVF_U2_UN ));
                 break;
             }
 
@@ -1799,7 +1799,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_CONV_OVF_U4_UN,             "conv.ovf.u4.un",   Pop1,               PushI,       InlineNone,         IPrimitive,  1,  0xFF,    0x88,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_U4, op != CEE_CONV_U4, op == CEE_CONV_OVF_U4_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_U4, op != CEE_CONV_U4, op == CEE_CONV_OVF_U4_UN ));
                 break;
             }
 
@@ -1812,7 +1812,7 @@ Execute_RestartDecoding:
                 {
                     break; 
                 }
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_U4, op != CEE_CONV_U, op == CEE_CONV_OVF_U_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_U4, op != CEE_CONV_U, op == CEE_CONV_OVF_U_UN ));
                break;
             }
 
@@ -1823,7 +1823,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_CONV_OVF_U8_UN,             "conv.ovf.u8.un",   Pop1,               PushI8,      InlineNone,         IPrimitive,  1,  0xFF,    0x89,    NEXT)
             // Stack: ... ... <value> -> <valueR> ...
             {
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_U8, op != CEE_CONV_U8, op == CEE_CONV_OVF_U8_UN ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].Convert( DATATYPE_U8, op != CEE_CONV_U8, op == CEE_CONV_OVF_U8_UN ));
                 break;
             }
 
@@ -1835,10 +1835,10 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_METHODTOKEN(arg,ip);
 
-                CLR_RT_MethodDef_Instance calleeInst; if(calleeInst.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_MethodDef_Instance calleeInst; if(calleeInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_TypeDef_Index      cls;
                 CLR_RT_HeapBlock*         pThis;
-#if defined(TINYCLR_APPDOMAINS)                
+#if defined(NANOCLR_APPDOMAINS)                
                 bool                      fAppDomainTransition = false;
 #endif
 
@@ -1856,7 +1856,7 @@ Execute_RestartDecoding:
                         {
                             pThis->Assign( dlg->m_object );
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                             fAppDomainTransition = pThis[ 0 ].IsTransparentProxy();
 #endif
                         }
@@ -1890,7 +1890,7 @@ Execute_RestartDecoding:
                         }
                         else
                         {
-                            TINYCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( pThis[ 0 ], cls ));
+                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( pThis[ 0 ], cls ));
 
                             //This test is for performance reasons.  c# emits a callvirt on all instance methods to make sure that 
                             //a NullReferenceException is thrown if 'this' is NULL.  However, if the instance method isn't virtual
@@ -1899,31 +1899,31 @@ Execute_RestartDecoding:
                             {
                                 if(g_CLR_RT_EventCache.FindVirtualMethod( cls, calleeInst, calleeReal ) == false)
                                 {
-                                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                 }
 
                                 calleeInst.InitializeFromIndex( calleeReal );
                             }
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                             fAppDomainTransition = pThis[ 0 ].IsTransparentProxy();
 #endif
                         }
                     }
                 }
                                
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 if(fAppDomainTransition)
                 {
                     WRITEBACK(stack,evalPos,ip,fDirty);
 
                     _ASSERTE(FIMPLIES(pThis->DataType() == DATATYPE_OBJECT, pThis->Dereference() != NULL));
-                    TINYCLR_CHECK_HRESULT(CLR_RT_StackFrame::PushAppDomainTransition( th, calleeInst, &pThis[ 0 ], &pThis[ 1 ]));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::PushAppDomainTransition( th, calleeInst, &pThis[ 0 ], &pThis[ 1 ]));
                 }
                 else
-#endif //TINYCLR_APPDOMAINS
+#endif //NANOCLR_APPDOMAINS
                 {
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                     if(stack->PushInline(ip, assm, evalPos, calleeInst, pThis))
                     {
                         fDirty = true;
@@ -1932,7 +1932,7 @@ Execute_RestartDecoding:
 #endif
 
                     WRITEBACK(stack,evalPos,ip,fDirty);
-                    TINYCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push( th, calleeInst, -1 ));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push( th, calleeInst, -1 ));
                 }
                                 
                 goto Execute_Restart;
@@ -1941,7 +1941,7 @@ Execute_RestartDecoding:
 
             OPDEF(CEE_RET,                        "ret",              VarPop,             Push0,       InlineNone,         IPrimitive,  1,  0xFF,    0x2A,    RETURN)
             {
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                 if(stack->m_inlineFrame)
                 {
                     stack->m_evalStackPos = evalPos;
@@ -1975,7 +1975,7 @@ Execute_RestartDecoding:
                 {
                     stack->Pop();
 
-                    TINYCLR_SET_AND_LEAVE(CLR_S_RESTART_EXECUTION);
+                    NANOCLR_SET_AND_LEAVE(CLR_S_RESTART_EXECUTION);
                 }
             }
 
@@ -1992,7 +1992,7 @@ Execute_RestartDecoding:
                 //
                 // Reassign will make sure these are objects of the same type.
                 //
-                TINYCLR_CHECK_HRESULT(evalPos[ 1 ].Reassign( evalPos[ 2 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 1 ].Reassign( evalPos[ 2 ] ));
                 break;
             }
 
@@ -2006,14 +2006,14 @@ Execute_RestartDecoding:
                 CLR_RT_TypeDef_Instance type;
                 CLR_RT_TypeDef_Index    cls;
 
-                if(type.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                if(type.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( evalPos[ 0 ], cls ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( evalPos[ 0 ], cls ));
 
                 // Check this is an object of the requested type.
                 if(type.m_data != cls.m_data)
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
 
                 UPDATESTACK(stack,evalPos);
@@ -2025,7 +2025,7 @@ Execute_RestartDecoding:
                     CLR_RT_HeapBlock     safeSource; safeSource.Assign( evalPos[ 0 ] );
                     CLR_RT_ProtectFromGC gc( safeSource );
 
-                    TINYCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( safeSource ));
+                    NANOCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( safeSource ));
 
                 }
                 
@@ -2042,7 +2042,7 @@ Execute_RestartDecoding:
 
                 UPDATESTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( evalPos[ 0 ], arg, assm ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( evalPos[ 0 ], arg, assm ));
                 break;
             }
 
@@ -2053,7 +2053,7 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_METHODTOKEN(arg,ip);
 
-                CLR_RT_MethodDef_Instance calleeInst; if(calleeInst.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_MethodDef_Instance calleeInst; if(calleeInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_TypeDef_Instance   cls;
                 CLR_RT_HeapBlock*         top;
                 CLR_INT32                 changes;
@@ -2070,21 +2070,21 @@ Execute_RestartDecoding:
                     // Special case for delegates. LDFTN or LDVIRTFTN have already created the delegate object, just check that...
                     //
                     changes = -calleeInst.m_target->numArgs;
-                    TINYCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK( *stack, stack->m_evalStackPos, changes )); // Check to see if we have enough parameters.
+                    NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK( *stack, stack->m_evalStackPos, changes )); // Check to see if we have enough parameters.
                     stack->m_evalStackPos += changes;
 
                     top = stack->m_evalStackPos++; // Push back the result.
 
                     if(top[ 1 ].DataType() != DATATYPE_OBJECT)
                     {
-                        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
                     CLR_RT_HeapBlock_Delegate* dlg = top[ 1 ].DereferenceDelegate();
 
                     if(dlg == NULL)
                     {
-                        TINYCLR_CHECK_HRESULT(CLR_E_NULL_REFERENCE);
+                        NANOCLR_CHECK_HRESULT(CLR_E_NULL_REFERENCE);
                     }
 
                     dlg->m_cls = cls;
@@ -2093,7 +2093,7 @@ Execute_RestartDecoding:
 
                     if(dlgInst.InitializeFromIndex( dlg->DelegateFtn() ) == false)
                     {
-                        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
                     if((dlgInst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
@@ -2106,7 +2106,7 @@ Execute_RestartDecoding:
                 else
                 {
                     changes = calleeInst.m_target->numArgs;
-                    TINYCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK( *stack, stack->m_evalStackPos, -changes )); // Check to see if we have enough parameters.
+                    NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK( *stack, stack->m_evalStackPos, -changes )); // Check to see if we have enough parameters.
                     top = stack->m_evalStackPos;
 
                     //
@@ -2123,7 +2123,7 @@ Execute_RestartDecoding:
                     //            ^
                     //            Top points here.
 
-                    TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( top[ 0 ], cls ));
+                    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( top[ 0 ], cls ));
 
                     //
                     // This is to flag the fact that we need to copy back the 'this' pointer into our stack.
@@ -2174,7 +2174,7 @@ Execute_RestartDecoding:
                             stack->m_flags &= ~CLR_RT_StackFrame::c_ExecutingConstructor;  
                         }
 
-                        TINYCLR_LEAVE();
+                        NANOCLR_LEAVE();
                     }
 
                     goto Execute_Restart;
@@ -2191,7 +2191,7 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_TYPETOKEN(arg,ip);
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CastToType( evalPos[ 0 ], arg, assm, (op == CEE_ISINST) ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CastToType( evalPos[ 0 ], arg, assm, (op == CEE_ISINST) ));
                 break;
             }
 
@@ -2205,7 +2205,7 @@ Execute_RestartDecoding:
 
                 Library_corlib_native_System_Exception::SetStackTrace( th->m_currentException, stack );
 
-                TINYCLR_CHECK_HRESULT(CLR_E_PROCESS_EXCEPTION);
+                NANOCLR_CHECK_HRESULT(CLR_E_PROCESS_EXCEPTION);
                 break;
             }
 
@@ -2216,11 +2216,11 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip);
 
-                CLR_RT_FieldDef_Instance fieldInst; if(fieldInst.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance fieldInst; if(fieldInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_HeapBlock*        obj = &evalPos[ 0 ];
                 CLR_DataType             dt  = obj->DataType();
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+                NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
                 switch(dt)
                 {
@@ -2232,23 +2232,23 @@ Execute_RestartDecoding:
                     case DATATYPE_TIMESPAN:
                         evalPos[ 0 ].SetInteger( (CLR_INT64)obj->NumericByRefConst().s8 );
                         break;
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                     case DATATYPE_TRANSPARENT_PROXY:
                         {
                             CLR_RT_HeapBlock val;
 
-                            TINYCLR_CHECK_HRESULT(obj->TransparentProxyValidate());
+                            NANOCLR_CHECK_HRESULT(obj->TransparentProxyValidate());
 
                             UPDATESTACK(stack,evalPos);
 
-                            TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->MarshalObject( obj->TransparentProxyDereference()[ fieldInst.CrossReference().m_offset ], val, obj->TransparentProxyAppDomain() ));
+                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->MarshalObject( obj->TransparentProxyDereference()[ fieldInst.CrossReference().m_offset ], val, obj->TransparentProxyAppDomain() ));
                             
                             evalPos[ 0 ].Assign( val );
                         }
                         goto Execute_LoadAndPromote;
 #endif
                     default:
-                        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         break;
 
                 }
@@ -2262,13 +2262,13 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip);
 
-                CLR_RT_FieldDef_Instance fieldInst; if(fieldInst.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance fieldInst; if(fieldInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_HeapBlock*        obj = &evalPos[ 0 ];
                 CLR_DataType             dt  = obj->DataType();
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+                NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 _ASSERTE(dt != DATATYPE_TRANSPARENT_PROXY);
 #endif
                 if(dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
@@ -2277,11 +2277,11 @@ Execute_RestartDecoding:
                 }
                 else if(dt == DATATYPE_DATETIME || dt == DATATYPE_TIMESPAN) // Special case.
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE); // NOT SUPPORTED.
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE); // NOT SUPPORTED.
                 }
                 else
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
 
                 break;
@@ -2296,11 +2296,11 @@ Execute_RestartDecoding:
 
                 evalPos -= 2; CHECKSTACK(stack,evalPos);
 
-                CLR_RT_FieldDef_Instance fieldInst; if(fieldInst.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance fieldInst; if(fieldInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_HeapBlock*        obj = &evalPos[ 1 ];
                 CLR_DataType             dt  = obj->DataType();
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+                NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
                 switch(dt)
                 {
@@ -2313,15 +2313,15 @@ Execute_RestartDecoding:
                         obj->NumericByRef().s8 = evalPos[ 2 ].NumericByRefConst().s8;
                         break;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                     case DATATYPE_TRANSPARENT_PROXY:
                         {
                             CLR_RT_HeapBlock val;
 
                             UPDATESTACK(stack,evalPos);
 
-                            TINYCLR_CHECK_HRESULT(obj->TransparentProxyValidate());
-                            TINYCLR_CHECK_HRESULT(obj->TransparentProxyAppDomain()->MarshalObject( evalPos[ 2 ], val ));
+                            NANOCLR_CHECK_HRESULT(obj->TransparentProxyValidate());
+                            NANOCLR_CHECK_HRESULT(obj->TransparentProxyAppDomain()->MarshalObject( evalPos[ 2 ], val ));
 
                             obj->TransparentProxyDereference()[ fieldInst.CrossReference().m_offset ].AssignAndPreserveType( val );
                         }
@@ -2329,7 +2329,7 @@ Execute_RestartDecoding:
 #endif
 
                     default:
-                        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         break;
                 }
 
@@ -2343,9 +2343,9 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip);
 
-                CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); if(ptr == NULL) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); if(ptr == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 evalPos++; CHECKSTACK(stack,evalPos);
 
@@ -2361,9 +2361,9 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip);
 
-                CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); if(ptr == NULL) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); if(ptr == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 evalPos++; CHECKSTACK(stack,evalPos);
 
@@ -2378,9 +2378,9 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip);
 
-                CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); if(ptr == NULL) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); if(ptr == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 evalPos--; CHECKSTACK(stack,evalPos);
 
@@ -2395,17 +2395,17 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_TYPETOKEN(arg,ip);
 
-                CLR_RT_TypeDef_Instance typeInst; if(typeInst.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_TypeDef_Instance typeInst; if(typeInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 UPDATESTACK(stack,evalPos);
 
                 if(op == CEE_BOX)
                 {
-                    TINYCLR_CHECK_HRESULT(evalPos[ 0 ].PerformBoxing( typeInst ));
+                    NANOCLR_CHECK_HRESULT(evalPos[ 0 ].PerformBoxing( typeInst ));
                 }
                 else
                 {
-                    TINYCLR_CHECK_HRESULT(evalPos[ 0 ].PerformUnboxing( typeInst ));
+                    NANOCLR_CHECK_HRESULT(evalPos[ 0 ].PerformUnboxing( typeInst ));
                 }
                 break;
             }
@@ -2421,7 +2421,7 @@ Execute_RestartDecoding:
                 //extracts the value contained within obj (of type O).  (It is equivalent to unbox followed by ldobj.)  
                 //When applied to a reference type, the unbox.any instruction has the same effect as castclass typeTok. 
 
-                CLR_RT_TypeDef_Instance typeInst; if(typeInst.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_TypeDef_Instance typeInst; if(typeInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 UPDATESTACK(stack,evalPos);
 
@@ -2429,14 +2429,14 @@ Execute_RestartDecoding:
                    ((typeInst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum     ))
                 {
                     //"unbox"
-                    TINYCLR_CHECK_HRESULT(evalPos[ 0 ].PerformUnboxing( typeInst ));
+                    NANOCLR_CHECK_HRESULT(evalPos[ 0 ].PerformUnboxing( typeInst ));
 
                     //"ldobj"
                     {
                         CLR_RT_HeapBlock     safeSource; safeSource.Assign( evalPos[ 0 ] );
                         CLR_RT_ProtectFromGC gc( safeSource );
 
-                        TINYCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( safeSource ));
+                        NANOCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( safeSource ));
                         
                         goto Execute_LoadAndPromote;
                     }
@@ -2444,7 +2444,7 @@ Execute_RestartDecoding:
                 else
                 {
                     //"castclass"
-                    TINYCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CastToType( evalPos[ 0 ], arg, assm, false ));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CastToType( evalPos[ 0 ], arg, assm, false ));
                 }
 
                 break;
@@ -2476,7 +2476,7 @@ Execute_RestartDecoding:
                     }
                     else
                     {
-                        TINYCLR_SET_AND_LEAVE(hr);
+                        NANOCLR_SET_AND_LEAVE(hr);
                     }
                 }
                 break;
@@ -2487,7 +2487,7 @@ Execute_RestartDecoding:
             OPDEF(CEE_LDLEN,                      "ldlen",            PopRef,             PushI,       InlineNone,         IObjModel,   1,  0xFF,    0x8E,    NEXT)
             // Stack: ... <obj> -> ...
             {
-                TINYCLR_CHECK_HRESULT(CLR_Checks::VerifyArrayReference( evalPos[ 0 ] ));
+                NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyArrayReference( evalPos[ 0 ] ));
 
                 CLR_RT_HeapBlock_Array* array = evalPos[ 0 ].DereferenceArray();
 
@@ -2504,7 +2504,7 @@ Execute_RestartDecoding:
 
                 evalPos--; CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].InitializeArrayReference( evalPos[ 0 ], evalPos[ 1 ].NumericByRef().s4 ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].InitializeArrayReference( evalPos[ 0 ], evalPos[ 1 ].NumericByRef().s4 ));
 
                 evalPos[ 0 ].FixArrayReferenceForValueTypes();
                 break;
@@ -2530,9 +2530,9 @@ Execute_RestartDecoding:
                 //
                 // To load an element from an array, we first initialize a temporary reference to the element and then dereference it.
                 //
-                CLR_RT_HeapBlock ref; TINYCLR_CHECK_HRESULT(ref.InitializeArrayReference( evalPos[ 0 ], evalPos[ 1 ].NumericByRef().s4 ));
+                CLR_RT_HeapBlock ref; NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference( evalPos[ 0 ], evalPos[ 1 ].NumericByRef().s4 ));
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( ref ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( ref ));
 
                 goto Execute_LoadAndPromote;
             }
@@ -2551,7 +2551,7 @@ Execute_RestartDecoding:
                 evalPos--;
                 CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 0 ].InitializeArrayReference( evalPos[ 0 ], evalPos[ 1 ].NumericByRef().s4 ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 0 ].InitializeArrayReference( evalPos[ 0 ], evalPos[ 1 ].NumericByRef().s4 ));
 
                 evalPos[ 0 ].FixArrayReferenceForValueTypes();
                 //</LDELEMA>
@@ -2560,13 +2560,13 @@ Execute_RestartDecoding:
                 CLR_RT_TypeDef_Index cls;
 
                 if( !type.ResolveToken( arg, assm ) )
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( evalPos[ 0 ], cls ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( evalPos[ 0 ], cls ));
 
                 // Check this is an object of the requested type.
                 if( type.m_data != cls.m_data )
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 UPDATESTACK(stack,evalPos);
                 {
@@ -2575,7 +2575,7 @@ Execute_RestartDecoding:
                     safeSource.Assign( evalPos[ 0 ] );
                     CLR_RT_ProtectFromGC gc( safeSource );
 
-                    TINYCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( safeSource ));
+                    NANOCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( safeSource ));
                 }
                 
                 goto Execute_LoadAndPromote;
@@ -2599,7 +2599,7 @@ Execute_RestartDecoding:
                 //
                 // To load an element from an array, we first initialize a temporary reference to the element and then dereference it.
                 //
-                CLR_RT_HeapBlock ref; TINYCLR_CHECK_HRESULT(ref.InitializeArrayReference( evalPos[ 1 ], evalPos[ 2 ].NumericByRef().s4 ));
+                CLR_RT_HeapBlock ref; NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference( evalPos[ 1 ], evalPos[ 2 ].NumericByRef().s4 ));
                 int              size = 0;
 
                 switch(op)
@@ -2616,7 +2616,7 @@ Execute_RestartDecoding:
 
                 evalPos[ 3 ].Promote();
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 3 ].StoreToReference( ref, size ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 3 ].StoreToReference( ref, size ));
                 break;
             }
 
@@ -2631,11 +2631,11 @@ Execute_RestartDecoding:
                 evalPos -= 3; // "pop" args from evaluation stack
                 CHECKSTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(evalPos[ 1 ].InitializeArrayReference( evalPos[ 1 ], evalPos[ 2 ].NumericByRef().s4 ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 1 ].InitializeArrayReference( evalPos[ 1 ], evalPos[ 2 ].NumericByRef().s4 ));
                 evalPos[ 1 ].FixArrayReferenceForValueTypes();
 
                 // Reassign will make sure these are objects of the same type.
-                TINYCLR_CHECK_HRESULT(evalPos[ 1 ].Reassign( evalPos[ 3 ] ));
+                NANOCLR_CHECK_HRESULT(evalPos[ 1 ].Reassign( evalPos[ 3 ] ));
 
                 break;
             }
@@ -2654,7 +2654,7 @@ Execute_RestartDecoding:
                 {
                 case TBL_TypeSpec:
                     {
-                        CLR_RT_TypeSpec_Instance sig; if(sig.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        CLR_RT_TypeSpec_Instance sig; if(sig.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                         evalPos[ 0 ].SetReflection( sig );
                     }
@@ -2663,7 +2663,7 @@ Execute_RestartDecoding:
                 case TBL_TypeRef:
                 case TBL_TypeDef:
                     {
-                        CLR_RT_TypeDef_Instance cls; if(cls.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        CLR_RT_TypeDef_Instance cls; if(cls.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                         evalPos[ 0 ].SetReflection( cls );
                     }
@@ -2672,7 +2672,7 @@ Execute_RestartDecoding:
                 case TBL_FieldRef:
                 case TBL_FieldDef:
                     {
-                        CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                         evalPos[ 0 ].SetReflection( field );
                     }
@@ -2681,14 +2681,14 @@ Execute_RestartDecoding:
                 case TBL_MethodRef:
                 case TBL_MethodDef:
                     {
-                        CLR_RT_MethodDef_Instance method; if(method.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        CLR_RT_MethodDef_Instance method; if(method.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                         evalPos[ 0 ].SetReflection( method );
                     }
                     break;
 
                 default:
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     break;
                 }
                 break;
@@ -2701,7 +2701,7 @@ Execute_RestartDecoding:
                 EMPTYSTACK(stack, evalPos);
                 WRITEBACK(stack,evalPos,ip,fDirty);
                 
-                TINYCLR_CHECK_HRESULT(th->ProcessException_EndFinally());
+                NANOCLR_CHECK_HRESULT(th->ProcessException_EndFinally());
 
                 _ASSERTE(th->m_currentException.Dereference() == NULL);
                 stack = th->CurrentFrame();
@@ -2719,11 +2719,11 @@ Execute_RestartDecoding:
                 
                 if(op == CEE_LEAVE)
                 {
-                    TINYCLR_READ_UNALIGNED_INT16( arg, ip );
+                    NANOCLR_READ_UNALIGNED_INT16( arg, ip );
                 }
                 else
                 {
-                    TINYCLR_READ_UNALIGNED_INT8( arg, ip );
+                    NANOCLR_READ_UNALIGNED_INT8( arg, ip );
                 }
 
                 {
@@ -2756,7 +2756,7 @@ Execute_RestartDecoding:
 
                         (void)Library_corlib_native_System_Exception::CreateInstance( th->m_currentException, g_CLR_RT_WellKnownTypes.m_ThreadAbortException, S_OK, stack );
                         
-                        TINYCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
                     }                
                 }
                 
@@ -2821,11 +2821,11 @@ Execute_RestartDecoding:
 
                 evalPos++; CHECKSTACK(stack,evalPos);
 
-                CLR_RT_MethodDef_Instance method; if(method.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_MethodDef_Instance method; if(method.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 UPDATESTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( evalPos[ 0 ], method, stack ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( evalPos[ 0 ], method, stack ));
                 break;
             }
 
@@ -2835,21 +2835,21 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_METHODTOKEN(arg,ip);
 
-                CLR_RT_MethodDef_Instance callee; if(callee.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_MethodDef_Instance callee; if(callee.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_TypeDef_Index      cls;
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( evalPos[ 0 ], cls ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( evalPos[ 0 ], cls ));
 
                 CLR_RT_MethodDef_Index calleeReal;
 
                 if(g_CLR_RT_EventCache.FindVirtualMethod( cls, callee, calleeReal ) == false)
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
 
                 UPDATESTACK(stack,evalPos);
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( evalPos[ 0 ], calleeReal, stack ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( evalPos[ 0 ], calleeReal, stack ));
                 break;
             }
 
@@ -2870,7 +2870,7 @@ Execute_RestartDecoding:
             {
                 if(th->m_nestedExceptionsPos == 0)
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
                 }
                 else
                 {
@@ -2880,11 +2880,11 @@ Execute_RestartDecoding:
                     {
                         th->m_currentException.SetObjectReference( us.m_exception );
 
-                        TINYCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
                     }
                     else
                     {
-                        TINYCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
                     }
                 }
                 break;
@@ -2896,7 +2896,7 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_TYPETOKEN(arg,ip);
 
-                CLR_RT_TypeDef_Instance clsInst; if(clsInst.ResolveToken( arg, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_TypeDef_Instance clsInst; if(clsInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_INT32               len;
 
                 if(clsInst.m_target->dataType)
@@ -2932,7 +2932,7 @@ Execute_RestartDecoding:
                 CHECKSTACK(stack,evalPos);
                 WRITEBACK(stack,evalPos,ip,fDirty);
                 
-                TINYCLR_CHECK_HRESULT(th->ProcessException_EndFilter());
+                NANOCLR_CHECK_HRESULT(th->ProcessException_EndFilter());
                 
                 stack = th->CurrentFrame();
                 goto Execute_Reload;
@@ -2966,23 +2966,23 @@ Execute_RestartDecoding:
             OPDEF(CEE_REFANYVAL,                  "refanyval",        Pop1,               PushI,       InlineType,         IPrimitive,  1,  0xFF,    0xC2,    NEXT)
             OPDEF(CEE_READONLY,                   "readonly.",        Pop0,               Push0,       InlineNone,         IPrefix,     2,  0xFE,    0x1E,    META)
 
-            TINYCLR_CHECK_HRESULT(CLR_Checks::VerifyUnsupportedInstruction( op ));
+            NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyUnsupportedInstruction( op ));
                 break;
 
             //////////////////////////////////////////////////////////////////////////////////////////
 
             default:
-                TINYCLR_CHECK_HRESULT(CLR_Checks::VerifyUnknownInstruction( op ));
+                NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyUnknownInstruction( op ));
                 break;
 #undef OPDEF
             }
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             if(stack->m_flags & CLR_RT_StackFrame::c_HasBreakpoint)
             {
                 g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step( stack, ip );
             }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             continue;
 
@@ -3021,18 +3021,18 @@ Execute_RestartDecoding:
                     {
                         UPDATESTACK(stack,evalPos);
 
-                        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject( evalPos[ 0 ], evalPos[ 0 ] ));
+                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject( evalPos[ 0 ], evalPos[ 0 ] ));
                     }
                     break;
                 }
             }
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             if(stack->m_flags & CLR_RT_StackFrame::c_HasBreakpoint)
             {
                 g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step( stack, ip );
             }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             continue;
 
             //--//
@@ -3043,25 +3043,25 @@ Execute_RestartDecoding:
 
                 if(c_CLR_RT_OpcodeLookup[ op ].m_opParam == CLR_OpcodeParam_ShortBrTarget)
                 {
-                    TINYCLR_READ_UNALIGNED_INT8( offset, ip );
+                    NANOCLR_READ_UNALIGNED_INT8( offset, ip );
                 }
                 else
                 {
-                    TINYCLR_READ_UNALIGNED_INT16( offset, ip );
+                    NANOCLR_READ_UNALIGNED_INT16( offset, ip );
                 }
 
                 if(fCondition) ip += offset;
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                 if(stack->m_flags & CLR_RT_StackFrame::c_HasBreakpoint)
                 {
                     g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step( stack, ip );
                 }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)                
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)                
 
                 if(th->m_timeQuantumExpired)
                 {
-                    TINYCLR_SET_AND_LEAVE( CLR_S_QUANTUM_EXPIRED );
+                    NANOCLR_SET_AND_LEAVE( CLR_S_QUANTUM_EXPIRED );
                 }
 
                 continue;
@@ -3088,7 +3088,7 @@ Execute_RestartDecoding:
 
                 if((stackNext->m_flags & CLR_RT_StackFrame::c_CallerIsCompatibleForCall) == 0)
                 {
-                    TINYCLR_SET_AND_LEAVE( CLR_S_RESTART_EXECUTION );
+                    NANOCLR_SET_AND_LEAVE( CLR_S_RESTART_EXECUTION );
                 }
 
                 //
@@ -3113,13 +3113,13 @@ Execute_RestartDecoding:
     }
 
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(fDirty)
     {
         WRITEBACK(stack,evalPos,ip,fDirty);
     }
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 

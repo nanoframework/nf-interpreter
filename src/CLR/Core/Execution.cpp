@@ -19,13 +19,13 @@ CLR_RT_ExecutionEngine::ExecutionConstraintCompensation CLR_RT_ExecutionEngine::
 HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CLEAR(g_CLR_RT_ExecutionEngine);
+    NANOCLR_CLEAR(g_CLR_RT_ExecutionEngine);
 
-    TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.ExecutionEngine_Initialize());
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.ExecutionEngine_Initialize());
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -33,7 +33,7 @@ HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     m_maximumTimeToActive = c_MaximumTimeToActive;  // CLR_INT64                           m_maximumTimeToActive
                                                     // int                                 m_iDebugger_Conditions;
@@ -65,7 +65,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
                                                     // CLR_RT_Thread*                      m_finalizerThread;
                                                     // CLR_RT_Thread*                      m_cctorThread;
                                                     //
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
     m_globalLock           = NULL;                  // CLR_RT_HeapBlock*                   m_globalLock;
     m_outOfMemoryException = NULL;                  // CLR_RT_HeapBlock*                   m_outOfMemoryException;
 #endif                                              //
@@ -83,12 +83,12 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
     m_interruptThread     = NULL;                   // CLR_RT_Thread                       m_interruptThread;
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     m_scratchPadArray = NULL;                       // CLR_RT_HeapBlock_Array*             m_scratchPadArray;
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     m_appDomains.DblLinkedList_Initialize();        // CLR_RT_DblLinkedList                m_appDomains;
     
     m_appDomainCurrent = NULL;                      // CLR_AppDomainCurrent*               m_appDomainCurrent;    
@@ -105,27 +105,27 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
     //--//
 
-    TINYCLR_CHECK_HRESULT(AllocateHeaps());
+    NANOCLR_CHECK_HRESULT(AllocateHeaps());
 
     g_CLR_RT_TypeSystem.TypeSystem_Initialize();
     g_CLR_RT_EventCache.EventCache_Initialize();
 
     //--//
 
-    TINYCLR_CHECK_HRESULT(CLR_HW_Hardware::CreateInstance());
+    NANOCLR_CHECK_HRESULT(CLR_HW_Hardware::CreateInstance());
 
     //--//
 
-    TINYCLR_CHECK_HRESULT(CLR_Messaging::CreateInstance());
+    NANOCLR_CHECK_HRESULT(CLR_Messaging::CreateInstance());
     
-    TINYCLR_CHECK_HRESULT(CLR_DBG_Debugger::CreateInstance());
+    NANOCLR_CHECK_HRESULT(CLR_DBG_Debugger::CreateInstance());
 
-#if defined(TINYCLR_PROFILE_NEW)
-    TINYCLR_CHECK_HRESULT(CLR_PRF_Profiler::CreateInstance());
+#if defined(NANOCLR_PROFILE_NEW)
+    NANOCLR_CHECK_HRESULT(CLR_PRF_Profiler::CreateInstance());
 #endif
 
-#if defined(TINYCLR_APPDOMAINS)
-    TINYCLR_CHECK_HRESULT(CLR_RT_AppDomain::CreateInstance( "default", m_appDomainCurrent ));
+#if defined(NANOCLR_APPDOMAINS)
+    NANOCLR_CHECK_HRESULT(CLR_RT_AppDomain::CreateInstance( "default", m_appDomainCurrent ));
 #endif
 
     UpdateTime();
@@ -136,13 +136,13 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
     //--//
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     const CLR_UINT32 c_HeapClusterSize = sizeof(CLR_RT_HeapBlock) * CLR_RT_HeapBlock::HB_MaxSize;
 
@@ -153,7 +153,7 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
 
     if(heapFree <= sizeof(CLR_RT_HeapCluster))
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
     while(heapFree > sizeof(CLR_RT_HeapCluster))
@@ -187,7 +187,7 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
         i             += size;
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -195,11 +195,11 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
 HRESULT CLR_RT_ExecutionEngine::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     
     g_CLR_RT_ExecutionEngine.ExecutionEngine_Cleanup();
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
@@ -207,14 +207,14 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     NATIVE_PROFILE_CLR_CORE();
     m_fShuttingDown = true;
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     m_scratchPadArray = NULL;
     m_breakpointsNum = 0;
 
     CLR_DBG_Debugger::DeleteInstance();
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(TINYCLR_PROFILE_NEW)
+#if defined(NANOCLR_PROFILE_NEW)
     CLR_PRF_Profiler::DeleteInstance();
 #endif
 
@@ -239,7 +239,7 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     g_CLR_RT_TypeSystem.TypeSystem_Cleanup();
     g_CLR_RT_EventCache.EventCache_Cleanup();
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
     m_globalLock = NULL;
 #endif
 
@@ -261,11 +261,11 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
 HRESULT CLR_RT_ExecutionEngine::StartHardware()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(g_CLR_HW_Hardware.Hardware_Initialize());
+    NANOCLR_SET_AND_LEAVE(g_CLR_HW_Hardware.Hardware_Initialize());
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_ExecutionEngine::Reboot( bool fHard )
@@ -308,7 +308,7 @@ void CLR_RT_ExecutionEngine::LoadDownloadedAssemblies()
     //
     // Load any patch or similar!
     //
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_WeakReference,weak,m_weakReferences)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_WeakReference,weak,m_weakReferences)
     {
         if((weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_ArrayOfBytes) != 0 && weak->m_targetSerialized)
         {
@@ -329,11 +329,11 @@ void CLR_RT_ExecutionEngine::LoadDownloadedAssemblies()
             }
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     (void)g_CLR_RT_TypeSystem.ResolveAll();
 
-    TINYCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+    NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
         if(pASSM->m_pFile)
         {
@@ -348,7 +348,7 @@ void CLR_RT_ExecutionEngine::LoadDownloadedAssemblies()
             }
         }
     }
-    TINYCLR_FOREACH_ASSEMBLY_END();
+    NANOCLR_FOREACH_ASSEMBLY_END();
 
     g_CLR_RT_TypeSystem.PrepareForExecution();
 }
@@ -404,11 +404,11 @@ void CLR_RT_ExecutionEngine::PerformHeapCompaction()
 void CLR_RT_ExecutionEngine::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_scratchPadArray );
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_globalLock           );
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_outOfMemoryException );
 #endif
@@ -422,29 +422,29 @@ void CLR_RT_ExecutionEngine::Relocate()
 
 //--//
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 
 void CLR_RT_ExecutionEngine::TryToUnloadAppDomains_Helper_Threads( CLR_RT_DblLinkedList& threads )
 {        
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
     {
         if(th->m_flags & CLR_RT_Thread::TH_F_ContainsDoomedAppDomain)
         {
-            TINYCLR_FOREACH_NODE(CLR_RT_StackFrame, stack, th->m_stackFrames)
+            NANOCLR_FOREACH_NODE(CLR_RT_StackFrame, stack, th->m_stackFrames)
             {
                 stack->m_appDomain->m_fCanBeUnloaded = false;                
             }
-            TINYCLR_FOREACH_NODE_END();
+            NANOCLR_FOREACH_NODE_END();
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 void CLR_RT_ExecutionEngine::TryToUnloadAppDomains_Helper_Finalizers( CLR_RT_DblLinkedList& finalizers, bool fAlive )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,finalizers)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,finalizers)
     {
         if(!fin->m_appDomain->IsLoaded())
         {
@@ -458,7 +458,7 @@ void CLR_RT_ExecutionEngine::TryToUnloadAppDomains_Helper_Finalizers( CLR_RT_Dbl
             fin->m_appDomain->m_fCanBeUnloaded = false;
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 bool CLR_RT_ExecutionEngine::TryToUnloadAppDomains()
@@ -466,11 +466,11 @@ bool CLR_RT_ExecutionEngine::TryToUnloadAppDomains()
     NATIVE_PROFILE_CLR_CORE();
     bool fAnyAppDomainsUnloaded = false;
 
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,m_appDomains)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,m_appDomains)
     {
         appDomain->m_fCanBeUnloaded = true;
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     TryToUnloadAppDomains_Helper_Finalizers( m_finalizersAlive  , true  );
     TryToUnloadAppDomains_Helper_Finalizers( m_finalizersPending, false );
@@ -480,7 +480,7 @@ bool CLR_RT_ExecutionEngine::TryToUnloadAppDomains()
 
     CLR_EE_CLR( UnloadingAppDomain );
     
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,m_appDomains)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,m_appDomains)
     {
         if(appDomain->m_state == CLR_RT_AppDomain::AppDomainState_Unloading)
         {
@@ -496,14 +496,14 @@ bool CLR_RT_ExecutionEngine::TryToUnloadAppDomains()
             }
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     if(fAnyAppDomainsUnloaded)
     {                      
         SignalEvents( CLR_RT_ExecutionEngine::c_Event_AppDomain );
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         Breakpoint_Assemblies_Loaded();
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     }
 
     return fAnyAppDomainsUnloaded;
@@ -514,7 +514,7 @@ bool CLR_RT_ExecutionEngine::TryToUnloadAppDomains()
 HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     while(CLR_EE_DBG_IS(Stopped) && !CLR_EE_DBG_IS(RebootPending) && !CLR_EE_DBG_IS(ExitPending))
     {
@@ -522,7 +522,7 @@ HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
 #if defined(WIN32)
         if(HAL_Windows_IsShutdownPending())
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_SHUTTING_DOWN);
+            NANOCLR_SET_AND_LEAVE(CLR_E_SHUTTING_DOWN);
         }
 #endif
 
@@ -530,9 +530,9 @@ HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
     }
 
 #if defined(WIN32)
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 #else
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 #endif 
 }
 
@@ -540,7 +540,7 @@ HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
 HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs( CLR_RT_HeapBlock& argsBlk, WCHAR* szCommandLineArgs )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     
     std::list<std::wstring> args;
 
@@ -559,7 +559,7 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs( CLR_RT_HeapBlock& argsBlk,
         szArg = wcstok_s( NULL, sep, &context );
     }
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( argsBlk, (CLR_UINT32)args.size(), g_CLR_RT_WellKnownTypes.m_String ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( argsBlk, (CLR_UINT32)args.size(), g_CLR_RT_WellKnownTypes.m_String ));
     
     CLR_RT_HeapBlock_Array* array = argsBlk.Array();
     CLR_UINT32 iArg = 0;
@@ -571,10 +571,10 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs( CLR_RT_HeapBlock& argsBlk,
         CLR_RT_HeapBlock* blk = (CLR_RT_HeapBlock*)array->GetElement( iArg );
         CLR_RT_UnicodeHelper::ConvertToUTF8( (*it).c_str(), arg );
 
-        TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( *blk, arg.c_str() ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( *blk, arg.c_str() ));
     }    
     
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 #endif
@@ -582,32 +582,32 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs( CLR_RT_HeapBlock& argsBlk,
 HRESULT CLR_RT_ExecutionEngine::Execute( LPWSTR entryPointArgs, int maxContextSwitch )
 {            
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock ref;
     CLR_RT_Thread*   thMain = NULL;
 
         
-    if(TINYCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
+    if(NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
     {
 #if !defined(BUILD_RTM) || defined(WIN32)
         CLR_Debug::Printf( "Cannot find any entrypoint!\r\n" );
 #endif
-        TINYCLR_SET_AND_LEAVE(CLR_E_ENTRYPOINT_NOT_FOUND);
+        NANOCLR_SET_AND_LEAVE(CLR_E_ENTRYPOINT_NOT_FOUND);
     }
 
-    TINYCLR_CHECK_HRESULT(WaitForDebugger());
+    NANOCLR_CHECK_HRESULT(WaitForDebugger());
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_EE_DBG_SET_MASK(State_ProgramRunning,State_Mask);
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
  
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( ref, g_CLR_RT_TypeSystem.m_entryPoint, NULL ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( ref, g_CLR_RT_TypeSystem.m_entryPoint, NULL ));
 
     {
         CLR_RT_ProtectFromGC gc( ref );
 
-        TINYCLR_CHECK_HRESULT(NewThread( thMain, ref.DereferenceDelegate(), ThreadPriority::Normal, -1 ));
+        NANOCLR_CHECK_HRESULT(NewThread( thMain, ref.DereferenceDelegate(), ThreadPriority::Normal, -1 ));
     }
 
     {            
@@ -621,18 +621,18 @@ HRESULT CLR_RT_ExecutionEngine::Execute( LPWSTR entryPointArgs, int maxContextSw
 #if defined(WIN32)
             if(entryPointArgs != NULL)
             {
-                TINYCLR_CHECK_HRESULT(CreateEntryPointArgs( stack->m_arguments[ 0 ], entryPointArgs ));
+                NANOCLR_CHECK_HRESULT(CreateEntryPointArgs( stack->m_arguments[ 0 ], entryPointArgs ));
             }
             else
 #endif
             {
-                TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( stack->m_arguments[ 0 ], 0, g_CLR_RT_WellKnownTypes.m_String ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( stack->m_arguments[ 0 ], 0, g_CLR_RT_WellKnownTypes.m_String ));
             }
         }
     }
 
     //To debug static constructors, the thread should be created after the entrypoint thread.
-    TINYCLR_CHECK_HRESULT(WaitForDebugger());
+    NANOCLR_CHECK_HRESULT(WaitForDebugger());
     
     // m_cctorThread is NULL before call and inialized by the SpawnStaticConstructor
     SpawnStaticConstructor( m_cctorThread );
@@ -640,23 +640,23 @@ HRESULT CLR_RT_ExecutionEngine::Execute( LPWSTR entryPointArgs, int maxContextSw
 
     while(true)
     {
-        HRESULT hr2 = ScheduleThreads( maxContextSwitch ); TINYCLR_CHECK_HRESULT(hr2);
+        HRESULT hr2 = ScheduleThreads( maxContextSwitch ); NANOCLR_CHECK_HRESULT(hr2);
         
         if(CLR_EE_DBG_IS( RebootPending ) || CLR_EE_DBG_IS( ExitPending ) || CLR_EE_REBOOT_IS(ClrOnly))
         {
-            TINYCLR_SET_AND_LEAVE(S_FALSE);
+            NANOCLR_SET_AND_LEAVE(S_FALSE);
         }
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if(CLR_EE_DBG_IS( Stopped ))
         {
             CLR_RT_ExecutionEngine::ExecutionConstraint_Suspend();
 
-            TINYCLR_CHECK_HRESULT(WaitForDebugger());
+            NANOCLR_CHECK_HRESULT(WaitForDebugger());
 
             CLR_RT_ExecutionEngine::ExecutionConstraint_Resume();
         }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if(CLR_EE_IS(Compaction_Pending))
         {            
@@ -673,7 +673,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute( LPWSTR entryPointArgs, int maxContextSw
 #if !defined(BUILD_RTM) || defined(WIN32)
             if(m_fPerformGarbageCollection)
             {
-#if defined(TINYCLR_GC_VERBOSE)
+#if defined(NANOCLR_GC_VERBOSE)
                 if(s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
                 {
                     CLR_Debug::Printf( "    Memory: Forcing GC.\r\n" );
@@ -681,7 +681,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute( LPWSTR entryPointArgs, int maxContextSw
 #endif
                 PerformGarbageCollection();
 
-#if defined(TINYCLR_GC_VERBOSE)
+#if defined(NANOCLR_GC_VERBOSE)
                 if(s_CLR_RT_fTrace_Memory > c_CLR_RT_Trace_Info)
                 {
                     CLR_UINT32 inUse = g_CLR_RT_GarbageCollector.m_totalBytes - g_CLR_RT_GarbageCollector.m_freeBytes;
@@ -698,9 +698,9 @@ HRESULT CLR_RT_ExecutionEngine::Execute( LPWSTR entryPointArgs, int maxContextSw
         }
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
-#if defined(TINYCLR_PROFILE_NEW)
+#if defined(NANOCLR_PROFILE_NEW)
     /* g_CLR_RT_ExecutionEngine.Cleanup() gets called too late to flush things out on the emulator since it
      * only gets called when the finalizer dealing with the managed half of the emulator runs.
      */
@@ -710,7 +710,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute( LPWSTR entryPointArgs, int maxContextSw
     // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Flush();
 
 #if defined(WIN32)
-#if defined(TINYCLR_PROFILE_NEW)
+#if defined(NANOCLR_PROFILE_NEW)
     if(CLR_EE_PRF_IS( Enabled ))
     {
         //Clients do not get all the messages they want if a program happens to end and the emulator terminates before
@@ -724,7 +724,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute( LPWSTR entryPointArgs, int maxContextSw
     WaitForDebugger();
 #endif
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 bool CLR_RT_ExecutionEngine::EnsureSystemThread( CLR_RT_Thread*& thread, int priority )
@@ -744,7 +744,7 @@ bool CLR_RT_ExecutionEngine::EnsureSystemThread( CLR_RT_Thread*& thread, int pri
 void CLR_RT_ExecutionEngine::SpawnTimer()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
     {
         if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_Triggered)
         {               
@@ -760,7 +760,7 @@ void CLR_RT_ExecutionEngine::SpawnTimer()
             break;
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback( void* arg )
@@ -769,7 +769,7 @@ void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback( void* arg )
     g_CLR_RT_ExecutionEngine.SpawnStaticConstructor( g_CLR_RT_ExecutionEngine.m_cctorThread );
 }
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper( CLR_RT_AppDomain* appDomain, CLR_RT_AppDomainAssembly* appDomainAssembly, const CLR_RT_MethodDef_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -824,7 +824,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
         CLR_RT_MethodDef_Instance inst;
 
         //Find next static constructor for given idx
-        _ASSERTE(TINYCLR_INDEX_IS_VALID(idx));
+        _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
         _SIDE_ASSERTE(inst.InitializeFromIndex( idx ));
 
         appDomainAssembly = dlg->m_appDomain->FindAppDomainAssembly( inst.m_assm );
@@ -842,9 +842,9 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
     }
 
     //first, find the AppDomainAssembly to run. (what about appdomains!!!)
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly,appDomainAssembly,appDomain->m_appDomainAssemblies)
+        NANOCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly,appDomainAssembly,appDomain->m_appDomainAssemblies)
         {
             CLR_RT_Assembly* assembly = appDomainAssembly->m_assembly;
 
@@ -871,9 +871,9 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
                     return;
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
 
     // No more static constructors needed...
@@ -881,7 +881,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
     // 1. Destroy constructor thread.
     pCctorThread->DestroyInstance();
 }
-#else //TINYCLR_APPDOMAINS
+#else //NANOCLR_APPDOMAINS
 
 bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper( CLR_RT_Assembly* assembly, const CLR_RT_MethodDef_Index& idx )
 {
@@ -935,7 +935,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
         CLR_RT_MethodDef_Instance inst;
 
         //Find next static constructor for given idx
-        _ASSERTE(TINYCLR_INDEX_IS_VALID(idx));
+        _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
         _SIDE_ASSERTE(inst.InitializeFromIndex( idx ));
     
         //This is ok if idx is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
@@ -947,7 +947,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
     }
 
     //first, find the AppDomainAssembly to run. (what about appdomains!!!)
-     TINYCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
         //Find an AppDomainAssembly that does not have it's static constructor bit set...
         if((pASSM->m_flags & CLR_RT_Assembly::c_StaticConstructorsExecuted) == 0)
@@ -970,12 +970,12 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
                 return;
         }
     }
-    TINYCLR_FOREACH_ASSEMBLY_END();
+    NANOCLR_FOREACH_ASSEMBLY_END();
 
     //no more static constructors needed...
     pCctorThread->DestroyInstance();
 }
-#endif //TINYCLR_APPDOMAINS
+#endif //NANOCLR_APPDOMAINS
 
 void CLR_RT_ExecutionEngine::FinalizerTerminationCallback(void* arg)
 {
@@ -993,7 +993,7 @@ void CLR_RT_ExecutionEngine::SpawnFinalizer()
         CLR_RT_HeapBlock     delegate; delegate.SetObjectReference( NULL );
         CLR_RT_ProtectFromGC gc( delegate );
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         (void)SetCurrentAppDomain( fin->m_appDomain );
 #endif
 
@@ -1018,13 +1018,13 @@ void CLR_RT_ExecutionEngine::SpawnFinalizer()
 void CLR_RT_ExecutionEngine::AdjustExecutionCounter( CLR_RT_DblLinkedList &threadList, int iUpdateValue )
 
 {   // Iterate over threads in increase executioin counter by iUpdateValue    
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,pThread,threadList)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,pThread,threadList)
     {
         pThread->m_executionCounter += iUpdateValue;
         // Update m_executionCounter if thread is too behind of m_GlobalExecutionCounter
         pThread->BringExecCounterToDate( m_GlobalExecutionCounter, pThread->GetQuantumDebit() );
     }
-    TINYCLR_FOREACH_NODE_END()
+    NANOCLR_FOREACH_NODE_END()
 }
 
 void CLR_RT_ExecutionEngine::UpdateToLowestExecutionCounter( CLR_RT_Thread *pThread ) const 
@@ -1080,9 +1080,9 @@ void CLR_DebuggerBreak()
 HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-#if defined(TINYCLR_APPDOMAINS)                    
+#if defined(NANOCLR_APPDOMAINS)                    
     CLR_RT_AppDomain* appDomainSav = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 #endif
 
@@ -1111,16 +1111,16 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
 #if defined(WIN32)
         if(HAL_Windows_IsShutdownPending())
         {
-            TINYCLR_SET_AND_LEAVE(CLR_S_NO_THREADS);
+            NANOCLR_SET_AND_LEAVE(CLR_S_NO_THREADS);
         }
 #endif
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if(CLR_EE_DBG_IS( Stopped ))
         {
-            TINYCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
+            NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
         }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)        
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)        
 
         CLR_RT_Thread* th = NULL;
 
@@ -1142,7 +1142,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             {
                 // The m_cctorThread is exists, but not ready - means entered blocking call.
                 // We do not want to preempt constructor thread, so stay idle.
-                TINYCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS); 
+                NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS); 
             }
         }
 
@@ -1160,12 +1160,12 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             th = (CLR_RT_Thread*)m_threadsReady.FirstNode();
 
             //Thread create can cause stopping debugging event
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             if(CLR_EE_DBG_IS(Stopped))
             {
-                TINYCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
+                NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
             }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         }
 
         // If there is ready thread - decrease m_executionCounter for this (th) thread. 
@@ -1191,10 +1191,10 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
         {
             if(m_threadsWaiting.IsEmpty())
             {
-                TINYCLR_SET_AND_LEAVE(CLR_S_NO_THREADS);
+                NANOCLR_SET_AND_LEAVE(CLR_S_NO_THREADS);
             }
 
-            TINYCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
+            NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
         }
 
         ::Watchdog_ResetCounter();
@@ -1230,11 +1230,11 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
         (void)ProcessTimer();
     }
 
-    TINYCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);
+    NANOCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
-#if defined(TINYCLR_APPDOMAINS)                    
+#if defined(NANOCLR_APPDOMAINS)                    
                 
     if(CLR_EE_IS( UnloadingAppDomain ))
     {
@@ -1251,7 +1251,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
     g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomainSav );
 #endif
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity()
@@ -1266,7 +1266,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity()
 
     if(timeoutMin > 0LL)
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,m_threadsWaiting)
+        NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,m_threadsWaiting)
         {
             if((th->m_waitForEvents & c_Event_IdleCPU) != 0 && th->m_waitForEvents_IdleTimeWorkItem < timeoutMin)
             {
@@ -1277,7 +1277,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity()
                 return SYSTEM_EVENT_FLAG_ALL; // Someone woke up...
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
 
         return WaitForActivity( SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, timeoutMin );
     }
@@ -1330,16 +1330,16 @@ void CLR_RT_ExecutionEngine::PutInProperList( CLR_RT_Thread* th )
 void CLR_RT_ExecutionEngine::AbortAllThreads( CLR_RT_DblLinkedList& threads )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
     {
         if((th->m_flags & CLR_RT_Thread::TH_F_Aborted) == 0)
         {
             th->Abort();
 
-            TINYCLR_FOREACH_NODE_RESTART(CLR_RT_Thread,th,threads);
+            NANOCLR_FOREACH_NODE_RESTART(CLR_RT_Thread,th,threads);
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 void CLR_RT_ExecutionEngine::ReleaseAllThreads( CLR_RT_DblLinkedList& threads )
@@ -1368,11 +1368,11 @@ void CLR_RT_ExecutionEngine::InsertThreadRoundRobin( CLR_RT_DblLinkedList& threa
     {
         int priTarget = thTarget->GetExecutionCounter();
 
-        TINYCLR_FOREACH_NODE__NODECL(CLR_RT_Thread,th,threads)
+        NANOCLR_FOREACH_NODE__NODECL(CLR_RT_Thread,th,threads)
         {
             if(th->GetExecutionCounter() < priTarget) break;
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
 
     thTarget->m_waitForEvents         = 0;
@@ -1393,13 +1393,13 @@ void CLR_RT_ExecutionEngine::InsertThreadRoundRobin( CLR_RT_DblLinkedList& threa
 HRESULT CLR_RT_ExecutionEngine::NewThread( CLR_RT_Thread*& thRes, CLR_RT_HeapBlock_Delegate* pDelegate, int priority, CLR_INT32 id, CLR_UINT32 flags  )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_Thread::CreateInstance( id != -1 ? id : ++m_lastPid, pDelegate, priority, thRes, flags ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_Thread::CreateInstance( id != -1 ? id : ++m_lastPid, pDelegate, priority, thRes, flags ));
 
     PutInProperList( thRes );
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(FAILED(hr))
     {
@@ -1411,7 +1411,7 @@ HRESULT CLR_RT_ExecutionEngine::NewThread( CLR_RT_Thread*& thRes, CLR_RT_HeapBlo
         }
     }
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
                                                               
 CLR_INT32 CLR_RT_ExecutionEngine::GetNextThreadId() 
@@ -1443,7 +1443,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray( CLR_RT_Type
         pArray->m_sizeOfElement  =  dtl.m_sizeInBytes;
         pArray->m_fReference     = (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric) == 0;
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectCreation( pArray );
 #endif
     }
@@ -1465,7 +1465,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForClassOrValueTypes(
     {
         hb->SetObjectCls(cls);
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectCreation( hb );
 #endif
     }
@@ -1490,7 +1490,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForObjects( CLR_UINT3
 
     CLR_RT_HeapBlock* hb = ExtractHeapBlocks( m_heap, dataType, flags, length );
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     if(hb)
     {
         g_CLR_PRF_Profiler.TrackObjectCreation( hb );
@@ -1515,7 +1515,7 @@ CLR_RT_HeapBlock_Node* CLR_RT_ExecutionEngine::ExtractHeapBlocksForEvents( CLR_U
     {
         hb->GenericNode_Initialize();
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectCreation( hb );
 #endif
     }
@@ -1538,7 +1538,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedLis
     }
 #endif
 
-#if defined(TINYCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION)
+#if defined(NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION)
     if(m_heapState != c_HeapState_UnderGC)
     {
         g_CLR_RT_EventCache.EventCache_Cleanup();
@@ -1553,7 +1553,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedLis
 
             if(flags & CLR_RT_HeapBlock::HB_Event)
             {
-                TINYCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapCluster,hc,heap)
+                NANOCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapCluster,hc,heap)
                 {
                     hb = hc->ExtractBlocks( dataType, flags, length );
                     if(hb)
@@ -1561,7 +1561,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedLis
                         return hb;
                     }
                 }
-                TINYCLR_FOREACH_NODE_BACKWARD_END();
+                NANOCLR_FOREACH_NODE_BACKWARD_END();
             }
             else
             {
@@ -1574,12 +1574,12 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedLis
                     }
                 }
 
-                TINYCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,heap)
+                NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,heap)
                 {
                     hb = hc->ExtractBlocks( dataType, flags, length );
                     if(hb)
                     {
-#if defined(TINYCLR_GC_VERBOSE)
+#if defined(NANOCLR_GC_VERBOSE)
                         if(s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
                         {
                             if(phase != 0)
@@ -1592,7 +1592,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedLis
                         return hb;
                     }
                 }
-                TINYCLR_FOREACH_NODE_END();
+                NANOCLR_FOREACH_NODE_END();
             }
 
             m_lastHcUsed = NULL;
@@ -1606,7 +1606,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedLis
         switch(phase)
         {
         case 0:
-#if defined(TINYCLR_GC_VERBOSE)
+#if defined(NANOCLR_GC_VERBOSE)
             if(s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
             {
                 CLR_Debug::Printf( "    Memory: ExtractHeapBlocks: %d bytes needed.\r\n", length * sizeof(CLR_RT_HeapBlock) );
@@ -1645,7 +1645,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::AccessStaticField( const CLR_RT_FieldD
 
     if(inst.InitializeFromIndex( fd ) && inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
-#if defined(TINYCLR_APPDOMAINS)        
+#if defined(NANOCLR_APPDOMAINS)        
         {
             CLR_RT_AppDomainAssembly* appDomainAssembly = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->FindAppDomainAssembly( inst.m_assm );
 
@@ -1671,12 +1671,12 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference( CLR_RT_HeapBlock& ref, CLR_
     // If you change this method, change "CLR_RT_ExecutionEngine::InitializeLocals" too.
     //
 
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_SignatureParser::Element res;
     CLR_DataType                    dt;
 
-    TINYCLR_CHECK_HRESULT(parser.Advance( res ));
+    NANOCLR_CHECK_HRESULT(parser.Advance( res ));
 
     dt = res.m_dt;
 
@@ -1696,7 +1696,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference( CLR_RT_HeapBlock& ref, CLR_
             }
             else
             {
-                TINYCLR_SET_AND_LEAVE(NewObject( ref, inst ));
+                NANOCLR_SET_AND_LEAVE(NewObject( ref, inst ));
             }
         }
         else
@@ -1711,19 +1711,19 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference( CLR_RT_HeapBlock& ref, CLR_
     ref.SetDataId( CLR_RT_HEAPBLOCK_RAW_ID( dt, CLR_RT_HeapBlock::HB_Alive, 1 ) );
     ref.ClearData();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::InitializeReference( CLR_RT_HeapBlock& ref, const CLR_RECORD_FIELDDEF* target, CLR_RT_Assembly* assm )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_SignatureParser parser; parser.Initialize_FieldDef( assm, target );
 
-    TINYCLR_SET_AND_LEAVE(InitializeReference( ref, parser ));
+    NANOCLR_SET_AND_LEAVE(InitializeReference( ref, parser ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -1737,7 +1737,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals( CLR_RT_HeapBlock* locals, CLR_
     // This method is a shortcut for the following code:
     //
   
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_PMETADATA sig     = assm->GetSignature( md->locals );
     CLR_UINT32    count   = md->numLocals;
@@ -1780,7 +1780,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals( CLR_RT_HeapBlock* locals, CLR_
                             CLR_RT_SignatureParser          sub; sub.Initialize_TypeSpec( assm, assm->GetTypeSpec( idx ) );
                             CLR_RT_SignatureParser::Element res;
 
-                            TINYCLR_CHECK_HRESULT(sub.Advance( res ));
+                            NANOCLR_CHECK_HRESULT(sub.Advance( res ));
 
                             cls     = res.m_cls;
                             levels += res.m_levels;
@@ -1796,7 +1796,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals( CLR_RT_HeapBlock* locals, CLR_
                         break;
 
                     default:
-                        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
                 }
@@ -1808,7 +1808,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals( CLR_RT_HeapBlock* locals, CLR_
 
                     if(cls2 == NULL)
                     {
-                        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
                     cls = *cls2;
@@ -1858,7 +1858,7 @@ done:
                         } while(++ptr < ptrEnd);
                     }
 
-                    TINYCLR_CHECK_HRESULT(NewObject( *locals, inst ));
+                    NANOCLR_CHECK_HRESULT(NewObject( *locals, inst ));
                 }
             }
             else
@@ -1877,7 +1877,7 @@ done:
         count--;
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -1885,21 +1885,21 @@ done:
 HRESULT CLR_RT_ExecutionEngine::NewObjectFromIndex( CLR_RT_HeapBlock& reference, const CLR_RT_TypeDef_Index& cls )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance inst;
 
-    if(inst.InitializeFromIndex( cls ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if(inst.InitializeFromIndex( cls ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-    TINYCLR_SET_AND_LEAVE(NewObject( reference, inst ));
+    NANOCLR_SET_AND_LEAVE(NewObject( reference, inst ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CLR_RT_TypeDef_Instance& inst )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     reference.SetObjectReference( NULL );
 
@@ -1910,7 +1910,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CL
     //
     if(inst.m_data == g_CLR_RT_WellKnownTypes.m_Array.m_data)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     if((c_CLR_RT_DataTypeLookup[ dt ].m_flags & CLR_RT_DataTypeLookup::c_Reference) == 0)
@@ -1931,7 +1931,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CL
             {
                 CLR_RT_HeapBlock_WeakReference* weakref;
 
-                TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_WeakReference::CreateInstance( weakref ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_WeakReference::CreateInstance( weakref ));
 
                 if(inst.m_data == g_CLR_RT_WellKnownTypes.m_ExtendedWeakReference.m_data)
                 {
@@ -1957,7 +1957,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CL
                     CLR_RT_TypeDef_Instance    instSub = inst;
 
 
-                    TINYCLR_CHECK_HRESULT(obj->SetObjectCls( inst ));
+                    NANOCLR_CHECK_HRESULT(obj->SetObjectCls( inst ));
 
                     //
                     // Initialize field types, from last to first.
@@ -1969,7 +1969,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CL
                     {
                         while(clsFields == 0)
                         {
-                            if(instSub.SwitchToParent() == false) TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                            if(instSub.SwitchToParent() == false) NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
 
                             clsFields = instSub.m_target->iFields_Num;
                             target    = NULL;
@@ -1983,37 +1983,37 @@ HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CL
 
                         obj--; target--; clsFields--;
 
-                        TINYCLR_CHECK_HRESULT(InitializeReference( *obj, target, assm ));
+                        NANOCLR_CHECK_HRESULT(InitializeReference( *obj, target, assm ));
                     }
                 }
 
                 if(inst.HasFinalizer())
                 {
-                    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Finalizer::CreateInstance( reference.Dereference(), inst ));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Finalizer::CreateInstance( reference.Dereference(), inst ));
                 }
             }
             break;
 
         default:
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, CLR_UINT32 tk, CLR_RT_Assembly* assm )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance res;
 
-    if(res.ResolveToken( tk, assm ) == false) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if(res.ResolveToken( tk, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-    TINYCLR_CHECK_HRESULT(NewObjectFromIndex( reference, res ));
+    NANOCLR_CHECK_HRESULT(NewObjectFromIndex( reference, res ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -2021,7 +2021,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, CLR_UINT
 HRESULT CLR_RT_ExecutionEngine::CloneObject( CLR_RT_HeapBlock& reference, const CLR_RT_HeapBlock& source )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     const CLR_RT_HeapBlock* obj = &source;
     CLR_DataType            dt;
@@ -2053,15 +2053,15 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject( CLR_RT_HeapBlock& reference, const 
             CLR_RT_HeapBlock     safeSource; safeSource.SetObjectReference( obj );
             CLR_RT_ProtectFromGC gc( safeSource );
 
-            TINYCLR_CHECK_HRESULT(NewObjectFromIndex( reference              , obj->ObjectCls() ));
-            TINYCLR_CHECK_HRESULT(CopyValueType     ( reference.Dereference(), obj              ));
+            NANOCLR_CHECK_HRESULT(NewObjectFromIndex( reference              , obj->ObjectCls() ));
+            NANOCLR_CHECK_HRESULT(CopyValueType     ( reference.Dereference(), obj              ));
         }
         break;
 
     default:
         if((c_CLR_RT_DataTypeLookup[ dt ].m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType) == 0)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
         //
@@ -2071,13 +2071,13 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject( CLR_RT_HeapBlock& reference, const 
         break;
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::CopyValueType( CLR_RT_HeapBlock* destination, const CLR_RT_HeapBlock* source )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(destination != source)
     {
@@ -2099,16 +2099,16 @@ HRESULT CLR_RT_ExecutionEngine::CopyValueType( CLR_RT_HeapBlock* destination, co
                 source     ++;
                 destination++;
 
-                TINYCLR_CHECK_HRESULT(destination->Reassign( *source ));
+                NANOCLR_CHECK_HRESULT(destination->Reassign( *source ));
             }
 
-            TINYCLR_SET_AND_LEAVE(S_OK);
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
 
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -2116,18 +2116,18 @@ HRESULT CLR_RT_ExecutionEngine::CopyValueType( CLR_RT_HeapBlock* destination, co
 HRESULT CLR_RT_ExecutionEngine::NewArrayList( CLR_RT_HeapBlock& ref, int size, CLR_RT_HeapBlock_Array*& array )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     const int minCapacity = CLR_RT_ArrayListHelper::c_defaultCapacity;
     int       count       = size;
     int       capacity    = size < minCapacity ? minCapacity : size;
 
-    TINYCLR_CHECK_HRESULT(NewObjectFromIndex( ref, g_CLR_RT_WellKnownTypes.m_ArrayList ));
+    NANOCLR_CHECK_HRESULT(NewObjectFromIndex( ref, g_CLR_RT_WellKnownTypes.m_ArrayList ));
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::PrepareArrayList         ( ref,        count, capacity ));
-    TINYCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( ref, array, count, capacity ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::PrepareArrayList         ( ref,        count, capacity ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( ref, array, count, capacity ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -2135,47 +2135,47 @@ HRESULT CLR_RT_ExecutionEngine::NewArrayList( CLR_RT_HeapBlock& ref, int size, C
 HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_TypeDef_Instance& inst, LPCSTR szText, CLR_RT_FieldDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance local = inst;
 
     do
     {
-        if(local.m_assm->FindFieldDef( local.m_target, szText, NULL, 0, res )) TINYCLR_SET_AND_LEAVE(S_OK);
+        if(local.m_assm->FindFieldDef( local.m_target, szText, NULL, 0, res )) NANOCLR_SET_AND_LEAVE(S_OK);
     }
     while(local.SwitchToParent());
 
-    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_HeapBlock& reference, LPCSTR szText, CLR_RT_FieldDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock*       obj;
     CLR_RT_TypeDef_Instance inst;
 
-    if(reference.DataType() != DATATYPE_OBJECT) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if(reference.DataType() != DATATYPE_OBJECT) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
     obj = reference.Dereference(); FAULT_ON_NULL(obj);
 
     if(inst.InitializeFromIndex( obj->ObjectCls() ) == false)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_SET_AND_LEAVE(FindFieldDef( inst, szText, res ));
+    NANOCLR_SET_AND_LEAVE(FindFieldDef( inst, szText, res ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::FindField( CLR_RT_HeapBlock& reference, LPCSTR szText, CLR_RT_HeapBlock*& field )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_FieldDef_Instance inst; 
     CLR_RT_FieldDef_Index    idx;
@@ -2183,13 +2183,13 @@ HRESULT CLR_RT_ExecutionEngine::FindField( CLR_RT_HeapBlock& reference, LPCSTR s
 
     field = NULL;
 
-    TINYCLR_CHECK_HRESULT(FindFieldDef( reference, szText, idx ));
+    NANOCLR_CHECK_HRESULT(FindFieldDef( reference, szText, idx ));
 
     inst.InitializeFromIndex( idx );
 
     if(inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
-        res = CLR_RT_ExecutionEngine::AccessStaticField( idx ); if(res == NULL) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        res = CLR_RT_ExecutionEngine::AccessStaticField( idx ); if(res == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
     else
     {
@@ -2200,35 +2200,35 @@ HRESULT CLR_RT_ExecutionEngine::FindField( CLR_RT_HeapBlock& reference, LPCSTR s
 
     field = res;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::SetField( CLR_RT_HeapBlock& reference, LPCSTR szText, CLR_RT_HeapBlock& value )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* field;
 
-    TINYCLR_CHECK_HRESULT(FindField( reference, szText, field ));
+    NANOCLR_CHECK_HRESULT(FindField( reference, szText, field ));
 
     field->Assign( value );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::GetField( CLR_RT_HeapBlock& reference, LPCSTR szText, CLR_RT_HeapBlock& value )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* field;
 
-    TINYCLR_CHECK_HRESULT(FindField( reference, szText, field ));
+    NANOCLR_CHECK_HRESULT(FindField( reference, szText, field ));
 
     value.Assign( *field );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -2236,13 +2236,13 @@ HRESULT CLR_RT_ExecutionEngine::GetField( CLR_RT_HeapBlock& reference, LPCSTR sz
 CLR_RT_HeapBlock_Lock* CLR_RT_ExecutionEngine::FindLockObject( CLR_RT_DblLinkedList& threads, CLR_RT_HeapBlock& object )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
         {            
             CLR_RT_HeapBlock& res = lock->m_resource;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
             if(lock->m_appDomain != GetCurrentAppDomain()) continue;
 #endif
 
@@ -2251,9 +2251,9 @@ CLR_RT_HeapBlock_Lock* CLR_RT_ExecutionEngine::FindLockObject( CLR_RT_DblLinkedL
                 return lock;
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     return NULL;
 }
@@ -2298,11 +2298,11 @@ void CLR_RT_ExecutionEngine::DeleteLockRequests( CLR_RT_Thread* thTarget, CLR_RT
 void CLR_RT_ExecutionEngine::DeleteLockRequests( CLR_RT_Thread* thTarget, CLR_RT_SubThread* sthTarget, CLR_RT_DblLinkedList& threads )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
         {
-            TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest,req,lock->m_requests)
+            NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest,req,lock->m_requests)
             {
                 CLR_RT_SubThread* sth = req->m_subthreadWaiting;
 
@@ -2313,11 +2313,11 @@ void CLR_RT_ExecutionEngine::DeleteLockRequests( CLR_RT_Thread* thTarget, CLR_RT
                     if(sth->ChangeLockRequestCount( -1 )) return;
                 }
             }
-            TINYCLR_FOREACH_NODE_END();
+            NANOCLR_FOREACH_NODE_END();
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 //--//
@@ -2394,7 +2394,7 @@ void CLR_RT_ExecutionEngine::ProcessTimeEvent( CLR_UINT32 event )
 
     Time_ToSystemTime( m_currentLocalTime, &systemTime );
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
     {
         if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
         {
@@ -2411,7 +2411,7 @@ void CLR_RT_ExecutionEngine::ProcessTimeEvent( CLR_UINT32 event )
             }
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     SpawnTimer();
 }
@@ -2460,16 +2460,16 @@ void CLR_RT_ExecutionEngine::CheckTimers( CLR_INT64& timeoutMin )
     NATIVE_PROFILE_CLR_CORE();
     bool fAnyTimersExpired = false;
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
     {
         if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
         {
             CLR_INT64 expire = timer->m_timeExpire;
             if(IsTimeExpired( expire, timeoutMin, (timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) != 0 ))
             {
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                 if(CLR_EE_DBG_IS_NOT( PauseTimers ))
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                 {
                     timer->Trigger();
                     fAnyTimersExpired = true;
@@ -2477,7 +2477,7 @@ void CLR_RT_ExecutionEngine::CheckTimers( CLR_INT64& timeoutMin )
             }
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     if(fAnyTimersExpired)
     {
@@ -2490,16 +2490,16 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
     {
         CLR_INT64 expire;
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if(th->m_flags & CLR_RT_Thread::TH_F_Suspended)
         {
             continue;
         }
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         //
         // Check events.
@@ -2533,9 +2533,9 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         //
         // Check lock requests.
         //
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
         {
-            TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest,req,lock->m_requests)
+            NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest,req,lock->m_requests)
             {
                 if(IsTimeExpired( req->m_timeExpire, timeoutMin, false ))
                 {
@@ -2546,14 +2546,14 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
                     g_CLR_RT_EventCache.Append_Node( req );
                 }
             }
-            TINYCLR_FOREACH_NODE_END();
+            NANOCLR_FOREACH_NODE_END();
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
 
         //
         // Check constraints.
         //
-        TINYCLR_FOREACH_NODE_BACKWARD(CLR_RT_SubThread,sth,th->m_subThreads)
+        NANOCLR_FOREACH_NODE_BACKWARD(CLR_RT_SubThread,sth,th->m_subThreads)
         {
             if(sth->m_timeConstraint != TIMEOUT_INFINITE)
             {
@@ -2584,9 +2584,9 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
                 }
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 //--//
@@ -2594,7 +2594,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
 HRESULT CLR_RT_ExecutionEngine::LockObject( CLR_RT_HeapBlock& reference, CLR_RT_SubThread* sth, const CLR_INT64& timeExpire, bool fForce )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Lock* lock;
 
@@ -2602,26 +2602,26 @@ HRESULT CLR_RT_ExecutionEngine::LockObject( CLR_RT_HeapBlock& reference, CLR_RT_
     
     if(lock == NULL)
     {
-        TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Lock::CreateInstance( lock, sth->m_owningThread, reference ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Lock::CreateInstance( lock, sth->m_owningThread, reference ));
     }
 
-    TINYCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Lock::IncrementOwnership( lock, sth, timeExpire, fForce ));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Lock::IncrementOwnership( lock, sth, timeExpire, fForce ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::UnlockObject( CLR_RT_HeapBlock& reference, CLR_RT_SubThread* sth )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Lock* lock;
 
     lock = FindLockObject( reference );
 
-    TINYCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Lock::DecrementOwnership( lock, sth ));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Lock::DecrementOwnership( lock, sth ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -2629,14 +2629,14 @@ HRESULT CLR_RT_ExecutionEngine::UnlockObject( CLR_RT_HeapBlock& reference, CLR_R
 HRESULT CLR_RT_ExecutionEngine::Sleep( CLR_RT_Thread* caller, const CLR_INT64& timeExpire )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     
     caller->m_waitForEvents_Timeout = timeExpire; CLR_RT_ExecutionEngine::InvalidateTimerCache();
     caller->m_status                = CLR_RT_Thread::TH_S_Waiting;
 
-    TINYCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
+    NANOCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -2644,7 +2644,7 @@ HRESULT CLR_RT_ExecutionEngine::Sleep( CLR_RT_Thread* caller, const CLR_INT64& t
 HRESULT CLR_RT_ExecutionEngine::WaitEvents( CLR_RT_Thread* caller, const CLR_INT64& timeExpire, CLR_UINT32 events, bool& fSuccess )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_raisedEvents & events)
     {
@@ -2662,11 +2662,11 @@ HRESULT CLR_RT_ExecutionEngine::WaitEvents( CLR_RT_Thread* caller, const CLR_INT
             caller->m_waitForEvents_Timeout = timeExpire; CLR_RT_ExecutionEngine::InvalidateTimerCache();
             caller->m_status                = CLR_RT_Thread::TH_S_Waiting;
 
-            TINYCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
+            NANOCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_ExecutionEngine::SignalEvents( CLR_RT_DblLinkedList& threads, CLR_UINT32 events )
@@ -2674,7 +2674,7 @@ void CLR_RT_ExecutionEngine::SignalEvents( CLR_RT_DblLinkedList& threads, CLR_UI
     NATIVE_PROFILE_CLR_CORE();
     m_raisedEvents |= events;
 
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
     {
         if((th->m_waitForEvents & events) != 0)
         {
@@ -2684,7 +2684,7 @@ void CLR_RT_ExecutionEngine::SignalEvents( CLR_RT_DblLinkedList& threads, CLR_UI
             th->Restart( true );
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 void CLR_RT_ExecutionEngine::SignalEvents( CLR_UINT32 events )
@@ -2837,7 +2837,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_HeapBlock& obj, CLR_RT_Assembl
 HRESULT CLR_RT_ExecutionEngine::CastToType( CLR_RT_HeapBlock& ref, CLR_UINT32 tk, CLR_RT_Assembly* assm, bool fUpdate )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(ref.DataType() == DATATYPE_OBJECT && ref.Dereference() == NULL)
     {
@@ -2851,13 +2851,13 @@ HRESULT CLR_RT_ExecutionEngine::CastToType( CLR_RT_HeapBlock& ref, CLR_UINT32 tk
     {
         if(fUpdate == false)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }
 
         ref.SetObjectReference( NULL );
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2866,13 +2866,13 @@ HRESULT CLR_RT_ExecutionEngine::CastToType( CLR_RT_HeapBlock& ref, CLR_UINT32 tk
 HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, const CLR_INT64& timeout )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(timeout < 0)
     {
         if(timeout != -1L)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         }
 
         timeExpire = TIMEOUT_INFINITE;
@@ -2882,19 +2882,19 @@ HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, const CLR_IN
         timeExpire = timeout + Time_GetMachineTime();
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, CLR_INT32 timeout )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(timeout < 0)
     {
         if(timeout != -1)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         }
 
         timeExpire = TIMEOUT_INFINITE;
@@ -2906,7 +2906,7 @@ HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, CLR_INT32 ti
         timeExpire += Time_GetMachineTime();
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2927,7 +2927,7 @@ void CLR_RT_ExecutionEngine::DebuggerLoop()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 void CLR_RT_ExecutionEngine::SetDebuggingInfoBreakpoints( bool fSet )
 {
@@ -3087,7 +3087,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_System_Event( CLR_DBG_Commands::Debuggin
 void CLR_RT_ExecutionEngine::Breakpoint_Assemblies_Loaded()
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; TINYCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
 
     for(size_t i = 0; i < this->m_breakpointsActiveNum; i++)
     {
@@ -3106,7 +3106,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Assemblies_Loaded()
 void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare( CLR_RT_DblLinkedList& threads )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
     {
         th->m_fHasJMCStepper = false;
 
@@ -3124,7 +3124,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare( CLR_RT_DblLinkedList& t
             }
         }
 
-        TINYCLR_FOREACH_NODE(CLR_RT_StackFrame,call,th->m_stackFrames)
+        NANOCLR_FOREACH_NODE(CLR_RT_StackFrame,call,th->m_stackFrames)
         {
             call->m_flags &= ~CLR_RT_StackFrame::c_HasBreakpoint;
 
@@ -3148,7 +3148,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare( CLR_RT_DblLinkedList& t
                     }
                 }
             }
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if(call->m_inlineFrame)
             {
                 if(call->m_inlineFrame->m_frame.m_call.DebuggingInfo().HasBreakpoint())
@@ -3174,15 +3174,15 @@ void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare( CLR_RT_DblLinkedList& t
             }
 #endif
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 void CLR_RT_ExecutionEngine::Breakpoint_Thread_Terminated( CLR_RT_Thread* th )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; TINYCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
     CLR_UINT16 evt = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_THREAD_TERMINATED;
 
     hit.m_depth = 0xFFFFFFFF;
@@ -3198,7 +3198,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Thread_Terminated( CLR_RT_Thread* th )
 void CLR_RT_ExecutionEngine::Breakpoint_Thread_Created( CLR_RT_Thread* th )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; TINYCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
 
     Breakpoint_System_Event( hit, CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_THREAD_CREATED, th, NULL, NULL );
 }
@@ -3387,7 +3387,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Hard( CLR_RT_StackFrame* stac
 void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Break( CLR_RT_StackFrame* stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; TINYCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
     
     Breakpoint_System_Event( hit, CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_BREAK, NULL, stack, NULL );
 }
@@ -3397,7 +3397,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Break( CLR_RT_StackFrame* sta
 void CLR_RT_ExecutionEngine::Breakpoint_Exception( CLR_RT_StackFrame* stack, CLR_UINT32 reason, CLR_PMETADATA ip )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; TINYCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
     hit.m_depthExceptionHandler = reason;
 
     Breakpoint_System_Event( hit, CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_THROWN, NULL, stack, ip );
@@ -3406,7 +3406,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Exception( CLR_RT_StackFrame* stack, CLR
 void CLR_RT_ExecutionEngine::Breakpoint_Exception_Uncaught( CLR_RT_Thread* th )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; TINYCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
 
     hit.m_depth                 = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_UNCAUGHT;
     hit.m_depthExceptionHandler = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_UNCAUGHT;
@@ -3417,7 +3417,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Exception_Uncaught( CLR_RT_Thread* th )
 void CLR_RT_ExecutionEngine::Breakpoint_Exception_Intercepted( CLR_RT_StackFrame* stack )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; TINYCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
     CLR_UINT16 event = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_CAUGHT
                        | CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_UNWIND;    
     
@@ -3426,11 +3426,11 @@ void CLR_RT_ExecutionEngine::Breakpoint_Exception_Intercepted( CLR_RT_StackFrame
     Breakpoint_System_Event( hit, event, NULL, stack, NULL );
 }
 
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 
 CLR_RT_AppDomain* CLR_RT_ExecutionEngine::SetCurrentAppDomain( CLR_RT_AppDomain* appDomain )
 { 
@@ -3451,12 +3451,12 @@ CLR_RT_AppDomain* CLR_RT_ExecutionEngine::GetCurrentAppDomain()
 void CLR_RT_ExecutionEngine::PrepareThreadsForAppDomainUnload( CLR_RT_AppDomain* appDomain, CLR_RT_DblLinkedList& threads)
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread, th, threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, threads)
     {
         bool fFoundDoomedAppDomain = false;
         bool fInjectThreadAbort    = false;
 
-        TINYCLR_FOREACH_NODE(CLR_RT_StackFrame, stack, th->m_stackFrames)
+        NANOCLR_FOREACH_NODE(CLR_RT_StackFrame, stack, th->m_stackFrames)
         {
             if(!fFoundDoomedAppDomain)
             {
@@ -3479,27 +3479,27 @@ void CLR_RT_ExecutionEngine::PrepareThreadsForAppDomainUnload( CLR_RT_AppDomain*
                 }
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
 
         if(fInjectThreadAbort)
         {            
             (void)th->Abort();
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 HRESULT CLR_RT_ExecutionEngine::UnloadAppDomain( CLR_RT_AppDomain* appDomain, CLR_RT_Thread* th )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     //Check to make sure the current thread does not contain any doomed AppDomains
-    TINYCLR_FOREACH_NODE(CLR_RT_StackFrame, stack, th->m_stackFrames)
+    NANOCLR_FOREACH_NODE(CLR_RT_StackFrame, stack, th->m_stackFrames)
     {
-        if(!stack->m_appDomain->IsLoaded() || stack->m_appDomain == appDomain) TINYCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        if(!stack->m_appDomain->IsLoaded() || stack->m_appDomain == appDomain) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     PrepareThreadsForAppDomainUnload( appDomain, m_threadsReady   );
     PrepareThreadsForAppDomainUnload( appDomain, m_threadsWaiting );
@@ -3507,7 +3507,7 @@ HRESULT CLR_RT_ExecutionEngine::UnloadAppDomain( CLR_RT_AppDomain* appDomain, CL
     appDomain->m_state = CLR_RT_AppDomain::AppDomainState_Unloading;
     CLR_EE_SET(UnloadingAppDomain);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 #endif
@@ -3531,7 +3531,7 @@ void CLR_RT_ExecutionEngine::UpdateTime()
         m_lastTimeZoneOffset = timeZoneOffset;
         Time_ToSystemTime( m_currentLocalTime, &systemTime );
     
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
         {
             if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
             {
@@ -3541,7 +3541,7 @@ void CLR_RT_ExecutionEngine::UpdateTime()
                 }
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
     
 }
@@ -3559,12 +3559,12 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
 
     if(timeout == 0) timeout = 1;
 
-#if defined(TINYCLR_TRACE_SYSTEMEVENTWAIT)
+#if defined(NANOCLR_TRACE_SYSTEMEVENTWAIT)
     CLR_INT64 start = Time_GetMachineTime();
 #endif
 
-//#define TINYCLR_STRESS_GC
-#if defined(TINYCLR_STRESS_GC)
+//#define NANOCLR_STRESS_GC
+#if defined(NANOCLR_STRESS_GC)
     if(timeout > 100)
     {
         CLR_INT64 startGC = Time_GetMachineTime();
@@ -3583,7 +3583,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
     ::Watchdog_GetSetEnabled( TRUE, TRUE );
 
 
-#if defined(TINYCLR_TRACE_SYSTEMEVENTWAIT)
+#if defined(NANOCLR_TRACE_SYSTEMEVENTWAIT)
     CLR_INT64 stop  = Time_GetMachineTime();
     CLR_INT64 stop2 = Time_GetMachineTime();
 

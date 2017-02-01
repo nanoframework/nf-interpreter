@@ -3,35 +3,35 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_DEBUGGING_H_
-#define _TINYCLR_DEBUGGING_H_
+#ifndef _NANOCLR_DEBUGGING_H_
+#define _NANOCLR_DEBUGGING_H_
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <TinyCLR_Types.h>
-#include <TinyCLR_Messaging.h>
+#include <nanoCLR_Types.h>
+#include <nanoCLR_Messaging.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if NUM_DEBUGGERS > 1
-    #define TINYCLR_FOREACH_DEBUGGER(ptr)                                     \
+    #define NANOCLR_FOREACH_DEBUGGER(ptr)                                     \
             for(int iDebuggerT = 0; iDebuggerT < NUM_DEBUGGERS; iDebuggerT++) \
             {                                                                 \
                 CLR_DBG_Debugger& ptr = g_CLR_DBG_Debuggers[ iDebuggerT ];
 
-#define TINYCLR_FOREACH_DEBUGGER_NO_TEMP()                                    \
+#define NANOCLR_FOREACH_DEBUGGER_NO_TEMP()                                    \
             for(int iDebuggerT = 0; iDebuggerT < NUM_DEBUGGERS; iDebuggerT++) \
             {                       
 #else
-    #define TINYCLR_FOREACH_DEBUGGER(ptr)                                     \
+    #define NANOCLR_FOREACH_DEBUGGER(ptr)                                     \
             {                                                                 \
                 CLR_DBG_Debugger& ptr = g_CLR_DBG_Debuggers[ 0 ];            
     
-    #define TINYCLR_FOREACH_DEBUGGER_NO_TEMP()                                \
+    #define NANOCLR_FOREACH_DEBUGGER_NO_TEMP()                                \
             {                                                                 
 #endif
 
-#define TINYCLR_FOREACH_DEBUGGER_END() \
+#define NANOCLR_FOREACH_DEBUGGER_END() \
         }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,8 +58,8 @@ struct CLR_DBG_Commands
 
     struct Monitor_Ping
     {
-        static const UINT32 c_Ping_Source_TinyCLR    = 0x00000000;
-        static const UINT32 c_Ping_Source_TinyBooter = 0x00000001;
+        static const UINT32 c_Ping_Source_CLR        = 0x00000000;
+        static const UINT32 c_Ping_Source_Booter     = 0x00000001;
         static const UINT32 c_Ping_Source_Host       = 0x00000002;
 
         static const UINT32 c_Ping_DbgFlag_Stop      = 0x00000001;
@@ -616,7 +616,7 @@ struct CLR_DBG_Commands
             {
                 CLR_RT_MethodDef_Index m_md;
                 CLR_UINT32             m_IP;
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 CLR_UINT32             m_appDomainID;
                 CLR_UINT32             m_flags;
 #endif
@@ -1048,7 +1048,7 @@ private:
 
     bool AccessMemory( CLR_UINT32 location, UINT32 lengthInBytes, BYTE* buf, int mode );
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain*  GetAppDomainFromID ( CLR_UINT32 id );
 #endif
 
@@ -1100,7 +1100,7 @@ public:
 
 
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     static bool Debugging_Execution_Breakpoints         ( WP_Message* msg, void* owner );
     static bool Debugging_Execution_BreakpointStatus    ( WP_Message* msg, void* owner );
     static bool Debugging_Execution_SetCurrentAppDomain ( WP_Message* msg, void* owner );
@@ -1140,15 +1140,15 @@ public:
     static bool Debugging_Resolve_Field                 ( WP_Message* msg, void* owner );
     static bool Debugging_Resolve_Method                ( WP_Message* msg, void* owner );
     static bool Debugging_Resolve_VirtualMethod         ( WP_Message* msg, void* owner );
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     static bool Debugging_Deployment_Status             ( WP_Message* msg, void* owner );
     static bool Debugging_Info_SetJMC                   ( WP_Message* msg, void* owner );
     
     bool Debugging_Info_SetJMC_Type                     ( const CLR_RT_TypeDef_Index&   idx, bool fJMC );
     bool Debugging_Info_SetJMC_Method                   ( const CLR_RT_MethodDef_Index& idx, bool fJMC );
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     static bool Profiling_Command                       ( WP_Message* msg, void* owner );
     bool Profiling_ChangeConditions                     ( WP_Message* msg );
@@ -1170,5 +1170,5 @@ extern const CLR_UINT32 c_Debugger_Lookup_Reply_count;
 
 //--//
 
-#endif // _TINYCLR_DEBUGGING_H_
+#endif // _NANOCLR_DEBUGGING_H_
 

@@ -15,8 +15,8 @@
 
 // FIXME: xxx_Types.h
 
-//#include <TinySupport.h>
-// TinyHAL_Types.h
+//#include <nanoSupport.h>
+// nanoHAL_Types.h
 
 #include <inttypes.h>
 

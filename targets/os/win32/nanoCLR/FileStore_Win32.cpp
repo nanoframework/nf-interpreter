@@ -11,13 +11,13 @@
 
 HRESULT CLR_RT_FileStore::LoadFile( LPCWSTR szFile, CLR_RT_Buffer& vec )
 {
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     FILE* stream;
     if(_wfopen_s(&stream, szFile, L"rb" ) != 0)
     {
         wprintf( L"Cannot open '%s'!\n", szFile );
-        TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
     /*********/ fseek( stream, 0, SEEK_END );
@@ -28,23 +28,23 @@ HRESULT CLR_RT_FileStore::LoadFile( LPCWSTR szFile, CLR_RT_Buffer& vec )
 
     if(vec.size() && fread( &vec[ 0 ], vec.size(), 1, stream ) != 1)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(stream)
     {
         fclose( stream );
     }
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_RT_FileStore::SaveFile( LPCWSTR szFile, const CLR_RT_Buffer& vec )
 {
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
         
     const CLR_UINT8* buf = NULL;
     size_t size = vec.size();
@@ -54,53 +54,53 @@ HRESULT CLR_RT_FileStore::SaveFile( LPCWSTR szFile, const CLR_RT_Buffer& vec )
         buf = &vec[ 0 ];
     }
 
-    TINYCLR_SET_AND_LEAVE(SaveFile( szFile, buf, size ));
+    NANOCLR_SET_AND_LEAVE(SaveFile( szFile, buf, size ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_FileStore::SaveFile( LPCWSTR szFile, const CLR_UINT8* buf, size_t size )
 {
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
     FILE* stream;
 
     if(_wfopen_s(&stream, szFile, L"wb" ) != 0)
     {
         wprintf( L"Cannot open '%s' for writing!\n", szFile );
-        TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
     if(buf != NULL && size != 0)
     {
         if(fwrite( buf, size, 1, stream ) != 1)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
     }
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(stream)
     {
         fclose( stream );
     }
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 //--//
 
 HRESULT CLR_RT_FileStore::ExtractTokensFromFile( LPCWSTR szFileName, std::vector< std::wstring >& vec, LPCWSTR separators, bool fNoComments )
 {
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_Buffer buf;
 
-    TINYCLR_CHECK_HRESULT(LoadFile( szFileName, buf ));
+    NANOCLR_CHECK_HRESULT(LoadFile( szFileName, buf ));
 
     ExtractTokens( buf, vec, separators, fNoComments );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_FileStore::ExtractTokens( const CLR_RT_Buffer& buf, CLR_RT_StringVector& vec, LPCWSTR separators, bool fNoComments )

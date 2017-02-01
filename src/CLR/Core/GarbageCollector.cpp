@@ -81,7 +81,7 @@ void CLR_RT_ProtectFromGC::InvokeAll()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_TRACE_EARLYCOLLECTION)
+#if defined(NANOCLR_TRACE_EARLYCOLLECTION)
 
 CLR_RT_AssertEarlyCollection* CLR_RT_AssertEarlyCollection::s_first = NULL;
 
@@ -134,11 +134,11 @@ void CLR_RT_AssertEarlyCollection::CheckAll( CLR_RT_HeapBlock* ptr )
 CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 {
     NATIVE_PROFILE_CLR_CORE();
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     g_CLR_PRF_Profiler.RecordGarbageCollectionBegin();
 #endif
 
-#if defined(TINYCLR_GC_VERBOSE)
+#if defined(NANOCLR_GC_VERBOSE)
     if(s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
     {        
         CLR_Debug::Printf( "    Memory: Start %s\r\n", Time_CurrentDateTimeToString() );
@@ -149,7 +149,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 
     CLR_RT_ExecutionEngine::ExecutionConstraint_Suspend();
 
-#if defined(TINYCLR_TRACE_MEMORY_STATS)
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
     CLR_UINT64 stats_start = 0;
 
     if(s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
@@ -168,7 +168,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 
     CheckMemoryPressure();
 
-#if defined(TINYCLR_TRACE_MEMORY_STATS)
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
     if(s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
         int milliSec = ((int)::HAL_Time_TicksToTime( HAL_Time_CurrentTicks() - stats_start ) + TIME_CONVERSION__TICKUNITS - 1) / TIME_CONVERSION__TICKUNITS;
@@ -178,11 +178,11 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 
     if(s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        int countBlocks[ DATATYPE_FIRST_INVALID ]; TINYCLR_CLEAR(countBlocks);
-        int countArryBlocks[ DATATYPE_FIRST_INVALID ]; TINYCLR_CLEAR(countArryBlocks);
+        int countBlocks[ DATATYPE_FIRST_INVALID ]; NANOCLR_CLEAR(countBlocks);
+        int countArryBlocks[ DATATYPE_FIRST_INVALID ]; NANOCLR_CLEAR(countArryBlocks);
         int dt;
 
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
         {
             CLR_RT_HeapBlock_Node* ptr = hc->m_payloadStart;
             CLR_RT_HeapBlock_Node* end = hc->m_payloadEnd;
@@ -218,7 +218,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                 ptr += ptr->DataSize();
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
 
         for(dt = DATATYPE_VOID; dt < DATATYPE_FIRST_INVALID; dt++)
         {
@@ -247,14 +247,14 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_GC_VERBOSE)
+#if defined(NANOCLR_GC_VERBOSE)
     if(s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
     {
         CLR_Debug::Printf( "    Memory: End %s\r\n", Time_CurrentDateTimeToString() );
     }
 #endif
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     g_CLR_PRF_Profiler.RecordGarbageCollectionEnd();
 #endif
 
@@ -297,7 +297,7 @@ void CLR_RT_GarbageCollector::MarkSlow()
 void CLR_RT_GarbageCollector::Mark()
 {
     NATIVE_PROFILE_CLR_CORE();
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
     CLR_RT_AppDomain* appDomainSav = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 #endif
 
@@ -331,7 +331,7 @@ void CLR_RT_GarbageCollector::Mark()
     //
     // Call global markers.
     //
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
      (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( NULL );
 #endif
 
@@ -349,21 +349,21 @@ void CLR_RT_GarbageCollector::Mark()
         // Mark all the events, so we keep the related threads/objects alive.
         //
         {
-            TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,g_CLR_RT_ExecutionEngine.m_finalizersPending)
+            NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,g_CLR_RT_ExecutionEngine.m_finalizersPending)
             {
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
                 (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( fin->m_appDomain );
 #endif
                 CheckSingleBlock( &fin->m_object );
             }
-            TINYCLR_FOREACH_NODE_END();
+            NANOCLR_FOREACH_NODE_END();
         }
 
         //
         // Mark all the static fields.
         //
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         AppDomain_Mark();
 #endif
 
@@ -375,20 +375,20 @@ void CLR_RT_GarbageCollector::Mark()
         Thread_Mark( g_CLR_RT_ExecutionEngine.m_threadsReady   );
         Thread_Mark( g_CLR_RT_ExecutionEngine.m_threadsWaiting );
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
         CheckSingleBlock_Force( g_CLR_RT_ExecutionEngine.m_globalLock );
 #endif
 
         CheckSingleBlock_Force( g_CLR_RT_ExecutionEngine.m_currentUICulture );
 
 
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
         (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( NULL );
-#endif //TINYCLR_VALIDATE_APPDOMAIN_ISOLATION
+#endif //NANOCLR_VALIDATE_APPDOMAIN_ISOLATION
 
-#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         CheckSingleBlock_Force( g_CLR_RT_ExecutionEngine.m_scratchPadArray );
-#endif //#if defined(TINYCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     
         if(m_fOutOfStackSpaceForGC)
         {
@@ -407,14 +407,14 @@ void CLR_RT_GarbageCollector::Mark()
     // Prepare finalization of objects
     //
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,g_CLR_RT_ExecutionEngine.m_finalizersAlive)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,g_CLR_RT_ExecutionEngine.m_finalizersAlive)
         {
             //
             // If the object is dead, make it alive one last time and put it in the pending finalizers list.
             //
             if(fin->m_object->IsAlive() == false)
             {
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
                 (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( fin->m_appDomain );
 #endif
                 CheckSingleBlock( &fin->m_object );
@@ -422,7 +422,7 @@ void CLR_RT_GarbageCollector::Mark()
                 g_CLR_RT_ExecutionEngine.m_finalizersPending.LinkAtBack( fin );
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
     //
     //
@@ -449,7 +449,7 @@ void CLR_RT_GarbageCollector::Mark()
     m_markStackList = NULL;
     m_markStack     = NULL;
 
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomainSav );
 #endif
 }
@@ -457,7 +457,7 @@ void CLR_RT_GarbageCollector::Mark()
 void CLR_RT_GarbageCollector::MarkWeak()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_WeakReference,weak,g_CLR_RT_ExecutionEngine.m_weakReferences)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_WeakReference,weak,g_CLR_RT_ExecutionEngine.m_weakReferences)
     {
         if(weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_Restored)
         {
@@ -505,7 +505,7 @@ void CLR_RT_GarbageCollector::MarkWeak()
             weak->Unlink();
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 //--//
@@ -520,7 +520,7 @@ void CLR_RT_GarbageCollector::Sweep()
     //                                                                                            //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Delegate_List,weak,m_weakDelegates_Reachable)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Delegate_List,weak,m_weakDelegates_Reachable)
     {
         CLR_UINT32        num  = weak->m_length;
         CLR_RT_HeapBlock* dlgs = weak->GetDelegates();
@@ -544,7 +544,7 @@ void CLR_RT_GarbageCollector::Sweep()
             }
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     RecoverEventsFromGC();
 
@@ -554,11 +554,11 @@ void CLR_RT_GarbageCollector::Sweep()
     // All the dead objects are marked as such, it's time to reclaim them.
     //
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
         {
             hc->RecoverFromGC();
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
 }
 
@@ -578,7 +578,7 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
         //
         // Drop all the restored objects that haven't been reclaimed by an application.
         //
-        TINYCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapBlock_WeakReference,weak,g_CLR_RT_ExecutionEngine.m_weakReferences)
+        NANOCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapBlock_WeakReference,weak,g_CLR_RT_ExecutionEngine.m_weakReferences)
         {
             if(weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_Restored)
             {
@@ -590,7 +590,7 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                 }
             }
         }
-        TINYCLR_FOREACH_NODE_BACKWARD_END();
+        NANOCLR_FOREACH_NODE_BACKWARD_END();
 
         if(fExit || m_freeBytes > c_memoryThreshold)
         {
@@ -602,7 +602,7 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
 
             if(m_pressureCounter > c_pressureThreshold)
             {
-                TINYCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapBlock_WeakReference,weak,g_CLR_RT_ExecutionEngine.m_weakReferences)
+                NANOCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapBlock_WeakReference,weak,g_CLR_RT_ExecutionEngine.m_weakReferences)
                 {
                     if(weak->m_targetSerialized && weak->m_targetDirect == NULL)
                     {
@@ -632,7 +632,7 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                         break;
                     }
                 }
-                TINYCLR_FOREACH_NODE_BACKWARD_END();
+                NANOCLR_FOREACH_NODE_BACKWARD_END();
             }
         }
     }
@@ -640,28 +640,28 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
 
 //--//
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
 
 void CLR_RT_GarbageCollector::AppDomain_Mark()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
     {
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)                            
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)                            
         (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomain );
 #endif
 
-        TINYCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly,appDomainAssembly,appDomain->m_appDomainAssemblies)
+        NANOCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly,appDomainAssembly,appDomain->m_appDomainAssemblies)
         {
             CheckMultipleBlocks( appDomainAssembly->m_pStaticFields, appDomainAssembly->m_assembly->m_iStaticFields );            
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
 
         CheckSingleBlock_Force( appDomain->m_globalLock           );
         CheckSingleBlock_Force( appDomain->m_strName              );
         CheckSingleBlock_Force( appDomain->m_outOfMemoryException );
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 #endif
@@ -669,20 +669,20 @@ void CLR_RT_GarbageCollector::AppDomain_Mark()
 void CLR_RT_GarbageCollector::Assembly_Mark()
 {
     NATIVE_PROFILE_CLR_CORE();
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)                            
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)                            
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( NULL );
 #endif
 
-    TINYCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+    NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
 
-#if !defined(TINYCLR_APPDOMAINS)
+#if !defined(NANOCLR_APPDOMAINS)
         CheckMultipleBlocks( pASSM->m_pStaticFields, pASSM->m_iStaticFields );
 #endif
 
         CheckSingleBlock( &pASSM->m_pFile );
     }
-    TINYCLR_FOREACH_ASSEMBLY_END();
+    NANOCLR_FOREACH_ASSEMBLY_END();
 }
 
 //--//
@@ -690,12 +690,12 @@ void CLR_RT_GarbageCollector::Assembly_Mark()
 void CLR_RT_GarbageCollector::Thread_Mark( CLR_RT_Thread* th )
 {
     NATIVE_PROFILE_CLR_CORE();
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( th->m_dlg->m_appDomain );
 #endif
     CheckSingleBlock      ( &th->m_dlg              );
 
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( th->CurrentAppDomain() );
 #endif    
     CheckSingleBlock_Force( &th->m_currentException );
@@ -704,7 +704,7 @@ void CLR_RT_GarbageCollector::Thread_Mark( CLR_RT_Thread* th )
     {
         CLR_RT_Thread::UnwindStack& us = th->m_nestedExceptions[ i ];
 
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
         (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( us.m_stack->m_appDomain );
 #endif
 
@@ -714,12 +714,12 @@ void CLR_RT_GarbageCollector::Thread_Mark( CLR_RT_Thread* th )
     //
     // Mark all the objects on the stack frames.
     //
-    TINYCLR_FOREACH_NODE(CLR_RT_StackFrame,stack,th->m_stackFrames)
+    NANOCLR_FOREACH_NODE(CLR_RT_StackFrame,stack,th->m_stackFrames)
     {
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
         (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( stack->m_appDomain );
 #endif
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if(stack->m_inlineFrame)
         {
             CheckMultipleBlocks( stack->m_inlineFrame->m_frame.m_args     , stack->m_inlineFrame->m_frame.m_call.m_target->numArgs   );
@@ -731,24 +731,24 @@ void CLR_RT_GarbageCollector::Thread_Mark( CLR_RT_Thread* th )
         CheckMultipleBlocks( stack->m_locals   , stack->m_call.m_target->numLocals );
         CheckMultipleBlocks( stack->m_evalStack, stack->TopValuePosition()         );
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     //
     // Mark locked objects.
     //
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
     {
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
         (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( lock->m_appDomain );
 #endif
         CheckSingleBlock_Force( &lock->m_resource );
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     //
     // Mark the objects this thread is waiting for.
     //
-#if defined(TINYCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
+#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)                    
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( th->CurrentAppDomain() );
 #endif
 
@@ -765,11 +765,11 @@ void CLR_RT_GarbageCollector::Thread_Mark( CLR_RT_Thread* th )
 void CLR_RT_GarbageCollector::Thread_Mark( CLR_RT_DblLinkedList& threads )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
     {
         Thread_Mark( th );
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 }
 
 //--//
@@ -786,39 +786,39 @@ void CLR_RT_GarbageCollector::RecoverEventsFromGC()
     // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_RecoverFromGC();
 #endif
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,g_CLR_RT_ExecutionEngine.m_timers)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,g_CLR_RT_ExecutionEngine.m_timers)
     {
         timer->RecoverFromGC();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     //--//
 
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsReady)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsReady)
     {
         th->RecoverFromGC();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsWaiting)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsWaiting)
     {
         th->RecoverFromGC();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
-    TINYCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsZombie)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,g_CLR_RT_ExecutionEngine.m_threadsZombie)
     {
         th->RecoverFromGC();
         th->ReleaseWhenDeadEx(); // After the GC has happened, we have to check if any zombie thread can be reclaimed.
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
-#if defined(TINYCLR_APPDOMAINS)
-    TINYCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
+#if defined(NANOCLR_APPDOMAINS)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
     {
         appDomain->RecoverFromGC();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 #endif
 }
 
@@ -830,20 +830,20 @@ CLR_UINT32 CLR_RT_GarbageCollector::Heap_ComputeAliveVsDeadRatio()
     CLR_UINT32 totalBytes = 0;
     CLR_UINT32 freeBlocks = 0;
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
     {
         CLR_RT_HeapBlock_Node* ptr = hc->m_payloadStart;
         CLR_RT_HeapBlock_Node* end = hc->m_payloadEnd;
 
         totalBytes += (CLR_UINT32)((CLR_UINT8*)end - (CLR_UINT8*)ptr);
 
-        TINYCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapBlock_Node,ptrFree,hc->m_freeList)
+        NANOCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapBlock_Node,ptrFree,hc->m_freeList)
         {
             freeBlocks += ptrFree->DataSize();
         }
-        TINYCLR_FOREACH_NODE_BACKWARD_END();
+        NANOCLR_FOREACH_NODE_BACKWARD_END();
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     m_totalBytes = totalBytes;
     m_freeBytes  = freeBlocks * sizeof(CLR_RT_HeapBlock);

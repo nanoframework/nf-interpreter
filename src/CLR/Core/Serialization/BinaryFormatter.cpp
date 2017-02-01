@@ -3,7 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <TinyClr_Runtime.h>
+#include <nanoClr_Runtime.h>
 #include <CorLib_Native.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,9 +35,9 @@ CLR_RT_HeapBlock* CLR_RT_BinaryFormatter::TypeHandler::FixNull( CLR_RT_HeapBlock
 HRESULT CLR_RT_BinaryFormatter::TypeHandler::TypeHandler_Initialize( CLR_RT_BinaryFormatter* bf, SerializationHintsAttribute* hints, CLR_RT_TypeDescriptor* expected )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CLEAR(*this);
+    NANOCLR_CLEAR(*this);
 
     m_bf = bf;
 
@@ -53,13 +53,13 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::TypeHandler_Initialize( CLR_RT_Bina
         *m_typeExpected = *expected;
     }
 
-    TINYCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue( CLR_RT_HeapBlock* v )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     m_value = NULL;
     m_type  = NULL;
@@ -72,9 +72,9 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue( CLR_RT_HeapBlock* v )
 
         m_value->Assign( *v );
 
-        TINYCLR_CHECK_HRESULT(m_type->InitializeFromObject( *v ));
+        NANOCLR_CHECK_HRESULT(m_type->InitializeFromObject( *v ));
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         if(m_bf->m_flags & CLR_RT_BinaryFormatter::c_Flags_Marshal)
         {
            //MarshalByRefObjects are special for the AppDomain marshaler, and need to get marshaled regardless of whether or not they
@@ -91,9 +91,9 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue( CLR_RT_HeapBlock* v )
 
         if((m_type->m_handlerCls.m_target->flags & CLR_RECORD_TYPEDEF::TD_Serializable) == 0)
         {
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 
-            if(m_fIsMarshalByRefObject) TINYCLR_SET_AND_LEAVE(S_OK);
+            if(m_fIsMarshalByRefObject) NANOCLR_SET_AND_LEAVE(S_OK);
 
             //For marshaling, we want to throw an exception if we can't correctly marshal an object across AD boundaries
             //In fact, this should probably be turned on for all serialization, but I don't know what other implications that
@@ -101,7 +101,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue( CLR_RT_HeapBlock* v )
 
             if(m_bf->m_flags & CLR_RT_BinaryFormatter::c_Flags_Marshal)
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_MARSHAL_EXCEPTION);
+                NANOCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_MARSHAL_EXCEPTION);
             }
 #endif
             m_value = NULL;
@@ -109,7 +109,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue( CLR_RT_HeapBlock* v )
         }        
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -210,7 +210,7 @@ bool CLR_RT_BinaryFormatter::TypeHandler::GetSignOfType( CLR_RT_TypeDescriptor* 
 HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature( int& res )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_UINT32 idx;
     int        mask = SignatureRequirements();
@@ -232,7 +232,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature( int& res )
                     break;
                 }
 
-                TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
+                NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
             }
         }
     }
@@ -247,30 +247,30 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature( int& res )
             if(m_typeExpected->GetDataType() == DATATYPE_STRING)
             {
 
-                TINYCLR_CHECK_HRESULT(m_bf->WriteCompressedUnsigned( 0xFFFFFFFF ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteCompressedUnsigned( 0xFFFFFFFF ));
 
-                res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+                res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
             }
 
-            TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
+            NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
         }
 
 
-        TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Null, TE_L1 ));
+        NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Null, TE_L1 ));
 
-        res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+        res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
     //--//
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     if(m_fIsMarshalByRefObject)
     {
         CLR_RT_HeapBlock* valPtr = m_value->Dereference();
 
-        TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other, TE_L1 ));
-        TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_Other, TE_L2 ));
-        TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L3_MBRO , TE_L3 ));
+        NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other, TE_L1 ));
+        NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_Other, TE_L2 ));
+        NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L3_MBRO , TE_L3 ));
 
         {            
             /*
@@ -297,11 +297,11 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature( int& res )
                 appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
             }
                             
-            TINYCLR_CHECK_HRESULT(m_bf->WriteBits( (CLR_UINT32)(size_t)ptr, 32));
-            TINYCLR_CHECK_HRESULT(m_bf->WriteBits( (CLR_UINT32)(size_t)appDomain, 32));
+            NANOCLR_CHECK_HRESULT(m_bf->WriteBits( (CLR_UINT32)(size_t)ptr, 32));
+            NANOCLR_CHECK_HRESULT(m_bf->WriteBits( (CLR_UINT32)(size_t)appDomain, 32));
         }
 
-        res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+        res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
     }
 #endif
 
@@ -313,29 +313,29 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature( int& res )
         //
         if((mask & c_Signature_Header) == 0)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
+            NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
         }
 
-        TINYCLR_CHECK_HRESULT(m_bf->WriteBits              ( TE_L1_Duplicate, TE_L1 ));
-        TINYCLR_CHECK_HRESULT(m_bf->WriteCompressedUnsigned( idx                    ));
+        NANOCLR_CHECK_HRESULT(m_bf->WriteBits              ( TE_L1_Duplicate, TE_L1 ));
+        NANOCLR_CHECK_HRESULT(m_bf->WriteCompressedUnsigned( idx                    ));
 
-        res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+        res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
     //--//
 
-    TINYCLR_CHECK_HRESULT(EmitSignature_Inner( mask, m_type, m_value ));
+    NANOCLR_CHECK_HRESULT(EmitSignature_Inner( mask, m_type, m_value ));
 
-    res = c_Action_ObjectData; TINYCLR_SET_AND_LEAVE(S_OK);
+    res = c_Action_ObjectData; NANOCLR_SET_AND_LEAVE(S_OK);
 
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner( int mask, CLR_RT_TypeDescriptor* type, CLR_RT_HeapBlock* value )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     // Unbox reflection types
     if(value && value->DataType() == DATATYPE_OBJECT)
@@ -356,30 +356,30 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner( int mask, CLR_
         case REFLECTION_TYPE_DELAYED:                    
             if((mask & c_Signature_Header) != 0)
             {
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other, TE_L1 ));
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_Other, TE_L2 ));
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L3_Type , TE_L3 ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other, TE_L1 ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_Other, TE_L2 ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L3_Type , TE_L3 ));
             }
             break;
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         case REFLECTION_ASSEMBLY:
         case REFLECTION_CONSTRUCTOR:
         case REFLECTION_METHOD:
         case REFLECTION_FIELD:
-            if((m_bf->m_flags & CLR_RT_BinaryFormatter::c_Flags_Marshal) == 0) TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            if((m_bf->m_flags & CLR_RT_BinaryFormatter::c_Flags_Marshal) == 0) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
             if((mask & c_Signature_Header) != 0)
             {
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other     , TE_L1 ));
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_Other     , TE_L2 ));
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L3_Reflection, TE_L3 ));  
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other     , TE_L1 ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_Other     , TE_L2 ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L3_Reflection, TE_L3 ));  
             }
             break;
 #endif
 
         default:
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }        
     }
     else if(value && (type->m_flags & (CLR_RT_DataTypeLookup::c_Array | CLR_RT_DataTypeLookup::c_ArrayList)))
@@ -392,17 +392,17 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner( int mask, CLR_
 
             if((mask & c_Signature_Header) != 0)
             {
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other, TE_L1 ));
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_Array, TE_L2 ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other, TE_L1 ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_Array, TE_L2 ));
             }
 
             if((mask & c_Signature_Type) != 0)
             {
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( (CLR_UINT32)type->m_reflex.m_levels, TE_ArrayDepth ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( (CLR_UINT32)type->m_reflex.m_levels, TE_ArrayDepth ));
 
                 CLR_RT_TypeDescriptor typeSub; typeSub.InitializeFromType( type->m_reflex.m_data.m_type );
 
-                TINYCLR_CHECK_HRESULT(EmitSignature_Inner( c_Signature_Header | c_Signature_Type, &typeSub, NULL ));
+                NANOCLR_CHECK_HRESULT(EmitSignature_Inner( c_Signature_Header | c_Signature_Type, &typeSub, NULL ));
             }
 
 
@@ -414,11 +414,11 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner( int mask, CLR_
 
             if((mask & c_Signature_Header) != 0)
             {
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other    , TE_L1 ));
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_ArrayList, TE_L2 ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other    , TE_L1 ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_ArrayList, TE_L2 ));
             }
 
-            TINYCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( *value, array, sizeReal, capacity ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( *value, array, sizeReal, capacity ));
         }
 
         if((mask & c_Signature_Length) != 0)
@@ -429,14 +429,14 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner( int mask, CLR_
             {
                 if(sizeReal >= (1 << bitsMax))
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
                 }
 
-                TINYCLR_SET_AND_LEAVE(m_bf->WriteBits( (CLR_UINT32)sizeReal, bitsMax ));
+                NANOCLR_SET_AND_LEAVE(m_bf->WriteBits( (CLR_UINT32)sizeReal, bitsMax ));
             }
             else
             {
-                TINYCLR_SET_AND_LEAVE(m_bf->WriteCompressedUnsigned( (CLR_UINT32)sizeReal ));
+                NANOCLR_SET_AND_LEAVE(m_bf->WriteCompressedUnsigned( (CLR_UINT32)sizeReal ));
             }
         }
         else
@@ -445,7 +445,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner( int mask, CLR_
 
             if(sizeExpected > 0 && sizeExpected != sizeReal)
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
+                NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
             }
         }
     }
@@ -454,29 +454,29 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner( int mask, CLR_
     {
         if((mask & c_Signature_Header) != 0)
         {
-            TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other    , TE_L1 ));
-            TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_Primitive, TE_L2 ));
+            NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Other    , TE_L1 ));
+            NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L2_Primitive, TE_L2 ));
         }
 
         if((mask & c_Signature_Type) != 0)
         {
-            TINYCLR_SET_AND_LEAVE(m_bf->WriteBits( CLR_RT_TypeSystem::MapDataTypeToElementType( type->GetDataType() ), TE_ElementType ));
+            NANOCLR_SET_AND_LEAVE(m_bf->WriteBits( CLR_RT_TypeSystem::MapDataTypeToElementType( type->GetDataType() ), TE_ElementType ));
         }
     }
     else
     {
         if((mask & c_Signature_Header) != 0)
         {
-            TINYCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Reference, TE_L1 ));
+            NANOCLR_CHECK_HRESULT(m_bf->WriteBits( TE_L1_Reference, TE_L1 ));
         }
 
         if((mask & c_Signature_Type) != 0)
         {
-            TINYCLR_SET_AND_LEAVE(m_bf->WriteType( type->m_handlerCls.CrossReference().m_hash ));
+            NANOCLR_SET_AND_LEAVE(m_bf->WriteType( type->m_handlerCls.CrossReference().m_hash ));
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -484,7 +484,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner( int mask, CLR_
 HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     int mask = SignatureRequirements();
 
@@ -505,16 +505,16 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
         CLR_UINT32 levelThree;
 
 
-        TINYCLR_CHECK_HRESULT(m_bf->ReadBits( levelOne, TE_L1 ));
+        NANOCLR_CHECK_HRESULT(m_bf->ReadBits( levelOne, TE_L1 ));
 
         if(levelOne == TE_L1_Null)
         {
             if(m_hints.m_flags & SF_PointerNeverNull)
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
+                NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
             }
 
-            res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+            res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
         }
 
         if(levelOne == TE_L1_Duplicate)
@@ -522,21 +522,21 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
             CLR_RT_HeapBlock* dup;
             CLR_UINT32        idx;
 
-            TINYCLR_CHECK_HRESULT(m_bf->ReadCompressedUnsigned( idx ));
+            NANOCLR_CHECK_HRESULT(m_bf->ReadCompressedUnsigned( idx ));
 
             dup = m_bf->GetDuplicate( idx );
             if(dup == NULL)
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
+                NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
             }
 
             m_value = &m_value_tmp;
             m_value->SetObjectReference( dup );
 
             m_type = &m_type_tmp;
-            TINYCLR_CHECK_HRESULT(m_type->InitializeFromObject( *m_value ));
+            NANOCLR_CHECK_HRESULT(m_type->InitializeFromObject( *m_value ));
 
-            res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+            res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
         }
 
         if(levelOne == TE_L1_Reference)
@@ -545,25 +545,25 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
             {
                 CLR_RT_ReflectionDef_Index idx;
 
-                TINYCLR_CHECK_HRESULT(m_bf->ReadType( idx ));
+                NANOCLR_CHECK_HRESULT(m_bf->ReadType( idx ));
 
                 m_type = &m_type_tmp;
-                TINYCLR_CHECK_HRESULT(m_type->InitializeFromReflection( idx ));
+                NANOCLR_CHECK_HRESULT(m_type->InitializeFromReflection( idx ));
             }
         }
         else
         {
-            TINYCLR_CHECK_HRESULT(m_bf->ReadBits( levelTwo, TE_L2 ));
+            NANOCLR_CHECK_HRESULT(m_bf->ReadBits( levelTwo, TE_L2 ));
             if(levelTwo == TE_L2_Primitive)
             {
                 if((mask & c_Signature_Type) != 0)
                 {
                     CLR_UINT32 et;
 
-                    TINYCLR_CHECK_HRESULT(m_bf->ReadBits( et, TE_ElementType ));
+                    NANOCLR_CHECK_HRESULT(m_bf->ReadBits( et, TE_ElementType ));
 
                     m_type = &m_type_tmp;
-                    TINYCLR_CHECK_HRESULT(m_type->InitializeFromDataType( CLR_RT_TypeSystem::MapElementTypeToDataType( et ) ));
+                    NANOCLR_CHECK_HRESULT(m_type->InitializeFromDataType( CLR_RT_TypeSystem::MapElementTypeToDataType( et ) ));
                 }
             }
             else if(levelTwo == TE_L2_Array)
@@ -572,40 +572,40 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
                 {
                     CLR_UINT32 depth;
 
-                    TINYCLR_CHECK_HRESULT(m_bf->ReadBits( depth, TE_ArrayDepth ));
+                    NANOCLR_CHECK_HRESULT(m_bf->ReadBits( depth, TE_ArrayDepth ));
 
-                    TINYCLR_CHECK_HRESULT(m_bf->ReadBits( levelOne, TE_L1 ));
+                    NANOCLR_CHECK_HRESULT(m_bf->ReadBits( levelOne, TE_L1 ));
 
                     if(levelOne == TE_L1_Reference)
                     {
                         CLR_RT_ReflectionDef_Index idx;
 
-                        TINYCLR_CHECK_HRESULT(m_bf->ReadType( idx ));
+                        NANOCLR_CHECK_HRESULT(m_bf->ReadType( idx ));
 
                         m_type = &m_type_tmp;
-                        TINYCLR_CHECK_HRESULT(m_type->InitializeFromReflection( idx ));
+                        NANOCLR_CHECK_HRESULT(m_type->InitializeFromReflection( idx ));
                     }
                     else if(levelOne == TE_L1_Other)
                     {
-                        TINYCLR_CHECK_HRESULT(m_bf->ReadBits( levelTwo, TE_L2 ));
+                        NANOCLR_CHECK_HRESULT(m_bf->ReadBits( levelTwo, TE_L2 ));
 
                         if(levelTwo == TE_L2_Primitive)
                         {
                             CLR_UINT32 et;
 
-                            TINYCLR_CHECK_HRESULT(m_bf->ReadBits( et, TE_ElementType ));
+                            NANOCLR_CHECK_HRESULT(m_bf->ReadBits( et, TE_ElementType ));
 
                             m_type = &m_type_tmp;
-                            TINYCLR_CHECK_HRESULT(m_type->InitializeFromDataType( CLR_RT_TypeSystem::MapElementTypeToDataType( et ) ));
+                            NANOCLR_CHECK_HRESULT(m_type->InitializeFromDataType( CLR_RT_TypeSystem::MapElementTypeToDataType( et ) ));
                         }
                         else
                         {
-                            TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_BADSTREAM);
+                            NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_BADSTREAM);
                         }
                     }
                     else
                     {
-                        TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_BADSTREAM);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_BADSTREAM);
                     }
 
                     m_type->m_reflex.m_levels = depth;
@@ -617,18 +617,18 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
                 if((mask & c_Signature_Type) != 0)
                 {
                     m_type = &m_type_tmp;
-                    TINYCLR_CHECK_HRESULT(m_type->InitializeFromType( g_CLR_RT_WellKnownTypes.m_ArrayList ));
+                    NANOCLR_CHECK_HRESULT(m_type->InitializeFromType( g_CLR_RT_WellKnownTypes.m_ArrayList ));
                 }
             }
             else if(levelTwo == TE_L2_Other)
             {
-                TINYCLR_CHECK_HRESULT(m_bf->ReadBits( levelThree, TE_L3 ));
+                NANOCLR_CHECK_HRESULT(m_bf->ReadBits( levelThree, TE_L3 ));
                 if(levelThree == TE_L3_Type)
                 {
                     m_type = &m_type_tmp;
-                    TINYCLR_CHECK_HRESULT(m_type->InitializeFromType( g_CLR_RT_WellKnownTypes.m_Type ));
+                    NANOCLR_CHECK_HRESULT(m_type->InitializeFromType( g_CLR_RT_WellKnownTypes.m_Type ));
                 }
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
                 else if (levelThree == TE_L3_Reflection)
                 {
                     CLR_RT_ReflectionDef_Index value;
@@ -636,14 +636,14 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
 
                     _ASSERTE(m_bf->m_flags & CLR_RT_BinaryFormatter::c_Flags_Marshal);
 
-                    TINYCLR_CHECK_HRESULT(m_bf->ReadBits( data, 64 ));
+                    NANOCLR_CHECK_HRESULT(m_bf->ReadBits( data, 64 ));
 
                     value.SetRawData( data );
                     
                     m_value = &m_value_tmp;
-                    TINYCLR_CHECK_HRESULT(m_value->SetReflection( value ));
+                    NANOCLR_CHECK_HRESULT(m_value->SetReflection( value ));
 
-                    res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+                    res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
                 }
                 else if (levelThree == TE_L3_MBRO)
                 {
@@ -652,8 +652,8 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
                     CLR_RT_HeapBlock* ptr;
                     CLR_RT_AppDomain* appDomain;                    
      
-                    TINYCLR_CHECK_HRESULT(m_bf->ReadBits( uintPtr      , 32 ));
-                    TINYCLR_CHECK_HRESULT(m_bf->ReadBits( uintAppDomain, 32 ));
+                    NANOCLR_CHECK_HRESULT(m_bf->ReadBits( uintPtr      , 32 ));
+                    NANOCLR_CHECK_HRESULT(m_bf->ReadBits( uintAppDomain, 32 ));
 
                     _ASSERTE(CLR_EE_DBG_IS( NoCompaction ));
 
@@ -661,7 +661,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
                     appDomain = (CLR_RT_AppDomain*)(size_t)uintAppDomain;
                     
                     m_type = &m_type_tmp;
-                    TINYCLR_CHECK_HRESULT(m_type->InitializeFromObject( *ptr ));
+                    NANOCLR_CHECK_HRESULT(m_type->InitializeFromObject( *ptr ));
 
                     m_value = &m_value_tmp;
                     if(appDomain != g_CLR_RT_ExecutionEngine.GetCurrentAppDomain())
@@ -679,12 +679,12 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
                     //Set the value reference to either the MBRO, or the proxy
                     m_value->SetObjectReference( ptr );  
 
-                    res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);                       
+                    res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);                       
                 }
 #endif
                 else
                 {
-                    TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_BADSTREAM);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_BADSTREAM);
                 }
             }
         }
@@ -700,11 +700,11 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
 
             if(bitsMax != 0)
             {
-                TINYCLR_CHECK_HRESULT(m_bf->ReadBits( len, bitsMax ));
+                NANOCLR_CHECK_HRESULT(m_bf->ReadBits( len, bitsMax ));
             }
             else
             {
-                TINYCLR_CHECK_HRESULT(m_bf->ReadCompressedUnsigned( len ));
+                NANOCLR_CHECK_HRESULT(m_bf->ReadCompressedUnsigned( len ));
             }
         }
         else
@@ -716,7 +716,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
                 //
                 // Only simple arrays can have variable size.
                 //
-                TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
 
             sub.InitializeFromType( m_type->m_reflex.m_data.m_type );
@@ -735,7 +735,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
                 case 32: len /= 32; break;
                 case 64: len /= 64; break;
                 default:
-                    TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
             }
         }
@@ -745,12 +745,12 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
             CLR_RT_HeapBlock_Array* array;
 
             m_value = &m_value_tmp;
-            TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewArrayList( *m_value, len, array ));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewArrayList( *m_value, len, array ));
         }
         else
         {
             m_value = &m_value_tmp;
-             TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( *m_value, len, m_type->m_reflex ));
+             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( *m_value, len, m_type->m_reflex ));
         }
     }
     else
@@ -761,19 +761,19 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
         {
             CLR_RT_ReflectionDef_Index idx;
 
-            TINYCLR_CHECK_HRESULT(m_bf->ReadType( idx ));
+            NANOCLR_CHECK_HRESULT(m_bf->ReadType( idx ));
 
-            TINYCLR_CHECK_HRESULT(m_value->SetReflection( idx ));
+            NANOCLR_CHECK_HRESULT(m_value->SetReflection( idx ));
 
-            res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+            res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
         }
 
-        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( *m_value, m_type->m_handlerCls ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( *m_value, m_type->m_handlerCls ));
     }
 
-    res = c_Action_ObjectData; TINYCLR_SET_AND_LEAVE(S_OK);
+    res = c_Action_ObjectData; NANOCLR_SET_AND_LEAVE(S_OK);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -781,7 +781,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature( int& res )
 HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue( int& res )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* value = m_value->FixBoxingReference();
     CLR_UINT64        val;
@@ -805,9 +805,9 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue( int& res )
         {
         case REFLECTION_TYPE:
         case REFLECTION_TYPE_DELAYED:
-            TINYCLR_CHECK_HRESULT(m_bf->WriteType( value->ReflectionDataConst() ));
+            NANOCLR_CHECK_HRESULT(m_bf->WriteType( value->ReflectionDataConst() ));
             break;        
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
         case REFLECTION_ASSEMBLY:
         case REFLECTION_CONSTRUCTOR:
         case REFLECTION_METHOD:
@@ -819,13 +819,13 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue( int& res )
 
                 data = value->ReflectionDataConst().GetRawData();
 
-                TINYCLR_CHECK_HRESULT(m_bf->WriteBits( data, 64 ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits( data, 64 ));
             }
             break;            
 #endif                    
         }
 
-        res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+        res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
     if(m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_DateTime.m_data)
@@ -853,18 +853,18 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue( int& res )
             LPCSTR     szText = value->RecoverString();
             CLR_UINT32 len    = szText ? (CLR_UINT32)hal_strlen_s( szText ) : 0xFFFFFFFF;
 
-            TINYCLR_CHECK_HRESULT(m_bf->WriteCompressedUnsigned( len ));
+            NANOCLR_CHECK_HRESULT(m_bf->WriteCompressedUnsigned( len ));
 
             if(len != (CLR_UINT32)-1)
             {
-                TINYCLR_CHECK_HRESULT(m_bf->WriteArray( (CLR_UINT8*)szText, len ));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteArray( (CLR_UINT8*)szText, len ));
             }
 
-            res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+            res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
         }
         else if(bits == CLR_RT_DataTypeLookup::c_NA)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
         CLR_RT_HeapBlock* v = FixDereference( value ); FAULT_ON_NULL(v);
@@ -874,7 +874,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue( int& res )
         fSigned = TypeHandler::GetSignOfType( m_type );
     }
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     else if(m_fIsMarshalByRefObject)
     {
         CLR_RT_HeapBlock* valPtr    = value->Dereference();
@@ -886,16 +886,16 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue( int& res )
             valPtr    = valPtr->TransparentProxyDereference();
         }
 
-        TINYCLR_CHECK_HRESULT(m_bf->WriteBits( (CLR_UINT32)(size_t)valPtr   , 32 ));
-        TINYCLR_CHECK_HRESULT(m_bf->WriteBits( (CLR_UINT32)(size_t)appDomain, 32 ));
+        NANOCLR_CHECK_HRESULT(m_bf->WriteBits( (CLR_UINT32)(size_t)valPtr   , 32 ));
+        NANOCLR_CHECK_HRESULT(m_bf->WriteBits( (CLR_UINT32)(size_t)appDomain, 32 ));
 
-        TINYCLR_SET_AND_LEAVE(S_OK);
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
 #endif
 
     else
     {
-        TINYCLR_SET_AND_LEAVE(TrackObject( res ));
+        NANOCLR_SET_AND_LEAVE(TrackObject( res ));
     }
 
     {
@@ -926,7 +926,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue( int& res )
 
             if(valS < (-maxVal-1) || valS > maxVal)
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
+                NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
             }
         }
 
@@ -944,24 +944,24 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue( int& res )
 
             if(valU > maxVal)
             {
-                TINYCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
+                NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
             }
         }
 
         val = (CLR_UINT64)valU;
     }
 
-    TINYCLR_CHECK_HRESULT(m_bf->WriteBits( val, bits ));
+    NANOCLR_CHECK_HRESULT(m_bf->WriteBits( val, bits ));
 
-    res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+    res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue( int& res )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_UINT64* dst;
     CLR_UINT64  val;
@@ -993,7 +993,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue( int& res )
         {
             CLR_UINT32 len;
 
-            TINYCLR_CHECK_HRESULT(m_bf->ReadCompressedUnsigned( len ));
+            NANOCLR_CHECK_HRESULT(m_bf->ReadCompressedUnsigned( len ));
 
             if(len == 0xFFFFFFFF)
             {
@@ -1004,15 +1004,15 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue( int& res )
                 CLR_RT_HeapBlock_String* str = CLR_RT_HeapBlock_String::CreateInstance( *m_value, len ); CHECK_ALLOCATION(str);
                 LPSTR                    dst = (LPSTR)str->StringText();
 
-                TINYCLR_CHECK_HRESULT(m_bf->ReadArray( (CLR_UINT8*)dst, len ));
+                NANOCLR_CHECK_HRESULT(m_bf->ReadArray( (CLR_UINT8*)dst, len ));
                 dst[ len ] = 0;
             }
 
-            res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+            res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
         }
         else if(bits == CLR_RT_DataTypeLookup::c_NA)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
         else
         {
@@ -1026,12 +1026,12 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue( int& res )
     }
     else
     {
-        TINYCLR_SET_AND_LEAVE(TrackObject( res ));
+        NANOCLR_SET_AND_LEAVE(TrackObject( res ));
     }
 
     if(m_hints.m_bitPacked) bits = m_hints.m_bitPacked;
 
-    TINYCLR_CHECK_HRESULT(m_bf->ReadBits( val, bits ));
+    NANOCLR_CHECK_HRESULT(m_bf->ReadBits( val, bits ));
 
     if(bits != 64)
     {
@@ -1050,9 +1050,9 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue( int& res )
 
     *dst = val + m_hints.m_rangeBias;
 
-    res = c_Action_None; TINYCLR_SET_AND_LEAVE(S_OK);
+    res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -1060,7 +1060,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue( int& res )
 HRESULT CLR_RT_BinaryFormatter::TypeHandler::TrackObject( int& res )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_type->m_flags & (CLR_RT_DataTypeLookup::c_Array | CLR_RT_DataTypeLookup::c_ArrayList))
     {
@@ -1072,13 +1072,13 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::TrackObject( int& res )
 
         if(m_typeExpected && m_typeExpected->m_flags == CLR_RT_DataTypeLookup::c_ValueType)
         {
-            TINYCLR_SET_AND_LEAVE(S_OK);
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
     }
 
-    TINYCLR_SET_AND_LEAVE(m_bf->TrackDuplicate( m_value ));
+    NANOCLR_SET_AND_LEAVE(m_bf->TrackDuplicate( m_value ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1086,7 +1086,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::TrackObject( int& res )
 HRESULT CLR_RT_BinaryFormatter::State::CreateInstance( CLR_RT_BinaryFormatter* parent, SerializationHintsAttribute* hints, CLR_RT_HeapBlock* type )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance     inst;
     CLR_RT_TypeDescriptor       desc;
@@ -1095,7 +1095,7 @@ HRESULT CLR_RT_BinaryFormatter::State::CreateInstance( CLR_RT_BinaryFormatter* p
 
     if(type && CLR_RT_ReflectionDef_Index::Convert( *type, inst, NULL ))
     {
-        TINYCLR_CHECK_HRESULT(desc.InitializeFromType( inst ));
+        NANOCLR_CHECK_HRESULT(desc.InitializeFromType( inst ));
 
         pDesc = &desc;
 
@@ -1103,7 +1103,7 @@ HRESULT CLR_RT_BinaryFormatter::State::CreateInstance( CLR_RT_BinaryFormatter* p
         {
             hints = &hintsTmp;
 
-            TINYCLR_CLEAR(*hints);
+            NANOCLR_CLEAR(*hints);
 
             hints->m_flags = (SerializationFlags)(SF_PointerNeverNull | SF_FixedType);
         }
@@ -1113,15 +1113,15 @@ HRESULT CLR_RT_BinaryFormatter::State::CreateInstance( CLR_RT_BinaryFormatter* p
         pDesc = NULL;
     }
 
-    TINYCLR_SET_AND_LEAVE(CreateInstance( parent, hints, pDesc ));
+    NANOCLR_SET_AND_LEAVE(CreateInstance( parent, hints, pDesc ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_BinaryFormatter::State::CreateInstance( CLR_RT_BinaryFormatter* parent, SerializationHintsAttribute* hints, CLR_RT_TypeDescriptor* type )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     State* ptr = EVENTCACHE_EXTRACT_NODE_INITTOZERO(g_CLR_RT_EventCache,State,DATATYPE_SERIALIZER_STATE);
 
@@ -1133,7 +1133,7 @@ HRESULT CLR_RT_BinaryFormatter::State::CreateInstance( CLR_RT_BinaryFormatter* p
     ptr->m_value_NeedProcessing = true;
     ptr->m_value.TypeHandler_Initialize( parent, hints, type );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_BinaryFormatter::State::DestroyInstance()
@@ -1147,9 +1147,9 @@ void CLR_RT_BinaryFormatter::State::DestroyInstance()
 HRESULT CLR_RT_BinaryFormatter::State::FindHints( SerializationHintsAttribute& hints, const CLR_RT_TypeDef_Instance& cls )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CLEAR(hints);
+    NANOCLR_CLEAR(hints);
 
     if(cls.m_target->flags & CLR_RECORD_TYPEDEF::TD_HasAttributes)
     {
@@ -1160,28 +1160,28 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints( SerializationHintsAttribute& h
         {
             CLR_RT_AttributeParser parser;
 
-            TINYCLR_CHECK_HRESULT(parser.Initialize( en ));
+            NANOCLR_CHECK_HRESULT(parser.Initialize( en ));
 
             while(true)
             {
                 CLR_RT_AttributeParser::Value* val;
 
-                TINYCLR_CHECK_HRESULT(parser.Next( val ));
+                NANOCLR_CHECK_HRESULT(parser.Next( val ));
 
                 if(val == NULL) break;
             }
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_BinaryFormatter::State::FindHints( SerializationHintsAttribute& hints, const CLR_RT_FieldDef_Instance& fld )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CLEAR(hints);
+    NANOCLR_CLEAR(hints);
 
     if(fld.m_target->flags & CLR_RECORD_FIELDDEF::FD_HasAttributes)
     {
@@ -1192,13 +1192,13 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints( SerializationHintsAttribute& h
         {
             CLR_RT_AttributeParser parser;
 
-            TINYCLR_CHECK_HRESULT(parser.Initialize( en ));
+            NANOCLR_CHECK_HRESULT(parser.Initialize( en ));
 
             while(true)
             {
                 CLR_RT_AttributeParser::Value* val;
 
-                TINYCLR_CHECK_HRESULT(parser.Next( val ));
+                NANOCLR_CHECK_HRESULT(parser.Next( val ));
 
                 if(val == NULL)
                 {
@@ -1216,7 +1216,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints( SerializationHintsAttribute& h
         }
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -1224,7 +1224,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints( SerializationHintsAttribute& h
 HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing( CLR_RT_HeapBlock& dst )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* src               = m_value.m_value;
     CLR_DataType      dt                = dst.DataType();
@@ -1239,7 +1239,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing( CLR_RT_HeapBlock& dst
 
         if(src == NULL || (c_CLR_RT_DataTypeLookup[ src->DataType() ].m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType) == 0)
         {
-            TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
     }
     else
@@ -1305,12 +1305,12 @@ HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing( CLR_RT_HeapBlock& dst
                 //
                 pDst->Dereference()->SetReflection(*reflex);
 
-                TINYCLR_SET_AND_LEAVE(S_OK);
+                NANOCLR_SET_AND_LEAVE(S_OK);
             }
 
             if(fBox)
             {
-                TINYCLR_CHECK_HRESULT(m_value.m_value->PerformBoxing( m_value.m_type->m_handlerCls ));
+                NANOCLR_CHECK_HRESULT(m_value.m_value->PerformBoxing( m_value.m_type->m_handlerCls ));
             }
         }
         else
@@ -1321,30 +1321,30 @@ HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing( CLR_RT_HeapBlock& dst
 
     if(dt == DATATYPE_ARRAY_BYREF)
     {
-        TINYCLR_CHECK_HRESULT(src->StoreToReference( dst, 0 ));
+        NANOCLR_CHECK_HRESULT(src->StoreToReference( dst, 0 ));
     }
     else
     {
         dst.Assign( *src );
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_BinaryFormatter::State::GetValue()
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     State* prev = (State*)Prev();
     if(prev->Prev() == NULL)
     {
-        TINYCLR_SET_AND_LEAVE(m_value.SetValue( &m_parent->m_value ));
+        NANOCLR_SET_AND_LEAVE(m_value.SetValue( &m_parent->m_value ));
     }
 
     if(prev->m_fields_NeedProcessing)
     {
-        TINYCLR_SET_AND_LEAVE(m_value.SetValue( prev->m_fields_Pointer ));
+        NANOCLR_SET_AND_LEAVE(m_value.SetValue( prev->m_fields_Pointer ));
     }
 
     if(prev->m_array_NeedProcessing)
@@ -1352,18 +1352,18 @@ HRESULT CLR_RT_BinaryFormatter::State::GetValue()
         CLR_RT_HeapBlock ref; ref.InitializeArrayReferenceDirect( *prev->m_array, prev->m_array_CurrentPos-1 );
         CLR_RT_HeapBlock val;
 
-        TINYCLR_CHECK_HRESULT(val.LoadFromReference( ref ));
+        NANOCLR_CHECK_HRESULT(val.LoadFromReference( ref ));
 
-        TINYCLR_SET_AND_LEAVE(m_value.SetValue( &val ));
+        NANOCLR_SET_AND_LEAVE(m_value.SetValue( &val ));
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_BinaryFormatter::State::SetValueAndDestroyInstance()
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_parent->m_fDeserialize)
     {
@@ -1371,27 +1371,27 @@ HRESULT CLR_RT_BinaryFormatter::State::SetValueAndDestroyInstance()
 
         if(prev->Prev() == NULL)
         {
-            TINYCLR_CHECK_HRESULT(AssignAndFixBoxing( m_parent->m_value ));
+            NANOCLR_CHECK_HRESULT(AssignAndFixBoxing( m_parent->m_value ));
         }
         else
         {
             if(prev->m_fields_NeedProcessing)
             {
-                TINYCLR_CHECK_HRESULT(AssignAndFixBoxing( *prev->m_fields_Pointer ));
+                NANOCLR_CHECK_HRESULT(AssignAndFixBoxing( *prev->m_fields_Pointer ));
             }
 
             if(prev->m_array_NeedProcessing)
             {
                 CLR_RT_HeapBlock ref; ref.InitializeArrayReferenceDirect( *prev->m_array, prev->m_array_CurrentPos-1 );
 
-                TINYCLR_CHECK_HRESULT(AssignAndFixBoxing( ref ));
+                NANOCLR_CHECK_HRESULT(AssignAndFixBoxing( ref ));
             }
         }
     }
 
     DestroyInstance();
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1399,7 +1399,7 @@ HRESULT CLR_RT_BinaryFormatter::State::SetValueAndDestroyInstance()
 HRESULT CLR_RT_BinaryFormatter::State::Advance()
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_value_NeedProcessing)
     {
@@ -1409,9 +1409,9 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
 
         if(m_parent->m_fDeserialize)
         {
-            TINYCLR_CHECK_HRESULT(m_value.ReadSignature( res ));
+            NANOCLR_CHECK_HRESULT(m_value.ReadSignature( res ));
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
             //Make sure that the type being deserialized is loaded in the current appDomain
             {
                 if(m_parent->m_flags & CLR_RT_BinaryFormatter::c_Flags_Marshal)
@@ -1440,7 +1440,7 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
                                     
                                     if(!g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->FindAppDomainAssembly( inst.m_assm )) 
                                     {
-                                        TINYCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_MARSHAL_EXCEPTION);
+                                        NANOCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_MARSHAL_EXCEPTION);
                                     }                                
                                 }
                                 break;
@@ -1467,7 +1467,7 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
                                         _ASSERTE(FALSE);
                                     }
 
-                                    TINYCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition( inst ));
+                                    NANOCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition( inst ));
                                     
                                     idx = desc.m_handlerCls;
                                 }
@@ -1481,7 +1481,7 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
 
                     if(idx.m_data != 0)
                     {
-                        TINYCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->VerifyTypeIsLoaded( idx ));
+                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->VerifyTypeIsLoaded( idx ));
                     }
                 }
             }
@@ -1490,21 +1490,21 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
         }
         else
         {
-            TINYCLR_CHECK_HRESULT(GetValue());
+            NANOCLR_CHECK_HRESULT(GetValue());
 
-            TINYCLR_CHECK_HRESULT(m_value.EmitSignature( res ));
+            NANOCLR_CHECK_HRESULT(m_value.EmitSignature( res ));
         }
 
         if(res != TypeHandler::c_Action_None)
         {
             if(m_parent->m_fDeserialize)
             {
-                TINYCLR_CHECK_HRESULT(m_value.ReadValue( res ));
+                NANOCLR_CHECK_HRESULT(m_value.ReadValue( res ));
 
             }
             else
             {
-                TINYCLR_CHECK_HRESULT(m_value.EmitValue( res ));
+                NANOCLR_CHECK_HRESULT(m_value.EmitValue( res ));
             }
 
             switch(res)
@@ -1530,7 +1530,7 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
                     {
                         int capacity;
 
-                        TINYCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( *m_value.m_value, m_array, m_array_LastPos, capacity ));
+                        NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( *m_value.m_value, m_array, m_array_LastPos, capacity ));
 
                         m_array_ExpectedType = NULL;
                     }
@@ -1551,18 +1551,18 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
 
     if(m_fields_NeedProcessing)
     {
-        TINYCLR_SET_AND_LEAVE(AdvanceToTheNextField());
+        NANOCLR_SET_AND_LEAVE(AdvanceToTheNextField());
     }
 
     if(m_array_NeedProcessing)
     {
-        TINYCLR_SET_AND_LEAVE(AdvanceToTheNextElement());
+        NANOCLR_SET_AND_LEAVE(AdvanceToTheNextElement());
     }
 
-    TINYCLR_SET_AND_LEAVE(SetValueAndDestroyInstance());
+    NANOCLR_SET_AND_LEAVE(SetValueAndDestroyInstance());
 
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -1570,9 +1570,9 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
 HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextField()
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    while(TINYCLR_INDEX_IS_VALID(m_fields_CurrentClass))
+    while(NANOCLR_INDEX_IS_VALID(m_fields_CurrentClass))
     {
         if(m_fields_CurrentField < m_fields_CurrentClass.m_target->iFields_Num)
         {
@@ -1593,12 +1593,12 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextField()
                 }
                 else
                 {
-                    TINYCLR_CHECK_HRESULT(FindHints( hints, inst ));
+                    NANOCLR_CHECK_HRESULT(FindHints( hints, inst ));
                 }
 
-                TINYCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition( inst ));
+                NANOCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition( inst ));
 
-                TINYCLR_SET_AND_LEAVE(State::CreateInstance( m_parent, &hints, &desc ));
+                NANOCLR_SET_AND_LEAVE(State::CreateInstance( m_parent, &hints, &desc ));
             }
         }
         else
@@ -1608,9 +1608,9 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextField()
         }
     }
 
-    TINYCLR_SET_AND_LEAVE(SetValueAndDestroyInstance());
+    NANOCLR_SET_AND_LEAVE(SetValueAndDestroyInstance());
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -1618,7 +1618,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextField()
 HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextElement()
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(m_array_ExpectedType && (c_CLR_RT_DataTypeLookup[ m_array->m_typeOfElement ].m_flags & CLR_RT_DataTypeLookup::c_Numeric))
     {
@@ -1635,7 +1635,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextElement()
         {
             if(fDeserialize)
             {
-                TINYCLR_CHECK_HRESULT(m_parent->ReadBits( val, bits ));
+                NANOCLR_CHECK_HRESULT(m_parent->ReadBits( val, bits ));
 
                 memcpy( ptr, &val, size );
             }
@@ -1643,7 +1643,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextElement()
             {
                 val = 0; memcpy( &val, ptr, size );
 
-                TINYCLR_CHECK_HRESULT(m_parent->WriteBits( val, bits ));
+                NANOCLR_CHECK_HRESULT(m_parent->WriteBits( val, bits ));
             }
 
             ptr += size;
@@ -1666,12 +1666,12 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextElement()
             hints = NULL;
         }
 
-        TINYCLR_SET_AND_LEAVE(State::CreateInstance( m_parent, hints, m_array_ExpectedType ));
+        NANOCLR_SET_AND_LEAVE(State::CreateInstance( m_parent, hints, m_array_ExpectedType ));
     }
 
-    TINYCLR_SET_AND_LEAVE(SetValueAndDestroyInstance());
+    NANOCLR_SET_AND_LEAVE(SetValueAndDestroyInstance());
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1679,7 +1679,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextElement()
 HRESULT CLR_RT_BinaryFormatter::CreateInstance( CLR_UINT8* buf, int len, CLR_RT_BinaryFormatter*& res )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_BinaryFormatter* ptr = EVENTCACHE_EXTRACT_NODE(g_CLR_RT_EventCache,CLR_RT_BinaryFormatter,DATATYPE_SERIALIZER_HEAD);
 
@@ -1696,9 +1696,9 @@ HRESULT CLR_RT_BinaryFormatter::CreateInstance( CLR_UINT8* buf, int len, CLR_RT_
     ptr->m_value_desc.TypeDescriptor_Initialize();   // CLR_RT_TypeDescriptor          m_value_desc;
 
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance( ptr->m_stream, buf, len ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance( ptr->m_stream, buf, len ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_BinaryFormatter::DestroyInstance()
@@ -1715,16 +1715,16 @@ void CLR_RT_BinaryFormatter::DestroyInstance()
 HRESULT CLR_RT_BinaryFormatter::Advance()
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     while(true)
     {
         State* top = (State*)m_states.LastNode(); if(top->Prev() == NULL) break;
 
-        TINYCLR_CHECK_HRESULT(top->Advance());
+        NANOCLR_CHECK_HRESULT(top->Advance());
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -1738,36 +1738,36 @@ void CLR_RT_BinaryFormatter::PrepareForGC( void* data )
 
         g_CLR_RT_GarbageCollector.CheckSingleBlock_Force( &bf->m_value );
 
-        TINYCLR_FOREACH_NODE(CLR_RT_BinaryFormatter::State,state,bf->m_states)
+        NANOCLR_FOREACH_NODE(CLR_RT_BinaryFormatter::State,state,bf->m_states)
         {
             g_CLR_RT_GarbageCollector.CheckSingleBlock_Force( state->m_value.m_value );
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
 }
 
 HRESULT CLR_RT_BinaryFormatter::Serialize( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object, CLR_RT_HeapBlock* cls, CLR_UINT32 flags )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_BinaryFormatter* bf = NULL;
     CLR_RT_ProtectFromGC    pgc( (void**)&bf, CLR_RT_BinaryFormatter::PrepareForGC );
 
     refData.SetObjectReference( NULL );
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_BinaryFormatter::CreateInstance( NULL, 0, bf ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_BinaryFormatter::CreateInstance( NULL, 0, bf ));
 
-    TINYCLR_CHECK_HRESULT(State::CreateInstance( bf, NULL, cls ));
+    NANOCLR_CHECK_HRESULT(State::CreateInstance( bf, NULL, cls ));
 
     bf->m_flags = flags;
     bf->m_value.Assign( object );        
 
-    TINYCLR_CHECK_HRESULT(bf->Advance());
+    NANOCLR_CHECK_HRESULT(bf->Advance());
 
-    TINYCLR_CHECK_HRESULT(bf->m_stream->ToArray( refData ));
+    NANOCLR_CHECK_HRESULT(bf->m_stream->ToArray( refData ));
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(bf)
     {
@@ -1776,13 +1776,13 @@ HRESULT CLR_RT_BinaryFormatter::Serialize( CLR_RT_HeapBlock& refData, CLR_RT_Hea
         bf = NULL;
     }
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_RT_BinaryFormatter::Deserialize( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object, CLR_RT_HeapBlock* cls, CLR_UINT32* unknownType, CLR_UINT32 flags )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* array = object.DereferenceArray();
 
@@ -1790,34 +1790,34 @@ HRESULT CLR_RT_BinaryFormatter::Deserialize( CLR_RT_HeapBlock& refData, CLR_RT_H
 
     if(array != NULL)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_RT_BinaryFormatter::Deserialize( refData, array->GetFirstElement(), array->m_numOfElements, cls, unknownType, flags ));
+        NANOCLR_SET_AND_LEAVE(CLR_RT_BinaryFormatter::Deserialize( refData, array->GetFirstElement(), array->m_numOfElements, cls, unknownType, flags ));
     }
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_BinaryFormatter::Deserialize( CLR_RT_HeapBlock& refData, CLR_UINT8* data, CLR_UINT32 size, CLR_RT_HeapBlock* cls, CLR_UINT32* unknownType, CLR_UINT32 flags )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_BinaryFormatter* bf    = NULL;
     CLR_RT_ProtectFromGC    pgc( (void**)&bf, CLR_RT_BinaryFormatter::PrepareForGC );
 
     refData.SetObjectReference( NULL );
 
-    TINYCLR_CHECK_HRESULT(CLR_RT_BinaryFormatter::CreateInstance( data, size, bf ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_BinaryFormatter::CreateInstance( data, size, bf ));
 
-    TINYCLR_CHECK_HRESULT(State::CreateInstance( bf, NULL, cls ));
+    NANOCLR_CHECK_HRESULT(State::CreateInstance( bf, NULL, cls ));
 
     bf->m_flags = flags;
 
-    TINYCLR_CHECK_HRESULT(bf->Advance());
+    NANOCLR_CHECK_HRESULT(bf->Advance());
 
     refData.Assign( bf->m_value );
 
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
     if(bf)
     {
@@ -1831,7 +1831,7 @@ HRESULT CLR_RT_BinaryFormatter::Deserialize( CLR_RT_HeapBlock& refData, CLR_UINT
         bf = NULL;
     }
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 //--//
@@ -1839,7 +1839,7 @@ HRESULT CLR_RT_BinaryFormatter::Deserialize( CLR_RT_HeapBlock& refData, CLR_UINT
 HRESULT CLR_RT_BinaryFormatter::TrackDuplicate( CLR_RT_HeapBlock* object )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     DuplicateTracker* ptr = EVENTCACHE_EXTRACT_NODE(g_CLR_RT_EventCache,DuplicateTracker,DATATYPE_SERIALIZER_DUPLICATE);
 
@@ -1850,7 +1850,7 @@ HRESULT CLR_RT_BinaryFormatter::TrackDuplicate( CLR_RT_HeapBlock* object )
     ptr->m_ptr = TypeHandler::FixDereference( object );
     ptr->m_idx = m_idx++;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 CLR_UINT32 CLR_RT_BinaryFormatter::SearchDuplicate( CLR_RT_HeapBlock* object )
@@ -1858,14 +1858,14 @@ CLR_UINT32 CLR_RT_BinaryFormatter::SearchDuplicate( CLR_RT_HeapBlock* object )
     NATIVE_PROFILE_CLR_SERIALIZATION();
     object = TypeHandler::FixDereference( object );
 
-    TINYCLR_FOREACH_NODE(DuplicateTracker,ptr,m_duplicates)
+    NANOCLR_FOREACH_NODE(DuplicateTracker,ptr,m_duplicates)
     {
         if(ptr->m_ptr == object)
         {
             return ptr->m_idx;
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     return (CLR_UINT32)-1;
 }
@@ -1873,14 +1873,14 @@ CLR_UINT32 CLR_RT_BinaryFormatter::SearchDuplicate( CLR_RT_HeapBlock* object )
 CLR_RT_HeapBlock* CLR_RT_BinaryFormatter::GetDuplicate( CLR_UINT32 idx )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_FOREACH_NODE(DuplicateTracker,ptr,m_duplicates)
+    NANOCLR_FOREACH_NODE(DuplicateTracker,ptr,m_duplicates)
     {
         if(ptr->m_idx == idx)
         {
             return ptr->m_ptr;
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     return NULL;
 }
@@ -1901,11 +1901,11 @@ HRESULT CLR_RT_BinaryFormatter::WriteArray   ( const CLR_UINT8*  buf, int bytes 
 HRESULT CLR_RT_BinaryFormatter::ReadCompressedUnsigned( CLR_UINT32& val )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_UINT32 extra;
 
-    TINYCLR_CHECK_HRESULT(m_stream->ReadBits( val, 8 ));
+    NANOCLR_CHECK_HRESULT(m_stream->ReadBits( val, 8 ));
 
     if(val == 0xFF)
     {
@@ -1932,15 +1932,15 @@ HRESULT CLR_RT_BinaryFormatter::ReadCompressedUnsigned( CLR_UINT32& val )
     }
 
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_RT_BinaryFormatter::WriteCompressedUnsigned( CLR_UINT32 val )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     int bits;
 
@@ -1964,15 +1964,15 @@ HRESULT CLR_RT_BinaryFormatter::WriteCompressedUnsigned( CLR_UINT32 val )
     }
     else
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
-    TINYCLR_CHECK_HRESULT(m_stream->WriteBits( val, bits ));
+    NANOCLR_CHECK_HRESULT(m_stream->WriteBits( val, bits ));
 
 
-    TINYCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
-    TINYCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 //--//
@@ -1980,37 +1980,37 @@ HRESULT CLR_RT_BinaryFormatter::WriteCompressedUnsigned( CLR_UINT32 val )
 HRESULT CLR_RT_BinaryFormatter::ReadType( CLR_RT_ReflectionDef_Index& val )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_CHECK_HRESULT(m_stream->ReadBits( m_lastTypeRead, 32 ));
+    NANOCLR_CHECK_HRESULT(m_stream->ReadBits( m_lastTypeRead, 32 ));
 
     val.InitializeFromHash( m_lastTypeRead );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_BinaryFormatter::WriteType( const CLR_RT_ReflectionDef_Index& val )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
-    TINYCLR_SET_AND_LEAVE(WriteType( val.GetTypeHash() ));
+    NANOCLR_SET_AND_LEAVE(WriteType( val.GetTypeHash() ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_BinaryFormatter::WriteType( CLR_UINT32 hash )
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(hash == 0xFFFFFFFF || hash == 0)
     {
-        TINYCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    TINYCLR_SET_AND_LEAVE(m_stream->WriteBits( hash, 32 ));
+    NANOCLR_SET_AND_LEAVE(m_stream->WriteBits( hash, 32 ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 

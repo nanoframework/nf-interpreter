@@ -7,7 +7,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(TINYCLR_USE_AVLTREE_FOR_METHODLOOKUP)
+#if defined(NANOCLR_USE_AVLTREE_FOR_METHODLOOKUP)
 
 int CLR_RT_EventCache::LookupEntry::Callback_Compare( void* state, CLR_RT_AVLTree::Entry* left, CLR_RT_AVLTree::Entry* right )
 {
@@ -347,14 +347,14 @@ void CLR_RT_EventCache::VirtualMethodTable::MoveEntryToTop( Link* entries, CLR_U
     }
 }
 
-#endif // #if defined(TINYCLR_USE_AVLTREE_FOR_METHODLOOKUP)
+#endif // #if defined(NANOCLR_USE_AVLTREE_FOR_METHODLOOKUP)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CLR_RT_EventCache::EventCache_Initialize()
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_CLEAR(*this);
+    NANOCLR_CLEAR(*this);
 
     m_events = (BoundedList*)&m_scratch[ 0 ];
 
@@ -370,7 +370,7 @@ void CLR_RT_EventCache::EventCache_Initialize()
 
     m_lookup_VirtualMethod.Initialize();
 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     m_inlineBufferStart = (CLR_RT_InlineBuffer*)g_scratchInlineBuffer;
 
     num = InlineBufferCount()-1;
@@ -392,14 +392,14 @@ CLR_UINT32 CLR_RT_EventCache::EventCache_Cleanup()
 
     while(num--)
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node,ptr,lst->m_blocks)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node,ptr,lst->m_blocks)
         {
             ptr->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, ptr->DataSize()) );
             ptr->ClearData();
 
             tot += ptr->DataSize();
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
 
         lst->m_blocks.DblLinkedList_Initialize();
 
@@ -421,13 +421,13 @@ void CLR_RT_EventCache::Append_Node( CLR_RT_HeapBlock* node )
     ptr->ChangeDataType ( DATATYPE_CACHEDBLOCK                                    );
     ptr->ChangeDataFlags( CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event );
 
-    TINYCLR_CHECK_EARLY_COLLECTION(ptr);
+    NANOCLR_CHECK_EARLY_COLLECTION(ptr);
 
     ptr->Debug_ClearBlock( 0xAB );
 
     lst.m_blocks.LinkAtBack( ptr );
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     g_CLR_PRF_Profiler.TrackObjectDeletion(node);
 #endif
 }
@@ -439,7 +439,7 @@ CLR_RT_HeapBlock* CLR_RT_EventCache::Extract_Node_Slow( CLR_UINT32 dataType, CLR
     CLR_RT_HeapBlock_Node* best     = NULL;
     CLR_UINT32             bestSize = 0;
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node,ptr,m_events[ 0 ].m_blocks)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node,ptr,m_events[ 0 ].m_blocks)
     {
         CLR_UINT32 size = ptr->DataSize();
 
@@ -460,7 +460,7 @@ CLR_RT_HeapBlock* CLR_RT_EventCache::Extract_Node_Slow( CLR_UINT32 dataType, CLR
             }
         }
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     ptr = best;
 
@@ -494,7 +494,7 @@ CLR_RT_HeapBlock* CLR_RT_EventCache::Extract_Node_Slow( CLR_UINT32 dataType, CLR
             ptr->Debug_ClearBlock( 0xAD );
         }
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectCreation( ptr );
 #endif
 
@@ -525,7 +525,7 @@ CLR_RT_HeapBlock* CLR_RT_EventCache::Extract_Node_Fast( CLR_UINT32 dataType, CLR
             ptr->Debug_ClearBlock( 0xAD );
         }
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectCreation( ptr );
 #endif
 
@@ -544,7 +544,7 @@ CLR_RT_HeapBlock* CLR_RT_EventCache::Extract_Node_Bytes( CLR_UINT32 dataType, CL
 CLR_RT_HeapBlock* CLR_RT_EventCache::Extract_Node( CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 blocks )
 {
     NATIVE_PROFILE_CLR_CORE();
-#if defined(TINYCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION)        
+#if defined(NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION)        
     return g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForEvents( dataType, flags, blocks );
 #else
     if(blocks > 0 && blocks < c_maxFastLists) return Extract_Node_Fast( dataType, flags, blocks );
@@ -562,7 +562,7 @@ bool CLR_RT_EventCache::FindVirtualMethod( const CLR_RT_TypeDef_Index& cls, cons
 
 // -- //
 
-#ifndef TINYCLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 bool CLR_RT_EventCache::GetInlineFrameBuffer(CLR_RT_InlineBuffer** ppBuffer)
 {
     if(m_inlineBufferStart != NULL)

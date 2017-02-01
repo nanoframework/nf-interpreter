@@ -20,7 +20,7 @@ CLR_RT_HeapBlock_String* CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlo
     {
         LPSTR szText = (LPSTR)&str[ 1 ]; szText[ 0 ] = 0;
 
-#if defined(TINYCLR_NO_ASSEMBLY_STRINGS)
+#if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
         str->SetStringText( szText );
 #else
         str->SetStringText( szText, NULL );
@@ -35,19 +35,19 @@ CLR_RT_HeapBlock_String* CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlo
 HRESULT CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlock& reference, LPCSTR szText )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     if(!szText) szText = "";
 
-    TINYCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance( reference, szText, (CLR_UINT32)hal_strlen_s( szText ) ));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance( reference, szText, (CLR_UINT32)hal_strlen_s( szText ) ));
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlock& reference, LPCSTR szText, CLR_UINT32 length )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_String* str;
     LPSTR                    szTextDst;
@@ -58,13 +58,13 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlock& reference, LP
 
     memcpy( szTextDst, szText, length ); szTextDst[ length ] = 0;
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlock& reference, LPCSTR szText, CLR_RT_Assembly* assm )
 {        
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_String* str;
 
@@ -74,13 +74,13 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlock& reference, LP
 
     reference.SetObjectReference( str );
 
-#if defined(TINYCLR_NO_ASSEMBLY_STRINGS)            
-    TINYCLR_CHECK_HRESULT( CLR_RT_HeapBlock_String::CreateInstance( reference, assm->GetString( CLR_DataFromTk( token ) ) ));    
+#if defined(NANOCLR_NO_ASSEMBLY_STRINGS)            
+    NANOCLR_CHECK_HRESULT( CLR_RT_HeapBlock_String::CreateInstance( reference, assm->GetString( CLR_DataFromTk( token ) ) ));    
 #else
     str->SetStringText( szText, assm );
 #endif
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlock& reference, CLR_UINT32 token, CLR_RT_Assembly* assm )
@@ -92,7 +92,7 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlock& reference, CL
 HRESULT CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlock& reference, CLR_UINT16* szText, CLR_UINT32 length )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_UnicodeHelper     uh;             uh.SetInputUTF16     ( szText );
     CLR_UINT32               lengthInBytes = uh.CountNumberOfBytes( length );
@@ -103,7 +103,7 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlock& reference, CL
 
     uh.ConvertToUTF8( length, false );
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 CLR_RT_HeapBlock_String* CLR_RT_HeapBlock_String::GetStringEmpty()

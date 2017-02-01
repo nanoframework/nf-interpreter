@@ -4,7 +4,7 @@
 //
 #include "stdafx.h"
 
-#include <TinyCLR_Application.h>
+#include <nanoCLR_Application.h>
 
 
 //

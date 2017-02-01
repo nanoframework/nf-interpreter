@@ -3,48 +3,48 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TINYCLR_INTEROP_H_
-#define _TINYCLR_INTEROP_H_
+#ifndef _NANOCLR_INTEROP_H_
+#define _NANOCLR_INTEROP_H_
 
-#include <TinyClr_PlatformDef.h>
+#include <nanoClr_PlatformDef.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern HRESULT TINYCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line );
+extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line );
 
 #if defined(_WIN32)
 
-#define TINYCLR_LEAVE()  { if(FAILED(hr)) TINYCLR_DEBUG_PROCESS_EXCEPTION( hr, NULL, NULL, 0 ); goto TinyCLR_Cleanup; }
-#define TINYCLR_RETURN() return hr
+#define NANOCLR_LEAVE()  { if(FAILED(hr)) NANOCLR_DEBUG_PROCESS_EXCEPTION( hr, NULL, NULL, 0 ); goto nanoCLR_Cleanup; }
+#define NANOCLR_RETURN() return hr
 
 #else
 
-#if defined(TINYCLR_TRACE_HRESULT)
+#if defined(NANOCLR_TRACE_HRESULT)
 
-#define TINYCLR_LEAVE()  { if(FAILED(hr)) TINYCLR_DEBUG_PROCESS_EXCEPTION( hr, __func__, __FILE__, __LINE__ ); goto TinyCLR_Cleanup; }
-#define TINYCLR_RETURN() return hr
+#define NANOCLR_LEAVE()  { if(FAILED(hr)) NANOCLR_DEBUG_PROCESS_EXCEPTION( hr, __func__, __FILE__, __LINE__ ); goto nanoCLR_Cleanup; }
+#define NANOCLR_RETURN() return hr
 
 #else
 
-#define TINYCLR_LEAVE()  goto TinyCLR_Cleanup
-#define TINYCLR_RETURN() return hr
+#define NANOCLR_LEAVE()  goto nanoCLR_Cleanup
+#define NANOCLR_RETURN() return hr
 
 #endif
 
 #endif
 
 
-#define TINYCLR_HEADER()               HRESULT hr
-#define TINYCLR_CHECK_HRESULT(expr)    { if(FAILED(hr = (expr))) TINYCLR_LEAVE(); }
-#define TINYCLR_EXIT_ON_SUCCESS(expr)  { if(SUCCEEDED(hr = (expr))) TINYCLR_LEAVE(); }
-#define TINYCLR_SET_AND_LEAVE(expr)    { hr = (expr); TINYCLR_LEAVE(); }
-#define TINYCLR_CLEANUP()              hr = S_OK; TinyCLR_Cleanup:
-#define TINYCLR_CLEANUP_END()          TINYCLR_RETURN()
-#define TINYCLR_NOCLEANUP()            TINYCLR_CLEANUP(); TINYCLR_CLEANUP_END()
-#define TINYCLR_NOCLEANUP_NOLABEL()    hr = S_OK; TINYCLR_RETURN()
-#define FAULT_ON_NULL(ptr)             if(!(ptr)) TINYCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE)
-#define FAULT_ON_NULL_ARG(ptr)         if(!(ptr)) TINYCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL)
+#define NANOCLR_HEADER()               HRESULT hr
+#define NANOCLR_CHECK_HRESULT(expr)    { if(FAILED(hr = (expr))) NANOCLR_LEAVE(); }
+#define NANOCLR_EXIT_ON_SUCCESS(expr)  { if(SUCCEEDED(hr = (expr))) NANOCLR_LEAVE(); }
+#define NANOCLR_SET_AND_LEAVE(expr)    { hr = (expr); NANOCLR_LEAVE(); }
+#define NANOCLR_CLEANUP()              hr = S_OK; nanoCLR_Cleanup:
+#define NANOCLR_CLEANUP_END()          NANOCLR_RETURN()
+#define NANOCLR_NOCLEANUP()            NANOCLR_CLEANUP(); NANOCLR_CLEANUP_END()
+#define NANOCLR_NOCLEANUP_NOLABEL()    hr = S_OK; NANOCLR_RETURN()
+#define FAULT_ON_NULL(ptr)             if(!(ptr)) NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE)
+#define FAULT_ON_NULL_ARG(ptr)         if(!(ptr)) NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL)
 
 
 //    Correspondence between CLR C# and C++ native types:
@@ -82,7 +82,7 @@ typedef CLR_RT_HeapBlock* UNSUPPORTED_TYPE;
 
 #define CLR_RT_HEAP_BLOCK_SIZE 12
 
-#define TINYCLR_NATIVE_DECLARE(mtd) static HRESULT mtd( CLR_RT_StackFrame& stack )
+#define NANOCLR_NATIVE_DECLARE(mtd) static HRESULT mtd( CLR_RT_StackFrame& stack )
 
 typedef HRESULT (*CLR_RT_MethodHandler)( CLR_RT_StackFrame& stack );
 
@@ -130,7 +130,7 @@ HRESULT Interop_Marshal_INT8  ( const CLR_RT_StackFrame &stackFrame, UINT32 para
 HRESULT Interop_Marshal_INT16 ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, INT16  &param );
 HRESULT Interop_Marshal_INT32 ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, INT32  &param );
 HRESULT Interop_Marshal_INT64 ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, INT64  &param );
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 HRESULT Interop_Marshal_float ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, float  &param );
 HRESULT Interop_Marshal_double( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, double &param );
 
@@ -178,7 +178,7 @@ friend HRESULT Interop_Marshal_INT16_ARRAY ( const CLR_RT_StackFrame &stackFrame
 friend HRESULT Interop_Marshal_INT32_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<INT32>  &typedArray );
 friend HRESULT Interop_Marshal_INT64_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<INT64>  &typedArray );
 
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 friend HRESULT Interop_Marshal_float_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<float>  &typedArray );
 friend HRESULT Interop_Marshal_double_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<double> &typedArray );
 #else
@@ -212,7 +212,7 @@ typedef CLR_RT_TypedArray<INT8>   CLR_RT_TypedArray_INT8;
 typedef CLR_RT_TypedArray<INT16>  CLR_RT_TypedArray_INT16;
 typedef CLR_RT_TypedArray<INT32>  CLR_RT_TypedArray_INT32;
 typedef CLR_RT_TypedArray<INT64>  CLR_RT_TypedArray_INT64;
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 typedef CLR_RT_TypedArray<float>  CLR_RT_TypedArray_float;
 typedef CLR_RT_TypedArray<double> CLR_RT_TypedArray_double;
 #else
@@ -256,7 +256,7 @@ void SetResult_UINT8 ( CLR_RT_StackFrame &stackFrame, UINT8  value );
 void SetResult_UINT16( CLR_RT_StackFrame &stackFrame, UINT16 value );
 void SetResult_UINT32( CLR_RT_StackFrame &stackFrame, UINT32 value );
 void SetResult_UINT64( CLR_RT_StackFrame &stackFrame, UINT64 value );
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 void SetResult_float ( CLR_RT_StackFrame &stackFrame, float  value );
 void SetResult_double( CLR_RT_StackFrame &stackFrame, double value );
 #else
@@ -294,7 +294,7 @@ HRESULT Interop_Marshal_INT8_ByRef  ( const CLR_RT_StackFrame &stackFrame, void 
 HRESULT Interop_Marshal_INT16_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, INT16  *&pParam );
 HRESULT Interop_Marshal_INT32_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, INT32  *&pParam );
 HRESULT Interop_Marshal_INT64_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, INT64  *&pParam );
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 HRESULT Interop_Marshal_float_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, float  *&pParam );
 HRESULT Interop_Marshal_double_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, double *&pParam );
 #else
@@ -356,7 +356,7 @@ INT16  &Interop_Marshal_GetField_INT16 ( CLR_RT_HeapBlock *pThis, UINT32 fieldIn
 INT32  &Interop_Marshal_GetField_INT32 ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
 INT64  &Interop_Marshal_GetField_INT64 ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
 //----------------- Float point types - float and double
-#if !defined(TINYCLR_EMULATED_FLOATINGPOINT)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 float  &Interop_Marshal_GetField_float ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
 double &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
 #else
@@ -456,6 +456,6 @@ void CLR_SoftReboot();
 
 void CLR_DebuggerBreak();
 
-#endif // _TINYCLR_INTEROP_H_
+#endif // _NANOCLR_INTEROP_H_
 
 

@@ -53,7 +53,7 @@ CLR_RT_HeapBlock* CLR_RT_HeapCluster::ExtractBlocks( CLR_UINT32 dataType, CLR_UI
 
     if(flags & CLR_RT_HeapBlock::HB_Event)
     {
-        TINYCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapBlock_Node,ptr,m_freeList)
+        NANOCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapBlock_Node,ptr,m_freeList)
         {
             available = ptr->DataSize();
 
@@ -63,11 +63,11 @@ CLR_RT_HeapBlock* CLR_RT_HeapCluster::ExtractBlocks( CLR_UINT32 dataType, CLR_UI
                 break;
             }
         }
-        TINYCLR_FOREACH_NODE_BACKWARD_END();
+        NANOCLR_FOREACH_NODE_BACKWARD_END();
     }
     else
     {
-        TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node,ptr,m_freeList)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node,ptr,m_freeList)
         {
             available = ptr->DataSize();
 
@@ -77,7 +77,7 @@ CLR_RT_HeapBlock* CLR_RT_HeapCluster::ExtractBlocks( CLR_UINT32 dataType, CLR_UI
                 break;
             }
         }
-        TINYCLR_FOREACH_NODE_END();
+        NANOCLR_FOREACH_NODE_END();
     }
 
     if(res)
@@ -165,11 +165,11 @@ void CLR_RT_HeapCluster::RecoverFromGC()
             {
                 ValidateBlock( next );
 
-#if defined(TINYCLR_PROFILE_NEW_ALLOCATIONS)
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
                 g_CLR_PRF_Profiler.TrackObjectDeletion( next );
 #endif
 
-                TINYCLR_CHECK_EARLY_COLLECTION(next);
+                NANOCLR_CHECK_EARLY_COLLECTION(next);
 
                 int len = next->DataSize();
 
@@ -212,11 +212,11 @@ CLR_RT_HeapBlock_Node* CLR_RT_HeapCluster::InsertInOrder( CLR_RT_HeapBlock_Node*
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock_Node* ptr;
 
-    TINYCLR_FOREACH_NODE__NODECL(CLR_RT_HeapBlock_Node,ptr,m_freeList)
+    NANOCLR_FOREACH_NODE__NODECL(CLR_RT_HeapBlock_Node,ptr,m_freeList)
     {
         if(ptr > node) break;
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     node->ClearData(); m_freeList.InsertBeforeNode( ptr, node );
 
@@ -246,7 +246,7 @@ CLR_RT_HeapBlock_Node* CLR_RT_HeapCluster::InsertInOrder( CLR_RT_HeapBlock_Node*
 
 //--//
 
-#if TINYCLR_VALIDATE_HEAP >= TINYCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
 
 void CLR_RT_HeapCluster::ValidateBlock( CLR_RT_HeapBlock* ptr )
 {
@@ -285,7 +285,7 @@ void CLR_RT_HeapCluster::ValidateBlock( CLR_RT_HeapBlock* ptr )
         return;
     }
 
-    TINYCLR_DEBUG_STOP();
+    NANOCLR_DEBUG_STOP();
 }
 
 #endif

@@ -48,11 +48,11 @@ int CLR_RT_DblLinkedList::NumOfNodes()
 
     int num  = 0;
 
-    TINYCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node,node,(*this))
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node,node,(*this))
     {
         num++;
     }
-    TINYCLR_FOREACH_NODE_END();
+    NANOCLR_FOREACH_NODE_END();
 
     return num;
 }
@@ -64,20 +64,20 @@ void CLR_RT_DblLinkedList::Relocate()
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_last  );
 }
 
-#if TINYCLR_VALIDATE_HEAP >= TINYCLR_VALIDATE_HEAP_2_DblLinkedList
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_2_DblLinkedList
 
 void CLR_RT_DblLinkedList::ValidateList()
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if(m_null != NULL) TINYCLR_DEBUG_STOP();
+    if(m_null != NULL) NANOCLR_DEBUG_STOP();
 
     CLR_RT_HeapBlock_Node* prev = Head();
     CLR_RT_HeapBlock_Node* node = prev->Next();
 
     while(node)
     {
-        if(node->Prev() != prev) TINYCLR_DEBUG_STOP();
+        if(node->Prev() != prev) NANOCLR_DEBUG_STOP();
 
         prev = node;
         node = prev->Next();

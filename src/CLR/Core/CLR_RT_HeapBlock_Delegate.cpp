@@ -10,20 +10,20 @@
 HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance( CLR_RT_HeapBlock& reference, const CLR_RT_MethodDef_Index& ftn, CLR_RT_StackFrame* call )
 {
     NATIVE_PROFILE_CLR_CORE();
-    TINYCLR_HEADER();
+    NANOCLR_HEADER();
 
     reference.SetObjectReference( NULL );
 
     CLR_UINT32 length = 0;
 
-#if defined(TINYCLR_DELEGATE_PRESERVE_STACK)    
+#if defined(NANOCLR_DELEGATE_PRESERVE_STACK)    
     if(call)
     {
-        TINYCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,ptr,call)
+        NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,ptr,call)
         {
             length++;
         }
-        TINYCLR_FOREACH_NODE_BACKWARD_END();
+        NANOCLR_FOREACH_NODE_BACKWARD_END();
     }
 
     //
@@ -41,32 +41,32 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance( CLR_RT_HeapBlock& reference, 
     dlg->ClearData();
     dlg->m_cls.Clear();
     dlg->m_ftn              = ftn;
-#if defined(TINYCLR_DELEGATE_PRESERVE_STACK)
+#if defined(NANOCLR_DELEGATE_PRESERVE_STACK)
     dlg->m_numOfStackFrames = length;
 #endif
     
     dlg->m_object.SetObjectReference( NULL );
 
-#if defined(TINYCLR_APPDOMAINS)
+#if defined(NANOCLR_APPDOMAINS)
     dlg->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 #endif
 
-#if defined(TINYCLR_DELEGATE_PRESERVE_STACK)
+#if defined(NANOCLR_DELEGATE_PRESERVE_STACK)
     if(call)
     {
         CLR_RT_MethodDef_Index* callStack = dlg->GetStackFrames();
 
-        TINYCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,ptr,call)
+        NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,ptr,call)
         {
             if(length-- == 0) break;
 
             *callStack++ = ptr->m_call;
         }
-        TINYCLR_FOREACH_NODE_BACKWARD_END();
+        NANOCLR_FOREACH_NODE_BACKWARD_END();
     }
 #endif
 
-    TINYCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_HeapBlock_Delegate::Relocate()
