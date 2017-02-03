@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
 #################################################################
 # WHEN ADDING A NEW SERIES add the appropriate GCC options bellow
 #################################################################
