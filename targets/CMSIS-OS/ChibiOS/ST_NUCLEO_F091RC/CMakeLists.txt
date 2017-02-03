@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
 
+# add header files with common OS definitions and board definitions specific for each image
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
+
 set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
@@ -59,6 +67,7 @@ add_executable(
 
 # include common directories
 include_directories(
+    "${CMAKE_CURRENT_BINARY_DIR}"
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/common
 
@@ -72,6 +81,7 @@ include_directories(
 
 # include nanoBooter directories
 target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
+    "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter"
      ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter
 
      ${TARGET_CMSIS_NANOBOOTER_INCLUDE_DIRS}
@@ -80,6 +90,7 @@ target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
 
 # include nanoCLR directories
 target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
+    "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
      ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
 
      ${TARGET_CMSIS_NANOCLR_INCLUDE_DIRS}

@@ -8,6 +8,7 @@
 
 #include <WireProtocol.h>
 #include <WireProtocol_MonitorCommands.h>
+#include <target_board.h>
 
 static const int AccessMemory_Check    = 0x00;
 static const int AccessMemory_Read     = 0x01;
@@ -20,13 +21,12 @@ static const int AccessMemory_Mask     = 0x0F;
 
 bool NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
 {
-    releaseInfo->version.usMajor = 0;
-    releaseInfo->version.usMinor = 0;
-    releaseInfo->version.usBuild = 12345;
-    releaseInfo->version.usRevision = 1;
+    releaseInfo->version.usMajor = NANOFRAMEWORK_VERSION_MAJOR;
+    releaseInfo->version.usMinor = NANOFRAMEWORK_VERSION_MINOR;
+    releaseInfo->version.usBuild = NANOFRAMEWORK_VERSION_BUILD;
+    releaseInfo->version.usRevision = 0;
 
-    // TODO replace this with string from (possibly...) main config file
-    memcpy(&releaseInfo->infoString, ">>>> nanoFramework RULES (nanoBooter here) <<<<", sizeof(releaseInfo->infoString));
+    memcpy(&releaseInfo->infoString, OEMINFO_STRING, sizeof(releaseInfo->infoString));
 
     return true;
 }
