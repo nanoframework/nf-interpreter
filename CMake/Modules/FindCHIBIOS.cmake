@@ -1,9 +1,18 @@
-# try to find board
+# try to find board in source 
 if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
     # board found
     message(STATUS "ChibiOS board '${CHIBIOS_BOARD}' found")
 else()
-    message(FATAL_ERROR "\n\nSorry but ${CHIBIOS_BOARD} seems to be missing in the available list of the ChibiOS supported boards...\n\n")
+
+    # board NOT found in source
+    # try to find it in nanoFramework community overlay 
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
+        # board found
+        message(STATUS "ChibiOS board '${CHIBIOS_BOARD}' found in nanoFramework overlays")
+    else()
+        message(FATAL_ERROR "\n\nSorry but ${CHIBIOS_BOARD} seems to be missing in the available list of the ChibiOS supported boards...\n\n")
+    endif()
+
 endif()
 
 # try to find out the MCU vendor from the board name
@@ -45,15 +54,28 @@ if("${CHIBIOS_TARGET_VENDOR}" STREQUAL "STM")
 
 
     ####################################################
+    # add here all boards with MCU from STM32F7xx series 
+    ####################################################
+    set(STM32_F7xx_BOARDS
+        ST_NUCLEO144_F746ZG 
+        CACHE INTERNAL "F7xx series board")
+    list(FIND STM32_F7xx_BOARDS ${CHIBIOS_BOARD} STM32_F7xx_BOARDS_INDEX)
+
+
+    ####################################################
     if(STM32_F0xx_BOARDS_INDEX GREATER -1)
         set(CHIBIOS_BOARD_SERIES "STM32F0xx")
     elseif(STM32_F4xx_BOARDS_INDEX GREATER -1)
         set(CHIBIOS_BOARD_SERIES "STM32F4xx")
+    elseif(STM32_F7xx_BOARDS_INDEX GREATER -1)
+        set(CHIBIOS_BOARD_SERIES "STM32F7xx")
     else()
         message(FATAL_ERROR "\n\n${CHIBIOS_BOARD} is not on any of the series lists.\nPlease add it to the correct series list and submit a PR.\n\n")
     endif()
 
+    # including here the CMake files for the source files specific to the target series
     include(CHIBIOS_${CHIBIOS_BOARD_SERIES}_sources)
+    # and here the GCC options tuned for the target series 
     include(CHIBIOS_${CHIBIOS_BOARD_SERIES}_GCC_options)
 
 endif()
@@ -77,11 +99,10 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/por
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/cmsis_os)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx)
 
+# append include directory for boards in the nanoFramework community overlay
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
+
 # source files and GCC options according to target vendor and series
-
-
-# source file(s) for board
-list(APPEND CHIBIOS_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD}/board.c)
 
 # source files for ChibiOS
 set(CHIBIOS_SRCS
@@ -142,6 +163,10 @@ set(CHIBIOS_SRCS
 
     # CMSIS
     cmsis_os.c
+
+    # board file(s)
+    board.c
+
 )
 
 foreach(SRC_FILE ${CHIBIOS_SRCS})
@@ -154,6 +179,15 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/oslib/src
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/cmsis_os
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/abstractions/cmsis_os
+        
+            # this path hint is for the usual location of the board.c file
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD}
+         
+            # this path hint is for the alternative boards folder in the nanoFramework community overlay
+            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD}
+
+            # this path hint is for OEM boards for which the board file(s) are probably located directly in the "target" folder along with remaining files
+            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
