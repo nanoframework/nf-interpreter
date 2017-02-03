@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
 cmake_minimum_required(VERSION 3.0)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
