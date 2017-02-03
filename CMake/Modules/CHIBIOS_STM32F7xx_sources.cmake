@@ -19,7 +19,6 @@ set(CHIBIOS_PORT_SRCS
     nvic.c
     hal_lld.c
     ext_lld_isr.c
-    hal_ext_lld_isr.c
 
     adc_lld.c
     can_lld.c
@@ -41,7 +40,6 @@ set(CHIBIOS_PORT_SRCS
     serial_lld.c
     uart_lld.c
     wdg_lld.c
-    hal_qspi_lld.c
 
     # RT
     chcore.c
@@ -64,7 +62,6 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv2
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/MACv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/OTGv1
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/QUADSPIv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RTCv2
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SDMMCv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SPIv2
