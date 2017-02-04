@@ -16,7 +16,7 @@ The build is based on CMake tool to ease the development in all major platforms.
 
 You'll need:
 - [GNU ARM Embedded Toolchain](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
-- [CMake](https://cmake.org/)
+- [CMake](https://cmake.org/) (Minimum required version is 3.7)
 
 If you are using VS Code as your development platform we suggest that you use the CMake Tools extension. This will allow you to run the builds without leaving VS Code.
 - [Visual Studio Code](http://code.visualstudio.com/)
