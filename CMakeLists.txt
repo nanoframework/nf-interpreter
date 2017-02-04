@@ -376,7 +376,7 @@ elseif(RTOS_FREERTOS_CHECK)
     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
    
     # add source directory
-    add_subdirectory("source")
+    add_subdirectory("src")
 
 #######################
 # mbed OS
@@ -528,7 +528,7 @@ elseif(RTOS_RTX_RTOS_CHECK)
     set(RTXRTOS_INCLUDE_DIRS ${RTXRTOS_SOURCE_DIR})
    
     # add source directory
-    add_subdirectory("source")
+    add_subdirectory("src")
 
 #######################
 # RTX RTOS2
@@ -587,7 +587,7 @@ support for RTX RTOS2 is in the works, please check latter...
     set(RTXRTOS2_INCLUDE_DIRS ${RTXRTOS2_SOURCE_DIR})
    
     # add source directory
-    add_subdirectory("source")
+    add_subdirectory("src")
 
 #######################
 
@@ -612,6 +612,6 @@ else()
     endif()    
    
     # add source directory
-    add_subdirectory("source")
+    add_subdirectory("src")
  
 endif()
