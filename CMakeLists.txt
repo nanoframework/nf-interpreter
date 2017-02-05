@@ -40,18 +40,23 @@ endif()
 #######################
 # handle RTOSes choice
 
-# sanity check here for invalid RTOS option
-set(RTOS_SUPPORTED CHIBIOS FREERTOS MBEDOS RTXRTOS RTXRTOS2 CACHE INTERNAL "supported RTOS options")
-list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
-if(RTOS_INDEX EQUAL -1)
-    message(FATAL_ERROR "\n\nSorry but ${RTOS} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-endif()
+# # sanity check here for invalid RTOS option
+# set(RTOS_SUPPORTED CHIBIOS FREERTOS MBEDOS RTXRTOS RTXRTOS2 CACHE INTERNAL "supported RTOS options")
+# list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
+# if(RTOS_INDEX EQUAL -1)
+#     message(FATAL_ERROR "\n\nSorry but ${RTOS} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+# endif()
 
-string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
-string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
-string(COMPARE EQUAL "MBEDOS"   "${RTOS}" RTOS_MBEDOS_CHECK)
-string(COMPARE EQUAL "RTXRTOS"  "${RTOS}" RTOS_RTX_RTOS_CHECK)
-string(COMPARE EQUAL "RTXRTOS2" "${RTOS}" RTOS_RTX_RTOS2_CHECK)
+# string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
+# string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
+# string(COMPARE EQUAL "MBEDOS"   "${RTOS}" RTOS_MBEDOS_CHECK)
+# string(COMPARE EQUAL "RTXRTOS"  "${RTOS}" RTOS_RTX_RTOS_CHECK)
+# string(COMPARE EQUAL "RTXRTOS2" "${RTOS}" RTOS_RTX_RTOS2_CHECK)
+
+##########################################################################
+# default RTOS choice is ChibiOS (no other RTOS is supported at this time)
+set(RTOS_CHIBIOS_CHECK TRUE)
+##########################################################################
 
 if(RTOS_FREERTOS_CHECK) 
     set(RTOS_FREERTOS_CHECK TRUE)
@@ -109,42 +114,42 @@ if(RTOS_CHIBIOS_CHECK)
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
 
-elseif(RTOS_MBEDOS_CHECK)
+# elseif(RTOS_MBEDOS_CHECK)
 
-    message(STATUS "\nSetting Toolchain file for mbed \n")
-    # set toolchain file
-    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.mbed.${TOOLCHAIN}.cmake)
+#     message(STATUS "\nSetting Toolchain file for mbed \n")
+#     # set toolchain file
+#     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.mbed.${TOOLCHAIN}.cmake)
 
-else()
+# else()
 
-    # find out the chip vendor in order to move on with the appropriate configuration
-    string(REGEX MATCH "^[S][T][M]32" CHIP_VENDOR_STM32 "${TARGET_CHIP}")
-    string(COMPARE EQUAL "STM32" "${CHIP_VENDOR_STM32}" CHIP_VENDOR_STM32_CHECK)
+#     # find out the chip vendor in order to move on with the appropriate configuration
+#     string(REGEX MATCH "^[S][T][M]32" CHIP_VENDOR_STM32 "${TARGET_CHIP}")
+#     string(COMPARE EQUAL "STM32" "${CHIP_VENDOR_STM32}" CHIP_VENDOR_STM32_CHECK)
 
-    if(CHIP_VENDOR_STM32_CHECK)
-        # vendor is ST and toolchain is GCC
-        message(STATUS "Chip vendor is ST. Chip is STM32.")
+#     if(CHIP_VENDOR_STM32_CHECK)
+#         # vendor is ST and toolchain is GCC
+#         message(STATUS "Chip vendor is ST. Chip is STM32.")
 
-        # set CMSIS include directories
-        include_directories(STM32CMSIS_INCLUDE_DIRS)
+#         # set CMSIS include directories
+#         include_directories(STM32CMSIS_INCLUDE_DIRS)
 
-        # set toolchain file for cross-compiling with CMake
-        # for this vendor/chip it will be 
-    # elseif(CHIP_VENDOR_??_CHECK)
-    #
-    #     # vendor is ?? and toolchain is GCC
-    #     message("Chip vendor is ??. Chip is ???.")
-    #     set(CMAKE_TOOLCHAIN_FILE CMake/???.cmake)
-    # 
-    else()
-        message(STATUS "\n-- ###############################################\n")
-        message(STATUS "Unknow vendor or chip. Supported vendors/chips:\n-- ST's STM32 (e.g. STM32F407VG)\n")
-        message(STATUS "###############################################\n\n")
-        message(FATAL_ERROR "Unknow vendor or chip in TARGET_CHIP")
-    endif()
+#         # set toolchain file for cross-compiling with CMake
+#         # for this vendor/chip it will be 
+#     # elseif(CHIP_VENDOR_??_CHECK)
+#     #
+#     #     # vendor is ?? and toolchain is GCC
+#     #     message("Chip vendor is ??. Chip is ???.")
+#     #     set(CMAKE_TOOLCHAIN_FILE CMake/???.cmake)
+#     # 
+#     else()
+#         message(STATUS "\n-- ###############################################\n")
+#         message(STATUS "Unknow vendor or chip. Supported vendors/chips:\n-- ST's STM32 (e.g. STM32F407VG)\n")
+#         message(STATUS "###############################################\n\n")
+#         message(FATAL_ERROR "Unknow vendor or chip in TARGET_CHIP")
+#     endif()
 
-    # set toolchain file
-    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.${CHIP_VENDOR_STM32}.${TOOLCHAIN}.cmake)
+#     # set toolchain file
+#     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.${CHIP_VENDOR_STM32}.${TOOLCHAIN}.cmake)
 endif()
 
 #########################################
@@ -282,336 +287,337 @@ if(RTOS_CHIBIOS_CHECK)
 
     # add TARGET board directory
     add_subdirectory("targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
-
-#######################
-# FreeRTOS
-elseif(RTOS_FREERTOS_CHECK)
-
-    # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
-    set(NO_FREERTOS_SOURCE TRUE)
-    if(FREERTOS_SOURCE)
-        if(NOT "${FREERTOS_SOURCE}" STREQUAL "")
-            set(NO_FREERTOS_SOURCE FALSE)
-        endif()
-    endif()
-
-    if(NO_FREERTOS_SOURCE)
-        # no FreeRTOS source specified, download it from it's repo
-
-        # check for SVN (needed here for advanced warning to user if it's not installed)
-        find_package(Subversion)
-
-        #  check is SVN was found, if not report to user and abort
-        if(NOT Subversion_SVN_EXECUTABLE)
-        message(FATAL_ERROR "error: could not find SVN, make sure you have it installed.")
-        endif()
-
-        # check if build was requested with a specifc FreeRTOS version
-        if(DEFINED FREERTOS_VERSION)
-
-            if("${FREERTOS_VERSION}" STREQUAL "")
-                set(FREERTOS_VERSION_EMPTY TRUE)
-            endif()
-
-            if(FREERTOS_VERSION_EMPTY)
-                # no FreeRTOS version actualy specified, must be empty which is fine, we'll grab the code from the trunk
-                message(STATUS "RTOS is: FreeRTOS (latest available code from trunk)")
-                set(FREERTOS_SVN_REPOSITORY "https://svn.code.sf.net/p/freertos/code/trunk")
-            else()
-                message(STATUS "RTOS is: FreeRTOS v${FREERTOS_VERSION}")
-                set(FREERTOS_SVN_REPOSITORY "https://svn.code.sf.net/p/freertos/code/tags/V${FREERTOS_VERSION}")
-            endif()
-            
-        endif()
-
-        # need to setup a separate CMake project to download the code from the SVN repository
-        # otherwise it won't be available before the actual build step
-        configure_file("CMake/FreeRTOS.CMakeLists.cmake.in"
-                    "${CMAKE_BINARY_DIR}/FreeRTOS_Download/CMakeLists.txt")
-        
-        # setup CMake project for FreeRTOS download
-        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                        RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
-
-        # run build on FreeRTOS download CMake project to perform the download
-        execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                        RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
-        
-        # add FreeRTOS as external project
-        ExternalProject_Add( 
-            FreeRTOS
-            PREFIX FreeRTOS
-            SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
-            SVN_REPOSITORY ${FREERTOS_SVN_REPOSITORY}/FreeRTOS/Source
-            TIMEOUT 10
-            LOG_DOWNLOAD 1
-            # Disable all other steps
-            INSTALL_COMMAND ""
-            CONFIGURE_COMMAND ""
-            BUILD_COMMAND ""
-        )
-
-        # get source dir for FreeRTOS CMake project
-        ExternalProject_Get_Property(FreeRTOS SOURCE_DIR)
-        set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
-
-    else()
-        # FreeRTOS source was specified
-
-        # sanity check is source path exists
-        if(EXISTS "${FREERTOS_SOURCE}/")
-            message(STATUS "RTOS is: FreeRTOS (source from: ${FREERTOS_SOURCE})")
-
-            file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
-            set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
-        else()
-            message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
-        endif()
-
-    endif()
-
-    # set CMSIS RTOS include directory
-    include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
-   
-    # add source directory
-    add_subdirectory("source")
-
-#######################
-# mbed OS
-elseif(RTOS_MBEDOS_CHECK)
-
-    # check if MBEDOS_SOURCE was specified or if it's empty (default is empty)
-    set(NO_MBEDOS_SOURCE TRUE)
-    if(MBEDOS_SOURCE)
-        if(NOT "${MBEDOS_SOURCE}" STREQUAL "")
-            set(NO_MBEDOS_SOURCE FALSE)
-        endif()
-    endif()
-
-    # check is a target was specified
-    if(MBED_TARGET)
-        if(NOT "${MBEDOS_SOURCE}" STREQUAL "")
-            message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mbed OS is the RTOS option\n\n")
-        endif()
-    else()
-        message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mbed OS is the RTOS option\n\n")
-    endif()
-
-    if(NO_MBEDOS_SOURCE)
-        # no mbed RTOS source specified, download it from it's repo
-
-        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-        include(Hack_SetGitSearchPath)
-
-        # check for Git (needed here for advanced warning to user if it's not installed)
-        find_package(Git)
-
-        #  check if Git was found, if not report to user and abort
-        if(NOT GIT_EXECUTABLE)
-        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
-        endif()
-
-        message(STATUS "RTOS is: mbed RTOS (latest available code from GitHub repo)")
-
-        # need to setup a separate CMake project to download the code from the SVN repository
-        # otherwise it won't be available before the actual build step
-        configure_file("CMake/mbedOS.CMakeLists.cmake.in"
-                    "${CMAKE_BINARY_DIR}/mbedOS_Download/CMakeLists.txt")
-        
-        # setup CMake project for mbed RTOS download
-        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                        RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedOS_Download")
-
-        # run build on mbed RTOS download CMake project to perform the download
-        execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                        RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedOS_Download")
-               
-        # download mbedOS source from official GitHub repo
-        ExternalProject_Add( 
-            mbedOS
-            PREFIX mbed-OS
-            SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedOS_Source
-            GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os/
-            GIT_TAG master  # target master branch
-            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
-            TIMEOUT 10
-            LOG_DOWNLOAD 1
-            
-            # Disable all other steps
-            CONFIGURE_COMMAND ""
-            BUILD_COMMAND ""
-            INSTALL_COMMAND ""
-        )
-
-        # get source dir for mbed RTOS CMake project
-        # ExternalProject_Get_Property(mbedOS SOURCE_DIR)
-        # set(MBEDOS_INCLUDE_DIRS ${MBEDOS_SOURCE_DIR})
-
-        # set update disconnected to prevent updates on builds
-        set_property(DIRECTORY ${MBEDOS_SOURCE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1)
-
-    else()
-        # mbed OS source location was specified
-
-        if(NOT EXISTS "${PROJECT_BINARY_DIR}/mbedOS_Source")
-            # need to copy srouce to build directory
-            message(STATUS "RTOS is: mbed OS (copying source from: ${MBEDOS_SOURCE})")
-
-            file(COPY "${MBEDOS_SOURCE}/" DESTINATION "${PROJECT_BINARY_DIR}/mbedOS_Source")
-        elseif()
-            # source directory  already at build folder so we are done here
-            message(STATUS "RTOS is: mbed OS (source from: ${MBEDOS_SOURCE} already at build directory)")
-        endif()
-
-        # set(MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source)
-
-    endif()
-
-    # find_package(MBEDOPTIONS REQUIRED)
-   
-    # add source directory
-    add_subdirectory("targets/os/mbed-os/nanoBooter")
-
-#######################
-# RTX RTOS
-elseif(RTOS_RTX_RTOS_CHECK)
-
-    # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-    include(Hack_SetGitSearchPath)
-
-    # check for Git (needed here for advanced warning to user if it's not installed)
-    find_package(Git)
-
-    #  check if Git was found, if not report to user and abort
-    if(NOT GIT_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
-    endif()
-
-    # need to setup a separate CMake project to download the code from the SVN repository
-    # otherwise it won't be available before the actual build step
-    configure_file("CMake/RTXRTOS.CMakeLists.cmake.in"
-                   "${CMAKE_BINARY_DIR}/RTXRTOS_Download/CMakeLists.txt")
-    
-    # setup CMake project for RTX RTOS download
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
-
-    # run build on RTX RTOS download CMake project to perform the download
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
-    
-    # download RTX RTOS source from official GitHub repo
-    ExternalProject_Add( 
-        RTXRTOS
-        PREFIX RTX-RTOS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/RTXRTOS_Source
-        GIT_REPOSITORY  https://github.com/ARM-software/CMSIS_5
-        GIT_TAG master  # target master branch
-        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
-        TIMEOUT 10
-        LOG_DOWNLOAD 1
-        
-        # Disable all other steps
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND ""
-    )
-
-    # get source dir for RTX RTOS CMake project
-    ExternalProject_Get_Property(RTXRTOS SOURCE_DIR)
-    set(RTXRTOS_INCLUDE_DIRS ${RTXRTOS_SOURCE_DIR})
-   
-    # add source directory
-    add_subdirectory("source")
-
-#######################
-# RTX RTOS2
-elseif(RTOS_RTX_RTOS2_CHECK)
-
-    message(FATAL_ERROR "
-#############################################################
-support for RTX RTOS2 is in the works, please check latter...
-#############################################################")
-
-    # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-    include(Hack_SetGitSearchPath)
-
-    # check for Git (needed here for advanced warning to user if it's not installed)
-    find_package(Git)
-
-    #  check if Git was found, if not report to user and abort
-    if(NOT GIT_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
-    endif()
-
-    # need to setup a separate CMake project to download the code from the SVN repository
-    # otherwise it won't be available before the actual build step
-    configure_file("CMake/RTXRTOS.CMakeLists.cmake.in"
-                   "${CMAKE_BINARY_DIR}/RTXRTOS_Download/CMakeLists.txt")
-    
-    # setup CMake project for RTX RTOS2 download (same as RTX RTOS)
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
-
-    # run build on RTX RTOS2 download CMake project to perform the download
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
-    
-    # download RTX RTOS2 source from official GitHub repo (same as RTX RTOS)
-    ExternalProject_Add( 
-        RTXRTOS2
-        PREFIX RTX-RTOS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/RTXRTOS_Source
-        GIT_REPOSITORY  https://github.com/ARM-software/CMSIS_5
-        GIT_TAG master  # target master branch
-        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
-        TIMEOUT 10
-        LOG_DOWNLOAD 1
-        
-        # Disable all other steps
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND ""
-    )
-
-    # get source dir for RTX RTOS2 CMake project
-    ExternalProject_Get_Property(RTXRTOS2 SOURCE_DIR)
-    set(RTXRTOS2_INCLUDE_DIRS ${RTXRTOS2_SOURCE_DIR})
-   
-    # add source directory
-    add_subdirectory("source")
-
-#######################
-
-# no RTOS specifed
-else()
-    
-    set(NORTOS TRUE)
-
-    message(STATUS "NO RTOS was specified")
-
-    # include CMSIS, HAL and drivers  
-    if(CHIP_VENDOR_STM32_CHECK)
-        # vendor is ST, chip is STM32
-
-        # ST Cube package with CMSIS and SMT32 HAL
-        add_subdirectory("stcube_repository")
-
-    # elseif(CHIP_VENDOR_??_CHECK)
-    #
-    #     # vendor is ?? and toolchain is GCC
-    #     add_subdirectory("???")
-    endif()    
-   
-    # add source directory
-    add_subdirectory("source")
- 
 endif()
+
+# #######################
+# # FreeRTOS
+# elseif(RTOS_FREERTOS_CHECK)
+
+#     # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
+#     set(NO_FREERTOS_SOURCE TRUE)
+#     if(FREERTOS_SOURCE)
+#         if(NOT "${FREERTOS_SOURCE}" STREQUAL "")
+#             set(NO_FREERTOS_SOURCE FALSE)
+#         endif()
+#     endif()
+
+#     if(NO_FREERTOS_SOURCE)
+#         # no FreeRTOS source specified, download it from it's repo
+
+#         # check for SVN (needed here for advanced warning to user if it's not installed)
+#         find_package(Subversion)
+
+#         #  check is SVN was found, if not report to user and abort
+#         if(NOT Subversion_SVN_EXECUTABLE)
+#         message(FATAL_ERROR "error: could not find SVN, make sure you have it installed.")
+#         endif()
+
+#         # check if build was requested with a specifc FreeRTOS version
+#         if(DEFINED FREERTOS_VERSION)
+
+#             if("${FREERTOS_VERSION}" STREQUAL "")
+#                 set(FREERTOS_VERSION_EMPTY TRUE)
+#             endif()
+
+#             if(FREERTOS_VERSION_EMPTY)
+#                 # no FreeRTOS version actualy specified, must be empty which is fine, we'll grab the code from the trunk
+#                 message(STATUS "RTOS is: FreeRTOS (latest available code from trunk)")
+#                 set(FREERTOS_SVN_REPOSITORY "https://svn.code.sf.net/p/freertos/code/trunk")
+#             else()
+#                 message(STATUS "RTOS is: FreeRTOS v${FREERTOS_VERSION}")
+#                 set(FREERTOS_SVN_REPOSITORY "https://svn.code.sf.net/p/freertos/code/tags/V${FREERTOS_VERSION}")
+#             endif()
+            
+#         endif()
+
+#         # need to setup a separate CMake project to download the code from the SVN repository
+#         # otherwise it won't be available before the actual build step
+#         configure_file("CMake/FreeRTOS.CMakeLists.cmake.in"
+#                     "${CMAKE_BINARY_DIR}/FreeRTOS_Download/CMakeLists.txt")
+        
+#         # setup CMake project for FreeRTOS download
+#         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+#                         RESULT_VARIABLE result
+#                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
+
+#         # run build on FreeRTOS download CMake project to perform the download
+#         execute_process(COMMAND ${CMAKE_COMMAND} --build .
+#                         RESULT_VARIABLE result
+#                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
+        
+#         # add FreeRTOS as external project
+#         ExternalProject_Add( 
+#             FreeRTOS
+#             PREFIX FreeRTOS
+#             SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
+#             SVN_REPOSITORY ${FREERTOS_SVN_REPOSITORY}/FreeRTOS/Source
+#             TIMEOUT 10
+#             LOG_DOWNLOAD 1
+#             # Disable all other steps
+#             INSTALL_COMMAND ""
+#             CONFIGURE_COMMAND ""
+#             BUILD_COMMAND ""
+#         )
+
+#         # get source dir for FreeRTOS CMake project
+#         ExternalProject_Get_Property(FreeRTOS SOURCE_DIR)
+#         set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
+
+#     else()
+#         # FreeRTOS source was specified
+
+#         # sanity check is source path exists
+#         if(EXISTS "${FREERTOS_SOURCE}/")
+#             message(STATUS "RTOS is: FreeRTOS (source from: ${FREERTOS_SOURCE})")
+
+#             file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
+#             set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
+#         else()
+#             message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
+#         endif()
+
+#     endif()
+
+#     # set CMSIS RTOS include directory
+#     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
+   
+#     # add source directory
+#     add_subdirectory("src")
+
+# #######################
+# # mbed OS
+# elseif(RTOS_MBEDOS_CHECK)
+
+#     # check if MBEDOS_SOURCE was specified or if it's empty (default is empty)
+#     set(NO_MBEDOS_SOURCE TRUE)
+#     if(MBEDOS_SOURCE)
+#         if(NOT "${MBEDOS_SOURCE}" STREQUAL "")
+#             set(NO_MBEDOS_SOURCE FALSE)
+#         endif()
+#     endif()
+
+#     # check is a target was specified
+#     if(MBED_TARGET)
+#         if(NOT "${MBEDOS_SOURCE}" STREQUAL "")
+#             message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mbed OS is the RTOS option\n\n")
+#         endif()
+#     else()
+#         message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mbed OS is the RTOS option\n\n")
+#     endif()
+
+#     if(NO_MBEDOS_SOURCE)
+#         # no mbed RTOS source specified, download it from it's repo
+
+#         # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+#         include(Hack_SetGitSearchPath)
+
+#         # check for Git (needed here for advanced warning to user if it's not installed)
+#         find_package(Git)
+
+#         #  check if Git was found, if not report to user and abort
+#         if(NOT GIT_EXECUTABLE)
+#         message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+#         endif()
+
+#         message(STATUS "RTOS is: mbed RTOS (latest available code from GitHub repo)")
+
+#         # need to setup a separate CMake project to download the code from the SVN repository
+#         # otherwise it won't be available before the actual build step
+#         configure_file("CMake/mbedOS.CMakeLists.cmake.in"
+#                     "${CMAKE_BINARY_DIR}/mbedOS_Download/CMakeLists.txt")
+        
+#         # setup CMake project for mbed RTOS download
+#         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+#                         RESULT_VARIABLE result
+#                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedOS_Download")
+
+#         # run build on mbed RTOS download CMake project to perform the download
+#         execute_process(COMMAND ${CMAKE_COMMAND} --build .
+#                         RESULT_VARIABLE result
+#                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedOS_Download")
+               
+#         # download mbedOS source from official GitHub repo
+#         ExternalProject_Add( 
+#             mbedOS
+#             PREFIX mbed-OS
+#             SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedOS_Source
+#             GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os/
+#             GIT_TAG master  # target master branch
+#             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+#             TIMEOUT 10
+#             LOG_DOWNLOAD 1
+            
+#             # Disable all other steps
+#             CONFIGURE_COMMAND ""
+#             BUILD_COMMAND ""
+#             INSTALL_COMMAND ""
+#         )
+
+#         # get source dir for mbed RTOS CMake project
+#         # ExternalProject_Get_Property(mbedOS SOURCE_DIR)
+#         # set(MBEDOS_INCLUDE_DIRS ${MBEDOS_SOURCE_DIR})
+
+#         # set update disconnected to prevent updates on builds
+#         set_property(DIRECTORY ${MBEDOS_SOURCE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1)
+
+#     else()
+#         # mbed OS source location was specified
+
+#         if(NOT EXISTS "${PROJECT_BINARY_DIR}/mbedOS_Source")
+#             # need to copy srouce to build directory
+#             message(STATUS "RTOS is: mbed OS (copying source from: ${MBEDOS_SOURCE})")
+
+#             file(COPY "${MBEDOS_SOURCE}/" DESTINATION "${PROJECT_BINARY_DIR}/mbedOS_Source")
+#         elseif()
+#             # source directory  already at build folder so we are done here
+#             message(STATUS "RTOS is: mbed OS (source from: ${MBEDOS_SOURCE} already at build directory)")
+#         endif()
+
+#         # set(MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source)
+
+#     endif()
+
+#     # find_package(MBEDOPTIONS REQUIRED)
+   
+#     # add source directory
+#     add_subdirectory("targets/os/mbed-os/nanoBooter")
+
+# #######################
+# # RTX RTOS
+# elseif(RTOS_RTX_RTOS_CHECK)
+
+#     # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+#     include(Hack_SetGitSearchPath)
+
+#     # check for Git (needed here for advanced warning to user if it's not installed)
+#     find_package(Git)
+
+#     #  check if Git was found, if not report to user and abort
+#     if(NOT GIT_EXECUTABLE)
+#       message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+#     endif()
+
+#     # need to setup a separate CMake project to download the code from the SVN repository
+#     # otherwise it won't be available before the actual build step
+#     configure_file("CMake/RTXRTOS.CMakeLists.cmake.in"
+#                    "${CMAKE_BINARY_DIR}/RTXRTOS_Download/CMakeLists.txt")
+    
+#     # setup CMake project for RTX RTOS download
+#     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+#                     RESULT_VARIABLE result
+#                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
+
+#     # run build on RTX RTOS download CMake project to perform the download
+#     execute_process(COMMAND ${CMAKE_COMMAND} --build .
+#                     RESULT_VARIABLE result
+#                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
+    
+#     # download RTX RTOS source from official GitHub repo
+#     ExternalProject_Add( 
+#         RTXRTOS
+#         PREFIX RTX-RTOS
+#         SOURCE_DIR ${CMAKE_BINARY_DIR}/RTXRTOS_Source
+#         GIT_REPOSITORY  https://github.com/ARM-software/CMSIS_5
+#         GIT_TAG master  # target master branch
+#         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+#         TIMEOUT 10
+#         LOG_DOWNLOAD 1
+        
+#         # Disable all other steps
+#         CONFIGURE_COMMAND ""
+#         BUILD_COMMAND ""
+#         INSTALL_COMMAND ""
+#     )
+
+#     # get source dir for RTX RTOS CMake project
+#     ExternalProject_Get_Property(RTXRTOS SOURCE_DIR)
+#     set(RTXRTOS_INCLUDE_DIRS ${RTXRTOS_SOURCE_DIR})
+   
+#     # add source directory
+#     add_subdirectory("src")
+
+# #######################
+# # RTX RTOS2
+# elseif(RTOS_RTX_RTOS2_CHECK)
+
+#     message(FATAL_ERROR "
+# #############################################################
+# support for RTX RTOS2 is in the works, please check latter...
+# #############################################################")
+
+#     # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+#     include(Hack_SetGitSearchPath)
+
+#     # check for Git (needed here for advanced warning to user if it's not installed)
+#     find_package(Git)
+
+#     #  check if Git was found, if not report to user and abort
+#     if(NOT GIT_EXECUTABLE)
+#       message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+#     endif()
+
+#     # need to setup a separate CMake project to download the code from the SVN repository
+#     # otherwise it won't be available before the actual build step
+#     configure_file("CMake/RTXRTOS.CMakeLists.cmake.in"
+#                    "${CMAKE_BINARY_DIR}/RTXRTOS_Download/CMakeLists.txt")
+    
+#     # setup CMake project for RTX RTOS2 download (same as RTX RTOS)
+#     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+#                     RESULT_VARIABLE result
+#                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
+
+#     # run build on RTX RTOS2 download CMake project to perform the download
+#     execute_process(COMMAND ${CMAKE_COMMAND} --build .
+#                     RESULT_VARIABLE result
+#                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
+    
+#     # download RTX RTOS2 source from official GitHub repo (same as RTX RTOS)
+#     ExternalProject_Add( 
+#         RTXRTOS2
+#         PREFIX RTX-RTOS
+#         SOURCE_DIR ${CMAKE_BINARY_DIR}/RTXRTOS_Source
+#         GIT_REPOSITORY  https://github.com/ARM-software/CMSIS_5
+#         GIT_TAG master  # target master branch
+#         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+#         TIMEOUT 10
+#         LOG_DOWNLOAD 1
+        
+#         # Disable all other steps
+#         CONFIGURE_COMMAND ""
+#         BUILD_COMMAND ""
+#         INSTALL_COMMAND ""
+#     )
+
+#     # get source dir for RTX RTOS2 CMake project
+#     ExternalProject_Get_Property(RTXRTOS2 SOURCE_DIR)
+#     set(RTXRTOS2_INCLUDE_DIRS ${RTXRTOS2_SOURCE_DIR})
+   
+#     # add source directory
+#     add_subdirectory("src")
+
+# #######################
+
+# # no RTOS specifed
+# else()
+    
+#     set(NORTOS TRUE)
+
+#     message(STATUS "NO RTOS was specified")
+
+#     # include CMSIS, HAL and drivers  
+#     if(CHIP_VENDOR_STM32_CHECK)
+#         # vendor is ST, chip is STM32
+
+#         # ST Cube package with CMSIS and SMT32 HAL
+#         add_subdirectory("stcube_repository")
+
+#     # elseif(CHIP_VENDOR_??_CHECK)
+#     #
+#     #     # vendor is ?? and toolchain is GCC
+#     #     add_subdirectory("???")
+#     endif()    
+   
+#     # add source directory
+#     add_subdirectory("src")
+ 
+# endif()

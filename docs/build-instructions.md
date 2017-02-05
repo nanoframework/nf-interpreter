@@ -40,21 +40,15 @@ As a suggestion we recommend that you create a directory named *build* in the re
 # Build a **nanoFramework** image
 
 The build script accepts the following parameters (some of them are mandatory).
-- TARGET_CHIP: this is the vendor reference to the chip that you are building the image for. At this time only STM32F4 series are supported. A valid reference here would be STM32F407VG.
-- PACKAGE_VERSION: In case you are building for an STM32 chip this is the package version of the ST Cube package (with the CMSIS and HAL drivers) that you want to use. This will be downloaded from ST web site except if the package already exists in the ST Cube repository folder. A valid package number is required. E.g.: 1.3.0 or 1.41.2.  
 - TOOLCHAIN: the toolchain to use in the build. The default (and only option at this time) is GCC.
 - TOOLCHAIN_PREFIX: path to the install directory of the toolchain. E.g.: "E:/GNU_Tools_ARM_Embedded/5_4_2016q3". Mind the forward slash on the path for all platforms.
 - CMAKE_BUILD_TYPE: build type (Debug, Release, etc). The default is Release.
-- RTOS: specifies the RTOS to add to the image. If no source path is specified the source files will be downloaded from the respective repository. Current valid RTOSes are FreeRTOS (FREERTOS), mbed OS (MBEDRTOS), ChibiOS (CHIBIOS) and ARM RTX (RTXRTOS).
-- FREERTOS_VERSION: specifies the FreeRTOS version to grab the source files. It has to match one of the official versions from the FreeRTOS repository. If none is specified it will download the 'trunk' version. This parameter is ignored if FREERTOS_SOURCE is specified. 
-- FREERTOS_SOURCE: specifies the path for the location of the FreeRTOS source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS must be specified with FREERTOS option. 
-- MBED_SOURCE: specifies the path for the location of the mBed source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS parameter must be specified with MBEDRTOS option. 
-- MBED_TARGET: specifies the mBed OS target. This parameter is mandatory when specifying MBEDRTOS as the RTOS choice parameter above. It has to be a valid target listed in mBed OS _targets.json_ file.
 - CHIBIOS_SOURCE: specifies the path for the location of the ChibiOS source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS parameter must be specified with CHIBIOS option. 
 - CHIBIOS_VERSION: specifies the ChibiOS version to grab the source files. It has to match one of the official versions from the ChibiOS repository. If none is specified it will download the 'trunk' version. This parameter is ignored if CHIBIOS_SOURCE is specified. 
 - CHIBIOS_BOARD: specifies the ChibiOS board. This parameter is mandatory when specifying CHIBIOS as the RTOS choice parameter above. It has to be a valid board listed in ChibiOS boards folder.
 
-_Note: the very first build will take more or less time depending on the download speed of the Internet connection of the machine were the build is running. This is because the source code of the RTOS of your choice will be downloaded from its repository. On the subsequent builds this won't happen._
+_Note 1: The RTOS currently supported is ChibiOS. If no source path is specified the source files will be downloaded from it's official GitHub mirror._
+_Note 2: the very first build will take more or less time depending on the download speed of the Internet connection of the machine were the build is running. This is because the source code of the RTOS of your choice will be downloaded from its repository. On the subsequent builds this won't happen._
 
 You can specify any generator that is supported in the platform where you are building.
 For more information on this check CMake documentation [here](https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html?highlight=generator).
@@ -68,28 +62,24 @@ The following is a working example:
 ```
 cmake \
 -DTOOLCHAIN_PREFIX="E:/GNU_Tools_ARM_Embedded/5_4_2016q3" \
--DTARGET_CHIP=STM32F407VG \
--DPACKAGE_VERSION=1.13.1 \
--RTOS=FREERTOS \
--FREERTOS_VERSION=9.0.0 \
+-DCHIBIOS_VERSION=16.1.7 \
+-DCHIBIOS_BOARD=ST_NUCLEO_F091RC \
 -G "NMake Makefiles" ../ 
 ```
 
-This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, targeting STM32F407VG, asking for the ST Cube package version 1.13.1 to be used, specifying FreeRTOS v9.0.0 as the RTOS and that the build files suitable for NMake are to be generated.
+This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, specifying ChibiOS v16.1.7 as the RTOS version, that the target board is named ST_NUCLEO_F091RC and that the build files suitable for NMake are to be generated.
 
 Another example:
 
 ```
 cmake \
 -DTOOLCHAIN_PREFIX="E:/GNU_Tools_ARM_Embedded/5_4_2016q3" \
--DTARGET_CHIP=STM32F091RC \
--DPACKAGE_VERSION=1.6.0 \
--RTOS=MBEDRTOS \
--MBEDRTOS_SOURCE=E:/GitHub/mbed-os \
+-DCHIBIOS_SOURCE=E:/GitHub/ChibiOS \
+-DCHIBIOS_BOARD=ST_NUCLEO144_F746ZG \
 -G "NMake Makefiles" ../ 
 ```
 
-This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, targeting STM32F091RC, asking for the ST Cube package version 1.6.0 to be used, specifying MBEDRTOS as the RTOS, that mBed RTOS sources are located in the designated path (mind the forward slash and no ending slash) and that the build files suitable for NMake are to be generated.
+This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, specifying that ChibiOS sources to be used are located in the designated path (mind the forward slash and no ending slash),  that the target board is named ST_NUCLEO144_F746ZG and that the build files suitable for NMake are to be generated.
 
 After successful completion you'll have the build files ready to be used in the target build tool.
 
