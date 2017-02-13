@@ -7,28 +7,44 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include <usbcfg.h>
+#include "usbcfg.h"
 #include <WireProtocol_ReceiverThread.h>
-#include <LaunchCLR.h>
 
 void BlinkerThread(void const * argument)
 {
   (void)argument;
 
-  // loop until thread receives a request to terminate
-  while (!chThdShouldTerminateX())
-  {
-      palSetPad(GPIOG, GPIOG_LED3_GREEN);
-	    palClearPad(GPIOG, GPIOG_LED4_RED);
-      osDelay(250);
+  palSetPad(GPIOD, GPIOD_LED3);
+  palSetPad(GPIOD, GPIOD_LED4);
+  palSetPad(GPIOD, GPIOD_LED5);
+  palSetPad(GPIOD, GPIOD_LED6);
+  osDelay(1000);
 
-      palClearPad(GPIOG, GPIOG_LED3_GREEN);
-      palSetPad(GPIOG, GPIOG_LED4_RED);
-      osDelay(250);
+  palClearPad(GPIOD, GPIOD_LED3);
+  palClearPad(GPIOD, GPIOD_LED4);
+  palClearPad(GPIOD, GPIOD_LED5);
+  palClearPad(GPIOD, GPIOD_LED6);
+  osDelay(250);
+
+  while (true) {
+
+      palSetPad(GPIOD, GPIOD_LED3);
+      osDelay(125);
+
+      palClearPad(GPIOD, GPIOD_LED3);
+      palSetPad(GPIOD, GPIOD_LED4);
+      osDelay(125);
+
+      palClearPad(GPIOD, GPIOD_LED4);
+      palSetPad(GPIOD, GPIOD_LED6);
+      osDelay(125);
+
+      palClearPad(GPIOD, GPIOD_LED6);
+      palSetPad(GPIOD, GPIOD_LED5);
+      osDelay(125);
+      
+      palClearPad(GPIOD, GPIOD_LED5);
   }
-  
-  // nothing to deinitialize or cleanup, so it's safe to return
-  return 0;
 }
 osThreadDef(BlinkerThread, osPriorityNormal, 128);
 
@@ -37,9 +53,6 @@ osThreadDef(ReceiverThread, osPriorityNormal, 1024);
 
 //  Application entry point.
 int main(void) {
-
-  osThreadId blinkerThreadId;
-  osThreadId receiverThreadId;
 
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
@@ -54,41 +67,24 @@ int main(void) {
   sduStart(&SDU1, &serusbcfg);
 
   // Activates the USB driver and then the USB bus pull-up on D+.
-  // Note, a delay is inserted in order to not have to disconnect the cable after a reset.
+  // Note, a delay is inserted in order to not have to disconnect the cable after a reset
   usbDisconnectBus(serusbcfg.usbp);
   chThdSleepMilliseconds(1500);
   usbStart(serusbcfg.usbp, &usbcfg);
   usbConnectBus(serusbcfg.usbp);
 
   // Creates the blinker thread, it does not start immediately.
-  blinkerThreadId = osThreadCreate(osThread(BlinkerThread), NULL);
+  osThreadCreate(osThread(BlinkerThread), NULL);
 
   // create the receiver thread
-  receiverThreadId = osThreadCreate(osThread(ReceiverThread), NULL);
+  osThreadCreate(osThread(ReceiverThread), NULL);
 
   // start kernel, after this the main() thread has priority osPriorityNormal by default
   osKernelStart();
 
-  //  Normal main() thread
+  //  Normal main() thread activity it does nothing except sleeping in a loop 
   while (true) {
-
-    // check for button pressed
-    if (palReadPad(GPIOA, GPIOA_BUTTON))
-    {
-      // Start the shutdown sequence
-
-      // terminate threads
-      osThreadTerminate(receiverThreadId);
-      osThreadTerminate(blinkerThreadId);
-      
-      // stop the serial-over-USB CDC driver
-      sduStop(&SDU1);
-      
-      // launch nanoCLR
-      LaunchCLR(0x08008000);
-    }
-    
-    osDelay(100);
+    osDelay(1000);
   }
 }
 

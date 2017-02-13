@@ -16,19 +16,20 @@ void BlinkerThread(void const * argument)
   (void)argument;
 
   // loop until thread receives a request to terminate
-  while (!chThdShouldTerminateX())
-  {
-      palSetPad(GPIOG, GPIOG_LED3_GREEN);
-	    palClearPad(GPIOG, GPIOG_LED4_RED);
+  while (!chThdShouldTerminateX()) {
+
+      palClearPad(GPIOC, GPIOC_LED3);
+      palSetPad(GPIOE, GPIOE_LED1);
       osDelay(250);
 
-      palClearPad(GPIOG, GPIOG_LED3_GREEN);
-      palSetPad(GPIOG, GPIOG_LED4_RED);
+      palClearPad(GPIOE, GPIOE_LED1);
+      palSetPad(GPIOE, GPIOE_LED2);
+      osDelay(250);
+
+      palClearPad(GPIOE, GPIOE_LED2);
+      palSetPad(GPIOC, GPIOC_LED3);
       osDelay(250);
   }
-  
-  // nothing to deinitialize or cleanup, so it's safe to return
-  return 0;
 }
 osThreadDef(BlinkerThread, osPriorityNormal, 128);
 
@@ -71,6 +72,7 @@ int main(void) {
 
   //  Normal main() thread
   while (true) {
+    /*
 
     // check for button pressed
     if (palReadPad(GPIOA, GPIOA_BUTTON))
@@ -87,8 +89,8 @@ int main(void) {
       // launch nanoCLR
       LaunchCLR(0x08008000);
     }
-    
-    osDelay(100);
+    */
+    osDelay(500);
   }
 }
 

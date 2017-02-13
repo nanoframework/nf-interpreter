@@ -112,6 +112,9 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/por
 if(${CHIBIOS_BOARD} STREQUAL "ST_STM32F429I_DISCOVERY")
     set(DEFAULT_LINKER_FILE_NAME "STM32F429xI")
 endif()
+if(${CHIBIOS_BOARD} STREQUAL "MBN_QUAIL")
+    set(DEFAULT_LINKER_FILE_NAME "mbn_quail")
+endif()
 
 
 ####################################################################################
