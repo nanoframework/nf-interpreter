@@ -1,6 +1,6 @@
 //
 // Copyright (c) 2017 The nanoFramework project contributors
-// Portions Copyright (c) 2006..2015 Giovanni Di Sirio. All rights reserved.
+// Portions Copyright (c) 2006..2015 Giovanni Di Sirio.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
@@ -16,11 +16,68 @@ SerialUSBDriver SDU1;
 #define USBD1_DATA_AVAILABLE_EP         1
 #define USBD1_INTERRUPT_REQUEST_EP      2
 
+// address for device unique ID
+// valid for STM32F4 series
+#define         DEVICE_ID1            (0x1FFF7A10)
+#define         DEVICE_ID2            (0x1FFF7A14)
+#define         DEVICE_ID3            (0x1FFF7A18)
+
+// // size of string serial is 36 = 2 + 5x2 + 26 from silicon unique ID precedeed of string "NANO_" and descriptor codes
+// #define  USB_SIZ_STRING_SERIAL        36
+
+////////////////////////////////////////////////
+// vendor 
+#define USB_STRING_VENDOR  L"STMicroelectronics"
+////////////////////////////////////////////////
+
+// structure for USB Vendor with Unicode string
+typedef struct usb_string_vendor
+{
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    wchar_t bPropertyData[sizeof USB_STRING_VENDOR - 2];  // substract 2 because we are not storing the terminator
+
+}usb_string_vendor;
+
+
+/////////////////////////////////////////////////////////////////////////
+// device description
+#define USB_STRING_DEVICE_DESCRIPTION  L"nanoFramework Virtual COM Port"
+/////////////////////////////////////////////////////////////////////////
+
+// structure for USB device descriptor with Unicode string
+typedef struct usb_string_device_description
+{
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    wchar_t bPropertyData[sizeof USB_STRING_DEVICE_DESCRIPTION - 2];  // substract 2 because we are not storing the terminator
+
+}usb_string_device_description;
+
+
+/////////////////////////////////////////////////////////////////////////
+// device serial number
+// this will produce a string with NANO_ prefix followed 
+// by the hexadecimal representation of the silicon unique ID of the CPU
+#define USB_STRING_SERIAL_NUMBER      L"NANO_xxxxxxxxxxxx"
+/////////////////////////////////////////////////////////////////////////
+#define INDEX_OF_WCHAR_FOR_UNIQUE_ID  5
+
+// structure for USB serial number descriptor with Unicode string
+typedef struct usb_string_serial_number
+{
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    wchar_t bPropertyData[sizeof USB_STRING_SERIAL_NUMBER - 2];  // substract 2 because we are not storing the terminator
+
+}usb_string_serial_number;
+
+
 /*
  * USB Device Descriptor.
  */
 static const uint8_t vcom_device_descriptor_data[18] = {
-  USB_DESC_DEVICE       (0x0200,        /* bcdUSB (2.0).                    */
+  USB_DESC_DEVICE       (0x0110,        /* bcdUSB (1.1).                    */
                          0x02,          /* bDeviceClass (CDC).              */
                          0x00,          /* bDeviceSubClass.                 */
                          0x00,          /* bDeviceProtocol.                 */
@@ -136,49 +193,85 @@ static const uint8_t vcom_string0[] = {
   USB_DESC_WORD(0x0409)                 /* wLANGID (U.S. English).          */
 };
 
-/*
- * Vendor string.
- */
-static const uint8_t vcom_string1[] = {
-  USB_DESC_BYTE(38),                    /* bLength.                         */
-  USB_DESC_BYTE(USB_DESCRIPTOR_STRING), /* bDescriptorType.                 */
-  'S', 0, 'T', 0, 'M', 0, 'i', 0, 'c', 0, 'r', 0, 'o', 0, 'e', 0,
-  'l', 0, 'e', 0, 'c', 0, 't', 0, 'r', 0, 'o', 0, 'n', 0, 'i', 0,
-  'c', 0, 's', 0
+
+// Vendor string
+static const usb_string_vendor usb_vendor = {
+  sizeof(usb_vendor),
+  USB_DESC_BYTE(USB_DESCRIPTOR_STRING),
+  USB_STRING_VENDOR
 };
 
-/*
- * Device Description string.
- */
-static const uint8_t vcom_string2[] = {
-  USB_DESC_BYTE(56),                    /* bLength.                         */
-  USB_DESC_BYTE(USB_DESCRIPTOR_STRING), /* bDescriptorType.                 */
-  'C', 0, 'h', 0, 'i', 0, 'b', 0, 'i', 0, 'O', 0, 'S', 0, '/', 0,
-  'R', 0, 'T', 0, ' ', 0, 'V', 0, 'i', 0, 'r', 0, 't', 0, 'u', 0,
-  'a', 0, 'l', 0, ' ', 0, 'C', 0, 'O', 0, 'M', 0, ' ', 0, 'P', 0,
-  'o', 0, 'r', 0, 't', 0
+
+// Device Description string
+static const usb_string_device_description usb_device_description = {
+  sizeof(usb_device_description),
+  USB_DESC_BYTE(USB_DESCRIPTOR_STRING),
+  USB_STRING_DEVICE_DESCRIPTION
 };
 
-/*
- * Serial Number string.
- */
-static const uint8_t vcom_string3[] = {
-  USB_DESC_BYTE(8),                     /* bLength.                         */
-  USB_DESC_BYTE(USB_DESCRIPTOR_STRING), /* bDescriptorType.                 */
-  '0' + CH_KERNEL_MAJOR, 0,
-  '0' + CH_KERNEL_MINOR, 0,
-  '0' + CH_KERNEL_PATCH, 0
+
+// Serial Number string.
+static usb_string_serial_number usb_serial_number = {
+  sizeof(usb_serial_number),
+  USB_DESC_BYTE(USB_DESCRIPTOR_STRING),
+  USB_STRING_SERIAL_NUMBER
 };
+
 
 /*
  * Strings wrappers array.
  */
 static const USBDescriptor vcom_strings[] = {
   {sizeof vcom_string0, vcom_string0},
-  {sizeof vcom_string1, vcom_string1},
-  {sizeof vcom_string2, vcom_string2},
-  {sizeof vcom_string3, vcom_string3}
+  {sizeof usb_vendor, (uint8_t*)(&usb_vendor)},
+  {sizeof usb_device_description, (uint8_t*)(&usb_device_description)},
+  {sizeof usb_serial_number, (uint8_t*)(&usb_serial_number)},
 };
+
+
+// Create the serial number string descriptor
+void Get_SerialNum(uint8_t* pbuf)
+{
+  uint32_t deviceserial0, deviceserial1, deviceserial2;
+  
+  deviceserial0 = *(uint32_t*)DEVICE_ID1;
+  deviceserial1 = *(uint32_t*)DEVICE_ID2;
+  deviceserial2 = *(uint32_t*)DEVICE_ID3;
+  
+  deviceserial0 += deviceserial2;
+  
+  if (deviceserial0 != 0)
+  {
+    IntToUnicode(deviceserial0, pbuf, 8);
+    pbuf += 16;
+    IntToUnicode(deviceserial1, pbuf, 4);
+  }
+}
+
+// Convert Hex 32Bits value into char 
+// value: value to convert
+// pbuf: pointer to the buffer 
+// len: buffer length
+void IntToUnicode(uint32_t value , uint8_t *pbuf, uint8_t len)
+{
+  uint8_t idx = 0;
+  
+  for( idx = 0; idx < len; idx ++)
+  {
+    if( ((value >> 28)) < 0xA )
+    {
+      pbuf[ 2* idx] = (value >> 28) + '0';
+    }
+    else
+    {
+      pbuf[2* idx] = (value >> 28) + 'A' - 10; 
+    }
+    
+    value = value << 4;
+    
+    pbuf[ 2* idx + 1] = 0;
+  }
+}
 
 /*
  * Handles the GET_DESCRIPTOR callback. All required descriptors must be
@@ -191,6 +284,7 @@ static const USBDescriptor *get_descriptor(USBDriver *usbp,
 
   (void)usbp;
   (void)lang;
+
   switch (dtype) {
   case USB_DESCRIPTOR_DEVICE:
     return &vcom_device_descriptor;
@@ -198,7 +292,16 @@ static const USBDescriptor *get_descriptor(USBDriver *usbp,
     return &vcom_configuration_descriptor;
   case USB_DESCRIPTOR_STRING:
     if (dindex < 4)
+    {
+      if(dindex == 3)
+      {
+        // request is for serial number
+        // get it from the silicon unique ID
+        Get_SerialNum(&usb_serial_number.bPropertyData[INDEX_OF_WCHAR_FOR_UNIQUE_ID]);
+      }
+
       return &vcom_strings[dindex];
+    }
   }
   return NULL;
 }
