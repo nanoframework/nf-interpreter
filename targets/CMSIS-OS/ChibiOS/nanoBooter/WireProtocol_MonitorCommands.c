@@ -21,12 +21,12 @@ static const int AccessMemory_Mask     = 0x0F;
 
 bool NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
 {
-    releaseInfo->version.usMajor = NANOFRAMEWORK_VERSION_MAJOR;
-    releaseInfo->version.usMinor = NANOFRAMEWORK_VERSION_MINOR;
-    releaseInfo->version.usBuild = NANOFRAMEWORK_VERSION_BUILD;
+    releaseInfo->version.usMajor = VERSION_MAJOR;
+    releaseInfo->version.usMinor = VERSION_MINOR;
+    releaseInfo->version.usBuild = VERSION_BUILD;
     releaseInfo->version.usRevision = 0;
 
-    memcpy(&releaseInfo->infoString, OEMINFO_STRING, sizeof(releaseInfo->infoString));
+    memcpy(&releaseInfo->infoString, OEMSYSTEMINFOSTRING, sizeof(releaseInfo->infoString));
 
     return true;
 }
