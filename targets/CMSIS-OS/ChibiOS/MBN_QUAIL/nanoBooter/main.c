@@ -7,90 +7,74 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include <usbcfg.h>
+#include "usbcfg.h"
 #include <WireProtocol_ReceiverThread.h>
-#include <LaunchCLR.h>
+
 
 void BlinkerThread(void const * argument)
 {
   (void)argument;
+  
+    palClearPad(GPIOE, GPIOE_LED1);
+    palClearPad(GPIOE, GPIOE_LED2);
+    palClearPad(GPIOC, GPIOC_LED3);
 
-  // loop until thread receives a request to terminate
-  while (!chThdShouldTerminateX()) {
-
-      palClearPad(GPIOC, GPIOC_LED3);
-      palSetPad(GPIOE, GPIOE_LED1);
-      osDelay(250);
-
-      palClearPad(GPIOE, GPIOE_LED1);
-      palSetPad(GPIOE, GPIOE_LED2);
-      osDelay(250);
-
-      palClearPad(GPIOE, GPIOE_LED2);
-      palSetPad(GPIOC, GPIOC_LED3);
-      osDelay(250);
+  while (!chThdShouldTerminateX()) 
+  {
+    palSetPad(GPIOE, GPIOE_LED1);
+    palSetPad(GPIOE, GPIOE_LED2);
+    palSetPad(GPIOC, GPIOC_LED3);
+    chThdSleepMilliseconds(100);
+    palClearPad(GPIOE, GPIOE_LED1);
+    palClearPad(GPIOE, GPIOE_LED2);
+    palClearPad(GPIOC, GPIOC_LED3);
+    chThdSleepMilliseconds(100);
   }
+  chThdSleepMilliseconds(100);
 }
-osThreadDef(BlinkerThread, osPriorityNormal, 128);
 
-// need to declare the Receiver thread here
+osThreadDef(BlinkerThread, osPriorityNormal, 128);
 osThreadDef(ReceiverThread, osPriorityNormal, 1024);
 
-//  Application entry point.
-int main(void) {
-
+int main(void) 
+{
   osThreadId blinkerThreadId;
   osThreadId receiverThreadId;
 
-  // HAL initialization, this also initializes the configured device drivers
-  // and performs the board-specific initializations.
   halInit();
-
-  // The kernel is initialized but not started yet, this means that
-  // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
 
   //  Initializes a serial-over-USB CDC driver.
   sduObjectInit(&SDU1);
   sduStart(&SDU1, &serusbcfg);
 
-  // Activates the USB driver and then the USB bus pull-up on D+.
-  // Note, a delay is inserted in order to not have to disconnect the cable after a reset.
   usbDisconnectBus(serusbcfg.usbp);
   chThdSleepMilliseconds(1500);
   usbStart(serusbcfg.usbp, &usbcfg);
   usbConnectBus(serusbcfg.usbp);
-
-  // Creates the blinker thread, it does not start immediately.
-  blinkerThreadId = osThreadCreate(osThread(BlinkerThread), NULL);
-
-  // create the receiver thread
+  
   receiverThreadId = osThreadCreate(osThread(ReceiverThread), NULL);
 
-  // start kernel, after this the main() thread has priority osPriorityNormal by default
+  blinkerThreadId = osThreadCreate(osThread(BlinkerThread), NULL);
+
   osKernelStart();
 
-  //  Normal main() thread
-  while (true) {
-    /*
-
-    // check for button pressed
-    if (palReadPad(GPIOA, GPIOA_BUTTON))
-    {
-      // Start the shutdown sequence
-
-      // terminate threads
-      osThreadTerminate(receiverThreadId);
-      osThreadTerminate(blinkerThreadId);
-      
-      // stop the serial-over-USB CDC driver
-      sduStop(&SDU1);
-      
-      // launch nanoCLR
-      LaunchCLR(0x08008000);
-    }
-    */
+  // Christophe : 
+  // Infinite loop here only for testing purposes
+  // It should be removed when/if the USB-CDC driver is working as expected
+  while (true)
+  {
     osDelay(500);
   }
+
+  //  Normal main() thread activity
+  osDelay (2000);
+
+  osThreadTerminate(receiverThreadId);
+  sduStop(&SDU1);
+
+  osThreadTerminate(blinkerThreadId); 
+
+  LaunchCLR(0x08008000);
 }
 
