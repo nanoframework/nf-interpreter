@@ -35,7 +35,7 @@ typedef struct usb_string_vendor
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    wchar_t bPropertyData[sizeof USB_STRING_VENDOR - 2];  // substract 2 because we are not storing the terminator
+    wchar_t bPropertyData[sizeof(USB_STRING_VENDOR)/sizeof(wchar_t) - 1];  // that's the 'w_char' string length less 1 because we are not storing the terminator (according to the USB spec)
 
 }usb_string_vendor;
 
@@ -50,7 +50,7 @@ typedef struct usb_string_device_description
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    wchar_t bPropertyData[sizeof USB_STRING_DEVICE_DESCRIPTION - 2];  // substract 2 because we are not storing the terminator
+    wchar_t bPropertyData[sizeof(USB_STRING_DEVICE_DESCRIPTION)/sizeof(wchar_t) - 1];  // that's the 'w_char' string length less 1 because we are not storing the terminator (according to the USB spec)
 
 }usb_string_device_description;
 
@@ -59,7 +59,7 @@ typedef struct usb_string_device_description
 // device serial number
 // this will produce a string with NANO_ prefix followed 
 // by the hexadecimal representation of the silicon unique ID of the CPU
-#define USB_STRING_SERIAL_NUMBER      L"NANO_xxxxxxxxxxxx"
+#define USB_STRING_SERIAL_NUMBER      L"NANO_xxxxxxxxxxx"
 /////////////////////////////////////////////////////////////////////////
 #define INDEX_OF_WCHAR_FOR_UNIQUE_ID  5
 
@@ -68,7 +68,7 @@ typedef struct usb_string_serial_number
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    wchar_t bPropertyData[sizeof USB_STRING_SERIAL_NUMBER - 2];  // substract 2 because we are not storing the terminator
+    wchar_t bPropertyData[sizeof(USB_STRING_SERIAL_NUMBER)/sizeof(wchar_t) - 1];  // that's the 'w_char' string length less 1 because we are not storing the terminator (according to the USB spec)
 
 }usb_string_serial_number;
 
