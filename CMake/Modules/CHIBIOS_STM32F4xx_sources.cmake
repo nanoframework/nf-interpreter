@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
 # from startup_stm32f4xx.mk
 # List of the ChibiOS generic STM32F4xx startup and CMSIS files.
 
