@@ -144,7 +144,7 @@
  * IO lines assignments.
  */
  
- /*
+
  // Christophe : what are those "lines" used for ?
  
 #define LINE_INT1              		PAL_LINE(GPIOA, 1U)
@@ -233,7 +233,7 @@
 
 #define LINE_OSC_IN                 PAL_LINE(GPIOH, 0U)
 #define LINE_OSC_OUT                PAL_LINE(GPIOH, 1U)
-*/
+
 
 /*
  * I/O ports initial setup, this configuration is established soon after reset
@@ -278,9 +278,9 @@
  * PA15 - GPIO1                    (input floating).
  */
 #define VAL_GPIOA_MODER             (PIN_MODE_ALTERNATE(GPIOA_PA0) |         	\
-                                     PIN_MODE_OUTPUT(GPIOA_INT1) |      		\
+                                     PIN_MODE_INPUT(GPIOA_INT1) |      		\
                                      PIN_MODE_INPUT(GPIOA_RST1) |      		\
-                                     PIN_MODE_INPUT(GPIOA_CS1) |     		\
+                                     PIN_MODE_OUTPUT(GPIOA_CS1) |     		\
                                      PIN_MODE_ANALOG(GPIOA_AN2) |  			\
                                      PIN_MODE_ANALOG(GPIOA_AN4) |           \
                                      PIN_MODE_ANALOG(GPIOA_AN1) |     		\
@@ -290,7 +290,7 @@
                                      PIN_MODE_ALTERNATE(GPIOA_RX4) |    	\
                                      PIN_MODE_ALTERNATE(GPIOA_OTG_FS_DM) |  \
                                      PIN_MODE_ALTERNATE(GPIOA_OTG_FS_DP) |  \
-                                     PIN_MODE_ALTERNATE(GPIOA_FLASH_CS) |      \
+                                     PIN_MODE_OUTPUT(GPIOA_FLASH_CS) |      \
                                      PIN_MODE_INPUT(GPIOA_INT4) |      		\
                                      PIN_MODE_INPUT(GPIOA_GPIO1))
 #define VAL_GPIOA_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOA_PA0) |     \
@@ -338,7 +338,7 @@
                                      PIN_PUPDR_FLOATING(GPIOA_RX4) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_OTG_FS_DM) |     \
                                      PIN_PUPDR_FLOATING(GPIOA_OTG_FS_DP) |     \
-                                     PIN_PUPDR_FLOATING(GPIOA_FLASH_CS) |        \
+                                     PIN_PUPDR_PULLDOWN(GPIOA_FLASH_CS) |        \
                                      PIN_PUPDR_FLOATING(GPIOA_INT4) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_GPIO1))
 #define VAL_GPIOA_ODR               (PIN_ODR_LOW(GPIOA_PA0) |           \
@@ -352,8 +352,8 @@
                                      PIN_ODR_HIGH(GPIOA_FLASH_HOLD) |         \
                                      PIN_ODR_LOW(GPIOA_TX4) |          \
                                      PIN_ODR_LOW(GPIOA_RX4) |          \
-                                     PIN_ODR_LOW(GPIOA_OTG_FS_DM) |           \
-                                     PIN_ODR_LOW(GPIOA_OTG_FS_DP) |           \
+                                     PIN_ODR_HIGH(GPIOA_OTG_FS_DM) |           \
+                                     PIN_ODR_HIGH(GPIOA_OTG_FS_DP) |           \
                                      PIN_ODR_LOW(GPIOA_FLASH_CS) |            \
                                      PIN_ODR_LOW(GPIOA_INT4) |            \
                                      PIN_ODR_LOW(GPIOA_GPIO1))
@@ -520,7 +520,7 @@
                                      PIN_MODE_ALTERNATE(GPIOC_TX3) |  \
                                      PIN_MODE_ALTERNATE(GPIOC_RX3) |     \
                                      PIN_MODE_INPUT(GPIOC_INT3) |           \
-                                     PIN_MODE_INPUT(GPIOC_FLASH_WP) |   \
+                                     PIN_MODE_OUTPUT(GPIOC_FLASH_WP) |   \
                                      PIN_MODE_ALTERNATE(GPIOC_SPI3_CLK) |     \
                                      PIN_MODE_ALTERNATE(GPIOC_SPI3_MISO) |          \
                                      PIN_MODE_ALTERNATE(GPIOC_SPI3_MOSI) |          \
@@ -584,7 +584,7 @@
                                      PIN_ODR_LOW(GPIOC_TX3) |        \
                                      PIN_ODR_LOW(GPIOC_RX3) |           \
                                      PIN_ODR_LOW(GPIOC_INT3) |             \
-                                     PIN_ODR_LOW(GPIOC_FLASH_WP) |         \
+                                     PIN_ODR_HIGH(GPIOC_FLASH_WP) |         \
                                      PIN_ODR_LOW(GPIOC_SPI3_CLK) |           \
                                      PIN_ODR_LOW(GPIOC_SPI3_MISO) |            \
                                      PIN_ODR_LOW(GPIOC_SPI3_MOSI) |            \
@@ -629,7 +629,7 @@
  * PD15 - FMC_D1                    (alternate 12).
  */
 #define VAL_GPIOD_MODER             (PIN_MODE_INPUT(GPIOD_RST4) |     \
-                                     PIN_MODE_INPUT(GPIOD_CS4) |     \
+                                     PIN_MODE_OUTPUT(GPIOD_CS4) |     \
                                      PIN_MODE_INPUT(GPIOD_GPIO10) |           \
                                      PIN_MODE_INPUT(GPIOD_GPIO11) |     \
                                      PIN_MODE_INPUT(GPIOD_GPIO12) |           \
@@ -639,7 +639,7 @@
                                      PIN_MODE_ALTERNATE(GPIOD_TX1) |    \
                                      PIN_MODE_ALTERNATE(GPIOD_RX1) |    \
                                      PIN_MODE_INPUT(GPIOD_GPIO14) |    \
-                                     PIN_MODE_INPUT(GPIOD_CS3) |         \
+                                     PIN_MODE_OUTPUT(GPIOD_CS3) |         \
                                      PIN_MODE_INPUT(GPIOD_RST3) |       \
                                      PIN_MODE_ALTERNATE(GPIOD_PWM3) |       \
                                      PIN_MODE_ALTERNATE(GPIOD_PWM4) |     \
@@ -745,7 +745,7 @@
  * PE14 - GPIO24                   (alternate 12).
  * PE15 - FMC_D12                   (alternate 12).
  */
-#define VAL_GPIOE_MODER             (PIN_MODE_INPUT(GPIOE_CS2) |   \
+#define VAL_GPIOE_MODER             (PIN_MODE_OUTPUT(GPIOE_CS2) |   \
                                      PIN_MODE_INPUT(GPIOE_RST2) |   \
                                      PIN_MODE_INPUT(GPIOE_GPIO15) |           \
                                      PIN_MODE_INPUT(GPIOE_GPIO16) |           \
