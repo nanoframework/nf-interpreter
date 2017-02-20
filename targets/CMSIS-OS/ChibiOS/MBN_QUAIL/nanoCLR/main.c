@@ -150,6 +150,37 @@ void TestSPI(uint8_t spiNum)
 	}
 }
 
+void TestI2C()
+{
+	static const uint8_t tx[] = {0, 100, 65};
+    uint8_t rx;
+	msg_t msg;
+	static const I2CConfig i2cconfig = { OPMODE_I2C, 100000U, STD_DUTY_CYCLE };
+
+	palClearPad(GPIOE, GPIOE_LED1);
+	palClearPad(GPIOE, GPIOE_LED2);
+	palClearPad(GPIOC, GPIOC_LED3);
+
+	i2cStart(&I2CD1, &i2cconfig);
+	// Write value 65 @ 100
+	i2cAcquireBus(&I2CD1);
+	msg = i2cMasterTransmitTimeout(&I2CD1, 0xA0>>1, tx, 3, NULL, 0, TIME_INFINITE);
+	i2cReleaseBus(&I2CD1);
+	chThdSleepMilliseconds(5);		// Mandatory after each Write transaction !!!
+
+	// Read byte @ 100 (should be 65)
+	i2cAcquireBus(&I2CD1);
+	msg = i2cMasterTransmitTimeout(&I2CD1, 0xA0>>1, tx, 2, NULL, 0, TIME_INFINITE);
+	chThdSleepMilliseconds(5);		// Mandatory after each Write transaction !!!
+	msg = i2cMasterReceiveTimeout(&I2CD1, 0xA0>>1, &rx, 1, TIME_INFINITE);
+	i2cReleaseBus(&I2CD1);
+
+	if (rx == 65) palSetPad(GPIOE, GPIOE_LED2);
+	else palSetPad(GPIOC, GPIOC_LED3);
+
+}
+
+
 
 //  Application entry point.
 int main(void)
@@ -179,13 +210,14 @@ int main(void)
 #endif
 
 	// Creates the blinker thread, it does not start immediately.
-	osThreadCreate(osThread(BlinkerThread), NULL);
+	//osThreadCreate(osThread(BlinkerThread), NULL);
 	
 	// start kernel, after this the main() thread has priority osPriorityNormal by default
 	osKernelStart();
 	osDelay(200);
+
+	TestI2C();
 	
-	TestSPI(3);
 	
 	//  Normal main() thread activity it does nothing except sleeping in a loop 
 	while (true)
