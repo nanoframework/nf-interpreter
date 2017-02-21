@@ -13,6 +13,18 @@
 #include <nanoCLR_ErrorCodes.h>
 #include <nanoSupport.h>
 
+// definition of WEAK attribute for stub functions
+#if defined(_MSC_VER)
+// because VC++ doesn't support this attribute it's definition end up being an empty one
+#define __nfweak 
+
+#elif defined(__GNUC__)
+#define __nfweak __attribute__((weak))
+
+#else
+#error "Unknow platform. Please add definition for weak attribute."
+#endif
+
 struct CLR_RADIAN
 {
     short cos;
@@ -248,11 +260,11 @@ struct CLR_PROF_CounterCallChain
 
     //--//
 
-    void* Prepare (                CLR_PROF_Handler* handler );
-    void  Complete( CLR_UINT64& t, CLR_PROF_Handler* handler );
+    __nfweak void* Prepare (                CLR_PROF_Handler* handler );
+    __nfweak void  Complete( CLR_UINT64& t, CLR_PROF_Handler* handler );
 
-    void Enter( CLR_RT_StackFrame* stack );
-    void Leave(                          );
+    __nfweak void Enter( CLR_RT_StackFrame* stack );
+    __nfweak void Leave(                          );
 
     //--//
 
@@ -296,23 +308,23 @@ struct CLR_PROF_Handler
 
     //--//
 
-    static void       Calibrate    (             );
-    static void       SuspendTime  (             );
-    static CLR_UINT64 GetFrozenTime(             );
-    static CLR_UINT64 ResumeTime   (             );
-    static CLR_UINT64 ResumeTime   ( CLR_INT64 t );
+    __nfweak static void       Calibrate    (             );
+    __nfweak static void       SuspendTime  (             );
+    __nfweak static CLR_UINT64 GetFrozenTime(             );
+    __nfweak static CLR_UINT64 ResumeTime   (             );
+    __nfweak static CLR_UINT64 ResumeTime   ( CLR_INT64 t );
 
     //--//
 
 private:
-    void Constructor(                                   );
+    __nfweak void Constructor(                                   );
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
-    void Constructor( CLR_PROF_CounterCallChain& target );
+    __nfweak void Constructor( CLR_PROF_CounterCallChain& target );
 #endif
 
-    void Destructor();
+    __nfweak void Destructor();
 
-    void Init( void* target );
+    __nfweak void Init( void* target );
 
     PROHIBIT_COPY_CONSTRUCTORS2(CLR_PROF_Handler);
 };
@@ -991,7 +1003,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     bool FindMethodBoundaries( CLR_IDX i, CLR_OFFSET& start, CLR_OFFSET& end );
 
-    void Relocate();
+    __nfweak void Relocate();
 
     //--//
 
@@ -1028,14 +1040,14 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 #define DECL_POSTFIX {}
 #endif
 public:
-    void DumpOpcode      ( CLR_RT_StackFrame*         stack, CLR_PMETADATA ip                                 ) DECL_POSTFIX;
-    void DumpOpcodeDirect( CLR_RT_MethodDef_Instance& call , CLR_PMETADATA ip, CLR_PMETADATA ipStart, int pid ) DECL_POSTFIX;
+    __nfweak void DumpOpcode      ( CLR_RT_StackFrame*         stack, CLR_PMETADATA ip                                 ) DECL_POSTFIX;
+    __nfweak void DumpOpcodeDirect( CLR_RT_MethodDef_Instance& call , CLR_PMETADATA ip, CLR_PMETADATA ipStart, int pid ) DECL_POSTFIX;
 
 private:
-    void DumpToken         ( CLR_UINT32     tk  ) DECL_POSTFIX;
-    void DumpSignature     ( CLR_SIG        sig ) DECL_POSTFIX;
-    void DumpSignature     ( CLR_PMETADATA& p   ) DECL_POSTFIX;
-    void DumpSignatureToken( CLR_PMETADATA& p   ) DECL_POSTFIX;
+    __nfweak void DumpToken         ( CLR_UINT32     tk  ) DECL_POSTFIX;
+    __nfweak void DumpSignature     ( CLR_SIG        sig ) DECL_POSTFIX;
+    __nfweak void DumpSignature     ( CLR_PMETADATA& p   ) DECL_POSTFIX;
+    __nfweak void DumpSignatureToken( CLR_PMETADATA& p   ) DECL_POSTFIX;
 
     //--//
 
@@ -1130,7 +1142,7 @@ struct CLR_RT_AppDomain : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP 
     void AppDomain_Uninitialize();
     bool IsLoaded              ();
 
-    void Relocate     ();
+    __nfweak void Relocate     ();
     void RecoverFromGC();
 
     CLR_RT_AppDomainAssembly* FindAppDomainAssembly( CLR_RT_Assembly* assm );
@@ -1159,7 +1171,7 @@ struct CLR_RT_AppDomainAssembly : public CLR_RT_HeapBlock_Node //EVENT HEAP - NO
     void    DestroyInstance();
     HRESULT AppDomainAssembly_Initialize( CLR_RT_AppDomain* appDomain, CLR_RT_Assembly* assm );
 
-    void Relocate();
+    __nfweak void Relocate();
 };
 
 #endif //NANOCLR_APPDOMAINS
@@ -1931,7 +1943,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 
     HRESULT NotImplementedStub();
 
-    void Relocate();
+    __nfweak void Relocate();
 
     ////////////////////////////////////////
 
@@ -2483,7 +2495,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
     void RecoverFromGC();
 
-    void Relocate();
+    __nfweak void Relocate();
 
     UnwindStack* PushEH     (                                                                                                                );
     void         PopEH_Inner( CLR_RT_StackFrame* stack, CLR_PMETADATA ip                                                                     );
@@ -3039,7 +3051,7 @@ struct CLR_RT_ExecutionEngine
     CLR_UINT32 PerformGarbageCollection();
     void       PerformHeapCompaction   ();
 
-    void Relocate();
+    __nfweak void Relocate();
 
     HRESULT ScheduleThreads( int maxContextSwitch );
 
@@ -3226,7 +3238,7 @@ CT_ASSERT( sizeof(CLR_RT_HeapBlock_Raw)  == sizeof(CLR_RT_HeapBlock) )
 #define    NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE  0
 #endif
 
-#if defined(GCC)  // Gcc compiler uses 8 bytes for a function pointer
+#if defined(__GNUC__)  // Gcc compiler uses 8 bytes for a function pointer
     CT_ASSERT( sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE )
 
 #elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(NANOCLR_TRACE_MEMORY_STATS)

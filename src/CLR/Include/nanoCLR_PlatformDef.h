@@ -9,17 +9,6 @@
 //#include <CLR_Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// PLATFORMS GENERAL DEFINITIONS
-#if defined(_WIN32)
-#define NANOCLR_STOP() ::DebugBreak()
-#pragma warning( error : 4706 ) // error C4706: assignment within conditional expression
-#elif defined(arm) || defined(__arm) || defined(__GNUC__)
-
-#define PLATFORM_ARM
-#define NANOCLR_STOP() HARD_BREAKPOINT()
-#endif
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 // DEFINITIONS
 #define NANOCLR_VALIDATE_HEAP_0_None                0 // No Trace
 #define NANOCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink 1 // Validate HeapBlocks and Unlink.

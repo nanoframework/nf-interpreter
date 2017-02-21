@@ -8,78 +8,54 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-bool CLR_RT_Persistence_Manager::ObjectHeader::Initialize( CLR_RT_HeapBlock_WeakReference* wr )
+__nfweak bool CLR_RT_Persistence_Manager::ObjectHeader::Initialize( CLR_RT_HeapBlock_WeakReference* wr )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return true;
 }
 
-bool CLR_RT_Persistence_Manager::ObjectHeader::IsGood( bool fIncludeData ) const
+__nfweak bool CLR_RT_Persistence_Manager::ObjectHeader::IsGood( bool fIncludeData ) const
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return true;
 }
 
-void CLR_RT_Persistence_Manager::ObjectHeader::Delete()
+__nfweak void CLR_RT_Persistence_Manager::ObjectHeader::Delete()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
-CLR_UINT32 CLR_RT_Persistence_Manager::ObjectHeader::Length() const
-{
-    NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-    return 0;
-}
-
-CLR_UINT32 CLR_RT_Persistence_Manager::ObjectHeader::Length( const CLR_RT_HeapBlock_WeakReference* ref )
+__nfweak CLR_UINT32 CLR_RT_Persistence_Manager::ObjectHeader::Length() const
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return 0;
 }
 
-CLR_UINT32 CLR_RT_Persistence_Manager::ObjectHeader::Length( CLR_UINT32 data )
+__nfweak CLR_UINT32 CLR_RT_Persistence_Manager::ObjectHeader::Length( const CLR_RT_HeapBlock_WeakReference* ref )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return 0;
 }
 
-CLR_RT_Persistence_Manager::ObjectHeader* CLR_RT_Persistence_Manager::ObjectHeader::Next() const
+__nfweak CLR_UINT32 CLR_RT_Persistence_Manager::ObjectHeader::Length( CLR_UINT32 data )
+{
+    NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
+    return 0;
+}
+
+__nfweak CLR_RT_Persistence_Manager::ObjectHeader* CLR_RT_Persistence_Manager::ObjectHeader::Next() const
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return NULL;
 }
 
-CLR_UINT32 CLR_RT_Persistence_Manager::ObjectHeader::ComputeCRC() const
+__nfweak CLR_UINT32 CLR_RT_Persistence_Manager::ObjectHeader::ComputeCRC() const
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return 0;
 }
 
-CLR_RT_Persistence_Manager::ObjectHeader* CLR_RT_Persistence_Manager::ObjectHeader::Find( FLASH_WORD* start, FLASH_WORD* end )
-{
-    NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-    return NULL;
-}
-
-//--//--//--//--//--//
-
-void CLR_RT_Persistence_Manager::BankHeader::Initialize()
-{
-    NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-}
-
-bool CLR_RT_Persistence_Manager::BankHeader::IsGood() const
-{
-    NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-    return true;
-}
-
-void CLR_RT_Persistence_Manager::BankHeader::Delete()
-{
-    NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-}
-
-CLR_RT_Persistence_Manager::BankHeader* CLR_RT_Persistence_Manager::BankHeader::Find( FLASH_WORD* start, FLASH_WORD* end )
+__nfweak CLR_RT_Persistence_Manager::ObjectHeader* CLR_RT_Persistence_Manager::ObjectHeader::Find( FLASH_WORD* start, FLASH_WORD* end )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return NULL;
@@ -87,50 +63,74 @@ CLR_RT_Persistence_Manager::BankHeader* CLR_RT_Persistence_Manager::BankHeader::
 
 //--//--//--//--//--//
 
-bool CLR_RT_Persistence_Manager::Bank::Initialize( UINT32 kind )
+__nfweak void CLR_RT_Persistence_Manager::BankHeader::Initialize()
+{
+    NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
+}
+
+__nfweak bool CLR_RT_Persistence_Manager::BankHeader::IsGood() const
+{
+    NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
+    return true;
+}
+
+__nfweak void CLR_RT_Persistence_Manager::BankHeader::Delete()
+{
+    NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
+}
+
+__nfweak CLR_RT_Persistence_Manager::BankHeader* CLR_RT_Persistence_Manager::BankHeader::Find( FLASH_WORD* start, FLASH_WORD* end )
+{
+    NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
+    return NULL;
+}
+
+//--//--//--//--//--//
+
+__nfweak bool CLR_RT_Persistence_Manager::Bank::Initialize( UINT32 kind )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 
     return false;
 }
 
-bool CLR_RT_Persistence_Manager::Bank::IsGood() const
+__nfweak bool CLR_RT_Persistence_Manager::Bank::IsGood() const
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return true;
 }
 
-bool CLR_RT_Persistence_Manager::Bank::Erase( int& sectorIndex )
+__nfweak bool CLR_RT_Persistence_Manager::Bank::Erase( int& sectorIndex )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return true;
 }
 
-void CLR_RT_Persistence_Manager::Bank::EraseAll()
+__nfweak void CLR_RT_Persistence_Manager::Bank::EraseAll()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
-bool CLR_RT_Persistence_Manager::Bank::Format()
+__nfweak bool CLR_RT_Persistence_Manager::Bank::Format()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return true;
 }
 
-void CLR_RT_Persistence_Manager::Bank::Switch( Bank& other )
+__nfweak void CLR_RT_Persistence_Manager::Bank::Switch( Bank& other )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
 //--//
 
-CLR_RT_Persistence_Manager::ObjectHeader* CLR_RT_Persistence_Manager::Bank::RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref )
+__nfweak CLR_RT_Persistence_Manager::ObjectHeader* CLR_RT_Persistence_Manager::Bank::RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return NULL;
 }
 
-bool CLR_RT_Persistence_Manager::Bank::WriteHeader( CLR_RT_HeapBlock_WeakReference* ref, ObjectHeader*& pOH, FLASH_WORD*& pData )
+__nfweak bool CLR_RT_Persistence_Manager::Bank::WriteHeader( CLR_RT_HeapBlock_WeakReference* ref, ObjectHeader*& pOH, FLASH_WORD*& pData )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return true;
@@ -138,78 +138,78 @@ bool CLR_RT_Persistence_Manager::Bank::WriteHeader( CLR_RT_HeapBlock_WeakReferen
 
 //--//
 
-bool CLR_RT_Persistence_Manager::Bank::CanWrite( FLASH_WORD* dst, CLR_UINT32 length )
+__nfweak bool CLR_RT_Persistence_Manager::Bank::CanWrite( FLASH_WORD* dst, CLR_UINT32 length )
 {    
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return true;
 }
 
-bool CLR_RT_Persistence_Manager::Bank::Write( FLASH_WORD* dst, const FLASH_WORD* src, CLR_UINT32 length )
+__nfweak bool CLR_RT_Persistence_Manager::Bank::Write( FLASH_WORD* dst, const FLASH_WORD* src, CLR_UINT32 length )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return true;
 }
 
-void CLR_RT_Persistence_Manager::Bank::Invalidate( FLASH_WORD* dst, FLASH_WORD match, CLR_UINT32 length )
+__nfweak void CLR_RT_Persistence_Manager::Bank::Invalidate( FLASH_WORD* dst, FLASH_WORD match, CLR_UINT32 length )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
 //--//
 
-void CLR_RT_Persistence_Manager::Uninitialize()
+__nfweak void CLR_RT_Persistence_Manager::Uninitialize()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
 
-void CLR_RT_Persistence_Manager::Initialize()
+__nfweak void CLR_RT_Persistence_Manager::Initialize()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
-void CLR_RT_Persistence_Manager::EraseAll()
+__nfweak void CLR_RT_Persistence_Manager::EraseAll()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
 //--//
 
-CLR_RT_Persistence_Manager::ObjectHeader* CLR_RT_Persistence_Manager::RecoverHeader( CLR_RT_HeapBlock_WeakReference* weak )
+__nfweak CLR_RT_Persistence_Manager::ObjectHeader* CLR_RT_Persistence_Manager::RecoverHeader( CLR_RT_HeapBlock_WeakReference* weak )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return NULL;
 }
 
-void CLR_RT_Persistence_Manager::InvalidateEntry( CLR_RT_HeapBlock_WeakReference* weak )
+__nfweak void CLR_RT_Persistence_Manager::InvalidateEntry( CLR_RT_HeapBlock_WeakReference* weak )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
 //--//
 
-void CLR_RT_Persistence_Manager::Callback( void* arg )
+__nfweak void CLR_RT_Persistence_Manager::Callback( void* arg )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
-void CLR_RT_Persistence_Manager::EnqueueNextCallback()
+__nfweak void CLR_RT_Persistence_Manager::EnqueueNextCallback()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
-void CLR_RT_Persistence_Manager::Relocate()
+__nfweak void CLR_RT_Persistence_Manager::Relocate()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 
-bool CLR_RT_Persistence_Manager::AdvanceState( bool force )
+__nfweak bool CLR_RT_Persistence_Manager::AdvanceState( bool force )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     return false;
 }
 
-void CLR_RT_Persistence_Manager::Flush()
+__nfweak void CLR_RT_Persistence_Manager::Flush()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
@@ -217,14 +217,14 @@ void CLR_RT_Persistence_Manager::Flush()
 //--//
 
 #if !defined(BUILD_RTM)
-void CLR_RT_Persistence_Manager::GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse )
+__nfweak void CLR_RT_Persistence_Manager::GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 }
 #endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CLR_UINT32 CLR_RT_HeapBlock_WeakReference_Identity::ComputeCRC( const CLR_UINT8* ptr, CLR_UINT32 len ) const
+__nfweak CLR_UINT32 CLR_RT_HeapBlock_WeakReference_Identity::ComputeCRC( const CLR_UINT8* ptr, CLR_UINT32 len ) const
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     CLR_UINT32 hash;
@@ -238,7 +238,7 @@ CLR_UINT32 CLR_RT_HeapBlock_WeakReference_Identity::ComputeCRC( const CLR_UINT8*
 
 //--//
 
-HRESULT CLR_RT_HeapBlock_WeakReference::CreateInstance( CLR_RT_HeapBlock_WeakReference*& weakref )
+__nfweak HRESULT CLR_RT_HeapBlock_WeakReference::CreateInstance( CLR_RT_HeapBlock_WeakReference*& weakref )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     NANOCLR_HEADER();
@@ -250,7 +250,7 @@ HRESULT CLR_RT_HeapBlock_WeakReference::CreateInstance( CLR_RT_HeapBlock_WeakRef
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_HeapBlock_WeakReference::SetTarget( CLR_RT_HeapBlock& targetReference )
+__nfweak HRESULT CLR_RT_HeapBlock_WeakReference::SetTarget( CLR_RT_HeapBlock& targetReference )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     NANOCLR_HEADER();
@@ -267,7 +267,7 @@ HRESULT CLR_RT_HeapBlock_WeakReference::SetTarget( CLR_RT_HeapBlock& targetRefer
     NANOCLR_NOCLEANUP();        
 }
 
-HRESULT CLR_RT_HeapBlock_WeakReference::GetTarget( CLR_RT_HeapBlock& targetReference )
+__nfweak HRESULT CLR_RT_HeapBlock_WeakReference::GetTarget( CLR_RT_HeapBlock& targetReference )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     NANOCLR_HEADER();
@@ -277,7 +277,7 @@ HRESULT CLR_RT_HeapBlock_WeakReference::GetTarget( CLR_RT_HeapBlock& targetRefer
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-void CLR_RT_HeapBlock_WeakReference::InsertInPriorityOrder()
+__nfweak void CLR_RT_HeapBlock_WeakReference::InsertInPriorityOrder()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 
@@ -287,7 +287,7 @@ void CLR_RT_HeapBlock_WeakReference::InsertInPriorityOrder()
 }
 
 
-void CLR_RT_HeapBlock_WeakReference::Relocate()
+__nfweak void CLR_RT_HeapBlock_WeakReference::Relocate()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     CLR_RT_HeapBlock_Node::Relocate();
@@ -298,7 +298,7 @@ void CLR_RT_HeapBlock_WeakReference::Relocate()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool CLR_RT_HeapBlock_WeakReference::PrepareForRecovery( CLR_RT_HeapBlock_Node* ptr, CLR_RT_HeapBlock_Node* end, CLR_UINT32 blockSize )
+__nfweak bool CLR_RT_HeapBlock_WeakReference::PrepareForRecovery( CLR_RT_HeapBlock_Node* ptr, CLR_RT_HeapBlock_Node* end, CLR_UINT32 blockSize )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     
@@ -353,7 +353,7 @@ bool CLR_RT_HeapBlock_WeakReference::PrepareForRecovery( CLR_RT_HeapBlock_Node* 
     return true;
 }
 
-void CLR_RT_HeapBlock_WeakReference::RecoverObjects( CLR_RT_DblLinkedList& lstHeap )
+__nfweak void CLR_RT_HeapBlock_WeakReference::RecoverObjects( CLR_RT_DblLinkedList& lstHeap )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,lstHeap)
@@ -415,4 +415,3 @@ void CLR_RT_HeapBlock_WeakReference::RecoverObjects( CLR_RT_DblLinkedList& lstHe
     }
     NANOCLR_FOREACH_NODE_END();
 }
-

@@ -7,14 +7,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_HW_Hardware::CreateInstance()
+__nfweak HRESULT CLR_HW_Hardware::CreateInstance()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     NANOCLR_HEADER();
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT CLR_HW_Hardware::Hardware_Initialize()
+__nfweak HRESULT CLR_HW_Hardware::Hardware_Initialize()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     NANOCLR_HEADER();
@@ -23,26 +23,26 @@ HRESULT CLR_HW_Hardware::Hardware_Initialize()
 
 //--//
 
-HRESULT CLR_HW_Hardware::DeleteInstance()
+__nfweak HRESULT CLR_HW_Hardware::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     NANOCLR_HEADER();
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-void CLR_HW_Hardware::Hardware_Cleanup()
+__nfweak void CLR_HW_Hardware::Hardware_Cleanup()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
 }
 
 //--//
 
-void CLR_HW_Hardware::PrepareForGC()
+__nfweak void CLR_HW_Hardware::PrepareForGC()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
 }
 
-void CLR_HW_Hardware::ProcessActivity()
+__nfweak void CLR_HW_Hardware::ProcessActivity()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
 }

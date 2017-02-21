@@ -82,4 +82,3 @@ unsigned int /* ie, BOOL */ GetHalSystemInfo(HalSystemInfo& systemInfo)
 {
     return FALSE;
 }
-

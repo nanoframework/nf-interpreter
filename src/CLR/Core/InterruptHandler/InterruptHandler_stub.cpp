@@ -7,28 +7,27 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_HW_Hardware::ManagedHardware_Initialize()
+__nfweak HRESULT CLR_HW_Hardware::ManagedHardware_Initialize()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     NANOCLR_SYSTEM_STUB_RETURN();
 }
 
-HRESULT CLR_HW_Hardware::SpawnDispatcher()
+__nfweak HRESULT CLR_HW_Hardware::SpawnDispatcher()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     NANOCLR_SYSTEM_STUB_RETURN();
     
 }
 
-HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
+__nfweak HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     NANOCLR_SYSTEM_STUB_RETURN();
 }
 
-HRESULT CLR_HW_Hardware::ProcessInterrupts()
+__nfweak HRESULT CLR_HW_Hardware::ProcessInterrupts()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     NANOCLR_SYSTEM_STUB_RETURN();
 }
-

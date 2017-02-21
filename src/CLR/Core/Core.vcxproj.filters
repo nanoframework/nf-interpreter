@@ -161,9 +161,6 @@
     <ClInclude Include="..\Include\nanoPAL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\nanoHAL_ReleaseInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\nanoCLR_Checks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -189,6 +186,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="corhdr_private.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\nanoHAL_ReleaseInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

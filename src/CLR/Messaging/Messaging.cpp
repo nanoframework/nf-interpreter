@@ -5,6 +5,7 @@
 //
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Runtime__HeapBlock.h>
+#include <nanoCLR_Messaging.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #if 0
@@ -253,18 +254,18 @@ bool CLR_Messaging::App_Release( void* state, WP_Message* msg )
 
 //--//
 
-const WP_PhysicalLayer c_Messaging_phy =
-{
-    &CLR_Messaging::Phy_ReceiveBytes   , 
-    &CLR_Messaging::Phy_TransmitMessage, 
-};
+ const WP_PhysicalLayer c_Messaging_phy =
+ {
+     &CLR_Messaging::Phy_ReceiveBytes   , 
+     &CLR_Messaging::Phy_TransmitMessage, 
+ };
 
-const WP_ApplicationLayer c_Messaging_app =
-{
-    &CLR_Messaging::App_ProcessHeader ,
-    &CLR_Messaging::App_ProcessPayload,
-    &CLR_Messaging::App_Release       , 
-};
+ const WP_ApplicationLayer c_Messaging_app =
+ {
+     &CLR_Messaging::App_ProcessHeader ,
+     &CLR_Messaging::App_ProcessPayload,
+     &CLR_Messaging::App_Release       , 
+ };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

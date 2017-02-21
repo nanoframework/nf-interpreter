@@ -5,6 +5,10 @@
 //   Microsoft.SPOT.Native.strings
 //   mscorlib.strings
 //
+#if defined(__GNUC__)
+#include <stddef.h>
+#include <nanoCLR_Types.h>
+#endif
 
 const size_t c_CLR_StringTable_Size = 860;
 

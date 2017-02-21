@@ -7,77 +7,76 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_Initialize()
+__nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_Initialize()
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
 
-void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_RecoverFromGC()
+__nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_RecoverFromGC()
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
 
-void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp()
+__nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp()
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
 
-void SaveNativeEventToHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, UINT32 data1, UINT32 data2 )
+__nfweak void SaveNativeEventToHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, UINT32 data1, UINT32 data2 )
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
 
-void CleanupNativeEventsFromHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext )
+__nfweak void CleanupNativeEventsFromHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext )
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
 
-HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::CreateInstance( CLR_RT_HeapBlock& owner, CLR_RT_HeapBlock& portRef )
-{
-    NATIVE_PROFILE_CLR_IOPORT();
-    NANOCLR_FEATURE_STUB_RETURN();
-}
-
-HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::ExtractInstance( CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_NativeEventDispatcher*& port )
+__nfweak HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::CreateInstance( CLR_RT_HeapBlock& owner, CLR_RT_HeapBlock& portRef )
 {
     NATIVE_PROFILE_CLR_IOPORT();
     NANOCLR_FEATURE_STUB_RETURN();
 }
 
-void CLR_RT_HeapBlock_NativeEventDispatcher::RecoverFromGC()
+__nfweak HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::ExtractInstance( CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_NativeEventDispatcher*& port )
+{
+    NATIVE_PROFILE_CLR_IOPORT();
+    NANOCLR_FEATURE_STUB_RETURN();
+}
+
+__nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::RecoverFromGC()
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
 
-bool CLR_RT_HeapBlock_NativeEventDispatcher::ReleaseWhenDeadEx()
+__nfweak bool CLR_RT_HeapBlock_NativeEventDispatcher::ReleaseWhenDeadEx()
 {
     NATIVE_PROFILE_CLR_IOPORT();
     return true;
 }
 
-void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
+__nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
-void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue( UINT32 data1, UINT32 data2 )
+__nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue( UINT32 data1, UINT32 data2 )
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
 
-HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::StartDispatch( CLR_RT_ApplicationInterrupt* appInterrupt, CLR_RT_Thread* th )
+__nfweak HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::StartDispatch( CLR_RT_ApplicationInterrupt* appInterrupt, CLR_RT_Thread* th )
 {
     NATIVE_PROFILE_CLR_IOPORT();
     NANOCLR_FEATURE_STUB_RETURN();
 }
 
-void CLR_RT_HeapBlock_NativeEventDispatcher::ThreadTerminationCallback( void* arg )
+__nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::ThreadTerminationCallback( void* arg )
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
 
-HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::RecoverManagedObject( CLR_RT_HeapBlock*& port )
+__nfweak HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::RecoverManagedObject( CLR_RT_HeapBlock*& port )
 {
     NATIVE_PROFILE_CLR_IOPORT();
     NANOCLR_FEATURE_STUB_RETURN();
 }
-

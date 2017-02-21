@@ -14,5 +14,6 @@
 #define VERSION_MAJOR @nanoFramework_VERSION_MAJOR@U
 #define VERSION_MINOR @nanoFramework_VERSION_MINOR@U
 #define VERSION_BUILD @nanoFramework_VERSION_PATCH@U
+#define VERSION_REVISION @nanoFramework_VERSION_TWEAK@U
 
 #endif /* _TARGET_OS_H_ */

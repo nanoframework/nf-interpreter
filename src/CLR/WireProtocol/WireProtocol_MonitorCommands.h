@@ -7,7 +7,7 @@
 #ifndef _WIREPROTOCOL_COMMANDS_H_
 #define _WIREPROTOCOL_COMMANDS_H_
 
-#include "WireProtocol.h"
+#include "WireProtocol_v2.h"
 #include "WireProtocol_Message.h"
 
 //////////////////////////////////////////

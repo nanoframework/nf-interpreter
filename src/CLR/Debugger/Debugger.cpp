@@ -5,8 +5,11 @@
 //
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Debugging.h>
+#include <nanoHAL.h>
 
 #include <CorLib_Native.h>
+
+#define __min(a,b) (((a) < (b)) ? (a) : (b))
 
 #if 0
 #define TRACE0( msg, ...) debug_printf( msg ) 

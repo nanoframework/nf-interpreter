@@ -145,32 +145,32 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
 
         //--//
 
-        HRESULT TypeHandler_Initialize( CLR_RT_BinaryFormatter* bf, SerializationHintsAttribute* hints, CLR_RT_TypeDescriptor* expected );
+        __nfweak HRESULT TypeHandler_Initialize( CLR_RT_BinaryFormatter* bf, SerializationHintsAttribute* hints, CLR_RT_TypeDescriptor* expected );
 
-        HRESULT SetValue( CLR_RT_HeapBlock* v );
-
-        //--//
-
-        int SignatureRequirements();
-
-        bool CompareTypes( CLR_RT_TypeDescriptor* left, CLR_RT_TypeDescriptor* right );
-
-        static CLR_DataType GetDataType  ( CLR_RT_TypeDescriptor* type );
-        static CLR_UINT32   GetSizeOfType( CLR_RT_TypeDescriptor* type );
-        static bool         GetSignOfType( CLR_RT_TypeDescriptor* type );
-
-        static CLR_RT_HeapBlock* FixDereference( CLR_RT_HeapBlock* v );
-        static CLR_RT_HeapBlock* FixNull       ( CLR_RT_HeapBlock* v );
+        __nfweak HRESULT SetValue( CLR_RT_HeapBlock* v );
 
         //--//
 
-        HRESULT EmitSignature      ( int& res                                                        );
-        HRESULT EmitSignature_Inner( int  mask, CLR_RT_TypeDescriptor* type, CLR_RT_HeapBlock* value );
-        HRESULT ReadSignature      ( int& res                                                        );
-        HRESULT EmitValue          ( int& res                                                        );
-        HRESULT ReadValue          ( int& res                                                        );
+        __nfweak int SignatureRequirements();
 
-        HRESULT TrackObject        ( int& res                                                        );
+        __nfweak bool CompareTypes( CLR_RT_TypeDescriptor* left, CLR_RT_TypeDescriptor* right );
+
+        __nfweak static CLR_DataType GetDataType  ( CLR_RT_TypeDescriptor* type );
+        __nfweak static CLR_UINT32   GetSizeOfType( CLR_RT_TypeDescriptor* type );
+        __nfweak static bool         GetSignOfType( CLR_RT_TypeDescriptor* type );
+
+        __nfweak static CLR_RT_HeapBlock* FixDereference( CLR_RT_HeapBlock* v );
+        __nfweak static CLR_RT_HeapBlock* FixNull       ( CLR_RT_HeapBlock* v );
+
+        //--//
+
+        __nfweak HRESULT EmitSignature      ( int& res                                                        );
+        __nfweak HRESULT EmitSignature_Inner( int  mask, CLR_RT_TypeDescriptor* type, CLR_RT_HeapBlock* value );
+        __nfweak HRESULT ReadSignature      ( int& res                                                        );
+        __nfweak HRESULT EmitValue          ( int& res                                                        );
+        __nfweak HRESULT ReadValue          ( int& res                                                        );
+
+        __nfweak HRESULT TrackObject        ( int& res                                                        );
     };
 
     struct State : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCATION -
@@ -194,26 +194,26 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
 
         //--//
 
-        static HRESULT CreateInstance( CLR_RT_BinaryFormatter* parent, SerializationHintsAttribute* hints, CLR_RT_HeapBlock*      type );
-        static HRESULT CreateInstance( CLR_RT_BinaryFormatter* parent, SerializationHintsAttribute* hints, CLR_RT_TypeDescriptor* type );
+        __nfweak static HRESULT CreateInstance( CLR_RT_BinaryFormatter* parent, SerializationHintsAttribute* hints, CLR_RT_HeapBlock*      type );
+        __nfweak static HRESULT CreateInstance( CLR_RT_BinaryFormatter* parent, SerializationHintsAttribute* hints, CLR_RT_TypeDescriptor* type );
 
-        void DestroyInstance();
+        __nfweak void DestroyInstance();
 
-        HRESULT FindHints( SerializationHintsAttribute& hints, const CLR_RT_TypeDef_Instance&  cls );
-        HRESULT FindHints( SerializationHintsAttribute& hints, const CLR_RT_FieldDef_Instance& fld );
-
-        //--//
-
-        HRESULT AssignAndFixBoxing( CLR_RT_HeapBlock& dst );
-
-        HRESULT GetValue                  ();
-        HRESULT SetValueAndDestroyInstance();
+        __nfweak HRESULT FindHints( SerializationHintsAttribute& hints, const CLR_RT_TypeDef_Instance&  cls );
+        __nfweak HRESULT FindHints( SerializationHintsAttribute& hints, const CLR_RT_FieldDef_Instance& fld );
 
         //--//
 
-        HRESULT Advance                ();
-        HRESULT AdvanceToTheNextField  ();
-        HRESULT AdvanceToTheNextElement();
+        __nfweak HRESULT AssignAndFixBoxing( CLR_RT_HeapBlock& dst );
+
+        __nfweak HRESULT GetValue                  ();
+        __nfweak HRESULT SetValueAndDestroyInstance();
+
+        //--//
+
+        __nfweak HRESULT Advance                ();
+        __nfweak HRESULT AdvanceToTheNextField  ();
+        __nfweak HRESULT AdvanceToTheNextElement();
     };
 
 
@@ -239,46 +239,46 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
 
     //--//
 
-    static bool SerializationEnabled();
+    __nfweak static bool SerializationEnabled();
 
-    static HRESULT CreateInstance( CLR_UINT8* buf, int len, CLR_RT_BinaryFormatter*& res );
+    __nfweak static HRESULT CreateInstance( CLR_UINT8* buf, int len, CLR_RT_BinaryFormatter*& res );
 
-    void    DestroyInstance();
-    HRESULT Advance        ();
+    __nfweak void    DestroyInstance();
+    __nfweak HRESULT Advance        ();
 
-    static HRESULT Serialize  ( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object        , CLR_RT_HeapBlock* cls                         , CLR_UINT32 flags );
-    static HRESULT Deserialize( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object        , CLR_RT_HeapBlock* cls, CLR_UINT32* unknownType, CLR_UINT32 flags );
-    static HRESULT Deserialize( CLR_RT_HeapBlock& refData, CLR_UINT8* data, CLR_UINT32 size, CLR_RT_HeapBlock* cls, CLR_UINT32* unknownType, CLR_UINT32 flags );
+    __nfweak static HRESULT Serialize  ( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object        , CLR_RT_HeapBlock* cls                         , CLR_UINT32 flags );
+    __nfweak static HRESULT Deserialize( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object        , CLR_RT_HeapBlock* cls, CLR_UINT32* unknownType, CLR_UINT32 flags );
+    __nfweak static HRESULT Deserialize( CLR_RT_HeapBlock& refData, CLR_UINT8* data, CLR_UINT32 size, CLR_RT_HeapBlock* cls, CLR_UINT32* unknownType, CLR_UINT32 flags );
 
-    HRESULT           TrackDuplicate ( CLR_RT_HeapBlock* object );
-    CLR_UINT32        SearchDuplicate( CLR_RT_HeapBlock* object );
-    CLR_RT_HeapBlock* GetDuplicate   ( CLR_UINT32        idx    );
+    __nfweak HRESULT           TrackDuplicate ( CLR_RT_HeapBlock* object );
+    __nfweak CLR_UINT32        SearchDuplicate( CLR_RT_HeapBlock* object );
+    __nfweak CLR_RT_HeapBlock* GetDuplicate   ( CLR_UINT32        idx    );
 
     //--//
 
-    int     BitsAvailable          (                                                  );
+    __nfweak int     BitsAvailable          (                                                  );
 
-    HRESULT ReadBits               (       CLR_UINT32&                 val, int bits  );
-    HRESULT WriteBits              (       CLR_UINT32                  val, int bits  );
+    __nfweak HRESULT ReadBits               (       CLR_UINT32&                 val, int bits  );
+    __nfweak HRESULT WriteBits              (       CLR_UINT32                  val, int bits  );
 
-    HRESULT ReadBits               (       CLR_UINT64&                 val, int bits  );
-    HRESULT WriteBits              (       CLR_UINT64                  val, int bits  );
+    __nfweak HRESULT ReadBits               (       CLR_UINT64&                 val, int bits  );
+    __nfweak HRESULT WriteBits              (       CLR_UINT64                  val, int bits  );
 
-    HRESULT ReadArray              (       CLR_UINT8*                  buf, int bytes );
-    HRESULT WriteArray             ( const CLR_UINT8*                  buf, int bytes );
+    __nfweak HRESULT ReadArray              (       CLR_UINT8*                  buf, int bytes );
+    __nfweak HRESULT WriteArray             ( const CLR_UINT8*                  buf, int bytes );
 
-    HRESULT ReadCompressedUnsigned (       CLR_UINT32&                 val            );
-    HRESULT WriteCompressedUnsigned(       CLR_UINT32                  val            );
+    __nfweak HRESULT ReadCompressedUnsigned (       CLR_UINT32&                 val            );
+    __nfweak HRESULT WriteCompressedUnsigned(       CLR_UINT32                  val            );
 
-    HRESULT ReadType               (       CLR_RT_ReflectionDef_Index& val            );
-    HRESULT WriteType              ( const CLR_RT_ReflectionDef_Index& val            );
-    HRESULT WriteType              (       CLR_UINT32                  val            );
+    __nfweak HRESULT ReadType               (       CLR_RT_ReflectionDef_Index& val            );
+    __nfweak HRESULT WriteType              ( const CLR_RT_ReflectionDef_Index& val            );
+    __nfweak HRESULT WriteType              (       CLR_UINT32                  val            );
 
     //--//
 
 private:
 
-    static void PrepareForGC( void* data );
+    __nfweak static void PrepareForGC( void* data );
 };
 
 #endif // _NANOCLR_RUNTIME__SERIALIZATION_H_

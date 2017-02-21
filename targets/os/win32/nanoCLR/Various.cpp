@@ -299,15 +299,15 @@ void HAL_EnterBooterMode()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if !defined(BUILD_RTM)
-void __cdecl HARD_Breakpoint()
-{
-    if(::IsDebuggerPresent())
-    {
-        ::DebugBreak();
-    }
-}
-#endif
+//#if !defined(BUILD_RTM)
+//void __cdecl HARD_Breakpoint()
+//{
+//    if(::IsDebuggerPresent())
+//    {
+//        ::DebugBreak();
+//    }
+//}
+//#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -370,16 +370,16 @@ void CPU_Shutdown()
     ClrExit();
 }
 
-void
-CPU_Reset()
-{
-    ::ExitProcess( 0 );
-}
+//void
+//CPU_Reset()
+//{
+//    ::ExitProcess( 0 );
+//}
 
-BOOL CPU_IsSoftRebootSupported ()
-{
-    return TRUE;
-}
+//BOOL CPU_IsSoftRebootSupported ()
+//{
+//    return TRUE;
+//}
 
 char nanoClr_Dat_Start[512*1024];
 char nanoClr_Dat_End  [1       ];

@@ -6,7 +6,7 @@
 
 #include <cmsis_os.h>
 
-#include <WireProtocol.h>
+#include <WireProtocol_v2.h>
 #include <WireProtocol_MonitorCommands.h>
 #include <target_board.h>
 

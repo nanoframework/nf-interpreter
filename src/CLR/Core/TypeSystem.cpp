@@ -1370,8 +1370,10 @@ CLR_UINT32 CLR_RECORD_ASSEMBLY::ComputeAssemblyHash( LPCSTR name, const CLR_RECO
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT32 assemblyHASH;
 
-    assemblyHASH = SUPPORT_ComputeCRC( name, (int)hal_strlen_s( name ), 0            );
-    assemblyHASH = SUPPORT_ComputeCRC( &ver,            sizeof( ver  ), assemblyHASH );
+    // UNDONE: FIXME
+    // assemblyHASH = SUPPORT_ComputeCRC( name, (int)hal_strlen_s( name ), 0            );
+    // UNDONE: FIXME
+    // assemblyHASH = SUPPORT_ComputeCRC( &ver,            sizeof( ver  ), assemblyHASH );
 
     return assemblyHASH;
 }
@@ -3167,7 +3169,8 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
 
                     LPCSTR fieldName = inst.m_assm->GetString( fd->name );
 
-                    hash = SUPPORT_ComputeCRC( fieldName, (CLR_UINT32)hal_strlen_s(fieldName), hash );
+                    // UNDONE: FIXME
+                    // hash = SUPPORT_ComputeCRC( fieldName, (CLR_UINT32)hal_strlen_s(fieldName), hash );
                 }
             }
 
@@ -3415,83 +3418,84 @@ bool CLR_RT_TypeSystem::FindTypeDef( CLR_UINT32 hash, CLR_RT_TypeDef_Index& res 
 bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR szClass, CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
-    char rgName     [ MAXTYPENAMELEN ];
-    char rgNamespace[ MAXTYPENAMELEN ];
+    // UNDONE: FIXME
+    // char rgName     [ MAXTYPENAMELEN ];
+    // char rgNamespace[ MAXTYPENAMELEN ];
 
-    if(hal_strlen_s(szClass) < ARRAYSIZE(rgNamespace))
-    {
-        LPCSTR szPtr              = szClass;
-        LPCSTR szPtr_LastDot      = NULL;
-        LPCSTR szPtr_FirstSubType = NULL;
-        char   c;
-        size_t len;
+    // if(hal_strlen_s(szClass) < ARRAYSIZE(rgNamespace))
+    // {
+    //     LPCSTR szPtr              = szClass;
+    //     LPCSTR szPtr_LastDot      = NULL;
+    //     LPCSTR szPtr_FirstSubType = NULL;
+    //     char   c;
+    //     size_t len;
 
-        while(true)
-        {
-            c = szPtr[ 0 ]; if(!c) break;
+    //     while(true)
+    //     {
+    //         c = szPtr[ 0 ]; if(!c) break;
 
-            if(c == '.')
-            {
-                szPtr_LastDot = szPtr;
-            }
-            else if(c == '+')
-            {
-                szPtr_FirstSubType = szPtr;
-                break;
-            }
+    //         if(c == '.')
+    //         {
+    //             szPtr_LastDot = szPtr;
+    //         }
+    //         else if(c == '+')
+    //         {
+    //             szPtr_FirstSubType = szPtr;
+    //             break;
+    //         }
 
-            szPtr++;
-        }
+    //         szPtr++;
+    //     }
 
-        if(szPtr_LastDot)
-        {
-            len = szPtr_LastDot++ - szClass      ; hal_strncpy_s( rgNamespace, ARRAYSIZE(rgNamespace), szClass      , len );
-            len = szPtr           - szPtr_LastDot; hal_strncpy_s( rgName     , ARRAYSIZE(rgName     ), szPtr_LastDot, len );
-        }
-        else
-        {
-            rgNamespace[ 0 ] = 0;
-            hal_strcpy_s( rgName, ARRAYSIZE(rgName), szClass );
-        }
+    //     if(szPtr_LastDot)
+    //     {
+    //         len = szPtr_LastDot++ - szClass      ; hal_strncpy_s( rgNamespace, ARRAYSIZE(rgNamespace), szClass      , len );
+    //         len = szPtr           - szPtr_LastDot; hal_strncpy_s( rgName     , ARRAYSIZE(rgName     ), szPtr_LastDot, len );
+    //     }
+    //     else
+    //     {
+    //         rgNamespace[ 0 ] = 0;
+    //         hal_strcpy_s( rgName, ARRAYSIZE(rgName), szClass );
+    //     }
 
         
-        if(FindTypeDef( rgName, rgNamespace, assm, res ))
-        {
-            //
-            // Found the containing type, let's look for the nested type.
-            //
-            if(szPtr_FirstSubType)
-            {
-                CLR_RT_TypeDef_Instance inst;
+    //     if(FindTypeDef( rgName, rgNamespace, assm, res ))
+    //     {
+    //         //
+    //         // Found the containing type, let's look for the nested type.
+    //         //
+    //         if(szPtr_FirstSubType)
+    //         {
+    //             CLR_RT_TypeDef_Instance inst;
 
-                do
-                {
-                    szPtr = ++szPtr_FirstSubType;
+    //             do
+    //             {
+    //                 szPtr = ++szPtr_FirstSubType;
 
-                    while(true)
-                    {
-                        c = szPtr_FirstSubType[ 0 ]; if(!c) break;
+    //                 while(true)
+    //                 {
+    //                     c = szPtr_FirstSubType[ 0 ]; if(!c) break;
 
-                        if(c == '+') break;
+    //                     if(c == '+') break;
 
-                        szPtr_FirstSubType++;
-                    }
+    //                     szPtr_FirstSubType++;
+    //                 }
 
-                    len = szPtr_FirstSubType - szPtr; hal_strncpy_s( rgName, ARRAYSIZE(rgName), szPtr, len );
+    //                 len = szPtr_FirstSubType - szPtr; hal_strncpy_s( rgName, ARRAYSIZE(rgName), szPtr, len );
 
-                    inst.InitializeFromIndex( res );
+    //                 inst.InitializeFromIndex( res );
 
-                    if(inst.m_assm->FindTypeDef( rgName, res.Type(), res ) == false)
-                    {
-                        return false;
-                    }
+    //                 if(inst.m_assm->FindTypeDef( rgName, res.Type(), res ) == false)
+    //                 {
+    //                     return false;
+    //                 }
 
-                } while(c == '+');
-            }
+    //             } while(c == '+');
+    //         }
 
-            return true;
-        }
-    }
+    //         return true;
+    //     }
+    // }
 
     res.Clear();
 
@@ -3501,99 +3505,101 @@ bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR szClass, CLR_RT_Assembly* assm, CLR_
 bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR szClass, CLR_RT_Assembly* assm, CLR_RT_ReflectionDef_Index& reflex )
 {
     NATIVE_PROFILE_CLR_CORE();
-    char rgName     [ MAXTYPENAMELEN ];
-    char rgNamespace[ MAXTYPENAMELEN ];
-    CLR_RT_TypeDef_Index res;
 
-    if(hal_strlen_s(szClass) < ARRAYSIZE(rgNamespace))
-    {
-        LPCSTR szPtr              = szClass;
-        LPCSTR szPtr_LastDot      = NULL;
-        LPCSTR szPtr_FirstSubType = NULL;
-        char   c;
-        size_t len;
-        bool arrayType = false;
+    // UNDONE: FIXME
+    // char rgName     [ MAXTYPENAMELEN ];
+    // char rgNamespace[ MAXTYPENAMELEN ];
+    // CLR_RT_TypeDef_Index res;
 
-        while(true)
-        {
-            c = szPtr[ 0 ]; if(!c) break;
+    // if(hal_strlen_s(szClass) < ARRAYSIZE(rgNamespace))
+    // {
+    //     LPCSTR szPtr              = szClass;
+    //     LPCSTR szPtr_LastDot      = NULL;
+    //     LPCSTR szPtr_FirstSubType = NULL;
+    //     char   c;
+    //     size_t len;
+    //     bool arrayType = false;
 
-            if(c == '.')
-            {
-                szPtr_LastDot = szPtr;
-            }
-            else if(c == '+')
-            {
-                szPtr_FirstSubType = szPtr;
-                break;
-            }
-            else if(c == '[')
-            {
-                char ch = szPtr[ 1 ];
-                if (ch == ']')
-                {
-                    arrayType = true;
-                    break;
-                }
-            }
+    //     while(true)
+    //     {
+    //         c = szPtr[ 0 ]; if(!c) break;
 
-            szPtr++;
-        }
+    //         if(c == '.')
+    //         {
+    //             szPtr_LastDot = szPtr;
+    //         }
+    //         else if(c == '+')
+    //         {
+    //             szPtr_FirstSubType = szPtr;
+    //             break;
+    //         }
+    //         else if(c == '[')
+    //         {
+    //             char ch = szPtr[ 1 ];
+    //             if (ch == ']')
+    //             {
+    //                 arrayType = true;
+    //                 break;
+    //             }
+    //         }
 
-        if(szPtr_LastDot)
-        {
-            len = szPtr_LastDot++ - szClass      ; hal_strncpy_s( rgNamespace, ARRAYSIZE(rgNamespace), szClass      , len );
-            len = szPtr           - szPtr_LastDot; hal_strncpy_s( rgName     , ARRAYSIZE(rgName     ), szPtr_LastDot, len );
-        }
-        else
-        {
-            rgNamespace[ 0 ] = 0;
-            hal_strcpy_s( rgName, ARRAYSIZE(rgName), szClass );
-        }
+    //         szPtr++;
+    //     }
 
-        if(FindTypeDef( rgName, rgNamespace, assm, res ))
-        {
-            //
-            // Found the containing type, let's look for the nested type.
-            //
-            if(szPtr_FirstSubType)
-            {
-                CLR_RT_TypeDef_Instance inst;
+    //     if(szPtr_LastDot)
+    //     {
+    //         len = szPtr_LastDot++ - szClass      ; hal_strncpy_s( rgNamespace, ARRAYSIZE(rgNamespace), szClass      , len );
+    //         len = szPtr           - szPtr_LastDot; hal_strncpy_s( rgName     , ARRAYSIZE(rgName     ), szPtr_LastDot, len );
+    //     }
+    //     else
+    //     {
+    //         rgNamespace[ 0 ] = 0;
+    //         hal_strcpy_s( rgName, ARRAYSIZE(rgName), szClass );
+    //     }
 
-                do
-                {
-                    szPtr = ++szPtr_FirstSubType;
+    //     if(FindTypeDef( rgName, rgNamespace, assm, res ))
+    //     {
+    //         //
+    //         // Found the containing type, let's look for the nested type.
+    //         //
+    //         if(szPtr_FirstSubType)
+    //         {
+    //             CLR_RT_TypeDef_Instance inst;
 
-                    while(true)
-                    {
-                        c = szPtr_FirstSubType[ 0 ]; if(!c) break;
+    //             do
+    //             {
+    //                 szPtr = ++szPtr_FirstSubType;
 
-                        if(c == '+') break;
+    //                 while(true)
+    //                 {
+    //                     c = szPtr_FirstSubType[ 0 ]; if(!c) break;
 
-                        szPtr_FirstSubType++;
-                    }
+    //                     if(c == '+') break;
 
-                    len = szPtr_FirstSubType - szPtr; hal_strncpy_s( rgName, ARRAYSIZE(rgName), szPtr, len );
+    //                     szPtr_FirstSubType++;
+    //                 }
 
-                    inst.InitializeFromIndex( res );
+    //                 len = szPtr_FirstSubType - szPtr; hal_strncpy_s( rgName, ARRAYSIZE(rgName), szPtr, len );
 
-                    if(inst.m_assm->FindTypeDef( rgName, res.Type(), res ) == false)
-                    {
-                        return false;
-                    }
+    //                 inst.InitializeFromIndex( res );
 
-                } while(c == '+');
-            }
+    //                 if(inst.m_assm->FindTypeDef( rgName, res.Type(), res ) == false)
+    //                 {
+    //                     return false;
+    //                 }
 
-            reflex.m_kind        = REFLECTION_TYPE;
-            // make sure this works for multidimensional arrays.
-            reflex.m_levels      = arrayType ? 1 : 0;
-            reflex.m_data.m_type = res;
-            return true;
-        }
-    }
+    //             } while(c == '+');
+    //         }
 
-    res.Clear();
+    //         reflex.m_kind        = REFLECTION_TYPE;
+    //         // make sure this works for multidimensional arrays.
+    //         reflex.m_levels      = arrayType ? 1 : 0;
+    //         reflex.m_data.m_type = res;
+    //         return true;
+    //     }
+    // }
+    //
+    //res.Clear();
 
     return false;
 }

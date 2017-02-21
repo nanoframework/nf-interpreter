@@ -6,7 +6,7 @@
 #ifndef _WIREPROTOCOL_HAL_INTERFACE_H_
 #define _WIREPROTOCOL_HAL_INTERFACE_H_
 
-#include "WireProtocol.h"
+#include "WireProtocol_v2.h"
 
 //////////////////////////////////////////
 bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size);
