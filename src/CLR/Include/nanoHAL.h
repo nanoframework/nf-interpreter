@@ -1616,13 +1616,4 @@ void CPU_Reset();
 #error Unsupported platform
 #endif
 
-// UNDONE: FIXME: VERSION_XXX
-#define VERSION_MAJOR       0
-#define VERSION_MINOR       1
-#define VERSION_BUILD       0
-#define VERSION_REVISION    0
-
-#define OEMSYSTEMINFOSTRING "OEM"  // UNDONE: FIXME: OEMSYSTEMINFOSTRING
-
 #endif  // _NANOHAL_H_
-

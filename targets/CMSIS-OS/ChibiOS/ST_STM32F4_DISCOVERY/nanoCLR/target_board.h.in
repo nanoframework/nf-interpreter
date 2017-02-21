@@ -13,6 +13,6 @@
 
 #include <target_common.h>
 
-#define OEMINFO_STRING "nanoFramework RULES! CLR running @ @CHIBIOS_BOARD@                "
+#define OEMSYSTEMINFOSTRING "nanoFramework RULES! CLR running @ @CHIBIOS_BOARD@                "
 
 #endif /* _TARGET_BOARD_NANOCLR_H_ */
