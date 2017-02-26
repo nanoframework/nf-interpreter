@@ -1,8 +1,3 @@
-#
-# Copyright (c) 2017 The nanoFramework project contributors
-# See LICENSE file in the project root for full license information.
-#
-
 # from startup_stm32f4xx.mk
 # List of the ChibiOS generic STM32F4xx startup and CMSIS files.
 
@@ -60,7 +55,12 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DACv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DMAv2
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/GPIOv2
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv2
+            if(${CHIBIOS_BOARD} STREQUAL "ST_STM32F429I_DISCOVERY" OR ${CHIBIOS_BOARD} STREQUAL "MBN_QUAIL")
+                ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv1
+            else()
+                ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv2
+            endif()
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/MACv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/OTGv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RTCv2
@@ -97,7 +97,11 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/por
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DACv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DMAv2)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/GPIOv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv2)
+if(${CHIBIOS_BOARD} STREQUAL "ST_STM32F429I_DISCOVERY" OR ${CHIBIOS_BOARD} STREQUAL "MBN_QUAIL")
+    list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv1)
+else()
+    list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv2)
+endif()
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/MACv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/OTGv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RTCv2)
@@ -114,8 +118,11 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/por
 #######################################################################################################################################
 
 # linker file
-if(${CHIBIOS_BOARD} STREQUAL "ST_STM32F4_DISCOVERY")
-    set(DEFAULT_LINKER_FILE_NAME "STM32F407xG")
+if(${CHIBIOS_BOARD} STREQUAL "ST_STM32F429I_DISCOVERY")
+    set(DEFAULT_LINKER_FILE_NAME "STM32F429xI")
+endif()
+if(${CHIBIOS_BOARD} STREQUAL "MBN_QUAIL")
+    set(DEFAULT_LINKER_FILE_NAME "mbn_quail")
 endif()
 
 
