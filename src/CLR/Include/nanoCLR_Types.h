@@ -476,7 +476,7 @@ inline CLR_UINT32 CLR_UncompressMethodToken( CLR_UINT32 tk )
 
 #if defined(_WIN32)
 
-CLR_UINT32 CLR_ReadTokenCompressed( CLR_PMETADATA& ip, CLR_OPCODE opcode );
+__nfweak CLR_UINT32 CLR_ReadTokenCompressed( CLR_PMETADATA& ip, CLR_OPCODE opcode );
 
 #endif
 
@@ -773,15 +773,15 @@ inline CLR_OPCODE CLR_ReadNextOpcodeCompressed( CLR_PMETADATA& ip )
 
 #if defined(_WIN32)
 
-CLR_PMETADATA CLR_SkipBodyOfOpcode          ( CLR_PMETADATA ip, CLR_OPCODE opcode );
-CLR_PMETADATA CLR_SkipBodyOfOpcodeCompressed( CLR_PMETADATA ip, CLR_OPCODE opcode );
+__nfweak CLR_PMETADATA CLR_SkipBodyOfOpcode          ( CLR_PMETADATA ip, CLR_OPCODE opcode );
+__nfweak CLR_PMETADATA CLR_SkipBodyOfOpcodeCompressed( CLR_PMETADATA ip, CLR_OPCODE opcode );
 
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern bool CLR_SafeSprintfV( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, va_list arg );
-extern bool CLR_SafeSprintf ( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, ...         );
+__nfweak extern bool CLR_SafeSprintfV( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, va_list arg );
+__nfweak extern bool CLR_SafeSprintf ( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, ...         );
 
 #if !defined(BUILD_RTM)
 
@@ -797,17 +797,17 @@ extern bool CLR_SafeSprintf ( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, .
 
 struct CLR_Debug
 {
-    static int  PrintfV( const char *format, va_list arg );
-    static int  Printf ( const char *format, ...         );
-    static void Emit   ( const char *text, int len       );
-    static void Flush  (                                 );
+    __nfweak static int  PrintfV( const char *format, va_list arg );
+    __nfweak static int  Printf ( const char *format, ...         );
+    __nfweak static void Emit   ( const char *text, int len       );
+    __nfweak static void Flush  (                                 );
 
     //--//
 
     typedef int (*OutputHandler)( const char *format, ... );
 
 #if defined(_WIN32)
-    static void RedirectToString( std::string* str );
+    __nfweak static void RedirectToString( std::string* str );
 #endif
 };
 

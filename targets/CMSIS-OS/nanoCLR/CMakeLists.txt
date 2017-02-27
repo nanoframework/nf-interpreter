@@ -4,9 +4,10 @@
 #
 
 # append target CMSIS-OS nanoCLR source files 
-# list(APPEND TARGET_CMSIS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_ReceiverThread.c")
+list(APPEND TARGET_CMSIS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR_dat.s)
+
 # make var global
-# set(TARGET_CMSIS_NANOCLR_SOURCES ${TARGET_CMSIS_NANOCLR_SOURCES} CACHE INTERNAL "make global")
+set(TARGET_CMSIS_NANOCLR_SOURCES ${TARGET_CMSIS_NANOCLR_SOURCES} CACHE INTERNAL "make global")
 
 
 # append target CMSIS-OS nanoCLR include directory

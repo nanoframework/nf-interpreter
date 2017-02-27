@@ -8,6 +8,8 @@
 
 //--//
 
+#include <nanoHAL_Types.h>
+
 #if defined(__GNUC__)
 #define HAL_Time_Sleep_MicroSeconds_BS(x) HAL_Time_Sleep_MicroSeconds_InRam(x)
 
@@ -326,13 +328,13 @@ struct BlockDeviceInfo
     // pointer to an array (NumRegions long) of region information
     const BlockRegionInfo *Regions;
 
-    SectorAddress PhysicalToSectorAddress( const BlockRegionInfo* pRegion, ByteAddress phyAddress ) const;
+    __nfweak SectorAddress PhysicalToSectorAddress( const BlockRegionInfo* pRegion, ByteAddress phyAddress ) const;
 
-    BOOL FindRegionFromAddress(ByteAddress Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const;
+    __nfweak BOOL FindRegionFromAddress(ByteAddress Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const;
 
-    BOOL FindForBlockUsage(UINT32 BlockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const;
+    __nfweak BOOL FindForBlockUsage(UINT32 BlockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const;
 
-    BOOL FindNextUsageBlock(UINT32 BlockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const;
+    __nfweak BOOL FindNextUsageBlock(UINT32 BlockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const;
 };
 
 ///////////////////////////////////////////////////////////////
@@ -843,16 +845,16 @@ struct BlockStorageStream
     BOOL IsReadModifyWrite() { return 0 != (Flags & c_BlockStorageStream__ReadModWrite); }
     void SetReadModifyWrite(){ Flags |= c_BlockStorageStream__ReadModWrite;              }
 
-    BOOL Initialize(UINT32 blockUsage); 
-    BOOL Initialize(UINT32 blockUsage, BlockStorageDevice* pDevice); 
-    BOOL NextStream();
-    BOOL PrevStream();
-    BOOL Seek( INT32 offset, SeekOrigin origin = SeekCurrent );
-    BOOL Write( UINT8* data  , UINT32 length );
-    BOOL Erase( UINT32 length );
-    BOOL ReadIntoBuffer( UINT8*  pBuffer, UINT32 length );
-    BOOL Read( UINT8** ppBuffer, UINT32 length );
-    UINT32 CurrentAddress();
+    __nfweak BOOL Initialize(UINT32 blockUsage); 
+    __nfweak BOOL Initialize(UINT32 blockUsage, BlockStorageDevice* pDevice); 
+    __nfweak BOOL NextStream();
+    __nfweak BOOL PrevStream();
+    __nfweak BOOL Seek( INT32 offset, SeekOrigin origin = SeekCurrent );
+    __nfweak BOOL Write( UINT8* data  , UINT32 length );
+    __nfweak BOOL Erase( UINT32 length );
+    __nfweak BOOL ReadIntoBuffer( UINT8*  pBuffer, UINT32 length );
+    __nfweak BOOL Read( UINT8** ppBuffer, UINT32 length );
+    __nfweak UINT32 CurrentAddress();
     BOOL IsErased( UINT32 length );
 };
     
@@ -861,32 +863,32 @@ struct BlockStorageStream
 struct BlockStorageList
 {
     // initailize the storage
-    static void Initialize();
+    __nfweak static void Initialize();
     
     // walk through list of devices and calls Init() function
-    static BOOL InitializeDevices();
+    __nfweak static BOOL InitializeDevices();
 
     // walk through list of devices and calls UnInit() function
-    static BOOL UnInitializeDevices();
+    __nfweak static BOOL UnInitializeDevices();
 
     // add pBSD to the list
     // If Init=true, the Init() will be called.
-    static BOOL AddDevice( BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, BOOL Init);
+    __nfweak static BOOL AddDevice( BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, BOOL Init);
 
     // remove pBSD from the list
     // Uninit = true, UnInit() will be called.
-    static BOOL RemoveDevice( BlockStorageDevice* pBSD, BOOL UnInit);
+    __nfweak static BOOL RemoveDevice( BlockStorageDevice* pBSD, BOOL UnInit);
 
     // Find the right Device with the corresponding phyiscal address.
     // 
-    static BOOL FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, UINT32 PhysicalAddress, ByteAddress &BlockAddress);
+    __nfweak static BOOL FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, UINT32 PhysicalAddress, ByteAddress &BlockAddress);
 
-    static BlockStorageDevice* GetFirstDevice();
+    __nfweak static BlockStorageDevice* GetFirstDevice();
     
-    static BlockStorageDevice* GetNextDevice( BlockStorageDevice& device );
+    __nfweak static BlockStorageDevice* GetNextDevice( BlockStorageDevice& device );
 
     // returns number of devices has been declared in the system
-    static UINT32 GetNumDevices();
+    __nfweak static UINT32 GetNumDevices();
 
     // pointer to the BlockStorageDevice which is the primary device with CONFIG block
     static BlockStorageDevice* s_primaryDevice;

@@ -9,11 +9,6 @@ list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/WireProto
 # make var global
 set(TARGET_CHIBIOS_COMMON_SOURCES ${TARGET_CHIBIOS_COMMON_SOURCES} CACHE INTERNAL "make global")
 
-# append target ChibiOS include directory
-list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
-# make var global
-set(TARGET_CHIBIOS_COMMON_INCLUDE_DIRS ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS} CACHE INTERNAL "make global")
-
 # add header with target platform definitions
 configure_file("${CMAKE_SOURCE_DIR}/CMake/ChibiOS_target_os.h.in"
                 "${CMAKE_BINARY_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/target_os.h" @ONLY)

@@ -340,7 +340,7 @@ static const uint32_t c_CRCTable[256] =
     0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
 };
 
-uint32_t SUPPORT_ComputeCRC(const void* rgBlock, int nLength, uint32_t crc)
+UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc)
 {
     const uint8_t* ptr = (const uint8_t*)rgBlock;
 

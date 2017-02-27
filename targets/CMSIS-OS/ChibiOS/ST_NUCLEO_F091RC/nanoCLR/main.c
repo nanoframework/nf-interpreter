@@ -7,6 +7,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
+#include <nanoCLR_Application.h>
 #include <WireProtocol_ReceiverThread.h>
 
 void BlinkerThread(void const * argument)
@@ -60,8 +61,18 @@ int main(void) {
   osKernelStart();
 
   //  Normal main() thread activity it does nothing except sleeping in a loop 
-  while (true) {
-    osDelay(1000);
-  }
-}
 
+  CLR_SETTINGS clrSettings;
+
+  memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+
+  clrSettings.MaxContextSwitches         = 50;
+  clrSettings.WaitForDebugger            = false;
+  clrSettings.EnterDebuggerLoopAfterExit = true;
+
+  //ClrStartup(clrSettings);
+
+  // while (true) {
+  //   osDelay(1000);
+  // }
+}

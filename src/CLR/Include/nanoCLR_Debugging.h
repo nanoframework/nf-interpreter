@@ -36,6 +36,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//#if defined(_MSC_VER)
 struct CLR_DBG_Commands
 {
     static const UINT32 c_Monitor_Ping               = 0x00000000; // The payload is empty, this command is used to let the other side know we are here...
@@ -1017,6 +1018,7 @@ struct CLR_DBG_Commands
     };
     
 };
+//#endif
 
 struct CLR_DBG_Debugger
 {
@@ -1026,21 +1028,21 @@ struct CLR_DBG_Debugger
 
     //--//
 
-    static void Debugger_Discovery();
-    static void Debugger_WaitForCommands();
+    __nfweak static void Debugger_Discovery();
+    __nfweak static void Debugger_WaitForCommands();
 
-    static HRESULT CreateInstance();
+    __nfweak static HRESULT CreateInstance();
 
     HRESULT Debugger_Initialize( COM_HANDLE port );
 
-    static HRESULT DeleteInstance();
+    __nfweak static HRESULT DeleteInstance();
 
     void Debugger_Cleanup();
 
-    static void BroadcastEvent( UINT32 cmd, UINT32 payloadSize, UINT8* payload, UINT32 flags );
+    __nfweak static void BroadcastEvent( UINT32 cmd, UINT32 payloadSize, UINT8* payload, UINT32 flags );
 
-    void ProcessCommands();
-    void PurgeCache     ();
+    __nfweak void ProcessCommands();
+    __nfweak void PurgeCache     ();
 
 private:
 

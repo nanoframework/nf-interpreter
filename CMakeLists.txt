@@ -155,7 +155,7 @@ endif()
 #########################################
 
 
-project(nanoFramework VERSION 0.0.0)
+project(nanoFramework VERSION 0.0.0.0)
 
 #######################
 message(STATUS "")
@@ -281,6 +281,7 @@ if(RTOS_CHIBIOS_CHECK)
     add_subdirectory(targets/CMSIS-OS/nanoCLR)
 
     # add target ChibiOS dirs
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/Include)
     add_subdirectory(targets/CMSIS-OS/ChibiOS/common)
     add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoBooter)
     add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoCLR)

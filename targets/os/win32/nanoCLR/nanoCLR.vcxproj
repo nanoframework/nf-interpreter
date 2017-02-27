@@ -98,8 +98,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\CLR\Include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;VERSION_MAJOR=0;VERSION_MINOR=0;VERSION_BUILD=0;VERSION_REVISION=0;OEMSYSTEMINFOSTRING="WIN_32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Include;..\..\..\..\src\CLR\Include;..\..\..\..\src\HAL\Include;..\..\..\..\src\PAL\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\Include\nanoHAL_Time.h" />
     <ClInclude Include="platform_selector.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -163,9 +164,7 @@
     <ClCompile Include="Generated\CLR_RT_InteropAssembliesTable.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="PAL\blockstorageList_stubs.cpp" />
-    <ClCompile Include="PAL\ComDirector_stubs.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="PAL\COMDirector_stubs.cpp" />
     <ClCompile Include="PAL\ConfigHelper_stubs.cpp" />
     <ClCompile Include="PAL\time_stubs.cpp" />
     <ClCompile Include="PAL\Watchdog_stubs.cpp" />

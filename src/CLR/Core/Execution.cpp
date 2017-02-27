@@ -4,6 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "Core.h"
+#include <nanoHAL_Power.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +41,8 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
                                                     //
                                                     // CLR_INT64                           m_currentMachineTime;
                                                     // CLR_INT64                           m_currentLocalTime;
-    m_lastTimeZoneOffset =  Time_GetTimeZoneOffset();// CLR_INT32                           m_lastTimeZoneOffset;
+    // UNDONE: FIXME
+    // m_lastTimeZoneOffset =  Time_GetTimeZoneOffset();// CLR_INT32                           m_lastTimeZoneOffset;
 
                                                     // CLR_INT64                           m_currentNextActivityTime;
     m_timerCache    = false;                        // bool                                m_timerCache;
@@ -272,7 +274,8 @@ void CLR_RT_ExecutionEngine::Reboot( bool fHard )
 {
     NATIVE_PROFILE_CLR_CORE();
     
-    ::Watchdog_GetSetEnabled( FALSE, TRUE );
+    // UNDONE: FIXME
+    // ::Watchdog_GetSetEnabled( FALSE, TRUE );
 
     // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Flush();
     //g_CLR_RT_Persistence_Manager.m_state = CLR_RT_Persistence_Manager::STATE_FlushNextObject;
@@ -1197,7 +1200,8 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
         }
 
-        ::Watchdog_ResetCounter();
+        // UNDONE: FIXME
+        // ::Watchdog_ResetCounter();
 
         {
             // Runs the tread until expiration of its quantum or until thread is blocked.
@@ -1221,7 +1225,8 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             }
         }
 
-        ::Watchdog_ResetCounter();
+        // UNDONE: FIXME
+        // ::Watchdog_ResetCounter();
 
         PutInProperList( th );
         
@@ -1279,7 +1284,9 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity()
         }
         NANOCLR_FOREACH_NODE_END();
 
-        return WaitForActivity( SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, timeoutMin );
+        // UNDONE: FIXME
+        // return WaitForActivity( SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, timeoutMin );
+        return 0;
     }
 
     return 0;
@@ -2325,7 +2332,8 @@ void CLR_RT_ExecutionEngine::DeleteLockRequests( CLR_RT_Thread* thTarget, CLR_RT
 void CLR_RT_ExecutionEngine::ProcessHardware()
 {
     NATIVE_PROFILE_CLR_CORE();
-    ::Watchdog_ResetCounter();
+    // UNDONE: FIXME
+    // ::Watchdog_ResetCounter();
 
     g_CLR_HW_Hardware.ProcessActivity();
 }
@@ -2444,7 +2452,8 @@ bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT
 bool CLR_RT_ExecutionEngine::IsThereEnoughIdleTime( CLR_UINT32 expectedMsec )
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(::Events_MaskedRead( g_CLR_HW_Hardware.m_wakeupEvents )) return false;
+    // UNDONE: FIXME
+    // if(::Events_MaskedRead( g_CLR_HW_Hardware.m_wakeupEvents )) return false;
 
     CLR_INT64 now = Time_GetMachineTime();
 
@@ -2918,7 +2927,8 @@ void CLR_RT_ExecutionEngine::DebuggerLoop()
 
     UpdateTime();
 
-    WaitSystemEvents( SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, TIME_CONVERSION__TO_MILLISECONDS * 100 );
+    // UNDONE: FIXME
+    // WaitSystemEvents( SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, TIME_CONVERSION__TO_MILLISECONDS * 100 );
 }
 
 
@@ -3002,7 +3012,7 @@ void CLR_RT_ExecutionEngine::StopOnBreakpoint( CLR_DBG_Commands::Debugging_Execu
 
             if(m_breakpointsActiveNum == 1)
             {
-                CLR_EE_DBG_EVENT_SEND(CLR_DBG_Commands::c_Debugging_Execution_BreakpointHit,sizeof(CLR_DBG_Commands::Debugging_Execution_BreakpointDef),&m_breakpointsActive[ 0 ],WP_Flags::c_NonCritical);
+				CLR_EE_DBG_EVENT_SEND(CLR_DBG_Commands::c_Debugging_Execution_BreakpointHit, sizeof(CLR_DBG_Commands::Debugging_Execution_BreakpointDef), &m_breakpointsActive[0], WP_Flags::c_NonCritical);
             }
         }
         else
@@ -3578,9 +3588,12 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
     }
 #endif
 
-    ::Watchdog_GetSetEnabled( FALSE, TRUE );
-    res = ::Events_WaitForEvents( powerLevel, events, timeout );
-    ::Watchdog_GetSetEnabled( TRUE, TRUE );
+    // UNDONE: FIXME
+    // ::Watchdog_GetSetEnabled( FALSE, TRUE );
+    // UNDONE: FIXME
+    // res = ::Events_WaitForEvents( powerLevel, events, timeout );
+    // UNDONE: FIXME
+    // ::Watchdog_GetSetEnabled( TRUE, TRUE );
 
 
 #if defined(NANOCLR_TRACE_SYSTEMEVENTWAIT)

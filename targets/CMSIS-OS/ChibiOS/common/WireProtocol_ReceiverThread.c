@@ -19,11 +19,10 @@ void ReceiverThread(void const * argument)
   // loop until thread receives a request to terminate
   while (!chThdShouldTerminateX()) {
     
-    WP_CheckAvailableIncomingData();
+//    WP_CheckAvailableIncomingData();
     
     osDelay(500);
   }
 
   // nothing to deinitialize or cleanup, so it's safe to return
 }
-

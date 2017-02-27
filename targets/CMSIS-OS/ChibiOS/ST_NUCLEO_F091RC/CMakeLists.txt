@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
 cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
 
@@ -15,6 +20,16 @@ set(NANOCLR_PROJECT_NAME "nanoCLR")
 find_package(CHIBIOS REQUIRED)
 find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
+
+# packages for nanoFramework libraries
+# mandatory 
+find_package(NF_CoreCLR REQUIRED)
+find_package(NF_Debugger REQUIRED)
+find_package(NF_WireProtocol REQUIRED)
+
+# optional
+
+
 
 add_subdirectory("common")
 add_subdirectory("nanoBooter")
@@ -49,7 +64,7 @@ add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
 
-    ${COMMON_PROJECT_SOURCES}
+    # ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
 
     ${TARGET_CMSIS_COMMON_SOURCES}
@@ -61,7 +76,12 @@ add_executable(
     ${CHIBIOS_SOURCES}
     ${ChibiOSnfOverlay_SOURCES}
 
-    ${WireProtocol_SOURCES}
+    # ${WireProtocol_SOURCES}
+
+    # sources for nanoFramework libraries
+    "${NF_CoreCLR_SOURCES}"
+    "${NF_Debugger_SOURCES}"
+    "${NF_WireProtocol_SOURCES}"
 )
 
 
@@ -79,7 +99,7 @@ include_directories(
     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
 )
 
-# include nanoBooter directories
+# include directories for nanoBooter
 target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter"
      ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter
@@ -88,13 +108,18 @@ target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
      ${TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS}
 )
 
-# include nanoCLR directories
+# include directories for nanoCLR
 target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
      ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
 
      ${TARGET_CMSIS_NANOCLR_INCLUDE_DIRS}
      ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+
+    # directories for nanoFramework libraries
+    "${NF_CoreCLR_INCLUDE_DIRS}"
+    "${NF_Debugger_INCLUDE_DIRS}"
+    "${NF_WireProtocol_INCLUDE_DIRS}"
 )
 
 ############################################################
@@ -113,11 +138,15 @@ CHIBIOS_ADD_HEX_BIN_DUMP_TARGETS(${NANOCLR_PROJECT_NAME}.elf)
 CHIBIOS_PRINT_SIZE_OF_TARGETS(${NANOBOOTER_PROJECT_NAME}.elf)
 CHIBIOS_PRINT_SIZE_OF_TARGETS(${NANOCLR_PROJECT_NAME}.elf)
 
+# set extra compiler flags 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DPLATFORM_EMULATED_FLOATINGPOINT -DPLATFORM_ARM")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPLATFORM_EMULATED_FLOATINGPOINT -DPLATFORM_ARM")
+
 # set extra linker flags for DEBUG
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
 
-# set linker flags for RELEASE
+# set extra linker flags for RELEASE
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_RELEASE " -flto ")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_RELEASE " -flto ")
 

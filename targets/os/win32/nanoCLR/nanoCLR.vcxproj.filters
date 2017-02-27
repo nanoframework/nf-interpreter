@@ -33,6 +33,9 @@
     <ClInclude Include="nanoCLR_ParseOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\nanoHAL_Time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -53,21 +56,6 @@
     <ClCompile Include="Time.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PAL\ComDirector_stubs.cpp">
-      <Filter>Source Files\PAL</Filter>
-    </ClCompile>
-    <ClCompile Include="PAL\time_stubs.cpp">
-      <Filter>Source Files\PAL</Filter>
-    </ClCompile>
-    <ClCompile Include="PAL\blockstorageList_stubs.cpp">
-      <Filter>Source Files\PAL</Filter>
-    </ClCompile>
-    <ClCompile Include="PAL\Watchdog_stubs.cpp">
-      <Filter>Source Files\PAL</Filter>
-    </ClCompile>
-    <ClCompile Include="PAL\ConfigHelper_stubs.cpp">
-      <Filter>Source Files\PAL</Filter>
-    </ClCompile>
     <ClCompile Include="CLRStartup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -82,6 +70,21 @@
     </ClCompile>
     <ClCompile Include="Memory.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PAL\time_stubs.cpp">
+      <Filter>Source Files\PAL</Filter>
+    </ClCompile>
+    <ClCompile Include="PAL\blockstorageList_stubs.cpp">
+      <Filter>Source Files\PAL</Filter>
+    </ClCompile>
+    <ClCompile Include="PAL\Watchdog_stubs.cpp">
+      <Filter>Source Files\PAL</Filter>
+    </ClCompile>
+    <ClCompile Include="PAL\ConfigHelper_stubs.cpp">
+      <Filter>Source Files\PAL</Filter>
+    </ClCompile>
+    <ClCompile Include="PAL\COMDirector_stubs.cpp">
+      <Filter>Source Files\PAL</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

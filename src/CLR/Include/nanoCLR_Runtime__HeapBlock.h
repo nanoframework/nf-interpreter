@@ -1316,7 +1316,7 @@ struct CLR_RT_HeapBlock_Node : public CLR_RT_HeapBlock
 
     //--//
 
-    void Relocate();
+    __nfweak void Relocate();
 };
 
 struct CLR_RT_DblLinkedList
@@ -1550,7 +1550,7 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
 
     //--//
 
-    void Relocate();
+    __nfweak void Relocate();
 
     //--//
 
@@ -1584,7 +1584,7 @@ struct CLR_RT_HeapBlock_Delegate : public CLR_RT_HeapBlock_Node // OBJECT HEAP -
 
     static HRESULT CreateInstance( CLR_RT_HeapBlock& reference, const CLR_RT_MethodDef_Index& ftn, CLR_RT_StackFrame* call );
 
-    void Relocate();
+    __nfweak void Relocate();
 };
 
 struct CLR_RT_HeapBlock_Delegate_List : public CLR_RT_HeapBlock_Node // OBJECT HEAP - DO RELOCATION -
@@ -1604,7 +1604,7 @@ struct CLR_RT_HeapBlock_Delegate_List : public CLR_RT_HeapBlock_Node // OBJECT H
     static HRESULT Combine( CLR_RT_HeapBlock& reference, CLR_RT_HeapBlock& delegateSrc, CLR_RT_HeapBlock& delegateNew, bool fWeak );
     static HRESULT Remove ( CLR_RT_HeapBlock& reference, CLR_RT_HeapBlock& delegateSrc, CLR_RT_HeapBlock& delegateOld             );
 
-    void Relocate();
+    __nfweak void Relocate();
 
 private:
 
@@ -1632,7 +1632,7 @@ struct CLR_RT_HeapBlock_BinaryBlob : public CLR_RT_HeapBlock
 
     void Release( bool fEvent );
 
-    void Relocate();
+    __nfweak void Relocate();
 
 private:
     static CLR_RT_HeapBlock_BinaryBlob* Allocate( CLR_UINT32 length, CLR_UINT32 flags );
@@ -1790,7 +1790,7 @@ struct CLR_RT_HeapBlock_EndPoint : public CLR_RT_ObjectToEvent_Destination // EV
         CLR_UINT32 m_type;
         CLR_UINT32 m_id;
 
-        bool Compare( const Port& port );
+        __nfweak bool Compare( const Port& port );
     };
 
     struct Address
@@ -1820,19 +1820,19 @@ struct CLR_RT_HeapBlock_EndPoint : public CLR_RT_ObjectToEvent_Destination // EV
 
     static CLR_RT_DblLinkedList m_endPoints;
 
-    static void HandlerMethod_Initialize   ();
-    static void HandlerMethod_RecoverFromGC();
-    static void HandlerMethod_CleanUp      ();
+    __nfweak static void HandlerMethod_Initialize   ();
+    __nfweak static void HandlerMethod_RecoverFromGC();
+    __nfweak static void HandlerMethod_CleanUp      ();
 
-    static CLR_RT_HeapBlock_EndPoint* FindEndPoint( const CLR_RT_HeapBlock_EndPoint::Port& port );
+    __nfweak static CLR_RT_HeapBlock_EndPoint* FindEndPoint( const CLR_RT_HeapBlock_EndPoint::Port& port );
 
-    static HRESULT CreateInstance ( const CLR_RT_HeapBlock_EndPoint::Port& port, CLR_RT_HeapBlock& owner, CLR_RT_HeapBlock&           epRef    );
-    static HRESULT ExtractInstance(                                              CLR_RT_HeapBlock& ref  , CLR_RT_HeapBlock_EndPoint*& endPoint );
+    __nfweak static HRESULT CreateInstance ( const CLR_RT_HeapBlock_EndPoint::Port& port, CLR_RT_HeapBlock& owner, CLR_RT_HeapBlock&           epRef    );
+    __nfweak static HRESULT ExtractInstance(                                              CLR_RT_HeapBlock& ref  , CLR_RT_HeapBlock_EndPoint*& endPoint );
 
-    bool ReleaseWhenDeadEx();
-    void RecoverFromGC    ();
+    __nfweak bool ReleaseWhenDeadEx();
+    __nfweak void RecoverFromGC    ();
 
-    Message* FindMessage( CLR_UINT32 cmd, const CLR_UINT32* seq );
+    __nfweak Message* FindMessage( CLR_UINT32 cmd, const CLR_UINT32* seq );
 };
 
 //--//
@@ -1851,7 +1851,7 @@ struct CLR_RT_HeapBlock_WaitForObject : public CLR_RT_HeapBlock_Node // EVENT HE
     static HRESULT WaitForSignal ( CLR_RT_StackFrame& stack, const CLR_INT64& timeExpire, CLR_RT_HeapBlock* objects, CLR_UINT32 cObjects, bool fWaitAll );    
     static void SignalObject     ( CLR_RT_HeapBlock& object );
 
-    void Relocate();
+    __nfweak void Relocate();
 
 private:
     static bool    TryWaitForSignal ( CLR_RT_Thread* caller,                              CLR_RT_HeapBlock* objects, CLR_UINT32 cObjects, bool fWaitAll );
@@ -1874,7 +1874,7 @@ struct CLR_RT_HeapBlock_Finalizer : public CLR_RT_HeapBlock_Node // EVENT HEAP -
 
     static HRESULT CreateInstance( CLR_RT_HeapBlock* object, const CLR_RT_TypeDef_Instance& inst );
 
-    void Relocate();
+    __nfweak void Relocate();
 
     static void SuppressFinalize( CLR_RT_HeapBlock* object );
 
@@ -1949,7 +1949,7 @@ struct CLR_RT_HeapBlock_WeakReference_Identity
     CLR_UINT32 m_id;
     CLR_INT32  m_priority;
 
-    CLR_UINT32 ComputeCRC( const CLR_UINT8* ptr, CLR_UINT32 len ) const;
+    __nfweak CLR_UINT32 ComputeCRC( const CLR_UINT8* ptr, CLR_UINT32 len ) const;
 };
 
 struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT HEAP - DO RELOCATION -
@@ -1999,17 +1999,17 @@ struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT H
 
     //--//
 
-    static HRESULT CreateInstance( CLR_RT_HeapBlock_WeakReference*& weakref );
+    __nfweak static HRESULT CreateInstance( CLR_RT_HeapBlock_WeakReference*& weakref );
 
-    static void RecoverObjects    ( CLR_RT_DblLinkedList& lstHeap                          );
-    static bool PrepareForRecovery( CLR_RT_HeapBlock_Node* ptr, CLR_RT_HeapBlock_Node* end, CLR_UINT32 blockSize );
+    __nfweak static void RecoverObjects    ( CLR_RT_DblLinkedList& lstHeap                          );
+    __nfweak static bool PrepareForRecovery( CLR_RT_HeapBlock_Node* ptr, CLR_RT_HeapBlock_Node* end, CLR_UINT32 blockSize );
 
-    HRESULT SetTarget( CLR_RT_HeapBlock& targetReference );
-    HRESULT GetTarget( CLR_RT_HeapBlock& targetReference );
+    __nfweak HRESULT SetTarget( CLR_RT_HeapBlock& targetReference );
+    __nfweak HRESULT GetTarget( CLR_RT_HeapBlock& targetReference );
 
-    void InsertInPriorityOrder();
+    __nfweak void InsertInPriorityOrder();
 
-    void Relocate();
+    __nfweak void Relocate();
 };
 
 //--//
@@ -2035,25 +2035,25 @@ struct CLR_RT_Persistence_Manager
 
         //--//
 
-        static ObjectHeader* Find( FLASH_WORD* start, FLASH_WORD* end );
+        __nfweak static ObjectHeader* Find( FLASH_WORD* start, FLASH_WORD* end );
 
-        bool Initialize( CLR_RT_HeapBlock_WeakReference* ref );
+        __nfweak bool Initialize( CLR_RT_HeapBlock_WeakReference* ref );
 
         bool HasGoodSignature() const { return m_signature == c_Version   ; }
         bool IsInUse         () const { return m_status    == c_InUseBlock; }
 
-        bool IsGood( bool fIncludeData ) const;
+        __nfweak bool IsGood( bool fIncludeData ) const;
 
-        void Delete();
+        __nfweak void Delete();
 
-               CLR_UINT32 Length(                                           ) const;
-        static CLR_UINT32 Length( const CLR_RT_HeapBlock_WeakReference* ref );
-        static CLR_UINT32 Length( CLR_UINT32 data                           );
+        __nfweak        CLR_UINT32 Length(                                           ) const;
+        __nfweak static CLR_UINT32 Length( const CLR_RT_HeapBlock_WeakReference* ref );
+        __nfweak static CLR_UINT32 Length( CLR_UINT32 data                           );
 
-        ObjectHeader* Next() const;
+        __nfweak ObjectHeader* Next() const;
 
     private:
-        CLR_UINT32 ComputeCRC() const;
+        __nfweak CLR_UINT32 ComputeCRC() const;
 
         //--//
     };
@@ -2072,16 +2072,16 @@ struct CLR_RT_Persistence_Manager
 
         //--//
 
-        static BankHeader* Find( FLASH_WORD* start, FLASH_WORD* end );
+        __nfweak static BankHeader* Find( FLASH_WORD* start, FLASH_WORD* end );
 
-        void Initialize();
+        __nfweak void Initialize();
 
         bool HasGoodSignature() const { return m_signature == c_Version;   } 
         bool IsInUse         () const { return m_status    == c_InUseBank; } 
 
-        bool IsGood() const;
+        __nfweak bool IsGood() const;
 
-        void Delete();
+        __nfweak void Delete();
 
         ObjectHeader* FirstObjectHeader() const { return (ObjectHeader*)&this[ 1 ]; }
     };
@@ -2109,20 +2109,20 @@ struct CLR_RT_Persistence_Manager
 
         //--//
 
-        bool IsGood() const;
+        __nfweak bool IsGood() const;
 
-        bool Initialize( UINT32 kind );
+        __nfweak bool Initialize( UINT32 kind );
 
-        bool Erase   ( int& sectorIndex );
-        void EraseAll(                  );
+        __nfweak bool Erase   ( int& sectorIndex );
+        __nfweak void EraseAll(                  );
 
-        bool Format     (                           );
+        __nfweak bool Format     (                           );
         bool SetSequence( CLR_UINT32 sequenceNumber );
 
-        void Switch( Bank& other );
+        __nfweak void Switch( Bank& other );
 
-        CLR_RT_Persistence_Manager::ObjectHeader* RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref                                         );
-        bool                                      WriteHeader  ( CLR_RT_HeapBlock_WeakReference* ref, ObjectHeader*& pOH, FLASH_WORD*& pData );
+        __nfweak CLR_RT_Persistence_Manager::ObjectHeader* RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref                                         );
+        __nfweak bool                                      WriteHeader  ( CLR_RT_HeapBlock_WeakReference* ref, ObjectHeader*& pOH, FLASH_WORD*& pData );
 
         //--//
         
@@ -2137,9 +2137,9 @@ struct CLR_RT_Persistence_Manager
         static bool FindBankWriteNonXIPData(FLASH_WORD* dst, CLR_UINT32 length);
         //--//
 
-        static bool CanWrite  ( FLASH_WORD* dst,                          CLR_UINT32 length );
-        static bool Write     ( FLASH_WORD* dst, const FLASH_WORD* src  , CLR_UINT32 length );
-        static void Invalidate( FLASH_WORD* dst,       FLASH_WORD  match, CLR_UINT32 length );
+        __nfweak static bool CanWrite  ( FLASH_WORD* dst,                          CLR_UINT32 length );
+        __nfweak static bool Write     ( FLASH_WORD* dst, const FLASH_WORD* src  , CLR_UINT32 length );
+        __nfweak static void Invalidate( FLASH_WORD* dst,       FLASH_WORD  match, CLR_UINT32 length );
 
         static FLASH_WORD* IncrementPointer( FLASH_WORD* ptr, CLR_UINT32 length ) 
         {             
@@ -2182,23 +2182,23 @@ struct CLR_RT_Persistence_Manager
 
     //--//
 
-    void Initialize();
-    void Uninitialize();
-    void EraseAll  ();
+    __nfweak void Initialize();
+    __nfweak void Uninitialize();
+    __nfweak void EraseAll  ();
 
-    void InvalidateEntry( CLR_RT_HeapBlock_WeakReference* weak );
+    __nfweak void InvalidateEntry( CLR_RT_HeapBlock_WeakReference* weak );
 
-    void Relocate();
+    __nfweak void Relocate();
 
-    ObjectHeader* RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref );
+    __nfweak ObjectHeader* RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref );
 
-    static void Callback( void* arg );
+    __nfweak static void Callback( void* arg );
 
 #if !defined(BUILD_RTM)
-    void GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse );
+    __nfweak void GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse );
 #endif
 
-    void Flush();
+    __nfweak void Flush();
 
     //--//
 
@@ -2221,9 +2221,9 @@ struct CLR_RT_Persistence_Manager
 
 private:
 
-    bool AdvanceState( bool force );
+    __nfweak bool AdvanceState( bool force );
 
-    void EnqueueNextCallback();
+    __nfweak void EnqueueNextCallback();
 };
 
 extern CLR_RT_Persistence_Manager g_CLR_RT_Persistence_Manager;
@@ -2257,9 +2257,9 @@ struct CLR_RT_ApplicationInterrupt;
 
 struct CLR_RT_HeapBlock_NativeEventDispatcher : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - NO RELOCATION -
 {
-    static void HandlerMethod_Initialize ();
-    static void HandlerMethod_RecoverFromGC ();
-    static void HandlerMethod_CleanUp ();
+    __nfweak static void HandlerMethod_Initialize ();
+    __nfweak static void HandlerMethod_RecoverFromGC ();
+    __nfweak static void HandlerMethod_CleanUp ();
 
     static CLR_RT_DblLinkedList m_ioPorts; 
 
@@ -2283,18 +2283,18 @@ struct CLR_RT_HeapBlock_NativeEventDispatcher : public CLR_RT_ObjectToEvent_Dest
 
     //--//
 
-    static HRESULT CreateInstance ( CLR_RT_HeapBlock& owner, CLR_RT_HeapBlock& portRef );
-    static HRESULT ExtractInstance( CLR_RT_HeapBlock&        ref, CLR_RT_HeapBlock_NativeEventDispatcher*& port                                                          );
+    __nfweak static HRESULT CreateInstance ( CLR_RT_HeapBlock& owner, CLR_RT_HeapBlock& portRef );
+    __nfweak static HRESULT ExtractInstance( CLR_RT_HeapBlock&        ref, CLR_RT_HeapBlock_NativeEventDispatcher*& port                                                          );
 
-    HRESULT StartDispatch       ( CLR_RT_ApplicationInterrupt* interrupt, CLR_RT_Thread* th );
-    HRESULT RecoverManagedObject( CLR_RT_HeapBlock*& port                                   );
+    __nfweak HRESULT StartDispatch       ( CLR_RT_ApplicationInterrupt* interrupt, CLR_RT_Thread* th );
+    __nfweak HRESULT RecoverManagedObject( CLR_RT_HeapBlock*& port                                   );
 
-    static void ThreadTerminationCallback( void* arg                                  );
-    void SaveToHALQueue( UINT32 data1, UINT32 data2 );
-    void RemoveFromHALQueue();
+    __nfweak static void ThreadTerminationCallback( void* arg                                  );
+    __nfweak void SaveToHALQueue( UINT32 data1, UINT32 data2 );
+    __nfweak void RemoveFromHALQueue();
 
-    void RecoverFromGC    ();
-    bool ReleaseWhenDeadEx();
+    __nfweak void RecoverFromGC    ();
+    __nfweak bool ReleaseWhenDeadEx();
 };
 
 //--//

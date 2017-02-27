@@ -1013,7 +1013,8 @@ HRESULT Library_corlib_native_System_String::Concat( CLR_RT_StackFrame& stack, C
             szTextSrc = ptrSrc->RecoverString();
             if(szTextSrc)
             {
-                len = (CLR_UINT32)hal_strlen_s( szTextSrc );
+                // UNDONE: FIXME
+                // len = (CLR_UINT32)hal_strlen_s( szTextSrc );
  
                 if(i==0)
                 {

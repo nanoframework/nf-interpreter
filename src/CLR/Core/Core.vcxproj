@@ -59,6 +59,7 @@
     <ClCompile Include="TypeSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Include\nanoHAL_ReleaseInfo.h" />
     <ClInclude Include="..\Include\netmf_errors.h" />
     <ClInclude Include="..\Include\nanoCLR_Application.h" />
     <ClInclude Include="..\Include\nanoCLR_Checks.h" />
@@ -75,7 +76,6 @@
     <ClInclude Include="..\Include\nanoCLR_Types.h" />
     <ClInclude Include="..\Include\nanoCLR_Win32.h" />
     <ClInclude Include="..\Include\nanoHAL.h" />
-    <ClInclude Include="..\Include\nanoHAL_ReleaseInfo.h" />
     <ClInclude Include="..\Include\nanoHAL_Types.h" />
     <ClInclude Include="..\Include\nanoPAL.h" />
     <ClInclude Include="..\Include\nanoSupport.h" />
@@ -158,8 +158,8 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Include;..\CorLib</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;VERSION_MAJOR=0;VERSION_MINOR=0;VERSION_BUILD=0;VERSION_REVISION=0;OEMSYSTEMINFOSTRING="WIN_32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\CorLib;..\..\HAL\Include;..\..\PAL\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

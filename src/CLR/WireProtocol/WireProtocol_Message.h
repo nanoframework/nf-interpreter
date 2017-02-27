@@ -7,7 +7,7 @@
 #ifndef _WIREPROTOCOL_MESSAGE_H_
 #define _WIREPROTOCOL_MESSAGE_H_
 
-#include "WireProtocol.h"
+#include "WireProtocol_v2.h"
 #include "WireProtocol_App_Interface.h"
 #include "WireProtocol_HAL_Interface.h"
 
@@ -29,7 +29,7 @@ bool WP_Message_Process(WP_Message* message);
 // helper functions
 void ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* ptr, int size);
 
-uint32_t SUPPORT_ComputeCRC(const void* rgBlock, int nLength, uint32_t crc);
+//uint32_t SUPPORT_ComputeCRC(const void* rgBlock, int nLength, uint32_t crc);
 
 #endif // _WIREPROTOCOL_MESSAGE_H_
 

@@ -528,7 +528,8 @@ HRESULT CLR_RT_Thread::Execute()
     _ASSERTE(!CLR_EE_DBG_IS( Stopped ));
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-    ::Events_SetBoolTimer( (BOOL*)&m_timeQuantumExpired, CLR_RT_Thread::c_TimeQuantum_Milliseconds );
+    // UNDONE: FIXME
+    // ::Events_SetBoolTimer( (BOOL*)&m_timeQuantumExpired, CLR_RT_Thread::c_TimeQuantum_Milliseconds );
 
     while(m_timeQuantumExpired == FALSE && !CLR_EE_DBG_IS( Stopped ))
     {
@@ -602,7 +603,8 @@ HRESULT CLR_RT_Thread::Execute()
     
     g_CLR_RT_ExecutionEngine.m_currentThread = currentThreadSav;
 
-    ::Events_SetBoolTimer( NULL, 0 );
+    // UNDONE: FIXME
+    // ::Events_SetBoolTimer( NULL, 0 );
 
     NANOCLR_CLEANUP_END();
 }
