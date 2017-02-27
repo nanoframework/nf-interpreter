@@ -155,7 +155,7 @@ endif()
 #########################################
 
 
-project(nanoFramework VERSION 0.0.0)
+project(nanoFramework VERSION 0.1.1)
 
 #######################
 message(STATUS "")
