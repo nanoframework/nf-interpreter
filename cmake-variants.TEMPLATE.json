@@ -30,15 +30,10 @@
         "settings": {
             "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>",
             "TARGET_CHIP" : "<target-chip-with-official-vendor-reference>",
-            "PACKAGE_VERSION" : "<N.N.N>",
-            "RTOS" : "<one-of-valid-rtos-options>", 
+            "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
             "CHIBIOS_VERSION" : "<N.N.N>",
             "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
-            "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
-            "FREERTOS_VERSION" : "<N.N.N>",
-            "FREERTOS_SOURCE" : "<path-to-freertos-source-mind-the-forward-slash>",
-            "MBEDOS_SOURCE" : "<path-to-mbedos-source-mind-the-forward-slash>",
-            "MBED_TARGET" : "<valid-target-name-from-targets-json-file>"
+            "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>"
         },
         "buildType": "Debug"
       },
@@ -48,15 +43,10 @@
         "settings": {
             "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>",
             "TARGET_CHIP" : "<target-chip-with-official-vendor-reference>",
-            "PACKAGE_VERSION" : "<N.N.N>",
-            "RTOS" : "<one-of-valid-rtos-options>", 
+            "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
             "CHIBIOS_VERSION" : "<N.N.N>",
             "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
-            "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
-            "FREERTOS_VERSION" : "<N.N.N>",
-            "FREERTOS_SOURCE" : "<path-to-freertos-source-mind-the-forward-slash>",
-            "MBEDOS_SOURCE" : "<path-to-mbedos-source-mind-the-forward-slash>",
-            "MBED_TARGET" : "<valid-target-name-from-targets-json-file>"
+            "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>"
         },
         "buildType": "Debug"
       },

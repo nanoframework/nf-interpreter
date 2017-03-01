@@ -102,6 +102,29 @@ endif()
 
 
 ##########################################
+# handle FPU preference, if any
+set(USE_FPU_IS_TRUE FALSE)
+
+if(USE_FPU)
+    if(NOT "${USE_FPU}" STREQUAL "")
+
+        if("${USE_FPU}" STREQUAL "TRUE")
+            set(USE_FPU_IS_TRUE TRUE CACHE INTERNAL "FPU preference")
+        elseif("${USE_FPU}" STREQUAL "FALSE")
+            set(USE_FPU_IS_TRUE FALSE CACHE INTERNAL "FPU preference")
+        else()
+            # something other that TRUE or FALSE...
+            message(FATAL_ERROR "\n\n'${USE_FPU}' is an invalid option for USE_FPU. Acceptable values are TRUE or FALSE.\n\n")
+        endif()    
+
+    endif()
+endif()
+
+# message("FPU preference is: ${USE_FPU_IS_TRUE}")  # debug helper
+##########################################
+
+
+##########################################
 # set default toolchain to GCC
 set(TOOLCHAIN GCC)
 # have it lower case too for file names
