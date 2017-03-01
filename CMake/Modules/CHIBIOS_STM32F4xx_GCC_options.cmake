@@ -7,7 +7,7 @@
 if(USE_FPU_IS_TRUE)
     set(FLOAT_ABI_OPTION "-mfloat-abi=hard")
 elseif()
-    set(FLOAT_ABI_OPTION "-mfloat-abi=softfp")
+    set(FLOAT_ABI_OPTION "-mfloat-abi=soft")
 endif()
 
 #################################################################
