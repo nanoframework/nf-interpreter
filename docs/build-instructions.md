@@ -43,6 +43,7 @@ The build script accepts the following parameters (some of them are mandatory).
 - TOOLCHAIN: the toolchain to use in the build. The default (and only option at this time) is GCC.
 - TOOLCHAIN_PREFIX: path to the install directory of the toolchain. E.g.: "E:/GNU_Tools_ARM_Embedded/5_4_2016q3". Mind the forward slash on the path for all platforms.
 - CMAKE_BUILD_TYPE: build type (Debug, Release, etc). The default is Release.
+- USE_FPU: specifies if the hardware floating point unit (if available at the platform) is to be used. If this doesn't apply, this parameter is simply ignored. The default is false.
 - CHIBIOS_SOURCE: specifies the path for the location of the ChibiOS source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS parameter must be specified with CHIBIOS option. 
 - CHIBIOS_VERSION: specifies the ChibiOS version to grab the source files. It has to match one of the official versions from the ChibiOS repository. If none is specified it will download the 'trunk' version. This parameter is ignored if CHIBIOS_SOURCE is specified. 
 - CHIBIOS_BOARD: specifies the ChibiOS board. This parameter is mandatory when specifying CHIBIOS as the RTOS choice parameter above. It has to be a valid board listed in ChibiOS boards folder.
@@ -76,10 +77,11 @@ cmake \
 -DTOOLCHAIN_PREFIX="E:/GNU_Tools_ARM_Embedded/5_4_2016q3" \
 -DCHIBIOS_SOURCE=E:/GitHub/ChibiOS \
 -DCHIBIOS_BOARD=ST_NUCLEO144_F746ZG \
+-DUSE_FPU=TRUE \
 -G "NMake Makefiles" ../ 
 ```
 
-This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, specifying that ChibiOS sources to be used are located in the designated path (mind the forward slash and no ending slash),  that the target board is named ST_NUCLEO144_F746ZG and that the build files suitable for NMake are to be generated.
+This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, specifying that ChibiOS sources to be used are located in the designated path (mind the forward slash and no ending slash),  that the target board is named ST_NUCLEO144_F746ZG, hardware floating point unit is to be used and that the build files suitable for NMake are to be generated.
 
 After successful completion you'll have the build files ready to be used in the target build tool.
 
