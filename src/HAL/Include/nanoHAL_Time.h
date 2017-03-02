@@ -8,7 +8,8 @@
 
 #include <targetHAL_Time.h>
 
-#define NANOHAL_TIME_CONVERSION_MICROSECONDS         1000000
+#define NANOHAL_TIME_CONVERSION_MICRO_TO_SECONDS                1000000
+#define NANOHAL_TIME_CONVERSION_MICRO_TO_HUNDREDS_NANOSECONDS   10000
 
 //////////////////////////////////////////
 // TODO delete these when working on #130
@@ -16,6 +17,6 @@ typedef unsigned int        UINT32;
 typedef signed   int        INT32;
 //////////////////////////////////////////
 
-INT32   HAL_Time_TicksToTimeMicroSec(UINT32 Ticks);
+INT32   HAL_Time_TicksToTimeMilliSec(UINT32 Ticks);
 
 #endif //_NANOHAL_TIME_H_

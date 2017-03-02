@@ -11,8 +11,8 @@ typedef unsigned int        UINT32;
 typedef signed   int        INT32;
 //////////////////////////////////////////
 
-// Converts ticks (CMSIS sysTicks) to microseconds
-INT32 HAL_Time_TicksToTimeMicroSec(UINT32 ticks) {
-    // T[s] = 1 / f[Hz] 
-    return (ticks / (osKernelSysTickFrequency * NANOHAL_TIME_CONVERSION_MICROSECONDS));
+// Converts ticks (CMSIS sysTicks) to milliseconds
+INT32 HAL_Time_TicksToTimeMilliSec(UINT32 ticks) {
+    
+    return ticks * (NANOHAL_TIME_CONVERSION_MICRO_TO_SECONDS / osKernelSysTickFrequency);
 }

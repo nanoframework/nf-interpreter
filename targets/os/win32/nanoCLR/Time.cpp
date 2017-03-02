@@ -23,13 +23,13 @@ UINT32 HAL_Time_CurrentTicks()
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTicks();
 }
 
-INT32 HAL_Time_TicksToTimeMicroSec( UINT32 Ticks )
+INT32 HAL_Time_TicksToTimeMilliSec( UINT32 Ticks )
 {
     _ASSERTE(Ticks <= 0x7FFFFFFF);
     
     //No need to go to managed code just to return Time.
 
-	// TODO need to convert from ticks to miliseconds
+	// TODO need to convert from whathever ticks are these to milliseconds
     return Ticks;
 }
        

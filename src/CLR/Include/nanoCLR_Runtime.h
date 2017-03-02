@@ -2967,9 +2967,9 @@ struct CLR_RT_ExecutionEngine
 
         CLR_INT64 Adjust( CLR_INT64 time ) const
         {
-            // need to 'convert' this from microseconds to 100ns ticks so it won't break the code calling Adjust() 
+            // need to 'convert' this from milliseconds to 100ns ticks so it won't break the code calling Adjust() 
             // FIXME: evaluate if the caller code can be adjusted to drop this workaround conversion 
-            return time + ::HAL_Time_TicksToTimeMicroSec( m_cumulative ) / 10;
+            return time + ::HAL_Time_TicksToTimeMilliSec( m_cumulative ) / NANOHAL_TIME_CONVERSION_MICRO_TO_HUNDREDS_NANOSECONDS;
         }
     };
 

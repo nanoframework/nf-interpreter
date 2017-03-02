@@ -171,9 +171,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
     if(s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        // convert to milliseconds to show a more meaningfull value 
-        // (because of the typical operation time showing it in microseconds could lead to a huge number...)
-        int milliSec = (::HAL_Time_TicksToTimeMicroSec( HAL_Time_CurrentTicks() - stats_start )) * 1000;
+        int milliSec = ::HAL_Time_TicksToTimeMilliSec( HAL_Time_CurrentTicks() - stats_start );
 
         CLR_Debug::Printf( "GC: %dmsec %d bytes used, %d bytes available\r\n", milliSec, m_totalBytes - m_freeBytes, m_freeBytes );
     }
