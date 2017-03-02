@@ -2967,7 +2967,7 @@ struct CLR_RT_ExecutionEngine
 
         CLR_INT64 Adjust( CLR_INT64 time ) const
         {
-            return time + ::HAL_Time_TicksToTime( m_cumulative );
+            return time + ::HAL_Time_TicksToTimeMicroSec( m_cumulative );
         }
     };
 

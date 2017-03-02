@@ -273,7 +273,7 @@ bool WP_Message::Process()
                 // If the time between consecutive payload bytes exceeds the timeout threshold then assume that
                 // the rest of the payload is not coming. Reinitialize to synch on the next header.
 
-                // FIXME: if(HAL_Time_TicksToTime(curTicks - m_payloadTicks) < (UINT64)c_PayloadTimeout)
+                // FIXME: if(HAL_Time_TicksToTimeMicroSec(curTicks - m_payloadTicks) < (UINT64)c_PayloadTimeout)
                 {
                     // FIXME: m_payloadTicks = curTicks;
 
