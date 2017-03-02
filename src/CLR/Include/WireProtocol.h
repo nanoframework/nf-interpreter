@@ -116,7 +116,7 @@ struct WP_Message
         static const int CompletePayload  = 6;
     };
 
-    static const UINT32 c_PayloadTimeout = 60000000; // 6 secs (100 nsecs units)
+    static const UINT32 c_PayloadTimeout = 6 * 1000; // 6 secs (from miliseconds time)
 
     WP_Controller* m_parent;
     WP_Packet      m_header;
@@ -125,7 +125,7 @@ struct WP_Message
 private:
     UINT8*         m_pos;
     UINT32         m_size;
-    UINT64         m_payloadTicks;
+    UINT32         m_payloadTicks;
     int            m_rxState;
 
 public:

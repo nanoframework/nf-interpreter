@@ -8,7 +8,7 @@
 
 #include <targetHAL_Time.h>
 
-#define NANOHAL_TIME_CONVERSION_MILISECONDS         1000000
+#define NANOHAL_TIME_CONVERSION_MICROSECONDS         1000000
 
 //////////////////////////////////////////
 // TODO delete these when working on #130

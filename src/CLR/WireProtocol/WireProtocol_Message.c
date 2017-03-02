@@ -8,6 +8,7 @@
 
 uint8_t receptionBuffer[2048];
 static uint16_t lastOutboundMessage;
+uint32_t m_payloadTicks;
 static uint8_t* marker;
 
 //////////////////////////////////////////
@@ -241,7 +242,7 @@ bool WP_Message_Process(WP_Message* message)
                             }
                             else
                             {
-                                // FIXME: m_payloadTicks = HAL_Time_CurrentTicks();
+                                m_payloadTicks = HAL_Time_CurrentTicks();
                                 message->m_rxState = ReceiveState_ReadingPayload;
                                 message->m_pos     = message->m_payload;
                                 message->m_size    = message->m_header.m_size;
