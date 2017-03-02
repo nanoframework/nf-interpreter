@@ -6,6 +6,8 @@
 #ifndef _TARGET_HAL_H_
 #define _TARGET_HAL_H_
 
+#include <target_board.h>
+
 #if !defined(BUILD_RTM)
 
 // FIXME IMPLEMENT
