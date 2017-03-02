@@ -33,7 +33,6 @@
 
 #include <nanoHAL_Power.h>
 #include <nanoHAL_Time.h>
-#include <target_board.h>
 #include <targetHAL.h>
 #include <nanoHAL_Types.h>
 #include <nanoHAL_ReleaseInfo.h>
