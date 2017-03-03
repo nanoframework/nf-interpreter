@@ -13,10 +13,10 @@
 
 //////////////////////////////////////////
 // TODO delete these when working on #130
+typedef unsigned long long  UINT64;
 typedef unsigned int        UINT32;
-typedef signed   int        INT32;
 //////////////////////////////////////////
 
-INT32   HAL_Time_TicksToTimeMilliSec(UINT32 Ticks);
+UINT64 HAL_Time_TicksToTimeMilliSec(UINT32 Ticks);
 
 #endif //_NANOHAL_TIME_H_

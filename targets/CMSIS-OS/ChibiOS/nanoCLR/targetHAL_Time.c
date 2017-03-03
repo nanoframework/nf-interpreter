@@ -12,7 +12,8 @@ typedef signed   int        INT32;
 //////////////////////////////////////////
 
 // Converts ticks (CMSIS sysTicks) to milliseconds
-INT32 HAL_Time_TicksToTimeMilliSec(UINT32 ticks) {
+UINT64 HAL_Time_TicksToTimeMilliSec(UINT32 ticks) {
     
-    return ticks * (NANOHAL_TIME_CONVERSION_MICRO_TO_SECONDS / osKernelSysTickFrequency);
+    // this is a rewrite of ChibiOS ST2MS(n) macro because it will overflow if doing the math using uint32_t
+    return  (((ticks) * 1000ULL + (uint64_t)CH_CFG_ST_FREQUENCY - 1ULL) / (uint64_t)CH_CFG_ST_FREQUENCY);
 }
