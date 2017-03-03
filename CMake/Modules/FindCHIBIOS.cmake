@@ -49,11 +49,13 @@ if("${CHIBIOS_TARGET_VENDOR}" STREQUAL "STM")
         CACHE INTERNAL "F0xx series board")
     list(FIND STM32_F0xx_BOARDS ${CHIBIOS_BOARD} STM32_F0xx_BOARDS_INDEX)
     
+    
     ####################################################
     # add here all boards with MCU from STM32F4xx series 
     ####################################################
     set(STM32_F4xx_BOARDS
-        ST_STM32F4_DISCOVERY 
+        ST_STM32F4_DISCOVERY
+        ST_STM32F429I_DISCOVERY
         CACHE INTERNAL "F4xx series board")
     list(FIND STM32_F4xx_BOARDS ${CHIBIOS_BOARD} STM32_F4xx_BOARDS_INDEX)
 
