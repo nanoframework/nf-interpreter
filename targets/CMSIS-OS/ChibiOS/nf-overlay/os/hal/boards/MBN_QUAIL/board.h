@@ -12,6 +12,8 @@
 #define BOARD_MBN_QUAIL
 #define BOARD_NAME                  "Mikrobus.Net QUAIL"
 
+#define BOARD_OTG_NOVBUSSENS
+
 /*
  * Board oscillators-related settings.
  * NOTE: LSE not fitted.

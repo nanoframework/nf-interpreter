@@ -7,6 +7,8 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
+#define _USB_
+
 #ifdef _USB_
 #include "usbcfg.h"
 #include <WireProtocol_ReceiverThread.h>
@@ -199,7 +201,6 @@ void TestSerial()
 
 	streamWrite(&SD2, (uint8_t *) data, strlen(data));
 }
-
 
 //  Application entry point.
 int main(void)
