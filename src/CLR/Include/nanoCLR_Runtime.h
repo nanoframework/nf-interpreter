@@ -2943,8 +2943,8 @@ struct CLR_RT_ExecutionEngine
     struct ExecutionConstraintCompensation
     {
         CLR_INT32  m_recursion;
-        CLR_INT64  m_start;
-        CLR_INT64  m_cumulative;
+        CLR_INT32  m_start;
+        CLR_INT32  m_cumulative;
 
         void Suspend()
         {
@@ -2967,7 +2967,9 @@ struct CLR_RT_ExecutionEngine
 
         CLR_INT64 Adjust( CLR_INT64 time ) const
         {
-            return time + ::HAL_Time_TicksToTime( m_cumulative );
+            // need to 'convert' this from milliseconds to 100ns ticks so it won't break the code calling Adjust() 
+            // FIXME: evaluate if the caller code can be adjusted to drop this workaround conversion 
+            return time + ::HAL_Time_TicksToTimeMilliSec( m_cumulative ) / NANOHAL_TIME_CONVERSION_MICRO_TO_HUNDREDS_NANOSECONDS;
         }
     };
 

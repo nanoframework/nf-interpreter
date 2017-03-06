@@ -308,7 +308,7 @@ BOOL       Time_TimeSpanToStringEx(const INT64& ticks, LPSTR& buf, size_t& len);
 LPCSTR     Time_CurrentDateTimeToString();
 
 
-INT64   HAL_Time_TicksToTime(UINT64 Ticks);
+
 INT64   HAL_Time_CurrentTime();
 
 //#include <TimeService_decl.h>

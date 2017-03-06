@@ -17,17 +17,19 @@ void HAL_Time_Sleep_MicroSeconds_InterruptEnabled( UINT32 uSec )
     // UNDONE: FIXME: return EmulatorNative::GetITimeDriver()->Sleep_MicroSecondsInterruptsEnabled( uSec );    
 }
 
-UINT64 HAL_Time_CurrentTicks()
+UINT32 HAL_Time_CurrentTicks()
 {
+	// TODO need to check if using the Win32 100ns ticks works
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTicks();
 }
 
-INT64 HAL_Time_TicksToTime( UINT64 Ticks )
+UINT64 HAL_Time_TicksToTimeMilliSec( UINT32 Ticks )
 {
-    _ASSERTE(Ticks <= 0x7FFFFFFFFFFFFFFF);
+    _ASSERTE(Ticks <= 0x7FFFFFFF);
     
     //No need to go to managed code just to return Time.
 
+	// TODO need to convert from whathever ticks are these to milliseconds
     return Ticks;
 }
        
