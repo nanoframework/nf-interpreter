@@ -15,79 +15,57 @@ else()
         # board found
         message(STATUS "ChibiOS board '${CHIBIOS_BOARD}' found in nanoFramework overlays")
     else()
-        message(FATAL_ERROR "\n\nSorry but ${CHIBIOS_BOARD} seems to be missing in the available list of the ChibiOS supported boards...\n\n")
+
+        # board NOT found in overlay
+        # try to find it in the target boards
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+            # board found!
+            # in this case it's mandatory that the board definitions (board.c and board.h) are present in the target folder
+            if( EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.c AND
+                EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.h)
+                # everything seems to be in order
+                message(STATUS "ChibiOS board '${CHIBIOS_BOARD}' (including board definition files) found in nanoFramework targets")
+            else()
+                message(FATAL_ERROR "\n\nSorry but the board definition files (board.c and board.h) for ${CHIBIOS_BOARD} seem to be missing in the target directory...\n\n")
+            endif()
+
+        else()
+            message(FATAL_ERROR "\n\nSorry but ${CHIBIOS_BOARD} seems to be missing in the available list of the ChibiOS supported boards...\n\n")
+        endif()
+
     endif()
 
 endif()
 
-# try to find out the MCU vendor from the board name
-string(FIND ${CHIBIOS_BOARD} "ST_STM" ST_STM_BOARD_INDEX)  # boards name containing ST_STM
-string(FIND ${CHIBIOS_BOARD} "ST_NUCLEO" ST_NUCLEO_BOARD_INDEX)  # boards name containing ST_NUCLEO
-string(FIND ${CHIBIOS_BOARD} "ST_EVB" ST_EVB_BOARD_INDEX)  # boards name containing ST_EVB
-string(FIND ${CHIBIOS_BOARD} "OLIMEX_STM32" OLIMEX_STM32_BOARD_INDEX)  # boards name containing OLIMEX_STM32
+# try to find board in the targets folder
+if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+    # board found
+    message(STATUS "support for target board '${CHIBIOS_BOARD}' found")
+else()
 
-if( ST_STM_BOARD_INDEX GREATER -1 OR
-    ST_NUCLEO_BOARD_INDEX GREATER -1 OR 
-    ST_EVB_BOARD_INDEX GREATER -1 OR 
-    OLIMEX_STM32_BOARD_INDEX GREATER -1
-)
-    set(CHIBIOS_TARGET_VENDOR "STM")
-endif()
-
-message("ChibiOS board MCU vendor is ${CHIBIOS_TARGET_VENDOR}") # debug helper
-
-# try to find the MCU series from the board name
-if("${CHIBIOS_TARGET_VENDOR}" STREQUAL "STM")
-    # vendor is STM, so check the list for each series
-
-    ####################################################
-    # add here all boards with MCU from STM32F0xx series 
-    ####################################################
-    set(STM32_F0xx_BOARDS 
-        ST_NUCLEO_F091RC 
-        ST_NUCLEO_F072RB
-        CACHE INTERNAL "F0xx series board")
-    list(FIND STM32_F0xx_BOARDS ${CHIBIOS_BOARD} STM32_F0xx_BOARDS_INDEX)
-    
-    
-    ####################################################
-    # add here all boards with MCU from STM32F4xx series 
-    ####################################################
-    set(STM32_F4xx_BOARDS
-        ST_STM32F4_DISCOVERY
-        ST_STM32F429I_DISCOVERY
-        CACHE INTERNAL "F4xx series board")
-    list(FIND STM32_F4xx_BOARDS ${CHIBIOS_BOARD} STM32_F4xx_BOARDS_INDEX)
-
-
-    ####################################################
-    # add here all boards with MCU from STM32F7xx series 
-    ####################################################
-    set(STM32_F7xx_BOARDS
-        ST_NUCLEO144_F746ZG 
-        CACHE INTERNAL "F7xx series board")
-    list(FIND STM32_F7xx_BOARDS ${CHIBIOS_BOARD} STM32_F7xx_BOARDS_INDEX)
-
-
-    ####################################################
-    if(STM32_F0xx_BOARDS_INDEX GREATER -1)
-        set(CHIBIOS_BOARD_SERIES "STM32F0xx")
-    elseif(STM32_F4xx_BOARDS_INDEX GREATER -1)
-        set(CHIBIOS_BOARD_SERIES "STM32F4xx")
-    elseif(STM32_F7xx_BOARDS_INDEX GREATER -1)
-        set(CHIBIOS_BOARD_SERIES "STM32F7xx")
-    else()
-        message(FATAL_ERROR "\n\n${CHIBIOS_BOARD} is not on any of the series lists.\nPlease add it to the correct series list and submit a PR.\n\n")
-    endif()
-
-    # including here the CMake files for the source files specific to the target series
-    include(CHIBIOS_${CHIBIOS_BOARD_SERIES}_sources)
-    # and here the GCC options tuned for the target series 
-    include(CHIBIOS_${CHIBIOS_BOARD_SERIES}_GCC_options)
+    # board NOT found in targets folder
+    message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
 
 endif()
 
-message("ChibiOS board MCU series is ${CHIBIOS_BOARD_SERIES}") # debug helper
+###################################################################################################################################
+# WHEN ADDING A NEW series add the respective name to the list bellow along with the CMake files with GCC options and source files
+###################################################################################################################################
+
+# check if the series name is supported 
+
+set(CHIBIOS_SUPPORTED_SERIES "STM32F0xx" "STM32F4xx" "STM32F7xx" CACHE INTERNAL "supported series names for ChibiOS")
+list(FIND CHIBIOS_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
+if(TARGET_SERIES_NAME_INDEX EQUAL -1)
+    message(FATAL_ERROR "\n\nSorry but ${TARGET_SERIES} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+endif()
+
+# including here the CMake files for the source files specific to the target series
+include(CHIBIOS_${TARGET_SERIES}_sources)
+# and here the GCC options tuned for the target series 
+include(CHIBIOS_${TARGET_SERIES}_GCC_options)
+
+# message("ChibiOS board series is ${TARGET_SERIES}") # debug helper
 
 # set include directories for ChibiOS
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os)
@@ -100,9 +78,9 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/incl
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/ext/CMSIS/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/ext/CMSIS/ST/${CHIBIOS_BOARD_SERIES})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/ext/CMSIS/ST/${TARGET_SERIES})
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/${CHIBIOS_BOARD_SERIES})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/${TARGET_SERIES})
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/cmsis_os)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx)
 
