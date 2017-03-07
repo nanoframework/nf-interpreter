@@ -17,6 +17,14 @@ typedef unsigned long long  UINT64;
 typedef unsigned int        UINT32;
 //////////////////////////////////////////
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 UINT64 HAL_Time_TicksToTimeMilliSec(UINT32 Ticks);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //_NANOHAL_TIME_H_
