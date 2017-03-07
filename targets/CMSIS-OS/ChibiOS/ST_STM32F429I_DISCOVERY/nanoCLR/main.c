@@ -79,7 +79,7 @@ int main(void) {
   clrSettings.WaitForDebugger            = false;
   clrSettings.EnterDebuggerLoopAfterExit = true;
 
-  //ClrStartup(clrSettings);
+  ClrStartup(clrSettings);
 
   while (true) {
     osDelay(1000);

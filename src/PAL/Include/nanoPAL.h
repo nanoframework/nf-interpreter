@@ -381,4 +381,8 @@ int hal_strncmp_s( const char* str1, const char* str2, size_t num );
 
 //#include <SD_decl.h>
 
+//#include "..\pal\Diagnostics\Native_Profiler.h"
+// native profiler
+#define NATIVE_PROFILE_PAL_HEAP()
+
 #endif // _NANOPAL_H_
