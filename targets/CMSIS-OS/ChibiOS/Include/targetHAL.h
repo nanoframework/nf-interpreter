@@ -36,4 +36,10 @@ inline void HAL_AssertEx()
     while(true) { /*nop*/ }
 }
 
+extern int HeapBegin;
+extern int HeapEnd;
+
+extern char * nanoCLR_Dat_Start;
+extern char * nanoCLR_Dat_End;
+
 #endif //_TARGET_HAL_H_
