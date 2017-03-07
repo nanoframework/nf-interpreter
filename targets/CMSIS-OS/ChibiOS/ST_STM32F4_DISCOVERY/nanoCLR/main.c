@@ -93,7 +93,7 @@ int main(void) {
 
   ClrStartup(clrSettings);
 
-  // while (true) {
-  //   osDelay(1000);
-  // }
+  while (true) {
+    osDelay(1000);
+  }
 }
