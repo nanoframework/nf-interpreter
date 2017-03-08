@@ -7,6 +7,7 @@
 #define _LAUNCHCLR_H_
 
 void LaunchCLR(uint32_t address);
+bool CheckValidCLRImage(uint32_t address);
 
 #endif //_LAUNCHCLR_H_
 

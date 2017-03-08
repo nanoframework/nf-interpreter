@@ -55,6 +55,21 @@ int main(void) {
   // and performs the board-specific initializations.
   halInit();
 
+  // the following IF is not mandatory, it's just providing a way for a user to 'force'
+  // the board to remain in nanoBooter and not launching nanoCLR
+
+  // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
+  if (palReadPad(GPIOC, GPIOC_BUTTON))
+  {
+    // check for valid CLR image 
+    if(CheckValidCLRImage(0x08008000))
+    {
+      // there seems to be a valid CLR image
+      // launch nanoCLR
+      LaunchCLR(0x08008000);
+    }
+  }
+
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
@@ -81,23 +96,6 @@ int main(void) {
 
   //  Normal main() thread
   while (true) {
-
-    // check for button pressed
-    if (palReadPad(GPIOC, GPIOC_BUTTON))
-    {
-      // Start the shutdown sequence
-
-      // terminate threads
-      osThreadTerminate(receiverThreadId);
-      osThreadTerminate(blinkerThreadId);
-      
-      // stop the serial-over-USB CDC driver
-      sduStop(&SDU1);
-      
-      // launch nanoCLR
-      LaunchCLR(0x08008000);
-    }
-    
     osDelay(500);
   }
 }
