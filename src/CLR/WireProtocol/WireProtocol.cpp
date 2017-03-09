@@ -239,7 +239,7 @@ bool WP_Message::Process()
                             }
                             else
                             {
-                                m_payloadTicks = HAL_Time_CurrentTicks();
+                                m_payloadTicks = HAL_Time_CurrentSysTicks();
                                 m_rxState = ReceiveState::ReadingPayload;
                                 m_pos     = (UINT8*)m_payload;
                                 m_size    = m_header.m_size;
@@ -268,12 +268,12 @@ bool WP_Message::Process()
             {
                 TRACE0(TRACE_STATE, "RxState=ReadingPayload\n");
 
-                UINT32 curTicks = HAL_Time_CurrentTicks();
+                UINT64 curTicks = HAL_Time_CurrentSysTicks();
 
                 // If the time between consecutive payload bytes exceeds the timeout threshold then assume that
                 // the rest of the payload is not coming. Reinitialize to synch on the next header.
 
-                if(HAL_Time_TicksToTimeMilliSec(curTicks - m_payloadTicks) < c_PayloadTimeout)
+                if(HAL_Time_SysTicksToTime(curTicks - m_payloadTicks) < (UINT64)c_PayloadTimeout)
                 {
                     m_payloadTicks = curTicks;
 

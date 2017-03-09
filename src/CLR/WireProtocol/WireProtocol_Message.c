@@ -242,7 +242,7 @@ bool WP_Message_Process(WP_Message* message)
                             }
                             else
                             {
-                                m_payloadTicks = HAL_Time_CurrentTicks();
+                                m_payloadTicks = HAL_Time_CurrentSysTicks();
                                 message->m_rxState = ReceiveState_ReadingPayload;
                                 message->m_pos     = message->m_payload;
                                 message->m_size    = message->m_header.m_size;

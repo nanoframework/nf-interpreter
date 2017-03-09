@@ -154,7 +154,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 
     if(s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        stats_start = HAL_Time_CurrentTicks();
+        stats_start = HAL_Time_CurrentSysTicks();
     }
 #endif
 
@@ -171,7 +171,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
     if(s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        int milliSec = (int)::HAL_Time_TicksToTimeMilliSec( HAL_Time_CurrentTicks() - stats_start );
+        int milliSec = ((int)::HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() - stats_start ) + TIME_CONVERSION__TICKUNITS - 1) / TIME_CONVERSION__TICKUNITS;
 
         CLR_Debug::Printf( "GC: %dmsec %d bytes used, %d bytes available\r\n", milliSec, m_totalBytes - m_freeBytes, m_freeBytes );
     }
