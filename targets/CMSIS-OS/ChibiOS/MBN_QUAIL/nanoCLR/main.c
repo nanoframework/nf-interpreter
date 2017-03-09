@@ -9,7 +9,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include <usbcfg.h>
+#include "usbcfg.h"
 #include <nanoCLR_Application.h>
 #include <WireProtocol_ReceiverThread.h>
 
@@ -102,22 +102,23 @@ int main(void) {
   osKernelStart();
 
   i2cStart(&I2CD1, &i2cconfig);
+  
+  DisplayClear (1);
+  DisplayWrite (1,1, "Hello world !");
+  DisplayWrite (2,3, "nanoFramework rules");
 
   CLR_SETTINGS clrSettings;
 
   memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
-
   clrSettings.MaxContextSwitches         = 50;
   clrSettings.WaitForDebugger            = false;
   clrSettings.EnterDebuggerLoopAfterExit = true;
 
-  DisplayClear (1);
-  DisplayWrite (1,1, "Hello world !");
-  DisplayWrite (2,3, "nanoFramework rules");
+  ClrStartup(clrSettings);
+  
   osDelay(3000);
   DisplayClear (0);
 
-  //ClrStartup(clrSettings);
 
   while (true)
   {
