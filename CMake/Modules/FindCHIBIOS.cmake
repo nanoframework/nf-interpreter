@@ -25,14 +25,17 @@ string(FIND ${CHIBIOS_BOARD} "ST_STM" ST_STM_BOARD_INDEX)  # boards name contain
 string(FIND ${CHIBIOS_BOARD} "ST_NUCLEO" ST_NUCLEO_BOARD_INDEX)  # boards name containing ST_NUCLEO
 string(FIND ${CHIBIOS_BOARD} "ST_EVB" ST_EVB_BOARD_INDEX)  # boards name containing ST_EVB
 string(FIND ${CHIBIOS_BOARD} "OLIMEX_STM32" OLIMEX_STM32_BOARD_INDEX)  # boards name containing OLIMEX_STM32
+string(FIND ${CHIBIOS_BOARD} "MBN_QUAIL" MBN_QUAIL_BOARD_INDEX)  # boards name containing MBN_QUAIL
 
 if( ST_STM_BOARD_INDEX GREATER -1 OR
     ST_NUCLEO_BOARD_INDEX GREATER -1 OR 
     ST_EVB_BOARD_INDEX GREATER -1 OR 
-    OLIMEX_STM32_BOARD_INDEX GREATER -1
+    OLIMEX_STM32_BOARD_INDEX GREATER -1 OR
+    MBN_QUAIL_BOARD_INDEX GREATER -1 
 )
     set(CHIBIOS_TARGET_VENDOR "STM")
 endif()
+
 
 message("ChibiOS board MCU vendor is ${CHIBIOS_TARGET_VENDOR}") # debug helper
 
@@ -54,6 +57,8 @@ if("${CHIBIOS_TARGET_VENDOR}" STREQUAL "STM")
     ####################################################
     set(STM32_F4xx_BOARDS
         ST_STM32F4_DISCOVERY 
+		ST_STM32F429I_DISCOVERY 
+        MBN_QUAIL
         CACHE INTERNAL "F4xx series board")
     list(FIND STM32_F4xx_BOARDS ${CHIBIOS_BOARD} STM32_F4xx_BOARDS_INDEX)
 

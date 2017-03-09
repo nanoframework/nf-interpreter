@@ -7,11 +7,9 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#ifdef _USB_
-#include "usbcfg.h"
+#include <usbcfg.h>
 #include <WireProtocol_ReceiverThread.h>
-#endif
-
+#include <LaunchCLR.h>
 
 void BlinkerThread(void const * argument)
 {
@@ -36,58 +34,56 @@ void BlinkerThread(void const * argument)
 }
 
 osThreadDef(BlinkerThread, osPriorityNormal, 128);
-#ifdef _USB_
+
+// need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityNormal, 1024);
-#endif
 
-int main(void) 
-{
+//  Application entry point.
+int main(void) {
+
   osThreadId blinkerThreadId;
-#ifdef _USB_
   osThreadId receiverThreadId;
-#endif
 
+  // HAL initialization, this also initializes the configured device drivers
+  // and performs the board-specific initializations.
   halInit();
+
+  // The kernel is initialized but not started yet, this means that
+  // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
 
-#ifdef _USB_
   //  Initializes a serial-over-USB CDC driver.
   sduObjectInit(&SDU1);
   sduStart(&SDU1, &serusbcfg);
 
+  // Activates the USB driver and then the USB bus pull-up on D+.
+  // Note, a delay is inserted in order to not have to disconnect the cable after a reset.
   usbDisconnectBus(serusbcfg.usbp);
   chThdSleepMilliseconds(1500);
   usbStart(serusbcfg.usbp, &usbcfg);
   usbConnectBus(serusbcfg.usbp);
-  
-  receiverThreadId = osThreadCreate(osThread(ReceiverThread), NULL);
-#endif
 
+  // Creates the blinker thread, it does not start immediately.
   blinkerThreadId = osThreadCreate(osThread(BlinkerThread), NULL);
 
+  // create the receiver thread
+  receiverThreadId = osThreadCreate(osThread(ReceiverThread), NULL);
+
+  // start kernel, after this the main() thread has priority osPriorityNormal by default
   osKernelStart();
 
-  // Christophe : 
-  // Infinite loop here only for testing purposes
-  // I am trying to have USB-Serial working in nanoBooter only, at the moment, 
-  // hence the infinite loop to stay in it and do not call nanoCLR
-  // It should be removed when/if the USB-CDC driver is working as expected
-/*
-  while (true)
-  {
-    osDelay(500);
-  }
-*/
-  //  Normal main() thread activity
-  osDelay (2000);
+  osDelay(2000);
 
-#ifdef _USB_
-  osThreadTerminate(receiverThreadId);
-  sduStop(&SDU1);
-#endif
+      // Start the shutdown sequence
 
-  osThreadTerminate(blinkerThreadId); 
-
-  LaunchCLR(0x08008000);
+      // terminate threads
+      osThreadTerminate(receiverThreadId);
+      osThreadTerminate(blinkerThreadId);
+      
+      // stop the serial-over-USB CDC driver
+      sduStop(&SDU1);
+      
+      // launch nanoCLR
+      LaunchCLR(0x08008000);
 }
 

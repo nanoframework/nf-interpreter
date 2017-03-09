@@ -6,7 +6,6 @@
 
 #include "hal.h"
 
-
 /* Virtual serial port over USB.*/
 SerialUSBDriver SDU1;
 
@@ -88,7 +87,7 @@ static const uint8_t vcom_device_descriptor_data[] = {
                          0x0200,        /* bcdDevice.                       */
                          1,             /* iManufacturer.                   */
                          2,             /* iProduct.                        */
-                         0,             /* iSerialNumber.                   */
+                         3,             /* iSerialNumber.                   */
                          1)             /* bNumConfigurations.              */
 };
 
@@ -103,12 +102,12 @@ static const USBDescriptor vcom_device_descriptor = {
 /* Configuration Descriptor tree for a CDC.*/
 static const uint8_t vcom_configuration_descriptor_data[] = {
   /* Configuration Descriptor.*/
-  USB_DESC_CONFIGURATION(0x0043,        /* wTotalLength.                    */
+  USB_DESC_CONFIGURATION(0x0043,            /* wTotalLength.                    */
                          0x02,          /* bNumInterfaces.                  */
                          0x01,          /* bConfigurationValue.             */
                          0,             /* iConfiguration.                  */
                          0xC0,          /* bmAttributes (self powered).     */
-                         0x32),         /* bMaxPower (100mA).               */
+                         50),           /* bMaxPower (100mA).               */
   /* Interface Descriptor.*/
   USB_DESC_INTERFACE    (0x00,          /* bInterfaceNumber.                */
                          0x00,          /* bAlternateSetting.               */
@@ -428,5 +427,3 @@ const SerialUSBConfig serusbcfg = {
   USBD1_DATA_AVAILABLE_EP,
   USBD1_INTERRUPT_REQUEST_EP
 };
-
-
