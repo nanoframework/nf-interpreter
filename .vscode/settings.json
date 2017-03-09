@@ -1,4 +1,6 @@
 {
     "cmake.generator": "NMake Makefiles",
-    "files.associations": {}
+    "files.associations": {
+        "xlocale": "cpp"
+    }
 }
