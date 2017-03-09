@@ -308,7 +308,7 @@ BOOL       Time_TimeSpanToStringEx(const INT64& ticks, LPSTR& buf, size_t& len);
 LPCSTR     Time_CurrentDateTimeToString();
 
 
-INT64   HAL_Time_TicksToTime(UINT64 Ticks);
+
 INT64   HAL_Time_CurrentTime();
 
 //#include <TimeService_decl.h>
@@ -380,5 +380,9 @@ int hal_strncmp_s( const char* str1, const char* str2, size_t num );
 #include "Blockstorage_decl.h"
 
 //#include <SD_decl.h>
+
+//#include "..\pal\Diagnostics\Native_Profiler.h"
+// native profiler
+#define NATIVE_PROFILE_PAL_HEAP()
 
 #endif // _NANOPAL_H_

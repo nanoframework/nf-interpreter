@@ -122,15 +122,11 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${NF_WireProtocol_INCLUDE_DIRS}"
 )
 
-############################################################
-# use default linker options and linker file for nanoBooter
-CHIBIOS_SET_LINKER_OPTIONS(${NANOBOOTER_PROJECT_NAME}.elf)
-############################################################
-
-#######################################################
-# need to use a specific linker file for nanoCLR
+###################
+# set linker files
+CHIBIOS_SET_LINKER_OPTIONS_AND_FILE(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F746xG.ld)
 CHIBIOS_SET_LINKER_OPTIONS_AND_FILE(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F746xG.ld)
-#######################################################
+###################
 
 CHIBIOS_ADD_HEX_BIN_DUMP_TARGETS(${NANOBOOTER_PROJECT_NAME}.elf)
 CHIBIOS_ADD_HEX_BIN_DUMP_TARGETS(${NANOCLR_PROJECT_NAME}.elf)
@@ -163,8 +159,11 @@ set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_F
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.map")
 
 # add other linker flags
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--library-path=${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--library-path=${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400")
+###################################################
+# the size of the CLR managed heap is defined here
+###################################################
+set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x0")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x9000")
 
 
 set(NANOBOOTER_HEX_FILE ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.hex)

@@ -52,4 +52,7 @@ REGION_ALIAS("NOCACHE_RAM", ram3);
 /* RAM region to be used for eth segment.*/
 REGION_ALIAS("ETH_RAM", ram3);
 
-INCLUDE ld/rules_STM32F7xx.ld
+/* RAM region to be used for the nanoFramework CLR managed heap.*/
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
+
+INCLUDE rules_STM32F7xx.ld

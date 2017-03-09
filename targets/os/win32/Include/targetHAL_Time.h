@@ -22,15 +22,15 @@
 //
 //#define TIME_ZONE_OFFSET    ((INT64)Time_GetTimeZoneOffset() * 600000000)
 //
-//INT64 HAL_Time_TicksToTime(UINT64 Ticks);
-//UINT64 HAL_Time_TicksToTime();
-UINT64 HAL_Time_CurrentTicks();
-#define HAL_Time_CurrentTicks           HAL_Time_CurrentTicks
 
-//
-//// FIXME
-//INT64 HAL_Time_TicksToTime(UINT64 Ticks)
-//
+
+UINT32 HAL_Time_CurrentSysTicks();
+
+
+
+
+
+
 ///// <summary>
 ///// Converts 64bit time value to SystemTime structure. 64bit time is assumed as an offset from 1/1/1601:00:00:00.000 in 100ns.
 ///// </summary>

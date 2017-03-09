@@ -8,4 +8,22 @@
 
 #include <targetHAL_Time.h>
 
+#define NANOHAL_TIME_CONVERSION_MICRO_TO_SECONDS                1000000
+
+//////////////////////////////////////////
+// TODO delete these when working on #130
+typedef unsigned long long  UINT64;
+typedef unsigned int        UINT32;
+//////////////////////////////////////////
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+UINT64 HAL_Time_SysTicksToTime(UINT32 sysTicks);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif //_NANOHAL_TIME_H_

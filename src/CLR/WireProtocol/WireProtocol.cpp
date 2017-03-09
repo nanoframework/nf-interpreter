@@ -239,7 +239,7 @@ bool WP_Message::Process()
                             }
                             else
                             {
-                                // FIXME: m_payloadTicks = HAL_Time_CurrentTicks();
+                                m_payloadTicks = HAL_Time_CurrentSysTicks();
                                 m_rxState = ReceiveState::ReadingPayload;
                                 m_pos     = (UINT8*)m_payload;
                                 m_size    = m_header.m_size;
@@ -268,14 +268,14 @@ bool WP_Message::Process()
             {
                 TRACE0(TRACE_STATE, "RxState=ReadingPayload\n");
 
-                // FIXME: UINT64 curTicks = HAL_Time_CurrentTicks();
+                UINT64 curTicks = HAL_Time_CurrentSysTicks();
 
                 // If the time between consecutive payload bytes exceeds the timeout threshold then assume that
                 // the rest of the payload is not coming. Reinitialize to synch on the next header.
 
-                // FIXME: if(HAL_Time_TicksToTime(curTicks - m_payloadTicks) < (UINT64)c_PayloadTimeout)
+                if(HAL_Time_SysTicksToTime(curTicks - m_payloadTicks) < (UINT64)c_PayloadTimeout)
                 {
-                    // FIXME: m_payloadTicks = curTicks;
+                    m_payloadTicks = curTicks;
 
                     if(m_parent->m_phy->ReceiveBytes(m_parent->m_state, m_pos, m_size) == false)
                     {
@@ -288,11 +288,11 @@ bool WP_Message::Process()
                         m_rxState = ReceiveState::CompletePayload;
                     }
                 }
-                // FIXME: else
-                //{
-                //    TRACE0(TRACE_ERRORS, "RxError: Payload InterCharacterTimeout exceeded\n");
-                //    m_rxState = ReceiveState::Initialize;
-                //}
+                else
+                {
+                   TRACE0(TRACE_ERRORS, "RxError: Payload InterCharacterTimeout exceeded\n");
+                   m_rxState = ReceiveState::Initialize;
+                }
             }
             break;
 

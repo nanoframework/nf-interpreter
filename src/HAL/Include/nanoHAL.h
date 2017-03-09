@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-
+#include <nanoWeak.h>
 
 
 
@@ -36,18 +36,6 @@
 #include <targetHAL.h>
 #include <nanoHAL_Types.h>
 #include <nanoHAL_ReleaseInfo.h>
-
-// definition of WEAK attribute for stub functions
-#if defined(_MSC_VER)
-// because VC++ doesn't support this attribute it's definition end up being an empty one
-#define __nfweak
-
-#elif defined(__GNUC__)
-#define __nfweak __attribute__((weak))
-
-#else
-#error "Unknow platform. Please add definition for weak attribute."
-#endif
 
 //#if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
 //#define ENABLE_NATIVE_PROFILER

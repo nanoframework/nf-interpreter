@@ -12,18 +12,7 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_ErrorCodes.h>
 #include <nanoSupport.h>
-
-// definition of WEAK attribute for stub functions
-#if defined(_MSC_VER)
-// because VC++ doesn't support this attribute it's definition end up being an empty one
-#define __nfweak 
-
-#elif defined(__GNUC__)
-#define __nfweak __attribute__((weak))
-
-#else
-#error "Unknow platform. Please add definition for weak attribute."
-#endif
+#include <nanoWeak.h>
 
 struct CLR_RADIAN
 {
@@ -2943,14 +2932,14 @@ struct CLR_RT_ExecutionEngine
     struct ExecutionConstraintCompensation
     {
         CLR_INT32  m_recursion;
-        CLR_INT64  m_start;
-        CLR_INT64  m_cumulative;
+        CLR_INT32  m_start;
+        CLR_INT32  m_cumulative;
 
         void Suspend()
         {
             if(m_recursion++ == 0)
             {
-                m_start = HAL_Time_CurrentTicks();
+                m_start = HAL_Time_CurrentSysTicks();
             }
         }
 
@@ -2960,14 +2949,15 @@ struct CLR_RT_ExecutionEngine
             {
                 if(--m_recursion == 0)
                 {
-                    m_cumulative += (HAL_Time_CurrentTicks() - m_start);
+                    m_cumulative += (HAL_Time_CurrentSysTicks() - m_start);
                 }
             }
         }
 
         CLR_INT64 Adjust( CLR_INT64 time ) const
         {
-            return time + ::HAL_Time_TicksToTime( m_cumulative );
+            // FIXME: evaluate if the caller code can be adjusted to use SysTicks instead of 100ns ticks
+            return time + ::HAL_Time_SysTicksToTime( m_cumulative );
         }
     };
 
