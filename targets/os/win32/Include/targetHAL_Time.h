@@ -24,7 +24,7 @@
 //
 
 
-UINT32 HAL_Time_CurrentTicks();
+UINT32 HAL_Time_CurrentSysTicks();
 
 
 

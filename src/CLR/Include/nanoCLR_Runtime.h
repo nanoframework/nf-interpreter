@@ -2939,7 +2939,7 @@ struct CLR_RT_ExecutionEngine
         {
             if(m_recursion++ == 0)
             {
-                m_start = HAL_Time_CurrentTicks();
+                m_start = HAL_Time_CurrentSysTicks();
             }
         }
 
@@ -2949,16 +2949,15 @@ struct CLR_RT_ExecutionEngine
             {
                 if(--m_recursion == 0)
                 {
-                    m_cumulative += (HAL_Time_CurrentTicks() - m_start);
+                    m_cumulative += (HAL_Time_CurrentSysTicks() - m_start);
                 }
             }
         }
 
         CLR_INT64 Adjust( CLR_INT64 time ) const
         {
-            // need to 'convert' this from milliseconds to 100ns ticks so it won't break the code calling Adjust() 
-            // FIXME: evaluate if the caller code can be adjusted to drop this workaround conversion 
-            return time + ::HAL_Time_TicksToTimeMilliSec( m_cumulative ) / NANOHAL_TIME_CONVERSION_MICRO_TO_HUNDREDS_NANOSECONDS;
+            // FIXME: evaluate if the caller code can be adjusted to use SysTicks instead of 100ns ticks
+            return time + ::HAL_Time_SysTicksToTime( m_cumulative );
         }
     };
 
