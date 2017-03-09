@@ -46,7 +46,7 @@ bool CheckValidCLRImage(uint32_t address)
        nanoCLRVectorTable->init_stack == 0x00000000)
     {
         // check failed, there is no valid CLR image
-        //return false;
+        return false;
     }
 
     // volatile uint16_t* temp1 = (uint16_t*)nanoCLRVectorTable->reset_handler;
@@ -56,8 +56,8 @@ bool CheckValidCLRImage(uint32_t address)
     
     // 2nd check: the content pointed by the reset vector has to be 0xB672 
     // this is the opcode for 'CPSID I' which is the very 1st assembly instruction of a ChibiOS nanoCLR image
-    // the casts bellow are there because the opcode is a 16 bit value and we need to subtract 1 from the reset vector address pointing to it
     uint16_t* opCodeAddress = (uint16_t*)nanoCLRVectorTable->reset_handler;
+    // the casts bellow are there because the opcode is a 16 bit value and we need to subtract 1 from the reset vector address pointing to it
     opCodeAddress = (uint8_t*)opCodeAddress - 0x1;
 
     if((uint16_t)*opCodeAddress == 0xB672)
@@ -67,7 +67,7 @@ bool CheckValidCLRImage(uint32_t address)
     }
     else
     {
-        // got here, assume that there isn't a valid CLR imaged flashed
+        // got here so there isn't a valid CLR imaged flashed
         return false;
     }
 }
