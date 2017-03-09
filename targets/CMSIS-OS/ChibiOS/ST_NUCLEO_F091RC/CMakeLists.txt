@@ -122,15 +122,11 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${NF_WireProtocol_INCLUDE_DIRS}"
 )
 
-############################################################
-# use default linker options and linker file for nanoBooter
-CHIBIOS_SET_LINKER_OPTIONS(${NANOBOOTER_PROJECT_NAME}.elf)
-############################################################
-
-#######################################################
-# need to use a specific linker file for nanoCLR
+###################
+# set linker files
+CHIBIOS_SET_LINKER_OPTIONS_AND_FILE(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F091xC.ld)
 CHIBIOS_SET_LINKER_OPTIONS_AND_FILE(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F091xC.ld)
-#######################################################
+###################
 
 CHIBIOS_ADD_HEX_BIN_DUMP_TARGETS(${NANOBOOTER_PROJECT_NAME}.elf)
 CHIBIOS_ADD_HEX_BIN_DUMP_TARGETS(${NANOCLR_PROJECT_NAME}.elf)

@@ -97,18 +97,6 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/por
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/xWDGv1)
 
 
-#######################################################################################################################################
-# WHEN ADDING A NEW BOARD add the respective IF clause bellow along with the default linker file name (without extension)
-#######################################################################################################################################
-
-# linker file
-if(${CHIBIOS_BOARD} STREQUAL "ST_NUCLEO_F072RB")
-    set(DEFAULT_LINKER_FILE_NAME "STM32F072xB")
-elseif(${CHIBIOS_BOARD} STREQUAL "ST_NUCLEO_F091RC")
-    set(DEFAULT_LINKER_FILE_NAME "STM32F091xC")
-endif()
-
-
 ####################################################################################
 # WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) bellow 
 ####################################################################################
@@ -138,23 +126,7 @@ list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Chib
 
 
 #######################################################################################################################################
-# this function sets the linker options including the default linker file
-# if the target uses a specific linker file use the function CHIBIOS_SET_LINKER_OPTIONS_AND_FILE
-function(CHIBIOS_SET_LINKER_OPTIONS TARGET)
-
-    get_target_property(TARGET_LD_FLAGS ${TARGET} LINK_FLAGS)
-    if(TARGET_LD_FLAGS)
-        set(TARGET_LD_FLAGS "-T${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC/ld/${DEFAULT_LINKER_FILE_NAME}.ld ${TARGET_LD_FLAGS}")
-    else()
-        set(TARGET_LD_FLAGS "-T${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC/ld/${DEFAULT_LINKER_FILE_NAME}.ld")
-    endif()
-    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS ${TARGET_LD_FLAGS})
-
-endfunction()
-
-#######################################################################################################################################
 # this function sets the linker options AND a specific linker file (full path and name, including extension)
-# if the target uses the default linker file use the function CHIBIOS_SET_LINKER_OPTIONS
 function(CHIBIOS_SET_LINKER_OPTIONS_AND_FILE TARGET LINKER_FILE_NAME)
 
     get_target_property(TARGET_LD_FLAGS ${TARGET} LINK_FLAGS)
