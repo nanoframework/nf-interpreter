@@ -7,11 +7,11 @@
 # ignore cmake-variants file (will change frequently per user/board setup, use should derive content from cmake-variants.TEMPLATE.json)
 cmake-variants.json
 
+# Visual Studio Code
 # ignore C/C++ launch file (will change frequently per user/board setup, use should derive content from launch.TEMPLATE.json)
 .vscode/launch.json
-
-# ignore cmaketools user preferences file 
 .vscode/.cmaketools.json
+.vscode/settings.json
 
 # Visual Studio
 ## Ignore Visual Studio temporary files, build results, and
