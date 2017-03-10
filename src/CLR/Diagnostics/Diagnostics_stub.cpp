@@ -26,15 +26,17 @@ __nfweak HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPC
 __nfweak bool CLR_SafeSprintfV( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    int  chars = hal_vsnprintf( szBuffer, iBuffer, format, arg );
-    bool fRes  = (chars >= 0);
+    // UNDO FIXME 
+    // int  chars = hal_vsnprintf( szBuffer, iBuffer, format, arg );
+    // bool fRes  = (chars >= 0);
 
-    if(fRes == false) chars = (int)iBuffer;
+    // if(fRes == false) chars = (int)iBuffer;
 
-    szBuffer += chars; szBuffer[ 0 ] = 0;
-    iBuffer  -= chars;
+    // szBuffer += chars; szBuffer[ 0 ] = 0;
+    // iBuffer  -= chars;
 
-    return fRes;
+    // return fRes;
+    return true;
 }
 
 __nfweak bool CLR_SafeSprintf( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, ... )
