@@ -15,10 +15,10 @@ HRESULT Time_Uninitialize()
     return CLR_E_NOTIMPL;
 }
 
-INT64 Time_GetUtcTime()
-{
-    return 0;
-}
+// INT64 Time_GetUtcTime()
+// {
+//     return 0;
+// }
 
 INT64 Time_SetUtcTime( INT64 UtcTime, bool calibrate )
 {
@@ -45,27 +45,22 @@ INT64 Time_GetTickCount()
     return 0;
 }
 
-INT64 Time_GetMachineTime()
-{
-    return 0;
-}
-
-BOOL Time_ToSystemTime(INT64 time, SYSTEMTIME* systemTime)
+BOOL HAL_Time_ToSystemTime(INT64 time, SYSTEMTIME* systemTime)
 {
     return FALSE;
 }
 
-INT64 Time_FromSystemTime(const SYSTEMTIME* systemTime)
+INT64 HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime)
 {
     return 0;
 }
 
-HRESULT Time_DaysInMonth(INT32 year, INT32 month, INT32* days)
+HRESULT HAL_Time_DaysInMonth(INT32 year, INT32 month, INT32* days)
 {
     return CLR_E_NOTIMPL;
 }
 
-HRESULT Time_AccDaysInMonth(INT32 year, INT32 month, INT32* days)
+HRESULT HAL_Time_AccDaysInMonth(INT32 year, INT32 month, INT32* days)
 {
     return CLR_E_NOTIMPL;
 }
@@ -80,12 +75,12 @@ BOOL Utility_SafeSprintf( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, ... )
     return FALSE;
 }
 
-BOOL Time_TimeSpanToStringEx( const INT64& ticks, LPSTR& buf, size_t& len )
+BOOL HAL_Time_TimeSpanToStringEx( const INT64& ticks, LPSTR& buf, size_t& len )
 {
     return FALSE;
 }
 
-LPCSTR Time_TimeSpanToString( const INT64& ticks )
+LPCSTR HAL_Time_TimeSpanToString( const INT64& ticks )
 {
     return NULL;
 }
@@ -100,7 +95,7 @@ LPCSTR Time_DateTimeToString( const INT64& time)
     return NULL;
 }
 
-LPCSTR Time_CurrentDateTimeToString()
+LPCSTR HAL_Time_CurrentDateTimeToString()
 {
     return NULL;
 }

@@ -353,7 +353,7 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf( "Ready.\r\n" );
 #endif
 
-                // UNDONE: FIXME: (void)g_CLR_RT_ExecutionEngine.Execute( NULL, params.MaxContextSwitches );
+                (void)g_CLR_RT_ExecutionEngine.Execute( NULL, params.MaxContextSwitches );
 
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf( "Done.\r\n" );

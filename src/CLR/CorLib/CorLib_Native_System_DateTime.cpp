@@ -75,7 +75,7 @@ HRESULT Library_corlib_native_System_DateTime::get_DayOfYear___I4( CLR_RT_StackF
     INT32 days;
     Expand( stack, st );
 
-    NANOCLR_CHECK_HRESULT(Time_AccDaysInMonth( st.wYear, st.wMonth, &days ));
+    NANOCLR_CHECK_HRESULT(HAL_Time_AccDaysInMonth( st.wYear, st.wMonth, &days ));
     days += st.wDay;
 
     stack.SetResult_I4( days );
@@ -172,7 +172,7 @@ HRESULT Library_corlib_native_System_DateTime::ToLocalTime___SystemDateTime( CLR
         // We cannot change *val, so we create copy and clear the bit.
         CLR_INT64 ticks = *pThis & s_TickMask;
 
-        *pRes = ticks + TIME_ZONE_OFFSET;
+        // UNDO FIXME *pRes = ticks + TIME_ZONE_OFFSET;
     }
     else
     {
@@ -196,7 +196,7 @@ HRESULT Library_corlib_native_System_DateTime::ToUniversalTime___SystemDateTime(
 
     if ( !(*pThis & s_UTCMask) )
     {
-        *pRes = *pThis - TIME_ZONE_OFFSET;
+        // UNDO FIXME *pRes = *pThis - TIME_ZONE_OFFSET;
         // In converted time we need to set UTC mask
         *pRes |= s_UTCMask;
     }
@@ -218,7 +218,7 @@ HRESULT Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4(
     CLR_INT32 month = stack.Arg1().NumericByRef().s4;
     CLR_INT32 days  = 0;
 
-    Time_DaysInMonth( year, month, &days );
+    HAL_Time_DaysInMonth( year, month, &days );
 
     stack.SetResult_I4( days );
 
@@ -232,7 +232,8 @@ HRESULT Library_corlib_native_System_DateTime::get_Now___STATIC__SystemDateTime(
 
     CLR_INT64* pRes = NewObject( stack );
 
-    *pRes = Time_GetLocalTime();
+    // FIXME time now is always UTC
+    *pRes = HAL_Time_CurrentTime();
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -244,7 +245,8 @@ HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTi
 
     CLR_INT64* pRes = NewObject( stack );
 
-    *pRes = Time_GetUtcTime() | s_UTCMask;
+    // FIXME time now is always UTC
+    *pRes = HAL_Time_CurrentTime() | s_UTCMask;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -258,14 +260,15 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
 
     {
         SYSTEMTIME st; 
-        Time_ToSystemTime( Time_GetLocalTime(), &st );
+        // FIXME time now is always UTC
+        HAL_Time_ToSystemTime( HAL_Time_CurrentTime(), &st );
 
         st.wHour         = 0;
         st.wMinute       = 0;
         st.wSecond       = 0;
         st.wMilliseconds = 0;
 
-        *pRes = Time_FromSystemTime( &st );
+        *pRes = HAL_Time_FromSystemTime( &st );
     }
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -330,8 +333,9 @@ void Library_corlib_native_System_DateTime::Expand( CLR_RT_StackFrame& stack, SY
     {
     // The most significant bit of *val keeps flag if time is UTC.
     // We cannot change *val, so we create copy and clear the bit.
+    // FIXME time now is always UTC
         CLR_INT64 ticks = *val & s_TickMask;
-        Time_ToSystemTime( ticks, &st );
+        HAL_Time_ToSystemTime( ticks, &st );
     }
 }
 
@@ -343,7 +347,7 @@ void Library_corlib_native_System_DateTime::Compress( CLR_RT_StackFrame& stack, 
 
     if(val) 
     {
-        *val = Time_FromSystemTime( &st );
+        *val = HAL_Time_FromSystemTime( &st );
     }
 }
 

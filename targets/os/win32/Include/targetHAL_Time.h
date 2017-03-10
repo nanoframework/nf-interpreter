@@ -5,23 +5,6 @@
 //
 #ifndef _TARGET_HAL_TIME_H_
 #define _TARGET_HAL_TIME_H_ 1
-//
-//#include <nanoCLR_Types.h>
-//
-//// FIXME
-//#define TIMEOUT_ZERO      0x0
-//#define TIMEOUT_INFINITE  LONGLONGCONSTANT(0x7FFFFFFFFFFFFFFF)
-//
-//#define TIME_CONVERSION__TO_MILLISECONDS    10000
-//#define TIME_CONVERSION__TO_SECONDS         10000000
-//#define TIME_CONVERSION__TICKUNITS         10000
-//#define TIME_CONVERSION__ONESECOND         1
-//#define TIME_CONVERSION__ONEMINUTE         60
-//#define TIME_CONVERSION__ONEHOUR           3600
-//#define TIME_CONVERSION__ONEDAY            86400
-//
-//#define TIME_ZONE_OFFSET    ((INT64)Time_GetTimeZoneOffset() * 600000000)
-//
 
 
 UINT32 HAL_Time_CurrentSysTicks();
@@ -47,7 +30,7 @@ UINT32 HAL_Time_CurrentSysTicks();
 ///// Retrieves time since device was booted. 
 ///// </summary>
 ///// <returns>Time in 100ns.</returns>
-//INT64 Time_GetMachineTime();
+//INT64 HAL_Time_GetMachineTime();
 //
 ///// <summary>
 ///// Offset from GMT.

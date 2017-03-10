@@ -182,7 +182,7 @@ void CLR_RT_HeapBlock_Timer::AdjustNextFixedExpire( const SYSTEMTIME& systemTime
     }
 
     st.wMilliseconds = 0;
-    baseTime = Time_FromSystemTime( &st );
+    baseTime = HAL_Time_FromSystemTime( &st );
 
     m_timeExpire     = fNext ? baseTime + add : baseTime;
     m_timeFrequency  = add;
@@ -241,7 +241,7 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
 
         if(anyChange)
         {
-            SYSTEMTIME systemTime; Time_ToSystemTime( g_CLR_RT_ExecutionEngine.m_currentLocalTime, &systemTime );
+            SYSTEMTIME systemTime; HAL_Time_ToSystemTime( g_CLR_RT_ExecutionEngine.m_currentLocalTime, &systemTime );
 
             timer->m_flags |= anyChange | (CLR_RT_HeapBlock_Timer::c_AbsoluteTimer | CLR_RT_HeapBlock_Timer::c_EnabledTimer);
 
@@ -318,7 +318,7 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
 
             if (minTime <= timer->m_timeExpire && timer->m_timeExpire <= maxTime)
             {
-                timer->m_timeExpire += Time_GetMachineTime();
+                timer->m_timeExpire += HAL_Time_CurrentTime();
 
                 timer->m_flags |= CLR_RT_HeapBlock_Timer::c_EnabledTimer;
             }

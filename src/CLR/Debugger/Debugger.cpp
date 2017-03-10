@@ -52,7 +52,7 @@ void CLR_DBG_Debugger::Debugger_Discovery()
 
     CLR_INT32 wait_sec = 5;
 
-    CLR_INT64 expire = Time_GetMachineTime() + (wait_sec * TIME_CONVERSION__TO_SECONDS);
+    CLR_INT64 expire = HAL_Time_CurrentTime() + (wait_sec * TIME_CONVERSION__TO_SECONDS);
 
     //
     // Send "presence" ping.
@@ -82,7 +82,7 @@ void CLR_DBG_Debugger::Debugger_Discovery()
             break;
         }
 
-        CLR_INT64 now = Time_GetMachineTime();
+        CLR_INT64 now = HAL_Time_CurrentTime();
 
         if(expire < now)
         {

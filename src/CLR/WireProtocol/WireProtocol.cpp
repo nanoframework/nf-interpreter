@@ -268,7 +268,7 @@ bool WP_Message::Process()
             {
                 TRACE0(TRACE_STATE, "RxState=ReadingPayload\n");
 
-                UINT64 curTicks = HAL_Time_CurrentSysTicks();
+                UINT32 curTicks = HAL_Time_CurrentSysTicks();
 
                 // If the time between consecutive payload bytes exceeds the timeout threshold then assume that
                 // the rest of the payload is not coming. Reinitialize to synch on the next header.

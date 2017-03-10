@@ -168,7 +168,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue( UINT32 data1, UINT3
         rec->m_data1   = data1;
         rec->m_data2   = data2;
         rec->m_context = this;
-        rec->m_time    = Time_GetUtcTime();
+        rec->m_time    = HAL_Time_CurrentTime();
     }
 
     ::Events_Set( SYSTEM_EVENT_HW_INTERRUPT );

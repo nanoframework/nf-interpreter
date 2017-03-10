@@ -8,6 +8,8 @@
 
 //#include <nanoHAL_types.h>
 
+#include <nanoPAL_Time.h>
+
 //#include <AsyncProcCalls_decl.h>
 
 typedef void (*HAL_CALLBACK_FPN)( void* arg );
@@ -234,82 +236,82 @@ enum POWER_LEVEL
 
 //#include <Time_decl.h>
 
-#define TIME INT64
-
-#define TIME_CONVERSION__TO_MILLISECONDS    10000
-#define TIME_CONVERSION__TO_SECONDS         10000000
-#define TIME_CONVERSION__TICKUNITS         10000
-#define TIME_CONVERSION__ONESECOND         1
-#define TIME_CONVERSION__ONEMINUTE         60
-#define TIME_CONVERSION__ONEHOUR           3600
-#define TIME_CONVERSION__ONEDAY            86400
-
-#define TIMEOUT_ZERO      LONGLONGCONSTANT(0x0000000000000000)
-#define TIMEOUT_INFINITE  LONGLONGCONSTANT(0x7FFFFFFFFFFFFFFF)
-
-#define TIME_ZONE_OFFSET    ((INT64)Time_GetTimeZoneOffset() * 600000000)
-
-/// <summary>
-/// Initializes PAL Time drivers, must be called before any of the Time_* PAL
-/// methods could be used.
-/// </summary>
-HRESULT    Time_Initialize  (                     );
-
-/// <summary>
-/// UTC time according to this system. 
-/// </summary>
-/// <returns>Returns current UTC time in 100ns elapsed since 1/1/1601:00:00:00.000 UTC.</returns>
-INT64       Time_GetUtcTime();
-
-/// <summary>
-/// Local time according to the Time subsystem.
-/// </summary>
-/// <returns>Local time in 100ns elapsed since 1/1/1601:00:00:00.000 local time.</returns>
-INT64       Time_GetLocalTime();
-
-/// <summary>
-/// Offset from GMT.
-/// </summary>
-/// <returns>In minutes, for example Pacific Time would be GMT-8 = -480.</returns>
-INT32 Time_GetTimeZoneOffset();
-
-/// <summary>
-/// Retrieves time since device was booted.
-/// </summary>
-/// <returns>Time in 100ns.</returns>
-INT64 Time_GetMachineTime();
-
-/// <summary>
-/// Converts 64bit time value to SystemTime structure. 64bit time is assumed as an offset from 1/1/1601:00:00:00.000 in 100ns.
-/// </summary>
-/// <returns>True if conversion is successful.</returns>
-BOOL       Time_ToSystemTime(TIME time, SYSTEMTIME* systemTime);
-
-/// <summary>
-/// Retrieves number of days given a month and a year. Calculates for leap years.
-/// </summary>
-/// <returns>S_OK if successful.</returns>
-HRESULT    Time_DaysInMonth(INT32 year, INT32 month, INT32* days);
-
-/// <summary>
-/// Retrieves number of days since the beginning of the year given a month and a year. Calculates for leap years.
-/// </summary>
-/// <returns>S_OK if successful.</returns>
-HRESULT    Time_AccDaysInMonth(INT32 year, INT32 month, INT32* days);
-
-/// <summary>
-/// Converts SystemTime structure to 64bit time, which is assumed as an offset from 1/1/1601:00:00:00.000 in 100ns.
-/// </summary>
-/// <returns>Time value.</returns>
-TIME       Time_FromSystemTime(const SYSTEMTIME* systemTime);
-
-/// APIs to convert between types
-BOOL       Time_TimeSpanToStringEx(const INT64& ticks, LPSTR& buf, size_t& len);
-LPCSTR     Time_CurrentDateTimeToString();
 
 
 
-INT64   HAL_Time_CurrentTime();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //#include <TimeService_decl.h>
 //#include <TouchPanel_decl.h>
