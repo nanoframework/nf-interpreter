@@ -10,6 +10,19 @@
 #include <nanoCLR_Application.h>
 #include <WireProtocol_ReceiverThread.h>
 
+///////////////////////////////////////////////////////////////////////////////////////////
+// RAM vector table declaration (valid for GCC only)
+__IO uint32_t vectorTable[48] __attribute__((section(".RAMVectorTable")));
+
+
+// need to change this address if nanoCLR is to be located at a different address 
+// has to match the start address of flash region in STM32F091xC.ld
+#define APPLICATION_ADDRESS         (uint32_t)0x08004000
+#define SYSCFG_MemoryRemap_SRAM     ((uint8_t)0x03)
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
 void BlinkerThread(void const * argument)
 {
   (void)argument;
@@ -42,6 +55,17 @@ int main(void) {
   // and performs the board-specific initializations.
   halInit();
 
+  // relocate the vector table to RAM
+  // Copy the vector table from the Flash (mapped at the base of the application
+  // load address APPLICATION_ADDRESS) to the base address of the SRAM at 0x20000000.
+  for(int i = 0; i < 48; i++)
+  {
+    vectorTable[i] = *(__IO uint32_t*)(APPLICATION_ADDRESS + (i<<2));
+  } 
+
+  // set CFGR1 register MEM_MODE bits value as "memory remap to SRAM"
+  SYSCFG->CFGR1 |= SYSCFG_MemoryRemap_SRAM;
+
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
@@ -62,15 +86,15 @@ int main(void) {
 
   //  Normal main() thread activity it does nothing except sleeping in a loop 
 
-  CLR_SETTINGS clrSettings;
+  // CLR_SETTINGS clrSettings;
 
-  memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+  // memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
-  clrSettings.MaxContextSwitches         = 50;
-  clrSettings.WaitForDebugger            = false;
-  clrSettings.EnterDebuggerLoopAfterExit = true;
+  // clrSettings.MaxContextSwitches         = 50;
+  // clrSettings.WaitForDebugger            = false;
+  // clrSettings.EnterDebuggerLoopAfterExit = true;
 
-  ClrStartup(clrSettings);
+  // ClrStartup(clrSettings);
 
   while (true) {
     osDelay(1000);
