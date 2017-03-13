@@ -26,7 +26,7 @@ __nfweak HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPC
 __nfweak bool CLR_SafeSprintfV( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    // UNDO FIXME 
+    // UNDONE: FIXME 
     // int  chars = hal_vsnprintf( szBuffer, iBuffer, format, arg );
     // bool fRes  = (chars >= 0);
 

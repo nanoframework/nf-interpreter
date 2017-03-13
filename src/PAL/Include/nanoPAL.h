@@ -132,17 +132,17 @@ struct HAL_COMPLETION : public HAL_CONTINUATION
 //#include <BatteryMeasurement_decl.h>
 
 //#include <COM_decl.h>
-BOOL DebuggerPort_Initialize(COM_HANDLE ComPortNum);
-BOOL DebuggerPort_Uninitialize(COM_HANDLE ComPortNum);
+__nfweak BOOL DebuggerPort_Initialize(COM_HANDLE ComPortNum);
+__nfweak BOOL DebuggerPort_Uninitialize(COM_HANDLE ComPortNum);
 
 // max retries is the number of retries if the first attempt fails, thus the maximum
 // total number of attempts is maxRretries + 1 since it always tries at least once.
-int  DebuggerPort_Write(COM_HANDLE ComPortNum, const char* Data, size_t size, int maxRetries = 99);
-int  DebuggerPort_Read(COM_HANDLE ComPortNum, char* Data, size_t size);
-BOOL DebuggerPort_Flush(COM_HANDLE ComPortNum);
-BOOL DebuggerPort_IsSslSupported(COM_HANDLE ComPortNum);
-BOOL DebuggerPort_UpgradeToSsl(COM_HANDLE ComPortNum, UINT32 flags);
-BOOL DebuggerPort_IsUsingSsl(COM_HANDLE ComPortNum);
+__nfweak int  DebuggerPort_Write(COM_HANDLE ComPortNum, const char* Data, size_t size, int maxRetries = 99);
+__nfweak int  DebuggerPort_Read(COM_HANDLE ComPortNum, char* Data, size_t size);
+__nfweak BOOL DebuggerPort_Flush(COM_HANDLE ComPortNum);
+__nfweak BOOL DebuggerPort_IsSslSupported(COM_HANDLE ComPortNum);
+__nfweak BOOL DebuggerPort_UpgradeToSsl(COM_HANDLE ComPortNum, UINT32 flags);
+__nfweak BOOL DebuggerPort_IsUsingSsl(COM_HANDLE ComPortNum);
 
 //
 //#include <Display_decl.h>
@@ -386,5 +386,6 @@ int hal_strncmp_s( const char* str1, const char* str2, size_t num );
 //#include "..\pal\Diagnostics\Native_Profiler.h"
 // native profiler
 #define NATIVE_PROFILE_PAL_HEAP()
+#define NATIVE_PROFILE_PAL_CRT()
 
 #endif // _NANOPAL_H_

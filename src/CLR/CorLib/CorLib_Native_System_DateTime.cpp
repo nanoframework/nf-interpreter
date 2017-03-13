@@ -172,7 +172,7 @@ HRESULT Library_corlib_native_System_DateTime::ToLocalTime___SystemDateTime( CLR
         // We cannot change *val, so we create copy and clear the bit.
         CLR_INT64 ticks = *pThis & s_TickMask;
 
-        // UNDO FIXME *pRes = ticks + TIME_ZONE_OFFSET;
+        // UNDONE: FIXME *pRes = ticks + TIME_ZONE_OFFSET;
     }
     else
     {
@@ -196,7 +196,7 @@ HRESULT Library_corlib_native_System_DateTime::ToUniversalTime___SystemDateTime(
 
     if ( !(*pThis & s_UTCMask) )
     {
-        // UNDO FIXME *pRes = *pThis - TIME_ZONE_OFFSET;
+        // UNDONE: FIXME *pRes = *pThis - TIME_ZONE_OFFSET;
         // In converted time we need to set UTC mask
         *pRes |= s_UTCMask;
     }

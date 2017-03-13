@@ -18,7 +18,8 @@ void CLRStartupThread(void const * argument)
 
 
   CLR_SETTINGS clrSettings;
-  ZeroMemory(&clrSettings, sizeof(clrSettings));
+
+  memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
   clrSettings.MaxContextSwitches         = 50;
   clrSettings.WaitForDebugger            = false;
@@ -26,11 +27,10 @@ void CLRStartupThread(void const * argument)
 
   ClrStartup(clrSettings);
 
-
   // loop until thread receives a request to terminate
   while (!chThdShouldTerminateX()) {
     
-    WP_CheckAvailableIncomingData();
+//    WP_CheckAvailableIncomingData();
     
     osDelay(500);
   }
