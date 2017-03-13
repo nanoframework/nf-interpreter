@@ -16,7 +16,7 @@ HRESULT CLR_PRF_Profiler::CreateInstance()
 
     g_CLR_PRF_Profiler.m_packetSeqId = 0;
     g_CLR_PRF_Profiler.m_stream = NULL;
-    g_CLR_PRF_Profiler.m_lastTimestamp = (CLR_UINT32)((CLR_UINT64)(Time_GetMachineTime() + ((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1))
+    g_CLR_PRF_Profiler.m_lastTimestamp = (CLR_UINT32)((CLR_UINT64)(HAL_Time_CurrentTime() + ((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1))
         >> CLR_PRF_CMDS::Bits::TimestampShift);
     g_CLR_PRF_Profiler.m_currentAssembly = 0;
     g_CLR_PRF_Profiler.m_currentThreadPID = 0;
@@ -515,7 +515,7 @@ void CLR_PRF_Profiler::Timestamp()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     //Send Profiling Timestamp
-    CLR_UINT32 time = (CLR_UINT32)((Time_GetMachineTime() + ((CLR_UINT64)((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1)))
+    CLR_UINT32 time = (CLR_UINT32)((HAL_Time_CurrentTime() + ((CLR_UINT64)((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1)))
         >> CLR_PRF_CMDS::Bits::TimestampShift);
     if(time > m_lastTimestamp)
     {

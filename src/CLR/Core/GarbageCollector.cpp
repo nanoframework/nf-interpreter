@@ -141,7 +141,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 #if defined(NANOCLR_GC_VERBOSE)
     if(s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
     {        
-        CLR_Debug::Printf( "    Memory: Start %s\r\n", Time_CurrentDateTimeToString() );
+        CLR_Debug::Printf( "    Memory: Start %s\r\n", HAL_Time_CurrentDateTimeToString() );
     }
 #endif
 
@@ -250,7 +250,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 #if defined(NANOCLR_GC_VERBOSE)
     if(s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf( "    Memory: End %s\r\n", Time_CurrentDateTimeToString() );
+        CLR_Debug::Printf( "    Memory: End %s\r\n", HAL_Time_CurrentDateTimeToString() );
     }
 #endif
 

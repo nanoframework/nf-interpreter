@@ -23,7 +23,7 @@ UINT32 HAL_Time_CurrentSysTicks()
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTicks();
 }
 
-UINT64 HAL_Time_SysTicksToTime( UINT32 sysTicks )
+INT64 HAL_Time_SysTicksToTime( UINT32 sysTicks )
 {
     _ASSERTE(sysTicks <= 0x7FFFFFFF);
     

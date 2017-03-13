@@ -69,7 +69,8 @@ typedef const WCHAR*       LPCWSTR;
 //--//
 
 #if !(defined(_WIN32) || defined(WIN32))
-struct SYSTEMTIME
+
+typedef struct SYSTEMTIME
 {
     WORD wYear;
     WORD wMonth;
@@ -79,8 +80,9 @@ struct SYSTEMTIME
     WORD wMinute;
     WORD wSecond;
     WORD wMilliseconds;
-};
-#endif 
+} SYSTEMTIME;
+
+#endif // !(defined(_WIN32) || defined(WIN32))
 
 #endif  // _HAL_TYPES_H_
 

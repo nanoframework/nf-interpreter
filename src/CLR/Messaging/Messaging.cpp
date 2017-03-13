@@ -433,7 +433,7 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
             {
                 m_cacheMaster.LinkAtFront( cache );
 
-                cache->m_lastSeen = Time_GetMachineTime();
+                cache->m_lastSeen = HAL_Time_CurrentTime();
 
                 if(cache->m_flags & CachedMessage::c_Processed)
                 {
@@ -460,7 +460,7 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
             {
                 m_cacheSubordinate.LinkAtFront( cache );
 
-                cache->m_lastSeen = Time_GetMachineTime();
+                cache->m_lastSeen = HAL_Time_CurrentTime();
 
                 TransmitMessage( &cache->m_message, false );
                 return true;
@@ -500,7 +500,7 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
 void CLR_Messaging::PurgeCache()
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_INT64 oldest = Time_GetMachineTime() - TIME_CONVERSION__TO_SECONDS * 3;
+    CLR_INT64 oldest = HAL_Time_CurrentTime() - TIME_CONVERSION__TO_SECONDS * 3;
 
     PurgeCache( m_cacheMaster     , oldest );
     PurgeCache( m_cacheSubordinate, oldest );
@@ -572,7 +572,7 @@ bool CLR_Messaging::TransmitMessage( const WP_Message* msg, bool fQueue )
                 m_cacheTotalSize  += len;
 
                 cache->m_size      = len;
-                cache->m_lastSeen  = Time_GetMachineTime();
+                cache->m_lastSeen  = HAL_Time_CurrentTime();
                 cache->m_message   = *msg;
 
                 if(payloadSize && msg->m_payload)

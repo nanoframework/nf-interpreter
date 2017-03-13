@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\nanoHAL_Time.h" />
+    <ClInclude Include="..\Include\targetPAL_time.h" />
     <ClInclude Include="platform_selector.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

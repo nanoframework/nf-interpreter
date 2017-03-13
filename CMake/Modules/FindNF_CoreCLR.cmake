@@ -87,6 +87,9 @@ set(NF_CoreCLR_SRCS
     Debugger_stub.cpp
     Diagnostics_stub.cpp
     Messaging_stub.cpp
+    
+    # HAL
+    HAL_Time.cpp
 )
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
@@ -115,6 +118,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${PROJECT_SOURCE_DIR}/src/CLR/Debugger
             ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics
             ${PROJECT_SOURCE_DIR}/src/CLR/Messaging
+            
+            # HAL
+            ${PROJECT_SOURCE_DIR}/src/HAL
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

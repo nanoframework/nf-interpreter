@@ -32,7 +32,7 @@ HRESULT Library_corlib_native_System_TimeSpan::ToString___STRING( CLR_RT_StackFr
     size_t     iBuffer  = ARRAYSIZE(rgBuffer);
     CLR_INT64* val      = GetValuePtr( stack ); FAULT_ON_NULL(val);
 
-    Time_TimeSpanToStringEx( *val, szBuffer, iBuffer );
+    HAL_Time_TimeSpanToStringEx( *val, szBuffer, iBuffer );
 
     NANOCLR_SET_AND_LEAVE(stack.SetResult_String( rgBuffer ));
 

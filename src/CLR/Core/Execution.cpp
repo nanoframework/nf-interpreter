@@ -5,6 +5,7 @@
 //
 #include "Core.h"
 #include <nanoHAL_Power.h>
+#include <nanoHAL_Time.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -132,7 +133,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
     UpdateTime();
 
-    m_startTime = Time_GetUtcTime();
+    m_startTime = HAL_Time_CurrentTime();
 
     CLR_RT_HeapBlock_WeakReference::RecoverObjects( m_heap );
 
@@ -295,7 +296,7 @@ void CLR_RT_ExecutionEngine::Reboot( bool fHard )
 
 CLR_INT64 CLR_RT_ExecutionEngine::GetUptime()
 {
-    return Time_GetUtcTime() - g_CLR_RT_ExecutionEngine.m_startTime;
+    return HAL_Time_CurrentTime() - g_CLR_RT_ExecutionEngine.m_startTime;
 }
 
 void CLR_RT_ExecutionEngine::JoinAllThreadsAndExecuteFinalizer()
@@ -2398,9 +2399,9 @@ void CLR_RT_ExecutionEngine::ProcessTimeEvent( CLR_UINT32 event )
     NATIVE_PROFILE_CLR_CORE();
     SYSTEMTIME systemTime;
 
-    UpdateTime();
+    // UNDO FORCE UpdateTime();
 
-    Time_ToSystemTime( m_currentLocalTime, &systemTime );
+    HAL_Time_ToSystemTime( m_currentLocalTime, &systemTime );
 
     NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
     {
@@ -2455,7 +2456,7 @@ bool CLR_RT_ExecutionEngine::IsThereEnoughIdleTime( CLR_UINT32 expectedMsec )
     // UNDONE: FIXME
     // if(::Events_MaskedRead( g_CLR_HW_Hardware.m_wakeupEvents )) return false;
 
-    CLR_INT64 now = Time_GetMachineTime();
+    CLR_INT64 now = HAL_Time_CurrentTime();
 
     if(now + expectedMsec * TIME_CONVERSION__TO_MILLISECONDS >= m_currentNextActivityTime) return false;
 
@@ -2665,7 +2666,7 @@ HRESULT CLR_RT_ExecutionEngine::WaitEvents( CLR_RT_Thread* caller, const CLR_INT
     {
         fSuccess = false;
 
-        if(Time_GetMachineTime() < timeExpire)
+        if(HAL_Time_CurrentTime() < timeExpire)
         {
             caller->m_waitForEvents         = events;
             caller->m_waitForEvents_Timeout = timeExpire; CLR_RT_ExecutionEngine::InvalidateTimerCache();
@@ -2888,7 +2889,7 @@ HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, const CLR_IN
     }
     else
     {
-        timeExpire = timeout + Time_GetMachineTime();
+        timeExpire = timeout + HAL_Time_CurrentTime();
     }
 
     NANOCLR_NOCLEANUP();
@@ -2912,7 +2913,7 @@ HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, CLR_INT32 ti
     {
         timeExpire  = timeout;
         timeExpire *= TIME_CONVERSION__TO_MILLISECONDS;
-        timeExpire += Time_GetMachineTime();
+        timeExpire += HAL_Time_CurrentTime();
     }
 
     NANOCLR_NOCLEANUP();
@@ -3528,18 +3529,19 @@ void CLR_RT_ExecutionEngine::UpdateTime()
 {
     NATIVE_PROFILE_CLR_CORE();
         
-    m_currentMachineTime = Time_GetMachineTime();
-    m_currentLocalTime = Time_GetLocalTime();
+    m_currentMachineTime = HAL_Time_CurrentTime();
+    // FIXME time is now UTC...
+    m_currentLocalTime = HAL_Time_CurrentTime();
 
     /// Did timezone or daylight offset got adjusted? If yes make some adjustments in timers too.
-    CLR_INT32 timeZoneOffset = Time_GetTimeZoneOffset();
+    CLR_INT32 timeZoneOffset = 0;//// FIXME time is now UTC...Time_GetTimeZoneOffset();
 
     if(timeZoneOffset != m_lastTimeZoneOffset)
     {
         SYSTEMTIME systemTime;
     
         m_lastTimeZoneOffset = timeZoneOffset;
-        Time_ToSystemTime( m_currentLocalTime, &systemTime );
+        HAL_Time_ToSystemTime( m_currentLocalTime, &systemTime );
     
         NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
         {
@@ -3570,19 +3572,19 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
     if(timeout == 0) timeout = 1;
 
 #if defined(NANOCLR_TRACE_SYSTEMEVENTWAIT)
-    CLR_INT64 start = Time_GetMachineTime();
+    CLR_INT64 start = HAL_Time_CurrentTime();
 #endif
 
 //#define NANOCLR_STRESS_GC
 #if defined(NANOCLR_STRESS_GC)
     if(timeout > 100)
     {
-        CLR_INT64 startGC = Time_GetMachineTime();
+        CLR_INT64 startGC = HAL_Time_CurrentTime();
 
 
         g_CLR_RT_ExecutionEngine.PerformHeapCompaction   ();
 
-        CLR_INT64 endGC = Time_GetMachineTime();
+        CLR_INT64 endGC = HAL_Time_CurrentTime();
 
         timeout -= (CLR_INT32)((endGC - startGC) / TIME_CONVERSION__TO_MILLISECONDS);
     }
@@ -3597,8 +3599,8 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
 
 
 #if defined(NANOCLR_TRACE_SYSTEMEVENTWAIT)
-    CLR_INT64 stop  = Time_GetMachineTime();
-    CLR_INT64 stop2 = Time_GetMachineTime();
+    CLR_INT64 stop  = HAL_Time_CurrentTime();
+    CLR_INT64 stop2 = HAL_Time_CurrentTime();
 
     static CLR_INT64 totalRequested = 0;
     static CLR_INT64 totalActual    = 0;
