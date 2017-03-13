@@ -361,4 +361,11 @@ SECTIONS
         . = ORIGIN(HEAP_RAM) + LENGTH(HEAP_RAM);
         __heap_end__ = .;
     } > HEAP_RAM
+
+    /* RAM space reserved for the vector table */
+    .RAMVectorTable (NOLOAD) :
+    {
+        *(.RAMVectorTable)
+    } > ramvt
+
 }

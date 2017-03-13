@@ -13,7 +13,8 @@
 MEMORY
 {
     flash : org = 0x08004000, len = 256k - 0x3FFF /* flash size less the space reserved for bootloader (1st eight sectors 0x08000000 to 0x08001FFF)*/
-    ram0  : org = 0x20000000, len = 32k
+    ramvt : org = 0x20000000, len = 0xC0        /* initial RAM address is reserved for a copy of the vector table */
+    ram0  : org = 0x20000000, len = 32k - 0xC0  /* remaining RAM is free for use */
     ram1  : org = 0x00000000, len = 0
     ram2  : org = 0x00000000, len = 0
     ram3  : org = 0x00000000, len = 0
