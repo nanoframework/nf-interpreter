@@ -101,7 +101,7 @@ HRESULT HAL_Time_AccDaysInMonth(INT32 year, INT32 month, INT32* days);
 INT64 HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime);
 
 /// APIs to convert between types
-BOOL     HAL_Time_TimeSpanToStringEx( const INT64& ticks, LPSTR& buf, size_t& len );
+// FIXME BOOL     HAL_Time_TimeSpanToStringEx( const INT64& ticks, LPSTR& buf, size_t& len );
 LPCSTR   HAL_Time_CurrentDateTimeToString();
 
 #endif //_NANOHAL_TIME_H_
