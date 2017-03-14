@@ -34,7 +34,8 @@
             "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
             "CHIBIOS_VERSION" : "<N.N.N>",
             "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
-            "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>"
+            "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
+            "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger"
         },
         "buildType": "Debug"
       },
@@ -48,7 +49,8 @@
             "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
             "CHIBIOS_VERSION" : "<N.N.N>",
             "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
-            "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>"
+            "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
+            "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger"
         },
         "buildType": "Debug"
       },

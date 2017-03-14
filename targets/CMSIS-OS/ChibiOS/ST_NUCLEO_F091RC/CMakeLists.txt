@@ -24,8 +24,13 @@ find_package(WireProtocol REQUIRED)
 # packages for nanoFramework libraries
 # mandatory 
 find_package(NF_CoreCLR REQUIRED)
-find_package(NF_Debugger REQUIRED)
-find_package(NF_WireProtocol REQUIRED)
+
+# nF feature: debugger
+if(NF_FEATURE_DEBUGGER)
+    find_package(NF_Debugger REQUIRED)
+    find_package(NF_WireProtocol REQUIRED)
+    else()
+endif()
 
 # optional
 
@@ -64,7 +69,7 @@ add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
 
-    # ${COMMON_PROJECT_SOURCES}
+    ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
 
     ${TARGET_CMSIS_COMMON_SOURCES}
@@ -76,7 +81,7 @@ add_executable(
     ${CHIBIOS_SOURCES}
     ${ChibiOSnfOverlay_SOURCES}
 
-    # ${WireProtocol_SOURCES}
+    ${WireProtocol_SOURCES}
 
     # sources for nanoFramework libraries
     "${NF_CoreCLR_SOURCES}"

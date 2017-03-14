@@ -48,6 +48,7 @@ The build script accepts the following parameters (some of them are mandatory).
 - CHIBIOS_SOURCE: specifies the path for the location of the ChibiOS source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS parameter must be specified with CHIBIOS option. 
 - CHIBIOS_VERSION: specifies the ChibiOS version to grab the source files. It has to match one of the official versions from the ChibiOS repository. If none is specified it will download the 'trunk' version. This parameter is ignored if CHIBIOS_SOURCE is specified. 
 - CHIBIOS_BOARD: specifies the ChibiOS board. This parameter is mandatory when specifying CHIBIOS as the RTOS choice parameter above. It has to be a valid board listed in ChibiOS boards folder.
+- NF_FEATURE_DEBUGGER: specifies if the debugger feature is to be included. If not supplied the default value will be used. The default is true (debugger will be included).
 
 _Note 1: The RTOS currently supported is ChibiOS. If no source path is specified the source files will be downloaded from it's official GitHub mirror._
 _Note 2: the very first build will take more or less time depending on the download speed of the Internet connection of the machine were the build is running. This is because the source code of the RTOS of your choice will be downloaded from its repository. On the subsequent builds this won't happen._
@@ -67,10 +68,11 @@ cmake \
 -DCHIBIOS_VERSION=16.1.7 \
 -DCHIBIOS_BOARD=ST_NUCLEO_F091RC \
 -DTARGET_SERIES=STM32F0xx \
+-DNF_FEATURE_DEBUGGER=TRUE \
 -G "NMake Makefiles" ../ 
 ```
 
-This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, specifying ChibiOS v16.1.7 as the RTOS version, that the target board is named ST_NUCLEO_F091RC, that STM32F0xx is the series name that it belongs to, and that the build files suitable for NMake are to be generated.
+This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, specifying ChibiOS v16.1.7 as the RTOS version, that the target board is named ST_NUCLEO_F091RC, that STM32F0xx is the series name that it belongs to, debugger feature is to be included and that the build files suitable for NMake are to be generated.
 
 Another example:
 
@@ -81,10 +83,11 @@ cmake \
 -DCHIBIOS_BOARD=ST_NUCLEO144_F746ZG \
 -DTARGET_SERIES=STM32F7xx \
 -DUSE_FPU=TRUE \
+-DNF_FEATURE_DEBUGGER=TRUE \
 -G "NMake Makefiles" ../ 
 ```
 
-This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, specifying that ChibiOS sources to be used are located in the designated path (mind the forward slash and no ending slash),  that the target board is named ST_NUCLEO144_F746ZG, that STM32F7xx is the series name that it belongs to, hardware floating point unit is to be used and that the build files suitable for NMake are to be generated.
+This will call CMake (on your *build* directory that is assumed to be under the repository root) specifying the location of the toolchain install, specifying that ChibiOS sources to be used are located in the designated path (mind the forward slash and no ending slash),  that the target board is named ST_NUCLEO144_F746ZG, that STM32F7xx is the series name that it belongs to, hardware floating point unit is to be used, debugger feature is to be included and that the build files suitable for NMake are to be generated.
 
 After successful completion you'll have the build files ready to be used in the target build tool.
 
