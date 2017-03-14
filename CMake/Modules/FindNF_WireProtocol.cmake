@@ -13,6 +13,7 @@ set(NF_WireProtocol_SRCS
 
     Messaging.cpp
     WireProtocol.cpp
+    nanoSupport_CRC32.c
 )
 
 foreach(SRC_FILE ${NF_WireProtocol_SRCS})
@@ -22,6 +23,7 @@ foreach(SRC_FILE ${NF_WireProtocol_SRCS})
             
             ${PROJECT_SOURCE_DIR}/src/CLR/Messaging
             ${PROJECT_SOURCE_DIR}/src/CLR/WireProtocol
+            ${PROJECT_SOURCE_DIR}/src/CLR/Core
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

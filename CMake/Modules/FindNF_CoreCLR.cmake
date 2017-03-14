@@ -62,6 +62,8 @@ set(NF_CoreCLR_SRCS
     TypeSystemLookup.cpp
     StringTableData.cpp
     TypeSystem.cpp
+    nanoSupport_CRC32.c
+    
     # TODO FIXME need to investigate how this file can be automated 
     CLR_RT_InteropAssembliesTable.cpp
 
