@@ -1,6 +1,9 @@
+
 ###
 
 language: c #NOTE: this will set CC=gcc which might cause trouble
+
+sudo: required
 
 # Do not build branches of the form "pr/*". By prefixing pull requests coming
 # from branches inside the repository with pr/, this avoids building both the
@@ -15,40 +18,49 @@ matrix:
 
    include:
     - os: linux
-      env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/tmp/gcc-arm-none-eabi-5_4-2016q3-20160926/ -DUSE_FPU=TRUE -DCHIBIOS_VERSION=16.1.7 -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DNF_FEATURE_DEBUGGER=TRUE "
-      compiler: gcc
+      env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_2-2015q4 -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCHIBIOS_VERSION=16.1.7 -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DNF_FEATURE_DEBUGGER=TRUE "
+
+## cache GCC toolchain to speedup next builds
+cache:
+  directories:
+    - $HOME/gcc-arm-none-eabi-5_2-2015q4
+
+before_install:
+
+  - mkdir $HOME/usr
+  - export PATH="$HOME/usr/bin:$PATH"
+  - wget --no-check-certificate http://www.cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.sh
+  - chmod +x cmake-3.7.2-Linux-x86_64.sh
+  - ./cmake-3.7.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
 
 
-install:
-############################################################################
-  # Install a recent CMake
-  ############################################################################
-  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      CMAKE_URL="https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.tar.gz"
-      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
-    else
-      brew install cmake
-      brew upgrade cmake
-    fi
-  - cmake --version
 
-  ## Install mainline ARM toolchain and srecord.
-  -  sudo apt-get -qq install srecord &&
-      $WGET https://developer.arm.com/-/media/Files/downloads/gnu-rm/5_4-2016q3/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2 &&
-      tar xjf gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2 -C /tmp/ &&
-      sudo cp -f -r /tmp/gcc-arm-none-eabi-5_4-2016q3-20160926/* /usr/local/ &&
-      rm -rf /tmp/gcc-arm-none-eabi-* gcc-arm-none-eabi-*-linux.tar.bz2 &&
-      arm-none-eabi-gcc --version ;
+# install:
 
+  ## Install mainline ARM toolchain 
+  - export GCC_DIR=$HOME/gcc-arm-none-eabi-5_2-2015q4
+  - export GCC_ARCHIVE=$HOME/gcc-arm-none-eabi-5_2-2015q4-20151219-linux.tar.bz2
+  - export GCC_URL=https://launchpad.net/gcc-arm-embedded/5.0/5-2015-q4-major/+download/gcc-arm-none-eabi-5_2-2015q4-20151219-linux.tar.bz2
+  - if [ ! -e $GCC_DIR/bin/arm-none-eabi-g++ ]; then wget $GCC_URL -O $GCC_ARCHIVE; tar xfj $GCC_ARCHIVE -C $HOME; fi
+  - export PATH=$PATH:$GCC_DIR/bin
 
 before_script:
+  # need to install the 32 bit libraries for GCC to run
+  - sudo apt-get update
+  - sudo apt-get install libc6:i386 libstdc++6:i386
+
+
+  # - cd $GCC_DIR/bin
+  # - ls 
+  # - $GCC_DIR/bin/arm-none-eabi-size
 
   ############################################################################
   # Go back to the root of the project and setup the build directory
   ############################################################################
   - cd ${TRAVIS_BUILD_DIR}
-  - (mkdir build && cd build && cmake .. ${CMAKE_OPTIONS})
+
+script:
+  - mkdir build && cd build && cmake ${CMAKE_OPTIONS} .. && cmake --build .
 
 notifications:
   email: false
