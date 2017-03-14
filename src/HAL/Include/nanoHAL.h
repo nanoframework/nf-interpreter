@@ -535,6 +535,12 @@ extern HAL_SYSTEM_CONFIG  HalSystemConfig;
 
 
 
+typedef void (*LOGGING_CALLBACK)(LPCSTR text);
+
+
+
+
+
 
 
 

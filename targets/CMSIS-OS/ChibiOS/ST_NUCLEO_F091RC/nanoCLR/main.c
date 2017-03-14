@@ -7,8 +7,8 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include <nanoCLR_Application.h>
 #include <WireProtocol_ReceiverThread.h>
+#include <CLR_Startup_Thread.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // RAM vector table declaration (valid for GCC only)
@@ -33,7 +33,8 @@ void BlinkerThread(void const * argument)
   palClearPad(GPIOA, GPIOA_LED_GREEN);
   osDelay(250);
 
-  while (true) {
+  // loop until thread receives a request to terminate
+  while (!chThdShouldTerminateX()) {
 
     palSetPad(GPIOA, GPIOA_LED_GREEN);
     osDelay(125);
@@ -46,6 +47,8 @@ osThreadDef(BlinkerThread, osPriorityNormal, 128);
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityNormal, 1024);
+
+osThreadDef(CLRStartupThread, osPriorityNormal, 1024);
 
 //  Application entry point.
 int main(void) {
@@ -80,6 +83,9 @@ int main(void) {
 
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
+  
+  // create the CLR Startup thread
+  osThreadCreate(osThread(CLRStartupThread), NULL);
 
   // start kernel, after this the main() thread has priority osPriorityNormal by default
   osKernelStart();

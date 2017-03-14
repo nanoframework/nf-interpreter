@@ -379,7 +379,8 @@ void CLR_RT_Persistence_Manager::Bank::EraseAll()
 
     while(Erase( idx ))
     {
-        Watchdog_ResetCounter();
+        // UNDONE: FIXME
+        //Watchdog_ResetCounter();
     }
 }
 
@@ -832,7 +833,8 @@ bool CLR_RT_Persistence_Manager::AdvanceState( bool force )
     CLR_RT_GarbageCollector::RelocationRegion relocHelper[ CLR_RT_GarbageCollector::c_minimumSpaceForCompact ];
     while(true)
     {
-        ::Watchdog_ResetCounter();
+        // UNDONE: FIXME
+        //::Watchdog_ResetCounter();
         switch(m_state)
         {
         case STATE_FlushNextObject:

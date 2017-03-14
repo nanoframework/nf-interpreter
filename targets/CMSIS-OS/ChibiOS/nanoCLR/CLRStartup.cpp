@@ -11,10 +11,10 @@
 
 // FIXME 
 // these are dummy data, we'll have to figure out how to fill these after the build happens
-char nanoClr_Dat_Start[1 ];
+char nanoClr_Dat_Start[100 ];
 char nanoClr_Dat_End  [1 ];
 
-typedef struct Settings
+struct Settings
 {
     CLR_SETTINGS m_clrOptions;
     bool m_fInitialized;
@@ -27,7 +27,7 @@ typedef struct Settings
 
         m_clrOptions = params;
 
-        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance());
+        NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance());
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Created EE.\r\n" );
 #endif
@@ -39,7 +39,7 @@ typedef struct Settings
         }
 #endif
 
-        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.StartHardware());
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.StartHardware());
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Started Hardware.\r\n" );
 #endif
@@ -102,24 +102,24 @@ typedef struct Settings
         CLR_Debug::Printf( "Create TS.\r\n" );
 #endif
 
-        NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( nanoClr_Dat_Start, nanoClr_Dat_End ));
+        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( nanoClr_Dat_Start, nanoClr_Dat_End ));
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Loading Deployment Assemblies.\r\n" );
 #endif
 
-        LoadDeploymentAssemblies( BlockUsage::DEPLOYMENT );
+        // UNDONE: FIXME: LoadDeploymentAssemblies( BlockUsage::DEPLOYMENT );
 
         //--//
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Resolving.\r\n" );
 #endif
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
+        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
 
         g_CLR_RT_Persistence_Manager.Initialize();
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
+        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
 
 #if defined(NANOCLR_PROFILE_HANDLER)
         CLR_PROF_Handler::Calibrate();
@@ -322,7 +322,7 @@ static Settings s_ClrSettings;
 void ClrStartup(CLR_SETTINGS params)
 {
     NATIVE_PROFILE_CLR_STARTUP();
-    //Settings settings;
+    Settings settings;
     ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock));
     bool softReboot;
 
