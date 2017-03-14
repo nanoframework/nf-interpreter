@@ -23,7 +23,7 @@ install:
 
   ## Install mainline ARM toolchain and srecord.
   -  sudo apt-get -qq install srecord &&
-     $WGET https://developer.arm.com/-/media/Files/downloads/gnu-rm/5_4-2016q3/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2 &&
+     $WGET --timeout=30 https://developer.arm.com/-/media/Files/downloads/gnu-rm/5_4-2016q3/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2 &&
      tar xjf gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2 -C /tmp/ &&
      sudo cp -f -r /tmp/gcc-arm-none-eabi-5_4-2016q3/* /usr/local/ &&
      rm -rf /tmp/gcc-arm-none-eabi-* gcc-arm-none-eabi-*-linux.tar.bz2 &&
