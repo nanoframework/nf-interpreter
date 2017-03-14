@@ -190,6 +190,22 @@ message(STATUS "")
 #######################
 
 
+#################################################################
+# nanoFramework features
+#################################################################
+
+#################################################################
+# debugger (default is TRUE to include debugger in release image
+if(NOT NF_FEATURE_DEBUGGER OR
+   NOT "${NF_FEATURE_DEBUGGER}" STREQUAL "TRUE")
+    set(NF_FEATURE_DEBUGGER TRUE)
+else()
+    set(NF_FEATURE_DEBUGGER FALSE)
+endif()
+
+#################################################################
+
+
 #######################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)

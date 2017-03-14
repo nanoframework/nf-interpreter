@@ -6,7 +6,15 @@
 #ifndef _SUPPORT_NANOSUPPORT_H_
 #define _SUPPORT_NANOSUPPORT_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc);
+
+#ifdef __cplusplus
+}
+#endif
 
 //typedef BOOL (*WRITE_MEMORY_FUNCT)( UINT32 Address, UINT32 NumBytes, const BYTE * pSectorBuff );
 //typedef BOOL (*READ_MEMORY_FUNCT) ( UINT32 Address, UINT32 NumBytes, BYTE * pSectorBuff );

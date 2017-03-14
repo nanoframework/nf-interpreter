@@ -24,8 +24,13 @@ find_package(WireProtocol REQUIRED)
 # packages for nanoFramework libraries
 # mandatory 
 find_package(NF_CoreCLR REQUIRED)
-find_package(NF_Debugger REQUIRED)
-find_package(NF_WireProtocol REQUIRED)
+
+# nF feature: debugger
+if(NF_FEATURE_DEBUGGER)
+    find_package(NF_Debugger REQUIRED)
+    find_package(NF_WireProtocol REQUIRED)
+    else()
+endif()
 
 # optional
 
