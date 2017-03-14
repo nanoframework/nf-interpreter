@@ -20,6 +20,7 @@ matrix:
 
 
 install:
+<<<<<<< 0b50926ffcb9a1770357744f2ab69e2c797613f6
 ############################################################################
   # Install a recent CMake
   ############################################################################
@@ -41,6 +42,12 @@ install:
       rm -rf /tmp/gcc-arm-none-eabi-* gcc-arm-none-eabi-*-linux.tar.bz2 &&
       arm-none-eabi-gcc --version ;
 
+=======
+
+  ## Install mainline ARM toolchain and srecord.
+  -  sudo apt-get -qq install gcc-arm-embedded srecord && 
+     arm-none-eabi-gcc --version ;
+>>>>>>> Update travis file
 
 before_script:
 
