@@ -68,7 +68,7 @@ add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
 
-    # ${COMMON_PROJECT_SOURCES}
+    ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
 
     ${TARGET_CMSIS_COMMON_SOURCES}
@@ -80,7 +80,7 @@ add_executable(
     ${CHIBIOS_SOURCES}
     ${ChibiOSnfOverlay_SOURCES}
 
-    # ${WireProtocol_SOURCES}
+    ${WireProtocol_SOURCES}
 
     # sources for nanoFramework libraries
     "${NF_CoreCLR_SOURCES}"
