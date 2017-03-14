@@ -1,0 +1,37 @@
+###
+
+language: c #NOTE: this will set CC=gcc which might cause trouble
+
+# Do not build branches of the form "pr/*". By prefixing pull requests coming
+# from branches inside the repository with pr/, this avoids building both the
+# branch push _and_ the pull request.
+branches:
+  except: /pr\/.*/
+
+# Workaround for https://github.com/travis-ci/travis-ci/issues/4681
+matrix:
+   exclude:
+    - env: TRAVIS_EMPTY_JOB_WORKAROUND=true
+
+   include:
+    - os: linux
+      env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/tmp/gcc-arm-none-eabi-5_4-2016q3-20160926/ -DUSE_FPU=TRUE -DCHIBIOS_VERSION=16.1.7 -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DNF_FEATURE_DEBUGGER=TRUE "
+      compiler: gcc
+
+
+install:
+
+  ## Install mainline ARM toolchain and srecord.
+  -  sudo apt-get -qq install gcc-arm-embedded srecord && 
+     arm-none-eabi-gcc --version ;
+
+before_script:
+
+  ############################################################################
+  # Go back to the root of the project and setup the build directory
+  ############################################################################
+  - cd ${TRAVIS_BUILD_DIR}
+  - (mkdir build && cd build && cmake .. ${CMAKE_OPTIONS})
+
+notifications:
+  email: false
