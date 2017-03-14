@@ -6,13 +6,13 @@
 #ifndef _SUPPORT_NANOSUPPORT_H_
 #define _SUPPORT_NANOSUPPORT_H_
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && defined(__GNUC__)
 extern "C" {
 #endif
 
 UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && defined(__GNUC__)
 }
 #endif
 
