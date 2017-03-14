@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
+#include <nanoSupport.h>
 
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
@@ -174,15 +175,4 @@ struct WP_CompileCheck
 
 typedef unsigned int       UINT32;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc);
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif // _WIREPROTOCOL_H_
-

@@ -6,13 +6,16 @@
 #ifndef _SUPPORT_NANOSUPPORT_H_
 #define _SUPPORT_NANOSUPPORT_H_
 
-#if defined(__cplusplus) && defined(__GNUC__)
+typedef unsigned int       UINT32;
+
+
+#if defined(__cplusplus) && !(defined(_WIN32) || defined(WIN32))
 extern "C" {
 #endif
 
 UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc);
 
-#if defined(__cplusplus) && defined(__GNUC__)
+#if defined(__cplusplus) && !(defined(_WIN32) || defined(WIN32))
 }
 #endif
 

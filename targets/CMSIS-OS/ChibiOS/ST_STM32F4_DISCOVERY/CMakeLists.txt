@@ -28,7 +28,6 @@ find_package(NF_CoreCLR REQUIRED)
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
     find_package(NF_Debugger REQUIRED)
-    find_package(NF_WireProtocol REQUIRED)
     else()
 endif()
 
@@ -95,6 +94,8 @@ include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/common
+    ${PROJECT_SOURCE_DIR}/src/CLR/Include
+    ${PROJECT_SOURCE_DIR}/src/HAL/Include
 
     ${WireProtocol_INCLUDE_DIRS}
     ${CHIBIOS_INCLUDE_DIRS}
