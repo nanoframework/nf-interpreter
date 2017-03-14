@@ -4,6 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <nanoHAL_Time.h>
+#include <nanoSupport.h>
 #include "WireProtocol_Message.h"
 
 uint8_t receptionBuffer[2048];

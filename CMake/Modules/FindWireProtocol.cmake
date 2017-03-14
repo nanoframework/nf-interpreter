@@ -9,6 +9,7 @@ set(WireProtocol_SRCS
     WireProtocol_HAL_Interface.c
     WireProtocol_App_Interface.c
 
+    nanoSupport_CRC32.c
 )
 
 foreach(SRC_FILE ${WireProtocol_SRCS})
@@ -16,6 +17,7 @@ foreach(SRC_FILE ${WireProtocol_SRCS})
     find_file(WireProtocol_SRC_FILE ${SRC_FILE}
         PATHS 
             ${PROJECT_SOURCE_DIR}/src/CLR/WireProtocol
+            ${PROJECT_SOURCE_DIR}/src/CLR/Core
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
