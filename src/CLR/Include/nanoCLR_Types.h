@@ -6,7 +6,7 @@
 #ifndef _NANOCLR_TYPES_H_
 #define _NANOCLR_TYPES_H_
 
-#include <nanoClr_PlatformDef.h>
+#include <nanoCLR_PlatformDef.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 

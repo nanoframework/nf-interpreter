@@ -165,7 +165,7 @@ struct Settings
         CLR_Debug::Printf( "Create TS.\r\n" );
 #endif
 
-        NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( nanoClr_Dat_Start, nanoClr_Dat_End ));
+        NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( nanoCLR_Dat_Start, nanoCLR_Dat_End ));
 
 #endif // defined(PLATFORM_WINDOWS_EMULATOR)
 

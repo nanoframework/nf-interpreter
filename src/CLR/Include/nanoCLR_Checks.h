@@ -6,7 +6,7 @@
 #ifndef _NANOCLR_CHECKS_H_
 #define _NANOCLR_CHECKS_H_
 
-#include <nanoClr_Runtime.h>
+#include <nanoCLR_Runtime.h>
 
 struct CLR_RT_DUMP
 {

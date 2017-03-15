@@ -381,8 +381,8 @@ void CPU_Shutdown()
 //    return TRUE;
 //}
 
-char nanoClr_Dat_Start[512*1024];
-char nanoClr_Dat_End  [1       ];
+char nanoCLR_Dat_Start[512*1024];
+char nanoCLR_Dat_End  [1       ];
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
