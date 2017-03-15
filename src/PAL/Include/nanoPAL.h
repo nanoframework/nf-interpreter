@@ -379,7 +379,7 @@ int hal_strncmp_s( const char* str1, const char* str2, size_t num );
 //#include <Analog_decl.h>
 //#include <AnalogOut_decl.h>
 //
-#include "Blockstorage_decl.h"
+#include "BlockStorage_decl.h"
 
 //#include <SD_decl.h>
 
