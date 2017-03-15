@@ -17,22 +17,24 @@ matrix:
     - env: TRAVIS_EMPTY_JOB_WORKAROUND=true
 
    include:
-    - os: linux
-      env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_2-2015q4 -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCHIBIOS_VERSION=16.1.7 -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DNF_FEATURE_DEBUGGER=TRUE "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_2-2015q4 -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCHIBIOS_VERSION=16.1.7 -DCMAKE_BUILD_TYPE=Debug -DNF_FEATURE_DEBUGGER=TRUE "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_2-2015q4 -DCHIBIOS_BOARD=ST_STM32F429I_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCHIBIOS_VERSION=16.1.7 -DCMAKE_BUILD_TYPE=Debug -DNF_FEATURE_DEBUGGER=TRUE "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_2-2015q4 -DCHIBIOS_BOARD=ST_NUCLEO_F091RC -DTARGET_SERIES=STM32F0xx -DCHIBIOS_VERSION=16.1.7 -DCMAKE_BUILD_TYPE=Debug -DNF_FEATURE_DEBUGGER=TRUE "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_2-2015q4 -DCHIBIOS_BOARD=ST_NUCLEO144_F746ZG -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DCHIBIOS_VERSION=16.1.7 -DCMAKE_BUILD_TYPE=Debug -DNF_FEATURE_DEBUGGER=TRUE "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_2-2015q4 -DCHIBIOS_BOARD=MBN_QUAIL -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCHIBIOS_VERSION=16.1.7 -DCMAKE_BUILD_TYPE=Debug -DNF_FEATURE_DEBUGGER=TRUE "
 
 ## cache GCC toolchain to speedup next builds
 cache:
   directories:
     - $HOME/gcc-arm-none-eabi-5_2-2015q4
 
-before_install:
+install:
 
   - mkdir $HOME/usr
   - export PATH="$HOME/usr/bin:$PATH"
   - wget --no-check-certificate http://www.cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.sh
   - chmod +x cmake-3.7.2-Linux-x86_64.sh
   - ./cmake-3.7.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
-
 
 
 # install:
@@ -45,14 +47,11 @@ before_install:
   - export PATH=$PATH:$GCC_DIR/bin
 
 before_script:
-  # need to install the 32 bit libraries for GCC to run
+  ###################################################################
+  # need to install the 32 bit libraries for ARM GCC to run properly 
   - sudo apt-get update
   - sudo apt-get install libc6:i386 libstdc++6:i386
-
-
-  # - cd $GCC_DIR/bin
-  # - ls 
-  # - $GCC_DIR/bin/arm-none-eabi-size
+  ###################################################################
 
   ############################################################################
   # Go back to the root of the project and setup the build directory
