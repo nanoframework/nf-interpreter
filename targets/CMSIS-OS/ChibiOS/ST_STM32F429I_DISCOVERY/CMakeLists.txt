@@ -28,7 +28,6 @@ find_package(NF_CoreCLR REQUIRED)
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
     find_package(NF_Debugger REQUIRED)
-    find_package(NF_WireProtocol REQUIRED)
     else()
 endif()
 
