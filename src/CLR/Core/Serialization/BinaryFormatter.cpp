@@ -3,7 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include <nanoClr_Runtime.h>
+#include <nanoCLR_Runtime.h>
 #include <CorLib_Native.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

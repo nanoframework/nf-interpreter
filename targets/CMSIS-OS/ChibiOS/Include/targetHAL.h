@@ -39,7 +39,8 @@ inline void HAL_AssertEx()
 extern int HeapBegin;
 extern int HeapEnd;
 
-extern char * nanoCLR_Dat_Start;
-extern char * nanoCLR_Dat_End;
+// FIXME uncomment? declaration needed here as external?
+// extern char * nanoCLR_Dat_Start;
+// extern char * nanoCLR_Dat_End;
 
 #endif //_TARGET_HAL_H_

@@ -11,8 +11,8 @@
 
 // FIXME 
 // these are dummy data, we'll have to figure out how to fill these after the build happens
-char nanoClr_Dat_Start[100 ];
-char nanoClr_Dat_End  [1 ];
+char nanoCLR_Dat_Start[100 ];
+char nanoCLR_Dat_End  [1 ];
 
 struct Settings
 {
@@ -102,7 +102,7 @@ struct Settings
         CLR_Debug::Printf( "Create TS.\r\n" );
 #endif
 
-        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( nanoClr_Dat_Start, nanoClr_Dat_End ));
+        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( nanoCLR_Dat_Start, nanoCLR_Dat_End ));
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Loading Deployment Assemblies.\r\n" );
