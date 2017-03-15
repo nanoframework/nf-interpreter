@@ -263,7 +263,7 @@ if(RTOS_CHIBIOS_CHECK)
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("CMake/CHIBIOS.CMakeLists.cmake.in"
+        configure_file("CMake/ChibiOS.CMakeLists.cmake.in"
                     "${CMAKE_BINARY_DIR}/ChibiOS_Download/CMakeLists.txt")
         
         # setup CMake project for ChibiOS download
