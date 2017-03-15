@@ -197,7 +197,7 @@
 
 #else
 
-#include <nanoHAL_types.h>
+#include <nanoHAL_Types.h>
 
 #include <stdarg.h>
 #include <stdlib.h>

@@ -6,7 +6,7 @@
 #ifndef _NANOPAL_H_
 #define _NANOPAL_H_ 1
 
-//#include <nanoHAL_types.h>
+//#include <nanoHAL_Types.h>
 
 #include <nanoPAL_Time.h>
 
