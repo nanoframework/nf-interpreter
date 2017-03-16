@@ -38,16 +38,10 @@ HRESULT CLR_HW_Hardware::Hardware_Initialize()
         m_MessagingEventsMask = 0;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-        for(int i = 0; i < HalSystemConfig.c_MaxDebuggers; i++)
-        {
-            m_DebuggerEventsMask |= ExtractEventFromTransport( HalSystemConfig.DebuggerPorts[ i ] );
-        }
+        m_DebuggerEventsMask |= ExtractEventFromTransport( HalSystemConfig.DebuggerPorts[ 0 ] );
 #endif
 
-        for(int i = 0; i < HalSystemConfig.c_MaxMessaging; i++)
-        {
-            m_MessagingEventsMask |= ExtractEventFromTransport( HalSystemConfig.MessagingPorts[ i ] );
-        }
+        m_MessagingEventsMask |= ExtractEventFromTransport( HalSystemConfig.MessagingPorts[ 0 ] );
 
         m_wakeupEvents = c_Default_WakeupEvents | m_DebuggerEventsMask;
         m_powerLevel   = PowerLevel__Active;
