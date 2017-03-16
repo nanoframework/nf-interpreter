@@ -43,6 +43,13 @@ typedef enum AccessMemory_Operations
 
 }AccessMemory_Operations;
 
+typedef enum MemoryMap_Options
+{
+    Monitor_MemoryMap_c_RAM     = 0x00000001,
+    Monitor_MemoryMap_c_FLASH   = 0x00000002,
+
+}MemoryMap_Options;
+
 //////////////////////////////////////////
 // typedefs
 
@@ -83,14 +90,39 @@ typedef struct CLR_DBG_Commands_Monitor_EraseMemory
 
 }CLR_DBG_Commands_Monitor_EraseMemory;
 
+typedef struct MemoryMap_Range
+{
+    uint32_t m_address;
+    uint32_t m_length;
+    uint32_t m_flags;
+
+}MemoryMap_Range;
+
+
+typedef struct CLR_DBG_Commands_Monitor_MemoryMap
+{
+    MemoryMap_Range m_map[1];
+
+}CLR_DBG_Commands_Monitor_MemoryMap;
+
+
 //////////////////////////////////////////
 // function declarations (commands)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 bool Monitor_Ping(WP_Message* message);
 bool Monitor_OemInfo(WP_Message* message);
 bool Monitor_WriteMemory(WP_Message* message);
 bool Monitor_Reboot(WP_Message* message);
 bool Monitor_EraseMemory(WP_Message* message);
+bool Monitor_MemoryMap(WP_Message* message);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //_WIREPROTOCOL_COMMANDS_H_
 

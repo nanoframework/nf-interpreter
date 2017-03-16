@@ -5,6 +5,7 @@
 //
 
 #include <cmsis_os.h>
+#include <nanoHAL_v2.h>
 
 #include <WireProtocol_v2.h>
 #include <WireProtocol_MonitorCommands.h>
@@ -143,4 +144,28 @@ bool Monitor_EraseMemory(WP_Message* message)
     ReplyToCommand(message, ret, false, NULL, 0);
         
     return ret;
+}
+
+bool Monitor_MemoryMap(WP_Message* message)
+{
+    MemoryMap_Range map[2];
+
+    // if(m_signedDataState.CheckDirty())
+    // {
+    //     m_signedDataState.EraseMemoryAndReset();
+        
+    //     return false;
+    // }
+
+    map[0].m_address = HalSystemConfig.RAM1.Base;
+    map[0].m_length  = HalSystemConfig.RAM1.Size;
+    map[0].m_flags   = Monitor_MemoryMap_c_RAM;
+
+    map[1].m_address = HalSystemConfig.FLASH1.Base;
+    map[1].m_length  = HalSystemConfig.FLASH1.Size;
+    map[1].m_flags   = Monitor_MemoryMap_c_FLASH;
+
+    ReplyToCommand(message, true, false, map, sizeof(map));
+
+    return true;
 }

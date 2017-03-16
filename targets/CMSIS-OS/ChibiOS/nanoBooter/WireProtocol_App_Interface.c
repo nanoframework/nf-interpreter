@@ -25,7 +25,7 @@ static const CommandHandlerLookup c_Lookup_Request[] =
     DEFINE_CMD(EraseMemory),
     // //
     // DEFINE_CMD(Execute    ),
-    // DEFINE_CMD(MemoryMap  ),
+    DEFINE_CMD(MemoryMap  ),
     // //
     // DEFINE_CMD(CheckSignature),
     // //
