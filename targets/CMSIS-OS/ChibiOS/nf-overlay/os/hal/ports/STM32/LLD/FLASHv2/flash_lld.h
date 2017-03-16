@@ -160,6 +160,9 @@ typedef struct SMT32FlashDriver {
 #define FLASH_SECTOR_21    ((uint32_t)21U) /*!< Sector Number 21  */
 #define FLASH_SECTOR_22    ((uint32_t)22U) /*!< Sector Number 22  */
 #define FLASH_SECTOR_23    ((uint32_t)23U) /*!< Sector Number 23  */
+#else
+// need to define here a 'dummy'' SECTOR_11, for F7 series this required when FLASH_SECTOR_TOTAL is 8
+#define FLASH_SECTOR_11    ((uint32_t)11U) /*!< Sector Number 11  */
 #endif /* FLASH_SECTOR_TOTAL == 24 */
 
 
