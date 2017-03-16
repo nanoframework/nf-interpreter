@@ -138,6 +138,33 @@ typedef struct SMT32FlashDriver {
 #endif /* STM32F401xE || STM32F411xE || STM32F446xx */
 /*-----------------------------------------------------------------------------------------------------*/
 
+/*---------------------------------- STM32F7xx ------------------------------*/
+#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
+    defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
+	  defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+
+#if (FLASH_SECTOR_TOTAL == 24)
+#define FLASH_SECTOR_8     ((uint32_t)8U)  /*!< Sector Number 8   */
+#define FLASH_SECTOR_9     ((uint32_t)9U)  /*!< Sector Number 9   */
+#define FLASH_SECTOR_10    ((uint32_t)10U) /*!< Sector Number 10  */
+#define FLASH_SECTOR_11    ((uint32_t)11U) /*!< Sector Number 11  */
+#define FLASH_SECTOR_12    ((uint32_t)12U) /*!< Sector Number 12  */
+#define FLASH_SECTOR_13    ((uint32_t)13U) /*!< Sector Number 13  */
+#define FLASH_SECTOR_14    ((uint32_t)14U) /*!< Sector Number 14  */
+#define FLASH_SECTOR_15    ((uint32_t)15U) /*!< Sector Number 15  */
+#define FLASH_SECTOR_16    ((uint32_t)16U) /*!< Sector Number 16  */
+#define FLASH_SECTOR_17    ((uint32_t)17U) /*!< Sector Number 17  */
+#define FLASH_SECTOR_18    ((uint32_t)18U) /*!< Sector Number 18  */
+#define FLASH_SECTOR_19    ((uint32_t)19U) /*!< Sector Number 19  */
+#define FLASH_SECTOR_20    ((uint32_t)20U) /*!< Sector Number 20  */
+#define FLASH_SECTOR_21    ((uint32_t)21U) /*!< Sector Number 21  */
+#define FLASH_SECTOR_22    ((uint32_t)22U) /*!< Sector Number 22  */
+#define FLASH_SECTOR_23    ((uint32_t)23U) /*!< Sector Number 23  */
+#endif /* FLASH_SECTOR_TOTAL == 24 */
+
+
+#endif // efined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || .... etc
+
 ///////////////////////////////////////////////////////////////////////////////
 // External declarations.                                                    //
 ///////////////////////////////////////////////////////////////////////////////
