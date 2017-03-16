@@ -1,5 +1,10 @@
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
 # set include directories for Wire Protocol
-list(APPEND WireProtocol_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/WireProtocol)
+list(APPEND WireProtocol_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
 
 # source files for Wire Protocol
 set(WireProtocol_SRCS
