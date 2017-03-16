@@ -146,6 +146,20 @@ bool Monitor_EraseMemory(WP_Message* message)
     return ret;
 }
 
+bool Monitor_CheckMemory(WP_Message* message)
+{
+    bool ret = false;
+
+    CLR_DBG_Commands_Monitor_CheckMemory* cmd = (CLR_DBG_Commands_Monitor_CheckMemory*)message->m_payload;
+    CLR_DBG_Commands_Monitor_CheckMemory_Reply cmdReply;
+
+    ret = AccessMemory(cmd->address, cmd->length, (uint8_t*)&cmdReply.crc, AccessMemory_Check);
+
+    ReplyToCommand(message, ret, false, &cmdReply, sizeof(cmdReply));
+
+    return ret;
+}
+
 bool Monitor_MemoryMap(WP_Message* message)
 {
     MemoryMap_Range map[2];
