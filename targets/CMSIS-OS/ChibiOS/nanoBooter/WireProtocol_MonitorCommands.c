@@ -10,12 +10,6 @@
 #include <WireProtocol_MonitorCommands.h>
 #include <target_board.h>
 
-static const int AccessMemory_Check    = 0x00;
-static const int AccessMemory_Read     = 0x01;
-static const int AccessMemory_Write    = 0x02;
-static const int AccessMemory_Erase    = 0x03;
-static const int AccessMemory_Mask     = 0x0F;
-
 //////////////////////////////////////////////////////////////////////
 // helper functions
 
@@ -33,8 +27,30 @@ bool NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
 
 static bool AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buffer, int mode)
 {
-    
-    return true;
+    switch(mode)
+    {
+        case AccessMemory_Write:
+            // use FLASH driver to perform write operation
+            // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
+            return stm32FlashWrite(location, lengthInBytes, buffer);
+
+        case AccessMemory_Erase:
+            // erase using FLASH driver
+            // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
+            return stm32FlashErase(location);
+
+        case AccessMemory_Check:
+            // use FLASH driver to check is FLASH segment is erased
+            // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
+            return stm32FlashIsErased(location, lengthInBytes);
+
+        ///////////////////////////////////
+        // modes NOT supported
+        case AccessMemory_Read:
+        default:
+            // default return is FALSE
+            return false;
+    }
 }
 
 ////////////////////////////////////////////////////

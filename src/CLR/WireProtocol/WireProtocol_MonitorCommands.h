@@ -23,6 +23,26 @@ typedef enum Monitor_Reboot_Options
     Monitor_Reboot_c_ClrStopDebugger = 4
 }Monitor_Reboot_Options;
 
+// structure for Access Memory operations
+typedef enum AccessMemory_Operations
+{
+    // check if memory space is erased
+    AccessMemory_Check    = 0x00,
+
+    // read block of data starting at a given address
+    AccessMemory_Read     = 0x01,
+    
+    // write block of data starting at a given address
+    AccessMemory_Write    = 0x02,
+
+    // erase sector/block/page at a given address 
+    AccessMemory_Erase    = 0x03,
+
+
+    AccessMemory_Mask     = 0x0F
+
+}AccessMemory_Operations;
+
 //////////////////////////////////////////
 // typedefs
 
