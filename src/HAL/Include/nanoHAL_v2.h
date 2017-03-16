@@ -8,6 +8,7 @@
 #define _NANOHAL_V2_H_ 1
 
 #include <stdio.h>
+#include <stdbool.h>
 
 // COM_HANDLE Defines a type representing both a port type or "transport" and a port number
 // The COM_HANDLE is a multi bit field value with the following bit fields usage

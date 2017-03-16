@@ -13,4 +13,21 @@
 
 #include <target_os.h>
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// The following addresses and sizes should be filled in according to the SoC data-sheet
+// they also must be coherent with what's in the linker file for nanoBooter and nanoCLR
+
+// RAM base address 
+#define RAM1_MEMORY_StartAddress        0x200000C0
+// RAM size 
+#define RAM1_MEMORY_Size                0x00007F40
+
+// FLASH base address
+#define FLASH1_MEMORY_StartAddress      0x08000000
+// FLASH size
+#define FLASH1_MEMORY_Size              0x00040000
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
 #endif /* _TARGET_COMMON_H_ */

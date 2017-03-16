@@ -47,6 +47,8 @@ add_executable(
     # executables for project, project sources
     ${NANOBOOTER_PROJECT_NAME}.elf
 
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+
     ${COMMON_PROJECT_SOURCES}
     ${NANOBOOTER_PROJECT_SOURCES}
 
@@ -68,6 +70,8 @@ add_executable(
 add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
+
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
