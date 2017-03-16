@@ -8,12 +8,12 @@
 
 // Enables the ChibiOS community overlay.
 #if !defined(HAL_USE_COMMUNITY) 
-#define HAL_USE_COMMUNITY           FALSE
+#define HAL_USE_COMMUNITY           TRUE
 #endif
 
 // enables STM32 Flash driver
 #if !defined(HAL_USE_STM32_FLASH) 
-#define HAL_USE_STM32_FLASH         FALSE
+#define HAL_USE_STM32_FLASH         TRUE
 #endif
 
 #endif // _HALCONF_NF_H_
