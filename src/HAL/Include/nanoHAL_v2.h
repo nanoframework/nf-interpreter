@@ -81,9 +81,6 @@ typedef struct HAL_SYSTEM_CONFIG
     HAL_SYSTEM_MEMORY_CONFIG RAM1;
     HAL_SYSTEM_MEMORY_CONFIG FLASH1;
 
-    //--//
-
-    //LPCSTR GetDriverName() { return "HAL_SYSTEM"; }
 }HAL_SYSTEM_CONFIG;
 
 extern HAL_SYSTEM_CONFIG  HalSystemConfig;

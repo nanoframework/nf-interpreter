@@ -15,17 +15,17 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
     //--//
 
     {                                               // UINT32      DebuggerPorts[MAX_DEBUGGERS];
-        //ConvertCOM_DebugHandle(0),
+        0//ConvertCOM_DebugHandle(0),
     },
 
     {
-        //ConvertCOM_DebugHandle(0),
+        0//ConvertCOM_DebugHandle(0),
     },
 
-    //ConvertCOM_DebugHandle(0),
+    0,//ConvertCOM_DebugHandle(0),
     115200,
     0,  // STDIO = COM2 or COM1
 
     { RAM1_MEMORY_StartAddress, RAM1_MEMORY_Size },
-    { FLASH1_MEMORY_StartAddress, FLASH1_MEMORY_Size },
+    { FLASH1_MEMORY_StartAddress, FLASH1_MEMORY_Size }
 };
