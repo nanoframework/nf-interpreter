@@ -56,6 +56,13 @@ typedef struct Monitor_Reboot_Command
 
 }Monitor_Reboot_Command;
 
+typedef struct CLR_DBG_Commands_Monitor_EraseMemory
+{
+    uint32_t address;
+    uint32_t length;
+
+}CLR_DBG_Commands_Monitor_EraseMemory;
+
 //////////////////////////////////////////
 // function declarations (commands)
 
@@ -63,6 +70,7 @@ bool Monitor_Ping(WP_Message* message);
 bool Monitor_OemInfo(WP_Message* message);
 bool Monitor_WriteMemory(WP_Message* message);
 bool Monitor_Reboot(WP_Message* message);
+bool Monitor_EraseMemory(WP_Message* message);
 
 #endif //_WIREPROTOCOL_COMMANDS_H_
 

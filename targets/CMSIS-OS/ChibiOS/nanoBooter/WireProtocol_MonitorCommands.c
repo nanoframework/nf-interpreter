@@ -113,3 +113,18 @@ bool Monitor_Reboot(WP_Message* message)
     return true;
 }
 
+bool Monitor_EraseMemory(WP_Message* message)
+{
+    bool ret = false;
+    
+    CLR_DBG_Commands_Monitor_EraseMemory* cmd = (CLR_DBG_Commands_Monitor_EraseMemory*)message->m_payload;
+
+    // TODO: not sure if we really need this
+    // nanoBooter_OnStateChange( State_MemoryErase, (void*)cmd->m_address );
+    
+    ret = AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase);
+
+    ReplyToCommand(message, ret, false, NULL, 0);
+        
+    return ret;
+}
