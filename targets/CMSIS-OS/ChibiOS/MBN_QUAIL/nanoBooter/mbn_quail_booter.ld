@@ -6,20 +6,19 @@
 //
 */
 
-
 /*
- * STM32F091xC memory setup.
+ * STM32F427Vx memory setup.
+ * Note: Use of ram1, ram2 and ram3 is mutually exclusive with use of ram0.
  */
 MEMORY
 {
-    flash : org = 0x08004000, len = 256k - 0x3FFF /* flash size less the space reserved for bootloader (1st eight sectors 0x08000000 to 0x08001FFF)*/
-    ramvt : org = 0x20000000, len = 0xC0        /* initial RAM address is reserved for a copy of the vector table */
-    ram0  : org = 0x200000C0, len = 32k - 0xC0  /* remaining RAM is free for use */
-    ram1  : org = 0x00000000, len = 0
-    ram2  : org = 0x00000000, len = 0
-    ram3  : org = 0x00000000, len = 0
-    ram4  : org = 0x00000000, len = 0
-    ram5  : org = 0x00000000, len = 0
+    flash : org = 0x08000000, len = 32k     /* space reserved for bootloader (1st two sectors 0x08000000 to 0x08007FFF)*/
+    ram0  : org = 0x20000000, len = 192k    /* SRAM1 + SRAM2 + SRAM3 */
+    ram1  : org = 0x20000000, len = 112k    /* SRAM1 */
+    ram2  : org = 0x2001C000, len = 16k     /* SRAM2 */
+    ram3  : org = 0x20020000, len = 64k     /* SRAM3 */
+    ram4  : org = 0x10000000, len = 64k     /* CCM SRAM */
+    ram5  : org = 0x40024000, len = 4k      /* BCKP SRAM */
     ram6  : org = 0x00000000, len = 0
     ram7  : org = 0x00000000, len = 0
 }
@@ -40,8 +39,5 @@ REGION_ALIAS("BSS_RAM", ram0);
 
 /* RAM region to be used for the default heap.*/
 REGION_ALIAS("HEAP_RAM", ram0);
-
-/* RAM region to be used for the nanoFramework CLR managed heap.*/
-REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
 
 INCLUDE rules.ld

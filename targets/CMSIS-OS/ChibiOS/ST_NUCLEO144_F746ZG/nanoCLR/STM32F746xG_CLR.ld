@@ -17,14 +17,14 @@
  */
 MEMORY
 {
-    flash       : org = 0x08008000, len = 1M - 0x7FFF /* flash size less the space reserved for bootloader (1st two sectors 0x08000000 to 0x08007FFF)*/
+    flash       : org = 0x08008000, len = 1M - 32k - 800k   /* flash size less the space reserved for nanoBooter and application deployment*/
     flash_itcm  : org = 0x00200000, len = 1M
-    ram0        : org = 0x20010000, len = 256k    /* SRAM1 + SRAM2 */
-    ram1        : org = 0x20010000, len = 240k    /* SRAM1 */
-    ram2        : org = 0x2004C000, len = 16k     /* SRAM2 */
-    ram3        : org = 0x20000000, len = 64k     /* DTCM-RAM */
-    ram4        : org = 0x00000000, len = 16k     /* ITCM-RAM */
-    ram5        : org = 0x40024000, len = 4k      /* BCKP SRAM */
+    ram0        : org = 0x20010000, len = 256k              /* SRAM1 + SRAM2 */
+    ram1        : org = 0x20010000, len = 240k              /* SRAM1 */
+    ram2        : org = 0x2004C000, len = 16k               /* SRAM2 */
+    ram3        : org = 0x20000000, len = 64k               /* DTCM-RAM */
+    ram4        : org = 0x00000000, len = 16k               /* ITCM-RAM */
+    ram5        : org = 0x40024000, len = 4k                /* BCKP SRAM */
     ram6        : org = 0x00000000, len = 0
     ram7        : org = 0x00000000, len = 0
 }
