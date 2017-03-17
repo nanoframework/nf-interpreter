@@ -55,25 +55,6 @@ bool HAL_FLASH_Lock(void)
   return true;  
 }
 
-static uint8_t GetSector(uint32_t address)
-{
-  uint8_t sector = 0;
-  bool sectorInBank2 = false;
-
-  if ((address - FLASH_BASE) >= 0x100000) {
-    sectorInBank2 = true;
-  } 
-
-  // clever algorithm to find out the sector number knowing the address
-  sector = sectorInBank2 ? ((address - 0x100000 - FLASH_BASE) >> 14) : ((address - FLASH_BASE) >> 14);
-  
-  if (sector >= 4) {
-    sector = (sector >> 3) + 4;
-  }
-
-  return sector;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Driver exported functions.                                                //
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,6 +144,25 @@ bool flash_lld_isErased(uint32_t startAddress, uint32_t length) {
     return true;
 }
 
+uint8_t flash_lld_getSector(uint32_t address)
+{
+  uint8_t sector = 0;
+  bool sectorInBank2 = false;
+
+  if ((address - FLASH_BASE) >= 0x100000) {
+    sectorInBank2 = true;
+  } 
+
+  // clever algorithm to find out the sector number knowing the address
+  sector = sectorInBank2 ? ((address - 0x100000 - FLASH_BASE) >> 14) : ((address - FLASH_BASE) >> 14);
+  
+  if (sector >= 4) {
+    sector = (sector >> 3) + 4;
+  }
+
+  return sector;
+}
+
 bool flash_lld_erase(uint32_t address) {
     
     uint32_t tmp_psize = 0;
@@ -171,7 +171,7 @@ bool flash_lld_erase(uint32_t address) {
     if(HAL_FLASH_Unlock())
     {
         // get the sector number to erase
-        uint8_t sectorNumber = GetSector(address);
+        uint8_t sectorNumber = flash_lld_getSector(address);
 
         /* Need to add offset of 4 when sector higher than FLASH_SECTOR_11 */
         if(sectorNumber > FLASH_SECTOR_11) 
@@ -208,4 +208,3 @@ bool flash_lld_erase(uint32_t address) {
 }
 
 #endif
-
