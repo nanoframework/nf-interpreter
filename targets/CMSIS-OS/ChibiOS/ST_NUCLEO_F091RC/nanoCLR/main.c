@@ -53,7 +53,6 @@ osThreadDef(CLRStartupThread, osPriorityNormal, 1024);
 //  Application entry point.
 int main(void) {
 
-
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
