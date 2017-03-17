@@ -144,6 +144,11 @@ bool flash_lld_isErased(uint32_t startAddress, uint32_t length) {
     return true;
 }
 
+uint8_t flash_lld_getSector(uint32_t address)
+{
+  return (address - FLASH_BASE) / F0_SERIES_SECTOR_SIZE;
+}
+
 bool flash_lld_erase(uint32_t address) {
 
     // unlock the FLASH
@@ -174,4 +179,3 @@ bool flash_lld_erase(uint32_t address) {
 }
 
 #endif
-

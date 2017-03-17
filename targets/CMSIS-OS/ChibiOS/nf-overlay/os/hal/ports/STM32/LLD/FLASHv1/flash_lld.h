@@ -44,6 +44,7 @@ typedef struct SMT32FlashDriver {
 #define HAL_IS_BIT_SET(REG, BIT)    (((REG) & (BIT)) != RESET)
 #define FLASH_FLAG_BSY              FLASH_SR_BSY  // FLASH Busy flag
 
+#define F0_SERIES_SECTOR_SIZE       ((uint32_t)0x00001000U)
 
 ///////////////////////////////////////////////////////////////////////////////
 // External declarations.                                                    //
@@ -62,6 +63,7 @@ extern "C" {
   bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffer);
   bool flash_lld_isErased(uint32_t startAddress, uint32_t length);
   bool flash_lld_erase(uint32_t address);
+  uint8_t flash_lld_getSector(uint32_t address);
 
 #ifdef __cplusplus
 }
@@ -70,4 +72,3 @@ extern "C" {
 #endif // HAL_USE_STM32_FLASH
 
 #endif // FLASH_LLD_H
-

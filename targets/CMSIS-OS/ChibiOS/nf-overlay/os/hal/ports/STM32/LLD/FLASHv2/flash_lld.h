@@ -185,6 +185,7 @@ extern "C" {
   bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffer);
   bool flash_lld_isErased(uint32_t startAddress, uint32_t length);
   bool flash_lld_erase(uint32_t address);
+  uint8_t flash_lld_getSector(uint32_t address);
 
 #ifdef __cplusplus
 }
@@ -193,4 +194,3 @@ extern "C" {
 #endif // HAL_USE_STM32_FLASH
 
 #endif // FLASH_LLD_H
-
