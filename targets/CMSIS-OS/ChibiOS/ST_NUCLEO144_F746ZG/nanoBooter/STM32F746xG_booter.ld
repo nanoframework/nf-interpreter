@@ -17,7 +17,7 @@
  */
 MEMORY
 {
-    flash       : org = 0x08000000, len = 1M
+    flash       : org = 0x08000000, len = 32k     /* space reserved for bootloader (1st two sectors 0x08000000 to 0x08007FFF)*/
     flash_itcm  : org = 0x00200000, len = 1M
     ram0        : org = 0x20010000, len = 256k    /* SRAM1 + SRAM2 */
     ram1        : org = 0x20010000, len = 240k    /* SRAM1 */
