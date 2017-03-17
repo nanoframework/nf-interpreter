@@ -12,15 +12,17 @@
  */
 MEMORY
 {
-    flash : org = 0x08000000, len = 16k     /* space reserved for bootloader (1st eight sectors 0x08000000 to 0x08003FFF)*/
-    ram0  : org = 0x20000000, len = 32k
-    ram1  : org = 0x00000000, len = 0
-    ram2  : org = 0x00000000, len = 0
-    ram3  : org = 0x00000000, len = 0
-    ram4  : org = 0x00000000, len = 0
-    ram5  : org = 0x00000000, len = 0
-    ram6  : org = 0x00000000, len = 0
-    ram7  : org = 0x00000000, len = 0
+    flash       : org = 0x08000000, len = 16k     /* space reserved for nanoBooter (1st eight sectors 0x08000000 to 0x08004000)*/
+    deployment  : org = 0x00000000, len = 0       /* space reserved for application deployment */
+    ramvt       : org = 0x00000000, len = 0       /* initial RAM address is reserved for a copy of the vector table */
+    ram0        : org = 0x20000000, len = 32k
+    ram1        : org = 0x00000000, len = 0
+    ram2        : org = 0x00000000, len = 0
+    ram3        : org = 0x00000000, len = 0
+    ram4        : org = 0x00000000, len = 0
+    ram5        : org = 0x00000000, len = 0
+    ram6        : org = 0x00000000, len = 0
+    ram7        : org = 0x00000000, len = 0
 }
 
 /* RAM region to be used for Main stack. This stack accommodates the processing

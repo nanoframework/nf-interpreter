@@ -7,6 +7,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
+#include <nanoHAL_v2.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <LaunchCLR.h>
 
@@ -46,12 +47,12 @@ int main(void) {
   // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
   if (palReadPad(GPIOC, GPIOC_BUTTON))
   {
-    // check for valid CLR image 
-    if(CheckValidCLRImage(0x08004000))
+    // check for valid CLR image at address contiguous to nanoBooter
+    if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
     {
       // there seems to be a valid CLR image
       // launch nanoCLR
-      LaunchCLR(0x08004000);
+      LaunchCLR((uint32_t)&__nanoImage_end__);
     }
   }
 

@@ -7,6 +7,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
+#include <nanoHAL_v2.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <CLR_Startup_Thread.h>
 
@@ -14,10 +15,6 @@
 // RAM vector table declaration (valid for GCC only)
 __IO uint32_t vectorTable[48] __attribute__((section(".RAMVectorTable")));
 
-
-// need to change this address if nanoCLR is to be located at a different address 
-// has to match the start address of flash region in STM32F091xC.ld
-#define APPLICATION_ADDRESS         (uint32_t)0x08004000
 #define SYSCFG_MemoryRemap_SRAM     ((uint8_t)0x03)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -53,17 +50,16 @@ osThreadDef(CLRStartupThread, osPriorityNormal, 1024);
 //  Application entry point.
 int main(void) {
 
-
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
 
   // relocate the vector table to RAM
   // Copy the vector table from the Flash (mapped at the base of the application
-  // load address APPLICATION_ADDRESS) to the base address of the SRAM at 0x20000000.
+  // load address) to the base address of the SRAM at 0x20000000.
   for(int i = 0; i < 48; i++)
   {
-    vectorTable[i] = *(__IO uint32_t*)(APPLICATION_ADDRESS + (i<<2));
+    vectorTable[i] = *(__IO uint32_t*)((uint32_t)&__nanoImage_start__ + (i<<2));
   } 
 
   // set CFGR1 register MEM_MODE bits value as "memory remap to SRAM"

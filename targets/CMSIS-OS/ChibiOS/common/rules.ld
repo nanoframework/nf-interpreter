@@ -32,6 +32,11 @@ __ram7_start__          = ORIGIN(ram7);
 __ram7_size__           = LENGTH(ram7);
 __ram7_end__            = __ram7_start__ + __ram7_size__;
 
+__nanoImage_start__     = ORIGIN(flash);
+__nanoImage_end__       = __nanoImage_start__ + LENGTH(flash);
+__deployment_start__    = ORIGIN(deployment);
+__deployment_end__      = __deployment_start__ + LENGTH(deployment);
+
 ENTRY(Reset_Handler)
 
 SECTIONS
