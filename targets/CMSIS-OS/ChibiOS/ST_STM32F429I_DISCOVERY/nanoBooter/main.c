@@ -8,6 +8,7 @@
 #include <cmsis_os.h>
 
 #include <usbcfg.h>
+#include <nanoHAL_v2.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <LaunchCLR.h>
 
@@ -53,11 +54,11 @@ int main(void) {
   if (palReadPad(GPIOA, GPIOA_BUTTON))
   {
     // check for valid CLR image 
-    if(CheckValidCLRImage(0x08008000))
+    if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
     {
       // there seems to be a valid CLR image
       // launch nanoCLR
-      LaunchCLR(0x08008000);
+      LaunchCLR((uint32_t)&__nanoImage_end__);
     }
   }
 

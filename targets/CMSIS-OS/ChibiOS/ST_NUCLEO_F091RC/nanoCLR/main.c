@@ -14,10 +14,6 @@
 // RAM vector table declaration (valid for GCC only)
 __IO uint32_t vectorTable[48] __attribute__((section(".RAMVectorTable")));
 
-
-// need to change this address if nanoCLR is to be located at a different address 
-// has to match the start address of flash region in STM32F091xC.ld
-#define APPLICATION_ADDRESS         (uint32_t)0x08004000
 #define SYSCFG_MemoryRemap_SRAM     ((uint8_t)0x03)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -59,10 +55,10 @@ int main(void) {
 
   // relocate the vector table to RAM
   // Copy the vector table from the Flash (mapped at the base of the application
-  // load address APPLICATION_ADDRESS) to the base address of the SRAM at 0x20000000.
+  // load address) to the base address of the SRAM at 0x20000000.
   for(int i = 0; i < 48; i++)
   {
-    vectorTable[i] = *(__IO uint32_t*)(APPLICATION_ADDRESS + (i<<2));
+    vectorTable[i] = *(__IO uint32_t*)((uint32_t)&__nanoImage_start__ + (i<<2));
   } 
 
   // set CFGR1 register MEM_MODE bits value as "memory remap to SRAM"
