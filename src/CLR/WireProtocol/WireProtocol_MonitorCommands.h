@@ -90,13 +90,6 @@ typedef struct CLR_DBG_Commands_Monitor_EraseMemory
 
 }CLR_DBG_Commands_Monitor_EraseMemory;
 
-typedef struct CLR_DBG_Commands_Monitor_CheckMemory
-{
-    uint32_t address;
-    uint32_t length;
-
-}CLR_DBG_Commands_Monitor_CheckMemory;
-
 typedef struct MemoryMap_Range
 {
     uint32_t m_address;
