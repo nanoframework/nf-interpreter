@@ -85,9 +85,4 @@ typedef struct HAL_SYSTEM_CONFIG
 
 extern HAL_SYSTEM_CONFIG  HalSystemConfig;
 
-extern uint32_t __nanoImage_start__;
-extern uint32_t __nanoImage_end__;
-extern uint32_t __deployment_start__;
-extern uint32_t __deployment_end__;
-
 #endif // _NANOHAL_V2_H_

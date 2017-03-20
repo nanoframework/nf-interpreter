@@ -8,7 +8,7 @@
 #include <cmsis_os.h>
 
 #include <usbcfg.h>
-#include <nanoHAL_v2.h>
+#include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <LaunchCLR.h>
 
