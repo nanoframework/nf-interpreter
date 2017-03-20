@@ -90,6 +90,19 @@ typedef struct CLR_DBG_Commands_Monitor_EraseMemory
 
 }CLR_DBG_Commands_Monitor_EraseMemory;
 
+typedef struct CLR_DBG_Commands_Monitor_CheckMemory
+{
+    uint32_t address;
+    uint32_t length;
+
+}CLR_DBG_Commands_Monitor_CheckMemory;
+
+typedef struct CLR_DBG_Commands_Monitor_CheckMemory_Reply
+{
+    uint32_t crc;
+    
+}CLR_DBG_Commands_Monitor_CheckMemory_Reply;
+
 typedef struct MemoryMap_Range
 {
     uint32_t m_address;
@@ -118,6 +131,7 @@ bool Monitor_OemInfo(WP_Message* message);
 bool Monitor_WriteMemory(WP_Message* message);
 bool Monitor_Reboot(WP_Message* message);
 bool Monitor_EraseMemory(WP_Message* message);
+bool Monitor_CheckMemory(WP_Message* message);
 bool Monitor_MemoryMap(WP_Message* message);
 
 #ifdef __cplusplus
