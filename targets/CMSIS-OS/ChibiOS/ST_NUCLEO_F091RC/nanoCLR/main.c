@@ -7,7 +7,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include <nanoHAL_v2.h>
+#include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <CLR_Startup_Thread.h>
 
