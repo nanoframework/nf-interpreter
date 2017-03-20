@@ -127,7 +127,7 @@ We use and recommend the following workflow:
   - If your change adds a new API, follow the [API Review Process](api-review-process.md). 
   - Clearly state that you are going to take on implementing it, if that's the case. You can request that the issue be assigned to you. Note: The issue filer and the implementer don't have to be the same person.
 2. Create a personal fork of the repository on GitHub (if you don't already have one).
-3. Create a branch off of **dev** (`git checkout -b mybranch`). 
+3. Create a branch off of **master** (`git checkout -b mybranch`). 
   - Name the branch so that it clearly communicates your intentions, such as issue-123 or githubhandle-issue. 
   - Branches are useful since they isolate your changes from incoming changes from upstream. They also enable you to create multiple PRs from the same fork.
 4. Make and commit your changes.
@@ -137,9 +137,17 @@ We use and recommend the following workflow:
 6. Build the repository with your changes.
   - Make sure that the builds are clean.
   - Make sure that the tests are all passing, including your new tests.
-7. Create a pull request (PR) against the upstream repository's **dev** branch.
-  - Push your changes to your fork on GitHub (if you haven't already).
+7. Push your changes to your fork on GitHub (if you haven't already).
+8. Create a pull request (PR) against the upstream repository's **master** branch.
 
 Note: It is OK for your PR to include a large number of commits. Once your change is accepted, you will be asked to squash your commits into one or some appropriately small number of commits before your PR is merged.
 
 Note: It is OK to create your PR as "[WIP]" on the upstream repo before the implementation is done. This can be useful if you'd like to start the feedback process concurrent with your implementation. State that this is the case in the initial PR comment.
+
+## Working on an open issue (including _up-for-grabs_)
+
+When you want to work on an open issue we recommend the following.
+
+- Issues labeled with [_investigating_](labels.md#investigating): if the current status doesn't seem updated or clear, add a comment asking for clarification before start any work on it.
+- Issues labeled with [_under-review_](labels.md#under-review): if the current status doesn't seem updated or clear, add a comment asking for a clarification before start any work on it.
+- Issues labeled with [_up-for-grabs_](labels.md#up-for-grabs): add a comment stating your interest and the issue will be assigned to you and the label switched to _in progress_.
