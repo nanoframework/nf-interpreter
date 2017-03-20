@@ -131,6 +131,7 @@ bool Monitor_OemInfo(WP_Message* message);
 bool Monitor_WriteMemory(WP_Message* message);
 bool Monitor_Reboot(WP_Message* message);
 bool Monitor_EraseMemory(WP_Message* message);
+bool Monitor_CheckMemory(WP_Message* message);
 bool Monitor_MemoryMap(WP_Message* message);
 
 #ifdef __cplusplus
