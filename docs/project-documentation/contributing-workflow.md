@@ -137,8 +137,8 @@ We use and recommend the following workflow:
 6. Build the repository with your changes.
   - Make sure that the builds are clean.
   - Make sure that the tests are all passing, including your new tests.
-7. Create a pull request (PR) against the upstream repository's **master** branch.
-  - Push your changes to your fork on GitHub (if you haven't already).
+7. Push your changes to your fork on GitHub (if you haven't already).
+8. Create a pull request (PR) against the upstream repository's **master** branch.
 
 Note: It is OK for your PR to include a large number of commits. Once your change is accepted, you will be asked to squash your commits into one or some appropriately small number of commits before your PR is merged.
 
