@@ -101,21 +101,20 @@ struct Settings
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Create TS.\r\n" );
 #endif
-
-        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( nanoCLR_Dat_Start, nanoCLR_Dat_End ));
+        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( 0 /*nanoCLR_Dat_Start*/, 0 /*nanoCLR_Dat_End*/ ));
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Loading Deployment Assemblies.\r\n" );
 #endif
 
-        // UNDONE: FIXME: LoadDeploymentAssemblies( BlockUsage::DEPLOYMENT );
+        LoadDeploymentAssemblies();
 
         //--//
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Resolving.\r\n" );
 #endif
-        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
 
         g_CLR_RT_Persistence_Manager.Initialize();
 
@@ -139,27 +138,27 @@ struct Settings
         //--//
         NANOCLR_HEADER();
 
-        BlockStorageDevice *device;
-        ByteAddress datByteAddress;
-        UINT32 datSize = ROUNDTOMULTIPLE((UINT32)(*end)- (UINT32)(*start), CLR_UINT32);
+        // BlockStorageDevice *device;
+        // ByteAddress datByteAddress;
+        // UINT32 datSize = ROUNDTOMULTIPLE((UINT32)(*end)- (UINT32)(*start), CLR_UINT32);
 
-        if (BlockStorageList::FindDeviceForPhysicalAddress( &device, (UINT32)(*start), datByteAddress ) && device != NULL)
-        {    
-            const BlockDeviceInfo * deviceInfo=device->GetDeviceInfo();
+        // if (BlockStorageList::FindDeviceForPhysicalAddress( &device, (UINT32)(*start), datByteAddress ) && device != NULL)
+        // {    
+        //     const BlockDeviceInfo * deviceInfo=device->GetDeviceInfo();
 
-            if (!deviceInfo->Attribute.SupportsXIP)
-            {
-                BYTE * datAssembliesBuffer = (BYTE*)CLR_RT_Memory::Allocate_And_Erase( datSize, CLR_RT_HeapBlock ::HB_Unmovable );  CHECK_ALLOCATION(datAssembliesBuffer);
+        //     if (!deviceInfo->Attribute.SupportsXIP)
+        //     {
+        //         BYTE * datAssembliesBuffer = (BYTE*)CLR_RT_Memory::Allocate_And_Erase( datSize, CLR_RT_HeapBlock ::HB_Unmovable );  CHECK_ALLOCATION(datAssembliesBuffer);
 
-                if ( !device->Read( datByteAddress, datSize, datAssembliesBuffer ))
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-                }
-                *start = (char *)datAssembliesBuffer;
-                *end = (char *)((UINT32) datAssembliesBuffer + (UINT32)datSize);
+        //         if ( !device->Read( datByteAddress, datSize, datAssembliesBuffer ))
+        //         {
+        //             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        //         }
+        //         *start = (char *)datAssembliesBuffer;
+        //         *end = (char *)((UINT32) datAssembliesBuffer + (UINT32)datSize);
 
-            }
-        }
+        //     }
+        // }
 
         // else data in RAM
         NANOCLR_NOCLEANUP();
@@ -198,7 +197,7 @@ struct Settings
     }
 
 
-    HRESULT ContiguousBlockAssemblies( BlockStorageStream stream, BOOL isXIP ) 
+    HRESULT ContiguousBlockAssemblies(BlockStorageStream stream) 
     {
         NANOCLR_HEADER();
 
@@ -207,15 +206,9 @@ struct Settings
         INT32  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
         BYTE * headerBuffer  = NULL;
 
-        if(!isXIP)
-        {
-            headerBuffer = (BYTE*)CLR_RT_Memory::Allocate( headerInBytes, true );  CHECK_ALLOCATION(headerBuffer);
-            CLR_RT_Memory::ZeroFill( headerBuffer, headerInBytes );
-        }
-
         while(TRUE)
         {
-            if(!stream.Read( &headerBuffer, headerInBytes )) break;
+            if(!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes )) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)headerBuffer;
 
@@ -227,29 +220,14 @@ struct Settings
 
             UINT32 AssemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
 
-            if(!isXIP)
-            {
-                // read the assemblies
-                assembliesBuffer = (BYTE*)CLR_RT_Memory::Allocate_And_Erase( AssemblySizeInByte, CLR_RT_HeapBlock ::HB_Unmovable );
-                
-                if (!assembliesBuffer) 
-                {
-                    // release the headerbuffer which has being used and leave
-                    CLR_RT_Memory::Release( headerBuffer );
-                    
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-                }
-            }
+            BlockStorageStream_Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
 
-            stream.Seek( -headerInBytes );
-
-            if(!stream.Read( &assembliesBuffer, AssemblySizeInByte )) break;
+            if(!BlockStorageStream_Read(&stream, &assembliesBuffer, AssemblySizeInByte)) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)assembliesBuffer;
 
             if(!header->GoodAssembly())
             {
-                if(!isXIP) CLR_RT_Memory::Release( assembliesBuffer );
                 break;
             }
                 
@@ -262,40 +240,30 @@ struct Settings
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem 
             if (FAILED(LoadAssembly( header, assm ) ))
             {   
-                if(!isXIP) CLR_RT_Memory::Release( assembliesBuffer );
                 break;
             }
             assm->m_flags |= CLR_RT_Assembly::c_Deployed;
         }
-        if(!isXIP) CLR_RT_Memory::Release( headerBuffer );
-        
+                
         NANOCLR_NOCLEANUP();
     }
 
-
-    HRESULT LoadDeploymentAssemblies( UINT32 memoryUsage )
+    HRESULT LoadDeploymentAssemblies()
     {
         NANOCLR_HEADER();
 
         BlockStorageStream      stream;
-        const BlockDeviceInfo* deviceInfo;
 
-        // find the block            
-        if (!stream.Initialize( memoryUsage ))
+        // init the stream for deployment storage
+        if (!BlockStorageStream_Initialize(&stream, StorageUsage_DEPLOYMENT))
         {
 #if !defined(BUILD_RTM)
-            CLR_Debug::Printf( "ERROR: Could not find device for DEPLOYMENT usage\r\n" );
+            CLR_Debug::Printf( "ERROR: failed to initialize DEPLOYMENT storage\r\n" );
 #endif            
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
-        do
-        {
-            deviceInfo = stream.Device->GetDeviceInfo();
-            
-            ContiguousBlockAssemblies( stream, deviceInfo->Attribute.SupportsXIP );
-        }
-        while(stream.NextStream());
+        ContiguousBlockAssemblies(stream);
         
         NANOCLR_NOCLEANUP();
     }
