@@ -12,11 +12,16 @@ list(APPEND NF_Debugger_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
 # source files for nanoFramework Debugger
 set(NF_Debugger_SRCS
 
-    Debugger.cpp
-    Debugger_full.cpp
+    # Debugger.cpp
+    # Debugger_full.cpp
 
-    Messaging.cpp
-    WireProtocol.cpp
+    # Messaging.cpp
+    # WireProtocol.cpp
+    
+    WireProtocol_Message.c
+    WireProtocol_MonitorCommands.c
+    WireProtocol_HAL_Interface.c
+    WireProtocol_App_Interface.c
 
     nanoSupport_CRC32.c
 )
