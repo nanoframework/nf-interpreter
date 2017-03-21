@@ -29,7 +29,7 @@ static const CommandHandlerLookup c_Lookup_Request[] =
     // //
     // DEFINE_CMD(CheckSignature),
     // //
-    // DEFINE_CMD(FlashSectorMap    ),
+    DEFINE_CMD(FlashSectorMap),
     // DEFINE_CMD(SignatureKeyUpdate),
     
     DEFINE_CMD(OemInfo),

@@ -55,3 +55,10 @@ __attribute__((weak)) bool Monitor_MemoryMap(WP_Message* message)
    // default to false
    return false;
 }
+
+// provided as weak to be replaced by actual implementation by application
+__attribute__((weak)) bool Monitor_FlashSectorMap(WP_Message* message)
+{
+   // default to false
+   return false;
+}

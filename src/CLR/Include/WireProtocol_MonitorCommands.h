@@ -133,6 +133,7 @@ bool Monitor_Reboot(WP_Message* message);
 bool Monitor_EraseMemory(WP_Message* message);
 bool Monitor_CheckMemory(WP_Message* message);
 bool Monitor_MemoryMap(WP_Message* message);
+bool Monitor_FlashSectorMap(WP_Message* message);
 
 #ifdef __cplusplus
 }
