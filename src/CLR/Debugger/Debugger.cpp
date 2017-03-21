@@ -436,7 +436,7 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg, void* owner )
 
             do
             {
-                const BlockDeviceInfo* deviceInfo = device->GetDeviceInfo();
+                const DeviceBlockInfo* deviceInfo = device->GetDeviceInfo();
 
                 for(UINT32 i = 0; i < deviceInfo->NumRegions;  i++)
                 {
@@ -567,7 +567,7 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, UINT32 lengthInBytes, 
 
     if (m_deploymentStorageDevice->FindRegionFromAddress( location, iRegion, iRange ))
     {
-        const BlockDeviceInfo* deviceInfo = m_deploymentStorageDevice->GetDeviceInfo() ;
+        const DeviceBlockInfo* deviceInfo = m_deploymentStorageDevice->GetDeviceInfo() ;
 
         // start from the block where the sector sits.
         ByteAddress   accessAddress = location;
@@ -3071,7 +3071,7 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status( WP_Message* msg, void* owner
     CLR_UINT32                                            deploySectorStart = 0;
     CLR_UINT32                                            deployLength      = 0;
 
-    const BlockDeviceInfo*                                deviceInfo;
+    const DeviceBlockInfo*                                deviceInfo;
 
     // find the first device in list with DEPLOYMENT blocks
     if (m_deploymentStorageDevice != NULL)

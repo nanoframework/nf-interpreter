@@ -304,7 +304,7 @@ struct MediaAttribute
     
 ///////////////////////////////////////////////////////////
     
-struct BlockDeviceInfo
+struct DeviceBlockInfo
 {
     // indicates if the storage media is removeable
 
@@ -396,7 +396,7 @@ struct GNU_PACKED SectorMetadata
 struct BLOCK_CONFIG
 {
     GPIO_FLAG               WriteProtectionPin;
-    const BlockDeviceInfo*  BlockDeviceInformation;
+    const DeviceBlockInfo*  BlockDeviceInformation;
 };
 
 // UNDONE: FIXME: struct MEMORY_MAPPED_NOR_BLOCK_CONFIG
@@ -470,7 +470,7 @@ struct IBlockStorageDevice
     // Description:
     //    Gets the information describing the device
     //
-    const BlockDeviceInfo*  (*GetDeviceInfo)(void*);
+    const DeviceBlockInfo*  (*GetDeviceInfo)(void*);
     
     /////////////////////////////////////////////////////////
     // Description:
@@ -640,7 +640,7 @@ public:
     // Description:
     //    Gets the information describing the device
     //
-    const BlockDeviceInfo* GetDeviceInfo() { return this->m_BSD->GetDeviceInfo( this->m_context ); }    
+    const DeviceBlockInfo* GetDeviceInfo() { return this->m_BSD->GetDeviceInfo( this->m_context ); }
 
     /////////////////////////////////////////////////////////
     // Description:
@@ -774,21 +774,21 @@ public:
 
     BOOL FindRegionFromAddress(ByteAddress Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) 
     {
-        const BlockDeviceInfo* pDevInfo = GetDeviceInfo();
+        const DeviceBlockInfo* pDevInfo = GetDeviceInfo();
 
         return pDevInfo->FindRegionFromAddress( Address, BlockRegionIndex, BlockRangeIndex );
     }
 
     BOOL FindForBlockUsage(UINT32 blockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) 
     {
-        const BlockDeviceInfo* pDevInfo = GetDeviceInfo();
+        const DeviceBlockInfo* pDevInfo = GetDeviceInfo();
 
         return pDevInfo->FindForBlockUsage( blockUsage, Address, BlockRegionIndex, BlockRangeIndex );
     }
 
     BOOL FindNextUsageBlock(UINT32 blockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) 
     {
-        const BlockDeviceInfo* pDevInfo = GetDeviceInfo();
+        const DeviceBlockInfo* pDevInfo = GetDeviceInfo();
 
         return pDevInfo->FindNextUsageBlock( blockUsage, Address, BlockRegionIndex, BlockRangeIndex );
     }

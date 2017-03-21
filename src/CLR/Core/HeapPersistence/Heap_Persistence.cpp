@@ -273,7 +273,7 @@ bool CLR_RT_Persistence_Manager::Bank::Initialize( UINT32 kind )
         return false;
     }
 
-    const BlockDeviceInfo* deviceInfo = m_stream.Device->GetDeviceInfo();
+    const DeviceBlockInfo* deviceInfo = m_stream.Device->GetDeviceInfo();
 
     if (!deviceInfo->Attribute.SupportsXIP)
     {
@@ -345,7 +345,7 @@ bool CLR_RT_Persistence_Manager::Bank::IsGood() const
 bool CLR_RT_Persistence_Manager::Bank::Erase( int& blockIndex )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-    const BlockDeviceInfo*      deviceInfo = m_stream.Device->GetDeviceInfo();
+    const DeviceBlockInfo*      deviceInfo = m_stream.Device->GetDeviceInfo();
     bool                        result  = TRUE;
     const BlockRegionInfo*      pRegion = NULL;
     const BlockRange*           pRange  = NULL;
@@ -505,7 +505,7 @@ void CLR_RT_Persistence_Manager::Bank::ReloadNonXIPBufferData()
 
 bool CLR_RT_Persistence_Manager::Bank::WriteNonXIPData(FLASH_WORD* dst, CLR_UINT32 length)
 {
-    const BlockDeviceInfo *deviceInfo = m_stream.Device->GetDeviceInfo();
+    const DeviceBlockInfo *deviceInfo = m_stream.Device->GetDeviceInfo();
 
     bool fRes = true;
  
@@ -566,7 +566,7 @@ bool CLR_RT_Persistence_Manager::Bank::Write( FLASH_WORD* dst, const FLASH_WORD*
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     bool fRes = true;
-    const BlockDeviceInfo *deviceInfo = g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device->GetDeviceInfo();
+    const DeviceBlockInfo *deviceInfo = g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device->GetDeviceInfo();
 
     if (deviceInfo->Attribute.SupportsXIP)
     {
@@ -590,7 +590,7 @@ void CLR_RT_Persistence_Manager::Bank::Invalidate( FLASH_WORD* dst, FLASH_WORD m
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 
-    const BlockDeviceInfo *deviceInfo = g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device->GetDeviceInfo();
+    const DeviceBlockInfo *deviceInfo = g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device->GetDeviceInfo();
     FLASH_WORD * start_dst = dst;
 
     FLASH_WORD data=c_Invalidated;

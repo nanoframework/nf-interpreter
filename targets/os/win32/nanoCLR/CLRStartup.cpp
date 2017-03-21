@@ -204,13 +204,13 @@ struct Settings
         //--//
         NANOCLR_HEADER();
 
-        BlockStorageDevice *device;
+		BlockStorageDevice *device;
         ByteAddress datByteAddress;
         UINT32 datSize = ROUNDTOMULTIPLE((UINT32)(*end)- (UINT32)(*start), CLR_UINT32);
 
         if (BlockStorageList::FindDeviceForPhysicalAddress( &device, (UINT32)(*start), datByteAddress ) && device != NULL)
         {    
-            const BlockDeviceInfo * deviceInfo=device->GetDeviceInfo();
+            const DeviceBlockInfo * deviceInfo=device->GetDeviceInfo();
 
             if (!deviceInfo->Attribute.SupportsXIP)
             {
@@ -343,7 +343,7 @@ struct Settings
         NANOCLR_HEADER();
 
         BlockStorageStream      stream;
-        const BlockDeviceInfo* deviceInfo;
+        const DeviceBlockInfo* deviceInfo;
 
         // find the block            
         if (!stream.Initialize( memoryUsage ))

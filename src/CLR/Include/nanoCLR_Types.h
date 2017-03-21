@@ -1133,6 +1133,7 @@ struct CLR_RECORD_RESOURCE
     CLR_UINT32 offset;
 };
 
+typedef UINT32 ByteAddress;
 
 #if defined(_MSC_VER)
 #pragma pack(pop, NANOCLR_TYPES_H)
