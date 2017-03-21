@@ -111,22 +111,22 @@ BOOL BlockStorageStream::Read( UINT8** ppBuffer, UINT32 length )
 
 //--// 
 
-SectorAddress BlockDeviceInfo::PhysicalToSectorAddress( const BlockRegionInfo* pRegion, ByteAddress phyAddress ) const
+SectorAddress DeviceBlockInfo::PhysicalToSectorAddress( const BlockRegionInfo* pRegion, ByteAddress phyAddress ) const
 {
     return phyAddress;
 }
 
-BOOL BlockDeviceInfo::FindRegionFromAddress(ByteAddress Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const
+BOOL DeviceBlockInfo::FindRegionFromAddress(ByteAddress Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const
 {
     return FALSE;        
 }
 
-BOOL BlockDeviceInfo::FindNextUsageBlock(UINT32 BlockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const
+BOOL DeviceBlockInfo::FindNextUsageBlock(UINT32 BlockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const
 {
     return FALSE;
 }
 
-BOOL BlockDeviceInfo::FindForBlockUsage(UINT32 BlockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const
+BOOL DeviceBlockInfo::FindForBlockUsage(UINT32 BlockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const
 {
     return FALSE;
 }

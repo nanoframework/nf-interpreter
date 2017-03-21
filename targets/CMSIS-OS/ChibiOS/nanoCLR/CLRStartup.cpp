@@ -133,38 +133,6 @@ struct Settings
         NANOCLR_CLEANUP_END();
     }
 
-    HRESULT CheckKnownAssembliesForNonXIP( char** start, char** end )
-    {
-        //--//
-        NANOCLR_HEADER();
-
-        // BlockStorageDevice *device;
-        // ByteAddress datByteAddress;
-        // UINT32 datSize = ROUNDTOMULTIPLE((UINT32)(*end)- (UINT32)(*start), CLR_UINT32);
-
-        // if (BlockStorageList::FindDeviceForPhysicalAddress( &device, (UINT32)(*start), datByteAddress ) && device != NULL)
-        // {    
-        //     const BlockDeviceInfo * deviceInfo=device->GetDeviceInfo();
-
-        //     if (!deviceInfo->Attribute.SupportsXIP)
-        //     {
-        //         BYTE * datAssembliesBuffer = (BYTE*)CLR_RT_Memory::Allocate_And_Erase( datSize, CLR_RT_HeapBlock ::HB_Unmovable );  CHECK_ALLOCATION(datAssembliesBuffer);
-
-        //         if ( !device->Read( datByteAddress, datSize, datAssembliesBuffer ))
-        //         {
-        //             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-        //         }
-        //         *start = (char *)datAssembliesBuffer;
-        //         *end = (char *)((UINT32) datAssembliesBuffer + (UINT32)datSize);
-
-        //     }
-        // }
-
-        // else data in RAM
-        NANOCLR_NOCLEANUP();
-    }
-
-
     HRESULT LoadKnownAssemblies( char* start, char* end )
     {
         //--//
@@ -173,7 +141,6 @@ struct Settings
         char *assEnd = end;
         const CLR_RECORD_ASSEMBLY* header;
 
-        NANOCLR_CHECK_HRESULT(CheckKnownAssembliesForNonXIP( &assStart, &assEnd ));
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (UINT32)assStart, (UINT32)assEnd);
 #endif 
@@ -208,7 +175,7 @@ struct Settings
 
         while(TRUE)
         {
-            if(!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes )) break;
+            if(!stream.Read(&stream, &headerBuffer, headerInBytes )) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)headerBuffer;
 
@@ -220,9 +187,9 @@ struct Settings
 
             UINT32 AssemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
 
-            BlockStorageStream_Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
+            stream.Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
 
-            if(!BlockStorageStream_Read(&stream, &assembliesBuffer, AssemblySizeInByte)) break;
+            if(!stream.Read(&stream, &assembliesBuffer, AssemblySizeInByte)) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)assembliesBuffer;
 
@@ -238,7 +205,7 @@ struct Settings
             CLR_Debug::Printf( "Attaching deployed file.\r\n" );
 
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem 
-            if (FAILED(LoadAssembly( header, assm ) ))
+            if (FAILED(LoadAssembly(header, assm)))
             {   
                 break;
             }
@@ -252,10 +219,13 @@ struct Settings
     {
         NANOCLR_HEADER();
 
-        BlockStorageStream      stream;
+        BlockStorageStream stream;
+        
+        // perform initialization of BlockStorageStream structure
+        BlockStorageStream_Init(&stream);
 
         // init the stream for deployment storage
-        if (!BlockStorageStream_Initialize(&stream, StorageUsage_DEPLOYMENT))
+        if (!stream.Initialize(&stream, StorageUsage_DEPLOYMENT))
         {
 #if !defined(BUILD_RTM)
             CLR_Debug::Printf( "ERROR: failed to initialize DEPLOYMENT storage\r\n" );
