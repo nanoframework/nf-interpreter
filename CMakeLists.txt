@@ -196,11 +196,21 @@ message(STATUS "")
 
 #################################################################
 # debugger (default is TRUE to include debugger in release image
-if(NOT NF_FEATURE_DEBUGGER OR
-   NOT "${NF_FEATURE_DEBUGGER}" STREQUAL "TRUE")
-    set(NF_FEATURE_DEBUGGER TRUE CACHE INTERNAL "NF Feature debugger")
-else()
-    set(NF_FEATURE_DEBUGGER FALSE CACHE INTERNAL "NF Feature debugger")
+set(NF_FEATURE_DEBUGGER TRUE)
+
+if(NF_FEATURE_DEBUGGER)
+    if(NOT "${NF_FEATURE_DEBUGGER}" STREQUAL "")
+
+        if("${NF_FEATURE_DEBUGGER}" STREQUAL "TRUE")
+            set(NF_FEATURE_DEBUGGER TRUE CACHE INTERNAL "NF feature DEBUGGER")
+        elseif("${NF_FEATURE_DEBUGGER}" STREQUAL "FALSE")
+            set(NF_FEATURE_DEBUGGER FALSE CACHE INTERNAL "NF feature DEBUGGER")
+        else()
+            # something other that TRUE or FALSE...
+            message(FATAL_ERROR "\n\n'${NF_FEATURE_DEBUGGER}' is an invalid option for NF_FEATURE_DEBUGGER. Acceptable values are TRUE or FALSE.\n\n")
+        endif()    
+
+    endif()
 endif()
 
 #################################################################
