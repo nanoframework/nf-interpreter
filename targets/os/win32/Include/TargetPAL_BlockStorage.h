@@ -3,11 +3,12 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _DRIVERS_PAL_BLOCKSTORAGE_H_
-#define _DRIVERS_PAL_BLOCKSTORAGE_H_ 1
+#ifndef _TARGET_PAL_BLOCKSTORAGE_H_
+#define _TARGET_PAL_BLOCKSTORAGE_H_ 1
 
 //--//
 
+#include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_Types.h>
 
 #if defined(__GNUC__)
@@ -113,49 +114,6 @@
 typedef UINT32 ByteAddress; 
 typedef UINT32 SectorAddress;
 
-//////////////////////////////////////////////////////////
-// Description:
-//   Flags to Indicate the status of a particular block in
-//   flash. ALL sectors for a block *MUST* share the same
-//   status.
-//
-// Remarks:
-//   When the block is reserved the lower 16 bits specifies a
-//   USAGE_XXXX value to indicate the purpose of the block.
-// 
-//   The BlockRange information is technically dynamic in the 
-//   sense that it is not fixed or defined in hardware. Rather,
-//   it is defined by the system designer. However, the BlockRange
-//   info does not and *MUST* not change at run-time.  The only
-//   exceptions to this rule is in the boot loader where the
-//   storage device is being formated or re-laid out as part
-//   of an update etc... and when an FS discovers a bad block
-//   it should mark it as bad. WIthout this restriction
-//   implementing an FS is virtually impossible since the FS
-//   would have to deal with the possibility that the usage for
-//   a Block could change at any point in time.
-//
-struct BlockUsage
-{
-    static const UINT32 BOOTSTRAP   = 0x0010;
-    static const UINT32 CODE        = 0x0020;
-    static const UINT32 CONFIG      = 0x0030;
-    static const UINT32 FILESYSTEM  = 0x0040;    
-
-    static const UINT32 DEPLOYMENT  = 0x0050; 
-
-    static const UINT32 UPDATE      = 0x0060;
-
-    static const UINT32 SIMPLE_A    = 0x0090;
-    static const UINT32 SIMPLE_B    = 0x00A0;
-    
-    static const UINT32 STORAGE_A   = 0x00E0;
-    static const UINT32 STORAGE_B   = 0x00F0;
-
-
-    static const UINT32 ANY         = 0x0000;
-};
-
 struct BlockRange
 {
     
@@ -183,18 +141,18 @@ public:
     static const UINT32 NON_USAGE_MASK     = 0xFFFFFF00;
 
     static const UINT32 BLOCKTYPE_RESERVED   = RESERVED;
-    static const UINT32 BLOCKTYPE_DIRTYBIT   =                  RESERVED | DATATYPE_RAW         | BlockUsage::CONFIG;     // for secondary devices to set dirtybits         
-    static const UINT32 BLOCKTYPE_CONFIG     = ATTRIB_PRIMARY | RESERVED | DATATYPE_RAW         | BlockUsage::CONFIG;     // Configuration data that contains all the unique data
+    static const UINT32 BLOCKTYPE_DIRTYBIT   =                  RESERVED | DATATYPE_RAW         | BlockUsage_CONFIG;     // for secondary devices to set dirtybits         
+    static const UINT32 BLOCKTYPE_CONFIG     = ATTRIB_PRIMARY | RESERVED | DATATYPE_RAW         | BlockUsage_CONFIG;     // Configuration data that contains all the unique data
 
-    static const UINT32 BLOCKTYPE_BOOTSTRAP  = EXECUTABLE     | RESERVED | DATATYPE_NATIVECODE  | BlockUsage::BOOTSTRAP;  // Boot loader and boot strap code
-    static const UINT32 BLOCKTYPE_CODE       = EXECUTABLE     | RESERVED | DATATYPE_NATIVECODE  | BlockUsage::CODE;       // CLR or other native code "application"
-    static const UINT32 BLOCKTYPE_DEPLOYMENT =                  RESERVED | DATATYPE_MANAGEDCODE | BlockUsage::DEPLOYMENT; // Deployment area for MFdeploy & Visual Studio
-    static const UINT32 BLOCKTYPE_SIMPLE_A   =                  RESERVED | DATATYPE_RAW         | BlockUsage::SIMPLE_A;   // Part A of Simple Storage
-    static const UINT32 BLOCKTYPE_SIMPLE_B   =                  RESERVED | DATATYPE_RAW         | BlockUsage::SIMPLE_B;   // Part B of Simple Storage
-    static const UINT32 BLOCKTYPE_STORAGE_A  =                  RESERVED | DATATYPE_RAW         | BlockUsage::STORAGE_A;  // Part A of EWR Storage
-    static const UINT32 BLOCKTYPE_STORAGE_B  =                  RESERVED | DATATYPE_RAW         | BlockUsage::STORAGE_B;  // Part B of EWR Storage
-    static const UINT32 BLOCKTYPE_FILESYSTEM =                             DATATYPE_RAW         | BlockUsage::FILESYSTEM; // File System
-    static const UINT32 BLOCKTYPE_UPDATE     =                  RESERVED | DATATYPE_RAW         | BlockUsage::UPDATE;     // Used for MFUpdate for firmware/assembly/etc updates
+    static const UINT32 BLOCKTYPE_BOOTSTRAP  = EXECUTABLE     | RESERVED | DATATYPE_NATIVECODE  | BlockUsage_BOOTSTRAP;  // Boot loader and boot strap code
+    static const UINT32 BLOCKTYPE_CODE       = EXECUTABLE     | RESERVED | DATATYPE_NATIVECODE  | BlockUsage_CODE;       // CLR or other native code "application"
+    static const UINT32 BLOCKTYPE_DEPLOYMENT =                  RESERVED | DATATYPE_MANAGEDCODE | BlockUsage_DEPLOYMENT; // Deployment area for MFdeploy & Visual Studio
+    static const UINT32 BLOCKTYPE_SIMPLE_A   =                  RESERVED | DATATYPE_RAW         | BlockUsage_SIMPLE_A;   // Part A of Simple Storage
+    static const UINT32 BLOCKTYPE_SIMPLE_B   =                  RESERVED | DATATYPE_RAW         | BlockUsage_SIMPLE_B;   // Part B of Simple Storage
+    static const UINT32 BLOCKTYPE_STORAGE_A  =                  RESERVED | DATATYPE_RAW         | BlockUsage_STORAGE_A;  // Part A of EWR Storage
+    static const UINT32 BLOCKTYPE_STORAGE_B  =                  RESERVED | DATATYPE_RAW         | BlockUsage_STORAGE_B;  // Part B of EWR Storage
+    static const UINT32 BLOCKTYPE_FILESYSTEM =                             DATATYPE_RAW         | BlockUsage_FILESYSTEM; // File System
+    static const UINT32 BLOCKTYPE_UPDATE     =                  RESERVED | DATATYPE_RAW         | BlockUsage_UPDATE;     // Used for MFUpdate for firmware/assembly/etc updates
 
     static BOOL IsBlocknanoBooterAgnostic( UINT32 BlockType )
     {
@@ -217,12 +175,12 @@ public:
     BOOL IsReservedData() const    { return ((RangeType & (RESERVED | DATATYPE_RAW )) == (RESERVED | DATATYPE_RAW )); }
     BOOL HasManagedCode() const { return ((RangeType & (DATATYPE_MANAGEDCODE    )) == (DATATYPE_MANAGEDCODE    )); }
 
-    BOOL IsCode() const               { return ((RangeType & USAGE_MASK) == BlockUsage::CODE);     }
-    BOOL IsBootstrap() const        { return ((RangeType & USAGE_MASK) == BlockUsage::BOOTSTRAP);}
+    BOOL IsCode() const               { return ((RangeType & USAGE_MASK) == BlockUsage_CODE);     }
+    BOOL IsBootstrap() const        { return ((RangeType & USAGE_MASK) == BlockUsage_BOOTSTRAP);}
     BOOL IsDirtyBit() const         { return ((RangeType & BLOCKTYPE_CONFIG) == BLOCKTYPE_DIRTYBIT);}
     BOOL IsConfig() const           { return ((RangeType & BLOCKTYPE_CONFIG) == BLOCKTYPE_CONFIG); }
-    BOOL IsDeployment() const  { return ((RangeType & USAGE_MASK) == BlockUsage::DEPLOYMENT);}
-    BOOL IsFileSystem() const     { return ((RangeType & USAGE_MASK) == BlockUsage::FILESYSTEM); }
+    BOOL IsDeployment() const  { return ((RangeType & USAGE_MASK) == BlockUsage_DEPLOYMENT);}
+    BOOL IsFileSystem() const     { return ((RangeType & USAGE_MASK) == BlockUsage_FILESYSTEM); }
     UINT32 GetBlockCount() const    { return (EndBlock - StartBlock + 1); }
 
     // NOTE: This is the application native code only (not including the managed DAT section)
@@ -920,5 +878,5 @@ void BlockStorage_AddDevices();
 
 //--//
 
-#endif // #if define _DRIVERS_PAL_BLOCKSTORAGE_H_
+#endif // _TARGET_PAL_BLOCKSTORAGE_H_
 

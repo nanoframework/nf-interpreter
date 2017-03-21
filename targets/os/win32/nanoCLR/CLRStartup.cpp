@@ -173,7 +173,7 @@ struct Settings
         CLR_Debug::Printf( "Loading Deployment Assemblies.\r\n" );
 #endif
 
-        LoadDeploymentAssemblies( BlockUsage::DEPLOYMENT );
+        LoadDeploymentAssemblies( BlockUsage_DEPLOYMENT );
 
         //--//
 

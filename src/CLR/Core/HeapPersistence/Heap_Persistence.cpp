@@ -643,8 +643,8 @@ void CLR_RT_Persistence_Manager::Initialize()
                                                   // UINT32                          m_margin_BurstWrite;
                                                   // UINT32                          m_margin_BlockErase;
                                                   //
-    if(!m_bankA.Initialize( BlockUsage::STORAGE_A )) return; // Bank                            m_bankA;
-    if(!m_bankB.Initialize( BlockUsage::STORAGE_B )) return; // Bank                            m_bankB;
+    if(!m_bankA.Initialize( BlockUsage_STORAGE_A )) return; // Bank                            m_bankA;
+    if(!m_bankB.Initialize( BlockUsage_STORAGE_B )) return; // Bank                            m_bankB;
                                                   //
     m_state = STATE_FlushNextObject;              // CLR_UINT32                      m_state;
                                                   //
