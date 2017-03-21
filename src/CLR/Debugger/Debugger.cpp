@@ -131,7 +131,7 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
 
     BlockStorageStream stream;
 
-    if (stream.Initialize( BlockUsage::DEPLOYMENT ))
+    if (stream.Initialize( BlockUsage_DEPLOYMENT ))
     {
         m_deploymentStorageDevice = stream.Device;
     }
@@ -3078,7 +3078,7 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status( WP_Message* msg, void* owner
     {
         BlockStorageStream stream;
 
-        if(stream.Initialize( BlockUsage::DEPLOYMENT, m_deploymentStorageDevice ))
+        if(stream.Initialize( BlockUsage_DEPLOYMENT, m_deploymentStorageDevice ))
         {
             do
             {
@@ -3113,7 +3113,7 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status( WP_Message* msg, void* owner
 
         bool fDone = false;
 
-        if(stream.Initialize( BlockUsage::DEPLOYMENT, m_deploymentStorageDevice ))
+        if(stream.Initialize( BlockUsage_DEPLOYMENT, m_deploymentStorageDevice ))
         {
             do
             {

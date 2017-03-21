@@ -198,9 +198,9 @@ message(STATUS "")
 # debugger (default is TRUE to include debugger in release image
 if(NOT NF_FEATURE_DEBUGGER OR
    NOT "${NF_FEATURE_DEBUGGER}" STREQUAL "TRUE")
-    set(NF_FEATURE_DEBUGGER TRUE)
+    set(NF_FEATURE_DEBUGGER TRUE CACHE INTERNAL "NF Feature debugger")
 else()
-    set(NF_FEATURE_DEBUGGER FALSE)
+    set(NF_FEATURE_DEBUGGER FALSE CACHE INTERNAL "NF Feature debugger")
 endif()
 
 #################################################################

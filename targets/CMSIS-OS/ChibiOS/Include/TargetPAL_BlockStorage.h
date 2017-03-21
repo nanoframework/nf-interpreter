@@ -4,13 +4,14 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _DRIVERS_PAL_BLOCKSTORAGE_H_
-#define _DRIVERS_PAL_BLOCKSTORAGE_H_ 1
+#ifndef _TARGET_PAL_BLOCKSTORAGE_H_
+#define _TARGET_PAL_BLOCKSTORAGE_H_ 1
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 #include <nanoWeak.h>
+#include <nanoPAL_BlockStorage.h>
 
 typedef struct BLOCKRANGE BlockRange;
 
@@ -203,4 +204,4 @@ struct BLOCKSTORAGESTREAM
 
 /////////////////////////////////////////////////////
 
-#endif  // _DRIVERS_PAL_BLOCKSTORAGE_H_
+#endif  // _TARGET_PAL_BLOCKSTORAGE_H_

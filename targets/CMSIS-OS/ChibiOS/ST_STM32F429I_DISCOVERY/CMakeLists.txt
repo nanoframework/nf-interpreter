@@ -28,7 +28,6 @@ find_package(NF_CoreCLR REQUIRED)
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
     find_package(NF_Debugger REQUIRED)
-    else()
 endif()
 
 # optional
@@ -84,12 +83,9 @@ add_executable(
     ${CHIBIOS_SOURCES}
     ${ChibiOSnfOverlay_SOURCES}
 
-    ${WireProtocol_SOURCES}
-
     # sources for nanoFramework libraries
     "${NF_CoreCLR_SOURCES}"
     "${NF_Debugger_SOURCES}"
-    "${NF_WireProtocol_SOURCES}"
 )
 
 
@@ -100,7 +96,8 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/common
     ${PROJECT_SOURCE_DIR}/src/CLR/Include
     ${PROJECT_SOURCE_DIR}/src/HAL/Include
-    
+    ${PROJECT_SOURCE_DIR}/src/PAL/Include
+
     ${WireProtocol_INCLUDE_DIRS}
     ${CHIBIOS_INCLUDE_DIRS}
     ${ChibiOSnfOverlay_INCLUDE_DIRS}
@@ -129,7 +126,6 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     # directories for nanoFramework libraries
     "${NF_CoreCLR_INCLUDE_DIRS}"
     "${NF_Debugger_INCLUDE_DIRS}"
-    "${NF_WireProtocol_INCLUDE_DIRS}"
 )
 
 ###################
