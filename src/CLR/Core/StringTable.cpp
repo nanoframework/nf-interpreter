@@ -16,7 +16,7 @@ void CLR_RT_Assembly::InitString()
     NATIVE_PROFILE_CLR_CORE();
 }
 
-LPCSTR CLR_RT_Assembly::GetString( CLR_STRING i )
+const char* CLR_RT_Assembly::GetString( CLR_STRING i )
 {
     NATIVE_PROFILE_CLR_CORE();
     static const CLR_STRING iMax = 0xFFFF - c_CLR_StringTable_Size;
@@ -26,7 +26,7 @@ LPCSTR CLR_RT_Assembly::GetString( CLR_STRING i )
         return &c_CLR_StringTable_Data[ c_CLR_StringTable_Lookup[ (CLR_STRING)0xFFFF - i ] ];
     }
 
-    return &(((LPCSTR)GetTable( TBL_Strings ))[ i ]);
+    return &(((const char*)GetTable( TBL_Strings ))[ i ]);
 }
 
 #if defined(_WIN32)

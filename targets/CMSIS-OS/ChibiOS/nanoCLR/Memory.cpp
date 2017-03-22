@@ -6,10 +6,10 @@
 
 #include <nanoHAL.h>
 
-void HeapLocation(UINT8*& baseAddress, UINT32& sizeInBytes)
+void HeapLocation(unsigned char*& baseAddress, unsigned int& sizeInBytes)
 {
     NATIVE_PROFILE_PAL_HEAP();
 
-    baseAddress = (UINT8*)                            &HeapBegin;
-    sizeInBytes = (UINT32)((size_t)&HeapEnd - (size_t)&HeapBegin + sizeof(HeapEnd));
+    baseAddress = (unsigned char*)                            &HeapBegin;
+    sizeInBytes = (unsigned int)((size_t)&HeapEnd - (size_t)&HeapBegin + sizeof(HeapEnd));
 }

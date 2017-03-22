@@ -146,8 +146,8 @@ target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_EMU
 target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_EMULATED_FLOATINGPOINT -DPLATFORM_ARM ")
 
 # set compiler definition for FPU
-target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC -DCORTEX_USE_FPU=$<$<BOOL:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:FALSE>)
-target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DCORTEX_USE_FPU=$<$<BOOL:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:FALSE>)
+target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC -DCORTEX_USE_FPU=$<$<bool:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<bool:USE_FPU_IS_TRUE>>:FALSE>)
+target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DCORTEX_USE_FPU=$<$<bool:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<bool:USE_FPU_IS_TRUE>>:FALSE>)
 
 # set extra linker flags for DEBUG
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")

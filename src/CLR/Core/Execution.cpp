@@ -276,7 +276,7 @@ void CLR_RT_ExecutionEngine::Reboot( bool fHard )
     NATIVE_PROFILE_CLR_CORE();
     
     // UNDONE: FIXME
-    // ::Watchdog_GetSetEnabled( FALSE, TRUE );
+    // ::Watchdog_GetSetEnabled( false, true );
 
     // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Flush();
     //g_CLR_RT_Persistence_Manager.m_state = CLR_RT_Persistence_Manager::STATE_FlushNextObject;
@@ -541,17 +541,17 @@ HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
 }
 
 #if defined(WIN32)
-HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs( CLR_RT_HeapBlock& argsBlk, WCHAR* szCommandLineArgs )
+HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs( CLR_RT_HeapBlock& argsBlk, wchar_t* szCommandLineArgs )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
     
     std::list<std::wstring> args;
 
-    WCHAR* szArgNext = NULL;
-    WCHAR* szArg     = szCommandLineArgs;
-    WCHAR* sep       = L" ";
-    WCHAR* context   = NULL;
+    wchar_t* szArgNext = NULL;
+    wchar_t* szArg     = szCommandLineArgs;
+    wchar_t* sep       = L" ";
+    wchar_t* context   = NULL;
     
     szArg = wcstok_s( szArg, sep, &context );
     
@@ -583,7 +583,7 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs( CLR_RT_HeapBlock& argsBlk,
 
 #endif
 
-HRESULT CLR_RT_ExecutionEngine::Execute( LPWSTR entryPointArgs, int maxContextSwitch )
+HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContextSwitch )
 {            
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2140,7 +2140,7 @@ HRESULT CLR_RT_ExecutionEngine::NewArrayList( CLR_RT_HeapBlock& ref, int size, C
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_TypeDef_Instance& inst, LPCSTR szText, CLR_RT_FieldDef_Index& res )
+HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_TypeDef_Instance& inst, const char* szText, CLR_RT_FieldDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2158,7 +2158,7 @@ HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_TypeDef_Instance& inst, LPC
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_HeapBlock& reference, LPCSTR szText, CLR_RT_FieldDef_Index& res )
+HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_HeapBlock& reference, const char* szText, CLR_RT_FieldDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2180,7 +2180,7 @@ HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_HeapBlock& reference, LPCST
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::FindField( CLR_RT_HeapBlock& reference, LPCSTR szText, CLR_RT_HeapBlock*& field )
+HRESULT CLR_RT_ExecutionEngine::FindField( CLR_RT_HeapBlock& reference, const char* szText, CLR_RT_HeapBlock*& field )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2211,7 +2211,7 @@ HRESULT CLR_RT_ExecutionEngine::FindField( CLR_RT_HeapBlock& reference, LPCSTR s
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::SetField( CLR_RT_HeapBlock& reference, LPCSTR szText, CLR_RT_HeapBlock& value )
+HRESULT CLR_RT_ExecutionEngine::SetField( CLR_RT_HeapBlock& reference, const char* szText, CLR_RT_HeapBlock& value )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2225,7 +2225,7 @@ HRESULT CLR_RT_ExecutionEngine::SetField( CLR_RT_HeapBlock& reference, LPCSTR sz
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::GetField( CLR_RT_HeapBlock& reference, LPCSTR szText, CLR_RT_HeapBlock& value )
+HRESULT CLR_RT_ExecutionEngine::GetField( CLR_RT_HeapBlock& reference, const char* szText, CLR_RT_HeapBlock& value )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -3008,7 +3008,7 @@ void CLR_RT_ExecutionEngine::StopOnBreakpoint( CLR_DBG_Commands::Debugging_Execu
             if(th)
             {
                 bp.m_pid                 = th->m_pid;
-                th->m_timeQuantumExpired = TRUE;
+                th->m_timeQuantumExpired = true;
             }
 
             if(m_breakpointsActiveNum == 1)
@@ -3018,7 +3018,7 @@ void CLR_RT_ExecutionEngine::StopOnBreakpoint( CLR_DBG_Commands::Debugging_Execu
         }
         else
         {
-            _ASSERTE(FALSE);
+            _ASSERTE(false);
         }
     }
 }
@@ -3591,11 +3591,11 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
 #endif
 
     // UNDONE: FIXME
-    // ::Watchdog_GetSetEnabled( FALSE, TRUE );
+    // ::Watchdog_GetSetEnabled( bool, bool );
     // UNDONE: FIXME
     // res = ::Events_WaitForEvents( powerLevel, events, timeout );
     // UNDONE: FIXME
-    // ::Watchdog_GetSetEnabled( TRUE, TRUE );
+    // ::Watchdog_GetSetEnabled( bool, bool );
 
 
 #if defined(NANOCLR_TRACE_SYSTEMEVENTWAIT)

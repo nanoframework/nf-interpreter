@@ -38,7 +38,7 @@ HRESULT Library_corlib_native_System_String::get_Chars___CHAR__I4( CLR_RT_StackF
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    LPCSTR               szText;
+    const char*               szText;
     CLR_RT_UnicodeHelper uh;
     CLR_UINT16           buf[ 3 ];
     int                  len;
@@ -90,7 +90,7 @@ HRESULT Library_corlib_native_System_String::get_Length___I4( CLR_RT_StackFrame&
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    LPCSTR szText = stack.Arg0().RecoverString(); FAULT_ON_NULL(szText);
+    const char* szText = stack.Arg0().RecoverString(); FAULT_ON_NULL(szText);
 
     CLR_RT_UnicodeHelper uh; uh.SetInputUTF8( szText );
 
@@ -587,11 +587,11 @@ HRESULT Library_corlib_native_System_String::IndexOf( CLR_RT_StackFrame& stack, 
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    LPCSTR               szText;
+    const char*               szText;
     int                  startIndex;
     int                  count;
     int                  pos;
-    LPCSTR               pString;
+    const char*               pString;
     const CLR_UINT16*    pChars;
     int                  iChars = 0;
     CLR_RT_UnicodeHelper uh;
@@ -659,7 +659,7 @@ HRESULT Library_corlib_native_System_String::IndexOf( CLR_RT_StackFrame& stack, 
         {
             while(count-- > 0)
             {
-                CLR_RT_UnicodeHelper uh1; uh1.SetInputUTF8( (LPCSTR)uh.m_inputUTF8 );
+                CLR_RT_UnicodeHelper uh1; uh1.SetInputUTF8( (const char*)uh.m_inputUTF8 );
                 CLR_RT_UnicodeHelper uh2; uh2.SetInputUTF8(         pString        );
 
                 while(true)
@@ -994,8 +994,8 @@ HRESULT Library_corlib_native_System_String::Concat( CLR_RT_StackFrame& stack, C
     NANOCLR_HEADER();
  
     CLR_RT_HeapBlock*       ptrSrc;
-    LPCSTR                  szTextSrc;
-    LPSTR                   szTextDst = NULL;
+    const char*                  szTextSrc;
+    char*                   szTextDst = NULL;
     CLR_UINT32              totLen;
     CLR_UINT32              len;
  
@@ -1037,7 +1037,7 @@ HRESULT Library_corlib_native_System_String::Concat( CLR_RT_StackFrame& stack, C
             CLR_RT_HeapBlock&        blkResult = stack.PushValue();
             CLR_RT_HeapBlock_String* str       = CLR_RT_HeapBlock_String::CreateInstance( blkResult, totLen ); CHECK_ALLOCATION(str);
             
-            szTextDst           = (LPSTR)str->StringText();
+            szTextDst           = (char*)str->StringText();
             szTextDst[ totLen ] = 0;
         }
     }
@@ -1045,7 +1045,7 @@ HRESULT Library_corlib_native_System_String::Concat( CLR_RT_StackFrame& stack, C
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_String::ConvertToCharArray( LPCSTR szText, CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_Array*& array, int startIndex, int length )
+HRESULT Library_corlib_native_System_String::ConvertToCharArray( const char* szText, CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_Array*& array, int startIndex, int length )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();

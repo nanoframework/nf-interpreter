@@ -5,25 +5,26 @@
 //
 #include "stdafx.h"
 
+
 //using namespace Microsoft::SPOT::Emulator;
 
-void HAL_Time_Sleep_MicroSeconds( UINT32 uSec )
+void HAL_Time_Sleep_MicroSeconds( unsigned int uSec )
 {
     // UNDONE: FIXME: return EmulatorNative::GetITimeDriver()->Sleep_MicroSeconds( uSec );    
 }
 
-void HAL_Time_Sleep_MicroSeconds_InterruptEnabled( UINT32 uSec )
+void HAL_Time_Sleep_MicroSeconds_InterruptEnabled( unsigned int uSec )
 {
     // UNDONE: FIXME: return EmulatorNative::GetITimeDriver()->Sleep_MicroSecondsInterruptsEnabled( uSec );    
 }
 
-UINT32 HAL_Time_CurrentSysTicks()
+unsigned int HAL_Time_CurrentSysTicks()
 {
 	// TODO need to check if using the Win32 100ns ticks works
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTicks();
 }
 
-INT64 HAL_Time_SysTicksToTime( UINT32 sysTicks )
+signed __int64 HAL_Time_SysTicksToTime( unsigned int sysTicks )
 {
     _ASSERTE(sysTicks <= 0x7FFFFFFF);
     
@@ -33,36 +34,36 @@ INT64 HAL_Time_SysTicksToTime( UINT32 sysTicks )
     return sysTicks;
 }
        
-INT64 HAL_Time_CurrentTime()
+signed __int64 HAL_Time_CurrentTime()
 {
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTime();
 }
 
-void HAL_Time_GetDriftParameters  ( INT32* a, INT32* b, INT64* c )
+void HAL_Time_GetDriftParameters  ( signed int* a, signed int* b, signed __int64* c )
 {
     *a = 1;
     *b = 1;
     *c = 0;
 }
 
-UINT32 CPU_SystemClock()
+unsigned int CPU_SystemClock()
 {
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->SystemClock;
 }
 
-UINT32 CPU_TicksPerSecond()
+unsigned int CPU_TicksPerSecond()
 {
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->TicksPerSecond;
 }
 
 //Completions
 
-void HAL_COMPLETION::EnqueueDelta( UINT32 uSecFromNow )
+void HAL_COMPLETION::EnqueueDelta( unsigned int uSecFromNow )
 {
     // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->EnqueueCompletion( (IntPtr)this, uSecFromNow ); 
 }
 
-void HAL_COMPLETION::EnqueueTicks( UINT64 EventTimeTicks )
+void HAL_COMPLETION::EnqueueTicks( unsigned __int64 EventTimeTicks )
 {
     _ASSERTE(FALSE);
 }
@@ -93,7 +94,7 @@ bool HAL_CONTINUATION::IsLinked()
     return false; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->IsLinked( (IntPtr)this );
 }
 
-BOOL HAL_CONTINUATION::Dequeue_And_Execute()
+bool HAL_CONTINUATION::Dequeue_And_Execute()
 {
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->DequeueAndExecuteContinuation();
 }

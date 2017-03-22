@@ -142,10 +142,10 @@ struct Settings
         const CLR_RECORD_ASSEMBLY* header;
 
 #if !defined(BUILD_RTM)
-        CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (UINT32)assStart, (UINT32)assEnd);
+        CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (unsigned int)assStart, (unsigned int)assEnd);
 #endif 
 
-        g_buildCRC = SUPPORT_ComputeCRC( assStart, (UINT32)assEnd -(UINT32) assStart, 0 );
+        g_buildCRC = SUPPORT_ComputeCRC( assStart, (unsigned int)assEnd -(unsigned int) assStart, 0 );
 
 
         header = (const CLR_RECORD_ASSEMBLY*)assStart;
@@ -169,9 +169,9 @@ struct Settings
         NANOCLR_HEADER();
 
         const CLR_RECORD_ASSEMBLY* header;
-        BYTE * assembliesBuffer ;
-        INT32  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
-        BYTE * headerBuffer  = NULL;
+        unsigned char * assembliesBuffer ;
+        signed int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
+        unsigned char * headerBuffer  = NULL;
 
         while(TRUE)
         {
@@ -185,7 +185,7 @@ struct Settings
                 break;
             }
 
-            UINT32 AssemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
+            unsigned int AssemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
 
             BlockStorageStream_Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
 

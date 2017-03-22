@@ -115,19 +115,19 @@ size_t PayloadArraySize() { return  PLATFORM_DEPENDENT_ENTRY_SIZE;              
 size_t InlineBufferCount() { return PLATFORM_DEPENDENT_INLINE_BUFFER_SIZE; }
 #endif
 
-UINT32 g_scratchVirtualMethodTableLink   [ LINK_SIZE_BYTES    * (PLATFORM_DEPENDENT_ENTRY_SIZE  + PLATFORM_DEPENDENT_HASH_TABLE_SIZE) / sizeof(UINT32) + 1 ];
-UINT32 g_scratchVirtualMethodTableLinkMRU[ LINK_SIZE_BYTES    * (PLATFORM_DEPENDENT_ENTRY_SIZE  + 1                                 ) / sizeof(UINT32) + 1 ];
-UINT32 g_scratchVirtualMethodPayload     [ PAYLOAD_SIZE_BYTES *  PLATFORM_DEPENDENT_ENTRY_SIZE                                        / sizeof(UINT32) + 1 ]; 
+unsigned int g_scratchVirtualMethodTableLink   [ LINK_SIZE_BYTES    * (PLATFORM_DEPENDENT_ENTRY_SIZE  + PLATFORM_DEPENDENT_HASH_TABLE_SIZE) / sizeof(unsigned int) + 1 ];
+unsigned int g_scratchVirtualMethodTableLinkMRU[ LINK_SIZE_BYTES    * (PLATFORM_DEPENDENT_ENTRY_SIZE  + 1                                 ) / sizeof(unsigned int) + 1 ];
+unsigned int g_scratchVirtualMethodPayload     [ PAYLOAD_SIZE_BYTES *  PLATFORM_DEPENDENT_ENTRY_SIZE                                        / sizeof(unsigned int) + 1 ]; 
 
 #ifndef NANOCLR_NO_IL_INLINE
-UINT32 g_scratchInlineBuffer[ INLINE_SIZE_BYTES * PLATFORM_DEPENDENT_INLINE_BUFFER_SIZE / sizeof(UINT32) + 1 ];
+unsigned int g_scratchInlineBuffer[ INLINE_SIZE_BYTES * PLATFORM_DEPENDENT_INLINE_BUFFER_SIZE / sizeof(unsigned int) + 1 ];
 #endif
 
 //--//
 
 size_t InterruptRecords() { return PLATFORM_DEPENDENT_INTERRUPT_RECORDS; } 
 
-UINT32 g_scratchInterruptDispatchingStorage[ (PLATFORM_DEPENDENT_INTERRUPT_RECORDS  * INTERRUPT_RECORD_SIZE_BYTES) / sizeof(UINT32) + 1 ];
+unsigned int g_scratchInterruptDispatchingStorage[ (PLATFORM_DEPENDENT_INTERRUPT_RECORDS  * INTERRUPT_RECORD_SIZE_BYTES) / sizeof(unsigned int) + 1 ];
 
 //--//
 

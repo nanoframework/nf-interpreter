@@ -5,6 +5,31 @@
 //
 
 #include <nanoPAL_BlockStorage.h>
+#include <nanoWeak.h>
+
+/////////////////////////////////////////////////////
+// DeviceBlockInfo stubs
+
+__nfweak SectorAddress DeviceBlockInfo_PhysicalToSectorAddress(DeviceBlockInfo* blockInfo,  const BlockRegionInfo* pRegion, ByteAddress phyAddress)
+{
+    return phyAddress;
+}
+
+__nfweak bool DeviceBlockInfo_FindRegionFromAddress(DeviceBlockInfo* blockInfo, ByteAddress address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+{
+    return false;        
+}
+
+__nfweak bool DeviceBlockInfo_FindNextUsageBlock(DeviceBlockInfo* blockInfo, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+{
+    return false;
+}
+
+__nfweak bool DeviceBlockInfo_FindForBlockUsage(DeviceBlockInfo* blockInfo, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+{
+    return false;
+}
+
 
 /////////////////////////////////////////////////////
 // BlockStorageStream stubs
@@ -24,19 +49,19 @@ __nfweak bool BlockStorageStream_SetReadModifyWrite(BlockStorageStream *stream)
     return false;
 }
 
-__nfweak bool BlockStorageStream_Initialize(BlockStorageStream *stream, uint32_t blockUsage)
+__nfweak bool BlockStorageStream_Initialize(BlockStorageStream *stream, unsigned int blockUsage)
 {
     return false;
 }
 
-__nfweak bool BlockStorageStream_InitializeWithBlockStorageDevice(BlockStorageStream *stream, uint32_t blockUsage, BlockStorageDevice *pDevice)
+__nfweak bool BlockStorageStream_InitializeWithBlockStorageDevice(BlockStorageStream *stream, unsigned int blockUsage, BlockStorageDevice *pDevice)
 {
     return false;
 }
 
 bool BlockStorageStream_NextStream(BlockStorageStream* stream)
 {
-    if(stream->Device == NULL || stream->Device->Prev(stream) == NULL) return false;
+    if(stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL) return false;
 
     const BlockRegionInfo* pRegion;
     const DeviceBlockInfo* pDevInfo;// UNDONE: FIXME:  = stream->Device->GetDeviceInfo();
@@ -53,9 +78,9 @@ bool BlockStorageStream_NextStream(BlockStorageStream* stream)
         {
             if(stream->RegionIndex == 0)
             {
-                stream->Device = stream->Device->Prev(stream);
+                stream->Device = BlockStorageDevice_Prev(stream->Device);
                 
-                if(stream->Device == NULL || stream->Device->Prev(stream) == NULL)
+                if(stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL)
                 {
                     memcpy(stream, &orig, sizeof(orig));
                     return false;
@@ -91,7 +116,7 @@ bool BlockStorageStream_NextStream(BlockStorageStream* stream)
     
     stream->BlockLength  = pRegion->BytesPerBlock;
     stream->BaseAddress  = pRegion->Start + pRegion->BlockRanges[stream->RangeIndex].StartBlock * stream->BlockLength;
-    stream->Length       = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * stream->BlockLength;
+    stream->Length       = BlockRange_GetBlockCount((BlockRange*)(&pRegion->BlockRanges[stream->RangeIndex])) * stream->BlockLength;
     stream->CurrentIndex = 0;
 
     return true;
@@ -99,7 +124,7 @@ bool BlockStorageStream_NextStream(BlockStorageStream* stream)
 
 bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
 {
-    if(stream->Device == NULL || stream->Device->Prev(stream) == NULL) return false;
+    if(stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL) return false;
 
     const BlockRegionInfo* pRegion;
     const DeviceBlockInfo* pDevInfo;// UNDONE: FIXME:  = this->Device->GetDeviceInfo();
@@ -116,9 +141,9 @@ bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
         {
             if(stream->RegionIndex == 0)
             {
-                stream->Device = stream->Device->Prev(stream);
+                stream->Device = BlockStorageDevice_Prev(stream->Device);
                 
-                if(stream->Device == NULL || stream->Device->Prev(stream) == NULL)
+                if(stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL)
                 {
                     memcpy(stream, &orig, sizeof(orig));
                     return false;
@@ -154,7 +179,7 @@ bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
     
     stream->BlockLength  = pRegion->BytesPerBlock;
     stream->BaseAddress  = pRegion->Start + pRegion->BlockRanges[stream->RangeIndex].StartBlock * stream->BlockLength;
-    stream->Length       = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * stream->BlockLength;
+    stream->Length       = BlockRange_GetBlockCount((BlockRange*)(&pRegion->BlockRanges[stream->RangeIndex])) * stream->BlockLength;
     stream->CurrentIndex = 0;
 
     return true;
@@ -162,7 +187,7 @@ bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
 
 bool BlockStorageStream_Seek(BlockStorageStream *stream, int32_t offset, SeekOrigin origin)
 {
-    uint32_t seekIndex;
+    unsigned int seekIndex;
 
     switch (origin)
     {
@@ -202,22 +227,22 @@ bool BlockStorageStream_Seek(BlockStorageStream *stream, int32_t offset, SeekOri
     return true;
 }
 
-__nfweak bool BlockStorageStream_Write(BlockStorageStream *stream, unsigned char *data, uint32_t length)
+__nfweak bool BlockStorageStream_Write(BlockStorageStream *stream, unsigned char *data, unsigned int length)
 {
     return false;
 }
 
-__nfweak bool BlockStorageStream_Erase(BlockStorageStream *stream, uint32_t length)
+__nfweak bool BlockStorageStream_Erase(BlockStorageStream *stream, unsigned int length)
 {
     return false;
 }
 
-__nfweak bool BlockStorageStream_ReadIntoBuffer(BlockStorageStream *stream, unsigned char *buffer, uint32_t length)
+__nfweak bool BlockStorageStream_ReadIntoBuffer(BlockStorageStream *stream, unsigned char *buffer, unsigned int length)
 {
     return false;
 }
 
-bool BlockStorageStream_Read(BlockStorageStream* stream, unsigned char** buffer, uint32_t length)
+bool BlockStorageStream_Read(BlockStorageStream* stream, unsigned char** buffer, unsigned int length)
 {
     if(stream == NULL || !buffer) return false;
 
@@ -248,14 +273,100 @@ bool BlockStorageStream_Read(BlockStorageStream* stream, unsigned char** buffer,
     return true;
 }
 
-uint32_t BlockStorageStream_CurrentAddress(BlockStorageStream *stream)
+unsigned int BlockStorageStream_CurrentAddress(BlockStorageStream *stream)
 {
     return stream->BaseAddress + stream->CurrentIndex;
 }
 
-__nfweak bool BlockStorageStream_IsErased(BlockStorageStream *stream, uint32_t length)
+__nfweak bool BlockStorageStream_IsErased(BlockStorageStream *stream, unsigned int length)
 {
     return false;
+}
+
+/////////////////////////////////////////////////////
+// BlockStorageDevice stubs
+
+__nfweak BlockStorageDevice* BlockStorageDevice_Next(BlockStorageDevice* device)
+{
+    return NULL;
+}
+
+__nfweak BlockStorageDevice* BlockStorageDevice_Prev(BlockStorageDevice* device)
+{
+    return NULL;
+}
+
+__nfweak bool BlockStorageDevice_InitializeDevice(BlockStorageDevice* device)
+{
+    return false;
+}
+
+__nfweak bool BlockStorageDevice_UninitializeDevice(BlockStorageDevice* device)
+{
+    return false;
+}
+
+__nfweak DeviceBlockInfo* BlockStorageDevice_GetDeviceInfo(BlockStorageDevice* device)
+{
+    return NULL;
+}
+
+__nfweak bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int address, unsigned int numBytes, unsigned char* pSectorBuff)
+{
+    return false;
+}
+
+__nfweak bool BlockStorageDevice_Write(BlockStorageDevice* device, unsigned int address, unsigned int numBytes, unsigned char* pSectorBuf, bool readModifyWrite)
+{
+    return false;
+}
+
+__nfweak bool BlockStorageDevice_Memset(BlockStorageDevice* device, unsigned int address, unsigned char data, unsigned int NumBytes)
+{
+    return false;
+}
+
+//__nfweak bool BlockStorageDevice_GetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart, SectorMetadata* pSectorMetadata);
+//__nfweak bool BlockStorageDevice_SetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart, SectorMetadata* pSectorMetadata);
+
+__nfweak bool BlockStorageDevice_IsBlockErased(BlockStorageDevice* device, unsigned int blockStartAddress, unsigned int blockLength)
+{
+    return false;
+}
+
+__nfweak bool BlockStorageDevice_EraseBlock(BlockStorageDevice* device, unsigned int address)
+{
+    return false;
+}
+
+__nfweak void BlockStorageDevice_SetPowerState(BlockStorageDevice* device, unsigned int state)
+{
+    return;
+}
+
+__nfweak bool BlockStorageDevice_FindRegionFromAddress(BlockStorageDevice* device, unsigned int address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+{
+    return false;
+}
+
+__nfweak bool BlockStorageDevice_FindForBlockUsage(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+{
+    return false;
+}
+
+__nfweak bool BlockStorageDevice_FindNextUsageBlock(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+{
+    return false;
+}
+
+__nfweak unsigned int BlockStorageDevice_MaxSectorWrite_uSec(BlockStorageDevice* device)
+{
+    return 0;
+}
+
+__nfweak unsigned int BlockStorageDevice_MaxBlockErase_uSec(BlockStorageDevice* device)
+{
+    return 0;
 }
 
 /////////////////////////////////////////////////////

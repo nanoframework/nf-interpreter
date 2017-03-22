@@ -11,7 +11,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-__nfweak extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line );
+__nfweak extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const char* szFile, int line );
 
 #if defined(_WIN32)
 
@@ -50,19 +50,19 @@ __nfweak extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFu
 //    Correspondence between CLR C# and C++ native types:
 //    CLR Type          C/C++ type	    C/C++ Ref Type
 
-//    System.Byte       UINT8           UINT8&
-//    System.UInt16     UINT16          UINT16&
-//    System.UInt32     UINT32          UINT32&
-//    System.UInt64     UINT64          UINT64&
-//    System.Char       CHAR            CHAR &
-//    System.SByte      INT8            INT8 &
-//    System.Int16      INT16           INT16&
-//    System.Int32      INT32           INT32&
-//    System.Int64      INT64           INT64&
+//    System.Byte       unsigned char           unsigned char&
+//    System.UInt16     unsigned short int          unsigned short int&
+//    System.UInt32     unsigned int          unsigned int&
+//    System.UInt64     unsigned __int64          unsigned __int64&
+//    System.Char       char            char &
+//    System.SByte      signed char            signed char &
+//    System.Int16      signed short int           signed short int&
+//    System.Int32      signed int           signed int&
+//    System.Int64      signed __int64           signed __int64&
 //    System.Single     float           float&
 //    System.Double     double          double&
-//    System.String     const CHAR *    CHAR *
-//    System.Byte[]     UINT8 *         Same as C/C++ type
+//    System.String     const char *    char *
+//    System.Byte[]     unsigned char *         Same as C/C++ type
 
 // Forward declaration for managed stack frame.
 // This is internal CLR type, reference to managed stack frame is exposed to marshaling code.
@@ -92,7 +92,7 @@ struct CLR_RT_NativeAssemblyData
     const char                 *m_szAssemblyName;
 
     // Check sum for the assembly.
-    UINT32                      m_checkSum;
+    unsigned int                      m_checkSum;
 
     // Pointer to array of functions that implement native methods.
     // It could be different type of the function depending if it is assembly Interop Method
@@ -120,28 +120,28 @@ const CLR_RT_NativeAssemblyData *GetAssemblyNativeData( const char *lpszAssembly
 ** Returns:   S_OK on success or error in case of paramter mismatch or invalid data passed from managed code.
 **********************************************************************/
 
-HRESULT Interop_Marshal_bool  ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, bool   &param );
-HRESULT Interop_Marshal_UINT8 ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, UINT8  &param );
-HRESULT Interop_Marshal_UINT16( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, UINT16 &param );
-HRESULT Interop_Marshal_UINT32( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, UINT32 &param );
-HRESULT Interop_Marshal_UINT64( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, UINT64 &param );
-HRESULT Interop_Marshal_CHAR  ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CHAR   &param );
-HRESULT Interop_Marshal_INT8  ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, INT8   &param );
-HRESULT Interop_Marshal_INT16 ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, INT16  &param );
-HRESULT Interop_Marshal_INT32 ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, INT32  &param );
-HRESULT Interop_Marshal_INT64 ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, INT64  &param );
+HRESULT Interop_Marshal_bool  ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, bool   &param );
+HRESULT Interop_Marshal_UINT8 ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, unsigned char  &param );
+HRESULT Interop_Marshal_UINT16( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, unsigned short int &param );
+HRESULT Interop_Marshal_UINT32( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, unsigned int &param );
+HRESULT Interop_Marshal_UINT64( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, unsigned __int64 &param );
+HRESULT Interop_Marshal_CHAR  ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, char   &param );
+HRESULT Interop_Marshal_INT8  ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, signed char   &param );
+HRESULT Interop_Marshal_INT16 ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, signed short int  &param );
+HRESULT Interop_Marshal_INT32 ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, signed int  &param );
+HRESULT Interop_Marshal_INT64 ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, signed __int64  &param );
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
-HRESULT Interop_Marshal_float ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, float  &param );
-HRESULT Interop_Marshal_double( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, double &param );
+HRESULT Interop_Marshal_float ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, float  &param );
+HRESULT Interop_Marshal_double( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, double &param );
 
 #else
-HRESULT Interop_Marshal_float ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, INT32  &param );
-HRESULT Interop_Marshal_double( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, INT64  &param );
+HRESULT Interop_Marshal_float ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, signed int  &param );
+HRESULT Interop_Marshal_double( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, signed __int64  &param );
 #endif
 
-HRESULT Interop_Marshal_LPCSTR( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, LPCSTR &param );
+HRESULT Interop_Marshal_LPCSTR( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, const char* &param );
 // For unsupported types we set param to NULL. 
-HRESULT Interop_Marshal_UNSUPPORTED_TYPE( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, UNSUPPORTED_TYPE &param );
+HRESULT Interop_Marshal_UNSUPPORTED_TYPE( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, UNSUPPORTED_TYPE &param );
 /**********************************************************************
 **
 ** Functions: Interop_Marshal_*_ARRAY
@@ -165,25 +165,25 @@ template <class T> class CLR_RT_TypedArray
 
 { 
     T      *m_pData;
-    UINT32  m_ElemCount;
+    unsigned int  m_ElemCount;
 
-friend HRESULT Interop_Marshal_bool_ARRAY  ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<UINT8>  &typedArray );
-friend HRESULT Interop_Marshal_UINT8_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<UINT8>  &typedArray );
-friend HRESULT Interop_Marshal_UINT16_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<UINT16> &typedArray );
-friend HRESULT Interop_Marshal_UINT32_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<UINT32> &typedArray );
-friend HRESULT Interop_Marshal_UINT64_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<UINT64> &typedArray );
-friend HRESULT Interop_Marshal_CHAR_ARRAY  ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<CHAR>   &typedArray );
-friend HRESULT Interop_Marshal_INT8_ARRAY  ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<INT8>   &typedArray );
-friend HRESULT Interop_Marshal_INT16_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<INT16>  &typedArray );
-friend HRESULT Interop_Marshal_INT32_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<INT32>  &typedArray );
-friend HRESULT Interop_Marshal_INT64_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<INT64>  &typedArray );
+friend HRESULT Interop_Marshal_bool_ARRAY  ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<unsigned char>  &typedArray );
+friend HRESULT Interop_Marshal_UINT8_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<unsigned char>  &typedArray );
+friend HRESULT Interop_Marshal_UINT16_ARRAY( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<unsigned short int> &typedArray );
+friend HRESULT Interop_Marshal_UINT32_ARRAY( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<unsigned int> &typedArray );
+friend HRESULT Interop_Marshal_UINT64_ARRAY( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<unsigned __int64> &typedArray );
+friend HRESULT Interop_Marshal_CHAR_ARRAY  ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<char>   &typedArray );
+friend HRESULT Interop_Marshal_INT8_ARRAY  ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<signed char>   &typedArray );
+friend HRESULT Interop_Marshal_INT16_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<signed short int>  &typedArray );
+friend HRESULT Interop_Marshal_INT32_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<signed int>  &typedArray );
+friend HRESULT Interop_Marshal_INT64_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<signed __int64>  &typedArray );
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
-friend HRESULT Interop_Marshal_float_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<float>  &typedArray );
-friend HRESULT Interop_Marshal_double_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<double> &typedArray );
+friend HRESULT Interop_Marshal_float_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<float>  &typedArray );
+friend HRESULT Interop_Marshal_double_ARRAY( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<double> &typedArray );
 #else
-friend HRESULT Interop_Marshal_float_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<INT32>  &typedArray );
-friend HRESULT Interop_Marshal_double_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray<INT64>  &typedArray );
+friend HRESULT Interop_Marshal_float_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<signed int>  &typedArray );
+friend HRESULT Interop_Marshal_double_ARRAY( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray<signed __int64>  &typedArray );
 
 #endif
 
@@ -191,11 +191,11 @@ friend HRESULT Interop_Marshal_double_ARRAY( const CLR_RT_StackFrame &stackFrame
 public :
     CLR_RT_TypedArray() { m_pData = NULL; m_ElemCount = 0; }
 
-    T GetValue( UINT32 i )             { return m_pData[ i ];}
-    void SetValue( UINT32 i, T &val )  { m_pData[ i ] = val; }
-    T& operator[]( UINT32 i )          { return m_pData[ i ];}
+    T GetValue( unsigned int i )             { return m_pData[ i ];}
+    void SetValue( unsigned int i, T &val )  { m_pData[ i ] = val; }
+    T& operator[]( unsigned int i )          { return m_pData[ i ];}
 
-    UINT32 GetSize() { return m_ElemCount; }
+    unsigned int GetSize() { return m_ElemCount; }
 
     // Direct access to buffer is provided for cases when other
     // native functions require access to buffer and cannot use CLR_RT_TypedArray object
@@ -203,37 +203,37 @@ public :
 
  };
 
-typedef CLR_RT_TypedArray<CHAR>   CLR_RT_TypedArray_CHAR;
-typedef CLR_RT_TypedArray<UINT8>  CLR_RT_TypedArray_UINT8;
-typedef CLR_RT_TypedArray<UINT16> CLR_RT_TypedArray_UINT16;
-typedef CLR_RT_TypedArray<UINT32> CLR_RT_TypedArray_UINT32;
-typedef CLR_RT_TypedArray<UINT64> CLR_RT_TypedArray_UINT64;
-typedef CLR_RT_TypedArray<INT8>   CLR_RT_TypedArray_INT8;
-typedef CLR_RT_TypedArray<INT16>  CLR_RT_TypedArray_INT16;
-typedef CLR_RT_TypedArray<INT32>  CLR_RT_TypedArray_INT32;
-typedef CLR_RT_TypedArray<INT64>  CLR_RT_TypedArray_INT64;
+typedef CLR_RT_TypedArray<char>   CLR_RT_TypedArray_CHAR;
+typedef CLR_RT_TypedArray<unsigned char>  CLR_RT_TypedArray_UINT8;
+typedef CLR_RT_TypedArray<unsigned short int> CLR_RT_TypedArray_UINT16;
+typedef CLR_RT_TypedArray<unsigned int> CLR_RT_TypedArray_UINT32;
+typedef CLR_RT_TypedArray<unsigned __int64> CLR_RT_TypedArray_UINT64;
+typedef CLR_RT_TypedArray<signed char>   CLR_RT_TypedArray_INT8;
+typedef CLR_RT_TypedArray<signed short int>  CLR_RT_TypedArray_INT16;
+typedef CLR_RT_TypedArray<signed int>  CLR_RT_TypedArray_INT32;
+typedef CLR_RT_TypedArray<signed __int64>  CLR_RT_TypedArray_INT64;
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 typedef CLR_RT_TypedArray<float>  CLR_RT_TypedArray_float;
 typedef CLR_RT_TypedArray<double> CLR_RT_TypedArray_double;
 #else
-typedef CLR_RT_TypedArray<INT32>  CLR_RT_TypedArray_float;
-typedef CLR_RT_TypedArray<INT64>  CLR_RT_TypedArray_double;
+typedef CLR_RT_TypedArray<signed int>  CLR_RT_TypedArray_float;
+typedef CLR_RT_TypedArray<signed __int64>  CLR_RT_TypedArray_double;
 
 
 #endif
 
-HRESULT Interop_Marshal_bool_ARRAY  ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_UINT8  &typedArray );
-HRESULT Interop_Marshal_UINT8_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_UINT8  &typedArray );
-HRESULT Interop_Marshal_UINT16_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_UINT16 &typedArray );
-HRESULT Interop_Marshal_UINT32_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_UINT32 &typedArray );
-HRESULT Interop_Marshal_UINT64_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_UINT64 &typedArray );
-HRESULT Interop_Marshal_CHAR_ARRAY  ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_CHAR   &typedArray );
-HRESULT Interop_Marshal_INT8_ARRAY  ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_INT8   &typedArray );
-HRESULT Interop_Marshal_INT16_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_INT16  &typedArray );
-HRESULT Interop_Marshal_INT32_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_INT32  &typedArray );
-HRESULT Interop_Marshal_INT64_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_INT64  &typedArray );
-HRESULT Interop_Marshal_float_ARRAY ( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_float  &typedArray );
-HRESULT Interop_Marshal_double_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT32 paramIndex, CLR_RT_TypedArray_double &typedArray );
+HRESULT Interop_Marshal_bool_ARRAY  ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_UINT8  &typedArray );
+HRESULT Interop_Marshal_UINT8_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_UINT8  &typedArray );
+HRESULT Interop_Marshal_UINT16_ARRAY( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_UINT16 &typedArray );
+HRESULT Interop_Marshal_UINT32_ARRAY( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_UINT32 &typedArray );
+HRESULT Interop_Marshal_UINT64_ARRAY( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_UINT64 &typedArray );
+HRESULT Interop_Marshal_CHAR_ARRAY  ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_CHAR   &typedArray );
+HRESULT Interop_Marshal_INT8_ARRAY  ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_INT8   &typedArray );
+HRESULT Interop_Marshal_INT16_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_INT16  &typedArray );
+HRESULT Interop_Marshal_INT32_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_INT32  &typedArray );
+HRESULT Interop_Marshal_INT64_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_INT64  &typedArray );
+HRESULT Interop_Marshal_float_ARRAY ( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_float  &typedArray );
+HRESULT Interop_Marshal_double_ARRAY( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, CLR_RT_TypedArray_double &typedArray );
 
 /**********************************************************************
 **
@@ -247,25 +247,25 @@ HRESULT Interop_Marshal_double_ARRAY( const CLR_RT_StackFrame &stackFrame, UINT3
 **********************************************************************/
 
 void SetResult_bool  ( CLR_RT_StackFrame &stackFrame, bool   value );
-void SetResult_CHAR  ( CLR_RT_StackFrame &stackFrame, CHAR   value );
-void SetResult_INT8  ( CLR_RT_StackFrame &stackFrame, INT8   value );
-void SetResult_INT16 ( CLR_RT_StackFrame &stackFrame, INT16  value );
-void SetResult_INT32 ( CLR_RT_StackFrame &stackFrame, INT32  value );
-void SetResult_INT64 ( CLR_RT_StackFrame &stackFrame, INT64  value );
-void SetResult_UINT8 ( CLR_RT_StackFrame &stackFrame, UINT8  value );
-void SetResult_UINT16( CLR_RT_StackFrame &stackFrame, UINT16 value );
-void SetResult_UINT32( CLR_RT_StackFrame &stackFrame, UINT32 value );
-void SetResult_UINT64( CLR_RT_StackFrame &stackFrame, UINT64 value );
+void SetResult_CHAR  ( CLR_RT_StackFrame &stackFrame, char   value );
+void SetResult_INT8  ( CLR_RT_StackFrame &stackFrame, signed char   value );
+void SetResult_INT16 ( CLR_RT_StackFrame &stackFrame, signed short int  value );
+void SetResult_INT32 ( CLR_RT_StackFrame &stackFrame, signed int  value );
+void SetResult_INT64 ( CLR_RT_StackFrame &stackFrame, signed __int64  value );
+void SetResult_UINT8 ( CLR_RT_StackFrame &stackFrame, unsigned char  value );
+void SetResult_UINT16( CLR_RT_StackFrame &stackFrame, unsigned short int value );
+void SetResult_UINT32( CLR_RT_StackFrame &stackFrame, unsigned int value );
+void SetResult_UINT64( CLR_RT_StackFrame &stackFrame, unsigned __int64 value );
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 void SetResult_float ( CLR_RT_StackFrame &stackFrame, float  value );
 void SetResult_double( CLR_RT_StackFrame &stackFrame, double value );
 #else
-void SetResult_float ( CLR_RT_StackFrame &stackFrame, INT32 value );
-void SetResult_double( CLR_RT_StackFrame &stackFrame, INT64 value );
+void SetResult_float ( CLR_RT_StackFrame &stackFrame, signed int value );
+void SetResult_double( CLR_RT_StackFrame &stackFrame, signed __int64 value );
 
 #endif
 
-void SetResult_LPCSTR( CLR_RT_StackFrame &stackFrame, LPCSTR value );
+void SetResult_LPCSTR( CLR_RT_StackFrame &stackFrame, const char* value );
 
 /**********************************************************************
 **
@@ -284,29 +284,29 @@ void SetResult_LPCSTR( CLR_RT_StackFrame &stackFrame, LPCSTR value );
 **
 ** Returns:   S_OK on success or error in case of paramter mismatch or invalid data passed from managed code.
 **********************************************************************/
-HRESULT Interop_Marshal_bool_ByRef  ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, UINT8  *&pParam );
-HRESULT Interop_Marshal_UINT8_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, UINT8  *&pParam );
-HRESULT Interop_Marshal_UINT16_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, UINT16 *&pParam );
-HRESULT Interop_Marshal_UINT32_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, UINT32 *&pParam );
-HRESULT Interop_Marshal_UINT64_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, UINT64 *&pParam );
-HRESULT Interop_Marshal_CHAR_ByRef  ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, CHAR   *&pParam );
-HRESULT Interop_Marshal_INT8_ByRef  ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, INT8   *&pParam );
-HRESULT Interop_Marshal_INT16_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, INT16  *&pParam );
-HRESULT Interop_Marshal_INT32_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, INT32  *&pParam );
-HRESULT Interop_Marshal_INT64_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, INT64  *&pParam );
+HRESULT Interop_Marshal_bool_ByRef  ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, unsigned char  *&pParam );
+HRESULT Interop_Marshal_UINT8_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, unsigned char  *&pParam );
+HRESULT Interop_Marshal_UINT16_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, unsigned short int *&pParam );
+HRESULT Interop_Marshal_UINT32_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, unsigned int *&pParam );
+HRESULT Interop_Marshal_UINT64_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, unsigned __int64 *&pParam );
+HRESULT Interop_Marshal_CHAR_ByRef  ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, char   *&pParam );
+HRESULT Interop_Marshal_INT8_ByRef  ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, signed char   *&pParam );
+HRESULT Interop_Marshal_INT16_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, signed short int  *&pParam );
+HRESULT Interop_Marshal_INT32_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, signed int  *&pParam );
+HRESULT Interop_Marshal_INT64_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, signed __int64  *&pParam );
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
-HRESULT Interop_Marshal_float_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, float  *&pParam );
-HRESULT Interop_Marshal_double_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, double *&pParam );
+HRESULT Interop_Marshal_float_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, float  *&pParam );
+HRESULT Interop_Marshal_double_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, double *&pParam );
 #else
-HRESULT Interop_Marshal_float_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, INT32  *&pParam );
-HRESULT Interop_Marshal_double_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, INT64  *&pParam );
+HRESULT Interop_Marshal_float_ByRef ( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, signed int  *&pParam );
+HRESULT Interop_Marshal_double_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, signed __int64  *&pParam );
 
 #endif
 
 
 // For unsuppoted types return NULL reference
 
-HRESULT Interop_Marshal_UNSUPPORTED_TYPE_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, UINT32 paramIndex, UNSUPPORTED_TYPE *&pParam );
+HRESULT Interop_Marshal_UNSUPPORTED_TYPE_ByRef( const CLR_RT_StackFrame &stackFrame, void *pHeapBlock, unsigned int paramIndex, UNSUPPORTED_TYPE *&pParam );
 /**********************************************************************
 **
 ** Function: Interop_Marshal_StoreRef
@@ -320,7 +320,7 @@ HRESULT Interop_Marshal_UNSUPPORTED_TYPE_ByRef( const CLR_RT_StackFrame &stackFr
 **
 ** Returns:   S_OK on success or error from StoreToReference. Error return would cause exception thrown in managed code.
 **********************************************************************/
-HRESULT Interop_Marshal_StoreRef( CLR_RT_StackFrame &stackFrame, void *pVoidHeapBlock, UINT32 paramIndex );
+HRESULT Interop_Marshal_StoreRef( CLR_RT_StackFrame &stackFrame, void *pVoidHeapBlock, unsigned int paramIndex );
 
 /**********************************************************************
 **
@@ -345,27 +345,27 @@ CLR_RT_HeapBlock* Interop_Marshal_RetrieveManagedObject( CLR_RT_StackFrame &stac
 **
 ** Returns:   Reference to the field.
 **********************************************************************/
-UINT8  &Interop_Marshal_GetField_bool  ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-UINT8  &Interop_Marshal_GetField_UINT8 ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-UINT16 &Interop_Marshal_GetField_UINT16( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-UINT32 &Interop_Marshal_GetField_UINT32( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-UINT64 &Interop_Marshal_GetField_UINT64( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-CHAR   &Interop_Marshal_GetField_CHAR  ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-INT8   &Interop_Marshal_GetField_INT8  ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-INT16  &Interop_Marshal_GetField_INT16 ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-INT32  &Interop_Marshal_GetField_INT32 ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-INT64  &Interop_Marshal_GetField_INT64 ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
+unsigned char  &Interop_Marshal_GetField_bool  ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+unsigned char  &Interop_Marshal_GetField_UINT8 ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+unsigned short int &Interop_Marshal_GetField_UINT16( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+unsigned int &Interop_Marshal_GetField_UINT32( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+unsigned __int64 &Interop_Marshal_GetField_UINT64( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+char   &Interop_Marshal_GetField_CHAR  ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+signed char   &Interop_Marshal_GetField_INT8  ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+signed short int  &Interop_Marshal_GetField_INT16 ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+signed int  &Interop_Marshal_GetField_INT32 ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+signed __int64  &Interop_Marshal_GetField_INT64 ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
 //----------------- Float point types - float and double
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
-float  &Interop_Marshal_GetField_float ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-double &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
+float  &Interop_Marshal_GetField_float ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+double &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
 #else
-INT32 &Interop_Marshal_GetField_float ( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
-INT64 &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
+signed int &Interop_Marshal_GetField_float ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+signed __int64 &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
 #endif
 
 // For all other unsupported types we always return NULL reference.
-UNSUPPORTED_TYPE &Interop_Marshal_GetField_UNSUPPORTED_TYPE( CLR_RT_HeapBlock *pThis, UINT32 fieldIndex );
+UNSUPPORTED_TYPE &Interop_Marshal_GetField_UNSUPPORTED_TYPE( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
 
 /**********************************************************************
 **
@@ -377,7 +377,7 @@ UNSUPPORTED_TYPE &Interop_Marshal_GetField_UNSUPPORTED_TYPE( CLR_RT_HeapBlock *p
 **              [pContext] - Pointer to the context that should be passed to the ISR ( INterrupt Service Routine ).
 **              [userData] - User data passed to constructor of NativeEventDispatcher.
 **********************************************************************/
-typedef HRESULT (*InitializeInterruptsProc     )( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, UINT64 userData );
+typedef HRESULT (*InitializeInterruptsProc     )( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, unsigned __int64 userData );
 
 /**********************************************************************
 ** EnableorDisableInterruptsProc
@@ -411,8 +411,8 @@ typedef HRESULT (*CleanupInterruptsProc)( CLR_RT_HeapBlock_NativeEventDispatcher
 **  {
 **      GLOBAL_LOCK(irq);
 **      // To do - Initialize userData1 and userData2 to userData.
-**      UINT32 userData1;
-**      UINT32 userData2;
+**      unsigned int userData1;
+**      unsigned int userData2;
 **      // Saves data to queue. Each call to SaveNativeEventToHALQueue initiates managed callback.
 **      SaveNativeEventToHALQueue( pContext, userData1, userData2 );
 **  }
@@ -445,12 +445,12 @@ CLR_RT_HeapBlock_NativeEventDispatcher *CreateNativeEventInstance( CLR_RT_StackF
 
 // Saves data from ISR. The data from this queue is used to call managed callbacks.
 // Should be called from ISR.
-__nfweak void SaveNativeEventToHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, UINT32 data1, UINT32 data2 );
+__nfweak void SaveNativeEventToHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, unsigned int data1, unsigned int data2 );
 
 // Cleans up the data in the queue after interrupts were closed and no managed callbacks are expected.
 __nfweak void CleanupNativeEventsFromHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext );
 
-void CLR_RetrieveCurrentMethod( UINT32& assmIdx, UINT32& methodIdx );
+void CLR_RetrieveCurrentMethod( unsigned int& assmIdx, unsigned int& methodIdx );
 
 void CLR_SoftReboot();
 

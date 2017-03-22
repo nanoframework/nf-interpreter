@@ -7,8 +7,8 @@
 #ifndef _NANOHAL_TIME_H_
 #define _NANOHAL_TIME_H_ 1
 
-#include <targetHAL_Time.h>
 #include <nanoHAL_Types.h>
+#include <targetHAL_Time.h>
 #include <nanoWeak.h>
 
 /// Our time origin is 1/1/1601 00:00:00.000.000.  In Gregorian Calendar Jan 1, 1601 was also a Monday.
@@ -28,7 +28,7 @@
 #define TIMEOUT_ZERO      LONGLONGCONSTANT(0x0000000000000000)
 #define TIMEOUT_INFINITE  LONGLONGCONSTANT(0x7FFFFFFFFFFFFFFF)
 
-// UNDONE: FIXME #define TIME_ZONE_OFFSET    ((INT64)Time_GetTimeZoneOffset() * 600000000)
+// UNDONE: FIXME #define TIME_ZONE_OFFSET    ((signed long long)Time_GetTimeZoneOffset() * 600000000)
 
 #define NANOHAL_TIME_CONVERSION_MICRO_TO_SECONDS                1000000
 
@@ -44,64 +44,64 @@
 /// if you are to create that date. To stay safe side 1/1/1601 is taken as origin, as was done for Windows.
 
 
-INT64 HAL_Time_SysTicksToTime(UINT32 sysTicks);
+signed long long HAL_Time_SysTicksToTime(unsigned int sysTicks);
 
 /// <summary>
 /// Time according to this system. 
 /// </summary>
 /// <returns>Returns current time in 100ns elapsed since 1/1/1601:00:00:00.000 UTC.</returns>
-INT64  HAL_Time_CurrentTime();
+signed long long  HAL_Time_CurrentTime();
 
 /// <summary>
 /// UTC time according to this system. 
 /// </summary>
 /// <returns>Returns current UTC time in 100ns elapsed since 1/1/1601:00:00:00.000 UTC.</returns>
-// __nfweak INT64       Time_GetUtcTime();
+// __nfweak signed long long       Time_GetUtcTime();
 
 /// <summary>
 /// Local time according to the Time subsystem.
 /// </summary>
 /// <returns>Local time in 100ns elapsed since 1/1/1601:00:00:00.000 local time.</returns>
-// __nfweak INT64       Time_GetLocalTime();
+// __nfweak signed long long       Time_GetLocalTime();
 
 /// <summary>
 /// Offset from GMT.
 /// </summary>
 /// <returns>In minutes, for example Pacific Time would be GMT-8 = -480.</returns>
-// __nfweak INT32 Time_GetTimeZoneOffset();
+// __nfweak signed int Time_GetTimeZoneOffset();
 
 /// <summary>
 /// Retrieves time since device was booted.
 /// </summary>
 /// <returns>Time in 100ns.</returns>
-//INT64 HAL_Time_GetMachineTime();
+//signed long long HAL_Time_GetMachineTime();
 
 /// <summary>
 /// Converts 64bit time value to SystemTime structure. 64bit time is assumed as an offset from 1/1/1601:00:00:00.000 in 100ns.
 /// </summary>
 /// <returns>True if conversion is successful.</returns>
-BOOL HAL_Time_ToSystemTime(INT64 time, SYSTEMTIME* systemTime);
+bool HAL_Time_ToSystemTime(signed long long time, SYSTEMTIME* systemTime);
 
 /// <summary>
 /// Retrieves number of days given a month and a year. Calculates for leap years.
 /// </summary>
 /// <returns>S_OK if successful.</returns>
-HRESULT HAL_Time_DaysInMonth(INT32 year, INT32 month, INT32* days);
+HRESULT HAL_Time_DaysInMonth(signed int year, signed int month, signed int* days);
 
 /// <summary>
 /// Retrieves number of days since the beginning of the year given a month and a year. Calculates for leap years.
 /// </summary>
 /// <returns>S_OK if successful.</returns>
-HRESULT HAL_Time_AccDaysInMonth(INT32 year, INT32 month, INT32* days);
+HRESULT HAL_Time_AccDaysInMonth(signed int year, signed int month, signed int* days);
 
 /// <summary>
 /// Converts SYSTEMTIME structure to 64bit time, which is assumed as an offset from 1/1/1601:00:00:00.000 in 100ns.
 /// </summary>
 /// <returns>Time value.</returns>
-INT64 HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime);
+signed long long HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime);
 
 /// APIs to convert between types
-// FIXME BOOL     HAL_Time_TimeSpanToStringEx( const INT64& ticks, LPSTR& buf, size_t& len );
-LPCSTR   HAL_Time_CurrentDateTimeToString();
+// FIXME bool     HAL_Time_TimeSpanToStringEx( const signed long long& ticks, char*& buf, size_t& len );
+const char*   HAL_Time_CurrentDateTimeToString();
 
 #endif //_NANOHAL_TIME_H_

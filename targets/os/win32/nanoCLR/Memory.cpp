@@ -8,23 +8,23 @@
 //using namespace Microsoft::SPOT::Emulator;
 
 // From minheap.cpp
-static UINT8* s_Memory_Start  = NULL;
-static UINT32 s_Memory_Length = 1024*1024*10;
+static unsigned char* s_Memory_Start  = NULL;
+static unsigned int s_Memory_Length = 1024*1024*10;
 
 
-void HeapLocation( UINT8*& BaseAddress, UINT32& SizeInBytes )
+void HeapLocation( unsigned char*& BaseAddress, unsigned int& SizeInBytes )
 {
     if(!s_Memory_Start)
     {
-        s_Memory_Start = (UINT8*)::VirtualAlloc( NULL, s_Memory_Length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE );
+        s_Memory_Start = (unsigned char*)::VirtualAlloc( NULL, s_Memory_Length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE );
 
         if(s_Memory_Start)
         {
             memset( s_Memory_Start, 0xEA, s_Memory_Length );
         }
 
-        HalSystemConfig.RAM1.Base = (UINT32)(size_t)s_Memory_Start;
-        HalSystemConfig.RAM1.Size = (UINT32)(size_t)s_Memory_Length;
+        HalSystemConfig.RAM1.Base = (unsigned int)(size_t)s_Memory_Start;
+        HalSystemConfig.RAM1.Size = (unsigned int)(size_t)s_Memory_Length;
     }
 
     BaseAddress = s_Memory_Start;
@@ -32,13 +32,13 @@ void HeapLocation( UINT8*& BaseAddress, UINT32& SizeInBytes )
 }
 
 
-static UINT8* s_CustomHeap_Start  = NULL;
+static unsigned char* s_CustomHeap_Start  = NULL;
 
-void CustomHeapLocation( UINT8*& BaseAddress, UINT32& SizeInBytes )
+void CustomHeapLocation( unsigned char*& BaseAddress, unsigned int& SizeInBytes )
 {
     if(!s_CustomHeap_Start)
     {
-        s_CustomHeap_Start = (UINT8*)::VirtualAlloc( NULL, s_Memory_Length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE );
+        s_CustomHeap_Start = (unsigned char*)::VirtualAlloc( NULL, s_Memory_Length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE );
 
         if(s_CustomHeap_Start)
         {

@@ -18,7 +18,7 @@ void CLR_Debug::RedirectToString( std::string* str )
     s_redirectedString = str;
 }
 
-HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line )
+HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const char* szFile, int line )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     switch(hr)
@@ -45,7 +45,7 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFil
 #else
 
 #if defined(NANOCLR_TRACE_HRESULT)
-HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line )
+HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const char* szFile, int line )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     switch(hr)
@@ -67,7 +67,7 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFil
 
 //--//
 
-bool CLR_SafeSprintfV( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, va_list arg )
+bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     int  chars = hal_vsnprintf( szBuffer, iBuffer, format, arg );
@@ -81,7 +81,7 @@ bool CLR_SafeSprintfV( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, va_list 
     return fRes;
 }
 
-bool CLR_SafeSprintf( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, ... )
+bool CLR_SafeSprintf( char*& szBuffer, size_t& iBuffer, const char* format, ... )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     va_list arg;
@@ -134,7 +134,7 @@ void CLR_Debug::Emit( const char *text, int len )
 
             if(s_CLR_RT_fTrace_RedirectLinesPerFile)
             {
-                WCHAR rgBuf[ 64 ];
+                wchar_t rgBuf[ 64 ];
 
                 swprintf( rgBuf, ARRAYSIZE(rgBuf), L".%08d", num++ );
 
@@ -148,9 +148,9 @@ void CLR_Debug::Emit( const char *text, int len )
 
         if(hFile != INVALID_HANDLE_VALUE)
         {
-            DWORD dwWritten;
+            unsigned long dwWritten;
 
-            ::WriteFile( hFile, text, (DWORD)len, &dwWritten, NULL );
+            ::WriteFile( hFile, text, (unsigned long)len, &dwWritten, NULL );
 
             if(s_CLR_RT_fTrace_RedirectLinesPerFile)
             {
@@ -233,7 +233,7 @@ int CLR_Debug::PrintfV( const char *format, va_list arg )
 
     char   buffer[512];
 
-    LPSTR  szBuffer =           buffer;
+    char*  szBuffer =           buffer;
     size_t iBuffer  = MAXSTRLEN(buffer);
 
     bool fRes = CLR_SafeSprintfV( szBuffer, iBuffer, format, arg );
@@ -407,7 +407,7 @@ void CLR_RT_Assembly::DumpToken( CLR_UINT32 tk )
     case TBL_TypeDef    : { LOOKUP_ELEMENT_IDX( idx, TypeDef    , TYPEDEF               );         CLR_RT_DUMP::TYPE  (  s );                                                                                           break; }
     case TBL_FieldDef   : { LOOKUP_ELEMENT_IDX( idx, FieldDef   , FIELDDEF              );         CLR_RT_DUMP::FIELD (  s );                                                                                           break; }
     case TBL_MethodDef  : { LOOKUP_ELEMENT_IDX( idx, MethodDef  , METHODDEF             );         CLR_RT_DUMP::METHOD(  s );                                                                                           break; }
-    case TBL_Strings    : { LPCSTR p = GetString( idx );                                                                               CLR_Debug::Printf( "'%s'" ,            p                                    );   break; }
+    case TBL_Strings    : { const char* p = GetString( idx );                                                                               CLR_Debug::Printf( "'%s'" ,            p                                    );   break; }
 
     default:
         CLR_Debug::Printf( "[%08x]", tk );
@@ -460,7 +460,7 @@ void CLR_RT_Assembly::DumpSignature( const CLR_UINT8*& p )
     {
         case DATATYPE_VOID      : CLR_Debug::Printf( "VOID"       );                          break;
         case DATATYPE_BOOLEAN   : CLR_Debug::Printf( "BOOLEAN"    );                          break;
-        case DATATYPE_CHAR      : CLR_Debug::Printf( "CHAR"       );                          break;
+        case DATATYPE_CHAR      : CLR_Debug::Printf( "char"       );                          break;
         case DATATYPE_I1        : CLR_Debug::Printf( "I1"         );                          break;
         case DATATYPE_U1        : CLR_Debug::Printf( "U1"         );                          break;
         case DATATYPE_I2        : CLR_Debug::Printf( "I2"         );                          break;
@@ -559,7 +559,7 @@ void CLR_RT_DUMP::TYPE( const CLR_RT_TypeDef_Index& cls )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     char   rgBuffer[ 512 ];
-    LPSTR  szBuffer = rgBuffer;
+    char*  szBuffer = rgBuffer;
     size_t iBuffer  = MAXSTRLEN(rgBuffer);
 
     g_CLR_RT_TypeSystem.BuildTypeName( cls, szBuffer, iBuffer ); rgBuffer[ MAXSTRLEN(rgBuffer) ] = 0;
@@ -588,7 +588,7 @@ void CLR_RT_DUMP::METHOD( const CLR_RT_MethodDef_Index& method )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     char   rgBuffer[ 512 ];
-    LPSTR  szBuffer = rgBuffer;
+    char*  szBuffer = rgBuffer;
     size_t iBuffer  = MAXSTRLEN(rgBuffer);
 
     g_CLR_RT_TypeSystem.BuildMethodName( method, szBuffer, iBuffer );
@@ -600,7 +600,7 @@ void CLR_RT_DUMP::FIELD( const CLR_RT_FieldDef_Index& field )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     char   rgBuffer[ 512 ];
-    LPSTR  szBuffer = rgBuffer;
+    char*  szBuffer = rgBuffer;
     size_t iBuffer  = MAXSTRLEN(rgBuffer);
 
     g_CLR_RT_TypeSystem.BuildFieldName( field, szBuffer, iBuffer );
@@ -608,7 +608,7 @@ void CLR_RT_DUMP::FIELD( const CLR_RT_FieldDef_Index& field )
     CLR_Debug::Printf( "%s", rgBuffer );
 }
 
-void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, LPCSTR text )
+void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, const char* text )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 #define PELEMENT_TO_STRING(elem) case DATATYPE_##elem: CLR_Debug::Printf( "%s", #elem ); break
@@ -710,7 +710,7 @@ void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, LPCSTR text )
 void CLR_RT_DUMP::EXCEPTION( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    LPCSTR msg;
+    const char* msg;
 
     CLR_RT_HeapBlock* obj = Library_corlib_native_System_Exception::GetTarget( ref ); if(!obj) return;
 
@@ -755,7 +755,7 @@ void CLR_RT_DUMP::POST_PROCESS_EXCEPTION( CLR_RT_HeapBlock& ref )
     }
 }
 
-LPCSTR CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
+const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 #define CASE_HRESULT_TO_STRING(hr) case hr: return #hr

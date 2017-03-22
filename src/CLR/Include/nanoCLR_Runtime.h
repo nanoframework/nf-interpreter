@@ -69,12 +69,12 @@ class CLR_XmlUtil
     IXMLDOMDocumentPtr m_xddDoc;
     IXMLDOMNodePtr m_xdnRoot;
     HANDLE                   m_hEvent;    // Used to abort a download.
-    DWORD                    m_dwTimeout; // Used to limit a download.
+    unsigned long                    m_dwTimeout; // Used to limit a download.
 
     void Init ();
     void Clean();
 
-    HRESULT LoadPost( /*[in] */ LPCWSTR szRootTag ,
+    HRESULT LoadPost( /*[in] */ const wchar_t* szRootTag ,
                       /*[out]*/ bool&   fLoaded   ,
                       /*[out]*/ bool*   fFound    );
 
@@ -82,8 +82,8 @@ class CLR_XmlUtil
 
 public:
     CLR_XmlUtil( /*[in]*/ const CLR_XmlUtil& xml                                               );
-    CLR_XmlUtil( /*[in]*/ IXMLDOMDocument*   xddDoc        , /*[in]*/ LPCWSTR szRootTag = NULL );
-    CLR_XmlUtil( /*[in]*/ IXMLDOMNode*       xdnRoot = NULL, /*[in]*/ LPCWSTR szRootTag = NULL );
+    CLR_XmlUtil( /*[in]*/ IXMLDOMDocument*   xddDoc        , /*[in]*/ const wchar_t* szRootTag = NULL );
+    CLR_XmlUtil( /*[in]*/ IXMLDOMNode*       xdnRoot = NULL, /*[in]*/ const wchar_t* szRootTag = NULL );
 
     ~CLR_XmlUtil();
 
@@ -93,55 +93,55 @@ public:
 
     HRESULT DumpError();
 
-    HRESULT New         (                                /*[in]*/ IXMLDOMNode* xdnRoot  , /*[in] */ BOOL    fDeep      = false                     );
-    HRESULT New         (                                /*[in]*/ LPCWSTR      szRootTag, /*[in] */ LPCWSTR szEncoding = L"utf-8" /*L"unicode"*/   );
-    HRESULT Load        ( /*[in ]*/ LPCWSTR    szFile  , /*[in]*/ LPCWSTR      szRootTag, /*[out]*/ bool&   fLoaded, /*[out]*/ bool* fFound = NULL );
-    HRESULT LoadAsStream( /*[in ]*/ IUnknown*  pStream , /*[in]*/ LPCWSTR      szRootTag, /*[out]*/ bool&   fLoaded, /*[out]*/ bool* fFound = NULL );
-    HRESULT LoadAsString( /*[in ]*/ BSTR       bstrData, /*[in]*/ LPCWSTR      szRootTag, /*[out]*/ bool&   fLoaded, /*[out]*/ bool* fFound = NULL );
-    HRESULT Save        ( /*[in ]*/ LPCWSTR    szFile                                                                                              );
+    HRESULT New         (                                /*[in]*/ IXMLDOMNode* xdnRoot  , /*[in] */ bool    fDeep      = false                     );
+    HRESULT New         (                                /*[in]*/ const wchar_t*      szRootTag, /*[in] */ const wchar_t* szEncoding = L"utf-8" /*L"unicode"*/   );
+    HRESULT Load        ( /*[in ]*/ const wchar_t*    szFile  , /*[in]*/ const wchar_t*      szRootTag, /*[out]*/ bool&   fLoaded, /*[out]*/ bool* fFound = NULL );
+    HRESULT LoadAsStream( /*[in ]*/ IUnknown*  pStream , /*[in]*/ const wchar_t*      szRootTag, /*[out]*/ bool&   fLoaded, /*[out]*/ bool* fFound = NULL );
+    HRESULT LoadAsString( /*[in ]*/ BSTR       bstrData, /*[in]*/ const wchar_t*      szRootTag, /*[out]*/ bool&   fLoaded, /*[out]*/ bool* fFound = NULL );
+    HRESULT Save        ( /*[in ]*/ const wchar_t*    szFile                                                                                              );
     HRESULT SaveAsStream( /*[out]*/ IUnknown* *ppStream                                                                                            );
     HRESULT SaveAsString( /*[out]*/ BSTR      *pbstrData                                                                                           );
 
-    HRESULT SetTimeout( /*[in]*/ DWORD dwTimeout );
+    HRESULT SetTimeout( /*[in]*/ unsigned long dwTimeout );
     HRESULT Abort     (                          );
 
-    HRESULT SetVersionAndEncoding( /*[in]*/ LPCWSTR szVersion, /*[in]*/ LPCWSTR szEncoding );
+    HRESULT SetVersionAndEncoding( /*[in]*/ const wchar_t* szVersion, /*[in]*/ const wchar_t* szEncoding );
 
     HRESULT GetDocument    (                         /*[out]*/ IXMLDOMDocument*  * pVal                                        ) const;
     HRESULT GetRoot        (                         /*[out]*/ IXMLDOMNode*      * pVal                                        ) const;
-    HRESULT GetNodes       ( /*[in]*/ LPCWSTR szTag, /*[out]*/ IXMLDOMNodeList*  * pVal                                        ) const;
-    HRESULT GetNode        ( /*[in]*/ LPCWSTR szTag, /*[out]*/ IXMLDOMNode*      * pVal                                        ) const;
-    HRESULT CreateNode     ( /*[in]*/ LPCWSTR szTag, /*[out]*/ IXMLDOMNode*      * pVal, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT GetNodes       ( /*[in]*/ const wchar_t* szTag, /*[out]*/ IXMLDOMNodeList*  * pVal                                        ) const;
+    HRESULT GetNode        ( /*[in]*/ const wchar_t* szTag, /*[out]*/ IXMLDOMNode*      * pVal                                        ) const;
+    HRESULT CreateNode     ( /*[in]*/ const wchar_t* szTag, /*[out]*/ IXMLDOMNode*      * pVal, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
 
-    HRESULT GetAttribute   ( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[out]*/ IXMLDOMAttribute*  *   pValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT GetAttribute   ( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[out]*/ _bstr_t&           bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT GetAttribute   ( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[out]*/ std::wstring&         szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT GetAttribute   ( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[out]*/ LONG&                  lValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT GetValue       ( /*[in]*/ LPCWSTR szTag,                          /*[out]*/ _variant_t&           vValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT GetValue       ( /*[in]*/ LPCWSTR szTag,                          /*[out]*/ _bstr_t&           bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT GetValue       ( /*[in]*/ LPCWSTR szTag,                          /*[out]*/ std::wstring&         szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT GetAttribute   ( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[out]*/ IXMLDOMAttribute*  *   pValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT GetAttribute   ( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[out]*/ _bstr_t&           bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT GetAttribute   ( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[out]*/ std::wstring&         szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT GetAttribute   ( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[out]*/ signed int&                  lValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT GetValue       ( /*[in]*/ const wchar_t* szTag,                          /*[out]*/ _variant_t&           vValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT GetValue       ( /*[in]*/ const wchar_t* szTag,                          /*[out]*/ _bstr_t&           bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT GetValue       ( /*[in]*/ const wchar_t* szTag,                          /*[out]*/ std::wstring&         szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
 
-    HRESULT ModifyAttribute( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[in] */ const _bstr_t&     bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT ModifyAttribute( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[in] */ const std::wstring&   szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT ModifyAttribute( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[in] */ LPCWSTR               szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT ModifyAttribute( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[in] */ LONG                   lValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT ModifyValue    ( /*[in]*/ LPCWSTR szTag,                          /*[in] */ const _variant_t&     vValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT ModifyValue    ( /*[in]*/ LPCWSTR szTag,                          /*[in] */ const _bstr_t&     bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT ModifyValue    ( /*[in]*/ LPCWSTR szTag,                          /*[in] */ const std::wstring&   szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT ModifyAttribute( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[in] */ const _bstr_t&     bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT ModifyAttribute( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[in] */ const std::wstring&   szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT ModifyAttribute( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[in] */ const wchar_t*               szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT ModifyAttribute( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[in] */ signed int                   lValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT ModifyValue    ( /*[in]*/ const wchar_t* szTag,                          /*[in] */ const _variant_t&     vValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT ModifyValue    ( /*[in]*/ const wchar_t* szTag,                          /*[in] */ const _bstr_t&     bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT ModifyValue    ( /*[in]*/ const wchar_t* szTag,                          /*[in] */ const std::wstring&   szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
 
-    HRESULT PutAttribute   ( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[in] */ IXMLDOMAttribute*  *   pValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT PutAttribute   ( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[in] */ const _bstr_t&     bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT PutAttribute   ( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[in] */ const std::wstring&   szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT PutAttribute   ( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[in] */ LPCWSTR               szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT PutAttribute   ( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[in] */ LONG                   lValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT PutValue       ( /*[in]*/ LPCWSTR szTag,                          /*[in] */ const _variant_t&     vValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT PutValue       ( /*[in]*/ LPCWSTR szTag,                          /*[in] */ const _bstr_t&     bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT PutValue       ( /*[in]*/ LPCWSTR szTag,                          /*[in] */ const std::wstring&   szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT PutValue       ( /*[in]*/ LPCWSTR szTag,                          /*[in] */ LPCWSTR               szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT PutAttribute   ( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[in] */ IXMLDOMAttribute*  *   pValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT PutAttribute   ( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[in] */ const _bstr_t&     bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT PutAttribute   ( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[in] */ const std::wstring&   szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT PutAttribute   ( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[in] */ const wchar_t*               szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT PutAttribute   ( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[in] */ signed int                   lValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT PutValue       ( /*[in]*/ const wchar_t* szTag,                          /*[in] */ const _variant_t&     vValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT PutValue       ( /*[in]*/ const wchar_t* szTag,                          /*[in] */ const _bstr_t&     bstrValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT PutValue       ( /*[in]*/ const wchar_t* szTag,                          /*[in] */ const std::wstring&   szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT PutValue       ( /*[in]*/ const wchar_t* szTag,                          /*[in] */ const wchar_t*               szValue, /*[out]*/ bool& fFound, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
 
-    HRESULT RemoveAttribute( /*[in]*/ LPCWSTR szTag, /*[in]*/ LPCWSTR szAttr, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT RemoveValue    ( /*[in]*/ LPCWSTR szTag,                          /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
-    HRESULT RemoveNode     ( /*[in]*/ LPCWSTR szTag,                          /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT RemoveAttribute( /*[in]*/ const wchar_t* szTag, /*[in]*/ const wchar_t* szAttr, /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT RemoveValue    ( /*[in]*/ const wchar_t* szTag,                          /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
+    HRESULT RemoveNode     ( /*[in]*/ const wchar_t* szTag,                          /*[in]*/ IXMLDOMNode* pxdnNode = NULL );
 };
 
 //--//
@@ -151,15 +151,15 @@ typedef std::vector< CLR_UINT8 > CLR_RT_Buffer;
 
 struct CLR_RT_FileStore
 {
-    static HRESULT LoadFile( LPCWSTR szFile,       CLR_RT_Buffer& vec          );
-    static HRESULT SaveFile( LPCWSTR szFile, const CLR_RT_Buffer& vec          );
-    static HRESULT SaveFile( LPCWSTR szFile, const CLR_UINT8* buf, size_t size );
+    static HRESULT LoadFile( const wchar_t* szFile,       CLR_RT_Buffer& vec          );
+    static HRESULT SaveFile( const wchar_t* szFile, const CLR_RT_Buffer& vec          );
+    static HRESULT SaveFile( const wchar_t* szFile, const CLR_UINT8* buf, size_t size );
 
-    static HRESULT ExtractTokensFromFile( LPCWSTR szFileName, CLR_RT_StringVector& vec, LPCWSTR separators = L" \t", bool fNoComments = true );
+    static HRESULT ExtractTokensFromFile( const wchar_t* szFileName, CLR_RT_StringVector& vec, const wchar_t* separators = L" \t", bool fNoComments = true );
 
-    static void ExtractTokens          ( const CLR_RT_Buffer& buf   , CLR_RT_StringVector& vec, LPCWSTR separators = L" \t", bool fNoComments = true );
-    static void ExtractTokensFromBuffer( LPWSTR               szLine, CLR_RT_StringVector& vec, LPCWSTR separators = L" \t", bool fNoComments = true );
-    static void ExtractTokensFromString( LPCWSTR              szLine, CLR_RT_StringVector& vec, LPCWSTR separators = L" \t"                          );
+    static void ExtractTokens          ( const CLR_RT_Buffer& buf   , CLR_RT_StringVector& vec, const wchar_t* separators = L" \t", bool fNoComments = true );
+    static void ExtractTokensFromBuffer( wchar_t*               szLine, CLR_RT_StringVector& vec, const wchar_t* separators = L" \t", bool fNoComments = true );
+    static void ExtractTokensFromString( const wchar_t*              szLine, CLR_RT_StringVector& vec, const wchar_t* separators = L" \t"                          );
 };
 
 #endif
@@ -346,10 +346,10 @@ private:
 
 struct CLR_RT_MemoryRange
 {
-    UINT8* m_location;
-    UINT32 m_size;
+    unsigned char* m_location;
+    unsigned int m_size;
 
-    bool LimitToRange( CLR_RT_MemoryRange& filtered, UINT8* address, UINT32 length ) const;
+    bool LimitToRange( CLR_RT_MemoryRange& filtered, unsigned char* address, unsigned int length ) const;
 };
 
 extern CLR_RT_MemoryRange s_CLR_RT_Heap;
@@ -388,12 +388,12 @@ public:
 #else
     CLR_INT64 NextDouble();
 #endif
-    void   NextBytes( BYTE* buffer, UINT32 count );
+    void   NextBytes( unsigned char* buffer, unsigned int count );
 };
 
 //--//
 
-extern void CLR_RT_GetVersion( UINT16* pMajor, UINT16* pMinor, UINT16* pBuild, UINT16* pRevision );
+extern void CLR_RT_GetVersion( unsigned short int* pMajor, unsigned short int* pMinor, unsigned short int* pBuild, unsigned short int* pRevision );
 
 #define NANOCLR_CLEAR(ref) CLR_RT_Memory::ZeroFill( &ref, sizeof(ref) )
 
@@ -708,7 +708,7 @@ struct CLR_RT_UnicodeHelper
 
     //--//
 
-    void SetInputUTF8 ( LPCSTR            src ) { m_inputUTF8  = (const CLR_UINT8*)src; }
+    void SetInputUTF8 ( const char*            src ) { m_inputUTF8  = (const CLR_UINT8*)src; }
     void SetInputUTF16( const CLR_UINT16* src ) { m_inputUTF16 =                   src; }
 
     int CountNumberOfCharacters( int max = -1 );
@@ -737,9 +737,9 @@ public:
     UnicodeString();
     ~UnicodeString();
 
-    HRESULT Assign( LPCSTR string );
-    operator LPCWSTR() { return (LPCWSTR)m_wCharArray; }
-    UINT32 Length(){ return m_length; }
+    HRESULT Assign( const char* string );
+    operator const wchar_t*() { return (const wchar_t*)m_wCharArray; }
+    unsigned int Length(){ return m_length; }
 
 private:
     void Release();
@@ -764,17 +764,17 @@ struct CLR_RT_ArrayListHelper
 
 struct CLR_RT_ByteArrayReader
 {
-    HRESULT Init( const UINT8* src, UINT32 srcSize );
+    HRESULT Init( const unsigned char* src, unsigned int srcSize );
 
-    HRESULT Read( void* dst, UINT32 size );
+    HRESULT Read( void* dst, unsigned int size );
     HRESULT Read1Byte( void* dst );
 
-    HRESULT Skip( UINT32 size );
+    HRESULT Skip( unsigned int size );
 
     bool IsValid() { return (source && sourceSize > 0); }
 
-    const UINT8* source;
-    UINT32       sourceSize;
+    const unsigned char* source;
+    unsigned int       sourceSize;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -907,7 +907,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     CLR_UINT32                         m_flags;
 
     const CLR_RECORD_ASSEMBLY*         m_header;                      // ANY HEAP - DO RELOCATION -
-    LPCSTR                             m_szName;                      // ANY HEAP - DO RELOCATION -
+    const char*                             m_szName;                      // ANY HEAP - DO RELOCATION -
 
     const CLR_RT_MethodHandler*        m_nativeCode;
 
@@ -952,7 +952,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 #if defined(_WIN32)
 
     static void InitString( std::map<std::string,CLR_OFFSET>& map );
-    static HRESULT CreateInstance ( const CLR_RECORD_ASSEMBLY* data, CLR_RT_Assembly*& assm, LPCWSTR szName );
+    static HRESULT CreateInstance ( const CLR_RECORD_ASSEMBLY* data, CLR_RT_Assembly*& assm, const wchar_t* szName );
 
 #endif
 
@@ -981,12 +981,12 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     CLR_UINT32 ComputeAssemblyHash( const CLR_RECORD_ASSEMBLYREF* ar );
 
 
-    bool FindTypeDef  ( LPCSTR     name, LPCSTR  nameSpace                                            , CLR_RT_TypeDef_Index&   idx );
-    bool FindTypeDef  ( LPCSTR     name, CLR_IDX scope                                                , CLR_RT_TypeDef_Index&   idx );
+    bool FindTypeDef  ( const char*     name, const char*  nameSpace                                            , CLR_RT_TypeDef_Index&   idx );
+    bool FindTypeDef  ( const char*     name, CLR_IDX scope                                                , CLR_RT_TypeDef_Index&   idx );
     bool FindTypeDef  ( CLR_UINT32 hash                                                               , CLR_RT_TypeDef_Index&   idx );
 
-    bool FindFieldDef ( const CLR_RECORD_TYPEDEF* src, LPCSTR name, CLR_RT_Assembly* base, CLR_SIG sig, CLR_RT_FieldDef_Index&  idx );
-    bool FindMethodDef( const CLR_RECORD_TYPEDEF* src, LPCSTR name, CLR_RT_Assembly* base, CLR_SIG sig, CLR_RT_MethodDef_Index& idx );
+    bool FindFieldDef ( const CLR_RECORD_TYPEDEF* src, const char* name, CLR_RT_Assembly* base, CLR_SIG sig, CLR_RT_FieldDef_Index&  idx );
+    bool FindMethodDef( const CLR_RECORD_TYPEDEF* src, const char* name, CLR_RT_Assembly* base, CLR_SIG sig, CLR_RT_MethodDef_Index& idx );
 
     bool FindNextStaticConstructor( CLR_RT_MethodDef_Index& idx );
 
@@ -1015,7 +1015,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     const CLR_RECORD_RESOURCE_FILE* GetResourceFile( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_RESOURCE_FILE, TBL_ResourcesFiles, i); }
     const CLR_RECORD_RESOURCE     * GetResource    ( CLR_IDX    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_RESOURCE     , TBL_Resources     , i); }
     CLR_PMETADATA                   GetResourceData( CLR_UINT32 i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8               , TBL_ResourcesData , i); }
-    LPCSTR                          GetString      ( CLR_STRING i );
+    const char*                          GetString      ( CLR_STRING i );
     CLR_PMETADATA                   GetSignature   ( CLR_SIG    i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8               , TBL_Signatures    , i); }
     CLR_PMETADATA                   GetByteCode    ( CLR_OFFSET i ) { return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8               , TBL_ByteCode      , i); }
 #undef NANOCLR_ASSEMBLY_RESOLVE
@@ -1045,8 +1045,8 @@ private:
     static FILE* s_toclose;
 
 public:
-    static void Dump_SetDevice  ( FILE *&outputDeviceFile, LPCWSTR szFileName );
-    static void Dump_SetDevice  ( LPCWSTR szFileName      );
+    static void Dump_SetDevice  ( FILE *&outputDeviceFile, const wchar_t* szFileName );
+    static void Dump_SetDevice  ( const wchar_t* szFileName      );
 
     static void Dump_CloseDevice( FILE *&outputDeviceFile);
     static void Dump_CloseDevice(                         );
@@ -1058,18 +1058,18 @@ public:
 
     void Dump( bool fNoByteCode );
 
-    UINT32 GenerateSignatureForNativeMethods();
+    unsigned int GenerateSignatureForNativeMethods();
 
     bool AreInternalMethodsPresent( const CLR_RECORD_TYPEDEF* td );
-    void GenerateSkeleton( LPCWSTR szFileName, LPCWSTR szProjectName );
-    void GenerateSkeletonFromComplientNames( LPCWSTR szFileName, LPCWSTR szProjectName );
+    void GenerateSkeleton( const wchar_t* szFileName, const wchar_t* szProjectName );
+    void GenerateSkeletonFromComplientNames( const wchar_t* szFileName, const wchar_t* szProjectName );
     
     void BuildParametersList( CLR_PMETADATA pMetaData, CLR_RT_VectorOfManagedElements &elemPtrArray );
     void GenerateSkeletonStubFieldsDef( const CLR_RECORD_TYPEDEF *pClsType, FILE *pFileStubHead, std::string strIndent, std::string strMngClassName );
-    void GenerateSkeletonStubCode( LPCWSTR szFilePath, FILE *pFileDotNetProj );
+    void GenerateSkeletonStubCode( const wchar_t* szFilePath, FILE *pFileDotNetProj );
 
     void BuildMethodName_Legacy( const CLR_RECORD_METHODDEF* md, std::string& name, CLR_RT_StringMap& mapMethods );
-    void GenerateSkeleton_Legacy( LPCWSTR szFileName, LPCWSTR szProjectName );
+    void GenerateSkeleton_Legacy( const wchar_t* szFileName, const wchar_t* szProjectName );
 
 
     void BuildMethodName( const CLR_RECORD_METHODDEF* md, std::string& name    , CLR_RT_StringMap& mapMethods );
@@ -1124,7 +1124,7 @@ struct CLR_RT_AppDomain : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP 
     CLR_RT_AppDomainAssembly* m_appDomainAssemblyLastAccess; // EVENT HEAP  - NO RELOCATION -
     bool                      m_fCanBeUnloaded;
 
-    static HRESULT CreateInstance ( LPCSTR szName, CLR_RT_AppDomain*& appDomain);
+    static HRESULT CreateInstance ( const char* szName, CLR_RT_AppDomain*& appDomain);
 
     void DestroyInstance       ();
     void AppDomain_Initialize  ();
@@ -1345,7 +1345,7 @@ struct CLR_RT_DataTypeLookup
     CLR_RT_HeapBlockRelocate m_relocate;
 
 #if defined(_WIN32) || defined(NANOCLR_TRACE_MEMORY_STATS)
-    LPCSTR                   m_name;
+    const char*                   m_name;
 #endif   
 };
 
@@ -1384,7 +1384,7 @@ struct CLR_RT_OpcodeLookup
     static const CLR_UINT16 ATTRIB_HAS_R8                = 0x8000;
 
 #if defined(NANOCLR_OPCODE_NAMES)
-    LPCSTR             m_name;
+    const char*             m_name;
 #endif 
 
 #if defined(NANOCLR_OPCODE_STACKCHANGES)
@@ -1408,9 +1408,9 @@ struct CLR_RT_OpcodeLookup
 #endif
 
 #if defined(NANOCLR_OPCODE_NAMES)
-    LPCSTR Name() const { return m_name; }
+    const char* Name() const { return m_name; }
 #else
-    LPCSTR Name() const { return ""; }
+    const char* Name() const { return ""; }
 #endif
 };
 
@@ -1427,16 +1427,16 @@ struct CLR_RT_LogicalOpcodeLookup
     static const CLR_UINT32 EXCEPTION_ON_CAST      = 0x00000040;
 
 #if defined(NANOCLR_OPCODE_NAMES)
-    LPCSTR     m_name;
+    const char*     m_name;
 #endif
 
     CLR_UINT32 m_flags;
 
 
 #if defined(NANOCLR_OPCODE_NAMES)
-    LPCSTR Name() const { return m_name; }
+    const char* Name() const { return m_name; }
 #else
-    LPCSTR Name() const { return ""; }
+    const char* Name() const { return ""; }
 #endif
 };
 
@@ -1449,7 +1449,7 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 {
     struct CompatibilityLookup
     {
-        LPCSTR             name;
+        const char*             name;
         CLR_RECORD_VERSION version;
     };
 
@@ -1481,28 +1481,28 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 
     HRESULT ResolveAll               (                   );
     HRESULT PrepareForExecution      (                   );
-    HRESULT PrepareForExecutionHelper( LPCSTR szAssembly );
+    HRESULT PrepareForExecutionHelper( const char* szAssembly );
 
-    CLR_RT_Assembly* FindAssembly( LPCSTR     name, const CLR_RECORD_VERSION* ver, bool fExact  );
+    CLR_RT_Assembly* FindAssembly( const char*     name, const CLR_RECORD_VERSION* ver, bool fExact  );
     
-    bool             FindTypeDef ( LPCSTR     name, LPCSTR nameSpace, CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res );
-    bool             FindTypeDef ( LPCSTR     name,                   CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res );
-    bool             FindTypeDef ( LPCSTR     name, LPCSTR nameSpace,                        CLR_RT_TypeDef_Index& res );
+    bool             FindTypeDef ( const char*     name, const char* nameSpace, CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res );
+    bool             FindTypeDef ( const char*     name,                   CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res );
+    bool             FindTypeDef ( const char*     name, const char* nameSpace,                        CLR_RT_TypeDef_Index& res );
     bool             FindTypeDef ( CLR_UINT32 hash                  ,                        CLR_RT_TypeDef_Index& res );
-    bool             FindTypeDef ( LPCSTR     name                  ,                        CLR_RT_TypeDef_Index& res );
-    bool             FindTypeDef ( LPCSTR     name                  , CLR_RT_Assembly* assm, CLR_RT_ReflectionDef_Index& reflex );
+    bool             FindTypeDef ( const char*     name                  ,                        CLR_RT_TypeDef_Index& res );
+    bool             FindTypeDef ( const char*     name                  , CLR_RT_Assembly* assm, CLR_RT_ReflectionDef_Index& reflex );
 
-    HRESULT LocateResourceFile( CLR_RT_Assembly_Instance assm, LPCSTR name, CLR_INT32& idxResourceFile );
+    HRESULT LocateResourceFile( CLR_RT_Assembly_Instance assm, const char* name, CLR_INT32& idxResourceFile );
     HRESULT LocateResource    ( CLR_RT_Assembly_Instance assm, CLR_INT32 idxResourceFile, CLR_INT16 id, const CLR_RECORD_RESOURCE*& res, CLR_UINT32& size );
 
-    HRESULT BuildTypeName      ( const CLR_RT_TypeDef_Index&   cls, LPSTR& szBuffer, size_t& size, CLR_UINT32 flags, CLR_UINT32 levels );
-    HRESULT BuildTypeName      ( const CLR_RT_TypeDef_Index&   cls, LPSTR& szBuffer, size_t& size                                      );
-    HRESULT BuildMethodName    ( const CLR_RT_MethodDef_Index& md , LPSTR& szBuffer, size_t& size                                      );
-    HRESULT BuildFieldName     ( const CLR_RT_FieldDef_Index&  fd , LPSTR& szBuffer, size_t& size                                      );
-    HRESULT QueueStringToBuffer(                                    LPSTR& szBuffer, size_t& size, LPCSTR szText                       );
+    HRESULT BuildTypeName      ( const CLR_RT_TypeDef_Index&   cls, char*& szBuffer, size_t& size, CLR_UINT32 flags, CLR_UINT32 levels );
+    HRESULT BuildTypeName      ( const CLR_RT_TypeDef_Index&   cls, char*& szBuffer, size_t& size                                      );
+    HRESULT BuildMethodName    ( const CLR_RT_MethodDef_Index& md , char*& szBuffer, size_t& size                                      );
+    HRESULT BuildFieldName     ( const CLR_RT_FieldDef_Index&  fd , char*& szBuffer, size_t& size                                      );
+    HRESULT QueueStringToBuffer(                                    char*& szBuffer, size_t& size, const char* szText                       );
 
     bool FindVirtualMethodDef( const CLR_RT_TypeDef_Index& cls, const CLR_RT_MethodDef_Index& calleeMD                   , CLR_RT_MethodDef_Index& idx );
-    bool FindVirtualMethodDef( const CLR_RT_TypeDef_Index& cls, const CLR_RT_MethodDef_Index& calleeMD, LPCSTR calleeName, CLR_RT_MethodDef_Index& idx );
+    bool FindVirtualMethodDef( const CLR_RT_TypeDef_Index& cls, const CLR_RT_MethodDef_Index& calleeMD, const char* calleeName, CLR_RT_MethodDef_Index& idx );
 
     static bool MatchSignature       ( CLR_RT_SignatureParser& parserLeft      , CLR_RT_SignatureParser& parserRight                             );
     static bool MatchSignatureDirect ( CLR_RT_SignatureParser& parserLeft      , CLR_RT_SignatureParser& parserRight      , bool fIsInstanceOfOK );
@@ -1512,7 +1512,7 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static CLR_UINT32   MapDataTypeToElementType( CLR_DataType dt );
 
 #if defined(_WIN32)
-    void Dump( LPCWSTR szFileName, bool fNoByteCode );
+    void Dump( const wchar_t* szFileName, bool fNoByteCode );
 #endif
 
     //--//
@@ -1655,7 +1655,7 @@ struct CLR_RT_AttributeParser
         CLR_RT_HeapBlock m_value;
 
         int              m_pos;
-        LPCSTR           m_name;
+        const char*           m_name;
     };
 
     //--//
@@ -1680,7 +1680,7 @@ struct CLR_RT_AttributeParser
     HRESULT Next( Value*& res );
 
 private:
-    LPCSTR GetString();
+    const char* GetString();
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1923,7 +1923,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 
     void    SetResult_Boolean( bool              val                        );
     void    SetResult_Object ( CLR_RT_HeapBlock* val                        );
-    HRESULT SetResult_String ( LPCSTR            val                        );
+    HRESULT SetResult_String ( const char*            val                        );
 
     HRESULT SetupTimeout( CLR_RT_HeapBlock& input, CLR_INT64*& output );
 
@@ -2418,7 +2418,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
     CLR_UINT32                 m_status;
     CLR_UINT32                 m_flags;
     int                        m_executionCounter;
-    volatile BOOL              m_timeQuantumExpired;
+    volatile bool              m_timeQuantumExpired;
 
     CLR_RT_HeapBlock_Delegate* m_dlg;                   // OBJECT HEAP - DO RELOCATION -
     CLR_RT_HeapBlock           m_currentException;      // OBJECT HEAP - DO RELOCATION -
@@ -2700,7 +2700,7 @@ struct CLR_RT_EventCache
     // the scratch array is used to avoid bringing in arm ABI methods (for semihosting)
     // struct arrays require initialization with the v3.0 compiler and this is done with ABI methods,
     // unless of course you provide a work around lik this ;-)
-    UINT32                  m_scratch[ (sizeof(BoundedList) * c_maxFastLists + 3) / sizeof(UINT32) ];
+    unsigned int                  m_scratch[ (sizeof(BoundedList) * c_maxFastLists + 3) / sizeof(unsigned int) ];
     BoundedList*            m_events;
 
     VirtualMethodTable      m_lookup_VirtualMethod;
@@ -2910,18 +2910,18 @@ struct CLR_RT_ExecutionEngine
 #define CLR_EE_REBOOT_SET( Cond )       g_CLR_RT_ExecutionEngine.m_iReboot_Options |=  CLR_RT_ExecutionEngine::c_fReboot_##Cond
 #define CLR_EE_REBOOT_CLR( Cond )       g_CLR_RT_ExecutionEngine.m_iReboot_Options &= ~CLR_RT_ExecutionEngine::c_fReboot_##Cond
 
-#define CLR_EE_DBG_EVENT_SEND( cmd, size, payload, flags ) ((g_CLR_DBG_Debuggers[ DEBUGGER_PORT_INDEX ].m_messaging != NULL) ? g_CLR_DBG_Debuggers[ DEBUGGER_PORT_INDEX ].m_messaging->SendEvent( cmd, size, (UINT8*)payload, flags ) : false)
+#define CLR_EE_DBG_EVENT_SEND( cmd, size, payload, flags ) ((g_CLR_DBG_Debuggers[ DEBUGGER_PORT_INDEX ].m_messaging != NULL) ? g_CLR_DBG_Debuggers[ DEBUGGER_PORT_INDEX ].m_messaging->SendEvent( cmd, size, (unsigned char*)payload, flags ) : false)
 
 #if NUM_MESSAGING == 1
-    #define CLR_EE_MSG_EVENT_RPC( cmd, size, payload, flags ) g_CLR_Messaging[ 0 ].SendEvent( cmd, size, (UINT8*)payload, flags )
+    #define CLR_EE_MSG_EVENT_RPC( cmd, size, payload, flags ) g_CLR_Messaging[ 0 ].SendEvent( cmd, size, (unsigned char*)payload, flags )
 #else
-    #define CLR_EE_MSG_EVENT_RPC( cmd, size, payload, flags ) CLR_Messaging::BroadcastEvent( cmd, size, (UINT8*)payload, flags )
+    #define CLR_EE_MSG_EVENT_RPC( cmd, size, payload, flags ) CLR_Messaging::BroadcastEvent( cmd, size, (unsigned char*)payload, flags )
 #endif
 
 #if NUM_DEBUGGERS == 1
     #define CLR_EE_DBG_EVENT_BROADCAST( cmd, size, payload, flags ) CLR_EE_DBG_EVENT_SEND( cmd, size, payload, flags )
 #else
-    #define CLR_EE_DBG_EVENT_BROADCAST( cmd, size, payload, flags ) CLR_DBG_Debugger::BroadcastEvent( cmd, size, (UINT8*)payload, flags )
+    #define CLR_EE_DBG_EVENT_BROADCAST( cmd, size, payload, flags ) CLR_DBG_Debugger::BroadcastEvent( cmd, size, (unsigned char*)payload, flags )
 #endif
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3048,7 +3048,7 @@ struct CLR_RT_ExecutionEngine
     CLR_UINT32 WaitForActivity( CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeout_ms );
     CLR_UINT32 WaitForActivity(                                                                );
 
-    HRESULT Execute      ( LPWSTR entryPointArgs, int maxContextSwitch  );
+    HRESULT Execute      ( wchar_t* entryPointArgs, int maxContextSwitch  );
 
     HRESULT WaitForDebugger();
 
@@ -3085,11 +3085,11 @@ struct CLR_RT_ExecutionEngine
     HRESULT NewArrayList ( CLR_RT_HeapBlock& ref, int size, CLR_RT_HeapBlock_Array*& array );
 
 
-    HRESULT FindFieldDef( CLR_RT_TypeDef_Instance& inst     , LPCSTR szText                          , CLR_RT_FieldDef_Index& res );
-    HRESULT FindFieldDef( CLR_RT_HeapBlock&        reference, LPCSTR szText                          , CLR_RT_FieldDef_Index& res );
-    HRESULT FindField   ( CLR_RT_HeapBlock&        reference, LPCSTR szText, CLR_RT_HeapBlock*& field                             );
-    HRESULT SetField    ( CLR_RT_HeapBlock&        reference, LPCSTR szText, CLR_RT_HeapBlock&  value                             );
-    HRESULT GetField    ( CLR_RT_HeapBlock&        reference, LPCSTR szText, CLR_RT_HeapBlock&  value                             );
+    HRESULT FindFieldDef( CLR_RT_TypeDef_Instance& inst     , const char* szText                          , CLR_RT_FieldDef_Index& res );
+    HRESULT FindFieldDef( CLR_RT_HeapBlock&        reference, const char* szText                          , CLR_RT_FieldDef_Index& res );
+    HRESULT FindField   ( CLR_RT_HeapBlock&        reference, const char* szText, CLR_RT_HeapBlock*& field                             );
+    HRESULT SetField    ( CLR_RT_HeapBlock&        reference, const char* szText, CLR_RT_HeapBlock&  value                             );
+    HRESULT GetField    ( CLR_RT_HeapBlock&        reference, const char* szText, CLR_RT_HeapBlock&  value                             );
 
 
     HRESULT LockObject        ( CLR_RT_HeapBlock& reference, CLR_RT_SubThread* sth, const CLR_INT64& timeExpire, bool fForce );
@@ -3193,7 +3193,7 @@ private:
     CLR_UINT32 WaitSystemEvents( CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire );
 
 #if defined(_WIN32)
-    HRESULT CreateEntryPointArgs( CLR_RT_HeapBlock& args, LPWSTR szCommandLineArgs );
+    HRESULT CreateEntryPointArgs( CLR_RT_HeapBlock& args, wchar_t* szCommandLineArgs );
 #endif
 
     // The lowest value for execution counter in threads.

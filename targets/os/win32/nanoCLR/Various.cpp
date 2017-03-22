@@ -12,9 +12,9 @@
 //using namespace System::Diagnostics;
 //using namespace Microsoft::SPOT::Emulator;
 
-BOOL HAL_Windows_IsShutdownPending()
+bool HAL_Windows_IsShutdownPending()
 {
-    return FALSE; //return EmulatorNative::GetEmulatorNative()->IsShuttingDown();
+    return false; //return EmulatorNative::GetEmulatorNative()->IsShuttingDown();
 }
 
 void HAL_Windows_AcquireGlobalLock()
@@ -27,17 +27,17 @@ void HAL_Windows_ReleaseGlobalLock()
     // UNDONE: FIXME: EmulatorNative::GetEmulatorNative()->EnableInterrupts();
 }
 
-BOOL HAL_Windows_HasGlobalLock()
+bool HAL_Windows_HasGlobalLock()
 {
-    return FALSE; // UNDONE: FIXME: !EmulatorNative::GetEmulatorNative()->AreInterruptsEnabled();
+    return false; // UNDONE: FIXME: !EmulatorNative::GetEmulatorNative()->AreInterruptsEnabled();
 }
 
-UINT64 HAL_Windows_GetPerformanceTicks()
+unsigned __int64 HAL_Windows_GetPerformanceTicks()
 {
     return 0; // UNDONE: FIXME: return EmulatorNative::GetEmulatorNative()->GetCurrentTicks();
 }
 
-void HAL_Windows_Debug_Print( LPSTR szText )
+void HAL_Windows_Debug_Print( char* szText )
 {
     // UNDONE: FIXME: System::Diagnostics::Debug::Print( gcnew System::String(szText) );
 }
@@ -45,17 +45,17 @@ void HAL_Windows_Debug_Print( LPSTR szText )
 
 //HAL_Configuration_Windows g_HAL_Configuration_Windows;
 
-//UINT32 LOAD_IMAGE_CalcCRC;
+//unsigned int LOAD_IMAGE_CalcCRC;
 
 //OEM_MODEL_SKU OEM_Model_SKU = { 1, 2, 3 };
 
 HAL_SYSTEM_CONFIG HalSystemConfig =
 {
-    { TRUE }, // HAL_DRIVER_CONFIG_HEADER Header;
+    { true }, // HAL_DRIVER_CONFIG_HEADER Header;
 
     //--//
 
-    {                                               // UINT32      DebuggerPorts[MAX_DEBUGGERS];
+    {                                               // unsigned int      DebuggerPorts[MAX_DEBUGGERS];
         DEBUGGER_PORT,
     },
 
@@ -98,7 +98,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 //        0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,
 //    },
 //
-//    // UINT32 SectorSignatureCheck[9*8]; // 287 sectors max * 8 changes before erase
+//    // unsigned int SectorSignatureCheck[9*8]; // 287 sectors max * 8 changes before erase
 //    {
 //        0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,
 //        0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,
@@ -190,9 +190,9 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 //
 //    // OEM_MODEL_SKU OEM_Model_SKU;
 //    {
-//        1,     // UINT8   OEM;
-//        2,     // UINT8   Model;
-//        3,     // UINT16  SKU;
+//        1,     // unsigned char   OEM;
+//        2,     // unsigned char   Model;
+//        3,     // unsigned short int  SKU;
 //    },
 //
 //    //--//--//--//
@@ -200,7 +200,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 //    // OEM_SERIAL_NUMBERS OemSerialNumbers
 //    {
 //        { 0, },
-//        { 0, }    // UINT8 system_serial_number[16];
+//        { 0, }    // unsigned char system_serial_number[16];
 //    },
 //
 //    // CLR Config Data
@@ -240,10 +240,10 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 //
 //    // HAL_CONFIG_BLOCK FirstConfigBlock;
 //    {
-//        HAL_CONFIG_BLOCK::c_Version_V2, // UINT32 Signature;
-//        0x8833794c,                     // UINT32 HeaderCRC;
-//        0x00000000,                     // UINT32 DataCRC;
-//        0x00000000,                     // UINT32 Size;
+//        HAL_CONFIG_BLOCK::c_Version_V2, // unsigned int Signature;
+//        0x8833794c,                     // unsigned int HeaderCRC;
+//        0x00000000,                     // unsigned int DataCRC;
+//        0x00000000,                     // unsigned int Size;
 //                                        // char   DriverName[64];
 //    },
 //};
@@ -351,12 +351,12 @@ void CPU_ChangePowerLevel(POWER_LEVEL level)
 
 void CPU_Hibernate()
 {
-    INT64 start = ::HAL_Time_CurrentTime();
+    signed __int64 start = ::HAL_Time_CurrentTime();
 
     while(true)
     {
         //wait on SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY as well??
-        UINT32 mask = ::Events_WaitForEvents( SLEEP_LEVEL__SLEEP, SYSTEM_EVENT_FLAG_COM_IN | SYSTEM_EVENT_HW_INTERRUPT /*| SYSTEM_EVENT_FLAG_BUTTON | SYSTEM_EVENT_FLAG_CHARGER_CHANGE*/, 1000);
+        unsigned int mask = ::Events_WaitForEvents( SLEEP_LEVEL__SLEEP, SYSTEM_EVENT_FLAG_COM_IN | SYSTEM_EVENT_HW_INTERRUPT /*| SYSTEM_EVENT_FLAG_BUTTON | SYSTEM_EVENT_FLAG_CHARGER_CHANGE*/, 1000);
 
         if(mask)
         {
@@ -376,7 +376,7 @@ void CPU_Shutdown()
 //    ::ExitProcess( 0 );
 //}
 
-//BOOL CPU_IsSoftRebootSupported ()
+//bool CPU_IsSoftRebootSupported ()
 //{
 //    return TRUE;
 //}
@@ -386,24 +386,24 @@ char nanoCLR_Dat_End  [1       ];
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BOOL Piezo_Tone( UINT32 Frequency_Hertz, UINT32 Duration_Milliseconds )
+bool Piezo_Tone( unsigned int Frequency_Hertz, unsigned int Duration_Milliseconds )
 {
-    return TRUE;
+    return true;
 }
 
-BOOL Piezo_IsEnabled()
+bool Piezo_IsEnabled()
 {
     return FALSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SecurityKey_Copy( UINT8 KeyCopy[], INT32 BytesToCopy )
+void SecurityKey_Copy( unsigned char KeyCopy[], signed int BytesToCopy )
 {
     memset( KeyCopy, 0, BytesToCopy );
 }
 
-void SecurityKey_LowLevelCopy( UINT8 KeyCopy[], INT32 BytesToCopy )
+void SecurityKey_LowLevelCopy( unsigned char KeyCopy[], signed int BytesToCopy )
 {
     memset( KeyCopy, 0, BytesToCopy );
 }
@@ -414,7 +414,7 @@ void SecurityKey_Print()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void HAL_Windows_FastSleep( INT64 ticks )
+void HAL_Windows_FastSleep( signed __int64 ticks )
 {
     LARGE_INTEGER frequency;
     LARGE_INTEGER countStart;
@@ -428,7 +428,7 @@ void HAL_Windows_FastSleep( INT64 ticks )
 
         double ratio = (double)TIME_CONVERSION__TO_SECONDS / (double)frequency.QuadPart;
 
-        countEnd.QuadPart = (INT64)(((countStart.QuadPart * ratio) + ticks) / ratio);
+        countEnd.QuadPart = (signed __int64)(((countStart.QuadPart * ratio) + ticks) / ratio);
 
         while(countStart.QuadPart < countEnd.QuadPart)
         {
@@ -545,7 +545,7 @@ int hal_vsnprintf( char* buffer, size_t len, const char* format, va_list arg )
 // CRC 32 table for use under ZModem protocol, IEEE 802
 // G(x) = x^32+x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1
 //
-static const UINT32 c_CRCTable[256] =
+static const unsigned int c_CRCTable[256] =
 {
 	0x00000000, 0x04C11DB7, 0x09823B6E, 0x0D4326D9, 0x130476DC, 0x17C56B6B, 0x1A864DB2, 0x1E475005,
 	0x2608EDB8, 0x22C9F00F, 0x2F8AD6D6, 0x2B4BCB61, 0x350C9B64, 0x31CD86D3, 0x3C8EA00A, 0x384FBDBD,
@@ -581,9 +581,9 @@ static const UINT32 c_CRCTable[256] =
 	0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
 };
 
-UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc)
+unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc)
 {
-	const UINT8* ptr = (const UINT8*)rgBlock;
+	const unsigned char* ptr = (const unsigned char*)rgBlock;
 
 	while (nLength-- > 0)
 	{
@@ -609,9 +609,9 @@ size_t CPU_GetUncachableAddress( size_t address )
 
 ///////////////////////////////////////////////////////////////
 
-BOOL Charger_Status( UINT32& Status )
+bool Charger_Status( unsigned int& Status )
 {
-    return TRUE;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -642,18 +642,18 @@ BOOL Charger_Status( UINT32& Status )
 //    HAL_Windows_ReleaseGlobalLock();
 //}
 //
-//BOOL SmartPtr_IRQ::ForceDisabled(void* context)
+//bool SmartPtr_IRQ::ForceDisabled(void* context)
 //{
-//    BOOL ret = GetState();
+//    bool ret = GetState();
 //
 //    HAL_Windows_AcquireGlobalLock();
 //
 //    return ret;
 //}
 //
-//BOOL SmartPtr_IRQ::ForceEnabled(void* context)
+//bool SmartPtr_IRQ::ForceEnabled(void* context)
 //{
-//    BOOL ret = GetState();
+//    bool ret = GetState();
 //
 //    HAL_Windows_ReleaseGlobalLock();
 //
@@ -661,7 +661,7 @@ BOOL Charger_Status( UINT32& Status )
 //}
 //
 //
-//BOOL SmartPtr_IRQ::GetState(void* context)
+//bool SmartPtr_IRQ::GetState(void* context)
 //{
 //    return HAL_Windows_HasGlobalLock();
 //}

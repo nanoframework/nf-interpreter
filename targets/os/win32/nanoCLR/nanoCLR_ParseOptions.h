@@ -19,12 +19,12 @@ struct CLR_RT_ParseOptions
 
     struct Parameter
     {
-        LPCWSTR m_szName;
-        LPCWSTR m_szDescription;
+        const wchar_t* m_szName;
+        const wchar_t* m_szDescription;
 
-        Parameter( LPCWSTR szName, LPCWSTR szDescription );
+        Parameter( const wchar_t* szName, const wchar_t* szDescription );
 
-        virtual bool Parse( LPCWSTR val ) = 0;
+        virtual bool Parse( const wchar_t* val ) = 0;
     };
 
     typedef std::vector< Parameter* > ParameterList;
@@ -38,9 +38,9 @@ struct CLR_RT_ParseOptions
     {
         std::wstring m_data;
 
-        Parameter_Generic( LPCWSTR szName, LPCWSTR szDescription );
+        Parameter_Generic( const wchar_t* szName, const wchar_t* szDescription );
 
-        virtual bool Parse( LPCWSTR arg );
+        virtual bool Parse( const wchar_t* arg );
     };
 
     struct Parameter_String : Parameter
@@ -48,9 +48,9 @@ struct CLR_RT_ParseOptions
         std::wstring  m_dataParsed;
         std::wstring* m_dataPtr;
 
-        Parameter_String( std::wstring* data, LPCWSTR szName, LPCWSTR szDescription );
+        Parameter_String( std::wstring* data, const wchar_t* szName, const wchar_t* szDescription );
 
-        virtual bool Parse( LPCWSTR arg );
+        virtual bool Parse( const wchar_t* arg );
     };
 
     struct Parameter_Boolean : Parameter
@@ -58,9 +58,9 @@ struct CLR_RT_ParseOptions
         bool  m_dataParsed;
         bool* m_dataPtr;
 
-        Parameter_Boolean( bool* data, LPCWSTR szName, LPCWSTR szDescription );
+        Parameter_Boolean( bool* data, const wchar_t* szName, const wchar_t* szDescription );
 
-        virtual bool Parse( LPCWSTR arg );
+        virtual bool Parse( const wchar_t* arg );
     };
 
     struct Parameter_Integer : Parameter
@@ -68,9 +68,9 @@ struct CLR_RT_ParseOptions
         int  m_dataParsed;
         int* m_dataPtr;
 
-        Parameter_Integer( int* data, LPCWSTR szName, LPCWSTR szDescription );
+        Parameter_Integer( int* data, const wchar_t* szName, const wchar_t* szDescription );
 
-        virtual bool Parse( LPCWSTR arg );
+        virtual bool Parse( const wchar_t* arg );
     };
 
     struct Parameter_Float : Parameter
@@ -78,20 +78,20 @@ struct CLR_RT_ParseOptions
         float  m_dataParsed;
         float* m_dataPtr;
 
-        Parameter_Float( float* data, LPCWSTR szName, LPCWSTR szDescription );
+        Parameter_Float( float* data, const wchar_t* szName, const wchar_t* szDescription );
 
-        virtual bool Parse( LPCWSTR arg );
+        virtual bool Parse( const wchar_t* arg );
     };
 
     //--//
 
     struct Command
     {
-        LPCWSTR       m_szName;
-        LPCWSTR       m_szDescription;
+        const wchar_t*       m_szName;
+        const wchar_t*       m_szDescription;
         ParameterList m_params;
 
-        Command( LPCWSTR szName, LPCWSTR szDescription );
+        Command( const wchar_t* szName, const wchar_t* szDescription );
 
         virtual bool Parse( CLR_RT_StringVector& argv, size_t& pos, CLR_RT_ParseOptions& options );
 
@@ -108,7 +108,7 @@ struct CLR_RT_ParseOptions
         bool  m_dataParsed;
         bool* m_dataPtr;
 
-        Command_SetFlag( bool* data, LPCWSTR szName, LPCWSTR szDescription );
+        Command_SetFlag( bool* data, const wchar_t* szName, const wchar_t* szDescription );
 
         virtual bool Parse( CLR_RT_StringVector& argv, size_t& pos, CLR_RT_ParseOptions& options );
     };
@@ -122,11 +122,11 @@ struct CLR_RT_ParseOptions
 
     CLR_RT_ParseOptions();
 
-    HRESULT ExtractOptionsFromFile( LPCWSTR szFileName );
+    HRESULT ExtractOptionsFromFile( const wchar_t* szFileName );
 
     HRESULT ReprocessOptions();
     HRESULT ProcessOptions(                          CLR_RT_StringVector& vec );
-    void    PushArguments ( int argc, LPWSTR argv[], CLR_RT_StringVector& vec );
+    void    PushArguments ( int argc, wchar_t* argv[], CLR_RT_StringVector& vec );
 
     virtual void Usage();
 };

@@ -16,22 +16,22 @@ void BlockStorageList::Initialize()
 {
 }
 
-BOOL BlockStorageList::InitializeDevices()
+bool BlockStorageList::InitializeDevices()
 {
     return TRUE;        
 }
 
-BOOL BlockStorageList::UnInitializeDevices()
+bool BlockStorageList::UnInitializeDevices()
 {
     return TRUE;        
 }
 
-BOOL BlockStorageList::AddDevice( BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, BOOL Init)
+bool BlockStorageList::AddDevice( BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool Init)
 {
     return TRUE;        
 }
 
-BOOL BlockStorageList::RemoveDevice( BlockStorageDevice* pBSD, BOOL UnInit)
+bool BlockStorageList::RemoveDevice( BlockStorageDevice* pBSD, bool UnInit)
 {
     return TRUE;        
 }
@@ -46,90 +46,90 @@ BlockStorageDevice* BlockStorageList::GetNextDevice( BlockStorageDevice& device 
     return NULL; 
 }
 
-UINT32 BlockStorageList::GetNumDevices()            
+unsigned int BlockStorageList::GetNumDevices()            
 { 
     return 0;  
 }
 
-BOOL BlockStorageList::FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, UINT32 PhysicalAddress, ByteAddress &SectAddress)
+bool BlockStorageList::FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, unsigned int PhysicalAddress, ByteAddress &SectAddress)
 {
     *pBSD = NULL;
     return FALSE;
 }
 
-BOOL BlockStorageStream::Initialize(UINT32 blockUsage)
-{
-    return FALSE;
-}
-
-BOOL BlockStorageStream::Initialize(UINT32 usage, BlockStorageDevice* pDevice)
-{
-    return FALSE;
-}
-
-
-UINT32 BlockStorageStream::CurrentAddress() 
-{
-    return 0xFFFFFFFF;
-}
-
-BOOL BlockStorageStream::PrevStream()
-{
-    return FALSE;
-}
-
-BOOL BlockStorageStream::NextStream()
-{
-    return FALSE;
-}
-
-BOOL BlockStorageStream::Seek( INT32 offset, SeekOrigin origin )
-{
-    return TRUE;
-}
-
-BOOL BlockStorageStream::Erase( UINT32 length )
-{
-    return TRUE;
-}
-
-BOOL BlockStorageStream::Write( UINT8* data  , UINT32 length )
-{
-    return TRUE;
-}
-
-BOOL BlockStorageStream::ReadIntoBuffer( UINT8* pBuffer, UINT32 length )
-{
-    return TRUE;
-}
-
-BOOL BlockStorageStream::Read( UINT8** ppBuffer, UINT32 length )
-{
-    return TRUE;
-}
-
+//bool BlockStorageStream::Initialize(unsigned int blockUsage)
+//{
+//    return FALSE;
+//}
+//
+//bool BlockStorageStream::Initialize(unsigned int usage, BlockStorageDevice* pDevice)
+//{
+//    return FALSE;
+//}
+//
+//
+//unsigned int BlockStorageStream::CurrentAddress() 
+//{
+//    return 0xFFFFFFFF;
+//}
+//
+//bool BlockStorageStream::PrevStream()
+//{
+//    return FALSE;
+//}
+//
+//bool BlockStorageStream::NextStream()
+//{
+//    return FALSE;
+//}
+//
+//bool BlockStorageStream::Seek( signed int offset, SeekOrigin origin )
+//{
+//    return TRUE;
+//}
+//
+//bool BlockStorageStream::Erase( unsigned int length )
+//{
+//    return TRUE;
+//}
+//
+//bool BlockStorageStream::Write( unsigned char* data  , unsigned int length )
+//{
+//    return TRUE;
+//}
+//
+//bool BlockStorageStream::ReadIntoBuffer( unsigned char* pBuffer, unsigned int length )
+//{
+//    return TRUE;
+//}
+//
+//bool BlockStorageStream::Read( unsigned char** ppBuffer, unsigned int length )
+//{
+//    return TRUE;
+//}
+//
 
 //--// 
 
-SectorAddress DeviceBlockInfo::PhysicalToSectorAddress( const BlockRegionInfo* pRegion, ByteAddress phyAddress ) const
-{
-    return phyAddress;
-}
-
-BOOL DeviceBlockInfo::FindRegionFromAddress(ByteAddress Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const
-{
-    return FALSE;        
-}
-
-BOOL DeviceBlockInfo::FindNextUsageBlock(UINT32 BlockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const
-{
-    return FALSE;
-}
-
-BOOL DeviceBlockInfo::FindForBlockUsage(UINT32 BlockUsage, ByteAddress &Address, UINT32 &BlockRegionIndex, UINT32 &BlockRangeIndex ) const
-{
-    return FALSE;
-}
+//SectorAddress DeviceBlockInfo::PhysicalToSectorAddress( const BlockRegionInfo* pRegion, ByteAddress phyAddress ) const
+//{
+//    return phyAddress;
+//}
+//
+//bool DeviceBlockInfo::FindRegionFromAddress(ByteAddress Address, unsigned int &BlockRegionIndex, unsigned int &BlockRangeIndex ) const
+//{
+//    return FALSE;        
+//}
+//
+//bool DeviceBlockInfo::FindNextUsageBlock(unsigned int BlockUsage, ByteAddress &Address, unsigned int &BlockRegionIndex, unsigned int &BlockRangeIndex ) const
+//{
+//    return FALSE;
+//}
+//
+//bool DeviceBlockInfo::FindForBlockUsage(unsigned int BlockUsage, ByteAddress &Address, unsigned int &BlockRegionIndex, unsigned int &BlockRangeIndex ) const
+//{
+//    return FALSE;
+//}
 
 
 //--// 

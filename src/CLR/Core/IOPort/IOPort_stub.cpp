@@ -22,7 +22,7 @@ __nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp()
     NATIVE_PROFILE_CLR_IOPORT();
 }
 
-__nfweak void SaveNativeEventToHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, UINT32 data1, UINT32 data2 )
+__nfweak void SaveNativeEventToHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, unsigned int data1, unsigned int data2 )
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
@@ -59,7 +59,7 @@ __nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }
-__nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue( UINT32 data1, UINT32 data2 )
+__nfweak void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue( unsigned int data1, unsigned int data2 )
 {
     NATIVE_PROFILE_CLR_IOPORT();
 }

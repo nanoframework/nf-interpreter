@@ -9,19 +9,19 @@
 
 #if defined(NANOCLR_TRACE_PERSISTENCE)
 
-void CLR_RT_Persistence_Manager::Trace_Emit( LPSTR szText )
+void CLR_RT_Persistence_Manager::Trace_Emit( char* szText )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     char   rgBuffer[ 512 ];
-    LPSTR  szBuffer = rgBuffer;
+    char*  szBuffer = rgBuffer;
     size_t iBuffer  = MAXSTRLEN(rgBuffer);
 }
 
-void CLR_RT_Persistence_Manager::Trace_Printf( LPCSTR format, ... )
+void CLR_RT_Persistence_Manager::Trace_Printf( const char* format, ... )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     char    rgBuffer[ 512 ];
-    LPSTR   szBuffer = rgBuffer;
+    char*   szBuffer = rgBuffer;
     size_t  iBuffer  = MAXSTRLEN(rgBuffer);
     va_list arg;
 
@@ -36,7 +36,7 @@ void CLR_RT_Persistence_Manager::Trace_Printf( LPCSTR format, ... )
     Trace_Emit( rgBuffer );
 }
 
-void CLR_RT_Persistence_Manager::Trace_DumpIdentity( LPSTR& szBuffer, size_t& iBuffer, CLR_RT_HeapBlock_WeakReference_Identity* identity )
+void CLR_RT_Persistence_Manager::Trace_DumpIdentity( char*& szBuffer, size_t& iBuffer, CLR_RT_HeapBlock_WeakReference_Identity* identity )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     CLR_RT_ReflectionDef_Index val;
@@ -56,11 +56,11 @@ void CLR_RT_Persistence_Manager::Trace_DumpIdentity( LPSTR& szBuffer, size_t& iB
 
 //--//
 
-void CLR_RT_Persistence_Manager::Trace_DumpState( LPCSTR szText, FLASH_WORD* dst, ObjectHeader* oh, CLR_RT_HeapBlock_WeakReference* wr )
+void CLR_RT_Persistence_Manager::Trace_DumpState( const char* szText, FLASH_WORD* dst, ObjectHeader* oh, CLR_RT_HeapBlock_WeakReference* wr )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     char                                     rgBuffer[ 512 ];
-    LPSTR                                    szBuffer = rgBuffer;
+    char*                                    szBuffer = rgBuffer;
     size_t                                   iBuffer  = MAXSTRLEN(rgBuffer);
     CLR_RT_HeapBlock_WeakReference_Identity* identity = NULL;
 
@@ -258,30 +258,30 @@ CLR_RT_Persistence_Manager::BankHeader* CLR_RT_Persistence_Manager::BankHeader::
 
 
 
-bool CLR_RT_Persistence_Manager::Bank::Initialize( UINT32 kind )
+bool CLR_RT_Persistence_Manager::Bank::Initialize( unsigned int kind )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 
     // Bank may reinitialize again, have to keep the m_start for the buffer address.
-    BYTE * ewrBuffer = (BYTE *)m_start;    
+    unsigned char * ewrBuffer = (unsigned char *)m_start;    
     NANOCLR_CLEAR(*this);
 
     //--//
 
-    if(!m_stream.Initialize( (kind & BlockRange::USAGE_MASK) ))
+    if(!BlockStorageStream_Initialize(&m_stream , (kind & BlockRange_USAGE_MASK) ))
     {
         return false;
     }
 
-    const DeviceBlockInfo* deviceInfo = m_stream.Device->GetDeviceInfo();
+    const DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(m_stream.Device);
 
-    if (!deviceInfo->Attribute.SupportsXIP)
+    if (!(deviceInfo->Attribute & MediaAttribute_SupportsXIP))
     {
         
         // if already assignd, don't allocated again.
         if (ewrBuffer == NULL)
         {
-            ewrBuffer = (BYTE*)CLR_RT_Memory::Allocate_And_Erase( m_stream.Length, CLR_RT_HeapBlock ::HB_Unmovable );
+            ewrBuffer = (unsigned char*)CLR_RT_Memory::Allocate_And_Erase( m_stream.Length, CLR_RT_HeapBlock ::HB_Unmovable );
             // no buffer, no EWR
             if (!ewrBuffer)
             {
@@ -296,7 +296,7 @@ bool CLR_RT_Persistence_Manager::Bank::Initialize( UINT32 kind )
         
         // else it is assigned already. No need to do it.
             
-        m_stream.Device->Read( m_stream.BaseAddress, m_stream.Length, (BYTE *)m_start );
+        BlockStorageDevice_Read(m_stream.Device, m_stream.BaseAddress, m_stream.Length, (unsigned char *)m_start);
     }
     else
     {
@@ -304,7 +304,7 @@ bool CLR_RT_Persistence_Manager::Bank::Initialize( UINT32 kind )
 
         // avoid error of getting the address at the last block end address, which will fall out of the 
         // address range, calcuate it directly from m_start
-        m_end = (FLASH_WORD *)((UINT32)m_start + m_stream.Length);
+        m_end = (FLASH_WORD *)((unsigned int)m_start + m_stream.Length);
     }
 
     m_totalBytes     = (CLR_UINT32)((CLR_UINT8*)m_end - (CLR_UINT8*)m_start) - sizeof(BankHeader);
@@ -345,8 +345,8 @@ bool CLR_RT_Persistence_Manager::Bank::IsGood() const
 bool CLR_RT_Persistence_Manager::Bank::Erase( int& blockIndex )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-    const DeviceBlockInfo*      deviceInfo = m_stream.Device->GetDeviceInfo();
-    bool                        result  = TRUE;
+    const DeviceBlockInfo*      deviceInfo = BlockStorageDevice_GetDeviceInfo(m_stream.Device);
+    bool                        result  = true;
     const BlockRegionInfo*      pRegion = NULL;
     const BlockRange*           pRange  = NULL;
 
@@ -354,16 +354,16 @@ bool CLR_RT_Persistence_Manager::Bank::Erase( int& blockIndex )
 
     pRange  = &pRegion->BlockRanges[ m_stream.RangeIndex ];
 
-    if(pRange->GetBlockCount() <= (CLR_UINT32)blockIndex)
+    if(BlockRange_GetBlockCount(pRange) <= (CLR_UINT32)blockIndex)
     {
         return false;
     }
     
-    result = (TRUE == m_stream.Device->EraseBlock( pRegion->BlockAddress( pRange->StartBlock + blockIndex ) ));
+    result = (true == BlockStorageDevice_EraseBlock(m_stream.Device, BlockRegionInfo_BlockAddress(pRegion, pRange->StartBlock + blockIndex) ));
 
     blockIndex++;
         
-    if(!deviceInfo->Attribute.SupportsXIP)
+    if(!(deviceInfo->Attribute & MediaAttribute_SupportsXIP))
     {    // reload the page.
        this->ReloadNonXIPBufferData();
     }
@@ -494,23 +494,23 @@ bool CLR_RT_Persistence_Manager::Bank::WriteHeader( CLR_RT_HeapBlock_WeakReferen
 
 void CLR_RT_Persistence_Manager::Bank::ReloadNonXIPBufferData()
 {
-    UINT32 lengthInBytes = 0;
+    unsigned int lengthInBytes = 0;
     
     // buffer is allocated at initialize, no need to allocated, it is already point to by m_start;
     
-    lengthInBytes = (UINT32)m_end - (UINT32)m_start;
-    m_stream.Device->Read( m_stream.BaseAddress, lengthInBytes, (BYTE*) m_start );
+    lengthInBytes = (unsigned int)m_end - (unsigned int)m_start;
+	BlockStorageDevice_Read(m_stream.Device, m_stream.BaseAddress, lengthInBytes, (unsigned char*) m_start );
 }
 
 
 bool CLR_RT_Persistence_Manager::Bank::WriteNonXIPData(FLASH_WORD* dst, CLR_UINT32 length)
 {
-    const DeviceBlockInfo *deviceInfo = m_stream.Device->GetDeviceInfo();
+    const DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(m_stream.Device);
 
     bool fRes = true;
  
     // if SupportsXIP then error?
-    if (deviceInfo->Attribute.SupportsXIP)
+    if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
     {
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf("Error at try to write Non-XIP but found XIP\r\n");
@@ -518,9 +518,9 @@ bool CLR_RT_Persistence_Manager::Bank::WriteNonXIPData(FLASH_WORD* dst, CLR_UINT
         return false;
     }
     
-    UINT32 offset = (UINT32)dst - (UINT32)m_start;
+    unsigned int offset = (unsigned int)dst - (unsigned int)m_start;
 
-    if(!m_stream.Device->Write( m_stream.BaseAddress + offset, length, (BYTE *)dst, FALSE ))
+    if(!BlockStorageDevice_Write(m_stream.Device, m_stream.BaseAddress + offset, length, (unsigned char *)dst, false ))
     {
         fRes=false;
     }
@@ -530,16 +530,16 @@ bool CLR_RT_Persistence_Manager::Bank::WriteNonXIPData(FLASH_WORD* dst, CLR_UINT
 
 bool CLR_RT_Persistence_Manager::Bank::FindBankWriteNonXIPData( FLASH_WORD* dst, CLR_UINT32 length )
 {
-    if (((UINT32)dst >=(UINT32)g_CLR_RT_Persistence_Manager.m_bankA.m_start) && ((UINT32)dst <(UINT32)g_CLR_RT_Persistence_Manager.m_bankA.m_end))
+    if (((unsigned int)dst >=(unsigned int)g_CLR_RT_Persistence_Manager.m_bankA.m_start) && ((unsigned int)dst <(unsigned int)g_CLR_RT_Persistence_Manager.m_bankA.m_end))
         return g_CLR_RT_Persistence_Manager.m_bankA.WriteNonXIPData( dst, length );
 
-    else if (((UINT32)dst >=(UINT32)g_CLR_RT_Persistence_Manager.m_bankB.m_start) && ((UINT32)dst <(UINT32)g_CLR_RT_Persistence_Manager.m_bankB.m_end))
+    else if (((unsigned int)dst >=(unsigned int)g_CLR_RT_Persistence_Manager.m_bankB.m_start) && ((unsigned int)dst <(unsigned int)g_CLR_RT_Persistence_Manager.m_bankB.m_end))
         return g_CLR_RT_Persistence_Manager.m_bankB.WriteNonXIPData( dst, length );
 
     else
     {
 #if !defined(BUILD_RTM)
-        CLR_Debug::Printf("No right Persistence bank address found!!! (%x)\r\n",(UINT32)dst );
+        CLR_Debug::Printf("No right Persistence bank address found!!! (%x)\r\n",(unsigned int)dst );
 #endif
         return false;
     }
@@ -566,11 +566,11 @@ bool CLR_RT_Persistence_Manager::Bank::Write( FLASH_WORD* dst, const FLASH_WORD*
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     bool fRes = true;
-    const DeviceBlockInfo *deviceInfo = g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device->GetDeviceInfo();
+    const DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device);
 
-    if (deviceInfo->Attribute.SupportsXIP)
+    if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
     {
-        if(!g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device->Write( (UINT32)dst, length,(BYTE *)src, FALSE ))
+        if(!BlockStorageDevice_Write(g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device, (unsigned int)dst, length,(unsigned char *)src, false ))
         {
             fRes=false;
         }
@@ -590,18 +590,18 @@ void CLR_RT_Persistence_Manager::Bank::Invalidate( FLASH_WORD* dst, FLASH_WORD m
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 
-    const DeviceBlockInfo *deviceInfo = g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device->GetDeviceInfo();
+    const DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device);
     FLASH_WORD * start_dst = dst;
 
     FLASH_WORD data=c_Invalidated;
 
-    if (deviceInfo->Attribute.SupportsXIP)
+    if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
     {
         for(CLR_UINT32 pos=0; pos<length; pos+=sizeof(FLASH_WORD))
         {
             if(*dst == match) 
             {
-                g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device->Write( (UINT32)dst, sizeof(FLASH_WORD), (BYTE *) &data, FALSE );
+				BlockStorageDevice_Write(g_CLR_RT_Persistence_Manager.m_bankA.m_stream.Device, (unsigned int)dst, sizeof(FLASH_WORD), (unsigned char *) &data, false );
             }
             dst++;
         }
@@ -640,8 +640,8 @@ void CLR_RT_Persistence_Manager::Initialize()
 
                                                   // HAL_COMPLETION                  m_completion;
                                                   //
-                                                  // UINT32                          m_margin_BurstWrite;
-                                                  // UINT32                          m_margin_BlockErase;
+                                                  // unsigned int                          m_margin_BurstWrite;
+                                                  // unsigned int                          m_margin_BlockErase;
                                                   //
     if(!m_bankA.Initialize( BlockUsage_STORAGE_A )) return; // Bank                            m_bankA;
     if(!m_bankB.Initialize( BlockUsage_STORAGE_B )) return; // Bank                            m_bankB;
@@ -656,8 +656,8 @@ void CLR_RT_Persistence_Manager::Initialize()
 
     m_completion.InitializeForUserMode( CLR_RT_Persistence_Manager::Callback );
 
-    m_margin_BurstWrite  = (m_bankA.m_stream.Device->MaxSectorWrite_uSec() * (c_MaxWriteBurst / sizeof(FLASH_WORD)) * 2 + 1000 - 1) / 1000;
-    m_margin_BlockErase  = (m_bankA.m_stream.Device->MaxBlockErase_uSec()  *                                          2 + 1000 - 1) / 1000;
+    m_margin_BurstWrite  = (BlockStorageDevice_MaxSectorWrite_uSec(m_bankA.m_stream.Device) * (c_MaxWriteBurst / sizeof(FLASH_WORD)) * 2 + 1000 - 1) / 1000;
+    m_margin_BlockErase  = (BlockStorageDevice_MaxBlockErase_uSec(m_bankA.m_stream.Device)  *                                          2 + 1000 - 1) / 1000;
     if(m_bankB.IsGood())
     {
         if(m_bankA.IsGood() == false || m_bankA.GetBankHeader()->m_sequenceNumber < m_bankB.GetBankHeader()->m_sequenceNumber)
@@ -726,8 +726,8 @@ void CLR_RT_Persistence_Manager::Initialize()
 void CLR_RT_Persistence_Manager::EraseAll()
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
-    if(!m_bankA.Initialize( BlockRange::BLOCKTYPE_STORAGE_A )) return;
-    if(!m_bankB.Initialize( BlockRange::BLOCKTYPE_STORAGE_B )) return;
+    if(!m_bankA.Initialize( BlockRange_BLOCKTYPE_STORAGE_A )) return;
+    if(!m_bankB.Initialize( BlockRange_BLOCKTYPE_STORAGE_B )) return;
 
     m_bankA.EraseAll();
     m_bankB.EraseAll();
@@ -1507,7 +1507,7 @@ bool CLR_RT_HeapBlock_WeakReference::PrepareForRecovery( CLR_RT_HeapBlock_Node* 
             }
         }
 
-        if((UINT32)(ptr + blockSize) > (UINT32)end)
+        if((unsigned int)(ptr + blockSize) > (unsigned int)end)
         {
             blockSize = (CLR_UINT32)(end - ptr);
         }

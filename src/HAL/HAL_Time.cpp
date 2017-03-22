@@ -22,19 +22,19 @@ const int CummulativeDaysForMonth[13] = {0, 31, 59, 90, 120, 151, 181, 212, 243,
 #define MINUTES_TO_HOUR             60
 #define HOURS_TO_DAY                24
 
-INT64  HAL_Time_CurrentTime() { 
+signed __int64  HAL_Time_CurrentTime() { 
     return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() ); 
 };
 
-INT64 HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime)
+signed __int64 HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime)
 {
-    INT64 r = YEARS_TO_DAYS(systemTime->wYear) + MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth) + systemTime->wDay - 1;
+    signed __int64 r = YEARS_TO_DAYS(systemTime->wYear) + MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth) + systemTime->wDay - 1;
     r = (((( (r * HOURS_TO_DAY) + systemTime->wHour) * MINUTES_TO_HOUR + systemTime->wMinute) * SECONDS_TO_MINUTES + systemTime->wSecond ) * MILLISECONDS_TO_SECONDS + systemTime->wMilliseconds) * TIMEUNIT_TO_MILLISECONDS;
 
     return r;    
 }
 
-BOOL HAL_Time_ToSystemTime(INT64 time, SYSTEMTIME* systemTime)
+bool HAL_Time_ToSystemTime(signed __int64 time, SYSTEMTIME* systemTime)
 {
     int ytd = 0;
     int mtd = 0;
@@ -50,7 +50,7 @@ BOOL HAL_Time_ToSystemTime(INT64 time, SYSTEMTIME* systemTime)
     time /= HOURS_TO_DAY;
 
     systemTime->wDayOfWeek = (time + BASE_YEAR_DAYOFWEEK_SHIFT) % 7;
-    systemTime->wYear = (WORD)(time / DAYS_IN_NORMAL_YEAR + BASE_YEAR);
+    systemTime->wYear = (unsigned short)(time / DAYS_IN_NORMAL_YEAR + BASE_YEAR);
     ytd = YEARS_TO_DAYS(systemTime->wYear);
     if (ytd > time)
     {
@@ -60,7 +60,7 @@ BOOL HAL_Time_ToSystemTime(INT64 time, SYSTEMTIME* systemTime)
 
     time -= ytd;
 
-    systemTime->wMonth = (WORD)(time / 31 + 1);
+    systemTime->wMonth = (unsigned short)(time / 31 + 1);
     mtd = MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth + 1);
 
     if (time >= mtd)
@@ -70,19 +70,19 @@ BOOL HAL_Time_ToSystemTime(INT64 time, SYSTEMTIME* systemTime)
 
     mtd = MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth);
 
-    systemTime->wDay = (WORD)(time - mtd + 1); 
+    systemTime->wDay = (unsigned short)(time - mtd + 1); 
 
     return true;    
 }
 
-HRESULT HAL_Time_AccDaysInMonth(INT32 year, INT32 month, INT32* days)
+HRESULT HAL_Time_AccDaysInMonth(signed int year, signed int month, signed int* days)
 {
     *days = MONTH_TO_DAYS(year, month);
 
     return S_OK;
 }
 
-HRESULT HAL_Time_DaysInMonth(INT32 year, INT32 month, INT32* days)
+HRESULT HAL_Time_DaysInMonth(signed int year, signed int month, signed int* days)
 {
     *days = MONTH_TO_DAYS(year, month);
 

@@ -44,17 +44,17 @@
 // without needing to continue defining additional transport types and modifying
 // switch on transport code. To keep compatibility high and code churn low, the
 // previous legacy transports remain though they should be considered deprecated.
-typedef int32_t COM_HANDLE;
+typedef int COM_HANDLE;
 
 typedef struct HAL_DRIVER_CONFIG_HEADER
 {
-    uint32_t Enable;
+    unsigned int Enable;
 }HAL_DRIVER_CONFIG_HEADER;
 
 typedef struct HAL_SYSTEM_MEMORY_CONFIG
 {
-    uint32_t Base;
-    uint32_t Size;
+    unsigned int Base;
+    unsigned int Size;
 }HAL_SYSTEM_MEMORY_CONFIG;
 
 typedef struct HAL_SYSTEM_CONFIG
@@ -71,7 +71,7 @@ typedef struct HAL_SYSTEM_CONFIG
     // applications
     COM_HANDLE               DebugTextPort;
 
-    uint32_t                   USART_DefaultBaudRate;
+    unsigned int                   USART_DefaultBaudRate;
     // internal HAL/PAL debug/tracing channel, this is separate
     // to allow tracing messages in the driver that implements
     // the transport for the Debugger and DebugTextPort. This

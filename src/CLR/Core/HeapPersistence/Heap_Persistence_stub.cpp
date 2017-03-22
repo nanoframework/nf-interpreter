@@ -87,7 +87,7 @@ __nfweak CLR_RT_Persistence_Manager::BankHeader* CLR_RT_Persistence_Manager::Ban
 
 //--//--//--//--//--//
 
-__nfweak bool CLR_RT_Persistence_Manager::Bank::Initialize( UINT32 kind )
+__nfweak bool CLR_RT_Persistence_Manager::Bank::Initialize( unsigned int kind )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
 
@@ -341,7 +341,7 @@ __nfweak bool CLR_RT_HeapBlock_WeakReference::PrepareForRecovery( CLR_RT_HeapBlo
             }
         }
 
-        if((UINT32)(ptr + blockSize) > (UINT32)end)
+        if((unsigned int)(ptr + blockSize) > (unsigned int)end)
         {
             blockSize = (CLR_UINT32)(end - ptr);
         }

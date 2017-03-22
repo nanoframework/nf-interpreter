@@ -29,9 +29,6 @@ void CLRStartupThread(void const * argument)
 
   // loop until thread receives a request to terminate
   while (!chThdShouldTerminateX()) {
-    
-//    WP_CheckAvailableIncomingData();
-    
     osDelay(500);
   }
 

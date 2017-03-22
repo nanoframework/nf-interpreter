@@ -17,7 +17,7 @@
 #endif
 
 // the Arm 3.0 compiler drags in a bunch of ABI methods (for initialization) if struct arrays are not initialized
-CLR_UINT32     g_scratchMessaging[ sizeof(CLR_Messaging) * NUM_MESSAGING / sizeof(UINT32) + 1 ];
+CLR_UINT32     g_scratchMessaging[ sizeof(CLR_Messaging) * NUM_MESSAGING / sizeof(unsigned int) + 1 ];
 CLR_Messaging *g_CLR_Messaging;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ static const CLR_Messaging_CommandHandlerLookup c_Messaging_Lookup_Reply[] =
 
 //--//
 
-bool CLR_Messaging::AllocateAndQueueMessage( CLR_UINT32 cmd, UINT32 length, UINT8* data, CLR_RT_HeapBlock_EndPoint::Port port, CLR_RT_HeapBlock_EndPoint::Address addr, CLR_UINT32 found )
+bool CLR_Messaging::AllocateAndQueueMessage( CLR_UINT32 cmd, unsigned int length, unsigned char* data, CLR_RT_HeapBlock_EndPoint::Port port, CLR_RT_HeapBlock_EndPoint::Address addr, CLR_UINT32 found )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
     CLR_RT_HeapBlock_EndPoint::Message* rpc;
@@ -169,7 +169,7 @@ bool CLR_Messaging::Messaging_Reply__Reply( WP_Message* msg, void* owner )
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-bool CLR_Messaging::Phy_ReceiveBytes( void* state, UINT8*& ptr, UINT32 & size )
+bool CLR_Messaging::Phy_ReceiveBytes( void* state, unsigned char*& ptr, unsigned int & size )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
     CLR_Messaging* messaging = (CLR_Messaging*)state;
@@ -219,7 +219,7 @@ bool CLR_Messaging::App_ProcessHeader( void* state, WP_Message*  msg )
             return false;
         }
 
-        msg->m_payload = (UINT8*)ptr;
+        msg->m_payload = (unsigned char*)ptr;
     }
 
     return true;
@@ -344,7 +344,7 @@ void CLR_Messaging::Initialize(
     m_Lookup_Replies[ 1 ].owner = owner;
     m_Lookup_Replies[ 1 ].size  = replyLookupCount;
 
-    m_fDebuggerInitialized = (DebuggerPort_Initialize( port ) != FALSE);
+    m_fDebuggerInitialized = (DebuggerPort_Initialize( port ) != false);
 
     m_fInitialized = true;
 
@@ -527,8 +527,8 @@ bool CLR_Messaging::TransmitMessage( const WP_Message* msg, bool fQueue )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
 
-    UINT32 payloadSize;
-    UINT32 flags;
+    unsigned int payloadSize;
+    unsigned int flags;
 
     payloadSize = msg->m_header.m_size;
     flags       = msg->m_header.m_flags;
@@ -579,7 +579,7 @@ bool CLR_Messaging::TransmitMessage( const WP_Message* msg, bool fQueue )
 
                 if(payloadSize && msg->m_payload)
                 {
-                    cache->m_message.m_payload = (UINT8*)&cache[ 1 ];
+                    cache->m_message.m_payload = (unsigned char*)&cache[ 1 ];
 
                     memcpy( cache->m_message.m_payload, msg->m_payload, payloadSize );
                 }
@@ -599,13 +599,13 @@ bool CLR_Messaging::TransmitMessage( const WP_Message* msg, bool fQueue )
 
 //--//
 
-bool CLR_Messaging::SendEvent( UINT32 cmd, UINT32 payloadSize, UINT8* payload, UINT32 flags )
+bool CLR_Messaging::SendEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
     return m_controller.SendProtocolMessage( cmd, flags, payloadSize, payload );
 }
 
-void CLR_Messaging::BroadcastEvent( UINT32 cmd, UINT32 payloadSize, UINT8* payload, UINT32 flags )
+void CLR_Messaging::BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
     NANOCLR_FOREACH_MESSAGING(msg)
@@ -621,7 +621,7 @@ void CLR_Messaging::ReplyToCommand( WP_Message* msg, bool fSuccess, bool fCritic
 {
     NATIVE_PROFILE_CLR_MESSAGING();
     WP_Message msgReply;
-    UINT32     flags = 0;
+    unsigned int     flags = 0;
 
     //
     // Make sure we reply only once!
@@ -646,7 +646,7 @@ void CLR_Messaging::ReplyToCommand( WP_Message* msg, bool fSuccess, bool fCritic
 
     msgReply.Initialize( &m_controller );
 
-    msgReply.PrepareReply( msg->m_header, flags, size, (UINT8*)ptr );
+    msgReply.PrepareReply( msg->m_header, flags, size, (unsigned char*)ptr );
 
     m_controller.SendProtocolMessage( msgReply );
 }

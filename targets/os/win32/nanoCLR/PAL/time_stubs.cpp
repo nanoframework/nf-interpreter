@@ -15,87 +15,87 @@ HRESULT Time_Uninitialize()
     return CLR_E_NOTIMPL;
 }
 
-// INT64 Time_GetUtcTime()
+// signed __int64 Time_GetUtcTime()
 // {
 //     return 0;
 // }
 
-INT64 Time_SetUtcTime( INT64 UtcTime, bool calibrate )
+signed __int64 Time_SetUtcTime( signed __int64 UtcTime, bool calibrate )
 {
     return 0;
 }
 
-INT64 Time_GetLocalTime()
+signed __int64 Time_GetLocalTime()
 {
     return 0;
 }
 
-INT32 Time_GetTimeZoneOffset()
+signed int Time_GetTimeZoneOffset()
 {
     return 0;
 }
 
-INT32 Time_SetTimeZoneOffset(INT32 offset)
+signed int Time_SetTimeZoneOffset(signed int offset)
 {
     return 0;
 }
 
-INT64 Time_GetTickCount()
+signed __int64 Time_GetTickCount()
 {
     return 0;
 }
 
-BOOL HAL_Time_ToSystemTime(INT64 time, SYSTEMTIME* systemTime)
+bool HAL_Time_ToSystemTime(signed __int64 time, SYSTEMTIME* systemTime)
 {
     return FALSE;
 }
 
-INT64 HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime)
+signed __int64 HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime)
 {
     return 0;
 }
 
-HRESULT HAL_Time_DaysInMonth(INT32 year, INT32 month, INT32* days)
+HRESULT HAL_Time_DaysInMonth(signed int year, signed int month, signed int* days)
 {
     return CLR_E_NOTIMPL;
 }
 
-HRESULT HAL_Time_AccDaysInMonth(INT32 year, INT32 month, INT32* days)
+HRESULT HAL_Time_AccDaysInMonth(signed int year, signed int month, signed int* days)
 {
     return CLR_E_NOTIMPL;
 }
 
-BOOL Utility_SafeSprintfV( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, va_list arg )
+bool Utility_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg )
 {
     return FALSE;
 }
 
-BOOL Utility_SafeSprintf( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, ... )
+bool Utility_SafeSprintf( char*& szBuffer, size_t& iBuffer, const char* format, ... )
 {
     return FALSE;
 }
 
-BOOL HAL_Time_TimeSpanToStringEx( const INT64& ticks, LPSTR& buf, size_t& len )
+bool HAL_Time_TimeSpanToStringEx( const signed __int64& ticks, char*& buf, size_t& len )
 {
     return FALSE;
 }
 
-LPCSTR HAL_Time_TimeSpanToString( const INT64& ticks )
+const char* HAL_Time_TimeSpanToString( const signed __int64& ticks )
 {
     return NULL;
 }
 
-BOOL Time_DateTimeToStringEx( const INT64& time, LPSTR& buf, size_t& len )
+bool Time_DateTimeToStringEx( const signed __int64& time, char*& buf, size_t& len )
 {   
     return FALSE;
 }
 
-LPCSTR Time_DateTimeToString( const INT64& time)
+const char* Time_DateTimeToString( const signed __int64& time)
 {
     return NULL;
 }
 
-LPCSTR HAL_Time_CurrentDateTimeToString()
+const char* HAL_Time_CurrentDateTimeToString()
 {
     return NULL;
 }

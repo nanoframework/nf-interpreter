@@ -89,5 +89,8 @@
     <ClCompile Include="PAL\COMDirector_stubs.cpp">
       <Filter>Source Files\PAL</Filter>
     </ClCompile>
+    <ClCompile Include="Target_BlockStorage.cpp">
+      <Filter>Source Files\PAL</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -522,16 +522,16 @@ HRESULT CLR_RT_Thread::Execute()
         hr = S_OK;
     }
 
-    m_timeQuantumExpired = FALSE;
+    m_timeQuantumExpired = false;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     _ASSERTE(!CLR_EE_DBG_IS( Stopped ));
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     // UNDONE: FIXME
-    // ::Events_SetBoolTimer( (BOOL*)&m_timeQuantumExpired, CLR_RT_Thread::c_TimeQuantum_Milliseconds );
+    // ::Events_SetBoolTimer( (bool*)&m_timeQuantumExpired, CLR_RT_Thread::c_TimeQuantum_Milliseconds );
 
-    while(m_timeQuantumExpired == FALSE && !CLR_EE_DBG_IS( Stopped ))
+    while(m_timeQuantumExpired == false && !CLR_EE_DBG_IS( Stopped ))
     {
         CLR_RT_StackFrame* stack;
 
@@ -614,7 +614,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    while(m_timeQuantumExpired == FALSE && !CLR_EE_DBG_IS( Stopped ))
+    while(m_timeQuantumExpired == false && !CLR_EE_DBG_IS( Stopped ))
     {
         CLR_RT_StackFrame *stack = CurrentFrame();
 
@@ -875,7 +875,7 @@ HRESULT CLR_RT_Thread::Execute_IL( CLR_RT_StackFrame* stack )
     while(true)
     {
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-        if(th->m_timeQuantumExpired == TRUE)
+        if(th->m_timeQuantumExpired == true)
         {
             NANOCLR_SET_AND_LEAVE( CLR_S_QUANTUM_EXPIRED );
         }

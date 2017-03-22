@@ -59,7 +59,7 @@ unsigned int Solution_GetReleaseInfo(MfReleaseInfo& releaseInfo)
                         VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION,
                         OEMSYSTEMINFOSTRING, hal_strlen_s(OEMSYSTEMINFOSTRING)
                         );
-    return TRUE; // alternatively, return false if you didn't initialize the releaseInfo structure.
+    return true; // alternatively, return false if you didn't initialize the releaseInfo structure.
 }
 
 /////////////////////////////////////////////////////////////////////////////

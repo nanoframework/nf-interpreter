@@ -150,7 +150,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
 }
 
 
-void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue( UINT32 data1, UINT32 data2 )
+void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue( unsigned int data1, unsigned int data2 )
 {
     NATIVE_PROFILE_CLR_IOPORT();
     ASSERT_IRQ_MUST_BE_OFF();
@@ -174,7 +174,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue( UINT32 data1, UINT3
     ::Events_Set( SYSTEM_EVENT_HW_INTERRUPT );
 }
 
-void SaveNativeEventToHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, UINT32 data1, UINT32 data2 )
+void SaveNativeEventToHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, unsigned int data1, unsigned int data2 )
 {
     pContext->SaveToHALQueue( data1, data2 );
 }

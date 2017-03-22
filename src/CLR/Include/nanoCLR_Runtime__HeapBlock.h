@@ -424,7 +424,7 @@ private:
 ///
 /// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
 /// When the optimization level is greater than zero, the gcc compiler
-/// code will not work with the UINT32* conversion, it requires you 
+/// code will not work with the unsigned int* conversion, it requires you 
 /// to copy byte by byte.
 ///
                     CLR_UINT8* tmp = (CLR_UINT8*)&ret_val;
@@ -456,7 +456,7 @@ private:
 ///
 /// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
 /// When the optimization level is greater than zero, the gcc compiler
-/// code will not work with the UINT32* conversion, it requires you 
+/// code will not work with the unsigned int* conversion, it requires you 
 /// to copy byte by byte.
 ///
                     CLR_UINT8* src = (CLR_UINT8*)&num;
@@ -733,7 +733,7 @@ private:
 
         struct String
         {
-            LPCSTR           m_text;
+            const char*           m_text;
 #if !defined(NANOCLR_NO_ASSEMBLY_STRINGS)
             CLR_RT_Assembly* m_assm;
 #endif
@@ -947,7 +947,7 @@ public:
 
     //--//
 
-    LPCSTR RecoverString() const
+    const char* RecoverString() const
     {
         if(DataType() == DATATYPE_OBJECT)
         {
@@ -970,15 +970,15 @@ public:
 
     //--//
 
-    LPCSTR StringText() const { return m_data.string.m_text; }
+    const char* StringText() const { return m_data.string.m_text; }
 
 #if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
-    void SetStringText( LPCSTR szText )
+    void SetStringText( const char* szText )
     {
         m_data.string.m_text = szText;
     }
 #else
-    void SetStringText( LPCSTR szText, CLR_RT_Assembly* assm )
+    void SetStringText( const char* szText, CLR_RT_Assembly* assm )
     {
         m_data.string.m_text = szText;
         m_data.string.m_assm = assm;
@@ -1519,10 +1519,10 @@ private:
 struct CLR_RT_HeapBlock_String : public CLR_RT_HeapBlock
 {
     static CLR_RT_HeapBlock_String* CreateInstance( CLR_RT_HeapBlock& reference, CLR_UINT32  length                        );
-    static HRESULT                  CreateInstance( CLR_RT_HeapBlock& reference, LPCSTR      szText                        );
-    static HRESULT                  CreateInstance( CLR_RT_HeapBlock& reference, LPCSTR      szText, CLR_UINT32 length     );
+    static HRESULT                  CreateInstance( CLR_RT_HeapBlock& reference, const char*      szText                        );
+    static HRESULT                  CreateInstance( CLR_RT_HeapBlock& reference, const char*      szText, CLR_UINT32 length     );
     static HRESULT                  CreateInstance( CLR_RT_HeapBlock& reference, CLR_UINT32  token , CLR_RT_Assembly* assm );
-    static HRESULT                  CreateInstance( CLR_RT_HeapBlock& reference, LPCSTR      szText, CLR_RT_Assembly* assm );
+    static HRESULT                  CreateInstance( CLR_RT_HeapBlock& reference, const char*      szText, CLR_RT_Assembly* assm );
     static HRESULT                  CreateInstance( CLR_RT_HeapBlock& reference, CLR_UINT16* szText, CLR_UINT32 length     );
 
     static CLR_RT_HeapBlock_String* GetStringEmpty();
@@ -2111,7 +2111,7 @@ struct CLR_RT_Persistence_Manager
 
         __nfweak bool IsGood() const;
 
-        __nfweak bool Initialize( UINT32 kind );
+        __nfweak bool Initialize( unsigned int kind );
 
         __nfweak bool Erase   ( int& sectorIndex );
         __nfweak void EraseAll(                  );
@@ -2164,8 +2164,8 @@ struct CLR_RT_Persistence_Manager
 
     HAL_COMPLETION                  m_completion;
 
-    UINT32                          m_margin_BurstWrite;
-    UINT32                          m_margin_BlockErase;
+    unsigned int                          m_margin_BurstWrite;
+    unsigned int                          m_margin_BlockErase;
 
     Bank                            m_bankA;
     Bank                            m_bankB;
@@ -2209,13 +2209,13 @@ struct CLR_RT_Persistence_Manager
 #define DECL_POSTFIX {}
 #endif
 
-    static void Trace_Emit( LPSTR szText ) DECL_POSTFIX;
+    static void Trace_Emit( char* szText ) DECL_POSTFIX;
 
-    static void Trace_Printf( LPCSTR format, ... ) DECL_POSTFIX;
+    static void Trace_Printf( const char* format, ... ) DECL_POSTFIX;
 
-    static void Trace_DumpIdentity( LPSTR& szBuffer, size_t& iBuffer, CLR_RT_HeapBlock_WeakReference_Identity* identity ) DECL_POSTFIX;
+    static void Trace_DumpIdentity( char*& szBuffer, size_t& iBuffer, CLR_RT_HeapBlock_WeakReference_Identity* identity ) DECL_POSTFIX;
 
-    static void Trace_DumpState( LPCSTR szText, FLASH_WORD* dst, ObjectHeader* oh, CLR_RT_HeapBlock_WeakReference* wr ) DECL_POSTFIX;
+    static void Trace_DumpState( const char* szText, FLASH_WORD* dst, ObjectHeader* oh, CLR_RT_HeapBlock_WeakReference* wr ) DECL_POSTFIX;
 
     //--//
 
@@ -2290,7 +2290,7 @@ struct CLR_RT_HeapBlock_NativeEventDispatcher : public CLR_RT_ObjectToEvent_Dest
     __nfweak HRESULT RecoverManagedObject( CLR_RT_HeapBlock*& port                                   );
 
     __nfweak static void ThreadTerminationCallback( void* arg                                  );
-    __nfweak void SaveToHALQueue( UINT32 data1, UINT32 data2 );
+    __nfweak void SaveToHALQueue( unsigned int data1, unsigned int data2 );
     __nfweak void RemoveFromHALQueue();
 
     __nfweak void RecoverFromGC    ();

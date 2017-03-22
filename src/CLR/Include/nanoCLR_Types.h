@@ -780,12 +780,12 @@ __nfweak CLR_PMETADATA CLR_SkipBodyOfOpcodeCompressed( CLR_PMETADATA ip, CLR_OPC
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-__nfweak extern bool CLR_SafeSprintfV( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, va_list arg );
-__nfweak extern bool CLR_SafeSprintf ( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, ...         );
+__nfweak extern bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg );
+__nfweak extern bool CLR_SafeSprintf ( char*& szBuffer, size_t& iBuffer, const char* format, ...         );
 
 #if !defined(BUILD_RTM)
 
-#define NANOCLR_DEBUG_STOP() _ASSERTE(FALSE)
+#define NANOCLR_DEBUG_STOP() _ASSERTE(false)
 
 #else
 
@@ -845,12 +845,12 @@ struct CLR_RECORD_ASSEMBLY
     CLR_UINT32         numOfPatchedMethods;
     //             
     //For every table, a number of bytes that were padded to the end of the table
-    //to align to DWORD.  Each table starts at a DWORD boundary, and ends 
-    //at a DWORD boundary.  Some of these tables will, by construction, have
+    //to align to unsigned long.  Each table starts at a unsigned long boundary, and ends 
+    //at a unsigned long boundary.  Some of these tables will, by construction, have
     //no padding, and all will have values in the range [0-3].  This isn't the most
     //compact form to hold this information, but it only costs 16 bytes/assembly.
     //Trying to only align some of the tables is just much more hassle than it's worth.
-    //And, of course, this field also has to be DWORD-aligned.
+    //And, of course, this field also has to be unsigned long-aligned.
     CLR_UINT8          paddingOfTables[ ((TBL_Max-1)+3)/4*4 ];
     //--//
 
@@ -867,7 +867,7 @@ struct CLR_RECORD_ASSEMBLY
 
     //--//
 
-    static CLR_UINT32 ComputeAssemblyHash( LPCSTR name, const CLR_RECORD_VERSION& ver );
+    static CLR_UINT32 ComputeAssemblyHash( const char* name, const CLR_RECORD_VERSION& ver );
 };
 
 struct CLR_RECORD_ASSEMBLYREF
@@ -1132,8 +1132,6 @@ struct CLR_RECORD_RESOURCE
     CLR_UINT8  flags;
     CLR_UINT32 offset;
 };
-
-typedef UINT32 ByteAddress;
 
 #if defined(_MSC_VER)
 #pragma pack(pop, NANOCLR_TYPES_H)

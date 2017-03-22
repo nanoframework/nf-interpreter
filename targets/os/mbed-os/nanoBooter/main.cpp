@@ -58,7 +58,7 @@ WP_Message wpMessage;
 
 Thread rt;
 
-extern UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc);
+extern unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc);
 
 class Receiver
 {
@@ -100,7 +100,7 @@ private:
                 
                 case WP_Message::ReceiveState::Initialize:
                     msg->m_rxState = WP_Message::ReceiveState::WaitingForHeader;
-                    msg->m_pos = (UINT8*)&msg->m_header;
+                    msg->m_pos = (unsigned char*)&msg->m_header;
                     msg->m_size = sizeof(msg->m_header);
                     break;
 
@@ -176,7 +176,7 @@ private:
                 break;
             }
 
-            UINT8* buff = (UINT8*)&msg->m_header;
+            unsigned char* buff = (unsigned char*)&msg->m_header;
 
             memmove(buff, &buff[1], len - 1);
 
@@ -235,7 +235,7 @@ private:
         reply.m_header.m_seqReply = msg->m_header.m_seq;
         reply.m_header.m_flags |= WP_Flags::c_Reply;
         reply.m_header.m_size = sizeof(pingReplyPayload);
-        reply.m_payload = (UINT8*)pingReplyPayload;
+        reply.m_payload = (unsigned char*)pingReplyPayload;
 
         reply.m_header.m_crcData = SUPPORT_ComputeCRC(reply.m_payload, reply.m_header.m_size, 0);
 
@@ -243,7 +243,7 @@ private:
         // The CRC for the header is computed setting the CRC field to zero and then running the CRC algorithm.
         //
         reply.m_header.m_crcHeader = 0;
-        reply.m_header.m_crcHeader = SUPPORT_ComputeCRC((UINT8*)&reply.m_header, sizeof(reply.m_header), 0);
+        reply.m_header.m_crcHeader = SUPPORT_ComputeCRC((unsigned char*)&reply.m_header, sizeof(reply.m_header), 0);
         
 
         uint8_t* p = (uint8_t*)&reply.m_header;

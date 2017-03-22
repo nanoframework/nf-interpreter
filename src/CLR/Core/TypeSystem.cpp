@@ -1365,7 +1365,7 @@ void CLR_RECORD_ASSEMBLY::ComputeCRC()
 
 #endif
 
-CLR_UINT32 CLR_RECORD_ASSEMBLY::ComputeAssemblyHash( LPCSTR name, const CLR_RECORD_VERSION& ver )
+CLR_UINT32 CLR_RECORD_ASSEMBLY::ComputeAssemblyHash( const char* name, const CLR_RECORD_VERSION& ver )
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT32 assemblyHASH;
@@ -1685,7 +1685,7 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
 
 
 #if defined(WIN32)
-HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_RT_Assembly*& assm, LPCWSTR szName )
+HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_RT_Assembly*& assm, const wchar_t* szName )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -1713,7 +1713,7 @@ bool CLR_RT_Assembly::Resolve_AssemblyRef( bool fOutput )
 
     ITERATE_THROUGH_RECORDS(this,i,AssemblyRef,ASSEMBLYREF)
     {
-        LPCSTR szName = GetString( src->name );
+        const char* szName = GetString( src->name );
 
         if(dst->m_target == NULL)
         {
@@ -1798,7 +1798,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            LPCSTR szName = GetString( src->name );
+            const char* szName = GetString( src->name );
             if(inst.m_assm->FindTypeDef( szName, inst.Type(), dst->m_target ) == false)
             {
 #if !defined(BUILD_RTM)
@@ -1816,8 +1816,8 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            LPCSTR szNameSpace = GetString( src->nameSpace );
-            LPCSTR szName      = GetString( src->name      );
+            const char* szNameSpace = GetString( src->nameSpace );
+            const char* szName      = GetString( src->name      );
             if(assm->FindTypeDef( szName, szNameSpace, dst->m_target ) == false)
             {
 #if !defined(BUILD_RTM)
@@ -1852,7 +1852,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
-        LPCSTR szName = GetString( src->name );
+        const char* szName = GetString( src->name );
 
         if(inst.m_assm->FindFieldDef( inst.m_target, szName, this, src->sig, dst->m_target ) == false)
         {
@@ -1887,7 +1887,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
-        LPCSTR name = GetString( src->name );
+        const char* name = GetString( src->name );
         bool   fGot = false;
 
         while(NANOCLR_INDEX_IS_VALID(inst))
@@ -2005,7 +2005,7 @@ void CLR_RT_Assembly::Resolve_Link()
 
 #if defined(NANOCLR_APPDOMAINS)
 
-HRESULT CLR_RT_AppDomain::CreateInstance( LPCSTR szName, CLR_RT_AppDomain*& appDomain )
+HRESULT CLR_RT_AppDomain::CreateInstance( const char* szName, CLR_RT_AppDomain*& appDomain )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2592,8 +2592,8 @@ void CLR_RT_AppDomainAssembly::Relocate()
 
 struct TypeIndexLookup
 {
-    LPCSTR                nameSpace;
-    LPCSTR                name;
+    const char*                nameSpace;
+    const char*                name;
     CLR_RT_TypeDef_Index* ptr;
 };
 
@@ -2728,7 +2728,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
 
 struct MethodIndexLookup
 {
-    LPCSTR                  name;
+    const char*                  name;
     CLR_RT_TypeDef_Index*   type;
     CLR_RT_MethodDef_Index* method;
 };
@@ -2843,7 +2843,7 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
     if((m_flags & CLR_RT_Assembly::c_PreparingForExecution) != 0)
     {
         //Circular dependency
-        _ASSERTE(FALSE);
+        _ASSERTE(false);
 
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
@@ -2909,7 +2909,7 @@ CLR_UINT32 CLR_RT_Assembly::ComputeAssemblyHash( const CLR_RECORD_ASSEMBLYREF* a
 
 //--//
 
-bool CLR_RT_Assembly::FindTypeDef( LPCSTR name, LPCSTR nameSpace, CLR_RT_TypeDef_Index& idx )
+bool CLR_RT_Assembly::FindTypeDef( const char* name, const char* nameSpace, CLR_RT_TypeDef_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_TYPEDEF* target  = GetTypeDef( 0 );
@@ -2919,8 +2919,8 @@ bool CLR_RT_Assembly::FindTypeDef( LPCSTR name, LPCSTR nameSpace, CLR_RT_TypeDef
     {
         if(target->enclosingType == CLR_EmptyIndex)
         {
-            LPCSTR szNameSpace = GetString( target->nameSpace );
-            LPCSTR szName      = GetString( target->name      );
+            const char* szNameSpace = GetString( target->nameSpace );
+            const char* szName      = GetString( target->name      );
 
             if(!strcmp( szName, name ) && !strcmp( szNameSpace, nameSpace ))
             {
@@ -2936,7 +2936,7 @@ bool CLR_RT_Assembly::FindTypeDef( LPCSTR name, LPCSTR nameSpace, CLR_RT_TypeDef
     return false;
 }
 
-bool CLR_RT_Assembly::FindTypeDef( LPCSTR name, CLR_IDX scope, CLR_RT_TypeDef_Index& idx )
+bool CLR_RT_Assembly::FindTypeDef( const char* name, CLR_IDX scope, CLR_RT_TypeDef_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_TYPEDEF* target  = GetTypeDef( 0 );
@@ -2946,7 +2946,7 @@ bool CLR_RT_Assembly::FindTypeDef( LPCSTR name, CLR_IDX scope, CLR_RT_TypeDef_In
     {
         if(target->enclosingType == scope)
         {
-            LPCSTR szName = GetString( target->name );
+            const char* szName = GetString( target->name );
 
             if(!strcmp( szName, name ))
             {
@@ -2990,14 +2990,14 @@ bool CLR_RT_Assembly::FindTypeDef( CLR_UINT32 hash, CLR_RT_TypeDef_Index& idx )
 
 //--//
 
-static bool local_FindFieldDef( CLR_RT_Assembly* assm, CLR_UINT32 first, CLR_UINT32 num, LPCSTR szText, CLR_RT_Assembly* base, CLR_IDX sig, CLR_RT_FieldDef_Index& res )
+static bool local_FindFieldDef( CLR_RT_Assembly* assm, CLR_UINT32 first, CLR_UINT32 num, const char* szText, CLR_RT_Assembly* base, CLR_IDX sig, CLR_RT_FieldDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_FIELDDEF* fd = assm->GetFieldDef( first );
 
     for(CLR_UINT32 i=0; i<num; i++, fd++)
     {
-        LPCSTR fieldName = assm->GetString( fd->name );
+        const char* fieldName = assm->GetString( fd->name );
 
         if(!strcmp( fieldName, szText ))
         {
@@ -3020,7 +3020,7 @@ static bool local_FindFieldDef( CLR_RT_Assembly* assm, CLR_UINT32 first, CLR_UIN
     return false;
 }
 
-bool CLR_RT_Assembly::FindFieldDef( const CLR_RECORD_TYPEDEF* td, LPCSTR name, CLR_RT_Assembly* base, CLR_IDX sig, CLR_RT_FieldDef_Index& idx )
+bool CLR_RT_Assembly::FindFieldDef( const CLR_RECORD_TYPEDEF* td, const char* name, CLR_RT_Assembly* base, CLR_IDX sig, CLR_RT_FieldDef_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
     if(local_FindFieldDef( this, td->iFields_First, td->iFields_Num, name, base, sig, idx )) return true;
@@ -3031,7 +3031,7 @@ bool CLR_RT_Assembly::FindFieldDef( const CLR_RECORD_TYPEDEF* td, LPCSTR name, C
     return false;
 }
 
-bool CLR_RT_Assembly::FindMethodDef( const CLR_RECORD_TYPEDEF* td, LPCSTR name, CLR_RT_Assembly* base, CLR_SIG sig, CLR_RT_MethodDef_Index& idx )
+bool CLR_RT_Assembly::FindMethodDef( const CLR_RECORD_TYPEDEF* td, const char* name, CLR_RT_Assembly* base, CLR_SIG sig, CLR_RT_MethodDef_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
     int                         i;
@@ -3040,7 +3040,7 @@ bool CLR_RT_Assembly::FindMethodDef( const CLR_RECORD_TYPEDEF* td, LPCSTR name, 
 
     for(i=0; i<num; i++, md++)
     {
-        LPCSTR methodName = GetString( md->name );
+        const char* methodName = GetString( md->name );
 
         if(!strcmp( methodName, name ))
         {
@@ -3167,7 +3167,7 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
                         break;
                     }
 
-                    LPCSTR fieldName = inst.m_assm->GetString( fd->name );
+                    const char* fieldName = inst.m_assm->GetString( fd->name );
 
                     // UNDONE: FIXME
                     // hash = SUPPORT_ComputeCRC( fieldName, (CLR_UINT32)hal_strlen_s(fieldName), hash );
@@ -3187,7 +3187,7 @@ CLR_UINT32 CLR_RT_Assembly::ComputeHashForName( const CLR_RT_TypeDef_Index& td, 
 {
     NATIVE_PROFILE_CLR_CORE();
     char   rgBuffer[ 512 ];
-    LPSTR  szBuffer = rgBuffer;
+    char*  szBuffer = rgBuffer;
     size_t iBuffer  = MAXSTRLEN(rgBuffer);
 
     g_CLR_RT_TypeSystem.BuildTypeName( td, szBuffer, iBuffer );
@@ -3246,10 +3246,10 @@ void CLR_RT_Assembly::Relocate()
 
 HRESULT CLR_RT_Assembly::VerifyEndian(CLR_RECORD_ASSEMBLY* header)
 {
-    UINT32 u = 0x1234567;
-    UINT8 *t = (UINT8*)&u;
-    BOOL  localIsBE=false;
-    BOOL  assyIsBE=false;
+    unsigned int u = 0x1234567;
+    unsigned char *t = (unsigned char*)&u;
+    bool  localIsBE = false;
+    bool  assyIsBE = false;
 
     NANOCLR_HEADER();
     
@@ -3332,7 +3332,7 @@ void CLR_RT_TypeSystem::PostLinkageProcessing( CLR_RT_Assembly* assm )
     }
 }
 
-CLR_RT_Assembly* CLR_RT_TypeSystem::FindAssembly( LPCSTR szName, const CLR_RECORD_VERSION* ver, bool fExact )
+CLR_RT_Assembly* CLR_RT_TypeSystem::FindAssembly( const char* szName, const CLR_RECORD_VERSION* ver, bool fExact )
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -3369,7 +3369,7 @@ CLR_RT_Assembly* CLR_RT_TypeSystem::FindAssembly( LPCSTR szName, const CLR_RECOR
     return NULL;
 }
 
-bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR name, LPCSTR nameSpace, CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res )
+bool CLR_RT_TypeSystem::FindTypeDef( const char* name, const char* nameSpace, CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -3389,7 +3389,7 @@ bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR name, LPCSTR nameSpace, CLR_RT_Assem
     return FindTypeDef( name, nameSpace, res);
 }
 
-bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR name, LPCSTR nameSpace, CLR_RT_TypeDef_Index& res )
+bool CLR_RT_TypeSystem::FindTypeDef( const char* name, const char* nameSpace, CLR_RT_TypeDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_FOREACH_ASSEMBLY_IN_CURRENT_APPDOMAIN(*this)
@@ -3415,7 +3415,7 @@ bool CLR_RT_TypeSystem::FindTypeDef( CLR_UINT32 hash, CLR_RT_TypeDef_Index& res 
     return false;
 }
 
-bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR szClass, CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res )
+bool CLR_RT_TypeSystem::FindTypeDef( const char* szClass, CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res )
 {
     NATIVE_PROFILE_CLR_CORE();
     // UNDONE: FIXME
@@ -3424,9 +3424,9 @@ bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR szClass, CLR_RT_Assembly* assm, CLR_
 
     // if(hal_strlen_s(szClass) < ARRAYSIZE(rgNamespace))
     // {
-    //     LPCSTR szPtr              = szClass;
-    //     LPCSTR szPtr_LastDot      = NULL;
-    //     LPCSTR szPtr_FirstSubType = NULL;
+    //     const char* szPtr              = szClass;
+    //     const char* szPtr_LastDot      = NULL;
+    //     const char* szPtr_FirstSubType = NULL;
     //     char   c;
     //     size_t len;
 
@@ -3502,7 +3502,7 @@ bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR szClass, CLR_RT_Assembly* assm, CLR_
     return false;
 }
 
-bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR szClass, CLR_RT_Assembly* assm, CLR_RT_ReflectionDef_Index& reflex )
+bool CLR_RT_TypeSystem::FindTypeDef( const char* szClass, CLR_RT_Assembly* assm, CLR_RT_ReflectionDef_Index& reflex )
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -3513,9 +3513,9 @@ bool CLR_RT_TypeSystem::FindTypeDef( LPCSTR szClass, CLR_RT_Assembly* assm, CLR_
 
     // if(hal_strlen_s(szClass) < ARRAYSIZE(rgNamespace))
     // {
-    //     LPCSTR szPtr              = szClass;
-    //     LPCSTR szPtr_LastDot      = NULL;
-    //     LPCSTR szPtr_FirstSubType = NULL;
+    //     const char* szPtr              = szClass;
+    //     const char* szPtr_LastDot      = NULL;
+    //     const char* szPtr_FirstSubType = NULL;
     //     char   c;
     //     size_t len;
     //     bool arrayType = false;
@@ -3619,7 +3619,7 @@ CompareResource( const void* p1, const void* p2 )
     return (int)resource1->id - (int)resource2->id;
 }
 
-HRESULT CLR_RT_TypeSystem::LocateResourceFile( CLR_RT_Assembly_Instance assm, LPCSTR name, CLR_INT32& idxResourceFile )
+HRESULT CLR_RT_TypeSystem::LocateResourceFile( CLR_RT_Assembly_Instance assm, const char* name, CLR_INT32& idxResourceFile )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -3852,7 +3852,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeSystem::PrepareForExecutionHelper( LPCSTR szAssembly )
+HRESULT CLR_RT_TypeSystem::PrepareForExecutionHelper( const char* szAssembly )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -3976,7 +3976,7 @@ bool CLR_RT_TypeSystem::MatchSignatureElement( CLR_RT_SignatureParser::Element& 
 
 //--//
 
-HRESULT CLR_RT_TypeSystem::QueueStringToBuffer( LPSTR& szBuffer, size_t& iBuffer, LPCSTR szText )
+HRESULT CLR_RT_TypeSystem::QueueStringToBuffer( char*& szBuffer, size_t& iBuffer, const char* szText )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -3996,13 +3996,13 @@ HRESULT CLR_RT_TypeSystem::QueueStringToBuffer( LPSTR& szBuffer, size_t& iBuffer
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeSystem::BuildTypeName( const CLR_RT_TypeDef_Index& cls, LPSTR& szBuffer, size_t& iBuffer )
+HRESULT CLR_RT_TypeSystem::BuildTypeName( const CLR_RT_TypeDef_Index& cls, char*& szBuffer, size_t& iBuffer )
 {
     NATIVE_PROFILE_CLR_CORE();
     return BuildTypeName( cls, szBuffer, iBuffer, CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL, 0 );
 }
 
-HRESULT CLR_RT_TypeSystem::BuildTypeName ( const CLR_RT_TypeDef_Index& cls, LPSTR& szBuffer, size_t& iBuffer, CLR_UINT32 flags, CLR_UINT32 levels )
+HRESULT CLR_RT_TypeSystem::BuildTypeName ( const CLR_RT_TypeDef_Index& cls, char*& szBuffer, size_t& iBuffer, CLR_UINT32 flags, CLR_UINT32 levels )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -4029,7 +4029,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName ( const CLR_RT_TypeDef_Index& cls, LPST
 
     if(fFullName && td->nameSpace != CLR_EmptyIndex)
     {
-        LPCSTR szNameSpace = assm->GetString( td->nameSpace );
+        const char* szNameSpace = assm->GetString( td->nameSpace );
 
         if(szNameSpace[ 0 ])
         {
@@ -4048,7 +4048,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName ( const CLR_RT_TypeDef_Index& cls, LPST
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeSystem::BuildMethodName( const CLR_RT_MethodDef_Index& md, LPSTR& szBuffer, size_t& iBuffer )
+HRESULT CLR_RT_TypeSystem::BuildMethodName( const CLR_RT_MethodDef_Index& md, char*& szBuffer, size_t& iBuffer )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -4066,7 +4066,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName( const CLR_RT_MethodDef_Index& md, LP
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeSystem::BuildFieldName( const CLR_RT_FieldDef_Index& fd, LPSTR& szBuffer, size_t& iBuffer )
+HRESULT CLR_RT_TypeSystem::BuildFieldName( const CLR_RT_FieldDef_Index& fd, char*& szBuffer, size_t& iBuffer )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -4093,7 +4093,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef( const CLR_RT_TypeDef_Index& cls, c
 
     if(calleeInst.InitializeFromIndex( calleeMD ))
     {
-        LPCSTR calleeName = calleeInst.m_assm->GetString( calleeInst.m_target->name );
+        const char* calleeName = calleeInst.m_assm->GetString( calleeInst.m_target->name );
 
         CLR_RT_TypeDef_Instance inst; inst.InitializeFromMethod( calleeInst );
 
@@ -4104,7 +4104,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef( const CLR_RT_TypeDef_Index& cls, c
             // Prepend the Interface name to the method name and try again.
             //
             char   rgBuffer[ 512 ];
-            LPSTR  szBuffer = rgBuffer;
+            char*  szBuffer = rgBuffer;
             size_t iBuffer  = MAXSTRLEN(rgBuffer);
 
             BuildTypeName      ( inst, szBuffer, iBuffer, CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL | CLR_RT_TypeSystem::TYPENAME_NESTED_SEPARATOR_DOT, 0 );
@@ -4122,7 +4122,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef( const CLR_RT_TypeDef_Index& cls, c
     return false;
 }
 
-bool CLR_RT_TypeSystem::FindVirtualMethodDef( const CLR_RT_TypeDef_Index& cls, const CLR_RT_MethodDef_Index& calleeMD, LPCSTR calleeName, CLR_RT_MethodDef_Index& idx )
+bool CLR_RT_TypeSystem::FindVirtualMethodDef( const CLR_RT_TypeDef_Index& cls, const CLR_RT_MethodDef_Index& calleeMD, const char* calleeName, CLR_RT_MethodDef_Index& idx )
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_TypeDef_Instance   clsInst   ; clsInst   .InitializeFromIndex( cls      );
@@ -4150,7 +4150,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef( const CLR_RT_TypeDef_Index& cls, c
 
             if(targetMDR->numArgs == calleeNumArgs && (targetMDR->flags & CLR_RECORD_METHODDEF::MD_Abstract) == 0)
             {
-                LPCSTR targetName = targetAssm->GetString( targetMDR->name );
+                const char* targetName = targetAssm->GetString( targetMDR->name );
 
                 if(!strcmp( targetName, calleeName ))
                 {
@@ -4440,7 +4440,7 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
     NANOCLR_NOCLEANUP();
 }
 
-LPCSTR CLR_RT_AttributeParser::GetString()
+const char* CLR_RT_AttributeParser::GetString()
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT32 tk; NANOCLR_READ_UNALIGNED_UINT16(tk,m_blob);
