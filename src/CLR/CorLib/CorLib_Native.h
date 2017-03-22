@@ -110,7 +110,7 @@ struct Library_corlib_native_System_Exception
 
     //--//
 
-    static LPCSTR     GetMessage( CLR_RT_HeapBlock* obj ) { return obj[ Library_corlib_native_System_Exception::FIELD___message  ].RecoverString()  ; }
+    static const char*     GetMessage( CLR_RT_HeapBlock* obj ) { return obj[ Library_corlib_native_System_Exception::FIELD___message  ].RecoverString()  ; }
     static CLR_UINT32 GetHResult( CLR_RT_HeapBlock* obj ) { return obj[ Library_corlib_native_System_Exception::FIELD__m_HResult ].NumericByRef().u4; }
 };
 
@@ -802,8 +802,8 @@ struct Library_corlib_native_System_Type
 
     static HRESULT CheckFlags( CLR_RT_StackFrame& stack, CLR_UINT32 mask, CLR_UINT32 flag );
 
-    static HRESULT GetFields ( CLR_RT_StackFrame& stack, LPCSTR szText, CLR_UINT32 attr                                        , bool fAllMatches );
-    static HRESULT GetMethods( CLR_RT_StackFrame& stack, LPCSTR szText, CLR_UINT32 attr, CLR_RT_HeapBlock* pParams, int iParams, bool fAllMatches );
+    static HRESULT GetFields ( CLR_RT_StackFrame& stack, const char* szText, CLR_UINT32 attr                                        , bool fAllMatches );
+    static HRESULT GetMethods( CLR_RT_StackFrame& stack, const char* szText, CLR_UINT32 attr, CLR_RT_HeapBlock* pParams, int iParams, bool fAllMatches );
 };
 
 struct Library_corlib_native_System_RuntimeType
@@ -918,7 +918,7 @@ struct Library_corlib_native_System_String
     static HRESULT Concat( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock* array, int num );
 
     static HRESULT ConvertToCharArray( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_Array*& array, int startIndex, int length );
-    static HRESULT ConvertToCharArray( LPCSTR szText           , CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_Array*& array, int startIndex, int length );
+    static HRESULT ConvertToCharArray( const char* szText           , CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_Array*& array, int startIndex, int length );
 };
 
 struct Library_corlib_native_System_Text_StringBuilder

@@ -12,13 +12,13 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 
-BOOL DebuggerPort_Initialize( COM_HANDLE ComPortNum )
+bool DebuggerPort_Initialize( COM_HANDLE ComPortNum )
 {
     NATIVE_PROFILE_PAL_COM();
     return true;
 }
 
-BOOL DebuggerPort_Uninitialize( COM_HANDLE ComPortNum )
+bool DebuggerPort_Uninitialize( COM_HANDLE ComPortNum )
 {
     NATIVE_PROFILE_PAL_COM();
     return true;
@@ -38,25 +38,25 @@ int DebuggerPort_Read( COM_HANDLE ComPortNum, char* Data, size_t size )
     return 0;
 }
 
-BOOL DebuggerPort_Flush( COM_HANDLE ComPortNum )
+bool DebuggerPort_Flush( COM_HANDLE ComPortNum )
 {
     NATIVE_PROFILE_PAL_COM();
     return true;
 }
 
-BOOL DebuggerPort_IsSslSupported( COM_HANDLE ComPortNum )
+bool DebuggerPort_IsSslSupported( COM_HANDLE ComPortNum )
 {
     NATIVE_PROFILE_PAL_COM();
     return FALSE;
 }
 
-BOOL DebuggerPort_UpgradeToSsl( COM_HANDLE ComPortNum, UINT32 flags ) 
+bool DebuggerPort_UpgradeToSsl( COM_HANDLE ComPortNum, unsigned int flags ) 
 { 
     NATIVE_PROFILE_PAL_COM();
     return FALSE; 
 }
 
-BOOL DebuggerPort_IsUsingSsl( COM_HANDLE ComPortNum )
+bool DebuggerPort_IsUsingSsl( COM_HANDLE ComPortNum )
 {
     NATIVE_PROFILE_PAL_COM();
     return FALSE;
@@ -75,7 +75,7 @@ void CPU_UninitializeCommunication()
 }
 
 
-void CPU_ProtectCommunicationGPIOs( BOOL On )
+void CPU_ProtectCommunicationGPIOs( bool On )
 {
     NATIVE_PROFILE_PAL_COM();
 }

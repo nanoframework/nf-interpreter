@@ -72,7 +72,7 @@ HRESULT Library_corlib_native_System_DateTime::get_DayOfYear___I4( CLR_RT_StackF
     NANOCLR_HEADER();
 
     SYSTEMTIME st ; 
-    INT32 days;
+    signed int days;
     Expand( stack, st );
 
     NANOCLR_CHECK_HRESULT(HAL_Time_AccDaysInMonth( st.wYear, st.wMonth, &days ));

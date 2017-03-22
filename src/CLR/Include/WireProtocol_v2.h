@@ -185,7 +185,4 @@ struct WP_CompileCheck
     char buf1[ sizeof(WP_Packet) == 8 * 4 ? 1 : -1 ];
 };
 
-
-typedef unsigned int       UINT32;
-
 #endif // _WIREPROTOCOL_H_

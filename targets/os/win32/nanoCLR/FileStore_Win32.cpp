@@ -9,7 +9,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_RT_FileStore::LoadFile( LPCWSTR szFile, CLR_RT_Buffer& vec )
+HRESULT CLR_RT_FileStore::LoadFile( const wchar_t* szFile, CLR_RT_Buffer& vec )
 {
     NANOCLR_HEADER();
 
@@ -42,7 +42,7 @@ HRESULT CLR_RT_FileStore::LoadFile( LPCWSTR szFile, CLR_RT_Buffer& vec )
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT CLR_RT_FileStore::SaveFile( LPCWSTR szFile, const CLR_RT_Buffer& vec )
+HRESULT CLR_RT_FileStore::SaveFile( const wchar_t* szFile, const CLR_RT_Buffer& vec )
 {
     NANOCLR_HEADER();
         
@@ -59,7 +59,7 @@ HRESULT CLR_RT_FileStore::SaveFile( LPCWSTR szFile, const CLR_RT_Buffer& vec )
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_FileStore::SaveFile( LPCWSTR szFile, const CLR_UINT8* buf, size_t size )
+HRESULT CLR_RT_FileStore::SaveFile( const wchar_t* szFile, const CLR_UINT8* buf, size_t size )
 {
     NANOCLR_HEADER();
     FILE* stream;
@@ -90,7 +90,7 @@ HRESULT CLR_RT_FileStore::SaveFile( LPCWSTR szFile, const CLR_UINT8* buf, size_t
 
 //--//
 
-HRESULT CLR_RT_FileStore::ExtractTokensFromFile( LPCWSTR szFileName, std::vector< std::wstring >& vec, LPCWSTR separators, bool fNoComments )
+HRESULT CLR_RT_FileStore::ExtractTokensFromFile( const wchar_t* szFileName, std::vector< std::wstring >& vec, const wchar_t* separators, bool fNoComments )
 {
     NANOCLR_HEADER();
 
@@ -103,26 +103,26 @@ HRESULT CLR_RT_FileStore::ExtractTokensFromFile( LPCWSTR szFileName, std::vector
     NANOCLR_NOCLEANUP();
 }
 
-void CLR_RT_FileStore::ExtractTokens( const CLR_RT_Buffer& buf, CLR_RT_StringVector& vec, LPCWSTR separators, bool fNoComments )
+void CLR_RT_FileStore::ExtractTokens( const CLR_RT_Buffer& buf, CLR_RT_StringVector& vec, const wchar_t* separators, bool fNoComments )
 {
     std::wstring tmp;
-    LPSTR        szBufA = NULL;
-    LPWSTR       szBufW = NULL;
-    LPCWSTR      src;
+    char*        szBufA = NULL;
+    wchar_t*       szBufW = NULL;
+    const wchar_t*      src;
     size_t       len;
 
     if (buf.size() == 0) { return; }
     else if(buf.size() >= 2 && buf[ 0 ] == 0xFF && buf[ 1 ] == 0xFE)
     {
-        len = (buf.size() - 2) / sizeof(WCHAR);
+        len = (buf.size() - 2) / sizeof(wchar_t);
 
-        src = (LPCWSTR)&buf[ 2 ];
+        src = (const wchar_t*)&buf[ 2 ];
     }
     else
     {
-        len = buf.size() / sizeof(CHAR);
+        len = buf.size() / sizeof(char);
 
-        szBufA = new CHAR[ len+1 ]; memcpy( szBufA, &buf[ 0 ], len ); szBufA[ len ] = 0;
+        szBufA = new char[ len+1 ]; memcpy( szBufA, &buf[ 0 ], len ); szBufA[ len ] = 0;
         CLR_RT_UnicodeHelper::ConvertFromUTF8( szBufA, tmp );
 
         src = tmp.c_str();
@@ -131,7 +131,7 @@ void CLR_RT_FileStore::ExtractTokens( const CLR_RT_Buffer& buf, CLR_RT_StringVec
 
     //--//
 
-    szBufW = new WCHAR[ len+1 ]; memcpy( szBufW, src, len * sizeof(WCHAR) ); szBufW[ len ] = 0;
+    szBufW = new wchar_t[ len+1 ]; memcpy( szBufW, src, len * sizeof(wchar_t) ); szBufW[ len ] = 0;
 
     vec.reserve( len / 60 );
 
@@ -143,11 +143,11 @@ void CLR_RT_FileStore::ExtractTokens( const CLR_RT_Buffer& buf, CLR_RT_StringVec
     delete[] szBufA;
 }
 
-void CLR_RT_FileStore::ExtractTokensFromBuffer( LPWSTR szLine, CLR_RT_StringVector& vec, LPCWSTR separators, bool fNoComments )
+void CLR_RT_FileStore::ExtractTokensFromBuffer( wchar_t* szLine, CLR_RT_StringVector& vec, const wchar_t* separators, bool fNoComments )
 {
     while(*szLine)
     {
-        LPWSTR szNextLine = szLine;
+        wchar_t* szNextLine = szLine;
 
         while(*szNextLine)
         {
@@ -173,7 +173,7 @@ void CLR_RT_FileStore::ExtractTokensFromBuffer( LPWSTR szLine, CLR_RT_StringVect
     }
 }
 
-void CLR_RT_FileStore::ExtractTokensFromString( LPCWSTR szLine, CLR_RT_StringVector& vec, LPCWSTR separators )
+void CLR_RT_FileStore::ExtractTokensFromString( const wchar_t* szLine, CLR_RT_StringVector& vec, const wchar_t* separators )
 {
     if(separators)
     {
@@ -181,14 +181,14 @@ void CLR_RT_FileStore::ExtractTokensFromString( LPCWSTR szLine, CLR_RT_StringVec
 
         while(szLine[ 0 ])
         {
-            WCHAR  token        [ 2048 ];
-            WCHAR  tokenExpanded[ 2048 ];
+            wchar_t  token        [ 2048 ];
+            wchar_t  tokenExpanded[ 2048 ];
             bool   fQuote = false;
             size_t pos;
 
             for(pos=0; pos<MAXSTRLEN(token); )
             {
-                WCHAR c = *szLine++;
+                wchar_t c = *szLine++;
 
                 if(c == 0)
                 {

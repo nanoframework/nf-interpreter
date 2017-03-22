@@ -137,8 +137,8 @@ struct Settings
         vec.push_back(L"-load");
         vec.push_back(L"C:\\Program Files (x86)\\Microsoft .NET Micro Framework\\v4.4\\Assemblies\\le\\Microsoft.SPOT.Native.pe");
 
-        //WCHAR* pContext = NULL;
-        //WCHAR* pch = wcstok_s(emulatorArgs, L" ", &pContext); // UNDONE: FIXME: wcstok_s(this->m_clrOptions.EmulatorArgs, L" ", &pContext);
+        //wchar_t* pContext = NULL;
+        //wchar_t* pch = wcstok_s(emulatorArgs, L" ", &pContext); // UNDONE: FIXME: wcstok_s(this->m_clrOptions.EmulatorArgs, L" ", &pContext);
 
         //while (pch != NULL)
         //{
@@ -206,22 +206,22 @@ struct Settings
 
 		BlockStorageDevice *device;
         ByteAddress datByteAddress;
-        UINT32 datSize = ROUNDTOMULTIPLE((UINT32)(*end)- (UINT32)(*start), CLR_UINT32);
+        unsigned int datSize = ROUNDTOMULTIPLE((unsigned int)(*end)- (unsigned int)(*start), CLR_UINT32);
 
-        if (BlockStorageList::FindDeviceForPhysicalAddress( &device, (UINT32)(*start), datByteAddress ) && device != NULL)
+        if (BlockStorageList::FindDeviceForPhysicalAddress( &device, (unsigned int)(*start), datByteAddress ) && device != NULL)
         {    
-            const DeviceBlockInfo * deviceInfo=device->GetDeviceInfo();
+            const DeviceBlockInfo * deviceInfo= BlockStorageDevice_GetDeviceInfo(device);
 
-            if (!deviceInfo->Attribute.SupportsXIP)
+            if (!deviceInfo->Attribute & MediaAttribute_SupportsXIP)
             {
-                BYTE * datAssembliesBuffer = (BYTE*)CLR_RT_Memory::Allocate_And_Erase( datSize, CLR_RT_HeapBlock ::HB_Unmovable );  CHECK_ALLOCATION(datAssembliesBuffer);
+                unsigned char * datAssembliesBuffer = (unsigned char*)CLR_RT_Memory::Allocate_And_Erase( datSize, CLR_RT_HeapBlock ::HB_Unmovable );  CHECK_ALLOCATION(datAssembliesBuffer);
 
-                if ( !device->Read( datByteAddress, datSize, datAssembliesBuffer ))
+                if ( !BlockStorageDevice_Read(device, datByteAddress, datSize, datAssembliesBuffer ))
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
                 }
                 *start = (char *)datAssembliesBuffer;
-                *end = (char *)((UINT32) datAssembliesBuffer + (UINT32)datSize);
+                *end = (char *)((unsigned int) datAssembliesBuffer + (unsigned int)datSize);
 
             }
         }
@@ -241,10 +241,10 @@ struct Settings
 
         NANOCLR_CHECK_HRESULT(CheckKnownAssembliesForNonXIP( &assStart, &assEnd ));
 #if !defined(BUILD_RTM)
-        CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (UINT32)assStart, (UINT32)assEnd);
+        CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (unsigned int)assStart, (unsigned int)assEnd);
 #endif 
 
-        g_buildCRC = SUPPORT_ComputeCRC( assStart, (UINT32)assEnd -(UINT32) assStart, 0 );
+        g_buildCRC = SUPPORT_ComputeCRC( assStart, (unsigned int)assEnd -(unsigned int) assStart, 0 );
 
 
         header = (const CLR_RECORD_ASSEMBLY*)assStart;
@@ -263,24 +263,24 @@ struct Settings
     }
 
 
-    HRESULT ContiguousBlockAssemblies( BlockStorageStream stream, BOOL isXIP ) 
+    HRESULT ContiguousBlockAssemblies( BlockStorageStream stream, bool isXIP ) 
     {
         NANOCLR_HEADER();
 
         const CLR_RECORD_ASSEMBLY* header;
-        BYTE * assembliesBuffer ;
-        INT32  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
-        BYTE * headerBuffer  = NULL;
+        unsigned char * assembliesBuffer ;
+        signed int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
+        unsigned char * headerBuffer  = NULL;
 
         if(!isXIP)
         {
-            headerBuffer = (BYTE*)CLR_RT_Memory::Allocate( headerInBytes, true );  CHECK_ALLOCATION(headerBuffer);
+            headerBuffer = (unsigned char*)CLR_RT_Memory::Allocate( headerInBytes, true );  CHECK_ALLOCATION(headerBuffer);
             CLR_RT_Memory::ZeroFill( headerBuffer, headerInBytes );
         }
 
         while(TRUE)
         {
-            if(!stream.Read( &headerBuffer, headerInBytes )) break;
+            if(!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes )) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)headerBuffer;
 
@@ -290,12 +290,12 @@ struct Settings
                 break;
             }
 
-            UINT32 AssemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
+            unsigned int AssemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
 
             if(!isXIP)
             {
                 // read the assemblies
-                assembliesBuffer = (BYTE*)CLR_RT_Memory::Allocate_And_Erase( AssemblySizeInByte, CLR_RT_HeapBlock ::HB_Unmovable );
+                assembliesBuffer = (unsigned char*)CLR_RT_Memory::Allocate_And_Erase( AssemblySizeInByte, CLR_RT_HeapBlock ::HB_Unmovable );
                 
                 if (!assembliesBuffer) 
                 {
@@ -306,9 +306,9 @@ struct Settings
                 }
             }
 
-            stream.Seek( -headerInBytes );
+			BlockStorageStream_Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
 
-            if(!stream.Read( &assembliesBuffer, AssemblySizeInByte )) break;
+            if(!BlockStorageStream_Read(&stream, &assembliesBuffer, AssemblySizeInByte )) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)assembliesBuffer;
 
@@ -338,7 +338,7 @@ struct Settings
     }
 
 
-    HRESULT LoadDeploymentAssemblies( UINT32 memoryUsage )
+    HRESULT LoadDeploymentAssemblies( unsigned int memoryUsage )
     {
         NANOCLR_HEADER();
 
@@ -346,7 +346,7 @@ struct Settings
         const DeviceBlockInfo* deviceInfo;
 
         // find the block            
-        if (!stream.Initialize( memoryUsage ))
+        if (!BlockStorageStream_Initialize(&stream, memoryUsage ))
         {
 #if !defined(BUILD_RTM)
             CLR_Debug::Printf( "ERROR: Could not find device for DEPLOYMENT usage\r\n" );
@@ -356,11 +356,11 @@ struct Settings
 
         do
         {
-            deviceInfo = stream.Device->GetDeviceInfo();
+            deviceInfo = BlockStorageDevice_GetDeviceInfo(stream.Device);
             
-            ContiguousBlockAssemblies( stream, deviceInfo->Attribute.SupportsXIP );
+            ContiguousBlockAssemblies( stream, (deviceInfo->Attribute & MediaAttribute_SupportsXIP));
         }
-        while(stream.NextStream());
+        while(BlockStorageStream_NextStream(&stream));
         
         NANOCLR_NOCLEANUP();
     }
@@ -412,7 +412,7 @@ struct Settings
         Settings& m_parent;
         FPN       m_call;
 
-        Command_Call( Settings& parent, FPN call, LPCWSTR szName, LPCWSTR szDescription ) 
+        Command_Call( Settings& parent, FPN call, const wchar_t* szName, const wchar_t* szDescription ) 
             : CLR_RT_ParseOptions::Command( szName, szDescription ), m_parent(parent), m_call(call)
         {
         }
@@ -441,7 +441,7 @@ struct Settings
         OPTION_CALL( Cmd_Resolve, L"-resolve", L"Tries to resolve cross-assembly references" );
     }    
 
-    HRESULT CheckAssemblyFormat( CLR_RECORD_ASSEMBLY* header, LPCWSTR src )
+    HRESULT CheckAssemblyFormat( CLR_RECORD_ASSEMBLY* header, const wchar_t* src )
     {
         NANOCLR_HEADER();
 
@@ -464,7 +464,7 @@ struct Settings
     {
         NANOCLR_HEADER();
 
-        LPCWSTR              szName = PARAM_EXTRACT_STRING( params, 0 );
+        const wchar_t*              szName = PARAM_EXTRACT_STRING( params, 0 );
         CLR_RT_Buffer*       buffer = new CLR_RT_Buffer(); 
         CLR_RECORD_ASSEMBLY* header;
 
@@ -495,7 +495,7 @@ struct Settings
         }
 
         {
-            LPCWSTR              szFile = PARAM_EXTRACT_STRING( params, 0 );
+            const wchar_t*              szFile = PARAM_EXTRACT_STRING( params, 0 );
             CLR_RT_Buffer        buffer;
             CLR_RECORD_ASSEMBLY* header;
             CLR_RECORD_ASSEMBLY* headerEnd;
@@ -562,7 +562,7 @@ struct Settings
             const CLR_RECORD_ASSEMBLYREF* src = (const CLR_RECORD_ASSEMBLYREF*)pASSM->GetTable( TBL_AssemblyRef );
             for(int i=0; i<pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, src++)
             {
-                LPCSTR szName = pASSM->GetString( src->name );
+                const char* szName = pASSM->GetString( src->name );
 
                 if(g_CLR_RT_TypeSystem.FindAssembly( szName, &src->version, true ) == NULL)
                 {
@@ -589,7 +589,7 @@ static Settings s_ClrSettings;
 //--//
 
 #if defined(_WIN32)
-HRESULT ClrLoadPE( LPCWSTR szPeFilePath )
+HRESULT ClrLoadPE( const wchar_t* szPeFilePath )
 {
     CLR_RT_StringVector vec;
 
@@ -600,7 +600,7 @@ HRESULT ClrLoadPE( LPCWSTR szPeFilePath )
     return s_ClrSettings.ProcessOptions(vec);
 }
 
-HRESULT ClrLoadDAT( LPCWSTR szDatFilePath )
+HRESULT ClrLoadDAT( const wchar_t* szDatFilePath )
 {
     CLR_RT_StringVector vec;
 

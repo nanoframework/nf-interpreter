@@ -428,14 +428,14 @@ void CLR_RT_UnicodeHelper::ConvertToUTF8( const std::wstring& src ,
 {
     if(src.size())
     {
-        LPSTR szBuf;
+        char* szBuf;
         int   iSize;
 
         iSize = ::WideCharToMultiByte( CP_UTF8, 0, src.c_str(), -1, NULL, 0, NULL, NULL );
 
         if(iSize > 0)
         {
-            szBuf = new CHAR[ iSize ];
+            szBuf = new char[ iSize ];
 
             iSize = ::WideCharToMultiByte( CP_UTF8, 0, src.c_str(), -1, szBuf, iSize, NULL, NULL );
             if(iSize > 0)
@@ -457,14 +457,14 @@ void CLR_RT_UnicodeHelper::ConvertFromUTF8( const std::string& src ,
 {
     if(src.size())
     {
-        LPWSTR szBuf;
+        wchar_t* szBuf;
         int    iSize;
 
         iSize = ::MultiByteToWideChar( CP_UTF8, 0, src.c_str(), -1, NULL, 0 );
 
         if(iSize > 0)
         {
-            szBuf = new WCHAR[ iSize ];
+            szBuf = new wchar_t[ iSize ];
 
             iSize = ::MultiByteToWideChar( CP_UTF8, 0, src.c_str(), -1, szBuf, iSize );
             if(iSize > 0)
@@ -495,7 +495,7 @@ UnicodeString::~UnicodeString()
     Release();
 }
 
-HRESULT UnicodeString::Assign( LPCSTR string )
+HRESULT UnicodeString::Assign( const char* string )
 {
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();

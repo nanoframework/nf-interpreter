@@ -47,7 +47,7 @@ void WP_Message::PrepareReception()
     m_rxState = ReceiveState::Initialize;
 }
 
-void WP_Message::PrepareRequest(UINT32 cmd, UINT32 flags, UINT32 payloadSize, UINT8* payload)
+void WP_Message::PrepareRequest(unsigned int cmd, unsigned int flags, unsigned int payloadSize, unsigned char* payload)
 {
     memcpy(m_header.m_signature, m_parent->m_szMarker ? m_parent->m_szMarker : MARKER_PACKET_V1, sizeof(m_header.m_signature));
 
@@ -63,10 +63,10 @@ void WP_Message::PrepareRequest(UINT32 cmd, UINT32 flags, UINT32 payloadSize, UI
     // The CRC for the header is computed setting the CRC field to zero and then running the CRC algorithm.
     //
     m_header.m_crcHeader = 0;
-    m_header.m_crcHeader = SUPPORT_ComputeCRC((UINT8*)&m_header, sizeof(m_header), 0);
+    m_header.m_crcHeader = SUPPORT_ComputeCRC((unsigned char*)&m_header, sizeof(m_header), 0);
 }
 
-void WP_Message::PrepareReply(const WP_Packet& req, UINT32 flags, UINT32 payloadSize, UINT8* payload)
+void WP_Message::PrepareReply(const WP_Packet& req, unsigned int flags, unsigned int payloadSize, unsigned char* payload)
 {
     memcpy(m_header.m_signature, m_parent->m_szMarker ? m_parent->m_szMarker : MARKER_PACKET_V1, sizeof(m_header.m_signature));
 
@@ -82,10 +82,10 @@ void WP_Message::PrepareReply(const WP_Packet& req, UINT32 flags, UINT32 payload
     // The CRC for the header is computed setting the CRC field to zero and then running the CRC algorithm.
     //
     m_header.m_crcHeader = 0;
-    m_header.m_crcHeader = SUPPORT_ComputeCRC((UINT8*)&m_header, sizeof(m_header), 0);
+    m_header.m_crcHeader = SUPPORT_ComputeCRC((unsigned char*)&m_header, sizeof(m_header), 0);
 }
 
-void WP_Message::SetPayload(UINT8* payload)
+void WP_Message::SetPayload(unsigned char* payload)
 {
     m_payload = payload;
 }
@@ -101,9 +101,9 @@ void WP_Message::Release()
 
 bool WP_Message::VerifyHeader()
 {
-    UINT32 crc = m_header.m_crcHeader;
+    unsigned int crc = m_header.m_crcHeader;
     m_header.m_crcHeader = 0;
-    UINT32 computedCrc = SUPPORT_ComputeCRC((UINT8*)&m_header, sizeof(m_header), 0);
+    unsigned int computedCrc = SUPPORT_ComputeCRC((unsigned char*)&m_header, sizeof(m_header), 0);
     m_header.m_crcHeader = crc;
 
     if(computedCrc != crc)
@@ -121,7 +121,7 @@ bool WP_Message::VerifyPayload()
         return false;
     }
 
-    UINT32 computedCrc = SUPPORT_ComputeCRC(m_payload, m_header.m_size, 0);
+    unsigned int computedCrc = SUPPORT_ComputeCRC(m_payload, m_header.m_size, 0);
     if(computedCrc != m_header.m_crcData)
     {
         TRACE(TRACE_ERRORS, "Payload CRC check failed: computed: 0x%08X; got: 0x%08X\n", computedCrc, m_header.m_crcData);
@@ -130,7 +130,7 @@ bool WP_Message::VerifyPayload()
     return true;
 }
 
-void WP_Message::ReplyBadPacket(UINT32 flags)
+void WP_Message::ReplyBadPacket(unsigned int flags)
 {
     WP_Message msg;
     msg.Initialize(m_parent);
@@ -141,7 +141,7 @@ void WP_Message::ReplyBadPacket(UINT32 flags)
 
 bool WP_Message::Process()
 {
-    UINT8* buf = (UINT8*)&m_header;
+    unsigned char* buf = (unsigned char*)&m_header;
     int len;
 
     while(true)
@@ -157,7 +157,7 @@ bool WP_Message::Process()
                 Release();
 
                 m_rxState = ReceiveState::WaitingForHeader;
-                m_pos     = (UINT8*)&m_header;
+                m_pos     = (unsigned char*)&m_header;
                 m_size    = sizeof(m_header);
                 break;
 
@@ -240,7 +240,7 @@ bool WP_Message::Process()
                             {
                                 m_payloadTicks = HAL_Time_CurrentSysTicks();
                                 m_rxState = ReceiveState::ReadingPayload;
-                                m_pos     = (UINT8*)m_payload;
+                                m_pos     = (unsigned char*)m_payload;
                                 m_size    = m_header.m_size;
                             }
                         }
@@ -267,12 +267,12 @@ bool WP_Message::Process()
             {
                 TRACE0(TRACE_STATE, "RxState=ReadingPayload\n");
 
-                UINT32 curTicks = HAL_Time_CurrentSysTicks();
+                unsigned int curTicks = HAL_Time_CurrentSysTicks();
 
                 // If the time between consecutive payload bytes exceeds the timeout threshold then assume that
                 // the rest of the payload is not coming. Reinitialize to synch on the next header.
 
-                if(HAL_Time_SysTicksToTime(curTicks - m_payloadTicks) < (UINT64)c_PayloadTimeout)
+                if(HAL_Time_SysTicksToTime(curTicks - m_payloadTicks) < (unsigned __int64)c_PayloadTimeout)
                 {
                     m_payloadTicks = curTicks;
 
@@ -322,7 +322,7 @@ bool WP_Message::Process()
 // WP_Controller
 //
 
-void WP_Controller::Initialize(LPCSTR szMarker, const WP_PhysicalLayer* phy, const WP_ApplicationLayer* app, void* state)
+void WP_Controller::Initialize(const char* szMarker, const WP_PhysicalLayer* phy, const WP_ApplicationLayer* app, void* state)
 {
     m_szMarker = szMarker;
     m_phy = phy;
@@ -347,7 +347,7 @@ bool WP_Controller::SendProtocolMessage(const WP_Message& msg)
     return m_phy->TransmitMessage(m_state, &msg);
 }
 
-bool WP_Controller::SendProtocolMessage(UINT32 cmd, UINT32 flags, UINT32 payloadSize, UINT8* payload)
+bool WP_Controller::SendProtocolMessage(unsigned int cmd, unsigned int flags, unsigned int payloadSize, unsigned char* payload)
 {
     WP_Message msg;
     msg.Initialize(this);

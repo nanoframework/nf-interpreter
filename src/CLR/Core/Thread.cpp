@@ -198,7 +198,7 @@ HRESULT CLR_RT_Thread::CreateInstance( int pid, int priority, CLR_RT_Thread*& th
         th->m_status                         = TH_S_Unstarted;                 // CLR_UINT32                 m_status;
         th->m_flags                          = flags;                           // CLR_UINT32                 m_flags;
         th->m_executionCounter               = 0;                               // int                        m_executionCounter;
-        th->m_timeQuantumExpired             = FALSE;                           // BOOL                       m_timeQuantumExpired;
+        th->m_timeQuantumExpired             = false;                           // bool                       m_timeQuantumExpired;
                                                                                 //
         th->m_dlg                            = NULL;                            // CLR_RT_HeapBlock_Delegate* m_dlg;
         th->m_currentException               .SetObjectReference( NULL );       // CLR_RT_HeapBlock           m_currentException;
@@ -513,7 +513,7 @@ void CLR_RT_Thread::Relocate()
 void CLR_RT_Thread::DumpStack()
 {
     NATIVE_PROFILE_CLR_CORE();
-    LPCSTR szStatus;
+    const char* szStatus;
 
     switch(m_status)
     {

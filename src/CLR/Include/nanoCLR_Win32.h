@@ -8,17 +8,17 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void HAL_Windows_FastSleep( INT64 ticks );
+void HAL_Windows_FastSleep( signed __int64 ticks );
 
-BOOL HAL_Windows_IsShutdownPending();
+bool HAL_Windows_IsShutdownPending();
 
 void HAL_Windows_AcquireGlobalLock();
 void HAL_Windows_ReleaseGlobalLock();
-BOOL HAL_Windows_HasGlobalLock();
+bool HAL_Windows_HasGlobalLock();
 
-UINT64 HAL_Windows_GetPerformanceTicks();
+unsigned __int64 HAL_Windows_GetPerformanceTicks();
 
-void HAL_Windows_Debug_Print( LPSTR szText );
+void HAL_Windows_Debug_Print( char* szText );
                         
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

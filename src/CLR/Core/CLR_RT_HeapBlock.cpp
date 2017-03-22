@@ -626,7 +626,7 @@ HRESULT CLR_RT_HeapBlock::Reassign( const CLR_RT_HeapBlock& value )
     }
     else if(value.DataType() == DATATYPE_ARRAY_BYREF)
     {
-        _ASSERTE( FALSE ); //not tested
+        _ASSERTE( false ); //not tested
 
         CLR_RT_HeapBlock valueT; valueT.Assign( value );
 
@@ -940,7 +940,7 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode( CLR_RT_HeapBlock* ptr, bool fRecurse, 
 
     case DATATYPE_STRING:
         {
-            LPCSTR szText = ptr->StringText();
+            const char* szText = ptr->StringText();
 
             crc = SUPPORT_ComputeCRC( szText, (int)hal_strlen_s( szText ), crc );
         }

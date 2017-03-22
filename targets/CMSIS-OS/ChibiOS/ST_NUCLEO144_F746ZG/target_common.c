@@ -14,7 +14,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 
     //--//
 
-    {                                               // UINT32      DebuggerPorts[MAX_DEBUGGERS];
+    {                                               // unsigned int      DebuggerPorts[MAX_DEBUGGERS];
         0//ConvertCOM_DebugHandle(0),
     },
 

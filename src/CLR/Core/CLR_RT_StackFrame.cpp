@@ -1049,7 +1049,7 @@ void CLR_RT_StackFrame::SetResult_Object( CLR_RT_HeapBlock* val )
     top.SetObjectReference( val );
 }
 
-HRESULT CLR_RT_StackFrame::SetResult_String( LPCSTR val )
+HRESULT CLR_RT_StackFrame::SetResult_String( const char* val )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();

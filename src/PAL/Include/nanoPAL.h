@@ -8,7 +8,10 @@
 
 //#include <nanoHAL_Types.h>
 
+#include <nanoHAL.h>
 #include <nanoPAL_Time.h>
+#include <nanoHAL_v2.h>
+#include <nanoPAL_BlockStorage.h>
 
 //#include <AsyncProcCalls_decl.h>
 
@@ -77,37 +80,37 @@ public:
 
     static void InitializeList();
 
-    static BOOL Dequeue_And_Execute();
+    static bool Dequeue_And_Execute();
 };
 
 //--//
 
 struct HAL_COMPLETION : public HAL_CONTINUATION
 {
-    UINT64 EventTimeTicks;
-    BOOL   ExecuteInISR;
+    unsigned __int64 EventTimeTicks;
+    bool   ExecuteInISR;
 
 #if defined(_DEBUG)
-    UINT64 Start_RTC_Ticks;
+    unsigned __int64 Start_RTC_Ticks;
 #endif
 
     void InitializeForISR( HAL_CALLBACK_FPN EntryPoint, void* Argument = NULL )
     {
-        ExecuteInISR = TRUE;
+        ExecuteInISR = true;
 
         InitializeCallback( EntryPoint, Argument );
     }
 
     void InitializeForUserMode( HAL_CALLBACK_FPN EntryPoint, void* Argument = NULL )
     {
-        ExecuteInISR = FALSE;
+        ExecuteInISR = false;
 
         InitializeCallback( EntryPoint, Argument );
     }
 
-    void EnqueueTicks               ( UINT64 EventTimeTicks        );
-    void EnqueueDelta64             ( UINT64 uSecFromNow           );
-    void EnqueueDelta               ( UINT32 uSecFromNow           );
+    void EnqueueTicks               ( unsigned __int64 EventTimeTicks        );
+    void EnqueueDelta64             ( unsigned __int64 uSecFromNow           );
+    void EnqueueDelta               ( unsigned int uSecFromNow           );
     
     void Abort();
 
@@ -121,7 +124,7 @@ struct HAL_COMPLETION : public HAL_CONTINUATION
 
     static void DequeueAndExec();
 
-    static void WaitForInterrupts( UINT64 Expire, UINT32 sleepLevel, UINT64 wakeEvents );
+    static void WaitForInterrupts( unsigned __int64 Expire, unsigned int sleepLevel, unsigned __int64 wakeEvents );
 };
 
 //--//
@@ -132,17 +135,17 @@ struct HAL_COMPLETION : public HAL_CONTINUATION
 //#include <BatteryMeasurement_decl.h>
 
 //#include <COM_decl.h>
-__nfweak BOOL DebuggerPort_Initialize(COM_HANDLE ComPortNum);
-__nfweak BOOL DebuggerPort_Uninitialize(COM_HANDLE ComPortNum);
+__nfweak bool DebuggerPort_Initialize(COM_HANDLE ComPortNum);
+__nfweak bool DebuggerPort_Uninitialize(COM_HANDLE ComPortNum);
 
 // max retries is the number of retries if the first attempt fails, thus the maximum
 // total number of attempts is maxRretries + 1 since it always tries at least once.
 __nfweak int  DebuggerPort_Write(COM_HANDLE ComPortNum, const char* Data, size_t size, int maxRetries = 99);
 __nfweak int  DebuggerPort_Read(COM_HANDLE ComPortNum, char* Data, size_t size);
-__nfweak BOOL DebuggerPort_Flush(COM_HANDLE ComPortNum);
-__nfweak BOOL DebuggerPort_IsSslSupported(COM_HANDLE ComPortNum);
-__nfweak BOOL DebuggerPort_UpgradeToSsl(COM_HANDLE ComPortNum, UINT32 flags);
-__nfweak BOOL DebuggerPort_IsUsingSsl(COM_HANDLE ComPortNum);
+__nfweak bool DebuggerPort_Flush(COM_HANDLE ComPortNum);
+__nfweak bool DebuggerPort_IsSslSupported(COM_HANDLE ComPortNum);
+__nfweak bool DebuggerPort_UpgradeToSsl(COM_HANDLE ComPortNum, unsigned int flags);
+__nfweak bool DebuggerPort_IsUsingSsl(COM_HANDLE ComPortNum);
 
 //
 //#include <Display_decl.h>
@@ -165,10 +168,10 @@ enum SLEEP_LEVEL
 //#include <events_decl.h>
 
 // destructive read system event flags
-UINT32 Events_Get( UINT32 EventsOfInterest );
+unsigned int Events_Get( unsigned int EventsOfInterest );
 
 // non-destructive read system event flags
-UINT32 Events_MaskedRead( UINT32 EventsOfInterest );
+unsigned int Events_MaskedRead( unsigned int EventsOfInterest );
 
 
 // returns 0 for timeout, non-zero are events that have happened and were asked to be waiting on (non-destructive read)
@@ -184,15 +187,15 @@ UINT32 Events_MaskedRead( UINT32 EventsOfInterest );
 
 #define EVENTS_TIMEOUT_INFINITE 0xFFFFFFFF
 
-UINT32 Events_WaitForEvents        ( UINT32 sleepLevel, UINT32 WakeupSystemEvents, UINT32 Timeout_Milliseconds );
-UINT32 Events_WaitForEventsInternal( UINT32 sleepLevel, UINT32 WakeupSystemEvents, UINT32 Timeout_Milliseconds );
+unsigned int Events_WaitForEvents        ( unsigned int sleepLevel, unsigned int WakeupSystemEvents, unsigned int Timeout_Milliseconds );
+unsigned int Events_WaitForEventsInternal( unsigned int sleepLevel, unsigned int WakeupSystemEvents, unsigned int Timeout_Milliseconds );
 
-__inline UINT32 Events_WaitForEvents( UINT32 WakeupSystemEvents, UINT32 Timeout_Milliseconds )
+__inline unsigned int Events_WaitForEvents( unsigned int WakeupSystemEvents, unsigned int Timeout_Milliseconds )
 {
     return Events_WaitForEvents( SLEEP_LEVEL__SLEEP, WakeupSystemEvents, Timeout_Milliseconds );
 }
 
-void Events_SetBoolTimer(BOOL* TimerCompleteFlag, UINT32 MillisecondsFromNow);
+void Events_SetBoolTimer(bool* TimerCompleteFlag, unsigned int MillisecondsFromNow);
 
 
 //#include <palevent_decl.h>
@@ -200,7 +203,7 @@ void Events_SetBoolTimer(BOOL* TimerCompleteFlag, UINT32 MillisecondsFromNow);
 //#include <heap_decl.h>
 
 // This function returns location of the CLR heap.
-void HeapLocation(UINT8*& BaseAddress, UINT32& SizeInBytes);
+void HeapLocation(unsigned char*& BaseAddress, unsigned int& SizeInBytes);
 
 
 //#include <gesture_decl.h>

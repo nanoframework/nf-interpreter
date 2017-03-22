@@ -20,12 +20,12 @@
 
 #include <inttypes.h>
 
-typedef unsigned char      UINT8;
-typedef unsigned short int UINT16;
-typedef unsigned int       UINT32;
-typedef uint64_t           UINT64;
+typedef unsigned char      unsigned char;
+typedef unsigned short int unsigned short int;
+typedef unsigned int       unsigned int;
+typedef uint64_t           unsigned __int64;
 
-typedef const char*        LPCSTR;
+typedef const char*        const char*;
 
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
@@ -55,35 +55,35 @@ struct WP_Controller;
 
 struct WP_Flags
 {
-    static const UINT16 c_NonCritical = 0x0001; // This doesn't need an acknowledge.
-    static const UINT16 c_Reply       = 0x0002; // This is the result of a command.
-    static const UINT16 c_BadHeader   = 0x0004;
-    static const UINT16 c_BadPayload  = 0x0008;
-    static const UINT16 c_Spare0010   = 0x0010;
-    static const UINT16 c_Spare0020   = 0x0020;
-    static const UINT16 c_Spare0040   = 0x0040;
-    static const UINT16 c_Spare0080   = 0x0080;
-    static const UINT16 c_Spare0100   = 0x0100;
-    static const UINT16 c_Spare0200   = 0x0200;
-    static const UINT16 c_Spare0400   = 0x0400;
-    static const UINT16 c_Spare0800   = 0x0800;
-    static const UINT16 c_Spare1000   = 0x1000;
-    static const UINT16 c_NoCaching   = 0x2000;
-    static const UINT16 c_NACK        = 0x4000;
-    static const UINT16 c_ACK         = 0x8000;
+    static const unsigned short int c_NonCritical = 0x0001; // This doesn't need an acknowledge.
+    static const unsigned short int c_Reply       = 0x0002; // This is the result of a command.
+    static const unsigned short int c_BadHeader   = 0x0004;
+    static const unsigned short int c_BadPayload  = 0x0008;
+    static const unsigned short int c_Spare0010   = 0x0010;
+    static const unsigned short int c_Spare0020   = 0x0020;
+    static const unsigned short int c_Spare0040   = 0x0040;
+    static const unsigned short int c_Spare0080   = 0x0080;
+    static const unsigned short int c_Spare0100   = 0x0100;
+    static const unsigned short int c_Spare0200   = 0x0200;
+    static const unsigned short int c_Spare0400   = 0x0400;
+    static const unsigned short int c_Spare0800   = 0x0800;
+    static const unsigned short int c_Spare1000   = 0x1000;
+    static const unsigned short int c_NoCaching   = 0x2000;
+    static const unsigned short int c_NACK        = 0x4000;
+    static const unsigned short int c_ACK         = 0x8000;
 };
 
 struct WP_Packet
 {
-    UINT8  m_signature[8];
-    UINT32 m_crcHeader;
-    UINT32 m_crcData;
+    unsigned char  m_signature[8];
+    unsigned int m_crcHeader;
+    unsigned int m_crcData;
 
-    UINT32 m_cmd;
-    UINT16 m_seq;
-    UINT16 m_seqReply;
-    UINT32 m_flags;
-    UINT32 m_size;
+    unsigned int m_cmd;
+    unsigned short int m_seq;
+    unsigned short int m_seqReply;
+    unsigned int m_flags;
+    unsigned int m_size;
 };
 
 //--//
@@ -94,7 +94,7 @@ struct WP_PhysicalLayer
     // TransmitMessage has to be fully buffered, in the sense it should accept all the input and return.
     // Blocking behavior has to be hidden in the driver.
     //
-    bool (*ReceiveBytes)(void* state, UINT8*& ptr, UINT32 & size);
+    bool (*ReceiveBytes)(void* state, unsigned char*& ptr, unsigned int & size);
     bool (*TransmitMessage)(void* state, const WP_Message* msg);
 };
 
@@ -120,48 +120,48 @@ struct WP_Message
         static const int CompletePayload  = 6;
     };
 
-    static const UINT32 c_PayloadTimeout = 60000000; // 6 secs (100 nsecs units)
+    static const unsigned int c_PayloadTimeout = 60000000; // 6 secs (100 nsecs units)
 
     WP_Controller* m_parent;
     WP_Packet      m_header;
-    UINT8*         m_payload;
+    unsigned char*         m_payload;
 
 // UNDONE: FIXME: private:
-    UINT8*         m_pos;
-    UINT32         m_size;
-    UINT64         m_payloadTicks;
+    unsigned char*         m_pos;
+    unsigned int         m_size;
+    unsigned __int64         m_payloadTicks;
     int            m_rxState;
 
 public:
     void Initialize(WP_Controller* parent);
     void PrepareReception();
-    void PrepareRequest(UINT32 cmd, UINT32 flags, UINT32 payloadSize, UINT8* payload);
-    void PrepareReply(const WP_Packet& req, UINT32 flags, UINT32 payloadSize, UINT8* payload);
-    void SetPayload(UINT8* payload);
+    void PrepareRequest(unsigned int cmd, unsigned int flags, unsigned int payloadSize, unsigned char* payload);
+    void PrepareReply(const WP_Packet& req, unsigned int flags, unsigned int payloadSize, unsigned char* payload);
+    void SetPayload(unsigned char* payload);
     void Release();
     bool Process();
 
 private:
     bool VerifyHeader ();
     bool VerifyPayload();
-    void ReplyBadPacket(UINT32 flags);
+    void ReplyBadPacket(unsigned int flags);
 };
 
 struct WP_Controller
 {
-    LPCSTR                     m_szMarker;
+    const char*                     m_szMarker;
     const WP_PhysicalLayer*    m_phy;
     const WP_ApplicationLayer* m_app;
     void*                      m_state;
 
     WP_Message                 m_inboundMessage;
-    UINT16                     m_lastOutboundMessage;
+    unsigned short int                     m_lastOutboundMessage;
 
 
-    void Initialize(LPCSTR szMarker, const WP_PhysicalLayer* phy, const WP_ApplicationLayer* app, void* state);
+    void Initialize(const char* szMarker, const WP_PhysicalLayer* phy, const WP_ApplicationLayer* app, void* state);
     bool AdvanceState();
     bool SendProtocolMessage(const WP_Message& msg);
-    bool SendProtocolMessage(UINT32 cmd, UINT32 flags = 0, UINT32 payloadSize = 0, UINT8* payload = NULL);
+    bool SendProtocolMessage(unsigned int cmd, unsigned int flags = 0, unsigned int payloadSize = 0, unsigned char* payload = NULL);
 };
 
 //--//

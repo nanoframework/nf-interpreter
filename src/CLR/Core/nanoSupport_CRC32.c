@@ -11,7 +11,7 @@
 // CRC 32 table for use under ZModem protocol, IEEE 802
 // G(x) = x^32+x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1
 //
-static const UINT32 c_CRCTable[256] =
+static const unsigned int c_CRCTable[256] =
 {
 	0x00000000, 0x04C11DB7, 0x09823B6E, 0x0D4326D9, 0x130476DC, 0x17C56B6B, 0x1A864DB2, 0x1E475005,
 	0x2608EDB8, 0x22C9F00F, 0x2F8AD6D6, 0x2B4BCB61, 0x350C9B64, 0x31CD86D3, 0x3C8EA00A, 0x384FBDBD,
@@ -47,9 +47,9 @@ static const UINT32 c_CRCTable[256] =
 	0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
 };
 
-UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc)
+unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc)
 {
-    const UINT8* ptr = (const UINT8*)rgBlock;
+    const unsigned char* ptr = (const unsigned char*)rgBlock;
 
     while(nLength-- > 0)
     {

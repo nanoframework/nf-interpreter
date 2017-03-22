@@ -6,30 +6,27 @@
 #ifndef _SUPPORT_NANOSUPPORT_H_
 #define _SUPPORT_NANOSUPPORT_H_
 
-typedef unsigned int       UINT32;
-
-
 #if defined(__cplusplus) && !(defined(_WIN32) || defined(WIN32))
 extern "C" {
 #endif
 
-UINT32 SUPPORT_ComputeCRC(const void* rgBlock, int nLength, UINT32 crc);
+unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc);
 
 #if defined(__cplusplus) && !(defined(_WIN32) || defined(WIN32))
 }
 #endif
 
-//typedef BOOL (*WRITE_MEMORY_FUNCT)( UINT32 Address, UINT32 NumBytes, const BYTE * pSectorBuff );
-//typedef BOOL (*READ_MEMORY_FUNCT) ( UINT32 Address, UINT32 NumBytes, BYTE * pSectorBuff );
+//typedef bool (*WRITE_MEMORY_FUNCT)( unsigned int Address, unsigned int NumBytes, const unsigned char * pSectorBuff );
+//typedef bool (*READ_MEMORY_FUNCT) ( unsigned int Address, unsigned int NumBytes, unsigned char * pSectorBuff );
 //
-//int LZ77_Decompress( UINT8* inBuf, int inSize, UINT8* outBuf, int outSize );
-//int LZ77_Decompress( UINT8* inBuf, int inSize, UINT8* outBuf, int outSize, WRITE_MEMORY_FUNCT writeMem, READ_MEMORY_FUNCT readMem );
+//int LZ77_Decompress( unsigned char* inBuf, int inSize, unsigned char* outBuf, int outSize );
+//int LZ77_Decompress( unsigned char* inBuf, int inSize, unsigned char* outBuf, int outSize, WRITE_MEMORY_FUNCT writeMem, READ_MEMORY_FUNCT readMem );
 
 //--//
 
 #if defined(_WIN32) || defined(WIN32)
 
-bool LZ77_Compress(LPCWSTR inFileText, LPCWSTR outFileText, UINT8* prefix, size_t prefixLength);
+bool LZ77_Compress(const wchar_t* inFileText, const wchar_t* outFileText, unsigned char* prefix, size_t prefixLength);
 
 #endif
 

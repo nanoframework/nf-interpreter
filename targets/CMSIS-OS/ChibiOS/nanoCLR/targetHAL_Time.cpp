@@ -7,7 +7,7 @@
 #include <nanoHAL_Time.h>
 
 // Converts CMSIS sysTicks to .NET ticks (100 nanoseconds)
-INT64 HAL_Time_SysTicksToTime(UINT32 sysTicks) {
+signed __int64 HAL_Time_SysTicksToTime(unsigned int sysTicks) {
     
     // this is a rewrite of ChibiOS ST2US(n) macro because it will overflow if doing the math using uint32_t
     

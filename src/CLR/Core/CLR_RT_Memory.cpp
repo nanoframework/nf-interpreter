@@ -122,14 +122,14 @@ void* CLR_RT_Memory::Allocate( size_t len, CLR_UINT32 flags )
 
     if(s_CLR_RT_Heap.m_size == 0)
     {
-        UINT8* heapStart = NULL;
-        UINT32 heapSize  = 0;
+        unsigned char* heapStart = NULL;
+        unsigned int heapSize  = 0;
 
         ::HeapLocation( heapStart, heapSize );
 
         if(len > heapSize)
         {
-            ASSERT(FALSE);
+            ASSERT(false);
             return NULL;
 
         }

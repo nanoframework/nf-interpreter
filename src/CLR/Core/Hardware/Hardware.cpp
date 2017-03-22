@@ -105,8 +105,8 @@ void CLR_HW_Hardware::ProcessActivity()
     }
     NANOCLR_FOREACH_DEBUGGER_END();
 
-    UINT32 events    = ::Events_Get( m_wakeupEvents );    
-    UINT32 eventsCLR = 0;
+    unsigned int events    = ::Events_Get( m_wakeupEvents );    
+    unsigned int eventsCLR = 0;
 
     if(events & m_MessagingEventsMask)
     {
@@ -171,8 +171,8 @@ void CLR_HW_Hardware::ProcessActivity()
 
     // UNDONE: FIXME: if(events & SYSTEM_EVENT_FLAG_CHARGER_CHANGE)
     //{
-    //    static UINT32 lastStatus;
-    //    UINT32        status;
+    //    static unsigned int lastStatus;
+    //    unsigned int        status;
 
     //    if(::Charger_Status( status ))
     //    {

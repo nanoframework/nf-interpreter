@@ -7,7 +7,6 @@
 #define _TARGET_HAL_H_
 
 #include <target_board.h>
-#include "TargetPAL_BlockStorage.h"
 
 #if !defined(BUILD_RTM)
 

@@ -37,13 +37,13 @@ int hal_snprintf_double( char* buffer, size_t len, const char* format, double d 
 }
 
 #else
-int hal_snprintf_float( char* buffer, size_t len, const char* format, INT32 f )
+int hal_snprintf_float( char* buffer, size_t len, const char* format, signed int f )
 {
     NATIVE_PROFILE_PAL_CRT();
     return 0;
 }
 
-int hal_snprintf_double( char* buffer, size_t len, const char* format, INT64& d )
+int hal_snprintf_double( char* buffer, size_t len, const char* format, signed __int64& d )
 {
     NATIVE_PROFILE_PAL_CRT();
     return 0;

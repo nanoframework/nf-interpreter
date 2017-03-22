@@ -188,14 +188,14 @@ bool Monitor_FlashSectorMap(WP_Message* message)
 {
     struct Flash_Sector
     {
-        UINT32 Start;
-        UINT32 Length;
-        UINT32 Usage;
+        unsigned int Start;
+        unsigned int Length;
+        unsigned int Usage;
     
     } *pData = NULL;
 
-    UINT32 rangeCount = 0;
-    UINT32 rangeIndex = 0;
+    unsigned int rangeCount = 0;
+    unsigned int rangeIndex = 0;
 
 //    for(int count = 0; count < 2; count++)
 //    {

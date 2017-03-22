@@ -8,7 +8,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CLR_RT_ParseOptions::Parameter::Parameter( LPCWSTR szName, LPCWSTR szDescription )
+CLR_RT_ParseOptions::Parameter::Parameter( const wchar_t* szName, const wchar_t* szDescription )
 {
     m_szName        = szName;
     m_szDescription = szDescription;
@@ -16,11 +16,11 @@ CLR_RT_ParseOptions::Parameter::Parameter( LPCWSTR szName, LPCWSTR szDescription
 
 //--//
 
-CLR_RT_ParseOptions::Parameter_Generic::Parameter_Generic( LPCWSTR szName, LPCWSTR szDescription ) : CLR_RT_ParseOptions::Parameter( szName, szDescription )
+CLR_RT_ParseOptions::Parameter_Generic::Parameter_Generic( const wchar_t* szName, const wchar_t* szDescription ) : CLR_RT_ParseOptions::Parameter( szName, szDescription )
 {
 }
 
-bool CLR_RT_ParseOptions::Parameter_Generic::Parse( LPCWSTR arg )
+bool CLR_RT_ParseOptions::Parameter_Generic::Parse( const wchar_t* arg )
 {
     m_data = arg;
 
@@ -29,12 +29,12 @@ bool CLR_RT_ParseOptions::Parameter_Generic::Parse( LPCWSTR arg )
 
 //--//
 
-CLR_RT_ParseOptions::Parameter_String::Parameter_String( std::wstring* data, LPCWSTR szName, LPCWSTR szDescription ) : CLR_RT_ParseOptions::Parameter( szName, szDescription )
+CLR_RT_ParseOptions::Parameter_String::Parameter_String( std::wstring* data, const wchar_t* szName, const wchar_t* szDescription ) : CLR_RT_ParseOptions::Parameter( szName, szDescription )
 {
     m_dataPtr = data ? data : &m_dataParsed;
 }
 
-bool CLR_RT_ParseOptions::Parameter_String::Parse( LPCWSTR arg )
+bool CLR_RT_ParseOptions::Parameter_String::Parse( const wchar_t* arg )
 {
     *m_dataPtr = arg;
 
@@ -43,12 +43,12 @@ bool CLR_RT_ParseOptions::Parameter_String::Parse( LPCWSTR arg )
 
 //--//
 
-CLR_RT_ParseOptions::Parameter_Boolean::Parameter_Boolean( bool* data, LPCWSTR szName, LPCWSTR szDescription ) : CLR_RT_ParseOptions::Parameter( szName, szDescription )
+CLR_RT_ParseOptions::Parameter_Boolean::Parameter_Boolean( bool* data, const wchar_t* szName, const wchar_t* szDescription ) : CLR_RT_ParseOptions::Parameter( szName, szDescription )
 {
     m_dataPtr = data ? data : &m_dataParsed;
 }
 
-bool CLR_RT_ParseOptions::Parameter_Boolean::Parse( LPCWSTR arg )
+bool CLR_RT_ParseOptions::Parameter_Boolean::Parse( const wchar_t* arg )
 {
     int num;
 
@@ -78,12 +78,12 @@ bool CLR_RT_ParseOptions::Parameter_Boolean::Parse( LPCWSTR arg )
 
 //--//
 
-CLR_RT_ParseOptions::Parameter_Integer::Parameter_Integer( int* data, LPCWSTR szName, LPCWSTR szDescription ) : CLR_RT_ParseOptions::Parameter( szName, szDescription )
+CLR_RT_ParseOptions::Parameter_Integer::Parameter_Integer( int* data, const wchar_t* szName, const wchar_t* szDescription ) : CLR_RT_ParseOptions::Parameter( szName, szDescription )
 {
     m_dataPtr = data ? data : &m_dataParsed;
 }
 
-bool CLR_RT_ParseOptions::Parameter_Integer::Parse( LPCWSTR arg )
+bool CLR_RT_ParseOptions::Parameter_Integer::Parse( const wchar_t* arg )
 {
     if(swscanf_s( arg, L"%d", m_dataPtr ) == 0)
     {
@@ -96,12 +96,12 @@ bool CLR_RT_ParseOptions::Parameter_Integer::Parse( LPCWSTR arg )
 
 //--//
 
-CLR_RT_ParseOptions::Parameter_Float::Parameter_Float( float* data, LPCWSTR szName, LPCWSTR szDescription ) : CLR_RT_ParseOptions::Parameter( szName, szDescription )
+CLR_RT_ParseOptions::Parameter_Float::Parameter_Float( float* data, const wchar_t* szName, const wchar_t* szDescription ) : CLR_RT_ParseOptions::Parameter( szName, szDescription )
 {
     m_dataPtr = data ? data : &m_dataParsed;
 }
 
-bool CLR_RT_ParseOptions::Parameter_Float::Parse( LPCWSTR arg )
+bool CLR_RT_ParseOptions::Parameter_Float::Parse( const wchar_t* arg )
 {
     if(swscanf_s( arg, L"%f", m_dataPtr ) == 0)
     {
@@ -114,7 +114,7 @@ bool CLR_RT_ParseOptions::Parameter_Float::Parse( LPCWSTR arg )
 
 //--//
 
-CLR_RT_ParseOptions::Command::Command( LPCWSTR szName, LPCWSTR szDescription )
+CLR_RT_ParseOptions::Command::Command( const wchar_t* szName, const wchar_t* szDescription )
 {
     m_szName        = szName;
     m_szDescription = szDescription;
@@ -162,7 +162,7 @@ HRESULT CLR_RT_ParseOptions::Command::Execute()
 
 //--//
 
-CLR_RT_ParseOptions::Command_SetFlag::Command_SetFlag( bool* data, LPCWSTR szName, LPCWSTR szDescription ) : CLR_RT_ParseOptions::Command( szName, szDescription )
+CLR_RT_ParseOptions::Command_SetFlag::Command_SetFlag( bool* data, const wchar_t* szName, const wchar_t* szDescription ) : CLR_RT_ParseOptions::Command( szName, szDescription )
 {
     m_dataPtr = data ? data : &m_dataParsed;
 }
@@ -180,7 +180,7 @@ CLR_RT_ParseOptions::CLR_RT_ParseOptions()
     m_fVerbose = false;
 }
 
-HRESULT CLR_RT_ParseOptions::ExtractOptionsFromFile( LPCWSTR szFileName )
+HRESULT CLR_RT_ParseOptions::ExtractOptionsFromFile( const wchar_t* szFileName )
 {
     NANOCLR_HEADER();
 
@@ -221,7 +221,7 @@ HRESULT CLR_RT_ParseOptions::ProcessOptions( CLR_RT_StringVector& argv )
     for(size_t i=0; i<argc; )
     {
         CommandListIter it;
-        LPCWSTR         arg = argv[ i ].c_str();
+        const wchar_t*         arg = argv[ i ].c_str();
 
         for(it = m_commands.begin(); it != m_commands.end(); it++)
         {
@@ -307,7 +307,7 @@ void CLR_RT_ParseOptions::Usage()
     }
 }
 
-void CLR_RT_ParseOptions::PushArguments( int argc, LPWSTR argv[], CLR_RT_StringVector& vec )
+void CLR_RT_ParseOptions::PushArguments( int argc, wchar_t* argv[], CLR_RT_StringVector& vec )
 {
     for(int i=0; i<argc; i++)
     {

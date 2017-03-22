@@ -7,7 +7,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CLR_RT_GetVersion( UINT16* pMajor, UINT16* pMinor, UINT16* pBuild, UINT16* pRevision )
+void CLR_RT_GetVersion( unsigned short int* pMajor, unsigned short int* pMinor, unsigned short int* pBuild, unsigned short int* pRevision )
 {
     NATIVE_PROFILE_CLR_CORE();
     if (pMajor) *pMajor = VERSION_MAJOR;
@@ -68,7 +68,7 @@ HRESULT CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( CLR_RT_HeapBlock & th
 
 //--//
 
-HRESULT CLR_RT_ByteArrayReader::Init( const UINT8* src, UINT32 srcSize )
+HRESULT CLR_RT_ByteArrayReader::Init( const unsigned char* src, unsigned int srcSize )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -81,7 +81,7 @@ HRESULT CLR_RT_ByteArrayReader::Init( const UINT8* src, UINT32 srcSize )
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ByteArrayReader::Read( void* dst, UINT32 size )
+HRESULT CLR_RT_ByteArrayReader::Read( void* dst, unsigned int size )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -103,7 +103,7 @@ HRESULT CLR_RT_ByteArrayReader::Read1Byte( void* dst )
 
     if (1 > sourceSize) NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
 
-    *(UINT8*)dst = *source;
+    *(unsigned char*)dst = *source;
 
     source++;
     sourceSize--;
@@ -111,7 +111,7 @@ HRESULT CLR_RT_ByteArrayReader::Read1Byte( void* dst )
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ByteArrayReader::Skip( UINT32 size )
+HRESULT CLR_RT_ByteArrayReader::Skip( unsigned int size )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();

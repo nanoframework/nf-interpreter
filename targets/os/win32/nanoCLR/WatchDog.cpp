@@ -4,10 +4,9 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "stdafx.h"
-
 //--//
 
-//HRESULT Watchdog_Enable( UINT32 TimeoutMilliseconds, WATCHDOG_INTERRUPT_CALLBACK callback, void* context )
+//HRESULT Watchdog_Enable( unsigned int TimeoutMilliseconds, WATCHDOG_INTERRUPT_CALLBACK callback, void* context )
 //{
 //    return S_OK; // UNDONE: FIXME: return EmulatorNative::GetIWatchdogDriver()->Enable( TimeoutMilliseconds );
 //}

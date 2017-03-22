@@ -21,7 +21,7 @@ struct CLR_RT_DUMP
     __nfweak static void TYPE  ( const CLR_RT_ReflectionDef_Index& reflex              ) DECL_POSTFIX;
     __nfweak static void METHOD( const CLR_RT_MethodDef_Index&     method              ) DECL_POSTFIX;
     __nfweak static void FIELD ( const CLR_RT_FieldDef_Index&      field               ) DECL_POSTFIX;
-    __nfweak static void OBJECT(       CLR_RT_HeapBlock*           ptr   , LPCSTR text ) DECL_POSTFIX;
+    __nfweak static void OBJECT(       CLR_RT_HeapBlock*           ptr   , const char* text ) DECL_POSTFIX;
 
     //--//
 
@@ -34,7 +34,7 @@ struct CLR_RT_DUMP
     __nfweak static void EXCEPTION             ( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref ) DECL_POSTFIX;
     __nfweak static void POST_PROCESS_EXCEPTION( CLR_RT_HeapBlock& ref                           ) DECL_POSTFIX;
 
-    __nfweak static LPCSTR GETERRORMESSAGE( HRESULT hrError );
+    __nfweak static const char* GETERRORMESSAGE( HRESULT hrError );
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

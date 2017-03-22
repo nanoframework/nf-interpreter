@@ -33,7 +33,7 @@ void monitor_debug_printf( const char* format, ... )
     //va_end( arg_ptr );
 }
 
-void FAULT_HandlerDisplay( UINT32 *registers, UINT32 exception )
+void FAULT_HandlerDisplay( unsigned int *registers, unsigned int exception )
 {
     int i;
 
@@ -59,7 +59,7 @@ void FAULT_HandlerDisplay( UINT32 *registers, UINT32 exception )
 
 extern "C"
 {
-    void FAULT_Handler( UINT32* registers, UINT32 exception )
+    void FAULT_Handler( unsigned int* registers, unsigned int exception )
     {    
         // TODO
         // ASSERT_IRQ_MUST_BE_OFF();
@@ -72,7 +72,7 @@ extern "C"
     #endif  // !defined(BUILD_RTM)
     }
 
-    void HARD_Breakpoint_Handler(UINT32 *registers)
+    void HARD_Breakpoint_Handler(unsigned int *registers)
     {    
     #if !defined(BUILD_RTM)
         // TODO

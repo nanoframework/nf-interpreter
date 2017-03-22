@@ -610,7 +610,7 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                         CLR_RT_ReflectionDef_Index val;
                         CLR_RT_TypeDef_Instance    inst;
                         char                       rgBuffer[ 512 ];
-                        LPSTR                      szBuffer = rgBuffer;
+                        char*                      szBuffer = rgBuffer;
                         size_t                     iBuffer  = MAXSTRLEN(rgBuffer);
 
                         CLR_Debug::Printf( "DROPPING OBJECT " );

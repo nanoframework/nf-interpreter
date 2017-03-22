@@ -52,7 +52,7 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING( CLR_RT_
     StackTrace*               pStackTrace;
     CLR_RT_HeapBlock*         pBlkString;
     char                      buf[ 512 ];
-    LPSTR                     strName;
+    char*                     strName;
     size_t                    iName;
     CLR_RT_HeapBlock          tmpArray; tmpArray.SetObjectReference( NULL );
     CLR_RT_ProtectFromGC      gc(tmpArray);

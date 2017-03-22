@@ -28,7 +28,7 @@ HRESULT Library_corlib_native_System_TimeSpan::ToString___STRING( CLR_RT_StackFr
     NANOCLR_HEADER();
 
     char       rgBuffer[ 128 ];
-    LPSTR      szBuffer =           rgBuffer;
+    char*      szBuffer =           rgBuffer;
     size_t     iBuffer  = ARRAYSIZE(rgBuffer);
     CLR_INT64* val      = GetValuePtr( stack ); FAULT_ON_NULL(val);
 

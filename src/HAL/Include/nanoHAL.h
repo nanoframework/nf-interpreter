@@ -151,14 +151,14 @@
 
 //--//
 
-typedef UINT32 GPIO_PIN;
+typedef unsigned int GPIO_PIN;
 
 //--//
 
 struct GPIO_FLAG
 {
     GPIO_PIN  Pin;
-    BOOL      ActiveState;
+    bool      ActiveState;
 };
 
 //--//
@@ -211,7 +211,7 @@ struct GPIO_FLAG
 #define PORT_NUMBER_MASK            0x00FF
 
 // Macro to extract the transport type from a COM_HANDLE
-#define ExtractTransport(x)         ((UINT32)(x) & TRANSPORT_MASK)
+#define ExtractTransport(x)         ((unsigned int)(x) & TRANSPORT_MASK)
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
 #define ExtractEventFromTransport(x) (ExtractTransport(x) == USART_TRANSPORT     ? SYSTEM_EVENT_FLAG_COM_IN: \
@@ -293,7 +293,7 @@ struct GPIO_FLAG
 
 
 
-typedef UINT32 FLASH_WORD;
+typedef unsigned int FLASH_WORD;
 
 
 
@@ -536,7 +536,7 @@ typedef UINT32 FLASH_WORD;
 
 
 
-typedef void (*LOGGING_CALLBACK)(LPCSTR text);
+typedef void (*LOGGING_CALLBACK)(const char* text);
 
 
 
@@ -571,7 +571,7 @@ typedef void (*LOGGING_CALLBACK)(LPCSTR text);
 //--//
 // Function macros
 
-void HAL_Assert  ( LPCSTR Func, int Line, LPCSTR File );
+void HAL_Assert  ( const char* Func, int Line, const char* File );
 // HAL_AssertEx is defined in the processor or platform selector files.
 extern void HAL_AssertEx();
 
@@ -608,9 +608,9 @@ extern void HAL_AssertEx();
 #define CT_ASSERT(e) static_assert( (e), __FILE__ CT_ASSERT_STRING(__LINE__) );
 #else
 // CT_ASSERT (compile-time assert) macro is used to test condition at compiler time and generate
-// compiler error if condition is FALSE.
-// Example: CT_ASSERT( sizeof( UINT32 ) == 2 ) would cause compilation error.
-//          CT_ASSERT( sizeof( UINT32 ) == 4 ) compiles without error.
+// compiler error if condition is bool.
+// Example: CT_ASSERT( sizeof( unsigned int ) == 2 ) would cause compilation error.
+//          CT_ASSERT( sizeof( unsigned int ) == 4 ) compiles without error.
 // Since this declaration is just typedef - it does not create any CPU code.
 //
 // Reason for CT_ASSERT_UNIQUE_NAME
@@ -856,18 +856,18 @@ private:
 
 public:
 #if defined(_DEBUG)
-    BOOL Exists( T* searchNode )
+    bool Exists( T* searchNode )
     {
         T* node = FirstValidNode();
         while( node != NULL && node != searchNode )
         {
             if (node == node->Next())
             {
-                ASSERT(FALSE);
+                ASSERT(false);
             }
             node = node->Next();
         }
-        return (node == NULL? FALSE: TRUE);
+        return (node == NULL? false: true);
     }
 #endif
 
@@ -1007,7 +1007,7 @@ template <typename T> class Hal_Queue_UnknownSize
     size_t m_writer;
     size_t m_reader;
     size_t m_size;
-    BOOL   m_full;
+    bool   m_full;
     T*     m_data;
 
 public:
@@ -1017,7 +1017,7 @@ public:
         m_reader = 0;
         m_size   = size;
         m_data   = data;
-        m_full   = FALSE;
+        m_full   = false;
     }
 
     size_t NumberOfElements()
@@ -1027,12 +1027,12 @@ public:
         else                    return m_writer - m_reader;
     }
 
-    BOOL IsEmpty()
+    bool IsEmpty()
     {
         return (m_writer == m_reader && !m_full);
     }
 
-    BOOL IsFull()
+    bool IsFull()
     {
         return m_full;
     }
@@ -1052,7 +1052,7 @@ public:
 
         m_writer++;  if(m_writer == m_size) m_writer = 0;
 
-        if(m_writer == m_reader) m_full = TRUE;
+        if(m_writer == m_reader) m_full = true;
 
         return &m_data[oldWriter];
     }
@@ -1072,7 +1072,7 @@ public:
 
         m_reader++;  if(m_reader == m_size) m_reader = 0;
 
-        m_full = FALSE;
+        m_full = false;
 
         return &m_data[oldReader];
     }
@@ -1095,7 +1095,7 @@ public:
 
         m_writer += nElements; if(m_writer == m_size) m_writer = 0;
 
-        if(m_writer == m_reader) m_full = TRUE;
+        if(m_writer == m_reader) m_full = true;
 
         return &m_data[oldWriter];
     }
@@ -1123,7 +1123,7 @@ public:
 
         m_reader += nElements; if(m_reader == m_size) m_reader = 0;
 
-        m_full = FALSE;
+        m_full = false;
 
         return &m_data[oldReader];
     }
@@ -1558,7 +1558,7 @@ void    Watchdog_ResetCounter( );
 /// <param name="enabled">Sets the watchdog enabled state when fSet is true; otherwise this parameter is ignored</param>
 /// <param name="fSet">Determines if this call is getting or setting the enabled state</param>
 /// <returns>Returns the current enabled state of the watchdog</returns>
-BOOL              Watchdog_GetSetEnabled ( BOOL enabled, BOOL fSet );
+bool              Watchdog_GetSetEnabled ( bool enabled, bool fSet );
 
 //
 //// SPI driver

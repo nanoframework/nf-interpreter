@@ -326,7 +326,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_ThreadState___SystemT
         case CLR_RT_Thread::TH_S_Ready     : val =  0; break; // Running
         case CLR_RT_Thread::TH_S_Waiting   : val = 32; break; // WaitSleepJoin
         case CLR_RT_Thread::TH_S_Terminated: val = 16; break; // Stopped
-        default                            : _ASSERTE(FALSE); break;
+        default                            : _ASSERTE(false); break;
         }
         
         // Suspended thread. Add ThreadState.Suspended to the return value

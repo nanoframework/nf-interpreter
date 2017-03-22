@@ -850,7 +850,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue( int& res )
         bits = TypeHandler::GetSizeOfType( m_type );
         if(bits == CLR_RT_DataTypeLookup::c_VariableSize)
         {
-            LPCSTR     szText = value->RecoverString();
+            const char*     szText = value->RecoverString();
             CLR_UINT32 len    = szText ? (CLR_UINT32)hal_strlen_s( szText ) : 0xFFFFFFFF;
 
             NANOCLR_CHECK_HRESULT(m_bf->WriteCompressedUnsigned( len ));
@@ -1002,7 +1002,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue( int& res )
             else
             {
                 CLR_RT_HeapBlock_String* str = CLR_RT_HeapBlock_String::CreateInstance( *m_value, len ); CHECK_ALLOCATION(str);
-                LPSTR                    dst = (LPSTR)str->StringText();
+                char*                    dst = (char*)str->StringText();
 
                 NANOCLR_CHECK_HRESULT(m_bf->ReadArray( (CLR_UINT8*)dst, len ));
                 dst[ len ] = 0;
@@ -1435,7 +1435,7 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
                                     
                                     if(!inst.InitializeFromIndex( value->ReflectionDataConst().m_data.m_assm ))
                                     {
-                                        _ASSERTE(FALSE);
+                                        _ASSERTE(false);
                                     }
                                     
                                     if(!g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->FindAppDomainAssembly( inst.m_assm )) 
@@ -1451,7 +1451,7 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
 
                                     if(!inst.InitializeFromIndex( value->ReflectionDataConst().m_data.m_method ))
                                     {
-                                        _ASSERTE(FALSE);
+                                        _ASSERTE(false);
                                     }
 
                                     idx.Set( inst.Assembly(), inst.CrossReference().GetOwner() );
@@ -1464,7 +1464,7 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
                                                                     
                                     if(!inst.InitializeFromIndex( value->ReflectionDataConst().m_data.m_field ))
                                     {
-                                        _ASSERTE(FALSE);
+                                        _ASSERTE(false);
                                     }
 
                                     NANOCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition( inst ));

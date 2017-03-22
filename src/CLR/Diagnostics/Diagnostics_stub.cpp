@@ -17,13 +17,13 @@ __nfweak void CLR_Debug::RedirectToString( std::string* str )
 
 #endif
 
-__nfweak HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, LPCSTR szFunc, LPCSTR szFile, int line )
+__nfweak HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const char* szFile, int line )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     return hr;
 }
 
-__nfweak bool CLR_SafeSprintfV( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, va_list arg )
+__nfweak bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     // UNDONE: FIXME 
@@ -39,7 +39,7 @@ __nfweak bool CLR_SafeSprintfV( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format,
     return true;
 }
 
-__nfweak bool CLR_SafeSprintf( LPSTR& szBuffer, size_t& iBuffer, LPCSTR format, ... )
+__nfweak bool CLR_SafeSprintf( char*& szBuffer, size_t& iBuffer, const char* format, ... )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     va_list arg;
@@ -141,7 +141,7 @@ __nfweak void CLR_RT_Assembly::DumpCall( CLR_RT_StackFrame& stack, bool fPush )
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_Assembly::DumpCall( CLR_RT_MethodDef_Instance& md, LPCSTR szPrefix )
+__nfweak void CLR_RT_Assembly::DumpCall( CLR_RT_MethodDef_Instance& md, const char* szPrefix )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
@@ -172,7 +172,7 @@ __nfweak void CLR_RT_DUMP::FIELD( const CLR_RT_FieldDef_Index& field )
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, LPCSTR text )
+__nfweak void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, const char* text )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
@@ -197,7 +197,7 @@ __nfweak void CLR_RT_DUMP::POST_PROCESS_EXCEPTION( CLR_RT_HeapBlock& ref )
 
 //--//
 
-__nfweak LPCSTR CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
+__nfweak const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     return NULL;
