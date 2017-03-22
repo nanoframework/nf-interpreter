@@ -92,6 +92,10 @@ set(NF_CoreCLR_SRCS
     
     # HAL
     HAL_Time.cpp
+
+    # PAL
+    nanoPAL_BlockStorage.c
+
 )
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
@@ -123,6 +127,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             
             # HAL
             ${PROJECT_SOURCE_DIR}/src/HAL
+
+            # PAL stubs
+            ${PROJECT_SOURCE_DIR}/src/PAL
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

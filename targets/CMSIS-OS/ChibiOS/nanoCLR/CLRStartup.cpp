@@ -175,7 +175,7 @@ struct Settings
 
         while(TRUE)
         {
-            if(!stream.Read(&stream, &headerBuffer, headerInBytes )) break;
+            if(!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes )) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)headerBuffer;
 
@@ -187,9 +187,9 @@ struct Settings
 
             UINT32 AssemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
 
-            stream.Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
+            BlockStorageStream_Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
 
-            if(!stream.Read(&stream, &assembliesBuffer, AssemblySizeInByte)) break;
+            if(!BlockStorageStream_Read(&stream, &assembliesBuffer, AssemblySizeInByte)) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)assembliesBuffer;
 
@@ -219,13 +219,11 @@ struct Settings
     {
         NANOCLR_HEADER();
 
-        BlockStorageStream stream;
-        
         // perform initialization of BlockStorageStream structure
-        BlockStorageStream_Init(&stream);
+        BlockStorageStream stream;
 
         // init the stream for deployment storage
-        if (!stream.Initialize(&stream, StorageUsage_DEPLOYMENT))
+        if (!BlockStorageStream_Initialize(&stream, StorageUsage_DEPLOYMENT))
         {
 #if !defined(BUILD_RTM)
             CLR_Debug::Printf( "ERROR: failed to initialize DEPLOYMENT storage\r\n" );
