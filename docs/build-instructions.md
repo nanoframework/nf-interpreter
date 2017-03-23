@@ -20,7 +20,8 @@ You'll need:
 
 If you are using VS Code as your development platform we suggest that you use the CMake Tools extension. This will allow you to run the builds without leaving VS Code.
 - [Visual Studio Code](http://code.visualstudio.com/)
-- [CMake Tools](https://marketplace.visualstudio.com/items?itemName=vector-of-bool.cmake-tools)
+- [CMake Extension](https://marketplace.visualstudio.com/items?itemName=twxs.cmake)
+- [CMake Tools Extension](https://marketplace.visualstudio.com/items?itemName=vector-of-bool.cmake-tools)
 
 In case you specify an RTOS and you want its source to be downloaded from the official repository, you'll need:
 - For FreeRTOS a SVN client. [Tortoise SVN](https://tortoisesvn.net/downloads) seems to be a popular choice for Windows machines.
