@@ -208,7 +208,7 @@ struct Settings
         ByteAddress datByteAddress;
         unsigned int datSize = ROUNDTOMULTIPLE((unsigned int)(*end)- (unsigned int)(*start), CLR_UINT32);
 
-        if (BlockStorageList::FindDeviceForPhysicalAddress( &device, (unsigned int)(*start), datByteAddress ) && device != NULL)
+        if (BlockStorageList_FindDeviceForPhysicalAddress( &device, (unsigned int)(*start), &datByteAddress ) && device != NULL)
         {    
             const DeviceBlockInfo * deviceInfo= BlockStorageDevice_GetDeviceInfo(device);
 

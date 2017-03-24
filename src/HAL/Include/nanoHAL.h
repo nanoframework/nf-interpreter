@@ -151,15 +151,15 @@
 
 //--//
 
-typedef unsigned int GPIO_PIN;
+
 
 //--//
 
-struct GPIO_FLAG
-{
-    GPIO_PIN  Pin;
-    bool      ActiveState;
-};
+
+
+
+
+
 
 //--//
 

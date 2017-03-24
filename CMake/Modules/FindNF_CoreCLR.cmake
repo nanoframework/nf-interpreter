@@ -128,8 +128,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             # HAL
             ${PROJECT_SOURCE_DIR}/src/HAL
 
-            # PAL stubs
+            # PAL
             ${PROJECT_SOURCE_DIR}/src/PAL
+            ${PROJECT_SOURCE_DIR}/src/PAL/BlockStorage
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
