@@ -99,6 +99,7 @@ We've added the required files and configurations to help you launch your build 
 Follows a brief explanation on the files you might want to tweak.
 
 - settings.json (inside .vscode folder) here you can change the generator that CMage uses to generate the build. The default is ```"cmake.generator": "NMake Makefiles"```.
+- launch.json (inside .vscode folder) here you can set up your launch configurations, such as gdb path or openocd configuration.
 - cmake-variants.json (at the repository root) here you can add several build flavors. You can even add variants to each one. Check the documentation extension [here](https://github.com/vector-of-bool/vscode-cmake-tools/blob/develop/docs/build_variants.md).
 
 To launch the build in VS Code check the status bar at the bottom. Select the build flavor and then click the build button (or hit F7).
