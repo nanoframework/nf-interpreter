@@ -102,14 +102,14 @@ bool WP_App_ProcessPayload(WP_Message* message)
             // execute command handler and save the result
             bool commandHandlerExecuteResult = ((bool* (*)(WP_Message*))cmd->handler)(message);
 
-            ReplyToCommand(message, commandHandlerExecuteResult, false, NULL, 0);
+            WP_ReplyToCommand(message, commandHandlerExecuteResult, false, NULL, 0);
             return true;
         }
 
         cmd++;
     }
 
-    ReplyToCommand(message, false, false, NULL, 0);
+    WP_ReplyToCommand(message, false, false, NULL, 0);
 
     return true;    
 }

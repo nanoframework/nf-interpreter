@@ -27,6 +27,6 @@ bool WP_Message_Process(WP_Message* message);
 
 //////////////////////////////////////////
 // helper functions
-void ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* ptr, int size);
+void WP_ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* ptr, int size);
 
 #endif // _WIREPROTOCOL_MESSAGE_H_

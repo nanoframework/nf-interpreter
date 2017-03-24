@@ -63,7 +63,7 @@ bool Monitor_Ping(WP_Message* message)
         Monitor_Ping_Reply cmdReply;
         cmdReply.m_source = Monitor_Ping_c_Ping_Source_NanoBooter;
 
-        ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
+        WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
     }
 
     return true;
@@ -77,7 +77,7 @@ bool Monitor_OemInfo(WP_Message* message)
         
         bool fOK = NanoBooter_GetReleaseInfo(&cmdReply.m_releaseInfo) == true;
         
-        ReplyToCommand(message, fOK, false, &cmdReply, sizeof(cmdReply));
+        WP_ReplyToCommand(message, fOK, false, &cmdReply, sizeof(cmdReply));
     }
 
     return true;
@@ -103,7 +103,7 @@ bool Monitor_WriteMemory(WP_Message* message)
     // assume at RAM, directly use the original address 
     ret = AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write);
   
-    ReplyToCommand(message, ret, false, NULL, 0);
+    WP_ReplyToCommand(message, ret, false, NULL, 0);
 
     return ret;
 }
@@ -112,7 +112,7 @@ bool Monitor_Reboot(WP_Message* message)
 {
     Monitor_Reboot_Command* cmd = (Monitor_Reboot_Command*)message->m_payload;
 
-    ReplyToCommand(message, true, false, NULL, 0);
+    WP_ReplyToCommand(message, true, false, NULL, 0);
 
     if(cmd != NULL)
     {
@@ -141,7 +141,7 @@ bool Monitor_EraseMemory(WP_Message* message)
     
     ret = AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase);
 
-    ReplyToCommand(message, ret, false, NULL, 0);
+    WP_ReplyToCommand(message, ret, false, NULL, 0);
         
     return ret;
 }
@@ -155,7 +155,7 @@ bool Monitor_CheckMemory(WP_Message* message)
 
     ret = AccessMemory(cmd->address, cmd->length, (uint8_t*)&cmdReply.crc, AccessMemory_Check);
 
-    ReplyToCommand(message, ret, false, &cmdReply, sizeof(cmdReply));
+    WP_ReplyToCommand(message, ret, false, &cmdReply, sizeof(cmdReply));
 
     return ret;
 }
@@ -179,7 +179,7 @@ bool Monitor_MemoryMap(WP_Message* message)
     map[1].m_length  = HalSystemConfig.FLASH1.Size;
     map[1].m_flags   = Monitor_MemoryMap_c_FLASH;
 
-    ReplyToCommand(message, true, false, map, sizeof(map));
+    WP_ReplyToCommand(message, true, false, map, sizeof(map));
 
     return true;
 }
@@ -203,7 +203,7 @@ bool Monitor_FlashSectorMap(WP_Message* message)
 
 //        if(device == NULL)
 //        {
-            ReplyToCommand(message, true, false, NULL, 0);
+            WP_ReplyToCommand(message, true, false, NULL, 0);
             return false;
 //        }
 
@@ -213,7 +213,7 @@ bool Monitor_FlashSectorMap(WP_Message* message)
 
 //            if(pData == NULL)
 //            {
-//                ReplyToCommand(message, true, false, NULL, 0);
+//                WP_ReplyToCommand(message, true, false, NULL, 0);
 //                return false;
 //            }
 //        }
@@ -246,7 +246,7 @@ bool Monitor_FlashSectorMap(WP_Message* message)
 //        while(device = BlockStorageList_GetNextDevice( *device ));
 //    }
 
-//    ReplyToCommand(message, true, false, (void*)pData, rangeCount * sizeof (struct Flash_Sector) );
+//    WP_ReplyToCommand(message, true, false, (void*)pData, rangeCount * sizeof (struct Flash_Sector) );
 
 //    private_free(pData);
 
