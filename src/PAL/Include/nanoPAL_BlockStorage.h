@@ -230,7 +230,7 @@ typedef struct DEVICEBLOCKINFO
 // Remarks:
 //    It is possible a given system might have more than one
 //    storage device type. This interface abstracts the
-//    hardware sepcifics from the rest of the system.
+//    hardware specifics from the rest of the system.
 //
 //    All of the functions take at least one void* parameter
 //    that normally points to a driver specific data structure
@@ -252,7 +252,10 @@ typedef struct DEVICEBLOCKINFO
 //    be a continuation so that the FS Manager can mount 
 //    an FS and then notify the managed app of the new FS.
 //
-struct IBlockStorageDevice
+
+typedef struct IBLOCKSTORAGEDEVICE  IBlockStorageDevice;
+
+struct IBLOCKSTORAGEDEVICE
 {
     /////////////////////////////////////////////////////////
     // Description:
@@ -441,7 +444,7 @@ struct BLOCKSTORAGEDEVICE
     BlockStorageDevice* m_nextNode;
     BlockStorageDevice* m_prevNode;
 
-    //IBlockStorageDevice* m_BSD;
+    IBlockStorageDevice* m_BSD;
     void*                m_context;
 };
 
@@ -509,5 +512,94 @@ struct BLOCKSTORAGESTREAM
     BlockStorageDevice *Device;
 
 };
+
+///////////////////////////////////////////////////
+// BlockStorageList declarations 
+
+//typedef struct BLOCKSTORAGELIST BlockStorageList;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// initialize the storage
+//__nfweak void BlockStorageList_Initialize();
+// walk through list of devices and calls Init() function
+//__nfweak bool BlockStorageList_InitializeDevices();
+// walk through list of devices and calls UnInit() function
+//__nfweak bool BlockStorageList_UnInitializeDevices();
+// add pBSD to the list
+// If Init=true, the Init() will be called.
+__nfweak bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool init);
+// remove pBSD from the list
+// Uninit = true, UnInit() will be called.
+//__nfweak bool BlockStorageList_RemoveDevice(BlockStorageDevice* pBSD, bool unInit);
+// Find the right Device with the corresponding phyiscal address.
+__nfweak bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress);
+__nfweak BlockStorageDevice* BlockStorageList_GetFirstDevice();
+//__nfweak BlockStorageDevice* BlockStorageList_GetNextDevice(BlockStorageDevice* device);
+// returns number of devices has been declared in the system
+//__nfweak unsigned int BlockStorageList_GetNumDevices();
+
+#ifdef __cplusplus
+}
+#endif
+
+// struct BLOCKSTORAGELIST
+// {
+//     pointer to the BlockStorageDevice which is the primary device with CONFIG block
+//     BlockStorageDevice* PrimaryDevice;
+    
+//     global pointer of all the storage devices
+//     HAL_DblLinkedList_BSD DeviceList; 
+
+//     bool Initialized;
+// };
+
+//////////////////////////////////////////////////////////
+// TODO: evaluate if these typedefs bellow should go away 
+// and be replaced with others or completely ditched 
+
+
+typedef struct CPU_MEMORY_CONFIG
+{
+    unsigned char   ChipSelect;
+    unsigned char   ReadOnly;
+    unsigned int    WaitStates;
+    unsigned int    ReleaseCounts;
+    unsigned int    BitWidth;
+    unsigned int    BaseAddress;
+    unsigned int    SizeInBytes;
+    unsigned char   XREADYEnable;           // 0,1
+    unsigned char   ByteSignalsForRead;     // 0,1
+    unsigned char   ExternalBufferEnable;   // 0,1
+
+}CPU_MEMORY_CONFIG;
+
+typedef unsigned int GPIO_PIN;
+
+typedef struct GPIO_FLAG
+{
+    GPIO_PIN  Pin;
+    bool      ActiveState;
+
+}GPIO_FLAG;
+
+typedef struct BLOCK_CONFIG
+{
+    GPIO_FLAG               WriteProtectionPin;
+    const DeviceBlockInfo*  BlockDeviceInformation;
+
+}BLOCK_CONFIG;
+
+typedef struct MEMORY_MAPPED_NOR_BLOCK_CONFIG
+{
+    BLOCK_CONFIG            BlockConfig;
+    CPU_MEMORY_CONFIG       Memory;
+    unsigned int            ChipProtection;
+    unsigned int            ManufacturerCode;
+    unsigned int            DeviceCode;
+
+}MEMORY_MAPPED_NOR_BLOCK_CONFIG;
 
 #endif // _NANOPAL_BLOCKSTORAGE_H_

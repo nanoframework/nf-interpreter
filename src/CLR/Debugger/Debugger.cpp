@@ -415,7 +415,7 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg, void* owner )
 
         for(int cnt = 0; cnt < 2; cnt++)
         {
-            BlockStorageDevice* device = BlockStorageList::GetFirstDevice();
+            BlockStorageDevice* device = BlockStorageList_GetFirstDevice();
 
             if(device == NULL)
             {
@@ -434,32 +434,28 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg, void* owner )
                 }
             }
 
-            do
+            const DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(NULL);
+
+            for(unsigned int i = 0; i < deviceInfo->NumRegions;  i++)
             {
-                const DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(NULL);
+                const BlockRegionInfo* pRegion = &deviceInfo->Regions[ i ];
 
-                for(unsigned int i = 0; i < deviceInfo->NumRegions;  i++)
+                for(unsigned int j = 0; j < pRegion->NumBlockRanges; j++)
                 {
-                    const BlockRegionInfo* pRegion = &deviceInfo->Regions[ i ];
 
-                    for(unsigned int j = 0; j < pRegion->NumBlockRanges; j++)
+                    if(cnt == 0)
                     {
-
-                        if(cnt == 0)
-                        {
-                            rangeCount++;
-                        }
-                        else
-                        {
-                            pData[ rangeIndex ].Start  = BlockRegionInfo_BlockAddress(pRegion, pRegion->BlockRanges[ j ].StartBlock);
-                            pData[ rangeIndex ].Length = BlockRange_GetBlockCount((BlockRange*)(&pRegion->BlockRanges[j])) * pRegion->BytesPerBlock;
-                            pData[ rangeIndex ].Usage  = pRegion->BlockRanges[ j ].RangeType & BlockRange_USAGE_MASK;
-                            rangeIndex++;
-                        }
+                        rangeCount++;
+                    }
+                    else
+                    {
+                        pData[ rangeIndex ].Start  = BlockRegionInfo_BlockAddress(pRegion, pRegion->BlockRanges[ j ].StartBlock);
+                        pData[ rangeIndex ].Length = BlockRange_GetBlockCount((BlockRange*)(&pRegion->BlockRanges[j])) * pRegion->BytesPerBlock;
+                        pData[ rangeIndex ].Usage  = pRegion->BlockRanges[ j ].RangeType & BlockRange_USAGE_MASK;
+                        rangeIndex++;
                     }
                 }
             }
-            while(NULL != (device = BlockStorageList::GetNextDevice( *device )));
         }
 
 

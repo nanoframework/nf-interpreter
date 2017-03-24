@@ -369,4 +369,50 @@ __nfweak unsigned int BlockStorageDevice_MaxBlockErase_uSec(BlockStorageDevice* 
     return 0;
 }
 
+///////////////////////////////////////////////////
+// BlockStorageList declarations 
+
+// // walk through list of devices and calls Init() function
+// __nfweak bool BlockStorageList_InitializeDevices()
+// {
+//     return false;
+// }
+
+// // walk through list of devices and calls UnInit() function
+// __nfweak bool BlockStorageList_UnInitializeDevices()
+// {
+//     return false;
+// }
+
+__nfweak bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool init)
+{
+    return false;
+}
+
+// __nfweak bool BlockStorageList_RemoveDevice(BlockStorageDevice* pBSD, bool unInit)
+// {
+//     return false;
+// }
+
+__nfweak bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress)
+{
+    return false;
+}
+
+__nfweak BlockStorageDevice* BlockStorageList_GetFirstDevice()
+{
+    return NULL;
+}
+
+// __nfweak BlockStorageDevice* BlockStorageList_GetNextDevice(BlockStorageDevice* device)
+// {
+//     return NULL;
+// }
+
+// // returns number of devices has been declared in the system
+// __nfweak unsigned int BlockStorageList_GetNumDevices()
+// {
+//     return 0;
+// }
+
 /////////////////////////////////////////////////////

@@ -705,45 +705,45 @@
     
 // -- global List
 
-struct BlockStorageList
-{
-    // initailize the storage
-    __nfweak static void Initialize();
+// struct BlockStorageList
+// {
+//     // initailize the storage
+//     __nfweak static void Initialize();
     
-    // walk through list of devices and calls Init() function
-    __nfweak static bool InitializeDevices();
+//     // walk through list of devices and calls Init() function
+//     __nfweak static bool InitializeDevices();
 
-    // walk through list of devices and calls UnInit() function
-    __nfweak static bool UnInitializeDevices();
+//     // walk through list of devices and calls UnInit() function
+//     __nfweak static bool UnInitializeDevices();
 
-    // add pBSD to the list
-    // If Init=true, the Init() will be called.
-    __nfweak static bool AddDevice( BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool Init);
+//     // add pBSD to the list
+//     // If Init=true, the Init() will be called.
+//     __nfweak static bool AddDevice( BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool Init);
 
-    // remove pBSD from the list
-    // Uninit = true, UnInit() will be called.
-    __nfweak static bool RemoveDevice( BlockStorageDevice* pBSD, bool UnInit);
+//     // remove pBSD from the list
+//     // Uninit = true, UnInit() will be called.
+//     __nfweak static bool RemoveDevice( BlockStorageDevice* pBSD, bool UnInit);
 
-    // Find the right Device with the corresponding phyiscal address.
-    // 
-    __nfweak static bool FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, uint32_t PhysicalAddress, ByteAddress &BlockAddress);
+//     // Find the right Device with the corresponding phyiscal address.
+//     // 
+//     __nfweak static bool FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, uint32_t PhysicalAddress, ByteAddress &BlockAddress);
 
-    __nfweak static BlockStorageDevice* GetFirstDevice();
+//     __nfweak static BlockStorageDevice* GetFirstDevice();
     
-    __nfweak static BlockStorageDevice* GetNextDevice( BlockStorageDevice& device );
+//     __nfweak static BlockStorageDevice* GetNextDevice( BlockStorageDevice& device );
 
-    // returns number of devices has been declared in the system
-    __nfweak static uint32_t GetNumDevices();
+//     // returns number of devices has been declared in the system
+//     __nfweak static uint32_t GetNumDevices();
 
-    // pointer to the BlockStorageDevice which is the primary device with CONFIG block
-    static BlockStorageDevice* s_primaryDevice;
+//     // pointer to the BlockStorageDevice which is the primary device with CONFIG block
+//     static BlockStorageDevice* s_primaryDevice;
     
-private:
-    // global pointer of all the storage devices
-    static HAL_DblLinkedList<BlockStorageDevice> s_deviceList; 
+// private:
+//     // global pointer of all the storage devices
+//     static HAL_DblLinkedList<BlockStorageDevice> s_deviceList; 
 
-    static bool s_Initialized;
-};
+//     static bool s_Initialized;
+// };
 
 ////////////////////////////////////////////////////////////////////////////////
 

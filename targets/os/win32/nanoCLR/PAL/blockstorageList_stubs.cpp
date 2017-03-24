@@ -7,54 +7,70 @@
 
 //--//
 
-HAL_DblLinkedList<BlockStorageDevice> BlockStorageList::s_deviceList;
-BlockStorageDevice*                   BlockStorageList::s_primaryDevice = NULL;
+//HAL_DblLinkedList<BlockStorageDevice> BlockStorageList::s_deviceList;
+//BlockStorageDevice*                   BlockStorageList::s_primaryDevice = NULL;
+static BlockStorageDevice* s_primaryDevice = NULL;
 
 //--//
 
-void BlockStorageList::Initialize()
+//void BlockStorageList::Initialize()
+//{
+//}
+//
+//bool BlockStorageList::InitializeDevices()
+//{
+//    return TRUE;        
+//}
+//
+//bool BlockStorageList::UnInitializeDevices()
+//{
+//    return TRUE;        
+//}
+//
+//bool BlockStorageList::AddDevice( BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool Init)
+//{
+//    return TRUE;        
+//}
+bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool init)
 {
-}
+	s_primaryDevice = pBSD;
 
-bool BlockStorageList::InitializeDevices()
+	// TODO what to do with vtable and config??
+	return true;
+}
+//
+//bool BlockStorageList::RemoveDevice( BlockStorageDevice* pBSD, bool UnInit)
+//{
+//    return TRUE;        
+//}
+
+//BlockStorageDevice* BlockStorageList::GetFirstDevice()
+//{ 
+//    return NULL; 
+//}
+BlockStorageDevice* BlockStorageList_GetFirstDevice()
 {
-    return TRUE;        
+	return s_primaryDevice;
 }
 
-bool BlockStorageList::UnInitializeDevices()
+//BlockStorageDevice* BlockStorageList::GetNextDevice( BlockStorageDevice& device )
+//{ 
+//    return NULL; 
+//}
+
+//unsigned int BlockStorageList::GetNumDevices()            
+//{ 
+//    return 0;  
+//}
+
+//bool BlockStorageList::FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, unsigned int PhysicalAddress, ByteAddress &SectAddress)
+//{
+//    *pBSD = NULL;
+//    return FALSE;
+//}
+bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress)
 {
-    return TRUE;        
-}
-
-bool BlockStorageList::AddDevice( BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool Init)
-{
-    return TRUE;        
-}
-
-bool BlockStorageList::RemoveDevice( BlockStorageDevice* pBSD, bool UnInit)
-{
-    return TRUE;        
-}
-
-BlockStorageDevice* BlockStorageList::GetFirstDevice()
-{ 
-    return NULL; 
-}
-
-BlockStorageDevice* BlockStorageList::GetNextDevice( BlockStorageDevice& device )
-{ 
-    return NULL; 
-}
-
-unsigned int BlockStorageList::GetNumDevices()            
-{ 
-    return 0;  
-}
-
-bool BlockStorageList::FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, unsigned int PhysicalAddress, ByteAddress &SectAddress)
-{
-    *pBSD = NULL;
-    return FALSE;
+	return false;
 }
 
 //bool BlockStorageStream::Initialize(unsigned int blockUsage)
