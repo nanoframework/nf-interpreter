@@ -9,27 +9,6 @@
 #include <nanoCLR_Types.h>
 #include <WireProtocol.h>
 
-#if NUM_MESSAGING > 1
-    #define NANOCLR_FOREACH_MESSAGING(ptr)                                 \
-            for(int iMessageT = 0; iMessageT < NUM_MESSAGING; iMessageT++) \
-            {                                                              \
-                CLR_Messaging& ptr = g_CLR_Messaging[ iMessageT ];
-
-#define NANOCLR_FOREACH_MESSAGING_NO_TEMP()                                \
-            for(int iMessageT = 0; iMessageT < NUM_MESSAGING; iMessageT++) \
-            {                       
-#else
-    #define NANOCLR_FOREACH_MESSAGING(ptr)                                 \
-            {                                                              \
-                CLR_Messaging& ptr = g_CLR_Messaging[ 0 ];            
-    
-    #define NANOCLR_FOREACH_MESSAGING_NO_TEMP()                            \
-            {                                                                 
-#endif
-
-#define NANOCLR_FOREACH_MESSAGING_END() \
-        }
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef bool (*CLR_Messaging_CommandHandler)( WP_Message* msg, void* owner );

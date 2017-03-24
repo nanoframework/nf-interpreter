@@ -17,7 +17,7 @@
 #endif
 
 // the Arm 3.0 compiler drags in a bunch of ABI methods (for initialization) if struct arrays are not initialized
-CLR_UINT32     g_scratchMessaging[ sizeof(CLR_Messaging) * NUM_MESSAGING / sizeof(unsigned int) + 1 ];
+CLR_UINT32     g_scratchMessaging[ sizeof(CLR_Messaging) ];
 CLR_Messaging *g_CLR_Messaging;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,23 +278,16 @@ HRESULT CLR_Messaging::CreateInstance()
 
     g_CLR_Messaging = (CLR_Messaging*)&g_scratchMessaging[ 0 ];
 
-    CLR_RT_Memory::ZeroFill( g_CLR_Messaging, sizeof(CLR_Messaging) * NUM_MESSAGING );
-
-    int iMsg = 0;
+    CLR_RT_Memory::ZeroFill( g_CLR_Messaging, sizeof(CLR_Messaging) );
     
-    NANOCLR_FOREACH_MESSAGING_NO_TEMP()
-    {
-        g_CLR_Messaging[ iMsg ].Initialize(
-            HalSystemConfig.MessagingPorts[ iMsg ], 
-            NULL, 
-            0, 
-            NULL, 
-            0, 
-            &g_CLR_Messaging[ iMsg ]
-            );
-        iMsg++;
-    }
-    NANOCLR_FOREACH_MESSAGING_END();
+    g_CLR_Messaging->Initialize(
+        HalSystemConfig.MessagingPort,
+        NULL, 
+        0, 
+        NULL, 
+        0, 
+        g_CLR_Messaging
+        );
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -311,8 +304,8 @@ void CLR_Messaging::Initialize(
     )
 {
     // If the debugger and Messaging share the same port (Legacy) then we will not initialze the Messaging port (because the debugger will take care of it)
-    if((port == HalSystemConfig.MessagingPorts[ 0 ]) && 
-       (port == HalSystemConfig.DebuggerPorts[ 0 ] ) &&
+    if((port == HalSystemConfig.MessagingPort) && 
+       (port == HalSystemConfig.DebuggerPort) &&
         requestLookup == NULL) // messaging is null so don't initialize the port
     {
         return;
@@ -355,11 +348,7 @@ HRESULT CLR_Messaging::DeleteInstance()
     NATIVE_PROFILE_CLR_MESSAGING();
     NANOCLR_HEADER();
 
-    NANOCLR_FOREACH_MESSAGING(msg)
-    {
-        msg.Cleanup();
-    }
-    NANOCLR_FOREACH_MESSAGING_END();
+    g_CLR_Messaging->Cleanup();
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -608,11 +597,8 @@ bool CLR_Messaging::SendEvent( unsigned int cmd, unsigned int payloadSize, unsig
 void CLR_Messaging::BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    NANOCLR_FOREACH_MESSAGING(msg)
-    {
-        msg.m_controller.SendProtocolMessage( cmd, flags, payloadSize, payload );        
-    }
-    NANOCLR_FOREACH_MESSAGING_END();
+
+    g_CLR_Messaging->m_controller.SendProtocolMessage( cmd, flags, payloadSize, payload );
 }
 
 //--//

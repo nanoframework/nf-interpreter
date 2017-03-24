@@ -2910,19 +2910,11 @@ struct CLR_RT_ExecutionEngine
 #define CLR_EE_REBOOT_SET( Cond )       g_CLR_RT_ExecutionEngine.m_iReboot_Options |=  CLR_RT_ExecutionEngine::c_fReboot_##Cond
 #define CLR_EE_REBOOT_CLR( Cond )       g_CLR_RT_ExecutionEngine.m_iReboot_Options &= ~CLR_RT_ExecutionEngine::c_fReboot_##Cond
 
-#define CLR_EE_DBG_EVENT_SEND( cmd, size, payload, flags ) ((g_CLR_DBG_Debuggers[ DEBUGGER_PORT_INDEX ].m_messaging != NULL) ? g_CLR_DBG_Debuggers[ DEBUGGER_PORT_INDEX ].m_messaging->SendEvent( cmd, size, (unsigned char*)payload, flags ) : false)
+#define CLR_EE_DBG_EVENT_SEND( cmd, size, payload, flags ) ((g_CLR_DBG_Debugger->m_messaging != NULL) ? g_CLR_DBG_Debugger->m_messaging->SendEvent( cmd, size, (unsigned char*)payload, flags ) : false)
 
-#if NUM_MESSAGING == 1
-    #define CLR_EE_MSG_EVENT_RPC( cmd, size, payload, flags ) g_CLR_Messaging[ 0 ].SendEvent( cmd, size, (unsigned char*)payload, flags )
-#else
-    #define CLR_EE_MSG_EVENT_RPC( cmd, size, payload, flags ) CLR_Messaging::BroadcastEvent( cmd, size, (unsigned char*)payload, flags )
-#endif
+#define CLR_EE_MSG_EVENT_RPC( cmd, size, payload, flags ) g_CLR_Messaging.SendEvent( cmd, size, (unsigned char*)payload, flags )
 
-#if NUM_DEBUGGERS == 1
-    #define CLR_EE_DBG_EVENT_BROADCAST( cmd, size, payload, flags ) CLR_EE_DBG_EVENT_SEND( cmd, size, payload, flags )
-#else
-    #define CLR_EE_DBG_EVENT_BROADCAST( cmd, size, payload, flags ) CLR_DBG_Debugger::BroadcastEvent( cmd, size, (unsigned char*)payload, flags )
-#endif
+#define CLR_EE_DBG_EVENT_BROADCAST( cmd, size, payload, flags ) CLR_EE_DBG_EVENT_SEND( cmd, size, payload, flags )
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 

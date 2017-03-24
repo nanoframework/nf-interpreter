@@ -63,8 +63,8 @@ typedef struct HAL_SYSTEM_CONFIG
 
     //--//
 
-    COM_HANDLE               DebuggerPorts[1];
-    COM_HANDLE               MessagingPorts[1];
+    COM_HANDLE               DebuggerPort;
+    COM_HANDLE               MessagingPort;
     // communication channel for debug messages in the debugger
     // which may be VS, MFDEPLOY, etc... Accessed via debug_printf
     // in the HAL/PAL and System.Diagnostics.Debug.Print() in managed

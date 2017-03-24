@@ -89,41 +89,25 @@ void CLR_HW_Hardware::ProcessActivity()
         if(!HAL_CONTINUATION::Dequeue_And_Execute()) break;
     }
 
-    NANOCLR_FOREACH_MESSAGING(msg)
+    if(!msg.IsDebuggerInitialized())
     {
-        if(!msg.IsDebuggerInitialized())
-        {
-            msg.InitializeDebugger();
-        }
-        msg.PurgeCache();
+        msg.InitializeDebugger();
     }
-    NANOCLR_FOREACH_MESSAGING_END();
+    msg.PurgeCache();
     
-    NANOCLR_FOREACH_DEBUGGER(dbg)
-    {
-        dbg.PurgeCache();
-    }
-    NANOCLR_FOREACH_DEBUGGER_END();
+    dbg.PurgeCache();
 
     unsigned int events    = ::Events_Get( m_wakeupEvents );    
     unsigned int eventsCLR = 0;
 
     if(events & m_MessagingEventsMask)
     {
-        NANOCLR_FOREACH_MESSAGING(msg)
-        {
-            msg.ProcessCommands();
-        }
-        NANOCLR_FOREACH_MESSAGING_END();
+        msg.ProcessCommands();
     }
 
     if(events & m_DebuggerEventsMask)
     {
-        NANOCLR_FOREACH_DEBUGGER(dbg)
-        {
-            dbg.ProcessCommands();
-        }
-        NANOCLR_FOREACH_DEBUGGER_END();
+        dbg.ProcessCommands();
 
 #if defined(PLATFORM_ARM)
         if(CLR_EE_DBG_IS(RebootPending))
