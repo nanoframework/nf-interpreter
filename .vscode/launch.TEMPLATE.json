@@ -1,62 +1,64 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "name the launch configuration 1 (booter) here",
-            "type": "cppdbg",
-            "request": "launch",
-            "miDebuggerPath": "<path-to-gdb-insie-the-gcc-toolchain-mind-the-forward-slash>",
-            "targetArchitecture": "ARM",
-            "program": "<path-to-nanoBooter-ELF-file-in-the-build-folder-mind-the-forward-slash>",
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "nanoBooter",
+      "type": "cppdbg",
+      "request": "launch",
+      "miDebuggerPath": "C:/Program Files (x86)/GNU Tools ARM Embedded/6 2017-q1-update/bin/arm-none-eabi-gdb.exe",
+      "targetArchitecture": "ARM",
+      "program": "${workspaceRoot}/build/nanoBooter.elf",
 
-            "setupCommands": [
-                {"text": "target extended-remote localhost:3333"},
-                {"text": "monitor reset halt"},
-                {"text": "monitor flash write_image erase \"<path-to-nanoBooter-HEX-file-in-the-build-folder-mind-the-forward-slash>\" "},
-                {"text": "file <path-to-nanoBooter-ELF-file-in-the-build-folder-mind-the-forward-slash>"},
-                {"text": "monitor reset halt"}
-            ],
+      "setupCommands": [
+        { "text": "target extended-remote localhost:3333" },
+        { "text": "monitor reset halt" },
+        { "text": "monitor flash write_image erase \"${workspaceRoot}/build/nanoBooter.hex\" " },
+        { "text": "file ${workspaceRoot}/build/nanoBooter.elf" },
+        { "text": "monitor reset halt" }
+      ],
 
-            "customLaunchSetupCommands": [
-                {"text": "monitor reset halt"}
-            ],
+      "customLaunchSetupCommands": [
+        { "text": "monitor reset halt" }
+      ],
 
-            "launchCompleteCommand": "exec-continue",
-            "debugServerPath": "C:/Program Files (x86)/openocd-0.10.0/bin/openocd.exe",
-            "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
-            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
-            "filterStderr": true,
-            "externalConsole": true,
-            "cwd": "${cwd}"
-        },
+      "launchCompleteCommand": "exec-continue",
+      "debugServerPath": "C:/Program Files (x86)/openocd-0.10.0/bin/openocd.exe",
+      "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
+      //"debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/stlink-v2-1.cfg -f board/stm32f4discovery.cfg",
+      "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+      "filterStderr": true,
+      "externalConsole": true,
+      "cwd": "${cwd}"
+    },
 
-        {
-            "name": "name the launch configuration 2 (CLR) here",
-            "type": "cppdbg",
-            "request": "launch",
-            "miDebuggerPath": "<path-to-gdb-insie-the-gcc-toolchain-mind-the-forward-slash>",
-            "targetArchitecture": "ARM",
-            "program": "<path-to-nanoCLR-ELF-file-in-the-build-folder-mind-the-forward-slash>",
+    {
+      "name": "nanoCLR",
+      "type": "cppdbg",
+      "request": "launch",
+      "miDebuggerPath": "C:/Program Files (x86)/GNU Tools ARM Embedded/6 2017-q1-update/bin/arm-none-eabi-gdb.exe",
+      "targetArchitecture": "ARM",
+      "program": "${workspaceRoot}/build/nanoCLR.elf",
 
-            "setupCommands": [
-                {"text": "target extended-remote localhost:3333"},
-                {"text": "monitor reset halt"},
-                {"text": "monitor flash write_image erase \"<path-to-nanoCLR-HEX-file-in-the-build-folder-mind-the-forward-slash>\" "},
-                {"text": "file <path-to-nanoCLR-ELF-file-in-the-build-folder-mind-the-forward-slash>"},
-                {"text": "monitor reset halt"}
-            ],
+      "setupCommands": [
+        { "text": "target extended-remote localhost:3333" },
+        { "text": "monitor reset halt" },
+        { "text": "monitor flash write_image erase \"${workspaceRoot}/build/nanoCLR.hex\" " },
+        { "text": "file ${workspaceRoot}/build/nanoCLR.elf" },
+        { "text": "monitor reset halt" }
+      ],
 
-            "customLaunchSetupCommands": [
-                {"text": "monitor reset halt"}
-            ],
+      "customLaunchSetupCommands": [
+        { "text": "monitor reset halt" }
+      ],
 
-            "launchCompleteCommand": "exec-continue",
-            "debugServerPath": "C:/Program Files (x86)/openocd-0.10.0/bin/openocd.exe",
-            "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
-            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
-            "filterStderr": true,
-            "externalConsole": true,
-            "cwd": "${cwd}"
-        }
-    ]
+      "launchCompleteCommand": "exec-continue",
+      "debugServerPath": "C:/Program Files (x86)/openocd-0.10.0/bin/openocd.exe",
+      "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
+      //"debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/stlink-v2-1.cfg -f board/stm32f4discovery.cfg",
+      "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+      "filterStderr": true,
+      "externalConsole": true,
+      "cwd": "${cwd}"
+    }
+  ]
 }
