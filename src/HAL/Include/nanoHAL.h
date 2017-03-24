@@ -1135,10 +1135,10 @@ public:
 
 //#include <..\Initialization\MasterConfig.h>
 
-#define NUM_DEBUGGERS          1    // UNDONE: Remove
-#define NUM_MESSAGING          1    // UNDONE: Remove
 
-#define DEBUGGER_PORT_INDEX    0    // UNDONE: Remove
+
+
+
 
 //--//
 

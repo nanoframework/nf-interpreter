@@ -13,29 +13,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if NUM_DEBUGGERS > 1
-    #define NANOCLR_FOREACH_DEBUGGER(ptr)                                     \
-            for(int iDebuggerT = 0; iDebuggerT < NUM_DEBUGGERS; iDebuggerT++) \
-            {                                                                 \
-                CLR_DBG_Debugger& ptr = g_CLR_DBG_Debuggers[ iDebuggerT ];
-
-#define NANOCLR_FOREACH_DEBUGGER_NO_TEMP()                                    \
-            for(int iDebuggerT = 0; iDebuggerT < NUM_DEBUGGERS; iDebuggerT++) \
-            {                       
-#else
-    #define NANOCLR_FOREACH_DEBUGGER(ptr)                                     \
-            {                                                                 \
-                CLR_DBG_Debugger& ptr = g_CLR_DBG_Debuggers[ 0 ];            
-    
-    #define NANOCLR_FOREACH_DEBUGGER_NO_TEMP()                                \
-            {                                                                 
-#endif
-
-#define NANOCLR_FOREACH_DEBUGGER_END() \
-        }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 //#if defined(_MSC_VER)
 struct CLR_DBG_Commands
 {
@@ -1161,7 +1138,7 @@ public:
 
 extern CLR_UINT32        g_scratchDebugger[];
 extern CLR_UINT32        g_scratchDebuggerMessaging[];
-extern CLR_DBG_Debugger *g_CLR_DBG_Debuggers;
+extern CLR_DBG_Debugger *g_CLR_DBG_Debugger;
 
 //--//
 

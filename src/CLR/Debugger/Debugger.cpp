@@ -107,27 +107,22 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
 
     int iDebugger = 0;
 
-    g_CLR_DBG_Debuggers = (CLR_DBG_Debugger*)&g_scratchDebugger[ 0 ];
+    g_CLR_DBG_Debugger = (CLR_DBG_Debugger*)&g_scratchDebugger[ 0 ];
 
-    CLR_RT_Memory::ZeroFill( g_scratchDebuggerMessaging, sizeof(CLR_Messaging) * NUM_DEBUGGERS );
+    CLR_RT_Memory::ZeroFill( g_scratchDebuggerMessaging, sizeof(CLR_Messaging) );
 
-    CLR_RT_Memory::ZeroFill( g_CLR_DBG_Debuggers, sizeof(CLR_DBG_Debugger) * NUM_DEBUGGERS );
+    CLR_RT_Memory::ZeroFill( g_CLR_DBG_Debugger, sizeof(CLR_DBG_Debugger) );
 
-    NANOCLR_FOREACH_DEBUGGER_NO_TEMP()
+    if(HalSystemConfig.DebuggerPort == HalSystemConfig.MessagingPort)
     {
-        if(HalSystemConfig.DebuggerPorts[ iDebugger ] == HalSystemConfig.MessagingPorts[ 0 ])
-        {
-            g_CLR_DBG_Debuggers[ iDebugger ].m_messaging = &g_CLR_Messaging[ 0 ];
-        }
-        else
-        {
-            g_CLR_DBG_Debuggers[iDebugger].m_messaging = (CLR_Messaging*)&g_scratchDebuggerMessaging[ iDebugger ];
-        }
-
-        NANOCLR_CHECK_HRESULT(g_CLR_DBG_Debuggers[ iDebugger ].Debugger_Initialize( HalSystemConfig.DebuggerPorts[ iDebugger ] ));
-        iDebugger++;
+        g_CLR_DBG_Debugger->m_messaging = &g_CLR_Messaging[ 0 ];
     }
-    NANOCLR_FOREACH_DEBUGGER_END();
+    else
+    {
+        g_CLR_DBG_Debugger->m_messaging = (CLR_Messaging*)&g_scratchDebuggerMessaging[0];
+    }
+
+    NANOCLR_CHECK_HRESULT(g_CLR_DBG_Debugger->Debugger_Initialize(HalSystemConfig.DebuggerPort));
 
     BlockStorageStream stream;
 
@@ -162,11 +157,7 @@ HRESULT CLR_DBG_Debugger::DeleteInstance()
     NATIVE_PROFILE_CLR_DEBUGGER();
     NANOCLR_HEADER();
 
-    NANOCLR_FOREACH_DEBUGGER(dbg)
-    {
-        dbg.Debugger_Cleanup();
-    }
-    NANOCLR_FOREACH_DEBUGGER_END();
+    g_CLR_DBG_Debugger->Debugger_Cleanup();
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -194,11 +185,7 @@ void CLR_DBG_Debugger::PurgeCache()
 void CLR_DBG_Debugger::BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    NANOCLR_FOREACH_DEBUGGER(dbg)
-    {
-        dbg.m_messaging->SendEvent( cmd, payloadSize, payload, flags );
-    }
-    NANOCLR_FOREACH_DEBUGGER_END();
+    g_CLR_DBG_Debugger->m_messaging->SendEvent( cmd, payloadSize, payload, flags );
 }
 
 //--//
@@ -523,7 +510,7 @@ bool CLR_DBG_Debugger::CheckPermission( ByteAddress address, int mode )
             }
             else
             {
-                hasPermission = DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]) == true;
+                hasPermission = DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort) == true;
             }
             break;
         case AccessMemory_Erase:
@@ -1130,7 +1117,7 @@ bool CLR_DBG_Debugger::Debugging_UpgradeToSsl(WP_Message* msg, void* owner )
     CLR_DBG_Commands::Debugging_UpgradeToSsl*       cmd = (CLR_DBG_Commands::Debugging_UpgradeToSsl*)msg->m_payload;
     CLR_DBG_Commands::Debugging_UpgradeToSsl::Reply reply;
 
-    if(!DebuggerPort_IsSslSupported(HalSystemConfig.DebuggerPorts[0]))
+    if(!DebuggerPort_IsSslSupported(HalSystemConfig.DebuggerPort))
     {
         return false;
     }
@@ -1141,7 +1128,7 @@ bool CLR_DBG_Debugger::Debugging_UpgradeToSsl(WP_Message* msg, void* owner )
 
     Events_WaitForEvents(0, 300);
 
-    return true == DebuggerPort_UpgradeToSsl(HalSystemConfig.DebuggerPorts[0], cmd->m_flags);
+    return true == DebuggerPort_UpgradeToSsl(HalSystemConfig.DebuggerPort, cmd->m_flags);
 }
 
 static CLR_UINT32 s_missingPkts[64];
