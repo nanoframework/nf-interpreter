@@ -16,7 +16,7 @@ static uint8_t* marker;
 //////////////////////////////////////////
 // helper functions
 
-void ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* ptr, int size)
+void WP_ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* ptr, int size)
 {
     WP_Message msgReply;
     uint32_t     flags = 0;
