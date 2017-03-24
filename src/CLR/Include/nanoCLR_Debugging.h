@@ -1051,26 +1051,26 @@ private:
 public:  
     static CLR_RT_Thread* GetThreadFromPid ( CLR_UINT32 pid );
 
-    static bool Monitor_Ping                            ( WP_Message* msg, void* owner );
-    static bool Monitor_Reboot                          ( WP_Message* msg, void* owner );
-    static bool Debugging_Execution_QueryCLRCapabilities( WP_Message* msg, void* owner );
+    static bool Monitor_Ping                            ( WP_Message* msg );
+    static bool Monitor_Reboot                          ( WP_Message* msg );
+    static bool Debugging_Execution_QueryCLRCapabilities( WP_Message* msg );
 
-    static bool Monitor_ReadMemory                      ( WP_Message* msg, void* owner );
-    static bool Monitor_WriteMemory                     ( WP_Message* msg, void* owner );
-    static bool Monitor_CheckMemory                     ( WP_Message* msg, void* owner );
-    static bool Monitor_EraseMemory                     ( WP_Message* msg, void* owner );
-    static bool Monitor_Execute                         ( WP_Message* msg, void* owner );
-    static bool Monitor_MemoryMap                       ( WP_Message* msg, void* owner );
-    static bool Monitor_FlashSectorMap                  ( WP_Message* msg, void* owner );
-    static bool Monitor_DeploymentMap                   ( WP_Message* msg, void* owner );
+    static bool Monitor_ReadMemory                      ( WP_Message* msg );
+    static bool Monitor_WriteMemory                     ( WP_Message* msg );
+    static bool Monitor_CheckMemory                     ( WP_Message* msg );
+    static bool Monitor_EraseMemory                     ( WP_Message* msg );
+    static bool Monitor_Execute                         ( WP_Message* msg );
+    static bool Monitor_MemoryMap                       ( WP_Message* msg );
+    static bool Monitor_FlashSectorMap                  ( WP_Message* msg );
+    static bool Monitor_DeploymentMap                   ( WP_Message* msg );
 
                                              
-    static bool Debugging_Execution_BasePtr             ( WP_Message* msg, void* owner );
-    static bool Debugging_Execution_ChangeConditions    ( WP_Message* msg, void* owner );
+    static bool Debugging_Execution_BasePtr             ( WP_Message* msg );
+    static bool Debugging_Execution_ChangeConditions    ( WP_Message* msg );
 
-    static bool Debugging_Execution_Allocate            ( WP_Message* msg, void* owner );
+    static bool Debugging_Execution_Allocate            ( WP_Message* msg );
 
-    static bool Debugging_UpgradeToSsl                  ( WP_Message* msg, void* owner );
+    static bool Debugging_UpgradeToSsl                  ( WP_Message* msg );
 
 
 
@@ -1080,56 +1080,56 @@ public:
 
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-    static bool Debugging_Execution_Breakpoints         ( WP_Message* msg, void* owner );
-    static bool Debugging_Execution_BreakpointStatus    ( WP_Message* msg, void* owner );
-    static bool Debugging_Execution_SetCurrentAppDomain ( WP_Message* msg, void* owner );
+    static bool Debugging_Execution_Breakpoints         ( WP_Message* msg );
+    static bool Debugging_Execution_BreakpointStatus    ( WP_Message* msg );
+    static bool Debugging_Execution_SetCurrentAppDomain ( WP_Message* msg );
 
-    static bool Debugging_Thread_CreateEx               ( WP_Message* msg, void* owner );
-    static bool Debugging_Thread_List                   ( WP_Message* msg, void* owner );
-    static bool Debugging_Thread_Stack                  ( WP_Message* msg, void* owner );
-    static bool Debugging_Thread_Kill                   ( WP_Message* msg, void* owner );
-    static bool Debugging_Thread_Suspend                ( WP_Message* msg, void* owner );
-    static bool Debugging_Thread_Resume                 ( WP_Message* msg, void* owner );
-    static bool Debugging_Thread_GetException           ( WP_Message* msg, void* owner );
-    static bool Debugging_Thread_Unwind                 ( WP_Message* msg, void* owner );
-    static bool Debugging_Thread_Get                    ( WP_Message* msg, void* owner );
+    static bool Debugging_Thread_CreateEx               ( WP_Message* msg );
+    static bool Debugging_Thread_List                   ( WP_Message* msg );
+    static bool Debugging_Thread_Stack                  ( WP_Message* msg );
+    static bool Debugging_Thread_Kill                   ( WP_Message* msg );
+    static bool Debugging_Thread_Suspend                ( WP_Message* msg );
+    static bool Debugging_Thread_Resume                 ( WP_Message* msg );
+    static bool Debugging_Thread_GetException           ( WP_Message* msg );
+    static bool Debugging_Thread_Unwind                 ( WP_Message* msg );
+    static bool Debugging_Thread_Get                    ( WP_Message* msg );
                                              
-    static bool Debugging_Stack_Info                    ( WP_Message* msg, void* owner );
-    static bool Debugging_Stack_SetIP                   ( WP_Message* msg, void* owner );
+    static bool Debugging_Stack_Info                    ( WP_Message* msg );
+    static bool Debugging_Stack_SetIP                   ( WP_Message* msg );
                                              
-    static bool Debugging_Value_ResizeScratchPad        ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_GetStack                ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_GetField                ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_GetArray                ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_GetBlock                ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_GetScratchPad           ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_SetBlock                ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_SetArray                ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_AllocateObject          ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_AllocateString          ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_AllocateArray           ( WP_Message* msg, void* owner );
-    static bool Debugging_Value_Assign                  ( WP_Message* msg, void* owner );
+    static bool Debugging_Value_ResizeScratchPad        ( WP_Message* msg );
+    static bool Debugging_Value_GetStack                ( WP_Message* msg );
+    static bool Debugging_Value_GetField                ( WP_Message* msg );
+    static bool Debugging_Value_GetArray                ( WP_Message* msg );
+    static bool Debugging_Value_GetBlock                ( WP_Message* msg );
+    static bool Debugging_Value_GetScratchPad           ( WP_Message* msg );
+    static bool Debugging_Value_SetBlock                ( WP_Message* msg );
+    static bool Debugging_Value_SetArray                ( WP_Message* msg );
+    static bool Debugging_Value_AllocateObject          ( WP_Message* msg );
+    static bool Debugging_Value_AllocateString          ( WP_Message* msg );
+    static bool Debugging_Value_AllocateArray           ( WP_Message* msg );
+    static bool Debugging_Value_Assign                  ( WP_Message* msg );
                                              
-    static bool Debugging_TypeSys_Assemblies            ( WP_Message* msg, void* owner );
-    static bool Debugging_TypeSys_AppDomains            ( WP_Message* msg, void* owner );
+    static bool Debugging_TypeSys_Assemblies            ( WP_Message* msg );
+    static bool Debugging_TypeSys_AppDomains            ( WP_Message* msg );
                                              
-    static bool Debugging_Resolve_AppDomain             ( WP_Message* msg, void* owner );
-    static bool Debugging_Resolve_Assembly              ( WP_Message* msg, void* owner );
-    static bool Debugging_Resolve_Type                  ( WP_Message* msg, void* owner );
-    static bool Debugging_Resolve_Field                 ( WP_Message* msg, void* owner );
-    static bool Debugging_Resolve_Method                ( WP_Message* msg, void* owner );
-    static bool Debugging_Resolve_VirtualMethod         ( WP_Message* msg, void* owner );
+    static bool Debugging_Resolve_AppDomain             ( WP_Message* msg );
+    static bool Debugging_Resolve_Assembly              ( WP_Message* msg );
+    static bool Debugging_Resolve_Type                  ( WP_Message* msg );
+    static bool Debugging_Resolve_Field                 ( WP_Message* msg );
+    static bool Debugging_Resolve_Method                ( WP_Message* msg );
+    static bool Debugging_Resolve_VirtualMethod         ( WP_Message* msg );
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-    static bool Debugging_Deployment_Status             ( WP_Message* msg, void* owner );
-    static bool Debugging_Info_SetJMC                   ( WP_Message* msg, void* owner );
+    static bool Debugging_Deployment_Status             ( WP_Message* msg );
+    static bool Debugging_Info_SetJMC                   ( WP_Message* msg );
     
     bool Debugging_Info_SetJMC_Type                     ( const CLR_RT_TypeDef_Index&   idx, bool fJMC );
     bool Debugging_Info_SetJMC_Method                   ( const CLR_RT_MethodDef_Index& idx, bool fJMC );
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-    static bool Profiling_Command                       ( WP_Message* msg, void* owner );
+    static bool Profiling_Command                       ( WP_Message* msg );
     bool Profiling_ChangeConditions                     ( WP_Message* msg );
     bool Profiling_FlushStream                          ( WP_Message* msg );
 };

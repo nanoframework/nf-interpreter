@@ -11,7 +11,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef bool (*CLR_Messaging_CommandHandler)( WP_Message* msg, void* owner );
+typedef bool (*CLR_Messaging_CommandHandler)( WP_Message* msg );
 
 struct CLR_Messaging_CommandHandlerLookup
 {
@@ -22,7 +22,6 @@ struct CLR_Messaging_CommandHandlerLookup
 struct CLR_Messaging_CommandHandlerLookups
 {
     const CLR_Messaging_CommandHandlerLookup* table;
-    void*                                     owner;
     CLR_UINT32                                size;
 };
 
@@ -104,7 +103,7 @@ struct CLR_Messaging
 
     static HRESULT CreateInstance();
 
-    void Initialize(COM_HANDLE port, const CLR_Messaging_CommandHandlerLookup* requestLookup, const CLR_UINT32 requestLookupCount, const CLR_Messaging_CommandHandlerLookup* replyLookup, const CLR_UINT32 replyLookupCount, void* owner );
+    void Initialize(COM_HANDLE port, const CLR_Messaging_CommandHandlerLookup* requestLookup, const CLR_UINT32 requestLookupCount, const CLR_Messaging_CommandHandlerLookup* replyLookup, const CLR_UINT32 replyLookupCount );
     void Cleanup();
 
     static HRESULT DeleteInstance();
@@ -144,12 +143,12 @@ private:
     bool TransmitMessage( const WP_Message* msg, bool fQueue );
 
 public:  
-    static bool Messaging_Query               ( WP_Message* msg, void* owner );
-    static bool Messaging_Query__Reply        ( WP_Message* msg, void* owner );
-    static bool Messaging_Send                ( WP_Message* msg, void* owner );
-    static bool Messaging_Send__Reply         ( WP_Message* msg, void* owner );
-    static bool Messaging_Reply               ( WP_Message* msg, void* owner );
-    static bool Messaging_Reply__Reply        ( WP_Message* msg, void* owner );
+    static bool Messaging_Query               ( WP_Message* msg );
+    static bool Messaging_Query__Reply        ( WP_Message* msg );
+    static bool Messaging_Send                ( WP_Message* msg );
+    static bool Messaging_Send__Reply         ( WP_Message* msg );
+    static bool Messaging_Reply               ( WP_Message* msg );
+    static bool Messaging_Reply__Reply        ( WP_Message* msg );
 };
 
 //--//

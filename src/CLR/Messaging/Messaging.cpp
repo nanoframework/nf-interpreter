@@ -72,10 +72,9 @@ bool CLR_Messaging::AllocateAndQueueMessage( CLR_UINT32 cmd, unsigned int length
 }
 
 
-bool CLR_Messaging::Messaging_Query( WP_Message* msg, void* owner )
+bool CLR_Messaging::Messaging_Query( WP_Message* msg )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging*                           messaging = (CLR_Messaging*)owner;
     CLR_Messaging_Commands::Messaging_Query*       cmd = (CLR_Messaging_Commands::Messaging_Query*)msg->m_payload;
     CLR_Messaging_Commands::Messaging_Query::Reply res;
     CLR_RT_HeapBlock_EndPoint*                      ep = CLR_RT_HeapBlock_EndPoint::FindEndPoint( cmd->m_addr.m_to );
@@ -83,29 +82,27 @@ bool CLR_Messaging::Messaging_Query( WP_Message* msg, void* owner )
     res.m_found = (ep != NULL);
     res.m_addr  = cmd->m_addr;
 
-    messaging->ReplyToCommand( msg, true, false, &res, sizeof(res) );
+    g_CLR_Messaging->ReplyToCommand( msg, true, false, &res, sizeof(res) );
 
     return true;
 }
 
-bool CLR_Messaging::Messaging_Query__Reply( WP_Message* msg, void* owner )
+bool CLR_Messaging::Messaging_Query__Reply( WP_Message* msg )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging *messaging = (CLR_Messaging*)owner;
     
     CLR_Messaging_Commands::Messaging_Query::Reply* cmd = (CLR_Messaging_Commands::Messaging_Query::Reply*)msg->m_payload;
     
-    messaging->AllocateAndQueueMessage( CLR_Messaging_Commands::c_Messaging_Query, 0, NULL, cmd->m_addr.m_from, cmd->m_addr, cmd->m_found );
+    g_CLR_Messaging->AllocateAndQueueMessage( CLR_Messaging_Commands::c_Messaging_Query, 0, NULL, cmd->m_addr.m_from, cmd->m_addr, cmd->m_found );
         
     return true;
 }
 
 //--//
 
-bool CLR_Messaging::Messaging_Send( WP_Message* msg, void* owner )
+bool CLR_Messaging::Messaging_Send( WP_Message* msg )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging*                           messaging = (CLR_Messaging*)owner;
     CLR_Messaging_Commands::Messaging_Send*       cmd  = (CLR_Messaging_Commands::Messaging_Send*)msg->m_payload;
     CLR_Messaging_Commands::Messaging_Send::Reply res;
     CLR_UINT32                                    len;
@@ -113,17 +110,17 @@ bool CLR_Messaging::Messaging_Send( WP_Message* msg, void* owner )
 
     len = msg->m_header.m_size - sizeof(cmd->m_addr);
         
-    fRes = messaging->AllocateAndQueueMessage( CLR_Messaging_Commands::c_Messaging_Send, len, cmd->m_data, cmd->m_addr.m_to, cmd->m_addr, false );
+    fRes = g_CLR_Messaging->AllocateAndQueueMessage( CLR_Messaging_Commands::c_Messaging_Send, len, cmd->m_data, cmd->m_addr.m_to, cmd->m_addr, false );
 
     res.m_found = true;
     res.m_addr  = cmd->m_addr;
 
-    messaging->ReplyToCommand( msg, fRes, false, &res, sizeof(res) );
+    g_CLR_Messaging->ReplyToCommand( msg, fRes, false, &res, sizeof(res) );
 
     return true;
 }
 
-bool CLR_Messaging::Messaging_Send__Reply( WP_Message* msg, void* owner )
+bool CLR_Messaging::Messaging_Send__Reply( WP_Message* msg )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
     //
@@ -135,27 +132,26 @@ bool CLR_Messaging::Messaging_Send__Reply( WP_Message* msg, void* owner )
 
 //--//
 
-bool CLR_Messaging::Messaging_Reply( WP_Message* msg, void* owner )
+bool CLR_Messaging::Messaging_Reply( WP_Message* msg )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging*                            messaging = (CLR_Messaging*)owner;
     CLR_Messaging_Commands::Messaging_Reply*       cmd  = (CLR_Messaging_Commands::Messaging_Reply*)msg->m_payload;
     CLR_Messaging_Commands::Messaging_Reply::Reply res;
     bool                                           fRes;
     CLR_UINT32                                     len;
 
     len = msg->m_header.m_size - sizeof(cmd->m_addr);
-    fRes = messaging->AllocateAndQueueMessage( CLR_Messaging_Commands::c_Messaging_Reply, len, cmd->m_data, cmd->m_addr.m_from, cmd->m_addr, false );
+    fRes = g_CLR_Messaging->AllocateAndQueueMessage( CLR_Messaging_Commands::c_Messaging_Reply, len, cmd->m_data, cmd->m_addr.m_from, cmd->m_addr, false );
 
     res.m_found = true;
     res.m_addr  = cmd->m_addr;
 
-    messaging->ReplyToCommand( msg, fRes, false, &res, sizeof(res) );
+    g_CLR_Messaging->ReplyToCommand( msg, fRes, false, &res, sizeof(res) );
 
     return true;
 }
 
-bool CLR_Messaging::Messaging_Reply__Reply( WP_Message* msg, void* owner )
+bool CLR_Messaging::Messaging_Reply__Reply( WP_Message* msg )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
     //
@@ -285,8 +281,7 @@ HRESULT CLR_Messaging::CreateInstance()
         NULL, 
         0, 
         NULL, 
-        0, 
-        g_CLR_Messaging
+        0
         );
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -299,8 +294,7 @@ void CLR_Messaging::Initialize(
     const CLR_Messaging_CommandHandlerLookup* requestLookup, 
     const CLR_UINT32                          requestLookupCount, 
     const CLR_Messaging_CommandHandlerLookup* replyLookup, 
-    const CLR_UINT32                          replyLookupCount, 
-    void*                                     owner 
+    const CLR_UINT32                          replyLookupCount
     )
 {
     // If the debugger and Messaging share the same port (Legacy) then we will not initialze the Messaging port (because the debugger will take care of it)
@@ -314,11 +308,9 @@ void CLR_Messaging::Initialize(
     if(m_fInitialized) return;
 
     m_Lookup_Requests[ 0 ].table = c_Messaging_Lookup_Request;
-    m_Lookup_Requests[ 0 ].owner = this;
     m_Lookup_Requests[ 0 ].size  = ARRAYSIZE(c_Messaging_Lookup_Request);
 
     m_Lookup_Replies[ 0 ].table = c_Messaging_Lookup_Reply;
-    m_Lookup_Replies[ 0 ].owner = this;
     m_Lookup_Replies[ 0 ].size  = ARRAYSIZE(c_Messaging_Lookup_Reply);
 
     m_cacheSubordinate.DblLinkedList_Initialize();
@@ -330,11 +322,9 @@ void CLR_Messaging::Initialize(
     m_port           = port;    
 
     m_Lookup_Requests[ 1 ].table = requestLookup;
-    m_Lookup_Requests[ 1 ].owner = owner;
     m_Lookup_Requests[ 1 ].size  = requestLookupCount;
 
     m_Lookup_Replies[ 1 ].table = replyLookup;
-    m_Lookup_Replies[ 1 ].owner = owner;
     m_Lookup_Replies[ 1 ].size  = replyLookupCount;
 
     m_fDebuggerInitialized = (DebuggerPort_Initialize( port ) != false);
@@ -472,7 +462,7 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
         {
             if(cmd->cmd == msg->m_header.m_cmd)
             {
-                ReplyToCommand( msg, (*(cmd->hnd))( msg, tables->owner ), false );
+                ReplyToCommand( msg, (*(cmd->hnd))( msg ), false );
                 return true;
             }
 
