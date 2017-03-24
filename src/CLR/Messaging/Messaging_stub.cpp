@@ -45,7 +45,7 @@ __nfweak void CLR_Messaging::ProcessCommands()
     NATIVE_PROFILE_CLR_MESSAGING();
 }
 
-__nfweak void CLR_Messaging::Initialize(COM_HANDLE port, const CLR_Messaging_CommandHandlerLookup* requestLookup, const CLR_UINT32 requestLookupCount, const CLR_Messaging_CommandHandlerLookup* replyLookup, const CLR_UINT32 replyLookupCount, void* owner )
+__nfweak void CLR_Messaging::Initialize(COM_HANDLE port, const CLR_Messaging_CommandHandlerLookup* requestLookup, const CLR_UINT32 requestLookupCount, const CLR_Messaging_CommandHandlerLookup* replyLookup, const CLR_UINT32 replyLookupCount )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
 }
