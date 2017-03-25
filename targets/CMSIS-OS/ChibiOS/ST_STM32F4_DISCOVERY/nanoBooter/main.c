@@ -36,9 +36,7 @@ void BlinkerThread(void const * argument)
       
       palClearPad(GPIOD, GPIOD_LED4);
   }
-  
   // nothing to deinitialize or cleanup, so it's safe to return
-  return 0;
 }
 osThreadDef(BlinkerThread, osPriorityNormal, 128);
 
