@@ -12,6 +12,8 @@ cmake-variants.json
 .vscode/launch.json
 .vscode/.cmaketools.json
 .vscode/settings.json
+.vscode/tasks.json
+.vscode/extensions.json
 
 # Visual Studio
 ## Ignore Visual Studio temporary files, build results, and
