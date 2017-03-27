@@ -185,7 +185,7 @@ bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
     return true;
 }
 
-bool BlockStorageStream_Seek(BlockStorageStream *stream, int32_t offset, SeekOrigin origin)
+bool BlockStorageStream_Seek(BlockStorageStream *stream, unsigned int offset, SeekOrigin origin)
 {
     unsigned int seekIndex;
 
