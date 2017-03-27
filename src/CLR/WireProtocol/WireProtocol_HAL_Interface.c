@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <nanoWeak.h>
 #include "WireProtocol_HAL_Interface.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,21 +16,21 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 // provided as weak to be replaced by actual implementation by HAL interface
-__attribute__((weak)) bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
+__nfweak bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
 {
     // default to false
     return false;
 }
 
 // provided as weak to be replaced by actual implementation by HAL interface
-__attribute__((weak)) bool WP_TransmitMessage(WP_Message* message)
+__nfweak bool WP_TransmitMessage(WP_Message* message)
 {
     // default to false
     return false;
 }
 
 // provided as weak to be replaced by actual implementation by HAL interface
-__attribute__((weak)) void WP_CheckAvailableIncomingData()
+__nfweak void WP_CheckAvailableIncomingData()
 {
 }
 

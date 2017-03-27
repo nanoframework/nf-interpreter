@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <nanoWeak.h>
 #include "WireProtocol_App_Interface.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -14,14 +15,14 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 // provided as weak to be replaced by actual implementation in the client application
-__attribute__((weak)) bool WP_App_ProcessHeader(WP_Message* message)
+__nfweak bool WP_App_ProcessHeader(WP_Message* message)
 {
     // default to false
     return false;
 }
 
 // provided as weak to be replaced by actual implementation in the client application
-__attribute__((weak)) bool WP_App_ProcessPayload(WP_Message* message)
+__nfweak bool WP_App_ProcessPayload(WP_Message* message)
 {
     // default to false
     return false; 
