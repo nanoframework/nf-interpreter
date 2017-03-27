@@ -7,10 +7,10 @@
 #include <nanoSupport.h>
 #include "WireProtocol_Message.h"
 
-unsigned char receptionBuffer[2048];
+uint8_t receptionBuffer[2048];
 static uint16_t lastOutboundMessage;
-// FIXME #146 unsigned int m_payloadTicks;
-static unsigned char* marker;
+// FIXME #146 uint32_t m_payloadTicks;
+static uint8_t* marker;
 
 //////////////////////////////////////////
 // helper functions
@@ -18,7 +18,7 @@ static unsigned char* marker;
 void WP_ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* ptr, int size)
 {
     WP_Message msgReply;
-    unsigned int     flags = 0;
+    uint32_t     flags = 0;
 
     //
     // Make sure we reply only once!
@@ -43,7 +43,7 @@ void WP_ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void*
 
     WP_Message_Initialize(&msgReply);
 
-    WP_Message_PrepareReply(&msgReply, &message->m_header, flags, size, (unsigned char*)ptr );
+    WP_Message_PrepareReply(&msgReply, &message->m_header, flags, size, (uint8_t*)ptr );
 
     WP_TransmitMessage(&msgReply);
 }
@@ -62,9 +62,9 @@ void WP_Message_PrepareReception(WP_Message* message)
     message->m_rxState = ReceiveState_Initialize;
 }
 
-void WP_Message_PrepareRequest(WP_Message* message, unsigned int cmd, unsigned int flags, unsigned int payloadSize, unsigned char* payload)
+void WP_Message_PrepareRequest(WP_Message* message, uint32_t cmd, uint32_t flags, uint32_t payloadSize, uint8_t* payload)
 {
-    memcpy(&message->m_header.m_signature, marker ? marker : (unsigned char*)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
+    memcpy(&message->m_header.m_signature, marker ? marker : (uint8_t*)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
 
     message->m_header.m_crcData   = SUPPORT_ComputeCRC(payload, payloadSize, 0);
     message->m_header.m_cmd       = cmd;
@@ -78,13 +78,13 @@ void WP_Message_PrepareRequest(WP_Message* message, unsigned int cmd, unsigned i
     // The CRC for the header is computed setting the CRC field to zero and then running the CRC algorithm.
     //
     message->m_header.m_crcHeader = 0;
-    message->m_header.m_crcHeader = SUPPORT_ComputeCRC((unsigned char*)&message->m_header, sizeof(message->m_header), 0);
+    message->m_header.m_crcHeader = SUPPORT_ComputeCRC((uint8_t*)&message->m_header, sizeof(message->m_header), 0);
 }
 
 
-void WP_Message_PrepareReply(WP_Message* message, const WP_Packet* req, unsigned int flags, unsigned int payloadSize,  unsigned char* payload)
+void WP_Message_PrepareReply(WP_Message* message, const WP_Packet* req, uint32_t flags, uint32_t payloadSize,  uint8_t* payload)
 {
-    memcpy(&message->m_header.m_signature, marker ? marker : (unsigned char*)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
+    memcpy(&message->m_header.m_signature, marker ? marker : (uint8_t*)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
 
     message->m_header.m_crcData   = SUPPORT_ComputeCRC(payload, payloadSize, 0);
     message->m_header.m_cmd       = req->m_cmd;
@@ -98,10 +98,10 @@ void WP_Message_PrepareReply(WP_Message* message, const WP_Packet* req, unsigned
     // The CRC for the header is computed setting the CRC field to zero and then running the CRC algorithm.
     //
     message->m_header.m_crcHeader = 0;
-    message->m_header.m_crcHeader = SUPPORT_ComputeCRC((unsigned char*)&message->m_header, sizeof(message->m_header), 0);
+    message->m_header.m_crcHeader = SUPPORT_ComputeCRC((uint8_t*)&message->m_header, sizeof(message->m_header), 0);
 }
 
-void WP_Message_SetPayload(WP_Message* message, unsigned char* payload)
+void WP_Message_SetPayload(WP_Message* message, uint8_t* payload)
 {
     message->m_payload = payload;
 }
@@ -116,9 +116,9 @@ void WP_Message_Release(WP_Message* message)
 
 bool WP_Message_VerifyHeader(WP_Message* message)
 {
-    unsigned int crc = message->m_header.m_crcHeader;
+    uint32_t crc = message->m_header.m_crcHeader;
     message->m_header.m_crcHeader = 0;
-    unsigned int computedCrc = SUPPORT_ComputeCRC((unsigned char*)&message->m_header, sizeof(message->m_header), 0);
+    uint32_t computedCrc = SUPPORT_ComputeCRC((uint8_t*)&message->m_header, sizeof(message->m_header), 0);
     message->m_header.m_crcHeader = crc;
 
     if(computedCrc != crc)
@@ -135,7 +135,7 @@ bool WP_Message_VerifyPayload(WP_Message* message)
         return false;
     }
 
-    unsigned int computedCrc = SUPPORT_ComputeCRC(message->m_payload, message->m_header.m_size, 0);
+    uint32_t computedCrc = SUPPORT_ComputeCRC(message->m_payload, message->m_header.m_size, 0);
     if(computedCrc != message->m_header.m_crcData)
     {
         return false;
@@ -143,7 +143,7 @@ bool WP_Message_VerifyPayload(WP_Message* message)
     return true;
 }
 
-void WP_Message_ReplyBadPacket(unsigned int flags)
+void WP_Message_ReplyBadPacket(uint32_t flags)
 {
     WP_Message message;
     WP_Message_Initialize(&message);
@@ -154,7 +154,7 @@ void WP_Message_ReplyBadPacket(unsigned int flags)
 
 bool WP_Message_Process(WP_Message* message)
 {
-    unsigned char* buf = (unsigned char*)&message->m_header;
+    uint8_t* buf = (uint8_t*)&message->m_header;
     int len;
 
     while(true)
@@ -168,7 +168,7 @@ bool WP_Message_Process(WP_Message* message)
                 WP_Message_Release(message);
 
                 message->m_rxState = ReceiveState_WaitingForHeader;
-                message->m_pos     = (unsigned char*)&message->m_header;
+                message->m_pos     = (uint8_t*)&message->m_header;
                 message->m_size    = sizeof(message->m_header);
                 break;
 
@@ -308,7 +308,7 @@ void WP_SendProtocolMessage(WP_Message *message)
     WP_TransmitMessage(&message);
 }
 
-void WP_PrepareAndSendProtocolMessage(unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags)
+void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_t* payload, uint32_t flags)
 {
     WP_Message message;
     WP_Message_Initialize(&message);
