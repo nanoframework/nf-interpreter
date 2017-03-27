@@ -1,4 +1,3 @@
-[submodule "targets-community"]
+[submodule "nf-Community-Targets"]
 	path = targets-community
 	url = https://github.com/nanoframework/nf-Community-Targets
-	ignore = dirty
