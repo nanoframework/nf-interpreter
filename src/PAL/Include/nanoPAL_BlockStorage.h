@@ -480,7 +480,7 @@ __nfweak bool BlockStorageStream_Initialize(BlockStorageStream* stream, unsigned
 __nfweak bool BlockStorageStream_InitializeWithBlockStorageDevice(BlockStorageStream* stream, unsigned int blockUsage, BlockStorageDevice* pDevice);
 __nfweak bool BlockStorageStream_NextStream(BlockStorageStream* stream);
 __nfweak bool BlockStorageStream_PrevStream(BlockStorageStream* stream);
-__nfweak bool BlockStorageStream_Seek(BlockStorageStream* stream, int32_t offset, SeekOrigin origin);
+__nfweak bool BlockStorageStream_Seek(BlockStorageStream* stream, unsigned int offset, SeekOrigin origin);
 __nfweak bool BlockStorageStream_Write(BlockStorageStream* stream, unsigned char* data, unsigned int length);
 __nfweak bool BlockStorageStream_Erase(BlockStorageStream* stream, unsigned int length);
 __nfweak bool BlockStorageStream_ReadIntoBuffer(BlockStorageStream* stream, unsigned char* buffer, unsigned int length);
