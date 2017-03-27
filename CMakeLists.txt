@@ -323,7 +323,27 @@ if(RTOS_CHIBIOS_CHECK)
     # set CMSIS RTOS include directory
     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
    
-    
+        # Assume no community board ... until proven otherwise
+    set(CHIBIOS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
+    # try to find board in chibios source 
+    if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
+        # Board found, nothing to do
+    else()
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
+            # board found in overlay, nothing to do 
+        else()
+            if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+                # board found in targets, nothing to do
+            else()
+                # try to find board in the Community targets folder
+                if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+                    # set flag for this being a community board
+                    set(CHIBIOS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
+                endif()
+            endif()
+        endif()
+    endif()
+
     # add target CMSIS OS folders
     add_subdirectory(targets/CMSIS-OS/common)
     add_subdirectory(targets/CMSIS-OS/nanoBooter)
@@ -387,11 +407,8 @@ if(RTOS_CHIBIOS_CHECK)
     # try to find board in the targets folder
     if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
         # board found
-        message(STATUS "support for target board '${CHIBIOS_BOARD}' found")
+        message(STATUS "Support for target board '${CHIBIOS_BOARD}' found")
         
-        # set flag for NOT being a community board
-        set(CHIBIOS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
-
         # add TARGET board directory
         add_subdirectory("targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
 
@@ -400,10 +417,7 @@ if(RTOS_CHIBIOS_CHECK)
         # try to find board in the Community targets folder
         if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
             # board found
-            message(STATUS "support for target board '${CHIBIOS_BOARD}' found in Community targets")
-        
-            # set flag for this being a community board
-            set(CHIBIOS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
+            message(STATUS "Support for target board '${CHIBIOS_BOARD}' found in Community targets")
 
             # add TARGET board directory from Community
             add_subdirectory("targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
