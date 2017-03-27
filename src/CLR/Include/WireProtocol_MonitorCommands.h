@@ -57,10 +57,20 @@ typedef enum MemoryMap_Options
 // backwards compatible with .NETMF
 typedef struct Monitor_Ping_Reply
 {
-    uint32_t m_source;
-    uint32_t m_dbg_flags;
+    unsigned int m_source;
+    unsigned int m_dbg_flags;
 
 }Monitor_Ping_Reply;
+
+// structure for command Monitor Ping
+// backwards compatible with .NETMF
+typedef struct Monitor_Ping_Command
+{
+    unsigned int m_source;
+    unsigned int m_dbg_flags;
+
+}Monitor_Ping_Command;
+
 
 // structure with reply for OEM information command
 typedef struct Monitor_OemInfo_Reply
@@ -71,43 +81,43 @@ typedef struct Monitor_OemInfo_Reply
 
 typedef struct CLR_DBG_Commands_Monitor_WriteMemory
 {
-    uint32_t address;
-    uint32_t length;
-    uint8_t  data[1];
+    unsigned int    address;
+    unsigned int    length;
+    unsigned char   data[1];
 
 }CLR_DBG_Commands_Monitor_WriteMemory;
 
 typedef struct Monitor_Reboot_Command
 {
-    uint32_t m_flags;
+    unsigned int m_flags;
 
 }Monitor_Reboot_Command;
 
 typedef struct CLR_DBG_Commands_Monitor_EraseMemory
 {
-    uint32_t address;
-    uint32_t length;
+    unsigned int address;
+    unsigned int length;
 
 }CLR_DBG_Commands_Monitor_EraseMemory;
 
 typedef struct CLR_DBG_Commands_Monitor_CheckMemory
 {
-    uint32_t address;
-    uint32_t length;
+    unsigned int address;
+    unsigned int length;
 
 }CLR_DBG_Commands_Monitor_CheckMemory;
 
 typedef struct CLR_DBG_Commands_Monitor_CheckMemory_Reply
 {
-    uint32_t crc;
+    unsigned int crc;
     
 }CLR_DBG_Commands_Monitor_CheckMemory_Reply;
 
 typedef struct MemoryMap_Range
 {
-    uint32_t m_address;
-    uint32_t m_length;
-    uint32_t m_flags;
+    unsigned int m_address;
+    unsigned int m_length;
+    unsigned int m_flags;
 
 }MemoryMap_Range;
 
@@ -140,4 +150,3 @@ bool Monitor_FlashSectorMap(WP_Message* message);
 #endif
 
 #endif //_WIREPROTOCOL_COMMANDS_H_
-
