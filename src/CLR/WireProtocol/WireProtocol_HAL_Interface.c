@@ -16,7 +16,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 // provided as weak to be replaced by actual implementation by HAL interface
-__nfweak bool WP_ReceiveBytes(unsigned char* ptr, unsigned short* size)
+__nfweak bool WP_ReceiveBytes(uint8_t* ptr, unsigned short* size)
 {
     // default to false
     return false;

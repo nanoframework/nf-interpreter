@@ -57,8 +57,8 @@ typedef enum MemoryMap_Options
 // backwards compatible with .NETMF
 typedef struct Monitor_Ping_Reply
 {
-    unsigned int m_source;
-    unsigned int m_dbg_flags;
+    uint32_t m_source;
+    uint32_t m_dbg_flags;
 
 }Monitor_Ping_Reply;
 
@@ -66,8 +66,8 @@ typedef struct Monitor_Ping_Reply
 // backwards compatible with .NETMF
 typedef struct Monitor_Ping_Command
 {
-    unsigned int m_source;
-    unsigned int m_dbg_flags;
+    uint32_t m_source;
+    uint32_t m_dbg_flags;
 
 }Monitor_Ping_Command;
 
@@ -81,43 +81,43 @@ typedef struct Monitor_OemInfo_Reply
 
 typedef struct CLR_DBG_Commands_Monitor_WriteMemory
 {
-    unsigned int    address;
-    unsigned int    length;
+    uint32_t    address;
+    uint32_t    length;
     unsigned char   data[1];
 
 }CLR_DBG_Commands_Monitor_WriteMemory;
 
 typedef struct Monitor_Reboot_Command
 {
-    unsigned int m_flags;
+    uint32_t m_flags;
 
 }Monitor_Reboot_Command;
 
 typedef struct CLR_DBG_Commands_Monitor_EraseMemory
 {
-    unsigned int address;
-    unsigned int length;
+    uint32_t address;
+    uint32_t length;
 
 }CLR_DBG_Commands_Monitor_EraseMemory;
 
 typedef struct CLR_DBG_Commands_Monitor_CheckMemory
 {
-    unsigned int address;
-    unsigned int length;
+    uint32_t address;
+    uint32_t length;
 
 }CLR_DBG_Commands_Monitor_CheckMemory;
 
 typedef struct CLR_DBG_Commands_Monitor_CheckMemory_Reply
 {
-    unsigned int crc;
+    uint32_t crc;
     
 }CLR_DBG_Commands_Monitor_CheckMemory_Reply;
 
 typedef struct MemoryMap_Range
 {
-    unsigned int m_address;
-    unsigned int m_length;
-    unsigned int m_flags;
+    uint32_t m_address;
+    uint32_t m_length;
+    uint32_t m_flags;
 
 }MemoryMap_Range;
 

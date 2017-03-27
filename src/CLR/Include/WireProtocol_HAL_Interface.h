@@ -9,7 +9,7 @@
 #include "WireProtocol_v2.h"
 
 //////////////////////////////////////////
-bool WP_ReceiveBytes(unsigned char* ptr, unsigned short* size);
+bool WP_ReceiveBytes(uint8_t* ptr, unsigned short* size);
 bool WP_TransmitMessage(WP_Message* message);
 void WP_CheckAvailableIncomingData();
 
