@@ -6,6 +6,8 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Runtime__HeapBlock.h>
 #include <nanoCLR_Messaging.h>
+#include <WireProtocol.h>
+#include <WireProtocol_Message.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #if 0
@@ -82,7 +84,7 @@ bool CLR_Messaging::Messaging_Query( WP_Message* msg )
     res.m_found = (ep != NULL);
     res.m_addr  = cmd->m_addr;
 
-    g_CLR_Messaging->ReplyToCommand( msg, true, false, &res, sizeof(res) );
+    WP_ReplyToCommand(msg, true, false, &res, sizeof(res));
 
     return true;
 }
@@ -115,7 +117,7 @@ bool CLR_Messaging::Messaging_Send( WP_Message* msg )
     res.m_found = true;
     res.m_addr  = cmd->m_addr;
 
-    g_CLR_Messaging->ReplyToCommand( msg, fRes, false, &res, sizeof(res) );
+    WP_ReplyToCommand( msg, fRes, false, &res, sizeof(res) );
 
     return true;
 }
@@ -146,7 +148,7 @@ bool CLR_Messaging::Messaging_Reply( WP_Message* msg )
     res.m_found = true;
     res.m_addr  = cmd->m_addr;
 
-    g_CLR_Messaging->ReplyToCommand( msg, fRes, false, &res, sizeof(res) );
+    WP_ReplyToCommand( msg, fRes, false, &res, sizeof(res) );
 
     return true;
 }
@@ -252,18 +254,18 @@ bool CLR_Messaging::App_Release( void* state, WP_Message* msg )
 
 //--//
 
- const WP_PhysicalLayer c_Messaging_phy =
- {
-     &CLR_Messaging::Phy_ReceiveBytes   , 
-     &CLR_Messaging::Phy_TransmitMessage, 
- };
 
- const WP_ApplicationLayer c_Messaging_app =
- {
-     &CLR_Messaging::App_ProcessHeader ,
-     &CLR_Messaging::App_ProcessPayload,
-     &CLR_Messaging::App_Release       , 
- };
+
+
+
+
+
+
+
+
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -316,7 +318,7 @@ void CLR_Messaging::Initialize(
     m_cacheSubordinate.DblLinkedList_Initialize();
     m_cacheMaster     .DblLinkedList_Initialize();
 
-    m_controller.Initialize( MARKER_DEBUGGER_V1, &c_Messaging_phy, &c_Messaging_app, this );
+
 
     m_cacheTotalSize = 0;
     m_port           = port;    
@@ -368,14 +370,14 @@ void CLR_Messaging::Cleanup()
 
 //--//
 
-void CLR_Messaging::ProcessCommands()
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-    if(m_fInitialized)
-    {
-        m_controller.AdvanceState();
-    }
-}
+
+
+
+
+
+
+
+
 
 bool CLR_Messaging::ProcessHeader( WP_Message* msg )
 {
@@ -387,7 +389,7 @@ bool CLR_Messaging::ProcessHeader( WP_Message* msg )
 bool CLR_Messaging::ProcessPayload( WP_Message* msg )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    if(msg->m_header.m_flags & WP_Flags::c_NACK)
+    if(msg->m_header.m_flags & WP_Flags_c_NACK)
     {
         //
         // Bad packet...
@@ -400,7 +402,7 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
     const CLR_Messaging_CommandHandlerLookups* tables;
     int tableCount = 0;
 
-    if(msg->m_header.m_flags & WP_Flags::c_Reply)
+    if(msg->m_header.m_flags & WP_Flags_c_Reply)
     {
         //
         // Only process replies once!
@@ -432,22 +434,22 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
     }
     else
     {
-        NANOCLR_FOREACH_NODE(CachedMessage,cache,m_cacheSubordinate)
-        {
-            WP_Packet& req = msg->            m_header;
-            WP_Packet& res = cache->m_message.m_header;
+        // NANOCLR_FOREACH_NODE(CachedMessage,cache,m_cacheSubordinate)
+        // {
+        //     WP_Packet& req = msg->            m_header;
+        //     WP_Packet& res = cache->m_message.m_header;
 
-            if(req.m_cmd == res.m_cmd && req.m_seq == res.m_seqReply)
-            {
-                m_cacheSubordinate.LinkAtFront( cache );
+        //     if(req.m_cmd == res.m_cmd && req.m_seq == res.m_seqReply)
+        //     {
+        //         m_cacheSubordinate.LinkAtFront( cache );
 
-                cache->m_lastSeen = HAL_Time_CurrentTime();
+        //         cache->m_lastSeen = HAL_Time_CurrentTime();
 
-                TransmitMessage( &cache->m_message, false );
-                return true;
-            }
-        }
-        NANOCLR_FOREACH_NODE_END();
+        //         TransmitMessage( &cache->m_message, false );
+        //         return true;
+        //     }
+        // }
+        // NANOCLR_FOREACH_NODE_END();
 
         tables     = m_Lookup_Requests;
         tableCount = ARRAYSIZE(m_Lookup_Requests);
@@ -462,7 +464,7 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
         {
             if(cmd->cmd == msg->m_header.m_cmd)
             {
-                ReplyToCommand( msg, (*(cmd->hnd))( msg ), false );
+                WP_ReplyToCommand(msg, (*(cmd->hnd))( msg ), false, NULL, 0);
                 return true;
             }
 
@@ -471,9 +473,18 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
         tables++;
     }
 
-    ReplyToCommand( msg, false, false );
+    WP_ReplyToCommand(msg, false, false, NULL, 0);
     
     return true;
+}
+
+// wrapper function for CLR_Messaging::ProcessPayload(
+extern "C" bool CLR_Messaging_ProcessPayload(WP_Message* msg)
+{
+    //CLR_Messaging* instance = (CLR_Messaging*)&g_scratchDebuggerMessaging[0];
+
+    bool retValue = g_CLR_DBG_Debugger->m_messaging->ProcessPayload(msg);
+    return retValue;
 }
 
 //--//
@@ -520,17 +531,17 @@ bool CLR_Messaging::TransmitMessage( const WP_Message* msg, bool fQueue )
     }
     DebuggerPort_Flush( m_port );
 
-    if(fQueue && (flags & WP_Flags::c_NoCaching) == 0)
+    if(fQueue && (flags & WP_Flags_c_NoCaching) == 0)
     {
         CLR_RT_DblLinkedList* lst;
 
-        if(flags & WP_Flags::c_Reply)
+        if(flags & WP_Flags_c_Reply)
         {
             lst = &m_cacheSubordinate;
         }
         else
         {
-            if(flags & WP_Flags::c_NonCritical)
+            if(flags & WP_Flags_c_NonCritical)
             {
                 //
                 // Don't cache non-critical requests.
@@ -581,55 +592,17 @@ bool CLR_Messaging::TransmitMessage( const WP_Message* msg, bool fQueue )
 bool CLR_Messaging::SendEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    return m_controller.SendProtocolMessage( cmd, flags, payloadSize, payload );
+    WP_PrepareAndSendProtocolMessage(cmd, payloadSize, payload, flags);
+
+    // FIXME: returning true to keep compatibility with previous code base
+    // improve this in a future revision
+    return true;
 }
 
 void CLR_Messaging::BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-
-    g_CLR_Messaging->m_controller.SendProtocolMessage( cmd, flags, payloadSize, payload );
+    WP_PrepareAndSendProtocolMessage(cmd, payloadSize, payload, flags);
 }
 
 //--//
-
-void CLR_Messaging::ReplyToCommand( WP_Message* msg, bool fSuccess, bool fCritical, void* ptr, int size )
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-    WP_Message msgReply;
-    unsigned int     flags = 0;
-
-    //
-    // Make sure we reply only once!
-    //
-    if(msg->m_header.m_flags & WP_Flags::c_NonCritical) return;
-    msg->m_header.m_flags |= WP_Flags::c_NonCritical;
-
-    //
-    // No caching in the request, no caching in the reply...
-    //
-    if(msg->m_header.m_flags & WP_Flags::c_NoCaching) flags |= WP_Flags::c_NoCaching;
-
-    if(fSuccess  ) flags |= WP_Flags::c_ACK;
-    else           flags |= WP_Flags::c_NACK;
-    if(!fCritical) flags |= WP_Flags::c_NonCritical;
-
-    if(fSuccess == false)
-    {
-        ptr  = NULL;
-        size = 0;
-    }
-
-    msgReply.Initialize( &m_controller );
-
-    msgReply.PrepareReply( msg->m_header, flags, size, (unsigned char*)ptr );
-
-    m_controller.SendProtocolMessage( msgReply );
-}
-
-void CLR_Messaging::ReplyToCommand( WP_Message* msg, bool fSuccess, bool fCritical )
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-    ReplyToCommand( msg, fSuccess, fCritical, NULL, 0 );
-}
-

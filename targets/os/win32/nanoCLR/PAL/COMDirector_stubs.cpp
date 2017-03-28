@@ -12,51 +12,51 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 
-bool DebuggerPort_Initialize( COM_HANDLE ComPortNum )
+__nfweak bool DebuggerPort_Initialize( COM_HANDLE ComPortNum )
 {
     NATIVE_PROFILE_PAL_COM();
     return true;
 }
 
-bool DebuggerPort_Uninitialize( COM_HANDLE ComPortNum )
+__nfweak bool DebuggerPort_Uninitialize( COM_HANDLE ComPortNum )
 {
     NATIVE_PROFILE_PAL_COM();
     return true;
 }
 
 
-int DebuggerPort_Write( COM_HANDLE ComPortNum, const char* Data, size_t size, int maxRetries )
+__nfweak int DebuggerPort_Write( COM_HANDLE ComPortNum, const char* Data, size_t size )
 {
     NATIVE_PROFILE_PAL_COM();
     return 0;
 }
 
 
-int DebuggerPort_Read( COM_HANDLE ComPortNum, char* Data, size_t size )
+__nfweak int DebuggerPort_Read( COM_HANDLE ComPortNum, char* Data, size_t size )
 {
     NATIVE_PROFILE_PAL_COM();
     return 0;
 }
 
-bool DebuggerPort_Flush( COM_HANDLE ComPortNum )
+__nfweak bool DebuggerPort_Flush( COM_HANDLE ComPortNum )
 {
     NATIVE_PROFILE_PAL_COM();
     return true;
 }
 
-bool DebuggerPort_IsSslSupported( COM_HANDLE ComPortNum )
+__nfweak bool DebuggerPort_IsSslSupported( COM_HANDLE ComPortNum )
 {
     NATIVE_PROFILE_PAL_COM();
     return FALSE;
 }
 
-bool DebuggerPort_UpgradeToSsl( COM_HANDLE ComPortNum, unsigned int flags ) 
+__nfweak bool DebuggerPort_UpgradeToSsl( COM_HANDLE ComPortNum, unsigned int flags ) 
 { 
     NATIVE_PROFILE_PAL_COM();
     return FALSE; 
 }
 
-bool DebuggerPort_IsUsingSsl( COM_HANDLE ComPortNum )
+__nfweak bool DebuggerPort_IsUsingSsl( COM_HANDLE ComPortNum )
 {
     NATIVE_PROFILE_PAL_COM();
     return FALSE;

@@ -92,5 +92,8 @@
     <ClCompile Include="Target_BlockStorage.cpp">
       <Filter>Source Files\PAL</Filter>
     </ClCompile>
+    <ClCompile Include="platform_heap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

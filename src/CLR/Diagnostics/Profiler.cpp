@@ -854,7 +854,7 @@ HRESULT CLR_PRF_Profiler::Stream_Flush()
             memcpy(&packet[ 1 ], ptr->m_payload, payloadLength);
 
             int packetLength = sizeof(CLR_DBG_Commands::Profiling_Stream) + payloadLength;
-            if(!CLR_EE_DBG_EVENT_SEND(messageType, packetLength, buffer, WP_Flags::c_NonCritical))
+            if(!CLR_EE_DBG_EVENT_SEND(messageType, packetLength, buffer, WP_Flags_c_NonCritical))
             {
                 _ASSERTE(false);
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);

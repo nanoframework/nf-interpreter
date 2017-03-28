@@ -114,7 +114,7 @@ bool BlockStorageStream_NextStream(BlockStorageStream* stream)
 
 	stream->BlockLength = pRegion->BytesPerBlock;
 	stream->BaseAddress = pRegion->Start + pRegion->BlockRanges[stream->RangeIndex].StartBlock * stream->BlockLength;
-	stream->Length = BlockRange_GetBlockCount((BlockRange*)(&pRegion->BlockRanges[stream->RangeIndex])) * stream->BlockLength;
+	stream->Length = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * stream->BlockLength;
 	stream->CurrentIndex = 0;
 
 	return true;
@@ -177,7 +177,7 @@ bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
 
 	stream->BlockLength = pRegion->BytesPerBlock;
 	stream->BaseAddress = pRegion->Start + pRegion->BlockRanges[stream->RangeIndex].StartBlock * stream->BlockLength;
-	stream->Length = BlockRange_GetBlockCount((BlockRange*)(&pRegion->BlockRanges[stream->RangeIndex])) * stream->BlockLength;
+	stream->Length = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * stream->BlockLength;
 	stream->CurrentIndex = 0;
 
 	return true;

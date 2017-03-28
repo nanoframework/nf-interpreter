@@ -1287,13 +1287,13 @@ void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler);
 
 
 //
-// This has to be extern "C" because the Crypto library has C-linkage.
+// This has to be extern "C" because we want to use platform implemented malloc 
 //
 extern "C" {
 
-void* private_malloc ( size_t len             );
-void  private_free   ( void*  ptr             );
-void* private_realloc( void*  ptr, size_t len );
+void* platform_malloc ( size_t size             );
+void  platform_free   ( void*  ptr              );
+void* platform_realloc( void*  ptr, size_t size );
 
 }
 
@@ -1315,12 +1315,12 @@ void* private_realloc( void*  ptr, size_t len );
 
 //--//
 
-#define HAL_DECLARE_CUSTOM_HEAP(allocFtn,freeFtn,reallocFtn)                           \
-    extern "C" {                                                                       \
-    void* private_malloc ( size_t len             ) { return allocFtn  ( len      ); } \
-    void  private_free   ( void*  ptr             ) {        freeFtn   ( ptr      ); } \
-    void* private_realloc( void*  ptr, size_t len ) { return reallocFtn( ptr, len ); } \
-    }
+
+
+
+
+
+
 
 
 

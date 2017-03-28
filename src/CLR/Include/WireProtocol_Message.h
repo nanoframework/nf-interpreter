@@ -7,7 +7,7 @@
 #ifndef _WIREPROTOCOL_MESSAGE_H_
 #define _WIREPROTOCOL_MESSAGE_H_
 
-#include "WireProtocol_v2.h"
+#include "WireProtocol.h"
 #include "WireProtocol_App_Interface.h"
 #include "WireProtocol_HAL_Interface.h"
 

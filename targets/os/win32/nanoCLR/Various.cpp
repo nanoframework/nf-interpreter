@@ -55,13 +55,10 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 
     //--//
 
-    {                                               // unsigned int      DebuggerPorts[MAX_DEBUGGERS];
-        DEBUGGER_PORT,
-    },
+                                                   // unsigned int      DebuggerPorts[MAX_DEBUGGERS];
+    DEBUGGER_PORT,
 
-    {
-        MESSAGING_PORT,
-    },
+    MESSAGING_PORT,
 
     DEBUG_TEXT_PORT,
     115200,
@@ -506,7 +503,7 @@ int hal_vfprintf( COM_HANDLE stream, const char* format, va_list arg )
     //switch(ExtractTransport(stream))
     //{
     //default:
-        DebuggerPort_Write( stream, buffer, chars, 0 ); // skip null terminator
+        DebuggerPort_Write( stream, buffer, chars); // skip null terminator
     //    break;
 
     //case LCD_TRANSPORT:

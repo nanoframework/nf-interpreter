@@ -126,7 +126,6 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     # directories for nanoFramework libraries
     "${NF_CoreCLR_INCLUDE_DIRS}"
     "${NF_Debugger_INCLUDE_DIRS}"
-    "${NF_WireProtocol_INCLUDE_DIRS}"
 )
 
 ###################

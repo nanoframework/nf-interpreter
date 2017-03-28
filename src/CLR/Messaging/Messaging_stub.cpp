@@ -40,22 +40,7 @@ __nfweak void CLR_Messaging::PurgeCache( CLR_RT_DblLinkedList& lst, CLR_INT64 ol
     NATIVE_PROFILE_CLR_MESSAGING();
 }
 
-__nfweak void CLR_Messaging::ProcessCommands()
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-}
-
 __nfweak void CLR_Messaging::Initialize(COM_HANDLE port, const CLR_Messaging_CommandHandlerLookup* requestLookup, const CLR_UINT32 requestLookupCount, const CLR_Messaging_CommandHandlerLookup* replyLookup, const CLR_UINT32 replyLookupCount )
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-}
-
-__nfweak void CLR_Messaging::ReplyToCommand( WP_Message* msg, bool fSuccess, bool fCritical )
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-}
-
-__nfweak void CLR_Messaging::ReplyToCommand( WP_Message* msg, bool fSuccess, bool fCritical, void* ptr, int size )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
 }

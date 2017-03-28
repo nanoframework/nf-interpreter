@@ -6,7 +6,7 @@
 #include <ch.h>
 #include <hal.h>
 
-#include <WireProtocol_v2.h>
+#include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
 #if (HAL_USE_SERIAL_USB == TRUE)

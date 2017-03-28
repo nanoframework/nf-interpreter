@@ -5,6 +5,7 @@
 
 #include <nanoPAL_BlockStorage.h>
 #include <targetHAL.h>
+#include <Target_BlockStorage_STM32FlashDriver.h>
 
 ///////////////////////////////////////////////////
 // BlockStream 
@@ -43,17 +44,27 @@ bool BlockStorageStream_Initialize(BlockStorageStream* stream, unsigned int bloc
 // BlockStorageList 
 ///////////////////////////////////////////////////
 
-extern struct BlockStorageDevice  Device_BlockStorage;
-extern struct IBlockStorageDevice Device_BlockStorageInterface;
-extern struct BLOCK_CONFIG        Device_BlockStorageConfig;
+extern struct BlockStorageDevice    Device_BlockStorage;
+extern struct MEMORY_MAPPED_NOR_BLOCK_CONFIG   Device_BlockStorageConfig;
+BlockStorageList             BlockStorage;
 
-
-//static BlockStorageDevice* s_primaryDevice = NULL;
-
+// map here the Block Storage Interface to the STM32 driver
+IBlockStorageDevice STM32Flash_BlockStorageInterface =
+{                          
+    &STM32FlashDriver_InitializeDevice,
+    &STM32FlashDriver_UninitializeDevice,
+    &STM32FlashDriver_GetDeviceInfo,
+    &STM32FlashDriver_Read,
+    &STM32FlashDriver_Write,
+    NULL,
+    &STM32FlashDriver_IsBlockErased,    
+    &STM32FlashDriver_EraseBlock,
+    &STM32FlashDriver_SetPowerState
+};
 
 void BlockStorage_AddDevices()
 {
-    BlockStorageList_AddDevice(&Device_BlockStorage, &Device_BlockStorageInterface, &Device_BlockStorageConfig, false);
+    BlockStorageList_AddDevice(&Device_BlockStorage, &STM32Flash_BlockStorageInterface, &Device_BlockStorageConfig, false);
 }
 
 bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress)
@@ -89,14 +100,15 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, un
 
 bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool init)
 {
-    // TODO what to do with these???
-    //s_primaryDevice = pBSD;
-    // vtable
-    // config
+    pBSD->m_BSD     = vtable;
+    pBSD->m_context = config;
+
+    BlockStorage.PrimaryDevice = pBSD;
+
     return true;
 }
 
 BlockStorageDevice* BlockStorageList_GetFirstDevice()
 {
-    return &Device_BlockStorage;
+    return BlockStorage.PrimaryDevice;
 }

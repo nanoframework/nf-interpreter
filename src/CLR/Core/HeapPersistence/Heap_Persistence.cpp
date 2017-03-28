@@ -354,7 +354,7 @@ bool CLR_RT_Persistence_Manager::Bank::Erase( int& blockIndex )
 
     pRange  = &pRegion->BlockRanges[ m_stream.RangeIndex ];
 
-    if(BlockRange_GetBlockCount(pRange) <= (CLR_UINT32)blockIndex)
+    if(BlockRange_GetBlockCount(pRegion->BlockRanges[m_stream.RangeIndex]) <= (CLR_UINT32)blockIndex)
     {
         return false;
     }

@@ -38,10 +38,10 @@ HRESULT CLR_HW_Hardware::Hardware_Initialize()
         m_MessagingEventsMask = 0;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-        m_DebuggerEventsMask |= ExtractEventFromTransport( HalSystemConfig.DebuggerPorts[ 0 ] );
+        m_DebuggerEventsMask |= ExtractEventFromTransport( HalSystemConfig.DebuggerPort );
 #endif
 
-        m_MessagingEventsMask |= ExtractEventFromTransport( HalSystemConfig.MessagingPorts[ 0 ] );
+        m_MessagingEventsMask |= ExtractEventFromTransport( HalSystemConfig.MessagingPort );
 
         m_wakeupEvents = c_Default_WakeupEvents | m_DebuggerEventsMask;
         m_powerLevel   = PowerLevel__Active;
@@ -89,25 +89,26 @@ void CLR_HW_Hardware::ProcessActivity()
         if(!HAL_CONTINUATION::Dequeue_And_Execute()) break;
     }
 
-    if(!msg.IsDebuggerInitialized())
-    {
-        msg.InitializeDebugger();
-    }
-    msg.PurgeCache();
+	// UNDONE: FIXME:
+    //if(!msg.IsDebuggerInitialized())
+    //{
+    //    msg.InitializeDebugger();
+    //}
+	// UNDONE: FIXME:msg.PurgeCache();
     
-    dbg.PurgeCache();
+	// UNDONE: FIXME:dbg.PurgeCache();
 
     unsigned int events    = ::Events_Get( m_wakeupEvents );    
     unsigned int eventsCLR = 0;
 
     if(events & m_MessagingEventsMask)
     {
-        msg.ProcessCommands();
+        //msg.ProcessCommands();
     }
 
     if(events & m_DebuggerEventsMask)
     {
-        dbg.ProcessCommands();
+        //dbg.ProcessCommands();
 
 #if defined(PLATFORM_ARM)
         if(CLR_EE_DBG_IS(RebootPending))

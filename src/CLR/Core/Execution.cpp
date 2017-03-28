@@ -724,7 +724,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
 #endif
 
     //By skipping the whole CLRStartup routine, the Monitor_Program_Exit message never gets sent to clients.
-    CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit,0,NULL,WP_Flags::c_NonCritical);
+    CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit,0,NULL,WP_Flags_c_NonCritical);
     WaitForDebugger();
 #endif
 
@@ -3013,7 +3013,7 @@ void CLR_RT_ExecutionEngine::StopOnBreakpoint( CLR_DBG_Commands::Debugging_Execu
 
             if(m_breakpointsActiveNum == 1)
             {
-				CLR_EE_DBG_EVENT_SEND(CLR_DBG_Commands::c_Debugging_Execution_BreakpointHit, sizeof(CLR_DBG_Commands::Debugging_Execution_BreakpointDef), &m_breakpointsActive[0], WP_Flags::c_NonCritical);
+				CLR_EE_DBG_EVENT_SEND(CLR_DBG_Commands::c_Debugging_Execution_BreakpointHit, sizeof(CLR_DBG_Commands::Debugging_Execution_BreakpointDef), &m_breakpointsActive[0],WP_Flags_c_NonCritical);
             }
         }
         else
