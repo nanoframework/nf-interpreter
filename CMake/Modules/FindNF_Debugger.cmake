@@ -16,7 +16,6 @@ set(NF_Debugger_SRCS
     Debugger_full.cpp
 
     Messaging.cpp
-    WireProtocol.cpp
     
     WireProtocol_Message.c
     WireProtocol_MonitorCommands.c

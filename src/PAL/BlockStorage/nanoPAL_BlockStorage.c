@@ -116,7 +116,7 @@ bool BlockStorageStream_NextStream(BlockStorageStream* stream)
     
     stream->BlockLength  = pRegion->BytesPerBlock;
     stream->BaseAddress  = pRegion->Start + pRegion->BlockRanges[stream->RangeIndex].StartBlock * stream->BlockLength;
-    stream->Length       = BlockRange_GetBlockCount((BlockRange*)(&pRegion->BlockRanges[stream->RangeIndex])) * stream->BlockLength;
+    stream->Length       = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * stream->BlockLength;
     stream->CurrentIndex = 0;
 
     return true;
@@ -179,7 +179,7 @@ bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
     
     stream->BlockLength  = pRegion->BytesPerBlock;
     stream->BaseAddress  = pRegion->Start + pRegion->BlockRanges[stream->RangeIndex].StartBlock * stream->BlockLength;
-    stream->Length       = BlockRange_GetBlockCount((BlockRange*)(&pRegion->BlockRanges[stream->RangeIndex])) * stream->BlockLength;
+    stream->Length       = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * stream->BlockLength;
     stream->CurrentIndex = 0;
 
     return true;
@@ -296,77 +296,195 @@ __nfweak BlockStorageDevice* BlockStorageDevice_Prev(BlockStorageDevice* device)
     return NULL;
 }
 
-__nfweak bool BlockStorageDevice_InitializeDevice(BlockStorageDevice* device)
+/////////////////////////////////////////////////////////
+// Description:
+//    Initializes a given block device for use
+// 
+// Returns:
+//   true if succesful; false if not
+//
+// Remarks:
+//    No other functions in this interface may be called
+//    until after Init returns.
+//
+bool BlockStorageDevice_InitializeDevice(BlockStorageDevice* device)
 {
-    return false;
+    return device->m_BSD->InitializeDevice(device->m_context);
 }
 
-__nfweak bool BlockStorageDevice_UninitializeDevice(BlockStorageDevice* device)
+/////////////////////////////////////////////////////////
+// Description:
+//    Initializes a given block device for use
+// 
+// Returns:
+//   true if succesful; false if not
+//
+// Remarks:
+//   De initializes the device when no longer needed
+//
+bool BlockStorageDevice_UninitializeDevice(BlockStorageDevice* device)
 {
-    return false;
+    return device->m_BSD->UninitializeDevice(device->m_context);
 }
 
-__nfweak DeviceBlockInfo* BlockStorageDevice_GetDeviceInfo(BlockStorageDevice* device)
+/////////////////////////////////////////////////////////
+// Description:
+//    Gets the information describing the device
+//
+DeviceBlockInfo* BlockStorageDevice_GetDeviceInfo(BlockStorageDevice* device)
 {
-    return NULL;
+    return device->m_BSD->GetDeviceInfo(device->m_context);
 }
 
-__nfweak bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int address, unsigned int numBytes, unsigned char* pSectorBuff)
+/////////////////////////////////////////////////////////
+// Description:
+//    Reads data from a set of sectors
+//
+// Input:
+//    startAddress - Starting Sector for the read
+//    numBytes  - Number of sectors to read
+//    buffer - pointer to buffer to read the data into.
+//                  Must be large enough to hold all of the data
+//                  being read.
+//
+//    pSectorMetadata - pointer to an array of structured (one for each sector)
+//                      for the extra sector information.
+// 
+// Returns:
+//   true if succesful; false if not
+//
+// Remarks:
+//   This function reads the number of sectors specified from the device.
+//   
+//   pSectorBuff may be NULL. This is to allow for reading just the metadata.
+// 
+//   pSectorMetadata can be set to NULL if the caller does not need the extra
+//   data.
+//
+//   If the device does not support sector Metadata it should fail if the 
+//   pSectorMetadata parameter is not NULL.
+//
+bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int startAddress, unsigned int numBytes, unsigned char* buffer)
 {
-    return false;
+     return device->m_BSD->Read(device->m_context, startAddress, numBytes, buffer);
 }
 
-__nfweak bool BlockStorageDevice_Write(BlockStorageDevice* device, unsigned int address, unsigned int numBytes, unsigned char* pSectorBuf, bool readModifyWrite)
+/////////////////////////////////////////////////////////
+// Description:
+//    Writes data to a set of sectors
+//
+// Input:
+//    startAddress - Starting Sector for the write
+//    numBytes  - Number of sectors to write
+//    buffer - pointer to data to write.
+//                  Must be large enough to hold complete sectors
+//                  for the number of sectors being written.
+//
+//    pSectorMetadata - pointer to an array of structures (one for each sector)
+//                      for the extra sector information.
+// 
+// Returns:
+//   true if succesful; false if not
+//
+// Remarks:
+//   This function reads the number of sectors specified from the device.
+//   The SectorMetadata is used for flash arrays without special controllers
+//   to manage wear leveling etc... (mostly for NOR and NAND). The metadata
+//   is used by upper layers to ensure that data is moved around on the flash
+//   when writing to prevent failure of the device from too many erase cycles
+//   on a sector. 
+//   
+//   If the device does not support sector Metadata it should fail if the 
+//   pSectorMetadata parameter is not NULL.
+//
+//   pSectorMetadata can be set to NULL if the caller does not need the extra
+//   data. Implementations must not attempt to write data through a NULL pointer! 
+//
+bool BlockStorageDevice_Write(BlockStorageDevice* device, unsigned int startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
 {
-    return false;
+    return device->m_BSD->Write(device->m_context, startAddress, numBytes, buffer, readModifyWrite);
 }
 
-__nfweak bool BlockStorageDevice_Memset(BlockStorageDevice* device, unsigned int address, unsigned char data, unsigned int NumBytes)
+bool BlockStorageDevice_Memset(BlockStorageDevice* device, unsigned int startAddress, unsigned char buffer, unsigned int numBytes)
 {
-    return false;
+    return device->m_BSD->Memset(device->m_context, startAddress, buffer, numBytes);
 }
 
 //__nfweak bool BlockStorageDevice_GetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart, SectorMetadata* pSectorMetadata);
 //__nfweak bool BlockStorageDevice_SetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart, SectorMetadata* pSectorMetadata);
 
-__nfweak bool BlockStorageDevice_IsBlockErased(BlockStorageDevice* device, unsigned int blockStartAddress, unsigned int blockLength)
+/////////////////////////////////////////////////////////
+// Description:
+//    Check a block is erased or not
+// 
+// Input:
+//    Address - Logical Sector Address
+//
+// Returns:
+//   true it is erased; false if not
+//
+// Remarks:
+//    check the block containing the sector address specified.
+//  
+bool BlockStorageDevice_IsBlockErased(BlockStorageDevice* device, unsigned int blockStartAddress, unsigned int length)
 {
-    return false;
+    return device->m_BSD->IsBlockErased(device->m_context, blockStartAddress, length);
 }
 
-__nfweak bool BlockStorageDevice_EraseBlock(BlockStorageDevice* device, unsigned int address)
+/////////////////////////////////////////////////////////
+// Description:
+//    Erases a block
+// 
+// Input:
+//    Address - Logical Sector Address
+//
+// Returns:
+//   true if succesful; false if not
+//
+// Remarks:
+//    Erases the block containing the sector address specified.
+//
+bool BlockStorageDevice_EraseBlock(BlockStorageDevice* device, unsigned int address)
 {
-    return false;
+    return device->m_BSD->EraseBlock(device->m_context, address);
 }
 
-__nfweak void BlockStorageDevice_SetPowerState(BlockStorageDevice* device, unsigned int state)
+/////////////////////////////////////////////////////////
+// Description:
+//   Changes the power state of the device
+// 
+// Input:
+//    state   - true= power on; false = power off
+//
+// Remarks:
+//   This function allows systems to conserve power by 
+//   shutting down the hardware when the system is 
+//   going into low power states.
+//
+void BlockStorageDevice_SetPowerState(BlockStorageDevice* device, unsigned int state)
 {
-    return;
+    device->m_BSD->SetPowerState(device->m_context, state);
 }
 
-__nfweak bool BlockStorageDevice_FindRegionFromAddress(BlockStorageDevice* device, unsigned int address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+bool BlockStorageDevice_FindRegionFromAddress(BlockStorageDevice* device, unsigned int address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
 {
-    return false;
+    const DeviceBlockInfo* pDevInfo = BlockStorageDevice_GetDeviceInfo(device);
+
+    return DeviceBlockInfo_FindRegionFromAddress(pDevInfo, address, blockRegionIndex, blockRangeIndex);
 }
 
-__nfweak bool BlockStorageDevice_FindForBlockUsage(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+bool BlockStorageDevice_FindForBlockUsage(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
 {
-    return false;
+    const DeviceBlockInfo* pDevInfo = BlockStorageDevice_GetDeviceInfo(device);
+
+    return DeviceBlockInfo_FindForBlockUsage(pDevInfo, blockUsage, address, blockRegionIndex, blockRangeIndex);
 }
 
-__nfweak bool BlockStorageDevice_FindNextUsageBlock(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+bool BlockStorageDevice_FindNextUsageBlock(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
 {
-    return false;
-}
+    const DeviceBlockInfo* pDevInfo = BlockStorageDevice_GetDeviceInfo(device);
 
-__nfweak unsigned int BlockStorageDevice_MaxSectorWrite_uSec(BlockStorageDevice* device)
-{
-    return 0;
-}
-
-__nfweak unsigned int BlockStorageDevice_MaxBlockErase_uSec(BlockStorageDevice* device)
-{
-    return 0;
+    return DeviceBlockInfo_FindNextUsageBlock(pDevInfo, blockUsage, address, blockRegionIndex, blockRangeIndex);
 }
 
 ///////////////////////////////////////////////////

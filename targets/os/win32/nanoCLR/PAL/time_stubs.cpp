@@ -45,7 +45,7 @@ signed __int64 Time_GetTickCount()
     return 0;
 }
 
-bool HAL_Time_ToSystemTime(signed __int64 time, SYSTEMTIME* systemTime)
+bool HAL_Time_ToSystemTime(signed long long time, SYSTEMTIME* systemTime)
 {
     return FALSE;
 }

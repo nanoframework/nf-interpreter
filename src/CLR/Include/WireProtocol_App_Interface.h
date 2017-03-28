@@ -6,7 +6,7 @@
 #ifndef _WIREPROTOCOL_APP_INTERFACE_H_
 #define _WIREPROTOCOL_APP_INTERFACE_H_
 
-#include "WireProtocol_v2.h"
+#include "WireProtocol.h"
 
 //////////////////////////////////////////
 extern uint8_t receptionBuffer[2048];

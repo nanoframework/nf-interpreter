@@ -170,6 +170,7 @@
     <ClCompile Include="PAL\time_stubs.cpp" />
     <ClCompile Include="PAL\Watchdog_stubs.cpp" />
     <ClCompile Include="ParseOptions_Win32.cpp" />
+    <ClCompile Include="platform_heap.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

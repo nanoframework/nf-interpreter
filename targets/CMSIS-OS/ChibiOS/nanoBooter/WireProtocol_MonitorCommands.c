@@ -7,7 +7,7 @@
 #include <cmsis_os.h>
 #include <nanoHAL_v2.h>
 
-#include <WireProtocol_v2.h>
+#include <WireProtocol.h>
 #include <WireProtocol_MonitorCommands.h>
 #include <target_board.h>
 
@@ -188,14 +188,14 @@ bool Monitor_FlashSectorMap(WP_Message* message)
 {
     struct Flash_Sector
     {
-        unsigned int Start;
-        unsigned int Length;
-        unsigned int Usage;
+        uint32_t Start;
+        uint32_t Length;
+        uint32_t Usage;
     
     } *pData = NULL;
 
-    unsigned int rangeCount = 0;
-    unsigned int rangeIndex = 0;
+    uint32_t rangeCount = 0;
+    uint32_t rangeIndex = 0;
 
 //    for(int count = 0; count < 2; count++)
 //    {
@@ -209,7 +209,7 @@ bool Monitor_FlashSectorMap(WP_Message* message)
 
 //        if(count == 1)
 //        {
-//            pData = (struct Flash_Sector*)private_malloc(rangeCount * sizeof(struct Flash_Sector));
+//            pData = (struct Flash_Sector*)platform_malloc(rangeCount * sizeof(struct Flash_Sector));
 
 //            if(pData == NULL)
 //            {
@@ -248,7 +248,7 @@ bool Monitor_FlashSectorMap(WP_Message* message)
 
 //    WP_ReplyToCommand(message, true, false, (void*)pData, rangeCount * sizeof (struct Flash_Sector) );
 
-//    private_free(pData);
+//    platform_free(pData);
 
 //    return true;
 }

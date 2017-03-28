@@ -141,19 +141,19 @@ typedef enum BlockUsage
 ////////////////////////////////////////////////////////
 //
 
-typedef struct BLOCKRANGE BlockRange;
+//typedef struct BLOCKRANGE BlockRange;
 
-#define BlockRange_GetBlockCount(block)                 (block->EndBlock - block->StartBlock + 1)
-#define BlockRange_GetBlockUsage(block)                 (block.RangeType & BlockRange_USAGE_MASK)
-#define BlockRange_IsDeployment(block)                  ((block.RangeType & BlockRange_USAGE_MASK) == BlockUsage_DEPLOYMENT) 
-#define BlockRange_IsConfig(block)                      ((block.RangeType & BlockRange_BLOCKTYPE_CONFIG) == BlockRange_BLOCKTYPE_CONFIG) 
-
-struct BLOCKRANGE
+typedef struct BlockRange
 {
     unsigned int RangeType;
     unsigned int StartBlock;
     unsigned int EndBlock;
-};
+}BlockRange;
+
+#define BlockRange_GetBlockCount(block)                 (block.EndBlock - block.StartBlock + 1)
+#define BlockRange_GetBlockUsage(block)                 (block.RangeType & BlockRange_USAGE_MASK)
+#define BlockRange_IsDeployment(block)                  ((block.RangeType & BlockRange_USAGE_MASK) == BlockUsage_DEPLOYMENT) 
+#define BlockRange_IsConfig(block)                      ((block.RangeType & BlockRange_BLOCKTYPE_CONFIG) == BlockRange_BLOCKTYPE_CONFIG) 
 
 /////////////////////////////////////////////////////////
 // Description:
@@ -178,10 +178,10 @@ typedef struct BLOCKREGIONINFO BlockRegionInfo;
 struct BLOCKREGIONINFO
 {
     ByteAddress         Start;                  // Starting Sector address
-    unsigned int            NumBlocks;              // total number of blocks in this region
-    unsigned int            BytesPerBlock;          // Total number of bytes per block
+    unsigned int        NumBlocks;              // total number of blocks in this region
+    unsigned int        BytesPerBlock;          // Total number of bytes per block
 
-    unsigned int            NumBlockRanges;
+    unsigned int        NumBlockRanges;
     const BlockRange    *BlockRanges;
 };
 
@@ -220,7 +220,7 @@ typedef struct DEVICEBLOCKINFO
     unsigned int NumRegions;
 
     // pointer to an array (NumRegions long) of region information
-    const BlockRegionInfo *Regions;
+    BlockRegionInfo *Regions;
 };
 
 /////////////////////////////////////////////////////////
@@ -288,16 +288,16 @@ struct IBLOCKSTORAGEDEVICE
     // Description:
     //    Gets the information describing the device
     //
-    const DeviceBlockInfo*  (*GetDeviceInfo)(void*);
+    DeviceBlockInfo*  (*GetDeviceInfo)(void*);
     
     /////////////////////////////////////////////////////////
     // Description:
     //    Reads data from a set of sectors
     //
     // Input:
-    //    StartSector - Starting Sector for the read
-    //    NumSectors  - Number of sectors to read
-    //    pSectorBuff - pointer to buffer to read the data into.
+    //    startAddress - Starting Sector for the read
+    //    numBytes  - Number of bytes to read
+    //    buffer - pointer to buffer to read the data into.
     //                  Must be large enough to hold all of the data
     //                  being read.
     //
@@ -318,16 +318,16 @@ struct IBLOCKSTORAGEDEVICE
     //   If the device does not support sector Metadata it should fail if the 
     //   pSectorMetadata parameter is not NULL.
     //
-    bool (*Read)(void*, ByteAddress StartSector, unsigned int NumBytes, unsigned char* pSectorBuff);
+    bool (*Read)(void*, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer);
 
     /////////////////////////////////////////////////////////
     // Description:
     //    Writes data to a set of sectors
     //
     // Input:
-    //    StartSector - Starting Sector for the write
-    //    NumSectors  - Number of sectors to write
-    //    pSectorBuff - pointer to data to write.
+    //    startAddress - Starting Sector for the write
+    //    numBytes  - Number of bytes to write
+    //    buffer - pointer to data to write.
     //                  Must be large enough to hold complete sectors
     //                  for the number of sectors being written.
     //
@@ -351,20 +351,20 @@ struct IBLOCKSTORAGEDEVICE
     //   pSectorMetadata can be set to NULL if the caller does not need the extra
     //   data. Implementations must not attempt to write data through a NULL pointer! 
     //
-    bool (*Write)(void*, ByteAddress Address, unsigned int NumBytes, unsigned char* pSectorBuf, bool ReadModifyWrite);
+    bool (*Write)(void*, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite);
 
-    bool (*Memset)(void*, ByteAddress Address, unsigned char Data, unsigned int NumBytes);
+    bool (*Memset)(void*, ByteAddress startAddress, unsigned char data, unsigned int numBytes);
 
-    //bool (*GetSectorMetadata)(void*, ByteAddress SectorStart, SectorMetadata* pSectorMetadata);
+    //bool (*GetSectorMetadata)(void*, ByteAddress startAddress, SectorMetadata* pSectorMetadata);
 
-    //bool (*SetSectorMetadata)(void*, ByteAddress SectorStart, SectorMetadata* pSectorMetadata);
+    //bool (*SetSectorMetadata)(void*, ByteAddress startAddress, SectorMetadata* pSectorMetadata);
 
     /////////////////////////////////////////////////////////
     // Description:
     //    Check a block is erased or not.
     // 
     // Input:
-    //    BlockStartAddress - Logical Sector Address
+    //    blockStartAddress - Logical Sector Address
     //
     // Returns:
     //   true if it is erassed, otherwise false
@@ -372,14 +372,14 @@ struct IBLOCKSTORAGEDEVICE
     // Remarks:
     //    Check  the block containing the sector address specified.
     //    
-    bool (*IsBlockErased)(void*, ByteAddress BlockStartAddress, unsigned int BlockLength);
+    bool (*IsBlockErased)(void*, ByteAddress blockStartAddress, unsigned int length);
 
     /////////////////////////////////////////////////////////
     // Description:
     //    Erases a block
     // 
     // Input:
-    //    Address - Logical Sector Address
+    //    address - Logical Sector Address
     //
     // Returns:
     //   true if succesful; false if not
@@ -387,7 +387,7 @@ struct IBLOCKSTORAGEDEVICE
     // Remarks:
     //    Erases the block containing the sector address specified.
     //    
-    bool (*EraseBlock)(void*, ByteAddress Address);
+    bool (*EraseBlock)(void*, ByteAddress address);
     
     /////////////////////////////////////////////////////////
     // Description:
@@ -401,11 +401,7 @@ struct IBLOCKSTORAGEDEVICE
     //   shutting down the hardware when the system is 
     //   going into low power states.
     //
-    void (*SetPowerState)(void*, unsigned int State);
-
-    unsigned int (*MaxSectorWrite_uSec)(void*);
-
-    unsigned int (*MaxBlockErase_uSec)(void*);
+    void (*SetPowerState)(void*, unsigned int state);
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -420,12 +416,12 @@ __nfweak BlockStorageDevice* BlockStorageDevice_Prev(BlockStorageDevice* device)
 __nfweak bool BlockStorageDevice_InitializeDevice(BlockStorageDevice* device);
 __nfweak bool BlockStorageDevice_UninitializeDevice(BlockStorageDevice* device);
 __nfweak DeviceBlockInfo* BlockStorageDevice_GetDeviceInfo(BlockStorageDevice* device);
-__nfweak bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int address, unsigned int numBytes, unsigned char* pSectorBuff);
-__nfweak bool BlockStorageDevice_Write(BlockStorageDevice* device, unsigned int address, unsigned int numBytes, unsigned char* pSectorBuf, bool readModifyWrite);
-__nfweak bool BlockStorageDevice_Memset(BlockStorageDevice* device, unsigned int address, unsigned char data, unsigned int NumBytes);
+__nfweak bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int startAddress, unsigned int numBytes, unsigned char* buffer);
+__nfweak bool BlockStorageDevice_Write(BlockStorageDevice* device, unsigned int startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite);
+__nfweak bool BlockStorageDevice_Memset(BlockStorageDevice* device, unsigned int startAddress, unsigned char buffer, unsigned int numBytes);
 //__nfweak bool BlockStorageDevice_GetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart, SectorMetadata* pSectorMetadata);
 //__nfweak bool BlockStorageDevice_SetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart, SectorMetadata* pSectorMetadata);
-__nfweak bool BlockStorageDevice_IsBlockErased(BlockStorageDevice* device, unsigned int blockStartAddress, unsigned int blockLength);
+__nfweak bool BlockStorageDevice_IsBlockErased(BlockStorageDevice* device, unsigned int blockStartAddress, unsigned int length);
 __nfweak bool BlockStorageDevice_EraseBlock(BlockStorageDevice* device, unsigned int address);
 __nfweak void BlockStorageDevice_SetPowerState(BlockStorageDevice* device, unsigned int state);
 __nfweak bool BlockStorageDevice_FindRegionFromAddress(BlockStorageDevice* device, unsigned int address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex);
@@ -516,7 +512,7 @@ struct BLOCKSTORAGESTREAM
 ///////////////////////////////////////////////////
 // BlockStorageList declarations 
 
-//typedef struct BLOCKSTORAGELIST BlockStorageList;
+typedef struct BLOCKSTORAGELIST BlockStorageList;
 
 #ifdef __cplusplus
 extern "C" {
@@ -545,16 +541,16 @@ __nfweak BlockStorageDevice* BlockStorageList_GetFirstDevice();
 }
 #endif
 
-// struct BLOCKSTORAGELIST
-// {
-//     pointer to the BlockStorageDevice which is the primary device with CONFIG block
-//     BlockStorageDevice* PrimaryDevice;
+struct BLOCKSTORAGELIST
+{
+    //pointer to the BlockStorageDevice which is the primary device with CONFIG block
+    BlockStorageDevice* PrimaryDevice;
     
-//     global pointer of all the storage devices
-//     HAL_DblLinkedList_BSD DeviceList; 
+    // global pointer of all the storage devices
+    // HAL_DblLinkedList_BSD DeviceList; 
 
-//     bool Initialized;
-// };
+    // bool Initialized;
+};
 
 //////////////////////////////////////////////////////////
 // TODO: evaluate if these typedefs bellow should go away 
@@ -588,7 +584,7 @@ typedef struct GPIO_FLAG
 typedef struct BLOCK_CONFIG
 {
     GPIO_FLAG               WriteProtectionPin;
-    const DeviceBlockInfo*  BlockDeviceInformation;
+    DeviceBlockInfo*        BlockDeviceInformation;
 
 }BLOCK_CONFIG;
 
@@ -601,5 +597,10 @@ typedef struct MEMORY_MAPPED_NOR_BLOCK_CONFIG
     unsigned int            DeviceCode;
 
 }MEMORY_MAPPED_NOR_BLOCK_CONFIG;
+
+
+//////////////////////////////////////////////////////////
+// function to included in all target devices to be added
+void BlockStorage_AddDevices();
 
 #endif // _NANOPAL_BLOCKSTORAGE_H_

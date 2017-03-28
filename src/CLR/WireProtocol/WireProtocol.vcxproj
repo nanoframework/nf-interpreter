@@ -19,7 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WireProtocol.cpp" />
+    <ClCompile Include="WireProtocol_App_Interface.c" />
+    <ClCompile Include="WireProtocol_HAL_Interface.c" />
+    <ClCompile Include="WireProtocol_Message.c" />
+    <ClCompile Include="WireProtocol_MonitorCommands.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2337C4A4-3AB4-4014-9C29-9EBE32F4510E}</ProjectGuid>

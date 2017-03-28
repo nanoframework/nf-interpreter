@@ -91,7 +91,7 @@ struct CLR_Messaging
 
     static const CLR_UINT32 c_MaxCacheSize = 5 * 1024;
     
-    WP_Controller        m_controller;
+    //WP_Controller        m_controller;
 
     CLR_RT_DblLinkedList m_cacheSubordinate;
     CLR_RT_DblLinkedList m_cacheMaster;
@@ -108,14 +108,14 @@ struct CLR_Messaging
 
     static HRESULT DeleteInstance();
 
-    void ProcessCommands();
+    //void ProcessCommands();
     void PurgeCache     ();
 
     bool        SendEvent     ( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags );
     static void BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags );
 
-    void ReplyToCommand( WP_Message* msg, bool fSuccess, bool fCritical, void* ptr, int size );
-    void ReplyToCommand( WP_Message* msg, bool fSuccess, bool fCritical                      );
+
+
 
     static bool Phy_ReceiveBytes   ( void* state, unsigned char*& ptr, unsigned int & size );
     static bool Phy_TransmitMessage( void* state, const WP_Message* msg      );
@@ -135,7 +135,7 @@ private:
     bool AllocateAndQueueMessage( CLR_UINT32 cmd, unsigned int length, unsigned char* data, CLR_RT_HeapBlock_EndPoint::Port port, CLR_RT_HeapBlock_EndPoint::Address addr, CLR_UINT32 found );
 
     bool ProcessHeader ( WP_Message* msg );
-    bool ProcessPayload( WP_Message* msg );
+
 
 
     void PurgeCache( CLR_RT_DblLinkedList& lst, CLR_INT64 oldest );
@@ -143,6 +143,7 @@ private:
     bool TransmitMessage( const WP_Message* msg, bool fQueue );
 
 public:  
+    bool ProcessPayload( WP_Message* msg );
     static bool Messaging_Query               ( WP_Message* msg );
     static bool Messaging_Query__Reply        ( WP_Message* msg );
     static bool Messaging_Send                ( WP_Message* msg );

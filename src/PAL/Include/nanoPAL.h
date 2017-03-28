@@ -134,18 +134,18 @@ struct HAL_COMPLETION : public HAL_CONTINUATION
 //#include <BatteryCharger_decl.h>
 //#include <BatteryMeasurement_decl.h>
 
-//#include <COM_decl.h>
-__nfweak bool DebuggerPort_Initialize(COM_HANDLE ComPortNum);
-__nfweak bool DebuggerPort_Uninitialize(COM_HANDLE ComPortNum);
+#include <nanoPAL_COM.h>
+// 
 
-// max retries is the number of retries if the first attempt fails, thus the maximum
-// total number of attempts is maxRretries + 1 since it always tries at least once.
-__nfweak int  DebuggerPort_Write(COM_HANDLE ComPortNum, const char* Data, size_t size, int maxRetries = 99);
-__nfweak int  DebuggerPort_Read(COM_HANDLE ComPortNum, char* Data, size_t size);
-__nfweak bool DebuggerPort_Flush(COM_HANDLE ComPortNum);
-__nfweak bool DebuggerPort_IsSslSupported(COM_HANDLE ComPortNum);
-__nfweak bool DebuggerPort_UpgradeToSsl(COM_HANDLE ComPortNum, unsigned int flags);
-__nfweak bool DebuggerPort_IsUsingSsl(COM_HANDLE ComPortNum);
+
+
+
+
+
+
+
+
+
 
 //
 //#include <Display_decl.h>

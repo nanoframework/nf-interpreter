@@ -34,25 +34,25 @@ struct CLR_DBG_Commands
 
     //--//
 
-    struct Monitor_Ping
-    {
-        static const unsigned int c_Ping_Source_CLR        = 0x00000000;
-        static const unsigned int c_Ping_Source_Booter     = 0x00000001;
-        static const unsigned int c_Ping_Source_Host       = 0x00000002;
 
-        static const unsigned int c_Ping_DbgFlag_Stop      = 0x00000001;
-        static const unsigned int c_Ping_DbgFlag_BigEndian = 0x02000002;
-        static const unsigned int c_Ping_DbgFlag_AppExit   = 0x00000004;
 
-        unsigned int m_source;
-        unsigned int m_dbg_flags;
 
-        struct Reply
-        {
-            unsigned int m_source;
-            unsigned int m_dbg_flags;
-        };
-    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     struct Monitor_OemInfo
     {
@@ -119,20 +119,20 @@ struct CLR_DBG_Commands
         unsigned int m_address;
     };
 
-    struct Monitor_MemoryMap
-    {
-        static const unsigned int c_RAM   = 0x00000001;
-        static const unsigned int c_FLASH = 0x00000002;
 
-        struct Range
-        {
-            unsigned int m_address;
-            unsigned int m_length;
-            unsigned int m_flags;
-        };
 
-        Range m_map[ 1 ];
-    };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     struct Monitor_DeploymentMap
@@ -1005,21 +1005,20 @@ struct CLR_DBG_Debugger
 
     //--//
 
-    __nfweak static void Debugger_Discovery();
-    __nfweak static void Debugger_WaitForCommands();
+    static void Debugger_Discovery();
+    static void Debugger_WaitForCommands();
 
-    __nfweak static HRESULT CreateInstance();
+    static HRESULT CreateInstance();
 
     HRESULT Debugger_Initialize( COM_HANDLE port );
 
-    __nfweak static HRESULT DeleteInstance();
+    static HRESULT DeleteInstance();
 
     void Debugger_Cleanup();
 
-    __nfweak static void BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags );
+    static void BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags );
 
-    __nfweak void ProcessCommands();
-    __nfweak void PurgeCache     ();
+    void PurgeCache     ();
 
 private:
 

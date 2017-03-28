@@ -3,9 +3,14 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <WireProtocol_v2.h>
+#include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
+
+
+// declaration for wrapper function
+extern bool CLR_Messaging_ProcessPayload(WP_Message* msg);
+
 
 // Initialize to a packet sequence number impossible to encounter
 static uint32_t lastPacketSequence = 0x00FEFFFF;
@@ -63,53 +68,5 @@ bool WP_App_ProcessHeader(WP_Message* message)
 
 bool WP_App_ProcessPayload(WP_Message* message)
 {
-    // Prevent processing duplicate packets
-    if(message->m_header.m_seq == lastPacketSequence)
-    {    
-        return false;       // Do not even respond to a repeat packet
-    }
-
-    // save this packet sequence number
-    lastPacketSequence = message->m_header.m_seq;
-
-    if(message->m_header.m_flags & WP_Flags_c_NACK)
-    {
-        //
-        // Bad packet...
-        //
-        return true;
-    }
-
-    size_t  num;
-    const CommandHandlerLookup* cmd;
-
-    if(message->m_header.m_flags & WP_Flags_c_Reply)
-    {
-        num = ARRAYSIZE(c_Lookup_Reply);
-        cmd =           c_Lookup_Reply;
-    }
-    else
-    {
-        num = ARRAYSIZE(c_Lookup_Request);
-        cmd =           c_Lookup_Request;
-    }
-
-    while(num--)
-    {
-        if(cmd->command == message->m_header.m_cmd)
-        {
-            // execute command handler and save the result
-            bool commandHandlerExecuteResult = ((bool* (*)(WP_Message*))cmd->handler)(message);
-
-            WP_ReplyToCommand(message, commandHandlerExecuteResult, false, NULL, 0);
-            return true;
-        }
-
-        cmd++;
-    }
-
-    WP_ReplyToCommand(message, false, false, NULL, 0);
-
-    return true;    
+    return CLR_Messaging_ProcessPayload(message);
 }
-

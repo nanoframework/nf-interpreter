@@ -96,6 +96,9 @@ set(NF_CoreCLR_SRCS
     # PAL
     nanoPAL_BlockStorage.c
 
+    # PAL stubs
+    COM_stubs.c
+
 )
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
@@ -131,6 +134,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             # PAL
             ${PROJECT_SOURCE_DIR}/src/PAL
             ${PROJECT_SOURCE_DIR}/src/PAL/BlockStorage
+
+            # PAL stubs
+            ${PROJECT_SOURCE_DIR}/src/PAL/COM
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

@@ -7,7 +7,7 @@
 #include <cmsis_os.h>
 
 #include <nanoCLR_Application.h>
-
+#include <nanoPAL_BlockStorage.h>
 
 // This thread needs to be implemented at ChibiOS level because it has to include a call to chThdShouldTerminateX()
 // in case the thread is requested to terminate by the CMSIS call osThreadTerminate()
@@ -16,6 +16,7 @@ void CLRStartupThread(void const * argument)
 {
   (void)argument;
 
+  BlockStorage_AddDevices();
 
   CLR_SETTINGS clrSettings;
 
@@ -34,4 +35,3 @@ void CLRStartupThread(void const * argument)
 
   // nothing to deinitialize or cleanup, so it's safe to return
 }
-
