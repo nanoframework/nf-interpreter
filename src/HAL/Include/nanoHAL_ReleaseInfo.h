@@ -56,7 +56,7 @@ struct HalSystemInfo
 
 //--//
 
-// GetHalSystemInfo() is defined in DeviceCode\pal\configuration\, and is provided
+// GetHalSystemInfo() is defined in \src\HAL\nanoHAL_SystemInformation.cpp and is provided
 // to allow convenient access to configuration and build information to the debugging
 // system and to managed code.
 bool GetHalSystemInfo(HalSystemInfo& systemInfo);
