@@ -1050,16 +1050,15 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
             break;
 
         case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_HalSystemInfo:
-            // UNDONE: FIXME 
-            // if(GetHalSystemInfo( reply.u_HalSystemInfo ) == true)
-            // {
-            //     data = (CLR_UINT8*)&reply.u_HalSystemInfo;
-            //     size = sizeof(reply.u_HalSystemInfo);
-            // }
-            // else
-            // {
-            //     fSuccess = false;
-            // }
+            if(GetHalSystemInfo( reply.u_HalSystemInfo ) == true)
+            {
+                data = (CLR_UINT8*)&reply.u_HalSystemInfo;
+                size = sizeof(reply.u_HalSystemInfo);
+            }
+            else
+            {
+                fSuccess = false;
+            }
             break;
 
         case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_ClrInfo:
