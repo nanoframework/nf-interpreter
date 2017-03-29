@@ -283,7 +283,7 @@ struct CLR_DBG_Commands
 
         struct SoftwareVersion
         {
-            char m_buildDate[ 20 ];
+            char m_buildDate[ 22 ];
             unsigned int m_compilerVersion;
         };
 
