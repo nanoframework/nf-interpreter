@@ -16,4 +16,7 @@
 #define VERSION_BUILD @nanoFramework_VERSION_PATCH@U
 #define VERSION_REVISION @nanoFramework_VERSION_TWEAK@U
 
+// build timestamp
+#define __DATE__   "@BUILD_TIMESTAMP@"
+
 #endif /* _TARGET_OS_H_ */
