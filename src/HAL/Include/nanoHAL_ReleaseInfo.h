@@ -59,7 +59,7 @@ struct HalSystemInfo
 // GetHalSystemInfo() is defined in DeviceCode\pal\configuration\, and is provided
 // to allow convenient access to configuration and build information to the debugging
 // system and to managed code.
-unsigned int GetHalSystemInfo(HalSystemInfo& systemInfo);
+bool GetHalSystemInfo(HalSystemInfo& systemInfo);
 
 // Solution-specific function; see nanoBooterEntry.cpp in your solution's nanoBooter directory for implementation.
 unsigned int nanoBooter_GetReleaseInfo(MfReleaseInfo& releaseInfo);
