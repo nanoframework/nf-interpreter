@@ -40,7 +40,7 @@ To illustrate this we are going to look into the linker script for the ST_NUCLEO
 The `flash` region configuration depends on two factors: the space reserved for nanoBooter image and the space reserved for application deployment.
 In the example it can be seen that nanoCLR image will start at address 0x08004000 and has a maximum size of 256k - 16k - 100k. That's the size reserved for nanoBooter and the size reserved for the application deployment.
 
-On this particular example (because this SoC requires that the vector table is copied to RAM) the `ram0` region needs to be tweaked so it starts after the space reserved for the vector table. The end result is `ram0` starts at 0x200000C0 with a length of 32k - 0xC0.
+On this particular example (because this SoC requires that the vector table is copied to RAM) the `ram0` region needs to be tweaked so it starts after the space reserved for the vector table. The end result is `ram0` starting at 0x200000C0 with a length of 32k - 0xC0.
 
 
 ### Tips
@@ -48,6 +48,6 @@ On this particular example (because this SoC requires that the vector table is c
 - When designing the address map make sure that the address region boundaries **match the FLASH memory blocks**. This is very important in order to be able to perform image updates. This is valid for nanoBooter, nanoCLR and application deployment.
 
 - The link script accepts several number format. Use the one that is convenient for what you are specifying. 
-Follow some examples. For an absolute address (such as the start of a FLASH block) use the hexadecimal notation like in 0x08000000. When specifying the size of a region use the _K_ and _M_ suffixes, like 16K for a block with 16k Bytes (4096 bytes), or 1M. This makes it much easier to copy/paste from the device data sheet.
+Follow some examples. For an absolute address (such as the start of a FLASH block) use the hexadecimal notation like in 0x08000000. When specifying the size of a region use the _k_ and _M_ suffixes, like 16k for a block with 16k Bytes (4096 bytes), or 1M. This makes it much easier to copy/paste from the device data sheet.
 
 - It's OK to use mathematical expressions. For example, when setting the available space for the nanoCLR image don't bother with doing the math, just put there 1M - 16k.
