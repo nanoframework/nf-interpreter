@@ -45,6 +45,7 @@ osThreadDef(BlinkerThread, osPriorityNormal, 128);
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityNormal, 1024);
 
+// declare CLRStartup thread here
 osThreadDef(CLRStartupThread, osPriorityNormal, 1024);
 
 //  Application entry point.
