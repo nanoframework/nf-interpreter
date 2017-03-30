@@ -78,7 +78,7 @@
 //    return FALSE;
 //}
 
-unsigned int /* ie, bool */ GetHalSystemInfo(HalSystemInfo& systemInfo)
+bool GetHalSystemInfo(HalSystemInfo& systemInfo)
 {
     return FALSE;
 }

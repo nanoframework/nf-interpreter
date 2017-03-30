@@ -1033,33 +1033,32 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
 
         case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityVersion:
 #if defined(__GNUC__)
-            reply.u_SoftwareVersion.m_compilerVersion = __GNUC__;
-#elif defined(__ARMCC_VERSION)
-            reply.u_SoftwareVersion.m_compilerVersion = __ARMCC_VERSION;
+			// this is returning the GNU GCC compiler version in coded format: MAJOR x 10000 + MINOR x 100 + PATCH
+            // example: v6.3.1 shows as 6 x 10000 + 3 x 100 + 1 = 60301
+            reply.u_SoftwareVersion.m_compilerVersion = (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__);
 #else
-            reply.u_SoftwareVersion.m_compilerVersion = -1;
+			reply.u_SoftwareVersion.m_compilerVersion = -1;
 #endif
 
 #if defined(__DATE__)
             hal_strncpy_s( reply.u_SoftwareVersion.m_buildDate, sizeof(reply.u_SoftwareVersion.m_buildDate), __DATE__,  hal_strlen_s(__DATE__) );
 #else
-            hal_strncpy_s( reply.u_SoftwareVersion.m_buildDate, sizeof(reply.u_SoftwareVersion.m_buildDate), "UNKNOWN",  hal_strlen_s("UNKNOWN") );
+#error "__DATE__ with build timestamp needs to be  defined"
 #endif
             data = (CLR_UINT8*)&reply.u_SoftwareVersion;
             size = sizeof(reply.u_SoftwareVersion);
             break;
 
         case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_HalSystemInfo:
-            // UNDONE: FIXME 
-            // if(GetHalSystemInfo( reply.u_HalSystemInfo ) == true)
-            // {
-            //     data = (CLR_UINT8*)&reply.u_HalSystemInfo;
-            //     size = sizeof(reply.u_HalSystemInfo);
-            // }
-            // else
-            // {
-            //     fSuccess = false;
-            // }
+            if(GetHalSystemInfo( reply.u_HalSystemInfo ) == true)
+            {
+                data = (CLR_UINT8*)&reply.u_HalSystemInfo;
+                size = sizeof(reply.u_HalSystemInfo);
+            }
+            else
+            {
+                fSuccess = false;
+            }
             break;
 
         case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_ClrInfo:

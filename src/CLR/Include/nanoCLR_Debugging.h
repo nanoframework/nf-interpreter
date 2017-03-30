@@ -8,6 +8,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <nanoPackStruct.h>
 #include <nanoCLR_Types.h>
 #include <nanoCLR_Messaging.h>
 
@@ -281,13 +282,13 @@ struct CLR_DBG_Commands
             CLR_UINT32 m_bpp;
         };
 
-        struct SoftwareVersion
+        struct __nfpack SoftwareVersion
         {
             char m_buildDate[ 22 ];
             unsigned int m_compilerVersion;
         };
 
-        struct ClrInfo
+        struct __nfpack ClrInfo
         {
             MfReleaseInfo m_clrReleaseInfo;
             MFVersion     m_TargetFrameworkVersion;
