@@ -1062,7 +1062,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
             break;
 
         case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_ClrInfo:
-            // UNDONE: FIXME GetClrReleaseInfo(reply.u_ClrInfo);
+            GetClrReleaseInfo(reply.u_ClrInfo);
             data = (CLR_UINT8*)&reply.u_ClrInfo;
             size = sizeof(reply.u_ClrInfo);
             break;
