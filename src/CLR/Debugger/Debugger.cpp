@@ -937,32 +937,32 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions( WP_Message* msg)
 
 static void GetClrReleaseInfo(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::ClrInfo& clrInfo)
 {
-    MfReleaseInfo::Init( clrInfo.m_clrReleaseInfo, VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION, OEMSYSTEMINFOSTRING, hal_strlen_s(OEMSYSTEMINFOSTRING) );
+    NFReleaseInfo::Init( clrInfo.m_clrReleaseInfo, VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION, OEMSYSTEMINFOSTRING, hal_strlen_s(OEMSYSTEMINFOSTRING) );
 
     if ( g_CLR_RT_TypeSystem.m_assemblyMscorlib &&
          g_CLR_RT_TypeSystem.m_assemblyMscorlib->m_header)
     {
         const CLR_RECORD_VERSION* mscorlibVer = & (g_CLR_RT_TypeSystem.m_assemblyMscorlib->m_header->version);
-        MFVersion::Init(  clrInfo.m_TargetFrameworkVersion,
+        NFVersion::Init(  clrInfo.m_TargetFrameworkVersion,
                         mscorlibVer->iMajorVersion, mscorlibVer->iMinorVersion,
                         mscorlibVer->iBuildNumber, mscorlibVer->iRevisionNumber
                         );
     }
     else
     {
-        MFVersion::Init( clrInfo.m_TargetFrameworkVersion, 0, 0, 0, 0 );
+        NFVersion::Init( clrInfo.m_TargetFrameworkVersion, 0, 0, 0, 0 );
     }
 }
 
 
-void MfReleaseInfo::Init(MfReleaseInfo& mfReleaseInfo, unsigned short int major, unsigned short int minor, unsigned short int build, unsigned short int revision, const char *info, size_t infoLen)
+void NFReleaseInfo::Init(NFReleaseInfo& NFReleaseInfo, unsigned short int major, unsigned short int minor, unsigned short int build, unsigned short int revision, const char *info, size_t infoLen)
 {
-    MFVersion::Init( mfReleaseInfo.version, major, minor, build, revision );
-    mfReleaseInfo.infoString[ 0 ] = 0;
+    NFVersion::Init( NFReleaseInfo.version, major, minor, build, revision );
+    NFReleaseInfo.infoString[ 0 ] = 0;
     if ( NULL != info && infoLen > 0 )
     {
-        const size_t len = MIN(infoLen, sizeof(mfReleaseInfo.infoString)-1);
-        hal_strncpy_s( (char*)&mfReleaseInfo.infoString[ 0 ], sizeof(mfReleaseInfo.infoString), info, len );
+        const size_t len = MIN(infoLen, sizeof(NFReleaseInfo.infoString)-1);
+        hal_strncpy_s( (char*)&NFReleaseInfo.infoString[ 0 ], sizeof(NFReleaseInfo.infoString), info, len );
     }
 }
 
@@ -1067,14 +1067,13 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
             size = sizeof(reply.u_ClrInfo);
             break;
 
-        case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_SolutionReleaseInfo:
-            // UNDONE: FIXME           
-            // if(Solution_GetReleaseInfo(reply.u_SolutionReleaseInfo) == true)
-            // {
-            //     data = (CLR_UINT8*)&reply.u_SolutionReleaseInfo;
-            //     size = sizeof(reply.u_SolutionReleaseInfo);
-            // }
-            // else
+        case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_TargetReleaseInfo:
+            if(Target_GetReleaseInfo(reply.u_TargetReleaseInfo) == true)
+            {
+                data = (CLR_UINT8*)&reply.u_TargetReleaseInfo;
+                size = sizeof(reply.u_TargetReleaseInfo);
+            }
+            else
             {
                 fSuccess = false;
             }

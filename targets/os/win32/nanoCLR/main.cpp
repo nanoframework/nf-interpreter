@@ -53,9 +53,9 @@
 
 
 // All solutions are expected to provide an implementation of this
-unsigned int Solution_GetReleaseInfo(MfReleaseInfo& releaseInfo)
+bool Target_GetReleaseInfo(NFReleaseInfo& releaseInfo)
 {
-    MfReleaseInfo::Init(releaseInfo,
+    NFReleaseInfo::Init(releaseInfo,
                         VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION,
                         OEMSYSTEMINFOSTRING, hal_strlen_s(OEMSYSTEMINFOSTRING)
                         );
