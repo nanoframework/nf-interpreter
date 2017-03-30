@@ -59,7 +59,7 @@ struct CLR_DBG_Commands
     {
         struct Reply
         {
-            MfReleaseInfo   m_releaseInfo;
+            NFReleaseInfo   m_releaseInfo;
         };
     };
 
@@ -260,7 +260,7 @@ struct CLR_DBG_Commands
         static const CLR_UINT32 c_CapabilityVersion           = 3;
         static const CLR_UINT32 c_HalSystemInfo               = 5;
         static const CLR_UINT32 c_ClrInfo                     = 6;
-        static const CLR_UINT32 c_SolutionReleaseInfo         = 7;
+        static const CLR_UINT32 c_TargetReleaseInfo           = 7;
 
         static const CLR_UINT32 c_CapabilityFlags_FloatingPoint         = 0x00000001;
         static const CLR_UINT32 c_CapabilityFlags_SourceLevelDebugging  = 0x00000002;
@@ -290,8 +290,8 @@ struct CLR_DBG_Commands
 
         struct __nfpack ClrInfo
         {
-            MfReleaseInfo m_clrReleaseInfo;
-            MFVersion     m_TargetFrameworkVersion;
+            NFReleaseInfo m_clrReleaseInfo;
+            NFVersion     m_TargetFrameworkVersion;
         };
         
         union ReplyUnion
@@ -301,7 +301,7 @@ struct CLR_DBG_Commands
             SoftwareVersion     u_SoftwareVersion;
             HalSystemInfo       u_HalSystemInfo;
             ClrInfo             u_ClrInfo;
-            MfReleaseInfo       u_SolutionReleaseInfo;
+            NFReleaseInfo       u_TargetReleaseInfo;
         };        
     };    
 

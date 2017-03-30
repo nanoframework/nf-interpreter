@@ -43,13 +43,13 @@ __nfweak void CLR_DBG_Debugger::BroadcastEvent( unsigned int cmd, unsigned int p
     NATIVE_PROFILE_CLR_DEBUGGER();
 }
 
-__nfweak void MfReleaseInfo::Init( MfReleaseInfo& mfReleaseInfo, unsigned short int major, unsigned short int minor, unsigned short int build, unsigned short int revision, const char *info, size_t infoLen )
+__nfweak void NFReleaseInfo::Init( NFReleaseInfo& NFReleaseInfo, unsigned short int major, unsigned short int minor, unsigned short int build, unsigned short int revision, const char *info, size_t infoLen )
 {
-    MFVersion::Init( mfReleaseInfo.version, major, minor, build, revision );
-    mfReleaseInfo.infoString[ 0 ] = 0;
+    NFVersion::Init( NFReleaseInfo.version, major, minor, build, revision );
+    NFReleaseInfo.infoString[ 0 ] = 0;
     if ( NULL != info && infoLen > 0 )
     {
-        const size_t len = MIN(infoLen, sizeof(mfReleaseInfo.infoString)-1);
-        hal_strncpy_s( (char*)&mfReleaseInfo.infoString[0], sizeof(mfReleaseInfo.infoString), info, len );
+        const size_t len = MIN(infoLen, sizeof(NFReleaseInfo.infoString)-1);
+        hal_strncpy_s( (char*)&NFReleaseInfo.infoString[0], sizeof(NFReleaseInfo.infoString), info, len );
     }
 }

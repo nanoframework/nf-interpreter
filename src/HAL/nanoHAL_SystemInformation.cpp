@@ -14,7 +14,7 @@ bool GetHalSystemInfo(HalSystemInfo& systemInfo)
     return FALSE;
 #else
 
-    // MfReleaseInfo:
+    // NFReleaseInfo:
     systemInfo.m_releaseInfo.version.usMajor       = VERSION_MAJOR;
     systemInfo.m_releaseInfo.version.usMinor       = VERSION_MINOR;
     systemInfo.m_releaseInfo.version.usBuild       = VERSION_BUILD;
@@ -33,4 +33,13 @@ bool GetHalSystemInfo(HalSystemInfo& systemInfo)
 
     return TRUE;
 #endif
+}
+
+bool Target_GetReleaseInfo(NFReleaseInfo& releaseInfo)
+{
+    NFReleaseInfo::Init(releaseInfo,
+                        VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION,
+                        OEMSYSTEMINFOSTRING, hal_strlen_s(OEMSYSTEMINFOSTRING)
+                        );
+    return TRUE; // alternatively, return false if you didn't initialize the releaseInfo structure.
 }
