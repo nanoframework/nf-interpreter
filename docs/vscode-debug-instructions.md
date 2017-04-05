@@ -19,7 +19,7 @@ You'll need:
 - OpenOCD (any working distribution will work, follow some suggestions)
     - [Freddie Chopin OpenOCD (development)](http://www.freddiechopin.info/en/download/category/10-openocd-dev)
     - [OpenOCD – Open On-Chip Debugger](https://sourceforge.net/projects/openocd/)
-    - [GNU ARM Eclipse OpenOCD](https://github.com/gnuarmeclipse/openocds)
+    - [GNU ARM Eclipse OpenOCD](https://github.com/gnuarmeclipse/openocd)
 
 
 # Preparation
