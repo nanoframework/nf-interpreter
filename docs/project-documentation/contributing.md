@@ -120,3 +120,7 @@ The following rules must be followed for PRs that include files from another pro
 There are many good algorithms implemented in other languages that would benefit the **nanoFramework** project. The rules for porting a Java file to C# , for example, are the same as would be used for copying the same file, as described above.
 
 [Clean-room](https://en.wikipedia.org/wiki/Clean_room_design) implementations of existing algorithms that are not permissively licensed will generally not be accepted. If you want to create or nominate such an implementation, please create an issue to discuss the idea.
+
+### Contributor License Agreement
+
+You must sign [nanoFramework Contribution License Agreement](../cla.md) (CLA) before your PR will be merged. This is a one-time requirement for projects under the nanoFramework organization. You can read more about Contribution License Agreements (CLA) on [Wikipedia](https://en.wikipedia.org/wiki/Contributor_License_Agreement).
