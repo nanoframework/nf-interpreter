@@ -6,7 +6,7 @@
 #ifndef _NANOCLR_PARSEOPTIONS_H_
 #define _NANOCLR_PARSEOPTIONS_H_
 
-//#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Runtime.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -134,4 +134,3 @@ struct CLR_RT_ParseOptions
 #endif
 
 #endif // _NANOCLR_PARSEOPTIONS_H_
-
