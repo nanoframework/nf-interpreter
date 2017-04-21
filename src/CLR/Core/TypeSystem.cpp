@@ -1370,10 +1370,8 @@ CLR_UINT32 CLR_RECORD_ASSEMBLY::ComputeAssemblyHash( const char* name, const CLR
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT32 assemblyHASH;
 
-    // UNDONE: FIXME
-    // assemblyHASH = SUPPORT_ComputeCRC( name, (int)hal_strlen_s( name ), 0            );
-    // UNDONE: FIXME
-    // assemblyHASH = SUPPORT_ComputeCRC( &ver,            sizeof( ver  ), assemblyHASH );
+    assemblyHASH = SUPPORT_ComputeCRC( name, (int)hal_strlen_s( name ), 0            );
+    assemblyHASH = SUPPORT_ComputeCRC( &ver,            sizeof( ver  ), assemblyHASH );
 
     return assemblyHASH;
 }
