@@ -1324,7 +1324,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( const CLR_RT_HeapBloc
 //
 // Keep these strings less than 8-character long!! They are stuffed into an 8-byte structure.
 //
-static const char c_MARKER_ASSEMBLY_V1[] = "MSSpot1";
+static const char c_MARKER_ASSEMBLY_V1[] = "NFMRK1";
 
 bool CLR_RECORD_ASSEMBLY::GoodHeader() const
 {
