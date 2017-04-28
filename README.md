@@ -2,7 +2,7 @@
 
 
 [![Build Status](https://travis-ci.org/nanoframework/nf-interpreter.svg?branch=master)](https://travis-ci.org/nanoframework/nf-interpreter)
-[![Join the chat at https://nanoframework.slack.com/](https://img.shields.io/badge/join%20us-on%20slack-orange.svg)](https://nanoframework.slack.com/)
+[![Join the chat at https://nanoframework.slack.com/](https://img.shields.io/badge/join%20us-on%20slack-orange.svg)](https://nanoframework.wordpress.com/slack-invite-form/)
 
 
 Welcome to the nanoFramework Interpreter repository!
