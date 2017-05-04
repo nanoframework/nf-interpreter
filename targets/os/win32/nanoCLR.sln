@@ -56,6 +56,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Serialization_stub", "..\..
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NF.TestApplication", "netnf\TestApplication\NF.TestApplication.csproj", "{247F9798-E240-4D5B-956D-35E5EAD21CE2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A5089650-2C81-4C04-ABA9-AABCEBDA3AA4}"
+	ProjectSection(SolutionItems) = preProject
+		packages.config = packages.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
