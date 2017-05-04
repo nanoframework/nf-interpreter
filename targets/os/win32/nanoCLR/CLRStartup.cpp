@@ -129,7 +129,11 @@ struct Settings
         CLR_RT_StringVector vec;
 
         vec.push_back(L"-load");
-        vec.push_back(L"..\\netmf\\MFConsoleApplication\\bin\\Release\\le\\MFConsoleApplication.pe");
+#if defined DEBUG
+		vec.push_back(L"..\\netnf\\TestApplication\\bin\\Debug\\TestApplication.pe");
+#else
+		vec.push_back(L"..\\netnf\\TestApplication\\bin\\Release\\TestApplication.pe");
+#endif
 
         vec.push_back(L"-load");
         vec.push_back(L"C:\\Program Files (x86)\\Microsoft .NET Micro Framework\\v4.4\\Assemblies\\le\\mscorlib.pe");
