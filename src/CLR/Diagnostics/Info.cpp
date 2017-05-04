@@ -244,6 +244,10 @@ int CLR_Debug::PrintfV( const char *format, va_list arg )
 
     Emit( buffer, (int)iBuffer );
 
+#if defined WIN32
+	OutputDebugStringA(buffer);
+#endif
+
     return (int)iBuffer;
 }
 
