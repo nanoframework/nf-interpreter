@@ -135,11 +135,15 @@ struct Settings
 		vec.push_back(L"..\\netnf\\TestApplication\\bin\\Release\\TestApplication.pe");
 #endif
 
-        vec.push_back(L"-load");
-        vec.push_back(L"C:\\Program Files (x86)\\Microsoft .NET Micro Framework\\v4.4\\Assemblies\\le\\mscorlib.pe");
+		// grab mscorlib.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
+		// ************************************************************************* //
+		// just need to update the path on the package folder as the version changes //
+		// ************************************************************************* //
+		vec.push_back(L"-load");
+        vec.push_back(L"..\\packages\\nanoFramework.CoreLibrary.1.0.0-preview011\\build\\mscorlib.pe");
 
-        vec.push_back(L"-load");
-        vec.push_back(L"C:\\Program Files (x86)\\Microsoft .NET Micro Framework\\v4.4\\Assemblies\\le\\Microsoft.SPOT.Native.pe");
+        //vec.push_back(L"-load");
+        //vec.push_back(L"C:\\Program Files (x86)\\Microsoft .NET Micro Framework\\v4.4\\Assemblies\\le\\Microsoft.SPOT.Native.pe");
 
         //wchar_t* pContext = NULL;
         //wchar_t* pch = wcstok_s(emulatorArgs, L" ", &pContext); // UNDONE: FIXME: wcstok_s(this->m_clrOptions.EmulatorArgs, L" ", &pContext);
