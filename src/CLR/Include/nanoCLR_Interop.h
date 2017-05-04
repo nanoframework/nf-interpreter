@@ -35,16 +35,23 @@ __nfweak extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char*
 #endif
 
 
-#define NANOCLR_HEADER()               HRESULT hr
-#define NANOCLR_CHECK_HRESULT(expr)    { if(FAILED(hr = (expr))) NANOCLR_LEAVE(); }
-#define NANOCLR_EXIT_ON_SUCCESS(expr)  { if(SUCCEEDED(hr = (expr))) NANOCLR_LEAVE(); }
-#define NANOCLR_SET_AND_LEAVE(expr)    { hr = (expr); NANOCLR_LEAVE(); }
-#define NANOCLR_CLEANUP()              hr = S_OK; nanoCLR_Cleanup:
-#define NANOCLR_CLEANUP_END()          NANOCLR_RETURN()
-#define NANOCLR_NOCLEANUP()            NANOCLR_CLEANUP(); NANOCLR_CLEANUP_END()
-#define NANOCLR_NOCLEANUP_NOLABEL()    hr = S_OK; NANOCLR_RETURN()
-#define FAULT_ON_NULL(ptr)             if(!(ptr)) NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE)
-#define FAULT_ON_NULL_ARG(ptr)         if(!(ptr)) NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL)
+#define NANOCLR_HEADER()							HRESULT hr
+#define NANOCLR_CHECK_HRESULT(expr)					{ if(FAILED(hr = (expr))) NANOCLR_LEAVE(); }
+#define NANOCLR_EXIT_ON_SUCCESS(expr)				{ if(SUCCEEDED(hr = (expr))) NANOCLR_LEAVE(); }
+#define NANOCLR_SET_AND_LEAVE(expr)					{ hr = (expr); NANOCLR_LEAVE(); }
+#if defined(_MSC_VER)
+#define NANOCLR_MSG_SET_AND_LEAVE(expr, msg)		{ wprintf(msg); hr = (expr); NANOCLR_LEAVE(); }
+#define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, arg)	{ wprintf(msg, arg); hr = (expr); NANOCLR_LEAVE(); }
+#else
+#define NANOCLR_MSG_SET_AND_LEAVE(expr, msg)		{ hr = (expr); NANOCLR_LEAVE(); }
+#define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, arg)	{ hr = (expr); NANOCLR_LEAVE(); }
+#endif
+#define NANOCLR_CLEANUP()							hr = S_OK; nanoCLR_Cleanup:
+#define NANOCLR_CLEANUP_END()						NANOCLR_RETURN()
+#define NANOCLR_NOCLEANUP()							NANOCLR_CLEANUP(); NANOCLR_CLEANUP_END()
+#define NANOCLR_NOCLEANUP_NOLABEL()					hr = S_OK; NANOCLR_RETURN()
+#define FAULT_ON_NULL(ptr)							if(!(ptr)) NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE)
+#define FAULT_ON_NULL_ARG(ptr)						if(!(ptr)) NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL)
 
 
 //    Correspondence between CLR C# and C++ native types:
