@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0029\build\nanoFramework.Tools.MSBuildSystem.props" Condition="Exists('packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0029\build\nanoFramework.Tools.MSBuildSystem.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup Label="Globals">
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{247F9798-E240-4D5B-956D-35E5EAD21CE2}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>TestApplication</RootNamespace>
+    <AssemblyName>TestApplication</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <TargetFrameworkIdentifier>
+    </TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\nanoFramework.Assemblies.mscorlib.1.0.0-preview006\build\nanoFramework.Assemblies.mscorlib.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\nanoFramework.Assemblies.mscorlib.1.0.0-preview006\build\nanoFramework.Assemblies.mscorlib.targets'))" />
+    <Error Condition="!Exists('packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0029\build\nanoFramework.Tools.MSBuildSystem.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0029\build\nanoFramework.Tools.MSBuildSystem.props'))" />
+    <Error Condition="!Exists('packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0029\build\nanoFramework.Tools.MSBuildSystem.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0029\build\nanoFramework.Tools.MSBuildSystem.targets'))" />
+  </Target>
+  <Import Project="packages\nanoFramework.Assemblies.mscorlib.1.0.0-preview006\build\nanoFramework.Assemblies.mscorlib.targets" Condition="Exists('packages\nanoFramework.Assemblies.mscorlib.1.0.0-preview006\build\nanoFramework.Assemblies.mscorlib.targets')" />
+  <Import Project="packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0029\build\nanoFramework.Tools.MSBuildSystem.targets" Condition="Exists('packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0029\build\nanoFramework.Tools.MSBuildSystem.targets')" />
+</Project>

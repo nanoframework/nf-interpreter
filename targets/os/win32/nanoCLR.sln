@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25920.0
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nanoCLR", "nanoCLR\nanoCLR.vcxproj", "{B5515C8A-B056-4320-8EA4-8CACE21A7D2E}"
 EndProject
@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CorLib", "..\..\..\src\CLR\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Diagnostics", "..\..\..\src\CLR\Diagnostics\Diagnostics.vcxproj", "{A5E9AE41-F4FA-40CE-AD82-A7861EBA007B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StartUp", "..\..\..\src\CLR\StartUp\StartUp.vcxproj", "{2A840DC3-FFA8-4562-BD13-AB2B0BA02CB6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Startup", "..\..\..\src\CLR\StartUp\StartUp.vcxproj", "{2A840DC3-FFA8-4562-BD13-AB2B0BA02CB6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Messaging", "..\..\..\src\CLR\Messaging\Messaging.vcxproj", "{131001E3-0201-451F-A87B-951D1C5C3EEE}"
 EndProject

@@ -190,21 +190,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\Hardware\Hardware.vcxproj">
       <Project>{5d50772e-dac8-407d-972f-37deb4450b72}</Project>
-      <Private>false</Private>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\src\CLR\Core\Hardware\Hardware_stub.vcxproj">
-      <Project>{31253d7f-147e-49a3-bc0d-e0ade6cf040b}</Project>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <Private>false</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\HeapPersistence\HeapPersistence.vcxproj">
       <Project>{bc2245b0-32e0-410e-b3f2-e2bfa0b503b3}</Project>
-      <Private>false</Private>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\HeapPersistence\HeapPersistence_stub.vcxproj">
       <Project>{4646f661-9505-45c2-9573-8409a9dd1149}</Project>
@@ -214,21 +202,12 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\InterruptHandler\InterruptHandler.vcxproj">
       <Project>{d32ee397-7e49-452d-ac95-afcb3c962e3d}</Project>
-      <Private>false</Private>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\InterruptHandler\InterruptHandler_stub.vcxproj">
       <Project>{5772d362-7277-49cf-9b49-42335a3154bd}</Project>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\src\CLR\Core\IOPort\IOPort.vcxproj">
-      <Project>{6dd5ca4f-2ae9-44d3-b9d7-a2a4a35fc5b2}</Project>
-      <Private>false</Private>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\IOPort\IOPort_stub.vcxproj">
       <Project>{5406eb0c-2243-47e1-9f21-f2d7ca277092}</Project>
@@ -238,9 +217,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\RPC\RPC.vcxproj">
       <Project>{ed4c887a-ec09-465b-b5d9-075450adc52d}</Project>
-      <Private>false</Private>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\RPC\RPC_stub.vcxproj">
       <Project>{d0b2adfe-3347-4d73-9364-9c36935d12f8}</Project>
@@ -250,9 +226,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\Serialization\Serialization.vcxproj">
       <Project>{16bf6131-a3b8-4b97-b867-e45669fb48bd}</Project>
-      <Private>false</Private>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\Serialization\Serialization_stub.vcxproj">
       <Project>{c337041d-344d-49fe-ad99-b137e7fd0188}</Project>
@@ -265,9 +238,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Debugger\Debugger.vcxproj">
       <Project>{dd397ec4-844b-4b59-a67b-cad6b46f1f00}</Project>
-      <Private>false</Private>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Debugger\Debugger_stub.vcxproj">
       <Project>{6dabcbf1-245a-4e76-bd36-8bc300c7dd82}</Project>
@@ -277,9 +247,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Diagnostics\Diagnostics.vcxproj">
       <Project>{a5e9ae41-f4fa-40ce-ad82-a7861eba007b}</Project>
-      <Private>false</Private>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Diagnostics\Diagnostics_stub.vcxproj">
       <Project>{c97a9845-02dc-46e4-b219-bf5ea8fb28e3}</Project>
@@ -289,9 +256,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Messaging\Messaging.vcxproj">
       <Project>{131001e3-0201-451f-a87b-951d1c5c3eee}</Project>
-      <Private>false</Private>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Messaging\Messaging_stub.vcxproj">
       <Project>{8acd05e8-42fb-4a49-9d8b-79239f0eed25}</Project>
@@ -304,9 +268,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\WireProtocol\WireProtocol.vcxproj">
       <Project>{2337c4a4-3ab4-4014-9c29-9ebe32f4510e}</Project>
-      <Private>false</Private>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
