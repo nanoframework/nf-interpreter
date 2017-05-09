@@ -6,6 +6,7 @@
 #ifndef _NANOCLR_INTEROP_H_
 #define _NANOCLR_INTEROP_H_
 
+#include <nanoHAL.h>
 #include <nanoCLR_PlatformDef.h>
 
 
@@ -352,7 +353,7 @@ CLR_RT_HeapBlock* Interop_Marshal_RetrieveManagedObject( CLR_RT_StackFrame &stac
 **
 ** Returns:   Reference to the field.
 **********************************************************************/
-unsigned char  &Interop_Marshal_GetField_bool  ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
+bool  &Interop_Marshal_GetField_bool  ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
 unsigned char  &Interop_Marshal_GetField_UINT8 ( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
 unsigned short int &Interop_Marshal_GetField_UINT16( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
 unsigned int &Interop_Marshal_GetField_UINT32( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex );
