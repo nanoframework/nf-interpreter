@@ -1068,6 +1068,9 @@ public:
     void GenerateSkeletonStubFieldsDef( const CLR_RECORD_TYPEDEF *pClsType, FILE *pFileStubHead, std::string strIndent, std::string strMngClassName );
     void GenerateSkeletonStubCode( const wchar_t* szFilePath, FILE *pFileDotNetProj );
 
+	void BuildMethodName_NoInterop(const CLR_RECORD_METHODDEF* md, std::string& name, CLR_RT_StringMap& mapMethods);
+	void GenerateSkeleton_NoInterop(LPCWSTR szFileName, LPCWSTR szProjectName);
+
     void BuildMethodName( const CLR_RECORD_METHODDEF* md, std::string& name    , CLR_RT_StringMap& mapMethods );
     void BuildClassName ( const CLR_RECORD_TYPEREF*   tr, std::string& cls_name, bool              fEscape    );
     void BuildClassName ( const CLR_RECORD_TYPEDEF*   td, std::string& cls_name, bool              fEscape    );
