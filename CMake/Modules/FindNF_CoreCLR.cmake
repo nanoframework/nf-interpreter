@@ -65,9 +65,6 @@ set(NF_CoreCLR_SRCS
     TypeSystem.cpp
     nanoSupport_CRC32.c
     nanoHAL_SystemInformation.cpp
-    
-    # TODO FIXME need to investigate how this file can be automated 
-    CLR_RT_InteropAssembliesTable.cpp
 
     # CoreLib
     CorLib_Native_System_DateTime.cpp
