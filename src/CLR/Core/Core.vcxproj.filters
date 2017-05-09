@@ -123,6 +123,9 @@
     <ClCompile Include="CLR_RT_SystemAssembliesTable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CLR_RT_Interop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h">

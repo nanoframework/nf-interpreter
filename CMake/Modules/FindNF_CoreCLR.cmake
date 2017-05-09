@@ -43,6 +43,7 @@ set(NF_CoreCLR_SRCS
     CLR_RT_HeapBlock_Timer.cpp
     CLR_RT_HeapBlock_WaitForObject.cpp
     CLR_RT_HeapCluster.cpp
+    CLR_RT_Interop.cpp
     CLR_RT_Memory.cpp
     CLR_RT_ObjectToEvent_Destination.cpp
     CLR_RT_ObjectToEvent_Source.cpp

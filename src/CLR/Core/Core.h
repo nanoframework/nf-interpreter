@@ -23,7 +23,7 @@
 #include <CorLib_Native.h>
 //#include <SPOT_native.h>
 //#include <SPOT_hardware_native.h>
-
+//#include <windows_devices_gpio_native.h>
 #include <nanoCLR_Runtime__HeapBlock.h>
 
 #endif // _NANOCLR_CORE_H_

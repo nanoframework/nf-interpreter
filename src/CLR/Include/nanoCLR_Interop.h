@@ -55,20 +55,20 @@ __nfweak extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char*
 
 
 //    Correspondence between CLR C# and C++ native types:
-//    CLR Type          C/C++ type	    C/C++ Ref Type
+//    CLR Type          C/C++ type	            C/C++ Ref Type
 
 //    System.Byte       unsigned char           unsigned char&
-//    System.UInt16     unsigned short int          unsigned short int&
-//    System.UInt32     unsigned int          unsigned int&
-//    System.UInt64     unsigned __int64          unsigned __int64&
-//    System.Char       char            char &
-//    System.SByte      signed char            signed char &
-//    System.Int16      signed short int           signed short int&
-//    System.Int32      signed int           signed int&
-//    System.Int64      signed __int64           signed __int64&
-//    System.Single     float           float&
-//    System.Double     double          double&
-//    System.String     const char *    char *
+//    System.UInt16     unsigned short int      unsigned short int&
+//    System.UInt32     unsigned int            unsigned int&
+//    System.UInt64     unsigned __int64        unsigned __int64&
+//    System.Char       char                    char &
+//    System.SByte      signed char             signed char &
+//    System.Int16      signed short int        signed short int&
+//    System.Int32      signed int              signed int&
+//    System.Int64      signed __int64          signed __int64&
+//    System.Single     float                   float&
+//    System.Double     double                  double&
+//    System.String     const char *            char *
 //    System.Byte[]     unsigned char *         Same as C/C++ type
 
 // Forward declaration for managed stack frame.

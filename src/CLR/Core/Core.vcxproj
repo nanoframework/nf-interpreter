@@ -36,6 +36,7 @@
     <ClCompile Include="CLR_RT_HeapBlock_Timer.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_WaitForObject.cpp" />
     <ClCompile Include="CLR_RT_HeapCluster.cpp" />
+    <ClCompile Include="CLR_RT_Interop.cpp" />
     <ClCompile Include="CLR_RT_Memory.cpp" />
     <ClCompile Include="CLR_RT_ObjectToEvent_Destination.cpp" />
     <ClCompile Include="CLR_RT_ObjectToEvent_Source.cpp" />
