@@ -105,6 +105,9 @@ set(CHIBIOS_SRCS
 
     chqueues.c
 
+    # required to use malloc and other newlib stuff
+    syscalls.c
+
     # CMSIS
     cmsis_os.c
 
@@ -123,6 +126,7 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/oslib/src
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/cmsis_os
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/abstractions/cmsis_os
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various
         
             # this path hint is for the usual location of the board.c file
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD}
