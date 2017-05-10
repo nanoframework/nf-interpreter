@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 #include <nanoCLR_Hardware.h>
-#include <CorLib_Native.h>
+#include <corlib_native.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

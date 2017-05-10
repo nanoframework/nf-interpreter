@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CorLib_Native.h">
+    <ClInclude Include="corlib_native.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CorLib.h">
@@ -29,19 +29,19 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CorLib_Native_System_Exception.cpp">
+    <ClCompile Include="corlib_native_System_Exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CorLib_Native_System_Threading_Thread.cpp">
+    <ClCompile Include="corlib_native_System_Threading_Thread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CorLib_Native_System_DateTime.cpp">
+    <ClCompile Include="corlib_native_System_DateTime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CorLib_Native_System_TimeSpan.cpp">
+    <ClCompile Include="corlib_native_System_TimeSpan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CorLib_Native_System_String.cpp">
+    <ClCompile Include="corlib_native_System_String.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="corlib_native_System_Object.cpp">
