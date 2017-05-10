@@ -77,12 +77,12 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Collections_ArrayList.cpp
     corlib_native_System_Collections_Queue.cpp
     corlib_native_System_Collections_Stack.cpp
-    CorLib_Native_System_DateTime.cpp
+    corlib_native_System_DateTime.cpp
     corlib_native_System_Delegate.cpp
     corlib_native_System_Diagnostics_Debugger.cpp
     corlib_native_System_Double.cpp
     corlib_native_System_Enum.cpp
-    CorLib_Native_System_Exception.cpp
+    corlib_native_System_Exception.cpp
     corlib_native_System_GC.cpp
     corlib_native_System_Globalization_CultureInfo.cpp
     corlib_native_System_Globalization_DateTimeFormat.cpp
@@ -106,18 +106,18 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp
     corlib_native_System_Runtime_Remoting_RemotingServices.cpp
     corlib_native_System_RuntimeType.cpp
-    CorLib_Native_System_String.cpp
+    corlib_native_System_String.cpp
     corlib_native_System_Text_UTF8Decoder.cpp
     corlib_native_System_Text_UTF8Encoding.cpp
     corlib_native_System_Threading_AutoResetEvent.cpp
     corlib_native_System_Threading_Interlocked.cpp
     corlib_native_System_Threading_ManualResetEvent.cpp
     corlib_native_System_Threading_Monitor.cpp
-    CorLib_Native_System_Threading_Thread.cpp
+    corlib_native_System_Threading_Thread.cpp
     corlib_native_System_Threading_ThreadAbortException.cpp    
     corlib_native_System_Threading_Timer.cpp
     corlib_native_System_Threading_WaitHandle.cpp
-    CorLib_Native_System_TimeSpan.cpp
+    corlib_native_System_TimeSpan.cpp
     corlib_native_System_TimeZone.cpp
     corlib_native_System_Type.cpp
     corlib_native_System_ValueType.cpp

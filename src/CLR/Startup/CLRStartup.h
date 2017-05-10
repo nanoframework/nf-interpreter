@@ -17,7 +17,7 @@
 //
 //#include <nanoCLR_Version.h>
 //
-//#include <CorLib_Native.h>
+//#include <corlib_native.h>
 //#include <SPOT_Native.h>
 //#include <SPOT_Graphics_Native.h>
 //#include <SPOT_Hardware_Native.h>

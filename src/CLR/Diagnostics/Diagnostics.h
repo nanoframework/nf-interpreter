@@ -10,6 +10,6 @@
 //#include <nanoCLR_Hardware.h>
 //#include <core.h>
 
-#include <CorLib_Native.h>
+#include <corlib_native.h>
 //#include <spot_net_native.h>
 

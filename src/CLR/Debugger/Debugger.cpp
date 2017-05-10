@@ -10,7 +10,7 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
 
-#include <CorLib_Native.h>
+#include <corlib_native.h>
 
 #define __min(a,b) (((a) < (b)) ? (a) : (b))
 

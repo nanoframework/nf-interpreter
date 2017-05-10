@@ -22,7 +22,7 @@
     <ClInclude Include="..\..\..\targets\os\win32\Include\nanoHAL_Time.h" />
     <ClInclude Include="..\..\..\targets\os\win32\Include\target_os.h" />
     <ClInclude Include="CorLib.h" />
-    <ClInclude Include="CorLib_Native.h" />
+    <ClInclude Include="corlib_native.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="corlib_native_System_AppDomain.cpp" />
@@ -32,12 +32,12 @@
     <ClCompile Include="corlib_native_System_Collections_ArrayList.cpp" />
     <ClCompile Include="corlib_native_System_Collections_Queue.cpp" />
     <ClCompile Include="corlib_native_System_Collections_Stack.cpp" />
-    <ClCompile Include="CorLib_Native_System_DateTime.cpp" />
+    <ClCompile Include="corlib_native_System_DateTime.cpp" />
     <ClCompile Include="corlib_native_System_Delegate.cpp" />
     <ClCompile Include="corlib_native_System_Diagnostics_Debugger.cpp" />
     <ClCompile Include="corlib_native_System_Double.cpp" />
     <ClCompile Include="corlib_native_System_Enum.cpp" />
-    <ClCompile Include="CorLib_Native_System_Exception.cpp" />
+    <ClCompile Include="corlib_native_System_Exception.cpp" />
     <ClCompile Include="corlib_native_System_GC.cpp" />
     <ClCompile Include="corlib_native_System_Globalization_CultureInfo.cpp" />
     <ClCompile Include="corlib_native_System_Globalization_DateTimeFormat.cpp" />
@@ -61,18 +61,18 @@
     <ClCompile Include="corlib_native_System_RuntimeType.cpp" />
     <ClCompile Include="corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp" />
     <ClCompile Include="corlib_native_System_Runtime_Remoting_RemotingServices.cpp" />
-    <ClCompile Include="CorLib_Native_System_String.cpp" />
+    <ClCompile Include="corlib_native_System_String.cpp" />
     <ClCompile Include="corlib_native_System_Text_UTF8Decoder.cpp" />
     <ClCompile Include="corlib_native_System_Text_UTF8Encoding.cpp" />
     <ClCompile Include="corlib_native_System_Threading_AutoResetEvent.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Interlocked.cpp" />
     <ClCompile Include="corlib_native_System_Threading_ManualResetEvent.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Monitor.cpp" />
-    <ClCompile Include="CorLib_Native_System_Threading_Thread.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_Thread.cpp" />
     <ClCompile Include="corlib_native_System_Threading_ThreadAbortException.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Timer.cpp" />
     <ClCompile Include="corlib_native_System_Threading_WaitHandle.cpp" />
-    <ClCompile Include="CorLib_Native_System_TimeSpan.cpp" />
+    <ClCompile Include="corlib_native_System_TimeSpan.cpp" />
     <ClCompile Include="corlib_native_System_TimeZone.cpp" />
     <ClCompile Include="corlib_native_System_Type.cpp" />
     <ClCompile Include="corlib_native_System_ValueType.cpp" />

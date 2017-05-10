@@ -20,7 +20,7 @@
 //
 //#include <nanoCLR_ParseOptions.h>
 //
-#include <CorLib_Native.h>
+#include <corlib_native.h>
 //#include <SPOT_native.h>
 //#include <SPOT_hardware_native.h>
 //#include <windows_devices_gpio_native.h>
