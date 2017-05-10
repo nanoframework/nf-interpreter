@@ -24,6 +24,7 @@
     <ClCompile Include="CLR_RT_DblLinkedList.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_Array.cpp" />
+    <ClCompile Include="CLR_RT_HeapBlock_ArrayList.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_BinaryBlob.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_Delegate.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_Delegate_List.cpp" />
@@ -31,6 +32,7 @@
     <ClCompile Include="CLR_RT_HeapBlock_Lock.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_LockRequest.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_Node.cpp" />
+    <ClCompile Include="CLR_RT_HeapBlock_Queue.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_Stack.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_String.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_Timer.cpp" />
@@ -50,6 +52,7 @@
     <ClCompile Include="GarbageCollector_Compaction.cpp" />
     <ClCompile Include="GarbageCollector_ComputeReachabilityGraph.cpp" />
     <ClCompile Include="Interpreter.cpp" />
+    <ClCompile Include="Random.cpp" />
     <ClCompile Include="Streams.cpp" />
     <ClCompile Include="StringTable.cpp" />
     <ClCompile Include="Thread.cpp" />

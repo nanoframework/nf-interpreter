@@ -1,14 +1,8 @@
-//-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
-//    This file was generated automatically by a tool.
-//    Re-running the tool will overwrite this file.
-//    You should copy this file to a custom location
-//    before adding any customization in the copy to
-//    prevent loss of your changes when the tool is
-//    re-run.
+// Copyright (c) 2017 The nanoFramework project contributors
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
+// See LICENSE file in the project root for full license information.
 //
-//-----------------------------------------------------------------------------
 
 
 #ifndef _CORLIB_NATIVE_H_
@@ -26,18 +20,18 @@ struct Library_corlib_native_System_Object
 
 };
 
-/* // THIS CLASS IS BUILT INTO mscorlib and we need to offset static fields accordingly
-struct Library_corlib_native__<PrivateImplementationDetails>{232B98F2-8B22-4CE9-8AB0-12C746226FA4}
-{
-    static const int FIELD_STATIC__$$method0x60003e6-1 = 0;
-    static const int FIELD_STATIC__$$method0x60003e6-2 = 1;
-    static const int FIELD_STATIC__$$method0x60003e6-3 = 2;
+// // THIS CLASS IS BUILT INTO mscorlib and we need to offset static fields accordingly
+// struct Library_corlib_native__<PrivateImplementationDetails>
+// {
+//     static const int FIELD_STATIC__30F2EDF187653C888CED20A5A3E3D6C361BBEC7C = 0;
+//     static const int FIELD_STATIC__7BD9FD6F0CA094855382F77F4352B6BC065CCDD4 = 1;
+//     static const int FIELD_STATIC__B5E59333D76EAFE27EB9A74E9A408CA8D0FDF212 = 2;
 
 
-    //--//
+//     //--//
 
-};
-*/
+// };
+//
 
 struct Library_corlib_native_System_ValueType
 {
@@ -403,6 +397,15 @@ struct Library_corlib_native_System_Diagnostics_Debugger
 {
     NANOCLR_NATIVE_DECLARE(get_IsAttached___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(Break___STATIC__VOID);
+
+    //--//
+
+};
+
+struct Library_corlib_native_System_Diagnostics_DebuggerBrowsableAttribute
+{
+    static const int FIELD__state = 1;
+
 
     //--//
 
@@ -1148,5 +1151,4 @@ struct Library_corlib_native_System_Collections_Hashtable__ValueCollection
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib;
 
-#endif // _CORLIB_NATIVE_H_
-
+#endif  //_CORLIB_NATIVE_H_

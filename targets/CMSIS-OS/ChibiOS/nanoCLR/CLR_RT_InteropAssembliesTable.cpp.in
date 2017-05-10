@@ -8,9 +8,12 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#include "Core.h"
- 
+#include <Core.h>
+
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib;
+
 const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] =
 {
+    &g_CLR_AssemblyNative_mscorlib,
     NULL
 };

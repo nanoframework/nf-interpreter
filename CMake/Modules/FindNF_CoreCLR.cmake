@@ -31,12 +31,14 @@ set(NF_CoreCLR_SRCS
     CLR_RT_DblLinkedList.cpp
     CLR_RT_HeapBlock.cpp
     CLR_RT_HeapBlock_Array.cpp
+    CLR_RT_HeapBlock_ArrayList.cpp
     CLR_RT_HeapBlock_BinaryBlob.cpp
     CLR_RT_HeapBlock_Delegate.cpp
     CLR_RT_HeapBlock_Delegate_List.cpp
     CLR_RT_HeapBlock_Finalizer.cpp
     CLR_RT_HeapBlock_Lock.cpp
     CLR_RT_HeapBlock_LockRequest.cpp
+    CLR_RT_HeapBlock_Queue.cpp
     CLR_RT_HeapBlock_Node.cpp
     CLR_RT_HeapBlock_Stack.cpp
     CLR_RT_HeapBlock_String.cpp
@@ -57,6 +59,7 @@ set(NF_CoreCLR_SRCS
     GarbageCollector_Compaction.cpp
     GarbageCollector_ComputeReachabilityGraph.cpp
     Interpreter.cpp
+    Random.cpp
     Streams.cpp
     StringTable.cpp
     Thread.cpp
@@ -67,11 +70,59 @@ set(NF_CoreCLR_SRCS
     nanoHAL_SystemInformation.cpp
 
     # CoreLib
+    corlib_native_System_AppDomain.cpp
+    corlib_native_System_Array.cpp
+    corlib_native_System_Attribute.cpp
+    corlib_native_System_BitConverter.cpp
+    corlib_native_System_Collections_ArrayList.cpp
+    corlib_native_System_Collections_Queue.cpp
+    corlib_native_System_Collections_Stack.cpp
     CorLib_Native_System_DateTime.cpp
+    corlib_native_System_Delegate.cpp
+    corlib_native_System_Diagnostics_Debugger.cpp
+    corlib_native_System_Double.cpp
+    corlib_native_System_Enum.cpp
     CorLib_Native_System_Exception.cpp
+    corlib_native_System_GC.cpp
+    corlib_native_System_Globalization_CultureInfo.cpp
+    corlib_native_System_Globalization_DateTimeFormat.cpp
+    corlib_native_System_Globalization_DaylightTime.cpp
+    corlib_native_System_MarshalByRefObject.cpp
+    corlib_native_System_Math.cpp
+    corlib_native_System_MulticastDelegate.cpp
+    corlib_native_System_Number.cpp
+    corlib_native_System_Object.cpp
+    corlib_native_System_Random.cpp
+    corlib_native_System_Reflection_Assembly.cpp
+    corlib_native_System_Reflection_Binder.cpp
+    corlib_native_System_Reflection_ConstructorInfo.cpp
+    corlib_native_System_Reflection_FieldInfo.cpp
+    corlib_native_System_Reflection_MethodBase.cpp
+    corlib_native_System_Reflection_MemberInfo.cpp
+    corlib_native_System_Reflection_PropertyInfo.cpp
+    corlib_native_System_Reflection_RuntimeFieldInfo.cpp
+    corlib_native_System_Reflection_RuntimeMethodInfo.cpp
+    corlib_native_System_Resources_ResourceManager.cpp
+    corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp
+    corlib_native_System_Runtime_Remoting_RemotingServices.cpp
+    corlib_native_System_RuntimeType.cpp
     CorLib_Native_System_String.cpp
+    corlib_native_System_Text_UTF8Decoder.cpp
+    corlib_native_System_Text_UTF8Encoding.cpp
+    corlib_native_System_Threading_AutoResetEvent.cpp
+    corlib_native_System_Threading_Interlocked.cpp
+    corlib_native_System_Threading_ManualResetEvent.cpp
+    corlib_native_System_Threading_Monitor.cpp
     CorLib_Native_System_Threading_Thread.cpp
+    corlib_native_System_Threading_ThreadAbortException.cpp    
+    corlib_native_System_Threading_Timer.cpp
+    corlib_native_System_Threading_WaitHandle.cpp
     CorLib_Native_System_TimeSpan.cpp
+    corlib_native_System_TimeZone.cpp
+    corlib_native_System_Type.cpp
+    corlib_native_System_ValueType.cpp
+    corlib_native_System_WeakReference.cpp
+    corlib_native.cpp
 
     # CLR startup
     CLRStartup.cpp
