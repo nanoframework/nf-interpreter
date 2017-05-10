@@ -13,6 +13,7 @@
 //#include <nanoCLR_Hardware.h>
 
 #include "CorLib_Native.h"
+#include "nanoCRT.h"
 
 #endif
 

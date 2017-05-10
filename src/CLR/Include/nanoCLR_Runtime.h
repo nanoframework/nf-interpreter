@@ -378,17 +378,17 @@ private:
     int m_next;
 
 public:
-    void Initialize();
-    void Initialize( int seed );
+    __nfweak void Initialize();
+    __nfweak void Initialize( int seed );
 
-    int    Next();
+    __nfweak int  Next();
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
-    double NextDouble();
+    __nfweak double NextDouble();
 #else
-    CLR_INT64 NextDouble();
+    __nfweak CLR_INT64 NextDouble();
 #endif
-    void   NextBytes( unsigned char* buffer, unsigned int count );
+    __nfweak void NextBytes( unsigned char* buffer, unsigned int count );
 };
 
 //--//

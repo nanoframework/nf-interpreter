@@ -126,6 +126,15 @@
     <ClCompile Include="CLR_RT_Interop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CLR_RT_HeapBlock_ArrayList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CLR_RT_HeapBlock_Queue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Random.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h">
