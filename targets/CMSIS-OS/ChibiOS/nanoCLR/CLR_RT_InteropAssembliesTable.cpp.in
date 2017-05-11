@@ -11,9 +11,11 @@
 #include <Core.h>
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib;
+@CLR_RT_NativeAssemblyDataDeclarations@
 
 const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] =
 {
     &g_CLR_AssemblyNative_mscorlib,
+    @CLR_RT_NativeAssemblyDataTableEntries@
     NULL
 };
