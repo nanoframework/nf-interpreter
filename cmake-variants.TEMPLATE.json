@@ -37,8 +37,7 @@
             "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
             "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger",
             "API_Windows.Devices.Gpio" : "OFF"
-        },
-        "buildType": "Debug"
+        }
       },
       "OPTION2_NAME_HERE": {
         "oneWordSummary$": "<summary-here>",
@@ -53,8 +52,7 @@
             "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
             "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger",
             "API_Windows.Devices.Gpio" : "OFF"
-        },
-        "buildType": "Debug"
+        }
       },
       "default$": "",
       "description$": "Variant for builds"
