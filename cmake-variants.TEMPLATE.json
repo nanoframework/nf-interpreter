@@ -35,7 +35,8 @@
             "CHIBIOS_VERSION" : "<N.N.N>",
             "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
             "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
-            "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger"
+            "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger",
+            "API_Windows.Devices.Gpio" : "OFF"
         },
         "buildType": "Debug"
       },
@@ -50,7 +51,8 @@
             "CHIBIOS_VERSION" : "<N.N.N>",
             "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
             "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
-            "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger"
+            "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger",
+            "API_Windows.Devices.Gpio" : "OFF"
         },
         "buildType": "Debug"
       },

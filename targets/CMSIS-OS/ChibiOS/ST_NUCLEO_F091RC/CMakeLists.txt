@@ -86,6 +86,9 @@ add_executable(
     # sources for nanoFramework libraries
     "${NF_CoreCLR_SOURCES}"
     "${NF_Debugger_SOURCES}"
+
+    # sources for nanoFramework APIs
+    "${TARGET_NANO_APIS_SOURCES}"
 )
 
 # include common directories
@@ -93,6 +96,7 @@ include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/common
+    ${PROJECT_SOURCE_DIR}/src/CLR/Core
     ${PROJECT_SOURCE_DIR}/src/CLR/Include
     ${PROJECT_SOURCE_DIR}/src/HAL/Include
     ${PROJECT_SOURCE_DIR}/src/PAL/Include
@@ -125,6 +129,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     # directories for nanoFramework libraries
     "${NF_CoreCLR_INCLUDE_DIRS}"
     "${NF_Debugger_INCLUDE_DIRS}"
+
+    # includes for nanoFramework APIs
+    "${TARGET_NANO_APIS_INCLUDES}"
 )
 
 ###################
