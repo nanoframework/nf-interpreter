@@ -32,6 +32,7 @@
     <ClCompile Include="corlib_native_System_Collections_ArrayList.cpp" />
     <ClCompile Include="corlib_native_System_Collections_Queue.cpp" />
     <ClCompile Include="corlib_native_System_Collections_Stack.cpp" />
+    <ClCompile Include="corlib_native_System_Convert.cpp" />
     <ClCompile Include="corlib_native_System_DateTime.cpp" />
     <ClCompile Include="corlib_native_System_Delegate.cpp" />
     <ClCompile Include="corlib_native_System_Diagnostics_Debugger.cpp" />
