@@ -6,7 +6,10 @@ namespace TestApplication
     {
         public static void Main()
         {
-
+            while(true)
+            {
+                int i = 0;
+            }
         }
     }
 }

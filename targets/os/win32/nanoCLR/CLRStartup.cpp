@@ -129,7 +129,7 @@ struct Settings
         CLR_RT_StringVector vec;
 
         vec.push_back(L"-load");
-#if defined DEBUG
+#if defined _DEBUG
 		vec.push_back(L"..\\netnf\\TestApplication\\bin\\Debug\\TestApplication.pe");
 #else
 		vec.push_back(L"..\\netnf\\TestApplication\\bin\\Release\\TestApplication.pe");
@@ -140,7 +140,7 @@ struct Settings
 		// just need to update the path on the package folder as the version changes //
 		// ************************************************************************* //
 		vec.push_back(L"-load");
-        vec.push_back(L"..\\packages\\nanoFramework.CoreLibrary.1.0.0-preview014\\build\\mscorlib.pe");
+        vec.push_back(L"..\\packages\\nanoFramework.CoreLibrary.1.0.0-preview015\\build\\mscorlib.pe");
 
         //vec.push_back(L"-load");
         //vec.push_back(L"C:\\Program Files (x86)\\Microsoft .NET Micro Framework\\v4.4\\Assemblies\\le\\Microsoft.SPOT.Native.pe");

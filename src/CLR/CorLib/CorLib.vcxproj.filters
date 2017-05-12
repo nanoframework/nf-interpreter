@@ -185,5 +185,8 @@
     <ClCompile Include="corlib_native_System_Threading_ThreadAbortException.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="corlib_native_System_Convert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

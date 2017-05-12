@@ -329,11 +329,8 @@ struct Library_corlib_native_System_Collections_Stack
 
 struct Library_corlib_native_System_Convert
 {
-    static const int FIELD_STATIC__s_rgchBase64EncodingDefault = 6;
-    static const int FIELD_STATIC__s_rgchBase64EncodingRFC4648 = 7;
-    static const int FIELD_STATIC__s_rgchBase64Encoding        = 8;
-    static const int FIELD_STATIC__s_rgbBase64Decode           = 9;
-
+    NANOCLR_NATIVE_DECLARE(ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(FromBase64CharArray___STATIC__SZARRAY_U1__SZARRAY_CHAR__I4);
 
     //--//
 
