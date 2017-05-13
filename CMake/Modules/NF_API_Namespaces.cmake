@@ -56,7 +56,7 @@ macro(ParseApiOptions)
     # Windows.Devices.Gpio
     if(API_Windows.Devices.Gpio)
         ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.Gpio")
+        PerformSettingsForApiEntry("Windows.Devices.Gpio.Provider")
     endif()
 
 
