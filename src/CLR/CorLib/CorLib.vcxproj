@@ -25,6 +25,7 @@
     <ClInclude Include="corlib_native.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="corlib_native.cpp" />
     <ClCompile Include="corlib_native_System_AppDomain.cpp" />
     <ClCompile Include="corlib_native_System_Array.cpp" />
     <ClCompile Include="corlib_native_System_Attribute.cpp" />
@@ -43,6 +44,7 @@
     <ClCompile Include="corlib_native_System_Globalization_CultureInfo.cpp" />
     <ClCompile Include="corlib_native_System_Globalization_DateTimeFormat.cpp" />
     <ClCompile Include="corlib_native_System_Globalization_DaylightTime.cpp" />
+    <ClCompile Include="corlib_native_System_Guid.cpp" />
     <ClCompile Include="corlib_native_System_MarshalByRefObject.cpp" />
     <ClCompile Include="corlib_native_System_Math.cpp" />
     <ClCompile Include="corlib_native_System_MulticastDelegate.cpp" />

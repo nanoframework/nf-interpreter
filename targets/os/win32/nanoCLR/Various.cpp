@@ -535,6 +535,27 @@ int hal_vsnprintf( char* buffer, size_t len, const char* format, va_list arg )
     return _vsnprintf_s( buffer, len, len-1/* force space for trailing zero*/, format, arg );
 }
 
+
+// Compares 2 ASCII strings case insensitive. Does not take locale into account.
+int hal_stricmp(const char * dst, const char * src)
+{
+	int f = 0, l = 0;
+
+	do
+	{
+		if (((f = (unsigned char)(*(dst++))) >= 'A') && (f <= 'Z'))
+		{
+			f -= 'A' - 'a';
+		}
+		if (((l = (unsigned char)(*(src++))) >= 'A') && (l <= 'Z'))
+		{
+			l -= 'A' - 'a';
+		}
+	} while (f && (f == l));
+
+	return(f - l);
+}
+
 #pragma managed(pop)
 
 /////////////////////////////////////////////////////////////////////////////

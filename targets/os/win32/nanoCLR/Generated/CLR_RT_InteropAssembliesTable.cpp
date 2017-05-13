@@ -29,7 +29,8 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Microsoft_SPOT_Updat
  
 const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] =
 {
-    // UNDONE: FIXME: &g_CLR_AssemblyNative_mscorlib,
+	&g_CLR_AssemblyNative_mscorlib,
+    // UNDONE: FIXME: 
     //&g_CLR_AssemblyNative_Microsoft_SPOT_Native,
     //&g_CLR_AssemblyNative_Microsoft_SPOT_Hardware,
     //&g_CLR_AssemblyNative_Microsoft_SPOT_EventSink_DriverProcs,

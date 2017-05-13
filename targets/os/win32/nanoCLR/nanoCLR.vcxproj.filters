@@ -92,5 +92,8 @@
     <ClCompile Include="platform_heap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\PAL\Double\nanoPAL_native_double.cpp">
+      <Filter>Source Files\PAL</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
