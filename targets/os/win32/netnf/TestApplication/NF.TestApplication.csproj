@@ -50,14 +50,14 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\..\packages\nanoFramework.CoreLibrary.1.0.0-preview015\build\nanoFramework.CoreLibrary.targets" Condition="Exists('..\..\packages\nanoFramework.CoreLibrary.1.0.0-preview015\build\nanoFramework.CoreLibrary.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\nanoFramework.CoreLibrary.1.0.0-preview015\build\nanoFramework.CoreLibrary.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\nanoFramework.CoreLibrary.1.0.0-preview015\build\nanoFramework.CoreLibrary.targets'))" />
     <Error Condition="!Exists('..\..\packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0039\build\nanoFramework.Tools.MSBuildSystem.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0039\build\nanoFramework.Tools.MSBuildSystem.props'))" />
     <Error Condition="!Exists('..\..\packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0039\build\nanoFramework.Tools.MSBuildSystem.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0039\build\nanoFramework.Tools.MSBuildSystem.targets'))" />
+    <Error Condition="!Exists('..\..\packages\nanoFramework.CoreLibrary.1.0.0-preview016\build\nanoFramework.CoreLibrary.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\nanoFramework.CoreLibrary.1.0.0-preview016\build\nanoFramework.CoreLibrary.targets'))" />
   </Target>
   <Import Project="..\..\packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0039\build\nanoFramework.Tools.MSBuildSystem.targets" Condition="Exists('..\..\packages\nanoFramework.Tools.MSBuildSystem.1.0.0-preview0039\build\nanoFramework.Tools.MSBuildSystem.targets')" />
+  <Import Project="..\..\packages\nanoFramework.CoreLibrary.1.0.0-preview016\build\nanoFramework.CoreLibrary.targets" Condition="Exists('..\..\packages\nanoFramework.CoreLibrary.1.0.0-preview016\build\nanoFramework.CoreLibrary.targets')" />
 </Project>

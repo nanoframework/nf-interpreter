@@ -6,6 +6,8 @@ namespace TestApplication
     {
         public static void Main()
         {
+            Guid newGuid = Guid.NewGuid();
+
             while(true)
             {
                 int i = 0;

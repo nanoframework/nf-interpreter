@@ -188,5 +188,11 @@
     <ClCompile Include="corlib_native_System_Convert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="corlib_native_System_Guid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="corlib_native.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
