@@ -16,6 +16,6 @@ Currently the stable branch of CHIBIOS (16.1.8) does not contain board.c and boa
 
 Also currently the stable branch of CHIBIOS (16.1.8) does not contain board.c and board.h. As such it is necessary to download the ST_STM32F769I_DISCOVERY folder from https://github.com/ChibiOS/ChibiOS/tree/master/os/hal/ports/STM32/STM32F7xx and replace the existing folder in ../os/hal/ports
 
-Lastly the stable branch of CHIBIOS (16.1.8) does not contain information on the processor so it is necessary download the folder from https://github.com/ChibiOS/ChibiOS/tree/masteros\common\ext\CMSIS\ST\STM32F7xx and replace os\ext\CMSIS\ST\STM32F7xx
+Lastly the stable branch of CHIBIOS (16.1.8) does not contain information on the processor so it is necessary download the folder from https://github.com/ChibiOS/ChibiOS/tree/masteros/common/ext/CMSIS/ST/STM32F7xx and replace os/ext/CMSIS/ST/STM32F7xx
 
 NOTE: this configuration was successfully tested in an ST_STM32F769I_DISCOVERY board using the Serial over USB connection on USB port 1 that creates a virtual COM port.

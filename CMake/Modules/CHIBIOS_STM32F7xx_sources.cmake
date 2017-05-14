@@ -18,7 +18,7 @@ set(CHIBIOS_PORT_SRCS
 
     nvic.c
     hal_lld.c
-    ext_lld_isr.c
+    hal_ext_lld_isr.c
 
     adc_lld.c
     can_lld.c
