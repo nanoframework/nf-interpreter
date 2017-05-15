@@ -11,8 +11,8 @@
 //-----------------------------------------------------------------------------
 
 
-#ifndef _WINDOWS_DEVICES_GPIO_NATIVE_WINDOWS_DEVICES_GPIO_DEFAULTGPIOCONTROLLERPROVIDER_H_
-#define _WINDOWS_DEVICES_GPIO_NATIVE_WINDOWS_DEVICES_GPIO_DEFAULTGPIOCONTROLLERPROVIDER_H_
+#ifndef _WINDOWS_DEVICES_GPIO_NATIVE_WINDOWS_DEVICES_GPIO_GPIOCONTROLLER_H_
+#define _WINDOWS_DEVICES_GPIO_NATIVE_WINDOWS_DEVICES_GPIO_GPIOCONTROLLER_H_
 
 namespace Windows
 {
@@ -20,13 +20,14 @@ namespace Windows
     {
         namespace Gpio
         {
-            struct DefaultGpioControllerProvider
+            struct GpioController
             {
                 // Helper Functions to access fields of managed object
                 // Declaration of stubs. These functions are implemented by Interop code developers
+                static bool NativeOpenpin( CLR_RT_HeapBlock* pMngObj, signed int param0, HRESULT &hr );
                 static signed int get_PinCount( CLR_RT_HeapBlock* pMngObj, HRESULT &hr );
             };
         }
     }
 }
-#endif  //_WINDOWS_DEVICES_GPIO_NATIVE_WINDOWS_DEVICES_GPIO_DEFAULTGPIOCONTROLLERPROVIDER_H_
+#endif  //_WINDOWS_DEVICES_GPIO_NATIVE_WINDOWS_DEVICES_GPIO_GPIOCONTROLLER_H_

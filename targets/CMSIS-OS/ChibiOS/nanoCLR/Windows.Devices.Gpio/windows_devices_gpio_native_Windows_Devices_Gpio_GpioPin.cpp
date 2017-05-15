@@ -13,39 +13,35 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include "windows_devices_gpio_provider_native.h"
-#include "windows_devices_gpio_provider_native_Windows_Devices_Gpio_Provider_DefaultGpioPinProvider.h"
 
-using namespace Windows::Devices::Gpio::Provider;
+#include "windows_devices_gpio_native.h"
+#include "windows_devices_gpio_native_Windows_Devices_Gpio_GpioPin.h"
+
+using namespace Windows::Devices::Gpio;
 
 stm32_gpio_t* gpioPort[] = { GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH, GPIOI, GPIOJ };
 
 #define GPIO_PORT(pin) (gpioPort[(pin/16) - 1])
 
-UNSUPPORTED_TYPE DefaultGpioPinProvider::get_DebounceTimeout( CLR_RT_HeapBlock* pMngObj, HRESULT &hr )
+bool GpioPin::NativeIsDriveModeSupported( CLR_RT_HeapBlock* pMngObj, unsigned char param0, HRESULT &hr )
 {
-    UNSUPPORTED_TYPE retVal = 0; 
-    return retVal;
+    return param0 < 5;
 }
 
-void DefaultGpioPinProvider::set_DebounceTimeout( CLR_RT_HeapBlock* pMngObj, UNSUPPORTED_TYPE param0, HRESULT &hr )
-{
-}
-
-void DefaultGpioPinProvider::NativeWrite( CLR_RT_HeapBlock* pMngObj, signed int param0, unsigned char param1, HRESULT &hr )
-{
-    if (param1 == 0) palClearPad(GPIO_PORT(param0), param0 % 16);
-    else palSetPad(GPIO_PORT(param0), param0 % 16);
-}
-
-signed int DefaultGpioPinProvider::NativeRead( CLR_RT_HeapBlock* pMngObj, signed int param0, HRESULT &hr )
+signed int GpioPin::NativeRead( CLR_RT_HeapBlock* pMngObj, signed int param0, HRESULT &hr )
 {
     return palReadPad(GPIO_PORT(param0), param0 % 16);
 }
 
-void DefaultGpioPinProvider::NativeSetDriveMode( CLR_RT_HeapBlock* pMngObj, signed int param0, signed int param1, HRESULT &hr )
+void GpioPin::NativeWrite( CLR_RT_HeapBlock* pMngObj, signed int param0, unsigned char param1, HRESULT &hr )
 {
-    switch (param1)
+	if (param1 == 0) palClearPad(GPIO_PORT(param0), param0 % 16);
+    else palSetPad(GPIO_PORT(param0), param0 % 16);
+}
+
+void GpioPin::NativeSetDriveMode( CLR_RT_HeapBlock* pMngObj, signed int param0, unsigned char param1, HRESULT &hr )
+{
+	switch (param1)
     {
         case 0 :    palSetPadMode(GPIO_PORT(param0), param0 % 16, PAL_MODE_ALTERNATE(PAL_MODE_INPUT));
                     break;
@@ -60,21 +56,19 @@ void DefaultGpioPinProvider::NativeSetDriveMode( CLR_RT_HeapBlock* pMngObj, sign
         default :   palSetPadMode(GPIO_PORT(param0), param0 % 16, PAL_MODE_ALTERNATE(PAL_MODE_INPUT));
                     break;
     }
-     
 }
 
-bool DefaultGpioPinProvider::NativeOpenpin( CLR_RT_HeapBlock* pMngObj, signed int param0, HRESULT &hr )
+signed int GpioPin::get_DebounceTimeout( CLR_RT_HeapBlock* pMngObj, HRESULT &hr )
 {
-    bool retVal = 0; 
+    signed int retVal = 0; 
     return retVal;
 }
 
-bool DefaultGpioPinProvider::NativeIsDriveModeSupported( CLR_RT_HeapBlock* pMngObj, unsigned char param0, HRESULT &hr )
+void GpioPin::set_DebounceTimeout( CLR_RT_HeapBlock* pMngObj, signed int param0, HRESULT &hr )
 {
-    return param0 < 5;
 }
 
-void DefaultGpioPinProvider::NativeDispose( CLR_RT_HeapBlock* pMngObj, HRESULT &hr )
+void GpioPin::DisposeNative( CLR_RT_HeapBlock* pMngObj, HRESULT &hr )
 {
 }
 
