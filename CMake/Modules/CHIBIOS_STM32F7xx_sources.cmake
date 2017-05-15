@@ -48,8 +48,8 @@ set(CHIBIOS_PORT_SRCS
 )
 
 foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
-    set(CHIBIOS_SRC_FILE SRC_FILE-NOTFOUND)
-    find_file(CHIBIOS_SRC_FILE ${SRC_FILE}
+    set(CHIBIOS_F7_SRC_FILE SRC_FILE-NOTFOUND)
+    find_file(CHIBIOS_F7_SRC_FILE ${SRC_FILE}
         PATHS 
 
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/STM32F7xx
@@ -79,8 +79,8 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${CHIBIOS_SRC_FILE}") # debug helper
-    list(APPEND CHIBIOS_SOURCES ${CHIBIOS_SRC_FILE})
+    # message("${SRC_FILE} >> ${CHIBIOS_F7_SRC_FILE}") # debug helper
+    list(APPEND CHIBIOS_SOURCES ${CHIBIOS_F7_SRC_FILE})
 endforeach()
 
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/devices/STM32F7xx)
