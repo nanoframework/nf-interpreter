@@ -26,10 +26,10 @@ void BlinkerThread(void const * argument)
     
   // nothing to deinitialize or cleanup, so it's safe to return
 }
-osThreadDef(BlinkerThread, osPriorityNormal, 128);
+osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityNormal, 1024);
+osThreadDef(ReceiverThread, osPriorityNormal, 1024, "ReceiverThread");
 
 // Application entry point.
 int main(void) {
