@@ -18,7 +18,7 @@
 // they also must be coherent with what's in the linker file for nanoBooter and nanoCLR
 
 // RAM base address 
-#define RAM1_MEMORY_StartAddress        ((uint32_t)0x200200C0)
+#define RAM1_MEMORY_StartAddress        ((uint32_t)0x200200C0) // <- Why is this offset by 0xC0 ?
 // RAM size 
 #define RAM1_MEMORY_Size                ((uint32_t)0x0005C000)
 
