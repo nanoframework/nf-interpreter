@@ -45,7 +45,7 @@ set(CHIBIOS_PORT_SRCS
     # RT
     chcore.c
     chcore_v7m.c
-    chcoreasm_v7m.s
+    chcoreasm_v7m.S
 )
 
 foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
@@ -86,7 +86,6 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
     list(APPEND CHIBIOS_SOURCES ${CHIBIOS_F4_SRC_FILE})
 endforeach()
 
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/devices/STM32F4xx)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ext/CMSIS/ST/STM32F4xx)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/STM32F4xx)
