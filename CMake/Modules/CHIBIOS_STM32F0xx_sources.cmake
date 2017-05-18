@@ -14,7 +14,7 @@ set(CHIBIOS_PORT_SRCS
     # startup code
     crt1.c
     vectors.c
-    crt0_v6m.s
+    crt0_v6m.S
 
     nvic.c
     hal_lld.c
