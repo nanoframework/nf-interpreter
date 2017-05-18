@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _MCUCONF_H_
-#define _MCUCONF_H_
+#ifndef MCUCONF_H
+#define MCUCONF_H
 
 /*
  * STM32F0xx drivers configuration.
@@ -230,4 +230,4 @@
 // header for nanoFramework overlay drivers
 #include "mcuconf_nf.h"
 
-#endif /* _MCUCONF_H_ */
+#endif /* MCUCONF_H */
