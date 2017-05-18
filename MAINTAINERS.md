@@ -15,5 +15,6 @@ right person or answer it themselves.
 | --- | --- | --- |
 | José Simões | @josesimoes | Native code build, VS Code Debug and CMake |
 | Stanislav Šimíček | @cw2 | Debug protocol, nanoFramework Interpreter |
+| Robin Jones | @NetoworkFusion | general coder
 
 This list is incomplete, if you need to find other maintainers please ping the team to get them filled in.
