@@ -45,7 +45,7 @@ bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         //////////////////////////////////////////////////////////
         
         // read from serial stream 
-        volatile size_t read = StreamRead((BaseSequentialStream *)&SDU1, ptr, *size);
+        volatile size_t read = streamRead((BaseSequentialStream *)&SDU1, ptr, *size);
 
         ptr  += read;
         *size -= read;
