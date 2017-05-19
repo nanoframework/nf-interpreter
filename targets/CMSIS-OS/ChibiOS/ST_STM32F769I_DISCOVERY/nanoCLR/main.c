@@ -17,10 +17,10 @@ void BlinkerThread(void const * argument)
 
   while (true) {
 
-      palSetLine(LINE_LED2_GREEN);
+      palSetLine(LINE_LED1_RED);
       osDelay(500);
 
-      palClearLine(LINE_LED2_GREEN);
+      palClearLine(LINE_LED1_RED);
       osDelay(500);   
       
   }
