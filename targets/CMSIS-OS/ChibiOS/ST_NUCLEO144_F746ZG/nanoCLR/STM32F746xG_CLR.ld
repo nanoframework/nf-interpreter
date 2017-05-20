@@ -18,7 +18,7 @@
 MEMORY
 {
     flash       : org = 0x08008000, len = 1M - 32k - 768k   /* flash size less the space reserved for nanoBooter and application deployment*/
-    flash_itcm  : org = 0x00200000, len = 1M
+    flash_itcm  : org = 0x00208000, len = 1M - 32k - 768k
     deployment  : org = 0x08040000, len = 768k              /* space reserved for application deployment */
     ramvt       : org = 0x00000000, len = 0                 /* initial RAM address is reserved for a copy of the vector table */
     ram0        : org = 0x20010000, len = 256k              /* SRAM1 + SRAM2 */
@@ -35,24 +35,24 @@ MEMORY
    and a load region (_LMA suffix).*/
 
 /* Flash region to be used for exception vectors.*/
-/* REGION_ALIAS("VECTORS_FLASH", flash_itcm);*/
-/* REGION_ALIAS("VECTORS_FLASH_LMA", flash);*/
+REGION_ALIAS("VECTORS_FLASH", flash_itcm);
+REGION_ALIAS("VECTORS_FLASH_LMA", flash);
 
 /* Flash region to be used for constructors and destructors.*/
-/* REGION_ALIAS("XTORS_FLASH", flash_itcm);*/
-/* REGION_ALIAS("XTORS_FLASH_LMA", flash);*/
+REGION_ALIAS("XTORS_FLASH", flash_itcm);
+REGION_ALIAS("XTORS_FLASH_LMA", flash);
 
 /* Flash region to be used for code text.*/
-/* REGION_ALIAS("TEXT_FLASH", flash_itcm);*/
-/* REGION_ALIAS("TEXT_FLASH_LMA", flash);*/
+REGION_ALIAS("TEXT_FLASH", flash_itcm);
+REGION_ALIAS("TEXT_FLASH_LMA", flash);
 
 /* Flash region to be used for read only data.*/
-/* REGION_ALIAS("RODATA_FLASH", flash_itcm);*/
-/* REGION_ALIAS("RODATA_FLASH_LMA", flash);*/
+REGION_ALIAS("RODATA_FLASH", flash_itcm);
+REGION_ALIAS("RODATA_FLASH_LMA", flash);
 
 /* Flash region to be used for various.*/
-/* REGION_ALIAS("VARIOUS_FLASH", flash_itcm);*/
-/* REGION_ALIAS("VARIOUS_FLASH_LMA", flash);*/
+REGION_ALIAS("VARIOUS_FLASH", flash_itcm);
+REGION_ALIAS("VARIOUS_FLASH_LMA", flash);
 
 /* Flash region to be used for RAM(n) initialization data.*/
 REGION_ALIAS("RAM_INIT_FLASH_LMA", flash);
@@ -79,7 +79,7 @@ REGION_ALIAS("HEAP_RAM", ram0);
 REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
 
 /* rules inclusion.*/
-INCLUDE rules.ld
+INCLUDE rules_stacks.ld
 
 /*===========================================================================*/
 /* Custom sections for STM32F7xx.                                            */
@@ -115,3 +115,12 @@ SECTIONS
         __eth_end__ = .;
     } > ETH_RAM
 }
+
+/* Code rules inclusion.*/
+INCLUDE rules_code.ld
+
+/* nanoCLR rules inclusion.*/
+INCLUDE rules_clr.ld
+
+/* Data rules inclusion.*/
+INCLUDE rules_data.ld

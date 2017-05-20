@@ -6,7 +6,6 @@
 //
 */
 
-
 __ram0_start__          = ORIGIN(ram0);
 __ram0_size__           = LENGTH(ram0);
 __ram0_end__            = __ram0_start__ + __ram0_size__;
@@ -33,132 +32,16 @@ __ram7_size__           = LENGTH(ram7);
 __ram7_end__            = __ram7_start__ + __ram7_size__;
 
 __nanoImage_start__     = ORIGIN(flash);
-__nanoImage_end__       = __nanoImage_start__ + LENGTH(flash);
+__nanoImage_size__      = LENGTH(flash);
+__nanoImage_end__       = __nanoImage_start__ + __nanoImage_size__;
 __deployment_start__    = ORIGIN(deployment);
-__deployment_end__      = __deployment_start__ + LENGTH(deployment);
+__deployment_size__     = LENGTH(deployment);
+__deployment_end__      = __deployment_start__ + __deployment_size__;
 
 ENTRY(Reset_Handler)
 
 SECTIONS
 {
-    . = 0;
-    _text = .;
-
-    startup : ALIGN(16) SUBALIGN(16)
-    {
-        KEEP(*(.vectors))
-    } > flash_itcm AT > flash
-
-    constructors : ALIGN(4) SUBALIGN(4)
-    {
-        __init_array_start = .;
-        KEEP(*(SORT(.init_array.*)))
-        KEEP(*(.init_array))
-        __init_array_end = .;
-    } > flash_itcm AT > flash
-
-    destructors : ALIGN(4) SUBALIGN(4)
-    {
-        __fini_array_start = .;
-        KEEP(*(.fini_array))
-        KEEP(*(SORT(.fini_array.*)))
-        __fini_array_end = .;
-    } > flash_itcm AT > flash
-
-    .text : ALIGN(16) SUBALIGN(16)
-    {
-        *(.text)
-        *(.text.*)
-        *(.glue_7t)
-        *(.glue_7)
-        *(.gcc*)
-    } > flash_itcm AT > flash
-
-    .ARM.extab :
-    {
-        *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > flash_itcm AT > flash
-
-    .ARM.exidx : {
-        __exidx_start = .;
-        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-        __exidx_end = .;
-     } > flash_itcm AT > flash
-
-    .eh_frame_hdr :
-    {
-        *(.eh_frame_hdr)
-    } > flash_itcm AT > flash
-
-    .eh_frame : ONLY_IF_RO
-    {
-        *(.eh_frame)
-    } > flash_itcm AT > flash
-
-    .textalign : ONLY_IF_RO
-    {
-        . = ALIGN(8);
-    } > flash_itcm AT > flash
-
-    /* Constants are placed in the normal flash (non-ITCM) region because it
-       is desirable to make them DMA-accessible.*/
-    .rodata : ALIGN(4)
-    {
-        . = ALIGN(4);
-        __rodata_base__ = .;
-        *(.rodata)
-        *(.rodata.*)
-        . = ALIGN(4);
-        __rodata_end__ = .;
-    } > flash
-
-    /* Legacy symbol, not used anywhere.*/
-    . = ALIGN(4);
-    PROVIDE(_etext = .);
-
-    /* Special section for exceptions stack.*/
-    .mstack :
-    {
-        . = ALIGN(8);
-        __main_stack_base__ = .;
-        . += __main_stack_size__;
-        . = ALIGN(8);
-        __main_stack_end__ = .;
-    } > MAIN_STACK_RAM
-
-    /* Special section for process stack.*/
-    .pstack :
-    {
-        __process_stack_base__ = .;
-        __main_thread_stack_base__ = .;
-        . += __process_stack_size__;
-        . = ALIGN(8);
-        __process_stack_end__ = .;
-        __main_thread_stack_end__ = .;
-    } > PROCESS_STACK_RAM
-
-    /* Special section for non cache-able areas.*/
-    .nocache (NOLOAD) : ALIGN(4)
-    {
-        __nocache_base__ = .;
-        *(.nocache)
-        *(.nocache.*)
-        *(.bss.__nocache_*)
-        . = ALIGN(4);
-        __nocache_end__ = .;
-    } > NOCACHE_RAM
-
-    /* Special section for Ethernet DMA non cache-able areas.*/
-    .eth (NOLOAD) : ALIGN(4)
-    {
-        __eth_base__ = .;
-        *(.eth)
-        *(.eth.*)
-        *(.bss.__eth_*)
-        . = ALIGN(4);
-        __eth_end__ = .;
-    } > ETH_RAM
-
     .data : ALIGN(4)
     {
         . = ALIGN(4);
@@ -172,7 +55,7 @@ SECTIONS
         . = ALIGN(4);
         PROVIDE(_edata = .);
         _data_end = .;
-    } > DATA_RAM AT > flash
+    } > DATA_RAM AT > DATA_RAM_LMA
 
     .bss (NOLOAD) : ALIGN(4)
     {
@@ -184,17 +67,17 @@ SECTIONS
         . = ALIGN(4);
         _bss_end = .;
         PROVIDE(end = .);
-    } > BSS_RAM    
+    } > BSS_RAM
 
     .ram0_init : ALIGN(4)
     {
         . = ALIGN(4);
         __ram0_init_text__ = LOADADDR(.ram0_init);
         __ram0_init__ = .;
-        *(.ram0_init)
-        *(.ram0_init.*)
+        KEEP(*(.ram0_init))
+        KEEP(*(.ram0_init.*))
         . = ALIGN(4);
-    } > ram0 AT > flash
+    } > ram0 AT > RAM_INIT_FLASH_LMA
 
     .ram0 (NOLOAD) : ALIGN(4)
     {
@@ -215,10 +98,10 @@ SECTIONS
         . = ALIGN(4);
         __ram1_init_text__ = LOADADDR(.ram1_init);
         __ram1_init__ = .;
-        *(.ram1_init)
-        *(.ram1_init.*)
+        KEEP(*(.ram1_init))
+        KEEP(*(.ram1_init.*))
         . = ALIGN(4);
-    } > ram1 AT > flash
+    } > ram1 AT > RAM_INIT_FLASH_LMA
 
     .ram1 (NOLOAD) : ALIGN(4)
     {
@@ -239,10 +122,10 @@ SECTIONS
         . = ALIGN(4);
         __ram2_init_text__ = LOADADDR(.ram2_init);
         __ram2_init__ = .;
-        *(.ram2_init)
-        *(.ram2_init.*)
+        KEEP(*(.ram2_init))
+        KEEP(*(.ram2_init.*))
         . = ALIGN(4);
-    } > ram2 AT > flash
+    } > ram2 AT > RAM_INIT_FLASH_LMA
 
     .ram2 (NOLOAD) : ALIGN(4)
     {
@@ -263,10 +146,10 @@ SECTIONS
         . = ALIGN(4);
         __ram3_init_text__ = LOADADDR(.ram3_init);
         __ram3_init__ = .;
-        *(.ram3_init)
-        *(.ram3_init.*)
+        KEEP(*(.ram3_init))
+        KEEP(*(.ram3_init.*))
         . = ALIGN(4);
-    } > ram3 AT > flash
+    } > ram3 AT > RAM_INIT_FLASH_LMA
 
     .ram3 (NOLOAD) : ALIGN(4)
     {
@@ -287,10 +170,10 @@ SECTIONS
         . = ALIGN(4);
         __ram4_init_text__ = LOADADDR(.ram4_init);
         __ram4_init__ = .;
-        *(.ram4_init)
-        *(.ram4_init.*)
+        KEEP(*(.ram4_init))
+        KEEP(*(.ram4_init.*))
         . = ALIGN(4);
-    } > ram4 AT > flash
+    } > ram4 AT > RAM_INIT_FLASH_LMA
 
     .ram4 (NOLOAD) : ALIGN(4)
     {
@@ -311,10 +194,10 @@ SECTIONS
         . = ALIGN(4);
         __ram5_init_text__ = LOADADDR(.ram5_init);
         __ram5_init__ = .;
-        *(.ram5_init)
-        *(.ram5_init.*)
+        KEEP(*(.ram5_init))
+        KEEP(*(.ram5_init.*))
         . = ALIGN(4);
-    } > ram5 AT > flash
+    } > ram5 AT > RAM_INIT_FLASH_LMA
 
     .ram5 (NOLOAD) : ALIGN(4)
     {
@@ -335,10 +218,10 @@ SECTIONS
         . = ALIGN(4);
         __ram6_init_text__ = LOADADDR(.ram6_init);
         __ram6_init__ = .;
-        *(.ram6_init)
-        *(.ram6_init.*)
+        KEEP(*(.ram6_init))
+        KEEP(*(.ram6_init.*))
         . = ALIGN(4);
-    } > ram6 AT > flash
+    } > ram6 AT > RAM_INIT_FLASH_LMA
 
     .ram6 (NOLOAD) : ALIGN(4)
     {
@@ -359,10 +242,10 @@ SECTIONS
         . = ALIGN(4);
         __ram7_init_text__ = LOADADDR(.ram7_init);
         __ram7_init__ = .;
-        *(.ram7_init)
-        *(.ram7_init.*)
+        KEEP(*(.ram7_init))
+        KEEP(*(.ram7_init.*))
         . = ALIGN(4);
-    } > ram7 AT > flash
+    } > ram7 AT > RAM_INIT_FLASH_LMA
 
     .ram7 (NOLOAD) : ALIGN(4)
     {
@@ -377,18 +260,6 @@ SECTIONS
         . = ALIGN(4);
         __ram7_free__ = .;
     } > ram7
-
-    /* nanoFramework CLR managed heap section at the specified RAM section.*/
-    .clr_managed_heap (NOLOAD) :
-    {
-        . = ALIGN(8);
-        PROVIDE(HeapBegin = LOADADDR(.clr_managed_heap));
-        __clr_managed_heap_base__ = .;
-        . += __clr_managed_heap_size__;
-        . = ALIGN(8);
-        __clr_managed_heap_end__ = .;
-        PROVIDE(HeapEnd = .);
-    } > CLR_MANAGED_HEAP_RAM
 
     /* The default heap uses the (statically) unused part of a RAM section.*/
     .heap (NOLOAD) :

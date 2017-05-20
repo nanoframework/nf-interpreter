@@ -35,24 +35,24 @@ MEMORY
    and a load region (_LMA suffix).*/
 
 /* Flash region to be used for exception vectors.*/
-/* REGION_ALIAS("VECTORS_FLASH", flash_itcm);*/
-/* REGION_ALIAS("VECTORS_FLASH_LMA", flash);*/
+REGION_ALIAS("VECTORS_FLASH", flash_itcm);
+REGION_ALIAS("VECTORS_FLASH_LMA", flash);
 
 /* Flash region to be used for constructors and destructors.*/
-/* REGION_ALIAS("XTORS_FLASH", flash_itcm);*/
-/* REGION_ALIAS("XTORS_FLASH_LMA", flash);*/
+REGION_ALIAS("XTORS_FLASH", flash_itcm);
+REGION_ALIAS("XTORS_FLASH_LMA", flash);
 
 /* Flash region to be used for code text.*/
-/* REGION_ALIAS("TEXT_FLASH", flash_itcm);*/
-/* REGION_ALIAS("TEXT_FLASH_LMA", flash);*/
+REGION_ALIAS("TEXT_FLASH", flash_itcm);
+REGION_ALIAS("TEXT_FLASH_LMA", flash);
 
 /* Flash region to be used for read only data.*/
-/* REGION_ALIAS("RODATA_FLASH", flash_itcm);*/
-/* REGION_ALIAS("RODATA_FLASH_LMA", flash);*/
+REGION_ALIAS("RODATA_FLASH", flash_itcm);
+REGION_ALIAS("RODATA_FLASH_LMA", flash);
 
 /* Flash region to be used for various.*/
-/* REGION_ALIAS("VARIOUS_FLASH", flash_itcm);*/
-/* REGION_ALIAS("VARIOUS_FLASH_LMA", flash);*/
+REGION_ALIAS("VARIOUS_FLASH", flash_itcm);
+REGION_ALIAS("VARIOUS_FLASH_LMA", flash);
 
 /* Flash region to be used for RAM(n) initialization data.*/
 REGION_ALIAS("RAM_INIT_FLASH_LMA", flash);
@@ -75,11 +75,9 @@ REGION_ALIAS("BSS_RAM", ram3);
 /* RAM region to be used for the default heap.*/
 REGION_ALIAS("HEAP_RAM", ram0);
 
-/* RAM region to be used for the nanoFramework CLR managed heap.*/
-REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
 
 /* rules inclusion.*/
-INCLUDE rules.ld
+INCLUDE rules_stacks.ld
 
 /*===========================================================================*/
 /* Custom sections for STM32F7xx.                                            */
@@ -115,3 +113,9 @@ SECTIONS
         __eth_end__ = .;
     } > ETH_RAM
 }
+
+/* Code rules inclusion.*/
+INCLUDE rules_code.ld
+
+/* Data rules inclusion.*/
+INCLUDE rules_data.ld

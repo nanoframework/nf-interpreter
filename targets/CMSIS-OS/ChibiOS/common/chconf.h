@@ -1,6 +1,6 @@
 //
 // Copyright (c) 2017 The nanoFramework project contributors
-// Portions Copyright (c) 2006..2015 Giovanni Di Sirio. All rights reserved.
+// Portions Copyright (c) 2006..2015 Giovanni Di Sirio.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
@@ -17,6 +17,8 @@
 
 #ifndef CHCONF_H
 #define CHCONF_H
+
+#define _CHIBIOS_RT_CONF_
 
 /*===========================================================================*/
 /**
@@ -459,7 +461,7 @@
  * @note    This macro can be used to deactivate a power saving mode.
  */
 #define CH_CFG_IDLE_LEAVE_HOOK() {                                          \
-  /* Idle-leave code here.*/                                                \
+  /* Idle-enter code here.*/                                                \
 }
 
 /**
@@ -503,7 +505,10 @@
 /* Port-specific settings (override port settings defaulted in chcore.h).    */
 /*===========================================================================*/
 
-#define CORTEX_VTOR_INIT                    0x00208000U
+///////////////////////////////////////////////////////////////////////////////
+// address of vector table for nanoCLR
+#define CORTEX_VTOR_INIT                0x08008000U
+///////////////////////////////////////////////////////////////////////////////
 
 #endif  /* CHCONF_H */
 
