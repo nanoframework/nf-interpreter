@@ -18,6 +18,8 @@
 #ifndef CHCONF_H
 #define CHCONF_H
 
+#define _CHIBIOS_RT_CONF_
+
 /*===========================================================================*/
 /**
  * @name System timers settings
