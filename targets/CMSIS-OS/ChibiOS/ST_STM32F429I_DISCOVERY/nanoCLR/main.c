@@ -35,13 +35,13 @@ void BlinkerThread(void const * argument)
       palClearPad(GPIOG, GPIOG_LED4_RED);
   }
 }
-osThreadDef(BlinkerThread, osPriorityNormal, 128);
+osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityNormal, 1024);
+osThreadDef(ReceiverThread, osPriorityNormal, 1024, "ReceiverThread");
 
 // declare CLRStartup thread here
-osThreadDef(CLRStartupThread, osPriorityNormal, 1024);
+osThreadDef(CLRStartupThread, osPriorityNormal, 1024, "CLRStartupThread");
 
 //  Application entry point.
 int main(void) {

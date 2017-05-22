@@ -45,7 +45,7 @@ bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         //////////////////////////////////////////////////////////
         
         // read from serial stream 
-        volatile size_t read = chSequentialStreamRead((BaseSequentialStream *)&SDU1, ptr, *size);
+        volatile size_t read = streamRead((BaseSequentialStream *)&SDU1, ptr, *size);
 
         ptr  += read;
         *size -= read;
@@ -104,7 +104,7 @@ bool WP_TransmitMessage(WP_Message* message)
     //////////////////////////////////////////////////////////
 
     // write header to output stream
-    if(chSequentialStreamWrite((BaseSequentialStream *)&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header)) != sizeof(message->m_header)) return false;
+    if(streamWrite((BaseSequentialStream *)&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header)) != sizeof(message->m_header)) return false;
 
     // if there is anything on the payload send it to the output stream
     if(message->m_header.m_size && message->m_payload)
@@ -114,7 +114,7 @@ bool WP_TransmitMessage(WP_Message* message)
         ///////////////////////////////////////////////////////////
         // see description above
         //////////////////////////////////////////////////////////
-        if(chSequentialStreamWrite((BaseSequentialStream *)&SDU1, message->m_payload, message->m_header.m_size ) != message->m_header.m_size) return false;
+        if(streamWrite((BaseSequentialStream *)&SDU1, message->m_payload, message->m_header.m_size ) != message->m_header.m_size) return false;
     }
 
     return true;    

@@ -14,43 +14,49 @@ set(CHIBIOS_PORT_SRCS
     # startup code
     crt1.c
     vectors.c
-    crt0_v7m.s
+    crt0_v7m.S
 
     nvic.c
     hal_lld.c
-    ext_lld_isr.c
+    hal_ext_lld_isr.c
 
-    adc_lld.c
-    can_lld.c
-    ext_lld.c
-    dac_lld.c
+    hal_adc_lld.c
+    hal_can_lld.c
+    hal_ext_lld.c
+    hal_dac_lld.c
     stm32_dma.c
-    pal_lld.c
-    i2c_lld.c
-    mac_lld.c
-    usb_lld.c
-    rtc_lld.c
-    sdc_lld.c
-    i2s_lld.c
-    spi_lld.c
-    gpt_lld.c
-    icu_lld.c
-    pwm_lld.c
-    st_lld.c
-    serial_lld.c
-    uart_lld.c
-    wdg_lld.c
+    hal_pal_lld.c
+    hal_i2c_lld.c
+    hal_mac_lld.c
+    hal_usb_lld.c
+    hal_rtc_lld.c
+    hal_sdc_lld.c
+    hal_i2s_lld.c
+    hal_spi_lld.c
+    hal_gpt_lld.c
+    hal_icu_lld.c
+    hal_pwm_lld.c
+    hal_st_lld.c
+    hal_serial_lld.c
+    hal_uart_lld.c
+    hal_usb_lld.c
+    hal_wdg_lld.c
 
     # RT
     chcore.c
     chcore_v7m.c
-    chcoreasm_v7m.s
+    chcoreasm_v7m.S
 )
 
 foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
     set(CHIBIOS_F7_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(CHIBIOS_F7_SRC_FILE ${SRC_FILE}
         PATHS 
+
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/compilers/GCC
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/common/ARMCMx
 
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/STM32F7xx
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/ADCv2
@@ -63,19 +69,16 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/MACv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/OTGv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RTCv2
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SDMMCv1
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SDMMCv1 #why not sdio?
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SPIv2
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/TIMv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/USARTv2
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/USBv1
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/xWDGv1
 
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/compilers/GCC
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC
 
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/compilers/GCC
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/common/ARMCMx
+
+
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -84,9 +87,7 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
 endforeach()
 
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/devices/STM32F7xx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/devices/STM32F7xx)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ext/CMSIS/ST/STM32F7xx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ext/CMSIS/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/STM32F7xx)
 
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/ADCv2)
@@ -99,10 +100,11 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/por
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/MACv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/OTGv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RTCv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SDMMCv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SDMMCv1)#why not sdio?
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SPIv2)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/TIMv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/USARTv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/USBv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/xWDGv1)
 
 

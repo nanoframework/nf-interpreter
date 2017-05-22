@@ -18,7 +18,7 @@
 MEMORY
 {
     flash       : org = 0x08008000, len = 1M - 32k - 768k   /* flash size less the space reserved for nanoBooter and application deployment*/
-    flash_itcm  : org = 0x00200000, len = 1M
+    flash_itcm  : org = 0x00208000, len = 1M - 32k - 768k
     deployment  : org = 0x08040000, len = 768k              /* space reserved for application deployment */
     ramvt       : org = 0x00000000, len = 0                 /* initial RAM address is reserved for a copy of the vector table */
     ram0        : org = 0x20010000, len = 256k              /* SRAM1 + SRAM2 */
@@ -31,8 +31,34 @@ MEMORY
     ram7        : org = 0x00000000, len = 0
 }
 
+/* For each data/text section two region are defined, a virtual region
+   and a load region (_LMA suffix).*/
+
+/* Flash region to be used for exception vectors.*/
+REGION_ALIAS("VECTORS_FLASH", flash_itcm);
+REGION_ALIAS("VECTORS_FLASH_LMA", flash);
+
+/* Flash region to be used for constructors and destructors.*/
+REGION_ALIAS("XTORS_FLASH", flash_itcm);
+REGION_ALIAS("XTORS_FLASH_LMA", flash);
+
+/* Flash region to be used for code text.*/
+REGION_ALIAS("TEXT_FLASH", flash_itcm);
+REGION_ALIAS("TEXT_FLASH_LMA", flash);
+
+/* Flash region to be used for read only data.*/
+REGION_ALIAS("RODATA_FLASH", flash_itcm);
+REGION_ALIAS("RODATA_FLASH_LMA", flash);
+
+/* Flash region to be used for various.*/
+REGION_ALIAS("VARIOUS_FLASH", flash_itcm);
+REGION_ALIAS("VARIOUS_FLASH_LMA", flash);
+
+/* Flash region to be used for RAM(n) initialization data.*/
+REGION_ALIAS("RAM_INIT_FLASH_LMA", flash);
+
 /* RAM region to be used for Main stack. This stack accommodates the processing
-   of all exceptions and interrupts*/
+   of all exceptions and interrupts.*/
 REGION_ALIAS("MAIN_STACK_RAM", ram3);
 
 /* RAM region to be used for the process stack. This is the stack used by
@@ -41,6 +67,7 @@ REGION_ALIAS("PROCESS_STACK_RAM", ram3);
 
 /* RAM region to be used for data segment.*/
 REGION_ALIAS("DATA_RAM", ram0);
+REGION_ALIAS("DATA_RAM_LMA", flash);
 
 /* RAM region to be used for BSS segment.*/
 REGION_ALIAS("BSS_RAM", ram3);
@@ -48,13 +75,52 @@ REGION_ALIAS("BSS_RAM", ram3);
 /* RAM region to be used for the default heap.*/
 REGION_ALIAS("HEAP_RAM", ram0);
 
+/* RAM region to be used for the nanoFramework CLR managed heap.*/
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
+
+/* rules inclusion.*/
+INCLUDE rules_stacks.ld
+
+/*===========================================================================*/
+/* Custom sections for STM32F7xx.                                            */
+/*===========================================================================*/
+
 /* RAM region to be used for nocache segment.*/
 REGION_ALIAS("NOCACHE_RAM", ram3);
 
 /* RAM region to be used for eth segment.*/
 REGION_ALIAS("ETH_RAM", ram3);
 
-/* RAM region to be used for the nanoFramework CLR managed heap.*/
-REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
+SECTIONS
+{
+    /* Special section for non cache-able areas.*/
+    .nocache (NOLOAD) : ALIGN(4)
+    {
+        __nocache_base__ = .;
+        *(.nocache)
+        *(.nocache.*)
+        *(.bss.__nocache_*)
+        . = ALIGN(4);
+        __nocache_end__ = .;
+    } > NOCACHE_RAM
 
-INCLUDE rules_STM32F7xx.ld
+    /* Special section for Ethernet DMA non cache-able areas.*/
+    .eth (NOLOAD) : ALIGN(4)
+    {
+        __eth_base__ = .;
+        *(.eth)
+        *(.eth.*)
+        *(.bss.__eth_*)
+        . = ALIGN(4);
+        __eth_end__ = .;
+    } > ETH_RAM
+}
+
+/* Code rules inclusion.*/
+INCLUDE rules_code.ld
+
+/* nanoCLR rules inclusion.*/
+INCLUDE rules_clr.ld
+
+/* Data rules inclusion.*/
+INCLUDE rules_data.ld

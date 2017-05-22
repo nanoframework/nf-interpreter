@@ -33,10 +33,10 @@ void BlinkerThread(void const * argument)
   chThdSleepMilliseconds(100);
 }
 
-osThreadDef(BlinkerThread, osPriorityNormal, 128);
+osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityNormal, 1024);
+osThreadDef(ReceiverThread, osPriorityNormal, 1024, "ReceiverThread");
 
 //  Application entry point.
 int main(void) {

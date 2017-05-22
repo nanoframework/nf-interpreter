@@ -23,21 +23,22 @@ include(CHIBIOS_${TARGET_SERIES}_GCC_options)
 # message("ChibiOS board series is ${TARGET_SERIES}") # debug helper
 
 # set include directories for ChibiOS
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os) 
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/license)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/common/ARMCMx)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/oslib/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/ext/CMSIS/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/ext/CMSIS/ST/${TARGET_SERIES})
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/${TARGET_SERIES})
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/cmsis_os)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ports/compilers/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/abstractions/cmsis_os)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/compilers/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ext/CMSIS/include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ext/CMSIS/ST/${TARGET_SERIES})
 
 # append include directory for boards in the nanoFramework ChibiOS 'overlay'
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
@@ -52,32 +53,32 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-O
 set(CHIBIOS_SRCS
     # HAL-OSAL files
     hal.c
-    st.c
+    hal_st.c
     
     hal_buffers.c
     hal_queues.c
     hal_mmcsd.c
     
-    adc.c
-    can.c
-    dac.c
-    ext.c
-    gpt.c
-    i2c.c
-    i2s.c
-    icu.c
-    mac.c
-    mmc_spi.c
-    pal.c
-    pwm.c
-    rtc.c
-    sdc.c
-    serial.c
-    serial_usb.c
-    spi.c
-    uart.c
-    usb.c
-    wdg.c
+    hal_adc.c
+    hal_can.c
+    hal_dac.c
+    hal_ext.c
+    hal_gpt.c
+    hal_i2c.c
+    hal_i2s.c
+    hal_icu.c
+    hal_mac.c
+    hal_mmc_spi.c
+    hal_pal.c
+    hal_pwm.c
+    hal_rtc.c
+    hal_sdc.c
+    hal_serial.c
+    hal_serial_usb.c
+    hal_spi.c
+    hal_uart.c
+    hal_usb.c
+    hal_wdg.c
 
     # OSAL RT
     osal.c
@@ -103,7 +104,7 @@ set(CHIBIOS_SRCS
     chmemcore.c
     chmempools.c
 
-    chqueues.c
+    #chqueues.c #no longer in v17 see commit https://github.com/ChibiOS/ChibiOS/commit/1914bcbbf422a9616dd2c1d6906a8ced3548921d
 
     # required to use malloc and other newlib stuff
     syscalls.c
@@ -117,14 +118,13 @@ set(CHIBIOS_SRCS
 )
 
 foreach(SRC_FILE ${CHIBIOS_SRCS})
-    set(CHIBIOS_SRC_FILE SRC_FILE-NOTFOUND)
+    set(CHIBIOS_SRC_FILE SRC_FILE -NOTFOUND)
     find_file(CHIBIOS_SRC_FILE ${SRC_FILE}
         PATHS 
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/src
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/src
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/oslib/src
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/ports/ARMCMx/cmsis_os
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/abstractions/cmsis_os
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various
         

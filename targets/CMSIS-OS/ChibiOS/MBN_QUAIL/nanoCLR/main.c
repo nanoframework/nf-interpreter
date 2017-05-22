@@ -60,13 +60,13 @@ void DisplayWrite(uint8_t x, uint8_t y, char * text)
 	  i2cReleaseBus(&I2CD1);
 }
 
-osThreadDef(BlinkerThread, osPriorityNormal, 128);
+osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityNormal, 1024);
+osThreadDef(ReceiverThread, osPriorityNormal, 1024, "ReceiverThread");
 
 // declare CLRStartup thread here
-osThreadDef(CLRStartupThread, osPriorityNormal, 1024);
+osThreadDef(CLRStartupThread, osPriorityNormal, 1024, "CLRStartupThread");
 
 static const I2CConfig i2cconfig = { OPMODE_I2C, 100000U, STD_DUTY_CYCLE };
 

@@ -4,14 +4,14 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _USBCFG_H_
-#define _USBCFG_H_
+#ifndef USBCFG_H
+#define USBCFG_H
 
 extern const USBConfig usbcfg;
 extern SerialUSBConfig serusbcfg;
 extern SerialUSBDriver SDU1;
 
-#endif  /* _USBCFG_H_ */
+#endif  /* USBCFG_H */
 
 /** @} */
 

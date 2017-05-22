@@ -18,6 +18,8 @@
 #ifndef CHCONF_H
 #define CHCONF_H
 
+#define _CHIBIOS_RT_CONF_
+
 /*===========================================================================*/
 /**
  * @name System timers settings
@@ -503,7 +505,7 @@
 /* Port-specific settings (override port settings defaulted in chcore.h).    */
 /*===========================================================================*/
 
-#define CORTEX_VTOR_INIT                    0x00200000U
+#define CORTEX_VTOR_INIT                    0x00208000U
 
 #endif  /* CHCONF_H */
 
