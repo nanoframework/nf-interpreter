@@ -29,10 +29,6 @@ void LaunchCLR(uint32_t address)
     // need to set stack pointer from CLR vector table
     __set_MSP((uint32_t)nanoCLRVectorTable->init_stack);
 
-    // clear memory caches
-    SCB_DisableDCache();
-    SCB_DisableICache();
-
     // make the jump to nanoCLR, at last
     JumpToNanoCLR();
 }
