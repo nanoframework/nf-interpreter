@@ -8,42 +8,41 @@
 
 const BlockRange BlockRange1[] = 
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 7   }           // 08000000 nanoBooter          
+    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 3   }           // 08000000 nanoBooter          
 };
 
 const BlockRange BlockRange2[] = 
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 9   }           // 08004000 nanoCLR          
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 34   }           // 08004000 nanoCLR    
 };
 
 const BlockRange BlockRange3[] =
-{
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 9   },          // 08020000 nanoCLR         
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   10, 26 }           // 08080000 deployment  
+{      
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 23 }           // 08027000 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 
 {
     {
         0x08000000,                         // start address for block region
-        8,                                  // total number of blocks in this region
-        0x800,                              // total number of bytes per block
+        4,                                  // total number of blocks in this region
+        0x1000,                              // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
     },
 
     {
         0x08004000,                         // start address for block region
-        10,                                 // total number of blocks in this region
-        0x800,                              // total number of bytes per block
+        35,                                 // total number of blocks in this region
+        0x1000,                              // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange2),
         BlockRange2,
     },
 
     {
         0x08027000,                         // start address for block region
-        26,                                 // total number of blocks in this region
-        0x800,                              // total number of bytes per block
+        24,                                 // total number of blocks in this region
+        0x1000,                              // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange3),
         BlockRange3,
     }
@@ -80,7 +79,7 @@ MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig =
         0,                          // UINT32 CPU_MEMORY_CONFIG::ReleaseCounts;
         16,                         // UINT32 CPU_MEMORY_CONFIG::BitWidth;
         0x08000000,                 // UINT32 CPU_MEMORY_CONFIG::BaseAddress;
-        0x00010000,                 // UINT32 CPU_MEMORY_CONFIG::SizeInBytes;
+        0x00040000,                 // UINT32 CPU_MEMORY_CONFIG::SizeInBytes;
         0,                          // UINT8  CPU_MEMORY_CONFIG::XREADYEnable 
         0,                          // UINT8  CPU_MEMORY_CONFIG::ByteSignalsForRead 
         0,                          // UINT8  CPU_MEMORY_CONFIG::ExternalBufferEnable
