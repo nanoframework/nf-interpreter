@@ -4,6 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "CorLib.h"
+#include <hal.h>
 
 CLR_INT64 s_UTCMask   = ULONGLONGCONSTANT(0x8000000000000000);
 CLR_INT64 s_TickMask  = ULONGLONGCONSTANT(0x7FFFFFFFFFFFFFFF);
@@ -155,60 +156,6 @@ HRESULT Library_corlib_native_System_DateTime::get_Year___I4( CLR_RT_StackFrame&
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_corlib_native_System_DateTime::ToLocalTime___SystemDateTime( CLR_RT_StackFrame& stack )
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    CLR_INT64*                pThis;
-    CLR_INT64*                pRes;
-
-    pThis = Library_corlib_native_System_DateTime::GetValuePtr( stack ); FAULT_ON_NULL(pThis);
-    pRes  = Library_corlib_native_System_DateTime::NewObject  ( stack );
-
-    if ( *pThis & s_UTCMask )
-    {
-        // The most significant bit of *val keeps flag if time is UTC.
-        // We cannot change *val, so we create copy and clear the bit.
-        CLR_INT64 ticks = *pThis & s_TickMask;
-
-        // UNDONE: FIXME *pRes = ticks + TIME_ZONE_OFFSET;
-    }
-    else
-    {
-        // If *pThis is already local time - we do not need conversion.
-        *pRes = *pThis;
-    }
-    
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_corlib_native_System_DateTime::ToUniversalTime___SystemDateTime( CLR_RT_StackFrame& stack )
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    CLR_INT64*                pThis;
-    CLR_INT64*                pRes;
-
-    pThis = Library_corlib_native_System_DateTime::GetValuePtr( stack ); FAULT_ON_NULL(pThis);
-    pRes  = Library_corlib_native_System_DateTime::NewObject  ( stack );
-
-    if ( !(*pThis & s_UTCMask) )
-    {
-        // UNDONE: FIXME *pRes = *pThis - TIME_ZONE_OFFSET;
-        // In converted time we need to set UTC mask
-        *pRes |= s_UTCMask;
-    }
-    else
-    {
-        // If *pThis is already UTS time - we do not need conversion.
-        *pRes = *pThis;
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -225,28 +172,29 @@ HRESULT Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4(
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_corlib_native_System_DateTime::get_Now___STATIC__SystemDateTime( CLR_RT_StackFrame& stack )
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    CLR_INT64* pRes = NewObject( stack );
-
-    // FIXME time now is always UTC
-    *pRes = HAL_Time_CurrentTime();
-
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
-
 HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTime( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     CLR_INT64* pRes = NewObject( stack );
+    SYSTEMTIME st; 
+    RTCDateTime _dateTime;
 
-    // FIXME time now is always UTC
-    *pRes = HAL_Time_CurrentTime() | s_UTCMask;
+    rtcGetTime(&RTCD1, &_dateTime);
+    st.wMilliseconds =(unsigned short) (_dateTime.millisecond % 1000);
+    _dateTime.millisecond /= 1000;
+    st.wSecond = (unsigned short) (_dateTime.millisecond % 60);
+    _dateTime.millisecond /= 60;
+    st.wMinute = (unsigned short) (_dateTime.millisecond % 60);
+    _dateTime.millisecond /= 60;
+    st.wMinute = (unsigned short) (_dateTime.millisecond % 24);
+    st.wDay = (unsigned short) _dateTime.day;
+    st.wMonth = (unsigned short) _dateTime.month;
+    st.wYear = (unsigned short) _dateTime.year;
+    st.wDayOfWeek = (unsigned short) _dateTime.dayofweek;
+
+    *pRes = HAL_Time_FromSystemTime( &st );
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -257,19 +205,15 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
     NANOCLR_HEADER();
 
     CLR_INT64* pRes = NewObject( stack );
+	SYSTEMTIME st; 
+    RTCDateTime _dateTime;
 
-    {
-        SYSTEMTIME st; 
-        // FIXME time now is always UTC
-        HAL_Time_ToSystemTime( HAL_Time_CurrentTime(), &st );
+    rtcGetTime(&RTCD1, &_dateTime);
+    st.wDay = (unsigned short) _dateTime.day;
+    st.wMonth = (unsigned short) _dateTime.month;
+    st.wYear = (unsigned short) _dateTime.year;
 
-        st.wHour         = 0;
-        st.wMinute       = 0;
-        st.wSecond       = 0;
-        st.wMilliseconds = 0;
-
-        *pRes = HAL_Time_FromSystemTime( &st );
-    }
+    *pRes = HAL_Time_FromSystemTime( &st );
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -282,9 +226,11 @@ CLR_INT64* Library_corlib_native_System_DateTime::NewObject( CLR_RT_StackFrame& 
     CLR_RT_HeapBlock& ref = stack.PushValue();
 
     ref.SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_DATETIME, 0, 1) );
-    ref.ClearData(                                                  );
+    ref.ClearData();
 
-    return (CLR_INT64*)&ref.NumericByRef().s8;
+    //return (CLR_INT64*)&ref.NumericByRef().s8;
+    // NOTE: reinterpret_cast is a test. It can be safely removed ;)
+    return reinterpret_cast<CLR_INT64*>(&ref.NumericByRef().s8);
 }
 
 CLR_INT64* Library_corlib_native_System_DateTime::GetValuePtr( CLR_RT_StackFrame& stack )
@@ -302,7 +248,6 @@ CLR_INT64* Library_corlib_native_System_DateTime::GetValuePtr( CLR_RT_HeapBlock&
     if(dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF)
     {
         obj = obj->Dereference(); if(!obj) return NULL;
-
         dt = obj->DataType();
     }
 

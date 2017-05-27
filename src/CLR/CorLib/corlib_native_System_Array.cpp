@@ -88,7 +88,7 @@ HRESULT Library_corlib_native_System_Array::Clear___STATIC__VOID__SystemArray__I
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Array::TrySZIndexOf___STATIC__BOOLEAN__SystemArray__I4__I4__OBJECT__BYREF_I4( CLR_RT_StackFrame& stack )
+HRESULT Library_corlib_native_System_Array::TrySzIndexOf___STATIC__BOOLEAN__SystemArray__I4__I4__OBJECT__BYREF_I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -97,7 +97,7 @@ HRESULT Library_corlib_native_System_Array::TrySZIndexOf___STATIC__BOOLEAN__Syst
     CLR_INT32 count = stack.Arg2().NumericByRefConst().s4;    
     CLR_INT32 stop  = start + count;
 
-    NANOCLR_SET_AND_LEAVE(TrySZIndexOf( stack, stack.Arg0(), stack.Arg3(), start, stop, true, stack.Arg4() ));
+    NANOCLR_SET_AND_LEAVE(TrySzIndexOf( stack, stack.Arg0(), stack.Arg3(), start, stop, true, stack.Arg4() ));
 
     NANOCLR_NOCLEANUP();
 }
@@ -147,7 +147,7 @@ HRESULT Library_corlib_native_System_Array::Copy( CLR_RT_StackFrame& stack, CLR_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Array::TrySZIndexOf( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& argSrc, CLR_RT_HeapBlock& match, int start, int stop, bool fForward, CLR_RT_HeapBlock& retValue )
+HRESULT Library_corlib_native_System_Array::TrySzIndexOf( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& argSrc, CLR_RT_HeapBlock& match, int start, int stop, bool fForward, CLR_RT_HeapBlock& retValue )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();

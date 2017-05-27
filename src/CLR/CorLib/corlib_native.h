@@ -126,13 +126,13 @@ struct Library_corlib_native_System_Array
     NANOCLR_NATIVE_DECLARE(CreateInstance___STATIC__SystemArray__SystemType__I4);
     NANOCLR_NATIVE_DECLARE(Copy___STATIC__VOID__SystemArray__I4__SystemArray__I4__I4);
     NANOCLR_NATIVE_DECLARE(Clear___STATIC__VOID__SystemArray__I4__I4);
-    NANOCLR_NATIVE_DECLARE(TrySZIndexOf___STATIC__BOOLEAN__SystemArray__I4__I4__OBJECT__BYREF_I4);
+	NANOCLR_NATIVE_DECLARE(TrySzIndexOf___STATIC__BOOLEAN__SystemArray__I4__I4__OBJECT__BYREF_I4);
 
     //--//
 
     static HRESULT Clear       ( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& arg   , int index   ,                                         int length                                            );
     static HRESULT Copy        ( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& argSrc, int indexSrc, CLR_RT_HeapBlock& argDst, int indexDst, int length                                            );
-    static HRESULT TrySZIndexOf( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& argSrc,               CLR_RT_HeapBlock& match , int start   , int stop  , bool fForward, CLR_RT_HeapBlock& retValue );
+    static HRESULT TrySzIndexOf( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& argSrc,               CLR_RT_HeapBlock& match , int start   , int stop  , bool fForward, CLR_RT_HeapBlock& retValue );
 };
 
 struct Library_corlib_native_System_Array__SZArrayEnumerator
@@ -336,25 +336,6 @@ struct Library_corlib_native_System_Convert
 
 };
 
-struct Library_corlib_native_System_TimeZone
-{
-    static const int FIELD__m_id = 1;
-
-    NANOCLR_NATIVE_DECLARE(GetTimeZoneOffset___STATIC__I8);
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_CurrentSystemTimeZone
-{
-    static const int FIELD__m_ticksOffset = 2;
-
-
-    //--//
-
-};
-
 struct Library_corlib_native_System_DateTime
 {
     static const int FIELD_STATIC__MinValue      = 10;
@@ -373,10 +354,7 @@ struct Library_corlib_native_System_DateTime
     NANOCLR_NATIVE_DECLARE(get_Month___I4);
     NANOCLR_NATIVE_DECLARE(get_Second___I4);
     NANOCLR_NATIVE_DECLARE(get_Year___I4);
-    NANOCLR_NATIVE_DECLARE(ToLocalTime___SystemDateTime);
-    NANOCLR_NATIVE_DECLARE(ToUniversalTime___SystemDateTime);
     NANOCLR_NATIVE_DECLARE(DaysInMonth___STATIC__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(get_Now___STATIC__SystemDateTime);
     NANOCLR_NATIVE_DECLARE(get_UtcNow___STATIC__SystemDateTime);
     NANOCLR_NATIVE_DECLARE(get_Today___STATIC__SystemDateTime);
 
@@ -1157,5 +1135,6 @@ struct Library_corlib_native_System_Collections_Hashtable__ValueCollection
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib;
+
 
 #endif  //_CORLIB_NATIVE_H_

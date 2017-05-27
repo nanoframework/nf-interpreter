@@ -23,8 +23,10 @@ void BlinkerThread()
 	// loop until thread receives a request to terminate
 	while (!chThdShouldTerminateX()) 
 	{
-		palClearPad(GPIOC, GPIOC_LED3);
-		palSetPad(GPIOE, GPIOE_LED1);
+		//palClearPad(GPIOC, GPIOC_LED3);
+		//palSetPad(GPIOE, GPIOE_LED1);
+    palClearLine(LINE_LED3);
+    palSetLine(LINE_LED1);
 		osDelay(200);
 		palClearPad(GPIOE, GPIOE_LED1);
 		palSetPad(GPIOE, GPIOE_LED2);
@@ -103,6 +105,8 @@ int main(void) {
 
   // start kernel, after this the main() thread has priority osPriorityNormal by default
   osKernelStart();
+  
+  rtcInit();
 
   i2cStart(&I2CD1, &i2cconfig);
   

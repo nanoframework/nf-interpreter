@@ -22,7 +22,8 @@ const int CummulativeDaysForMonth[13] = {0, 31, 59, 90, 120, 151, 181, 212, 243,
 #define MINUTES_TO_HOUR             60
 #define HOURS_TO_DAY                24
 
-signed long long  HAL_Time_CurrentTime() { 
+signed long long  HAL_Time_CurrentTime()
+{ 
     return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() ); 
 };
 

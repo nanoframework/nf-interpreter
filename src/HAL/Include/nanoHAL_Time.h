@@ -53,24 +53,6 @@ signed long long HAL_Time_SysTicksToTime(unsigned int sysTicks);
 signed long long  HAL_Time_CurrentTime();
 
 /// <summary>
-/// UTC time according to this system. 
-/// </summary>
-/// <returns>Returns current UTC time in 100ns elapsed since 1/1/1601:00:00:00.000 UTC.</returns>
-// __nfweak signed long long       Time_GetUtcTime();
-
-/// <summary>
-/// Local time according to the Time subsystem.
-/// </summary>
-/// <returns>Local time in 100ns elapsed since 1/1/1601:00:00:00.000 local time.</returns>
-// __nfweak signed long long       Time_GetLocalTime();
-
-/// <summary>
-/// Offset from GMT.
-/// </summary>
-/// <returns>In minutes, for example Pacific Time would be GMT-8 = -480.</returns>
-// __nfweak signed int Time_GetTimeZoneOffset();
-
-/// <summary>
 /// Retrieves time since device was booted.
 /// </summary>
 /// <returns>Time in 100ns.</returns>
