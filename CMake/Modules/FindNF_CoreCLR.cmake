@@ -120,7 +120,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Threading_Timer.cpp
     corlib_native_System_Threading_WaitHandle.cpp
     corlib_native_System_TimeSpan.cpp
-    corlib_native_System_TimeZone.cpp
     corlib_native_System_Type.cpp
     corlib_native_System_ValueType.cpp
     corlib_native_System_WeakReference.cpp
