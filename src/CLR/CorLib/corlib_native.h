@@ -126,13 +126,13 @@ struct Library_corlib_native_System_Array
     NANOCLR_NATIVE_DECLARE(CreateInstance___STATIC__SystemArray__SystemType__I4);
     NANOCLR_NATIVE_DECLARE(Copy___STATIC__VOID__SystemArray__I4__SystemArray__I4__I4);
     NANOCLR_NATIVE_DECLARE(Clear___STATIC__VOID__SystemArray__I4__I4);
-    NANOCLR_NATIVE_DECLARE(TrySZIndexOf___STATIC__BOOLEAN__SystemArray__I4__I4__OBJECT__BYREF_I4);
+    NANOCLR_NATIVE_DECLARE(TrySzIndexOf___STATIC__BOOLEAN__SystemArray__I4__I4__OBJECT__BYREF_I4);
 
     //--//
 
     static HRESULT Clear       ( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& arg   , int index   ,                                         int length                                            );
     static HRESULT Copy        ( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& argSrc, int indexSrc, CLR_RT_HeapBlock& argDst, int indexDst, int length                                            );
-    static HRESULT TrySZIndexOf( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& argSrc,               CLR_RT_HeapBlock& match , int start   , int stop  , bool fForward, CLR_RT_HeapBlock& retValue );
+    static HRESULT TrySzIndexOf( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& argSrc,               CLR_RT_HeapBlock& match , int start   , int stop  , bool fForward, CLR_RT_HeapBlock& retValue );
 };
 
 struct Library_corlib_native_System_Array__SZArrayEnumerator
@@ -329,8 +329,9 @@ struct Library_corlib_native_System_Collections_Stack
 
 struct Library_corlib_native_System_Convert
 {
-    NANOCLR_NATIVE_DECLARE(ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(FromBase64CharArray___STATIC__SZARRAY_U1__SZARRAY_CHAR__I4);
+	NANOCLR_NATIVE_DECLARE(NativeToInt32___STATIC__I4__STRING__I4);
+    NANOCLR_NATIVE_DECLARE(NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8);
+    NANOCLR_NATIVE_DECLARE(NativeToDouble___STATIC__R8__STRING);
 
     //--//
 
