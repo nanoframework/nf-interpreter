@@ -2188,9 +2188,9 @@ HRESULT CLR_RT_AppDomain::GetManagedObject( CLR_RT_HeapBlock& res )
 
         pRes = res.Dereference();
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance( this, *pRes, pRes[ Library_corlib_native_System_AppDomain::FIELD__m_appDomain ] ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance( this, *pRes, pRes[ Library_corlib_native_System_AppDomain::FIELD___appDomain ] ));
 
-        pRes[ Library_corlib_native_System_AppDomain::FIELD__m_friendlyName ].SetObjectReference( m_strName );
+        pRes[ Library_corlib_native_System_AppDomain::FIELD___friendlyName ].SetObjectReference( m_strName );
     }
 
     NANOCLR_CLEANUP();

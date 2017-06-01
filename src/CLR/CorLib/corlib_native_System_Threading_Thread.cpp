@@ -14,17 +14,17 @@ HRESULT Library_corlib_native_System_Threading_Thread::_ctor___VOID__SystemThrea
 
     CLR_RT_HeapBlock* pThis = stack.This();
 
-    pThis[ FIELD__m_Delegate ].Assign            ( stack.Arg1() );
+    pThis[ FIELD___delegate ].Assign            ( stack.Arg1() );
     
     // Thread is always constructed with normal priority.
-    pThis[ FIELD__m_Priority ].NumericByRef().s4 = ThreadPriority::Normal;
+    pThis[ FIELD___priority ].NumericByRef().s4 = ThreadPriority::Normal;
     
     // Book a Thread ID
-    pThis[ FIELD__m_Id       ].NumericByRef().s4 = g_CLR_RT_ExecutionEngine.GetNextThreadId();
+    pThis[ FIELD___id       ].NumericByRef().s4 = g_CLR_RT_ExecutionEngine.GetNextThreadId();
     
            
 #if defined(NANOCLR_APPDOMAINS)
-    NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance( g_CLR_RT_ExecutionEngine.GetCurrentAppDomain(), *pThis, pThis[ FIELD__m_AppDomain ] ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance( g_CLR_RT_ExecutionEngine.GetCurrentAppDomain(), *pThis, pThis[ FIELD___appDomain ] ));
     NANOCLR_NOCLEANUP();
 #else
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -52,16 +52,16 @@ HRESULT Library_corlib_native_System_Threading_Thread::Start___VOID( CLR_RT_Stac
     }
 
     pThis = stack.This();                                     FAULT_ON_NULL(pThis);
-    dlg   = pThis[ FIELD__m_Delegate ].DereferenceDelegate(); FAULT_ON_NULL(dlg  );
+    dlg   = pThis[ FIELD___delegate ].DereferenceDelegate(); FAULT_ON_NULL(dlg  );
     
     // Set priority of new sub-thread to the priority stored in the thread C# object.
     // The new sub-thread becames the current one, it should always match priority stored in Thread C# object 
 
-    pri   = pThis[ FIELD__m_Priority ].NumericByRef().s4;
+    pri   = pThis[ FIELD___priority ].NumericByRef().s4;
 
     pThis->ResetFlags( CLR_RT_HeapBlock::HB_Signaled );
 
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewThread( th, dlg, pri, pThis[ FIELD__m_Id ].NumericByRef().s4 ));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewThread( th, dlg, pri, pThis[ FIELD___id ].NumericByRef().s4 ));
 
     NANOCLR_SET_AND_LEAVE(SetThread( stack, th ));
 
@@ -156,7 +156,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_Priority___SystemThre
     CLR_RT_HeapBlock* pThis = stack.This(); FAULT_ON_NULL(pThis);
     
     // Reads priority stored in C# object. 
-    pri = pThis[ FIELD__m_Priority ].NumericByRef().s4;
+    pri = pThis[ FIELD___priority ].NumericByRef().s4;
 
     // Here we check consistency of values stored in C# and internal thread objects.
     // Get thread associated with C# thread object. It might be NULL if thread was not started.
@@ -172,7 +172,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_Priority___SystemThre
        pri = th->GetThreadPriority();
     
        // We store it back to managed object to keep values consistent.
-       pThis[ FIELD__m_Priority ].NumericByRef().s4 = pri;
+       pThis[ FIELD___priority ].NumericByRef().s4 = pri;
     }
 
     // Zero priority correspond is equal to managed. ThreadPriority.Lowest.
@@ -209,7 +209,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::set_Priority___VOID__Syst
         NANOCLR_CHECK_HRESULT(GetThread( stack, th, false, true ));
 
         // Save priority to managed C# object
-        pThis[ FIELD__m_Priority ].NumericByRef().s4 = pri;
+        pThis[ FIELD___priority ].NumericByRef().s4 = pri;
 
         if ( th )
         {
@@ -241,7 +241,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_ManagedThreadId___I4(
     CLR_RT_HeapBlock* pThis = stack.This(); FAULT_ON_NULL(pThis);
     
     // Reads priority stored in C# object. 
-    id = pThis[ FIELD__m_Id ].NumericByRef().s4;
+    id = pThis[ FIELD___id ].NumericByRef().s4;
 
     // Return value back to C# code.
     stack.SetResult_I4( id );
@@ -420,7 +420,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATI
         
 #if defined(NANOCLR_APPDOMAINS)
         {
-            CLR_RT_ObjectToEvent_Source* appDomainSrc =  CLR_RT_ObjectToEvent_Source::ExtractInstance( pManagedThread[ FIELD__m_AppDomain ] );
+            CLR_RT_ObjectToEvent_Source* appDomainSrc =  CLR_RT_ObjectToEvent_Source::ExtractInstance( pManagedThread[ FIELD___appDomain ] );
 
             FAULT_ON_NULL_HR(appDomainSrc, CLR_E_FAIL);
             
@@ -450,10 +450,10 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATI
             
     pRes = top.Dereference();
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance( thread, *pRes, pRes[ FIELD__m_Thread ] ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance( thread, *pRes, pRes[ FIELD___thread ] ));
 
 #if defined(NANOCLR_APPDOMAINS)
-    NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance( g_CLR_RT_ExecutionEngine.GetCurrentAppDomain(), *pRes, pRes[ FIELD__m_AppDomain ] ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance( g_CLR_RT_ExecutionEngine.GetCurrentAppDomain(), *pRes, pRes[ FIELD___appDomain ] ));
 #endif
 
     NANOCLR_NOCLEANUP();
@@ -482,7 +482,7 @@ CLR_RT_ObjectToEvent_Source* Library_corlib_native_System_Threading_Thread::GetT
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock* pThis = stack.This();
 
-    return CLR_RT_ObjectToEvent_Source::ExtractInstance( pThis[ FIELD__m_Thread ] );
+    return CLR_RT_ObjectToEvent_Source::ExtractInstance( pThis[ FIELD___thread ] );
 }
 
 void Library_corlib_native_System_Threading_Thread::ResetThreadReference( CLR_RT_StackFrame& stack )
@@ -504,7 +504,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::SetThread( CLR_RT_StackFr
 
     ResetThreadReference( stack );
 
-    NANOCLR_SET_AND_LEAVE(CLR_RT_ObjectToEvent_Source::CreateInstance( th, *pThis, pThis[ FIELD__m_Thread ] ));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_ObjectToEvent_Source::CreateInstance( th, *pThis, pThis[ FIELD___thread ] ));
 
     NANOCLR_NOCLEANUP();
 }

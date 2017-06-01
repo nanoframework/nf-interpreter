@@ -116,7 +116,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Threading_ManualResetEvent.cpp
     corlib_native_System_Threading_Monitor.cpp
     corlib_native_System_Threading_Thread.cpp
-    corlib_native_System_Threading_ThreadAbortException.cpp    
     corlib_native_System_Threading_Timer.cpp
     corlib_native_System_Threading_WaitHandle.cpp
     corlib_native_System_TimeSpan.cpp

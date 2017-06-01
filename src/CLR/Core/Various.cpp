@@ -30,9 +30,9 @@ HRESULT CLR_RT_ArrayListHelper::PrepareArrayList( CLR_RT_HeapBlock& thisRef, int
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pThis[ FIELD__m_items ], capacity, g_CLR_RT_WellKnownTypes.m_Object ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pThis[ FIELD___items ], capacity, g_CLR_RT_WellKnownTypes.m_Object ));
 
-    pThis[ FIELD__m_size ].NumericByRef().s4 = count;
+    pThis[ FIELD___size ].NumericByRef().s4 = count;
 
     NANOCLR_NOCLEANUP();
 }
@@ -46,7 +46,7 @@ HRESULT CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( CLR_RT_HeapBlock & th
     CLR_RT_HeapBlock* items;
 
     pThis = thisRef.Dereference(); FAULT_ON_NULL(pThis);
-    items = &pThis[ FIELD__m_items ];
+    items = &pThis[ FIELD___items ];
 
     if(items->DataType() != DATATYPE_OBJECT)
     {
@@ -61,7 +61,7 @@ HRESULT CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( CLR_RT_HeapBlock & th
     }
 
     capacity = array->m_numOfElements;
-    count    = pThis[ FIELD__m_size ].NumericByRef().s4;
+    count    = pThis[ FIELD___size ].NumericByRef().s4;
 
     NANOCLR_NOCLEANUP();
 }

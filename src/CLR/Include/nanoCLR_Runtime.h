@@ -751,8 +751,8 @@ struct CLR_RT_ArrayListHelper
 {
     static const int c_defaultCapacity = 2;
 
-    static const int FIELD__m_items    = 1;
-    static const int FIELD__m_size     = 2;
+    static const int FIELD___items    = 1;
+    static const int FIELD___size     = 2;
 
     //--//
 

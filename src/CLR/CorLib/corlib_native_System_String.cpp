@@ -33,6 +33,16 @@ static const CLR_UINT16 c_WhiteSpaces[] =
 
 //--//
 
+HRESULT Library_corlib_native_System_String::CompareTo___I4__OBJECT( CLR_RT_StackFrame& stack )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(Library_corlib_native_System_String::CompareTo___I4__STRING( stack ));
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_String::get_Chars___CHAR__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -221,15 +231,6 @@ HRESULT Library_corlib_native_System_String::_ctor___VOID__CHAR__I4( CLR_RT_Stac
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_String::CompareTo___I4__OBJECT( CLR_RT_StackFrame& stack )
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    NANOCLR_SET_AND_LEAVE(Library_corlib_native_System_String::CompareTo___I4__STRING( stack ));
-
-    NANOCLR_NOCLEANUP();
-}
 
 HRESULT Library_corlib_native_System_String::CompareTo___I4__STRING( CLR_RT_StackFrame& stack )
 {
@@ -1084,4 +1085,3 @@ HRESULT Library_corlib_native_System_String::ConvertToCharArray( CLR_RT_StackFra
     NATIVE_PROFILE_CLR_CORE();
     return ConvertToCharArray( stack.Arg0().RecoverString(), ref, array, startIndex, length );
 }
-

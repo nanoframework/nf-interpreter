@@ -209,7 +209,7 @@ HRESULT Library_corlib_native_System_AppDomain::GetAppDomain( CLR_RT_HeapBlock& 
     _ASSERTE(obj->DataType()         == DATATYPE_CLASS                            );
     _ASSERTE(obj->ObjectCls().m_data == g_CLR_RT_WellKnownTypes.m_AppDomain.m_data);
     
-    src       = CLR_RT_ObjectToEvent_Source::ExtractInstance( obj[ FIELD__m_appDomain ] ); FAULT_ON_NULL(src);
+    src       = CLR_RT_ObjectToEvent_Source::ExtractInstance( obj[ FIELD___appDomain ] ); FAULT_ON_NULL(src);
     appDomain = (CLR_RT_AppDomain*)src->m_eventPtr                                       ; FAULT_ON_NULL(appDomain);
     
     _ASSERTE(appDomain->DataType() == DATATYPE_APPDOMAIN_HEAD);

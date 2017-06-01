@@ -6,25 +6,6 @@
 #include "CorLib.h"
 
 
-HRESULT Library_corlib_native_System_Resources_ResourceManager::FindResource___STATIC__I4__STRING__SystemReflectionAssembly( CLR_RT_StackFrame& stack )
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    CLR_RT_Assembly_Instance assm;
-    CLR_INT32                resourceFileId;
-    CLR_RT_HeapBlock*        pArgs = &stack.Arg0();
-
-    const char* szText = pArgs[ 0 ].RecoverString(); FAULT_ON_NULL(szText);
-    
-    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_Assembly::GetTypeDescriptor( *pArgs[ 1 ].Dereference(), assm ));
-
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.LocateResourceFile( assm, szText, resourceFileId ));
-
-    stack.SetResult_I4( resourceFileId );
-
-    NANOCLR_NOCLEANUP();
-}
 
 HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2( CLR_RT_StackFrame& stack )
 {
@@ -38,7 +19,7 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInterna
     const CLR_UINT8*           buf;
     CLR_RT_HeapBlock*          pThis          =   stack.This();
     CLR_RT_HeapBlock*          pArgs          = &(stack.Arg1());
-    CLR_UINT32                 resourceFileId = pThis[ FIELD__m_resourceFileId ].NumericByRefConst().s4; 
+    CLR_UINT32                 resourceFileId = pThis[ FIELD___resourceFileId ].NumericByRefConst().s4; 
     CLR_RT_HeapBlock&          top            = stack.PushValueAndClear();
 
     //
@@ -50,7 +31,7 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInterna
         stack.m_flags       |= CLR_RT_StackFrame::c_CompactAndRestartOnOutOfMemory;
     }
 
-    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_Assembly::GetTypeDescriptor( *pThis[ FIELD__m_assembly ].Dereference(), assm ));
+    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_Assembly::GetTypeDescriptor( *pThis[ FIELD___assembly ].Dereference(), assm ));
     
     NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.LocateResource( assm, resourceFileId, pArgs[ 0 ].NumericByRefConst().s2, resource, size ));
 
@@ -124,7 +105,7 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInterna
     const CLR_UINT8*           buf;
     CLR_RT_HeapBlock*          pThis          =   stack.This();
     CLR_RT_HeapBlock*          pArgs          = &(stack.Arg1());
-    CLR_UINT32                 resourceFileId = pThis[ FIELD__m_resourceFileId ].NumericByRefConst().s4; 
+    CLR_UINT32                 resourceFileId = pThis[ FIELD___resourceFileId ].NumericByRefConst().s4; 
     CLR_RT_HeapBlock&          top            = stack.PushValueAndClear();
     CLR_UINT32                 offset         = pArgs[ 1 ].NumericByRef().s4;
     CLR_UINT32                 length         = pArgs[ 2 ].NumericByRef().s4;
@@ -138,7 +119,7 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInterna
         stack.m_flags       |= CLR_RT_StackFrame::c_CompactAndRestartOnOutOfMemory;
     }
 
-    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_Assembly::GetTypeDescriptor( *pThis[ FIELD__m_assembly ].Dereference(), assm ));
+    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_Assembly::GetTypeDescriptor( *pThis[FIELD___assembly].Dereference(), assm ));
     
     NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.LocateResource( assm, resourceFileId, pArgs[ 0 ].NumericByRefConst().s2, resource, size ));
 
@@ -191,6 +172,25 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInterna
     NANOCLR_NOCLEANUP();   
 }
 
+HRESULT Library_corlib_native_System_Resources_ResourceManager::FindResource___STATIC__I4__STRING__SystemReflectionAssembly( CLR_RT_StackFrame& stack )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_Assembly_Instance assm;
+    CLR_INT32                resourceFileId;
+    CLR_RT_HeapBlock*        pArgs = &stack.Arg0();
+
+    const char* szText = pArgs[ 0 ].RecoverString(); FAULT_ON_NULL(szText);
+    
+    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_Assembly::GetTypeDescriptor( *pArgs[ 1 ].Dereference(), assm ));
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.LocateResourceFile( assm, szText, resourceFileId ));
+
+    stack.SetResult_I4( resourceFileId );
+
+    NANOCLR_NOCLEANUP();
+}
 
 HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum( CLR_RT_StackFrame& stack )
 {

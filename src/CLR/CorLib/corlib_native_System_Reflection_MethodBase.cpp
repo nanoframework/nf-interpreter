@@ -6,6 +6,49 @@
 #include "CorLib.h"
 
 
+
+
+HRESULT Library_corlib_native_System_Reflection_MethodBase::get_Name___STRING( CLR_RT_StackFrame& stack )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_MethodDef_Instance md;
+    CLR_RT_HeapBlock*         hbMeth  = stack.Arg0().Dereference();
+
+    NANOCLR_CHECK_HRESULT(GetMethodDescriptor( stack, *hbMeth, md ));
+
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance( stack.PushValue(), md.m_target->name, md.m_assm ));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_Reflection_MethodBase::get_DeclaringType___SystemType( CLR_RT_StackFrame& stack )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_MethodDef_Instance md;
+    CLR_RT_TypeDef_Instance   cls;
+    CLR_RT_HeapBlock* hbMeth  = stack.Arg0().Dereference();
+
+    NANOCLR_CHECK_HRESULT(GetMethodDescriptor( stack, *hbMeth, md ));
+
+    if(cls.InitializeFromMethod( md ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+
+    {
+        CLR_RT_HeapBlock& top = stack.PushValue();
+        CLR_RT_HeapBlock* hbObj;
+
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        
+        hbObj = top.Dereference();
+        hbObj->SetReflection( cls );
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_Reflection_MethodBase::get_IsPublic___BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -100,47 +143,6 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
         {               
             stack.SetResult_Object( NULL );
         }
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_corlib_native_System_Reflection_MethodBase::get_Name___STRING( CLR_RT_StackFrame& stack )
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    CLR_RT_MethodDef_Instance md;
-    CLR_RT_HeapBlock*         hbMeth  = stack.Arg0().Dereference();
-
-    NANOCLR_CHECK_HRESULT(GetMethodDescriptor( stack, *hbMeth, md ));
-
-    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance( stack.PushValue(), md.m_target->name, md.m_assm ));
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_corlib_native_System_Reflection_MethodBase::get_DeclaringType___SystemType( CLR_RT_StackFrame& stack )
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    CLR_RT_MethodDef_Instance md;
-    CLR_RT_TypeDef_Instance   cls;
-    CLR_RT_HeapBlock* hbMeth  = stack.Arg0().Dereference();
-
-    NANOCLR_CHECK_HRESULT(GetMethodDescriptor( stack, *hbMeth, md ));
-
-    if(cls.InitializeFromMethod( md ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-
-    {
-        CLR_RT_HeapBlock& top = stack.PushValue();
-        CLR_RT_HeapBlock* hbObj;
-
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
-        
-        hbObj = top.Dereference();
-        hbObj->SetReflection( cls );
     }
 
     NANOCLR_NOCLEANUP();

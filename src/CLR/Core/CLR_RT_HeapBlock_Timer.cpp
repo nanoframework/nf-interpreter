@@ -90,8 +90,8 @@ void CLR_RT_HeapBlock_Timer::SpawnTimer( CLR_RT_Thread* th )
 
     CLR_RT_ObjectToEvent_Source* ref          = (CLR_RT_ObjectToEvent_Source*)m_references.FirstValidNode();
     CLR_RT_HeapBlock*            managedTimer = ref->m_objectPtr;
-    CLR_RT_HeapBlock*            callback     = &managedTimer[ Library_corlib_native_System_Threading_Timer::FIELD__m_callback ];
-    CLR_RT_HeapBlock*            state        = &managedTimer[ Library_corlib_native_System_Threading_Timer::FIELD__m_state    ];
+    CLR_RT_HeapBlock*            callback     = &managedTimer[ Library_corlib_native_System_Threading_Timer::FIELD___callback ];
+    CLR_RT_HeapBlock*            state        = &managedTimer[ Library_corlib_native_System_Threading_Timer::FIELD___state    ];
     CLR_RT_HeapBlock_Delegate*   delegate     = callback->DereferenceDelegate();
     CLR_RT_ProtectFromGC         gc( *managedTimer );
 
@@ -194,7 +194,7 @@ bool CLR_RT_HeapBlock_Timer::CheckDisposed( CLR_RT_StackFrame& stack )
     CLR_RT_HeapBlock*       pThis =   stack.This();
     CLR_RT_HeapBlock_Timer* timer;
     
-    if(!FAILED(CLR_RT_HeapBlock_Timer::ExtractInstance( pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_timer ], timer )))
+    if(!FAILED(CLR_RT_HeapBlock_Timer::ExtractInstance( pThis[ Library_corlib_native_System_Threading_Timer::FIELD___timer ], timer )))
     {
         if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_ACTION_Destroy) == 0)
         {
@@ -217,23 +217,23 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
     const CLR_INT64 maxTime = (CLR_INT64)0x7FFFFFFF * (CLR_INT64)TIME_CONVERSION__TO_MILLISECONDS;
     const CLR_INT64 minTime = 0;
 
-    // UNDONE: FIXME: _ASSERTE(Library_corlib_native_System_Threading_Timer::FIELD__m_timer    == Library_spot_native_Microsoft_SPOT_ExtendedTimer::FIELD__m_timer   );
-    // UNDONE: FIXME: _ASSERTE(Library_corlib_native_System_Threading_Timer::FIELD__m_state    == Library_spot_native_Microsoft_SPOT_ExtendedTimer::FIELD__m_state   );
-    // UNDONE: FIXME: _ASSERTE(Library_corlib_native_System_Threading_Timer::FIELD__m_callback == Library_spot_native_Microsoft_SPOT_ExtendedTimer::FIELD__m_callback);
+    // UNDONE: FIXME: _ASSERTE(Library_corlib_native_System_Threading_Timer::FIELD___timer    == Library_spot_native_Microsoft_SPOT_ExtendedTimer::FIELD___timer   );
+    // UNDONE: FIXME: _ASSERTE(Library_corlib_native_System_Threading_Timer::FIELD___state    == Library_spot_native_Microsoft_SPOT_ExtendedTimer::FIELD___state   );
+    // UNDONE: FIXME: _ASSERTE(Library_corlib_native_System_Threading_Timer::FIELD___callback == Library_spot_native_Microsoft_SPOT_ExtendedTimer::FIELD___callback);
 
     if(flags & CLR_RT_HeapBlock_Timer::c_ACTION_Create)
     {
         FAULT_ON_NULL(args[ 0 ].DereferenceDelegate());
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Timer::CreateInstance( 0, *pThis, pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_timer ] ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Timer::CreateInstance( 0, *pThis, pThis[ Library_corlib_native_System_Threading_Timer::FIELD___timer ] ));
 
-        pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_callback ].Assign( args[ 0 ] );
-        pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_state    ].Assign( args[ 1 ] );
+        pThis[ Library_corlib_native_System_Threading_Timer::FIELD___callback ].Assign( args[ 0 ] );
+        pThis[ Library_corlib_native_System_Threading_Timer::FIELD___state    ].Assign( args[ 1 ] );
 
         args += 2;
     }
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Timer::ExtractInstance( pThis[ Library_corlib_native_System_Threading_Timer::FIELD__m_timer ], timer ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Timer::ExtractInstance( pThis[ Library_corlib_native_System_Threading_Timer::FIELD___timer ], timer ));
 
     if(flags & CLR_RT_HeapBlock_Timer::c_ACTION_Create)
     {

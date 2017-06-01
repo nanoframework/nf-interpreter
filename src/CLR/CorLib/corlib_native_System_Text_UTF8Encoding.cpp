@@ -70,6 +70,26 @@ HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetBytes___I4__STRING__I
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetChars___SZARRAY_CHAR__SZARRAY_U1( CLR_RT_StackFrame& stack )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_CHECK_HRESULT(Helper__GetChars( stack, false ));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetChars___SZARRAY_CHAR__SZARRAY_U1__I4__I4( CLR_RT_StackFrame& stack )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_CHECK_HRESULT(Helper__GetChars( stack, true ));
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT_StackFrame& stack, bool fIndexed)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -102,27 +122,6 @@ HRESULT Library_corlib_native_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT_
     hal_strncpy_s( (char*) szText, cBytesCopy, (const char*)pArrayBytes->GetElement(byteIdx), byteCnt );    
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_String::ConvertToCharArray( szText, stack.PushValueAndClear(), arrTmp, 0, -1 ));
-
-    NANOCLR_NOCLEANUP();
-}
-
-
-HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetChars___SZARRAY_CHAR__SZARRAY_U1( CLR_RT_StackFrame& stack )
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    NANOCLR_CHECK_HRESULT(Helper__GetChars( stack, false ));
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetChars___SZARRAY_CHAR__SZARRAY_U1__I4__I4( CLR_RT_StackFrame& stack )
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    NANOCLR_CHECK_HRESULT(Helper__GetChars( stack, true ));
 
     NANOCLR_NOCLEANUP();
 }

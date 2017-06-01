@@ -4,7 +4,6 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "CorLib.h"
-#include <hal.h>
 
 CLR_INT64 s_UTCMask   = ULONGLONGCONSTANT(0x8000000000000000);
 CLR_INT64 s_TickMask  = ULONGLONGCONSTANT(0x7FFFFFFFFFFFFFFF);
@@ -28,7 +27,7 @@ HRESULT Library_corlib_native_System_DateTime::_ctor___VOID__I4__I4__I4__I4__I4_
     st.wMilliseconds = pArg[ 6 ].NumericByRef().s4;
 
     /// Our current supported range is between 1601 and 3000. Years before 1582 requires different calculation (see explanation
-    /// in time_decl.h), same way years after 3000 will not hold the simple arithmatic which we are using. More complex calculations
+    /// in time_decl.h), same way years after 3000 will not hold the simple arithmetic which we are using. More complex calculations
     /// outside these range are not worth the CPU cycle and codesize.
     if ((st.wYear < 1601) || (st.wYear > 3000) ||
         (st.wMonth < 1) || (st.wMonth > 12) ||
@@ -40,7 +39,7 @@ HRESULT Library_corlib_native_System_DateTime::_ctor___VOID__I4__I4__I4__I4__I4_
 
     Compress( stack, st );
 
-    NANOCLR_NOCLEANUP();   
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Day___I4( CLR_RT_StackFrame& stack )
@@ -177,24 +176,25 @@ HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTi
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_INT64* pRes = NewObject( stack );
-    SYSTEMTIME st; 
-    RTCDateTime _dateTime;
+	// TODO: move to target platform layer
+    //CLR_INT64* pRes = NewObject( stack );
+    //SYSTEMTIME st; 
+    //RTCDateTime _dateTime;
 
-    rtcGetTime(&RTCD1, &_dateTime);
-    st.wMilliseconds =(unsigned short) (_dateTime.millisecond % 1000);
-    _dateTime.millisecond /= 1000;
-    st.wSecond = (unsigned short) (_dateTime.millisecond % 60);
-    _dateTime.millisecond /= 60;
-    st.wMinute = (unsigned short) (_dateTime.millisecond % 60);
-    _dateTime.millisecond /= 60;
-    st.wMinute = (unsigned short) (_dateTime.millisecond % 24);
-    st.wDay = (unsigned short) _dateTime.day;
-    st.wMonth = (unsigned short) _dateTime.month;
-    st.wYear = (unsigned short) _dateTime.year;
-    st.wDayOfWeek = (unsigned short) _dateTime.dayofweek;
+    //rtcGetTime(&RTCD1, &_dateTime);
+    //st.wMilliseconds =(unsigned short) (_dateTime.millisecond % 1000);
+    //_dateTime.millisecond /= 1000;
+    //st.wSecond = (unsigned short) (_dateTime.millisecond % 60);
+    //_dateTime.millisecond /= 60;
+    //st.wMinute = (unsigned short) (_dateTime.millisecond % 60);
+    //_dateTime.millisecond /= 60;
+    //st.wMinute = (unsigned short) (_dateTime.millisecond % 24);
+    //st.wDay = (unsigned short) _dateTime.day;
+    //st.wMonth = (unsigned short) _dateTime.month;
+    //st.wYear = (unsigned short) _dateTime.year;
+    //st.wDayOfWeek = (unsigned short) _dateTime.dayofweek;
 
-    *pRes = HAL_Time_FromSystemTime( &st );
+    //*pRes = HAL_Time_FromSystemTime( &st );
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -204,16 +204,17 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_INT64* pRes = NewObject( stack );
-	SYSTEMTIME st; 
-    RTCDateTime _dateTime;
+	// TODO: move to target platform layer
+	//   CLR_INT64* pRes = NewObject( stack );
+	//SYSTEMTIME st; 
+ //   RTCDateTime _dateTime;
 
-    rtcGetTime(&RTCD1, &_dateTime);
-    st.wDay = (unsigned short) _dateTime.day;
-    st.wMonth = (unsigned short) _dateTime.month;
-    st.wYear = (unsigned short) _dateTime.year;
+ //   rtcGetTime(&RTCD1, &_dateTime);
+ //   st.wDay = (unsigned short) _dateTime.day;
+ //   st.wMonth = (unsigned short) _dateTime.month;
+ //   st.wYear = (unsigned short) _dateTime.year;
 
-    *pRes = HAL_Time_FromSystemTime( &st );
+ //   *pRes = HAL_Time_FromSystemTime( &st );
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -263,7 +264,7 @@ CLR_INT64* Library_corlib_native_System_DateTime::GetValuePtr( CLR_RT_HeapBlock&
 
     if(dt == DATATYPE_VALUETYPE && obj->ObjectCls().m_data == g_CLR_RT_WellKnownTypes.m_DateTime.m_data)
     {
-        return (CLR_INT64*)&obj[ FIELD__m_ticks ].NumericByRef().s8;
+        return (CLR_INT64*)&obj[ FIELD___ticks ].NumericByRef().s8;
     }
 
     return NULL;
