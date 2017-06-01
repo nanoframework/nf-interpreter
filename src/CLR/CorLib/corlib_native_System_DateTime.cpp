@@ -176,25 +176,10 @@ HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTi
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-	// TODO: move to target platform layer
-    //CLR_INT64* pRes = NewObject( stack );
-    //SYSTEMTIME st; 
-    //RTCDateTime _dateTime;
+    CLR_INT64* pRes = NewObject( stack );
 
-    //rtcGetTime(&RTCD1, &_dateTime);
-    //st.wMilliseconds =(unsigned short) (_dateTime.millisecond % 1000);
-    //_dateTime.millisecond /= 1000;
-    //st.wSecond = (unsigned short) (_dateTime.millisecond % 60);
-    //_dateTime.millisecond /= 60;
-    //st.wMinute = (unsigned short) (_dateTime.millisecond % 60);
-    //_dateTime.millisecond /= 60;
-    //st.wMinute = (unsigned short) (_dateTime.millisecond % 24);
-    //st.wDay = (unsigned short) _dateTime.day;
-    //st.wMonth = (unsigned short) _dateTime.month;
-    //st.wYear = (unsigned short) _dateTime.year;
-    //st.wDayOfWeek = (unsigned short) _dateTime.dayofweek;
-
-    //*pRes = HAL_Time_FromSystemTime( &st );
+    // request full date&time
+    *pRes = HAL_Time_CurrentDateTime(false) | s_UTCMask;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -204,17 +189,10 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-	// TODO: move to target platform layer
-	//   CLR_INT64* pRes = NewObject( stack );
-	//SYSTEMTIME st; 
- //   RTCDateTime _dateTime;
+    CLR_INT64* pRes = NewObject( stack );
 
- //   rtcGetTime(&RTCD1, &_dateTime);
- //   st.wDay = (unsigned short) _dateTime.day;
- //   st.wMonth = (unsigned short) _dateTime.month;
- //   st.wYear = (unsigned short) _dateTime.year;
-
- //   *pRes = HAL_Time_FromSystemTime( &st );
+    // request date part only
+    *pRes = HAL_Time_CurrentDateTime(true) | s_UTCMask;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -293,6 +271,6 @@ void Library_corlib_native_System_DateTime::Compress( CLR_RT_StackFrame& stack, 
 
     if(val) 
     {
-        *val = HAL_Time_FromSystemTime( &st );
+        *val = HAL_Time_ConvertFromSystemTime( &st );
     }
 }

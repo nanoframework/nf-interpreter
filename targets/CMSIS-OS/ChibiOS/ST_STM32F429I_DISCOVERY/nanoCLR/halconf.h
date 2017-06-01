@@ -18,6 +18,7 @@
 #ifndef HALCONF_H
 #define HALCONF_H
 
+#include <target_platform.h>
 #include "mcuconf.h"
 
 /**
@@ -107,9 +108,10 @@
 /**
  * @brief   Enables the RTC subsystem.
  */
-#if !defined(HAL_USE_RTC) || defined(__DOXYGEN__)
-#define HAL_USE_RTC                 TRUE
-#endif
+// this option is set at target_board.h (from config file)
+// #if !defined(HAL_USE_RTC) || defined(__DOXYGEN__)
+// #define HAL_USE_RTC                 TRUE
+// #endif
 
 /**
  * @brief   Enables the SDC subsystem.

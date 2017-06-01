@@ -47,6 +47,14 @@
 signed long long HAL_Time_SysTicksToTime(unsigned int sysTicks);
 
 /// <summary>
+/// System time and date for DateTime managed class.
+/// This value will be provided by the system tick or from an RTC if hardware support exists and if the board designer has enabled it in the configuration options.
+/// The datePartOnly allows returning only the date part with the time fields zeroed.
+/// </summary>
+/// <returns>Returns current time in 100ns elapsed since 1/1/1601:00:00:00.000 UTC.</returns>
+signed long long  HAL_Time_CurrentDateTime(bool datePartOnly);
+
+/// <summary>
 /// Time according to this system. 
 /// </summary>
 /// <returns>Returns current time in 100ns elapsed since 1/1/1601:00:00:00.000 UTC.</returns>
@@ -80,7 +88,7 @@ HRESULT HAL_Time_AccDaysInMonth(signed int year, signed int month, signed int* d
 /// Converts SYSTEMTIME structure to 64bit time, which is assumed as an offset from 1/1/1601:00:00:00.000 in 100ns.
 /// </summary>
 /// <returns>Time value.</returns>
-signed long long HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime);
+signed long long HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime);
 
 /// APIs to convert between types
 // FIXME bool     HAL_Time_TimeSpanToStringEx( const signed long long& ticks, char*& buf, size_t& len );

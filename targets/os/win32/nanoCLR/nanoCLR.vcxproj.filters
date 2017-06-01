@@ -53,9 +53,6 @@
     <ClCompile Include="WatchDog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Time.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CLRStartup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -94,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\PAL\Double\nanoPAL_native_double.cpp">
       <Filter>Source Files\PAL</Filter>
+    </ClCompile>
+    <ClCompile Include="targetHAL_Time.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

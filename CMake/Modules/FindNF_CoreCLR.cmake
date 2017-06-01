@@ -141,7 +141,7 @@ set(NF_CoreCLR_SRCS
     Messaging_stub.cpp
     
     # HAL
-    HAL_Time.cpp
+    nanoHAL_Time.cpp
 
     # PAL
     nanoPAL_BlockStorage.c

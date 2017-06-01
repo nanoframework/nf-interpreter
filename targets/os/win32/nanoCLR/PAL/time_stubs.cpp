@@ -50,7 +50,7 @@ bool HAL_Time_ToSystemTime(signed long long time, SYSTEMTIME* systemTime)
     return FALSE;
 }
 
-signed __int64 HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime)
+signed __int64 HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime)
 {
     return 0;
 }

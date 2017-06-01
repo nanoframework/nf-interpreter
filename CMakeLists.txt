@@ -219,6 +219,16 @@ if(NF_FEATURE_DEBUGGER)
 endif()
 
 #################################################################
+# RTC (real time clock) (default is OFF so RTC is NOT included)
+option(NF_FEATURE_RTC "option to use hardware RTC")
+
+if(NF_FEATURE_RTC)
+    set(HAL_USE_RTC_OPTION TRUE CACHE INTERNAL "NF feature RTC")
+else()    
+    set(HAL_USE_RTC_OPTION FALSE CACHE INTERNAL "NF feature RTC")
+endif()
+
+#################################################################
 
 #################################################################
 # manage nanoFramework API namespaces

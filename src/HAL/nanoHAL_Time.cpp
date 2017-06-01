@@ -27,7 +27,10 @@ signed long long  HAL_Time_CurrentTime()
     return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() ); 
 };
 
-signed long long HAL_Time_FromSystemTime(const SYSTEMTIME* systemTime)
+/// <summary>
+/// Converts a SYSTEMTIME value to HAL time value
+/// </summary>
+signed long long HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime)
 {
     signed long long r = YEARS_TO_DAYS(systemTime->wYear) + MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth) + systemTime->wDay - 1;
     r = (((( (r * HOURS_TO_DAY) + systemTime->wHour) * MINUTES_TO_HOUR + systemTime->wMinute) * SECONDS_TO_MINUTES + systemTime->wSecond ) * MILLISECONDS_TO_SECONDS + systemTime->wMilliseconds) * TIMEUNIT_TO_MILLISECONDS;
