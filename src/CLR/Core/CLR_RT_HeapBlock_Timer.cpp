@@ -182,7 +182,7 @@ void CLR_RT_HeapBlock_Timer::AdjustNextFixedExpire( const SYSTEMTIME& systemTime
     }
 
     st.wMilliseconds = 0;
-    baseTime = HAL_Time_FromSystemTime( &st );
+    baseTime = HAL_Time_ConvertFromSystemTime( &st );
 
     m_timeExpire     = fNext ? baseTime + add : baseTime;
     m_timeFrequency  = add;

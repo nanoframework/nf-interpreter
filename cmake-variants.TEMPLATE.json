@@ -36,7 +36,8 @@
             "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
             "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
             "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger",
-            "API_Windows.Devices.Gpio" : "OFF"
+            "NF_FEATURE_RTC" : "OFF-default-ON-to-enable-hardware-RTC",
+            "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API"
         }
       },
       "OPTION2_NAME_HERE": {
@@ -51,7 +52,8 @@
             "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
             "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
             "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger",
-            "API_Windows.Devices.Gpio" : "OFF"
+            "NF_FEATURE_RTC" : "OFF-default-ON-to-enable-hardware-RTC",
+            "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API"
         }
       },
       "default$": "",

@@ -39,6 +39,27 @@ signed __int64 HAL_Time_CurrentTime()
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTime();
 }
 
+signed __int64 HAL_Time_CurrentDateTime(bool datePartOnly)
+{
+	if (datePartOnly)
+	{
+		SYSTEMTIME st;
+		HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
+
+		st.wHour = 0;
+		st.wMinute = 0;
+		st.wSecond = 0;
+		st.wMilliseconds = 0;
+
+		return HAL_Time_ConvertFromSystemTime(&st);
+	}
+	else
+	{
+		// on Windows we'll just return what is the current time from HAL
+		return HAL_Time_CurrentTime();
+	}
+}
+
 void HAL_Time_GetDriftParameters  ( signed int* a, signed int* b, signed __int64* c )
 {
     *a = 1;

@@ -5,6 +5,10 @@
 
 include(NF_API_Namespaces)
 
+# add header file with common target definitions
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/target_platform.h" @ONLY)
+
 # append target ChibiOS nanoCLR source files
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_App_Interface.c)
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_MonitorCommands.c)
@@ -36,6 +40,7 @@ set(TARGET_CHIBIOS_NANOCLR_SOURCES ${TARGET_CHIBIOS_NANOCLR_SOURCES} CACHE INTER
 
 # append target ChibiOS nanoCLR include directory
 list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
+list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
 
 # make var global
