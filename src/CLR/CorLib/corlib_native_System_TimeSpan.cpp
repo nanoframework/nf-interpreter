@@ -186,7 +186,7 @@ CLR_INT64* Library_corlib_native_System_TimeSpan::GetValuePtr( CLR_RT_HeapBlock&
 
     if(dt == DATATYPE_VALUETYPE && obj->ObjectCls().m_data == g_CLR_RT_WellKnownTypes.m_TimeSpan.m_data)
     {
-        return (CLR_INT64*)&obj[ FIELD__m_ticks ].NumericByRef().s8;
+        return (CLR_INT64*)&obj[ FIELD___numberOfTicks ].NumericByRef().s8;
     }
 
     return NULL;

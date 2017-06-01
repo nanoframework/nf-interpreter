@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2017 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
 #include "CorLib.h"
 
 
@@ -325,8 +329,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4,
     NULL,
-    NULL,
-    NULL,
     Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTime,
     Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTime,
     NULL,
@@ -584,6 +586,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJECT__OBJECT,
     NULL,
     Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnType___SystemType,
+    NULL,
+    Library_corlib_native_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2,
+    Library_corlib_native_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2__I4__I4,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -903,7 +909,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x82C23209,
+    0x42DFA82F,
     method_lookup
 };
-

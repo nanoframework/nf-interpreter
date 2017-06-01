@@ -198,7 +198,7 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::StartDispatch( CLR_RT_Applicatio
     InterruptPortInterrupt& interrupt = appInterrupt->m_interruptPortInterrupt;
 
     NANOCLR_CHECK_HRESULT(RecoverManagedObject( port ));
-    dlg = port[ Library_spot_hardware_native_Microsoft_SPOT_Hardware_NativeEventDispatcher::FIELD__m_threadSpawn ].DereferenceDelegate(); FAULT_ON_NULL(dlg);
+    dlg = port[ Library_spot_hardware_native_Microsoft_SPOT_Hardware_NativeEventDispatcher::FIELD___threadSpawn ].DereferenceDelegate(); FAULT_ON_NULL(dlg);
 
     NANOCLR_CHECK_HRESULT(th->PushThreadProcDelegate( dlg ));
 

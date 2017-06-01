@@ -1884,7 +1884,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get( WP_Message* msg)
         
 #if defined(NANOCLR_APPDOMAINS)
         {
-            CLR_RT_ObjectToEvent_Source* appDomainSrc = CLR_RT_ObjectToEvent_Source::ExtractInstance( pManagedThread[ Library_corlib_native_System_Threading_Thread::FIELD__m_AppDomain ] );
+            CLR_RT_ObjectToEvent_Source* appDomainSrc = CLR_RT_ObjectToEvent_Source::ExtractInstance( pManagedThread[ Library_corlib_native_System_Threading_Thread::FIELD___appDomain ] );
 
             if(appDomainSrc == NULL) break;
             
@@ -1919,12 +1919,12 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get( WP_Message* msg)
 
             int pri = th->GetThreadPriority();
             
-            pRes[Library_corlib_native_System_Threading_Thread::FIELD__m_Priority].NumericByRef().s4 = pri;
+            pRes[Library_corlib_native_System_Threading_Thread::FIELD___priority].NumericByRef().s4 = pri;
 
-            if(SUCCEEDED(CLR_RT_ObjectToEvent_Source::CreateInstance( th, *pRes, pRes[ Library_corlib_native_System_Threading_Thread::FIELD__m_Thread ] )))
+            if(SUCCEEDED(CLR_RT_ObjectToEvent_Source::CreateInstance( th, *pRes, pRes[ Library_corlib_native_System_Threading_Thread::FIELD___thread ] )))
             {
 #if defined(NANOCLR_APPDOMAINS)
-                CLR_RT_ObjectToEvent_Source::CreateInstance( g_CLR_RT_ExecutionEngine.GetCurrentAppDomain(), *pRes, pRes[ Library_corlib_native_System_Threading_Thread::FIELD__m_AppDomain ] );
+                CLR_RT_ObjectToEvent_Source::CreateInstance( g_CLR_RT_ExecutionEngine.GetCurrentAppDomain(), *pRes, pRes[ Library_corlib_native_System_Threading_Thread::FIELD___appDomain ] );
 #endif
                 fFound = true;
             }

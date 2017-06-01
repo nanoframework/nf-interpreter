@@ -74,9 +74,6 @@
     <ClCompile Include="corlib_native_System_Collections_Stack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="corlib_native_System_TimeZone.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="corlib_native_System_Diagnostics_Debugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -180,9 +177,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="corlib_native_System_Reflection_MemberInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="corlib_native_System_Threading_ThreadAbortException.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="corlib_native_System_Convert.cpp">

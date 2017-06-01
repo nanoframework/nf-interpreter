@@ -59,7 +59,7 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING( CLR_RT_
     int                       depth        = 0;
     CLR_RT_HeapBlock*         pThis        = stack.This();         FAULT_ON_NULL(pThis);
 
-    pArray = pThis[ FIELD__m_stackTrace ].DereferenceArray();
+    pArray = pThis[ FIELD___stackTrace ].DereferenceArray();
 
     if(pArray)
     {
@@ -130,7 +130,7 @@ HRESULT Library_corlib_native_System_Exception::CreateInstance( CLR_RT_HeapBlock
 
     obj = ref.Dereference();
 
-    obj[ FIELD__m_HResult ].SetInteger( (CLR_UINT32)hrIn );
+    obj[ FIELD__HResult ].SetInteger( (CLR_UINT32)hrIn );
 
     if(hr == S_OK)
     {
@@ -190,11 +190,11 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace( CLR_RT_HeapBlock&
 
         //--//
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( obj[ FIELD__m_stackTrace ], depth * sizeof(StackTrace), g_CLR_RT_WellKnownTypes.m_UInt8 ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( obj[ FIELD___stackTrace ], depth * sizeof(StackTrace), g_CLR_RT_WellKnownTypes.m_UInt8 ));
 
         //--//
 
-        array = obj[ FIELD__m_stackTrace ].DereferenceArray();
+        array = obj[ FIELD___stackTrace ].DereferenceArray();
         dst   = (StackTrace*)array->GetFirstElement();
 
         NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,stackSub,stack)
@@ -230,7 +230,7 @@ Library_corlib_native_System_Exception::StackTrace* Library_corlib_native_System
     NATIVE_PROFILE_CLR_CORE();
     if(obj)
     {
-        CLR_RT_HeapBlock_Array* array = obj[ FIELD__m_stackTrace ].DereferenceArray();
+        CLR_RT_HeapBlock_Array* array = obj[ FIELD___stackTrace ].DereferenceArray();
 
         if(array)
         {

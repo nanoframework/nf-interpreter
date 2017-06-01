@@ -72,11 +72,9 @@
     <ClCompile Include="corlib_native_System_Threading_ManualResetEvent.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Monitor.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Thread.cpp" />
-    <ClCompile Include="corlib_native_System_Threading_ThreadAbortException.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Timer.cpp" />
     <ClCompile Include="corlib_native_System_Threading_WaitHandle.cpp" />
     <ClCompile Include="corlib_native_System_TimeSpan.cpp" />
-    <ClCompile Include="corlib_native_System_TimeZone.cpp" />
     <ClCompile Include="corlib_native_System_Type.cpp" />
     <ClCompile Include="corlib_native_System_ValueType.cpp" />
     <ClCompile Include="corlib_native_System_WeakReference.cpp" />
