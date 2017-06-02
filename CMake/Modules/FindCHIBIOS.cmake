@@ -104,8 +104,6 @@ set(CHIBIOS_SRCS
     chmemcore.c
     chmempools.c
 
-    #chqueues.c #no longer in v17 see commit https://github.com/ChibiOS/ChibiOS/commit/1914bcbbf422a9616dd2c1d6906a8ced3548921d
-
     # required to use malloc and other newlib stuff
     syscalls.c
 

@@ -1,6 +1,10 @@
 {
     "cmake.generator": "NMake Makefiles",
     "files.associations": {
-        "xlocale": "cpp"
+        "xlocale": "cpp",
+        "system_error": "cpp",
+        "istream": "cpp",
+        "xutility": "cpp",
+        "xmemory0": "cpp"
     }
 }
