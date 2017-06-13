@@ -21,8 +21,8 @@
 #define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
 #endif
 
-#define MARKER_DEBUGGER_V1 "MSdbgV1" // Used to identify the debugger at boot time.
-#define MARKER_PACKET_V1   "MSpktV1" // Used to identify the start of a packet.
+#define MARKER_DEBUGGER_V1 "NFDBGV1" // Used to identify the debugger at boot time.
+#define MARKER_PACKET_V1   "NFPKTV1" // Used to identify the start of a packet.
 
 // enum with Wire Protocol flags
 // backwards compatible with .NETMF
