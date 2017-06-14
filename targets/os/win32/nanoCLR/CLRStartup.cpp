@@ -338,7 +338,7 @@ struct Settings
                 if(!isXIP) CLR_RT_Memory::Release( assembliesBuffer );
                 break;
             }
-            assm->m_flags |= CLR_RT_Assembly::c_Deployed;
+            assm->m_flags |= CLR_RT_Assembly::Deployed;
         }
         if(!isXIP) CLR_RT_Memory::Release( headerBuffer );
         

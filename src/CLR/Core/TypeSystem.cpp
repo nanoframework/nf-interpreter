@@ -1732,7 +1732,7 @@ bool CLR_RT_Assembly::Resolve_AssemblyRef( bool fOutput )
 
             CLR_RT_Assembly* target = g_CLR_RT_TypeSystem.FindAssembly( szName, &src->version, fExact );
 
-            if(target == NULL || (target->m_flags & CLR_RT_Assembly::c_Resolved) == 0)
+            if(target == NULL || (target->m_flags & CLR_RT_Assembly::Resolved) == 0)
             {
 #if !defined(BUILD_RTM)
                 if(fOutput)
@@ -2839,7 +2839,7 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if((m_flags & CLR_RT_Assembly::c_PreparingForExecution) != 0)
+    if((m_flags & CLR_RT_Assembly::PreparingForExecution) != 0)
     {
         //Circular dependency
         _ASSERTE(false);
@@ -2847,11 +2847,11 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
         NANOCLR_MSG_SET_AND_LEAVE(CLR_E_FAIL, L"Failed to prepare type system for execution\n");
     }
 
-    if((m_flags & CLR_RT_Assembly::c_PreparedForExecution) == 0)
+    if((m_flags & CLR_RT_Assembly::PreparedForExecution) == 0)
     {
         int i;
 
-        m_flags |= CLR_RT_Assembly::c_PreparingForExecution;
+        m_flags |= CLR_RT_Assembly::PreparingForExecution;
 
         ITERATE_THROUGH_RECORDS(this,i,AssemblyRef,ASSEMBLYREF)
         {
@@ -2886,8 +2886,8 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
     NANOCLR_CLEANUP();
 
     //Only try once.  If this fails, then what?
-    m_flags |=  CLR_RT_Assembly::c_PreparedForExecution;
-    m_flags &= ~CLR_RT_Assembly::c_PreparingForExecution;
+    m_flags |=  CLR_RT_Assembly::PreparedForExecution;
+    m_flags &= ~CLR_RT_Assembly::PreparingForExecution;
 
     NANOCLR_CLEANUP_END();
 }
@@ -3696,7 +3696,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
 
         NANOCLR_FOREACH_ASSEMBLY(*this)
         {
-            if((pASSM->m_flags & CLR_RT_Assembly::c_Resolved) == 0)
+            if((pASSM->m_flags & CLR_RT_Assembly::Resolved) == 0)
             {
                 fNeedResolution = true;
 
@@ -3704,7 +3704,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 {
                     fGot = true;
 
-                    pASSM->m_flags |= CLR_RT_Assembly::c_Resolved;
+                    pASSM->m_flags |= CLR_RT_Assembly::Resolved;
 
                     NANOCLR_CHECK_HRESULT(pASSM->Resolve_TypeRef       ());
                     NANOCLR_CHECK_HRESULT(pASSM->Resolve_FieldRef      ());
@@ -3718,7 +3718,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                     NANOCLR_CHECK_HRESULT(pASSM->Resolve_AllocateStaticFields( pASSM->m_pStaticFields ));
 #endif
 
-                    pASSM->m_flags |= CLR_RT_Assembly::c_ResolutionCompleted;
+                    pASSM->m_flags |= CLR_RT_Assembly::ResolutionCompleted;
                 }
             }
         }

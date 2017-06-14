@@ -896,18 +896,22 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     //--//
 
-    static const CLR_UINT32 c_Resolved                   = 0x00000001;
-    static const CLR_UINT32 c_ResolutionCompleted        = 0x00000002;
-    static const CLR_UINT32 c_PreparedForExecution       = 0x00000004;
-    static const CLR_UINT32 c_Deployed                   = 0x00000008;
-    static const CLR_UINT32 c_PreparingForExecution      = 0x00000010;
-    static const CLR_UINT32 c_StaticConstructorsExecuted = 0x00000020;
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // NEED TO KEEP THESE IN SYNC WITH Enum 'Commands.DebuggingResolveAssembly.ResolvedStatus' on debugger library code //
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static const CLR_UINT32 Resolved                   = 0x00000001;
+    static const CLR_UINT32 ResolutionCompleted        = 0x00000002;
+    static const CLR_UINT32 PreparedForExecution       = 0x00000004;
+    static const CLR_UINT32 Deployed                   = 0x00000008;
+    static const CLR_UINT32 PreparingForExecution      = 0x00000010;
+    static const CLR_UINT32 StaticConstructorsExecuted = 0x00000020;
 
     CLR_UINT32                         m_idx;                         // Relative to the type system (for static fields access).
     CLR_UINT32                         m_flags;
 
     const CLR_RECORD_ASSEMBLY*         m_header;                      // ANY HEAP - DO RELOCATION -
-    const char*                             m_szName;                      // ANY HEAP - DO RELOCATION -
+    const char*                        m_szName;                      // ANY HEAP - DO RELOCATION -
 
     const CLR_RT_MethodHandler*        m_nativeCode;
 
@@ -1146,7 +1150,7 @@ struct CLR_RT_AppDomain : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP 
 
 struct CLR_RT_AppDomainAssembly : public CLR_RT_HeapBlock_Node //EVENT HEAP - NO RELOCATION -
 {
-    static const CLR_UINT32 c_StaticConstructorsExecuted = 0x00000001;
+    static const CLR_UINT32 StaticConstructorsExecuted = 0x00000001;
 
     CLR_UINT32        m_flags;
     CLR_RT_AppDomain* m_appDomain;      // EVENT HEAP - NO RELOCATION -
