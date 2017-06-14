@@ -209,7 +209,7 @@ struct Settings
             {   
                 break;
             }
-            assm->m_flags |= CLR_RT_Assembly::c_Deployed;
+            assm->m_flags |= CLR_RT_Assembly::Deployed;
         }
                 
         NANOCLR_NOCLEANUP();

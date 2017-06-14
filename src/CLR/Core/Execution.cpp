@@ -344,7 +344,7 @@ void CLR_RT_ExecutionEngine::LoadDownloadedAssemblies()
             //
             // For those assemblies that failed to load (missing dependency?), clean up.
             //
-            if((pASSM->m_flags & CLR_RT_Assembly::c_ResolutionCompleted) == 0)
+            if((pASSM->m_flags & CLR_RT_Assembly::ResolutionCompleted) == 0)
             {
                 pASSM->m_pFile = NULL;
 
@@ -807,7 +807,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper( CLR_RT_AppDomain* app
         }
     }
 
-    appDomainAssembly->m_flags |= CLR_RT_AppDomainAssembly::c_StaticConstructorsExecuted;
+    appDomainAssembly->m_flags |= CLR_RT_AppDomainAssembly::StaticConstructorsExecuted;
     return false;
 }
 
@@ -853,7 +853,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
             CLR_RT_Assembly* assembly = appDomainAssembly->m_assembly;
 
             //Find an AppDomainAssembly that does not have it's static constructor bit set...
-            if((appDomainAssembly->m_flags & CLR_RT_AppDomainAssembly::c_StaticConstructorsExecuted) == 0)
+            if((appDomainAssembly->m_flags & CLR_RT_AppDomainAssembly::StaticConstructorsExecuted) == 0)
             {                                
                 CLR_RT_MethodDef_Index idx; idx.Set( assembly->m_idx, 0 );
 
@@ -866,7 +866,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
                     CLR_RT_AppDomainAssembly* appDomainAssemblyRef = appDomain->FindAppDomainAssembly(ar->m_target);
                     
                     _ASSERTE(appDomainAssemblyRef != NULL);
-                    _ASSERTE(appDomainAssemblyRef->m_flags & CLR_RT_AppDomainAssembly::c_StaticConstructorsExecuted);
+                    _ASSERTE(appDomainAssemblyRef->m_flags & CLR_RT_AppDomainAssembly::StaticConstructorsExecuted);
                 }
 #endif
                         
@@ -919,7 +919,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper( CLR_RT_Assembly* asse
         }
     }
 
-    assembly->m_flags |= CLR_RT_Assembly::c_StaticConstructorsExecuted;
+    assembly->m_flags |= CLR_RT_Assembly::StaticConstructorsExecuted;
     return false;
 }
 
@@ -954,7 +954,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
      NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
         //Find an AppDomainAssembly that does not have it's static constructor bit set...
-        if((pASSM->m_flags & CLR_RT_Assembly::c_StaticConstructorsExecuted) == 0)
+        if((pASSM->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
         {                                
             CLR_RT_MethodDef_Index idx; idx.Set( pASSM->m_idx, 0 );
             bool fDepedenciesRun = true;
@@ -963,7 +963,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
             CLR_RT_AssemblyRef_CrossReference* ar = pASSM->m_pCrossReference_AssemblyRef;
             for(int i=0; i<pASSM->m_pTablesSize[ TBL_AssemblyRef ]; i++, ar++)
             {
-                if((ar->m_target->m_flags & CLR_RT_Assembly::c_StaticConstructorsExecuted) == 0)
+                if((ar->m_target->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
                 {
                     fDepedenciesRun = true;
                     break;
