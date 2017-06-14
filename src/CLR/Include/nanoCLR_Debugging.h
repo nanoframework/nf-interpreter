@@ -30,7 +30,6 @@ struct CLR_DBG_Commands
     static const unsigned int c_Monitor_CheckSignature     = 0x0000000A;
     static const unsigned int c_Monitor_DeploymentMap      = 0x0000000B;
     static const unsigned int c_Monitor_FlashSectorMap     = 0x0000000C;
-    static const unsigned int c_Monitor_SignatureKeyUpdate = 0x0000000D;
     static const unsigned int c_Monitor_OemInfo            = 0x0000000E;
 
     //--//
