@@ -427,8 +427,6 @@ __nfweak void BlockStorageDevice_SetPowerState(BlockStorageDevice* device, unsig
 __nfweak bool BlockStorageDevice_FindRegionFromAddress(BlockStorageDevice* device, unsigned int address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex);
 __nfweak bool BlockStorageDevice_FindForBlockUsage(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex);
 __nfweak bool BlockStorageDevice_FindNextUsageBlock(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex);
-__nfweak unsigned int BlockStorageDevice_MaxSectorWrite_uSec(BlockStorageDevice* device);
-__nfweak unsigned int BlockStorageDevice_MaxBlockErase_uSec(BlockStorageDevice* device);
 
 #ifdef __cplusplus
 }

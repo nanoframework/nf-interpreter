@@ -946,10 +946,9 @@ struct CLR_DBG_Commands
             CLR_UINT32 m_storageStart;
             CLR_UINT32 m_storageLength;
             
-            CLR_UINT32  m_eraseWord;
-            CLR_UINT32  m_maxSectorErase_uSec;
-            CLR_UINT32  m_maxWordWrite_uSec;
-            FlashSector m_data[ 1 ];
+            // TODO temporary implementation without support for incremental deployment, is not using these
+            // CLR_UINT32  m_eraseWord;
+            // FlashSector m_data[ 1 ];
         };
     };
 
@@ -1120,8 +1119,9 @@ public:
     static bool Debugging_Resolve_VirtualMethod         ( WP_Message* msg );
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     static bool Debugging_Deployment_Status             ( WP_Message* msg );
+
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     static bool Debugging_Info_SetJMC                   ( WP_Message* msg );
     
     bool Debugging_Info_SetJMC_Type                     ( const CLR_RT_TypeDef_Index&   idx, bool fJMC );
