@@ -656,8 +656,8 @@ void CLR_RT_Persistence_Manager::Initialize()
 
     m_completion.InitializeForUserMode( CLR_RT_Persistence_Manager::Callback );
 
-    m_margin_BurstWrite  = (BlockStorageDevice_MaxSectorWrite_uSec(m_bankA.m_stream.Device) * (c_MaxWriteBurst / sizeof(FLASH_WORD)) * 2 + 1000 - 1) / 1000;
-    m_margin_BlockErase  = (BlockStorageDevice_MaxBlockErase_uSec(m_bankA.m_stream.Device)  *                                          2 + 1000 - 1) / 1000;
+    m_margin_BurstWrite  = (500 * (c_MaxWriteBurst / sizeof(FLASH_WORD)) * 2 + 1000 - 1) / 1000;
+    m_margin_BlockErase  = (500 *                                          2 + 1000 - 1) / 1000;
     if(m_bankB.IsGood())
     {
         if(m_bankA.IsGood() == false || m_bankA.GetBankHeader()->m_sequenceNumber < m_bankB.GetBankHeader()->m_sequenceNumber)

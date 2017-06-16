@@ -358,14 +358,4 @@ __nfweak bool BlockStorageDevice_FindNextUsageBlock(BlockStorageDevice* device, 
 	return false;
 }
 
-__nfweak unsigned int BlockStorageDevice_MaxSectorWrite_uSec(BlockStorageDevice* device)
-{
-	return 0;
-}
-
-__nfweak unsigned int BlockStorageDevice_MaxBlockErase_uSec(BlockStorageDevice* device)
-{
-	return 0;
-}
-
 /////////////////////////////////////////////////////
