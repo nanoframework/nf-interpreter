@@ -301,7 +301,7 @@ void ClrStartup(CLR_SETTINGS params)
         {
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_EE_DBG_SET_MASK(State_ProgramExited, State_Mask);
-            CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, NULL, WP_Flags::c_NonCritical);
+            CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, NULL, WP_Flags_c_NonCritical);
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             if(params.EnterDebuggerLoopAfterExit)
