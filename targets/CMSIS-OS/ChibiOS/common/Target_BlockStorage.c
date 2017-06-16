@@ -27,14 +27,16 @@ bool BlockStorageStream_Initialize(BlockStorageStream* stream, unsigned int bloc
         // set BaseAddress to the start of the region
         stream->BaseAddress = &__nanoImage_start__;
         // set Length to the region size 
-        stream->Length = &__nanoImage_end__ - &__nanoImage_start__;
+        // need to cast the pointers to make sure the compiler implements the correct math
+        stream->Length = ((uint32_t)&__nanoImage_end__) - ((uint32_t)&__nanoImage_start__);
     }
     else if(blockUsage == StorageUsage_DEPLOYMENT)
     {
         // set BaseAddress to the start of the region
         stream->BaseAddress = &__deployment_start__;
         // set Length to the region size 
-        stream->Length = &__deployment_end__ - &__deployment_start__;
+        // need to cast the pointers to make sure the compiler implements the correct math
+        stream->Length = ((uint32_t)&__deployment_end__) - ((uint32_t)&__deployment_start__);
     }
 
     return true;
