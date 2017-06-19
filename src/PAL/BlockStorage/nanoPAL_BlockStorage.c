@@ -15,9 +15,35 @@ __nfweak SectorAddress DeviceBlockInfo_PhysicalToSectorAddress(DeviceBlockInfo* 
     return phyAddress;
 }
 
-__nfweak bool DeviceBlockInfo_FindRegionFromAddress(DeviceBlockInfo* blockInfo, ByteAddress address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+bool DeviceBlockInfo_FindRegionFromAddress(DeviceBlockInfo* blockInfo, ByteAddress address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
 {
-    return false;        
+    const BlockRegionInfo *pRegion;
+
+    *blockRegionIndex = 0;
+
+    for(uint32_t i = 0; i < blockInfo->NumRegions;  i++)
+    {
+        pRegion = &blockInfo->Regions[i];
+
+        if(pRegion->Start <= address && address < (pRegion->Start + pRegion->NumBlocks * pRegion->BytesPerBlock))
+        {
+            uint32_t endRangeAddr = pRegion->Start + pRegion->BytesPerBlock * pRegion->BlockRanges[0].StartBlock;
+            
+            for(uint32_t j =0; j < pRegion->NumBlockRanges; j++)
+            {
+                endRangeAddr += pRegion->BytesPerBlock * BlockRange_GetBlockCount(pRegion->BlockRanges[j]);
+                
+                if(address < endRangeAddr)
+                {
+                    *blockRegionIndex = i;
+                    *blockRangeIndex  = j;
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 __nfweak bool DeviceBlockInfo_FindNextUsageBlock(DeviceBlockInfo* blockInfo, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
