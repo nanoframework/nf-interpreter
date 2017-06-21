@@ -80,6 +80,7 @@ typedef struct SMT32FlashDriver {
 #define FLASH_FLAG_PGPERR              FLASH_SR_PGPERR         /*!< FLASH Programming Parallelism error flag  */
 #define FLASH_FLAG_ERSERR              FLASH_SR_ERSERR         /*!< FLASH Erasing Sequence error flag         */
 #define FLASH_FLAG_BSY                 FLASH_SR_BSY            /*!< FLASH Busy flag                           */
+#define FLASH_FLAG_PGSERR                                      /*!< doesn't exist just to make the compiler happy */
 
 #endif
 
