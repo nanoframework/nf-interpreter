@@ -995,11 +995,11 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
 
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_ExceptionFilters;
 
+            // the current version ONLY suports incremental deployment
+            reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_IncrementalDeployment;
+
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_SourceLevelDebugging;
-
-            // TODO temporary implementation without support for incremental deployment
-            // reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_IncrementalDeployment;
 
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_ThreadCreateEx;
 #endif
