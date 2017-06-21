@@ -132,8 +132,7 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
     if(HAL_FLASH_Unlock())
     {
         // Clear pending flags (if any)
-        __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | 
-                                FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR);
+        __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
 
         // clear the program size mask
         CLEAR_BIT(FLASH->CR, CR_PSIZE_MASK);
@@ -243,8 +242,7 @@ bool flash_lld_erase(uint32_t address) {
     if(HAL_FLASH_Unlock())
     {
         // Clear pending flags (if any)  
-        __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | 
-                                FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR);
+        __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
         
         // get the sector number to erase
         uint8_t sectorNumber = flash_lld_getSector(address);
