@@ -44,9 +44,64 @@ typedef struct SMT32FlashDriver {
 // From STMicroelectronics Cube HAL 
 #define FLASH                       ((FLASH_TypeDef *) FLASH_R_BASE)
 #define HAL_IS_BIT_SET(REG, BIT)    (((REG) & (BIT)) != RESET)
-#define FLASH_FLAG_BSY              FLASH_SR_BSY  // FLASH Busy flag
-#define FLASH_KEY1               ((uint32_t)0x45670123U)
-#define FLASH_KEY2               ((uint32_t)0xCDEF89ABU)
+#define FLASH_KEY1                  ((uint32_t)0x45670123U)
+#define FLASH_KEY2                  ((uint32_t)0xCDEF89ABU)
+#define SECTOR_MASK                 ((uint32_t)0xFFFFFF07)
+
+//---------------------------------- STM32F4xx ------------------------------//
+#if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx)|| defined(STM32F439xx) ||\
+    defined(STM32F469xx) || defined(STM32F479xx) ||\
+    defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || defined(STM32F412Zx) ||\
+    defined(STM32F412Vx) || defined(STM32F412Rx) || defined(STM32F412Cx) ||\
+    defined(STM32F401xC) ||\
+    defined(STM32F410Tx) || defined(STM32F410Cx) || defined(STM32F410Rx) ||\
+    defined(STM32F401xE) || defined(STM32F411xE) || defined(STM32F446xx)
+
+#define FLASH_FLAG_EOP                 FLASH_SR_EOP            /*!< FLASH End of Operation flag               */
+#define FLASH_FLAG_OPERR               FLASH_SR_SOP            /*!< FLASH operation Error flag                */
+#define FLASH_FLAG_WRPERR              FLASH_SR_WRPERR         /*!< FLASH Write protected error flag          */
+#define FLASH_FLAG_PGAERR              FLASH_SR_PGAERR         /*!< FLASH Programming Alignment error flag    */
+#define FLASH_FLAG_PGPERR              FLASH_SR_PGPERR         /*!< FLASH Programming Parallelism error flag  */
+#define FLASH_FLAG_PGSERR              FLASH_SR_PGSERR         /*!< FLASH Programming Sequence error flag     */
+#if defined(FLASH_SR_RDERR)
+#define FLASH_FLAG_RDERR               FLASH_SR_RDERR          /*!< Read Protection error flag (PCROP)        */
+#endif /* FLASH_SR_RDERR */
+#define FLASH_FLAG_BSY                 FLASH_SR_BSY            /*!< FLASH Busy flag                           */ 
+
+#if defined(FLASH_SR_RDERR)
+#define FLASH_FLAG_ALL_ERRORS  (FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                        FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR | FLASH_FLAG_RDERR)
+
+#else
+#define FLASH_FLAG_ALL_ERRORS  (FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                        FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR )
+
+#endif // FLASH_SR_RDERR
+
+
+//---------------------------------- STM32F7xx ------------------------------//
+#elif defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
+    defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
+	  defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+
+#define FLASH_FLAG_EOP                 FLASH_SR_EOP            /*!< FLASH End of Operation flag               */
+#define FLASH_FLAG_OPERR               FLASH_SR_OPERR          /*!< FLASH operation Error flag                */
+#define FLASH_FLAG_WRPERR              FLASH_SR_WRPERR         /*!< FLASH Write protected error flag          */
+#define FLASH_FLAG_PGAERR              FLASH_SR_PGAERR         /*!< FLASH Programming Alignment error flag    */
+#define FLASH_FLAG_PGPERR              FLASH_SR_PGPERR         /*!< FLASH Programming Parallelism error flag  */
+#define FLASH_FLAG_ERSERR              FLASH_SR_ERSERR         /*!< FLASH Erasing Sequence error flag         */
+#define FLASH_FLAG_BSY                 FLASH_SR_BSY            /*!< FLASH Busy flag                           */
+
+#if defined (FLASH_OPTCR2_PCROP)
+#define FLASH_FLAG_RDERR               FLASH_SR_RDERR          /*!< FLASH Read protection error flag          */
+#define FLASH_FLAG_ALL_ERRORS     (FLASH_FLAG_OPERR   | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                                   FLASH_FLAG_PGPERR  | FLASH_FLAG_ERSERR | FLASH_FLAG_RDERR)
+#else
+#define FLASH_FLAG_ALL_ERRORS     (FLASH_FLAG_OPERR   | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                                   FLASH_FLAG_PGPERR  | FLASH_FLAG_ERSERR)
+#endif /* FLASH_OPTCR2_PCROP */
+
+#endif
 
 // FLASH_Program_Parallelism FLASH Program Parallelism
 #define FLASH_PSIZE_BYTE           ((uint32_t)0x00000000U)
@@ -54,6 +109,9 @@ typedef struct SMT32FlashDriver {
 #define FLASH_PSIZE_WORD           ((uint32_t)0x00000200U)
 #define FLASH_PSIZE_DOUBLE_WORD    ((uint32_t)0x00000300U)
 #define CR_PSIZE_MASK              ((uint32_t)0xFFFFFCFFU)
+
+#define __HAL_FLASH_GET_FLAG(__FLAG__)   ((FLASH->SR & (__FLAG__)))
+#define __HAL_FLASH_CLEAR_FLAG(__FLAG__)   (FLASH->SR = (__FLAG__))
 
 // FLASHEx_Sectors FLASH Sectors
 /*-------------------------------------- STM32F42xxx/STM32F43xxx/STM32F469xx ------------------------------------*/   
@@ -167,6 +225,18 @@ typedef struct SMT32FlashDriver {
 
 
 #endif // efined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || .... etc
+
+#define __HAL_FLASH_INSTRUCTION_CACHE_ENABLE()  (FLASH->ACR |= FLASH_ACR_ICEN)
+#define __HAL_FLASH_INSTRUCTION_CACHE_DISABLE()   (FLASH->ACR &= (~FLASH_ACR_ICEN))
+
+#define __HAL_FLASH_DATA_CACHE_DISABLE()   (FLASH->ACR &= (~FLASH_ACR_DCEN))
+#define __HAL_FLASH_DATA_CACHE_ENABLE()  (FLASH->ACR |= FLASH_ACR_DCEN)
+#define __HAL_FLASH_INSTRUCTION_CACHE_RESET() do {FLASH->ACR |= FLASH_ACR_ICRST;  \
+                                                  FLASH->ACR &= ~FLASH_ACR_ICRST; \
+                                                 }while(0U)
+#define __HAL_FLASH_DATA_CACHE_RESET() do {FLASH->ACR |= FLASH_ACR_DCRST;  \
+                                           FLASH->ACR &= ~FLASH_ACR_DCRST; \
+                                          }while(0U)
 
 ///////////////////////////////////////////////////////////////////////////////
 // External declarations.                                                    //
