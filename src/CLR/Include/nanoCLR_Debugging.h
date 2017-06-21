@@ -930,25 +930,19 @@ struct CLR_DBG_Commands
 
     struct Debugging_Deployment_Status
     {    
-        static const CLR_UINT32 c_CRC_Erased_Sentinel = 0x0;
-
         struct FlashSector
         {
-            CLR_UINT32 m_start;
-            CLR_UINT32 m_length;
-            
-            CLR_UINT32 m_crc;
+            CLR_UINT32 Start;
+            CLR_UINT32 Length;
         };
 
         struct Reply
         {
-            CLR_UINT32 m_entryPoint;
-            CLR_UINT32 m_storageStart;
-            CLR_UINT32 m_storageLength;
+            CLR_UINT32 EntryPoint;
+            CLR_UINT32 StorageStart;
+            CLR_UINT32 StorageLength;
             
-            // TODO temporary implementation without support for incremental deployment, is not using these
-            // CLR_UINT32  m_eraseWord;
-            // FlashSector m_data[ 1 ];
+            // FlashSector SectorData[ 1 ];
         };
     };
 
