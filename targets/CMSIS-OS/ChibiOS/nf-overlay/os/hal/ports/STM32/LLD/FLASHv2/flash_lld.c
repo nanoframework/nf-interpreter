@@ -69,6 +69,14 @@ bool FLASH_WaitForLastOperation()
     return true;
 }  
 
+#if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx)|| defined(STM32F439xx) ||\
+    defined(STM32F469xx) || defined(STM32F479xx) ||\
+    defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || defined(STM32F412Zx) ||\
+    defined(STM32F412Vx) || defined(STM32F412Rx) || defined(STM32F412Cx) ||\
+    defined(STM32F401xC) ||\
+    defined(STM32F410Tx) || defined(STM32F410Cx) || defined(STM32F410Rx) ||\
+    defined(STM32F401xE) || defined(STM32F411xE) || defined(STM32F446xx)
+
 void FLASH_FlushCaches(void)
 {
   // Flush instruction cache 
@@ -93,6 +101,7 @@ void FLASH_FlushCaches(void)
     __HAL_FLASH_DATA_CACHE_ENABLE();
   }
 }
+#endif // define STM32F4xxxx
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver exported functions.                                                //
@@ -272,8 +281,17 @@ bool flash_lld_erase(uint32_t address) {
         // after erase operation completed disable the SER and SNB Bits
         CLEAR_BIT(FLASH->CR, (FLASH_CR_SER | FLASH_CR_SNB));
 
+#if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx)|| defined(STM32F439xx) ||\
+    defined(STM32F469xx) || defined(STM32F479xx) ||\
+    defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || defined(STM32F412Zx) ||\
+    defined(STM32F412Vx) || defined(STM32F412Rx) || defined(STM32F412Cx) ||\
+    defined(STM32F401xC) ||\
+    defined(STM32F410Tx) || defined(STM32F410Cx) || defined(STM32F410Rx) ||\
+    defined(STM32F401xE) || defined(STM32F411xE) || defined(STM32F446xx)
+
         // Flush the caches to be sure of the data consistency
         FLASH_FlushCaches();
+#endif
 
         // lock the FLASH
         HAL_FLASH_Lock();
