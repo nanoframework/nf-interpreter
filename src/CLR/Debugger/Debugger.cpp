@@ -647,7 +647,6 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
                         break;
                 }
 
-
                 if(!success)
                 {
                     break;
@@ -3052,10 +3051,12 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status( WP_Message* msg)
     CLR_DBG_Commands::Debugging_Deployment_Status::Reply cmdReply;
 
 
-    cmdReply.m_entryPoint          = g_CLR_RT_TypeSystem.m_entryPoint.m_data;
-    cmdReply.m_storageStart        = (uint32_t)&__deployment_start__;
+    cmdReply.EntryPoint          = g_CLR_RT_TypeSystem.m_entryPoint.m_data;
+    cmdReply.StorageStart        = (uint32_t)&__deployment_start__;
     // need to cast the pointers to make sure the compiler implements the correct math
-    cmdReply.m_storageLength       = ((uint32_t)&__deployment_end__) - ((uint32_t)&__deployment_start__);
+    cmdReply.StorageLength       = ((uint32_t)&__deployment_end__) - ((uint32_t)&__deployment_start__);
+
+
 
 
     WP_ReplyToCommand( msg, true, false, &cmdReply, sizeof(cmdReply) );
