@@ -32,11 +32,11 @@ SMT32FlashDriver STM32FLASH;
 // Unlock the FLASH control register access
 bool HAL_FLASH_Unlock(void)
 {
-  if (HAL_IS_BIT_SET(FLASH->CR, FLASH_CR_LOCK))
+  if((FLASH->CR & FLASH_CR_LOCK) != RESET)
   {
-    /* Authorize the FLASH Registers access */
-    WRITE_REG(FLASH->KEYR, FLASH_KEY1);
-    WRITE_REG(FLASH->KEYR, FLASH_KEY2);
+    // Authorize the FLASH Registers access
+    FLASH->KEYR = FLASH_KEY1;
+    FLASH->KEYR = FLASH_KEY2;
   }
   else
   {
@@ -47,12 +47,51 @@ bool HAL_FLASH_Unlock(void)
 }
 
 // Locks the FLASH control register access
-bool HAL_FLASH_Lock(void)
+void HAL_FLASH_Lock(void)
 {
-  /* Set the LOCK Bit to lock the FLASH Registers access */
-  SET_BIT(FLASH->CR, FLASH_CR_LOCK);
+  // Set the LOCK Bit to lock the FLASH Registers access
+  FLASH->CR |= FLASH_CR_LOCK;
+}
+
+bool FLASH_WaitForLastOperation()
+{ 
+    // Wait for the FLASH operation to complete by polling on BUSY flag to be reset.
+    //  Even if the FLASH operation fails, the BUSY flag will be reset and an error
+    //  flag will be set
+
+    while(__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET) 
+    { 
+        // TODO: add a timeout here using an OS function
+        __NOP();
+    }
+
+    // If there is no error flag set
+    return true;
+}  
+
+void FLASH_FlushCaches(void)
+{
+  // Flush instruction cache 
+  if(READ_BIT(FLASH->ACR, FLASH_ACR_ICEN)!= RESET)
+  {
+    // Disable instruction cache
+    __HAL_FLASH_INSTRUCTION_CACHE_DISABLE();
+    // Reset instruction cache
+    __HAL_FLASH_INSTRUCTION_CACHE_RESET();
+    // Enable instruction cache
+    __HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
+  }
   
-  return true;  
+  // Flush data cache
+  if(READ_BIT(FLASH->ACR, FLASH_ACR_DCEN) != RESET)
+  {
+    // Disable data cache 
+    __HAL_FLASH_DATA_CACHE_DISABLE();
+    // Reset data cache
+    __HAL_FLASH_DATA_CACHE_RESET();
+    // Enable data cache
+    __HAL_FLASH_DATA_CACHE_ENABLE();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -83,6 +122,13 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
     // unlock the FLASH
     if(HAL_FLASH_Unlock())
     {
+        // Clear pending flags (if any)
+        __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | 
+                                FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR);
+
+        // clear the program size mask
+        CLEAR_BIT(FLASH->CR, CR_PSIZE_MASK);
+
         // proceed to program the flash by setting the PG Bit
         SET_BIT(FLASH->CR, FLASH_CR_PG);
 
@@ -92,6 +138,9 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
             // NOTE: assuming that the supply voltage is able to cope with half-word programming
             if((endAddress - cursor) >= 2)
             {
+                // set the size of of the programming word to HALF WORD
+                SET_BIT(FLASH->CR, FLASH_PSIZE_HALF_WORD);
+
                 *((__IO uint16_t*)cursor++) = *((uint16_t*)buffer++);
 
                 // update flash and buffer pointers by the 'extra' byte that was programmed
@@ -100,24 +149,46 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
             }
             else
             {
-                // program single byte 
+                // program single byte
+
+                // clear the program size mask
+                CLEAR_BIT(FLASH->CR, CR_PSIZE_MASK);
+                // set the size of of the programming word to BYTE
+                SET_BIT(FLASH->CR, FLASH_PSIZE_BYTE);
+
                 *cursor = *buffer++;
             }
-            
-            // wait for program operation to be completed 
-            // TODO: add a timeout here using an OS function
-            while(((FLASH->SR) & (FLASH_FLAG_BSY)) == (FLASH_FLAG_BSY)){};
+                
+            // wait for any flash operation to be completed 
+            if(!FLASH_WaitForLastOperation())
+            {
+                // lock the FLASH
+                HAL_FLASH_Lock();
+
+                return false;
+            }
         }
 
         // after the program operation is completed disable the PG Bit
         CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
-        
+                
         // lock the FLASH
-        if(HAL_FLASH_Lock())
+        HAL_FLASH_Lock();
+
+        // check for errors
+        #if defined(FLASH_SR_RDERR)  
+        if(__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                                FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR | FLASH_FLAG_RDERR)) != RESET)
+        #else
+        if(__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                                FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR)) != RESET)
+        #endif // FLASH_SR_RDERR
         {
-            // lock succesfull, done here
-            return true;
+            return false;
         }
+
+        // done here
+        return true;
     }
 
     // default to false
@@ -164,43 +235,63 @@ uint8_t flash_lld_getSector(uint32_t address)
 }
 
 bool flash_lld_erase(uint32_t address) {
-    
-    uint32_t tmp_psize = 0;
 
     // unlock the FLASH
     if(HAL_FLASH_Unlock())
     {
+        // Clear pending flags (if any)  
+        __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | 
+                                FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR);
+        
         // get the sector number to erase
         uint8_t sectorNumber = flash_lld_getSector(address);
 
-        /* Need to add offset of 4 when sector higher than FLASH_SECTOR_11 */
+        // Need to add offset of 4 when sector higher than FLASH_SECTOR_11
         if(sectorNumber > FLASH_SECTOR_11) 
         {
             sectorNumber += 4U;
         }
 
-        // erase the sector
+        // If the previous operation is completed, proceed to erase the sector
         CLEAR_BIT(FLASH->CR, FLASH_CR_PSIZE);
-
-        // set program size to half-word (16 bits) to be conservative
-        FLASH->CR |= FLASH_PSIZE_HALF_WORD;
+        SET_BIT(FLASH->CR, FLASH_PSIZE_HALF_WORD);
         CLEAR_BIT(FLASH->CR, FLASH_CR_SNB);
         FLASH->CR |= FLASH_CR_SER | (sectorNumber << POSITION_VAL(FLASH_CR_SNB));
+        
+        // start erase operation
         FLASH->CR |= FLASH_CR_STRT;
         
-        // wait for erase operation to be completed 
-        // TODO: add a timeout here using an OS function
-        while(((FLASH->SR) & (FLASH_FLAG_BSY)) == (FLASH_FLAG_BSY)){};
+        if(FLASH_WaitForLastOperation())
+        {
+            // lock the FLASH anyways
+            HAL_FLASH_Lock();
+
+            return false;
+        }
 
         // after erase operation completed disable the SER and SNB Bits
         CLEAR_BIT(FLASH->CR, (FLASH_CR_SER | FLASH_CR_SNB));
 
+        // Flush the caches to be sure of the data consistency
+        FLASH_FlushCaches();
+
         // lock the FLASH
-        if(HAL_FLASH_Lock())
+        HAL_FLASH_Lock();
+
+        // check for errors
+        #if defined(FLASH_SR_RDERR)  
+        if(__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                                FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR | FLASH_FLAG_RDERR)) != RESET)
+        #else
+        if(__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                                FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR)) != RESET)
+        #endif // FLASH_SR_RDERR
         {
-            // lock succesfull, done here
-            return true;
+            return false;
         }
+
+        // done here
+        return true;
     }
 
     // default to false
