@@ -185,13 +185,7 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
         HAL_FLASH_Lock();
 
         // check for errors
-        #if defined(FLASH_SR_RDERR)  
-        if(__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
-                                FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR | FLASH_FLAG_RDERR)) != RESET)
-        #else
-        if(__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
-                                FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR)) != RESET)
-        #endif // FLASH_SR_RDERR
+        if(__HAL_FLASH_GET_FLAG(FLASH_FLAG_ALL_ERRORS) != RESET)
         {
             return false;
         }
@@ -297,13 +291,7 @@ bool flash_lld_erase(uint32_t address) {
         HAL_FLASH_Lock();
 
         // check for errors
-        #if defined(FLASH_SR_RDERR)  
-        if(__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
-                                FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR | FLASH_FLAG_RDERR)) != RESET)
-        #else
-        if(__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
-                                FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR)) != RESET)
-        #endif // FLASH_SR_RDERR
+        if(__HAL_FLASH_GET_FLAG(FLASH_FLAG_ALL_ERRORS) != RESET)
         {
             return false;
         }

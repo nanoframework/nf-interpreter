@@ -68,6 +68,17 @@ typedef struct SMT32FlashDriver {
 #endif /* FLASH_SR_RDERR */
 #define FLASH_FLAG_BSY                 FLASH_SR_BSY            /*!< FLASH Busy flag                           */ 
 
+#if defined(FLASH_SR_RDERR)
+#define FLASH_FLAG_ALL_ERRORS  (FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                        FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR | FLASH_FLAG_RDERR)
+
+#else
+#define FLASH_FLAG_ALL_ERRORS  (FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                        FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR )
+
+#endif // FLASH_SR_RDERR
+
+
 //---------------------------------- STM32F7xx ------------------------------//
 #elif defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
     defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
@@ -80,7 +91,15 @@ typedef struct SMT32FlashDriver {
 #define FLASH_FLAG_PGPERR              FLASH_SR_PGPERR         /*!< FLASH Programming Parallelism error flag  */
 #define FLASH_FLAG_ERSERR              FLASH_SR_ERSERR         /*!< FLASH Erasing Sequence error flag         */
 #define FLASH_FLAG_BSY                 FLASH_SR_BSY            /*!< FLASH Busy flag                           */
-#define FLASH_FLAG_PGSERR                                      /*!< doesn't exist just to make the compiler happy */
+
+#if defined (FLASH_OPTCR2_PCROP)
+#define FLASH_FLAG_RDERR               FLASH_SR_RDERR          /*!< FLASH Read protection error flag          */
+#define FLASH_FLAG_ALL_ERRORS     (FLASH_FLAG_OPERR   | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                                   FLASH_FLAG_PGPERR  | FLASH_FLAG_ERSERR | FLASH_FLAG_RDERR)
+#else
+#define FLASH_FLAG_ALL_ERRORS     (FLASH_FLAG_OPERR   | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | \
+                                   FLASH_FLAG_PGPERR  | FLASH_FLAG_ERSERR)
+#endif /* FLASH_OPTCR2_PCROP */
 
 #endif
 
