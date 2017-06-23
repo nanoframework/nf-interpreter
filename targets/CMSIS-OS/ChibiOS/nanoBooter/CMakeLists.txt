@@ -9,7 +9,9 @@ list(APPEND TARGET_CHIBIOS_NANOBOOTER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/WireP
 # make var global
 set(TARGET_CHIBIOS_NANOBOOTER_SOURCES ${TARGET_CHIBIOS_NANOBOOTER_SOURCES} CACHE INTERNAL "make global")
 
-
+# append include directory for debugger
+list(APPEND TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Debugger")
+    
 # append target ChibiOS nanoBooter include directory
 list(APPEND TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
 # make var global

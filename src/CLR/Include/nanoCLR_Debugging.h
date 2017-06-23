@@ -88,6 +88,11 @@ struct CLR_DBG_Commands
         unsigned int m_address;
         unsigned int m_length;
         unsigned char  m_data[ 1 ];
+
+        struct Reply
+        {
+            unsigned int ErrorCode;
+        };        
     };
 
     struct Monitor_Signature
@@ -112,6 +117,11 @@ struct CLR_DBG_Commands
     {
         unsigned int m_address;
         unsigned int m_length;
+
+        struct Reply
+        {
+            unsigned int ErrorCode;
+        };        
     };
 
     struct Monitor_Execute
@@ -1017,7 +1027,7 @@ private:
 
     bool CheckPermission( ByteAddress address, int mode );
 
-    bool AccessMemory( CLR_UINT32 location, unsigned int lengthInBytes, unsigned char* buf, int mode );
+    bool AccessMemory( CLR_UINT32 location, unsigned int lengthInBytes, unsigned char* buf, int mode, unsigned int* errorCode );
 
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain*  GetAppDomainFromID ( CLR_UINT32 id );

@@ -8,6 +8,7 @@
 #include <nanoHAL_v2.h>
 
 #include <WireProtocol.h>
+#include <Debugger.h>
 #include <WireProtocol_MonitorCommands.h>
 #include <target_board.h>
 
@@ -26,8 +27,11 @@ bool NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
     return true;
 }
 
-static bool AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buffer, int mode)
+static bool AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buffer, int mode, unsigned int* errorCode)
 {
+    // reset error code
+    *errorCode = AccessMemoryErrorCode_NoError;
+    
     switch(mode)
     {
         case AccessMemory_Write:
@@ -85,9 +89,9 @@ bool Monitor_OemInfo(WP_Message* message)
 
 bool Monitor_WriteMemory(WP_Message* message)
 {
-    bool ret;
-    
     CLR_DBG_Commands_Monitor_WriteMemory* cmd = (CLR_DBG_Commands_Monitor_WriteMemory*)message->m_payload;
+    CLR_DBG_Commands_Monitor_WriteMemory_Reply cmdReply;
+
 
     // TODO: not sure if we really need this
     // if(!m_signedDataState.VerifyContiguousData(cmd->m_address, cmd->m_length))
@@ -101,11 +105,11 @@ bool Monitor_WriteMemory(WP_Message* message)
     // nanoBooter_OnStateChange(State_MemoryWrite, (void*)cmd->m_address);
 
     // assume at RAM, directly use the original address 
-    ret = AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write);
+    AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write, &cmdReply.ErrorCode);
   
-    WP_ReplyToCommand(message, ret, false, NULL, 0);
+    WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
 
-    return ret;
+    return true;
 }
 
 bool Monitor_Reboot(WP_Message* message)
@@ -132,18 +136,17 @@ bool Monitor_Reboot(WP_Message* message)
 
 bool Monitor_EraseMemory(WP_Message* message)
 {
-    bool ret = false;
-    
     CLR_DBG_Commands_Monitor_EraseMemory* cmd = (CLR_DBG_Commands_Monitor_EraseMemory*)message->m_payload;
+    CLR_DBG_Commands_Monitor_EraseMemory_Reply cmdReply;
 
     // TODO: not sure if we really need this
     // nanoBooter_OnStateChange( State_MemoryErase, (void*)cmd->m_address );
     
-    ret = AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase);
+    AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase, &cmdReply.ErrorCode);
 
-    WP_ReplyToCommand(message, ret, false, NULL, 0);
+    WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
         
-    return ret;
+    return true;
 }
 
 bool Monitor_CheckMemory(WP_Message* message)
@@ -152,8 +155,9 @@ bool Monitor_CheckMemory(WP_Message* message)
 
     CLR_DBG_Commands_Monitor_CheckMemory* cmd = (CLR_DBG_Commands_Monitor_CheckMemory*)message->m_payload;
     CLR_DBG_Commands_Monitor_CheckMemory_Reply cmdReply;
+    unsigned int errorCode;
 
-    ret = AccessMemory(cmd->address, cmd->length, (uint8_t*)&cmdReply.crc, AccessMemory_Check);
+    ret = AccessMemory(cmd->address, cmd->length, (uint8_t*)&cmdReply.crc, AccessMemory_Check, &errorCode);
 
     WP_ReplyToCommand(message, ret, false, &cmdReply, sizeof(cmdReply));
 
