@@ -3069,9 +3069,8 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status( WP_Message* msg)
 
 
     cmdReply.EntryPoint          = g_CLR_RT_TypeSystem.m_entryPoint.m_data;
-    cmdReply.StorageStart        = (uint32_t)&__deployment_start__;
-    // need to cast the pointers to make sure the compiler implements the correct math
-    cmdReply.StorageLength       = ((uint32_t)&__deployment_end__) - ((uint32_t)&__deployment_start__);
+    cmdReply.StorageStart        = 0;
+    cmdReply.StorageLength       = 0;
 
 
 
