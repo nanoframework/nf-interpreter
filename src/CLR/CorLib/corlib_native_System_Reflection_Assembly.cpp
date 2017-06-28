@@ -271,8 +271,6 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     array = stack.Arg0().DereferenceArray(); FAULT_ON_NULL(array);
 
     header = (CLR_RECORD_ASSEMBLY*)array->GetFirstElement();
-    
-    NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::VerifyEndian(header));
 
     if(header->GoodAssembly())
     {

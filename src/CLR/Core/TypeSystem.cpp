@@ -1333,12 +1333,6 @@ bool CLR_RECORD_ASSEMBLY::GoodHeader() const
     NATIVE_PROFILE_CLR_CORE();
     CLR_RECORD_ASSEMBLY header = *this; header.headerCRC = 0;
 
-    if ( (header.flags & CLR_RECORD_ASSEMBLY::c_Flags_BigEndian) == CLR_RECORD_ASSEMBLY::c_Flags_BigEndian)
-    {
-        // Incorrect endianness
-        return false;
-    }
-
     if(SUPPORT_ComputeCRC( &header, sizeof(header), 0 ) != this->headerCRC) return false;
 
     if(this->stringTableVersion != c_CLR_StringTable_Version) return false;
@@ -3241,38 +3235,6 @@ void CLR_RT_Assembly::Relocate()
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_szName     );
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_pFile      );
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_nativeCode );
-}
-
-HRESULT CLR_RT_Assembly::VerifyEndian(CLR_RECORD_ASSEMBLY* header)
-{
-    unsigned int u = 0x1234567;
-    unsigned char *t = (unsigned char*)&u;
-    bool  localIsBE = false;
-    bool  assyIsBE = false;
-
-    NANOCLR_HEADER();
-    
-    // Is this a Big Endian system?
-    if ( 0x12!=*t)
-    {
-        localIsBE=true;
-    }
-
-    if( (header->flags & CLR_RECORD_ASSEMBLY::c_Flags_BigEndian) == CLR_RECORD_ASSEMBLY::c_Flags_BigEndian )
-    {
-        assyIsBE=true;
-    }
-    
-    if (assyIsBE==localIsBE)
-    {
-        NANOCLR_SET_AND_LEAVE(S_OK);
-    }
-    else
-    {
-        NANOCLR_SET_AND_LEAVE(S_FALSE);
-    }
-
-    NANOCLR_NOCLEANUP();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
