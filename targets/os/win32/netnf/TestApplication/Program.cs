@@ -1,14 +1,14 @@
 ﻿using System;
 
-namespace TestApplication
+namespace NF.TestApplication_NEW
 {
-    public class Program
+	public class Program
     {
         public static void Main()
         {
             Guid newGuid = Guid.NewGuid();
 
-            while(true)
+            while (true)
             {
                 int i = 0;
             }
