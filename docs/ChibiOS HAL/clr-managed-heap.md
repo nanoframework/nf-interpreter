@@ -5,9 +5,11 @@
 This document describes how the CLR manged heap is defined as a ChibiOS target.
 
 For STM32 based devices:
-The configurations are spread between two linker files: 
-- [rules.ld](../../targets/CMSIS-OS/ChibiOS/common/rules.ld) (which is common to all STM32 based ChibiOS targets **except** the F7 series that use [rules_STM32F7xx.ld](../../targets/CMSIS-OS/ChibiOS/common/rules_STM32F7xx.ld) instead)
-- the target linker file provided for the nanoCLR in the target board folder, e.g. [STM32F091xC.ld](../../targets/CMSIS-OS/ChibiOS/ST_NUCLEO_F091RC/nanoCLR/STM32F091xC.ld)
+The configurations are chained by linker files: 
+- the target linker file provided for the nanoCLR in the target board folder, e.g. [STM32F091xC.ld](../../targets/CMSIS-OS/ChibiOS/ST_NUCLEO_F091RC/nanoCLR/STM32F091xC.ld) and from within calls rules.ld **except** the F7 series which calls rules_clr.ld, rules_code.ld, rules_data.ld and rules_stacks.ld directly.
+- [rules.ld](../../targets/CMSIS-OS/ChibiOS/common/rules.ld) (which is common to all STM32 based ChibiOS targets and calls the next set of linker files)
+- [rules_clr.ld](../../targets/CMSIS-OS/ChibiOS/common/rules_clr.ld), [rules_code.ld](../../targets/CMSIS-OS/ChibiOS/common/rules_code.ld), [rules_data.ld](../../targets/CMSIS-OS/ChibiOS/common/rules_data.ld) and [rules_stacks.ld](../../targets/CMSIS-OS/ChibiOS/common/rules_stacks.ld)
+
 
 
 ## Managed heap location and size
@@ -23,13 +25,13 @@ This empowers developers to create new target boards with maximum flexibility of
 
 The location of the CLR managed heap is set in in target linker file provided for nanoCLR in the target boards folder, e.g. [STM32F091xC.ld](../../targets/CMSIS-OS/ChibiOS/ST_NUCLEO_F091RC/nanoCLR/STM32F091xC.ld)
 
-For exaple the line (usually toward the end of the file) will contain something similar to `REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);`. The example stated here defines CLR manged heap location as being set in the _ram0_ region. The RAM regions are defined on that same file, at the beginning. For further information, please check the ChibiOS documentation for details on how to define further RAM regions.
+For example the line (usually toward the end of the file) will contain something similar to `REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);`. The example stated here defines CLR manged heap location as being set in the _ram0_ region. The RAM regions are defined on that same file, at the beginning. For further information, please check the ChibiOS documentation for details on how to define further RAM regions.
 
 
 ### Definition of the CLR managed heap size
 
 The size of the CLR managed heap is set in the CMake file of the target board, e.g. [CMakeLists.txt](../../targets/CMSIS-OS/ChibiOS/ST_NUCLEO_F091RC/CMakeLists.txt).
-For example the line will contain something similar to `--defsym=__clr_managed_heap_size__=0x7000`. In the example stated here the size of CLR manged heap is being set to 0x7000.
+For example the line will contain something similar to `--defsym=__clr_managed_heap_size__=0x7000`. In the example stated here the size of CLR managed heap is being set to 0x7000.
 
 When defining the size you need to take into account several factors:
 - the total available size of the region where it's being placed
