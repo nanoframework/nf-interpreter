@@ -32,7 +32,7 @@ Locate the line containing `--defsym=__clr_managed_heap_size__=0x7000`. On the e
 
 When defining this size you need to take into account several factors:
 - the total available size of the region here it's being placed
-- if there are initialized variables assigned to this region how much space of ot they are taking
+- if there are initialized variables assigned to this region how much space of it they are taking
 - if the CRT heap is to be located in this region what will be the size left for it and if that is enough
 
 The linker will only be able to check if there is enough room for all these and it will complain if there isn't. But it can not check if the CRT heap is large enough for the running requirements. That is up to the target board developer.

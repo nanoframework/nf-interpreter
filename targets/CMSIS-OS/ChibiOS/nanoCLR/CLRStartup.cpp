@@ -101,7 +101,7 @@ struct Settings
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Create TS.\r\n" );
 #endif
-        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( 0 /*nanoCLR_Dat_Start*/, 0 /*nanoCLR_Dat_End*/ ));
+        //NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( (char*)&__deployment_start__, (char*)&__deployment_end__ ));
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Loading Deployment Assemblies.\r\n" );
@@ -173,6 +173,9 @@ struct Settings
         signed int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
         unsigned char * headerBuffer  = NULL;
 
+        headerBuffer = (unsigned char*)CLR_RT_Memory::Allocate( headerInBytes, true );  CHECK_ALLOCATION(headerBuffer);
+        CLR_RT_Memory::ZeroFill( headerBuffer, headerInBytes );
+
         while(TRUE)
         {
             if(!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes )) break;
@@ -185,16 +188,28 @@ struct Settings
                 break;
             }
 
-            unsigned int AssemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
+            unsigned int assemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
+
+            // read the assemblies
+            assembliesBuffer = (unsigned char*)CLR_RT_Memory::Allocate_And_Erase( assemblySizeInByte, CLR_RT_HeapBlock ::HB_Unmovable );
+            
+            if (!assembliesBuffer) 
+            {
+                // release the headerbuffer which has being used and leave
+                CLR_RT_Memory::Release( headerBuffer );
+                
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            }
 
             BlockStorageStream_Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
 
-            if(!BlockStorageStream_Read(&stream, &assembliesBuffer, AssemblySizeInByte)) break;
+            if(!BlockStorageStream_Read(&stream, &assembliesBuffer, assemblySizeInByte)) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)assembliesBuffer;
 
             if(!header->GoodAssembly())
             {
+                CLR_RT_Memory::Release( assembliesBuffer );
                 break;
             }
                 
@@ -206,11 +221,14 @@ struct Settings
 
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem 
             if (FAILED(LoadAssembly(header, assm)))
-            {   
+            {
+                CLR_RT_Memory::Release( assembliesBuffer );
                 break;
             }
             assm->m_flags |= CLR_RT_Assembly::Deployed;
         }
+
+        CLR_RT_Memory::Release( headerBuffer );
                 
         NANOCLR_NOCLEANUP();
     }
