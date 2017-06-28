@@ -54,7 +54,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RPC_stub", "..\..\..\src\CL
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Serialization_stub", "..\..\..\src\CLR\Core\Serialization\Serialization_stub.vcxproj", "{C337041D-344D-49FE-AD99-B137E7FD0188}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NF.TestApplication", "netnf\TestApplication\NF.TestApplication.csproj", "{247F9798-E240-4D5B-956D-35E5EAD21CE2}"
+Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "NF.TestApplication", "netnf\TestApplication\NF.TestApplication.nfproj", "{247F9798-E240-4D5B-956D-35E5EAD21CE2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A5089650-2C81-4C04-ABA9-AABCEBDA3AA4}"
 	ProjectSection(SolutionItems) = preProject
