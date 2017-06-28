@@ -977,8 +977,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     HRESULT Resolve_ComputeHashes         (              );
     HRESULT Resolve_AllocateStaticFields  ( CLR_RT_HeapBlock* pStaticFields );
 
-    static HRESULT VerifyEndian(CLR_RECORD_ASSEMBLY* header);
-
     HRESULT PrepareForExecution();
 
     CLR_UINT32 ComputeAssemblyHash(                                  );
