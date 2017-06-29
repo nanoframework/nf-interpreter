@@ -118,7 +118,7 @@ struct Settings
 
         g_CLR_RT_Persistence_Manager.Initialize();
 
-        // UNDONE: FIXME: NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
 
 #if defined(NANOCLR_PROFILE_HANDLER)
         CLR_PROF_Handler::Calibrate();
@@ -173,9 +173,6 @@ struct Settings
         signed int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
         unsigned char * headerBuffer  = NULL;
 
-        headerBuffer = (unsigned char*)CLR_RT_Memory::Allocate( headerInBytes, true );  CHECK_ALLOCATION(headerBuffer);
-        CLR_RT_Memory::ZeroFill( headerBuffer, headerInBytes );
-
         while(TRUE)
         {
             if(!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes )) break;
@@ -185,36 +182,27 @@ struct Settings
             // check header first before read
             if(!header->GoodHeader())
             {
-                break;
+                // check failed, try to continue to the next 
+                continue;
             }
 
             unsigned int assemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
 
-            // read the assemblies
-            assembliesBuffer = (unsigned char*)CLR_RT_Memory::Allocate_And_Erase( assemblySizeInByte, CLR_RT_HeapBlock ::HB_Unmovable );
-            
-            if (!assembliesBuffer) 
-            {
-                // release the headerbuffer which has being used and leave
-                CLR_RT_Memory::Release( headerBuffer );
-                
-                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-            }
-
+            // advance stream beyond header
             BlockStorageStream_Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
 
+            // read the assembly
             if(!BlockStorageStream_Read(&stream, &assembliesBuffer, assemblySizeInByte)) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)assembliesBuffer;
 
             if(!header->GoodAssembly())
             {
-                CLR_RT_Memory::Release( assembliesBuffer );
-                break;
+                // check failed, try to continue to the next 
+                continue;
             }
                 
             // we have good Assembly 
-
             CLR_RT_Assembly* assm;
 
             CLR_Debug::Printf( "Attaching deployed file.\r\n" );
@@ -222,13 +210,13 @@ struct Settings
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem 
             if (FAILED(LoadAssembly(header, assm)))
             {
-                CLR_RT_Memory::Release( assembliesBuffer );
-                break;
+                // load failed, try to continue to the next 
+                continue;
             }
+
+            // load successfull, mark as deployed
             assm->m_flags |= CLR_RT_Assembly::Deployed;
         }
-
-        CLR_RT_Memory::Release( headerBuffer );
                 
         NANOCLR_NOCLEANUP();
     }
