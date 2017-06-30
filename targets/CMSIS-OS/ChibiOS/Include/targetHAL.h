@@ -8,6 +8,9 @@
 
 #include <target_board.h>
 
+// call to CMSIS osDelay to allow other threads to run
+#define NANOCLR_RELINQUISHEXECUTIONCONTROL()       osDelay(1);
+
 #if !defined(BUILD_RTM)
 
 // FIXME IMPLEMENT

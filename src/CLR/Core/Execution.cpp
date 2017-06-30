@@ -1234,6 +1234,9 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
         UpdateTime();
 
         (void)ProcessTimer();
+
+        // relinquish execution to OS
+        NANOCLR_RELINQUISHEXECUTIONCONTROL();
     }
 
     NANOCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);

@@ -85,4 +85,8 @@ typedef struct HAL_SYSTEM_CONFIG
 
 extern HAL_SYSTEM_CONFIG  HalSystemConfig;
 
+// declaration of call to function that relinquishes execution control to OS
+// this has to be provided at target level
+void NANOCLR_RELINQUISHEXECUTIONCONTROL();
+
 #endif // _NANOHAL_V2_H_
