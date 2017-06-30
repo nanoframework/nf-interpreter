@@ -148,6 +148,7 @@ set(NF_CoreCLR_SRCS
 
     # PAL stubs
     COM_stubs.c
+    Events_stubs.cpp
 
 )
 
@@ -187,6 +188,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
 
             # PAL stubs
             ${PROJECT_SOURCE_DIR}/src/PAL/COM
+            ${PROJECT_SOURCE_DIR}/src/PAL/Events
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
