@@ -536,7 +536,11 @@ HRESULT CLR_RT_Thread::Execute()
 
         if(SUCCEEDED(hr))
         {
-            hr = Execute_Inner(); if(SUCCEEDED(hr)) NANOCLR_LEAVE();
+            hr = Execute_Inner();
+            if(SUCCEEDED(hr))
+            {
+                NANOCLR_LEAVE();
+            }
         }
 
         switch(hr)
