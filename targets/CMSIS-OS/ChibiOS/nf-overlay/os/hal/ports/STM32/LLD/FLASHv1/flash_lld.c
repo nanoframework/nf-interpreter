@@ -113,11 +113,10 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
         CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
         
         // lock the FLASH
-        if(HAL_FLASH_Lock())
-        {
-            // lock succesfull, done here
-            return true;
-        }
+        HAL_FLASH_Lock();
+        
+        // done here
+        return true;
     }
 
     // default to false
@@ -167,11 +166,10 @@ bool flash_lld_erase(uint32_t address) {
         CLEAR_BIT(FLASH->CR, FLASH_CR_PER);
 
         // lock the FLASH
-        if(HAL_FLASH_Lock())
-        {
-            // lock succesfull, done here
-            return true;
-        }
+        HAL_FLASH_Lock();
+
+        // done here
+        return true;
     }
 
     // default to false
