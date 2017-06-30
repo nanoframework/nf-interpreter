@@ -173,8 +173,15 @@ struct Settings
         signed int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
         unsigned char * headerBuffer  = NULL;
 
-        while(TRUE)
+        while(stream.CurrentIndex < stream.Length)
         {
+            // check if there is enough stream length to continue
+            if((stream.Length - stream.CurrentIndex ) < headerInBytes)
+            {
+                // not enough stream to read, leave now
+                break;
+            }
+
             if(!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes )) break;
 
             header = (const CLR_RECORD_ASSEMBLY*)headerBuffer;
