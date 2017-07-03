@@ -1,4 +1,3 @@
-
 ###
 
 language: c #NOTE: this will set CC=gcc which might cause trouble
@@ -17,20 +16,20 @@ matrix:
     - env: TRAVIS_EMPTY_JOB_WORKAROUND=true
 
    include:
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_4-2016q3 -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_4-2016q3 -DCHIBIOS_BOARD=ST_STM32F429I_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_4-2016q3 -DCHIBIOS_BOARD=ST_NUCLEO64_F091RC -DTARGET_SERIES=STM32F0xx -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_4-2016q3 -DCHIBIOS_BOARD=ST_NUCLEO144_F746ZG -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_4-2016q3 -DCHIBIOS_BOARD=MBN_QUAIL -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-5_4-2016q3 -DCHIBIOS_BOARD=ST_STM32F769I_DISCOVERY -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=ST_STM32F429I_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=ST_NUCLEO64_F091RC -DTARGET_SERIES=STM32F0xx -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=ST_NUCLEO144_F746ZG -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=MBN_QUAIL -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
+    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=ST_STM32F769I_DISCOVERY -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON "
 
 ## cache GCC toolchain to speedup next builds
 cache:
   directories:
-    - $HOME/gcc-arm-none-eabi-5_4-2016q3
+    - $HOME/gcc-arm-none-eabi-6-2017-q1-update
 
 install:
-
+## Install CMake
   - mkdir $HOME/usr
   - export PATH="$HOME/usr/bin:$PATH"
   - wget --no-check-certificate https://cmake.org/files/v3.8/cmake-3.8.2-Linux-x86_64.sh
@@ -38,21 +37,22 @@ install:
   - ./cmake-3.8.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
 
 
-# install:
-
   ## Install mainline ARM toolchain 
-  - export GCC_DIR=$HOME/gcc-arm-none-eabi-5_4-2016q3
-  - export GCC_ARCHIVE=$HOME/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2
-  - export GCC_URL=https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q3-update/+download/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2
+  - export GCC_DIR=$HOME/gcc-arm-none-eabi-6-2017-q1-update
+  - export GCC_ARCHIVE=$HOME/gcc-arm-none-eabi-6-2017-q1-update-linux.tar.bz2
+  - export GCC_URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/6_1-2017q1/gcc-arm-none-eabi-6-2017-q1-update-linux.tar.bz2?product=GNU%20ARM%20Embedded%20Toolchain,64-bit,,Linux,6-2017-q1-update
   - if [ ! -e $GCC_DIR/bin/arm-none-eabi-g++ ]; then wget $GCC_URL -O $GCC_ARCHIVE; tar xfj $GCC_ARCHIVE -C $HOME; fi
-  - export PATH=$PATH:$GCC_DIR/bin
+
+  - export PATH=$PATH:$GCC_DIR/bi
+
+addons:
+  apt:
+    packages:
+      - libc6-i386
+      - libstdc++6:i386
 
 before_script:
-  ###################################################################
-  # need to install the 32 bit libraries for ARM GCC to run properly 
-  - sudo apt-get update
-  - sudo apt-get install libc6:i386 libstdc++6:i386
-  ###################################################################
+  #- sudo apt-get update
 
   ############################################################################
   # Go back to the root of the project and setup the build directory
