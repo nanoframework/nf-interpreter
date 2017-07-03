@@ -2,8 +2,7 @@
 
 language: c #NOTE: this will set CC=gcc which might cause trouble
 
-#sudo: required
-sudo: false
+sudo: required
 
 # Do not build branches of the form "pr/*". By prefixing pull requests coming
 # from branches inside the repository with pr/, this avoids building both the
