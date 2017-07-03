@@ -53,8 +53,6 @@ addons:
 
 before_script:
   #- sudo apt-get update
-  - tools/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-gcc --version
- 
 
   ############################################################################
   # Go back to the root of the project and setup the build directory
