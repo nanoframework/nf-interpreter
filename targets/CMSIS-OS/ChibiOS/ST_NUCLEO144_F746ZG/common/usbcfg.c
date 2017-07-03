@@ -17,10 +17,10 @@ SerialUSBDriver SDU1;
 #define USBD1_INTERRUPT_REQUEST_EP      2
 
 // address for device unique ID
-// valid for STM32F4 series
-#define         DEVICE_ID1            (0x1FFF7A10)
-#define         DEVICE_ID2            (0x1FFF7A14)
-#define         DEVICE_ID3            (0x1FFF7A18)
+// valid for STM32F7 series
+#define         DEVICE_ID1            (0x1FF0F420)
+#define         DEVICE_ID2            (0x1FF0F424)
+#define         DEVICE_ID3            (0x1FF0F428)
 
 // // size of string serial is 36 = 2 + 5x2 + 26 from silicon unique ID precedeed of string "NANO_" and descriptor codes
 // #define  USB_SIZ_STRING_SERIAL        36
