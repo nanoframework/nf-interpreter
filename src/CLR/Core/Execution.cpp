@@ -2931,8 +2931,8 @@ void CLR_RT_ExecutionEngine::DebuggerLoop()
 
     UpdateTime();
 
-    // UNDONE: FIXME
-    // WaitSystemEvents( SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, TIME_CONVERSION__TO_MILLISECONDS * 100 );
+    // relinquish execution to OS
+    NANOCLR_RELINQUISHEXECUTIONCONTROL();
 }
 
 
