@@ -16,16 +16,16 @@ The configurations are chained by linker files:
 
 The CLR managed heap can be located on the target board at any RAM address where space available. Either internal or external.
 
-It will be placed (considering the RAM region defined) after the region containing the initialized variables (if any is assigned to that RAM region) and before the CRT heap (if this is assigned to the same RAM region).
+It will be placed (considering the RAM region defined) after the region containing the initialized variables (if any are assigned to that RAM region) and before the CRT heap (if it is assigned to the same RAM region).
 
-This empowers developers to create new target boards with maximum flexibility of where to locate the CLR managed heap and its size.
+This empowers developers to create new target boards with maximum flexibility of where to locate the CLR managed heap and its respective size.
 
 
 ### Definition the CLR managed heap location
 
 The location of the CLR managed heap is set in in target linker file provided for nanoCLR in the target boards folder, e.g. [STM32F091xC.ld](../../targets/CMSIS-OS/ChibiOS/ST_NUCLEO_F091RC/nanoCLR/STM32F091xC.ld)
 
-For example the line (usually toward the end of the file) will contain something similar to `REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);`. The example stated here defines CLR manged heap location as being set in the _ram0_ region. The RAM regions are defined on that same file, at the beginning. For further information, please check the ChibiOS documentation for details on how to define further RAM regions.
+For example the line (usually toward the end of the file) will contain something similar to `REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);`. The example stated here defines CLR manged heap location as being set in the _ram0_ region. The RAM regions and respective sizes are defined in the same file. For further information, please check the ChibiOS documentation for details on how to define further RAM regions.
 
 
 ### Definition of the CLR managed heap size
