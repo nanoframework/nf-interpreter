@@ -2,7 +2,8 @@
 
 language: c #NOTE: this will set CC=gcc which might cause trouble
 
-sudo: required
+#sudo: required
+sudo: false
 
 # Do not build branches of the form "pr/*". By prefixing pull requests coming
 # from branches inside the repository with pr/, this avoids building both the
@@ -52,11 +53,9 @@ addons:
       - libstdc++6:i386
 
 before_script:
-  ###################################################################
-  # need to install the 32 bit libraries for ARM GCC to run properly 
-  - sudo apt-get update
-  #- sudo apt-get install -y libc6:i386 libstdc++6:i386
-  ###################################################################
+  #- sudo apt-get update
+  - tools/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-gcc --version
+ 
 
   ############################################################################
   # Go back to the root of the project and setup the build directory
