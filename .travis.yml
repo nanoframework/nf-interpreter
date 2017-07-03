@@ -40,8 +40,8 @@ install:
   ## Install mainline ARM toolchain 
   - export GCC_DIR=$HOME/gcc-arm-none-eabi-6-2017-q2
   - export GCC_ARCHIVE=$HOME/gcc-arm-none-eabi-6-2017-q2-update-linux.tar.bz2
-  - export GCC_URL= https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/6-2017q2/gcc-arm-none-eabi-6-2017-q2-update-linux.tar.bz2
-  - if [ ! -e $GCC_DIR/bin/arm-none-eabi-g++ ]; then wget $GCC_URL -O $GCC_ARCHIVE; tar xfj $GCC_ARCHIVE -C $HOME; fi
+  - export GCC_URL= https://developer.arm.com/-/media/Files/downloads/gnu-rm/6-2017q2/gcc-arm-none-eabi-6-2017-q2-update-linux.tar.bz2
+  - if [ ! -e $GCC_DIR/bin/arm-none-eabi-g++ ]; then wget --no-check-certificate $GCC_URL -O $GCC_ARCHIVE; tar xfj $GCC_ARCHIVE -C $HOME; fi
   - export PATH=$PATH:$GCC_DIR/bin
 
 before_script:
