@@ -1,4 +1,3 @@
-
 ###
 
 language: c #NOTE: this will set CC=gcc which might cause trouble
