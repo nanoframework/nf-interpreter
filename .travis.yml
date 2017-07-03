@@ -49,7 +49,7 @@ before_script:
   # need to install the 32 bit libraries for ARM GCC to run properly 
   - sudo apt-get update
   - sudo apt-get install -y libc6:i386 libstdc++6:i386
-  - sudo apt-get install -y install lib32z1 lib32ncurses5 lib32bz2-1.0
+  #- sudo apt-get install -y install lib32z1 lib32ncurses5 lib32bz2-1.0
   ###################################################################
 
   ############################################################################
