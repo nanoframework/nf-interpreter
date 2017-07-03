@@ -6,6 +6,7 @@
 
 #include <cmsis_os.h>
 #include <nanoHAL_v2.h>
+#include <nanoPAL_BlockStorage.h>
 
 #include <WireProtocol.h>
 #include <Debugger.h>
@@ -201,58 +202,58 @@ bool Monitor_FlashSectorMap(WP_Message* message)
     uint32_t rangeCount = 0;
     uint32_t rangeIndex = 0;
 
-//    for(int count = 0; count < 2; count++)
-//    {
-//        BlockStorageDevice* device = BlockStorageList_GetFirstDevice();
+   for(int count = 0; count < 2; count++)
+   {
+       BlockStorageDevice* device = BlockStorageList_GetFirstDevice();
 
-//        if(device == NULL)
-//        {
+       if(device == NULL)
+       {
             WP_ReplyToCommand(message, true, false, NULL, 0);
             return false;
-//        }
+       }
 
-//        if(count == 1)
-//        {
-//            pData = (struct Flash_Sector*)platform_malloc(rangeCount * sizeof(struct Flash_Sector));
+       if(count == 1)
+       {
+           pData = (struct Flash_Sector*)platform_malloc(rangeCount * sizeof(struct Flash_Sector));
 
-//            if(pData == NULL)
-//            {
-//                WP_ReplyToCommand(message, true, false, NULL, 0);
-//                return false;
-//            }
-//        }
+           if(pData == NULL)
+           {
+               WP_ReplyToCommand(message, true, false, NULL, 0);
+               return false;
+           }
+       }
 
-//        do
-//        {
-//            const DeviceBlockInfo* deviceInfo = device->GetDeviceInfo(device);
+       do
+       {
+           const DeviceBlockInfo* deviceInfo = device->GetDeviceInfo(device);
 
-//            for(int i = 0; i < deviceInfo->NumRegions;  i++)
-//            {
-//                const BlockRegionInfo* pRegion = &deviceInfo->Regions[ i ];
+           for(int i = 0; i < deviceInfo->NumRegions;  i++)
+           {
+               const BlockRegionInfo* pRegion = &deviceInfo->Regions[ i ];
                 
-//                for(int j = 0; j < pRegion->NumBlockRanges; j++)
-//                {
+               for(int j = 0; j < pRegion->NumBlockRanges; j++)
+               {
                     
-//                    if(count == 0)
-//                    {
-//                        rangeCount++;    
-//                    }
-//                    else
-//                    {
-//                        pData[ rangeIndex ].Start  = 0; //pRegion->BlockRegionInfo_BlockAddress( pRegion->BlockRanges[ j ].StartBlock );
-//                        pData[ rangeIndex ].Length = 0; //pRegion->BlockRanges[ j ].GetBlockCount() * pRegion->BytesPerBlock;
-//                        pData[ rangeIndex ].Usage  = 0; //pRegion->BlockRanges[ j ].RangeType & BlockRange_USAGE_MASK;
-//                        rangeIndex++;
-//                    }
-//                }
-//            }
-//        }
-//        while(device = BlockStorageList_GetNextDevice( *device ));
-//    }
+                   if(count == 0)
+                   {
+                       rangeCount++;    
+                   }
+                   else
+                   {
+                       pData[ rangeIndex ].Start  = 0; //pRegion->BlockRegionInfo_BlockAddress( pRegion->BlockRanges[ j ].StartBlock );
+                       pData[ rangeIndex ].Length = 0; //pRegion->BlockRanges[ j ].GetBlockCount() * pRegion->BytesPerBlock;
+                       pData[ rangeIndex ].Usage  = 0; //pRegion->BlockRanges[ j ].RangeType & BlockRange_USAGE_MASK;
+                       rangeIndex++;
+                   }
+               }
+           }
+       }
+       while(device = BlockStorageList_GetNextDevice( *device ));
+   }
 
-//    WP_ReplyToCommand(message, true, false, (void*)pData, rangeCount * sizeof (struct Flash_Sector) );
+   WP_ReplyToCommand(message, true, false, (void*)pData, rangeCount * sizeof (struct Flash_Sector) );
 
-//    platform_free(pData);
+   platform_free(pData);
 
-//    return true;
+   return true;
 }
