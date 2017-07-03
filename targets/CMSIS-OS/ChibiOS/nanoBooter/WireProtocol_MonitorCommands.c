@@ -6,6 +6,7 @@
 
 #include <cmsis_os.h>
 #include <nanoHAL_v2.h>
+#include <nanoPAL_BlockStorage.h>
 
 #include <WireProtocol.h>
 #include <Debugger.h>
