@@ -25,6 +25,6 @@ bool GpioController::NativeOpenpin( CLR_RT_HeapBlock* pMngObj, signed int param0
 signed int GpioController::get_PinCount( CLR_RT_HeapBlock* pMngObj, HRESULT &hr )
 {
     signed int retVal = 0; 
-    return 80;	// Fixme: temporary arbitrary value
+    return 144;	// Fixme: temporary arbitrary value
 }
 
