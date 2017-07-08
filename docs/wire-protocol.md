@@ -15,7 +15,7 @@
 
 **About this document**
 
-This document describes the Wire Protocol used by **nanoFramework** for debug and booter stage.
+This document describes the Wire Protocol used by **nanoFramework** for debug and the booter stage.
 The protocol follows the implementation of the .NET Micro Framework Wire Protocol. The intention is to review it later in order to improve and simplify it.
 
 
