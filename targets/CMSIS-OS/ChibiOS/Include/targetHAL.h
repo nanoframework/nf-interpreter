@@ -52,3 +52,4 @@ extern uint32_t __deployment_start__;
 extern uint32_t __deployment_end__;
 
 #endif //_TARGET_HAL_H_
+

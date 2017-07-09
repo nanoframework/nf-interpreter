@@ -12,13 +12,14 @@
 #include <ch.h>
 #include <hal.h>
 #include <cmsis_os.h>
-
+#include <LaunchCLR.h>
 
 #include "windows_devices_gpio_native.h"
 #include "windows_devices_gpio_native_Windows_Devices_Gpio_GpioPin.h"
 
 using namespace Windows::Devices::Gpio;
 
+/*
 stm32_gpio_t* gpioPort[] = { GPIOA, GPIOB
 #if STM32_HAS_GPIOC
 , GPIOC
@@ -50,6 +51,7 @@ stm32_gpio_t* gpioPort[] = { GPIOA, GPIOB
  };
 
 #define GPIO_PORT(pin) (gpioPort[pin/16])
+*/
 
 bool GpioPin::NativeIsDriveModeSupported( CLR_RT_HeapBlock* pMngObj, unsigned char param0, HRESULT &hr )
 {

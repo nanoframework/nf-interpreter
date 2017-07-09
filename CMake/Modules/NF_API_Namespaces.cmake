@@ -11,6 +11,7 @@
 ###########################################################################################
 
 option(API_Windows.Devices.Gpio "option for Windows.Devices.Gpio API")
+option(API_Windows.Devices.Spi "option for Windows.Devices.Spi API")
 
 
 #################################################################
@@ -57,6 +58,11 @@ macro(ParseApiOptions)
     if(API_Windows.Devices.Gpio)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("Windows.Devices.Gpio")
+    endif()
+	# Windows.Devices.Spi
+    if(API_Windows.Devices.Spi)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Devices.Spi")
     endif()
 
 
