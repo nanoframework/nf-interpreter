@@ -14,7 +14,7 @@ const BlockRange BlockRange1[] =
 
 const BlockRange BlockRange2[] = 
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 08010000 nanoCLR          
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 08020000 nanoCLR          
 };
 
 const BlockRange BlockRange3[] =
@@ -33,7 +33,7 @@ const BlockRegionInfo BlockRegions[] =
     },
 
     {
-        0x08010000,                         // start address for block region
+        0x08020000,                         // start address for block region
         1,                                  // total number of blocks in this region
         0x20000,                            // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange2),
@@ -41,7 +41,7 @@ const BlockRegionInfo BlockRegions[] =
     },
 
     {
-        0x08020000,                         // start address for block region
+        0x08040000,                         // start address for block region
         3,                                  // total number of blocks in this region
         0x40000,                            // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange3),
