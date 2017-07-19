@@ -20,21 +20,20 @@ void BlinkerThread()
 	palClearPad(GPIOC, GPIOC_LED3);
 	palClearPad(GPIOA, GPIOA_INT1);
 	
-	// loop until thread receives a request to terminate
-	while (!chThdShouldTerminateX()) 
-	{
-		//palClearPad(GPIOC, GPIOC_LED3);
-		//palSetPad(GPIOE, GPIOE_LED1);
-    palClearLine(LINE_LED3);
-    palSetLine(LINE_LED1);
-		osDelay(200);
-		palClearPad(GPIOE, GPIOE_LED1);
-		palSetPad(GPIOE, GPIOE_LED2);
-		osDelay(200);
-		palClearPad(GPIOE, GPIOE_LED2);
-		palSetPad(GPIOC, GPIOC_LED3);
-		osDelay(200);
-	}
+  while (!chThdShouldTerminateX()) 
+  {
+    palSetPad(GPIOC, GPIOC_LED3);
+    chThdSleepMilliseconds(100);
+    palClearPad(GPIOC, GPIOC_LED3);
+
+    palSetPad(GPIOE, GPIOE_LED2);
+    chThdSleepMilliseconds(100);
+    palClearPad(GPIOE, GPIOE_LED2);
+
+    palSetPad(GPIOE, GPIOE_LED1);
+    chThdSleepMilliseconds(100);
+    palClearPad(GPIOE, GPIOE_LED1);
+  }
 }
 
 void DisplayClear(uint8_t backLight)
@@ -116,7 +115,6 @@ int main(void) {
   
   osDelay(3000);
   DisplayClear (0);
-
 
   while (true)
   {

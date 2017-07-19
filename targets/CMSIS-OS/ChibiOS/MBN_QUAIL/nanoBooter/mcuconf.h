@@ -27,8 +27,8 @@
  * HAL driver system settings.
  */
 #define STM32_NO_INIT                       FALSE
-#define STM32_HSI_ENABLED                   FALSE
-#define STM32_LSI_ENABLED                   FALSE
+#define STM32_HSI_ENABLED                   TRUE
+#define STM32_LSI_ENABLED                   TRUE
 #define STM32_HSE_ENABLED                   TRUE
 #define STM32_LSE_ENABLED                   TRUE
 #define STM32_CLOCK48_REQUIRED              TRUE
@@ -42,8 +42,8 @@
 #define STM32_PPRE1                         STM32_PPRE1_DIV4
 #define STM32_PPRE2                         STM32_PPRE2_DIV2
 #define STM32_RTCSEL                        STM32_RTCSEL_LSE
-#define STM32_RTCPRE_VALUE                  8
-#define STM32_MCO1SEL                       STM32_MCO1SEL_HSE
+#define STM32_RTCPRE_VALUE                  2
+#define STM32_MCO1SEL                       STM32_MCO1SEL_HSI
 #define STM32_MCO1PRE                       STM32_MCO1PRE_DIV1
 #define STM32_MCO2SEL                       STM32_MCO2SEL_SYSCLK
 #define STM32_MCO2PRE                       STM32_MCO2PRE_DIV1
@@ -237,12 +237,12 @@
 /*
  * SERIAL driver system settings.
  */
-#define STM32_SERIAL_USE_USART1             TRUE
+#define STM32_SERIAL_USE_USART1             FALSE
 #define STM32_SERIAL_USE_USART2             TRUE
-#define STM32_SERIAL_USE_USART3             TRUE
+#define STM32_SERIAL_USE_USART3             FALSE
 #define STM32_SERIAL_USE_UART4              FALSE
 #define STM32_SERIAL_USE_UART5              FALSE
-#define STM32_SERIAL_USE_USART6             TRUE
+#define STM32_SERIAL_USE_USART6             FALSE
 #define STM32_SERIAL_USART1_PRIORITY        12
 #define STM32_SERIAL_USART2_PRIORITY        12
 #define STM32_SERIAL_USART3_PRIORITY        12
@@ -279,12 +279,12 @@
 /*
  * UART driver system settings.
  */
-#define STM32_UART_USE_USART1               TRUE
-#define STM32_UART_USE_USART2               TRUE
-#define STM32_UART_USE_USART3               TRUE
+#define STM32_UART_USE_USART1               FALSE
+#define STM32_UART_USE_USART2               FALSE
+#define STM32_UART_USE_USART3               FALSE
 #define STM32_UART_USE_UART4                FALSE
 #define STM32_UART_USE_UART5                FALSE
-#define STM32_UART_USE_USART6               TRUE
+#define STM32_UART_USE_USART6               FALSE
 #define STM32_UART_USART1_RX_DMA_STREAM     STM32_DMA_STREAM_ID(2, 2)
 #define STM32_UART_USART1_TX_DMA_STREAM     STM32_DMA_STREAM_ID(2, 7)
 #define STM32_UART_USART2_RX_DMA_STREAM     STM32_DMA_STREAM_ID(1, 5)

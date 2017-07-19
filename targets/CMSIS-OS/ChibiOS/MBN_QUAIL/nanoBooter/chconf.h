@@ -38,7 +38,7 @@
  * @details Frequency of the system timer that drives the system ticks. This
  *          setting also defines the system tick time unit.
  */
-#define CH_CFG_ST_FREQUENCY                 10000
+#define CH_CFG_ST_FREQUENCY                 10000 // this is 1 millisecond
 
 /**
  * @brief   Time delta constant for the tick-less mode.
@@ -130,7 +130,7 @@
  *
  * @note    The default is @p TRUE.
  */
-#define CH_CFG_USE_TM                       FALSE
+#define CH_CFG_USE_TM                       TRUE
 
 /**
  * @brief   Threads registry APIs.
@@ -174,7 +174,7 @@
  *
  * @note    The default is @p TRUE.
  */
-#define CH_CFG_USE_MUTEXES                  FALSE
+#define CH_CFG_USE_MUTEXES                  TRUE
 
 /**
  * @brief   Enables recursive behavior on mutexes.
@@ -194,7 +194,7 @@
  * @note    The default is @p TRUE.
  * @note    Requires @p CH_CFG_USE_MUTEXES.
  */
-#define CH_CFG_USE_CONDVARS                 FALSE
+#define CH_CFG_USE_CONDVARS                 TRUE
 
 /**
  * @brief   Conditional Variables APIs with timeout.
@@ -204,7 +204,7 @@
  * @note    The default is @p TRUE.
  * @note    Requires @p CH_CFG_USE_CONDVARS.
  */
-#define CH_CFG_USE_CONDVARS_TIMEOUT         FALSE
+#define CH_CFG_USE_CONDVARS_TIMEOUT         TRUE
 
 /**
  * @brief   Events Flags APIs.
@@ -508,4 +508,3 @@
 #endif  /* CHCONF_H */
 
 /** @} */
-

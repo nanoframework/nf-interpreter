@@ -12,7 +12,7 @@
  */
 MEMORY
 {
-    flash       : org = 0x08000000, len = 32k     /* space reserved for nanoBooter (1st two sectors 0x08000000 to 0x08008000)*/
+    flash       : org = 0x08000000, len = 32k     /* space reserved for nanoBooter (1st two sectors 0x08000000 to 0x08007FFF)*/
     deployment  : org = 0x00000000, len = 0       /* space reserved for application deployment */
     ramvt       : org = 0x00000000, len = 0       /* initial RAM address is reserved for a copy of the vector table */
     ram0        : org = 0x20000000, len = 192k    /* SRAM1 + SRAM2 + SRAM3 */
@@ -67,7 +67,7 @@ REGION_ALIAS("DATA_RAM_LMA", flash);
 REGION_ALIAS("BSS_RAM", ram0);
 
 /* RAM region to be used for the default heap.*/
-REGION_ALIAS("HEAP_RAM", ram0);
+REGION_ALIAS("HEAP_RAM", ram4);
 
 /* Stacks rules inclusion.*/
 INCLUDE rules_stacks.ld
