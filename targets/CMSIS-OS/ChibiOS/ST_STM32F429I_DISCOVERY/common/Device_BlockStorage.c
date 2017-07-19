@@ -8,34 +8,34 @@
 
 const BlockRange BlockRange1[] = 
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 1 },            // 08000000 nanoBooter          
-    { BlockRange_BLOCKTYPE_CODE      ,   2, 3 }             // 08008000 nanoCLR          
+    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 1 },            // 08000000 nanoBooter
+    { BlockRange_BLOCKTYPE_CODE      ,   2, 3 }             // 08008000 nanoCLR
 };
 
 const BlockRange BlockRange2[] = 
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 08010000 nanoCLR          
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 08010000 nanoCLR
 };
 
 const BlockRange BlockRange3[] =
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 6 },            // 08020000 nanoCLR         
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 3 },            // 08020000 nanoCLR
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   4, 6 },            // 080A0000 deployment
 };
 
 const BlockRange BlockRange4[] = 
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 3 }             // 08100000 nanoCLR          
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 3 }             // 08100000 deployment
 };
 
 const BlockRange BlockRange5[] = 
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 08110000 nanoCLR          
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 0 }             // 08110000 deployment
 };
 
 const BlockRange BlockRange6[] =
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 },            // 08120000 nanoCLR         
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1, 6 }             // 08140000 deployment  
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 6 }             // 08120000 deployment
 };
 
 const BlockRegionInfo BlockRegions[] = 
