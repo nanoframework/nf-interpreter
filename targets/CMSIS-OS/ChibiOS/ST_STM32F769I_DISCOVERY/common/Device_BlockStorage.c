@@ -6,20 +6,20 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
-const BlockRange BlockRange1[] = 
+const BlockRange BlockRange1[] = // 32KB blocks
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 0 },            // 08000000 nanoBooter          
+    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 0 },            // 08000000 nanoBooter         
     { BlockRange_BLOCKTYPE_CODE      ,   1, 3 }             // 08008000 nanoCLR          
 };
 
-const BlockRange BlockRange2[] = 
+const BlockRange BlockRange2[] = //128KB block
 {
     { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 08020000 nanoCLR          
 };
 
-const BlockRange BlockRange3[] =
+const BlockRange BlockRange3[] = // 256KB blocks
 {
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 6 } //<- other examples dont use all sectors, why?            // 08040000 deployment  
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 6 }             // 08040000 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 
@@ -27,7 +27,7 @@ const BlockRegionInfo BlockRegions[] =
     {
         0x08000000,                         // start address for block region
         4,                                  // total number of blocks in this region
-        0x018000,//<- or should it be 0x020000, why should it be missing 32k?   // total number of bytes per block
+        0x8000,                             // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
     },
@@ -35,7 +35,7 @@ const BlockRegionInfo BlockRegions[] =
     {
         0x08020000,                         // start address for block region
         1,                                  // total number of blocks in this region
-        0x020000,                            // total number of bytes per block
+        0x20000,                            // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange2),
         BlockRange2,
     },
@@ -43,41 +43,13 @@ const BlockRegionInfo BlockRegions[] =
     {
         0x08040000,                         // start address for block region
         7,                                  // total number of blocks in this region
-        0x1C0000,                           // total number of bytes per block
+        0x40000,                           // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange3),
         BlockRange3,
     },
 
 };
 
-//Would possibly be used for dual bank setup ->
-// const BlockRegionInfo BlockRegions[] = 
-// {
-//     {
-//         0x08000000,                         // start address for block region
-//         4,                                  // total number of blocks in this region
-//         0x10000,                            // total number of bytes per block
-//         ARRAYSIZE_CONST_EXPR(BlockRange1),
-//         BlockRange1,
-//     },
-
-//     {
-//         0x08010000,                         // start address for block region
-//         1,                                  // total number of blocks in this region
-//         0x10000,                            // total number of bytes per block
-//         ARRAYSIZE_CONST_EXPR(BlockRange2),
-//         BlockRange2,
-//     },
-
-//     {
-//         0x08020000,                         // start address for block region
-//         3,                                  // total number of blocks in this region
-//         0x20000,                            // total number of bytes per block
-//         ARRAYSIZE_CONST_EXPR(BlockRange3),
-//         BlockRange3,
-//     },
-
-// };
 
 const DeviceBlockInfo Device_BlockInfo =
 {
