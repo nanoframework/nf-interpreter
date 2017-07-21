@@ -20,4 +20,4 @@ When adding HAL components, drivers, boards or any other code to the **nanoFrame
 
 Follows a list of available components in **nanoFramework** overlay.
 
-- [Driver for internal flash of STM32 parts](stm32-internal-flash-driver.md) (F0 and F4 series)
+- [Driver for internal flash of STM32 parts](stm32-internal-flash-driver.md) (supports F0, F4 and F7 series)
