@@ -11,6 +11,7 @@
 ###########################################################################################
 
 option(API_Windows.Devices.Gpio "option for Windows.Devices.Gpio API")
+option(API_Windows.Devices.Spi "option for Windows.Devices.Spi API")
 
 
 #################################################################
@@ -59,7 +60,14 @@ macro(ParseApiOptions)
         PerformSettingsForApiEntry("Windows.Devices.Gpio")
     endif()
 
+    
+    # Windows.Devices.Spi
+    if(API_Windows.Devices.Spi)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Devices.Spi")
+    endif()
 
+    
     # parse the declarations to have new lines and ';'
     string(REPLACE ";;" ";\n" CLR_RT_NativeAssemblyDataDeclarations "${CLR_RT_NativeAssemblyDataList}")
     # parse the list to have new lines, ',' and identation
