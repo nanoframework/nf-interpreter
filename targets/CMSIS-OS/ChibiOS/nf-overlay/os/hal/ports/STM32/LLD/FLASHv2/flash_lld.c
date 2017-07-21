@@ -151,6 +151,13 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
 
                 *((__IO uint16_t*)cursor++) = *((uint16_t*)buffer++);
 
+#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
+    defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
+	defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+    
+                // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
+                __DSB();
+#endif
                 // update flash and buffer pointers by the 'extra' byte that was programmed
                 cursor++;
                 buffer++;
@@ -165,6 +172,14 @@ bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buff
                 SET_BIT(FLASH->CR, FLASH_PSIZE_BYTE);
 
                 *cursor = *buffer++;
+
+#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
+    defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
+	defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+    
+                // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
+                __DSB();
+#endif                
             }
                 
             // wait for any flash operation to be completed 
@@ -220,17 +235,70 @@ bool flash_lld_isErased(uint32_t startAddress, uint32_t length) {
 uint8_t flash_lld_getSector(uint32_t address)
 {
   uint8_t sector = 0;
-  bool sectorInBank2 = false;
 
-  if ((address - FLASH_BASE) >= 0x100000) {
-    sectorInBank2 = true;
-  } 
+  if((address < ADDR_FLASH_SECTOR_1) && (address >= ADDR_FLASH_SECTOR_0))
+  {
+    sector = FLASH_SECTOR_0;
+  }
+  else if((address < ADDR_FLASH_SECTOR_2) && (address >= ADDR_FLASH_SECTOR_1))
+  {
+    sector = FLASH_SECTOR_1;
+  }
+  else if((address < ADDR_FLASH_SECTOR_3) && (address >= ADDR_FLASH_SECTOR_2))
+  {
+    sector = FLASH_SECTOR_2;
+  }
+  else if((address < ADDR_FLASH_SECTOR_4) && (address >= ADDR_FLASH_SECTOR_3))
+  {
+    sector = FLASH_SECTOR_3;
+  }
 
-  // clever algorithm to find out the sector number knowing the address
-  sector = sectorInBank2 ? ((address - 0x100000 - FLASH_BASE) >> 14) : ((address - FLASH_BASE) >> 14);
-  
-  if (sector >= 4) {
-    sector = (sector >> 3) + 4;
+// need to wrap the else ifs bellow because not all target devices have all the sectors defined
+#if defined(FLASH_SECTOR_4)
+  else if((address < ADDR_FLASH_SECTOR_5) && (address >= ADDR_FLASH_SECTOR_4))
+  {
+    sector = FLASH_SECTOR_4;
+  }
+#endif
+#if defined(FLASH_SECTOR_5)
+  else if((address < ADDR_FLASH_SECTOR_6) && (address >= ADDR_FLASH_SECTOR_5))
+  {
+    sector = FLASH_SECTOR_5;
+  }
+#endif
+#if defined(FLASH_SECTOR_6)
+  else if((address < ADDR_FLASH_SECTOR_7) && (address >= ADDR_FLASH_SECTOR_6))
+  {
+    sector = FLASH_SECTOR_6;
+  }
+#endif
+#if defined(FLASH_SECTOR_7)
+  else if((address < ADDR_FLASH_SECTOR_8) && (address >= ADDR_FLASH_SECTOR_7))
+  {
+    sector = FLASH_SECTOR_7;
+  }
+#endif
+#if defined(FLASH_SECTOR_8)
+  else if((address < ADDR_FLASH_SECTOR_9) && (address >= ADDR_FLASH_SECTOR_8))
+  {
+    sector = FLASH_SECTOR_8;
+  }
+#endif
+#if defined(FLASH_SECTOR_9)
+  else if((address < ADDR_FLASH_SECTOR_10) && (address >= ADDR_FLASH_SECTOR_9))
+  {
+    sector = FLASH_SECTOR_9;
+  }
+#endif
+#if defined(FLASH_SECTOR_10)
+  else if((address < ADDR_FLASH_SECTOR_11) && (address >= ADDR_FLASH_SECTOR_10))
+  {
+    sector = FLASH_SECTOR_10;
+  }
+#endif  
+  else /* (address < FLASH_END_ADDR) && (address >= ADDR_FLASH_SECTOR_11) */
+  {
+    sector = FLASH_SECTOR_11;
   }
 
   return sector;
@@ -261,7 +329,15 @@ bool flash_lld_erase(uint32_t address) {
         
         // start erase operation
         FLASH->CR |= FLASH_CR_STRT;
-        
+
+#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
+    defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
+	  defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+    
+        // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
+        __DSB();
+#endif
+
         if(FLASH_WaitForLastOperation())
         {
             // lock the FLASH anyways
