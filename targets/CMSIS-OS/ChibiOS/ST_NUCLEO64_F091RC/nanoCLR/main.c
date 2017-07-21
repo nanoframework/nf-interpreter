@@ -9,7 +9,8 @@
 
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
-#include <CLR_Startup_Thread.h>
+#include <nanoCLR_Application.h>
+#include <nanoPAL_BlockStorage.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // RAM vector table declaration (valid for GCC only)
@@ -19,34 +20,8 @@ __IO uint32_t vectorTable[48] __attribute__((section(".RAMVectorTable")));
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-
-void BlinkerThread(void const * argument)
-{
-  (void)argument;
-
-  palSetPad(GPIOA, GPIOA_LED_GREEN);
-  osDelay(1000);
-
-  palClearPad(GPIOA, GPIOA_LED_GREEN);
-  osDelay(250);
-
-  // loop until thread receives a request to terminate
-  while (!chThdShouldTerminateX()) {
-
-    palSetPad(GPIOA, GPIOA_LED_GREEN);
-    osDelay(125);
-  
-    palClearPad(GPIOA, GPIOA_LED_GREEN);
-    osDelay(125);
-  }
-}
-osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
-
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityNormal, 1024, "ReceiverThread");
-
-// declare CLRStartup thread here
-osThreadDef(CLRStartupThread, osPriorityNormal, 1024, "CLRStartupThread");
+osThreadDef(ReceiverThread, osPriorityNormal, 2048, "ReceiverThread");
 
 //  Application entry point.
 int main(void) {
@@ -75,31 +50,27 @@ int main(void) {
   palSetPadMode(GPIOA, 2, PAL_MODE_ALTERNATE(1)); // USART2 TX
   palSetPadMode(GPIOA, 3, PAL_MODE_ALTERNATE(1)); // USART2 RX
 
-  // Creates the blinker thread, it does not start immediately.
-  osThreadCreate(osThread(BlinkerThread), NULL);
-
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
-  
-  // create the CLR Startup thread
-  osThreadCreate(osThread(CLRStartupThread), NULL);
 
-  // start kernel, after this the main() thread has priority osPriorityNormal by default
+  // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
 
-  //  Normal main() thread activity it does nothing except sleeping in a loop 
+  // preparation for the CLR startup
+  BlockStorage_AddDevices();
 
-  // CLR_SETTINGS clrSettings;
+  CLR_SETTINGS clrSettings;
 
-  // memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+  memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
-  // clrSettings.MaxContextSwitches         = 50;
-  // clrSettings.WaitForDebugger            = false;
-  // clrSettings.EnterDebuggerLoopAfterExit = true;
+  clrSettings.MaxContextSwitches         = 50;
+  clrSettings.WaitForDebugger            = false;
+  clrSettings.EnterDebuggerLoopAfterExit = true;
 
-  // ClrStartup(clrSettings);
+  // startup CLR now
+  ClrStartup(clrSettings);
 
-  while (true) {
-    osDelay(1000);
+  while (true) { 
+    osDelay(100);
   }
 }
