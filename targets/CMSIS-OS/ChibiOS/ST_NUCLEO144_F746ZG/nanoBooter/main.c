@@ -21,28 +21,15 @@ void BlinkerThread(void const * argument)
 
       palSetPad(GPIOB, GPIOB_LED1);
       osDelay(250);
-
       palClearPad(GPIOB, GPIOB_LED1);
-      palSetPad(GPIOB, GPIOB_LED2);
       osDelay(250);
-
-      palClearPad(GPIOB, GPIOB_LED2);
-      palSetPad(GPIOB, GPIOB_LED3);
-      osDelay(250);
-
-      palClearPad(GPIOB, GPIOB_LED3);
-      palSetPad(GPIOB, GPIOB_LED2);
-      osDelay(250);
-
-      palClearPad(GPIOB, GPIOB_LED2);
 
   }
-  // nothing to deinitialize or cleanup, so it's safe to return
 }
 osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityNormal, 1024, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityNormal, 2048, "ReceiverThread");
 
 //  Application entry point.
 int main(void) {
@@ -91,7 +78,7 @@ int main(void) {
   // create the receiver thread
   receiverThreadId = osThreadCreate(osThread(ReceiverThread), NULL);
 
-  // start kernel, after this the main() thread has priority osPriorityNormal by default
+  // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
 
   //  Normal main() thread

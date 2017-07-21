@@ -10,31 +10,9 @@
 #include <cmsis_os.h>
 
 #include "usbcfg.h"
-#include <CLR_Startup_Thread.h>
 #include <WireProtocol_ReceiverThread.h>
-
-void BlinkerThread()
-{	
-	palSetPad(GPIOE, GPIOE_LED1);
-	palClearPad(GPIOE, GPIOE_LED2);
-	palClearPad(GPIOC, GPIOC_LED3);
-	palClearPad(GPIOA, GPIOA_INT1);
-	
-  while (!chThdShouldTerminateX()) 
-  {
-    palSetPad(GPIOC, GPIOC_LED3);
-    chThdSleepMilliseconds(100);
-    palClearPad(GPIOC, GPIOC_LED3);
-
-    palSetPad(GPIOE, GPIOE_LED2);
-    chThdSleepMilliseconds(100);
-    palClearPad(GPIOE, GPIOE_LED2);
-
-    palSetPad(GPIOE, GPIOE_LED1);
-    chThdSleepMilliseconds(100);
-    palClearPad(GPIOE, GPIOE_LED1);
-  }
-}
+#include <nanoCLR_Application.h>
+#include <nanoPAL_BlockStorage.h>
 
 void DisplayClear(uint8_t backLight)
 {
@@ -61,13 +39,8 @@ void DisplayWrite(uint8_t x, uint8_t y, char * text)
 	  i2cReleaseBus(&I2CD1);
 }
 
-osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
-
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityNormal, 1024, "ReceiverThread");
-
-// declare CLRStartup thread here
-osThreadDef(CLRStartupThread, osPriorityNormal, 1024, "CLRStartupThread");
+osThreadDef(ReceiverThread, osPriorityNormal, 2048, "ReceiverThread");
 
 static const I2CConfig i2cconfig = { OPMODE_I2C, 100000U, STD_DUTY_CYCLE };
 
@@ -93,16 +66,10 @@ int main(void) {
   usbStart(serusbcfg.usbp, &usbcfg);
   usbConnectBus(serusbcfg.usbp);
 
-  // Creates the blinker thread, it does not start immediately.
-  osThreadCreate(osThread(BlinkerThread), NULL);
-
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
-  
-  // create the CLR Startup thread
-  osThreadCreate(osThread(CLRStartupThread), NULL);
 
-  // start kernel, after this the main() thread has priority osPriorityNormal by default
+  // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
   
   rtcInit();
@@ -116,8 +83,21 @@ int main(void) {
   osDelay(3000);
   DisplayClear (0);
 
-  while (true)
-  {
-     osDelay(1000);
+  // preparation for the CLR startup
+  BlockStorage_AddDevices();
+
+  CLR_SETTINGS clrSettings;
+
+  memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+
+  clrSettings.MaxContextSwitches         = 50;
+  clrSettings.WaitForDebugger            = false;
+  clrSettings.EnterDebuggerLoopAfterExit = true;
+
+  // startup CLR now
+  ClrStartup(clrSettings);
+
+  while (true) { 
+    osDelay(100);
   }
 }
