@@ -235,6 +235,13 @@ endif()
 #################################################################
 include(NF_API_Namespaces)
 
+# for some APIs we need to enable the device in the HAL config
+if(API_Windows.Devices.Spi)
+    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
+else()    
+    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
+endif()
+
 #######################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)

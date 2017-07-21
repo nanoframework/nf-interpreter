@@ -144,9 +144,10 @@
 /**
  * @brief   Enables the SPI subsystem.
  */
-#if !defined(HAL_USE_SPI) || defined(__DOXYGEN__)
-#define HAL_USE_SPI                 FALSE
-#endif
+// this option is set at target_board.h (from config file)
+// #if !defined(HAL_USE_SPI) || defined(__DOXYGEN__)
+// #define HAL_USE_SPI                 FALSE
+// #endif
 
 /**
  * @brief   Enables the UART subsystem.
