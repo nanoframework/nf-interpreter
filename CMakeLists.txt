@@ -235,6 +235,9 @@ endif()
 #################################################################
 include(NF_API_Namespaces)
 
+#################################################################
+# manage HAL/PAL required for API namespaces
+#################################################################
 # for some APIs we need to enable the device in the HAL config
 if(API_Windows.Devices.Spi)
     set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
