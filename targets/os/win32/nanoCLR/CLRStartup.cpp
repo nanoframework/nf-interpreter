@@ -149,6 +149,14 @@ struct Settings
 		vec.push_back(L"-load");
 		vec.push_back(L"..\\packages\\nanoFramework.Windows.Devices.Gpio.1.0.0-preview006\\lib\\Windows.Devices.Gpio.pe");
 
+		// grab Windows.Devices.Spi.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
+		// ************************************************************************* //
+		// just need to update the path on the package folder as the version changes //
+		// ************************************************************************* //
+		vec.push_back(L"-load");
+		vec.push_back(L"..\\packages\\nanoFramework.Windows.Devices.Spi.1.0.0-preview003\\lib\\Windows.Devices.Spi.pe");
+
+
         //vec.push_back(L"-load");
         //vec.push_back(L"C:\\Program Files (x86)\\Microsoft .NET Micro Framework\\v4.4\\Assemblies\\le\\Microsoft.SPOT.Native.pe");
 

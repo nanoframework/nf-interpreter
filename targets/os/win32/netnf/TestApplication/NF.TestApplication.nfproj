@@ -32,6 +32,11 @@
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
+    <Reference Include="Windows.Devices.Spi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6df87852110734f7">
+      <HintPath>..\..\packages\nanoFramework.Windows.Devices.Spi.1.0.0-preview003\lib\Windows.Devices.Spi.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>True</SpecificVersion>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
