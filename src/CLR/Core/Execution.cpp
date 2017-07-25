@@ -79,7 +79,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
     Handler_Initialize();
 #else
     CLR_RT_HeapBlock_EndPoint::HandlerMethod_Initialize(); 
-    // UNDONE: FIXME: CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_Initialize();
+    CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_Initialize();
     // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_Initialize();
 
 #endif

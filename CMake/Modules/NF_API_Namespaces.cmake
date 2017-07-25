@@ -12,6 +12,7 @@
 
 option(API_Windows.Devices.Gpio "option for Windows.Devices.Gpio API")
 option(API_Windows.Devices.Spi "option for Windows.Devices.Spi API")
+option(API_nanoFramework.Runtime.NativeEvents "option for nanoFramework.Runtime.NativeEvents API")
 
 
 #################################################################
@@ -65,6 +66,13 @@ macro(ParseApiOptions)
     if(API_Windows.Devices.Spi)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("Windows.Devices.Spi")
+    endif()
+
+    
+    # nanoFramework.Runtime.NativeEvents
+    if(API_nanoFramework.Runtime.NativeEvents)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Runtime.NativeEvents")
     endif()
 
     

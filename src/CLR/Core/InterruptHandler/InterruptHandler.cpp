@@ -30,40 +30,40 @@ HRESULT CLR_HW_Hardware::SpawnDispatcher()
     NATIVE_PROFILE_CLR_HARDWARE();
     NANOCLR_HEADER();
 
-    // UNDONE: FIXME: CLR_RT_ApplicationInterrupt* interrupt;
-    //CLR_RT_HeapBlock_NativeEventDispatcher* ioPort;
-    //CLR_RT_HeapBlock_NativeEventDispatcher ::InterruptPortInterrupt *interruptData;
+    CLR_RT_ApplicationInterrupt* interrupt;
+    CLR_RT_HeapBlock_NativeEventDispatcher* ioPort;
+    CLR_RT_HeapBlock_NativeEventDispatcher ::InterruptPortInterrupt *interruptData;
 
-    //// if reboot is in progress, just bail out
-    //if(CLR_EE_DBG_IS( RebootPending )) 
-    //{
-    //    return S_OK;
-    //}
+    // if reboot is in progress, just bail out
+    if(CLR_EE_DBG_IS( RebootPending )) 
+    {
+       return S_OK;
+    }
 
-    //interrupt = (CLR_RT_ApplicationInterrupt*)m_interruptData.m_applicationQueue.FirstValidNode();
+    interrupt = (CLR_RT_ApplicationInterrupt*)m_interruptData.m_applicationQueue.FirstValidNode();
 
-    //if((interrupt == NULL) || !g_CLR_RT_ExecutionEngine.EnsureSystemThread( g_CLR_RT_ExecutionEngine.m_interruptThread, ThreadPriority::System_Highest ))
-    //{
-    //    return S_OK;
-    //}
+    if((interrupt == NULL) || !g_CLR_RT_ExecutionEngine.EnsureSystemThread( g_CLR_RT_ExecutionEngine.m_interruptThread, ThreadPriority::System_Highest ))
+    {
+       return S_OK;
+    }
 
-    //interrupt->Unlink();
+    interrupt->Unlink();
 
-    //interruptData = &interrupt->m_interruptPortInterrupt;
-    //ioPort = interruptData->m_context;
+    interruptData = &interrupt->m_interruptPortInterrupt;
+    ioPort = interruptData->m_context;
 
-    //CLR_RT_ProtectFromGC gc1 ( *ioPort );
-    //
-    //NANOCLR_SET_AND_LEAVE(ioPort->StartDispatch( interrupt, g_CLR_RT_ExecutionEngine.m_interruptThread ));
-    //
-    //NANOCLR_CLEANUP();
+    CLR_RT_ProtectFromGC gc1 ( *ioPort );
+    
+    NANOCLR_SET_AND_LEAVE(ioPort->StartDispatch( interrupt, g_CLR_RT_ExecutionEngine.m_interruptThread ));
+    
+    NANOCLR_CLEANUP();
 
-    //if(FAILED(hr))
-    //{
-    //    ioPort->ThreadTerminationCallback( interrupt );
-    //}
+    if(FAILED(hr))
+    {
+       ioPort->ThreadTerminationCallback( interrupt );
+    }
 
-    //--m_interruptData.m_queuedInterrupts;
+    --m_interruptData.m_queuedInterrupts;
 
     NANOCLR_CLEANUP_END();
 }
