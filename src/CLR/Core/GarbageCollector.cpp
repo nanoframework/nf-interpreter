@@ -782,7 +782,7 @@ void CLR_RT_GarbageCollector::RecoverEventsFromGC()
     Handler_RecoverFromGC();
 #else
     CLR_RT_HeapBlock_EndPoint::HandlerMethod_RecoverFromGC(); 
-    // UNDONE: FIXME: CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_RecoverFromGC();
+    CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_RecoverFromGC();
     // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_RecoverFromGC();
 #endif
 

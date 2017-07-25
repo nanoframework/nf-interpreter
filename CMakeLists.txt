@@ -238,12 +238,27 @@ include(NF_API_Namespaces)
 #################################################################
 # manage HAL/PAL required for API namespaces
 #################################################################
-# for some APIs we need to enable the device in the HAL config
+# for some APIs we need to enable the device in the HAL config 
+# and/or manage other APIs that are required
+
+
+if(API_Windows.Devices.Gpio)
+    set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Gpio")
+    
+    # this API requires nanoFramework.Runtime.NativeEvents
+    set(API_nanoFramework.Runtime.NativeEvents ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.NativeEvents")
+
+else()    
+    set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Gpio")
+endif()
+
+
 if(API_Windows.Devices.Spi)
     set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 else()    
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
+
 
 #######################
 # ChibiOS
