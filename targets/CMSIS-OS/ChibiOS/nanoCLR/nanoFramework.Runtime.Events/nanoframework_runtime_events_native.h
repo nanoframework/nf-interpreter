@@ -11,7 +11,7 @@
 #include <nanoCLR_Interop.h>
 #include "Core.h"
 
-struct Library_nanoframework_runtime_events_native_nanoFramework_Runtime_NativeEvents_NativeEventDispatcher
+struct Library_nanoframework_runtime_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher
 {
     static const int FIELD__threadSpawn = 1;
     static const int FIELD__callbacks = 2;
@@ -33,6 +33,6 @@ struct Library_nanoframework_runtime_events_native_nanoFramework_Runtime_NativeE
 
 
 
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_NativeEvents;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
 
 #endif  //_NANOFRAMEWORK_RUNTIME_EVENTS_NATIVE_H_
