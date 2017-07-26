@@ -56,7 +56,7 @@ To ease the overall configuration of an API and related hardware (and when it ma
 
 10. When adding/enabling new APIs and depending on how the drivers and the library are coded, some static variables will be added to the BSS RAM area. Because of that extra space that is taken by those variables the Managed Heap size may have to be adjusted to make room for those. To do this find the `__clr_managed_heap_size__` in the general CMakeLists.txt of that target and decrease the value there as required.
 
-11. Some APIs depend of others. This happens for example with Windows.Devices.Gpio that requires nanoFramework.Runtime.NativeEvents in order to generate the interrupts for the changed pin values. To make this happen the option to include the required API(s) has to be enabled in the main [CMakeLists.txt](../../CMakeLists.txt) inside the if clause of the dependent API. Just like if the option was enabled at the CMake command line. Check this by searching for `API_nanoFramework.Runtime.NativeEvents` inside the `if(API_Windows.Devices.Gpio)`.
+11. Some APIs depend of others. This happens for example with Windows.Devices.Gpio that requires nanoFramework.Runtime.Events in order to generate the interrupts for the changed pin values. To make this happen the option to include the required API(s) has to be enabled in the main [CMakeLists.txt](../../CMakeLists.txt) inside the if clause of the dependent API. Just like if the option was enabled at the CMake command line. Check this by searching for `API_nanoFramework.Runtime.Events` inside the `if(API_Windows.Devices.Gpio)`.
 
 ## How to include a class library in the build
 

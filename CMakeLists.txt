@@ -245,8 +245,8 @@ include(NF_API_Namespaces)
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Gpio")
     
-    # this API requires nanoFramework.Runtime.NativeEvents
-    set(API_nanoFramework.Runtime.NativeEvents ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.NativeEvents")
+    # this API requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
 
 else()    
     set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Gpio")
