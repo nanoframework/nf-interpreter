@@ -5,19 +5,21 @@
             "name": "name the launch configuration 1 (booter) here",
             "type": "cppdbg",
             "request": "launch",
-            "miDebuggerPath": "<path-to-gdb-insie-the-gcc-toolchain-mind-the-forward-slash>",
+            "miDebuggerPath": "<path-to-gdb-inside-the-gcc-toolchain-mind-the-forward-slash>",
             "targetArchitecture": "ARM",
-            "program": "<path-to-nanoBooter-ELF-file-in-the-build-folder-mind-the-forward-slash>",
+            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoBooter.elf",
 
             "setupCommands": [
                 {"text": "target extended-remote localhost:3333"},
+                {"text": "monitor reset_config none separate"},
                 {"text": "monitor reset halt"},
-                {"text": "monitor flash write_image erase \"<path-to-nanoBooter-HEX-file-in-the-build-folder-mind-the-forward-slash>\" "},
-                {"text": "file <path-to-nanoBooter-ELF-file-in-the-build-folder-mind-the-forward-slash>"},
+                {"text": "monitor flash write_image erase \"<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoBooter.hex\" "},
+                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoBooter.elf"},
                 {"text": "monitor reset halt"}
             ],
 
             "customLaunchSetupCommands": [
+                {"text": "monitor reset_config none separate"},
                 {"text": "monitor reset halt"}
             ],
 
@@ -34,19 +36,21 @@
             "name": "name the launch configuration 2 (CLR) here",
             "type": "cppdbg",
             "request": "launch",
-            "miDebuggerPath": "<path-to-gdb-insie-the-gcc-toolchain-mind-the-forward-slash>",
+            "miDebuggerPath": "<path-to-gdb-inside-the-gcc-toolchain-mind-the-forward-slash>",
             "targetArchitecture": "ARM",
-            "program": "<path-to-nanoCLR-ELF-file-in-the-build-folder-mind-the-forward-slash>",
+            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf",
 
             "setupCommands": [
                 {"text": "target extended-remote localhost:3333"},
+                {"text": "monitor reset_config none separate"},
                 {"text": "monitor reset halt"},
-                {"text": "monitor flash write_image erase \"<path-to-nanoCLR-HEX-file-in-the-build-folder-mind-the-forward-slash>\" "},
-                {"text": "file <path-to-nanoCLR-ELF-file-in-the-build-folder-mind-the-forward-slash>"},
+                {"text": "monitor flash write_image erase \"<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.hex\" "},
+                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
                 {"text": "monitor reset halt"}
             ],
 
             "customLaunchSetupCommands": [
+                {"text": "monitor reset_config none separate"},
                 {"text": "monitor reset halt"}
             ],
 
