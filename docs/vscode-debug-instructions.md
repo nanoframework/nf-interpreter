@@ -29,9 +29,9 @@ Assuming you are using VS Code to launch your builds, you'll have this image rea
 (see [Build instructions documentation](build-instructions.md))
 
 In order to launch the debug session you'll need to create and setup a *launch.json* file, located in the .vscode folder.
-We recommend that you use the provided an script [debug-setup.ps1](..\debug-setup.ps1) to help get you up and running quickly. 
+We recommend that you use the provided script [debug-setup.ps1](..\debug-setup.ps1) to help get you up and running quickly. 
 
-A template file [launch.TEMPLATE.json](..\.vscode\launch.TEMPLATE.json) also exists for those that prefer, Just copy and rename it to *launch.json* and then adapt its content to your requirement (see below).
+A template file [launch.TEMPLATE.json](..\.vscode\launch.TEMPLATE.json) also exists for those that prefer. Just copy and rename it to *launch.json* and then adapt its content to your requirement (see below).
 
 Here's what you need to change in order to adapt the template file to your setup and make it more suitable to your working style and preferences.
 - name: here you can name each of the launch configurations to help choosing the appropriate one when launching the debug session. These could be for example: "nanoBooter for Discovery 4", "nanoCLR for Nucleo F091RC", "test featureXYZ for Discovery 4".
@@ -42,7 +42,7 @@ Here's what you need to change in order to adapt the template file to your setup
 - debugServerPath: full path to the OpenOCD executable
 - debugServerArgs: full path to the scripts directory on the OpenOCD installation AND the appropriate .cfg files for the interface and the board.
 
-_Note 1: VS Code parser currently has trouble parsing and replacing the environment variable ${workspaceRoot} for certain OpenOCD commands. For this reason we currently use full (absolute) paths to keep OpenOCD happy._
+_Note 1: The VS Code parser currently has trouble parsing and replacing the environment variable ${workspaceRoot} for certain OpenOCD commands. For this reason we currently use full (absolute) paths to keep OpenOCD happy._
 
 _Note 2: Always use forward slashes in the paths above (backslashes are reserved for escaping characters), otherwise you'll receive strange and unclear errors from OpenOCD._
 
@@ -51,7 +51,7 @@ _Note 2: Always use forward slashes in the paths above (backslashes are reserved
 
 Using VS Code menu View > Debug, clicking on the debug icon on the left hand toolbar or hitting the CTRL+SHIT+D shortcut you'll reach the debug view. There you'll find the launch configurations for debug that we've setup above (see the drop down at the top) and the familiar green play button (or F5 if you prefer).
 
-When a debug session is active you will find a lot of familiar stuff:
+When a debug session is active you will find a lot of familiar features:
 - debug toolbar with the usual operations (pause, step over, into, out, restart and stop)
 - variables list
 - call stack that you can use to navigate up and down

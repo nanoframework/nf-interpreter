@@ -4,7 +4,7 @@ Write-Host "______________________________________________________________"
 
 If (Test-Path .\.vscode\launch.json){
   # File exists
-    Read-Host "WARNING, This file will overwrite the existing launch.json, Press any key to continue..."
+    Read-Host "WARNING, This file will overwrite the existing launch.json. Press any key to continue..."
   }
 
 Write-Host "creating a copy of the template..."
@@ -85,7 +85,7 @@ $boardConfigStr = $boardConfigFile.TrimEnd('.cfg')
 
 
 
-$interfaceConfigFile =  Read-Host 'enter the interface used for connecting to the board e.g. stlink-v2 (valid types found in the scripts\interface folder of the openOCD path)'
+$interfaceConfigFile =  Read-Host 'Enter the interface used for connecting to the board e.g. stlink-v2 (valid types found in the scripts\interface folder of the openOCD path)'
 
 #we should perform validation on this
 (Get-Content .\.vscode\launch.json).replace('<interface-config-file>', $interfaceConfigFile.TrimEnd('.cfg')) | Set-Content .\.vscode\launch.json
