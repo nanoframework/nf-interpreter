@@ -18,15 +18,29 @@ list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/${B
 # source files
 set(nanoFramework.Runtime.Events_SRCS
 
-    nanoframework_runtime_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher_mshl.cpp
-    nanoframework_runtime_events_native.cpp
+    # source files of the assembly
+    nanoframework_runtime_events_nanoFramework_Runtime_Events_EventSink.cpp
+    nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher_mshl.cpp
+    nanoframework_runtime_events.cpp
+
+    # source files
+    AsyncCompletions.cpp
+    AsyncContinuations.cpp
+    nanoPAL_Events_functions.cpp
+    
 )
 
 foreach(SRC_FILE ${nanoFramework.Runtime.Events_SRCS})
     set(nanoFramework.Runtime.Events_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(nanoFramework.Runtime.Events_SRC_FILE ${SRC_FILE}
-        PATHS 
+        PATHS
+
+            # path for source files of this module
             ${PROJECT_SOURCE_DIR}/${BASE_PATH_FOR_THIS_MODULE}
+
+            # path for AsyncProcCall and related code
+            ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall
+            ${PROJECT_SOURCE_DIR}/src/PAL/Events
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

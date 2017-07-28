@@ -267,14 +267,14 @@ void __cdecl HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler)
 
 bool g_fDoNotUninitializeDebuggerPort = false;
 
-void __cdecl HAL_Initialize(void)
+void __cdecl nanoHAL_Initialize(void)
 {
     // In the case of the Extensible Emulator, the work typically done here is
     // carried out in EmulatorNative::Settings::System_Start(), but this ep is
     // here to satisfy ClrStartup()
 }
 
-void __cdecl HAL_Uninitialize(void)
+void __cdecl nanoHAL_Uninitialize(void)
 {
     int i;
 

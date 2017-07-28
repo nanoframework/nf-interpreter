@@ -11,6 +11,11 @@
 // call to CMSIS osDelay to allow other threads to run
 #define NANOCLR_RELINQUISHEXECUTIONCONTROL()       osDelay(1);
 
+#define GLOBAL_LOCK(x)              chSysLock();
+#define GLOBAL_UNLOCK(x);           chSysUnlock();
+#define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
+
+
 #if !defined(BUILD_RTM)
 
 // FIXME IMPLEMENT

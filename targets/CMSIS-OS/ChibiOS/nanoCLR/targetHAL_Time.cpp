@@ -67,3 +67,8 @@ signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
 
 #endif
 };
+
+unsigned __int64 CPU_MiliSecondsToSysTicks(unsigned __int64 miliSeconds)
+{
+    return MS2ST(miliSeconds);
+}

@@ -159,6 +159,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\CLR\Core\IOPort\IOPort_stub.cpp" />
     <ClCompile Include="..\..\..\..\src\PAL\Double\nanoPAL_native_double.cpp" />
     <ClCompile Include="CLRStartup.cpp" />
     <ClCompile Include="Events.cpp" />

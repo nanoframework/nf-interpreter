@@ -18,7 +18,9 @@ extern "C" {
 /// Initializes PAL Time drivers, must be called before any of the Time_* PAL
 /// methods could be used.
 /// </summary>
-__nfweak HRESULT    Time_Initialize  (                     );
+__nfweak HRESULT    Time_Initialize    (                     );
+__nfweak HRESULT    Time_Uninitialize  (                     );
+__nfweak void       Time_SetCompare    ( unsigned __int64 compareValue );
 
 #ifdef __cplusplus
 }
