@@ -335,12 +335,12 @@ void ClrStartup(CLR_SETTINGS params)
                 
                 s_ClrSettings.Cleanup();
 
-                // UNDONE: FIXME: HAL_Uninitialize();
+                nanoHAL_Uninitialize();
 
                 // UNDONE: FIXME: SmartPtr_IRQ::ForceDisabled();
 
                 //re-init the hal for the reboot (initially it is called in bootentry)
-                // UNDONE: FIXME: HAL_Initialize();
+                nanoHAL_Initialize();
 
                 // make sure interrupts are back on
                 // UNDONE: FIXME: SmartPtr_IRQ::ForceEnabled();

@@ -1271,11 +1271,10 @@ public:
 
 
 
+// hal cleanup for CLR reboot
 
-
-
-
-
+void nanoHAL_Initialize();
+void nanoHAL_Uninitialize();
 
 void HAL_EnterBooterMode();
 

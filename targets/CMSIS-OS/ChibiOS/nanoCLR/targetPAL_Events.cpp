@@ -10,10 +10,20 @@
 
 // events timer
 static virtual_timer_t eventsBoolTimer;
+volatile unsigned int systemEvents;
+
+set_Event_Callback g_Event_Callback     = NULL;
+void*              g_Event_Callback_Arg = NULL;
 
 bool Events_Initialize()
 {
     NATIVE_PROFILE_PAL_EVENTS();
+
+    // init events
+    chSysLock();
+    systemEvents = 0;
+    chSysUnlock();
+
     return true;
 }
 
@@ -24,6 +34,21 @@ bool Events_Uninitialize()
     chVTResetI(&eventsBoolTimer);
 
     return true;
+}
+
+void Events_Set( unsigned int events )
+{
+    NATIVE_PROFILE_PAL_EVENTS();
+
+    chSysLock();
+    systemEvents |= events;
+
+    if( g_Event_Callback != NULL )
+    {
+        g_Event_Callback( g_Event_Callback_Arg );
+    }
+
+    chSysUnlock();
 }
 
 static void local_Events_SetBoolTimer_Callback( void* arg )

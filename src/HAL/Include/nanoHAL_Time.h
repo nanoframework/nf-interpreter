@@ -94,4 +94,8 @@ signed long long HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime);
 // FIXME bool     HAL_Time_TimeSpanToStringEx( const signed long long& ticks, char*& buf, size_t& len );
 const char*   HAL_Time_CurrentDateTimeToString();
 
+
+__nfweak unsigned __int64  CPU_MilisecondsToSysTicks       ( unsigned __int64 miliSeconds    );
+
+
 #endif //_NANOHAL_TIME_H_

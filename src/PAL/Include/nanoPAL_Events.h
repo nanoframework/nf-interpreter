@@ -6,12 +6,13 @@
 #ifndef _NANOPAL_EVENTS_H_
 #define _NANOPAL_EVENTS_H_ 1
 
+#include <nanoHAL.h>
 #include <nanoWeak.h>
 #include <netmf_errors.h>
 
-//
-// !!! KEEP IN SYNC WITH Microsoft.SPOT.Hardware.SleepLevel !!!
-//
+//////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Microsoft.SPOT.Hardware.SleepLevel !!! //
+//////////////////////////////////////////////////////////////////
 enum SLEEP_LEVEL
 {
     SLEEP_LEVEL__AWAKE         = 0x00,
@@ -20,6 +21,20 @@ enum SLEEP_LEVEL
     SLEEP_LEVEL__DEEP_SLEEP    = 0x30,
     SLEEP_LEVEL__OFF           = 0x40,
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Runtime.Events.EventCategory (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#define EVENT_UNKNOWN     0
+#define EVENT_CUSTOM      10
+#define EVENT_GPIO        20
+
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+typedef void (*set_Event_Callback)( void* );
 
 #define EVENTS_TIMEOUT_INFINITE 0xFFFFFFFF
 
@@ -56,6 +71,46 @@ __inline unsigned int Events_WaitForEvents( unsigned int WakeupSystemEvents, uns
 
 __nfweak bool Events_Initialize();
 __nfweak bool Events_Uninitialize();
+__nfweak void Events_Set( unsigned int events );
 __nfweak void Events_SetBoolTimer( bool* timerCompleteFlag, unsigned int millisecondsFromNow );
+
+
+void PostManagedEvent(unsigned char category, unsigned char subCategory, unsigned short data1, unsigned int data2);
+
+//--//
+
+typedef void (*PALEVENTLISTENER) (unsigned int e, unsigned int param);
+
+struct PalEventListener : public HAL_DblLinkedNode<PalEventListener>
+{
+
+    PALEVENTLISTENER m_palEventListener;
+    unsigned int     m_eventMask;
+};
+
+
+__nfweak HRESULT PalEvent_Initialize();
+__nfweak HRESULT PalEvent_Uninitialize();
+__nfweak HRESULT PalEvent_Post(unsigned int e, unsigned int param);
+__nfweak HRESULT PalEvent_Enlist(PalEventListener* listener);
+
+//--//
+
+struct PalEventDriver
+{
+public:
+
+    HAL_DblLinkedList<PalEventListener> listenerList;
+
+    static HRESULT Initialize();
+    static HRESULT Uninitialize();
+    static HRESULT PostEvent(unsigned int e, unsigned int param);
+    static HRESULT EnlistListener(PalEventListener* listener);
+
+private:
+    static bool s_initialized;
+};
+
+extern PalEventDriver g_palEventDriver;
 
 #endif //_NANOPAL_EVENTS_H_
