@@ -272,8 +272,16 @@ uint8_t flash_lld_getSector(uint32_t address)
     sector = FLASH_SECTOR_6;
   }
 #endif
-#if defined(FLASH_SECTOR_7)
+// the next one is for devices that have FLASH sector 8 defined (see next one for devices WITHOUT sector 8)
+#if defined(FLASH_SECTOR_7) && defined(FLASH_SECTOR_8)
   else if((address < ADDR_FLASH_SECTOR_8) && (address >= ADDR_FLASH_SECTOR_7))
+  {
+    sector = FLASH_SECTOR_7;
+  }
+#endif
+// this next one needs to be here for devices that don't have FLASH sector 8
+#if defined(FLASH_SECTOR_7) && !defined(FLASH_SECTOR_8)
+  else if(address >= ADDR_FLASH_SECTOR_7)
   {
     sector = FLASH_SECTOR_7;
   }
