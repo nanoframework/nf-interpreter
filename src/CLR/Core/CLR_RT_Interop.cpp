@@ -668,52 +668,52 @@ CLR_RT_HeapBlock* Interop_Marshal_RetrieveManagedObject( CLR_RT_StackFrame &stac
 **
 ** Returns:   Reference to the field.
 **********************************************************************/
-bool &Interop_Marshal_GetField_bool(   CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+bool &Interop_Marshal_GetField_bool(   CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (bool&)pThis[ fieldIndex ].NumericByRef().u1;
 }
 
-unsigned char &Interop_Marshal_GetField_UINT8(  CLR_RT_HeapBlock *pThis, signed int fieldIndex )         
+unsigned char &Interop_Marshal_GetField_UINT8(  CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )         
 {
     return pThis[ fieldIndex ].NumericByRef().u1;
 }
 
-unsigned short &Interop_Marshal_GetField_UINT16( CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+unsigned short &Interop_Marshal_GetField_UINT16( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return pThis[ fieldIndex ].NumericByRef().u2;
 }
 
-unsigned int &Interop_Marshal_GetField_UINT32( CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+unsigned int &Interop_Marshal_GetField_UINT32( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return pThis[ fieldIndex ].NumericByRef().u4;
 }
 
-unsigned __int64 &Interop_Marshal_GetField_UINT64( CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+unsigned __int64 &Interop_Marshal_GetField_UINT64( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (unsigned __int64 &)pThis[ fieldIndex ].NumericByRef().u8;
 }
 
-char &Interop_Marshal_GetField_CHAR(   CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+char &Interop_Marshal_GetField_CHAR(   CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (char &)pThis[ fieldIndex ].NumericByRef().s1;
 }
 
-signed char &Interop_Marshal_GetField_INT8(   CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+signed char &Interop_Marshal_GetField_INT8(   CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return pThis[ fieldIndex ].NumericByRef().s1;
 }
 
-signed short &Interop_Marshal_GetField_INT16(  CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+signed short &Interop_Marshal_GetField_INT16(  CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return pThis[ fieldIndex ].NumericByRef().s2;
 }
 
-signed int &Interop_Marshal_GetField_INT32(  CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+signed int &Interop_Marshal_GetField_INT32(  CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return pThis[ fieldIndex ].NumericByRef().s4;
 }
 
-signed __int64 &Interop_Marshal_GetField_INT64(  CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+signed __int64 &Interop_Marshal_GetField_INT64(  CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (signed __int64 &)pThis[ fieldIndex ].NumericByRef().s8;
 }
@@ -721,23 +721,23 @@ signed __int64 &Interop_Marshal_GetField_INT64(  CLR_RT_HeapBlock *pThis, signed
 //----------------- Float point types - float and double
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
-float &Interop_Marshal_GetField_float(  CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+float &Interop_Marshal_GetField_float(  CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return pThis[ fieldIndex ].NumericByRef().r4;
 }
 
-double &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+double &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (double &)pThis[ fieldIndex ].NumericByRef().r8;
 }
 #else
 
-signed int &Interop_Marshal_GetField_float(  CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+signed int &Interop_Marshal_GetField_float(  CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (signed int &) pThis[ fieldIndex ].NumericByRef().r4;
 }
 
-signed __int64 &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+signed __int64 &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (signed __int64 &)pThis[ fieldIndex ].NumericByRef().r8;
 }
@@ -749,7 +749,7 @@ signed __int64 &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, signed
 #pragma push
 #pragma diag_suppress 284
 #endif
-UNSUPPORTED_TYPE &Interop_Marshal_GetField_UNSUPPORTED_TYPE( CLR_RT_HeapBlock *pThis, signed int fieldIndex )
+UNSUPPORTED_TYPE &Interop_Marshal_GetField_UNSUPPORTED_TYPE( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (UNSUPPORTED_TYPE &)(*((UNSUPPORTED_TYPE *)NULL));
 }
