@@ -18,11 +18,9 @@ list(APPEND Windows.Devices.Spi_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/${BASE_PATH_
 # source files
 set(Windows.Devices.Spi_SRCS
 
-    windows_devices_spi_native_Windows_Devices_Spi_SpiBusInfo.cpp
-    windows_devices_spi_native_Windows_Devices_Spi_SpiBusInfo_mshl.cpp
-    windows_devices_spi_native_Windows_Devices_Spi_SpiDevice.cpp
-    windows_devices_spi_native_Windows_Devices_Spi_SpiDevice_mshl.cpp
-    windows_devices_spi_native.cpp
+    win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo.cpp
+    win_dev_spi_native_Windows_Devices_Spi_SpiDevice.cpp
+    win_dev_spi_native.cpp
 )
 
 foreach(SRC_FILE ${Windows.Devices.Spi_SRCS})

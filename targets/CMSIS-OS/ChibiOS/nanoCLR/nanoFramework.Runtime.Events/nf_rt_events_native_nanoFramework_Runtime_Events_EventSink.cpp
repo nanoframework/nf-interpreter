@@ -4,10 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoCLR_Interop.h>
-#include "nanoframework_runtime_events.h"
-#include "nanoframework_runtime_events_nanoFramework_Runtime_Events_EventSink.h"
-
+#include "nf_rt_events_native.h"
 
 static CLR_RT_HeapBlock_NativeEventDispatcher *g_Context = NULL;
 
@@ -46,9 +43,13 @@ static HRESULT CleanupEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContex
     return S_OK;
 }
 
-HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_EventSink::EventConfig___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink::EventConfig___VOID( CLR_RT_StackFrame& stack )
 {
-    return S_OK;
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
 }
 
 static const CLR_RT_DriverInterruptMethods g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink = 

@@ -5,13 +5,16 @@
 //
 
 
-#ifndef _NANOFRAMEWORK_RUNTIME_EVENTS_H_
-#define _NANOFRAMEWORK_RUNTIME_EVENTS_H_
+#ifndef _NF_RT_EVENTS_NATIVE_H_
+#define _NF_RT_EVENTS_NATIVE_H_
+
 
 #include <nanoCLR_Interop.h>
-#include "Core.h"
+#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Checks.h>
 
-struct Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher
 {
     static const int FIELD__threadSpawn = 1;
     static const int FIELD__callbacks = 2;
@@ -29,7 +32,7 @@ struct Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeE
     static CLR_RT_HeapBlock_NativeEventDispatcher*  GetEventDispatcher   ( CLR_RT_StackFrame& stack                                  );
 };
 
-struct Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_EventSink
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink
 {
     static const int FIELD_STATIC___eventSink = 0;
     static const int FIELD_STATIC___eventInfoTable = 1;
@@ -40,7 +43,7 @@ struct Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_EventSi
 
 };
 
-struct Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_EventSink__EventInfo
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink__EventInfo
 {
     static const int FIELD__EventListener = 1;
     static const int FIELD__EventFilter = 2;
@@ -52,7 +55,7 @@ struct Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_EventSi
 
 };
 
-struct Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_BaseEvent
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_BaseEvent
 {
     static const int FIELD__Source = 1;
     static const int FIELD__Message = 2;
@@ -62,7 +65,7 @@ struct Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_BaseEve
 
 };
 
-struct Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_GenericEvent
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_GenericEvent
 {
     static const int FIELD__Category = 3;
     static const int FIELD__Data = 4;
@@ -71,10 +74,9 @@ struct Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_Generic
 
 
     //--//
+
 };
-
-
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
 
-#endif  //_NANOFRAMEWORK_RUNTIME_EVENTS_H_
+#endif  //_NF_RT_EVENTS_NATIVE_H_
