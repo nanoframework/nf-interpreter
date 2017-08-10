@@ -5,24 +5,24 @@
 //
 
 
-#include "nanoframework_runtime_events.h"
+#include "nf_rt_events_native.h"
 
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::EnableInterrupt___VOID,
-    Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::DisableInterrupt___VOID,
-    Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::Dispose___VOID__BOOLEAN,
+    Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::EnableInterrupt___VOID,
+    Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::DisableInterrupt___VOID,
+    Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::Dispose___VOID__BOOLEAN,
     NULL,
     NULL,
-    Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::_ctor___VOID__STRING__U8,
-    NULL,
-    NULL,
-    NULL,
+    Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::_ctor___VOID__STRING__U8,
     NULL,
     NULL,
     NULL,
-    Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_EventSink::EventConfig___VOID,
+    NULL,
+    NULL,
+    NULL,
+    Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink::EventConfig___VOID,
     NULL,
     NULL,
     NULL,

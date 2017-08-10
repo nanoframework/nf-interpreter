@@ -19,9 +19,9 @@ list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/${B
 set(nanoFramework.Runtime.Events_SRCS
 
     # source files of the assembly
-    nanoframework_runtime_events_nanoFramework_Runtime_Events_EventSink.cpp
-    nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher_mshl.cpp
-    nanoframework_runtime_events.cpp
+    nf_rt_events_native_nanoFramework_Runtime_Events_EventSink.cpp
+    nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher.cpp
+    nf_rt_events_native.cpp
 
     # source files
     AsyncCompletions.cpp

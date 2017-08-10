@@ -5,10 +5,10 @@
 //
 
 
-#include "nanoframework_runtime_events.h"
+#include "nf_rt_events_native.h"
 
 
-HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::EnableInterrupt___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::EnableInterrupt___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -35,7 +35,7 @@ HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_Native
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::DisableInterrupt___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::DisableInterrupt___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
    
@@ -61,7 +61,7 @@ HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_Native
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::Dispose___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::Dispose___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
         
@@ -85,7 +85,7 @@ HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_Native
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::_ctor___VOID__STRING__U8( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::_ctor___VOID__STRING__U8( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); 
 
@@ -145,7 +145,7 @@ HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_Native
 
 //--//
 
-CLR_RT_ObjectToEvent_Source* Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispReference( CLR_RT_StackFrame& stack )
+CLR_RT_ObjectToEvent_Source* Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispReference( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     CLR_RT_HeapBlock* pThis = stack.This();
@@ -153,7 +153,7 @@ CLR_RT_ObjectToEvent_Source* Library_nanoframework_runtime_events_nanoFramework_
     return CLR_RT_ObjectToEvent_Source::ExtractInstance( pThis[ FIELD___NativeEventDispatcher ] );
 }
 
-HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock_NativeEventDispatcher*& port )
+HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock_NativeEventDispatcher*& port )
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     NANOCLR_HEADER();
@@ -167,7 +167,7 @@ HRESULT Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_Native
     NANOCLR_NOCLEANUP();
 }
 
-CLR_RT_HeapBlock_NativeEventDispatcher* Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( CLR_RT_StackFrame& stack )
+CLR_RT_HeapBlock_NativeEventDispatcher* Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     CLR_RT_ObjectToEvent_Source* src = GetEventDispReference( stack );
@@ -183,13 +183,13 @@ CLR_RT_HeapBlock_NativeEventDispatcher *CreateNativeEventInstance( CLR_RT_StackF
     CLR_RT_HeapBlock* pThis = stack.This();
     
     // Creates intstance of CLR_RT_HeapBlock_NativeEventDispatcher and saves it in pThis
-    if(FAILED(CLR_RT_HeapBlock_NativeEventDispatcher::CreateInstance( *pThis, pThis[ Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::FIELD___NativeEventDispatcher ] )))
+    if(FAILED(CLR_RT_HeapBlock_NativeEventDispatcher::CreateInstance( *pThis, pThis[ Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::FIELD___NativeEventDispatcher ] )))
     {
         return NULL;
     }
 
     // Retrieves instance of 
-    Library_nanoframework_runtime_events_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( stack, pNativeDisp );
+    Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( stack, pNativeDisp );
     
     return pNativeDisp;
 }

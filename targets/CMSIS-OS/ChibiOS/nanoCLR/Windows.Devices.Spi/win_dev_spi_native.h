@@ -4,13 +4,18 @@
 //
 
 
-#ifndef _WINDOWS_DEVICES_SPI_NATIVE_H_
-#define _WINDOWS_DEVICES_SPI_NATIVE_H_
+#ifndef _WIN_DEV_SPI_NATIVE_H_
+#define _WIN_DEV_SPI_NATIVE_H_
+
 
 #include <nanoCLR_Interop.h>
-struct Library_windows_devices_spi_native_Windows_Devices_Spi_SpiBusInfo
+#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Checks.h>
+
+
+struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo
 {
-    static const int FIELD__SOMETHING_WRONG_WITH_THIS_FIELD_POSSIBLY_MISSING_BACKING_FIELD = 1;
+    static const int FIELD___ChipSelectLineCount = 1;
 
     NANOCLR_NATIVE_DECLARE(get_MaxClockFrequency___I4);
     NANOCLR_NATIVE_DECLARE(get_MinClockFrequency___I4);
@@ -19,7 +24,7 @@ struct Library_windows_devices_spi_native_Windows_Devices_Spi_SpiBusInfo
 
 };
 
-struct Library_windows_devices_spi_native_Windows_Devices_Spi_SpiConnectionSettings
+struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings
 {
     static const int FIELD___csLine = 1;
     static const int FIELD___clockFrequency = 2;
@@ -32,13 +37,13 @@ struct Library_windows_devices_spi_native_Windows_Devices_Spi_SpiConnectionSetti
 
 };
 
-struct Library_windows_devices_spi_native_Windows_Devices_Spi_SpiDevice
+struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice
 {
     static const int FIELD_STATIC__Rnd = 0;
 
     static const int FIELD___spiBus = 1;
     static const int FIELD___deviceId = 2;
-    static const int FIELD__SOMETHING_WRONG_WITH_THIS_FIELD_POSSIBLY_MISSING_BACKING_FIELD = 3;
+    static const int FIELD___ConnectionSettings = 3;
 
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__STRING__SZARRAY_U1__SZARRAY_U1__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__STRING__SZARRAY_U2__SZARRAY_U2__BOOLEAN);
@@ -49,8 +54,6 @@ struct Library_windows_devices_spi_native_Windows_Devices_Spi_SpiDevice
 
 };
 
-
-
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi;
 
-#endif  //_WINDOWS_DEVICES_SPI_NATIVE_H_
+#endif  //_WIN_DEV_SPI_NATIVE_H_
