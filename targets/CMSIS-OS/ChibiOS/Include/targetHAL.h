@@ -9,7 +9,7 @@
 #include <target_board.h>
 
 // call to CMSIS osDelay to allow other threads to run
-#define NANOCLR_RELINQUISHEXECUTIONCONTROL()       osDelay(1);
+#define NANOCLR_RELINQUISHEXECUTIONCONTROL()       osDelay(10);
 
 #define GLOBAL_LOCK(x)              chSysLock();
 #define GLOBAL_UNLOCK(x);           chSysUnlock();
