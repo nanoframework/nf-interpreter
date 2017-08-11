@@ -39,15 +39,16 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings
 
 struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice
 {
-    static const int FIELD_STATIC__Rnd = 0;
-
-    static const int FIELD___spiBus = 1;
-    static const int FIELD___deviceId = 2;
-    static const int FIELD___ConnectionSettings = 3;
+    static const int FIELD___syncLock = 1;
+    static const int FIELD___spiBus = 2;
+    static const int FIELD___deviceId = 3;
+    static const int FIELD___connectionSettings = 4;
+    static const int FIELD___disposedValue = 5;
 
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__STRING__SZARRAY_U1__SZARRAY_U1__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__STRING__SZARRAY_U2__SZARRAY_U2__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativeInit___VOID__STRING__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
+    NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
