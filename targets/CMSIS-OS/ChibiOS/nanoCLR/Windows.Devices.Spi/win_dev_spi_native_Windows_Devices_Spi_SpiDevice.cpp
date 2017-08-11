@@ -14,6 +14,25 @@
 #include "win_dev_spi_native.h"
 
 
+///////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
+///////////////////////////////////////////////////////////////////////////////////////
+
+enum SpiModes
+{
+    SpiModes_Mode0 = 0,
+    SpiModes_Mode1,
+    SpiModes_Mode2,
+    SpiModes_Mode3
+};
+
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
+// define this type here to make it shorter and improve code readability
+typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings SpiConnectionSettings;
+
+
 stm32_gpio_t* gpioPortSpi[] = { GPIOA, GPIOB
 #if STM32_HAS_GPIOC
 , GPIOC
@@ -46,7 +65,90 @@ stm32_gpio_t* gpioPortSpi[] = { GPIOA, GPIOB
 
 #define GPIO_PORT(pin) (gpioPortSpi[pin/16])
 
+uint16_t ComputePrescaler (uint8_t bus, int32_t requestedFrequency)
+{
+    uint16_t pre = 0;
+	int32_t clock = STM32_SPII2S_MAX >> 1;		// SP1, SPI4, SPI5 and SPI6 on APB2
+	if (bus == 2 || bus == 3) clock >>= 1;		// SPI2 and SPI3 on APB1
+
+	if (clock > requestedFrequency << 3)
+    {
+		clock >>= 4;
+		pre |= SPI_CR1_BR_2;
+	}
+	if (clock > requestedFrequency << 1)
+    {
+		clock >>= 2;
+		pre |= SPI_CR1_BR_1;
+	}
+	if (clock > requestedFrequency)	pre |= SPI_CR1_BR_0;
+
+  return pre;
+}
+
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__STRING__SZARRAY_U1__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    const char * spiBus = stack.Arg0().StringText();
+    uint8_t bus = (uint8_t)spiBus[3] - 48;
+
+    int wCount = stack.Arg1().DereferenceArray()->m_numOfElements;
+    int rCount = stack.Arg2().DereferenceArray()->m_numOfElements;
+
+    uint8_t * wBuf = stack.Arg1().DereferenceArray()->GetFirstElement();
+    uint8_t * rBuf = stack.Arg2().DereferenceArray()->GetFirstElement();
+
+    SPIDriver _drv;
+
+    switch (bus)
+    {
+#if STM32_SPI_USE_SPI1
+        case 1 :   _drv = SPID1;
+                    break;
+#endif
+#if STM32_SPI_USE_SPI2
+        case 2 :    _drv = SPID2;
+                    break;
+#endif
+#if STM32_SPI_USE_SPI3
+        case 3 :    _drv = SPID3;
+                    break;
+#endif
+#if STM32_SPI_USE_SPI4
+        case 4 :    _drv = SPID4;
+                    break;
+#endif
+#if STM32_SPI_USE_SPI5
+        case 5 :    _drv = SPID5;
+                    break;
+#endif
+#if STM32_SPI_USE_SPI6
+        case 6 :    _drv = SPID6;
+                    break;
+#endif
+    }
+    spiSelect(&_drv);
+    if (wCount != 0 && rCount != 0)     // Transmit+Receive
+    {
+        if (stack.Arg3().NumericByRef().u1 == 1) spiExchange(&_drv,wCount, wBuf, rBuf);    // Full duplex
+        else
+        {
+            spiSend(&_drv, wCount, wBuf);
+            spiReceive(&_drv, rCount, rBuf);
+        }
+    }
+    else                    // Transmit only or Receive only
+    {
+        if (rCount != 0) spiReceive(&_drv, rCount, rBuf);
+        else spiSend(&_drv, wCount, wBuf);
+    }
+    spiUnselect(&_drv);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__STRING__SZARRAY_U2__SZARRAY_U2__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -55,111 +157,72 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__STRING__SZARRAY_U2__SZARRAY_U2__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-        uint8_t data[2];
-        data[1] = 31;
-        data[0] = 0;
+        // get connection settings from managed object
+        CLR_RT_HeapBlock* connectionSettings = pThis[ FIELD___connectionSettings ].Dereference(); FAULT_ON_NULL(connectionSettings);
 
-        palSetPad(GPIOE, GPIOE_LED2);
-        spiSelect(&SPID1);
-        spiSend(&SPID1, 2, &data);
-        spiUnselect(&SPID1);
-        palSetPad(GPIOC, GPIOC_LED3);
-        /*
+        const char* spiBus = pThis[ FIELD___spiBus ].RecoverString();
+        FAULT_ON_NULL(spiBus);
+        
+        // spiBus is an ASCII string with the bus name in format 'SPIn'
+        // need to grab 'n' from the string and convert to the integer value from the ASCII code
+        uint8_t bus = (uint8_t)spiBus[3] - 48;
 
-        int bus = 1;    //Fixme : retrieve real bus number from param0
-        SPIDriver _drv;
+        uint16_t CR1 = SPI_CR1_SSI | SPI_CR1_MSTR | SPI_CR1_SPE;
 
-        switch (bus)
+        // mode
+        int32_t mode = connectionSettings[ SpiConnectionSettings::FIELD___spiMode ].NumericByRef().s4;
+
+        switch (mode)
         {
-    #if STM32_SPI_USE_SPI1
-            case 1 :   _drv = SPID1;
-                        break;
-    #endif
-    #if STM32_SPI_USE_SPI2
-            case 2 :    _drv = SPID2;
-                        break;
-    #endif
-    #if STM32_SPI_USE_SPI3
-            case 3 :    _drv = SPID3;
-                        break;
-    #endif
-    #if STM32_SPI_USE_SPI4
-            case 4 :    _drv = SPID4;
-                        break;
-    #endif
-    #if STM32_SPI_USE_SPI5
-            case 5 :    _drv = SPID5;
-                        break;
-    #endif
-    #if STM32_SPI_USE_SPI6
-            case 6 :    _drv = SPID6;
-                        break;
-    #endif
+            case SpiModes_Mode1 :
+                CR1 |= SPI_CR1_CPHA;
+                break;
+            case SpiModes_Mode2 :
+                CR1 |= SPI_CR1_CPOL;
+                break;
+            case SpiModes_Mode3 :
+                CR1 |= SPI_CR1_CPHA | SPI_CR1_CPOL;
+                break;
+            default :   // Default to Mode0 if invalid mode specified
+                break;
         }
-        spiSelect(&_drv);
-        if (sizeof(param1) != 0 && sizeof(param2) != 0)     // Transmit+Receive
+
+        // Data format
+        int32_t dataBitLength = connectionSettings[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
+
+        if (dataBitLength == 16)
         {
-            if (param3) spiExchange(&_drv,sizeof(param1), &param1, &param2);    // Full duplex
-            else
-            {
-                spiSend(&_drv, sizeof(param1), &param1);
-                spiReceive(&_drv, sizeof(param2), &param2);
-            }
+            // data length is 16 bits
+            CR1 |= SPI_CR1_DFF;
         }
-        else                    // Transmit only or Receive only
-        {
-            if (sizeof(param2) != 0) spiReceive(&_drv, sizeof(param2), &param2);
-            else spiSend(&_drv, sizeof(param1), &param1);
-        }
-        spiUnselect(&_drv);
-        */
-    }
-    NANOCLR_NOCLEANUP();
-}
 
-HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID__STRING__I4__I4__I4( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
+        // Clock prescaler
+        int32_t clockFrequency = connectionSettings[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4;
 
-        uint8_t data[2];
-        data[1] = 31;
-        data[0] = 0;
+        CR1 |= ComputePrescaler(bus, clockFrequency);
 
-        int bus = 1;    //Fixme : retrieve real bus number from param0
+        // chip select pin
+        int32_t csPin = connectionSettings[ SpiConnectionSettings::FIELD___csLine ].NumericByRef().s4;
+
+
         SPIConfig spi_cfg =
-            {
-                NULL,
-                GPIOA,
-                GPIOA_CS1,
-                SPI_CR1_BR_0,       // Fixme : set correct bits from config parameters
-            };
-        palSetPad(GPIOE, GPIOE_LED1);
-        spiStart(&SPID1, &spi_cfg);
-        
-        palSetPad(GPIOE, GPIOE_LED2);
-        spiSelect(&SPID1);
-        spiSend(&SPID1, 2, &data);
-        spiUnselect(&SPID1);
-        palSetPad(GPIOC, GPIOC_LED3);
-        
+        {
+            NULL,
+            GPIO_PORT(csPin),
+            csPin % 16,
+            CR1,
+        };
+    
         switch (bus)
         {
     #if STM32_SPI_USE_SPI1
             case 1 :    spiStart(&SPID1, &spi_cfg);
-        
-        palSetPad(GPIOE, GPIOE_LED2);
-        spiSelect(&SPID1);
-        spiSend(&SPID1, 2, &data);
-        spiUnselect(&SPID1);
-        palSetPad(GPIOC, GPIOC_LED3);
                         break;
     #endif
     #if STM32_SPI_USE_SPI2
@@ -182,7 +245,22 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 6 :    spiStart(&SPID6, &spi_cfg);
                         break;
     #endif
+
         }
+
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::DisposeNative___VOID( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+        // set pin to input to save power
+        // clear interrupts
+        // release the pin
     }
     NANOCLR_NOCLEANUP();
 }
