@@ -8,12 +8,15 @@
 #include <cmsis_os.h>
 
 #include "usbcfg.h"
+#include <CLR_Startup_Thread.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityNormal, 2048, "ReceiverThread");
+// declare CLRStartup thread here 
+osThreadDef(CLRStartupThread, osPriorityNormal, 2048, "CLRStartupThread"); 
 
 //  Application entry point.
 int main(void) {
@@ -39,23 +42,11 @@ int main(void) {
 
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
+  // create the CLR Startup thread 
+  osThreadCreate(osThread(CLRStartupThread), NULL); 
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
-
-  // preparation for the CLR startup
-  BlockStorage_AddDevices();
-
-  CLR_SETTINGS clrSettings;
-
-  memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
-
-  clrSettings.MaxContextSwitches         = 50;
-  clrSettings.WaitForDebugger            = false;
-  clrSettings.EnterDebuggerLoopAfterExit = true;
-
-  // startup CLR now
-  ClrStartup(clrSettings);
 
   while (true) { 
     osDelay(100);
