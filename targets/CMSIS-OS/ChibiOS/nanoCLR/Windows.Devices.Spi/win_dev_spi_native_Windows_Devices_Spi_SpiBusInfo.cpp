@@ -11,11 +11,16 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::get_MaxClockF
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
-        signed int retVal = 48000000; 
-        
-        stack.SetResult_I4( retVal );
+        CLR_RT_HeapBlock* pArg = &(stack.Arg1());
+
+        // spiBus is an ASCII string with the bus name in format 'SPIn'
+        // need to grab 'n' from the string and convert to the integer value from the ASCII code
+        uint8_t bus = (uint8_t)pArg[0].RecoverString()[3] - 48;
+
+        // According to STM : "At a minimum, the clock frequency should be twice the required communication frequency."
+        // So maximum useable frequency is CoreClock / 2.
+        // SPI2 or SPI3 are on APB1, so divide max frequency by four.
+        stack.SetResult_I4 ((bus == 2 or bus == 3) ? SystemCoreClock >>= 2 : SystemCoreClock >> 1);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -24,11 +29,15 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::get_MinClockF
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
-        signed int retVal = 1000000; 
-        
-        stack.SetResult_I4( retVal );
+        CLR_RT_HeapBlock* pArg = &(stack.Arg1());
+
+        // spiBus is an ASCII string with the bus name in format 'SPIn'
+        // need to grab 'n' from the string and convert to the integer value from the ASCII code
+        uint8_t bus = (uint8_t)pArg[0].RecoverString()[3] - 48;
+
+        // Max prescaler value = 256
+        // SPI2 or SPI3 are on APB1, so divide max frequency by four.
+        stack.SetResult_I4 ((bus == 2 or bus == 3) ? SystemCoreClock >>= 9 : SystemCoreClock >> 8);
     }
     NANOCLR_NOCLEANUP();
 }

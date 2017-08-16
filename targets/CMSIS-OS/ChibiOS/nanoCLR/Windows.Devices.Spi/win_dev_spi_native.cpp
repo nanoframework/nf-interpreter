@@ -36,8 +36,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__STRING__SZARRAY_U1__SZARRAY_U1__BOOLEAN,
-    Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__STRING__SZARRAY_U2__SZARRAY_U2__BOOLEAN,
+    NULL,
+    NULL,
+    NULL,
+    Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN,
+    Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN,
     Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID,
     NULL,
     NULL,
@@ -61,6 +64,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi =
 {
     "Windows.Devices.Spi", 
-    0xD124F515,
+    0x3A9E993E,
     method_lookup
 };
