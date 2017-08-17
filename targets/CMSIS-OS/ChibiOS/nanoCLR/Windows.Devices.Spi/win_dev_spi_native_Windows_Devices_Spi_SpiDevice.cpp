@@ -21,8 +21,8 @@ SPIConfig spi_cfg;
 
 enum DataBitOrder
 {
-    MSB = 0,
-    LSB
+    DataBitOrder_MSB = 0,
+    DataBitOrder_LSB
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ enum SpiModes
 // define this type here to make it shorter and improve code readability
 typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings SpiConnectionSettings;
 
-
+// Computes the prescaler registers given a frequency
 uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputePrescaler (uint8_t bus, int32_t requestedFrequency)
 {
     uint16_t pre = 0;
@@ -65,7 +65,7 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputePresca
   return pre;
 }
 
-
+// Give a complete low-level SPI configuration from user's managed connectionSettings
 nfSPIConfig Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(int bus, CLR_RT_HeapBlock* config)
 {
     SPIDriver * _drv;
@@ -87,13 +87,21 @@ nfSPIConfig Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(
         default :   // Default to Mode0 if invalid mode specified
             break;
     }
+
     if (config[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4 == 16)
     {
         // data length is 16 bits
         CR1 |= SPI_CR1_DFF;
+
+        // Sets the order of bytes transmission : MSB first or LSB first
+        int bitOrder = config[ SpiConnectionSettings::FIELD___bitOrder ].NumericByRef().s4;
+        if (bitOrder == DataBitOrder_LSB) CR1 |= SPI_CR1_LSBFIRST;
     }
+
+    // SPI on STM32 needs a prescaler value to set the frequency used
     CR1 |= ComputePrescaler(bus, config[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4);
 
+    // Choose the driver that is mapped to the chosen bus
     switch (bus)
     {
 #if STM32_SPI_USE_SPI1
@@ -122,6 +130,7 @@ nfSPIConfig Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(
 #endif
     }
 
+    // Create the final configuration
     nfSPIConfig cfg =
     {
         {
@@ -148,13 +157,21 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+        
+        // get a pointer to the managed spi connectionSettings object instance
+        CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
 
         // get bus index
         // this is coded with a multiplication, need to perform and int division to get the number
         // see the comments in the SpiDevice() constructor in managed code for details
         uint8_t bus = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
 
+        // Get a complete low-level SPI configuration, depending on user's managed parameters
         nfSPIConfig cfg = GetConfig(bus, pThis[ FIELD___connectionSettings ].Dereference());
+
+        // If databitLength is set to 16 bit, then temporarily set it to 8 bit
+        int databitLength = pConfig[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
+        if (databitLength == 16) cfg.Configuration.cr1 &= ~SPI_CR1_DFF;
 
         // dereference the write and read buffers from the arguments
         CLR_RT_HeapBlock_Array* writeBuffer = stack.Arg1().DereferenceArray();
@@ -182,6 +199,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         spiAcquireBus(cfg.Driver);
         spiSelect(cfg.Driver);
 
+        // Are we using SPI full-duplex for transfer ?
         bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
 
         if (writeSize != 0 && readSize != 0)
@@ -216,6 +234,9 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         spiReleaseBus(cfg.Driver);
         spiStop(cfg.Driver);
 
+        // If databitLength was set to 16 bit above, then set it back to 16 bit
+        if (databitLength == 16) cfg.Configuration.cr1 |= SPI_CR1_DFF;
+
         // null pointers and vars
         writeData = NULL;
         readData = NULL;
@@ -229,9 +250,81 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+    {
+        CLR_RT_TypedArray<unsigned short> writeData;
+        CLR_RT_TypedArray<unsigned short> readData;
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        // marshal the write and read buffers
+        Interop_Marshal_UINT16_ARRAY(stack, 1, writeData);
+        Interop_Marshal_UINT16_ARRAY(stack, 2, readData);
+        int writeSize = writeData.GetSize();
+        int readSize = readData.GetSize();
 
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+        
+        // get a pointer to the managed spi connectionSettings object instance
+        CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
+
+        // get bus index
+        // this is coded with a multiplication, need to perform and int division to get the number
+        // see the comments in the SpiDevice() constructor in managed code for details
+        uint8_t bus = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
+
+        // Gets a complete low-level SPI configuration, depending on user's managed parameters
+        nfSPIConfig cfg = GetConfig(bus, pConfig);
+
+        // If current config databitLength is 8bit, then set it temporarily to 16bit
+        int databitLength = pConfig[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
+        if (databitLength == 8) cfg.Configuration.cr1 |= SPI_CR1_DFF;
+        
+        // because the bus access is shared, acquire and select the appropriate bus
+        spiStart(cfg.Driver, &cfg.Configuration);
+        spiAcquireBus(cfg.Driver);
+        spiSelect(cfg.Driver);
+
+        // Are we using SPI full-duplex for transfer ?
+        bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
+
+        if (writeSize != 0 && readSize != 0)
+        {
+            // Transmit+Receive
+            if (fullDuplex)
+            {
+                // Full duplex
+                spiExchange(cfg.Driver, writeSize, &writeData[0], &readData[0]);    
+            }
+            else
+            {
+                spiSend(cfg.Driver, writeSize, &writeData[0]);
+                spiReceive(cfg.Driver, readSize, &readData[0]);
+            }
+        }
+        else
+        {
+            // Transmit only or Receive only
+            if (readSize != 0) 
+            {
+                spiReceive(cfg.Driver, readSize, &readData[0]);
+            }
+            else
+            {
+                spiSend(cfg.Driver, writeSize, &writeData[0]);
+            }
+        }
+
+        // Release the bus
+        spiUnselect(cfg.Driver);
+        spiReleaseBus(cfg.Driver);
+        spiStop(cfg.Driver);
+
+        // If current config databitLength was 8bit, then set it back to 8bit
+        if (databitLength == 8) cfg.Configuration.cr1 &= ~SPI_CR1_DFF;
+
+        // null pointers and vars
+        pThis = NULL;
+        pConfig = NULL;
+    }
     NANOCLR_NOCLEANUP();
 }
 
@@ -248,8 +341,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::DisposeNative_
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-
         // set pin to input to save power
         // clear interrupts
         // release the pin
@@ -259,31 +350,37 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::DisposeNative_
 
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
 {
-    NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
+   NANOCLR_HEADER();
+   {
+       // declare the device selector string whose max size is "SPI1,SPI2,SPI3,SPI4,SPI5,SPI6," + terminator and init with the terminator
+       char deviceSelectorString[ 30 + 1] = { 0 };
 
-        char* retVal = "";
-    #if STM32_SPI_USE_SPI1
-        strcat(retVal,"SPI1,");
-    #endif
-    #if STM32_SPI_USE_SPI2
-        strcat(retVal,"SPI2,");
-    #endif
-    #if STM32_SPI_USE_SPI3
-        strcat(retVal,"SPI3,");
-    #endif
-    #if STM32_SPI_USE_SPI4
-        strcat(retVal,"SPI4,");
-    #endif
-    #if STM32_SPI_USE_SPI5
-        strcat(retVal,"SPI5,");
-    #endif
-    #if STM32_SPI_USE_SPI6
-        strcat(retVal,"SPI6");
-    #endif
+   #if STM32_SPI_USE_SPI1
+       strcat(deviceSelectorString, "SPI1,");
+   #endif
+   #if STM32_SPI_USE_SPI2
+       strcat(deviceSelectorString, "SPI2,");
+   #endif
+   #if STM32_SPI_USE_SPI3
+       strcat(deviceSelectorString, "SPI3,");
+   #endif
+   #if STM32_SPI_USE_SPI4
+       strcat(deviceSelectorString, "SPI4,");
+   #endif
+   #if STM32_SPI_USE_SPI5
+       strcat(deviceSelectorString, "SPI5,");
+   #endif
+   #if STM32_SPI_USE_SPI6
+       strcat(deviceSelectorString, "SPI6,");
+   #endif
 
-        stack.SetResult_String( retVal );
-    }
-    NANOCLR_NOCLEANUP();
+       // replace the last comma with a terminator
+       deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+
+       // because the caller is expecting a result to be returned
+       // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
+       stack.SetResult_String(deviceSelectorString);
+   }
+   NANOCLR_NOCLEANUP();
 }
+
