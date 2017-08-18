@@ -312,6 +312,14 @@ struct Library_corlib_native_System_Collections_Stack
 
 };
 
+struct Library_corlib_native_System_Console
+{
+    NANOCLR_NATIVE_DECLARE(OutNative___STATIC__VOID__STRING__BOOLEAN);
+
+    //--//
+
+};
+
 struct Library_corlib_native_System_Convert
 {
     NANOCLR_NATIVE_DECLARE(ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN);
