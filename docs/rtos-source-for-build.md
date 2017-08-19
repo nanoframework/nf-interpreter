@@ -10,7 +10,7 @@ This document aims to give you an brief overview of the differences between thes
 
 ### Source from official repository
 
-When running CMake if the parameter `-DCHIBIOS_SOURCE` is not not specified what happens is that Cake will connect to [ChibiOS repo](https://github.com/nanoframework/ChibiOS) on GitHub and will download it from there. The time for this operation to complete will depend mostly on the speed of the Internet connection. Note that you need to specify `-CHIBIOS_VERSION` too otherwise the 'master' branch will be checked out instead of a stable branch.
+When running CMake if the parameter `-DCHIBIOS_SOURCE` is not not specified what happens is that Cake will connect to [ChibiOS repo](https://github.com/nanoframework/ChibiOS) on GitHub and will download it from there. The time for this operation to complete will depend mostly on the speed of the Internet connection. Note that you can specify `-CHIBIOS_VERSION` too otherwise the latest code from the 'stable_17.6.x' branch will be checked out instead.
 
 ChibiOS will be cached in the build directory so the full download won't happen again unless the build directory is cleared. A check for any changes in the repo is made whenever a build is run. If there are any, the changes will be downloaded and merged.
 
