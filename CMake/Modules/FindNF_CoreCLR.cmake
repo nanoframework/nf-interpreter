@@ -77,6 +77,7 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Collections_ArrayList.cpp
     corlib_native_System_Collections_Queue.cpp
     corlib_native_System_Collections_Stack.cpp
+    corlib_native_System_Console.cpp
     corlib_native_System_Convert.cpp
     corlib_native_System_DateTime.cpp
     corlib_native_System_Delegate.cpp
