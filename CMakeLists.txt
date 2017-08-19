@@ -294,13 +294,13 @@ if(RTOS_CHIBIOS_CHECK)
             endif()
 
             if(CHIBIOS_VERSION_EMPTY)
-                # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from master branch
-                message(STATUS "RTOS is: CHIBIOS (latest available code from trunk)")
-                set(CHIBIOS_GIT_TAG "master")
+                # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_17.6.x branch
+                message(STATUS "RTOS is: CHIBIOS (latest available code from stable_17.6.x)")
+                set(CHIBIOS_GIT_TAG "stable_17.6.x")
             else()
                 message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
 
-                # branch naming follows the pattern 'stable_16.1.x'
+                # branch naming follows the pattern 'stable_17.6.x'
                 # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter 
                 # find 1st dot in version number
                 string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)

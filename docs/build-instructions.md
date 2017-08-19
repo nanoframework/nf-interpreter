@@ -47,7 +47,7 @@ The build script accepts the following parameters (some of them are mandatory).
 - USE_FPU: specifies if the hardware floating point unit (if available at the platform) is to be used. If this doesn't apply, this parameter is simply ignored. The default is false.
 - TARGET_SERIES: specifies the series name for the target board. This parameter is mandatory and has to be in the list of the supported series for the target OS.
 - CHIBIOS_SOURCE: specifies the path for the location of the ChibiOS source code. If this parameter is specified the code on that path will be used and no download is performed. For this parameter to be valid RTOS parameter must be specified with CHIBIOS option. 
-- CHIBIOS_VERSION: specifies the ChibiOS version to grab the source files. It has to match one of the official versions from the ChibiOS repository. If none is specified it will download the 'trunk' version. This parameter is ignored if CHIBIOS_SOURCE is specified. 
+- CHIBIOS_VERSION: specifies the ChibiOS version to grab the source files. It has to match one of the official versions from the ChibiOS repository. If none is specified it will download the latest source from the 'stable_17.6.x' branch. This parameter is ignored if CHIBIOS_SOURCE is specified. 
 - CHIBIOS_BOARD: specifies the ChibiOS board. This parameter is mandatory when specifying CHIBIOS as the RTOS choice parameter above. It has to be a valid board listed in ChibiOS boards folder.
 - NF_FEATURE_DEBUGGER: specifies if the debugger feature is to be included. If not supplied the default value will be used. The default is true (debugger will be included).
 - NF_FEATURE_RTC: Allows you to specify whether the board contains a real time clock that can be used for date & time functions. The default is off.
