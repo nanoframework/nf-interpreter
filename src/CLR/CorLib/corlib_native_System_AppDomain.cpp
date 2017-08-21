@@ -109,10 +109,14 @@ HRESULT Library_corlib_native_System_AppDomain::CreateDomain___STATIC__SystemApp
     NANOCLR_CHECK_HRESULT(CLR_RT_AppDomain::CreateInstance( szName, appDomain ));
 
     //load mscorlib
-    NANOCLR_CHECK_HRESULT(appDomain->LoadAssembly( g_CLR_RT_TypeSystem.m_assemblyMscorlib ));        
-    //load Native
-    NANOCLR_CHECK_HRESULT(appDomain->LoadAssembly( g_CLR_RT_TypeSystem.m_assemblyNative   ));
-    
+    NANOCLR_CHECK_HRESULT(appDomain->LoadAssembly( g_CLR_RT_TypeSystem.m_assemblyMscorlib ));
+
+    //load Runtime.Native
+    if(g_CLR_RT_TypeSystem.m_assemblyNative != NULL)
+    {
+        NANOCLR_CHECK_HRESULT(appDomain->LoadAssembly( g_CLR_RT_TypeSystem.m_assemblyNative   ));
+    }
+
     NANOCLR_CHECK_HRESULT(appDomain->GetManagedObject( res ));
 
     //Marshal the new AD to the calling AD.
