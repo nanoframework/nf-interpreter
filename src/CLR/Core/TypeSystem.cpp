@@ -3287,7 +3287,7 @@ void CLR_RT_TypeSystem::PostLinkageProcessing( CLR_RT_Assembly* assm )
     {
         m_assemblyMscorlib = assm;
     }
-    if(!strcmp( assm->m_szName, "Microsoft.SPOT.Native" ))
+    if(!strcmp( assm->m_szName, "nanoFramework.Runtime.Native" ))
     {
         m_assemblyNative = assm;
     }
