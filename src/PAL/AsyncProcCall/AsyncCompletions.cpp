@@ -35,7 +35,7 @@ void HAL_COMPLETION::Execute()
 
 //--//
 
-static const unsigned __int64 HAL_Completion_IdleValue = 0x0000FFFFFFFFFFFFull;
+static const uint64_t HAL_Completion_IdleValue = 0x0000FFFFFFFFFFFFull;
 
 void HAL_COMPLETION::InitializeList()
 {
@@ -79,7 +79,7 @@ void HAL_COMPLETION::DequeueAndExec()
 
 //--//
 
-void HAL_COMPLETION::EnqueueTicks( unsigned __int64 eventTimeTicks )
+void HAL_COMPLETION::EnqueueTicks( uint64_t eventTimeTicks )
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
     ASSERT(eventTimeTicks != 0);
@@ -109,21 +109,21 @@ void HAL_COMPLETION::EnqueueTicks( unsigned __int64 eventTimeTicks )
 }
 
 // the argument to enqueue is in miliseconds as we don't need anything bellow this in a reasonale use case scenario
-void HAL_COMPLETION::EnqueueDelta64( unsigned __int64 miliSecondsFromNow )
+void HAL_COMPLETION::EnqueueDelta64( uint64_t miliSecondsFromNow )
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
     // grab time first to be closest to now as possible from when this function was called
-    unsigned __int64 now            = HAL_Time_CurrentSysTicks();
-    unsigned __int64 eventTimeTicks = CPU_MilisecondsToSysTicks( miliSecondsFromNow );
+    uint64_t now            = HAL_Time_CurrentSysTicks();
+    uint64_t eventTimeTicks = CPU_MilisecondsToSysTicks( miliSecondsFromNow );
 
     EnqueueTicks( now + eventTimeTicks );
 }
 
 // the argument to enqueue is in miliseconds as we don't need anything bellow this in a reasonale use case scenario
-void HAL_COMPLETION::EnqueueDelta( unsigned int miliSecondsFromNow )
+void HAL_COMPLETION::EnqueueDelta( uint32_t miliSecondsFromNow )
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    EnqueueDelta64( (unsigned __int64)miliSecondsFromNow );
+    EnqueueDelta64( (uint64_t)miliSecondsFromNow );
 }
 
 //--//
@@ -143,7 +143,7 @@ void HAL_COMPLETION::Abort()
 
     if(firstNode == this)
     {
-        unsigned __int64 nextTicks;
+        uint64_t nextTicks;
 
         if(g_HAL_Completion_List.IsEmpty())
         {
@@ -167,7 +167,7 @@ void HAL_COMPLETION::Abort()
 
 //--//
 
-void HAL_COMPLETION::WaitForInterrupts( unsigned __int64 expire, unsigned int sleepLevel, unsigned __int64 wakeEvents )
+void HAL_COMPLETION::WaitForInterrupts( uint64_t expire, uint32_t sleepLevel, uint64_t wakeEvents )
 {
     // TODO 
     // still unclear on the best way to handle this
