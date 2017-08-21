@@ -45,10 +45,10 @@ typedef void (*set_Event_Callback)( void* );
 #endif
 
 // destructive read system event flags
-unsigned int Events_Get( unsigned int EventsOfInterest );
+uint32_t Events_Get( uint32_t eventsOfInterest );
 
 // non-destructive read system event flags
-unsigned int Events_MaskedRead( unsigned int EventsOfInterest );
+uint32_t Events_MaskedRead( uint32_t eventsOfInterest );
 
 // returns 0 for timeout, non-zero are events that have happened and were asked to be waiting on (non-destructive read)
 // timeout limit is about 3034 milliseconds currently
@@ -61,37 +61,39 @@ unsigned int Events_MaskedRead( unsigned int EventsOfInterest );
 // Events_WaitForEvents(0, EVENTS_TIMEOUT_INFINITE) sleeps forever.  Don't do that.
 // Events_WaitForEvents(flags, EVENTS_TIMEOUT_INFINITE) waits forever for that event.
 
-unsigned int Events_WaitForEvents        ( unsigned int sleepLevel, unsigned int WakeupSystemEvents, unsigned int Timeout_Milliseconds );
-unsigned int Events_WaitForEventsInternal( unsigned int sleepLevel, unsigned int WakeupSystemEvents, unsigned int Timeout_Milliseconds );
+uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeout_Milliseconds );
+uint32_t Events_WaitForEventsInternal( uint32_t sleepLevel, uint32_t WakeupSystemEvents, uint32_t Timeout_Milliseconds );
 
-__inline unsigned int Events_WaitForEvents( unsigned int WakeupSystemEvents, unsigned int Timeout_Milliseconds )
+__inline uint32_t Events_WaitForEvents( uint32_t WakeupSystemEvents, uint32_t Timeout_Milliseconds )
 {
     return Events_WaitForEvents( SLEEP_LEVEL__SLEEP, WakeupSystemEvents, Timeout_Milliseconds );
 }
 
 __nfweak bool Events_Initialize();
 __nfweak bool Events_Uninitialize();
-__nfweak void Events_Set( unsigned int events );
-__nfweak void Events_SetBoolTimer( bool* timerCompleteFlag, unsigned int millisecondsFromNow );
+__nfweak void Events_Set( uint32_t events );
+__nfweak void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow );
+__nfweak void Events_SetCallback( set_Event_Callback pfn, void* arg );
+__nfweak void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
 
-void PostManagedEvent(unsigned char category, unsigned char subCategory, unsigned short data1, unsigned int data2);
+void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
 //--//
 
-typedef void (*PALEVENTLISTENER) (unsigned int e, unsigned int param);
+typedef void (*PALEVENTLISTENER) (uint32_t e, uint32_t param);
 
 struct PalEventListener : public HAL_DblLinkedNode<PalEventListener>
 {
 
     PALEVENTLISTENER m_palEventListener;
-    unsigned int     m_eventMask;
+    uint32_t     m_eventMask;
 };
 
 
 __nfweak HRESULT PalEvent_Initialize();
 __nfweak HRESULT PalEvent_Uninitialize();
-__nfweak HRESULT PalEvent_Post(unsigned int e, unsigned int param);
+__nfweak HRESULT PalEvent_Post(uint32_t e, uint32_t param);
 __nfweak HRESULT PalEvent_Enlist(PalEventListener* listener);
 
 //--//
@@ -104,7 +106,7 @@ public:
 
     static HRESULT Initialize();
     static HRESULT Uninitialize();
-    static HRESULT PostEvent(unsigned int e, unsigned int param);
+    static HRESULT PostEvent(uint32_t e, uint32_t param);
     static HRESULT EnlistListener(PalEventListener* listener);
 
 private:
