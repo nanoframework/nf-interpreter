@@ -59,12 +59,12 @@ __nfweak void HAL_COMPLETION::Uninitialize()
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
 
-__nfweak void HAL_COMPLETION::EnqueueTicks( unsigned __int64 EventTimeTicks)
+__nfweak void HAL_COMPLETION::EnqueueTicks( uint64_t EventTimeTicks)
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
 
-__nfweak void HAL_COMPLETION::EnqueueDelta( unsigned int uSecFromNow )
+__nfweak void HAL_COMPLETION::EnqueueDelta( uint32_t uSecFromNow )
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
@@ -84,7 +84,7 @@ __nfweak void HAL_COMPLETION::DequeueAndExec()
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
 
-__nfweak void HAL_COMPLETION::WaitForInterrupts( unsigned __int64 Expire, unsigned int sleepLevel, unsigned __int64 wakeEvents )
+__nfweak void HAL_COMPLETION::WaitForInterrupts( uint64_t Expire, uint32_t sleepLevel, uint64_t wakeEvents )
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }

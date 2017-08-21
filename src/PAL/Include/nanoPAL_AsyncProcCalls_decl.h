@@ -90,11 +90,11 @@ public:
 
 struct HAL_COMPLETION : public HAL_CONTINUATION
 {
-    unsigned __int64 EventTimeTicks;
+    uint64_t EventTimeTicks;
     bool   ExecuteInISR;
 
 #if defined(_DEBUG)
-    unsigned __int64 Start_RTC_Ticks;
+    uint64_t Start_RTC_Ticks;
 #endif
 
     void InitializeForISR( HAL_CALLBACK_FPN EntryPoint, void* Argument = NULL )
@@ -111,9 +111,9 @@ struct HAL_COMPLETION : public HAL_CONTINUATION
         InitializeCallback( EntryPoint, Argument );
     }
 
-    void EnqueueTicks               ( unsigned __int64 eventTimeTicks        );
-    void EnqueueDelta64             ( unsigned __int64 miliSecondsFromNow    );
-    void EnqueueDelta               ( unsigned int miliSecondsFromNow        );
+    void EnqueueTicks               ( uint64_t eventTimeTicks        );
+    void EnqueueDelta64             ( uint64_t miliSecondsFromNow    );
+    void EnqueueDelta               ( uint32_t miliSecondsFromNow        );
     
     void Abort();
 
@@ -127,7 +127,7 @@ struct HAL_COMPLETION : public HAL_CONTINUATION
 
     static void DequeueAndExec();
 
-    static void WaitForInterrupts( unsigned __int64 expire, unsigned int sleepLevel, unsigned __int64 wakeEvents );
+    static void WaitForInterrupts( uint64_t expire, uint32_t sleepLevel, uint64_t wakeEvents );
 };
 
 //--//
