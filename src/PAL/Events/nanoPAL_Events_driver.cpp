@@ -34,7 +34,7 @@ HRESULT PalEventDriver::Uninitialize()
     return S_OK;
 }
 
-HRESULT PalEventDriver::PostEvent(unsigned int e, unsigned int param)
+HRESULT PalEventDriver::PostEvent(uint32_t e, uint32_t param)
 {
     PalEventListener *listener = g_palEventDriver.listenerList.FirstNode();
         
