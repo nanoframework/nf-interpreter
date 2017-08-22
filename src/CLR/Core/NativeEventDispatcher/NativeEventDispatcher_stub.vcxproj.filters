@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="IOPort_stub.cpp">
+    <ClCompile Include="NativeEventDispatcher_stub.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

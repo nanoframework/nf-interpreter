@@ -129,10 +129,7 @@ set(NF_CoreCLR_SRCS
     CLRStartup.cpp
 
     # Core stubs
-    Hardware_stub.cpp
     Heap_Persistence_stub.cpp
-    InterruptHandler_stub.cpp
-    IOPort_stub.cpp
     RPC_stub.cpp
     BinaryFormatter_stub.cpp
 
@@ -152,8 +149,6 @@ set(NF_CoreCLR_SRCS
     # PAL stubs
     Async_stubs.cpp
     COM_stubs.c
-    Async_stubs.cpp
-
 )
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
@@ -174,7 +169,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/Hardware
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/HeapPersistence
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/InterruptHandler
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/IOPort
+            ${PROJECT_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/RPC
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/Serialization
 

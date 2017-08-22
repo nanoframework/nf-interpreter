@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6DD5CA4F-2AE9-44D3-B9D7-A2A4A35FC5B2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>IOPort</RootNamespace>
+    <RootNamespace>NativeEventDispatcher</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

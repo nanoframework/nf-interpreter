@@ -159,7 +159,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\src\CLR\Core\IOPort\IOPort_stub.cpp" />
+    <ClCompile Include="..\..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher_stub.cpp" />
     <ClCompile Include="..\..\..\..\src\PAL\Double\nanoPAL_native_double.cpp" />
     <ClCompile Include="CLRStartup.cpp" />
     <ClCompile Include="Events.cpp" />
@@ -212,7 +212,7 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\src\CLR\Core\IOPort\IOPort_stub.vcxproj">
+    <ProjectReference Include="..\..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher_stub.vcxproj">
       <Project>{5406eb0c-2243-47e1-9f21-f2d7ca277092}</Project>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
