@@ -40,30 +40,37 @@ void Events_Set( uint32_t events )
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
+    // set events
     chSysLock();
     systemEvents |= events;
+    chSysUnlock();
 
     if( g_Event_Callback != NULL )
     {
         g_Event_Callback( g_Event_Callback_Arg );
     }
-
-    chSysUnlock();
 }
 
 uint32_t Events_Get( uint32_t eventsOfInterest )
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    uint32_t mask = ~eventsOfInterest;
-    
+    // get the requested flags from system events state and...
+    uint32_t returnEvents = (systemEvents & eventsOfInterest);
+
+    // ... clear the requested flags atomically
     chSysLock();
-    // capture current event flags state and clear the requested flags atomically
-    uint32_t events = ( systemEvents & mask );
+    systemEvents &= ~eventsOfInterest;
     chSysUnlock();
     
     // give the caller notice of just the events they asked for ( and were cleared already )
-    return events & eventsOfInterest;
+    return returnEvents;
+}
+
+uint32_t Events_MaskedRead( uint32_t eventsOfInterest )
+{
+    NATIVE_PROFILE_PAL_EVENTS();
+    return (systemEvents & eventsOfInterest);
 }
 
 static void local_Events_SetBoolTimer_Callback( void* arg )
