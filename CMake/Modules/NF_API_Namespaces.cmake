@@ -12,6 +12,7 @@
 
 option(API_Windows.Devices.Gpio "option for Windows.Devices.Gpio API")
 option(API_Windows.Devices.Spi "option for Windows.Devices.Spi API")
+option(API_Windows.Devices.I2c "option for Windows.Devices.I2c API")
 option(API_nanoFramework.Runtime.Events "option for nanoFramework.Runtime.Events API")
 
 
@@ -68,6 +69,11 @@ macro(ParseApiOptions)
         PerformSettingsForApiEntry("Windows.Devices.Spi")
     endif()
 
+	# Windows.Devices.I2c
+    if(API_Windows.Devices.I2c)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Devices.I2c")
+    endif()
     
     # nanoFramework.Runtime.Events
     if(API_nanoFramework.Runtime.Events)
