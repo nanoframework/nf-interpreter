@@ -28,7 +28,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeapPersistence", "..\..\..
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InterruptHandler", "..\..\..\src\CLR\Core\InterruptHandler\InterruptHandler.vcxproj", "{D32EE397-7E49-452D-AC95-AFCB3C962E3D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IOPort", "..\..\..\src\CLR\Core\IOPort\IOPort.vcxproj", "{6DD5CA4F-2AE9-44D3-B9D7-A2A4A35FC5B2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NativeEventDispatcher", "..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher.vcxproj", "{6DD5CA4F-2AE9-44D3-B9D7-A2A4A35FC5B2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RPC", "..\..\..\src\CLR\Core\RPC\RPC.vcxproj", "{ED4C887A-EC09-465B-B5D9-075450ADC52D}"
 EndProject
@@ -46,7 +46,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeapPersistence_stub", "..\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InterruptHandler_stub", "..\..\..\src\CLR\Core\InterruptHandler\InterruptHandler_stub.vcxproj", "{5772D362-7277-49CF-9B49-42335A3154BD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IOPort_stub", "..\..\..\src\CLR\Core\IOPort\IOPort_stub.vcxproj", "{5406EB0C-2243-47E1-9F21-F2D7CA277092}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NativeEventDispatcher_stub", "..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher_stub.vcxproj", "{5406EB0C-2243-47E1-9F21-F2D7CA277092}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Messaging_stub", "..\..\..\src\CLR\Messaging\Messaging_stub.vcxproj", "{8ACD05E8-42FB-4A49-9D8B-79239F0EED25}"
 EndProject

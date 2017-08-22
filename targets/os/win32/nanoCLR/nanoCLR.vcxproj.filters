@@ -95,7 +95,7 @@
     <ClCompile Include="targetHAL_Time.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\CLR\Core\IOPort\IOPort_stub.cpp">
+    <ClCompile Include="..\..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher_stub.cpp">
       <Filter>Source Files\PAL</Filter>
     </ClCompile>
   </ItemGroup>
