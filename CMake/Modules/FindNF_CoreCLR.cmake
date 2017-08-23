@@ -128,7 +128,10 @@ set(NF_CoreCLR_SRCS
     CLRStartup.cpp
 
     # Core stubs
+    Hardware_stub.cpp
     Heap_Persistence_stub.cpp
+    InterruptHandler_stub.cpp
+    NativeEventDispatcher_stub.cpp
     RPC_stub.cpp
     BinaryFormatter_stub.cpp
 
