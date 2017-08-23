@@ -50,7 +50,7 @@ HRESULT CLR_HW_Hardware::SpawnDispatcher()
     interrupt->Unlink();
 
     interruptData = &interrupt->m_interruptPortInterrupt;
-    ioPort = interruptData->m_context;
+    ioPort = interruptData->context;
 
     CLR_RT_ProtectFromGC gc1 ( *ioPort );
     
@@ -87,11 +87,11 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
 
         CLR_RT_ApplicationInterrupt* queueRec = (CLR_RT_ApplicationInterrupt*)CLR_RT_Memory::Allocate_And_Erase( sizeof(CLR_RT_ApplicationInterrupt), CLR_RT_HeapBlock::HB_CompactOnFailure );  CHECK_ALLOCATION(queueRec);
 
-        queueRec->m_interruptPortInterrupt.m_data1   =                                          rec->m_data1;
-        queueRec->m_interruptPortInterrupt.m_data2   =                                          rec->m_data2;
-        queueRec->m_interruptPortInterrupt.m_data3   =                                          rec->m_data3;
-        queueRec->m_interruptPortInterrupt.m_time    =                                          rec->m_time;
-        queueRec->m_interruptPortInterrupt.m_context = (CLR_RT_HeapBlock_NativeEventDispatcher*)rec->m_context;
+        queueRec->m_interruptPortInterrupt.data1   =                                          rec->m_data1;
+        queueRec->m_interruptPortInterrupt.data2   =                                          rec->m_data2;
+        queueRec->m_interruptPortInterrupt.data3   =                                          rec->m_data3;
+        queueRec->m_interruptPortInterrupt.time    =                                          rec->m_time;
+        queueRec->m_interruptPortInterrupt.context = (CLR_RT_HeapBlock_NativeEventDispatcher*)rec->m_context;
 
         m_interruptData.m_applicationQueue.LinkAtBack( queueRec ); ++m_interruptData.m_queuedInterrupts;
 
@@ -136,4 +136,3 @@ HRESULT CLR_HW_Hardware::ProcessInterrupts()
 
     NANOCLR_NOCLEANUP();
 }
-

@@ -21,6 +21,7 @@ set(nanoFramework.Runtime.Events_SRCS
     # source files of the assembly
     nf_rt_events_native_nanoFramework_Runtime_Events_EventSink.cpp
     nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher.cpp
+    nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate.cpp    
     nf_rt_events_native.cpp
 
     # source files
