@@ -367,6 +367,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_corlib_native_System_Globalization_CultureInfo::get_CurrentUICultureInternal___STATIC__SystemGlobalizationCultureInfo,
+    Library_corlib_native_System_Globalization_CultureInfo::set_CurrentUICultureInternal___STATIC__VOID__SystemGlobalizationCultureInfo,
     Library_corlib_native_System_Globalization_DateTimeFormat::FormatDigits___STATIC__STRING__I4__I4,
     NULL,
     NULL,
@@ -900,6 +901,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x138C738A,
+    0x964C8465,
     method_lookup
 };
