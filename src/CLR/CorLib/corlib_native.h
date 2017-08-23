@@ -116,15 +116,6 @@ struct Library_corlib_native_System_Collections_Hashtable__KeyCollection
 
 };
 
-struct Library_corlib_native_System_Globalization_Resources_CultureInfo
-{
-    static const int FIELD_STATIC__manager = 0;
-
-
-    //--//
-
-};
-
 struct Library_corlib_native_System_AppDomain
 {
     static const int FIELD___appDomain = 1;
@@ -411,7 +402,6 @@ struct Library_corlib_native_System_Globalization_CultureInfo
     static const int FIELD___parent = 5;
 
     NANOCLR_NATIVE_DECLARE(get_CurrentUICultureInternal___STATIC__SystemGlobalizationCultureInfo);
-    NANOCLR_NATIVE_DECLARE(set_CurrentUICultureInternal___STATIC__VOID__SystemGlobalizationCultureInfo);
 
     //--//
 
@@ -427,35 +417,10 @@ struct Library_corlib_native_System_Globalization_DateTimeFormat
 
 struct Library_corlib_native_System_Globalization_DateTimeFormatInfo
 {
-    static const int FIELD___amDesignator = 1;
-    static const int FIELD___pmDesignator = 2;
-    static const int FIELD___dateSeparator = 3;
-    static const int FIELD___longTimePattern = 4;
-    static const int FIELD___shortTimePattern = 5;
-    static const int FIELD___generalShortTimePattern = 6;
-    static const int FIELD___generalLongTimePattern = 7;
-    static const int FIELD___timeSeparator = 8;
-    static const int FIELD___monthDayPattern = 9;
-    static const int FIELD___fullDateTimePattern = 10;
-    static const int FIELD___longDatePattern = 11;
-    static const int FIELD___shortDatePattern = 12;
-    static const int FIELD___yearMonthPattern = 13;
-    static const int FIELD___abbreviatedDayNames = 14;
-    static const int FIELD___dayNames = 15;
-    static const int FIELD___abbreviatedMonthNames = 16;
-    static const int FIELD___monthNames = 17;
-    static const int FIELD__CultureInfo = 18;
-
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_Globalization_DaylightTime
-{
-    static const int FIELD___daylightTimeStart = 1;
-    static const int FIELD___daylightTimeEnd = 2;
-    static const int FIELD___daylightTimeDelta = 3;
+    static const int FIELD___generalShortTimePattern = 1;
+    static const int FIELD___generalLongTimePattern = 2;
+    static const int FIELD___fullDateTimePattern = 3;
+    static const int FIELD__CultureInfo = 4;
 
 
     //--//

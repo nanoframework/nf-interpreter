@@ -88,7 +88,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_GC.cpp
     corlib_native_System_Globalization_CultureInfo.cpp
     corlib_native_System_Globalization_DateTimeFormat.cpp
-    corlib_native_System_Globalization_DaylightTime.cpp
     corlib_native_System_Guid.cpp
     corlib_native_System_MarshalByRefObject.cpp
     corlib_native_System_Math.cpp
