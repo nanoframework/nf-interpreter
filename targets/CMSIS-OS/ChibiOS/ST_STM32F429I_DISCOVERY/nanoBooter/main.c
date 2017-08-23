@@ -40,14 +40,6 @@ int main(void) {
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
-  
-  // check for valid CLR image 
-    if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
-    {
-      // there seems to be a valid CLR image
-      // launch nanoCLR
-      LaunchCLR((uint32_t)&__nanoImage_end__);
-    }
 
   // the following IF is not mandatory, it's just providing a way for a user to 'force'
   // the board to remain in nanoBooter and not launching nanoCLR
