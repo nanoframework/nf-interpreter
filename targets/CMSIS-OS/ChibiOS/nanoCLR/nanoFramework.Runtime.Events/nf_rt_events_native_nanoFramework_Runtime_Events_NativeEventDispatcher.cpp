@@ -25,12 +25,12 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
 
     // Calls driver to enable interrupts.  Consider that there could be no driver 
     // associated to this object so check that the driver methods are set 
-    if(pNativeDisp->m_DriverMethods == NULL)
+    if(pNativeDisp->driverMethods == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
     
-    NANOCLR_CHECK_HRESULT(pNativeDisp->m_DriverMethods->m_EnableProc( pNativeDisp, true ));
+    NANOCLR_CHECK_HRESULT(pNativeDisp->driverMethods->enableProcessor( pNativeDisp, true ));
     
     NANOCLR_NOCLEANUP();
 }
@@ -53,9 +53,9 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     // Calls driver to enable interrupts.  Consider that there could be no driver 
     // associated to this object so check that the driver methods are set 
     // we will be tolerant in this case and not throw any exception
-    if(pNativeDisp->m_DriverMethods != NULL)
+    if(pNativeDisp->driverMethods != NULL)
     {
-        NANOCLR_CHECK_HRESULT(pNativeDisp->m_DriverMethods->m_EnableProc( pNativeDisp, false ));
+        NANOCLR_CHECK_HRESULT(pNativeDisp->driverMethods->enableProcessor( pNativeDisp, false ));
     }
     
     NANOCLR_NOCLEANUP();
@@ -77,9 +77,9 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     // Calls driver to enable interrupts.  Consider that there could be no driver 
     // associated to this object so check that the driver methods are set 
     // we will be tolerant in this case and not throw any exception
-    if(pNativeDisp->m_DriverMethods != NULL)
+    if(pNativeDisp->driverMethods != NULL)
     {
-        NANOCLR_CHECK_HRESULT(pNativeDisp->m_DriverMethods->m_CleanupProc( pNativeDisp )); 
+        NANOCLR_CHECK_HRESULT(pNativeDisp->driverMethods->cleanupProcessor( pNativeDisp )); 
     }
     
     NANOCLR_NOCLEANUP();
@@ -125,7 +125,7 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     pDriverMethods = (CLR_RT_DriverInterruptMethods *)pNativeDriverData->m_pNativeMethods;
     
     // Check that all methods are present:
-    if(pDriverMethods->m_InitProc == NULL || pDriverMethods->m_EnableProc == NULL || pDriverMethods->m_CleanupProc == NULL)
+    if(pDriverMethods->initProcessor == NULL || pDriverMethods->enableProcessor == NULL || pDriverMethods->cleanupProcessor == NULL)
     {
        NANOCLR_CHECK_HRESULT(CLR_E_DRIVER_NOT_REGISTERED);
     }
@@ -137,8 +137,8 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     NANOCLR_CHECK_HRESULT(GetEventDispatcher( stack, pNativeDisp ));
 
     // Now call the driver. First save pointer to driver data.
-    pNativeDisp->m_DriverMethods = pDriverMethods;
-    NANOCLR_CHECK_HRESULT(pDriverMethods->m_InitProc( pNativeDisp, driverData ));
+    pNativeDisp->driverMethods = pDriverMethods;
+    NANOCLR_CHECK_HRESULT(pDriverMethods->initProcessor( pNativeDisp, driverData ));
     
     NANOCLR_NOCLEANUP();
 }
@@ -153,13 +153,13 @@ CLR_RT_ObjectToEvent_Source* Library_nf_rt_events_native_nanoFramework_Runtime_E
     return CLR_RT_ObjectToEvent_Source::ExtractInstance( pThis[ FIELD___NativeEventDispatcher ] );
 }
 
-HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock_NativeEventDispatcher*& port )
+HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock_NativeEventDispatcher*& event )
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     NANOCLR_HEADER();
 
-    port = GetEventDispatcher( stack );
-    if(port == NULL)
+    event = GetEventDispatcher( stack );
+    if(event == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
@@ -173,23 +173,4 @@ CLR_RT_HeapBlock_NativeEventDispatcher* Library_nf_rt_events_native_nanoFramewor
     CLR_RT_ObjectToEvent_Source* src = GetEventDispReference( stack );
 
     return (src == NULL) ? NULL : (CLR_RT_HeapBlock_NativeEventDispatcher*)src->m_eventPtr;
-}
-
-CLR_RT_HeapBlock_NativeEventDispatcher *CreateNativeEventInstance( CLR_RT_StackFrame& stack )
-{  
-    NATIVE_PROFILE_CLR_IOPORT();
-
-    CLR_RT_HeapBlock_NativeEventDispatcher *pNativeDisp = NULL;
-    CLR_RT_HeapBlock* pThis = stack.This();
-    
-    // Creates intstance of CLR_RT_HeapBlock_NativeEventDispatcher and saves it in pThis
-    if(FAILED(CLR_RT_HeapBlock_NativeEventDispatcher::CreateInstance( *pThis, pThis[ Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::FIELD___NativeEventDispatcher ] )))
-    {
-        return NULL;
-    }
-
-    // Retrieves instance of 
-    Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( stack, pNativeDisp );
-    
-    return pNativeDisp;
 }

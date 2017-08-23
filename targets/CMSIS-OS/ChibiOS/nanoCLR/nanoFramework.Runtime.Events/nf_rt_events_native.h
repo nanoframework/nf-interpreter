@@ -28,7 +28,7 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispa
 
     //--//
     static CLR_RT_ObjectToEvent_Source*             GetEventDispReference( CLR_RT_StackFrame& stack                                  );
-    static HRESULT                                  GetEventDispatcher   ( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock_NativeEventDispatcher*& port  );
+    static HRESULT                                  GetEventDispatcher   ( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock_NativeEventDispatcher*& event  );
     static CLR_RT_HeapBlock_NativeEventDispatcher*  GetEventDispatcher   ( CLR_RT_StackFrame& stack                                  );
 };
 
@@ -65,17 +65,36 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_BaseEvent
 
 };
 
-struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_GenericEvent
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventArgs
 {
-    static const int FIELD__Category = 3;
-    static const int FIELD__Data = 4;
-    static const int FIELD__Tag = 5;
-    static const int FIELD__Time = 6;
+    static const int FIELD_STATIC__Empty = 2;
 
 
     //--//
 
 };
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_GenericEvent
+{
+    static const int FIELD__Category = 3;
+    static const int FIELD__Data = 4;
+    static const int FIELD__Time = 5;
+
+
+    //--//
+
+};
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate
+{
+    NANOCLR_NATIVE_DECLARE(Combine___STATIC__mscorlibSystemDelegate__mscorlibSystemDelegate__mscorlibSystemDelegate);
+    NANOCLR_NATIVE_DECLARE(Remove___STATIC__mscorlibSystemDelegate__mscorlibSystemDelegate__mscorlibSystemDelegate);
+
+    //--//
+
+};
+
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs;
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
 

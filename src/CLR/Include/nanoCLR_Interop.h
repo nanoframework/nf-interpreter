@@ -438,9 +438,9 @@ typedef HRESULT (*InterruptServiceProc)( CLR_RT_HeapBlock_NativeEventDispatcher 
 struct CLR_RT_DriverInterruptMethods
 
 {
-    InitializeInterruptsProc      m_InitProc;
-    EnableorDisableInterruptsProc m_EnableProc;
-    CleanupInterruptsProc         m_CleanupProc;
+    InitializeInterruptsProc      initProcessor;
+    EnableorDisableInterruptsProc enableProcessor;
+    CleanupInterruptsProc         cleanupProcessor;
 };
 
 // Randomly generated 32 bit number.
@@ -452,7 +452,7 @@ CLR_RT_HeapBlock_NativeEventDispatcher *CreateNativeEventInstance( CLR_RT_StackF
 
 // Saves data from ISR. The data from this queue is used to call managed callbacks.
 // Should be called from ISR.
-__nfweak void SaveNativeEventToHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, unsigned int data1, unsigned int data2 );
+__nfweak void SaveNativeEventToHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, uint32_t data1, uint32_t data2 );
 
 // Cleans up the data in the queue after interrupts were closed and no managed callbacks are expected.
 __nfweak void CleanupNativeEventsFromHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pContext );

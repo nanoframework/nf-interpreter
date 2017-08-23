@@ -4,7 +4,6 @@
 // See LICENSE file in the project root for full license information.
 //
 #include <nanoCLR_Hardware.h>
-#include <corlib_native.h>
 #include <nf_rt_events_native.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

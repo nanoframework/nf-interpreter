@@ -8,21 +8,17 @@
 
 static CLR_RT_HeapBlock_NativeEventDispatcher *g_Context = NULL;
 
-void PostManagedEvent(unsigned char category, unsigned char subCategory, unsigned short data1, unsigned int data2)
+void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
     if(g_Context != NULL)
     {
-        chSysLock();   
-
-        unsigned int d = ((unsigned int)data1 << 16) | (category << 8) | subCategory;
+        uint16_t d = ((uint16_t)data1 << 16) | (category << 8) | subCategory;
 
         SaveNativeEventToHALQueue( g_Context, d, data2 );
-
-        chSysUnlock();
     }
 }
 
-static HRESULT InitializeEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, unsigned __int64 userData )
+static HRESULT InitializeEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, uint64_t userData )
 {
    g_Context  = pContext;
 
@@ -45,11 +41,7 @@ static HRESULT CleanupEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContex
 
 HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink::EventConfig___VOID( CLR_RT_StackFrame& stack )
 {
-    NANOCLR_HEADER();
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
+    return S_OK;
 }
 
 static const CLR_RT_DriverInterruptMethods g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink = 

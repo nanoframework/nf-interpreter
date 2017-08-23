@@ -2261,23 +2261,23 @@ struct CLR_RT_HeapBlock_NativeEventDispatcher : public CLR_RT_ObjectToEvent_Dest
     __nfweak static void HandlerMethod_RecoverFromGC ();
     __nfweak static void HandlerMethod_CleanUp ();
 
-    static CLR_RT_DblLinkedList m_ioPorts; 
+    static CLR_RT_DblLinkedList eventList; 
 
 
     struct InterruptPortInterrupt
     {
-        CLR_INT64                 m_time;
-        CLR_RT_HeapBlock_NativeEventDispatcher*  m_context;
-        CLR_UINT32                m_data1;
-        CLR_UINT32                m_data2;
-        CLR_UINT32                m_data3;
+        CLR_INT64                 time;
+        CLR_RT_HeapBlock_NativeEventDispatcher*  context;
+        CLR_UINT32                data1;
+        CLR_UINT32                data2;
+        CLR_UINT32                data3;
     };
 
     // Pointer to Hardware driver methods
-    CLR_RT_DriverInterruptMethods  *m_DriverMethods;
+    CLR_RT_DriverInterruptMethods  *driverMethods;
     //--//
-    // Poiner to custom data used by device drivers.
-    void  *m_pDrvCustomData;
+    // Pointer to custom data used by device drivers.
+    void  *pDrvCustomData;
 
 
 
@@ -2290,7 +2290,7 @@ struct CLR_RT_HeapBlock_NativeEventDispatcher : public CLR_RT_ObjectToEvent_Dest
     __nfweak HRESULT RecoverManagedObject( CLR_RT_HeapBlock*& port                                   );
 
     __nfweak static void ThreadTerminationCallback( void* arg                                  );
-    __nfweak void SaveToHALQueue( unsigned int data1, unsigned int data2 );
+    __nfweak void SaveToHALQueue( uint32_t data1, uint32_t data2 );
     __nfweak void RemoveFromHALQueue();
 
     __nfweak void RecoverFromGC    ();

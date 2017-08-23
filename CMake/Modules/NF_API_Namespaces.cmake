@@ -73,6 +73,14 @@ macro(ParseApiOptions)
     if(API_nanoFramework.Runtime.Events)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("nanoFramework.Runtime.Events")
+
+        # this one is special because it requires also another assembly for events that is internal (doens't have a managed end)
+
+        # append to list of declaration for Interop Assemblies table
+        list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs;")
+        # append to list of entries for Interop Assemblies table
+        list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs,")
+
     endif()
 
     

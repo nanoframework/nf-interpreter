@@ -18,6 +18,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="NativeEventDispatcher.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6DD5CA4F-2AE9-44D3-B9D7-A2A4A35FC5B2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -96,7 +99,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Include;..\..\CorLib;..\..\..\HAL\Include;..\..\..\PAL\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Include;..\..\CorLib;..\..\..\HAL\Include;..\..\..\PAL\Include;..\..\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
