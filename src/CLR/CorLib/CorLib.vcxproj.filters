@@ -167,9 +167,6 @@
     <ClCompile Include="corlib_native_System_Enum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="corlib_native_System_Globalization_DaylightTime.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="corlib_native_System_MarshalByRefObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
