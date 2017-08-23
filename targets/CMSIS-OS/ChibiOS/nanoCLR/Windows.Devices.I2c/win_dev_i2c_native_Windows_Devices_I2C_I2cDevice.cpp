@@ -32,8 +32,8 @@ enum I2cSharingMode
 ///////////////////////////////////////////////////////////////////////////////////////
  enum I2cTransferStatus
     {
-        I2cTransferStatus_ClockStretchTimeout = 0,
-        I2cTransferStatus_FullTransfer,
+        I2cTransferStatus_FullTransfer = 0,
+        I2cTransferStatus_ClockStretchTimeout,
         I2cTransferStatus_PartialTransfer,
         I2cTransferStatus_SlaveAddressNotAcknowledged,
         I2cTransferStatus_UnknownError
@@ -60,16 +60,16 @@ nfI2CConfig Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetConfig(
     // Choose the driver that is mapped to the chosen bus
     switch (bus)
     {
-#if STM32_SPI_USE_I2C1
-        case 1 :   _drv = &I2C1;
+#if STM32_I2C_USE_I2C1
+        case 1 :   _drv = &I2CD1;
                     break;
 #endif
-#if STM32_SPI_USE_I2C2
-        case 2 :    _drv = &I2C2;
+#if STM32_I2C_USE_I2C2
+        case 2 :    _drv = &I2CD2;
                     break;
 #endif
-#if STM32_SPI_USE_I2C3
-        case 3 :    _drv = &I2C3;
+#if STM32_I2C_USE_I2C3
+        case 3 :    _drv = &I2CD3;
                     break;
 #endif
     }
@@ -110,7 +110,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         unsigned char * readData = NULL;
         int writeSize = 0;
         int readSize = 0;
-
+        msg_t i2cStatus;
         int returnStatus = I2cTransferStatus_FullTransfer;
 
         // get a pointer to the managed object instance and check that it's not NULL
@@ -148,72 +148,40 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             readSize = readBuffer->m_numOfElements;
         }
 
+        // because the bus access is shared, acquire the appropriate bus
         i2cStart(cfg.Driver, &cfg.Configuration);
         i2cAcquireBus(cfg.Driver);
-        if (readSize == 0)  // Write only
+        if (readSize != 0 && writeSize != 0)  // WriteRead
         {
-            i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, NULL, 0, TIME_INFINITE);
+            i2cStatus = i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, &readData[0], readSize, TIME_INFINITE);
         }
-        else                // WriteRead
+        else
         {
-            i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, &readData[0], readSize, TIME_INFINITE);
+            if (readSize == 0)      //Write
+            {
+                i2cStatus = i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, NULL, 0, TIME_INFINITE);
+            }
+            else                    // Read
+            {
+                i2cStatus = i2cMasterReceiveTimeout (cfg.Driver, cfg.SlaveAddress, &readData[0], readSize, TIME_INFINITE);
+            }
         }
         i2cReleaseBus(cfg.Driver);
         i2cStop(cfg.Driver);
+
+        returnStatus = I2cTransferStatus_FullTransfer;
+        if (i2cStatus != MSG_OK)
+        {
+            int errorMask = i2cGetErrors(cfg.Driver);
+
+            //TODO: return correct error   
+            returnStatus = I2cTransferStatus_UnknownError;
+        }
 
         // null pointers and vars
         writeData = NULL;
         readData = NULL;
         writeBuffer = NULL;
-        readBuffer = NULL;
-        pThis = NULL;
-
-        stack.SetResult_I4(returnStatus);
-    }
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeRead___I4__SZARRAY_U1__U4( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {
-        unsigned char * readData = NULL;
-        int readSize = 0;
-
-        int returnStatus = I2cTransferStatus_FullTransfer;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
-        // get a pointer to the managed spi connectionSettings object instance
-        CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
-
-        // get bus index
-        // this is coded with a multiplication, need to perform and int division to get the number
-        // see the comments in the SpiDevice() constructor in managed code for details
-        uint8_t bus = (uint8_t)(pThis[ FIELD___i2cBus ].NumericByRef().s4 / 1000);
-
-        // Get a complete low-level SPI configuration, depending on user's managed parameters
-        nfI2CConfig cfg = GetConfig(bus, pThis[ FIELD___connectionSettings ].Dereference());
-
-        CLR_RT_HeapBlock_Array* readBuffer = stack.Arg1().DereferenceArray();
-        if (readBuffer != NULL)
-        {
-            // grab the pointer to the array by getting the first element of the array
-            readData = readBuffer->GetFirstElement();
-
-            // get the size of the buffer by reading the number of elements in the HeapBlock array
-            readSize = readBuffer->m_numOfElements;
-        }
-
-        i2cStart(cfg.Driver, &cfg.Configuration);
-        i2cAcquireBus(cfg.Driver);
-        i2cMasterReceiveTimeout (cfg.Driver, cfg.SlaveAddress, &readData[0], readSize, TIME_INFINITE);
-        i2cReleaseBus(cfg.Driver);
-        i2cStop(cfg.Driver);
-
-        // null pointers and vars
-        readData = NULL;
         readBuffer = NULL;
         pThis = NULL;
 
@@ -229,13 +197,13 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetDeviceSelec
        // declare the device selector string whose max size is "I2C1,I2C2,I2C3," + terminator and init with the terminator
        char deviceSelectorString[ 15 + 1] = { 0 };
 
-   #if STM32_SPI_USE_I2C1
+   #if STM32_I2C_USE_I2C1
        strcat(deviceSelectorString, "I2C1,");
    #endif
-   #if STM32_SPI_USE_I2C2
+   #if STM32_I2C_USE_I2C2
        strcat(deviceSelectorString, "I2C2,");
    #endif
-   #if STM32_SPI_USE_I2C3
+   #if STM32_I2C_USE_I2C3
        strcat(deviceSelectorString, "I2C3,");
    #endif
 

@@ -57,7 +57,6 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(NativeTransmit___I4__SZARRAY_U1__U4__SZARRAY_U1__U4);
-    NANOCLR_NATIVE_DECLARE(NativeRead___I4__SZARRAY_U1__U4);
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
