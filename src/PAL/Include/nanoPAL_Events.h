@@ -45,15 +45,15 @@ typedef void (*set_Event_Callback)( void* );
 #endif
 
 
-__nfweak bool Events_Initialize();
-__nfweak bool Events_Uninitialize();
-__nfweak void Events_Set( uint32_t events );
+ bool Events_Initialize();
+ bool Events_Uninitialize();
+ void Events_Set( uint32_t events );
 
 // destructive read system event flags
-__nfweak uint32_t Events_Get( uint32_t eventsOfInterest );
+ uint32_t Events_Get( uint32_t eventsOfInterest );
 
 // non-destructive read system event flags
-__nfweak uint32_t Events_MaskedRead( uint32_t eventsOfInterest );
+ uint32_t Events_MaskedRead( uint32_t eventsOfInterest );
 
 // returns 0 for timeout, non-zero are events that have happened and were asked to be waiting on (non-destructive read)
 // timeout limit is about 3034 milliseconds currently
@@ -74,9 +74,9 @@ __inline uint32_t Events_WaitForEvents( uint32_t WakeupSystemEvents, uint32_t Ti
     return Events_WaitForEvents( SLEEP_LEVEL__SLEEP, WakeupSystemEvents, Timeout_Milliseconds );
 }
 
-__nfweak void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow );
-__nfweak void Events_SetCallback( set_Event_Callback pfn, void* arg );
-__nfweak void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
+ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow );
+ void Events_SetCallback( set_Event_Callback pfn, void* arg );
+ void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
 void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
@@ -91,10 +91,10 @@ struct PalEventListener : public HAL_DblLinkedNode<PalEventListener>
 };
 
 
-__nfweak HRESULT PalEvent_Initialize();
-__nfweak HRESULT PalEvent_Uninitialize();
-__nfweak HRESULT PalEvent_Post(uint32_t e, uint32_t param);
-__nfweak HRESULT PalEvent_Enlist(PalEventListener* listener);
+ HRESULT PalEvent_Initialize();
+ HRESULT PalEvent_Uninitialize();
+ HRESULT PalEvent_Post(uint32_t e, uint32_t param);
+ HRESULT PalEvent_Enlist(PalEventListener* listener);
 
 //--//
 

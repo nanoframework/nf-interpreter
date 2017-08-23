@@ -108,21 +108,21 @@ struct CLR_HW_Hardware
     
     //--//
 
-    __nfweak static HRESULT CreateInstance();
+     static HRESULT CreateInstance();
 
-    __nfweak HRESULT Hardware_Initialize();
+     HRESULT Hardware_Initialize();
 
-    __nfweak static HRESULT DeleteInstance();
+     static HRESULT DeleteInstance();
 
-    __nfweak void Hardware_Cleanup();
+     void Hardware_Cleanup();
 
-    __nfweak void PrepareForGC   ();
-    __nfweak void ProcessActivity();
+     void PrepareForGC   ();
+     void ProcessActivity();
 
-    __nfweak HRESULT ManagedHardware_Initialize();
-    __nfweak HRESULT ProcessInterrupts();
-    __nfweak HRESULT SpawnDispatcher();
-    __nfweak HRESULT TransferAllInterruptsToApplicationQueue();
+     HRESULT ManagedHardware_Initialize();
+     HRESULT ProcessInterrupts();
+     HRESULT SpawnDispatcher();
+     HRESULT TransferAllInterruptsToApplicationQueue();
 
     // UNDONE: FIXME: void Screen_Flush( CLR_GFX_Bitmap& bitmap, CLR_UINT16 x, CLR_UINT16 y, CLR_UINT16 width, CLR_UINT16 height );
 };
