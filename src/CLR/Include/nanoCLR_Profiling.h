@@ -161,49 +161,49 @@ struct CLR_PRF_Profiler
 {
     // This is not implemented:
     // Write formatter functions to send only as many bits as needed for uint32,uint64 numbers, cast bytes, etc.
-    __nfweak static HRESULT CreateInstance();
-    __nfweak static HRESULT DeleteInstance();
+     static HRESULT CreateInstance();
+     static HRESULT DeleteInstance();
 
-    __nfweak HRESULT Stream_Send();
-    __nfweak HRESULT Stream_Flush();
+     HRESULT Stream_Send();
+     HRESULT Stream_Flush();
 
-    __nfweak HRESULT Profiler_Cleanup();
-    __nfweak HRESULT DumpHeap();
+     HRESULT Profiler_Cleanup();
+     HRESULT DumpHeap();
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
-    __nfweak HRESULT RecordContextSwitch( CLR_RT_Thread* nextThread );
-    __nfweak HRESULT RecordFunctionCall( CLR_RT_Thread* th, CLR_RT_MethodDef_Index md );
-    __nfweak HRESULT RecordFunctionReturn( CLR_RT_Thread* th, CLR_PROF_CounterCallChain& prof );
+     HRESULT RecordContextSwitch( CLR_RT_Thread* nextThread );
+     HRESULT RecordFunctionCall( CLR_RT_Thread* th, CLR_RT_MethodDef_Index md );
+     HRESULT RecordFunctionReturn( CLR_RT_Thread* th, CLR_PROF_CounterCallChain& prof );
 #endif
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-    __nfweak void TrackObjectCreation( CLR_RT_HeapBlock* ptr );
-    __nfweak void TrackObjectDeletion( CLR_RT_HeapBlock* ptr );
-    __nfweak void TrackObjectRelocation();
-    __nfweak void RecordGarbageCollectionBegin();
-    __nfweak void RecordGarbageCollectionEnd();
-    __nfweak void RecordHeapCompactionBegin();
-    __nfweak void RecordHeapCompactionEnd();
+     void TrackObjectCreation( CLR_RT_HeapBlock* ptr );
+     void TrackObjectDeletion( CLR_RT_HeapBlock* ptr );
+     void TrackObjectRelocation();
+     void RecordGarbageCollectionBegin();
+     void RecordGarbageCollectionEnd();
+     void RecordHeapCompactionBegin();
+     void RecordHeapCompactionEnd();
 #endif
 
-    __nfweak void SendMemoryLayout();
+     void SendMemoryLayout();
 
 private:
-    __nfweak void SendTrue();
-    __nfweak void SendFalse();
-    __nfweak void Timestamp();
-    __nfweak void PackAndWriteBits( CLR_UINT32 value );
-    __nfweak void PackAndWriteBits( const CLR_RT_TypeDef_Index& typeDef );
-    __nfweak void PackAndWriteBits( const CLR_RT_MethodDef_Index& methodDef );
-    __nfweak CLR_RT_HeapBlock* FindReferencedObject( CLR_RT_HeapBlock* ref );
-    __nfweak HRESULT DumpRoots();
-    __nfweak void DumpRoot( CLR_RT_HeapBlock* root, CLR_UINT32 type, CLR_UINT32 flags, CLR_RT_MethodDef_Index* source );
-    __nfweak void DumpObject( CLR_RT_HeapBlock* ptr );
-    __nfweak void DumpEndOfRefsList();
-    __nfweak void DumpPointer( void* ref );
-    __nfweak void DumpSingleReference( CLR_RT_HeapBlock* ptr );
-    __nfweak void DumpListOfReferences( CLR_RT_DblLinkedList& list );
-    __nfweak void DumpListOfReferences( CLR_RT_HeapBlock* firstItem, CLR_UINT16 count );
+     void SendTrue();
+     void SendFalse();
+     void Timestamp();
+     void PackAndWriteBits( CLR_UINT32 value );
+     void PackAndWriteBits( const CLR_RT_TypeDef_Index& typeDef );
+     void PackAndWriteBits( const CLR_RT_MethodDef_Index& methodDef );
+     CLR_RT_HeapBlock* FindReferencedObject( CLR_RT_HeapBlock* ref );
+     HRESULT DumpRoots();
+     void DumpRoot( CLR_RT_HeapBlock* root, CLR_UINT32 type, CLR_UINT32 flags, CLR_RT_MethodDef_Index* source );
+     void DumpObject( CLR_RT_HeapBlock* ptr );
+     void DumpEndOfRefsList();
+     void DumpPointer( void* ref );
+     void DumpSingleReference( CLR_RT_HeapBlock* ptr );
+     void DumpListOfReferences( CLR_RT_DblLinkedList& list );
+     void DumpListOfReferences( CLR_RT_HeapBlock* firstItem, CLR_UINT16 count );
 
     CLR_RT_HeapBlock_MemoryStream*  m_stream;
     CLR_UINT16                      m_packetSeqId;

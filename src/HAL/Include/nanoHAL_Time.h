@@ -95,7 +95,7 @@ signed long long HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime);
 const char*   HAL_Time_CurrentDateTimeToString();
 
 
-__nfweak unsigned __int64  CPU_MilisecondsToSysTicks       ( unsigned __int64 miliSeconds    );
+ unsigned __int64  CPU_MilisecondsToSysTicks       ( unsigned __int64 miliSeconds    );
 
 
 #endif //_NANOHAL_TIME_H_
