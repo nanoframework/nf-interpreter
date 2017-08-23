@@ -398,10 +398,11 @@ struct Library_corlib_native_System_Globalization_CultureInfo
     static const int FIELD___numInfo = 1;
     static const int FIELD___dateTimeInfo = 2;
     static const int FIELD___cultureInfoName = 3;
-    static const int FIELD___cultureInfoResourceManager = 4;
+    static const int FIELD___name = 4;
     static const int FIELD___parent = 5;
 
     NANOCLR_NATIVE_DECLARE(get_CurrentUICultureInternal___STATIC__SystemGlobalizationCultureInfo);
+    NANOCLR_NATIVE_DECLARE(set_CurrentUICultureInternal___STATIC__VOID__SystemGlobalizationCultureInfo);
 
     //--//
 
