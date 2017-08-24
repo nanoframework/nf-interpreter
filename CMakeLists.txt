@@ -231,6 +231,19 @@ endif()
 #################################################################
 
 #################################################################
+# enables Application Domains support in nanoCLR
+# (default is OFF so Application Domains is NOT supported)
+option(NF_FEATURE_USE_APPDOMAINS "option to use hardware RTC")
+
+if(NF_FEATURE_USE_APPDOMAINS)
+    message(STATUS "Application Domains support is included")
+else()    
+    message(STATUS "Application Domains support IS NOT included")
+endif()
+
+#################################################################
+
+#################################################################
 # manage nanoFramework API namespaces
 #################################################################
 include(NF_API_Namespaces)

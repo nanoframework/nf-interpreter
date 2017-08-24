@@ -161,6 +161,12 @@ endif()
 target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC -DCORTEX_USE_FPU=$<$<BOOL:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:FALSE>)
 target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DCORTEX_USE_FPU=$<$<BOOL:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:FALSE>)
 
+# set compiler definition for using Application Domains feature
+if(NF_FEATURE_USE_APPDOMAINS)
+    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC -DNANOCLR_USE_APPDOMAINS)
+    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DNANOCLR_USE_APPDOMAINS)
+endif()
+
 # set extra linker flags for DEBUG
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
