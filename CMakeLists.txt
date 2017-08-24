@@ -244,6 +244,19 @@ endif()
 #################################################################
 
 #################################################################
+# enables Networking support in nanoCLR
+# (default is OFF so Networking is NOT supported)
+option(NF_FEATURE_USE_NETWORKING "option to use networking")
+
+if(NF_FEATURE_USE_NETWORKING)
+    set(NF_FEATURE_USE_NETWORKING TRUE CACHE INTERNAL "NF feature DEBUGGER")
+else()    
+    set(NF_FEATURE_USE_NETWORKING TRUE CACHE INTERNAL "NF feature DEBUGGER")
+endif()
+
+#################################################################
+
+#################################################################
 # manage nanoFramework API namespaces
 #################################################################
 include(NF_API_Namespaces)

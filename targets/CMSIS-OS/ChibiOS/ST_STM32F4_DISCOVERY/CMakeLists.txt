@@ -31,7 +31,10 @@ if(NF_FEATURE_DEBUGGER)
 endif()
 
 # optional
-
+# nF feature: networking
+if(NF_FEATURE_USE_NETWORKING)
+find_package(CHIBIOS_LWIP REQUIRED)
+endif()
 
 
 add_subdirectory("common")

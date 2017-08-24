@@ -6,10 +6,10 @@ execute_process(
 
 
 # List of the required lwIp include files.
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various)
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings)
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include)
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/ipv4)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/ipv4)
 
 
 set(LWIP_SRCS
@@ -74,10 +74,10 @@ find_file(LWIP_SRC_FILE ${SRC_FILE}
     CMAKE_FIND_ROOT_PATH_BOTH
 )
 # message("${SRC_FILE} >> ${LWIP_SRC_FILE}") # debug helper
-list(APPEND LWIP_SOURCES ${LWIP_SRC_FILE})
+list(APPEND CHIBIOS_LWIP_SOURCES ${LWIP_SRC_FILE})
 endforeach()
 
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Debugger DEFAULT_MSG LWIP_INCLUDE_DIRS LWIP_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(CHIBIOS_LWIP DEFAULT_MSG CHIBIOS_LWIP_INCLUDE_DIRS CHIBIOS_LWIP_SOURCES)
