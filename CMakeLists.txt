@@ -251,7 +251,7 @@ option(NF_FEATURE_USE_NETWORKING "option to use networking")
 if(NF_FEATURE_USE_NETWORKING)
     set(NF_FEATURE_USE_NETWORKING TRUE CACHE INTERNAL "NF feature NETWORKING")
 else()    
-    set(NF_FEATURE_USE_NETWORKING TRUE CACHE INTERNAL "NF feature NETWORKING")
+    set(NF_FEATURE_USE_NETWORKING FALSE CACHE INTERNAL "NF feature NETWORKING")
 endif()
 
 #################################################################
