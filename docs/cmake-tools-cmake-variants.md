@@ -66,6 +66,8 @@ The following explains each line of the *linkage* section. Text highlighted in *
 	- A boolean switch to specify whether the debugger feature is to be included.
 - "NF_FEATURE_RTC" : "**<OFF-default-ON-to-enable-hardware-RTC>**"
 	- Allows you to specify whether the board contains a real time clock that can be used for date & time functions.
+- "NF_FEATURE_USE_NETWORKING" : "**<OFF-default-ON-to-enable-networking>**"
+	- Allows you to specify whether to include the TCP/IP stack.
 - "NF_FEATURE_USE_APPDOMAINS" : "**<OFF-default-ON-to-enable-support-for-Application-Domains>**"
 	- Allows you to specify whether to include, or not, support for Application Domains. More information about this is available in the documentation [here](https://msdn.microsoft.com/en-us/library/cxk374d9(v=vs.90).aspx). ***Note that the complete removal of support for this feature is being considered (see issue [here](https://github.com/nanoframework/nf-interpreter/issues/303)).***
 - "API_Windows.Devices.Gpio" : "**<OFF-default-ON-to-add-this-API>**"
@@ -99,7 +101,8 @@ The following linkage section is a real example used to build nanoFramework for 
             "CHIBIOS_BOARD" : "MBN_QUAIL"
 			"NF_FEATURE_DEBUGGER" : "TRUE",
             "NF_FEATURE_RTC" : "ON",
-			"NF_FEATURE_USE_APPDOMAINS" : "OFF",			
+			"NF_FEATURE_USE_APPDOMAINS" : "OFF",
+			"NF_FEATURE_USE_NETWORKING" : "OFF",			
             "API_Windows.Devices.Gpio" : "ON"
         },
         "buildType": "Debug"

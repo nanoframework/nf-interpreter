@@ -39,7 +39,8 @@
             "NF_FEATURE_RTC" : "OFF-default-ON-to-enable-hardware-RTC",
             "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
             "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API"
+            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
+            "NF_FEATURE_USE_NETWORKING" : "OFF-default-ON-to-enable-support"
         }
       },
       "OPTION2_NAME_HERE": {
@@ -57,7 +58,8 @@
             "NF_FEATURE_RTC" : "OFF-default-ON-to-enable-hardware-RTC",
             "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
             "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API"
+            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
+            "NF_FEATURE_USE_NETWORKING" : "OFF-default-ON-to-enable-support"
         }
       },
       "default$": "",
