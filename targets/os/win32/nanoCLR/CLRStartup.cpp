@@ -142,26 +142,26 @@ struct Settings
 		vec.push_back(L"-load");
         vec.push_back(L"..\\packages\\nanoFramework.CoreLibrary.1.0.0-preview026\\lib\\mscorlib.pe");
 		
-		//// grab Windows.Devices.Gpio.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
-		//// ************************************************************************* //
-		//// just need to update the path on the package folder as the version changes //
-		//// ************************************************************************* //
-		//vec.push_back(L"-load");
-		//vec.push_back(L"..\\packages\\nanoFramework.Windows.Devices.Gpio.1.0.0-preview010\\lib\\Windows.Devices.Gpio.pe");
+		// grab Windows.Devices.Gpio.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
+		// ************************************************************************* //
+		// just need to update the path on the package folder as the version changes //
+		// ************************************************************************* //
+		vec.push_back(L"-load");
+		vec.push_back(L"..\\packages\\nanoFramework.Windows.Devices.Gpio.1.0.0-preview013\\lib\\Windows.Devices.Gpio.pe");
 
-		//// grab nanoFramework.Runtime.Events.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
-		//// ************************************************************************* //
-		//// just need to update the path on the package folder as the version changes //
-		//// ************************************************************************* //
-		//vec.push_back(L"-load");
-		//vec.push_back(L"..\\packages\\nanoFramework.Runtime.Events.1.0.0-preview007\\lib\\nanoFramework.Runtime.Events.pe");
+		// grab nanoFramework.Runtime.Events.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
+		// ************************************************************************* //
+		// just need to update the path on the package folder as the version changes //
+		// ************************************************************************* //
+		vec.push_back(L"-load");
+		vec.push_back(L"..\\packages\\nanoFramework.Runtime.Events.1.0.0-preview012\\lib\\nanoFramework.Runtime.Events.pe");
 
-		//// grab Windows.Devices.Spi.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
-		//// ************************************************************************* //
-		//// just need to update the path on the package folder as the version changes //
-		//// ************************************************************************* //
-		//vec.push_back(L"-load");
-		//vec.push_back(L"..\\packages\\nanoFramework.Windows.Devices.Spi.1.0.0-preview006\\lib\\Windows.Devices.Spi.pe");
+		// grab Windows.Devices.Spi.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
+		// ************************************************************************* //
+		// just need to update the path on the package folder as the version changes //
+		// ************************************************************************* //
+		vec.push_back(L"-load");
+		vec.push_back(L"..\\packages\\nanoFramework.Windows.Devices.Spi.1.0.0-preview014\\lib\\Windows.Devices.Spi.pe");
 
 
         //vec.push_back(L"-load");

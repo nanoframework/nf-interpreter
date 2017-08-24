@@ -26,10 +26,20 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Microsoft_SPOT_Secur
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Microsoft_SPOT_Cryptoki_SlotEvent;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Microsoft_SPOT_Time;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Microsoft_SPOT_Update;
+
+// nanoFramework class libraries declarations
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Gpio;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi;
  
 const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] =
 {
 	&g_CLR_AssemblyNative_mscorlib,
+	&g_CLR_AssemblyNative_Windows_Devices_Gpio,
+	&g_CLR_AssemblyNative_nanoFramework_Runtime_Events,
+	&g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs,
+	&g_CLR_AssemblyNative_Windows_Devices_Spi,
     // UNDONE: FIXME: 
     //&g_CLR_AssemblyNative_Microsoft_SPOT_Native,
     //&g_CLR_AssemblyNative_Microsoft_SPOT_Hardware,
