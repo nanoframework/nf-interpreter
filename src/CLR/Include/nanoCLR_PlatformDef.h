@@ -26,7 +26,7 @@
 #define NANOCLR_EMULATED_FLOATINGPOINT    // use the fixed point floating point notation in the clr ocdes 
 #endif
 
-#if !defined(NANOCLR_NO_APPDOMAINS)
+#if defined(NANOCLR_USE_APPDOMAINS)
 #define NANOCLR_APPDOMAINS           // enables application doman support
 #endif
 #define NANOCLR_TRACE_EXCEPTIONS     // enables exception dump support

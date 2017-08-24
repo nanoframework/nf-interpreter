@@ -156,6 +156,12 @@ else()
     target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_EMULATED_FLOATINGPOINT -DPLATFORM_ARM ")
 endif()
 
+# set compiler definition for using Application Domains feature
+if(NF_FEATURE_USE_APPDOMAINS)
+    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC -DNANOCLR_USE_APPDOMAINS)
+    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DNANOCLR_USE_APPDOMAINS)
+endif()
+
 # set extra linker flags for DEBUG
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
