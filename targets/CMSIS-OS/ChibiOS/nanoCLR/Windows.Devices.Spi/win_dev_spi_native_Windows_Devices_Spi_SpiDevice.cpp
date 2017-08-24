@@ -251,14 +251,10 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_TypedArray<unsigned short> writeData;
-        CLR_RT_TypedArray<unsigned short> readData;
-
-        // marshal the write and read buffers
-        Interop_Marshal_UINT16_ARRAY(stack, 1, writeData);
-        Interop_Marshal_UINT16_ARRAY(stack, 2, readData);
-        int writeSize = writeData.GetSize();
-        int readSize = readData.GetSize();
+		unsigned short * writeData = NULL;
+        unsigned short * readData = NULL;
+        int writeSize = 0;
+        int readSize = 0;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -277,6 +273,27 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         // If current config databitLength is 8bit, then set it temporarily to 16bit
         int databitLength = pConfig[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
         if (databitLength == 8) cfg.Configuration.cr1 |= SPI_CR1_DFF;
+
+		// dereference the write and read buffers from the arguments
+        CLR_RT_HeapBlock_Array* writeBuffer = stack.Arg1().DereferenceArray();
+        if (writeBuffer != NULL)
+        {
+            // grab the pointer to the array by getting the first element of the array
+            writeData = writeBuffer->GetFirstElementUInt16();
+
+            // get the size of the buffer by reading the number of elements in the HeapBlock array
+            writeSize = writeBuffer->m_numOfElements;
+        }
+
+        CLR_RT_HeapBlock_Array* readBuffer = stack.Arg2().DereferenceArray();
+        if (readBuffer != NULL)
+        {
+            // grab the pointer to the array by getting the first element of the array
+            readData = readBuffer->GetFirstElementUInt16();
+
+            // get the size of the buffer by reading the number of elements in the HeapBlock array
+            readSize = readBuffer->m_numOfElements;
+        }
         
         // because the bus access is shared, acquire and select the appropriate bus
         spiStart(cfg.Driver, &cfg.Configuration);
@@ -322,8 +339,11 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         if (databitLength == 8) cfg.Configuration.cr1 &= ~SPI_CR1_DFF;
 
         // null pointers and vars
+        writeData = NULL;
+        readData = NULL;
+        writeBuffer = NULL;
+        readBuffer = NULL;
         pThis = NULL;
-        pConfig = NULL;
     }
     NANOCLR_NOCLEANUP();
 }
