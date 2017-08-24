@@ -87,9 +87,10 @@
 /**
  * @brief   Enables the MAC subsystem.
  */
-#if !defined(HAL_USE_MAC) || defined(__DOXYGEN__)
-#define HAL_USE_MAC                 FALSE
-#endif
+// this option is set at target_board.h (from config file)
+// #if !defined(HAL_USE_MAC) || defined(__DOXYGEN__)
+// #define HAL_USE_MAC                 TRUE
+// #endif
 
 /**
  * @brief   Enables the MMC_SPI subsystem.

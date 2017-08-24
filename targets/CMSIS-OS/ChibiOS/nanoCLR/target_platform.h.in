@@ -14,6 +14,9 @@
 // set preference to enable (or not) the RTC subsystem
 #define HAL_USE_RTC @HAL_USE_RTC_OPTION@
 
+// set when networking is enabled
+#define HAL_USE_MAC @HAL_USE_MAC_OPTION@
+
 // takes care of enabling the HAL subsystems required for API options
 #define HAL_USE_SPI @HAL_USE_SPI_OPTION@
 #define HAL_USE_I2C @HAL_USE_I2C_OPTION@
