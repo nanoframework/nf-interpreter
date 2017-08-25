@@ -135,6 +135,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 
     # includes for nanoFramework APIs
     "${TARGET_NANO_APIS_INCLUDES}"
+
+    # includes for ChibiOS LwIP
+    "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 )
 
 ###################
