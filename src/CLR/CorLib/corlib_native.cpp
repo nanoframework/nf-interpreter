@@ -274,9 +274,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Console::OutNative___STATIC__VOID__STRING__BOOLEAN,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    NULL,
+    Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4,
+    Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING,
     NULL,
     NULL,
     NULL,
@@ -901,6 +900,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x964C8465,
+    0x7D73728E,
     method_lookup
 };
+
