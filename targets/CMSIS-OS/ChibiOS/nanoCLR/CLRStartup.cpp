@@ -283,7 +283,8 @@ void ClrStartup(CLR_SETTINGS params)
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "\r\nnanoCLR (Build %d.%d.%d.%d)\r\n\r\n", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION );
-#endif
+        CLR_Debug::Printf( "\r\n%s\r\n\r\n", OEMSYSTEMINFOSTRING );
+        #endif
 
         CLR_RT_Memory::Reset();
         
