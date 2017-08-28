@@ -10,6 +10,7 @@
 #include <cmsis_os.h>
 
 #include "usbcfg.h"
+#include <swo.h>
 #include <CLR_Startup_Thread.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
@@ -26,6 +27,11 @@ int main(void) {
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
+  
+  // init SWO as soon as possible to make it available to output ASAP
+  #if (SWO_OUPUT == TRUE)  
+  SwoInit();
+  #endif
 
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.

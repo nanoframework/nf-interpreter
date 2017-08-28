@@ -7,6 +7,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
+#include <swo.h>
 #include <targetHAL.h>
 #include <CLR_Startup_Thread.h>
 #include <WireProtocol_ReceiverThread.h>
@@ -33,6 +34,11 @@ int main(void) {
   // and performs the board-specific initializations.
   halInit();
 
+  // init SWO as soon as possible to make it available to output ASAP
+  #if (SWO_OUPUT == TRUE)  
+  SwoInit();
+  #endif
+  
   // relocate the vector table to RAM
   // Copy the vector table from the Flash (mapped at the base of the application
   // load address) to the base address of the SRAM at 0x20000000.

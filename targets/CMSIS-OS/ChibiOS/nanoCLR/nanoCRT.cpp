@@ -88,10 +88,13 @@ int hal_snprintf( char* buffer, size_t len, const char* format, ... )
 int hal_vsnprintf( char* buffer, size_t len, const char* format, va_list arg )
 {
     NATIVE_PROFILE_PAL_CRT();
-    return 0;
+#undef vsnprintf
+    
+    return vsnprintf( buffer, len, format, arg );
+    
+#define vsnprintf  DoNotUse_*printf []
 }
 
-#if !defined(PLATFORM_BLACKFIN) && !defined(PLATFORM_SH)
 int hal_strcpy_s ( char* strDst, size_t sizeInBytes, const char* strSrc )
 {
     NATIVE_PROFILE_PAL_CRT();
@@ -148,9 +151,6 @@ int hal_strncmp_s ( const char* str1, const char* str2, size_t num )
 
 #define strncmp DoNotUse_*strncmp []
 }
-
-#endif //!defined(PLATFORM_BLACKFIN) && !defined(PLATFORM_SH)
-
 
 // Compares 2 ASCII strings case insensitive. Does not take locale into account.
 int hal_stricmp( const char * dst, const char * src )
