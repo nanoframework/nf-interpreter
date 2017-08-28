@@ -70,7 +70,7 @@ struct Settings
             // First verify that check sum in assembly object matches hardcoded check sum. 
             if ( assm->m_header->nativeMethodsChecksum != pNativeAssmData->m_checkSum )
             {
-                CLR_Debug::Printf("***********************************************************************\r\n");
+                CLR_Debug::Printf("\r\n\r\n***********************************************************************\r\n");
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("* ERROR!!!!  Firmware version does not match managed code version!!!! *\r\n");
                 CLR_Debug::Printf("*                                                                     *\r\n");
