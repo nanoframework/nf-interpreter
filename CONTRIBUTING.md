@@ -6,7 +6,7 @@ The **nanoFramework** team maintains several guidelines for contributing to the 
 
 - [General Contribution Guidance](#general-contribution-guidance) describes general contribution guidance, including more subjective stylistic guidelines.
 - [Contribution Bar](#contribution-bar) describes the bar that the team uses to accept changes.
-- [Contribution Workflow](contributing-workflow.md) describes the workflow that the team uses for considering and accepting changes.
+- [Contribution Workflow](docs/project-documentation/contributing-workflow.md) describes the workflow that the team uses for considering and accepting changes.
 - [Copyright Notice](#copyright-notice) describes file header copyright notice format.
 
 ## General Contribution Guidance
@@ -42,8 +42,8 @@ the PR.
 
 ### DOs and DON'Ts
 
-* **DO** follow our C/C++ [coding style](../coding-guidelines/cxx-coding-style.md)
-* **DO** follow our C# [coding style](../coding-guidelines/cs-coding-style.md)
+* **DO** follow our C/C++ [coding style](docs/coding-guidelines/cxx-coding-style.md)
+* **DO** follow our C# [coding style](docs/coding-guidelines/cs-coding-style.md)
 * **DO** give priority to the current style of the project or file you're changing even if it diverges from the general guidelines.
 * **DO** include tests when adding new features. When fixing bugs, start with
   adding a test that highlights how the current behavior is broken.
@@ -57,11 +57,11 @@ the PR.
   of time.
 * **DON'T** commit code that you didn't write. If you find code that you think is a good fit to add to **nanoFramework**, file an issue and start a discussion before proceeding.
 * **DON'T** submit PRs that alter licensing related files or headers. If you believe there's a problem with them, file an issue and we'll be happy to discuss it.
-* **DON'T** add API additions without filing an issue and discussing with us first. See [API Review Process](api-review-process.md).
+* **DON'T** add API additions without filing an issue and discussing with us first. See [API Review Process](docs/project-documentation/api-review-process.md).
 
 ### Contribution "Bar"
 
-Project maintainers will merge changes that align with [project priorities](project-priorities.md) and/or improve the product significantly for a broad set of apps. Proposals must also satisfy the published [guidelines for **nanoFramework**](#contribution-guidelines).
+Project maintainers will merge changes that align with [project priorities](docs/project-documentation/project-priorities.md) and/or improve the product significantly for a broad set of apps. Proposals must also satisfy the published [guidelines for **nanoFramework**](#contribution-guidelines).
 
 Maintainers will not merge changes that have narrowly-defined benefits, due to compatibility risk. Changes to the codebase are first reviewed and tested to ensure they are correct for those products and will not inadvertently break applications. We may revert changes if they are found to be breaking.
 
@@ -123,4 +123,4 @@ There are many good algorithms implemented in other languages that would benefit
 
 ### Contributor License Agreement
 
-You must sign [nanoFramework Contribution License Agreement](../cla.md) (CLA) before your PR will be merged. This is a one-time requirement for projects under the nanoFramework organization. You can read more about Contribution License Agreements (CLA) on [Wikipedia](https://en.wikipedia.org/wiki/Contributor_License_Agreement).
+You must sign [nanoFramework Contribution License Agreement](docs/cla.md) (CLA) before your PR will be merged. This is a one-time requirement for projects under the nanoFramework organization. You can read more about Contribution License Agreements (CLA) on [Wikipedia](https://en.wikipedia.org/wiki/Contributor_License_Agreement).

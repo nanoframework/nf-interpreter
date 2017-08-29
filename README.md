@@ -24,12 +24,12 @@ is a great place to start. Or take a look at our [documentation](docs/).
 
 See some of our guides for more details:
 
-* [Contributing Guide](docs/project-documentation/contributing.md)
+* [Contributing Guide](CONTRIBUTING.md)
 * [Developer Guide](docs/project-documentation/developer-guide.md)
 
 ## Who is behind this project?
 
-There are a number of people behind this project. We are mostly embedded systems enthusiasts, passionate about coding and people that like chalenges. 
+There are a number of people behind this project. We are mostly embedded systems enthusiasts, passionate about coding and people that like challenges. 
 All of us have our daily jobs and we work on this project on our free time.
 This is to say that you can always expect an answer from us. Maybe not instantly but in a - hopefully - timely fashion :wink: !
 
