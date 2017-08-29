@@ -1001,6 +1001,22 @@ void CLR_RT_StackFrame::SetResult_R8( CLR_INT64 val )
 
 #endif
 
+void CLR_RT_StackFrame::SetResult_I1( CLR_INT8 val )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    CLR_RT_HeapBlock& top = PushValue();
+
+    top.SetInteger( val );
+}
+
+void CLR_RT_StackFrame::SetResult_I2( CLR_INT16 val )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    CLR_RT_HeapBlock& top = PushValue();
+
+    top.SetInteger( val );
+}
+
 void CLR_RT_StackFrame::SetResult_I4( CLR_INT32 val )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -1010,6 +1026,22 @@ void CLR_RT_StackFrame::SetResult_I4( CLR_INT32 val )
 }
 
 void CLR_RT_StackFrame::SetResult_I8( CLR_INT64& val )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    CLR_RT_HeapBlock& top = PushValue();
+
+    top.SetInteger( val );
+}
+
+void CLR_RT_StackFrame::SetResult_U1( CLR_UINT8  val )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    CLR_RT_HeapBlock& top = PushValue();
+
+    top.SetInteger( val );
+}
+
+void CLR_RT_StackFrame::SetResult_U2( CLR_UINT16  val )
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock& top = PushValue();

@@ -1909,8 +1909,12 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     HRESULT HandleSynchronized( bool fAcquire, bool fGlobal );
 
     void    SetResult        ( CLR_INT32         val, CLR_DataType dataType );
+    void    SetResult_I1     ( CLR_INT8          val                        );
+    void    SetResult_I2     ( CLR_INT16         val                        );
     void    SetResult_I4     ( CLR_INT32         val                        );
     void    SetResult_I8     ( CLR_INT64&        val                        );
+    void    SetResult_U1     ( CLR_UINT8         val                        );
+    void    SetResult_U2     ( CLR_UINT16        val                        );
     void    SetResult_U4     ( CLR_UINT32        val                        );
     void    SetResult_U8     ( CLR_UINT64&       val                        );
 
