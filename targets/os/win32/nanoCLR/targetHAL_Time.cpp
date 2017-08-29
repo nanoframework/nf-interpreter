@@ -79,6 +79,10 @@ unsigned int CPU_TicksPerSecond()
 
 //Completions
 
+void HAL_COMPLETION::InitializeList()
+{
+}
+
 void HAL_COMPLETION::EnqueueDelta( unsigned int uSecFromNow )
 {
     // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->EnqueueCompletion( (IntPtr)this, uSecFromNow ); 
@@ -109,6 +113,9 @@ void HAL_COMPLETION::Execute()
 }
 
 //Continuations
+void HAL_CONTINUATION::InitializeList()
+{
+}
 
 bool HAL_CONTINUATION::IsLinked()
 {

@@ -20,7 +20,7 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
-    
+
     NANOCLR_CHECK_HRESULT(GetEventDispatcher( stack, pNativeDisp ));
 
     // Calls driver to enable interrupts.  Consider that there could be no driver 
@@ -42,7 +42,7 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     CLR_RT_HeapBlock_NativeEventDispatcher *pNativeDisp = NULL;
     
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-    
+
     if(pThis[ FIELD__disposed ].NumericByRef().s1 != 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
@@ -68,7 +68,7 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     CLR_RT_HeapBlock_NativeEventDispatcher *pNativeDisp = NULL;
     
     CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
-    
+
     NANOCLR_CHECK_HRESULT(GetEventDispatcher( stack, pNativeDisp ));
     
     // Cleanup the HAL queue from the instance of associated CLR_RT_HeapBlock_NativeEventDispatcher 
@@ -97,13 +97,14 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     unsigned __int64                        driverData;
     
     CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
-    
+
     // Retrieve paramenters; 
     if (stack.Arg1().DataType() != DATATYPE_OBJECT) 
-    {   NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);                      
+    {   
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);                      
     }
-    driverName = stack.Arg1().RecoverString();  FAULT_ON_NULL(driverName);
 
+    driverName = stack.Arg1().RecoverString();  FAULT_ON_NULL(driverName);
     driverData = stack.Arg2().NumericByRef().u8;
 
     // Throw NULL exception if string is empty. 
@@ -125,7 +126,9 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     pDriverMethods = (CLR_RT_DriverInterruptMethods *)pNativeDriverData->m_pNativeMethods;
     
     // Check that all methods are present:
-    if(pDriverMethods->initProcessor == NULL || pDriverMethods->enableProcessor == NULL || pDriverMethods->cleanupProcessor == NULL)
+    if( pDriverMethods->initProcessor == NULL || 
+        pDriverMethods->enableProcessor == NULL || 
+        pDriverMethods->cleanupProcessor == NULL)
     {
        NANOCLR_CHECK_HRESULT(CLR_E_DRIVER_NOT_REGISTERED);
     }
@@ -138,6 +141,7 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
 
     // Now call the driver. First save pointer to driver data.
     pNativeDisp->driverMethods = pDriverMethods;
+
     NANOCLR_CHECK_HRESULT(pDriverMethods->initProcessor( pNativeDisp, driverData ));
     
     NANOCLR_NOCLEANUP();
@@ -148,6 +152,7 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
 CLR_RT_ObjectToEvent_Source* Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispReference( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     CLR_RT_HeapBlock* pThis = stack.This();
 
     return CLR_RT_ObjectToEvent_Source::ExtractInstance( pThis[ FIELD___NativeEventDispatcher ] );
@@ -156,6 +161,7 @@ CLR_RT_ObjectToEvent_Source* Library_nf_rt_events_native_nanoFramework_Runtime_E
 HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock_NativeEventDispatcher*& event )
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     NANOCLR_HEADER();
 
     event = GetEventDispatcher( stack );
@@ -170,6 +176,7 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
 CLR_RT_HeapBlock_NativeEventDispatcher* Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher::GetEventDispatcher( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     CLR_RT_ObjectToEvent_Source* src = GetEventDispReference( stack );
 
     return (src == NULL) ? NULL : (CLR_RT_HeapBlock_NativeEventDispatcher*)src->m_eventPtr;

@@ -10,6 +10,7 @@
 HRESULT CLR_HW_Hardware::CreateInstance()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     NANOCLR_HEADER();
 
     NANOCLR_CLEAR(g_CLR_HW_Hardware);
@@ -22,6 +23,7 @@ HRESULT CLR_HW_Hardware::CreateInstance()
 HRESULT CLR_HW_Hardware::Hardware_Initialize()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     NANOCLR_HEADER();
 
     if(m_fInitialized == false)
@@ -57,6 +59,7 @@ HRESULT CLR_HW_Hardware::Hardware_Initialize()
 HRESULT CLR_HW_Hardware::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     NANOCLR_HEADER();
 
     g_CLR_HW_Hardware.Hardware_Cleanup();
@@ -67,6 +70,7 @@ HRESULT CLR_HW_Hardware::DeleteInstance()
 void CLR_HW_Hardware::Hardware_Cleanup()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     if(m_fInitialized == true)
     {
         m_fInitialized = false;
@@ -98,8 +102,8 @@ void CLR_HW_Hardware::ProcessActivity()
     
 	// UNDONE: FIXME:dbg.PurgeCache();
 
-    unsigned int events    = ::Events_Get( m_wakeupEvents );    
-    unsigned int eventsCLR = 0;
+    uint32_t events    = ::Events_Get( m_wakeupEvents );    
+    uint32_t eventsCLR = 0;
 
     if(events & m_MessagingEventsMask)
     {

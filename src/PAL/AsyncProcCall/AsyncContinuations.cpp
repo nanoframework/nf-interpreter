@@ -4,6 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include "stdafx.h"
 #include <nanoPAL.h>
 
 HAL_DblLinkedList<HAL_CONTINUATION> g_HAL_Continuation_List;

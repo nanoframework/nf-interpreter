@@ -21,7 +21,6 @@ namespace NF.TestApplication_NEW
         private static GpioPin LED;
         private static GpioPin LED1;
         private static GpioPin UserButton;
-        private static bool on = false;
 
         private static SpiDevice MemsSensor;
 
@@ -92,15 +91,13 @@ namespace NF.TestApplication_NEW
         {
             dummyIntForGpio++;
 
-            if (on)
+            if (e.Edge == GpioPinEdge.RisingEdge)
             {
                 LED1.Write(GpioPinValue.High);
-                on = false;
             }
             else
             {
                 LED1.Write(GpioPinValue.Low);
-                on = true;
             }
         }
     }
