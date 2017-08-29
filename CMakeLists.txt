@@ -129,22 +129,6 @@ endif()
 ##########################################
 
 
-#################################################################
-# ARM Cortex-M Single Wire Output (SWO) 
-# (default is OFF so no SWO output)
-
-option(SWO_OUPUT "option to enable SWO")
-
-if(SWO_OUPUT)
-    set(SWO_OUPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
-    message(STATUS "Single Wire Output (SWO) enabled")
-else()    
-    set(SWO_OUPUT_OPTION FALSE CACHE INTERNAL "Single Wire Output Option")
-endif()
-
-#################################################################
-
-
 ##########################################
 # set default toolchain to GCC
 set(TOOLCHAIN GCC)
@@ -260,15 +244,31 @@ endif()
 #################################################################
 
 #################################################################
+# ARM Cortex-M Single Wire Output (SWO) 
+# (default is OFF so no SWO output)
+
+option(SWO_OUPUT "option to enable SWO")
+
+if(SWO_OUPUT)
+    set(SWO_OUPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
+    message(STATUS "Single Wire Output (SWO) enabled")
+else()    
+    set(SWO_OUPUT_OPTION FALSE CACHE INTERNAL "Single Wire Output Option")
+endif()
+
+#################################################################
+
+#################################################################
 # enables Networking support in nanoCLR
 # (default is OFF so Networking is NOT supported)
 option(NF_FEATURE_USE_NETWORKING "option to use networking")
 
 if(NF_FEATURE_USE_NETWORKING)
-    set(NF_FEATURE_USE_NETWORKING TRUE CACHE INTERNAL "NF feature NETWORKING")
+    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
     set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for NF_FEATURE_USE_NETWORKING")
+    message(STATUS "Support for networking enabled")
 else()    
-    set(NF_FEATURE_USE_NETWORKING FALSE CACHE INTERNAL "NF feature NETWORKING")
+    set(USE_NETWORKING_OPTION FALSE CACHE INTERNAL "NF feature NETWORKING")
     set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for NF_FEATURE_USE_NETWORKING")
 endif()
 
@@ -303,11 +303,13 @@ else()
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
+
 if(API_Windows.Devices.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
 else()    
     set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
 endif()
+
 
 #######################
 # ChibiOS
