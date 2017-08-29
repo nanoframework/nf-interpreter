@@ -1,4 +1,5 @@
-# nanoFramework Interpreter
+
+# **nanoFramework** Interpreter
 
 
 [![Build Status](https://travis-ci.org/nanoframework/nf-interpreter.svg?branch=master)](https://travis-ci.org/nanoframework/nf-interpreter)
@@ -39,3 +40,7 @@ The list of contributors to this project can be found at [CONTRIBUTORS](CONTRIBU
 ## License
 
 The nanoFramework Interpreter is licensed under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
+
+## Code of Conduct
+This project has adopted the code of conduct defined by the [Contributor Covenant](http://contributor-covenant.org/)
+to clarify expected behavior in our community.
