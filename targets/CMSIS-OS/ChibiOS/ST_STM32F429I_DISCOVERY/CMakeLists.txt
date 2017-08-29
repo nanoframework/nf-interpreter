@@ -22,19 +22,24 @@ find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
 
 # packages for nanoFramework libraries
+#######################################
 # mandatory 
 find_package(NF_CoreCLR REQUIRED)
 
+#######################################
+# optional
+
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
-    find_package(NF_Debugger REQUIRED)
+find_package(NF_Debugger REQUIRED)
 endif()
 
-# optional
 # nF feature: networking
-if(NF_FEATURE_USE_NETWORKING)
-find_package(CHIBIOS_LWIP REQUIRED)
+if(USE_NETWORKING_OPTION)
+    find_package(CHIBIOS_LWIP REQUIRED)
 endif()
+
+#######################################
 
 
 add_subdirectory("common")
@@ -194,7 +199,7 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAG
 # the size of the CLR managed heap is defined here
 ###################################################
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x0")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x29920")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x29900")
 
 
 set(NANOBOOTER_HEX_FILE ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.hex)

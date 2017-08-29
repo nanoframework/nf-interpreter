@@ -9,6 +9,11 @@
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
 
+
+// need to declare this here because this is implemented as a C++ function
+// and the declaration is in nanoHAL.h which is including C++ declarations
+void nanoHAL_Initialize_C();
+
 // This thread needs to be implemented at ChibiOS level because it has to include a call to chThdShouldTerminateX()
 // in case the thread is requested to terminate by the CMSIS call osThreadTerminate()
 
@@ -16,7 +21,11 @@ void CLRStartupThread(void const * argument)
 {
   (void)argument;
 
+  // initialize block storage devices
   BlockStorage_AddDevices();
+
+  // initialize nanoHAL
+  nanoHAL_Initialize_C();
 
   CLR_SETTINGS clrSettings;
 

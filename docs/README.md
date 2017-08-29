@@ -3,9 +3,12 @@
 - [Building **nanoFramework**](build-instructions.md)
 - [Debug with VS Code](vscode-debug-instructions.md)
 - [Debug class libraries and startup](debugging-class-libraries.md)
+- [Use a viewer to watch output from Cortex-M SWO](arm-swo.md)
+
 
 ## CLR core and support components
 - [Wire Protocol](wire-protocol.md)
+
 
 ## Architecture
 

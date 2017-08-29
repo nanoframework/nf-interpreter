@@ -14,12 +14,14 @@ CLR_RT_DblLinkedList CLR_RT_HeapBlock_NativeEventDispatcher::eventList;
 void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_Initialize()
 {
     NATIVE_PROFILE_CLR_IOPORT();
+
     CLR_RT_HeapBlock_NativeEventDispatcher::eventList.DblLinkedList_Initialize();
 }
 
 void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_RecoverFromGC()
 {
     NATIVE_PROFILE_CLR_IOPORT();
+
     NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_NativeEventDispatcher, event, CLR_RT_HeapBlock_NativeEventDispatcher::eventList)
     {
         event->RecoverFromGC();
@@ -30,6 +32,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_RecoverFromGC()
 void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp()
 {
     NATIVE_PROFILE_CLR_IOPORT();
+
     CLR_RT_HeapBlock_NativeEventDispatcher* event;
 
     while(NULL != (event = (CLR_RT_HeapBlock_NativeEventDispatcher*)CLR_RT_HeapBlock_NativeEventDispatcher::eventList.FirstValidNode()))
@@ -38,6 +41,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp()
         {
             event->driverMethods->cleanupProcessor(event);
         }
+
         event->DetachAll();
         event->ReleaseWhenDeadEx();
     }
@@ -73,7 +77,10 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::CreateInstance( CLR_RT_HeapBlock
 
     if(FAILED(hr))
     {
-        if(event)         event->ReleaseWhenDead();
+        if(event)
+        {
+            event->ReleaseWhenDead();
+        }
     }
 
     NANOCLR_CLEANUP_END();
@@ -82,6 +89,7 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::CreateInstance( CLR_RT_HeapBlock
 HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::ExtractInstance( CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_NativeEventDispatcher*& event )
 {
     NATIVE_PROFILE_CLR_IOPORT();
+
     NANOCLR_HEADER();
 
     CLR_RT_ObjectToEvent_Source* src = CLR_RT_ObjectToEvent_Source::ExtractInstance( ref ); FAULT_ON_NULL(src);
@@ -94,6 +102,7 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::ExtractInstance( CLR_RT_HeapBloc
 void CLR_RT_HeapBlock_NativeEventDispatcher::RecoverFromGC()
 {
     NATIVE_PROFILE_CLR_IOPORT();
+
     CheckAll();
 
     ReleaseWhenDeadEx();
@@ -102,6 +111,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RecoverFromGC()
 bool CLR_RT_HeapBlock_NativeEventDispatcher::ReleaseWhenDeadEx()
 {
     NATIVE_PROFILE_CLR_IOPORT();
+
     if(!IsReadyForRelease()) return false;
 
     //remove any queued interrupts for this event
@@ -136,15 +146,18 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
     
     // For all elements in the queue
     for ( CLR_UINT32 curElem = 0; curElem < elemCount; curElem++ )
-    {   // Retrieve the element ( actually remove it from the queue )
+    {
+        // Retrieve the element ( actually remove it from the queue )
         CLR_HW_Hardware::HalInterruptRecord* testRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Pop();
         
         // Check if context of this record points to the instance of CLR_RT_HeapBlock_NativeEventDispatcher
         // If the "context" is the same as "this", then we skip the "Push" and record is removed.
         if ( testRec->m_context != this )
-        { // If it is different from this instance of CLR_RT_HeapBlock_NativeEventDispatcher, thin push it back
-          CLR_HW_Hardware::HalInterruptRecord* newRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Push();
-          newRec->AssignFrom( *testRec );
+        {
+            // If it is different from this instance of CLR_RT_HeapBlock_NativeEventDispatcher, thin push it back
+            CLR_HW_Hardware::HalInterruptRecord* newRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Push();
+
+            newRec->AssignFrom( *testRec );
         }
     }
 }
@@ -152,13 +165,16 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
 void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue( uint32_t data1, uint32_t data2 )
 {
     NATIVE_PROFILE_CLR_IOPORT();
+
     ASSERT_IRQ_MUST_BE_OFF();
 
     CLR_HW_Hardware::HalInterruptRecord* rec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Push();
 
     if(rec == NULL)
     {
-        g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Pop(); // remove the oldest interrupt to make room for the newest
+        // remove the oldest interrupt to make room for the newest
+        g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Pop();
+        
         rec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Push();
     }
     
@@ -186,6 +202,7 @@ void CleanupNativeEventsFromHALQueue( CLR_RT_HeapBlock_NativeEventDispatcher *pC
 HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::StartDispatch( CLR_RT_ApplicationInterrupt* appInterrupt, CLR_RT_Thread* th )
 {
     NATIVE_PROFILE_CLR_IOPORT();
+
     NANOCLR_HEADER();
 
     CLR_RT_StackFrame* stackTop;
@@ -218,7 +235,6 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::StartDispatch( CLR_RT_Applicatio
     args[2].SetInteger    ( (CLR_UINT64)interrupt.time | c_UTCMask );
     args[2].ChangeDataType( DATATYPE_DATETIME                      );
     
-
     th->m_terminationCallback  = CLR_RT_HeapBlock_NativeEventDispatcher::ThreadTerminationCallback;
     th->m_terminationParameter = appInterrupt;
 
@@ -228,6 +244,7 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::StartDispatch( CLR_RT_Applicatio
 void CLR_RT_HeapBlock_NativeEventDispatcher::ThreadTerminationCallback( void* arg )
 {
     NATIVE_PROFILE_CLR_IOPORT();
+
     CLR_RT_ApplicationInterrupt* appInterrupt = (CLR_RT_ApplicationInterrupt*)arg;
     CLR_RT_HeapBlock_NativeEventDispatcher::InterruptPortInterrupt& interrupt = appInterrupt->m_interruptPortInterrupt;
 
@@ -247,6 +264,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::ThreadTerminationCallback( void* ar
 HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::RecoverManagedObject( CLR_RT_HeapBlock*& event )
 {
     NATIVE_PROFILE_CLR_IOPORT();
+
     NANOCLR_HEADER();
 
     // recover the managed object

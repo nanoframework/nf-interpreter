@@ -69,6 +69,9 @@ int main()
 {
     //void ApplicationEntryPoint()
 
+	// initialize nanoHAL
+	nanoHAL_Initialize();
+
     CLR_SETTINGS clrSettings;
     ZeroMemory(&clrSettings, sizeof(clrSettings));
 

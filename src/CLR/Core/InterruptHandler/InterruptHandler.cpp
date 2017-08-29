@@ -13,6 +13,7 @@
 HRESULT CLR_HW_Hardware::ManagedHardware_Initialize()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     NANOCLR_HEADER();
     
     m_interruptData.m_HalQueue.Initialize( (CLR_HW_Hardware::HalInterruptRecord*)&g_scratchInterruptDispatchingStorage, InterruptRecords() );
@@ -22,12 +23,12 @@ HRESULT CLR_HW_Hardware::ManagedHardware_Initialize()
     m_interruptData.m_queuedInterrupts = 0;
 
     NANOCLR_NOCLEANUP_NOLABEL();
-
 }
 
 HRESULT CLR_HW_Hardware::SpawnDispatcher()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     NANOCLR_HEADER();
 
     CLR_RT_ApplicationInterrupt* interrupt;
@@ -71,6 +72,7 @@ HRESULT CLR_HW_Hardware::SpawnDispatcher()
 HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     NANOCLR_HEADER();
 
     while(true)
@@ -81,6 +83,8 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
             GLOBAL_LOCK(irq1);
 
             rec = m_interruptData.m_HalQueue.Peek();
+
+            GLOBAL_UNLOCK();
         }
 
         if(rec == NULL) break;
@@ -97,8 +101,10 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
 
         {
             GLOBAL_LOCK(irq2);
-            
+
             m_interruptData.m_HalQueue.Pop();
+
+            GLOBAL_UNLOCK();
         }
     }
 
@@ -119,6 +125,8 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
             {
                 m_interruptData.m_HalQueue.Pop();
             }
+
+            GLOBAL_UNLOCK();
         }
     }    
     
@@ -128,6 +136,7 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
 HRESULT CLR_HW_Hardware::ProcessInterrupts()
 {
     NATIVE_PROFILE_CLR_HARDWARE();
+
     NANOCLR_HEADER();
 
     NANOCLR_CHECK_HRESULT(TransferAllInterruptsToApplicationQueue());

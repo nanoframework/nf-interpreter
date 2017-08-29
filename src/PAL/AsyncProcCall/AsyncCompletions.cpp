@@ -4,6 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include "stdafx.h"
+
 #include <nanoPAL.h>
 
 

@@ -52,9 +52,10 @@
 /**
  * @brief   Enables the EXT subsystem.
  */
-#if !defined(HAL_USE_EXT) || defined(__DOXYGEN__)
-#define HAL_USE_EXT                 FALSE
-#endif
+// this option is set at target_board.h (from config file)
+// #if !defined(HAL_USE_EXT) || defined(__DOXYGEN__)
+// #define HAL_USE_EXT                 FALSE
+// #endif
 
 /**
  * @brief   Enables the GPT subsystem.

@@ -8,6 +8,7 @@
 #include <cmsis_os.h>
 
 #include <usbcfg.h>
+#include <swo.h>
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <LaunchCLR.h>
@@ -41,6 +42,11 @@ int main(void) {
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
+
+  // init SWO as soon as possible to make it available to output ASAP
+  #if (SWO_OUPUT == TRUE)  
+  SwoInit();
+  #endif
 
   // the following IF is not mandatory, it's just providing a way for a user to 'force'
   // the board to remain in nanoBooter and not launching nanoCLR

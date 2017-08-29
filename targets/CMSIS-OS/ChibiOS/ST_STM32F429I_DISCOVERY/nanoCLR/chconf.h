@@ -479,6 +479,8 @@
  */
 #define CH_CFG_SYSTEM_TICK_HOOK() {                                         \
   /* System tick event code here.*/                                         \
+  extern void Time_Interrupt_Hook();                                        \
+  Time_Interrupt_Hook();                                                    \
 }
 
 /**

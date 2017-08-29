@@ -34,6 +34,7 @@
 #if defined(DEBUG) || defined(_DEBUG)
 #define NANOCLR_TRACE_STACK          // enables rich eval stack tracing  
 #endif
+//#define TINYCLR_TRACE_INSTRUCTIONS 1    // enables tracing of instructions execution
 //#define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries 
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
@@ -74,7 +75,7 @@
 #define NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN
 #define NANOCLR_TRACE_EARLYCOLLECTION
 #define NANOCLR_DELEGATE_PRESERVE_STACK
-#define NANOCLR_VALIDATE_APPDOMAIN_ISOLATION
+//#define NANOCLR_VALIDATE_APPDOMAIN_ISOLATION
 #define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries 
 #else //RELEASE
 #define NANOCLR_VALIDATE_HEAP NANOCLR_VALIDATE_HEAP_0_None

@@ -1,4 +1,5 @@
-# nanoFramework Interpreter
+
+# **nanoFramework** Interpreter
 
 
 [![Build Status](https://travis-ci.org/nanoframework/nf-interpreter.svg?branch=master)](https://travis-ci.org/nanoframework/nf-interpreter)
@@ -23,12 +24,12 @@ is a great place to start. Or take a look at our [documentation](docs/).
 
 See some of our guides for more details:
 
-* [Contributing Guide](docs/project-documentation/contributing.md)
+* [Contributing Guide](CONTRIBUTING.md)
 * [Developer Guide](docs/project-documentation/developer-guide.md)
 
 ## Who is behind this project?
 
-There are a number of people behind this project. We are mostly embedded systems enthusiasts, passionate about coding and people that like chalenges. 
+There are a number of people behind this project. We are mostly embedded systems enthusiasts, passionate about coding and people that like challenges. 
 All of us have our daily jobs and we work on this project on our free time.
 This is to say that you can always expect an answer from us. Maybe not instantly but in a - hopefully - timely fashion :wink: !
 
@@ -39,3 +40,7 @@ The list of contributors to this project can be found at [CONTRIBUTORS](CONTRIBU
 ## License
 
 The nanoFramework Interpreter is licensed under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
+
+## Code of Conduct
+This project has adopted the code of conduct defined by the [Contributor Covenant](http://contributor-covenant.org/)
+to clarify expected behavior in our community.

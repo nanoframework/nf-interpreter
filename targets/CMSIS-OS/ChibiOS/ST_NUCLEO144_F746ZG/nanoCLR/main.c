@@ -8,10 +8,40 @@
 #include <cmsis_os.h>
 
 #include "usbcfg.h"
+#include <swo.h>
 #include <CLR_Startup_Thread.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
+
+// need this definition here because it depends on the specifics of the target (how many INT lines exist)
+#if (HAL_USE_EXT == TRUE)
+EXTConfig extInterruptsConfiguration = {
+    {{EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL}}};
+#endif
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityNormal, 2048, "ReceiverThread");
@@ -24,6 +54,11 @@ int main(void) {
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
+
+  // init SWO as soon as possible to make it available to output ASAP
+  #if (SWO_OUPUT == TRUE)  
+  SwoInit();
+  #endif
 
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.

@@ -22,19 +22,24 @@ find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
 
 # packages for nanoFramework libraries
+#######################################
 # mandatory 
 find_package(NF_CoreCLR REQUIRED)
 
+#######################################
+# optional
+
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
-    find_package(NF_Debugger REQUIRED)
+find_package(NF_Debugger REQUIRED)
 endif()
 
-# optional
 # nF feature: networking
-if(NF_FEATURE_USE_NETWORKING)
-find_package(CHIBIOS_LWIP REQUIRED)
+if(USE_NETWORKING_OPTION)
+    find_package(CHIBIOS_LWIP REQUIRED)
 endif()
+
+#######################################
 
 
 add_subdirectory("common")
