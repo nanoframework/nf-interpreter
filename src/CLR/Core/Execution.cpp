@@ -250,7 +250,7 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     Handler_CleanUp();
 #else
     CLR_RT_HeapBlock_EndPoint::HandlerMethod_CleanUp(); 
-    // UNDONE: FIXME: CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp();
+    CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp();
     // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_CleanUp();
 #endif
 
@@ -1288,9 +1288,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity()
         }
         NANOCLR_FOREACH_NODE_END();
 
-        // UNDONE: FIXME
-        // return WaitForActivity( SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, timeoutMin );
-        return 0;
+        return WaitForActivity( SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, timeoutMin );
     }
 
     return 0;
@@ -2456,8 +2454,7 @@ bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT
 bool CLR_RT_ExecutionEngine::IsThereEnoughIdleTime( CLR_UINT32 expectedMsec )
 {
     NATIVE_PROFILE_CLR_CORE();
-    // UNDONE: FIXME
-    // if(::Events_MaskedRead( g_CLR_HW_Hardware.m_wakeupEvents )) return false;
+    if(::Events_MaskedRead( g_CLR_HW_Hardware.m_wakeupEvents )) return false;
 
     CLR_INT64 now = HAL_Time_CurrentTime();
 
@@ -3595,8 +3592,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
 
     // UNDONE: FIXME
     // ::Watchdog_GetSetEnabled( bool, bool );
-    // UNDONE: FIXME
-    // res = ::Events_WaitForEvents( powerLevel, events, timeout );
+    res = ::Events_WaitForEvents( powerLevel, events, timeout );
     // UNDONE: FIXME
     // ::Watchdog_GetSetEnabled( bool, bool );
 

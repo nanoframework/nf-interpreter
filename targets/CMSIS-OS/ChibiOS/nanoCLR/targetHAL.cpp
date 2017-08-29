@@ -10,6 +10,16 @@
 #include <hal.h>
 #include <ch.h>
 
+
+// because nanoHAL_Initialize needs to be called in both C and C++ we need a proxy to allow it to be called in 'C'
+extern "C" {
+    
+    void nanoHAL_Initialize_C()
+    {
+        nanoHAL_Initialize();
+    }
+}
+
 void nanoHAL_Initialize()
 {
     HAL_CONTINUATION::InitializeList();
@@ -17,7 +27,8 @@ void nanoHAL_Initialize()
 
     Events_Initialize();
 
-    PalEvent_Initialize();
+    // no PAL events required until now
+    //PalEvent_Initialize();
 }
 
 void nanoHAL_Uninitialize()
@@ -34,8 +45,6 @@ void nanoHAL_Uninitialize()
     //         break;
     //     }
     // }   
-
-    PalEvent_Uninitialize();
     
     Events_Uninitialize();
     

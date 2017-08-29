@@ -18,16 +18,32 @@ list(APPEND Windows.Devices.Gpio_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/${BASE_PATH
 # source files
 set(Windows.Devices.Gpio_SRCS
 
+    # class library source files
     win_dev_gpio_native_Windows_Devices_Gpio_GpioController.cpp
     win_dev_gpio_native_Windows_Devices_Gpio_GpioPin.cpp
     win_dev_gpio_native.cpp
+
+    # core source files
+    AsyncCompletions.cpp
+    AsyncContinuations.cpp
+    NativeEventDispatcher.cpp
+    InterruptHandler.cpp
+    Hardware.cpp
 )
 
 foreach(SRC_FILE ${Windows.Devices.Gpio_SRCS})
     set(Windows.Devices.Gpio_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(Windows.Devices.Gpio_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${PROJECT_SOURCE_DIR}/${BASE_PATH_FOR_THIS_MODULE}
+
+            # class library source files
+            "${PROJECT_SOURCE_DIR}/${BASE_PATH_FOR_THIS_MODULE}"
+
+            # core source files
+            "${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall"
+            "${PROJECT_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher"
+            "${PROJECT_SOURCE_DIR}/src/CLR/Core/InterruptHandler"
+            "${PROJECT_SOURCE_DIR}/src/CLR/Core/Hardware"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

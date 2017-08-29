@@ -14,6 +14,34 @@
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
 
+// need this definition here because it depends on the specifics of the target (how many INT lines exist)
+#if (HAL_USE_EXT == TRUE)
+EXTConfig extInterruptsConfiguration = {
+    {{EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL},
+     {EXT_CH_MODE_DISABLED, NULL}}};
+#endif
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityNormal, 2048, "ReceiverThread");
 // declare CLRStartup thread here 
@@ -50,6 +78,11 @@ int main(void) {
   osThreadCreate(osThread(ReceiverThread), NULL);
   // create the CLR Startup thread 
   osThreadCreate(osThread(CLRStartupThread), NULL); 
+
+  // EXT driver needs to be started from main   
+  #if (HAL_USE_EXT == TRUE)
+  extStart(&EXTD1, &extInterruptsConfiguration);
+  #endif
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();

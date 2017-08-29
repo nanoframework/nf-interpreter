@@ -18,7 +18,12 @@
 #define HAL_USE_MAC @HAL_USE_MAC_OPTION@
 
 // takes care of enabling the HAL subsystems required for API options
+
+// enable SPI
 #define HAL_USE_SPI @HAL_USE_SPI_OPTION@
 #define HAL_USE_I2C @HAL_USE_I2C_OPTION@
+
+// enable EXT subsystem because it's required for interrupt handling when GPIO is enable
+#define HAL_USE_EXT @HAL_USE_GPIO_OPTION@
 
 #endif /* _TARGET_CHIBIOS_NANOCLR_H_ */
