@@ -1,45 +1,59 @@
+![nanoFramework logo](resources/logo/nanoFramework-repo-logo.png)
+
+-----
 
 # **nanoFramework** Interpreter
 
+Welcome to the **nanoFramework** Interpreter repository!
 
-[![Build Status](https://travis-ci.org/nanoframework/nf-interpreter.svg?branch=master)](https://travis-ci.org/nanoframework/nf-interpreter)
-[![Build status](https://ci.appveyor.com/api/projects/status/94fldjinqji4w977?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter)
-[![Join the chat at https://nanoframework.slack.com/](https://img.shields.io/badge/join%20us-on%20slack-orange.svg)](https://nanoframework.wordpress.com/slack-invite-form/)
+This repo contains:
+
+* **nanoFramework** agnostic blocks
+  * [CLR](src/CLR)
+  * [HAL](src/HAL)
+  * [PAL](src/PAL)
+* Target reference for CMSIS OS
+  * [ChibiOS](targets/CMSIS-OS/ChibiOS)
+    * Reference target boards
+      * [MBN QUAIL](targets/CMSIS-OS/ChibiOS/MBN_QUAIL)
+      * [ST NUCLEO64 F091RC](targets/CMSIS-OS/ChibiOS/ST_NUCLEO64_F091RC)
+      * [ST NUCLEO144 F746ZG](targets/CMSIS-OS/ChibiOS/ST_NUCLEO144_F746ZG)
+      * [ST STM32F4 DISCOVERY](targets/CMSIS-OS/ChibiOS/ST_STM32F4_DISCOVERY)
+      * [ST STM32F429I DISCOVERY](targets/CMSIS-OS/ChibiOS/ST_STM32F429I_DISCOVERY)
+      * [ST STM32F769I DISCOVERY](targets/CMSIS-OS/ChibiOS/ST_STM32F769I_DISCOVERY)
+    * ChibiOS overlay for **nanoFramework**
+      * [STM32 NUCLEO144 F746ZG (board)](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/ST_NUCLEO144_F746ZG)
+      * [STM32 Flash driver](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_flash)
+* Target reference for other OSes
+  * [Win32 OS (test project only at this time)](targets/os/win32)
+* [CMake files for the build system](CMake)
 
 
-Welcome to the nanoFramework Interpreter repository!
+## Build status
 
-## How to Engage, Contribute and Provide Feedback
+| Component | Build Status |
+|:-|---|
+| nanoBooter | [![Build Status](https://travis-ci.org/nanoframework/nf-interpreter.svg?branch=master)](https://travis-ci.org/nanoframework/nf-interpreter) |
+| nanoCLR | [![Build Status](https://travis-ci.org/nanoframework/nf-interpreter.svg?branch=master)](https://travis-ci.org/nanoframework/nf-interpreter) |
+| Win32 test project | [![Build status](https://ci.appveyor.com/api/projects/status/94fldjinqji4w977?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter) |
 
-Some of the best ways to contribute are to try things out, file bugs, and join in design conversations. 
-If you are having issues or need a clarification about something, instead of opening an issue the best way is to start a conversation in one of our Slack channels.
-Please select the one that's most appropriate to the matter you are facing.
 
+## Feedback and documentation
 
-If you've find a bug or can't use Slack, please open an issue at [Issues](https://github.com/nanoframework/nf-interpreter/issues).
-We ask you to open an issue only when you have a real and confirmed one. Don't open an issue for support requests or to start a discussion. For that you'll get a better (and quicker!) support/feedback in one of the Slack channels.
+For documentation, providing feedback, issues and finding out how to contribute please refer to the [Home repo](https://github.com/nanoframework/Home).
 
-Looking for something to work on? The list of [up-for-grabs issues](https://github.com/nanoframework/nf-interpreter/labels/up-for-grabs)
-is a great place to start. Or take a look at our [documentation](docs/).
+Join our Slack community by filling in this [invite form](https://nanoframework.wordpress.com/slack-invite-form/).
 
-See some of our guides for more details:
-
-* [Contributing Guide](CONTRIBUTING.md)
-* [Developer Guide](docs/project-documentation/developer-guide.md)
-
-## Who is behind this project?
-
-There are a number of people behind this project. We are mostly embedded systems enthusiasts, passionate about coding and people that like challenges. 
-All of us have our daily jobs and we work on this project on our free time.
-This is to say that you can always expect an answer from us. Maybe not instantly but in a - hopefully - timely fashion :wink: !
 
 ## Credits
 
 The list of contributors to this project can be found at [CONTRIBUTORS](CONTRIBUTORS.md).
 
+
 ## License
 
 The nanoFramework Interpreter is licensed under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
+
 
 ## Code of Conduct
 This project has adopted the code of conduct defined by the [Contributor Covenant](http://contributor-covenant.org/)
