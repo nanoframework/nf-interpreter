@@ -22,23 +22,18 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="mscorlib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\..\packages\nanoFramework.CoreLibrary.1.0.0-preview026\lib\mscorlib.dll</HintPath>
+    <Reference Include="mscorlib, Version=1.0.0.27, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\..\packages\nanoFramework.CoreLibrary.1.0.0-preview027\lib\mscorlib.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
-    <Reference Include="nanoFramework.Runtime.Events, Version=1.0.0.0, Culture=neutral, PublicKeyToken=72027bbd7f714be2">
-      <HintPath>..\..\packages\nanoFramework.Runtime.Events.1.0.0-preview012\lib\nanoFramework.Runtime.Events.dll</HintPath>
+    <Reference Include="nanoFramework.Runtime.Events, Version=1.0.0.13, Culture=neutral, PublicKeyToken=72027bbd7f714be2">
+      <HintPath>..\..\packages\nanoFramework.Runtime.Events.1.0.0-preview013\lib\nanoFramework.Runtime.Events.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
-    <Reference Include="Windows.Devices.Gpio, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6df87852110734f7">
-      <HintPath>..\..\packages\nanoFramework.Windows.Devices.Gpio.1.0.0-preview020\lib\Windows.Devices.Gpio.dll</HintPath>
-      <Private>True</Private>
-      <SpecificVersion>True</SpecificVersion>
-    </Reference>
-    <Reference Include="Windows.Devices.Spi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6df87852110734f7">
-      <HintPath>..\..\packages\nanoFramework.Windows.Devices.Spi.1.0.0-preview014\lib\Windows.Devices.Spi.dll</HintPath>
+    <Reference Include="Windows.Devices.Gpio, Version=1.0.0.22, Culture=neutral, PublicKeyToken=6df87852110734f7">
+      <HintPath>..\..\packages\nanoFramework.Windows.Devices.Gpio.1.0.0-preview022\lib\Windows.Devices.Gpio.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
