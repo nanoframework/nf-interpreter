@@ -13,48 +13,6 @@
 #include <nanoCLR_Checks.h>
 
 
-struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCount
-{
-    static const int FIELD__Count = 1;
-    static const int FIELD__RelativeTime = 2;
-
-
-    //--//
-
-};
-
-struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter
-{
-    static const int FIELD___Polarity = 1;
-
-
-    //--//
-
-};
-
-struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeReader
-{
-    static const int FIELD___capacity = 1;
-    static const int FIELD___isOverflowed = 2;
-    static const int FIELD___isStarted = 3;
-    static const int FIELD___length = 4;
-    static const int FIELD___polarity = 5;
-
-
-    //--//
-
-};
-
-struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeRecord
-{
-    static const int FIELD__Edge = 1;
-    static const int FIELD__RelativeTime = 2;
-
-
-    //--//
-
-};
-
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
 {
     static const int FIELD_STATIC__s_instance = 0;
@@ -74,15 +32,16 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin
     static const int FIELD___driveMode = 3;
     static const int FIELD___debounceTimeout = 4;
     static const int FIELD___callbacks = 5;
-    static const int FIELD___disposedValue = 6;
+    static const int FIELD___lastOutputValue = 6;
+    static const int FIELD___disposedValue = 7;
 
     NANOCLR_NATIVE_DECLARE(Read___WindowsDevicesGpioGpioPinValue);
-    NANOCLR_NATIVE_DECLARE(Write___VOID__WindowsDevicesGpioGpioPinValue);
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(NativeIsDriveModeSupported___BOOLEAN__WindowsDevicesGpioGpioPinDriveMode);
     NANOCLR_NATIVE_DECLARE(NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode);
     NANOCLR_NATIVE_DECLARE(NativeInit___BOOLEAN__I4);
     NANOCLR_NATIVE_DECLARE(NativeSetDebounceTimeout___VOID);
+    NANOCLR_NATIVE_DECLARE(WriteNative___VOID__WindowsDevicesGpioGpioPinValue);
 
     //--//
 
