@@ -1,10 +1,8 @@
-![nanoFramework logo](resources/logo/nanoFramework-repo-logo.png)
+![nanoFramework logo](https://github.com/nanoframework/Home/blob/master/resources/logo/nanoFramework-repo-logo.png)
 
 -----
 
-# **nanoFramework** Interpreter
-
-Welcome to the **nanoFramework** Interpreter repository!
+### Welcome to the **nanoFramework** Interpreter repository!
 
 This repo contains:
 
