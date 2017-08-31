@@ -3851,9 +3851,9 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
     }
 #endif
 
-    //Load Native to ensure that CultureInfo gets properly initialized
-    NANOCLR_CHECK_HRESULT(PrepareForExecutionHelper( "Microsoft.SPOT.Native" ));
-
+    // Load Runtime.Events to setup EventSink for other assemblies using it
+    NANOCLR_CHECK_HRESULT(PrepareForExecutionHelper( "nanoFramework.Runtime.Events" ));
+    
     NANOCLR_FOREACH_ASSEMBLY(*this)
     {
         NANOCLR_CHECK_HRESULT(pASSM->PrepareForExecution());
