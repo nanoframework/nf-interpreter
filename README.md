@@ -2,9 +2,7 @@
 
 -----
 
-# **nanoFramework** Interpreter
-
-Welcome to the **nanoFramework** Interpreter repository!
+### Welcome to the **nanoFramework** Interpreter repository!
 
 This repo contains:
 
