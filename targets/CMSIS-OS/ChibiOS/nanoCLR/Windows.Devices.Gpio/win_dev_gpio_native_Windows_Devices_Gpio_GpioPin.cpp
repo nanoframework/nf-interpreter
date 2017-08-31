@@ -166,47 +166,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___Windows
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Write___VOID__WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
-
-        // check if object has been disposed
-        if(pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue ].NumericByRef().u1 != 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-
-        int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
-        GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
-
-        GpioPinValue state = (GpioPinValue)stack.Arg1().NumericByRef().s4;
-
-        // sanity check for drive mode set to output so we don't mess up writing to an input pin
-        if ((driveMode == GpioPinDriveMode_Output) ||
-            (driveMode == GpioPinDriveMode_OutputOpenDrain) ||
-            (driveMode == GpioPinDriveMode_OutputOpenDrainPullUp) ||
-            (driveMode == GpioPinDriveMode_OutputOpenSource) ||
-            (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
-        {
-            if (state == GpioPinValue_Low)
-            {
-                palClearPad(GPIO_PORT(pinNumber), pinNumber % 16);
-            }
-            else 
-            {
-                palSetPad(GPIO_PORT(pinNumber), pinNumber % 16);
-            }
-        }
-        else
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-    }
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -279,6 +238,16 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
         // it's better cast this this to the appropriate enum
         GpioPinDriveMode driveMode = (GpioPinDriveMode)stack.Arg1().NumericByRef().s4;
 
+        // check if drive mode is input
+        bool driveModeIsInput = false;
+
+        if( driveMode == GpioPinDriveMode_Input ||
+            driveMode == GpioPinDriveMode_InputPullDown ||
+            driveMode == GpioPinDriveMode_InputPullUp)
+            {
+                driveModeIsInput = true;
+            }
+
         // flag to signal that interrupts need to be setup
         bool setupInterrupt = false;
 
@@ -289,7 +258,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
         // the EXT driver can only handle 16 interrupts and each channel can serve only one port
         // ex: channel 0 can be triggered by pad 0 on port A, B, C.... but EXCLUSIVELY by ONLY ONE of those
         // see MCU programming manual for details (External interrupt/event controller (EXTI))
-        if(extInterruptsConfiguration.channels[pad].mode != 0 && callbacksRegistered)
+        if(extInterruptsConfiguration.channels[pad].mode != 0 && callbacksRegistered && driveModeIsInput)
         {
             // channel for this pad is already taken
             // TODO: probably better to have a dedicated exception here, this one is too generic...
@@ -335,6 +304,12 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
                 // all other modes are NOT supported
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
                 break;
+        }
+
+        // if drive mode is output, read the pad to update the managed field _lastOutputValue
+        if(!driveModeIsInput)
+        {
+            pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = palReadPad(port, pad);
         }
 
         if(callbacksRegistered && setupInterrupt)
@@ -383,5 +358,46 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebou
 
     // nothing to do here as the debounce timeout is grabbed from the managed object when required
 
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___VOID__WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+        // check if object has been disposed
+        if(pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue ].NumericByRef().u1 != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+        GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
+
+        GpioPinValue state = (GpioPinValue)stack.Arg1().NumericByRef().s4;
+
+        // sanity check for drive mode set to output so we don't mess up writing to an input pin
+        if ((driveMode == GpioPinDriveMode_Output) ||
+            (driveMode == GpioPinDriveMode_OutputOpenDrain) ||
+            (driveMode == GpioPinDriveMode_OutputOpenDrainPullUp) ||
+            (driveMode == GpioPinDriveMode_OutputOpenSource) ||
+            (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
+        {
+            if (state == GpioPinValue_Low)
+            {
+                palClearPad(GPIO_PORT(pinNumber), pinNumber % 16);
+            }
+            else 
+            {
+                palSetPad(GPIO_PORT(pinNumber), pinNumber % 16);
+            }
+        }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+    }
     NANOCLR_NOCLEANUP();
 }
