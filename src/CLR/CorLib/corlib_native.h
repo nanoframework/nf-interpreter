@@ -8,6 +8,10 @@
 #ifndef _CORLIB_NATIVE_H_
 #define _CORLIB_NATIVE_H_
 
+#include <nanoCLR_Interop.h>
+#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Checks.h>
+
 struct Library_corlib_native_System_Object
 {
     NANOCLR_NATIVE_DECLARE(Equals___BOOLEAN__OBJECT);
@@ -313,6 +317,8 @@ struct Library_corlib_native_System_Console
 
 struct Library_corlib_native_System_Convert
 {
+	NANOCLR_NATIVE_DECLARE(NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4);
+    NANOCLR_NATIVE_DECLARE(NativeToDouble___STATIC__R8__STRING);
     NANOCLR_NATIVE_DECLARE(ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(FromBase64CharArray___STATIC__SZARRAY_U1__SZARRAY_CHAR__I4);
 
