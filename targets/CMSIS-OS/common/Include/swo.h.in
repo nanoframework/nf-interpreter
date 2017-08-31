@@ -12,10 +12,10 @@
 #define SWO_H_
 
 
-#define SWO_OUPUT @SWO_OUPUT_OPTION@
+#define SWO_OUTPUT @SWO_OUTPUT_OPTION@
 
 
-#if (SWO_OUPUT == TRUE)
+#if (SWO_OUTPUT == TRUE)
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,7 +29,7 @@ extern "C" {
 }
 #endif
 
-#endif //(SWO_OUPUT == TRUE)
+#endif //(SWO_OUTPUT == TRUE)
 
 
 #endif  // SWO_H_

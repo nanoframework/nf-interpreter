@@ -56,8 +56,14 @@ int main(void) {
   halInit();
 
   // init SWO as soon as possible to make it available to output ASAP
-  #if (SWO_OUPUT == TRUE)  
+  #if (SWO_OUTPUT == TRUE)
+
+  // need to set SWO pin (PB3) to alternate mode (0 == the status after RESET) 
+  // because it's being to a different function in board config
+  palSetPadMode(GPIOB, 0x03, PAL_MODE_ALTERNATE(0) );
+
   SwoInit();
+  
   #endif
 
   // The kernel is initialized but not started yet, this means that
