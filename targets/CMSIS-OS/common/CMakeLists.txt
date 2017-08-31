@@ -6,7 +6,7 @@
 # append target CMSIS-OS common source files 
 
 # if SWO opting add source file
-if(SWO_OUPUT_OPTION)
+if(SWO_OUTPUT_OPTION)
     list(APPEND TARGET_CMSIS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/swo.cpp")
 endif()
 

@@ -247,13 +247,13 @@ endif()
 # ARM Cortex-M Single Wire Output (SWO) 
 # (default is OFF so no SWO output)
 
-option(SWO_OUPUT "option to enable SWO")
+option(SWO_OUTPUT "option to enable SWO")
 
-if(SWO_OUPUT)
-    set(SWO_OUPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
+if(SWO_OUTPUT)
+    set(SWO_OUTPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
     message(STATUS "Single Wire Output (SWO) enabled")
 else()    
-    set(SWO_OUPUT_OPTION FALSE CACHE INTERNAL "Single Wire Output Option")
+    set(SWO_OUTPUT_OPTION FALSE CACHE INTERNAL "Single Wire Output Option")
 endif()
 
 #################################################################
