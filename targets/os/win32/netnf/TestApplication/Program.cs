@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using Windows.Devices.Gpio;
 using Windows.Devices.Spi;
@@ -22,7 +22,7 @@ namespace NF.TestApplication_NEW
         private static GpioPin LED1;
         private static GpioPin UserButton;
 
-        //private static SpiDevice MemsSensor;
+        private static SpiDevice MemsSensor;
 
         private static int dummyIntForTimer = 0;
         private static int dummyIntForGpio = 0;
@@ -55,22 +55,22 @@ namespace NF.TestApplication_NEW
             UserButton.ValueChanged += UserButton_ValueChanged;
 
 
-            //////////////////////////////////////////////////////////////////////////////////////
-            //// Spi test
+            ////////////////////////////////////////////////////////////////////////////////////
+            // Spi test
 
-            //var settings = new SpiConnectionSettings(3)        // PA3:CS1
-            //{
-            //    Mode = SpiMode.Mode1,
-            //    ClockFrequency = 12 * 1000 * 1000,  // 12Mhz
-            //    DataBitLength = 8
-            //};
+            var settings = new SpiConnectionSettings(3)        // PA3:CS1
+            {
+                Mode = SpiMode.Mode1,
+                ClockFrequency = 12 * 1000 * 1000,  // 12Mhz
+                DataBitLength = 8
+            };
 
-            //MemsSensor = SpiDevice.FromId("SPI5", settings);
+            MemsSensor = SpiDevice.FromId("SPI5", settings);
 
-            ////ushort[] redBuffer = new ushort[4];
-            ////MemsSensor.TransferFullDuplex(new ushort[] { 0x100, 0x200, 0x300, 0x400 }, redBuffer);
+            //ushort[] redBuffer = new ushort[4];
+            //MemsSensor.TransferFullDuplex(new ushort[] { 0x100, 0x200, 0x300, 0x400 }, redBuffer);
 
-            //MemsSensor.Write(new ushort[] { 0x100, 0x200, 0x300, 0x400 });
+            MemsSensor.Write(new ushort[] { 0x100, 0x200, 0x300, 0x400 });
 
             ////////////////////////////////////////////////////////////////////////////////////
             while (true)
