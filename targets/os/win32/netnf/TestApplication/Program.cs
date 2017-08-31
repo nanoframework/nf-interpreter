@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Windows.Devices.Gpio;
-//using Windows.Devices.Spi;
+using Windows.Devices.Spi;
 
 namespace NF.TestApplication_NEW
 {
