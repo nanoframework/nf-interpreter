@@ -9,7 +9,6 @@
 #include <cmsis_os.h>
 #include <LaunchCLR.h>
 #include <string.h>
-#include <swo.h>
 #include <targetPAL.h>
 #include "win_dev_spi_native.h"
 
@@ -169,8 +168,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         int writeSize = 0;
         int readSize = 0;
 
-        char str[100];
-
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
         
@@ -245,10 +242,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             }
             else
             {
-                sprintf (str,"writeSize  = %d\r\n", (int)writeSize);
-                SwoPrintString(str);
-                sprintf (str,"data0, data1  = %d, %d\r\n", (int)writeData[0], (int)writeData[1]);
-                SwoPrintString(str);
                 spiSend(cfg.Driver, writeSize, &writeData[0]);
             }
         }
