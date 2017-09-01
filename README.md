@@ -45,7 +45,7 @@ Join our Slack community by filling in this [invite form](https://nanoframework.
 
 ## Credits
 
-The list of contributors to this project can be found at [CONTRIBUTORS](CONTRIBUTORS.md).
+The list of contributors to this project can be found at [CONTRIBUTORS](https://github.com/nanoframework/Home/blob/master/CONTRIBUTORS.md).
 
 
 ## License
