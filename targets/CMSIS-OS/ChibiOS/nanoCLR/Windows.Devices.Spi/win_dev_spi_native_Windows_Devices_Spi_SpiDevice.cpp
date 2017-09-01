@@ -71,8 +71,8 @@ nfSPIConfig Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(
     SPIDriver * _drv;
     
     int csPin = config[ SpiConnectionSettings::FIELD___csLine ].NumericByRef().s4;
-    //uint16_t CR1 = SPI_CR1_SSI | SPI_CR1_MSTR | SPI_CR1_SPE;
     uint16_t CR1 = SPI_CR1_SSI | SPI_CR1_MSTR;
+
 #ifdef STM32F7xx_MCUCONF
     // 8bit transfer mode
     uint16_t CR2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
@@ -169,6 +169,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         int writeSize = 0;
         int readSize = 0;
 
+        char str[100];
+
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
         
@@ -179,10 +181,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         // this is coded with a multiplication, need to perform and int division to get the number
         // see the comments in the SpiDevice() constructor in managed code for details
         uint8_t bus = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
-
-char str[100];
-sprintf (str,"Bus = %d\r\n", (int)bus);
-SwoPrintString(str);
 
         // Get a complete low-level SPI configuration, depending on user's managed parameters
         nfSPIConfig cfg = GetConfig(bus, pThis[ FIELD___connectionSettings ].Dereference());
@@ -217,8 +215,8 @@ SwoPrintString(str);
         }
 
         // because the bus access is shared, acquire and select the appropriate bus
-        spiStart(cfg.Driver, &cfg.Configuration);
         spiAcquireBus(cfg.Driver);
+        spiStart(cfg.Driver, &cfg.Configuration);
         spiSelect(cfg.Driver);
 
         // Are we using SPI full-duplex for transfer ?
@@ -247,10 +245,9 @@ SwoPrintString(str);
             }
             else
             {
-                SwoPrintString("spiSend only\r\n");
-                sprintf (str,"WriteSize = %d\r\n", (int)writeSize);
+                sprintf (str,"writeSize  = %d\r\n", (int)writeSize);
                 SwoPrintString(str);
-                sprintf (str,"WriteData[0] & [1] = %d, %d\r\n", (int)writeData[0], (int)writeData[1]);
+                sprintf (str,"data0, data1  = %d, %d\r\n", (int)writeData[0], (int)writeData[1]);
                 SwoPrintString(str);
                 spiSend(cfg.Driver, writeSize, &writeData[0]);
             }
@@ -258,7 +255,6 @@ SwoPrintString(str);
         // Release the bus
         spiUnselect(cfg.Driver);
         spiReleaseBus(cfg.Driver);
-        spiStop(cfg.Driver);
 
         // If databitLength was set to 16 bit above, then set it back to 16 bit
 #ifdef STM32F4xx_MCUCONF
@@ -314,8 +310,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 #endif
 
         // because the bus access is shared, acquire and select the appropriate bus
-        spiStart(cfg.Driver, &cfg.Configuration);
         spiAcquireBus(cfg.Driver);
+        spiStart(cfg.Driver, &cfg.Configuration);
         spiSelect(cfg.Driver);
 
         // Are we using SPI full-duplex for transfer ?
@@ -351,7 +347,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         // Release the bus
         spiUnselect(cfg.Driver);
         spiReleaseBus(cfg.Driver);
-        spiStop(cfg.Driver);
 		
 		// If current config databitLength was 8bit, then set it back to 8bit
 #ifdef STM32F4xx_MCUCONF
