@@ -9,7 +9,6 @@
 #include <cmsis_os.h>
 #include <LaunchCLR.h>
 #include <string.h>
-
 #include <targetPAL.h>
 #include "win_dev_spi_native.h"
 
@@ -71,7 +70,12 @@ nfSPIConfig Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(
     SPIDriver * _drv;
     
     int csPin = config[ SpiConnectionSettings::FIELD___csLine ].NumericByRef().s4;
-    uint16_t CR1 = SPI_CR1_SSI | SPI_CR1_MSTR | SPI_CR1_SPE;
+    uint16_t CR1 = SPI_CR1_SSI | SPI_CR1_MSTR;
+
+#ifdef STM32F7xx_MCUCONF
+    // 8bit transfer mode
+    uint16_t CR2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
+#endif
 
     switch (config[ SpiConnectionSettings::FIELD___spiMode ].NumericByRef().s4)
     {
@@ -90,9 +94,13 @@ nfSPIConfig Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(
 
     if (config[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4 == 16)
     {
-        // data length is 16 bits
+        // Set data transfer length to 16 bits
+#ifdef STM32F4xx_MCUCONF
         CR1 |= SPI_CR1_DFF;
-
+#endif
+#ifdef STM32F7xx_MCUCONF
+        CR2 = SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
+#endif
         // Sets the order of bytes transmission : MSB first or LSB first
         int bitOrder = config[ SpiConnectionSettings::FIELD___bitOrder ].NumericByRef().s4;
         if (bitOrder == DataBitOrder_LSB) CR1 |= SPI_CR1_LSBFIRST;
@@ -105,7 +113,7 @@ nfSPIConfig Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(
     switch (bus)
     {
 #if STM32_SPI_USE_SPI1
-        case 1 :   _drv = &SPID1;
+        case 1 :    _drv = &SPID1;
                     break;
 #endif
 #if STM32_SPI_USE_SPI2
@@ -138,7 +146,12 @@ nfSPIConfig Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(
             GPIO_PORT(csPin),
             csPin % 16,
             CR1,
+#ifdef STM32F4xx_MCUCONF
             0
+#endif
+#ifdef STM32F7xx_MCUCONF
+            CR2
+#endif
         },
         _drv
     };
@@ -171,8 +184,12 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 
         // If databitLength is set to 16 bit, then temporarily set it to 8 bit
         int databitLength = pConfig[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
+#ifdef STM32F4xx_MCUCONF
         if (databitLength == 16) cfg.Configuration.cr1 &= ~SPI_CR1_DFF;
-
+#endif
+#ifdef STM32F7xx_MCUCONF
+        if (databitLength == 16) cfg.Configuration.cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
+#endif
         // dereference the write and read buffers from the arguments
         CLR_RT_HeapBlock_Array* writeBuffer = stack.Arg1().DereferenceArray();
         if (writeBuffer != NULL)
@@ -195,8 +212,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         }
 
         // because the bus access is shared, acquire and select the appropriate bus
-        spiStart(cfg.Driver, &cfg.Configuration);
         spiAcquireBus(cfg.Driver);
+        spiStart(cfg.Driver, &cfg.Configuration);
         spiSelect(cfg.Driver);
 
         // Are we using SPI full-duplex for transfer ?
@@ -228,15 +245,17 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                 spiSend(cfg.Driver, writeSize, &writeData[0]);
             }
         }
-
         // Release the bus
         spiUnselect(cfg.Driver);
         spiReleaseBus(cfg.Driver);
-        spiStop(cfg.Driver);
 
         // If databitLength was set to 16 bit above, then set it back to 16 bit
+#ifdef STM32F4xx_MCUCONF
         if (databitLength == 16) cfg.Configuration.cr1 |= SPI_CR1_DFF;
-
+#endif
+#ifdef STM32F7xx_MCUCONF
+        if (databitLength == 16) cfg.Configuration.cr2 = SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
+#endif
         // null pointers and vars
         writeData = NULL;
         readData = NULL;
@@ -276,11 +295,16 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 
         // If current config databitLength is 8bit, then set it temporarily to 16bit
         int databitLength = pConfig[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
+#ifdef STM32F4xx_MCUCONF
         if (databitLength == 8) cfg.Configuration.cr1 |= SPI_CR1_DFF;
-        
+#endif
+#ifdef STM32F7xx_MCUCONF
+        if (databitLength == 8) cfg.Configuration.cr2 = SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
+#endif
+
         // because the bus access is shared, acquire and select the appropriate bus
-        spiStart(cfg.Driver, &cfg.Configuration);
         spiAcquireBus(cfg.Driver);
+        spiStart(cfg.Driver, &cfg.Configuration);
         spiSelect(cfg.Driver);
 
         // Are we using SPI full-duplex for transfer ?
@@ -316,10 +340,14 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         // Release the bus
         spiUnselect(cfg.Driver);
         spiReleaseBus(cfg.Driver);
-        spiStop(cfg.Driver);
-
-        // If current config databitLength was 8bit, then set it back to 8bit
+		
+		// If current config databitLength was 8bit, then set it back to 8bit
+#ifdef STM32F4xx_MCUCONF
         if (databitLength == 8) cfg.Configuration.cr1 &= ~SPI_CR1_DFF;
+#endif
+#ifdef STM32F7xx_MCUCONF
+        if (databitLength == 8) cfg.Configuration.cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
+#endif
 
         // null pointers and vars
         pThis = NULL;
