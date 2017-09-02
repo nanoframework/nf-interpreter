@@ -29,8 +29,7 @@
         "description$": "<description-here>",
         "settings": {
             "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>",
-            "TARGET_CHIP" : "<target-chip-with-official-vendor-reference>",
-            "TARGET_SERIES" : "<series-name-of-the-target-chip>",
+            "TARGET_SERIES" : "<series-name-of-the-target-chip-STM32F0xx-STM32F4xx-STM32F7xx>",
             "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
             "CHIBIOS_VERSION" : "<N.N.N>",
             "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
@@ -41,16 +40,16 @@
             "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
             "NF_FEATURE_USE_NETWORKING" : "OFF-default-ON-to-enable-support",
             "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API"
-        }
+            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API"
+          }
       },
       "OPTION2_NAME_HERE": {
         "oneWordSummary$": "<summary-here>",
         "description$": "<description-here>",
         "settings": {
             "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>",
-            "TARGET_CHIP" : "<target-chip-with-official-vendor-reference>",
-            "TARGET_SERIES" : "<series-name-of-the-target-chip>",
+            "TARGET_SERIES" : "<series-name-of-the-target-chip-STM32F0xx-STM32F4xx-STM32F7xx>",
             "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
             "CHIBIOS_VERSION" : "<N.N.N>",
             "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
@@ -61,7 +60,8 @@
             "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
             "NF_FEATURE_USE_NETWORKING" : "OFF-default-ON-to-enable-support",
             "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API"
+            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API"
         }
       },
       "default$": "",

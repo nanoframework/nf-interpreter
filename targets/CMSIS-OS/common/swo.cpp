@@ -10,6 +10,10 @@
 
 extern "C" void SwoInit()
 {
+    // set SWO pin (PB3) to alternate mode (0 == the status after RESET) 
+    // in case it's being set to a different function in board config
+    palSetPadMode(GPIOB, 0x03, PAL_MODE_ALTERNATE(0) );
+      
     // enable trace in core debug register
     CoreDebug->DEMCR = CoreDebug_DEMCR_TRCENA_Msk;
 
