@@ -311,6 +311,20 @@ else()
 endif()
 
 
+if(API_Windows.Devices.Pwm)
+set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
+else()    
+set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
+endif()
+
+
+if(API_Windows.Devices.Adc)
+set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+else()    
+set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+endif()
+
+
 #######################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
