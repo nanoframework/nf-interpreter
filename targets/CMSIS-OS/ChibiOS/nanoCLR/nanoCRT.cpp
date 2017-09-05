@@ -81,7 +81,17 @@ int hal_vfprintf( COM_HANDLE stream, const char* format, va_list arg )
 int hal_snprintf( char* buffer, size_t len, const char* format, ... )
 {
     NATIVE_PROFILE_PAL_CRT();
-    return 0;
+    
+    va_list arg_ptr;
+    int     chars;
+
+    va_start( arg_ptr, format );
+
+    chars = hal_vsnprintf( buffer, len, format, arg_ptr );
+
+    va_end( arg_ptr );
+
+    return chars;
 }
 
 
