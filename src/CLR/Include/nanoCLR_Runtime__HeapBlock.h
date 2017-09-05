@@ -1546,6 +1546,10 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
 
     CLR_UINT8* GetElement( CLR_UINT32 index ) { return GetFirstElement() + m_sizeOfElement * index; }
 
+    CLR_UINT16* GetFirstElementUInt16() { return ((CLR_UINT16*)&this[ 1 ]); }
+
+    CLR_UINT16* GetElementUInt16( CLR_UINT32 index ) { return GetFirstElementUInt16() + m_sizeOfElement * index; }
+
     HRESULT ClearElements( int index, int length );
 
     //--//
