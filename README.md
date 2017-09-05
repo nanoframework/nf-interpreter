@@ -20,7 +20,6 @@ This repo contains:
       * [ST STM32F429I DISCOVERY](targets/CMSIS-OS/ChibiOS/ST_STM32F429I_DISCOVERY)
       * [ST STM32F769I DISCOVERY](targets/CMSIS-OS/ChibiOS/ST_STM32F769I_DISCOVERY)
     * ChibiOS overlay for **nanoFramework**
-      * [STM32 NUCLEO144 F746ZG (board)](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/ST_NUCLEO144_F746ZG)
       * [STM32 Flash driver](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_flash)
 * Target reference for other OSes
   * [Win32 OS (test project only at this time)](targets/os/win32)
