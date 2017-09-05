@@ -41,7 +41,9 @@
             "NF_FEATURE_USE_NETWORKING" : "OFF-default-ON-to-enable-support",
             "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
             "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API"
+            "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.Adc" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API"
           }
       },
       "OPTION2_NAME_HERE": {
@@ -61,7 +63,9 @@
             "NF_FEATURE_USE_NETWORKING" : "OFF-default-ON-to-enable-support",
             "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
             "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API"
+            "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.Adc" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API"
         }
       },
       "default$": "",

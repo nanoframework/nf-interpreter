@@ -31,9 +31,10 @@
 /**
  * @brief   Enables the ADC subsystem.
  */
-#if !defined(HAL_USE_ADC) || defined(__DOXYGEN__)
-#define HAL_USE_ADC                 FALSE
-#endif
+// this option is set at target_board.h (from config file)
+// #if !defined(HAL_USE_ADC) || defined(__DOXYGEN__)
+// #define HAL_USE_ADC                 FALSE
+// #endif
 
 /**
  * @brief   Enables the CAN subsystem.
@@ -104,9 +105,10 @@
 /**
  * @brief   Enables the PWM subsystem.
  */
-#if !defined(HAL_USE_PWM) || defined(__DOXYGEN__)
-#define HAL_USE_PWM                 FALSE
-#endif
+// this option is set at target_board.h (from config file)
+// #if !defined(HAL_USE_PWM) || defined(__DOXYGEN__)
+// #define HAL_USE_PWM                 FALSE
+// #endif
 
 /**
  * @brief   Enables the RTC subsystem.
