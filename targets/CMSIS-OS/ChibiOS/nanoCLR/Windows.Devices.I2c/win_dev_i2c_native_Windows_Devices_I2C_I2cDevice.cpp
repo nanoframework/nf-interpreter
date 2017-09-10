@@ -113,6 +113,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
 {
     NANOCLR_HEADER();
     {
+        
         unsigned char * writeData = NULL;
         unsigned char * readData = NULL;
         int writeSize = 0;
@@ -158,6 +159,9 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         // because the bus access is shared, acquire the appropriate bus
         i2cStart(cfg.Driver, &cfg.Configuration);
         i2cAcquireBus(cfg.Driver);
+#ifdef STM32F7xx_MCUCONF
+        SCB_CleanInvalidateDCache();
+#endif
         if (readSize != 0 && writeSize != 0)  // WriteRead
         {
             i2cStatus = i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, &readData[0], readSize, TIME_INFINITE);

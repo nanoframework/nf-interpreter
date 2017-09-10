@@ -219,6 +219,9 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         // Are we using SPI full-duplex for transfer ?
         bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
 
+#ifdef STM32F7xx_MCUCONF
+        SCB_CleanInvalidateDCache();
+#endif
         if (writeSize != 0 && readSize != 0)
         {
             // Transmit+Receive
@@ -327,6 +330,9 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         // Are we using SPI full-duplex for transfer ?
         bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
 
+#ifdef STM32F7xx_MCUCONF
+        SCB_CleanInvalidateDCache();
+#endif
         if (writeSize != 0 && readSize != 0)
         {
             // Transmit+Receive

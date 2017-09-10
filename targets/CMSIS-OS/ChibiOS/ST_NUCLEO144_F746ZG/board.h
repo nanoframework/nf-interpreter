@@ -1255,7 +1255,7 @@
  * PG14 - ARD_D1 USART6_TX          (input pullup).
  * PG15 - PIN15                     (input pullup).
  */
-#define VAL_GPIOG_MODER             (PIN_MODE_INPUT(GPIOG_ZIO_D65) |        \
+#define VAL_GPIOG_MODER             (PIN_MODE_OUTPUT(GPIOG_ZIO_D65) |        \
                                      PIN_MODE_OUTPUT(GPIOG_ZIO_D64) |        \
                                      PIN_MODE_INPUT(GPIOG_ZIO_D49) |        \
                                      PIN_MODE_INPUT(GPIOG_ZIO_D50) |        \
@@ -1287,7 +1287,7 @@
                                      PIN_OTYPE_PUSHPULL(GPIOG_RMII_TXD0) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOG_ARD_D1) |     \
                                      PIN_OTYPE_PUSHPULL(GPIOG_PIN15))
-#define VAL_GPIOG_OSPEEDR           (PIN_OSPEED_VERYLOW(GPIOG_ZIO_D65) |    \
+#define VAL_GPIOG_OSPEEDR           (PIN_OSPEED_HIGH(GPIOG_ZIO_D65) |    \
                                      PIN_OSPEED_HIGH(GPIOG_ZIO_D64) |    \
                                      PIN_OSPEED_VERYLOW(GPIOG_ZIO_D49) |    \
                                      PIN_OSPEED_VERYLOW(GPIOG_ZIO_D50) |    \
