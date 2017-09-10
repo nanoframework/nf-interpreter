@@ -1,14 +1,7 @@
-//-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
-//    This file was generated automatically by a tool.
-//    Re-running the tool will overwrite this file.
-//    You should copy this file to a custom location
-//    before adding any customization in the copy to
-//    prevent loss of your changes when the tool is
-//    re-run.
+// Copyright (c) 2017 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
 //
-//-----------------------------------------------------------------------------
 
 #include <ch.h>
 #include <hal.h>
@@ -72,15 +65,29 @@ nfI2CConfig Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetConfig(
         case 3 :    _drv = &I2CD3;
                     break;
 #endif
+#if STM32_I2C_USE_I2C4
+        case 4 :    _drv = &I2CD4;
+                    break;
+#endif
     }
 
     // Create the final configuration
     nfI2CConfig cfg =
     {
         {
+#ifdef STM32F4xx_MCUCONF
             OPMODE_I2C,
             busSpeed == I2cBusSpeed_StandardMode ? 100000U : 400000U,
             busSpeed == I2cBusSpeed_StandardMode ? STD_DUTY_CYCLE : FAST_DUTY_CYCLE_2
+#endif
+#ifdef STM32F7xx_MCUCONF
+            // Standard mode : 100 KHz, Rise time 120 ns, Fall time 25 ns, 54MHz clock source
+            // Fast mode : 400 KHz, Rise time 120 ns, Fall time 25 ns, 54MHz clock source
+            // Timing register value calculated by STM32 CubeMx
+            busSpeed == I2cBusSpeed_StandardMode ? 0x80201721 : 0x00B01B59,
+            0,
+            0
+#endif
         },
         _drv,
         (uint16_t)slaveAddress
@@ -122,7 +129,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         // get bus index
         // this is coded with a multiplication, need to perform and int division to get the number
         // see the comments in the SpiDevice() constructor in managed code for details
-        uint8_t bus = (uint8_t)(pThis[ FIELD___i2cBus ].NumericByRef().s4 / 1000);
+        uint8_t bus = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
 
         // Get a complete low-level SPI configuration, depending on user's managed parameters
         nfI2CConfig cfg = GetConfig(bus, pThis[ FIELD___connectionSettings ].Dereference());
@@ -167,14 +174,12 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             }
         }
         i2cReleaseBus(cfg.Driver);
-        i2cStop(cfg.Driver);
 
-        returnStatus = I2cTransferStatus_FullTransfer;
         if (i2cStatus != MSG_OK)
         {
             int errorMask = i2cGetErrors(cfg.Driver);
 
-            //TODO: return correct error   
+            //TODO: return correct error status regarding UWP API
             returnStatus = I2cTransferStatus_UnknownError;
         }
 
@@ -194,8 +199,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetDeviceSelec
 {
     NANOCLR_HEADER();
    {
-       // declare the device selector string whose max size is "I2C1,I2C2,I2C3," + terminator and init with the terminator
-       char deviceSelectorString[ 15 + 1] = { 0 };
+       // declare the device selector string whose max size is "I2C1,I2C2,I2C3,I2C4," + terminator and init with the terminator
+       char deviceSelectorString[ 20 + 1] = { 0 };
 
    #if STM32_I2C_USE_I2C1
        strcat(deviceSelectorString, "I2C1,");
@@ -206,7 +211,9 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetDeviceSelec
    #if STM32_I2C_USE_I2C3
        strcat(deviceSelectorString, "I2C3,");
    #endif
-
+   #if STM32_I2C_USE_I2C4
+       strcat(deviceSelectorString, "I2C4,");
+   #endif
        // replace the last comma with a terminator
        deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
 

@@ -81,7 +81,7 @@
  #define STM32_CK48MSEL                      STM32_CK48MSEL_PLL
  #define STM32_SDMMCSEL                      STM32_SDMMCSEL_SYSCLK
  #define STM32_SRAM2_NOCACHE                 FALSE
- 
+
 /*
  * ADC driver system settings.
  */
@@ -172,8 +172,8 @@
 /*
  * I2C driver system settings.
  */
-#define STM32_I2C_USE_I2C1                  FALSE
-#define STM32_I2C_USE_I2C2                  FALSE
+#define STM32_I2C_USE_I2C1                  TRUE
+#define STM32_I2C_USE_I2C2                  TRUE
 #define STM32_I2C_USE_I2C3                  FALSE
 #define STM32_I2C_USE_I2C4                  FALSE
 #define STM32_I2C_BUSY_TIMEOUT              50
