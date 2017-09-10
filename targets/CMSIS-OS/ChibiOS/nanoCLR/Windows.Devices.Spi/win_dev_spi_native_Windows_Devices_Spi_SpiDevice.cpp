@@ -326,6 +326,14 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 
         // Are we using SPI full-duplex for transfer ?
         bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
+        
+#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
+defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
+defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+
+        // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
+        __DSB();
+#endif
 
         if (writeSize != 0 && readSize != 0)
         {
