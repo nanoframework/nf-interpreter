@@ -335,12 +335,12 @@
                                      PIN_PUPDR_FLOATING(GPIOA_AN4) |         \
                                      PIN_PUPDR_FLOATING(GPIOA_AN1) |     \
                                      PIN_PUPDR_FLOATING(GPIOA_AN3) |      \
-                                     PIN_PUPDR_FLOATING(GPIOA_FLASH_HOLD) |   \
+                                     PIN_PUPDR_PULLDOWN(GPIOA_FLASH_HOLD) |   \
                                      PIN_PUPDR_FLOATING(GPIOA_TX4) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_RX4) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_OTG_FS_DM) |     \
                                      PIN_PUPDR_FLOATING(GPIOA_OTG_FS_DP) |     \
-                                     PIN_PUPDR_PULLDOWN(GPIOA_FLASH_CS) |        \
+                                     PIN_PUPDR_FLOATING(GPIOA_FLASH_CS) |        \
                                      PIN_PUPDR_FLOATING(GPIOA_INT4) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_GPIO1))
 #define VAL_GPIOA_ODR               (PIN_ODR_LOW(GPIOA_PA0) |           \
@@ -351,12 +351,12 @@
                                      PIN_ODR_LOW(GPIOA_AN4) |             \
                                      PIN_ODR_LOW(GPIOA_AN1) |           \
                                      PIN_ODR_LOW(GPIOA_AN3) |          \
-                                     PIN_ODR_HIGH(GPIOA_FLASH_HOLD) |         \
+                                     PIN_ODR_LOW(GPIOA_FLASH_HOLD) |         \
                                      PIN_ODR_LOW(GPIOA_TX4) |          \
                                      PIN_ODR_LOW(GPIOA_RX4) |          \
                                      PIN_ODR_HIGH(GPIOA_OTG_FS_DM) |           \
                                      PIN_ODR_HIGH(GPIOA_OTG_FS_DP) |           \
-                                     PIN_ODR_LOW(GPIOA_FLASH_CS) |            \
+                                     PIN_ODR_HIGH(GPIOA_FLASH_CS) |            \
                                      PIN_ODR_LOW(GPIOA_INT4) |            \
                                      PIN_ODR_LOW(GPIOA_GPIO1))
 #define VAL_GPIOA_AFRL              (PIN_AFIO_AF(GPIOA_PA0, 0U) |        \
