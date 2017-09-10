@@ -158,7 +158,17 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         // because the bus access is shared, acquire the appropriate bus
         i2cStart(cfg.Driver, &cfg.Configuration);
         i2cAcquireBus(cfg.Driver);
-        if (readSize != 0 && writeSize != 0)  // WriteRead
+
+#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
+defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
+defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+
+        // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
+        __DSB();
+#endif
+
+        // WriteRead
+        if (readSize != 0 && writeSize != 0)
         {
             i2cStatus = i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, &readData[0], readSize, TIME_INFINITE);
         }
@@ -173,6 +183,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
                 i2cStatus = i2cMasterReceiveTimeout (cfg.Driver, cfg.SlaveAddress, &readData[0], readSize, TIME_INFINITE);
             }
         }
+
+        // release the I2C now
         i2cReleaseBus(cfg.Driver);
 
         if (i2cStatus != MSG_OK)
