@@ -356,7 +356,7 @@ if(RTOS_CHIBIOS_CHECK)
         
         # check if build was requested with a specifc ChibiOS version
         if(DEFINED CHIBIOS_VERSION)
-            if("${CHIBIOS_VERSION}" NOT STREQUAL "")
+            if(NOT "${CHIBIOS_VERSION}" STREQUAL "")
                 set(CHIBIOS_VERSION_EMPTY FALSE)
             endif()
         endif()
