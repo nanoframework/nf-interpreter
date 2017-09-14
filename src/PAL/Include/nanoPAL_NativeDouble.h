@@ -6,13 +6,13 @@
 #ifndef _NANOPAL_DOUBLE_DECL_H_
 #define _NANOPAL_DOUBLE_DECL_H_
 
-//#include <tinyhal.h>
+#include <nanoHAL.h>
 
 namespace System
 {
     struct Double
     {
-        static signed int   CompareTo( double d, double val );
+        static int32_t      CompareTo( double d, double val );
         static bool         IsInfinity( double d );
         static bool         IsNaN( double d );
         static bool         IsNegativeInfinity( double d );
@@ -36,7 +36,7 @@ namespace System
         static double       Log10(double d);
         static double       Pow(double x, double y);
         static double       Round(double d);
-        static signed int   Sign(double d);
+        static int32_t      Sign(double d);
         static double       Sin(double d);
         static double       Sinh(double d);
         static double       Sqrt(double d);

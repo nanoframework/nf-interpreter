@@ -22,31 +22,95 @@ void hal_fprintf_SetLoggingCallback( LOGGING_CALLBACK fpn )
 
 //--//
 
-#if !defined(PLATFORM_EMULATED_FLOATINGPOINT)
+#if defined(PLATFORM_EMULATED_FLOATINGPOINT)
+
+// no floating point, fixed point 
+
+int hal_snprintf_float( char* buffer, size_t len, const char* format, int32_t f )
+{
+    NATIVE_PROFILE_PAL_CRT();
+
+    uint32_t   i ;
+    uint32_t  dec;
+
+    if ( f < 0 ) 
+    {
+        // negative number
+        i = (uint32_t) -f  ;
+        dec = i & (( 1<<HAL_FLOAT_SHIFT) -1 );
+        i = (i >>HAL_FLOAT_SHIFT);   
+
+        if (dec !=0) dec = (dec * (uint32_t)HAL_FLOAT_PRECISION + (1<< (HAL_FLOAT_SHIFT-1))) >>HAL_FLOAT_SHIFT;  
+
+        return hal_snprintf( buffer, len, "-%d.%03u", i, (uint32_t)dec);
+
+    }
+    else
+    {
+        // positive number
+        i = (uint32_t) f  ;
+        dec = f & (( 1<<HAL_FLOAT_SHIFT) -1 );
+        i =(uint32_t)( i >>HAL_FLOAT_SHIFT); 
+
+        if (dec !=0) dec = (dec * (uint32_t)HAL_FLOAT_PRECISION + (1<< (HAL_FLOAT_SHIFT-1))) >>HAL_FLOAT_SHIFT;  
+
+        return hal_snprintf( buffer, len, "%d.%03u", i, (uint32_t)dec);
+    }
+}
+
+int hal_snprintf_double( char* buffer, size_t len, const char* format, int64_t& d )
+{
+    NATIVE_PROFILE_PAL_CRT();
+
+    uint64_t i;
+    uint32_t  dec; // 32 bit is enough for decimal part
+
+    if ( d < 0 ) 
+    {
+        // negative number
+        i = (uint64_t)-d;
+        
+        i += ((1 << (HAL_DOUBLE_SHIFT-1)) / HAL_DOUBLE_PRECISION); // add broad part of rounding increment before split
+
+        dec = i & (( 1<<HAL_DOUBLE_SHIFT) -1 );
+        i = i >> HAL_DOUBLE_SHIFT ;
+
+        if (dec !=0)  dec = (dec * HAL_DOUBLE_PRECISION + ((1 << (HAL_DOUBLE_SHIFT-1)) % HAL_DOUBLE_PRECISION)) >> HAL_DOUBLE_SHIFT;
+
+        return hal_snprintf( buffer, len, "-%lld.%04u", (int64_t)i, (uint32_t)dec);
+
+    }
+    else
+    {
+
+        // positive number
+        i = (uint64_t)d;
+
+        i += ((1 << (HAL_DOUBLE_SHIFT-1)) / HAL_DOUBLE_PRECISION); // add broad part of rounding increment before split
+
+        dec = i & (( 1<<HAL_DOUBLE_SHIFT) -1 );
+        i = i >> HAL_DOUBLE_SHIFT;
+        
+        if (dec !=0)  dec = (dec * HAL_DOUBLE_PRECISION + ((1 << (HAL_DOUBLE_SHIFT-1)) % HAL_DOUBLE_PRECISION)) >> HAL_DOUBLE_SHIFT;
+
+        return hal_snprintf( buffer, len, "%lld.%04u", (int64_t)i, (uint32_t)dec);
+    }
+}
+
+#else
 
 int hal_snprintf_float( char* buffer, size_t len, const char* format, float f )
 {
     NATIVE_PROFILE_PAL_CRT();
-    return 0;
+
+    return hal_snprintf( buffer, len, format, f );
 }
 
 int hal_snprintf_double( char* buffer, size_t len, const char* format, double d )
 {
     NATIVE_PROFILE_PAL_CRT();
-    return 0;
-}
 
-#else
-int hal_snprintf_float( char* buffer, size_t len, const char* format, signed int f )
-{
-    NATIVE_PROFILE_PAL_CRT();
-    return 0;
-}
-
-int hal_snprintf_double( char* buffer, size_t len, const char* format, signed __int64& d )
-{
-    NATIVE_PROFILE_PAL_CRT();
-    return 0;
+    return hal_snprintf( buffer, len, format, d );
 }
 
 #endif

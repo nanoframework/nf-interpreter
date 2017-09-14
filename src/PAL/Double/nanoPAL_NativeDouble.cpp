@@ -5,7 +5,7 @@
 //
 
 #include "stdafx.h"
-#include "nanoPAL_double_decl.h"
+#include "nanoPAL_NativeDouble.h"
 
 #include <math.h>
 
@@ -87,7 +87,7 @@ using namespace System;
 //     Greater than zero 
 //         This instance is greater than value. -or- 
 //         This instance is a number and value is not a number (System.Double.NaN).
-INT32 Double::CompareTo( double d, double val )
+int32_t Double::CompareTo( double d, double val )
 {
 
     if (__isnand(d))
@@ -179,11 +179,11 @@ bool Double::IsNegativeInfinity( double d )
 
     /* Return signbit of __x */
     /* Used by signbit macro */
-    INT8 signBit = __signbitd(d);
+    int8_t signBit = __signbitd(d);
     
     /* Return 1 if __x is infinite, 0 otherwise */
     /* Used by isinf macro */
-    INT8 infiniteBit = __isinfd(d) != 0;
+    int8_t infiniteBit = __isinfd(d) != 0;
     
     bool retVal = (signBit != 0) && (infiniteBit != 0); 
     return retVal;
@@ -206,11 +206,11 @@ bool Double::IsPositiveInfinity( double d )
 
     /* Return signbit of __x */
     /* Used by signbit macro */
-    INT8 signBit = __signbitd(d);
+    int8_t signBit = __signbitd(d);
     
     /* Return 1 if __x is infinite, 0 otherwise */
     /* Used by isinf macro */
-    INT8 infiniteBit = __isinfd(d);
+    int8_t infiniteBit = __isinfd(d);
     
     bool retVal = (signBit == 0) && (infiniteBit != 0);  
     return retVal;
@@ -308,7 +308,7 @@ double Math::Round( double d )
     return retVal;
 }
 
-INT32 Math::Sign( double d )
+int32_t Math::Sign( double d )
 {
     if (d < 0) return -1;
     if (d > 0) return +1;

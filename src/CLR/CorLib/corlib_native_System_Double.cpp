@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "CorLib.h"
-#include "nanoPAL_double_decl.h"
+#include "nanoPAL_NativeDouble.h"
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 HRESULT Library_corlib_native_System_Double::CompareTo___STATIC__I4__R8__R8( CLR_RT_StackFrame& stack )

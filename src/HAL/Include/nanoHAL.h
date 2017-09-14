@@ -13,22 +13,20 @@
 #include <nanoWeak.h>
 #include <nanoHAL_v2.h>
 
+#if defined(PLATFORM_EMULATED_FLOATINGPOINT)
+/***************************************************/
+// Keep in sync with the nanoCLR_Runtime__HeapBlock.h
 
+#define HAL_FLOAT_SHIFT         10
+#define HAL_FLOAT_PRECISION     1000
 
+#define HAL_DOUBLE_SHIFT        16
+#define HAL_DOUBLE_PRECISION    10000
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+/************************************************/
+#else
+#include <math.h>
+#endif
 
 
 

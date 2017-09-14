@@ -145,6 +145,7 @@ set(NF_CoreCLR_SRCS
 
     # PAL
     nanoPAL_BlockStorage.c
+    nanoPAL_NativeDouble.cpp
 
     # PAL stubs
     Async_stubs.cpp
@@ -184,6 +185,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             # PAL
             ${PROJECT_SOURCE_DIR}/src/PAL
             ${PROJECT_SOURCE_DIR}/src/PAL/BlockStorage
+            ${PROJECT_SOURCE_DIR}/src/PAL/Double
 
             # PAL stubs
             ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall

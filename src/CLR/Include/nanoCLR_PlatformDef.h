@@ -23,7 +23,7 @@
 
 
 #if defined(PLATFORM_EMULATED_FLOATINGPOINT)
-#define NANOCLR_EMULATED_FLOATINGPOINT    // use the fixed point floating point notation in the clr ocdes 
+#define NANOCLR_EMULATED_FLOATINGPOINT    // use the fixed point floating point notation in the clr codes
 #endif
 
 #if defined(NANOCLR_USE_APPDOMAINS)

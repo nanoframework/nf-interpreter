@@ -112,7 +112,6 @@ set(USE_FPU_IS_TRUE FALSE)
 
 if(USE_FPU)
     if(NOT "${USE_FPU}" STREQUAL "")
-
         if("${USE_FPU}" STREQUAL "TRUE")
             set(USE_FPU_IS_TRUE TRUE CACHE INTERNAL "FPU preference")
         elseif("${USE_FPU}" STREQUAL "FALSE")
@@ -121,7 +120,6 @@ if(USE_FPU)
             # something other that TRUE or FALSE...
             message(FATAL_ERROR "\n\n'${USE_FPU}' is an invalid option for USE_FPU. Acceptable values are TRUE or FALSE.\n\n")
         endif()    
-
     endif()
 endif()
 
@@ -193,6 +191,15 @@ message(STATUS "Build  directory is '${PROJECT_BINARY_DIR}'.")
 message(STATUS "Toolchain is '${TOOLCHAIN}'.")
 message(STATUS "")
 #######################
+
+
+#################################################################
+# output FPU option
+if("${USE_FPU}" STREQUAL "TRUE")
+    message(STATUS "Hardware Floating Point enabled")
+elseif("${USE_FPU}" STREQUAL "FALSE")
+    message(STATUS "Emulated Floating Point enabled")
+endif()
 
 
 #################################################################
