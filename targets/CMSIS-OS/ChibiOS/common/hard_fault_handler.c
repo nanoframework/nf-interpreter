@@ -16,9 +16,13 @@ typedef enum {
     UsageFault = 6,
 } FaultType;
 
+#if defined(STM32F4xx) || defined(STM32F7xx)
+
 void NMI_Handler(void) {
     while(1);
 }
+
+#endif
 
 // dev note: on all the following the variables need to be declared as volatile so they don't get optimized out by the linker
 
@@ -33,7 +37,10 @@ void HardFault_Handler(void) {
 
     //Interrupt status register: Which interrupt have we encountered, e.g. HardFault?
     volatile FaultType faultType = (FaultType)__get_IPSR();
-    
+
+    // these are not available in all the STM32 series
+#if defined(STM32F4xx) || defined(STM32F7xx)
+
     //Flags about hardfault / busfault
     //See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
     volatile bool isFaultPrecise = ((SCB->CFSR >> SCB_CFSR_BUSFAULTSR_Pos) & (1 << 1) ? true : false);
@@ -60,6 +67,8 @@ void HardFault_Handler(void) {
     //For HardFault/BusFault this is the address that was accessed causing the error
     volatile uint32_t faultAddress = SCB->BFAR;
 
+#endif
+    
     // forces a breakpoint causing the debugger to stop
     // if no debugger is attached this is ignored
     __asm volatile("BKPT #0\n");
@@ -82,6 +91,9 @@ void UsageFault_Handler(void) {
     FaultType faultType = (FaultType)__get_IPSR();
     (void)faultType;
 
+    // these are not available in all the STM32 series
+#if defined(STM32F4xx) || defined(STM32F7xx)
+    
     //Flags about hardfault / busfault
     //See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
     volatile bool isUndefinedInstructionFault = ((SCB->CFSR >> SCB_CFSR_USGFAULTSR_Pos) & (1 << 0) ? true : false);
@@ -90,6 +102,8 @@ void UsageFault_Handler(void) {
     volatile bool isNoCoprocessorFault = ((SCB->CFSR >> SCB_CFSR_USGFAULTSR_Pos) & (1 << 3) ? true : false);
     volatile bool isUnalignedAccessFault = ((SCB->CFSR >> SCB_CFSR_USGFAULTSR_Pos) & (1 << 8) ? true : false);
     volatile bool isDivideByZeroFault = ((SCB->CFSR >> SCB_CFSR_USGFAULTSR_Pos) & (1 << 9) ? true : false);
+
+#endif
 
     // forces a breakpoint causing the debugger to stop
     // if no debugger is attached this is ignored
@@ -111,6 +125,9 @@ void MemManage_Handler(void) {
     FaultType faultType = (FaultType)__get_IPSR();
     (void)faultType;
 
+    // these are not available in all the STM32 series
+#if defined(STM32F4xx) || defined(STM32F7xx)
+    
     //For HardFault/BusFault this is the address that was accessed causing the error
     volatile uint32_t faultAddress = SCB->MMFAR;
 
@@ -121,6 +138,8 @@ void MemManage_Handler(void) {
     volatile bool isExceptionUnstackingFault = ((SCB->CFSR >> SCB_CFSR_MEMFAULTSR_Pos) & (1 << 3) ? true : false);
     volatile bool isExceptionStackingFault = ((SCB->CFSR >> SCB_CFSR_MEMFAULTSR_Pos) & (1 << 4) ? true : false);
     volatile bool isFaultAddressValid = ((SCB->CFSR >> SCB_CFSR_MEMFAULTSR_Pos) & (1 << 7) ? true : false);
+
+#endif
 
     // forces a breakpoint causing the debugger to stop
     // if no debugger is attached this is ignored
