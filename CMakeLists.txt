@@ -351,33 +351,34 @@ if(RTOS_CHIBIOS_CHECK)
         message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
         endif()
 
+        # ChibiOS version
+        set(CHIBIOS_VERSION_EMPTY TRUE)
+        
         # check if build was requested with a specifc ChibiOS version
         if(DEFINED CHIBIOS_VERSION)
-
-            if("${CHIBIOS_VERSION}" STREQUAL "")
-                set(CHIBIOS_VERSION_EMPTY TRUE)
+            if("${CHIBIOS_VERSION}" NOT STREQUAL "")
+                set(CHIBIOS_VERSION_EMPTY FALSE)
             endif()
+        endif()
 
-            if(CHIBIOS_VERSION_EMPTY)
-                # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_17.6.x branch
-                message(STATUS "RTOS is: CHIBIOS (latest available code from stable_17.6.x)")
-                set(CHIBIOS_GIT_TAG "stable_17.6.x")
-            else()
-                message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
+        if(CHIBIOS_VERSION_EMPTY)
+            # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_17.6.x branch
+            message(STATUS "RTOS is: CHIBIOS (latest available code from stable_17.6.x)")
+            set(CHIBIOS_GIT_TAG "stable_17.6.x")
+        else()
+            message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
 
-                # branch naming follows the pattern 'stable_17.6.x'
-                # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter 
-                # find 1st dot in version number
-                string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)
-                # find 2nd dot in version number
-                string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX REVERSE)
-                # extract 'short' version  
-                string(SUBSTRING ${CHIBIOS_VERSION} 0 ${CHIBIOS_VERSION_DOT_INDEX} CHIBIOS_SHORT_VERSION)
+            # branch naming follows the pattern 'stable_17.6.x'
+            # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter 
+            # find 1st dot in version number
+            string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)
+            # find 2nd dot in version number
+            string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX REVERSE)
+            # extract 'short' version  
+            string(SUBSTRING ${CHIBIOS_VERSION} 0 ${CHIBIOS_VERSION_DOT_INDEX} CHIBIOS_SHORT_VERSION)
 
-                # set branch name
-                set(CHIBIOS_GIT_TAG "stable_${CHIBIOS_SHORT_VERSION}.x")
-            endif()
-            
+            # set branch name
+            set(CHIBIOS_GIT_TAG "stable_${CHIBIOS_SHORT_VERSION}.x")
         endif()
 
         # need to setup a separate CMake project to download the code from the GitHub repository
