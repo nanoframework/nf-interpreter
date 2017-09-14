@@ -6,7 +6,7 @@
 #include "CorLib.h"
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
-#include "nanoPAL_double_decl.h"
+#include "nanoPAL_NativeDouble.h"
 
 HRESULT Library_corlib_native_System_Math::Acos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
 {
@@ -211,7 +211,7 @@ HRESULT Library_corlib_native_System_Math::Sign___STATIC__I4__R8( CLR_RT_StackFr
     NANOCLR_HEADER();
 
     double d = stack.Arg0().NumericByRefConst().r8;
-    INT32 res;
+    int32_t res;
     if (d < 0) res =  -1;
     else if (d > 0) res =  +1;
     else res = 0;

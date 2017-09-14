@@ -13,12 +13,12 @@ const BlockRange BlockRange1[] =
 
 const BlockRange BlockRange2[] = 
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 34   }           // 08004000 nanoCLR    
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 38   }          // 08004000 nanoCLR    
 };
 
 const BlockRange BlockRange3[] =
 {      
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 23 }           // 08027000 deployment  
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 19 }            // 0802B000 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 
@@ -26,23 +26,23 @@ const BlockRegionInfo BlockRegions[] =
     {
         0x08000000,                         // start address for block region
         4,                                  // total number of blocks in this region
-        0x1000,                              // total number of bytes per block
+        0x1000,                             // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
     },
 
     {
         0x08004000,                         // start address for block region
-        35,                                 // total number of blocks in this region
-        0x1000,                              // total number of bytes per block
+        39,                                 // total number of blocks in this region
+        0x1000,                             // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange2),
         BlockRange2,
     },
 
     {
-        0x08027000,                         // start address for block region
-        24,                                 // total number of blocks in this region
-        0x1000,                              // total number of bytes per block
+        0x0802B000,                         // start address for block region
+        20,                                 // total number of blocks in this region
+        0x1000,                             // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange3),
         BlockRange3,
     }
