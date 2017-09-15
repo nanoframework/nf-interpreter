@@ -127,6 +127,12 @@ set(NF_CoreCLR_SRCS
     # CLR startup
     CLRStartup.cpp
 
+    # Runtime.Native
+    nf_rt_native.cpp
+    nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_Debug.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
+    
     # Core stubs
     Hardware_stub.cpp
     Heap_Persistence_stub.cpp
@@ -165,6 +171,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
 
             # CLR startup
             ${PROJECT_SOURCE_DIR}/src/CLR/Startup
+
+            # Runtime.Native
+            ${PROJECT_SOURCE_DIR}/src/CLR/Runtime.Native
 
             # Core stubs
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/Hardware

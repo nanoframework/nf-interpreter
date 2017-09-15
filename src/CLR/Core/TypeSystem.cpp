@@ -3854,6 +3854,9 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
     // Load Runtime.Events to setup EventSink for other assemblies using it
     NANOCLR_CHECK_HRESULT(PrepareForExecutionHelper( "nanoFramework.Runtime.Events" ));
     
+    // Load Runtime.Native for other assemblies using it
+    NANOCLR_CHECK_HRESULT(PrepareForExecutionHelper( "nanoFramework.Runtime.Native" ));
+    
     NANOCLR_FOREACH_ASSEMBLY(*this)
     {
         NANOCLR_CHECK_HRESULT(pASSM->PrepareForExecution());
