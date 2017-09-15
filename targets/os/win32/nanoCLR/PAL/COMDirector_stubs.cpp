@@ -24,9 +24,14 @@ __nfweak bool DebuggerPort_Uninitialize( COM_HANDLE ComPortNum )
     return true;
 }
 
-
 __nfweak int DebuggerPort_Write( COM_HANDLE ComPortNum, const char* Data, size_t size )
 {
+    NATIVE_PROFILE_PAL_COM();
+    return DebuggerPort_Write( ComPortNum, Data, size, COM_MAX_RETRIES );
+}
+
+__nfweak int DebuggerPort_Write( COM_HANDLE ComPortNum, const char* Data, size_t size, int maxRetries )
+{   
     NATIVE_PROFILE_PAL_COM();
     return 0;
 }

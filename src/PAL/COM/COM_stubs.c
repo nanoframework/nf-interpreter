@@ -18,11 +18,13 @@ __nfweak bool DebuggerPort_Uninitialize(COM_HANDLE comPortNum)
     return true;
 }
 
-__nfweak int DebuggerPort_Write(COM_HANDLE comPortNum, const char* data, size_t size)
+__nfweak int DebuggerPort_Write(COM_HANDLE comPortNum, const char* data, size_t size, int maxRetries)
 {
-    int maxRetries = COM_MAX_RETRIES;
-    
     NATIVE_PROFILE_PAL_COM();
+
+    // minimum implementation is calling generic port
+    GenericPort_Write( comPortNum, data, size );
+
     return 0;
 }
 

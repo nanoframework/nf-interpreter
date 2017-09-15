@@ -31,7 +31,8 @@ find_package(NF_CoreCLR REQUIRED)
 
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
-find_package(NF_Debugger REQUIRED)
+    find_package(NF_Debugger REQUIRED)
+    find_package(NF_Diagnostics REQUIRED)
 endif()
 
 # nF feature: networking
@@ -94,6 +95,7 @@ add_executable(
     # sources for nanoFramework libraries
     "${NF_CoreCLR_SOURCES}"
     "${NF_Debugger_SOURCES}"
+    "${NF_Diagnostics_SOURCES}"
 
     # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
@@ -137,7 +139,8 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     # directories for nanoFramework libraries
     "${NF_CoreCLR_INCLUDE_DIRS}"
     "${NF_Debugger_INCLUDE_DIRS}"
-
+    "${NF_Diagnostics_INCLUDE_DIRS}"
+    
     # includes for nanoFramework APIs
     "${TARGET_NANO_APIS_INCLUDES}"
 
