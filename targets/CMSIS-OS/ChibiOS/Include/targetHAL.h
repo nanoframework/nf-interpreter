@@ -47,10 +47,6 @@ inline void HAL_AssertEx()
 extern int HeapBegin;
 extern int HeapEnd;
 
-// FIXME uncomment? declaration needed here as external?
-// extern char * nanoCLR_Dat_Start;
-// extern char * nanoCLR_Dat_End;
-
 extern uint32_t __nanoImage_start__;
 extern uint32_t __nanoImage_end__;
 extern uint32_t __deployment_start__;
