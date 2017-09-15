@@ -26,17 +26,16 @@ __nfweak HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc
 __nfweak bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    // UNDONE: FIXME 
-    // int  chars = hal_vsnprintf( szBuffer, iBuffer, format, arg );
-    // bool fRes  = (chars >= 0);
 
-    // if(fRes == false) chars = (int)iBuffer;
+    int  chars = hal_vsnprintf( szBuffer, iBuffer, format, arg );
+    bool fRes  = (chars >= 0);
 
-    // szBuffer += chars; szBuffer[ 0 ] = 0;
-    // iBuffer  -= chars;
+    if(fRes == false) chars = (int)iBuffer;
 
-    // return fRes;
-    return true;
+    szBuffer += chars; szBuffer[ 0 ] = 0;
+    iBuffer  -= chars;
+
+    return fRes;
 }
 
 __nfweak bool CLR_SafeSprintf( char*& szBuffer, size_t& iBuffer, const char* format, ... )
