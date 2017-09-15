@@ -164,17 +164,17 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
 #endif
         if (readSize != 0 && writeSize != 0)  // WriteRead
         {
-            i2cStatus = i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, &readData[0], readSize, TIME_INFINITE);
+            i2cStatus = i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, &readData[0], readSize, 2000);
         }
         else
         {
             if (readSize == 0)      //Write
             {
-                i2cStatus = i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, NULL, 0, TIME_INFINITE);
+                i2cStatus = i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, NULL, 0, 2000);
             }
             else                    // Read
             {
-                i2cStatus = i2cMasterReceiveTimeout (cfg.Driver, cfg.SlaveAddress, &readData[0], readSize, TIME_INFINITE);
+                i2cStatus = i2cMasterReceiveTimeout (cfg.Driver, cfg.SlaveAddress, &readData[0], readSize, 2000);
             }
         }
         i2cReleaseBus(cfg.Driver);
