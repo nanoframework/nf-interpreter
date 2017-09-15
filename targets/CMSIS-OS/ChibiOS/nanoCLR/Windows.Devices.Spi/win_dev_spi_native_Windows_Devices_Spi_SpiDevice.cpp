@@ -46,9 +46,12 @@ typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings Spi
 uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputePrescaler (uint8_t bus, int32_t requestedFrequency)
 {
     uint16_t pre = 0;
-	int32_t clock = STM32_SPII2S_MAX >> 1;		// SP1, SPI4, SPI5 and SPI6 on APB2
-	if (bus == 2 || bus == 3) clock >>= 1;		// SPI2 and SPI3 on APB1
-
+#if defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF)
+    int32_t clock = STM32_SPII2S_MAX >> 1;		// SP1, SPI4, SPI5 and SPI6 on APB2
+    if (bus == 2 || bus == 3) clock >>= 1;		// SPI2 and SPI3 on APB1
+#else
+    int32_t clock = 12000000 >> 1;
+#endif
 	if (clock > requestedFrequency << 3)
     {
 		clock >>= 4;
