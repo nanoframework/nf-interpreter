@@ -3,11 +3,19 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <nanoHAL.h>
 #include <nanoHAL_Types.h>
 #include <nanoHAL_Time.h>
 #include <target_platform.h>
 #include <hal.h>
 #include <ch.h>
+
+// Utilities to output date time related strings
+bool Utility_SafeSprintfV( char*& szBuffer, size_t& iBuffer, char* format, va_list arg );
+bool SafeSprintf( char*& szBuffer, size_t& iBuffer,  char* format, ... );
+bool SafeSprintfV( char*& szBuffer, size_t& iBuffer, char* format, va_list arg );
+bool Utility_SafeSprintf( char*& szBuffer, size_t& iBuffer, char* format, ... );
+
 
 // Converts CMSIS sysTicks to .NET ticks (100 nanoseconds)
 signed __int64 HAL_Time_SysTicksToTime(unsigned int sysTicks) {
@@ -67,6 +75,89 @@ signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
 
 #endif
 };
+
+bool SafeSprintf( char*& szBuffer, size_t& iBuffer,  char* format, ... )
+{
+    va_list arg;
+    bool    fRes;
+
+    va_start( arg, format );
+
+    fRes = Utility_SafeSprintfV( szBuffer, iBuffer, format, arg );
+
+    va_end( arg );
+
+    return fRes;
+}
+
+bool SafeSprintfV( char*& szBuffer, size_t& iBuffer, char* format, va_list arg )
+{
+    int  chars = hal_vsnprintf( szBuffer, iBuffer, format, arg );
+    bool fRes  = (chars >= 0);
+
+    if(fRes == false) chars = 0;
+
+    szBuffer += chars; szBuffer[0] = 0;
+    iBuffer  -= chars;
+
+    return fRes;
+}
+
+bool Utility_SafeSprintfV( char*& szBuffer, size_t& iBuffer, char* format, va_list arg )
+{
+    return SafeSprintfV(szBuffer, iBuffer, format, arg);
+}
+
+bool Utility_SafeSprintf( char*& szBuffer, size_t& iBuffer, char* format, ... )
+{
+    va_list arg;
+    bool   fRes;
+
+    va_start( arg, format );
+
+    fRes = SafeSprintfV(szBuffer, iBuffer, format, arg);
+
+    va_end( arg );
+
+    return fRes;
+}
+
+bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
+{
+    uint64_t ticksAbs;
+    uint64_t rest;
+
+    if(ticks < 0)
+    {
+        ticksAbs = -ticks;
+
+        Utility_SafeSprintf( buf, len, "-" );
+    }
+    else
+    {
+        ticksAbs = ticks;
+    }
+
+    rest      = ticksAbs % ( 1000 * TIME_CONVERSION__TICKUNITS);
+    ticksAbs  = ticksAbs / ( 1000 * TIME_CONVERSION__TICKUNITS);  // Convert to seconds.
+
+    if(ticksAbs > TIME_CONVERSION__ONEDAY) // More than one day.
+    {
+        Utility_SafeSprintf( buf, len, "%d.", (int32_t)(ticksAbs / TIME_CONVERSION__ONEDAY) ); ticksAbs %= TIME_CONVERSION__ONEDAY;
+    }
+
+    SafeSprintf( buf, len, "%02d:", (int32_t)(ticksAbs / TIME_CONVERSION__ONEHOUR)  ); ticksAbs %= TIME_CONVERSION__ONEHOUR  ;
+    SafeSprintf( buf, len, "%02d:", (int32_t)(ticksAbs / TIME_CONVERSION__ONEMINUTE)); ticksAbs %= TIME_CONVERSION__ONEMINUTE;
+    SafeSprintf( buf, len, "%02d" , (int32_t)(ticksAbs / TIME_CONVERSION__ONESECOND)); ticksAbs %= TIME_CONVERSION__ONESECOND;
+
+    ticksAbs = (uint32_t)rest;
+    if(ticksAbs)
+    {
+        SafeSprintf( buf, len, ".%07d", (uint32_t)ticksAbs );
+    }
+
+    return len != 0;
+}
 
 unsigned __int64 CPU_MiliSecondsToSysTicks(unsigned __int64 miliSeconds)
 {

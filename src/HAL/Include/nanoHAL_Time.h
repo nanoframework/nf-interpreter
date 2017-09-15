@@ -91,11 +91,10 @@ HRESULT HAL_Time_AccDaysInMonth(signed int year, signed int month, signed int* d
 signed long long HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime);
 
 /// APIs to convert between types
-// FIXME bool     HAL_Time_TimeSpanToStringEx( const signed long long& ticks, char*& buf, size_t& len );
+bool          HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len );
 const char*   HAL_Time_CurrentDateTimeToString();
 
 
- unsigned __int64  CPU_MilisecondsToSysTicks       ( unsigned __int64 miliSeconds    );
-
+unsigned __int64  CPU_MilisecondsToSysTicks       ( unsigned __int64 miliSeconds    );
 
 #endif //_NANOHAL_TIME_H_
