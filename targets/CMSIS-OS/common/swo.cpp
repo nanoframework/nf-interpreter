@@ -65,18 +65,15 @@ extern "C" void SwoPrintString(const char *s)
     }
 }
 
-int CLR_Debug::Printf( const char *format, ... )
+int GenericPort_Write( int portNum, const char* data, size_t size )
 {
-    char    buffer[256];
-    va_list arg_ptr;
-
-    va_start( arg_ptr, format );
-
-   int len = hal_vsnprintf( buffer, sizeof(buffer)-1, format, arg_ptr );
+    char* p = (char*)data;
+    int counter = 0;
 
     // send characters directly to the trace port
-    for( char* p = buffer; *p != '\0' || p-buffer >= 256; ++p )
-    ITM_SendChar( *p );
-
-    va_end( arg_ptr );
+    while(*p != '\0' || counter < size)
+    {
+        ITM_SendChar( *p++ );
+        counter++;
+    }
 }

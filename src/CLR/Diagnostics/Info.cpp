@@ -191,7 +191,8 @@ void CLR_Debug::Emit( const char *text, int len )
 
         if(s_chars > 80 || strchr( s_buffer, '\n' ))
         {
-            ::Watchdog_ResetCounter();
+            // UNDONE: FIXME
+            //::Watchdog_ResetCounter();
 
 #if defined(PLATFORM_WINDOWS_EMULATOR)
             HAL_Windows_Debug_Print( s_buffer );

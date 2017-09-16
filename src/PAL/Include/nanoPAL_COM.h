@@ -13,13 +13,29 @@
 #define COM_MAX_RETRIES  99;
 #define NATIVE_PROFILE_PAL_COM()
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+__nfweak int GenericPort_Write( int portNum, const char* data, size_t size );
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#ifdef __cplusplus
+int DebuggerPort_Write( COM_HANDLE comPortNum, const char* data, size_t size );
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
  bool DebuggerPort_Initialize( COM_HANDLE comPortNum );
  bool DebuggerPort_Uninitialize( COM_HANDLE comPortNum );
- int DebuggerPort_Write( COM_HANDLE comPortNum, const char* data, size_t size);
+ int DebuggerPort_Write( COM_HANDLE comPortNum, const char* data, size_t size, int maxRetries );
  int DebuggerPort_Read( COM_HANDLE comPortNum, char* data, size_t size );
  bool DebuggerPort_Flush( COM_HANDLE comPortNum );
  bool DebuggerPort_IsSslSupported( COM_HANDLE comPortNum );
