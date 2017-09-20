@@ -27,7 +27,7 @@ SECTIONS
         __fini_array_end = .;
     } > XTORS_FLASH AT > XTORS_FLASH_LMA
 
-    .text ALIGN(16) : ALIGN(16)
+    .text : ALIGN(16)
     {
         *(.text)
         *(.text.*)

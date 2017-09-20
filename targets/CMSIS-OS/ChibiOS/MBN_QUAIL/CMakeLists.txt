@@ -17,6 +17,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
 set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
+find_package(BuildUtils REQUIRED)
 find_package(CHIBIOS REQUIRED)
 find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
@@ -277,7 +278,23 @@ else()
 
             # dump target image as source code listing
             COMMAND ${CMAKE_OBJDUMP} -d -EL -S $<TARGET_FILE:${NANOCLR_PROJECT_NAME}.elf> > ${NANOCLR_DUMP_FILE}
-
+           
             COMMENT "Generate nanoCLR HEX and BIN files for deployment, LST file for debug")
+
+endif()
+
+
+# if HEX2DFU tool is available pack the binaries into a DFU package
+if(HEX2DFU_TOOL_AVAILABLE)
+
+    ####################################################################################################
+    ## when changing the linker file make sure to update the new addresses for the image files bellow ##
+    ## DO NOT use the leading 0x notation, just the address in plain hexadecimal formating            ##
+    ####################################################################################################
+    NF_GENERATE_DFU_PACKAGE(
+        ${NANOBOOTER_BIN_FILE} 08000000 
+        ${NANOCLR_BIN_FILE} 08008000 
+        ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu
+    )
 
 endif()
