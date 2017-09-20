@@ -29,6 +29,7 @@
         "description$": "<description-here>",
         "settings": {
             "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>",
+            "TOOL_HEX2DFU_PREFIX" : "<path-to-hex2dfu-utility-mind-the-forward-slash>",
             "TARGET_SERIES" : "<series-name-of-the-target-chip-STM32F0xx-STM32F4xx-STM32F7xx>",
             "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
             "CHIBIOS_VERSION" : "<N.N.N>",
@@ -51,6 +52,7 @@
         "description$": "<description-here>",
         "settings": {
             "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>",
+            "TOOL_HEX2DFU_PREFIX" : "<path-to-hex2dfu-utility-mind-the-forward-slash>",
             "TARGET_SERIES" : "<series-name-of-the-target-chip-STM32F0xx-STM32F4xx-STM32F7xx>",
             "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
             "CHIBIOS_VERSION" : "<N.N.N>",
