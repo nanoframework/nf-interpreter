@@ -156,6 +156,7 @@ set(NF_CoreCLR_SRCS
     # PAL stubs
     Async_stubs.cpp
     COM_stubs.c
+    GenericPort_stubs.c
 )
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
