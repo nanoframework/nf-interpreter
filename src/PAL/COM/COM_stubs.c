@@ -22,7 +22,7 @@ __nfweak int DebuggerPort_Write(COM_HANDLE comPortNum, const char* data, size_t 
 {
     NATIVE_PROFILE_PAL_COM();
 
-    // minimum implementation is calling generic port
+    // minimum implementation is calling generic port to be able to use SWO (if available)
     GenericPort_Write( comPortNum, data, size );
 
     return 0;
