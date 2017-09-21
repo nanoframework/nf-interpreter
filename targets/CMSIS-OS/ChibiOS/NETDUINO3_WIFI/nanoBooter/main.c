@@ -72,6 +72,7 @@ int main(void) {
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
+  osDelay(20);		// Let init stabilize
 
   //  Initializes a serial-over-USB CDC driver.
   sduObjectInit(&SDU1);
