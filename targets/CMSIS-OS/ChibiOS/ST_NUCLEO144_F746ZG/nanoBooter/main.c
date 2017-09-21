@@ -47,6 +47,11 @@ int main(void) {
   SwoInit();
   #endif
 
+  // The kernel is initialized but not started yet, this means that
+  // main() is executing with absolute priority but interrupts are already enabled.
+  osKernelInitialize();
+  osDelay(20);    // Let init stabilize
+
   // the following IF is not mandatory, it's just providing a way for a user to 'force'
   // the board to remain in nanoBooter and not launching nanoCLR
 
@@ -62,10 +67,6 @@ int main(void) {
       LaunchCLR((uint32_t)&__nanoImage_end__);
     }
   }
-
-  // The kernel is initialized but not started yet, this means that
-  // main() is executing with absolute priority but interrupts are already enabled.
-  osKernelInitialize();
 
   //  Initializes a serial-over-USB CDC driver.
   sduObjectInit(&SDU1);

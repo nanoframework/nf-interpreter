@@ -8,7 +8,6 @@
 #include <cmsis_os.h>
 
 #include <usbcfg.h>
-#include <swo.h>
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <LaunchCLR.h>
@@ -55,11 +54,6 @@ int main(void) {
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
-  
-  // init SWO as soon as possible to make it available to output ASAP
-  #if (SWO_OUTPUT == TRUE)  
-  SwoInit();
-  #endif
   
   // check for valid CLR image at address contiguous to nanoBooter
   if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
