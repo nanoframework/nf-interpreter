@@ -177,11 +177,14 @@ endif()
 target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC $<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:-DPLATFORM_EMULATED_FLOATINGPOINT>)
 target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC $<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:-DPLATFORM_EMULATED_FLOATINGPOINT>)
 
-# using FPU requires enabling printf with FP support for newlib nano, but just for nanoCLR target, don't need that for nanoBooter
-if(USE_FPU_IS_TRUE)
-    set_target_properties( ${NANOCLR_PROJECT_NAME}.elf PROPERTIES C_STANDARD "-u _printf_float" )
-    set_target_properties( ${NANOCLR_PROJECT_NAME}.elf PROPERTIES CXX_STANDARD "-u _printf_float" )
-endif()
+# set compiler options
+nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
+
+# set link options
+# using FPU requires enabling printf with FP support for newlib nano, but just for nanoCLR target, don't need to overload nanoBooter with that
+nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf FALSE)
+nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf TRUE)
 
 # set compiler definition for FPU
 target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC -DCORTEX_USE_FPU=$<$<BOOL:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:FALSE>)
@@ -193,29 +196,12 @@ if(NF_FEATURE_USE_APPDOMAINS)
     target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DNANOCLR_USE_APPDOMAINS)
 endif()
 
-# set extra linker flags for DEBUG
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
-
-# set extra linker flags for RELEASE
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_RELEASE " -flto ")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_RELEASE " -flto ")
-
-# add linker flags set with traditional CMAKE_EXE_LINKER_FLAGS
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
-
-# add linker flags to generate map file
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.map")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.map")
-
 # add other linker flags
 ###################################################
 # the size of the CLR managed heap is defined here
 ###################################################
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x0")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x29600")
-
+set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x0")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x29600")
 
 set(NANOBOOTER_HEX_FILE ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.hex)
 set(NANOCLR_HEX_FILE ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.hex)
@@ -227,4 +213,4 @@ set(NANOBOOTER_DUMP_FILE ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.
 set(NANOCLR_DUMP_FILE ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.lst)
 
 # generate HEX, BIN and LST files as needed
-NF_GENERATE_BUILD_OUTPUT_FILES()
+nf_generate_build_output_files()

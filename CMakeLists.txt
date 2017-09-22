@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.7)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
 
-# set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
+set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
 
 # the following prevents launchin a build in the source tree
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -135,7 +135,15 @@ string(TOLOWER TOOLCHAIN_LOWER ${TOOLCHAIN})
 ##########################################
 
 if(RTOS_CHIBIOS_CHECK)
-
+    
+    # check for toolchain path
+    if(NOT TOOLCHAIN_PREFIX)
+         message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
+         message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
+         message(STATUS "########################################\n\n")
+         message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
+    endif()
+    
     message(STATUS "\nSetting Toolchain file for ChibiOS \n")
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
@@ -210,6 +218,38 @@ message(STATUS "Build  directory is '${PROJECT_BINARY_DIR}'.")
 message(STATUS "Toolchain is '${TOOLCHAIN}'.")
 message(STATUS "")
 #######################
+
+        
+#################################################################
+# clear CMAKE_C_FLAGS_INIT and CMAKE_CXX_FLAGS_INIT
+# (this needs to be here and not before because by now 
+# the compiler detection has already occurred)
+set(CMAKE_C_FLAGS "" CACHE INTERNAL "clear c compiler flags")
+set(CMAKE_CXX_FLAGS "" CACHE INTERNAL "clear cxx compiler flags")
+#################################################################
+
+
+#################################################################
+# clear some CMake flavor flags that are being set as default 
+# in the GNU compiler init
+# we want to control and fine tune these
+set(CMAKE_C_FLAGS_DEBUG "" CACHE INTERNAL "clear c compiler flags")
+set(CMAKE_C_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c compiler flags")
+set(CMAKE_C_FLAGS_RELEASE "" CACHE INTERNAL "clear c compiler flags")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c compiler flags")
+set(CMAKE_CXX_FLAGS_DEBUG "" CACHE INTERNAL "clear c++ compiler flags")
+set(CMAKE_CXX_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c++ compiler flags")
+set(CMAKE_CXX_FLAGS_RELEASE "" CACHE INTERNAL "clear c++ compiler flags")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c++ compiler flags")
+#################################################################
+
+
+#################################################################
+# clear default libraries that are set by CMake
+# we want to control 
+set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c linker default libs")
+set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
+#################################################################
 
 
 #################################################################
