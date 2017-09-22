@@ -285,6 +285,19 @@ if(NF_FEATURE_DEBUGGER)
 endif()
 
 #################################################################
+# RTM (Build RTM version of firmware (default is OFF so the build is not RTM and the CLR outputs some debug informations)
+option(NF_BUILD_RTM "option to build the RTM firmware")
+
+if(NF_BUILD_RTM)
+    set(HAL_BUILD_RTM TRUE CACHE INTERNAL "NF Build RTM")
+	message(STATUS "Building RTM firmware")
+else()    
+    set(HAL_BUILD_RTM FALSE CACHE INTERNAL "NF Build RTM")
+endif()
+
+#################################################################
+
+#################################################################
 # RTC (real time clock) (default is OFF so RTC is NOT included)
 option(NF_FEATURE_RTC "option to use hardware RTC")
 

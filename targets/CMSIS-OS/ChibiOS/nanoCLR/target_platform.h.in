@@ -14,6 +14,9 @@
 // set preference to enable (or not) the RTC subsystem
 #define HAL_USE_RTC @HAL_USE_RTC_OPTION@
 
+// set the Build RTM option
+#define BUILD_RTM @HAL_BUILD_RTM@
+
 // takes care of enabling the HAL subsystems required for API options
 
 // enable SPI
