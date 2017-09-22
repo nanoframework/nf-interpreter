@@ -51,7 +51,7 @@ REGION_ALIAS("RODATA_FLASH", flash);
 REGION_ALIAS("RODATA_FLASH_LMA", flash);
 
 /* Flash region to be used for various.*/
-REGION_ALIAS("VARIOUS_FLASH", flash);
+REGION_ALIAS("VARIOUS_FLASH", flash_itcm);
 REGION_ALIAS("VARIOUS_FLASH_LMA", flash);
 
 /* Flash region to be used for RAM(n) initialization data.*/

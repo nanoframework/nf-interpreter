@@ -47,7 +47,7 @@ REGION_ALIAS("TEXT_FLASH", flash_itcm);
 REGION_ALIAS("TEXT_FLASH_LMA", flash);
 
 /* Flash region to be used for read only data.*/
-REGION_ALIAS("RODATA_FLASH", flash_itcm);
+REGION_ALIAS("RODATA_FLASH", flash);
 REGION_ALIAS("RODATA_FLASH_LMA", flash);
 
 /* Flash region to be used for various.*/
