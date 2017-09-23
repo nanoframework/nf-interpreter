@@ -485,7 +485,7 @@ bool CLR_DBG_Debugger::CheckPermission( ByteAddress address, int mode )
             break;
         case AccessMemory_Read:
 #if defined(BUILD_RTM)
-            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]))
+            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
                 break;
 #endif
             switch(range.RangeType)
@@ -506,7 +506,7 @@ bool CLR_DBG_Debugger::CheckPermission( ByteAddress address, int mode )
             break;
         case AccessMemory_Write:
 #if defined(BUILD_RTM)
-            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]))
+            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
                 break;
 #endif
             if(BlockRange_IsDeployment(range) || BlockRange_IsConfig(range))
@@ -520,7 +520,7 @@ bool CLR_DBG_Debugger::CheckPermission( ByteAddress address, int mode )
             break;
         case AccessMemory_Erase:
 #if defined(BUILD_RTM)
-            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]))
+            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
                 break;
 #endif
             switch(range.RangeType)
@@ -830,7 +830,7 @@ bool CLR_DBG_Debugger::Monitor_Execute( WP_Message* msg)
     CLR_DBG_Commands::Monitor_Execute* cmd = (CLR_DBG_Commands::Monitor_Execute*)msg->m_payload;
 
 #if defined(BUILD_RTM)
-    if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]))
+    if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
         return false;
 #endif
 
@@ -848,11 +848,12 @@ bool CLR_DBG_Debugger::Monitor_Reboot( WP_Message* msg)
     CLR_DBG_Commands::Monitor_Reboot* cmd = (CLR_DBG_Commands::Monitor_Reboot*)msg->m_payload;
 
 #if defined(BUILD_RTM)
-    if(COM_IsSock(g_CLR_DBG_Debugger->m_messaging->m_port))
-    {
-        if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]))
+    //FIXME: COM_IsSock() is not defined
+    //if(COM_IsSock(g_CLR_DBG_Debugger->m_messaging->m_port))
+    //{
+        if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
             return false;
-    }
+    //}
 #endif
 
     if(NULL != cmd)
