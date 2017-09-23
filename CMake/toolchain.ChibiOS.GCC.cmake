@@ -103,7 +103,7 @@ function(NF_SET_OPTIMIZATION_OPTIONS TARGET)
 
     target_compile_options(${TARGET} PRIVATE
         $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-        $<$<CONFIG:Release>:-Os -flto -fno-strict-aliasing>
+        $<$<CONFIG:Release>:-O3 -flto -fno-strict-aliasing>
         $<$<CONFIG:MinSizeRel>:-Os -flto -fno-strict-aliasing>
         $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
     )

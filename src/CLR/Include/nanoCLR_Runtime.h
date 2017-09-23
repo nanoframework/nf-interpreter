@@ -2872,7 +2872,7 @@ struct CLR_RT_ExecutionEngine
     size_t                                               m_breakpointsActiveNum;
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if !defined(BUILD_RTM) || defined(_WIN32)
+#if (BUILD_RTM == FALSE) || defined(_WIN32)
     bool m_fPerformGarbageCollection;   //Should the EE do a GC every context switch
     bool m_fPerformHeapCompaction;      //Should the EE do a Compaction following every GC
 #endif

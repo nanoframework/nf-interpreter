@@ -212,7 +212,8 @@ extern "C" {
 }
 #endif
 
-typedef struct DEVICEBLOCKINFO
+//typedef struct DEVICEBLOCKINFO
+struct DEVICEBLOCKINFO
 {
     MediaAttribute Attribute;
 

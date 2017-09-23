@@ -51,7 +51,7 @@ int s_CLR_RT_fTrace_GC                         = NANOCLR_TRACE_DEFAULT(c_CLR_RT_
 int s_CLR_RT_fTrace_SimulateSpeed              = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_None);
 #endif
 
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
 int s_CLR_RT_fTrace_AssemblyOverhead           = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_None);
 #endif
 
@@ -1631,7 +1631,7 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
 
         assm->Assembly_Initialize( offsets );
         
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
         CLR_Debug::Printf( "   Assembly: %s (%d.%d.%d.%d)  ", assm->m_szName, header->version.iMajorVersion, header->version.iMinorVersion, header->version.iBuildNumber, header->version.iRevisionNumber );
 
         if(s_CLR_RT_fTrace_AssemblyOverhead >= c_CLR_RT_Trace_Info)
@@ -1728,7 +1728,7 @@ bool CLR_RT_Assembly::Resolve_AssemblyRef( bool fOutput )
 
             if(target == NULL || (target->m_flags & CLR_RT_Assembly::Resolved) == 0)
             {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
                 if(fOutput)
                 {
                     CLR_Debug::Printf( "Assembly: %s (%d.%d.%d.%d)", m_szName, m_header->version.iMajorVersion, m_header->version.iMinorVersion, m_header->version.iBuildNumber, m_header->version.iRevisionNumber );
@@ -1786,7 +1786,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
 
             if(inst.InitializeFromIndex( m_pCrossReference_TypeRef[ src->scope & 0x7FFF ].m_target ) == false)
             {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
                 CLR_Debug::Printf( "Resolve: unknown scope: %08x\r\n", src->scope );
 #endif
                 NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown scope: %08x\r\n", src->scope);
@@ -1795,7 +1795,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
             const char* szName = GetString( src->name );
             if(inst.m_assm->FindTypeDef( szName, inst.Type(), dst->m_target ) == false)
             {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
                 CLR_Debug::Printf( "Resolve: unknown type: %s\r\n", szName );
 #endif
 				NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown type: %s\r\n", szName);
@@ -1813,7 +1813,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
             const char* szName      = GetString( src->name      );
             if(assm->FindTypeDef( szName, szNameSpace, dst->m_target ) == false)
             {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
                 CLR_Debug::Printf( "Resolve: unknown type: %s.%s\r\n", szNameSpace, szName );
 #endif
 
@@ -1838,7 +1838,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
 
         if(inst.InitializeFromIndex( m_pCrossReference_TypeRef[ src->container ].m_target ) == false)
         {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
             CLR_Debug::Printf( "Resolve Field: unknown scope: %08x\r\n", src->container );
 #endif
 
@@ -1849,7 +1849,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
 
         if(inst.m_assm->FindFieldDef( inst.m_target, szName, this, src->sig, dst->m_target ) == false)
         {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
             CLR_Debug::Printf( "Resolve: unknown field: %s\r\n", szName );
 #endif
 
@@ -1873,7 +1873,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
         if(inst.InitializeFromIndex( m_pCrossReference_TypeRef[ src->container ].m_target ) == false)
         {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
             CLR_Debug::Printf( "Resolve Field: unknown scope: %08x\r\n", src->container );
 #endif
 
@@ -1901,7 +1901,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             const CLR_RECORD_TYPEDEF* qTD   = inst.m_target;
             CLR_RT_Assembly*          qASSM = inst.m_assm;
 
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
             CLR_Debug::Printf( "Resolve: unknown method: %s.%s.%s\r\n", qASSM->GetString( qTD->nameSpace ), qASSM->GetString( qTD->name ), name );
 #endif
 
@@ -3695,7 +3695,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
         {
             if(fNeedResolution)
             {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
                 CLR_Debug::Printf( "Link failure: some assembly references cannot be resolved!!\r\n\r\n" );
 #endif
 
@@ -3708,7 +3708,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
         }
     }
 
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
 
     if(s_CLR_RT_fTrace_AssemblyOverhead >= c_CLR_RT_Trace_Info)
     {

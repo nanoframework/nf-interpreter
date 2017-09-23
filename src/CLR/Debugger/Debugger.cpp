@@ -10,7 +10,7 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
 #include "Debugger.h"
-
+#include <target_platform.h>
 #include <corlib_native.h>
 
 #define __min(a,b) (((a) < (b)) ? (a) : (b))
@@ -39,7 +39,7 @@ void CLR_DBG_Debugger::Debugger_WaitForCommands()
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
     // UNDONE: FIXME: hal_fprintf(STREAM_LCD, "\r\nWaiting for debug commands...\r\n");
     CLR_Debug::Printf( "Waiting for debug commands...\r\n" );
 #endif
@@ -484,8 +484,8 @@ bool CLR_DBG_Debugger::CheckPermission( ByteAddress address, int mode )
             hasPermission = true;
             break;
         case AccessMemory_Read:
-#if defined(BUILD_RTM)
-            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]))
+#if (BUILD_RTM == TRUE)
+            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
                 break;
 #endif
             switch(range.RangeType)
@@ -505,8 +505,8 @@ bool CLR_DBG_Debugger::CheckPermission( ByteAddress address, int mode )
             }
             break;
         case AccessMemory_Write:
-#if defined(BUILD_RTM)
-            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]))
+#if (BUILD_RTM == TRUE)
+            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
                 break;
 #endif
             if(BlockRange_IsDeployment(range) || BlockRange_IsConfig(range))
@@ -519,8 +519,8 @@ bool CLR_DBG_Debugger::CheckPermission( ByteAddress address, int mode )
             }
             break;
         case AccessMemory_Erase:
-#if defined(BUILD_RTM)
-            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]))
+#if (BUILD_RTM == TRUE)
+            if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
                 break;
 #endif
             switch(range.RangeType)
@@ -829,8 +829,8 @@ bool CLR_DBG_Debugger::Monitor_Execute( WP_Message* msg)
 
     CLR_DBG_Commands::Monitor_Execute* cmd = (CLR_DBG_Commands::Monitor_Execute*)msg->m_payload;
 
-#if defined(BUILD_RTM)
-    if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]))
+#if (BUILD_RTM == TRUE)
+    if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
         return false;
 #endif
 
@@ -847,12 +847,12 @@ bool CLR_DBG_Debugger::Monitor_Reboot( WP_Message* msg)
     
     CLR_DBG_Commands::Monitor_Reboot* cmd = (CLR_DBG_Commands::Monitor_Reboot*)msg->m_payload;
 
-#if defined(BUILD_RTM)
-    if(COM_IsSock(g_CLR_DBG_Debugger->m_messaging->m_port))
-    {
-        if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPorts[ 0 ]))
+#if (BUILD_RTM == TRUE)
+    //if(COM_IsSock(g_CLR_DBG_Debugger->m_messaging->m_port))
+    //{
+        if(!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
             return false;
-    }
+    //}
 #endif
 
     if(NULL != cmd)
