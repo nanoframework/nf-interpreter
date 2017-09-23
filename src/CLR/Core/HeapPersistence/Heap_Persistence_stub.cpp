@@ -216,7 +216,7 @@ __nfweak void CLR_RT_Persistence_Manager::Flush()
 
 //--//
 
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
 __nfweak void CLR_RT_Persistence_Manager::GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse )
 {
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();

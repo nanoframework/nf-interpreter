@@ -117,7 +117,7 @@ void CLR_HW_Hardware::ProcessActivity()
 #if defined(PLATFORM_ARM)
         if(CLR_EE_DBG_IS(RebootPending))
         {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
             CLR_Debug::Printf( "Rebooting...\r\n" );
 #endif
 

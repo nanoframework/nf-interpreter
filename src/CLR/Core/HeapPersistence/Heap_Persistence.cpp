@@ -512,7 +512,7 @@ bool CLR_RT_Persistence_Manager::Bank::WriteNonXIPData(FLASH_WORD* dst, CLR_UINT
     // if SupportsXIP then error?
     if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
     {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
         CLR_Debug::Printf("Error at try to write Non-XIP but found XIP\r\n");
 #endif        
         return false;
@@ -538,7 +538,7 @@ bool CLR_RT_Persistence_Manager::Bank::FindBankWriteNonXIPData( FLASH_WORD* dst,
 
     else
     {
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
         CLR_Debug::Printf("No right Persistence bank address found!!! (%x)\r\n",(unsigned int)dst );
 #endif
         return false;
@@ -1219,7 +1219,7 @@ void CLR_RT_Persistence_Manager::Flush()
 
 //--//
 
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
 
 void CLR_RT_Persistence_Manager::GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse )
 {

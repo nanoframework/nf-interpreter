@@ -1184,7 +1184,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
     //m_currentException is still set, but we return PROCESS_EXCEPTION signalling that there is no hope for the thread,
     //which causes Thread::Execute to terminate it.
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-#if !defined(BUILD_RTM)
+#if (BUILD_RTM == FALSE)
     //special case thread abort exception
     if((this->m_flags & CLR_RT_Thread::TH_F_Aborted) == 0)
     {
