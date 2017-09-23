@@ -148,6 +148,7 @@
  
 
  // Christophe : what are those "lines" used for ?
+
 #define LINE_INT1              		PAL_LINE(GPIOA, 1U)
 #define LINE_RST1              		PAL_LINE(GPIOA, 2U)
 #define LINE_CS1                 	PAL_LINE(GPIOA, 3U)
@@ -234,6 +235,7 @@
 
 #define LINE_OSC_IN                 PAL_LINE(GPIOH, 0U)
 #define LINE_OSC_OUT                PAL_LINE(GPIOH, 1U)
+
 
 /*
  * I/O ports initial setup, this configuration is established soon after reset
