@@ -12,7 +12,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Settings_WITH_WRONG_NAME_FOR_TESTING
+struct Settings
 #if defined(_WIN32)
 : CLR_RT_ParseOptions
 #endif
