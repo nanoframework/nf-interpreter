@@ -312,7 +312,7 @@ endif()
 #################################################################
 # enables Application Domains support in nanoCLR
 # (default is OFF so Application Domains is NOT supported)
-option(NF_FEATURE_USE_APPDOMAINS "option to use hardware RTC")
+option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")
 
 if(NF_FEATURE_USE_APPDOMAINS)
     message(STATUS "Application Domains support is included")
