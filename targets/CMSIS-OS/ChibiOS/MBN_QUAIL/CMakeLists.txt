@@ -214,3 +214,18 @@ set(NANOCLR_DUMP_FILE ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.lst)
 
 # generate HEX, BIN and LST files as needed
 nf_generate_build_output_files()
+
+# if HEX2DFU tool is available pack the binaries into a DFU package
+if(HEX2DFU_TOOL_AVAILABLE)
+
+    ####################################################################################################
+    ## when changing the linker file make sure to update the new addresses for the image files bellow ##
+    ## DO NOT use the leading 0x notation, just the address in plain hexadecimal formating            ##
+    ####################################################################################################
+    NF_GENERATE_DFU_PACKAGE(
+        ${NANOBOOTER_BIN_FILE} 08000000 
+        ${NANOCLR_BIN_FILE} 08008000 
+        ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu
+    )
+
+endif()
