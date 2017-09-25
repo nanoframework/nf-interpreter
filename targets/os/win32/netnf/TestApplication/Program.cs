@@ -32,7 +32,7 @@ namespace NF.TestApplication_NEW
             ////////////////////////////////////////////////////////////////////////////////////
             // ToString() test
             int thisIsAnInteger = 64;
-            var testString = thisIsAnInteger.ToString();
+            var testString = thisIsAnInteger_WRONG_NAME.ToString();
 
             
             ////////////////////////////////////////////////////////////////////////////////////
