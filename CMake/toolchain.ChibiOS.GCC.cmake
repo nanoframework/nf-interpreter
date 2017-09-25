@@ -74,7 +74,7 @@ set(CMAKE_C_EXTENSIONS OFF CACHE INTERNAL "C compiler extensions OFF")
 set(CMAKE_CXX_EXTENSIONS OFF CACHE INTERNAL "C++ compiler extensions OFF")
 
 
-function(CHIBIOS_ADD_HEX_BIN_DUMP_TARGETS TARGET)
+function(NF_ADD_HEX_BIN_DUMP_TARGETS TARGET)
     if(EXECUTABLE_OUTPUT_PATH)
         set(FILENAME "${EXECUTABLE_OUTPUT_PATH}/${TARGET}")
     else()
@@ -89,7 +89,7 @@ function(CHIBIOS_ADD_HEX_BIN_DUMP_TARGETS TARGET)
 endfunction()
 
 
-function(CHIBIOS_PRINT_SIZE_OF_TARGETS TARGET)
+function(NF_PRINT_SIZE_OF_TARGETS TARGET)
     if(EXECUTABLE_OUTPUT_PATH)
       set(FILENAME "${EXECUTABLE_OUTPUT_PATH}/${TARGET}")
     else()
@@ -113,12 +113,45 @@ endfunction()
 
 function(NF_SET_LINK_MAP TARGET) 
 
-
     # need to remove the .elf suffix from target name
     string(FIND ${TARGET} "." TARGET_EXTENSION_DOT_INDEX)
     string(SUBSTRING ${TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
     
     # add linker flags to generate map file
     set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${TARGET_SHORT}.map,--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
+
+endfunction()
+
+
+function(NF_SET_COMPILER_DEFINITIONS TARGET)
+
+    # definition for platform (always ARM here)
+    target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM ")
+
+    # set compiler definitions related with the build type
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+        # build types that include debug have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
+        target_compile_definitions(${TARGET} PUBLIC "-DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
+    endif()
+
+    # set compiler definition for platform emulated floating point according to FPU
+    # no FPU requires FP emulation from the platform
+    target_compile_definitions(${TARGET} PUBLIC $<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:-DPLATFORM_EMULATED_FLOATINGPOINT>)
+
+    # set compiler definition for CORTEX according to FPU
+    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=$<$<BOOL:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:FALSE>)
+
+    # set compiler definition for using Application Domains feature
+    if(NF_FEATURE_USE_APPDOMAINS)
+        target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
+    endif()
+
+endfunction()
+
+
+function(NF_SET_LINKER_FILE TARGET LINKER_FILE_NAME)
+
+    # set linker file name
+    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "-T${LINKER_FILE_NAME}")
 
 endfunction()

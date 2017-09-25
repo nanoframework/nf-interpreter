@@ -138,18 +138,3 @@ list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Chib
 #
 # list(APPEND CHIBIOS_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/<path-here>)
 ##########################################################################################################################
-
-
-#######################################################################################################################################
-# this function sets the linker options AND a specific linker file (full path and name, including extension)
-function(CHIBIOS_SET_LINKER_OPTIONS_AND_FILE TARGET LINKER_FILE_NAME)
-
-    get_target_property(TARGET_LD_FLAGS ${TARGET} LINK_FLAGS)
-    if(TARGET_LD_FLAGS)
-        set(TARGET_LD_FLAGS "-T${LINKER_FILE_NAME} ${TARGET_LD_FLAGS}")
-    else()
-        set(TARGET_LD_FLAGS "-T${LINKER_FILE_NAME}")
-    endif()
-    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS ${TARGET_LD_FLAGS})
-
-endfunction()

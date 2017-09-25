@@ -150,51 +150,22 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 )
 
-###################
-# set linker files
-CHIBIOS_SET_LINKER_OPTIONS_AND_FILE(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/mbn_quail_booter.ld)
-CHIBIOS_SET_LINKER_OPTIONS_AND_FILE(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/mbn_quail_CLR.ld)
-###################
-
-CHIBIOS_ADD_HEX_BIN_DUMP_TARGETS(${NANOBOOTER_PROJECT_NAME}.elf)
-CHIBIOS_ADD_HEX_BIN_DUMP_TARGETS(${NANOCLR_PROJECT_NAME}.elf)
-
-CHIBIOS_PRINT_SIZE_OF_TARGETS(${NANOBOOTER_PROJECT_NAME}.elf)
-CHIBIOS_PRINT_SIZE_OF_TARGETS(${NANOCLR_PROJECT_NAME}.elf)
-
-# set extra compiler flags, some are related with the build type
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-# build types that include debug have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
-    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ARM -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
-    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ARM -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
-else()
-    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ARM ")
-    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ARM ")
-endif()
-
-# set compiler definition for platform emulated floating point according to FPU
-# no FPU requires FP emulation from the platform
-target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC $<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:-DPLATFORM_EMULATED_FLOATINGPOINT>)
-target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC $<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:-DPLATFORM_EMULATED_FLOATINGPOINT>)
-
 # set compiler options
 nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
-# set link options
+# set compiler definitions
+nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
+
+# set linker file
+nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/mbn_quail_booter.ld)
+nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/mbn_quail_CLR.ld)
+
+# set linker options
 # using FPU requires enabling printf with FP support for newlib nano, but just for nanoCLR target, don't need to overload nanoBooter with that
 nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf FALSE)
 nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf TRUE)
-
-# set compiler definition for FPU
-target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC -DCORTEX_USE_FPU=$<$<BOOL:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:FALSE>)
-target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DCORTEX_USE_FPU=$<$<BOOL:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:FALSE>)
-
-# set compiler definition for using Application Domains feature
-if(NF_FEATURE_USE_APPDOMAINS)
-    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC -DNANOCLR_USE_APPDOMAINS)
-    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DNANOCLR_USE_APPDOMAINS)
-endif()
 
 # add other linker flags
 ###################################################
@@ -203,17 +174,9 @@ endif()
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x0")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__clr_managed_heap_size__=0x9000")
 
-set(NANOBOOTER_HEX_FILE ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.hex)
-set(NANOCLR_HEX_FILE ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.hex)
-set(NANOBOOTER_S19_FILE ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.s19)
-set(NANOCLR_S19_FILE ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.s19)
-set(NANOBOOTER_BIN_FILE ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin)
-set(NANOCLR_BIN_FILE ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin)
-set(NANOBOOTER_DUMP_FILE ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.lst)
-set(NANOCLR_DUMP_FILE ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.lst)
-
-# generate HEX, BIN and LST files as needed
-nf_generate_build_output_files()
+# generate output files
+nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
+nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
 
 # if HEX2DFU tool is available pack the binaries into a DFU package
 if(HEX2DFU_TOOL_AVAILABLE)
