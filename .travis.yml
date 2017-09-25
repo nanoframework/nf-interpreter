@@ -1,66 +1,81 @@
-###
-
 language: c #NOTE: this will set CC=gcc which might cause trouble
-
 sudo: required
-
 # Do not build branches of the form "pr/*". By prefixing pull requests coming
 # from branches inside the repository with pr/, this avoids building both the
 # branch push _and_ the pull request.
 branches:
-  except: /pr\/.*/
-
+  except: "/pr\\/.*/"
 # Workaround for https://github.com/travis-ci/travis-ci/issues/4681
 matrix:
-   exclude:
-    - env: TRAVIS_EMPTY_JOB_WORKAROUND=true
+  exclude:
+  - env: TRAVIS_EMPTY_JOB_WORKAROUND=true
 
-   include:
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON"
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=ST_STM32F429I_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON"
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=ST_NUCLEO64_F091RC -DTARGET_SERIES=STM32F0xx -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF"
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=ST_NUCLEO144_F746ZG -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON"
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=MBN_QUAIL -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON"
-    - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update -DCHIBIOS_BOARD=ST_STM32F769I_DISCOVERY -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DNF_FEATURE_USE_NETWORKING=ON"
+  include:
+  - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
+      -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE
+      -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON
+      -DAPI_Windows.Devices.Gpio=ON"
+  - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
+      -DCHIBIOS_BOARD=ST_STM32F429I_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE
+      -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON
+      -DAPI_Windows.Devices.Gpio=ON"
+  - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
+      -DCHIBIOS_BOARD=ST_NUCLEO64_F091RC -DTARGET_SERIES=STM32F0xx -DCMAKE_BUILD_TYPE=MinSizeRel
+      -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF"
+  - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
+      -DCHIBIOS_BOARD=ST_NUCLEO144_F746ZG -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE
+      -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON
+      -DAPI_Windows.Devices.Gpio=ON"
+  - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
+      -DCHIBIOS_BOARD=MBN_QUAIL -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel
+      -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON
+      -DAPI_Windows.Devices.Spi=ON"
+  - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
+      -DCHIBIOS_BOARD=ST_STM32F769I_DISCOVERY -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE
+      -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON
+      -DAPI_Windows.Devices.Gpio=ON -DNF_FEATURE_USE_NETWORKING=ON"
 
 ## cache GCC toolchain to speedup next builds
 cache:
   directories:
-    - $HOME/gcc-arm-none-eabi-6-2017-q1-update
+  - "$HOME/gcc-arm-none-eabi-6-2017-q1-update"
 
 install:
 ## Install CMake
-  - mkdir $HOME/usr
-  - export PATH="$HOME/usr/bin:$PATH"
-  - wget --no-check-certificate https://cmake.org/files/v3.9/cmake-3.9.1-Linux-x86_64.sh
-  - chmod +x cmake-3.9.1-Linux-x86_64.sh
-  - ./cmake-3.9.1-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
+- mkdir $HOME/usr
+- export PATH="$HOME/usr/bin:$PATH"
+- wget --no-check-certificate https://cmake.org/files/v3.9/cmake-3.9.1-Linux-x86_64.sh
+- chmod +x cmake-3.9.1-Linux-x86_64.sh
+- "./cmake-3.9.1-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license"
 
 
-  ## Install mainline ARM toolchain 
-  - export GCC_DIR=$HOME/gcc-arm-none-eabi-6-2017-q1-update
-  - export GCC_ARCHIVE=$HOME/gcc-arm-none-eabi-6-2017-q1-update-linux.tar.bz2
-  - export GCC_URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/6_1-2017q1/gcc-arm-none-eabi-6-2017-q1-update-linux.tar.bz2?product=GNU%20ARM%20Embedded%20Toolchain,64-bit,,Linux,6-2017-q1-update
-  - if [ ! -e $GCC_DIR/bin/arm-none-eabi-g++ ]; then wget $GCC_URL -O $GCC_ARCHIVE; tar xfj $GCC_ARCHIVE -C $HOME; fi
-
-  - export PATH=$PATH:$GCC_DIR/bi
-
+## Install mainline ARM toolchain 
+- export GCC_DIR=$HOME/gcc-arm-none-eabi-6-2017-q1-update
+- export GCC_ARCHIVE=$HOME/gcc-arm-none-eabi-6-2017-q1-update-linux.tar.bz2
+- export GCC_URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/6_1-2017q1/gcc-arm-none-eabi-6-2017-q1-update-linux.tar.bz2?product=GNU%20ARM%20Embedded%20Toolchain,64-bit,,Linux,6-2017-q1-update
+- if [ ! -e $GCC_DIR/bin/arm-none-eabi-g++ ]; then wget $GCC_URL -O $GCC_ARCHIVE;
+  tar xfj $GCC_ARCHIVE -C $HOME; fi
+- export PATH=$PATH:$GCC_DIR/bi
 addons:
   apt:
     packages:
-      - libc6-i386
-      - libstdc++6:i386
+    - libc6-i386
+    - libstdc++6:i386
 
 before_script:
-  #- sudo apt-get update
-
-  ############################################################################
-  # Go back to the root of the project and setup the build directory
-  ############################################################################
-  - cd ${TRAVIS_BUILD_DIR}
+############################################################################
+# Go back to the root of the project and setup the build directory
+############################################################################
+- cd ${TRAVIS_BUILD_DIR}
 
 script:
-  - mkdir build && cd build && cmake ${CMAKE_OPTIONS} .. && cmake --build .
+- mkdir build && cd build && cmake ${CMAKE_OPTIONS} .. && cmake --build .
 
 notifications:
   email: false
+  slack:
+    rooms:
+        secure: mfb4k1sKQVdJlQ+74403S0RKaLJU9hVduGo4XJ3LFS9ovlmalLEbGdLIUj+z4RuFQX3bkPcCYPDYVP9s0hh0HxQXsZeCj+6pVuM/pW9CRoXVdljf60mqr2dF95W/T6hJScW9h/48U3uAuKmaa9cQ3B3kFw/+vr6nZC9GNnDJxAsUbD1+LK6mKpl+E2XJZ6Kgx2nDVv3b1IWDesT+cpzzDeCFeV8TJkrsa8BxLMrpq4kGrQBk13zgDtIncI64H7kUFMQQtnDvOdGouTRIIZ7HI9W/Gd2PlYmibWFalVxcBOHvHZkwoaTulbIOfFSe/FP5IL/KSqtPFA6RxeViiure5XUGym4kJQcTsl3L9/Ym8SLe3BRU6KSrHf9xgeJZxzCqvj2ta9SmkQh4A6VaCl/26liSLmL4AHhtD8Xe/LRBp3uW+9DQGP0V3sBq9PpD5VXu02nf2HlyMIVziM6Ya3lJVSJlhm0GaMQtZA+8KaclH2O0Y6FXWfDBerIDbyyhbrXjEif2GII4r3igPK6Wx40Wvurp7S5RGpiM7nBfgdj7E3ZweYV8/6OVFoU886jVweXYOJ1boK5Q7bovCExkhOnsc6XS1T/ghXpodSoYCOMr2hwrHSVp2TgZ4jxrEtoRp0eoo3695cXVZMoJUMEd2kynq4q+zM8fR78m8kJPrT4WLtM=
+    on_success: change
+    on_failure: always
+    on_error: always
