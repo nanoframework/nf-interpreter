@@ -206,7 +206,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace( CLR_RT_HeapBlock&
         }
         NANOCLR_FOREACH_NODE_BACKWARD_END();
 
-#if (BUILD_RTM == FALSE)
+#if !defined(BUILD_RTM)
         //shutting down the EE happens by Thread->Abort.  These exceptions are by design, and 
         //don't need to be logged, or written to the console....
         if(!g_CLR_RT_ExecutionEngine.m_fShuttingDown)    

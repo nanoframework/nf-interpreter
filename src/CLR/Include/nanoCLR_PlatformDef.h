@@ -95,7 +95,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // GENERAL RTM RULES
-#if (BUILD_RTM == TRUE) || defined(PLATFORM_NO_CLR_TRACE)
+#if defined(BUILD_RTM) || defined(PLATFORM_NO_CLR_TRACE)
 #undef NANOCLR_TRACE_MEMORY_STATS
 #undef NANOCLR_TRACE_EXCEPTIONS 
 #undef NANOCLR_TRACE_ERRORS

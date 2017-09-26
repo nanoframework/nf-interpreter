@@ -2198,7 +2198,7 @@ struct CLR_RT_Persistence_Manager
 
      static void Callback( void* arg );
 
-#if (BUILD_RTM == FALSE)
+#if !defined(BUILD_RTM)
      void GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse );
 #endif
 

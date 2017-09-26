@@ -574,7 +574,7 @@ void HAL_Assert  ( const char* Func, int Line, const char* File );
 extern void HAL_AssertEx();
 
 #if defined(PLATFORM_ARM)
-    #if (BUILD_RTM == FALSE)
+    #if !defined(BUILD_RTM)
         #define       ASSERT(i)  { if(!(i)) HAL_AssertEx(); }
         #define _SIDE_ASSERTE(i) { if(!(i)) HAL_AssertEx(); }
     #endif

@@ -783,7 +783,7 @@ inline CLR_OPCODE CLR_ReadNextOpcodeCompressed( CLR_PMETADATA& ip )
  extern bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg );
  extern bool CLR_SafeSprintf ( char*& szBuffer, size_t& iBuffer, const char* format, ...         );
 
-#if (BUILD_RTM == FALSE)
+#if !defined(BUILD_RTM)
 
 #define NANOCLR_DEBUG_STOP() _ASSERTE(false)
 
