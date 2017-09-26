@@ -286,7 +286,7 @@ CLR_RT_Thread::UnwindStack* CLR_RT_Thread::PushEH()
     }
     else
     {
-#if (BUILD_RTM == FALSE)
+#if !defined(BUILD_RTM)
         CLR_Debug::Printf( "WARNING: TOO MANY NESTED EXCEPTIONS!!\r\n" );
 #endif
         // clip the oldest exception in the nest

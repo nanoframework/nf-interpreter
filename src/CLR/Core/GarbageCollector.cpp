@@ -606,7 +606,7 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                 {
                     if(weak->m_targetSerialized && weak->m_targetDirect == NULL)
                     {
-#if (BUILD_RTM == FALSE)
+#if !defined(BUILD_RTM)
                         CLR_RT_ReflectionDef_Index val;
                         CLR_RT_TypeDef_Instance    inst;
                         char                       rgBuffer[ 512 ];

@@ -102,7 +102,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
     m_GlobalExecutionCounter = 0;
 
-#if (BUILD_RTM == FALSE)
+#if !defined(BUILD_RTM)
     m_fShuttingDown = false;                        //bool                                m_fShuttingDown;
 #endif
 
@@ -384,7 +384,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 
     m_lastHcUsed = NULL;
 
-#if (BUILD_RTM == FALSE) || defined(_WIN32)
+#if !defined(BUILD_RTM) || defined(_WIN32)
     if(m_fPerformHeapCompaction) CLR_EE_SET( Compaction_Pending );
 #endif
 
@@ -594,7 +594,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
         
     if(NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
     {
-#if (BUILD_RTM == FALSE) || defined(WIN32)
+#if !defined(BUILD_RTM) || defined(_WIN32)
         CLR_Debug::Printf( "Cannot find any entrypoint!\r\n" );
 #endif
         NANOCLR_SET_AND_LEAVE(CLR_E_ENTRYPOINT_NOT_FOUND);
@@ -674,7 +674,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
         }
         else if(hr2 == CLR_S_QUANTUM_EXPIRED)
         {
-#if (BUILD_RTM == FALSE) || defined(WIN32)
+#if !defined(BUILD_RTM) || defined(_WIN32)
             if(m_fPerformGarbageCollection)
             {
 #if defined(NANOCLR_GC_VERBOSE)
@@ -1535,7 +1535,7 @@ CLR_RT_HeapBlock_Node* CLR_RT_ExecutionEngine::ExtractHeapBlocksForEvents( CLR_U
 CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedList& heap, CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length )
 {
     NATIVE_PROFILE_CLR_CORE();
-#if (BUILD_RTM == FALSE)
+#if !defined(BUILD_RTM)
     if(m_heapState == c_HeapState_UnderGC && ((flags & CLR_RT_HeapBlock::HB_SpecialGCAllocation) == 0))
     {
         CLR_Debug::Printf( "Internal error: call to memory allocation during garbage collection!!!\r\n" );
@@ -1627,7 +1627,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedLis
             break;
 
         default: // Total failure...
-#if (BUILD_RTM == FALSE)
+#if !defined(BUILD_RTM)
             CLR_Debug::Printf( "Failed allocation for %d blocks, %d bytes\r\n\r\n", length, length * sizeof(CLR_RT_HeapBlock) );
 #endif
             if(g_CLR_RT_GarbageCollector.m_freeBytes >= (length * sizeof(CLR_RT_HeapBlock)))

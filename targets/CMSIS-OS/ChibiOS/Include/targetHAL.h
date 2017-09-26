@@ -19,9 +19,9 @@
 #if !defined(BUILD_RTM)
 
 // FIXME IMPLEMENT
-inline void HARD_Breakpoint() { };
+//inline void HARD_Breakpoint() { };
 
-#define HARD_BREAKPOINT()     HARD_Breakpoint()
+#define HARD_BREAKPOINT()     HardFault_Handler()
 
 // #if defined(_DEBUG)
 // #define DEBUG_HARD_BREAKPOINT()     HARD_Breakpoint()
@@ -36,7 +36,7 @@ inline void HARD_Breakpoint() { };
 
 #endif  // !defined(BUILD_RTM)
 
-#define NANOCLR_STOP() HARD_BREAKPOINT()
+#define NANOCLR_STOP() CPU_Reset();
 
 inline void HAL_AssertEx()
 {

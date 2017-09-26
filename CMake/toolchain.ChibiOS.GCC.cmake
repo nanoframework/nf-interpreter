@@ -134,6 +134,11 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
         target_compile_definitions(${TARGET} PUBLIC "-DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
     endif()
 
+    # set compiler definition for RTM build option
+    if(NF_BUILD_RTM)
+        target_compile_definitions(${TARGET} PUBLIC BUILD_RTM)
+    endif()
+
     # set compiler definition for platform emulated floating point according to FPU
     # no FPU requires FP emulation from the platform
     target_compile_definitions(${TARGET} PUBLIC $<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:-DPLATFORM_EMULATED_FLOATINGPOINT>)

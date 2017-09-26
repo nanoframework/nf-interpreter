@@ -349,10 +349,11 @@ struct Settings
             }
                 
             // we have good Assembly 
-
             CLR_RT_Assembly* assm;
 
+#if !defined(BUILD_RTM)            
             CLR_Debug::Printf( "Attaching deployed file.\r\n" );
+#endif
 
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem 
             if (FAILED(LoadAssembly( header, assm ) ))
