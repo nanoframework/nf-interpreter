@@ -186,8 +186,8 @@ if(HEX2DFU_TOOL_AVAILABLE)
     ## DO NOT use the leading 0x notation, just the address in plain hexadecimal formating            ##
     ####################################################################################################
     NF_GENERATE_DFU_PACKAGE(
-        ${NANOBOOTER_PROJECT_NAME}.bin 08000000 
-        ${NANOCLR_PROJECT_NAME}.bin 08008000 
+        ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000 
+        ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08008000 
         ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu
     )
 
