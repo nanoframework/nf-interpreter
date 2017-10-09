@@ -266,7 +266,8 @@ SECTIONS
     {
         . = ALIGN(8);
         __heap_base__ = .;
-        . = ORIGIN(HEAP_RAM) + LENGTH(HEAP_RAM);
+        . += __crt_heap_size__;
+        . = ALIGN(8);
         __heap_end__ = .;
     } > HEAP_RAM
 }
