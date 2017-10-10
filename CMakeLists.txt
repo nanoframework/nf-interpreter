@@ -207,8 +207,11 @@ if(WIN32)
 endif()
 
 
-
-project(nanoFramework VERSION 0.0.0.0)
+# set default version
+if(NOT BUILD_VERSION)
+    set(BUILD_VERSION 0.0.0.0)
+endif()
+project(nanoFramework VERSION ${BUILD_VERSION})
 
 #######################
 message(STATUS "")
@@ -504,6 +507,8 @@ if(RTOS_CHIBIOS_CHECK)
 
             file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
             set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
+            # dummy target required for targets that have a declared dependency from ChibiOS
+            add_custom_target(ChibiOS)
         else()
             message(FATAL_ERROR "Couldn't find ChibiOS source at ${CHIBIOS_SOURCE}/")
         endif()
