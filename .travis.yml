@@ -16,72 +16,58 @@ matrix:
       -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE
       -DCMAKE_BUILD_TYPE=Debug -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON
       -DAPI_Windows.Devices.Gpio=ON"
-      ARTIFACT_DIR="ST_STM32F4_DISCOVERY"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=ST_STM32F429I_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE
       -DCMAKE_BUILD_TYPE=Debug -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON  -DNF_FEATURE_RTC=ON
       -DAPI_Windows.Devices.Gpio=ON"
-      ARTIFACT_DIR="ST_STM32F429I_DISCOVERY"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=ST_NUCLEO64_F091RC -DTARGET_SERIES=STM32F0xx -DCMAKE_BUILD_TYPE=Debug
       -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF"
-      ARTIFACT_DIR="ST_NUCLEO64_F091RC"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=ST_NUCLEO144_F746ZG -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE
       -DCMAKE_BUILD_TYPE=Debug -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON
       -DAPI_Windows.Devices.Gpio=ON"
-      ARTIFACT_DIR="ST_NUCLEO144_F746ZG"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=MBN_QUAIL -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=Debug
       -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON
       -DAPI_Windows.Devices.Spi=ON"
-      ARTIFACT_DIR="MBN_QUAIL"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=ST_STM32F769I_DISCOVERY -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE
       -DCMAKE_BUILD_TYPE=Debug -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON
       -DAPI_Windows.Devices.Gpio=ON -DNF_FEATURE_USE_NETWORKING=ON"
-      ARTIFACT_DIR="ST_STM32F769I_DISCOVERY"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=NETDUINO3_WIFI -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=Debug
       -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON
       -DAPI_Windows.Devices.Spi=ON"
-      ARTIFACT_DIR="NETDUINO3_WIFI"
 
   # RTM builds
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=ST_STM32F4_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE
       -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_BUILD_RTM=ON -DNF_FEATURE_DEBUGGER=TRUE
       -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON"
-      ARTIFACT_DIR="ST_STM32F4_DISCOVERY"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=ST_STM32F429I_DISCOVERY -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE
       -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_BUILD_RTM=ON -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON
       -DAPI_Windows.Devices.Gpio=ON"
-      ARTIFACT_DIR="ST_STM32F429I_DISCOVERY"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=ST_NUCLEO64_F091RC -DTARGET_SERIES=STM32F0xx -DCMAKE_BUILD_TYPE=MinSizeRel
        -DNF_BUILD_RTM=ON -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF"
-       ARTIFACT_DIR="ST_NUCLEO64_F091RC"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=ST_NUCLEO144_F746ZG -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_BUILD_RTM=ON
       -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON
       -DAPI_Windows.Devices.Gpio=ON"
-      ARTIFACT_DIR="ST_NUCLEO144_F746ZG"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=MBN_QUAIL -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel
        -DNF_BUILD_RTM=ON -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON
       -DAPI_Windows.Devices.Spi=ON"
-      ARTIFACT_DIR="MBN_QUAIL"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=ST_STM32F769I_DISCOVERY -DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE
       -DCMAKE_BUILD_TYPE=MinSizeRel -DNF_BUILD_RTM=ON -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON
       -DAPI_Windows.Devices.Gpio=ON -DNF_FEATURE_USE_NETWORKING=ON"
-      ARTIFACT_DIR="ST_STM32F769I_DISCOVERY"
   - env: CMAKE_OPTIONS="-DTOOLCHAIN_PREFIX=/home/travis/gcc-arm-none-eabi-6-2017-q1-update
       -DCHIBIOS_BOARD=NETDUINO3_WIFI -DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DCMAKE_BUILD_TYPE=MinSizeRel
        -DNF_BUILD_RTM=ON -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON
       -DAPI_Windows.Devices.Spi=ON"
-      ARTIFACT_DIR="NETDUINO3_WIFI"
       
 ## cache GCC toolchain to speedup next builds
 cache:
@@ -110,6 +96,9 @@ addons:
     - libc6-i386
     - libstdc++6:i386
 
+before_install:
+  - git fetch --unshallow # Travis always does a shallow clone, but GitVersion needs the full history including branches and tags
+
 before_script:
 ############################################################################
 # Go back to the root of the project and setup the build directory
@@ -118,15 +107,6 @@ before_script:
 
 script:
 - mkdir build && cd build && cmake ${CMAKE_OPTIONS} .. && cmake --build .
-
-after_success:
-- cd ${TRAVIS_BUILD_DIR}/build && mkdir ${ARTIFACT_DIR} && cp *.bin /${ARTIFACT_DIR} && cp *.hex /${ARTIFACT_DIR} 
-
-addons:
-  artifacts: true
-  paths: ${TRAVIS_BUILD_DIR}/${ARTIFACT_DIR}
-  working_dir: ${TRAVIS_BUILD_DIR}/${ARTIFACT_DIR}
-  debug: true
 
 notifications:
   email: false
