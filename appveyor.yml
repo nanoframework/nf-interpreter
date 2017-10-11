@@ -1,21 +1,463 @@
-version: 1.0.{build}
-pull_requests:
-  do_not_increment_build_number: true
-skip_tags: true
-image: Visual Studio 2017
-clone_depth: 1
-install:
-- ps: .\install-vsix-appveyor.ps1
-build_script:
-- ps: >-
-    nuget restore targets\os\win32\nanoCLR.sln
+# configuration for "master" branch
+-
+  branches:
+    only:
+      - master
 
-    msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-notifications:
-- provider: Slack
-  auth_token:
-    secure: 2tqAJTTbN2dm24Vrwo5TXun3Vxc34R5G9l7o3pK3xEuKZAzxx3nbP2yGkMI/kl3+NxHXknjBfZnkhZC5eLYBHb+jO7YVUZwPYOfC/ZGy5HU=
-  channel: '#build-monitor'
-  on_build_status_changed: true
-  on_build_success: false
-  on_build_failure: false
+  # Skipping commits affecting specific files
+  skip_commits:
+    files:
+    - '**\AssemblyInfo.*'
+    - '**/*.md'
+    - 'LICENSE'
+    - dir/*
+    - '.gitignore'
+
+  image: Visual Studio 2017
+
+  init:
+    - git config --global core.autocrlf true
+    - git config --global credential.helper store
+    - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
+    - git config --global user.email "%GitHubUserEmail%"
+    - git config --global user.name "%GitHubUserName%"
+
+  configuration:
+    - MinSizeRel
+
+  environment:
+    GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
+    NINJA_PATH: 'C:\mytools\ninja'
+    HEX2DFU_PATH: 'C:\mytools\hex2dfu'
+    RUBY_VERSION: 24
+    GitHubUserName:
+      secure: 7OBtVAMTodMWK20wg6pGnQ==
+    GitHubUserEmail:
+      secure: HeABB68Sn/Lhbd69C2cUcfWv0ab/rMDEcOLvcxf8gGw=
+    GitHubToken:
+      secure: WOqlCsnwTzfDPJFoNV/h8mEESIpG/9uFn1u6oE8hGZtXwIQQlsY+NyyLt9Y5xoFn
+
+    matrix:
+      - BOARD_NAME: 'ST_STM32F4_DISCOVERY'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'ST_STM32F429I_DISCOVERY'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'ST_NUCLEO64_F091RC'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
+      - BOARD_NAME: 'ST_NUCLEO144_F746ZG'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'MBN_QUAIL'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON'
+        NEEDS_DFU: '$True'
+      - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'NETDUINO3_WIFI'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+        NEEDS_DFU: '$True'
+
+
+  matrix:
+    fast_finish: true
+
+  cache:
+    - C:\ProgramData\chocolatey\bin -> appveyor.yml
+    - C:\ProgramData\chocolatey\lib -> appveyor.yml
+    - vendor/bundle
+    - '%GNU_GCC_TOOLCHAIN_PATH%'
+    - '%NINJA_PATH%'
+    - '%HEX2DFU_PATH%'
+
+  install:
+    - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
+    - set PATH=%NINJA_PATH%;%PATH%
+
+    - gem install github_changelog_generator --quiet --no-ri --no-rdoc
+    - choco install gitversion.portable -pre -y
+
+    - ps: |
+        .\install-arm-gcc-toolchain.ps1
+        .\install-ninja.ps1
+        .\install-nf-hex2dfu.ps1
+
+  build:
+    verbosity: minimal
+
+  before_build:
+    - md build
+    - ps: |
+
+        gitversion /l console /output buildserver
+
+        cd build
+        $cmake = "cmake"
+
+        # need to split the build options into an array to properly pass those as CMake arguments
+        $separator = " "
+        $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+        $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+        If($env:NEEDS_DFU -eq $True)
+        {
+            $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH"
+        }
+
+        &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions ..
+
+  build_script:
+    - ps: |
+
+        $cmake = "cmake"
+        &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+
+  after_build:
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.bin
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.hex
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.s19
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.dfu
+
+  test: off
+
+  artifacts:
+    - path: '**\%BOARD_NAME%-%GitVersion_SemVer%.zip'
+      name: nanoImage
+
+  # before_deploy:
+  #   # need this to keep ruby happy
+  #   - ps: md c:\tmp
+  #   - bundle exec github_changelog_generator --token %GitHubToken%
+  #   # add here the updated changelog and the updated assembly info files
+  #   - git add .
+  #   - git commit --amend --no-edit
+
+  notifications:
+    - provider: Slack
+      auth_token:
+        secure: 2tqAJTTbN2dm24Vrwo5TXun3Vxc34R5G9l7o3pK3xEuKZAzxx3nbP2yGkMI/kl3+NxHXknjBfZnkhZC5eLYBHb+jO7YVUZwPYOfC/ZGy5HU=
+      channel: '#build-monitor'
+      on_build_status_changed: true
+      on_build_success: false
+      on_build_failure: false
+
+
+####################################
+# configuration for develop branches
+-
+  branches:
+    only:
+      - /dev.*/
+
+  skip_branch_with_pr: true
+
+  # Do not build on tags
+  skip_tags: false
+  
+  pull_requests:
+    do_not_increment_build_number: true
+
+  # Skipping commits affecting specific files
+  skip_commits:
+    files:
+    - '**\AssemblyInfo.*'
+    - '**/*.md'
+    - 'LICENSE'
+    - dir/*
+    - '.gitignore'
+
+  image: Visual Studio 2017
+
+  init:
+    - git config --global core.autocrlf true
+    - git config --global credential.helper store
+    - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
+    - git config --global user.email "%GitHubUserEmail%"
+    - git config --global user.name "%GitHubUserName%"
+
+  configuration:
+    - Debug
+    - MinSizeRel
+
+  environment:
+    GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
+    NINJA_PATH: 'C:\mytools\ninja'
+    HEX2DFU_PATH: 'C:\mytools\hex2dfu'
+    RUBY_VERSION: 24
+    GitHubUserName:
+      secure: 7OBtVAMTodMWK20wg6pGnQ==
+    GitHubUserEmail:
+      secure: HeABB68Sn/Lhbd69C2cUcfWv0ab/rMDEcOLvcxf8gGw=
+    GitHubToken:
+      secure: WOqlCsnwTzfDPJFoNV/h8mEESIpG/9uFn1u6oE8hGZtXwIQQlsY+NyyLt9Y5xoFn
+
+    matrix:
+      - BOARD_NAME: 'ST_STM32F4_DISCOVERY'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'ST_STM32F429I_DISCOVERY'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'ST_NUCLEO64_F091RC'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
+      - BOARD_NAME: 'ST_NUCLEO144_F746ZG'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'MBN_QUAIL'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON'
+        NEEDS_DFU: $True
+      - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'NETDUINO3_WIFI'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+        NEEDS_DFU: $True
+      - BOARD_NAME: 'NANOCLR_WINDOWS'
+
+  matrix:
+    fast_finish: true
+
+    exclude:
+      - BOARD_NAME: 'NANOCLR_WINDOWS'
+        configuration: Debug
+
+  cache:
+    - C:\ProgramData\chocolatey\bin -> appveyor.yml
+    - C:\ProgramData\chocolatey\lib -> appveyor.yml
+    - vendor/bundle
+    - '%GNU_GCC_TOOLCHAIN_PATH%'
+    - '%NINJA_PATH%'
+    - '%HEX2DFU_PATH%'
+
+  install:
+    - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
+    - set PATH=%NINJA_PATH%;%PATH%
+
+    - gem install github_changelog_generator --quiet --no-ri --no-rdoc
+    - choco install gitversion.portable -pre -y
+
+    - ps: |
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+        {
+          .\install-vsix-appveyor.ps1
+        }
+        Else
+        {
+          .\install-arm-gcc-toolchain.ps1
+          .\install-ninja.ps1
+          .\install-nf-hex2dfu.ps1
+        }
+
+  build:
+    verbosity: minimal
+
+  before_build:
+    - md build
+    - ps: |
+
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+        {
+          nuget restore targets\os\win32\nanoCLR.sln
+        }
+        Else
+        {
+          gitversion /l console /output buildserver
+
+          cd build
+          $cmake = "cmake"
+
+          # need to split the build options into an array to properly pass those as CMake arguments
+          $separator = " "
+          $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+          $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+          If($env:NEEDS_DFU -eq $True)
+          {
+             $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH"
+          }
+
+          &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+
+        }
+
+  build_script:
+    - ps: |
+
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+        {
+          msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        }
+        Else
+        {
+          $cmake = "cmake"
+          &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+        }
+
+  after_build:
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.bin
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.hex
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.s19
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.dfu
+
+  test: off
+
+  artifacts:
+    - path: '**\%BOARD_NAME%-%GitVersion_SemVer%.zip'
+      name: nanoImage
+
+  # before_deploy:
+  #   # need this to keep ruby happy
+  #   - ps: md c:\tmp
+  #   - bundle exec github_changelog_generator --token %GitHubToken%
+  #   # add here the updated changelog and the updated assembly info files
+  #   - git add .
+  #   - git commit --amend --no-edit
+
+  notifications:
+    - provider: Slack
+      auth_token:
+        secure: 2tqAJTTbN2dm24Vrwo5TXun3Vxc34R5G9l7o3pK3xEuKZAzxx3nbP2yGkMI/kl3+NxHXknjBfZnkhZC5eLYBHb+jO7YVUZwPYOfC/ZGy5HU=
+      channel: '#build-monitor'
+      on_build_status_changed: true
+      on_build_success: false
+      on_build_failure: false
+
+
+############################################
+# configuration for release candidate branch
+-
+  branches:
+    only:
+      - release.*
+
+  pull_requests:
+    do_not_increment_build_number: true
+
+  skip_branch_with_pr: true
+
+  # Skipping commits affecting specific files
+  skip_commits:
+    files:
+    - '**\AssemblyInfo.*'
+    - '**/*.md'
+    - 'LICENSE'
+    - dir/*
+    - '.gitignore'
+
+  image: Visual Studio 2017
+
+  init:
+    - git config --global core.autocrlf true
+    - git config --global credential.helper store
+    - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
+    - git config --global user.email "%GitHubUserEmail%"
+    - git config --global user.name "%GitHubUserName%"
+
+  configuration:
+    - MinSizeRel
+
+  environment:
+    GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
+    NINJA_PATH: 'C:\mytools\ninja'
+    HEX2DFU_PATH: 'C:\mytools\hex2dfu'
+    RUBY_VERSION: 24
+    GitHubUserName:
+      secure: 7OBtVAMTodMWK20wg6pGnQ==
+    GitHubUserEmail:
+      secure: HeABB68Sn/Lhbd69C2cUcfWv0ab/rMDEcOLvcxf8gGw=
+    GitHubToken:
+      secure: WOqlCsnwTzfDPJFoNV/h8mEESIpG/9uFn1u6oE8hGZtXwIQQlsY+NyyLt9Y5xoFn
+
+    matrix:
+      - BOARD_NAME: 'ST_STM32F4_DISCOVERY'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'ST_STM32F429I_DISCOVERY'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'ST_NUCLEO64_F091RC'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'ST_NUCLEO144_F746ZG'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
+      - BOARD_NAME: 'MBN_QUAIL'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON'
+        NEEDS_DFU: $True
+      - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      - BOARD_NAME: 'NETDUINO3_WIFI'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+        NEEDS_DFU: $True
+
+  matrix:
+    fast_finish: true
+
+  cache:
+    - C:\ProgramData\chocolatey\bin -> appveyor.yml
+    - C:\ProgramData\chocolatey\lib -> appveyor.yml
+    - vendor/bundle
+    - '%GNU_GCC_TOOLCHAIN_PATH%'
+    - '%NINJA_PATH%'
+    - '%HEX2DFU_PATH%'
+
+  install:
+    - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
+    - set PATH=%NINJA_PATH%;%PATH%
+
+    - gem install github_changelog_generator --quiet --no-ri --no-rdoc
+    - choco install gitversion.portable -pre -y
+
+    - ps: |
+        .\install-arm-gcc-toolchain.ps1
+        .\install-ninja.ps1
+        .\install-nf-hex2dfu.ps1
+
+  build:
+    verbosity: minimal
+
+  before_build:
+    - md build
+    - ps: |
+
+        gitversion /l console /output buildserver
+
+        cd build
+        $cmake = "cmake"
+
+        # need to split the build options into an array to properly pass those as CMake arguments
+        $separator = " "
+        $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+        $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+        If($env:NEEDS_DFU -eq $True)
+        {
+            $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH"
+        }
+
+        &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+
+  build_script:
+    - ps: |
+
+        $cmake = "cmake"
+        &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+  after_build:
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.bin
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.hex
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.s19
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.dfu
+
+  test: off
+
+  artifacts:
+    - path: '**\%BOARD_NAME%-%GitVersion_SemVer%.zip'
+      name: nanoImage
+
+  # before_deploy:
+  #   # need this to keep ruby happy
+  #   - ps: md c:\tmp
+  #   - bundle exec github_changelog_generator --token %GitHubToken%
+  #   # add here the updated changelog and the updated assembly info files
+  #   - git add .
+  #   - git commit --amend --no-edit
+
+  notifications:
+    - provider: Slack
+      auth_token:
+        secure: 2tqAJTTbN2dm24Vrwo5TXun3Vxc34R5G9l7o3pK3xEuKZAzxx3nbP2yGkMI/kl3+NxHXknjBfZnkhZC5eLYBHb+jO7YVUZwPYOfC/ZGy5HU=
+      channel: '#build-monitor'
+      on_build_status_changed: true
+      on_build_success: false
+      on_build_failure: false

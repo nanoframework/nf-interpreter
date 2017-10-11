@@ -102,6 +102,9 @@ add_executable(
     "${TARGET_NANO_APIS_SOURCES}"
 )
 
+# add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
+add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf ChibiOS)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf ChibiOS)
 
 # include common directories
 include_directories(
