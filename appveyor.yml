@@ -48,24 +48,20 @@
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
       - BOARD_NAME: 'MBN_QUAIL'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON'
-        NEEDS_DFU: '$True'
+        NEEDS_DFU: 'True'
       - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
       - BOARD_NAME: 'NETDUINO3_WIFI'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-        NEEDS_DFU: '$True'
-
+        NEEDS_DFU: 'True'
 
   matrix:
     fast_finish: true
 
   cache:
-    - C:\ProgramData\chocolatey\bin -> appveyor.yml
-    - C:\ProgramData\chocolatey\lib -> appveyor.yml
-    - vendor/bundle
-    - '%GNU_GCC_TOOLCHAIN_PATH%'
-    - '%NINJA_PATH%'
-    - '%HEX2DFU_PATH%'
+    - '%GNU_GCC_TOOLCHAIN_PATH% -> appveyor.yml'
+    - '%NINJA_PATH% -> appveyor.yml'
+    - '%HEX2DFU_PATH% -> appveyor.yml'
 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
@@ -96,9 +92,9 @@
         $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
         $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
 
-        If($env:NEEDS_DFU -eq $True)
+        If($env:NEEDS_DFU -eq 'True')
         {
-            $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH"
+            $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
         }
 
         &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions ..
@@ -200,12 +196,12 @@
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
       - BOARD_NAME: 'MBN_QUAIL'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON'
-        NEEDS_DFU: $True
+        NEEDS_DFU: 'True'
       - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
       - BOARD_NAME: 'NETDUINO3_WIFI'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-        NEEDS_DFU: $True
+        NEEDS_DFU: 'True'
       - BOARD_NAME: 'NANOCLR_WINDOWS'
 
   matrix:
@@ -218,10 +214,9 @@
   cache:
     - C:\ProgramData\chocolatey\bin -> appveyor.yml
     - C:\ProgramData\chocolatey\lib -> appveyor.yml
-    - vendor/bundle
-    - '%GNU_GCC_TOOLCHAIN_PATH%'
-    - '%NINJA_PATH%'
-    - '%HEX2DFU_PATH%'
+    - '%GNU_GCC_TOOLCHAIN_PATH% -> appveyor.yml'
+    - '%NINJA_PATH% -> appveyor.yml'
+    - '%HEX2DFU_PATH% -> appveyor.yml'
 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
@@ -265,9 +260,9 @@
           $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
           $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
 
-          If($env:NEEDS_DFU -eq $True)
+          If($env:NEEDS_DFU -eq 'True')
           {
-             $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH"
+             $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
           }
 
           &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
@@ -373,12 +368,12 @@
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
       - BOARD_NAME: 'MBN_QUAIL'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON'
-        NEEDS_DFU: $True
+        NEEDS_DFU: 'True'
       - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
       - BOARD_NAME: 'NETDUINO3_WIFI'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-        NEEDS_DFU: $True
+        NEEDS_DFU: 'True'
 
   matrix:
     fast_finish: true
@@ -386,10 +381,9 @@
   cache:
     - C:\ProgramData\chocolatey\bin -> appveyor.yml
     - C:\ProgramData\chocolatey\lib -> appveyor.yml
-    - vendor/bundle
-    - '%GNU_GCC_TOOLCHAIN_PATH%'
-    - '%NINJA_PATH%'
-    - '%HEX2DFU_PATH%'
+    - '%GNU_GCC_TOOLCHAIN_PATH% -> appveyor.yml'
+    - '%NINJA_PATH% -> appveyor.yml'
+    - '%HEX2DFU_PATH% -> appveyor.yml'
 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
@@ -420,9 +414,9 @@
         $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
         $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
 
-        If($env:NEEDS_DFU -eq $True)
+        If($env:NEEDS_DFU -eq 'True')
         {
-            $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH"
+            $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
         }
 
         &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
