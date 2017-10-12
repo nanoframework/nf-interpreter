@@ -16,4 +16,8 @@ If($GnuGccPathExists -eq $False)
     
     # unzip toolchain
     Expand-Archive $output -DestinationPath $env:GNU_GCC_TOOLCHAIN_PATH
+
+    # delete the samples and docs folder
+    $toDelete = $env:GNU_GCC_TOOLCHAIN_PATH + '\share'
+    Remove-Item -Recurse -Force $toDelete
 }
