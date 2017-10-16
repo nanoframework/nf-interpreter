@@ -212,8 +212,6 @@
         configuration: Debug
 
   cache:
-    - C:\ProgramData\chocolatey\bin -> appveyor.yml
-    - C:\ProgramData\chocolatey\lib -> appveyor.yml
     - '%GNU_GCC_TOOLCHAIN_PATH% -> appveyor.yml'
     - '%NINJA_PATH% -> appveyor.yml'
     - '%HEX2DFU_PATH% -> appveyor.yml'
@@ -379,8 +377,6 @@
     fast_finish: true
 
   cache:
-    - C:\ProgramData\chocolatey\bin -> appveyor.yml
-    - C:\ProgramData\chocolatey\lib -> appveyor.yml
     - '%GNU_GCC_TOOLCHAIN_PATH% -> appveyor.yml'
     - '%NINJA_PATH% -> appveyor.yml'
     - '%HEX2DFU_PATH% -> appveyor.yml'
