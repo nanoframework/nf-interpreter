@@ -115,6 +115,29 @@ int hal_snprintf_double( char* buffer, size_t len, const char* format, double d 
 
 #endif
 
+// because debug_printf needs to be called in both C and C++ we need a proxy to allow it to be called in 'C'
+extern "C" {
+
+#if !defined(BUILD_RTM)
+    
+    void debug_printf(const char* format, ...)
+    {
+        char buffer[256];
+        va_list arg_ptr;
+    
+        va_start( arg_ptr, format );
+    
+        int len = hal_vsnprintf( buffer, sizeof(buffer)-1, format, arg_ptr );
+   
+        DebuggerPort_Write( HalSystemConfig.stdio, buffer, len, 0 ); // skip null terminator
+    
+        va_end( arg_ptr );
+    }
+
+#else
+    __inline void debug_printf( const char *format, ... ) {}
+#endif  // !defined(BUILD_RTM)
+}
 
 int hal_printf( const char* format, ... )
 {
@@ -128,7 +151,6 @@ int hal_vprintf( const char* format, va_list arg )
     return 0;
 }
 
-
 int hal_fprintf( COM_HANDLE stream, const char* format, ... )
 {
     NATIVE_PROFILE_PAL_CRT();
@@ -139,7 +161,13 @@ int hal_vfprintf( COM_HANDLE stream, const char* format, va_list arg )
 {
     NATIVE_PROFILE_PAL_CRT();
 
-    return 0;
+    char buffer[512];
+    int chars = 0;
+
+    chars = hal_vsnprintf( buffer, sizeof(buffer), format, arg );
+    DebuggerPort_Write( stream, buffer, chars, 0 ); // skip null terminator
+
+    return chars;
 }
 
 int hal_snprintf( char* buffer, size_t len, const char* format, ... )

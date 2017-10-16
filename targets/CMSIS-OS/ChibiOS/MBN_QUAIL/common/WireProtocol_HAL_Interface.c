@@ -103,6 +103,8 @@ bool WP_TransmitMessage(WP_Message* message)
     // if the write was sucessfull or at least buffered
     //////////////////////////////////////////////////////////
 
+    TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
+
     // write header to output stream
     if(chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), MS2ST(250)) != sizeof(message->m_header)) return false;
 
@@ -117,7 +119,9 @@ bool WP_TransmitMessage(WP_Message* message)
         if(chnWriteTimeout(&SDU1, message->m_payload, message->m_header.m_size, MS2ST(250)) != message->m_header.m_size) return false;
     }
 
-    return true;    
+    TRACE0( TRACE_ERRORS, "TXMSG: OK\n");
+    
+    return true;
 }
 #elif (HAL_USE_SERIAL == TRUE)
 
@@ -130,6 +134,8 @@ bool WP_TransmitMessage(WP_Message* message)
     // preferably with timeout and being able to check 
     // if the write was sucessfull or at least buffered
     //////////////////////////////////////////////////////////
+
+    TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
 
     // write header to output stream
     if(chnWriteTimeout(&SD2, (const uint8_t *)&message->m_header, sizeof(message->m_header), MS2ST(250)) != sizeof(message->m_header)) return false;
@@ -145,7 +151,9 @@ bool WP_TransmitMessage(WP_Message* message)
         if(chnWriteTimeout(&SD2, message->m_payload, message->m_header.m_size, MS2ST(250)) != message->m_header.m_size) return false;
     }
 
-    return true;    
+    TRACE0( TRACE_ERRORS, "TXMSG: OK\n");
+
+    return true;
 }
 
 #else
