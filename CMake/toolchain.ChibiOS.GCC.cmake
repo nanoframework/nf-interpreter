@@ -151,6 +151,9 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
         target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
     endif()
 
+    # set definition for Wire Protocol trace mask
+    target_compile_definitions(${TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
+
 endfunction()
 
 

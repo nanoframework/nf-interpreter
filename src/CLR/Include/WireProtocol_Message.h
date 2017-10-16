@@ -11,6 +11,20 @@
 #include "WireProtocol_App_Interface.h"
 #include "WireProtocol_HAL_Interface.h"
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#define TRACE_ERRORS 1
+#define TRACE_HEADERS 2
+#define TRACE_STATE 4
+#define TRACE_NODATA 8
+
+#if TRACE_MASK != 0
+#define TRACE0( f, msg ) if((f) & TRACE_MASK ) debug_printf( msg ) 
+#define TRACE( f, msg, ...) if((f) & TRACE_MASK ) debug_printf( msg, __VA_ARGS__ ) 
+#else
+#define TRACE0( f, msg,...)
+#define TRACE( f, msg,...)
+#endif
+
 ////////////////////////////////////////////////////
 // function declarations (related with WP_Message)
 

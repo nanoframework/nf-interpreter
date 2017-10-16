@@ -4,6 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <nanoWeak.h>
 #include <nanoSupport.h>
 #include "WireProtocol_Message.h"
 
@@ -11,6 +12,8 @@ uint8_t receptionBuffer[2048];
 static uint16_t lastOutboundMessage;
 // FIXME #146 uint32_t m_payloadTicks;
 static uint8_t* marker;
+
+extern void debug_printf( const char* format, ... );
 
 //////////////////////////////////////////
 // helper functions
@@ -123,6 +126,7 @@ bool WP_Message_VerifyHeader(WP_Message* message)
 
     if(computedCrc != crc)
     {
+        TRACE( TRACE_ERRORS, "Header CRC check failed: computed: 0x%08X; got: 0x%08X\n", computedCrc, message->m_header.m_crcHeader );
         return false;
     }
     return true;
@@ -138,6 +142,7 @@ bool WP_Message_VerifyPayload(WP_Message* message)
     uint32_t computedCrc = SUPPORT_ComputeCRC(message->m_payload, message->m_header.m_size, 0);
     if(computedCrc != message->m_header.m_crcData)
     {
+        TRACE( TRACE_ERRORS, "Payload CRC check failed: computed: 0x%08X; got: 0x%08X\n", computedCrc, message->m_header.m_crcData );
         return false;
     }
     return true;
@@ -162,9 +167,11 @@ bool WP_Message_Process(WP_Message* message)
         switch(message->m_rxState)
         {
             case ReceiveState_Idle:
+                TRACE0( TRACE_STATE, "RxState==IDLE\n");
                 return true;
 
             case ReceiveState_Initialize:
+                TRACE0( TRACE_STATE, "RxState==INIT\n");
                 WP_Message_Release(message);
 
                 message->m_rxState = ReceiveState_WaitingForHeader;
@@ -173,10 +180,11 @@ bool WP_Message_Process(WP_Message* message)
                 break;
 
             case ReceiveState_WaitingForHeader:
-                //TRACE0(TRACE_STATE, "RxState==WaitForHeader\n");
+                TRACE0( TRACE_STATE, "RxState==WaitForHeader\n");
                 if(WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
                 {
                     // didn't receive the expected amount of bytes, returning false
+                    TRACE0( TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
                     return false;
                 }
 
@@ -213,9 +221,11 @@ bool WP_Message_Process(WP_Message* message)
                 break;
 
             case ReceiveState_ReadingHeader:
+                TRACE0( TRACE_STATE, "RxState==ReadingHeader\n");
                 if(WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
                 {
                     // didn't receive the expected amount of bytes, returning false
+                    TRACE0( TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
                     return false;
                 }
 
@@ -227,10 +237,13 @@ bool WP_Message_Process(WP_Message* message)
 
             case ReceiveState_CompleteHeader:
             {
+                TRACE0( TRACE_STATE, "RxState=CompleteHeader\n");
                 bool fBadPacket = true;
 
                 if(WP_Message_VerifyHeader(message))
                 {
+                    TRACE( TRACE_HEADERS, "RXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
+
                     if(WP_App_ProcessHeader(message))
                     {
                         fBadPacket = false;
@@ -270,9 +283,11 @@ bool WP_Message_Process(WP_Message* message)
 
             case ReceiveState_ReadingPayload:
                 {
+                    TRACE0( TRACE_STATE, "RxState=ReadingPayload\n");
                     if(WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
                     {
                         // didn't receive the expected amount of bytes, returning false
+                        TRACE0( TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
                         return false;
                     }
 
@@ -284,6 +299,7 @@ bool WP_Message_Process(WP_Message* message)
                 break;
 
             case ReceiveState_CompletePayload:
+                TRACE0( TRACE_STATE, "RxState=CompletePayload\n");
                 if(WP_Message_VerifyPayload(message) == true)
                 {
                     WP_App_ProcessPayload(message);
@@ -298,6 +314,7 @@ bool WP_Message_Process(WP_Message* message)
 
             default:
                 // unknow state
+                TRACE0( TRACE_ERRORS, "RxState=UNKNOWN!!\n");
                 return false;
         }
     }
@@ -305,6 +322,7 @@ bool WP_Message_Process(WP_Message* message)
 
 void WP_SendProtocolMessage(WP_Message *message)
 {
+    TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
     WP_TransmitMessage(&message);
 }
 
@@ -314,5 +332,16 @@ void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_
     WP_Message_Initialize(&message);
     WP_Message_PrepareRequest(&message, cmd, flags, payloadSize, payload);
 
+    TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message.m_header.m_cmd, message.m_header.m_flags, message.m_header.m_size );
     WP_TransmitMessage(&message);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// weak implementations of the functions (to be replaced with _strong_ implementations if and when required) //
+
+__nfweak void debug_printf( const char* format, ... )
+{
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
