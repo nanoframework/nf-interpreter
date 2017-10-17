@@ -4,7 +4,6 @@
 #
 
 # append source files required for ChibiOS interface  
-list(APPEND COMMON_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_HAL_Interface.c")
 list(APPEND COMMON_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Device_BlockStorage.c")
 
 # make var global
