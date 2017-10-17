@@ -18,6 +18,8 @@ void ReceiverThread(void const * argument)
 {
   (void)argument;
 
+  osDelay(500);
+
   // initialize Wire Protocol semaphore in the "not taken" state
   chBSemObjectInit(&wpChannelSemaphore, false);
 

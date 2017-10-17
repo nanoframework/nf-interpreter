@@ -64,6 +64,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // WINDOWS
 #if defined(_WIN32)
+
 #define NANOCLR_GC_VERBOSE
 #define NANOCLR_TRACE_MEMORY_STATS
 #define NANOCLR_PROFILE_NEW
@@ -78,7 +79,7 @@
 //#define NANOCLR_VALIDATE_APPDOMAIN_ISOLATION
 #define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries 
 #else //RELEASE
-#define NANOCLR_VALIDATE_HEAP NANOCLR_VALIDATE_HEAP_0_None
+#define NANOCLR_VALIDATE_HEAP                   NANOCLR_VALIDATE_HEAP_0_None
 #endif
 #define NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 #endif
@@ -86,7 +87,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // ARM
 #if defined(PLATFORM_ARM)
+//#define NANOCLR_GC_VERBOSE
 #define NANOCLR_TRACE_MEMORY_STATS
+//#define NANOCLR_VALIDATE_HEAP                   NANOCLR_VALIDATE_HEAP_3_Compaction
 #endif
 
 //-o-//-o-//-o-//-o-//-o-//-o-//

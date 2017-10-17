@@ -139,18 +139,18 @@ private:
 
             struct U8
             {
-                CLR_UINT32 _L;
-                CLR_UINT32 _H;
+                CLR_UINT32 LL;
+                CLR_UINT32 HH;
 
                 operator CLR_UINT64() const
                 {
-                    return ((CLR_UINT64)_H << 32 | (CLR_UINT64)_L );
+                    return ((CLR_UINT64)HH << 32 | (CLR_UINT64)LL );
                 }
 
                 U8& operator=( const CLR_UINT64 num )
                 {
-                    _L = (CLR_UINT32)((ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)      );
-                    _H = (CLR_UINT32)((ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32);
+                    LL = (CLR_UINT32)((ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)      );
+                    HH = (CLR_UINT32)((ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32);
                     return *this;
                 }
                 U8& operator+=( const U8& num )
@@ -191,8 +191,8 @@ private:
                 U8 operator~( )
                 {
                     U8 ret_value;
-                    ret_value._L = ~_L;                        
-                    ret_value._H = ~_H;
+                    ret_value.LL = ~LL;                        
+                    ret_value.HH = ~HH;
                     return ret_value;
                 }
 
@@ -207,22 +207,22 @@ private:
 
                 U8& operator&=( const U8& num )
                 {
-                    _L &= num._L;
-                    _H &= num._H;
+                    LL &= num.LL;
+                    HH &= num.HH;
                     return *this;
                 }
 
                 U8& operator|=( const U8& num )
                 {
-                    _L |= num._L;
-                    _H |= num._H;
+                    LL |= num.LL;
+                    HH |= num.HH;
                     return *this;
                 }
 
                 U8& operator^=( const U8& num )
                 {
-                    _L ^= num._L;
-                    _H ^= num._H;
+                    LL ^= num.LL;
+                    HH ^= num.HH;
                     return *this;
                 }
 
@@ -275,18 +275,18 @@ private:
 
             struct S8
             {
-                CLR_UINT32 _L;
-                CLR_UINT32 _H;
+                CLR_UINT32 LL;
+                CLR_UINT32 HH;
 
                 operator CLR_INT64() const
                 {
-                     return (((CLR_UINT64)_H) << 32 | (CLR_UINT64)_L);
+                     return (((CLR_UINT64)HH) << 32 | (CLR_UINT64)LL);
                 }
 
                 S8& operator=( const CLR_INT64 num )
                 {
-                    _L = (CLR_UINT32) (( ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)       );
-                    _H = (CLR_UINT32) (( ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32 );
+                    LL = (CLR_UINT32) (( ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)       );
+                    HH = (CLR_UINT32) (( ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32 );
                     return *this;
                 }
 
@@ -327,8 +327,8 @@ private:
                 S8 operator~()
                 {
                     S8 ret_value;
-                    ret_value._L = ~_L;
-                    ret_value._H = ~_H;    
+                    ret_value.LL = ~LL;
+                    ret_value.HH = ~HH;    
                     return ret_value;
                 }
 
@@ -344,22 +344,22 @@ private:
 
                 S8& operator&=( const S8& num )
                 {
-                    _L &= num._L;
-                    _H &= num._H;
+                    LL &= num.LL;
+                    HH &= num.HH;
                     return *this;
                 }
 
                 S8& operator|=( const S8& num )
                 {
-                    _L |= num._L;
-                    _H |= num._H;
+                    LL |= num.LL;
+                    HH |= num.HH;
                     return *this;
                 }
 
                 S8& operator^=( const S8& num )
                 {
-                    _L ^= num._L;
-                    _H ^= num._H;
+                    LL ^= num.LL;
+                    HH ^= num.HH;
                     return *this;
                 }
 
@@ -413,8 +413,8 @@ private:
 
             struct R8
             {
-                CLR_UINT32 _L;
-                CLR_UINT32 _H;
+                CLR_UINT32 LL;
+                CLR_UINT32 HH;
 
                 operator double() const
                 {
@@ -428,7 +428,7 @@ private:
 /// to copy byte by byte.
 ///
                     CLR_UINT8* tmp = (CLR_UINT8*)&ret_val;
-                    CLR_UINT8* src = (CLR_UINT8*)&_L;
+                    CLR_UINT8* src = (CLR_UINT8*)&LL;
                     int i;
                     
                     for(i=0; i<sizeof(CLR_UINT32); i++)
@@ -436,15 +436,15 @@ private:
                         *tmp++ = *src++;
                     }
 
-                    src = (CLR_UINT8*)&_H;
+                    src = (CLR_UINT8*)&HH;
                     for(i=0; i<sizeof(CLR_UINT32); i++)
                     {
                         *tmp++ = *src++;
                     }
 #else
                     CLR_UINT32 *tmp = (CLR_UINT32*)&ret_val;
-                    tmp[0]=_L;
-                    tmp[1]=_H;
+                    tmp[0]=LL;
+                    tmp[1]=HH;
 #endif // defined(__GNUC__)
 
                     return ret_val;
@@ -460,7 +460,7 @@ private:
 /// to copy byte by byte.
 ///
                     CLR_UINT8* src = (CLR_UINT8*)&num;
-                    CLR_UINT8* dst = (CLR_UINT8*)&_L;
+                    CLR_UINT8* dst = (CLR_UINT8*)&LL;
                     int i;
                     
                     for(i=0; i<sizeof(CLR_UINT32); i++)
@@ -468,15 +468,15 @@ private:
                         *dst++ = *src++;
                     }
 
-                    dst = (CLR_UINT8*)&_H;
+                    dst = (CLR_UINT8*)&HH;
                     for(i=0; i<sizeof(CLR_UINT32); i++)
                     {
                         *dst++ = *src++;
                     }
 #else
                     CLR_UINT32* tmp= (CLR_UINT32 *) &num;
-                    _L = (CLR_UINT32)tmp[0];
-                    _H = (CLR_UINT32)tmp[1];
+                    LL = (CLR_UINT32)tmp[0];
+                    HH = (CLR_UINT32)tmp[1];
 #endif
 
                     return *this;
@@ -549,34 +549,34 @@ private:
 
             struct R4 {
                
-                CLR_INT32  _L;
+                CLR_INT32  LL;
 
                 operator CLR_INT32 () const
                 {
-                    return _L;
+                    return LL;
                 }
 
                 R4& operator=( const CLR_INT32 num )
                 {
-                    _L = num;
+                    LL = num;
                     return *this;
                 }
                 R4& operator+=( const R4& num )
                 {
-                    _L += num._L;
+                    LL += num.LL;
                     return *this;
                 }
 
                 R4& operator-=( const R4& num )
                 {
-                    _L -= num._L;
+                    LL -= num.LL;
                    return *this;
                 }
 
 
                 R4& operator%=( const R4& num )
                 {
-                    _L %= num._L;
+                    LL %= num.LL;
                     return *this;
                 }
 
@@ -584,14 +584,14 @@ private:
                 R4 operator*( const R4& num )
                 {
                     R4  ret_value;
-                    ret_value._L = (CLR_INT32)(((CLR_INT64)_L * (CLR_INT64)num._L) >> HB_FloatShift );
+                    ret_value.LL = (CLR_INT32)(((CLR_INT64)LL * (CLR_INT64)num.LL) >> HB_FloatShift );
                     return ret_value;
                 }
 
                 R4 operator/( const R4& num )
                 {
                     R4 ret_value;
-                    ret_value._L = (CLR_INT32)((((CLR_INT64)_L) << HB_FloatShift)  / (CLR_INT64)num._L); 
+                    ret_value.LL = (CLR_INT32)((((CLR_INT64)LL) << HB_FloatShift)  / (CLR_INT64)num.LL); 
                     return ret_value;
                 }
 
@@ -599,18 +599,18 @@ private:
 
             struct R8
             {
-                CLR_UINT32 _L;
-                CLR_UINT32 _H;
+                CLR_UINT32 LL;
+                CLR_UINT32 HH;
 
                 operator CLR_INT64() const
                 {
-                    return ((CLR_INT64)_H << 32 | (CLR_INT64)_L );
+                    return ((CLR_INT64)HH << 32 | (CLR_INT64)LL );
                 }
 
                 R8& operator=( const CLR_INT64 num )
                 {
-                    _L = (CLR_UINT32) (( ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)       );
-                    _H = (CLR_UINT32) (( ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32 );
+                    LL = (CLR_UINT32) (( ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)       );
+                    HH = (CLR_UINT32) (( ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32 );
                     return *this;
                 }
 

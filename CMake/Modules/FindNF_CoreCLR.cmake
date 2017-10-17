@@ -58,6 +58,7 @@ set(NF_CoreCLR_SRCS
     GarbageCollector.cpp
     GarbageCollector_Compaction.cpp
     GarbageCollector_ComputeReachabilityGraph.cpp
+    GarbageCollector_Info.cpp
     Interpreter.cpp
     Random.cpp
     Streams.cpp
