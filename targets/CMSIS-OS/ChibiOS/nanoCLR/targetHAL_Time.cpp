@@ -107,6 +107,31 @@ bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len 
     return len != 0;
 }
 
+bool DateTimeToString(const int64_t& time, char*& buf, size_t& len )
+{
+    SYSTEMTIME st;
+
+    HAL_Time_ToSystemTime( time, &st );
+
+    return CLR_SafeSprintf(buf, len, "%4d/%02d/%02d %02d:%02d:%02d.%03d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds );
+}
+
+char* DateTimeToString(const int64_t& time)
+{
+    static char rgBuffer[128];
+    char*  szBuffer =           rgBuffer;
+    size_t iBuffer  = ARRAYSIZE(rgBuffer);
+
+    DateTimeToString( time, szBuffer, iBuffer );
+
+    return rgBuffer;
+}
+
+const char* HAL_Time_CurrentDateTimeToString()
+{
+    return DateTimeToString(HAL_Time_CurrentDateTime(false));
+}
+
 unsigned __int64 CPU_MiliSecondsToSysTicks(unsigned __int64 miliSeconds)
 {
     return MS2ST(miliSeconds);

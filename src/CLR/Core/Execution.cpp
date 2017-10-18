@@ -414,7 +414,7 @@ void CLR_RT_ExecutionEngine::Relocate()
 
 #if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_globalLock           );
-    CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_outOfMemoryException );
+    //CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_outOfMemoryException );
 #endif
 
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_currentUICulture     );

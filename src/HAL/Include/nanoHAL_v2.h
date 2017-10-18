@@ -89,4 +89,15 @@ extern HAL_SYSTEM_CONFIG  HalSystemConfig;
 // this has to be provided at target level
 void NANOCLR_RELINQUISHEXECUTIONCONTROL();
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void nanoHAL_Initialize_C();
+void HeapLocation_C(unsigned char** baseAddress, unsigned int* sizeInBytes);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // _NANOHAL_V2_H_
