@@ -251,7 +251,7 @@ struct Settings
     {
         g_CLR_RT_Persistence_Manager.Uninitialize();
 
-        // UNDONE: FIXME: CLR_RT_ExecutionEngine::DeleteInstance();
+        CLR_RT_ExecutionEngine::DeleteInstance();
 
         m_fInitialized = false;
     }
