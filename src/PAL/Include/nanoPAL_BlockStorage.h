@@ -597,9 +597,16 @@ typedef struct MEMORY_MAPPED_NOR_BLOCK_CONFIG
 
 }MEMORY_MAPPED_NOR_BLOCK_CONFIG;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //////////////////////////////////////////////////////////
 // function to included in all target devices to be added
 void BlockStorage_AddDevices();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _NANOPAL_BLOCKSTORAGE_H_

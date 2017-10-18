@@ -7,7 +7,6 @@
 #include <cmsis_os.h>
 
 #include <nanoCLR_Application.h>
-#include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_v2.h>
 
 
@@ -18,21 +17,10 @@ void CLRStartupThread(void const * argument)
 {
   (void)argument;
 
-  // initialize block storage devices
-  BlockStorage_AddDevices();
-
-  // clear managed heap region
-  uint8_t* baseAddress;
-  uint32_t sizeInBytes;
-
-  HeapLocation_C(&baseAddress, &sizeInBytes);
-  memset(baseAddress, 0, sizeInBytes);
-
   // initialize nanoHAL
   nanoHAL_Initialize_C();
 
   CLR_SETTINGS clrSettings;
-
   memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
   clrSettings.MaxContextSwitches         = 50;

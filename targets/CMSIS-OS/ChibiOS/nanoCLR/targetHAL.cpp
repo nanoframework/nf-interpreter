@@ -3,13 +3,13 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoHAL_Types.h>
-#include <nanoHAL_Time.h>
-#include <nanoPAL.h>
-#include <target_platform.h>
-#include <hal.h>
 #include <ch.h>
-
+#include <hal.h>
+#include <nanoPAL.h>
+#include <nanoHAL_Time.h>
+#include <nanoHAL_Types.h>
+#include <target_platform.h>
+#include <nanoPAL_BlockStorage.h>
 
 // because nanoHAL_Initialize needs to be called in both C and C++ we need a proxy to allow it to be called in 'C'
 extern "C" {
@@ -24,6 +24,16 @@ void nanoHAL_Initialize()
 {
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION  ::InitializeList();
+
+    // initialize block storage devices
+    BlockStorage_AddDevices();
+
+    // clear managed heap region
+    unsigned char* heapStart = NULL;
+    unsigned int heapSize  = 0;
+
+    ::HeapLocation( heapStart, heapSize );
+    memset(heapStart, 0, heapSize);
 
     Events_Initialize();
 
