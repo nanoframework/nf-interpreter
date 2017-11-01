@@ -32,7 +32,7 @@ void ReceiverThread(void const * argument)
     WP_Message_Process(&inboundMessage);
 
     // delay here to give other threads a chance to run
-    osDelay(500);
+    osDelay(100);
   }
 
   // nothing to deinitialize or cleanup, so it's safe to return
