@@ -51,7 +51,7 @@ bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         if(semaphoreResult == MSG_OK)
         {
             // read from serial stream 
-            volatile size_t read = chnReadTimeout(&SDU1, ptr, *size, MS2ST(100));
+            volatile size_t read = chnReadTimeout(&SDU1, ptr, *size, MS2ST(250));
 
             ptr  += read;
             *size -= read;
@@ -95,7 +95,7 @@ bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         {
             
             // non blocking read from serial port with 100ms timeout
-            volatile size_t read = sdReadTimeout(&SD2, ptr, *size, MS2ST(100));
+            volatile size_t read = sdReadTimeout(&SD2, ptr, *size, MS2ST(250));
 
             ptr  += read;
             *size -= read;
