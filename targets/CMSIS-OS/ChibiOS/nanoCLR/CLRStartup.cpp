@@ -318,7 +318,7 @@ void ClrStartup(CLR_SETTINGS params)
 
             if(params.EnterDebuggerLoopAfterExit)
             {
-                // UNDONE: FIXME: CLR_DBG_Debugger::Debugger_WaitForCommands();
+                CLR_DBG_Debugger::Debugger_WaitForCommands();
             }
         }
 
