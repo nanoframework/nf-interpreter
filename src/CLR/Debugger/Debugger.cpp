@@ -364,7 +364,7 @@ bool CLR_DBG_Debugger::Monitor_Ping( WP_Message* msg)
 
         cmdReply.m_source    = Monitor_Ping_c_Ping_Source_NanoCLR;
 
-        cmdReply.m_dbg_flags = CLR_EE_DBG_IS(State_ProgramExited) != 0 ? Monitor_Ping_c_Ping_DbgFlag_AppExit : 0;
+        cmdReply.m_dbg_flags = CLR_EE_DBG_IS(StateProgramExited) != 0 ? Monitor_Ping_c_Ping_DbgFlag_AppExit : 0;
 
         WP_ReplyToCommand( msg, true, false, &cmdReply, sizeof(cmdReply) );
     }
@@ -376,7 +376,7 @@ bool CLR_DBG_Debugger::Monitor_Ping( WP_Message* msg)
         fStopOnBoot = (cmdReply != NULL) && (cmdReply->m_dbg_flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
     }
 
-    if(CLR_EE_DBG_IS_MASK(State_Initialize, State_Mask))
+    if(CLR_EE_DBG_IS_MASK(StateInitialize, StateMask))
     {
         if(fStopOnBoot) CLR_EE_DBG_SET(Stopped);
         else            CLR_EE_DBG_CLR(Stopped);
@@ -926,14 +926,14 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions( WP_Message* msg)
     
     CLR_DBG_Commands::Debugging_Execution_ChangeConditions* cmd = (CLR_DBG_Commands::Debugging_Execution_ChangeConditions*)msg->m_payload;
 
-    g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions |=  cmd->m_set;
-    g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions &= ~cmd->m_reset;
+    g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions |=  cmd->FlagsToSet;
+    g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions &= ~cmd->FlagsToReset;
 
     if((msg->m_header.m_flags & WP_Flags_c_NonCritical) == 0)
     {
         CLR_DBG_Commands::Debugging_Execution_ChangeConditions::Reply cmdReply;
 
-        cmdReply.m_current = g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions;
+        cmdReply.CurrentState = g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions;
 
         WP_ReplyToCommand( msg, true, false, &cmdReply, sizeof(cmdReply) );
     }

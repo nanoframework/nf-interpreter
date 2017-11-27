@@ -364,12 +364,12 @@ struct CLR_DBG_Commands
 
     struct Debugging_Execution_ChangeConditions
     {
-        CLR_UINT32 m_set;
-        CLR_UINT32 m_reset;
+        CLR_UINT32 FlagsToSet;
+        CLR_UINT32 FlagsToReset;
 
         struct Reply
         {
-            CLR_UINT32 m_current;
+            CLR_UINT32 CurrentState;
         };
     };
 

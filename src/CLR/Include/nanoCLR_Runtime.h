@@ -2803,19 +2803,14 @@ struct CLR_RT_ExecutionEngine
     static const int                    c_HeapState_Normal         = 0x00000000;
     static const int                    c_HeapState_UnderGC        = 0x00000001;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // NEED TO KEEP THESE IN SYNC WITH Enum 'Commands.Debugging_Execution_ChangeConditions...' on debugger library code //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static const int                    c_fDebugger_Unused00000001           = 0x00000001;
-    static const int                    c_fDebugger_Unused00000002           = 0x00000002;
-    static const int                    c_fDebugger_Unused00000004           = 0x00000004;
-    //
-    static const int                    c_fDebugger_LcdSendFrame             = 0x00000100;
-    static const int                    c_fDebugger_LcdSendFrameNotification = 0x00000200;
-    //
-    static const int                    c_fDebugger_State_Initialize         = 0x00000000;
-    static const int                    c_fDebugger_State_ProgramRunning     = 0x00000400;
-    static const int                    c_fDebugger_State_ProgramExited      = 0x00000800;
-    static const int                    c_fDebugger_State_Mask               = 0x00000c00;
+    static const int                    c_fDebugger_StateInitialize          = 0x00000000;
+    static const int                    c_fDebugger_StateProgramRunning      = 0x00000400;
+    static const int                    c_fDebugger_StateProgramExited       = 0x00000800;
+    static const int                    c_fDebugger_StateMask                = c_fDebugger_StateProgramRunning + c_fDebugger_StateProgramExited;
     //
     static const int                    c_fDebugger_BreakpointsDisabled      = 0x00001000;
     //

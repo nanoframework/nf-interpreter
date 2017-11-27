@@ -603,7 +603,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
     NANOCLR_CHECK_HRESULT(WaitForDebugger());
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-    CLR_EE_DBG_SET_MASK(State_ProgramRunning,State_Mask);
+    CLR_EE_DBG_SET_MASK(StateProgramRunning,StateMask);
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
  
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( ref, g_CLR_RT_TypeSystem.m_entryPoint, NULL ));
