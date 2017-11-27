@@ -171,7 +171,6 @@
 
   configuration:
     - Debug
-    - MinSizeRel
 
   environment:
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
