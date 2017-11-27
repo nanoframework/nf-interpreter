@@ -2545,7 +2545,7 @@ HRESULT CLR_RT_AppDomainAssembly::AppDomainAssembly_Initialize( CLR_RT_AppDomain
 
     NANOCLR_CHECK_HRESULT(assm->Resolve_AllocateStaticFields( m_pStaticFields ));
 
-    if(!CLR_EE_DBG_IS_MASK(State_Initialize,State_Mask))
+    if(!CLR_EE_DBG_IS_MASK(StateInitialize,StateMask))
     {
         //Only in the non-boot case should we do this. Otherwise, debug events can occur out of order (thread creation of the
         //static constructor before thread creation of the main thread.
