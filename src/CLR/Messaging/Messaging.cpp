@@ -479,7 +479,7 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
 }
 
 // wrapper function for CLR_Messaging::ProcessPayload(
-extern "C" bool CLR_Messaging_ProcessPayload(WP_Message* msg)
+extern "C" int CLR_Messaging_ProcessPayload(WP_Message* msg)
 {
     //CLR_Messaging* instance = (CLR_Messaging*)&g_scratchDebuggerMessaging[0];
 

@@ -15,7 +15,7 @@
 //////////////////////////////////////////////////////////////////////
 // helper functions
 
-bool NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
+int NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
 {
     releaseInfo->version.usMajor = VERSION_MAJOR;
     releaseInfo->version.usMinor = VERSION_MINOR;
@@ -27,7 +27,7 @@ bool NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
     return true;
 }
 
-static bool AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buffer, int mode, unsigned int* errorCode)
+static int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buffer, int mode, unsigned int* errorCode)
 {
     // reset error code
     *errorCode = AccessMemoryErrorCode_NoError;
@@ -60,7 +60,7 @@ static bool AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buf
 
 ////////////////////////////////////////////////////
 
-bool Monitor_Ping(WP_Message* message)
+int Monitor_Ping(WP_Message* message)
 {
     if((message->m_header.m_flags & WP_Flags_c_Reply) == 0)
     {
@@ -73,7 +73,7 @@ bool Monitor_Ping(WP_Message* message)
     return true;
 }
 
-bool Monitor_OemInfo(WP_Message* message)
+int Monitor_OemInfo(WP_Message* message)
 {
     if((message->m_header.m_flags & WP_Flags_c_Reply) == 0)
     {
@@ -87,7 +87,7 @@ bool Monitor_OemInfo(WP_Message* message)
     return true;
 }
 
-bool Monitor_WriteMemory(WP_Message* message)
+int Monitor_WriteMemory(WP_Message* message)
 {
     CLR_DBG_Commands_Monitor_WriteMemory* cmd = (CLR_DBG_Commands_Monitor_WriteMemory*)message->m_payload;
     CLR_DBG_Commands_Monitor_WriteMemory_Reply cmdReply;
@@ -112,7 +112,7 @@ bool Monitor_WriteMemory(WP_Message* message)
     return true;
 }
 
-bool Monitor_Reboot(WP_Message* message)
+int Monitor_Reboot(WP_Message* message)
 {
     Monitor_Reboot_Command* cmd = (Monitor_Reboot_Command*)message->m_payload;
 
@@ -134,7 +134,7 @@ bool Monitor_Reboot(WP_Message* message)
     return true;
 }
 
-bool Monitor_EraseMemory(WP_Message* message)
+int Monitor_EraseMemory(WP_Message* message)
 {
     CLR_DBG_Commands_Monitor_EraseMemory* cmd = (CLR_DBG_Commands_Monitor_EraseMemory*)message->m_payload;
     CLR_DBG_Commands_Monitor_EraseMemory_Reply cmdReply;
@@ -149,7 +149,7 @@ bool Monitor_EraseMemory(WP_Message* message)
     return true;
 }
 
-bool Monitor_CheckMemory(WP_Message* message)
+int Monitor_CheckMemory(WP_Message* message)
 {
     bool ret = false;
 
@@ -164,7 +164,7 @@ bool Monitor_CheckMemory(WP_Message* message)
     return ret;
 }
 
-bool Monitor_MemoryMap(WP_Message* message)
+int Monitor_MemoryMap(WP_Message* message)
 {
     MemoryMap_Range map[2];
 
@@ -188,7 +188,7 @@ bool Monitor_MemoryMap(WP_Message* message)
     return true;
 }
 
-bool Monitor_FlashSectorMap(WP_Message* message)
+int Monitor_FlashSectorMap(WP_Message* message)
 {
     struct Flash_Sector
     {

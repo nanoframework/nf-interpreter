@@ -94,15 +94,15 @@ struct WP_PhysicalLayer
     // TransmitMessage has to be fully buffered, in the sense it should accept all the input and return.
     // Blocking behavior has to be hidden in the driver.
     //
-    bool (*ReceiveBytes)(void* state, unsigned char*& ptr, unsigned int & size);
-    bool (*TransmitMessage)(void* state, const WP_Message* msg);
+    int (*ReceiveBytes)(void* state, unsigned char*& ptr, unsigned int & size);
+    int (*TransmitMessage)(void* state, const WP_Message* msg);
 };
 
 struct WP_ApplicationLayer
 {
-    bool (*ProcessHeader)(void* state, WP_Message* msg);
-    bool (*ProcessPayload)(void* state, WP_Message* msg);
-    bool (*Release)(void* state, WP_Message* msg);
+    int (*ProcessHeader)(void* state, WP_Message* msg);
+    int (*ProcessPayload)(void* state, WP_Message* msg);
+    int (*Release)(void* state, WP_Message* msg);
 };
 
 //--//
@@ -139,11 +139,11 @@ public:
     void PrepareReply(const WP_Packet& req, unsigned int flags, unsigned int payloadSize, unsigned char* payload);
     void SetPayload(unsigned char* payload);
     void Release();
-    bool Process();
+    int  Process();
 
 private:
-    bool VerifyHeader ();
-    bool VerifyPayload();
+    int  VerifyHeader ();
+    int  VerifyPayload();
     void ReplyBadPacket(unsigned int flags);
 };
 
@@ -159,9 +159,9 @@ struct WP_Controller
 
 
     void Initialize(const char* szMarker, const WP_PhysicalLayer* phy, const WP_ApplicationLayer* app, void* state);
-    bool AdvanceState();
-    bool SendProtocolMessage(const WP_Message& msg);
-    bool SendProtocolMessage(unsigned int cmd, unsigned int flags = 0, unsigned int payloadSize = 0, unsigned char* payload = NULL);
+    int  AdvanceState();
+    int  SendProtocolMessage(const WP_Message& msg);
+    int  SendProtocolMessage(unsigned int cmd, unsigned int flags = 0, unsigned int payloadSize = 0, unsigned char* payload = NULL);
 };
 
 //--//

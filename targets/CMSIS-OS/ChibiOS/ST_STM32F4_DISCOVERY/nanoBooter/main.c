@@ -51,14 +51,14 @@ int main(void) {
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
-  osDelay(20);    // Let init stabilize
+  //osDelay(100);    // Let init stabilize
 
   // the following IF is not mandatory, it's just providing a way for a user to 'force'
   // the board to remain in nanoBooter and not launching nanoCLR
 
   // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
   // the user button in this board has a pull-up resistor so the check has to be inverted
-  if (palReadPad(GPIOA, GPIOA_BUTTON))
+  if (!palReadPad(GPIOA, GPIOA_BUTTON))
   {
     // check for valid CLR image 
     if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
