@@ -29,7 +29,7 @@ binary_semaphore_t wpChannelSemaphore;
 
 #if (HAL_USE_SERIAL_USB == TRUE)
 
-bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
+int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
 {
     // save for latter comparison
     uint16_t requestedSize = *size;
@@ -72,7 +72,7 @@ bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
 }
 #elif (HAL_USE_SERIAL == TRUE)
 
-bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
+int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
 {
     // save for latter comparison
     uint16_t requestedSize = *size;
@@ -121,7 +121,7 @@ bool WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
 
 #if (HAL_USE_SERIAL_USB == TRUE)
 
-bool WP_TransmitMessage(WP_Message* message)
+int WP_TransmitMessage(WP_Message* message)
 {
     int writeResult;
     bool operationResult = false;
@@ -181,7 +181,7 @@ bool WP_TransmitMessage(WP_Message* message)
 }
 #elif (HAL_USE_SERIAL == TRUE)
 
-bool WP_TransmitMessage(WP_Message* message)
+int WP_TransmitMessage(WP_Message* message)
 {
     int writeResult;
     bool operationResult = false;

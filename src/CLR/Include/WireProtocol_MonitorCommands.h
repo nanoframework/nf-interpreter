@@ -148,14 +148,14 @@ typedef struct CLR_DBG_Commands_Monitor_MemoryMap
 extern "C" {
 #endif
 
-bool Monitor_Ping(WP_Message* message);
-bool Monitor_OemInfo(WP_Message* message);
-bool Monitor_WriteMemory(WP_Message* message);
-bool Monitor_Reboot(WP_Message* message);
-bool Monitor_EraseMemory(WP_Message* message);
-bool Monitor_CheckMemory(WP_Message* message);
-bool Monitor_MemoryMap(WP_Message* message);
-bool Monitor_FlashSectorMap(WP_Message* message);
+int Monitor_Ping(WP_Message* message);
+int Monitor_OemInfo(WP_Message* message);
+int Monitor_WriteMemory(WP_Message* message);
+int Monitor_Reboot(WP_Message* message);
+int Monitor_EraseMemory(WP_Message* message);
+int Monitor_CheckMemory(WP_Message* message);
+int Monitor_MemoryMap(WP_Message* message);
+int Monitor_FlashSectorMap(WP_Message* message);
 
 #ifdef __cplusplus
 }

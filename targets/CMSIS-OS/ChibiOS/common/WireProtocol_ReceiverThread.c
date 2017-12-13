@@ -5,7 +5,6 @@
 
 #include <ch.h>
 #include <cmsis_os.h>
-
 #include "WireProtocol_HAL_Interface.h"
 
 extern WP_Message inboundMessage;

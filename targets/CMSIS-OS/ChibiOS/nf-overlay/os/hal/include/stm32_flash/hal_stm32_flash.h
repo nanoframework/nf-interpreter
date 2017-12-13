@@ -42,9 +42,9 @@ extern "C" {
   void stm32FlashInit(void);
   void stm32FlashObjectInit(SMT32FlashDriver* flash);
   void stm32FlashReadBytes(uint32_t startAddress, uint32_t length, uint8_t* buffer);
-  bool stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t* buffer);
-  bool stm32FlashIsErased(uint32_t startAddress, uint32_t length);
-  bool stm32FlashErase(uint32_t address);
+  int  stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t* buffer);
+  int  stm32FlashIsErased(uint32_t startAddress, uint32_t length);
+  int  stm32FlashErase(uint32_t address);
 
 #ifdef __cplusplus
 }

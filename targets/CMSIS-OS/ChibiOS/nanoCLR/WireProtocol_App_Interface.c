@@ -9,7 +9,7 @@
 
 
 // declaration for wrapper function
-extern bool CLR_Messaging_ProcessPayload(WP_Message* msg);
+extern int CLR_Messaging_ProcessPayload(WP_Message* msg);
 
 
 // Initialize to a packet sequence number impossible to encounter
@@ -54,7 +54,7 @@ static const CommandHandlerLookup c_Lookup_Reply[] =
     /*******************************************************************************************************************************************************************/
 };
 
-bool WP_App_ProcessHeader(WP_Message* message)
+int WP_App_ProcessHeader(WP_Message* message)
 {
     // check for reception buffer overflow 
     if(message->m_header.m_size > sizeof(receptionBuffer))
@@ -66,7 +66,7 @@ bool WP_App_ProcessHeader(WP_Message* message)
     return true;
 }
 
-bool WP_App_ProcessPayload(WP_Message* message)
+int WP_App_ProcessPayload(WP_Message* message)
 {
     return CLR_Messaging_ProcessPayload(message);
 }

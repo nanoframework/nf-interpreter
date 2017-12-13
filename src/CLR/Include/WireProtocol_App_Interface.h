@@ -10,11 +10,11 @@
 
 //////////////////////////////////////////
 extern uint8_t receptionBuffer[2048];
-extern void ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* ptr, int size);
+extern void ReplyToCommand(WP_Message* message, int fSuccess, int fCritical, void* ptr, int size);
 
 //////////////////////////////////////////
-bool WP_App_ProcessHeader(WP_Message* message);
-bool WP_App_ProcessPayload(WP_Message* message);
+int WP_App_ProcessHeader(WP_Message* message);
+int WP_App_ProcessPayload(WP_Message* message);
 
 #endif // _WIREPROTOCOL_APP_INTERFACE_H_
 

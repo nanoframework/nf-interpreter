@@ -18,7 +18,7 @@ extern void debug_printf( const char* format, ... );
 //////////////////////////////////////////
 // helper functions
 
-void WP_ReplyToCommand(WP_Message* message, bool fSuccess, bool fCritical, void* ptr, int size)
+void WP_ReplyToCommand(WP_Message* message, int fSuccess, int fCritical, void* ptr, int size)
 {
     WP_Message msgReply;
     uint32_t     flags = 0;
@@ -117,7 +117,7 @@ void WP_Message_Release(WP_Message* message)
     }
 }
 
-bool WP_Message_VerifyHeader(WP_Message* message)
+int WP_Message_VerifyHeader(WP_Message* message)
 {
     uint32_t crc = message->m_header.m_crcHeader;
     message->m_header.m_crcHeader = 0;
@@ -132,7 +132,7 @@ bool WP_Message_VerifyHeader(WP_Message* message)
     return true;
 }
 
-bool WP_Message_VerifyPayload(WP_Message* message)
+int WP_Message_VerifyPayload(WP_Message* message)
 {
     if(message->m_payload == NULL && message->m_header.m_size)
     {
@@ -157,7 +157,7 @@ void WP_Message_ReplyBadPacket(uint32_t flags)
     WP_TransmitMessage(&message);
 }
 
-bool WP_Message_Process(WP_Message* message)
+int WP_Message_Process(WP_Message* message)
 {
     uint8_t* buf = (uint8_t*)&message->m_header;
     int len;

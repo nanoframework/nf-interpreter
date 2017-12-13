@@ -87,7 +87,7 @@ void WP_Message::Release()
     }
 }
 
-bool WP_Message::VerifyHeader()
+int WP_Message::VerifyHeader()
 {
     unsigned int crc = m_header.m_crcHeader;
     m_header.m_crcHeader = 0;
@@ -102,7 +102,7 @@ bool WP_Message::VerifyHeader()
     return true;
 }
 
-bool WP_Message::VerifyPayload()
+int WP_Message::VerifyPayload()
 {
     if(m_payload == NULL && m_header.m_size)
     {
@@ -127,7 +127,7 @@ void WP_Message::ReplyBadPacket(unsigned int flags)
     m_parent->SendProtocolMessage(msg);
 }
 
-bool WP_Message::Process()
+int WP_Message::Process()
 {
     unsigned char* buf = (unsigned char*)&m_header;
     int len;
@@ -324,18 +324,18 @@ void WP_Controller::Initialize(const char* szMarker, const WP_PhysicalLayer* phy
     m_inboundMessage.PrepareReception();
 }
 
-bool WP_Controller::AdvanceState()
+int WP_Controller::AdvanceState()
 {
     return m_inboundMessage.Process();
 }
 
-bool WP_Controller::SendProtocolMessage(const WP_Message& msg)
+int WP_Controller::SendProtocolMessage(const WP_Message& msg)
 {
     TRACE(TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", msg.m_header.m_cmd, msg.m_header.m_flags, msg.m_header.m_size);
     return m_phy->TransmitMessage(m_state, &msg);
 }
 
-bool WP_Controller::SendProtocolMessage(unsigned int cmd, unsigned int flags, unsigned int payloadSize, unsigned char* payload)
+int WP_Controller::SendProtocolMessage(unsigned int cmd, unsigned int flags, unsigned int payloadSize, unsigned char* payload)
 {
     WP_Message msg;
     msg.Initialize(this);

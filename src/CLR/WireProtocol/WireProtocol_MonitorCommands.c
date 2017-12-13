@@ -9,56 +9,56 @@
 ////////////////////////////////////////////////////
 
 // provided as weak to be replaced by actual implementation by application
-__nfweak bool Monitor_Ping(WP_Message* message)
+__nfweak int Monitor_Ping(WP_Message* message)
 {
    // default to false
    return false;
 }
 
 // provided as weak to be replaced by actual implementation by application
-__nfweak bool Monitor_OemInfo(WP_Message* message)
+__nfweak int Monitor_OemInfo(WP_Message* message)
 {
    // default to false
    return false;
 }
 
 // provided as weak to be replaced by actual implementation by application
-__nfweak bool Monitor_WriteMemory(WP_Message* message)
+__nfweak int Monitor_WriteMemory(WP_Message* message)
 {
    // default to false
    return false;
 }
 
 // provided as weak to be replaced by actual implementation by application
-__nfweak bool Monitor_Reboot(WP_Message* message)
+__nfweak int Monitor_Reboot(WP_Message* message)
 {
    // default to false
    return false;
 }
 
 // provided as weak to be replaced by actual implementation by application
-__nfweak bool Monitor_EraseMemory(WP_Message* message)
+__nfweak int Monitor_EraseMemory(WP_Message* message)
 {
    // default to false
    return false;
 }
 
 // provided as weak to be replaced by actual implementation by application
-__nfweak bool Monitor_CheckMemory(WP_Message* message)
+__nfweak int Monitor_CheckMemory(WP_Message* message)
 {
    // default to false
    return false;
 }
 
 // provided as weak to be replaced by actual implementation by application
-__nfweak bool Monitor_MemoryMap(WP_Message* message)
+__nfweak int Monitor_MemoryMap(WP_Message* message)
 {
    // default to false
    return false;
 }
 
 // provided as weak to be replaced by actual implementation by application
-__nfweak bool Monitor_FlashSectorMap(WP_Message* message)
+__nfweak int Monitor_FlashSectorMap(WP_Message* message)
 {
    // default to false
    return false;
