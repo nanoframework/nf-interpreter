@@ -26,6 +26,7 @@
     - MinSizeRel
 
   environment:
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
@@ -59,9 +60,9 @@
     fast_finish: true
 
   cache:
-    - '%GNU_GCC_TOOLCHAIN_PATH% -> appveyor.yml'
-    - '%NINJA_PATH% -> appveyor.yml'
-    - '%HEX2DFU_PATH% -> appveyor.yml'
+    - C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1
+    - C:\mytools\ninja
+    - C:\mytools\hex2dfu
 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
@@ -173,6 +174,7 @@
     - Debug
 
   environment:
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
@@ -185,35 +187,31 @@
       secure: WOqlCsnwTzfDPJFoNV/h8mEESIpG/9uFn1u6oE8hGZtXwIQQlsY+NyyLt9Y5xoFn
 
     matrix:
-      - BOARD_NAME: 'ST_STM32F4_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-      - BOARD_NAME: 'ST_STM32F429I_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-      - BOARD_NAME: 'ST_NUCLEO64_F091RC'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
-      - BOARD_NAME: 'ST_NUCLEO144_F746ZG'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-      - BOARD_NAME: 'MBN_QUAIL'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON'
-        NEEDS_DFU: 'True'
-      - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-      - BOARD_NAME: 'NETDUINO3_WIFI'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-        NEEDS_DFU: 'True'
+      # - BOARD_NAME: 'ST_STM32F4_DISCOVERY'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      # - BOARD_NAME: 'ST_STM32F429I_DISCOVERY'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      # - BOARD_NAME: 'ST_NUCLEO64_F091RC'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
+      # - BOARD_NAME: 'ST_NUCLEO144_F746ZG'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      # - BOARD_NAME: 'MBN_QUAIL'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON'
+      #   NEEDS_DFU: 'True'
+      # - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      # - BOARD_NAME: 'NETDUINO3_WIFI'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      #   NEEDS_DFU: 'True'
       - BOARD_NAME: 'NANOCLR_WINDOWS'
 
   matrix:
     fast_finish: true
 
-    exclude:
-      - BOARD_NAME: 'NANOCLR_WINDOWS'
-        configuration: Debug
-
   cache:
-    - '%GNU_GCC_TOOLCHAIN_PATH% -> appveyor.yml'
-    - '%NINJA_PATH% -> appveyor.yml'
-    - '%HEX2DFU_PATH% -> appveyor.yml'
+    - C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1
+    - C:\mytools\ninja
+    - C:\mytools\hex2dfu
 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
@@ -225,7 +223,9 @@
     - ps: |
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
+
           .\install-vsix-appveyor.ps1
+
         }
         Else
         {
@@ -243,7 +243,9 @@
 
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
+
           nuget restore targets\os\win32\nanoCLR.sln
+        
         }
         Else
         {
@@ -271,7 +273,11 @@
 
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
-          msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+          
+          msbuild targets\os\win32\netnf\TestApplication\TestApplication.sln /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+          
+          msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /p:Platform=x86 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        
         }
         Else
         {
@@ -343,6 +349,7 @@
     - MinSizeRel
 
   environment:
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
@@ -376,9 +383,9 @@
     fast_finish: true
 
   cache:
-    - '%GNU_GCC_TOOLCHAIN_PATH% -> appveyor.yml'
-    - '%NINJA_PATH% -> appveyor.yml'
-    - '%HEX2DFU_PATH% -> appveyor.yml'
+    - C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1
+    - C:\mytools\ninja
+    - C:\mytools\hex2dfu
 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
