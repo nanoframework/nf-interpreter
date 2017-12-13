@@ -10,7 +10,7 @@
 #include <nanoWeak.h>
 #include <nanoHAL_v2.h>
 
-#define COM_MAX_RETRIES  99;
+#define COM_MAX_RETRIES  99
 #define NATIVE_PROFILE_PAL_COM()
 
 
