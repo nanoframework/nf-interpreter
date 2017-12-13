@@ -335,7 +335,7 @@
                                      PIN_PUPDR_FLOATING(GPIOA_AN4) |         \
                                      PIN_PUPDR_FLOATING(GPIOA_AN1) |     \
                                      PIN_PUPDR_FLOATING(GPIOA_AN3) |      \
-                                     PIN_PUPDR_PULLDOWN(GPIOA_FLASH_HOLD) |   \
+                                     PIN_PUPDR_FLOATING(GPIOA_FLASH_HOLD) |   \
                                      PIN_PUPDR_FLOATING(GPIOA_TX4) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_RX4) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_OTG_FS_DM) |     \
@@ -351,7 +351,7 @@
                                      PIN_ODR_LOW(GPIOA_AN4) |             \
                                      PIN_ODR_LOW(GPIOA_AN1) |           \
                                      PIN_ODR_LOW(GPIOA_AN3) |          \
-                                     PIN_ODR_LOW(GPIOA_FLASH_HOLD) |         \
+                                     PIN_ODR_HIGH(GPIOA_FLASH_HOLD) |         \
                                      PIN_ODR_LOW(GPIOA_TX4) |          \
                                      PIN_ODR_LOW(GPIOA_RX4) |          \
                                      PIN_ODR_HIGH(GPIOA_OTG_FS_DM) |           \
