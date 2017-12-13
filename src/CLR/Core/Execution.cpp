@@ -1942,11 +1942,6 @@ HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CL
 
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_WeakReference::CreateInstance( weakref ));
 
-                if(inst.m_data == g_CLR_RT_WellKnownTypes.m_ExtendedWeakReference.m_data)
-                {
-                    weakref->m_identity.m_flags |= CLR_RT_HeapBlock_WeakReference::WR_ExtendedType;
-                }
-
                 reference.SetObjectReference( weakref );
             }
             break;

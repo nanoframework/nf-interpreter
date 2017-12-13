@@ -1121,14 +1121,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject( const CLR_RT_HeapBlock& ref
             {
                 CLR_RT_HeapBlock_WeakReference* weak = (CLR_RT_HeapBlock_WeakReference*)obj;
 
-                if(weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_ExtendedType)
-                {
-                    cls = &g_CLR_RT_WellKnownTypes.m_ExtendedWeakReference;
-                }
-                else
-                {
-                    cls = &g_CLR_RT_WellKnownTypes.m_WeakReference;
-                }
+                cls = &g_CLR_RT_WellKnownTypes.m_WeakReference;
             }
             break;
 
@@ -2648,7 +2641,6 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
     TIL( "System.Reflection"       , "RuntimeFieldInfo"              , m_FieldInfo                                          ),
 
     TIL( "System"                  , "WeakReference"                 , m_WeakReference                                      ),
-    TIL( "Microsoft.SPOT"          , "ExtendedWeakReference"         , m_ExtendedWeakReference                              ),
 
     TIL( "Microsoft.SPOT"          , "SerializationHintsAttribute"   , m_SerializationHintsAttribute                        ),
 

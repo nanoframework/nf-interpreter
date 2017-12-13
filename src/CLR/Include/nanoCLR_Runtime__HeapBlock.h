@@ -1989,9 +1989,6 @@ struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT H
     static const CLR_UINT32 WR_Unused_10000000    = 0x10000000;
     static const CLR_UINT32 WR_Persisted          = 0x20000000;
     static const CLR_UINT32 WR_Restored           = 0x40000000;
-    static const CLR_UINT32 WR_ExtendedType       = 0x80000000;
-
-    static const CLR_UINT32 WR_MaskForStorage = WR_SurviveBoot | WR_SurvivePowerdown | WR_ArrayOfBytes | WR_ExtendedType;
 
     //--//
 

@@ -469,17 +469,6 @@ void CLR_RT_GarbageCollector::MarkWeak()
 
         if(weak->IsAlive())
         {
-            //
-            // Only extended weak references are kept alive, memory permitting.
-            //
-            if(weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_ExtendedType)
-            {
-                if(weak->m_targetSerialized && weak->m_targetSerialized->IsAlive() == false)
-                {
-                    weak->m_targetSerialized->MarkAlive();
-                }
-            }
-
             if(weak->m_targetDirect)
             {
                 if(weak->m_targetDirect->IsAlive())

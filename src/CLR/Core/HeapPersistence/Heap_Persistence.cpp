@@ -116,7 +116,6 @@ bool CLR_RT_Persistence_Manager::ObjectHeader::Initialize( CLR_RT_HeapBlock_Weak
 
     m_identity          = wr->m_identity;
     m_identity.m_crc    = m_identity.ComputeCRC( array->GetFirstElement(), m_identity.m_length );
-    m_identity.m_flags &= CLR_RT_HeapBlock_WeakReference::WR_MaskForStorage;
 
     memcpy( &m_object, array, sizeof(m_object) );
     m_object.SetFlags( CLR_RT_HeapBlock::HB_Pinned | CLR_RT_HeapBlock::HB_Alive );
@@ -1303,22 +1302,10 @@ HRESULT CLR_RT_HeapBlock_WeakReference::SetTarget( CLR_RT_HeapBlock& targetRefer
 
         m_targetDirect = target;
 
-        //
-        // Check if this is an Extended Weak Reference before calling SerializationEnabled().
-        // Checking a flag is faster than calling a function that is unlikely to be inlined
-        // (from a separate static library)
-        //
-        // As WR_ExtendedType can only be set in the constructor of the ExtendedWeakReference class,
-        // this flag cannot be unset after an EWR is persisted to flash.
-        // Thus, the EWR invalidation code only needs to be called when WR_ExtendedType is set,
-        // allowing it to be inside the following 'if' block, and minimizing the number of 'if' conditions
-        // to check for the non EWR case.
-        //
         // This is particularly important to nanoCore and System.Threading.Dispatcher, which uses a
         // WeakReference to cache the last used Dispatcher and improve event throughput.
         //
-        if((m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_ExtendedType) != 0 &&
-           CLR_RT_BinaryFormatter::SerializationEnabled())
+        if(CLR_RT_BinaryFormatter::SerializationEnabled())
         {
             if(target)
             {
@@ -1431,25 +1418,7 @@ void CLR_RT_HeapBlock_WeakReference::InsertInPriorityOrder()
     NATIVE_PROFILE_CLR_HEAP_PERSISTENCE();
     this->Unlink(); // Remove from the list before looking for a spot, to avoid comparing against ourselves.
 
-    if(m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_ExtendedType)
-    {
-        CLR_INT32                       pri = m_identity.m_priority;
-        CLR_RT_HeapBlock_WeakReference* ptr = (CLR_RT_HeapBlock_WeakReference*)g_CLR_RT_ExecutionEngine.m_weakReferences.FirstNode();
-        while(true)
-        {
-            CLR_RT_HeapBlock_WeakReference* ptrNext = (CLR_RT_HeapBlock_WeakReference*)ptr->Next(); if(!ptrNext) break;
-
-            if(ptr->m_identity.m_priority <= pri) break;
-
-            ptr = ptrNext;
-        }
-
-        g_CLR_RT_ExecutionEngine.m_weakReferences.InsertBeforeNode( ptr, this );
-    }
-    else
-    {
-        g_CLR_RT_ExecutionEngine.m_weakReferences.LinkAtBack( this );
-    }
+    g_CLR_RT_ExecutionEngine.m_weakReferences.LinkAtBack( this );
 }
 
 
