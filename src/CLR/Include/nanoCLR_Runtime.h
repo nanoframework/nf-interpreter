@@ -1229,7 +1229,6 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_FieldInfo;
 
     CLR_RT_TypeDef_Index m_WeakReference;
-    CLR_RT_TypeDef_Index m_ExtendedWeakReference;
 
     CLR_RT_TypeDef_Index m_SerializationHintsAttribute;
 
