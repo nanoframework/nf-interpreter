@@ -304,7 +304,7 @@
     version: $(GitVersion_SemVer)
     publish: true
     override: true
-    explode: true
+    explode: false
     
   # before_deploy:
   #   # need this to keep ruby happy
