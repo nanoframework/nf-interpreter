@@ -1201,7 +1201,6 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_Exception;
     CLR_RT_TypeDef_Index m_IndexOutOfRangeException;
     CLR_RT_TypeDef_Index m_ThreadAbortException;
-    CLR_RT_TypeDef_Index m_IOException;
     CLR_RT_TypeDef_Index m_InvalidOperationException;
     CLR_RT_TypeDef_Index m_InvalidCastException;
     CLR_RT_TypeDef_Index m_NotSupportedException;
@@ -1232,38 +1231,6 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index m_SerializationHintsAttribute;
 
-    CLR_RT_TypeDef_Index m_ExtendedTimeZone;
-
-    CLR_RT_TypeDef_Index m_Bitmap;
-    CLR_RT_TypeDef_Index m_Font;
-
-    CLR_RT_TypeDef_Index m_TouchEvent;
-    CLR_RT_TypeDef_Index m_TouchInput;
-
-    CLR_RT_TypeDef_Index m_Message;
-
-    CLR_RT_TypeDef_Index m_ScreenMetrics;
-
-    CLR_RT_TypeDef_Index m_I2CDevice;
-    CLR_RT_TypeDef_Index m_I2CDevice__I2CReadTransaction;
-    CLR_RT_TypeDef_Index m_I2CDevice__I2CWriteTransaction;
-
-    CLR_RT_TypeDef_Index m_UsbClientConfiguration;
-    CLR_RT_TypeDef_Index m_UsbClientConfiguration__Descriptor;
-    CLR_RT_TypeDef_Index m_UsbClientConfiguration__DeviceDescriptor;
-    CLR_RT_TypeDef_Index m_UsbClientConfiguration__ClassDescriptor;
-    CLR_RT_TypeDef_Index m_UsbClientConfiguration__Endpoint;
-    CLR_RT_TypeDef_Index m_UsbClientConfiguration__UsbInterface;
-    CLR_RT_TypeDef_Index m_UsbClientConfiguration__ConfigurationDescriptor;
-    CLR_RT_TypeDef_Index m_UsbClientConfiguration__StringDescriptor;
-    CLR_RT_TypeDef_Index m_UsbClientConfiguration__GenericDescriptor;
-    
-    CLR_RT_TypeDef_Index m_NetworkInterface;
-    CLR_RT_TypeDef_Index m_Wireless80211;
-
-    CLR_RT_TypeDef_Index m_TimeServiceSettings;
-    CLR_RT_TypeDef_Index m_TimeServiceStatus;
-
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_TypeDef_Index m_AppDomain;
     CLR_RT_TypeDef_Index m_MarshalByRefObject;
@@ -1271,24 +1238,6 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index m_Thread;
     CLR_RT_TypeDef_Index m_ResourceManager;
-
-    CLR_RT_TypeDef_Index m_SocketException;
-
-    CLR_RT_TypeDef_Index m_NativeFileInfo;
-    CLR_RT_TypeDef_Index m_VolumeInfo;
-
-    CLR_RT_TypeDef_Index m_XmlNameTable_Entry;
-    CLR_RT_TypeDef_Index m_XmlReader_XmlNode;
-    CLR_RT_TypeDef_Index m_XmlReader_XmlAttribute;
-    CLR_RT_TypeDef_Index m_XmlReader_NamespaceEntry;
-
-    CLR_RT_TypeDef_Index m_CryptoKey;
-    CLR_RT_TypeDef_Index m_CryptokiObject;
-    CLR_RT_TypeDef_Index m_CryptokiSession;
-    CLR_RT_TypeDef_Index m_CryptokiSlot;
-    CLR_RT_TypeDef_Index m_CryptokiMechanismType;
-    CLR_RT_TypeDef_Index m_CryptoException;
-    CLR_RT_TypeDef_Index m_CryptokiCertificate;
 
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_WellKnownTypes);
 };
