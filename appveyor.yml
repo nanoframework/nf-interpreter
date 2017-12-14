@@ -60,9 +60,7 @@
     fast_finish: true
 
   cache:
-    - C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1
-    - C:\mytools\ninja
-    - C:\mytools\hex2dfu
+    - '%GNU_GCC_TOOLCHAIN_PATH%'
 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
@@ -189,29 +187,27 @@
     matrix:
       - BOARD_NAME: 'ST_STM32F4_DISCOVERY'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-      - BOARD_NAME: 'ST_STM32F429I_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-      - BOARD_NAME: 'ST_NUCLEO64_F091RC'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
-      - BOARD_NAME: 'ST_NUCLEO144_F746ZG'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-      - BOARD_NAME: 'MBN_QUAIL'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON'
-        NEEDS_DFU: 'True'
-      - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-      - BOARD_NAME: 'NETDUINO3_WIFI'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
-        NEEDS_DFU: 'True'
-      - BOARD_NAME: 'NANOCLR_WINDOWS'
+      # - BOARD_NAME: 'ST_STM32F429I_DISCOVERY'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      # - BOARD_NAME: 'ST_NUCLEO64_F091RC'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
+      # - BOARD_NAME: 'ST_NUCLEO144_F746ZG'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      # - BOARD_NAME: 'MBN_QUAIL'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON'
+      #   NEEDS_DFU: 'True'
+      # - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      # - BOARD_NAME: 'NETDUINO3_WIFI'
+      #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON'
+      #   NEEDS_DFU: 'True'
+      # - BOARD_NAME: 'NANOCLR_WINDOWS'
 
   matrix:
     fast_finish: true
 
   cache:
-    - C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1
-    - C:\mytools\ninja
-    - C:\mytools\hex2dfu
+    - '%GNU_GCC_TOOLCHAIN_PATH%'
 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
@@ -297,6 +293,19 @@
     - path: '**\%BOARD_NAME%-%GitVersion_SemVer%.zip'
       name: nanoImage
 
+  deploy:
+  - provider: BinTray
+    username: nfbot
+    api_key:
+      secure: Wz0wwFOzMkDwwzzax1HPzKZB3r/aTprlleqFYX5arxpH9pP3D9glINxEuY+P/BaN
+    subject: nfbot
+    repo: nanoframework-images-dev
+    package: $(BOARD_NAME)
+    version: $(GitVersion_SemVer)
+    publish: true
+    override: true
+    explode: true
+    
   # before_deploy:
   #   # need this to keep ruby happy
   #   - ps: md c:\tmp
@@ -383,9 +392,7 @@
     fast_finish: true
 
   cache:
-    - C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1
-    - C:\mytools\ninja
-    - C:\mytools\hex2dfu
+    - '%GNU_GCC_TOOLCHAIN_PATH%'
 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
