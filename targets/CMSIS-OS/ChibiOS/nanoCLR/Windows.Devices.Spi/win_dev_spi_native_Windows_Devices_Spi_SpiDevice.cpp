@@ -233,12 +233,12 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             if (fullDuplex)
             {
                 // Full duplex
-                spiExchange(cfg.Driver, writeSize, &writeData[0], &readData[0]);    
+                spiExchange(cfg.Driver, writeSize > readSize ? writeSize : readSize, writeData, readData);
             }
             else
             {
-                spiSend(cfg.Driver, writeSize, &writeData[0]);
-                spiReceive(cfg.Driver, readSize, &readData[0]);
+                spiSend(cfg.Driver, writeSize, writeData);
+                spiReceive(cfg.Driver, readSize, readData);
             }
         }
         else
@@ -246,11 +246,11 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             // Transmit only or Receive only
             if (readSize != 0) 
             {
-                spiReceive(cfg.Driver, readSize, &readData[0]);
+                spiReceive(cfg.Driver, readSize, readData);
             }
             else
             {
-                spiSend(cfg.Driver, writeSize, &writeData[0]);
+                spiSend(cfg.Driver, writeSize, writeData);
             }
         }
         // Release the bus
@@ -344,12 +344,13 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             if (fullDuplex)
             {
                 // Full duplex
-                spiExchange(cfg.Driver, writeSize, &writeData[0], &readData[0]);    
+                // Uses the largest buffer size as transfer size
+                spiExchange(cfg.Driver, writeSize > readSize ? writeSize : readSize, writeData, readData);
             }
             else
             {
-                spiSend(cfg.Driver, writeSize, &writeData[0]);
-                spiReceive(cfg.Driver, readSize, &readData[0]);
+                spiSend(cfg.Driver, writeSize, writeData);
+                spiReceive(cfg.Driver, readSize, readData);
             }
         }
         else
@@ -357,11 +358,11 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             // Transmit only or Receive only
             if (readSize != 0) 
             {
-                spiReceive(cfg.Driver, readSize, &readData[0]);
+                spiReceive(cfg.Driver, readSize, readData);
             }
             else
             {
-                spiSend(cfg.Driver, writeSize, &writeData[0]);
+                spiSend(cfg.Driver, writeSize, writeData);
             }
         }
 
