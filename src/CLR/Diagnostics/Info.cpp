@@ -738,26 +738,6 @@ void CLR_RT_DUMP::EXCEPTION( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref )
 
 void CLR_RT_DUMP::POST_PROCESS_EXCEPTION( CLR_RT_HeapBlock& ref )
 {
-    // socket exceptions have an extra field (ErrorCode), so lets display that as well
-    if (CLR_RT_ExecutionEngine::IsInstanceOf( ref, g_CLR_RT_WellKnownTypes.m_SocketException ))
-    {
-        CLR_RT_HeapBlock* obj = ref.Dereference();
-        if(obj != NULL)
-        {
-            // UNDONE: FIXME: CLR_INT32 errorCode = obj[ Library_system_sockets_System_Net_Sockets_SocketException::FIELD___errorCode ].NumericByRef().s4;
-            // UNDONE: FIXME: CLR_Debug::Printf( "    #### SocketException ErrorCode = %d\r\n", errorCode ); 
-        }
-    }
-    else if(CLR_RT_ExecutionEngine::IsInstanceOf( ref, g_CLR_RT_WellKnownTypes.m_CryptoException ))
-    {
-        CLR_RT_HeapBlock* obj = ref.Dereference();
-        if(obj != NULL)
-        {
-            // m_errorCode field 
-            CLR_INT32 errorCode = obj[5].NumericByRef().s4;
-            CLR_Debug::Printf( "    #### CryptoException ErrorCode = %d\r\n", errorCode ); 
-        }
-    }
 }
 
 const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )

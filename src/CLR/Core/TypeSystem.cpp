@@ -2620,7 +2620,6 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
     TIL( "System"                  , "NullReferenceException"        , m_NullReferenceException                             ),
     TIL( "System"                  , "OutOfMemoryException"          , m_OutOfMemoryException                               ),
     TIL( "System"                  , "ObjectDisposedException"       , m_ObjectDisposedException                            ),
-    TIL( "System.IO"               , "IOException"                   , m_IOException                                        ),
     TIL( "System.Threading"        , "ThreadAbortException"          , m_ThreadAbortException                               ),
     TIL( "Microsoft.SPOT"          , "ConstraintException"           , m_ConstraintException                                ),
     TIL( "Microsoft.SPOT"          , "UnknownTypeException"          , m_UnknownTypeException                               ),
@@ -2644,39 +2643,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
 
     TIL( "Microsoft.SPOT"          , "SerializationHintsAttribute"   , m_SerializationHintsAttribute                        ),
 
-    TIL( "Microsoft.SPOT"          , "ExtendedTimeZone"              , m_ExtendedTimeZone                                   ),
-
-    TIL( "Microsoft.SPOT"          , "Bitmap"                        , m_Bitmap                                             ),
-    TIL( "Microsoft.SPOT"          , "Font"                          , m_Font                                               ),
-
-    TIL( "Microsoft.SPOT.Touch"    , "TouchEvent"                    , m_TouchEvent                                         ),
-    TIL( "Microsoft.SPOT.Touch"    , "TouchInput"                    , m_TouchInput                                         ),
-
-    TIL( "Microsoft.SPOT.Messaging", "Message"                       , m_Message                                            ),
-
-    TIL( "Microsoft.SPOT.Hardware" , "ScreenMetrics"                 , m_ScreenMetrics                                      ),
-
     TIL( "Microsoft.SPOT.Hardware" , "WatchdogException"             , m_WatchdogException                                  ),
-
-    TIL( "Microsoft.SPOT.Hardware" , "I2CDevice"                     , m_I2CDevice                                          ),
-    TIL( NULL                      , "I2CReadTransaction"            , m_I2CDevice__I2CReadTransaction                      ),
-    TIL( NULL                      , "I2CWriteTransaction"           , m_I2CDevice__I2CWriteTransaction                     ),
-    
-    TIL( "Microsoft.SPOT.Hardware.UsbClient", "Configuration"        , m_UsbClientConfiguration                             ),
-    TIL( NULL                      , "Descriptor"                    , m_UsbClientConfiguration__Descriptor                 ),
-    TIL( NULL                      , "DeviceDescriptor"              , m_UsbClientConfiguration__DeviceDescriptor           ),
-    TIL( NULL                      , "ClassDescriptor"               , m_UsbClientConfiguration__ClassDescriptor            ),
-    TIL( NULL                      , "Endpoint"                      , m_UsbClientConfiguration__Endpoint                   ),
-    TIL( NULL                      , "UsbInterface"                  , m_UsbClientConfiguration__UsbInterface               ),
-    TIL( NULL                      , "ConfigurationDescriptor"       , m_UsbClientConfiguration__ConfigurationDescriptor    ),
-    TIL( NULL                      , "StringDescriptor"              , m_UsbClientConfiguration__StringDescriptor           ),
-    TIL( NULL                      , "GenericDescriptor"             , m_UsbClientConfiguration__GenericDescriptor          ),
-
-    TIL( "Microsoft.SPOT.Net.NetworkInformation", "NetworkInterface" , m_NetworkInterface                                   ),
-    TIL( "Microsoft.SPOT.Net.NetworkInformation", "Wireless80211"    , m_Wireless80211                                      ),
-
-    TIL( "Microsoft.SPOT.Time"     , "TimeServiceSettings"           , m_TimeServiceSettings                                ),
-    TIL( "Microsoft.SPOT.Time"     , "TimeServiceStatus"             , m_TimeServiceStatus                                  ),
 
 #if defined(NANOCLR_APPDOMAINS)
     TIL( "System"                  , "AppDomain"                     , m_AppDomain                                          ),
@@ -2685,24 +2652,6 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
 
     TIL( "System.Threading"        , "Thread"                        , m_Thread                                             ),
     TIL( "System.Resources"        , "ResourceManager"               , m_ResourceManager                                    ),
-
-    TIL( "System.Net.Sockets"      , "SocketException"               , m_SocketException                                    ),
-
-    TIL( "Microsoft.SPOT.IO"       , "NativeFileInfo"                , m_NativeFileInfo                                     ),
-    TIL( "Microsoft.SPOT.IO"       , "VolumeInfo"                    , m_VolumeInfo                                         ),
-
-    TIL( "System.Xml"              , "XmlNameTable_Entry"            , m_XmlNameTable_Entry                                 ),
-    TIL( "System.Xml"              , "XmlReader_XmlNode"             , m_XmlReader_XmlNode                                  ),
-    TIL( "System.Xml"              , "XmlReader_XmlAttribute"        , m_XmlReader_XmlAttribute                             ),
-    TIL( "System.Xml"              , "XmlReader_NamespaceEntry"      , m_XmlReader_NamespaceEntry                           ),
-
-    TIL( "System.Security.Cryptography", "CryptoKey"                 , m_CryptoKey                                          ),
-    TIL( "Microsoft.SPOT.Cryptoki"     , "CryptokiObject"            , m_CryptokiObject                                     ),
-    TIL( "Microsoft.SPOT.Cryptoki"     , "Session"                   , m_CryptokiSession                                    ),
-    TIL( "Microsoft.SPOT.Cryptoki"     , "Slot"                      , m_CryptokiSlot                                       ),
-    TIL( "Microsoft.SPOT.Cryptoki"     , "MechanismType"             , m_CryptokiMechanismType                              ),
-    TIL( "System.Security.Cryptography", "CryptographicException"    , m_CryptoException                                    ),
-    TIL( "Microsoft.SPOT.Cryptoki"     , "CryptokiCertificate"       , m_CryptokiCertificate                                ),
 
 #undef TIL
 };

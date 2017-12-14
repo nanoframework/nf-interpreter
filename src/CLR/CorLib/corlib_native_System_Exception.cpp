@@ -26,16 +26,6 @@ static const ExceptionLookup c_ExceptionLookup[] =
     EL(CLR_E_NULL_REFERENCE           , m_NullReferenceException     ),
     EL(CLR_E_OUT_OF_MEMORY            , m_OutOfMemoryException       ),
     EL(CLR_E_OBJECT_DISPOSED          , m_ObjectDisposedException    ),
-    EL(CLR_E_FILE_IO                  , m_IOException                ),
-    EL(CLR_E_INVALID_DRIVER           , m_IOException                ),
-    EL(CLR_E_FILE_NOT_FOUND           , m_IOException                ),
-    EL(CLR_E_DIRECTORY_NOT_FOUND      , m_IOException                ),
-    EL(CLR_E_VOLUME_NOT_FOUND         , m_IOException                ),
-    EL(CLR_E_PATH_TOO_LONG            , m_IOException                ),
-    EL(CLR_E_DIRECTORY_NOT_EMPTY      , m_IOException                ),
-    EL(CLR_E_UNAUTHORIZED_ACCESS      , m_IOException                ),
-    EL(CLR_E_PATH_ALREADY_EXISTS      , m_IOException                ),
-    EL(CLR_E_TOO_MANY_OPEN_HANDLES    , m_IOException                ),
     EL(CLR_E_WATCHDOG_TIMEOUT         , m_WatchdogException          ),
 
 #undef EL
