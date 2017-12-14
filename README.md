@@ -13,12 +13,13 @@ This repo contains:
 * Target reference for CMSIS OS
   * [ChibiOS](targets/CMSIS-OS/ChibiOS)
     * Reference target boards
-      * [MBN QUAIL](targets/CMSIS-OS/ChibiOS/MBN_QUAIL)
+      * [Mikrobus QUAIL](targets/CMSIS-OS/ChibiOS/MBN_QUAIL)
       * [ST NUCLEO64 F091RC](targets/CMSIS-OS/ChibiOS/ST_NUCLEO64_F091RC)
       * [ST NUCLEO144 F746ZG](targets/CMSIS-OS/ChibiOS/ST_NUCLEO144_F746ZG)
       * [ST STM32F4 DISCOVERY](targets/CMSIS-OS/ChibiOS/ST_STM32F4_DISCOVERY)
       * [ST STM32F429I DISCOVERY](targets/CMSIS-OS/ChibiOS/ST_STM32F429I_DISCOVERY)
       * [ST STM32F769I DISCOVERY](targets/CMSIS-OS/ChibiOS/ST_STM32F769I_DISCOVERY)
+      * [Wilderness Labs Netduino3 WiFi](targets/CMSIS-OS/ChibiOS/NETDIUNO3_WIFI)
     * ChibiOS overlay for **nanoFramework**
       * [STM32 Flash driver](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_flash)
 * Target reference for other OSes
@@ -33,6 +34,41 @@ This repo contains:
 | nanoBooter | [![Build status](https://ci.appveyor.com/api/projects/status/94fldjinqji4w977?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter) |
 | nanoCLR | [![Build status](https://ci.appveyor.com/api/projects/status/94fldjinqji4w977?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter) |
 | Win32 test project | [![Build status](https://ci.appveyor.com/api/projects/status/94fldjinqji4w977?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter) |
+
+
+## Firmware for reference boards
+
+
+Each of the following ZIP files contains the image files for nanoBooter and nanoCLR in various formats (HEX, BIN and DFU). They should be flashed in the target boards using an appropriate software utility.
+
+The **stable** versions are RTM builds with the smallest possible size. They include the latest stable version. The debugging feature is disabled and only minimal (or none) error messages.
+
+The **preview** versions are continuous builds of the reference targets. They include the latest version of all features and bug corrections. They also have the debugging feature enabled along with detailed error messages.
+
+
+| Target | Stable | Preview |
+|:-|---|---|
+| ST_STM32F4_DISCOVERY | []() |  [![Download](https://api.bintray.com/packages/nfbot/nanoframework-images-dev/ST_STM32F4_DISCOVERY/images/download.svg)](https://bintray.com/nfbot/nanoframework-images-dev/ST_STM32F4_DISCOVERY/_latestVersion) |
+| ST_STM32F429I_DISCOVERY | []() | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images-dev/ST_STM32F429I_DISCOVERY/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images-dev/ST_STM32F429I_DISCOVERY/_latestVersion) |
+| ST_NUCLEO64_F091RC | []() | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images-dev/ST_NUCLEO64_F091RC/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images-dev/ST_NUCLEO64_F091RC/_latestVersion) |
+| ST_NUCLEO144_F746ZG | []() | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images-dev/ST_NUCLEO144_F746ZG/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images-dev/ST_NUCLEO144_F746ZG/_latestVersion) |
+| ST_STM32F769I_DISCOVERY | []() | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images-dev/ST_STM32F769I_DISCOVERY/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images-dev/ST_STM32F769I_DISCOVERY/_latestVersion) |
+| MBN_QUAIL | []() | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images-dev/MBN_QUAIL/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images-dev/MBN_QUAIL/_latestVersion) |
+| NETDUINO3_WIFI | []() | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images-dev/NETDUINO3_WIFI/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images-dev/NETDUINO3_WIFI/_latestVersion) |
+
+
+The above firmware builds include support for the class libraries and features marked bellow.
+
+
+| Target | Gpio | Spi | I2c | Events | Native | SWO |
+|:-|:-:|:-:|:-:|:-:|:-:|:-:|
+| ST_STM32F4_DISCOVERY | :heavy_check_mark: | | | :heavy_check_mark: | | :heavy_check_mark: |
+| ST_STM32F429I_DISCOVERY | :heavy_check_mark: | | | :heavy_check_mark: | | :heavy_check_mark: |
+| ST_NUCLEO64_F091RC | | | | | | :heavy_check_mark: |
+| ST_NUCLEO144_F746ZG | :heavy_check_mark: | | | :heavy_check_mark: | | |
+| ST_STM32F769I_DISCOVERY | :heavy_check_mark: | | | :heavy_check_mark: | | :heavy_check_mark: |
+| MBN_QUAIL | :heavy_check_mark: | :heavy_check_mark: | | :heavy_check_mark: | | |
+| NETDUINO3_WIFI | :heavy_check_mark: | | | :heavy_check_mark: | | |
 
 
 ## Feedback and documentation
