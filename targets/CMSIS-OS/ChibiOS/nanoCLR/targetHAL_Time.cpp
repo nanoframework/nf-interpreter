@@ -36,7 +36,7 @@ signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
 
     st.wDay = (unsigned short) _dateTime.day;
     st.wMonth = (unsigned short) _dateTime.month;
-    st.wYear = (unsigned short) _dateTime.year;
+    st.wYear = (unsigned short) (_dateTime.year + 1980);    // ChibiOS is counting years since 1980
     st.wDayOfWeek = (unsigned short) _dateTime.dayofweek;
 
     // zero 'time' fields if date part only is required
@@ -45,7 +45,7 @@ signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
         st.wMilliseconds = 0;
         st.wSecond = 0;
         st.wMinute = 0;
-        st.wMinute = 0;
+        st.wHour = 0;
     }
     else
     {
@@ -57,7 +57,7 @@ signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
         _dateTime.millisecond /= 60;
         st.wMinute = (unsigned short) (_dateTime.millisecond % 60);
         _dateTime.millisecond /= 60;
-        st.wMinute = (unsigned short) (_dateTime.millisecond % 24);
+        st.wHour = (unsigned short) (_dateTime.millisecond % 24);
     }
 
     return HAL_Time_ConvertFromSystemTime( &st );
