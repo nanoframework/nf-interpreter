@@ -81,22 +81,22 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
         switch(dt)
         {
         case DATATYPE_I1: 
-            hal_snprintf( result, ARRAYSIZE(result), "%.*d", precision, value->NumericByRef().s1 ); 
+            hal_snprintf( result, ARRAYSIZE(result), formatCh == 'N' ? "%d" : "%.*d", formatCh == 'N' ? value->NumericByRef().s1 : precision, value->NumericByRef().s1 );
             break;
         case DATATYPE_U1: 
-            hal_snprintf( result, ARRAYSIZE(result), "%.*u", precision, value->NumericByRef().u1 ); 
+            hal_snprintf( result, ARRAYSIZE(result), formatCh == 'N' ? "%u" : "%.*u", formatCh == 'N' ? value->NumericByRef().u1 : precision, value->NumericByRef().u1 );
             break;
         case DATATYPE_I2: 
-            hal_snprintf( result, ARRAYSIZE(result), "%.*d", precision, value->NumericByRef().s2 ); 
+            hal_snprintf( result, ARRAYSIZE(result), formatCh == 'N' ? "%d" : "%.*d", formatCh == 'N' ? value->NumericByRef().s2 : precision, value->NumericByRef().s2 );
             break;
         case DATATYPE_U2: 
-            hal_snprintf( result, ARRAYSIZE(result), "%.*u", precision, value->NumericByRef().u2 ); 
+            hal_snprintf( result, ARRAYSIZE(result), formatCh == 'N' ? "%u" : "%.*u", formatCh == 'N' ? value->NumericByRef().u2 : precision, value->NumericByRef().u2 );
             break;
         case DATATYPE_I4: 
-            hal_snprintf( result, ARRAYSIZE(result), "%.*d", precision, value->NumericByRef().s4 ); 
+            hal_snprintf( result, ARRAYSIZE(result), formatCh == 'N' ? "%d" : "%.*d", formatCh == 'N' ? value->NumericByRef().s4 : precision, value->NumericByRef().s4 );
             break;
         case DATATYPE_U4: 
-            hal_snprintf( result, ARRAYSIZE(result), "%.*u", precision, value->NumericByRef().u4 ); 
+            hal_snprintf( result, ARRAYSIZE(result), formatCh == 'N' ? "%u" : "%.*u", formatCh == 'N' ? value->NumericByRef().u4 : precision, value->NumericByRef().u4 );
             break;
 #if defined(_WIN32)
         case DATATYPE_I8: 
