@@ -59,10 +59,10 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
             break;
 #else
         case DATATYPE_I8: 
-            hal_snprintf( result, ARRAYSIZE(result), "%.*llX", precision, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8); 
+            hal_snprintf( result, ARRAYSIZE(result), "%.*X", precision, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8); 
             break;
         case DATATYPE_U8:
-            hal_snprintf( result, ARRAYSIZE(result), "%.*llX", precision, (CLR_UINT64_TEMP_CAST)value->NumericByRef().u8 ); 
+            hal_snprintf( result, ARRAYSIZE(result), "%.*X", precision, (CLR_UINT64_TEMP_CAST)value->NumericByRef().u8 ); 
             break;
 #endif
 
@@ -109,13 +109,13 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
         case DATATYPE_I8: 
             {   // use local 64 bit variable to assure 8-byte boundary.
                 signed __int64 i64 = (CLR_INT64_TEMP_CAST)value->NumericByRef().s8;
-                hal_snprintf( result, ARRAYSIZE(result), "%.*lld", precision, i64); 
+                hal_snprintf( result, ARRAYSIZE(result), "%.*ld", precision, i64); 
             }
             break;
         case DATATYPE_U8: 
             {   // use local 64 bit variable to assure 8-byte boundary.
                 unsigned __int64 ui64 = (CLR_UINT64_TEMP_CAST)value->NumericByRef().u8;
-                hal_snprintf( result, ARRAYSIZE(result), "%.*llu", precision, ui64 ); 
+                hal_snprintf( result, ARRAYSIZE(result), "%.*lu", precision, ui64 ); 
             }
             break;
 #endif
