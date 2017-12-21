@@ -29,16 +29,17 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin
 
     static const int FIELD___syncLock = 1;
     static const int FIELD___pinNumber = 2;
-    static const int FIELD___driveMode = 3;
-    static const int FIELD___debounceTimeout = 4;
-    static const int FIELD___callbacks = 5;
-    static const int FIELD___lastOutputValue = 6;
-    static const int FIELD___disposedValue = 7;
+    static const int FIELD___alternateFunction = 3;
+    static const int FIELD___driveMode = 4;
+    static const int FIELD___debounceTimeout = 5;
+    static const int FIELD___callbacks = 6;
+    static const int FIELD___lastOutputValue = 7;
+    static const int FIELD___disposedValue = 8;
 
     NANOCLR_NATIVE_DECLARE(Read___WindowsDevicesGpioGpioPinValue);
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(NativeIsDriveModeSupported___BOOLEAN__WindowsDevicesGpioGpioPinDriveMode);
-    NANOCLR_NATIVE_DECLARE(NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode);
+    NANOCLR_NATIVE_DECLARE(NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode__I4);
     NANOCLR_NATIVE_DECLARE(NativeInit___BOOLEAN__I4);
     NANOCLR_NATIVE_DECLARE(NativeSetDebounceTimeout___VOID);
     NANOCLR_NATIVE_DECLARE(WriteNative___VOID__WindowsDevicesGpioGpioPinValue);
