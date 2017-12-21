@@ -8,7 +8,7 @@
 #include <ch.h>
 #include <hal.h>
 #include <cmsis_os.h>
-#include <swo.h>
+
 #include <targetPAL.h>
 #include "win_dev_gpio_native.h"
 #include "nf_rt_events_native.h"
@@ -303,9 +303,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
                 palSetPadMode(port, pad, PAL_MODE_OUTPUT_OPENDRAIN);
                 break;
 			case GpioPinDriveMode_Alternate:
-				char str[100];
-				sprintf (str,"Setting alternate function %d\r\n", alternateFunction);
-				SwoPrintString(str);
                 palSetPadMode(port, pad, PAL_MODE_ALTERNATE(alternateFunction));
                 break;
 
