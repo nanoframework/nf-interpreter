@@ -364,9 +364,11 @@ option(NF_FEATURE_USE_FILESYSTEM "option to use filesystem")
 
 if(NF_FEATURE_USE_FILESYSTEM)
     set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
-    message(STATUS "Support for networking enabled")
+    set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
+    message(STATUS "Support for filesystem enabled")
 else()    
     set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
+    set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
 endif()
 
 #################################################################
