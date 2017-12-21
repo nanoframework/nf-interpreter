@@ -41,6 +41,11 @@ if(USE_NETWORKING_OPTION)
     find_package(CHIBIOS_LWIP REQUIRED)
 endif()
 
+# nF feature: filesystem
+if(USE_FILESYSTEM_OPTION)
+    find_package(CHIBIOS_FATFS REQUIRED)
+endif()
+
 #######################################
 
 

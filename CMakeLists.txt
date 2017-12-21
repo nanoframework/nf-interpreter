@@ -358,6 +358,20 @@ endif()
 #################################################################
 
 #################################################################
+# enables filesysytem support in nanoCLR
+# (default is OFF so the filesystem is NOT supported)
+option(NF_FEATURE_USE_FILESYSTEM "option to use filesystem")
+
+if(NF_FEATURE_USE_FILESYSTEM)
+    set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
+    message(STATUS "Support for networking enabled")
+else()    
+    set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
+endif()
+
+#################################################################
+
+#################################################################
 # manage nanoFramework API namespaces
 #################################################################
 include(NF_API_Namespaces)
