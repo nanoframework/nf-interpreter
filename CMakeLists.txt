@@ -302,18 +302,6 @@ if(NF_FEATURE_DEBUGGER)
 endif()
 
 #################################################################
-# RTC (real time clock) (default is OFF so RTC is NOT included)
-option(NF_FEATURE_RTC "option to use hardware RTC")
-
-if(NF_FEATURE_RTC)
-    set(HAL_USE_RTC_OPTION TRUE CACHE INTERNAL "NF feature RTC")
-else()    
-    set(HAL_USE_RTC_OPTION FALSE CACHE INTERNAL "NF feature RTC")
-endif()
-
-#################################################################
-
-#################################################################
 # enables Application Domains support in nanoCLR
 # (default is OFF so Application Domains is NOT supported)
 option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")
@@ -369,6 +357,11 @@ include(NF_API_Namespaces)
 # and/or manage other APIs that are required
 
 
+if(API_System.DateTime)
+    # this API requires RTC
+    set(NF_FEATURE_RTC ON CACHE INTERNAL "enable NF_FEATURE_RTC from System.DateTime")
+endif()
+
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
     
@@ -406,6 +399,19 @@ set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
 else()    
 set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
 endif()
+
+
+#################################################################
+# RTC (real time clock) (default is OFF so RTC is NOT included)
+option(NF_FEATURE_RTC "option to use hardware RTC")
+
+if(NF_FEATURE_RTC)
+    set(HAL_USE_RTC_OPTION TRUE CACHE INTERNAL "NF feature RTC")
+else()    
+    set(HAL_USE_RTC_OPTION FALSE CACHE INTERNAL "NF feature RTC")
+endif()
+
+#################################################################
 
 
 #######################
