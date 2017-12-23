@@ -80,7 +80,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Collections_Stack.cpp
     corlib_native_System_Console.cpp
     corlib_native_System_Convert.cpp
-    corlib_native_System_DateTime.cpp
     corlib_native_System_Delegate.cpp
     corlib_native_System_Diagnostics_Debugger.cpp
     corlib_native_System_Double.cpp
@@ -88,7 +87,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Exception.cpp
     corlib_native_System_GC.cpp
     corlib_native_System_Globalization_CultureInfo.cpp
-    corlib_native_System_Globalization_DateTimeFormat.cpp
     corlib_native_System_Guid.cpp
     corlib_native_System_MarshalByRefObject.cpp
     corlib_native_System_Math.cpp
@@ -133,7 +131,7 @@ set(NF_CoreCLR_SRCS
     nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Debug.cpp
     nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
-    
+
     # Core stubs
     Hardware_stub.cpp
     Heap_Persistence_stub.cpp

@@ -1752,7 +1752,6 @@ struct CLR_RT_HeapBlock_Timer : public CLR_RT_ObjectToEvent_Destination // EVENT
 
     static const CLR_UINT32 c_INPUT_Int32      = 0x00100000;
     static const CLR_UINT32 c_INPUT_TimeSpan   = 0x00200000;
-    static const CLR_UINT32 c_INPUT_Absolute   = 0x00400000;
 
     static const CLR_UINT32 c_UNUSED_10000000  = 0x10000000;
     static const CLR_UINT32 c_AbsoluteTimer    = 0x20000000;

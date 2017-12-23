@@ -828,15 +828,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue( int& res )
         res = c_Action_None; NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
-    if(m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_DateTime.m_data)
-    {
-        CLR_INT64* pVal = Library_corlib_native_System_DateTime::GetValuePtr( *value ); FAULT_ON_NULL(pVal);
-
-        val     = *(CLR_UINT64*)pVal;
-        bits    = 64;
-        fSigned = false;
-    }
-    else if(m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_TimeSpan.m_data)
+    if(m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_TimeSpan.m_data)
     {
         CLR_INT64* pVal = Library_corlib_native_System_TimeSpan::GetValuePtr( *value ); FAULT_ON_NULL(pVal);
 
@@ -968,15 +960,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue( int& res )
     CLR_UINT32  bits;
     bool        fSigned;
 
-    if(m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_DateTime.m_data)
-    {
-        CLR_INT64* pVal = Library_corlib_native_System_DateTime::GetValuePtr( *m_value ); FAULT_ON_NULL(pVal);
-
-        dst     = (CLR_UINT64*)pVal;
-        bits    = 64;
-        fSigned = false;
-    }
-    else if(m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_TimeSpan.m_data)
+    if(m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_TimeSpan.m_data)
     {
         CLR_INT64* pVal = Library_corlib_native_System_TimeSpan::GetValuePtr( *m_value ); FAULT_ON_NULL(pVal);
 
