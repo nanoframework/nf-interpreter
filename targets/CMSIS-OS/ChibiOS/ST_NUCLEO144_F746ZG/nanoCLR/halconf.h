@@ -128,9 +128,10 @@
 /**
  * @brief   Enables the SDC subsystem.
  */
-#if !defined(HAL_USE_SDC) || defined(__DOXYGEN__)
-#define HAL_USE_SDC                 FALSE
-#endif
+// this option is set at target_board.h (from config file)
+// #if !defined(HAL_USE_SDC) || defined(__DOXYGEN__)
+// #define HAL_USE_SDC                 FALSE
+// #endif
 
 /**
  * @brief   Enables the SERIAL subsystem.

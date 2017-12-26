@@ -346,6 +346,22 @@ endif()
 #################################################################
 
 #################################################################
+# enables filesysytem support in nanoCLR
+# (default is OFF so the filesystem is NOT supported)
+option(NF_FEATURE_USE_FILESYSTEM "option to use filesystem")
+
+if(NF_FEATURE_USE_FILESYSTEM)
+    set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
+    set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
+    message(STATUS "Support for filesystem enabled")
+else()    
+    set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
+    set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
+endif()
+
+#################################################################
+
+#################################################################
 # manage nanoFramework API namespaces
 #################################################################
 include(NF_API_Namespaces)
