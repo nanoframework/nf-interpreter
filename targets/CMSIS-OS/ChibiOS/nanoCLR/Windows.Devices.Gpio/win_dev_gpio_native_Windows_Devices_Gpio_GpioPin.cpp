@@ -28,6 +28,7 @@ enum GpioPinDriveMode
     GpioPinDriveMode_OutputOpenDrainPullUp,
     GpioPinDriveMode_OutputOpenSource,
     GpioPinDriveMode_OutputOpenSourcePullDown,
+	GpioPinDriveMode_Alternate
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -208,7 +209,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveM
             (driveMode == GpioPinDriveMode_InputPullDown) ||
             (driveMode == GpioPinDriveMode_InputPullUp) ||
             (driveMode == GpioPinDriveMode_Output) ||
-            (driveMode == GpioPinDriveMode_OutputOpenDrain))
+            (driveMode == GpioPinDriveMode_OutputOpenDrain) ||
+			(driveMode == GpioPinDriveMode_Alternate))
         {
             driveModeSupported = true;
         }
@@ -219,7 +221,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveM
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -232,6 +234,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 
         // get pin number and take the port and pad references from that one
         int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+		int32_t alternateFunction = stack.Arg2().NumericByRef().s4;
         stm32_gpio_t* port  = GPIO_PORT(pinNumber);
         int16_t pad = pinNumber % 16;
 
@@ -298,6 +301,9 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 
             case GpioPinDriveMode_OutputOpenDrain:
                 palSetPadMode(port, pad, PAL_MODE_OUTPUT_OPENDRAIN);
+                break;
+			case GpioPinDriveMode_Alternate:
+                palSetPadMode(port, pad, PAL_MODE_ALTERNATE(alternateFunction));
                 break;
 
             default:
