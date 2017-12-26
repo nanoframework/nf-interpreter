@@ -1,0 +1,83 @@
+{
+  "buildType": {
+    "default$": "debug",
+    "description$": "the build type to use",
+    "debug": {
+      "oneWordSummary$": "Debug",
+      "description$": "Emit debug information without performing optimizations",
+      "buildType": "Debug"
+    },
+    "release": {
+      "oneWordSummary$": "Release",
+      "description$": "Enable optimizations, omit debug info",
+      "buildType": "Release"
+    },
+    "minsize": {
+      "oneWordSummary$": "MinSizeRel",
+      "description$": "Optimize for smallest binary size",
+      "buildType": "MinSizeRel"
+    },
+    "reldeb": {
+      "oneWordSummary$": "RelWithDebInfo",
+      "description$": "Perform optimizations AND include debugging information",
+      "buildType": "RelWithDebInfo"
+    }
+  },
+  "linkage": {
+      "Esp32_NanoCLR": {
+        "oneWordSummary$": "NanoCLR",
+        "description$": "Build TinyCLR for ESP32 environment",
+        "settings": {
+            "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>/xtensa-esp32-elf",
+            "TARGET_SERIES" : "ESP32",
+            "RTOS" : "FREERTOS",
+            "ESP32_IDF_PATH" : "<path-to-esp-idf-mind-the-forward-slash>/esp-idf",
+            "NF_BUILD_RTM" : "OFF",
+            "NF_WP_TRACE_ERRORS" : "OFF",
+            "NF_WP_TRACE_HEADERS" : "OFF",
+            "NF_WP_TRACE_STATE" : "OFF",
+            "NF_WP_TRACE_NODATA" : "OFF",
+            "NF_WP_TRACE_ALL" : "OFF",
+            "NF_FEATURE_DEBUGGER" : "TRUE",
+            "NF_FEATURE_RTC" : "OFF",
+            "NF_FEATURE_USE_APPDOMAINS" : "OFF",
+            "NF_FEATURE_USE_NETWORKING" : "ON",
+            "API_Windows.Devices.Gpio" : "ON",
+            "API_Windows.Devices.Spi" : "ON",
+            "API_Windows.Devices.I2c" : "ON",
+            "API_Windows.Devices.Adc" : "OFF",
+            "API_Windows.Devices.Pwm" : "OFF",
+            "API_Windows.Devices.Wifi" : "ON"
+          }
+      },
+      "OPTION2_NAME_HERE": {
+        "oneWordSummary$": "<summary-here>",
+        "description$": "<description-here>",
+        "settings": {
+            "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>/xtensa-esp32-elf",
+            "TARGET_SERIES" : "ESP32",
+            "RTOS" : "FREERTOS",
+            "ESP32_IDF_PATH" : "<path-to-esp-idf-mind-the-forward-slash>/esp-idf",
+            "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
+ 			      "NF_BUILD_RTM" : "OFF-default-ON-to-enable-RTM-build",
+            "NF_WP_TRACE_ERRORS" : "OFF",
+            "NF_WP_TRACE_HEADERS" : "OFF",
+            "NF_WP_TRACE_STATE" : "OFF",
+            "NF_WP_TRACE_NODATA" : "OFF",
+            "NF_WP_TRACE_ALL" : "OFF",
+            "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger",
+            "NF_FEATURE_RTC" : "OFF-default-ON-to-enable-hardware-RTC",
+            "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
+            "NF_FEATURE_USE_NETWORKING" : "OFF-default-ON-to-enable-support",
+            "API_System.DateTime" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.Adc" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API"
+        }
+      },
+      "default$": "",
+      "description$": "Variant for builds"
+    }
+}

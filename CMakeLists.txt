@@ -45,22 +45,20 @@ string(TIMESTAMP BUILD_TIMESTAMP UTC)
 #######################
 # handle RTOSes choice
 
-# # sanity check here for invalid RTOS option
-# set(RTOS_SUPPORTED CHIBIOS FREERTOS MBEDOS RTXRTOS RTXRTOS2 CACHE INTERNAL "supported RTOS options")
-# list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
-# if(RTOS_INDEX EQUAL -1)
-#     message(FATAL_ERROR "\n\nSorry but ${RTOS} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-# endif()
+# sanity check here for invalid RTOS option
+set(RTOS_SUPPORTED CHIBIOS FREERTOS MBEDOS RTXRTOS RTXRTOS2 CACHE INTERNAL "supported RTOS options")
+list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
+if(RTOS_INDEX EQUAL -1)
+    set(RTOS_CHIBIOS_CHECK TRUE)
+    message(STATUS "\n\nNo RTOS specified, defaulting to CHIBIOS.\n\n")
+endif()
 
-# string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
-# string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
+string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
+string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
 # string(COMPARE EQUAL "MBEDOS"   "${RTOS}" RTOS_MBEDOS_CHECK)
 # string(COMPARE EQUAL "RTXRTOS"  "${RTOS}" RTOS_RTX_RTOS_CHECK)
 # string(COMPARE EQUAL "RTXRTOS2" "${RTOS}" RTOS_RTX_RTOS2_CHECK)
 
-##########################################################################
-# default RTOS choice is ChibiOS (no other RTOS is supported at this time)
-set(RTOS_CHIBIOS_CHECK TRUE)
 ##########################################################################
 
 if(RTOS_FREERTOS_CHECK) 
@@ -147,6 +145,10 @@ if(RTOS_CHIBIOS_CHECK)
     message(STATUS "\nSetting Toolchain file for ChibiOS \n")
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
+
+elseif(RTOS_FREERTOS_CHECK)
+    message(STATUS "\nSetting Toolchain file for FreeRtos Esp32 \n")
+    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
 
 # elseif(RTOS_MBEDOS_CHECK)
 
@@ -236,6 +238,7 @@ if(NF_BUILD_RTM)
 endif()
 #################################################################
 
+if(RTOS_CHIBIOS_CHECK)
         
 #################################################################
 # clear CMAKE_C_FLAGS_INIT and CMAKE_CXX_FLAGS_INIT
@@ -268,6 +271,7 @@ set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c linker default li
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
 #################################################################
 
+endif()
 
 #################################################################
 # output FPU option
@@ -314,6 +318,7 @@ endif()
 
 #################################################################
 
+if(RTOS_CHIBIOS_CHECK)
 #################################################################
 # ARM Cortex-M Single Wire Output (SWO) 
 # (default is OFF so no SWO output)
@@ -328,6 +333,7 @@ else()
 endif()
 
 #################################################################
+endif()
 
 #################################################################
 # enables Networking support in nanoCLR
@@ -404,16 +410,23 @@ endif()
 
 
 if(API_Windows.Devices.Pwm)
-set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
+    set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
 else()    
-set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
+    set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
 endif()
 
 
 if(API_Windows.Devices.Adc)
-set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
 else()    
-set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+endif()
+
+
+if(API_Windows.Devices.Wifi)
+    set(HAL_USE_WIFI_OPTION TRUE CACHE INTERNAL "HAL Wifi for Windows.Devices.Wifi")
+else()    
+    set(HAL_USE_WIFI_OPTION FALSE CACHE INTERNAL "HAL Wifi for Windows.Devices.Wifi")
 endif()
 
 
@@ -537,6 +550,9 @@ if(RTOS_CHIBIOS_CHECK)
 
     endif()
 
+    # Define Base path for the class libraries
+    set(BASE_PATH_FOR_CLASS_MODULES "targets/CMSIS-OS/ChibiOS/nanoCLR")
+        
     # set CMSIS RTOS include directory
     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
 
@@ -636,11 +652,19 @@ if(RTOS_CHIBIOS_CHECK)
 
     endif()
 
-endif()
-
 # #######################
 # # FreeRTOS
-# elseif(RTOS_FREERTOS_CHECK)
+elseif(RTOS_FREERTOS_CHECK)
+	if("${TARGET_SERIES}" STREQUAL "ESP32")
+        message("Platform ESP32")
+
+        # Define Base path for the class libraries
+        set(BASE_PATH_FOR_CLASS_MODULES "targets/FreeRtos/Esp32/nanoCLR")
+
+ 		add_subdirectory(targets/FreeRtos/Esp32)
+	endif()
+endif()
+
 
 #     # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
 #     set(NO_FREERTOS_SOURCE TRUE)

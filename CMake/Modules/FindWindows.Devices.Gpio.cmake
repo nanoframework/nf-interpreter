@@ -4,8 +4,7 @@
 #
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.Gpio")
-
+set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_MODULES}/Windows.Devices.Gpio")
 
 # set include directories
 list(APPEND Windows.Devices.Gpio_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
