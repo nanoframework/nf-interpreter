@@ -639,9 +639,9 @@ elseif(RTOS_FREERTOS_CHECK)
         message("Platform ESP32")
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRtos/Esp32/nanoCLR")
+        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/nanoCLR")
 
- 		add_subdirectory(targets/FreeRtos/Esp32)
+ 		add_subdirectory(targets/FreeRTOS/ESP32_DevKitC)
     endif()
 
 endif()
