@@ -4,7 +4,7 @@
 #
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.Pwm")
+set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_MODULES}/Windows.Devices.Pwm")
 
 
 # set include directories
