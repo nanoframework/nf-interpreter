@@ -2,18 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "ESP32 NanoCLR - OLimex OCD-H",
+            "name": "ESP32 nanoCLR - OLimex OCD-H",
             "type": "cppdbg",
             "request": "launch",
             "MIMode": "gdb",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/xtensa-esp32-elf-gdb.exe",
             "stopAtEntry":true,
-            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS/ESP32_DevKitC/NanoCLR.elf",
+            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS/ESP32_DevKitC/nanoCLR.elf",
 
             "setupCommands": [
                 {"text": "set logging on"},
                 {"text": "target extended-remote localhost:3333"},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/NanoCLR.elf"},
+                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
                 {"text": "monitor reset halt"},
                 {"text": "thb app_main"},
                 {"text": "x $a1=0"}
@@ -37,18 +37,18 @@
             }
         },
         {
-            "name": "ESP32 NanoCLR - Wrover",
+            "name": "ESP32 nanoCLR - Wrover",
             "type": "cppdbg",
             "request": "launch",
             "MIMode": "gdb",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/xtensa-esp32-elf-gdb.exe",
             "stopAtEntry":true,
-            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS/ESP32_DevKitC/NanoCLR.elf",
+            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS/ESP32_DevKitC/nanoCLR.elf",
 
             "setupCommands": [
                 {"text": "set logging on"},
                 {"text": "target extended-remote localhost:3333"},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/NanoCLR.elf"},
+                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
                 {"text": "monitor reset halt"},
                 {"text": "thb app_main"},
                 {"text": "x $a1=0"}
