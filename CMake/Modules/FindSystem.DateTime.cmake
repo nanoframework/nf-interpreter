@@ -8,7 +8,7 @@
 # CoreCLR
 list(APPEND System.DateTime_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/System.DateTime")
 # native code directory
-list(APPEND System.DateTime_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR/System.DateTime")
+list(APPEND System.DateTime_INCLUDE_DIRS "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.DateTime")
 
 # source files
 set(System.DateTime_SRCS
@@ -32,7 +32,7 @@ foreach(SRC_FILE ${System.DateTime_SRCS})
             "${PROJECT_SOURCE_DIR}/src/CLR/System.DateTime"
 
             # native part of System.DateTime
-            "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR/System.DateTime"
+            "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.DateTime"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
