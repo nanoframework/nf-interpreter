@@ -4,7 +4,7 @@
 #
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_MODULES}/Windows.Devices.I2c")
+set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.Devices.I2c")
 
 
 # set include directories
@@ -12,7 +12,7 @@ list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core
 list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
 list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
 list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
-list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
 
 
 # source files
@@ -27,7 +27,7 @@ foreach(SRC_FILE ${Windows.Devices.I2c_SRCS})
     set(Windows.Devices.I2c_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(Windows.Devices.I2c_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${PROJECT_SOURCE_DIR}/${BASE_PATH_FOR_THIS_MODULE}
+            "${BASE_PATH_FOR_THIS_MODULE}"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

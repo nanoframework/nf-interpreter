@@ -45,19 +45,25 @@ string(TIMESTAMP BUILD_TIMESTAMP UTC)
 #######################
 # handle RTOSes choice
 
-# sanity check here for invalid RTOS option
-set(RTOS_SUPPORTED CHIBIOS FREERTOS MBEDOS RTXRTOS RTXRTOS2 CACHE INTERNAL "supported RTOS options")
+if("${RTOS}" STREQUAL "")
+    # no RTOS selected, defaulting to ChibiOS
+    set(RTOS "CHIBIOS")
+endif()
+
+# list of supported RTOSes
+# when adding a new RTOS add the corresponding string bellow AND...
+# ... also on the compare block bellow
+set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" CACHE INTERNAL "supported RTOS options")
+
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
-    set(RTOS_CHIBIOS_CHECK TRUE)
-    message(STATUS "\n\nNo RTOS specified, defaulting to CHIBIOS.\n\n")
+    message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
+else()    
+    message(STATUS "\nSetting RTOS to ${RTOS}\n")
 endif()
 
 string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
 string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
-# string(COMPARE EQUAL "MBEDOS"   "${RTOS}" RTOS_MBEDOS_CHECK)
-# string(COMPARE EQUAL "RTXRTOS"  "${RTOS}" RTOS_RTX_RTOS_CHECK)
-# string(COMPARE EQUAL "RTXRTOS2" "${RTOS}" RTOS_RTX_RTOS2_CHECK)
 
 ##########################################################################
 
@@ -69,36 +75,12 @@ if(RTOS_FREERTOS_CHECK)
     set(RTOS_RTX_RTOS2_CHECK FALSE)
 endif()
 
-if(RTOS_MBEDOS_CHECK) 
-    set(RTOS_MBEDOS_CHECK TRUE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS2_CHECK FALSE)
-endif()
-
 if(RTOS_CHIBIOS_CHECK) 
     set(RTOS_CHIBIOS_CHECK TRUE)
     set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_MBEDOS_CHECK FALSE)
     set(RTOS_RTX_RTOS_CHECK FALSE)
     set(RTOS_RTX_RTOS2_CHECK FALSE)
-endif()
-
-if(RTOS_RTX_RTOS_CHECK) 
-    set(RTOS_RTX_RTOS_CHECK TRUE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_MBEDOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS2_CHECK FALSE)
-endif()
-
-if(RTOS_RTX_RTOS2_CHECK) 
-    set(RTOS_RTX_RTOS2_CHECK TRUE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_MBEDOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS_CHECK FALSE)
 endif()
 
 #######################
@@ -147,14 +129,8 @@ if(RTOS_CHIBIOS_CHECK)
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
 
 elseif(RTOS_FREERTOS_CHECK)
-    message(STATUS "\nSetting Toolchain file for FreeRtos Esp32 \n")
+    message(STATUS "\nSetting Toolchain file for FreeRTOS ESP32 \n")
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
-
-# elseif(RTOS_MBEDOS_CHECK)
-
-#     message(STATUS "\nSetting Toolchain file for mbed \n")
-#     # set toolchain file
-#     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.mbed.${TOOLCHAIN}.cmake)
 
 # else()
 
@@ -240,36 +216,36 @@ endif()
 
 if(RTOS_CHIBIOS_CHECK)
         
-#################################################################
-# clear CMAKE_C_FLAGS_INIT and CMAKE_CXX_FLAGS_INIT
-# (this needs to be here and not before because by now 
-# the compiler detection has already occurred)
-set(CMAKE_C_FLAGS "" CACHE INTERNAL "clear c compiler flags")
-set(CMAKE_CXX_FLAGS "" CACHE INTERNAL "clear cxx compiler flags")
-#################################################################
+    #################################################################
+    # clear CMAKE_C_FLAGS_INIT and CMAKE_CXX_FLAGS_INIT
+    # (this needs to be here and not before because by now 
+    # the compiler detection has already occurred)
+    set(CMAKE_C_FLAGS "" CACHE INTERNAL "clear c compiler flags")
+    set(CMAKE_CXX_FLAGS "" CACHE INTERNAL "clear cxx compiler flags")
+    #################################################################
 
 
-#################################################################
-# clear some CMake flavor flags that are being set as default 
-# in the GNU compiler init
-# we want to control and fine tune these
-set(CMAKE_C_FLAGS_DEBUG "" CACHE INTERNAL "clear c compiler flags")
-set(CMAKE_C_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c compiler flags")
-set(CMAKE_C_FLAGS_RELEASE "" CACHE INTERNAL "clear c compiler flags")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c compiler flags")
-set(CMAKE_CXX_FLAGS_DEBUG "" CACHE INTERNAL "clear c++ compiler flags")
-set(CMAKE_CXX_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c++ compiler flags")
-set(CMAKE_CXX_FLAGS_RELEASE "" CACHE INTERNAL "clear c++ compiler flags")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c++ compiler flags")
-#################################################################
+    #################################################################
+    # clear some CMake flavor flags that are being set as default 
+    # in the GNU compiler init
+    # we want to control and fine tune these
+    set(CMAKE_C_FLAGS_DEBUG "" CACHE INTERNAL "clear c compiler flags")
+    set(CMAKE_C_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c compiler flags")
+    set(CMAKE_C_FLAGS_RELEASE "" CACHE INTERNAL "clear c compiler flags")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c compiler flags")
+    set(CMAKE_CXX_FLAGS_DEBUG "" CACHE INTERNAL "clear c++ compiler flags")
+    set(CMAKE_CXX_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c++ compiler flags")
+    set(CMAKE_CXX_FLAGS_RELEASE "" CACHE INTERNAL "clear c++ compiler flags")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c++ compiler flags")
+    #################################################################
 
 
-#################################################################
-# clear default libraries that are set by CMake
-# we want to control 
-set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c linker default libs")
-set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
-#################################################################
+    #################################################################
+    # clear default libraries that are set by CMake
+    # we want to control 
+    set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c linker default libs")
+    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
+    #################################################################
 
 endif()
 
@@ -319,20 +295,22 @@ endif()
 #################################################################
 
 if(RTOS_CHIBIOS_CHECK)
-#################################################################
-# ARM Cortex-M Single Wire Output (SWO) 
-# (default is OFF so no SWO output)
 
-option(SWO_OUTPUT "option to enable SWO")
+    #################################################################
+    # ARM Cortex-M Single Wire Output (SWO) 
+    # (default is OFF so no SWO output)
 
-if(SWO_OUTPUT)
-    set(SWO_OUTPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
-    message(STATUS "Single Wire Output (SWO) enabled")
-else()    
-    set(SWO_OUTPUT_OPTION FALSE CACHE INTERNAL "Single Wire Output Option")
-endif()
+    option(SWO_OUTPUT "option to enable SWO")
 
-#################################################################
+    if(SWO_OUTPUT)
+        set(SWO_OUTPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
+        message(STATUS "Single Wire Output (SWO) enabled")
+    else()    
+        set(SWO_OUTPUT_OPTION FALSE CACHE INTERNAL "Single Wire Output Option")
+    endif()
+
+    #################################################################
+
 endif()
 
 #################################################################
@@ -384,6 +362,7 @@ if(API_System.DateTime)
     set(NF_FEATURE_RTC ON CACHE INTERNAL "enable NF_FEATURE_RTC from System.DateTime")
 endif()
 
+
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
     
@@ -424,9 +403,9 @@ endif()
 
 
 if(API_Windows.Devices.Wifi)
-    set(HAL_USE_WIFI_OPTION TRUE CACHE INTERNAL "HAL Wifi for Windows.Devices.Wifi")
+    set(HAL_USE_WIFI_OPTION TRUE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
 else()    
-    set(HAL_USE_WIFI_OPTION FALSE CACHE INTERNAL "HAL Wifi for Windows.Devices.Wifi")
+    set(HAL_USE_WIFI_OPTION FALSE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
 endif()
 
 
@@ -550,9 +529,9 @@ if(RTOS_CHIBIOS_CHECK)
 
     endif()
 
-    # Define Base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_MODULES "targets/CMSIS-OS/ChibiOS/nanoCLR")
-        
+    # Define base path for the class libraries
+    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
+
     # set CMSIS RTOS include directory
     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
 
@@ -652,19 +631,20 @@ if(RTOS_CHIBIOS_CHECK)
 
     endif()
 
-# #######################
-# # FreeRTOS
+#######################
+# FreeRTOS
 elseif(RTOS_FREERTOS_CHECK)
-	if("${TARGET_SERIES}" STREQUAL "ESP32")
+
+    if("${TARGET_SERIES}" STREQUAL "ESP32")
         message("Platform ESP32")
 
-        # Define Base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_MODULES "targets/FreeRtos/Esp32/nanoCLR")
+        # Define base path for the class libraries
+        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRtos/Esp32/nanoCLR")
 
  		add_subdirectory(targets/FreeRtos/Esp32)
-	endif()
-endif()
+    endif()
 
+endif()
 
 #     # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
 #     set(NO_FREERTOS_SOURCE TRUE)
