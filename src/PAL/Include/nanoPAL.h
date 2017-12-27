@@ -224,7 +224,7 @@ int hal_snprintf( char* buffer, size_t len, const char* format, ... );
 
 int hal_vsnprintf( char* buffer, size_t len, const char* format, va_list arg );
 
-#if defined(PLATFORM_ARM)  | defined(PLATFORM_ESP)
+#if defined(PLATFORM_ARM)  | defined(PLATFORM_ESP32)
 #define printf     DoNotUse_*printf []
 //#define sprintf    DoNotUse_*printf []
 #define fprintf    DoNotUse_*printf []

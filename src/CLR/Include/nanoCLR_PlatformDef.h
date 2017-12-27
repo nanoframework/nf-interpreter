@@ -154,7 +154,7 @@
 #define ULONGLONGCONSTANT(v) (v##UI64)
 #endif
 
-#if defined(PLATFORM_ARM) | defined(PLATFORM_ESP)
+#if defined(PLATFORM_ARM) | defined(PLATFORM_ESP32)
 #define PROHIBIT_ALL_CONSTRUCTORS(cls)   \
     private:                             \
         cls();                           \

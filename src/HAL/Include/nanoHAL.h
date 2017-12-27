@@ -1613,7 +1613,7 @@ void CPU_Reset();
 #define ASSERT_IRQ_MUST_BE_ON()
 #endif
 
-#elif defined(__arm__)  | defined(PLATFORM_ESP)
+#elif defined(__arm__)  | defined(PLATFORM_ESP32)
 // nothing to define here just to help the nanoCLR VS project to build hapilly
 #else
 #error Unsupported platform
