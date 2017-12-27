@@ -36,7 +36,7 @@ bool Esp32FlashDriver_InitializeDevice(void* context)
 	g_esp32_flash_start_ptr = NULL;
 
 	// Find the application partition and save partition entry
-	g_pFlashDriver_partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_TINYCLR, NULL);
+	g_pFlashDriver_partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NANOCLR, NULL);
 	if (g_pFlashDriver_partition == NULL)
 	{
 		ESP_LOGE(TAG, "InitializeDevice failed\n");

@@ -13,7 +13,7 @@
 
 
 //!< .NanoFramework deploy partition
-#define     ESP_PARTITION_SUBTYPE_DATA_TINYCLR  (esp_partition_subtype_t)0x84                                
+#define     ESP_PARTITION_SUBTYPE_DATA_NANOCLR  (esp_partition_subtype_t)0x84                                
 //--//
 
 bool Esp32FlashDriver_InitializeDevice(void*);
