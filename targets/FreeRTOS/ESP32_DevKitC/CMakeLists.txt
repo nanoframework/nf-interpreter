@@ -176,11 +176,11 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 # set extra compiler flags, some are related with the build type
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     ## build types that include debug have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
-#    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
-    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC    "-DPLATFORM_ESP -DPLATFORM_EMULATED_FLOATINGPOINT -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
+#    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32 -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
+    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC    "-DPLATFORM_ESP32 -DPLATFORM_EMULATED_FLOATINGPOINT -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
 else()
-#    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP ")
-    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC    "-DPLATFORM_ESP -DPLATFORM_EMULATED_FLOATINGPOINT")
+#    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32 ")
+    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC    "-DPLATFORM_ESP32 -DPLATFORM_EMULATED_FLOATINGPOINT")
 endif()
 
 # set compiler definition for using Application Domains feature
