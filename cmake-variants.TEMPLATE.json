@@ -52,7 +52,8 @@
             "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
             "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API",
             "API_Windows.Devices.Adc" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API"
+            "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.SerialCommunication" : "OFF-default-ON-to-add-this-API"
           }
       },
       "OPTION2_NAME_HERE": {
@@ -83,7 +84,8 @@
             "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
             "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API",
             "API_Windows.Devices.Adc" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API"
+            "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API",
+            "API_Windows.Devices.SerialCommunication" : "OFF-default-ON-to-add-this-API"
         }
       },
       "default$": "",
