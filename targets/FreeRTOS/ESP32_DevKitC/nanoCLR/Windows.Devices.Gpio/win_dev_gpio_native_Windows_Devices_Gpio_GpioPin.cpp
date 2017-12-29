@@ -23,6 +23,7 @@ enum GpioPinDriveMode
     GpioPinDriveMode_OutputOpenDrainPullUp,
     GpioPinDriveMode_OutputOpenSource,
     GpioPinDriveMode_OutputOpenSourcePullDown,
+   	GpioPinDriveMode_Alternate
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +165,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveM
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -177,6 +178,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 
         signed int pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
         signed int driveMode = stack.Arg1().NumericByRef().s4;
+        int32_t alternateFunction = stack.Arg2().NumericByRef().s4;
+        
 
         // Valid PinNumber
         if ( ! GPIO_IS_VALID_GPIO(pinNumber) ) 
@@ -192,7 +195,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
   
         switch (driveMode)
         {
-            case 0 :    gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 0 - GpioPinDriveMode_Input
+            case GpioPinDriveMode_Input :    
+                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 0 - GpioPinDriveMode_Input
                         gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_FLOATING);
                         break;
             case 1 :    gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 1 - GpioPinDriveMode_InputPullDown 
@@ -211,6 +215,9 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
                         break;
                                                                              // 6 - GpioPinDriveMode_OutputOpenSource
                                                                              // 7 - GpioPinDriveMode_OutputOpenSourcePullDown
+
+            case 8:     break;                                                          // Alternate 
+
             default :   gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT_OUTPUT); 
                         break;
         }
