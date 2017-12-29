@@ -18,5 +18,5 @@ If($ESP32LibPathExists -eq $False)
     Write-Host "Installing ESP32 pre-compiled libs..."
     
     # unzip toolchain
-    Expand-7Zip -ArchiveFileName $output -TargetPath $env:ESP32_LIBS_PATH
+    Expand-7Zip -ArchiveFileName $output -TargetPath $env:APPVEYOR_BUILD_FOLDER$env:ESP32_LIBS_PATH
 }
