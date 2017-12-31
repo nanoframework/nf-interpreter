@@ -27,7 +27,7 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::get_MaxFre
         if (timerId == 1 || timerId >= 8) maxFrequency = (double)STM32_PCLK2_MAX;   // TIM1, TIM8 and TIM9 on APB2
         else maxFrequency = (double)STM32_PCLK1_MAX;        // other timers on APB1
 #elif defined(STM32F0xx_MCUCONF)
-        maxFrequency = (double)STM32_PCLK1_MAX;         // Only APB1 on this MCU
+        maxFrequency = (double)STM32_PCLK_MAX;         // Only APB1 on this MCU
 #endif
         stack.SetResult_R8(maxFrequency);
     }
