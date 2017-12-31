@@ -92,7 +92,7 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::NativeSetD
             // Enable all channels
             {
                 {PWM_OUTPUT_ACTIVE_HIGH, NULL},
-                {PWM_OUTPUT_ACTIVE_LOW, NULL},
+                {PWM_OUTPUT_ACTIVE_HIGH, NULL},
                 {PWM_OUTPUT_ACTIVE_HIGH, NULL},
                 {PWM_OUTPUT_ACTIVE_HIGH, NULL}
             },
