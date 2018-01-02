@@ -664,6 +664,154 @@ switch (timerId)
             break;
     }
 #endif
+#if defined(STM32F407xx)
+    switch (timerId)
+    {
+        case 1 :
+            switch (pin)
+            {
+                case 8 :          // PA8
+                case 4*16+9 :     // PE9
+                    channel = 0;
+                    break;
+                case 9 :          // PA9
+                case 4*16+11 :     // PE11
+                    channel = 1;
+                    break;
+                case 10 :          // PA10
+                case 4*16+13 :     // PE13
+                    channel = 2;
+                    break;
+                case 11 :          // PA11
+                case 4*16+14 :     // PE14
+                    channel = 3;
+                    break;
+            }
+            break;
+        
+        case 2 :
+            switch (pin)
+            {
+                case 0 :          // PA0, PA5, PA15
+                case 5 :
+                case 15 :
+                    channel = 0;
+                    break;
+                case 1 :          // PA1, PB3
+                case 1 * 16 + 3 :
+                    channel = 1;
+                    break;
+                case 2 :          // PA2, PB10
+                case 1 * 16 + 10 :
+                    channel = 2;
+                    break;
+                case 3 :          // PA3, PB11
+                case 1 * 16 + 11 :
+                    channel = 3;
+                    break;
+            }
+            break;
+
+        case 3 :
+            switch (pin)
+            {
+                case 6 :
+                case 1*16+4 :
+                case 2*16+6 :
+                    channel = 0;
+                    break;
+                case 7 :
+                case 1*16+5 :
+                case 2*16+7 :
+                    channel = 1;
+                    break;
+                case 1*16+0 :
+                case 2*16+8 :
+                    channel = 2;
+                    break;
+                case 1*16+1 :
+                case 2*16+9 :
+                    channel = 3;
+                    break;
+            }
+            break;
+        case 4 :
+            switch (pin)
+            {
+                case 1 * 16 + 6 :           // PB6, PD12
+                case 3 * 16 + 12 :
+                    channel = 0;
+                    break;
+                case 1 * 16 + 7 :           // PB7, PD13
+                case 3 * 16 + 13 :
+                    channel = 1;
+                    break;
+                case 1 * 16 + 8 :           // PB8, PD14
+                case 3 * 16 + 14 :
+                    channel = 2;
+                    break;
+                case 1 * 16 + 9 :           // PB9, PD15
+                case 3 * 16 + 15 :
+                    channel = 3;
+                    break;
+            }
+            break;
+
+        case 5 :
+            switch (pin)
+            {
+                case 0 :                // PA0
+                    channel = 0;
+                    break;
+                case 1 :                // PA1
+                    channel = 1;
+                    break;
+                case 2 :                // PA2
+                    channel = 2;
+                    break;
+                case 3 :                // PA3
+                    channel = 3;
+                    break;
+            }
+            break;
+
+        case 8 :
+            switch (pin)
+            {
+                case 2 * 16 + 6 :       // PC6
+                    channel = 0;
+                    break;
+                case 2 * 16 + 7 :       // PC7
+                    channel = 1;
+                    break;
+                case 2 * 16 + 8 :       // PC8
+                    channel = 2;
+                    break;
+                case 2 * 16 + 9 :       // PC9
+                    channel = 3;
+                    break;
+            }
+            break;
+
+        case 9 :
+            switch (pin)
+            {
+                case 2 :                // PA2, PE5
+                case 4 * 16 + 5 :
+                    channel = 0;
+                    break;
+                case 3 :                // PA3, PE6
+                case 4 * 16 + 6 :
+                    channel = 1;
+                    break;
+            }
+            break;
+
+        default : 
+            channel = 0xFF;
+            break;
+    }
+#endif
     return channel;
 }
 
