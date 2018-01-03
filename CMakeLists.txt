@@ -535,12 +535,6 @@ if(RTOS_CHIBIOS_CHECK)
     add_subdirectory(targets/CMSIS-OS/nanoBooter)
     add_subdirectory(targets/CMSIS-OS/nanoCLR)
 
-    # add target ChibiOS dirs
-    add_subdirectory(targets/CMSIS-OS/ChibiOS/Include)
-    add_subdirectory(targets/CMSIS-OS/ChibiOS/common)
-    add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoBooter)
-    add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoCLR)
-
     # need to find board definition files (board.c and board.h)
 
     # assume no community board... until proven otherwise
@@ -595,6 +589,12 @@ if(RTOS_CHIBIOS_CHECK)
         endif()
 
     endif()
+    
+    # add target ChibiOS dirs
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/Include)
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/common)
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoBooter)
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
@@ -612,7 +612,7 @@ if(RTOS_CHIBIOS_CHECK)
         if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
             # board found
             message(STATUS "Support for target board '${CHIBIOS_BOARD}' found in Community targets")
-            message(STATUS "$CHIBIOS_BOARD_DEFINITIONS_LOCATION")
+            message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
             
             # add TARGET board directory from Community
             add_subdirectory("targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
