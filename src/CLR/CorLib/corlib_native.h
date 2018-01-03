@@ -326,6 +326,37 @@ struct Library_corlib_native_System_Convert
 
 };
 
+struct Library_corlib_native_System_DateTime
+{
+    static const int FIELD_STATIC__MinValue = 3;
+    static const int FIELD_STATIC__MaxValue = 4;
+
+    static const int FIELD___ticks = 1;
+
+    NANOCLR_NATIVE_DECLARE(_ctor___VOID__I4__I4__I4__I4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(get_Day___I4);
+    NANOCLR_NATIVE_DECLARE(get_DayOfWeek___SystemDayOfWeek);
+    NANOCLR_NATIVE_DECLARE(get_DayOfYear___I4);
+    NANOCLR_NATIVE_DECLARE(get_Hour___I4);
+    NANOCLR_NATIVE_DECLARE(get_Millisecond___I4);
+    NANOCLR_NATIVE_DECLARE(get_Minute___I4);
+    NANOCLR_NATIVE_DECLARE(get_Month___I4);
+    NANOCLR_NATIVE_DECLARE(get_Second___I4);
+    NANOCLR_NATIVE_DECLARE(get_Year___I4);
+    NANOCLR_NATIVE_DECLARE(DaysInMonth___STATIC__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(get_UtcNow___STATIC__SystemDateTime);
+    NANOCLR_NATIVE_DECLARE(get_Today___STATIC__SystemDateTime);
+
+    //--//
+
+    static CLR_INT64* NewObject  ( CLR_RT_StackFrame& stack );
+    static CLR_INT64* GetValuePtr( CLR_RT_StackFrame& stack );
+    static CLR_INT64* GetValuePtr( CLR_RT_HeapBlock&  ref   );
+
+    static void Expand  ( CLR_RT_StackFrame& stack,       SYSTEMTIME& st );
+    static void Compress( CLR_RT_StackFrame& stack, const SYSTEMTIME& st );
+};
+
 struct Library_corlib_native_System_Diagnostics_Debugger
 {
     NANOCLR_NATIVE_DECLARE(get_IsAttached___STATIC__BOOLEAN);
@@ -378,6 +409,26 @@ struct Library_corlib_native_System_Globalization_CultureInfo
 
     NANOCLR_NATIVE_DECLARE(get_CurrentUICultureInternal___STATIC__SystemGlobalizationCultureInfo);
     NANOCLR_NATIVE_DECLARE(set_CurrentUICultureInternal___STATIC__VOID__SystemGlobalizationCultureInfo);
+
+    //--//
+
+};
+
+struct Library_corlib_native_System_Globalization_DateTimeFormat
+{
+    NANOCLR_NATIVE_DECLARE(FormatDigits___STATIC__STRING__I4__I4);
+
+    //--//
+
+};
+
+struct Library_corlib_native_System_Globalization_DateTimeFormatInfo
+{
+    static const int FIELD___generalShortTimePattern = 1;
+    static const int FIELD___generalLongTimePattern = 2;
+    static const int FIELD___fullDateTimePattern = 3;
+    static const int FIELD__CultureInfo = 4;
+
 
     //--//
 
