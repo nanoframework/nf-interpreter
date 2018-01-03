@@ -357,12 +357,6 @@ include(NF_API_Namespaces)
 # and/or manage other APIs that are required
 
 
-if(API_System.DateTime)
-    # this API requires RTC
-    set(NF_FEATURE_RTC ON CACHE INTERNAL "enable NF_FEATURE_RTC from System.DateTime")
-endif()
-
-
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
     
