@@ -174,10 +174,13 @@
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
+    ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-75'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
-    ESP32_LIBS_PATH: '\targets\FreeRTOS\common\libs'
-    ESP32_IDF_PATH: 'FIXME-WITH-PATH-PROBABLY-WILL-NEED-ANOTHER-PS-SCRIPT-TO-DOWNLOAD-AND-INSTALL'
+
+    ESP32_TOOLS_PATH: 'C:\ESP32_TOOLS'
+    ESP32_LIBS_PATH: '%ESP32_TOOLS_PATH%\libs'
+    ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0-rc1'
     RUBY_VERSION: 24
     GitHubUserName:
       secure: 7OBtVAMTodMWK20wg6pGnQ==
@@ -204,7 +207,7 @@
       #   BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.DateTime=ON'
       #   NEEDS_DFU: 'True'
       - BOARD_NAME: 'ESP32_DEVKITC'
-        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS'
+        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_FEATURE_DEBUGGER=TRUE -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
       # - BOARD_NAME: 'NANOCLR_WINDOWS'
 
   matrix:
@@ -212,7 +215,8 @@
 
   cache:
     - '%GNU_GCC_TOOLCHAIN_PATH%'
-
+    - '%ESP32_TOOLCHAIN_PATH%'
+ 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
@@ -225,14 +229,20 @@
         {
 
           .\install-vsix-appveyor.ps1
-
+        }
+        ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
+        {
+          .\install-esp32-toolchain.ps1
+          .\install-ninja.ps1
+          .\install-nf-hex2dfu.ps1
+          .\install-esp32-libs.ps1
+          .\install-esp32-idf.ps1
         }
         Else
         {
           .\install-arm-gcc-toolchain.ps1
           .\install-ninja.ps1
           .\install-nf-hex2dfu.ps1
-          .\install-esp32-libs.ps1
         }
 
   build:
@@ -267,7 +277,7 @@
 
           If($env:BOARD_NAME -eq "ESP32_DEVKITC")
           {
-             &$cmake -G Ninja "-DESP32_IDF_PATH=$env:ESP32_IDF_PATH" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+             &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:ESP32_TOOLCHAIN_PATH" "-DESP32_IDF_PATH=$env:ESP32_IDF_PATH" "-DESP32_LIBS_PATH=$env:ESP32_LIBS_PATH" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
           }
           Else
           {

@@ -97,7 +97,8 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS "  -L ${ESP32_IDF_PATH}/components/esp32/lib -lcore -lrtc -lnet80211 -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lphy ")
 
 #set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/examples/get-started/blink/build/esp32 -T esp32_out.ld ")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/examples/get-started/blink/build/esp32 -T esp32_out.ld ")
+#set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/examples/get-started/blink/build/esp32 -T esp32_out.ld ")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L  ${CMAKE_CURRENT_SOURCE_DIR} -T esp32_out.ld ")
 
 #set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/ld -u ld_include_panic_highint_hdl -T esp32.common.ld -T esp32.rom.ld -T esp32.peripherals.ld -T esp32.rom.spiram_incompatible_fns.ld ")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/ld -u ld_include_panic_highint_hdl -T esp32.common.ld -T esp32.rom.ld -T esp32.peripherals.ld -T esp32.rom.spiram_incompatible_fns.ld ")
@@ -133,7 +134,7 @@ endforeach( IDF_libraries )
 #set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -lgcc -lstdc++ -Wl,--end-group -Wl,-EL  ")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -lgcc -lstdc++ -Wl,--end-group -Wl,-EL  ")
 
-message( "wireprotol :${WireProtocol_INCLUDE_DIRS}")
+#message( "wireprotol :${WireProtocol_INCLUDE_DIRS}")
 
 # include common directories
 include_directories(
@@ -233,13 +234,13 @@ add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
 	COMMENT "List flash 4Mb Esp32 Partition tables" )
 
 
-message("CMAKE_CXX_FLAGS:${CMAKE_CXX_FLAGS}" )
-message("CMAKE_EXE_LINKER_FLAGS:${CMAKE_EXE_LINKER_FLAGS}" )
-message("CMAKE_EXE_LINKER_FLAGS_DEBUG:${CMAKE_EXE_LINKER_FLAGS_DEBUG}" )
-message("CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT:${CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT}" )
-message("CMAKE_CXX_LINK_EXECUTABLE:${CMAKE_CXX_LINK_EXECUTABLE}" )
-message("CMAKE_C_LINK_EXECUTABLE:${CMAKE_C_LINK_EXECUTABLE}" )
-message("FLAGS:${FLAGS}" )
+#message("CMAKE_CXX_FLAGS:${CMAKE_CXX_FLAGS}" )
+#message("CMAKE_EXE_LINKER_FLAGS:${CMAKE_EXE_LINKER_FLAGS}" )
+#message("CMAKE_EXE_LINKER_FLAGS_DEBUG:${CMAKE_EXE_LINKER_FLAGS_DEBUG}" )
+#message("CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT:${CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT}" )
+#message("CMAKE_CXX_LINK_EXECUTABLE:${CMAKE_CXX_LINK_EXECUTABLE}" )
+#message("CMAKE_C_LINK_EXECUTABLE:${CMAKE_C_LINK_EXECUTABLE}" )
+#message("FLAGS:${FLAGS}" )
 
 #get_property( BOOTER_LINK_FLAGS TARGET ${NANOBOOTER_PROJECT_NAME}.elf  PROPERTY LINK_FLAGS )
 #message("BOOTER_LINK_FLAGS:${BOOTER_LINK_FLAGS}" )

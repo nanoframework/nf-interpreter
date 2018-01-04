@@ -5,18 +5,21 @@ INCLUDE(CMakeForceCompiler)
 # endif()
 
 # check for toolchain path
-if(NOT TOOLCHAIN_PREFIX)
-	message( "tcp ${TOOLCHAIN_PREFIX}" )
-     message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain")
-     message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
-     message(STATUS "########################################\n\n")
-     message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
-endif()
+# if(NOT TOOLCHAIN_PREFIX)
+# 	message( "tcp ${TOOLCHAIN_PREFIX}" )
+#      message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain")
+#      message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
+#      message(STATUS "########################################\n\n")
+#      message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
+# endif()
+
+# Stop cmake trying to check if compiler works
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY )
 
 # set toolchain directories
-set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/bin)
-set(TOOLCHAIN_INC_DIR ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf/include)
-set(TOOLCHAIN_LIB_DIR ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf/lib)
+set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf/bin)
+set(TOOLCHAIN_INC_DIR ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf/xtensa-esp32-elf/include)
+set(TOOLCHAIN_LIB_DIR ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf/xtensa-esp32-elf/lib)
 
 # the name of the operating system for which CMake is to build
 set(CMAKE_SYSTEM_NAME Generic)
@@ -32,18 +35,12 @@ endmacro()
 # setup C compiler
 if(NOT CMAKE_C_COMPILER)
     SET_COMPILER_VAR(C_COMPILER gcc)
-   if(CMAKE_C_COMPILER)
-      CMAKE_FORCE_C_COMPILER(${CMAKE_C_COMPILER} GNU)
-   endif()
 endif()
 SET_COMPILER_VAR(C_COMPILER gcc)
 
 # setup C++ compiler
 if(NOT CMAKE_CXX_COMPILER)
     SET_COMPILER_VAR(CXX_COMPILER g++)
-   if(CMAKE_CXX_COMPILER)
-      CMAKE_FORCE_CXX_COMPILER(${CMAKE_CXX_COMPILER} GNU)
-   endif()
 endif()
 
 # setup Assembler compiler
