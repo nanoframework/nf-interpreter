@@ -17,9 +17,6 @@ option(API_Windows.Devices.Pwm "option for Windows.Devices.Pwm API")
 option(API_Windows.Devices.Adc "option for Windows.Devices.Adc API")
 option(API_nanoFramework.Runtime.Events "option for nanoFramework.Runtime.Events API")
 
-# options for base class library flavours
-option(API_System.DateTime "option for System.DateTime API")
-
 
 #################################################################
 # macro to perform individual settings to add an API to the build
@@ -60,19 +57,14 @@ endmacro()
 ############################################################################################
 
 macro(ParseApiOptions)
-      
-    # System.DateTime
-    if(API_System.DateTime)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("System.DateTime")
-    endif()
-  
+    
     # Windows.Devices.Gpio
     if(API_Windows.Devices.Gpio)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("Windows.Devices.Gpio")
     endif()
 
+    
     # Windows.Devices.Spi
     if(API_Windows.Devices.Spi)
         ##### API name here (doted name)
