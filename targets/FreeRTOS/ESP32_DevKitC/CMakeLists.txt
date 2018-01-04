@@ -207,12 +207,12 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.map")
 
 # Create bin file from elf
-#set(NANOBOOTER_BIN_FILE ${PROJECT_SOURCE_DIR}/build/targets/FreeRTOS/ESP32_DevKitC/${NANOBOOTER_PROJECT_NAME}.bin)
-set(NANOCLR_BIN_FILE ${PROJECT_SOURCE_DIR}/build/targets/FreeRTOS/ESP32_DevKitC/${NANOCLR_PROJECT_NAME}.bin)
+set(GEN_ESP32_BIN_PATH ${PROJECT_SOURCE_DIR}/build )
+#set(NANOBOOTER_BIN_FILE ${GEN_ESP32_BIN_PATH}/${NANOBOOTER_PROJECT_NAME}.bin)
+set(NANOCLR_BIN_FILE ${GEN_ESP32_BIN_PATH}/${NANOCLR_PROJECT_NAME}.bin)
 set(ESPTOOL_PY_FILE ${ESP32_IDF_PATH}/components/esptool_py/esptool/esptool.py )
 set(ESPTOOL_PY_FLAGS "--chip esp32 elf2image --flash_mode \"dio\" --flash_freq \"40m\" --flash_size \"4MB\" " )
 set(GEN_ESP32PART_PY_FILE ${ESP32_IDF_PATH}/components/partition_table/gen_esp32part.py )
-set(GEN_ESP32PART_BIN_PATH ${PROJECT_SOURCE_DIR}/build/targets/FreeRTOS/ESP32_DevKitC )
 
 # add_custom_command( TARGET ${NANOBOOTER_PROJECT_NAME}.elf POST_BUILD
 # 	COMMAND ${ESPTOOL_PY_FILE} ${ESPTOOL_PY_FLAGS} -o ${NANOBOOTER_BIN_FILE}   ${NANOBOOTER_PROJECT_NAME}.elf
@@ -224,13 +224,13 @@ add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
     
 # # Create partition table
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify    ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/IDF/partitions_nanoclr_4mb.csv ${GEN_ESP32PART_BIN_PATH}/partitions_4mb.bin
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify   ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/IDF/partitions_nanoclr_2mb.csv ${GEN_ESP32PART_BIN_PATH}/partitions_2mb.bin
+	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify    ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/IDF/partitions_nanoclr_4mb.csv ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
+	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify   ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/IDF/partitions_nanoclr_2mb.csv ${GEN_ESP32_BIN_PATH}/partitions_2mb.bin
 	COMMENT "Generate Esp32 Partition tables for 2MB and 4MB flash" )
 
 # list partition table
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${GEN_ESP32PART_PY_FILE}  ${GEN_ESP32PART_BIN_PATH}/partitions_4mb.bin
+	COMMAND ${GEN_ESP32PART_PY_FILE}  ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
 	COMMENT "List flash 4Mb Esp32 Partition tables" )
 
 

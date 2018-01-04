@@ -234,7 +234,6 @@
         {
           .\install-esp32-toolchain.ps1
           .\install-ninja.ps1
-          .\install-nf-hex2dfu.ps1
           .\install-esp32-libs.ps1
           .\install-esp32-idf.ps1
         }

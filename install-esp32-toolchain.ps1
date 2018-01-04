@@ -1,4 +1,4 @@
-# This PS installs the ARM GNU GCC toolchain from out Bintray repository if it's not already available
+# This PS installs the xtensa ESP32 toolchain from Espressif downloads repository if it's not already available
 
 # check if path already exists
 $XtensaPathExists = Test-Path $env:ESP32_TOOLCHAIN_PATH -ErrorAction SilentlyContinue
@@ -9,7 +9,7 @@ If($XtensaPathExists -eq $False)
 
     Write-Host "Downloading Xtensa ESP32 toolchain..."
 
-    # FIXME use bintray
+    # Download xtensa ESP32 toolchain and install
     $url = "https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-75-gbaf03c2-5.2.0.zip"
     $output = "$PSScriptRoot\xtensa-esp32-elf-win32.zip"
     

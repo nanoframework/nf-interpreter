@@ -17,10 +17,9 @@ If($Esp32IdfPathExists -eq $False)
 
     # unzip
     Expand-Archive $output -DestinationPath $env:ESP32_TOOLS_PATH
-
- 
-    Write-Host "Installing python pyserial..."
-    # Make sure serial package is installed in python otherwise
-    # esptool.py won't run
-    python -m pip install pyserial
 }
+
+Write-Host "Installing python pyserial..."
+# Make sure serial package is installed in python otherwise
+# the esptool.py tool won't run
+python -m pip install pyserial
