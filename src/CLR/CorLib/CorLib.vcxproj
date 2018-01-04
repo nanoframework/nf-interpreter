@@ -35,6 +35,7 @@
     <ClCompile Include="corlib_native_System_Collections_Stack.cpp" />
     <ClCompile Include="corlib_native_System_Console.cpp" />
     <ClCompile Include="corlib_native_System_Convert.cpp" />
+    <ClCompile Include="corlib_native_System_DateTime.cpp" />
     <ClCompile Include="corlib_native_System_Delegate.cpp" />
     <ClCompile Include="corlib_native_System_Diagnostics_Debugger.cpp" />
     <ClCompile Include="corlib_native_System_Double.cpp" />
@@ -42,6 +43,7 @@
     <ClCompile Include="corlib_native_System_Exception.cpp" />
     <ClCompile Include="corlib_native_System_GC.cpp" />
     <ClCompile Include="corlib_native_System_Globalization_CultureInfo.cpp" />
+    <ClCompile Include="corlib_native_System_Globalization_DateTimeFormat.cpp" />
     <ClCompile Include="corlib_native_System_Guid.cpp" />
     <ClCompile Include="corlib_native_System_MarshalByRefObject.cpp" />
     <ClCompile Include="corlib_native_System_Math.cpp" />

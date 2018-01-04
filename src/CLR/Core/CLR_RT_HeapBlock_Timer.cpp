@@ -251,6 +251,11 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
         {
             flags |= CLR_RT_HeapBlock_Timer::c_ACTION_Change;
         }
+
+        if(flags & CLR_RT_HeapBlock_Timer::c_INPUT_Absolute)
+        {
+            timer->m_flags |= CLR_RT_HeapBlock_Timer::c_AbsoluteTimer;
+        }
     }
 
     if(flags & CLR_RT_HeapBlock_Timer::c_ACTION_Destroy)
@@ -288,11 +293,24 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
             pVal = Library_corlib_native_System_TimeSpan::GetValuePtr( args[ 1 ] ); FAULT_ON_NULL(pVal); 
             if (*pVal == -c_TickPerMillisecond) timer->m_timeFrequency = TIMEOUT_INFINITE;
             else timer->m_timeFrequency    = *pVal;
-        }              
+        }
+        else if(flags & CLR_RT_HeapBlock_Timer::c_INPUT_Absolute)
+        {
+            CLR_INT64* pVal;
+
+            if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) == 0) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+
+            pVal = Library_corlib_native_System_DateTime::GetValuePtr( args[ 0 ] ); FAULT_ON_NULL(pVal); timer->m_timeExpire    = *pVal;
+            pVal = Library_corlib_native_System_TimeSpan::GetValuePtr( args[ 1 ] ); FAULT_ON_NULL(pVal); timer->m_timeFrequency = *pVal;
+        }                
 
         if(timer->m_timeExpire == TIMEOUT_INFINITE) 
         {
             timer->m_flags &= ~CLR_RT_HeapBlock_Timer::c_EnabledTimer;
+        }
+        else if((flags & CLR_RT_HeapBlock_Timer::c_INPUT_Absolute) )
+        {
+            timer->m_flags |= CLR_RT_HeapBlock_Timer::c_EnabledTimer;
         }
         else
         {
