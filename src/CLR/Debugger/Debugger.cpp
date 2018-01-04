@@ -967,12 +967,12 @@ static void GetClrReleaseInfo(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapa
 
 void NFReleaseInfo::Init(NFReleaseInfo& NFReleaseInfo, unsigned short int major, unsigned short int minor, unsigned short int build, unsigned short int revision, const char *info, size_t infoLen)
 {
-    NFVersion::Init( NFReleaseInfo.version, major, minor, build, revision );
-    NFReleaseInfo.infoString[ 0 ] = 0;
+    NFVersion::Init( NFReleaseInfo.Version, major, minor, build, revision );
+    NFReleaseInfo.InfoString[ 0 ] = 0;
     if ( NULL != info && infoLen > 0 )
     {
-        const size_t len = MIN(infoLen, sizeof(NFReleaseInfo.infoString)-1);
-        hal_strncpy_s( (char*)&NFReleaseInfo.infoString[ 0 ], sizeof(NFReleaseInfo.infoString), info, len );
+        const size_t len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString)-1);
+        hal_strncpy_s( (char*)&NFReleaseInfo.InfoString[ 0 ], sizeof(NFReleaseInfo.InfoString), info, len );
     }
 }
 
@@ -990,6 +990,15 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
     CLR_UINT8* data   = NULL;
     int size          = 0;
     bool fSuccess     = true;
+
+    // set the compiler info string here
+#if defined(__GNUC__)
+#define COMPILER_INFO "GNU ARM GCC"
+    const size_t len = MIN(sizeof(COMPILER_INFO), sizeof(reply.u_SoftwareVersion.CompilerInfo)-1);
+#else
+#define COMPILER_INFO "UNKNOWN"
+    const size_t len = 0;
+#endif
 
     memset(&reply, 0, sizeof(reply));
 
@@ -1048,16 +1057,19 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
 #if defined(__GNUC__)
 			// this is returning the GNU GCC compiler version in coded format: MAJOR x 10000 + MINOR x 100 + PATCH
             // example: v6.3.1 shows as 6 x 10000 + 3 x 100 + 1 = 60301
-            reply.u_SoftwareVersion.m_compilerVersion = (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__);
+            reply.u_SoftwareVersion.CompilerVersion = (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__);
 #else
-			reply.u_SoftwareVersion.m_compilerVersion = -1;
+			reply.u_SoftwareVersion.CompilerVersion = -1;
 #endif
 
 #if defined(__DATE__)
-            hal_strncpy_s( reply.u_SoftwareVersion.m_buildDate, sizeof(reply.u_SoftwareVersion.m_buildDate), __DATE__,  hal_strlen_s(__DATE__) );
+            hal_strncpy_s( reply.u_SoftwareVersion.BuildDate, sizeof(reply.u_SoftwareVersion.BuildDate), __DATE__,  hal_strlen_s(__DATE__) );
 #else
 #error "__DATE__ with build timestamp needs to be  defined"
 #endif
+
+            hal_strncpy_s( (char*)&reply.u_SoftwareVersion.CompilerInfo[ 0 ], sizeof(reply.u_SoftwareVersion.CompilerInfo), COMPILER_INFO, len );
+
             data = (CLR_UINT8*)&reply.u_SoftwareVersion;
             size = sizeof(reply.u_SoftwareVersion);
             break;
