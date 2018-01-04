@@ -293,8 +293,9 @@ struct CLR_DBG_Commands
 
         struct __nfpack SoftwareVersion
         {
-            char m_buildDate[ 22 ];
-            unsigned int m_compilerVersion;
+            char BuildDate[ 22 ];
+            char CompilerInfo[16];
+            unsigned int CompilerVersion;
         };
 
         struct __nfpack ClrInfo

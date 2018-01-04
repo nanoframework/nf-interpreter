@@ -15,13 +15,13 @@ bool GetHalSystemInfo(HalSystemInfo& systemInfo)
 #else
 
     // NFReleaseInfo:
-    systemInfo.m_releaseInfo.version.usMajor       = VERSION_MAJOR;
-    systemInfo.m_releaseInfo.version.usMinor       = VERSION_MINOR;
-    systemInfo.m_releaseInfo.version.usBuild       = VERSION_BUILD;
-    systemInfo.m_releaseInfo.version.usRevision    = VERSION_REVISION;
-    const size_t len = sizeof(systemInfo.m_releaseInfo.infoString);
+    systemInfo.m_releaseInfo.Version.usMajor       = VERSION_MAJOR;
+    systemInfo.m_releaseInfo.Version.usMinor       = VERSION_MINOR;
+    systemInfo.m_releaseInfo.Version.usBuild       = VERSION_BUILD;
+    systemInfo.m_releaseInfo.Version.usRevision    = VERSION_REVISION;
+    const size_t len = sizeof(systemInfo.m_releaseInfo.InfoString);
 
-    hal_strncpy_s ((char*)&systemInfo.m_releaseInfo.infoString[0], len, OEMSYSTEMINFOSTRING, len-1 );
+    hal_strncpy_s ((char*)&systemInfo.m_releaseInfo.InfoString[0], len, OEMSYSTEMINFOSTRING, len-1 );
 
     // we are not supporting this at this time
     // OEM_MODEL_SKU:
