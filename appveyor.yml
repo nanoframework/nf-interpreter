@@ -306,7 +306,8 @@
     - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.hex
     - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.s19
     - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.dfu
-
+    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %ESP32_LIBS_PATH%\bootloader.bin
+  
   test: off
 
   artifacts:
