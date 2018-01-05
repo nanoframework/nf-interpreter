@@ -58,12 +58,16 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
 
             // release WP semaphore
             chBSemSignalI(&wpChannelSemaphore);
+
+            TRACE( TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n",requestedSize, read);
             
             // check if the requested read matches the actual read count
             return (requestedSize == read);
         }
         else
         {
+            TRACE0( TRACE_ERRORS, "RXMSG: failed to get semaphore.\n");
+
             return false;
         }
     }
@@ -93,7 +97,6 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         
         if(semaphoreResult == MSG_OK)
         {
-            
             // non blocking read from serial port with 100ms timeout
             volatile size_t read = sdReadTimeout(&SD2, ptr, *size, MS2ST(250));
 
@@ -103,11 +106,15 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
             // release WP semaphore
             chBSemSignalI(&wpChannelSemaphore);
             
+            TRACE( TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n",requestedSize, read);
+
             // check if the requested read matches the actual read count
             return (requestedSize == read);
         }
         else
         {
+            TRACE0( TRACE_ERRORS, "RXMSG: failed to get semaphore.\n");
+
             return false;
         }
     }
