@@ -217,9 +217,16 @@
     - choco install gitversion.portable -pre -y
 
     - ps: |
-        .\install-arm-gcc-toolchain.ps1
-        .\install-ninja.ps1
-        .\install-nf-hex2dfu.ps1
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+        {
+
+        }
+        Else
+        {
+          .\install-arm-gcc-toolchain.ps1
+          .\install-ninja.ps1
+          .\install-nf-hex2dfu.ps1
+        }
 
   build:
     verbosity: minimal
@@ -228,22 +235,30 @@
     - md build
     - ps: |
 
-        gitversion /l console /output buildserver
-
-        cd build
-        $cmake = "cmake"
-
-        # need to split the build options into an array to properly pass those as CMake arguments
-        $separator = " "
-        $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
-        $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
-
-        If($env:NEEDS_DFU -eq 'True')
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
-           $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
+        
         }
+        Else
+        {
+          gitversion /l console /output buildserver
 
-        &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+          cd build
+          $cmake = "cmake"
+
+          # need to split the build options into an array to properly pass those as CMake arguments
+          $separator = " "
+          $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+          $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+          If($env:NEEDS_DFU -eq 'True')
+          {
+             $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
+          }
+
+          &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+
+        }
 
   build_script:
     - ps: |
