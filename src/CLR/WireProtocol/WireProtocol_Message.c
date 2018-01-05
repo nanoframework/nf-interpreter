@@ -283,7 +283,7 @@ int WP_Message_Process(WP_Message* message)
 
             case ReceiveState_ReadingPayload:
                 {
-                    TRACE0( TRACE_STATE, "RxState=ReadingPayload\n");
+                    TRACE( TRACE_STATE, "RxState=ReadingPayload. Expecting %d bytes.\n", message->m_size);
                     if(WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
                     {
                         // didn't receive the expected amount of bytes, returning false
