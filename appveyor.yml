@@ -217,18 +217,9 @@
     - choco install gitversion.portable -pre -y
 
     - ps: |
-        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
-        {
-
-          .\install-vsix-appveyor.ps1
-
-        }
-        Else
-        {
-          .\install-arm-gcc-toolchain.ps1
-          .\install-ninja.ps1
-          .\install-nf-hex2dfu.ps1
-        }
+        .\install-arm-gcc-toolchain.ps1
+        .\install-ninja.ps1
+        .\install-nf-hex2dfu.ps1
 
   build:
     verbosity: minimal
@@ -237,40 +228,28 @@
     - md build
     - ps: |
 
-        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+        gitversion /l console /output buildserver
+
+        cd build
+        $cmake = "cmake"
+
+        # need to split the build options into an array to properly pass those as CMake arguments
+        $separator = " "
+        $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+        $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+        If($env:NEEDS_DFU -eq 'True')
         {
-
-          nuget restore targets\os\win32\nanoCLR.sln
-        
+           $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
         }
-        Else
-        {
-          gitversion /l console /output buildserver
 
-          cd build
-          $cmake = "cmake"
-
-          # need to split the build options into an array to properly pass those as CMake arguments
-          $separator = " "
-          $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
-          $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
-
-          If($env:NEEDS_DFU -eq 'True')
-          {
-             $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
-          }
-
-          &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
-
-        }
+        &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
 
   build_script:
     - ps: |
 
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
-          
-          msbuild targets\os\win32\netnf\TestApplication\TestApplication.sln /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
           
           msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /p:Platform=x86 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
         
