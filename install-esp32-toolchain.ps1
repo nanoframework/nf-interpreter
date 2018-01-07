@@ -1,4 +1,5 @@
-# This PS installs the xtensa ESP32 toolchain from Espressif downloads repository if it's not already available
+# This PS installs the xtensa ESP32 toolchain from Espressif downloads repository 
+# if it's not already available at ESP32_TOOLCHAIN_PATH
 
 # check if path already exists
 $XtensaPathExists = Test-Path $env:ESP32_TOOLCHAIN_PATH -ErrorAction SilentlyContinue
