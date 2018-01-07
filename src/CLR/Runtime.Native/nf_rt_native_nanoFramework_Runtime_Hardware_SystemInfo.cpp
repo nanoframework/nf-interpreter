@@ -24,16 +24,16 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo::GetSyste
 
         Target_GetReleaseInfo( releaseInfo );
 
-        hbMajor.SetInteger( releaseInfo.version.usMajor );
+        hbMajor.SetInteger( releaseInfo.Version.usMajor );
         NANOCLR_CHECK_HRESULT(hbMajor.StoreToReference( stack.Arg0(), 0 ));
 
-        hbMinor.SetInteger( releaseInfo.version.usMinor );
+        hbMinor.SetInteger( releaseInfo.Version.usMinor );
         NANOCLR_CHECK_HRESULT(hbMinor.StoreToReference( stack.Arg1(), 0 ));
 
-        hbBuild.SetInteger( releaseInfo.version.usBuild );
+        hbBuild.SetInteger( releaseInfo.Version.usBuild );
         NANOCLR_CHECK_HRESULT(hbBuild.StoreToReference( stack.Arg2(), 0 ));
 
-        hbRevision.SetInteger( releaseInfo.version.usRevision );
+        hbRevision.SetInteger( releaseInfo.Version.usRevision );
         NANOCLR_CHECK_HRESULT(hbRevision.StoreToReference( stack.Arg3(), 0 ));
     }
 
@@ -50,7 +50,7 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo::get_OEMS
 
         Target_GetReleaseInfo( releaseInfo );
 
-        NANOCLR_SET_AND_LEAVE(stack.SetResult_String( (char*)releaseInfo.infoString ));
+        NANOCLR_SET_AND_LEAVE(stack.SetResult_String( (char*)releaseInfo.InfoString ));
     }
 
     NANOCLR_NOCLEANUP();

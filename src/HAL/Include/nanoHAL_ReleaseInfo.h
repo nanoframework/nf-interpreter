@@ -29,8 +29,8 @@ struct __nfpack NFVersion
 
 struct __nfpack NFReleaseInfo
 {
-    NFVersion version;
-    unsigned char infoString[64-sizeof(NFVersion)];
+    NFVersion Version;
+    unsigned char InfoString[128-sizeof(NFVersion)];
     
     static void Init(NFReleaseInfo& releaseInfo, unsigned short major=0, unsigned short minor=0, unsigned short build=0, unsigned short revision=0, const char *info=(const char *)NULL, size_t infoLen=0);
 };

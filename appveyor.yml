@@ -228,7 +228,6 @@
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
 
-          .\install-vsix-appveyor.ps1
         }
         ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
         {
@@ -253,8 +252,6 @@
 
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
-
-          nuget restore targets\os\win32\nanoCLR.sln
         
         }
         Else
@@ -289,8 +286,6 @@
 
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
-          
-          msbuild targets\os\win32\netnf\TestApplication\TestApplication.sln /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
           
           msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /p:Platform=x86 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
         
