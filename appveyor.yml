@@ -4,7 +4,7 @@
     only:
       - master
 
-  # Skipping commits affecting specific files
+  # Skipping commits affecting specific files 
   skip_commits:
     files:
     - '**\AssemblyInfo.*'
