@@ -1129,6 +1129,224 @@ public:
     T* Storage() { return m_data; }
 };
 
+template<typename T> class HAL_RingBuffer 
+{
+    size_t _size;
+    size_t _capacity;
+    size_t _write_index;
+    size_t _read_index;
+    T * _buffer;
+
+public:
+
+    void Initialize(T* data, size_t size)
+    {
+        _capacity = size;
+        _write_index = 0;
+        _read_index = 0;
+        _size = 0;
+
+        _buffer = data;
+    }
+
+    size_t Capacity() { return _capacity; }
+
+    size_t Length() { return _size; }
+
+    // Push N elements to the buffer.
+    size_t Push(const T* data, size_t length)
+    {
+        size_t lengthToWrite = 0;
+
+        // sanity check for 0 length
+        if (length == 0) return 0;
+
+        if(length < _capacity - _size)
+        {
+            lengthToWrite = length;
+        }
+        else
+        {
+            lengthToWrite = _capacity - _size;
+        }
+
+        // single memcpy
+        if (lengthToWrite <= _capacity - _write_index)
+        {
+            memcpy(_buffer + _write_index, data, lengthToWrite);
+            _write_index += lengthToWrite;
+           
+            // check if we are the end of the capacity
+            if (_write_index == _capacity) _write_index = 0;
+        }
+        // need to memcpy in two chunks
+        else
+        {
+            size_t chunk1Size = _capacity - _write_index;
+            memcpy(_buffer + _write_index, data, chunk1Size);
+
+            size_t chunk2Size = lengthToWrite - chunk1Size;
+            memcpy(_buffer, data + chunk1Size, chunk2Size);
+
+            _write_index = chunk2Size;
+        }
+
+        // update ring buffer size
+        _size += lengthToWrite;
+
+        return lengthToWrite;
+    }
+
+    // Pop N elements from ring buffer returning them in the data argument.
+    size_t Pop(T* data, size_t length)
+    {
+        size_t lengthToRead = 0;
+
+        // sanity check for 0 length
+        if (length == 0) return 0;
+
+        if(length < _size)
+        {
+            lengthToRead = length;
+        }
+        else
+        {
+            lengthToRead = _size;
+        }
+
+        // can read in a single memcpy
+        if (lengthToRead <= _capacity - _read_index)
+        {
+            memcpy(data, _buffer + _read_index, lengthToRead);
+            _read_index += lengthToRead;
+
+            // check if we are at end of capacity
+            if (_read_index == _capacity) _read_index = 0;
+        }
+        // need to memcpy in two steps
+        else
+        {
+            size_t chunk1Size = _capacity - _read_index;
+            memcpy(data, _buffer + _read_index, chunk1Size);
+
+            size_t chunk2Size = lengthToRead - chunk1Size;
+            memcpy(data + chunk1Size, _buffer, chunk2Size);
+
+            _read_index = chunk2Size;
+        }
+
+        // update ring buffer size
+        _size -= lengthToRead;
+
+        // check for optimization to improve sequential push
+        // buffer has to be empty and read and write indexes coincide
+        if(_size == 0 && (_write_index == _read_index))
+        {
+            // reset the read/write index
+            _write_index = 0;
+            _read_index = 0;
+        }
+
+        return lengthToRead;
+    }
+
+    // Pop N elements from ring buffer. The elements are not actually returned, just popped from the buffer.
+    size_t Pop(size_t length)
+    {
+        size_t lengthToRead = 0;
+
+        // sanity check for 0 length
+        if (length == 0) return 0;
+
+        if(length < _size)
+        {
+            lengthToRead = length;
+        }
+        else
+        {
+            lengthToRead = _size;
+        }
+
+        // can read in a single memcpy
+        if (lengthToRead <= _capacity - _read_index)
+        {
+            _read_index += lengthToRead;
+
+            // check if we are at end of capacity
+            if (_read_index == _capacity) _read_index = 0;
+        }
+        // need to memcpy in two steps
+        else
+        {
+            size_t chunk1Size = _capacity - _read_index;
+            size_t chunk2Size = lengthToRead - chunk1Size;
+            _read_index = chunk2Size;
+        }
+
+        // update ring buffer size
+        _size -= lengthToRead;
+
+        // // check for optimization to improve sequential push
+        // // buffer has to be empty and read and write indexes coincide
+        // if(_size == 0 && (_write_index == _read_index))
+        // {
+        //     // reset the read/write index
+        //     _write_index = 0;
+        //     _read_index = 0;
+        // }
+
+        return lengthToRead;
+    }
+
+    void OptimizeSequence()
+    {
+        // no elements, so there is nothing to optimize
+        if(_size == 0) return;
+     
+        // read index is already at index 0, so there is nothing to optimize
+        if(_read_index == 0) return;
+
+        // can move data in a single memcpy
+        if (_read_index < _write_index)
+        {
+            // buffer looks like this
+            // |...xxxxx.....|
+            memcpy(_buffer, _buffer + _read_index, _size);
+        }
+        // need to move data in two steps
+        else
+        {
+            // buffer looks like this
+            // |xxxx......xxxxxx|
+            
+            // store size of tail
+            size_t tailSize = _write_index - 1;
+
+            // 1st move tail to temp buffer (need to malloc first)
+            T* tempBuffer = (T*)chHeapAlloc(NULL, tailSize);
+            memcpy(tempBuffer, _buffer, tailSize);
+            
+            // store size of remaining buffer
+            size_t headSize = _capacity - _read_index;
+
+            // 2nd move head to start of buffer
+            memcpy(_buffer, _buffer + _read_index, headSize);
+
+            // 3rd move temp buffer after head
+            memcpy(_buffer + headSize, tempBuffer, tailSize);
+
+            // free memory
+            chHeapFree(tempBuffer);
+        }
+
+        // adjust indexes
+        _read_index = 0;
+        _write_index = _size;
+    }
+
+    T* Reader() { return _buffer + _read_index; }
+};
+
 //--//
 
 //#include <..\Initialization\MasterConfig.h>
