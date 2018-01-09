@@ -396,6 +396,13 @@ else()
 endif()
 
 
+if(API_Windows.Devices.SerialCommunication)
+    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
+else()
+    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
+endif()
+
+
 if(API_Windows.Devices.Wifi)
     set(HAL_USE_WIFI_OPTION TRUE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
 else()    
