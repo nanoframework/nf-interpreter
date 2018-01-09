@@ -368,7 +368,7 @@
  * @note    Disabling this option saves both code and data space.
  */
 #if !defined(UART_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
-#define UART_USE_MUTUAL_EXCLUSION   FALSE
+#define UART_USE_MUTUAL_EXCLUSION   TRUE
 #endif
 
 /*===========================================================================*/
