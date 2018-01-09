@@ -37,9 +37,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID,
     Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeInit___VOID,
+    Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeConfig___VOID,
     Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeWrite___VOID__SZARRAY_U1,
+    Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeStore___U4,
     NULL,
     Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -51,6 +54,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_SerialCommunication =
 {
     "Windows.Devices.SerialCommunication", 
-    0x08A389F7,
+    0x8858E680,
     method_lookup
 };
