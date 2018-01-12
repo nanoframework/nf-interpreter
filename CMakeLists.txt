@@ -396,6 +396,13 @@ else()
 endif()
 
 
+if(API_Windows.Devices.SerialCommunication)
+    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
+else()
+    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
+endif()
+
+
 if(API_Windows.Devices.Wifi)
     set(HAL_USE_WIFI_OPTION TRUE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
 else()    
@@ -492,7 +499,7 @@ if(RTOS_CHIBIOS_CHECK)
             ChibiOS
             PREFIX ChibiOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
-            GIT_REPOSITORY  https://github.com/ChibiOS/ChibiOS/
+            GIT_REPOSITORY  https://github.com/nanoframework/ChibiOS
             GIT_TAG ${CHIBIOS_GIT_TAG}  # target specified branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10

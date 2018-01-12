@@ -15,6 +15,7 @@ option(API_Windows.Devices.Spi "option for Windows.Devices.Spi API")
 option(API_Windows.Devices.I2c "option for Windows.Devices.I2c API")
 option(API_Windows.Devices.Pwm "option for Windows.Devices.Pwm API")
 option(API_Windows.Devices.Adc "option for Windows.Devices.Adc API")
+option(API_Windows.Devices.SerialCommunication "option for Windows.Devices.SerialCommunication API")
 option(API_nanoFramework.Runtime.Events "option for nanoFramework.Runtime.Events API")
 
 
@@ -88,6 +89,12 @@ macro(ParseApiOptions)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("Windows.Devices.Adc")
     endif()
+
+    # Windows.Devices.SerialCommunication
+    if(API_Windows.Devices.SerialCommunication)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
+    endif()
     
     # nanoFramework.Runtime.Events
     if(API_nanoFramework.Runtime.Events)
@@ -129,9 +136,9 @@ macro(ParseApiOptions)
 
         foreach(entry ${apiListing})
             message(STATUS " ${entry}")
-            message(STATUS "")
         endforeach(entry ${})
         
+        message(STATUS "")
         message(STATUS " ***  end of APIs  ***")
         message(STATUS "")
 

@@ -29,11 +29,10 @@ This repo contains:
 
 ## Build status
 
-| Component | Build Status |
-|:-|---|
-| nanoBooter | [![Build status](https://ci.appveyor.com/api/projects/status/94fldjinqji4w977?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter) |
-| nanoCLR | [![Build status](https://ci.appveyor.com/api/projects/status/94fldjinqji4w977?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter) |
-| Win32 test project | [![Build status](https://ci.appveyor.com/api/projects/status/94fldjinqji4w977?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter) |
+| Component | Build Status | Build Status (develop) |
+|:-|---|---|
+| nanoBooter + nanoCLR | [![Build status](https://ci.appveyor.com/api/projects/status/gvkj25wv62eoikoq?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter-852pb) | [![Build status](https://ci.appveyor.com/api/projects/status/gvkj25wv62eoikoq/branch/develop?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter-852pb/branch/develop) | 
+| Win32 test project | [![Build status](https://ci.appveyor.com/api/projects/status/gvkj25wv62eoikoq?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter-852pb) | [![Build status](https://ci.appveyor.com/api/projects/status/gvkj25wv62eoikoq/branch/develop?svg=true)](https://ci.appveyor.com/project/nfbot/nf-interpreter-852pb/branch/develop) |
 
 
 ## Firmware for reference boards
