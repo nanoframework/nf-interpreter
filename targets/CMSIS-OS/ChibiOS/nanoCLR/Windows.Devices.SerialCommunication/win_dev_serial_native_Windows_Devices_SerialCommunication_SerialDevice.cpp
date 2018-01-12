@@ -48,6 +48,17 @@ enum SerialStopBitCount
     SerialStopBitCount_Two
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH  Windows.Storage.Streams.InputStreamOptions (in managed code) !!! //
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+enum InputStreamOptions
+{
+    InputStreamOptions_None = 0,
+    InputStreamOptions_Partial,
+    InputStreamOptions_ReadAhead
+};
+
 /////////////////////////////////////////////////////////
 // UART PAL strucs delcared in win_dev_serial_native.h //
 /////////////////////////////////////////////////////////
@@ -77,7 +88,7 @@ enum SerialStopBitCount
 #endif
 
 // This callback is invoked when a transmission buffer has been completely read by the driver.
-void TxEnd1(UARTDriver *uartp) 
+static void TxEnd1(UARTDriver *uartp) 
 {
     (void)uartp;
 
@@ -139,6 +150,73 @@ void TxEnd1(UARTDriver *uartp)
     palUart->TxOngoingCount = 0;
 }
 
+// This callback is invoked when a character is received but the application was not ready to receive it, the character is passed as parameter.
+static void RxChar(UARTDriver *uartp, uint16_t c) 
+{
+    (void)uartp;
+    (void)c;
+
+    NF_PAL_UART* palUart;
+
+    #if STM32_UART_USE_USART1
+    if (uartp == &UARTD1)
+    {
+        palUart = &Uart1_PAL;
+    }
+    #endif
+    #if STM32_UART_USE_USART2
+    if (uartp == &UARTD2)
+    {
+        palUart = &Uart2_PAL;
+    }
+    #endif
+    #if STM32_UART_USE_USART3
+    if (uartp == &UARTD3)
+    {
+        palUart = &Uart3_PAL;
+    }
+    #endif
+    #if STM32_UART_USE_UART4
+    if (uartp == &UARTD4)
+    {
+        palUart = &Uart4_PAL;
+    }
+    #endif
+    #if STM32_UART_USE_UART5
+    if (uartp == &UARTD5)
+    {
+        palUart = &Uart5_PAL;
+    }
+    #endif
+    #if STM32_UART_USE_USART6
+    if (uartp == &UARTD6)
+    {
+        palUart = &Uart6_PAL;
+    }
+    #endif
+    #if STM32_UART_USE_UART7
+    if (uartp == &UARTD7)
+    {
+        palUart = &Uart7_PAL;
+    }
+    #endif
+    #if STM32_UART_USE_UART8
+    if (uartp == &UARTD8)
+    {
+        palUart = &Uart8_PAL;
+    }
+    #endif
+  
+    // store this into the UART Rx buffer
+
+    // push char to ring buffer
+    // don't care about the success of the operation, if it's full we are droping the char anyway
+    palUart->RxRingBuffer.Push((uint8_t)c);
+    
+    // TODO
+    // check for need to fire a data arrival event
+}
+
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -172,7 +250,6 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     }
     NANOCLR_NOCLEANUP();
 }
-
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
@@ -250,12 +327,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         // configure UART handlers
         palUart->Uart_cfg.txend1_cb = TxEnd1;
-
-        // need to configure these here because it would be harder to add them in the UART_INIT replacement macro
-    #if defined(STM32F0xx_MCUCONF) || defined(STM32F7xx_MCUCONF)
-        palUart->Uart_cfg.timeout_cb =  NULL;
-        palUart->Uart_cfg.timeout = 0;
-    #endif
+        palUart->Uart_cfg.rxchar_cb = RxChar;
+        // palUart->Uart_cfg.rxend_cb = RxEnd;
 
         // call the configure
         return NativeConfig___VOID(stack);
@@ -403,7 +476,6 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP();
 }
 
-
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeWrite___VOID__SZARRAY_U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -492,6 +564,12 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
         
+        // need to update the _unstoredBufferLength field in the SerialDeviceOutputStream
+        // get pointer to outputStream field
+        CLR_RT_HeapBlock* outputStream = pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___outputStream].Dereference();
+        // get pointer to _unstoredBufferLength field and udpate field value
+        outputStream[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream::FIELD___unstoredBufferLength].NumericByRef().s4 = palUart->TxRingBuffer.Length();
+
         // null pointers and vars
         pThis = NULL;
     }
@@ -563,7 +641,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         if(palUart->TxRingBuffer.Length() > 0)
         {
 
-            // check if there is any TX operation ongoing
+            // check if there is a TX operation ongoing
             if(palUart->TxOngoingCount > 0)
             {
                 // need to wait for the ongoing operation to complete before starting a new one
@@ -571,11 +649,17 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
+            // uartStopSend(palUart->UartDriver);
+        
             // optimize buffer for sequential reading
             palUart->TxRingBuffer.OptimizeSequence();
 
             // get data length available in the buffer
             length = palUart->TxRingBuffer.Length();
+
+            // flush DMA buffer to ensure cache coherency
+            // (only required for Cortex-M7)
+            dmaBufferFlush(palUart->TxRingBuffer.Reader(), length);
 
             // set TX ongoing count
             palUart->TxOngoingCount = length;
@@ -583,9 +667,6 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             // because the UART can be accessed from several threads need to get exclusive access to it
             uartAcquireBus(palUart->UartDriver);
 
-    //CLR_Debug::Printf(">>%s<<\n", palUart->TxRingBuffer.Reader());
-    //uartStartSend(palUart->UartDriver, 2, "\r\n");
-            
             // start sending data (DMA will read from the ring buffer)
             uartStartSend(palUart->UartDriver, length, (uint8_t*)palUart->TxRingBuffer.Reader());
             
@@ -598,6 +679,161 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         // null pointers and vars
         pThis = NULL;
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeRead___U4__SZARRAY_U1__I4__I4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        NF_PAL_UART* palUart;
+
+        uint8_t* data;
+        size_t dataLength = 0;
+
+        size_t count = 0;
+        size_t bytesRead = 0;
+        size_t toRead = 0;
+
+        InputStreamOptions options = InputStreamOptions_None;
+
+        CLR_RT_HeapBlock* timeout;
+        int64_t*  timeoutTicks;
+        int64_t  timeoutMilisecondsValue;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+        if(pThis[ FIELD___disposed ].NumericByRef().u1 != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        // dereference the data buffer from the argument
+        CLR_RT_HeapBlock_Array* dataBuffer = stack.Arg1().DereferenceArray();
+
+        // get a the pointer to the array by using the first element of the array
+        data = dataBuffer->GetFirstElement();
+
+        // get the length of the data buffer
+        dataLength =  dataBuffer->m_numOfElements;
+
+        // get how many bytes are requested to read
+        count = stack.Arg2().NumericByRef().s4;
+
+        // get the InputStreamOptions option
+        options = (InputStreamOptions)stack.Arg3().NumericByRef().s4;
+
+        // Choose the driver for this SerialDevice
+        switch ((int)pThis[ FIELD___portIndex ].NumericByRef().s4)
+        {
+    #if STM32_UART_USE_USART1
+            case 1 :
+                palUart = &Uart1_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_USART2
+            case 2 :
+                palUart = &Uart2_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_USART3
+            case 3 :
+                palUart = &Uart3_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_UART4
+            case 4 :
+                palUart = &Uart6_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_UART5
+            case 5 :
+                palUart = &Uart5_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_USART6
+            case 6 :
+                palUart = &Uart6_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_UART7
+            case 7 :
+                palUart = &Uart7_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_UART8
+            case 8 :
+                palUart = &Uart8_PAL;
+                break;
+    #endif
+        }
+
+        // read whatever is available from the Rx ring buffer
+        if(palUart->RxRingBuffer.Length() >= count)
+        {
+            // read from Rx ring buffer
+            toRead = count;
+
+            // is the read ahead option enabled?
+            if(options == InputStreamOptions_ReadAhead)
+            {
+                // yes
+                // check how many bytes we can store in the buffer argument
+                if(dataLength < palUart->RxRingBuffer.Length())
+                {
+                    // read as many bytes has the buffer can hold
+                    toRead = dataLength;
+                }
+                else
+                {
+                    // read everything that's available in the ring buffer
+                    toRead = palUart->RxRingBuffer.Length();
+                }
+            }
+
+            // pop the request bytes from the ring buffer
+            bytesRead = palUart->RxRingBuffer.Pop(data, toRead);
+            
+            // update data pointer
+            data += bytesRead;
+        }
+
+        if(bytesRead < count)
+        {
+            // need to read the remaining requested bytes directly from the UART
+            // update the bytes to read counter
+            toRead = count - bytesRead;
+
+            // get value for readtimeout
+            // the way to access this it's somewhat convoluted but it is what it is
+            // get pointer to the field
+            timeout = &pThis[ Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___readTimeout ];
+            // now get a pointer to the actual value
+            timeoutTicks = Library_corlib_native_System_TimeSpan::GetValuePtr( *timeout );
+            // now get the value in ticks and convert it to miliseconds
+            timeoutMilisecondsValue = *timeoutTicks / TIME_CONVERSION__TICKUNITS;
+
+            // because the UART can be accessed from several threads need to get exclusive access to it
+            uartAcquireBus(palUart->UartDriver);
+
+            // start receive data
+            uartReceiveTimeout(palUart->UartDriver, &toRead, palUart->RxBuffer, MS2ST(timeoutMilisecondsValue));
+
+            // need to invalidate buffer before reading
+            dmaBufferInvalidate(palUart->RxBuffer, toRead);
+           
+            // read from Rx ring buffer
+            // udpate read counter
+            bytesRead += palUart->RxRingBuffer.Pop(data, toRead);
+
+            // done here, release the UART
+            uartReleaseBus(palUart->UartDriver);
+        }
+
+        // return how many bytes were read from the Rx buffer and/or UART
+        stack.SetResult_U4(bytesRead);
     }
     NANOCLR_NOCLEANUP();
 }

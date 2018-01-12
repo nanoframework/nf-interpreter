@@ -10,21 +10,8 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
+#include <corlib_native.h>
 #include <hal.h>
-
-
-// struct representing the UART 
-struct NF_PAL_UART
-{
-    UARTDriver* UartDriver;
-    UARTConfig Uart_cfg;
-
-    HAL_RingBuffer<uint8_t> TxRingBuffer;
-    uint8_t* TxBuffer;
-    uint8_t  TxOngoingCount;
-
-};
-
 
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_ErrorReceivedEventArgs
 {
@@ -67,6 +54,7 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     NANOCLR_NATIVE_DECLARE(NativeConfig___VOID);
     NANOCLR_NATIVE_DECLARE(NativeWrite___VOID__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(NativeStore___U4);
+    NANOCLR_NATIVE_DECLARE(NativeRead___U4__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
@@ -83,7 +71,7 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 
 };
 
-struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream
+struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceInputStream
 {
     static const int FIELD___serialDevice = 1;
 
@@ -92,7 +80,34 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 
 };
 
+struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream
+{
+    static const int FIELD___serialDevice = 1;
+    static const int FIELD___unstoredBufferLength = 2;
+
+
+    //--//
+
+};
+
+
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_SerialCommunication;
+
+
+// struct representing the UART 
+struct NF_PAL_UART
+{
+    UARTDriver* UartDriver;
+    UARTConfig Uart_cfg;
+
+    HAL_RingBuffer<uint8_t> TxRingBuffer;
+    uint8_t* TxBuffer;
+    uint16_t TxOngoingCount;
+
+    HAL_RingBuffer<uint8_t> RxRingBuffer;
+    uint8_t* RxBuffer;
+};
+
 
 ////////////////////////////////////////////
 // declaration of the the UART PAL strucs //
@@ -144,37 +159,77 @@ void ConfigPins_UART7();
 void ConfigPins_UART8();
 
 
-//////////////////////////////////////
-// pointers to UART Tx buffers      //
-// these exist in the target folder //
-//////////////////////////////////////
-extern uint8_t* Uart1TxBuffer;
-extern uint8_t* Uart2TxBuffer;
-extern uint8_t* Uart3TxBuffer;
-extern uint8_t* Uart4TxBuffer;
-extern uint8_t* Uart5TxBuffer;
-extern uint8_t* Uart6TxBuffer;
-extern uint8_t* Uart7TxBuffer;
-extern uint8_t* Uart8TxBuffer;
+/////////////////////////////////////
+// UART Tx buffers                 //
+// these live in the target folder //
+/////////////////////////////////////
+extern uint8_t Uart1_TxBuffer[];
+extern uint8_t Uart2_TxBuffer[];
+extern uint8_t Uart3_TxBuffer[];
+extern uint8_t Uart4_TxBuffer[];
+extern uint8_t Uart5_TxBuffer[];
+extern uint8_t Uart6_TxBuffer[];
+extern uint8_t Uart7_TxBuffer[];
+extern uint8_t Uart8_TxBuffer[];
+
+
+/////////////////////////////////////
+// UART Rx buffers                 //
+// these live in the target folder //
+/////////////////////////////////////
+extern uint8_t Uart1_RxBuffer[];
+extern uint8_t Uart2_RxBuffer[];
+extern uint8_t Uart3_RxBuffer[];
+extern uint8_t Uart4_RxBuffer[];
+extern uint8_t Uart5_RxBuffer[];
+extern uint8_t Uart6_RxBuffer[];
+extern uint8_t Uart7_RxBuffer[];
+extern uint8_t Uart8_RxBuffer[];
+
 
 // the following macro defines a function that initializes an UART struct
 // it gets called in the Windows_Devices_SerialCommunication_SerialDevice::NativeInit function
+
+#if defined(STM32F7xx_MCUCONF) || defined(STM32F0xx_MCUCONF)
+
+// STM32F7 and STM32F0 use UART driver v2
 #define UART_INIT(num, tx_buffer_size, rx_buffer_size) void Init_UART##num() { \
     Uart##num##_PAL.Uart_cfg.txend2_cb = NULL; \
     Uart##num##_PAL.Uart_cfg.rxend_cb = NULL; \
     Uart##num##_PAL.Uart_cfg.rxerr_cb = NULL; \
+    Uart##num##_PAL.Uart_cfg.timeout_cb =  NULL; \
+    Uart##num##_PAL.Uart_cfg.timeout = 0; \
+    Uart##num##_PAL.Uart_cfg.speed = 9600; \
     Uart##num##_PAL.Uart_cfg.cr1 = 0; \
     Uart##num##_PAL.Uart_cfg.cr2 = 0; \
     Uart##num##_PAL.Uart_cfg.cr3 = 0; \
-    Uart##num##_PAL.Uart_cfg.speed = 9600; \
-    Uart##num##_PAL.Uart_cfg.speed = 9600; \
-    Uart##num##_PAL.Uart_cfg.speed = 9600; \
-    Uart##num##_PAL.Uart_cfg.speed = 9600; \
-    Uart##num##TxBuffer = (uint8_t*)chHeapAlloc(NULL, tx_buffer_size); \
-    Uart##num##_PAL.TxBuffer = Uart##num##TxBuffer; \
-    Uart##num##_PAL.TxRingBuffer.Initialize( &Uart##num##_PAL.TxBuffer[0], tx_buffer_size); \
+    Uart##num##_PAL.TxBuffer = Uart##num##_TxBuffer; \
+    Uart##num##_PAL.TxRingBuffer.Initialize( Uart##num##_PAL.TxBuffer, tx_buffer_size); \
     Uart##num##_PAL.TxOngoingCount = 0; \
+    Uart##num##_PAL.RxBuffer = Uart##num##_RxBuffer; \
+    Uart##num##_PAL.RxRingBuffer.Initialize( Uart##num##_PAL.RxBuffer, rx_buffer_size); \
 }
+
+#else
+
+// all other STM32F use UART driver v1 which has a different UARTConfig struct
+#define UART_INIT(num, tx_buffer_size, rx_buffer_size) void Init_UART##num() { \
+    Uart##num##_PAL.Uart_cfg.txend2_cb = NULL; \
+    Uart##num##_PAL.Uart_cfg.rxend_cb = NULL; \
+    Uart##num##_PAL.Uart_cfg.rxerr_cb = NULL; \
+    Uart##num##_PAL.Uart_cfg.speed = 9600; \
+    Uart##num##_PAL.Uart_cfg.cr1 = 0; \
+    Uart##num##_PAL.Uart_cfg.cr2 = 0; \
+    Uart##num##_PAL.Uart_cfg.cr3 = 0; \
+    Uart##num##_TxBuffer = (uint8_t*)chHeapAlloc(NULL, tx_buffer_size); \
+    Uart##num##_PAL.TxRingBuffer.Initialize( Uart##num##_PAL.TxBuffer, tx_buffer_size); \
+    Uart##num##_PAL.TxOngoingCount = 0; \
+    Uart##num##_PAL.RxBuffer = Uart##num##_RxBuffer; \
+    Uart##num##_PAL.RxRingBuffer.Initialize( Uart##num##_PAL.RxBuffer, rx_buffer_size); \
+}
+
+#endif
+
 
 // when a UART/USART is defined the declarations bellow will have the real function/configuration 
 // in the target folder @ target_windows_devices_serialcommunication_config.cpp
@@ -190,7 +245,7 @@ void Init_UART8();
 
 // the following macro defines a function that un initializes an UART struct
 // it gets called in the Windows_Devices_SerialCommunication_SerialDevice::NativeDispose function
-#define UART_UNINIT(num) void UnInit_UART##num() { chHeapFree(Uart##num##TxBuffer); }
+#define UART_UNINIT(num) void UnInit_UART##num() { return; }
 
 // when a UART/USART is defined the declarations bellow will have the real function/configuration 
 // in the target folder @ target_windows_devices_serialcommunication_config.cpp
