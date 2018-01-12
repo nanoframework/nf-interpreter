@@ -1153,6 +1153,24 @@ public:
 
     size_t Length() { return _size; }
 
+    // Push a single element to the buffer.
+    size_t Push(const T data)
+    {
+        T* destination = _buffer;
+        destination += _write_index;
+
+        *destination = data;
+        _write_index += 1;
+        
+        // check if we are the end of the capacity
+        if (_write_index == _capacity) _write_index = 0;
+
+        // update ring buffer size
+        _size += 1;
+
+        return 1;
+    }
+
     // Push N elements to the buffer.
     size_t Push(const T* data, size_t length)
     {
@@ -1286,14 +1304,14 @@ public:
         // update ring buffer size
         _size -= lengthToRead;
 
-        // // check for optimization to improve sequential push
-        // // buffer has to be empty and read and write indexes coincide
-        // if(_size == 0 && (_write_index == _read_index))
-        // {
-        //     // reset the read/write index
-        //     _write_index = 0;
-        //     _read_index = 0;
-        // }
+        // check for optimization to improve sequential push
+        // buffer has to be empty and read and write indexes coincide
+        if(_size == 0 && (_write_index == _read_index))
+        {
+            // reset the read/write index
+            _write_index = 0;
+            _read_index = 0;
+        }
 
         return lengthToRead;
     }
