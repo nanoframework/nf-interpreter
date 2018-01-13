@@ -221,7 +221,7 @@ extern uint8_t Uart8_RxBuffer[];
     Uart##num##_PAL.Uart_cfg.cr1 = 0; \
     Uart##num##_PAL.Uart_cfg.cr2 = 0; \
     Uart##num##_PAL.Uart_cfg.cr3 = 0; \
-    Uart##num##_TxBuffer = (uint8_t*)chHeapAlloc(NULL, tx_buffer_size); \
+    Uart##num##_PAL.TxBuffer = Uart##num##_TxBuffer; \
     Uart##num##_PAL.TxRingBuffer.Initialize( Uart##num##_PAL.TxBuffer, tx_buffer_size); \
     Uart##num##_PAL.TxOngoingCount = 0; \
     Uart##num##_PAL.RxBuffer = Uart##num##_RxBuffer; \
