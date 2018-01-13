@@ -13,7 +13,7 @@
 // port: GPIOA
 // TX pin: is GPIOA_9
 // RX pin: is GPIOA_10
-// GPIO alternate pin function is 8 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in STM32F427xx and STM32F429xx datasheet)
+// GPIO alternate pin function is 7 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in STM32F427xx and STM32F429xx datasheet)
 UART_CONFIG_PINS(1, GPIOA, 9, 10, 7)
 
 ///////////
@@ -24,7 +24,7 @@ UART_CONFIG_PINS(1, GPIOA, 9, 10, 7)
 // port: GPIOD
 // TX pin: is GPIOD_6
 // RX pin: is GPIOD_7
-// GPIO alternate pin function is 8 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in STM32F427xx and STM32F429xx datasheet)
+// GPIO alternate pin function is 7 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in STM32F427xx and STM32F429xx datasheet)
 UART_CONFIG_PINS(2, GPIOD, 5, 6, 7)
 
 ///////////
@@ -35,7 +35,7 @@ UART_CONFIG_PINS(2, GPIOD, 5, 6, 7)
 // port: GPIOD
 // TX pin: is GPIOD_8
 // RX pin: is GPIOD_9
-// GPIO alternate pin function is 8 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in STM32F427xx and STM32F429xx datasheet)
+// GPIO alternate pin function is 7 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in STM32F427xx and STM32F429xx datasheet)
 UART_CONFIG_PINS(3, GPIOD, 8, 9, 7)
 
 
