@@ -640,7 +640,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // check if there is anything the buffer
         if(palUart->TxRingBuffer.Length() > 0)
         {
-
+            /*
             // check if there is a TX operation ongoing
             if(palUart->TxOngoingCount > 0)
             {
@@ -648,6 +648,9 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 // not sure if this is the best exception to throw here...
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
+            */
+            // Let any TX operation terminate
+            while (palUart->TxOngoingCount > 0) { osDelay(1); }
 
             // uartStopSend(palUart->UartDriver);
         
