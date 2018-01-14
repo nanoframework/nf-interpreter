@@ -36,11 +36,8 @@ void  IRAM_ATTR receiver_task(void *pvParameter)
 // Main task start point
 void  IRAM_ATTR main_task(void *pvParameter)
 {
-  ets_printf("Clr task started\n");
- 
   CLRStartupThread( 0);
  
-  ets_printf("Clr task ended\n");
   vTaskDelete(NULL);
 }
 
@@ -52,13 +49,9 @@ void  app_main()
   initialise_wifi_smart_config();
 
   Esp32FlashDriver_InitializeDevice(0);
-  //   // if ( !Esp32FlashDriver_InitializeDevice(0) ) {
-  //   //   ets_printf("Block storage init failed\n");
-  //   //   return;
-  //   // }
  
- 	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL, 1);
+ 	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 6, NULL, 1);
   
-  // // Start the main task pinned to 2nd core
+  // Start the main task pinned to 2nd core
 	xTaskCreatePinnedToCore(&main_task, "main_task", 15000, NULL, 5, NULL, 1);
 }

@@ -1341,7 +1341,11 @@ public:
             size_t tailSize = _write_index - 1;
 
             // 1st move tail to temp buffer (need to malloc first)
+#if defined(__arm__)
             T* tempBuffer = (T*)chHeapAlloc(NULL, tailSize);
+#else
+            T* tempBuffer = (T*)malloc(tailSize);
+#endif
             memcpy(tempBuffer, _buffer, tailSize);
             
             // store size of remaining buffer
@@ -1354,7 +1358,11 @@ public:
             memcpy(_buffer + headSize, tempBuffer, tailSize);
 
             // free memory
+#if defined(__arm__)
             chHeapFree(tempBuffer);
+#else
+            free(tempBuffer);
+#endif
         }
 
         // adjust indexes

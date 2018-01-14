@@ -56,7 +56,7 @@ bool WP_Initialise(COM_HANDLE port)
     uart_set_pin(WP_Port, g_ESP32_Uart_TxD_Pins[WP_Port], g_ESP32_Uart_RxD_Pins[WP_Port], UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
     
     // Setup UART driver(without UART queue)
-    uart_driver_install(WP_Port, 1024 * 2, 0, 10, NULL, 0);
+    uart_driver_install(WP_Port, 1024 * 2, 512, 0, NULL, 0);
     
     WP_Port_Intitialised = true;
  

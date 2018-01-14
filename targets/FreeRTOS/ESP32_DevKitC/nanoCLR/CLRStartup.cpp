@@ -83,7 +83,7 @@ struct Settings
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
 
- //TODO Adrian               NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
+                NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
             }
 
             // Assembly has valid pointer to table with native methods. Save it.
