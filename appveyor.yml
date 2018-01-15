@@ -12,6 +12,7 @@
     - 'LICENSE'
     - dir/*
     - '.gitignore'
+    - targets-community/*
 
   image: Visual Studio 2017
 
@@ -158,6 +159,7 @@
     - 'LICENSE'
     - dir/*
     - '.gitignore'
+    - targets-community/*
 
   image: Visual Studio 2017
 
@@ -338,6 +340,7 @@
     - 'LICENSE'
     - dir/*
     - '.gitignore'
+    - targets-community/*
 
   image: Visual Studio 2017
 
