@@ -308,7 +308,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     #if STM32_UART_USE_UART7
             case 7 :
                 Init_UART7();
-                Uart_PAL7.UartDriver = &UARTD7;
+                Uart7_PAL.UartDriver = &UARTD7;
                 palUart = &Uart7_PAL;
                 break;
     #endif
