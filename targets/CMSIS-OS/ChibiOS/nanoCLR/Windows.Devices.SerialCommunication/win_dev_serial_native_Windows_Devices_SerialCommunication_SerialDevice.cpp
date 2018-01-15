@@ -584,6 +584,10 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         size_t length = 0;
 
+        CLR_RT_HeapBlock* timeout;
+        int64_t*  timeoutTicks;
+        int64_t  timeoutMilisecondsValue;
+        
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
@@ -640,20 +644,39 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // check if there is anything the buffer
         if(palUart->TxRingBuffer.Length() > 0)
         {
-            /*
             // check if there is a TX operation ongoing
             if(palUart->TxOngoingCount > 0)
             {
                 // need to wait for the ongoing operation to complete before starting a new one
-                // not sure if this is the best exception to throw here...
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            }
-            */
-            // Let any TX operation terminate
-            while (palUart->TxOngoingCount > 0) { osDelay(1); }
+                   
+                // get value for readtimeout
+                // the way to access this it's somewhat convoluted but it is what it is
+                // get pointer to the field
+                timeout = &pThis[ Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___writeTimeout ];
+                // now get a pointer to the actual value
+                timeoutTicks = Library_corlib_native_System_TimeSpan::GetValuePtr( *timeout );
+                // now get the value in ticks and convert it to miliseconds
+                timeoutMilisecondsValue = *timeoutTicks / TIME_CONVERSION__TICKUNITS;
 
-            // uartStopSend(palUart->UartDriver);
-        
+                // setup while loop (with timeout) to wait for TX operation to complete
+                systime_t start = chVTGetSystemTime();
+                systime_t end = start + MS2ST(timeoutMilisecondsValue);
+
+                while(palUart->TxOngoingCount > 0) 
+                { 
+                    // wait until the timeout expires
+                    if(chVTIsSystemTimeWithin(start, end))
+                    {
+                        osDelay(10);
+                    }
+                    else
+                    {
+                        // not sure if this is the best exception to throw here...
+                        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                    }
+                }
+            }
+
             // optimize buffer for sequential reading
             palUart->TxRingBuffer.OptimizeSequence();
 
