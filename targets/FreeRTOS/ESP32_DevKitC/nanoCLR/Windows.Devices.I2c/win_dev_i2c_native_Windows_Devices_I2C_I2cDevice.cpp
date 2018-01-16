@@ -65,7 +65,7 @@ void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::SetConfig(i2c_por
 }
 
 
-HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
+HRESULT IRAM_ATTR Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -103,8 +103,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::DisposeNative_
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-        i2c_port_t bus = (i2c_port_t)((pThis[ FIELD___i2cBus ].NumericByRef().s4 / 1000) - 1);
-        bus = I2C_NUM_0;
+        i2c_port_t bus = (i2c_port_t)((pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000) - 1);
 
         i2c_driver_delete(bus);
     }    
@@ -131,9 +130,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         // get bus index
         // this is coded with a multiplication, need to perform and int division to get the number
         // see the comments in the SpiDevice() constructor in managed code for details, subtract 1 to get ESP32 bus number
-        i2c_port_t bus = (i2c_port_t)((pThis[ FIELD___i2cBus ].NumericByRef().s4 / 1000) - 1);
-        bus = I2C_NUM_0;
-
+        i2c_port_t bus = (i2c_port_t)((pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000) - 1);
+ 
         // Set the Bus parameters
         SetConfig( bus, pConfig);
 
