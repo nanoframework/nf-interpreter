@@ -1878,7 +1878,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     void    SetResult_Object ( CLR_RT_HeapBlock* val                        );
     HRESULT SetResult_String ( const char*            val                        );
 
-    HRESULT SetupTimeout( CLR_RT_HeapBlock& input, CLR_INT64*& output );
+    HRESULT SetupTimeoutFromTicks( CLR_RT_HeapBlock& input, CLR_INT64*& output );
 
     void ConvertResultToBoolean();
     void NegateResult          ();
@@ -2728,17 +2728,13 @@ extern bool g_CLR_RT_fBadStack;
 
 struct CLR_RT_ExecutionEngine
 {
-    static const CLR_UINT32             c_Event_SerialPort  = 0x00000002;
-    static const CLR_UINT32             c_Event_Battery     = 0x00000008;
-    static const CLR_UINT32             c_Event_AirPressure = 0x00000010;
-    static const CLR_UINT32             c_Event_HeartRate   = 0x00000020;
-    static const CLR_UINT32             c_Event_I2C         = 0x00000040;
-    static const CLR_UINT32             c_Event_IO          = 0x00000080;
-    static const CLR_UINT32             c_Event_EndPoint    = 0x01000000;
-    static const CLR_UINT32             c_Event_AppDomain   = 0x02000000;
-    static const CLR_UINT32             c_Event_Socket      = 0x20000000;
-    static const CLR_UINT32             c_Event_IdleCPU     = 0x40000000;
-    static const CLR_UINT32             c_Event_LowMemory   = 0x80000000; // Wait for a low-memory condition.
+    static const CLR_UINT32             c_Event_SerialPortIn  = 0x00000002;
+    static const CLR_UINT32             c_Event_SerialPortOut = 0x00000004;
+    static const CLR_UINT32             c_Event_EndPoint      = 0x00000008;
+    static const CLR_UINT32             c_Event_IO            = 0x00000080;
+    static const CLR_UINT32             c_Event_AppDomain     = 0x02000000;
+    static const CLR_UINT32             c_Event_IdleCPU       = 0x40000000;
+    static const CLR_UINT32             c_Event_LowMemory     = 0x80000000; // Wait for a low-memory condition.
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

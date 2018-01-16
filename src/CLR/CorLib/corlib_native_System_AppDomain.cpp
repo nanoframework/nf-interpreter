@@ -150,7 +150,7 @@ HRESULT Library_corlib_native_System_AppDomain::Unload___STATIC__VOID__SystemApp
     
     NANOCLR_CHECK_HRESULT(GetAppDomain( stack.ThisRef(), appDomain, appDomainSav, false ));
 
-    hbTimeout.SetInteger( 5 * 1000 );
+    hbTimeout.SetInteger( 5 * 1000 * TIME_CONVERSION__TO_MILLISECONDS);
     
     if(stack.m_customState == 0)
     {        
@@ -158,7 +158,7 @@ HRESULT Library_corlib_native_System_AppDomain::Unload___STATIC__VOID__SystemApp
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.UnloadAppDomain( appDomain, stack.m_owningThread ));            
     }
 
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeout( hbTimeout, timeout ));
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
     fRes = true;
     while(fRes)
