@@ -106,6 +106,7 @@ struct NF_PAL_UART
 
     HAL_RingBuffer<uint8_t> RxRingBuffer;
     uint8_t* RxBuffer;
+    uint16_t RxBytesToRead;
 };
 
 

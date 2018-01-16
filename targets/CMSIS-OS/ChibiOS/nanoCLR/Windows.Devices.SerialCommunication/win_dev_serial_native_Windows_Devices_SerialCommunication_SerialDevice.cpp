@@ -148,6 +148,8 @@ static void TxEnd1(UARTDriver *uartp)
 
     // reset Tx ongoing count
     palUart->TxOngoingCount = 0;
+
+    Events_Set( SYSTEM_EVENT_FLAG_COM_OUT );
 }
 
 // This callback is invoked when a character is received but the application was not ready to receive it, the character is passed as parameter.
@@ -212,9 +214,16 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     // push char to ring buffer
     // don't care about the success of the operation, if it's full we are droping the char anyway
     palUart->RxRingBuffer.Push((uint8_t)c);
-    
-    // TODO
-    // check for need to fire a data arrival event
+
+    // check if the requested bytes are available in the buffer 
+    if(palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead)
+    {
+        // reset Rx bytes to read count
+        palUart->RxBytesToRead = 0;
+
+        // fire event for Rx buffer complete
+        Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+    }
 }
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID( CLR_RT_StackFrame& stack )
@@ -328,7 +337,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // configure UART handlers
         palUart->Uart_cfg.txend1_cb = TxEnd1;
         palUart->Uart_cfg.rxchar_cb = RxChar;
-        // palUart->Uart_cfg.rxend_cb = RxEnd;
+        //palUart->Uart_cfg.rxend_cb = RxEnd;
 
         // call the configure
         return NativeConfig___VOID(stack);
@@ -584,9 +593,10 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         size_t length = 0;
 
-        CLR_RT_HeapBlock* timeout;
+        CLR_RT_HeapBlock* writeTimeout;
         int64_t*  timeoutTicks;
-        int64_t  timeoutMilisecondsValue;
+        bool eventResult = true;
+        bool txOk = false;
         
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -641,42 +651,59 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     #endif
         }
 
+        // get value for _readtimeout field (pointer!)
+        writeTimeout = &pThis[ Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___writeTimeout ];
+
+        // setup timeout
+        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(*writeTimeout, timeoutTicks));
+
         // check if there is anything the buffer
         if(palUart->TxRingBuffer.Length() > 0)
         {
             // check if there is a TX operation ongoing
-            if(palUart->TxOngoingCount > 0)
+            if(palUart->TxOngoingCount == 0)
+            {
+                // OK to Tx
+                txOk = true;
+            }
+            else
             {
                 // need to wait for the ongoing operation to complete before starting a new one
-                   
-                // get value for readtimeout
-                // the way to access this it's somewhat convoluted but it is what it is
-                // get pointer to the field
-                timeout = &pThis[ Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___writeTimeout ];
-                // now get a pointer to the actual value
-                timeoutTicks = Library_corlib_native_System_TimeSpan::GetValuePtr( *timeout );
-                // now get the value in ticks and convert it to miliseconds
-                timeoutMilisecondsValue = *timeoutTicks / TIME_CONVERSION__TICKUNITS;
+            }
+        }
 
-                // setup while loop (with timeout) to wait for TX operation to complete
-                systime_t start = chVTGetSystemTime();
-                systime_t end = start + MS2ST(timeoutMilisecondsValue);
-
-                while(palUart->TxOngoingCount > 0) 
-                { 
-                    // wait until the timeout expires
-                    if(chVTIsSystemTimeWithin(start, end))
-                    {
-                        osDelay(10);
-                    }
-                    else
-                    {
-                        // not sure if this is the best exception to throw here...
-                        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-                    }
+        while(eventResult)
+        {
+            if(stack.m_customState == 1)
+            {
+                if(txOk)
+                {
+                    // OK to start Tx data
+                    eventResult = false;
+                }
+                else
+                {
+                    // need to wait for the ongoing operation to complete before starting a new one
+                    // update custom state
+                    stack.m_customState = 2;
                 }
             }
+            else
+            {
+                // wait for event
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_SerialPortOut, eventResult ));
 
+                if(eventResult)
+                {
+                    // event occurred
+                    // OK to Tx
+                    txOk = true;
+                }
+            }
+        }
+
+        if(txOk)
+        {
             // optimize buffer for sequential reading
             palUart->TxRingBuffer.OptimizeSequence();
 
@@ -700,6 +727,12 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             uartReleaseBus(palUart->UartDriver);
         }
 
+        // pop timeout heap block from stack
+        stack.PopValue();
+
+        // reset the stack custom state
+        stack.m_customState = 0;
+
         // return how many bytes were send to the UART
         stack.SetResult_U4(length);
 
@@ -720,13 +753,13 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         size_t count = 0;
         size_t bytesRead = 0;
-        size_t toRead = 0;
+        size_t bytesToRead = 0;
 
         InputStreamOptions options = InputStreamOptions_None;
 
-        CLR_RT_HeapBlock* timeout;
+        CLR_RT_HeapBlock* readTimeout;
         int64_t*  timeoutTicks;
-        int64_t  timeoutMilisecondsValue;
+        bool eventResult = true;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -796,11 +829,17 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     #endif
         }
 
-        // read whatever is available from the Rx ring buffer
+        // get value for _readtimeout field (pointer!)
+        readTimeout = &pThis[ Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___readTimeout ];
+
+        // setup timeout from the _readtimeout heap block
+        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( *readTimeout, timeoutTicks ));
+
+        // figure out what's available in the Rx ring buffer
         if(palUart->RxRingBuffer.Length() >= count)
         {
             // read from Rx ring buffer
-            toRead = count;
+            bytesToRead = count;
 
             // is the read ahead option enabled?
             if(options == InputStreamOptions_ReadAhead)
@@ -810,55 +849,100 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 if(dataLength < palUart->RxRingBuffer.Length())
                 {
                     // read as many bytes has the buffer can hold
-                    toRead = dataLength;
+                    bytesToRead = dataLength;
                 }
                 else
                 {
                     // read everything that's available in the ring buffer
-                    toRead = palUart->RxRingBuffer.Length();
+                    bytesToRead = palUart->RxRingBuffer.Length();
                 }
             }
-
-            // pop the request bytes from the ring buffer
-            bytesRead = palUart->RxRingBuffer.Pop(data, toRead);
-            
-            // update data pointer
-            data += bytesRead;
         }
-
-        if(bytesRead < count)
+        else
         {
-            // need to read the remaining requested bytes directly from the UART
-            // update the bytes to read counter
-            toRead = count - bytesRead;
+            if(stack.m_customState == 1)
+            {
+                // not enough bytes available, have to read from UART
+                palUart->RxBytesToRead = count;
+                
+                // clear event by getting it
+                Events_Get(SYSTEM_EVENT_FLAG_COM_IN);
 
-            // get value for readtimeout
-            // the way to access this it's somewhat convoluted but it is what it is
-            // get pointer to the field
-            timeout = &pThis[ Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___readTimeout ];
-            // now get a pointer to the actual value
-            timeoutTicks = Library_corlib_native_System_TimeSpan::GetValuePtr( *timeout );
-            // now get the value in ticks and convert it to miliseconds
-            timeoutMilisecondsValue = *timeoutTicks / TIME_CONVERSION__TICKUNITS;
-
-            // because the UART can be accessed from several threads need to get exclusive access to it
-            uartAcquireBus(palUart->UartDriver);
-
-            // start receive data
-            uartReceiveTimeout(palUart->UartDriver, &toRead, palUart->RxBuffer, MS2ST(timeoutMilisecondsValue));
-
-            // need to invalidate buffer before reading
-            dmaBufferInvalidate(palUart->RxBuffer, toRead);
-           
-            // read from Rx ring buffer
-            // udpate read counter
-            bytesRead += palUart->RxRingBuffer.Pop(data, toRead);
-
-            // done here, release the UART
-            uartReleaseBus(palUart->UartDriver);
+                // don't read anything from the buffer yet
+                bytesToRead = 0;
+            }  
         }
 
-        // return how many bytes were read from the Rx buffer and/or UART
+        while(eventResult)
+        {
+            if(stack.m_customState == 1)
+            {
+                if(bytesToRead > 0)
+                {
+                    // enough bytes available
+                    eventResult = false;
+                }
+                else
+                {
+                    // need to read from the UART
+                    // update custom state
+                    stack.m_customState = 2;
+                }
+            }
+            else
+            {
+                // wait for event
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_SerialPortIn, eventResult));
+
+                if(!eventResult)
+                {
+                    // event timeout
+
+                    // compute how many bytes to read 
+                    // considering the InputStreamOptions read ahead option
+                    if(options == InputStreamOptions_ReadAhead)
+                    {
+                        // yes
+                        // check how many bytes we can store in the buffer argument
+                        if(dataLength < palUart->RxRingBuffer.Length())
+                        {
+                            // read as many bytes has the buffer can hold
+                            bytesToRead = dataLength;
+                        }
+                        else
+                        {
+                            // read everything that's available in the ring buffer
+                            bytesToRead = palUart->RxRingBuffer.Length();
+                        }
+                    }
+                    else
+                    {
+                        // take InputStreamOptions_Partial as default and read requested quantity or what's available
+                        bytesToRead = count;
+
+                        if(count > palUart->RxRingBuffer.Length())
+                        {
+                            // need to adjust because there aren't enough bytes available
+                            bytesToRead = palUart->RxRingBuffer.Length();
+                        }
+                    }
+                }
+            }
+        }
+
+        if(bytesToRead > 0)
+        {
+            // pop the requested bytes from the ring buffer
+            bytesRead = palUart->RxRingBuffer.Pop(data, bytesToRead);
+        }
+
+        // pop timeout heap block from stack
+        stack.PopValue();
+
+        // reset the stack custom state
+        stack.m_customState = 0;
+
+        // return how many bytes were read
         stack.SetResult_U4(bytesRead);
     }
     NANOCLR_NOCLEANUP();
