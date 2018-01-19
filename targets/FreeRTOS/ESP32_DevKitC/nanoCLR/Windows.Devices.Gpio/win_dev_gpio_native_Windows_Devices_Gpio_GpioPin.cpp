@@ -4,10 +4,18 @@
 // See LICENSE file in the project root for full license information.
 //
 
+//  ESP32 GPIO ( 40 physical GPIO pads)
+//
+//  GPIO6-11 used for PSI flash
+//
+//  GPIO34-39 Only input mode
+//
 
 #include <targetPAL.h>
 #include "win_dev_gpio_native.h"
 #include "nf_rt_events_native.h"
+
+#include "Esp32_DeviceMapping.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioPinDriveMode (in managed code) !!! //
@@ -46,6 +54,7 @@ static bool  Gpio_Initialised = false;
 // this array keeps track of the Gpio pins that are assigned to each channel
 CLR_RT_HeapBlock* channelPinMapping[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                                           NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+
 
 void Initialize_gpio()
 {
@@ -216,7 +225,10 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
                                                                              // 6 - GpioPinDriveMode_OutputOpenSource
                                                                              // 7 - GpioPinDriveMode_OutputOpenSourcePullDown
 
-            case 8:     break;                                                          // Alternate 
+            case 8:                                                         // 8 - Alternate map gpio pins to device ( alternateFunction )
+                        Esp32_SetMappedDevicePins( (uint8_t)pinNumber, alternateFunction );
+                        break;                                                          
+
 
             default :   gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT_OUTPUT); 
                         break;

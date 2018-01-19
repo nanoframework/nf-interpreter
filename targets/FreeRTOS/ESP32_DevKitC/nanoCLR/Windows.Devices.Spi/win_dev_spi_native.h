@@ -15,11 +15,14 @@
 
 // # buses but first can't be used as SPI flash
 #define NUM_SPI_BUSES   3
+#define MAX_SPI_DEVICES 3
 
 struct nfSpiBusConfig
 {
     bool                spiBusInited;
-    spi_device_handle_t deviceHandles[5];       // Max 5 devices per bus
+    int                 deviceId[MAX_SPI_DEVICES];            // Used to find correct device in config
+    int                 deviceCount;
+    spi_device_handle_t deviceHandles[MAX_SPI_DEVICES];       // Max 3 devices per bus (IDF limit )
 };
 
 struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo
@@ -73,6 +76,9 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice
     //--//
 
     static spi_device_interface_config_t GetConfig(int bus, CLR_RT_HeapBlock* config);
+    static bool Add_Spi_Device(int bus, CLR_RT_HeapBlock* pThis);
+    static bool GetDevice( CLR_RT_HeapBlock* pThis, uint8_t * pBus, int * pDeviceIndex);
+
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi;

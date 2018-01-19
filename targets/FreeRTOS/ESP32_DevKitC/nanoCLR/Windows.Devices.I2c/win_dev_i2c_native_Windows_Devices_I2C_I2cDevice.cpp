@@ -8,12 +8,7 @@
 #include <targetPAL.h>
 
 #include "win_dev_i2c_native.h"
-
-// Default I2C gpio pins
-#define  I2C1_DATA      18
-#define  I2C1_CLOCK     19
-#define  I2C2_DATA      25
-#define  I2C2_CLOCK     26
+#include "Esp32_DeviceMapping.h"
 
  
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -53,11 +48,14 @@ void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::SetConfig(i2c_por
 {
     int busSpeed = config[ I2cConnectionSettings::FIELD___busSpeed ].NumericByRef().s4;
 
+    gpio_num_t DataPin  = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_I2C, bus, 0);
+    gpio_num_t ClockPin = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_I2C, bus, 1);
+    
     i2c_config_t conf;
         conf.mode = I2C_MODE_MASTER;
-        conf.sda_io_num =  (gpio_num_t)((bus == I2C_NUM_0) ? I2C1_DATA : I2C2_DATA);
+        conf.sda_io_num =  DataPin;
         conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
-        conf.scl_io_num = (gpio_num_t)((bus == I2C_NUM_0) ? I2C1_CLOCK : I2C2_CLOCK);
+        conf.scl_io_num = ClockPin;
         conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
         conf.master.clk_speed = (busSpeed==0)? 100000 : 400000;
 

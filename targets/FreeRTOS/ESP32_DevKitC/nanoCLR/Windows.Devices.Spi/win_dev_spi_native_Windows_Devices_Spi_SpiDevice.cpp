@@ -3,15 +3,21 @@
 // See LICENSE file in the project root for full license information.
 //
 
+//  Esp32 has 4 SPI devices called SPI0, SPI1, HSPI and VSPI
+//  SPIO, SPI1 are dedicated entirely to flash
+//
+//  HSPI("SPI1") and VSPI("SPI2") are free to use
 
 #include <Esp32_os.h>
 #include <LaunchCLR.h>
 #include <string.h>
 #include <targetPAL.h>
 #include "win_dev_spi_native.h"
+#include "Esp32_DeviceMapping.h"
 
 static nfSpiBusConfig  spiconfig[NUM_SPI_BUSES];
 static bool nfSpiInited = false;
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
@@ -41,20 +47,34 @@ enum SpiModes
 // define this type here to make it shorter and improve code readability
 typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings SpiConnectionSettings;
 
+// Tag for ESP32 logging
 static const char* TAG = "SpiDevice";
+
+
+// Define this to allow access to device config in spi master driver
+struct spi_device_t {
+    QueueHandle_t trans_queue;
+    QueueHandle_t ret_queue;
+    spi_device_interface_config_t cfg;
+};
+
 
 
 // Inialise the SPI Bus
 static void InitSpiBus( spi_host_device_t bus)
 {
+    gpio_num_t mosiPin  = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, bus, 0);
+    gpio_num_t misoPin  = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, bus, 1);
+    gpio_num_t clockPin = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, bus, 2);
+ 
     spi_bus_config_t bus_config 
     {
-       23, // -1,         // mosi pin
-       25, // -1,         // miso pin
-       19, // -1,         // Clock
-        -1,         // Quad Write protect
-        -1,         // Quad Hold
-        0           // Default max transfer size ( 4096 )
+       mosiPin,          // mosi pin
+       misoPin,          // miso pin
+       clockPin,         // Clock
+        -1,              // Quad Write protect
+        -1,              // Quad Hold
+        0                // Default max transfer size ( 4096 )
     };
 
     esp_err_t ret =  spi_bus_initialize(bus,  &bus_config, 1);
@@ -66,6 +86,62 @@ static void InitSpiBus( spi_host_device_t bus)
 }
 
 
+bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::Add_Spi_Device(int bus, CLR_RT_HeapBlock* pThis)
+{
+    spi_device_interface_config_t dev_config;
+    nfSpiBusConfig * pBusConfig = &spiconfig[bus];
+
+    // Check if all device slots used
+    if ( pBusConfig->deviceCount >= MAX_SPI_DEVICES ) return false;
+
+    // Get a complete low-level SPI configuration, depending on user's managed parameters
+    dev_config = GetConfig(bus, pThis[ FIELD___connectionSettings ].Dereference());
+    
+     // Add device to bus
+    spi_device_handle_t deviceHandle;
+    if ( spi_bus_add_device( (spi_host_device_t)bus, &dev_config, &deviceHandle ) != ESP_OK )
+    {
+        ESP_LOGE( TAG, "Unable to init SPI device");
+        return false; 
+    }
+
+    // Add next Device
+    pBusConfig->deviceId[pBusConfig->deviceCount] = pThis[ FIELD___deviceId ].NumericByRef().s4;
+    pBusConfig->deviceHandles[pBusConfig->deviceCount++ ] = deviceHandle;
+
+    return true;
+}
+
+void Remove_Spi_Device(int bus, int deviceIndex)
+{
+        // Remove device from bus
+    spi_bus_remove_device( spiconfig[bus].deviceHandles[deviceIndex] );
+    spiconfig[bus].deviceHandles[deviceIndex] = 0;
+    spiconfig[bus].deviceId[deviceIndex] = 0;
+    spiconfig[bus].spiBusInited = false;
+}
+
+//
+//  Get the Bus and device index
+//  return false if error
+//
+bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetDevice( CLR_RT_HeapBlock* pThis, uint8_t * pBus, int * pDeviceIndex)
+{
+    int32_t deviceId = pThis[ FIELD___deviceId ].NumericByRef().s4;
+    *pBus = (uint8_t)(deviceId / 1000);
+        
+    // Find device in spiconfig
+    for( int index=0; index < MAX_SPI_DEVICES; index++)
+    {
+        if ( spiconfig[*pBus].deviceId[index] = deviceId )
+        {
+            // Device found with same deviceId
+            *pDeviceIndex = index;
+            return true;
+        }
+    }
+    return false;
+}
 // Give a complete low-level SPI configuration from user's managed connectionSettings
 spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig( int bus, CLR_RT_HeapBlock* config)
 {
@@ -73,12 +149,10 @@ spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_Spi
     uint8_t spiMode  = (uint8_t)config[ SpiConnectionSettings::FIELD___spiMode ].NumericByRef().s4;
     int bitOrder = config[ SpiConnectionSettings::FIELD___bitOrder ].NumericByRef().s4;
     int clockHz  = config[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4;
-    //int fullDuplex  = config[ SpiConnectionSettings::FIELD___fullDuplex ].NumericByRef().s4;
     
 //ets_printf( "Spi config cspin:%d spiMode:%d bitorder:%d clockHz:%d\n", csPin, spiMode, bitOrder, clockHz);
     uint32_t flags = (bitOrder == 1) ? (SPI_DEVICE_TXBIT_LSBFIRST | SPI_DEVICE_RXBIT_LSBFIRST) : 0;
-   // flags |= fullDuplex? 0 : SPI_DEVICE_HALFDUPLEX;
-
+ 
     // Fill in device config    
     spi_device_interface_config_t dev_config
     {
@@ -115,10 +189,13 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         // get a pointer to the managed spi connectionSettings object instance
         CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
 
-        // get bus index
-        // this is coded with a multiplication, need to perform and int division to get the number
-        // see the comments in the SpiDevice() constructor in managed code for details
-        uint8_t bus = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
+        // get bus index and Device index
+        uint8_t bus;
+        int deviceIndex;
+        if ( GetDevice( pThis, &bus, &deviceIndex) == false )
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
 
         // If databitLength is set to 16 bit, then temporarily set it to 8 bit
         int databitLength = pConfig[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
@@ -144,10 +221,13 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             readSize = readBuffer->m_numOfElements;
         }
 
-        // TODO: (fullDuplex) We need to know this when setting up device config, so it should be in the configuration not as parameter on transfer
-
         // Are we using SPI full-duplex for transfer ?
-    //    bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
+        bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
+
+        // Change fullDuplex/halfduplex device config flags
+        spi_device_t * dev = (spi_device_t *)spiconfig[bus].deviceHandles[deviceIndex];
+        dev->cfg.flags &= ~SPI_DEVICE_HALFDUPLEX;   // Remove bit
+        if ( !fullDuplex ) dev->cfg.flags |= SPI_DEVICE_HALFDUPLEX;
     
         // Set up SPI Transaction
         spi_transaction_t trans_desc;
@@ -160,7 +240,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         trans_desc.tx_buffer = writeData;
         trans_desc.rx_buffer = readData;
 
-        esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[0], &trans_desc);
+        esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
         if ( ret != ESP_OK )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -191,10 +271,13 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         // get a pointer to the managed spi connectionSettings object instance
         CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
 
-        // get bus index
-        // this is coded with a multiplication, need to perform and int division to get the number
-        // see the comments in the SpiDevice() constructor in managed code for details
-        uint8_t bus = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
+        // get bus index and Device index
+        uint8_t bus;
+        int deviceIndex;
+        if ( GetDevice( pThis, &bus, &deviceIndex) == false )
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
 
          // If current config databitLength is 8bit, then set it temporarily to 16bit
         int databitLength = pConfig[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
@@ -222,6 +305,14 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 
         int Maxlength = (readSize > writeSize)? readSize: writeSize;
 
+        // Are we using SPI full-duplex for transfer ?
+        bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
+
+        // Change fullDuplex/halfduplex device config flags
+        spi_device_t * dev = (spi_device_t *)spiconfig[bus].deviceHandles[deviceIndex];
+        dev->cfg.flags &= ~SPI_DEVICE_HALFDUPLEX;   // Remove bit
+        if ( !fullDuplex ) dev->cfg.flags |= SPI_DEVICE_HALFDUPLEX;
+      
         // Set up SPI Transaction
         spi_transaction_t trans_desc;
         trans_desc.flags = SPI_TRANS_USE_RXDATA | SPI_TRANS_USE_RXDATA;
@@ -233,12 +324,11 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         trans_desc.tx_buffer = writeData;
         trans_desc.rx_buffer = readData;
 
-        esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[0], &trans_desc);
+        esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
         if ( ret != ESP_OK )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
-
 
         // null pointers and vars
         writeData = NULL;
@@ -251,47 +341,53 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
+HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
     spi_device_interface_config_t dev_config;
-    spi_host_device_t bus = HSPI_HOST;
-
+ 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  //FAULT_ON_NULL(pThis);
 
- 
+    // get bus index
+    // this is coded with a multiplication, need to perform and int division to get the number
+    // see the comments in the SpiDevice() constructor in managed code for details ( 1 or 2 )
+    int32_t deviceId = pThis[ FIELD___deviceId ].NumericByRef().s4;
+
+    spi_host_device_t bus = (spi_host_device_t)( deviceId / 1000 );
+    
+    // Chip Select
+    int chipSelect  = deviceId % 1000;
+
+    // Check valid bus
+    if ( bus < HSPI_HOST || bus > VSPI_HOST )
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     if ( !nfSpiInited )
     {
         for( int i=0; i<NUM_SPI_BUSES; i++)
         {
             spiconfig[i].spiBusInited = false;
+            spiconfig[i].deviceCount = 0;
             memset( &spiconfig[i].deviceHandles, 0, sizeof(spiconfig[i].deviceHandles) );
         }      
         nfSpiInited = true;  
     }
 
-    // Check valid bus
-    if ( bus == SPI_HOST )
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    if ( !spiconfig[bus].spiBusInited )
+     if ( !spiconfig[bus].spiBusInited )
     {
         InitSpiBus(bus);
         spiconfig[bus].spiBusInited = true;
     }
 
-    // Get a complete low-level SPI configuration, depending on user's managed parameters
-    dev_config = GetConfig(bus, pThis[ FIELD___connectionSettings ].Dereference());
-    
-    // Add device to bus
-    if ( spi_bus_add_device( bus, &dev_config, &spiconfig[bus].deviceHandles[0] ) != ESP_OK )
+
+    // Add new device to bus
+    if ( Add_Spi_Device( bus, pThis) == false )
     {
-        ESP_LOGE( TAG, "Unable to init SPI device");
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+       NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     NANOCLR_NOCLEANUP();
@@ -301,18 +397,34 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::DisposeNative_
 {
     NANOCLR_HEADER();
     {
-        spi_host_device_t bus = HSPI_HOST;
-        
-        ets_printf( "Spi dispose%d\n");
-        ESP_LOGE( TAG, "Test dispose");
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock* pThis = stack.This(); 
+
+        // get bus index and Device index
+        uint8_t bus;
+        int deviceIndex;
+        if ( GetDevice( pThis, &bus, &deviceIndex) == false )
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
         // Remove device from bus
-        spi_bus_remove_device( spiconfig[bus].deviceHandles[0] );
-        spiconfig[bus].deviceHandles[0] = 0;
-        
-        // Free up bus if last device(TODO:)
-        spi_bus_free(bus);
-        spiconfig[bus].spiBusInited = false;
-        
+        Remove_Spi_Device( (spi_host_device_t)bus, deviceIndex);
+
+        // If last device on bus then free up bus
+        bool NoDevices = true;
+        for( int index=0; index < MAX_SPI_DEVICES; index++)
+        {
+            if ( spiconfig[bus].deviceHandles[index] != 0 )
+            {
+                NoDevices = false;
+                break;
+            }
+        }
+        if ( NoDevices )
+        {
+            spi_bus_free((spi_host_device_t)bus);
+        }
     }
     NANOCLR_NOCLEANUP();
 }
@@ -321,14 +433,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetDeviceSelec
 {
    NANOCLR_HEADER();
    {
-       // declare the device selector string whose max size is "SPI1,SPI2,SPI3,SPI4,SPI5,SPI6," + terminator and init with the terminator
-       char deviceSelectorString[ 30 + 1] = { 0 };
-
-       strcat(deviceSelectorString, "HSPI,");
-       strcat(deviceSelectorString, "VSPI,");
-   
-       // replace the last comma with a terminator
-       deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+       // declare the device selector string whose max size is "SPI1,SPI2" + terminator and init with the terminator
+       char deviceSelectorString[ 15 ] = { "SPI1,SPI2" };   // HSPI & VSPI
 
        // because the caller is expecting a result to be returned
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
