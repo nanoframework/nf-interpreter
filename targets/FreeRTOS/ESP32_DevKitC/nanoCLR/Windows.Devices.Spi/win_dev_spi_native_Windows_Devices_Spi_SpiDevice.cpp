@@ -174,7 +174,17 @@ spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_Spi
     return dev_config;
 }
 
-HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
+{
+    return NativeTransfer( stack, false );
+}
+
+HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN( CLR_RT_StackFrame& stack )
+{
+    return NativeTransfer( stack, true );
+}
+
+HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer( CLR_RT_StackFrame& stack, bool data16 )
 {
     NANOCLR_HEADER();
     {
@@ -197,15 +207,19 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // If databitLength is set to 16 bit, then temporarily set it to 8 bit
+        // get data bit length
         int databitLength = pConfig[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
+        if ( data16 ) databitLength = 16;
 
         // dereference the write and read buffers from the arguments
         CLR_RT_HeapBlock_Array* writeBuffer = stack.Arg1().DereferenceArray();
         if (writeBuffer != NULL)
         {
             // grab the pointer to the array by getting the first element of the array
-            writeData = writeBuffer->GetFirstElement();
+            if ( data16 )
+                writeData = (unsigned char * )writeBuffer->GetFirstElementUInt16();
+            else
+                writeData = writeBuffer->GetFirstElement();
 
             // get the size of the buffer by reading the number of elements in the HeapBlock array
             writeSize = writeBuffer->m_numOfElements;
@@ -215,122 +229,73 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         if (readBuffer != NULL)
         {
             // grab the pointer to the array by getting the first element of the array
-            readData = readBuffer->GetFirstElement();
-
+            if ( data16 )
+               readData = (unsigned char * )readBuffer->GetFirstElementUInt16();
+            else
+               readData = readBuffer->GetFirstElement();
+            
             // get the size of the buffer by reading the number of elements in the HeapBlock array
             readSize = readBuffer->m_numOfElements;
         }
 
-        // Are we using SPI full-duplex for transfer ?
-        bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
+        int MaxDatalength = (readSize > writeSize)? readSize: writeSize;
 
-        // Change fullDuplex/halfduplex device config flags
-        spi_device_t * dev = (spi_device_t *)spiconfig[bus].deviceHandles[deviceIndex];
-        dev->cfg.flags &= ~SPI_DEVICE_HALFDUPLEX;   // Remove bit
-        if ( !fullDuplex ) dev->cfg.flags |= SPI_DEVICE_HALFDUPLEX;
-    
-        // Set up SPI Transaction
+        int  totalBitLength = databitLength * MaxDatalength;
+        int  rxBitLength = readSize * databitLength;
+
+       // Set up SPI Transaction
         spi_transaction_t trans_desc;
-        trans_desc.flags = 0;
+        trans_desc.flags  = 0;
         trans_desc.cmd = 0;
         trans_desc.addr = 0;
-        trans_desc.length = (writeSize * databitLength);
-        trans_desc.rxlength = (readSize * databitLength);
+        trans_desc.length = totalBitLength;
+        trans_desc.rxlength = rxBitLength;
         trans_desc.user = NULL;
         trans_desc.tx_buffer = writeData;
         trans_desc.rx_buffer = readData;
 
-        esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
-        if ( ret != ESP_OK )
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        // null pointers and vars
-        writeData = NULL;
-        readData = NULL;
-        writeBuffer = NULL;
-        readBuffer = NULL;
-        pThis = NULL;
-    }
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {
-        unsigned short * writeData = NULL;
-        unsigned short * readData = NULL;
-        int writeSize = 0;
-        int readSize = 0;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
-        // get a pointer to the managed spi connectionSettings object instance
-        CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
-
-        // get bus index and Device index
-        uint8_t bus;
-        int deviceIndex;
-        if ( GetDevice( pThis, &bus, &deviceIndex) == false )
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-         // If current config databitLength is 8bit, then set it temporarily to 16bit
-        int databitLength = pConfig[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
-
-        // dereference the write and read buffers from the arguments
-        CLR_RT_HeapBlock_Array* writeBuffer = stack.Arg1().DereferenceArray();
-        if (writeBuffer != NULL)
-        {
-            // grab the pointer to the array by getting the first element of the array
-            writeData = writeBuffer->GetFirstElementUInt16();
-
-            // get the size of the buffer by reading the number of elements in the HeapBlock array
-            writeSize = writeBuffer->m_numOfElements;
-        }
-
-        CLR_RT_HeapBlock_Array* readBuffer = stack.Arg2().DereferenceArray();
-        if (readBuffer != NULL)
-        {
-            // grab the pointer to the array by getting the first element of the array
-            readData = readBuffer->GetFirstElementUInt16();
-
-            // get the size of the buffer by reading the number of elements in the HeapBlock array
-            readSize = readBuffer->m_numOfElements;
-        }
-
-        int Maxlength = (readSize > writeSize)? readSize: writeSize;
-
         // Are we using SPI full-duplex for transfer ?
         bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
-
-        // Change fullDuplex/halfduplex device config flags
-        spi_device_t * dev = (spi_device_t *)spiconfig[bus].deviceHandles[deviceIndex];
-        dev->cfg.flags &= ~SPI_DEVICE_HALFDUPLEX;   // Remove bit
-        if ( !fullDuplex ) dev->cfg.flags |= SPI_DEVICE_HALFDUPLEX;
-      
-        // Set up SPI Transaction
-        spi_transaction_t trans_desc;
-        trans_desc.flags = SPI_TRANS_USE_RXDATA | SPI_TRANS_USE_RXDATA;
-        trans_desc.cmd = 0;
-        trans_desc.addr = 0;
-        trans_desc.length = databitLength * Maxlength;
-        trans_desc.rxlength = (readSize * databitLength);
-        trans_desc.user = NULL;
-        trans_desc.tx_buffer = writeData;
-        trans_desc.rx_buffer = readData;
-
-        esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
-        if ( ret != ESP_OK )
+        if ( fullDuplex)
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            // Do tx and rx
+            esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
+            if ( ret != ESP_OK )
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            }
+        }
+        else
+        {
+            // Halfduplex, first do TX operation then RX.
+
+            // Transmit data if any
+            if ( writeSize > 0 )
+            {
+                trans_desc.length = writeSize * databitLength;
+                trans_desc.rxlength = 0;
+                esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
+                if ( ret != ESP_OK )
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                }
+            }
+
+            // Read data if any
+            if ( readSize > 0 )
+            {
+                trans_desc.length = readSize * databitLength;
+                trans_desc.tx_buffer = 0;
+
+                esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
+                if ( ret != ESP_OK )
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                }
+            }
         }
 
-        // null pointers and vars
+       // null pointers and vars
         writeData = NULL;
         readData = NULL;
         writeBuffer = NULL;

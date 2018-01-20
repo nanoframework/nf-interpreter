@@ -78,6 +78,8 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice
     static spi_device_interface_config_t GetConfig(int bus, CLR_RT_HeapBlock* config);
     static bool Add_Spi_Device(int bus, CLR_RT_HeapBlock* pThis);
     static bool GetDevice( CLR_RT_HeapBlock* pThis, uint8_t * pBus, int * pDeviceIndex);
+    
+    static HRESULT NativeTransfer( CLR_RT_StackFrame& stack, bool data16 );
 
 };
 
