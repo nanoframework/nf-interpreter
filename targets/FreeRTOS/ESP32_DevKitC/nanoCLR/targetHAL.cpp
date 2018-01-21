@@ -10,6 +10,28 @@
 #include <target_platform.h>
 #include <nanoPAL_BlockStorage.h>
 
+
+//
+//  Reboot hnadlers clean up on reboot
+//
+static ON_SOFT_REBOOT_HANDLER s_rebootHandlers[16] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
+void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler)
+{
+    for(int i=0; i<ARRAYSIZE(s_rebootHandlers); i++)
+    {
+        if(s_rebootHandlers[i] == NULL)
+        {
+            s_rebootHandlers[i] = handler;
+            return;
+        }
+        else if(s_rebootHandlers[i] == handler)
+        {
+            return;
+        }
+    }
+}
+
 // because nanoHAL_Initialize needs to be called in both C and C++ we need a proxy to allow it to be called in 'C'
 extern "C" {
     
@@ -42,18 +64,18 @@ void nanoHAL_Initialize()
 
 void nanoHAL_Uninitialize()
 {
-    // TODO check for s_rebootHandlers
-    // for(int i = 0; i< ARRAYSIZE(s_rebootHandlers); i++)
-    // {
-    //     if(s_rebootHandlers[i] != NULL)
-    //     {
-    //         s_rebootHandlers[i]();
-    //     }
-    //     else
-    //     {
-    //         break;
-    //     }
-    // }   
+    // check for s_rebootHandlers
+    for(int i = 0; i< ARRAYSIZE(s_rebootHandlers); i++)
+    {
+        if(s_rebootHandlers[i] != NULL)
+        {
+            s_rebootHandlers[i]();
+        }
+        else
+        {
+            break;
+        }
+    }   
     
     //PalEvent_Uninitialize();
 
@@ -62,3 +84,6 @@ void nanoHAL_Uninitialize()
     HAL_CONTINUATION::Uninitialize();
     HAL_COMPLETION  ::Uninitialize();
 }
+
+
+

@@ -43,6 +43,20 @@ enum I2cBusSpeed
 
 typedef Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings I2cConnectionSettings;
 
+static char Esp_I2C_Initialised_Flag[I2C_NUM_MAX] = {0,0};
+
+void Esp32_I2c_UnitializeAll()
+{
+    for (int c = 0; c < I2C_NUM_MAX; c++) 
+    {
+        if (Esp_I2C_Initialised_Flag[c])
+        {
+            // Delete bus driver 
+            i2c_driver_delete((i2c_port_t)c);
+            Esp_I2C_Initialised_Flag[c] = 0;
+        }
+    }
+}
 
 void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::SetConfig(i2c_port_t bus, CLR_RT_HeapBlock* config)
 {
@@ -82,14 +96,18 @@ HRESULT IRAM_ATTR Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::Nati
         // get a pointer to the managed spi connectionSettings object instance
         CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
 
-        // Set the Bus parameters
+       // Set the Bus parameters
         SetConfig( bus, pConfig);
-
+ 
         esp_err_t res =  i2c_driver_install( bus, I2C_MODE_MASTER, 0, 0, 0);
         if ( res != ESP_OK)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+
+       // Ensure driver gets unitialized during soft reboot
+       HAL_AddSoftRebootHandler(Esp32_I2c_UnitializeAll);
+       Esp_I2C_Initialised_Flag[bus] = 1;
    }
    NANOCLR_NOCLEANUP();
 }
@@ -104,6 +122,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::DisposeNative_
         i2c_port_t bus = (i2c_port_t)((pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000) - 1);
 
         i2c_driver_delete(bus);
+
+        Esp_I2C_Initialised_Flag[bus] = 0;
     }    
     NANOCLR_NOCLEANUP();
 }

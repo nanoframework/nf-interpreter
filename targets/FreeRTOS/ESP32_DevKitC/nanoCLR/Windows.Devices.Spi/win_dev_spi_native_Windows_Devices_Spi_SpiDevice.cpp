@@ -59,6 +59,34 @@ struct spi_device_t {
 };
 
 
+void Remove_Spi_Device(int bus, int deviceIndex)
+{
+        // Remove device from bus
+    spi_bus_remove_device( spiconfig[bus].deviceHandles[deviceIndex] );
+    spiconfig[bus].deviceHandles[deviceIndex] = 0;
+    spiconfig[bus].deviceId[deviceIndex] = 0;
+}
+
+// Unitialise SPI on restart
+void Esp32_Spi_UnitializeAll()
+{
+    for (int bus = 0; bus < NUM_SPI_BUSES; bus++) 
+    {
+        if (spiconfig[bus].spiBusInited)
+        {
+            // Remove any devices
+            for( int deviceIndex=0; deviceIndex < MAX_SPI_DEVICES; deviceIndex++)
+            {
+                if ( spiconfig[bus].deviceHandles[deviceIndex] != 0 )
+                    Remove_Spi_Device(bus, deviceIndex);
+            }
+
+            // Delete bus driver 
+            spi_bus_free((spi_host_device_t)bus);
+            spiconfig[bus].spiBusInited = false;
+        }
+    }
+}
 
 // Inialise the SPI Bus
 static void InitSpiBus( spi_host_device_t bus)
@@ -110,15 +138,6 @@ bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::Add_Spi_Device(in
     pBusConfig->deviceHandles[pBusConfig->deviceCount++ ] = deviceHandle;
 
     return true;
-}
-
-void Remove_Spi_Device(int bus, int deviceIndex)
-{
-        // Remove device from bus
-    spi_bus_remove_device( spiconfig[bus].deviceHandles[deviceIndex] );
-    spiconfig[bus].deviceHandles[deviceIndex] = 0;
-    spiconfig[bus].deviceId[deviceIndex] = 0;
-    spiconfig[bus].spiBusInited = false;
 }
 
 //
@@ -342,12 +361,15 @@ HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::Nati
         nfSpiInited = true;  
     }
 
-     if ( !spiconfig[bus].spiBusInited )
+    // Init bus if first device
+    if ( !spiconfig[bus].spiBusInited )
     {
         InitSpiBus(bus);
         spiconfig[bus].spiBusInited = true;
+        
+        // Ensure driver gets unitialized during soft reboot
+        HAL_AddSoftRebootHandler(Esp32_Spi_UnitializeAll);
     }
-
 
     // Add new device to bus
     if ( Add_Spi_Device( bus, pThis) == false )

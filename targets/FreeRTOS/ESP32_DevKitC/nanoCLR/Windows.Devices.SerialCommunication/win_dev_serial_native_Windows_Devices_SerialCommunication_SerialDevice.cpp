@@ -67,6 +67,21 @@ enum InputStreamOptions
 
 static const char* TAG = "SerialDevice";
 
+static char Esp_Serial_Initialised_Flag[UART_NUM_MAX] = {0,0,0};
+
+void Esp32_Serial_UnitializeAll()
+{
+    for (int uart_num = 0; uart_num < UART_NUM_MAX; uart_num++) 
+    {
+        if (Esp_Serial_Initialised_Flag[uart_num])
+        {
+            // Delete uart driver 
+            uart_driver_delete((uart_port_t)uart_num);
+            Esp_Serial_Initialised_Flag[uart_num] = 0;
+        }
+    }
+}
+
 HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -77,6 +92,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
        // Get Uart number for serial device
         uart_port_t uart_num = (uart_port_t)pThis[ FIELD___portIndex ].NumericByRef().s4;
         uart_driver_delete(uart_num);
+        Esp_Serial_Initialised_Flag[uart_num] = 0;
    }
     NANOCLR_NOCLEANUP();
 }
@@ -115,6 +131,10 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
             ESP_LOGE( TAG, "Failed to install uart driver");
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }   
+        
+        // Ensure driver gets unitialized during soft reboot
+        HAL_AddSoftRebootHandler(Esp32_Serial_UnitializeAll);
+         Esp_Serial_Initialised_Flag[uart_num] = 1;
     }
     NANOCLR_NOCLEANUP(); 
 }
