@@ -141,9 +141,9 @@ struct NF_PAL_UART
 // the following macro defines a function that configures the GPIO pins for a STM32 UART/USART
 // it gets called in the Windows_Devices_SerialCommunication_SerialDevice::NativeConfig function
 // this is required because the UART/USART peripherals can use multiple GPIO configuration combinations
-#define UART_CONFIG_PINS(num, gpio_port, tx_pin, rx_pin, alternate_function) void ConfigPins_UART##num() { \
-    palSetPadMode(gpio_port, tx_pin, PAL_MODE_ALTERNATE(alternate_function)); \
-    palSetPadMode(gpio_port, rx_pin, PAL_MODE_ALTERNATE(alternate_function)); \
+#define UART_CONFIG_PINS(num, gpio_port_tx, gpio_port_rx, tx_pin, rx_pin, alternate_function) void ConfigPins_UART##num() { \
+    palSetPadMode(gpio_port_tx, tx_pin, PAL_MODE_ALTERNATE(alternate_function)); \
+    palSetPadMode(gpio_port_rx, rx_pin, PAL_MODE_ALTERNATE(alternate_function)); \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

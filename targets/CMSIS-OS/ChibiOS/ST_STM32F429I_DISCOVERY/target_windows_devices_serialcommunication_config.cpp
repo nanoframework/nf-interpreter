@@ -10,11 +10,12 @@
 ///////////
 
 // pin configuration for UART1
-// port: GPIOA
+// port for TX pin is: GPIOA
+// port for RX pin is: GPIOA
 // TX pin: is GPIOA_9
 // RX pin: is GPIOA_10
 // GPIO alternate pin function is 7 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in STM32F427xx and STM32F429xx datasheet)
-UART_CONFIG_PINS(1, GPIOA, 9, 10, 7)
+UART_CONFIG_PINS(1, GPIOA, GPIOA, 9, 10, 7)
 
 // buffers size
 // tx buffer size: 256 bytes
@@ -46,11 +47,12 @@ UART_UNINIT(1)
 ///////////
 
 // pin configuration for UART3
-// port: GPIOD
+// port for TX pin is: GPIOD
+// port for RX pin is: GPIOD
 // TX pin: is GPIOD_8
 // RX pin: is GPIOD_9
 // GPIO alternate pin function is 7 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in STM32F427xx and STM32F429xx datasheet)
-UART_CONFIG_PINS(3, GPIOD, 8, 9, 7)
+UART_CONFIG_PINS(3, GPIOD, GPIOD, 8, 9, 7)
 
 // buffers size
 // tx buffer size: 256 bytes
@@ -82,11 +84,12 @@ UART_UNINIT(3)
 ///////////
 
 // pin configuration for UART6
-// port: GPIOC
+// port for TX pin is: GPIOC
+// port for RX pin is: GPIOC
 // TX pin: is GPIOC_6
 // RX pin: is GPIOC_7
 // GPIO alternate pin function is 8 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in STM32F427xx and STM32F429xx datasheet)
-UART_CONFIG_PINS(6, GPIOC, 6, 7, 8)
+UART_CONFIG_PINS(6, GPIOC, GPIOC, 6, 7, 8)
 
 // buffers size
 // tx buffer size: 256 bytes

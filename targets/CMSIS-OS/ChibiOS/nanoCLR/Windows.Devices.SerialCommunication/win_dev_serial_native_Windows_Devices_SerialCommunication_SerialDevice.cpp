@@ -216,7 +216,7 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     palUart->RxRingBuffer.Push((uint8_t)c);
 
     // check if the requested bytes are available in the buffer 
-    if(palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead)
+    if(palUart->RxBytesToRead > 0 && palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead)
     {
         // reset Rx bytes to read count
         palUart->RxBytesToRead = 0;

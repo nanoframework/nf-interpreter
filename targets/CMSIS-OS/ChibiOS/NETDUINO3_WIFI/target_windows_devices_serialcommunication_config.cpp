@@ -10,11 +10,12 @@
 ///////////
 
 // pin configuration for UART3
-// port: GPIOD
+// port for TX pin is: GPIOD
+// port for RX pin is: GPIOD
 // TX pin: is GPIOD_8
 // RX pin: is GPIOD_9
 // GPIO alternate pin function is 7 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in STM32F427xx and STM32F429xx datasheet)
-UART_CONFIG_PINS(3, GPIOD, 8, 9, 7)
+UART_CONFIG_PINS(3, GPIOD, GPIOD, 8, 9, 7)
 
 // buffers size
 // tx buffer size: 256 bytes
