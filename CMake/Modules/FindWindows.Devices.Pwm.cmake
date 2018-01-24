@@ -39,4 +39,4 @@ endforeach()
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Debugger DEFAULT_MSG Windows.Devices.Pwm_INCLUDE_DIRS Windows.Devices.Pwm_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Windows.Devices.Pwm DEFAULT_MSG Windows.Devices.Pwm_INCLUDE_DIRS Windows.Devices.Pwm_SOURCES)

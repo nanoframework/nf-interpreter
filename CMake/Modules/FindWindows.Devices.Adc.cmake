@@ -38,4 +38,4 @@ endforeach()
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Debugger DEFAULT_MSG Windows.Devices.Adc_INCLUDE_DIRS Windows.Devices.Adc_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Windows.Devices.Adc DEFAULT_MSG Windows.Devices.Adc_INCLUDE_DIRS Windows.Devices.Adc_SOURCES)

@@ -38,4 +38,4 @@ endforeach()
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Debugger DEFAULT_MSG Windows.Devices.Spi_INCLUDE_DIRS Windows.Devices.Spi_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Windows.Devices.Spi DEFAULT_MSG Windows.Devices.Spi_INCLUDE_DIRS Windows.Devices.Spi_SOURCES)

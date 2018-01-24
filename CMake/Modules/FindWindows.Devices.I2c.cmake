@@ -38,4 +38,4 @@ endforeach()
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Debugger DEFAULT_MSG Windows.Devices.I2c_INCLUDE_DIRS Windows.Devices.I2c_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Windows.Devices.I2c DEFAULT_MSG Windows.Devices.I2c_INCLUDE_DIRS Windows.Devices.I2c_SOURCES)
