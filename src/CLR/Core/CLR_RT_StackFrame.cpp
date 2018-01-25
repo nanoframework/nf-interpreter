@@ -1112,7 +1112,8 @@ void CLR_RT_StackFrame::NegateResult()
 
 //--//
 
-HRESULT CLR_RT_StackFrame::SetupTimeout( CLR_RT_HeapBlock& input, CLR_INT64*& output )
+// input HeapBlock has timeout value in ticks
+HRESULT CLR_RT_StackFrame::SetupTimeoutFromTicks( CLR_RT_HeapBlock& input, CLR_INT64*& output )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -1125,7 +1126,7 @@ HRESULT CLR_RT_StackFrame::SetupTimeout( CLR_RT_HeapBlock& input, CLR_INT64*& ou
         //
         // Initialize timeout and save it on the stack.
         //
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitTimeout( timeExpire, input.NumericByRef().s4 ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitTimeout( timeExpire, input.NumericByRef().s8 ));
 
         ref.SetInteger( timeExpire );
 

@@ -106,6 +106,7 @@ struct NF_PAL_UART
 
     HAL_RingBuffer<uint8_t> RxRingBuffer;
     uint8_t* RxBuffer;
+    uint16_t RxBytesToRead;
 };
 
 
@@ -140,9 +141,9 @@ struct NF_PAL_UART
 // the following macro defines a function that configures the GPIO pins for a STM32 UART/USART
 // it gets called in the Windows_Devices_SerialCommunication_SerialDevice::NativeConfig function
 // this is required because the UART/USART peripherals can use multiple GPIO configuration combinations
-#define UART_CONFIG_PINS(num, gpio_port, tx_pin, rx_pin, alternate_function) void ConfigPins_UART##num() { \
-    palSetPadMode(gpio_port, tx_pin, PAL_MODE_ALTERNATE(alternate_function)); \
-    palSetPadMode(gpio_port, rx_pin, PAL_MODE_ALTERNATE(alternate_function)); \
+#define UART_CONFIG_PINS(num, gpio_port_tx, gpio_port_rx, tx_pin, rx_pin, alternate_function) void ConfigPins_UART##num() { \
+    palSetPadMode(gpio_port_tx, tx_pin, PAL_MODE_ALTERNATE(alternate_function)); \
+    palSetPadMode(gpio_port_rx, rx_pin, PAL_MODE_ALTERNATE(alternate_function)); \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,7 +222,7 @@ extern uint8_t Uart8_RxBuffer[];
     Uart##num##_PAL.Uart_cfg.cr1 = 0; \
     Uart##num##_PAL.Uart_cfg.cr2 = 0; \
     Uart##num##_PAL.Uart_cfg.cr3 = 0; \
-    Uart##num##_TxBuffer = (uint8_t*)chHeapAlloc(NULL, tx_buffer_size); \
+    Uart##num##_PAL.TxBuffer = Uart##num##_TxBuffer; \
     Uart##num##_PAL.TxRingBuffer.Initialize( Uart##num##_PAL.TxBuffer, tx_buffer_size); \
     Uart##num##_PAL.TxOngoingCount = 0; \
     Uart##num##_PAL.RxBuffer = Uart##num##_RxBuffer; \

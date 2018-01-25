@@ -54,4 +54,4 @@ endforeach()
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Debugger DEFAULT_MSG Windows.Devices.Gpio_INCLUDE_DIRS Windows.Devices.Gpio_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Windows.Devices.Gpio DEFAULT_MSG Windows.Devices.Gpio_INCLUDE_DIRS Windows.Devices.Gpio_SOURCES)

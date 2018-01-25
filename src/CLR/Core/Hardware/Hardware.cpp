@@ -129,15 +129,15 @@ void CLR_HW_Hardware::ProcessActivity()
 #endif
     }
 
-    if( events & (SYSTEM_EVENT_FLAG_COM_IN | SYSTEM_EVENT_FLAG_COM_OUT) )
+    if(events & SYSTEM_EVENT_FLAG_COM_IN)
     {
-        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_SerialPort;
+        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_SerialPortIn;
     }
 
-    // UNDONE: FIXME: if(events & SYSTEM_EVENT_I2C_XACTION)
-    //{
-    //    eventsCLR |= CLR_RT_ExecutionEngine::c_Event_I2C;
-    //}
+    if(events & SYSTEM_EVENT_FLAG_COM_OUT)
+    {
+        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_SerialPortOut;
+    }
 
     if((events & SYSTEM_EVENT_HW_INTERRUPT)
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -148,10 +148,10 @@ void CLR_HW_Hardware::ProcessActivity()
         ProcessInterrupts();
     }
 
-    if(events & SYSTEM_EVENT_FLAG_SOCKET)
-    {
-        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_Socket;
-    }
+    // UNDONE: FIXME: if(events & SYSTEM_EVENT_FLAG_SOCKET)
+    // {
+    //     eventsCLR |= CLR_RT_ExecutionEngine::c_Event_Socket;
+    // }
 
     if(events & SYSTEM_EVENT_FLAG_IO)
     {
