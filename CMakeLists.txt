@@ -53,7 +53,7 @@ endif()
 # list of supported RTOSes
 # when adding a new RTOS add the corresponding string bellow AND...
 # ... also on the compare block bellow
-set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS_ESP32" CACHE INTERNAL "supported RTOS options")
+set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS_ESP32" "TIRTOS" CACHE INTERNAL "supported RTOS options")
 
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
@@ -63,18 +63,27 @@ else()
 endif()
 
 string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
-string(COMPARE EQUAL "FREERTOS_ESP32" "${RTOS}" RTOS_FREERTOS_ESP32_CHECK)
+string(COMPARE EQUAL "FREERTOS_ESP32" "${RTOS}" RTOS_FREERTOS_CHECK)
+string(COMPARE EQUAL "TIRTOS" "${RTOS}" RTOS_TIRTOS_CHECK)
 
 ##########################################################################
 
 if(RTOS_FREERTOS_ESP32_CHECK)
     set(RTOS_FREERTOS_ESP32_CHECK TRUE)
     set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_TIRTOS_CHECK FALSE)
 endif()
 
 if(RTOS_CHIBIOS_CHECK)
     set(RTOS_CHIBIOS_CHECK TRUE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
+    set(RTOS_TIRTOS_CHECK FALSE)
+endif()
+
+if(RTOS_TIRTOS_CHECK) 
+    set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
+    set(RTOS_TIRTOS_CHECK TRUE)
 endif()
 
 #######################
@@ -143,6 +152,11 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 
 #     # set toolchain file
 #     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.${CHIP_VENDOR_STM32}.${TOOLCHAIN}.cmake)
+
+elseif(RTOS_TIRTOS_CHECK)
+    message(STATUS "\nSetting Toolchain file for TI-RTOS \n")
+    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.TIRTOS.${TOOLCHAIN}.cmake)
+
 endif()
 
 #########################################
@@ -1099,6 +1113,19 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}")
  		add_subdirectory(targets/FreeRTOS_ESP32/${ESP32_BOARD})
 
+    endif()
+
+#######################
+# TI-RTOS
+elseif(RTOS_TIRTOS_CHECK)
+
+    if("${TARGET_SERIES}" STREQUAL "TICC3200")
+        message("Platform TICC3200")
+
+        # Define base path for the class libraries
+        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/TI-RTOS/CC3200/nanoCLR")
+
+ 		add_subdirectory(targets/TI-RTOS/CC3200)
     endif()
 
 endif()
