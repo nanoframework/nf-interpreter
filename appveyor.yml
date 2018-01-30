@@ -542,19 +542,7 @@
     - path: '**\*.zip'
       name: nanoImage
 
-  deploy:
-  - provider: BinTray
-    username: nfbot
-    api_key:
-      secure: Wz0wwFOzMkDwwzzax1HPzKZB3r/aTprlleqFYX5arxpH9pP3D9glINxEuY+P/BaN
-    subject: nfbot
-    repo: nanoframework-images-dev
-    package: $(BOARD_NAME)
-    version: $(GitVersion_SemVer)
-    publish: true
-    override: true
-    explode: false
-    
+
   # before_deploy:
   #   # need this to keep ruby happy
   #   - ps: md c:\tmp
