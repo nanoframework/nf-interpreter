@@ -29,8 +29,15 @@
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
+    ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-75'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
+    ESP32_TOOLS_PATH: 'C:\ESP32_TOOLS'
+    ESP32_LIBS_PATH: '%ESP32_TOOLS_PATH%\libs'
+    ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0-rc1'
+    BOARD_NAME: ''
+    BUILD_OPTIONS: ''
+    NEEDS_DFU: 'False'
     RUBY_VERSION: 24
     GitHubUserName:
       secure: 7OBtVAMTodMWK20wg6pGnQ==
@@ -71,9 +78,28 @@
     - choco install gitversion.portable -pre -y
 
     - ps: |
-        .\install-arm-gcc-toolchain.ps1
-        .\install-ninja.ps1
-        .\install-nf-hex2dfu.ps1
+
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+        {
+
+        }
+        ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
+        {
+          .\install-esp32-toolchain.ps1
+          .\install-ninja.ps1
+          .\install-esp32-libs.ps1
+          .\install-esp32-idf.ps1
+        }
+        Else
+        {
+          # get build matrix
+          .\get-stm32-targets-to-build.ps1
+
+          # install tools and utilities
+          .\install-arm-gcc-toolchain.ps1
+          .\install-ninja.ps1
+          .\install-nf-hex2dfu.ps1
+        }
 
   build:
     verbosity: minimal
@@ -82,53 +108,150 @@
     - md build
     - ps: |
 
-        gitversion /l console /output buildserver
-
-        cd build
-        $cmake = "cmake"
-
-        # need to split the build options into an array to properly pass those as CMake arguments
-        $separator = " "
-        $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
-        $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
-
-        If($env:NEEDS_DFU -eq 'True')
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
-            $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
+        
+        }
+        Else
+        {
+          gitversion /l console /output buildserver
+
+          cd build
+          $cmake = "cmake"
+
+          If($env:BOARD_NAME -eq "ESP32_DEVKITC")
+          {
+            # need to split the build options into an array to properly pass those as CMake arguments
+            $separator = " "
+            $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+            $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+             &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:ESP32_TOOLCHAIN_PATH" "-DESP32_IDF_PATH=$env:ESP32_IDF_PATH" "-DESP32_LIBS_PATH=$env:ESP32_LIBS_PATH" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+          }
+          Else
+          {
+            if(!$global:BUILD_MATRIX)
+            {
+              # need to split the build options into an array to properly pass those as CMake arguments
+              $separator = " "
+              $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+              $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+              If($env:NEEDS_DFU -eq 'True')
+              {
+                $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
+              }
+
+              &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+            }
+          }
         }
 
-        &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions ..
-
   build_script:
-    - ps: |
-
-        $cmake = "cmake"
-        &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
-
-  after_build:
     - ps: |
 
         Install-Module 7Zip4PowerShell -Force
 
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
+          msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /p:Platform=x86 /m /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        }
+        Else
+        {
+          If($env:BOARD_NAME -eq "ESP32_DEVKITC")
+          {
+            $cmake = "cmake"
+            &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
-        }
-        ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
-        {
-          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-          Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-        }
-        else
-        {
-          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-        Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-          Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-        }
+            Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+            Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
 
-        If($env:NEEDS_DFU -eq 'True')
-        {
-          Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+            #upload package only if this not a PR
+            if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+            {
+              $webClient = New-Object System.Net.WebClient
+              $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+            }
+          }
+          Else
+          {
+            # STM32 target
+            if(!$global:BUILD_MATRIX)
+            {
+              # single STM32 target
+              $cmake = "cmake"
+              &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+              Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+              Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+              Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+              If($env:NEEDS_DFU -eq 'True')
+              {
+                Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+              }
+
+              #upload package only if this not a PR
+              if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+              {
+                $webClient = New-Object System.Net.WebClient
+                $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              }
+            }
+            else
+            {
+              # build matrix for STM32 targets
+              ForEach($item in $global:BUILD_MATRIX)
+              {
+                $env:BOARD_NAME = $item[0]
+                $env:BUILD_OPTIONS = $item[1]
+                $env:NEEDS_DFU = $item[2]
+
+                $cmake = "cmake"
+
+                # need to split the build options into an array to properly pass those as CMake arguments
+                $separator = " "
+                $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+                $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+                If($env:NEEDS_DFU -eq 'True')
+                {
+                    $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
+                }
+
+                &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions ..
+
+                &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+                if ($lastexitcode -ne 0)
+                {
+                  throw [System.Exception] "CMake build failed with exit code $lastexitcode."
+                }
+
+                Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+                Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                If($env:NEEDS_DFU -eq 'True')
+                {
+                  Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                }
+                
+                #upload package only if this not a PR
+                if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+                {
+                  $webClient = New-Object System.Net.WebClient
+                  $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                }
+
+                cd ..
+                Rename-Item -NewName build-$env:BOARD_NAME -Path "build" -Force
+                md build
+                cd build
+              }
+            }            
+          }          
         }
 
   test: off
@@ -198,10 +321,12 @@
     ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-75'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
-
     ESP32_TOOLS_PATH: 'C:\ESP32_TOOLS'
     ESP32_LIBS_PATH: '%ESP32_TOOLS_PATH%\libs'
     ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0-rc1'
+    BOARD_NAME: ''
+    BUILD_OPTIONS: ''
+    NEEDS_DFU: 'False'
     RUBY_VERSION: 24
     GitHubUserName:
       secure: 7OBtVAMTodMWK20wg6pGnQ==
@@ -211,22 +336,7 @@
       secure: WOqlCsnwTzfDPJFoNV/h8mEESIpG/9uFn1u6oE8hGZtXwIQQlsY+NyyLt9Y5xoFn
 
     matrix:
-      - BOARD_NAME: 'MBN_QUAIL'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
-        NEEDS_DFU: 'True'
-      - BOARD_NAME: 'ST_STM32F4_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
-      - BOARD_NAME: 'ST_STM32F429I_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
-      - BOARD_NAME: 'ST_NUCLEO64_F091RC'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
-      - BOARD_NAME: 'ST_NUCLEO144_F746ZG'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
-      - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
-      - BOARD_NAME: 'NETDUINO3_WIFI'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
-        NEEDS_DFU: 'True'
+      - BOARD_NAME: 'STM32'
       - BOARD_NAME: 'ESP32_DEVKITC'
         BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_FEATURE_DEBUGGER=TRUE -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.SerialCommunication=ON'
       - BOARD_NAME: 'NANOCLR_WINDOWS'
@@ -246,6 +356,7 @@
     - choco install gitversion.portable -pre -y
 
     - ps: |
+
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
 
@@ -259,6 +370,10 @@
         }
         Else
         {
+          # get build matrix
+          .\get-stm32-targets-to-build.ps1
+
+          # install tools and utilities
           .\install-arm-gcc-toolchain.ps1
           .\install-ninja.ps1
           .\install-nf-hex2dfu.ps1
@@ -282,65 +397,139 @@
           cd build
           $cmake = "cmake"
 
-          # need to split the build options into an array to properly pass those as CMake arguments
-          $separator = " "
-          $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
-          $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
-
-          If($env:NEEDS_DFU -eq 'True')
-          {
-             $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
-          }
-
           If($env:BOARD_NAME -eq "ESP32_DEVKITC")
           {
+            # need to split the build options into an array to properly pass those as CMake arguments
+            $separator = " "
+            $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+            $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
              &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:ESP32_TOOLCHAIN_PATH" "-DESP32_IDF_PATH=$env:ESP32_IDF_PATH" "-DESP32_LIBS_PATH=$env:ESP32_LIBS_PATH" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
           }
           Else
           {
-             &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+            if(!$global:BUILD_MATRIX)
+            {
+              # need to split the build options into an array to properly pass those as CMake arguments
+              $separator = " "
+              $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+              $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+              If($env:NEEDS_DFU -eq 'True')
+              {
+                $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
+              }
+
+              &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+            }
           }
         }
 
   build_script:
     - ps: |
 
-        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
-        {
-          
-          msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /p:Platform=x86 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-        
-        }
-        Else
-        {
-          $cmake = "cmake"
-          &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
-        }
-
-  after_build:
-    - ps: |
-
         Install-Module 7Zip4PowerShell -Force
 
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
+          msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /p:Platform=x86 /m /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        }
+        Else
+        {
+          If($env:BOARD_NAME -eq "ESP32_DEVKITC")
+          {
+            $cmake = "cmake"
+            &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
-        }
-        ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
-        {
-          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-          Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-        }
-        else
-        {
-          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-        Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-          Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-        }
+            Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+            Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
 
-        If($env:NEEDS_DFU -eq 'True')
-        {
-          Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+            #upload package only if this not a PR
+            if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+            {
+              $webClient = New-Object System.Net.WebClient
+              $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+            }
+          }
+          Else
+          {
+            # STM32 target
+            if(!$global:BUILD_MATRIX)
+            {
+              # single STM32 target
+              $cmake = "cmake"
+              &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+              Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+              Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+              Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+              If($env:NEEDS_DFU -eq 'True')
+              {
+                Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+              }
+
+              #upload package only if this not a PR
+              if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+              {
+                $webClient = New-Object System.Net.WebClient
+                $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              }
+            }
+            else
+            {
+              # build matrix for STM32 targets
+              ForEach($item in $global:BUILD_MATRIX)
+              {
+                $env:BOARD_NAME = $item[0]
+                $env:BUILD_OPTIONS = $item[1]
+                $env:NEEDS_DFU = $item[2]
+
+                $cmake = "cmake"
+
+                # need to split the build options into an array to properly pass those as CMake arguments
+                $separator = " "
+                $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+                $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+                If($env:NEEDS_DFU -eq 'True')
+                {
+                    $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
+                }
+
+                &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions ..
+
+                &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+                if ($lastexitcode -ne 0)
+                {
+                  throw [System.Exception] "CMake build failed with exit code $lastexitcode."
+                }
+
+                Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+                Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                If($env:NEEDS_DFU -eq 'True')
+                {
+                  Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                }
+                
+                #upload package only if this not a PR
+                if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+                {
+                  $webClient = New-Object System.Net.WebClient
+                  $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                }
+
+                cd ..
+                Rename-Item -NewName build-$env:BOARD_NAME -Path "build" -Force
+                md build
+                cd build
+              }
+            }            
+          }          
         }
 
   test: off
@@ -417,8 +606,15 @@
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
+    ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-75'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
+    ESP32_TOOLS_PATH: 'C:\ESP32_TOOLS'
+    ESP32_LIBS_PATH: '%ESP32_TOOLS_PATH%\libs'
+    ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0-rc1'
+    BOARD_NAME: ''
+    BUILD_OPTIONS: ''
+    NEEDS_DFU: 'False'
     RUBY_VERSION: 24
     GitHubUserName:
       secure: 7OBtVAMTodMWK20wg6pGnQ==
@@ -459,9 +655,28 @@
     - choco install gitversion.portable -pre -y
 
     - ps: |
-        .\install-arm-gcc-toolchain.ps1
-        .\install-ninja.ps1
-        .\install-nf-hex2dfu.ps1
+
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+        {
+
+        }
+        ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
+        {
+          .\install-esp32-toolchain.ps1
+          .\install-ninja.ps1
+          .\install-esp32-libs.ps1
+          .\install-esp32-idf.ps1
+        }
+        Else
+        {
+          # get build matrix
+          .\get-stm32-targets-to-build.ps1
+
+          # install tools and utilities
+          .\install-arm-gcc-toolchain.ps1
+          .\install-ninja.ps1
+          .\install-nf-hex2dfu.ps1
+        }
 
   build:
     verbosity: minimal
@@ -470,53 +685,150 @@
     - md build
     - ps: |
 
-        gitversion /l console /output buildserver
-
-        cd build
-        $cmake = "cmake"
-
-        # need to split the build options into an array to properly pass those as CMake arguments
-        $separator = " "
-        $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
-        $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
-
-        If($env:NEEDS_DFU -eq 'True')
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
-            $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
+        
+        }
+        Else
+        {
+          gitversion /l console /output buildserver
+
+          cd build
+          $cmake = "cmake"
+
+          If($env:BOARD_NAME -eq "ESP32_DEVKITC")
+          {
+            # need to split the build options into an array to properly pass those as CMake arguments
+            $separator = " "
+            $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+            $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+             &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:ESP32_TOOLCHAIN_PATH" "-DESP32_IDF_PATH=$env:ESP32_IDF_PATH" "-DESP32_LIBS_PATH=$env:ESP32_LIBS_PATH" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+          }
+          Else
+          {
+            if(!$global:BUILD_MATRIX)
+            {
+              # need to split the build options into an array to properly pass those as CMake arguments
+              $separator = " "
+              $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+              $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+              If($env:NEEDS_DFU -eq 'True')
+              {
+                $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
+              }
+
+              &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+            }
+          }
         }
 
-        &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
-
   build_script:
-    - ps: |
-
-        $cmake = "cmake"
-        &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
-
-  after_build:
     - ps: |
 
         Install-Module 7Zip4PowerShell -Force
 
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
+          msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /p:Platform=x86 /m /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        }
+        Else
+        {
+          If($env:BOARD_NAME -eq "ESP32_DEVKITC")
+          {
+            $cmake = "cmake"
+            &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
-        }
-        ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
-        {
-          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-          Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-        }
-        else
-        {
-          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-        Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-          Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-        }
+            Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+            Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
 
-        If($env:NEEDS_DFU -eq 'True')
-        {
-          Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+            #upload package only if this not a PR
+            if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+            {
+              $webClient = New-Object System.Net.WebClient
+              $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+            }
+          }
+          Else
+          {
+            # STM32 target
+            if(!$global:BUILD_MATRIX)
+            {
+              # single STM32 target
+              $cmake = "cmake"
+              &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+              Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+              Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+              Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+              If($env:NEEDS_DFU -eq 'True')
+              {
+                Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+              }
+
+              #upload package only if this not a PR
+              if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+              {
+                $webClient = New-Object System.Net.WebClient
+                $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              }
+            }
+            else
+            {
+              # build matrix for STM32 targets
+              ForEach($item in $global:BUILD_MATRIX)
+              {
+                $env:BOARD_NAME = $item[0]
+                $env:BUILD_OPTIONS = $item[1]
+                $env:NEEDS_DFU = $item[2]
+
+                $cmake = "cmake"
+
+                # need to split the build options into an array to properly pass those as CMake arguments
+                $separator = " "
+                $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
+                $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
+
+                If($env:NEEDS_DFU -eq 'True')
+                {
+                    $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
+                }
+
+                &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions ..
+
+                &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+                if ($lastexitcode -ne 0)
+                {
+                  throw [System.Exception] "CMake build failed with exit code $lastexitcode."
+                }
+
+                Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+                Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                If($env:NEEDS_DFU -eq 'True')
+                {
+                  Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                }
+                
+                #upload package only if this not a PR
+                if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+                {
+                  $webClient = New-Object System.Net.WebClient
+                  $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                }
+
+                cd ..
+                Rename-Item -NewName build-$env:BOARD_NAME -Path "build" -Force
+                md build
+                cd build
+              }
+            }            
+          }          
         }
 
   test: off
