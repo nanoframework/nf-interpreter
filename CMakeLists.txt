@@ -131,7 +131,7 @@ if(RTOS_CHIBIOS_CHECK)
 elseif(RTOS_FREERTOS_CHECK)
     message(STATUS "\nSetting Toolchain file for FreeRTOS ESP32 \n")
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
-
+ 
 # else()
 
 #     # find out the chip vendor in order to move on with the appropriate configuration
@@ -637,12 +637,12 @@ if(RTOS_CHIBIOS_CHECK)
 elseif(RTOS_FREERTOS_CHECK)
 
     if("${TARGET_SERIES}" STREQUAL "ESP32")
-        message("Platform ESP32")
+        message(STATUS "Platform ESP32")
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRtos/Esp32/nanoCLR")
+        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/nanoCLR")
 
- 		add_subdirectory(targets/FreeRtos/Esp32)
+ 		add_subdirectory(targets/FreeRTOS/ESP32_DevKitC)
     endif()
 
 endif()

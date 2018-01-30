@@ -45,7 +45,7 @@
       - BOARD_NAME: 'ST_STM32F429I_DISCOVERY'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON'
       - BOARD_NAME: 'ST_NUCLEO64_F091RC'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
       - BOARD_NAME: 'ST_NUCLEO144_F746ZG'
         BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON'
       - BOARD_NAME: 'MBN_QUAIL'
@@ -105,12 +105,31 @@
         $cmake = "cmake"
         &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
-
   after_build:
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.bin
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.hex
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.s19
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.dfu
+    - ps: |
+
+        Install-Module 7Zip4PowerShell -Force
+
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+        {
+
+        }
+        ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
+        {
+          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+          Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+        }
+        else
+        {
+          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+        Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+          Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+        }
+
+        If($env:NEEDS_DFU -eq 'True')
+        {
+          Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+        }
 
   test: off
 
@@ -176,8 +195,13 @@
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\6-2017-q2-update1'
+    ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-75'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
+
+    ESP32_TOOLS_PATH: 'C:\ESP32_TOOLS'
+    ESP32_LIBS_PATH: '%ESP32_TOOLS_PATH%\libs'
+    ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0-rc1'
     RUBY_VERSION: 24
     GitHubUserName:
       secure: 7OBtVAMTodMWK20wg6pGnQ==
@@ -188,21 +212,23 @@
 
     matrix:
       - BOARD_NAME: 'MBN_QUAIL'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
         NEEDS_DFU: 'True'
       - BOARD_NAME: 'ST_STM32F4_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
       - BOARD_NAME: 'ST_STM32F429I_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
       - BOARD_NAME: 'ST_NUCLEO64_F091RC'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F0xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=OFF'
       - BOARD_NAME: 'ST_NUCLEO144_F746ZG'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
       - BOARD_NAME: 'ST_STM32F769I_DISCOVERY'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
       - BOARD_NAME: 'NETDUINO3_WIFI'
-        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON'
+        BUILD_OPTIONS: '-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON'
         NEEDS_DFU: 'True'
+      - BOARD_NAME: 'ESP32_DEVKITC'
+        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_FEATURE_DEBUGGER=TRUE -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.SerialCommunication=ON'
       - BOARD_NAME: 'NANOCLR_WINDOWS'
 
   matrix:
@@ -210,7 +236,8 @@
 
   cache:
     - '%GNU_GCC_TOOLCHAIN_PATH%'
-
+    - '%ESP32_TOOLCHAIN_PATH%'
+ 
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
@@ -222,6 +249,13 @@
         If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
         {
 
+        }
+        ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
+        {
+          .\install-esp32-toolchain.ps1
+          .\install-ninja.ps1
+          .\install-esp32-libs.ps1
+          .\install-esp32-idf.ps1
         }
         Else
         {
@@ -258,8 +292,14 @@
              $cmakeOptions += "-DTOOL_HEX2DFU_PREFIX=$env:HEX2DFU_PATH".Replace('\','/')
           }
 
-          &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
-
+          If($env:BOARD_NAME -eq "ESP32_DEVKITC")
+          {
+             &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:ESP32_TOOLCHAIN_PATH" "-DESP32_IDF_PATH=$env:ESP32_IDF_PATH" "-DESP32_LIBS_PATH=$env:ESP32_LIBS_PATH" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+          }
+          Else
+          {
+             &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:GNU_GCC_TOOLCHAIN_PATH" "-DCHIBIOS_BOARD=$env:BOARD_NAME" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+          }
         }
 
   build_script:
@@ -278,10 +318,30 @@
         }
 
   after_build:
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.bin
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.hex
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.s19
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.dfu
+    - ps: |
+
+        Install-Module 7Zip4PowerShell -Force
+
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+        {
+
+        }
+        ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
+        {
+          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+          Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+        }
+        else
+        {
+          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+        Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+          Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+        }
+
+        If($env:NEEDS_DFU -eq 'True')
+        {
+          Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+        }
 
   test: off
 
@@ -434,10 +494,30 @@
         &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
   after_build:
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.bin
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.hex
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.s19
-    - 7z a %BOARD_NAME%-%GitVersion_SemVer%.zip %APPVEYOR_BUILD_FOLDER%\build\*.dfu
+    - ps: |
+
+        Install-Module 7Zip4PowerShell -Force
+
+        If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+        {
+
+        }
+        ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
+        {
+          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+          Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+        }
+        else
+        {
+          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+        Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+          Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+        }
+
+        If($env:NEEDS_DFU -eq 'True')
+        {
+          Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+        }
 
   test: off
 

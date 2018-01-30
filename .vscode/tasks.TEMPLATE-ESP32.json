@@ -1,0 +1,37 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "taskName": "Flash NanoClr <COMPORT>",
+            "type": "shell",
+            "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 --port \"<COMPORT>\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/esp-idf/examples/get-started/blink/build/bootloader/bootloader.bin 0x10000 <absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>/nf-interpreter/build/targets/FreeRTOS/ESP32_DevKitC/nanoCLR.bin 0x8000 <absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>/nf-interpreter/build/targets/FreeRTOS/ESP32_DevKitC/partitions_4mb.bin",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "taskName": "Flash NanoClr Wrover <COMPORT>",
+            "type": "shell",
+            "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 --port \"<COMPORT>\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/esp-idf/examples/get-started/blink/build/bootloader/bootloader.bin 0x10000 <absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>/nf-interpreter/build/targets/FreeRTOS/ESP32_DevKitC/nanoCLR.bin 0x8000 <absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>/nf-interpreter/build/targets/FreeRTOS/ESP32_DevKitC/partitions_4mb.bin",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "taskName": "Flash NanoClr ESP32-EVB <COMPORT>",
+            "type": "shell",
+            "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 --port \"<COMPORT>\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/esp-idf/examples/get-started/blink/build/bootloader/bootloader.bin 0x10000 <absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>/nf-interpreter/build/targets/FreeRTOS/ESP32_DevKitC/nanoCLR.bin 0x8000 <absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>/nf-interpreter/build/targets/FreeRTOS/ESP32_DevKitC/partitions_4mb.bin",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
