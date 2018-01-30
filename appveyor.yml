@@ -45,6 +45,8 @@
       secure: HeABB68Sn/Lhbd69C2cUcfWv0ab/rMDEcOLvcxf8gGw=
     GitHubToken:
       secure: WOqlCsnwTzfDPJFoNV/h8mEESIpG/9uFn1u6oE8hGZtXwIQQlsY+NyyLt9Y5xoFn
+    BinTrayKey:
+      secure: Wz0wwFOzMkDwwzzax1HPzKZB3r/aTprlleqFYX5arxpH9pP3D9glINxEuY+P/BaN
 
     matrix:
       - BOARD_NAME: 'ST_STM32F4_DISCOVERY'
@@ -242,7 +244,7 @@
                 {
                   $webClient = New-Object System.Net.WebClient
                   $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
                 }
 
                 cd ..
@@ -334,6 +336,8 @@
       secure: HeABB68Sn/Lhbd69C2cUcfWv0ab/rMDEcOLvcxf8gGw=
     GitHubToken:
       secure: WOqlCsnwTzfDPJFoNV/h8mEESIpG/9uFn1u6oE8hGZtXwIQQlsY+NyyLt9Y5xoFn
+    BinTrayKey:
+      secure: Wz0wwFOzMkDwwzzax1HPzKZB3r/aTprlleqFYX5arxpH9pP3D9glINxEuY+P/BaN
 
     matrix:
       - BOARD_NAME: 'STM32'
@@ -520,7 +524,7 @@
                 {
                   $webClient = New-Object System.Net.WebClient
                   $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
                 }
 
                 cd ..
@@ -567,7 +571,6 @@
       on_build_status_changed: true
       on_build_success: false
       on_build_failure: false
-
 
 ############################################
 # configuration for release candidate branch
@@ -622,6 +625,8 @@
       secure: HeABB68Sn/Lhbd69C2cUcfWv0ab/rMDEcOLvcxf8gGw=
     GitHubToken:
       secure: WOqlCsnwTzfDPJFoNV/h8mEESIpG/9uFn1u6oE8hGZtXwIQQlsY+NyyLt9Y5xoFn
+    BinTrayKey:
+      secure: Wz0wwFOzMkDwwzzax1HPzKZB3r/aTprlleqFYX5arxpH9pP3D9glINxEuY+P/BaN
 
     matrix:
       - BOARD_NAME: 'ST_STM32F4_DISCOVERY'
@@ -748,7 +753,7 @@
             {
               $webClient = New-Object System.Net.WebClient
               $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
             }
           }
           Else
