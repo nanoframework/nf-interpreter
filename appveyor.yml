@@ -163,15 +163,15 @@
             $cmake = "cmake"
             &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
+            Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
             Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-            Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
 
             #upload package only if this not a PR
             if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
             {
               $webClient = New-Object System.Net.WebClient
               $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
             }
           }
           Else
@@ -196,7 +196,7 @@
               {
                 $webClient = New-Object System.Net.WebClient
                 $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
               }
             }
             else
@@ -441,15 +441,15 @@
             $cmake = "cmake"
             &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
+            Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
             Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-            Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
 
             #upload package only if this not a PR
             if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
             {
               $webClient = New-Object System.Net.WebClient
               $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
             }
           }
           Else
@@ -474,7 +474,7 @@
               {
                 $webClient = New-Object System.Net.WebClient
                 $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
               }
             }
             else
@@ -740,8 +740,8 @@
             $cmake = "cmake"
             &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
+            Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
             Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-            Compress-7Zip -Path $env:ESP32_LIBS_PATH -Filter "bootloader.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
 
             #upload package only if this not a PR
             if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
@@ -773,7 +773,7 @@
               {
                 $webClient = New-Object System.Net.WebClient
                 $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
               }
             }
             else
@@ -819,7 +819,7 @@
                 {
                   $webClient = New-Object System.Net.WebClient
                   $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\nf-interpreter\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
                 }
 
                 cd ..
