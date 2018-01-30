@@ -259,7 +259,7 @@
   test: off
 
   artifacts:
-    - path: '**\%BOARD_NAME%-%GitVersion_SemVer%.zip'
+    - path: '**\*.zip'
       name: nanoImage
 
   # before_deploy:
@@ -539,7 +539,7 @@
   test: off
 
   artifacts:
-    - path: '**\%BOARD_NAME%-%GitVersion_SemVer%.zip'
+    - path: '**\*.zip'
       name: nanoImage
 
   deploy:
@@ -839,7 +839,7 @@
   test: off
 
   artifacts:
-    - path: '**\%BOARD_NAME%-%GitVersion_SemVer%.zip'
+    - path: '**\*.zip'
       name: nanoImage
 
   # before_deploy:
