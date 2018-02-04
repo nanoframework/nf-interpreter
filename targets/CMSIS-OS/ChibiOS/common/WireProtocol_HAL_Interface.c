@@ -14,7 +14,6 @@
 #endif
 
 WP_Message inboundMessage;
-binary_semaphore_t wpChannelSemaphore;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,32 +43,17 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         // preferably with read timeout and being able to check 
         // if the requested number of bytes was actually read
         //////////////////////////////////////////////////////////
+
+        // read from serial stream 
+        volatile size_t read = chnReadTimeout(&SDU1, ptr, *size, MS2ST(250));
+
+        ptr  += read;
+        *size -= read;
+
+        TRACE( TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n",requestedSize, read);
         
-        // wait for WP semaphore with a 500ms timeout
-        msg_t semaphoreResult = chBSemWaitTimeout(&wpChannelSemaphore, MS2ST(500));
-        
-        if(semaphoreResult == MSG_OK)
-        {
-            // read from serial stream 
-            volatile size_t read = chnReadTimeout(&SDU1, ptr, *size, MS2ST(250));
-
-            ptr  += read;
-            *size -= read;
-
-            // release WP semaphore
-            chBSemSignalI(&wpChannelSemaphore);
-
-            TRACE( TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n",requestedSize, read);
-            
-            // check if the requested read matches the actual read count
-            return (requestedSize == read);
-        }
-        else
-        {
-            TRACE0( TRACE_ERRORS, "RXMSG: failed to get semaphore.\n");
-
-            return false;
-        }
+        // check if the requested read matches the actual read count
+        return (requestedSize == read);
     }
 
     return true;
@@ -92,31 +76,16 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         // if the requested number of bytes was actually read
         //////////////////////////////////////////////////////////
         
-        // wait for WP semaphore with a 500ms timeout
-        msg_t semaphoreResult = chBSemWaitTimeout(&wpChannelSemaphore, MS2ST(500));
+        // non blocking read from serial port with 100ms timeout
+        volatile size_t read = sdReadTimeout(&SD2, ptr, *size, MS2ST(250));
+
+        ptr  += read;
+        *size -= read;
         
-        if(semaphoreResult == MSG_OK)
-        {
-            // non blocking read from serial port with 100ms timeout
-            volatile size_t read = sdReadTimeout(&SD2, ptr, *size, MS2ST(250));
+        TRACE( TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n",requestedSize, read);
 
-            ptr  += read;
-            *size -= read;
-
-            // release WP semaphore
-            chBSemSignalI(&wpChannelSemaphore);
-            
-            TRACE( TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n",requestedSize, read);
-
-            // check if the requested read matches the actual read count
-            return (requestedSize == read);
-        }
-        else
-        {
-            TRACE0( TRACE_ERRORS, "RXMSG: failed to get semaphore.\n");
-
-            return false;
-        }
+        // check if the requested read matches the actual read count
+        return (requestedSize == read);
     }
 
     return true;
@@ -141,50 +110,39 @@ int WP_TransmitMessage(WP_Message* message)
     // if the write was sucessfull or at least buffered
     //////////////////////////////////////////////////////////
 
-    // wait for WP semaphore with a 500ms timeout
-    msg_t semaphoreResult = chBSemWaitTimeout(&wpChannelSemaphore, MS2ST(500));
+    TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
 
-    if(semaphoreResult == MSG_OK)
+    // write header to output stream
+    writeResult = chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), MS2ST(250));
+
+    if(writeResult == sizeof(message->m_header))
     {
-        TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
+        operationResult = true;
 
-        // write header to output stream
-        writeResult = chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), MS2ST(250));
-
-        if(writeResult == sizeof(message->m_header))
+        // if there is anything on the payload send it to the output stream
+        if(message->m_header.m_size && message->m_payload)
         {
-            operationResult = true;
+            ///////////////////////////////////////////////////////////
+            //              PORTING CHANGE REQUIRED HERE             //
+            ///////////////////////////////////////////////////////////
+            // see description above
+            //////////////////////////////////////////////////////////
 
-            // if there is anything on the payload send it to the output stream
-            if(message->m_header.m_size && message->m_payload)
+            // reset flag
+            operationResult = false;
+
+            writeResult = chnWriteTimeout(&SDU1, message->m_payload, message->m_header.m_size, MS2ST(250));
+
+            if(writeResult == message->m_header.m_size)
             {
-                ///////////////////////////////////////////////////////////
-                //              PORTING CHANGE REQUIRED HERE             //
-                ///////////////////////////////////////////////////////////
-                // see description above
-                //////////////////////////////////////////////////////////
+                operationResult = true;
 
-                // reset flag
-                operationResult = false;
-
-                writeResult = chnWriteTimeout(&SDU1, message->m_payload, message->m_header.m_size, MS2ST(250));
-
-                if(writeResult == message->m_header.m_size)
-                {
-                    operationResult = true;
-
-                    TRACE0( TRACE_ERRORS, "TXMSG: OK\n");                    
-                }
+                TRACE0( TRACE_ERRORS, "TXMSG: OK\n");                    
             }
         }
-
-        // release WP semaphore
-        chBSemSignalI(&wpChannelSemaphore);
-
-        return operationResult;
     }
 
-    return false;
+    return operationResult;
 }
 #elif (HAL_USE_SERIAL == TRUE)
 
@@ -200,51 +158,40 @@ int WP_TransmitMessage(WP_Message* message)
     // preferably with timeout and being able to check 
     // if the write was sucessfull or at least buffered
     //////////////////////////////////////////////////////////
-
-    // wait for WP semaphore with a 500ms timeout
-    msg_t semaphoreResult = chBSemWaitTimeout(&wpChannelSemaphore, MS2ST(500));
     
-    if(semaphoreResult == MSG_OK)
+    TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
+
+    // write header to output stream
+    writeResult = chnWriteTimeout(&SD2, (const uint8_t *)&message->m_header, sizeof(message->m_header), MS2ST(250));
+
+    if(writeResult == sizeof(message->m_header))
     {
-        TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
+        operationResult = true;
 
-        // write header to output stream
-        writeResult = chnWriteTimeout(&SD2, (const uint8_t *)&message->m_header, sizeof(message->m_header), MS2ST(250));
-
-        if(writeResult == sizeof(message->m_header))
+        // if there is anything on the payload send it to the output stream
+        if(message->m_header.m_size && message->m_payload)
         {
-            operationResult = true;
+            ///////////////////////////////////////////////////////////
+            //              PORTING CHANGE REQUIRED HERE             //
+            ///////////////////////////////////////////////////////////
+            // see description above
+            //////////////////////////////////////////////////////////
 
-            // if there is anything on the payload send it to the output stream
-            if(message->m_header.m_size && message->m_payload)
+            // reset flag
+            operationResult = false;
+
+            writeResult = chnWriteTimeout(&SD2, message->m_payload, message->m_header.m_size, MS2ST(250));
+
+            if(writeResult == message->m_header.m_size)
             {
-                ///////////////////////////////////////////////////////////
-                //              PORTING CHANGE REQUIRED HERE             //
-                ///////////////////////////////////////////////////////////
-                // see description above
-                //////////////////////////////////////////////////////////
+                operationResult = true;
 
-                // reset flag
-                operationResult = false;
-
-                writeResult = chnWriteTimeout(&SD2, message->m_payload, message->m_header.m_size, MS2ST(250));
-
-                if(writeResult == message->m_header.m_size)
-                {
-                    operationResult = true;
-
-                    TRACE0( TRACE_ERRORS, "TXMSG: OK\n");                    
-                }
+                TRACE0( TRACE_ERRORS, "TXMSG: OK\n");                    
             }
-
-            // release WP semaphore
-            chBSemSignalI(&wpChannelSemaphore);
-
-            return operationResult;
         }
     }
 
-    return false;
+    return operationResult;
 }
 
 #else

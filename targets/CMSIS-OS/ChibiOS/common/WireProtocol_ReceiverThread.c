@@ -8,7 +8,6 @@
 #include "WireProtocol_HAL_Interface.h"
 
 extern WP_Message inboundMessage;
-extern binary_semaphore_t wpChannelSemaphore;
 
 // This thread needs to be implemented at ChibiOS level because it has to include a call to chThdShouldTerminateX()
 // in case the thread is requested to terminate by the CMSIS call osThreadTerminate()
@@ -18,9 +17,6 @@ void ReceiverThread(void const * argument)
   (void)argument;
 
   osDelay(500);
-
-  // initialize Wire Protocol semaphore in the "not taken" state
-  chBSemObjectInit(&wpChannelSemaphore, false);
 
   // loop until thread receives a request to terminate
   while (!chThdShouldTerminateX()) {
