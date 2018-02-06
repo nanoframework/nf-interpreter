@@ -27,8 +27,7 @@ enum GpioPinDriveMode
     GpioPinDriveMode_OutputOpenDrain,
     GpioPinDriveMode_OutputOpenDrainPullUp,
     GpioPinDriveMode_OutputOpenSource,
-    GpioPinDriveMode_OutputOpenSourcePullDown,
-	GpioPinDriveMode_Alternate
+    GpioPinDriveMode_OutputOpenSourcePullDown
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -209,8 +208,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveM
             (driveMode == GpioPinDriveMode_InputPullDown) ||
             (driveMode == GpioPinDriveMode_InputPullUp) ||
             (driveMode == GpioPinDriveMode_Output) ||
-            (driveMode == GpioPinDriveMode_OutputOpenDrain) ||
-			(driveMode == GpioPinDriveMode_Alternate))
+            (driveMode == GpioPinDriveMode_OutputOpenDrain))
         {
             driveModeSupported = true;
         }
@@ -221,7 +219,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveM
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -234,7 +232,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 
         // get pin number and take the port and pad references from that one
         int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
-		int32_t alternateFunction = stack.Arg2().NumericByRef().s4;
         stm32_gpio_t* port  = GPIO_PORT(pinNumber);
         int16_t pad = pinNumber % 16;
 
@@ -301,9 +298,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 
             case GpioPinDriveMode_OutputOpenDrain:
                 palSetPadMode(port, pad, PAL_MODE_OUTPUT_OPENDRAIN);
-                break;
-			case GpioPinDriveMode_Alternate:
-                palSetPadMode(port, pad, PAL_MODE_ALTERNATE(alternateFunction));
                 break;
 
             default:
@@ -404,6 +398,32 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlternateFunction___VOID__I4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+        // check if object has been disposed
+        if(pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue ].NumericByRef().u1 != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        // get pin number and take the port and pad references from that one
+        int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+        stm32_gpio_t* port  = GPIO_PORT(pinNumber);
+        int16_t pad = pinNumber % 16;
+
+        // get alternate function argument
+		int32_t alternateFunction = stack.Arg1().NumericByRef().s4;
+
+        palSetPadMode(port, pad, PAL_MODE_ALTERNATE(alternateFunction));
+
     }
     NANOCLR_NOCLEANUP();
 }
