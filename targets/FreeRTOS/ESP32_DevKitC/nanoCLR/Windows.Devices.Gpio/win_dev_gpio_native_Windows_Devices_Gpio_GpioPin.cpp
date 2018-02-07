@@ -30,8 +30,7 @@ enum GpioPinDriveMode
     GpioPinDriveMode_OutputOpenDrain,
     GpioPinDriveMode_OutputOpenDrainPullUp,
     GpioPinDriveMode_OutputOpenSource,
-    GpioPinDriveMode_OutputOpenSourcePullDown,
-   	GpioPinDriveMode_Alternate
+    GpioPinDriveMode_OutputOpenSourcePullDown
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +173,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveM
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -187,8 +186,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 
         signed int pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
         signed int driveMode = stack.Arg1().NumericByRef().s4;
-        int32_t alternateFunction = stack.Arg2().NumericByRef().s4;
-        
 
         // Valid PinNumber
         if ( ! GPIO_IS_VALID_GPIO(pinNumber) ) 
@@ -208,28 +205,27 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
                         gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 0 - GpioPinDriveMode_Input
                         gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_FLOATING);
                         break;
-            case 1 :    gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 1 - GpioPinDriveMode_InputPullDown 
+            case GpioPinDriveMode_InputPullDown :    
+                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 1 - GpioPinDriveMode_InputPullDown 
                         gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_PULLDOWN_ONLY);
                         break;
-            case 2 :    gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 2 - GpioPinDriveMode_InputPullUp
+            case GpioPinDriveMode_InputPullUp :    
+                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 2 - GpioPinDriveMode_InputPullUp
                         gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_PULLUP_ONLY);
                         break;
-            case 3 :    gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_OUTPUT);    // 3 - GpioPinDriveMode_Output
+            case GpioPinDriveMode_Output :    
+                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_OUTPUT);    // 3 - GpioPinDriveMode_Output
                         gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_FLOATING);
                         break;
-            case 4 :    gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_OUTPUT_OD); // 4 - GpioPinDriveMode_OutputOpenDrain
+            case GpioPinDriveMode_OutputOpenDrain :    
+                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_OUTPUT_OD); // 4 - GpioPinDriveMode_OutputOpenDrain
                         break;
-            case 5 :    gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_OUTPUT_OD); // 5 - GpioPinDriveMode_OutputOpenDrainPullUp
+            case GpioPinDriveMode_OutputOpenDrainPullUp :    
+                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_OUTPUT_OD); // 5 - GpioPinDriveMode_OutputOpenDrainPullUp
                         gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_PULLUP_ONLY);
                         break;
-                                                                             // 6 - GpioPinDriveMode_OutputOpenSource
-                                                                             // 7 - GpioPinDriveMode_OutputOpenSourcePullDown
-
-            case 8:                                                         // 8 - Alternate map gpio pins to device ( alternateFunction )
-                        Esp32_SetMappedDevicePins( (uint8_t)pinNumber, alternateFunction );
-                        break;                                                          
-
-
+                                                                                          // 6 - GpioPinDriveMode_OutputOpenSource
+                                                                                          // 7 - GpioPinDriveMode_OutputOpenSourcePullDown
             default :   gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT_OUTPUT); 
                         break;
         }
@@ -311,6 +307,30 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlternateFunction___VOID__I4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+        // check if object has been disposed
+        if(pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue ].NumericByRef().u1 != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        // get pin number and take the port and pad references from that one
+        int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+
+        // get alternate function argument
+		int32_t alternateFunction = stack.Arg1().NumericByRef().s4;
+
+        Esp32_SetMappedDevicePins( (uint8_t)pinNumber, alternateFunction );
     }
     NANOCLR_NOCLEANUP();
 }
