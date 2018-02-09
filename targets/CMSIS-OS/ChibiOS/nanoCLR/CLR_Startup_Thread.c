@@ -13,10 +13,9 @@
 // This thread needs to be implemented at ChibiOS level because it has to include a call to chThdShouldTerminateX()
 // in case the thread is requested to terminate by the CMSIS call osThreadTerminate()
 
+__attribute__((noreturn))
 void CLRStartupThread(void const * argument)
 {
-  (void)argument;
-
   // initialize nanoHAL
   nanoHAL_Initialize_C();
 
@@ -30,9 +29,9 @@ void CLRStartupThread(void const * argument)
   ClrStartup(clrSettings);
 
   // loop until thread receives a request to terminate
-  while (!chThdShouldTerminateX()) {
+  while (1) {
     osDelay(500);
   }
 
-  // nothing to deinitialize or cleanup, so it's safe to return
+  // this function never returns
 }
