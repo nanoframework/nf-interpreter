@@ -665,6 +665,9 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             {
                 // OK to Tx
                 txOk = true;
+
+                // don't bother going into the event loop
+                eventResult = false;
             }
             else
             {
@@ -692,13 +695,6 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             {
                 // wait for event
                 NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_SerialPortOut, eventResult ));
-
-                if(eventResult)
-                {
-                    // event occurred
-                    // OK to Tx
-                    txOk = true;
-                }
             }
         }
 
