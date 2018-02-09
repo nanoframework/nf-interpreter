@@ -8,6 +8,8 @@
 #include <target_platform.h>
 #include <Esp32_os.h>
 
+uint64_t CPU_MiliSecondsToSysTicks(uint64_t miliSeconds);
+
 // events timer
 static TimerHandle_t eventsBoolTimer;
 static bool*  saveTimerCompleteFlag = 0;
@@ -128,13 +130,24 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
     Events_WaitForEvents_Calls++;
 #endif
 
-   if( systemEvents == 0) {
-        // no events, wait for timeout_Milliseconds
-        vTaskDelay( timeout_Milliseconds / portTICK_PERIOD_MS );
+    uint64_t CountsRemaining = CPU_MiliSecondsToSysTicks(timeout_Milliseconds);
+    uint64_t Expire = HAL_Time_CurrentSysTicks() + CountsRemaining;
+ 
+    while( true )
+    {
+        uint32_t Events = Events_MaskedRead( wakeupSystemEvents );
+        if(Events) 
+            return Events;
+
+        if(Expire <= HAL_Time_CurrentSysTicks())
+            break;
+
+       // no events, release time to OS
+        vTaskDelay(0);
     }
 
-    return  systemEvents;
-}
+    return 0;
+ }
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
