@@ -37,6 +37,8 @@ void nanoHAL_Initialize()
 
     Events_Initialize();
 
+    GPIO_Initialize();
+
     // no PAL events required until now
     //PalEvent_Initialize();
 }
@@ -55,7 +57,9 @@ void nanoHAL_Uninitialize()
     //         break;
     //     }
     // }   
-    
+
+    GPIO_Uninitialize();
+
     Events_Uninitialize();
     
     HAL_CONTINUATION::Uninitialize();
