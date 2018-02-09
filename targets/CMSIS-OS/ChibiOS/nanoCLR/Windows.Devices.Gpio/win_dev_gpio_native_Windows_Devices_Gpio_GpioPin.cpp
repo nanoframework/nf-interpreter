@@ -44,7 +44,7 @@ enum GpioPinValue
 ///////////////////////////////////////////////////////////////////////////////////
 
 // this structure is part of the target because it can have different sizes according to the device
-extern EXTConfig extInterruptsConfiguration;
+//extern EXTConfig extInterruptsConfiguration;
 
 // this array keeps track of the Gpio pins that are assigned to each channel
 CLR_RT_HeapBlock* channelPinMapping[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };

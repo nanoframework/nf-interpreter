@@ -10,6 +10,7 @@
 
 #include <nanoHAL.h>
 #include <nanoPAL_Time.h>
+#include <nanoPAL_GPIO.h>
 #include <nanoHAL_v2.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoPAL_Events.h>

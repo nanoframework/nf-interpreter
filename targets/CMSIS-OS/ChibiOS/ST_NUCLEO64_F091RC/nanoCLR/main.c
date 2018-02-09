@@ -13,11 +13,7 @@
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
-
-// need this definition here because it depends on the specifics of the target (how many INT lines exist on that series/device)
-#if (HAL_USE_EXT == TRUE)
-EXTConfig extInterruptsConfiguration = { .channels = { {EXT_CH_MODE_DISABLED, NULL} }};
-#endif
+#include <targetPAL.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // RAM vector table declaration (valid for GCC only)
