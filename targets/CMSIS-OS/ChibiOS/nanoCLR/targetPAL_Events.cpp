@@ -111,17 +111,21 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
     Events_WaitForEvents_Calls++;
 #endif
 
-    uint64_t CountsRemaining = CPU_MiliSecondsToSysTicks( (uint64_t)timeout_Milliseconds );
-    uint64_t Expire           = HAL_Time_CurrentSysTicks() + CountsRemaining;
+    uint64_t countsRemaining = CPU_MiliSecondsToSysTicks( (uint64_t)timeout_Milliseconds );
+    uint64_t expire          = HAL_Time_CurrentSysTicks() + countsRemaining;
  
     while( true )
     {
-        uint32_t Events = Events_MaskedRead( wakeupSystemEvents );
-        if(Events) 
-            return Events;
+        uint32_t events = Events_MaskedRead( wakeupSystemEvents );
+        if(events)
+        {
+            return events;
+        }
 
-        if(Expire <= HAL_Time_CurrentSysTicks())
+        if(expire <= HAL_Time_CurrentSysTicks())
+        {
             break;
+        }
 
        // no events, release time to OS
         osDelay(1);
