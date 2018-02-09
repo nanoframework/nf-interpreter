@@ -19,13 +19,13 @@ set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m4 -x assembler-with-cpp" CACHE INTER
 
 # need to specify linker flags here
 # -mfpu=fpv5-sp-d16
-set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -mthumb -mcpu=cortex-m4 -mfloat-abi=soft -march=armv7e-m -mfpu=fpv4-sp-d16 -mabi=aapcs -nostartfiles -Wl,-T,${TIRTOS_BIOS_INSTALLATION_DIR}/ti/platforms/simplelink/include_gnu/cc3200.lds -lgcc -lc -lm -lrdimon " CACHE INTERNAL "executable linker flags")
+set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -march=armv7e-m -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=soft -mabi=aapcs -nostartfiles -lgcc -lc -lm -lrdimon " CACHE INTERNAL "executable linker flags")
 
 
 function(NF_SET_COMPILER_OPTIONS TARGET)
 
     # include any extra options comming from any extra args?
-    target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m4  -mfloat-abi=soft -march=armv7e-m -mfpu=fpv4-sp-d16 -gstrict-dwarf -mabi=aapcs -nostdlib -Wall -w -static -ffunction-sections -fshort-wchar -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fsingle-precision-constant -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -mstructure-size-boundary=8 -ffast-math -ftree-vectorize -fcheck-new -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
+    target_compile_options(${TARGET} PUBLIC  ${ARGN} -march=armv7e-m -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=soft -mabi=aapcs -gstrict-dwarf -nostdlib -Wall -w -static -ffunction-sections -fshort-wchar -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fsingle-precision-constant -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -mstructure-size-boundary=8 -ffast-math -ftree-vectorize -fcheck-new -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
         
 endfunction()
 

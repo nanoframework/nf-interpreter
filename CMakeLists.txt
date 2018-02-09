@@ -153,10 +153,6 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 #     # set toolchain file
 #     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.${CHIP_VENDOR_STM32}.${TOOLCHAIN}.cmake)
 
-elseif(RTOS_TIRTOS_CHECK)
-    message(STATUS "\nSetting Toolchain file for TI-RTOS \n")
-    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.TIRTOS.${TOOLCHAIN}.cmake)
-
 endif()
 
 #########################################
@@ -1113,19 +1109,6 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}")
  		add_subdirectory(targets/FreeRTOS_ESP32/${ESP32_BOARD})
 
-    endif()
-
-#######################
-# TI-RTOS
-elseif(RTOS_TIRTOS_CHECK)
-
-    if("${TARGET_SERIES}" STREQUAL "TICC3200")
-        message("Platform TICC3200")
-
-        # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/TI-RTOS/CC3200/nanoCLR")
-
- 		add_subdirectory(targets/TI-RTOS/CC3200)
     endif()
 
 endif()

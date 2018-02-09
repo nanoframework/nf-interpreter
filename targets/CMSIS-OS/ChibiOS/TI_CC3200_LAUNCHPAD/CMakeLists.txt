@@ -7,8 +7,6 @@ cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
 
 # add header files with common OS definitions and board definitions specific for each image
-# configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in"
-#                 "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
@@ -17,25 +15,24 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
 # set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
-find_package(CC3200_SDK REQUIRED)
 find_package(BuildUtils REQUIRED)
-# find_package(CHIBIOS REQUIRED)
-# find_package(ChibiOSnfOverlay REQUIRED)
-# find_package(WireProtocol REQUIRED)
+find_package(CHIBIOS REQUIRED)
+find_package(ChibiOSnfOverlay REQUIRED)
+find_package(WireProtocol REQUIRED)
 
 # packages for nanoFramework libraries
 #######################################
 # mandatory 
-# find_package(NF_CoreCLR REQUIRED)
+find_package(NF_CoreCLR REQUIRED)
 
 #######################################
 # optional
 
-# # nF feature: debugger
-# if(NF_FEATURE_DEBUGGER)
-#     find_package(NF_Debugger REQUIRED)
-#     find_package(NF_Diagnostics REQUIRED)
-# endif()
+# nF feature: debugger
+if(NF_FEATURE_DEBUGGER)
+    find_package(NF_Debugger REQUIRED)
+    find_package(NF_Diagnostics REQUIRED)
+endif()
 
 # # nF feature: networking
 # if(USE_NETWORKING_OPTION)
@@ -47,10 +44,18 @@ find_package(BuildUtils REQUIRED)
 #     find_package(CHIBIOS_FATFS REQUIRED)
 # endif()
 
+####################################################
+# sources for target specifc stuff related with APIs
+list(APPEND API_RELATED_TARGET_SOURCES "")
+
+# Windows.Devices.SerialCommunication
+if(API_Windows.Devices.SerialCommunication)
+    list(APPEND API_RELATED_TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_windows_devices_serialcommunication_config.cpp")    
+endif()
+
 #######################################
 
-
-# add_subdirectory("common")
+add_subdirectory("common")
 # add_subdirectory("nanoBooter")
 add_subdirectory("nanoCLR")
 
@@ -85,46 +90,70 @@ add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
     
-    # "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+    # "heap_useNewlib.c"
+    # "osi_chibios.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
 
-    # ${TARGET_CMSIS_COMMON_SOURCES}
-    # ${TARGET_CMSIS_NANOCLR_SOURCES}
+    ${TARGET_CMSIS_COMMON_SOURCES}
+    ${TARGET_CMSIS_NANOCLR_SOURCES}
     
-    # ${TARGET_CHIBIOS_COMMON_SOURCES}
-    # ${TARGET_CHIBIOS_NANOCLR_SOURCES}
+    ${TARGET_CHIBIOS_COMMON_SOURCES}
+    ${TARGET_CHIBIOS_NANOCLR_SOURCES}
 
-    ${CC3200_SDK_SOURCES}
-    # ${ChibiOSnfOverlay_SOURCES}
+    ${CHIBIOS_SOURCES}
+    ${ChibiOSnfOverlay_SOURCES}
 
     # sources for nanoFramework libraries
-    # "${NF_CoreCLR_SOURCES}"
-    # "${NF_Debugger_SOURCES}"
-    # "${NF_Diagnostics_SOURCES}"
+    "${NF_CoreCLR_SOURCES}"
+    "${NF_Debugger_SOURCES}"
+    "${NF_Diagnostics_SOURCES}"
 
     # sources for nanoFramework APIs
-    # "${TARGET_NANO_APIS_SOURCES}"
+    "${TARGET_NANO_APIS_SOURCES}"
 )
 
+# add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf ChibiOS)
 
 # include common directories
 include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/common
-    # ${PROJECT_SOURCE_DIR}/src/CLR/Core
-    # ${PROJECT_SOURCE_DIR}/src/CLR/Include
-    # ${PROJECT_SOURCE_DIR}/src/HAL/Include
-    # ${PROJECT_SOURCE_DIR}/src/PAL/Include
+    ${PROJECT_SOURCE_DIR}/src/CLR/Core
+    ${PROJECT_SOURCE_DIR}/src/CLR/Include
+    ${PROJECT_SOURCE_DIR}/src/HAL/Include
+    ${PROJECT_SOURCE_DIR}/src/PAL/Include
 
-    # ${WireProtocol_INCLUDE_DIRS}
-    ${CC3200_SDK_INCLUDE_DIRS}
-    # ${ChibiOSnfOverlay_INCLUDE_DIRS}
+    ${WireProtocol_INCLUDE_DIRS}
+    ${CHIBIOS_INCLUDE_DIRS}
+    ${ChibiOSnfOverlay_INCLUDE_DIRS}
 
-    # ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
-    # ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+    ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
+    ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+)
+
+# include directories for nanoCLR
+target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
+    "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
+     ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
+
+     ${TARGET_CMSIS_NANOCLR_INCLUDE_DIRS}
+     ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+
+    # directories for nanoFramework libraries
+    "${NF_CoreCLR_INCLUDE_DIRS}"
+    "${NF_Debugger_INCLUDE_DIRS}"
+    "${NF_Diagnostics_INCLUDE_DIRS}"
+    
+    # includes for nanoFramework APIs
+    "${TARGET_NANO_APIS_INCLUDES}"
+
+    # includes for ChibiOS LwIP
+    # "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 )
 
 # set compiler options
@@ -144,10 +173,17 @@ nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoC
 # nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf FALSE)
 nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf FALSE)
 
+# add other linker flags
+###################################################
+# the size of the CLR managed heap is defined here
+###################################################
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x1800")
+
 # add libraries 
-target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${TI_CC3200_SDK_PATH}/driverlib/gcc/exe/libdriver.a)
-target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${TI_CC3200_SDK_PATH}/simplelink/gcc/exe/libsimplelink.a)
-target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${TI_CC3200_SDK_PATH}/oslib/gcc/exe/libtirtos.a)
+# target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${TI_CC3200_SDK_PATH}/simplelink/gcc/exe/libsimplelink.a)
+# target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${TI_CC3200_SDK_PATH}/driverlib/gcc/exe/libdriver.a)
+# target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${TI_CC3200_SDK_PATH}/oslib/gcc/exe/libtirtos.a)
+# target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${TI_CC3200_SDK_PATH}/oslib/gcc/exe/freertos.a)
 
 # generate output files
 # nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
