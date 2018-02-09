@@ -8,6 +8,8 @@
 #include <target_platform.h>
 #include <hal.h>
 
+uint64_t CPU_MiliSecondsToSysTicks(uint64_t miliSeconds);
+
 // events timer
 static virtual_timer_t eventsBoolTimer;
 volatile uint32_t systemEvents;
@@ -109,13 +111,23 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
     Events_WaitForEvents_Calls++;
 #endif
 
-    if(systemEvents == 0)
+    uint64_t CountsRemaining = CPU_MiliSecondsToSysTicks( (uint64_t)timeout_Milliseconds );
+    uint64_t Expire           = HAL_Time_CurrentSysTicks() + CountsRemaining;
+ 
+    while( true )
     {
-        // no events, wait for timeout_Milliseconds
-        osDelay(timeout_Milliseconds);
+        uint32_t Events = Events_MaskedRead( wakeupSystemEvents );
+        if(Events) 
+            return Events;
+
+        if(Expire <= HAL_Time_CurrentSysTicks())
+            break;
+
+       // no events, release time to OS
+        osDelay(1);
     }
 
-    return systemEvents;
+    return 0;
 }
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
