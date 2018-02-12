@@ -13,7 +13,6 @@ list(APPEND NF_Debugger_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
 set(NF_Debugger_SRCS
 
     Debugger.cpp
-    Debugger_full.cpp
 
     Messaging.cpp
     
@@ -24,6 +23,14 @@ set(NF_Debugger_SRCS
 
     nanoSupport_CRC32.c
 )
+
+# add the debugger source file according to the build flavor
+if(NF_BUILD_RTM)
+    set(NF_Debugger_SRCS ${NF_Debugger_SRCS} Debugger_minimal.cpp)
+else()
+    set(NF_Debugger_SRCS ${NF_Debugger_SRCS} Debugger_full.cpp)
+endif()
+
 
 foreach(SRC_FILE ${NF_Debugger_SRCS})
     set(NF_Debugger_SRC_FILE SRC_FILE-NOTFOUND)
