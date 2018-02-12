@@ -3067,133 +3067,58 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status( WP_Message* msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    // temporary implementation without support for incremental deployment
-    CLR_DBG_Commands::Debugging_Deployment_Status::Reply cmdReply;
+    CLR_DBG_Commands::Debugging_Deployment_Status::Reply* cmdReply;
+    CLR_UINT32                                            totLength;
+    CLR_UINT32                                            deploySectorsNum  = 0;
+    CLR_UINT32                                            deploySectorStart = 0;
+    CLR_UINT32                                            deployLength      = 0;
 
+    const DeviceBlockInfo*                                deviceInfo;
 
-    cmdReply.EntryPoint          = g_CLR_RT_TypeSystem.m_entryPoint.m_data;
-    cmdReply.StorageStart        = 0;
-    cmdReply.StorageLength       = 0;
+    // find the first device in list with DEPLOYMENT blocks
+    if (m_deploymentStorageDevice != NULL)
+    {
+        BlockStorageStream stream;
 
+        if(BlockStorageStream_InitializeWithBlockStorageDevice(&stream, BlockUsage_DEPLOYMENT, m_deploymentStorageDevice ))
+        {
+            do
+            {
+                if(deploySectorsNum == 0)
+                {
+                    deploySectorStart = BlockStorageStream_CurrentAddress(&stream);
+                }
+                deployLength     += stream.Length;
+                deploySectorsNum ++;
+            }
+            while(BlockStorageStream_NextStream(&stream) && stream.BaseAddress == (deploySectorStart + deployLength));
+        }
 
+        deviceInfo = BlockStorageDevice_GetDeviceInfo(m_deploymentStorageDevice);
 
+        totLength = sizeof(CLR_DBG_Commands::Debugging_Deployment_Status::Reply);
 
-    WP_ReplyToCommand( msg, true, false, &cmdReply, sizeof(cmdReply) );
+        cmdReply = (CLR_DBG_Commands::Debugging_Deployment_Status::Reply*)CLR_RT_Memory::Allocate( totLength, true );
 
-    return true;
+        if(!cmdReply) return false;
 
-    // /////////////////////////////////////////////////////////////////////////
+        CLR_RT_Memory::ZeroFill( cmdReply, totLength );
 
-    // CLR_DBG_Commands::Debugging_Deployment_Status::Reply* cmdReply;
-    // CLR_UINT32                                            totLength;
-    // CLR_UINT32                                            deploySectorsNum  = 0;
-    // CLR_UINT32                                            deploySectorStart = 0;
-    // CLR_UINT32                                            deployLength      = 0;
+        cmdReply->EntryPoint          = g_CLR_RT_TypeSystem.m_entryPoint.m_data;
+        cmdReply->StorageStart        = deploySectorStart;
+        cmdReply->StorageLength       = deployLength;
 
-    // const DeviceBlockInfo*                                deviceInfo;
+        WP_ReplyToCommand( msg, true, false, cmdReply, totLength );
 
-    // // find the first device in list with DEPLOYMENT blocks
-    // if (m_deploymentStorageDevice != NULL)
-    // {
-    //     BlockStorageStream stream;
+        CLR_RT_Memory::Release( cmdReply );
 
-    //     if(BlockStorageStream_InitializeWithBlockStorageDevice(&stream, BlockUsage_DEPLOYMENT, m_deploymentStorageDevice ))
-    //     {
-    //         do
-    //         {
-    //             if(deploySectorsNum == 0)
-    //             {
-    //                 deploySectorStart = BlockStorageStream_CurrentAddress(&stream);
-    //             }
-    //             deployLength     += stream.Length;
-    //             deploySectorsNum ++;
-    //         }
-    //         while(BlockStorageStream_NextStream(&stream) && stream.BaseAddress == (deploySectorStart + deployLength));
-    //     }
-
-    //     deviceInfo = BlockStorageDevice_GetDeviceInfo(m_deploymentStorageDevice);
-
-    //     totLength = sizeof(CLR_DBG_Commands::Debugging_Deployment_Status::Reply) + (deploySectorsNum) * sizeof(CLR_DBG_Commands::Debugging_Deployment_Status::FlashSector);
-
-    //     cmdReply = (CLR_DBG_Commands::Debugging_Deployment_Status::Reply*)CLR_RT_Memory::Allocate( totLength, true );
-
-    //     if(!cmdReply) return false;
-
-    //     CLR_RT_Memory::ZeroFill( cmdReply, totLength );
-
-    //     cmdReply->m_entryPoint          = g_CLR_RT_TypeSystem.m_entryPoint.m_data;
-    //     cmdReply->m_storageStart        = deploySectorStart;
-    //     cmdReply->m_storageLength       = deployLength;
-    //     cmdReply->m_eraseWord           = 0xffffffff; //Is this true for all current devices?
-
-    //     int index = 0;
-
-    //     bool fDone = false;
-
-    //     if(BlockStorageStream_InitializeWithBlockStorageDevice(&stream, BlockUsage_DEPLOYMENT, m_deploymentStorageDevice))
-    //     {
-    //         do
-    //         {
-    //             FLASH_WORD  * dataBuf = NULL;
-    //             CLR_UINT32 crc=0;
-
-    //             if (!(deviceInfo->Attribute & MediaAttribute_SupportsXIP))
-    //             {
-    //                 // length for each block can be different, so should malloc and free at each block
-    //                 dataBuf = (FLASH_WORD* )CLR_RT_Memory::Allocate( stream.BlockLength, true );  if(!dataBuf) return false;
-    //             }
-
-    //             //or should the PC have to calculate this??
-    //             // need to read the data to a buffer first.
-    //             if (BlockStorageDevice_IsBlockErased(m_deploymentStorageDevice, BlockStorageStream_CurrentAddress(&stream), stream.Length ))
-    //             {
-    //                  crc = CLR_DBG_Commands::Monitor_DeploymentMap::c_CRC_Erased_Sentinel;
-    //             }
-    //             else
-    //             {
-    //                 int len = stream.Length;
-    //                 while(len > 0)
-    //                 {
-	// 					BlockStorageStream_Read(&stream, (unsigned char **)&dataBuf, stream.BlockLength );
-                        
-    //                     crc = SUPPORT_ComputeCRC( dataBuf, stream.BlockLength, crc );
-
-    //                     len -= stream.BlockLength;
-    //                 }
-    //             }
-
-    //             if (!(deviceInfo->Attribute & MediaAttribute_SupportsXIP))
-    //             {
-    //                 CLR_RT_Memory::Release( dataBuf );
-    //             }
-
-    //             // need real address
-    //             cmdReply->m_data[ index ].m_start  = stream.BaseAddress;
-    //             cmdReply->m_data[ index ].m_length = stream.Length;
-    //             cmdReply->m_data[ index ].m_crc    = crc;
-    //             index ++;
-
-    //             if(index >= (signed int)deploySectorsNum)
-    //             {
-    //                 fDone = true;
-    //                 break;
-    //             }
-
-    //         }
-    //         while(BlockStorageStream_NextStream(&stream));
-    //     }
-
-    //     WP_ReplyToCommand( msg, true, false, cmdReply, totLength );
-
-    //     CLR_RT_Memory::Release( cmdReply );
-
-    //     return true;
-    // }
-    // else
-    // {
-    //     WP_ReplyToCommand( msg, false, false, NULL, 0 );
-    //     return false;
-    // }
+        return true;
+    }
+    else
+    {
+        WP_ReplyToCommand( msg, false, false, NULL, 0 );
+        return false;
+    }
 }
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
