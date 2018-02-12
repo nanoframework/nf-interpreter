@@ -8,16 +8,20 @@
 
 #include <target_board.h>
 
-
-// call to FrreRTOS vTaskDelay to allow other threads to run
-#define NANOCLR_RELINQUISHEXECUTIONCONTROL()       vTaskDelay(0);
-
 //TODO: implement
 //#define GLOBAL_LOCK(x)              chSysLock();
 //#define GLOBAL_UNLOCK(x);           chSysUnlock();
 #define GLOBAL_LOCK(x)             
 #define GLOBAL_UNLOCK(x);          
 #define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
+
+
+// these macros are to be used at entry/exit of native interrupt handlers
+#define NATIVE_INTERRUPT_START  SystemState_SetNoLock( SYSTEM_STATE_ISR              );   \
+                                SystemState_SetNoLock( SYSTEM_STATE_NO_CONTINUATIONS );
+#define NATIVEINTERRUPT_END     SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS ); \
+                                SystemState_ClearNoLock( SYSTEM_STATE_ISR              );
+
 
 // TODO: Doesn't seem to be defined anywhere, used  clr corlib math
 #define INT32 int32_t

@@ -92,6 +92,8 @@ static void TxEnd1(UARTDriver *uartp)
 {
     (void)uartp;
 
+    NATIVE_INTERRUPT_START
+
     NF_PAL_UART* palUart;
 
     #if STM32_UART_USE_USART1
@@ -150,6 +152,8 @@ static void TxEnd1(UARTDriver *uartp)
     palUart->TxOngoingCount = 0;
 
     Events_Set( SYSTEM_EVENT_FLAG_COM_OUT );
+
+    NATIVE_INTERRUPT_END
 }
 
 // This callback is invoked when a character is received but the application was not ready to receive it, the character is passed as parameter.
@@ -157,6 +161,8 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
 {
     (void)uartp;
     (void)c;
+
+    NATIVE_INTERRUPT_START
 
     NF_PAL_UART* palUart;
 
@@ -224,6 +230,8 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
         // fire event for Rx buffer complete
         Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
     }
+
+    NATIVE_INTERRUPT_END
 }
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID( CLR_RT_StackFrame& stack )

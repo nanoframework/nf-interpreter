@@ -86,4 +86,46 @@ void nanoHAL_Uninitialize()
 }
 
 
+volatile int32_t SystemStates[SYSTEM_STATE_TOTAL_STATES];
 
+void SystemState_SetNoLock(SYSTEM_STATE_type state)
+{
+    SystemStates[state]++;
+}
+
+void SystemState_ClearNoLock(SYSTEM_STATE_type state)
+{
+    SystemStates[state]--;
+}
+
+bool SystemState_QueryNoLock(SYSTEM_STATE_type state)
+{
+    return (SystemStates[state] > 0) ? true : false;
+}
+
+void SystemState_Set(SYSTEM_STATE_type state)
+{
+    GLOBAL_LOCK(irq);
+
+    SystemState_SetNoLock(state);
+
+    GLOBAL_UNLOCK(irq);
+}
+
+void SystemState_Clear(SYSTEM_STATE_type state)
+{
+    GLOBAL_LOCK(irq);
+
+    SystemState_ClearNoLock(state );
+
+    GLOBAL_UNLOCK(irq);
+}
+
+bool SystemState_Query(SYSTEM_STATE_type state)
+{
+    GLOBAL_LOCK(irq);
+
+    return SystemState_QueryNoLock(state);
+
+    GLOBAL_UNLOCK(irq);
+}
