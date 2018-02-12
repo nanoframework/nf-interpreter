@@ -68,9 +68,13 @@ void Gpio_Interupt_ISR(void * args)
 {
    uint32_t pinNumber = (uint32_t)args;
 
+   NATIVE_INTERRUPT_START
+
    CLR_RT_HeapBlock*  pThis = channelPinMapping[pinNumber];
    if ( pThis == NULL )
    {
+       NATIVE_INTERRUPT_END
+
        return;
    }
     
@@ -78,6 +82,7 @@ void Gpio_Interupt_ISR(void * args)
    if( pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue ].NumericByRef().u1 != 0)
    {
        // object has been disposed, leave now
+       NATIVE_INTERRUPT_END
        return;
    }
 
@@ -88,7 +93,8 @@ void Gpio_Interupt_ISR(void * args)
         // if handle registed then post a managed event with the current pin reading
         PostManagedEvent( EVENT_GPIO, 0, pinNumber, gpio_get_level((gpio_num_t)pinNumber)  );
    }
-       
+
+    NATIVE_INTERRUPT_END
 }
 
 void Add_Gpio_Interrupt(gpio_num_t pinNumber)

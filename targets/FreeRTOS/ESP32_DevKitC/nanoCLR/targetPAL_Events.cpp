@@ -164,9 +164,8 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             HAL_COMPLETION::WaitForInterrupts(expire, powerLevel, wakeupSystemEvents );          
         }
 
-
         // no events, release time to OS
-        osDelay(10);
+        vTaskDelay(0);
     }
 
     return 0;
