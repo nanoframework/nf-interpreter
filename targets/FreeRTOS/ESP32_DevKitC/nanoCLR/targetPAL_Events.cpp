@@ -125,15 +125,18 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
 
 uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeout_Milliseconds )
 {
+    // schedule an interrupt for this far in the future
+    // timeout is in milliseconds, convert to Sleep Counts
+    uint64_t countsRemaining = CPU_MiliSecondsToSysTicks(timeout_Milliseconds);
 
 #if defined(HAL_PROFILE_ENABLED)
     Events_WaitForEvents_Calls++;
 #endif
 
-    uint64_t countsRemaining = CPU_MiliSecondsToSysTicks(timeout_Milliseconds);
     uint64_t expire          = HAL_Time_CurrentSysTicks() + countsRemaining;
- 
-    while( true )
+    bool runContinuations = true;
+
+    while(true)
     {
         uint32_t events = Events_MaskedRead( wakeupSystemEvents );
         if(events)
@@ -146,7 +149,22 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             break;
         }
 
-       // no events, release time to OS
+        // first check and possibly run any continuations
+        // but only if we have slept after stalling
+        if(runContinuations && !SystemState_QueryNoLock(SYSTEM_STATE_NO_CONTINUATIONS))
+        {
+            // if we stall on time, don't check again until after we sleep
+            runContinuations = HAL_CONTINUATION::Dequeue_And_Execute();
+        }
+        else
+        {
+            // try stalled continuations again after sleeping
+            runContinuations = true;
+
+            HAL_COMPLETION::WaitForInterrupts(expire, powerLevel, wakeupSystemEvents );          
+        }
+
+        // no events, release time to OS
         vTaskDelay(0);
     }
 

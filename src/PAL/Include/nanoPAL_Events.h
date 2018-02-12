@@ -10,18 +10,6 @@
 #include <nanoWeak.h>
 #include <netmf_errors.h>
 
-//////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Microsoft.SPOT.Hardware.SleepLevel !!! //
-//////////////////////////////////////////////////////////////////
-enum SLEEP_LEVEL
-{
-    SLEEP_LEVEL__AWAKE         = 0x00,
-    SLEEP_LEVEL__SELECTIVE_OFF = 0x10,
-    SLEEP_LEVEL__SLEEP         = 0x20,
-    SLEEP_LEVEL__DEEP_SLEEP    = 0x30,
-    SLEEP_LEVEL__OFF           = 0x40,
-};
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH nanoFramework.Runtime.Events.EventCategory (in managed code) !!! //
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +55,6 @@ typedef void (*set_Event_Callback)( void* );
 // Events_WaitForEvents(flags, EVENTS_TIMEOUT_INFINITE) waits forever for that event.
 
 uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeout_Milliseconds );
-uint32_t Events_WaitForEventsInternal( uint32_t sleepLevel, uint32_t WakeupSystemEvents, uint32_t Timeout_Milliseconds );
 
 __inline uint32_t Events_WaitForEvents( uint32_t WakeupSystemEvents, uint32_t Timeout_Milliseconds )
 {

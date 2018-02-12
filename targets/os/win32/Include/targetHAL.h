@@ -9,9 +9,6 @@
 // #include <nanoHAL_Time.h>
 // #include <nanoHAL_Power.h>
 
-// empty implementation for WIN32
-#define NANOCLR_RELINQUISHEXECUTIONCONTROL()
-
 #if defined(_WIN32)
 #define NANOCLR_STOP() ::DebugBreak()
 #pragma warning( error : 4706 ) // error C4706: assignment within conditional expression

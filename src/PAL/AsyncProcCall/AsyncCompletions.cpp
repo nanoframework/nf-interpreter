@@ -169,45 +169,46 @@ void HAL_COMPLETION::Abort()
 
 //--//
 
-void HAL_COMPLETION::WaitForInterrupts( uint64_t expire, uint32_t sleepLevel, uint64_t wakeEvents )
+void HAL_COMPLETION::WaitForInterrupts(uint64_t expire, uint32_t sleepLevel, uint64_t wakeEvents)
 {
-    // TODO 
-    // still unclear on the best way to handle this
+    NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 
-    // NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    // const int setCompare   = 1;
-    // const int resetCompare = 2;
-    // const int nilCompare   = 4;
+    const int setCompare   = 1;
+    const int resetCompare = 2;
+    const int nilCompare   = 4;
 
-    // ASSERT_IRQ_MUST_BE_OFF();
+    ASSERT_IRQ_MUST_BE_OFF();
 
-    // HAL_COMPLETION* ptr = (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode();
-    // int             state;
+    HAL_COMPLETION* ptr = (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode();
+    int             state;
 
-    // if(ptr->Next() == NULL)
-    // {
-    //     state = setCompare | nilCompare;
-    // }
-    // else if(ptr->EventTimeTicks > expire)
-    // {
-    //     state = setCompare | resetCompare;
-    // }
-    // else
-    // {
-    //     state = 0;
-    // }
+    if(ptr->Next() == NULL)
+    {
+        state = setCompare | nilCompare;
+    }
+    else if(ptr->EventTimeTicks > expire)
+    {
+        state = setCompare | resetCompare;
+    }
+    else
+    {
+        state = 0;
+    }
 
-    // if(state & setCompare) Time_SetCompare( expire );
+    if(state & setCompare)
+    {
+        Time_SetCompare(expire);
+    }
 
-    // CPU_Sleep( (SLEEP_LEVEL)sleepLevel, wakeEvents );
+    CPU_Sleep((SLEEP_LEVEL_type)sleepLevel, wakeEvents);
 
-    // if(state & (resetCompare | nilCompare))
-    // {   
-    //     // let's get the first node again
-    //     // it could have changed since CPU_Sleep re-enabled interrupts
-    //     ptr = (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode();
-    //     Time_SetCompare( (state & resetCompare) ? ptr->EventTimeTicks : HAL_Completion_IdleValue );
-    // }
+    if(state & (resetCompare | nilCompare))
+    {   
+        // let's get the first node again
+        // it could have changed since CPU_Sleep re-enabled interrupts
+        ptr = (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode();
+        Time_SetCompare((state & resetCompare) ? ptr->EventTimeTicks : HAL_Completion_IdleValue);
+    }
 }
 
 void HAL_COMPLETION::Uninitialize()

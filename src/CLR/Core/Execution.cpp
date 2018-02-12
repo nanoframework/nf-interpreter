@@ -1234,9 +1234,6 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
         UpdateTime();
 
         (void)ProcessTimer();
-
-        // relinquish execution to OS
-        NANOCLR_RELINQUISHEXECUTIONCONTROL();
     }
 
     NANOCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);
@@ -2923,8 +2920,7 @@ void CLR_RT_ExecutionEngine::DebuggerLoop()
 
     UpdateTime();
 
-    // relinquish execution to OS
-    NANOCLR_RELINQUISHEXECUTIONCONTROL();
+    WaitSystemEvents(SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, TIME_CONVERSION__TO_MILLISECONDS * 100 );
 }
 
 

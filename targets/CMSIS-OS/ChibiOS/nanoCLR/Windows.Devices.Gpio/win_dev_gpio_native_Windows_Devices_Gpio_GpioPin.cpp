@@ -94,6 +94,8 @@ static void ExtInterruptHandler(EXTDriver *extp, expchannel_t channel)
     (void)extp;
     (void)channel;
 
+    NATIVE_INTERRUPT_START
+
     chSysLockFromISR();
 
     CLR_RT_HeapBlock*  pThis = channelPinMapping[channel];
@@ -110,6 +112,9 @@ static void ExtInterruptHandler(EXTDriver *extp, expchannel_t channel)
     {
         // object has been disposed, leave now
         chSysUnlockFromISR();
+
+        NATIVE_INTERRUPT_END
+
         return;
     }
     
@@ -129,6 +134,9 @@ static void ExtInterruptHandler(EXTDriver *extp, expchannel_t channel)
         {
             // there is a debounce timer already running so this change in pin value should be discarded 
             chSysUnlockFromISR();
+
+            NATIVE_INTERRUPT_END
+            
             return;
         }
 
@@ -145,6 +153,8 @@ static void ExtInterruptHandler(EXTDriver *extp, expchannel_t channel)
     }
 
     chSysUnlockFromISR();
+
+    NATIVE_INTERRUPT_END
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )
