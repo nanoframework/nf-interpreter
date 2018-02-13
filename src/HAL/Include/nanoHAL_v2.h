@@ -164,7 +164,7 @@ extern "C" {
 #endif
 
 void CPU_Reset();
-void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents);
+//void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents);
 
 #ifdef __cplusplus
 }
