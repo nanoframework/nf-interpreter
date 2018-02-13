@@ -148,10 +148,10 @@ void CLR_HW_Hardware::ProcessActivity()
         ProcessInterrupts();
     }
 
-    // UNDONE: FIXME: if(events & SYSTEM_EVENT_FLAG_SOCKET)
-    // {
-    //     eventsCLR |= CLR_RT_ExecutionEngine::c_Event_Socket;
-    // }
+    if(events & SYSTEM_EVENT_FLAG_SOCKET)
+    {
+         eventsCLR |= CLR_RT_ExecutionEngine::c_Event_Socket;
+    }
 
     if(events & SYSTEM_EVENT_FLAG_IO)
     {

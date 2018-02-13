@@ -19,7 +19,6 @@ list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/l
 set(LWIP_SRCS
     # bindings
     lwipthread.c
-    sys_arch.c
 
     # netif
     etharp.c
@@ -54,13 +53,19 @@ set(LWIP_SRCS
 
     # api
     api_lib.c
-    api_msg.c
     err.c
     netbuf.c
     netdb.c
     netifapi.c
-    sockets.c
     tcpip.c
+
+    # api patched files for nanoframework
+    nf_api_msg.c
+    nf_sockets.c
+    nf_sys_arch.c
+
+    #extras
+    evtimer.c
 )
 
 
@@ -68,13 +73,15 @@ foreach(SRC_FILE ${LWIP_SRCS})
     set(LWIP_SRC_FILE SRC_FILE -NOTFOUND)
     find_file(LWIP_SRC_FILE ${SRC_FILE}
         PATHS 
-
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings/arch
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv4
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/api
+
+            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

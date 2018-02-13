@@ -39,6 +39,7 @@ endif()
 # nF feature: networking
 if(USE_NETWORKING_OPTION)
     find_package(CHIBIOS_LWIP REQUIRED)
+    find_package(NF_NETWORKING REQUIRED)
 endif()
 
 # nF feature: filesystem
@@ -111,6 +112,10 @@ add_executable(
     "${NF_Debugger_SOURCES}"
     "${NF_Diagnostics_SOURCES}"
     
+    # sources for nanoFramework Network LWIP and Sockets
+    "${CHIBIOS_LWIP_SOURCES}"
+    "${NF_Networking_SOURCES}"
+
     # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
 
@@ -167,6 +172,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 
     # includes for ChibiOS LwIP
     "${CHIBIOS_LWIP_INCLUDE_DIRS}"
+
+    # incudes for Networking
+	"${NF_Networking_INCLUDE_DIRS}"
 )
 
 # set compiler options

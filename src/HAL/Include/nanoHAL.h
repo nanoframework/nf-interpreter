@@ -35,6 +35,7 @@
 #include <targetHAL.h>
 #include <nanoHAL_Types.h>
 #include <nanoHAL_ReleaseInfo.h>
+#include <nanoHAL_Network.h>
 
 //#if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
 //#define ENABLE_NATIVE_PROFILER
@@ -289,7 +290,8 @@
 // Creates a COM_HANDLE value for a platform specific port number
 #define ConvertCOM_DebugHandle(x)    ((COM_HANDLE)((x) + DEBUG_TRANSPORT     + 1))
 
-
+// Extracts a Socket transport port id from a SOCKET_TRASNPORT COM_HANDLE
+#define ConvertCOM_SockPort(x)      (((x) & PORT_NUMBER_MASK) - 1)
 
 typedef unsigned int FLASH_WORD;
 

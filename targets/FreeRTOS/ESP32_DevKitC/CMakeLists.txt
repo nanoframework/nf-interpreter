@@ -37,6 +37,11 @@ find_package(NF_Debugger REQUIRED)
 find_package(NF_Diagnostics REQUIRED)
 endif()
 
+# nF feature: Networking Stack, LWIP included in IDF libs
+if(NF_FEATURE_USE_NETWORKING)
+find_package(NF_NETWORKING REQUIRED)
+endif()
+
 #######################################
 
 add_subdirectory("common")
@@ -82,6 +87,9 @@ add_executable(
     "${NF_Debugger_SOURCES}"
     "${NF_Diagnostics_SOURCES}"
     
+	# sources for nanoFramework Network sockets
+    "${NF_Networking_SOURCES}"
+	
     # # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
 )
@@ -168,6 +176,7 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     # directories for nanoFramework libraries
     "${NF_CoreCLR_INCLUDE_DIRS}"
     "${NF_Debugger_INCLUDE_DIRS}"
+	"${NF_Networking_INCLUDE_DIRS}"
 
     # includes for nanoFramework APIs
     "${TARGET_NANO_APIS_INCLUDES}"
@@ -177,7 +186,7 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 # set extra compiler flags, some are related with the build type
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     ## build types that include debug have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
-#    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32 -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
+#    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32  -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
     target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC    "-DPLATFORM_ESP32 -DPLATFORM_EMULATED_FLOATINGPOINT -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
 else()
 #    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32 ")
