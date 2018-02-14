@@ -251,7 +251,11 @@ struct Settings
     {
         g_CLR_RT_Persistence_Manager.Uninitialize();
 
-        CLR_RT_ExecutionEngine::DeleteInstance();
+        if(!CLR_EE_REBOOT_IS(NoShutdown))
+        {
+            // OK to delete execution engine 
+            CLR_RT_ExecutionEngine::DeleteInstance();
+        }
 
         m_fInitialized = false;
     }
@@ -330,7 +334,7 @@ void ClrStartup(CLR_SETTINGS params)
             {
                 softReboot = true;
 
-                params.WaitForDebugger = CLR_EE_REBOOT_IS(ClrOnlyStopDebugger);
+                params.WaitForDebugger = CLR_EE_REBOOT_IS(WaitForDebugger);
                 
                 s_ClrSettings.Cleanup();
 

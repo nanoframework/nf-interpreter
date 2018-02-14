@@ -75,14 +75,8 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
     m_currentUICulture     = NULL;                  // CLR_RT_HeapBlock*                   m_currentUICulture;
 
-#if defined(CLR_COMPONENTIZATION_USE_HANDLER)
-    Handler_Initialize();
-#else
     CLR_RT_HeapBlock_EndPoint::HandlerMethod_Initialize(); 
     CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_Initialize();
-    // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_Initialize();
-
-#endif
 
     m_interruptThread     = NULL;                   // CLR_RT_Thread                       m_interruptThread;
 
@@ -246,13 +240,8 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_globalLock = NULL;
 #endif
 
-#if defined(CLR_COMPONENTIZATION_USE_HANDLER)
-    Handler_CleanUp();
-#else
     CLR_RT_HeapBlock_EndPoint::HandlerMethod_CleanUp(); 
     CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp();
-    // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_CleanUp();
-#endif
 
     m_interruptThread = NULL;    
 
@@ -289,7 +278,7 @@ void CLR_RT_ExecutionEngine::Reboot( bool fHard )
     }
     else
     {
-        CLR_EE_REBOOT_SET(ClrOnly);
+        CLR_EE_REBOOT_CLR;
         CLR_EE_DBG_SET(RebootPending);
     }
 }
