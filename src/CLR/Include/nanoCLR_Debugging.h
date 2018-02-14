@@ -62,12 +62,16 @@ struct CLR_DBG_Commands
         };
     };
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.RebootOptions (in managed code) !!! //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
     struct Monitor_Reboot
     {
         static const unsigned int c_NormalReboot    = 0;
         static const unsigned int c_EnterBootloader = 1;
-        static const unsigned int c_ClrRebootOnly   = 2;
-        static const unsigned int c_ClrStopDebugger = 4;
+        static const unsigned int c_ClrOnly   = 2;
+        static const unsigned int c_WaitForDebugger   = 4;
+        static const unsigned int c_NoShutdown = 8;
 
         unsigned int m_flags;
     };

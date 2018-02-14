@@ -857,17 +857,7 @@ bool CLR_DBG_Debugger::Monitor_Reboot( WP_Message* msg)
             // UNDONE: FIXME HAL_EnterBooterMode();
         }
 
-        if(::CPU_IsSoftRebootSupported ())
-        {
-            if((CLR_DBG_Commands::Monitor_Reboot::c_ClrRebootOnly == (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_ClrRebootOnly)))
-            {
-                CLR_EE_REBOOT_SET(ClrOnly);
-            }
-            else if((CLR_DBG_Commands::Monitor_Reboot::c_ClrStopDebugger == (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_ClrStopDebugger)))
-            {
-                CLR_EE_REBOOT_SET(ClrOnlyStopDebugger);
-            }
-        }
+        g_CLR_RT_ExecutionEngine.m_iReboot_Options = cmd->m_flags;
     }
 
     CLR_EE_DBG_SET( RebootPending );
