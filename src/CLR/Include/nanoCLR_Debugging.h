@@ -244,10 +244,6 @@ struct CLR_DBG_Commands
 
     //--//                                                       
                                                                  
-    static const unsigned int c_Debugging_Lcd_NewFrame                   = 0x00020070; // Reports a new frame sent to the LCD.
-    static const unsigned int c_Debugging_Lcd_NewFrameData               = 0x00020071; // Reports a new frame sent to the LCD, with its contents.
-    static const unsigned int c_Debugging_Lcd_GetFrame                   = 0x00020072; // Requests the current frame.
-                                                                 
     static const unsigned int c_Debugging_Button_Report                  = 0x00020080; // Reports a button press/release.
     static const unsigned int c_Debugging_Button_Inject                  = 0x00020081; // Injects a button press/release.
                                                                                                                    
@@ -269,7 +265,6 @@ struct CLR_DBG_Commands
     struct Debugging_Execution_QueryCLRCapabilities
     {
         static const CLR_UINT32 c_CapabilityFlags             = 1;
-        static const CLR_UINT32 c_CapabilityLCD               = 2;
         static const CLR_UINT32 c_CapabilityVersion           = 3;
         static const CLR_UINT32 c_HalSystemInfo               = 5;
         static const CLR_UINT32 c_ClrInfo                     = 6;
@@ -288,13 +283,6 @@ struct CLR_DBG_Commands
 
         CLR_UINT32 m_cmd;
 
-        struct LCD
-        {
-            CLR_UINT32 m_width;
-            CLR_UINT32 m_height;
-            CLR_UINT32 m_bpp;
-        };
-
         struct __nfpack SoftwareVersion
         {
             char BuildDate[ 22 ];
@@ -311,7 +299,6 @@ struct CLR_DBG_Commands
         union ReplyUnion
         {
             CLR_UINT32          u_capsFlags;
-            LCD                 u_LCD;
             SoftwareVersion     u_SoftwareVersion;
             HalSystemInfo       u_HalSystemInfo;
             ClrInfo             u_ClrInfo;
