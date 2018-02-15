@@ -5,7 +5,7 @@ $GnuGccPathExists = Test-Path $env:GNU_GCC_TOOLCHAIN_PATH -ErrorAction SilentlyC
 
 If($GnuGccPathExists -eq $False)
 {
-    Install-Module 7Zip4PowerShell -Force -Verbose
+    Install-Module 7Zip4PowerShell -Force
 
     Write-Host "Downloading ARM GNU GCC toolchain..."
 

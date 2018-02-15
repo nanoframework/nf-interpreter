@@ -5,7 +5,7 @@ $ESP32LibPathExists = Test-Path $env:ESP32_LIBS_PATH -ErrorAction SilentlyContin
 
 If($ESP32LibPathExists -eq $False)
 {
-    Install-Module 7Zip4PowerShell -Force -Verbose
+    Install-Module 7Zip4PowerShell -Force
 
     Write-Host "Downloading ESP32 pre-compiled libs..."
 
