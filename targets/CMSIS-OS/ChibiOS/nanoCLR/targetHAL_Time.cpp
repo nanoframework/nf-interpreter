@@ -134,5 +134,5 @@ const char* HAL_Time_CurrentDateTimeToString()
 
 unsigned __int64 CPU_MiliSecondsToSysTicks(unsigned __int64 miliSeconds)
 {
-    return MS2ST(miliSeconds);
+    return TIME_MS2I(miliSeconds);
 }
