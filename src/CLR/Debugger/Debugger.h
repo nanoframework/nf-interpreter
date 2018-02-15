@@ -73,10 +73,6 @@ typedef enum CLR_DBG_Commands_Debugging
 
     //--//                                                       
                                                                  
-    CLR_DBG_Commands_c_Debugging_Lcd_NewFrame                   = 0x00020070, // Reports a new frame sent to the LCD.
-    CLR_DBG_Commands_c_Debugging_Lcd_NewFrameData               = 0x00020071, // Reports a new frame sent to the LCD, with its contents.
-    CLR_DBG_Commands_c_Debugging_Lcd_GetFrame                   = 0x00020072, // Requests the current frame.
-                                                                 
     CLR_DBG_Commands_c_Debugging_Button_Report                  = 0x00020080, // Reports a button press/release.
     CLR_DBG_Commands_c_Debugging_Button_Inject                  = 0x00020081, // Injects a button press/release.
                                                                                                                    

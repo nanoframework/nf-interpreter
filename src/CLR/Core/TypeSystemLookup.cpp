@@ -124,8 +124,6 @@ const CLR_RT_DataTypeLookup c_CLR_RT_DataTypeLookup[] =
 
     DATATYPE_NOT_SUPPORTED  //VTU_PORT
 
-    { DT_REF                                                                  , DT_NA, DT_NA, DT_T(I2C_XACTION         ), DT_CNV(END      ), NULL                       , DT_NOREL(CLR_RT_HeapBlock_I2CXAction                      ) DT_OPT_NAME(I2C_XACTION         ) }, // DATATYPE_I2C_XACTION
-
 #if defined(NANOCLR_APPDOMAINS)
     { DT_REF                                                                  , DT_NA, DT_NA, DT_T(APPDOMAIN_HEAD      ), DT_CNV(END      ), NULL                       , DT_REL  (CLR_RT_AppDomain::Relocate                       ) DT_OPT_NAME(APPDOMAIN_HEAD      ) }, // DATATYPE_APPDOMAIN_HEAD
     { DT_REF                                                           | DT_MT, DT_NA, DT_NA, DT_T(TRANSPARENT_PROXY   ), DT_CNV(END      ), NULL                       , DT_REL  (CLR_RT_HeapBlock::Relocate_TransparentProxy      ) DT_OPT_NAME(TRANSPARENT_PROXY   ) }, // DATATYPE_TRANSPARENT_PROXY

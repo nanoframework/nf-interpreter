@@ -39,7 +39,6 @@ void CLR_DBG_Debugger::Debugger_WaitForCommands()
     NATIVE_PROFILE_CLR_DEBUGGER();
 
 #if !defined(BUILD_RTM)
-    // UNDONE: FIXME: hal_fprintf(STREAM_LCD, "\r\nWaiting for debug commands...\r\n");
     CLR_Debug::Printf( "Waiting for debug commands...\r\n" );
 #endif
 
@@ -1033,15 +1032,6 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
             data = (CLR_UINT8*)&reply.u_capsFlags;
             size = sizeof(reply.u_capsFlags);
             break;
-
-        // UNDONE: FIXME: case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityLCD:
-            //reply.u_LCD.m_width  = LCD_SCREEN_WIDTH;
-            //reply.u_LCD.m_height = LCD_SCREEN_HEIGHT;
-            //reply.u_LCD.m_bpp    = LCD_SCREEN_BPP;
-
-            //data = (CLR_UINT8*)&reply.u_LCD;
-            //size = sizeof(reply.u_LCD);
-            //break;
 
         case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityVersion:
 #if defined(__GNUC__)
