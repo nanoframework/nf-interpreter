@@ -60,7 +60,7 @@ bool FLASH_WaitForLastOperation(uint32_t timeout)
     //  flag will be set
 
     systime_t start = chVTGetSystemTime();
-    systime_t end = start + MS2ST(timeout);
+    systime_t end = start + TIME_MS2I(timeout);
     
     while(__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET) 
     { 
