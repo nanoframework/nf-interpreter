@@ -267,11 +267,6 @@ void CLR_RT_ExecutionEngine::Reboot( bool fHard )
     // UNDONE: FIXME
     // ::Watchdog_GetSetEnabled( false, true );
 
-    // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Flush();
-    //g_CLR_RT_Persistence_Manager.m_state = CLR_RT_Persistence_Manager::STATE_FlushNextObject;
-    //g_CLR_RT_Persistence_Manager.m_pending_object = NULL;
-    //g_CLR_RT_Persistence_Manager.Flush();
-
     if(fHard)
     {
         ::CPU_Reset();
@@ -409,8 +404,6 @@ void CLR_RT_ExecutionEngine::Relocate()
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_currentUICulture     );
 
     m_weakReferences.Relocate();
-
-    // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Relocate();
 }
 
 //--//
@@ -699,8 +692,6 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
      */
     g_CLR_PRF_Profiler.Stream_Flush();
 #endif
-
-    // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Flush();
 
 #if defined(WIN32)
 #if defined(NANOCLR_PROFILE_NEW)
@@ -1926,7 +1917,9 @@ HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CL
             {
                 CLR_RT_HeapBlock_WeakReference* weakref;
 
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_WeakReference::CreateInstance( weakref ));
+                // this used to be a call to CLR_RT_HeapBlock_WeakReference::CreateInstance                
+                weakref = (CLR_RT_HeapBlock_WeakReference*)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects( DATATYPE_WEAKCLASS, CLR_RT_HeapBlock::HB_InitializeToZero, sizeof(*weakref) );
+                CHECK_ALLOCATION(weakref);
 
                 reference.SetObjectReference( weakref );
             }

@@ -112,8 +112,6 @@ struct Settings
 #endif
         NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
 
-        g_CLR_RT_Persistence_Manager.Initialize();
-
         NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
 
 #if defined(NANOCLR_PROFILE_HANDLER)
@@ -249,8 +247,6 @@ struct Settings
 
     void Cleanup()
     {
-        g_CLR_RT_Persistence_Manager.Uninitialize();
-
         if(!CLR_EE_REBOOT_IS(NoShutdown))
         {
             // OK to delete execution engine 

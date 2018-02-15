@@ -489,8 +489,6 @@ void CLR_RT_GarbageCollector::MarkWeak()
         }
         else
         {
-            g_CLR_RT_Persistence_Manager.InvalidateEntry( weak );
-
             weak->Unlink();
         }
     }
@@ -574,8 +572,6 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                 if(weak->m_targetSerialized)
                 {
                     fExit = true;
-
-                    g_CLR_RT_Persistence_Manager.InvalidateEntry( weak );
                 }
             }
         }
@@ -615,8 +611,6 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
 
                         CLR_Debug::Printf( " [%d bytes] %s\r\n", weak->m_targetSerialized->m_numOfElements, (weak->m_targetDirect ? "DIRECT" : "") );
 #endif
-
-                        g_CLR_RT_Persistence_Manager.InvalidateEntry( weak );
 
                         break;
                     }
