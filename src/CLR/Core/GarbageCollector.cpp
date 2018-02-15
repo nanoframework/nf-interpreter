@@ -232,7 +232,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                     {
                         if(countArryBlocks[ dt2 ])
                         {
-                            CLR_Debug::Printf( "  Type %02X (%-20s): %6d bytes\r\n", dt2, c_CLR_RT_DataTypeLookup[ dt2 ].m_name, countArryBlocks[ dt2 ] * sizeof(CLR_RT_HeapBlock) );
+                            CLR_Debug::Printf( "   Type %02X (%-17s): %6d bytes\r\n", dt2, c_CLR_RT_DataTypeLookup[ dt2 ].m_name, countArryBlocks[ dt2 ] * sizeof(CLR_RT_HeapBlock) );
                         }
                     }
                 }
