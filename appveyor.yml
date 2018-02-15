@@ -165,6 +165,11 @@
             $cmake = "cmake"
             &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
+            if ($lastexitcode -ne 0)
+            {
+              throw [System.Exception] "CMake build failed with exit code $lastexitcode."
+            }
+
             Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
             Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
 
@@ -184,6 +189,11 @@
               # single STM32 target
               $cmake = "cmake"
               &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+              if ($lastexitcode -ne 0)
+              {
+                throw [System.Exception] "CMake build failed with exit code $lastexitcode."
+              }
 
               Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
               Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
@@ -445,6 +455,11 @@
             $cmake = "cmake"
             &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
+            if ($lastexitcode -ne 0)
+            {
+              throw [System.Exception] "CMake build failed with exit code $lastexitcode."
+            }
+
             Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
             Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
 
@@ -464,6 +479,11 @@
               # single STM32 target
               $cmake = "cmake"
               &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+              if ($lastexitcode -ne 0)
+              {
+                throw [System.Exception] "CMake build failed with exit code $lastexitcode."
+              }
 
               Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
               Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
@@ -733,6 +753,11 @@
             $cmake = "cmake"
             &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
+            if ($lastexitcode -ne 0)
+            {
+              throw [System.Exception] "CMake build failed with exit code $lastexitcode."
+            }
+
             Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
             Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
 
@@ -752,6 +777,11 @@
               # single STM32 target
               $cmake = "cmake"
               &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+
+              if ($lastexitcode -ne 0)
+              {
+                throw [System.Exception] "CMake build failed with exit code $lastexitcode."
+              }
 
               Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
               Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
