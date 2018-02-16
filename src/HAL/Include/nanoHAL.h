@@ -1838,7 +1838,7 @@ bool              Watchdog_GetSetEnabled ( bool enabled, bool fSet );
 
 #if defined(_WIN32)
 
-#define GLOBAL_LOCK(x)               // UNDONE: FIXME: SmartPtr_IRQ x
+#define GLOBAL_LOCK(x)
 //#define DISABLE_INTERRUPTS()       SmartPtr_IRQ::ForceDisabled()
 //#define ENABLE_INTERRUPTS()        SmartPtr_IRQ::ForceEnabled()
 //#define INTERRUPTS_ENABLED_STATE() SmartPtr_IRQ::GetState()

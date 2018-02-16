@@ -21,8 +21,7 @@
 
 #if !defined(BUILD_RTM)
 
-// FIXME IMPLEMENT
-//inline void HARD_Breakpoint() { };
+inline void HARD_Breakpoint() { };
 
 #define HARD_BREAKPOINT()     HardFault_Handler()
 

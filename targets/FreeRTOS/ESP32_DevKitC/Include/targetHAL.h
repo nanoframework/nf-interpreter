@@ -32,7 +32,6 @@
 
 #if !defined(BUILD_RTM)
 
-// FIXME IMPLEMENT
 inline void HARD_Breakpoint() { };
 
 #define HARD_BREAKPOINT()     HARD_Breakpoint()

@@ -217,10 +217,6 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
     const CLR_INT64 maxTime = (CLR_INT64)0x7FFFFFFF * (CLR_INT64)TIME_CONVERSION__TO_MILLISECONDS;
     const CLR_INT64 minTime = 0;
 
-    // UNDONE: FIXME: _ASSERTE(Library_corlib_native_System_Threading_Timer::FIELD___timer    == Library_spot_native_Microsoft_SPOT_ExtendedTimer::FIELD___timer   );
-    // UNDONE: FIXME: _ASSERTE(Library_corlib_native_System_Threading_Timer::FIELD___state    == Library_spot_native_Microsoft_SPOT_ExtendedTimer::FIELD___state   );
-    // UNDONE: FIXME: _ASSERTE(Library_corlib_native_System_Threading_Timer::FIELD___callback == Library_spot_native_Microsoft_SPOT_ExtendedTimer::FIELD___callback);
-
     if(flags & CLR_RT_HeapBlock_Timer::c_ACTION_Create)
     {
         FAULT_ON_NULL(args[ 0 ].DereferenceDelegate());
