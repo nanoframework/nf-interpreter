@@ -9,6 +9,9 @@ include(NF_API_Namespaces)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/target_platform.h" @ONLY)
 
+# append nanoHAL
+list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.cpp")
+
 # append target ChibiOS nanoCLR source files
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_App_Interface.c)
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_MonitorCommands.c)
@@ -29,9 +32,6 @@ list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Memory.c
 
 # append nanoCRT
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoCRT.cpp")
-
-# append nanoHAL
-list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.cpp")
 
 # append files from Runtime.Native
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_RTC.cpp")
