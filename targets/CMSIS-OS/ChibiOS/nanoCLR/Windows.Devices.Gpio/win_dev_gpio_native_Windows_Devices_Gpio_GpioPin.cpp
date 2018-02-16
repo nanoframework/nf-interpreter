@@ -144,7 +144,7 @@ static void ExtInterruptHandler(EXTDriver *extp, expchannel_t channel)
         lastPadValue = palReadPad(port, pad);
 
         // setup timer
-        chVTSetI(&debounceTimer, MS2ST(debounceTimeoutMilsec), debounceTimer_Callback, pThis);
+        chVTSetI(&debounceTimer, TIME_MS2I(debounceTimeoutMilsec), debounceTimer_Callback, pThis);
     }
     else
     {
