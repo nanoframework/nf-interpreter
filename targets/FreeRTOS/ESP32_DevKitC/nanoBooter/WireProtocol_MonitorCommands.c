@@ -123,8 +123,6 @@ int Monitor_Reboot(WP_Message* message)
         // only reset if we are not trying to get into the bootloader
         if((cmd->m_flags & Monitor_Reboot_c_EnterBootloader) != Monitor_Reboot_c_EnterBootloader)
         {
-            // UNDONE: FIXME: Events_WaitForEvents( 0, 100 );
-
             // RESET CPU
             esp_restart();
         }

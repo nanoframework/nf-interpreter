@@ -2976,7 +2976,6 @@ void CLR_RT_ExecutionEngine::StopOnBreakpoint( CLR_DBG_Commands::Debugging_Execu
             bp = def;
 
             CLR_EE_DBG_SET(Stopped);
-            // UNDONE: FIXME: CLR_RT_EmulatorHooks::Notify_ExecutionStateChanged();
             
             if(th)
             {

@@ -40,8 +40,6 @@ struct Settings
         CLR_Debug::Printf( "Started Hardware.\r\n" );
 #endif
 
-        // UNDONE: FIXME: CLR_DBG_Debugger::Debugger_Discovery();
-
         m_fInitialized = true;
 
 
@@ -336,13 +334,8 @@ void ClrStartup(CLR_SETTINGS params)
 
                 nanoHAL_Uninitialize();
 
-                // UNDONE: FIXME: SmartPtr_IRQ::ForceDisabled();
-
                 //re-init the hal for the reboot (initially it is called in bootentry)
                 nanoHAL_Initialize();
-
-                // make sure interrupts are back on
-                // UNDONE: FIXME: SmartPtr_IRQ::ForceEnabled();
             }
             else
             {

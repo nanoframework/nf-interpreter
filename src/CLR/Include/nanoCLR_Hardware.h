@@ -120,8 +120,6 @@ struct CLR_HW_Hardware
      HRESULT ProcessInterrupts();
      HRESULT SpawnDispatcher();
      HRESULT TransferAllInterruptsToApplicationQueue();
-
-    // UNDONE: FIXME: void Screen_Flush( CLR_GFX_Bitmap& bitmap, CLR_UINT16 x, CLR_UINT16 y, CLR_UINT16 width, CLR_UINT16 height );
 };
 
 extern CLR_HW_Hardware g_CLR_HW_Hardware;

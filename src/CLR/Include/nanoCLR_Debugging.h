@@ -1000,7 +1000,6 @@ struct CLR_DBG_Debugger
 
     //--//
 
-    static void Debugger_Discovery();
     static void Debugger_WaitForCommands();
 
     static HRESULT CreateInstance();
