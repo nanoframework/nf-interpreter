@@ -143,7 +143,6 @@ void CLR_RT_HeapBlock_Timer::Reschedule()
     if((m_flags & CLR_RT_HeapBlock_Timer::c_Recurring   ) &&
        (m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)  )
     {
-        CLR_INT64 cmp    = (m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) ? g_CLR_RT_ExecutionEngine.m_currentLocalTime : g_CLR_RT_ExecutionEngine.m_currentMachineTime;
         CLR_INT64 expire = m_timeLastExpiration + m_timeFrequency;
 
         //
@@ -151,9 +150,9 @@ void CLR_RT_HeapBlock_Timer::Reschedule()
         //
         // If we fall back too much, we need to compute the next expiration in the future, to avoid an avalanche effect.
         //
-        if(expire < cmp)
+        if(expire < g_CLR_RT_ExecutionEngine.m_currentMachineTime)
         {
-            expire = cmp - ((cmp - expire) % m_timeFrequency) + m_timeFrequency;
+            expire = g_CLR_RT_ExecutionEngine.m_currentMachineTime - ((g_CLR_RT_ExecutionEngine.m_currentMachineTime - expire) % m_timeFrequency) + m_timeFrequency;
         }
 
         m_timeExpire = expire; CLR_RT_ExecutionEngine::InvalidateTimerCache();
@@ -237,20 +236,15 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
 
         if(anyChange)
         {
-            SYSTEMTIME systemTime; HAL_Time_ToSystemTime( g_CLR_RT_ExecutionEngine.m_currentLocalTime, &systemTime );
+            SYSTEMTIME systemTime; HAL_Time_ToSystemTime( g_CLR_RT_ExecutionEngine.m_currentMachineTime, &systemTime );
 
-            timer->m_flags |= anyChange | (CLR_RT_HeapBlock_Timer::c_AbsoluteTimer | CLR_RT_HeapBlock_Timer::c_EnabledTimer);
+            timer->m_flags |= anyChange | CLR_RT_HeapBlock_Timer::c_EnabledTimer;
 
             timer->AdjustNextFixedExpire( systemTime, true );
         }
         else
         {
             flags |= CLR_RT_HeapBlock_Timer::c_ACTION_Change;
-        }
-
-        if(flags & CLR_RT_HeapBlock_Timer::c_INPUT_Absolute)
-        {
-            timer->m_flags |= CLR_RT_HeapBlock_Timer::c_AbsoluteTimer;
         }
     }
 
@@ -268,8 +262,6 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
 
         if(flags & CLR_RT_HeapBlock_Timer::c_INPUT_Int32)
         {
-            if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) != 0) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
             timer->m_timeExpire    = args[ 0 ].NumericByRef().s4;
             timer->m_timeFrequency = args[ 1 ].NumericByRef().s4;
 
@@ -280,8 +272,6 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
         {
             CLR_INT64* pVal;
 
-            if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) != 0) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
             pVal = Library_corlib_native_System_TimeSpan::GetValuePtr( args[ 0 ] ); FAULT_ON_NULL(pVal); 
             if (*pVal == -c_TickPerMillisecond) timer->m_timeExpire = TIMEOUT_INFINITE;
             else timer->m_timeExpire    = *pVal;
@@ -290,23 +280,10 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
             if (*pVal == -c_TickPerMillisecond) timer->m_timeFrequency = TIMEOUT_INFINITE;
             else timer->m_timeFrequency    = *pVal;
         }
-        else if(flags & CLR_RT_HeapBlock_Timer::c_INPUT_Absolute)
-        {
-            CLR_INT64* pVal;
-
-            if((timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) == 0) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
-            pVal = Library_corlib_native_System_DateTime::GetValuePtr( args[ 0 ] ); FAULT_ON_NULL(pVal); timer->m_timeExpire    = *pVal;
-            pVal = Library_corlib_native_System_TimeSpan::GetValuePtr( args[ 1 ] ); FAULT_ON_NULL(pVal); timer->m_timeFrequency = *pVal;
-        }                
 
         if(timer->m_timeExpire == TIMEOUT_INFINITE) 
         {
             timer->m_flags &= ~CLR_RT_HeapBlock_Timer::c_EnabledTimer;
-        }
-        else if((flags & CLR_RT_HeapBlock_Timer::c_INPUT_Absolute) )
-        {
-            timer->m_flags |= CLR_RT_HeapBlock_Timer::c_EnabledTimer;
         }
         else
         {
