@@ -2900,9 +2900,7 @@ struct CLR_RT_ExecutionEngine
     //--//
     
     CLR_INT64                           m_currentMachineTime;
-    CLR_INT64                           m_currentLocalTime;
     CLR_INT64                           m_startTime;  
-    CLR_INT32                           m_lastTimeZoneOffset;
     CLR_INT64                           m_currentNextActivityTime;
     bool                                m_timerCache;
     CLR_INT64                           m_timerCacheNextTimeout;
@@ -3072,7 +3070,7 @@ struct CLR_RT_ExecutionEngine
 
     //--//
 
-    bool IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin, bool fAbsolute );
+    bool IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin );
 
     bool IsThereEnoughIdleTime( CLR_UINT32 expectedMsec );
 

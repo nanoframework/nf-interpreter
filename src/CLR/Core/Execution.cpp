@@ -41,9 +41,6 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
                                                     // int                                 m_iDebugger_Conditions;
                                                     //
                                                     // CLR_INT64                           m_currentMachineTime;
-                                                    // CLR_INT64                           m_currentLocalTime;
-    // UNDONE: FIXME
-    // m_lastTimeZoneOffset =  Time_GetTimeZoneOffset();// CLR_INT32                           m_lastTimeZoneOffset;
 
                                                     // CLR_INT64                           m_currentNextActivityTime;
     m_timerCache    = false;                        // bool                                m_timerCache;
@@ -2376,7 +2373,7 @@ void CLR_RT_ExecutionEngine::ProcessTimeEvent( CLR_UINT32 event )
 
     // UNDO FORCE UpdateTime();
 
-    HAL_Time_ToSystemTime( m_currentLocalTime, &systemTime );
+    HAL_Time_ToSystemTime( m_currentMachineTime, &systemTime );
 
     NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
     {
@@ -2408,14 +2405,13 @@ void CLR_RT_ExecutionEngine::InvalidateTimerCache()
 
 //--//--//
 
-bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin, bool fAbsolute )
+bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_INT64 cmp = (fAbsolute ? m_currentLocalTime : m_currentMachineTime);
 
-    if(timeExpire <= cmp) return true;
+    if(timeExpire <= m_currentMachineTime) return true;
 
-    CLR_INT64 diff = timeExpire - cmp;
+    CLR_INT64 diff = timeExpire - m_currentMachineTime;
 
     if(diff < timeoutMin)
     {
@@ -2449,7 +2445,7 @@ void CLR_RT_ExecutionEngine::CheckTimers( CLR_INT64& timeoutMin )
         if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
         {
             CLR_INT64 expire = timer->m_timeExpire;
-            if(IsTimeExpired( expire, timeoutMin, (timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) != 0 ))
+            if(IsTimeExpired( expire, timeoutMin ))
             {
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                 if(CLR_EE_DBG_IS_NOT( PauseTimers ))
@@ -2489,7 +2485,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         // Check events.
         //
         expire = th->m_waitForEvents_Timeout;
-        if(IsTimeExpired( expire, timeoutMin, false ))
+        if(IsTimeExpired( expire, timeoutMin ))
         {
             th->m_waitForEvents_Timeout = TIMEOUT_INFINITE;
 
@@ -2505,7 +2501,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
 
             if(wait)
             {
-                if(IsTimeExpired( wait->m_timeExpire, timeoutMin, false ))
+                if(IsTimeExpired( wait->m_timeExpire, timeoutMin ))
                 {
                     th->m_waitForObject_Result = CLR_RT_Thread::TH_WAIT_RESULT_TIMEOUT;
         
@@ -2521,7 +2517,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         {
             NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest,req,lock->m_requests)
             {
-                if(IsTimeExpired( req->m_timeExpire, timeoutMin, false ))
+                if(IsTimeExpired( req->m_timeExpire, timeoutMin ))
                 {
                     CLR_RT_SubThread* sth = req->m_subthreadWaiting;
 
@@ -2541,7 +2537,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         {
             if(sth->m_timeConstraint != TIMEOUT_INFINITE)
             {
-                if(IsTimeExpired( s_compensation.Adjust( sth->m_timeConstraint ), timeoutMin, false ))
+                if(IsTimeExpired( s_compensation.Adjust( sth->m_timeConstraint ), timeoutMin ))
                 {
                     (void)Library_corlib_native_System_Exception::CreateInstance( th->m_currentException, g_CLR_RT_WellKnownTypes.m_ConstraintException, S_OK, th->CurrentFrame() );
 
@@ -3502,32 +3498,6 @@ void CLR_RT_ExecutionEngine::UpdateTime()
     NATIVE_PROFILE_CLR_CORE();
         
     m_currentMachineTime = HAL_Time_CurrentTime();
-    // FIXME time is now UTC...
-    m_currentLocalTime = HAL_Time_CurrentTime();
-
-    /// Did timezone or daylight offset got adjusted? If yes make some adjustments in timers too.
-    CLR_INT32 timeZoneOffset = 0;//// FIXME time is now UTC...Time_GetTimeZoneOffset();
-
-    if(timeZoneOffset != m_lastTimeZoneOffset)
-    {
-        SYSTEMTIME systemTime;
-    
-        m_lastTimeZoneOffset = timeZoneOffset;
-        HAL_Time_ToSystemTime( m_currentLocalTime, &systemTime );
-    
-        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
-        {
-            if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
-            {
-                if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_AnyChange)
-                {
-                    timer->AdjustNextFixedExpire( systemTime, false );
-                }
-            }
-        }
-        NANOCLR_FOREACH_NODE_END();
-    }
-    
 }
 
 CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire )
