@@ -214,7 +214,6 @@
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
 #define ExtractEventFromTransport(x) (ExtractTransport(x) == USART_TRANSPORT     ? SYSTEM_EVENT_FLAG_COM_IN: \
-                                      ExtractTransport(x) == USB_TRANSPORT       ? SYSTEM_EVENT_FLAG_USB_IN: \
                                       ExtractTransport(x) == SOCKET_TRANSPORT    ? SYSTEM_EVENT_FLAG_SOCKET: \
                                       ExtractTransport(x) == GENERIC_TRANSPORT   ? SYSTEM_EVENT_FLAG_GENERIC_PORT: \
                                       ExtractTransport(x) == DEBUG_TRANSPORT     ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY: \
@@ -1841,7 +1840,7 @@ bool              Watchdog_GetSetEnabled ( bool enabled, bool fSet );
 
 #if defined(_WIN32)
 
-#define GLOBAL_LOCK(x)               // UNDONE: FIXME: SmartPtr_IRQ x
+#define GLOBAL_LOCK(x)
 //#define DISABLE_INTERRUPTS()       SmartPtr_IRQ::ForceDisabled()
 //#define ENABLE_INTERRUPTS()        SmartPtr_IRQ::ForceEnabled()
 //#define INTERRUPTS_ENABLED_STATE() SmartPtr_IRQ::GetState()

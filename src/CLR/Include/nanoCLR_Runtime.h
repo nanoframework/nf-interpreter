@@ -2784,11 +2784,6 @@ struct CLR_RT_ExecutionEngine
 
     int                                 m_iExecution_Conditions;
 
-    static const int                    c_fReboot_Normal                     = 0x00000000;
-    static const int                    c_fReboot_ClrOnly                    = 0x00000001;
-    static const int                    c_fReboot_EnterBootLoader            = 0x00000002;
-    static const int                    c_fReboot_ClrOnlyStopDebugger        = 0x00000004 | c_fReboot_ClrOnly;
-
     int                                 m_iReboot_Options;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2853,9 +2848,8 @@ struct CLR_RT_ExecutionEngine
 #define CLR_EE_SET( Cond )              g_CLR_RT_ExecutionEngine.m_iExecution_Conditions |=  CLR_RT_ExecutionEngine::c_fExecution_##Cond
 #define CLR_EE_CLR( Cond )              g_CLR_RT_ExecutionEngine.m_iExecution_Conditions &= ~CLR_RT_ExecutionEngine::c_fExecution_##Cond
 
-#define CLR_EE_REBOOT_IS( Cond )      ((g_CLR_RT_ExecutionEngine.m_iReboot_Options &   CLR_RT_ExecutionEngine::c_fReboot_##Cond) == CLR_RT_ExecutionEngine::c_fReboot_##Cond)
-#define CLR_EE_REBOOT_SET( Cond )       g_CLR_RT_ExecutionEngine.m_iReboot_Options |=  CLR_RT_ExecutionEngine::c_fReboot_##Cond
-#define CLR_EE_REBOOT_CLR( Cond )       g_CLR_RT_ExecutionEngine.m_iReboot_Options &= ~CLR_RT_ExecutionEngine::c_fReboot_##Cond
+#define CLR_EE_REBOOT_IS( Cond )      ((g_CLR_RT_ExecutionEngine.m_iReboot_Options & CLR_DBG_Commands::Monitor_Reboot::c_##Cond) == CLR_DBG_Commands::Monitor_Reboot::c_##Cond)
+#define CLR_EE_REBOOT_CLR               g_CLR_RT_ExecutionEngine.m_iReboot_Options = CLR_DBG_Commands::Monitor_Reboot::c_ClrOnly
 
 #define CLR_EE_DBG_EVENT_SEND( cmd, size, payload, flags ) ((g_CLR_DBG_Debugger->m_messaging != NULL) ? g_CLR_DBG_Debugger->m_messaging->SendEvent( cmd, size, (unsigned char*)payload, flags ) : false)
 
@@ -2909,9 +2903,7 @@ struct CLR_RT_ExecutionEngine
     //--//
     
     CLR_INT64                           m_currentMachineTime;
-    CLR_INT64                           m_currentLocalTime;
     CLR_INT64                           m_startTime;  
-    CLR_INT32                           m_lastTimeZoneOffset;
     CLR_INT64                           m_currentNextActivityTime;
     bool                                m_timerCache;
     CLR_INT64                           m_timerCacheNextTimeout;
@@ -3081,7 +3073,7 @@ struct CLR_RT_ExecutionEngine
 
     //--//
 
-    bool IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin, bool fAbsolute );
+    bool IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin );
 
     bool IsThereEnoughIdleTime( CLR_UINT32 expectedMsec );
 

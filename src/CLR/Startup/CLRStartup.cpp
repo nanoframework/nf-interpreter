@@ -15,6 +15,6 @@ void ClrExit()
 void ClrReboot()
 {
     NATIVE_PROFILE_CLR_STARTUP();
-    CLR_EE_REBOOT_SET(ClrOnly);
+    CLR_EE_REBOOT_CLR;
     CLR_EE_DBG_SET(RebootPending);
 }

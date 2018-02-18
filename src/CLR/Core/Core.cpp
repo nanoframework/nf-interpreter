@@ -84,7 +84,4 @@ CLR_UINT32        g_scratchDebugger         [ sizeof(CLR_DBG_Debugger) ];
 CLR_UINT32        g_scratchDebuggerMessaging[ sizeof(CLR_Messaging) ];
 CLR_DBG_Debugger *g_CLR_DBG_Debugger;
 
-CLR_RT_Persistence_Manager g_CLR_RT_Persistence_Manager;
-
 //--//
-

@@ -14,9 +14,6 @@
 //#include <nanoCLR_Stream.h>
 //#include <nanoCLR_Xml.h>
 //#include <nanoCLR_Application.h>
-//#if defined(CLR_COMPONENTIZATION_USE_HANDLER)
-//#include <nanoCLR_Handler.h>
-//#endif
 //
 //#include <nanoCLR_ParseOptions.h>
 //

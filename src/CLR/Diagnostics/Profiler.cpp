@@ -396,23 +396,6 @@ void CLR_PRF_Profiler::DumpObject( CLR_RT_HeapBlock* ptr )
                     break;
                 }
 
-            // UNDONE: case DATATYPE_I2C_XACTION:
-            //    {
-            //        CLR_RT_HeapBlock_I2CXAction* ixa = (CLR_RT_HeapBlock_I2CXAction*)ptr;
-            //        size_t index;
-
-            //        //These are unmanaged pointers; we need to get the pointer to the BinaryBlob via
-            //        if(ixa->m_HalXAction)      { DumpSingleReference( CLR_RT_HeapBlock_BinaryBlob::GetBlob( ixa->m_HalXAction      ) ); }
-            //        if(ixa->m_dataBuffers)     { DumpSingleReference( CLR_RT_HeapBlock_BinaryBlob::GetBlob( ixa->m_dataBuffers     ) ); }
-            //        if(ixa->m_HalXActionUnits) { DumpSingleReference( CLR_RT_HeapBlock_BinaryBlob::GetBlob( ixa->m_HalXActionUnits ) ); }
-            //        for(index = 0; index < ixa->m_xActionUnits; ++index)
-            //        {            
-            //            DumpSingleReference( CLR_RT_HeapBlock_BinaryBlob::GetBlob( ixa->m_HalXActionUnits[ index ] ) );
-            //        }
-            //        break;
-            //    }
-                
-
 #if defined(NANOCLR_APPDOMAINS)
         case DATATYPE_APPDOMAIN_HEAD:
             {

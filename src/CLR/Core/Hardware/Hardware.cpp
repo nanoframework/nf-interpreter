@@ -158,48 +158,11 @@ void CLR_HW_Hardware::ProcessActivity()
         eventsCLR |= CLR_RT_ExecutionEngine::c_Event_IO;
     }
 
-    // UNDONE: FIXME: if(events & SYSTEM_EVENT_FLAG_CHARGER_CHANGE)
-    //{
-    //    static unsigned int lastStatus;
-    //    unsigned int        status;
-
-    //    if(::Charger_Status( status ))
-    //    {
-    //        status &= CHARGER_STATUS_ON_AC_POWER;
-
-    //        if(lastStatus != status)
-    //        {
-    //            lastStatus = status;
-
-    //            eventsCLR |= CLR_RT_ExecutionEngine::c_Event_Battery;
-    //        }
-    //    }
-    //}
-
     if(eventsCLR)
     {
         g_CLR_RT_ExecutionEngine.SignalEvents( eventsCLR );
     }
 }
-
-//--//
-
-// UNDONE: FIXME: void CLR_HW_Hardware::Screen_Flush( CLR_GFX_Bitmap& bitmap, CLR_UINT16 x, CLR_UINT16 y, CLR_UINT16 width, CLR_UINT16 height )
-//{
-//    NATIVE_PROFILE_CLR_HARDWARE();
-//    CLR_INT32 widthMax  = LCD_SCREEN_WIDTH;
-//    CLR_INT32 heightMax = LCD_SCREEN_HEIGHT;
-//
-//    if((CLR_UINT32)(x + width)  > bitmap.m_bm.m_width ) width  = bitmap.m_bm.m_width  - x;
-//    if((CLR_UINT32)(y + height) > bitmap.m_bm.m_height) height = bitmap.m_bm.m_height - y;    
-//
-//    if(bitmap.m_bm.m_width                 != widthMax                              ) return;
-//    if(bitmap.m_bm.m_height                != heightMax                             ) return;
-//    if(bitmap.m_bm.m_bitsPerPixel          != CLR_GFX_BitmapDescription::c_NativeBpp) return;
-//    if(bitmap.m_palBitmap.transparentColor != PAL_GFX_Bitmap::c_InvalidColor        ) return;
-//
-//    LCD_BitBltEx( x, y, width, height, bitmap.m_palBitmap.data );
-//}
 
 //--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 

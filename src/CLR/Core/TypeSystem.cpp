@@ -3105,8 +3105,7 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
 
                     const char* fieldName = inst.m_assm->GetString( fd->name );
 
-                    // UNDONE: FIXME
-                    // hash = SUPPORT_ComputeCRC( fieldName, (CLR_UINT32)hal_strlen_s(fieldName), hash );
+                    hash = SUPPORT_ComputeCRC( fieldName, (CLR_UINT32)hal_strlen_s(fieldName), hash );
                 }
             }
 

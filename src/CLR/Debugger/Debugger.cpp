@@ -39,7 +39,6 @@ void CLR_DBG_Debugger::Debugger_WaitForCommands()
     NATIVE_PROFILE_CLR_DEBUGGER();
 
 #if !defined(BUILD_RTM)
-    // UNDONE: FIXME: hal_fprintf(STREAM_LCD, "\r\nWaiting for debug commands...\r\n");
     CLR_Debug::Printf( "Waiting for debug commands...\r\n" );
 #endif
 
@@ -48,58 +47,6 @@ void CLR_DBG_Debugger::Debugger_WaitForCommands()
         g_CLR_RT_ExecutionEngine.DebuggerLoop();
     }
 }
-
-void CLR_DBG_Debugger::Debugger_Discovery()
-{
-    NATIVE_PROFILE_CLR_DEBUGGER();
-
-    CLR_INT32 wait_sec = 5;
-
-    CLR_INT64 expire = HAL_Time_CurrentTime() + (wait_sec * TIME_CONVERSION__TO_SECONDS);
-
-    //
-    // Send "presence" ping.
-    //
-    Monitor_Ping_Reply cmd;
-
-    cmd.m_source = Monitor_Ping_c_Ping_Source_NanoCLR;
-
-    while(true)
-    {
-        CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_Ping, sizeof(cmd), &cmd, WP_Flags_c_NoCaching | WP_Flags_c_NonCritical);
-
-        // if we support soft reboot and the debugger is not stopped then we don't need to connect the debugger
-        if(!CLR_EE_DBG_IS(Stopped) && ::CPU_IsSoftRebootSupported())
-        {
-            break;
-        }
-
-        g_CLR_RT_ExecutionEngine.DebuggerLoop();
-
-        if(CLR_EE_DBG_IS(Enabled))
-        {
-            //
-            // Debugger on the other side, let's exit the discovery loop.
-            //
-            CLR_Debug::Printf( "Found debugger!\r\n" );
-            break;
-        }
-
-        CLR_INT64 now = HAL_Time_CurrentTime();
-
-        if(expire < now)
-        {
-            //
-            // No response in time...
-            //
-            CLR_Debug::Printf( "No debugger!\r\n" );
-            break;
-        }
-    }
-
-    g_CLR_RT_ExecutionEngine.WaitForDebugger();
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -852,22 +799,12 @@ bool CLR_DBG_Debugger::Monitor_Reboot( WP_Message* msg)
         {
             WP_ReplyToCommand(msg, true, false, NULL, 0);
 
-            // UNDONE: FIXME Events_WaitForEvents( 0, 100 ); // give message a little time to be flushed
+            Events_WaitForEvents( 0, 100 ); // give message a little time to be flushed
 
-            // UNDONE: FIXME HAL_EnterBooterMode();
+            HAL_EnterBooterMode();
         }
 
-        if(::CPU_IsSoftRebootSupported ())
-        {
-            if((CLR_DBG_Commands::Monitor_Reboot::c_ClrRebootOnly == (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_ClrRebootOnly)))
-            {
-                CLR_EE_REBOOT_SET(ClrOnly);
-            }
-            else if((CLR_DBG_Commands::Monitor_Reboot::c_ClrStopDebugger == (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_ClrStopDebugger)))
-            {
-                CLR_EE_REBOOT_SET(ClrOnlyStopDebugger);
-            }
-        }
+        g_CLR_RT_ExecutionEngine.m_iReboot_Options = cmd->m_flags;
     }
 
     CLR_EE_DBG_SET( RebootPending );
@@ -937,8 +874,6 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions( WP_Message* msg)
 
         WP_ReplyToCommand( msg, true, false, &cmdReply, sizeof(cmdReply) );
     }
-
-    // UNDONE: FIXME: CLR_RT_EmulatorHooks::Notify_ExecutionStateChanged();
 
     return true;
 }
@@ -1044,15 +979,6 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
             size = sizeof(reply.u_capsFlags);
             break;
 
-        // UNDONE: FIXME: case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityLCD:
-            //reply.u_LCD.m_width  = LCD_SCREEN_WIDTH;
-            //reply.u_LCD.m_height = LCD_SCREEN_HEIGHT;
-            //reply.u_LCD.m_bpp    = LCD_SCREEN_BPP;
-
-            //data = (CLR_UINT8*)&reply.u_LCD;
-            //size = sizeof(reply.u_LCD);
-            //break;
-
         case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityVersion:
 #if defined(__GNUC__)
 			// this is returning the GNU GCC compiler version in coded format: MAJOR x 10000 + MINOR x 100 + PATCH
@@ -1146,7 +1072,7 @@ bool CLR_DBG_Debugger::Debugging_UpgradeToSsl(WP_Message* msg)
 
     WP_ReplyToCommand( msg, true, true, &reply, sizeof(reply) );
 
-    // UNDONE: FIXME Events_WaitForEvents(0, 300);
+    Events_WaitForEvents(0, 300);
 
     return true == DebuggerPort_UpgradeToSsl(HalSystemConfig.DebuggerPort, cmd->m_flags);
 }

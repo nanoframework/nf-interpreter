@@ -354,7 +354,7 @@ void CPU_Hibernate()
     while(true)
     {
         //wait on SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY as well??
-        unsigned int mask = ::Events_WaitForEvents( SLEEP_LEVEL__SLEEP, SYSTEM_EVENT_FLAG_COM_IN | SYSTEM_EVENT_HW_INTERRUPT /*| SYSTEM_EVENT_FLAG_BUTTON | SYSTEM_EVENT_FLAG_CHARGER_CHANGE*/, 1000);
+        unsigned int mask = ::Events_WaitForEvents( SLEEP_LEVEL__SLEEP, SYSTEM_EVENT_FLAG_COM_IN | SYSTEM_EVENT_HW_INTERRUPT /*| SYSTEM_EVENT_FLAG_BUTTON */, 1000);
 
         if(mask)
         {
@@ -381,18 +381,6 @@ void CPU_Shutdown()
 
 char nanoCLR_Dat_Start[512*1024];
 char nanoCLR_Dat_End  [1       ];
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool Piezo_Tone( unsigned int Frequency_Hertz, unsigned int Duration_Milliseconds )
-{
-    return true;
-}
-
-bool Piezo_IsEnabled()
-{
-    return FALSE;
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -450,17 +438,6 @@ void debug_printf( char const* format, ... )
     va_end( arg_ptr );
 }
 
-void lcd_printf( char const * format, ... )
-{
-    va_list arg_ptr;
-
-    va_start( arg_ptr, format );
-
-    int chars = hal_vprintf( format, arg_ptr );
-
-    va_end( arg_ptr );
-}
-
 int hal_printf( const char* format, ... )
 {
     va_list arg_ptr;
@@ -505,9 +482,6 @@ int hal_vfprintf( COM_HANDLE stream, const char* format, va_list arg )
     //{
     //default:
         DebuggerPort_Write( stream, buffer, chars); // skip null terminator
-    //    break;
-
-    //case LCD_TRANSPORT:
     //    break;
 
     //case FLASH_WRITE_TRANSPORT:
@@ -624,13 +598,6 @@ size_t CPU_GetCachableAddress( size_t address )
 size_t CPU_GetUncachableAddress( size_t address )
 {
     return address;
-}
-
-///////////////////////////////////////////////////////////////
-
-bool Charger_Status( unsigned int& Status )
-{
-    return true;
 }
 
 ///////////////////////////////////////////////////////////////
