@@ -232,7 +232,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                     {
                         if(countArryBlocks[ dt2 ])
                         {
-                            CLR_Debug::Printf( "  Type %02X (%-20s): %6d bytes\r\n", dt2, c_CLR_RT_DataTypeLookup[ dt2 ].m_name, countArryBlocks[ dt2 ] * sizeof(CLR_RT_HeapBlock) );
+                            CLR_Debug::Printf( "   Type %02X (%-17s): %6d bytes\r\n", dt2, c_CLR_RT_DataTypeLookup[ dt2 ].m_name, countArryBlocks[ dt2 ] * sizeof(CLR_RT_HeapBlock) );
                         }
                     }
                 }
@@ -489,8 +489,6 @@ void CLR_RT_GarbageCollector::MarkWeak()
         }
         else
         {
-            g_CLR_RT_Persistence_Manager.InvalidateEntry( weak );
-
             weak->Unlink();
         }
     }
@@ -574,8 +572,6 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                 if(weak->m_targetSerialized)
                 {
                     fExit = true;
-
-                    g_CLR_RT_Persistence_Manager.InvalidateEntry( weak );
                 }
             }
         }
@@ -615,8 +611,6 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
 
                         CLR_Debug::Printf( " [%d bytes] %s\r\n", weak->m_targetSerialized->m_numOfElements, (weak->m_targetDirect ? "DIRECT" : "") );
 #endif
-
-                        g_CLR_RT_Persistence_Manager.InvalidateEntry( weak );
 
                         break;
                     }
@@ -767,13 +761,8 @@ void CLR_RT_GarbageCollector::RecoverEventsFromGC()
 {
     NATIVE_PROFILE_CLR_CORE();
 
-#if defined(CLR_COMPONENTIZATION_USE_HANDLER)
-    Handler_RecoverFromGC();
-#else
     CLR_RT_HeapBlock_EndPoint::HandlerMethod_RecoverFromGC(); 
     CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_RecoverFromGC();
-    // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_RecoverFromGC();
-#endif
 
     NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,g_CLR_RT_ExecutionEngine.m_timers)
     {

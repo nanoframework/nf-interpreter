@@ -41,9 +41,6 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
                                                     // int                                 m_iDebugger_Conditions;
                                                     //
                                                     // CLR_INT64                           m_currentMachineTime;
-                                                    // CLR_INT64                           m_currentLocalTime;
-    // UNDONE: FIXME
-    // m_lastTimeZoneOffset =  Time_GetTimeZoneOffset();// CLR_INT32                           m_lastTimeZoneOffset;
 
                                                     // CLR_INT64                           m_currentNextActivityTime;
     m_timerCache    = false;                        // bool                                m_timerCache;
@@ -75,14 +72,8 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
     m_currentUICulture     = NULL;                  // CLR_RT_HeapBlock*                   m_currentUICulture;
 
-#if defined(CLR_COMPONENTIZATION_USE_HANDLER)
-    Handler_Initialize();
-#else
     CLR_RT_HeapBlock_EndPoint::HandlerMethod_Initialize(); 
     CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_Initialize();
-    // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_Initialize();
-
-#endif
 
     m_interruptThread     = NULL;                   // CLR_RT_Thread                       m_interruptThread;
 
@@ -246,13 +237,8 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_globalLock = NULL;
 #endif
 
-#if defined(CLR_COMPONENTIZATION_USE_HANDLER)
-    Handler_CleanUp();
-#else
     CLR_RT_HeapBlock_EndPoint::HandlerMethod_CleanUp(); 
     CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp();
-    // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_CleanUp();
-#endif
 
     m_interruptThread = NULL;    
 
@@ -278,18 +264,13 @@ void CLR_RT_ExecutionEngine::Reboot( bool fHard )
     // UNDONE: FIXME
     // ::Watchdog_GetSetEnabled( false, true );
 
-    // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Flush();
-    //g_CLR_RT_Persistence_Manager.m_state = CLR_RT_Persistence_Manager::STATE_FlushNextObject;
-    //g_CLR_RT_Persistence_Manager.m_pending_object = NULL;
-    //g_CLR_RT_Persistence_Manager.Flush();
-
     if(fHard)
     {
         ::CPU_Reset();
     }
     else
     {
-        CLR_EE_REBOOT_SET(ClrOnly);
+        CLR_EE_REBOOT_CLR;
         CLR_EE_DBG_SET(RebootPending);
     }
 }
@@ -420,8 +401,6 @@ void CLR_RT_ExecutionEngine::Relocate()
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_currentUICulture     );
 
     m_weakReferences.Relocate();
-
-    // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Relocate();
 }
 
 //--//
@@ -710,8 +689,6 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
      */
     g_CLR_PRF_Profiler.Stream_Flush();
 #endif
-
-    // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Flush();
 
 #if defined(WIN32)
 #if defined(NANOCLR_PROFILE_NEW)
@@ -1937,7 +1914,9 @@ HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CL
             {
                 CLR_RT_HeapBlock_WeakReference* weakref;
 
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_WeakReference::CreateInstance( weakref ));
+                // this used to be a call to CLR_RT_HeapBlock_WeakReference::CreateInstance                
+                weakref = (CLR_RT_HeapBlock_WeakReference*)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects( DATATYPE_WEAKCLASS, CLR_RT_HeapBlock::HB_InitializeToZero, sizeof(*weakref) );
+                CHECK_ALLOCATION(weakref);
 
                 reference.SetObjectReference( weakref );
             }
@@ -2394,7 +2373,7 @@ void CLR_RT_ExecutionEngine::ProcessTimeEvent( CLR_UINT32 event )
 
     // UNDO FORCE UpdateTime();
 
-    HAL_Time_ToSystemTime( m_currentLocalTime, &systemTime );
+    HAL_Time_ToSystemTime( m_currentMachineTime, &systemTime );
 
     NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
     {
@@ -2426,14 +2405,13 @@ void CLR_RT_ExecutionEngine::InvalidateTimerCache()
 
 //--//--//
 
-bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin, bool fAbsolute )
+bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_INT64 cmp = (fAbsolute ? m_currentLocalTime : m_currentMachineTime);
 
-    if(timeExpire <= cmp) return true;
+    if(timeExpire <= m_currentMachineTime) return true;
 
-    CLR_INT64 diff = timeExpire - cmp;
+    CLR_INT64 diff = timeExpire - m_currentMachineTime;
 
     if(diff < timeoutMin)
     {
@@ -2467,7 +2445,7 @@ void CLR_RT_ExecutionEngine::CheckTimers( CLR_INT64& timeoutMin )
         if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
         {
             CLR_INT64 expire = timer->m_timeExpire;
-            if(IsTimeExpired( expire, timeoutMin, (timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) != 0 ))
+            if(IsTimeExpired( expire, timeoutMin ))
             {
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                 if(CLR_EE_DBG_IS_NOT( PauseTimers ))
@@ -2507,7 +2485,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         // Check events.
         //
         expire = th->m_waitForEvents_Timeout;
-        if(IsTimeExpired( expire, timeoutMin, false ))
+        if(IsTimeExpired( expire, timeoutMin ))
         {
             th->m_waitForEvents_Timeout = TIMEOUT_INFINITE;
 
@@ -2523,7 +2501,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
 
             if(wait)
             {
-                if(IsTimeExpired( wait->m_timeExpire, timeoutMin, false ))
+                if(IsTimeExpired( wait->m_timeExpire, timeoutMin ))
                 {
                     th->m_waitForObject_Result = CLR_RT_Thread::TH_WAIT_RESULT_TIMEOUT;
         
@@ -2539,7 +2517,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         {
             NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest,req,lock->m_requests)
             {
-                if(IsTimeExpired( req->m_timeExpire, timeoutMin, false ))
+                if(IsTimeExpired( req->m_timeExpire, timeoutMin ))
                 {
                     CLR_RT_SubThread* sth = req->m_subthreadWaiting;
 
@@ -2559,7 +2537,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         {
             if(sth->m_timeConstraint != TIMEOUT_INFINITE)
             {
-                if(IsTimeExpired( s_compensation.Adjust( sth->m_timeConstraint ), timeoutMin, false ))
+                if(IsTimeExpired( s_compensation.Adjust( sth->m_timeConstraint ), timeoutMin ))
                 {
                     (void)Library_corlib_native_System_Exception::CreateInstance( th->m_currentException, g_CLR_RT_WellKnownTypes.m_ConstraintException, S_OK, th->CurrentFrame() );
 
@@ -2994,7 +2972,6 @@ void CLR_RT_ExecutionEngine::StopOnBreakpoint( CLR_DBG_Commands::Debugging_Execu
             bp = def;
 
             CLR_EE_DBG_SET(Stopped);
-            // UNDONE: FIXME: CLR_RT_EmulatorHooks::Notify_ExecutionStateChanged();
             
             if(th)
             {
@@ -3521,32 +3498,6 @@ void CLR_RT_ExecutionEngine::UpdateTime()
     NATIVE_PROFILE_CLR_CORE();
         
     m_currentMachineTime = HAL_Time_CurrentTime();
-    // FIXME time is now UTC...
-    m_currentLocalTime = HAL_Time_CurrentTime();
-
-    /// Did timezone or daylight offset got adjusted? If yes make some adjustments in timers too.
-    CLR_INT32 timeZoneOffset = 0;//// FIXME time is now UTC...Time_GetTimeZoneOffset();
-
-    if(timeZoneOffset != m_lastTimeZoneOffset)
-    {
-        SYSTEMTIME systemTime;
-    
-        m_lastTimeZoneOffset = timeZoneOffset;
-        HAL_Time_ToSystemTime( m_currentLocalTime, &systemTime );
-    
-        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
-        {
-            if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
-            {
-                if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_AnyChange)
-                {
-                    timer->AdjustNextFixedExpire( systemTime, false );
-                }
-            }
-        }
-        NANOCLR_FOREACH_NODE_END();
-    }
-    
 }
 
 CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire )

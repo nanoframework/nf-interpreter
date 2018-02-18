@@ -44,10 +44,7 @@ struct Settings
         CLR_Debug::Printf( "Started Hardware.\r\n" );
 #endif
 
-        // UNDONE: FIXME: CLR_DBG_Debugger::Debugger_Discovery();
-
         m_fInitialized = true;
-
 
         NANOCLR_NOCLEANUP();
     }
@@ -115,8 +112,6 @@ struct Settings
         CLR_Debug::Printf( "Resolving.\r\n" );
 #endif
         NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
-
-        g_CLR_RT_Persistence_Manager.Initialize();
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
 
@@ -251,9 +246,11 @@ struct Settings
 
     void Cleanup()
     {
-        g_CLR_RT_Persistence_Manager.Uninitialize();
-
-        // UNDONE: FIXME: CLR_RT_ExecutionEngine::DeleteInstance();
+        if(!CLR_EE_REBOOT_IS(NoShutdown))
+        {
+            // OK to delete execution engine 
+            CLR_RT_ExecutionEngine::DeleteInstance();
+        }
 
         m_fInitialized = false;
     }
@@ -331,19 +328,14 @@ void ClrStartup(CLR_SETTINGS params)
             {
                 softReboot = true;
 
-                params.WaitForDebugger = CLR_EE_REBOOT_IS(ClrOnlyStopDebugger);
-                
+                params.WaitForDebugger = CLR_EE_REBOOT_IS(WaitForDebugger);
+
                 s_ClrSettings.Cleanup();
 
                 nanoHAL_Uninitialize();
 
-                // UNDONE: FIXME: SmartPtr_IRQ::ForceDisabled();
-
                 //re-init the hal for the reboot (initially it is called in bootentry)
                 nanoHAL_Initialize();
-
-                // make sure interrupts are back on
-                // UNDONE: FIXME: SmartPtr_IRQ::ForceEnabled();
             }
             else
             {

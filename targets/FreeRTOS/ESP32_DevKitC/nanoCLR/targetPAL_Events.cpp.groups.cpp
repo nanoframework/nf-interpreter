@@ -146,14 +146,4 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
     NATIVE_PROFILE_PAL_EVENTS();
-
-    // TODO: not sure if this is really needed here... just kept it for further investigation
-    // switch(category)
-    // {
-    //     //case EVENT_GESTURE:
-    //     case EVENT_TOUCH:
-    //         break;
-    //     default:
-    //         break;
-    // }
 }

@@ -22,6 +22,8 @@ This repo contains:
       * [Wilderness Labs Netduino3 WiFi](targets/CMSIS-OS/ChibiOS/NETDIUNO3_WIFI)
     * ChibiOS overlay for **nanoFramework**
       * [STM32 Flash driver](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_flash)
+* Target reference for FreeRTOS
+  * [ESP32_DevKitC](targets/FreeRTOS/ESP32_DevKitC)
 * Target reference for other OSes
   * [Win32 OS (test project only at this time)](targets/os/win32)
 * [CMake files for the build system](CMake)

@@ -12,28 +12,28 @@
 
 //--//
 
-//
-// THIS HAS TO MATCH THE ENUM Microsoft.SPOT.Hardware.ButtonCode!!!!
-//
-// UNDONE: FIXME: static const int c_CLR_HW_Button_Up        = 0;
-//static const int c_CLR_HW_Button_Down      = 1;
-//static const int c_CLR_HW_Button_Spare     = 2;
-//static const int c_CLR_HW_Button_Select    = 3;
-//static const int c_CLR_HW_Button_Channel   = 4;
-//static const int c_CLR_HW_Button_Backlight = 5;
-//
-//static const int c_CLR_HW_Button_Raw_B0    = 10;
-//static const int c_CLR_HW_Button_Raw_B1    = 11;
-//static const int c_CLR_HW_Button_Raw_B2    = 12;
-//static const int c_CLR_HW_Button_Raw_B3    = 13;
-//static const int c_CLR_HW_Button_Raw_B4    = 14;
-//static const int c_CLR_HW_Button_Raw_B5    = 15;
-//static const int c_CLR_HW_Button_Raw_B6    = 16;
-//static const int c_CLR_HW_Button_Raw_B7    = 17;
-//static const int c_CLR_HW_Button_Raw_B8    = 18;
-//static const int c_CLR_HW_Button_Raw_B9    = 19;
-//
-//static const int c_CLR_HW_Button_MAX       = 32;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #if defined(_WIN32)
 #include "nanoCLR_Win32.h"
@@ -57,12 +57,9 @@ struct CLR_HW_Hardware
     static const CLR_UINT32 c_Default_PowerLevel   = PowerLevel__Sleep; 
     static const CLR_UINT32 c_Default_WakeupEvents = SYSTEM_EVENT_FLAG_COM_IN            |
                                                      SYSTEM_EVENT_FLAG_COM_OUT           |
-                                                     SYSTEM_EVENT_FLAG_USB_IN            |
                                                      SYSTEM_EVENT_FLAG_SYSTEM_TIMER      |
                                                      SYSTEM_EVENT_HW_INTERRUPT           |
-                                                     // UNDONE: FIXME: SYSTEM_EVENT_I2C_XACTION            |
                                                      SYSTEM_EVENT_FLAG_SOCKET            |
-                                                     // UNDONE: FIXME: SYSTEM_EVENT_FLAG_CHARGER_CHANGE    |
                                                      SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY |
                                                      SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY|
                                                      SYSTEM_EVENT_FLAG_IO                ;
@@ -123,8 +120,6 @@ struct CLR_HW_Hardware
      HRESULT ProcessInterrupts();
      HRESULT SpawnDispatcher();
      HRESULT TransferAllInterruptsToApplicationQueue();
-
-    // UNDONE: FIXME: void Screen_Flush( CLR_GFX_Bitmap& bitmap, CLR_UINT16 x, CLR_UINT16 y, CLR_UINT16 width, CLR_UINT16 height );
 };
 
 extern CLR_HW_Hardware g_CLR_HW_Hardware;
