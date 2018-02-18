@@ -8,7 +8,6 @@
 #define _LWIP_SOCKETS_H_
 
 #include <nanoHAL.h>
-//#include <lwipthread.h>
 
 #define NATIVE_PROFILE_PAL_NETWORK()
 

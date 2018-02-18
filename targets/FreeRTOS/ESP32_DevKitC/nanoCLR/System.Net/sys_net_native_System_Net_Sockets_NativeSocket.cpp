@@ -322,7 +322,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::setsockopt___STA
     NATIVE_PROFILE_CLR_NETWORK();
     return SockOptHelper( stack, false );
 }
-extern int ets_printf(const char *fmt, ...);
+
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__BOOLEAN__OBJECT__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
@@ -352,19 +352,16 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__B
         NANOCLR_SET_AND_LEAVE (CLR_E_PROCESS_EXCEPTION);
     }
 
-    if(timeout_us < 0) timeout_ms = -1;
-    else               timeout_ms = timeout_us / 1000;
-    
-    timeout_ms = 1000;
-    
-    hbTimeout.SetInteger( timeout_ms );
+    if(timeout_us < 0)
+        hbTimeout.SetInteger( TIMEOUT_INFINITE);
+    else 
+        hbTimeout.SetInteger( timeout_us * TIME_CONVERSION__TO_MILLISECONDS / 1000 );
 
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
     while(fRes)
     {
         res = Helper__SelectSocket( handle, mode );
-ets_printf( "poll select %d\n", res);
 
         if(res != 0) break;
 
@@ -378,8 +375,6 @@ ets_printf( "poll select %d\n", res);
     stack.SetResult_Boolean( res != 0 );   
 
     NANOCLR_NOCLEANUP();
-    ets_printf( "poll exit %d\n",res);
-
 }
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::ioctl___STATIC__VOID__OBJECT__U4__BYREF_U4( CLR_RT_StackFrame& stack )
