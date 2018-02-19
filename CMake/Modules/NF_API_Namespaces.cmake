@@ -17,6 +17,7 @@ option(API_Windows.Devices.Pwm "option for Windows.Devices.Pwm API")
 option(API_Windows.Devices.Adc "option for Windows.Devices.Adc API")
 option(API_Windows.Devices.SerialCommunication "option for Windows.Devices.SerialCommunication API")
 option(API_nanoFramework.Runtime.Events "option for nanoFramework.Runtime.Events API")
+option(API_Windows.Networking.Sockets "option for Windows.Networking.Sockets")
 
 
 #################################################################
@@ -110,6 +111,18 @@ macro(ParseApiOptions)
 
     endif()
 
+     # Windows.Networking.Sockets
+     if(API_Windows.Networking.Sockets)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Networking.Sockets")
+    endif()
+
+    # System.Net
+    if(API_System.Net)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("System.Net")
+    endif()
+    
     
     # parse the declarations to have new lines and ';'
     string(REPLACE ";;" ";\n" CLR_RT_NativeAssemblyDataDeclarations "${CLR_RT_NativeAssemblyDataList}")
