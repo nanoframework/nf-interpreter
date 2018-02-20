@@ -63,12 +63,7 @@ int main(void) {
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
   // create the CLR Startup thread 
-  osThreadCreate(osThread(CLRStartupThread), NULL); 
-
-  // EXT driver needs to be started from main   
-  #if (HAL_USE_EXT == TRUE)
-  extStart(&EXTD1, &extInterruptsConfiguration);
-  #endif
+  osThreadCreate(osThread(CLRStartupThread), NULL);
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
