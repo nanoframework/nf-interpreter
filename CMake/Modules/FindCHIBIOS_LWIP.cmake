@@ -4,7 +4,7 @@
 #
 
 execute_process(
-    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-1.4.1_patched.7z
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
 )
 
@@ -21,13 +21,12 @@ set(LWIP_SRCS
     lwipthread.c
     sys_arch.c
 
-    # netif
-    etharp.c
-
     # core
-    dhcp.c
-    dns.c
     init.c
+    def.c
+    dns.c
+    inet_chksum.c
+    ip.c
     mem.c
     memp.c
     netif.c
@@ -38,19 +37,29 @@ set(LWIP_SRCS
     tcp.c
     tcp_in.c
     tcp_out.c
+    timeouts.c
     udp.c
 
     # ipv4
     autoip.c
+    dhcp.c
+    etharp.c
     icmp.c
     igmp.c
-    inet.c
-    inet_chksum.c
-    ip.c
-    ip_addr.c
-    ip_frag.c
-    def.c
-    timers.c
+    ip4_frag.c
+    ip4.c
+    ip4_addr.c
+
+    # ip6
+    dhcp6.c
+    ethip6.c
+    icmp6.c
+    inet6.c
+    ip6.c
+    ip6_addr.c
+    ip6_frag.c
+    mld6.c
+    nd6.c
 
     # api
     api_lib.c
@@ -61,6 +70,92 @@ set(LWIP_SRCS
     netifapi.c
     sockets.c
     tcpip.c
+
+    # netif
+    ethernet.c
+    slipif.c
+
+    # 6LoWPAN
+    lowpan6.c
+
+    # PPP
+    auth.c
+    ccp.c
+    chap-md5.c
+    chap_ms.c
+    chap-new.c
+    demand.c
+    eap.c
+    ecp.c
+    eui64.c
+    fsm.c
+    ipcp.c
+    ipv6cp.c
+    lcp.c
+    magic.c
+    mppe.c
+    multilink.c
+    ppp.c
+    pppapi.c
+    pppcrypt.c
+    pppoe.c
+    pppol2tp.c
+    pppos.c
+    upap.c
+    utils.c
+    vj.c
+    arc4.c
+    des.c
+    md4.c
+    md5.c
+    sha1.c
+
+    # APPS!
+
+    # SNMPv2c agent
+    snmp_asn1.c
+    snmp_core.c
+    snmp_mib2.c
+    snmp_mib2_icmp.c
+    snmp_mib2_interfaces.c
+    snmp_mib2_ip.c
+    snmp_mib2_snmp.c
+    snmp_mib2_system.c
+    snmp_mib2_tcp.c
+    snmp_mib2_udp.c
+    snmp_msg.c
+    snmp_v3.c
+    snmp_netconn.c
+    snmp_pbuf_stream.c
+    snmp_raw.c
+    snmp_scalar.c
+    snmp_table.c
+    snmp_threadsync.c
+    snmp_traps.c
+    snmpv3_mbedtls.c
+    snmpv3_dummy.c
+
+    # http server
+    fs.c
+    httpd.c
+
+    # iperf server
+    lwiperf.c
+
+    # SNTP client
+    sntp.c
+
+    # MDNS responder
+    mdns.c
+
+    # NetBIOS server
+    netbiosns.c
+
+    # TFTP server
+    tftp_server.c
+
+    # MQTT client
+    mqtt.c
 )
 
 
@@ -71,10 +166,22 @@ foreach(SRC_FILE ${LWIP_SRCS})
 
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings/arch
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv4
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv6
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/api
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif/ppp
+
+            # APPS:
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/snmp
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/httpd
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/lwiperf
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/sntp
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/mdns
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/netbiosns
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/tftp
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/mqtt
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
