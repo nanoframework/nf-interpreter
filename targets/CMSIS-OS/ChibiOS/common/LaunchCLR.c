@@ -7,11 +7,11 @@
 
 #include <ch.h>
 #include <hal.h>
-//#include <vectors.h>
+#include <vectors.h>
 
 void LaunchCLR(uint32_t address)
 {
-    /*// function pointer to load nanoCLR ResetHandler address
+    // function pointer to load nanoCLR ResetHandler address
     irq_vector_t JumpToNanoCLR;
 
     // load nanoCLR vector table
@@ -30,12 +30,12 @@ void LaunchCLR(uint32_t address)
     __set_MSP((uint32_t)nanoCLRVectorTable->init_stack);
 
     // make the jump to nanoCLR, at last
-    JumpToNanoCLR(); */
+    JumpToNanoCLR();
 }
 
 bool CheckValidCLRImage(uint32_t address)
 {
-    /*// load nanoCLR vector table
+    // load nanoCLR vector table
     const vectors_t* nanoCLRVectorTable = (vectors_t*) address;
 
     // 1st check: the flash content pointed by the address can't be all 0's neither all F's
@@ -67,7 +67,7 @@ bool CheckValidCLRImage(uint32_t address)
     }
     else
     {
-        // got here so there isn't a valid CLR imaged flashed */
+        // got here so there isn't a valid CLR imaged flashed
         return false;
-    //}
+    }
 }
