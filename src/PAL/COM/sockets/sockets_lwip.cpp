@@ -16,7 +16,7 @@ Sockets_LWIP_Driver g_Sockets_LWIP_Driver;
 
 // int32_t g_DebuggerPort_SslCtx_Handle = -1;
 
-SOCK_SOCKET SOCK_socket( int32_t family, int32_t type, int32_t protocol ) 
+SOCK_SOCKET SOCK_socket( int family, int type, int protocol ) 
 { 
     NATIVE_PROFILE_PAL_COM();
     return Sockets_LWIP_Driver::Socket( family, type, protocol, FALSE );
@@ -26,17 +26,17 @@ int SOCK_bind( SOCK_SOCKET socket, const struct SOCK_sockaddr* address, int addr
     NATIVE_PROFILE_PAL_COM();
     return HAL_SOCK_bind( socket, address, addressLen  );
 }
-int SOCK_connect(SOCK_SOCKET socket, const struct SOCK_sockaddr* address, int32_t addressLen) 
+int SOCK_connect(SOCK_SOCKET socket, const struct SOCK_sockaddr* address, int addressLen) 
 { 
     NATIVE_PROFILE_PAL_COM();
     return Sockets_LWIP_Driver::Connect(socket, address, addressLen);
 }
-int SOCK_send(SOCK_SOCKET socket, const char* buf, int32_t len, int32_t flags) 
+int SOCK_send(SOCK_SOCKET socket, const char* buf, int len, int flags) 
 { 
     NATIVE_PROFILE_PAL_COM();    
     return Sockets_LWIP_Driver::Send(socket, buf, len, flags);
 }
-int SOCK_recv(SOCK_SOCKET socket, char* buf, int32_t len, int32_t flags)
+int SOCK_recv(SOCK_SOCKET socket, char* buf, int len, int flags)
 { 
     NATIVE_PROFILE_PAL_COM();
     return Sockets_LWIP_Driver::Recv(socket, buf, len, flags);
@@ -46,7 +46,7 @@ int SOCK_close(SOCK_SOCKET socket)
     NATIVE_PROFILE_PAL_COM();
     return Sockets_LWIP_Driver::Close(socket);
 }
-int SOCK_listen( SOCK_SOCKET socket, int32_t backlog )
+int SOCK_listen( SOCK_SOCKET socket, int backlog )
 { 
     NATIVE_PROFILE_PAL_COM();
     return Sockets_LWIP_Driver::Listen( socket, backlog );
@@ -56,7 +56,7 @@ SOCK_SOCKET SOCK_accept( SOCK_SOCKET socket, struct SOCK_sockaddr* address, int*
     NATIVE_PROFILE_PAL_COM();
     return Sockets_LWIP_Driver::Accept( socket, address, addressLen, FALSE );
 }
-int SOCK_shutdown( SOCK_SOCKET socket, int32_t how )
+int SOCK_shutdown( SOCK_SOCKET socket, int how )
 { 
     NATIVE_PROFILE_PAL_COM();
     return HAL_SOCK_shutdown( socket, how );
@@ -81,17 +81,17 @@ int SOCK_getlasterror()
     NATIVE_PROFILE_PAL_COM();
     return HAL_SOCK_getlasterror();
 }
-int SOCK_select( int32_t nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* except, const struct SOCK_timeval* timeout )
+int SOCK_select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* except, const struct SOCK_timeval* timeout )
 { 
     NATIVE_PROFILE_PAL_COM();
     return Sockets_LWIP_Driver::Select( nfds, readfds, writefds, except, timeout );
 }
-int SOCK_setsockopt( SOCK_SOCKET socket, int32_t level, int32_t optname, const char* optval, int32_t  optlen )
+int SOCK_setsockopt( SOCK_SOCKET socket, int level, int optname, const char* optval, int  optlen )
 { 
     NATIVE_PROFILE_PAL_COM();
     return HAL_SOCK_setsockopt( socket, level, optname, optval, optlen );
 }
-int SOCK_getsockopt( SOCK_SOCKET socket, int32_t level, int32_t optname, char* optval, int* optlen )
+int SOCK_getsockopt( SOCK_SOCKET socket, int level, int optname, char* optval, int* optlen )
 { 
     NATIVE_PROFILE_PAL_COM();
     return HAL_SOCK_getsockopt( socket, level, optname, optval, optlen );
@@ -106,12 +106,12 @@ int SOCK_getsockname( SOCK_SOCKET socket, struct SOCK_sockaddr* name, int* namel
     NATIVE_PROFILE_PAL_COM();
     return HAL_SOCK_getsockname( socket, name, namelen );
 }
-int SOCK_recvfrom( SOCK_SOCKET s, char* buf, int32_t len, int32_t flags, struct SOCK_sockaddr* from, int* fromlen )
+int SOCK_recvfrom( SOCK_SOCKET s, char* buf, int len, int flags, struct SOCK_sockaddr* from, int* fromlen )
 { 
     NATIVE_PROFILE_PAL_COM();
     return Sockets_LWIP_Driver::RecvFrom( s, buf, len, flags, from, fromlen );
 }
-int SOCK_sendto( SOCK_SOCKET s, const char* buf, int32_t len, int32_t flags, const struct SOCK_sockaddr* to, int32_t tolen )
+int SOCK_sendto( SOCK_SOCKET s, const char* buf, int len, int flags, const struct SOCK_sockaddr* to, int tolen )
 { 
     NATIVE_PROFILE_PAL_COM();
     return Sockets_LWIP_Driver::SendTo( s, buf, len, flags, to, tolen );

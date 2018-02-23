@@ -6,7 +6,6 @@
 // This file includes the board specific Network Intialisation
 
 #include <nanoHAL.h>
-
 #include "lwipthread.h"
 
 void nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc)

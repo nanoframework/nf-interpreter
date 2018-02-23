@@ -9,17 +9,14 @@ list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Lwip)
 
 # source files for nanoFramework Networking
 set(NF_Networking_SRCS
-    
+
     #pal Socket
     sockets_lwip.cpp
 
     #Lwip 
     LwIP_Sockets.cpp
     LwIP_Sockets_functions.cpp 
-
-    #target board init
-    targetHAL_Network.cpp
- )
+)
 
 if(NF_FEATURE_DEBUGGER)
     list(APPEND NF_Networking_SRCS sockets_debugger.cpp)
@@ -35,7 +32,7 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
  
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}") # debug helper
+    # message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}") # debug helper
     list(APPEND NF_Networking_SOURCES ${NF_Networking_SRC_FILE})
 endforeach()
 
