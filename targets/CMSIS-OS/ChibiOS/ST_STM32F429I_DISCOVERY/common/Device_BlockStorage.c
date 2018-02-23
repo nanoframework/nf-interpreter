@@ -19,8 +19,8 @@ const BlockRange BlockRange2[] =
 
 const BlockRange BlockRange3[] =
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 4 },            // 08020000 nanoCLR
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   5, 6 },            // 080C0000 deployment
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 3 },            // 08020000 nanoCLR
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   4, 6 },            // 080A0000 deployment
 };
 
 const BlockRange BlockRange4[] = 
