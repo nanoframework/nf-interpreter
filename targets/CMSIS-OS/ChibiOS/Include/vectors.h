@@ -46,6 +46,7 @@ typedef struct {
   irq_vector_t  vector34;
   irq_vector_t  pendsv_handler;
   irq_vector_t  systick_handler;
+  irq_vector_t  vectors[CORTEX_NUM_VECTORS];
 } vectors_t;
 #endif /* !defined(_FROM_ASM_) */
 
