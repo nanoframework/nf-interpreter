@@ -30,11 +30,11 @@ foreach(SRC_FILE ${System.Net_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    #message("${SRC_FILE} >> ${System.Net_SRC_FILE}") # debug helper
+    # message("${SRC_FILE} >> ${System.Net_SRC_FILE}") # debug helper
     list(APPEND System.Net_SOURCES ${System.Net_SRC_FILE})
 endforeach()
 
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Debugger DEFAULT_MSG System.Net_INCLUDE_DIRS System.Net_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(System.Net DEFAULT_MSG System.Net_INCLUDE_DIRS System.Net_SOURCES)

@@ -33,11 +33,11 @@ foreach(SRC_FILE ${Windows.Networking.Sockets_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    #message("${SRC_FILE} >> ${Windows.Networking.Sockets_SRC_FILE}") # debug helper
+    # message("${SRC_FILE} >> ${Windows.Networking.Sockets_SRC_FILE}") # debug helper
     list(APPEND Windows.Networking.Sockets_SOURCES ${Windows.Networking.Sockets_SRC_FILE})
 endforeach()
 
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Debugger DEFAULT_MSG Windows.Networking.Sockets_INCLUDE_DIRS Windows.Networking.Sockets_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Windows.Networking.Sockets DEFAULT_MSG Windows.Networking.Sockets_INCLUDE_DIRS Windows.Networking.Sockets_SOURCES)
