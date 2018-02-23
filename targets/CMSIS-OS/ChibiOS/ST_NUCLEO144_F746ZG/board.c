@@ -5,6 +5,7 @@
 //
 
 #include "hal.h"
+#include "stm32_gpio.h"
 
 #if HAL_USE_PAL || defined(__DOXYGEN__)
 /**
