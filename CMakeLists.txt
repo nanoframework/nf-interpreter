@@ -314,20 +314,11 @@ if(RTOS_CHIBIOS_CHECK)
 endif()
 
 #################################################################
-# enables Networking support in nanoCLR
+# declares Networking option 
+# needs to show before the API namespaces processing because it's used there
 # (default is OFF so Networking is NOT supported)
-option(NF_FEATURE_USE_NETWORKING "option to use networking")
+option(USE_NETWORKING_OPTION "option to use networking")
 
-if(NF_FEATURE_USE_NETWORKING)
-    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
-    set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for NF_FEATURE_USE_NETWORKING")
-    message(STATUS "Support for networking enabled")
-else()    
-    set(USE_NETWORKING_OPTION FALSE CACHE INTERNAL "NF feature NETWORKING")
-    set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for NF_FEATURE_USE_NETWORKING")
-endif()
-
-#################################################################
 
 #################################################################
 # enables filesysytem support in nanoCLR
@@ -357,6 +348,22 @@ include(NF_API_Namespaces)
 # and/or manage other APIs that are required
 
 
+if(API_System.Net)
+    # this API requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
+
+    # set NETWORKING option to true
+    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
+endif()
+
+
+if(API_Windows.Devices.Adc)
+    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+else()    
+    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+endif()
+
+
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
     
@@ -365,13 +372,6 @@ if(API_Windows.Devices.Gpio)
 
 else()    
     set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-endif()
-
-
-if(API_Windows.Devices.Spi)
-    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-else()    
-    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
 
@@ -389,17 +389,17 @@ else()
 endif()
 
 
-if(API_Windows.Devices.Adc)
-    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
-else()    
-    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
-endif()
-
-
 if(API_Windows.Devices.SerialCommunication)
     set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
 else()
     set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
+endif()
+
+
+if(API_Windows.Devices.Spi)
+    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
+else()    
+    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
 
@@ -408,6 +408,28 @@ if(API_Windows.Devices.Wifi)
 else()    
     set(HAL_USE_WIFI_OPTION FALSE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
 endif()
+
+
+if(API_Windows.Networking.Sockets)
+    # this API requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
+
+    # set NETWORKING option to true
+    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
+endif()
+
+
+#################################################################
+# handles Networking support at HAL level
+
+if(USE_NETWORKING_OPTION)
+    set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
+    message(STATUS "Support for networking enabled")
+else()    
+    set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
+endif()
+
+#################################################################
 
 
 #################################################################

@@ -19,7 +19,6 @@ list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/l
 set(LWIP_SRCS
     # bindings
     lwipthread.c
-    sys_arch.c
 
     # core
     init.c
@@ -63,12 +62,10 @@ set(LWIP_SRCS
 
     # api
     api_lib.c
-    api_msg.c
     err.c
     netbuf.c
     netdb.c
     netifapi.c
-    sockets.c
     tcpip.c
 
     # netif
@@ -163,7 +160,7 @@ foreach(SRC_FILE ${LWIP_SRCS})
     set(LWIP_SRC_FILE SRC_FILE -NOTFOUND)
     find_file(LWIP_SRC_FILE ${SRC_FILE}
         PATHS 
-
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings/arch
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core

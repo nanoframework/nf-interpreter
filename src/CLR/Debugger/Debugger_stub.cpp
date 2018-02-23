@@ -13,11 +13,6 @@ __nfweak void CLR_DBG_Debugger::Debugger_WaitForCommands()
     NATIVE_PROFILE_CLR_DEBUGGER();
 }
 
-__nfweak void CLR_DBG_Debugger::Debugger_Discovery()
-{
-    NATIVE_PROFILE_CLR_DEBUGGER();
-}
-
 __nfweak void CLR_DBG_Debugger::PurgeCache()
 {
     NATIVE_PROFILE_CLR_DEBUGGER();

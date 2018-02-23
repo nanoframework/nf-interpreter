@@ -35,6 +35,7 @@
 #include <targetHAL.h>
 #include <nanoHAL_Types.h>
 #include <nanoHAL_ReleaseInfo.h>
+#include <nanoHAL_Network.h>
 
 //#if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
 //#define ENABLE_NATIVE_PROFILER
@@ -213,7 +214,6 @@
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
 #define ExtractEventFromTransport(x) (ExtractTransport(x) == USART_TRANSPORT     ? SYSTEM_EVENT_FLAG_COM_IN: \
-                                      ExtractTransport(x) == USB_TRANSPORT       ? SYSTEM_EVENT_FLAG_USB_IN: \
                                       ExtractTransport(x) == SOCKET_TRANSPORT    ? SYSTEM_EVENT_FLAG_SOCKET: \
                                       ExtractTransport(x) == GENERIC_TRANSPORT   ? SYSTEM_EVENT_FLAG_GENERIC_PORT: \
                                       ExtractTransport(x) == DEBUG_TRANSPORT     ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY: \
@@ -289,7 +289,8 @@
 // Creates a COM_HANDLE value for a platform specific port number
 #define ConvertCOM_DebugHandle(x)    ((COM_HANDLE)((x) + DEBUG_TRANSPORT     + 1))
 
-
+// Extracts a Socket transport port id from a SOCKET_TRASNPORT COM_HANDLE
+#define ConvertCOM_SockPort(x)      (((x) & PORT_NUMBER_MASK) - 1)
 
 typedef unsigned int FLASH_WORD;
 
@@ -1839,7 +1840,7 @@ bool              Watchdog_GetSetEnabled ( bool enabled, bool fSet );
 
 #if defined(_WIN32)
 
-#define GLOBAL_LOCK(x)               // UNDONE: FIXME: SmartPtr_IRQ x
+#define GLOBAL_LOCK(x)
 //#define DISABLE_INTERRUPTS()       SmartPtr_IRQ::ForceDisabled()
 //#define ENABLE_INTERRUPTS()        SmartPtr_IRQ::ForceEnabled()
 //#define INTERRUPTS_ENABLED_STATE() SmartPtr_IRQ::GetState()

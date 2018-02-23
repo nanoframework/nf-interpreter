@@ -60,6 +60,12 @@ void nanoHAL_Initialize()
 
     // no PAL events required until now
     //PalEvent_Initialize();
+	
+	// Init Networking
+	Network_Initialize();
+    
+	// Start Network Debugger
+   // SOCKETS_DbgInitialize( 0 );
 }
 
 void nanoHAL_Uninitialize()

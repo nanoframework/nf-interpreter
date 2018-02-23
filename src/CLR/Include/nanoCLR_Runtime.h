@@ -1239,6 +1239,8 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_Thread;
     CLR_RT_TypeDef_Index m_ResourceManager;
 
+    CLR_RT_TypeDef_Index m_SocketException;
+
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_WellKnownTypes);
 };
 
@@ -2733,6 +2735,7 @@ struct CLR_RT_ExecutionEngine
     static const CLR_UINT32             c_Event_EndPoint      = 0x00000008;
     static const CLR_UINT32             c_Event_IO            = 0x00000080;
     static const CLR_UINT32             c_Event_AppDomain     = 0x02000000;
+    static const CLR_UINT32             c_Event_Socket        = 0x20000000;
     static const CLR_UINT32             c_Event_IdleCPU       = 0x40000000;
     static const CLR_UINT32             c_Event_LowMemory     = 0x80000000; // Wait for a low-memory condition.
 
@@ -2900,9 +2903,7 @@ struct CLR_RT_ExecutionEngine
     //--//
     
     CLR_INT64                           m_currentMachineTime;
-    CLR_INT64                           m_currentLocalTime;
     CLR_INT64                           m_startTime;  
-    CLR_INT32                           m_lastTimeZoneOffset;
     CLR_INT64                           m_currentNextActivityTime;
     bool                                m_timerCache;
     CLR_INT64                           m_timerCacheNextTimeout;
@@ -3072,7 +3073,7 @@ struct CLR_RT_ExecutionEngine
 
     //--//
 
-    bool IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin, bool fAbsolute );
+    bool IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin );
 
     bool IsThereEnoughIdleTime( CLR_UINT32 expectedMsec );
 

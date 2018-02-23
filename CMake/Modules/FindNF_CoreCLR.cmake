@@ -137,7 +137,6 @@ set(NF_CoreCLR_SRCS
     
     # Core stubs
     Hardware_stub.cpp
-    Heap_Persistence_stub.cpp
     InterruptHandler_stub.cpp
     NativeEventDispatcher_stub.cpp
     RPC_stub.cpp
@@ -154,6 +153,7 @@ set(NF_CoreCLR_SRCS
     # PAL
     nanoPAL_BlockStorage.c
     nanoPAL_NativeDouble.cpp
+    nanoPAL_Network_stubs.cpp
 
     # PAL stubs
     Async_stubs.cpp
@@ -180,7 +180,6 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
 
             # Core stubs
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/Hardware
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/HeapPersistence
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/InterruptHandler
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/RPC

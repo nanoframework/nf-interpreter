@@ -2653,6 +2653,8 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
     TIL( "System.Threading"        , "Thread"                        , m_Thread                                             ),
     TIL( "System.Resources"        , "ResourceManager"               , m_ResourceManager                                    ),
 
+    TIL( "System.Net.Sockets"      , "SocketException"               , m_SocketException                                    ),
+
 #undef TIL
 };
 
@@ -3103,8 +3105,7 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
 
                     const char* fieldName = inst.m_assm->GetString( fd->name );
 
-                    // UNDONE: FIXME
-                    // hash = SUPPORT_ComputeCRC( fieldName, (CLR_UINT32)hal_strlen_s(fieldName), hash );
+                    hash = SUPPORT_ComputeCRC( fieldName, (CLR_UINT32)hal_strlen_s(fieldName), hash );
                 }
             }
 
