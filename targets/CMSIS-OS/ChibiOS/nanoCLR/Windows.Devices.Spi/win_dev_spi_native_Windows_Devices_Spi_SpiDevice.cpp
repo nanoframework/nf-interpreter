@@ -147,6 +147,7 @@ nfSPIConfig Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(
     nfSPIConfig cfg =
     {
         {
+            TRUE,
             NULL,
             GPIO_PORT(csPin),
             csPin % 16,
