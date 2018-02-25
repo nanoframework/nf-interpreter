@@ -39,14 +39,6 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeCloseChannel___VOID( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-
-
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeDisposeChannel___VOID__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();

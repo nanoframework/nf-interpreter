@@ -39,7 +39,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetC
 
         CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-        // Return number of single ended channels
+        // FIXME - Return number of single ended channels
         int deviceId = pThis[ FIELD___deviceId ].NumericByRefConst().s4;
         switch(deviceId)
         {
@@ -57,7 +57,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetM
 {
     NANOCLR_HEADER();
     {
-        // Currently fixed 12 bit so return 4095
+        // Currently fixed at 12 bit so return 4095
         stack.SetResult_I4(4095);
     }
     NANOCLR_NOCLEANUP();
@@ -67,7 +67,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetM
 {
     NANOCLR_HEADER();
 
-    // Return 0 for now, is this signed ?
+    // Return 0 for now
     stack.SetResult_I4(0);
 
     NANOCLR_NOCLEANUP();
@@ -101,7 +101,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::GetDeviceS
     NANOCLR_HEADER();
    {
       // declare the device selector string
-      // ADC1 and ADC2
+      // FIXME - ADC1 and ADC2
        char deviceSelectorString[] = 
             "ADC1,ADC2";
 
