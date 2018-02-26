@@ -1,8 +1,8 @@
 //
 // Copyright (c) 2017 The nanoFramework project contributors
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-
 
 #ifndef _WIN_DEV_ADC_NATIVE_H_
 #define _WIN_DEV_ADC_NATIVE_H_
@@ -10,7 +10,6 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-#include <hal.h>
 
 struct Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel
 {
@@ -44,7 +43,6 @@ struct Library_win_dev_adc_native_Windows_Devices_Adc_AdcController
     //--//
 
 };
-
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Adc;
 

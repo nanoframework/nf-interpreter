@@ -39,6 +39,7 @@ struct Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin
     static const int FIELD___isStarted = 8;
     static const int FIELD___disposedValue = 9;
 
+    NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeSetActiveDutyCyclePercentage___VOID__U4);
     NANOCLR_NATIVE_DECLARE(NativeSetPolarity___VOID__U1);
     NANOCLR_NATIVE_DECLARE(NativeStart___VOID);
