@@ -15,6 +15,7 @@ extern "C"
 #include "lwip\Netdb.h"
 #include "lwip\tcp.h"
 #include "lwip\Sockets.h"
+#include "errno_.h"
 }
 
 // extern const HAL_CONFIG_BLOCK   g_NetworkConfigHeader;

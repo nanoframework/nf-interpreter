@@ -426,7 +426,8 @@ if(USE_NETWORKING_OPTION)
     set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
     message(STATUS "Support for networking enabled")
 else()    
-    set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
+    set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")  
+    message(STATUS "Support for networking IS NOT enabled")
 endif()
 
 #################################################################

@@ -39,6 +39,8 @@
 #define __LWIPOPT_H__
 
 
+//#define LWIP_PROVIDE_ERRNO  1
+//#define LWIP_ERRNO_INCLUDE "errno.h"
 /*
    -----------------------------------------------
    ---------- Platform specific locking ----------
