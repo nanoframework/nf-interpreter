@@ -14,9 +14,14 @@ branches:
     increment: Patch
     prevent-increment-of-merged-branch-version: true
     track-merge-target: false
-  develop?[/-]:
+  develop:
     mode: ContinuousDeployment
     tag: preview
+    increment: Minor
+    prevent-increment-of-merged-branch-version: false
+    track-merge-target: true
+  develop?[/-]:
+    mode: ContinuousDeployment
     increment: Minor
     prevent-increment-of-merged-branch-version: false
     track-merge-target: true
