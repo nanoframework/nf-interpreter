@@ -7,8 +7,9 @@
 #ifndef _DRIVERS_SOCKETS_DECL_H_
 #define _DRIVERS_SOCKETS_DECL_H_ 1
 
-//#include <platform_selector.h>
-
+#if defined(_WIN32)
+#define GLOBAL_LOCK_SOCKETS(x)
+#endif
 //--//
 
 
