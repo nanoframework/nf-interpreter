@@ -42,8 +42,8 @@ typedef struct _X509CertData
 
 //Avoid including windows socket definitions
 
-#ifndef TINYCLR_SOCK_STRUCTURES
-#define TINYCLR_SOCK_STRUCTURES
+#ifndef NANOCLR_SOCK_STRUCTURES
+#define NANOCLR_SOCK_STRUCTURES
 
 #define SOCK_EINTR                   10004L
 #define SOCK_EBADF                   10009L
@@ -480,7 +480,7 @@ __inline void SOCK_FD_CLR(int y, SOCK_fd_set* x)
     }                               
 }                                
 
-#endif //TINYCLR_SOCK_STRUCTURES
+#endif //NANOCLR_SOCK_STRUCTURES
 
 #ifndef DEBUG_SOCKET_PORT  // default debug socket port
 #define DEBUG_SOCKET_PORT 26000
