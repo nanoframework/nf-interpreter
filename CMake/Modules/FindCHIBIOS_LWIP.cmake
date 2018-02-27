@@ -33,7 +33,7 @@ set(LWIP_SRCS
 
     # bindings
     lwipthread.c
-    sys_arch.c
+    # sys_arch.c
 
     # core
     init.c
@@ -77,12 +77,12 @@ set(LWIP_SRCS
 
     # api
     api_lib.c
-	api_msg.c
+	# api_msg.c
 	err.c
 	netbuf.c
 	netdb.c
 	netifapi.c
-	sockets.c
+	# sockets.c
 	tcpip.c
 
     # api patched files for nanoframework
