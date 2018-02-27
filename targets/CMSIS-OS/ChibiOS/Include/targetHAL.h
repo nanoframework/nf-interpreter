@@ -8,18 +8,20 @@
 
 #include <target_board.h>
 
-// call to CMSIS osDelay to allow other threads to run
-#define NANOCLR_RELINQUISHEXECUTIONCONTROL()       osDelay(10);
-
 #define GLOBAL_LOCK(x)              chSysLock();
 #define GLOBAL_UNLOCK(x);           chSysUnlock();
-#define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
+#define ASSERT_IRQ_MUST_BE_OFF()    // TODO need to determine if this needs implementation
 
+
+// these macros are to be used at entry/exit of native interrupt handlers
+#define NATIVE_INTERRUPT_START  SystemState_SetNoLock( SYSTEM_STATE_ISR              );   \
+                                SystemState_SetNoLock( SYSTEM_STATE_NO_CONTINUATIONS );
+#define NATIVE_INTERRUPT_END    SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS ); \
+                                SystemState_ClearNoLock( SYSTEM_STATE_ISR              );
 
 #if !defined(BUILD_RTM)
 
-// FIXME IMPLEMENT
-//inline void HARD_Breakpoint() { };
+inline void HARD_Breakpoint() { };
 
 #define HARD_BREAKPOINT()     HardFault_Handler()
 

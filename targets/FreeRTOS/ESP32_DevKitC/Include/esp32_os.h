@@ -21,8 +21,8 @@
 #include "i2c.h"
 #include "esp_wifi.h"
 #include "uart.h"   
-
-
+#include "ledc.h"
+#include "adc.h"
 
 
 #endif // _ESP32_OS_H_

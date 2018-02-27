@@ -3,9 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _GPIO_PORT
-#define _GPIO_PORT
+#ifndef _TARGETPAL_H_
+#define _TARGETPAL_H_
 
 
 
-#endif
+#endif // _TARGETPAL_H_

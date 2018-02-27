@@ -10,15 +10,15 @@
 
 #include <nanoHAL.h>
 #include <nanoPAL_Time.h>
+#include <nanoPAL_GPIO.h>
 #include <nanoHAL_v2.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoPAL_Events.h>
 #include <nanoPAL_AsyncProcCalls_decl.h>
 
-//#include <StateDebounce_decl.h>
-//#include <Backlight_decl.h>
-//#include <BatteryCharger_decl.h>
-//#include <BatteryMeasurement_decl.h>
+
+
+
 
 #include <nanoPAL_COM.h>
 // 
@@ -92,8 +92,8 @@
 void HeapLocation(unsigned char*& BaseAddress, unsigned int& SizeInBytes);
 
 
-//#include <gesture_decl.h>
-//#include <ink_decl.h>
+
+
 //
 //#include <graphics_decl.h>
 //
@@ -103,8 +103,8 @@ void HeapLocation(unsigned char*& BaseAddress, unsigned int& SizeInBytes);
 //
 //#include <FS_decl.h>
 //
-//#include <GPIO_button_decl.h>
-//#include <piezo_decl.h>
+
+
 //
 
 //#include <Power_decl.h>
@@ -203,7 +203,7 @@ enum POWER_LEVEL
 
 
 //#include <TimeService_decl.h>
-//#include <TouchPanel_decl.h>
+
 
 //#include <nanocrt_decl.h>
 

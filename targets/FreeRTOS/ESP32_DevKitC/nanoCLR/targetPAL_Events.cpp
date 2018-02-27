@@ -8,6 +8,8 @@
 #include <target_platform.h>
 #include <Esp32_os.h>
 
+uint64_t CPU_MiliSecondsToSysTicks(uint64_t miliSeconds);
+
 // events timer
 static TimerHandle_t eventsBoolTimer;
 static bool*  saveTimerCompleteFlag = 0;
@@ -123,30 +125,53 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
 
 uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeout_Milliseconds )
 {
+    // schedule an interrupt for this far in the future
+    // timeout is in milliseconds, convert to Sleep Counts
+    uint64_t countsRemaining = CPU_MiliSecondsToSysTicks(timeout_Milliseconds);
 
 #if defined(HAL_PROFILE_ENABLED)
     Events_WaitForEvents_Calls++;
 #endif
 
-   if( systemEvents == 0) {
-        // no events, wait for timeout_Milliseconds
-        vTaskDelay( timeout_Milliseconds / portTICK_PERIOD_MS );
+    uint64_t expire          = HAL_Time_CurrentSysTicks() + countsRemaining;
+    bool runContinuations = true;
+
+    while(true)
+    {
+        uint32_t events = Events_MaskedRead( wakeupSystemEvents );
+        if(events)
+        {
+            return events;
+        }
+
+        if(expire <= HAL_Time_CurrentSysTicks())
+        {
+            break;
+        }
+
+        // first check and possibly run any continuations
+        // but only if we have slept after stalling
+        if(runContinuations && !SystemState_QueryNoLock(SYSTEM_STATE_NO_CONTINUATIONS))
+        {
+            // if we stall on time, don't check again until after we sleep
+            runContinuations = HAL_CONTINUATION::Dequeue_And_Execute();
+        }
+        else
+        {
+            // try stalled continuations again after sleeping
+            runContinuations = true;
+
+            HAL_COMPLETION::WaitForInterrupts(expire, powerLevel, wakeupSystemEvents );          
+        }
+
+        // no events, release time to OS
+        vTaskDelay(0);
     }
 
-    return  systemEvents;
-}
+    return 0;
+ }
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
     NATIVE_PROFILE_PAL_EVENTS();
-
-    // TODO: not sure if this is really needed here... just kept it for further investigation
-    // switch(category)
-    // {
-    //     //case EVENT_GESTURE:
-    //     case EVENT_TOUCH:
-    //         break;
-    //     default:
-    //         break;
-    // }
 }

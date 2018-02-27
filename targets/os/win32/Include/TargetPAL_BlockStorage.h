@@ -758,7 +758,6 @@ void BlockStorage_AddDevices();
 
 #define FLASH_BEGIN_PROGRAMMING_FAST()             { GLOBAL_LOCK(FlashIrq)
 #define FLASH_BEGIN_PROGRAMMING(x)                 { uint32_t FlashOperationStatus = Flash_StartOperation( x )
-#define FLASH_SLEEP_IF_INTERRUPTS_ENABLED(u)       if(!FlashOperationStatus) { Events_WaitForEventsInternal( 0, u/1000 ); }
 #define FLASH_END_PROGRAMMING(banner,address)      Flash_EndOperation( FlashOperationStatus ); }
 #define FLASH_END_PROGRAMMING_FAST(banner,address) }
 

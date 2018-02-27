@@ -249,22 +249,22 @@ void CLR_RT_GarbageCollector::TestPointers_Remap()
     NATIVE_PROFILE_CLR_CORE();
     Rel_Map_Iter it;
 
-    // for(it = s_mapOldToRecord.begin(); it != s_mapOldToRecord.end(); it++)
-    // {
-    //     RelocationRecord* ptr = it->second;
-    //     void**            ref = it->first  ; CLR_RT_GarbageCollector::Relocation_UpdatePointer( (void**)&ref );
-    //     CLR_UINT32*       dst = ptr->oldPtr; CLR_RT_GarbageCollector::Relocation_UpdatePointer( (void**)&dst );
+    for(it = s_mapOldToRecord.begin(); it != s_mapOldToRecord.end(); it++)
+    {
+        RelocationRecord* ptr = it->second;
+        void**            ref = it->first  ; CLR_RT_GarbageCollector::Relocation_UpdatePointer( (void**)&ref );
+        CLR_UINT32*       dst = ptr->oldPtr; CLR_RT_GarbageCollector::Relocation_UpdatePointer( (void**)&dst );
 
-    //     if(s_mapNewToRecord.find( ref ) != s_mapNewToRecord.end())
-    //     {
-    //         CLR_Debug::Printf( "Duplicate base NEW: %08x\r\n", ref );
-    //     }
+        if(s_mapNewToRecord.find( ref ) != s_mapNewToRecord.end())
+        {
+            CLR_Debug::Printf( "Duplicate base NEW: %08x\r\n", ref );
+        }
 
-    //     s_mapNewToRecord[ ref ] = ptr;
+        s_mapNewToRecord[ ref ] = ptr;
 
-    //     ptr->newRef = ref;
-    //     ptr->newPtr = dst;
-    // }
+        ptr->newRef = ref;
+        ptr->newPtr = dst;
+    }
 }
 
 //--//

@@ -213,7 +213,6 @@
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
 #define ExtractEventFromTransport(x) (ExtractTransport(x) == USART_TRANSPORT     ? SYSTEM_EVENT_FLAG_COM_IN: \
-                                      ExtractTransport(x) == USB_TRANSPORT       ? SYSTEM_EVENT_FLAG_USB_IN: \
                                       ExtractTransport(x) == SOCKET_TRANSPORT    ? SYSTEM_EVENT_FLAG_SOCKET: \
                                       ExtractTransport(x) == GENERIC_TRANSPORT   ? SYSTEM_EVENT_FLAG_GENERIC_PORT: \
                                       ExtractTransport(x) == DEBUG_TRANSPORT     ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY: \
@@ -649,29 +648,6 @@ void* platform_realloc( void*  ptr, size_t size );
 
 //--//
 
-//These events match emulator events in Framework\Tools\Emulator\Events.cs
-
-#define SYSTEM_EVENT_FLAG_COM_IN                    0x00000001
-#define SYSTEM_EVENT_FLAG_COM_OUT                   0x00000002
-#define SYSTEM_EVENT_FLAG_USB_IN                    0x00000004
-//#define SYSTEM_EVENT_FLAG_USB_OUT                   0x00000008
-#define SYSTEM_EVENT_FLAG_SYSTEM_TIMER              0x00000010
-//#define SYSTEM_EVENT_FLAG_TIMER1                    0x00000020
-//#define SYSTEM_EVENT_FLAG_TIMER2                    0x00000040
-//#define SYSTEM_EVENT_FLAG_BUTTON                    0x00000080
-#define SYSTEM_EVENT_FLAG_GENERIC_PORT              0x00000100
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00000200         0x00000200
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00000400         0x00000400
-//#define SYSTEM_EVENT_FLAG_NETWORK                   0x00000800
-//#define SYSTEM_EVENT_FLAG_TONE_COMPLETE             0x00001000
-//#define SYSTEM_EVENT_FLAG_TONE_BUFFER_EMPTY         0x00002000
-#define SYSTEM_EVENT_FLAG_SOCKET                    0x00004000
-//#define SYSTEM_EVENT_FLAG_SPI                       0x00008000
-//#define SYSTEM_EVENT_FLAG_CHARGER_CHANGE            0x00010000
-//#define SYSTEM_EVENT_FLAG_OEM_RESERVED_1            0x00020000
-//#define SYSTEM_EVENT_FLAG_OEM_RESERVED_2            0x00040000
-#define SYSTEM_EVENT_FLAG_IO                        0x00080000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00100000         0x00100000
 
 
 
@@ -679,18 +655,41 @@ void* platform_realloc( void*  ptr, size_t size );
 
 
 
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00200000         0x00200000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00400000         0x00400000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00800000         0x00800000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x01000000         0x01000000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x02000000         0x02000000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x04000000         0x04000000
-#define SYSTEM_EVENT_HW_INTERRUPT                   0x08000000
-//#define SYSTEM_EVENT_I2C_XACTION                    0x10000000
-#define SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY         0x20000000
-#define SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY        0x40000000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x80000000         0x80000000
-#define SYSTEM_EVENT_FLAG_ALL                       0xFFFFFFFF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -709,8 +708,7 @@ void* platform_realloc( void*  ptr, size_t size );
 
 
 
-
-
+//--//
 
 
 
@@ -1822,7 +1820,6 @@ bool              Watchdog_GetSetEnabled ( bool enabled, bool fSet );
 //// Power API
 //#include <Power_decl.h>
 
-void CPU_Reset();
 
 
 //
@@ -1837,7 +1834,7 @@ void CPU_Reset();
 
 #if defined(_WIN32)
 
-#define GLOBAL_LOCK(x)               // UNDONE: FIXME: SmartPtr_IRQ x
+#define GLOBAL_LOCK(x)
 //#define DISABLE_INTERRUPTS()       SmartPtr_IRQ::ForceDisabled()
 //#define ENABLE_INTERRUPTS()        SmartPtr_IRQ::ForceEnabled()
 //#define INTERRUPTS_ENABLED_STATE() SmartPtr_IRQ::GetState()
