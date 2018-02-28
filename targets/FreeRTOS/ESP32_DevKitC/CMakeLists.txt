@@ -190,6 +190,9 @@ if(NF_FEATURE_USE_APPDOMAINS)
     target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DNANOCLR_USE_APPDOMAINS)
 endif()
 
+# set definition for Wire Protocol trace mask
+target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
+
 # set extra linker flags for DEBUG
 #set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
