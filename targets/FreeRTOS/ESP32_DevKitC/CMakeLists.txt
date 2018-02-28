@@ -193,6 +193,11 @@ endif()
 # set definition for Wire Protocol trace mask
 target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
 
+# set compiler definition for implementing (or not) CRC32 in Wire Protocol
+if(NF_WP_IMPLEMENTS_CRC32)
+    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DWP_IMPLEMENTS_CRC32)
+endif()
+
 # set extra linker flags for DEBUG
 #set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
