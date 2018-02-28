@@ -69,7 +69,11 @@ void WP_Message_PrepareRequest(WP_Message* message, uint32_t cmd, uint32_t flags
 {
     memcpy(&message->m_header.m_signature, marker ? marker : (uint8_t*)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
 
+#if defined(WP_IMPLEMENTS_CRC32)
     message->m_header.m_crcData   = SUPPORT_ComputeCRC(payload, payloadSize, 0);
+#else
+    message->m_header.m_crcData   = 0;
+#endif
     message->m_header.m_cmd       = cmd;
     message->m_header.m_seq       = lastOutboundMessage++;
     message->m_header.m_seqReply  = 0;
@@ -81,7 +85,9 @@ void WP_Message_PrepareRequest(WP_Message* message, uint32_t cmd, uint32_t flags
     // The CRC for the header is computed setting the CRC field to zero and then running the CRC algorithm.
     //
     message->m_header.m_crcHeader = 0;
+#if defined(WP_IMPLEMENTS_CRC32)
     message->m_header.m_crcHeader = SUPPORT_ComputeCRC((uint8_t*)&message->m_header, sizeof(message->m_header), 0);
+#endif
 }
 
 
@@ -89,7 +95,11 @@ void WP_Message_PrepareReply(WP_Message* message, const WP_Packet* req, uint32_t
 {
     memcpy(&message->m_header.m_signature, marker ? marker : (uint8_t*)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
 
+#if defined(WP_IMPLEMENTS_CRC32)
     message->m_header.m_crcData   = SUPPORT_ComputeCRC(payload, payloadSize, 0);
+#else
+    message->m_header.m_crcData   = 0;
+#endif
     message->m_header.m_cmd       = req->m_cmd;
     message->m_header.m_seq       = lastOutboundMessage++;
     message->m_header.m_seqReply  = req->m_seq;
@@ -101,7 +111,9 @@ void WP_Message_PrepareReply(WP_Message* message, const WP_Packet* req, uint32_t
     // The CRC for the header is computed setting the CRC field to zero and then running the CRC algorithm.
     //
     message->m_header.m_crcHeader = 0;
+#if defined(WP_IMPLEMENTS_CRC32)
     message->m_header.m_crcHeader = SUPPORT_ComputeCRC((uint8_t*)&message->m_header, sizeof(message->m_header), 0);
+#endif
 }
 
 void WP_Message_SetPayload(WP_Message* message, uint8_t* payload)
@@ -121,6 +133,9 @@ int WP_Message_VerifyHeader(WP_Message* message)
 {
     uint32_t crc = message->m_header.m_crcHeader;
     message->m_header.m_crcHeader = 0;
+
+#if defined(WP_IMPLEMENTS_CRC32)
+    
     uint32_t computedCrc = SUPPORT_ComputeCRC((uint8_t*)&message->m_header, sizeof(message->m_header), 0);
     message->m_header.m_crcHeader = crc;
 
@@ -129,6 +144,9 @@ int WP_Message_VerifyHeader(WP_Message* message)
         TRACE( TRACE_ERRORS, "Header CRC check failed: computed: 0x%08X; got: 0x%08X\n", computedCrc, message->m_header.m_crcHeader );
         return false;
     }
+
+#endif
+
     return true;
 }
 
@@ -139,12 +157,17 @@ int WP_Message_VerifyPayload(WP_Message* message)
         return false;
     }
 
+#if defined(WP_IMPLEMENTS_CRC32)
+
     uint32_t computedCrc = SUPPORT_ComputeCRC(message->m_payload, message->m_header.m_size, 0);
     if(computedCrc != message->m_header.m_crcData)
     {
         TRACE( TRACE_ERRORS, "Payload CRC check failed: computed: 0x%08X; got: 0x%08X\n", computedCrc, message->m_header.m_crcData );
         return false;
     }
+
+#endif
+
     return true;
 }
 
