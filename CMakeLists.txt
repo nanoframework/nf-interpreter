@@ -314,6 +314,14 @@ if(RTOS_CHIBIOS_CHECK)
 endif()
 
 #################################################################
+# reports Wire Protocol CRC32 implementation
+if(NF_WP_IMPLEMENTS_CRC32)
+    message(STATUS "Wire Protocol implements CRC32")
+else()
+    message(STATUS "Wire Protocol does NOT implement CRC32")
+endif()
+
+#################################################################
 # enables Networking support in nanoCLR
 # (default is OFF so Networking is NOT supported)
 option(NF_FEATURE_USE_NETWORKING "option to use networking")
