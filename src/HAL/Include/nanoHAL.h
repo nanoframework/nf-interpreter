@@ -572,6 +572,17 @@ void HAL_Assert  ( const char* Func, int Line, const char* File );
 // HAL_AssertEx is defined in the processor or platform selector files.
 extern void HAL_AssertEx();
 
+//
+// This has to be extern "C" because we want to use platform implemented malloc 
+//
+extern "C" {
+
+void* platform_malloc ( size_t size             );
+void  platform_free   ( void*  ptr              );
+void* platform_realloc( void*  ptr, size_t size );
+
+}
+
 #if defined(PLATFORM_ARM)
     #if !defined(BUILD_RTM)
         #define       ASSERT(i)  { if(!(i)) HAL_AssertEx(); }
@@ -1339,11 +1350,8 @@ public:
             size_t tailSize = _write_index - 1;
 
             // 1st move tail to temp buffer (need to malloc first)
-#if defined(__arm__)
-            T* tempBuffer = (T*)chHeapAlloc(NULL, tailSize);
-#else
-            T* tempBuffer = (T*)malloc(tailSize);
-#endif
+            T* tempBuffer = (T*)platform_malloc(tailSize);
+            
             memcpy(tempBuffer, _buffer, tailSize);
             
             // store size of remaining buffer
@@ -1356,11 +1364,7 @@ public:
             memcpy(_buffer + headSize, tempBuffer, tailSize);
 
             // free memory
-#if defined(__arm__)
-            chHeapFree(tempBuffer);
-#else
-            free(tempBuffer);
-#endif
+            platform_free(tempBuffer);
         }
 
         // adjust indexes
@@ -1525,16 +1529,8 @@ void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler);
 //--//
 
 
-//
-// This has to be extern "C" because we want to use platform implemented malloc 
-//
-extern "C" {
 
-void* platform_malloc ( size_t size             );
-void  platform_free   ( void*  ptr              );
-void* platform_realloc( void*  ptr, size_t size );
 
-}
 
 
 
