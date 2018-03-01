@@ -313,6 +313,10 @@ bool CLR_DBG_Debugger::Monitor_Ping( WP_Message* msg)
 
         cmdReply.m_dbg_flags = CLR_EE_DBG_IS(StateProgramExited) != 0 ? Monitor_Ping_c_Ping_DbgFlag_AppExit : 0;
 
+        #if defined(WP_IMPLEMENTS_CRC32)
+        cmdReply.m_dbg_flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;
+        #endif
+
         WP_ReplyToCommand( msg, true, false, &cmdReply, sizeof(cmdReply) );
     }
     else

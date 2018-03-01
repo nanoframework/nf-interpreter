@@ -5,6 +5,7 @@
 //
 
 #include <nanoHAL_Types.h>
+#include <nanoWeak.h>
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -47,7 +48,11 @@ static const unsigned int c_CRCTable[256] =
 	0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
 };
 
-unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc)
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// This is declared with GCC weak attribute so it can be replaced with an implementation at target level //
+// Currently this is happening with the STM32 targets as all chips feature a CRC hardware unit           //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+__nfweak unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc)
 {
     const unsigned char* ptr = (const unsigned char*)rgBlock;
 

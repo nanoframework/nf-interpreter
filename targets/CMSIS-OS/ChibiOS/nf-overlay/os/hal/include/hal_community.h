@@ -12,6 +12,11 @@
 #define HAL_USE_STM32_FLASH                         FALSE
 #endif
 
+#if !defined(HAL_USE_STM32_CRC)
+// the default for this driver is to be included
+#define HAL_USE_STM32_CRC                           TRUE
+#endif
+
 // Abstract interfaces
 
 // Shared headers
@@ -19,6 +24,7 @@
 
 // Normal drivers
 #include "hal_stm32_flash.h"
+#include "hal_stm32_crc.h"
 
 // Complex drivers
 // #include "hal_nnnn.h"

@@ -4,6 +4,7 @@
 //
 
 #include <ch.h>
+#include <hal.h>
 #include <cmsis_os.h>
 
 #include <nanoCLR_Application.h>
@@ -16,6 +17,12 @@
 __attribute__((noreturn))
 void CLRStartupThread(void const * argument)
 {
+
+  #if (HAL_USE_STM32_CRC == TRUE)
+  // startup crc
+  crcStart(NULL);
+  #endif
+
   // initialize nanoHAL
   nanoHAL_Initialize_C();
 
