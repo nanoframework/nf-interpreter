@@ -1,33 +1,12 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) 2018 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_NF_COMMUNITY_H
-#define HAL_NF_COMMUNITY_H
+#ifndef HAL_STM32_CRC_H
+#define HAL_STM32_CRC_H
 
-
-// these are for error checks on the configuration header files
-#if !defined(HAL_USE_STM32_FLASH)
-#define HAL_USE_STM32_FLASH                         FALSE
-#endif
-
-#if !defined(HAL_USE_STM32_CRC)
-// the default for this driver is to be included
-#define HAL_USE_STM32_CRC                           TRUE
-#endif
-
-// Abstract interfaces
-
-// Shared headers
-// #include "hal_nnnn.h"
-
-// Normal drivers
-#include "hal_stm32_flash.h"
-#include "hal_stm32_crc.h"
-
-// Complex drivers
-// #include "hal_nnnn.h"
+#if (HAL_USE_STM32_CRC == TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver constants.                                                         //
@@ -37,6 +16,12 @@
 // Driver pre-compile time settings.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
+// Enables the crcAcquireModule() and crcReleaseModule() APIs.
+// Disabling this option saves both code and data space.
+#if !defined(CRC_USE_MUTUAL_EXCLUSION)
+#define CRC_USE_MUTUAL_EXCLUSION        TRUE
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // Derived constants and error checks.                                       //
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,6 +29,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Driver data structures and types.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief   Driver state machine possible states.
+ */
+typedef enum {
+  CRC_UNINIT,          // Not initialized
+  CRC_STOP,            // Stopped
+  CRC_READY,           // Ready
+  CRC_ACTIVE           // Calculating CRC
+} crcState;
+
+#include "crc_lld.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver macros.                                                            //
@@ -57,11 +54,21 @@
 extern "C" {
 #endif
 
-  void halCommunityInit(void);
+  void crcInit(void);
+  void crcStart(const crcConfig *config);
+  void crcStop();
+  void crcReset();
+  uint32_t crcCompute(const void* buffer, int size, uint32_t initialCrc);
+
+#if (CRC_USE_MUTUAL_EXCLUSION == TRUE)
+  void crcAquireModule();
+  void crcReleaseModule();
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // HAL_NF_COMMUNITY_H
+#endif // HAL_USE_STM32_CRC
 
+#endif // HAL_STM32_CRC_H

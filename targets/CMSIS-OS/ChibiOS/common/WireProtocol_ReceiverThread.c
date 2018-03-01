@@ -4,6 +4,7 @@
 //
 
 #include <ch.h>
+#include <hal.h>
 #include <cmsis_os.h>
 #include "WireProtocol_HAL_Interface.h"
 
@@ -16,6 +17,11 @@ __attribute__((noreturn))
 void ReceiverThread(void const * argument)
 {
   osDelay(500);
+
+  #if (HAL_USE_STM32_CRC == TRUE)
+  // startup crc
+  crcStart(NULL);
+  #endif
 
   // loop until thread receives a request to terminate
   while (1) {

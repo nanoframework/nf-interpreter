@@ -67,6 +67,12 @@ int Monitor_Ping(WP_Message* message)
         Monitor_Ping_Reply cmdReply;
         cmdReply.m_source = Monitor_Ping_c_Ping_Source_NanoBooter;
 
+    #if defined(WP_IMPLEMENTS_CRC32)
+        cmdReply.m_dbg_flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;
+    #else
+        cmdReply.m_dbg_flags = 0;
+    #endif
+
         WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
     }
 

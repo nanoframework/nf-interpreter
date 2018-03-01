@@ -137,11 +137,14 @@ typedef struct WP_Message
 // adds NEW flags for nanoBooter and nanoCLR
 typedef enum Monitor_Ping_Source_Flags
 {
-    Monitor_Ping_c_Ping_Source_NanoCLR    = 0x00010000,
-    Monitor_Ping_c_Ping_Source_NanoBooter = 0x00010001,
+    Monitor_Ping_c_Ping_Source_NanoCLR          = 0x00010000,
+    Monitor_Ping_c_Ping_Source_NanoBooter       = 0x00010001,
 
-    Monitor_Ping_c_Ping_DbgFlag_Stop      = 0x00000001,
-    Monitor_Ping_c_Ping_DbgFlag_AppExit   = 0x00000004,
+    Monitor_Ping_c_Ping_DbgFlag_Stop            = 0x00000001,
+    Monitor_Ping_c_Ping_DbgFlag_AppExit         = 0x00000004,
+    
+    // flags specific to Wire Protocol capabilities
+    Monitor_Ping_c_Ping_WPFlag_SupportsCRC32    = 0x00000010,
 }Monitor_Ping_Source_Flags;
 
 
