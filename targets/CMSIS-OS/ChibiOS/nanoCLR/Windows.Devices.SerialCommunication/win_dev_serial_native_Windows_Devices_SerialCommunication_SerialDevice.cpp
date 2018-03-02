@@ -704,7 +704,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         
         // flush DMA buffer to ensure cache coherency
         // (only required for Cortex-M7)
-        dmaBufferFlush(palUart->TxRingBuffer.Reader(), length);
+        cacheBufferInvalidate(palUart->TxRingBuffer.Reader(), length);
 
         // set TX ongoing count
         palUart->TxOngoingCount = length;

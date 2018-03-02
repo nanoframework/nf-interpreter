@@ -41,6 +41,9 @@ void nanoHAL_Initialize()
 
     // no PAL events required until now
     //PalEvent_Initialize();
+	
+	// Initialise Network Stack
+    Network_Initialize();
 }
 
 void nanoHAL_Uninitialize()

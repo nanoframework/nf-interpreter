@@ -463,8 +463,9 @@
             Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
             Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
 
-            #upload package only if this not a PR
-            if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+            # upload package only if this not a PR 
+            # and this is 'develop' (not develop-something)
+            if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_REPO_BRANCH -eq "develop")
             {
               $webClient = New-Object System.Net.WebClient
               $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
@@ -493,8 +494,9 @@
                 Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
               }
 
-              #upload package only if this not a PR
-              if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+              # upload package only if this not a PR 
+              # and this is 'develop' (not develop-something)
+              if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_REPO_BRANCH -eq "develop")
               {
                 $webClient = New-Object System.Net.WebClient
                 $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
@@ -539,8 +541,9 @@
                   Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
                 }
                 
-                #upload package only if this not a PR
-                if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
+                # upload package only if this not a PR 
+                # and this is 'develop' (not develop-something)
+                if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_REPO_BRANCH -eq "develop")
                 {
                   $webClient = New-Object System.Net.WebClient
                   $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)

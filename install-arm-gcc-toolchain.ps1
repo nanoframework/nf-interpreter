@@ -1,4 +1,4 @@
-# This PS installs the ARM GNU GCC toolchain from out Bintray repository if it's not already available
+# This PS installs the ARM GNU GCC toolchain from our Bintray repository if it's not already available
 
 # check if path already exists
 $GnuGccPathExists = Test-Path $env:GNU_GCC_TOOLCHAIN_PATH -ErrorAction SilentlyContinue
@@ -8,7 +8,7 @@ If($GnuGccPathExists -eq $False)
     Install-Module 7Zip4PowerShell -Force
 
     Write-Host "Downloading ARM GNU GCC toolchain..."
-
+    
     $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-7-2017-q4-major-win32.7z"
     $output = "$PSScriptRoot\gcc-arm.7z"
     

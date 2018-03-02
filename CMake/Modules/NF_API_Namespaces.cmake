@@ -10,13 +10,15 @@
 # and the namespace designation is 'Windows.Devices.Gpio'
 ###########################################################################################
 
-option(API_Windows.Devices.Gpio "option for Windows.Devices.Gpio API")
-option(API_Windows.Devices.Spi "option for Windows.Devices.Spi API")
-option(API_Windows.Devices.I2c "option for Windows.Devices.I2c API")
-option(API_Windows.Devices.Pwm "option for Windows.Devices.Pwm API")
-option(API_Windows.Devices.Adc "option for Windows.Devices.Adc API")
-option(API_Windows.Devices.SerialCommunication "option for Windows.Devices.SerialCommunication API")
-option(API_nanoFramework.Runtime.Events "option for nanoFramework.Runtime.Events API")
+option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
+option(API_System.Net                           "option for System.Net")
+option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
+option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
+option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
+option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
+option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
+option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
+option(API_Windows.Networking.Sockets           "option for Windows.Networking.Sockets")
 
 
 #################################################################
@@ -58,44 +60,7 @@ endmacro()
 ############################################################################################
 
 macro(ParseApiOptions)
-    
-    # Windows.Devices.Gpio
-    if(API_Windows.Devices.Gpio)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.Gpio")
-    endif()
 
-    
-    # Windows.Devices.Spi
-    if(API_Windows.Devices.Spi)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.Spi")
-    endif()
-
-	# Windows.Devices.I2c
-    if(API_Windows.Devices.I2c)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.I2c")
-    endif()
-
-    # Windows.Devices.Pwm
-    if(API_Windows.Devices.Pwm)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.Pwm")
-    endif()
-
-    # Windows.Devices.Adc
-    if(API_Windows.Devices.Adc)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.Adc")
-    endif()
-
-    # Windows.Devices.SerialCommunication
-    if(API_Windows.Devices.SerialCommunication)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
-    endif()
-    
     # nanoFramework.Runtime.Events
     if(API_nanoFramework.Runtime.Events)
         ##### API name here (doted name)
@@ -110,6 +75,54 @@ macro(ParseApiOptions)
 
     endif()
 
+    # System.Net
+    if(API_System.Net)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("System.Net")
+    endif()
+
+    # Windows.Devices.Adc
+    if(API_Windows.Devices.Adc)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Devices.Adc")
+    endif()
+
+    # Windows.Devices.Gpio
+    if(API_Windows.Devices.Gpio)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Devices.Gpio")
+    endif()
+
+	# Windows.Devices.I2c
+    if(API_Windows.Devices.I2c)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Devices.I2c")
+    endif()
+
+    # Windows.Devices.Pwm
+    if(API_Windows.Devices.Pwm)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Devices.Pwm")
+    endif()
+
+    # Windows.Devices.SerialCommunication
+    if(API_Windows.Devices.SerialCommunication)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
+    endif()
+    
+    # Windows.Devices.Spi
+    if(API_Windows.Devices.Spi)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Devices.Spi")
+    endif()
+
+    # Windows.Networking.Sockets
+     if(API_Windows.Networking.Sockets)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("Windows.Networking.Sockets")
+    endif()
+    
     
     # parse the declarations to have new lines and ';'
     string(REPLACE ";;" ";\n" CLR_RT_NativeAssemblyDataDeclarations "${CLR_RT_NativeAssemblyDataList}")

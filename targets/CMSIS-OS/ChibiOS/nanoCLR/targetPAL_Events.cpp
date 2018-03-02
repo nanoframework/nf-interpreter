@@ -100,7 +100,7 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
 
     if(timerCompleteFlag != NULL)
     {
-        chVTSetI(&eventsBoolTimer, MS2ST(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
+        chVTSetI(&eventsBoolTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
     }
 }
 

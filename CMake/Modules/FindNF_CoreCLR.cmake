@@ -153,6 +153,7 @@ set(NF_CoreCLR_SRCS
     # PAL
     nanoPAL_BlockStorage.c
     nanoPAL_NativeDouble.cpp
+    nanoPAL_Network_stubs.cpp
 
     # PAL stubs
     Async_stubs.cpp

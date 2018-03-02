@@ -147,6 +147,9 @@ nfSPIConfig Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(
     nfSPIConfig cfg =
     {
         {
+            #if (SPI_SUPPORTS_CIRCULAR == TRUE) 
+            SPI_USE_CIRCULAR, 
+            #endif 
             NULL,
             GPIO_PORT(csPin),
             csPin % 16,

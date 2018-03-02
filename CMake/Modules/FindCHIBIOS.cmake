@@ -60,6 +60,7 @@ set(CHIBIOS_SRCS
     
     hal_adc.c
     hal_can.c
+    hal_crypto.c
     hal_dac.c
     hal_ext.c
     hal_gpt.c
@@ -70,6 +71,7 @@ set(CHIBIOS_SRCS
     hal_mmc_spi.c
     hal_pal.c
     hal_pwm.c
+    hal_qspi.c
     hal_rtc.c
     hal_sdc.c
     hal_serial.c

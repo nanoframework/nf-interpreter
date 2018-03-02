@@ -15,6 +15,12 @@
 #define GLOBAL_UNLOCK(x);          
 #define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
 
+// Defininitions for Sockets/Network
+#define GLOBAL_LOCK_SOCKETS(x)       
+#define SOCKETS_MAX_COUNT 16
+#define LPCSTR  const uint8_t*
+#define NETWORK_INTERFACE_COUNT 2
+
 
 // these macros are to be used at entry/exit of native interrupt handlers
 #define NATIVE_INTERRUPT_START  SystemState_SetNoLock( SYSTEM_STATE_ISR              );   \

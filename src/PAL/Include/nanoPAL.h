@@ -22,7 +22,7 @@
 
 #include <nanoPAL_COM.h>
 // 
-
+#include <nanoPAL_Sockets.h>
 
 
 

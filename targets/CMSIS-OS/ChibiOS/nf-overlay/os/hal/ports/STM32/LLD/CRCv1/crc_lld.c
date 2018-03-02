@@ -115,7 +115,7 @@ void crc_lld_start(const crcConfig *config) {
 void crc_lld_stop() {
 
     // disable  peripheral
-    rccDisableCRC(FALSE);
+    rccDisableCRC();
 
     // driver is stopped
     CRCD1.State = CRC_STOP;
