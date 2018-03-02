@@ -39,6 +39,7 @@ endif()
 # nF feature: networking
 if(USE_NETWORKING_OPTION)
     find_package(CHIBIOS_LWIP REQUIRED)
+    find_package(NF_NETWORKING REQUIRED)
 endif()
 
 # nF feature: filesystem
@@ -111,6 +112,10 @@ add_executable(
     "${NF_Debugger_SOURCES}"
     "${NF_Diagnostics_SOURCES}"
     
+    # sources for nanoFramework Network LWIP and Sockets
+    "${CHIBIOS_LWIP_SOURCES}"
+    "${NF_Networking_SOURCES}"
+
     # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
 
@@ -167,6 +172,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 
     # includes for ChibiOS LwIP
     "${CHIBIOS_LWIP_INCLUDE_DIRS}"
+
+    # incudes for Networking
+	"${NF_Networking_INCLUDE_DIRS}"
 )
 
 # set compiler options
@@ -191,7 +199,7 @@ nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf TRUE)
 # the size of the CLR managed heap is defined here
 ###################################################
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x1800")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x2000")
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)

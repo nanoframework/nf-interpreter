@@ -2653,6 +2653,8 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
     TIL( "System.Threading"        , "Thread"                        , m_Thread                                             ),
     TIL( "System.Resources"        , "ResourceManager"               , m_ResourceManager                                    ),
 
+    TIL( "System.Net.Sockets"      , "SocketException"               , m_SocketException                                    ),
+
 #undef TIL
 };
 

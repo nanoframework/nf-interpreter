@@ -39,6 +39,10 @@
 #define __LWIPOPT_H__
 
 
+#define _REENT_ONLY
+#define set_errno(err)
+#include <sys/errno.h>
+
 /*
    -----------------------------------------------
    ---------- Platform specific locking ----------
@@ -947,7 +951,7 @@
  * an upper limit on the MSS advertised by the remote host.
  */
 #ifndef TCP_MSS
-#define TCP_MSS                         536
+#define TCP_MSS                         1480
 #endif
 
 /**

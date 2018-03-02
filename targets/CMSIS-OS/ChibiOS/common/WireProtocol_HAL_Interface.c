@@ -45,7 +45,7 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         //////////////////////////////////////////////////////////
 
         // read from serial stream 
-        volatile size_t read = chnReadTimeout(&SDU1, ptr, *size, MS2ST(250));
+        volatile size_t read = chnReadTimeout(&SDU1, ptr, *size, TIME_MS2I(250));
 
         ptr  += read;
         *size -= read;
@@ -77,7 +77,7 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         //////////////////////////////////////////////////////////
         
         // non blocking read from serial port with 100ms timeout
-        volatile size_t read = sdReadTimeout(&SD2, ptr, *size, MS2ST(250));
+        volatile size_t read = sdReadTimeout(&SD2, ptr, *size, TIME_MS2I(250));
 
         ptr  += read;
         *size -= read;
@@ -113,7 +113,7 @@ int WP_TransmitMessage(WP_Message* message)
     TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
 
     // write header to output stream
-    writeResult = chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), MS2ST(250));
+    writeResult = chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(250));
 
     if(writeResult == sizeof(message->m_header))
     {
@@ -131,7 +131,7 @@ int WP_TransmitMessage(WP_Message* message)
             // reset flag
             operationResult = false;
 
-            writeResult = chnWriteTimeout(&SDU1, message->m_payload, message->m_header.m_size, MS2ST(250));
+            writeResult = chnWriteTimeout(&SDU1, message->m_payload, message->m_header.m_size, TIME_MS2I(250));
 
             if(writeResult == message->m_header.m_size)
             {
@@ -162,7 +162,7 @@ int WP_TransmitMessage(WP_Message* message)
     TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
 
     // write header to output stream
-    writeResult = chnWriteTimeout(&SD2, (const uint8_t *)&message->m_header, sizeof(message->m_header), MS2ST(250));
+    writeResult = chnWriteTimeout(&SD2, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(250));
 
     if(writeResult == sizeof(message->m_header))
     {
@@ -180,7 +180,7 @@ int WP_TransmitMessage(WP_Message* message)
             // reset flag
             operationResult = false;
 
-            writeResult = chnWriteTimeout(&SD2, message->m_payload, message->m_header.m_size, MS2ST(250));
+            writeResult = chnWriteTimeout(&SD2, message->m_payload, message->m_header.m_size, TIME_MS2I(250));
 
             if(writeResult == message->m_header.m_size)
             {

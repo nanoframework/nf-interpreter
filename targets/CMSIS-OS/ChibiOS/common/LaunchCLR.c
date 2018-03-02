@@ -48,19 +48,18 @@ bool CheckValidCLRImage(uint32_t address)
         // check failed, there is no valid CLR image
         return false;
     }
-
-    // volatile uint16_t* temp1 = (uint16_t*)nanoCLRVectorTable->reset_handler;
-    // temp1 = ((uint8_t*)temp1) - 0x1;
-    // volatile uint16_t temp = (uint16_t)(*temp1);
-
     
-    // 2nd check: the content pointed by the reset vector has to be 0xB672 
-    // this is the opcode for 'CPSID I' which is the very 1st assembly instruction of a ChibiOS nanoCLR image
-    uint16_t* opCodeAddress = (uint16_t*)nanoCLRVectorTable->reset_handler;
-    // the casts bellow are there because the opcode is a 16 bit value and we need to subtract 1 from the reset vector address pointing to it
-    opCodeAddress = (uint8_t*)opCodeAddress - 0x1;
+    // 2nd check: the content pointed by the reset vector has to be 0xE002 
+    // that's an assembly "b.n" (branch instruction) the very first one in the Reset_Handler function
+    // see os\common\startup\ARMCMx\compilers\GCC\vectors.S
+    // the linker places this startup code right after the vectors table
+    uint16_t* opCodeAddress = (uint16_t*)((irq_vector_t)nanoCLRVectorTable + sizeof(vectors_t) + sizeof(irq_vector_t));
 
-    if((uint16_t)*opCodeAddress == 0xB672)
+    // because the code in the vectors region is aligned by 16 bytes we need to check if the linker has pushed this further and adjust accordingly
+    uint32_t alignmentOffset =  ((uint32_t)opCodeAddress % 0x10);
+    opCodeAddress =  ((uint32_t)opCodeAddress + (0x10 - alignmentOffset));
+
+    if((uint16_t)*opCodeAddress == 0xE002)
     {
         // check, there seems to be a valid CLR image
         return true;

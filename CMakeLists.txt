@@ -317,19 +317,11 @@ endif()
 
 #################################################################
 # enables Networking support in nanoCLR
+# declares Networking option 
+# needs to show before the API namespaces processing because it's used there
 # (default is OFF so Networking is NOT supported)
-option(NF_FEATURE_USE_NETWORKING "option to use networking")
+option(USE_NETWORKING_OPTION "option to use networking")
 
-if(NF_FEATURE_USE_NETWORKING)
-    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
-    set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for NF_FEATURE_USE_NETWORKING")
-    message(STATUS "Support for networking enabled")
-else()    
-    set(USE_NETWORKING_OPTION FALSE CACHE INTERNAL "NF feature NETWORKING")
-    set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for NF_FEATURE_USE_NETWORKING")
-endif()
-
-#################################################################
 
 #################################################################
 # enables filesysytem support in nanoCLR
@@ -359,6 +351,22 @@ include(NF_API_Namespaces)
 # and/or manage other APIs that are required
 
 
+if(API_System.Net)
+    # this API requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
+
+    # set NETWORKING option to true
+    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
+endif()
+
+
+if(API_Windows.Devices.Adc)
+    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+else()    
+    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+endif()
+
+
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
     
@@ -367,13 +375,6 @@ if(API_Windows.Devices.Gpio)
 
 else()    
     set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-endif()
-
-
-if(API_Windows.Devices.Spi)
-    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-else()    
-    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
 
@@ -391,17 +392,17 @@ else()
 endif()
 
 
-if(API_Windows.Devices.Adc)
-    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
-else()    
-    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
-endif()
-
-
 if(API_Windows.Devices.SerialCommunication)
     set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
 else()
     set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
+endif()
+
+
+if(API_Windows.Devices.Spi)
+    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
+else()    
+    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
 
@@ -410,6 +411,29 @@ if(API_Windows.Devices.Wifi)
 else()    
     set(HAL_USE_WIFI_OPTION FALSE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
 endif()
+
+
+if(API_Windows.Networking.Sockets)
+    # this API requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
+
+    # set NETWORKING option to true
+    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
+endif()
+
+
+#################################################################
+# handles Networking support at HAL level
+
+if(USE_NETWORKING_OPTION)
+    set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
+    message(STATUS "Support for networking enabled")
+else()    
+    set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")  
+    message(STATUS "Support for networking IS NOT enabled")
+endif()
+
+#################################################################
 
 
 #################################################################
@@ -462,13 +486,13 @@ if(RTOS_CHIBIOS_CHECK)
         endif()
 
         if(CHIBIOS_VERSION_EMPTY)
-            # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_17.6.x branch
-            message(STATUS "RTOS is: CHIBIOS (latest available code from stable_17.6.x)")
-            set(CHIBIOS_GIT_TAG "stable_17.6.x")
+            # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_18.2.x branch
+            message(STATUS "RTOS is: CHIBIOS (latest available code from stable_18.2.x)")
+            set(CHIBIOS_GIT_TAG "stable_18.2.x")
         else()
             message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
 
-            # branch naming follows the pattern 'stable_17.6.x'
+            # branch naming follows the pattern 'stable_18.2.x'
             # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter 
             # find 1st dot in version number
             string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)
