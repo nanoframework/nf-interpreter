@@ -88,7 +88,7 @@ typedef struct CRCDriver {
  *
  * @api
  */
-#define rccDisableCRC(lp) rccDisableAHB1(RCC_AHB1ENR_CRCEN, lp)
+#define rccDisableCRC() rccDisableAHB1(RCC_AHB1ENR_CRCEN)
 
 /**
  * @brief   Resets the CRC peripheral.
