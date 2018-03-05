@@ -172,7 +172,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___Windows
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        stack.SetResult_I4( GetIoLine(pThis[ FIELD___pinNumber ].NumericByRefConst().s4) );
+        stack.SetResult_I4( palReadLine(GetIoLine(pThis[ FIELD___pinNumber ].NumericByRefConst().s4)) );
     }
     NANOCLR_NOCLEANUP();
 }
