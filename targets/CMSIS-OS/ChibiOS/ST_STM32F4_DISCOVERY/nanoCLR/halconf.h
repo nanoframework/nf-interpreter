@@ -72,6 +72,7 @@
 //#if !defined(HAL_USE_I2C) || defined(__DOXYGEN__)
 //#define HAL_USE_I2C                 TRUE
 //#endif
+
 /**
  * @brief   Enables the I2S subsystem.
  */
@@ -381,4 +382,3 @@
 #endif /* HALCONF_H */
 
 /** @} */
-
