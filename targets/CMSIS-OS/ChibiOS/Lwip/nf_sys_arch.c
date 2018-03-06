@@ -207,6 +207,24 @@ void sys_arch_unprotect(sys_prot_t pval) {
   osalSysRestoreStatusX((syssts_t)pval);
 }
 
+////////////////////////////////////////////////////
+// nanoFramework "hack" extending LwIP original code
+// with this callback here we don't need any reference to CLR nor need to include any nanoFramework headers here
+void (*signal_sock_functionPtr)() = 0;
+
+void set_signal_sock_function( void (*funcPtr)() )
+{
+   signal_sock_functionPtr = funcPtr;
+}
+
+void sys_signal_sock_event()
+{
+  if ( signal_sock_functionPtr != 0 )
+     signal_sock_functionPtr();    
+}
+
+////////////////////////////////////////////////////
+
 u32_t sys_now(void) {
 
 #if OSAL_ST_FREQUENCY == 1000
