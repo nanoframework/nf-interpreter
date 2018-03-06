@@ -538,6 +538,15 @@ lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
     LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_accept(%d) returning new sock=%d", s, newsock));
   }
 
+  // [NF_CHANGE] - Signal the CLR that a socket event has occured
+  //               TODO: We may want to investigate other ways to signal
+  //               the CLR (maybe based on which socket received the
+  //               event).
+  if(nsock->rcvevent > 0 ) {
+    sys_signal_sock_event();
+  }
+  //[END_NF_CHANGE]
+
   sock_set_errno(sock, 0);
   return newsock;
 }
@@ -1622,6 +1631,14 @@ event_callback(struct netconn *conn, enum netconn_evt evt, u16_t len)
   if (sock->select_waiting == 0) {
     /* noone is waiting for this socket, no need to check select_cb_list */
     SYS_ARCH_UNPROTECT(lev);
+    
+    // [NF_CHANGE] - Signal the CLR that a socket event has occured
+    //               TODO: We may want to investigate other ways to signal
+    //               the CLR (maybe based on which socket received the
+    //               event).
+    sys_signal_sock_event();
+    //[END_NF_CHANGE]
+
     return;
   }
 
@@ -1677,6 +1694,13 @@ again:
     }
   }
   SYS_ARCH_UNPROTECT(lev);
+
+  // [NF_CHANGE] - Signal the CLR that a socket event has occurred
+  //               TODO: We may want to investigate other ways to signal
+  //               the CLR (maybe based on which socket received the
+  //               event).
+  sys_signal_sock_event();
+  //[END_NF_CHANGE]  
 }
 
 /**
