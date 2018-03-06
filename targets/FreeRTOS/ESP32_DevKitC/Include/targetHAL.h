@@ -72,6 +72,8 @@ extern int HeapEnd;
 
 extern uint32_t __nanoImage_start__;
 extern uint32_t __nanoImage_end__;
+extern uint32_t __nanoConfig_start__;
+extern uint32_t __nanoConfig_end__;
 extern uint32_t __deployment_start__;
 extern uint32_t __deployment_end__;
 
