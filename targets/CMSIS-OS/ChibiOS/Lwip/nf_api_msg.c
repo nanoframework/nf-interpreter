@@ -1917,6 +1917,10 @@ lwip_netconn_do_dns_found(const char *name, const ip_addr_t *ipaddr, void *arg)
   }
   /* wake up the application task waiting in netconn_gethostbyname */
   sys_sem_signal(API_EXPR_REF_SEM(msg->sem));
+
+  // [NF_CHANGE]
+  sys_signal_sock_event();
+  // [END_NF_CHANGE]
 }
 
 /**
