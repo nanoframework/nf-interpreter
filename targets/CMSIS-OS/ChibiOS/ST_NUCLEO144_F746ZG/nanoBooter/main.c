@@ -60,11 +60,12 @@ int main(void) {
   if (!palReadPad(GPIOC, GPIOC_BUTTON))
   {
     // check for valid CLR image 
-    if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
+    // we are checking for a valid image right after the configuration block
+    if(CheckValidCLRImage((uint32_t)&__nanoConfig_end__))
     {
       // there seems to be a valid CLR image
       // launch nanoCLR
-      LaunchCLR((uint32_t)&__nanoImage_end__);
+      LaunchCLR((uint32_t)&__nanoConfig_end__);
     }
   }
 
