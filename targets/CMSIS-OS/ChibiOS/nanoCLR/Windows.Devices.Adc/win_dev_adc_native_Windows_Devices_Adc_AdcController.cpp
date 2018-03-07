@@ -57,7 +57,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetM
 {
     NANOCLR_HEADER();
     {
-        // Currently fixed at 12 bit so return 4095
+        // Currently fixed at 12 bit so return 4095 = ((2^12) - 1)
         stack.SetResult_I4(4095);
     }
     NANOCLR_NOCLEANUP();
@@ -100,10 +100,21 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::GetDeviceS
 {
     NANOCLR_HEADER();
    {
-      // declare the device selector string
-      // FIXME - ADC1 and ADC2
-       char deviceSelectorString[] = 
-            "ADC1,ADC2";
+       // declare the device selector string whose max size is "ADC1,ADC2,ADC3" + terminator and init with the terminator
+       char deviceSelectorString[ 15 + 1] = { 0 };
+
+   #if STM32_ADC_USE_ADC1
+       strcat(deviceSelectorString, "ADC1,");
+   #endif
+   #if STM32_ADC_USE_ADC2
+       strcat(deviceSelectorString, "ADC2,");
+   #endif
+   #if STM32_ADC_USE_ADC3
+       strcat(deviceSelectorString, "ADC3,");
+   #endif
+
+       // replace the last comma with a terminator
+       deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
 
        // because the caller is expecting a result to be returned
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
