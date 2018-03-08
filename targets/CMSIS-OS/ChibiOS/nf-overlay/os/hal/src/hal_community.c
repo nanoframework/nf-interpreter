@@ -38,6 +38,10 @@ void halCommunityInit(void) {
   crcInit();
 #endif
 
+#if (HAL_USE_STM32_RNG == TRUE)
+  rngInit();
+#endif
+
 }
 
 #endif // HAL_USE_COMMUNITY
