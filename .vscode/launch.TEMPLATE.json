@@ -66,9 +66,11 @@
             "filterStderr": true,
             "externalConsole": true,
             "cwd": "${cwd}",
-            
-            
-            
+            // Enable the following to debug GDB
+            //"logging": {
+            //    "engineLogging": true,
+            //    "traceResponse": true
+            //},
         }
     ]
 }
