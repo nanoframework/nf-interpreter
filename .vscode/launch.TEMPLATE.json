@@ -29,7 +29,12 @@
             "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
             "filterStderr": true,
             "externalConsole": true,
-            "cwd": "${cwd}"
+            "cwd": "${cwd}",
+            // Enable the following to debug GDB
+            //"logging": {
+            //    "engineLogging": true,
+            //    "traceResponse": true
+            //},
         },
 
         {
@@ -60,7 +65,8 @@
             "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
             "filterStderr": true,
             "externalConsole": true,
-            "cwd": "${cwd}"
+            "cwd": "${cwd}",
+            
         }
     ]
 }
