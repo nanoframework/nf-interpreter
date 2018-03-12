@@ -100,8 +100,8 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffe
             }
             else
             {
-                // program single byte 
-                *cursor = *buffer++;
+                // program single byte
+                *((__IO uint8_t*)cursor++) = *((uint8_t*)buffer);
             }
             
             // wait for program operation to be completed 
