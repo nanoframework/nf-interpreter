@@ -196,7 +196,7 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffe
                 // proceed to program the flash by setting the PG Bit
                 SET_BIT(FLASH->CR, FLASH_CR_PG);
 
-                *cursor = *buffer++;
+                *((__IO uint8_t*)cursor++) = *((uint8_t*)buffer);
 
 #if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
     defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
