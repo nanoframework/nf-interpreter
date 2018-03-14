@@ -205,40 +205,53 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
   
+        gpio_mode_t     mode         = GPIO_MODE_DISABLE;
+        gpio_pullup_t   pull_up_en   = GPIO_PULLUP_DISABLE;
+        gpio_pulldown_t pull_down_en = GPIO_PULLDOWN_DISABLE;
+        gpio_int_type_t intr_type    = GPIO_INTR_ANYEDGE;
+
         switch (driveMode)
         {
-            case GpioPinDriveMode_Input :    
-                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 0 - GpioPinDriveMode_Input
-                        gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_FLOATING);
+            case GpioPinDriveMode_Input :   
+                        mode = GPIO_MODE_INPUT; 
                         break;
             case GpioPinDriveMode_InputPullDown :    
-                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 1 - GpioPinDriveMode_InputPullDown 
-                        gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_PULLDOWN_ONLY);
+                        mode = GPIO_MODE_INPUT; 
+                        pull_down_en = GPIO_PULLDOWN_ENABLE;
                         break;
             case GpioPinDriveMode_InputPullUp :    
-                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT);     // 2 - GpioPinDriveMode_InputPullUp
-                        gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_PULLUP_ONLY);
+                        pull_up_en = GPIO_PULLUP_ENABLE;
                         break;
             case GpioPinDriveMode_Output :    
-                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_OUTPUT);    // 3 - GpioPinDriveMode_Output
-                        gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_FLOATING);
+                        mode = GPIO_MODE_OUTPUT;
                         break;
             case GpioPinDriveMode_OutputOpenDrain :    
-                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_OUTPUT_OD); // 4 - GpioPinDriveMode_OutputOpenDrain
+                        driveMode = GPIO_MODE_OUTPUT_OD;
                         break;
             case GpioPinDriveMode_OutputOpenDrainPullUp :    
-                        gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_OUTPUT_OD); // 5 - GpioPinDriveMode_OutputOpenDrainPullUp
-                        gpio_set_pull_mode( (gpio_num_t)pinNumber, GPIO_PULLUP_ONLY);
+                        mode = GPIO_MODE_OUTPUT_OD;
+                        pull_up_en = GPIO_PULLUP_ENABLE;
                         break;
-                                                                                          // 6 - GpioPinDriveMode_OutputOpenSource
-                                                                                          // 7 - GpioPinDriveMode_OutputOpenSourcePullDown
-            default :   gpio_set_direction( (gpio_num_t)pinNumber, GPIO_MODE_INPUT_OUTPUT); 
+            case GpioPinDriveMode_OutputOpenSource:
+                        mode = GPIO_MODE_OUTPUT_OD;
+                        break;
+            case GpioPinDriveMode_OutputOpenSourcePullDown:
+                        mode = GPIO_MODE_OUTPUT_OD;
+                        pull_down_en = GPIO_PULLDOWN_ENABLE;
                         break;
         }
 
-        gpio_set_intr_type((gpio_num_t)pinNumber, GPIO_INTR_ANYEDGE);
+        gpio_config_t GPIOConfig;
         
-        // Enabler interrupts for all pins
+        GPIOConfig.pin_bit_mask = (1ULL << pinNumber);
+        GPIOConfig.mode = mode;
+        GPIOConfig.pull_up_en = pull_up_en;
+        GPIOConfig.pull_down_en = pull_down_en;
+        GPIOConfig.intr_type = intr_type;
+
+        gpio_config( &GPIOConfig );
+
+        // Enable interrupts for all pins
         Add_Gpio_Interrupt( (gpio_num_t)pinNumber );
 
         // save pin reference
