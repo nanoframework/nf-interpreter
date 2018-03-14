@@ -166,13 +166,13 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffe
             if((endAddress - cursor) >= 2)
             {
                 // clear the program size mask
-                CLEAR_BIT(FLASH->CR, CR_PSIZE_MASK);
+                FLASH->CR &= CR_PSIZE_MASK;
                 // set the size of of the programming word to HALF WORD
-                SET_BIT(FLASH->CR, FLASH_PSIZE_HALF_WORD);
+                FLASH->CR |= FLASH_PSIZE_HALF_WORD;
                 // proceed to program the flash by setting the PG Bit
-                SET_BIT(FLASH->CR, FLASH_CR_PG);
+                FLASH->CR |= FLASH_CR_PG;
 
-                *((__IO uint16_t*)cursor++) = *((uint16_t*)buffer++);
+                *(__IO uint16_t*)cursor = *((uint16_t*)buffer);
 
 #if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
     defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
@@ -182,21 +182,21 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffe
                 __DSB();
 #endif
                 // update flash and buffer pointers by the 'extra' byte that was programmed
-                cursor++;
-                buffer++;
+                cursor += 2;
+                buffer += 2;
             }
             else
             {
                 // program single byte
 
                 // clear the program size mask
-                CLEAR_BIT(FLASH->CR, CR_PSIZE_MASK);
+                FLASH->CR &= CR_PSIZE_MASK;
                 // set the size of of the programming word to BYTE
-                SET_BIT(FLASH->CR, FLASH_PSIZE_BYTE);
+                FLASH->CR |= FLASH_PSIZE_BYTE;
                 // proceed to program the flash by setting the PG Bit
-                SET_BIT(FLASH->CR, FLASH_CR_PG);
+                FLASH->CR |= FLASH_CR_PG;
 
-                *((__IO uint8_t*)cursor++) = *((uint8_t*)buffer);
+                *(__IO uint8_t*)cursor = *buffer;
 
 #if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) || \
     defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) || \
@@ -205,6 +205,9 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffe
                 // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
                 __DSB();
 #endif                
+
+                // update flash pointer by the 'extra' byte that was programmed
+                cursor += 2;
             }
                 
             // wait 500ms for any flash operation to be completed
@@ -218,7 +221,7 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffe
         }
 
         // after the program operation is completed disable the PG Bit
-        CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
+        FLASH->CR &= (~FLASH_CR_PG);
                 
         // lock the FLASH
         HAL_FLASH_Lock();
