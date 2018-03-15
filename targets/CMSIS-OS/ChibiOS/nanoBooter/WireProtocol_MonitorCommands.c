@@ -154,6 +154,36 @@ int Monitor_EraseMemory(WP_Message* message)
     return true;
 }
 
+int Monitor_QueryConfiguration(WP_Message* message)
+{
+    Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command*)message->m_payload;
+
+    uint8_t* data   = NULL;
+    int size          = 0;
+    bool success     = false;
+    Configuration_Network* config = NULL;
+    //CLR_UINT8 buf[ sizeof(Configuration_Network) ];
+
+    switch(cmd->Configuration)
+    {
+        case Monitor_QueryConfiguration_ConfigurationNetwork:
+
+            // if(GetConfigurationNetwork(*config) == true)
+            // {
+            //     //memcpy(buf, config, sizeof(Configuration_Network));
+            //     data = (uint8_t*)config;
+            //     size = sizeof(Configuration_Network);
+
+            //     success = true;
+            // }
+            break;
+    }
+
+    WP_ReplyToCommand(message, success, false, data, size);
+
+    return success;
+}
+
 int Monitor_CheckMemory(WP_Message* message)
 {
     bool ret = false;

@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include <nanoHAL_Network.h>
+
 typedef enum SYSTEM_STATE
 {
     SYSTEM_STATE_ISR,

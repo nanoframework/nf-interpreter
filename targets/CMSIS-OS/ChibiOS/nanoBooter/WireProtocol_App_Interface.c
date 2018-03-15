@@ -23,6 +23,7 @@ static const CommandHandlerLookup c_Lookup_Request[] =
     DEFINE_CMD(WriteMemory),
     DEFINE_CMD(CheckMemory),
     DEFINE_CMD(EraseMemory),
+    DEFINE_CMD(QueryConfiguration),
     // //
     // DEFINE_CMD(Execute    ),
     DEFINE_CMD(MemoryMap  ),
