@@ -837,13 +837,10 @@ bool CLR_DBG_Debugger::Monitor_MemoryMap( WP_Message* msg)
     return true;
 }
 
-
-
 bool CLR_DBG_Debugger::Monitor_DeploymentMap( WP_Message* msg)
 {
     return true;
 }
-
 
 bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
 {
@@ -865,7 +862,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
     {
         switch(cmd->Configuration)
         {
-            case Monitor_QueryConfiguration_ConfigurationNetwork:
+            case DeviceConfigurationOption_Network:
 
                 if(GetConfigurationNetwork(config) == true)
                 {
@@ -884,6 +881,35 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
     return success;
 }
 
+bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message* message)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    Monitor_UpdateConfiguration_Command* cmd = (Monitor_UpdateConfiguration_Command*)message->m_payload;
+    Monitor_UpdateConfiguration_Reply cmdReply;
+
+    bool success = false;
+
+    switch(cmd->Configuration)
+    {
+        case DeviceConfigurationOption_Network:
+
+            if(StoreConfigurationNetwork((Configuration_Network*)cmd->Data) == true)
+            {
+                cmdReply.ErrorCode = 0;
+                success = true;
+            }
+            else 
+            {
+                cmdReply.ErrorCode = 100;
+            }            
+            break;
+    }
+
+    WP_ReplyToCommand(message, success, false, &cmdReply, sizeof(cmdReply));
+
+    return success;
+}
 
 //--//
 

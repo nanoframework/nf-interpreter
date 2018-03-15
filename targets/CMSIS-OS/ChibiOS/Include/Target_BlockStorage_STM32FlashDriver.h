@@ -10,6 +10,10 @@
 #include <hal.h>
 #include <nanoPAL_BlockStorage.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool STM32FlashDriver_InitializeDevice(void*);
 bool STM32FlashDriver_UninitializeDevice(void*);
 DeviceBlockInfo* STM32FlashDriver_GetDeviceInfo(void*);
@@ -18,5 +22,9 @@ bool STM32FlashDriver_Write(void*, ByteAddress startAddress, unsigned int numByt
 bool STM32FlashDriver_IsBlockErased(void*, ByteAddress blockAddress, unsigned int length);
 bool STM32FlashDriver_EraseBlock(void*, ByteAddress address);
 void STM32FlashDriver_SetPowerState(void*, unsigned int state);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  //_TARGET_STM32FLASH_DRIVER_H_

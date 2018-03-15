@@ -50,6 +50,14 @@ typedef enum MemoryMap_Options
 
 }MemoryMap_Options;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.DeviceConfiguration.DeviceConfigurationOption (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+typedef enum DeviceConfigurationOption
+{
+    DeviceConfigurationOption_Network = 1,
+}DeviceConfigurationOption;
+
 //////////////////////////////////////////
 // typedefs
 
@@ -146,10 +154,19 @@ typedef struct Monitor_QueryConfiguration_Command
 
 }Monitor_QueryConfiguration_Command;
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Monitor_QueryConfiguration (in managed code) !!! //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define Monitor_QueryConfiguration_ConfigurationNetwork         1
+typedef struct Monitor_UpdateConfiguration_Command
+{
+    uint32_t Configuration;
+    uint32_t Length;
+    uint8_t Data[1];
+
+}Monitor_UpdateConfiguration_Command;
+
+typedef struct Monitor_UpdateConfiguration_Reply
+{
+    uint32_t ErrorCode;
+
+}Monitor_UpdateConfiguration_Reply;
 
 //////////////////////////////////////////
 // function declarations (commands)
@@ -164,6 +181,7 @@ int Monitor_WriteMemory(WP_Message* message);
 int Monitor_Reboot(WP_Message* message);
 int Monitor_EraseMemory(WP_Message* message);
 int Monitor_QueryConfiguration(WP_Message* message);
+int Monitor_UpdateConfiguration(WP_Message* message);
 int Monitor_CheckMemory(WP_Message* message);
 int Monitor_MemoryMap(WP_Message* message);
 int Monitor_FlashSectorMap(WP_Message* message);
