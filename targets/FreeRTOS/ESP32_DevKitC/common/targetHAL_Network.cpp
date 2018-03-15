@@ -30,3 +30,13 @@ void nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc)
 	// Callback to Network stack when init complete 
 	initfunc(NULL);
 }
+
+// the bellow gets the network configuration block from the configuration block stored in the flash sector, 
+// it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is used
+bool GetConfigurationNetwork(Configuration_Network* configurationNetwork)
+{
+    // copy the config block content to the pointer in the argument
+	// FIXME 
+
+    return FALSE;
+}

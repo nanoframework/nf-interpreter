@@ -76,6 +76,7 @@ typedef enum CLR_DBG_Commands_Monitor
     CLR_DBG_Commands_c_Monitor_DeploymentMap      = 0x0000000B,
     CLR_DBG_Commands_c_Monitor_FlashSectorMap     = 0x0000000C,
     CLR_DBG_Commands_c_Monitor_OemInfo            = 0x0000000E,
+    CLR_DBG_Commands_c_Monitor_QueryConfiguration = 0x0000000F,
 }CLR_DBG_Commands_Monitor;
 
 // structure for Wire Protocol packet

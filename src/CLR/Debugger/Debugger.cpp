@@ -845,6 +845,45 @@ bool CLR_DBG_Debugger::Monitor_DeploymentMap( WP_Message* msg)
 }
 
 
+bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command*)message->m_payload;
+
+    int size          = 0;
+    bool success     = false;
+    //Configuration_Network config;
+
+    Configuration_Network* config = (Configuration_Network*)platform_malloc(sizeof(Configuration_Network));
+
+    if (!config)
+    {
+        WP_ReplyToCommand( message, false, false, NULL, 0 );
+    }
+    else
+    {
+        switch(cmd->Configuration)
+        {
+            case Monitor_QueryConfiguration_ConfigurationNetwork:
+
+                if(GetConfigurationNetwork(config) == true)
+                {
+                    size = sizeof(Configuration_Network);
+                    success = true;
+                }
+                break;
+        }
+
+        WP_ReplyToCommand( message, success, false, (CLR_UINT8*)config, size );
+
+       platform_free(config);
+    }
+
+
+    return success;
+}
+
 
 //--//
 
@@ -3128,4 +3167,3 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC( WP_Message* msg)
 }
 
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-

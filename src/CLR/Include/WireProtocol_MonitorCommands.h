@@ -140,6 +140,16 @@ typedef struct CLR_DBG_Commands_Monitor_MemoryMap
 
 }CLR_DBG_Commands_Monitor_MemoryMap;
 
+typedef struct Monitor_QueryConfiguration_Command
+{
+    uint32_t Configuration;
+
+}Monitor_QueryConfiguration_Command;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Monitor_QueryConfiguration (in managed code) !!! //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define Monitor_QueryConfiguration_ConfigurationNetwork         1
 
 //////////////////////////////////////////
 // function declarations (commands)
@@ -153,6 +163,7 @@ int Monitor_OemInfo(WP_Message* message);
 int Monitor_WriteMemory(WP_Message* message);
 int Monitor_Reboot(WP_Message* message);
 int Monitor_EraseMemory(WP_Message* message);
+int Monitor_QueryConfiguration(WP_Message* message);
 int Monitor_CheckMemory(WP_Message* message);
 int Monitor_MemoryMap(WP_Message* message);
 int Monitor_FlashSectorMap(WP_Message* message);
