@@ -162,26 +162,50 @@ int Monitor_QueryConfiguration(WP_Message* message)
     int size          = 0;
     bool success     = false;
     Configuration_Network* config = NULL;
-    //CLR_UINT8 buf[ sizeof(Configuration_Network) ];
-
+ 
     switch(cmd->Configuration)
     {
-        case Monitor_QueryConfiguration_ConfigurationNetwork:
+        case DeviceConfigurationOption_Network:
 
-            // if(GetConfigurationNetwork(*config) == true)
-            // {
-            //     //memcpy(buf, config, sizeof(Configuration_Network));
-            //     data = (uint8_t*)config;
-            //     size = sizeof(Configuration_Network);
-
-            //     success = true;
-            // }
+            if(GetConfigurationNetwork(config) == true)
+            {
+                size = sizeof(Configuration_Network);
+                success = true;
+            }
             break;
     }
 
     WP_ReplyToCommand(message, success, false, data, size);
 
     return success;
+}
+
+int Monitor_UpdateConfiguration(WP_Message* message)
+{
+    Monitor_UpdateConfiguration_Command* cmd = (Monitor_UpdateConfiguration_Command*)message->m_payload;
+    Monitor_UpdateConfiguration_Reply cmdReply;
+
+    bool success     = false;
+
+    switch(cmd->Configuration)
+    {
+        case DeviceConfigurationOption_Network:
+
+            if(StoreConfigurationNetwork((Configuration_Network*)cmd->Data) == true)
+            {
+                cmdReply.ErrorCode = 0;
+                success = true;
+            }
+            else 
+            {
+                cmdReply.ErrorCode = 100;
+            }            
+            break;
+    }
+  
+    WP_ReplyToCommand(message, success, false, &cmdReply, sizeof(cmdReply));
+
+    return true;
 }
 
 int Monitor_CheckMemory(WP_Message* message)

@@ -81,9 +81,13 @@ void 	nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc);
 extern "C" {
 #endif
 
-// GetConfigurationNetwork() is defined in nanoHAL_Network.c at target level because the targets 
+// GetConfigurationNetwork() is defined in targetHAL_Network.cpp at target level because the targets 
 // need to be free to implement the storage of the configuration block as they see fit
 __nfweak bool GetConfigurationNetwork(Configuration_Network* configurationNetwork);
+
+// StoreConfigurationNetwork() is defined in targetHAL_Network.cpp at target level because the targets 
+// need to be free to implement the storage of the configuration block as they see fit
+__nfweak bool StoreConfigurationNetwork(Configuration_Network* configurationNetwork);
 
 #ifdef __cplusplus
 }
