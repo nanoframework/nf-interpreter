@@ -30,5 +30,3 @@ void nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc)
 	// Callback to Network stack when init complete 
 	initfunc(NULL);
 }
-
-

@@ -39,6 +39,10 @@
 #define __LWIPOPT_H__
 
 
+#define _REENT_ONLY
+#define set_errno(err)
+#include <sys/errno.h>
+
 /*
    -----------------------------------------------
    ---------- Platform specific locking ----------
@@ -97,7 +101,7 @@
  * already use it.
  */
 #ifndef MEM_LIBC_MALLOC
-#define MEM_LIBC_MALLOC                 0
+#define MEM_LIBC_MALLOC                 1
 #endif
 
 /**
@@ -608,8 +612,10 @@
  * numbers after booting a device.
  */
 #ifndef LWIP_RANDOMIZE_INITIAL_LOCAL_PORTS
-#define LWIP_RANDOMIZE_INITIAL_LOCAL_PORTS 0
+#define LWIP_RANDOMIZE_INITIAL_LOCAL_PORTS 1
 #endif
+
+#define LWIP_RAND rand
 
 /*
    ----------------------------------
@@ -673,7 +679,7 @@
  * LWIP_DHCP==1: Enable DHCP module.
  */
 #ifndef LWIP_DHCP
-#define LWIP_DHCP                       0
+#define LWIP_DHCP                       1
 #endif
 
 /**
@@ -809,7 +815,7 @@
  * transport.
  */
 #ifndef LWIP_DNS
-#define LWIP_DNS                        0
+#define LWIP_DNS                        1
 #endif
 
 /** DNS maximum number of entries to maintain locally. */
@@ -947,7 +953,7 @@
  * an upper limit on the MSS advertised by the remote host.
  */
 #ifndef TCP_MSS
-#define TCP_MSS                         536
+#define TCP_MSS                         1480
 #endif
 
 /**
@@ -1108,7 +1114,7 @@
  * field.
  */
 #ifndef LWIP_NETIF_HOSTNAME
-#define LWIP_NETIF_HOSTNAME             0
+#define LWIP_NETIF_HOSTNAME             1
 #endif
 
 /**
@@ -1501,7 +1507,7 @@
  * LWIP_STATS==1: Enable statistics collection in lwip_stats.
  */
 #ifndef LWIP_STATS
-#define LWIP_STATS                      1
+#define LWIP_STATS                      0
 #endif
 
 #if LWIP_STATS
