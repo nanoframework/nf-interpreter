@@ -850,7 +850,6 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
 
     int size          = 0;
     bool success     = false;
-    //Configuration_Network config;
 
     Configuration_Network* config = (Configuration_Network*)platform_malloc(sizeof(Configuration_Network));
 

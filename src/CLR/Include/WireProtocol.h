@@ -62,21 +62,22 @@ typedef enum ReceiveState
 // backwards compatible with .NETMF
 typedef enum CLR_DBG_Commands_Monitor
 {
-    CLR_DBG_Commands_c_Monitor_Ping               = 0x00000000, // The payload is empty, this command is used to let the other side know we are here...
-    CLR_DBG_Commands_c_Monitor_Message            = 0x00000001, // The payload is composed of the string characters, no zero at the end.
-    CLR_DBG_Commands_c_Monitor_ReadMemory         = 0x00000002,
-    CLR_DBG_Commands_c_Monitor_WriteMemory        = 0x00000003,
-    CLR_DBG_Commands_c_Monitor_CheckMemory        = 0x00000004,
-    CLR_DBG_Commands_c_Monitor_EraseMemory        = 0x00000005,
-    CLR_DBG_Commands_c_Monitor_Execute            = 0x00000006,
-    CLR_DBG_Commands_c_Monitor_Reboot             = 0x00000007,
-    CLR_DBG_Commands_c_Monitor_MemoryMap          = 0x00000008,
-    CLR_DBG_Commands_c_Monitor_ProgramExit        = 0x00000009, // The payload is empty, this command is used to tell the PC of a program termination
-    CLR_DBG_Commands_c_Monitor_CheckSignature     = 0x0000000A,
-    CLR_DBG_Commands_c_Monitor_DeploymentMap      = 0x0000000B,
-    CLR_DBG_Commands_c_Monitor_FlashSectorMap     = 0x0000000C,
-    CLR_DBG_Commands_c_Monitor_OemInfo            = 0x0000000E,
-    CLR_DBG_Commands_c_Monitor_QueryConfiguration = 0x0000000F,
+    CLR_DBG_Commands_c_Monitor_Ping                = 0x00000000, // The payload is empty, this command is used to let the other side know we are here...
+    CLR_DBG_Commands_c_Monitor_Message             = 0x00000001, // The payload is composed of the string characters, no zero at the end.
+    CLR_DBG_Commands_c_Monitor_ReadMemory          = 0x00000002,
+    CLR_DBG_Commands_c_Monitor_WriteMemory         = 0x00000003,
+    CLR_DBG_Commands_c_Monitor_CheckMemory         = 0x00000004,
+    CLR_DBG_Commands_c_Monitor_EraseMemory         = 0x00000005,
+    CLR_DBG_Commands_c_Monitor_Execute             = 0x00000006,
+    CLR_DBG_Commands_c_Monitor_Reboot              = 0x00000007,
+    CLR_DBG_Commands_c_Monitor_MemoryMap           = 0x00000008,
+    CLR_DBG_Commands_c_Monitor_ProgramExit         = 0x00000009, // The payload is empty, this command is used to tell the PC of a program termination
+    CLR_DBG_Commands_c_Monitor_CheckSignature      = 0x0000000A,
+    CLR_DBG_Commands_c_Monitor_DeploymentMap       = 0x0000000B,
+    CLR_DBG_Commands_c_Monitor_FlashSectorMap      = 0x0000000C,
+    CLR_DBG_Commands_c_Monitor_OemInfo             = 0x0000000E,
+    CLR_DBG_Commands_c_Monitor_QueryConfiguration  = 0x0000000F,
+    CLR_DBG_Commands_c_Monitor_UpdateConfiguration = 0x00000010,
 }CLR_DBG_Commands_Monitor;
 
 // structure for Wire Protocol packet
