@@ -31,40 +31,40 @@ typedef enum AddressMode
 typedef struct __nfpack Configuration_Network {
 
     // this is the marker placeholder for this configuration block
-    uint8_t   Marker[4];
+    unsigned char Marker[4];
 
     // Pointer to MAC address as an array of 6 unsigned bytes.
-    uint8_t   MacAddress[6];
+    unsigned char MacAddress[6];
 
     // Network IPv4 address as 32-bit unsigned integer
-    uint32_t  IPv4Address;
+    unsigned int  IPv4Address;
 
     // Network IPv4 subnet mask as 32-bit unsigned integer
-    uint32_t  IPv4NetMask;
+    unsigned int  IPv4NetMask;
 
     // Network gateway IPv4 address as 32-bit unsigned integer
-    uint32_t  IPv4GatewayAddress;
+    unsigned int  IPv4GatewayAddress;
 
     // DNS server 1 IPv4 address as 32-bit unsigned integer
-    uint32_t  IPv4DNS1Address;
+    unsigned int  IPv4DNS1Address;
 
     // DNS server 2 IPv4 address as 32-bit unsigned integer
-    uint32_t  IPv4DNS2Address;
+    unsigned int  IPv4DNS2Address;
 
     // Network IPv6 address as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6Address[4];
+    unsigned int  IPv6Address[4];
 
     // Network IPv6 subnet mask as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6NetMask[4];
+    unsigned int  IPv6NetMask[4];
 
     // Network gateway IPv6 address as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6GatewayAddress[4];
+    unsigned int  IPv6GatewayAddress[4];
 
     // DNS server 1 IPv6 address as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6DNS1Address[4];
+    unsigned int  IPv6DNS1Address[4];
 
     // DNS server 2 IPv6 address as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6DNS2Address[4];
+    unsigned int  IPv6DNS2Address[4];
 
     // Startup network addressing mode - static, DHCP, auto
     AddressMode StartupAddressMode;
