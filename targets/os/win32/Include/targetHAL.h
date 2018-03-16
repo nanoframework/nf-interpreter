@@ -26,6 +26,11 @@ inline void __cdecl HARD_Breakpoint()
 
 #define HARD_BREAKPOINT()     HARD_Breakpoint()
 
+inline bool Target_ConfigUpdateRequiresErase()
+{ 
+	return true;
+}
+
 // #if defined(_DEBUG)
 // #define DEBUG_HARD_BREAKPOINT()     HARD_Breakpoint()
 // #else
