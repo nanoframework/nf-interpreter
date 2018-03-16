@@ -24,23 +24,48 @@ void sys_signal_sock_event()
 void nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc)
 {
     // Initialise the lwIP CLR signal callback
-    //set_signal_sock_function( &sys_signal_sock_event );
+    set_signal_sock_function( &sys_signal_sock_event );
 
-    // Start lwIP thread in ChibiOS bindings using default options
-    //lwipInit(NULL));
+    // get network configuration
+    Configuration_Network* networkConfig = (Configuration_Network*)platform_malloc(sizeof(Configuration_Network));
+    
+    if(GetConfigurationNetwork(networkConfig) == true)
+    {
+        // build lwIP configuration 
+        struct lwipthread_opts lwipOptions;
 
-    const uint8_t localMACAddress[6] = { 0, 0x80U, 0xe1U, 0x01U, 0x35U, 0x56U };
+        // grab MAC address
+        lwipOptions.macaddress = (uint8_t *)networkConfig->MacAddress;
 
-    struct lwipthread_opts lwipOptions = { 
-        (uint8_t *)localMACAddress,
-        0, //IP4_ADDR(&ip, 192, 168, 1, 199),
-        0, //IP4_ADDR(&netmask, 255, 255, 255, 0),
-        0, //IP4_ADDR(&gateway, 192, 168, 1, 2),
-        NET_ADDRESS_DHCP, //   NET_ADDRESS_STATIC, 
-        "nanodevice"};
+        // static or dinamic address
+        if(networkConfig->StartupAddressMode == AddressMode_Static)
+        {
+            // IPv4 configs
+            lwipOptions.address = networkConfig->IPv4Address;
+            lwipOptions.netmask = networkConfig->IPv4NetMask;
+            lwipOptions.gateway = networkConfig->IPv4GatewayAddress;
+        }
+        else if(networkConfig->StartupAddressMode == AddressMode_DHCP)
+        {
+            // clear  IPv4 configs
+            lwipOptions.address = 0;
+            lwipOptions.netmask = 0;
+            lwipOptions.gateway = 0;
+        }
 
-    // Start lwIP thread in ChibiOS bindings using the above options
-    lwipInit(&lwipOptions);
+        // set address mode option
+        // our enum follows lwIP defines for address mode
+        lwipOptions.addrMode = (net_addr_mode_t)networkConfig->StartupAddressMode;
+
+        // we could consider making the device name configurable (or maybe not)
+        lwipOptions.ourHostName = "nanodevice";
+
+        // Start lwIP thread in ChibiOS bindings using the above options
+        lwipInit(&lwipOptions);
+
+        // free memory
+        platform_free(networkConfig);
+    }
 
     // Callback to Network stack when init complete 
     initfunc(NULL);
