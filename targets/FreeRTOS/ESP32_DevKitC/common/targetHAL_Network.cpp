@@ -24,6 +24,9 @@ void nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc)
  	// Initialise the Lwip CLR signal callback
 	set_signal_sock_function( &sys_signal_sock_event );
 
+	// get network configuration
+	// FIXME
+	
 	// TODO currently initialised in  'initialise_wifi_smart_config.c'
 	// tcpip_adapter_init(); 
 	
