@@ -68,6 +68,16 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
     { 0, 0 },   // { FLASH_MEMORY_Base, FLASH_MEMORY_Size },
 };
 
+bool GetConfigurationNetwork(Configuration_Network* configurationNetwork)
+{
+	return true;
+}
+
+bool StoreConfigurationNetwork(Configuration_Network* configurationNetwork)
+{
+	return true;
+}
+
 //const ConfigurationSector g_ConfigurationSector =
 //{
 //    // ConfigurationLength
