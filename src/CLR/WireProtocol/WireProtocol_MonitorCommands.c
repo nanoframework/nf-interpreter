@@ -44,6 +44,20 @@ __nfweak int Monitor_EraseMemory(WP_Message* message)
 }
 
 // provided as weak to be replaced by actual implementation by application
+__nfweak int Monitor_QueryConfiguration(WP_Message* message)
+{
+   // default to false
+   return false;
+}
+
+// provided as weak to be replaced by actual implementation by application
+__nfweak int Monitor_UpdateConfiguration(WP_Message* message)
+{
+   // default to false
+   return false;
+}
+
+// provided as weak to be replaced by actual implementation by application
 __nfweak int Monitor_CheckMemory(WP_Message* message)
 {
    // default to false

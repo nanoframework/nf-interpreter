@@ -157,24 +157,33 @@ int Monitor_QueryConfiguration(WP_Message* message)
 {
     Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command*)message->m_payload;
 
-    uint8_t* data   = NULL;
     int size          = 0;
     bool success     = false;
-    Configuration_Network* config = NULL;
- 
-    switch(cmd->Configuration)
+
+    Configuration_Network* config = (Configuration_Network*)platform_malloc(sizeof(Configuration_Network));
+
+    if (!config)
     {
-        case DeviceConfigurationOption_Network:
-
-            if(GetConfigurationNetwork(config) == true)
-            {
-                size = sizeof(Configuration_Network);
-                success = true;
-            }
-            break;
+        WP_ReplyToCommand( message, false, false, NULL, 0 );
     }
+    else
+    {
+        switch(cmd->Configuration)
+        {
+            case DeviceConfigurationOption_Network:
 
-    WP_ReplyToCommand(message, success, false, data, size);
+                if(GetConfigurationNetwork(config) == true)
+                {
+                    size = sizeof(Configuration_Network);
+                    success = true;
+                }
+                break;
+        }
+
+        WP_ReplyToCommand( message, success, false, (uint8_t*)config, size );
+
+       platform_free(config);
+    }
 
     return success;
 }
