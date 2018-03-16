@@ -122,6 +122,10 @@ add_executable(
 add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf ChibiOS)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf ChibiOS)
 
+# add dependencies from CHIBIOS_NETWORK_COMPONENTS (this is required to make sure that ChibiOS network components are unzip at the proper locations before the build starts)
+add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
+
 # include common directories
 include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"

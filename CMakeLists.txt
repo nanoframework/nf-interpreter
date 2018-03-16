@@ -551,8 +551,12 @@ if(RTOS_CHIBIOS_CHECK)
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
             LOG_DOWNLOAD 1
+
+            # install command has to perform TWO extracts
+            # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/ COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/wolfssl-3.12.2-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+            
             # Disable all other steps
-            INSTALL_COMMAND ""
             CONFIGURE_COMMAND ""
             BUILD_COMMAND ""
         )

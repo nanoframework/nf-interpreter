@@ -219,3 +219,22 @@ endforeach()
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CHIBIOS_LWIP DEFAULT_MSG CHIBIOS_LWIP_INCLUDE_DIRS CHIBIOS_LWIP_SOURCES)
+
+# setup target to unzip ChibiOS external network components
+add_custom_target( CHIBIOS_NETWORK_COMPONENTS ALL )
+
+add_custom_command(TARGET CHIBIOS_NETWORK_COMPONENTS
+PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+    DEPENDS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z
+	
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/wolfssl-3.12.2-patched.7z
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+    DEPENDS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/wolfssl-3.12.2-patched.7z
+
+    VERBATIM
+)
+
+# this depends on ChibiOS target being already downloaded
+add_dependencies(CHIBIOS_NETWORK_COMPONENTS ChibiOS)
