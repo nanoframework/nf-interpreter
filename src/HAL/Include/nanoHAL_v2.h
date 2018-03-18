@@ -8,6 +8,7 @@
 #define _NANOHAL_V2_H_ 1
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #include <nanoHAL_Network.h>

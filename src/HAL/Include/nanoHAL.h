@@ -8,6 +8,7 @@
 #define _NANOHAL_H_ 1
 
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
 #include <nanoWeak.h>
