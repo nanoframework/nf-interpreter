@@ -7,6 +7,7 @@
 #define _TARGET_HAL_H_
 
 #include <target_board.h>
+#include <nanoWeak.h>
 
 //TODO: implement
 //#define GLOBAL_LOCK(x)              chSysLock();
@@ -62,6 +63,10 @@ inline void HAL_AssertEx()
  //   __BKPT(0);
     while(true) { /*nop*/ }
 }
+
+// Provides information whether the configuration block storage requires erase command before sending the update command
+// ESP32 is storing this using its non-volatile storage therefore no erase is required.
+__nfweak bool Target_ConfigUpdateRequiresErase() { return false; };
 
 extern int HeapBegin;
 extern int HeapEnd;
