@@ -251,6 +251,27 @@ elseif("${USE_FPU}" STREQUAL "FALSE")
     message(STATUS "Emulated Floating Point enabled")
 endif()
 
+#################################################################
+# True random number generation option supported by Target MCU
+set(TARGET_MCU_SUPPORTS_RNG TRUE)
+
+if(TARGET_MCU_SUPPORTS_RNG)
+    if(NOT "${USE_RNG}" STREQUAL "")
+        if("${USE_RNG}" STREQUAL "TRUE")
+            set(TARGET_MCU_SUPPORTS_RNG TRUE CACHE INTERNAL "MCU TRNG Support")
+            message(STATUS "Random Number Generation by target MCU is activated")
+        elseif("${USE_RNG}" STREQUAL "FALSE")
+            set(TARGET_MCU_SUPPORTS_RNG FALSE CACHE INTERNAL "MCU TRNG Support")
+            message(STATUS "Random Number Generation by target MCU is NOT activated")
+        else()
+            # something other than TRUE or FALSE...
+            message(FATAL_ERROR "\n\n'${USE_RNG}' is an invalid option for USE_RNG. Acceptable values are TRUE or FALSE.\n\n")
+        endif()    
+    else()
+        # default = true, but can be overridden by setting USE_RNG to TRUE or FALSE in cmake-variants.json
+        message(STATUS "Random Number Generation by target MCU is activated.")
+    endif()
+endif()
 
 #################################################################
 # nanoFramework features
