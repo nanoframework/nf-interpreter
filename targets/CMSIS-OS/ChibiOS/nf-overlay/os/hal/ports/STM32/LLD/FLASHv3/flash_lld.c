@@ -149,16 +149,19 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffe
                 // NOTE: assuming that the supply voltage is able to cope with half-word programming
                 if((endAddress - cursor) >= 2)
                 {
-                    *((__IO uint16_t*)cursor++) = *((uint16_t*)buffer++);
+                    *(__IO uint16_t*)cursor = *((uint16_t*)buffer);
 
                     // update flash and buffer pointers by the 'extra' byte that was programmed
-                    cursor++;
-                    buffer++;
+                    cursor += 2;
+                    buffer += 2;
                 }
                 else
                 {
-                    // program single byte 
-                    *cursor = *buffer++;
+                    // program single byte
+                    *(__IO uint8_t*)cursor = *buffer;
+
+                    // update flash pointer by the 'extra' byte that was programmed
+                    cursor += 2;
                 }
             }
         }

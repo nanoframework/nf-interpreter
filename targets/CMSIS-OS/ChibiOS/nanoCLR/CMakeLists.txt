@@ -41,6 +41,16 @@ if(USE_NETWORKING_OPTION)
     list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Network.cpp")
 endif()
 
+# append random implementation for all series, except F0
+if( ${TARGET_SERIES} STREQUAL "STM32L0xx" OR
+    ${TARGET_SERIES} STREQUAL "STM32F4xx" OR 
+    ${TARGET_SERIES} STREQUAL "STM32F7xx" OR
+    ${TARGET_SERIES} STREQUAL "STM32H7xx")
+
+    list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetRandom.cpp")  
+
+endif()
+
 # parse nanoFramework API options
 ParseApiOptions()
 

@@ -78,7 +78,7 @@ The above firmware builds include support for the class libraries and features m
 
 For documentation, providing feedback, issues and finding out how to contribute please refer to the [Home repo](https://github.com/nanoframework/Home).
 
-Join our Slack community by filling in this [invite form](https://nanoframework.wordpress.com/slack-invite-form/).
+Join our Slack community [here](https://join.slack.com/t/nanoframework/shared_invite/enQtMzI3OTg4MTk0NTgwLWQ0ODQ3ZWIwZjgxZWFmNjU3MDIwN2E2YzM2OTdhMWRiY2Q3M2NlOTk2N2IwNTM3MmRlMmQ2NTRlNjZlYzJlMmY).
 
 
 ## Credits

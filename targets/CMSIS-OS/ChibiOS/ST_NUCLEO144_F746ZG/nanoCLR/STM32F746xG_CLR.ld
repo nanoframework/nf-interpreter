@@ -17,9 +17,9 @@
  */
 MEMORY
 {
-    flash       : org = 0x08008000, len = 1M - 32k - 32k - 512k     /* flash size less the space reserved for nanoBooter, configuration block and application deployment*/
-    flash_itcm  : org = 0x00208000, len = 1M - 32k - 32k - 512k
-    config      : org = 0x08010000, len = 32k                       /* space reserved for configuration block */
+    flash       : org = 0x08010000, len = 1M - 32k - 32k - 512k     /* flash size less the space reserved for nanoBooter, configuration block and application deployment*/
+    flash_itcm  : org = 0x00210000, len = 1M - 32k - 32k - 512k
+    config      : org = 0x08008000, len = 32k                       /* space reserved for configuration block */
     deployment  : org = 0x08080000, len = 512k                      /* space reserved for application deployment */
     ramvt       : org = 0x00000000, len = 0                         /* initial RAM address is reserved for a copy of the vector table */
     ram0        : org = 0x20010000, len = 256k                      /* SRAM1 + SRAM2 */

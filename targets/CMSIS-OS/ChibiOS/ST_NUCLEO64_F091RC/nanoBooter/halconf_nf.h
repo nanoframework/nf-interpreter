@@ -16,5 +16,9 @@
 #define HAL_USE_STM32_FLASH         TRUE
 #endif
 
+#if !defined(HAL_USE_STM32_RNG)
+#define HAL_USE_STM32_RNG           FALSE
+#endif
+
 #endif // _HALCONF_NF_H_
 

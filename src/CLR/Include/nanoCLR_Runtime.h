@@ -374,14 +374,11 @@ struct CLR_RT_Memory
 
 struct CLR_RT_Random
 {
-private:
-    int m_next;
-
 public:
      void Initialize();
      void Initialize( int seed );
 
-     int  Next();
+     uint32_t  Next();
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
      double NextDouble();
