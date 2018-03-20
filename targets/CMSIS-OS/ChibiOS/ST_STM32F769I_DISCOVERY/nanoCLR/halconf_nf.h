@@ -16,4 +16,9 @@
 #define HAL_USE_STM32_FLASH         TRUE
 #endif
 
+// Enables the Flexible Memory Controller subsystem.
+#if !defined(HAL_USE_FSMC)
+#define HAL_USE_FSMC                TRUE
+#endif
+
 #endif // _HALCONF_NF_H_

@@ -30,6 +30,7 @@ MEMORY
     ram5        : org = 0x40024000, len = 4k                        /* BCKP SRAM */
     ram6        : org = 0x00000000, len = 0
     ram7        : org = 0x00000000, len = 0
+    sram        : org = 0xC0000000, len = 2M
 }
 
 /* For each data/text section two region are defined, a virtual region
@@ -115,6 +116,12 @@ SECTIONS
         . = ALIGN(4);
         __eth_end__ = .;
     } > ETH_RAM
+
+      /* placing my named section at given address: */
+    .myBufBlock 0xC0000000 :
+    {
+        KEEP(*(.myBufSection)) /* keep my variable even if not referenced */
+    } > sram
 }
 
 /* Code rules inclusion.*/
