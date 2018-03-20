@@ -36,11 +36,6 @@ list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoCRT.
 # append files from Runtime.Native
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_RTC.cpp")
 
-# append networking files, if enabled
-if(USE_NETWORKING_OPTION)
-    list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Network.cpp")
-endif()
-
 # append TRNG only if enabled in variants (USE_RNG)
 if(TARGET_MCU_SUPPORTS_RNG)
     # append random implementation for all series, except F0
