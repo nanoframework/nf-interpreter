@@ -4,6 +4,7 @@
 //
 
 #include <string.h>
+#include <hal.h>
 #include <ch.h>
 
 //See http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/BABBGBEC.html
@@ -16,7 +17,7 @@ typedef enum {
     UsageFault = 6,
 } FaultType;
 
-#if defined(STM32F4xx) || defined(STM32F7xx)
+#if defined(STM32F4XX) || defined(STM32F7XX)
 
 void NMI_Handler(void) {
     while(1);
@@ -39,7 +40,7 @@ void HardFault_Handler(void) {
     volatile FaultType faultType = (FaultType)__get_IPSR();
 
     // these are not available in all the STM32 series
-#if defined(STM32F4xx) || defined(STM32F7xx)
+#if defined(STM32F4XX) || defined(STM32F7XX)
 
     //Flags about hardfault / busfault
     //See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
@@ -92,7 +93,7 @@ void UsageFault_Handler(void) {
     (void)faultType;
 
     // these are not available in all the STM32 series
-#if defined(STM32F4xx) || defined(STM32F7xx)
+#if defined(STM32F4XX) || defined(STM32F7XX)
     
     //Flags about hardfault / busfault
     //See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
@@ -126,7 +127,7 @@ void MemManage_Handler(void) {
     (void)faultType;
 
     // these are not available in all the STM32 series
-#if defined(STM32F4xx) || defined(STM32F7xx)
+#if defined(STM32F4XX) || defined(STM32F7XX)
     
     //For HardFault/BusFault this is the address that was accessed causing the error
     volatile uint32_t faultAddress = SCB->MMFAR;
