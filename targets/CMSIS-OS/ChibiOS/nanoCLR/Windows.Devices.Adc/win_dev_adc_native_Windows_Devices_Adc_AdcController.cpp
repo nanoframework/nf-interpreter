@@ -6,7 +6,6 @@
 
 #include "win_dev_adc_native.h"
 
-
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.Adc.AdcChannelMode (in managed code) !!!    //
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -16,18 +15,62 @@ enum AdcChannelMode
         Differential
 };
 
-
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpenChannel___VOID__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpenChannel___VOID__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
-        // Get passed ADC device Id and channel
-        int deviceId = stack.Arg1().NumericByRef().s4;
-        int channel = stack.Arg2().NumericByRef().s4;
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        // Get channel from argument
+        int channel = stack.Arg1().NumericByRef().s4;
 
-     }
+        // get device ID
+        int deviceId = pThis[FIELD___deviceId].NumericByRef().s4;
+
+        // we are filling this bellow with the appropriate ADC port pin config
+        NF_PAL_ADC_PORT_PIN_CHANNEL channelDef;
+        ADCDriver* adc;
+
+        // we should remove form the build the ADC options that aren't implemented
+        // plus we have to use the default to catch invalid ADC Ids
+        switch(deviceId)
+        {
+
+   #if STM32_ADC_USE_ADC1
+            case 1: 
+                channelDef = Adc1PortPinConfig[channel];
+                adc = &ADCD1;
+                break;
+   #endif
+
+   #if STM32_ADC_USE_ADC2
+            case 2: 
+                channelDef = Adc2PortPinConfig[channel];
+                adc = &ADCD2;
+                break;
+   #endif
+
+   #if STM32_ADC_USE_ADC3
+            case 3: 
+                channelDef = Adc3PortPinConfig[channel];
+                adc = &ADCD3;
+                break;
+   #endif
+
+            default: 
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        if(channelDef.portId != NULL && channelDef.pin != NULL)
+        {
+            palSetGroupMode(channelDef.portId, PAL_PORT_BIT(channelDef.pin), 0, PAL_MODE_INPUT_ANALOG);
+        }
+
+        // start ADC
+        adcStart(adc, NULL);
+
+    }
     NANOCLR_NOCLEANUP();
 }
 
@@ -41,10 +84,32 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetC
 
         // FIXME - Return number of single ended channels
         int deviceId = pThis[ FIELD___deviceId ].NumericByRefConst().s4;
+
+        // we should remove form the build the ADC options that aren't implemented
+        // plus we have to use the default to catch invalid ADC Ids
         switch(deviceId)
         {
-            case 1: channelCount = 8; break;
-            default: NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+
+   #if STM32_ADC_USE_ADC1
+            case 1: 
+                channelCount = Adc1ChannelCount;
+                break;
+   #endif
+
+   #if STM32_ADC_USE_ADC2
+            case 2: 
+                channelCount = Adc2ChannelCount;
+                break;
+   #endif
+
+   #if STM32_ADC_USE_ADC3
+            case 3: 
+                channelCount = Adc3ChannelCount;
+                break;
+   #endif
+
+            default: 
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
         
         // Return value to the managed application
@@ -92,6 +157,43 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetR
     {
         // Fixed at 12 bit for now
         stack.SetResult_I4(12);
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit___VOID( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        // Get device Id from argument
+        int deviceId = stack.Arg1().NumericByRef().s4;
+
+        // all required initialization for ADC are already handled in ChibiOS driver
+        // this is only to check if the requested deviceId is available in hardware
+
+        // we should remove form the build the ADC options that aren't implemented
+        // plus we have to use the default to catch invalid ADC Ids
+        switch(deviceId)
+        {
+
+   #if STM32_ADC_USE_ADC1
+            case 1: 
+                break;
+   #endif
+
+   #if STM32_ADC_USE_ADC2
+            case 2: 
+                break;
+   #endif
+
+   #if STM32_ADC_USE_ADC3
+            case 3: 
+                break;
+   #endif
+
+            default: 
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
     }
     NANOCLR_NOCLEANUP();
 }

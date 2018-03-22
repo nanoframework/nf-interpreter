@@ -31,7 +31,7 @@ enum AdcChannelMode
         Differential
 };
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpenChannel___VOID__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpenChannel___VOID__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -39,10 +39,15 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
         adc_bits_width_t width_bit = ADC_WIDTH_BIT_12; // default to 12
         adc_atten_t atten = ADC_ATTEN_DB_11;
 
-        // Get passed ADC device number, expect 1 or 2
-        adc_unit_t adcUnit = (adc_unit_t)stack.Arg1().NumericByRef().s4;
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
+        // Get channel from argument
         int channel = stack.Arg2().NumericByRef().s4;
+
+        // Get ADC device number from deviceId field
+        // expect 1 or 2
+        adc_unit_t adcUnit = (adc_unit_t)pThis[FIELD___deviceId].NumericByRef().s4;
 
         adc_power_on();         // Make sure powered on
 
@@ -141,6 +146,29 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetR
     {
         // Fixed at 12 bit for now
         stack.SetResult_I4(12);
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit___VOID( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        // Get device Id from argument
+        int deviceId = stack.Arg1().NumericByRef().s4;
+
+        // all required initialization for ADC are already handled
+        // this is only to check if the requested deviceId is available in hardware
+
+        // expect 1 or 2
+        if(deviceId == 1 || deviceId == 2)
+        {
+            return;
+        }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
     }
     NANOCLR_NOCLEANUP();
 }
