@@ -163,7 +163,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit
         // expect 1 or 2
         if(deviceId == 1 || deviceId == 2)
         {
-            return;
+            // we are OK
         }
         else
         {
