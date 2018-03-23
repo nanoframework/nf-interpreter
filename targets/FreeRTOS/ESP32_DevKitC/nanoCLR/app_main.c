@@ -47,9 +47,11 @@ void  IRAM_ATTR main_task(void *pvParameter)
 void  app_main()
 {
   // Switch off logging so as not to interfere with WireProtocol over Uart0
-  esp_log_level_set("*", ESP_LOG_NONE);         
+  esp_log_level_set("*", ESP_LOG_INFO);         
 
-  initialise_wifi_smart_config();
+  ESP_ERROR_CHECK( nvs_flash_init() );
+
+// initialise_wifi_smart_config();
 
   Esp32FlashDriver_InitializeDevice(0);
  

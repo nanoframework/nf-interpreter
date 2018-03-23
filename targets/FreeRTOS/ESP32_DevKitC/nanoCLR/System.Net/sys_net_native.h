@@ -15,10 +15,71 @@
 #include <corlib_native.h>
 
 
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
+{
+    static const int FIELD___interfaceIndex = 1;
+    static const int FIELD___flags = 2;
+    static const int FIELD___ipAddress = 3;
+    static const int FIELD___gatewayAddress = 4;
+    static const int FIELD___subnetMask = 5;
+    static const int FIELD___dnsAddress1 = 6;
+    static const int FIELD___dnsAddress2 = 7;
+    static const int FIELD___networkInterfaceType = 8;
+    static const int FIELD___macAddress = 9;
+
+    NANOCLR_NATIVE_DECLARE(InitializeNetworkInterfaceSettings___VOID);
+    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(GetNetworkInterfaceCount___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4);
+    NANOCLR_NATIVE_DECLARE(IPAddressFromString___STATIC__U4__STRING);
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211
+{
+    static const int FIELD__Authentication = 10;
+    static const int FIELD__Encryption = 11;
+    static const int FIELD__Radio = 12;
+    static const int FIELD__PassPhrase = 13;
+    static const int FIELD__NetworkKey = 14;
+    static const int FIELD__ReKeyInternal = 15;
+    static const int FIELD__Ssid = 16;
+    static const int FIELD__Id = 17;
+
+    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID__SystemNetNetworkInformationWireless80211__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(SaveAllConfigurations___STATIC__VOID);
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
+{
+    static const int FIELD_STATIC__NetworkAddressChanged = 0;
+    static const int FIELD_STATIC__NetworkAvailabilityChanged = 1;
+
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange__NetworkEvent
+{
+    static const int FIELD__EventType = 3;
+    static const int FIELD__Flags = 4;
+    static const int FIELD__Time = 5;
+
+
+    //--//
+
+};
+
 struct Library_sys_net_native_System_Net_IPAddress
 {
-    static const int FIELD_STATIC__Any = 0;
-    static const int FIELD_STATIC__Loopback = 1;
+    static const int FIELD_STATIC__Any = 2;
+    static const int FIELD_STATIC__Loopback = 3;
 
     static const int FIELD__m_Address = 1;
 
@@ -41,6 +102,15 @@ struct Library_sys_net_native_System_Net_IPHostEntry
 {
     static const int FIELD__hostName = 1;
     static const int FIELD__addressList = 2;
+
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityEventArgs
+{
+    static const int FIELD___isAvailable = 1;
 
 
     //--//
@@ -76,7 +146,7 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
     NANOCLR_NATIVE_DECLARE(setsockopt___STATIC__VOID__OBJECT__I4__I4__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(poll___STATIC__BOOLEAN__OBJECT__I4__I4);
     NANOCLR_NATIVE_DECLARE(ioctl___STATIC__VOID__OBJECT__U4__BYREF_U4);
-
+ 
     //--//
     static HRESULT MarshalSockAddress( struct SOCK_sockaddr* addrDst, CLR_UINT32& addrLenDst, const CLR_RT_HeapBlock& blkSrc );
     static HRESULT MarshalSockAddress( CLR_RT_HeapBlock& blkDst, const struct SOCK_sockaddr* addrSrc, CLR_UINT32 addrLenSrc );
@@ -105,6 +175,7 @@ struct Library_sys_net_native_System_Net_Sockets_NetworkStream
     static const int FIELD___remoteEndPoint = 3;
     static const int FIELD___ownsSocket = 4;
     static const int FIELD___disposed = 5;
+
 
     //--//
 

@@ -1756,7 +1756,7 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 
 //--//
 
-
+#include <nanoPAL_Network.h>
 #include <nanoPAL.h>
 //#include <drivers.h>
 

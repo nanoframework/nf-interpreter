@@ -143,109 +143,110 @@ uint32_t SOCK_CONFIGURATION_GetAdapterCount()
     return HAL_SOCK_CONFIGURATION_GetAdapterCount();
 }
 
-// HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config )
-// {
-//     NATIVE_PROFILE_PAL_COM();
-//     return HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(interfaceIndex, config);
-// }
-// HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config )
-// {
-//     NATIVE_PROFILE_PAL_COM();
-//     HRESULT hr = S_OK;
-//     bool fDbg = FALSE;
+HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config )
+{
+    NATIVE_PROFILE_PAL_COM();
+    return HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(interfaceIndex, config);
+}
+HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config )
+{
+    NATIVE_PROFILE_PAL_COM();
+    HRESULT hr = S_OK;
+    bool fDbg = FALSE;
 
-//     if(interfaceIndex >= NETWORK_INTERFACE_COUNT) 
-//     {
-//         return CLR_E_INVALID_PARAMETER;
-//     }
+    if(interfaceIndex >= NETWORK_INTERFACE_COUNT) 
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
 
-//     const uint32_t c_reInitFlag = SOCK_NETWORKCONFIGURATION_UPDATE_DHCP       | 
-//                                 SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RENEW | 
-//                                 SOCK_NETWORKCONFIGURATION_UPDATE_MAC;
+    const uint32_t c_reInitFlag = SOCK_NETWORKCONFIGURATION_UPDATE_DHCP       | 
+                                SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RENEW | 
+                                SOCK_NETWORKCONFIGURATION_UPDATE_MAC;
 
-//     const uint32_t c_uninitFlag = c_reInitFlag | SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RELEASE;
+    const uint32_t c_uninitFlag = c_reInitFlag | SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RELEASE;
 
-//     if(0 != (updateFlags & c_uninitFlag))
-//     {
-//         fDbg = SOCKETS_Uninitialize(COM_SOCKET_DBG);
-//     }
+    if(0 != (updateFlags & c_uninitFlag))
+    {
+        fDbg = SOCKETS_DbgUninitialize(COM_SOCKET_DBG);
+    }
 
-//     hr = HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, config);
+    hr = HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, config);
 
-//     if(SUCCEEDED(hr))
-//     {
-//         Sockets_LWIP_Driver::SaveConfig(interfaceIndex, config);
-//     }
-//     else
-//     {
-//         // restore the network configuration
-//         HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, &g_NetworkConfig.NetworkInterfaces[interfaceIndex]);
-//     }
+    if(SUCCEEDED(hr))
+    {
+        Sockets_LWIP_Driver::SaveConfig(interfaceIndex, config);
+    }
+    else
+    {
+        // restore the network configuration
+        HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, &g_NetworkConfig.NetworkInterfaces[interfaceIndex]);
+    }
 
-//     if(0 != (updateFlags & c_reInitFlag))
-//     {
-//         if(fDbg) SOCKETS_Initialize(COM_SOCKET_DBG);
-//     }
+    if(0 != (updateFlags & c_reInitFlag))
+    {
+        if(fDbg) SOCKETS_DbgInitialize(COM_SOCKET_DBG);
+    }
 
-//     return hr;
-// }
+    return hr;
+}
 
-// HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config )
-// {
-//     NATIVE_PROFILE_PAL_COM();
-//     HRESULT hr = S_OK;
+HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config )
+{
+    NATIVE_PROFILE_PAL_COM();
+    HRESULT hr = S_OK;
 
-//     if(interfaceIndex >= NETWORK_INTERFACE_COUNT || config == NULL) 
-//     {
-//         return CLR_E_INVALID_PARAMETER;
-//     }
+    if(interfaceIndex >= NETWORK_INTERFACE_COUNT || config == NULL) 
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
 
-//     // load current DCHP settings
-//     hr = SOCK_CONFIGURATION_LoadAdapterConfiguration(interfaceIndex, config);
+    // load current DCHP settings
+    hr = SOCK_CONFIGURATION_LoadAdapterConfiguration(interfaceIndex, config);
 
-//     return hr;
-// }
+    return hr;
+}
 
-// HRESULT SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig )
-// {
-//     NATIVE_PROFILE_PAL_COM();
+HRESULT SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig )
+{
+    NATIVE_PROFILE_PAL_COM();
 
-//     if (interfaceIndex >= WIRELESS_INTERFACE_COUNT)
-//     {
-//         return CLR_E_INVALID_PARAMETER;
-//     }
+    if (interfaceIndex >= WIRELESS_INTERFACE_COUNT)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
 
-//     Sockets_LWIP_Driver::ApplyWirelessConfig();
+    Sockets_LWIP_Driver::ApplyWirelessConfig();
 
-//     /// Hal version is given a chance if it wants to override stored predifned values.
-//     if (HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration(interfaceIndex, wirelessConfig) != S_OK)
-//     {
-//         memcpy( wirelessConfig, &g_WirelessConfig.WirelessInterfaces[interfaceIndex], sizeof(SOCK_WirelessConfiguration) );
-//     }
+    /// Hal version is given a chance if it wants to override stored predifned values.
 
-//     return S_OK;
-// }
+    if (HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration(interfaceIndex, wirelessConfig) != S_OK)
+    {
+        memcpy( wirelessConfig, &g_WirelessConfig.WirelessInterfaces[interfaceIndex], sizeof(SOCK_WirelessConfiguration) );
+    }
 
-// HRESULT SOCK_CONFIGURATION_UpdateWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig )
-// {
-//     NATIVE_PROFILE_PAL_COM();
+    return S_OK;
+}
 
-//     if (interfaceIndex >= WIRELESS_INTERFACE_COUNT)
-//     {
-//         return CLR_E_INVALID_PARAMETER;
-//     }
+HRESULT SOCK_CONFIGURATION_UpdateWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig )
+{
+    NATIVE_PROFILE_PAL_COM();
 
-//     memcpy( &g_WirelessConfig.WirelessInterfaces[interfaceIndex], wirelessConfig, sizeof(SOCK_WirelessConfiguration) );
+    if (interfaceIndex >= WIRELESS_INTERFACE_COUNT)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
 
-//     return S_OK;
-// }
+    memcpy( &g_WirelessConfig.WirelessInterfaces[interfaceIndex], wirelessConfig, sizeof(SOCK_WirelessConfiguration) );
 
-// HRESULT SOCK_CONFIGURATION_SaveAllWirelessConfigurations( )
-// {
-//     HAL_CONFIG_BLOCK::UpdateBlockWithName(g_WirelessConfig.GetDriverName(), &g_WirelessConfig, sizeof(g_WirelessConfig), TRUE);
+    return S_OK;
+}
 
-//     return S_OK;
-// }
+HRESULT SOCK_CONFIGURATION_SaveAllWirelessConfigurations( )
+{
+//FIXME    HAL_CONFIG_BLOCK::UpdateBlockWithName(g_WirelessConfig.GetDriverName(), &g_WirelessConfig, sizeof(g_WirelessConfig), TRUE);
+
+    return S_OK;
+}
 
 
 #define SOCKET_SHUTDOWN_READ         0
@@ -407,55 +408,57 @@ int Sockets_LWIP_Driver::SendTo( SOCK_SOCKET s, const char* buf, int32_t len, in
 
 
 
-// void Sockets_LWIP_Driver::SaveConfig(int32_t index, SOCK_NetworkConfiguration *cfg)
-// {
-//     NATIVE_PROFILE_PAL_COM();
-//     if(index >= NETWORK_INTERFACE_COUNT) return;
+void Sockets_LWIP_Driver::SaveConfig(int32_t index, SOCK_NetworkConfiguration *cfg)
+{
+    NATIVE_PROFILE_PAL_COM();
+    if(index >= NETWORK_INTERFACE_COUNT) return;
 
-//     if(cfg) 
-//     {
-//         memcpy( &g_NetworkConfig.NetworkInterfaces[index], cfg, sizeof(SOCK_NetworkConfiguration) );
-//     }
+    if(cfg) 
+    {
+        memcpy( &g_NetworkConfig.NetworkInterfaces[index], cfg, sizeof(SOCK_NetworkConfiguration) );
+    }
     
-//     HAL_CONFIG_BLOCK::UpdateBlockWithName(g_NetworkConfig.GetDriverName(), &g_NetworkConfig, sizeof(g_NetworkConfig), TRUE);
-// }
+//FIXME    HAL_CONFIG_BLOCK::UpdateBlockWithName(g_NetworkConfig.GetDriverName(), &g_NetworkConfig, sizeof(g_NetworkConfig), TRUE);
+}
 
-// void Sockets_LWIP_Driver::ApplyConfig()
-// {
-//     NATIVE_PROFILE_PAL_COM();
-//     if(!HAL_CONFIG_BLOCK::ApplyConfig( g_NetworkConfig.GetDriverName(), &g_NetworkConfig, sizeof(g_NetworkConfig) ))
-//     {
-//         // save to the dynamic config section so that MFDeploy will be able to get the configuration.
-//         SaveConfig(0, NULL);            
-//     }
-// }
+void Sockets_LWIP_Driver::ApplyConfig()
+{
+    NATIVE_PROFILE_PAL_COM();
+// FIXME
+    // if(!HAL_CONFIG_BLOCK::ApplyConfig( g_NetworkConfig.GetDriverName(), &g_NetworkConfig, sizeof(g_NetworkConfig) ))
+    // {
+    //     // save to the dynamic config section so that MFDeploy will be able to get the configuration.
+    //     SaveConfig(0, NULL);            
+    // }
+}
 
-// void Sockets_LWIP_Driver::ApplyWirelessConfig()
-// {
-//     NATIVE_PROFILE_PAL_COM();
+void Sockets_LWIP_Driver::ApplyWirelessConfig()
+{
+    NATIVE_PROFILE_PAL_COM();
 
-//     if(!s_wirelessInitialized)
-//     {
-//         if(!HAL_CONFIG_BLOCK::ApplyConfig( g_WirelessConfig.GetDriverName(), &g_WirelessConfig, sizeof(g_WirelessConfig) ))
-//         {
-//             SaveWirelessConfig(0, NULL);
-//         }
-//         s_wirelessInitialized = TRUE;
-//     }
-// }
+    if(!s_wirelessInitialized)
+    {
+        //FIXME
+        // if(!HAL_CONFIG_BLOCK::ApplyConfig( g_WirelessConfig.GetDriverName(), &g_WirelessConfig, sizeof(g_WirelessConfig) ))
+        // {
+        //     SaveWirelessConfig(0, NULL);
+        // }
+        s_wirelessInitialized = TRUE;
+    }
+}
 
-// void Sockets_LWIP_Driver::SaveWirelessConfig(int32_t index, SOCK_NetworkConfiguration *cfg)
-// {
-//     NATIVE_PROFILE_PAL_COM();
-//     if(index >= WIRELESS_INTERFACE_COUNT) return;
+void Sockets_LWIP_Driver::SaveWirelessConfig(int32_t index, SOCK_NetworkConfiguration *cfg)
+{
+    NATIVE_PROFILE_PAL_COM();
+    if(index >= WIRELESS_INTERFACE_COUNT) return;
     
-//     if(cfg) 
-//     {
-//         memcpy( &g_WirelessConfig.WirelessInterfaces[index], cfg, sizeof(SOCK_WirelessConfiguration) );
-//     }
+    if(cfg) 
+    {
+        memcpy( &g_WirelessConfig.WirelessInterfaces[index], cfg, sizeof(SOCK_WirelessConfiguration) );
+    }
     
-//     HAL_CONFIG_BLOCK::UpdateBlockWithName(g_WirelessConfig.GetDriverName(), &g_WirelessConfig, sizeof(g_WirelessConfig), TRUE);    
-// }
+//FIXME    HAL_CONFIG_BLOCK::UpdateBlockWithName(g_WirelessConfig.GetDriverName(), &g_WirelessConfig, sizeof(g_WirelessConfig), TRUE);    
+}
 
 
     

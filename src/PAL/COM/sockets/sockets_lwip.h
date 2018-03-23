@@ -15,8 +15,8 @@ extern void debug_printf( const char* format, ... );
 
 //--//
 
-//TODO extern NETWORK_CONFIG  g_NetworkConfig;
-//TODO extern WIRELESS_CONFIG g_WirelessConfig;
+extern NETWORK_CONFIG  g_NetworkConfig;
+extern WIRELESS_CONFIG g_WirelessConfig;
 
 //--//
 
