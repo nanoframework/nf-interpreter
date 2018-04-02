@@ -83,6 +83,9 @@ static void debounceTimer_Callback( void* arg )
     // read line
     uint16_t currentValue = palReadLine(GetIoLine(pinNumber));
 
+    // read pad
+    uint16_t lastPadValue = pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___lastInputValue ].NumericByRef().s4;
+
     if(lastPadValue == currentValue)
     {
         // value hasn't change for debounce interval so this is a valid change
@@ -127,7 +130,7 @@ static void GpioEventCallback(void *arg)
 
     // check if there is a debounce time set
     int64_t debounceTimeoutMilsec = (CLR_INT64_TEMP_CAST) pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___debounceTimeout ].NumericByRefConst().s8 / TIME_CONVERSION__TO_MILLISECONDS;
-                
+
     if(debounceTimeoutMilsec > 0)
     {
         // debounce set, need to handle it
@@ -143,13 +146,16 @@ static void GpioEventCallback(void *arg)
         }
 
         // read pad
-        lastPadValue = palReadLine(ioLine);
+        pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___lastInputValue ].NumericByRef().s4 = palReadLine(ioLine);
 
         // setup timer
         chVTSetI(&debounceTimer, TIME_MS2I(debounceTimeoutMilsec), debounceTimer_Callback, pThis);
     }
     else
     {
+        // read pad
+        pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___lastInputValue ].NumericByRef().s4 = palReadLine(ioLine);
+
         // post a managed event with the current pin reading
         PostManagedEvent( EVENT_GPIO, 0, pinNumber, palReadLine(ioLine) );
     }

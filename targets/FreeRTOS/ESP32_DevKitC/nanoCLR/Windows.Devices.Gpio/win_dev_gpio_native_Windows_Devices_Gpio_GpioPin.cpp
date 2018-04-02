@@ -353,7 +353,3 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlter
     }
     NANOCLR_NOCLEANUP();
 }
-
-
-
-
