@@ -12,7 +12,7 @@ void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uin
 {
     if(g_Context != NULL)
     {
-        uint16_t d = ((uint16_t)data1 << 16) | (category << 8) | subCategory;
+        uint32_t d = ((uint32_t)data1 << 16) | (category << 8) | subCategory;
 
         SaveNativeEventToHALQueue( g_Context, d, data2 );
     }
