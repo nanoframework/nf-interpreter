@@ -315,7 +315,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::setsockopt___STA
     NATIVE_PROFILE_CLR_NETWORK();
     return SockOptHelper( stack, false );
 }
-extern int ets_printf(const char *fmt, ...);
+
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__BOOLEAN__OBJECT__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
@@ -368,8 +368,6 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__B
     stack.SetResult_Boolean( res != 0 );   
 
     NANOCLR_NOCLEANUP();
-    ets_printf( "poll exit %d\n",res);
-
 }
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::ioctl___STATIC__VOID__OBJECT__U4__BYREF_U4( CLR_RT_StackFrame& stack )

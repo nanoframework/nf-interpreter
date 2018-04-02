@@ -6,32 +6,17 @@
 
 #include <nanohal.h>
 
-//--//
-
-
+//
+// Default Network settings
+//
 NETWORK_CONFIG g_NetworkConfig =
 {
     { TRUE },
-    2,      // interface count
-    {       
-        {                                      
-            SOCK_NETWORKCONFIGURATION_FLAGS_DHCP,         /*flags         to enable wireless bitwise OR this value with  SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__set(SOCK_NETWORKCONFIGURATION_FLAGS_WIRELESS)*/  
-            SOCK_MAKE_IP_ADDR_LITTLEEND(  0,  0,  0,  0), /*ip address */  
-            SOCK_MAKE_IP_ADDR_LITTLEEND(  0,  0,  0,  0), /*subnet mask*/  
-            SOCK_MAKE_IP_ADDR_LITTLEEND(  0,  0,  0,  0), /*gateway    */  
-            SOCK_MAKE_IP_ADDR_LITTLEEND(  0,  0,  0,  0), /*dns1       */  
-            SOCK_MAKE_IP_ADDR_LITTLEEND(  0,  0,  0,  0), /*dns2       */  
-            SOCK_NETWORKCONFIGURATION_INTERFACETYPE_ETHERNET,        /* Change to SOCK_NETWORKCONFIGURATION_INTERFACETYPE_WIRELESS_80211 for wireless */ 
-            6,              /*mac address length*/                  
-            {               /*mac address*/                         
-                0x00, 0x50, 0xC2, 0xF8, 0x90, 0x05, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-            }                                                       
-        },                                                          
+    1,
+    {   
        {                                      
-            SOCK_NETWORKCONFIGURATION_FLAGS_DHCP,         /*flags         to enable wireless bitwise OR this value with  SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__set(SOCK_NETWORKCONFIGURATION_FLAGS_WIRELESS)*/  
+            SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__set(SOCK_NETWORKCONFIGURATION_FLAGS_NETWORK_INTERFACE) | 
+            SOCK_NETWORKCONFIGURATION_FLAGS_DHCP,         /*flags */  
             SOCK_MAKE_IP_ADDR_LITTLEEND(  0,  0,  0,  0), /*ip address */  
             SOCK_MAKE_IP_ADDR_LITTLEEND(  0,  0,  0,  0), /*subnet mask*/  
             SOCK_MAKE_IP_ADDR_LITTLEEND(  0,  0,  0,  0), /*gateway    */  
@@ -40,12 +25,12 @@ NETWORK_CONFIG g_NetworkConfig =
             SOCK_NETWORKCONFIGURATION_INTERFACETYPE_ETHERNET,        /* Change to SOCK_NETWORKCONFIGURATION_INTERFACETYPE_WIRELESS_80211 for wireless */ 
             6,              /*mac address length*/                  
             {               /*mac address*/                         
-                0x00, 0x50, 0xC2, 0xF8, 0x90, 0x06, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+                0x00, 0x50, 0xC2, 0xF8, 0x90, 0x07, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
             }                                                       
-        },                                                          
+        }                                                          
     },
 };
 

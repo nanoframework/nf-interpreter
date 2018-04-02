@@ -21,7 +21,7 @@
 #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT    16
 
 // Possible Ethernet conections
-#define NETWORK_INTERFACE_COUNT  2 
+#define NETWORK_INTERFACE_COUNT  3 
 
 // Wireless AP + Station
 #define WIRELESS_INTERFACE_COUNT 2

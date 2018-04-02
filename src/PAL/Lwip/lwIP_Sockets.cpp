@@ -6,6 +6,7 @@
 
 #include "LWIP_sockets.h"
 
+
 extern "C"
 {
 #include "lwip\init.h"
@@ -16,6 +17,7 @@ extern "C"
 #include "lwip\tcp.h"
 #include "lwip\Sockets.h"
 #include "lwip\dhcp.h"
+#include "lwip\netif.h"
 }
 
 // extern const HAL_CONFIG_BLOCK   g_NetworkConfigHeader;
@@ -43,17 +45,13 @@ struct netif *netif_find_interface(int num);
 LWIP_SOCKETS_Driver g_LWIP_SOCKETS_Driver;
 
 //--//
-
+#if LWIP_NETIF_STATUS_CALLBACK == 1
 static HAL_CONTINUATION PostAddressChangedContinuation;
+#endif
+#if LWIP_NETIF_LINK_CALLBACK == 1
 static HAL_CONTINUATION PostAvailabilityOnContinuation;
 static HAL_CONTINUATION PostAvailabilityOffContinuation;
-
-
-// Dummy methods so it will compile
-bool Network_Interface_Bind(int index){ return true; }
-int  Network_Interface_Open(int index){ return index; }
-bool Network_Interface_Close(int index){ return true; }
-
+#endif
 
 void LWIP_SOCKETS_Driver::PostAddressChanged(void* arg)
 {
@@ -70,6 +68,7 @@ void LWIP_SOCKETS_Driver::PostAvailabilityOff(void* arg)
 	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 0);
 }
 
+#if LWIP_NETIF_LINK_CALLBACK == 1
 void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
 {
 	if (netif_is_link_up(netif))
@@ -85,7 +84,9 @@ void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
+#endif
 
+#if LWIP_NETIF_STATUS_CALLBACK == 1
 void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 {
 	if (!PostAddressChangedContinuation.IsLinked())
@@ -113,8 +114,8 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 #if LWIP_DNS
 	if (netif->flags & NETIF_FLAG_ETHARP)
 	{
-		//ip_addr_t dns1 = dns_getserver(0);
-		//ip_addr_t dns2 = dns_getserver(1);
+		//ip_addr_t * dns1 = dns_getserver(0);
+		//ip_addr_t * dns2 = dns_getserver(1);
 
 		// lcd_printf("         dns1: %d.%d.%d.%d\n", (dns1.addr >> 0) & 0xFF,
 		// 	(dns1.addr >> 8) & 0xFF,
@@ -131,6 +132,7 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
+#endif
 
 // This binds to the adapters and sets up callback to monitor link status
 // TODO Commented out
@@ -144,41 +146,48 @@ void LWIP_SOCKETS_Driver::TcpipInitDone(void* arg)
 
  		SOCK_NetworkConfiguration *pNetCfg = &g_NetworkConfig.NetworkInterfaces[i];
 
-// 		/* Bind and Open the Ethernet driver */
-// 		Network_Interface_Bind(i);
-// 		interfaceNumber = Network_Interface_Open(i);
+ 		/* Bind and Open the Ethernet driver */
+ 		Network_Interface_Bind(i);
+ 		interfaceNumber = Network_Interface_Open(i);
 
-// 		if (interfaceNumber == SOCK_SOCKET_ERROR)
-// 		{
-// 			DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
-// 			debug_printf("SocketError: %d\n", errno);
-// 			continue;
-// 		}
+		if (interfaceNumber == SOCK_SOCKET_ERROR)
+		{
+			DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
+//FIXME			debug_printf("SocketError: %d\n", errno);
+			continue;
+		}
 
-// 		g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
+ 		g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
-// 		UpdateAdapterConfiguration(i, SOCK_NETWORKCONFIGURATION_UPDATE_DHCP | SOCK_NETWORKCONFIGURATION_UPDATE_DNS, pNetCfg);
+ 		UpdateAdapterConfiguration(i, SOCK_NETWORKCONFIGURATION_UPDATE_DHCP | SOCK_NETWORKCONFIGURATION_UPDATE_DNS, pNetCfg);
 
-// 		pNetIf = netif_find_interface(interfaceNumber);
+ 		pNetIf = netif_find_interface(interfaceNumber);
 
-// 		if (pNetIf)
-// 		{		
-// 			netif_set_link_callback(pNetIf, Link_callback);
-// 			if (netif_is_link_up(pNetIf))
-// 				Link_callback(pNetIf);
+ 		if (pNetIf)
+ 		{	
+#if LWIP_NETIF_LINK_CALLBACK == 1
+ 			netif_set_link_callback(pNetIf, Link_callback);
+			if (netif_is_link_up(pNetIf))
+				Link_callback(pNetIf);
+#endif
+#if LWIP_NETIF_STATUS_CALLBACK == 1
+			netif_set_status_callback(pNetIf, Status_callback);
+			if (netif_is_up(pNetIf))
+				Status_callback(pNetIf);
+#endif
 
-// 			netif_set_status_callback(pNetIf, Status_callback);
-// 			if (netif_is_up(pNetIf))
-// 				Status_callback(pNetIf);
-
-// 			// default debugger interface
-//             if (0 == i)
-//             {
-//                 uint8_t* addr = (uint8_t*)&pNetIf->ip_addr.addr;
-// //                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
-//                 debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
-//             }
-// 		}
+			// default debugger interface
+            if (0 == i)
+            {
+#if LWIP_IPV6
+                uint8_t* addr = (uint8_t*)&pNetIf->ip_addr.u_addr.ip4.addr;
+#else
+                uint8_t* addr = (uint8_t*)&pNetIf->ip_addr.addr;
+#endif                
+//                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
+// FIXME               debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
+            }
+		}
 	}
 }
 
@@ -186,10 +195,13 @@ bool LWIP_SOCKETS_Driver::Initialize()
 {   
     NATIVE_PROFILE_PAL_NETWORK();
 
+#if LWIP_NETIF_STATUS_CALLBACK == 1
     PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
+#endif
+#if LWIP_NETIF_LINK_CALLBACK == 1
     PostAvailabilityOnContinuation.InitializeCallback(PostAvailabilityOn, NULL);
     PostAvailabilityOffContinuation.InitializeCallback(PostAvailabilityOff, NULL);
-
+#endif
     /* Initialize the target board lwIP stack */
     nanoHAL_Network_Initialize(TcpipInitDone);
 
@@ -200,9 +212,13 @@ bool LWIP_SOCKETS_Driver::Uninitialize()
 {
     NATIVE_PROFILE_PAL_NETWORK();      
 
+#if LWIP_NETIF_STATUS_CALLBACK == 1
     PostAddressChangedContinuation.Abort();
+#endif
+#if LWIP_NETIF_LINK_CALLBACK == 1
     PostAvailabilityOnContinuation.Abort();
     PostAvailabilityOffContinuation.Abort();
+#endif
 
     for(int i=0; i<g_NetworkConfig.NetworkInterfaceCount; i++)
     {
@@ -778,11 +794,22 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration( uint32_t interfaceIndex, 
 
 #if LWIP_DNS
 #if LWIP_IPV6
+#if LWIP_VERSION_MAJOR == 2 
+            config->dnsServer1 = dns_getserver(0)->u_addr.ip4.addr;
+            config->dnsServer2 = dns_getserver(1)->u_addr.ip4.addr;
+#else
             config->dnsServer1 = dns_getserver(0).u_addr.ip4.addr;
             config->dnsServer2 = dns_getserver(1).u_addr.ip4.addr;
+#endif
 #else
-            config->dnsServer1 = dns_getserver(0).addr;
-            config->dnsServer2 = dns_getserver(1).addr;
+#if LWIP_VERSION_MAJOR == 2 
+              config->dnsServer1 = dns_getserver(0)->addr;
+              config->dnsServer2 = dns_getserver(1)->addr;
+#else
+              config->dnsServer1 = dns_getserver(0).addr;
+              config->dnsServer2 = dns_getserver(1).addr;
+#endif
+
 #endif
 #endif
         }

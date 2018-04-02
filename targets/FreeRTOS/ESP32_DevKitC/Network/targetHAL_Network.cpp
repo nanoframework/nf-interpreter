@@ -7,8 +7,10 @@
 
 #include <nanoHAL.h>
 #include "Esp32_os.h"
+#include "LWIP_Sockets.h"
 
 extern "C" void set_signal_sock_function( void (*funcPtr)() );
+
 
 // NVS parameters for Ethernet config
 #define NVS_NAMESPACE	    "nanoF"
@@ -28,44 +30,66 @@ __nfweak void InitialiseEthernet()
 {
 }
 
-static bool WifiInitialised = false;
 
-
-void InitaliseWifiConfig()
+static void PostAddressChanged()
 {
-	esp_err_t ec;
+	Network_PostEvent(NETWORK_EVENT_TYPE_ADDRESS_CHANGED, 0);
+}
 
-	// Load Wifi Config and se if we need to initialise it 
+static void PostAvailabilityOn()
+{
+	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 1);
+}
 
-	// if (?????)
-	{
-		if (!WifiInitialised)
-		{
-			// Init WiFi Alloc resource for WiFi driver, such as WiFi control structure, 
-			// RX/TX buffer, WiFi NVS structure etc, this WiFi also start WiFi task. 
-			wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-			ec = esp_wifi_init(&cfg);
+static void PostAvailabilityOff()
+{
+	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 0);
+}
 
-			// We don't want to save config to NVS, we will do it ourselves
-			esp_wifi_set_storage(WIFI_STORAGE_RAM); 
+//
+// Network event loop handler
+//
+static  esp_err_t event_handler(void *ctx, system_event_t *event)
+{
+    switch(event->event_id) {
 
-			ec = esp_wifi_start();
-			WifiInitialised = true;
-		}
+// Wifi station events
+    case SYSTEM_EVENT_STA_START:
+       // Smart config commented out as giving exception when running
+       // xTaskCreate(smartconfig_task, "smartconfig_example_task", 4096, NULL, 3, NULL);
+        break;
+    case SYSTEM_EVENT_STA_GOT_IP:
+		PostAddressChanged();
+        //xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
+        break;
+    case SYSTEM_EVENT_STA_CONNECTED:
+		PostAvailabilityOff();
+		break;
+    case SYSTEM_EVENT_STA_DISCONNECTED:
+		PostAvailabilityOff();
+        esp_wifi_connect();
+        //xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
+        break;
 
-		// What about auto reconnect ? 
-		// would need to monitor wifi events
+// Ethernet events
+	case SYSTEM_EVENT_ETH_START:
+		break;
+	case SYSTEM_EVENT_ETH_STOP:
+		break;
+	case SYSTEM_EVENT_ETH_CONNECTED:
+		PostAvailabilityOn();
+		break;
+	case SYSTEM_EVENT_ETH_GOT_IP:
+		PostAddressChanged();
+		break;
+    case SYSTEM_EVENT_ETH_DISCONNECTED:
+		PostAvailabilityOff();
+		break;
 
-		// Connect directly
-		wifi_config_t sta_config;
-		memcpy( (char *)sta_config.sta.ssid, "ssid", sizeof(sta_config.sta.ssid));
-		memcpy( (char*)sta_config.sta.password,"password",sizeof(sta_config.sta.password));
-		sta_config.sta.bssid_set = false;
-		
-		ec = esp_wifi_set_config(WIFI_IF_STA, &sta_config);
-		
-		ec = esp_wifi_connect();
-	}
+    default:
+        break;
+    }
+    return ESP_OK;
 }
 
 
@@ -79,18 +103,14 @@ void IRAM_ATTR nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc)
 	// Initialise Tcp adpater
     tcpip_adapter_init();
    
-    esp_event_loop_init(NULL, NULL);
+    esp_event_loop_init(event_handler, NULL);
 
-	// Load Wifi saved config and connect if required 
-	InitaliseWifiConfig();
-
-	// Initialise Ethernet interface if available
-	// Gets in a reset loop if no Phy available
-//	InitialiseEthernet();   
-
-	// Callback to Network stack when init complete 
+	// Callback to Network stack when init complete to open interfaces
 	initfunc(NULL);
 }
+
+
+
 
 // Gets the network configuration block from the configuration block stored in the NVS block, 
 // maybe better to store each config item under a separate key which would work better if config block changes

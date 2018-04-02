@@ -65,14 +65,14 @@ IBlockStorageDevice ESP32Flash_BlockStorageInterface =
 
 void BlockStorage_AddDevices()
 {
-    BlockStorageList_AddDevice( &Device_BlockStorage, &ESP32Flash_BlockStorageInterface, &Device_BlockStorageConfig, false);
+    BlockStorageList_AddDevice( (BlockStorageDevice*)&Device_BlockStorage, &ESP32Flash_BlockStorageInterface, &Device_BlockStorageConfig, false);
 }
 
 bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress)
 {
     *pBSD = NULL;
        
-    BlockStorageDevice* block = BlockStorageList_GetFirstDevice;
+    BlockStorageDevice* block = (BlockStorageDevice*)BlockStorageList_GetFirstDevice;
 
     // this has to add to make metadataprocessor happy
     if(!block) return true;

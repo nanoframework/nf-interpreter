@@ -88,11 +88,16 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 {
     switch(event->event_id) {
     case SYSTEM_EVENT_STA_START:
+ets_printf("SYSTEM_EVENT_STA_START\n");
        // Smart config commented out as giving exception when running
        // xTaskCreate(smartconfig_task, "smartconfig_example_task", 4096, NULL, 3, NULL);
         break;
     case SYSTEM_EVENT_STA_GOT_IP:
+ets_printf("SYSTEM_EVENT_STA_GOT_IP\n");
         xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
+        break;
+    case SYSTEM_EVENT_STA_CONNECTED:
+ets_printf("SYSTEM_EVENT_STA_CONNECTED\n");
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
         esp_wifi_connect();
@@ -107,8 +112,7 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 
 void initialise_wifi_smart_config(void)
 {
-    
-    ESP_ERROR_CHECK( nvs_flash_init() );
+  //  ESP_ERROR_CHECK( nvs_flash_init() );
 
     tcpip_adapter_init();
     wifi_event_group = xEventGroupCreate();
@@ -118,21 +122,34 @@ void initialise_wifi_smart_config(void)
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   
     ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
+    ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_FLASH) );
     ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK( esp_wifi_start() );
     
-    // Connect direct
-    // wifi_config_t sta_config = {
-    //     .sta = {
-    //         .ssid = "YourSSID",
-    //         .password = "YourPassword",
-    //         .bssid_set = false
-    //     }
-    // };
+//    bool autoConnect = false;
+//    esp_wifi_get_auto_connect(&autoConnect);
+//    if ( !autoConnect )
+    {
+//        ESP_ERROR_CHECK( esp_wifi_set_auto_connect(true) );
 
-    // ESP_ERROR_CHECK( esp_wifi_set_config(WIFI_IF_STA, &sta_config) );
-    // ESP_ERROR_CHECK( esp_wifi_connect() );
+        // Connect direct
+        wifi_config_t sta_config = {
+            .sta = {
+                .ssid = "OpenWrt2",
+                .password = "Daniel457",
+                .bssid_set = false
+            }
+        };
+
+        ESP_ERROR_CHECK( esp_wifi_set_config(WIFI_IF_STA, &sta_config) );
+        
     
+        ESP_ERROR_CHECK( esp_wifi_connect() );
+    }
+//    else
+//    {
+//        ESP_ERROR_CHECK( esp_wifi_connect() );
+//    }
 }
 
 
