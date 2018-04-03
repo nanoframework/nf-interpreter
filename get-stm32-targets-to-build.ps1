@@ -9,8 +9,12 @@ $BuildMatrix = ("MBN_QUAIL", "-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU
 =======
 ("ST_NUCLEO144_F746ZG", "-DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON", 'False'),
 ("ST_STM32F769I_DISCOVERY", "-DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON", 'False'),
+<<<<<<< HEAD
 >>>>>>> Enable ADC API for STM32F769I DISCO
 ("NETDUINO3_WIFI", "-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON", 'True')
+=======
+("NETDUINO3_WIFI", "-DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DUSE_FPU=TRUE -DNF_FEATURE_DEBUGGER=TRUE -DSWO_OUTPUT=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON", 'True')
+>>>>>>> Enable ADC API feature for Netuino3
 
 
 # get commit message
