@@ -7,7 +7,7 @@
 #include "win_dev_adc_native.h"
 
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadValue___I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadValue___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -17,8 +17,8 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-        // Get channel from argument
-        int channelNumber = stack.Arg1().NumericByRef().s4;
+        // Get channel from _channelNumber field
+        int channelNumber = pThis[FIELD___channelNumber].NumericByRef().s4;
 
         // need to get the deviceId for the ADC controller of this channel
         // get pointer to AdcController field
@@ -49,10 +49,11 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeDisposeChannel___VOID__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeDisposeChannel___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
+    // left empty on purpose, nothing to do here
 
     NANOCLR_NOCLEANUP();
 }

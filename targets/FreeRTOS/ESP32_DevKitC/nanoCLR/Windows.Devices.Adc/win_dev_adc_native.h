@@ -18,8 +18,8 @@ struct Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel
     static const int FIELD___syncLock = 3;
     static const int FIELD___disposedValue = 4;
 
-    NANOCLR_NATIVE_DECLARE(NativeReadValue___I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeDisposeChannel___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(NativeReadValue___I4);
+    NANOCLR_NATIVE_DECLARE(NativeDisposeChannel___VOID);
 
     //--//
 
