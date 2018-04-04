@@ -17,7 +17,7 @@ static void adcerrorcallback(ADCDriver *adcp, adcerror_t err)
   (void)err;
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadValue___I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadValue___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -26,57 +26,66 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-        // Get channel from argument
-        int channelNumber = stack.Arg1().NumericByRef().s4;
+        // Get channel from _channelNumber field
+        int channelNumber = pThis[FIELD___channelNumber].NumericByRef().s4;
 
         // need to get the deviceId for the ADC controller of this channel
         // get pointer to AdcController field
         CLR_RT_HeapBlock* adcController = pThis[FIELD___adcController].Dereference();
 
-        // get pointer to _deviceId field
+        // get pointer to _deviceId field in AdcController
         int deviceId = adcController[Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::FIELD___deviceId].NumericByRef().s4;
 
-        // we are filling this bellow with the appropriate ADC port pin config
-        NF_PAL_ADC_PORT_PIN_CHANNEL channelDef;
-        ADCDriver* adc;
+        // we are filling this bellow with the appropriate ADC port pin config and ADC driver
+        NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
+        ADCDriver* adcDriver;
 
-        // we should remove form the build the ADC options that aren't implemented
-        // plus we have to use the default to catch invalid ADC Ids
-        switch(deviceId)
+        // only one ADC controller for now, but check it anyways
+        if(deviceId == 1)
         {
+            adcDefinition = AdcPortPinConfig[channelNumber];
 
+            // we should remove form the build the ADC options that aren't implemented
+            // plus we have to use the default to catch invalid ADC Ids
+            switch(adcDefinition.adcIndex)
+            {
    #if STM32_ADC_USE_ADC1
-            case 1: 
-                channelDef = Adc1PortPinConfig[channelNumber];
-                adc = &ADCD1;
-                break;
+                case 1: 
+                    adcDriver = &ADCD1;
+                    break;
    #endif
 
    #if STM32_ADC_USE_ADC2
-            case 2: 
-                channelDef = Adc2PortPinConfig[channelNumber];
-                adc = &ADCD2;
-                break;
+                case 2:
+                    adcDriver = &ADCD2;
+                    break;
    #endif
 
    #if STM32_ADC_USE_ADC3
-            case 3: 
-                channelDef = Adc3PortPinConfig[channelNumber];
-                adc = &ADCD3;
-                break;
+                case 3:
+                    adcDriver = &ADCD3;
+                    break;
    #endif
+                default: 
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);            
+            }
 
-            default: 
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        bool enableVref = channelDef.adcChannel == ADC_CHANNEL_SENSOR  \
-                        | channelDef.adcChannel == ADC_CHANNEL_VREFINT \
-                        | channelDef.adcChannel == ADC_CHANNEL_VBAT;
+        bool enableVref = adcDefinition.adcChannel == ADC_CHANNEL_SENSOR  \
+                        | adcDefinition.adcChannel == ADC_CHANNEL_VREFINT \
+                        | adcDefinition.adcChannel == ADC_CHANNEL_VBAT;
+        
         // need to enable VREF?
         if(enableVref)
         {
             adcSTM32EnableTSVREFE();
+
+            osDelay(10);
         }
 
         // need to setup the conversion group parameters
@@ -91,12 +100,12 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
             0,                                      /* SMPR2 */
             0,                                      /* SQR1 */
             0,                                      /* SQR2 */
-            ADC_SQR3_SQ1_N(channelDef.adcChannel)
+            ADC_SQR3_SQ1_N(adcDefinition.adcChannel)
         };
 
         // perform the conversion
-        adcConvert(adc, &adcgrpcfg1, sampleBuffer, 1);
-       
+        adcConvert(adcDriver, &adcgrpcfg1, sampleBuffer, 1);
+
         // need to turn off VREF?
         if(enableVref)
         {
@@ -109,9 +118,11 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeDisposeChannel___VOID__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeDisposeChannel___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+
+    // left empty on purpose, nothing to do here
 
     NANOCLR_NOCLEANUP();
 }
