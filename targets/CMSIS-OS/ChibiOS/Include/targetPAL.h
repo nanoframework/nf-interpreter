@@ -19,8 +19,4 @@ extern stm32_gpio_t* gpioPort[];
 
 #endif // defined(STM32F0xx) || defined(STM32F4xx) || defined(STM32F7xx) || defined(STM32H7xx)
 
-#if (HAL_USE_EXT == TRUE)
-extern EXTConfig extInterruptsConfiguration;
-#endif
-
 #endif // _TARGETPAL_H_

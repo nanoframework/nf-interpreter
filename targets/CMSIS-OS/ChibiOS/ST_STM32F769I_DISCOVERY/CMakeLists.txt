@@ -56,6 +56,11 @@ if(API_Windows.Devices.SerialCommunication)
     list(APPEND API_RELATED_TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_windows_devices_serialcommunication_config.cpp")    
 endif()
 
+# Windows.Devices.Adc
+if(API_Windows.Devices.Adc)
+    list(APPEND API_RELATED_TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_windows_devices_adc_config.cpp")
+endif()
+
 #######################################
 
 add_subdirectory("common")
