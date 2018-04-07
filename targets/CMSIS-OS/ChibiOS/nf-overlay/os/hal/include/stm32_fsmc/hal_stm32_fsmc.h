@@ -1,99 +1,244 @@
-/*
-    ChibiOS/HAL - Copyright (C) 2014 Uladzimir Pylinsky aka barthess
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
-
-// FSMC Driver subsystem low level driver header.
+//
+// Copyright (c) 2018 The nanoFramework project contributors
+// Portions Copyright (c) 2014 Uladzimir Pylinsky aka barthess
+// See LICENSE file in the project root for full license information.
+//
 
 #ifndef HAL_FSMC_H_
 #define HAL_FSMC_H_
 
 #if (HAL_USE_FSMC == TRUE)
 
-#include "stm32_registry.h"
+///////////////////////////////////////////////////////////////////////////////
+// Driver constants.                                                         //
+///////////////////////////////////////////////////////////////////////////////
 
-/*===========================================================================*/
-/* Driver constants.                                                         */
-/*===========================================================================*/
+// (Re)define if needed base address constants supplied in ST's CMSIS
+#if (defined(STM32F427xx) || defined(STM32F437xx) || \
+     defined(STM32F429xx) || defined(STM32F439xx) || \
+     defined(STM32F745xx) || defined(STM32F746xx) || \
+     defined(STM32F756xx) || defined(STM32F767xx) || \
+     defined(STM32F769xx) || defined(STM32F777xx) || \
+     defined(STM32F779xx))
+  #if !defined(FSMC_Bank1_R_BASE)
+  #define FSMC_Bank1_R_BASE               (FMC_R_BASE + 0x0000)
+  #endif
+  #if !defined(FSMC_Bank1E_R_BASE)
+  #define FSMC_Bank1E_R_BASE              (FMC_R_BASE + 0x0104)
+  #endif
+  #if !defined(FSMC_Bank2_R_BASE)
+  #define FSMC_Bank2_R_BASE               (FMC_R_BASE + 0x0060)
+  #endif
+  #if !defined(FSMC_Bank3_R_BASE)
+  #define FSMC_Bank3_R_BASE               (FMC_R_BASE + 0x0080)
+  #endif
+  #if !defined(FSMC_Bank4_R_BASE)
+  #define FSMC_Bank4_R_BASE               (FMC_R_BASE + 0x00A0)
+  #endif
+  #if !defined(FSMC_Bank5_R_BASE)
+  #define FSMC_Bank5_6_R_BASE             (FMC_R_BASE + 0x0140)
+  #endif
+#else
+  #if !defined(FSMC_Bank1_R_BASE)
+  #define FSMC_Bank1_R_BASE               (FSMC_R_BASE + 0x0000)
+  #endif
+  #if !defined(FSMC_Bank1E_R_BASE)
+  #define FSMC_Bank1E_R_BASE              (FSMC_R_BASE + 0x0104)
+  #endif
+  #if !defined(FSMC_Bank2_R_BASE)
+  #define FSMC_Bank2_R_BASE               (FSMC_R_BASE + 0x0060)
+  #endif
+  #if !defined(FSMC_Bank3_R_BASE)
+  #define FSMC_Bank3_R_BASE               (FSMC_R_BASE + 0x0080)
+  #endif
+  #if !defined(FSMC_Bank4_R_BASE)
+  #define FSMC_Bank4_R_BASE               (FSMC_R_BASE + 0x00A0)
+  #endif
+#endif
 
-// map to STM32 HAL defines
-#define _MC_Bank1_R_BASE                    FMC_Bank1_R_BASE
-#define _MC_Bank1E_R_BASE                   FMC_Bank1E_R_BASE
-#define _MC_Bank2_R_BASE                    FMC_Bank2_R_BASE
-#define _MC_Bank3_R_BASE                    FMC_Bank3_R_BASE
-#define _MC_Bank4_R_BASE                    FMC_Bank4_R_BASE
-#define _MC_Bank5_6_R_BASE                  FMC_Bank5_6_R_BASE
+/*
+ * Base bank mappings
+ */
+#define FSMC_Bank1_MAP_BASE               ((uint32_t) 0x60000000)
+#define FSMC_Bank2_MAP_BASE               ((uint32_t) 0x70000000)
+#define FSMC_Bank3_MAP_BASE               ((uint32_t) 0x80000000)
+#define FSMC_Bank4_MAP_BASE               ((uint32_t) 0x90000000)
+#if (defined(STM32F427xx) || defined(STM32F437xx) || \
+     defined(STM32F429xx) || defined(STM32F439xx) || \
+     defined(STM32F7))
+  #define FSMC_Bank5_MAP_BASE             ((uint32_t) 0xC0000000)
+  #define FSMC_Bank6_MAP_BASE             ((uint32_t) 0xD0000000)
+#endif
 
-#define FMC_NORSRAM_TypeDef                 FMC_Bank1_TypeDef
-#define FMC_NAND_TypeDef                    FMC_Bank3_TypeDef
-#define FMC_SDRAM_TypeDef                   FMC_Bank5_6_TypeDef
+/*
+ * Subbunks of bank1
+ */
+#define FSMC_SUBBUNK_OFFSET           (1024 * 1024 * 64)
+#define FSMC_Bank1_1_MAP              (FSMC_Bank1_MAP_BASE)
+#define FSMC_Bank1_2_MAP              (FSMC_Bank1_1_MAP + FSMC_SUBBUNK_OFFSET)
+#define FSMC_Bank1_3_MAP              (FSMC_Bank1_2_MAP + FSMC_SUBBUNK_OFFSET)
+#define FSMC_Bank1_4_MAP              (FSMC_Bank1_3_MAP + FSMC_SUBBUNK_OFFSET)
 
+/*
+ * Bank 2 (NAND)
+ */
+#define FSMC_Bank2_MAP_COMMON             (FSMC_Bank2_MAP_BASE + 0)
+#define FSMC_Bank2_MAP_ATTR               (FSMC_Bank2_MAP_BASE + 0x8000000)
 
-// Base address of banks
-#define _MC_Bank1_MAP_BASE                ((uint32_t) 0x60000000)
-#define _MC_Bank2_MAP_BASE                ((uint32_t) 0x70000000)
-#define _MC_Bank3_MAP_BASE                ((uint32_t) 0x80000000)
-#define _MC_Bank4_MAP_BASE                ((uint32_t) 0x90000000)
-#define _MC_Bank5_MAP_BASE                ((uint32_t) 0xC0000000)
-#define _MC_Bank6_MAP_BASE                ((uint32_t) 0xD0000000)
+#define FSMC_Bank2_MAP_COMMON_DATA        (FSMC_Bank2_MAP_COMMON + 0)
+#define FSMC_Bank2_MAP_COMMON_CMD         (FSMC_Bank2_MAP_COMMON + 0x10000)
+#define FSMC_Bank2_MAP_COMMON_ADDR        (FSMC_Bank2_MAP_COMMON + 0x20000)
 
-// Sub-banks of bank1
-#define _MC_SUBBANK_OFFSET                (1024 * 1024 * 64)
-#define _MC_Bank1_1_MAP                   (_MC_Bank1_MAP_BASE)
-#define _MC_Bank1_2_MAP                   (_MC_Bank1_1_MAP + _MC_SUBBANK_OFFSET)
-#define _MC_Bank1_3_MAP                   (_MC_Bank1_2_MAP + _MC_SUBBANK_OFFSET)
-#define _MC_Bank1_4_MAP                   (_MC_Bank1_3_MAP + _MC_SUBBANK_OFFSET)
+#define FSMC_Bank2_MAP_ATTR_DATA          (FSMC_Bank2_MAP_ATTR + 0)
+#define FSMC_Bank2_MAP_ATTR_CMD           (FSMC_Bank2_MAP_ATTR + 0x10000)
+#define FSMC_Bank2_MAP_ATTR_ADDR          (FSMC_Bank2_MAP_ATTR + 0x20000)
 
-// Bank 2 (NAND)
-#define _MC_Bank2_MAP_COMMON             (_MC_Bank2_MAP_BASE + 0)
-#define _MC_Bank2_MAP_ATTR               (_MC_Bank2_MAP_BASE + 0x8000000)
+/*
+ * Bank 3 (NAND)
+ */
+#define FSMC_Bank3_MAP_COMMON             (FSMC_Bank3_MAP_BASE + 0)
+#define FSMC_Bank3_MAP_ATTR               (FSMC_Bank3_MAP_BASE + 0x8000000)
 
-#define _MC_Bank2_MAP_COMMON_DATA        (_MC_Bank2_MAP_COMMON + 0)
-#define _MC_Bank2_MAP_COMMON_CMD         (_MC_Bank2_MAP_COMMON + 0x10000)
-#define _MC_Bank2_MAP_COMMON_ADDR        (_MC_Bank2_MAP_COMMON + 0x20000)
+#define FSMC_Bank3_MAP_COMMON_DATA        (FSMC_Bank3_MAP_COMMON + 0)
+#define FSMC_Bank3_MAP_COMMON_CMD         (FSMC_Bank3_MAP_COMMON + 0x10000)
+#define FSMC_Bank3_MAP_COMMON_ADDR        (FSMC_Bank3_MAP_COMMON + 0x20000)
 
-#define _MC_Bank2_MAP_ATTR_DATA          (_MC_Bank2_MAP_ATTR + 0)
-#define _MC_Bank2_MAP_ATTR_CMD           (_MC_Bank2_MAP_ATTR + 0x10000)
-#define _MC_Bank2_MAP_ATTR_ADDR          (_MC_Bank2_MAP_ATTR + 0x20000)
+#define FSMC_Bank3_MAP_ATTR_DATA          (FSMC_Bank3_MAP_ATTR + 0)
+#define FSMC_Bank3_MAP_ATTR_CMD           (FSMC_Bank3_MAP_ATTR + 0x10000)
+#define FSMC_Bank3_MAP_ATTR_ADDR          (FSMC_Bank3_MAP_ATTR + 0x20000)
 
-// Bank 3 (NAND)
-#define _MC_Bank3_MAP_COMMON             (_MC_Bank3_MAP_BASE + 0)
-#define _MC_Bank3_MAP_ATTR               (_MC_Bank3_MAP_BASE + 0x8000000)
+/*
+ * Bank 4 (PC card)
+ */
+#define FSMC_Bank4_MAP_COMMON             (FSMC_Bank4_MAP_BASE + 0)
+#define FSMC_Bank4_MAP_ATTR               (FSMC_Bank4_MAP_BASE + 0x8000000)
+#define FSMC_Bank4_MAP_IO                 (FSMC_Bank4_MAP_BASE + 0xC000000)
 
-#define _MC_Bank3_MAP_COMMON_DATA        (_MC_Bank3_MAP_COMMON + 0)
-#define _MC_Bank3_MAP_COMMON_CMD         (_MC_Bank3_MAP_COMMON + 0x10000)
-#define _MC_Bank3_MAP_COMMON_ADDR        (_MC_Bank3_MAP_COMMON + 0x20000)
+/*
+ * More convenient typedefs than CMSIS has
+ */
+typedef struct {
+  __IO uint32_t PCR;        /**< NAND Flash control */
+  __IO uint32_t SR;         /**< NAND Flash FIFO status and interrupt */
+  __IO uint32_t PMEM;       /**< NAND Flash Common memory space timing */
+  __IO uint32_t PATT;       /**< NAND Flash Attribute memory space timing  */
+  uint32_t      RESERVED0;  /**< Reserved, 0x70     */
+  __IO uint32_t ECCR;       /**< NAND Flash ECC result registers */
+} FSMC_NAND_TypeDef;
 
-#define _MC_Bank3_MAP_ATTR_DATA          (_MC_Bank3_MAP_ATTR + 0)
-#define _MC_Bank3_MAP_ATTR_CMD           (_MC_Bank3_MAP_ATTR + 0x10000)
-#define _MC_Bank3_MAP_ATTR_ADDR          (_MC_Bank3_MAP_ATTR + 0x20000)
+typedef struct {
+  __IO uint32_t PCR;       /**< PC Card  control */
+  __IO uint32_t SR;        /**< PC Card  FIFO status and interrupt */
+  __IO uint32_t PMEM;      /**< PC Card  Common memory space timing */
+  __IO uint32_t PATT;      /**< PC Card  Attribute memory space timing */
+  __IO uint32_t PIO;       /**< PC Card  I/O space timing */
+} FSMC_PCCard_TypeDef;
 
-// Bank 4 (PC card)
-#define _MC_Bank4_MAP_COMMON             (_MC_Bank4_MAP_BASE + 0)
-#define _MC_Bank4_MAP_ATTR               (_MC_Bank4_MAP_BASE + 0x8000000)
-#define _MC_Bank4_MAP_IO                 (_MC_Bank4_MAP_BASE + 0xC000000)
+typedef struct {
+  __IO uint32_t BCR;          /**< SRAM/NOR chip-select control registers */
+  __IO uint32_t BTR;          /**< SRAM/NOR chip-select timing registers */
+  uint32_t      RESERVED[63]; /**< Reserved */
+  __IO uint32_t BWTR;         /**< SRAM/NOR write timing registers */
+} FSMC_SRAM_NOR_TypeDef;
 
+#if (defined(STM32F427xx) || defined(STM32F437xx) || \
+     defined(STM32F429xx) || defined(STM32F439xx) || \
+     defined(STM32F7))
+
+typedef struct {
+  __IO uint32_t SDCR1;              /**< SDRAM control register (bank 1) */
+  __IO uint32_t SDCR2;              /**< SDRAM control register (bank 2) */
+  __IO uint32_t SDTR1;              /**< SDRAM timing register (bank 1) */
+  __IO uint32_t SDTR2;              /**< SDRAM timing register (bank 2) */
+  __IO uint32_t SDCMR;              /**< SDRAM comand mode register */
+  __IO uint32_t SDRTR;              /**< SDRAM refresh timer register */
+  __IO uint32_t SDSR;               /**< SDRAM status register */
+} FSMC_SDRAM_TypeDef;
+
+#endif
+
+/**
+ * @brief   PCR register
+ */
+#define  FSMC_PCR_PWAITEN         ((uint32_t)1 << 1)
+#define  FSMC_PCR_PBKEN           ((uint32_t)1 << 2)
+#define  FSMC_PCR_PTYP            ((uint32_t)1 << 3)
+#define  FSMC_PCR_PWID_8          ((uint32_t)0 << 4)
+#define  FSMC_PCR_PWID_16         ((uint32_t)1 << 4)
+#define  FSMC_PCR_PWID_RESERVED1  ((uint32_t)2 << 4)
+#define  FSMC_PCR_PWID_RESERVED2  ((uint32_t)3 << 4)
+#define  FSMC_PCR_PWID_MASK       ((uint32_t)3 << 4)
+#define  FSMC_PCR_ECCEN           ((uint32_t)1 << 6)
+#define  FSMC_PCR_PTYP_PCCARD     0
+#define  FSMC_PCR_PTYP_NAND       FSMC_PCR_PTYP
+
+/**
+ * @brief   SR register
+ */
+#define  FSMC_SR_IRS              ((uint8_t)0x01)
+#define  FSMC_SR_ILS              ((uint8_t)0x02)
+#define  FSMC_SR_IFS              ((uint8_t)0x04)
+#define  FSMC_SR_IREN             ((uint8_t)0x08)
+#define  FSMC_SR_ILEN             ((uint8_t)0x10)
+#define  FSMC_SR_IFEN             ((uint8_t)0x20)
+#define  FSMC_SR_FEMPT            ((uint8_t)0x40)
+#define  FSMC_SR_ISR_MASK         (FSMC_SR_IRS | FSMC_SR_ILS | FSMC_SR_IFS)
+
+/**
+ * @brief   BCR register
+ */
+#define  FSMC_BCR_MBKEN           ((uint32_t)1 << 0)
+#define  FSMC_BCR_MUXEN           ((uint32_t)1 << 1)
+#define  FSMC_BCR_MTYP_SRAM       ((uint32_t)0 << 2)
+#define  FSMC_BCR_MTYP_PSRAM      ((uint32_t)1 << 2)
+#define  FSMC_BCR_MTYP_NOR_NAND   ((uint32_t)2 << 2)
+#define  FSMC_BCR_MTYP_RESERVED   ((uint32_t)3 << 2)
+#define  FSMC_BCR_MWID_8          ((uint32_t)0 << 4)
+#define  FSMC_BCR_MWID_16         ((uint32_t)1 << 4)
+#if (defined(STM32F427xx) || defined(STM32F437xx) || \
+     defined(STM32F429xx) || defined(STM32F439xx) || \
+     defined(STM32F7))
+#define  FSMC_BCR_MWID_32         ((uint32_t)2 << 4)
+#else
+#define  FSMC_BCR_MWID_RESERVED1  ((uint32_t)2 << 4)
+#endif
+#define  FSMC_BCR_MWID_RESERVED2  ((uint32_t)3 << 4)
+#define  FSMC_BCR_FACCEN          ((uint32_t)1 << 6)
+#define  FSMC_BCR_BURSTEN         ((uint32_t)1 << 8)
+#define  FSMC_BCR_WAITPOL         ((uint32_t)1 << 9)
+#define  FSMC_BCR_WRAPMOD         ((uint32_t)1 << 10)
+#define  FSMC_BCR_WAITCFG         ((uint32_t)1 << 11)
+#define  FSMC_BCR_WREN            ((uint32_t)1 << 12)
+#define  FSMC_BCR_WAITEN          ((uint32_t)1 << 13)
+#define  FSMC_BCR_EXTMOD          ((uint32_t)1 << 14)
+#define  FSMC_BCR_ASYNCWAIT       ((uint32_t)1 << 15)
+#define  FSMC_BCR_CBURSTRW        ((uint32_t)1 << 19)
+#if (defined(STM32F427xx) || defined(STM32F437xx) || \
+     defined(STM32F429xx) || defined(STM32F439xx) || \
+     defined(STM32F7))
+#define  FSMC_BCR_CCLKEN          ((uint32_t)1 << 20)
+#endif
+#if (defined(STM32F7))
+#define FSMC_BCR_WFDIS            ((uint32_t)1 << 21)
+#endif
 
 /*===========================================================================*/
 /* Driver pre-compile time settings.                                         */
 /*===========================================================================*/
 
-// FSMC driver enable switch.
-// If set to TRUE the support for the Flexible Memory Controller is included
+/**
+ * @name    Configuration options
+ * @{
+ */
+/**
+ * @brief   FSMC driver enable switch.
+ * @details If set to @p TRUE the support for FSMC is included.
+ */
 #if !defined(STM32_FSMC_USE_FSMC1)
 #define STM32_FSMC_USE_FSMC1             FALSE
 #endif
+
+/** @} */
 
 /*===========================================================================*/
 /* Derived constants and error checks.                                       */
@@ -106,121 +251,64 @@
 /* Driver data structures and types.                                         */
 /*===========================================================================*/
 
-// Type of a structure representing an FSMC driver.
+/**
+ * @brief   Type of a structure representing an FSMC driver.
+ */
 typedef struct FSMCDriver FSMCDriver;
 
-// Driver state machine possible states.
-typedef enum
-{
+/**
+ * @brief   Driver state machine possible states.
+ */
+typedef enum {
   FSMC_UNINIT = 0,                   /**< Not initialized.                   */
   FSMC_STOP = 1,                     /**< Stopped.                           */
   FSMC_READY = 2,                    /**< Ready.                             */
-} FSMCstate_t;
+} fsmcstate_t;
 
-// Structure representing an FSMC driver.
-struct FSMCDriver
-{
-  // Driver state.
-  FSMCstate_t               state;
+/**
+ * @brief   Structure representing an FSMC driver.
+ */
+struct FSMCDriver {
+  /**
+   * @brief Driver state.
+   */
+  fsmcstate_t               state;
+  /* End of the mandatory fields.*/
 
 #if STM32_SRAM_USE_FSMC_SRAM1
-  FMC_NORSRAM_TypeDef     *sram1;
+  FSMC_SRAM_NOR_TypeDef     *sram1;
 #endif
 #if STM32_SRAM_USE_FSMC_SRAM2
-  FMC_NORSRAM_TypeDef     *sram2;
+  FSMC_SRAM_NOR_TypeDef     *sram2;
 #endif
 #if STM32_SRAM_USE_FSMC_SRAM3
-  FMC_NORSRAM_TypeDef     *sram3;
+  FSMC_SRAM_NOR_TypeDef     *sram3;
 #endif
 #if STM32_SRAM_USE_FSMC_SRAM4
-  FMC_NORSRAM_TypeDef     *sram4;
+  FSMC_SRAM_NOR_TypeDef     *sram4;
 #endif
 #if STM32_NAND_USE_FSMC_NAND1
-  FMC_NAND_TypeDef         *nand1;
+  FSMC_NAND_TypeDef         *nand1;
 #endif
 #if STM32_NAND_USE_FSMC_NAND2
-  FMC_NAND_TypeDef         *nand2;
+  FSMC_NAND_TypeDef         *nand2;
 #endif
 #if (defined(STM32F427xx) || defined(STM32F437xx) || \
      defined(STM32F429xx) || defined(STM32F439xx) || \
      defined(STM32F7))
   #if STM32_USE_FSMC_SDRAM
-    FMC_SDRAM_TypeDef       *sdram;
+    FSMC_SDRAM_TypeDef       *sdram;
   #endif
 #endif
 };
 
-/*===========================================================================*/
-/* Driver macros.                                                            */
-/*===========================================================================*/
+///////////////////////////////////////////////////////////////////////////////
+// Driver macros.                                                            //
+///////////////////////////////////////////////////////////////////////////////
 
-// From STMicroelectronics Cube HAL
-// SDRAM Mode definition register defines
-#define SDRAM_MODEREG_BURST_LENGTH_1             ((uint16_t)0x0000)
-#define SDRAM_MODEREG_BURST_LENGTH_2             ((uint16_t)0x0001)
-#define SDRAM_MODEREG_BURST_LENGTH_4             ((uint16_t)0x0002)
-#define SDRAM_MODEREG_BURST_LENGTH_8             ((uint16_t)0x0004)
-#define SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL      ((uint16_t)0x0000)
-#define SDRAM_MODEREG_BURST_TYPE_INTERLEAVED     ((uint16_t)0x0008)
-#define SDRAM_MODEREG_CAS_LATENCY_2              ((uint16_t)0x0020)
-#define SDRAM_MODEREG_CAS_LATENCY_3              ((uint16_t)0x0030)
-#define SDRAM_MODEREG_OPERATING_MODE_STANDARD    ((uint16_t)0x0000)
-#define SDRAM_MODEREG_WRITEBURST_MODE_PROGRAMMED ((uint16_t)0x0000)
-#define SDRAM_MODEREG_WRITEBURST_MODE_SINGLE     ((uint16_t)0x0200)
-
-// FMC_SDRAM_Read_Pipe_Delay FMC SDRAM Read Pipe Delay
-#define FMC_SDRAM_RPIPE_DELAY_0               ((uint32_t)0x00000000U)
-#define FMC_SDRAM_RPIPE_DELAY_1               ((uint32_t)0x00002000U)
-#define FMC_SDRAM_RPIPE_DELAY_2               ((uint32_t)0x00004000U)
-//#define FSMC_ReadPipe_Delay_Mask            ((uint32_t)0x00006000)
-
-// FMC_SDRAM_Read_Burst FMC SDRAM Read Burst
-#define FMC_SDRAM_RBURST_DISABLE              ((uint32_t)0x00000000U)
-#define FMC_SDRAM_RBURST_ENABLE               ((uint32_t)0x00001000U)
-// #define FSMC_Read_Burst_Mask                ((uint32_t)0x00001000)
-
-// FMC_SDRAM_Clock_Period FMC SDRAM Clock Period
-#define FMC_SDRAM_CLOCK_DISABLE               ((uint32_t)0x00000000U)
-#define FMC_SDRAM_CLOCK_PERIOD_2              ((uint32_t)0x00000800U)
-#define FMC_SDRAM_CLOCK_PERIOD_3              ((uint32_t)0x00000C00)
-// #define FSMC_SDClock_Period_Mask            ((uint32_t)0x00000C00)
-
-// FMC_SDRAM_Column_Bits_number FMC SDRAM Column Bits number 
-#define FMC_SDRAM_COLUMN_BITS_NUM_8           ((uint32_t)0x00000000U)
-#define FMC_SDRAM_COLUMN_BITS_NUM_9           ((uint32_t)0x00000001U)
-#define FMC_SDRAM_COLUMN_BITS_NUM_10          ((uint32_t)0x00000002U)
-#define FMC_SDRAM_COLUMN_BITS_NUM_11          ((uint32_t)0x00000003U)
-
-// FMC_SDRAM_Row_Bits_number FMC SDRAM Row Bits number
-#define FMC_SDRAM_ROW_BITS_NUM_11             ((uint32_t)0x00000000U)
-#define FMC_SDRAM_ROW_BITS_NUM_12             ((uint32_t)0x00000004U)
-#define FMC_SDRAM_ROW_BITS_NUM_13             ((uint32_t)0x00000008U)
-
-// FMC_SDRAM_Memory_Bus_Width FMC SDRAM Memory Bus Width
-#define FMC_SDRAM_MEM_BUS_WIDTH_8             ((uint32_t)0x00000000U)
-#define FMC_SDRAM_MEM_BUS_WIDTH_16            ((uint32_t)0x00000010U)
-#define FMC_SDRAM_MEM_BUS_WIDTH_32            ((uint32_t)0x00000020U)
-
-// FMC_SDRAM_Internal_Banks_Number FMC SDRAM Internal Banks Number
-#define FMC_SDRAM_INTERN_BANKS_NUM_2          ((uint32_t)0x00000000U)
-#define FMC_SDRAM_INTERN_BANKS_NUM_4          ((uint32_t)0x00000040U)
-
-// FMC_SDRAM_CAS_Latency FMC SDRAM CAS Latency
-#define FMC_SDRAM_CAS_LATENCY_1               ((uint32_t)0x00000080U)
-#define FMC_SDRAM_CAS_LATENCY_2               ((uint32_t)0x00000100U)
-#define FMC_SDRAM_CAS_LATENCY_3               ((uint32_t)0x00000180)
-
-// FMC_SDRAM_Write_Protection FMC SDRAM Write Protection
-#define FMC_SDRAM_WRITE_PROTECTION_DISABLE    ((uint32_t)0x00000000U)
-#define FMC_SDRAM_WRITE_PROTECTION_ENABLE     ((uint32_t)0x00000200U)
-
-/*===========================================================================*/
-/* External declarations.                                                    */
-/*===========================================================================*/
-
-#include "fsmc_nand_lld.h"
-#include "fsmc_sdram_lld.h"
-#include "fsmc_sram_lld.h"
+///////////////////////////////////////////////////////////////////////////////
+// External declarations.                                                    //
+///////////////////////////////////////////////////////////////////////////////
 
 #if STM32_FSMC_USE_FSMC1 && !defined(__DOXYGEN__)
 extern FSMCDriver FSMCD1;
@@ -229,11 +317,9 @@ extern FSMCDriver FSMCD1;
 #ifdef __cplusplus
 extern "C" {
 #endif
-
   void stm32FsmcInit(void);
-  void stm32FsmcStart(FSMCDriver *fsmc);
-  void stm32FsmcStop(FSMCDriver *fsmc);
-
+  void fsmc_start(FSMCDriver *fsmcp);
+  void fsmc_stop(FSMCDriver *fsmcp);
 #ifdef __cplusplus
 }
 #endif

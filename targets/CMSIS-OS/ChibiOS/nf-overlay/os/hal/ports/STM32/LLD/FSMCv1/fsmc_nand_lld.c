@@ -1,86 +1,52 @@
-/*
-    ChibiOS/HAL - Copyright (C) 2014 Uladzimir Pylinsky aka barthess
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
-
-/**
- * @file    hal_nand_lld.c
- * @brief   NAND Driver subsystem low level driver source.
- *
- * @addtogroup NAND
- * @{
- */
+//
+// Copyright (c) 2018 The nanoFramework project contributors
+// Portions Copyright (c) 2014 Uladzimir Pylinsky aka barthess
+// See LICENSE file in the project root for full license information.
+//
 
 #include "hal.h"
 
 #if (HAL_USE_NAND == TRUE)
 
-/*===========================================================================*/
-/* Driver local definitions.                                                 */
-/*===========================================================================*/
+///////////////////////////////////////////////////////////////////////////////
+// Driver local definitions.                                                 //
+///////////////////////////////////////////////////////////////////////////////
 #define NAND_DMA_CHANNEL                                                  \
   STM32_DMA_GETCHANNEL(STM32_NAND_DMA_STREAM,                             \
                        STM32_FSMC_DMA_CHN)
 
-/**
- * @brief   Bus width of NAND IC.
- * @details Must be 8 or 16
- */
+//  Bus width of NAND IC.
+// Must be 8 or 16
 #if ! defined(STM32_NAND_BUS_WIDTH)
 #define STM32_NAND_BUS_WIDTH        8
 #endif
 
-/**
- * @brief   DMA transaction width on AHB bus in bytes
- */
+//  DMA transaction width on AHB bus in bytes
 #define AHB_TRANSACTION_WIDTH       2
 
-/*===========================================================================*/
-/* Driver exported variables.                                                */
-/*===========================================================================*/
+///////////////////////////////////////////////////////////////////////////////
+// Driver exported variables.                                                //
+///////////////////////////////////////////////////////////////////////////////
 
-/**
- * @brief   NAND1 driver identifier.
- */
+// NAND1 driver identifier.
 #if STM32_NAND_USE_FSMC_NAND1
 NANDDriver NANDD1;
 #endif
 
-/**
- * @brief   NAND2 driver identifier.
- */
+//  NAND2 driver identifier.
 #if STM32_NAND_USE_FSMC_NAND2
 NANDDriver NANDD2;
 #endif
 
-/*===========================================================================*/
-/* Driver local types.                                                       */
-/*===========================================================================*/
+///////////////////////////////////////////////////////////////////////////////
+// Driver local variables and types.                                         //
+///////////////////////////////////////////////////////////////////////////////
 
-/*===========================================================================*/
-/* Driver local variables and types.                                         */
-/*===========================================================================*/
+///////////////////////////////////////////////////////////////////////////////
+// Driver local functions.                                                   //
+///////////////////////////////////////////////////////////////////////////////
 
-/*===========================================================================*/
-/* Driver local functions.                                                   */
-/*===========================================================================*/
-
-/**
- * @brief   Helper function.
- *
- * @notapi
- */
+// Helper function.
 static void align_check(const void *ptr, uint32_t len) {
   osalDbgCheck((((uint32_t)ptr % AHB_TRANSACTION_WIDTH) == 0) &&
                          ((len % AHB_TRANSACTION_WIDTH) == 0) &&
@@ -89,17 +55,13 @@ static void align_check(const void *ptr, uint32_t len) {
   (void)len;
 }
 
-/**
- * @brief   Work around errata in STM32's FSMC core.
- * @details Constant output clock (if enabled) disappears when CLKDIV value
- *          sets to 1 (FSMC_CLK period = 2 × HCLK periods) AND 8-bit async
- *          transaction generated on AHB. This workaround eliminates 8-bit
- *          transactions on bus when you use 8-bit memory. It suitable only
- *          for 8-bit memory (i.e. PWID bits in PCR register must be set
- *          to 8-bit mode).
- *
- * @notapi
- */
+//  Work around errata in STM32's FSMC core.
+//  Constant output clock (if enabled) disappears when CLKDIV value
+//   sets to 1 (FMC_CLK period = 2 × HCLK periods) AND 8-bit async
+//   transaction generated on AHB. This workaround eliminates 8-bit
+//   transactions on bus when you use 8-bit memory. It suitable only
+//   for 8-bit memory (i.e. PWID bits in PCR register must be set
+//   to 8-bit mode).
 static void set_16bit_bus(NANDDriver *nandp) {
 #if STM32_NAND_BUS_WIDTH
   nandp->nand->PCR |= FSMC_PCR_PWID_16;
@@ -116,35 +78,24 @@ static void set_8bit_bus(NANDDriver *nandp) {
 #endif
 }
 
-/**
- * @brief   Wakes up the waiting thread.
- *
- * @param[in] nandp  pointer to the @p NANDDriver object
- * @param[in] msg       wakeup message
- *
- * @notapi
- */
+// Wakes up the waiting thread.
+//  nandp  pointer to the @p NANDDriver object
+//  msg       wakeup message
 static void wakeup_isr(NANDDriver *nandp) {
 
   osalDbgCheck(nandp->thread != NULL);
   osalThreadResumeI(&nandp->thread, MSG_OK);
 }
 
-/**
- * @brief   Put calling thread in suspend and switch driver state
- *
- * @param[in] nandp    pointer to the @p NANDDriver object
- */
+//  Put calling thread in suspend and switch driver state
+// nandp    pointer to the @p NANDDriver object
 static void nand_lld_suspend_thread(NANDDriver *nandp) {
 
   osalThreadSuspendS(&nandp->thread);
 }
 
-/**
- * @brief   Caclulate ECCPS register value
- *
- * @param[in] nandp    pointer to the @p NANDDriver object
- */
+//  Caclulate ECCPS register value
+//  nandp    pointer to the @p NANDDriver object
 static uint32_t calc_eccps(NANDDriver *nandp) {
 
   uint32_t i = 0;
@@ -159,17 +110,20 @@ static uint32_t calc_eccps(NANDDriver *nandp) {
   return i << 17;
 }
 
-/*===========================================================================*/
-/* Driver interrupt handlers.                                                */
-/*===========================================================================*/
+///////////////////////////////////////////////////////////////////////////////
+// Driver local variables and types.                                         //
+///////////////////////////////////////////////////////////////////////////////
 
-/**
- * @brief   Enable interrupts from NAND
- *
- * @param[in] nandp    pointer to the @p NANDDriver object
- *
- * @notapi
- */
+///////////////////////////////////////////////////////////////////////////////
+// Driver local functions.                                                   //
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// Driver interrupt handlers.                                                //
+///////////////////////////////////////////////////////////////////////////////
+
+//  Enable interrupts from NAND
+// nandp    pointer to the @p NANDDriver object
 static void nand_ready_isr_enable(NANDDriver *nandp) {
 
   nandp->nand->SR &= ~(FSMC_SR_IRS | FSMC_SR_ILS | FSMC_SR_IFS |
@@ -177,30 +131,20 @@ static void nand_ready_isr_enable(NANDDriver *nandp) {
   nandp->nand->SR |= FSMC_SR_IREN;
 }
 
-/**
- * @brief   Disable interrupts from NAND
- *
- * @param[in] nandp    pointer to the @p NANDDriver object
- *
- * @notapi
- */
+//  Disable interrupts from NAND
+// nandp    pointer to the @p NANDDriver object
 static void nand_ready_isr_disable(NANDDriver *nandp) {
 
   nandp->nand->SR &= ~FSMC_SR_IREN;
 }
 
-/**
- * @brief   Ready interrupt handler
- *
- * @param[in] nandp    pointer to the @p NANDDriver object
- *
- * @notapi
- */
+//  Ready interrupt handler
+// nandp    pointer to the @p NANDDriver object
 static void nand_isr_handler(NANDDriver *nandp) {
 
   osalSysLockFromISR();
 
-  osalDbgCheck(nandp->nand->SR & FSMC_SR_IRS); /* spurious interrupt happened */
+  osalDbgCheck(nandp->nand->SR & FSMC_SR_IRS); // spurious interrupt happened
   nandp->nand->SR &= ~FSMC_SR_IRS;
 
   switch (nandp->state){
@@ -208,12 +152,12 @@ static void nand_isr_handler(NANDDriver *nandp) {
     nandp->state = NAND_DMA_RX;
     dmaStartMemCopy(nandp->dma, nandp->dmamode, nandp->map_data, nandp->rxdata,
                     nandp->datalen/AHB_TRANSACTION_WIDTH);
-    /* thread will be waked up from DMA ISR */
+    // thread will be waked up from DMA ISR
     break;
 
-  case NAND_ERASE:      /* NAND reports about erase finish */
-  case NAND_PROGRAM:    /* NAND reports about page programming finish */
-  case NAND_RESET:      /* NAND reports about finished reset recover */
+  case NAND_ERASE:      // NAND reports about erase finish
+  case NAND_PROGRAM:    // NAND reports about page programming finish
+  case NAND_RESET:      // NAND reports about finished reset recover
     nandp->state = NAND_READY;
     wakeup_isr(nandp);
     break;
@@ -225,16 +169,11 @@ static void nand_isr_handler(NANDDriver *nandp) {
   osalSysUnlockFromISR();
 }
 
-/**
- * @brief   DMA RX end IRQ handler.
- *
- * @param[in] nandp    pointer to the @p NANDDriver object
- * @param[in] flags    pre-shifted content of the ISR register
- *
- * @notapi
- */
+//  DMA RX end IRQ handler.
+// nandp    pointer to the @p NANDDriver object
+// flags    pre-shifted content of the ISR register
 static void nand_lld_serve_transfer_end_irq(NANDDriver *nandp, uint32_t flags) {
-  /* DMA errors handling.*/
+  // DMA errors handling.
 #if defined(STM32_NAND_DMA_ERROR_HOOK)
   if ((flags & (STM32_DMA_ISR_TEIF | STM32_DMA_ISR_DMEIF)) != 0) {
     STM32_NAND_DMA_ERROR_HOOK(nandp);
@@ -251,7 +190,7 @@ static void nand_lld_serve_transfer_end_irq(NANDDriver *nandp, uint32_t flags) {
   case NAND_DMA_TX:
     nandp->state = NAND_PROGRAM;
     nandp->map_cmd[0] = NAND_CMD_PAGEPROG;
-    /* thread will be woken up from ready_isr() */
+    // thread will be woken up from ready_isr()
     break;
 
   case NAND_DMA_RX:
@@ -269,21 +208,17 @@ static void nand_lld_serve_transfer_end_irq(NANDDriver *nandp, uint32_t flags) {
   osalSysUnlockFromISR();
 }
 
-/*===========================================================================*/
-/* Driver exported functions.                                                */
-/*===========================================================================*/
+///////////////////////////////////////////////////////////////////////////////
+// Driver exported functions.                                                //
+///////////////////////////////////////////////////////////////////////////////
 
-/**
- * @brief   Low level NAND driver initialization.
- *
- * @notapi
- */
-void nand_lld_init(void) {
+//  Low level NAND driver initialization.
+void fsmcNandInit(void) {
 
   stm32FsmcInit();
 
 #if STM32_NAND_USE_FSMC_NAND1
-  /* Driver initialization.*/
+  // Driver initialization.
   nandObjectInit(&NANDD1);
   NANDD1.rxdata   = NULL;
   NANDD1.datalen  = 0;
@@ -294,10 +229,10 @@ void nand_lld_init(void) {
   NANDD1.map_cmd  = (uint16_t *)FSMC_Bank2_MAP_COMMON_CMD;
   NANDD1.map_addr = (uint16_t *)FSMC_Bank2_MAP_COMMON_ADDR;
   NANDD1.bb_map   = NULL;
-#endif /* STM32_NAND_USE_FSMC_NAND1 */
+#endif // STM32_NAND_USE_FSMC_NAND1
 
 #if STM32_NAND_USE_FSMC_NAND2
-  /* Driver initialization.*/
+  // Driver initialization.
   nandObjectInit(&NANDD2);
   NANDD2.rxdata   = NULL;
   NANDD2.datalen  = 0;
@@ -308,24 +243,19 @@ void nand_lld_init(void) {
   NANDD2.map_cmd  = (uint16_t *)FSMC_Bank3_MAP_COMMON_CMD;
   NANDD2.map_addr = (uint16_t *)FSMC_Bank3_MAP_COMMON_ADDR;
   NANDD2.bb_map   = NULL;
-#endif /* STM32_NAND_USE_FSMC_NAND2 */
+#endif // STM32_NAND_USE_FSMC_NAND2
 }
 
-/**
- * @brief   Configures and activates the NAND peripheral.
- *
- * @param[in] nandp         pointer to the @p NANDDriver object
- *
- * @notapi
- */
-void nand_lld_start(NANDDriver *nandp) {
+//  Configures and activates the NAND peripheral.
+// nandp         pointer to the @p NANDDriver object
+void fsmcNandStart(NANDDriver *nandp) {
 
   bool b;
   uint32_t dmasize;
   uint32_t pcr_bus_width;
 
   if (FSMCD1.state == FSMC_STOP)
-    stm32FsmcStart(&FSMCD1);
+    fsmc_start(&FSMCD1);
 
   if (nandp->state == NAND_STOP) {
     b = dmaStreamAllocate(nandp->dma,
@@ -367,14 +297,9 @@ void nand_lld_start(NANDDriver *nandp) {
   }
 }
 
-/**
- * @brief   Deactivates the NAND peripheral.
- *
- * @param[in] nandp         pointer to the @p NANDDriver object
- *
- * @notapi
- */
-void nand_lld_stop(NANDDriver *nandp) {
+//   Deactivates the NAND peripheral.
+// nandp         pointer to the @p NANDDriver object
+void fsmcNandStop(NANDDriver *nandp) {
 
   if (nandp->state == NAND_READY) {
     dmaStreamRelease(nandp->dma);
@@ -384,18 +309,13 @@ void nand_lld_stop(NANDDriver *nandp) {
   }
 }
 
-/**
- * @brief   Read data from NAND.
- *
- * @param[in] nandp         pointer to the @p NANDDriver object
- * @param[out] data         pointer to data buffer
- * @param[in] datalen       size of data buffer in bytes
- * @param[in] addr          pointer to address buffer
- * @param[in] addrlen       length of address
- * @param[out] ecc          pointer to store computed ECC. Ignored when NULL.
- *
- * @notapi
- */
+//   Read data from NAND.
+// nandp         pointer to the @p NANDDriver object
+// data         pointer to data buffer
+// datalen       size of data buffer in bytes
+// addr          pointer to address buffer
+// addrlen       length of address
+// ecc          pointer to store computed ECC. Ignored when NULL.
 void nand_lld_read_data(NANDDriver *nandp, uint16_t *data, size_t datalen,
                         uint8_t *addr, size_t addrlen, uint32_t *ecc){
 
@@ -412,9 +332,9 @@ void nand_lld_read_data(NANDDriver *nandp, uint16_t *data, size_t datalen,
   nand_lld_write_cmd(nandp, NAND_CMD_READ0_CONFIRM);
   set_8bit_bus(nandp);
 
-  /* Here NAND asserts busy signal and starts transferring from memory
-     array to page buffer. After the end of transmission ready_isr functions
-     starts DMA transfer from page buffer to MCU's RAM.*/
+  // Here NAND asserts busy signal and starts transferring from memory
+  //   array to page buffer. After the end of transmission ready_isr functions
+  //   starts DMA transfer from page buffer to MCU's RAM.
   osalDbgAssert((nandp->nand->PCR & FSMC_PCR_ECCEN) == 0,
           "State machine broken. ECCEN must be previously disabled.");
 
@@ -425,7 +345,7 @@ void nand_lld_read_data(NANDDriver *nandp, uint16_t *data, size_t datalen,
   nand_lld_suspend_thread(nandp);
   osalSysUnlock();
 
-  /* thread was woken up from DMA ISR */
+  // thread was woken up from DMA ISR
   if (NULL != ecc){
     while (! (nandp->nand->SR & FSMC_SR_FEMPT))
       ;
@@ -434,20 +354,14 @@ void nand_lld_read_data(NANDDriver *nandp, uint16_t *data, size_t datalen,
   }
 }
 
-/**
- * @brief   Write data to NAND.
- *
- * @param[in] nandp         pointer to the @p NANDDriver object
- * @param[in] data          buffer with data to be written
- * @param[in] datalen       size of data buffer in bytes
- * @param[in] addr          pointer to address buffer
- * @param[in] addrlen       length of address
- * @param[out] ecc          pointer to store computed ECC. Ignored when NULL.
- *
- * @return    The operation status reported by NAND IC (0x70 command).
- *
- * @notapi
- */
+//   Write data to NAND.
+//  nandp         pointer to the @p NANDDriver object
+// data          buffer with data to be written
+// datalen       size of data buffer in bytes
+// addr          pointer to address buffer
+// addrlen       length of address
+// ecc          pointer to store computed ECC. Ignored when NULL.
+//   The operation status reported by NAND IC (0x70 command).
 uint8_t nand_lld_write_data(NANDDriver *nandp, const uint16_t *data,
                 size_t datalen, uint8_t *addr, size_t addrlen, uint32_t *ecc) {
 
@@ -461,8 +375,8 @@ uint8_t nand_lld_write_data(NANDDriver *nandp, const uint16_t *data,
   nand_lld_write_addr(nandp, addr, addrlen);
   set_8bit_bus(nandp);
 
-  /* Now start DMA transfer to NAND buffer and put thread in sleep state.
-     Tread will be woken up from ready ISR. */
+  // Now start DMA transfer to NAND buffer and put thread in sleep state.
+  //   Tread will be woken up from ready ISR.
   nandp->state = NAND_DMA_TX;
   osalDbgAssert((nandp->nand->PCR & FSMC_PCR_ECCEN) == 0,
           "State machine broken. ECCEN must be previously disabled.");
@@ -487,13 +401,8 @@ uint8_t nand_lld_write_data(NANDDriver *nandp, const uint16_t *data,
   return nand_lld_read_status(nandp);
 }
 
-/**
- * @brief   Soft reset NAND device.
- *
- * @param[in] nandp         pointer to the @p NANDDriver object
- *
- * @notapi
- */
+//  Soft reset NAND device.
+// nandp         pointer to the @p NANDDriver object
 void nand_lld_reset(NANDDriver *nandp) {
 
   nandp->state = NAND_RESET;
@@ -507,17 +416,11 @@ void nand_lld_reset(NANDDriver *nandp) {
   osalSysUnlock();
 }
 
-/**
- * @brief   Erase block.
- *
- * @param[in] nandp         pointer to the @p NANDDriver object
- * @param[in] addr          pointer to address buffer
- * @param[in] addrlen       length of address
- *
- * @return    The operation status reported by NAND IC (0x70 command).
- *
- * @notapi
- */
+//   Erase block.
+// nandp         pointer to the @p NANDDriver object
+// addr          pointer to address buffer
+// addrlen       length of address
+// return   The operation status reported by NAND IC (0x70 command).
 uint8_t nand_lld_erase(NANDDriver *nandp, uint8_t *addr, size_t addrlen) {
 
   nandp->state = NAND_ERASE;
@@ -535,15 +438,10 @@ uint8_t nand_lld_erase(NANDDriver *nandp, uint8_t *addr, size_t addrlen) {
   return nand_lld_read_status(nandp);
 }
 
-/**
- * @brief   Send addres to NAND.
- *
- * @param[in] nandp         pointer to the @p NANDDriver object
- * @param[in] len           length of address array
- * @param[in] addr          pointer to address array
- *
- * @notapi
- */
+//   Send addres to NAND.
+// nandp         pointer to the @p NANDDriver object
+// len           length of address array
+// addr          pointer to address array
 void nand_lld_write_addr(NANDDriver *nandp, const uint8_t *addr, size_t len) {
   size_t i = 0;
 
@@ -551,27 +449,16 @@ void nand_lld_write_addr(NANDDriver *nandp, const uint8_t *addr, size_t len) {
     nandp->map_addr[i] = addr[i];
 }
 
-/**
- * @brief   Send command to NAND.
- *
- * @param[in] nandp         pointer to the @p NANDDriver object
- * @param[in] cmd           command value
- *
- * @notapi
- */
+//   Send command to NAND.
+// nandp         pointer to the @p NANDDriver object
+// cmd           command value
 void nand_lld_write_cmd(NANDDriver *nandp, uint8_t cmd) {
   nandp->map_cmd[0] = cmd;
 }
 
-/**
- * @brief   Read status byte from NAND.
- *
- * @param[in] nandp         pointer to the @p NANDDriver object
- *
- * @return    Status byte.
- *
- * @notapi
- */
+//   Read status byte from NAND.
+// nandp         pointer to the @p NANDDriver object
+// return    Status byte.
 uint8_t nand_lld_read_status(NANDDriver *nandp) {
 
   uint16_t status;
@@ -584,4 +471,4 @@ uint8_t nand_lld_read_status(NANDDriver *nandp) {
   return status & 0xFF;
 }
 
-#endif /* HAL_USE_NAND */
+#endif // HAL_USE_NAND

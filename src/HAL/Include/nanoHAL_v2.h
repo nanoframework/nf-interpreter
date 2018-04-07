@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <nanoWeak.h>
 
 typedef enum SYSTEM_STATE
 {
@@ -150,6 +151,10 @@ extern "C" {
 
 void nanoHAL_Initialize_C();
 void HeapLocation_C(unsigned char** baseAddress, unsigned int* sizeInBytes);
+
+// Call to the external memory configuration and initialization function
+// If a target has external memory it has to provide the implementation for it.
+void Target_ExternalMemoryInit();
 
 #ifdef __cplusplus
 }

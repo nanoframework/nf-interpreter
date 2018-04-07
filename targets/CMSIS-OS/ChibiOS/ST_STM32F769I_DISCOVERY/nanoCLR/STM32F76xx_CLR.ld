@@ -30,7 +30,6 @@ MEMORY
     ram5        : org = 0x40024000, len = 4k                        /* BCKP SRAM */
     ram6        : org = 0x00000000, len = 0
     ram7        : org = 0x00000000, len = 0
-    sram        : org = 0xC0000000, len = 2M
 }
 
 /* For each data/text section two region are defined, a virtual region
