@@ -575,17 +575,6 @@ void HAL_Assert  ( const char* Func, int Line, const char* File );
 // HAL_AssertEx is defined in the processor or platform selector files.
 extern void HAL_AssertEx();
 
-//
-// This has to be extern "C" because we want to use platform implemented malloc 
-//
-extern "C" {
-
-void* platform_malloc ( size_t size             );
-void  platform_free   ( void*  ptr              );
-void* platform_realloc( void*  ptr, size_t size );
-
-}
-
 #if defined(PLATFORM_ARM)
     #if !defined(BUILD_RTM)
         #define       ASSERT(i)  { if(!(i)) HAL_AssertEx(); }

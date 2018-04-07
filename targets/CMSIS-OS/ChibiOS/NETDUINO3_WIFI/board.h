@@ -294,12 +294,12 @@
  * PB7  - I2C1_SDA
  * PB8  - D5
  * PB9  - D6
- * PB10 - D10
+ * PB10 - D10 (=SPI2_SS)
  * PB11 - MICROSD_INS
  * PB12 - D4
- * PB13 - D13
- * PB14 - D12
- * PB15 - D11
+ * PB13 - D13 (=SPI2_SCK)
+ * PB14 - D12 (=SPI2_MISO)
+ * PB15 - D11 (=SPI2_MOSI)
  */
 #define VAL_GPIOB_MODER             (PIN_MODE_OUTPUT(GPIOB_MICROSD_CS) |     \
                                      PIN_MODE_OUTPUT(GPIOB_MICROSD_CTRL) |     \
@@ -311,12 +311,12 @@
                                      PIN_MODE_ALTERNATE(GPIOB_I2C1_SDA) |           \
                                      PIN_MODE_INPUT(GPIOB_D5) |     \
                                      PIN_MODE_INPUT(GPIOB_D6) |     \
-                                     PIN_MODE_INPUT(GPIOB_D10) |     \
+                                     PIN_MODE_OUTPUT(GPIOB_D10) |     \
                                      PIN_MODE_INPUT(GPIOB_MICROSD_INS) |     \
                                      PIN_MODE_INPUT(GPIOB_D4) |  \
-                                     PIN_MODE_INPUT(GPIOB_D13) |    \
-                                     PIN_MODE_INPUT(GPIOB_D12) |  \
-                                     PIN_MODE_INPUT(GPIOB_D11))
+                                     PIN_MODE_ALTERNATE(GPIOB_D13) |    \
+                                     PIN_MODE_ALTERNATE(GPIOB_D12) |  \
+                                     PIN_MODE_ALTERNATE(GPIOB_D11))
 #define VAL_GPIOB_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOB_MICROSD_CS) |     \
                                      PIN_OTYPE_PUSHPULL(GPIOB_MICROSD_CTRL) |     \
                                      PIN_OTYPE_PUSHPULL(GPIOB_BOOT1) |      \
@@ -394,9 +394,9 @@
                                      PIN_AFIO_AF(GPIOB_D10, 0U) |       \
                                      PIN_AFIO_AF(GPIOB_MICROSD_INS, 0U) |       \
                                      PIN_AFIO_AF(GPIOB_D4, 0U) |    \
-                                     PIN_AFIO_AF(GPIOB_D13, 0U) |   \
-                                     PIN_AFIO_AF(GPIOB_D12, 0U) |    \
-                                     PIN_AFIO_AF(GPIOB_D11, 0U))
+                                     PIN_AFIO_AF(GPIOB_D13, 5U) |   \
+                                     PIN_AFIO_AF(GPIOB_D12, 5U) |    \
+                                     PIN_AFIO_AF(GPIOB_D11, 5U))
 
 /*
  * GPIOC setup:
@@ -407,8 +407,8 @@
  * PC3  - A3
  * PC4  - A4
  * PC5  - A5
- * PC6  - D1
- * PC7  - D0
+ * PC6  - USART6_TX_D1
+ * PC7  - USART6_RX_D0
  * PC8  - CC_CS
  * PC9  - LINK_LED
  * PC10 - SPI3_CLK
@@ -424,8 +424,8 @@
                                      PIN_MODE_ANALOG(GPIOC_A3) |           \
                                      PIN_MODE_ANALOG(GPIOC_A4) |    \
                                      PIN_MODE_ANALOG(GPIOC_A5) |      \
-                                     PIN_MODE_INPUT(GPIOC_D1) |  \
-                                     PIN_MODE_INPUT(GPIOC_D0) |     \
+                                     PIN_MODE_ALTERNATE(GPIOC_D1) |  \
+                                     PIN_MODE_ALTERNATE(GPIOC_D0) |     \
                                      PIN_MODE_OUTPUT(GPIOC_CC_CS) |           \
                                      PIN_MODE_OUTPUT(GPIOC_LINK_LED) |   \
                                      PIN_MODE_ALTERNATE(GPIOC_SPI3_CLK) |     \

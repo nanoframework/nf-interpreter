@@ -1043,6 +1043,11 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
                 reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_SoftReboot;
             }
 
+            if (::Target_ConfigUpdateRequiresErase())
+            {
+                reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_ConfigBlockRequiresErase;
+            }
+
             data = (CLR_UINT8*)&reply.u_capsFlags;
             size = sizeof(reply.u_capsFlags);
             break;

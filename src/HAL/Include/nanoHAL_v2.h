@@ -171,6 +171,21 @@ void CPU_Reset();
 
 //--//
 
+//
+// This has to be extern "C" because we want to use platform implemented malloc 
+//
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void* platform_malloc ( size_t size             );
+void  platform_free   ( void*  ptr              );
+void* platform_realloc( void*  ptr, size_t size );
+
+#ifdef __cplusplus
+}
+#endif
+
 void SystemState_Set  ( SYSTEM_STATE_type newState );
 void SystemState_Clear( SYSTEM_STATE_type state    );
 bool SystemState_Query( SYSTEM_STATE_type state    );

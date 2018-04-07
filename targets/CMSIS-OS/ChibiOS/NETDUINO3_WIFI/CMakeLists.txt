@@ -55,6 +55,11 @@ if(API_Windows.Devices.SerialCommunication)
     list(APPEND API_RELATED_TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_windows_devices_serialcommunication_config.cpp")    
 endif()
 
+# Windows.Devices.Adc
+if(API_Windows.Devices.Adc)
+    list(APPEND API_RELATED_TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_windows_devices_adc_config.cpp")    
+endif()
+
 #######################################
 
 add_subdirectory("common")
@@ -207,7 +212,7 @@ if(HEX2DFU_TOOL_AVAILABLE)
     NF_GENERATE_DFU_PACKAGE(
         ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000 
         ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08008000 
-        ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu
+        ${PROJECT_SOURCE_DIR}/build/nanoframework-4-netduino3wifi.dfu
     )
 
 endif()

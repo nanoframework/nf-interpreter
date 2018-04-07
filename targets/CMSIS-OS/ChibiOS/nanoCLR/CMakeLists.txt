@@ -36,14 +36,17 @@ list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoCRT.
 # append files from Runtime.Native
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_RTC.cpp")
 
-# append random implementation for all series, except F0
-if( ${TARGET_SERIES} STREQUAL "STM32L0xx" OR
-    ${TARGET_SERIES} STREQUAL "STM32F4xx" OR 
-    ${TARGET_SERIES} STREQUAL "STM32F7xx" OR
-    ${TARGET_SERIES} STREQUAL "STM32H7xx")
+# append TRNG only if enabled in variants (USE_RNG)
+if(TARGET_MCU_SUPPORTS_RNG)
+    # append random implementation for all series, except F0
+    if( ${TARGET_SERIES} STREQUAL "STM32L0xx" OR
+        ${TARGET_SERIES} STREQUAL "STM32F4xx" OR 
+        ${TARGET_SERIES} STREQUAL "STM32F7xx" OR
+        ${TARGET_SERIES} STREQUAL "STM32H7xx")
 
-    list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetRandom.cpp")  
+        list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetRandom.cpp")  
 
+    endif()
 endif()
 
 # parse nanoFramework API options

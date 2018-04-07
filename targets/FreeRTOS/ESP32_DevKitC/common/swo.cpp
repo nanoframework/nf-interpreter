@@ -30,13 +30,13 @@ int GenericPort_Write( int portNum, const char* data, size_t size )
     char* p = (char*)data;
     int counter = 0;
 
-    /// send characters directly to the trace port
-    // while(*p != '\0' || counter < size)
-    // {
-    //     ets_printf( "%c", *p++); 
-    //     counter++;
-    // }
-    // return counter;
+    // send characters directly to the trace port
+    while(*p != '\0' || counter < size)
+    {
+        ets_printf( "%c", *p++); 
+        counter++;
+    }
+    return counter;
     
-    return size;
+    //return size;
 }

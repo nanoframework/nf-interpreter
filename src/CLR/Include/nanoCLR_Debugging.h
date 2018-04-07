@@ -272,16 +272,17 @@ struct CLR_DBG_Commands
         static const CLR_UINT32 c_ClrInfo                     = 6;
         static const CLR_UINT32 c_TargetReleaseInfo           = 7;
 
-        static const CLR_UINT32 c_CapabilityFlags_FloatingPoint         = 0x00000001;
-        static const CLR_UINT32 c_CapabilityFlags_SourceLevelDebugging  = 0x00000002;
-        static const CLR_UINT32 c_CapabilityFlags_AppDomains            = 0x00000004;
-        static const CLR_UINT32 c_CapabilityFlags_ExceptionFilters      = 0x00000008;
-        static const CLR_UINT32 c_CapabilityFlags_IncrementalDeployment = 0x00000010;
-        static const CLR_UINT32 c_CapabilityFlags_SoftReboot            = 0x00000020;
-        static const CLR_UINT32 c_CapabilityFlags_Profiling             = 0x00000040;
-        static const CLR_UINT32 c_CapabilityFlags_Profiling_Allocations = 0x00000080;
-        static const CLR_UINT32 c_CapabilityFlags_Profiling_Calls       = 0x00000100;
-        static const CLR_UINT32 c_CapabilityFlags_ThreadCreateEx        = 0x00000400;
+        static const CLR_UINT32 c_CapabilityFlags_FloatingPoint             = 0x00000001;
+        static const CLR_UINT32 c_CapabilityFlags_SourceLevelDebugging      = 0x00000002;
+        static const CLR_UINT32 c_CapabilityFlags_AppDomains                = 0x00000004;
+        static const CLR_UINT32 c_CapabilityFlags_ExceptionFilters          = 0x00000008;
+        static const CLR_UINT32 c_CapabilityFlags_IncrementalDeployment     = 0x00000010;
+        static const CLR_UINT32 c_CapabilityFlags_SoftReboot                = 0x00000020;
+        static const CLR_UINT32 c_CapabilityFlags_Profiling                 = 0x00000040;
+        static const CLR_UINT32 c_CapabilityFlags_Profiling_Allocations     = 0x00000080;
+        static const CLR_UINT32 c_CapabilityFlags_Profiling_Calls           = 0x00000100;
+        static const CLR_UINT32 c_CapabilityFlags_ThreadCreateEx            = 0x00000400;
+        static const CLR_UINT32 c_CapabilityFlags_ConfigBlockRequiresErase  = 0x00000800;
 
         CLR_UINT32 m_cmd;
 
