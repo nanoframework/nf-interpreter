@@ -104,8 +104,6 @@ struct LWIP_SOCKETS_Driver
 
 
 private:
-	static void TcpipInitDone(void* arg);
-
 	static void Status_callback(struct netif *netif);
 
 	static void Link_callback(struct netif *netif);

@@ -5,9 +5,11 @@
 //
 
 #include <nanoHAL.h>
+#include <lwip/netifapi.h>
 
 extern NETWORK_CONFIG  g_NetworkConfig;
 
+extern "C" struct netif * nf_getNetif();
 //
 // Works with the Target_NetworkConfig to map the Network_Interface_XXXXX calls to the correct driver
 // This works in conjunction with the g_NetworkConfig in the Target_NetworkConfig.cpp
@@ -27,14 +29,15 @@ int  Network_Interface_Open(int index)
     {
         case 0:
         {
-            // Open the notwork interface and set its config
+            // Open the network interface and set its config
             // TODO / FIXME
-
 
             // Return index to NetIF in its linked list, return 0 (probably right if only interface)
             // This used by Network stack to hook in to status/address changes for events to users
-            
-            return 0; 
+
+            // For now get the Netif number form original Chibios binding code
+            struct netif * nptr = nf_getNetif();
+            return nptr->num; 
         }
         break;
     }

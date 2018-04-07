@@ -93,7 +93,7 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 }
 
 
-void IRAM_ATTR nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc)
+void IRAM_ATTR nanoHAL_Network_Initialize()
 {
 	esp_err_t ret;
 
@@ -104,9 +104,6 @@ void IRAM_ATTR nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc)
     tcpip_adapter_init();
    
     esp_event_loop_init(event_handler, NULL);
-
-	// Callback to Network stack when init complete to open interfaces
-	initfunc(NULL);
 }
 
 

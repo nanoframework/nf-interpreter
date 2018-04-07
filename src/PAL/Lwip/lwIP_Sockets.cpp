@@ -134,11 +134,21 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 }
 #endif
 
-// This binds to the adapters and sets up callback to monitor link status
-// TODO Commented out
-void LWIP_SOCKETS_Driver::TcpipInitDone(void* arg)
-{
+bool LWIP_SOCKETS_Driver::Initialize()
+{   
+    NATIVE_PROFILE_PAL_NETWORK();
+
 	struct netif *pNetIf;
+
+#if LWIP_NETIF_STATUS_CALLBACK == 1
+    PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
+#endif
+#if LWIP_NETIF_LINK_CALLBACK == 1
+    PostAvailabilityOnContinuation.InitializeCallback(PostAvailabilityOn, NULL);
+    PostAvailabilityOffContinuation.InitializeCallback(PostAvailabilityOff, NULL);
+#endif
+    /* Initialize the target board lwIP stack */
+    nanoHAL_Network_Initialize();
 
 	for (int i = 0; i<g_NetworkConfig.NetworkInterfaceCount; i++)
 	{
@@ -189,21 +199,6 @@ void LWIP_SOCKETS_Driver::TcpipInitDone(void* arg)
             }
 		}
 	}
-}
-
-bool LWIP_SOCKETS_Driver::Initialize()
-{   
-    NATIVE_PROFILE_PAL_NETWORK();
-
-#if LWIP_NETIF_STATUS_CALLBACK == 1
-    PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
-#endif
-#if LWIP_NETIF_LINK_CALLBACK == 1
-    PostAvailabilityOnContinuation.InitializeCallback(PostAvailabilityOn, NULL);
-    PostAvailabilityOffContinuation.InitializeCallback(PostAvailabilityOff, NULL);
-#endif
-    /* Initialize the target board lwIP stack */
-    nanoHAL_Network_Initialize(TcpipInitDone);
 
     return TRUE;
 }

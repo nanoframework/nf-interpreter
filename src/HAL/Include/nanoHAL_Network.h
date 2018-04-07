@@ -71,11 +71,7 @@ typedef struct __nfpack Configuration_Network {
 
 }Configuration_Network;
 
-
-// Callback for when init done
-typedef void(* tcpip_init_done_fn) (void *arg);
-
-void 	nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc);
+void 	nanoHAL_Network_Initialize();
 
 #ifdef __cplusplus
 extern "C" {
