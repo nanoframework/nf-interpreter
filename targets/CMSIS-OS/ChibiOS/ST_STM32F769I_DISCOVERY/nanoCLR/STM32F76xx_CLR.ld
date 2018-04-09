@@ -115,6 +115,12 @@ SECTIONS
         . = ALIGN(4);
         __eth_end__ = .;
     } > ETH_RAM
+
+      /* placing my named section at given address: */
+    .myBufBlock 0xC0000000 :
+    {
+        KEEP(*(.myBufSection)) /* keep my variable even if not referenced */
+    } > sram
 }
 
 /* Code rules inclusion.*/

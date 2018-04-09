@@ -155,6 +155,14 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
         CLR_RT_HeapCluster* hc   = (CLR_RT_HeapCluster*)                                 heapFirstFree;
         CLR_UINT32          size =                      (heapFree < c_HeapClusterSize) ? heapFree : c_HeapClusterSize;
 
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
+
+        CLR_Debug::Printf( "Heap Cluster information\r\n");
+        CLR_Debug::Printf( "Start:       %08x\r\n", (size_t)heapFirstFree);
+        CLR_Debug::Printf( "Free:        %08x\r\n", (size_t)heapFree);
+        CLR_Debug::Printf( "Block size:  %d\r\n", sizeof(CLR_RT_HeapBlock));
+
+#endif
         ///
         /// Speed up heap initialization for devices with very large heaps > 1MB
         /// Exponentially increase the size of a default heap block

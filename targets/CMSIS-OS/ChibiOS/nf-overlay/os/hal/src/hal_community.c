@@ -42,7 +42,10 @@ void halCommunityInit(void) {
   rngInit();
 #endif
 
+#if HAL_USE_FSMC
+  stm32FsmcInit();
+#endif
+
 }
 
 #endif // HAL_USE_COMMUNITY
-
