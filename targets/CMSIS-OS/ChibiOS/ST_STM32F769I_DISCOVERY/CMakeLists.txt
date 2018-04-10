@@ -133,8 +133,11 @@ add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf ChibiOS)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf ChibiOS)
 
 # add dependencies from CHIBIOS_NETWORK_COMPONENTS (this is required to make sure that ChibiOS network components are unzip at the proper locations before the build starts)
-add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
-add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
+# only required if networking in ON
+if(USE_NETWORKING_OPTION)
+    add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
+endif()
 
 # include common directories
 include_directories(
@@ -152,9 +155,6 @@ include_directories(
 
     ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-
-    # includes for ChibiOS LwIP
-    "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 )
 
 # include directories for nanoBooter
@@ -164,6 +164,9 @@ target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
 
      ${TARGET_CMSIS_NANOBOOTER_INCLUDE_DIRS}
      ${TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS}
+
+    # includes for ChibiOS LwIP
+    "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 )
 
 # include directories for nanoCLR
@@ -181,6 +184,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     
     # includes for nanoFramework APIs
     "${TARGET_NANO_APIS_INCLUDES}"
+
+    # includes for ChibiOS LwIP
+    "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 
     # incudes for Networking
 	"${NF_Networking_INCLUDE_DIRS}"
