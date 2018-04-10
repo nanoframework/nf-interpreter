@@ -9,7 +9,7 @@
 
 // these are for error checks on the configuration header files
 #if !defined(HAL_USE_STM32_FLASH)
-#define HAL_USE_STM32_FLASH                         FALSE
+#define HAL_USE_STM32_FLASH                  FALSE
 #endif
 
 #if !defined(HAL_USE_STM32_CRC)
@@ -22,6 +22,11 @@
 #define HAL_USE_STM32_RNG                           TRUE
 #endif
 
+#if !defined(HAL_USE_FSMC)
+#define HAL_USE_FSMC                         FALSE
+#endif
+
+
 // Abstract interfaces
 
 // Shared headers
@@ -31,6 +36,7 @@
 #include "hal_stm32_flash.h"
 #include "hal_stm32_crc.h"
 #include "hal_stm32_rng.h"
+#include "hal_stm32_fsmc.h"
 
 // Complex drivers
 // #include "hal_nnnn.h"

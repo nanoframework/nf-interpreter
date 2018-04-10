@@ -10,6 +10,8 @@ list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS
 list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/include/stm32_crc)
 # component STM32_RNG
 list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/include/stm32_rng)
+# component STM32_FSMC (Flexible Memory Controller)
+list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/include/stm32_fsmc)
 
 ##################################################################################################################################
 # Add above the required include directory(ies) for a new nanoFramework overlay component that you are adding
@@ -36,6 +38,8 @@ list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Chib
 list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_crc/hal_stm32_crc.c)
 # component STM32_RNG
 list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_rng/hal_stm32_rng.c) 
+# component STM32_FSMC (Flexible Memory Controller)
+list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_fsmc/hal_stm32_fsmc.c)
 
 #########################################################################################################################
 # Add above ALL the source code file(s) required for a new nanoFramework overlay component that you are adding
