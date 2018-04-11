@@ -99,6 +99,8 @@ add_executable(
     ${NANOCLR_PROJECT_NAME}.elf
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+    # the next one is required is the target implements and it's using external memory
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_external_memory.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
@@ -133,8 +135,11 @@ add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf ChibiOS)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf ChibiOS)
 
 # add dependencies from CHIBIOS_NETWORK_COMPONENTS (this is required to make sure that ChibiOS network components are unzip at the proper locations before the build starts)
-add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
-add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
+# only required if networking in ON
+if(USE_NETWORKING_OPTION)
+    add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
+endif()
 
 # include common directories
 include_directories(
@@ -152,9 +157,6 @@ include_directories(
 
     ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-
-    # includes for ChibiOS LwIP
-    "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 )
 
 # include directories for nanoBooter
@@ -164,6 +166,9 @@ target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
 
      ${TARGET_CMSIS_NANOBOOTER_INCLUDE_DIRS}
      ${TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS}
+
+    # includes for ChibiOS LwIP
+    "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 )
 
 # include directories for nanoCLR
@@ -181,6 +186,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     
     # includes for nanoFramework APIs
     "${TARGET_NANO_APIS_INCLUDES}"
+
+    # includes for ChibiOS LwIP
+    "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 
     # incudes for Networking
 	"${NF_Networking_INCLUDE_DIRS}"
@@ -208,7 +216,7 @@ nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf TRUE)
 # the size of the CLR managed heap is defined here
 ###################################################
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x2000")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x40000")
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)

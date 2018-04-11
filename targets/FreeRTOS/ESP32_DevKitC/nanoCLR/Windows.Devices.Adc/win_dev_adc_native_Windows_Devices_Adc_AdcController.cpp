@@ -8,9 +8,10 @@
 
 // ESP32 ADC controller
 //
-// ADC1 and ADC2
-// ADC1 with 9 channels ( GPIO 32 - 39 ) 0=36, 1=37, 2=38, 3=39, 4=32, 5=33, 6=34, 7=35
-//                      channel 9 is the built in Esp32 Hall sensor, restriction channel 0 and 3 must be unused
+// Contains ADC1 and ADC2
+// ADC1 with 8 channels ( GPIO 32 - 39 ) 0=36, 1=37, 2=38, 3=39, 4=32, 5=33, 6=34, 7=35
+//                      channel 8/9 are logical channles for temperture sensor and is the built in Esp32 Hall sensor.
+//                      For hall sensor there is a restriction channel 0 and 3 must be unused
 // ADC2 with 10 channels (GPIO 0,2,4,12-15 and 25-27) 
 // Note : ADC2 cannot be used if Wifi started and other restrictions as pins used for other things.
 // 
@@ -21,6 +22,12 @@
 // VP - GPIO36 ( channel 0 )
 // VN - GPIO39 ( channel 3 )
 
+// From managed code we treat all ADC channels as 1 logical ADC unit (ADC1)
+// Logical channels 
+// ADC1 / 0 - 7     - 8 channels - ( GPIO 32 - 39 ) 0=36, 1=37, 2=38, 3=39, 4=32, 5=33, 6=34, 7=35
+//  8               - Internal Temperture sensor
+//  9               - Internal Hall Sensor
+// ADC2 / 10 - 19   - 10 Channels -( GPIOs 0, 2, 4, 12 - 15 and 25 - 27. )
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.Adc.AdcChannelMode (in managed code) !!!    //
@@ -43,21 +50,20 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         // Get channel from argument
-        int channel = stack.Arg2().NumericByRef().s4;
+        int channel = stack.Arg1().NumericByRef().s4;
 
-        // Get ADC device number from deviceId field
-        // expect 1 or 2
-        adc_unit_t adcUnit = (adc_unit_t)pThis[FIELD___deviceId].NumericByRef().s4;
+        if ( channel < ADC_CHANNEL_0 || channel > 19 ) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+
+        // Get ADC device number from channel
+        int adcUnit = channel <= 9 ? 1 : 2;
 
         adc_power_on();         // Make sure powered on
 
-        if ( channel < ADC_CHANNEL_0 || channel > ADC_CHANNEL_MAX ) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
-        switch( (int)adcUnit)
+        switch(adcUnit)
         {
             case 1:
-                // Normal channel ?
-                if ( channel <= 8 )
+                // Normal channel 0-7 ?
+                if ( channel <= 7 )
                 {
                     adc1_config_width( width_bit );
 
@@ -76,9 +82,6 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
                     NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
                 }
                 break;
-
-            default:
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
      }
     NANOCLR_NOCLEANUP();
@@ -88,19 +91,8 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetC
 {
     NANOCLR_HEADER();
     {
-        int channelCount;
+        int channelCount = 20;
 
-        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
-
-        // Return number of single ended channels
-        int deviceId = pThis[ FIELD___deviceId ].NumericByRefConst().s4;
-        switch(deviceId)
-        {
-            case 1: channelCount = 8; break;
-            case 2: channelCount = ADC_CHANNEL_MAX; break;
-            default: NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-        
         // Return value to the managed application
         stack.SetResult_I4(channelCount);
     }
@@ -160,8 +152,8 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit
         // all required initialization for ADC are already handled
         // this is only to check if the requested deviceId is available in hardware
 
-        // expect 1 or 2
-        if(deviceId == 1 || deviceId == 2)
+        // expect only 1
+        if(deviceId == 1)
         {
             // we are OK
         }
@@ -179,10 +171,12 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::GetDeviceS
    {
       // declare the device selector string
       // ADC1 and ADC2
-      // ADC1 with 8 channels
+      // ADC1 with 8 channels + Temperture sensor and and internal hall sensor
       // ADC2 with 10 channeld but cannot be used if Wifi started
+      //
+      // These are now combined into 1 logical ADC (ADC1)
        char deviceSelectorString[] = 
-            "ADC1,ADC2";
+            "ADC1";
 
        // because the caller is expecting a result to be returned
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)

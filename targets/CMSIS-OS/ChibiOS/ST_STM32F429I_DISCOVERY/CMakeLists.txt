@@ -93,6 +93,8 @@ add_executable(
     ${NANOCLR_PROJECT_NAME}.elf
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+    # the next one is required is the target implements and it's using external memory
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_external_memory.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
