@@ -21,7 +21,7 @@ void sys_signal_sock_event()
      Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
 }
 
-void nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc)
+void nanoHAL_Network_Initialize()
 {
     // Initialise the lwIP CLR signal callback
     set_signal_sock_function( &sys_signal_sock_event );
@@ -66,9 +66,6 @@ void nanoHAL_Network_Initialize(tcpip_init_done_fn initfunc)
         // free memory
         platform_free(networkConfig);
     }
-
-    // Callback to Network stack when init complete 
-    initfunc(NULL);
 }
 
 // Gets the network configuration block from the configuration block stored in the flash sector, 

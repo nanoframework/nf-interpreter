@@ -372,6 +372,7 @@ typedef struct SOCK_timeval {
 ///
 /// Keep these values in sync with the manged code enumeration Wireless80211.AuthenticationType in wireless.cs
 ///
+// Wireless flags bits 0 - 3
 #define WIRELESS_FLAG_AUTHENTICATION_NONE      0
 #define WIRELESS_FLAG_AUTHENTICATION_EAP       1
 #define WIRELESS_FLAG_AUTHENTICATION_PEAP      2
@@ -386,6 +387,8 @@ typedef struct SOCK_timeval {
 ///
 /// Keep these values in sync with the manged code enumeration Wireless80211.EncryptionType in wireless.cs
 ///
+
+// Wireless flags bits 4 - 7
 #define WIRELESS_FLAG_ENCRYPTION_NONE          0
 #define WIRELESS_FLAG_ENCRYPTION_WEP           1
 #define WIRELESS_FLAG_ENCRYPTION_WPA           2
@@ -399,6 +402,8 @@ typedef struct SOCK_timeval {
 ///
 /// Keep these values in sync with the manged code enumeration Wireless80211.RadioType in wireless.cs
 ///
+
+// Wireless flags bits 8 - 11
 #define WIRELESS_FLAG_RADIO_a                  1
 #define WIRELESS_FLAG_RADIO_b                  2
 #define WIRELESS_FLAG_RADIO_g                  4
@@ -409,12 +414,14 @@ typedef struct SOCK_timeval {
 #define WIRELESS_FLAG_RADIO__set(x)            (((x) << WIRELESS_FLAG_RADIO__shift) & WIRELESS_FLAG_RADIO__mask)
 
 
+// Wireless flags bits 12 - 15
 #define WIRELESS_FLAG_DATA_ENCRYPTED           1
 #define WIRELESS_FLAG_DATA__shift              12
 #define WIRELESS_FLAG_DATA__mask               0x0000F000
 #define WIRELESS_FLAG_DATA__value(x)           (((x) & WIRELESS_FLAG_DATA__mask) >> WIRELESS_FLAG_DATA__shift)
 #define WIRELESS_FLAG_DATA__set(x)             (((x) << WIRELESS_FLAG_DATA__shift) & WIRELESS_FLAG_DATA__mask)
-    
+
+
 //extern const ConfigurationSector g_ConfigurationSector;
 
 //--//
@@ -500,8 +507,6 @@ int  Network_Interface_Open(int index);
 bool Network_Interface_Close(int index);
 
 //--//
-
-#define EVENT_NETWORK                            4
 
 #define NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED 1
 #define NETWORK_EVENT_TYPE_ADDRESS_CHANGED       2

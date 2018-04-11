@@ -2645,6 +2645,9 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
 
     TIL( "Microsoft.SPOT.Hardware" , "WatchdogException"             , m_WatchdogException                                  ),
 
+    TIL( "System.Net.NetworkInformation", "NetworkInterface"        , m_NetworkInterface                                   ),
+    TIL( "System.Net.NetworkInformation", "Wireless80211"           , m_Wireless80211                                      ),
+
 #if defined(NANOCLR_APPDOMAINS)
     TIL( "System"                  , "AppDomain"                     , m_AppDomain                                          ),
     TIL( "System"                  , "MarshalByRefObject"            , m_MarshalByRefObject                                 ),

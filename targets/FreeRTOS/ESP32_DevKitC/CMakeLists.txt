@@ -38,16 +38,18 @@ find_package(NF_Diagnostics REQUIRED)
 endif()
 
 # nF feature: Networking Stack, LWIP included in IDF libs
-if(USE_NETWORKING_OPTION)
 find_package(NF_NETWORKING REQUIRED)
-endif()
 
 #######################################
 
 add_subdirectory("common")
+add_subdirectory("Lwip")  # lwip must be before IDF
 add_subdirectory("IDF")
+add_subdirectory("Network")
 #add_subdirectory("nanoBooter")
 add_subdirectory("nanoCLR")
+
+
 #######################
 # nanoBooter executable
 
@@ -87,12 +89,15 @@ add_executable(
     "${NF_Debugger_SOURCES}"
     "${NF_Diagnostics_SOURCES}"
     
-	# sources for nanoFramework Network sockets
+	# sources for nanoFramework Network sockets & LWIP
     "${NF_Networking_SOURCES}"
-	
+    "${TARGET_ESP32_NETWORK_SOURCES}"
+    "${TARGET_LWIP_SOURCES}"
+    
     # # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
 )
+
 
 # Add link flags
 #set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--start-group ")

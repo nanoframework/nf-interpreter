@@ -6,6 +6,8 @@
 
 #include "win_dev_adc_native.h"
 
+extern "C" uint8_t temprature_sens_read(); 
+
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadValue___I4( CLR_RT_StackFrame& stack )
 {
@@ -25,14 +27,20 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
         CLR_RT_HeapBlock* adcController = pThis[FIELD___adcController].Dereference();
 
         // get pointer to _deviceId field
-        int adcNumber = adcController[Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::FIELD___deviceId].NumericByRef().s4;
+//       int adcNumber = adcController[Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::FIELD___deviceId].NumericByRef().s4;
+        int adcNumber = channelNumber <= 9 ? 1 : 2;
 
         if ( adcNumber == 1)
         {
-            if ( channelNumber == 9 ) 
-                reading = hall_sensor_read();
-            else
-                reading = adc1_get_raw( (adc1_channel_t)channelNumber); 
+            switch(channelNumber)
+            {
+                case 8:
+                    reading = temprature_sens_read(); break;
+                case 9:
+                    reading = hall_sensor_read(); break;
+                default:
+                     reading = adc1_get_raw( (adc1_channel_t)channelNumber); break;
+            }
         }
         else if ( adcNumber == 2)
         {

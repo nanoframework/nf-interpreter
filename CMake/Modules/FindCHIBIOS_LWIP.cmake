@@ -31,8 +31,6 @@ list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/l
 
 set(LWIP_SRCS
 
-    # bindings
-    lwipthread.c
     # sys_arch.c
 
     # core
@@ -88,7 +86,9 @@ set(LWIP_SRCS
     # api patched files for nanoframework
     nf_api_msg.c
     nf_sockets.c
-    nf_sys_arch.c
+	nf_sys_arch.c
+    # bindings
+	nf_lwipthread.c
 
     #extras
     evtimer.c

@@ -1228,6 +1228,9 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index m_SerializationHintsAttribute;
 
+    CLR_RT_TypeDef_Index m_NetworkInterface;
+    CLR_RT_TypeDef_Index m_Wireless80211;
+
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_TypeDef_Index m_AppDomain;
     CLR_RT_TypeDef_Index m_MarshalByRefObject;
