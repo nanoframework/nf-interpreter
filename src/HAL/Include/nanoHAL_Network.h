@@ -9,13 +9,12 @@
 #include <nanoPackStruct.h>
 #include <nanoWeak.h>
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH DeviceConfiguration.NetworkConfigurationProperties.AddressMode (in managed code) !!! //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.AddressMode (in managed code) !!! //
+///////////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////
-// Description: Startup network assigning modes
+// Description: Startup network IP assigning modes
 typedef enum AddressMode
 {
     AddressMode_DHCP       = 0x01,
@@ -28,7 +27,60 @@ typedef enum AddressMode
     
 }AddressMode;
 
-typedef struct __nfpack Configuration_Network {
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.AuthenticationType (in managed code) !!! //
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+// Description: authentication used in wireless network
+typedef enum AuthenticationType
+{
+    AuthenticationType_None     = 0x00,
+    AuthenticationType_EAP      = 0x01,
+    AuthenticationType_PEAP     = 0x02,
+    AuthenticationType_WCN      = 0x03,
+    AuthenticationType_Open     = 0x04,
+    AuthenticationType_Shared   = 0x05,
+    AuthenticationType_WEP      = 0x06,
+    AuthenticationType_WPA      = 0x07,
+    AuthenticationType_WPA2     = 0x08,
+    
+}AuthenticationType;
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.EncryptionType (in managed code) !!! //
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+// Description: encryption used in wireless network
+typedef enum EncryptionType
+{
+    EncryptionType_None         = 0x00,
+    EncryptionType_WEP          = 0x01,
+    EncryptionType_WPA          = 0x02,
+    EncryptionType_WPA2         = 0x03,
+    EncryptionType_WPA_PSK      = 0x04,
+    EncryptionType_WPA2_PSK     = 0x05,
+    EncryptionType_Certificate  = 0x06,
+    
+}EncryptionType;
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.RadioType (in managed code) !!! //
+/////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////
+// Description: type of radio that the wireless network uses
+typedef enum RadioType
+{
+    RadioType_None      = 0x00,
+    RadioType_802_11a   = 0x01,
+    RadioType_802_11b   = 0x02,
+    RadioType_802_11g   = 0x03,
+    RadioType_802_11n   = 0x04,
+}RadioType;
+
+typedef struct __nfpack Configuration_NetworkInterface {
 
     // this is the marker placeholder for this configuration block
     uint8_t Marker[4];
@@ -46,10 +98,10 @@ typedef struct __nfpack Configuration_Network {
     uint32_t  IPv4GatewayAddress;
 
     // DNS server 1 IPv4 address as 32-bit unsigned integer
-    uint32_t  IPv4DNS1Address;
+    uint32_t  IPv4DNSAddress1;
 
     // DNS server 2 IPv4 address as 32-bit unsigned integer
-    uint32_t  IPv4DNS2Address;
+    uint32_t  IPv4DNSAddress2;
 
     // Network IPv6 address as an array of 4 32-bit unsigned integers
     uint32_t  IPv6Address[4];
@@ -61,29 +113,47 @@ typedef struct __nfpack Configuration_Network {
     uint32_t  IPv6GatewayAddress[4];
 
     // DNS server 1 IPv6 address as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6DNS1Address[4];
+    uint32_t  IPv6DNSAddress1[4];
 
     // DNS server 2 IPv6 address as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6DNS2Address[4];
+    uint32_t  IPv6DNSAddress2[4];
 
     // Startup network addressing mode - static, DHCP, auto
     AddressMode StartupAddressMode;
 
-}Configuration_Network;
+} Configuration_NetworkInterface;
+
+
+typedef struct __nfpack Configuration_Wireless80211NetworkInterface {
+
+    // this is the marker placeholder for this configuration block
+    uint8_t Marker[4];
+    
+    // Network interface configuration
+    Configuration_NetworkInterface NetworkConfig;
+
+    // Type of authentication used on the wireless network
+    AuthenticationType Authentication;
+
+    // Type of encryption used on the wireless network.
+    EncryptionType Encryption;
+
+    // Type of radio used by the wireless network adapter.
+    RadioType Radio;
+
+    // Network SSID
+    uint8_t Ssid[32];
+
+    // Network password
+    uint8_t Password[64];
+
+} Configuration_Wireless80211NetworkInterface;
 
 void 	nanoHAL_Network_Initialize();
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// GetConfigurationNetwork() is defined in targetHAL_Network.cpp at target level because the targets 
-// need to be free to implement the storage of the configuration block as they see fit
-__nfweak bool GetConfigurationNetwork(Configuration_Network* configurationNetwork);
-
-// StoreConfigurationNetwork() is defined in targetHAL_Network.cpp at target level because the targets 
-// need to be free to implement the storage of the configuration block as they see fit
-__nfweak bool StoreConfigurationNetwork(Configuration_Network* configurationNetwork);
 
 #ifdef __cplusplus
 }

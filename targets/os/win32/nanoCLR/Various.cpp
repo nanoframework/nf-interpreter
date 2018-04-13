@@ -68,12 +68,12 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
     { 0, 0 },   // { FLASH_MEMORY_Base, FLASH_MEMORY_Size },
 };
 
-bool GetConfigurationNetwork(Configuration_Network* configurationNetwork)
+bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex)
 {
 	return true;
 }
 
-bool StoreConfigurationNetwork(Configuration_Network* configurationNetwork)
+bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize)
 {
 	return true;
 }

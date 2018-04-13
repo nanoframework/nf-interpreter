@@ -23,13 +23,12 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
     NANOCLR_CLEAR(config);
     NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadAdapterConfiguration( interfaceIndex, &config ));
 
-    pConfig[ FIELD___flags                ].SetInteger( (CLR_UINT32)config.flags      );
-    pConfig[ FIELD___ipAddress            ].SetInteger( (CLR_UINT32)config.ipaddr     );
-    pConfig[ FIELD___gatewayAddress       ].SetInteger( (CLR_UINT32)config.gateway    );
-    pConfig[ FIELD___subnetMask           ].SetInteger( (CLR_UINT32)config.subnetmask );
-    pConfig[ FIELD___dnsAddress1          ].SetInteger( (CLR_UINT32)config.dnsServer1 );
-    pConfig[ FIELD___dnsAddress2          ].SetInteger( (CLR_UINT32)config.dnsServer2 );    
-    pConfig[ FIELD___networkInterfaceType ].SetInteger( (CLR_UINT32)config.networkInterfaceType );
+    pConfig[ FIELD___ipv4Address            ].SetInteger( (CLR_UINT32)config.ipaddr     );
+    pConfig[ FIELD___ipv4GatewayAddress     ].SetInteger( (CLR_UINT32)config.gateway    );
+    pConfig[ FIELD___ipv4NetMask            ].SetInteger( (CLR_UINT32)config.subnetmask );
+    pConfig[ FIELD___ipv4dnsAddress1        ].SetInteger( (CLR_UINT32)config.dnsServer1 );
+    pConfig[ FIELD___ipv4dnsAddress2        ].SetInteger( (CLR_UINT32)config.dnsServer2 );    
+    pConfig[ FIELD___networkInterfaceType   ].SetInteger( (CLR_UINT32)config.networkInterfaceType );
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pConfig[ FIELD___macAddress ], config.macAddressLen, g_CLR_RT_WellKnownTypes.m_UInt8 ));   
 
@@ -51,12 +50,11 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
 
     NANOCLR_CLEAR(config);
 
-    config.flags                = pConfig[ FIELD___flags                ].NumericByRef().u4;
-    config.ipaddr               = pConfig[ FIELD___ipAddress            ].NumericByRef().u4;
-    config.gateway              = pConfig[ FIELD___gatewayAddress       ].NumericByRef().u4;
-    config.subnetmask           = pConfig[ FIELD___subnetMask           ].NumericByRef().u4;
-    config.dnsServer1           = pConfig[ FIELD___dnsAddress1          ].NumericByRef().u4;
-    config.dnsServer2           = pConfig[ FIELD___dnsAddress2          ].NumericByRef().u4;
+    config.ipaddr               = pConfig[ FIELD___ipv4Address            ].NumericByRef().u4;
+    config.gateway              = pConfig[ FIELD___ipv4GatewayAddress       ].NumericByRef().u4;
+    config.subnetmask           = pConfig[ FIELD___ipv4NetMask           ].NumericByRef().u4;
+    config.dnsServer1           = pConfig[ FIELD___ipv4dnsAddress1          ].NumericByRef().u4;
+    config.dnsServer2           = pConfig[ FIELD___ipv4dnsAddress2          ].NumericByRef().u4;
     config.networkInterfaceType = pConfig[ FIELD___networkInterfaceType ].NumericByRef().u4;
     
     if(pMACAddress != NULL)
@@ -93,7 +91,6 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     CLR_RT_HeapBlock*         pConfig;
     CLR_UINT32                interfaceIndex = stack.Arg0().NumericByRef().u4;
     CLR_RT_HeapBlock&         top            = stack.PushValueAndClear();
-    //RSAKey*                   key            = NULL;
 
     NANOCLR_CLEAR(config);
 
@@ -103,32 +100,31 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     
     switch(type)
     {
-    case SOCK_NETWORKCONFIGURATION_FLAGS_NETWORK_INTERFACE:
-        {
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_NetworkInterface ));
-            break;
-        }
-    case SOCK_NETWORKCONFIGURATION_FLAGS_WIRELESS:
-        {
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_Wireless80211 ));
-            break;
-        }
-    default:
-        {
-            /// Unknown type, not supported.
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            break;
-        }
+        case SOCK_NETWORKCONFIGURATION_FLAGS_NETWORK_INTERFACE:
+            {
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_NetworkInterface ));
+                break;
+            }
+        case SOCK_NETWORKCONFIGURATION_FLAGS_WIRELESS:
+            {
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_Wireless80211 ));
+                break;
+            }
+        default:
+            {
+                /// Unknown type, not supported.
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                break;
+            }
     }
     
     pConfig = top.Dereference(); FAULT_ON_NULL(pConfig);
     
-    pConfig[ FIELD___flags                ].SetInteger( (CLR_UINT32)config.flags      );
-    pConfig[ FIELD___ipAddress            ].SetInteger( (CLR_UINT32)config.ipaddr     );
-    pConfig[ FIELD___gatewayAddress       ].SetInteger( (CLR_UINT32)config.gateway    );
-    pConfig[ FIELD___subnetMask           ].SetInteger( (CLR_UINT32)config.subnetmask );
-    pConfig[ FIELD___dnsAddress1          ].SetInteger( (CLR_UINT32)config.dnsServer1 );
-    pConfig[ FIELD___dnsAddress2          ].SetInteger( (CLR_UINT32)config.dnsServer2 );    
+    pConfig[ FIELD___ipv4Address            ].SetInteger( (CLR_UINT32)config.ipaddr     );
+    pConfig[ FIELD___ipv4GatewayAddress       ].SetInteger( (CLR_UINT32)config.gateway    );
+    pConfig[ FIELD___ipv4NetMask           ].SetInteger( (CLR_UINT32)config.subnetmask );
+    pConfig[ FIELD___ipv4dnsAddress1          ].SetInteger( (CLR_UINT32)config.dnsServer1 );
+    pConfig[ FIELD___ipv4dnsAddress2          ].SetInteger( (CLR_UINT32)config.dnsServer2 );    
     pConfig[ FIELD___networkInterfaceType ].SetInteger( (CLR_UINT32)config.networkInterfaceType );
     pConfig[ FIELD___interfaceIndex       ].SetInteger( interfaceIndex    );
 
@@ -136,74 +132,31 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
 
     memcpy( pConfig[ FIELD___macAddress ].DereferenceArray()->GetFirstElement(), config.macAddressBuffer, config.macAddressLen );
 
-    /// Type specific load.
+    // Type specific load.
     switch(type)
     {
-    case SOCK_NETWORKCONFIGURATION_FLAGS_WIRELESS:
-        {
-            CLR_UINT32 wirelessIndex = SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__value(config.flags);
-            SOCK_WirelessConfiguration wirelessConfig;
-            
-            NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadWirelessConfiguration( wirelessIndex, &wirelessConfig ));
-
-            pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__Authentication ].SetInteger( (CLR_INT32)WIRELESS_FLAG_AUTHENTICATION__value(wirelessConfig.wirelessFlags) );
-            pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__Encryption     ].SetInteger( (CLR_INT32)WIRELESS_FLAG_ENCRYPTION__value    (wirelessConfig.wirelessFlags) );
-            pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__Radio          ].SetInteger( (CLR_INT32)WIRELESS_FLAG_RADIO__value         (wirelessConfig.wirelessFlags) );
-
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__NetworkKey ], wirelessConfig.networkKeyLength, g_CLR_RT_WellKnownTypes.m_UInt8 )); 
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__ReKeyInternal ], wirelessConfig.reKeyLength, g_CLR_RT_WellKnownTypes.m_UInt8 )); 
-
-            uint32_t dataFlag = WIRELESS_FLAG_DATA__value(wirelessConfig.wirelessFlags);
-            if (dataFlag & WIRELESS_FLAG_DATA_ENCRYPTED)
+        case SOCK_NETWORKCONFIGURATION_FLAGS_WIRELESS:
             {
-                ASSERT(FALSE);  // TODO: ADD SUPPORT FOR ENCRYPTION
-                //key = RetrieveWirelessEncryptionKey();
-            }
+                CLR_UINT32 wirelessIndex = SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__value(config.flags);
+                SOCK_WirelessConfiguration wirelessConfig;
+                
+                NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadWirelessConfiguration( wirelessIndex, &wirelessConfig ));
 
-            //if (key == NULL)
-            {   
+                pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::FIELD__Authentication ].SetInteger( (CLR_INT32)WIRELESS_FLAG_AUTHENTICATION__value(wirelessConfig.wirelessFlags) );
+                pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::FIELD__Encryption     ].SetInteger( (CLR_INT32)WIRELESS_FLAG_ENCRYPTION__value    (wirelessConfig.wirelessFlags) );
+                pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::FIELD__Radio          ].SetInteger( (CLR_INT32)WIRELESS_FLAG_RADIO__value         (wirelessConfig.wirelessFlags) );
+
                 wirelessConfig.passPhrase[ WIRELESS_PASSPHRASE_LENGTH - 1 ] = 0;
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__PassPhrase ], wirelessConfig.passPhrase ));                
-                if(wirelessConfig.networkKeyLength > 0)
-                {
-                    memcpy( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__NetworkKey ].DereferenceArray()->GetFirstElement(), wirelessConfig.networkKey, wirelessConfig.networkKeyLength );                
-                }
-                if(wirelessConfig.reKeyLength > 0)
-                {
-                    memcpy( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__ReKeyInternal ].DereferenceArray()->GetFirstElement(), wirelessConfig.reKeyInternal, wirelessConfig.reKeyLength );
-                }
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::FIELD__Password ], wirelessConfig.passPhrase ));                
+
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::FIELD__Ssid ], wirelessConfig.ssid ));                
+
+                break;
             }
-            /*
-                    else
-                    {   
-                        char passPhrase[ WIRELESS_PASSPHRASE_LENGTH ];
-                        
-                        Decrypt( (BYTE *)key, (BYTE *)wirelessConfig.passPhrase, WIRELESS_PASSPHRASE_LENGTH - 1, (BYTE *)passPhrase, WIRELESS_PASSPHRASE_LENGTH - 1 );
-                        passPhrase[ WIRELESS_PASSPHRASE_LENGTH - 1 ] = 0;
-                        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__PassPhrase ], passPhrase ));
-
-                        if(wirelessConfig.networkKeyLength > 0)
-                        {
-                            Decrypt( (BYTE *)key, (BYTE *)wirelessConfig.networkKey, wirelessConfig.networkKeyLength, pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__NetworkKey ].DereferenceArray()->GetFirstElement(), wirelessConfig.networkKeyLength );
-                        }
-
-                        if(wirelessConfig.reKeyLength > 0)
-                        {
-                            Decrypt( (BYTE *)key, (BYTE *)wirelessConfig.reKeyInternal, wirelessConfig.reKeyLength, pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__ReKeyInternal ].DereferenceArray()->GetFirstElement(), wirelessConfig.reKeyLength );                
-                        }
-                    }
-                    */
-
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__Ssid ], wirelessConfig.ssid ));                
-
-            pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::FIELD__Id ].SetInteger( wirelessIndex );
-
-            break;
-        }
-    default:
-        {
-            break;
-        }
+        default:
+            {
+                break;
+            }
     }
 
     NANOCLR_NOCLEANUP();

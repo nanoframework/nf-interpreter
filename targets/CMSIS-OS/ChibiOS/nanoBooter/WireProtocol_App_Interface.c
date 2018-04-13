@@ -19,7 +19,7 @@ static const CommandHandlerLookup c_Lookup_Request[] =
     DEFINE_CMD(Ping       ),
     DEFINE_CMD(Reboot     ),
     // //
-    // DEFINE_CMD(ReadMemory ),
+    DEFINE_CMD(ReadMemory ),
     DEFINE_CMD(WriteMemory),
     DEFINE_CMD(CheckMemory),
     DEFINE_CMD(EraseMemory),

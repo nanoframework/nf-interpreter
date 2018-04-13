@@ -50,13 +50,6 @@ typedef enum MemoryMap_Options
 
 }MemoryMap_Options;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.DeviceConfiguration.DeviceConfigurationOption (in managed code) !!! //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-typedef enum DeviceConfigurationOption
-{
-    DeviceConfigurationOption_Network = 1,
-}DeviceConfigurationOption;
 
 //////////////////////////////////////////
 // typedefs
@@ -159,12 +152,14 @@ typedef struct CLR_DBG_Commands_Monitor_MemoryMap
 typedef struct Monitor_QueryConfiguration_Command
 {
     uint32_t Configuration;
+    uint32_t BlockIndex;
 
 }Monitor_QueryConfiguration_Command;
 
 typedef struct Monitor_UpdateConfiguration_Command
 {
     uint32_t Configuration;
+    uint32_t BlockIndex;
     uint32_t Length;
     uint8_t Data[1];
 
