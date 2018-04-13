@@ -7,7 +7,6 @@
 
 #include <nanoHAL.h>
 #include <lwipthread.h>
-#include <Target_BlockStorage_STM32FlashDriver.h>
 
 
 // this is the declaration for the callback implement in nf_sys_arch.c 
@@ -27,9 +26,9 @@ void nanoHAL_Network_Initialize()
     set_signal_sock_function( &sys_signal_sock_event );
 
     // get network configuration
-    Configuration_Network* networkConfig = (Configuration_Network*)platform_malloc(sizeof(Configuration_Network));
+    Configuration_NetworkInterface* networkConfig = (Configuration_NetworkInterface*)platform_malloc(sizeof(Configuration_NetworkInterface));
     
-    if(GetConfigurationNetwork(networkConfig) == true)
+    if(ConfigurationManager_GetConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0) == true)
     {
         // build lwIP configuration 
         struct lwipthread_opts lwipOptions;
@@ -66,22 +65,4 @@ void nanoHAL_Network_Initialize()
         // free memory
         platform_free(networkConfig);
     }
-}
-
-// Gets the network configuration block from the configuration block stored in the flash sector, 
-// it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is used
-__nfweak bool GetConfigurationNetwork(Configuration_Network* configurationNetwork)
-{
-    // copy the config block content to the pointer in the argument
-    memcpy(configurationNetwork, (Configuration_Network*)&__nanoConfig_start__, sizeof(Configuration_Network));
-
-    return TRUE;
-}
-
-// Stored the network configuration block to the configuration block stored in the flash sector, 
-// it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is used
-__nfweak bool StoreConfigurationNetwork(Configuration_Network* configurationNetwork)
-{
-    // copy the config block content to the config block storage
-    return STM32FlashDriver_Write(NULL, (ByteAddress)&__nanoConfig_start__, sizeof(Configuration_Network), (unsigned char*)configurationNetwork, true);
 }

@@ -66,7 +66,7 @@ BOOL Decrypt( BYTE *Key, BYTE *pCypherText, DWORD cbCypherText, BYTE* pPlainText
 }
 */
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::UpdateConfiguration___STATIC__VOID__SystemNetNetworkInformationWireless80211__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::UpdateConfiguration___STATIC__VOID__SystemNetNetworkInformationWireless80211__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
@@ -163,7 +163,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::Upda
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211::SaveAllConfigurations___STATIC__VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::SaveAllConfigurations___STATIC__VOID( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();

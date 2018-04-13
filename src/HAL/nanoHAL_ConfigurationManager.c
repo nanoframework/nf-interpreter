@@ -1,0 +1,107 @@
+//
+// Copyright (c) 2018 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
+
+#include <string.h>
+#include <nanoHAL_ConfigurationManager.h>
+
+
+uint32_t FindNextBlock(uint32_t startAddress, uint32_t endAddress, const unsigned char* marker)
+{
+    // all configuration markers are 4 bytes length
+
+    unsigned char* cursor = (unsigned char*)startAddress;
+
+    while(cursor < (unsigned char*)endAddress - 4)
+    {
+        if(memcmp(cursor, marker, 4 ) == 0)
+        {
+            // found one!
+            break;
+        }
+
+        cursor++;
+    }
+
+    return (uint32_t)cursor;
+}
+
+uint32_t GetBlockCount(uint32_t startAddress, uint32_t endAddress, uint32_t blockSize, const unsigned char* marker)
+{
+    // all configuration markers are 4 bytes length
+    int blockCount = 0;
+
+    unsigned char* cursor = (unsigned char*)startAddress;
+
+    while(cursor < (unsigned char*)endAddress - 4)
+    {
+        if(memcmp(cursor, marker, 4 ) == 0)
+        {
+            // found one!
+            blockCount++;
+
+            // bump cursor to the end of the config block size
+            cursor +=blockSize;
+        }
+        else
+        {
+            cursor++;
+        }
+    }
+
+    return blockCount;
+}
+
+__nfweak HAL_CONFIGURATION_NETWORK* ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
+{
+    uint32_t nextBlock = startAddress;
+
+    // first pass: find out how many blocks of this type we have
+    uint32_t blockCount = GetBlockCount(startAddress, endAddress, sizeof(Configuration_NetworkInterface), c_MARKER_CONFIGURATION_NETWORK_V1);
+
+    // allocate config struct
+    HAL_CONFIGURATION_NETWORK *networkConfigs = (HAL_CONFIGURATION_NETWORK *)platform_malloc(offsetof(HAL_CONFIGURATION_NETWORK, Configs) + blockCount * sizeof(networkConfigs->Configs[0]));
+
+    // set collection count
+    networkConfigs->Count = blockCount;
+
+    if(blockCount > 0)
+    {
+
+        // second pass: get address of each config block
+        for(int i = 0; i < blockCount; i++)
+        {
+            nextBlock = FindNextBlock(nextBlock, endAddress, c_MARKER_CONFIGURATION_NETWORK_V1);
+            networkConfigs->Configs[i] = (Configuration_NetworkInterface*)nextBlock;
+        }
+    }
+
+    return networkConfigs;
+}
+
+__nfweak HAL_CONFIGURATION_NETWORK_WIRELESS80211* ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
+{
+    uint32_t nextBlock = startAddress;
+
+    // first pass: find out how many blocks of this type we have
+    uint32_t blockCount = GetBlockCount(startAddress, endAddress, sizeof(Configuration_Wireless80211NetworkInterface), c_MARKER_CONFIGURATION_WIRELESS80211_NETWORK_V1);
+
+    // allocate config struct
+    HAL_CONFIGURATION_NETWORK_WIRELESS80211 *networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) + blockCount * sizeof(networkWirelessConfigs->Configs[0]));
+
+    // set collection count
+    networkWirelessConfigs->Count = blockCount;
+
+    if(blockCount > 0)
+    {
+        // second pass: get address of each config block
+        for(int i = 0; i < blockCount; i++)
+        {
+            nextBlock = FindNextBlock(nextBlock, endAddress, c_MARKER_CONFIGURATION_WIRELESS80211_NETWORK_V1);
+            networkWirelessConfigs->Configs[i] = (Configuration_Wireless80211NetworkInterface*)nextBlock;
+        }
+    }
+
+    return networkWirelessConfigs;
+}

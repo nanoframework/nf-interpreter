@@ -21,7 +21,7 @@ set(System.Net_SRCS
 
     # System.Net.NetworkInformation
     sys_net_native_System_Net_NetworkInformation_NetworkInterface.cpp
-    sys_net_native_System_Net_NetworkInformation_Wireless80211.cpp
+    sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface.cpp
 )
 
 foreach(SRC_FILE ${System.Net_SRCS})

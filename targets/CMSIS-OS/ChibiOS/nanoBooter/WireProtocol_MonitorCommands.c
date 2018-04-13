@@ -178,29 +178,43 @@ int Monitor_QueryConfiguration(WP_Message* message)
     int size          = 0;
     bool success     = false;
 
-    Configuration_Network* config = (Configuration_Network*)platform_malloc(sizeof(Configuration_Network));
+    Configuration_NetworkInterface* configNetworkInterface;
+    Configuration_Wireless80211NetworkInterface* configWireless80211NetworkInterface;
 
-    if (!config)
+    switch((DeviceConfigurationOption)cmd->Configuration)
     {
-        WP_ReplyToCommand( message, false, false, NULL, 0 );
+        case DeviceConfigurationOption_Network:
+
+            configNetworkInterface = (Configuration_NetworkInterface*)platform_malloc(sizeof(Configuration_NetworkInterface));
+
+            if(ConfigurationManager_GetConfigurationBlock(configNetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
+            {
+                size = sizeof(Configuration_NetworkInterface);
+                success = true;
+
+                WP_ReplyToCommand( message, success, false, (uint8_t*)configNetworkInterface, size );
+                platform_free(configNetworkInterface);
+            }            
+            break;
+
+        case DeviceConfigurationOption_Wireless80211Network:
+
+            configWireless80211NetworkInterface = (Configuration_Wireless80211NetworkInterface*)platform_malloc(sizeof(Configuration_Wireless80211NetworkInterface));
+
+            if(ConfigurationManager_GetConfigurationBlock(configWireless80211NetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
+            {
+                size = sizeof(Configuration_Wireless80211NetworkInterface);
+                success = true;
+
+                WP_ReplyToCommand( message, success, false, (uint8_t*)configWireless80211NetworkInterface, size );
+                platform_free(configWireless80211NetworkInterface);
+            }
+            break;
     }
-    else
+
+    if(!success)
     {
-        switch(cmd->Configuration)
-        {
-            case DeviceConfigurationOption_Network:
-
-                if(GetConfigurationNetwork(config) == true)
-                {
-                    size = sizeof(Configuration_Network);
-                    success = true;
-                }
-                break;
-        }
-
-        WP_ReplyToCommand( message, success, false, (uint8_t*)config, size );
-
-       platform_free(config);
+        WP_ReplyToCommand( message, success, false, NULL, size );
     }
 
     return success;
@@ -208,16 +222,17 @@ int Monitor_QueryConfiguration(WP_Message* message)
 
 int Monitor_UpdateConfiguration(WP_Message* message)
 {
+    bool success = false;
+
     Monitor_UpdateConfiguration_Command* cmd = (Monitor_UpdateConfiguration_Command*)message->m_payload;
     Monitor_UpdateConfiguration_Reply cmdReply;
 
-    bool success     = false;
-
-    switch(cmd->Configuration)
+    switch((DeviceConfigurationOption)cmd->Configuration)
     {
         case DeviceConfigurationOption_Network:
-
-            if(StoreConfigurationNetwork((Configuration_Network*)cmd->Data) == true)
+        case DeviceConfigurationOption_Wireless80211Network:
+        case DeviceConfigurationOption_All:
+            if(ConfigurationManager_StoreConfigurationBlock(cmd->Data, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex, cmd->Length) == true)
             {
                 cmdReply.ErrorCode = 0;
                 success = true;
@@ -225,8 +240,11 @@ int Monitor_UpdateConfiguration(WP_Message* message)
             else 
             {
                 cmdReply.ErrorCode = 100;
-            }            
+            }
             break;
+
+        default:
+            cmdReply.ErrorCode = 10;
     }
   
     WP_ReplyToCommand(message, success, false, &cmdReply, sizeof(cmdReply));

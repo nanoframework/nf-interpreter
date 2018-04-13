@@ -13,6 +13,7 @@
 #include <nanoWeak.h>
 
 #include <nanoHAL_Network.h>
+#include <nanoHAL_ConfigurationManager.h>
 
 typedef enum SYSTEM_STATE
 {

@@ -35,6 +35,8 @@ void nanoHAL_Initialize()
     ::HeapLocation( heapStart, heapSize );
     memset(heapStart, 0, heapSize);
 
+    ConfigurationManager_Initialize();
+
     Events_Initialize();
 
     // no PAL events required until now
