@@ -23,6 +23,13 @@ __nfweak int Monitor_OemInfo(WP_Message* message)
 }
 
 // provided as weak to be replaced by actual implementation by application
+__nfweak int Monitor_ReadMemory(WP_Message* message)
+{
+   // default to false
+   return false;
+}
+
+// provided as weak to be replaced by actual implementation by application
 __nfweak int Monitor_WriteMemory(WP_Message* message)
 {
    // default to false

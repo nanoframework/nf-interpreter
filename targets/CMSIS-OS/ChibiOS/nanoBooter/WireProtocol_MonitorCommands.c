@@ -50,9 +50,11 @@ static int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buff
             // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
             return stm32FlashIsErased(location, lengthInBytes);
 
-        ///////////////////////////////////
-        // modes NOT supported
         case AccessMemory_Read:
+            // use FLASH driver to perform read operation
+            // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
+            return stm32FlashReadBytes(location, lengthInBytes, buffer);
+
         default:
             // default return is FALSE
             return false;
@@ -90,6 +92,21 @@ int Monitor_OemInfo(WP_Message* message)
         
         WP_ReplyToCommand(message, fOK, false, &cmdReply, sizeof(cmdReply));
     }
+
+    return true;
+}
+
+int Monitor_ReadMemory(WP_Message* message)
+{
+    CLR_DBG_Commands_Monitor_ReadMemory* cmd = (CLR_DBG_Commands_Monitor_ReadMemory*)message->m_payload;
+
+    unsigned char buf[ 1024 ];
+    unsigned int len = cmd->length; if(len > sizeof(buf)) len = sizeof(buf);
+    unsigned int errorCode;
+
+    AccessMemory(cmd->address, len, buf, AccessMemory_Read, &errorCode );
+
+    WP_ReplyToCommand(message, true, false, buf, len);
 
     return true;
 }
