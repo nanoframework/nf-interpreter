@@ -6,7 +6,12 @@
 #include <nanoHAL.h>
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
+<<<<<<< HEAD
 #include "Esp32_os.h"
+=======
+#include <Esp32_os.h>
+#include <nvs.h>
+>>>>>>> 32fab16bd6f245811e65468a29d021e12cc730e7
 
 // initialization of configuration manager
 // provided as weak so it can be replaced at target level, if required because of the target implementing the storage with a mechanism other then saving to flash
@@ -101,5 +106,9 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
         ConfigurationManager_EnumerateConfigurationBlocks();
     }
 
+<<<<<<< HEAD
     return success;
+=======
+    return result;
+>>>>>>> 32fab16bd6f245811e65468a29d021e12cc730e7
 }
