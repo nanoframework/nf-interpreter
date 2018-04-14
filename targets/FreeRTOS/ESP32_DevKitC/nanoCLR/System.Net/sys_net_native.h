@@ -18,14 +18,19 @@
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 {
     static const int FIELD___interfaceIndex = 1;
-    static const int FIELD___flags = 2;
-    static const int FIELD___ipAddress = 3;
-    static const int FIELD___gatewayAddress = 4;
-    static const int FIELD___subnetMask = 5;
-    static const int FIELD___dnsAddress1 = 6;
-    static const int FIELD___dnsAddress2 = 7;
-    static const int FIELD___networkInterfaceType = 8;
-    static const int FIELD___macAddress = 9;
+    static const int FIELD___macAddress = 2;
+    static const int FIELD___startupAddressMode = 3;
+    static const int FIELD___ipv4Address = 4;
+    static const int FIELD___ipv4NetMask = 5;
+    static const int FIELD___ipv4GatewayAddress = 6;
+    static const int FIELD___ipv4dnsAddress1 = 7;
+    static const int FIELD___ipv4dnsAddress2 = 8;
+    static const int FIELD___ipv6Address = 9;
+    static const int FIELD___ipv6NetMask = 10;
+    static const int FIELD___ipv6GatewayAddress = 11;
+    static const int FIELD___ipv6dnsAddress1 = 12;
+    static const int FIELD___ipv6dnsAddress2 = 13;
+    static const int FIELD___networkInterfaceType = 14;
 
     NANOCLR_NATIVE_DECLARE(InitializeNetworkInterfaceSettings___VOID);
     NANOCLR_NATIVE_DECLARE(UpdateConfiguration___VOID__I4);
@@ -37,18 +42,15 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 
 };
 
-struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211
+struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface
 {
-    static const int FIELD__Authentication = 10;
-    static const int FIELD__Encryption = 11;
-    static const int FIELD__Radio = 12;
-    static const int FIELD__PassPhrase = 13;
-    static const int FIELD__NetworkKey = 14;
-    static const int FIELD__ReKeyInternal = 15;
-    static const int FIELD__Ssid = 16;
-    static const int FIELD__Id = 17;
+    static const int FIELD__Authentication = 15;
+    static const int FIELD__Encryption = 16;
+    static const int FIELD__Radio = 17;
+    static const int FIELD__Password = 18;
+    static const int FIELD__Ssid = 19;
 
-    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID__SystemNetNetworkInformationWireless80211__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID__SystemNetNetworkInformationWireless80211NetworkInterface__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(SaveAllConfigurations___STATIC__VOID);
 
     //--//
