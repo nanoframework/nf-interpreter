@@ -35,7 +35,7 @@ foreach(SRC_FILE ${System.Net_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    message("${SRC_FILE} >> ${System.Net_SRC_FILE}") # debug helper
+    # message("${SRC_FILE} >> ${System.Net_SRC_FILE}") # debug helper
     list(APPEND System.Net_SOURCES ${System.Net_SRC_FILE})
 endforeach()
 

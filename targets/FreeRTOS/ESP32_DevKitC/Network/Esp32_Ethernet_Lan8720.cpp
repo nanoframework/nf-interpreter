@@ -91,7 +91,7 @@ esp_err_t Esp32_InitialiseEthernet( uint8_t * pMacAdr)
 //
 int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config) 
 { 
-    if ( Esp32_InitialiseEthernet(config->macAddressBuffer) == ESP_OK )
+    if ( Esp32_InitialiseEthernet(config->MacAddress) == ESP_OK )
     {
        // Return NetIf number for Esp32 wireless station
 

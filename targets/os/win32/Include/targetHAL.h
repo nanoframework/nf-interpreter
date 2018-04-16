@@ -6,7 +6,6 @@
 #ifndef _TARGET_HAL_H_
 #define _TARGET_HAL_H_
 
-// #include <nanoHAL_Time.h>
 // #include <nanoHAL_Power.h>
 
 #if defined(_WIN32)

@@ -27,6 +27,10 @@
 #define WIRELESS_REKEYINTERNAL_LENGTH          32
 #define WIRELESS_SSID_LENGTH                   32
 
+#if !defined(WIRELESS_INTERFACE_COUNT)
+#define WIRELESS_INTERFACE_COUNT                0
+#endif
+
 struct SOCK_WirelessConfiguration
 {  
     /// Bits 0-3: Authetication, 4-7: Encryption, 8-11: Radio.

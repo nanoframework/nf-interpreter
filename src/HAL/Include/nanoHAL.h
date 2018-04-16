@@ -36,7 +36,6 @@
 #include <targetHAL.h>
 #include <nanoHAL_Types.h>
 #include <nanoHAL_ReleaseInfo.h>
-#include <nanoHAL_Network.h>
 
 //#if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
 //#define ENABLE_NATIVE_PROFILER

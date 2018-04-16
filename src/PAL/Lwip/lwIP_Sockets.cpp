@@ -779,9 +779,10 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration( uint32_t interfaceIndex, 
             config->IPv4NetMask = pNetIf->netmask.u_addr.ip4.addr;
             config->IPv4GatewayAddress    = pNetIf->gw.u_addr.ip4.addr;
 
-            config->IPv6Address     = pNetIf->ip_addr.u_addr.ip6.addr;
-            config->IPv6NetMask = pNetIf->netmask.u_addr.ip6.addr;
-            config->IPv6GatewayAddress    = pNetIf->gw.u_addr.ip6.addr;
+            // FIXME IPV6
+            // config->IPv6Address     = pNetIf->ip_addr.u_addr.ip6.addr;
+            // config->IPv6NetMask = pNetIf->netmask.u_addr.ip6.addr;
+            // config->IPv6GatewayAddress    = pNetIf->gw.u_addr.ip6.addr;
 #else
             config->IPv4Address     = pNetIf->ip_addr.addr;
             config->IPv4NetMask = pNetIf->netmask.addr;
@@ -794,14 +795,16 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration( uint32_t interfaceIndex, 
             config->IPv4DNSAddress1 = dns_getserver(0)->u_addr.ip4.addr;
             config->IPv4DNSAddress2 = dns_getserver(1)->u_addr.ip4.addr;
 
-            config->IPv6DNSAddress1 = dns_getserver(0)->u_addr.ip6.addr;
-            config->IPv6DNSAddress2 = dns_getserver(1)->u_addr.ip6.addr;
+            // FIXME IPV6
+            // config->IPv6DNSAddress1 = dns_getserver(0)->u_addr.ip6.addr;
+            // config->IPv6DNSAddress2 = dns_getserver(1)->u_addr.ip6.addr;
 #else
             config->IPv4DNSAddress1 = dns_getserver(0).u_addr.ip4.addr;
             config->IPv4DNSAddress2 = dns_getserver(1).u_addr.ip4.addr;
 
-            config->IPv6DNSAddress1 = dns_getserver(0).u_addr.ip6.addr;
-            config->IPv6DNSAddress2 = dns_getserver(1).u_addr.ip6.addr;
+            // FIXME IPV6
+            // config->IPv6DNSAddress1 = dns_getserver(0).u_addr.ip6.addr;
+            // config->IPv6DNSAddress2 = dns_getserver(1).u_addr.ip6.addr;
 #endif
 #else
 #if LWIP_VERSION_MAJOR == 2 
