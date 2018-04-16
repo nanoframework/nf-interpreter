@@ -7,15 +7,13 @@
 #include <nanoHAL.h>
 #include "Esp32_os.h"
 
-extern NETWORK_CONFIG  g_NetworkConfig;
 
 //
 // Works with the Target_NetworkConfig to map the Network_Interface_XXXXX calls to the correct driver
-// This works in conjunction with the g_NetworkConfig in the Target_NetworkConfig.cpp
 	
-int  Esp32_Wireless_Open(int index, SOCK_NetworkConfiguration * config);
+int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * config);
 bool Esp32_Wireless_Close(int index);
-int  Esp32_Ethernet_Open(int index, SOCK_NetworkConfiguration * config);
+int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config);
 bool Esp32_Ethernet_Close(int index);
 
 
@@ -27,7 +25,7 @@ bool Network_Interface_Bind(int index)
 int  Network_Interface_Open(int index)
 {
     ets_printf( "Network_Interface_Open %d\n", index);
-    SOCK_NetworkConfiguration * config = &g_NetworkConfig.NetworkInterfaces[index];
+    HAL_Configuration_NetworkInterface * config = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index];
 
     switch((tcpip_adapter_if_t)index)
     {

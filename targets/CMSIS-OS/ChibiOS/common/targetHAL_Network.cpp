@@ -25,8 +25,14 @@ void nanoHAL_Network_Initialize()
     // Initialise the lwIP CLR signal callback
     set_signal_sock_function( &sys_signal_sock_event );
 
-    // get network configuration
-    Configuration_NetworkInterface* networkConfig = (Configuration_NetworkInterface*)platform_malloc(sizeof(Configuration_NetworkInterface));
+    // get network configuration, if available
+    if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
+    {
+        // there is no networking configuration block, can't proceed
+        return;
+    }
+
+    HAL_Configuration_NetworkInterface* networkConfig = (HAL_Configuration_NetworkInterface*)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
     
     if(ConfigurationManager_GetConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0) == true)
     {

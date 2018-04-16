@@ -36,7 +36,7 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
     if(configuration == DeviceConfigurationOption_Network)
     {
         // set blob size
-        blobSize = sizeof(Configuration_NetworkInterface);
+        blobSize = sizeof(HAL_Configuration_NetworkInterface);
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
     {
@@ -68,7 +68,7 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
     if(configuration == DeviceConfigurationOption_Network)
     {
         // set blob size
-        blobSize = sizeof(Configuration_NetworkInterface);
+        blobSize = sizeof(HAL_Configuration_NetworkInterface);
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
     {

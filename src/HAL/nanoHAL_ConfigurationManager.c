@@ -4,8 +4,7 @@
 //
 
 #include <string.h>
-#include <nanoHAL_ConfigurationManager.h>
-
+#include <nanoHAL_v2.h>
 
 uint32_t FindNextBlock(uint32_t startAddress, uint32_t endAddress, const unsigned char* marker)
 {
@@ -58,7 +57,7 @@ __nfweak HAL_CONFIGURATION_NETWORK* ConfigurationManager_FindNetworkConfiguratio
     uint32_t nextBlock = startAddress;
 
     // first pass: find out how many blocks of this type we have
-    uint32_t blockCount = GetBlockCount(startAddress, endAddress, sizeof(Configuration_NetworkInterface), c_MARKER_CONFIGURATION_NETWORK_V1);
+    uint32_t blockCount = GetBlockCount(startAddress, endAddress, sizeof(HAL_Configuration_NetworkInterface), c_MARKER_CONFIGURATION_NETWORK_V1);
 
     // allocate config struct
     HAL_CONFIGURATION_NETWORK *networkConfigs = (HAL_CONFIGURATION_NETWORK *)platform_malloc(offsetof(HAL_CONFIGURATION_NETWORK, Configs) + blockCount * sizeof(networkConfigs->Configs[0]));
@@ -73,7 +72,7 @@ __nfweak HAL_CONFIGURATION_NETWORK* ConfigurationManager_FindNetworkConfiguratio
         for(int i = 0; i < blockCount; i++)
         {
             nextBlock = FindNextBlock(nextBlock, endAddress, c_MARKER_CONFIGURATION_NETWORK_V1);
-            networkConfigs->Configs[i] = (Configuration_NetworkInterface*)nextBlock;
+            networkConfigs->Configs[i] = (HAL_Configuration_NetworkInterface*)nextBlock;
         }
     }
 

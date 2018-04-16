@@ -143,12 +143,13 @@ uint32_t SOCK_CONFIGURATION_GetAdapterCount()
     return HAL_SOCK_CONFIGURATION_GetAdapterCount();
 }
 
-HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config )
+HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config )
 {
     NATIVE_PROFILE_PAL_COM();
     return HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(interfaceIndex, config);
 }
-HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config )
+
+HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config )
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
@@ -179,7 +180,8 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, 
     else
     {
         // restore the network configuration
-        HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, &g_NetworkConfig.NetworkInterfaces[interfaceIndex]);
+        // FIXME replace with config manager get config block
+        HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, g_TargetConfiguration.NetworkInterfaceConfigs->Configs[interfaceIndex]);
     }
 
     if(0 != (updateFlags & c_reInitFlag))
@@ -190,7 +192,7 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, 
     return hr;
 }
 
-HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config )
+HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config )
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
@@ -408,14 +410,15 @@ int Sockets_LWIP_Driver::SendTo( SOCK_SOCKET s, const char* buf, int32_t len, in
 
 
 
-void Sockets_LWIP_Driver::SaveConfig(int32_t index, SOCK_NetworkConfiguration *cfg)
+void Sockets_LWIP_Driver::SaveConfig(int32_t index, HAL_Configuration_NetworkInterface *cfg)
 {
     NATIVE_PROFILE_PAL_COM();
     if(index >= NETWORK_INTERFACE_COUNT) return;
 
     if(cfg) 
     {
-        memcpy( &g_NetworkConfig.NetworkInterfaces[index], cfg, sizeof(SOCK_NetworkConfiguration) );
+        // FIXME replace with call to save config block
+        memcpy( g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index], cfg, sizeof(HAL_Configuration_NetworkInterface) );
     }
     
 //FIXME    HAL_CONFIG_BLOCK::UpdateBlockWithName(g_NetworkConfig.GetDriverName(), &g_NetworkConfig, sizeof(g_NetworkConfig), TRUE);
@@ -447,7 +450,7 @@ void Sockets_LWIP_Driver::ApplyWirelessConfig()
     }
 }
 
-void Sockets_LWIP_Driver::SaveWirelessConfig(int32_t index, SOCK_NetworkConfiguration *cfg)
+void Sockets_LWIP_Driver::SaveWirelessConfig(int32_t index, HAL_Configuration_NetworkInterface *cfg)
 {
     NATIVE_PROFILE_PAL_COM();
     if(index >= WIRELESS_INTERFACE_COUNT) return;

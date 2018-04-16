@@ -8,6 +8,7 @@
 #define _LWIP_SOCKETS_H_
 
 #include <nanoHAL.h>
+#include <nanoHAL_ConfigurationManager.h>
 
 #define NATIVE_PROFILE_PAL_NETWORK()
 
@@ -96,9 +97,9 @@ struct LWIP_SOCKETS_Driver
 
     static uint32_t GetAdapterCount();
 
-    static HRESULT LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config );
+    static HRESULT LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config );
     
-    static HRESULT UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config );
+    static HRESULT UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config );
 
     static HRESULT LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
 

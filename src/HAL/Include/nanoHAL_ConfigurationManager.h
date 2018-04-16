@@ -6,21 +6,8 @@
 #ifndef _NANOHAL_CONFIG_MANAGER_H_
 #define _NANOHAL_CONFIG_MANAGER_H_ 1
 
-#include <nanoHAL_v2.h>
-
-/////////////////////////////////////////
-// network configuration block markers //
-/////////////////////////////////////////
-
-// Network configuration block start marker
-static const unsigned char c_MARKER_CONFIGURATION_NETWORK_V1[] = "CN1";
-
-// Network configuration block start marker
-static const unsigned char c_MARKER_CONFIGURATION_WIRELESS80211_NETWORK_V1[] = "WN1";
-
-// Wireless AP configuration block start marker
-static const unsigned char c_MARKER_CONFIGURATION_WIRELESS_AP_V1[] = "AP1";
-
+#include <nanoWeak.h>
+#include <stdint.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.DeviceConfiguration.DeviceConfigurationOption (in managed code) !!! //
@@ -50,7 +37,7 @@ typedef struct HAL_CONFIGURATION_NETWORK
     uint8_t Count;
 
     // pointer to the network interface configuration
-    Configuration_NetworkInterface* Configs[];
+    HAL_Configuration_NetworkInterface* Configs[];
 
 } HAL_CONFIGURATION_NETWORK;
 

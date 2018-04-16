@@ -89,7 +89,7 @@ esp_err_t Esp32_InitialiseEthernet( uint8_t * pMacAdr)
 //
 //  Open Ethernet Network driver
 //
-int  Esp32_Ethernet_Open(int index, SOCK_NetworkConfiguration * config) 
+int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config) 
 { 
     if ( Esp32_InitialiseEthernet(config->macAddressBuffer) == ESP_OK )
     {

@@ -9,6 +9,37 @@
 #include <nanoPackStruct.h>
 #include <nanoWeak.h>
 
+// this is the maximum hardware address length (MAC address)
+// setting it to 6 and using the same define that lwIP uses for this
+#define NETIF_MAX_HWADDR_LEN 6
+
+/////////////////////////////////////////
+// network configuration block markers //
+/////////////////////////////////////////
+
+// Network configuration block start marker
+static const unsigned char c_MARKER_CONFIGURATION_NETWORK_V1[] = "CN1";
+
+// Network configuration block start marker
+static const unsigned char c_MARKER_CONFIGURATION_WIRELESS80211_NETWORK_V1[] = "WN1";
+
+// Wireless AP configuration block start marker
+static const unsigned char c_MARKER_CONFIGURATION_WIRELESS_AP_V1[] = "AP1";
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkInterfaceType (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////
+// Description: network interface type 
+typedef enum NetworkInterfaceType
+{
+    NetworkInterfaceType_Unknown        = 1,
+    NetworkInterfaceType_Ethernet       = 6,
+    NetworkInterfaceType_Wireless80211  = 71,
+
+}NetworkInterfaceType;
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.AddressMode (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +111,7 @@ typedef enum RadioType
     RadioType_802_11n   = 0x04,
 }RadioType;
 
-typedef struct __nfpack Configuration_NetworkInterface {
+typedef struct __nfpack HAL_Configuration_NetworkInterface {
 
     // this is the marker placeholder for this configuration block
     uint8_t Marker[4];
@@ -121,7 +152,7 @@ typedef struct __nfpack Configuration_NetworkInterface {
     // Startup network addressing mode - static, DHCP, auto
     AddressMode StartupAddressMode;
 
-} Configuration_NetworkInterface;
+} HAL_Configuration_NetworkInterface;
 
 
 typedef struct __nfpack Configuration_Wireless80211NetworkInterface {
@@ -130,7 +161,7 @@ typedef struct __nfpack Configuration_Wireless80211NetworkInterface {
     uint8_t Marker[4];
     
     // Network interface configuration
-    Configuration_NetworkInterface NetworkConfig;
+    HAL_Configuration_NetworkInterface NetworkConfig;
 
     // Type of authentication used on the wireless network
     AuthenticationType Authentication;

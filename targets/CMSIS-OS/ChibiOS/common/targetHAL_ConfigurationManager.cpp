@@ -63,7 +63,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBloc
         }
 
         // set block size
-        sizeOfBlock = sizeof(Configuration_NetworkInterface);
+        sizeOfBlock = sizeof(HAL_Configuration_NetworkInterface);
 
         // get block address
         blockAddress = (uint8_t*)g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configurationIndex];

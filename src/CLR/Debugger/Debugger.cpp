@@ -851,18 +851,18 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
     int size          = 0;
     bool success     = false;
 
-    Configuration_NetworkInterface* configNetworkInterface;
+    HAL_Configuration_NetworkInterface* configNetworkInterface;
     Configuration_Wireless80211NetworkInterface* configWireless80211NetworkInterface;
 
     switch((DeviceConfigurationOption)cmd->Configuration)
     {
         case DeviceConfigurationOption_Network:
 
-            configNetworkInterface = (Configuration_NetworkInterface*)platform_malloc(sizeof(Configuration_NetworkInterface));
+            configNetworkInterface = (HAL_Configuration_NetworkInterface*)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
 
             if(ConfigurationManager_GetConfigurationBlock(configNetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
             {
-                size = sizeof(Configuration_NetworkInterface);
+                size = sizeof(HAL_Configuration_NetworkInterface);
                 success = true;
 
                 WP_ReplyToCommand( message, success, false, (uint8_t*)configNetworkInterface, size );

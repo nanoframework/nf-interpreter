@@ -20,7 +20,6 @@ static EventGroupHandle_t wifi_event_group;
 
 static bool WifiInitialised = false;
 
-extern NETWORK_CONFIG  g_NetworkConfig;
 extern WIRELESS_CONFIG g_WirelessConfig;
 
 esp_err_t Esp32_InitaliseWifi()
@@ -68,7 +67,7 @@ esp_err_t Esp32_Wireless_Connect(SOCK_WirelessConfiguration * pWireless)
 	return ESP_OK;
 }
 
-int  Esp32_Wireless_Open(int index, SOCK_NetworkConfiguration * config) 
+int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * config) 
 { 
 	esp_err_t ec;
 

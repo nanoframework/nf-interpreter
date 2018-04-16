@@ -342,7 +342,7 @@ typedef struct SOCK_timeval {
 #define SOCK_NETWORKCONFIGURATION_FLAGS_DHCP                0x00000001
 #define SOCK_NETWORKCONFIGURATION_FLAGS_DYNAMIC_DNS         0x00000002
 
-/// Bits 19-16 of SOCK_NetworkConfiguration.flags: Type of SOCK_NetworkConfiguration
+/// Bits 19-16 of HAL_Configuration_NetworkInterface.flags: Type of HAL_Configuration_NetworkInterface
 /// 0 - NetworkInterface
 /// 1 - Wireless
 #define SOCK_NETWORKCONFIGURATION_FLAGS_NETWORK_INTERFACE   0
@@ -494,7 +494,7 @@ __inline void SOCK_FD_CLR(int y, SOCK_fd_set* x)
 #endif
 
 
-struct SOCK_NetworkConfiguration;
+//struct HAL_Configuration_NetworkInterface;
 struct SOCK_WirelessConfiguration;
 
 //--//
@@ -558,10 +558,10 @@ int SOCK_sendto( int s, const char* buf, int len, int flags, const struct SOCK_s
 //network adapter settings
 
 uint32_t SOCK_CONFIGURATION_GetAdapterCount();
-HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config );
-HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config );
+HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config );
+HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config );
 
-HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config );
+HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config );
 
 /// Wireless adapter specific settings.
 HRESULT SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
@@ -619,8 +619,8 @@ int HAL_SOCK_recvfrom( int s, char* buf, int len, int flags, struct SOCK_sockadd
 int HAL_SOCK_sendto( int s, const char* buf, int len, int flags, const struct SOCK_sockaddr* to, int tolen );
 
 uint32_t HAL_SOCK_CONFIGURATION_GetAdapterCount();
-HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config );
-HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config );
+HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config );
+HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config );
 
 HRESULT HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
 

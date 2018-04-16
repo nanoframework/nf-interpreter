@@ -22,45 +22,6 @@
 #define DEBGGER_NETWORK_INTERFACE_INDEX  0
 #endif
 
-#if !defined(NETWORK_INTERFACE_COUNT)
-#define NETWORK_INTERFACE_COUNT          1
-#endif
-
-#if !defined(WIRELESS_INTERFACE_COUNT)
-#define WIRELESS_INTERFACE_COUNT          1
-#endif
-
-struct SOCK_NetworkConfiguration
-{  
-    /// Bits 0-15 regular flags.
-    ///     16-19 Type
-    ///     20-23 SubIndex.
-    uint32_t flags;
-
-    uint32_t ipaddr;
-    uint32_t subnetmask;
-    uint32_t gateway;
-    uint32_t dnsServer1;
-    uint32_t dnsServer2;
-    uint32_t networkInterfaceType;
-    uint32_t macAddressLen;
-    uint8_t  macAddressBuffer[64];
-};
-
-struct NETWORK_CONFIG
-{
-    HAL_DRIVER_CONFIG_HEADER Header;
-
-    //--//
-
-    int                       NetworkInterfaceCount;
-    SOCK_NetworkConfiguration NetworkInterfaces[NETWORK_INTERFACE_COUNT];
-    
-    //--//
-
-    static LPCSTR GetDriverName() { return "NETWORK"; }
-};
-
 #define WIRELESS_PASSPHRASE_LENGTH             64
 #define WIRELESS_NETWORKKEY_LENGTH             256
 #define WIRELESS_REKEYINTERNAL_LENGTH          32

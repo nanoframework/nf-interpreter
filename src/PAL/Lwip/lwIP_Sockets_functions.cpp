@@ -125,12 +125,12 @@ uint32_t HAL_SOCK_CONFIGURATION_GetAdapterCount()
     NATIVE_PROFILE_PAL_NETWORK();
     return LWIP_SOCKETS_Driver::GetAdapterCount();
 }
-HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config )
+HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config )
 {
     NATIVE_PROFILE_PAL_NETWORK();
     return LWIP_SOCKETS_Driver::LoadAdapterConfiguration(interfaceIndex, config);
 }
-HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config )
+HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config )
 {
     NATIVE_PROFILE_PAL_NETWORK();
     return LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(interfaceIndex, updateFlags, config);

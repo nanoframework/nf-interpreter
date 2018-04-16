@@ -15,7 +15,6 @@ extern void debug_printf( const char* format, ... );
 
 //--//
 
-extern NETWORK_CONFIG  g_NetworkConfig;
 extern WIRELESS_CONFIG g_WirelessConfig;
 
 //--//
@@ -81,7 +80,7 @@ struct Sockets_LWIP_Driver
     static bool  Uninitialize();
     static void  CloseConnections(bool fCloseDbg);
 
-    static void SaveConfig(int32_t index, SOCK_NetworkConfiguration *cfg);
+    static void SaveConfig(int32_t index, HAL_Configuration_NetworkInterface *cfg);
 
     // Debugger methods ( socket_debugger.cpp )
     static void Debugger_Initialize();
@@ -173,7 +172,7 @@ private:
     static void OnDebuggerTimeout(void* arg);
 
     static void ApplyConfig();    
-    static void SaveWirelessConfig(int32_t index, SOCK_NetworkConfiguration *cfg);
+    static void SaveWirelessConfig(int32_t index, HAL_Configuration_NetworkInterface *cfg);
     
     static HAL_COMPLETION s_DebuggerTimeoutCompletion;
 

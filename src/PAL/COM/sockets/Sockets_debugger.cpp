@@ -547,7 +547,7 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void* arg)
         
         if(fFound)
         {
-            // SOCK_NetworkConfiguration current;
+            // HAL_Configuration_NetworkInterface current;
             // SOCK_discoveryinfo info;
             SOCK_sockaddr_in sockAddr;
             SOCK_sockaddr_in sockAddrMulticast;

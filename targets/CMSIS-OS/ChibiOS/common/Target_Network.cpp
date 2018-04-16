@@ -7,13 +7,9 @@
 #include <nanoHAL.h>
 #include <lwip/netifapi.h>
 
-extern NETWORK_CONFIG  g_NetworkConfig;
-
 extern "C" struct netif * nf_getNetif();
 //
 // Works with the Target_NetworkConfig to map the Network_Interface_XXXXX calls to the correct driver
-// This works in conjunction with the g_NetworkConfig in the Target_NetworkConfig.cpp
-
 
 
 bool Network_Interface_Bind(int index)
@@ -23,7 +19,7 @@ bool Network_Interface_Bind(int index)
 
 int  Network_Interface_Open(int index)
 {
-    SOCK_NetworkConfiguration * config = &g_NetworkConfig.NetworkInterfaces[index];
+    HAL_Configuration_NetworkInterface * config = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index];
 
     switch(index)
     {
