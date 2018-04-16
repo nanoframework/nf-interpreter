@@ -87,7 +87,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
         memcpy( &config.MacAddress, pMACAddress->GetFirstElement(), NETIF_MAX_HWADDR_LEN ); 
     }
 
-    NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_UpdateAdapterConfiguration( interfaceIndex, updateFlags, &config ));
+    NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_UpdateAdapterConfiguration( &config, DeviceConfigurationOption_Network, interfaceIndex, updateFlags ));
 
     NANOCLR_NOCLEANUP();
 }
@@ -124,7 +124,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     // {
     //     case SOCK_NETWORKCONFIGURATION_FLAGS_NETWORK_INTERFACE:
     //         {
-    //             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_NetworkInterface ));
+               NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_NetworkInterface ));
     //             break;
     //         }
     //     case SOCK_NETWORKCONFIGURATION_FLAGS_WIRELESS:

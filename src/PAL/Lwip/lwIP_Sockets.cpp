@@ -144,6 +144,11 @@ bool LWIP_SOCKETS_Driver::Initialize()
     PostAvailabilityOnContinuation.InitializeCallback(PostAvailabilityOn, NULL);
     PostAvailabilityOffContinuation.InitializeCallback(PostAvailabilityOff, NULL);
 #endif
+
+    // create m_interfaceNumber array
+    int interfaceCount = g_TargetConfiguration.NetworkInterfaceConfigs->Count + g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Count;
+    g_LWIP_SOCKETS_Driver.m_interfaces = (LWIP_DRIVER_INTERFACE_DATA*)platform_malloc(interfaceCount * sizeof(LWIP_DRIVER_INTERFACE_DATA)); 
+
     /* Initialize the target board lwIP stack */
     nanoHAL_Network_Initialize();
 
@@ -751,20 +756,9 @@ int LWIP_SOCKETS_Driver::SendTo( SOCK_SOCKET socket, const char* buf, int len, i
     return lwip_sendto(socket, buf, len, flags, (sockaddr*)&addr, (u32_t)tolen);
 }
 
-uint32_t LWIP_SOCKETS_Driver::GetAdapterCount()
-{
-    NATIVE_PROFILE_PAL_NETWORK();
-    return NETWORK_INTERFACE_COUNT;
-}
-
 HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config )
 {
     NATIVE_PROFILE_PAL_NETWORK();
-
-    if(interfaceIndex >= NETWORK_INTERFACE_COUNT) 
-    {
-        return CLR_E_INVALID_PARAMETER;
-    }
 
     memcpy(config, g_TargetConfiguration.NetworkInterfaceConfigs->Configs[interfaceIndex], sizeof(HAL_Configuration_NetworkInterface));
 
@@ -848,10 +842,6 @@ struct dhcp_client_id
 HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config )
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    if(interfaceIndex >= NETWORK_INTERFACE_COUNT) 
-    {
-        return CLR_E_INVALID_PARAMETER;
-    }
     
     bool fEnableDhcp = (config->StartupAddressMode == AddressMode_DHCP);
     bool fDhcpStarted;

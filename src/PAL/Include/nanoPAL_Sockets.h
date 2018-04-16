@@ -559,7 +559,7 @@ int SOCK_sendto( int s, const char* buf, int len, int flags, const struct SOCK_s
 
 uint32_t SOCK_CONFIGURATION_GetAdapterCount();
 HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config );
-HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config );
+HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( void* config, DeviceConfigurationOption configuration, uint32_t interfaceIndex, uint32_t updateFlags );
 
 HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config );
 
@@ -618,7 +618,6 @@ int HAL_SOCK_getsockname( int socket, struct SOCK_sockaddr* name, int* namelen )
 int HAL_SOCK_recvfrom( int s, char* buf, int len, int flags, struct SOCK_sockaddr* from, int* fromlen );
 int HAL_SOCK_sendto( int s, const char* buf, int len, int flags, const struct SOCK_sockaddr* to, int tolen );
 
-uint32_t HAL_SOCK_CONFIGURATION_GetAdapterCount();
 HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config );
 HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config );
 

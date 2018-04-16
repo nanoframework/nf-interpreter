@@ -120,11 +120,6 @@ int HAL_SOCK_sendto( SOCK_SOCKET s, const char* buf, int len, int flags, const s
     return LWIP_SOCKETS_Driver::SendTo( s, buf, len, flags, to, tolen );
 }
 
-uint32_t HAL_SOCK_CONFIGURATION_GetAdapterCount()
-{
-    NATIVE_PROFILE_PAL_NETWORK();
-    return LWIP_SOCKETS_Driver::GetAdapterCount();
-}
 HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config )
 {
     NATIVE_PROFILE_PAL_NETWORK();

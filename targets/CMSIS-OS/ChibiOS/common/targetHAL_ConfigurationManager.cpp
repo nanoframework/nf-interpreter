@@ -108,6 +108,9 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
 
         // set storage address from block address
         storageAddress = (ByteAddress)g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configurationIndex];
+
+        // set block size, in case it's not already set
+        blockSize = sizeof(HAL_Configuration_NetworkInterface);
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
     {
@@ -120,6 +123,9 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
 
         // set storage address from block address
         storageAddress = (ByteAddress)g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Configs[configurationIndex];
+
+        // set block size, in case it's not already set
+        blockSize = sizeof(Configuration_Wireless80211NetworkInterface);
     }
     else if(configuration == DeviceConfigurationOption_All)
     {
@@ -130,12 +136,18 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
 
         // always enumerate the blocks again after storing it
         requiresEnumeration = TRUE;
+
+        // for save all the block size has to be provided, check it 
+        if(blockSize == 0)
+        {
+            return FALSE;
+        }
     }
 
     // copy the config block content to the config block storage
     success = STM32FlashDriver_Write(NULL, storageAddress, blockSize, (unsigned char*)configurationBlock, true);
 
-    if(requiresEnumeration)
+    if(success == TRUE && requiresEnumeration)
     {
         // free the current allocation(s)
         platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
@@ -143,6 +155,82 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
 
         // perform enumeration of configuration blocks
         ConfigurationManager_EnumerateConfigurationBlocks();
+    }
+
+    return success;
+}
+
+// Updates a configuration block in the configuration flash sector
+// The flash sector has to be erased before writing the updated block
+// it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is used
+__nfweak bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex)
+{
+    ByteAddress storageAddress;
+    uint32_t blockOffset;
+    uint8_t* blockAddressInCopy;
+    uint32_t blockSize;
+    bool success = FALSE;
+
+    // config sector size
+    int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
+
+    // allocate memory from CRT heap
+    uint8_t* configSectorCopy = (uint8_t*)platform_malloc(sizeOfConfigSector);
+
+    if(configSectorCopy != NULL)
+    {
+        // copy config sector from flash to RAM
+        memcpy(configSectorCopy, &__nanoConfig_start__, sizeOfConfigSector);
+
+        // find out the address for the config block to update in the configSectorCopy
+        // because we are copying back the config block to flash and just replacing the config block content
+        // the addresses in g_TargetConfiguration will remain the same
+        // plus we can calculate the offset of the config block from g_TargetConfiguration
+        if(configuration == DeviceConfigurationOption_Network)
+        {
+            // get storage address from block address
+            storageAddress = (ByteAddress)g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configurationIndex];
+
+            // set block size, in case it's not already set
+            blockSize = sizeof(HAL_Configuration_NetworkInterface);
+        }
+        else if(configuration == DeviceConfigurationOption_Wireless80211Network)
+        {
+            // storage address from block address
+            storageAddress = (ByteAddress)g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Configs[configurationIndex];
+
+            // set block size, in case it's not already set
+            blockSize = sizeof(Configuration_Wireless80211NetworkInterface);
+        }
+        else
+        {
+            // this not a valid configuration option to update, quit
+            // free memory first
+            platform_free(configSectorCopy);
+
+            return FALSE;
+        }
+    
+        // erase config sector
+        if(STM32FlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
+        {
+            // flash block is erased
+
+            // subtract the start address of config sector to get the offset
+            blockOffset = storageAddress - (uint32_t)&__nanoConfig_start__;
+
+            // set pointer to block to udpate
+            blockAddressInCopy = configSectorCopy + blockOffset;
+            
+            // replace config block with new content by replacing memory
+            memcpy(blockAddressInCopy, configSectorCopy, blockSize);
+
+            // copy the config block copy back to the config block storage
+            success = STM32FlashDriver_Write(NULL, (uint32_t)&__nanoConfig_start__, sizeOfConfigSector, (unsigned char*)configSectorCopy, true);
+        }
+
+        // free memory
+        platform_free(configSectorCopy);
     }
 
     return success;

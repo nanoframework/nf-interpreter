@@ -297,10 +297,19 @@ static THD_FUNCTION(lwip_thread, p) {
     unsigned i;
 
     for (i = 0; i < 6; i++)
+    {
       thisif.hwaddr[i] = opts->macaddress[i];
+    }
+#if LWIP_IPV6
+    // FIXME IPV6
+    //ip.u_addr = opts->address;
+    //gateway.u_addr = opts->gateway;
+    //netmask.u_addr = opts->netmask;
+#else
     ip.addr = opts->address;
     gateway.addr = opts->gateway;
     netmask.addr = opts->netmask;
+#endif
     addressMode = opts->addrMode;
 #if LWIP_NETIF_HOSTNAME
     thisif.hostname = opts->ourHostName;
@@ -313,9 +322,16 @@ static THD_FUNCTION(lwip_thread, p) {
     thisif.hwaddr[3] = LWIP_ETHADDR_3;
     thisif.hwaddr[4] = LWIP_ETHADDR_4;
     thisif.hwaddr[5] = LWIP_ETHADDR_5;
+#if LWIP_IPV6
+    // FIXME IPV6
+    // LWIP_IPADDR(&ip);
+    // LWIP_GATEWAY(&gateway);
+    // LWIP_NETMASK(&netmask);
+#else   
     LWIP_IPADDR(&ip);
     LWIP_GATEWAY(&gateway);
     LWIP_NETMASK(&netmask);
+#endif
     addressMode = NET_ADDRESS_STATIC;
 #if LWIP_NETIF_HOSTNAME
     thisif.hostname = NULL;

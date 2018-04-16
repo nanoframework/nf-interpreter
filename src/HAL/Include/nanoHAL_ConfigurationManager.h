@@ -80,13 +80,16 @@ void ConfigurationManager_Initialize();
 void ConfigurationManager_EnumerateConfigurationBlocks();
 
 // GetConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target 
-// need to be free to implement the storage of the configuration block as they see fit
+// needs to be free to implement the storage of the configuration block as they see fit
 __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex);
 
 // StoreConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target 
-// need to be free to implement the storage of the configuration block as they see fit
+// needs to be free to implement the storage of the configuration block as they see fit
 __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize);
 
+// UpdateConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target 
+// needs to be free to implement the storage of the configuration block as they see fit
+__nfweak bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex);
 
 // helper functions
 

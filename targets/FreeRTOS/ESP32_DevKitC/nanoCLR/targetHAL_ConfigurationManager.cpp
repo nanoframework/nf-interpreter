@@ -126,3 +126,9 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
 
     return result;
 }
+
+// Updates a configuration block in the configuration flash sector
+bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex)
+{
+    return ConfigurationManager_StoreConfigurationBlock(configurationBlock, configuration, configurationIndex, 0);    
+}

@@ -140,7 +140,8 @@ void SOCKETS_CloseConnections()
 uint32_t SOCK_CONFIGURATION_GetAdapterCount()
 {
     NATIVE_PROFILE_PAL_COM();
-    return HAL_SOCK_CONFIGURATION_GetAdapterCount();
+
+    return (g_TargetConfiguration.NetworkInterfaceConfigs->Count + g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Count);
 }
 
 HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config )
@@ -149,16 +150,11 @@ HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HA
     return HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(interfaceIndex, config);
 }
 
-HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config )
+HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( void* config, DeviceConfigurationOption configuration, uint32_t interfaceIndex, uint32_t updateFlags )
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
     bool fDbg = FALSE;
-
-    if(interfaceIndex >= NETWORK_INTERFACE_COUNT) 
-    {
-        return CLR_E_INVALID_PARAMETER;
-    }
 
     const uint32_t c_reInitFlag = SOCK_NETWORKCONFIGURATION_UPDATE_DHCP       | 
                                 SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RENEW | 
@@ -171,11 +167,11 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, 
         fDbg = SOCKETS_DbgUninitialize(COM_SOCKET_DBG);
     }
 
-    hr = HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, config);
+    hr = HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, (HAL_Configuration_NetworkInterface*)config);
 
     if(SUCCEEDED(hr))
     {
-        Sockets_LWIP_Driver::SaveConfig(interfaceIndex, config);
+        ConfigurationManager_StoreConfigurationBlock(config, configuration, interfaceIndex, 0);
     }
     else
     {
@@ -196,11 +192,6 @@ HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, HAL_Confi
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
-
-    if(interfaceIndex >= NETWORK_INTERFACE_COUNT || config == NULL) 
-    {
-        return CLR_E_INVALID_PARAMETER;
-    }
 
     // load current DCHP settings
     hr = SOCK_CONFIGURATION_LoadAdapterConfiguration(interfaceIndex, config);
@@ -406,22 +397,6 @@ int Sockets_LWIP_Driver::SendTo( SOCK_SOCKET s, const char* buf, int32_t len, in
     NATIVE_PROFILE_PAL_COM();
     
     return HAL_SOCK_sendto(s, buf, len, flags, to, tolen);
-}
-
-
-
-void Sockets_LWIP_Driver::SaveConfig(int32_t index, HAL_Configuration_NetworkInterface *cfg)
-{
-    NATIVE_PROFILE_PAL_COM();
-    if(index >= NETWORK_INTERFACE_COUNT) return;
-
-    if(cfg) 
-    {
-        // FIXME replace with call to save config block
-        memcpy( g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index], cfg, sizeof(HAL_Configuration_NetworkInterface) );
-    }
-    
-//FIXME    HAL_CONFIG_BLOCK::UpdateBlockWithName(g_NetworkConfig.GetDriverName(), &g_NetworkConfig, sizeof(g_NetworkConfig), TRUE);
 }
 
 void Sockets_LWIP_Driver::ApplyConfig()

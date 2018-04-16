@@ -18,9 +18,6 @@
 
 #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT    16
 
-// Possible Ethernet conections
-#define NETWORK_INTERFACE_COUNT  1 
-
 // Wireless connection
 #define WIRELESS_INTERFACE_COUNT 1
 
