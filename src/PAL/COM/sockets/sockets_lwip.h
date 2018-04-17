@@ -15,10 +15,6 @@ extern void debug_printf( const char* format, ... );
 
 //--//
 
-extern WIRELESS_CONFIG g_WirelessConfig;
-
-//--//
-
 #define SOCKET_CHECK_ENTER()  \
     int32_t ret=0               \
 

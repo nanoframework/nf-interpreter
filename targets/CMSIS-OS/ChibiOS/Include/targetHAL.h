@@ -18,9 +18,6 @@
 
 #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT    16
 
-// Wireless connection
-#define WIRELESS_INTERFACE_COUNT 1
-
 #define LPCSTR  const char*
 
 // these macros are to be used at entry/exit of native interrupt handlers

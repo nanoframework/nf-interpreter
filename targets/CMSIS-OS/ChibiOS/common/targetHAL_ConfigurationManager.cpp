@@ -77,7 +77,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBloc
         }
 
         // set block size
-        sizeOfBlock = sizeof(Configuration_Wireless80211NetworkInterface);
+        sizeOfBlock = sizeof(HAL_Configuration_Wireless80211NetworkInterface);
 
         // get block address
         blockAddress = (uint8_t*)g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Configs[configurationIndex];
@@ -125,7 +125,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
         storageAddress = (ByteAddress)g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Configs[configurationIndex];
 
         // set block size, in case it's not already set
-        blockSize = sizeof(Configuration_Wireless80211NetworkInterface);
+        blockSize = sizeof(HAL_Configuration_Wireless80211NetworkInterface);
     }
     else if(configuration == DeviceConfigurationOption_All)
     {
@@ -200,7 +200,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(void* configurationB
             storageAddress = (ByteAddress)g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Configs[configurationIndex];
 
             // set block size, in case it's not already set
-            blockSize = sizeof(Configuration_Wireless80211NetworkInterface);
+            blockSize = sizeof(HAL_Configuration_Wireless80211NetworkInterface);
         }
         else
         {

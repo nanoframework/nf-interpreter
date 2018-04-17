@@ -168,7 +168,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
             {
                 // FIXME
                 // CLR_UINT32 wirelessIndex = SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__value(config.flags);
-                // SOCK_WirelessConfiguration wirelessConfig;
+                // HAL_Configuration_Wireless80211NetworkInterface wirelessConfig;
                 
                 // NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadWirelessConfiguration( wirelessIndex, &wirelessConfig ));
 

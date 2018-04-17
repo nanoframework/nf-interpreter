@@ -155,7 +155,7 @@ typedef struct __nfpack HAL_Configuration_NetworkInterface {
 } HAL_Configuration_NetworkInterface;
 
 
-typedef struct __nfpack Configuration_Wireless80211NetworkInterface {
+typedef struct __nfpack HAL_Configuration_Wireless80211NetworkInterface {
 
     // this is the marker placeholder for this configuration block
     uint8_t Marker[4];
@@ -178,7 +178,7 @@ typedef struct __nfpack Configuration_Wireless80211NetworkInterface {
     // Network password
     uint8_t Password[64];
 
-} Configuration_Wireless80211NetworkInterface;
+} HAL_Configuration_Wireless80211NetworkInterface;
 
 void 	nanoHAL_Network_Initialize();
 

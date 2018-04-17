@@ -49,7 +49,7 @@ typedef struct HAL_CONFIGURATION_NETWORK_WIRELESS80211
     uint8_t Count;
 
     // pointer to the wireless network interface configuration
-    Configuration_Wireless80211NetworkInterface* Configs[];
+    HAL_Configuration_Wireless80211NetworkInterface* Configs[];
 
 } HAL_CONFIGURATION_NETWORK_WIRELESS80211;
 

@@ -823,7 +823,7 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration( uint32_t interfaceIndex, 
     return S_OK;
 }
 
-HRESULT LWIP_SOCKETS_Driver::LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig )
+HRESULT LWIP_SOCKETS_Driver::LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211NetworkInterface* wirelessConfig )
 {
     /// Load wireless specific settings if any. You must return S_OK, otherwise default values will be
     /// loaded by PAL.

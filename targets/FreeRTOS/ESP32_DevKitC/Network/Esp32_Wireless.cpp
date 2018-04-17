@@ -20,8 +20,6 @@ static EventGroupHandle_t wifi_event_group;
 
 static bool WifiInitialised = false;
 
-extern WIRELESS_CONFIG g_WirelessConfig;
-
 esp_err_t Esp32_InitaliseWifi()
 {
 	esp_err_t ec = ESP_OK;
@@ -48,14 +46,14 @@ esp_err_t Esp32_InitaliseWifi()
 	return ec;
 }
 
-esp_err_t Esp32_Wireless_Connect(SOCK_WirelessConfiguration * pWireless)
+esp_err_t Esp32_Wireless_Connect(HAL_Configuration_Wireless80211NetworkInterface * pWireless)
 {
 	esp_err_t ec;
 
 	// Connect directly
 	wifi_config_t sta_config;
-	hal_strncpy_s( (char *)sta_config.sta.ssid, sizeof(sta_config.sta.ssid), pWireless->ssid, hal_strlen_s(pWireless->ssid) );
-	hal_strncpy_s( (char*)sta_config.sta.password, sizeof(sta_config.sta.password), pWireless->passPhrase, hal_strlen_s(pWireless->passPhrase) );
+	hal_strncpy_s( (char *)sta_config.sta.ssid, sizeof(sta_config.sta.ssid), (char *)pWireless->Ssid, hal_strlen_s((char *)pWireless->Ssid) );
+	hal_strncpy_s( (char*)sta_config.sta.password, sizeof(sta_config.sta.password), (char *)pWireless->Password, hal_strlen_s((char *)pWireless->Password) );
 	sta_config.sta.bssid_set = false;
 	
 	ec = esp_wifi_set_config(WIFI_IF_STA, &sta_config);
@@ -76,7 +74,8 @@ int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * config)
  
 	// FIXME
     //int wirelessIndex = SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__value(config->flags);
-	//SOCK_WirelessConfiguration * pWireless = &g_WirelessConfig.WirelessInterfaces[wirelessIndex];
+	// FIXME (right now not sure how to get the wirelessIndex)
+	//HAL_Configuration_Wireless80211NetworkInterface * pWireless = g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Configs[wirelessIndex];
 
 	//FIXME Configure Wireless Interface
 

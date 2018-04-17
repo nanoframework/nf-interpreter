@@ -131,7 +131,7 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceInd
     return LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(interfaceIndex, updateFlags, config);
 }
 
-HRESULT HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig )
+HRESULT HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211NetworkInterface* wirelessConfig )
 {
     NATIVE_PROFILE_PAL_NETWORK();
     return LWIP_SOCKETS_Driver::LoadWirelessConfiguration(interfaceIndex, wirelessConfig);

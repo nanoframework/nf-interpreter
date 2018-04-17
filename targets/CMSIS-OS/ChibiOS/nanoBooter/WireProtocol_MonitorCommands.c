@@ -179,7 +179,7 @@ int Monitor_QueryConfiguration(WP_Message* message)
     bool success     = false;
 
     HAL_Configuration_NetworkInterface* configNetworkInterface;
-    Configuration_Wireless80211NetworkInterface* configWireless80211NetworkInterface;
+    HAL_Configuration_Wireless80211NetworkInterface* configWireless80211NetworkInterface;
 
     switch((DeviceConfigurationOption)cmd->Configuration)
     {
@@ -199,11 +199,11 @@ int Monitor_QueryConfiguration(WP_Message* message)
 
         case DeviceConfigurationOption_Wireless80211Network:
 
-            configWireless80211NetworkInterface = (Configuration_Wireless80211NetworkInterface*)platform_malloc(sizeof(Configuration_Wireless80211NetworkInterface));
+            configWireless80211NetworkInterface = (HAL_Configuration_Wireless80211NetworkInterface*)platform_malloc(sizeof(HAL_Configuration_Wireless80211NetworkInterface));
 
             if(ConfigurationManager_GetConfigurationBlock(configWireless80211NetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
             {
-                size = sizeof(Configuration_Wireless80211NetworkInterface);
+                size = sizeof(HAL_Configuration_Wireless80211NetworkInterface);
                 success = true;
 
                 WP_ReplyToCommand( message, success, false, (uint8_t*)configWireless80211NetworkInterface, size );

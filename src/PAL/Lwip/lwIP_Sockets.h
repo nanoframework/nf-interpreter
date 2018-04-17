@@ -99,7 +99,7 @@ struct LWIP_SOCKETS_Driver
     
     static HRESULT UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config );
 
-    static HRESULT LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
+    static HRESULT LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211NetworkInterface* wirelessConfig );
 
 
 private:

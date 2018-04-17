@@ -84,7 +84,7 @@ __nfweak HAL_CONFIGURATION_NETWORK_WIRELESS80211* ConfigurationManager_FindNetwo
     uint32_t nextBlock = startAddress;
 
     // first pass: find out how many blocks of this type we have
-    uint32_t blockCount = GetBlockCount(startAddress, endAddress, sizeof(Configuration_Wireless80211NetworkInterface), c_MARKER_CONFIGURATION_WIRELESS80211_NETWORK_V1);
+    uint32_t blockCount = GetBlockCount(startAddress, endAddress, sizeof(HAL_Configuration_Wireless80211NetworkInterface), c_MARKER_CONFIGURATION_WIRELESS80211_NETWORK_V1);
 
     // allocate config struct
     HAL_CONFIGURATION_NETWORK_WIRELESS80211 *networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) + blockCount * sizeof(networkWirelessConfigs->Configs[0]));
@@ -98,7 +98,7 @@ __nfweak HAL_CONFIGURATION_NETWORK_WIRELESS80211* ConfigurationManager_FindNetwo
         for(int i = 0; i < blockCount; i++)
         {
             nextBlock = FindNextBlock(nextBlock, endAddress, c_MARKER_CONFIGURATION_WIRELESS80211_NETWORK_V1);
-            networkWirelessConfigs->Configs[i] = (Configuration_Wireless80211NetworkInterface*)nextBlock;
+            networkWirelessConfigs->Configs[i] = (HAL_Configuration_Wireless80211NetworkInterface*)nextBlock;
         }
     }
 

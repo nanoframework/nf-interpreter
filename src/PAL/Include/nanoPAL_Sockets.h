@@ -495,7 +495,7 @@ __inline void SOCK_FD_CLR(int y, SOCK_fd_set* x)
 
 
 //struct HAL_Configuration_NetworkInterface;
-struct SOCK_WirelessConfiguration;
+struct HAL_Configuration_Wireless80211NetworkInterface;
 
 //--//
 
@@ -564,8 +564,8 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( void* config, DeviceConfi
 HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config );
 
 /// Wireless adapter specific settings.
-HRESULT SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
-HRESULT SOCK_CONFIGURATION_UpdateWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
+HRESULT SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211NetworkInterface* wirelessConfig );
+HRESULT SOCK_CONFIGURATION_UpdateWirelessConfiguration(HAL_Configuration_Wireless80211NetworkInterface* config, uint32_t interfaceIndex);
 HRESULT SOCK_CONFIGURATION_SaveAllWirelessConfigurations( );
 
 //--// SSL 
@@ -621,7 +621,7 @@ int HAL_SOCK_sendto( int s, const char* buf, int len, int flags, const struct SO
 HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config );
 HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config );
 
-HRESULT HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
+HRESULT HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211NetworkInterface* wirelessConfig );
 
 void* HAL_SOCK_GlobalLockContext();
 void  HAL_SOCK_EventsSet(uint32_t events);
