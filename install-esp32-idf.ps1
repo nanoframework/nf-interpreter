@@ -7,8 +7,8 @@ If($Esp32IdfPathExists -eq $False)
 {
     Write-Host "Downloading ESP32 IDF..."
 
-    $url = "https://github.com/espressif/esp-idf/releases/download/v3.0-rc1/esp-idf-v3.0-rc1.zip"
-    $output = "$PSScriptRoot\esp-idf-v3.0-rc1.zip"
+    $url = "https://github.com/espressif/esp-idf/archive/v3.0-rc1.zip"
+    $output = "$PSScriptRoot\v3.0-rc1.zip"
 
     # download zip with Espressif IDF
     (New-Object Net.WebClient).DownloadFile($url, $output)
