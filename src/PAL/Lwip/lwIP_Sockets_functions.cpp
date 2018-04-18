@@ -120,10 +120,10 @@ int HAL_SOCK_sendto( SOCK_SOCKET s, const char* buf, int len, int flags, const s
     return LWIP_SOCKETS_Driver::SendTo( s, buf, len, flags, to, tolen );
 }
 
-HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config )
+HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return LWIP_SOCKETS_Driver::LoadAdapterConfiguration(interfaceIndex, config);
+    return LWIP_SOCKETS_Driver::LoadAdapterConfiguration(config, interfaceIndex);
 }
 HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config )
 {
@@ -131,7 +131,7 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceInd
     return LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(interfaceIndex, updateFlags, config);
 }
 
-HRESULT HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211NetworkInterface* wirelessConfig )
+HRESULT HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211* wirelessConfig )
 {
     NATIVE_PROFILE_PAL_NETWORK();
     return LWIP_SOCKETS_Driver::LoadWirelessConfiguration(interfaceIndex, wirelessConfig);

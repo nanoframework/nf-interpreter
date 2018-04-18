@@ -30,14 +30,14 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
     // because this is a struct of structs that use flexible members the memory has to be allocated from the heap
     // the malloc size for each struct is computed separately 
     uint32_t sizeOfNetworkInterfaceConfigs = offsetof(HAL_CONFIGURATION_NETWORK, Configs) + networkConfigs->Count * sizeof(networkConfigs->Configs[0]);
-    uint32_t sizeOfNetworkWireless80211InterfaceConfigs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) + networkWirelessConfigs->Count * sizeof(networkWirelessConfigs->Configs[0]);
+    uint32_t sizeOfWireless80211Configs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) + networkWirelessConfigs->Count * sizeof(networkWirelessConfigs->Configs[0]);
 
     g_TargetConfiguration.NetworkInterfaceConfigs = (HAL_CONFIGURATION_NETWORK*)platform_malloc(sizeOfNetworkInterfaceConfigs);
-    g_TargetConfiguration.NetworkWireless80211InterfaceConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211*)platform_malloc(sizeOfNetworkWireless80211InterfaceConfigs);
+    g_TargetConfiguration.Wireless80211Configs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211*)platform_malloc(sizeOfWireless80211Configs);
 
     // copy structs to g_TargetConfiguration
     memcpy((HAL_CONFIGURATION_NETWORK*)g_TargetConfiguration.NetworkInterfaceConfigs, networkConfigs, sizeOfNetworkInterfaceConfigs);
-    memcpy((HAL_CONFIGURATION_NETWORK_WIRELESS80211*)g_TargetConfiguration.NetworkWireless80211InterfaceConfigs, networkWirelessConfigs, sizeOfNetworkWireless80211InterfaceConfigs);
+    memcpy((HAL_CONFIGURATION_NETWORK_WIRELESS80211*)g_TargetConfiguration.Wireless80211Configs, networkWirelessConfigs, sizeOfWireless80211Configs);
 
     // // now free the memory of the original structs
     platform_free(networkConfigs);
@@ -70,17 +70,17 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBloc
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
     {
-        if(g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Count == 0 ||
-            (configurationIndex + 1) > g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Count)
+        if(g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
         {
             return FALSE;
         }
 
         // set block size
-        sizeOfBlock = sizeof(HAL_Configuration_Wireless80211NetworkInterface);
+        sizeOfBlock = sizeof(HAL_Configuration_Wireless80211);
 
         // get block address
-        blockAddress = (uint8_t*)g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Configs[configurationIndex];
+        blockAddress = (uint8_t*)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex];
     }
 
     // copy the config block content to the pointer in the argument
@@ -114,18 +114,18 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
     {
-        if(g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Count == 0 ||
-            (configurationIndex + 1) > g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Count)
+        if(g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
         {
             // this is a block that wasn't here before, so we need to enumerate the blocks again after storing it
             requiresEnumeration = TRUE;
         }
 
         // set storage address from block address
-        storageAddress = (ByteAddress)g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Configs[configurationIndex];
+        storageAddress = (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex];
 
         // set block size, in case it's not already set
-        blockSize = sizeof(HAL_Configuration_Wireless80211NetworkInterface);
+        blockSize = sizeof(HAL_Configuration_Wireless80211);
     }
     else if(configuration == DeviceConfigurationOption_All)
     {
@@ -151,7 +151,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
     {
         // free the current allocation(s)
         platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
-        platform_free(g_TargetConfiguration.NetworkWireless80211InterfaceConfigs);
+        platform_free(g_TargetConfiguration.Wireless80211Configs);
 
         // perform enumeration of configuration blocks
         ConfigurationManager_EnumerateConfigurationBlocks();
@@ -197,10 +197,10 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(void* configurationB
         else if(configuration == DeviceConfigurationOption_Wireless80211Network)
         {
             // storage address from block address
-            storageAddress = (ByteAddress)g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Configs[configurationIndex];
+            storageAddress = (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex];
 
             // set block size, in case it's not already set
-            blockSize = sizeof(HAL_Configuration_Wireless80211NetworkInterface);
+            blockSize = sizeof(HAL_Configuration_Wireless80211);
         }
         else
         {

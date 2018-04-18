@@ -46,7 +46,7 @@ esp_err_t Esp32_InitaliseWifi()
 	return ec;
 }
 
-esp_err_t Esp32_Wireless_Connect(HAL_Configuration_Wireless80211NetworkInterface * pWireless)
+esp_err_t Esp32_Wireless_Connect(HAL_Configuration_Wireless80211 * pWireless)
 {
 	esp_err_t ec;
 
@@ -73,9 +73,7 @@ int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * config)
     if(ec != ESP_OK) return SOCK_SOCKET_ERROR;
  
 	// FIXME
-    //int wirelessIndex = SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__value(config->flags);
-	// FIXME (right now not sure how to get the wirelessIndex)
-	//HAL_Configuration_Wireless80211NetworkInterface * pWireless = g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Configs[wirelessIndex];
+	//HAL_Configuration_Wireless80211 * pWireless = ConfigurationManager_GetWirelessConfigurationFromId(config.SpecificConfigId);
 
 	//FIXME Configure Wireless Interface
 

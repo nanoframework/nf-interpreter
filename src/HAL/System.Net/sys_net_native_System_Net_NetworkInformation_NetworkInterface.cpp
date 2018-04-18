@@ -18,10 +18,13 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
 
     HAL_Configuration_NetworkInterface config; 
     CLR_RT_HeapBlock* pConfig           = stack.Arg0().Dereference();  _ASSERTE(pConfig != NULL);
+    
     CLR_UINT32 interfaceIndex           = pConfig[ FIELD___interfaceIndex ].NumericByRefConst().u4;
 
     NANOCLR_CLEAR(config);
-    NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadAdapterConfiguration( interfaceIndex, &config ));
+    
+    // load network interface configuration from storage
+    NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadAdapterConfiguration(&config, interfaceIndex));
 
     pConfig[ FIELD___ipv4Address            ].SetInteger( (CLR_UINT32)config.IPv4Address);
     pConfig[ FIELD___ipv4GatewayAddress     ].SetInteger( (CLR_UINT32)config.IPv4GatewayAddress);
@@ -36,7 +39,8 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
     // pConfig[ FIELD___ipv6dnsAddress1        ].SetInteger( (CLR_UINT32)config.IPv6DNSAddress1);
     // pConfig[ FIELD___ipv6dnsAddress2        ].SetInteger( (CLR_UINT32)config.IPv6DNSAddress2);
 
-    // FIXME pConfig[ FIELD___networkInterfaceType   ].SetInteger( (CLR_UINT32)config.networkInterfaceType);
+    pConfig[ FIELD___networkInterfaceType   ].SetInteger( (CLR_UINT32)config.InterfaceType);
+    pConfig[ FIELD___specificConfigId       ].SetInteger( (CLR_UINT32)config.SpecificConfigId);
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pConfig[ FIELD___macAddress ], NETIF_MAX_HWADDR_LEN, g_CLR_RT_WellKnownTypes.m_UInt8 ));   
     memcpy( pConfig[ FIELD___macAddress ].DereferenceArray()->GetFirstElement(), config.MacAddress, NETIF_MAX_HWADDR_LEN );
@@ -69,25 +73,16 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
     // config.IPv6NetMask           = pConfig[ FIELD___ipv6NetMask        ].NumericByRef().u4;
     // config.IPv6DNSAddress1       = pConfig[ FIELD___ipv6dnsAddress1    ].NumericByRef().u4;
     // config.IPv6DNSAddress2       = pConfig[ FIELD___ipv6dnsAddress2    ].NumericByRef().u4;
-
-    // set network interface type 
-    switch((NetworkInterfaceType)pConfig[ FIELD___networkInterfaceType ].NumericByRef().u4)
-    {
-        case NetworkInterfaceType_Ethernet:
-            //memcpy( &config.MacAddress, pMACAddress->GetFirstElement(), NETIF_MAX_HWADDR_LEN ); 
-            break;
-
-        case NetworkInterfaceType_Wireless80211:
-            break;
-    }
-    // FIXME config.networkInterfaceType = pConfig[ FIELD___networkInterfaceType ].NumericByRef().u4;
     
+    config.InterfaceType = (NetworkInterfaceType)pConfig[ FIELD___networkInterfaceType ].NumericByRef().u4;
+    config.SpecificConfigId = (CLR_UINT32)pConfig[ FIELD___specificConfigId       ].NumericByRef().u4;
+
     if(pMACAddress != NULL)
     {
         memcpy( &config.MacAddress, pMACAddress->GetFirstElement(), NETIF_MAX_HWADDR_LEN ); 
     }
 
-    NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_UpdateAdapterConfiguration( &config, DeviceConfigurationOption_Network, interfaceIndex, updateFlags ));
+    NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_UpdateAdapterConfiguration(&config, interfaceIndex, updateFlags));
 
     NANOCLR_NOCLEANUP();
 }
@@ -97,7 +92,8 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
-    stack.SetResult_I4( SOCK_CONFIGURATION_GetAdapterCount() );    
+    // grab the count right from the structure
+    stack.SetResult_I4( g_TargetConfiguration.NetworkInterfaceConfigs->Count );    
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -108,37 +104,15 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     NANOCLR_HEADER();
 
     HAL_Configuration_NetworkInterface config; 
-    CLR_UINT32                type = 0;
     CLR_RT_HeapBlock*         pConfig;
     CLR_UINT32                interfaceIndex = stack.Arg0().NumericByRef().u4;
     CLR_RT_HeapBlock&         top            = stack.PushValueAndClear();
 
     NANOCLR_CLEAR(config);
 
-    NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadConfiguration( interfaceIndex, &config ));    
+    NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadConfiguration(&config, interfaceIndex));
 
-    // FIXME        
-    // type = SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__value(config.flags);
-    
-    // switch(type)
-    // {
-    //     case SOCK_NETWORKCONFIGURATION_FLAGS_NETWORK_INTERFACE:
-    //         {
-               NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_NetworkInterface ));
-    //             break;
-    //         }
-    //     case SOCK_NETWORKCONFIGURATION_FLAGS_WIRELESS:
-    //         {
-    //             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_Wireless80211 ));
-    //             break;
-    //         }
-    //     default:
-    //         {
-    //             /// Unknown type, not supported.
-    //             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    //             break;
-    //         }
-    // }
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_NetworkInterface ));
     
     pConfig = top.Dereference(); FAULT_ON_NULL(pConfig);
 
@@ -155,39 +129,11 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     // pConfig[ FIELD___ipv6dnsAddress1        ].SetInteger( (CLR_UINT32)config.IPv6DNSAddress1);
     // pConfig[ FIELD___ipv6dnsAddress2        ].SetInteger( (CLR_UINT32)config.IPv6DNSAddress2);
 
-    // FIXME pConfig[ FIELD___networkInterfaceType   ].SetInteger( (CLR_UINT32)config.networkInterfaceType);
+    pConfig[ FIELD___networkInterfaceType   ].SetInteger( (CLR_UINT32)config.InterfaceType);
+    pConfig[ FIELD___specificConfigId       ].SetInteger( (CLR_UINT32)config.SpecificConfigId);
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pConfig[ FIELD___macAddress ], NETIF_MAX_HWADDR_LEN, g_CLR_RT_WellKnownTypes.m_UInt8 ));   
-
     memcpy( pConfig[ FIELD___macAddress ].DereferenceArray()->GetFirstElement(), config.MacAddress, NETIF_MAX_HWADDR_LEN );
-
-    // Type specific load.
-    switch(type)
-    {
-        case SOCK_NETWORKCONFIGURATION_FLAGS_WIRELESS:
-            {
-                // FIXME
-                // CLR_UINT32 wirelessIndex = SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__value(config.flags);
-                // HAL_Configuration_Wireless80211NetworkInterface wirelessConfig;
-                
-                // NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadWirelessConfiguration( wirelessIndex, &wirelessConfig ));
-
-                // pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::FIELD__Authentication ].SetInteger( (CLR_INT32)WIRELESS_FLAG_AUTHENTICATION__value(wirelessConfig.wirelessFlags) );
-                // pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::FIELD__Encryption     ].SetInteger( (CLR_INT32)WIRELESS_FLAG_ENCRYPTION__value    (wirelessConfig.wirelessFlags) );
-                // pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::FIELD__Radio          ].SetInteger( (CLR_INT32)WIRELESS_FLAG_RADIO__value         (wirelessConfig.wirelessFlags) );
-
-                // wirelessConfig.passPhrase[ WIRELESS_PASSPHRASE_LENGTH - 1 ] = 0;
-                // NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::FIELD__Password ], wirelessConfig.passPhrase ));                
-
-                // NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( pConfig[Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface::FIELD__Ssid ], wirelessConfig.ssid ));                
-
-                break;
-            }
-        default:
-            {
-                break;
-            }
-    }
 
     NANOCLR_NOCLEANUP();
 }

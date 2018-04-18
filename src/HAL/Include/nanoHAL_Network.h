@@ -13,6 +13,18 @@
 // setting it to 6 and using the same define that lwIP uses for this
 #define NETIF_MAX_HWADDR_LEN 6
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.Wireless80211Configuration.MaxPasswordLength (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// this is the maximum wireless 802.11 configuration password length
+#define WIRELESS82011_CONFIG_MAX_PASSWORD_LEN 64
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.Wireless80211Configuration.MaxSsidLength (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// this is the maximum wireless 802.11 configuration SSID length
+#define WIRELESS82011_CONFIG_MAX_SSID_LEN 32
+
 /////////////////////////////////////////
 // network configuration block markers //
 /////////////////////////////////////////
@@ -21,7 +33,7 @@
 static const unsigned char c_MARKER_CONFIGURATION_NETWORK_V1[] = "CN1";
 
 // Network configuration block start marker
-static const unsigned char c_MARKER_CONFIGURATION_WIRELESS80211_NETWORK_V1[] = "WN1";
+static const unsigned char c_MARKER_CONFIGURATION_WIRELESS80211_V1[] = "WN1";
 
 // Wireless AP configuration block start marker
 static const unsigned char c_MARKER_CONFIGURATION_WIRELESS_AP_V1[] = "AP1";
@@ -104,11 +116,11 @@ typedef enum EncryptionType
 // Description: type of radio that the wireless network uses
 typedef enum RadioType
 {
-    RadioType_None      = 0x00,
-    RadioType_802_11a   = 0x01,
-    RadioType_802_11b   = 0x02,
-    RadioType_802_11g   = 0x03,
-    RadioType_802_11n   = 0x04,
+    RadioType_NotSpecified  = 0x00,
+    RadioType_802_11a       = 0x01,
+    RadioType_802_11b       = 0x02,
+    RadioType_802_11g       = 0x03,
+    RadioType_802_11n       = 0x04,
 }RadioType;
 
 typedef struct __nfpack HAL_Configuration_NetworkInterface {
@@ -149,19 +161,29 @@ typedef struct __nfpack HAL_Configuration_NetworkInterface {
     // DNS server 2 IPv6 address as an array of 4 32-bit unsigned integers
     uint32_t  IPv6DNSAddress2[4];
 
+    // interface type
+    NetworkInterfaceType InterfaceType;
+
+    // Specific configuration Id
+    // Id of the configuration block specific for this interface type
+    // NULL otherwise
+    // currently in use:
+    // - HAL_Configuration_Wireless80211 for NetworkInterfaceType_Wireless80211
+    uint32_t SpecificConfigId;
+
     // Startup network addressing mode - static, DHCP, auto
     AddressMode StartupAddressMode;
 
 } HAL_Configuration_NetworkInterface;
 
 
-typedef struct __nfpack HAL_Configuration_Wireless80211NetworkInterface {
+typedef struct __nfpack HAL_Configuration_Wireless80211 {
 
     // this is the marker placeholder for this configuration block
     uint8_t Marker[4];
-    
-    // Network interface configuration
-    HAL_Configuration_NetworkInterface NetworkConfig;
+
+    // Id of the configuration
+    uint32_t Id;
 
     // Type of authentication used on the wireless network
     AuthenticationType Authentication;
@@ -178,7 +200,7 @@ typedef struct __nfpack HAL_Configuration_Wireless80211NetworkInterface {
     // Network password
     uint8_t Password[64];
 
-} HAL_Configuration_Wireless80211NetworkInterface;
+} HAL_Configuration_Wireless80211;
 
 void 	nanoHAL_Network_Initialize();
 

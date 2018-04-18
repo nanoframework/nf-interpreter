@@ -146,7 +146,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
 #endif
 
     // create m_interfaceNumber array
-    int interfaceCount = g_TargetConfiguration.NetworkInterfaceConfigs->Count + g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Count;
+    int interfaceCount = g_TargetConfiguration.NetworkInterfaceConfigs->Count;
     g_LWIP_SOCKETS_Driver.m_interfaces = (LWIP_DRIVER_INTERFACE_DATA*)platform_malloc(interfaceCount * sizeof(LWIP_DRIVER_INTERFACE_DATA)); 
 
     /* Initialize the target board lwIP stack */
@@ -756,7 +756,7 @@ int LWIP_SOCKETS_Driver::SendTo( SOCK_SOCKET socket, const char* buf, int len, i
     return lwip_sendto(socket, buf, len, flags, (sockaddr*)&addr, (u32_t)tolen);
 }
 
-HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config )
+HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -823,7 +823,7 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration( uint32_t interfaceIndex, 
     return S_OK;
 }
 
-HRESULT LWIP_SOCKETS_Driver::LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211NetworkInterface* wirelessConfig )
+HRESULT LWIP_SOCKETS_Driver::LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211* wirelessConfig )
 {
     /// Load wireless specific settings if any. You must return S_OK, otherwise default values will be
     /// loaded by PAL.

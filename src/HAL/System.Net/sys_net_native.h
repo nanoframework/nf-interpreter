@@ -14,48 +14,24 @@
 #include <nanoHAL_time.h>
 #include <corlib_native.h>
 
-
-struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
+struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration
 {
-    static const int FIELD___interfaceIndex = 1;
-    static const int FIELD___macAddress = 2;
-    static const int FIELD___startupAddressMode = 3;
-    static const int FIELD___ipv4Address = 4;
-    static const int FIELD___ipv4NetMask = 5;
-    static const int FIELD___ipv4GatewayAddress = 6;
-    static const int FIELD___ipv4dnsAddress1 = 7;
-    static const int FIELD___ipv4dnsAddress2 = 8;
-    static const int FIELD___ipv6Address = 9;
-    static const int FIELD___ipv6NetMask = 10;
-    static const int FIELD___ipv6GatewayAddress = 11;
-    static const int FIELD___ipv6dnsAddress1 = 12;
-    static const int FIELD___ipv6dnsAddress2 = 13;
-    static const int FIELD___networkInterfaceType = 14;
+    static const int FIELD___configurationIndex = 1;
+    static const int FIELD___id = 2;
+    static const int FIELD___authentication = 3;
+    static const int FIELD___encryption = 4;
+    static const int FIELD___radio = 5;
+    static const int FIELD___password = 6;
+    static const int FIELD___ssid = 7;
 
-    NANOCLR_NATIVE_DECLARE(InitializeNetworkInterfaceSettings___VOID);
-    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___VOID__I4);
-    NANOCLR_NATIVE_DECLARE(GetNetworkInterfaceCount___STATIC__I4);
-    NANOCLR_NATIVE_DECLARE(GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4);
-    NANOCLR_NATIVE_DECLARE(IPAddressFromString___STATIC__U4__STRING);
+    NANOCLR_NATIVE_DECLARE(GetWireless82011ConfigurationCount___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
+    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
 
     //--//
 
 };
 
-struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211NetworkInterface
-{
-    static const int FIELD__Authentication = 15;
-    static const int FIELD__Encryption = 16;
-    static const int FIELD__Radio = 17;
-    static const int FIELD__Password = 18;
-    static const int FIELD__Ssid = 19;
-
-    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID__SystemNetNetworkInformationWireless80211NetworkInterface__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(SaveAllConfigurations___STATIC__VOID);
-
-    //--//
-
-};
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
@@ -114,6 +90,34 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityE
 {
     static const int FIELD___isAvailable = 1;
 
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
+{
+    static const int FIELD___interfaceIndex = 1;
+    static const int FIELD___macAddress = 2;
+    static const int FIELD___startupAddressMode = 3;
+    static const int FIELD___specificConfigId = 4;
+    static const int FIELD___ipv4Address = 5;
+    static const int FIELD___ipv4NetMask = 6;
+    static const int FIELD___ipv4GatewayAddress = 7;
+    static const int FIELD___ipv4dnsAddress1 = 8;
+    static const int FIELD___ipv4dnsAddress2 = 9;
+    static const int FIELD___ipv6Address = 10;
+    static const int FIELD___ipv6NetMask = 11;
+    static const int FIELD___ipv6GatewayAddress = 12;
+    static const int FIELD___ipv6dnsAddress1 = 13;
+    static const int FIELD___ipv6dnsAddress2 = 14;
+    static const int FIELD___networkInterfaceType = 15;
+
+    NANOCLR_NATIVE_DECLARE(InitializeNetworkInterfaceSettings___VOID);
+    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(GetNetworkInterfaceCount___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4);
+    NANOCLR_NATIVE_DECLARE(IPAddressFromString___STATIC__U4__STRING);
 
     //--//
 

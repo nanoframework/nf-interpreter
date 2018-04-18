@@ -49,7 +49,7 @@ typedef struct HAL_CONFIGURATION_NETWORK_WIRELESS80211
     uint8_t Count;
 
     // pointer to the wireless network interface configuration
-    HAL_Configuration_Wireless80211NetworkInterface* Configs[];
+    HAL_Configuration_Wireless80211* Configs[];
 
 } HAL_CONFIGURATION_NETWORK_WIRELESS80211;
 
@@ -58,7 +58,7 @@ typedef struct HAL_CONFIGURATION_NETWORK_WIRELESS80211
 typedef struct HAL_TARGET_CONFIGURATION
 {
     HAL_CONFIGURATION_NETWORK* NetworkInterfaceConfigs;
-    HAL_CONFIGURATION_NETWORK_WIRELESS80211* NetworkWireless80211InterfaceConfigs;
+    HAL_CONFIGURATION_NETWORK_WIRELESS80211* Wireless80211Configs;
 
 } HAL_TARGET_CONFIGURATION;
 
@@ -98,6 +98,10 @@ HAL_CONFIGURATION_NETWORK* ConfigurationManager_FindNetworkConfigurationBlocks(u
 
 // function that sweeps a memory region searching for wireless network configuration blocks
 HAL_CONFIGURATION_NETWORK_WIRELESS80211* ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(uint32_t startAddress, uint32_t storageSize);
+
+// gets the HAL_Configuration_Wireless80211 configuration block that has the specified Id, if that exists 
+// defined as weak needs to be free to implement the storage of the configuration block as they see fit
+HAL_Configuration_Wireless80211* ConfigurationManager_GetWirelessConfigurationFromId(uint32_t configurationId);
 
 
 #ifdef __cplusplus

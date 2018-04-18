@@ -130,21 +130,13 @@ void SOCKETS_CloseConnections()
     Sockets_LWIP_Driver::CloseConnections(FALSE);
 }
 
-
-uint32_t SOCK_CONFIGURATION_GetAdapterCount()
+HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex)
 {
     NATIVE_PROFILE_PAL_COM();
-
-    return (g_TargetConfiguration.NetworkInterfaceConfigs->Count + g_TargetConfiguration.NetworkWireless80211InterfaceConfigs->Count);
+    return HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(config, interfaceIndex);
 }
 
-HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config )
-{
-    NATIVE_PROFILE_PAL_COM();
-    return HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(interfaceIndex, config);
-}
-
-HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( void* config, DeviceConfigurationOption configuration, uint32_t interfaceIndex, uint32_t updateFlags )
+HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex, uint32_t updateFlags)
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
@@ -161,11 +153,11 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( void* config, DeviceConfi
         success = SOCKETS_DbgUninitialize(COM_SOCKET_DBG);
     }
 
-    hr = HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, (HAL_Configuration_NetworkInterface*)config);
+    hr = HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, config);
 
     if(SUCCEEDED(hr))
     {
-        if(ConfigurationManager_StoreConfigurationBlock(config, configuration, interfaceIndex, 0) != TRUE)
+        if(ConfigurationManager_StoreConfigurationBlock(config, DeviceConfigurationOption_Network, interfaceIndex, 0) != TRUE)
         {
             return S_FALSE;
         }
@@ -185,18 +177,18 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( void* config, DeviceConfi
     return hr;
 }
 
-HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, HAL_Configuration_NetworkInterface* config )
+HRESULT SOCK_CONFIGURATION_LoadConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex)
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
 
     // load current DCHP settings
-    hr = SOCK_CONFIGURATION_LoadAdapterConfiguration(interfaceIndex, config);
+    hr = SOCK_CONFIGURATION_LoadAdapterConfiguration(config, interfaceIndex);
 
     return hr;
 }
 
-HRESULT SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211NetworkInterface* wirelessConfig )
+HRESULT SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211* wirelessConfig )
 {
     NATIVE_PROFILE_PAL_COM();
 
@@ -207,13 +199,13 @@ HRESULT SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, H
     if (HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration(interfaceIndex, wirelessConfig) != S_OK)
     {
         // FIXME
-        //memcpy( wirelessConfig, &g_WirelessConfig.WirelessInterfaces[interfaceIndex], sizeof(HAL_Configuration_Wireless80211NetworkInterface) );
+        //memcpy( wirelessConfig, &g_WirelessConfig.WirelessInterfaces[interfaceIndex], sizeof(HAL_Configuration_Wireless80211) );
     }
 
     return S_OK;
 }
 
-HRESULT SOCK_CONFIGURATION_UpdateWirelessConfiguration(HAL_Configuration_Wireless80211NetworkInterface* config, uint32_t interfaceIndex)
+HRESULT SOCK_CONFIGURATION_UpdateWirelessConfiguration(HAL_Configuration_Wireless80211* config, uint32_t interfaceIndex)
 {
     NATIVE_PROFILE_PAL_COM();
 
@@ -224,14 +216,6 @@ HRESULT SOCK_CONFIGURATION_UpdateWirelessConfiguration(HAL_Configuration_Wireles
     
     return S_FALSE;
 }
-
-HRESULT SOCK_CONFIGURATION_SaveAllWirelessConfigurations( )
-{
-//FIXME    HAL_CONFIG_BLOCK::UpdateBlockWithName(g_WirelessConfig.GetDriverName(), &g_WirelessConfig, sizeof(g_WirelessConfig), TRUE);
-
-    return S_OK;
-}
-
 
 #define SOCKET_SHUTDOWN_READ         0
 #define SOCKET_SHUTDOWN_WRITE        1
@@ -423,7 +407,7 @@ void Sockets_LWIP_Driver::SaveWirelessConfig(int32_t index, HAL_Configuration_Ne
     if(cfg) 
     {
         // FIXME
-        //memcpy( &g_WirelessConfig.WirelessInterfaces[index], cfg, sizeof(HAL_Configuration_Wireless80211NetworkInterface) );
+        //memcpy( &g_WirelessConfig.WirelessInterfaces[index], cfg, sizeof(HAL_Configuration_Wireless80211) );
     }
     
 //FIXME    HAL_CONFIG_BLOCK::UpdateBlockWithName(g_WirelessConfig.GetDriverName(), &g_WirelessConfig, sizeof(g_WirelessConfig), TRUE);    
