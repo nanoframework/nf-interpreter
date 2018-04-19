@@ -113,6 +113,9 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
 
         // set block size, in case it's not already set
         blockSize = sizeof(HAL_Configuration_NetworkInterface);
+
+        // make sure the config block marker is set
+        memcpy(configurationBlock, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1)); 
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
     {
@@ -128,6 +131,9 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
 
         // set block size, in case it's not already set
         blockSize = sizeof(HAL_Configuration_Wireless80211);
+
+        // make sure the config block marker is set
+        memcpy(configurationBlock, c_MARKER_CONFIGURATION_WIRELESS80211_V1, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));        
     }
     else if(configuration == DeviceConfigurationOption_All)
     {
@@ -195,6 +201,9 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(void* configurationB
 
             // set block size, in case it's not already set
             blockSize = sizeof(HAL_Configuration_NetworkInterface);
+                
+            // make sure the config block marker is set
+            memcpy(configurationBlock, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
         }
         else if(configuration == DeviceConfigurationOption_Wireless80211Network)
         {
@@ -203,6 +212,9 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(void* configurationB
 
             // set block size, in case it's not already set
             blockSize = sizeof(HAL_Configuration_Wireless80211);
+
+            // make sure the config block marker is set
+            memcpy(configurationBlock, c_MARKER_CONFIGURATION_WIRELESS80211_V1, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
         }
         else
         {
