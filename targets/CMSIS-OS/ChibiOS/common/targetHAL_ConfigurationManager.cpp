@@ -89,7 +89,9 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBloc
     return TRUE;
 }
 
-// Stores the configuration block to the configuration flash sector 
+// Stores the configuration block to the configuration flash sector
+// NOTE: because inserting or removing a configuration block it's very 'RAM expensive' we choose not to support those operations
+// the host debugger will have to be used to manage these operations on the device configuration collection 
 // it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is used
 __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize)
 {
@@ -102,8 +104,8 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
         if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
         {
-            // this is a block that wasn't here before, so we need to enumerate the blocks again after storing it
-            requiresEnumeration = TRUE;
+            // there is no room for this block, fail the operation
+            return FALSE;
         }
 
         // set storage address from block address
@@ -117,8 +119,8 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
         if(g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
         {
-            // this is a block that wasn't here before, so we need to enumerate the blocks again after storing it
-            requiresEnumeration = TRUE;
+            // there is no room for this block, fail the operation
+            return FALSE;
         }
 
         // set storage address from block address
@@ -137,7 +139,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
         // always enumerate the blocks again after storing it
         requiresEnumeration = TRUE;
 
-        // for save all the block size has to be provided, check it 
+        // for save all the block size has to be provided, check that 
         if(blockSize == 0)
         {
             return FALSE;
