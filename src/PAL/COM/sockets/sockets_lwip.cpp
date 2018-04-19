@@ -153,20 +153,11 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(HAL_Configuration_NetworkI
         success = SOCKETS_DbgUninitialize(COM_SOCKET_DBG);
     }
 
-    hr = HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, config);
+    hr = HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(config, interfaceIndex, updateFlags);
 
-    if(SUCCEEDED(hr))
+    if(!SUCCEEDED(hr))
     {
-        if(ConfigurationManager_StoreConfigurationBlock(config, DeviceConfigurationOption_Network, interfaceIndex, 0) != TRUE)
-        {
-            return S_FALSE;
-        }
-    }
-    else
-    {
-        // restore the network configuration
-        // FIXME replace with config manager get config block
-        HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(interfaceIndex, updateFlags, g_TargetConfiguration.NetworkInterfaceConfigs->Configs[interfaceIndex]);
+        return S_FALSE;
     }
 
     if(0 != (updateFlags & c_reInitFlag))
@@ -186,35 +177,6 @@ HRESULT SOCK_CONFIGURATION_LoadConfiguration(HAL_Configuration_NetworkInterface*
     hr = SOCK_CONFIGURATION_LoadAdapterConfiguration(config, interfaceIndex);
 
     return hr;
-}
-
-HRESULT SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211* wirelessConfig )
-{
-    NATIVE_PROFILE_PAL_COM();
-
-    Sockets_LWIP_Driver::ApplyWirelessConfig();
-
-    /// Hal version is given a chance if it wants to override stored predifned values.
-
-    if (HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration(interfaceIndex, wirelessConfig) != S_OK)
-    {
-        // FIXME
-        //memcpy( wirelessConfig, &g_WirelessConfig.WirelessInterfaces[interfaceIndex], sizeof(HAL_Configuration_Wireless80211) );
-    }
-
-    return S_OK;
-}
-
-HRESULT SOCK_CONFIGURATION_UpdateWirelessConfiguration(HAL_Configuration_Wireless80211* config, uint32_t interfaceIndex)
-{
-    NATIVE_PROFILE_PAL_COM();
-
-    if(ConfigurationManager_StoreConfigurationBlock(config, DeviceConfigurationOption_Wireless80211Network, interfaceIndex, 0) == TRUE)
-    {
-        return S_OK;
-    }
-    
-    return S_FALSE;
 }
 
 #define SOCKET_SHUTDOWN_READ         0
@@ -383,21 +345,6 @@ void Sockets_LWIP_Driver::ApplyConfig()
     //     // save to the dynamic config section so that MFDeploy will be able to get the configuration.
     //     SaveConfig(0, NULL);            
     // }
-}
-
-void Sockets_LWIP_Driver::ApplyWirelessConfig()
-{
-    NATIVE_PROFILE_PAL_COM();
-
-    if(!s_wirelessInitialized)
-    {
-        //FIXME
-        // if(!HAL_CONFIG_BLOCK::ApplyConfig( g_WirelessConfig.GetDriverName(), &g_WirelessConfig, sizeof(g_WirelessConfig) ))
-        // {
-        //     SaveWirelessConfig(0, NULL);
-        // }
-        s_wirelessInitialized = TRUE;
-    }
 }
 
 void Sockets_LWIP_Driver::SaveWirelessConfig(int32_t index, HAL_Configuration_NetworkInterface *cfg)

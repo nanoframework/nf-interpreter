@@ -823,14 +823,6 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkI
     return S_OK;
 }
 
-HRESULT LWIP_SOCKETS_Driver::LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211* wirelessConfig )
-{
-    /// Load wireless specific settings if any. You must return S_OK, otherwise default values will be
-    /// loaded by PAL.
-
-    return CLR_E_FAIL;
-}
-
 struct dhcp_client_id
 {
     uint8_t code;

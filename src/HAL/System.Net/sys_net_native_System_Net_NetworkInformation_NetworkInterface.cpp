@@ -82,6 +82,12 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
         memcpy( &config.MacAddress, pMACAddress->GetFirstElement(), NETIF_MAX_HWADDR_LEN ); 
     }
 
+    // store configuration
+    if(ConfigurationManager_StoreConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex, 0) != TRUE)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+    
     NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_UpdateAdapterConfiguration(&config, interfaceIndex, updateFlags));
 
     NANOCLR_NOCLEANUP();
