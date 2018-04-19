@@ -41,9 +41,10 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
 
     pConfig[ FIELD___networkInterfaceType   ].SetInteger( (CLR_UINT32)config.InterfaceType);
     pConfig[ FIELD___specificConfigId       ].SetInteger( (CLR_UINT32)config.SpecificConfigId);
+    pConfig[ FIELD___startupAddressMode     ].SetInteger( (CLR_UINT32)config.StartupAddressMode);
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pConfig[ FIELD___macAddress ], NETIF_MAX_HWADDR_LEN, g_CLR_RT_WellKnownTypes.m_UInt8 ));   
-    memcpy( pConfig[ FIELD___macAddress ].DereferenceArray()->GetFirstElement(), config.MacAddress, NETIF_MAX_HWADDR_LEN );
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pConfig[ FIELD___macAddress ], NETIF_MAX_HWADDR_LEN, g_CLR_RT_WellKnownTypes.m_UInt8));
+    memcpy(pConfig[ FIELD___macAddress ].DereferenceArray()->GetFirstElement(), config.MacAddress, NETIF_MAX_HWADDR_LEN);
     
     NANOCLR_NOCLEANUP();
 }
@@ -74,8 +75,9 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
     // config.IPv6DNSAddress1       = pConfig[ FIELD___ipv6dnsAddress1    ].NumericByRef().u4;
     // config.IPv6DNSAddress2       = pConfig[ FIELD___ipv6dnsAddress2    ].NumericByRef().u4;
     
-    config.InterfaceType = (NetworkInterfaceType)pConfig[ FIELD___networkInterfaceType ].NumericByRef().u4;
-    config.SpecificConfigId = (CLR_UINT32)pConfig[ FIELD___specificConfigId       ].NumericByRef().u4;
+    config.InterfaceType        = (NetworkInterfaceType)    pConfig[ FIELD___networkInterfaceType ].NumericByRef().u4;
+    config.SpecificConfigId     = (CLR_UINT32)              pConfig[ FIELD___specificConfigId     ].NumericByRef().u4;
+    config.StartupAddressMode   = (AddressMode)             pConfig[ FIELD___startupAddressMode   ].NumericByRef().u4;
 
     if(pMACAddress != NULL)
     {
@@ -137,6 +139,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
 
     pConfig[ FIELD___networkInterfaceType   ].SetInteger( (CLR_UINT32)config.InterfaceType);
     pConfig[ FIELD___specificConfigId       ].SetInteger( (CLR_UINT32)config.SpecificConfigId);
+    pConfig[ FIELD___startupAddressMode     ].SetInteger( (CLR_UINT32)config.StartupAddressMode);
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pConfig[ FIELD___macAddress ], NETIF_MAX_HWADDR_LEN, g_CLR_RT_WellKnownTypes.m_UInt8 ));   
     memcpy( pConfig[ FIELD___macAddress ].DereferenceArray()->GetFirstElement(), config.MacAddress, NETIF_MAX_HWADDR_LEN );
