@@ -116,6 +116,8 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
 
         // make sure the config block marker is set
         memcpy(configurationBlock, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1)); 
+    
+        _ASSERTE(((HAL_Configuration_NetworkInterface*)configurationBlock)->StartupAddressMode > 0);
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
     {
@@ -204,6 +206,8 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(void* configurationB
                 
             // make sure the config block marker is set
             memcpy(configurationBlock, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
+
+            _ASSERTE(((HAL_Configuration_NetworkInterface*)configurationBlock)->StartupAddressMode > 0);
         }
         else if(configuration == DeviceConfigurationOption_Wireless80211Network)
         {

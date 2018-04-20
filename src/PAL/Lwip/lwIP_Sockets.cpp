@@ -760,8 +760,6 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkI
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-    memcpy(config, g_TargetConfiguration.NetworkInterfaceConfigs->Configs[interfaceIndex], sizeof(HAL_Configuration_NetworkInterface));
-
     if(config->StartupAddressMode == AddressMode_DHCP)
     {
         struct netif *pNetIf;

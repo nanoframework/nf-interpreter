@@ -23,7 +23,11 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
 
     NANOCLR_CLEAR(config);
     
-    // load network interface configuration from storage
+    // load network interface configuration from storage   
+    memcpy(&config, g_TargetConfiguration.NetworkInterfaceConfigs->Configs[interfaceIndex], sizeof(HAL_Configuration_NetworkInterface));
+    _ASSERTE(config.StartupAddressMode > 0);
+
+    // now load adapter configuration on top of the stored config 
     NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadAdapterConfiguration(&config, interfaceIndex));
 
     pConfig[ FIELD___ipv4Address            ].SetInteger( (CLR_UINT32)config.IPv4Address);
@@ -84,8 +88,8 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
         memcpy( &config.MacAddress, pMACAddress->GetFirstElement(), NETIF_MAX_HWADDR_LEN ); 
     }
 
-    // store configuration
-    if(ConfigurationManager_StoreConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex, 0) != TRUE)
+    // store configuration, updating the configuration block
+    if(ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex) != TRUE)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
@@ -117,7 +121,12 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     CLR_RT_HeapBlock&         top            = stack.PushValueAndClear();
 
     NANOCLR_CLEAR(config);
+    
+    // load network interface configuration from storage   
+    memcpy(&config, g_TargetConfiguration.NetworkInterfaceConfigs->Configs[interfaceIndex], sizeof(HAL_Configuration_NetworkInterface));
+    _ASSERTE(config.StartupAddressMode > 0);
 
+    // now load adapter configuration on top of the stored config 
     NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadConfiguration(&config, interfaceIndex));
 
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_NetworkInterface ));
