@@ -833,16 +833,13 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
 {
     NATIVE_PROFILE_PAL_NETWORK();
     
-    bool fEnableDhcp = (config->StartupAddressMode == AddressMode_DHCP);
-    bool fDhcpStarted;
+    bool enableDHCP = (config->StartupAddressMode == AddressMode_DHCP);
 
     struct netif *pNetIf = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber);
     if (NULL == pNetIf)
     {
         return CLR_E_FAIL;
     }
-
-    fDhcpStarted = (0 != (pNetIf->flags & NETIF_FLAG_ETHARP));
 
 #if LWIP_DNS
     // when using DHCP do not use the static settings
@@ -871,40 +868,36 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
 #if LWIP_DHCP
     if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DHCP))
     {
-        if(fEnableDhcp)
-        {   
-            if(!fDhcpStarted)
+        if(enableDHCP)
+        {
+            // need to start DHCP   
+            if(ERR_OK != dhcp_start(pNetIf))
             {
-                if(ERR_OK != dhcp_start(pNetIf))
-                {
-                    return CLR_E_FAIL;
-                }
+                return CLR_E_FAIL;
             }
         }
         else
         {
-            if(fDhcpStarted)
-            {
-                dhcp_stop(pNetIf);
-            }
+            // stop DHCP
+            dhcp_stop(pNetIf);
 
+            // set interface with our static IP configs
             netif_set_addr(pNetIf, (const ip4_addr_t *) &config->IPv4Address, (const ip4_addr_t *)&config->IPv4NetMask, (const ip4_addr_t *)&config->IPv4GatewayAddress);
 
-            Network_PostEvent( NETWORK_EVENT_TYPE_ADDRESS_CHANGED, 0 );
+            // we should be polite and let the DHCP server that we are now using a static IP
+            dhcp_inform(pNetIf);
         }
     }
 
-    if(fEnableDhcp && fDhcpStarted)
+    if(enableDHCP)
     {
         // Try Renew before release since renewing after release will fail
         if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RENEW))
         {
-            //netifapi_netif_common(pNetIf, NULL, dhcp_renew);
             dhcp_renew(pNetIf);
         }
         else if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RELEASE))
         {
-            //netifapi_netif_common(pNetIf, NULL, dhcp_release);
             dhcp_release(pNetIf);
         }
     }
