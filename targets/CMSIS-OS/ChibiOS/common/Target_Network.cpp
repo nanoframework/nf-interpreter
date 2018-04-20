@@ -19,7 +19,16 @@ bool Network_Interface_Bind(int index)
 
 int  Network_Interface_Open(int index)
 {
-    HAL_Configuration_NetworkInterface * config = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index];
+    HAL_Configuration_NetworkInterface networkConfiguration;
+
+    // load network interface configuration from storage
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
+    {
+        // failed to load configuration
+        // FIXME output error?
+        return SOCK_SOCKET_ERROR;
+    }
+    _ASSERTE(networkConfiguration.StartupAddressMode > 0);
 
     switch(index)
     {

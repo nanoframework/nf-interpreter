@@ -25,7 +25,16 @@ bool Network_Interface_Bind(int index)
 int  Network_Interface_Open(int index)
 {
     ets_printf( "Network_Interface_Open %d\n", index);
-    HAL_Configuration_NetworkInterface * config = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index];
+    HAL_Configuration_NetworkInterface config;
+
+    // load network interface configuration from storage
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&config, DeviceConfigurationOption_Network, index))
+    {
+        // failed to load configuration
+        // FIXME output error?
+        return SOCK_SOCKET_ERROR;
+    }
+    _ASSERTE(config.StartupAddressMode > 0);
 
     switch((tcpip_adapter_if_t)index)
     {

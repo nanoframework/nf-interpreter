@@ -23,8 +23,11 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
 
     NANOCLR_CLEAR(config);
     
-    // load network interface configuration from storage   
-    memcpy(&config, g_TargetConfiguration.NetworkInterfaceConfigs->Configs[interfaceIndex], sizeof(HAL_Configuration_NetworkInterface));
+    // load network interface configuration from storage
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&config, DeviceConfigurationOption_Network, interfaceIndex))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
     _ASSERTE(config.StartupAddressMode > 0);
 
     // now load adapter configuration on top of the stored config 
@@ -43,6 +46,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
     // pConfig[ FIELD___ipv6dnsAddress1        ].SetInteger( (CLR_UINT32)config.IPv6DNSAddress1);
     // pConfig[ FIELD___ipv6dnsAddress2        ].SetInteger( (CLR_UINT32)config.IPv6DNSAddress2);
 
+    pConfig[ FIELD___automaticDns           ].SetInteger( (CLR_UINT32)config.AutomaticDNS);
     pConfig[ FIELD___networkInterfaceType   ].SetInteger( (CLR_UINT32)config.InterfaceType);
     pConfig[ FIELD___specificConfigId       ].SetInteger( (CLR_UINT32)config.SpecificConfigId);
     pConfig[ FIELD___startupAddressMode     ].SetInteger( (CLR_UINT32)config.StartupAddressMode);
@@ -79,6 +83,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
     // config.IPv6DNSAddress1       = pConfig[ FIELD___ipv6dnsAddress1    ].NumericByRef().u4;
     // config.IPv6DNSAddress2       = pConfig[ FIELD___ipv6dnsAddress2    ].NumericByRef().u4;
     
+    config.AutomaticDNS         =                           pConfig[ FIELD___automaticDns         ].NumericByRef().u4;
     config.InterfaceType        = (NetworkInterfaceType)    pConfig[ FIELD___networkInterfaceType ].NumericByRef().u4;
     config.SpecificConfigId     = (CLR_UINT32)              pConfig[ FIELD___specificConfigId     ].NumericByRef().u4;
     config.StartupAddressMode   = (AddressMode)             pConfig[ FIELD___startupAddressMode   ].NumericByRef().u4;
@@ -122,8 +127,11 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
 
     NANOCLR_CLEAR(config);
     
-    // load network interface configuration from storage   
-    memcpy(&config, g_TargetConfiguration.NetworkInterfaceConfigs->Configs[interfaceIndex], sizeof(HAL_Configuration_NetworkInterface));
+    // load network interface configuration from storage
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&config, DeviceConfigurationOption_Network, interfaceIndex))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
     _ASSERTE(config.StartupAddressMode > 0);
 
     // now load adapter configuration on top of the stored config 
@@ -146,6 +154,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     // pConfig[ FIELD___ipv6dnsAddress1        ].SetInteger( (CLR_UINT32)config.IPv6DNSAddress1);
     // pConfig[ FIELD___ipv6dnsAddress2        ].SetInteger( (CLR_UINT32)config.IPv6DNSAddress2);
 
+    pConfig[ FIELD___automaticDns           ].SetInteger( (CLR_UINT32)config.AutomaticDNS);
     pConfig[ FIELD___networkInterfaceType   ].SetInteger( (CLR_UINT32)config.InterfaceType);
     pConfig[ FIELD___specificConfigId       ].SetInteger( (CLR_UINT32)config.SpecificConfigId);
     pConfig[ FIELD___startupAddressMode     ].SetInteger( (CLR_UINT32)config.StartupAddressMode);

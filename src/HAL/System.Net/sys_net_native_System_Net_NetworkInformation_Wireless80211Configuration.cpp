@@ -30,7 +30,10 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
     NANOCLR_CLEAR(config);
     
     // load wireless 802.11 configuration from the storage
-    memcpy(&config, g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex], sizeof(HAL_Configuration_Wireless80211));
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&config, DeviceConfigurationOption_Wireless80211Network, configurationIndex))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
 
     // create new object for configuration
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Wireless80211Configuration));
@@ -89,7 +92,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
     hal_strncpy_s((char*)config.Ssid, WIRELESS82011_CONFIG_MAX_SSID_LEN, hbSsid->StringText(), ssidLength);    
 
     // store configuration
-    if(ConfigurationManager_StoreConfigurationBlock(&config, DeviceConfigurationOption_Wireless80211Network, configurationIndex, 0) != TRUE)
+    if(ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Wireless80211Network, configurationIndex) != TRUE)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }

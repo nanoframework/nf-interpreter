@@ -136,6 +136,8 @@ bool LWIP_SOCKETS_Driver::Initialize()
     NATIVE_PROFILE_PAL_NETWORK();
 
 	struct netif *networkInterface;
+    HAL_Configuration_NetworkInterface networkConfiguration;
+    int interfaceNumber;
 
 #if LWIP_NETIF_STATUS_CALLBACK == 1
     PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
@@ -154,10 +156,15 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
 	for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
 	{
-		int interfaceNumber;
-
-        // get the configuration from storage
- 		HAL_Configuration_NetworkInterface *pNetCfg = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[i];
+        // load network interface configuration from storage
+        if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, i))
+        {
+            // failed to load configuration
+            // FIXME output error?
+            // move to the next, if any
+            continue;
+        }
+        _ASSERTE(networkConfiguration.StartupAddressMode > 0);
 
  		/* Bind and Open the Ethernet driver */
  		Network_Interface_Bind(i);
@@ -172,7 +179,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
  		g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
- 		UpdateAdapterConfiguration(i, SOCK_NETWORKCONFIGURATION_UPDATE_DHCP | SOCK_NETWORKCONFIGURATION_UPDATE_DNS, pNetCfg);
+ 		UpdateAdapterConfiguration(i, SOCK_NETWORKCONFIGURATION_UPDATE_DHCP | SOCK_NETWORKCONFIGURATION_UPDATE_DNS, &networkConfiguration);
 
  		networkInterface = netif_find_interface(interfaceNumber);
 

@@ -32,25 +32,25 @@ void nanoHAL_Network_Initialize()
         return;
     }
 
-    HAL_Configuration_NetworkInterface* networkConfig = (HAL_Configuration_NetworkInterface*)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
+    HAL_Configuration_NetworkInterface networkConfig;
     
-    if(ConfigurationManager_GetConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0) == true)
+    if(ConfigurationManager_GetConfigurationBlock((void *)&networkConfig, DeviceConfigurationOption_Network, 0) == true)
     {
         // build lwIP configuration 
         struct lwipthread_opts lwipOptions;
 
         // grab MAC address
-        lwipOptions.macaddress = (uint8_t *)networkConfig->MacAddress;
+        lwipOptions.macaddress = (uint8_t *)networkConfig.MacAddress;
 
         // static or dinamic address
-        if(networkConfig->StartupAddressMode == AddressMode_Static)
+        if(networkConfig.StartupAddressMode == AddressMode_Static)
         {
             // IPv4 configs
-            lwipOptions.address = networkConfig->IPv4Address;
-            lwipOptions.netmask = networkConfig->IPv4NetMask;
-            lwipOptions.gateway = networkConfig->IPv4GatewayAddress;
+            lwipOptions.address = networkConfig.IPv4Address;
+            lwipOptions.netmask = networkConfig.IPv4NetMask;
+            lwipOptions.gateway = networkConfig.IPv4GatewayAddress;
         }
-        else if(networkConfig->StartupAddressMode == AddressMode_DHCP)
+        else if(networkConfig.StartupAddressMode == AddressMode_DHCP)
         {
             // clear  IPv4 configs
             lwipOptions.address = 0;
@@ -60,15 +60,12 @@ void nanoHAL_Network_Initialize()
 
         // set address mode option
         // our enum follows lwIP defines for address mode
-        lwipOptions.addrMode = (net_addr_mode_t)networkConfig->StartupAddressMode;
+        lwipOptions.addrMode = (net_addr_mode_t)networkConfig.StartupAddressMode;
 
         // we could consider making the device name configurable (or maybe not)
         lwipOptions.ourHostName = "nanodevice";
 
         // Start lwIP thread in ChibiOS bindings using the above options
         lwipInit(&lwipOptions);
-
-        // free memory
-        platform_free(networkConfig);
     }
 }
