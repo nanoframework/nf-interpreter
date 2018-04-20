@@ -90,8 +90,6 @@ struct Sockets_LWIP_Driver
     static bool UpgradeToSsl( int ComPortNum, const uint8_t* pCACert, uint32_t caCertLen, const uint8_t* pDeviceCert, uint32_t deviceCertLen, LPCSTR szTargetHost );
     static bool IsUsingSsl( int ComPortNum );
 
-    static void ApplyWirelessConfig();
-
     void* GetSocketSslData(SOCK_SOCKET socket)
     {
         int32_t tmp;
@@ -166,9 +164,6 @@ private:
 
     static void CloseDebuggerSocket();
     static void OnDebuggerTimeout(void* arg);
-
-    static void ApplyConfig();    
-    static void SaveWirelessConfig(int32_t index, HAL_Configuration_NetworkInterface *cfg);
     
     static HAL_COMPLETION s_DebuggerTimeoutCompletion;
 

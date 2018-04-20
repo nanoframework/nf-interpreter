@@ -335,32 +335,6 @@ int Sockets_LWIP_Driver::SendTo( SOCK_SOCKET s, const char* buf, int32_t len, in
     
     return HAL_SOCK_sendto(s, buf, len, flags, to, tolen);
 }
-
-void Sockets_LWIP_Driver::ApplyConfig()
-{
-    NATIVE_PROFILE_PAL_COM();
-// FIXME
-    // if(!HAL_CONFIG_BLOCK::ApplyConfig( g_NetworkConfig.GetDriverName(), &g_NetworkConfig, sizeof(g_NetworkConfig) ))
-    // {
-    //     // save to the dynamic config section so that MFDeploy will be able to get the configuration.
-    //     SaveConfig(0, NULL);            
-    // }
-}
-
-void Sockets_LWIP_Driver::SaveWirelessConfig(int32_t index, HAL_Configuration_NetworkInterface *cfg)
-{
-    NATIVE_PROFILE_PAL_COM();
-    
-    if(cfg) 
-    {
-        // FIXME
-        //memcpy( &g_WirelessConfig.WirelessInterfaces[index], cfg, sizeof(HAL_Configuration_Wireless80211) );
-    }
-    
-//FIXME    HAL_CONFIG_BLOCK::UpdateBlockWithName(g_WirelessConfig.GetDriverName(), &g_WirelessConfig, sizeof(g_WirelessConfig), TRUE);    
-}
-
-
     
 bool Sockets_LWIP_Driver::Initialize()
 {
@@ -379,10 +353,6 @@ bool Sockets_LWIP_Driver::Initialize()
             g_Sockets_LWIP_Driver.m_socketHandles[i].m_flags   = 0;
             g_Sockets_LWIP_Driver.m_socketHandles[i].m_sslData = NULL;
         }
-
-
-//        ApplyConfig();        
-//        ApplyWirelessConfig();
         
         SOCKET_CHECK_bool( HAL_SOCK_Initialize() );
 
