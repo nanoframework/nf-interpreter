@@ -815,6 +815,11 @@ bool CLR_DBG_Debugger::Monitor_Reboot( WP_Message* msg)
 
     WP_ReplyToCommand(msg, true, false, NULL, 0);
 
+#if defined(PLATFORM_ESP32)
+    // Add a delay to allow CLR to Reboot
+    vTaskDelay( 1000 / portTICK_PERIOD_MS);
+#endif
+
     return true;
 }
 
