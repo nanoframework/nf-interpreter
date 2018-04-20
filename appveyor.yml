@@ -9,6 +9,7 @@
     files:
     - '**\AssemblyInfo.*'
     - '**/*.md'
+    - '**/*.cs'
     - 'LICENSE'
     - dir/*
     - '.gitignore'
@@ -310,6 +311,7 @@
     files:
     - '**\AssemblyInfo.*'
     - '**/*.md'
+    - '**/*.cs'
     - 'LICENSE'
     - dir/*
     - '.gitignore'
@@ -600,6 +602,7 @@
     files:
     - '**\AssemblyInfo.*'
     - '**/*.md'
+    - '**/*.cs'
     - 'LICENSE'
     - dir/*
     - '.gitignore'
