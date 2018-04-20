@@ -171,6 +171,9 @@ typedef struct __nfpack HAL_Configuration_NetworkInterface {
     // - HAL_Configuration_Wireless80211 for NetworkInterfaceType_Wireless80211
     uint32_t SpecificConfigId;
 
+    // Option to use DNS addresses from DHCP or static ones
+    uint8_t AutomaticDNS;
+
     // Startup network addressing mode - static, DHCP, auto
     AddressMode StartupAddressMode;
 

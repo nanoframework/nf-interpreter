@@ -853,7 +853,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
     if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DNS))
     {
         // FIXME IPV6
-        if(config->IPv4DNSAddress1 != 0 || config->IPv4DNSAddress2 != 0)
+        if(config->AutomaticDNS == 0)
         {
             // user defined DNS addresses
             if(config->IPv4DNSAddress1 != 0)
