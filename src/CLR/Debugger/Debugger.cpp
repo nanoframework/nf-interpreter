@@ -815,10 +815,9 @@ bool CLR_DBG_Debugger::Monitor_Reboot( WP_Message* msg)
 
     WP_ReplyToCommand(msg, true, false, NULL, 0);
 
-#if defined(PLATFORM_ESP32)
-    // Wait for CLR to Reboot
-    vTaskDelay( 1000 / portTICK_PERIOD_MS);
-#endif
+    // Allow some time for CLR to Reboot
+    // FIXME find a better way to syncronise the reboot with clr 
+    PLATFORM_WAIT( 1000 );
 
     return true;
 }
