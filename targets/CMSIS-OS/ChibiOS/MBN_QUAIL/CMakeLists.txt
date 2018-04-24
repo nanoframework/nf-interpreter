@@ -50,6 +50,11 @@ endif()
 # sources for target specifc stuff related with APIs
 list(APPEND API_RELATED_TARGET_SOURCES "")
 
+# Windows.Devices.I2c
+if(API_Windows.Devices.I2c)
+    list(APPEND API_RELATED_TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_windows_devices_i2c_config.cpp")    
+endif()
+
 # Windows.Devices.SerialCommunication
 if(API_Windows.Devices.SerialCommunication)
     list(APPEND API_RELATED_TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_windows_devices_serialcommunication_config.cpp")    

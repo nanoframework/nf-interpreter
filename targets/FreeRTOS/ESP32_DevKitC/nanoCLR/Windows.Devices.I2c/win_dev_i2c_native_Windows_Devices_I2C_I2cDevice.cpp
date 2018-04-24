@@ -6,40 +6,40 @@
 
 #include <string.h>
 #include <targetPAL.h>
-
 #include "win_dev_i2c_native.h"
 #include "Esp32_DeviceMapping.h"
 
  
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cSharingMode (in managed code) !!!    //
 ///////////////////////////////////////////////////////////////////////////////////////
 enum I2cSharingMode
-    {
-        Exclusive = 0,
-        Shared
-    };
+{
+    Exclusive = 0,
+    Shared
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cTransferStatus (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////
  enum I2cTransferStatus
-    {
-        I2cTransferStatus_FullTransfer = 0,
-        I2cTransferStatus_ClockStretchTimeout,
-        I2cTransferStatus_PartialTransfer,
-        I2cTransferStatus_SlaveAddressNotAcknowledged,
-        I2cTransferStatus_UnknownError
-    };
+{
+    I2cTransferStatus_FullTransfer = 0,
+    I2cTransferStatus_ClockStretchTimeout,
+    I2cTransferStatus_PartialTransfer,
+    I2cTransferStatus_SlaveAddressNotAcknowledged,
+    I2cTransferStatus_UnknownError
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cBusSpeed (in managed code) !!!       //
 ///////////////////////////////////////////////////////////////////////////////////////
 enum I2cBusSpeed
-    {
-        I2cBusSpeed_StandardMode = 0,
-        I2cBusSpeed_FastMode
-	};
+{
+    I2cBusSpeed_StandardMode = 0,
+    I2cBusSpeed_FastMode
+};
 
 typedef Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings I2cConnectionSettings;
 
@@ -128,7 +128,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::DisposeNative_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit___I4__SZARRAY_U1__U4__SZARRAY_U1__U4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit___WindowsDevicesI2cI2cTransferResult__SZARRAY_U1__SZARRAY_U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -138,6 +138,10 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         int readSize = 0;
         esp_err_t i2cStatus;
         int returnStatus = I2cTransferStatus_FullTransfer;
+
+        CLR_RT_HeapBlock*       result;
+        // create the return object (I2cTransferResult)
+        CLR_RT_HeapBlock&       top = stack.PushValueAndClear();
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -194,13 +198,38 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         i2cStatus = i2c_master_cmd_begin(bus, cmd, 1000 / portTICK_RATE_MS);
         i2c_cmd_link_delete(cmd);
 
+        // create return object
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_I2cTransferResult));
+        result = top.Dereference(); FAULT_ON_NULL(result);
+
         if (i2cStatus != ESP_OK)
         {
+            // set the result field
             if ( i2cStatus == ESP_FAIL )
-                returnStatus = I2cTransferStatus_SlaveAddressNotAcknowledged;
+            {
+                result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___status ].SetInteger((CLR_UINT32)I2cTransferStatus_SlaveAddressNotAcknowledged);
+            }
             else
-                returnStatus = I2cTransferStatus_UnknownError;
-       }
+            {
+                result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___status ].SetInteger((CLR_UINT32)I2cTransferStatus_UnknownError);
+            }
+
+            // set the bytes transferred field
+            result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___bytesTransferred ].SetInteger(0);
+        }
+        else
+        {
+            result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___status ].SetInteger((CLR_UINT32)I2cTransferStatus_FullTransfer);
+
+            // set the bytes transferred field
+            result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___bytesTransferred ].SetInteger((CLR_UINT32)(writeSize + readSize));
+
+            if(readSize > 0)
+            {
+                // because this was a Read transaction, need to copy from DMA buffer to managed buffer
+                memcpy(readBuffer->GetFirstElement(), &readData[0], readSize);
+            }
+        }
 
         // null pointers and vars
         writeData = NULL;
