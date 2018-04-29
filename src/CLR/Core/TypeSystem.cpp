@@ -2655,6 +2655,8 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
 
     TIL( "System.Net.Sockets"      , "SocketException"               , m_SocketException                                    ),
 
+    TIL( "Windows.Devices.I2c"     , "I2cTransferResult"             , m_I2cTransferResult                                    ),
+
 #undef TIL
 };
 

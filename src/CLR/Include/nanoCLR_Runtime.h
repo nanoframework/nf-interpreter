@@ -1238,6 +1238,8 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index m_SocketException;
 
+    CLR_RT_TypeDef_Index m_I2cTransferResult;
+
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_WellKnownTypes);
 };
 
@@ -2727,14 +2729,14 @@ extern bool g_CLR_RT_fBadStack;
 
 struct CLR_RT_ExecutionEngine
 {
-    static const CLR_UINT32             c_Event_SerialPortIn  = 0x00000002;
-    static const CLR_UINT32             c_Event_SerialPortOut = 0x00000004;
-    static const CLR_UINT32             c_Event_EndPoint      = 0x00000008;
-    static const CLR_UINT32             c_Event_IO            = 0x00000080;
-    static const CLR_UINT32             c_Event_AppDomain     = 0x02000000;
-    static const CLR_UINT32             c_Event_Socket        = 0x20000000;
-    static const CLR_UINT32             c_Event_IdleCPU       = 0x40000000;
-    static const CLR_UINT32             c_Event_LowMemory     = 0x80000000; // Wait for a low-memory condition.
+    static const CLR_UINT32             c_Event_SerialPortIn        = 0x00000002;
+    static const CLR_UINT32             c_Event_SerialPortOut       = 0x00000004;
+    static const CLR_UINT32             c_Event_EndPoint            = 0x00000008;
+    static const CLR_UINT32             c_Event_I2cMaster           = 0x00000080;
+    static const CLR_UINT32             c_Event_AppDomain           = 0x02000000;
+    static const CLR_UINT32             c_Event_Socket              = 0x20000000;
+    static const CLR_UINT32             c_Event_IdleCPU             = 0x40000000;
+    static const CLR_UINT32             c_Event_LowMemory           = 0x80000000; // Wait for a low-memory condition.
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

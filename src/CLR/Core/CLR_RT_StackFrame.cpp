@@ -1112,7 +1112,8 @@ void CLR_RT_StackFrame::NegateResult()
 
 //--//
 
-// input HeapBlock has timeout value in ticks
+// input HeapBlock has timeout value **IN TICKS**
+// sometimes you have to force a cast to (CLR_INT64) otherwise the set operations will fail because of the var size mismatch
 HRESULT CLR_RT_StackFrame::SetupTimeoutFromTicks( CLR_RT_HeapBlock& input, CLR_INT64*& output )
 {
     NATIVE_PROFILE_CLR_CORE();
