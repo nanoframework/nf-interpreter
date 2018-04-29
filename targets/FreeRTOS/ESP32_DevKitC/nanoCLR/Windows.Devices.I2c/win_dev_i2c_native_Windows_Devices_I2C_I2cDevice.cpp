@@ -170,7 +170,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             writeSize = writeBuffer->m_numOfElements;
         }
 
-        CLR_RT_HeapBlock_Array* readBuffer = stack.Arg3().DereferenceArray();
+        CLR_RT_HeapBlock_Array* readBuffer = stack.Arg2().DereferenceArray();
         if (readBuffer != NULL)
         {
             // grab the pointer to the array by getting the first element of the array
