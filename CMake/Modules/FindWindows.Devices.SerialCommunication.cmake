@@ -20,6 +20,8 @@ set(Windows.Devices.SerialCommunication_SRCS
 
     win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice.cpp
     win_dev_serial_native.cpp
+
+    target_windows_devices_serialcommunication_config.cpp
 )
 
 foreach(SRC_FILE ${Windows.Devices.SerialCommunication_SRCS})
@@ -27,6 +29,7 @@ foreach(SRC_FILE ${Windows.Devices.SerialCommunication_SRCS})
     find_file(Windows.Devices.SerialCommunication_SRC_FILE ${SRC_FILE}
         PATHS 
             "${BASE_PATH_FOR_THIS_MODULE}"
+            "${TARGET_BASE_LOCATION}"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

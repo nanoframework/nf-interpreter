@@ -22,6 +22,8 @@ set(Windows.Devices.Adc_SRCS
     win_dev_adc_native.h
     win_dev_adc_native_Windows_Devices_Adc_AdcController.cpp
     win_dev_adc_native_Windows_Devices_Adc_AdcChannel.cpp
+
+    target_windows_devices_adc_config.cpp
 )
 
 foreach(SRC_FILE ${Windows.Devices.Adc_SRCS})
@@ -29,7 +31,8 @@ foreach(SRC_FILE ${Windows.Devices.Adc_SRCS})
     find_file(Windows.Devices.Adc_SRC_FILE ${SRC_FILE}
         PATHS 
             "${BASE_PATH_FOR_THIS_MODULE}"
-
+            "${TARGET_BASE_LOCATION}"
+            
         CMAKE_FIND_ROOT_PATH_BOTH
     )
     # message("${SRC_FILE} >> ${Windows.Devices.Adc_SRC_FILE}") # debug helper
