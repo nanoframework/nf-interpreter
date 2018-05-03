@@ -333,7 +333,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
 
             // flush DMA buffer to ensure cache coherency
             // (only required for Cortex-M7)
-            cacheBufferInvalidate(palI2c->WriteBuffer, palI2c->WriteSize);
+            cacheBufferFlush(palI2c->WriteBuffer, palI2c->WriteSize);
             
             // spawn working thread to perform the I2C transaction
             palI2c->WorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(128),
@@ -415,7 +415,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
                     // need to dereference readBuffer argument to be able to write back on it
                     readBuffer = stack.Arg2().DereferenceArray();
 
-                    // flush DMA buffer to ensure cache coherency
+                    // invalidate cache over read buffer to ensure that content from DMA is read
                     // (only required for Cortex-M7)
                     cacheBufferInvalidate(palI2c->ReadBuffer, palI2c->ReadSize);
 
