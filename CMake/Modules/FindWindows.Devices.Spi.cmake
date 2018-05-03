@@ -21,6 +21,8 @@ set(Windows.Devices.Spi_SRCS
     win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo.cpp
     win_dev_spi_native_Windows_Devices_Spi_SpiDevice.cpp
     win_dev_spi_native.cpp
+
+    target_windows_devices_spi_config.cpp
 )
 
 foreach(SRC_FILE ${Windows.Devices.Spi_SRCS})
@@ -28,6 +30,7 @@ foreach(SRC_FILE ${Windows.Devices.Spi_SRCS})
     find_file(Windows.Devices.Spi_SRC_FILE ${SRC_FILE}
         PATHS 
             "${BASE_PATH_FOR_THIS_MODULE}"
+            "${TARGET_BASE_LOCATION}"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
