@@ -50,6 +50,15 @@
 #define STM32_RTCSEL                        STM32_RTCSEL_LSI
 
 /*
+ * IRQ system settings.
+ */
+#define STM32_IRQ_EXTI0_1_IRQ_PRIORITY      3
+#define STM32_IRQ_EXTI2_3_IRQ_PRIORITY      3
+#define STM32_IRQ_EXTI4_15_IRQ_PRIORITY     3
+#define STM32_IRQ_EXTI16_IRQ_PRIORITY       3
+#define STM32_IRQ_EXTI17_20_IRQ_PRIORITY    3
+
+/*
  * ADC driver system settings.
  */
 #define STM32_ADC_USE_ADC1                  FALSE
