@@ -153,6 +153,11 @@ void CLR_HW_Hardware::ProcessActivity()
          eventsCLR |= CLR_RT_ExecutionEngine::c_Event_Socket;
     }
 
+    if(events & SYSTEM_EVENT_FLAG_SPI_MASTER)
+    {
+        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_SpiMaster;
+    }
+
     if(events & SYSTEM_EVENT_FLAG_I2C_MASTER)
     {
         eventsCLR |= CLR_RT_ExecutionEngine::c_Event_I2cMaster;
