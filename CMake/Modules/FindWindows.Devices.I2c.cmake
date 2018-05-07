@@ -21,6 +21,8 @@ set(Windows.Devices.I2c_SRCS
     win_dev_i2c_native.cpp
     win_dev_i2c_native.h
     win_dev_i2c_native_Windows_Devices_I2C_I2cDevice.cpp
+
+    target_windows_devices_i2c_config.cpp
 )
 
 foreach(SRC_FILE ${Windows.Devices.I2c_SRCS})
@@ -28,6 +30,7 @@ foreach(SRC_FILE ${Windows.Devices.I2c_SRCS})
     find_file(Windows.Devices.I2c_SRC_FILE ${SRC_FILE}
         PATHS 
             "${BASE_PATH_FOR_THIS_MODULE}"
+            "${TARGET_BASE_LOCATION}"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

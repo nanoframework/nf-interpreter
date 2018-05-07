@@ -584,6 +584,23 @@ if(RTOS_CHIBIOS_CHECK)
     # Define base path for the class libraries
     set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
 
+    # set target base location
+    # this has to be set before the class library modules are pulled in
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+        # set target base location
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+    else()
+        # try to find board in the Community targets folder
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+            # set target base location
+            set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+        else()
+            # board NOT found in targets folder
+            # can't continue
+            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        endif()
+    endif()
+
     # set CMSIS RTOS include directory
     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
 
@@ -603,14 +620,12 @@ if(RTOS_CHIBIOS_CHECK)
         # board found
         # if it's on nF overlay board.c and board.h exist there for sure
         set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")
-
     else()
         # board NOT found in ChibiOS 'overlay'
 
         # try to find it in the target boards
         if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
             # board found
-
             # check if the board definition files are available at the target folder
             if( EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.c AND
                 EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.h)
@@ -660,7 +675,7 @@ if(RTOS_CHIBIOS_CHECK)
         # board found
         message(STATUS "Support for target board '${CHIBIOS_BOARD}' found")
         message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
-        
+
         # add TARGET board directory
         add_subdirectory("targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
 
@@ -671,7 +686,7 @@ if(RTOS_CHIBIOS_CHECK)
             # board found
             message(STATUS "Support for target board '${CHIBIOS_BOARD}' found in Community targets")
             message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
-            
+
             # add TARGET board directory from Community
             add_subdirectory("targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
 
@@ -692,6 +707,9 @@ elseif(RTOS_FREERTOS_CHECK)
 
         # Define base path for the class libraries
         set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/nanoCLR")
+          
+        # set target base location
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC")
 
  		add_subdirectory(targets/FreeRTOS/ESP32_DevKitC)
     endif()

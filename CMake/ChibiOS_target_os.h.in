@@ -11,6 +11,9 @@
 #ifndef _TARGET_OS_H_
 #define _TARGET_OS_H_
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
 #define VERSION_MAJOR @nanoFramework_VERSION_MAJOR@U
 #define VERSION_MINOR @nanoFramework_VERSION_MINOR@U
 #define VERSION_BUILD @nanoFramework_VERSION_PATCH@U
