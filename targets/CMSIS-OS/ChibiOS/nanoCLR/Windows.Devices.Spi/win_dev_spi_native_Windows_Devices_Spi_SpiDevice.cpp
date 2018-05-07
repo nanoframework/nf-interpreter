@@ -12,8 +12,6 @@
 #include <targetPAL.h>
 #include "win_dev_spi_native.h"
 
-#define SPI_TRANSACTION_TIMEOUT_PER_BYTE_MS      50
-
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -125,8 +123,6 @@ static void SpiCallback(SPIDriver *spip)
         // all done here!
 
         spiUnselect(palSpi->Driver);
-        // need to deassert the chip select line because the current ChibiOS driver doesn't implement the above spiUnselect()
-        palSetPad(palSpi->Configuration.ssport, palSpi->Configuration.sspad);
 
         // Release the bus
         spiReleaseBus(palSpi->Driver);
@@ -177,15 +173,10 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputePresca
 }
 
 // Give a complete low-level SPI configuration from user's managed connectionSettings
-void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, bool bufferIs16bits)
+void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig)
 {
     int csPin = config[ SpiConnectionSettings::FIELD___csLine ].NumericByRef().s4;
     uint16_t CR1 = SPI_CR1_SSI | SPI_CR1_MSTR;
-
-  #ifdef STM32F7xx_MCUCONF
-    // 8bit transfer mode as default
-    uint16_t CR2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
-  #endif
 
     switch (config[ SpiConnectionSettings::FIELD___spiMode ].NumericByRef().s4)
     {
@@ -205,61 +196,6 @@ void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(int bus
             break;
     }
 
-    // set data transfer length according to SPI connection settings and...
-    // ... buffer data size. Have to use the shortest one.
-    if (config[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4 == 16)
-    {
-        // databitLength is 16bits
-
-        if(bufferIs16bits)
-        {
-            // Set data transfer length to 16 bits
-  #ifdef STM32F4xx_MCUCONF
-            CR1 |= SPI_CR1_DFF;
-  #endif
-  #ifdef STM32F7xx_MCUCONF
-            CR2 = SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
-  #endif
-            // Sets the order of bytes transmission : MSB first or LSB first
-            int bitOrder = config[ SpiConnectionSettings::FIELD___bitOrder ].NumericByRef().s4;
-            if (bitOrder == DataBitOrder_LSB) 
-            {
-                CR1 |= SPI_CR1_LSBFIRST;
-            }
-        }
-        else
-        {
-            // have to force transfer length to 8bit
-  #ifdef STM32F4xx_MCUCONF
-            CR1 &= ~SPI_CR1_DFF;
-  #endif
-  #ifdef STM32F7xx_MCUCONF
-            CR2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
-  #endif            
-        }
-    }
-    else
-    {
-        // databitLength is 8bits
-
-        if(bufferIs16bits)
-        {
-            // have to force transfer length to 16bit 
-  #ifdef STM32F4xx_MCUCONF
-            CR1 |= SPI_CR1_DFF;
-  #endif
-  #ifdef STM32F7xx_MCUCONF
-            CR2 = SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
-  #endif
-
-        }
-        else
-        {
-            // set transfer length to 8bits
-            // this is the default so it's already set this way
-        }
-    }
-
     // SPI on STM32 needs a prescaler value to set the frequency used
     CR1 |= ComputePrescaler(busIndex, config[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4);
 
@@ -271,13 +207,101 @@ void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig(int bus
     llConfig->ssport = GPIO_PORT(csPin);
     llConfig->sspad = csPin % 16;
     llConfig->cr1 = CR1;
-  #ifdef STM32F4xx_MCUCONF
     llConfig->cr2 = 0;
+}
+
+// adjust SPI config for a particular operation
+void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetOperationConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, bool bufferIs16bits)
+{
+    // clear databit order CR1 
+    llConfig->cr1 &= ~(SPI_CR1_LSBFIRST_Msk);
+  
+  #ifdef STM32F7xx_MCUCONF
+    llConfig->cr2 = 0;
+  #endif 
+
+    // set data transfer length according to SPI connection settings and...
+    // ... buffer data size. Have to use the shortest one.
+    if (config[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4 == 16)
+    {
+        // databitLength is 16bits
+
+        if(bufferIs16bits)
+        {
+            // Set data transfer length to 16 bits
+  #ifdef STM32F4xx_MCUCONF
+            llConfig->cr1 |= SPI_CR1_DFF;
   #endif
   #ifdef STM32F7xx_MCUCONF
-    llConfig->cr2 = CR2;
+            llConfig->cr2 = SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
+  #endif
+            // Sets the order of bytes transmission : MSB first or LSB first
+            int bitOrder = config[ SpiConnectionSettings::FIELD___bitOrder ].NumericByRef().s4;
+            if (bitOrder == DataBitOrder_LSB) 
+            {
+                llConfig->cr1 |= SPI_CR1_LSBFIRST;
+            }
+        }
+        else
+        {
+            // have to force transfer length to 8bit
+  #ifdef STM32F4xx_MCUCONF
+            llConfig->cr1 &= ~SPI_CR1_DFF;
+  #endif
+  #ifdef STM32F7xx_MCUCONF
+            llConfig->cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
+  #endif            
+        }
+    }
+    else
+    {
+        // databitLength is 8bits
+
+        if(bufferIs16bits)
+        {
+            // have to force transfer length to 16bit 
+  #ifdef STM32F4xx_MCUCONF
+            llConfig->cr1 |= SPI_CR1_DFF;
+  #endif
+  #ifdef STM32F7xx_MCUCONF
+            llConfig->cr2 = SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
   #endif
 
+        }
+        else
+        {
+            // set transfer length to 8bits
+  #ifdef STM32F4xx_MCUCONF
+            llConfig->cr1 &= ~SPI_CR1_DFF;
+  #endif
+  #ifdef STM32F7xx_MCUCONF
+            llConfig->cr2 |= SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
+  #endif            
+        }
+    }
+}
+
+// estimate the time required to perform the SPI transaction
+bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::IsLongRunningOperation(int writeSize, int readSize, bool bufferIs16bits, float byteTime, int& estimatedDurationMiliseconds)
+{
+    if(bufferIs16bits)
+    {
+        // double the buffers size
+        writeSize = 2 * writeSize;
+        readSize = 2 * readSize;
+    }
+
+    estimatedDurationMiliseconds = byteTime * (writeSize + readSize);
+
+    if(estimatedDurationMiliseconds > CLR_RT_Thread::c_TimeQuantum_Milliseconds)
+    {
+        // total operation time will exceed thread quantum, so this is a long running operation
+        return true;
+    }
+    else
+    {
+        return false;        
+    }
 }
 
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
@@ -298,10 +322,12 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         uint8_t busIndex;
         bool fullDuplex;
         bool databitLengthIs16;
+        bool isLongRunningOperation = false;
 
         CLR_RT_HeapBlock    hbTimeout;
         CLR_INT64*          timeout;
         bool                eventResult = true;
+        int                 estimatedDurationMiliseconds;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -360,71 +386,47 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         CLR_RT_HeapBlock_Array* writeBuffer = stack.Arg1().DereferenceArray();
         if (writeBuffer != NULL)
         {
-            // get the size of the buffer by reading the number of elements in the HeapBlock array
+            // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
             palSpi->WriteSize = writeBuffer->m_numOfElements;
-
-            // sanity check for buffer size
-            if(bufferIs16bits)
-            {
-                if((palSpi->WriteSize * 2) > palSpi->WriteBufferSize)
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-                }
-            }
-            else
-            {
-                if(palSpi->WriteSize > palSpi->WriteBufferSize)
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-                }
-            }
         }
 
         CLR_RT_HeapBlock_Array* readBuffer = stack.Arg2().DereferenceArray();
         if (readBuffer != NULL)
         {
-            // get the size of the buffer by reading the number of elements in the HeapBlock array
+            // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
             palSpi->ReadSize = readBuffer->m_numOfElements;
-
-            // sanity check for buffer size
-            if(bufferIs16bits)
-            {
-                if((palSpi->ReadSize * 2) > palSpi->ReadBufferSize)
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-                }
-            }
-            else
-            {
-                if(palSpi->ReadSize > palSpi->ReadBufferSize)
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-                }
-            }          
         }
 
-        // set a timeout equal to N milliseconds per read and write byte for the Spi transaction timeout
-        // it should be enough to ensure SPI bus read and write, including any potential timeout there
-        // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
-        hbTimeout.SetInteger((CLR_INT64)SPI_TRANSACTION_TIMEOUT_PER_BYTE_MS * (palSpi->WriteSize + palSpi->ReadSize) * TIME_CONVERSION__TO_MILLISECONDS);
+        // check if this is a long running operation
+        isLongRunningOperation = IsLongRunningOperation(palSpi->WriteSize, palSpi->ReadSize, bufferIs16bits, palSpi->ByteTime, (int&)estimatedDurationMiliseconds);
 
-        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
-
-        // this is going to be used to check for the right event in case of simultaneous Spi transaction
-        if(stack.m_customState == 1)
+        if(isLongRunningOperation)
         {
-            // Get a complete low-level SPI configuration, depending on user's managed parameters and buffer element size
-            GetConfig(busIndex, pConfig, &palSpi->Configuration, bufferIs16bits);
+            // if this is a long running operation, set a timeout equal to the estimated transaction duration in milliseconds
+            // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
+            hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds);
+
+            NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
+            
+            // protect the buffers from GC so DMA can find them where they are supposed to be
+            CLR_RT_ProtectFromGC gcWriteBuffer( *writeBuffer );
+            CLR_RT_ProtectFromGC gcReadBuffer( *readBuffer );
+        }
+
+        // setup the operation and init buffers
+        if(!isLongRunningOperation || stack.m_customState == 1)
+        {
+            // update the low-level SPI configuration for this operation, depending on user's managed parameters and buffer element size
+            GetOperationConfig(busIndex, pConfig, &palSpi->Configuration, bufferIs16bits);
 
             if (writeBuffer != NULL)
             {
-                // copy to DMA write buffer
+                // set DMA write buffer
                 if(bufferIs16bits)
                 {
                     // buffer data width is 16bits
-                    // get the pointer to the write buffer as UINT16
-                    // memcpy copies N bytes, so we need to double the array size because it's really an UINT16 (2 bytes)
-                    memcpy(palSpi->WriteBuffer, (uint8_t*)writeBuffer->GetFirstElementUInt16(), (palSpi->WriteSize * 2));
+                    // get the pointer to the write buffer as UINT16 because it's really an UINT16 (2 bytes)
+                    palSpi->WriteBuffer = (uint8_t*)writeBuffer->GetFirstElementUInt16();
 
                     // flush DMA buffer to ensure cache coherency
                     // (only required for Cortex-M7)
@@ -434,7 +436,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                 {
                     // buffer data width is 8bits
                     // get the pointer to the write buffer as BYTE
-                    memcpy(palSpi->WriteBuffer, (uint8_t*)writeBuffer->GetFirstElement(), palSpi->WriteSize);
+                    palSpi->WriteBuffer = (uint8_t*)writeBuffer->GetFirstElement();
 
                     // flush DMA buffer to ensure cache coherency
                     // (only required for Cortex-M7)
@@ -442,14 +444,89 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                 }               
             }
 
+            if (readBuffer != NULL)
+            {
+                // set DMA read buffer
+                if(palSpi->ReadSize > 0)
+                {
+                    if(bufferIs16bits)
+                    {
+                        // buffer data width is 16bits
+                        palSpi->ReadBuffer = (uint8_t*)readBuffer->GetFirstElementUInt16();
+                    }
+                    else
+                    {
+                        // buffer data width is 8bits
+                        // get the pointer to the read buffer as BYTE
+                        palSpi->ReadBuffer = (uint8_t*)readBuffer->GetFirstElement();
+                    }
+                }
+            }
+
             // because the bus access is shared, acquire and select the appropriate bus
             spiAcquireBus(palSpi->Driver);
             spiStart(palSpi->Driver, &palSpi->Configuration);
 
             spiSelect(palSpi->Driver);
-            // need to assert the chip select line because the current ChibiOS driver doesn't implement the above spiSelect()
-            palClearPad(palSpi->Configuration.ssport, palSpi->Configuration.sspad);
+        }
 
+        if(isLongRunningOperation)
+        {
+            // this is a long running operation and hasn't started yet
+            // perform SPI operation using driver's ASYNC API
+            if(stack.m_customState == 1)
+            {
+                if (palSpi->WriteSize != 0 && palSpi->ReadSize != 0)
+                {
+                    // Transmit+Receive
+                    if (fullDuplex)
+                    {
+                        // Full duplex
+                        // single operation, clear flag
+                        palSpi->SequentialTxRx = false;
+
+                        // Uses the largest buffer size as transfer size
+                        spiStartExchange(palSpi->Driver, palSpi->WriteSize > palSpi->ReadSize ? palSpi->WriteSize : palSpi->ReadSize, palSpi->WriteBuffer, palSpi->ReadBuffer);
+                    }
+                    else
+                    {
+                        // flag that an Rx is required after the Tx operation completes
+                        palSpi->SequentialTxRx = true;
+
+                        // start send operation
+                        spiStartSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
+                        // receive operation will be started in the callback after the above completes
+                    }
+                }
+                else
+                {
+                    // Transmit only or Receive only
+                    if (palSpi->ReadSize != 0) 
+                    {
+                        // single operation, clear flag
+                        palSpi->SequentialTxRx = false;
+
+                        // start receive
+                        spiStartReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
+                    }
+                    else
+                    {
+                        // single operation, clear flag
+                        palSpi->SequentialTxRx = false;
+
+                        // start send
+                        spiStartSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
+                    }
+                }            
+
+                // bump custom state
+                stack.m_customState = 2;
+            }
+        }
+        else
+        {
+            // this is NOT a long running operation
+            // perform SPI operation using driver's SYNC API
             if (palSpi->WriteSize != 0 && palSpi->ReadSize != 0)
             {
                 // Transmit+Receive
@@ -460,16 +537,17 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                     palSpi->SequentialTxRx = false;
 
                     // Uses the largest buffer size as transfer size
-                    spiStartExchange(palSpi->Driver, palSpi->WriteSize > palSpi->ReadSize ? palSpi->WriteSize : palSpi->ReadSize, palSpi->WriteBuffer, palSpi->ReadBuffer);
+                    spiExchange(palSpi->Driver, palSpi->WriteSize > palSpi->ReadSize ? palSpi->WriteSize : palSpi->ReadSize, palSpi->WriteBuffer, palSpi->ReadBuffer);
                 }
                 else
                 {
                     // flag that an Rx is required after the Tx operation completes
                     palSpi->SequentialTxRx = true;
 
-                    // start send operation
-                    spiStartSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
-                    // receive operation will be started in the callback after the above completes
+                    // send operation
+                    spiSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
+                    // receive operation
+                    spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
                 }
             }
             else
@@ -480,25 +558,35 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                     // single operation, clear flag
                     palSpi->SequentialTxRx = false;
 
-                    // start receive
-                    spiStartReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
+                    // receive
+                    spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
                 }
                 else
                 {
                     // single operation, clear flag
                     palSpi->SequentialTxRx = false;
 
-                    // start send
-                    spiStartSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
+                    // send
+                    spiSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
                 }
-            }            
+            }
+                
+            spiUnselect(palSpi->Driver);
+            // need to deassert the chip select line because the current ChibiOS driver doesn't implement the above spiUnselect()
+            //palSetPad(palSpi->Configuration.ssport, palSpi->Configuration.sspad);
 
-            // bump custom state
-            stack.m_customState = 2;
+            // Release the bus
+            spiReleaseBus(palSpi->Driver);
         }
 
         while(eventResult)
         {
+            if(!isLongRunningOperation)
+            {
+                // this is not a long running operation so nothing to do here
+                break;
+            }
+
             if(palSpi->Driver->state == SPI_READY)
             {
                 // SPI driver is ready meaning that the SPI transaction(s) is(are) completed
@@ -509,12 +597,16 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_SpiMaster, eventResult ));
         }
 
-        // pop timeout heap block from stack
-        stack.PopValue();
-
-        if(eventResult)
+        if(isLongRunningOperation)
+        {
+            // pop timeout heap block from stack
+            stack.PopValue();
+        }
+        
+        if(eventResult || !isLongRunningOperation)
         {
             // event occurred
+            // OR this is NOT a long running operation
             if(palSpi->ReadSize > 0)
             {
                 // because this was a Read transaction, need to copy from DMA buffer to managed buffer
@@ -524,12 +616,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                     
                     // invalidate cache over read buffer to ensure that content from DMA is read
                     // (only required for Cortex-M7)
+                    // get the pointer to the read buffer as UINT16 because it's really an UINT16 (2 bytes)
                     cacheBufferInvalidate(palSpi->ReadBuffer, (palSpi->ReadSize * 2));
-
-                    // copy Spi read buffer into managed buffer
-                    // get the pointer to the read buffer as UINT16
-                    // memcpy copies N bytes, so we need to double the array size because it's really an UINT16 (2 bytes)
-                    memcpy(readBuffer->GetFirstElementUInt16(), palSpi->ReadBuffer, (palSpi->ReadSize * 2));
                 }
                 else
                 {
@@ -537,11 +625,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 
                     // invalidate cache over read buffer to ensure that content from DMA is read
                     // (only required for Cortex-M7)
-                    cacheBufferInvalidate(palSpi->ReadBuffer, palSpi->ReadSize);
-
-                    // copy Spi read buffer into managed buffer
                     // get the pointer to the read buffer as BYTE
-                    memcpy(readBuffer->GetFirstElement(), palSpi->ReadBuffer, palSpi->ReadSize);
+                    cacheBufferInvalidate(palSpi->ReadBuffer, palSpi->ReadSize);
                 }
             }
         }
@@ -557,8 +642,13 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
 {
     NANOCLR_HEADER();
     {
+        NF_PAL_SPI* palSpi;
+
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+        
+        // get a pointer to the managed spi connectionSettings object instance
+        CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
         
         // get bus index
         // this is coded with a multiplication, need to perform and int division to get the number
@@ -574,8 +664,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 1:
                 if(SPI1_PAL.Driver == NULL)
                 {
-                    Init_SPI1();
                     SPI1_PAL.Driver = &SPID1;
+                    palSpi = &SPI1_PAL;
                 }
                 break;
     #endif
@@ -583,8 +673,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 2:
                 if(SPI2_PAL.Driver == NULL)
                 {
-                    Init_SPI2();
                     SPI2_PAL.Driver = &SPID2;
+                    palSpi = &SPI2_PAL;
                 }
                 break;
     #endif
@@ -592,8 +682,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 3:
                 if(SPI3_PAL.Driver == NULL)
                 {
-                    Init_SPI3();
                     SPI3_PAL.Driver = &SPID3;
+                    palSpi = &SPI3_PAL;
                 }
                 break;
     #endif
@@ -601,8 +691,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 4:
                 if(SPI4_PAL.Driver == NULL)
                 {
-                    Init_SPI4();
                     SPI4_PAL.Driver = &SPID4;
+                    palSpi = &SPI4_PAL;
                 }
                 break;
     #endif
@@ -610,8 +700,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 5:
                 if(SPI5_PAL.Driver == NULL)
                 {
-                    Init_SPI5();
                     SPI5_PAL.Driver = &SPID5;
+                    palSpi = &SPI5_PAL;
                 }
                 break;
     #endif
@@ -619,8 +709,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 6:
                 if(SPI6_PAL.Driver == NULL)
                 {
-                    Init_SPI6();
                     SPI6_PAL.Driver = &SPID6;
+                    palSpi = &SPI6_PAL;
                 }
                 break;
     #endif
@@ -630,6 +720,11 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
                 break;
         }
 
+        // Get a general low-level SPI configuration, depending on user's managed parameters
+        GetSPIConfig(busIndex, pConfig, &palSpi->Configuration);
+
+        // compute rough estimate on the time to tx/rx a byte (in milliseconds)
+        palSpi->ByteTime = (1.0 / (pConfig[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4 * 8 * 1000));
     }
     NANOCLR_NOCLEANUP();
 }
@@ -638,9 +733,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::DisposeNative_
 {
     NANOCLR_HEADER();
     {
-        // set pin to input to save power
-        // clear interrupts
-        // release the pin
+
     }
     NANOCLR_NOCLEANUP();
 }
