@@ -815,10 +815,6 @@ bool CLR_DBG_Debugger::Monitor_Reboot( WP_Message* msg)
 
     WP_ReplyToCommand(msg, true, false, NULL, 0);
 
-    // Allow some time for CLR to Reboot
-    // FIXME find a better way to syncronise the reboot with clr 
-    PLATFORM_WAIT( 1000 );
-
     return true;
 }
 
