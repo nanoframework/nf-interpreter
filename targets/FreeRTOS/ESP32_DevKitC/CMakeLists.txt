@@ -42,6 +42,14 @@ if(USE_NETWORKING_OPTION)
 find_package(NF_NETWORKING REQUIRED)
 endif()
 
+# RTC (real time clock) (default is OFF so RTC is NOT included)
+option(NF_FEATURE_RTC "option to use hardware RTC")
+if(NF_FEATURE_RTC)
+    set(HAL_USE_RTC_OPTION TRUE CACHE INTERNAL "NF feature RTC")
+else()    
+    set(HAL_USE_RTC_OPTION FALSE CACHE INTERNAL "NF feature RTC")
+endif()
+
 #######################################
 
 add_subdirectory("common")
@@ -155,6 +163,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/src/CLR/Debugger
     ${PROJECT_SOURCE_DIR}/src/HAL/Include
     ${PROJECT_SOURCE_DIR}/src/PAL/Include
+    ${PROJECT_SOURCE_DIR}/src/CLR/Runtime.Native
 
     ${WireProtocol_INCLUDE_DIRS}
 
