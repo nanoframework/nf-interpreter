@@ -134,91 +134,113 @@ static void SpiCallback(SPIDriver *spip)
     NATIVE_INTERRUPT_END
 };
 
-// Computes the prescaler registers given a frequency
-uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputePrescaler(uint8_t busIndex, int32_t requestedFrequency)
+// Computes the SPI peripheral baud rate according to the requested frequency
+uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRate(uint8_t busIndex, int32_t requestedFrequency, int32_t& actualFrequency)
 {
-    uint16_t pre = 0;
-  #if defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF)
-    // SP1, SPI4, SPI5 and SPI6 on APB2
-	int32_t clock = STM32_SPII2S_MAX >> 1;
-    
-    // SPI2 and SPI3 on APB1
+    uint16_t divider = 0;
+    uint32_t maxSpiFrequency;
+
+  #if defined(STM32F0xx_MCUCONF)
+
+    // STM32F0 SPI is always feed by APB1
+    actualFrequency = STM32_PCLK1;
+
+    // from datasheet
+    maxSpiFrequency = 18000000;
+
+  #elif defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF)
+
+    // SP1, SPI4, SPI5 and SPI6 are feed by APB2 (STM32_PCLK2)
+    actualFrequency = STM32_PCLK2;
+
+    // SPI2 and SPI3 are feed by APB1 (STM32_PCLK1)
     if (busIndex == 2 || busIndex == 3)
     {
-        clock >>= 1;
+        actualFrequency = STM32_PCLK1;
     }
-  #elif defined(STM32F0xx_MCUCONF)
-    int32_t clock = 12000000 >> 1;
+
+    // this is not really accurate because there are different max SPI clocks depending on which APB clock source if feeding the SPI
+    // because ChibiOS doesn't offer that we have to go with minimum common denominator
+    maxSpiFrequency = STM32_SPII2S_MAX;
+
+  #elif defined(STM32H7xx_MCUCONF)
+
+    // SP1, SPI4, SPI5 and SPI6 are feed by APB2 (STM32_PCLK2)
+    actualFrequency = STM32_PCLK2;
+    maxSpiFrequency = STM32_SPI456_MAX;
+
+    // SPI1, SPI2 and SPI3 are feed by APB1 (STM32_PCLK1)
+    if (busIndex == 2 || busIndex == 3)
+    {
+        actualFrequency = STM32_PCLK1;
+        maxSpiFrequency = STM32_SPI123_MAX;
+    }
+
   #else
     #error "Please check max SPI frequency"
   #endif
+    
 
-	if (clock > requestedFrequency << 3)
+    // when requested frequency is 0, means that the developer hasn't set ClockFrequency in SpiConnectionSettings
+    // default to the max possible SPI frequency
+    if(requestedFrequency == 0)
     {
-		clock >>= 4;
-		pre |= SPI_CR1_BR_2;
-	}
-	if (clock > requestedFrequency << 1)
-    {
-		clock >>= 2;
-		pre |= SPI_CR1_BR_1;
-	}
-
-	if (clock > requestedFrequency)
-    {
-        pre |= SPI_CR1_BR_0;
+        requestedFrequency = maxSpiFrequency;
     }
 
-    return pre;
+    for( ; divider < 8; divider++)
+    {
+        actualFrequency = actualFrequency / 2;
+        
+        if(actualFrequency <= requestedFrequency)
+        {
+            // best match for the requested frequency
+            // just check if it's bellow the max SPI frequency
+            if(actualFrequency <= maxSpiFrequency)
+            {
+                // we are good with this value
+                break;
+            }
+        }
+    }
+
+    // the baud rate bits are in the position B5:3 so need to left shit the divider value 
+    return divider << 3;
 }
 
 // Give a complete low-level SPI configuration from user's managed connectionSettings
-void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig)
+void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, bool bufferIs16bits)
 {
-    int csPin = config[ SpiConnectionSettings::FIELD___csLine ].NumericByRef().s4;
-    uint16_t CR1 = SPI_CR1_SSI | SPI_CR1_MSTR;
+    int32_t actualFrequency;
 
+    // clear values
+    llConfig->cr1 = 0;
+    llConfig->cr2 = 0;
+
+    // get chip select pin
+    int csPin = config[ SpiConnectionSettings::FIELD___csLine ].NumericByRef().s4;
+
+    // SPI mode
     switch (config[ SpiConnectionSettings::FIELD___spiMode ].NumericByRef().s4)
     {
         case SpiModes_Mode1:
-            CR1 |= SPI_CR1_CPHA;
+            llConfig->cr1 |= SPI_CR1_CPHA;
             break;
 
         case SpiModes_Mode2:
-            CR1 |= SPI_CR1_CPOL;
+            llConfig->cr1 |= SPI_CR1_CPOL;
             break;
 
         case SpiModes_Mode3:
-            CR1 |= SPI_CR1_CPHA | SPI_CR1_CPOL;
+            llConfig->cr1 |= SPI_CR1_CPHA | SPI_CR1_CPOL;
             break;
 
         default:   // Default to Mode0 if invalid mode specified
             break;
     }
 
-    // SPI on STM32 needs a prescaler value to set the frequency used
-    CR1 |= ComputePrescaler(busIndex, config[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4);
-
-    // Create the low level configuration
-  #if (SPI_SUPPORTS_CIRCULAR == TRUE) 
-    llConfig->circular = SPI_USE_CIRCULAR;
-  #endif
-    llConfig->end_cb = SpiCallback;
-    llConfig->ssport = GPIO_PORT(csPin);
-    llConfig->sspad = csPin % 16;
-    llConfig->cr1 = CR1;
-    llConfig->cr2 = 0;
-}
-
-// adjust SPI config for a particular operation
-void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetOperationConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, bool bufferIs16bits)
-{
-    // clear databit order CR1 
-    llConfig->cr1 &= ~(SPI_CR1_LSBFIRST_Msk);
-  
-  #ifdef STM32F7xx_MCUCONF
-    llConfig->cr2 = 0;
-  #endif 
+    // compute baud rate of SPI peripheral according to the requested frequency
+    llConfig->cr1 |= ComputeBaudRate(busIndex, config[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4, (int32_t&)actualFrequency);
 
     // set data transfer length according to SPI connection settings and...
     // ... buffer data size. Have to use the shortest one.
@@ -279,6 +301,14 @@ void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetOperationConfi
   #endif            
         }
     }
+
+    // Create the low level configuration
+  #if (SPI_SUPPORTS_CIRCULAR == TRUE) 
+    llConfig->circular = SPI_USE_CIRCULAR;
+  #endif
+    llConfig->end_cb = SpiCallback;
+    llConfig->ssport = GPIO_PORT(csPin);
+    llConfig->sspad = csPin % 16;
 }
 
 // estimate the time required to perform the SPI transaction
@@ -404,7 +434,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         {
             // if this is a long running operation, set a timeout equal to the estimated transaction duration in milliseconds
             // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
-            hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds);
+            hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
 
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
             
@@ -416,8 +446,15 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         // setup the operation and init buffers
         if(!isLongRunningOperation || stack.m_customState == 1)
         {
-            // update the low-level SPI configuration for this operation, depending on user's managed parameters and buffer element size
-            GetOperationConfig(busIndex, pConfig, &palSpi->Configuration, bufferIs16bits);
+            // get the LL SPI configuration, depending on user's managed parameters and buffer element size
+            GetSPIConfig(busIndex, pConfig, &palSpi->Configuration, bufferIs16bits);
+
+            // if this is not a long run operation we'll be using the async API thus operations are sequencial
+            // need to remove the callback from the SPI LL config
+            if(!isLongRunningOperation)
+            {
+                palSpi->Configuration.end_cb = NULL;
+            }
 
             if (writeBuffer != NULL)
             {
@@ -467,6 +504,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             spiAcquireBus(palSpi->Driver);
             spiStart(palSpi->Driver, &palSpi->Configuration);
 
+            // just to satisfy the driver ceremony, no actual implementation for STM32
             spiSelect(palSpi->Driver);
         }
 
@@ -533,17 +571,11 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                 if (fullDuplex)
                 {
                     // Full duplex
-                    // single operation, clear flag
-                    palSpi->SequentialTxRx = false;
-
                     // Uses the largest buffer size as transfer size
                     spiExchange(palSpi->Driver, palSpi->WriteSize > palSpi->ReadSize ? palSpi->WriteSize : palSpi->ReadSize, palSpi->WriteBuffer, palSpi->ReadBuffer);
                 }
                 else
                 {
-                    // flag that an Rx is required after the Tx operation completes
-                    palSpi->SequentialTxRx = true;
-
                     // send operation
                     spiSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
                     // receive operation
@@ -555,25 +587,18 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                 // Transmit only or Receive only
                 if (palSpi->ReadSize != 0) 
                 {
-                    // single operation, clear flag
-                    palSpi->SequentialTxRx = false;
-
                     // receive
                     spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
                 }
                 else
                 {
-                    // single operation, clear flag
-                    palSpi->SequentialTxRx = false;
-
                     // send
                     spiSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
                 }
             }
-                
+            
+            // just to satisfy the driver ceremony, no actual implementation for STM32
             spiUnselect(palSpi->Driver);
-            // need to deassert the chip select line because the current ChibiOS driver doesn't implement the above spiUnselect()
-            //palSetPad(palSpi->Configuration.ssport, palSpi->Configuration.sspad);
 
             // Release the bus
             spiReleaseBus(palSpi->Driver);
@@ -603,10 +628,9 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             stack.PopValue();
         }
         
-        if(eventResult || !isLongRunningOperation)
+        if(eventResult)
         {
             // event occurred
-            // OR this is NOT a long running operation
             if(palSpi->ReadSize > 0)
             {
                 // because this was a Read transaction, need to copy from DMA buffer to managed buffer
@@ -643,7 +667,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
     NANOCLR_HEADER();
     {
         NF_PAL_SPI* palSpi;
-
+        int32_t actualFrequency;
+        
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
         
@@ -720,11 +745,9 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
                 break;
         }
 
-        // Get a general low-level SPI configuration, depending on user's managed parameters
-        GetSPIConfig(busIndex, pConfig, &palSpi->Configuration);
-
         // compute rough estimate on the time to tx/rx a byte (in milliseconds)
-        palSpi->ByteTime = (1.0 / (pConfig[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4 * 8 * 1000));
+        ComputeBaudRate(busIndex, pConfig[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4, (int32_t&)actualFrequency);
+        palSpi->ByteTime = (1.0 / actualFrequency) * 1000;
     }
     NANOCLR_NOCLEANUP();
 }
@@ -773,4 +796,3 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetDeviceSelec
    }
    NANOCLR_NOCLEANUP();
 }
-
