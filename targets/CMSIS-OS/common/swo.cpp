@@ -65,15 +65,33 @@ extern "C" void SwoPrintString(const char *s)
     }
 }
 
-int GenericPort_Write( int portNum, const char* data, size_t size )
+// this function is heavily based in the CMSIS ITM_SendChar 
+// but with small performance improvements as we are sending a string not individual chars
+__STATIC_INLINE int GenericPort_Write_CMSIS( int portNum, const char* data, size_t size )
 {
     char* p = (char*)data;
     int counter = 0;
 
-    // send characters directly to the trace port
-    while(*p != '\0' || counter < size)
+    // check if ITM port is enabled before start sending
+    if (((ITM->TCR & ITM_TCR_ITMENA_Msk) != 0UL) &&      /* ITM enabled */
+        ((ITM->TER & 1UL               ) != 0UL)   )     /* ITM Port #0 enabled */
     {
-        ITM_SendChar( *p++ );
-        counter++;
+        while(*p != '\0' || counter < size)
+        {
+            // wait until TX buffer is available
+            while (ITM->PORT[0U].u32 == 0UL)
+            {
+                __NOP();
+            }
+
+            ITM->PORT[0U].u8 = (uint8_t)*p++;
+
+            counter++;
+        }
     }
+}
+
+int GenericPort_Write( int portNum, const char* data, size_t size )
+{
+    return GenericPort_Write_CMSIS(portNum, data, size);
 }
