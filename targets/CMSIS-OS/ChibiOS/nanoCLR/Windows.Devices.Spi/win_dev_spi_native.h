@@ -110,26 +110,4 @@ struct NF_PAL_SPI
     extern NF_PAL_SPI SPI6_PAL;
 #endif
 
-// when a SPI is defined the declarations bellow will have the real function/configuration 
-// in the target folder @ target_windows_devices_SPI_config.cpp
-void Init_SPI1();
-void Init_SPI2();
-void Init_SPI3();
-void Init_SPI4();
-void Init_SPI5();
-void Init_SPI6();
-
-// the following macro defines a function that un initializes an SPI struct
-// it gets called in the Windows_Devices_SPI_SPIDevice::NativeDispose function
-#define SPI_UNINIT(num) void UnInit_SPI##num() { return; }
-
-// when a SPI is defined the declarations bellow will have the real function/configuration 
-// in the target folder @ target_windows_devices_SPI_config.cpp
-void UnInit_SPI1();
-void UnInit_SPI2();
-void UnInit_SPI3();
-void UnInit_SPI4();
-void UnInit_SPI5();
-void UnInit_SPI6();
-
 #endif  //_WIN_DEV_SPI_NATIVE_H_
