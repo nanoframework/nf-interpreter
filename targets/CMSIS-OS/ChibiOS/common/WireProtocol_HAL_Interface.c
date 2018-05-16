@@ -45,7 +45,7 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         //////////////////////////////////////////////////////////
 
         // read from serial stream 
-        volatile size_t read = chnReadTimeout(&SDU1, ptr, *size, TIME_MS2I(250));
+        size_t read = streamRead(&SDU1, ptr, *size); 
 
         ptr  += read;
         *size -= read;
@@ -113,7 +113,7 @@ int WP_TransmitMessage(WP_Message* message)
     TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
 
     // write header to output stream
-    writeResult = chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(250));
+    writeResult = streamWrite(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header));
 
     if(writeResult == sizeof(message->m_header))
     {
@@ -131,7 +131,7 @@ int WP_TransmitMessage(WP_Message* message)
             // reset flag
             operationResult = false;
 
-            writeResult = chnWriteTimeout(&SDU1, message->m_payload, message->m_header.m_size, TIME_MS2I(250));
+            writeResult = streamWrite(&SDU1, message->m_payload, message->m_header.m_size);
 
             if(writeResult == message->m_header.m_size)
             {
