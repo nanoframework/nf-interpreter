@@ -9,6 +9,7 @@
 #include "WireProtocol_HAL_Interface.h"
 
 extern WP_Message inboundMessage;
+extern SerialUSBDriver SDU1;
 
 // This thread needs to be implemented at ChibiOS level because it has to include a call to chThdShouldTerminateX()
 // in case the thread is requested to terminate by the CMSIS call osThreadTerminate()
@@ -26,13 +27,20 @@ void ReceiverThread(void const * argument)
   // loop until thread receives a request to terminate
   while (1) {
 
-    WP_Message_Initialize(&inboundMessage);
-    WP_Message_PrepareReception(&inboundMessage);
+    if (SDU1.config->usbp->state == USB_ACTIVE)
+    {
+      WP_Message_Initialize(&inboundMessage);
+      WP_Message_PrepareReception(&inboundMessage);
 
-    WP_Message_Process(&inboundMessage);
+      WP_Message_Process(&inboundMessage);
 
-    // delay here to give other threads a chance to run
-    osDelay(100);
+      // pass control to the OS
+      osThreadYield();
+    }
+    else
+    {
+      osDelay(1000);      
+    }
   }
 
   // this function never returns
