@@ -64,9 +64,8 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice
 
     //--//
 
-    static uint16_t ComputePrescaler (uint8_t bus, int32_t requestedFrequency);
-    static void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig);
-    static void GetOperationConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, bool bufferIs16bits);
+    static uint16_t ComputeBaudRate(uint8_t bus, int32_t requestedFrequency, int32_t& actualFrequency);
+    static void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, bool bufferIs16bits);
     static bool IsLongRunningOperation(int writeSize, int readSize, bool bufferIs16bits, float byteTime, int& estimatedDurationMiliseconds);
     static HRESULT NativeTransfer(CLR_RT_StackFrame& stack, bool bufferIs16bits);
 };
