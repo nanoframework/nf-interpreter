@@ -169,7 +169,7 @@ void HAL_COMPLETION::Abort()
 
 //--//
 
-void HAL_COMPLETION::WaitForInterrupts(uint64_t expire, uint32_t sleepLevel, uint64_t wakeEvents)
+void HAL_COMPLETION::WaitForInterrupts(uint64_t expireTicks, uint32_t sleepLevel, uint64_t wakeEvents)
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 
@@ -186,7 +186,7 @@ void HAL_COMPLETION::WaitForInterrupts(uint64_t expire, uint32_t sleepLevel, uin
     {
         state = setCompare | nilCompare;
     }
-    else if(ptr->EventTimeTicks > expire)
+    else if(ptr->EventTimeTicks > expireTicks)
     {
         state = setCompare | resetCompare;
     }
@@ -197,7 +197,7 @@ void HAL_COMPLETION::WaitForInterrupts(uint64_t expire, uint32_t sleepLevel, uin
 
     if(state & setCompare)
     {
-        Time_SetCompare(expire);
+        Time_SetCompare(expireTicks);
     }
 
     CPU_Sleep((SLEEP_LEVEL_type)sleepLevel, wakeEvents);

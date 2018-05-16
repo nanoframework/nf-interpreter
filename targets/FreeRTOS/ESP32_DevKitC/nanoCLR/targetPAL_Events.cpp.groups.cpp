@@ -13,7 +13,7 @@
 static void local_Events_SetBoolTimer_Callback(  TimerHandle_t xTimer  );
 
 // events timer
-static TimerHandle_t eventsBoolTimer;
+static TimerHandle_t boolEventsTimer;
 static bool*  saveTimerCompleteFlag = 0;
 
 EventGroupHandle_t systemEventsHigh;
@@ -32,7 +32,7 @@ bool Events_Initialize()
     systemEventsHigh = xEventGroupCreate();
     systemEventsLow  = xEventGroupCreate();
     
-    eventsBoolTimer = xTimerCreate( "eventsTimer", 10, pdFALSE, (void *)0, local_Events_SetBoolTimer_Callback);
+    boolEventsTimer = xTimerCreate( "boolEventsTimer", 10, pdFALSE, (void *)0, local_Events_SetBoolTimer_Callback);
 
     return true;
 }
@@ -93,9 +93,6 @@ static void local_Events_SetBoolTimer_Callback(  TimerHandle_t xTimer  )
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-//   bool* timerCompleteFlag = (bool*)pvTimerGetTimerID( xTimer );
-// *timerCompleteFlag = true;
-
     *saveTimerCompleteFlag = true;
 }
 
@@ -112,18 +109,18 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
     NATIVE_PROFILE_PAL_EVENTS();
 
     // we assume only 1 can be active, abort previous just in case
-    xTimerStop( eventsBoolTimer, 0 );
+    xTimerStop( boolEventsTimer, 0 );
 
     if(timerCompleteFlag != NULL)
     {
 
-        xTimerChangePeriod( eventsBoolTimer, millisecondsFromNow / portTICK_PERIOD_MS,  0 );
+        xTimerChangePeriod( boolEventsTimer, millisecondsFromNow / portTICK_PERIOD_MS,  0 );
 
-// Was going to just change existing timer but vTimerSetTimerID() does not exist in this version of FreeRtos
+// Was going to just change existing timer but vTimerSetTimerID() does not exist in this version of FreeRTOS
 // As only one timer running at a time we will just save it in global memory
         saveTimerCompleteFlag = timerCompleteFlag;
-        //        vTimerSetTimerID( eventsBoolTimer, (void *)timerCompleteFlag );
-        xTimerStart(eventsBoolTimer, 0);
+        //        vTimerSetTimerID( boolEventsTimer, (void *)timerCompleteFlag );
+        xTimerStart(boolEventsTimer, 0);
     }
 }
 
@@ -135,7 +132,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
 #endif
 
     EventBits_t events = (xEventGroupGetBits(systemEventsHigh) << 16) & xEventGroupGetBits(systemEventsLow)
-   if( events == 0) {
+    if( events == 0) {
         // no events, wait for timeout_Milliseconds
         vTaskDelay( timeout_Milliseconds / portTICK_PERIOD_MS );
     }

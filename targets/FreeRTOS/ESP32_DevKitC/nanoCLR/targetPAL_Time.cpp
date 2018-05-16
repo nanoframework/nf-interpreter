@@ -7,40 +7,40 @@
 #include <target_platform.h>
 #include <Esp32_os.h>
 
-static uint64_t g_nextEvent;   // tick time of next event to be scheduled
+static TimerHandle_t nextEventTimer;
+
+static void NextEventTimer_Callback( TimerHandle_t xTimer )
+{
+    // this call also schedules the next one, if there is one
+    HAL_COMPLETION::DequeueAndExec();
+}
 
 HRESULT Time_Initialize()
 {
-    g_nextEvent = 0xFFFFFFFFFFFF; // never
+    nextEventTimer = xTimerCreate( "NextEventTimer", 10, pdFALSE, (void *)0, NextEventTimer_Callback);
 
-    // nothing to do here has time management is handled by ChibiOS
     return S_OK;
 }
 
 HRESULT Time_Uninitialize()
 {
-    // nothing to do here has time management is handled by ChibiOS
+    // nothing to do here has time management is handled by FreeRTOS
     return S_OK;
 }
 
-void Time_SetCompare ( uint64_t compareValue )
+void Time_SetCompare ( uint64_t compareValueTicks )
 {
-// TODO
-// setup timer with callback that calls HAL_COMPLETION::DequeueAndExec( );
-// see Events_SetBoolTimer
+    // can have only one event timer setup, abort previous just in case
+    xTimerStop( nextEventTimer, 0 );
 
-    g_nextEvent = compareValue;
-}
-
-extern "C" {
-
-void Time_Interrupt_Hook()
-{
-    if (HAL_Time_CurrentSysTicks() >= g_nextEvent && g_nextEvent > 0) 
-    { 
-        // handle event
-        HAL_COMPLETION::DequeueAndExec(); // this also schedules the next one, if there is one
-    }    
-}
-
+    if(compareValueTicks == 0)
+    {
+        // compare value is 0 so dequeue and schedule immediately 
+        NextEventTimer_Callback(NULL);
+    }
+    else
+    {
+        // need to convert from ticks to milliseconds
+        xTimerChangePeriod( boolEventsTimer, (compareValueTicks * TIME_CONVERSION__TO_MILLISECONDS) / portTICK_PERIOD_MS,  0 );
+    }
 }
