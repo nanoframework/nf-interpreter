@@ -41,6 +41,6 @@ void Time_SetCompare ( uint64_t compareValueTicks )
     else
     {
         // need to convert from ticks to milliseconds
-        xTimerChangePeriod( boolEventsTimer, (compareValueTicks * TIME_CONVERSION__TO_MILLISECONDS) / portTICK_PERIOD_MS,  0 );
+        xTimerChangePeriod( nextEventTimer, (compareValueTicks * TIME_CONVERSION__TO_MILLISECONDS) / portTICK_PERIOD_MS,  0 );
     }
 }

@@ -152,7 +152,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
         }
 
         // no events, pass control to the OS
-        taskYIELD(0);
+        taskYIELD();
     }
 
     return 0;
