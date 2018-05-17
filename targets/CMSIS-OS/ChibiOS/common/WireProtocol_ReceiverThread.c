@@ -10,6 +10,10 @@
 
 extern WP_Message inboundMessage;
 
+#if (HAL_USE_SERIAL_USB == TRUE)
+extern SerialUSBDriver SDU1;
+#endif
+
 // This thread needs to be implemented at ChibiOS level because it has to include a call to chThdShouldTerminateX()
 // in case the thread is requested to terminate by the CMSIS call osThreadTerminate()
 
@@ -26,13 +30,31 @@ void ReceiverThread(void const * argument)
   // loop until thread receives a request to terminate
   while (1) {
 
-    WP_Message_Initialize(&inboundMessage);
-    WP_Message_PrepareReception(&inboundMessage);
+  #if (HAL_USE_SERIAL_USB == TRUE)
+    // only bother to wait for WP message is USB is connected
+    if (SDU1.config->usbp->state == USB_ACTIVE)
+    {
+  #endif
 
-    WP_Message_Process(&inboundMessage);
+      WP_Message_Initialize(&inboundMessage);
+      WP_Message_PrepareReception(&inboundMessage);
 
+      WP_Message_Process(&inboundMessage);
+
+  #if (HAL_USE_SERIAL_USB == TRUE)
+      // pass control to the OS
+      osThreadYield();
+    }
+    else
+    {
+      osDelay(1000);
+    }
+
+  #elif (HAL_USE_SERIAL == TRUE)
     // delay here to give other threads a chance to run
     osDelay(100);
+  #endif
+
   }
 
   // this function never returns

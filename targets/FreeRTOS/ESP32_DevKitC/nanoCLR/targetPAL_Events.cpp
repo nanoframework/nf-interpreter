@@ -10,17 +10,13 @@
 
 uint64_t CPU_MiliSecondsToSysTicks(uint64_t miliSeconds);
 
-// events timer
-static TimerHandle_t eventsBoolTimer;
+// timer for bool events
+static TimerHandle_t boolEventsTimer;
 static bool*  saveTimerCompleteFlag = 0;
 
 volatile uint32_t systemEvents;
 
-
 static void local_Events_SetBoolTimer_Callback(  TimerHandle_t xTimer  );
-
-#define chSysLock() 
-#define chSysUnlock() 
 
 set_Event_Callback g_Event_Callback     = NULL;
 void*              g_Event_Callback_Arg = NULL;
@@ -30,11 +26,9 @@ bool Events_Initialize()
     NATIVE_PROFILE_PAL_EVENTS();
 
     // init events
- //   chSysLock();
     systemEvents = 0;
- //   chSysUnlock();
 
-    eventsBoolTimer = xTimerCreate( "eventsTimer", 10, pdFALSE, (void *)0, local_Events_SetBoolTimer_Callback);
+    boolEventsTimer = xTimerCreate( "boolEventsTimer", 10, pdFALSE, (void *)0, local_Events_SetBoolTimer_Callback);
  
     return true;
 }
@@ -43,7 +37,7 @@ bool Events_Uninitialize()
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    xTimerDelete(eventsBoolTimer,0);
+    xTimerDelete(boolEventsTimer,0);
  
     return true;
 }
@@ -53,9 +47,7 @@ void Events_Set( uint32_t events )
     NATIVE_PROFILE_PAL_EVENTS();
 
     // set events
-    chSysLock();
     systemEvents |= events;
-    chSysUnlock();
 
     if( g_Event_Callback != NULL )
     {
@@ -71,9 +63,7 @@ uint32_t Events_Get( uint32_t eventsOfInterest )
     uint32_t returnEvents = (systemEvents & eventsOfInterest);
 
     // ... clear the requested flags atomically
-    chSysLock();
     systemEvents &= ~eventsOfInterest;
-    chSysUnlock();
     
     // give the caller notice of just the events they asked for ( and were cleared already )
     return returnEvents;
@@ -88,9 +78,6 @@ uint32_t Events_MaskedRead( uint32_t eventsOfInterest )
 static void local_Events_SetBoolTimer_Callback(  TimerHandle_t xTimer  )
 {
     NATIVE_PROFILE_PAL_EVENTS();
-
-//   bool* timerCompleteFlag = (bool*)pvTimerGetTimerID( xTimer );
-// *timerCompleteFlag = true;
 
     *saveTimerCompleteFlag = true;
 }
@@ -108,18 +95,18 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
     NATIVE_PROFILE_PAL_EVENTS();
 
     // we assume only 1 can be active, abort previous just in case
-    xTimerStop( eventsBoolTimer, 0 );
+    xTimerStop( boolEventsTimer, 0 );
 
     if(timerCompleteFlag != NULL)
     {
 
-        xTimerChangePeriod( eventsBoolTimer, millisecondsFromNow / portTICK_PERIOD_MS,  0 );
+        xTimerChangePeriod( boolEventsTimer, millisecondsFromNow / portTICK_PERIOD_MS,  0 );
 
-// Was going to just change existing timer but vTimerSetTimerID() does not exist in this version of FreeRtos
+// Was going to just change existing timer but vTimerSetTimerID() does not exist in this version of FreeRTOS
 // As only one timer running at a time we will just save it in global memory
         saveTimerCompleteFlag = timerCompleteFlag;
-        //        vTimerSetTimerID( eventsBoolTimer, (void *)timerCompleteFlag );
-        xTimerStart(eventsBoolTimer, 0);
+        //        vTimerSetTimerID( boolEventsTimer, (void *)timerCompleteFlag );
+        xTimerStart(boolEventsTimer, 0);
     }
 }
 
@@ -133,7 +120,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
     Events_WaitForEvents_Calls++;
 #endif
 
-    uint64_t expire          = HAL_Time_CurrentSysTicks() + countsRemaining;
+    uint64_t expireTicks  = HAL_Time_CurrentTime() + countsRemaining;
     bool runContinuations = true;
 
     while(true)
@@ -144,7 +131,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             return events;
         }
 
-        if(expire <= HAL_Time_CurrentSysTicks())
+        if(expireTicks <= HAL_Time_CurrentTime())
         {
             break;
         }
@@ -161,11 +148,11 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             // try stalled continuations again after sleeping
             runContinuations = true;
 
-            HAL_COMPLETION::WaitForInterrupts(expire, powerLevel, wakeupSystemEvents );          
+            HAL_COMPLETION::WaitForInterrupts(expireTicks, powerLevel, wakeupSystemEvents );          
         }
 
-        // no events, release time to OS
-        vTaskDelay(0);
+        // no events, pass control to the OS
+        taskYIELD();
     }
 
     return 0;

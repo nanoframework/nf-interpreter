@@ -10,6 +10,7 @@
     - '**\AssemblyInfo.*'
     - '**/*.md'
     - '**/*.cs'
+    - '**/*.json'
     - 'LICENSE'
     - dir/*
     - '.gitignore'
@@ -312,6 +313,7 @@
     - '**\AssemblyInfo.*'
     - '**/*.md'
     - '**/*.cs'
+    - '**/*.json'
     - 'LICENSE'
     - dir/*
     - '.gitignore'
@@ -603,6 +605,7 @@
     - '**\AssemblyInfo.*'
     - '**/*.md'
     - '**/*.cs'
+    - '**/*.json'
     - 'LICENSE'
     - dir/*
     - '.gitignore'

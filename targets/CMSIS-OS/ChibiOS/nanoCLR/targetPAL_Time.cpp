@@ -8,12 +8,20 @@
 #include <hal.h>
 #include <ch.h>
 
-static uint64_t g_nextEvent;   // tick time of next event to be scheduled
+// timer for next event
+static virtual_timer_t nextEventTimer;
+
+
+static void NextEventTimer_Callback( void* arg )
+{
+    (bool*)arg;
+
+    // this call also schedules the next one, if there is one
+    HAL_COMPLETION::DequeueAndExec();
+}
 
 HRESULT Time_Initialize()
 {
-    g_nextEvent = 0xFFFFFFFFFFFF; // never
-
     // nothing to do here has time management is handled by ChibiOS
     return S_OK;
 }
@@ -24,24 +32,19 @@ HRESULT Time_Uninitialize()
     return S_OK;
 }
 
-void Time_SetCompare ( uint64_t compareValue )
+void Time_SetCompare ( uint64_t compareValueTicks )
 {
-// TODO
-// setup timer with callback that calls HAL_COMPLETION::DequeueAndExec( );
-// see Events_SetBoolTimer
+    // can have only one event timer setup, abort previous just in case
+    chVTResetI(&nextEventTimer);
 
-    g_nextEvent = compareValue;
-}
-
-extern "C" {
-
-void Time_Interrupt_Hook()
-{
-    if (HAL_Time_CurrentSysTicks() >= g_nextEvent && g_nextEvent > 0) 
-    { 
-        // handle event
-        HAL_COMPLETION::DequeueAndExec(); // this also schedules the next one, if there is one
-    }    
-}
-
+    if(compareValueTicks == 0)
+    {
+        // compare value is 0 so dequeue and schedule immediately 
+        NextEventTimer_Callback(NULL);
+    }
+    else
+    {
+        // need to convert from ticks to milliseconds
+        chVTSetI(&nextEventTimer, TIME_MS2I(compareValueTicks * TIME_CONVERSION__TO_MILLISECONDS), NextEventTimer_Callback, NULL);
+    }
 }
