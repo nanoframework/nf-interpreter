@@ -1,12 +1,13 @@
-# How to Build, Flash and Debug the ESP32 nanoClr on Windows using Visual Code
+# How to Build, Flash and Debug the ESP32 nanoCLR on Windows using Visual Code
 
-## Table of contents ##
+
+## Table of contents
 
 - [Prerequisites](#prerequisites)
 - [Setting up the build environment for ESP32](#Setting up the build environment for ESP32)
 - [Set up Visual Code](#Set up Visual Code)
-- [Build the nanoClr](#Build the nanoClr)
-- [Flash nanoClr to ESP32](#Flash nanoClr to ESP32)
+- [Build the nanoCLR](#Build the nanoCLR)
+- [Flash nanoCLR to ESP32](#Flash nanoCLR to ESP32)
 - [Start with a Hello World C# application](#Start with a Hello World C# application)
 - [Debug the nanoCLR](#Debug the nanoCLR)
 
@@ -15,7 +16,8 @@
 This document describes how to build the required images for **nanoFramework** for ESP32.
 The build is based on CMake tool to ease the development in all major platforms.
 
-# Prerequisites
+
+## Prerequisites
 
 You'll need:
 
@@ -27,58 +29,66 @@ You'll need:
 - [Python 3.6.5](https://www.python.org/ftp/python/3.6.5/python-3.6.5.exe) Required for uploading the nanoCLR to the ESP32.
 - [OpenOCD](https://github.com/espressif/openocd-esp32/releases/download/v0.10.0-esp32-20180418/openocd-esp32-win32-0.10.0-esp32-20180418.zip) For on chip debugging of the nanoCLR
 
-# Setting up the build environment for ESP32
 
-To save time on building the nanoClr and to avoid having to create a CMakeLists.txt project for the ESP32 IDF files, the ESP32 IDF libraries are prebuilt using the Esp32 Msys32 environment then used for linking in the CMake build of nanoClr.
+## Setting up the build environment for ESP32
+
+To save time on building the nanoCLR and to avoid having to create a CMakeLists.txt project for the ESP32 IDF files, the ESP32 IDF libraries are prebuilt using the Esp32 Msys32 environment then used for linking in the CMake build of nanoCLR.
 This has already been done and the libraries can be just be downloaded.
 
-Create the following directory structure:-
+1. Create a directory structure such as the following:
 
-- c:\Esp32_Tools
-- c:\Esp32_Tools\libs
+   - `C:\Esp32_Tools`
+   - `C:\Esp32_Tools\libs`
 
-Download the pre-built libs zip from here:- https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs.zip
-and unzip into c:\Esp32_Tools\libs
+2. Download the pre-built libs zip from [here](https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs.zip)
+and extract it into `C:\Esp32_Tools\libs`.
 
-Download the v3.0rc1 IDF source zip file from here :- https://github.com/espressif/esp-idf/releases/download/v3.0-rc1/esp-idf-v3.0-rc1.zip 
-Unzip into c:\Esp32_Tools so you get C:\ESP32_Tools\esp-idf-v3.0-rc1\components etc.
+3. Download the v3.0rc1 IDF source zip file from [here](https://github.com/espressif/esp-idf/releases/download/v3.0-rc1/esp-idf-v3.0-rc1.zip) and extract it into `C:\Esp32_Tools` so you get `C:\ESP32_Tools\esp-idf-v3.0-rc1\components` etc.
 
-Download the Esp32 toolchain from https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-75-gbaf03c2-5.2.0.zip
-Unzip into C:\Esp32_Tools so you get C:\Esp32_Tools\xtensa-esp32-elf
+4. Download the Esp32 toolchain from [here](https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-75-gbaf03c2-5.2.0.zip) and extract it into `C:\Esp32_Tools` so you get `C:\Esp32_Tools\xtensa-esp32-elf`.
 
-Unzip the OpenOCD into C:\Esp32_Tools so you get C:\Esp32_Tools\openocd-esp32
+5. Extract OpenOCD into `C:\Esp32_Tools` so you get `C:\Esp32_Tools\openocd-esp32`.
 
-## Nanoframework on GitHub ( https://github.com/nanoframework/nf-interpreter )
 
-If you intend to changed the nanoCLR for ESP32 and create Pull Requests then you will need to fork the Nanoframework/nf-interpreter to your own github repo and clone the forked github repo to your Windows system. (GitHub Desktop application).
-You should use the develop branch for all activity or develop-network to include the Networking work in progrees.
+## **nanoFramework** GitHub repo
+
+If you intend to change the nanoCLR for ESP32 and create Pull Requests then you will need to fork the [nanoFramework/nf-interpreter](https://github.com/nanoFramework/nf-interpreter) to your own GitHub repo and clone the forked GitHub repo to your Windows system using an Git client such as the [GitHub Desktop application](https://desktop.github.com/).
+
+You should use the _develop_ branch for mainstream development or the _develop-network_ branch to work with the networking features which is currently a work in progress.
+
 
 ## Set up CMake
-- Download the latest stable version from https://cmake.org/download/ and install it.
+
+1. Download the latest stable version from [here](https://cmake.org/download/) and install it.
+
+
 ## Set up Visual Code
 
-Install extensions
+1. Install the extensions:
 
-"C/C++" extension by Microsoft
-"CMake" language support for Visual Studio Code by twxs
-"CMake tools" Extended CMake support in Visual Studio code by vector-of-bool (Must be version 0.10.4 as version 0.11 is currently not supported)
-To install an older version of a VS extension you have to hack it.
-- In Visual Studio Code goto settings -> settings and set "extensions.autoUpdate" to false
-- Download https://ms-vscode.gallery.vsassets.io/_apis/public/gallery/publisher/vector-of-bool/extension/cmake-tools/0.10.4/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage
-- Rename the download into a file with ".vsix" extension
-- In Visual Studio Code goto Extension click the "..." and select "Install form VSIX" and select the renamed download.
+    - "C/C++" extension by Microsoft.
+    - "CMake" language support for Visual Studio Code by twxs.
+    - "CMake tools" Extended CMake support in Visual Studio code by vector-of-bool (Must be version 0.10.4 as version 0.11 is currently not supported).
+            
+        To install an older version of a VS extension you have to hack it like this:
+        - In Visual Studio Code goto settings -> settings and set "extensions.autoUpdate" to false.
+        - Download version 0.10.4 from [here](https://ms-vscode.gallery.vsassets.io/_apis/public/gallery/publisher/vector-of-bool/extension/cmake-tools/0.10.4/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage).
+        - Rename the download into a file with ".vsix" extension.
+        - In Visual Studio Code goto Extension click the "..." and select "Install form VSIX" and select the file that you've just renamed.
 
-Set up the "CMake-variants.json' in root directory of nanoframework/nf-interpreter clone
-There is a template file called cmake-variants.TEMPLATE.json that can be renamed and set up to the following:-
-Be aware of the foreward slashes in the paths. The TOOLCHAIN_PREFIX should be set to the directory where the xtensa-esp32-elf is the subdirectory. If you follow the paths in this guide then you can use this as it is:-
+2. Set up the `CMake-variants.json` in root directory of your local nanoFramework/nf-interpreter clone.
+    
+    There is a template file called `cmake-variants.TEMPLATE.json` that can be renamed and set up to the following:
+
+    Be aware of the forward slashes in the paths. The TOOLCHAIN_PREFIX should be set to the directory where the xtensa-esp32-elf is the subdirectory. If you follow the paths in this guide then you can use this as it is:
  
 ```
   "linkage": { 
-      "Esp32_NanoCLR": { 
-        "oneWordSummary$": "NanoCLR", 
-        "description$": "Build TinyCLR for ESP32 environment", 
+      "Esp32_nanoCLR": { 
+        "oneWordSummary$": "nanoCLR", 
+        "description$": "Build nanoCLR for ESP32 environment", 
         "settings": { 
-          "TOOLCHAIN_PREFIX" : "C:/ESP32_Tools", 
+            "TOOLCHAIN_PREFIX" : "C:/ESP32_Tools", 
             "TARGET_SERIES" : "ESP32", 
             "RTOS" : "FREERTOS", 
             "ESP32_IDF_PATH" : "C:/ESP32_Tools/esp-idf-v3.0-rc1", 
@@ -100,24 +110,25 @@ Be aware of the foreward slashes in the paths. The TOOLCHAIN_PREFIX should be se
             "API_Windows.Devices.Adc" : "ON", 
             "API_Windows.Devices.Pwm" : "ON", 
             "API_Windows.Devices.Wifi": "ON", 
-            "API_System.Net"  : "OFF", 
-            "API_Windows.Networking.Sockets"  : "OFF" 
+            "API_System.Net" : "OFF", 
+            "API_Windows.Networking.Sockets" : "OFF" 
           } 
       }, 
 ```
 
-Create a ./.vscode/tasks.json from /.vscode/tasks.TEMPLATE-ESP32.json
-For flashing the nanoCLR into the ESP32 or to erase the flash of the ESP32 you will need this in the tasks.json file
-Adjust the COM port and the <path-to-Nanoframework-build-directory-mind-the-forward-slashes> to your needs.
+3. Create a `./.vscode/tasks.json` from `/.vscode/tasks.TEMPLATE-ESP32.json`.
+
+    For flashing the nanoCLR into the ESP32 or to erase the flash of the ESP32 you will need this in the `tasks.json` file.
+    Adjust the COM port and the path to nanoFramework build directory (**!!mind the forward slashes!!**) to your needs.
 
 ```
 { 
     "version": "2.0.0", 
 	    "tasks": [ 
         { 
-            "taskName": "Flash NanoClr COM6", 
+            "taskName": "Flash nanoCLR COM6", 
             "type": "shell", 
-            "command": "python C:/ESP32_Tools/esp-idf-v3.0-rc1/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM6\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 C:/ESP32_Tools/libs/bootloader.bin 0x10000 <path-to-Nanoframework-build-directory-mind-the-forward-slashes>/NanoCLR.bin 0x8000 <path-to-Nanoframework-build-directory-mind-the-forward-slashes>/partitions_4mb.bin", 
+            "command": "python C:/ESP32_Tools/esp-idf-v3.0-rc1/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM6\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 C:/ESP32_Tools/libs/bootloader.bin 0x10000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/nanoCLR.bin 0x8000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/partitions_4mb.bin", 
             "presentation": { 
                 "reveal": "always", 
                 "panel": "shared" 
@@ -138,32 +149,73 @@ Adjust the COM port and the <path-to-Nanoframework-build-directory-mind-the-forw
 } 
 ```
 
+
 ## Set up Ninja
-- Unzip the exe into C:\Esp32_Tools and add the C:\Esp32_Tools directory to your path variable
+
+1. Extract the exe into `C:\Esp32_Tools` and add the `C:\Esp32_Tools` directory to your path variable.
+
 
 ## Set up Python
-- Install it and then install the serial driver for python from the command line: python -m pip install pyserial
 
-# Build the nanoClr
-- To enter a command into Visual Studio Code use the key combination Ctrl+Shift+P
-- Enter the command "CMake: Set build type" and set it to the Debug build type. Currently only this build type is working.
-- Press F7, enter the command "CMake: Build" or click on Build in Status bar.
-- If you get no error you will have in the build directory the nanoCLR.bin and partitions_4mb.bin
-- The third file that gets flashed into the ESP32 is the C:/ESP32_Tools/libs/bootloader.bin file
+1. Install it and then install the serial driver for python from the command line: 
+```
+python -m pip install pyserial
+```
 
-# Flash nanoClr to ESP32
-- Connect your developement board to the computer port that you setup in tasks.json
-- Bring your board into download mode by holding down the GPIO0 pin to GND or holding down the respective button during power up.
-- In Visual Studio Code enter the command "Tasks: Run task" and if you flash for the first time "Erase flash" and then "Flash NanoCLR"
 
-# Start with a Hello World C# application
-- Watch the video https://youtu.be/iZdN2GmefXI and follow the step that should be done in Visual Studio 2017 Community Editon. Skip the steps that describing uploading the nanoCLR into the STM32 Nucleo board.
+## Build nanoCLR
 
-# Debug the nanoCLR
+1. To enter a command into Visual Studio Code use the key combination Ctrl+Shift+P.
+
+2. Enter the command 
+    ```
+    CMake: Set build type
+    ```
+    and set it to the Debug build type. Currently only this build type is working.
+
+3. Press F7, click on Build in the Status bar or enter the command 
+    ```
+    CMake: Build
+    ```
+
+4. If you get no error you will have in the build directory the files `nanoCLR.bin` and `partitions_4mb.bin`.
+
+5. The third file that gets flashed into the ESP32 is the `C:/ESP32_Tools/libs/bootloader.bin`.
+
+
+## Flash nanoCLR into ESP32
+
+1. Connect your development board to the computer port that you've setup in `tasks.json`.
+
+2. Bring your board into download mode by holding down the GPIO0 pin to GND or holding down the respective button during power up.
+
+3. In Visual Studio Code enter the command 
+    ```
+    Tasks: Run task
+    ```
+    and if you flash the board for the first time 
+
+    ```
+    Erase flash
+    ```
+    and then 
+    ```
+    Flash nanoCLR
+    ```
+
+
+## Start with a 'Hello World' C# application
+
+1. Watch the video tutorial [here](https://youtu.be/iZdN2GmefXI) and follow the step that should be done in Visual Studio 2017 Community Editon. Skip the steps that describing uploading the nanoCLR into the STM32 Nucleo board.
+
+
+## Debugging nanoCLR
+
 If you want to debug the nanoCLR on the ESP32 chip you can use the Olimex ARM-USB-OCD-H JTAG debugging adapter. The following setup is specific for the Olimex ARM-USB-OCD-H but you can use other configuration files to get it working with other JTAG adapters.
 
-Create a ./.vscode/launch.json from /.vscode/launch.TEMPLATE-ESP32.json
-Edit the file and adjust the <absolute-path-to-the-build-folder-mind-the-forward-slashes> to your needs.
+Create a `./.vscode/launch.json` from `/.vscode/launch.TEMPLATE-ESP32.json`.
+
+Edit the file and adjust the absolute path to the build folder (**!!mind the forward slashes!!**) to your needs.
 
 ```
 {
@@ -203,14 +255,13 @@ Edit the file and adjust the <absolute-path-to-the-build-folder-mind-the-forward
 },
 ```
 
-You can now debug the nanoCLR on the ESP32 by pressing F5 in Visual Studio Code.
+You can now debug nanoCLR on the ESP32 by pressing F5 in Visual Studio Code.
+
 
 ## Notes on JTAG debugging on ESP32
 
 The Esp32 only has 2 hardware breakpoints.
 
-As code is dynamically loaded unless the method has an IRAM_ATTR attribute any breakpoints set up at the start will cause an error when you try to debug ( Unable to set breakpoint). When launched the debugger will normally stop at the main task. Its not possible to set a break point on code that is not yet loaded so either step down to a point that it is loaded or temporarily set the method with the IRAM_ATTR attribute.
+As code is dynamically loaded unless the method has an `IRAM_ATTR` attribute any breakpoints set up at the start will cause an error when you try to debug (Unable to set breakpoint). When launched the debugger will normally stop at the main task. Its not possible to set a break point on code that is not yet loaded so either step down to a point that it is loaded or temporarily set the method with the IRAM_ATTR attribute.
 
-[For more information on JTAG debugging see Espressif documentaion](http://esp-idf.readthedocs.io/en/latest/api-guides/jtag-debugging/)
-
-
+For more information on JTAG debugging see [Espressif documentaion](http://esp-idf.readthedocs.io/en/latest/api-guides/jtag-debugging/).
