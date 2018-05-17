@@ -125,6 +125,14 @@
 #define NANOCLR_PROFILE_HANDLER
 #endif
 
+#if defined(NANOCLR_PROFILE_NEW_CALLS) && !defined(NANOCLR_PROFILE_NEW)
+#define NANOCLR_PROFILE_NEW
+#endif
+
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS) && !defined(NANOCLR_PROFILE_NEW)
+#define NANOCLR_PROFILE_NEW
+#endif
+
 //-o-//-o-//-o-//-o-//-o-//-o-//
 // CODE
 //-o-//-o-//-o-//-o-//-o-//-o-//
@@ -229,17 +237,4 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if defined(NANOCLR_PROFILE_NEW_CALLS) && !defined(NANOCLR_PROFILE_NEW)
-!ERROR "NANOCLR_PROFILER_NEW is required for NANOCLR_PROFILE_NEW_CALLS"
-#endif
-
-#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS) && !defined(NANOCLR_PROFILE_NEW)
-!ERROR "NANOCLR_PROFILER_NEW is required for NANOCLR_PROFILE_NEW_ALLOCATIONS"
-#endif
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
 #endif // _NANOCLR_PLATFORMDEF_H_
-
