@@ -15,6 +15,7 @@
 #include <nanoPAL_BlockStorage.h>
 #include <nanoPAL_Events.h>
 #include <nanoPAL_AsyncProcCalls_decl.h>
+#include <nanoPAL_PerformanceCounters.h>
 
 
 
