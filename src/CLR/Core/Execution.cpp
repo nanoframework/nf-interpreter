@@ -3525,7 +3525,6 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
     CLR_INT64 start = HAL_Time_CurrentTime();
 #endif
 
-//#define NANOCLR_STRESS_GC
 #if defined(NANOCLR_STRESS_GC)
     if(timeout > 100)
     {
