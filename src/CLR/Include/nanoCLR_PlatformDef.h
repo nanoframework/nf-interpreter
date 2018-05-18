@@ -87,9 +87,14 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // ARM
 #if defined(PLATFORM_ARM)
-//#define NANOCLR_GC_VERBOSE
-#define NANOCLR_TRACE_MEMORY_STATS
-//#define NANOCLR_VALIDATE_HEAP                   NANOCLR_VALIDATE_HEAP_3_Compaction
+// #define NANOCLR_STRESS_GC
+// #define NANOCLR_GC_VERBOSE
+// #define NANOCLR_PROFILE_NEW
+// #define NANOCLR_PROFILE_NEW_CALLS
+// #define NANOCLR_PROFILE_NEW_ALLOCATIONS
+// #define NANOCLR_TRACE_MEMORY_STATS
+//#define NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION
+#define NANOCLR_VALIDATE_HEAP                   NANOCLR_VALIDATE_HEAP_0_CompactionPlus
 #endif
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
