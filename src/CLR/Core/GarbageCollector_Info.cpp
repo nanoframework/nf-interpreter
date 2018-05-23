@@ -242,6 +242,12 @@ void CLR_RT_GarbageCollector::TestPointers_PopulateOld()
     Heap_Relocate_Pass( TestPointers_PopulateOld_Worker );
 }
 
+void CLR_RT_GarbageCollector::Relocation_UpdatePointer(void** ref)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    
+}
+
 //--//
 
 void CLR_RT_GarbageCollector::TestPointers_Remap()

@@ -48,7 +48,15 @@ typedef CLR_RT_SymbolToAddressMap::iterator  CLR_RT_SymbolToAddressMapIter;
 
 typedef std::map< CLR_UINT32, std::wstring > CLR_RT_AddressToSymbolMap;
 typedef CLR_RT_AddressToSymbolMap::iterator  CLR_RT_AddressToSymbolMapIter;
+
+#else
+
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_4_CompactionPlus
+#include <list>
+#include <map>
 #endif
+
+#endif // #if defined(_WIN32)
 
 #if defined(_MSC_VER)
 #pragma pack(push, NANOCLR_RUNTIME_H, 4)
@@ -2170,6 +2178,7 @@ struct CLR_RT_GarbageCollector
     static Rel_Map  s_mapOldToRecord;
     static Rel_Map  s_mapNewToRecord;
 
+    void Relocation_UpdatePointer(void** ref);
 
     static bool TestPointers_PopulateOld_Worker( void** ref );
     static bool TestPointers_PopulateNew_Worker( void** ref );
