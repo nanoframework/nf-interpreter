@@ -12,19 +12,16 @@
 #include <ch.h>
 
 // Converts CMSIS sysTicks to .NET ticks (100 nanoseconds)
-signed __int64 HAL_Time_SysTicksToTime(unsigned int sysTicks) {
-    
-    // this is a rewrite of ChibiOS ST2US(n) macro because it will overflow if doing the math using uint32_t
-    
+int64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) 
+{
     // convert to microseconds from CMSIS SysTicks
-    int64_t microsecondsFromSysTicks = (((sysTicks) * 1000000ULL + (int64_t)CH_CFG_ST_FREQUENCY - 1ULL) / (int64_t)CH_CFG_ST_FREQUENCY);
-
+    // this is a rewrite of ChibiOS TIME_I2US(n) macro because it will overflow if doing the math using uint32_t
     // need to convert from microseconds to 100 nanoseconds
-    return  microsecondsFromSysTicks * 10;
+    return (((sysTicks * (int64_t)1000000) + (int64_t)CH_CFG_ST_FREQUENCY - 1) / (int64_t)CH_CFG_ST_FREQUENCY) * 10;
 }
 
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
-signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
+int64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
 #if defined(HAL_USE_RTC)
 
@@ -132,7 +129,8 @@ const char* HAL_Time_CurrentDateTimeToString()
     return DateTimeToString(HAL_Time_CurrentDateTime(false));
 }
 
-unsigned __int64 CPU_MiliSecondsToSysTicks(unsigned __int64 miliSeconds)
+uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
 {
-    return TIME_MS2I(miliSeconds);
+    // this is a rewrite of ChibiOS TIME_MS2I(n) macro because it will overflow if doing the math using uint32_t
+    return (((ticks * (uint64_t)CH_CFG_ST_FREQUENCY) + 999) / (uint64_t)1000);
 }

@@ -72,6 +72,6 @@ REGION_ALIAS("BSS_RAM", ram0);
 REGION_ALIAS("HEAP_RAM", ram4);
 
 /* RAM region to be used for the nanoFramework CLR managed heap.*/
-REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ext_ram);
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
 
 INCLUDE rules.ld

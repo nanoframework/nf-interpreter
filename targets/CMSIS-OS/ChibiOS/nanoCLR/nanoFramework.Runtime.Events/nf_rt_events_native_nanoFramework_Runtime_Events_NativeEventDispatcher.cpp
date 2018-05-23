@@ -94,7 +94,7 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     CLR_RT_HeapBlock_NativeEventDispatcher* pNativeDisp = NULL;
     
     const char *                            driverName;    
-    unsigned __int64                        driverData;
+    uint64_t                        driverData;
     
     CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
