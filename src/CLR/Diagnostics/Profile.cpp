@@ -92,7 +92,7 @@ static CLR_UINT64 GetPerformanceCounter()
     static CLR_UINT32 rollover  = 0;
     static CLR_UINT32 lastValue = 0;
 
-    CLR_UINT32 value = ::Time_PerformanceCounter();
+    CLR_UINT32 value = ::PAL_PerformanceCounter();
 
     if(lastValue > value) rollover++;
 
@@ -204,7 +204,7 @@ void CLR_PROF_Handler::Calibrate()
     s_time_adjusted = 0;
 
 #if defined(PLATFORM_ARM)
-    ::Time_PerformanceCounter_Initialize();
+    ::PAL_PerformanceCounter_Initialize();
 #endif
 
     int              i;

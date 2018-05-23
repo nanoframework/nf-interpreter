@@ -8,12 +8,24 @@
 #include <hal.h>
 #include <ch.h>
 
-static uint64_t g_nextEvent;   // tick time of next event to be scheduled
+// timer for next event
+static virtual_timer_t nextEventTimer;
+void*  nextEventCallbackDummyArg = NULL;
+
+static void NextEventTimer_Callback( void* arg )
+{
+    (bool*)arg;
+
+    chSysLock();
+
+    // this call also schedules the next one, if there is one
+    HAL_COMPLETION::DequeueAndExec();
+    
+    chSysUnlock();
+}
 
 HRESULT Time_Initialize()
 {
-    g_nextEvent = 0xFFFFFFFFFFFF; // never
-
     // nothing to do here has time management is handled by ChibiOS
     return S_OK;
 }
@@ -24,24 +36,17 @@ HRESULT Time_Uninitialize()
     return S_OK;
 }
 
-void Time_SetCompare ( uint64_t compareValue )
+void Time_SetCompare ( uint64_t compareValueTicks )
 {
-// TODO
-// setup timer with callback that calls HAL_COMPLETION::DequeueAndExec( );
-// see Events_SetBoolTimer
-
-    g_nextEvent = compareValue;
-}
-
-extern "C" {
-
-void Time_Interrupt_Hook()
-{
-    if (HAL_Time_CurrentSysTicks() >= g_nextEvent && g_nextEvent > 0) 
-    { 
-        // handle event
-        HAL_COMPLETION::DequeueAndExec(); // this also schedules the next one, if there is one
-    }    
-}
-
+    if(compareValueTicks == 0)
+    {
+        // compare value is 0 so dequeue and schedule immediately 
+        NextEventTimer_Callback(nextEventCallbackDummyArg);
+    }
+    else
+    {
+        // need to convert from ticks to milliseconds
+        // no need to stop the time if it's running because the API does it anyway
+        chVTSet(&nextEventTimer, TIME_MS2I(compareValueTicks * TIME_CONVERSION__TO_MILLISECONDS), NextEventTimer_Callback, nextEventCallbackDummyArg);
+    }
 }
