@@ -120,7 +120,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
     Events_WaitForEvents_Calls++;
   #endif
 
-    uint64_t expireTicks  = HAL_Time_CurrentTime() + countsRemaining;
+    uint64_t expireTimeInTicks  = HAL_Time_CurrentTime() + countsRemaining;
     bool runContinuations = true;
 
     while(true)
@@ -131,7 +131,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             return events;
         }
 
-        if(expireTicks <= HAL_Time_CurrentTime())
+        if(expireTimeInTicks <= HAL_Time_CurrentTime())
         {
             break;
         }
@@ -148,7 +148,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             // try stalled continuations again after sleeping
             runContinuations = true;
 
-            HAL_COMPLETION::WaitForInterrupts(expireTicks, powerLevel, wakeupSystemEvents );          
+            HAL_COMPLETION::WaitForInterrupts(expireTimeInTicks, powerLevel, wakeupSystemEvents );          
         }
 
         // no events, pass control to the OS
