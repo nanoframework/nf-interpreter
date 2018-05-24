@@ -40,7 +40,6 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
     m_maximumTimeToActive = c_MaximumTimeToActive;  // CLR_INT64                           m_maximumTimeToActive
                                                     // int                                 m_iDebugger_Conditions;
                                                     //
-                                                    // CLR_INT64                           m_currentMachineTime;
 
                                                     // CLR_INT64                           m_currentNextActivityTime;
     m_timerCache    = false;                        // bool                                m_timerCache;
@@ -121,8 +120,6 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 #if defined(NANOCLR_APPDOMAINS)
     NANOCLR_CHECK_HRESULT(CLR_RT_AppDomain::CreateInstance( "default", m_appDomainCurrent ));
 #endif
-
-    UpdateTime();
 
     m_startTime = HAL_Time_CurrentTime();
 
@@ -1215,8 +1212,6 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
         // ::Watchdog_ResetCounter();
 
         PutInProperList( th );
-        
-        UpdateTime();
 
         (void)ProcessTimer();
     }
@@ -1248,8 +1243,6 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
 CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity()
 {
     NATIVE_PROFILE_CLR_CORE();
-
-    UpdateTime();
 
     CLR_INT64 timeoutMin = ProcessTimer();
 
@@ -2348,9 +2341,9 @@ CLR_INT64 CLR_RT_ExecutionEngine::ProcessTimer()
     }
     else
     {
-        if(m_timerCache && m_timerCacheNextTimeout > m_currentMachineTime)
+        if(m_timerCache && m_timerCacheNextTimeout > HAL_Time_CurrentTime())
         {
-            timeoutMin = m_timerCacheNextTimeout - m_currentMachineTime;
+            timeoutMin = m_timerCacheNextTimeout - HAL_Time_CurrentTime();
         }
         //else
         {
@@ -2359,8 +2352,8 @@ CLR_INT64 CLR_RT_ExecutionEngine::ProcessTimer()
             CheckThreads( timeoutMin, m_threadsReady   );
             CheckThreads( timeoutMin, m_threadsWaiting );
 
-            m_timerCacheNextTimeout = timeoutMin + m_currentMachineTime;
-            m_timerCache            = (m_timerCacheNextTimeout > m_currentMachineTime);
+            m_timerCacheNextTimeout = timeoutMin + HAL_Time_CurrentTime();
+            m_timerCache            = (m_timerCacheNextTimeout > HAL_Time_CurrentTime());
         
         }
     }
@@ -2379,9 +2372,7 @@ void CLR_RT_ExecutionEngine::ProcessTimeEvent( CLR_UINT32 event )
     NATIVE_PROFILE_CLR_CORE();
     SYSTEMTIME systemTime;
 
-    // UNDO FORCE UpdateTime();
-
-    HAL_Time_ToSystemTime( m_currentMachineTime, &systemTime );
+    HAL_Time_ToSystemTime( HAL_Time_CurrentTime(), &systemTime );
 
     NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
     {
@@ -2417,9 +2408,9 @@ bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if(timeExpire <= m_currentMachineTime) return true;
+    if(timeExpire <= HAL_Time_CurrentTime()) return true;
 
-    CLR_INT64 diff = timeExpire - m_currentMachineTime;
+    CLR_INT64 diff = timeExpire - HAL_Time_CurrentTime();
 
     if(diff < timeoutMin)
     {
@@ -2903,8 +2894,6 @@ void CLR_RT_ExecutionEngine::DebuggerLoop()
 {
     NATIVE_PROFILE_CLR_CORE();
     ProcessHardware();
-
-    UpdateTime();
 
     WaitSystemEvents(SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, TIME_CONVERSION__TO_MILLISECONDS * 100 );
 }
@@ -3501,13 +3490,6 @@ HRESULT CLR_RT_ExecutionEngine::UnloadAppDomain( CLR_RT_AppDomain* appDomain, CL
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CLR_RT_ExecutionEngine::UpdateTime()
-{
-    NATIVE_PROFILE_CLR_CORE();
-        
-    m_currentMachineTime = HAL_Time_CurrentTime();
-}
-
 CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -3515,7 +3497,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
     
     CLR_UINT32 res = 0;
 
-    m_currentNextActivityTime = timeExpire + m_currentMachineTime;
+    m_currentNextActivityTime = timeExpire + HAL_Time_CurrentTime();
 
     timeout = (CLR_INT32)timeExpire / TIME_CONVERSION__TO_MILLISECONDS;
 

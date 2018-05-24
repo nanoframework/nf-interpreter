@@ -98,7 +98,7 @@ void CLR_RT_HeapBlock_Timer::SpawnTimer( CLR_RT_Thread* th )
     _ASSERTE(delegate != NULL);  if(delegate == NULL) return;
     _ASSERTE(delegate->DataType() == DATATYPE_DELEGATE_HEAD);
 
-    m_ticksLastExpiration = g_CLR_RT_ExecutionEngine.m_currentMachineTime;
+    m_ticksLastExpiration = HAL_Time_CurrentTime();
     m_timeLastExpiration  = m_timeExpire;
     m_timeExpire          = TIMEOUT_INFINITE;
 
@@ -150,9 +150,9 @@ void CLR_RT_HeapBlock_Timer::Reschedule()
         //
         // If we fall back too much, we need to compute the next expiration in the future, to avoid an avalanche effect.
         //
-        if(expire < g_CLR_RT_ExecutionEngine.m_currentMachineTime)
+        if(expire < HAL_Time_CurrentTime())
         {
-            expire = g_CLR_RT_ExecutionEngine.m_currentMachineTime - ((g_CLR_RT_ExecutionEngine.m_currentMachineTime - expire) % m_timeFrequency) + m_timeFrequency;
+            expire = HAL_Time_CurrentTime() - ((HAL_Time_CurrentTime() - expire) % m_timeFrequency) + m_timeFrequency;
         }
 
         m_timeExpire = expire; CLR_RT_ExecutionEngine::InvalidateTimerCache();
@@ -236,7 +236,7 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject( CLR_RT_StackFrame& stack, CLR_U
 
         if(anyChange)
         {
-            SYSTEMTIME systemTime; HAL_Time_ToSystemTime( g_CLR_RT_ExecutionEngine.m_currentMachineTime, &systemTime );
+            SYSTEMTIME systemTime; HAL_Time_ToSystemTime( HAL_Time_CurrentTime(), &systemTime );
 
             timer->m_flags |= anyChange | CLR_RT_HeapBlock_Timer::c_EnabledTimer;
 
