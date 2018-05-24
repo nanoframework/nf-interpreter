@@ -124,7 +124,7 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
     }
 }
 
-uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeout_Milliseconds )
+uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeoutMilliseconds )
 {
 
 #if defined(HAL_PROFILE_ENABLED)
@@ -133,8 +133,8 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
 
     EventBits_t events = (xEventGroupGetBits(systemEventsHigh) << 16) & xEventGroupGetBits(systemEventsLow)
     if( events == 0) {
-        // no events, wait for timeout_Milliseconds
-        vTaskDelay( timeout_Milliseconds / portTICK_PERIOD_MS );
+        // no events, wait for timeoutMilliseconds
+        vTaskDelay( timeoutMilliseconds / portTICK_PERIOD_MS );
     }
 
     return (uint32_t)events;

@@ -32,7 +32,7 @@ bool HAL_Windows_HasGlobalLock()
     return false; // UNDONE: FIXME: !EmulatorNative::GetEmulatorNative()->AreInterruptsEnabled();
 }
 
-unsigned __int64 HAL_Windows_GetPerformanceTicks()
+uint64_t HAL_Windows_GetPerformanceTicks()
 {
     return 0; // UNDONE: FIXME: return EmulatorNative::GetEmulatorNative()->GetCurrentTicks();
 }
@@ -349,7 +349,7 @@ void CPU_ChangePowerLevel(POWER_LEVEL level)
 
 void CPU_Hibernate()
 {
-    signed __int64 start = ::HAL_Time_CurrentTime();
+    int64_t start = ::HAL_Time_CurrentTime();
 
     while(true)
     {

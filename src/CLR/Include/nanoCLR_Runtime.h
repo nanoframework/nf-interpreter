@@ -2911,7 +2911,6 @@ struct CLR_RT_ExecutionEngine
     
     //--//
     
-    CLR_INT64                           m_currentMachineTime;
     CLR_INT64                           m_startTime;  
     CLR_INT64                           m_currentNextActivityTime;
     bool                                m_timerCache;
@@ -3128,8 +3127,6 @@ private:
 
     void InsertThreadRoundRobin( CLR_RT_DblLinkedList& threads, CLR_RT_Thread* th );
 
-    void UpdateTime      ( );
-    
     CLR_UINT32 WaitSystemEvents( CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire );
 
 #if defined(_WIN32)

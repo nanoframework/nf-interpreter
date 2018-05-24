@@ -24,23 +24,39 @@ HRESULT Time_Initialize()
 
 HRESULT Time_Uninitialize()
 {
-    // nothing to do here has time management is handled by FreeRTOS
+    xTimerDelete(nextEventTimer, 0);
+
     return S_OK;
 }
 
 void Time_SetCompare ( uint64_t compareValueTicks )
 {
-    // can have only one event timer setup, abort previous just in case
-    xTimerStop( nextEventTimer, 0 );
-
     if(compareValueTicks == 0)
     {
         // compare value is 0 so dequeue and schedule immediately 
         NextEventTimer_Callback(NULL);
     }
+    else if(compareValueTicks == HAL_COMPLETION_IDLE_VALUE)
+    {
+        // wait for infinity, don't need to do anything here
+        return;
+    }    
     else
     {
-        // need to convert from ticks to milliseconds
-        xTimerChangePeriod( nextEventTimer, (compareValueTicks * TIME_CONVERSION__TO_MILLISECONDS) / portTICK_PERIOD_MS,  0 );
+        if (HAL_Time_CurrentTime() >= compareValueTicks) 
+        { 
+            // already missed the event, dequeue and execute immediately 
+            HAL_COMPLETION::DequeueAndExec();
+        }
+        else
+        {
+            // compareValueTicks is the time (in sys ticks) that is being requested to fire an HAL_COMPLETION::DequeueAndExec()
+            // need to subtract the current system time to set when the timer will fire
+            compareValueTicks -= HAL_Time_CurrentTime();
+            
+            // no need to stop the timer even if it's running because the API does it anyway
+            // need to convert from nF ticks to milliseconds and then to FreeRTOS sys ticks to load the timer
+            xTimerChangePeriod( nextEventTimer, ((compareValueTicks / TIME_CONVERSION__TO_MILLISECONDS) / portTICK_PERIOD_MS),  0 );
+        }
     }
 }

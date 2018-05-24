@@ -8,7 +8,7 @@
 #include <target_platform.h>
 #include <Esp32_os.h>
 
-uint64_t CPU_MiliSecondsToSysTicks(uint64_t miliSeconds);
+uint64_t CPU_MillisecondsToTicks(uint64_t ticks);
 
 // timer for bool events
 static TimerHandle_t boolEventsTimer;
@@ -110,15 +110,15 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
     }
 }
 
-uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeout_Milliseconds )
+uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeoutMilliseconds )
 {
     // schedule an interrupt for this far in the future
-    // timeout is in milliseconds, convert to Sleep Counts
-    uint64_t countsRemaining = CPU_MiliSecondsToSysTicks(timeout_Milliseconds);
+    // timeout is in milliseconds, need to convert to ticks
+    uint64_t countsRemaining = CPU_MillisecondsToTicks(timeoutMilliseconds);
 
-#if defined(HAL_PROFILE_ENABLED)
+  #if defined(HAL_PROFILE_ENABLED)
     Events_WaitForEvents_Calls++;
-#endif
+  #endif
 
     uint64_t expireTicks  = HAL_Time_CurrentTime() + countsRemaining;
     bool runContinuations = true;
@@ -156,7 +156,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
     }
 
     return 0;
- }
+}
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {

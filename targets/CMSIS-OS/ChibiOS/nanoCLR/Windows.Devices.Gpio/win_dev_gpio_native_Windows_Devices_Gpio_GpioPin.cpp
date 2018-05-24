@@ -183,6 +183,39 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___Windows
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+        // check if object has been disposed
+        if(pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue ].NumericByRef().u1 != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        // get IoLine from pin number
+        ioline_t ioLine = GetIoLine(pThis[ FIELD___pinNumber ].NumericByRefConst().s4);
+
+        GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
+
+        GpioPinValue state = (GpioPinValue)stack.Arg1().NumericByRef().s4;
+
+        // sanity check for drive mode set to output so we don't mess up writing to an input pin
+        if ((driveMode == GpioPinDriveMode_Output) ||
+            (driveMode == GpioPinDriveMode_OutputOpenDrain) ||
+            (driveMode == GpioPinDriveMode_OutputOpenDrainPullUp) ||
+            (driveMode == GpioPinDriveMode_OutputOpenSource) ||
+            (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
+        {
+            palToggleLine(ioLine);
+        }
+
+    }
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
