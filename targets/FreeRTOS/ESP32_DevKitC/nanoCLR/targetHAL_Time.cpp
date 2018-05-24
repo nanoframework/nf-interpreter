@@ -13,7 +13,7 @@
 #define ESP32_TICKS_PER_MS(x)            ( ((uint64_t)x * configTICK_RATE_HZ) / 1000)
 
 // Converts Tickcount to .NET ticks (100 nanoseconds)
-signed __int64 HAL_Time_SysTicksToTime(unsigned int sysTicks) {
+int64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) {
     
     // convert to microseconds from FreeRtyos Tickcount
     int64_t microsecondsFromSysTicks = ((( xTaskGetTickCount() ) * 1000000ULL + (int64_t)configTICK_RATE_HZ - 1ULL) / (int64_t)configTICK_RATE_HZ);
@@ -23,7 +23,7 @@ signed __int64 HAL_Time_SysTicksToTime(unsigned int sysTicks) {
 }
 
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
-signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
+int64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
 #if defined(HAL_USE_RTC)
     SYSTEMTIME st; 
@@ -128,7 +128,8 @@ const char* HAL_Time_CurrentDateTimeToString()
     return DateTimeToString(HAL_Time_CurrentDateTime(false));
 }
 
-unsigned __int64 CPU_MiliSecondsToSysTicks(unsigned __int64 miliSeconds)
+uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
 {
-    return  ESP32_TICKS_PER_MS(miliSeconds);
+    //return  ESP32_TICKS_PER_MS(milliSeconds);
+    return ticks * 1000;
 }

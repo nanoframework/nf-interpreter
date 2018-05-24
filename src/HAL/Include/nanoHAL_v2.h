@@ -8,6 +8,7 @@
 #define _NANOHAL_V2_H_ 1
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <nanoWeak.h>
 
@@ -165,7 +166,7 @@ extern "C" {
 #endif
 
 void CPU_Reset();
-//void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents);
+void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents);
 
 #ifdef __cplusplus
 }
@@ -209,5 +210,6 @@ bool SystemState_QueryNoLock( SYSTEM_STATE_type state );
 
 //--//
 
+#define HAL_COMPLETION_IDLE_VALUE    0x0000FFFFFFFFFFFFull
 
 #endif // _NANOHAL_V2_H_

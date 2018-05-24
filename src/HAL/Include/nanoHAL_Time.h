@@ -95,6 +95,6 @@ bool          HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, siz
 const char*   HAL_Time_CurrentDateTimeToString();
 
 
-unsigned __int64  CPU_MilisecondsToSysTicks       ( unsigned __int64 miliSeconds    );
+uint64_t  CPU_MillisecondsToTicks       ( uint64_t ticks  );
 
 #endif //_NANOHAL_TIME_H_

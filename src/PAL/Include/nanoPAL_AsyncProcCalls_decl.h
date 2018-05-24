@@ -127,7 +127,7 @@ struct HAL_COMPLETION : public HAL_CONTINUATION
 
     static void DequeueAndExec();
 
-    static void WaitForInterrupts( uint64_t expireTicks, uint32_t sleepLevel, uint64_t wakeEvents );
+    static void WaitForInterrupts( uint64_t expireTimeInSysTicks, uint32_t sleepLevel, uint64_t wakeEvents );
 };
 
 //--//
