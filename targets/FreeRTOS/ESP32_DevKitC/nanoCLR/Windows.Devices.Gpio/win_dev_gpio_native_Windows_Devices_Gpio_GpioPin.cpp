@@ -131,6 +131,41 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___Windows
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
+        
+        // check if object has been disposed
+        if(pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue ].NumericByRef().u1 != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+        GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
+        
+        // sanity check for drive mode set to output so we don't mess up writing to an input pin
+        if ((driveMode == GpioPinDriveMode_Output) ||
+            (driveMode == GpioPinDriveMode_OutputOpenDrain) ||
+            (driveMode == GpioPinDriveMode_OutputOpenDrainPullUp) ||
+            (driveMode == GpioPinDriveMode_OutputOpenSource) ||
+            (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
+        {
+            // ESP32 API doesn't have a native toggle, so need to read pin...
+            int state = gpio_get_level((gpio_num_t)pinNumber);
+
+            // ... toggle value...
+            state == 1 ? state = 0 : state = 1;
+
+            // ... write back the toggled value
+            gpio_set_level((gpio_num_t)pinNumber, state);
+        }
+    }
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -285,7 +320,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___B
     NANOCLR_NOCLEANUP();
 }
 
-
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebounceTimeout___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -294,7 +328,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebou
 
     NANOCLR_NOCLEANUP();
 }
-
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___VOID__WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )
 {
@@ -329,7 +362,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
     }
     NANOCLR_NOCLEANUP();
 }
-
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlternateFunction___VOID__I4( CLR_RT_StackFrame& stack )
 {
