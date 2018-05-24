@@ -34,7 +34,7 @@ void Time_SetCompare ( uint64_t compareValueTicks )
     if(compareValueTicks == 0)
     {
         // compare value is 0 so dequeue and schedule immediately 
-        NextEventTimer_Callback(NULL);
+        HAL_COMPLETION::DequeueAndExec();
     }
     else if(compareValueTicks == HAL_COMPLETION_IDLE_VALUE)
     {
@@ -50,13 +50,15 @@ void Time_SetCompare ( uint64_t compareValueTicks )
         }
         else
         {
+            xTimerStop( nextEventTimer, 0 );
+
             // compareValueTicks is the time (in sys ticks) that is being requested to fire an HAL_COMPLETION::DequeueAndExec()
             // need to subtract the current system time to set when the timer will fire
             compareValueTicks -= HAL_Time_CurrentTime();
             
             // no need to stop the timer even if it's running because the API does it anyway
             // need to convert from nF ticks to milliseconds and then to FreeRTOS sys ticks to load the timer
-            xTimerChangePeriod( nextEventTimer, ((compareValueTicks / TIME_CONVERSION__TO_MILLISECONDS) / portTICK_PERIOD_MS),  0 );
+            xTimerChangePeriod(nextEventTimer, compareValueTicks, 0);
         }
     }
 }
