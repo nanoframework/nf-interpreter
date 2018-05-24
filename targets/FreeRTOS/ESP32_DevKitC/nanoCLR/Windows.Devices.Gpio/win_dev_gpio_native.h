@@ -37,6 +37,7 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin
     static const int FIELD___disposedValue = 8;
 
     NANOCLR_NATIVE_DECLARE(Read___WindowsDevicesGpioGpioPinValue);
+    NANOCLR_NATIVE_DECLARE(Toggle___VOID);
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(NativeIsDriveModeSupported___BOOLEAN__WindowsDevicesGpioGpioPinDriveMode);
     NANOCLR_NATIVE_DECLARE(NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode);
