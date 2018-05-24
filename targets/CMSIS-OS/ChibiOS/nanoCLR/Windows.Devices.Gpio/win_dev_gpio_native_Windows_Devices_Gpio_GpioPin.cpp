@@ -195,13 +195,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        // get IoLine from pin number
-        ioline_t ioLine = GetIoLine(pThis[ FIELD___pinNumber ].NumericByRefConst().s4);
-
         GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
-
-        GpioPinValue state = (GpioPinValue)stack.Arg1().NumericByRef().s4;
-
+	    
         // sanity check for drive mode set to output so we don't mess up writing to an input pin
         if ((driveMode == GpioPinDriveMode_Output) ||
             (driveMode == GpioPinDriveMode_OutputOpenDrain) ||
@@ -209,6 +204,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
             (driveMode == GpioPinDriveMode_OutputOpenSource) ||
             (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
         {
+	    // get IoLine from pin number
+	    ioline_t ioLine = GetIoLine(pThis[ FIELD___pinNumber ].NumericByRefConst().s4);
             palToggleLine(ioLine);
         }
 
