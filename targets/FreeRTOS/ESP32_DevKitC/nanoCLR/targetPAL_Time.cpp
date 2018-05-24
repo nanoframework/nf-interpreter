@@ -24,7 +24,8 @@ HRESULT Time_Initialize()
 
 HRESULT Time_Uninitialize()
 {
-    // nothing to do here has time management is handled by FreeRTOS
+    xTimerDelete(nextEventTimer, 0);
+
     return S_OK;
 }
 
