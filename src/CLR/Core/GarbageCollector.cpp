@@ -150,12 +150,9 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
     CLR_RT_ExecutionEngine::ExecutionConstraint_Suspend();
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
-    CLR_UINT32 stats_start = 0;
 
-    if(s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
-    {
-        stats_start = HAL_Time_CurrentSysTicks();
-    }
+    CLR_UINT32 stats_start = HAL_Time_CurrentSysTicks();
+
 #endif
 
     g_CLR_RT_EventCache.EventCache_Cleanup();
