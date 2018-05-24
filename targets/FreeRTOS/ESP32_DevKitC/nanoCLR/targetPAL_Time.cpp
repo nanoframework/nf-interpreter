@@ -7,40 +7,56 @@
 #include <target_platform.h>
 #include <Esp32_os.h>
 
-static uint64_t g_nextEvent;   // tick time of next event to be scheduled
+static TimerHandle_t nextEventTimer;
+
+static void NextEventTimer_Callback( TimerHandle_t xTimer )
+{
+    // this call also schedules the next one, if there is one
+    HAL_COMPLETION::DequeueAndExec();
+}
 
 HRESULT Time_Initialize()
 {
-    g_nextEvent = 0xFFFFFFFFFFFF; // never
+    nextEventTimer = xTimerCreate( "NextEventTimer", 10, pdFALSE, (void *)0, NextEventTimer_Callback);
 
-    // nothing to do here has time management is handled by ChibiOS
     return S_OK;
 }
 
 HRESULT Time_Uninitialize()
 {
-    // nothing to do here has time management is handled by ChibiOS
+    xTimerDelete(nextEventTimer, 0);
+
     return S_OK;
 }
 
-void Time_SetCompare ( uint64_t compareValue )
+void Time_SetCompare ( uint64_t compareValueTicks )
 {
-// TODO
-// setup timer with callback that calls HAL_COMPLETION::DequeueAndExec( );
-// see Events_SetBoolTimer
-
-    g_nextEvent = compareValue;
-}
-
-extern "C" {
-
-void Time_Interrupt_Hook()
-{
-    if (HAL_Time_CurrentSysTicks() >= g_nextEvent && g_nextEvent > 0) 
-    { 
-        // handle event
-        HAL_COMPLETION::DequeueAndExec(); // this also schedules the next one, if there is one
+    if(compareValueTicks == 0)
+    {
+        // compare value is 0 so dequeue and schedule immediately 
+        NextEventTimer_Callback(NULL);
+    }
+    else if(compareValueTicks == HAL_COMPLETION_IDLE_VALUE)
+    {
+        // wait for infinity, don't need to do anything here
+        return;
     }    
-}
-
+    else
+    {
+        if (HAL_Time_CurrentTime() >= compareValueTicks) 
+        { 
+            // already missed the event, dequeue and execute immediately 
+            HAL_COMPLETION::DequeueAndExec();
+        }
+        else
+        {
+            // compareValueTicks is the time (in sys ticks) that is being requested to fire an HAL_COMPLETION::DequeueAndExec()
+            // need to subtract the current system time to set when the timer will fire
+            compareValueTicks -= HAL_Time_CurrentTime();
+            
+            // no need to stop the timer even if it's running because the API does it anyway
+            // need to convert from nF ticks to milliseconds and then to FreeRTOS sys ticks to load the timer
+            xTimerChangePeriod( nextEventTimer, ((compareValueTicks / TIME_CONVERSION__TO_MILLISECONDS) / portTICK_PERIOD_MS),  0 );
+        }
+    }
 }

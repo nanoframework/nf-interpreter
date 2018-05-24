@@ -84,7 +84,7 @@ __nfweak void HAL_COMPLETION::DequeueAndExec()
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
 
-__nfweak void HAL_COMPLETION::WaitForInterrupts( uint64_t Expire, uint32_t sleepLevel, uint64_t wakeEvents )
+__nfweak void HAL_COMPLETION::WaitForInterrupts( uint64_t expireTimeInSysTicks, uint32_t sleepLevel, uint64_t wakeEvents )
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }

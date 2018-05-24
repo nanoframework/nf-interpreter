@@ -155,6 +155,7 @@ set(NF_CoreCLR_SRCS
     nanoPAL_BlockStorage.c
     nanoPAL_NativeDouble.cpp
     nanoPAL_Network_stubs.cpp
+    nanoPAL_PerformanceCounters_stubs.cpp
 
     # PAL stubs
     Async_stubs.cpp
@@ -202,6 +203,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             # PAL stubs
             ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall
             ${PROJECT_SOURCE_DIR}/src/PAL/COM
+            ${PROJECT_SOURCE_DIR}/src/PAL/Profiler
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

@@ -48,7 +48,15 @@ typedef CLR_RT_SymbolToAddressMap::iterator  CLR_RT_SymbolToAddressMapIter;
 
 typedef std::map< CLR_UINT32, std::wstring > CLR_RT_AddressToSymbolMap;
 typedef CLR_RT_AddressToSymbolMap::iterator  CLR_RT_AddressToSymbolMapIter;
+
+#else
+
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_4_CompactionPlus
+#include <list>
+#include <map>
 #endif
+
+#endif // #if defined(_WIN32)
 
 #if defined(_MSC_VER)
 #pragma pack(push, NANOCLR_RUNTIME_H, 4)
@@ -2173,6 +2181,7 @@ struct CLR_RT_GarbageCollector
     static Rel_Map  s_mapOldToRecord;
     static Rel_Map  s_mapNewToRecord;
 
+    void Relocation_UpdatePointer(void** ref);
 
     static bool TestPointers_PopulateOld_Worker( void** ref );
     static bool TestPointers_PopulateNew_Worker( void** ref );
@@ -2905,7 +2914,6 @@ struct CLR_RT_ExecutionEngine
     
     //--//
     
-    CLR_INT64                           m_currentMachineTime;
     CLR_INT64                           m_startTime;  
     CLR_INT64                           m_currentNextActivityTime;
     bool                                m_timerCache;
@@ -3122,8 +3130,6 @@ private:
 
     void InsertThreadRoundRobin( CLR_RT_DblLinkedList& threads, CLR_RT_Thread* th );
 
-    void UpdateTime      ( );
-    
     CLR_UINT32 WaitSystemEvents( CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire );
 
 #if defined(_WIN32)

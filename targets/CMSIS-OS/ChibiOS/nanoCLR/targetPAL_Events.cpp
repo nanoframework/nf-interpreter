@@ -8,11 +8,11 @@
 #include <target_platform.h>
 #include <hal.h>
 
-uint64_t CPU_MiliSecondsToSysTicks(uint64_t miliSeconds);
+uint64_t CPU_MillisecondsToTicks(uint64_t ticks);
 
-// events timer
-static virtual_timer_t eventsBoolTimer;
-volatile uint32_t systemEvents;
+// timer for bool events
+static virtual_timer_t boolEventsTimer;
+uint32_t systemEvents;
 
 set_Event_Callback g_Event_Callback     = NULL;
 void*              g_Event_Callback_Arg = NULL;
@@ -33,7 +33,7 @@ bool Events_Uninitialize()
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    chVTResetI(&eventsBoolTimer);
+    chVTResetI(&boolEventsTimer);
 
     return true;
 }
@@ -80,7 +80,11 @@ static void local_Events_SetBoolTimer_Callback( void* arg )
     NATIVE_PROFILE_PAL_EVENTS();
     bool* timerCompleteFlag = (bool*)arg;
 
+    chSysLock();
+    
     *timerCompleteFlag = true;
+
+    chSysUnlock();
 }
 
 void Events_SetCallback( set_Event_Callback pfn, void* arg )
@@ -95,26 +99,24 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    // we assume only 1 can be active, abort previous just in case
-    chVTResetI(&eventsBoolTimer);
-
     if(timerCompleteFlag != NULL)
     {
-        chVTSetI(&eventsBoolTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
+        // no need to stop the timer even if it's running because the API does it anyway
+        chVTSetI(&boolEventsTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
     }
 }
 
-uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeout_Milliseconds )
+uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeoutMilliseconds )
 {
     // schedule an interrupt for this far in the future
-    // timeout is in milliseconds, convert to Sleep Counts
-    uint64_t countsRemaining = CPU_MiliSecondsToSysTicks( (uint64_t)timeout_Milliseconds );
+    // timeout is in milliseconds, need to convert to ticks
+    uint64_t countsRemaining = CPU_MillisecondsToTicks( timeoutMilliseconds );
 
 #if defined(HAL_PROFILE_ENABLED)
     Events_WaitForEvents_Calls++;
 #endif
 
-    uint64_t expire          = HAL_Time_CurrentSysTicks() + countsRemaining;
+    uint64_t expireTimeInTicks  = HAL_Time_CurrentTime() + countsRemaining;
     bool runContinuations = true;
 
     while(true)
@@ -125,7 +127,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             return events;
         }
 
-        if(expire <= HAL_Time_CurrentSysTicks())
+        if(expireTimeInTicks <= HAL_Time_CurrentTime())
         {
             break;
         }
@@ -142,12 +144,11 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             // try stalled continuations again after sleeping
             runContinuations = true;
 
-            HAL_COMPLETION::WaitForInterrupts(expire, powerLevel, wakeupSystemEvents );          
+            HAL_COMPLETION::WaitForInterrupts(expireTimeInTicks, powerLevel, wakeupSystemEvents );          
         }
 
-
-        // no events, release time to OS
-        osDelay(10);
+        // no events, pass control to the OS
+        osThreadYield();
     }
 
     return 0;

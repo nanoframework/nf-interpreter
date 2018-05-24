@@ -10,7 +10,9 @@
 #include <nanoHAL_v2.h>
 
 inline void CPU_Reset(){ NVIC_SystemReset(); };
-inline void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents){ osDelay(10); };
+
+// CPU sleep is not currently implemented in this target
+inline void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents){  };
 
 inline bool CPU_IsSoftRebootSupported() { return true; };
 

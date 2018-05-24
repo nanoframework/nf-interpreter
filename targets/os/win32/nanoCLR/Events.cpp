@@ -41,9 +41,9 @@ uint32_t Events_MaskedRead( uint32_t Events )
     return 0; // UNDONE: FIXME: EmulatorNative::GetIEventsDriver()->MaskedRead( Events );
 }
 
-uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t WakeupSystemEvents, uint32_t Timeout_Milliseconds )
+uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t WakeupSystemEvents, uint32_t TimeoutMilliseconds )
 {
-    return 0; // UNDONE: FIXME: EmulatorNative::GetIEventsDriver()->WaitForEvents( powerLevel, WakeupSystemEvents, Timeout_Milliseconds ); 
+    return 0; // UNDONE: FIXME: EmulatorNative::GetIEventsDriver()->WaitForEvents( powerLevel, WakeupSystemEvents, TimeoutMilliseconds ); 
 }
 
 void Events_SetBoolTimer( bool* TimerCompleteFlag, uint32_t MillisecondsFromNow )

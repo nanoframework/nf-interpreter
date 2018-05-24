@@ -13,7 +13,7 @@
 #define ESP32_TICKS_PER_MS(x)            ( ((uint64_t)x * configTICK_RATE_HZ) / 1000)
 
 // Converts Tickcount to .NET ticks (100 nanoseconds)
-signed __int64 HAL_Time_SysTicksToTime(unsigned int sysTicks) {
+int64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) {
     
     // convert to microseconds from FreeRtyos Tickcount
     int64_t microsecondsFromSysTicks = ((( xTaskGetTickCount() ) * 1000000ULL + (int64_t)configTICK_RATE_HZ - 1ULL) / (int64_t)configTICK_RATE_HZ);
@@ -23,50 +23,47 @@ signed __int64 HAL_Time_SysTicksToTime(unsigned int sysTicks) {
 }
 
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
-signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
+int64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-// #if defined(HAL_USE_RTC)
+#if defined(HAL_USE_RTC)
+    SYSTEMTIME st; 
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    
+    time_t mtime = now.tv_sec;
+    struct tm mtm;
+    gmtime_r(&mtime, &mtm);
 
-//     // use RTC to get date time
-//     SYSTEMTIME st; 
-//     RTCDateTime _dateTime;
+    st.wDay = (unsigned short) mtm.tm_mday;         // day of the month 1-31
+    st.wMonth = (unsigned short) mtm.tm_mon + 1;    // months since January 0-11
+    st.wYear = (unsigned short) mtm.tm_year + 1900; // years since 1900
+    st.wDayOfWeek = (unsigned short) mtm.tm_wday;   // days since Sunday 0-6
 
-//     rtcGetTime(&RTCD1, &_dateTime);
+    // zero 'time' fields if date part only is required
+    if(datePartOnly)
+    {
+        st.wMilliseconds = 0;
+        st.wSecond = 0;
+        st.wMinute = 0;
+        st.wHour   = 0;
+    }
+    else
+    {
+        // full date&time required, fill in 'time' fields too
+        st.wMilliseconds = now.tv_usec / 1000;
+        st.wSecond = mtm.tm_sec;
+        st.wMinute = mtm.tm_min;
+        st.wHour   = mtm.tm_hour;
+    }
 
-//     st.wDay = (unsigned short) _dateTime.day;
-//     st.wMonth = (unsigned short) _dateTime.month;
-//     st.wYear = (unsigned short) _dateTime.year;
-//     st.wDayOfWeek = (unsigned short) _dateTime.dayofweek;
+    return HAL_Time_ConvertFromSystemTime( &st );
 
-//     // zero 'time' fields if date part only is required
-//     if(datePartOnly)
-//     {
-//         st.wMilliseconds = 0;
-//         st.wSecond = 0;
-//         st.wMinute = 0;
-//         st.wMinute = 0;
-//     }
-//     else
-//     {
-//         // full date&time required, fill in 'time' fields too
-        
-//         st.wMilliseconds =(unsigned short) (_dateTime.millisecond % 1000);
-//         _dateTime.millisecond /= 1000;
-//         st.wSecond = (unsigned short) (_dateTime.millisecond % 60);
-//         _dateTime.millisecond /= 60;
-//         st.wMinute = (unsigned short) (_dateTime.millisecond % 60);
-//         _dateTime.millisecond /= 60;
-//         st.wMinute = (unsigned short) (_dateTime.millisecond % 24);
-//     }
+#else
 
-//     return HAL_Time_ConvertFromSystemTime( &st );
+     // use system ticks
+     return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() );
 
-// #else
-
-    // use system ticks
-    return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() );
-
-// #endif
+#endif
 };
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
@@ -131,7 +128,8 @@ const char* HAL_Time_CurrentDateTimeToString()
     return DateTimeToString(HAL_Time_CurrentDateTime(false));
 }
 
-unsigned __int64 CPU_MiliSecondsToSysTicks(unsigned __int64 miliSeconds)
+uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
 {
-    return  ESP32_TICKS_PER_MS(miliSeconds);
+    //return  ESP32_TICKS_PER_MS(milliSeconds);
+    return ticks * 1000;
 }

@@ -57,7 +57,7 @@ static void DumpTimeout( CLR_RT_Thread* th, CLR_INT64& t )
 
     if(t < TIMEOUT_INFINITE)
     {
-        t -= g_CLR_RT_ExecutionEngine.m_currentMachineTime;
+        t -= HAL_Time_CurrentTime();
 
         CLR_Debug::Printf( " %d", (int)t );
     }
@@ -240,6 +240,12 @@ void CLR_RT_GarbageCollector::TestPointers_PopulateOld()
     //--//
 
     Heap_Relocate_Pass( TestPointers_PopulateOld_Worker );
+}
+
+void CLR_RT_GarbageCollector::Relocation_UpdatePointer(void** ref)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    
 }
 
 //--//

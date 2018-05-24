@@ -87,9 +87,14 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // ARM
 #if defined(PLATFORM_ARM)
-//#define NANOCLR_GC_VERBOSE
-#define NANOCLR_TRACE_MEMORY_STATS
-//#define NANOCLR_VALIDATE_HEAP                   NANOCLR_VALIDATE_HEAP_3_Compaction
+// #define NANOCLR_STRESS_GC
+// #define NANOCLR_GC_VERBOSE
+// #define NANOCLR_PROFILE_NEW
+// #define NANOCLR_PROFILE_NEW_CALLS
+// #define NANOCLR_PROFILE_NEW_ALLOCATIONS
+// #define NANOCLR_TRACE_MEMORY_STATS
+// #define NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION
+#define NANOCLR_VALIDATE_HEAP                   NANOCLR_VALIDATE_HEAP_0_CompactionPlus
 #endif
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
@@ -123,6 +128,14 @@
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS) && !defined(NANOCLR_PROFILE_HANDLER)
 #define NANOCLR_PROFILE_HANDLER
+#endif
+
+#if defined(NANOCLR_PROFILE_NEW_CALLS) && !defined(NANOCLR_PROFILE_NEW)
+#define NANOCLR_PROFILE_NEW
+#endif
+
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS) && !defined(NANOCLR_PROFILE_NEW)
+#define NANOCLR_PROFILE_NEW
 #endif
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
@@ -230,17 +243,4 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if defined(NANOCLR_PROFILE_NEW_CALLS) && !defined(NANOCLR_PROFILE_NEW)
-!ERROR "NANOCLR_PROFILER_NEW is required for NANOCLR_PROFILE_NEW_CALLS"
-#endif
-
-#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS) && !defined(NANOCLR_PROFILE_NEW)
-!ERROR "NANOCLR_PROFILER_NEW is required for NANOCLR_PROFILE_NEW_ALLOCATIONS"
-#endif
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
 #endif // _NANOCLR_PLATFORMDEF_H_
-
