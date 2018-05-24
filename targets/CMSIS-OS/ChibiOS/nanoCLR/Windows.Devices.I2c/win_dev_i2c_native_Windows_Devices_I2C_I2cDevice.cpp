@@ -10,8 +10,6 @@
 #include <nanoHAL.h>
 #include "win_dev_i2c_native.h"
 
-#define I2C_TRANSACTION_TIMEOUT_MS      1000
-
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cSharingMode (in managed code) !!!    //
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -67,27 +65,30 @@ static THD_FUNCTION(I2CWorkingThread, arg)
 {
     NF_PAL_I2C* palI2c = (NF_PAL_I2C*)arg;
     msg_t result;
-
-    // because the bus access is shared, acquire the appropriate bus
-    i2cStart(palI2c->Driver, &palI2c->Configuration);
-    i2cAcquireBus(palI2c->Driver);
+    int estimatedDurationMiliseconds = palI2c->ByteTime * (palI2c->WriteSize + palI2c->ReadSize + 1);
 
     if (palI2c->ReadSize != 0 && palI2c->WriteSize != 0)
     {
         // this is a Write/Read transaction
-       result = i2cMasterTransmitTimeout(palI2c->Driver, palI2c->Address, palI2c->WriteBuffer, palI2c->WriteSize, palI2c->ReadBuffer, palI2c->ReadSize, I2C_TRANSACTION_TIMEOUT_MS);
+       result = i2cMasterTransmitTimeout(palI2c->Driver, palI2c->Address, palI2c->WriteBuffer, palI2c->WriteSize, palI2c->ReadBuffer, palI2c->ReadSize, TIME_MS2I(estimatedDurationMiliseconds));
     }
     else
     {
         if (palI2c->ReadSize == 0)
         {
             // this is Write only transaction
-            result = i2cMasterTransmitTimeout(palI2c->Driver, palI2c->Address, palI2c->WriteBuffer, palI2c->WriteSize, NULL, 0, I2C_TRANSACTION_TIMEOUT_MS);
+
+            estimatedDurationMiliseconds = palI2c->ByteTime * (palI2c->WriteSize + 1);
+
+            result = i2cMasterTransmitTimeout(palI2c->Driver, palI2c->Address, palI2c->WriteBuffer, palI2c->WriteSize, NULL, 0, TIME_MS2I(estimatedDurationMiliseconds));
         }
         else
         {
             // this is a Read only transaction
-            result = i2cMasterReceiveTimeout (palI2c->Driver, palI2c->Address, palI2c->ReadBuffer, palI2c->ReadSize, I2C_TRANSACTION_TIMEOUT_MS);
+
+            estimatedDurationMiliseconds = palI2c->ByteTime * (palI2c->ReadSize + 1);
+
+            result = i2cMasterReceiveTimeout (palI2c->Driver, palI2c->Address, palI2c->ReadBuffer, palI2c->ReadSize, TIME_MS2I(estimatedDurationMiliseconds));
         }
     }
 
@@ -99,7 +100,7 @@ static THD_FUNCTION(I2CWorkingThread, arg)
     chThdExit(result);
 }
 
-void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetConfig(CLR_RT_HeapBlock* managedConfig, I2CConfig* llConfig)
+void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetI2cConfig(CLR_RT_HeapBlock* managedConfig, I2CConfig* llConfig)
 {
     I2cBusSpeed busSpeed = (I2cBusSpeed)managedConfig[ I2cConnectionSettings::FIELD___busSpeed ].NumericByRef().s4;
 
@@ -127,13 +128,35 @@ void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetConfig(CLR_RT_
 
 }
 
+// estimate the time required to perform the I2C transaction
+bool Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::IsLongRunningOperation(int writeSize, int readSize, float byteTime, int& estimatedDurationMiliseconds)
+{
+    // add an extra byte to account for the address
+    estimatedDurationMiliseconds = byteTime * (writeSize + readSize + 1);
+
+    if(estimatedDurationMiliseconds > CLR_RT_Thread::c_TimeQuantum_Milliseconds)
+    {
+        // total operation time will exceed thread quantum, so this is a long running operation
+        return true;
+    }
+    else
+    {
+        return false;        
+    }
+}
+
 HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
+        NF_PAL_I2C* palI2c;
+
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
+       
+        // get a pointer to the managed I2C connectionSettings object instance
+        CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
+
         // get bus index
         // this is coded with a multiplication, need to perform and int division to get the number
         // see the comments in the I2cDevice() constructor in managed code for details
@@ -145,45 +168,61 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
         switch (busIndex)
         {
     #if STM32_I2C_USE_I2C1
-            case 1 :
+            case 1:
                 if(I2C1_PAL.Driver == NULL)
                 {
-                    Init_I2C1();
                     I2C1_PAL.Driver = &I2CD1;
+                    palI2c = &I2C1_PAL;
                 }
                 break;
     #endif
     #if STM32_I2C_USE_I2C2
-            case 2 :
+            case 2:
                 if(I2C2_PAL.Driver == NULL)
                 {
-                    Init_I2C2();
                     I2C2_PAL.Driver = &I2CD2;
+                    palI2c = &I2C2_PAL;
                 }
                 break;
     #endif
     #if STM32_I2C_USE_I2C3
-            case 3 :
+            case 3:
                 if(I2C3_PAL.Driver == NULL)
                 {
-                    Init_I2C3();
                     I2C3_PAL.Driver = &I2CD3;
+                    palI2c = &I2C3_PAL;
                 }
                 break;
     #endif
     #if STM32_I2C_USE_I2C4
-            case 4 :
+            case 4:
                 if(I2C4_PAL.Driver == NULL)
                 {
-                    Init_I2C4();
                     I2C4_PAL.Driver = &I2CD4;
+                    palI2c = &I2C4_PAL;
                 }
                 break;
     #endif
+
             default:
                 // this I2C bus is not valid
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
                 break;
+        }
+
+        // Get a general low-level I2C configuration, depending on user's managed parameters
+        GetI2cConfig(pConfig, &palI2c->Configuration);
+
+        // compute rough estimate on the time to tx/rx a byte (in milliseconds)
+        if((I2cBusSpeed)pConfig[ I2cConnectionSettings::FIELD___busSpeed ].NumericByRef().s4 == I2cBusSpeed_StandardMode)
+        {
+            // 100kbit/s: this is roughly 0.10ms per byte, give or take
+            palI2c->ByteTime = 0.1;
+        }
+        else
+        {
+            // 400kbit/s: this is roughly 0.02ms per byte, give or take
+            palI2c->ByteTime = 0.02;
         }
 
     }
@@ -194,45 +233,6 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::DisposeNative_
 {
     NANOCLR_HEADER();
     {
-        NF_PAL_I2C* palI2c;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
-        // get bus index
-        // this is coded with a multiplication, need to perform and int division to get the number
-        // see the comments in the I2cDevice() constructor in managed code for details
-        uint8_t busIndex = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
-
-        // uninit the PAL struct for this I2C bus
-        switch (busIndex)
-        {
-    #if STM32_I2C_USE_I2C1
-            case 1 :
-                UnInit_I2C1();
-                break;
-    #endif
-    #if STM32_I2C_USE_I2C2
-            case 2 :
-                UnInit_I2C2();
-                break;
-    #endif
-    #if STM32_I2C_USE_I2C3
-            case 3 :
-                UnInit_I2C3();
-                break;
-    #endif
-    #if STM32_I2C_USE_I2C4
-            case 4 :
-                UnInit_I2C3();
-                break;
-    #endif
-            default:
-                // this I2C bus is not valid
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-                break;
-        }
-
     }
     NANOCLR_NOCLEANUP();
 }
@@ -243,10 +243,13 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
     {
         uint8_t busIndex;
         NF_PAL_I2C* palI2c;
-        
+        bool isLongRunningOperation = false;
+        msg_t transactionResult = MSG_OK;
+
         CLR_RT_HeapBlock    hbTimeout;
         CLR_INT64*          timeout;
         bool                eventResult = true;
+        int                 estimatedDurationMiliseconds;
 
         CLR_RT_HeapBlock_Array* writeBuffer;
         CLR_RT_HeapBlock_Array* readBuffer;
@@ -254,6 +257,9 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+        // get pointer to connection settings field
+        CLR_RT_HeapBlock* connectionSettings = pThis[ FIELD___connectionSettings ].Dereference();
 
         // get bus index
         // this is coded with a multiplication, need to perform and int division to get the number
@@ -289,22 +295,40 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
                 break;
         }
 
-        // set timeout to twice the I2C transaction timeout
-        // it should be enough to ensure thread start and execution, including any potential timeout there
-        // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
-        hbTimeout.SetInteger((CLR_INT64)I2C_TRANSACTION_TIMEOUT_MS * TIME_CONVERSION__TO_MILLISECONDS);
+        // dereference the write and read buffers from the arguments
+        writeBuffer = stack.Arg1().DereferenceArray();
+        if (writeBuffer != NULL)
+        {
+            // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
+            palI2c->WriteSize = writeBuffer->m_numOfElements;
+        }
 
-        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
+        readBuffer = stack.Arg2().DereferenceArray();
+        if (readBuffer != NULL)
+        {
+            // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
+            palI2c->ReadSize = readBuffer->m_numOfElements;
+        }
+
+        // check if this is a long running operation
+        isLongRunningOperation = IsLongRunningOperation(palI2c->WriteSize, palI2c->ReadSize, palI2c->ByteTime, (int&)estimatedDurationMiliseconds);
+
+        if(isLongRunningOperation)
+        {
+            // if this is a long running operation, set a timeout equal to the estimated transaction duration in milliseconds
+            // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
+            hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
+
+            NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
+            
+            // protect the buffers from GC so DMA can find them where they are supposed to be
+            CLR_RT_ProtectFromGC gcWriteBuffer( *writeBuffer );
+            CLR_RT_ProtectFromGC gcReadBuffer( *readBuffer );
+        }
 
         // this is going to be used to check for the right event in case of simultaneous I2C transaction
-        if(stack.m_customState == 1)
+        if(!isLongRunningOperation || stack.m_customState == 1)
         {
-            // get pointer to connection settings field
-            CLR_RT_HeapBlock* connectionSettings = pThis[ FIELD___connectionSettings ].Dereference();
-
-            // get a complete low-level I2C configuration, based in connection settings
-            GetConfig(connectionSettings, &palI2c->Configuration);
-
             // get slave address from connection settings field
             palI2c->Address = (i2caddr_t)connectionSettings[Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings::FIELD___slaveAddress].NumericByRef().s4;
 
@@ -313,43 +337,79 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             palI2c->Driver->addr = palI2c->Address;
     #endif
 
-            // dereference the write and read buffers from the arguments
-            writeBuffer = stack.Arg1().DereferenceArray();
             if (writeBuffer != NULL)
             {
-                // get the size of the buffer by reading the number of elements in the HeapBlock array
-                palI2c->WriteSize = writeBuffer->m_numOfElements;
+                palI2c->WriteBuffer = (uint8_t*)writeBuffer->GetFirstElement();
 
-                // copy to DMA write buffer
-                memcpy(palI2c->WriteBuffer, writeBuffer->GetFirstElement(), palI2c->WriteSize);
+                // flush DMA buffer to ensure cache coherency
+                // (only required for Cortex-M7)
+                cacheBufferFlush(palI2c->WriteBuffer, palI2c->WriteSize);
             }
 
-            readBuffer = stack.Arg2().DereferenceArray();
             if (readBuffer != NULL)
             {
-                // get the size of the buffer by reading the number of elements in the HeapBlock array
-                palI2c->ReadSize = readBuffer->m_numOfElements;
-            }
-
-            // flush DMA buffer to ensure cache coherency
-            // (only required for Cortex-M7)
-            cacheBufferFlush(palI2c->WriteBuffer, palI2c->WriteSize);
-            
-            // spawn working thread to perform the I2C transaction
-            palI2c->WorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(128),
-                                        "I2CWT", NORMALPRIO, I2CWorkingThread, palI2c);
-
-            if(palI2c->WorkingThread == NULL)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                palI2c->ReadBuffer = (uint8_t*)readBuffer->GetFirstElement();
             }
             
-            // bump custom state
-            stack.m_customState = 2;
+            // because the bus access is shared, acquire the appropriate bus
+            i2cStart(palI2c->Driver, &palI2c->Configuration);
+            i2cAcquireBus(palI2c->Driver);
         }
+
+        if(isLongRunningOperation)
+        {
+            // this is a long running operation and hasn't started yet
+            // perform I2C transaction using driver's ASYNC API which is launching a thread to perform it
+            if(stack.m_customState == 1)
+            {
+                // spawn working thread to perform the I2C transaction
+                palI2c->WorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(256),
+                                            "I2CWT", NORMALPRIO, I2CWorkingThread, palI2c);
+
+                if(palI2c->WorkingThread == NULL)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                }
+                
+                // bump custom state
+                stack.m_customState = 2;                      
+            }
+        }
+        else
+        {
+            // this is NOT a long running operation
+            // perform I2C transaction using driver's SYNC API
+
+            if (palI2c->ReadSize != 0 && palI2c->WriteSize != 0)
+            {
+                // this is a Write/Read transaction
+                transactionResult = i2cMasterTransmitTimeout(palI2c->Driver, palI2c->Address, palI2c->WriteBuffer, palI2c->WriteSize, palI2c->ReadBuffer, palI2c->ReadSize, TIME_MS2I(20));
+            }
+            else
+            {
+                if (palI2c->ReadSize == 0)
+                {
+                    // this is Write only transaction
+                    transactionResult = i2cMasterTransmitTimeout(palI2c->Driver, palI2c->Address, palI2c->WriteBuffer, palI2c->WriteSize, NULL, 0, TIME_MS2I(20));
+                }
+                else
+                {
+                    // this is a Read only transaction
+                    transactionResult = i2cMasterReceiveTimeout (palI2c->Driver, palI2c->Address, palI2c->ReadBuffer, palI2c->ReadSize, TIME_MS2I(20));
+                }
+            }
+
+            i2cReleaseBus(palI2c->Driver);
+        }    
 
         while(eventResult)
         {
+            if(!isLongRunningOperation)
+            {
+                // this is not a long running operation so nothing to do here
+                break;
+            }
+
             if(palI2c->WorkingThread->state == CH_STATE_FINAL)
             {
                 // I2C working thread is now complete
@@ -360,14 +420,16 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_I2cMaster, eventResult ));
         }
 
-        // pop timeout heap block from stack
-        stack.PopValue();
+        if(isLongRunningOperation)
+        {
+            // pop timeout heap block from stack
+            stack.PopValue();
+        }
 
-        if(eventResult)
+        if(eventResult || !isLongRunningOperation)
         {
             // event occurred
-            // ChibiOS requirement: need to call chThdWait for I2C working thread in order to have it's memory released to the heap, otherwise it won't be returned
-            msg_t threadResult = chThdWait(palI2c->WorkingThread);
+            // OR this is NOT a long running operation
 
             // create the return object (I2cTransferResult)
             // only at this point we are sure that there will be a return from this thread so it's OK to use the managed stack
@@ -375,8 +437,14 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_I2cTransferResult));
             result = top.Dereference(); FAULT_ON_NULL(result);
 
+            if(isLongRunningOperation)
+            {
+                // ChibiOS requirement: need to call chThdWait for I2C working thread in order to have it's memory released to the heap, otherwise it won't be returned
+                transactionResult = chThdWait(palI2c->WorkingThread);
+            }
+
             // get the result from the working thread execution
-            if (threadResult != MSG_OK)
+            if (transactionResult != MSG_OK)
             {
                 // error in transaction
                 int errors = i2cGetErrors(palI2c->Driver);
@@ -407,21 +475,13 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
 
                 // set the bytes transferred field
                 result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___bytesTransferred ].SetInteger((CLR_UINT32)(palI2c->WriteSize + palI2c->ReadSize));
-
-                if(palI2c->ReadSize > 0)
-                {
-                    // because this was a Read transaction, need to copy from DMA buffer to managed buffer
-
-                    // need to dereference readBuffer argument to be able to write back on it
-                    readBuffer = stack.Arg2().DereferenceArray();
-
-                    // invalidate cache over read buffer to ensure that content from DMA is read
-                    // (only required for Cortex-M7)
-                    cacheBufferInvalidate(palI2c->ReadBuffer, palI2c->ReadSize);
-
-                    // copy I2C read buffer into managed buffer
-                    memcpy(readBuffer->GetFirstElement(), palI2c->ReadBuffer, palI2c->ReadSize);
-                }
+            }
+        
+            if(palI2c->ReadSize > 0)
+            {
+                // invalidate cache over read buffer to ensure that content from DMA is read
+                // (only required for Cortex-M7)
+                cacheBufferInvalidate(palI2c->ReadBuffer, palI2c->ReadSize);
             }
         }
 
