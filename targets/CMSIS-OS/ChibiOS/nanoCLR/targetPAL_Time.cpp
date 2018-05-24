@@ -24,13 +24,15 @@ static void NextEventTimer_Callback( void* arg )
 HRESULT Time_Initialize()
 {
     // need to setup the timer at boot, but stoped
-    //chVTSet(&nextEventTimer, TIME_INFINITE, NextEventTimer_Callback, nextEventCallbackDummyArg);
+    chVTSet(&nextEventTimer, TIME_INFINITE, NextEventTimer_Callback, nextEventCallbackDummyArg);
 
     return S_OK;
 }
 
 HRESULT Time_Uninitialize()
 {
+    chVTReset(&nextEventTimer);
+
     // nothing to do here has time management is handled by ChibiOS
     return S_OK;
 }
