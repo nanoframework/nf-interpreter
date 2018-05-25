@@ -153,14 +153,22 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
             (driveMode == GpioPinDriveMode_OutputOpenSource) ||
             (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
         {
-            // ESP32 API doesn't have a native toggle, so need to read pin...
-            int state = gpio_get_level((gpio_num_t)pinNumber);
+            // ESP32 GPIO API doesn't offer a 'toggle', so need to rely on the last output value field and toggle that one
+            GpioPinValue state = (GpioPinValue)pThis[ FIELD___lastOutputValue ].NumericByRef().s4;
+            
+            // ...handle the toggle...
+            GpioPinValue newState = GpioPinValue_Low;
 
-            // ... toggle value...
-            state == 1 ? state = 0 : state = 1;
+            if(state == GpioPinValue_Low)
+            {
+                newState = GpioPinValue_High;
+            }
+            
+            // ...write back to the GPIO...
+            gpio_set_level((gpio_num_t)pinNumber, newState);
 
-            // ... write back the toggled value
-            gpio_set_level((gpio_num_t)pinNumber, state);
+            // ... and finally store it
+            pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = newState;
         }
     }
     NANOCLR_NOCLEANUP();
@@ -304,6 +312,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___B
 {
     NANOCLR_HEADER();
     {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
+
         int16_t pinNumber = stack.Arg1().NumericByRef().s4;
 
         // TODO is probably a good idea keep track of the used pins, so we can check that here
@@ -313,6 +323,9 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___B
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+
+        // default to low
+        pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = GpioPinValue_Low;
 
         // Return value to the managed application
         stack.SetResult_Boolean(true );
@@ -354,6 +367,9 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
             (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
         {
             gpio_set_level( (gpio_num_t)pinNumber, state);
+
+            // store the output value in the field
+            pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = state;
         }
         else
         {
