@@ -154,15 +154,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
             (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
         {
             // ESP32 GPIO API doesn't offer a 'toggle', so need to rely on the last output value field and toggle that one
-            GpioPinValue state = (GpioPinValue)pThis[ FIELD___lastOutputValue ].NumericByRef().s4;
-            
-            // ...handle the toggle...
-            GpioPinValue newState = GpioPinValue_Low;
-
-            if(state == GpioPinValue_Low)
-            {
-                newState = GpioPinValue_High;
-            }
+            GpioPinValue newState = GpioPinValue_High ^ (GpioPinValue)pThis[ FIELD___lastOutputValue ].NumericByRef().s4;
             
             // ...write back to the GPIO...
             gpio_set_level((gpio_num_t)pinNumber, newState);
