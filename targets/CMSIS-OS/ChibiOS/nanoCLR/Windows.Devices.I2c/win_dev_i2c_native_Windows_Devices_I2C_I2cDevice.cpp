@@ -162,7 +162,9 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         i2cStart(cfg.Driver, &cfg.Configuration);
         i2cAcquireBus(cfg.Driver);
         // Handle potential cache issues on MCUs that have it (e.g. F7xx, H7xx)
+#if defined(STM32F7xx_MCUCONF) || defined(STM32H7xx_MCUCONF)
         SCB_CleanInvalidateDCache();
+#endif
 
         if (readSize != 0 && writeSize != 0)  // WriteRead
         {
