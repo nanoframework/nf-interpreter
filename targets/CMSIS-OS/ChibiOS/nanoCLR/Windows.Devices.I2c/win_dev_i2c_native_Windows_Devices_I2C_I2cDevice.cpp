@@ -75,12 +75,14 @@ nfI2CConfig Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetConfig(
     nfI2CConfig cfg =
     {
         {
-#ifdef STM32F4xx_MCUCONF
+#if defined(STM32F1xx_MCUCONF) || defined(STM32F4xx_MCUCONF) || defined(STM32L1xx_MCUCONF)
             OPMODE_I2C,
             busSpeed == I2cBusSpeed_StandardMode ? 100000U : 400000U,
             busSpeed == I2cBusSpeed_StandardMode ? STD_DUTY_CYCLE : FAST_DUTY_CYCLE_2
 #endif
-#ifdef STM32F7xx_MCUCONF
+#if defined(STM32F7xx_MCUCONF) || defined(STM32F3xx_MCUCONF) || defined(STM32F0xx_MCUCONF) || \
+            defined(STM32L0xx_MCUCONF) ||  defined(STM32L4xx_MCUCONF) || \
+            defined(STM32H7xx_MCUCONF) 
             // Standard mode : 100 KHz, Rise time 120 ns, Fall time 25 ns, 54MHz clock source
             // Fast mode : 400 KHz, Rise time 120 ns, Fall time 25 ns, 54MHz clock source
             // Timing register value calculated by STM32 CubeMx
@@ -124,15 +126,15 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
         
-        // get a pointer to the managed spi connectionSettings object instance
+        // get a pointer to the managed I2C connectionSettings object instance
         CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
 
         // get bus index
         // this is coded with a multiplication, need to perform and int division to get the number
-        // see the comments in the SpiDevice() constructor in managed code for details
+        // see the comments in the I2cDevice() constructor in managed code for details
         uint8_t bus = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
 
-        // Get a complete low-level SPI configuration, depending on user's managed parameters
+        // Get a complete low-level I2C configuration, depending on user's managed parameters
         nfI2CConfig cfg = GetConfig(bus, pThis[ FIELD___connectionSettings ].Dereference());
 
         // dereference the write and read buffers from the arguments
@@ -159,9 +161,9 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         // because the bus access is shared, acquire the appropriate bus
         i2cStart(cfg.Driver, &cfg.Configuration);
         i2cAcquireBus(cfg.Driver);
-#ifdef STM32F7xx_MCUCONF
+        // Handle potential cache issues on MCUs that have it (e.g. F7xx, H7xx)
         SCB_CleanInvalidateDCache();
-#endif
+
         if (readSize != 0 && writeSize != 0)  // WriteRead
         {
             i2cStatus = i2cMasterTransmitTimeout(cfg.Driver, cfg.SlaveAddress, &writeData[0], writeSize, &readData[0], readSize, 2000);
