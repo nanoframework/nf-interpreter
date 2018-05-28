@@ -302,12 +302,22 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
             palI2c->WriteSize = writeBuffer->m_numOfElements;
         }
+        else
+        {
+            // nothing to write, have to zero this
+            palI2c->WriteSize = 0;
+        }
 
         readBuffer = stack.Arg2().DereferenceArray();
         if (readBuffer != NULL)
         {
             // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
             palI2c->ReadSize = readBuffer->m_numOfElements;
+        }
+        else
+        {
+            // nothing to read, have to zero this
+            palI2c->ReadSize = 0;
         }
 
         // check if this is a long running operation
