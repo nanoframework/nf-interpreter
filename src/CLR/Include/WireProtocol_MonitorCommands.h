@@ -140,6 +140,13 @@ typedef struct CLR_DBG_Commands_Monitor_MemoryMap
 
 }CLR_DBG_Commands_Monitor_MemoryMap;
 
+typedef struct NativeAssembly_Details
+{
+    uint32_t CheckSum;
+    // version Version  // TODO add 'version info' in a future version
+    uint8_t AssemblyName[128];
+
+}NativeAssembly_Details;
 
 //////////////////////////////////////////
 // function declarations (commands)
