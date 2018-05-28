@@ -222,8 +222,9 @@ struct CLR_DBG_Commands
     static const unsigned int c_Debugging_Value_AllocateArray            = 0x0002003A; // Creates a new instance of an array.
     static const unsigned int c_Debugging_Value_Assign                   = 0x0002003B; // Assigns a value to another value.
                                                                  
-    static const unsigned int c_Debugging_TypeSys_Assemblies             = 0x00020040; // Lists all the assemblies in the system.
-    static const unsigned int c_Debugging_TypeSys_AppDomains             = 0x00020044; // Lists all the AppDomans loaded.
+    static const unsigned int c_Debugging_TypeSys_Assemblies                = 0x00020040; // Lists all the assemblies in the system.
+    static const unsigned int c_Debugging_TypeSys_AppDomains                = 0x00020044; // Lists all the AppDomans loaded.
+    static const unsigned int c_Debugging_TypeSys_InteropNativeAssemblies   = 0x00020045; // Lists all the Interop Native Assemblies.
                                                                  
     static const unsigned int c_Debugging_Resolve_Assembly               = 0x00020050; // Resolves an assembly.
     static const unsigned int c_Debugging_Resolve_Type                   = 0x00020051; // Resolves a type to a string.
@@ -1104,8 +1105,9 @@ public:
     static bool Debugging_Value_AllocateArray           ( WP_Message* msg );
     static bool Debugging_Value_Assign                  ( WP_Message* msg );
                                              
-    static bool Debugging_TypeSys_Assemblies            ( WP_Message* msg );
-    static bool Debugging_TypeSys_AppDomains            ( WP_Message* msg );
+    static bool Debugging_TypeSys_Assemblies                ( WP_Message* msg );
+    static bool Debugging_TypeSys_AppDomains                ( WP_Message* msg );
+    static bool Debugging_TypeSys_InteropNativeAssemblies   ( WP_Message* msg );
                                              
     static bool Debugging_Resolve_AppDomain             ( WP_Message* msg );
     static bool Debugging_Resolve_Assembly              ( WP_Message* msg );
