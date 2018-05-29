@@ -169,6 +169,12 @@ spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_Spi
     int bitOrder = config[ SpiConnectionSettings::FIELD___bitOrder ].NumericByRef().s4;
     int clockHz  = config[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4;
     
+    // if clock frequency is unset use the maximum frequency
+    if (clockHz == 0)
+    {
+        clockHz = MAX_CLOCK_FREQUENCY;
+    }
+
 //ets_printf( "Spi config cspin:%d spiMode:%d bitorder:%d clockHz:%d\n", csPin, spiMode, bitOrder, clockHz);
     uint32_t flags = (bitOrder == 1) ? (SPI_DEVICE_TXBIT_LSBFIRST | SPI_DEVICE_RXBIT_LSBFIRST) : 0;
  
