@@ -31,12 +31,12 @@
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\7-2017-q4-major'
-    ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-75'
+    ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-80'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
     ESP32_TOOLS_PATH: 'C:\ESP32_TOOLS'
     ESP32_LIBS_PATH: '%ESP32_TOOLS_PATH%\libs'
-    ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0-rc1'
+    ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0'
     BOARD_NAME: ''
     BUILD_OPTIONS: ''
     NEEDS_DFU: 'False'
@@ -334,12 +334,12 @@
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\7-2017-q4-major'
-    ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-75'
+    ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-80'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
     ESP32_TOOLS_PATH: 'C:\ESP32_TOOLS'
     ESP32_LIBS_PATH: '%ESP32_TOOLS_PATH%\libs'
-    ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0-rc1'
+    ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0'
     BOARD_NAME: ''
     BUILD_OPTIONS: ''
     NEEDS_DFU: 'False'
@@ -626,12 +626,12 @@
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
     GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\7-2017-q4-major'
-    ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-75'
+    ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-80'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
     ESP32_TOOLS_PATH: 'C:\ESP32_TOOLS'
     ESP32_LIBS_PATH: '%ESP32_TOOLS_PATH%\libs'
-    ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0-rc1'
+    ESP32_IDF_PATH: '%ESP32_TOOLS_PATH%\esp-idf-v3.0'
     BOARD_NAME: ''
     BUILD_OPTIONS: ''
     NEEDS_DFU: 'False'
