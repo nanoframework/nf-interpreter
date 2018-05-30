@@ -2760,6 +2760,43 @@ bool CLR_DBG_Debugger::Debugging_Value_Assign( WP_Message* msg)
 
 //--//
 
+bool CLR_DBG_Debugger::Debugging_TypeSys_InteropNativeAssemblies( WP_Message* msg)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
+
+    int nativeAssembliesCount = 0;
+    NativeAssembly_Details* interopNativeAssemblies;
+
+    // because the Interop assemblies list is assembled during the build we have to count how many are there before allocating memory for the array
+    for ( int i = 0; g_CLR_InteropAssembliesNativeData[i]; i++ )
+    {
+        if (g_CLR_InteropAssembliesNativeData[i] != NULL)
+        {
+            nativeAssembliesCount++;
+        }
+    }
+
+    interopNativeAssemblies = (NativeAssembly_Details*)platform_malloc(sizeof(NativeAssembly_Details) * nativeAssembliesCount);
+
+    // fill the array
+    for ( int i = 0; i < nativeAssembliesCount; i++ )
+    {
+        if (g_CLR_InteropAssembliesNativeData[i] != NULL)
+        {
+            interopNativeAssemblies[i].CheckSum = g_CLR_InteropAssembliesNativeData[i]->m_checkSum;
+            hal_strcpy_s((char*)interopNativeAssemblies[i].AssemblyName, ARRAYSIZE(interopNativeAssemblies[i].AssemblyName), g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);
+        }
+    }
+
+    WP_ReplyToCommand( msg, true, false, interopNativeAssemblies, (sizeof(NativeAssembly_Details) * nativeAssembliesCount));
+
+    platform_free(interopNativeAssemblies);
+
+    return true;
+}
+
 bool CLR_DBG_Debugger::Debugging_TypeSys_Assemblies( WP_Message* msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
