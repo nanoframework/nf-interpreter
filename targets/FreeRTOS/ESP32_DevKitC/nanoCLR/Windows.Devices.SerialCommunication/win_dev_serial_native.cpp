@@ -59,5 +59,6 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_SerialCommu
 {
     "Windows.Devices.SerialCommunication", 
     0x5E530ECD,
-    method_lookup
+    method_lookup,
+    { 1, 0, 0, 0 }
 };
