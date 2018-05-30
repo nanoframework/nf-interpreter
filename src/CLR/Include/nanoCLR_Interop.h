@@ -7,6 +7,7 @@
 #define _NANOCLR_INTEROP_H_
 
 #include <nanoCLR_PlatformDef.h>
+#include <nanoCLR_Types.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,12 +100,15 @@ struct CLR_RT_NativeAssemblyData
     const char                 *m_szAssemblyName;
 
     // Check sum for the assembly.
-    unsigned int                      m_checkSum;
+    unsigned int               m_checkSum;
 
     // Pointer to array of functions that implement native methods.
     // It could be different type of the function depending if it is assembly Interop Method
     // or function enabling Interrupts by user driver.
     const void                 *m_pNativeMethods;
+
+    // Assembly version
+    CLR_RECORD_VERSION          m_Version;
 };
 
 // Looks up in interop assemblies table for assembly with specified name.

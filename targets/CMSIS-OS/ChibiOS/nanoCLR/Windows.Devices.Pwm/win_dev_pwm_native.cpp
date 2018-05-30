@@ -57,6 +57,6 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Pwm =
 {
     "Windows.Devices.Pwm", 
     0xFA305154,
-    method_lookup
+    method_lookup,
+    { 1, 0, 0, 0 }
 };
-

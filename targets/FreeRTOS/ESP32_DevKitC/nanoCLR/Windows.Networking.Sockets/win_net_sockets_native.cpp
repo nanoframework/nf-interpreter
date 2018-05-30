@@ -115,6 +115,6 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Networking_Sockets 
 {
     "Windows.Networking.Sockets", 
     0x03D7E1A6,
-    method_lookup
+    method_lookup,
+    { 1, 0, 0, 0 }
 };
-

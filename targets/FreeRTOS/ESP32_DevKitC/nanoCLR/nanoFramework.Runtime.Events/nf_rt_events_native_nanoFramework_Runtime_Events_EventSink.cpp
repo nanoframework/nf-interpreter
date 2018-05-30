@@ -55,5 +55,6 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Event
 {
     "EventSink", 
     DRIVER_INTERRUPT_METHODS_CHECKSUM,
-    &g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink
+    &g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink,
+    { 1, 0, 0, 0 }
 };

@@ -39,5 +39,6 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Wifi =
 {
     "Windows.Devices.Wifi", 
     0xF0F3E985,
-    method_lookup
+    method_lookup,
+    { 1, 0, 0, 0 }
 };
