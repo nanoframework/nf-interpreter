@@ -128,6 +128,6 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net", 
     0xDE2F601A,
-    method_lookup
+    method_lookup,
+    { 1, 0, 0, 0 }
 };
-

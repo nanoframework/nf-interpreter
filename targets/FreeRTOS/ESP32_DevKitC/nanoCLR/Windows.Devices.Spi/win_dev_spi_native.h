@@ -17,6 +17,9 @@
 #define NUM_SPI_BUSES   3
 #define MAX_SPI_DEVICES 3
 
+// Max clock frequency is 20 MHz
+#define MAX_CLOCK_FREQUENCY 20000000
+
 struct nfSpiBusConfig
 {
     bool                spiBusInited;
