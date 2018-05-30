@@ -71,9 +71,8 @@ const CLR_Messaging_CommandHandlerLookup c_Debugger_Lookup_Request[] =
     DEFINE_CMD(Value_AllocateArray       ),
     DEFINE_CMD(Value_Assign              ),
     //
-    DEFINE_CMD(TypeSys_Assemblies               ),
-    DEFINE_CMD(TypeSys_AppDomains               ),
-    DEFINE_CMD(TypeSys_InteropNativeAssemblies  ),
+    DEFINE_CMD(TypeSys_Assemblies        ),
+    DEFINE_CMD(TypeSys_AppDomains        ),
     //
     DEFINE_CMD(Resolve_AppDomain         ),
     DEFINE_CMD(Resolve_Assembly          ),

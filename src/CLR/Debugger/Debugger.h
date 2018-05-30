@@ -53,7 +53,6 @@ typedef enum CLR_DBG_Commands_Debugging
                                                                  
     CLR_DBG_Commands_c_Debugging_TypeSys_Assemblies                 = 0x00020040, // Lists all the assemblies in the system.
     CLR_DBG_Commands_c_Debugging_TypeSys_AppDomains                 = 0x00020044, // Lists all the AppDomans loaded.
-    CLR_DBG_Commands_c_Debugging_TypeSys_InteropNativeAssemblies    = 0x00020045, // Lists all the Interop Native Assemblies.
                                                                 
     CLR_DBG_Commands_c_Debugging_Resolve_Assembly               = 0x00020050, // Resolves an assembly.
     CLR_DBG_Commands_c_Debugging_Resolve_Type                   = 0x00020051, // Resolves a type to a string.
