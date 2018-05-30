@@ -30,7 +30,7 @@ foreach(SRC_FILE ${Hardware.Esp32_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    message("${SRC_FILE} >> ${Hardware.Esp32_SRC_FILE}") # debug helper
+    # message("${SRC_FILE} >> ${Hardware.Esp32_SRC_FILE}") # debug helper
     list(APPEND Hardware.Esp32_SOURCES ${Hardware.Esp32_SRC_FILE})
 endforeach()
 
