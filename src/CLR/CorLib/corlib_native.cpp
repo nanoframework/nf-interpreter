@@ -816,8 +816,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Threading_Thread::Join___BOOLEAN__SystemTimeSpan,
     Library_corlib_native_System_Threading_Thread::get_ThreadState___SystemThreadingThreadState,
     Library_corlib_native_System_Threading_Thread::Sleep___STATIC__VOID__I4,
+    NULL,
     Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATIC__SystemThreadingThread,
     Library_corlib_native_System_Threading_Thread::GetDomain___STATIC__SystemAppDomain,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -900,7 +902,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x7D73728E,
+    0x7207CF2D,
     method_lookup,
     { 1, 0, 0, 0 }
 };
