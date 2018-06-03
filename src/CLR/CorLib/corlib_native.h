@@ -995,6 +995,15 @@ struct Library_corlib_native_System_Threading_Thread
     static HRESULT Join( CLR_RT_StackFrame& stack, const CLR_INT64& timeExpire );
 };
 
+struct Library_corlib_native_System_Threading_Timeout
+{
+    static const int FIELD_STATIC__InfiniteTimeSpan = 6;
+
+
+    //--//
+
+};
+
 struct Library_corlib_native_System_Threading_Timer
 {
     static const int FIELD___timer = 1;

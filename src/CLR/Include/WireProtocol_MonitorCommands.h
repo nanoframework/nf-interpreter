@@ -140,7 +140,6 @@ typedef struct CLR_DBG_Commands_Monitor_MemoryMap
 
 }CLR_DBG_Commands_Monitor_MemoryMap;
 
-
 //////////////////////////////////////////
 // function declarations (commands)
 
