@@ -82,7 +82,7 @@ void Esp32_Serial_UnitializeAll()
     }
 }
 
-HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -100,7 +100,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
 //
 //  Initialise a new Serial port
 //
-HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -142,7 +142,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
 //
 //  Set up serial port Configuration
 //
-HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeConfig___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeConfig___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -276,7 +276,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
 //
 //  Write data into buffer
 //
-HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeWrite___VOID__SZARRAY_U1( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeWrite___VOID__SZARRAY_U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -330,7 +330,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
 //
 // Store - Send buffer and wait
 //
-HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeStore___U4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeStore___U4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -361,7 +361,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
 }
 
 
-HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeRead___U4__SZARRAY_U1__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeRead___U4__SZARRAY_U1__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -451,7 +451,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
 }
 
 
-HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
 {
    NANOCLR_HEADER();
    {
