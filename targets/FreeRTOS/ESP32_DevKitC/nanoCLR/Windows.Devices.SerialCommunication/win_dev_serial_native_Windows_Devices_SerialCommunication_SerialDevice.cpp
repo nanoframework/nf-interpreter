@@ -455,8 +455,8 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
 {
    NANOCLR_HEADER();
    {
-       // declare the device selector string whose max size is "COM1,COM2,COM3" + terminator 
-       char deviceSelectorString[ 20 ] = "COM1,COM2,COM3";
+       // declare the device selector string whose max size is "COM0,COM1,COM2" + terminator 
+       char deviceSelectorString[ 15 ] = "COM0,COM1,COM2";
 
        // because the caller is expecting a result to be returned
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
