@@ -90,7 +90,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
        // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)pThis[ FIELD___portIndex ].NumericByRef().s4;
+        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
         uart_driver_delete(uart_num);
         Esp_Serial_Initialised_Flag[uart_num] = 0;
    }
@@ -108,8 +108,8 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)pThis[ FIELD___portIndex ].NumericByRef().s4;
-        if ( uart_num > UART_NUM_2 )
+        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+        if ( uart_num > UART_NUM_2 || uart_num < 0 )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
@@ -152,8 +152,8 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)pThis[ FIELD___portIndex ].NumericByRef().s4;
-        if ( uart_num > UART_NUM_2 )
+        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+        if ( uart_num > UART_NUM_2 || uart_num < 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
@@ -301,7 +301,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
         length = (size_t)dataBuffer->m_numOfElements;
 
         // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)pThis[ FIELD___portIndex ].NumericByRef().s4;
+        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
  
 
         // Write data to ring bufferand start sending
@@ -345,7 +345,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
         }
 
         // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)pThis[ FIELD___portIndex ].NumericByRef().s4;
+        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
 
         // Wait for 1 sec for data to be sent
         esp_err_t esp_err = uart_wait_tx_done( uart_num,  (TickType_t) 1000 / portTICK_PERIOD_MS);
@@ -402,7 +402,7 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
         options = (InputStreamOptions)stack.Arg3().NumericByRef().s4;
 
        // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)pThis[ FIELD___portIndex ].NumericByRef().s4;
+        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
 
         // Bytes requested to read
         toRead = count;
@@ -455,8 +455,8 @@ HRESULT IRAM_ATTR Library_win_dev_serial_native_Windows_Devices_SerialCommunicat
 {
    NANOCLR_HEADER();
    {
-       // declare the device selector string whose max size is "COM0,COM1,COM2" + terminator 
-       char deviceSelectorString[ 15 ] = "COM0,COM1,COM2";
+       // declare the device selector string whose max size is "COM1,COM2,COM3" + terminator 
+       char deviceSelectorString[ 15 ] = "COM1,COM2,COM3";
 
        // because the caller is expecting a result to be returned
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
