@@ -91,7 +91,7 @@ struct Settings
     }
 
 
-    HRESULT IRAM_ATTR Load()
+    HRESULT Load()
     {
         NANOCLR_HEADER();
 
@@ -159,7 +159,7 @@ struct Settings
     }
 
 
-    HRESULT IRAM_ATTR ContiguousBlockAssemblies(BlockStorageStream stream) 
+    HRESULT ContiguousBlockAssemblies(BlockStorageStream stream) 
     {
         NANOCLR_HEADER();
 
@@ -223,7 +223,7 @@ struct Settings
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT IRAM_ATTR LoadDeploymentAssemblies()
+    HRESULT LoadDeploymentAssemblies()
     {
         NANOCLR_HEADER();
 
