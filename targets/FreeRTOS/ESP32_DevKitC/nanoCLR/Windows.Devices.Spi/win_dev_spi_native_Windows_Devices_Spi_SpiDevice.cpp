@@ -199,17 +199,17 @@ spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_Spi
     return dev_config;
 }
 
-HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     return NativeTransfer( stack, false );
 }
 
-HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     return NativeTransfer( stack, true );
 }
 
-HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer( CLR_RT_StackFrame& stack, bool data16 )
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer( CLR_RT_StackFrame& stack, bool data16 )
 {
     NANOCLR_HEADER();
     {
@@ -331,7 +331,7 @@ HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::Nati
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 

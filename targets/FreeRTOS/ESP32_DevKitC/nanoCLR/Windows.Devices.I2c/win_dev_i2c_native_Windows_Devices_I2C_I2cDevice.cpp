@@ -77,7 +77,7 @@ void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::SetConfig(i2c_por
 }
 
 
-HRESULT IRAM_ATTR Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {

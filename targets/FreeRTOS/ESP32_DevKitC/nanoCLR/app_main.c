@@ -26,7 +26,7 @@ uint32_t __nanoImage_end__ = 0;
 extern bool Esp32FlashDriver_InitializeDevice(void* context);
 
 
-void  IRAM_ATTR receiver_task(void *pvParameter)
+void receiver_task(void *pvParameter)
 {
   ReceiverThread( 0);
    
@@ -34,7 +34,7 @@ void  IRAM_ATTR receiver_task(void *pvParameter)
 }
 
 // Main task start point
-void  IRAM_ATTR main_task(void *pvParameter)
+void main_task(void *pvParameter)
 {
   CLRStartupThread( 0);
  
