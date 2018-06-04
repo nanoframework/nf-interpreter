@@ -4,9 +4,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "hardware_esp32_native.h"
+#include "nanoFramework_hardware_esp32_native.h"
 
-HRESULT Library_hardware_esp32_native_nanoFramework_Hardware_Esp32_Logging::NativeSetLogLevel___STATIC__VOID__STRING__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Logging::NativeSetLogLevel___STATIC__VOID__STRING__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {

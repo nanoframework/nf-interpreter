@@ -12,7 +12,7 @@
 #include <nanoCLR_Checks.h>
 #include <corlib_native.h>
 
-struct Library_hardware_esp32_native_nanoFramework_Hardware_Esp32_Logging
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Logging
 {
     NANOCLR_NATIVE_DECLARE(NativeSetLogLevel___STATIC__VOID__STRING__I4);
 
@@ -20,7 +20,7 @@ struct Library_hardware_esp32_native_nanoFramework_Hardware_Esp32_Logging
 
 };
 
-struct Library_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep
 {
     NANOCLR_NATIVE_DECLARE(NativeEnableWakupByTimer___STATIC__nanoFrameworkHardwareEsp32ErrorsEsp__U8);
     NANOCLR_NATIVE_DECLARE(NativeEnableWakupByPin___STATIC__nanoFrameworkHardwareEsp32ErrorsEsp__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__I4);
@@ -36,6 +36,6 @@ struct Library_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep
 
 };
 
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Hardware_Esp32;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32;
 
 #endif  //_HARDWARE_ESP32_NATIVE_H_

@@ -129,7 +129,7 @@ macro(ParseApiOptions)
     # Hardware.Esp32
     if(API_Hardware.Esp32)
         ##### API name here (doted name)
-        PerformSettingsForApiEntry("Hardware.Esp32")
+        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
     endif()
 
     # parse the declarations to have new lines and ';'
