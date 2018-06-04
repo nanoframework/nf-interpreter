@@ -2622,7 +2622,6 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
     TIL( "System"                           , "ObjectDisposedException"       , m_ObjectDisposedException                            ),
     TIL( "System.Threading"                 , "ThreadAbortException"          , m_ThreadAbortException                               ),
     TIL( "nanoFramework.Runtime.Native"     , "ConstraintException"           , m_ConstraintException                                ),
-    TIL( "Microsoft.SPOT"                   , "UnknownTypeException"          , m_UnknownTypeException                               ),
 
     TIL( "System"                           , "Delegate"                      , m_Delegate                                           ),
     TIL( "System"                           , "MulticastDelegate"             , m_MulticastDelegate                                  ),
