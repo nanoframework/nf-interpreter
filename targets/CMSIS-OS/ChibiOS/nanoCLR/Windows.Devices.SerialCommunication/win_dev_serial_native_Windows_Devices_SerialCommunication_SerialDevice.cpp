@@ -867,6 +867,12 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 bytesToRead = palUart->RxRingBuffer.Length();
             }
         }
+
+        // we have enough bytes, skip wait for event
+        eventResult = false;
+               
+        // clear event by getting it
+        Events_Get(SYSTEM_EVENT_FLAG_COM_IN);
     }
     else
     {
