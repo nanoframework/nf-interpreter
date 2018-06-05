@@ -14,6 +14,8 @@
 
 extern void CLRStartupThread(void const * argument);
 
+// Mutex for GLOBAL_LOCK / GLOBAL_UNLOCK
+portMUX_TYPE globalLockMutex = portMUX_INITIALIZER_UNLOCKED;
 
 // These are offsets in the Deployment partition
 uint32_t  __deployment_start__ = 0;
