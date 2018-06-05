@@ -14,6 +14,8 @@
 
 extern void CLRStartupThread(void const * argument);
 
+// Mutex for GLOBAL_LOCK / GLOBAL_UNLOCK
+portMUX_TYPE globalLockMutex = portMUX_INITIALIZER_UNLOCKED;
 
 // These are offsets in the Deployment partition
 uint32_t  __deployment_start__ = 0;
@@ -53,7 +55,7 @@ void  app_main()
 
   Esp32FlashDriver_InitializeDevice(0);
  
- 	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 6, NULL, 1);
+ 	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL, 1);
   
   // Start the main task pinned to 2nd core
 	xTaskCreatePinnedToCore(&main_task, "main_task", 15000, NULL, 5, NULL, 1);
