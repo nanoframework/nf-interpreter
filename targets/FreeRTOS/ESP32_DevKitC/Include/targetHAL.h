@@ -15,10 +15,7 @@ extern portMUX_TYPE globalLockMutex;
 #define GLOBAL_UNLOCK(x)            taskEXIT_CRITICAL(&globalLockMutex);
 #define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
 
-
-#define PLATFORM_WAIT(milliSecs)    vTaskDelay(milliSecs/portTICK_PERIOD_MS);
-
-// Defininitions for Sockets/Network
+// Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)       
 #define SOCKETS_MAX_COUNT 16
 #define LPCSTR  const uint8_t*

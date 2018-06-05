@@ -55,7 +55,7 @@ void  app_main()
 
   Esp32FlashDriver_InitializeDevice(0);
  
- 	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 6, NULL, 1);
+ 	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL, 1);
   
   // Start the main task pinned to 2nd core
 	xTaskCreatePinnedToCore(&main_task, "main_task", 15000, NULL, 5, NULL, 1);
