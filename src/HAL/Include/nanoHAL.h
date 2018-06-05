@@ -1832,8 +1832,6 @@ bool              Watchdog_GetSetEnabled ( bool enabled, bool fSet );
 //#define GLOBAL_LOCK_SOCKETS(x)     // UNDONE: FIXME: SmartPtr_IRQ x
 #define GLOBAL_UNLOCK(x)
 
-#define PLATFORM_WAIT(milliSecs)
-
 #if defined(_DEBUG)
 #define ASSERT_IRQ_MUST_BE_OFF()   ASSERT( HAL_Windows_HasGlobalLock())
 #define ASSERT_IRQ_MUST_BE_ON()    ASSERT(!HAL_Windows_HasGlobalLock())

@@ -8,17 +8,14 @@
 
 #include <target_board.h>
 #include <nanoWeak.h>
+#include <esp32_os.h>
 
-//TODO: implement
-//#define GLOBAL_LOCK(x)              chSysLock();
-//#define GLOBAL_UNLOCK(x);           chSysUnlock();
-#define GLOBAL_LOCK(x)             
-#define GLOBAL_UNLOCK(x);          
+extern portMUX_TYPE globalLockMutex;
+#define GLOBAL_LOCK(x)              taskENTER_CRITICAL(&globalLockMutex);
+#define GLOBAL_UNLOCK(x)            taskEXIT_CRITICAL(&globalLockMutex);
 #define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
 
-#define PLATFORM_WAIT(milliSecs)    vTaskDelay(milliSecs/portTICK_PERIOD_MS);
-
-// Defininitions for Sockets/Network
+// Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)   
 
 #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT    16

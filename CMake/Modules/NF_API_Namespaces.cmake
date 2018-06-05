@@ -21,6 +21,9 @@ option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi 
 option(API_Windows.Networking.Sockets           "option for Windows.Networking.Sockets")
 
 
+# Esp32 only
+option(API_Hardware.Esp32                       "option for Hardware.Esp32")
+
 #################################################################
 # macro to perform individual settings to add an API to the build
 macro(PerformSettingsForApiEntry apiNamespace)
@@ -123,7 +126,12 @@ macro(ParseApiOptions)
         PerformSettingsForApiEntry("Windows.Networking.Sockets")
     endif()
     
-    
+    # Hardware.Esp32
+    if(API_Hardware.Esp32)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
+    endif()
+
     # parse the declarations to have new lines and ';'
     string(REPLACE ";;" ";\n" CLR_RT_NativeAssemblyDataDeclarations "${CLR_RT_NativeAssemblyDataList}")
     # parse the list to have new lines, ',' and identation

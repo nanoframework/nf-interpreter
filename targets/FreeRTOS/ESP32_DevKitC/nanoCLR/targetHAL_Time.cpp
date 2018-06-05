@@ -10,12 +10,10 @@
 #include <target_platform.h>
 #include <Esp32_os.h>
 
-#define ESP32_TICKS_PER_MS(x)            ( ((uint64_t)x * configTICK_RATE_HZ) / 1000)
-
 // Converts Tickcount to .NET ticks (100 nanoseconds)
 int64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) {
     
-    // convert to microseconds from FreeRtyos Tickcount
+    // convert to microseconds from FreeRTOS Tickcount
     int64_t microsecondsFromSysTicks = ((( xTaskGetTickCount() ) * 1000000ULL + (int64_t)configTICK_RATE_HZ - 1ULL) / (int64_t)configTICK_RATE_HZ);
 
     // need to convert from microseconds to 100 nanoseconds
@@ -128,8 +126,8 @@ const char* HAL_Time_CurrentDateTimeToString()
     return DateTimeToString(HAL_Time_CurrentDateTime(false));
 }
 
+
 uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
 {
-    //return  ESP32_TICKS_PER_MS(milliSeconds);
-    return ticks * 1000;
+    return ESP32_TICKS_PER_MS(ticks);
 }

@@ -13,9 +13,7 @@
 #define GLOBAL_UNLOCK(x);           chSysUnlock();
 #define ASSERT_IRQ_MUST_BE_OFF()    // TODO need to determine if this needs implementation
 
-#define PLATFORM_WAIT(milliSecs)    osDelay(milliSecs);
-
-// Defininitions for Sockets/Network
+// Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)       
 
 #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT    16

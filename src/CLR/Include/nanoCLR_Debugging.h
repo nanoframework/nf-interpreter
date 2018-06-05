@@ -224,8 +224,8 @@ struct CLR_DBG_Commands
     static const unsigned int c_Debugging_Value_AllocateArray            = 0x0002003A; // Creates a new instance of an array.
     static const unsigned int c_Debugging_Value_Assign                   = 0x0002003B; // Assigns a value to another value.
                                                                  
-    static const unsigned int c_Debugging_TypeSys_Assemblies             = 0x00020040; // Lists all the assemblies in the system.
-    static const unsigned int c_Debugging_TypeSys_AppDomains             = 0x00020044; // Lists all the AppDomans loaded.
+    static const unsigned int c_Debugging_TypeSys_Assemblies                = 0x00020040; // Lists all the assemblies in the system.
+    static const unsigned int c_Debugging_TypeSys_AppDomains                = 0x00020044; // Lists all the AppDomans loaded.
                                                                  
     static const unsigned int c_Debugging_Resolve_Assembly               = 0x00020050; // Resolves an assembly.
     static const unsigned int c_Debugging_Resolve_Type                   = 0x00020051; // Resolves a type to a string.
@@ -271,6 +271,7 @@ struct CLR_DBG_Commands
         static const CLR_UINT32 c_HalSystemInfo               = 5;
         static const CLR_UINT32 c_ClrInfo                     = 6;
         static const CLR_UINT32 c_TargetReleaseInfo           = 7;
+        static const CLR_UINT32 c_InteropNativeAssemblies     = 8;
 
         static const CLR_UINT32 c_CapabilityFlags_FloatingPoint             = 0x00000001;
         static const CLR_UINT32 c_CapabilityFlags_SourceLevelDebugging      = 0x00000002;
@@ -299,6 +300,14 @@ struct CLR_DBG_Commands
             NFVersion     m_TargetFrameworkVersion;
         };
         
+        struct __nfpack NativeAssemblyDetails
+        {
+            uint32_t CheckSum;
+            NFVersion Version;
+            uint8_t AssemblyName[128];
+
+        };
+
         union ReplyUnion
         {
             CLR_UINT32          u_capsFlags;

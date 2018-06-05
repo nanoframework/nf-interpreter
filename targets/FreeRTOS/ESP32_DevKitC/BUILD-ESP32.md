@@ -40,12 +40,12 @@ This has already been done and the libraries can be just be downloaded.
    - `C:\Esp32_Tools`
    - `C:\Esp32_Tools\libs`
 
-2. Download the pre-built libs zip from [here](https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs.zip)
-and extract it into `C:\Esp32_Tools\libs`.
+2. Download the pre-built libs zip from [here](https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.0.zip)
+and extract it into `C:\Esp32_Tools\libs-v3.0`.
 
-3. Download the v3.0rc1 IDF source zip file from [here](https://github.com/espressif/esp-idf/releases/download/v3.0-rc1/esp-idf-v3.0-rc1.zip) and extract it into `C:\Esp32_Tools` so you get `C:\ESP32_Tools\esp-idf-v3.0-rc1\components` etc.
+3. Download the v3.0 IDF source zip file from [here](https://github.com/espressif/esp-idf/releases/download/v3.0/esp-idf-v3.0.zip) and extract it into `C:\Esp32_Tools` so you get `C:\ESP32_Tools\esp-idf-v3.0\components` etc.
 
-4. Download the Esp32 toolchain from [here](https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-75-gbaf03c2-5.2.0.zip) and extract it into `C:\Esp32_Tools` so you get `C:\Esp32_Tools\xtensa-esp32-elf`.
+4. Download the Esp32 toolchain from [here](https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip) and extract it into `C:\Esp32_Tools\1.22.0.80` so you get `C:\Esp32_Tools\1.22.0.80\xtensa-esp32-elf`.
 
 5. Extract OpenOCD into `C:\Esp32_Tools` so you get `C:\Esp32_Tools\openocd-esp32`.
 
@@ -88,10 +88,10 @@ You should use the _develop_ branch for mainstream development or the _develop-n
         "oneWordSummary$": "nanoCLR", 
         "description$": "Build nanoCLR for ESP32 environment", 
         "settings": { 
-            "TOOLCHAIN_PREFIX" : "C:/ESP32_Tools", 
+            "TOOLCHAIN_PREFIX" : "C:/ESP32_Tools/1.22.0.80", 
             "TARGET_SERIES" : "ESP32", 
             "RTOS" : "FREERTOS", 
-            "ESP32_IDF_PATH" : "C:/ESP32_Tools/esp-idf-v3.0-rc1", 
+            "ESP32_IDF_PATH" : "C:/ESP32_Tools/esp-idf-v3.0", 
             "ESP32_LIBS_PATH" : "C:/ESP32_Tools/libs", 
             "NF_BUILD_RTM" : "OFF", 
             "NF_WP_TRACE_ERRORS" : "ON", 
@@ -128,7 +128,7 @@ You should use the _develop_ branch for mainstream development or the _develop-n
         { 
             "taskName": "Flash nanoCLR COM6", 
             "type": "shell", 
-            "command": "python C:/ESP32_Tools/esp-idf-v3.0-rc1/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM6\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 C:/ESP32_Tools/libs/bootloader.bin 0x10000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/nanoCLR.bin 0x8000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/partitions_4mb.bin", 
+            "command": "python C:/ESP32_Tools/esp-idf-v3.0/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM6\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 C:/ESP32_Tools/libs/bootloader.bin 0x10000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/nanoCLR.bin 0x8000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/partitions_4mb.bin", 
             "presentation": { 
                 "reveal": "always", 
                 "panel": "shared" 
@@ -138,7 +138,7 @@ You should use the _develop_ branch for mainstream development or the _develop-n
         { 
             "taskName": "Erase flash COM6", 
             "type": "shell", 
-            "command": "python C:/ESP32_Tools/esp-idf-v3.0-rc1/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM6\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" erase_flash", 
+            "command": "python C:/ESP32_Tools/esp-idf-v3.0/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM6\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" erase_flash", 
             "presentation": { 
                 "reveal": "always", 
                 "panel": "shared" 

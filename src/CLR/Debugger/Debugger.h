@@ -51,9 +51,9 @@ typedef enum CLR_DBG_Commands_Debugging
     CLR_DBG_Commands_c_Debugging_Value_AllocateArray            = 0x0002003A, // Creates a new instance of an array.
     CLR_DBG_Commands_c_Debugging_Value_Assign                   = 0x0002003B, // Assigns a value to another value.
                                                                  
-    CLR_DBG_Commands_c_Debugging_TypeSys_Assemblies             = 0x00020040, // Lists all the assemblies in the system.
-    CLR_DBG_Commands_c_Debugging_TypeSys_AppDomains             = 0x00020044, // Lists all the AppDomans loaded.
-                                                                 
+    CLR_DBG_Commands_c_Debugging_TypeSys_Assemblies                 = 0x00020040, // Lists all the assemblies in the system.
+    CLR_DBG_Commands_c_Debugging_TypeSys_AppDomains                 = 0x00020044, // Lists all the AppDomans loaded.
+                                                                
     CLR_DBG_Commands_c_Debugging_Resolve_Assembly               = 0x00020050, // Resolves an assembly.
     CLR_DBG_Commands_c_Debugging_Resolve_Type                   = 0x00020051, // Resolves a type to a string.
     CLR_DBG_Commands_c_Debugging_Resolve_Field                  = 0x00020052, // Resolves a field to a string.

@@ -45,7 +45,8 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
-    static void GetConfig(CLR_RT_HeapBlock* managedConfig, I2CConfig* llConfig);
+    static void GetI2cConfig(CLR_RT_HeapBlock* managedConfig, I2CConfig* llConfig);
+    static bool IsLongRunningOperation(int writeSize, int readSize, float byteTime, int& estimatedDurationMiliseconds);
 };
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult
@@ -67,6 +68,7 @@ struct NF_PAL_I2C
     I2CConfig   Configuration;
     thread_t*   WorkingThread;
     i2caddr_t   Address;
+    float ByteTime;
 
     uint8_t* WriteBuffer;
     uint8_t  WriteSize;
@@ -90,51 +92,5 @@ struct NF_PAL_I2C
 #if STM32_I2C_USE_I2C4
     extern NF_PAL_I2C I2C4_PAL;
 #endif
-
-
-/////////////////////////////////////
-// I2C Tx buffers                 //
-// these live in the target folder //
-/////////////////////////////////////
-extern uint8_t I2C1_WriteBuffer[];
-extern uint8_t I2C2_WriteBuffer[];
-extern uint8_t I2C3_WriteBuffer[];
-extern uint8_t I2C4_WriteBuffer[];
-
-
-/////////////////////////////////////
-// I2C Rx buffers                  //
-// these live in the target folder //
-/////////////////////////////////////
-extern uint8_t I2C1_ReadBuffer[];
-extern uint8_t I2C2_ReadBuffer[];
-extern uint8_t I2C3_ReadBuffer[];
-extern uint8_t I2C4_ReadBuffer[];
-
-
-// the following macro defines a function that initializes an I2C struct
-// it gets called in the Windows_Devices_I2c_I2cDevice::NativeInit function
-#define I2C_INIT(num, tx_buffer_size, rx_buffer_size) void Init_I2C##num() { \
-    I2C##num##_PAL.WriteBuffer = I2C##num##_WriteBuffer; \
-    I2C##num##_PAL.ReadBuffer = I2C##num##_ReadBuffer; \
-}
-
-// when a I2C is defined the declarations bellow will have the real function/configuration 
-// in the target folder @ target_windows_devices_i2c_config.cpp
-void Init_I2C1();
-void Init_I2C2();
-void Init_I2C3();
-void Init_I2C4();
-
-// the following macro defines a function that un initializes an I2C struct
-// it gets called in the Windows_Devices_I2c_I2cDevice::NativeDispose function
-#define I2C_UNINIT(num) void UnInit_I2C##num() { return; }
-
-// when a I2C is defined the declarations bellow will have the real function/configuration 
-// in the target folder @ target_windows_devices_i2c_config.cpp
-void UnInit_I2C1();
-void UnInit_I2C2();
-void UnInit_I2C3();
-void UnInit_I2C4();
 
 #endif  //_WIN_DEV_I2C_NATIVE_H_

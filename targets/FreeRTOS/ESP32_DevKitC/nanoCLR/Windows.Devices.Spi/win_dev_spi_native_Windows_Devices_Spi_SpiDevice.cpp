@@ -169,6 +169,12 @@ spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_Spi
     int bitOrder = config[ SpiConnectionSettings::FIELD___bitOrder ].NumericByRef().s4;
     int clockHz  = config[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4;
     
+    // if clock frequency is unset use the maximum frequency
+    if (clockHz == 0)
+    {
+        clockHz = MAX_CLOCK_FREQUENCY;
+    }
+
 //ets_printf( "Spi config cspin:%d spiMode:%d bitorder:%d clockHz:%d\n", csPin, spiMode, bitOrder, clockHz);
     uint32_t flags = (bitOrder == 1) ? (SPI_DEVICE_TXBIT_LSBFIRST | SPI_DEVICE_RXBIT_LSBFIRST) : 0;
  
@@ -193,17 +199,17 @@ spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_Spi
     return dev_config;
 }
 
-HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     return NativeTransfer( stack, false );
 }
 
-HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     return NativeTransfer( stack, true );
 }
 
-HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer( CLR_RT_StackFrame& stack, bool data16 )
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer( CLR_RT_StackFrame& stack, bool data16 )
 {
     NANOCLR_HEADER();
     {
@@ -325,7 +331,7 @@ HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::Nati
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT IRAM_ATTR Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 

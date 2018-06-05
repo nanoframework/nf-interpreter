@@ -37,7 +37,7 @@ void Blinker_task(void *pvParameter)
 }
 
 // Main task start point
-void  IRAM_ATTR main_task(void *pvParameter)
+void main_task(void *pvParameter)
 {
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.

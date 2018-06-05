@@ -17,7 +17,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::get_MaxClockF
         // need to grab 'n' from the string and convert to the integer value from the ASCII code
         uint8_t bus = (uint8_t)pArg[0].RecoverString()[3] - 48;
 
-        stack.SetResult_I4 ( 20000000 );
+        stack.SetResult_I4 ( MAX_CLOCK_FREQUENCY );
     }
     NANOCLR_NOCLEANUP();
 }

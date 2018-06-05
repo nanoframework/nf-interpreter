@@ -14,6 +14,8 @@
 
 extern void CLRStartupThread(void const * argument);
 
+// Mutex for GLOBAL_LOCK / GLOBAL_UNLOCK
+portMUX_TYPE globalLockMutex = portMUX_INITIALIZER_UNLOCKED;
 
 // These are offsets in the Deployment partition
 uint32_t  __deployment_start__ = 0;
@@ -26,7 +28,7 @@ uint32_t __nanoImage_end__ = 0;
 extern bool Esp32FlashDriver_InitializeDevice(void* context);
 
 
-void  IRAM_ATTR receiver_task(void *pvParameter)
+void receiver_task(void *pvParameter)
 {
   ReceiverThread( 0);
    
@@ -34,7 +36,7 @@ void  IRAM_ATTR receiver_task(void *pvParameter)
 }
 
 // Main task start point
-void  IRAM_ATTR main_task(void *pvParameter)
+void main_task(void *pvParameter)
 {
   CLRStartupThread( 0);
  
@@ -55,7 +57,7 @@ void  app_main()
 
   Esp32FlashDriver_InitializeDevice(0);
  
- 	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 6, NULL, 1);
+ 	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL, 1);
   
   // Start the main task pinned to 2nd core
 	xTaskCreatePinnedToCore(&main_task, "main_task", 15000, NULL, 5, NULL, 1);

@@ -815,10 +815,6 @@ bool CLR_DBG_Debugger::Monitor_Reboot( WP_Message* msg)
 
     WP_ReplyToCommand(msg, true, false, NULL, 0);
 
-    // Allow some time for CLR to Reboot
-    // FIXME find a better way to syncronise the reboot with clr 
-    PLATFORM_WAIT( 1000 );
-
     return true;
 }
 
@@ -1000,6 +996,52 @@ void NFReleaseInfo::Init(NFReleaseInfo& NFReleaseInfo, unsigned short int major,
     }
 }
 
+static bool GetInteropNativeAssemblies( uint8_t* &data, int* size)
+{
+    extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
+
+    int nativeAssembliesCount = 0;
+    CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails* interopNativeAssemblies = NULL;
+
+    // because the Interop assemblies list is assembled during the build we have to count how many are there before allocating memory for the array
+    for ( int i = 0; g_CLR_InteropAssembliesNativeData[i]; i++ )
+    {
+        if (g_CLR_InteropAssembliesNativeData[i] != NULL)
+        {
+            nativeAssembliesCount++;
+        }
+    }
+
+    interopNativeAssemblies = (CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails*)platform_malloc(sizeof(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails) * nativeAssembliesCount);
+
+    // check for malloc failure
+    if(interopNativeAssemblies == NULL)
+    {
+        return false;
+    }
+
+    // fill the array
+    for ( int i = 0; i < nativeAssembliesCount; i++ )
+    {
+        if (g_CLR_InteropAssembliesNativeData[i] != NULL)
+        {
+            interopNativeAssemblies[i].CheckSum = g_CLR_InteropAssembliesNativeData[i]->m_checkSum;
+            hal_strcpy_s((char*)interopNativeAssemblies[i].AssemblyName, ARRAYSIZE(interopNativeAssemblies[i].AssemblyName), g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);
+
+            NFVersion::Init(interopNativeAssemblies[i].Version,
+                        g_CLR_InteropAssembliesNativeData[i]->m_Version.iMajorVersion, g_CLR_InteropAssembliesNativeData[i]->m_Version.iMinorVersion,
+                        g_CLR_InteropAssembliesNativeData[i]->m_Version.iBuildNumber, g_CLR_InteropAssembliesNativeData[i]->m_Version.iRevisionNumber
+                        );
+        }
+    }
+
+    data = (uint8_t*)interopNativeAssemblies;
+
+    *size = (sizeof(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails) * nativeAssembliesCount);
+
+    return true;
+}
+
 //--//
 
 bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg)
@@ -1014,6 +1056,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
     CLR_UINT8* data   = NULL;
     int size          = 0;
     bool fSuccess     = true;
+    bool freeAllocFlag = false;
 
     // set the compiler info string here
 #if defined(__GNUC__)
@@ -1124,12 +1167,30 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
             }
             break;
 
+        case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_InteropNativeAssemblies:
+            if(GetInteropNativeAssemblies(data, &size) == true)
+            {
+                // signal need to free memory
+                freeAllocFlag = true;
+            }
+            else
+            {
+                fSuccess = false;
+            }
+            break;
+
         default:
             fSuccess = false;
             break;
     }
 
     WP_ReplyToCommand( msg, fSuccess, false, data, size );
+
+    // check if we need to free data pointer
+    if(freeAllocFlag)
+    {
+        platform_free(data);
+    }
 
     return true;
 }
