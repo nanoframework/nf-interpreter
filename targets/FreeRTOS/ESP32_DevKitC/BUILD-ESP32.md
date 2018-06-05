@@ -40,8 +40,8 @@ This has already been done and the libraries can be just be downloaded.
    - `C:\Esp32_Tools`
    - `C:\Esp32_Tools\libs`
 
-2. Download the pre-built libs zip from [here](https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs.zip)
-and extract it into `C:\Esp32_Tools\libs`.
+2. Download the pre-built libs zip from [here](https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.0.zip)
+and extract it into `C:\Esp32_Tools\libs-v3.0`.
 
 3. Download the v3.0 IDF source zip file from [here](https://github.com/espressif/esp-idf/releases/download/v3.0/esp-idf-v3.0.zip) and extract it into `C:\Esp32_Tools` so you get `C:\ESP32_Tools\esp-idf-v3.0\components` etc.
 
