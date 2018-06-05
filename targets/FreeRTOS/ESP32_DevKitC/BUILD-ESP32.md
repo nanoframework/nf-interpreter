@@ -103,7 +103,6 @@ You should use the _develop_ branch for mainstream development or the _develop-n
             "NF_FEATURE_DEBUGGER" : "ON", 
             "NF_FEATURE_RTC" : "ON", 
             "NF_FEATURE_USE_APPDOMAINS" : "OFF", 
-            "NF_FEATURE_USE_NETWORKING" : "OFF", 
             "API_Windows.Devices.Gpio" : "ON", 
             "API_Windows.Devices.Spi" : "ON", 
             "API_Windows.Devices.I2c" : "ON", 
