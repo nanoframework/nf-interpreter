@@ -27,14 +27,7 @@ const BlockRegionInfo BlockRegions[] =
 
 const DeviceBlockInfo Device_BlockInfo =
 {
-    // {  
-    //     false,              // BOOL Removable;
-    //     true,               // BOOL SupportsXIP;
-    //     false,              // BOOL WriteProtected;
-    //     false               // BOOL SupportsCopyBack
-    // },
-    MediaAttribute_SupportsXIP,
-
+    (MediaAttribute_SupportsXIP),
     ARRAYSIZE_CONST_EXPR(BlockRegions),     // UINT32 NumRegions;
     (BlockRegionInfo*)BlockRegions          // const BlockRegionInfo* pRegions;
 };
