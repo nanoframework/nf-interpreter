@@ -405,9 +405,17 @@ struct IBLOCKSTORAGEDEVICE
     void (*SetPowerState)(void*, unsigned int state);
 };
 
-/////////////////////////////////////////////////////////////////////
-typedef struct BLOCKSTORAGEDEVICE BlockStorageDevice;
+typedef struct BLOCKSTORAGEDEVICE
+{
+    // from templace class HAL_DblLinkedNode<BlockStorageDevice>
+    struct BLOCKSTORAGEDEVICE* m_nextNode;
+    struct BLOCKSTORAGEDEVICE* m_prevNode;
 
+    IBlockStorageDevice* m_BSD;
+    void*                m_context;
+}BlockStorageDevice;
+
+/////////////////////////////////////////////////////////////////////
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -433,15 +441,6 @@ extern "C" {
 }
 #endif
 
-struct BLOCKSTORAGEDEVICE
-{
-    // from templace class HAL_DblLinkedNode<BlockStorageDevice>
-    BlockStorageDevice* m_nextNode;
-    BlockStorageDevice* m_prevNode;
-
-    IBlockStorageDevice* m_BSD;
-    void*                m_context;
-};
 
 /////////////////////////////////////////////////////
 // BlockStorageStream declarations
