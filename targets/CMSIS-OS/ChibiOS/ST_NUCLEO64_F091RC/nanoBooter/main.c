@@ -10,6 +10,7 @@
 #include <swo.h>
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
+#include <nanoPAL_BlockStorage.h>
 #include <LaunchCLR.h>
 
 void BlinkerThread(void const * argument)
@@ -32,9 +33,6 @@ osThreadDef(ReceiverThread, osPriorityHigh, 3072, "ReceiverThread");
 
 // Application entry point.
 int main(void) {
-
-  osThreadId blinkerThreadId;
-  osThreadId receiverThreadId;
 
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
@@ -71,10 +69,10 @@ int main(void) {
   palSetPadMode(GPIOA, 3, PAL_MODE_ALTERNATE(1)); // USART2 RX
 
   // Creates the blinker thread, it does not start immediately.
-  blinkerThreadId = osThreadCreate(osThread(BlinkerThread), NULL);
+  osThreadCreate(osThread(BlinkerThread), NULL);
 
   // create the receiver thread
-  receiverThreadId = osThreadCreate(osThread(ReceiverThread), NULL);
+  osThreadCreate(osThread(ReceiverThread), NULL);
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
