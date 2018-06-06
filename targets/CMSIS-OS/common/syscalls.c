@@ -11,13 +11,15 @@ extern "C" {
 
 extern void _exit(int status)
 {
+	(void)status;
+
 	for (;;);
 }
 
 extern void _kill(int pid, int sig)
 {
-	( void ) pid;
-	( void ) sig;
+	(void) pid;
+	(void) sig;
 	return;
 }
 

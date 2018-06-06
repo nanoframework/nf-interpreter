@@ -14,6 +14,7 @@
 
 void hal_fprintf_SetLoggingCallback( LOGGING_CALLBACK fpn )
 {
+    (void)fpn;
     NATIVE_PROFILE_PAL_CRT();
 
 }
@@ -141,18 +142,26 @@ extern "C" {
 
 int hal_printf( const char* format, ... )
 {
+    (void)format;
+
     NATIVE_PROFILE_PAL_CRT();
     return 0;
 }
 
 int hal_vprintf( const char* format, va_list arg )
 {
+    (void)format;
+    (void)arg;
+
     NATIVE_PROFILE_PAL_CRT();
     return 0;
 }
 
 int hal_fprintf( COM_HANDLE stream, const char* format, ... )
 {
+    (void)stream;
+    (void)format;
+
     NATIVE_PROFILE_PAL_CRT();
     return 0;
 }

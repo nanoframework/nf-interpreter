@@ -18,7 +18,7 @@ __nfweak bool GenericPort_Uninitialize(int comPortNum)
     return true;
 }
 
-__nfweak int GenericPort_Write(int comPortNum, const char* data, size_t size)
+__nfweak uint32_t GenericPort_Write(int comPortNum, const char* data, size_t size)
 {
     NATIVE_PROFILE_PAL_COM();
     return 0;

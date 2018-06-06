@@ -11,7 +11,7 @@
 #include <Esp32_os.h>
 
 // Converts Tickcount to .NET ticks (100 nanoseconds)
-int64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) {
+uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) {
     
     // convert to microseconds from FreeRTOS Tickcount
     int64_t microsecondsFromSysTicks = ((( xTaskGetTickCount() ) * 1000000ULL + (int64_t)configTICK_RATE_HZ - 1ULL) / (int64_t)configTICK_RATE_HZ);
@@ -21,7 +21,7 @@ int64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) {
 }
 
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
-int64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
+uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
 #if defined(HAL_USE_RTC)
     SYSTEMTIME st; 

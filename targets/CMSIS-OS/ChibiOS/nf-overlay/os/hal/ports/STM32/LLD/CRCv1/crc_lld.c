@@ -13,7 +13,7 @@
 // Others have different configurations and polynomial coefficients.
 
 
-#include "hal.h"
+#include <hal.h>
 
 #if (HAL_USE_STM32_CRC == TRUE)
 
@@ -128,12 +128,9 @@ void crc_lld_reset() {
 
 uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
 
-    uint32_t index = 0U;
+    int32_t index = 0U;
     uint32_t arg1;
-    uint32_t size_remainder = 0U;
-    volatile uint32_t crc, crc_temp;
-    volatile uint32_t targetCRC;
-    volatile uint32_t currentCRC;
+    uint32_t crc;
 
     // anything to do here?
     if(size == 0)
@@ -146,6 +143,7 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
     uint16_t* ptr16 = (uint16_t*)buffer;
 
 #if defined(STM32F1XX) || defined(STM32L1XX) || defined(STM32F2XX) || defined(STM32F4XX)
+    uint32_t size_remainder = 0;
 
     // need to reset CRC peripheral if:
     // - CRC initial value is 0 
@@ -292,7 +290,7 @@ void crc_lld_release() {
 
 #endif
 
-static uint32_t crc_lld_reverseCRC32(uint32_t targetCRC)
+uint32_t crc_lld_reverseCRC32(uint32_t targetCRC)
 {
     // nibble lookup table for _REVERSE_ CRC32 polynomial 0x4C11DB7
     static const uint32_t crc32NibbleTable[16] =
@@ -311,7 +309,7 @@ static uint32_t crc_lld_reverseCRC32(uint32_t targetCRC)
     return targetCRC;
 }
 
-static uint32_t crc_lld_fastCRC32(uint32_t initialCrc, uint8_t data)
+uint32_t crc_lld_fastCRC32(uint32_t initialCrc, uint8_t data)
 {
     // nibble lookup table for CRC32 polynomial 0x4C11DB7
     static const uint32_t crc32NibbleTable[16] = 

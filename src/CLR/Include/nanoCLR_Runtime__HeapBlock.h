@@ -45,6 +45,8 @@ struct CLR_RT_HeapBlock_Raw
     CLR_UINT32 data[ 3 ];
 };
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 struct CLR_RT_HeapBlock
 {
     friend struct CLR_RT_HeapBlock_Node;
@@ -424,7 +426,7 @@ private:
 ///
                     CLR_UINT8* tmp = (CLR_UINT8*)&ret_val;
                     CLR_UINT8* src = (CLR_UINT8*)&LL;
-                    int i;
+                    uint32_t i;
                     
                     for(i=0; i<sizeof(CLR_UINT32); i++)
                     {
@@ -456,7 +458,7 @@ private:
 ///
                     CLR_UINT8* src = (CLR_UINT8*)&num;
                     CLR_UINT8* dst = (CLR_UINT8*)&LL;
-                    int i;
+                    uint32_t i;
                     
                     for(i=0; i<sizeof(CLR_UINT32); i++)
                     {
@@ -1164,6 +1166,8 @@ private:
 
 };
 
+#pragma GCC diagnostic pop
+
 //--//
 
 #define NANOCLR_FOREACH_NODE(cls,ptr,lst)                                                            \
@@ -1240,6 +1244,7 @@ private:
     }
 
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 struct CLR_RT_HeapBlock_Node : public CLR_RT_HeapBlock
 {
@@ -1313,6 +1318,8 @@ struct CLR_RT_HeapBlock_Node : public CLR_RT_HeapBlock
 
      void Relocate();
 };
+
+#pragma GCC diagnostic pop
 
 struct CLR_RT_DblLinkedList
 {
@@ -2008,6 +2015,8 @@ struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT H
 
 //--//
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 struct CLR_RT_Persistence_Manager
 {
     static const CLR_UINT32 c_Erased = 0xFFFFFFFF;
@@ -2046,10 +2055,10 @@ struct CLR_RT_Persistence_Manager
 
          ObjectHeader* Next() const;
 
-    private:
-         CLR_UINT32 ComputeCRC() const;
+        private:
+            CLR_UINT32 ComputeCRC() const;
 
-        //--//
+            //--//
     };
 
     struct BankHeader
@@ -2176,32 +2185,32 @@ struct CLR_RT_Persistence_Manager
 
     //--//
 
-     void Initialize();
-     void Uninitialize();
-     void EraseAll  ();
+    void Initialize();
+    void Uninitialize();
+    void EraseAll  ();
 
-     void InvalidateEntry( CLR_RT_HeapBlock_WeakReference* weak );
+    void InvalidateEntry( CLR_RT_HeapBlock_WeakReference* weak );
 
-     void Relocate();
+    void Relocate();
 
-     ObjectHeader* RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref );
+    ObjectHeader* RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref );
 
-     static void Callback( void* arg );
+    static void Callback( void* arg );
 
-#if !defined(BUILD_RTM)
-     void GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse );
-#endif
+  #if !defined(BUILD_RTM)
+    void GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse );
+  #endif
 
-     void Flush();
+    void Flush();
 
     //--//
 
-#undef DECL_POSTFIX
-#if defined(NANOCLR_TRACE_PERSISTENCE)
-#define DECL_POSTFIX
-#else
-#define DECL_POSTFIX {}
-#endif
+  #undef DECL_POSTFIX
+  #if defined(NANOCLR_TRACE_PERSISTENCE)
+  #define DECL_POSTFIX
+  #else
+  #define DECL_POSTFIX {}
+  #endif
 
     static void Trace_Emit( char* szText ) DECL_POSTFIX;
 
@@ -2213,12 +2222,14 @@ struct CLR_RT_Persistence_Manager
 
     //--//
 
-private:
+    private:
 
-     bool AdvanceState( bool force );
+        bool AdvanceState( bool force );
 
-     void EnqueueNextCallback();
+        void EnqueueNextCallback();
 };
+
+#pragma GCC diagnostic pop
 
 extern CLR_RT_Persistence_Manager g_CLR_RT_Persistence_Manager;
 

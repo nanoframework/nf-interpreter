@@ -32,7 +32,7 @@ void stm32FlashInit(void) {
 }
 
 void stm32FlashObjectInit(SMT32FlashDriver* flash) {
-
+  (void)flash;
 }
 
 

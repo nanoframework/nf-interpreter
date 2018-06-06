@@ -13,6 +13,7 @@
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
+#include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
 // need to declare the Receiver thread here

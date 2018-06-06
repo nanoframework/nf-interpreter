@@ -6,7 +6,7 @@
 #include <ch.h>
 #include <hal.h>
 #include <cmsis_os.h>
-#include "WireProtocol_HAL_Interface.h"
+#include <WireProtocol_Message.h>
 
 extern WP_Message inboundMessage;
 
@@ -20,6 +20,8 @@ extern SerialUSBDriver SDU1;
 __attribute__((noreturn))
 void ReceiverThread(void const * argument)
 {
+  (void)argument;
+
   osDelay(500);
 
   #if (HAL_USE_STM32_CRC == TRUE)

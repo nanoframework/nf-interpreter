@@ -187,8 +187,8 @@ extern "C" {
   void crc_lld_release();
 #endif
 
-  static uint32_t crc_lld_reverseCRC32(uint32_t targetCRC);
-  static uint32_t crc_lld_fastCRC32(uint32_t initialCrc, uint8_t data);
+uint32_t crc_lld_reverseCRC32(uint32_t targetCRC);
+uint32_t crc_lld_fastCRC32(uint32_t initialCrc, uint8_t data);
 
 #ifdef __cplusplus
 }

@@ -9,7 +9,7 @@
 // https://github.com/xpacks/stm32f7-hal/blob/xpack/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rng.c
 // https://github.com/ChibiOS/ChibiOS-Contrib/blob/master/os/hal/src/hal_rng.c
 
-#include "hal.h"
+#include <hal.h>
 
 #if (HAL_USE_STM32_RNG == TRUE)
 
@@ -95,7 +95,7 @@ uint32_t rng_lld_GenerateRandomNumber() {
     {
       if(!chVTIsSystemTimeWithin(start, end))
       {   
-        return NULL;
+        return 0;
       } 
 
     }

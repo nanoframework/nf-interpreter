@@ -4,7 +4,6 @@
 //
 
 #include <string.h>
-
 #include <ch.h>
 #include <hal.h>
 #include <vectors.h>
@@ -42,7 +41,7 @@ bool CheckValidCLRImage(uint32_t address)
     // meaning that the Flash is neither 'all burnt' or erased
     
     // the stack pointer is at the 1st position of vectors_t
-    if(nanoCLRVectorTable->init_stack == 0xFFFFFFFF ||
+    if(nanoCLRVectorTable->init_stack == (uint32_t*)0xFFFFFFFF ||
        nanoCLRVectorTable->init_stack == 0x00000000)
     {
         // check failed, there is no valid CLR image
@@ -57,7 +56,7 @@ bool CheckValidCLRImage(uint32_t address)
 
     // because the code in the vectors region is aligned by 16 bytes we need to check if the linker has pushed this further and adjust accordingly
     uint32_t alignmentOffset =  ((uint32_t)opCodeAddress % 0x10);
-    opCodeAddress =  ((uint32_t)opCodeAddress + (0x10 - alignmentOffset));
+    opCodeAddress =  (uint16_t*)((uint32_t)opCodeAddress + (0x10 - alignmentOffset));
 
     if((uint16_t)*opCodeAddress == 0xE002)
     {

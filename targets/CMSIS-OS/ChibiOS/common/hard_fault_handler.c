@@ -26,6 +26,9 @@ void NMI_Handler(void) {
 #endif
 
 // dev note: on all the following the variables need to be declared as volatile so they don't get optimized out by the linker
+// dev note: the pragma bellow is to ignore the warning/error because the variables aren't being used
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
 
 void HardFault_Handler(void) {                                                                                   
 
@@ -149,3 +152,5 @@ void MemManage_Handler(void) {
     // If no debugger connected, just reset the board
     NVIC_SystemReset();
 }
+
+#pragma GCC diagnostic pop

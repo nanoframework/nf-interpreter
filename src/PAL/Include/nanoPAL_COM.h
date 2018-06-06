@@ -20,7 +20,7 @@ extern "C" {
 
 bool GenericPort_Initialize( COM_HANDLE comPortNum );
 bool GenericPort_Uninitialize( COM_HANDLE comPortNum );
-int GenericPort_Write( int portNum, const char* data, size_t size );
+uint32_t GenericPort_Write( int portNum, const char* data, size_t size );
 int GenericPort_Read( COM_HANDLE comPortNum, char* data, size_t size );
 bool GenericPort_Flush( COM_HANDLE comPortNum );
 bool GenericPort_IsSslSupported( COM_HANDLE comPortNum );

@@ -209,17 +209,17 @@ enum POWER_LEVEL
 //#include <nanocrt_decl.h>
 
 #if defined(PLATFORM_ARM)
-#pragma check_printf_formats   /* hint to the compiler to check f/s/printf format */
+extern int  hal_vprintf (const char* format, va_list arg) __attribute__ ((format (printf, 1, 0)));
 #endif
 int hal_vprintf( const char* format, va_list arg );
 
 #if defined(PLATFORM_ARM)
-#pragma check_printf_formats   /* hint to the compiler to check f/s/printf format */
+extern int  hal_vfprintf ( COM_HANDLE stream, const char* format, va_list arg ) __attribute__ ((format (printf, 2, 0)));
 #endif
 int hal_vfprintf( COM_HANDLE stream, const char* format, va_list arg );
 
 #if defined(PLATFORM_ARM)
-#pragma check_printf_formats   /* hint to the compiler to check f/s/printf format */
+extern int  hal_snprintf ( char* buffer, size_t len, const char* format, ... ) __attribute__ ((format (printf, 3, 0)));
 #endif
 int hal_snprintf( char* buffer, size_t len, const char* format, ... );
 

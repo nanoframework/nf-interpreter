@@ -18,6 +18,9 @@
 // provided as weak to be replaced by actual implementation by HAL interface
 __nfweak int WP_ReceiveBytes(uint8_t* ptr, unsigned short* size)
 {
+    (void)(ptr);
+    (void)(size);
+
     // default to false
     return false;
 }
@@ -25,6 +28,8 @@ __nfweak int WP_ReceiveBytes(uint8_t* ptr, unsigned short* size)
 // provided as weak to be replaced by actual implementation by HAL interface
 __nfweak int WP_TransmitMessage(WP_Message* message)
 {
+    (void)(message);
+
     // default to false
     return false;
 }
@@ -33,4 +38,3 @@ __nfweak int WP_TransmitMessage(WP_Message* message)
 __nfweak void WP_CheckAvailableIncomingData()
 {
 }
-
