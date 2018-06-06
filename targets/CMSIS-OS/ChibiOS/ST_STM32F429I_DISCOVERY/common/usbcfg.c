@@ -229,25 +229,6 @@ static const USBDescriptor vcom_strings[] = {
 };
 
 
-// Create the serial number string descriptor
-void Get_SerialNum(uint8_t* pbuf)
-{
-  uint32_t deviceserial0, deviceserial1, deviceserial2;
-  
-  deviceserial0 = *(uint32_t*)DEVICE_ID1;
-  deviceserial1 = *(uint32_t*)DEVICE_ID2;
-  deviceserial2 = *(uint32_t*)DEVICE_ID3;
-  
-  deviceserial0 += deviceserial2;
-  
-  if (deviceserial0 != 0)
-  {
-    IntToUnicode(deviceserial0, pbuf, 8);
-    pbuf += 16;
-    IntToUnicode(deviceserial1, pbuf, 4);
-  }
-}
-
 // Convert Hex 32Bits value into char 
 // value: value to convert
 // pbuf: pointer to the buffer 
@@ -270,6 +251,25 @@ void IntToUnicode(uint32_t value , uint8_t *pbuf, uint8_t len)
     value = value << 4;
     
     pbuf[ 2* idx + 1] = 0;
+  }
+}
+
+// Create the serial number string descriptor
+void Get_SerialNum(uint8_t* pbuf)
+{
+  uint32_t deviceserial0, deviceserial1, deviceserial2;
+  
+  deviceserial0 = *(uint32_t*)DEVICE_ID1;
+  deviceserial1 = *(uint32_t*)DEVICE_ID2;
+  deviceserial2 = *(uint32_t*)DEVICE_ID3;
+  
+  deviceserial0 += deviceserial2;
+  
+  if (deviceserial0 != 0)
+  {
+    IntToUnicode(deviceserial0, pbuf, 8);
+    pbuf += 16;
+    IntToUnicode(deviceserial1, pbuf, 4);
   }
 }
 
@@ -297,7 +297,7 @@ static const USBDescriptor *get_descriptor(USBDriver *usbp,
       {
         // request is for serial number
         // get it from the silicon unique ID
-        Get_SerialNum(&usb_serial_number.bPropertyData[INDEX_OF_WCHAR_FOR_UNIQUE_ID]);
+        Get_SerialNum((uint8_t*)&usb_serial_number.bPropertyData[INDEX_OF_WCHAR_FOR_UNIQUE_ID]);
       }
 
       return &vcom_strings[dindex];
