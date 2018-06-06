@@ -12,17 +12,9 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 {
     { true }, // HAL_DRIVER_CONFIG_HEADER Header;
 
-    //--//
-
-    {                                               // unsigned int      DebuggerPorts[MAX_DEBUGGERS];
-        1//ConvertCOM_DebugHandle(1),
-    },
-
-    {
-        1//ConvertCOM_DebugHandle(1),
-    },
-
-    0,//ConvertCOM_DebugHandle(0),
+    1,  //ConvertCOM_DebugHandle(1),
+    1,  //ConvertCOM_DebugHandle(1),
+    0,  //ConvertCOM_DebugHandle(0),
     115200,
     0,  // STDIO = COM2 or COM1
 
