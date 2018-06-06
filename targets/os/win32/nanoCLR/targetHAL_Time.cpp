@@ -24,7 +24,7 @@ unsigned int HAL_Time_CurrentSysTicks()
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTicks();
 }
 
-int64_t HAL_Time_SysTicksToTime( unsigned int sysTicks )
+uint64_t HAL_Time_SysTicksToTime( unsigned int sysTicks )
 {
     _ASSERTE(sysTicks <= 0x7FFFFFFF);
     
@@ -34,12 +34,12 @@ int64_t HAL_Time_SysTicksToTime( unsigned int sysTicks )
     return sysTicks;
 }
        
-int64_t HAL_Time_CurrentTime()
+uint64_t HAL_Time_CurrentTime()
 {
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTime();
 }
 
-int64_t HAL_Time_CurrentDateTime(bool datePartOnly)
+uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
 {
 	if (datePartOnly)
 	{

@@ -12,16 +12,16 @@
 #include <ch.h>
 
 // Converts CMSIS sysTicks to .NET ticks (100 nanoseconds)
-int64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) 
+uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) 
 {
     // convert to microseconds from CMSIS SysTicks
     // this is a rewrite of ChibiOS TIME_I2US(n) macro because it will overflow if doing the math using uint32_t
     // need to convert from microseconds to 100 nanoseconds
-    return (((sysTicks * (int64_t)1000000) + (int64_t)CH_CFG_ST_FREQUENCY - 1) / (int64_t)CH_CFG_ST_FREQUENCY) * 10;
+    return (((sysTicks * (uint64_t)1000000) + (int64_t)CH_CFG_ST_FREQUENCY - 1) / (int64_t)CH_CFG_ST_FREQUENCY) * 10;
 }
 
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
-int64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
+uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
 #if defined(HAL_USE_RTC)
 
@@ -104,7 +104,7 @@ bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len 
     return len != 0;
 }
 
-bool DateTimeToString(const int64_t& time, char*& buf, size_t& len )
+bool DateTimeToString(const uint64_t& time, char*& buf, size_t& len )
 {
     SYSTEMTIME st;
 
@@ -113,7 +113,7 @@ bool DateTimeToString(const int64_t& time, char*& buf, size_t& len )
     return CLR_SafeSprintf(buf, len, "%4d/%02d/%02d %02d:%02d:%02d.%03d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds );
 }
 
-char* DateTimeToString(const int64_t& time)
+char* DateTimeToString(const uint64_t& time)
 {
     static char rgBuffer[128];
     char*  szBuffer =           rgBuffer;

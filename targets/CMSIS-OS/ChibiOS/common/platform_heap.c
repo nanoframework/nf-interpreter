@@ -14,5 +14,7 @@ void  platform_free(void*  ptr) {
 }
 
 void* platform_realloc(void*  ptr, size_t size) {
+    (void)size;
+
     return ptr;
 }

@@ -12,6 +12,8 @@ void CLR_RT_Random::Initialize()
 
 void CLR_RT_Random::Initialize( int seed )
 {
+    (void)seed;
+
     rngStart();
 }
 

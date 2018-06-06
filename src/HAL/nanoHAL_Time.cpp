@@ -22,7 +22,7 @@ const int CummulativeDaysForMonth[13] = {0, 31, 59, 90, 120, 151, 181, 212, 243,
 #define MINUTES_TO_HOUR             60
 #define HOURS_TO_DAY                24
 
-signed long long  HAL_Time_CurrentTime()
+uint64_t  HAL_Time_CurrentTime()
 { 
     return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() ); 
 };
@@ -30,15 +30,15 @@ signed long long  HAL_Time_CurrentTime()
 /// <summary>
 /// Converts a SYSTEMTIME value to HAL time value
 /// </summary>
-signed long long HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime)
+uint64_t HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime)
 {
-    signed long long r = YEARS_TO_DAYS(systemTime->wYear) + MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth) + systemTime->wDay - 1;
+    uint64_t r = YEARS_TO_DAYS(systemTime->wYear) + MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth) + systemTime->wDay - 1;
     r = (((( (r * HOURS_TO_DAY) + systemTime->wHour) * MINUTES_TO_HOUR + systemTime->wMinute) * SECONDS_TO_MINUTES + systemTime->wSecond ) * MILLISECONDS_TO_SECONDS + systemTime->wMilliseconds) * TIMEUNIT_TO_MILLISECONDS;
 
     return r;    
 }
 
-bool HAL_Time_ToSystemTime(signed long long time, SYSTEMTIME* systemTime)
+bool HAL_Time_ToSystemTime(uint64_t time, SYSTEMTIME* systemTime)
 {
     int ytd = 0;
     int mtd = 0;

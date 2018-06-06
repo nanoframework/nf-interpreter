@@ -7,52 +7,10 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
 
-
 // declaration for wrapper function
 extern int CLR_Messaging_ProcessPayload(WP_Message* msg);
 
-
-// Initialize to a packet sequence number impossible to encounter
-static uint32_t lastPacketSequence = 0x00FEFFFF;
-
-// defining this array here makes is local helping reduce the image size because of compiler opmitizations
-static const CommandHandlerLookup c_Lookup_Request[] =
-{
-    /*******************************************************************************************************************************************************************/
-#define DEFINE_CMD(cmd) { CLR_DBG_Commands_c_Monitor_##cmd, &Monitor_##cmd }
-    DEFINE_CMD(Ping       ),
-    // DEFINE_CMD(Reboot     ),
-    // //
-    // DEFINE_CMD(ReadMemory ),
-    // DEFINE_CMD(WriteMemory),
-    // DEFINE_CMD(CheckMemory),
-    // DEFINE_CMD(EraseMemory),
-    // //
-    // DEFINE_CMD(Execute    ),
-    // DEFINE_CMD(MemoryMap  ),
-    // //
-    // DEFINE_CMD(CheckSignature),
-    // //
-    // DEFINE_CMD(FlashSectorMap    ),
-    // DEFINE_CMD(SignatureKeyUpdate),
-    
-    DEFINE_CMD(OemInfo),
-
-#undef DEFINE_CMD
-    /*******************************************************************************************************************************************************************/
-};
-
 ////////////////////////////////////////////////////
-
-// defining this array here makes is local helping reduce the image size because of compiler opmitizations
-static const CommandHandlerLookup c_Lookup_Reply[] =
-{
-    /*******************************************************************************************************************************************************************/
-#define DEFINE_CMD(cmd) { CLR_DBG_Commands_c_Monitor_##cmd, &Monitor_##cmd }
-    DEFINE_CMD(Ping),
-#undef DEFINE_CMD
-    /*******************************************************************************************************************************************************************/
-};
 
 int WP_App_ProcessHeader(WP_Message* message)
 {

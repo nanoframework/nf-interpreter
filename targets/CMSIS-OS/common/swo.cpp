@@ -67,10 +67,12 @@ extern "C" void SwoPrintString(const char *s)
 
 // this function is heavily based in the CMSIS ITM_SendChar 
 // but with small performance improvements as we are sending a string not individual chars
-__STATIC_INLINE int GenericPort_Write_CMSIS( int portNum, const char* data, size_t size )
+__STATIC_INLINE uint32_t GenericPort_Write_CMSIS(int portNum, const char* data, size_t size)
 {
+    (void)portNum;
+
     char* p = (char*)data;
-    int counter = 0;
+    uint32_t counter = 0;
 
     // check if ITM port is enabled before start sending
     if (((ITM->TCR & ITM_TCR_ITMENA_Msk) != 0UL) &&      /* ITM enabled */
@@ -89,9 +91,11 @@ __STATIC_INLINE int GenericPort_Write_CMSIS( int portNum, const char* data, size
             counter++;
         }
     }
+
+    return counter;
 }
 
-int GenericPort_Write( int portNum, const char* data, size_t size )
+uint32_t GenericPort_Write(int portNum, const char* data, size_t size)
 {
     return GenericPort_Write_CMSIS(portNum, data, size);
 }

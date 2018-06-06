@@ -15,7 +15,7 @@ void*  nextEventCallbackDummyArg = NULL;
 
 static void NextEventTimer_Callback( void* arg )
 {
-    (bool*)arg;
+    (void)arg;
 
     // this call also schedules the next one, if there is one
     HAL_COMPLETION::DequeueAndExec();

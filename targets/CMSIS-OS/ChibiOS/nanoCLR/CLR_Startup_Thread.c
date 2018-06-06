@@ -18,6 +18,7 @@
 __attribute__((noreturn))
 void CLRStartupThread(void const * argument)
 {
+  (void)argument;
 
   #if (HAL_USE_STM32_CRC == TRUE)
   // startup crc
