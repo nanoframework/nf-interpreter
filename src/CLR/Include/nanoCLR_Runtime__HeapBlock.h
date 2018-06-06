@@ -6,11 +6,6 @@
 #ifndef _NANOCLR_RUNTIME__HEAPBLOCK_H_
 #define _NANOCLR_RUNTIME__HEAPBLOCK_H_
 
-#ifdef __arm__
-// ARM compiler does not allow anonymous structs by default
-#pragma anon_unions
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define CLR_RT_HEAPBLOCK_RAW_ID( dataType, flags, size ) ( (dataType & 0x000000FF) | ((flags & 0x000000FF) << 8) | ((size & 0x0000FFFF) << 16))
