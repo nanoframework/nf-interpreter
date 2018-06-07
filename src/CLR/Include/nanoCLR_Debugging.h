@@ -505,7 +505,7 @@ struct CLR_DBG_Commands
 
         static const CLR_UINT16 c_STEP               = c_STEP_IN | c_STEP_OVER | c_STEP_OUT;
 
-        static const CLR_UINT32 c_PID_ANY            = 0xFFFFFFFF;
+        static const CLR_INT32 c_PID_ANY             = 0x7FFFFFFF;
 
         static const CLR_UINT32 c_DEPTH_EXCEPTION_FIRST_CHANCE    = 0x00000000;
         static const CLR_UINT32 c_DEPTH_EXCEPTION_USERS_CHANCE    = 0x00000001;
@@ -525,7 +525,7 @@ struct CLR_DBG_Commands
         CLR_UINT16             m_id;
         CLR_UINT16             m_flags;
 
-        CLR_UINT32             m_pid;
+        CLR_INT32              m_pid;
         CLR_UINT32             m_depth;
 
         //
