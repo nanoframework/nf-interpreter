@@ -1034,9 +1034,9 @@ private:
     CLR_RT_AppDomain*  GetAppDomainFromID ( CLR_UINT32 id );
 #endif
 
-    CLR_RT_StackFrame* CheckStackFrame    ( CLR_UINT32 pid, CLR_UINT32 depth, bool& isInline                                        );
+    CLR_RT_StackFrame* CheckStackFrame    ( CLR_INT32 pid, CLR_UINT32 depth, bool& isInline                                        );
     HRESULT            CreateListOfThreads(                 CLR_DBG_Commands::Debugging_Thread_List ::Reply*& cmdReply, int& totLen );
-    HRESULT            CreateListOfCalls  ( CLR_UINT32 pid, CLR_DBG_Commands::Debugging_Thread_Stack::Reply*& cmdReply, int& totLen );
+    HRESULT            CreateListOfCalls  ( CLR_INT32 pid, CLR_DBG_Commands::Debugging_Thread_Stack::Reply*& cmdReply, int& totLen );
 
     CLR_RT_Assembly*   IsGoodAssembly( CLR_IDX                       idxAssm                                  );
     bool               CheckTypeDef  ( const CLR_RT_TypeDef_Index&   td     , CLR_RT_TypeDef_Instance&   inst );
@@ -1052,7 +1052,7 @@ private:
 
        
 public:  
-    static CLR_RT_Thread* GetThreadFromPid ( CLR_UINT32 pid );
+    static CLR_RT_Thread* GetThreadFromPid ( CLR_INT32 pid );
 
     static bool Monitor_Ping                            ( WP_Message* msg );
     static bool Monitor_Reboot                          ( WP_Message* msg );

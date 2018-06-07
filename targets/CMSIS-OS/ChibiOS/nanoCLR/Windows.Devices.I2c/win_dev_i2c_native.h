@@ -46,7 +46,7 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice
 
     //--//
     static void GetI2cConfig(CLR_RT_HeapBlock* managedConfig, I2CConfig* llConfig);
-    static bool IsLongRunningOperation(int writeSize, int readSize, float byteTime, int& estimatedDurationMiliseconds);
+    static bool IsLongRunningOperation(uint16_t writeSize, uint16_t readSize, float byteTime, uint32_t& estimatedDurationMiliseconds);
 };
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult

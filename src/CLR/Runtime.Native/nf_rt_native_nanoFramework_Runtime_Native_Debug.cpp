@@ -43,9 +43,11 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::EnableGCMessage
 
     NANOCLR_HEADER();
 
-#if defined(NANOCLR_TRACE_MEMORY_STATS)
+  #if defined(NANOCLR_TRACE_MEMORY_STATS)
     s_CLR_RT_fTrace_MemoryStats = stack.Arg0().NumericByRefConst().u1 != 0 ? c_CLR_RT_Trace_Info : c_CLR_RT_Trace_None;
-#endif
+  #else
+    (void)stack;
+  #endif
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }

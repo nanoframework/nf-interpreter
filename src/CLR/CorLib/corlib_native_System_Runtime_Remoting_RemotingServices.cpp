@@ -11,12 +11,12 @@ HRESULT Library_corlib_native_System_Runtime_Remoting_RemotingServices::IsTransp
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock& obj    = stack.Arg0();
     bool              fProxy = false;    
 
-#if defined(NANOCLR_APPDOMAINS)
+  #if defined(NANOCLR_APPDOMAINS)
+    CLR_RT_HeapBlock& obj    = stack.Arg0();
     fProxy = obj.IsTransparentProxy();
-#endif
+  #endif
 
     stack.SetResult_Boolean( fProxy );
 

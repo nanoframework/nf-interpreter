@@ -824,7 +824,7 @@ int Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetAlternateFunction 
 
 PWMDriver * Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetDriver(int timerId)
 {
-    PWMDriver * _drv;
+    PWMDriver * _drv = NULL;
 
     switch (timerId)
         {
@@ -938,14 +938,18 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeStop___VOID
 
 HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+
     NANOCLR_HEADER();
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+
     NANOCLR_HEADER();
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }

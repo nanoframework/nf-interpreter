@@ -363,10 +363,14 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
             {
                 switch(ptr->DataType())
                 {
-                case DATATYPE_BYREF:
-                case DATATYPE_ARRAY_BYREF:
-                    res.m_fByRef = true;
-                    break;
+                    case DATATYPE_BYREF:
+                    case DATATYPE_ARRAY_BYREF:
+                        res.m_fByRef = true;
+                        break;
+
+                    default:
+                        // the remaining data types aren't to be handled
+                        break;
                 }
 
                 NANOCLR_CHECK_HRESULT(desc.InitializeFromObject( *ptr ));
@@ -694,18 +698,22 @@ bool CLR_RT_TypeDef_Instance::ResolveToken( CLR_UINT32 tk, CLR_RT_Assembly* assm
 
         switch( CLR_TypeFromTk( tk ) )
         {
-        case TBL_TypeRef:
-            m_data   = assm->m_pCrossReference_TypeRef[ idx ].m_target.m_data;
-            m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
-            m_target = m_assm->GetTypeDef              ( Type    ()   );
-            return true;
+            case TBL_TypeRef:
+                m_data   = assm->m_pCrossReference_TypeRef[ idx ].m_target.m_data;
+                m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
+                m_target = m_assm->GetTypeDef              ( Type    ()   );
+                return true;
 
-        case TBL_TypeDef:
-            Set( assm->m_idx, idx );
+            case TBL_TypeDef:
+                Set( assm->m_idx, idx );
 
-            m_assm   = assm;
-            m_target = assm->GetTypeDef( idx );
-            return true;
+                m_assm   = assm;
+                m_target = assm->GetTypeDef( idx );
+                return true;
+
+            default:
+                // the remaining data types aren't to be handled
+                break;
         }
     }
 
@@ -793,18 +801,22 @@ bool CLR_RT_FieldDef_Instance::ResolveToken( CLR_UINT32 tk, CLR_RT_Assembly* ass
 
         switch(CLR_TypeFromTk( tk ))
         {
-        case TBL_FieldRef:
-            m_data   = assm->m_pCrossReference_FieldRef[ idx ].m_target.m_data;
-            m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
-            m_target = m_assm->GetFieldDef             ( Field   ()   );
-            return true;
+            case TBL_FieldRef:
+                m_data   = assm->m_pCrossReference_FieldRef[ idx ].m_target.m_data;
+                m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
+                m_target = m_assm->GetFieldDef             ( Field   ()   );
+                return true;
 
-        case TBL_FieldDef:
-            Set( assm->m_idx, idx );
+            case TBL_FieldDef:
+                Set( assm->m_idx, idx );
 
-            m_assm   = assm;
-            m_target = m_assm->GetFieldDef( idx );
-            return true;
+                m_assm   = assm;
+                m_target = m_assm->GetFieldDef( idx );
+                return true;
+
+            default:
+                // the remaining data types aren't to be handled
+                break;
         }
     }
 
@@ -852,18 +864,22 @@ bool CLR_RT_MethodDef_Instance::ResolveToken( CLR_UINT32 tk, CLR_RT_Assembly* as
 
         switch(CLR_TypeFromTk( tk ))
         {
-        case TBL_MethodRef:
-            m_data   = assm->m_pCrossReference_MethodRef[ idx ].m_target.m_data;
-            m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
-            m_target = m_assm->GetMethodDef            ( Method  ()   );
-            return true;
+            case TBL_MethodRef:
+                m_data   = assm->m_pCrossReference_MethodRef[ idx ].m_target.m_data;
+                m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
+                m_target = m_assm->GetMethodDef            ( Method  ()   );
+                return true;
 
-        case TBL_MethodDef:
-            Set( assm->m_idx, idx );
+            case TBL_MethodDef:
+                Set( assm->m_idx, idx );
 
-            m_assm   = assm;
-            m_target = m_assm->GetMethodDef( idx );
-            return true;
+                m_assm   = assm;
+                m_target = m_assm->GetMethodDef( idx );
+                return true;
+
+            default:
+                // the remaining data types aren't to be handled
+                break;
         }
     }
 
@@ -1119,8 +1135,6 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject( const CLR_RT_HeapBlock& ref
 
         case DATATYPE_WEAKCLASS:
             {
-                CLR_RT_HeapBlock_WeakReference* weak = (CLR_RT_HeapBlock_WeakReference*)obj;
-
                 cls = &g_CLR_RT_WellKnownTypes.m_WeakReference;
             }
             break;
@@ -1531,7 +1545,7 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
     // Compute overall size for assembly data structure.
     //
     {
-        for(int i=0; i<ARRAYSIZE(skeleton->m_pTablesSize)-1; i++)
+        for(uint32_t i = 0; i<ARRAYSIZE(skeleton->m_pTablesSize)-1; i++)
         {
             skeleton->m_pTablesSize[ i ]  = header->SizeOfTable    ( (CLR_TABLESENUM)i );
         }
@@ -3096,12 +3110,10 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
 
                     hash = ComputeHashForType(  res.m_dt, hash );
 
-                    switch(res.m_dt)
+                    if( (res.m_dt == DATATYPE_VALUETYPE) ||
+                        (res.m_dt == DATATYPE_CLASS))
                     {
-                    case DATATYPE_VALUETYPE:
-                    case DATATYPE_CLASS    :
                         hash = ComputeHashForName( res.m_cls, hash );
-                        break;
                     }
 
                     const char* fieldName = inst.m_assm->GetString( fd->name );
@@ -3321,6 +3333,10 @@ bool CLR_RT_TypeSystem::FindTypeDef( CLR_UINT32 hash, CLR_RT_TypeDef_Index& res 
 
 bool CLR_RT_TypeSystem::FindTypeDef( const char* szClass, CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res )
 {
+    (void)szClass;
+    (void)assm;
+    (void)res;
+
     NATIVE_PROFILE_CLR_CORE();
     // UNDONE: FIXME
     // char rgName     [ MAXTYPENAMELEN ];
@@ -3408,6 +3424,10 @@ bool CLR_RT_TypeSystem::FindTypeDef( const char* szClass, CLR_RT_Assembly* assm,
 
 bool CLR_RT_TypeSystem::FindTypeDef( const char* szClass, CLR_RT_Assembly* assm, CLR_RT_ReflectionDef_Index& reflex )
 {
+    (void)szClass;
+    (void)assm;
+    (void)reflex;
+
     NATIVE_PROFILE_CLR_CORE();
 
     // UNDONE: FIXME

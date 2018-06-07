@@ -606,13 +606,15 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
             //Main entrypoint takes an optional String[] parameter.
             //Set the arg to NULL, if that's the case.
 
-#if defined(WIN32)
+  #if defined(WIN32)
             if(entryPointArgs != NULL)
             {
                 NANOCLR_CHECK_HRESULT(CreateEntryPointArgs( stack->m_arguments[ 0 ], entryPointArgs ));
             }
             else
-#endif
+  #else
+            (void)entryPointArgs;
+  #endif
             {
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( stack->m_arguments[ 0 ], 0, g_CLR_RT_WellKnownTypes.m_String ));
             }
@@ -751,6 +753,8 @@ void CLR_RT_ExecutionEngine::SpawnTimer()
 
 void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback( void* arg )
 {
+    (void)arg;
+
     NATIVE_PROFILE_CLR_CORE();
     g_CLR_RT_ExecutionEngine.SpawnStaticConstructor( g_CLR_RT_ExecutionEngine.m_cctorThread );
 }
@@ -965,6 +969,8 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
 
 void CLR_RT_ExecutionEngine::FinalizerTerminationCallback(void* arg)
 {
+    (void)arg;
+
     NATIVE_PROFILE_CLR_CORE();
     g_CLR_RT_ExecutionEngine.SpawnFinalizer();
 }
@@ -2255,6 +2261,10 @@ CLR_RT_HeapBlock_Lock* CLR_RT_ExecutionEngine::FindLockObject( CLR_RT_HeapBlock&
                 case DATATYPE_VALUETYPE:
                 case DATATYPE_CLASS    :
                     return ptr->ObjectLock();
+
+                default:
+                    // the remaining data types aren't to be handled
+                    break;  
             }
         }
     }
@@ -2408,7 +2418,7 @@ bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if(timeExpire <= HAL_Time_CurrentTime()) return true;
+    if(timeExpire <= (CLR_INT64)HAL_Time_CurrentTime()) return true;
 
     CLR_INT64 diff = timeExpire - HAL_Time_CurrentTime();
 
@@ -2446,9 +2456,10 @@ void CLR_RT_ExecutionEngine::CheckTimers( CLR_INT64& timeoutMin )
             CLR_INT64 expire = timer->m_timeExpire;
             if(IsTimeExpired( expire, timeoutMin ))
             {
-#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+                
+          #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                 if(CLR_EE_DBG_IS_NOT( PauseTimers ))
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+          #endif
                 {
                     timer->Trigger();
                     fAnyTimersExpired = true;
@@ -2635,7 +2646,7 @@ HRESULT CLR_RT_ExecutionEngine::WaitEvents( CLR_RT_Thread* caller, const CLR_INT
     {
         fSuccess = false;
 
-        if(HAL_Time_CurrentTime() < timeExpire)
+        if((CLR_INT64)HAL_Time_CurrentTime() < timeExpire)
         {
             caller->m_waitForEvents         = events;
             caller->m_waitForEvents_Timeout = timeExpire; CLR_RT_ExecutionEngine::InvalidateTimerCache();
@@ -3040,7 +3051,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_System_Event( CLR_DBG_Commands::Debuggin
             th = stack->m_owningThread;
         }
 
-        if(th == NULL || def.m_pid == th->m_pid || def.m_pid == CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_PID_ANY)
+        if(th == NULL || (def.m_pid == th->m_pid) || def.m_pid == CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_PID_ANY)
         {
             if(def.m_flags & event)
             {

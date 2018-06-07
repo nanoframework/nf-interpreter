@@ -121,11 +121,15 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements( int index, int length )
 
         switch(dt)
         {
-        case DATATYPE_VALUETYPE:
-        case DATATYPE_CLASS:
-        case DATATYPE_WEAKCLASS:
-            dt = DATATYPE_OBJECT;
-            break;
+            case DATATYPE_VALUETYPE:
+            case DATATYPE_CLASS:
+            case DATATYPE_WEAKCLASS:
+                dt = DATATYPE_OBJECT;
+                break;
+
+            default:
+                // the remaining data types aren't to be handled
+                break;
         }
 
         while(length > 0)

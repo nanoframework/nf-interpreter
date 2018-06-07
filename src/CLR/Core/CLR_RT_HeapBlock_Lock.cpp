@@ -39,6 +39,10 @@ HRESULT CLR_RT_HeapBlock_Lock::CreateInstance( CLR_RT_HeapBlock_Lock*& lock, CLR
                 case DATATYPE_CLASS    :
                     ptr->SetObjectLock( lock );
                     break;
+                
+                default:
+                    // the remaining data types aren't to be handled
+                    break;
             }
         }
     }
@@ -125,6 +129,10 @@ void CLR_RT_HeapBlock_Lock::ChangeOwner()
                 case DATATYPE_CLASS    :
                     ptr->SetObjectLock( NULL );
                     break;
+                
+                default:
+                    // the remaining data types aren't to be handled
+                    break;                    
             }
         }
     }

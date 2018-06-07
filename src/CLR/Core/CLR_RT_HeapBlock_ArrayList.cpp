@@ -150,13 +150,13 @@ HRESULT CLR_RT_HeapBlock_ArrayList::RemoveAt( CLR_INT32 index )
 }
 
 // May Trigger GC
-HRESULT CLR_RT_HeapBlock_ArrayList::SetCapacity( CLR_INT32 newCapacity )
+HRESULT CLR_RT_HeapBlock_ArrayList::SetCapacity( CLR_UINT32 newCapacity )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* items = GetItems();
-    CLR_INT32               size  = GetSize();
+    CLR_UINT32               size  = GetSize();
 
     if(newCapacity != items->m_numOfElements) // if capacity is changing
     {

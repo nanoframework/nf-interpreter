@@ -138,7 +138,7 @@ static void SpiCallback(SPIDriver *spip)
 uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRate(uint8_t busIndex, int32_t requestedFrequency, int32_t& actualFrequency)
 {
     uint16_t divider = 0;
-    uint32_t maxSpiFrequency;
+    int32_t maxSpiFrequency;
 
   #if defined(STM32F0xx_MCUCONF)
 
@@ -312,7 +312,7 @@ void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int 
 }
 
 // estimate the time required to perform the SPI transaction
-bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::IsLongRunningOperation(int writeSize, int readSize, bool bufferIs16bits, float byteTime, int& estimatedDurationMiliseconds)
+bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::IsLongRunningOperation(uint32_t writeSize, uint32_t readSize, bool bufferIs16bits, float byteTime, uint32_t& estimatedDurationMiliseconds)
 {
     if(bufferIs16bits)
     {
@@ -351,13 +351,12 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         NF_PAL_SPI* palSpi;
         uint8_t busIndex;
         bool fullDuplex;
-        bool databitLengthIs16;
         bool isLongRunningOperation = false;
 
         CLR_RT_HeapBlock    hbTimeout;
         CLR_INT64*          timeout;
         bool                eventResult = true;
-        int                 estimatedDurationMiliseconds;
+        uint32_t            estimatedDurationMiliseconds;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -428,7 +427,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         }
 
         // check if this is a long running operation
-        isLongRunningOperation = IsLongRunningOperation(palSpi->WriteSize, palSpi->ReadSize, bufferIs16bits, palSpi->ByteTime, (int&)estimatedDurationMiliseconds);
+        isLongRunningOperation = IsLongRunningOperation(palSpi->WriteSize, palSpi->ReadSize, bufferIs16bits, palSpi->ByteTime, (uint32_t&)estimatedDurationMiliseconds);
 
         if(isLongRunningOperation)
         {
@@ -754,11 +753,13 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
 
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+
     NANOCLR_HEADER();
     {
 
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
@@ -794,5 +795,5 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetDeviceSelec
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
        stack.SetResult_String(deviceSelectorString);
    }
-   NANOCLR_NOCLEANUP();
+   NANOCLR_NOCLEANUP_NOLABEL();
 }

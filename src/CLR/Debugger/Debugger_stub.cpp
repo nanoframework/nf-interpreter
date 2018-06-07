@@ -35,6 +35,11 @@ __nfweak HRESULT CLR_DBG_Debugger::DeleteInstance()
 
 __nfweak void CLR_DBG_Debugger::BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags )
 {
+    (void)cmd;
+    (void)payloadSize;
+    (void)payload;
+    (void)flags;
+
     NATIVE_PROFILE_CLR_DEBUGGER();
 }
 

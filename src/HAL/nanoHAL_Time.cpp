@@ -40,8 +40,8 @@ uint64_t HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime)
 
 bool HAL_Time_ToSystemTime(uint64_t time, SYSTEMTIME* systemTime)
 {
-    int ytd = 0;
-    int mtd = 0;
+    uint32_t ytd = 0;
+    uint32_t mtd = 0;
     
     time /= TIMEUNIT_TO_MILLISECONDS;
     systemTime->wMilliseconds = time % MILLISECONDS_TO_SECONDS;

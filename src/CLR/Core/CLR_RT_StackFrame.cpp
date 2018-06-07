@@ -64,7 +64,16 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
         if(memorySize  < c_MinimumStack) memorySize  = c_MinimumStack;
 #endif
 
+    #ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Winvalid-offsetof"
+    #endif
+
         memorySize += CONVERTFROMSIZETOHEAPBLOCKS(offsetof(CLR_RT_StackFrame,m_extension));
+
+    #ifdef __GNUC__
+    #pragma GCC diagnostic pop
+    #endif
 
         stack = EVENTCACHE_EXTRACT_NODE_AS_BLOCKS(g_CLR_RT_EventCache,CLR_RT_StackFrame,DATATYPE_STACK_FRAME,0,memorySize); CHECK_ALLOCATION(stack);
     }

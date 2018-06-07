@@ -68,7 +68,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        if(adcDefinition.portId != NULL && adcDefinition.pin != NULL)
+        if(adcDefinition.portId != NULL)
         {
             palSetGroupMode(adcDefinition.portId, PAL_PORT_BIT(adcDefinition.pin), 0, PAL_MODE_INPUT_ANALOG);
         }
@@ -113,7 +113,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetM
         // Currently fixed at 12 bit so return 4095 = ((2^12) - 1)
         stack.SetResult_I4(4095);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetMinValue___I4( CLR_RT_StackFrame& stack )
@@ -122,7 +122,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetM
 
     stack.SetResult_I4(0);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeIsChannelModeSupported___BOOLEAN__I4( CLR_RT_StackFrame& stack )
@@ -135,7 +135,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeIsCh
         stack.SetResult_Boolean( (mode == (int)AdcChannelMode::SingleEnded) ) ;
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetResolutionInBits___I4( CLR_RT_StackFrame& stack )
@@ -145,7 +145,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetR
         // Fixed at 12 bit
         stack.SetResult_I4(12);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit___VOID( CLR_RT_StackFrame& stack )
@@ -177,5 +177,5 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::GetDeviceS
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
        stack.SetResult_String("ADC1");
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
