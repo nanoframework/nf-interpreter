@@ -297,7 +297,7 @@ HRESULT Library_corlib_native_System_Math::Truncate___STATIC__R8__R8( CLR_RT_Sta
     double res = 0.0;
     double retVal = System::Math::Truncate(d, res);
 
-    stack.SetResult_R8( res );
+    stack.SetResult_R8( retVal );
 
     NANOCLR_NOCLEANUP_NOLABEL();
 
