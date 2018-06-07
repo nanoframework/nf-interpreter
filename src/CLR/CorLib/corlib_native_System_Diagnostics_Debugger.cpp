@@ -42,7 +42,7 @@ HRESULT Library_corlib_native_System_Diagnostics_Debugger::Break___STATIC__VOID(
     NANOCLR_NOCLEANUP();
     
 #else
-
+    (void)stack;
     NANOCLR_NOCLEANUP_NOLABEL();
 
 #endif
