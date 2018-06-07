@@ -220,7 +220,7 @@ struct Settings
             assm->m_flags |= CLR_RT_Assembly::Deployed;
         }
                 
-        NANOCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP_NOLABEL();
     }
 
     HRESULT LoadDeploymentAssemblies()

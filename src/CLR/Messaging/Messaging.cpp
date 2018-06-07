@@ -9,15 +9,6 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-#if 0
-#define TRACE0( msg, ...) debug_printf( msg ) 
-#define TRACE( msg, ...) debug_printf( msg, __VA_ARGS__ ) 
-#else
-#define TRACE0(msg,...)
-#define TRACE(msg,...)
-#endif
-
 // the Arm 3.0 compiler drags in a bunch of ABI methods (for initialization) if struct arrays are not initialized
 CLR_UINT32     g_scratchMessaging[ sizeof(CLR_Messaging) ];
 CLR_Messaging *g_CLR_Messaging;
@@ -124,6 +115,8 @@ bool CLR_Messaging::Messaging_Send( WP_Message* msg )
 
 bool CLR_Messaging::Messaging_Send__Reply( WP_Message* msg )
 {
+    (void)msg;
+
     NATIVE_PROFILE_CLR_MESSAGING();
     //
     // retransmission support is currently not implemented
@@ -155,6 +148,8 @@ bool CLR_Messaging::Messaging_Reply( WP_Message* msg )
 
 bool CLR_Messaging::Messaging_Reply__Reply( WP_Message* msg )
 {
+    (void)msg;
+
     NATIVE_PROFILE_CLR_MESSAGING();
     //
     // retransmission support  is currently not implemented
@@ -241,6 +236,8 @@ bool CLR_Messaging::App_ProcessPayload( void* state, WP_Message* msg )
 
 bool CLR_Messaging::App_Release( void* state, WP_Message* msg )
 {
+    (void)state;
+
     NATIVE_PROFILE_CLR_MESSAGING();
     if(msg->m_payload != NULL)
     {
@@ -381,6 +378,8 @@ void CLR_Messaging::Cleanup()
 
 bool CLR_Messaging::ProcessHeader( WP_Message* msg )
 {
+    (void)msg;
+
     NATIVE_PROFILE_CLR_MESSAGING();
     TRACE("MSG: 0x%08X\n", msg->m_header.m_cmd );
     return true;
@@ -517,7 +516,7 @@ bool CLR_Messaging::TransmitMessage( const WP_Message* msg, bool fQueue )
 {
     NATIVE_PROFILE_CLR_MESSAGING();
 
-    unsigned int payloadSize;
+    int payloadSize;
     unsigned int flags;
 
     payloadSize = msg->m_header.m_size;

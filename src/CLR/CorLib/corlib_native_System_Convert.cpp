@@ -22,7 +22,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
 
         stack.SetResult_I8 ((_result > _maxValue || _result < _minValue) ? _zero : _result);
 	}
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING( CLR_RT_StackFrame& stack )
@@ -33,7 +33,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
 
         stack.SetResult_R8 (strtod(_string, nullptr));
 	}
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN( CLR_RT_StackFrame& stack )

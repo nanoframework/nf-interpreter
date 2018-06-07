@@ -96,7 +96,6 @@ HRESULT Library_corlib_native_System_TimeSpan::CompareTo___I4__OBJECT( CLR_RT_St
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock* pLeft  = stack.This();
     CLR_RT_HeapBlock* pRight = stack.Arg1().Dereference();
 
     if(pRight)

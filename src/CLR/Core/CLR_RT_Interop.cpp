@@ -154,6 +154,11 @@ HRESULT Interop_Marshal_LPCSTR( const CLR_RT_StackFrame &stackFrame, unsigned in
     NANOCLR_NOCLEANUP();
 }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 // For unsupported types we set param to zero and always return S_OK.
 HRESULT Interop_Marshal_UNSUPPORTED_TYPE( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, UNSUPPORTED_TYPE &param )
 {
@@ -161,6 +166,10 @@ HRESULT Interop_Marshal_UNSUPPORTED_TYPE( const CLR_RT_StackFrame &stackFrame, u
     param = NULL;
     return S_OK;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #undef NANOCLR_INTEROP_CHECK_ARG_TYPE
 /**********************************************************************
@@ -749,10 +758,17 @@ signed __int64 &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, unsign
 #pragma push
 #pragma diag_suppress 284
 #endif
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 UNSUPPORTED_TYPE &Interop_Marshal_GetField_UNSUPPORTED_TYPE( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (UNSUPPORTED_TYPE &)(*((UNSUPPORTED_TYPE *)NULL));
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 #if defined(__arm)
 #pragma pop
 #endif

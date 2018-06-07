@@ -473,8 +473,8 @@ CLR_RT_HeapBlock* CLR_RT_EventCache::Extract_Node_Slow( CLR_UINT32 dataType, CLR
         {
             CLR_RT_HeapBlock_Node* next = &ptr[ blocks ];
 
-            ptr->SetDataId ( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_CACHEDBLOCK,CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event,           blocks) );
-            next->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_CACHEDBLOCK,CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event,bestSize - blocks) );
+            ptr->SetDataId ( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_CACHEDBLOCK, (CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event),             blocks)  );
+            next->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_CACHEDBLOCK, (CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event), (bestSize - blocks)) );
             next->ClearData();
 
             Append_Node( next );

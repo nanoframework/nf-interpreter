@@ -236,6 +236,8 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+
     NANOCLR_HEADER();
     {
 
@@ -265,7 +267,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     #endif
 
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
@@ -600,7 +602,6 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NF_PAL_UART* palUart;
 
     size_t length = 0;
-    size_t totalTxlength = 0;
 
     CLR_RT_HeapBlock* writeTimeout;
     int64_t*  timeoutTicks;
@@ -1000,5 +1001,5 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
        stack.SetResult_String(deviceSelectorString);
    }
-   NANOCLR_NOCLEANUP();
+   NANOCLR_NOCLEANUP_NOLABEL();
 }

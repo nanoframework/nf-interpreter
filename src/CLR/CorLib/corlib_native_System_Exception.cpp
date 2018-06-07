@@ -141,7 +141,7 @@ HRESULT Library_corlib_native_System_Exception::CreateInstance( CLR_RT_HeapBlock
 
     _ASSERTE(FAILED(hrIn));
 
-    for(int i = 0; i < ARRAYSIZE(c_ExceptionLookup); i++)
+    for(uint32_t i = 0; i < ARRAYSIZE(c_ExceptionLookup); i++)
     {
         if(c_ExceptionLookup[ i ].hr == hrIn)
         {

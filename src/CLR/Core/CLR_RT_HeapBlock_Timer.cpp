@@ -143,7 +143,7 @@ void CLR_RT_HeapBlock_Timer::Reschedule()
     if((m_flags & CLR_RT_HeapBlock_Timer::c_Recurring   ) &&
        (m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)  )
     {
-        CLR_INT64 expire = m_timeLastExpiration + m_timeFrequency;
+        CLR_UINT64 expire = m_timeLastExpiration + m_timeFrequency;
 
         //
         // Normally, adding the 'timeFrequency' will put the expiration in the future.
