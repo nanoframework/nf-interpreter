@@ -149,7 +149,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
 {
     NANOCLR_HEADER();
     {
-        NF_PAL_I2C* palI2c;
+        NF_PAL_I2C* palI2c = NULL;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -245,7 +245,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
     NANOCLR_HEADER();
     {
         uint8_t busIndex;
-        NF_PAL_I2C* palI2c;
+        NF_PAL_I2C* palI2c = NULL;
         bool isLongRunningOperation = false;
         msg_t transactionResult = MSG_OK;
 
