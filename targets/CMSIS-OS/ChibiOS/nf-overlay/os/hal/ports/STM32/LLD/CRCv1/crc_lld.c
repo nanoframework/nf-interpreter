@@ -130,7 +130,7 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
 
     int32_t index = 0U;
     uint32_t arg1;
-    uint32_t crc;
+    uint32_t crc = 0;
 
     // anything to do here?
     if(size == 0)
@@ -140,7 +140,6 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
 
     // get pointer to buffer
     uint8_t* ptr = (uint8_t*)buffer;
-    uint16_t* ptr16 = (uint16_t*)buffer;
 
 #if defined(STM32F1XX) || defined(STM32L1XX) || defined(STM32F2XX) || defined(STM32F4XX)
     uint32_t size_remainder = 0;
@@ -199,6 +198,7 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
     }
 
 #else
+    uint16_t* ptr16 = (uint16_t*)buffer;
     
     // need to reset CRC peripheral if:
     // - CRC initial value is 0 
