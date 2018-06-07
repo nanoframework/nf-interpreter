@@ -45,7 +45,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
 
         // we are filling this bellow with the appropriate ADC port pin config and ADC driver
         NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
-        ADCDriver* adcDriver;
+        ADCDriver* adcDriver = NULL;
 
         // only one ADC controller for now, but check it anyways
         if(deviceId == 1)

@@ -69,7 +69,7 @@ static void SpiCallback(SPIDriver *spip)
 
     NATIVE_INTERRUPT_START
 
-    NF_PAL_SPI* palSpi;
+    NF_PAL_SPI* palSpi = NULL;
 
   #if STM32_SPI_USE_SPI1
     if (spip == &SPID1)
@@ -348,7 +348,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 {
     NANOCLR_HEADER();
     {
-        NF_PAL_SPI* palSpi;
+        NF_PAL_SPI* palSpi = NULL;
         uint8_t busIndex;
         bool fullDuplex;
         bool isLongRunningOperation = false;
@@ -665,7 +665,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
 {
     NANOCLR_HEADER();
     {
-        NF_PAL_SPI* palSpi;
+        NF_PAL_SPI* palSpi = NULL;
         int32_t actualFrequency;
         
         // get a pointer to the managed object instance and check that it's not NULL
