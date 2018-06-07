@@ -359,7 +359,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 {
     NANOCLR_HEADER();
     {
-        NF_PAL_UART* palUart;
+        NF_PAL_UART* palUart = NULL;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -499,7 +499,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 {
     NANOCLR_HEADER();
     {
-        NF_PAL_UART* palUart;
+        NF_PAL_UART* palUart = NULL;
 
         uint8_t* data;
         unsigned int length = 0;
@@ -599,7 +599,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART* palUart;
+    NF_PAL_UART* palUart = NULL;
 
     size_t length = 0;
 
@@ -757,7 +757,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array* dataBuffer;
-    NF_PAL_UART* palUart;
+    NF_PAL_UART* palUart = NULL;
 
     uint8_t* data;
     size_t dataLength = 0;
