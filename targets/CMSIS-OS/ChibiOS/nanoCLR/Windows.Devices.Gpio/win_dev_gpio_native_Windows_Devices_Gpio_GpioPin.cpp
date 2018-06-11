@@ -208,6 +208,9 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
             (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
         {
             palToggleLine(ioLine);
+
+            // store new state
+            pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = (GpioPinValue)(GpioPinValue_High ^ (GpioPinValue)pThis[ FIELD___lastOutputValue ].NumericByRef().s4);
         }
 
     }
@@ -401,6 +404,9 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
             (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
         {
             palWriteLine(ioLine, state);
+
+            // update the managed field _lastOutputValue
+            pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = state;
         }
         else
         {
