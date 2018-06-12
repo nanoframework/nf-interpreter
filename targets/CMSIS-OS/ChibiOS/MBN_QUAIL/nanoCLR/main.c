@@ -18,7 +18,7 @@
 #include <targetPAL.h>
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 3072, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 4096, "ReceiverThread");
 // declare CLRStartup thread here 
 osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread"); 
 
