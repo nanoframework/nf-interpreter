@@ -694,6 +694,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_String::ToLower___STRING,
     Library_corlib_native_System_String::ToUpper___STRING,
     Library_corlib_native_System_String::Trim___STRING,
+    NULL,
+    NULL,
     Library_corlib_native_System_String::Equals___STATIC__BOOLEAN__STRING__STRING,
     Library_corlib_native_System_String::op_Equality___STATIC__BOOLEAN__STRING__STRING,
     Library_corlib_native_System_String::op_Inequality___STATIC__BOOLEAN__STRING__STRING,
@@ -706,6 +708,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_String::Concat___STATIC__STRING__STRING__STRING__STRING,
     Library_corlib_native_System_String::Concat___STATIC__STRING__STRING__STRING__STRING__STRING,
     Library_corlib_native_System_String::Concat___STATIC__STRING__SZARRAY_STRING,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -902,7 +905,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x7207CF2D,
+    0x315C7581,
     method_lookup,
     { 1, 0, 0, 0 }
 };
