@@ -122,6 +122,13 @@ int CLR_RT_UnicodeHelper::CountNumberOfBytes( int max )
 
 //--//
 
+// dev note: need the pragma bellow because there are a couple of 'smart' hacks in
+// the switch cases to improve the algorithm
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
+
 bool CLR_RT_UnicodeHelper::ConvertFromUTF8( int iMaxChars, bool fJustMove, int iMaxBytes )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -143,14 +150,7 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8( int iMaxChars, bool fJustMove, int i
 
         switch(ch & 0xF0)
         {
-            case 0x00: 
-                if(ch == 0)
-                { 
-                    inputUTF8--; 
-                    goto ExitFalse; 
-                }
-                break;
-
+            case 0x00: if(ch == 0) { inputUTF8--; goto ExitFalse; }
             case 0x10:
             case 0x20:
             case 0x30:
@@ -310,16 +310,20 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8( int iMaxChars, bool fJustMove, int i
     res = true;
     goto Exit;
 
-ExitFalse:
+  ExitFalse:
     res = false;
 
-Exit:
+  Exit:
     m_inputUTF8        = inputUTF8;
     m_outputUTF16      = outputUTF16;
     m_outputUTF16_size = outputUTF16_size;
 
     return res;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 bool CLR_RT_UnicodeHelper::ConvertToUTF8( int iMaxChars, bool fJustMove )
 {
