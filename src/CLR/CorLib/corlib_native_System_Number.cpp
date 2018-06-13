@@ -132,7 +132,7 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
 
                 if (formatCh == 'G') 
                 {
-                    hal_snprintf( formatStr, ARRAYSIZE(formatStr), "%%.%dg", (dt == DATATYPE_R4) ? 9 : 17 ); // "%.9g" for float, "%.17g" for double
+                    hal_snprintf( formatStr, ARRAYSIZE(formatStr), "%%.%dg", (dt == DATATYPE_R4) ? 9 : 15 ); // "%.9g" for float, "%.15g" for double
                 }
                 else
                 {
