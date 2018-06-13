@@ -39,6 +39,11 @@ struct CLR_RT_DUMP
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 struct CLR_Checks
 {
     static HRESULT VerifyStackOK( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock* top, int num ) { return S_OK; }
@@ -51,7 +56,10 @@ struct CLR_Checks
     static HRESULT VerifyUnsupportedInstruction( CLR_OPCODE op         );
 };
 
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif // _NANOCLR_CHECKS_H_
-

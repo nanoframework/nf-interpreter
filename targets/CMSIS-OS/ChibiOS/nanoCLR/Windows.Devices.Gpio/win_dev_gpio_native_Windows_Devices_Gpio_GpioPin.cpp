@@ -200,8 +200,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
 
         GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
 
-        GpioPinValue state = (GpioPinValue)stack.Arg1().NumericByRef().s4;
-
         // sanity check for drive mode set to output so we don't mess up writing to an input pin
         if ((driveMode == GpioPinDriveMode_Output) ||
             (driveMode == GpioPinDriveMode_OutputOpenDrain) ||
@@ -210,6 +208,9 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
             (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
         {
             palToggleLine(ioLine);
+
+            // store new state
+            pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = (GpioPinValue)(GpioPinValue_High ^ (GpioPinValue)pThis[ FIELD___lastOutputValue ].NumericByRef().s4);
         }
 
     }
@@ -256,7 +257,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveM
         // Return value to the managed application
         stack.SetResult_Boolean( driveModeSupported ) ;
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode( CLR_RT_StackFrame& stack )
@@ -354,7 +355,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___B
 {
     NANOCLR_HEADER();
     {
-        int16_t pinNumber = stack.Arg1().NumericByRef().s4;
+        //int16_t pinNumber = stack.Arg1().NumericByRef().s4;
 
         // TODO is probably a good idea keep track of the used pins, so we can check that here
         // TODO is probably a good idea to check if this pin exists
@@ -362,16 +363,18 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___B
         // Return value to the managed application
         stack.SetResult_Boolean(true );
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebounceTimeout___VOID( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+
     NANOCLR_HEADER();
 
     // nothing to do here as the debounce timeout is grabbed from the managed object when required
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___VOID__WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )
@@ -401,6 +404,9 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
             (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
         {
             palWriteLine(ioLine, state);
+
+            // update the managed field _lastOutputValue
+            pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = state;
         }
         else
         {

@@ -102,7 +102,7 @@ int WP_App_ProcessPayload(WP_Message* message)
         if(cmd->command == message->m_header.m_cmd)
         {
             // execute command handler and save the result
-            int commandHandlerExecuteResult = ((int* (*)(WP_Message*))cmd->handler)(message);
+            int commandHandlerExecuteResult = ((int(*)(WP_Message*))cmd->handler)(message);
 
             WP_ReplyToCommand(message, commandHandlerExecuteResult, false, NULL, 0);
             return true;

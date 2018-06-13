@@ -129,7 +129,7 @@ void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetI2cConfig(CLR_
 }
 
 // estimate the time required to perform the I2C transaction
-bool Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::IsLongRunningOperation(int writeSize, int readSize, float byteTime, int& estimatedDurationMiliseconds)
+bool Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::IsLongRunningOperation(uint16_t writeSize, uint16_t readSize, float byteTime, uint32_t& estimatedDurationMiliseconds)
 {
     // add an extra byte to account for the address
     estimatedDurationMiliseconds = byteTime * (writeSize + readSize + 1);
@@ -149,7 +149,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
 {
     NANOCLR_HEADER();
     {
-        NF_PAL_I2C* palI2c;
+        NF_PAL_I2C* palI2c = NULL;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -231,10 +231,13 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
 
 HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+
     NANOCLR_HEADER();
     {
+
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit___WindowsDevicesI2cI2cTransferResult__SZARRAY_U1__SZARRAY_U1( CLR_RT_StackFrame& stack )
@@ -242,7 +245,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
     NANOCLR_HEADER();
     {
         uint8_t busIndex;
-        NF_PAL_I2C* palI2c;
+        NF_PAL_I2C* palI2c = NULL;
         bool isLongRunningOperation = false;
         msg_t transactionResult = MSG_OK;
 
@@ -321,7 +324,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         }
 
         // check if this is a long running operation
-        isLongRunningOperation = IsLongRunningOperation(palI2c->WriteSize, palI2c->ReadSize, palI2c->ByteTime, (int&)estimatedDurationMiliseconds);
+        isLongRunningOperation = IsLongRunningOperation(palI2c->WriteSize, palI2c->ReadSize, palI2c->ByteTime, (uint32_t&)estimatedDurationMiliseconds);
 
         if(isLongRunningOperation)
         {
@@ -525,5 +528,5 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetDeviceSelec
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
        stack.SetResult_String(deviceSelectorString);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }

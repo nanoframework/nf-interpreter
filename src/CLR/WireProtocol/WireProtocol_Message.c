@@ -131,11 +131,12 @@ void WP_Message_Release(WP_Message* message)
 
 int WP_Message_VerifyHeader(WP_Message* message)
 {
-    uint32_t crc = message->m_header.m_crcHeader;
     message->m_header.m_crcHeader = 0;
 
 #if defined(WP_IMPLEMENTS_CRC32)
-    
+
+    uint32_t crc = message->m_header.m_crcHeader;
+
     uint32_t computedCrc = SUPPORT_ComputeCRC((uint8_t*)&message->m_header, sizeof(message->m_header), 0);
     message->m_header.m_crcHeader = crc;
 
@@ -183,7 +184,7 @@ void WP_Message_ReplyBadPacket(uint32_t flags)
 int WP_Message_Process(WP_Message* message)
 {
     uint8_t* buf = (uint8_t*)&message->m_header;
-    int len;
+    uint16_t len;
 
     while(true)
     {
@@ -346,7 +347,7 @@ int WP_Message_Process(WP_Message* message)
 void WP_SendProtocolMessage(WP_Message *message)
 {
     TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
-    WP_TransmitMessage(&message);
+    WP_TransmitMessage(message);
 }
 
 void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_t* payload, uint32_t flags)
@@ -364,7 +365,9 @@ void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_
 
 __nfweak void debug_printf( const char* format, ... )
 {
-    return 0;
+    (void)format;
+
+    return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

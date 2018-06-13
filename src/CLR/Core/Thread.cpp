@@ -99,9 +99,11 @@ bool CLR_RT_SubThread::ChangeLockRequestCount( int diff )
 }
 
 void CLR_RT_Thread::BringExecCounterToDate( int iGlobalExecutionCounter, int iDebitForEachRun )
+{
+    (void)iDebitForEachRun;
 
-{   // Normally the condition is false. It becames true if thread was out of execution for some time.
-    // The value of ThreadPriority::System_Highest + 1) is 33. 
+    // Normally the condition is false. It becomes true if thread was out of execution for some time.
+    // The value of (ThreadPriority::System_Highest + 1) is 33. 
     // 33 for ThreadPriority::Highest gives up to 16 cycles to catch up.
     // 33 for ThreadPriority::Lowest we provide only 1 cycle to catch up.
     // If thread was sleeping for some time we forefeet the time it was sleeping and not updating execution counter. 

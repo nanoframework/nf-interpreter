@@ -58,8 +58,8 @@ typedef struct RNGDriver {
 
 // From STMicroelectronics Cube HAL 
 /////////////////////////////////////////////////////////////
-#define rccEnableRNG(lp) rccEnableAHB2(RCC_AHB2ENR_RNGEN, lp)
-#define rccDisableCRC() rccDisableAHB2(RCC_AHB1ENR_CRCEN)
+#define rccEnableRNG(lp)  rccEnableAHB2(RCC_AHB2ENR_RNGEN, lp)
+#define rccDisableRNG()   rccDisableAHB2(RCC_AHB2ENR_RNGEN)
 
 /*===========================================================================*/
 /* Driver macros.                                                            */
@@ -96,6 +96,13 @@ extern "C" {
   void rng_lld_stop(void);
   uint32_t rng_lld_GenerateRandomNumber(void);
   uint32_t rng_lld_GetLastRandomNumber(void);
+
+#if (RNG_USE_MUTUAL_EXCLUSION == TRUE)
+
+  void rng_lld_aquire();
+  void rng_lld_release();
+
+#endif 
 
 #ifdef __cplusplus
 }

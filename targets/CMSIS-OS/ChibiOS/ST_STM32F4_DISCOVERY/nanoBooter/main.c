@@ -11,6 +11,7 @@
 #include <swo.h>
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
+#include <nanoPAL_BlockStorage.h>
 #include <LaunchCLR.h>
 
 void BlinkerThread(void const * argument)
@@ -31,13 +32,10 @@ void BlinkerThread(void const * argument)
 osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 3072, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 
 //  Application entry point.
 int main(void) {
-
-  osThreadId blinkerThreadId;
-  osThreadId receiverThreadId;
 
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
@@ -81,10 +79,10 @@ int main(void) {
   usbConnectBus(serusbcfg.usbp);
 
   // Creates the blinker thread, it does not start immediately.
-  blinkerThreadId = osThreadCreate(osThread(BlinkerThread), NULL);
+  osThreadCreate(osThread(BlinkerThread), NULL);
 
   // create the receiver thread
-  receiverThreadId = osThreadCreate(osThread(ReceiverThread), NULL);
+  osThreadCreate(osThread(ReceiverThread), NULL);
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();

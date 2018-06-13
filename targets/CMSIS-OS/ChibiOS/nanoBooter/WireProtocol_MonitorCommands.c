@@ -6,7 +6,7 @@
 
 #include <cmsis_os.h>
 #include <nanoHAL_v2.h>
-
+#include <hal.h>
 #include <WireProtocol.h>
 #include <Debugger.h>
 #include <WireProtocol_MonitorCommands.h>
@@ -28,7 +28,7 @@ int NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
     return true;
 }
 
-static int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buffer, int mode, unsigned int* errorCode)
+static int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buffer, int32_t mode, uint32_t* errorCode)
 {
     // reset error code
     *errorCode = AccessMemoryErrorCode_NoError;
@@ -252,7 +252,7 @@ int Monitor_CheckMemory(WP_Message* message)
 
     CLR_DBG_Commands_Monitor_CheckMemory* cmd = (CLR_DBG_Commands_Monitor_CheckMemory*)message->m_payload;
     CLR_DBG_Commands_Monitor_CheckMemory_Reply cmdReply;
-    unsigned int errorCode;
+    uint32_t errorCode;
 
     ret = AccessMemory(cmd->address, cmd->length, (uint8_t*)&cmdReply.crc, AccessMemory_Check, &errorCode);
 

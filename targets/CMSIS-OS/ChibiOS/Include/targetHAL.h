@@ -8,6 +8,7 @@
 
 #include <target_board.h>
 #include <nanoWeak.h>
+#include <cmsis_gcc.h>
 
 #define GLOBAL_LOCK(x)              chSysLock();
 #define GLOBAL_UNLOCK(x);           chSysUnlock();

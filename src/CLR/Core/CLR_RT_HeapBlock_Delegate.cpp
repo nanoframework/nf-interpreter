@@ -16,7 +16,7 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance( CLR_RT_HeapBlock& reference, 
 
     CLR_UINT32 length = 0;
 
-#if defined(NANOCLR_DELEGATE_PRESERVE_STACK)    
+  #if defined(NANOCLR_DELEGATE_PRESERVE_STACK)    
     if(call)
     {
         NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,ptr,call)
@@ -30,7 +30,9 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance( CLR_RT_HeapBlock& reference, 
     // Limit depth to three callers.
     //
     if(length > 3) length = 3;
-#endif
+  #else
+    (void)call;
+  #endif
 
     CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Delegate) + length * sizeof(CLR_RT_MethodDef_Index));
 

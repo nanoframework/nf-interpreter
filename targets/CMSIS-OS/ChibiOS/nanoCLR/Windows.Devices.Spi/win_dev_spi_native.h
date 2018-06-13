@@ -66,7 +66,7 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice
 
     static uint16_t ComputeBaudRate(uint8_t bus, int32_t requestedFrequency, int32_t& actualFrequency);
     static void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, bool bufferIs16bits);
-    static bool IsLongRunningOperation(int writeSize, int readSize, bool bufferIs16bits, float byteTime, int& estimatedDurationMiliseconds);
+    static bool IsLongRunningOperation(uint32_t writeSize, uint32_t readSize, bool bufferIs16bits, float byteTime, uint32_t& estimatedDurationMiliseconds);
     static HRESULT NativeTransfer(CLR_RT_StackFrame& stack, bool bufferIs16bits);
 };
 

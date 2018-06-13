@@ -99,7 +99,7 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
 
 int WP_TransmitMessage(WP_Message* message)
 {
-    int writeResult;
+    uint32_t writeResult;
     bool operationResult = false;
 
     ///////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ int WP_TransmitMessage(WP_Message* message)
 
 int WP_TransmitMessage(WP_Message* message)
 {
-    int writeResult;
+    uint32_t writeResult;
     bool operationResult = false;
     
     ///////////////////////////////////////////////////////////

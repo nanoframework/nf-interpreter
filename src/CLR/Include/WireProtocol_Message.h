@@ -21,8 +21,8 @@
 #define TRACE0( f, msg ) if((f) & TRACE_MASK ) debug_printf( msg ) 
 #define TRACE( f, msg, ...) if((f) & TRACE_MASK ) debug_printf( msg, __VA_ARGS__ ) 
 #else
-#define TRACE0( f, msg,...)
-#define TRACE( f, msg,...)
+#define TRACE0(msg,...)
+#define TRACE(msg,...)
 #endif
 
 ////////////////////////////////////////////////////

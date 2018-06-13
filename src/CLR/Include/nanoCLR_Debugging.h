@@ -507,7 +507,7 @@ struct CLR_DBG_Commands
 
         static const CLR_UINT16 c_STEP               = c_STEP_IN | c_STEP_OVER | c_STEP_OUT;
 
-        static const CLR_UINT32 c_PID_ANY            = 0xFFFFFFFF;
+        static const CLR_INT32 c_PID_ANY             = 0x7FFFFFFF;
 
         static const CLR_UINT32 c_DEPTH_EXCEPTION_FIRST_CHANCE    = 0x00000000;
         static const CLR_UINT32 c_DEPTH_EXCEPTION_USERS_CHANCE    = 0x00000001;
@@ -527,7 +527,7 @@ struct CLR_DBG_Commands
         CLR_UINT16             m_id;
         CLR_UINT16             m_flags;
 
-        CLR_UINT32             m_pid;
+        CLR_INT32              m_pid;
         CLR_UINT32             m_depth;
 
         //
@@ -1036,9 +1036,9 @@ private:
     CLR_RT_AppDomain*  GetAppDomainFromID ( CLR_UINT32 id );
 #endif
 
-    CLR_RT_StackFrame* CheckStackFrame    ( CLR_UINT32 pid, CLR_UINT32 depth, bool& isInline                                        );
+    CLR_RT_StackFrame* CheckStackFrame    ( CLR_INT32 pid, CLR_UINT32 depth, bool& isInline                                        );
     HRESULT            CreateListOfThreads(                 CLR_DBG_Commands::Debugging_Thread_List ::Reply*& cmdReply, int& totLen );
-    HRESULT            CreateListOfCalls  ( CLR_UINT32 pid, CLR_DBG_Commands::Debugging_Thread_Stack::Reply*& cmdReply, int& totLen );
+    HRESULT            CreateListOfCalls  ( CLR_INT32 pid, CLR_DBG_Commands::Debugging_Thread_Stack::Reply*& cmdReply, int& totLen );
 
     CLR_RT_Assembly*   IsGoodAssembly( CLR_IDX                       idxAssm                                  );
     bool               CheckTypeDef  ( const CLR_RT_TypeDef_Index&   td     , CLR_RT_TypeDef_Instance&   inst );
@@ -1054,7 +1054,7 @@ private:
 
        
 public:  
-    static CLR_RT_Thread* GetThreadFromPid ( CLR_UINT32 pid );
+    static CLR_RT_Thread* GetThreadFromPid ( CLR_INT32 pid );
 
     static bool Monitor_Ping                            ( WP_Message* msg );
     static bool Monitor_Reboot                          ( WP_Message* msg );

@@ -25,7 +25,7 @@ extern "C" void SwoPrintString(const char *s)
     }
 }
 
-int GenericPort_Write( int portNum, const char* data, size_t size )
+uint32_t GenericPort_Write( int portNum, const char* data, size_t size )
 {
     char* p = (char*)data;
     int counter = 0;

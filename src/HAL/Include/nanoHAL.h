@@ -793,6 +793,14 @@ public:
 
 //--//
 
+// The use of offsetof below throwns an "invalid offset warning" because CLR_RT_StackFrame is not POD type 
+// C+17 is the first standard that allow this, so until we are using it we have to disable it to keep GCC happy 
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+
 template <class T> class HAL_DblLinkedList
 {
     //
@@ -917,6 +925,10 @@ public:
         return node;
     }
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 //--//
 

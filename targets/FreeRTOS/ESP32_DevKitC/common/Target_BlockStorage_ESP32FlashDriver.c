@@ -31,6 +31,8 @@ static const char* TAG = "FlashDriver";
 //
 bool Esp32FlashDriver_InitializeDevice(void* context)
 {
+	(void)context;
+
 //	ets_printf("InitializeDevice enter\n");
 
 	g_esp32_flash_start_ptr = NULL;
@@ -69,6 +71,8 @@ bool Esp32FlashDriver_InitializeDevice(void* context)
 //
 bool Esp32FlashDriver_UninitializeDevice(void* context)
 {
+	(void)context;
+
 	// Unmap the flash memory
 	if (g_esp32_flash_start_ptr != NULL) {
 		spi_flash_munmap(g_esp32_flash_out_handle);
@@ -84,6 +88,8 @@ bool Esp32FlashDriver_UninitializeDevice(void* context)
 //
 DeviceBlockInfo* Esp32FlashDriver_GetDeviceInfo(void* context)
 {
+	(void)context;
+
     MEMORY_MAPPED_NOR_BLOCK_CONFIG* config = context;
     
     return config->BlockConfig.BlockDeviceInformation;  
@@ -108,6 +114,8 @@ DeviceBlockInfo* Esp32FlashDriver_GetDeviceInfo(void* context)
 //   
 bool Esp32FlashDriver_Read(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer)
 {
+	(void)context;
+
 //	ets_printf("Flash Read adr %X bytes %X target %X\n", startAddress, numBytes, buffer);
 
 	if (startAddress == 0) return false;
@@ -145,6 +153,8 @@ bool Esp32FlashDriver_Read(void* context, ByteAddress startAddress, unsigned int
 //   
 bool Esp32FlashDriver_Write(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
 {
+	(void)context;
+
 	//ets_printf("Flash write adr %X bytes %X  src %X\n", startAddress, numBytes, buffer);
 
 	size_t partitionOffset = (size_t)startAddress;
@@ -184,6 +194,8 @@ bool Esp32FlashDriver_Write(void* context, ByteAddress startAddress, unsigned in
 //    
 bool Esp32FlashDriver_IsBlockErased(void* context, ByteAddress blockAddress, unsigned int length)
 {
+	(void)context;
+
 //	ets_printf("IsBlockErased %X %X start mem %X\n", blockAddress, length, g_esp32_flash_start_ptr);
 
 	if ( length > g_pFlashDriver_partition->size ) {
@@ -224,6 +236,8 @@ bool Esp32FlashDriver_IsBlockErased(void* context, ByteAddress blockAddress, uns
 //    
 bool Esp32FlashDriver_EraseBlock(void* context, ByteAddress address)
 {
+	(void)context;
+
 //	ets_printf("EraseBlock start part adr:%X start mem: %X size:%X erase adr:%X\n", g_pFlashDriver_partition->address, g_esp32_flash_start_ptr, g_pFlashDriver_partition->size, address);
 
 	uint32_t start_addr = address * SPI_FLASH_SEC_SIZE;
@@ -241,5 +255,8 @@ bool Esp32FlashDriver_EraseBlock(void* context, ByteAddress address)
 
 void Esp32FlashDriver_SetPowerState(void* context, unsigned int state)
 {
+	(void)context;
+	(void)state;
+
     // nothing to be done here
 }

@@ -240,7 +240,7 @@ HRESULT CLR_RT_HeapBlock_MemoryStream::WriteBits( CLR_UINT32 val, CLR_UINT32 bit
         {
             m_pos++;
 
-            if(m_pos < sizeof(m_current->m_payload))
+            if(m_pos < (int)sizeof(m_current->m_payload))
             {
                 m_current->m_length++;
                 m_current->m_payload[ m_pos ] = 0;

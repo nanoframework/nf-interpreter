@@ -604,7 +604,7 @@ void CLR_RT_DUMP::FIELD( const CLR_RT_FieldDef_Index& field )
 void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, const char* text )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-#define PELEMENT_TO_STRING(elem) case DATATYPE_##elem: CLR_Debug::Printf( "%s", #elem ); break
+  #define PELEMENT_TO_STRING(elem) case DATATYPE_##elem: CLR_Debug::Printf( "%s", #elem ); break
 
     CLR_Debug::Printf( "%s - ", text );
 
@@ -619,76 +619,79 @@ void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, const char* text )
 
     switch(ptr->DataType())
     {
-    case DATATYPE_CLASS:
-    case DATATYPE_VALUETYPE:
-        {
-            CLR_RT_DUMP::TYPE( ptr->ObjectCls() );
-        }
-        break;
+        case DATATYPE_CLASS:
+        case DATATYPE_VALUETYPE:
+            {
+                CLR_RT_DUMP::TYPE( ptr->ObjectCls() );
+            }
+            break;
 
-    case DATATYPE_STRING:
-        {
-            CLR_Debug::Printf( "'%s'", ptr->StringText() );
-        }
-        break;
+        case DATATYPE_STRING:
+            {
+                CLR_Debug::Printf( "'%s'", ptr->StringText() );
+            }
+            break;
 
-    case DATATYPE_SZARRAY:
-        {
-            CLR_RT_HeapBlock_Array* array = (CLR_RT_HeapBlock_Array*)ptr;
+        case DATATYPE_SZARRAY:
+            {
+                CLR_RT_HeapBlock_Array* array = (CLR_RT_HeapBlock_Array*)ptr;
 
-            CLR_RT_DUMP::TYPE( array->ReflectionData() );
-        }
-        break;
+                CLR_RT_DUMP::TYPE( array->ReflectionData() );
+            }
+            break;
 
-    case DATATYPE_DELEGATE_HEAD:
-        {
-            CLR_RT_HeapBlock_Delegate* dlg = (CLR_RT_HeapBlock_Delegate*)ptr;
+        case DATATYPE_DELEGATE_HEAD:
+            {
+                CLR_RT_HeapBlock_Delegate* dlg = (CLR_RT_HeapBlock_Delegate*)ptr;
 
-            CLR_RT_DUMP::METHOD( dlg->DelegateFtn() );
-        }
-        break;
+                CLR_RT_DUMP::METHOD( dlg->DelegateFtn() );
+            }
+            break;
 
 
-    PELEMENT_TO_STRING(BOOLEAN);
-    PELEMENT_TO_STRING(CHAR   );
-    PELEMENT_TO_STRING(I1     );
-    PELEMENT_TO_STRING(U1     );
-    PELEMENT_TO_STRING(I2     );
-    PELEMENT_TO_STRING(U2     );
-    PELEMENT_TO_STRING(I4     );
-    PELEMENT_TO_STRING(U4     );
-    PELEMENT_TO_STRING(I8     );
-    PELEMENT_TO_STRING(U8     );
-    PELEMENT_TO_STRING(R4     );
-    PELEMENT_TO_STRING(R8     );
+        PELEMENT_TO_STRING(BOOLEAN);
+        PELEMENT_TO_STRING(CHAR   );
+        PELEMENT_TO_STRING(I1     );
+        PELEMENT_TO_STRING(U1     );
+        PELEMENT_TO_STRING(I2     );
+        PELEMENT_TO_STRING(U2     );
+        PELEMENT_TO_STRING(I4     );
+        PELEMENT_TO_STRING(U4     );
+        PELEMENT_TO_STRING(I8     );
+        PELEMENT_TO_STRING(U8     );
+        PELEMENT_TO_STRING(R4     );
+        PELEMENT_TO_STRING(R8     );
 
-    PELEMENT_TO_STRING(FREEBLOCK             );
-    PELEMENT_TO_STRING(CACHEDBLOCK           );
-    PELEMENT_TO_STRING(ASSEMBLY              );
-    PELEMENT_TO_STRING(WEAKCLASS             );
-    PELEMENT_TO_STRING(REFLECTION            );
-    PELEMENT_TO_STRING(ARRAY_BYREF           );
-    PELEMENT_TO_STRING(DELEGATELIST_HEAD     );
-    PELEMENT_TO_STRING(OBJECT_TO_EVENT       );
-    PELEMENT_TO_STRING(BINARY_BLOB_HEAD      );
+        PELEMENT_TO_STRING(FREEBLOCK             );
+        PELEMENT_TO_STRING(CACHEDBLOCK           );
+        PELEMENT_TO_STRING(ASSEMBLY              );
+        PELEMENT_TO_STRING(WEAKCLASS             );
+        PELEMENT_TO_STRING(REFLECTION            );
+        PELEMENT_TO_STRING(ARRAY_BYREF           );
+        PELEMENT_TO_STRING(DELEGATELIST_HEAD     );
+        PELEMENT_TO_STRING(OBJECT_TO_EVENT       );
+        PELEMENT_TO_STRING(BINARY_BLOB_HEAD      );
 
-    PELEMENT_TO_STRING(THREAD                );
-    PELEMENT_TO_STRING(SUBTHREAD             );
-    PELEMENT_TO_STRING(STACK_FRAME           );
-    PELEMENT_TO_STRING(TIMER_HEAD            );
-    PELEMENT_TO_STRING(LOCK_HEAD             );
-    PELEMENT_TO_STRING(LOCK_OWNER_HEAD       );
-    PELEMENT_TO_STRING(LOCK_REQUEST_HEAD     );
-    PELEMENT_TO_STRING(WAIT_FOR_OBJECT_HEAD  );
-    PELEMENT_TO_STRING(FINALIZER_HEAD        );
-    PELEMENT_TO_STRING(MEMORY_STREAM_HEAD    );
-    PELEMENT_TO_STRING(MEMORY_STREAM_DATA    );
+        PELEMENT_TO_STRING(THREAD                );
+        PELEMENT_TO_STRING(SUBTHREAD             );
+        PELEMENT_TO_STRING(STACK_FRAME           );
+        PELEMENT_TO_STRING(TIMER_HEAD            );
+        PELEMENT_TO_STRING(LOCK_HEAD             );
+        PELEMENT_TO_STRING(LOCK_OWNER_HEAD       );
+        PELEMENT_TO_STRING(LOCK_REQUEST_HEAD     );
+        PELEMENT_TO_STRING(WAIT_FOR_OBJECT_HEAD  );
+        PELEMENT_TO_STRING(FINALIZER_HEAD        );
+        PELEMENT_TO_STRING(MEMORY_STREAM_HEAD    );
+        PELEMENT_TO_STRING(MEMORY_STREAM_DATA    );
 
+        default:
+            // the remaining data types aren't to be handled
+            break;
     }
 
     CLR_Debug::Printf( "\r\n" );
 
-#undef PELEMENT_TO_STRING
+  #undef PELEMENT_TO_STRING
 }
 
 #endif // defined(NANOCLR_TRACE_ERRORS)
@@ -726,6 +729,7 @@ void CLR_RT_DUMP::EXCEPTION( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref )
 
 void CLR_RT_DUMP::POST_PROCESS_EXCEPTION( CLR_RT_HeapBlock& ref )
 {
+    (void)ref;
 }
 
 const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )

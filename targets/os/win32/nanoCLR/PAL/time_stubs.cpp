@@ -45,12 +45,12 @@ signed __int64 Time_GetTickCount()
     return 0;
 }
 
-bool HAL_Time_ToSystemTime(signed long long time, SYSTEMTIME* systemTime)
+bool HAL_Time_ToSystemTime(unsigned long long time, SYSTEMTIME* systemTime)
 {
     return FALSE;
 }
 
-signed __int64 HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime)
+uint64_t HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime)
 {
     return 0;
 }

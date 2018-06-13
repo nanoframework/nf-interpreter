@@ -9,20 +9,27 @@
 // this has to be an array because ChibiOS ADC API expects that
 static adcsample_t sampleBuffer[1 * 1];
 
-// not used, just left here if needed for debug
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
+
+// not used, just left here if needed for debugging purposes
 static void adcerrorcallback(ADCDriver *adcp, adcerror_t err)
 {
-
   (void)adcp;
   (void)err;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadValue___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
-        int value = 0;
-
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
@@ -38,7 +45,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
 
         // we are filling this bellow with the appropriate ADC port pin config and ADC driver
         NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
-        ADCDriver* adcDriver;
+        ADCDriver* adcDriver = NULL;
 
         // only one ADC controller for now, but check it anyways
         if(deviceId == 1)
@@ -76,9 +83,9 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        bool enableVref = adcDefinition.adcChannel == ADC_CHANNEL_SENSOR  \
-                        | adcDefinition.adcChannel == ADC_CHANNEL_VREFINT \
-                        | adcDefinition.adcChannel == ADC_CHANNEL_VBAT;
+        bool enableVref = (adcDefinition.adcChannel == ADC_CHANNEL_SENSOR)  \
+                        | (adcDefinition.adcChannel == ADC_CHANNEL_VREFINT) \
+                        | (adcDefinition.adcChannel == ADC_CHANNEL_VBAT);
         
         // need to enable VREF?
         if(enableVref)
@@ -120,9 +127,11 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeDisposeChannel___VOID( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+
     NANOCLR_HEADER();
 
     // left empty on purpose, nothing to do here
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }

@@ -367,9 +367,12 @@ void CLR_RT_GarbageCollector::Heap_Relocate()
 void CLR_RT_GarbageCollector::Heap_Relocate_Pass( RelocateFtn ftn )
 {
     NATIVE_PROFILE_CLR_CORE();
-#if NANOCLR_VALIDATE_HEAP > NANOCLR_VALIDATE_HEAP_0_None
+
+  #if NANOCLR_VALIDATE_HEAP > NANOCLR_VALIDATE_HEAP_0_None
     m_relocWorker = ftn;
-#endif
+  #else
+    (void)ftn;
+  #endif
 
     NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
     {

@@ -53,7 +53,7 @@ struct NF_PAL_ADC_PORT_PIN_CHANNEL
     uint8_t         adcIndex;
     stm32_gpio_t*   portId;
     uint8_t         pin;
-    uint8_t         adcChannel;
+    uint32_t        adcChannel;
 };
 
 extern const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[];

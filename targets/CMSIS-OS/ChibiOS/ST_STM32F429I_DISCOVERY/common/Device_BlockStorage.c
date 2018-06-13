@@ -92,14 +92,9 @@ const BlockRegionInfo BlockRegions[] =
 
 const DeviceBlockInfo Device_BlockInfo =
 {
-    {  
-        false,              // BOOL Removable;
-        true,               // BOOL SupportsXIP;
-        false,              // BOOL WriteProtected;
-        false               // BOOL SupportsCopyBack
-    },
+    (MediaAttribute_SupportsXIP),
     ARRAYSIZE_CONST_EXPR(BlockRegions),     // UINT32 NumRegions;
-    BlockRegions,                           // const BlockRegionInfo* pRegions;
+    (BlockRegionInfo*)BlockRegions,         // const BlockRegionInfo* pRegions;
 };
 
 MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig =
@@ -110,7 +105,7 @@ MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig =
             false,      // BOOL                 ActiveState;
         },
 
-        &Device_BlockInfo,             // BlockDeviceinfo
+        (DeviceBlockInfo*)&Device_BlockInfo,    // BlockDeviceinfo
     },
 
     { // CPU_MEMORY_CONFIG

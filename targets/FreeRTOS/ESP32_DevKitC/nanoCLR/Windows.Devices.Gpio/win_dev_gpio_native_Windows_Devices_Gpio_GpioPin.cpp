@@ -316,9 +316,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___B
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // default to low
-        pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = GpioPinValue_Low;
-
         // Return value to the managed application
         stack.SetResult_Boolean(true );
     }

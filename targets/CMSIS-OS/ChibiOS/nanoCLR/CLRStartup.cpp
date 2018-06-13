@@ -162,7 +162,7 @@ struct Settings
 
         const CLR_RECORD_ASSEMBLY* header;
         unsigned char * assembliesBuffer ;
-        signed int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
+        uint32_t  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
         unsigned char * headerBuffer  = NULL;
 
         while(stream.CurrentIndex < stream.Length)
@@ -219,7 +219,7 @@ struct Settings
             assm->m_flags |= CLR_RT_Assembly::Deployed;
         }
                 
-        NANOCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP_NOLABEL();
     }
 
     HRESULT LoadDeploymentAssemblies()

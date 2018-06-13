@@ -41,7 +41,7 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::get_MinFre
         // FIXME : how can this value be determined ?
         stack.SetResult_R8(1.0);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::get_PinCount___I4( CLR_RT_StackFrame& stack )
@@ -59,7 +59,7 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::get_PinCou
 #endif
         stack.SetResult_I4(pinCount);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::NativeSetDesiredFrequency___U4__U4( CLR_RT_StackFrame& stack )
@@ -86,8 +86,8 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::NativeSetD
         // Build the PWM config structure
         PWMConfig pwmConfig = 
         {
-            desiredFrequency*period,            // PWM clock frequency
-            period,                             // PWM period
+            (desiredFrequency * period),        // PWM clock frequency
+            (pwmcnt_t)period,                   // PWM period
             NULL,                               // No callback
             // Enable all channels
             {
@@ -97,7 +97,8 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::NativeSetD
                 {PWM_OUTPUT_ACTIVE_HIGH, NULL}
             },
             0,
-            0
+            0,
+            0,
         };
 
         // Starts the pwm driver
@@ -147,5 +148,5 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::GetDeviceS
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
        stack.SetResult_String(deviceSelectorString);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }

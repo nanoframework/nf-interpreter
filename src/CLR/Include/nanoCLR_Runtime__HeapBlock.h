@@ -6,11 +6,6 @@
 #ifndef _NANOCLR_RUNTIME__HEAPBLOCK_H_
 #define _NANOCLR_RUNTIME__HEAPBLOCK_H_
 
-#ifdef __arm__
-// ARM compiler does not allow anonymous structs by default
-#pragma anon_unions
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define CLR_RT_HEAPBLOCK_RAW_ID( dataType, flags, size ) ( (dataType & 0x000000FF) | ((flags & 0x000000FF) << 8) | ((size & 0x0000FFFF) << 16))
@@ -49,6 +44,11 @@ struct CLR_RT_HeapBlock_Raw
 {
     CLR_UINT32 data[ 3 ];
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 struct CLR_RT_HeapBlock
 {
@@ -407,7 +407,7 @@ private:
             } s8;
             //
 
-#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
+          #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
             float      r4;
 
@@ -420,16 +420,16 @@ private:
                 {
                     double ret_val;
 
-#if defined(__GNUC__)
-///
-/// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
-/// When the optimization level is greater than zero, the gcc compiler
-/// code will not work with the unsigned int* conversion, it requires you 
-/// to copy byte by byte.
-///
+            #if defined(__GNUC__)
+            ///
+            /// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
+            /// When the optimization level is greater than zero, the gcc compiler
+            /// code will not work with the unsigned int* conversion, it requires you 
+            /// to copy byte by byte.
+            ///
                     CLR_UINT8* tmp = (CLR_UINT8*)&ret_val;
                     CLR_UINT8* src = (CLR_UINT8*)&LL;
-                    int i;
+                    uint32_t i;
                     
                     for(i=0; i<sizeof(CLR_UINT32); i++)
                     {
@@ -441,27 +441,27 @@ private:
                     {
                         *tmp++ = *src++;
                     }
-#else
+            #else
                     CLR_UINT32 *tmp = (CLR_UINT32*)&ret_val;
                     tmp[0]=LL;
                     tmp[1]=HH;
-#endif // defined(__GNUC__)
+            #endif // defined(__GNUC__)
 
                     return ret_val;
                 }
 
                 R8& operator=( const double num )
                 {
-#if defined(__GNUC__)
-///
-/// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
-/// When the optimization level is greater than zero, the gcc compiler
-/// code will not work with the unsigned int* conversion, it requires you 
-/// to copy byte by byte.
-///
+            #if defined(__GNUC__)
+            ///
+            /// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
+            /// When the optimization level is greater than zero, the gcc compiler
+            /// code will not work with the unsigned int* conversion, it requires you 
+            /// to copy byte by byte.
+            ///
                     CLR_UINT8* src = (CLR_UINT8*)&num;
                     CLR_UINT8* dst = (CLR_UINT8*)&LL;
-                    int i;
+                    uint32_t i;
                     
                     for(i=0; i<sizeof(CLR_UINT32); i++)
                     {
@@ -473,11 +473,11 @@ private:
                     {
                         *dst++ = *src++;
                     }
-#else
+            #else
                     CLR_UINT32* tmp= (CLR_UINT32 *) &num;
                     LL = (CLR_UINT32)tmp[0];
                     HH = (CLR_UINT32)tmp[1];
-#endif
+            #endif
 
                     return *this;
                 }
@@ -544,8 +544,8 @@ private:
 
             } r8;
 
-#else  
- /// not using floating point lib, emulated one
+          #else  
+          /// not using floating point lib, emulated one
 
             struct R4 {
                
@@ -653,14 +653,14 @@ private:
 
                     CLR_UINT64 v;
 
-#define ACCUMULATE(res,op,part) v = op1 * (CLR_UINT16)(op2 >> (16 * part)); res += (16 * part - HB_DoubleShift >= 0) ? (v << (16 * part - HB_DoubleShift)) : (v >> (HB_DoubleShift - 16 * part))
+    #define ACCUMULATE(res,op,part) v = op1 * (CLR_UINT16)(op2 >> (16 * part)); res += (16 * part - HB_DoubleShift >= 0) ? (v << (16 * part - HB_DoubleShift)) : (v >> (HB_DoubleShift - 16 * part))
 
                     ACCUMULATE(res,+=,0);
                     ACCUMULATE(res,+=,1);
                     ACCUMULATE(res,+=,2);
                     ACCUMULATE(res,+=,3);
 
-#undef ACCUMULATE
+    #undef ACCUMULATE
 
                     ret_value = (CLR_INT64)res;
 
@@ -708,7 +708,7 @@ private:
 
             } r8;
 
-#endif
+    #endif
         } numeric;
 
         // The macro CT_ASSERT is used to validate that members of Numeric union start at zero offset in union.
@@ -1169,6 +1169,10 @@ private:
 
 };
 
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 //--//
 
 #define NANOCLR_FOREACH_NODE(cls,ptr,lst)                                                            \
@@ -1244,7 +1248,10 @@ private:
         }                                                                                            \
     }
 
-
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 struct CLR_RT_HeapBlock_Node : public CLR_RT_HeapBlock
 {
@@ -1318,6 +1325,10 @@ struct CLR_RT_HeapBlock_Node : public CLR_RT_HeapBlock
 
      void Relocate();
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 struct CLR_RT_DblLinkedList
 {
@@ -2013,6 +2024,11 @@ struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT H
 
 //--//
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 struct CLR_RT_Persistence_Manager
 {
     static const CLR_UINT32 c_Erased = 0xFFFFFFFF;
@@ -2051,10 +2067,10 @@ struct CLR_RT_Persistence_Manager
 
          ObjectHeader* Next() const;
 
-    private:
-         CLR_UINT32 ComputeCRC() const;
+        private:
+            CLR_UINT32 ComputeCRC() const;
 
-        //--//
+            //--//
     };
 
     struct BankHeader
@@ -2181,32 +2197,32 @@ struct CLR_RT_Persistence_Manager
 
     //--//
 
-     void Initialize();
-     void Uninitialize();
-     void EraseAll  ();
+    void Initialize();
+    void Uninitialize();
+    void EraseAll  ();
 
-     void InvalidateEntry( CLR_RT_HeapBlock_WeakReference* weak );
+    void InvalidateEntry( CLR_RT_HeapBlock_WeakReference* weak );
 
-     void Relocate();
+    void Relocate();
 
-     ObjectHeader* RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref );
+    ObjectHeader* RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref );
 
-     static void Callback( void* arg );
+    static void Callback( void* arg );
 
-#if !defined(BUILD_RTM)
-     void GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse );
-#endif
+  #if !defined(BUILD_RTM)
+    void GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse );
+  #endif
 
-     void Flush();
+    void Flush();
 
     //--//
 
-#undef DECL_POSTFIX
-#if defined(NANOCLR_TRACE_PERSISTENCE)
-#define DECL_POSTFIX
-#else
-#define DECL_POSTFIX {}
-#endif
+  #undef DECL_POSTFIX
+  #if defined(NANOCLR_TRACE_PERSISTENCE)
+  #define DECL_POSTFIX
+  #else
+  #define DECL_POSTFIX {}
+  #endif
 
     static void Trace_Emit( char* szText ) DECL_POSTFIX;
 
@@ -2218,12 +2234,16 @@ struct CLR_RT_Persistence_Manager
 
     //--//
 
-private:
+    private:
 
-     bool AdvanceState( bool force );
+        bool AdvanceState( bool force );
 
-     void EnqueueNextCallback();
+        void EnqueueNextCallback();
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 extern CLR_RT_Persistence_Manager g_CLR_RT_Persistence_Manager;
 
@@ -2318,7 +2338,7 @@ public:
     HRESULT Clear();
     HRESULT Insert( CLR_INT32 index, CLR_RT_HeapBlock* value );
     HRESULT RemoveAt( CLR_INT32 index );
-    HRESULT SetCapacity( CLR_INT32 newCapacity );
+    HRESULT SetCapacity( CLR_UINT32 newCapacity );
 
     //--//
     
