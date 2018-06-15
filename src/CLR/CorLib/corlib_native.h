@@ -1028,7 +1028,7 @@ struct Library_corlib_native_System_TimeSpan
     static const int FIELD_STATIC__MaxValue = 8;
     static const int FIELD_STATIC__MinValue = 9;
 
-    static const int FIELD___numberOfTicks = 1;
+    static const int FIELD___ticks = 1;
 
     NANOCLR_NATIVE_DECLARE(Equals___BOOLEAN__OBJECT);
     NANOCLR_NATIVE_DECLARE(ToString___STRING);
