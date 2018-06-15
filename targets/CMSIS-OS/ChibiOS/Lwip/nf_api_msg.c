@@ -32,6 +32,7 @@
 // Author: Adam Dunkels <adam@sics.se>
 
 
+#include <nanoHAL_Network.h>
 #include "lwip/opt.h"
 
 #if LWIP_NETCONN /* don't build if not configured for use in lwipopts.h */

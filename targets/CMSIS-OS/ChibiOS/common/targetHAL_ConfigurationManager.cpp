@@ -49,7 +49,7 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
 __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex)
 {
     int sizeOfBlock = 0;
-    uint8_t* blockAddress;
+    uint8_t* blockAddress = NULL;
 
     // validate if the requested block exists
     // Count has to be non zero
@@ -95,7 +95,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBloc
 // it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is used
 __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize)
 {
-    ByteAddress storageAddress;
+    ByteAddress storageAddress = 0;
     bool requiresEnumeration = FALSE;
     bool success = FALSE;
 

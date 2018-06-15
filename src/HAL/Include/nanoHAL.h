@@ -620,19 +620,19 @@ extern void HAL_AssertEx();
 #define CT_ASSERT(e)                  CT_ASSERT_UNIQUE_NAME(e,nanoclr)
 #endif
 
+extern "C"
+{
+#if !defined(BUILD_RTM)
 
+void debug_printf( const char *format, ... );
 
+#else
 
+__inline void debug_printf( const char *format, ... ) {}
 
-
-
-
-
-
-
-
-
-
+#endif  // !defined(BUILD_RTM)
+}
+//--//
 
 
 

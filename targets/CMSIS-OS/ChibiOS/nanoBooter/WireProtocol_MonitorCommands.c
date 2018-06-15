@@ -53,7 +53,8 @@ static int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buff
         case AccessMemory_Read:
             // use FLASH driver to perform read operation
             // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
-            return stm32FlashReadBytes(location, lengthInBytes, buffer);
+            stm32FlashReadBytes(location, lengthInBytes, buffer);
+            return true;
 
         default:
             // default return is FALSE
@@ -102,7 +103,7 @@ int Monitor_ReadMemory(WP_Message* message)
 
     unsigned char buf[ 1024 ];
     unsigned int len = cmd->length; if(len > sizeof(buf)) len = sizeof(buf);
-    unsigned int errorCode;
+    uint32_t errorCode;
 
     AccessMemory(cmd->address, len, buf, AccessMemory_Read, &errorCode );
 
@@ -204,6 +205,13 @@ int Monitor_QueryConfiguration(WP_Message* message)
                 WP_ReplyToCommand( message, success, false, (uint8_t*)&configWireless80211NetworkInterface, size );
             }
             break;
+
+        case DeviceConfigurationOption_WirelessNetworkAP:
+            // TODO missing implementation for now
+            break;
+
+        default:
+            break;            
     }
 
     if(!success)

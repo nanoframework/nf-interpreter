@@ -882,6 +882,13 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
                 platform_free(configWireless80211NetworkInterface);
             }
             break;
+        
+        case DeviceConfigurationOption_WirelessNetworkAP:
+            // TODO missing implementation for now
+            break;
+
+        default:
+            break;
     }
 
     if(!success)

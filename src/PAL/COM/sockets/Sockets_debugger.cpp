@@ -44,6 +44,8 @@ int32_t SOCKETS_Read( int32_t ComPortNum, char* Data, size_t size )
 
 bool SOCKETS_Flush( int32_t ComPortNum )
 {
+    (void)ComPortNum;
+
     NATIVE_PROFILE_PAL_COM();
     //Events_WaitForEvents(0, 2);
     return TRUE;
@@ -129,8 +131,7 @@ bool Sockets_LWIP_Driver::InitializeDbgListener( int ComPortNum )
 
     SOCKET_CHECK_RESULT( HAL_SOCK_setsockopt( g_Sockets_LWIP_Driver.m_SocketDebugListener, SOCK_IPPROTO_TCP, SOCK_TCP_NODELAY, (char*)&optval, sizeof(optval) ) );
 
-// Linger not implemented in LWIP version ?
-//    SOCKET_CHECK_RESULT( HAL_SOCK_setsockopt(g_Sockets_LWIP_Driver.m_SocketDebugListener, SOCK_SOL_SOCKET, SOCK_SOCKO_LINGER, (const char*)&optLinger, sizeof(int32_t)) );
+    SOCKET_CHECK_RESULT( HAL_SOCK_setsockopt(g_Sockets_LWIP_Driver.m_SocketDebugListener, SOCK_SOL_SOCKET, SOCK_SOCKO_LINGER, (const char*)&optLinger, sizeof(int32_t)) );
 
     SOCKET_CHECK_RESULT( SOCK_bind( g_Sockets_LWIP_Driver.m_SocketDebugListener,  (SOCK_sockaddr*)&sockAddr, sizeof(sockAddr) ) );
 
@@ -366,6 +367,8 @@ void Sockets_LWIP_Driver::CloseDebuggerSocket()
 
 void Sockets_LWIP_Driver::OnDebuggerTimeout(void* arg)
 {
+    (void)arg;
+
     CloseDebuggerSocket();
 }
 
@@ -518,6 +521,8 @@ void Sockets_LWIP_Driver::MulticastDiscoverySchedule()
 
 void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void* arg)
 {
+    (void)arg;
+
     NATIVE_PROFILE_PAL_COM();
     SOCK_sockaddr from;
 

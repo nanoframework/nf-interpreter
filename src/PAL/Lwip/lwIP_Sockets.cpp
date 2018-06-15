@@ -52,16 +52,22 @@ static HAL_CONTINUATION PostAvailabilityOffContinuation;
 
 void LWIP_SOCKETS_Driver::PostAddressChanged(void* arg)
 {
+    (void)arg;
+
 	Network_PostEvent(NETWORK_EVENT_TYPE_ADDRESS_CHANGED, 0);
 }
 
 void LWIP_SOCKETS_Driver::PostAvailabilityOn(void* arg)
 {
+    (void)arg;
+
 	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 1);
 }
 
 void LWIP_SOCKETS_Driver::PostAvailabilityOff(void* arg)
 {
+    (void)arg;
+
 	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 0);
 }
 
@@ -206,9 +212,9 @@ bool LWIP_SOCKETS_Driver::Initialize()
             if (0 == i)
             {
 #if LWIP_IPV6
-                uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.u_addr.ip4.addr;
+                //uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.u_addr.ip4.addr;
 #else
-                uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.addr;
+                //uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.addr;
 #endif                
 //                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
 // FIXME               debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
@@ -530,6 +536,8 @@ static void MARSHAL_FDSET_TO_SOCK_FDSET(SOCK_fd_set *sf, fd_set *f)
 
 int LWIP_SOCKETS_Driver::Select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* exceptfds, const SOCK_timeval* timeout )
 {
+    (void)nfds;
+
     NATIVE_PROFILE_PAL_NETWORK();
     int ret = 0;
 
@@ -778,7 +786,7 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkI
     {
         struct netif *networkInterface;
 
-        if (networkInterface = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber))
+        if ((networkInterface = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber)))
         {
 #if LWIP_IPV6
             config->IPv4Address     = networkInterface->ip_addr.u_addr.ip4.addr;

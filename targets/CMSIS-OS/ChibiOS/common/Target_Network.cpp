@@ -14,6 +14,8 @@ extern "C" struct netif * nf_getNetif();
 
 bool Network_Interface_Bind(int index)
 {
+    (void)index;
+
     return true;
 }
 

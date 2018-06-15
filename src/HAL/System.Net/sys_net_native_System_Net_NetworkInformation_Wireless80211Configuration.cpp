@@ -14,7 +14,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
     // grab the count right from the structure
     stack.SetResult_I4(g_TargetConfiguration.Wireless80211Configs->Count);    
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration::GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4( CLR_RT_StackFrame& stack )

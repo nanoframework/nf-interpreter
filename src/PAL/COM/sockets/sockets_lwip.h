@@ -7,8 +7,6 @@
 #ifndef _SOCKETS_H_
 #define _SOCKETS_H_ 1
 
-extern void debug_printf( const char* format, ... );
-
 //--//
 
 #include "nanoHAL.h"

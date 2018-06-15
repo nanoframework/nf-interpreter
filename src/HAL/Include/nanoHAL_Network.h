@@ -6,6 +6,7 @@
 #ifndef _NANOHAL_NETWORK_H_
 #define _NANOHAL_NETWORK_H_ 1
 
+#include <stdio.h>
 #include <nanoPackStruct.h>
 #include <nanoWeak.h>
 
@@ -206,6 +207,8 @@ typedef struct __nfpack HAL_Configuration_Wireless80211 {
 } HAL_Configuration_Wireless80211;
 
 void 	nanoHAL_Network_Initialize();
+void    sys_signal_sock_event();
+
 
 #ifdef __cplusplus
 extern "C" {

@@ -12,6 +12,7 @@
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoPAL_BlockStorage.h>
+#include <nanoHAL_ConfigurationManager.h>
 #include <LaunchCLR.h>
 
 void BlinkerThread(void const * argument)

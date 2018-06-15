@@ -409,6 +409,8 @@ bool Sockets_LWIP_Driver::Uninitialize( )
 //-----------------------------------------------------------------------------
 void Sockets_LWIP_Driver::RegisterSocket( SOCK_SOCKET sock, bool selectable, bool fDebug )
 {
+    (void)selectable;
+
     NATIVE_PROFILE_PAL_COM();
     if(sock == SOCK_SOCKET_ERROR)
     {
@@ -462,10 +464,10 @@ void Sockets_LWIP_Driver::UnregisterSocket( SOCK_SOCKET sock )
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // weak implementations of the functions (to be replaced with _strong_ implementations if and when required) //
 // C++ version
-__nfweak void debug_printf( const char* format, ... )
-{
-    return;
-}
+// __nfweak void debug_printf( const char* format, ... )
+// {
+//     return;
+// }
 
 bool Sockets_LWIP_Driver::s_initialized=FALSE;
 bool Sockets_LWIP_Driver::s_wirelessInitialized=FALSE;

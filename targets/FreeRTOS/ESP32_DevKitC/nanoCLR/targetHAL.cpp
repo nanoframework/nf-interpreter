@@ -9,7 +9,7 @@
 #include <nanoHAL_Types.h>
 #include <target_platform.h>
 #include <nanoPAL_BlockStorage.h>
-
+#include <nanoHAL_ConfigurationManager.h>
 
 //
 //  Reboot hnadlers clean up on reboot

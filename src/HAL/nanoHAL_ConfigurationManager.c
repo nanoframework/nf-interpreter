@@ -69,7 +69,7 @@ __nfweak HAL_CONFIGURATION_NETWORK* ConfigurationManager_FindNetworkConfiguratio
     {
 
         // second pass: get address of each config block
-        for(int i = 0; i < blockCount; i++)
+        for(uint32_t i = 0; i < blockCount; i++)
         {
             nextBlock = FindNextBlock(nextBlock, endAddress, c_MARKER_CONFIGURATION_NETWORK_V1);
             networkConfigs->Configs[i] = (HAL_Configuration_NetworkInterface*)nextBlock;
@@ -95,7 +95,7 @@ __nfweak HAL_CONFIGURATION_NETWORK_WIRELESS80211* ConfigurationManager_FindNetwo
     if(blockCount > 0)
     {
         // second pass: get address of each config block
-        for(int i = 0; i < blockCount; i++)
+        for(uint32_t i = 0; i < blockCount; i++)
         {
             nextBlock = FindNextBlock(nextBlock, endAddress, c_MARKER_CONFIGURATION_WIRELESS80211_V1);
             networkWirelessConfigs->Configs[i] = (HAL_Configuration_Wireless80211*)nextBlock;

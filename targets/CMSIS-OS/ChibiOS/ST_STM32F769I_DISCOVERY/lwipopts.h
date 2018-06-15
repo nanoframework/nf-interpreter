@@ -42,6 +42,7 @@
 #define _REENT_ONLY
 #define set_errno(err)
 #include <sys/errno.h>
+#include <stdlib.h>
 
 /*
    -----------------------------------------------
@@ -2144,6 +2145,6 @@
 //#define LWIP_DEBUG 1
 
 // debug output using SWO
-#define LWIP_PLATFORM_DIAG(x) do {debug_printf x;} while(0)
+#define LWIP_PLATFORM_DIAG(x) do {GenericPort_Write(0, x, 512);} while(0)
 
 #endif /* __LWIPOPT_H__ */

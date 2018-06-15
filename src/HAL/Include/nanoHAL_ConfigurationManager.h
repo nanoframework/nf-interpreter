@@ -8,6 +8,7 @@
 
 #include <nanoWeak.h>
 #include <stdint.h>
+#include <nanoHAL_Network.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.DeviceConfiguration.DeviceConfigurationOption (in managed code) !!! //

@@ -33,12 +33,14 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::bind___STATIC__V
 {
     NANOCLR_HEADER();
     return BindConnectHelper( stack, true );
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::connect___STATIC__VOID__OBJECT__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     return BindConnectHelper( stack, false );
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::send___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4( CLR_RT_StackFrame& stack )
@@ -327,7 +329,6 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__B
     CLR_INT32 timeout_us = stack.Arg2().NumericByRef().s4;
     
     CLR_RT_HeapBlock hbTimeout;
-    CLR_INT32 timeout_ms;
 
     CLR_INT32 res = 0;
     bool fRes     = true;
