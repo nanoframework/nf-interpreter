@@ -131,13 +131,18 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS "  ${ESP32_IDF_PATH}/components/newlib/lib/libm.a ")
 
 #message( "project libs:${PROJECT_LINK_LIBS} " )
+set(LIBPATHSAVE "")
 foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
     get_filename_component( LIBNAME ${IDF_libraries} NAME_WE )
     get_filename_component( LIBPATH ${IDF_libraries} DIRECTORY )
   
     string( SUBSTRING ${LIBNAME} 3 -1 LIBSHORT )
-#    set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -L${LIBPATH} -l${LIBSHORT} " )
-    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${LIBPATH} -l${LIBSHORT} " )
+    if( NOT "${LIBPATHSAVE}" STREQUAL ${LIBPATH} )
+        set(LIBPATHSAVE ${LIBPATH})
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -L${LIBPATH} " )
+    endif() 
+#    set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -l${LIBSHORT} " )
+    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -l${LIBSHORT} " )
     
     # Add options into LINK_FLAGS in same position as IDF link
     if( "${LIBSHORT}" STREQUAL "cxx" )
