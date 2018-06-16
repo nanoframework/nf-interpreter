@@ -40,7 +40,7 @@ int  Network_Interface_Open(int index)
     {
         // Wireless 
         case TCPIP_ADAPTER_IF_STA:
-            return Esp32_Wireless_Open(index, config);
+            return Esp32_Wireless_Open(index, &config);
 
        // Soft AP
         case TCPIP_ADAPTER_IF_AP:
@@ -49,7 +49,7 @@ int  Network_Interface_Open(int index)
 #if ESP32_ETHERNET_SUPPORT
         // Ethernet
         case TCPIP_ADAPTER_IF_ETH:
-            return Esp32_Ethernet_Open(index, config);
+            return Esp32_Ethernet_Open(index, &config);
 #endif
     }
 	return SOCK_SOCKET_ERROR;
