@@ -19,4 +19,6 @@
 #define VERSION_BUILD @nanoFramework_VERSION_PATCH@U
 #define VERSION_REVISION @nanoFramework_VERSION_TWEAK@U
 
+#define DP_FLOATINGPOINT @TARGET_DP_FLOATINGPOINT@
+
 #endif /* _TARGET_OS_H_ */

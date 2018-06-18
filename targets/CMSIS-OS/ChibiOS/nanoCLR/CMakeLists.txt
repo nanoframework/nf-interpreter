@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-include(NF_API_Namespaces)
+include(NF_NativeAssemblies)
 
 # add header file with common target definitions
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in"
@@ -48,8 +48,8 @@ if(TARGET_MCU_SUPPORTS_RNG)
     endif()
 endif()
 
-# parse nanoFramework API options
-ParseApiOptions()
+# add native assemblies
+ParseNativeAssemblies()
 
 # configure code file with Interop Assemblies table and...
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CLR_RT_InteropAssembliesTable.cpp.in"

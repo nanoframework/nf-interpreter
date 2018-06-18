@@ -251,6 +251,19 @@ elseif("${USE_FPU}" STREQUAL "FALSE")
     message(STATUS "Emulated Floating Point enabled")
 endif()
 
+#################################################################################
+# chooses if double-point float point support is provided by the platform
+# (default is OFF which means that single-precision floating point is effective)
+option(DP_FLOATINGPOINT "option to enable support for double-precision floating point")
+
+if(DP_FLOATINGPOINT)
+    set(TARGET_DP_FLOATINGPOINT TRUE CACHE INTERNAL "DP FP support")
+    message(STATUS "Double-precision floating point is effective")
+else()
+    set(TARGET_DP_FLOATINGPOINT FALSE CACHE INTERNAL "DP FP support")
+    message(STATUS "Single-precision floating point is effective")
+endif()
+
 #################################################################
 # True random number generation option supported by Target MCU
 set(TARGET_MCU_SUPPORTS_RNG TRUE)
@@ -360,10 +373,6 @@ endif()
 
 #################################################################
 
-#################################################################
-# manage nanoFramework API namespaces
-#################################################################
-include(NF_API_Namespaces)
 
 #################################################################
 # manage HAL/PAL required for API namespaces
