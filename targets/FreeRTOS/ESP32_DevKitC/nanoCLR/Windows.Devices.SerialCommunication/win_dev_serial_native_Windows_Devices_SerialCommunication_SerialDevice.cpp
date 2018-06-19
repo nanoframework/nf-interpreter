@@ -115,9 +115,13 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 
 
-        // call the configure
+        // call the configure and abort if not OK
         HRESULT res = NativeConfig___VOID(stack);
-        
+        if (res != S_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(res);
+        }
+
         // Install driver
         esp_err_t esp_err = uart_driver_install(uart_num, 
                                                 UART_RX_BUFER_SIZE, // rx_buffer_size, 
@@ -256,6 +260,9 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 rtsPin = UART_NUM_2_CTS_DIRECT_GPIO_NUM; // 8
                 ctsPin = UART_NUM_2_RTS_DIRECT_GPIO_NUM; // 7
                 break;
+
+            default:
+                break;
        }
 
        // Don't use RTS/CTS if no hardware handshake enabled
@@ -348,7 +355,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
 
         // Wait for 1 sec for data to be sent
-        esp_err_t esp_err = uart_wait_tx_done( uart_num,  (TickType_t) 1000 / portTICK_PERIOD_MS);
+        /*esp_err_t esp_err =*/ uart_wait_tx_done( uart_num,  (TickType_t) 1000 / portTICK_PERIOD_MS);
 
 
         // return how many bytes were send to the UART
@@ -462,5 +469,5 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
        stack.SetResult_String(deviceSelectorString);
    }
-   NANOCLR_NOCLEANUP();
+   NANOCLR_NOCLEANUP_NOLABEL();
 }

@@ -68,6 +68,8 @@ static  void sc_callback(smartconfig_status_t status, void *pdata)
 
 void  smartconfig_task(void * parm)
 {
+    (void)parm;
+
     EventBits_t uxBits;
     ESP_ERROR_CHECK( esp_smartconfig_set_type(SC_TYPE_ESPTOUCH) );
     ESP_ERROR_CHECK( esp_smartconfig_start(sc_callback) );
@@ -86,6 +88,8 @@ void  smartconfig_task(void * parm)
 
 static  esp_err_t event_handler(void *ctx, system_event_t *event)
 {
+    (void)ctx;
+    
     switch(event->event_id) {
     case SYSTEM_EVENT_STA_START:
        // Smart config commented out as giving exception when running

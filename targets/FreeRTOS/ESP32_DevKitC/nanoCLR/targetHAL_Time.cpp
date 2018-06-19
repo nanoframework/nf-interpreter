@@ -13,6 +13,8 @@
 // Converts Tickcount to .NET ticks (100 nanoseconds)
 uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) {
     
+    (void)sysTicks;
+    
     // convert to microseconds from FreeRTOS Tickcount
     int64_t microsecondsFromSysTicks = ((( xTaskGetTickCount() ) * 1000000ULL + (int64_t)configTICK_RATE_HZ - 1ULL) / (int64_t)configTICK_RATE_HZ);
 

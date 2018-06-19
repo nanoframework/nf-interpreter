@@ -12,6 +12,8 @@
 
 void LaunchCLR(uint32_t address)
 {
+    (void)address;
+
     //// function pointer to load nanoCLR ResetHandler address
     //irq_vector_t JumpToNanoCLR;
 
@@ -36,6 +38,8 @@ void LaunchCLR(uint32_t address)
 
 bool CheckValidCLRImage(uint32_t address)
 {
+    (void)address;
+    
     //// load nanoCLR vector table
     //const vectors_t* nanoCLRVectorTable = (vectors_t*) address;
 

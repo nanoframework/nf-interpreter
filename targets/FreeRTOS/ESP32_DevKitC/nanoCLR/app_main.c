@@ -30,6 +30,8 @@ extern bool Esp32FlashDriver_InitializeDevice(void* context);
 
 void receiver_task(void *pvParameter)
 {
+  (void)pvParameter;
+
   ReceiverThread( 0);
    
   vTaskDelete(NULL);
@@ -38,6 +40,8 @@ void receiver_task(void *pvParameter)
 // Main task start point
 void main_task(void *pvParameter)
 {
+  (void)pvParameter;
+  
   CLRStartupThread( 0);
  
   vTaskDelete(NULL);

@@ -77,9 +77,6 @@ int  Esp32_GetMappedDevicePins( Esp32_MapDeviceType deviceType, int DevNumber, i
     {
         switch( deviceType )
         {
-            case  DEV_TYPE_GPIO:
-                break;           
-
             case DEV_TYPE_SPI:
                 DevNumber--;        // 0 index not used
                 return (int)Esp32_SPI_DevicePinMap[DevNumber][PinIndex];
@@ -92,6 +89,9 @@ int  Esp32_GetMappedDevicePins( Esp32_MapDeviceType deviceType, int DevNumber, i
 
             case DEV_TYPE_SERIAL:
                 return (int)Esp32_SERIAL_DevicePinMap[DevNumber][PinIndex];
+
+            default:
+                break;
         };
     }
     return -1;

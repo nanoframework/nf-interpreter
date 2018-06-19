@@ -122,13 +122,6 @@ int CLR_RT_UnicodeHelper::CountNumberOfBytes( int max )
 
 //--//
 
-// dev note: need the pragma bellow because there are a couple of 'smart' hacks in
-// the switch cases to improve the algorithm
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-#endif
-
 bool CLR_RT_UnicodeHelper::ConvertFromUTF8( int iMaxChars, bool fJustMove, int iMaxBytes )
 {
     NATIVE_PROFILE_CLR_CORE();

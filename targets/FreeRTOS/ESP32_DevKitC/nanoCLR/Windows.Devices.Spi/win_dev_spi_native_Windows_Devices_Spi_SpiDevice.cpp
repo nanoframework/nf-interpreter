@@ -152,7 +152,7 @@ bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetDevice( CLR_RT
     // Find device in spiconfig
     for( int index=0; index < MAX_SPI_DEVICES; index++)
     {
-        if ( spiconfig[*pBus].deviceId[index] = deviceId )
+        if ( spiconfig[*pBus].deviceId[index] == deviceId )
         {
             // Device found with same deviceId
             *pDeviceIndex = index;
@@ -164,6 +164,8 @@ bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetDevice( CLR_RT
 // Give a complete low-level SPI configuration from user's managed connectionSettings
 spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig( int bus, CLR_RT_HeapBlock* config)
 {
+    (void)bus;
+
     int csPin    = config[ SpiConnectionSettings::FIELD___csLine ].NumericByRef().s4;
     uint8_t spiMode  = (uint8_t)config[ SpiConnectionSettings::FIELD___spiMode ].NumericByRef().s4;
     int bitOrder = config[ SpiConnectionSettings::FIELD___bitOrder ].NumericByRef().s4;
@@ -335,7 +337,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
 {
     NANOCLR_HEADER();
 
-    spi_device_interface_config_t dev_config;
+    //spi_device_interface_config_t dev_config;
  
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  //FAULT_ON_NULL(pThis);
@@ -348,7 +350,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
     spi_host_device_t bus = (spi_host_device_t)( deviceId / 1000 );
     
     // Chip Select
-    int chipSelect  = deviceId % 1000;
+    //int chipSelect  = deviceId % 1000;
 
     // Check valid bus
     if ( bus < HSPI_HOST || bus > VSPI_HOST )
@@ -433,6 +435,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetDeviceSelec
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
        stack.SetResult_String(deviceSelectorString);
    }
-   NANOCLR_NOCLEANUP();
+   NANOCLR_NOCLEANUP_NOLABEL();
 }
 

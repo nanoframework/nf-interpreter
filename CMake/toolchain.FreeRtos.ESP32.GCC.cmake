@@ -62,10 +62,8 @@ set(GCC_ESP32_LINKER_LD, " -L ${ESP32_IDF_PATH}/components/esp32/ld  -T esp32_ou
 
 set(CMAKE_CXX_FLAGS "" CACHE INTERNAL "")
 
-set(CMAKE_C_FLAGS_DEBUG "-std=gnu99 -Og -ggdb -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Werror=all -Wno-error=unused-function -Wno-error=unused-but-set-variable -Wno-error=unused-variable -Wno-error=deprecated-declarations -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-old-style-declaration -Wno-error=maybe-uninitialized -DWITH_POSIX -DHAVE_CONFIG_H -DESP_PLATFORM -D IDF_VER=\"v3.0-dev-349-g2861f3e-dirty\" -MMD -MP  " CACHE INTERNAL "c compiler flags debug")
-set(CMAKE_CXX_FLAGS_DEBUG " -Og -ggdb -std=gnu++11 -fno-exceptions -fno-rtti  -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Werror=all -Wno-error=unused-function -Wno-error=unused-but-set-variable -Wno-error=unused-variable -Wno-error=deprecated-declarations -Wextra -Wno-unused-parameter -Wno-sign-compare -DESP_PLATFORM " CACHE INTERNAL "cxx compiler flags debug")
-# added for CLR
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-invalid-offsetof  -Wno-switch -Wno-unused-variable -Wno-parentheses -Wno-unused-label" CACHE INTERNAL "cxx compiler flags debug")
+set(CMAKE_C_FLAGS_DEBUG "-std=gnu99 -Og -ggdb -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Wextra -Werror -DWITH_POSIX -DHAVE_CONFIG_H -DESP_PLATFORM -D IDF_VER=\"v3.0-dev-349-g2861f3e-dirty\" -MMD -MP  " CACHE INTERNAL "c compiler flags debug")
+set(CMAKE_CXX_FLAGS_DEBUG " -Og -ggdb -std=gnu++11 -fno-exceptions -fno-rtti  -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Wextra -Werror -DESP_PLATFORM " CACHE INTERNAL "cxx compiler flags debug")
 
 set(CMAKE_ASM_FLAGS_DEBUG " -g3 -ggdb" CACHE INTERNAL "asm compiler flags debug")
 
@@ -73,9 +71,8 @@ set(CMAKE_ASM_FLAGS_DEBUG " -g3 -ggdb" CACHE INTERNAL "asm compiler flags debug"
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG " -nostdlib -u call_user_start_cpu0  -Wl,--gc-sections -Wl,-static  " CACHE INTERNAL "linker flags debug")
 
 # set release flags
-set(CMAKE_C_FLAGS_RELEASE " -std=gnu99 -Os -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -MMD -MP -Wall -D IDF_VER=\"v3.0-dev-349-g2861f3e-dirty\"  " CACHE INTERNAL "c compiler flags release")
-
-#set(CMAKE_CXX_FLAGS_RELEASE " -Os -std=gnu++11 -g3 -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Werror=all -Wno-error=unused-function -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations -Wextra -Wno-unused-parameter -Wno-sign-compare -DESP_PLATFORM " CACHE INTERNAL "cxx compiler flags release")
+set(CMAKE_C_FLAGS_RELEASE " -std=gnu99 -Os -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -MMD -MP -Wall -Wextra -Werror -D IDF_VER=\"v3.0-dev-349-g2861f3e-dirty\"  " CACHE INTERNAL "c compiler flags release")
+set(CMAKE_CXX_FLAGS_RELEASE " -Os -std=gnu++11 -g3 -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Wextra -Werror -DESP_PLATFORM " CACHE INTERNAL "cxx compiler flags release")
 
 set(CMAKE_ASM_FLAGS_RELEASE "" CACHE INTERNAL "asm compiler flags release")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE " ${GCC_ESP32_LINKER_FLAGS} ${GCC_ESP32_LINKER_LIBS} ${GCC_ESP32_LINKER_LD}" CACHE INTERNAL "linker flags release")
