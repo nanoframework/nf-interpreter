@@ -8,7 +8,6 @@
 
 #include <nanoHAL.h>
 #include <nanoWeak.h>
-#include <netmf_errors.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH nanoFramework.Runtime.Events.EventCategory (in managed code) !!! //

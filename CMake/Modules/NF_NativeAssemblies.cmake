@@ -188,7 +188,7 @@ macro(PerformSettingsForInteropEntry interopAssemblyName)
     list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_${interopAssemblyNameWithoutDots},")
 
     # find the module
-    find_package("INTEROP_${interopAssemblyName}" REQUIRED)
+    find_package("INTEROP-${interopAssemblyName}" REQUIRED)
 
     #########
     # because Interop assemblies are considered and treated as like any CLR assembly we add them to the same lists
