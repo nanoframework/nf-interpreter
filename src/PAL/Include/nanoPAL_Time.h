@@ -7,7 +7,6 @@
 #define _NANOPAL_TIME_H_ 1
 
 #include <nanoWeak.h>
-#include <netmf_errors.h>
 #include <targetPAL_Time.h>
 
 #ifdef __cplusplus

@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef __NETMF_ERRORS_H__
-#define __NETMF_ERRORS_H__
+#ifndef __NF_ERRORS_H__
+#define __NF_ERRORS_H__
 
 #if !defined(WIN32) && !defined(_WIN32)
 
@@ -167,5 +167,5 @@ typedef int HRESULT;
 #define CLR_S_RESTART_EXECUTION                        MAKE_HRESULT( SEVERITY_SUCCESS, 0x0500, 0x0000 )
 
 
-#endif  // __NETMF_ERRORS_H__
+#endif  // __NF_ERRORS_H__
 
