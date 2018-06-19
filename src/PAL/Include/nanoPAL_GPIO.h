@@ -7,8 +7,6 @@
 #define _NANOPAL_GPIO_H_ 1
 
 #include <nanoWeak.h>
-#include <netmf_errors.h>
-//#include <targetPAL_GPIO.h>
 
 #ifdef __cplusplus
 extern "C" {
