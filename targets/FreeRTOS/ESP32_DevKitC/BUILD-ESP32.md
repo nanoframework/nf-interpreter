@@ -4,12 +4,12 @@
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
-- [Setting up the build environment for ESP32](#Setting up the build environment for ESP32)
-- [Set up Visual Code](#Set up Visual Code)
-- [Build the nanoCLR](#Build the nanoCLR)
-- [Flash nanoCLR to ESP32](#Flash nanoCLR to ESP32)
-- [Start with a Hello World C# application](#Start with a Hello World C# application)
-- [Debug the nanoCLR](#Debug the nanoCLR)
+- [Setting up the build environment for ESP32](#Setting-up-the-build-environment-for-ESP32)
+- [Set up Visual Code](#Set-up-Visual-Code)
+- [Build the nanoCLR](#Build-the-nanoCLR)
+- [Flash nanoCLR to ESP32](#Flash-nanoCLR-to-ESP32)
+- [Start with a Hello World C# application](#Start-with-a-Hello-World-C#-application)
+- [Debug the nanoCLR](#Debug-the-nanoCLR)
 
 **About this document**
 
@@ -68,13 +68,7 @@ You should use the _develop_ branch for mainstream development or the _develop-n
 
     - "C/C++" extension by Microsoft.
     - "CMake" language support for Visual Studio Code by twxs.
-    - "CMake tools" Extended CMake support in Visual Studio code by vector-of-bool (Must be version 0.10.4 as version 0.11 is currently not supported).
-            
-        To install an older version of a VS extension you have to hack it like this:
-        - In Visual Studio Code goto settings -> settings and set "extensions.autoUpdate" to false.
-        - Download version 0.10.4 from [here](https://ms-vscode.gallery.vsassets.io/_apis/public/gallery/publisher/vector-of-bool/extension/cmake-tools/0.10.4/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage).
-        - Rename the download into a file with ".vsix" extension.
-        - In Visual Studio Code goto Extension click the "..." and select "Install form VSIX" and select the file that you've just renamed.
+    - "CMake tools" Extended CMake support in Visual Studio code by vector-of-bool
 
 2. Set up the `CMake-variants.json` in root directory of your local nanoFramework/nf-interpreter clone.
     
@@ -83,39 +77,47 @@ You should use the _develop_ branch for mainstream development or the _develop-n
     Be aware of the forward slashes in the paths. The TOOLCHAIN_PREFIX should be set to the directory where the xtensa-esp32-elf is the subdirectory. If you follow the paths in this guide then you can use this as it is:
  
 ```
-  "linkage": { 
-      "Esp32_nanoCLR": { 
-        "oneWordSummary$": "nanoCLR", 
-        "description$": "Build nanoCLR for ESP32 environment", 
-        "settings": { 
-            "TOOLCHAIN_PREFIX" : "C:/ESP32_Tools/1.22.0.80", 
-            "TARGET_SERIES" : "ESP32", 
-            "RTOS" : "FREERTOS", 
-            "ESP32_IDF_PATH" : "C:/ESP32_Tools/esp-idf-v3.0", 
-            "ESP32_LIBS_PATH" : "C:/ESP32_Tools/libs", 
-            "NF_BUILD_RTM" : "OFF", 
-            "NF_WP_TRACE_ERRORS" : "ON", 
-            "NF_WP_TRACE_HEADERS" : "ON", 
-            "NF_WP_TRACE_STATE" : "ON", 
-            "NF_WP_TRACE_NODATA" : "OFF", 
-            "NF_WP_TRACE_ALL" : "OFF", 
-            "NF_WP_IMPLEMENTS_CRC32" : "ON", 
-            "NF_FEATURE_DEBUGGER" : "ON", 
-            "NF_FEATURE_RTC" : "ON", 
-            "NF_FEATURE_USE_APPDOMAINS" : "OFF", 
-            "API_Windows.Devices.Gpio" : "ON", 
-            "API_Windows.Devices.Spi" : "ON", 
-            "API_Windows.Devices.I2c" : "ON", 
-            "API_Windows.Devices.Adc" : "ON", 
-            "API_Windows.Devices.Pwm" : "ON", 
-            "API_Windows.Devices.Wifi": "ON", 
-            "API_System.Net" : "OFF", 
-            "API_Windows.Networking.Sockets" : "OFF" 
-          } 
-      }, 
+  "linkage": {
+    "default": "",
+    "choices": {
+      "Esp32_NanoCLR": {
+        "short": "NanoCLR",
+        "settings": {
+          "TOOLCHAIN_PREFIX" : "C:/ESP32_Tools/1.22.0.80",
+          "ESP32_IDF_PATH" : "C:/ESP32_Tools/esp-idf-v3.0",
+          "ESP32_LIBS_PATH" : "C:/ESP32_Tools/libs",
+          "TARGET_SERIES" : "ESP32",
+          "USE_FPU" : "TRUE",
+          "RTOS" : "FREERTOS",
+          "NF_BUILD_RTM" : "OFF",
+          "NF_WP_TRACE_ERRORS" : "OFF",
+          "NF_WP_TRACE_HEADERS" : "OFF",
+          "NF_WP_TRACE_STATE" : "OFF",
+          "NF_WP_TRACE_NODATA" : "OFF",
+          "NF_WP_TRACE_ALL" : "OFF",
+          "NF_WP_IMPLEMENTS_CRC32" : "OFF",
+          "NF_FEATURE_DEBUGGER" : "TRUE",
+          "NF_FEATURE_RTC" : "ON",
+          "NF_FEATURE_USE_APPDOMAINS" : "OFF",
+          "NF_FEATURE_USE_FILESYSTEM" : "OFF",
+          "API_System.Net" : "OFF",
+          "API_Windows.Devices.Adc" : "ON",
+          "API_Windows.Devices.Gpio" : "ON",
+          "API_Windows.Devices.I2c" : "ON",
+          "API_Windows.Devices.Pwm" : "ON",
+          "API_Windows.Devices.SerialCommunication" : "ON",
+          "API_Windows.Devices.Spi" : "ON",
+          "API_Windows.Networking.Sockets" : "OFF",
+          "API_Hardware.Esp32" : "ON"
+        }
+      }
+    }
+  }
 ```
 
-3. Create a `./.vscode/tasks.json` from `/.vscode/tasks.TEMPLATE-ESP32.json`.
+3. Create a `./.vscode/cmake-kits.json` from `/.vscode/cmake-kits.TEMPLATE-ESP32.json`.
+
+4. Create a `./.vscode/tasks.json` from `/.vscode/tasks.TEMPLATE-ESP32.json`.
 
     For flashing the nanoCLR into the ESP32 or to erase the flash of the ESP32 you will need this in the `tasks.json` file.
     Adjust the COM port and the path to nanoFramework build directory (**!!mind the forward slashes!!**) to your needs.
@@ -170,7 +172,7 @@ python -m pip install pyserial
     ```
     CMake: Set build type
     ```
-    and set it to the Debug build type. Currently only this build type is working.
+    and set it to the `Debug + NanoCLR` build type. Currently only this build type is working. If it also asks for a kit select `ESP32 Tools`
 
 3. Press F7, click on Build in the Status bar or enter the command 
     ```
