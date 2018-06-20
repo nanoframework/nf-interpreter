@@ -337,8 +337,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
 {
     NANOCLR_HEADER();
 
-    //spi_device_interface_config_t dev_config;
- 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  //FAULT_ON_NULL(pThis);
 
@@ -349,9 +347,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
 
     spi_host_device_t bus = (spi_host_device_t)( deviceId / 1000 );
     
-    // Chip Select
-    //int chipSelect  = deviceId % 1000;
-
     // Check valid bus
     if ( bus < HSPI_HOST || bus > VSPI_HOST )
     {

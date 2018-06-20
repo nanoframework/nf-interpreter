@@ -355,8 +355,15 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
 
         // Wait for 1 sec for data to be sent
-        /*esp_err_t esp_err =*/ uart_wait_tx_done( uart_num,  (TickType_t) 1000 / portTICK_PERIOD_MS);
-
+        esp_err_t esp_err = uart_wait_tx_done( uart_num,  (TickType_t) 1000 / portTICK_PERIOD_MS);
+        if (esp_err == ESP_ERR_TIMEOUT)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
+        else if (esp_err != ESP_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
 
         // return how many bytes were send to the UART
         stack.SetResult_U4(length);

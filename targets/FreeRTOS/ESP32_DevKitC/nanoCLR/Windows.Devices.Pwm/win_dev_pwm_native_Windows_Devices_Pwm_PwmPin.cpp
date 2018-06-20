@@ -116,9 +116,6 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeInit___VOID
        // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-        //int timerId   = (int)(pThis[ FIELD___pwmTimer ].NumericByRef().u4);
-        //PwmPulsePolarity polarity  = (PwmPulsePolarity)(pThis[ FIELD___polarity ].NumericByRef().u4);
-
         // Check pin number is a valid for output
         int pinNumber = (int)(pThis[ FIELD___pinNumber ].NumericByRef().u4);
         if ( !GPIO_IS_VALID_OUTPUT_GPIO(pinNumber) )
@@ -128,9 +125,6 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeInit___VOID
 
         // Create a new entry in channel table and configure channel which will also start channel
         NANOCLR_CHECK_HRESULT( ConfigureAndStart(pThis, true, true) );
-
-        // Get speed mode based on Timer used
-        //ledc_mode_t speed_mode = GetSpeedMode(timerId);
     }
     NANOCLR_NOCLEANUP();
 }
