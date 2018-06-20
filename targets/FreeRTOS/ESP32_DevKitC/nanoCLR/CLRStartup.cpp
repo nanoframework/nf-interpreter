@@ -165,7 +165,7 @@ struct Settings
 
         const CLR_RECORD_ASSEMBLY* header;
         unsigned char * assembliesBuffer ;
-        signed int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
+        unsigned int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
         unsigned char * headerBuffer  = NULL;
 
         while(stream.CurrentIndex < stream.Length)

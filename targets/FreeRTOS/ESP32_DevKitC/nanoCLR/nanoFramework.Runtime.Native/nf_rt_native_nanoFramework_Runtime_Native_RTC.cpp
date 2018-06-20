@@ -34,7 +34,7 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_RTC::Native_RTC_SetSys
         // Return value to the managed application
         stack.SetResult_Boolean(true);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_RTC::Native_RTC_SetAlarm___STATIC__BOOLEAN__I4__U1__U1__U1__U1__U1__U1( CLR_RT_StackFrame& stack )

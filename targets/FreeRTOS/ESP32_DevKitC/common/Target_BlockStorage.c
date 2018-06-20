@@ -65,21 +65,21 @@ IBlockStorageDevice ESP32Flash_BlockStorageInterface =
 
 void BlockStorage_AddDevices()
 {
-    BlockStorageList_AddDevice( &Device_BlockStorage, &ESP32Flash_BlockStorageInterface, &Device_BlockStorageConfig, false);
+    BlockStorageList_AddDevice( (BlockStorageDevice*)&Device_BlockStorage, &ESP32Flash_BlockStorageInterface, &Device_BlockStorageConfig, false);
 }
 
 bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress)
 {
     *pBSD = NULL;
        
-    BlockStorageDevice* block = BlockStorageList_GetFirstDevice;
+    BlockStorageDevice* block = (BlockStorageDevice*)BlockStorageList_GetFirstDevice;
 
     // this has to add to make metadataprocessor happy
     if(!block) return true;
 
-    DeviceBlockInfo* pDeviceInfo = BlockStorageDevice_GetDeviceInfo(&block);
+    DeviceBlockInfo* pDeviceInfo = BlockStorageDevice_GetDeviceInfo((BlockStorageDevice*)&block);
         
-    for(int i=0; i < pDeviceInfo->NumRegions; i++)
+    for(unsigned int i=0; i < pDeviceInfo->NumRegions; i++)
     {
         BlockRegionInfo* pRegion = &pDeviceInfo->Regions[i];
         
@@ -101,6 +101,8 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, un
 
 bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool init)
 {
+    (void)init;
+
     pBSD->m_BSD     = vtable;
     pBSD->m_context = config;
 
