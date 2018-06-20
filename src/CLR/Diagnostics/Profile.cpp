@@ -190,7 +190,7 @@ static void TestCalibrate( CLR_PROF_CounterCallChain& cnt )
 void CLR_PROF_Handler::Calibrate()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-#if defined(PLATFORM_ARM)
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
     const int c_training = 10;
 #else
     const int c_training = 1024;
@@ -203,7 +203,7 @@ void CLR_PROF_Handler::Calibrate()
     s_time_freeze   = 0;
     s_time_adjusted = 0;
 
-#if defined(PLATFORM_ARM)
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
     ::PAL_PerformanceCounter_Initialize();
 #endif
 
