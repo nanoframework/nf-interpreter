@@ -20,3 +20,9 @@ The following ADC channels (and respective GPIO pins) are available to the manag
 - Vbatt ADC1
 
 These first 6 channels are exposed in the board J4 connector as A0 to A5.
+
+
+## Floating point
+
+The current build is set to add support for single-precision floating point.
+Meaning that `System.Math` API supports only the `float` overloads. The `double` ones will throw a `NotImplementedException`.
