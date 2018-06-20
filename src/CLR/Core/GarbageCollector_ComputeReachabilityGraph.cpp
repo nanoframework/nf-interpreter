@@ -248,7 +248,6 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks( CLR_RT_
                     case DATATYPE_BINARY_BLOB_HEAD:
                         {
                             CLR_RT_HeapBlock_BinaryBlob* blob = (CLR_RT_HeapBlock_BinaryBlob*)ptr;
-                            (void)blob;
                             
                             _ASSERTE(blob->BinaryBlobMarkingHandler() == NULL);
                         }
