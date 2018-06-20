@@ -574,7 +574,7 @@ void HAL_Assert  ( const char* Func, int Line, const char* File );
 // HAL_AssertEx is defined in the processor or platform selector files.
 extern void HAL_AssertEx();
 
-#if defined(PLATFORM_ARM)
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
     #if !defined(BUILD_RTM)
         #define       ASSERT(i)  { if(!(i)) HAL_AssertEx(); }
         #define _SIDE_ASSERTE(i) { if(!(i)) HAL_AssertEx(); }
