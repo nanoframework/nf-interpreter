@@ -226,6 +226,7 @@ int CLR_Debug::PrintfV( const char *format, va_list arg )
     size_t iBuffer  = MAXSTRLEN(buffer);
 
     bool fRes = CLR_SafeSprintfV( szBuffer, iBuffer, format, arg );
+    (void)fRes;
 
     _ASSERTE(fRes);
 
