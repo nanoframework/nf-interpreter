@@ -264,6 +264,19 @@ else()
     message(STATUS "Single-precision floating point is effective")
 endif()
 
+###################################################################################
+# chooses if platform provides support for converting string to values on any base
+# (default is OFF which means that conversion to value from base 10 and 16 (partial) is effective)
+option(SUPPORT_ANY_BASE_CONVERSION "option to enable support for converting strings to value on any base")
+
+if(SUPPORT_ANY_BASE_CONVERSION)
+    set(TARGET_SUPPORT_ANY_BASE_CONVERSION TRUE CACHE INTERNAL "Option for string conversion to value from any base")
+    message(STATUS "String conversion to value on any base is effective")
+else()
+    set(TARGET_SUPPORT_ANY_BASE_CONVERSION FALSE CACHE INTERNAL "Option for string conversion to value from base 10 and partial for 16")
+    message(STATUS "String conversion to value from base 10 and 16 (partial) is effective")
+endif()
+
 #################################################################
 # True random number generation option supported by Target MCU
 set(TARGET_MCU_SUPPORTS_RNG TRUE)
