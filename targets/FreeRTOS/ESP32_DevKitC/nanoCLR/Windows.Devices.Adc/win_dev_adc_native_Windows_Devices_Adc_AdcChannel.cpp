@@ -24,7 +24,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
 
         // need to get the deviceId for the ADC controller of this channel
         // get pointer to AdcController field
-        CLR_RT_HeapBlock* adcController = pThis[FIELD___adcController].Dereference();
+        //CLR_RT_HeapBlock* adcController = pThis[FIELD___adcController].Dereference();
 
         // get pointer to _deviceId field
 //       int adcNumber = adcController[Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::FIELD___deviceId].NumericByRef().s4;
@@ -59,9 +59,11 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeDisposeChannel___VOID( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+    
     NANOCLR_HEADER();
 
     // left empty on purpose, nothing to do here
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }

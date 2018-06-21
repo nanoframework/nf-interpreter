@@ -85,8 +85,8 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// ARM
-#if defined(PLATFORM_ARM)
+// ARM & ESP32
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
 // #define NANOCLR_STRESS_GC
 // #define NANOCLR_GC_VERBOSE
 // #define NANOCLR_PROFILE_NEW

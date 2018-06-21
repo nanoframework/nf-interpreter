@@ -14,6 +14,7 @@ extern "C" void SwoInit()
 
 extern "C" void SwoPrintChar(char c)
 {
+    (void)c;
 }
 
 extern "C" void SwoPrintString(const char *s)
@@ -27,8 +28,10 @@ extern "C" void SwoPrintString(const char *s)
 
 uint32_t GenericPort_Write( int portNum, const char* data, size_t size )
 {
-    char* p = (char*)data;
-    int counter = 0;
+    (void)portNum;
+    (void)data;
+    //char* p = (char*)data;
+    //int counter = 0;
 
     // send characters directly to the trace port
     while(*p != '\0' || counter < size)

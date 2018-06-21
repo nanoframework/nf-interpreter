@@ -77,6 +77,8 @@ uint32_t Events_MaskedRead( uint32_t eventsOfInterest )
 
 static void local_Events_SetBoolTimer_Callback(  TimerHandle_t xTimer  )
 {
+    (void)xTimer;
+
     NATIVE_PROFILE_PAL_EVENTS();
 
     *saveTimerCompleteFlag = true;
@@ -160,5 +162,10 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
+    (void)category;
+    (void)subCategory;
+    (void)data1;
+    (void)data2;
+    
     NATIVE_PROFILE_PAL_EVENTS();
 }

@@ -122,11 +122,14 @@ int CLR_RT_UnicodeHelper::CountNumberOfBytes( int max )
 
 //--//
 
-// dev note: need the pragma bellow because there are a couple of 'smart' hacks in
-// the switch cases to improve the algorithm
-#ifdef __GNUC__
+// dev note: need the pragma bellow because there are a couple of 'smart' hacks in	
+// the switch cases to improve the algorithm	
+#ifdef __GNUC__	
 #pragma GCC diagnostic push
+// the GCC compiler for ESP32 doesn't know the -Wimplicit-fallthrough option
+#ifndef PLATFORM_ESP32
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
 #endif
 
 bool CLR_RT_UnicodeHelper::ConvertFromUTF8( int iMaxChars, bool fJustMove, int iMaxBytes )

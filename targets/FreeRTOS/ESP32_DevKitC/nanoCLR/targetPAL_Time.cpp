@@ -11,6 +11,8 @@ static TimerHandle_t nextEventTimer;
 
 static void NextEventTimer_Callback( TimerHandle_t xTimer )
 {
+    (void)xTimer;
+    
     // this call also schedules the next one, if there is one
     HAL_COMPLETION::DequeueAndExec();
 }

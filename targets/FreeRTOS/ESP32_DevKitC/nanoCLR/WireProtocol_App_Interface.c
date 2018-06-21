@@ -13,7 +13,7 @@ extern bool CLR_Messaging_ProcessPayload(WP_Message* msg);
 
 
 // Initialize to a packet sequence number impossible to encounter
-static uint32_t lastPacketSequence = 0x00FEFFFF;
+//static uint32_t lastPacketSequence = 0x00FEFFFF;
 
 // defining this array here makes is local helping reduce the image size because of compiler opmitizations
 static const CommandHandlerLookup c_Lookup_Request[] =

@@ -34,8 +34,6 @@ extern portMUX_TYPE globalLockMutex;
 #define INT32 int32_t
 #define TRUE  true
 #define FALSE false
-#define fmod(x,y) (1)
-
 
 #if !defined(BUILD_RTM)
 

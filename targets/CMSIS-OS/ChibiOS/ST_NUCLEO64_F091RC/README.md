@@ -33,3 +33,10 @@ If porting this reference board to another SMT32F0 (or L0) series make sure this
 
 
 **NOTE: this configuration was successfully tested in a NUCLEO_F091RC board using the virtual COM port through the ST Link USB connection.**
+
+
+## Floating point
+
+The current build is set to add support for single-precision floating point.
+Meaning that `System.Math` API supports only the `float` overloads. The `double` ones will throw a `NotImplementedException`.
+There is no FPU available, so floating point is provided through software implementation.

@@ -18,7 +18,7 @@ static ON_SOFT_REBOOT_HANDLER s_rebootHandlers[16] = {NULL, NULL, NULL, NULL, NU
 
 void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler)
 {
-    for(int i=0; i<ARRAYSIZE(s_rebootHandlers); i++)
+    for(unsigned int i=0; i<ARRAYSIZE(s_rebootHandlers); i++)
     {
         if(s_rebootHandlers[i] == NULL)
         {
@@ -73,7 +73,7 @@ void nanoHAL_Initialize()
 void nanoHAL_Uninitialize()
 {
     // check for s_rebootHandlers
-    for(int i = 0; i< ARRAYSIZE(s_rebootHandlers); i++)
+    for(unsigned int i = 0; i< ARRAYSIZE(s_rebootHandlers); i++)
     {
         if(s_rebootHandlers[i] != NULL)
         {
