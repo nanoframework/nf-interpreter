@@ -69,35 +69,16 @@ typedef struct CRCDriver {
 
 // From STMicroelectronics Cube HAL 
 ///////////////////////////////////////////
-// FIXME
-// THESE can be removed in ChibiOS 18.2
 
-#if defined(STM32F7XX) || defined(STM32H7XX) 
+#if defined(STM32L0XX)
+// this series uses different names for the buses
 
-/**
- * @brief   Enables the CRC peripheral clock.
- *
- * @param[in] lp        low power enable flag
- *
- * @api
- */
-#define rccEnableCRC(lp) rccEnableAHB1(RCC_AHB1ENR_CRCEN, lp)
+#define rccEnableCRC(lp) rccEnableAPB1(RCC_AHBENR_CRCEN, lp)
+#define rccDisableCRC() rccDisableAPB1(RCC_AHBENR_CRCEN)
+#define rccResetCRC() rccResetAPB1(RCC_AHB1RSTR_CRCRST)
 
-/**
- * @brief   Disables the CRC peripheral clock.
- *
- * @api
- */
-#define rccDisableCRC() rccDisableAHB1(RCC_AHB1ENR_CRCEN)
+#endif //defined(STM32L0XX)
 
-/**
- * @brief   Resets the CRC peripheral.
- *
- * @api
- */
-#define rccResetCRC() rccResetAHB1(RCC_AHB1RSTR_CRCRST)
-
-#endif //defined(STM32F7XX) || defined(STM32H7XX) 
 /** @defgroup CRC_Default_Polynomial_Value    Default CRC generating polynomial
   * @{
   */
