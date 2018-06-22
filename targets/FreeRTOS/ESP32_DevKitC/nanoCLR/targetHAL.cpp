@@ -12,7 +12,7 @@
 
 
 //
-//  Reboot hnadlers clean up on reboot
+//  Reboot handlers clean up on reboot
 //
 static ON_SOFT_REBOOT_HANDLER s_rebootHandlers[16] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
