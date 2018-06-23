@@ -8,6 +8,7 @@
 
 #if (defined(STM32F427xx) || defined(STM32F437xx) || \
      defined(STM32F429xx) || defined(STM32F439xx) || \
+	 defined(STM32F469xx) || defined(STM32F479xx) || \
      defined(STM32F745xx) || defined(STM32F746xx) || \
      defined(STM32F756xx) || defined(STM32F767xx) || \
      defined(STM32F769xx) || defined(STM32F777xx) || \
@@ -162,5 +163,5 @@ void fsmcSdramStop(SDRAMDriver *sdramp) {
 
 #endif // STM32_USE_FSMC_SDRAM 
 
-#endif //STM32F427xx / STM32F429xx / STM32F437xx / STM32F439xx / STM32F745xx / STM32F746xx 
+#endif //STM32F427xx / STM32F429xx / STM32F437xx / STM32F439xx / STM32F469xx / STM32F479xx / STM32F745xx / STM32F746xx 
        // STM32F756xx / STM32F767xx / STM32F769xx / STM32F777xx / STM32F779xx

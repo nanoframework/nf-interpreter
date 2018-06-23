@@ -16,6 +16,7 @@
 // (Re)define if needed base address constants supplied in ST's CMSIS
 #if (defined(STM32F427xx) || defined(STM32F437xx) || \
      defined(STM32F429xx) || defined(STM32F439xx) || \
+	 defined(STM32F469xx) || defined(STM32F479xx) || \
      defined(STM32F745xx) || defined(STM32F746xx) || \
      defined(STM32F756xx) || defined(STM32F767xx) || \
      defined(STM32F769xx) || defined(STM32F777xx) || \
@@ -65,6 +66,7 @@
 #define FSMC_Bank4_MAP_BASE               ((uint32_t) 0x90000000)
 #if (defined(STM32F427xx) || defined(STM32F437xx) || \
      defined(STM32F429xx) || defined(STM32F439xx) || \
+	 defined(STM32F469xx) || defined(STM32F479xx) || \
      defined(STM32F7))
   #define FSMC_Bank5_MAP_BASE             ((uint32_t) 0xC0000000)
   #define FSMC_Bank6_MAP_BASE             ((uint32_t) 0xD0000000)
@@ -143,6 +145,7 @@ typedef struct {
 
 #if (defined(STM32F427xx) || defined(STM32F437xx) || \
      defined(STM32F429xx) || defined(STM32F439xx) || \
+	 defined(STM32F469xx) || defined(STM32F479xx) || \
      defined(STM32F7))
 
 typedef struct {
@@ -197,6 +200,7 @@ typedef struct {
 #define  FSMC_BCR_MWID_16         ((uint32_t)1 << 4)
 #if (defined(STM32F427xx) || defined(STM32F437xx) || \
      defined(STM32F429xx) || defined(STM32F439xx) || \
+	 defined(STM32F469xx) || defined(STM32F479xx) || \
      defined(STM32F7))
 #define  FSMC_BCR_MWID_32         ((uint32_t)2 << 4)
 #else
@@ -215,6 +219,7 @@ typedef struct {
 #define  FSMC_BCR_CBURSTRW        ((uint32_t)1 << 19)
 #if (defined(STM32F427xx) || defined(STM32F437xx) || \
      defined(STM32F429xx) || defined(STM32F439xx) || \
+	 defined(STM32F469xx) || defined(STM32F479xx) || \
      defined(STM32F7))
 #define  FSMC_BCR_CCLKEN          ((uint32_t)1 << 20)
 #endif
@@ -295,6 +300,7 @@ struct FSMCDriver {
 #endif
 #if (defined(STM32F427xx) || defined(STM32F437xx) || \
      defined(STM32F429xx) || defined(STM32F439xx) || \
+	 defined(STM32F469xx) || defined(STM32F479xx) || \
      defined(STM32F7))
   #if STM32_USE_FSMC_SDRAM
     FSMC_SDRAM_TypeDef       *sdram;
