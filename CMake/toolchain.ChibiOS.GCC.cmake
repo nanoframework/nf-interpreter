@@ -141,10 +141,10 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
 
     # set compiler definition for platform emulated floating point according to FPU
     # no FPU requires FP emulation from the platform
-    target_compile_definitions(${TARGET} PUBLIC $<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:-DPLATFORM_EMULATED_FLOATINGPOINT>)
+    target_compile_definitions(${TARGET} PUBLIC $<$<NOT:$<BOOL:USE_FPU>>:-DPLATFORM_EMULATED_FLOATINGPOINT>)
 
     # set compiler definition for CORTEX according to FPU
-    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=$<$<BOOL:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:FALSE>)
+    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=${USE_FPU_IS_TRUE})
 
     # set compiler definition for using Application Domains feature
     if(NF_FEATURE_USE_APPDOMAINS)

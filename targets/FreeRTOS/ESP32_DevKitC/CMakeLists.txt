@@ -33,12 +33,12 @@ find_package(NF_CoreCLR REQUIRED)
 
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
-find_package(NF_Debugger REQUIRED)
-find_package(NF_Diagnostics REQUIRED)
+    find_package(NF_Debugger REQUIRED)
+    find_package(NF_Diagnostics REQUIRED)
 endif()
 
 # nF feature: Networking Stack, LWIP included in IDF libs
-find_package(NF_NETWORKING REQUIRED)
+    find_package(NF_NETWORKING REQUIRED)
 
 # RTC (real time clock) (default is OFF so RTC is NOT included)
 option(NF_FEATURE_RTC "option to use hardware RTC")
