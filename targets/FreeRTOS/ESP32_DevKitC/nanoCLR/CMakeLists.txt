@@ -36,7 +36,7 @@ list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoCRT.cp
 list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.cpp")
 
 # append files from Runtime.Native
-list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_RTC.cpp")
+list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp")
 
 
 # add native assemblies

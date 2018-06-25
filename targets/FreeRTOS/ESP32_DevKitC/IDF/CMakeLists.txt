@@ -4,11 +4,6 @@
 #
 
 
-# add header file with common target definitions
-#configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in"
-#                "${CMAKE_CURRENT_BINARY_DIR}/target_platform.h" @ONLY)
-
-
 list(APPEND COMPONENT_PATH "${ESP32_IDF_PATH}/components")
 #append ESP32 IDF include paths
 
