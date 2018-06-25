@@ -10,13 +10,28 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 
-struct Library_nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Runtime.Native.SystemInfo.FloatingPoint (in managed code) !!!    //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum FloatingPoint
+{
+    FloatingPoint_None = 0,
+    FloatingPoint_SinglePrecisionSoftware = 1,
+    FloatingPoint_SinglePrecisionHardware = 2,
+    FloatingPoint_DoublePrecisionSoftware = 3,
+    FloatingPoint_DoublePrecisionHardware = 4,
+};
+
+struct Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo
 {
     NANOCLR_NATIVE_DECLARE(GetSystemVersion___STATIC__VOID__BYREF_I4__BYREF_I4__BYREF_I4__BYREF_I4);
     NANOCLR_NATIVE_DECLARE(get_OEMString___STATIC__STRING);
     NANOCLR_NATIVE_DECLARE(get_OEM___STATIC__U1);
     NANOCLR_NATIVE_DECLARE(get_Model___STATIC__U1);
     NANOCLR_NATIVE_DECLARE(get_SKU___STATIC__U2);
+    NANOCLR_NATIVE_DECLARE(GetNativeFlotingPointSupport___STATIC__U1);
 
     //--//
 
