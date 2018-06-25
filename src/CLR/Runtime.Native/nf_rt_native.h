@@ -54,10 +54,9 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint
 
 };
 
-struct Library_nf_rt_native_nanoFramework_Runtime_Native_RTC
+struct Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc
 {
     NANOCLR_NATIVE_DECLARE(Native_RTC_SetSystemTime___STATIC__BOOLEAN__I4__U1__U1__U1__U1__U1__U1);
-    NANOCLR_NATIVE_DECLARE(Native_RTC_SetAlarm___STATIC__BOOLEAN__I4__U1__U1__U1__U1__U1__U1);
 
     //--//
 
