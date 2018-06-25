@@ -17,11 +17,6 @@ void HeapLocation(unsigned char*& baseAddress, unsigned int& sizeInBytes)
 {
     NATIVE_PROFILE_PAL_HEAP();
 
-#if defined(PLATFORM_ESP32)
     baseAddress = (unsigned char*)&managedHeap;
     sizeInBytes = sizeof(managedHeap);
-#else
-    baseAddress = (unsigned char*)                            &HeapBegin;
-    sizeInBytes = (unsigned int)((size_t)&HeapEnd - (size_t)&HeapBegin + sizeof(HeapEnd));
-#endif
 }

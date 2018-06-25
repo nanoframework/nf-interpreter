@@ -25,45 +25,10 @@ uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) {
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-#if defined(HAL_USE_RTC)
-    SYSTEMTIME st; 
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    
-    time_t mtime = now.tv_sec;
-    struct tm mtm;
-    gmtime_r(&mtime, &mtm);
+    (void) datePartOnly;
 
-    st.wDay = (unsigned short) mtm.tm_mday;         // day of the month 1-31
-    st.wMonth = (unsigned short) mtm.tm_mon + 1;    // months since January 0-11
-    st.wYear = (unsigned short) mtm.tm_year + 1900; // years since 1900
-    st.wDayOfWeek = (unsigned short) mtm.tm_wday;   // days since Sunday 0-6
-
-    // zero 'time' fields if date part only is required
-    if(datePartOnly)
-    {
-        st.wMilliseconds = 0;
-        st.wSecond = 0;
-        st.wMinute = 0;
-        st.wHour   = 0;
-    }
-    else
-    {
-        // full date&time required, fill in 'time' fields too
-        st.wMilliseconds = now.tv_usec / 1000;
-        st.wSecond = mtm.tm_sec;
-        st.wMinute = mtm.tm_min;
-        st.wHour   = mtm.tm_hour;
-    }
-
-    return HAL_Time_ConvertFromSystemTime( &st );
-
-#else
-
-     // use system ticks
-     return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() );
-
-#endif
+    // use system ticks
+    return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() );
 };
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
@@ -127,7 +92,6 @@ const char* HAL_Time_CurrentDateTimeToString()
 {
     return DateTimeToString(HAL_Time_CurrentDateTime(false));
 }
-
 
 uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
 {
