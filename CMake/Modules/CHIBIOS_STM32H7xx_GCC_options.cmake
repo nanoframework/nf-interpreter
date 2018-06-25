@@ -4,7 +4,7 @@
 #
 
 # FPU preference for using hardware FP unit or soft library
-if(USE_FPU_IS_TRUE)
+if(USE_FPU)
     set(FLOAT_ABI_OPTION "-mfloat-abi=hard")
 elseif()
     set(FLOAT_ABI_OPTION "-mfloat-abi=soft")
