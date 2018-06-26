@@ -85,7 +85,7 @@ struct Sockets_LWIP_Driver
     static bool UninitializeDbgListener( int ComPortNum );
     static int  Write( int ComPortNum, const char* Data, size_t size );
     static int  Read ( int ComPortNum, char*       Data, size_t size );
-    static bool UpgradeToSsl( int ComPortNum, const uint8_t* pCACert, uint32_t caCertLen, const uint8_t* pDeviceCert, uint32_t deviceCertLen, LPCSTR szTargetHost );
+    static bool UpgradeToSsl( int ComPortNum, const int8_t* pCACert, uint32_t caCertLen, const int8_t* pDeviceCert, uint32_t deviceCertLen, const char* szTargetHost );
     static bool IsUsingSsl( int ComPortNum );
 
     void* GetSocketSslData(SOCK_SOCKET socket)

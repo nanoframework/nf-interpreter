@@ -24,6 +24,12 @@ set(System.Net_SRCS
     sys_net_native_System_Net_NetworkInformation_NetworkInterface.cpp
     sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration.cpp
 
+    # System.Security.Cryptography.X509Certificates 
+    sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate.cpp
+
+    # System.Net.Security
+    sys_net_native_System_Net_Security_SslNative.cpp
+
 )
 
 foreach(SRC_FILE ${System.Net_SRCS})

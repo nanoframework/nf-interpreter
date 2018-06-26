@@ -65,23 +65,21 @@ esp_err_t Esp32_Wireless_Connect(HAL_Configuration_Wireless80211 * pWireless)
 	return ESP_OK;
 }
 
-int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * config) 
+int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * pConfig) 
 { 
 	esp_err_t ec;
 
     ec = Esp32_InitaliseWifi();
     if(ec != ESP_OK) return SOCK_SOCKET_ERROR;
  
-	// FIXME
-	//HAL_Configuration_Wireless80211 * pWireless = ConfigurationManager_GetWirelessConfigurationFromId(config.SpecificConfigId);
-
-	//FIXME Configure Wireless Interface
+	// Get Wireless config
+	HAL_Configuration_Wireless80211 * pWireless = ConfigurationManager_GetWirelessConfigurationFromId(pConfig->SpecificConfigId);
 
 	// Connect if we have an ssid
-	// if ( hal_strlen_s(pWireless->ssid) > 0 )
-	// {
-	// 	Esp32_Wireless_Connect(pWireless); 
-	// }
+	if ( hal_strlen_s((const char *)pWireless->Ssid) > 0 )
+	{
+	 	Esp32_Wireless_Connect(pWireless); 
+	}
 	
 	// FIXME find a better way to get the netif ptr
 	struct netif *pNetIf;

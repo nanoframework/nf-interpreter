@@ -38,5 +38,5 @@ uint32_t GenericPort_Write( int portNum, const char* data, size_t size )
     }
     return counter;
     
-    //return size;
+//    return size;
 }

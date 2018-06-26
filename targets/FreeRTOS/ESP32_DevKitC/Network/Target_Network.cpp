@@ -22,25 +22,25 @@ bool Network_Interface_Bind(int index)
     return true;
 }
 
-int  Network_Interface_Open(int index)
+int  Network_Interface_Open(int configIndex)
 {
-    ets_printf( "Network_Interface_Open %d\n", index);
-    HAL_Configuration_NetworkInterface config;
+    ets_printf( "Network_Interface_Open %d\n", configIndex);
+    HAL_Configuration_NetworkInterface * pConfig;
+
+    // Check index in range
+    if ( g_TargetConfiguration.NetworkInterfaceConfigs->Count <= configIndex ) return SOCK_SOCKET_ERROR;
 
     // load network interface configuration from storage
-    if(!ConfigurationManager_GetConfigurationBlock((void*)&config, DeviceConfigurationOption_Network, index))
-    {
-        // failed to load configuration
-        // FIXME output error?
-        return SOCK_SOCKET_ERROR;
-    }
-    _ASSERTE(config.StartupAddressMode > 0);
+    pConfig = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
 
-    switch((tcpip_adapter_if_t)index)
+    // Check valid config
+//    _ASSERTE(pConfig->StartupAddressMode > 0);
+
+    switch((tcpip_adapter_if_t)configIndex)
     {
         // Wireless 
         case TCPIP_ADAPTER_IF_STA:
-            return Esp32_Wireless_Open(index, &config);
+            return Esp32_Wireless_Open(configIndex, pConfig);
 
        // Soft AP
         case TCPIP_ADAPTER_IF_AP:
@@ -49,19 +49,19 @@ int  Network_Interface_Open(int index)
 #if ESP32_ETHERNET_SUPPORT
         // Ethernet
         case TCPIP_ADAPTER_IF_ETH:
-            return Esp32_Ethernet_Open(index, &config);
+            return Esp32_Ethernet_Open(configIndex, pConfig);
 #endif
     }
 	return SOCK_SOCKET_ERROR;
 }
 
-bool Network_Interface_Close(int index)
+bool Network_Interface_Close(int configIndex)
 {
-     switch((tcpip_adapter_if_t)index)
+     switch((tcpip_adapter_if_t)configIndex)
     {
         // Wireless 
         case TCPIP_ADAPTER_IF_STA:
-            return Esp32_Wireless_Close(index);
+            return Esp32_Wireless_Close(configIndex);
 
        // Soft AP
        case TCPIP_ADAPTER_IF_AP:
@@ -70,7 +70,7 @@ bool Network_Interface_Close(int index)
 #if ESP32_ETHERNET_SUPPORT
         // Ethernet
         case TCPIP_ADAPTER_IF_ETH:
-            return Esp32_Ethernet_Close(index);
+            return Esp32_Ethernet_Close(configIndex);
 #endif
 
     }
