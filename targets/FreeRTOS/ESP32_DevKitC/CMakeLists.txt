@@ -89,7 +89,9 @@ add_executable(
     ${NANOCLR_PROJECT_SOURCES}
 
     ${TARGET_ESP32_NANOCLR_SOURCES}
-    
+
+    ${WireProtocol_SOURCES}
+
     # sources for nanoFramework libraries
     "${NF_CoreCLR_SOURCES}"
     "${NF_Debugger_SOURCES}"
