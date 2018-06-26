@@ -30,8 +30,29 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_PinChan
 
 };
 
+struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDataEvent
+{
+    static const int FIELD__SerialDeviceIndex = 3;
+    static const int FIELD__Event = 4;
+
+
+    //--//
+
+};
+
+struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDataReceivedEventArgs
+{
+    static const int FIELD___data = 1;
+
+
+    //--//
+
+};
+
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice
 {
+    static const int FIELD_STATIC__s_eventListener = 0;
+
     static const int FIELD___disposed = 1;
     static const int FIELD___syncLock = 2;
     static const int FIELD___opened = 3;
@@ -47,6 +68,8 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     static const int FIELD___parity = 13;
     static const int FIELD___stopBits = 14;
     static const int FIELD___bytesReceived = 15;
+    static const int FIELD___watchChar = 16;
+    static const int FIELD___callbacksDataReceivedEvent = 17;
 
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
@@ -54,6 +77,7 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     NANOCLR_NATIVE_DECLARE(NativeWrite___VOID__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(NativeStore___U4);
     NANOCLR_NATIVE_DECLARE(NativeRead___U4__SZARRAY_U1__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeSetWatchChar___VOID);
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
@@ -62,8 +86,26 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceController
 {
-    static const int FIELD_STATIC__s_instance = 0;
-    static const int FIELD_STATIC__s_deviceCollection = 1;
+    static const int FIELD_STATIC__s_instance = 1;
+    static const int FIELD_STATIC__s_deviceCollection = 2;
+
+
+    //--//
+
+};
+
+struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceEventListener
+{
+    static const int FIELD___serialDevicesMap = 1;
+
+
+    //--//
+
+};
+
+struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceInputStream
+{
+    static const int FIELD___serialDevice = 1;
 
 
     //--//
@@ -73,6 +115,7 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream
 {
     static const int FIELD___serialDevice = 1;
+    static const int FIELD___unstoredBufferLength = 2;
 
 
     //--//

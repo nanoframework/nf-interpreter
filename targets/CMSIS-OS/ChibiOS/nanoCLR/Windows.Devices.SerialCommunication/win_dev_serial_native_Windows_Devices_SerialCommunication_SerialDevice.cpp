@@ -59,6 +59,16 @@ enum InputStreamOptions
     InputStreamOptions_ReadAhead
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialData (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum SerialData
+{
+    SerialData_Chars = 0,
+    SerialData_WatchChar,
+};
+
 /////////////////////////////////////////////////////////
 // UART PAL strucs delcared in win_dev_serial_native.h //
 /////////////////////////////////////////////////////////
@@ -159,59 +169,65 @@ static void TxEnd1(UARTDriver *uartp)
 // This callback is invoked when a character is received but the application was not ready to receive it, the character is passed as parameter.
 static void RxChar(UARTDriver *uartp, uint16_t c) 
 {
-    (void)uartp;
-    (void)c;
-
     NATIVE_INTERRUPT_START
 
     NF_PAL_UART* palUart;
+    uint8_t portIndex = 0;
 
     #if STM32_UART_USE_USART1
     if (uartp == &UARTD1)
     {
         palUart = &Uart1_PAL;
+        portIndex = 1;
     }
     #endif
     #if STM32_UART_USE_USART2
     if (uartp == &UARTD2)
     {
         palUart = &Uart2_PAL;
+        portIndex = 2;
     }
     #endif
     #if STM32_UART_USE_USART3
     if (uartp == &UARTD3)
     {
         palUart = &Uart3_PAL;
+        portIndex = 3;
     }
     #endif
     #if STM32_UART_USE_UART4
     if (uartp == &UARTD4)
     {
         palUart = &Uart4_PAL;
+        portIndex = 4;
     }
     #endif
     #if STM32_UART_USE_UART5
     if (uartp == &UARTD5)
     {
         palUart = &Uart5_PAL;
+        portIndex = 5;
     }
     #endif
     #if STM32_UART_USE_USART6
     if (uartp == &UARTD6)
     {
         palUart = &Uart6_PAL;
+        portIndex = 6;
     }
     #endif
     #if STM32_UART_USE_UART7
     if (uartp == &UARTD7)
     {
         palUart = &Uart7_PAL;
+        portIndex = 7;
     }
     #endif
     #if STM32_UART_USE_UART8
     if (uartp == &UARTD8)
     {
         palUart = &Uart8_PAL;
+        portIndex = 8;
     }
     #endif
   
@@ -221,14 +237,27 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     // don't care about the success of the operation, if it's full we are droping the char anyway
     palUart->RxRingBuffer.Push((uint8_t)c);
 
-    // check if the requested bytes are available in the buffer 
-    if(palUart->RxBytesToRead > 0 && palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead)
+    // is there a read operation going on?
+    if(palUart->RxBytesToRead > 0)
     {
-        // reset Rx bytes to read count
-        palUart->RxBytesToRead = 0;
+        // yes
+        // check if the requested bytes are available in the buffer...
+        //... or if the watch char was received
+        if((palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead) ||
+            (c == palUart->WatchChar))
+        {
+            // reset Rx bytes to read count
+            palUart->RxBytesToRead = 0;
 
-        // fire event for Rx buffer complete
-        Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+            // fire event for Rx buffer complete
+            Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+        }
+    }
+    else
+    {
+        // no read operation ongoing, so fire an event
+        // post a managed event with the port index and event code (check if this is the watch char or just another another)
+        PostManagedEvent( EVENT_SERIAL, 0, portIndex, (c == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars );
     }
 
     NATIVE_INTERRUPT_END
@@ -960,6 +989,71 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     stack.SetResult_U4(bytesRead);
 
     NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeSetWatchChar___VOID( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        NF_PAL_UART* palUart;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+        // Choose the driver for this SerialDevice
+        switch ((int)pThis[ FIELD___portIndex ].NumericByRef().s4)
+        {
+    #if STM32_UART_USE_USART1
+            case 1 :
+                palUart = &Uart1_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_USART2
+            case 2 :
+                palUart = &Uart2_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_USART3
+            case 3 :
+                palUart = &Uart3_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_UART4
+            case 4 :
+                palUart = &Uart4_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_UART5
+            case 5 :
+                palUart = &Uart5_PAL;
+                break;                
+    #endif
+    #if STM32_UART_USE_USART6
+            case 6 :
+                palUart = &Uart6_PAL;
+                break;                
+    #endif
+    #if STM32_UART_USE_UART7
+            case 7 :
+                palUart = &Uart7_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_UART8
+            case 8 :
+                palUart = &Uart8_PAL;
+                break;
+    #endif
+            default:
+                // this COM port is not valid
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+        }
+
+        // set watch char
+        palUart->WatchChar = (uint8_t)pThis[ FIELD___watchChar ].NumericByRef().u1;
+
+    }
+    NANOCLR_NOCLEANUP(); 
 }
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
