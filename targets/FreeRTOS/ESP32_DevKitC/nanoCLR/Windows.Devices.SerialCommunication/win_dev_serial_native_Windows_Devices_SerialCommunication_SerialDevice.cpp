@@ -476,15 +476,20 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeSetWatchChar___VOID( CLR_RT_StackFrame& stack )
 {
-    (void) stack;
-
     NANOCLR_HEADER();
-    {
-        // set watch char
-        // (uint8_t)pThis[ FIELD___watchChar ].NumericByRef().u1;
 
-    }
-    NANOCLR_NOCLEANUP_NOLABEL(); 
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::get_BytesToRead___U4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )

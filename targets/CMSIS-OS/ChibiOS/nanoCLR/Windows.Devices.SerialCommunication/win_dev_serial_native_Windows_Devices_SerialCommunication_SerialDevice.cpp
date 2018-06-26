@@ -1056,6 +1056,71 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP(); 
 }
 
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::get_BytesToRead___U4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    {
+        NF_PAL_UART* palUart;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+        // Choose the driver for this SerialDevice
+        switch ((int)pThis[ FIELD___portIndex ].NumericByRef().s4)
+        {
+    #if STM32_UART_USE_USART1
+            case 1 :
+                palUart = &Uart1_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_USART2
+            case 2 :
+                palUart = &Uart2_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_USART3
+            case 3 :
+                palUart = &Uart3_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_UART4
+            case 4 :
+                palUart = &Uart4_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_UART5
+            case 5 :
+                palUart = &Uart5_PAL;
+                break;                
+    #endif
+    #if STM32_UART_USE_USART6
+            case 6 :
+                palUart = &Uart6_PAL;
+                break;                
+    #endif
+    #if STM32_UART_USE_UART7
+            case 7 :
+                palUart = &Uart7_PAL;
+                break;
+    #endif
+    #if STM32_UART_USE_UART8
+            case 8 :
+                palUart = &Uart8_PAL;
+                break;
+    #endif
+            default:
+                // this COM port is not valid
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+        }
+
+        // get length of Rx ring buffer
+        stack.SetResult_U4(palUart->RxRingBuffer.Length());
+
+    }
+    NANOCLR_NOCLEANUP(); 
+}
+
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
 {
    NANOCLR_HEADER();

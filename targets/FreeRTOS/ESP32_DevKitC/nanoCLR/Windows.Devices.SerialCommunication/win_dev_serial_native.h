@@ -71,6 +71,7 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     static const int FIELD___watchChar = 16;
     static const int FIELD___callbacksDataReceivedEvent = 17;
 
+    NANOCLR_NATIVE_DECLARE(get_BytesToRead___U4);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeConfig___VOID);
