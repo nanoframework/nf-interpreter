@@ -215,6 +215,16 @@ if(NF_WP_IMPLEMENTS_CRC32)
     target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DWP_IMPLEMENTS_CRC32)
 endif()
 
+# set compiler definition regarding inclusion of trace messages and checks on CLR
+if(NF_PLATFORM_NO_CLR_TRACE)
+    target_compile_definitions(${TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
+endif()
+
+# set compiler definition regarding CLR IL inlining
+if(NF_CLR_NO_IL_INLINE)
+    target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
+endif()
+
 # set extra linker flags for DEBUG
 #set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS_DEBUG "")

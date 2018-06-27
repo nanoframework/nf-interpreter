@@ -166,7 +166,7 @@ nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
 nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DRUNTIME_MEMORY_PROFILE__extrasmall=1)
 
 # set linker file
 nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F091xC_booter.ld)
