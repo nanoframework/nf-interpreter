@@ -65,6 +65,16 @@ enum InputStreamOptions
     InputStreamOptions_ReadAhead
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialData (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum SerialData
+{
+    SerialData_Chars = 0,
+    SerialData_WatchChar,
+};
+
 static const char* TAG = "SerialDevice";
 
 static char Esp_Serial_Initialised_Flag[UART_NUM_MAX] = {0,0,0};
@@ -464,6 +474,23 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeSetWatchChar___VOID( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::get_BytesToRead___U4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
 {
