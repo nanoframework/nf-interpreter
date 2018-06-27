@@ -60,10 +60,22 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
     return HAL_Time_ConvertFromSystemTime( &st );
 
 #else
+	if (datePartOnly)
+	{
+		SYSTEMTIME st;
+		HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
 
-    // use system ticks
-    return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() );
+		st.wHour = 0;
+		st.wMinute = 0;
+		st.wSecond = 0;
+		st.wMilliseconds = 0;
 
+		return HAL_Time_ConvertFromSystemTime(&st);
+	}
+	else
+    {
+        return HAL_Time_CurrentTime();
+    }
 #endif
 };
 
