@@ -140,7 +140,21 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRa
     uint16_t divider = 0;
     int32_t maxSpiFrequency;
 
-  #if defined(STM32F0xx_MCUCONF)
+  #if defined(STM32L0xx_MCUCONF)
+
+    // SP1 is feed by APB2 (STM32_PCLK2)
+    actualFrequency = STM32_PCLK2;
+
+    // SPI2 is feed by APB1 (STM32_PCLK1)
+    if (busIndex == 1)
+    {
+        actualFrequency = STM32_PCLK1;
+    }
+
+    // from datasheet
+    maxSpiFrequency = 12000000;
+
+  #elif defined(STM32F0xx_MCUCONF)
 
     // STM32F0 SPI is always feed by APB1
     actualFrequency = STM32_PCLK1;
@@ -177,7 +191,9 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRa
     }
 
   #else
-    #error "Please check max SPI frequency"
+
+    #error "Error setting max SPI frequency. Check if the target series is defined."
+
   #endif
     
 
