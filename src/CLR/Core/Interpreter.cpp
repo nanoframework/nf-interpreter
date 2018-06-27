@@ -321,7 +321,7 @@ void CLR_RT_Thread::PopEH_Inner( CLR_RT_StackFrame* stack, CLR_PMETADATA ip )
             //
             if(ip && (us.m_currentBlockStart <= ip && ip < us.m_currentBlockEnd)) break;
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
             if(stack->m_inlineFrame) break;
 #endif
 
@@ -1929,7 +1929,7 @@ Execute_RestartDecoding:
                 else
 #endif //NANOCLR_APPDOMAINS
                 {
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
                     if(stack->PushInline(ip, assm, evalPos, calleeInst, pThis))
                     {
                         fDirty = true;
@@ -1947,7 +1947,7 @@ Execute_RestartDecoding:
 
             OPDEF(CEE_RET,                        "ret",              VarPop,             Push0,       InlineNone,         IPrimitive,  1,  0xFF,    0x2A,    RETURN)
             {
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
                 if(stack->m_inlineFrame)
                 {
                     stack->m_evalStackPos = evalPos;
