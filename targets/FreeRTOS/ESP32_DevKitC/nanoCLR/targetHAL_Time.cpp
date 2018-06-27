@@ -10,25 +10,31 @@
 #include <target_platform.h>
 #include <Esp32_os.h>
 
-// Converts Tickcount to .NET ticks (100 nanoseconds)
-uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) {
-    
-    (void)sysTicks;
-    
-    // convert to microseconds from FreeRTOS Tickcount
-    int64_t microsecondsFromSysTicks = ((( xTaskGetTickCount() ) * 1000000ULL + (int64_t)configTICK_RATE_HZ - 1ULL) / (int64_t)configTICK_RATE_HZ);
-
-    // need to convert from microseconds to 100 nanoseconds
-    return  microsecondsFromSysTicks * 10;
+// Converts FreeRTOS Tickcount to .NET ticks (100 nanoseconds)
+uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) 
+{
+    return (((int64_t)sysTicks * (int64_t)1000000 + (int64_t)configTICK_RATE_HZ - 1) / (int64_t)configTICK_RATE_HZ) * 10;
 }
 
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-    (void) datePartOnly;
+	if (datePartOnly)
+	{
+		SYSTEMTIME st;
+		HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
 
-    // use system ticks
-    return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() );
+		st.wHour = 0;
+		st.wMinute = 0;
+		st.wSecond = 0;
+		st.wMilliseconds = 0;
+
+		return HAL_Time_ConvertFromSystemTime(&st);
+	}
+	else
+    {
+        return HAL_Time_CurrentTime();
+    }
 };
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
