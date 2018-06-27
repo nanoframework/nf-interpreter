@@ -8,6 +8,11 @@
 
 #include <nanoCLR_Runtime.h>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 struct CLR_RT_DUMP
 {
 #undef DECL_POSTFIX
@@ -38,11 +43,6 @@ struct CLR_RT_DUMP
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif
 
 struct CLR_Checks
 {

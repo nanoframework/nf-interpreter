@@ -128,6 +128,9 @@ set(NF_CoreCLR_SRCS
     # CLR startup
     CLRStartup.cpp
 
+    # Messaging
+    Messaging.cpp
+
     # Runtime.Native
     nf_rt_native.cpp
     nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp
