@@ -1,18 +1,11 @@
 /*
-    ChibiOS - Copyright (C) 2006..2016 Giovanni Di Sirio
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+//
+// Copyright (c) 2017 The nanoFramework project contributors
+// Portions Copyright (c) 2006..2015 Giovanni Di Sirio.  All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
 */
+
 
 /*
  * STM32L072xZ memory setup.
@@ -20,9 +13,10 @@
 MEMORY
 {
     flash       : org = 0x08004000, len = 192k - 16k - 12k      /* flash size less the space reserved for nanoBooter and application deployment*/
+    config      : org = 0x00000000, len = 0                     /* space reserved for configuration block */
     deployment  : org = 0x0802C000, len = 12k                   /* space reserved for application deployment */
-    ramvt       : org = 0x00000000, len = 0                     /* initial RAM address is reserved for a copy of the vector table */
-    ram0        : org = 0x20000000, len = 20k
+    ramvt       : org = 0x20000000, len = 0xC0                  /* initial RAM address is reserved for a copy of the vector table */
+    ram0        : org = 0x200000C0, len = 20k - 0xC0            /* remaining RAM is free for use */
     ram1        : org = 0x00000000, len = 0
     ram2        : org = 0x00000000, len = 0
     ram3        : org = 0x00000000, len = 0
@@ -76,11 +70,7 @@ REGION_ALIAS("BSS_RAM", ram0);
 /* RAM region to be used for the default heap.*/
 REGION_ALIAS("HEAP_RAM", ram0);
 
-/* Stacks rules inclusion.*/
-INCLUDE rules_stacks.ld
+/* RAM region to be used for the nanoFramework CLR managed heap.*/
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
 
-/* Code rules inclusion.*/
-INCLUDE rules_code.ld
-
-/* Data rules inclusion.*/
-INCLUDE rules_data.ld
+INCLUDE rules.ld

@@ -98,6 +98,8 @@ add_executable(
     ${CHIBIOS_SOURCES}
     ${ChibiOSnfOverlay_SOURCES}
 
+    ${WireProtocol_SOURCES}
+
     # sources for nanoFramework libraries
     "${NF_CoreCLR_SOURCES}"
     "${NF_Debugger_SOURCES}"
@@ -164,7 +166,7 @@ nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
 nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DNANOCLR_NO_IL_INLINE=1 -DPLATFORM_NO_CLR_TRACE=1 -DRUNTIME_MEMORY_PROFILE__extrasmall=1 -DNANOCLR_NO_ASSEMBLY_STRINGS=1)
 
 # set linker file
 nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32L072xB_booter.ld)
@@ -180,7 +182,7 @@ nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf TRUE)
 # the size of the CLR managed heap is defined here
 ###################################################
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x1800")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x300,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x1200")
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
