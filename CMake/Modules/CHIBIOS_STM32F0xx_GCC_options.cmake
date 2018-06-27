@@ -5,7 +5,6 @@
 
 # sanity check on FPU preference
 if(USE_FPU)
-elseif()
     message(FATAL_ERROR "STM32F0 series doesn't have FPU. Need to set USE_FPU option to OFF.")
 endif()
 
