@@ -862,7 +862,18 @@ public:
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     void SetFloat  ( const float       num ) { CLR_RT_HEAPBLOCK_ASSIGN_FLOAT32           (DATATYPE_R4, num); }
     void SetDouble ( const double      num ) { CLR_RT_HEAPBLOCK_ASSIGN_FLOAT64           (DATATYPE_R8, num); }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
     void SetFloatFromBits ( const CLR_UINT32  num ) { SetFloat ( *(const float *)&num ); }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
     void SetDoubleFromBits( const CLR_UINT64& num ) { SetDouble( *(const double*)&num ); }
 #else
     void SetFloat  ( const CLR_INT32   num ) { CLR_RT_HEAPBLOCK_ASSIGN_FLOAT32           (DATATYPE_R4, num); }
