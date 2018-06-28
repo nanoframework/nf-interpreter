@@ -316,7 +316,7 @@
     - git config --global user.name "%GitHubUserName%"
 
   configuration:
-    - Debug
+    - MinSizeRel
 
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
