@@ -1052,6 +1052,12 @@ struct CLR_RECORD_METHODDEF
     CLR_SIG    sig;             // TBL_Signatures
 };
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+// pragma required here because compiler is not too happy with the cast to CLR_UINT32* from a CLR_UINT16 variable
+
 struct CLR_RECORD_ATTRIBUTE
 {
     CLR_UINT16 ownerType;       // one of TBL_TypeDef, TBL_MethodDef, or TBL_FieldDef.
@@ -1061,6 +1067,10 @@ struct CLR_RECORD_ATTRIBUTE
 
     CLR_UINT32 Key() const { return *(CLR_UINT32*)&ownerType; }
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 struct CLR_RECORD_TYPESPEC
 {

@@ -697,10 +697,19 @@ unsigned int &Interop_Marshal_GetField_UINT32( CLR_RT_HeapBlock *pThis, unsigned
     return pThis[ fieldIndex ].NumericByRef().u4;
 }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
 unsigned __int64 &Interop_Marshal_GetField_UINT64( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (unsigned __int64 &)pThis[ fieldIndex ].NumericByRef().u8;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 char &Interop_Marshal_GetField_CHAR(   CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
@@ -722,10 +731,19 @@ signed int &Interop_Marshal_GetField_INT32(  CLR_RT_HeapBlock *pThis, unsigned i
     return pThis[ fieldIndex ].NumericByRef().s4;
 }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
 signed __int64 &Interop_Marshal_GetField_INT64(  CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (signed __int64 &)pThis[ fieldIndex ].NumericByRef().s8;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 //----------------- Float point types - float and double
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
@@ -735,10 +753,20 @@ float &Interop_Marshal_GetField_float(  CLR_RT_HeapBlock *pThis, unsigned int fi
     return pThis[ fieldIndex ].NumericByRef().r4;
 }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
 double &Interop_Marshal_GetField_double( CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (double &)pThis[ fieldIndex ].NumericByRef().r8;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 #else
 
 signed int &Interop_Marshal_GetField_float(  CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
