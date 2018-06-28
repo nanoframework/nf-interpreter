@@ -39,10 +39,8 @@ bool CheckValidCLRImage(uint32_t address)
 
     // 1st check: the flash content pointed by the address can't be all 0's neither all F's
     // meaning that the Flash is neither 'all burnt' or erased
-    
-    // the stack pointer is at the 1st position of vectors_t
-    if(nanoCLRVectorTable->init_stack == (uint32_t*)0xFFFFFFFF ||
-       nanoCLRVectorTable->init_stack == 0x00000000)
+    if( (uint32_t)(*(uint32_t**)((uint32_t*)address)) == 0xFFFFFFFF ||
+        (uint32_t)(*(uint32_t**)((uint32_t*)address)) == 0x00000000 )
     {
         // check failed, there is no valid CLR image
         return false;
