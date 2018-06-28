@@ -20,16 +20,7 @@ The content of these files is parsed by CMake. It can include CMake variables. C
 
 ## nanoCLR image start address ##
 
-The start address of nanoCLR (it's vector table) is defined in the linker file (STM32F091xC.ld)[nanoCLR/STM32F091xC.ld] by setting the initial address of the _flash_ region. The total size has to be the flash region size less the space reserved for nanoBooter.
-
-
-## Vector table copy to RAM ##
-
-Because the STM32L0 series don't have the SCB->VTOR register that allows offsetting the vector table another approach as to be taken: copy the vector table to a RAM location and remap the memory mode using SYSCFG->CFGR1. This is accomplished by reserving in RAM0 region the required space (in the linker file) and by performing the copy of the vector table right after the nanoCLR starts. This code block is located in main() right after the call to halInit(). 
-
-If porting this reference board to another SMT32F0 (or L0) series make sure this piece of code is kept there.
-
-
+The start address of nanoCLR (it's vector table) is defined in the linker file (STM32L072xZ_CLR.ld)[nanoCLR/STM32L072xZ_CLR.ld] by setting the initial address of the _flash_ region. The total size has to be the flash region size less the space reserved for nanoBooter.
 
 
 **NOTE: this configuration was successfully tested in a ST_STM32L0_LRWAN1 board using the virtual COM port through the ST Link USB connection.**

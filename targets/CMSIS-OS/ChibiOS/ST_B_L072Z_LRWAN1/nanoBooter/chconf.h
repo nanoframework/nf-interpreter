@@ -32,20 +32,26 @@
  * @brief   System time counter resolution.
  * @note    Allowed values are 16 or 32 bits.
  */
+#if !defined(CH_CFG_ST_RESOLUTION)
 #define CH_CFG_ST_RESOLUTION                16
+#endif
 
 /**
  * @brief   System tick frequency.
  * @details Frequency of the system timer that drives the system ticks. This
  *          setting also defines the system tick time unit.
  */
+#if !defined(CH_CFG_ST_FREQUENCY)
 #define CH_CFG_ST_FREQUENCY                 1000 // this is 1 millisecond
+#endif
 
 /**
  * @brief   Time intervals data size.
  * @note    Allowed values are 16, 32 or 64 bits.
  */
+#if !defined(CH_CFG_INTERVALS_SIZE)
 #define CH_CFG_INTERVALS_SIZE               32
+#endif
 
 /**
  * @brief   Time types data size.
@@ -125,7 +131,7 @@
  * @note    This is not related to the compiler optimization options.
  * @note    The default is @p TRUE.
  */
-#define CH_CFG_OPTIMIZE_SPEED               TRUE
+#define CH_CFG_OPTIMIZE_SPEED               FALSE
 
 /** @} */
 

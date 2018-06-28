@@ -12,10 +12,11 @@
  */
 MEMORY
 {
-    flash       : org = 0x08000000, len = 192k     /* space reserved for nanoBooter (1st 128 sectors 0x08000000 to 0x08004000)*/
-    deployment  : org = 0x00000000, len = 0       /* space reserved for application deployment */
-    ramvt       : org = 0x00000000, len = 0       /* initial RAM address is reserved for a copy of the vector table */
-    ram0        : org = 0x20000000, len = 20k
+    flash       : org = 0x08001F00, len = 192k - 7936 - 20k       /* flash size less the space reserved for nanoBooter and application deployment*/
+    config      : org = 0x00000000, len = 0                     /* space reserved for configuration block */
+    deployment  : org = 0x0802B000, len = 20k                   /* space reserved for application deployment */
+    ramvt       : org = 0x20000000, len = 0                     /* initial RAM address is reserved for a copy of the vector table */
+    ram0        : org = 0x20000000, len = 20k                   /* remaining RAM is free for use */
     ram1        : org = 0x00000000, len = 0
     ram2        : org = 0x00000000, len = 0
     ram3        : org = 0x00000000, len = 0

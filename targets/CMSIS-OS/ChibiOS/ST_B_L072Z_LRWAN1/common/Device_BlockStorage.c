@@ -8,44 +8,31 @@
 
 const BlockRange BlockRange1[] = 
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 3   }           // 08000000 nanoBooter          
+    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0    , 61  }          // 08000000 nanoBooter          
 };
 
-const BlockRange BlockRange2[] = 
-{
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 34   }          // 08004000 nanoCLR    
-};
-
-const BlockRange BlockRange3[] =
+const BlockRange BlockRange2[] =
 {      
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 5   },          // 08027000 nanoCLR    
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   6, 18 }            // 0802C000 deployment  
+    { BlockRange_BLOCKTYPE_CODE      ,   0    , 1312 },        // 08001F00 nanoCLR
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1313 , 1473 }         // 0802B000 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 
 {
     {
         0x08000000,                         // start address for block region
-        4,                                  // total number of blocks in this region
-        0x1000,                             // total number of bytes per block
+        62,                                 // total number of blocks in this region
+        0x80,                               // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
     },
 
     {
-        0x08004000,                         // start address for block region
-        35,                                 // total number of blocks in this region
-        0x1000,                             // total number of bytes per block
+        0x08001F00,                         // start address for block region
+        1474,                               // total number of blocks in this region
+        0x80,                               // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange2),
         BlockRange2,
-    },
-
-    {
-        0x0802B000,                         // start address for block region
-        24,                                 // total number of blocks in this region
-        0x1000,                             // total number of bytes per block
-        ARRAYSIZE_CONST_EXPR(BlockRange3),
-        BlockRange3,
     }
     
 };

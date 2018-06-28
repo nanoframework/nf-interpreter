@@ -32,7 +32,7 @@
 #define STM32_PLS                           STM32_PLS_LEV0
 #define STM32_HSI16_ENABLED                 TRUE
 #define STM32_HSI16_DIVIDER_ENABLED         FALSE
-#define STM32_LSI_ENABLED                   FALSE
+#define STM32_LSI_ENABLED                   TRUE
 #define STM32_HSE_ENABLED                   FALSE
 #define STM32_LSE_ENABLED                   TRUE
 #define STM32_ADC_CLOCK_ENABLED             TRUE
@@ -58,14 +58,14 @@
 #define STM32_HSI48SEL                      STM32_HSI48SEL_HSI48
 
 /*
- * IRQ driver system settings.
+ * IRQ system settings.
  */
-#define STM32_IRQ_EXTI0_1_IRQ_PRIORITY      3
-#define STM32_IRQ_EXTI2_3_IRQ_PRIORITY      3
-#define STM32_IRQ_EXTI4_15_IRQ_PRIORITY     3
-#define STM32_IRQ_EXTI16_IRQ_PRIORITY       3
-#define STM32_IRQ_EXTI17_20_IRQ_PRIORITY    3
-#define STM32_IRQ_EXTI21_22_IRQ_PRIORITY    3
+#define STM32_IRQ_EXTI0_1_PRIORITY          3
+#define STM32_IRQ_EXTI2_3_PRIORITY          3
+#define STM32_IRQ_EXTI4_15_PRIORITY         3
+#define STM32_IRQ_EXTI16_PRIORITY           3
+#define STM32_IRQ_EXTI17_20_PRIORITY        3
+#define STM32_IRQ_EXTI21_22_PRIORITY        3
 
 /*
  * ADC driver system settings.

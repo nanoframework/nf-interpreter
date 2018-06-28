@@ -66,24 +66,24 @@ typedef struct {
 #if STM32_HAS_GPIOE || defined(__DOXYGEN__)
   gpio_setup_t          PEData;
 #endif
-// #if STM32_HAS_GPIOF || defined(__DOXYGEN__)
-//   gpio_setup_t          PFData;
-// #endif
-// #if STM32_HAS_GPIOG || defined(__DOXYGEN__)
-//   gpio_setup_t          PGData;
-// #endif
+#if STM32_HAS_GPIOF || defined(__DOXYGEN__)
+  gpio_setup_t          PFData;
+#endif
+#if STM32_HAS_GPIOG || defined(__DOXYGEN__)
+  gpio_setup_t          PGData;
+#endif
 #if STM32_HAS_GPIOH || defined(__DOXYGEN__)
   gpio_setup_t          PHData;
 #endif
-// #if STM32_HAS_GPIOI || defined(__DOXYGEN__)
-//   gpio_setup_t          PIData;
-// #endif
-// #if STM32_HAS_GPIOJ || defined(__DOXYGEN__)
-//   gpio_setup_t          PJData;
-// #endif
-// #if STM32_HAS_GPIOK || defined(__DOXYGEN__)
-//   gpio_setup_t          PKData;
-// #endif
+#if STM32_HAS_GPIOI || defined(__DOXYGEN__)
+  gpio_setup_t          PIData;
+#endif
+#if STM32_HAS_GPIOJ || defined(__DOXYGEN__)
+  gpio_setup_t          PJData;
+#endif
+#if STM32_HAS_GPIOK || defined(__DOXYGEN__)
+  gpio_setup_t          PKData;
+#endif
 } gpio_config_t;
 
 /**
@@ -122,18 +122,18 @@ static const gpio_config_t gpio_default_config = {
   {VAL_GPIOH_MODER, VAL_GPIOH_OTYPER, VAL_GPIOH_OSPEEDR, VAL_GPIOH_PUPDR,
    VAL_GPIOH_ODR,   VAL_GPIOH_AFRL,   VAL_GPIOH_AFRH},
 #endif
-// #if STM32_HAS_GPIOI
-//   {VAL_GPIOI_MODER, VAL_GPIOI_OTYPER, VAL_GPIOI_OSPEEDR, VAL_GPIOI_PUPDR,
-//    VAL_GPIOI_ODR,   VAL_GPIOI_AFRL,   VAL_GPIOI_AFRH},
-// #endif
-// #if STM32_HAS_GPIOJ
-//   {VAL_GPIOJ_MODER, VAL_GPIOJ_OTYPER, VAL_GPIOJ_OSPEEDR, VAL_GPIOJ_PUPDR,
-//    VAL_GPIOJ_ODR,   VAL_GPIOJ_AFRL,   VAL_GPIOJ_AFRH},
-// #endif
-// #if STM32_HAS_GPIOK
-//   {VAL_GPIOK_MODER, VAL_GPIOK_OTYPER, VAL_GPIOK_OSPEEDR, VAL_GPIOK_PUPDR,
-//    VAL_GPIOK_ODR,   VAL_GPIOK_AFRL,   VAL_GPIOK_AFRH}
-// #endif
+#if STM32_HAS_GPIOI
+  {VAL_GPIOI_MODER, VAL_GPIOI_OTYPER, VAL_GPIOI_OSPEEDR, VAL_GPIOI_PUPDR,
+   VAL_GPIOI_ODR,   VAL_GPIOI_AFRL,   VAL_GPIOI_AFRH},
+#endif
+#if STM32_HAS_GPIOJ
+  {VAL_GPIOJ_MODER, VAL_GPIOJ_OTYPER, VAL_GPIOJ_OSPEEDR, VAL_GPIOJ_PUPDR,
+   VAL_GPIOJ_ODR,   VAL_GPIOJ_AFRL,   VAL_GPIOJ_AFRH},
+#endif
+#if STM32_HAS_GPIOK
+  {VAL_GPIOK_MODER, VAL_GPIOK_OTYPER, VAL_GPIOK_OSPEEDR, VAL_GPIOK_PUPDR,
+   VAL_GPIOK_ODR,   VAL_GPIOK_AFRL,   VAL_GPIOK_AFRH}
+#endif
 };
 
 /*===========================================================================*/
@@ -155,8 +155,8 @@ static void stm32_gpio_init(void) {
 
   /* Enabling GPIO-related clocks, the mask comes from the
      registry header file.*/
-  rccResetAPB1(STM32_GPIO_EN_MASK);
-  rccEnableAPB1(STM32_GPIO_EN_MASK, true);
+  rccResetIOP(STM32_GPIO_EN_MASK);
+  rccEnableIOP(STM32_GPIO_EN_MASK, true);
 
   /* Initializing all the defined GPIO ports.*/
 #if STM32_HAS_GPIOA
@@ -174,24 +174,24 @@ static void stm32_gpio_init(void) {
 #if STM32_HAS_GPIOE
   gpio_init(GPIOE, &gpio_default_config.PEData);
 #endif
-// #if STM32_HAS_GPIOF
-//   gpio_init(GPIOF, &gpio_default_config.PFData);
-// #endif
-// #if STM32_HAS_GPIOG
-//   gpio_init(GPIOG, &gpio_default_config.PGData);
-// #endif
+#if STM32_HAS_GPIOF
+  gpio_init(GPIOF, &gpio_default_config.PFData);
+#endif
+#if STM32_HAS_GPIOG
+  gpio_init(GPIOG, &gpio_default_config.PGData);
+#endif
 #if STM32_HAS_GPIOH
   gpio_init(GPIOH, &gpio_default_config.PHData);
 #endif
-// #if STM32_HAS_GPIOI
-//   gpio_init(GPIOI, &gpio_default_config.PIData);
-// #endif
-// #if STM32_HAS_GPIOJ
-//   gpio_init(GPIOJ, &gpio_default_config.PJData);
-// #endif
-// #if STM32_HAS_GPIOK
-//   gpio_init(GPIOK, &gpio_default_config.PKData);
-// #endif
+#if STM32_HAS_GPIOI
+  gpio_init(GPIOI, &gpio_default_config.PIData);
+#endif
+#if STM32_HAS_GPIOJ
+  gpio_init(GPIOJ, &gpio_default_config.PJData);
+#endif
+#if STM32_HAS_GPIOK
+  gpio_init(GPIOK, &gpio_default_config.PKData);
+#endif
 }
 
 /*===========================================================================*/
@@ -220,8 +220,8 @@ void __early_init(void) {
 bool sdc_lld_is_card_inserted(SDCDriver *sdcp) {
 
   (void)sdcp;
-
-  return !palReadLine(LINE_SD_DETECT);
+  /* TODO: Fill the implementation.*/
+  return true;
 }
 
 /**

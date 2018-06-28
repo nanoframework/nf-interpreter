@@ -65,7 +65,7 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_EXT) || defined(__DOXYGEN__)
-// #define HAL_USE_EXT                          FALSE
+// #define HAL_USE_EXT                         FALSE
 // #endif
 
 /**
@@ -80,7 +80,7 @@
  */
 // this option is set at target_platform.h (from config file)
 //#if !defined(HAL_USE_I2C) || defined(__DOXYGEN__)
-//#define HAL_USE_I2C                          TRUE
+//#define HAL_USE_I2C                         TRUE
 //#endif
 
 /**
@@ -102,14 +102,14 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_MAC) || defined(__DOXYGEN__)
-// #define HAL_USE_MAC                          TRUE
+// #define HAL_USE_MAC                         TRUE
 // #endif
 
 /**
  * @brief   Enables the MMC_SPI subsystem.
  */
 #if !defined(HAL_USE_MMC_SPI) || defined(__DOXYGEN__)
-#define HAL_USE_MMC_SPI                         FALSE
+#define HAL_USE_MMC_SPI                     FALSE
 #endif
 
 /**
@@ -132,7 +132,7 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_RTC) || defined(__DOXYGEN__)
-// #define HAL_USE_RTC                          TRUE
+// #define HAL_USE_RTC                         TRUE
 // #endif
 
 /**
@@ -140,7 +140,7 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_SDC) || defined(__DOXYGEN__)
-// #define HAL_USE_SDC                          FALSE
+// #define HAL_USE_SDC                         FALSE
 // #endif
 
 /**
@@ -306,7 +306,7 @@
  * @brief   Enables the zero-copy API.
  */
 #if !defined(MAC_USE_ZERO_COPY) || defined(__DOXYGEN__)
-#define MAC_USE_ZERO_COPY           FALSE
+#define MAC_USE_ZERO_COPY                   FALSE
 #endif
 
 /**
