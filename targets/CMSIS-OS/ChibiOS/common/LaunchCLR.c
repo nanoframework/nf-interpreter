@@ -49,14 +49,15 @@ bool CheckValidCLRImage(uint32_t address)
     // 2nd check: the content pointed by the reset vector has to be 0xE002 
     // that's an assembly "b.n" (branch instruction) the very first one in the Reset_Handler function
     // see os\common\startup\ARMCMx\compilers\GCC\vectors.S
-    // the linker places this startup code right after the vectors table
-    uint16_t* opCodeAddress = (uint16_t*)((irq_vector_t)nanoCLRVectorTable + sizeof(vectors_t) + sizeof(irq_vector_t));
 
-    // because the code in the vectors region is aligned by 16 bytes we need to check if the linker has pushed this further and adjust accordingly
-    uint32_t alignmentOffset =  ((uint32_t)opCodeAddress % 0x10);
-    opCodeAddress =  (uint16_t*)((uint32_t)opCodeAddress + (0x10 - alignmentOffset));
+    // the linker can place this anywhere on the address space because of optimizations so we better check where the reset pointer points to
+    uint32_t opCodeAddress = (uint32_t)((uint32_t**)nanoCLRVectorTable->reset_handler);
 
-    if((uint16_t)*opCodeAddress == 0xE002)
+    // real address is -1
+    opCodeAddress -= 1;
+
+    uint32_t opCode = *((uint32_t*)opCodeAddress);
+    if((uint16_t)opCode == 0xE002)
     {
         // check, there seems to be a valid CLR image
         return true;
