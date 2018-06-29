@@ -252,7 +252,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         CLR_RT_HeapBlock    hbTimeout;
         CLR_INT64*          timeout;
         bool                eventResult = true;
-        int                 estimatedDurationMiliseconds;
+        uint32_t            estimatedDurationMiliseconds;
 
         CLR_RT_HeapBlock_Array* writeBuffer;
         CLR_RT_HeapBlock_Array* readBuffer;
