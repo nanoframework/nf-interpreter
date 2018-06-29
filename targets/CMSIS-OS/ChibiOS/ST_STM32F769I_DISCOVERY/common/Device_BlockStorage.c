@@ -6,22 +6,24 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
-const BlockRange BlockRange1[] = // 32KB blocks
+// 32kB blocks
+const BlockRange BlockRange1[] =
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 0 },            // 08000000 nanoBooter         
-    { BlockRange_BLOCKTYPE_CONFIG    ,   1, 1 },            // 08008000 configuration block          
-    { BlockRange_BLOCKTYPE_CODE      ,   2, 3 }             // 08010000 nanoCLR          
+    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 0 },            // 0x08000000 nanoBooter         
+    { BlockRange_BLOCKTYPE_CONFIG    ,   1, 1 },            // 0x08008000 configuration block          
+    { BlockRange_BLOCKTYPE_CODE      ,   2, 3 }             // 0x08010000 nanoCLR          
 };
 
-const BlockRange BlockRange2[] = //128KB block
+//128kB block
+const BlockRange BlockRange2[] =
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 08020000 nanoCLR          
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 0x08020000 nanoCLR          
 };
 
-const BlockRange BlockRange3[] = // 256KB blocks
+// 256kB blocks
+const BlockRange BlockRange3[] =
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 },            // 08040000 nanoCLR  
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1, 6 }             // 08080000 deployment  
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 6 }             // 0x08040000 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 

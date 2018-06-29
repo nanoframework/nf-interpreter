@@ -24,9 +24,9 @@ __IO uint32_t vectorTable[48] __attribute__((section(".RAMVectorTable")));
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 1024, "ReceiverThread");
 // declare CLRStartup thread here 
-osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread"); 
+osThreadDef(CLRStartupThread, osPriorityNormal, 3072, "CLRStartupThread"); 
 
 //  Application entry point.
 int main(void) {
@@ -57,8 +57,6 @@ int main(void) {
 
   // Prepares the serial driver 2 using UART2
   sdStart(&SD2, NULL);
-  palSetPadMode(GPIOA, 2, PAL_MODE_ALTERNATE(1)); // USART2 TX
-  palSetPadMode(GPIOA, 3, PAL_MODE_ALTERNATE(1)); // USART2 RX
 
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
