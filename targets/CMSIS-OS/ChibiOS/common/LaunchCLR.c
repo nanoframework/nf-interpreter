@@ -39,10 +39,8 @@ bool CheckValidCLRImage(uint32_t address)
 
     // 1st check: the flash content pointed by the address can't be all 0's neither all F's
     // meaning that the Flash is neither 'all burnt' or erased
-    
-    // the stack pointer is at the 1st position of vectors_t
-    if(nanoCLRVectorTable->init_stack == (uint32_t*)0xFFFFFFFF ||
-       nanoCLRVectorTable->init_stack == 0x00000000)
+    if( (uint32_t)(*(uint32_t**)((uint32_t*)address)) == 0xFFFFFFFF ||
+        (uint32_t)(*(uint32_t**)((uint32_t*)address)) == 0x00000000 )
     {
         // check failed, there is no valid CLR image
         return false;
@@ -51,14 +49,15 @@ bool CheckValidCLRImage(uint32_t address)
     // 2nd check: the content pointed by the reset vector has to be 0xE002 
     // that's an assembly "b.n" (branch instruction) the very first one in the Reset_Handler function
     // see os\common\startup\ARMCMx\compilers\GCC\vectors.S
-    // the linker places this startup code right after the vectors table
-    uint16_t* opCodeAddress = (uint16_t*)((irq_vector_t)nanoCLRVectorTable + sizeof(vectors_t) + sizeof(irq_vector_t));
 
-    // because the code in the vectors region is aligned by 16 bytes we need to check if the linker has pushed this further and adjust accordingly
-    uint32_t alignmentOffset =  ((uint32_t)opCodeAddress % 0x10);
-    opCodeAddress =  (uint16_t*)((uint32_t)opCodeAddress + (0x10 - alignmentOffset));
+    // the linker can place this anywhere on the address space because of optimizations so we better check where the reset pointer points to
+    uint32_t opCodeAddress = (uint32_t)((uint32_t**)nanoCLRVectorTable->reset_handler);
 
-    if((uint16_t)*opCodeAddress == 0xE002)
+    // real address is -1
+    opCodeAddress -= 1;
+
+    uint32_t opCode = *((uint32_t*)opCodeAddress);
+    if((uint16_t)opCode == 0xE002)
     {
         // check, there seems to be a valid CLR image
         return true;
