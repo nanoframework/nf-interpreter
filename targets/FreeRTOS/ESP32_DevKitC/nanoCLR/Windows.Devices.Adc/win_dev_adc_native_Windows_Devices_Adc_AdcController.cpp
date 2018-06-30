@@ -126,7 +126,8 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeIsCh
         int mode = stack.Arg1().NumericByRef().s4;
         
         // Only support Single ended mode for now
-        stack.SetResult_Boolean( (mode == (int)AdcChannelMode::SingleEnded) ) ;
+        AdcChannelMode singleEndedMode = SingleEnded;
+        stack.SetResult_Boolean( (mode == (int)singleEndedMode) ) ;
     }
 
     NANOCLR_NOCLEANUP_NOLABEL();

@@ -72,10 +72,13 @@ set(CMAKE_EXE_LINKER_FLAGS_DEBUG " -nostdlib -u call_user_start_cpu0  -Wl,--gc-s
 
 # set release flags
 set(CMAKE_C_FLAGS_RELEASE " -std=gnu99 -Os -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -MMD -MP -Wall -Wextra -Werror -D IDF_VER=\"v3.0-dev-349-g2861f3e-dirty\"  " CACHE INTERNAL "c compiler flags release")
+set(CMAKE_C_FLAGS_MINSIZEREL " -std=gnu99 -Os -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -MMD -MP -Wall -Wextra -Werror -D IDF_VER=\"v3.0-dev-349-g2861f3e-dirty\"  " CACHE INTERNAL "c compiler flags minsizerel")
 set(CMAKE_CXX_FLAGS_RELEASE " -Os -std=gnu++11 -g3 -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Wextra -Werror -DESP_PLATFORM " CACHE INTERNAL "cxx compiler flags release")
+set(CMAKE_CXX_FLAGS_MINSIZEREL " -Os -std=gnu++11 -g3 -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Wextra -Werror -DESP_PLATFORM " CACHE INTERNAL "cxx compiler flags minsizerel")
 
 set(CMAKE_ASM_FLAGS_RELEASE "" CACHE INTERNAL "asm compiler flags release")
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE " ${GCC_ESP32_LINKER_FLAGS} ${GCC_ESP32_LINKER_LIBS} ${GCC_ESP32_LINKER_LD}" CACHE INTERNAL "linker flags release")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE " -nostdlib -u call_user_start_cpu0  -Wl,--gc-sections -Wl,-static  " CACHE INTERNAL "linker flags release")
+set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL " -nostdlib -u call_user_start_cpu0  -Wl,--gc-sections -Wl,-static  " CACHE INTERNAL "linker flags minsizerel")
 
 set( CMAKE_C_LINK_EXECUTABLE   "<CMAKE_C_COMPILER>   <CMAKE_C_LINK_FLAGS>   <OBJECTS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
 set( CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_CXX_COMPILER> <CMAKE_C_LINK_FLAGS> <OBJECTS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
