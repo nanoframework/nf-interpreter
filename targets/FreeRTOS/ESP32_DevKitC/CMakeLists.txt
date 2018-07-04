@@ -55,7 +55,7 @@ add_subdirectory("nanoCLR")
 # Build the networking components as a separate library
 # This is done this way to stop "Createprocess: file no found" errors in linker when object input file is greater than 32k
 if(USE_NETWORKING_OPTION)
-add_library(NetworkLib SHARED "${NF_Networking_SOURCES}" "${TARGET_ESP32_NETWORK_SOURCES}"  "${TARGET_LWIP_SOURCES}" )
+add_library(NetworkLib STATIC "${NF_Networking_SOURCES}" "${TARGET_ESP32_NETWORK_SOURCES}"  "${TARGET_LWIP_SOURCES}" )
 endif()
 
 
