@@ -7,7 +7,7 @@
 
 #include "sys_net_native.h"
 
-// TODO -  Check if required, for now just ignore
+// FIXME -  Check if required, for now just ignore
 #define SwapEndianIfBEc16(x)    (x)
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::socket___STATIC__I4__I4__I4__I4( CLR_RT_StackFrame& stack )
@@ -327,7 +327,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__B
     CLR_INT32 handle;
     CLR_INT32 mode       = stack.Arg1().NumericByRef().s4;    
     CLR_INT32 timeout_us = stack.Arg2().NumericByRef().s4;
-    
+    uint64_t ct = 0;
     CLR_RT_HeapBlock hbTimeout;
 
     CLR_INT32 res = 0;
@@ -346,11 +346,14 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__B
         NANOCLR_SET_AND_LEAVE (CLR_E_PROCESS_EXCEPTION);
     }
 
+// FIXME TIMEOUT_INFINITE
     if(timeout_us < 0)
-        hbTimeout.SetInteger( TIMEOUT_INFINITE);
-    else 
+//        hbTimeout.SetInteger( TIMEOUT_INFINITE);
+         hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
+  else 
         hbTimeout.SetInteger( timeout_us * TIME_CONVERSION__TO_MILLISECONDS / 1000 );
 
+   
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
     while(fRes)
@@ -591,7 +594,9 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper( 
 
     if(offset + count > arrData->m_numOfElements) NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);    
 
-    hbTimeout.SetInteger( timeout_ms * TIME_CONVERSION__TO_MILLISECONDS);
+ // FIXME  -1 timeout !
+    hbTimeout.SetInteger( (CLR_INT64)10000 * TIME_CONVERSION__TO_MILLISECONDS);
+ //   hbTimeout.SetInteger( timeout_ms * TIME_CONVERSION__TO_MILLISECONDS);
         
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 

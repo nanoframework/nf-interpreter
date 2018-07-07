@@ -66,9 +66,19 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
 
     if(isServer)
     {
-        // TODO:  we should be setting up the CA lsit
+        // TODO:  we should be setting up the CA list
          //SSL_CTX_set_client_CA_list
 
+        if (sslMode & NANOCLR_SSL_MODE_TLS12 )
+        {
+            meth = (SSL_METHOD*)TLSv1_2_server_method();
+        }
+        else
+        if (sslMode & NANOCLR_SSL_MODE_TLS11 )
+        {
+            meth = (SSL_METHOD*)TLSv1_1_server_method();
+        }
+        else
         if(sslMode & NANOCLR_SSL_MODE_TLS1)
         {
             meth = (SSL_METHOD*)TLSv1_server_method();
@@ -80,6 +90,16 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     }
     else
     {
+        if (sslMode & NANOCLR_SSL_MODE_TLS12 )
+        {
+            meth = (SSL_METHOD*)TLSv1_2_client_method();
+        }
+        else
+        if (sslMode & NANOCLR_SSL_MODE_TLS11 )
+        {
+            meth = (SSL_METHOD*)TLSv1_1_client_method();
+        }
+        else
         if(sslMode & NANOCLR_SSL_MODE_TLS1)
         {
             meth = (SSL_METHOD*)TLSv1_client_method();

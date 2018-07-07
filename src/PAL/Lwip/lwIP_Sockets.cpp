@@ -4,8 +4,21 @@
 // See LICENSE file in the project root for full license information.
 //
 
+
+
 #include "LWIP_sockets.h"
 
+// Make sure the ESP32 version of FD_xx macro are used
+// as the socket number is offset
+// FIXME - The problem is these MACROs are also defined in the newlib sys/types.h
+#ifdef PLATFORM_ESP32
+#undef FD_SET
+#undef FD_CLR
+#undef FD_ISSET
+#undef FD_ZERO
+#undef _types_fd_set
+#undef fd_set
+#endif
 
 extern "C"
 {
@@ -19,6 +32,8 @@ extern "C"
 #include "lwip\dhcp.h"
 #include "lwip\netif.h"
 }
+
+
 
 #if defined(__RENESAS__)
 volatile int errno;

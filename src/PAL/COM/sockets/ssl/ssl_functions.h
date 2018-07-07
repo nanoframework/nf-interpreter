@@ -11,8 +11,11 @@
 #include <nanoHal.h>
 //#include <ossl_typ.h>
 
-#define NANOCLR_SSL_MODE_TLS1 0x10
-#define NANOCLR_SSL_MODE_SSL3 0x08
+// Keey these in sync with SslProtocols in System.Net
+#define NANOCLR_SSL_MODE_TLS1  0x10
+#define NANOCLR_SSL_MODE_TLS11 0x20
+#define NANOCLR_SSL_MODE_TLS12 0x40
+#define NANOCLR_SSL_MODE_SSL3  0x08
 
 #define NANOCLR_SSL_VERIFY_NONE         0x01
 #define NANOCLR_SSL_VERIFY_PEER         0x02

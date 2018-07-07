@@ -46,24 +46,26 @@ static void UpdateSslSeedValue(void* arg)
 
 static void GenerateNewSslSeed()
 {
-    // uint8_t   signature[ 128 ];
-    // uint8_t   IVPtr[ BLOCK_SIZE ];
-    // bool    success;
+//     uint8_t   signature[ 128 ];
+//     uint8_t   IVPtr[ BLOCK_SIZE ];
+//     bool    success;
 
-    // uint64_t data[ 2 ]  = { ++g_SSL_SeedData.Config.SeedCounter, HAL_Time_CurrentTicks() };
+//     uint64_t data[ 2 ]  = { ++g_SSL_SeedData.Config.SeedCounter, HAL_Time_CurrentTicks() };
 
-    // memset( &IVPtr[ 0 ], 0, sizeof(IVPtr) );
+//     memset( &IVPtr[ 0 ], 0, sizeof(IVPtr) );
 
-    // success = Crypto_Encrypt( (BYTE*)&g_SSL_SeedData.Config.SslSeedKey[ 0 ], (uint8_t*)IVPtr, sizeof(IVPtr), (uint8_t*)&data, sizeof(data), signature, sizeof(signature) ) == CRYPTO_SUCCESS ? S_OK : CLR_E_FAIL;
+//     // Encrypts a buffer using a symmetric algorithm.
+// //  BOOL Crypto_Encrypt(BYTE *Key, BYTE *IV, DWORD cbIVSize, BYTE* pPlainText, DWORD cbPlainText, BYTE *pCypherText, DWORD cbCypherText);
+//   //success = Crypto_Encrypt( (BYTE*)&g_SSL_SeedData.Config.SslSeedKey[ 0 ], (uint8_t*)IVPtr, sizeof(IVPtr), (uint8_t*)&data, sizeof(data), signature, sizeof(signature) ) == CRYPTO_SUCCESS ? S_OK : CLR_E_FAIL;
 
-    // ASSERT(success);
+//     // ASSERT(success);
 
-    // ssl_rand_seed(signature, sizeof(signature));
+//     ssl_rand_seed(signature, sizeof(signature));
 
-    // if(!g_SSL_SeedData.m_completion.IsLinked())
-    // {
-    //     g_SSL_SeedData.m_completion.EnqueueDelta( 5 * 1000000ul ); // 5 seconds
-    // }
+//     if(!g_SSL_SeedData.m_completion.IsLinked())
+//     {
+//          g_SSL_SeedData.m_completion.EnqueueDelta( 5 * 1000000ul ); // 5 seconds
+//     }
 }
 
 //--//
@@ -101,7 +103,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureServerInit__
 HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
-    return InitHelper( stack, true );
+    return InitHelper( stack, false );
 }
 
 HRESULT Library_sys_net_native_System_Net_Security_SslNative::UpdateCertificates___STATIC__VOID__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate( CLR_RT_StackFrame& stack )
@@ -181,8 +183,10 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
         NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
     }
 
+// FIXME timeout_ms = -1 INFINITE
+//    hbTimeout.SetInteger( timeout_ms );
+             hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
 
-    hbTimeout.SetInteger( timeout_ms );
         
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
@@ -246,8 +250,10 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
 
     szName = hb->StringText();
 
-    hbTimeout.SetInteger( timeout_ms );
-        
+    // FIXME timeout_ms = -1 = INFINITE
+   // hbTimeout.SetInteger( timeout_ms );
+          hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
+       
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
     while(true)
@@ -380,8 +386,10 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::ReadWriteHelper( C
 
     FAULT_ON_NULL(arrData);
 
-    hbTimeout.SetInteger( timeout_ms );
-        
+ // FIXME timeout_ms = -1 = INFINITE
+    //hbTimeout.SetInteger( timeout_ms );
+           hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
+      
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
     //
@@ -516,31 +524,32 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
 
         isFirstCall = true;
 
-#if !defined(_WIN32) && !defined(WIN32) && !defined(_WIN32_WCE)
-        int i;
+// FIXME
+// #if !defined(_WIN32) && !defined(WIN32) && !defined(_WIN32_WCE)
+//         int i;
 
-// TODO save seed data
-        // if(!HAL_CONFIG_BLOCK::ApplyConfig( g_SSL_SeedData.Config.GetDriverName(), &g_SSL_SeedData.Config, sizeof(g_SSL_SeedData.Config) ))
-        // {
-        //     return CLR_E_NOT_SUPPORTED;
-        // }
+// // TODO save seed data
+//         // if(!HAL_CONFIG_BLOCK::ApplyConfig( g_SSL_SeedData.Config.GetDriverName(), &g_SSL_SeedData.Config, sizeof(g_SSL_SeedData.Config) ))
+//         // {
+//         //     return CLR_E_NOT_SUPPORTED;
+//         // }
 
-        // validate the security key (make sure it isn't all 0x00 or all 0xFF
-        for(i=1; i<sizeof(g_SSL_SeedData.Config.SslSeedKey) && !fOK; i++)
-        {
-            if( g_SSL_SeedData.Config.SslSeedKey[ i   ] != 0 && 
-                g_SSL_SeedData.Config.SslSeedKey[ i   ] != 0xFF && 
-                g_SSL_SeedData.Config.SslSeedKey[ i-1 ] != g_SSL_SeedData.Config.SslSeedKey[ i ])
-            {
-                fOK = TRUE;
-            }
-        }
+//         // validate the security key (make sure it isn't all 0x00 or all 0xFF
+//         for(i=1; i<sizeof(g_SSL_SeedData.Config.SslSeedKey) && !fOK; i++)
+//         {
+//             if( g_SSL_SeedData.Config.SslSeedKey[ i   ] != 0 && 
+//                 g_SSL_SeedData.Config.SslSeedKey[ i   ] != 0xFF && 
+//                 g_SSL_SeedData.Config.SslSeedKey[ i-1 ] != g_SSL_SeedData.Config.SslSeedKey[ i ])
+//             {
+//                 fOK = TRUE;
+//             }
+//         }
 
-        if(!fOK)
-        {
-            return CLR_E_NOT_SUPPORTED;
-        }
-#endif
+//         if(!fOK)
+//         {
+//             return CLR_E_NOT_SUPPORTED;
+//         }
+// #endif
 
         g_SSL_SeedData.m_completion.Initialize();
         
