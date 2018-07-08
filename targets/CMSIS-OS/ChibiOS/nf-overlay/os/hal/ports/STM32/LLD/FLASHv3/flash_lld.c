@@ -70,7 +70,7 @@ HAL_StatusTypeDef FLASH_WaitForLastOperation(uint32_t timeout)
     //  flag will be set
 
     systime_t start = chVTGetSystemTime();
-    systime_t end = start + MS2ST(timeout);
+    systime_t end = start + TIME_MS2I(timeout);
     
     while(__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET) 
     { 
@@ -201,8 +201,6 @@ uint8_t flash_lld_getSector(uint32_t address)
 
 int flash_lld_erase(uint32_t address) {
 
-    HAL_StatusTypeDef status = HAL_ERROR;
-
     // unlock the FLASH
     if(HAL_FLASH_Unlock())
     {
@@ -218,7 +216,7 @@ int flash_lld_erase(uint32_t address) {
         *(__IO uint32_t *)(uint32_t)(address & ~(FLASH_PAGE_SIZE - 1)) = 0x00000000;
 
         // Wait for last operation to be completed
-        status = FLASH_WaitForLastOperation(FLASH_TIMEOUT_VALUE);
+        FLASH_WaitForLastOperation(FLASH_TIMEOUT_VALUE);
 
         // If the erase operation is completed, disable the ERASE Bit
         CLEAR_BIT(FLASH->PECR, FLASH_PECR_PROG);

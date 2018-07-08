@@ -40,6 +40,8 @@ static const char g_ESP32_Uart_TxD_Pins[] = ESP32_UART_TXD_PINS;
 
 bool WP_Initialise(COM_HANDLE port)
 {
+    (void)port;
+
     if ( WP_Port > UART_NUM_2 ) return false;
  
     uart_config_t uart_config = {
@@ -128,7 +130,7 @@ int WP_TransmitMessage(WP_Message* message)
         ///////////////////////////////////////////////////////////
         // see description above
         //////////////////////////////////////////////////////////
-        if (uart_write_bytes(WP_Port, (const char*)message->m_payload, message->m_header.m_size ) != message->m_header.m_size ) return false;
+        if (uart_write_bytes(WP_Port, (const char*)message->m_payload, message->m_header.m_size ) != (int)message->m_header.m_size ) return false;
     }
 
     return true;    

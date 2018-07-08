@@ -53,7 +53,7 @@
     matrix:
       - BOARD_NAME: 'STM32'
       - BOARD_NAME: 'ESP32_DEVKITC'
-        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=OFF -DAPI_Hardware.Esp32=ON'
+        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=OFF -DAPI_Hardware.Esp32=ON'
 
   matrix:
     fast_finish: true
@@ -316,7 +316,7 @@
     - git config --global user.name "%GitHubUserName%"
 
   configuration:
-    - Debug
+    - MinSizeRel
 
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
@@ -345,7 +345,7 @@
       #  BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_FEATURE_DEBUGGER=TRUE -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON'
       - BOARD_NAME: 'STM32'
       - BOARD_NAME: 'ESP32_DEVKITC'
-        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Hardware.Esp32=ON'
+        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Hardware.Esp32=ON'
       - BOARD_NAME: 'NANOCLR_WINDOWS'
 
   matrix:
@@ -411,7 +411,7 @@
             $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
             $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
 
-             &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:ESP32_TOOLCHAIN_PATH" "-DESP32_IDF_PATH=$env:ESP32_IDF_PATH" "-DESP32_LIBS_PATH=$env:ESP32_LIBS_PATH" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+             &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:ESP32_TOOLCHAIN_PATH" "-DESP32_IDF_PATH=$env:ESP32_IDF_PATH" "-DESP32_LIBS_PATH=$env:ESP32_LIBS_PATH" "-DCMAKE_BUILD_TYPE=Debug" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
           }
           Else
           {
@@ -446,7 +446,7 @@
           If($env:BOARD_NAME -eq "ESP32_DEVKITC")
           {
             $cmake = "cmake"
-            &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
+            &$cmake --build (Get-Location).path --target all --config "Debug"
 
             if ($lastexitcode -ne 0)
             {
@@ -637,7 +637,7 @@
     matrix:
       - BOARD_NAME: 'STM32'
       - BOARD_NAME: 'ESP32_DEVKITC'
-        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=TRUE -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=OFF -DAPI_Hardware.Esp32=ON'
+        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=OFF -DAPI_Hardware.Esp32=ON'
 
   matrix:
     fast_finish: true
@@ -861,4 +861,3 @@
       on_build_status_changed: true
       on_build_success: false
       on_build_failure: false
-

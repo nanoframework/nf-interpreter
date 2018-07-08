@@ -81,23 +81,17 @@ endif()
 
 
 ##########################################
-# handle FPU preference, if any
-set(USE_FPU_IS_TRUE FALSE)
+# handle FPU option
+# (default is ON so FPU support is enabled)
+option(USE_FPU "option to use floating point support" ON)
 
 if(USE_FPU)
-    if(NOT "${USE_FPU}" STREQUAL "")
-        if("${USE_FPU}" STREQUAL "TRUE")
-            set(USE_FPU_IS_TRUE TRUE CACHE INTERNAL "FPU preference")
-        elseif("${USE_FPU}" STREQUAL "FALSE")
-            set(USE_FPU_IS_TRUE FALSE CACHE INTERNAL "FPU preference")
-        else()
-            # something other that TRUE or FALSE...
-            message(FATAL_ERROR "\n\n'${USE_FPU}' is an invalid option for USE_FPU. Acceptable values are TRUE or FALSE.\n\n")
-        endif()    
-    endif()
+    set(USE_FPU_IS_TRUE TRUE CACHE INTERNAL "FPU preference")
+else()
+    set(USE_FPU_IS_TRUE FALSE CACHE INTERNAL "FPU preference")
 endif()
 
-# message("FPU preference is: ${USE_FPU_IS_TRUE}")  # debug helper
+# message("FPU preference is: ${USE_FPU}")  # debug helper
 ##########################################
 
 
@@ -245,55 +239,60 @@ endif()
 
 #################################################################
 # output FPU option
-if("${USE_FPU}" STREQUAL "TRUE")
+if(USE_FPU)
     message(STATUS "Hardware Floating Point enabled")
-elseif("${USE_FPU}" STREQUAL "FALSE")
-    message(STATUS "Emulated Floating Point enabled")
+elseif()
+    message(STATUS "Emulated Floating Point IS NOT enabled")
+endif()
+
+#################################################################################
+# chooses if double-point float point support is provided by the platform
+# (default is OFF which means that single-precision floating point is effective)
+option(DP_FLOATINGPOINT "option to enable support for double-precision floating point")
+
+if(DP_FLOATINGPOINT)
+    set(TARGET_DP_FLOATINGPOINT TRUE CACHE INTERNAL "DP FP support")
+    message(STATUS "Double-precision floating point is effective")
+else()
+    set(TARGET_DP_FLOATINGPOINT FALSE CACHE INTERNAL "DP FP support")
+    message(STATUS "Single-precision floating point is effective")
+endif()
+
+###################################################################################
+# chooses if platform provides support for converting string to values on any base
+# (default is OFF which means that conversion to value from base 10 and 16 (partial) is effective)
+option(SUPPORT_ANY_BASE_CONVERSION "option to enable support for converting strings to value on any base")
+
+if(SUPPORT_ANY_BASE_CONVERSION)
+    set(TARGET_SUPPORT_ANY_BASE_CONVERSION TRUE CACHE INTERNAL "Option for string conversion to value from any base")
+    message(STATUS "String conversion to value on any base is effective")
+else()
+    set(TARGET_SUPPORT_ANY_BASE_CONVERSION FALSE CACHE INTERNAL "Option for string conversion to value from base 10 and partial for 16")
+    message(STATUS "String conversion to value from base 10 and 16 (partial) is effective")
 endif()
 
 #################################################################
-# True random number generation option supported by Target MCU
-set(TARGET_MCU_SUPPORTS_RNG TRUE)
+# true random number generation option supported by hardware
+option(USE_RNG "option to enable use of true random generator hardware block")
 
-if(TARGET_MCU_SUPPORTS_RNG)
-    if(NOT "${USE_RNG}" STREQUAL "")
-        if("${USE_RNG}" STREQUAL "TRUE")
-            set(TARGET_MCU_SUPPORTS_RNG TRUE CACHE INTERNAL "MCU TRNG Support")
-            message(STATUS "Random Number Generation by target MCU is activated")
-        elseif("${USE_RNG}" STREQUAL "FALSE")
-            set(TARGET_MCU_SUPPORTS_RNG FALSE CACHE INTERNAL "MCU TRNG Support")
-            message(STATUS "Random Number Generation by target MCU is NOT activated")
-        else()
-            # something other than TRUE or FALSE...
-            message(FATAL_ERROR "\n\n'${USE_RNG}' is an invalid option for USE_RNG. Acceptable values are TRUE or FALSE.\n\n")
-        endif()    
-    else()
-        # default = true, but can be overridden by setting USE_RNG to TRUE or FALSE in cmake-variants.json
-        message(STATUS "Random Number Generation by target MCU is activated.")
-    endif()
+if(USE_RNG)
+    message(STATUS "Random Number Generation by target MCU is activated")
+else()
+    message(STATUS "Random Number Generation by target MCU is NOT activated")
 endif()
 
 #################################################################
 # nanoFramework features
 #################################################################
 
-#################################################################
-# debugger (default is TRUE to include debugger in release image
-set(NF_FEATURE_DEBUGGER TRUE)
+###################################################################
+# debugger (default is OFF so no support for debugging is included 
+option(NF_FEATURE_DEBUGGER "option to enable support for debugging")
 
 if(NF_FEATURE_DEBUGGER)
-    if(NOT "${NF_FEATURE_DEBUGGER}" STREQUAL "")
-
-        if("${NF_FEATURE_DEBUGGER}" STREQUAL "TRUE")
-            set(NF_FEATURE_DEBUGGER TRUE CACHE INTERNAL "NF feature DEBUGGER")
-        elseif("${NF_FEATURE_DEBUGGER}" STREQUAL "FALSE")
-            set(NF_FEATURE_DEBUGGER FALSE CACHE INTERNAL "NF feature DEBUGGER")
-        else()
-            # something other that TRUE or FALSE...
-            message(FATAL_ERROR "\n\n'${NF_FEATURE_DEBUGGER}' is an invalid option for NF_FEATURE_DEBUGGER. Acceptable values are TRUE or FALSE.\n\n")
-        endif()    
-
-    endif()
+    message(STATUS "Support for debugging managed applications is included.")
+else()
+    message(STATUS "Support for debugging managed applications IS NOT included.")
 endif()
 
 #################################################################
@@ -305,6 +304,28 @@ if(NF_FEATURE_USE_APPDOMAINS)
     message(STATUS "Application Domains support is included")
 else()    
     message(STATUS "Application Domains support IS NOT included")
+endif()
+
+#################################################################
+# disable all trace messages and checks on CLR
+# (default is OFF so all traces and checks are enabled)
+option(NF_PLATFORM_NO_CLR_TRACE "option to disable all trace stuff in CLR")
+
+if(NF_PLATFORM_NO_CLR_TRACE)
+    message(STATUS "CLR has all trace messages and checks DISABLED")
+else()
+    message(STATUS "CLR has all trace messages and checks enabled")
+endif()
+
+#################################################################
+# disable CLR IL inlining
+# (default is OFF so CLR IL inline is enabled)
+option(NF_CLR_NO_IL_INLINE "option to disable CLR IL inlining")
+
+if(NF_CLR_NO_IL_INLINE)
+    message(STATUS "CLR IL inlining is DISABLED")
+else()
+    message(STATUS "CLR IL inlining is enabled")
 endif()
 
 #################################################################
@@ -360,10 +381,6 @@ endif()
 
 #################################################################
 
-#################################################################
-# manage nanoFramework API namespaces
-#################################################################
-include(NF_API_Namespaces)
 
 #################################################################
 # manage HAL/PAL required for API namespaces
@@ -597,7 +614,7 @@ if(RTOS_CHIBIOS_CHECK)
         else()
             # board NOT found in targets folder
             # can't continue
-            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
     endif()
 

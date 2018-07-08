@@ -8,6 +8,10 @@
 
 #include "nanoCLR_Types.h"
 
+#if (__CORTEX_M == 0)
+    #error "ITM port is not available on Cortex-M0(+) cores. Need to set CMake option SWO_OUTPUT to OFF."
+#else
+
 extern "C" void SwoInit()
 {
     // set SWO pin (PB3) to alternate mode (0 == the status after RESET) 
@@ -99,3 +103,5 @@ uint32_t GenericPort_Write(int portNum, const char* data, size_t size)
 {
     return GenericPort_Write_CMSIS(portNum, data, size);
 }
+
+#endif // (__CORTEX_M == 0)

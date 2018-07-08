@@ -26,3 +26,9 @@ The content of these files is parsed by CMake. It can include CMake variables. C
 
 
 **NOTE: this configuration was successfully tested in a ST_STM32F429I_DISCOVERY board using the Serial over USB connection on USB port 1 that creates a virtual COM port.**
+
+
+## Floating point
+
+The current build is set to add support for single-precision floating point.
+Meaning that `System.Math` API supports only the `float` overloads. The `double` ones will throw a `NotImplementedException`.

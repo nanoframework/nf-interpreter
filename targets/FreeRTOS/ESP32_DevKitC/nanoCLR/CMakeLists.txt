@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-include(NF_API_Namespaces)
+include(NF_NativeAssemblies)
 
 # add header file with common target definitions
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in"
@@ -36,11 +36,11 @@ list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoCRT.cp
 list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.cpp")
 
 # append files from Runtime.Native
-list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_RTC.cpp")
+list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp")
 
 
-# parse nanoFramework API options
-ParseApiOptions()
+# add native assemblies
+ParseNativeAssemblies()
 
 # configure code file with Interop Assemblies table and...
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CLR_RT_InteropAssembliesTable.cpp.in"

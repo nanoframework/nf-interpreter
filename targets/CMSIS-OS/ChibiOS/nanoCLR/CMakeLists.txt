@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-include(NF_API_Namespaces)
+include(NF_NativeAssemblies)
 
 # add header file with common target definitions
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in"
@@ -33,10 +33,21 @@ list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Memory.c
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoCRT.cpp")
 
 # append files from Runtime.Native
-list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_RTC.cpp")
+list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp")
 
+<<<<<<< HEAD
 # append TRNG only if enabled in variants (USE_RNG)
 if(TARGET_MCU_SUPPORTS_RNG)
+=======
+# append networking files, if enabled
+if(USE_NETWORKING_OPTION)
+    list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Network.cpp")
+endif()
+
+# append TRNG only if option is ON
+if(USE_RNG)
+    
+>>>>>>> develop
     # append random implementation for all series, except F0
     if( ${TARGET_SERIES} STREQUAL "STM32L0xx" OR
         ${TARGET_SERIES} STREQUAL "STM32F4xx" OR 
@@ -45,11 +56,15 @@ if(TARGET_MCU_SUPPORTS_RNG)
 
         list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetRandom.cpp")  
 
+    else()
+        # this series doesn't feature hardware TRNG, report
+        message(ERROR "This CPU doesn't have a Random Number Generation. Please change USE_RNG option to OFF.")
     endif()
+
 endif()
 
-# parse nanoFramework API options
-ParseApiOptions()
+# add native assemblies
+ParseNativeAssemblies()
 
 # configure code file with Interop Assemblies table and...
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CLR_RT_InteropAssembliesTable.cpp.in"

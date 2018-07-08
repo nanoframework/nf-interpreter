@@ -129,12 +129,16 @@ set(NF_CoreCLR_SRCS
     # CLR startup
     CLRStartup.cpp
 
+    # Messaging
+    Messaging.cpp
+
     # Runtime.Native
     nf_rt_native.cpp
     nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Debug.cpp
     nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
-    nf_rt_native_nanoFramework_Runtime_Native_RTC_stubs.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_Power.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp
     
     # Core stubs
     Hardware_stub.cpp

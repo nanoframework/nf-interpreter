@@ -20,16 +20,21 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::get_MaxFre
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         // Retrieves the needed parameters from private class properties
-        int timerId = (int)(pThis[ FIELD___deviceId ].NumericByRef().u4);
         double maxFrequency = 0.0;
 
 #if defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF)
+        int timerId = (int)(pThis[ FIELD___deviceId ].NumericByRef().u4);
+
         if (timerId == 1 || timerId >= 8) maxFrequency = (double)STM32_PCLK2_MAX;   // TIM1, TIM8 and TIM9 on APB2
         else maxFrequency = (double)STM32_PCLK1_MAX;        // other timers on APB1
+
 #elif defined(STM32F0xx_MCUCONF)
+
         maxFrequency = (double)STM32_PCLK_MAX;         // Only APB1 on this MCU
+
 #endif
         stack.SetResult_R8(maxFrequency);
+
     }
     NANOCLR_NOCLEANUP();
 }

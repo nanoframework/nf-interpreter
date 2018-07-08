@@ -3,6 +3,11 @@
 # See LICENSE file in the project root for full license information.
 #
 
+# sanity check on FPU preference
+if(USE_FPU)
+    message(FATAL_ERROR "STM32L0 series doesn't have FPU. Need to set USE_FPU option to OFF.")
+endif()
+
 #################################################################
 # WHEN ADDING A NEW SERIES add the appropriate GCC options bellow
 #################################################################

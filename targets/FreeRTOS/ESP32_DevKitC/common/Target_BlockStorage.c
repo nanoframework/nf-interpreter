@@ -77,9 +77,9 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, un
     // this has to add to make metadataprocessor happy
     if(!block) return true;
 
-    DeviceBlockInfo* pDeviceInfo = BlockStorageDevice_GetDeviceInfo(&block);
+    DeviceBlockInfo* pDeviceInfo = BlockStorageDevice_GetDeviceInfo((BlockStorageDevice*)&block);
         
-    for(int i=0; i < pDeviceInfo->NumRegions; i++)
+    for(unsigned int i=0; i < pDeviceInfo->NumRegions; i++)
     {
         BlockRegionInfo* pRegion = &pDeviceInfo->Regions[i];
         
@@ -101,6 +101,8 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, un
 
 bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool init)
 {
+    (void)init;
+
     pBSD->m_BSD     = vtable;
     pBSD->m_context = config;
 

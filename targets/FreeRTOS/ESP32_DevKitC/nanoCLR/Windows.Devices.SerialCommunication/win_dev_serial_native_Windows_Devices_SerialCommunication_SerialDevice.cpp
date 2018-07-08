@@ -65,6 +65,16 @@ enum InputStreamOptions
     InputStreamOptions_ReadAhead
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialData (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum SerialData
+{
+    SerialData_Chars = 0,
+    SerialData_WatchChar,
+};
+
 static const char* TAG = "SerialDevice";
 
 static char Esp_Serial_Initialised_Flag[UART_NUM_MAX] = {0,0,0};
@@ -115,9 +125,13 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 
 
-        // call the configure
+        // call the configure and abort if not OK
         HRESULT res = NativeConfig___VOID(stack);
-        
+        if (res != S_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(res);
+        }
+
         // Install driver
         esp_err_t esp_err = uart_driver_install(uart_num, 
                                                 UART_RX_BUFER_SIZE, // rx_buffer_size, 
@@ -256,6 +270,9 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 rtsPin = UART_NUM_2_CTS_DIRECT_GPIO_NUM; // 8
                 ctsPin = UART_NUM_2_RTS_DIRECT_GPIO_NUM; // 7
                 break;
+
+            default:
+                break;
        }
 
        // Don't use RTS/CTS if no hardware handshake enabled
@@ -349,7 +366,14 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         // Wait for 1 sec for data to be sent
         esp_err_t esp_err = uart_wait_tx_done( uart_num,  (TickType_t) 1000 / portTICK_PERIOD_MS);
-
+        if (esp_err == ESP_ERR_TIMEOUT)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
+        else if (esp_err != ESP_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
 
         // return how many bytes were send to the UART
         stack.SetResult_U4(length);
@@ -450,6 +474,23 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeSetWatchChar___VOID( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::get_BytesToRead___U4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
 {
@@ -462,5 +503,5 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
        stack.SetResult_String(deviceSelectorString);
    }
-   NANOCLR_NOCLEANUP();
+   NANOCLR_NOCLEANUP_NOLABEL();
 }

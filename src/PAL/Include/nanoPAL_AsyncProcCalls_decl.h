@@ -8,7 +8,6 @@
 #define _NANOPAL_ASYNCPROCCALLS_DECL_H_ 1
 
 #include <nanoWeak.h>
-#include <netmf_errors.h>
 
 //--//
 

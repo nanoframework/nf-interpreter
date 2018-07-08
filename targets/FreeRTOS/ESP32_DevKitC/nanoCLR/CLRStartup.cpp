@@ -9,11 +9,6 @@
 #include <nanoCLR_Types.h>
 #include <CLRStartup.h>
 
-// FIXME 
-// these are dummy data, we'll have to figure out how to fill these after the build happens
-char nanoCLR_Dat_Start[100 ];
-char nanoCLR_Dat_End  [1 ];
-
 struct Settings
 {
     CLR_SETTINGS m_clrOptions;
@@ -165,7 +160,7 @@ struct Settings
 
         const CLR_RECORD_ASSEMBLY* header;
         unsigned char * assembliesBuffer ;
-        signed int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
+        unsigned int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
         unsigned char * headerBuffer  = NULL;
 
         while(stream.CurrentIndex < stream.Length)

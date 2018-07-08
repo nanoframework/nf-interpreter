@@ -3,7 +3,6 @@
 # See LICENSE file in the project root for full license information.
 #
 
-
 ############################################################################################
 # WHEN ADDING A NEW API add the name that corresponds to the CMake option here
 # e.g.: for namespace Windows.Devices.Gpio, the CMake option is 'API_Windows.Devices.Gpio' 
@@ -62,7 +61,7 @@ endmacro()
 # 2. change the call to PerformSettingsForApiEntry() macro with the API name (doted naming)
 ############################################################################################
 
-macro(ParseApiOptions)
+macro(ParseNativeAssemblies)
 
     # nanoFramework.Runtime.Events
     if(API_nanoFramework.Runtime.Events)
@@ -121,7 +120,7 @@ macro(ParseApiOptions)
     endif()
 
     # Windows.Networking.Sockets
-     if(API_Windows.Networking.Sockets)
+    if(API_Windows.Networking.Sockets)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("Windows.Networking.Sockets")
     endif()
@@ -132,6 +131,10 @@ macro(ParseApiOptions)
         PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
     endif()
 
+    # Interop assemblies
+    ParseInteropAssemblies()
+
+
     # parse the declarations to have new lines and ';'
     string(REPLACE ";;" ";\n" CLR_RT_NativeAssemblyDataDeclarations "${CLR_RT_NativeAssemblyDataList}")
     # parse the list to have new lines, ',' and identation
@@ -139,8 +142,6 @@ macro(ParseApiOptions)
 
 
     # make the vars global
-    set(CLR_RT_NativeAssemblyData_declarations CACHE INTERNAL "make global")
-    set(CLR_RT_NativeAssemblyData_table_entries CACHE INTERNAL "make global")
     set(TARGET_NANO_APIS_INCLUDES ${TARGET_NANO_APIS_INCLUDES} CACHE INTERNAL "make global")
     set(TARGET_NANO_APIS_SOURCES ${TARGET_NANO_APIS_SOURCES} CACHE INTERNAL "make global")
 
@@ -166,6 +167,81 @@ macro(ParseApiOptions)
     else()
         # no APIs were included
         message(STATUS " *** NO APIs included ***")    
+    endif()
+
+endmacro()
+
+##############################################################################
+# macro to perform individual settings to add an Interop assembly to the build
+macro(PerformSettingsForInteropEntry interopAssemblyName)
+    
+    # namespace with '_' replacing '.'
+    string(REPLACE "." "_" interopAssemblyNameWithoutDots "${interopAssemblyName}")
+
+    # list this option
+    list(APPEND interopAssemblyList "${interopAssemblyName}")
+
+    # append to list of declaration for Interop Assemblies table
+    list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_${interopAssemblyNameWithoutDots};")
+
+    # append to list of entries for Interop Assemblies table
+    list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_${interopAssemblyNameWithoutDots},")
+
+    # find the module
+    find_package("INTEROP-${interopAssemblyName}" REQUIRED)
+
+    #########
+    # because Interop assemblies are considered and treated as like any CLR assembly we add them to the same lists
+    #########
+
+    # append include directories to list with includes for all the APIs
+    list(APPEND TARGET_NANO_APIS_INCLUDES "${${interopAssemblyName}_INCLUDE_DIRS}")
+    list(REMOVE_DUPLICATES TARGET_NANO_APIS_INCLUDES)
+
+    # append source files to list wiht source files for all the APIs
+    list(APPEND TARGET_NANO_APIS_SOURCES "${${interopAssemblyName}_SOURCES}")
+    list(REMOVE_DUPLICATES TARGET_NANO_APIS_SOURCES)
+
+endmacro()
+
+#################################################################
+# macro that adds the requested Interop assemblies to the build
+# requiremens to add an Interop assemble:
+# 1) add it's namespace to the NF_INTEROP_ASSEMBLIES CMake options
+# 2) have the corresponding CMake module in the Modules folder (mind the correct naming)
+macro(ParseInteropAssemblies)
+
+    # check if there are any Interop assemblies to be added
+    if(NF_INTEROP_ASSEMBLIES)
+
+        # loop through each Interop assembly and add it to the build
+        foreach(assembly ${NF_INTEROP_ASSEMBLIES})
+            PerformSettingsForInteropEntry(${assembly})
+        endforeach()
+       
+    endif()
+
+    # output the list of Interop assemblies included
+    list(LENGTH interopAssemblyList interopAssemblyListLenght)
+
+    if(interopAssemblyListLenght GREATER 0)
+        
+        # APIs included
+        message(STATUS "")
+        message(STATUS " *** Interop assemblies included ***")
+        message(STATUS "")
+
+        foreach(entry ${interopAssemblyList})
+            message(STATUS " ${entry}")
+        endforeach(entry ${})
+        
+        message(STATUS "")
+        message(STATUS " ***  end of Interop assemblies  ***")
+        message(STATUS "")
+
+    else()
+        # no Interop assemblies were included
+        message(STATUS " *** NO Interop assemblies included ***")    
     endif()
 
 endmacro()

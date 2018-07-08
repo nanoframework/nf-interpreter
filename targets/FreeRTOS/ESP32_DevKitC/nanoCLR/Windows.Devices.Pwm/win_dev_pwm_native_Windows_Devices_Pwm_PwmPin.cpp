@@ -70,8 +70,7 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::ConfigureAndStart
 int  Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetChannel (int pin, int timerId, bool create)
 {
     int channel = -1;  // Return if not found
-    int index;
-
+    
     // Selct map depending if high or low speed timers
     char * pMap =  (timerId > 3)? LowSpeedPinMap: HighSpeedPinMap;
     char * pMap2 = pMap;
@@ -100,7 +99,7 @@ int  Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetChannel (int pin,
 uint32_t  Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::CalculateDuty(int timerId, uint32_t dutyCycle, PwmPulsePolarity polarity)
 {
     // if polarity Active low then reverse duty cycle
-    if (polarity == PwmPulsePolarity::ActiveLow ) dutyCycle = 10000 - dutyCycle;
+    if (polarity == ActiveLow ) dutyCycle = 10000 - dutyCycle;
 
     // Return a duy cycle in the range of the current timer duty resolution
     return PwmController_Timer_resolution[timerId] * dutyCycle / 10000;
@@ -117,9 +116,6 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeInit___VOID
        // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-        int timerId   = (int)(pThis[ FIELD___pwmTimer ].NumericByRef().u4);
-        PwmPulsePolarity polarity  = (PwmPulsePolarity)(pThis[ FIELD___polarity ].NumericByRef().u4);
-
         // Check pin number is a valid for output
         int pinNumber = (int)(pThis[ FIELD___pinNumber ].NumericByRef().u4);
         if ( !GPIO_IS_VALID_OUTPUT_GPIO(pinNumber) )
@@ -129,9 +125,6 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeInit___VOID
 
         // Create a new entry in channel table and configure channel which will also start channel
         NANOCLR_CHECK_HRESULT( ConfigureAndStart(pThis, true, true) );
-
-        // Get speed mode based on Timer used
-        ledc_mode_t speed_mode = GetSpeedMode(timerId);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -174,11 +167,13 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeSetActiveDu
 
 HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeSetPolarity___VOID__U1( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+    
     NANOCLR_HEADER();
     {
         // Nothing to do here, we handle it other places
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 

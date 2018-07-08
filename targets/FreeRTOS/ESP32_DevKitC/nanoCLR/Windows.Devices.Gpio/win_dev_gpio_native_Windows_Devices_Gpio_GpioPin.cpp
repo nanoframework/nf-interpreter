@@ -211,7 +211,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveM
         // Return value to the managed application
         stack.SetResult_Boolean( driveModeSupported ) ;
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode( CLR_RT_StackFrame& stack )
@@ -324,11 +324,13 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___B
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebounceTimeout___VOID( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+    
     NANOCLR_HEADER();
 
     // nothing to do here as the debounce timeout is grabbed from the managed object when required
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___VOID__WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )

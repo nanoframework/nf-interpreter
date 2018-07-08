@@ -29,12 +29,18 @@ find_package(NF_CoreCLR REQUIRED)
 
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
-find_package(NF_Debugger REQUIRED)
-find_package(NF_Diagnostics REQUIRED)
+    find_package(NF_Debugger REQUIRED)
+    find_package(NF_Diagnostics REQUIRED)
 endif()
 
 # nF feature: Networking Stack, LWIP included in IDF libs
+<<<<<<< HEAD
 find_package(NF_NETWORKING REQUIRED)
+=======
+if(USE_NETWORKING_OPTION)
+    find_package(NF_NETWORKING REQUIRED)
+endif()
+>>>>>>> develop
 
 # RTC (real time clock) (default is OFF so RTC is NOT included)
 option(NF_FEATURE_RTC "option to use hardware RTC")
@@ -74,7 +80,9 @@ add_executable(
     ${NANOCLR_PROJECT_SOURCES}
 
     ${TARGET_ESP32_NANOCLR_SOURCES}
-    
+
+    ${WireProtocol_SOURCES}
+
     # sources for nanoFramework libraries
     "${NF_CoreCLR_SOURCES}"
     "${NF_Debugger_SOURCES}"
@@ -195,6 +203,16 @@ endif()
 # set compiler definition for implementing (or not) CRC32 in Wire Protocol
 if(NF_WP_IMPLEMENTS_CRC32)
     target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DWP_IMPLEMENTS_CRC32)
+endif()
+
+# set compiler definition regarding inclusion of trace messages and checks on CLR
+if(NF_PLATFORM_NO_CLR_TRACE)
+    target_compile_definitions(${TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
+endif()
+
+# set compiler definition regarding CLR IL inlining
+if(NF_CLR_NO_IL_INLINE)
+    target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
 endif()
 
 # set extra linker flags for DEBUG

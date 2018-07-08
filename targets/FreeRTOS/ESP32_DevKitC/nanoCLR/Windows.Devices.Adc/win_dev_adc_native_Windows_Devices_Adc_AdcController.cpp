@@ -96,7 +96,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetC
         // Return value to the managed application
         stack.SetResult_I4(channelCount);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetMaxValue___I4( CLR_RT_StackFrame& stack )
@@ -106,7 +106,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetM
         // Currently fixed 12 bit so return 4095
         stack.SetResult_I4(4095);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetMinValue___I4( CLR_RT_StackFrame& stack )
@@ -116,7 +116,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetM
     // Return 0 for now, is this signed ?
     stack.SetResult_I4(0);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeIsChannelModeSupported___BOOLEAN__I4( CLR_RT_StackFrame& stack )
@@ -126,10 +126,11 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeIsCh
         int mode = stack.Arg1().NumericByRef().s4;
         
         // Only support Single ended mode for now
-        stack.SetResult_Boolean( (mode == (int)AdcChannelMode::SingleEnded) ) ;
+        AdcChannelMode singleEndedMode = SingleEnded;
+        stack.SetResult_Boolean( (mode == (int)singleEndedMode) ) ;
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetResolutionInBits___I4( CLR_RT_StackFrame& stack )
@@ -139,7 +140,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetR
         // Fixed at 12 bit for now
         stack.SetResult_I4(12);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit___VOID( CLR_RT_StackFrame& stack )
@@ -182,5 +183,5 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::GetDeviceS
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
        stack.SetResult_String(deviceSelectorString);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }

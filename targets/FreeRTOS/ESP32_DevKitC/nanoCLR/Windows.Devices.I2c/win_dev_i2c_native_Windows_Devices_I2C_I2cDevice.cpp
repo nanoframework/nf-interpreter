@@ -154,9 +154,6 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         // see the comments in the SpiDevice() constructor in managed code for details, subtract 1 to get ESP32 bus number
         i2c_port_t bus = (i2c_port_t)((pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000) - 1);
  
-        // Set the Bus parameters
-        SetConfig( bus, pConfig);
-
         int slaveAddress = pConfig[ I2cConnectionSettings::FIELD___slaveAddress ].NumericByRef().s4;
     
         // dereference the write and read buffers from the arguments
@@ -182,7 +179,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
 
         i2c_cmd_handle_t cmd = i2c_cmd_link_create();
         i2c_master_start(cmd);
-        i2c_master_write_byte( cmd, ( slaveAddress << 1 ) | I2C_MASTER_WRITE, 1);
+        int ReadWrite = (readSize > 0) ? I2C_MASTER_READ : I2C_MASTER_WRITE;
+        i2c_master_write_byte( cmd, ( slaveAddress << 1 ) | ReadWrite, 1);
 
         if ( writeSize != 0 )  // Write
         {
@@ -256,5 +254,5 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetDeviceSelec
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
        stack.SetResult_String(deviceSelectorString);
    }
-   NANOCLR_NOCLEANUP();
+   NANOCLR_NOCLEANUP_NOLABEL();
 }
