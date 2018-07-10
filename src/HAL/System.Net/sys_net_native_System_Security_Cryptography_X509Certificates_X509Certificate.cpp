@@ -29,9 +29,9 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
     CLR_RT_ProtectFromGC    gc2( hbSubject );
     X509CertData            cert;
     CLR_INT64*              val;
-    CLR_INT64               tzOffset;
+//    CLR_INT64               tzOffset;
     SYSTEMTIME              st;
-    INT32                   standardBias;
+//    INT32                   standardBias;
     CLR_RT_HeapBlock*       hbPwd     = stack.Arg1().DereferenceString();
     LPCSTR                  szPwd;
 

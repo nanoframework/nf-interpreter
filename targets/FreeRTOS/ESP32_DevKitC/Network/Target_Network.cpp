@@ -19,6 +19,8 @@ bool Esp32_Ethernet_Close(int index);
 
 bool Network_Interface_Bind(int index)
 {
+    (void)index;
+    
     return true;
 }
 
@@ -51,6 +53,8 @@ int  Network_Interface_Open(int configIndex)
         case TCPIP_ADAPTER_IF_ETH:
             return Esp32_Ethernet_Open(configIndex, pConfig);
 #endif
+        default:
+            break;
     }
 	return SOCK_SOCKET_ERROR;
 }
@@ -72,6 +76,8 @@ bool Network_Interface_Close(int configIndex)
         case TCPIP_ADAPTER_IF_ETH:
             return Esp32_Ethernet_Close(configIndex);
 #endif
+        default:
+            break;
 
     }
 	return false; 

@@ -42,6 +42,9 @@ static bool SSL_GenericInit( int sslMode, int sslVerify, const char* certificate
 
 bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* szPwd, X509CertData* certData )
 {
+    (void)certLength; // suppress warning
+    (void)szPwd;
+    
     if (!s_init_done) s_init_done=ssl_initialize_internal();
     NATIVE_PROFILE_PAL_COM();
     return ssl_parse_certificate_internal((void *)certificate,

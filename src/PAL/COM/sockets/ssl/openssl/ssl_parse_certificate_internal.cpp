@@ -29,21 +29,24 @@ static const char *mon[12] =
 // TODO - FIXME
 //static int ssl_get_ASN1_UTCTIME(const ASN1_UTCTIME *tm, DATE_TIME_INFO *dti);
 
-static int password_cb(char *buf, int size, int rwflag, void *userdata)
-{
-    const char* password = (const char*)userdata;
-    int res = NANOCLR_SSL_STRLEN(password);
+// static int password_cb(char *buf, int size, int rwflag, void *userdata)
+// {
+//     (void)rwflag; // suppress warning
+//     const char* password = (const char*)userdata;
+//     int res = NANOCLR_SSL_STRLEN(password);
 
-    if (res > size)
-        res = size;
+//     if (res > size)
+//         res = size;
     
-    NANOCLR_SSL_MEMCPY(buf, password, res);
+//     NANOCLR_SSL_MEMCPY(buf, password, res);
     
-    return res;
-}
+//     return res;
+// }
 
 X509* ssl_parse_certificate(void* pCert, size_t certLen, LPCSTR pwd, EVP_PKEY** privateKey)
 {
+    (void)pwd;
+
     X509 *x=NULL;
    // PKCS12* p12 = NULL;
 
@@ -129,8 +132,10 @@ X509* ssl_parse_certificate(void* pCert, size_t certLen, LPCSTR pwd, EVP_PKEY** 
 
 bool ssl_parse_certificate_internal(void * bytes, size_t size, void* pwd, void* x509CertData)
 {
-    char *name,*subject;
-    X509CertData* x509 = (X509CertData*)x509CertData;
+    (void)x509CertData;
+
+//    char *name,*subject;
+//    X509CertData* x509 = (X509CertData*)x509CertData;
     X509* x = ssl_parse_certificate(bytes, size, (LPCSTR)pwd, NULL);
 
     if (x == NULL)

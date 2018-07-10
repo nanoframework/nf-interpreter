@@ -16,7 +16,7 @@ extern "C"
 
 struct netif * Esp32_find_netif(esp_interface_t esp_if);
 
-static EventGroupHandle_t wifi_event_group;
+//static EventGroupHandle_t wifi_event_group;
 
 static bool WifiInitialised = false;
 
@@ -67,6 +67,8 @@ esp_err_t Esp32_Wireless_Connect(HAL_Configuration_Wireless80211 * pWireless)
 
 int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * pConfig) 
 { 
+	(void)index;
+	
 	esp_err_t ec;
 
     ec = Esp32_InitaliseWifi();
@@ -97,6 +99,8 @@ int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * pConfig
 
 bool Esp32_Wireless_Close(int index)
 { 
+	(void)index;
+
 	if ( WifiInitialised )
 	{
 		esp_wifi_deinit();

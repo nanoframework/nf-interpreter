@@ -21,6 +21,11 @@
 bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, 
 	int cert_len, const char* szCertPwd )
 {
+    (void)sslContextHandle;
+    (void)certificate;
+    (void)cert_len;
+    (void)szCertPwd;
+    
     return false;
 }
 

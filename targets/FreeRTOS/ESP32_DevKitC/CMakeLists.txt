@@ -34,13 +34,9 @@ if(NF_FEATURE_DEBUGGER)
 endif()
 
 # nF feature: Networking Stack, LWIP included in IDF libs
-<<<<<<< HEAD
-find_package(NF_NETWORKING REQUIRED)
-=======
 if(USE_NETWORKING_OPTION)
     find_package(NF_NETWORKING REQUIRED)
 endif()
->>>>>>> develop
 
 # RTC (real time clock) (default is OFF so RTC is NOT included)
 option(NF_FEATURE_RTC "option to use hardware RTC")
@@ -183,6 +179,9 @@ target_include_directories(NetworkLib PUBLIC
 target_compile_definitions(NetworkLib PUBLIC "-DPLATFORM_ESP32 " )
 set (EXTRA_LIBS ${EXTRA_LIBS} NetworkLib)
 target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${EXTRA_LIBS})
+SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
+# Inhibit warnings so we can compile 3rd party code (Lwip)
+set_target_properties(NetworkLib PROPERTIES COMPILE_FLAGS " -w " )
 endif()
 
 # set extra compiler flags, some are related with the build type

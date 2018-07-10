@@ -26,7 +26,7 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
     int nonblock = 0;
 
     // Retrieve SSL struct from g_SSL_Driver    
-    if((sslContextHandle >= ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
+    if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
     {
         goto error;
     }

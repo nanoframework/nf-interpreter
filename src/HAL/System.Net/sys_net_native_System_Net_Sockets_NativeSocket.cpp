@@ -327,7 +327,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__B
     CLR_INT32 handle;
     CLR_INT32 mode       = stack.Arg1().NumericByRef().s4;    
     CLR_INT32 timeout_us = stack.Arg2().NumericByRef().s4;
-    uint64_t ct = 0;
+//    uint64_t ct = 0;
     CLR_RT_HeapBlock hbTimeout;
 
     CLR_INT32 res = 0;
@@ -570,7 +570,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper( 
     CLR_UINT32              offset    = stack.Arg2().NumericByRef().u4;
     CLR_UINT32              count     = stack.Arg3().NumericByRef().u4;
     CLR_INT32               flags     = stack.Arg4().NumericByRef().s4;
-    CLR_INT32               timeout_ms = stack.Arg5().NumericByRef().s4;
+//    CLR_INT32               timeout_ms = stack.Arg5().NumericByRef().s4;
     CLR_RT_HeapBlock        hbTimeout;
 
     CLR_INT64* timeout;

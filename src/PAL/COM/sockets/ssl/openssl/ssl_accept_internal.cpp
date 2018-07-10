@@ -20,7 +20,7 @@ int ssl_accept_internal( int sd, int sslContextHandle )
     SSL *ssl = NULL;
     int nonblock = 0;
     
-    if((sslContextHandle >= ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
+    if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
     {
         goto error;
     }

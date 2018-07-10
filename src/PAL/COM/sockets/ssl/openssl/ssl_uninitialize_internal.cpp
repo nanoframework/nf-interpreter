@@ -20,7 +20,7 @@ bool ssl_uninitialize_internal()
 {
     bool result = TRUE;
     
-    for(int i = 0; i<ARRAYSIZE(g_SSL_Driver.m_sslContextArray); i++)
+    for(uint32_t i = 0; i<ARRAYSIZE(g_SSL_Driver.m_sslContextArray); i++)
     {
         if(g_SSL_Driver.m_sslContextArray[i].SslContext != NULL)
         {

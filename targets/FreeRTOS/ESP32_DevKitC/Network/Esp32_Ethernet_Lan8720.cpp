@@ -56,6 +56,8 @@ static void eth_gpio_config_rmii(void)
 
 esp_err_t Esp32_InitialiseEthernet( uint8_t * pMacAdr)
 {
+    (void)pMacAdr;
+    
     // Config Ethernet interface which will depend on current hardware
     eth_config_t config = DEFAULT_ETHERNET_PHY_CONFIG;
     /* Set the PHY address in the example configuration */
@@ -91,6 +93,8 @@ esp_err_t Esp32_InitialiseEthernet( uint8_t * pMacAdr)
 //
 int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config) 
 { 
+    (void)index;
+
     if ( Esp32_InitialiseEthernet(config->MacAddress) == ESP_OK )
     {
        // Return NetIf number for Esp32 wireless station
@@ -113,5 +117,6 @@ int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config)
 
 bool Esp32_Ethernet_Close(int index)
 { 
+    (void)index;
     return  esp_eth_disable() == ESP_OK;
 }
