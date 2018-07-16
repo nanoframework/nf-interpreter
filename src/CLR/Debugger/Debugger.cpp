@@ -1041,6 +1041,11 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
                 reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_ConfigBlockRequiresErase;
             }
 
+            if (::Target_HasNanoBooter())
+            {
+                reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_HasNanoBooter;
+            }
+
             data = (CLR_UINT8*)&reply.u_capsFlags;
             size = sizeof(reply.u_capsFlags);
             break;
