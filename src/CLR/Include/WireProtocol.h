@@ -13,6 +13,10 @@
 #include <string.h>
 #include <nanoSupport.h>
 
+#if !defined(_WIN32)
+#include <target_common.h>
+#endif
+
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
 #endif
@@ -23,6 +27,11 @@
 
 #define MARKER_DEBUGGER_V1 "NFDBGV1" // Used to identify the debugger at boot time.
 #define MARKER_PACKET_V1   "NFPKTV1" // Used to identify the start of a packet.
+
+#ifndef WP_PACKET_SIZE
+// no Wire Protocol defined at target_common, set to default as 1024
+#define WP_PACKET_SIZE      1024U
+#endif
 
 // enum with Wire Protocol flags
 // backwards compatible with .NETMF
@@ -133,8 +142,9 @@ typedef struct WP_Message
 
 
 // enum with flags for Monitor ping source and debugger flags
-// backwards compatible with .NETMF in debugger flags only
-// adds NEW flags for nanoBooter and nanoCLR
+///////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Monitor_Ping (in debugger library code) !!! //
+///////////////////////////////////////////////////////////////////////
 typedef enum Monitor_Ping_Source_Flags
 {
     Monitor_Ping_c_Ping_Source_NanoCLR          = 0x00010000,
@@ -145,6 +155,13 @@ typedef enum Monitor_Ping_Source_Flags
     
     // flags specific to Wire Protocol capabilities
     Monitor_Ping_c_Ping_WPFlag_SupportsCRC32    = 0x00000010,
+    
+    // Wire Protocol packet size (3rd position)
+    Monitor_Ping_c_PacketSize_1024              = 0x00000100,
+    Monitor_Ping_c_PacketSize_0512              = 0x00000200,
+    Monitor_Ping_c_PacketSize_0256              = 0x00000300,
+    Monitor_Ping_c_PacketSize_0128              = 0x00000400,
+
 }Monitor_Ping_Source_Flags;
 
 
