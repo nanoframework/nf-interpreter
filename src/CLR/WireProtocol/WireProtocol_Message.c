@@ -8,7 +8,7 @@
 #include <nanoSupport.h>
 #include "WireProtocol_Message.h"
 
-uint8_t receptionBuffer[2048];
+uint8_t receptionBuffer[sizeof(WP_Packet) + WP_PACKET_SIZE];
 static uint16_t lastOutboundMessage;
 // FIXME #146 uint32_t m_payloadTicks;
 static uint8_t* marker;

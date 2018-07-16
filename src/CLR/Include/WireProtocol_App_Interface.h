@@ -9,7 +9,7 @@
 #include "WireProtocol.h"
 
 //////////////////////////////////////////
-extern uint8_t receptionBuffer[2048];
+extern uint8_t receptionBuffer[sizeof(WP_Packet) + WP_PACKET_SIZE];
 extern void ReplyToCommand(WP_Message* message, int fSuccess, int fCritical, void* ptr, int size);
 
 //////////////////////////////////////////
