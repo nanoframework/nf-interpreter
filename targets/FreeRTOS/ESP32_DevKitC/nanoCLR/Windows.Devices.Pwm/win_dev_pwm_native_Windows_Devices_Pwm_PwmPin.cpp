@@ -99,7 +99,7 @@ int  Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetChannel (int pin,
 uint32_t  Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::CalculateDuty(int timerId, uint32_t dutyCycle, PwmPulsePolarity polarity)
 {
     // if polarity Active low then reverse duty cycle
-    if (polarity == PwmPulsePolarity::ActiveLow ) dutyCycle = 10000 - dutyCycle;
+    if (polarity == ActiveLow ) dutyCycle = 10000 - dutyCycle;
 
     // Return a duy cycle in the range of the current timer duty resolution
     return PwmController_Timer_resolution[timerId] * dutyCycle / 10000;

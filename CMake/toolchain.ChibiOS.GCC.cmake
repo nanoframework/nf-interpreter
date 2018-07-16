@@ -159,6 +159,19 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
     # set definition for Wire Protocol trace mask
     target_compile_definitions(${TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
 
+    # set compiler definition regarding inclusion of trace messages and checks on CLR
+    if(NF_PLATFORM_NO_CLR_TRACE)
+        target_compile_definitions(${TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
+    endif()
+
+    # set compiler definition regarding CLR IL inlining
+    if(NF_CLR_NO_IL_INLINE)
+        target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
+    endif()
+
+    # include any extra compiler definitions comming from extra args
+    target_compile_definitions(${TARGET} PUBLIC ${ARGN})
+
 endfunction()
 
 

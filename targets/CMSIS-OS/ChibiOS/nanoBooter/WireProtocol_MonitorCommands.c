@@ -76,6 +76,18 @@ int Monitor_Ping(WP_Message* message)
         cmdReply.m_dbg_flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;    
     #endif
 
+    // Wire Protocol packet size 
+    #if (WP_PACKET_SIZE == 512)
+        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_0512;
+    #elif (WP_PACKET_SIZE == 256)
+        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_0256;
+    #elif (WP_PACKET_SIZE == 128)
+        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_0128;
+    #elif (WP_PACKET_SIZE == 1024)
+        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_1024;
+    #endif
+
+
         WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
     }
 

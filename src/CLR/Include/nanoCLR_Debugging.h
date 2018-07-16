@@ -284,6 +284,7 @@ struct CLR_DBG_Commands
         static const CLR_UINT32 c_CapabilityFlags_Profiling_Calls           = 0x00000100;
         static const CLR_UINT32 c_CapabilityFlags_ThreadCreateEx            = 0x00000400;
         static const CLR_UINT32 c_CapabilityFlags_ConfigBlockRequiresErase  = 0x00000800;
+        static const CLR_UINT32 c_CapabilityFlags_HasNanoBooter             = 0x00001000;
 
         CLR_UINT32 m_cmd;
 

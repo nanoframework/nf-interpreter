@@ -16,6 +16,7 @@
 #define EVENT_UNKNOWN     0
 #define EVENT_CUSTOM      10
 #define EVENT_GPIO        20
+#define EVENT_SERIAL      30
 #define EVENT_NETWORK     40
 
 ////////////////////////////////////////////////////////////////////////////////////////////

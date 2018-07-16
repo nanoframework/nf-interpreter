@@ -307,6 +307,28 @@ else()
 endif()
 
 #################################################################
+# disable all trace messages and checks on CLR
+# (default is OFF so all traces and checks are enabled)
+option(NF_PLATFORM_NO_CLR_TRACE "option to disable all trace stuff in CLR")
+
+if(NF_PLATFORM_NO_CLR_TRACE)
+    message(STATUS "CLR has all trace messages and checks DISABLED")
+else()
+    message(STATUS "CLR has all trace messages and checks enabled")
+endif()
+
+#################################################################
+# disable CLR IL inlining
+# (default is OFF so CLR IL inline is enabled)
+option(NF_CLR_NO_IL_INLINE "option to disable CLR IL inlining")
+
+if(NF_CLR_NO_IL_INLINE)
+    message(STATUS "CLR IL inlining is DISABLED")
+else()
+    message(STATUS "CLR IL inlining is enabled")
+endif()
+
+#################################################################
 
 if(RTOS_CHIBIOS_CHECK)
 
