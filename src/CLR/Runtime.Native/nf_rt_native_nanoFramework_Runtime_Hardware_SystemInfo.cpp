@@ -98,7 +98,7 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::get_SKU___
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::GetNativeFlotingPointSupport___STATIC__U1( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::GetNativeFloatingPointSupport___STATIC__U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {

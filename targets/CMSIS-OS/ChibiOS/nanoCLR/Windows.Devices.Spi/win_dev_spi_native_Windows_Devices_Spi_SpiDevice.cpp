@@ -156,6 +156,8 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRa
 
   #elif defined(STM32F0xx_MCUCONF)
 
+    (void)busIndex;
+
     // STM32F0 SPI is always feed by APB1
     actualFrequency = STM32_PCLK1;
 
