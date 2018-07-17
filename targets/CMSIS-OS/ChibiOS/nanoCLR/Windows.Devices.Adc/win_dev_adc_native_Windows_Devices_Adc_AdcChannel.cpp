@@ -105,6 +105,8 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
             ADC_CR2_SWSTART,                        /* CR2 */
             ADC_SMPR1_SMP_AN11(ADC_SAMPLE_3),       /* SMPR1 */
             0,                                      /* SMPR2 */
+            0,                                      /* HTR */
+            0,                                      /* LTR */
             0,                                      /* SQR1 */
             0,                                      /* SQR2 */
             ADC_SQR3_SQ1_N(adcDefinition.adcChannel)
