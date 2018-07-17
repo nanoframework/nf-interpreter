@@ -13,21 +13,6 @@
 #include <nanoPAL_BlockStorage.h>
 #include <LaunchCLR.h>
 
-void BlinkerThread(void const * argument)
-{
-  (void)argument;
-
-  // loop until thread receives a request to terminate
-  while (!chThdShouldTerminateX()) {
-
-    palClearPad(GPIOA, GPIOA_LED_GREEN);
-    osDelay(500);
-    palSetPad(GPIOA, GPIOA_LED_GREEN);
-    osDelay(500);
-  }
-}
-osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
-
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 
@@ -68,9 +53,6 @@ int main(void) {
   palSetPadMode(GPIOA, 2, PAL_MODE_ALTERNATE(1)); // USART2 TX
   palSetPadMode(GPIOA, 3, PAL_MODE_ALTERNATE(1)); // USART2 RX
 
-  // Creates the blinker thread, it does not start immediately.
-  osThreadCreate(osThread(BlinkerThread), NULL);
-
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
 
@@ -84,6 +66,9 @@ int main(void) {
 
   //  Normal main() thread
   while (true) {
+    palClearPad(GPIOA, GPIOA_LED_GREEN);
+    osDelay(500);
+    palSetPad(GPIOA, GPIOA_LED_GREEN);
     osDelay(500);
   }
 }
