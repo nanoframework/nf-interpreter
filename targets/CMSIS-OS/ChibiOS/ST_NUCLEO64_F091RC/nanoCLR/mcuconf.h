@@ -50,13 +50,13 @@
 #define STM32_RTCSEL                        STM32_RTCSEL_LSI
 
 /*
- * IRQ system settings.
+ * EXT driver system settings.
  */
-#define STM32_IRQ_EXTI0_1_IRQ_PRIORITY      3
-#define STM32_IRQ_EXTI2_3_IRQ_PRIORITY      3
-#define STM32_IRQ_EXTI4_15_IRQ_PRIORITY     3
-#define STM32_IRQ_EXTI16_IRQ_PRIORITY       3
-#define STM32_IRQ_EXTI17_20_IRQ_PRIORITY    3
+#define STM32_EXT_EXTI0_1_IRQ_PRIORITY      3
+#define STM32_EXT_EXTI2_3_IRQ_PRIORITY      3
+#define STM32_EXT_EXTI4_15_IRQ_PRIORITY     3
+#define STM32_EXT_EXTI16_IRQ_PRIORITY       3
+#define STM32_EXT_EXTI17_20_IRQ_PRIORITY    3
 
 /*
  * ADC driver system settings.
@@ -68,13 +68,10 @@
 #define STM32_ADC_ADC1_DMA_STREAM           STM32_DMA_STREAM_ID(1, 1)
 
 /*
- * EXT driver system settings.
+ * CAN driver system settings.
  */
-#define STM32_EXT_EXTI0_1_IRQ_PRIORITY      3
-#define STM32_EXT_EXTI2_3_IRQ_PRIORITY      3
-#define STM32_EXT_EXTI4_15_IRQ_PRIORITY     3
-#define STM32_EXT_EXTI16_IRQ_PRIORITY       3
-#define STM32_EXT_EXTI17_20_IRQ_PRIORITY    3
+#define STM32_CAN_USE_CAN1                  TRUE
+#define STM32_CAN_CAN1_IRQ_PRIORITY         3
 
 /*
  * GPT driver system settings.
@@ -91,7 +88,7 @@
 /*
  * I2C driver system settings.
  */
-#define STM32_I2C_USE_I2C1                  FALSE
+#define STM32_I2C_USE_I2C1                  TRUE
 #define STM32_I2C_USE_I2C2                  FALSE
 #define STM32_I2C_BUSY_TIMEOUT              50
 #define STM32_I2C_I2C1_IRQ_PRIORITY         3
@@ -108,7 +105,7 @@
 /*
  * I2S driver system settings.
  */
-#define STM32_I2S_USE_SPI1                  FALSE
+#define STM32_I2S_USE_SPI1                  TRUE
 #define STM32_I2S_USE_SPI2                  FALSE
 #define STM32_I2S_SPI1_MODE                 (STM32_I2S_MODE_MASTER |        \
                                              STM32_I2S_MODE_RX)
@@ -158,17 +155,12 @@
 #define STM32_SERIAL_USE_UART8              FALSE
 #define STM32_SERIAL_USART1_PRIORITY        3
 #define STM32_SERIAL_USART2_PRIORITY        3
-#define STM32_SERIAL_USART3_PRIORITY        3
-#define STM32_SERIAL_UART4_PRIORITY         3
-#define STM32_SERIAL_UART5_PRIORITY         3
-#define STM32_SERIAL_USART6_PRIORITY        3
-#define STM32_SERIAL_UART7_PRIORITY         3
-#define STM32_SERIAL_UART8_PRIORITY         3
+#define STM32_SERIAL_USART3_8_PRIORITY      3
 
 /*
  * SPI driver system settings.
  */
-#define STM32_SPI_USE_SPI1                  FALSE
+#define STM32_SPI_USE_SPI1                  TRUE
 #define STM32_SPI_USE_SPI2                  FALSE
 #define STM32_SPI_SPI1_DMA_PRIORITY         1
 #define STM32_SPI_SPI2_DMA_PRIORITY         1
@@ -196,15 +188,10 @@
 #define STM32_UART_USE_UART5                FALSE
 #define STM32_UART_USE_USART6               FALSE
 #define STM32_UART_USE_UART7                FALSE
-#define STM32_UART_USE_UART8                FALSE
+#define STM32_UART_USE_UART8                TRUE
 #define STM32_UART_USART1_IRQ_PRIORITY      3
 #define STM32_UART_USART2_IRQ_PRIORITY      3
-#define STM32_UART_USART3_IRQ_PRIORITY      3
-#define STM32_UART_UART4_IRQ_PRIORITY       3
-#define STM32_UART_UART5_IRQ_PRIORITY       3
-#define STM32_UART_USART6_IRQ_PRIORITY      3
-#define STM32_UART_UART7_IRQ_PRIORITY       3
-#define STM32_UART_UART8_IRQ_PRIORITY       3
+#define STM32_UART_USART3_8_IRQ_PRIORITY    3
 #define STM32_UART_USART1_DMA_PRIORITY      0
 #define STM32_UART_USART2_DMA_PRIORITY      0
 #define STM32_UART_USART3_DMA_PRIORITY      0
@@ -230,6 +217,13 @@
 #define STM32_UART_UART8_RX_DMA_STREAM      STM32_DMA_STREAM_ID(1, 5)
 #define STM32_UART_UART8_TX_DMA_STREAM      STM32_DMA_STREAM_ID(1, 4)
 #define STM32_UART_DMA_ERROR_HOOK(uartp)    osalSysHalt("DMA failure")
+
+/*
+ * USB driver system settings.
+ */
+#define STM32_USB_USE_USB1                  FALSE
+#define STM32_USB_LOW_POWER_ON_SUSPEND      FALSE
+#define STM32_USB_USB1_LP_IRQ_PRIORITY      3
 
 /*
  * WDG driver system settings.
