@@ -32,9 +32,7 @@ esp_err_t Esp32_InitaliseWifi()
 		ec = esp_wifi_init(&cfg);
 		if ( ec != ESP_OK) return ec;
 
-		// We don't want to save config to NVS, we will do it ourselves
-		esp_wifi_set_storage(WIFI_STORAGE_RAM); 
-
+		
 		esp_wifi_set_mode(WIFI_MODE_STA);
 
 		ec = esp_wifi_start();

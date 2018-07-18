@@ -136,130 +136,124 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getaddrinfo___ST
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
-    // LPCSTR szName = stack.Arg0().RecoverString();
-    // struct SOCK_addrinfo hints;
-    // struct SOCK_addrinfo* addr = NULL;
-    // struct SOCK_addrinfo* addrT;
-    // CLR_UINT32        cAddresses = 0;
-    // CLR_RT_HeapBlock* pAddress;
-    // CLR_INT32         timeout_ms = 30000;
-    // CLR_RT_HeapBlock  hbTimeout;
-    // CLR_INT32         ret;
-    // bool              fRes = true;
-    // CLR_INT64*        timeout;
+    LPCSTR szName = stack.Arg0().RecoverString();
+    struct SOCK_addrinfo hints;
+    struct SOCK_addrinfo* addr = NULL;
+    struct SOCK_addrinfo* addrT;
+    CLR_UINT32        cAddresses = 0;
+    CLR_RT_HeapBlock* pAddress;
+    CLR_INT32         timeout_ms = 30000;
+    CLR_RT_HeapBlock  hbTimeout;
+    CLR_INT32         ret;
+    bool              fRes = true;
+    CLR_INT64*        timeout;
 
-    // hbTimeout.SetInteger( timeout_ms );
+    hbTimeout.SetInteger( timeout_ms * TIME_CONVERSION__TO_MILLISECONDS );
 
-    // NANOCLR_CHECK_HRESULT(stack.SetupTimeout( hbTimeout, timeout ));
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
-    // do
-    // {
-    //     memset( &hints, 0, sizeof(hints) );
+    do
+    {
+        memset( &hints, 0, sizeof(hints) );
 
-    //     ret = SOCK_getaddrinfo( szName, NULL, &hints, &addr );
+        ret = SOCK_getaddrinfo( szName, NULL, &hints, &addr );
 
-    //     if(ret == SOCK_SOCKET_ERROR)
-    //     {
-    //         if(SOCK_getlasterror() == SOCK_EWOULDBLOCK)
-    //         {
-    //             // non-blocking - allow other threads to run while we wait for handle activity
-    //             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_Socket, fRes ));
-    //         }
-    //         else
-    //         {
-    //             break;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         break;
-    //     }
-    // }
-    // while(fRes);
+        if(ret == SOCK_SOCKET_ERROR)
+        {
+            if(SOCK_getlasterror() == SOCK_EWOULDBLOCK)
+            {
+                // non-blocking - allow other threads to run while we wait for handle activity
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_Socket, fRes ));
+            }
+            else
+            {
+                break;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+    while(fRes);
     
-    // // timeout expired
-    // if(!fRes)
-    // {
-    //     ret = SOCK_SOCKET_ERROR;
+    // timeout expired
+    if(!fRes)
+    {
+        ret = SOCK_SOCKET_ERROR;
         
-    //     ThrowError( stack, SOCK_ETIMEDOUT );
+        ThrowError( stack, SOCK_ETIMEDOUT );
     
-    //     NANOCLR_SET_AND_LEAVE( CLR_E_PROCESS_EXCEPTION );
-    // }
+        NANOCLR_SET_AND_LEAVE( CLR_E_PROCESS_EXCEPTION );
+    }
 
-    // // getaddrinfo returns a winsock error code rather than SOCK_SOCKET_ERROR, so pass this on to the exception handling
-    // if(ret != 0)
-    // {
-    //     ThrowError( stack, ret );
-    //     NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
-    // }
+    // getaddrinfo returns a winsock error code rather than SOCK_SOCKET_ERROR, so pass this on to the exception handling
+    if(ret != 0)
+    {
+        ThrowError( stack, ret );
+        NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+    }
 
-    // {
-    //     CLR_RT_HeapBlock  hbCanonicalName;
-    //     CLR_RT_HeapBlock  hbAddresses;
+    {
+        CLR_RT_HeapBlock  hbCanonicalName;
+        CLR_RT_HeapBlock  hbAddresses;
         
-    //     hbCanonicalName.SetObjectReference( NULL );
-    //     CLR_RT_ProtectFromGC gc( hbCanonicalName );
+        hbCanonicalName.SetObjectReference( NULL );
+        CLR_RT_ProtectFromGC gc( hbCanonicalName );
 
-    //     hbAddresses.SetObjectReference( NULL );
-    //     CLR_RT_ProtectFromGC gc2( hbAddresses );
+        hbAddresses.SetObjectReference( NULL );
+        CLR_RT_ProtectFromGC gc2( hbAddresses );
 
-    //     for(int pass = 0; pass < 2; pass++)
-    //     {                                    
-    //         cAddresses = 0;
+        for(int pass = 0; pass < 2; pass++)
+        {                                    
+            cAddresses = 0;
 
-    //         for(addrT = addr; addrT != NULL; addrT = addrT->ai_next)
-    //         {
-    //             if(pass == 1)
-    //             {
-    //                 if(addrT->ai_canonname && addrT->ai_canonname[ 0 ])
-    //                 {
-    //                     //allocate return string
-    //                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbCanonicalName, addrT->ai_canonname ));
-    //                     NANOCLR_CHECK_HRESULT(hbCanonicalName.StoreToReference( stack.Arg1(), 0 ));
-    //                 }
+            for(addrT = addr; addrT != NULL; addrT = addrT->ai_next)
+            {
+                if(pass == 1)
+                {
+                    if(addrT->ai_canonname && addrT->ai_canonname[ 0 ])
+                    {
+                        //allocate return string
+                        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbCanonicalName, addrT->ai_canonname ));
+                        NANOCLR_CHECK_HRESULT(hbCanonicalName.StoreToReference( stack.Arg1(), 0 ));
+                    }
 
-    //                 //allocate address and store into array
-    //                 pAddress = (CLR_RT_HeapBlock*)hbAddresses.DereferenceArray()->GetElement( cAddresses );
+                    //allocate address and store into array
+                    pAddress = (CLR_RT_HeapBlock*)hbAddresses.DereferenceArray()->GetElement( cAddresses );
 
-    //                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( *pAddress, (CLR_UINT32)addrT->ai_addrlen, g_CLR_RT_WellKnownTypes.m_UInt8 ));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( *pAddress, (CLR_UINT32)addrT->ai_addrlen, g_CLR_RT_WellKnownTypes.m_UInt8 ));
 
-    //                 //copy address.
-    //                 memcpy( pAddress->DereferenceArray()->GetFirstElement(), addrT->ai_addr, addrT->ai_addrlen );
-    //             }
+                    //copy address.
+                    memcpy( pAddress->DereferenceArray()->GetFirstElement(), addrT->ai_addr, addrT->ai_addrlen );
+                }
                                 
-    //             cAddresses++;
-    //         }
+                cAddresses++;
+            }
                             
-    //         if(pass == 0)
-    //         {
-    //             //allocate array of byte arrays
-    //             CLR_RT_ReflectionDef_Index idx;
+            if(pass == 0)
+            {
+                //allocate array of byte arrays
+                CLR_RT_ReflectionDef_Index idx;
 
-    //             idx.m_kind               = REFLECTION_TYPE;
-    //             idx.m_levels             = 2;
-    //             idx.m_data.m_type.m_data = g_CLR_RT_WellKnownTypes.m_UInt8.m_data;
+                idx.m_kind               = REFLECTION_TYPE;
+                idx.m_levels             = 2;
+                idx.m_data.m_type.m_data = g_CLR_RT_WellKnownTypes.m_UInt8.m_data;
 
-    //             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( hbAddresses, cAddresses, idx ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( hbAddresses, cAddresses, idx ));
 
-    //             NANOCLR_CHECK_HRESULT(hbAddresses.StoreToReference( stack.Arg2(), 0 ));                
-    //         }
-    //     }    
-    // }
+                NANOCLR_CHECK_HRESULT(hbAddresses.StoreToReference( stack.Arg2(), 0 ));                
+            }
+        }    
+    }
 
-    // stack.PopValue();       // Timeout
+    stack.PopValue();       // Timeout
     
-    // NANOCLR_CLEANUP();
+    NANOCLR_CLEANUP();
 
-    // if( addr ) SOCK_freeaddrinfo( addr );
+    if( addr ) SOCK_freeaddrinfo( addr );
 
-    // NANOCLR_CLEANUP_END();
-
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
-
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::shutdown___STATIC__VOID__OBJECT__I4__BYREF_I4( CLR_RT_StackFrame& stack )
@@ -346,10 +340,8 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__B
         NANOCLR_SET_AND_LEAVE (CLR_E_PROCESS_EXCEPTION);
     }
 
-// FIXME TIMEOUT_INFINITE
     if(timeout_us < 0)
-//        hbTimeout.SetInteger( TIMEOUT_INFINITE);
-         hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
+        hbTimeout.SetInteger( -1 );  // Infinite Timeout
   else 
         hbTimeout.SetInteger( timeout_us * TIME_CONVERSION__TO_MILLISECONDS / 1000 );
 
@@ -594,10 +586,8 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper( 
 
     if(offset + count > arrData->m_numOfElements) NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);    
 
- // FIXME  -1 timeout !
-    hbTimeout.SetInteger( (CLR_INT64)10000 * TIME_CONVERSION__TO_MILLISECONDS);
- //   hbTimeout.SetInteger( timeout_ms * TIME_CONVERSION__TO_MILLISECONDS);
-        
+// FIXME check working
+    hbTimeout.SetInteger( -1 );  // Infinite timeout
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
     //

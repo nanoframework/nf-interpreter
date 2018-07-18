@@ -72,15 +72,12 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, 
     switch(configurationIndex)
     {
         case 0: // Wireless Station
-// Test code - remove
-    hal_strcpy_s(  (char *)pconfig->Ssid, sizeof(pconfig->Ssid), "OpenWrt2");
-    hal_strcpy_s(  (char *)pconfig->Password, sizeof(pconfig->Password), "Daniel457");
-
             pconfig->Authentication = AuthenticationType_WPA2;
             pconfig->Encryption = EncryptionType_WPA2;
             break;
 
-        case 1: // Wireless Station
+        case 1: // Wireless AP
+            // FIXME add MAC addr to default SSID
             hal_strcpy_s(  (char *)pconfig->Ssid, sizeof(pconfig->Ssid), "nanoFramework");
             hal_strcpy_s(  (char *)pconfig->Password, sizeof(pconfig->Password), "password");
             pconfig->Authentication = AuthenticationType_WPA2;
