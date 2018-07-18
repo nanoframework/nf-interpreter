@@ -54,6 +54,8 @@ inline void HARD_Breakpoint() { };
 
 #endif  // !defined(BUILD_RTM)
 
+inline bool Target_HasNanoBooter() { return false; };
+
 #define NANOCLR_STOP() HARD_BREAKPOINT()
 
 inline void HAL_AssertEx()

@@ -15,23 +15,6 @@
 #include <nanoHAL_ConfigurationManager.h>
 #include <LaunchCLR.h>
 
-void BlinkerThread(void const * argument)
-{
-  (void)argument;
-
-  // loop until thread receives a request to terminate
-  while (!chThdShouldTerminateX()) {
-
-      palSetPad(GPIOD, GPIOD_LED3);
-      osDelay(500);
-      palClearPad(GPIOD, GPIOD_LED3);
-      osDelay(500);
-      
-  }
-  // nothing to deinitialize or cleanup, so it's safe to return
-}
-osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
-
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 
@@ -79,9 +62,6 @@ int main(void) {
   usbStart(serusbcfg.usbp, &usbcfg);
   usbConnectBus(serusbcfg.usbp);
 
-  // Creates the blinker thread, it does not start immediately.
-  osThreadCreate(osThread(BlinkerThread), NULL);
-
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
 
@@ -100,6 +80,9 @@ int main(void) {
 
   //  Normal main() thread
   while (true) {
-    osDelay(500);
+      palSetPad(GPIOD, GPIOD_LED3);
+      osDelay(500);
+      palClearPad(GPIOD, GPIOD_LED3);
+      osDelay(500);
   }
 }
