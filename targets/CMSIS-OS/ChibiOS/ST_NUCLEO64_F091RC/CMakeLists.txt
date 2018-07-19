@@ -181,10 +181,9 @@ nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf FALSE)
 nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf TRUE)
 
 # add other linker flags
-###################################################
-# the size of the CLR managed heap is defined here
-###################################################
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x1800")
+###########################################################
+# the sizes of CRT heap and ChibiOS stacks are defined here
+set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x2200")
 
 # generate output files
