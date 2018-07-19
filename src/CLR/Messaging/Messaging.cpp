@@ -162,30 +162,6 @@ bool CLR_Messaging::Messaging_Reply__Reply( WP_Message* msg )
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-bool CLR_Messaging::Phy_ReceiveBytes( void* state, unsigned char*& ptr, unsigned int & size )
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging* messaging = (CLR_Messaging*)state;
-
-    if(size)
-    {
-        int read = DebuggerPort_Read( messaging->m_port, (char*)ptr, size ); if(read <= 0) return false;
-
-        ptr  += read;
-        size -= read;
-    }
-
-    return true;
-}
-
-bool CLR_Messaging::Phy_TransmitMessage( void* state, const WP_Message* msg )
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging* messaging = (CLR_Messaging*)state;
-
-    return messaging->TransmitMessage( msg, true );
-}
-
 //--//
 
 bool CLR_Messaging::App_ProcessHeader( void* state, WP_Message*  msg )
@@ -276,7 +252,6 @@ HRESULT CLR_Messaging::CreateInstance()
     CLR_RT_Memory::ZeroFill( g_CLR_Messaging, sizeof(CLR_Messaging) );
     
     g_CLR_Messaging->Initialize(
-        HalSystemConfig.MessagingPort,
         NULL, 
         0, 
         NULL, 
@@ -289,21 +264,12 @@ HRESULT CLR_Messaging::CreateInstance()
 //--//
 
 void CLR_Messaging::Initialize(
-    COM_HANDLE                                port, 
     const CLR_Messaging_CommandHandlerLookup* requestLookup, 
     const CLR_UINT32                          requestLookupCount, 
     const CLR_Messaging_CommandHandlerLookup* replyLookup, 
     const CLR_UINT32                          replyLookupCount
     )
 {
-    // If the debugger and Messaging share the same port (Legacy) then we will not initialze the Messaging port (because the debugger will take care of it)
-    if((port == HalSystemConfig.MessagingPort) && 
-       (port == HalSystemConfig.DebuggerPort) &&
-        requestLookup == NULL) // messaging is null so don't initialize the port
-    {
-        return;
-    }
-
     if(m_fInitialized) return;
 
     m_Lookup_Requests[ 0 ].table = c_Messaging_Lookup_Request;
@@ -312,13 +278,7 @@ void CLR_Messaging::Initialize(
     m_Lookup_Replies[ 0 ].table = c_Messaging_Lookup_Reply;
     m_Lookup_Replies[ 0 ].size  = ARRAYSIZE(c_Messaging_Lookup_Reply);
 
-    m_cacheSubordinate.DblLinkedList_Initialize();
-    m_cacheMaster     .DblLinkedList_Initialize();
-
-
-
-    m_cacheTotalSize = 0;
-    m_port           = port;    
+    m_port           = HalSystemConfig.DebuggerPort;
 
     m_Lookup_Requests[ 1 ].table = requestLookup;
     m_Lookup_Requests[ 1 ].size  = requestLookupCount;
@@ -326,7 +286,7 @@ void CLR_Messaging::Initialize(
     m_Lookup_Replies[ 1 ].table = replyLookup;
     m_Lookup_Replies[ 1 ].size  = replyLookupCount;
 
-    m_fDebuggerInitialized = (DebuggerPort_Initialize( port ) != false);
+    m_fDebuggerInitialized = (DebuggerPort_Initialize( HalSystemConfig.DebuggerPort ) != false);
 
     m_fInitialized = true;
 
@@ -355,11 +315,6 @@ void CLR_Messaging::Cleanup()
         DebuggerPort_Uninitialize( m_port );
     }
     
-    m_cacheSubordinate.DblLinkedList_Release();
-    m_cacheMaster     .DblLinkedList_Release();
-
-    m_cacheTotalSize = 0;
-
     m_fDebuggerInitialized = false;
 
     m_fInitialized = false;
@@ -403,53 +358,11 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
 
     if(msg->m_header.m_flags & WP_Flags_c_Reply)
     {
-        //
-        // Only process replies once!
-        //
-        NANOCLR_FOREACH_NODE(CachedMessage,cache,m_cacheMaster)
-        {
-            WP_Packet& req = cache->m_message.m_header;
-            WP_Packet& res = msg->            m_header;
-
-            if(req.m_cmd == res.m_cmd && req.m_seq == res.m_seqReply)
-            {
-                m_cacheMaster.LinkAtFront( cache );
-
-                cache->m_lastSeen = HAL_Time_CurrentTime();
-
-                if(cache->m_flags & CachedMessage::c_Processed)
-                {
-                    return true;
-                }
-
-                cache->m_flags |= CachedMessage::c_Processed;
-                break;
-            }
-        }
-        NANOCLR_FOREACH_NODE_END();
-
         tables     = m_Lookup_Replies;
         tableCount = ARRAYSIZE(m_Lookup_Replies);
     }
     else
     {
-        // NANOCLR_FOREACH_NODE(CachedMessage,cache,m_cacheSubordinate)
-        // {
-        //     WP_Packet& req = msg->            m_header;
-        //     WP_Packet& res = cache->m_message.m_header;
-
-        //     if(req.m_cmd == res.m_cmd && req.m_seq == res.m_seqReply)
-        //     {
-        //         m_cacheSubordinate.LinkAtFront( cache );
-
-        //         cache->m_lastSeen = HAL_Time_CurrentTime();
-
-        //         TransmitMessage( &cache->m_message, false );
-        //         return true;
-        //     }
-        // }
-        // NANOCLR_FOREACH_NODE_END();
-
         tables     = m_Lookup_Requests;
         tableCount = ARRAYSIZE(m_Lookup_Requests);
     }
@@ -480,110 +393,8 @@ bool CLR_Messaging::ProcessPayload( WP_Message* msg )
 // wrapper function for CLR_Messaging::ProcessPayload(
 extern "C" int CLR_Messaging_ProcessPayload(WP_Message* msg)
 {
-    //CLR_Messaging* instance = (CLR_Messaging*)&g_scratchDebuggerMessaging[0];
-
     bool retValue = g_CLR_DBG_Debugger->m_messaging->ProcessPayload(msg);
     return retValue;
-}
-
-//--//
-
-void CLR_Messaging::PurgeCache()
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_INT64 oldest = HAL_Time_CurrentTime() - TIME_CONVERSION__TO_SECONDS * 3;
-
-    PurgeCache( m_cacheMaster     , oldest );
-    PurgeCache( m_cacheSubordinate, oldest );
-}
-
-void CLR_Messaging::PurgeCache( CLR_RT_DblLinkedList& lst, CLR_INT64 oldest )
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-    NANOCLR_FOREACH_NODE_BACKWARD(CachedMessage,cache,lst)
-    {
-        if(cache->m_lastSeen < oldest || m_cacheTotalSize > c_MaxCacheSize)
-        {
-            cache->Unlink(); m_cacheTotalSize -= cache->m_size;
-
-            CLR_RT_Memory::Release( cache );
-        }
-    }
-    NANOCLR_FOREACH_NODE_BACKWARD_END();
-}
-
-bool CLR_Messaging::TransmitMessage( const WP_Message* msg, bool fQueue )
-{
-    NATIVE_PROFILE_CLR_MESSAGING();
-
-    int payloadSize;
-    unsigned int flags;
-
-    payloadSize = msg->m_header.m_size;
-    flags       = msg->m_header.m_flags;
-
-    if(DebuggerPort_Write( m_port, (char*)&msg->m_header, sizeof(msg->m_header) ) != sizeof(msg->m_header)) return false;
-
-    if(msg->m_header.m_size && msg->m_payload)
-    {
-        if(DebuggerPort_Write( m_port, (char*)msg->m_payload, payloadSize ) != payloadSize) return false;
-    }
-    DebuggerPort_Flush( m_port );
-
-    if(fQueue && (flags & WP_Flags_c_NoCaching) == 0)
-    {
-        CLR_RT_DblLinkedList* lst;
-
-        if(flags & WP_Flags_c_Reply)
-        {
-            lst = &m_cacheSubordinate;
-        }
-        else
-        {
-            if(flags & WP_Flags_c_NonCritical)
-            {
-                //
-                // Don't cache non-critical requests.
-                //
-                lst = NULL;
-            }
-            else
-            {
-                lst = &m_cacheMaster;
-            }
-        }
-
-        if(lst)
-        {
-            CLR_UINT32 len = sizeof(CachedMessage) + payloadSize;
-
-            CachedMessage* cache = (CachedMessage*)CLR_RT_Memory::Allocate_And_Erase( len, CLR_RT_HeapBlock::HB_CompactOnFailure );
-            if(cache)
-            {
-                m_cacheTotalSize  += len;
-
-                cache->m_size      = len;
-                cache->m_lastSeen  = HAL_Time_CurrentTime();
-                cache->m_message   = *msg;
-
-                if(payloadSize && msg->m_payload)
-                {
-                    cache->m_message.m_payload = (unsigned char*)&cache[ 1 ];
-
-                    memcpy( cache->m_message.m_payload, msg->m_payload, payloadSize );
-                }
-                else
-                {
-                    cache->m_message.m_header.m_size = 0;
-                    cache->m_message.m_payload       = NULL;
-                }
-
-                lst->LinkAtFront( cache );
-            }
-        }
-    }
-
-    return true;
 }
 
 //--//

@@ -2908,8 +2908,6 @@ struct CLR_RT_ExecutionEngine
 
 #define CLR_EE_DBG_EVENT_SEND( cmd, size, payload, flags ) ((g_CLR_DBG_Debugger->m_messaging != NULL) ? g_CLR_DBG_Debugger->m_messaging->SendEvent( cmd, size, (unsigned char*)payload, flags ) : false)
 
-#define CLR_EE_MSG_EVENT_RPC( cmd, size, payload, flags ) g_CLR_Messaging.SendEvent( cmd, size, (unsigned char*)payload, flags )
-
 #define CLR_EE_DBG_EVENT_BROADCAST( cmd, size, payload, flags ) CLR_EE_DBG_EVENT_SEND( cmd, size, payload, flags )
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

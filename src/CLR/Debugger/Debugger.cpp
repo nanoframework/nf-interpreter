@@ -57,18 +57,11 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
 
     g_CLR_DBG_Debugger = (CLR_DBG_Debugger*)&g_scratchDebugger[0];
 
-    CLR_RT_Memory::ZeroFill( g_scratchDebuggerMessaging, sizeof(CLR_Messaging) );
+
 
     CLR_RT_Memory::ZeroFill( g_CLR_DBG_Debugger, sizeof(CLR_DBG_Debugger) );
 
-    if(HalSystemConfig.DebuggerPort == HalSystemConfig.MessagingPort)
-    {
-        g_CLR_DBG_Debugger->m_messaging = g_CLR_Messaging;
-    }
-    else
-    {
-        g_CLR_DBG_Debugger->m_messaging = (CLR_Messaging*)&g_scratchDebuggerMessaging[0];
-    }
+    g_CLR_DBG_Debugger->m_messaging = (CLR_Messaging*)&g_scratchDebuggerMessaging[0];
 
     NANOCLR_CHECK_HRESULT(g_CLR_DBG_Debugger->Debugger_Initialize(HalSystemConfig.DebuggerPort));
 
@@ -93,10 +86,12 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
 
 HRESULT CLR_DBG_Debugger::Debugger_Initialize( COM_HANDLE port )
 {
+    (void)port;
+
     NATIVE_PROFILE_CLR_DEBUGGER();
     NANOCLR_HEADER();
 
-    m_messaging->Initialize( port, c_Debugger_Lookup_Request, c_Debugger_Lookup_Request_count, c_Debugger_Lookup_Reply, c_Debugger_Lookup_Reply_count );
+    m_messaging->Initialize( c_Debugger_Lookup_Request, c_Debugger_Lookup_Request_count, c_Debugger_Lookup_Reply, c_Debugger_Lookup_Reply_count );
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -126,12 +121,6 @@ void CLR_DBG_Debugger::Debugger_Cleanup()
 //     NATIVE_PROFILE_CLR_DEBUGGER();
 //     m_messaging->m_controller.AdvanceState();
 // }
-
-void CLR_DBG_Debugger::PurgeCache()
-{
-    NATIVE_PROFILE_CLR_DEBUGGER();
-    m_messaging->PurgeCache();
-}
 
 void CLR_DBG_Debugger::BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags )
 {
