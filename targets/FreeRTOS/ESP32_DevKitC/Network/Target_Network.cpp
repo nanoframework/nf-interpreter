@@ -19,11 +19,15 @@ bool Esp32_Ethernet_Close(int index);
 
 bool Network_Interface_Bind(int index)
 {
+    (void)index;
+
     return true;
 }
 
 int  Network_Interface_Open(int index)
 {
+    (void)index;
+
     ets_printf( "Network_Interface_Open %d\n", index);
     HAL_Configuration_NetworkInterface config;
 
@@ -51,12 +55,18 @@ int  Network_Interface_Open(int index)
         case TCPIP_ADAPTER_IF_ETH:
             return Esp32_Ethernet_Open(index, &config);
 #endif
+        default:
+            // TODO probably this should return a different error as we should never reach this
+            return SOCK_SOCKET_ERROR;
+
     }
 	return SOCK_SOCKET_ERROR;
 }
 
 bool Network_Interface_Close(int index)
 {
+    (void)index;
+
      switch((tcpip_adapter_if_t)index)
     {
         // Wireless 

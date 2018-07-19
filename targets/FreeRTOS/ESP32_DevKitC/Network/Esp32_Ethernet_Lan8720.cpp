@@ -90,7 +90,9 @@ esp_err_t Esp32_InitialiseEthernet( uint8_t * pMacAdr)
 //  Open Ethernet Network driver
 //
 int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config) 
-{ 
+{
+    (void)index;
+
     if ( Esp32_InitialiseEthernet(config->MacAddress) == ESP_OK )
     {
        // Return NetIf number for Esp32 wireless station
@@ -112,6 +114,8 @@ int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config)
 }
 
 bool Esp32_Ethernet_Close(int index)
-{ 
+{
+    (void)index;
+
     return  esp_eth_disable() == ESP_OK;
 }

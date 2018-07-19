@@ -51,6 +51,8 @@ static void PostAvailabilityOff()
 //
 static  esp_err_t event_handler(void *ctx, system_event_t *event)
 {
+	(void)ctx;
+
     switch(event->event_id) {
 
 // Wifi station events
@@ -95,8 +97,6 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 
 void IRAM_ATTR nanoHAL_Network_Initialize()
 {
-	esp_err_t ret;
-
  	// Initialise the Lwip CLR signal callback
 	set_signal_sock_function( &sys_signal_sock_event );
 
