@@ -16,7 +16,7 @@
 
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 2048, "");
+osThreadDef(ReceiverThread, osPriorityHigh, 512, "");
 // declare CLRStartup thread here 
 osThreadDef(CLRStartupThread, osPriorityNormal, 4096, ""); 
 
@@ -26,11 +26,6 @@ int main(void) {
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
-
-  // init SWO as soon as possible to make it available to output ASAP
-  #if (SWO_OUTPUT == TRUE)  
-  SwoInit();
-  #endif
 
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.
