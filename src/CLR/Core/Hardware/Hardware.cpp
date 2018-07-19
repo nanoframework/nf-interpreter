@@ -37,13 +37,10 @@ HRESULT CLR_HW_Hardware::Hardware_Initialize()
         m_interruptData.m_queuedInterrupts = 0;
 
         m_DebuggerEventsMask  = 0;
-        m_MessagingEventsMask = 0;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         m_DebuggerEventsMask |= ExtractEventFromTransport( HalSystemConfig.DebuggerPort );
 #endif
-
-        m_MessagingEventsMask |= ExtractEventFromTransport( HalSystemConfig.MessagingPort );
 
         m_wakeupEvents = c_Default_WakeupEvents | m_DebuggerEventsMask;
         m_powerLevel   = PowerLevel__Active;
@@ -104,11 +101,6 @@ void CLR_HW_Hardware::ProcessActivity()
 
     uint32_t events    = ::Events_Get( m_wakeupEvents );    
     uint32_t eventsCLR = 0;
-
-    if(events & m_MessagingEventsMask)
-    {
-        //msg.ProcessCommands();
-    }
 
     if(events & m_DebuggerEventsMask)
     {

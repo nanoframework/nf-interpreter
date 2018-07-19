@@ -99,7 +99,6 @@ struct CLR_HW_Hardware
     InterruptData m_interruptData;
 
     CLR_UINT32    m_DebuggerEventsMask;
-    CLR_UINT32    m_MessagingEventsMask;
 
     CLR_UINT32    m_powerLevel;
     CLR_UINT32    m_wakeupEvents;

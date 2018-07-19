@@ -58,8 +58,6 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
                                                    // unsigned int      DebuggerPorts[MAX_DEBUGGERS];
     DEBUGGER_PORT,
 
-    MESSAGING_PORT,
-
     DEBUG_TEXT_PORT,
     115200,
     0,  // STDIO = COM2 or COM1
