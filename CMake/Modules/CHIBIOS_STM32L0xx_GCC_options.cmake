@@ -13,16 +13,20 @@ endif()
 #################################################################
 
 # need to specify this for assembler
-set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m0 -mabi=aapcs -x assembler-with-cpp" CACHE INTERNAL "asm compiler flags")
+#####################################################################
+# because nanoCLR is loaded the VTOR has to be init in ChibiOS CRT0
+# this define has to be placed here because it's on an assembly file
+#####################################################################
+set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m0plus -mfloat-abi=soft -mabi=aapcs -mtune=cortex-m0plus -x assembler-with-cpp -DCRT0_VTOR_INIT=TRUE" CACHE INTERNAL "asm compiler flags")
 
 # need to specify linker flags here
-set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -mthumb -mcpu=cortex-m0 -mabi=aapcs -nostartfiles " CACHE INTERNAL "executable linker flags")
+set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -mthumb -mcpu=cortex-m0plus -mfloat-abi=soft -mabi=aapcs -mtune=cortex-m0plus -nostartfiles " CACHE INTERNAL "executable linker flags")
 
 
 function(NF_SET_COMPILER_OPTIONS TARGET)
 
     # include any extra options comming from any extra args?
-    target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m0 -mabi=aapcs -nostdlib -Wall -Wextra -Werror -ffunction-sections -fshort-wchar -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -mstructure-size-boundary=8 -ffast-math -ftree-vectorize -fcheck-new )
+    target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m0plus -mfloat-abi=soft -mabi=aapcs -mtune=cortex-m0plus -nostdlib -Wall -Wextra -Werror -ffunction-sections -fshort-wchar -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -mstructure-size-boundary=8 -ffast-math -ftree-vectorize -fcheck-new )
             
 endfunction()
 
