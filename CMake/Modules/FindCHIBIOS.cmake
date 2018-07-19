@@ -87,6 +87,7 @@ set(CHIBIOS_SRCS
     # RT
     chsys.c
     chdebug.c
+    chtrace.c
     chvt.c
     chschd.c
     chthreads.c
@@ -104,6 +105,7 @@ set(CHIBIOS_SRCS
     chmboxes.c
     chmemcore.c
     chmempools.c
+    chfactory.c
 
     # required to use malloc and other newlib stuff
     syscalls.c

@@ -203,15 +203,14 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${TARGET_NANO_APIS_INCLUDES}"
 )
 
+# set platform
+target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32 " )
 
 # set extra compiler flags, some are related with the build type
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    ## build types that include debug have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
-#    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32  -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
-    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC    "-DPLATFORM_ESP32 -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
-else()
-#    target_compile_definitions(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32 ")
-    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC    "-DPLATFORM_ESP32 " )
+
+# build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
+if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
+    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
 endif()
 
 # set compiler definition for using Application Domains feature

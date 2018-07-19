@@ -409,7 +409,7 @@
             $splitOption = [System.StringSplitOptions]::RemoveEmptyEntries
             $cmakeOptions = $env:BUILD_OPTIONS.Split($separator, $splitOption)
 
-             &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:ESP32_TOOLCHAIN_PATH" "-DESP32_IDF_PATH=$env:ESP32_IDF_PATH" "-DESP32_LIBS_PATH=$env:ESP32_LIBS_PATH" "-DCMAKE_BUILD_TYPE=Debug" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
+             &$cmake -G Ninja "-DTOOLCHAIN_PREFIX=$env:ESP32_TOOLCHAIN_PATH" "-DESP32_IDF_PATH=$env:ESP32_IDF_PATH" "-DESP32_LIBS_PATH=$env:ESP32_LIBS_PATH" "-DCMAKE_BUILD_TYPE=$env:CONFIGURATION" $cmakeOptions "-DBUILD_VERSION=$env:GitVersion_AssemblySemVer" ..
           }
           Else
           {
@@ -444,7 +444,7 @@
           If($env:BOARD_NAME -eq "ESP32_DEVKITC")
           {
             $cmake = "cmake"
-            &$cmake --build (Get-Location).path --target all --config "Debug"
+            &$cmake --build (Get-Location).path --target all --config "$env:CONFIGURATION"
 
             if ($lastexitcode -ne 0)
             {
