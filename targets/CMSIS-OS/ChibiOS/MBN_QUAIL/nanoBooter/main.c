@@ -13,27 +13,6 @@
 #include <nanoPAL_BlockStorage.h>
 #include <LaunchCLR.h>
 
-void BlinkerThread(void const * argument)
-{
-  (void)argument;
-  
-  palClearPad(GPIOE, GPIOE_LED1);
-  palClearPad(GPIOE, GPIOE_LED2);
-  palClearPad(GPIOC, GPIOC_LED3);
-
-  while (!chThdShouldTerminateX()) 
-  {
-
-    palSetPad(GPIOE, GPIOE_LED1);
-    chThdSleepMilliseconds(500);
-    palClearPad(GPIOE, GPIOE_LED1);
-    chThdSleepMilliseconds(500);
-
-  }
-}
-
-osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
-
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 
@@ -67,9 +46,6 @@ int main(void) {
   usbStart(serusbcfg.usbp, &usbcfg);
   usbConnectBus(serusbcfg.usbp);
 
-  // Creates the blinker thread, it does not start immediately.
-  osThreadCreate(osThread(BlinkerThread), NULL);
-
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
 
@@ -83,6 +59,9 @@ int main(void) {
 
   //  Normal main() thread
   while (true) {
+    palSetPad(GPIOE, GPIOE_LED1);
+    osDelay(500);
+    palClearPad(GPIOE, GPIOE_LED1);
     osDelay(500);
   }
 }

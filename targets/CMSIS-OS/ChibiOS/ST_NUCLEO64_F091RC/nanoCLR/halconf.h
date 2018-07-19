@@ -80,7 +80,7 @@
  */
 // this option is set at target_platform.h (from config file)
 //#if !defined(HAL_USE_I2C) || defined(__DOXYGEN__)
-//#define HAL_USE_I2C                          TRUE
+//#define HAL_USE_I2C                           TRUE
 //#endif
 
 /**
@@ -117,7 +117,7 @@
  */
 // this option is set at target_platform.h (from config file) 
 // #if !defined(HAL_USE_PWM) || defined(__DOXYGEN__)
-// #define HAL_USE_PWM                         FALSE
+// #define HAL_USE_PWM                          FALSE
 // #endif
 
 /**

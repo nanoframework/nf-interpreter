@@ -128,9 +128,8 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
     # definition for platform (always ARM here)
     target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM ")
 
-    # set compiler definitions related with the build type
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-        # build types that include debug have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
+    # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
+    if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
         target_compile_definitions(${TARGET} PUBLIC "-DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
     endif()
 
