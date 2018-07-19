@@ -11,7 +11,7 @@ HAL_COMPLETION Sockets_LWIP_Driver::s_DebuggerTimeoutCompletion;
 
 static HAL_CONTINUATION MulticastResponseContinuation;
 
-int32_t g_DebuggerPort_SslCtx_Handle = -1;
+int g_DebuggerPort_SslCtx_Handle = -1;
 
 //
 //  Methods used by the Network Debugger 

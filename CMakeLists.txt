@@ -395,6 +395,13 @@ if(API_System.Net)
 
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
+
+    # set Security module to use
+    if(NF_SECURITY_OPENSSL)
+        set(USE_SECURITY_OPENSSL_OPTION TRUE CACHE INTERNAL "NF security OPENSSL")
+    elseif(NF_SECURITY_MBEDTLS)
+        set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
+    endif()
 endif()
 
 

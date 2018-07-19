@@ -8,8 +8,11 @@ list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets
 list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl)
 list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Lwip)
 
-#list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl/MbedTls)
-list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl/openssl)
+if(USE_SECURITY_MBEDTLS_OPTION)
+    #list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl/MbedTls)
+elseif(USE_SECURITY_OPENSSL_OPTION)
+    list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl/openssl)
+endif()
 
 # source files for nanoFramework Networking
 set(NF_Networking_SRCS
@@ -20,31 +23,40 @@ set(NF_Networking_SRCS
     #Lwip 
     LwIP_Sockets.cpp
     LwIP_Sockets_functions.cpp 
-
-    #security SSL
-    ssl.cpp
-    #ssl_stubs.cpp
-
-    # SSL MbedTLS specific 
-    #MbedTls_parse_certificate.cpp
-    #MbedTls.cpp
-   
-    # SSL openssl
-    ssl_initialize_internal.cpp
-    ssl_generic_init_internal.cpp
-    ssl_uninitialize_internal.cpp
-    ssl_parse_certificate_internal.cpp
-    ssl_accept_internal.cpp
-    ssl_connect_internal.cpp
-    ssl_read_internal.cpp
-    ssl_write_internal.cpp
-    ssl_pending_internal.cpp
-    ssl_closesocket_internal.cpp
-    ssl_exit_context_internal.cpp
-    ssl_add_cert_auth_internal.cpp
-    ssl_clear_cert_auth_internal.cpp
-
 )
+
+# Select security module
+if(USE_SECURITY_MBEDTLS_OPTION)
+    list(APPEND NF_Networking_SRCS 
+        ssl.cpp
+        # FIXME - SSL MbedTLS specific interface (WIP)
+        #MbedTls_parse_certificate.cpp
+        #MbedTls.cpp
+    )
+elseif(USE_SECURITY_OPENSSL_OPTION)
+    list(APPEND NF_Networking_SRCS
+        ssl.cpp
+        # SSL openssl (wrapper)
+        ssl_initialize_internal.cpp
+        ssl_generic_init_internal.cpp
+        ssl_uninitialize_internal.cpp
+        ssl_parse_certificate_internal.cpp
+        ssl_accept_internal.cpp
+        ssl_connect_internal.cpp
+        ssl_read_internal.cpp
+        ssl_write_internal.cpp
+        ssl_pending_internal.cpp
+        ssl_closesocket_internal.cpp
+        ssl_exit_context_internal.cpp
+        ssl_add_cert_auth_internal.cpp
+        ssl_clear_cert_auth_internal.cpp
+    )
+else()
+    list(APPEND NF_Networking_SRCS
+        # No security interface defined
+        ssl_stubs.cpp
+    )
+endif()
 
 if(NF_FEATURE_DEBUGGER)
     list(APPEND NF_Networking_SRCS sockets_debugger.cpp)
@@ -56,8 +68,11 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
         PATHS 
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
-#            ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTls
-            ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/openssl
+            if(USE_SECURITY_MBEDTLS_OPTION)
+                #${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTls
+            elseif(USE_SECURITY_OPENSSL_OPTION)
+                ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/openssl
+            endif()
             ${PROJECT_SOURCE_DIR}/src/PAL/Lwip
             ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
  

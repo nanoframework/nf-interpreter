@@ -576,7 +576,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
             arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_sessionHandle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
 
             // pass the session handle as the ssl context parameter
-            sslContext = *(INT32*)arrCert->GetFirstElement();
+            sslContext = *(int32_t*)arrCert->GetFirstElement();
 
             // the certificate has already been loaded so just pass an empty string
             szPwd = "";
@@ -631,7 +631,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
 
                 arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_sessionHandle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
 
-                sessionCtx = *(INT32*)arrCert->GetFirstElement();
+                sessionCtx = *(int32_t*)arrCert->GetFirstElement();
 
                 // pass the session handle down as the password paramter and the certificate handle as the data parameter
                 result = (SSL_AddCertificateAuthority( sslContext, (const char*)sslCert, arrCert->m_numOfElements, (LPCSTR)&sessionCtx ) ? 0 : -1);
