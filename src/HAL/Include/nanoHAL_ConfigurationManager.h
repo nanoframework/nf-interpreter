@@ -10,6 +10,11 @@
 #include <stdint.h>
 #include <nanoHAL_Network.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.DeviceConfiguration.DeviceConfigurationOption (in managed code) !!! //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,9 +34,8 @@ typedef enum DeviceConfigurationOption
 
 } DeviceConfigurationOption;
 
-
 // network interface configuration struct
-// declared with a flexible array member to allow N config blocks totaly independent of compilation
+// declared with a flexible array member to allow N config blocks totally independent of compilation
 typedef struct HAL_CONFIGURATION_NETWORK
 {
     // count of the configs elements
@@ -43,7 +47,7 @@ typedef struct HAL_CONFIGURATION_NETWORK
 } HAL_CONFIGURATION_NETWORK;
 
 // network wireless interface configuration struct
-// declared with a flexible array member to allow N config blocks totaly independent of compilation
+// declared with a flexible array member to allow N config blocks totally independent of compilation
 typedef struct HAL_CONFIGURATION_NETWORK_WIRELESS80211
 {
     // count of the configs elements
@@ -63,15 +67,6 @@ typedef struct HAL_TARGET_CONFIGURATION
 
 } HAL_TARGET_CONFIGURATION;
 
-
-// declaration of Target configuration union as external, has to be provided at target level
-extern HAL_TARGET_CONFIGURATION g_TargetConfiguration;
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Initialization of configuration manager
 void ConfigurationManager_Initialize();
 
@@ -82,23 +77,23 @@ void ConfigurationManager_EnumerateConfigurationBlocks();
 
 // GetConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target 
 // needs to be free to implement the storage of the configuration block as they see fit
-__nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex);
+bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex);
 
 // StoreConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target 
 // needs to be free to implement the storage of the configuration block as they see fit
-__nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize);
+bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize);
 
 // UpdateConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target 
 // needs to be free to implement the storage of the configuration block as they see fit
-__nfweak bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex);
+bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex);
 
 // helper functions
 
 // function that sweeps a memory region searching for network configuration blocks
-HAL_CONFIGURATION_NETWORK* ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t startAddress, uint32_t storageSize);
+void* ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t startAddress, uint32_t endAddress);
 
 // function that sweeps a memory region searching for wireless network configuration blocks
-HAL_CONFIGURATION_NETWORK_WIRELESS80211* ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(uint32_t startAddress, uint32_t storageSize);
+void* ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(uint32_t startAddress, uint32_t endAddress);
 
 // gets the HAL_Configuration_Wireless80211 configuration block that has the specified Id, if that exists 
 // defined as weak needs to be free to implement the storage of the configuration block as they see fit
@@ -108,5 +103,8 @@ HAL_Configuration_Wireless80211* ConfigurationManager_GetWirelessConfigurationFr
 #ifdef __cplusplus
 }
 #endif
+
+// declaration of Target configuration union as external, has to be provided at target level
+extern HAL_TARGET_CONFIGURATION g_TargetConfiguration;
 
 #endif //_NANOHAL_CONFIG_MANAGER_H_

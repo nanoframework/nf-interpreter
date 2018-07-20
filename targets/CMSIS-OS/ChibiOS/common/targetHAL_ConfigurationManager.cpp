@@ -21,10 +21,10 @@ __nfweak void ConfigurationManager_Initialize()
 __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
 {
     // find network configuration blocks
-    HAL_CONFIGURATION_NETWORK* networkConfigs = ConfigurationManager_FindNetworkConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
+    HAL_CONFIGURATION_NETWORK* networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManager_FindNetworkConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
 
     // find wireless 80211 network configuration blocks
-    HAL_CONFIGURATION_NETWORK_WIRELESS80211* networkWirelessConfigs = ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
+    HAL_CONFIGURATION_NETWORK_WIRELESS80211* networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211*)ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
 
     // alloc memory for g_TargetConfiguration
     // because this is a struct of structs that use flexible members the memory has to be allocated from the heap

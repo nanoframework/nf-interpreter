@@ -11,7 +11,6 @@
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoPAL_BlockStorage.h>
-#include <nanoHAL_ConfigurationManager.h>
 #include <LaunchCLR.h>
 
 // need to declare the Receiver thread here
@@ -57,11 +56,6 @@ int main(void) {
   // in CLR this is called in nanoHAL_Initialize()
   // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
   BlockStorage_AddDevices();
- 
-  // initialize configuration manager
-  // in CLR this is called in nanoHAL_Initialize()
-  // for nanoBooter we have to init it here to have access to network configuration blocks
-  ConfigurationManager_Initialize();
 
   //  Normal main() thread
   while (true) {

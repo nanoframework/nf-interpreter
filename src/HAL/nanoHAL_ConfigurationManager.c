@@ -52,7 +52,7 @@ uint32_t GetBlockCount(uint32_t startAddress, uint32_t endAddress, uint32_t bloc
     return blockCount;
 }
 
-__nfweak HAL_CONFIGURATION_NETWORK* ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
+__nfweak void* ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
 {
     uint32_t nextBlock = startAddress;
 
@@ -79,7 +79,7 @@ __nfweak HAL_CONFIGURATION_NETWORK* ConfigurationManager_FindNetworkConfiguratio
     return networkConfigs;
 }
 
-__nfweak HAL_CONFIGURATION_NETWORK_WIRELESS80211* ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
+__nfweak void* ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
 {
     uint32_t nextBlock = startAddress;
 
