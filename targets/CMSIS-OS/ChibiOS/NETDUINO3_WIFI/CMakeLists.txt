@@ -170,9 +170,14 @@ nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
 
-# set linker file
-nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/netduino3wifi_booter.ld)
-nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/netduino3wifi_CLR.ld)
+# set linker files
+if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/netduino3wifi_booter-DEBUG.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/netduino3wifi_CLR-DEBUG.ld)
+else()
+    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/netduino3wifi_booter.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/netduino3wifi_CLR.ld)
+endif()
 
 # set linker options
 # using FPU requires enabling printf with FP support for newlib nano, but just for nanoCLR target, don't need to overload nanoBooter with that
@@ -199,10 +204,19 @@ if(HEX2DFU_TOOL_AVAILABLE)
     ## when changing the linker file make sure to update the new addresses for the image files bellow ##
     ## DO NOT use the leading 0x notation, just the address in plain hexadecimal formating            ##
     ####################################################################################################
-    NF_GENERATE_DFU_PACKAGE(
-        ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000 
-        ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08008000 
-        ${PROJECT_SOURCE_DIR}/build/nanoframework-4-netduino3wifi.dfu
-    )
+
+    if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+        NF_GENERATE_DFU_PACKAGE(
+            ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000 
+            ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08008000 
+            ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu
+        )
+    else()
+        NF_GENERATE_DFU_PACKAGE(
+            ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000 
+            ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08004000 
+            ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu
+        )
+    endif()
 
 endif()
