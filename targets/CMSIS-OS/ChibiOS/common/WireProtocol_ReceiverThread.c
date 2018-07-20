@@ -22,8 +22,6 @@ void ReceiverThread(void const * argument)
 {
   (void)argument;
 
-  osDelay(500);
-
   #if (HAL_USE_STM32_CRC == TRUE)
   // startup crc
   crcStart(NULL);
