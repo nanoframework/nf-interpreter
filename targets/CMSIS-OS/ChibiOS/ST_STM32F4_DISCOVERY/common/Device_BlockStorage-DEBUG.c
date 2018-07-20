@@ -6,24 +6,24 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
-// 32kB blocks
+//16kB block
 const BlockRange BlockRange1[] = 
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 0 },            // 0x08000000 nanoBooter          
-    { BlockRange_BLOCKTYPE_CONFIG    ,   1, 1 },            // 0x08008000 configuration block          
-    { BlockRange_BLOCKTYPE_CODE      ,   2, 3 }             // 0x08010000 nanoCLR          
+    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 1 },            // 0x08000000 nanoBooter          
+    { BlockRange_BLOCKTYPE_CODE      ,   2, 3 }             // 0x08008000 nanoCLR          
+};
+
+//64kB block
+const BlockRange BlockRange2[] = 
+{
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 0x08010000 nanoCLR          
 };
 
 //128kB block
-const BlockRange BlockRange2[] = 
-{
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 0x08020000 nanoCLR          
-};
-
-// 256kB blocks
 const BlockRange BlockRange3[] =
 {
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 2 }             // 0x08040000 deployment  
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 },            // 0x08020000 nanoCLR         
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1, 6 }             // 0x08040000 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 
@@ -31,23 +31,23 @@ const BlockRegionInfo BlockRegions[] =
     {
         0x08000000,                         // start address for block region
         4,                                  // total number of blocks in this region
-        0x8000,                             // total number of bytes per block
+        0x4000,                             // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
     },
 
     {
-        0x08020000,                         // start address for block region
+        0x08010000,                         // start address for block region
         1,                                  // total number of blocks in this region
-        0x20000,                            // total number of bytes per block
+        0x10000,                            // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange2),
         BlockRange2,
     },
 
     {
-        0x08040000,                         // start address for block region
-        3,                                  // total number of blocks in this region
-        0x40000,                            // total number of bytes per block
+        0x08020000,                         // start address for block region
+        7,                                  // total number of blocks in this region
+        0x20000,                            // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange3),
         BlockRange3,
     },
