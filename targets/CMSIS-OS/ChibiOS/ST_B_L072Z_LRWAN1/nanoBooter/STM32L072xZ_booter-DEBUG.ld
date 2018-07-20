@@ -12,7 +12,17 @@
  */
 MEMORY
 {
-    flash       : org = 0x08000000, len = 7936      /* space reserved for nanoBooter */
+    /* 
+    ///////////////////////////////////////////////////////////////////
+    // this linker file is meant to build nanoBooter in debug flavour
+    // it DOES NOT work to properly launch the nanoCLR in debug mode
+    // because of the start address mismatch
+    // if you really need to debug both images you have to update the 
+    // flash start address and the declaration of the BlockStorage
+    ///////////////////////////////////////////////////////////////////
+    */
+
+    flash       : org = 0x08000000, len = 10496     /* space reserved for nanoBooter */
     config      : org = 0x00000000, len = 0         /* space reserved for configuration block */
     deployment  : org = 0x00000000, len = 0         /* space reserved for application deployment */
     ramvt       : org = 0x00000000, len = 0         /* initial RAM address is reserved for a copy of the vector table */
