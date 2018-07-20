@@ -365,13 +365,13 @@ endif()
 option(USE_NETWORKING_OPTION "option to use networking")
 
 # (default is OFF so OpenSSL is NOT used)
-option(NF_SECURITY_OPENSSL "option to use OpenSSL as the network security provider")
+option(NF_SECURITY_MBEDTLS "option to use OpenSSL as the network security provider")
 
 # (default is OFF so mbed TLS is NOT used)
 option(NF_SECURITY_OPENSSL "option to use mbed TLS as the network security provider")
 
 # sanity check for both providers set
-if(NF_SECURITY_OPENSSL AND NF_SECURITY_OPENSSL)
+if(NF_SECURITY_OPENSSL AND NF_SECURITY_MBEDTLS)
     message(FATAL_ERROR "Can't have both OpenSSL and mbedTLS providers selected. Please choose one or none.")
 endif()
 
