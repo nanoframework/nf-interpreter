@@ -364,6 +364,16 @@ endif()
 # (default is OFF so Networking is NOT supported)
 option(USE_NETWORKING_OPTION "option to use networking")
 
+# (default is OFF so OpenSSL is NOT used)
+option(NF_SECURITY_OPENSSL "option to use OpenSSL as the network security provider")
+
+# (default is OFF so mbed TLS is NOT used)
+option(NF_SECURITY_OPENSSL "option to use mbed TLS as the network security provider")
+
+# sanity check for both providers set
+if(NF_SECURITY_OPENSSL AND NF_SECURITY_OPENSSL)
+    message(FATAL_ERROR "Can't have both OpenSSL and mbedTLS providers selected. Please choose one or none.")
+endif()
 
 #################################################################
 # enables filesysytem support in nanoCLR
@@ -399,7 +409,7 @@ if(API_System.Net)
     # set Security module to use
     if(NF_SECURITY_OPENSSL)
         set(USE_SECURITY_OPENSSL_OPTION TRUE CACHE INTERNAL "NF security OPENSSL")
-    elseif(NF_SECURITY_MBEDTLS)
+    elseif(NF_SECURITY_MBEDTLS )
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 endif()
@@ -472,7 +482,15 @@ endif()
 
 if(USE_NETWORKING_OPTION)
     set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
-    message(STATUS "Support for networking enabled")
+
+    if(NF_SECURITY_OPENSSL)
+        message(STATUS "Support for networking enabled with security from OpenSSL")
+    elseif(NF_SECURITY_MBEDTLS)
+        message(STATUS "Support for networking enabled with security from mbed TLS")
+    else()
+        message(STATUS "Support for networking enabled WITHOUT security")
+    endif()
+
 else()    
     set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")  
     message(STATUS "Support for networking IS NOT enabled")
