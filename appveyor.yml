@@ -341,11 +341,9 @@
       secure: Wz0wwFOzMkDwwzzax1HPzKZB3r/aTprlleqFYX5arxpH9pP3D9glINxEuY+P/BaN
 
     matrix:
-      #- BOARD_NAME: 'ESP32_DEVKITC'
-      #  BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_FEATURE_DEBUGGER=TRUE -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON'
       - BOARD_NAME: 'STM32'
       - BOARD_NAME: 'ESP32_DEVKITC'
-        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DNF_SECURITY_OPENSSL=ON -DAPI_Hardware.Esp32=ON'
+        BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DNF_SECURITY_OPENSSL=ON -DAPI_Hardware.Esp32=ON'
       - BOARD_NAME: 'NANOCLR_WINDOWS'
 
   matrix:

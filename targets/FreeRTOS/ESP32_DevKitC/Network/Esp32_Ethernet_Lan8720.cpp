@@ -92,7 +92,11 @@ esp_err_t Esp32_InitialiseEthernet( uint8_t * pMacAdr)
 //  Open Ethernet Network driver
 //
 int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config) 
+<<<<<<< HEAD
 { 
+=======
+{
+>>>>>>> develop-network
     (void)index;
 
     if ( Esp32_InitialiseEthernet(config->MacAddress) == ESP_OK )
@@ -116,7 +120,13 @@ int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config)
 }
 
 bool Esp32_Ethernet_Close(int index)
+<<<<<<< HEAD
 { 
     (void)index;
+=======
+{
+    (void)index;
+
+>>>>>>> develop-network
     return  esp_eth_disable() == ESP_OK;
 }
