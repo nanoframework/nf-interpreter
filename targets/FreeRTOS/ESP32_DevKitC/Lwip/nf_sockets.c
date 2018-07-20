@@ -40,6 +40,16 @@
 
 #include "lwip/opt.h"
 
+// FIXME should not need these
+#ifdef PLATFORM_ESP32
+#undef FD_SET
+#undef FD_CLR
+#undef FD_ISSET
+#undef FD_ZERO
+#undef _types_fd_set
+#undef fd_set
+#endif
+
 #if LWIP_SOCKET /* don't build if not configured for use in lwipopts.h */
 
 #include "lwip/sockets.h"

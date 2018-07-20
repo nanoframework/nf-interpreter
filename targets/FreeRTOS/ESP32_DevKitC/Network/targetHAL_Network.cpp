@@ -11,10 +11,6 @@
 
 extern "C" void set_signal_sock_function( void (*funcPtr)() );
 
-
-// NVS parameters for Ethernet config
-#define NVS_NAMESPACE	    "nanoF"
-#define NVS_NETWORK_CONFIG1	"Net1"
 //
 // Callback from LWIP on event
 //
@@ -23,13 +19,11 @@ void sys_signal_sock_event()
      Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
 }
 
-
 //
 // Dummy Ethernet Initialisation, board specific Initialisation in separate file
 __nfweak void InitialiseEthernet()
 {
 }
-
 
 static void PostAddressChanged()
 {
@@ -59,19 +53,45 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
     case SYSTEM_EVENT_STA_START:
        // Smart config commented out as giving exception when running
        // xTaskCreate(smartconfig_task, "smartconfig_example_task", 4096, NULL, 3, NULL);
+//ets_printf("SYSTEM_EVENT_STA_START\n");
         break;
     case SYSTEM_EVENT_STA_GOT_IP:
+//ets_printf("SYSTEM_EVENT_STA_GOT_IP\n");
 		PostAddressChanged();
         //xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
         break;
+	case SYSTEM_EVENT_STA_LOST_IP:
+//ets_printf("SYSTEM_EVENT_STA_LOST_IP\n");
+		break;
+
     case SYSTEM_EVENT_STA_CONNECTED:
+//ets_printf("SYSTEM_EVENT_STA_CONNECTED\n");
 		PostAvailabilityOff();
 		break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
+//ets_printf("SYSTEM_EVENT_STA_DISCONNECTED\n");
 		PostAvailabilityOff();
         esp_wifi_connect();
         //xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
         break;
+	
+	case SYSTEM_EVENT_STA_AUTHMODE_CHANGE:
+//		system_event_sta_authmode_change_t *auth_change = &event->event_info.auth_change;
+//ets_printf("SYSTEM_EVENT_STA_AUTHMODE_CHANGE");
+		break;
+	case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:
+//ets_printf("SYSTEM_EVENT_STA_WPS_ER_SUCCESS\n");
+		break;
+	case SYSTEM_EVENT_STA_WPS_ER_FAILED:
+//ets_printf("SYSTEM_EVENT_STA_WPS_ER_FAILED\n");
+		break;
+
+	case SYSTEM_EVENT_STA_WPS_ER_TIMEOUT:
+//ets_printf("SYSTEM_EVENT_STA_WPS_ER_TIMEOUT\n");
+		break;
+	case SYSTEM_EVENT_STA_WPS_ER_PIN:
+//ets_printf("SYSTEM_EVENT_STA_WPS_ER_PIN\n");
+		break;
 
 // Ethernet events
 	case SYSTEM_EVENT_ETH_START:
@@ -95,7 +115,7 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 }
 
 
-void IRAM_ATTR nanoHAL_Network_Initialize()
+void nanoHAL_Network_Initialize()
 {
  	// Initialise the Lwip CLR signal callback
 	set_signal_sock_function( &sys_signal_sock_event );

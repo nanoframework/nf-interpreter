@@ -356,7 +356,7 @@ bool Sockets_LWIP_Driver::Initialize()
         
         SOCKET_CHECK_bool( HAL_SOCK_Initialize() );
 
-//        SSL_Initialize();
+        SSL_Initialize();
 
         s_initialized = TRUE;
     }

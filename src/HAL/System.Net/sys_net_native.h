@@ -124,6 +124,51 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 
 };
 
+struct Library_sys_net_native_System_Net_Security_SslNative
+{
+    NANOCLR_NATIVE_DECLARE(SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate);
+    NANOCLR_NATIVE_DECLARE(SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate);
+    NANOCLR_NATIVE_DECLARE(UpdateCertificates___STATIC__VOID__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate);
+    NANOCLR_NATIVE_DECLARE(SecureAccept___STATIC__VOID__I4__OBJECT);
+    NANOCLR_NATIVE_DECLARE(SecureConnect___STATIC__VOID__I4__STRING__OBJECT);
+    NANOCLR_NATIVE_DECLARE(SecureRead___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(SecureWrite___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(SecureCloseSocket___STATIC__I4__OBJECT);
+    NANOCLR_NATIVE_DECLARE(ExitSecureContext___STATIC__I4__I4);
+    NANOCLR_NATIVE_DECLARE(DataAvailable___STATIC__I4__OBJECT);
+
+    //--//
+
+    static HRESULT ReadWriteHelper( CLR_RT_StackFrame& stack, bool isWrite  );
+    static HRESULT InitHelper     ( CLR_RT_StackFrame& stack, bool isServer );
+    static HRESULT ThrowOnError   ( CLR_RT_StackFrame& stack, int err       );
+    static void    ThrowError     ( CLR_RT_StackFrame& stack, int errorCode );
+
+};
+
+struct Library_sys_net_native_System_Net_Sockets_NetworkStream
+{
+    static const int FIELD___socket = 1;
+    static const int FIELD___socketType = 2;
+    static const int FIELD___remoteEndPoint = 3;
+    static const int FIELD___ownsSocket = 4;
+    static const int FIELD___disposed = 5;
+
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_Security_SslStream
+{
+    static const int FIELD___sslContext = 6;
+    static const int FIELD___isServer = 7;
+
+
+    //--//
+
+};
+
 struct Library_sys_net_native_System_Net_SocketAddress
 {
     static const int FIELD__m_Buffer = 1;
@@ -175,19 +220,6 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
     static const int DISPOSED_HANDLE = -1;
 };
 
-struct Library_sys_net_native_System_Net_Sockets_NetworkStream
-{
-    static const int FIELD___socket = 1;
-    static const int FIELD___socketType = 2;
-    static const int FIELD___remoteEndPoint = 3;
-    static const int FIELD___ownsSocket = 4;
-    static const int FIELD___disposed = 5;
-
-
-    //--//
-
-};
-
 struct Library_sys_net_native_System_Net_Sockets_Socket
 {
     static const int FIELD__m_Handle = 1;
@@ -205,6 +237,23 @@ struct Library_sys_net_native_System_Net_Sockets_SocketException
 {
     static const int FIELD___errorCode = 5;
 
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate
+{
+    static const int FIELD__m_certificate = 1;
+    static const int FIELD__m_password = 2;
+    static const int FIELD__m_issuer = 3;
+    static const int FIELD__m_subject = 4;
+    static const int FIELD__m_effectiveDate = 5;
+    static const int FIELD__m_expirationDate = 6;
+    static const int FIELD__m_handle = 7;
+    static const int FIELD__m_sessionHandle = 8;
+
+    NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_mscorlibSystemDateTime__BYREF_mscorlibSystemDateTime);
 
     //--//
 
