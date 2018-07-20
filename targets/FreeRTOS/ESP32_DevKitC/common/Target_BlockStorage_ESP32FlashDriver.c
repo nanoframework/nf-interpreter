@@ -241,7 +241,7 @@ bool Esp32FlashDriver_EraseBlock(void* context, ByteAddress address)
 //	ets_printf("EraseBlock start part adr:%X start mem: %X size:%X erase adr:%X\n", g_pFlashDriver_partition->address, g_esp32_flash_start_ptr, g_pFlashDriver_partition->size, address);
 
 	uint32_t start_addr = address * SPI_FLASH_SEC_SIZE;
-	uint32_t size = 4096 * 20; // g_pFlashDriver_partition->size
+	uint32_t size = g_pFlashDriver_partition->size;
 //	ets_printf("EraseBlock start addr %X\n", start_addr);
 
 	if (esp_partition_erase_range(g_pFlashDriver_partition, start_addr, size) != ESP_OK)
