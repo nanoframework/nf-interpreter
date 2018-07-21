@@ -185,10 +185,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
         NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
     }
 
-// FIXME timeout_ms = -1 INFINITE
-//    hbTimeout.SetInteger( timeout_ms );
-             hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
-
+    hbTimeout.SetInteger( timeout_ms );
         
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
@@ -252,9 +249,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
 
     szName = hb->StringText();
 
-    // FIXME timeout_ms = -1 = INFINITE
-   // hbTimeout.SetInteger( timeout_ms );
-          hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
+    hbTimeout.SetInteger( timeout_ms );
        
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
@@ -388,9 +383,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::ReadWriteHelper( C
 
     FAULT_ON_NULL(arrData);
 
- // FIXME timeout_ms = -1 = INFINITE
-    //hbTimeout.SetInteger( timeout_ms );
-           hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
+    hbTimeout.SetInteger( timeout_ms );
       
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
