@@ -9,7 +9,7 @@ list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets
 list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Lwip)
 
 if(USE_SECURITY_MBEDTLS_OPTION)
-    #list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl/MbedTls)
+    #list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl/mbedTLS)
 elseif(USE_SECURITY_OPENSSL_OPTION)
     list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl/openssl)
 endif()
@@ -29,7 +29,7 @@ set(NF_Networking_SRCS
 if(USE_SECURITY_MBEDTLS_OPTION)
     list(APPEND NF_Networking_SRCS 
         ssl.cpp
-        # FIXME - SSL MbedTLS specific interface (WIP)
+        # FIXME - SSL mbedTLS specific interface (WIP)
         #MbedTls_parse_certificate.cpp
         #MbedTls.cpp
     )
@@ -69,7 +69,7 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
             if(USE_SECURITY_MBEDTLS_OPTION)
-                #${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTls
+                #${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
             elseif(USE_SECURITY_OPENSSL_OPTION)
                 ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/openssl
             endif()
