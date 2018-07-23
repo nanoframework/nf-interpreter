@@ -584,13 +584,35 @@ if(RTOS_CHIBIOS_CHECK)
         if(EXISTS "${CHIBIOS_SOURCE}/")
             message(STATUS "RTOS is: ChibiOS (source from: ${CHIBIOS_SOURCE})")
 
-            file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+                file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+            else()
+                message(STATUS "Using local cache of ChibiOS source from ${CHIBIOS_SOURCE}")
+            endif()
+            
             set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
-            # dummy target required for targets that have a declared dependency from ChibiOS
-            add_custom_target(ChibiOS)
         else()
             message(FATAL_ERROR "Couldn't find ChibiOS source at ${CHIBIOS_SOURCE}/")
         endif()
+
+        # add ChibiOS as external project
+        ExternalProject_Add( 
+            ChibiOS
+            PREFIX ChibiOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
+
+            # install command has to perform TWO extracts
+            # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/ COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/wolfssl-3.12.2-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+            
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+        # get source dir for ChibiOS CMake project
+        ExternalProject_Get_Property(ChibiOS SOURCE_DIR)
 
     endif()
 
