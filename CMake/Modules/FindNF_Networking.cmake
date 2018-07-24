@@ -30,8 +30,8 @@ if(USE_SECURITY_MBEDTLS_OPTION)
     list(APPEND NF_Networking_SRCS 
         ssl.cpp
         # FIXME - SSL mbedTLS specific interface (WIP)
-        #MbedTls_parse_certificate.cpp
-        #MbedTls.cpp
+        mbedtls_parse_certificate.cpp
+        mbedtls.cpp
     )
 elseif(USE_SECURITY_OPENSSL_OPTION)
     list(APPEND NF_Networking_SRCS
@@ -68,11 +68,13 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
         PATHS 
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
+
             if(USE_SECURITY_MBEDTLS_OPTION)
                 #${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
             elseif(USE_SECURITY_OPENSSL_OPTION)
                 ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/openssl
             endif()
+
             ${PROJECT_SOURCE_DIR}/src/PAL/Lwip
             ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
  
