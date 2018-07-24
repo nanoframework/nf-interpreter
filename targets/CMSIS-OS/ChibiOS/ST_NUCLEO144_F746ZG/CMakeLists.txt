@@ -47,6 +47,11 @@ if(USE_FILESYSTEM_OPTION)
     find_package(CHIBIOS_FATFS REQUIRED)
 endif()
 
+# security provider is mbedTLS
+if(NF_SECURITY_MBEDTLS)
+    find_package(mbedTLS REQUIRED)
+endif()
+
 #######################################
 
 add_subdirectory("common")
@@ -111,9 +116,10 @@ add_executable(
     "${NF_Debugger_SOURCES}"
     "${NF_Diagnostics_SOURCES}"
 	
-	# sources for nanoFramework Network LWIP and Sockets
+    # sources for nanoFramework Network LWIP, Sockets and TLS
     "${CHIBIOS_LWIP_SOURCES}"
     "${NF_Networking_SOURCES}"
+    "${mbedTLS_SOURCES}"
 
     # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
@@ -128,6 +134,11 @@ add_dependencies(${NANOCLR_PROJECT_NAME}.elf ChibiOS)
 if(USE_NETWORKING_OPTION)
     add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
+
+    # add dependency for security provider mbedTLS
+    if(NF_SECURITY_MBEDTLS)
+        add_dependencies(${NANOCLR_PROJECT_NAME}.elf mbedTLS)
+    endif()
 endif()
 
 # include common directories
@@ -179,13 +190,19 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     # includes for ChibiOS LwIP
     "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 
-	# incudes for Networking
-	"${NF_Networking_INCLUDE_DIRS}"
+	# incudes for Networking and TLS
+    "${NF_Networking_INCLUDE_DIRS}"
+    "${mbedTLS_INCLUDE_DIRS}"
 )
 
 # set compiler options
 nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
+
+# this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
+if(NF_SECURITY_MBEDTLS)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/mbedtls_config.h>\"")
+endif()
 
 # set compiler definitions
 nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)

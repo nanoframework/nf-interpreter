@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <MbedTls.h>
+#include "mbedtls.h"
 
 void SSL_GetCertDateTime_internal(DATE_TIME_INFO * dt, mbedtls_x509_time * mt )
 {
@@ -21,6 +21,8 @@ void SSL_GetCertDateTime_internal(DATE_TIME_INFO * dt, mbedtls_x509_time * mt )
 
 bool ssl_parse_certificate_internal(void * certificate, size_t size, void* pwd, void* x509CertData)
 {
+    (void)pwd;
+
     int ret;
     X509CertData* x509 = (X509CertData*)x509CertData;
 

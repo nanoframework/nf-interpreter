@@ -70,7 +70,7 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
 
             if(USE_SECURITY_MBEDTLS_OPTION)
-                #${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+                ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
             elseif(USE_SECURITY_OPENSSL_OPTION)
                 ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/openssl
             endif()
