@@ -165,7 +165,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
 
     CLR_INT32         sslContext = stack.Arg0().NumericByRef().s4;
     CLR_RT_HeapBlock* socket     = stack.Arg1().Dereference();
-//    CLR_INT32         timeout_ms = -1; // wait forever
+    CLR_INT32         timeout_ms = -1; // wait forever
     CLR_RT_HeapBlock  hbTimeout;
 
     int        result = 0;    
@@ -185,10 +185,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
         NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
     }
 
-// FIXME timeout_ms = -1 INFINITE
-//    hbTimeout.SetInteger( timeout_ms );
-             hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
-
+    hbTimeout.SetInteger( timeout_ms );
         
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
@@ -227,7 +224,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
     CLR_INT32 sslContext     = stack.Arg0().NumericByRef().s4;
     CLR_RT_HeapBlock* hb     = stack.Arg1().DereferenceString();
     CLR_RT_HeapBlock* socket = stack.Arg2().Dereference();
-//    CLR_INT32         timeout_ms = -1; // wait forever
+    CLR_INT32         timeout_ms = -1; // wait forever
     CLR_RT_HeapBlock  hbTimeout;
     
     int          result;    
@@ -252,9 +249,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
 
     szName = hb->StringText();
 
-    // FIXME timeout_ms = -1 = INFINITE
-   // hbTimeout.SetInteger( timeout_ms );
-          hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
+    hbTimeout.SetInteger( timeout_ms );
        
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
@@ -359,7 +354,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::ReadWriteHelper( C
     CLR_RT_HeapBlock_Array* arrData    = stack.Arg1().DereferenceArray(); 
     CLR_INT32               offset     = stack.Arg2().NumericByRef().s4;
     CLR_INT32               count      = stack.Arg3().NumericByRef().s4;
-//    CLR_INT32               timeout_ms = stack.Arg4().NumericByRef().s4;
+    CLR_INT32               timeout_ms = stack.Arg4().NumericByRef().s4;
     CLR_UINT8*              buffer;
     CLR_RT_HeapBlock        hbTimeout;
 
@@ -388,9 +383,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::ReadWriteHelper( C
 
     FAULT_ON_NULL(arrData);
 
- // FIXME timeout_ms = -1 = INFINITE
-    //hbTimeout.SetInteger( timeout_ms );
-           hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
+    hbTimeout.SetInteger( timeout_ms );
       
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
