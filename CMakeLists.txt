@@ -13,7 +13,7 @@ include(ExternalProject)
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
-# fatal error and message explaining this 
+# fatal error and message explaining this
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(STATUS "\n-- ###############################################\n")
     message(STATUS "Please run the build outside of the source tree.\n\n")
@@ -58,7 +58,7 @@ set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" CACHE INTERNAL "supported RTOS options")
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
     message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
-else()    
+else()
     message(STATUS "\nSetting RTOS to ${RTOS}\n")
 endif()
 
@@ -67,12 +67,12 @@ string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
 
 ##########################################################################
 
-if(RTOS_FREERTOS_CHECK) 
+if(RTOS_FREERTOS_CHECK)
     set(RTOS_FREERTOS_CHECK TRUE)
     set(RTOS_CHIBIOS_CHECK FALSE)
 endif()
 
-if(RTOS_CHIBIOS_CHECK) 
+if(RTOS_CHIBIOS_CHECK)
     set(RTOS_CHIBIOS_CHECK TRUE)
     set(RTOS_FREERTOS_CHECK FALSE)
 endif()
@@ -99,11 +99,11 @@ endif()
 # set default toolchain to GCC
 set(TOOLCHAIN GCC)
 # have it lower case too for file names
-string(TOLOWER TOOLCHAIN_LOWER ${TOOLCHAIN}) 
+string(TOLOWER TOOLCHAIN_LOWER ${TOOLCHAIN})
 ##########################################
 
 if(RTOS_CHIBIOS_CHECK)
-    
+
     # check for toolchain path
     if(NOT TOOLCHAIN_PREFIX)
          message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
@@ -111,7 +111,7 @@ if(RTOS_CHIBIOS_CHECK)
          message(STATUS "########################################\n\n")
          message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
     endif()
-    
+
     message(STATUS "\nSetting Toolchain file for ChibiOS \n")
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
@@ -119,7 +119,7 @@ if(RTOS_CHIBIOS_CHECK)
 elseif(RTOS_FREERTOS_CHECK)
     message(STATUS "\nSetting Toolchain file for FreeRTOS ESP32 \n")
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
- 
+
 # else()
 
 #     # find out the chip vendor in order to move on with the appropriate configuration
@@ -134,13 +134,13 @@ elseif(RTOS_FREERTOS_CHECK)
 #         include_directories(STM32CMSIS_INCLUDE_DIRS)
 
 #         # set toolchain file for cross-compiling with CMake
-#         # for this vendor/chip it will be 
+#         # for this vendor/chip it will be
 #     # elseif(CHIP_VENDOR_??_CHECK)
 #     #
 #     #     # vendor is ?? and toolchain is GCC
 #     #     message("Chip vendor is ??. Chip is ???.")
 #     #     set(CMAKE_TOOLCHAIN_FILE CMake/???.cmake)
-#     # 
+#     #
 #     else()
 #         message(STATUS "\n-- ###############################################\n")
 #         message(STATUS "Unknow vendor or chip. Supported vendors/chips:\n-- ST's STM32 (e.g. STM32F407VG)\n")
@@ -203,10 +203,10 @@ endif()
 #################################################################
 
 if(RTOS_CHIBIOS_CHECK)
-        
+
     #################################################################
     # clear CMAKE_C_FLAGS_INIT and CMAKE_CXX_FLAGS_INIT
-    # (this needs to be here and not before because by now 
+    # (this needs to be here and not before because by now
     # the compiler detection has already occurred)
     set(CMAKE_C_FLAGS "" CACHE INTERNAL "clear c compiler flags")
     set(CMAKE_CXX_FLAGS "" CACHE INTERNAL "clear cxx compiler flags")
@@ -214,7 +214,7 @@ if(RTOS_CHIBIOS_CHECK)
 
 
     #################################################################
-    # clear some CMake flavor flags that are being set as default 
+    # clear some CMake flavor flags that are being set as default
     # in the GNU compiler init
     # we want to control and fine tune these
     set(CMAKE_C_FLAGS_DEBUG "" CACHE INTERNAL "clear c compiler flags")
@@ -230,7 +230,7 @@ if(RTOS_CHIBIOS_CHECK)
 
     #################################################################
     # clear default libraries that are set by CMake
-    # we want to control 
+    # we want to control
     set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c linker default libs")
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
     #################################################################
@@ -286,7 +286,7 @@ endif()
 #################################################################
 
 ###################################################################
-# debugger (default is OFF so no support for debugging is included 
+# debugger (default is OFF so no support for debugging is included
 option(NF_FEATURE_DEBUGGER "option to enable support for debugging")
 
 if(NF_FEATURE_DEBUGGER)
@@ -302,7 +302,7 @@ option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")
 
 if(NF_FEATURE_USE_APPDOMAINS)
     message(STATUS "Application Domains support is included")
-else()    
+else()
     message(STATUS "Application Domains support IS NOT included")
 endif()
 
@@ -333,7 +333,7 @@ endif()
 if(RTOS_CHIBIOS_CHECK)
 
     #################################################################
-    # ARM Cortex-M Single Wire Output (SWO) 
+    # ARM Cortex-M Single Wire Output (SWO)
     # (default is OFF so no SWO output)
 
     option(SWO_OUTPUT "option to enable SWO")
@@ -341,7 +341,7 @@ if(RTOS_CHIBIOS_CHECK)
     if(SWO_OUTPUT)
         set(SWO_OUTPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
         message(STATUS "Single Wire Output (SWO) enabled")
-    else()    
+    else()
         set(SWO_OUTPUT_OPTION FALSE CACHE INTERNAL "Single Wire Output Option")
     endif()
 
@@ -359,7 +359,7 @@ endif()
 
 #################################################################
 # enables Networking support in nanoCLR
-# declares Networking option 
+# declares Networking option
 # needs to show before the API namespaces processing because it's used there
 # (default is OFF so Networking is NOT supported)
 option(USE_NETWORKING_OPTION "option to use networking")
@@ -384,7 +384,7 @@ if(NF_FEATURE_USE_FILESYSTEM)
     set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
     set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
     message(STATUS "Support for filesystem enabled")
-else()    
+else()
     set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
     set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
 endif()
@@ -395,7 +395,7 @@ endif()
 #################################################################
 # manage HAL/PAL required for API namespaces
 #################################################################
-# for some APIs we need to enable the device in the HAL config 
+# for some APIs we need to enable the device in the HAL config
 # and/or manage other APIs that are required
 
 
@@ -417,32 +417,32 @@ endif()
 
 if(API_Windows.Devices.Adc)
     set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
-else()    
+else()
     set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
 endif()
 
 
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-    
+
     # this API requires nanoFramework.Runtime.Events
     set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
 
-else()    
+else()
     set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
 endif()
 
 
 if(API_Windows.Devices.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
-else()    
+else()
     set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
 endif()
 
 
 if(API_Windows.Devices.Pwm)
     set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
-else()    
+else()
     set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
 endif()
 
@@ -456,14 +456,14 @@ endif()
 
 if(API_Windows.Devices.Spi)
     set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-else()    
+else()
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
 
 if(API_Windows.Devices.Wifi)
     set(HAL_USE_WIFI_OPTION TRUE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
-else()    
+else()
     set(HAL_USE_WIFI_OPTION FALSE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
 endif()
 
@@ -694,7 +694,7 @@ if(RTOS_CHIBIOS_CHECK)
 
             else()
                 # board.c and board.h are NOT in the target folder, try to find them in the official distribution
-                
+
                 if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
                     # board found
                     # if it's on the ChibiOS official distribution board.c and board.h exist here for sure
@@ -718,11 +718,11 @@ if(RTOS_CHIBIOS_CHECK)
                 # quit now as there is no were else to search for these
                 message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${CHIBIOS_BOARD} in the available list of ChibiOS supported boards...\n\n")
             endif()
-            
+
         endif()
 
     endif()
-    
+
     # add target ChibiOS dirs
     add_subdirectory(targets/CMSIS-OS/ChibiOS/Include)
     add_subdirectory(targets/CMSIS-OS/ChibiOS/common)
@@ -767,7 +767,7 @@ elseif(RTOS_FREERTOS_CHECK)
 
         # Define base path for the class libraries
         set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/nanoCLR")
-          
+
         # set target base location
         set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC")
 
