@@ -540,7 +540,7 @@ if(RTOS_CHIBIOS_CHECK)
 
         # ChibiOS version
         set(CHIBIOS_VERSION_EMPTY TRUE)
-        
+
         # check if build was requested with a specifc ChibiOS version
         if(DEFINED CHIBIOS_VERSION)
             if(NOT "${CHIBIOS_VERSION}" STREQUAL "")
@@ -556,12 +556,12 @@ if(RTOS_CHIBIOS_CHECK)
             message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
 
             # branch naming follows the pattern 'stable_18.2.x'
-            # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter 
+            # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter
             # find 1st dot in version number
             string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)
             # find 2nd dot in version number
             string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX REVERSE)
-            # extract 'short' version  
+            # extract 'short' version
             string(SUBSTRING ${CHIBIOS_VERSION} 0 ${CHIBIOS_VERSION_DOT_INDEX} CHIBIOS_SHORT_VERSION)
 
             # set branch name
@@ -572,7 +572,7 @@ if(RTOS_CHIBIOS_CHECK)
         # otherwise it won't be available before the actual build step
         configure_file("CMake/ChibiOS.CMakeLists.cmake.in"
                     "${CMAKE_BINARY_DIR}/ChibiOS_Download/CMakeLists.txt")
-        
+
         # setup CMake project for ChibiOS download
         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                         RESULT_VARIABLE result
@@ -582,9 +582,9 @@ if(RTOS_CHIBIOS_CHECK)
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS_Download")
-        
+
         # add ChibiOS as external project
-        ExternalProject_Add( 
+        ExternalProject_Add(
             ChibiOS
             PREFIX ChibiOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
@@ -595,9 +595,9 @@ if(RTOS_CHIBIOS_CHECK)
             LOG_DOWNLOAD 1
 
             # install command has to perform TWO extracts
-            # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
+            # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword
             INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/ COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/wolfssl-3.12.2-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-            
+
             # Disable all other steps
             CONFIGURE_COMMAND ""
             BUILD_COMMAND ""
@@ -613,13 +613,35 @@ if(RTOS_CHIBIOS_CHECK)
         if(EXISTS "${CHIBIOS_SOURCE}/")
             message(STATUS "RTOS is: ChibiOS (source from: ${CHIBIOS_SOURCE})")
 
-            file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+                file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+            else()
+                message(STATUS "Using local cache of ChibiOS source from ${CHIBIOS_SOURCE}")
+            endif()
+
             set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
-            # dummy target required for targets that have a declared dependency from ChibiOS
-            add_custom_target(ChibiOS)
         else()
             message(FATAL_ERROR "Couldn't find ChibiOS source at ${CHIBIOS_SOURCE}/")
         endif()
+
+        # add ChibiOS as external project
+        ExternalProject_Add(
+            ChibiOS
+            PREFIX ChibiOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
+
+            # install command has to perform TWO extracts
+            # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+        # get source dir for ChibiOS CMake project
+        ExternalProject_Get_Property(ChibiOS SOURCE_DIR)
 
     endif()
 
