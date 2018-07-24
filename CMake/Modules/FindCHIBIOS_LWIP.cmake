@@ -3,6 +3,12 @@
 # See LICENSE file in the project root for full license information.
 #
 
+# extract LwIP source files
+execute_process(
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+)
+
 # List of the required lwIp include files.
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings)
