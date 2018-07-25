@@ -37,7 +37,6 @@
           "ESP32_IDF_PATH" : "<path-to-esp32-idf-mind-the-forward-slash>/esp-idf",
           "ESP32_LIBS_PATH" : "<path-to-esp32-libraries-mind-the-forward-slash>/libs",
           "TARGET_SERIES" : "<series-name-of-the-target-chip-----STM32F0xx-STM32F4xx-STM32F7xx-ESP32>",
-          "USE_FPU" : "<ON-default-for-using-hardware-floating-point-unit>",
           "USE_RNG" : "<OFF-default-for-using-hardware-true-random-generator-unit>",
           "DP_FLOATINGPOINT" : "<OFF-default-ON-for-adding-support-for-double-precision-floating-point>",
           "SUPPORT_ANY_BASE_CONVERSION" : "<OFF-default-ON-for-adding-support-for-conversion-strings-to-values-on-any-base>",

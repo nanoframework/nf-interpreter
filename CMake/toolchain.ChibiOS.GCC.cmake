@@ -138,13 +138,6 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
         target_compile_definitions(${TARGET} PUBLIC BUILD_RTM)
     endif()
 
-    # set compiler definition for platform emulated floating point according to FPU
-    # no FPU requires FP emulation from the platform
-    target_compile_definitions(${TARGET} PUBLIC $<$<NOT:$<BOOL:USE_FPU>>:-DPLATFORM_EMULATED_FLOATINGPOINT>)
-
-    # set compiler definition for CORTEX according to FPU
-    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=${USE_FPU_IS_TRUE})
-
     # set compiler definition for using Application Domains feature
     if(NF_FEATURE_USE_APPDOMAINS)
         target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)

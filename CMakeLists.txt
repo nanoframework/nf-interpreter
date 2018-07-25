@@ -81,21 +81,6 @@ endif()
 
 
 ##########################################
-# handle FPU option
-# (default is ON so FPU support is enabled)
-option(USE_FPU "option to use floating point support" ON)
-
-if(USE_FPU)
-    set(USE_FPU_IS_TRUE TRUE CACHE INTERNAL "FPU preference")
-else()
-    set(USE_FPU_IS_TRUE FALSE CACHE INTERNAL "FPU preference")
-endif()
-
-# message("FPU preference is: ${USE_FPU}")  # debug helper
-##########################################
-
-
-##########################################
 # set default toolchain to GCC
 set(TOOLCHAIN GCC)
 # have it lower case too for file names
@@ -235,14 +220,6 @@ if(RTOS_CHIBIOS_CHECK)
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
     #################################################################
 
-endif()
-
-#################################################################
-# output FPU option
-if(USE_FPU)
-    message(STATUS "Hardware Floating Point enabled")
-elseif()
-    message(STATUS "Emulated Floating Point IS NOT enabled")
 endif()
 
 #################################################################################
