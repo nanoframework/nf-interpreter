@@ -51,7 +51,7 @@
  * @brief   lwIP thread priority.
  */
 #ifndef LWIP_THREAD_PRIORITY
-#define LWIP_THREAD_PRIORITY                LOWPRIO
+#define LWIP_THREAD_PRIORITY                NORMALPRIO
 #endif
 
 /**

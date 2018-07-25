@@ -1266,7 +1266,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef TCPIP_THREAD_PRIO
-#define TCPIP_THREAD_PRIO               (LOWPRIO + 1)
+#define TCPIP_THREAD_PRIO               (NORMALPRIO + 1)
 #endif
 
 /**
@@ -1300,7 +1300,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef SLIPIF_THREAD_PRIO
-#define SLIPIF_THREAD_PRIO              (LOWPRIO + 1)
+#define SLIPIF_THREAD_PRIO              (NORMALPRIO + 1)
 #endif
 
 /**
@@ -1325,7 +1325,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef PPP_THREAD_PRIO
-#define PPP_THREAD_PRIO                 (LOWPRIO + 1)
+#define PPP_THREAD_PRIO                 (NORMALPRIO + 1)
 #endif
 
 /**
@@ -1350,7 +1350,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef DEFAULT_THREAD_PRIO
-#define DEFAULT_THREAD_PRIO             (LOWPRIO + 1)
+#define DEFAULT_THREAD_PRIO             (NORMALPRIO + 1)
 #endif
 
 /**
