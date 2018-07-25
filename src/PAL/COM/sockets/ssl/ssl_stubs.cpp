@@ -110,9 +110,9 @@ __nfweak void SSL_RegisterTimeCallback(SSL_DATE_TIME_FUNC pfn)
     NATIVE_PROFILE_PAL_COM();
 }
 
-__nfweak bool SSL_ParseCertificate( const char* certificate, size_t cert_length, const char* szPwd, X509CertData* certData )
+__nfweak bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* password, X509CertData* certData )
 {
-    (void)certificate; (void)cert_length; (void)szPwd;  (void)certData; 
+    (void)certificate; (void)certLength; (void)password;  (void)certData; 
 
     NATIVE_PROFILE_PAL_COM();
     return TRUE;

@@ -580,7 +580,7 @@ int  SSL_Read       ( int socket, char* Data, size_t size );
 int  SSL_CloseSocket( int socket );
 void SSL_GetTime(DATE_TIME_INFO* pdt);
 void SSL_RegisterTimeCallback(SSL_DATE_TIME_FUNC pfn);
-bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* szPwd, X509CertData* certData );
+bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* password, X509CertData* certData );
 int  SSL_DataAvailable( int socket );
 
 //--//

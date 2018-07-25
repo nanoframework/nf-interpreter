@@ -40,16 +40,13 @@ static bool SSL_GenericInit( int sslMode, int sslVerify, const char* certificate
     return ssl_generic_init_internal( sslMode, sslVerify, certificate, cert_len, pwd, sslContextHandle, isServer );     
 }
 
-bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* szPwd, X509CertData* certData )
+bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* password, X509CertData* certData )
 {
-    (void)certLength; // suppress warning
-    (void)szPwd;
-    
     if (!s_init_done) s_init_done=ssl_initialize_internal();
     NATIVE_PROFILE_PAL_COM();
     return ssl_parse_certificate_internal((void *)certificate,
-                                          hal_strlen_s(certificate),
-                                          NULL, (void*)certData);
+                                          certLength,
+                                          (void*)password, (void*)certData);
 }
 
 void SSL_RegisterTimeCallback(SSL_DATE_TIME_FUNC pfn)
