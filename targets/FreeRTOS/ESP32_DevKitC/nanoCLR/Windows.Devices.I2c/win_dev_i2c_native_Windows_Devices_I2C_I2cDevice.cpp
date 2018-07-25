@@ -99,15 +99,19 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
        // Set the Bus parameters
         SetConfig( bus, pConfig);
  
-        esp_err_t res =  i2c_driver_install( bus, I2C_MODE_MASTER, 0, 0, 0);
-        if ( res != ESP_OK)
+        // If this is first devcie on Bus then init driver
+        if ( Esp_I2C_Initialised_Flag[bus] == 0 )
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
+            esp_err_t res =  i2c_driver_install( bus, I2C_MODE_MASTER, 0, 0, 0);
+            if ( res != ESP_OK)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            }
 
-       // Ensure driver gets unitialized during soft reboot
-       HAL_AddSoftRebootHandler(Esp32_I2c_UnitializeAll);
-       Esp_I2C_Initialised_Flag[bus] = 1;
+            // Ensure driver gets unitialized during soft reboot
+             HAL_AddSoftRebootHandler(Esp32_I2c_UnitializeAll);
+            Esp_I2C_Initialised_Flag[bus]++;
+        }
    }
    NANOCLR_NOCLEANUP();
 }
@@ -121,9 +125,14 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::DisposeNative_
 
         i2c_port_t bus = (i2c_port_t)((pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000) - 1);
 
-        i2c_driver_delete(bus);
+        Esp_I2C_Initialised_Flag[bus]--;
 
-        Esp_I2C_Initialised_Flag[bus] = 0;
+        if ( Esp_I2C_Initialised_Flag[bus] <= 0 )
+        {
+            i2c_driver_delete(bus);
+
+            Esp_I2C_Initialised_Flag[bus] = 0;
+        }
     }    
     NANOCLR_NOCLEANUP();
 }
@@ -137,7 +146,6 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         int writeSize = 0;
         int readSize = 0;
         esp_err_t i2cStatus;
-        int returnStatus = I2cTransferStatus_FullTransfer;
 
         CLR_RT_HeapBlock*       result;
         // create the return object (I2cTransferResult)
@@ -228,16 +236,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
                 memcpy(readBuffer->GetFirstElement(), &readData[0], readSize);
             }
         }
-
-        // null pointers and vars
-        writeData = NULL;
-        readData = NULL;
-        writeBuffer = NULL;
-        readBuffer = NULL;
-        pThis = NULL;
-
-        stack.SetResult_I4(returnStatus);
-    }
+   }
     NANOCLR_NOCLEANUP();
 }
 

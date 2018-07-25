@@ -3,27 +3,25 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# sanity check on FPU preference
-if(USE_FPU)
-    message(FATAL_ERROR "STM32F0 series doesn't have FPU. Need to set USE_FPU option to OFF.")
-endif()
-
 #################################################################
 # WHEN ADDING A NEW SERIES add the appropriate GCC options bellow
 #################################################################
 
 # need to specify this for assembler
-set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m0 -mabi=aapcs -x assembler-with-cpp" CACHE INTERNAL "asm compiler flags")
+set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m0 -mfloat-abi=soft -mabi=aapcs -x assembler-with-cpp" CACHE INTERNAL "asm compiler flags")
 
 # need to specify linker flags here
-set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -mthumb -mcpu=cortex-m0 -mabi=aapcs -nostartfiles " CACHE INTERNAL "executable linker flags")
+set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -mthumb -mcpu=cortex-m0 -mfloat-abi=soft -mabi=aapcs -nostartfiles " CACHE INTERNAL "executable linker flags")
 
 
 function(NF_SET_COMPILER_OPTIONS TARGET)
 
     # include any extra options comming from any extra args?
     target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m0 -mabi=aapcs -nostdlib -Wall -Wextra -Werror -ffunction-sections -fshort-wchar -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -mstructure-size-boundary=8 -ffast-math -ftree-vectorize -fcheck-new )
-            
+
+    # this series doesn't have FPU 
+    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=FALSE)
+
 endfunction()
 
 
