@@ -161,24 +161,24 @@ bool ssl_exit_context_internal(int sslContextHandle )
     return false;
 }
 
-bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, int certLength, const char* pwd, int& sslContextHandle, bool isServer )
-{
-    (void)sslMode;
-    (void)sslVerify;
-    (void)certificate;
-    (void)certLength;
-    (void)pwd;
-    (void)sslContextHandle;
-    (void)isServer;
+// bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, int certLength, const char* pwd, int& sslContextHandle, bool isServer )
+// {
+//     (void)sslMode;
+//     (void)sslVerify;
+//     (void)certificate;
+//     (void)certLength;
+//     (void)pwd;
+//     (void)sslContextHandle;
+//     (void)isServer;
     
-    return false;
-}
+//     return false;
+// }
 
-bool ssl_initialize_internal()
-{
-    // mbedtls_ssl_init(&g_SSL_Driver.SslContext);
-    return true;
-}
+// bool ssl_initialize_internal()
+// {
+//     // mbedtls_ssl_init(&g_SSL_Driver.SslContext);
+//     return true;
+// }
 
 bool ssl_uninitialize_internal()
 {
