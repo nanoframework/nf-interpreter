@@ -29,23 +29,23 @@ __nfweak bool SSL_Uninitialize()
     return TRUE;
 }
 
-__nfweak bool SSL_ServerInit( int sslMode, int sslVerify, const char* certificate, int cert_len, const char* szCertPwd, int& sslContextHandle )
+__nfweak bool SSL_ServerInit( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle )
 { 
-    (void)sslMode; (void)sslVerify; (void)certificate; (void)cert_len; (void)szCertPwd;  (void)sslContextHandle;
+    (void)sslMode; (void)sslVerify; (void)certificate; (void)certLength; (void)certPassword;  (void)sslContextHandle;
     NATIVE_PROFILE_PAL_COM();
     return TRUE; 
 }
 
-__nfweak bool SSL_ClientInit( int sslMode, int sslVerify, const char* certificate, int cert_len, const char* szCertPwd, int& sslContextHandle )
+__nfweak bool SSL_ClientInit( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle )
 { 
-    (void)sslMode; (void)sslVerify; (void)certificate; (void)cert_len; (void)szCertPwd;  (void)sslContextHandle;
+    (void)sslMode; (void)sslVerify; (void)certificate; (void)certLength; (void)certPassword;  (void)sslContextHandle;
     NATIVE_PROFILE_PAL_COM();
     return TRUE; 
 }
 
-__nfweak bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int cert_len, const char* szCertPwd )
+__nfweak bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int certLength, const char* certPassword )
 {
-    (void)sslContextHandle; (void)certificate; (void)cert_len; (void)szCertPwd; 
+    (void)sslContextHandle; (void)certificate; (void)certLength; (void)certPassword; 
     NATIVE_PROFILE_PAL_COM();
     return TRUE;
 }

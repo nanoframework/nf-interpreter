@@ -34,10 +34,10 @@ bool SSL_Uninitialize()
     return retVal;
 }
 
-static bool SSL_GenericInit( int sslMode, int sslVerify, const char* certificate, int cert_len, const char* pwd, int& sslContextHandle, bool isServer )
+static bool SSL_GenericInit( int sslMode, int sslVerify, const char* certificate, int certLength, const char* pwd, int& sslContextHandle, bool isServer )
 {
     if (!s_init_done) s_init_done=ssl_initialize_internal();
-    return ssl_generic_init_internal( sslMode, sslVerify, certificate, cert_len, pwd, sslContextHandle, isServer );     
+    return ssl_generic_init_internal( sslMode, sslVerify, certificate, certLength, pwd, sslContextHandle, isServer );     
 }
 
 bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* password, X509CertData* certData )
@@ -55,21 +55,21 @@ void SSL_RegisterTimeCallback(SSL_DATE_TIME_FUNC pfn)
     g_SSL_Driver.m_pfnGetTimeFuncPtr = pfn;
 }
 
-bool SSL_ServerInit( int sslMode, int sslVerify, const char* certificate, int cert_len, const char* szCertPwd, int& sslContextHandle )
+bool SSL_ServerInit( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle )
 {
     NATIVE_PROFILE_PAL_COM();
-    return SSL_GenericInit( sslMode, sslVerify, certificate, cert_len, szCertPwd, sslContextHandle, TRUE );
+    return SSL_GenericInit( sslMode, sslVerify, certificate, certLength, certPassword, sslContextHandle, TRUE );
 }
 
-bool SSL_ClientInit( int sslMode, int sslVerify, const char* certificate, int cert_len, const char* szCertPwd, int& sslContextHandle )
+bool SSL_ClientInit( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle )
 { 
     NATIVE_PROFILE_PAL_COM();
-    return SSL_GenericInit( sslMode, sslVerify, certificate, cert_len, szCertPwd, sslContextHandle, FALSE );
+    return SSL_GenericInit( sslMode, sslVerify, certificate, certLength, certPassword, sslContextHandle, FALSE );
 }
 
-bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int cert_len, const char* szCertPwd )
+bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int certLength, const char* certPassword )
 {
-    return ssl_add_cert_auth_internal(sslContextHandle, certificate, cert_len, szCertPwd);    
+    return ssl_add_cert_auth_internal(sslContextHandle, certificate, certLength, certPassword);    
 }
 
 void SSL_ClearCertificateAuthority( int sslContextHandle )

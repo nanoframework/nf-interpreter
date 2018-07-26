@@ -33,10 +33,10 @@ int ssl_write_internal( int socket, const char* Data, size_t size);
 int ssl_closesocket_internal( int sd );
 int ssl_pending_internal( int sd );
 BOOL ssl_exit_context_internal(int sslContextHandle );
-BOOL ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, int cert_len, const char* pwd, int& sslContextHandle, BOOL isServer );
+BOOL ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, int certLength, const char* pwd, int& sslContextHandle, BOOL isServer );
 BOOL ssl_initialize_internal();
 BOOL ssl_uninitialize_internal();
 void ssl_clear_cert_auth_internal(int sslContextHandle );
-BOOL ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, 	int cert_len, const char* szCertPwd );
+BOOL ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, 	int certLength, const char* certPassword );
 
 #endif

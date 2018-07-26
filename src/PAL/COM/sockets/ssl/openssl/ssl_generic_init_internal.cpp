@@ -43,7 +43,7 @@ int hal_fprintf_ssl(const char* format, ... )
 
 
 bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, 
-    int cert_len, const char* szCertPwd, int& sslContextHandle, bool isServer )
+    int certLength, const char* certPassword, int& sslContextHandle, bool isServer )
 {
     SSL*                ssl = NULL;
     SSL_CTX*            ctx = NULL;
@@ -119,10 +119,10 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
         goto err;
     }
 
-    if(certificate != NULL && cert_len > 0)
+    if(certificate != NULL && certLength > 0)
     {
         // Certificate Handle passed
-        if(cert_len == sizeof(INT32))
+        if(certLength == sizeof(INT32))
         {
             // TODO - FIXME     
             goto err;
@@ -146,7 +146,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
         }
         else
         {
-            cert_x509 = ssl_parse_certificate((void*)certificate, cert_len, szCertPwd, &pkey);
+            cert_x509 = ssl_parse_certificate((void*)certificate, certLength, certPassword, &pkey);
 
             if (cert_x509 == NULL || pkey == NULL)
             {
@@ -191,7 +191,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     
     if (ssl == NULL) goto err;
 
-    if(cert_len != sizeof(INT32))
+    if(certLength != sizeof(INT32))
     {
         if(cert_x509 != NULL) X509_free(cert_x509);
     }
@@ -211,7 +211,7 @@ err:
     if(ssl != NULL) SSL_free(ssl);
     if(ctx != NULL) SSL_CTX_free(ctx);
     
-    if(cert_len != sizeof(INT32))
+    if(certLength != sizeof(INT32))
     {
         X509_free(cert_x509);
         EVP_PKEY_free(pkey);

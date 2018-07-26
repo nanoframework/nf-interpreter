@@ -161,12 +161,12 @@ bool ssl_exit_context_internal(int sslContextHandle )
     return false;
 }
 
-bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, int cert_len, const char* pwd, int& sslContextHandle, bool isServer )
+bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, int certLength, const char* pwd, int& sslContextHandle, bool isServer )
 {
     (void)sslMode;
     (void)sslVerify;
     (void)certificate;
-    (void)cert_len;
+    (void)certLength;
     (void)pwd;
     (void)sslContextHandle;
     (void)isServer;
@@ -190,12 +190,12 @@ void ssl_clear_cert_auth_internal(int sslContextHandle )
     (void)sslContextHandle;
 }
 
-bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, int cert_len, const char* szCertPwd )
+bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, int certLength, const char* certPassword )
 {
     (void)sslContextHandle;
     (void)certificate;
-    (void)cert_len;
-    (void)szCertPwd;
+    (void)certLength;
+    (void)certPassword;
 
     return false;
 }

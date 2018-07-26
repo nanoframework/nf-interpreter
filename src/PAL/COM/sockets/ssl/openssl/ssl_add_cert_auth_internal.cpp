@@ -19,12 +19,12 @@
 #ifdef NO_CERT_STORE
 
 bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, 
-	int cert_len, const char* szCertPwd )
+	int certLength, const char* certPassword )
 {
     (void)sslContextHandle;
     (void)certificate;
-    (void)cert_len;
-    (void)szCertPwd;
+    (void)certLength;
+    (void)certPassword;
     
     return false;
 }
@@ -34,7 +34,7 @@ bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate,
 extern CK_RV Cryptoki_GetSlotIDFromSession(CK_SESSION_HANDLE session, CK_SLOT_ID_PTR pSlotID, CryptokiSession** ppSession);
 
 bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, 
-	int cert_len, const char* szCertPwd )
+	int certLength, const char* certPassword )
 {
     SSL *ssl = NULL;
     int ret = FALSE;
@@ -51,7 +51,7 @@ bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate,
         goto error;
     }
 
-    if(cert_len == sizeof(INT32))
+    if(certLength == sizeof(INT32))
     {
         CryptokiSession* pSession;
         CK_SLOT_ID  slotID;
@@ -59,9 +59,9 @@ bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate,
         CERT_DATA* pCert;
         CK_SESSION_HANDLE sessCtx;
 
-        if(szCertPwd == NULL) return FALSE;
+        if(certPassword == NULL) return FALSE;
 
-        sessCtx = *(INT32*)szCertPwd;
+        sessCtx = *(INT32*)certPassword;
         
         if(CKR_OK != Cryptoki_GetSlotIDFromSession(sessCtx, &slotID, &pSession)) return FALSE;
 
@@ -75,7 +75,7 @@ bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate,
     }
     else
     {
-        x = ssl_parse_certificate((void*)certificate, cert_len, szCertPwd, NULL);
+        x = ssl_parse_certificate((void*)certificate, certLength, certPassword, NULL);
     }
 
     if(x != NULL)
@@ -88,7 +88,7 @@ bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate,
 
             if(pCtx == NULL) 
             {
-                if(cert_len != sizeof(INT32)) X509_free(x);   
+                if(certLength != sizeof(INT32)) X509_free(x);   
                     
                 return FALSE;
             }
