@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) 2018 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -29,10 +29,11 @@ bool ssl_parse_certificate_internal(void * certificate, size_t size, void* pwd, 
     mbedtls_x509_crt cacert;
     mbedtls_x509_crt_init(&cacert);
     
-    ret = mbedtls_x509_crt_parse(&cacert, (const unsigned char *)certificate, size );
+    // need to add an extra byte here because the mbed TLS API is expecting 
+    // the buffer length INCLUDING the terminator 
+    ret = mbedtls_x509_crt_parse(&cacert, (const unsigned char *)certificate, size + 1 );
     if(ret < 0)
     {
-    //    ESP_LOGE(TAG, "mbedtls_x509_crt_parse returned -0x%x\n\n", -ret);
         return false;
     }
  
