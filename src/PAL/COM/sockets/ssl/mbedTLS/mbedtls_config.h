@@ -7,6 +7,7 @@
 #ifndef MBEDTLS_CONFIG_H
 #define MBEDTLS_CONFIG_H
 
+#include <target_common.h>
 
 /* System support */
 #define MBEDTLS_HAVE_ASM
@@ -43,7 +44,15 @@
 #define MBEDTLS_X509_USE_C
 
 #define MBEDTLS_NO_PLATFORM_ENTROPY
+
+////////////////////////////////////////////////////////////////////////////
+// This define depends on the platform having a hardware random generator.
+// Requires that a function mbedtls_hardware_poll() exits as explained in mbed TLS documentation.
+// Because it's target dependent, the define PLATFORM_HAS_RNG belongs in the target_common header
+#if (PLATFORM_HAS_RNG == TRUE)
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
+#endif
+//////////////////////////////////////////////////////////////////////////
 
 /* For test certificates */
 #define MBEDTLS_BASE64_C

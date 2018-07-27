@@ -112,10 +112,7 @@ int SSL_CloseSocket( SOCK_SOCKET socket )
     return ssl_closesocket_internal(socket);
 }
 
-
 int SSL_DataAvailable( SOCK_SOCKET socket )
 {
     return ssl_pending_internal(socket);
 }
-
-
