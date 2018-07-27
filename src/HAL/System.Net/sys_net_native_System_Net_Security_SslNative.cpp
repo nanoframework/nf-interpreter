@@ -224,7 +224,6 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
     CLR_INT32 sslContext     = stack.Arg0().NumericByRef().s4;
     CLR_RT_HeapBlock* hb     = stack.Arg1().DereferenceString();
     CLR_RT_HeapBlock* socket = stack.Arg2().Dereference();
-    CLR_INT32         timeout_ms = -1; // wait forever
     CLR_RT_HeapBlock  hbTimeout;
     
     int          result;    
@@ -249,7 +248,9 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
 
     szName = hb->StringText();
 
-    hbTimeout.SetInteger( timeout_ms );
+    // Infinite Timeout
+    // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
+    hbTimeout.SetInteger( (CLR_INT64)-1 );
        
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
