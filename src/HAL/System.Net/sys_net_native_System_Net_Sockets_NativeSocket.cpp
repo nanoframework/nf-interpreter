@@ -420,7 +420,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::BindConnectHelpe
         
         fThrowOnWouldBlock = (stack.Arg2().NumericByRefConst().s4 != 0);
         
-        if(!fThrowOnWouldBlock && SOCK_getlasterror() == SOCK_EWOULDBLOCK)
+        if(!fThrowOnWouldBlock && HAL_SOCK_getsocklasterror( handle ) == SOCK_EWOULDBLOCK)
         {
             NANOCLR_SET_AND_LEAVE(S_OK);            
         }
