@@ -10,9 +10,9 @@ execute_process(
 )
 
 # List of the required lwIp include files.
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Lwip)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings/arch)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip/apps)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip/priv)
@@ -81,8 +81,12 @@ set(LWIP_SRCS
     nf_api_msg.c
     nf_sockets.c
 	nf_sys_arch.c
-    # bindings
+    
+	# bindings
 	nf_lwipthread.c
+	
+	# platform implementations
+	platform_sys_arch.c
 
     #extras
     evtimer.c
@@ -182,8 +186,6 @@ foreach(SRC_FILE ${LWIP_SRCS})
     find_file(LWIP_SRC_FILE ${SRC_FILE}
         PATHS 
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings/arch
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv4
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv6
@@ -193,6 +195,7 @@ foreach(SRC_FILE ${LWIP_SRCS})
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif/ppp/polarssl
 
             ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
+            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Lwip
 
             # APPS:
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/snmp

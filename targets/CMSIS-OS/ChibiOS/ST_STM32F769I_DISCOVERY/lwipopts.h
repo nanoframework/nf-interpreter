@@ -56,7 +56,7 @@
  * allocation and deallocation.
  */
 #ifndef SYS_LIGHTWEIGHT_PROT
-#define SYS_LIGHTWEIGHT_PROT            0
+#define SYS_LIGHTWEIGHT_PROT            1
 #endif
 
 /** 
@@ -111,7 +111,7 @@
 * speed and usage from interrupts!
 */
 #ifndef MEMP_MEM_MALLOC
-#define MEMP_MEM_MALLOC                 0
+#define MEMP_MEM_MALLOC                 1
 #endif
 
 /**
@@ -1898,7 +1898,7 @@
  * debug messages of certain types.
  */
 #ifndef LWIP_DBG_TYPES_ON
-#define LWIP_DBG_TYPES_ON               LWIP_DBG_ON
+#define LWIP_DBG_TYPES_ON               LWIP_DBG_OFF
 #endif
 
 /**
@@ -2142,9 +2142,6 @@
 
 // in order to enable the lwIP debug output the bellow has to be uncomment and 
 // the options above changed to LWIP_DBG_ON for the features that are to output debug information
-//#define LWIP_DEBUG 1
-
-// debug output using SWO
-#define LWIP_PLATFORM_DIAG(x) do {GenericPort_Write(0, x, 512);} while(0)
+#define LWIP_DEBUG 1
 
 #endif /* __LWIPOPT_H__ */
