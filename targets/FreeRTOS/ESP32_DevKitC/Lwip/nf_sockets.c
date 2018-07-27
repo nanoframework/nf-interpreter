@@ -3360,4 +3360,12 @@ lwip_shutdown_r(int s, int how)
 
 #endif
 
+// get last socket error
+// lwIP is clearly missing an API to get the last error from a socket
+uint32_t lwip_socket_get_err(int s)
+{
+  struct lwip_sock *sock = get_socket(s);
+  return sock->err;
+}
+
 #endif /* LWIP_SOCKET */

@@ -602,6 +602,7 @@ int HAL_SOCK_getaddrinfo(  const char* nodename, char* servname, const struct SO
 void HAL_SOCK_freeaddrinfo( struct SOCK_addrinfo* ai );
 int HAL_SOCK_ioctl( int socket, int cmd, int* data );
 int HAL_SOCK_getlasterror();
+int HAL_SOCK_getsocklasterror( int socket );
 int HAL_SOCK_select( int socket, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* except, const struct SOCK_timeval* timeout );
 int HAL_SOCK_setsockopt( int socket, int level, int optname, const char* optval, int  optlen );
 int HAL_SOCK_getsockopt( int socket, int level, int optname,       char* optval, int* optlen );

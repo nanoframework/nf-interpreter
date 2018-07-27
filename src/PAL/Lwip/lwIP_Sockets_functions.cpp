@@ -84,6 +84,11 @@ int HAL_SOCK_getlasterror()
     NATIVE_PROFILE_PAL_NETWORK();
     return LWIP_SOCKETS_Driver::GetLastError();
 }
+int HAL_SOCK_getsocklasterror(SOCK_SOCKET socket)
+{ 
+    NATIVE_PROFILE_PAL_NETWORK();
+    return LWIP_SOCKETS_Driver::GetSockLastError(socket);
+}
 int HAL_SOCK_select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* except, const struct SOCK_timeval* timeout )
 { 
     NATIVE_PROFILE_PAL_NETWORK();

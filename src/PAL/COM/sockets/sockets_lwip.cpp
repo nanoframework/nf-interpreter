@@ -75,6 +75,11 @@ int SOCK_getlasterror()
     NATIVE_PROFILE_PAL_COM();
     return HAL_SOCK_getlasterror();
 }
+int SOCK_getsocklasterror(SOCK_SOCKET socket)
+{ 
+    NATIVE_PROFILE_PAL_COM();
+    return HAL_SOCK_getsocklasterror(socket);
+}
 int SOCK_select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* except, const struct SOCK_timeval* timeout )
 { 
     NATIVE_PROFILE_PAL_COM();

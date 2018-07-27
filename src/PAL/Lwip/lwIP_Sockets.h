@@ -73,6 +73,8 @@ struct LWIP_SOCKETS_Driver
 
     static int GetLastError();
 
+    static int GetSockLastError(SOCK_SOCKET socket);
+
     static int GetNativeTcpOption (int optname);
 
     static int GetNativeSockOption (int optname);

@@ -52,6 +52,13 @@ int errno;
 
 struct netif *netif_find_interface(int num);
 
+//
+
+// declaration of function not available in standard lwIP API
+extern "C"
+{
+extern uint32_t lwip_socket_get_err(int s);
+}
 //--//
 
 LWIP_SOCKETS_Driver g_LWIP_SOCKETS_Driver;
@@ -511,6 +518,16 @@ int LWIP_SOCKETS_Driver::Ioctl( SOCK_SOCKET socket, int cmd, int* data )
 int LWIP_SOCKETS_Driver::GetLastError()
 {
     NATIVE_PROFILE_PAL_NETWORK();
+
+    return GetNativeError(errno);
+}
+
+int LWIP_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+
+    // get last error number from socket
+    errno = lwip_socket_get_err(socket);
 
     return GetNativeError(errno);
 }
