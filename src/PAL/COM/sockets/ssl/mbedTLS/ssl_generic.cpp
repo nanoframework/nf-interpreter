@@ -6,6 +6,12 @@
 
 #include "mbedtls.h"
 
+#include "lwip/sockets.h"
+  
+
+// this one lives in lwIPSocket.cpp
+extern int errno;
+
 int sslRecv(void *ctx, unsigned char *buf, size_t len)
 {
     (void)buf;
@@ -93,13 +99,6 @@ int  ssl_closesocket_internal( int sd )
     return 0;
 }
 
-int  ssl_pending_internal( int sd )
-{
-    (void)sd;
-
-    return 0;
-}
-
 void ssl_clear_cert_auth_internal(int sslContextHandle )
 {
     (void)sslContextHandle;
@@ -129,4 +128,139 @@ void nf_debug( void *ctx, int level, const char *file, int line, const char *str
 
     // this is a lightheight version with just the debug messages
     debug_printf( "%s", str );
+}
+
+int net_would_block( const mbedtls_net_context *ctx )
+{
+    /*
+    * Never return 'WOULD BLOCK' on a non-blocking socket
+    */
+    int val = 0;
+    
+    if( ( fcntl( ctx->fd, F_GETFL, val) & O_NONBLOCK ) != O_NONBLOCK )
+        return( 0 );
+
+    switch( errno )
+    {
+      #if defined EAGAIN
+        case EAGAIN:
+      #endif
+      #if defined EWOULDBLOCK && EWOULDBLOCK != EAGAIN
+        case EWOULDBLOCK:
+      #endif
+        return( 1 );
+    }
+
+    return( 0 );
+}
+
+int mbedtls_net_recv( void *ctx, unsigned char *buf, size_t len )
+{
+    int32_t ret;
+    int32_t fd = ((mbedtls_net_context *) ctx)->fd;
+
+    if( fd < 0 )
+    {
+        return MBEDTLS_ERR_NET_INVALID_CONTEXT;
+    }
+    
+    ret = (int32_t) read( fd, buf, len );
+
+    if( ret < 0 )
+    {
+        if(net_would_block((mbedtls_net_context *)ctx) != 0)
+        {
+            return MBEDTLS_ERR_SSL_WANT_READ;
+        }
+        
+        if(errno == EPIPE || errno == ECONNRESET)
+        {
+            return MBEDTLS_ERR_NET_CONN_RESET;
+        }
+
+        if(errno == EINTR)
+        {
+            return MBEDTLS_ERR_SSL_WANT_READ;
+        }
+
+        return MBEDTLS_ERR_NET_RECV_FAILED;
+    }
+
+    return ret;
+}
+
+int mbedtls_net_send( void *ctx, const unsigned char *buf, size_t len )
+{
+    int32_t ret;
+    int fd = ((mbedtls_net_context *) ctx)->fd;
+
+    if( fd < 0 )
+    {
+        return MBEDTLS_ERR_NET_INVALID_CONTEXT;
+    }
+    
+    ret = (int32_t) write(fd, buf, len);
+
+    if( ret < 0 )
+    {
+        if(net_would_block((mbedtls_net_context *)ctx) != 0)
+        {
+            return MBEDTLS_ERR_SSL_WANT_WRITE;
+        }
+        
+        if(errno == EPIPE || errno == ECONNRESET)
+        {
+            return MBEDTLS_ERR_NET_CONN_RESET;
+        }
+        
+        if(errno == EINTR)
+        {
+            return MBEDTLS_ERR_SSL_WANT_WRITE;
+        }
+
+        return MBEDTLS_ERR_NET_SEND_FAILED;
+    }
+
+    return ret;
+}
+
+int mbedtls_net_recv_timeout( void *ctx, unsigned char *buf,
+                              size_t len, uint32_t timeout )
+{
+    int ret;
+    struct timeval tv;
+    fd_set read_fds;
+    int fd = ((mbedtls_net_context *) ctx)->fd;
+
+    if( fd < 0 )
+        return( MBEDTLS_ERR_NET_INVALID_CONTEXT );
+
+    FD_ZERO( &read_fds );
+    FD_SET( fd, &read_fds );
+
+    tv.tv_sec  = timeout / 1000;
+    tv.tv_usec = ( timeout % 1000 ) * 1000;
+
+    ret = select( fd + 1, &read_fds, NULL, NULL, timeout == 0 ? NULL : &tv );
+
+    /* Zero fds ready means we timed out */
+    if( ret == 0 )
+        return( MBEDTLS_ERR_SSL_TIMEOUT );
+
+    if( ret < 0 )
+    {
+  #if ( defined(_WIN32) || defined(_WIN32_WCE) ) && !defined(EFIX64) && \
+    !defined(EFI32)
+        if( WSAGetLastError() == WSAEINTR )
+            return( MBEDTLS_ERR_SSL_WANT_READ );
+  #else
+        if( errno == EINTR )
+            return( MBEDTLS_ERR_SSL_WANT_READ );
+  #endif
+
+        return( MBEDTLS_ERR_NET_RECV_FAILED );
+    }
+
+    /* This call will not block */
+    return( mbedtls_net_recv( ctx, buf, len ) );
 }
