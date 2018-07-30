@@ -199,3 +199,12 @@ bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, 
 
     return false;
 }
+
+// mbed TLS requires a function with this signature, so we are wrapping the call to our debug_printf here 
+void nf_debug( void *ctx, int level, const char *file, int line, const char *str )
+{
+    (void)level;
+    (void)ctx;
+
+    debug_printf( "%s:%04d: %s", file, line, str );
+}
