@@ -205,6 +205,13 @@ void nf_debug( void *ctx, int level, const char *file, int line, const char *str
 {
     (void)level;
     (void)ctx;
+    (void)file;
+    (void)line;
 
-    debug_printf( "%s:%04d: %s", file, line, str );
+    // the following line outputs the source code file name and line number
+    // for verbose output SWO is overhelmed and output fails at some point
+    //debug_printf( "%s:%04d: %s", file, line, str );
+
+    // this is a lightheight version with just the debug messages
+    debug_printf( "%s", str );
 }
