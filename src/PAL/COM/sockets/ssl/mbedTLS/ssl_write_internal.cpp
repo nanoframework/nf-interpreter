@@ -1,0 +1,39 @@
+//
+// Copyright (c) 2018 The nanoFramework project contributors
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+
+#include <ssl.h> 
+#include "mbedtls.h"
+
+static const int  c_MaxSslDataSize = 1460; 
+
+int  ssl_write_internal( int sd, const char* Data, size_t req_len)
+{
+    (void)sd;
+    (void)Data;
+    (void)req_len;
+
+    mbedtls_ssl_context *pSsl = (mbedtls_ssl_context*)SOCKET_DRIVER.GetSocketSslData(sd);
+    int ret;
+
+    // Loop until all data has been sent or error
+    size_t req_offset = 0;
+    do {
+        ret = mbedtls_ssl_write( pSsl, (const unsigned char *)(Data + req_offset), req_len - req_offset);
+        if (ret > 0)
+            req_offset += static_cast<size_t>(ret);
+    }
+    while( req_offset < req_len &&
+           (ret > 0 ||
+           ret == MBEDTLS_ERR_SSL_WANT_WRITE ||
+           ret == MBEDTLS_ERR_SSL_WANT_READ) );
+
+    if (ret < 0) {
+        //mbedtls_printf("mbedtls_ssl_write() returned -0x%04X\n", -ret);
+        return 0;
+    } 
+
+    return req_len;
+}

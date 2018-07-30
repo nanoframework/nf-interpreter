@@ -30,9 +30,11 @@ if(USE_SECURITY_MBEDTLS_OPTION)
     list(APPEND NF_Networking_SRCS 
         ssl.cpp
         # FIXME - SSL mbedTLS specific interface (WIP)
+        ssl_connect_internal.cpp
         ssl_generic_init_internal.cpp
         ssl_initialize_internal.cpp
         ssl_parse_certificate_internal.cpp
+        ssl_write_internal.cpp
         mbedtls.cpp
     )
 elseif(USE_SECURITY_OPENSSL_OPTION)
