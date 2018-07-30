@@ -18,6 +18,15 @@
 #include "mbedtls/error.h"
 #include "mbedtls/certs.h"
 
+typedef struct mbedTLS_NFContext
+{
+    mbedtls_entropy_context* entropy;
+    mbedtls_ctr_drbg_context* ctr_drbg;
+    mbedtls_ssl_context* ssl;
+    mbedtls_ssl_config* conf;
+    mbedtls_net_context* server_fd;
+}mbedTLS_NFContext;
+
 // debug output declaration 
 void nf_debug( void *ctx, int level, const char *file, int line, const char *str );
 

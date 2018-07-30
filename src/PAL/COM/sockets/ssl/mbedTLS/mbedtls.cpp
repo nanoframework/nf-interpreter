@@ -100,18 +100,6 @@ int  ssl_pending_internal( int sd )
     return 0;
 }
 
-bool ssl_exit_context_internal(int sslContextHandle )
-{
-    (void)sslContextHandle;
-
-    return false;
-}
-
-bool ssl_uninitialize_internal()
-{
-    return false;
-}
-
 void ssl_clear_cert_auth_internal(int sslContextHandle )
 {
     (void)sslContextHandle;

@@ -21,10 +21,8 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
 
     ///////////////////////
     mbedtls_x509_crt ca;
-    mbedtls_entropy_context* entropy = NULL;
-    mbedtls_ctr_drbg_context* ctr_drbg = NULL;
-    mbedtls_ssl_context* ssl = NULL;
-    mbedtls_ssl_config* conf = NULL;
+
+    mbedTLS_NFContext* context;
 
     ///////////////////////
 
@@ -38,6 +36,21 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     }
     
     if(sslContexIndex == -1) return FALSE;
+
+    // create and init mbedTLS nanoFramework context
+    // this needs to be freed in ssl_exit_context_internal
+    context = (mbedTLS_NFContext*)platform_malloc(sizeof(mbedTLS_NFContext));
+    if(context == NULL)
+    {
+        goto error;
+    }  
+
+    // allocate memory for net context 
+    context->server_fd = (mbedtls_net_context*)platform_malloc(sizeof(mbedtls_net_context));
+    if(context->server_fd == NULL)
+    {
+        goto error;
+    }
 
     if(isServer)
     {
@@ -53,50 +66,50 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
 
     // create and init CTR_DRBG
     // this needs to be freed in ssl_exit_context_internal
-    ctr_drbg = (mbedtls_ctr_drbg_context*)platform_malloc(sizeof(mbedtls_ctr_drbg_context));
-    if(ctr_drbg == NULL)
+    context->ctr_drbg = (mbedtls_ctr_drbg_context*)platform_malloc(sizeof(mbedtls_ctr_drbg_context));
+    if(context->ctr_drbg == NULL)
     {
         goto error;
     }    
-    mbedtls_ctr_drbg_init( ctr_drbg );
+    mbedtls_ctr_drbg_init( context->ctr_drbg );
 
     // create and init SSL context
     // this needs to be freed in ssl_exit_context_internal
-    ssl = (mbedtls_ssl_context*)platform_malloc(sizeof(mbedtls_ssl_context));
-    if(ssl == NULL)
+    context->ssl = (mbedtls_ssl_context*)platform_malloc(sizeof(mbedtls_ssl_context));
+    if(context->ssl == NULL)
     {
         goto error;
     }
-    mbedtls_ssl_init(ssl);
+    mbedtls_ssl_init(context->ssl);
 
     // create and init SSL configuration
     // this needs to be freed in ssl_exit_context_internal
-    conf = (mbedtls_ssl_config*)platform_malloc(sizeof(mbedtls_ssl_config));
-    if(conf == NULL)
+    context->conf = (mbedtls_ssl_config*)platform_malloc(sizeof(mbedtls_ssl_config));
+    if(context->conf == NULL)
     {
         goto error;
     }
 
-    mbedtls_ssl_config_init( conf );
+    mbedtls_ssl_config_init( context->conf );
     mbedtls_x509_crt_init( &ca );
 
     // create and init entropy context
     // this needs to be freed in ssl_exit_context_internal
-    entropy = (mbedtls_entropy_context*)platform_malloc(sizeof(mbedtls_entropy_context));
-    if(entropy == NULL)
+    context->entropy = (mbedtls_entropy_context*)platform_malloc(sizeof(mbedtls_entropy_context));
+    if(context->entropy == NULL)
     {
         goto error;
     }
-    mbedtls_entropy_init( entropy );
+    mbedtls_entropy_init( context->entropy );
 
     // TODO: review if we can add some instance-unique data to the custom argument bellow
-    if( mbedtls_ctr_drbg_seed( ctr_drbg, mbedtls_entropy_func, entropy, NULL, 0 ) != 0 )
+    if( mbedtls_ctr_drbg_seed( context->ctr_drbg, mbedtls_entropy_func, context->entropy, NULL, 0 ) != 0 )
     {
         // ctr_drbg_seed_failed
         goto error;
     }
 
-    if( mbedtls_ssl_config_defaults( conf,
+    if( mbedtls_ssl_config_defaults( context->conf,
                 endpoint,
                 MBEDTLS_SSL_TRANSPORT_STREAM,
                 MBEDTLS_SSL_PRESET_DEFAULT ) != 0 )
@@ -109,31 +122,31 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     switch((SslProtocols)sslMode)
     {
         case SslProtocols_SSLv3:
-            conf->min_major_ver = 3;
-            conf->min_minor_ver = 0;
-            conf->max_major_ver = 3;
-            conf->max_minor_ver = 0;
+            context->conf->min_major_ver = 3;
+            context->conf->min_minor_ver = 0;
+            context->conf->max_major_ver = 3;
+            context->conf->max_minor_ver = 0;
             break;
 
         case SslProtocols_TLSv1:
-            conf->min_major_ver = 1;
-            conf->min_minor_ver = 0;
-            conf->max_major_ver = 1;
-            conf->max_minor_ver = 0;
+            context->conf->min_major_ver = 1;
+            context->conf->min_minor_ver = 0;
+            context->conf->max_major_ver = 1;
+            context->conf->max_minor_ver = 0;
             break;
 
         case SslProtocols_TLSv11:
-            conf->min_major_ver = 1;
-            conf->min_minor_ver = 1;
-            conf->max_major_ver = 1;
-            conf->max_minor_ver = 1;
+            context->conf->min_major_ver = 1;
+            context->conf->min_minor_ver = 1;
+            context->conf->max_major_ver = 1;
+            context->conf->max_minor_ver = 1;
             break;
 
         case SslProtocols_TLSv12:
-            conf->min_major_ver = 1;
-            conf->min_minor_ver = 2;
-            conf->max_major_ver = 1;
-            conf->max_minor_ver = 2;
+            context->conf->min_major_ver = 1;
+            context->conf->min_minor_ver = 2;
+            context->conf->max_major_ver = 1;
+            context->conf->max_minor_ver = 2;
             break;
 
         default:
@@ -142,7 +155,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     }
 
 
-    mbedtls_ssl_conf_rng( conf, mbedtls_ctr_drbg_random, ctr_drbg );
+    mbedtls_ssl_conf_rng( context->conf, mbedtls_ctr_drbg_random, context->ctr_drbg );
 
     // parse certificate if passed
     if(certificate != NULL && certLength > 0)
@@ -153,8 +166,8 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
             goto error;
         }
 
-        mbedtls_ssl_conf_ca_chain( conf, &ca, NULL );
-        mbedtls_ssl_conf_authmode( conf, MBEDTLS_SSL_VERIFY_REQUIRED );
+        mbedtls_ssl_conf_ca_chain( context->conf, &ca, NULL );
+        mbedtls_ssl_conf_authmode( context->conf, MBEDTLS_SSL_VERIFY_REQUIRED );
     }
 
     // set certificate verification
@@ -163,7 +176,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     {
         authMode = MBEDTLS_SSL_VERIFY_REQUIRED;
     }
-    mbedtls_ssl_conf_authmode( conf, authMode );
+    mbedtls_ssl_conf_authmode( context->conf, authMode );
 
     // set bellow the threshold level for debug messages
     // check mbed TLS mbedtls/debug.h header for details.
@@ -174,9 +187,9 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     // 3 Informational
     // 4 Verbose
     mbedtls_debug_set_threshold( 2 );
-    mbedtls_ssl_conf_dbg( conf, nf_debug, stdout );
+    mbedtls_ssl_conf_dbg( context->conf, nf_debug, stdout );
 
-    if( mbedtls_ssl_setup( ssl, conf ) != 0 )
+    if( mbedtls_ssl_setup( context->ssl, context->conf ) != 0 )
     {
         // ssl_setup_failed
         goto error;
@@ -184,7 +197,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
 
     //////////////////////////////////////
 
-    g_SSL_Driver.m_sslContextArray[sslContexIndex].SslContext = ssl;
+    g_SSL_Driver.m_sslContextArray[sslContexIndex].SslContext = context;
     g_SSL_Driver.m_sslContextCount++;
 
     sslContextHandle = sslContexIndex;
@@ -194,10 +207,12 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
 error:
 
     // check for any memory allocation that needs to be freed before exiting
-    if(ssl != NULL) platform_free(ssl);
-    if(conf != NULL) platform_free(conf);
-    if(entropy != NULL) platform_free(entropy);
-    if(ctr_drbg != NULL) platform_free(ctr_drbg);
+    if(context->ssl != NULL) platform_free(context->ssl);
+    if(context->conf != NULL) platform_free(context->conf);
+    if(context->entropy != NULL) platform_free(context->entropy);
+    if(context->ctr_drbg != NULL) platform_free(context->ctr_drbg);
+    if(context->server_fd != NULL) platform_free(context->server_fd);
+    if(context != NULL) platform_free(context);
 
     return FALSE;
 }

@@ -156,8 +156,7 @@ int mbedtls_net_recv_timeout( void *ctx, unsigned char *buf,
 
 int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
 {
-    mbedtls_ssl_context* ssl;
-    mbedtls_net_context* server_fd = NULL;
+    mbedTLS_NFContext* context;
 
     int ret = -1;
 
@@ -168,46 +167,34 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
     }
     
     // sd should already have been created
-    // Now do the SSL negotiation   
-    ssl = (mbedtls_ssl_context*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
-    if (ssl == NULL) goto error;
-
-    // allocate memory for net context 
-    server_fd = (mbedtls_net_context*)platform_malloc(sizeof(mbedtls_net_context));
-    if(server_fd == NULL)
-    {
-        goto error;
-    }
+    // Now do the SSL negotiation
+    context = (mbedTLS_NFContext*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
+    if (context == NULL) goto error;
 
     // set socket
-    server_fd->fd = sd;
+    context->server_fd->fd = sd;
 
     if(szTargetHost != NULL && szTargetHost[0] != 0)
     {
-        if( mbedtls_ssl_set_hostname( ssl, szTargetHost ) != 0 )
+        if( (ret = mbedtls_ssl_set_hostname( context->ssl, szTargetHost )) != 0 )
         {
             // hostname_failed
             goto error;
         }
     }
 
-    mbedtls_ssl_set_bio( ssl, server_fd, mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout );
+    mbedtls_ssl_set_bio( context->ssl, context->server_fd, mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout );
 
-    while( ( ret = mbedtls_ssl_handshake( ssl ) ) != 0 )
+    while( ( ret = mbedtls_ssl_handshake( context->ssl ) ) != 0 )
     {
         if( ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE )
         {
+            // SSL handshake failed
             //mbedtls_printf( " failed\n  ! mbedtls_ssl_handshake returned -0x%x\n\n", -ret );
             goto error;
         }
     }
 
-    return ret;
-
 error:
-
-    // check for any memory allocation that needs to be freed before exiting
-    if(server_fd != NULL) platform_free(server_fd);
-  
     return ret;
 }

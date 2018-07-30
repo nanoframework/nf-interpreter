@@ -31,9 +31,11 @@ if(USE_SECURITY_MBEDTLS_OPTION)
         ssl.cpp
         # FIXME - SSL mbedTLS specific interface (WIP)
         ssl_connect_internal.cpp
+        ssl_exit_context_internal.cpp
         ssl_generic_init_internal.cpp
         ssl_initialize_internal.cpp
         ssl_parse_certificate_internal.cpp
+        ssl_uninitialize_internal.cpp
         ssl_write_internal.cpp
         mbedtls.cpp
     )
