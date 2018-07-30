@@ -7,8 +7,6 @@
 #include <ssl.h> 
 #include "mbedtls.h"
 
-static const int  c_MaxSslDataSize = 1460; 
-
 int  ssl_write_internal( int sd, const char* Data, size_t req_len)
 {
     (void)sd;
