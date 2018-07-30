@@ -12,6 +12,7 @@
 /* System support */
 #define MBEDTLS_HAVE_ASM
 #define MBEDTLS_HAVE_TIME
+#define MBEDTLS_HAVE_TIME_DATE
 
 /* mbed TLS feature support */
 #define MBEDTLS_CIPHER_MODE_CBC
@@ -42,6 +43,7 @@
 #define MBEDTLS_SSL_TLS_C
 #define MBEDTLS_X509_CRT_PARSE_C
 #define MBEDTLS_X509_USE_C
+#define MBEDTLS_DEBUG_C
 
 #define MBEDTLS_NO_PLATFORM_ENTROPY
 
@@ -58,6 +60,13 @@
 #define MBEDTLS_BASE64_C
 #define MBEDTLS_CERTS_C
 #define MBEDTLS_PEM_PARSE_C
+
+#define SSL_DEBUG_BUF MBEDTLS_SSL_DEBUG_BUF
+#define SSL_DEBUG_CRT MBEDTLS_SSL_DEBUG_CRT
+#define SSL_DEBUG_ECP MBEDTLS_SSL_DEBUG_ECP
+#define SSL_DEBUG_MPI MBEDTLS_SSL_DEBUG_MPI
+#define SSL_DEBUG_MSG MBEDTLS_SSL_DEBUG_MSG
+#define SSL_DEBUG_RET MBEDTLS_SSL_DEBUG_RET
 
 /* uncomment the defines below to enable static memory allocation feature */
 #if 0 

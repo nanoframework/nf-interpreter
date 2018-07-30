@@ -199,9 +199,10 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
-# this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
+# mbed TLS requires a config file
 if(NF_SECURITY_MBEDTLS)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/mbedtls_config.h>\"")
+    # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_CURRENT_SOURCE_DIR}/mbedtls_config.h>\"")
 endif()
 
 # set compiler definitions
