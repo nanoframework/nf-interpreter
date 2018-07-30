@@ -7,19 +7,17 @@
 #include <ssl.h> 
 #include "mbedtls.h"
 
-int  ssl_write_internal( int sd, const char* Data, size_t req_len)
+int  ssl_write_internal( int sd, const char* data, size_t req_len)
 {
-    (void)sd;
-    (void)Data;
-    (void)req_len;
+    mbedTLS_NFContext* context= (mbedTLS_NFContext*)SOCKET_DRIVER.GetSocketSslData(sd);
+    mbedtls_ssl_context *ssl = context->ssl;
 
-    mbedtls_ssl_context *pSsl = (mbedtls_ssl_context*)SOCKET_DRIVER.GetSocketSslData(sd);
     int ret;
 
     // Loop until all data has been sent or error
     size_t req_offset = 0;
     do {
-        ret = mbedtls_ssl_write( pSsl, (const unsigned char *)(Data + req_offset), req_len - req_offset);
+        ret = mbedtls_ssl_write( ssl, (const unsigned char *)(data + req_offset), req_len - req_offset);
         if (ret > 0)
             req_offset += static_cast<size_t>(ret);
     }
