@@ -12,15 +12,30 @@
 //#include <ossl_typ.h>
 
 // Keey these in sync with SslProtocols in System.Net
-#define NANOCLR_SSL_MODE_TLS1  0x10
-#define NANOCLR_SSL_MODE_TLS11 0x20
-#define NANOCLR_SSL_MODE_TLS12 0x40
-#define NANOCLR_SSL_MODE_SSL3  0x08
 
-#define NANOCLR_SSL_VERIFY_NONE         0x01
-#define NANOCLR_SSL_VERIFY_PEER         0x02
-#define NANOCLR_SSL_VERIFY_CERT_REQ     0x04
-#define NANOCLR_SSL_VERIFY_CLIENT_ONCE  0x08
+///////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.Security.SslProtocols (in managed code) !!!  //
+///////////////////////////////////////////////////////////////////////////////////
+enum SslProtocols
+{
+        SslProtocols_None =     0x00,
+        SslProtocols_SSLv3 =    0x08,
+        SslProtocols_TLSv1 =    0x10,
+        SslProtocols_TLSv11 =   0x20,
+        SslProtocols_TLSv12 =   0x40,
+};
+
+//////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.Security.SslVerification (in managed code) !!!  //
+//////////////////////////////////////////////////////////////////////////////////////
+enum SslVerification
+{
+        SslVerification_Invalid =               0,
+        SslVerification_NoVerification =        1,
+        SslVerification_VerifyPeer =            2,
+        SslVerification_CertificateRequired =   4,
+        SslVerification_VerifyClientOnce =      8,
+};
 
 
 // Lifted from Apps.h

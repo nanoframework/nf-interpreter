@@ -69,44 +69,52 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
         // TODO:  we should be setting up the CA list
          //SSL_CTX_set_client_CA_list
 
-        if (sslMode & NANOCLR_SSL_MODE_TLS12 )
+        switch((SslProtocols)sslMode)
         {
-            meth = (SSL_METHOD*)TLSv1_2_server_method();
-        }
-        else
-        if (sslMode & NANOCLR_SSL_MODE_TLS11 )
-        {
-            meth = (SSL_METHOD*)TLSv1_1_server_method();
-        }
-        else
-        if(sslMode & NANOCLR_SSL_MODE_TLS1)
-        {
-            meth = (SSL_METHOD*)TLSv1_server_method();
-        }
-        else
-        {
-            meth = (SSL_METHOD*)SSLv3_server_method();  
+            case SslProtocols_SSLv3:
+                meth = (SSL_METHOD*)SSLv3_server_method();
+                break;
+
+            case SslProtocols_TLSv1:
+                meth = (SSL_METHOD*)TLSv1_server_method();
+                break;
+
+            case SslProtocols_TLSv11:
+                meth = (SSL_METHOD*)TLSv1_1_server_method();
+                break;
+
+            case SslProtocols_TLSv12:
+                meth = (SSL_METHOD*)TLSv1_2_server_method();
+                break;
+
+            default:
+                // shouldn't reach here!
+                return FALSE;
         }
     }
     else
     {
-        if (sslMode & NANOCLR_SSL_MODE_TLS12 )
+        switch((SslProtocols)sslMode)
         {
-            meth = (SSL_METHOD*)TLSv1_2_client_method();
-        }
-        else
-        if (sslMode & NANOCLR_SSL_MODE_TLS11 )
-        {
-            meth = (SSL_METHOD*)TLSv1_1_client_method();
-        }
-        else
-        if(sslMode & NANOCLR_SSL_MODE_TLS1)
-        {
-            meth = (SSL_METHOD*)TLSv1_client_method();
-        }
-        else
-        {
-            meth = (SSL_METHOD*)SSLv3_client_method();  
+            case SslProtocols_SSLv3:
+                meth = (SSL_METHOD*)SSLv3_client_method();
+                break;
+
+            case SslProtocols_TLSv1:
+                meth = (SSL_METHOD*)TLSv1_client_method();
+                break;
+
+            case SslProtocols_TLSv11:
+                meth = (SSL_METHOD*)TLSv1_1_client_method();
+                break;
+
+            case SslProtocols_TLSv12:
+                meth = (SSL_METHOD*)TLSv1_2_client_method();
+                break;
+
+            default:
+                // shouldn't reach here!
+                return FALSE;
         }
     }
 
