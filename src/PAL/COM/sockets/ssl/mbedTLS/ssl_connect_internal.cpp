@@ -25,7 +25,7 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
     context = (mbedTLS_NFContext*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
     if (context == NULL) goto error;
 
-    // set socket
+    // set socket in network context
     context->server_fd->fd = sd;
 
     if(szTargetHost != NULL && szTargetHost[0] != 0)
@@ -37,8 +37,10 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
         }
     }
 
+    // setup internal SSL context and calls to transport layer send, receive and receive with timeout
     mbedtls_ssl_set_bio( context->ssl, context->server_fd, mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout );
 
+    // perform SSL handshake
     while( ( ret = mbedtls_ssl_handshake( context->ssl ) ) != 0 )
     {
         if( ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE )
@@ -49,6 +51,7 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
         }
     }
 
+    // store SSL context in sockets driver
     SOCKET_DRIVER.SetSocketSslData(sd, (void*)context);
 
 error:
