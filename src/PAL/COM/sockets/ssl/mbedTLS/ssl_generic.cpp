@@ -205,8 +205,7 @@ int mbedtls_net_send( void *ctx, const unsigned char *buf, size_t len )
     return ret;
 }
 
-int mbedtls_net_recv_timeout( void *ctx, unsigned char *buf,
-                              size_t len, uint32_t timeout )
+int mbedtls_net_recv_timeout( void *ctx, unsigned char *buf, size_t len, uint32_t timeout )
 {
     int ret;
     struct timeval tv;
