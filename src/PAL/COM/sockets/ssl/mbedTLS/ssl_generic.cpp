@@ -73,25 +73,6 @@ int ssl_accept_internal( int sd, int sslContextHandle )
     return 0;
  }
 
-
-int  ssl_read_internal( int sd, char* Data, size_t size )
-{
-    (void)sd;
-    (void)Data;
-    (void)size;
-
-    //mbedtls_ssl_config *pSsl = (mbedtls_ssl_config*)SOCKET_DRIVER.GetSocketSslData(sd);
-    
-    // int ret = mbedtls_ssl_read(pSsl, (unsigned char *)(Data), size);
-    // if ( ret < 0 )
-    // {
-    //     return 0;
-    // }
-
-    // return ret;
-    return 0;
-}
-
 int  ssl_closesocket_internal( int sd )
 {
     (void)sd;
