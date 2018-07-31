@@ -288,7 +288,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureRead___STATI
 HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureWrite___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
-    return ReadWriteHelper( stack, false );
+    return ReadWriteHelper( stack, true );
 }
 
 HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureCloseSocket___STATIC__I4__OBJECT( CLR_RT_StackFrame& stack )
