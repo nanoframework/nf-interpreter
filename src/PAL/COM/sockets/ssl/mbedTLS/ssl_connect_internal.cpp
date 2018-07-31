@@ -49,6 +49,8 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
         }
     }
 
+    SOCKET_DRIVER.SetSocketSslData(sd, (void*)context);
+
 error:
     return ret;
 }
