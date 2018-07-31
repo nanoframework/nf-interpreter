@@ -16,17 +16,21 @@ int  ssl_write_internal( int sd, const char* data, size_t req_len)
 
     // Loop until all data has been sent or error
     size_t req_offset = 0;
-    do {
+    do 
+    {
         ret = mbedtls_ssl_write( ssl, (const unsigned char *)(data + req_offset), req_len - req_offset);
         if (ret > 0)
+        {
             req_offset += static_cast<size_t>(ret);
+        }
     }
     while( req_offset < req_len &&
            (ret > 0 ||
            ret == MBEDTLS_ERR_SSL_WANT_WRITE ||
            ret == MBEDTLS_ERR_SSL_WANT_READ) );
 
-    if (ret < 0) {
+    if (ret < 0)
+    {
         //mbedtls_printf("mbedtls_ssl_write() returned -0x%04X\n", -ret);
         return 0;
     } 
