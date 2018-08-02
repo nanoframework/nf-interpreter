@@ -11,19 +11,24 @@
 int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
 {
     mbedTLS_NFContext* context;
+    int nonblock = 0;
 
-    int ret = -1;
+    int ret = SOCK_SOCKET_ERROR;
 
-    // Retrieve SSL struct from g_SSL_Driver    
+    // Check sslContextHandle range
     if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
     {
         goto error;
     }
     
+    // Retrieve SSL struct from g_SSL_Driver    
     // sd should already have been created
     // Now do the SSL negotiation
     context = (mbedTLS_NFContext*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
-    if (context == NULL) goto error;
+    if (context == NULL)
+    {
+        return false;
+    }
 
     // set socket in network context
     context->server_fd->fd = sd;
@@ -40,6 +45,8 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
     // setup internal SSL context and calls to transport layer send, receive and receive with timeout
     mbedtls_ssl_set_bio( context->ssl, context->server_fd, mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout );
 
+    SOCK_ioctl(sd, SOCK_FIONBIO, &nonblock);
+
     // perform SSL handshake
     while( ( ret = mbedtls_ssl_handshake( context->ssl ) ) != 0 )
     {
@@ -50,6 +57,9 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
             goto error;
         }
     }
+
+    nonblock = 1;
+    SOCK_ioctl(sd, SOCK_FIONBIO, &nonblock);
 
     // store SSL context in sockets driver
     SOCKET_DRIVER.SetSocketSslData(sd, (void*)context);
