@@ -37,6 +37,7 @@ bool ssl_exit_context_internal(int sslContextHandle )
     platform_free(context->entropy);
     platform_free(context->ctr_drbg);
     platform_free(context->conf);
+    platform_free(context->x509_crt);
     platform_free(context->ssl);
     platform_free(context);
 

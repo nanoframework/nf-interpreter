@@ -22,9 +22,10 @@ typedef struct mbedTLS_NFContext
 {
     mbedtls_entropy_context* entropy;
     mbedtls_ctr_drbg_context* ctr_drbg;
-    mbedtls_ssl_context* ssl;
     mbedtls_ssl_config* conf;
+    mbedtls_ssl_context* ssl;
     mbedtls_net_context* server_fd;
+    mbedtls_x509_crt* x509_crt;
 }mbedTLS_NFContext;
 
 int net_would_block( const mbedtls_net_context *ctx );

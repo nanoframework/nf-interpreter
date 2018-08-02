@@ -20,11 +20,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     int endpoint = 0;
 
     ///////////////////////
-    mbedtls_x509_crt ca;
-
     mbedTLS_NFContext* context;
-
-    ///////////////////////
 
     for(uint32_t i=0; i<ARRAYSIZE(g_SSL_Driver.m_sslContextArray); i++)
     { 
@@ -91,7 +87,15 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     }
 
     mbedtls_ssl_config_init( context->conf );
-    mbedtls_x509_crt_init( &ca );
+
+    // create and init X509 CRT
+    // this needs to be freed in ssl_exit_context_internal
+    context->x509_crt = (mbedtls_x509_crt*)platform_malloc(sizeof(mbedtls_x509_crt));
+    if(context->x509_crt == NULL)
+    {
+        goto error;
+    }
+    mbedtls_x509_crt_init( context->x509_crt );
 
     // create and init entropy context
     // this needs to be freed in ssl_exit_context_internal
@@ -162,13 +166,13 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     {
         // need to add an extra byte here because the mbed TLS API is expecting 
         // the buffer length INCLUDING the terminator
-        if(mbedtls_x509_crt_parse( &ca, (const unsigned char*)certificate, certLength + 1 ) != 0)
+        if(mbedtls_x509_crt_parse( context->x509_crt, (const unsigned char*)certificate, certLength + 1 ) != 0)
         {
             // x509_crt_parse_failed
             goto error;
         }
 
-        mbedtls_ssl_conf_ca_chain( context->conf, &ca, NULL );
+        mbedtls_ssl_conf_ca_chain( context->conf, context->x509_crt, NULL );
     }
 
     // set certificate verification
@@ -213,7 +217,7 @@ error:
     if(context->entropy != NULL) platform_free(context->entropy);
     if(context->ctr_drbg != NULL) platform_free(context->ctr_drbg);
     if(context->server_fd != NULL) platform_free(context->server_fd);
-    if(context != NULL) platform_free(context);
+    if(context->x509_crt != NULL) platform_free(context->x509_crt);
 
     return FALSE;
 }
