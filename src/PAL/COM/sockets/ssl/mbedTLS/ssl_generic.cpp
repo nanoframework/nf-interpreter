@@ -192,3 +192,23 @@ void mbedtls_net_free( mbedtls_net_context *ctx )
 
     ctx->fd = -1;
 }
+
+// get Unix Epoch time from HAL SystemTime
+time_t nf_get_unix_epoch()
+{
+    struct tm time;
+    SYSTEMTIME systemTime;
+
+    // get HAL time in SYSTEMTIME format
+    HAL_Time_ToSystemTime(HAL_Time_CurrentDateTime(false), &systemTime);
+
+    // fill in the tm struct
+    time.tm_sec = systemTime.wSecond;
+    time.tm_min = systemTime.wMinute;
+    time.tm_hour = systemTime.wHour;
+    time.tm_mday = systemTime.wDay;
+    time.tm_mon = systemTime.wMonth - 1;
+    time.tm_year = systemTime.wYear - 1900;
+
+    return mktime(&time);
+}

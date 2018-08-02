@@ -37,6 +37,17 @@ void mbedtls_net_free( mbedtls_net_context *ctx );
 // debug output declaration 
 void nf_debug( void *ctx, int level, const char *file, int line, const char *str );
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// function returning the system date and time in Unix Epoch 
+time_t nf_get_unix_epoch();
+
+#ifdef __cplusplus
+}
+#endif
+
 #define SOCKET_DRIVER g_Sockets_LWIP_Driver
 
 #endif

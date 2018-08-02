@@ -8,12 +8,17 @@
 #define MBEDTLS_CONFIG_H
 
 #include <target_common.h>
+#include <time.h>
+
+// need to declare this as external to be picked up by mbed TLS platform_time
+extern time_t nf_get_unix_epoch();
 
 /* System support */
 #define MBEDTLS_HAVE_ASM
 #define MBEDTLS_HAVE_TIME
 #define MBEDTLS_HAVE_TIME_DATE
-// #define MBEDTLS_PLATFORM_TIME_MACRO
+// need to define this as the alternative to standard time function
+#define MBEDTLS_PLATFORM_TIME_MACRO nf_get_unix_epoch
 
 /* mbed TLS feature support */
 #define MBEDTLS_CIPHER_MODE_CBC
