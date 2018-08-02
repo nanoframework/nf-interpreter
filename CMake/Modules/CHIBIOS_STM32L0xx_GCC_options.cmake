@@ -31,14 +31,10 @@ function(NF_SET_COMPILER_OPTIONS TARGET)
 endfunction()
 
 
-function(NF_SET_LINKER_OPTIONS TARGET PRINTF_FLOAT_SUPPORT)
+function(NF_SET_LINKER_OPTIONS TARGET)
 
-    # request to include support for float printf form newlib nano
-    if(PRINTF_FLOAT_SUPPORT)
-        set_property(TARGET ${TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs -u _printf_float")
-    else()
-        set_property(TARGET ${TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs ")
-    endif()
+    # request specs from newlib nano
+    set_property(TARGET ${TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs ")
 
     # set extra linker flags
     set_property(TARGET ${TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${ARGN}")

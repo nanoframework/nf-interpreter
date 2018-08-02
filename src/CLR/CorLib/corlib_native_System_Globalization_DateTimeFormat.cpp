@@ -22,7 +22,7 @@ HRESULT Library_corlib_native_System_Globalization_DateTimeFormat::FormatDigits_
 
     if(len >= 2)
     {
-        hal_snprintf( fmt, ARRAYSIZE(fmt), "%%0%dd", len );
+        sprintf( fmt, "%%0%dd", len );
     }
     else
     {
@@ -31,7 +31,7 @@ HRESULT Library_corlib_native_System_Globalization_DateTimeFormat::FormatDigits_
         fmt[2] = '\0';
     }
 
-    hal_snprintf( buffer, ARRAYSIZE(buffer), fmt, value );
+    sprintf( buffer, fmt, value );
 
     NANOCLR_SET_AND_LEAVE(stack.SetResult_String( buffer ));
 

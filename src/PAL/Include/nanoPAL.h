@@ -209,42 +209,11 @@ enum POWER_LEVEL
 //#include <nanocrt_decl.h>
 
 #if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
-extern int  hal_vprintf (const char* format, va_list arg) __attribute__ ((format (printf, 1, 0)));
-#endif
-int hal_vprintf( const char* format, va_list arg );
-
-#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
-extern int  hal_vfprintf ( COM_HANDLE stream, const char* format, va_list arg ) __attribute__ ((format (printf, 2, 0)));
-#endif
-int hal_vfprintf( COM_HANDLE stream, const char* format, va_list arg );
-
-#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
-extern int  hal_snprintf ( char* buffer, size_t len, const char* format, ... ) __attribute__ ((format (printf, 3, 0)));
-#endif
-int hal_snprintf( char* buffer, size_t len, const char* format, ... );
-
-int hal_vsnprintf( char* buffer, size_t len, const char* format, va_list arg );
-
-#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
-#define printf     DoNotUse_*printf []
-//#define sprintf    DoNotUse_*printf []
-#define fprintf    DoNotUse_*printf []
-
-#define _printf    DoNotUse_*printf []
-#define _sprintf   DoNotUse_*printf []
-#define _fprintf   DoNotUse_*printf []
-
-#define snprintf   DoNotUse_*printf []
-#define vsnprintf  DoNotUse_*printf []
-
-#define _snprintf  DoNotUse_*printf []
-#define _vsnprintf DoNotUse_*printf []
 
 #define strcpy    DoNotUse_*strcpy  []
 #define strncpy   DoNotUse_*strcpy  []
 #define strlen    DoNotUse_*strlen  []
 #define strncmp   DoNotUse_*strncmp  []
-
 
 int hal_strcpy_s ( char* strDst, size_t sizeInBytes, const char* strSrc );
 int hal_strncpy_s( char* strDst, size_t sizeInBytes, const char* strSrc, size_t count );
@@ -252,6 +221,11 @@ size_t hal_strlen_s (const char * str);
 int hal_strncmp_s( const char* str1, const char* str2, size_t num );
 
 #elif defined(_WIN32)
+
+int hal_vprintf( const char* format, va_list arg );
+int hal_vfprintf( COM_HANDLE stream, const char* format, va_list arg );
+int hal_snprintf( char* buffer, size_t len, const char* format, ... );
+int hal_vsnprintf( char* buffer, size_t len, const char* format, va_list arg );
 
 #define hal_strcpy_s(strDst, sizeInBytes, strSrc) strcpy_s(strDst, sizeInBytes, strSrc)
 #define hal_strncpy_s(strDst, sizeInBytes, strSrc, count) strncpy_s(strDst, sizeInBytes, strSrc, count)

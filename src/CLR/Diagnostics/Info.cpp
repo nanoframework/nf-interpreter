@@ -70,6 +70,9 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const c
 bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#if defined(_WIN32)
+
     int  chars = hal_vsnprintf( szBuffer, iBuffer, format, arg );
     bool fRes  = (chars >= 0);
 
@@ -79,6 +82,15 @@ bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_
     iBuffer  -= chars;
 
     return fRes;
+
+#else
+
+    // use out tiny sprintf
+    iBuffer = tiny_vstringfn(szBuffer, iBuffer, format, arg);
+
+    return TRUE;
+
+#endif
 }
 
 bool CLR_SafeSprintf( char*& szBuffer, size_t& iBuffer, const char* format, ... )
@@ -220,21 +232,38 @@ int CLR_Debug::PrintfV( const char *format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
+#if defined(_WIN32)
     char   buffer[512];
-
-    char*  szBuffer =           buffer;
+	char*  szBuffer = buffer;
     size_t iBuffer  = MAXSTRLEN(buffer);
 
-    bool fRes = CLR_SafeSprintfV( szBuffer, iBuffer, format, arg );
+    
+    bool fRes = CLR_SafeSprintfV(szBuffer, iBuffer, format, arg );
     
     _ASSERTE(fRes);
 
     iBuffer = MAXSTRLEN(buffer) - iBuffer;
 
+#else
+    char*  buffer = (char*)platform_malloc(512);
+    size_t iBuffer = 512;
+
+    CLR_SafeSprintfV( buffer, iBuffer, format, arg );
+    iBuffer  = hal_strlen_s(buffer);
+    
+#endif
+
     Emit( buffer, (int)iBuffer );
 
-#if defined WIN32
+#if defined(_WIN32)
 	OutputDebugStringA(buffer);
+#endif
+
+#if !defined(_WIN32)
+    if(buffer != NULL)
+    {
+        platform_free(buffer);
+    }
 #endif
 
     return (int)iBuffer;
@@ -800,7 +829,7 @@ const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
 
     static char s_tmp[ 32 ];
 
-    hal_snprintf( s_tmp, MAXSTRLEN(s_tmp), "0x%08x", hrError );
+    sprintf( s_tmp, "0x%08x", hrError );
 
     return s_tmp;
 }
