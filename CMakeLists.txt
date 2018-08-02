@@ -426,6 +426,10 @@ endif()
 
 if(API_Windows.Devices.SerialCommunication)
     set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
+    
+    # this API requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
+
 else()
     set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
 endif()
