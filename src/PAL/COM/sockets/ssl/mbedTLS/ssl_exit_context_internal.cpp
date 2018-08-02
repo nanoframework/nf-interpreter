@@ -13,13 +13,22 @@ bool ssl_exit_context_internal(int sslContextHandle )
 {
     mbedTLS_NFContext* context = NULL;
 
+    // Check sslContextHandle range
     if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0) || (g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext == NULL))
     {
         return FALSE;
     }
 
     context = (mbedTLS_NFContext*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
-    
+    if (context == NULL)
+    {
+        return FALSE;
+    }
+
+    mbedtls_net_free(context->server_fd);
+    mbedtls_ctr_drbg_free( context->ctr_drbg );
+    mbedtls_entropy_free( context->entropy );
+
     // zero memory to wipe any security critical info in RAM
     memset(context->ssl, 0, sizeof(mbedtls_ssl_context));
 

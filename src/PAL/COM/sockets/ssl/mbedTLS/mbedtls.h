@@ -31,6 +31,7 @@ int net_would_block( const mbedtls_net_context *ctx );
 int mbedtls_net_recv( void *ctx, unsigned char *buf, size_t len );
 int mbedtls_net_send( void *ctx, const unsigned char *buf, size_t len );
 int mbedtls_net_recv_timeout( void *ctx, unsigned char *buf, size_t len, uint32_t timeout );
+void mbedtls_net_free( mbedtls_net_context *ctx );
 
 // debug output declaration 
 void nf_debug( void *ctx, int level, const char *file, int line, const char *str );
