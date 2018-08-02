@@ -160,14 +160,15 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     // parse certificate if passed
     if(certificate != NULL && certLength > 0)
     {
-        if(mbedtls_x509_crt_parse( &ca, (const unsigned char*)certificate, certLength ) != 0)
+        // need to add an extra byte here because the mbed TLS API is expecting 
+        // the buffer length INCLUDING the terminator
+        if(mbedtls_x509_crt_parse( &ca, (const unsigned char*)certificate, certLength + 1 ) != 0)
         {
             // x509_crt_parse_failed
             goto error;
         }
 
         mbedtls_ssl_conf_ca_chain( context->conf, &ca, NULL );
-        mbedtls_ssl_conf_authmode( context->conf, MBEDTLS_SSL_VERIFY_REQUIRED );
     }
 
     // set certificate verification
