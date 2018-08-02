@@ -31,70 +31,6 @@ int sslRecv(void *ctx, unsigned char *buf, size_t len)
     return 0;
 }
 
-int ssl_accept_internal( int sd, int sslContextHandle )
-{
-    (void)sd;
-    (void)sslContextHandle;
-
-    // int err = SOCK_SOCKET_ERROR;
-    // int nonblock = 0;
-    // mbedtls_ssl_config *pSsl = NULL;
-
-    // // Check sslContextHandle range
-    // if((sslContextHandle >= ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
-    // {
-    //     goto error;
-    // }
-
-    // pSsl = (mbedtls_ssl_config*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
-    // if (ssl == NULL)
-    // {
-    //     goto error;
-    // }
-
-    // // Set socket against this SSL context 
-    // mbedtls_ssl_set_bio(pSsl, static_cast<void *>(sd), sslSend, sslRecv, NULL);
- 
-    // // Set non blocking socket
-    // SOCK_ioctl(sd, SOCK_FIONBIO, &nonblock);
-
-    // // Connecion is set up now do SSL handshake  
-    // mbedtls_ssl_handshake()
-    
-    // nonblock = 1;
-    // SOCK_ioctl(sd, SOCK_FIONBIO, &nonblock);
-
-    // // Save SSL context against socket
-    // SOCKET_DRIVER.SetSocketSslData(sd, (void*)ssl);
-
- //error:
-    //return err;
-
-    return 0;
- }
-
-int  ssl_closesocket_internal( int sd )
-{
-    (void)sd;
-
-    return 0;
-}
-
-void ssl_clear_cert_auth_internal(int sslContextHandle )
-{
-    (void)sslContextHandle;
-}
-
-bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, int certLength, const char* certPassword )
-{
-    (void)sslContextHandle;
-    (void)certificate;
-    (void)certLength;
-    (void)certPassword;
-
-    return false;
-}
-
 // mbed TLS requires a function with this signature, so we are wrapping the call to our debug_printf here 
 void nf_debug( void *ctx, int level, const char *file, int line, const char *str )
 {
@@ -243,4 +179,16 @@ int mbedtls_net_recv_timeout( void *ctx, unsigned char *buf, size_t len, uint32_
 
     /* This call will not block */
     return( mbedtls_net_recv( ctx, buf, len ) );
+}
+
+// Gracefully closes the connection
+void mbedtls_net_free( mbedtls_net_context *ctx )
+{
+    if( ctx->fd == -1 )
+        return;
+
+    shutdown( ctx->fd, 2 );
+    close( ctx->fd );
+
+    ctx->fd = -1;
 }
