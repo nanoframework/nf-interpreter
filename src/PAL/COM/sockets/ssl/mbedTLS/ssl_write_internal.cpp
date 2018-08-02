@@ -9,10 +9,16 @@
 
 int  ssl_write_internal( int sd, const char* data, size_t req_len)
 {
+    int ret;
+
     mbedTLS_NFContext* context= (mbedTLS_NFContext*)SOCKET_DRIVER.GetSocketSslData(sd);
     mbedtls_ssl_context *ssl = context->ssl;
 
-    int ret;
+    // sanity check
+    if(ssl == NULL)
+    {
+        return SOCK_SOCKET_ERROR;
+    }
 
     // Loop until all data has been sent or error
     size_t req_offset = 0;

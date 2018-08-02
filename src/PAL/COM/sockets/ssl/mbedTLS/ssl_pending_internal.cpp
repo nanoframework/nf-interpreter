@@ -12,6 +12,7 @@ int ssl_pending_internal( int sd )
     mbedTLS_NFContext* context= (mbedTLS_NFContext*)SOCKET_DRIVER.GetSocketSslData(sd);
     mbedtls_ssl_context *ssl = context->ssl;
 
+    // sanity check
     if(ssl == NULL)
     {
         return SOCK_SOCKET_ERROR;
