@@ -9,6 +9,7 @@
 # and the namespace designation is 'Windows.Devices.Gpio'
 ###########################################################################################
 
+option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
 option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
@@ -62,6 +63,12 @@ endmacro()
 ############################################################################################
 
 macro(ParseNativeAssemblies)
+
+    # nanoFramework.Networking.Sntp
+    if(API_nanoFramework.Networking.Sntp)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Networking.Sntp")
+    endif()
 
     # nanoFramework.Runtime.Events
     if(API_nanoFramework.Runtime.Events)

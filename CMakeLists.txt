@@ -392,6 +392,12 @@ if(API_System.Net)
     elseif(NF_SECURITY_MBEDTLS )
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
+
+    # enable nanoFramework.Networking.Sntp
+    if(NF_NETWORKING_SNTP)
+        set(API_nanoFramework.Networking.Sntp ON CACHE INTERNAL "enable of nanoFramework.Networking.Sntp")
+    endif()
+
 endif()
 
 
