@@ -28,7 +28,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::get_FullName___STRING(
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
     
-    hal_snprintf( buffer, NANOCLR_MAX_ASSEMBLY_NAME * 2, 
+    sprintf( buffer, 
                   "%s, Version=%d.%d.%d.%d", 
                   assm->m_szName, 
                   header->version.iMajorVersion, 

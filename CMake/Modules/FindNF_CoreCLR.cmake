@@ -20,6 +20,7 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${PROJECT_SOURCE_DIR}/src/CLR/Startup)
 # others
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Debugger)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf)
 
 
 # source files for nanoFramework Core, CoreLib and CLR startup
@@ -152,6 +153,9 @@ set(NF_CoreCLR_SRCS
     Diagnostics_stub.cpp
     Messaging_stub.cpp
     
+    # Helpers
+    printf.c
+
     # HAL
     nanoHAL_Time.cpp
 
@@ -196,6 +200,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics
             ${PROJECT_SOURCE_DIR}/src/CLR/Messaging
             
+            # Helpers
+            ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf
+
             # HAL
             ${PROJECT_SOURCE_DIR}/src/HAL
 
