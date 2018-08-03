@@ -23,8 +23,6 @@ set(NF_Networking_SRCS
     #Lwip 
     LwIP_Sockets.cpp
     LwIP_Sockets_functions.cpp 
-
-    ssl_stubs.cpp
 )
 
 # source files for security layer
@@ -49,6 +47,11 @@ set(NF_Networking_Security_SRCS
     # ssl_types.cpp
 )
 
+# Use SSL_stubs when no security provider enabled
+# Although ssl_stibs uses weak methods it doesn't work for ESP32 builds as the networking code has been put into a library
+if(NOT USE_SECURITY_MBEDTLS_OPTION AND NOT USE_SECURITY_OPENSSL_OPTION)
+    list(APPEND NF_Networking_SRCS ssl_stubs.cpp)
+endif()
 
 if(NF_FEATURE_DEBUGGER)
     list(APPEND NF_Networking_SRCS sockets_debugger.cpp)
@@ -64,11 +67,11 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
 
-            if(USE_SECURITY_MBEDTLS_OPTION)
-                # ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
-            elseif(USE_SECURITY_OPENSSL_OPTION)
-                ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/openssl
-            endif()
+#            if(USE_SECURITY_MBEDTLS_OPTION)
+#                # ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+#            elseif(USE_SECURITY_OPENSSL_OPTION)
+#                ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/openssl
+#            endif()
 
             ${PROJECT_SOURCE_DIR}/src/PAL/Lwip
             ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}

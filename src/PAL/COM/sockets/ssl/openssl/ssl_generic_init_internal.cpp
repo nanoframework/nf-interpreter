@@ -9,38 +9,13 @@
 #include <openssl.h> 
 
 
-// #include <NANOCLR/ssl_functions.h>
-// #include <openssl/ssl.h>
-// #include <openssl/err.h>
-// #include <openssl.h>
-// #include <PKCS11\Tokens\OpenSSL\OpenSSL_pkcs11.h>
-
 // TODO - FIXME
 //extern CK_RV Cryptoki_GetSlotIDFromSession(CK_SESSION_HANDLE session, CK_SLOT_ID_PTR pSlotID, CryptokiSession** ppSession);
 
 // FIXME - sort out an error print function
 void ERR_print_errors_fp()
 {
-
-
 }
-
-
-int hal_fprintf_ssl(const char* format, ... )
-{
-    va_list arg_ptr;
-    int     chars;
-
-    va_start( arg_ptr, format );
-
-    chars = hal_vprintf( format, arg_ptr );
-
-    va_end( arg_ptr );
-
-    return chars;
-}
-
-
 
 bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, 
     int certLength, const char* certPassword, int& sslContextHandle, bool isServer )

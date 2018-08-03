@@ -12,8 +12,12 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 #include <nanoHAL_time.h>
-#include <apps/sntp.h>
 
+#ifndef PLATFORM_ESP32
+#include <apps/sntp.h>
+#else
+#include <apps/sntp/sntp.h>
+#endif
 
 struct Library_nf_networking_sntp_nanoFramework_Networking_Sntp
 {
