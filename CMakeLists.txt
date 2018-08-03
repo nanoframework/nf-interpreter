@@ -352,6 +352,9 @@ if(NF_SECURITY_OPENSSL AND NF_SECURITY_MBEDTLS)
     message(FATAL_ERROR "Can't have both OpenSSL and mbedTLS providers selected. Please choose one or none.")
 endif()
 
+# set default option for SNTP to ON
+option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
+
 #################################################################
 # enables filesysytem support in nanoCLR
 # (default is OFF so the filesystem is NOT supported)

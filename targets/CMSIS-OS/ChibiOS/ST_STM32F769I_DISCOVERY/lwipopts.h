@@ -44,6 +44,8 @@
 #include <sys/errno.h>
 #include <stdlib.h>
 
+#include <nf_lwipopts_sntp.h>
+
 /*
    -----------------------------------------------
    ---------- Platform specific locking ----------

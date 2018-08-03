@@ -11,6 +11,7 @@ execute_process(
 
 # List of the required lwIp include files.
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Lwip)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include)
@@ -164,8 +165,9 @@ set(LWIP_SRCS
     # iperf server
     # lwiperf.c
 
-    # SNTP client
-    sntp.c
+	# SNTP client
+	# this one is added bellow if NF_NETWORKING_SNTP option is ON
+    # sntp.c
 
     # MDNS responder
     mdns.c
@@ -180,6 +182,9 @@ set(LWIP_SRCS
     # mqtt.c
 )
 
+if(NF_NETWORKING_SNTP)
+    list(APPEND LWIP_SRCS sntp.c)
+endif()
 
 foreach(SRC_FILE ${LWIP_SRCS})
     set(LWIP_SRC_FILE SRC_FILE -NOTFOUND)
