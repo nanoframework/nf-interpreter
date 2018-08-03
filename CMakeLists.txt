@@ -13,7 +13,7 @@ include(ExternalProject)
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
-# fatal error and message explaining this 
+# fatal error and message explaining this
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(STATUS "\n-- ###############################################\n")
     message(STATUS "Please run the build outside of the source tree.\n\n")
@@ -58,7 +58,7 @@ set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" CACHE INTERNAL "supported RTOS options")
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
     message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
-else()    
+else()
     message(STATUS "\nSetting RTOS to ${RTOS}\n")
 endif()
 
@@ -67,12 +67,12 @@ string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
 
 ##########################################################################
 
-if(RTOS_FREERTOS_CHECK) 
+if(RTOS_FREERTOS_CHECK)
     set(RTOS_FREERTOS_CHECK TRUE)
     set(RTOS_CHIBIOS_CHECK FALSE)
 endif()
 
-if(RTOS_CHIBIOS_CHECK) 
+if(RTOS_CHIBIOS_CHECK)
     set(RTOS_CHIBIOS_CHECK TRUE)
     set(RTOS_FREERTOS_CHECK FALSE)
 endif()
@@ -84,11 +84,11 @@ endif()
 # set default toolchain to GCC
 set(TOOLCHAIN GCC)
 # have it lower case too for file names
-string(TOLOWER TOOLCHAIN_LOWER ${TOOLCHAIN}) 
+string(TOLOWER TOOLCHAIN_LOWER ${TOOLCHAIN})
 ##########################################
 
 if(RTOS_CHIBIOS_CHECK)
-    
+
     # check for toolchain path
     if(NOT TOOLCHAIN_PREFIX)
          message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
@@ -96,7 +96,7 @@ if(RTOS_CHIBIOS_CHECK)
          message(STATUS "########################################\n\n")
          message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
     endif()
-    
+
     message(STATUS "\nSetting Toolchain file for ChibiOS \n")
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
@@ -104,7 +104,7 @@ if(RTOS_CHIBIOS_CHECK)
 elseif(RTOS_FREERTOS_CHECK)
     message(STATUS "\nSetting Toolchain file for FreeRTOS ESP32 \n")
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
- 
+
 # else()
 
 #     # find out the chip vendor in order to move on with the appropriate configuration
@@ -119,13 +119,13 @@ elseif(RTOS_FREERTOS_CHECK)
 #         include_directories(STM32CMSIS_INCLUDE_DIRS)
 
 #         # set toolchain file for cross-compiling with CMake
-#         # for this vendor/chip it will be 
+#         # for this vendor/chip it will be
 #     # elseif(CHIP_VENDOR_??_CHECK)
 #     #
 #     #     # vendor is ?? and toolchain is GCC
 #     #     message("Chip vendor is ??. Chip is ???.")
 #     #     set(CMAKE_TOOLCHAIN_FILE CMake/???.cmake)
-#     # 
+#     #
 #     else()
 #         message(STATUS "\n-- ###############################################\n")
 #         message(STATUS "Unknow vendor or chip. Supported vendors/chips:\n-- ST's STM32 (e.g. STM32F407VG)\n")
@@ -188,10 +188,10 @@ endif()
 #################################################################
 
 if(RTOS_CHIBIOS_CHECK)
-        
+
     #################################################################
     # clear CMAKE_C_FLAGS_INIT and CMAKE_CXX_FLAGS_INIT
-    # (this needs to be here and not before because by now 
+    # (this needs to be here and not before because by now
     # the compiler detection has already occurred)
     set(CMAKE_C_FLAGS "" CACHE INTERNAL "clear c compiler flags")
     set(CMAKE_CXX_FLAGS "" CACHE INTERNAL "clear cxx compiler flags")
@@ -199,7 +199,7 @@ if(RTOS_CHIBIOS_CHECK)
 
 
     #################################################################
-    # clear some CMake flavor flags that are being set as default 
+    # clear some CMake flavor flags that are being set as default
     # in the GNU compiler init
     # we want to control and fine tune these
     set(CMAKE_C_FLAGS_DEBUG "" CACHE INTERNAL "clear c compiler flags")
@@ -215,7 +215,7 @@ if(RTOS_CHIBIOS_CHECK)
 
     #################################################################
     # clear default libraries that are set by CMake
-    # we want to control 
+    # we want to control
     set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c linker default libs")
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
     #################################################################
@@ -263,7 +263,7 @@ endif()
 #################################################################
 
 ###################################################################
-# debugger (default is OFF so no support for debugging is included 
+# debugger (default is OFF so no support for debugging is included
 option(NF_FEATURE_DEBUGGER "option to enable support for debugging")
 
 if(NF_FEATURE_DEBUGGER)
@@ -279,7 +279,7 @@ option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")
 
 if(NF_FEATURE_USE_APPDOMAINS)
     message(STATUS "Application Domains support is included")
-else()    
+else()
     message(STATUS "Application Domains support IS NOT included")
 endif()
 
@@ -310,7 +310,7 @@ endif()
 if(RTOS_CHIBIOS_CHECK)
 
     #################################################################
-    # ARM Cortex-M Single Wire Output (SWO) 
+    # ARM Cortex-M Single Wire Output (SWO)
     # (default is OFF so no SWO output)
 
     option(SWO_OUTPUT "option to enable SWO")
@@ -318,7 +318,7 @@ if(RTOS_CHIBIOS_CHECK)
     if(SWO_OUTPUT)
         set(SWO_OUTPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
         message(STATUS "Single Wire Output (SWO) enabled")
-    else()    
+    else()
         set(SWO_OUTPUT_OPTION FALSE CACHE INTERNAL "Single Wire Output Option")
     endif()
 
@@ -336,11 +336,24 @@ endif()
 
 #################################################################
 # enables Networking support in nanoCLR
-# declares Networking option 
+# declares Networking option
 # needs to show before the API namespaces processing because it's used there
 # (default is OFF so Networking is NOT supported)
 option(USE_NETWORKING_OPTION "option to use networking")
 
+# (default is OFF so OpenSSL is NOT used)
+option(NF_SECURITY_OPENSSL "option to use OpenSSL as the network security provider")
+
+# (default is OFF so mbed TLS is NOT used)
+option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider")
+
+# sanity check for both providers set
+if(NF_SECURITY_OPENSSL AND NF_SECURITY_MBEDTLS)
+    message(FATAL_ERROR "Can't have both OpenSSL and mbedTLS providers selected. Please choose one or none.")
+endif()
+
+# set default option for SNTP to ON
+option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
 
 #################################################################
 # enables filesysytem support in nanoCLR
@@ -351,7 +364,7 @@ if(NF_FEATURE_USE_FILESYSTEM)
     set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
     set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
     message(STATUS "Support for filesystem enabled")
-else()    
+else()
     set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
     set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
 endif()
@@ -362,7 +375,7 @@ endif()
 #################################################################
 # manage HAL/PAL required for API namespaces
 #################################################################
-# for some APIs we need to enable the device in the HAL config 
+# for some APIs we need to enable the device in the HAL config
 # and/or manage other APIs that are required
 
 
@@ -372,37 +385,50 @@ if(API_System.Net)
 
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
+
+    # set Security module to use
+    if(NF_SECURITY_OPENSSL)
+        set(USE_SECURITY_OPENSSL_OPTION TRUE CACHE INTERNAL "NF security OPENSSL")
+    elseif(NF_SECURITY_MBEDTLS )
+        set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
+    endif()
+
+    # enable nanoFramework.Networking.Sntp
+    if(NF_NETWORKING_SNTP)
+        set(API_nanoFramework.Networking.Sntp ON CACHE INTERNAL "enable of nanoFramework.Networking.Sntp")
+    endif()
+
 endif()
 
 
 if(API_Windows.Devices.Adc)
     set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
-else()    
+else()
     set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
 endif()
 
 
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-    
+
     # this API requires nanoFramework.Runtime.Events
     set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
 
-else()    
+else()
     set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
 endif()
 
 
 if(API_Windows.Devices.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
-else()    
+else()
     set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
 endif()
 
 
 if(API_Windows.Devices.Pwm)
     set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
-else()    
+else()
     set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
 endif()
 
@@ -420,14 +446,14 @@ endif()
 
 if(API_Windows.Devices.Spi)
     set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-else()    
+else()
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
 
 if(API_Windows.Devices.Wifi)
     set(HAL_USE_WIFI_OPTION TRUE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
-else()    
+else()
     set(HAL_USE_WIFI_OPTION FALSE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
 endif()
 
@@ -446,9 +472,17 @@ endif()
 
 if(USE_NETWORKING_OPTION)
     set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
-    message(STATUS "Support for networking enabled")
-else()    
-    set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")  
+
+    if(NF_SECURITY_OPENSSL)
+        message(STATUS "Support for networking enabled with security from OpenSSL")
+    elseif(NF_SECURITY_MBEDTLS)
+        message(STATUS "Support for networking enabled with security from mbed TLS")
+    else()
+        message(STATUS "Support for networking enabled WITHOUT security")
+    endif()
+
+else()
+    set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
     message(STATUS "Support for networking IS NOT enabled")
 endif()
 
@@ -461,7 +495,7 @@ option(NF_FEATURE_RTC "option to use hardware RTC")
 
 if(NF_FEATURE_RTC)
     set(HAL_USE_RTC_OPTION TRUE CACHE INTERNAL "NF feature RTC")
-else()    
+else()
     set(HAL_USE_RTC_OPTION FALSE CACHE INTERNAL "NF feature RTC")
 endif()
 
@@ -471,6 +505,11 @@ endif()
 #######################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
+
+    # sanity check on SSL provider: ChibiOS only supports mbed TLS
+    if(NF_SECURITY_OPENSSL)
+        message(FATAL "Can't use OpenSSL for ChibiOS. Currently only mbed TLS is supported.")
+    endif()
 
     # check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
     set(NO_CHIBIOS_SOURCE TRUE)
@@ -496,7 +535,7 @@ if(RTOS_CHIBIOS_CHECK)
 
         # ChibiOS version
         set(CHIBIOS_VERSION_EMPTY TRUE)
-        
+
         # check if build was requested with a specifc ChibiOS version
         if(DEFINED CHIBIOS_VERSION)
             if(NOT "${CHIBIOS_VERSION}" STREQUAL "")
@@ -512,12 +551,12 @@ if(RTOS_CHIBIOS_CHECK)
             message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
 
             # branch naming follows the pattern 'stable_18.2.x'
-            # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter 
+            # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter
             # find 1st dot in version number
             string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)
             # find 2nd dot in version number
             string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX REVERSE)
-            # extract 'short' version  
+            # extract 'short' version
             string(SUBSTRING ${CHIBIOS_VERSION} 0 ${CHIBIOS_VERSION_DOT_INDEX} CHIBIOS_SHORT_VERSION)
 
             # set branch name
@@ -528,7 +567,7 @@ if(RTOS_CHIBIOS_CHECK)
         # otherwise it won't be available before the actual build step
         configure_file("CMake/ChibiOS.CMakeLists.cmake.in"
                     "${CMAKE_BINARY_DIR}/ChibiOS_Download/CMakeLists.txt")
-        
+
         # setup CMake project for ChibiOS download
         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                         RESULT_VARIABLE result
@@ -538,9 +577,9 @@ if(RTOS_CHIBIOS_CHECK)
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS_Download")
-        
+
         # add ChibiOS as external project
-        ExternalProject_Add( 
+        ExternalProject_Add(
             ChibiOS
             PREFIX ChibiOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
@@ -549,8 +588,10 @@ if(RTOS_CHIBIOS_CHECK)
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
             LOG_DOWNLOAD 1
+
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+
             # Disable all other steps
-            INSTALL_COMMAND ""
             CONFIGURE_COMMAND ""
             BUILD_COMMAND ""
         )
@@ -566,27 +607,25 @@ if(RTOS_CHIBIOS_CHECK)
             message(STATUS "RTOS is: ChibiOS (source from: ${CHIBIOS_SOURCE})")
 
             # check if we already have the sources, no need to copy again
-            if(NOT EXISTS "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/ChibiOS_Source")
                 file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
             else()
                 message(STATUS "Using local cache of ChibiOS source from ${CHIBIOS_SOURCE}")
             endif()
-            
+
             set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
         else()
             message(FATAL_ERROR "Couldn't find ChibiOS source at ${CHIBIOS_SOURCE}/")
         endif()
 
         # add ChibiOS as external project
-        ExternalProject_Add( 
+        ExternalProject_Add(
             ChibiOS
             PREFIX ChibiOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
 
-            # install command has to perform TWO extracts
-            # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
-            INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/ COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/wolfssl-3.12.2-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-            
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+
             # Disable all other steps
             CONFIGURE_COMMAND ""
             BUILD_COMMAND ""
@@ -594,6 +633,112 @@ if(RTOS_CHIBIOS_CHECK)
 
         # get source dir for ChibiOS CMake project
         ExternalProject_Get_Property(ChibiOS SOURCE_DIR)
+
+    endif()
+
+    # if mbed TLS is enabled add it to the build
+    if(NF_SECURITY_MBEDTLS)
+
+        # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
+        set(NO_MBEDTLS_SOURCE TRUE)
+
+        if(MBEDTLS_SOURCE)
+            if(NOT "${MBEDTLS_SOURCE}" STREQUAL "")
+                set(NO_MBEDTLS_SOURCE FALSE)
+            endif()
+        endif()
+
+        # set options for mbed TLS
+        option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
+
+        if(NO_MBEDTLS_SOURCE)
+            # no mbed TLS source specified, download it from it's repo
+
+            # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+            include(Hack_SetGitSearchPath)
+
+            # check for Git (needed here for advanced warning to user if it's not installed)
+            find_package(Git)
+
+            #  check if Git was found, if not report to user and abort
+            if(NOT GIT_EXECUTABLE)
+                message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+            endif()
+
+            # set tag for currently supported version
+            set(MBEDTLS_GIT_TAG "mbedtls-2.11.0")
+
+            # need to setup a separate CMake project to download the code from the GitHub repository
+            # otherwise it won't be available before the actual build step
+            configure_file("CMake/mbedTLS.CMakeLists.cmake.in"
+                        "${CMAKE_BINARY_DIR}/mbedTLS_Download/CMakeLists.txt")
+
+            # setup CMake project for mbedTLS download
+            execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                            RESULT_VARIABLE result
+                            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedTLS_Download")
+
+            # run build on mbedTLS download CMake project to perform the download
+            execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                            RESULT_VARIABLE result
+                            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedTLS_Download")
+
+            # add mbedTLS as external project
+            ExternalProject_Add(
+                mbedTLS
+                PREFIX mbedTLS
+                SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source
+                GIT_REPOSITORY  https://github.com/nanoframework/mbedtls
+                GIT_TAG ${MBEDTLS_GIT_TAG}  # target specified branch
+                GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+                TIMEOUT 10
+                LOG_DOWNLOAD 1
+
+                # Disable all other steps
+                CONFIGURE_COMMAND ""
+                BUILD_COMMAND ""
+                INSTALL_COMMAND ""
+            )
+
+        else()
+            # mbedTLS source was specified
+
+            # sanity check is source path exists
+            if(EXISTS "${MBEDTLS_SOURCE}/")
+
+                # check if we already have the sources, no need to copy again
+                if(NOT EXISTS "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+                    message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")
+                    file(COPY "${MBEDTLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+                else()
+                    message(STATUS "Using local cache of mbedTLS source from ${MBEDTLS_SOURCE}")
+                endif()
+
+                set(MBEDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source/include)
+            else()
+                message(FATAL_ERROR "Couldn't find mbedTLS source at ${MBEDTLS_SOURCE}/")
+            endif()
+
+            # add mbedTLS as external project
+            ExternalProject_Add(
+                mbedTLS
+                PREFIX mbedTLS
+                SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source
+
+                # Disable all other steps
+                CONFIGURE_COMMAND ""
+                BUILD_COMMAND ""
+                INSTALL_COMMAND ""
+            )
+
+        endif()
+
+        # get source dir for mbedTLS CMake project
+        ExternalProject_Get_Property(mbedTLS SOURCE_DIR)
+
+        set(mbedTLS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include")
+        set(mbedTLS_LIBRARIES "${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        include_directories(${mbedTLS_INCLUDE_DIRS})
 
     endif()
 
@@ -650,7 +795,7 @@ if(RTOS_CHIBIOS_CHECK)
 
             else()
                 # board.c and board.h are NOT in the target folder, try to find them in the official distribution
-                
+
                 if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
                     # board found
                     # if it's on the ChibiOS official distribution board.c and board.h exist here for sure
@@ -674,11 +819,11 @@ if(RTOS_CHIBIOS_CHECK)
                 # quit now as there is no were else to search for these
                 message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${CHIBIOS_BOARD} in the available list of ChibiOS supported boards...\n\n")
             endif()
-            
+
         endif()
 
     endif()
-    
+
     # add target ChibiOS dirs
     add_subdirectory(targets/CMSIS-OS/ChibiOS/Include)
     add_subdirectory(targets/CMSIS-OS/ChibiOS/common)
@@ -723,7 +868,7 @@ elseif(RTOS_FREERTOS_CHECK)
 
         # Define base path for the class libraries
         set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/nanoCLR")
-          
+
         # set target base location
         set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC")
 

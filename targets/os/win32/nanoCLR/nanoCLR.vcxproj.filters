@@ -39,9 +39,6 @@
     <ClInclude Include="platform_selector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\nanoHAL_Time.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\targetPAL_time.h">
       <Filter>Header Files</Filter>
     </ClInclude>

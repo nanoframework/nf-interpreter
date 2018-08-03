@@ -61,6 +61,12 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly);
 uint64_t  HAL_Time_CurrentTime();
 
 /// <summary>
+/// Set UTC time of the system. This will be effective immediately.
+/// </summary>
+/// <param name="utcTime">In 100ns since 1/1/1601:00:00:00.000</param>
+void      HAL_Time_SetUtcTime(uint64_t utcTime);
+
+/// <summary>
 /// Retrieves time since device was booted.
 /// </summary>
 /// <returns>Time in 100ns.</returns>

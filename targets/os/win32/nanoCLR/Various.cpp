@@ -66,6 +66,16 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
     { 0, 0 },   // { FLASH_MEMORY_Base, FLASH_MEMORY_Size },
 };
 
+bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex)
+{
+	return true;
+}
+
+bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize)
+{
+	return true;
+}
+
 //const ConfigurationSector g_ConfigurationSector =
 //{
 //    // ConfigurationLength
@@ -425,16 +435,6 @@ void HAL_Windows_FastSleep( signed __int64 ticks )
 
 #pragma managed(push, off)
 
-void debug_printf( char const* format, ... )
-{
-    va_list arg_ptr;
-
-    va_start( arg_ptr, format );
-
-    int chars = hal_vprintf( format, arg_ptr );
-
-    va_end( arg_ptr );
-}
 
 int hal_printf( const char* format, ... )
 {

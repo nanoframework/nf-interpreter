@@ -9,7 +9,7 @@
 #include <nanoHAL_Types.h>
 #include <target_platform.h>
 #include <nanoPAL_BlockStorage.h>
-
+#include <nanoHAL_ConfigurationManager.h>
 
 //
 //  Reboot handlers clean up on reboot
@@ -55,6 +55,8 @@ void nanoHAL_Initialize()
 
     ::HeapLocation( heapStart, heapSize );
     memset(heapStart, 0, heapSize);
+
+    ConfigurationManager_Initialize();
 
     Events_Initialize();
 

@@ -10,6 +10,7 @@
 #include <nanoHAL_Types.h>
 #include <target_platform.h>
 #include <nanoPAL_BlockStorage.h>
+#include <nanoHAL_ConfigurationManager.h>
 
 // because nanoHAL_Initialize needs to be called in both C and C++ we need a proxy to allow it to be called in 'C'
 extern "C" {
@@ -34,6 +35,8 @@ void nanoHAL_Initialize()
 
     ::HeapLocation( heapStart, heapSize );
     memset(heapStart, 0, heapSize);
+
+    ConfigurationManager_Initialize();
 
     Events_Initialize();
 

@@ -50,6 +50,7 @@ typedef enum MemoryMap_Options
 
 }MemoryMap_Options;
 
+
 //////////////////////////////////////////
 // typedefs
 
@@ -78,6 +79,14 @@ typedef struct Monitor_OemInfo_Reply
     ReleaseInfo   m_releaseInfo;
 
 }Monitor_OemInfo_Reply;
+
+typedef struct CLR_DBG_Commands_Monitor_ReadMemory
+{
+    uint32_t    address;
+    uint32_t    length;
+    unsigned char   data[1];
+
+}CLR_DBG_Commands_Monitor_ReadMemory;
 
 typedef struct CLR_DBG_Commands_Monitor_WriteMemory
 {
@@ -140,6 +149,28 @@ typedef struct CLR_DBG_Commands_Monitor_MemoryMap
 
 }CLR_DBG_Commands_Monitor_MemoryMap;
 
+typedef struct Monitor_QueryConfiguration_Command
+{
+    uint32_t Configuration;
+    uint32_t BlockIndex;
+
+}Monitor_QueryConfiguration_Command;
+
+typedef struct Monitor_UpdateConfiguration_Command
+{
+    uint32_t Configuration;
+    uint32_t BlockIndex;
+    uint32_t Length;
+    uint8_t Data[1];
+
+}Monitor_UpdateConfiguration_Command;
+
+typedef struct Monitor_UpdateConfiguration_Reply
+{
+    uint32_t ErrorCode;
+
+}Monitor_UpdateConfiguration_Reply;
+
 //////////////////////////////////////////
 // function declarations (commands)
 
@@ -150,8 +181,11 @@ extern "C" {
 int Monitor_Ping(WP_Message* message);
 int Monitor_OemInfo(WP_Message* message);
 int Monitor_WriteMemory(WP_Message* message);
+int Monitor_ReadMemory(WP_Message* message);
 int Monitor_Reboot(WP_Message* message);
 int Monitor_EraseMemory(WP_Message* message);
+int Monitor_QueryConfiguration(WP_Message* message);
+int Monitor_UpdateConfiguration(WP_Message* message);
 int Monitor_CheckMemory(WP_Message* message);
 int Monitor_MemoryMap(WP_Message* message);
 int Monitor_FlashSectorMap(WP_Message* message);

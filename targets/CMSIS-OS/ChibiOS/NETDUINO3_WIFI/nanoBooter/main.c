@@ -56,7 +56,7 @@ int main(void) {
   // in CLR this is called in nanoHAL_Initialize()
   // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
   BlockStorage_AddDevices();
- 
+
   //  Normal main() thread
   while (true) {
     palClearPad(GPIOE, GPIOE_LED_GOPORT3);
