@@ -20,6 +20,9 @@
 // set update delay (in milliseconds)
 #define SNTP_UPDATE_DELAY       3600000
 
+// need a startup delay because we can have DHCP enabled
+#define SNTP_STARTUP_DELAY      30000
+
 // retry timeout (15 minutes)
 #define SNTP_RETRY_TIMEOUT      900000
 

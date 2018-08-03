@@ -70,6 +70,7 @@
 #include <lwip/tcpip.h>
 #include <netif/etharp.h>
 #include <lwip/netifapi.h>
+#include <apps/sntp.h>
 
 #if LWIP_DHCP
 #include <lwip/dhcp.h>
@@ -378,6 +379,13 @@ static THD_FUNCTION(lwip_thread, p) {
   /* Resumes the caller and goes to the final priority.*/
   chThdResume(&lwip_trp, MSG_OK);
   chThdSetPriority(LWIP_THREAD_PRIORITY);
+
+  // setup SNTP
+  #if SNTP_SERVER_DNS
+  sntp_setoperatingmode(SNTP_OPMODE_POLL);
+  sntp_setservername(0, "pool.ntp.org");
+  sntp_init();
+  #endif
 
   while (true) {
     eventmask_t mask = chEvtWaitAny(ALL_EVENTS);
