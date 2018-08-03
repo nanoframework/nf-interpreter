@@ -165,7 +165,7 @@ set(LWIP_SRCS
     # lwiperf.c
 
     # SNTP client
-    # sntp.c
+    sntp.c
 
     # MDNS responder
     mdns.c
