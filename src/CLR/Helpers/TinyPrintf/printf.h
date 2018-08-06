@@ -18,7 +18,7 @@ extern "C" {
 
 int tiny_sprintf (char *out, const char *format, ...);
 int tiny_snprintf(char *out, unsigned int max_len, const char *format, ...);
-int tiny_vstringfn(char *out, unsigned int max_len, const char *format, va_list va);
+int tiny_vsnprintf(char *out, unsigned int max_len, const char *format, va_list va);
 
 #ifdef __cplusplus
 }
@@ -26,5 +26,7 @@ int tiny_vstringfn(char *out, unsigned int max_len, const char *format, va_list 
 
 // the defines bellow allow using the regular calls to sprintf
 #define sprintf tiny_sprintf 
+#define snprintf tiny_snprintf
+#define vsnprintf tiny_vsnprintf
 
 #endif
