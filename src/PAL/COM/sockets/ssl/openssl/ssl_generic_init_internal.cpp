@@ -26,19 +26,19 @@ void ERR_print_errors_fp()
 }
 
 
-int hal_fprintf_ssl(const char* format, ... )
-{
-    va_list arg_ptr;
-    int     chars;
+// int hal_fprintf_ssl(const char* format, ... )
+// {
+//     va_list arg_ptr;
+//     int     chars;
 
-    va_start( arg_ptr, format );
+//     va_start( arg_ptr, format );
 
-    chars = hal_vprintf( format, arg_ptr );
+//     chars = hal_vprintf( format, arg_ptr );
 
-    va_end( arg_ptr );
+//     va_end( arg_ptr );
 
-    return chars;
-}
+//     return chars;
+// }
 
 
 

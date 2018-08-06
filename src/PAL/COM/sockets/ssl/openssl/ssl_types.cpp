@@ -123,19 +123,19 @@ void tinyclr_qsort ( void * base, size_t num, size_t size,
     return;
 }
 
-int hal_fprintf_ssl(OPENSSL_TYPE__FILE* x, const char* format, ... )
-{
-    va_list arg_ptr;
-    int     chars;
+// int hal_fprintf_ssl(OPENSSL_TYPE__FILE* x, const char* format, ... )
+// {
+//     va_list arg_ptr;
+//     int     chars;
 
-    va_start( arg_ptr, format );
+//     va_start( arg_ptr, format );
 
-    chars = hal_vprintf( format, arg_ptr );
+//     chars = hal_vprintf( format, arg_ptr );
 
-    va_end( arg_ptr );
+//     va_end( arg_ptr );
 
-    return chars;
-}
+//     return chars;
+// }
 
 INT64 s_TimeUntil1900 = 0;
 
