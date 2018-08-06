@@ -114,8 +114,8 @@ extern "C" {
     
         va_start( arg_ptr, format );
     
-        int len = sprintf(buffer, format, arg_ptr );
-   
+        int len = vsnprintf( buffer, sizeof(buffer)-1, format, arg_ptr );
+
         DebuggerPort_Write( HalSystemConfig.stdio, buffer, len, 0 ); // skip null terminator
     
         va_end( arg_ptr );
