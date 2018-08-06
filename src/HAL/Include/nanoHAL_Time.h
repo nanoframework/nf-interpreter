@@ -32,6 +32,7 @@
 
 #define NANOHAL_TIME_CONVERSION_MICRO_TO_SECONDS                1000000
 
+#define TIME_UNIX_EPOCH_TO_SECONDS         62167132800
 
 /// NOTES: Why origin is at 1/1/1601.
 /// Current civil calendar is named as Gregorian calendar after Pope Gregory XIII as he made adjustments

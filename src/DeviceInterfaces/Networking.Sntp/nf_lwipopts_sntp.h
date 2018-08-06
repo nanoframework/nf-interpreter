@@ -11,6 +11,8 @@
 #include <time.h>
 #include <nanoWeak.h>
 
+extern void SetSystemTimeFromUnixEpoch(uint32_t seconds);
+
 // SNTP servers can be IP or full address and are resolved at 
 #define SNTP_SERVER_DNS         1
 
@@ -26,8 +28,8 @@
 // retry timeout (15 minutes)
 #define SNTP_RETRY_TIMEOUT      900000
 
-// call to set the system time with seconds and milliseconds
-#define SNTP_SET_SYSTEM_TIME_US(sec, us)    
+// call to set the system time with seconds (Unix Epoch time)
+#define SNTP_SET_SYSTEM_TIME    SetSystemTimeFromUnixEpoch   
 
 // need to declare this here to keep compiler happy 
 __nfweak char* ctime (const time_t * timer);

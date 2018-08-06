@@ -102,3 +102,12 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server2___
     }
     NANOCLR_NOCLEANUP();
 }
+
+// need this declared as "C" because we are calling it from lwIP
+extern "C" 
+{
+void SetSystemTimeFromUnixEpoch(uint32_t seconds)
+{
+    HAL_Time_SetUtcTime((seconds + TIME_UNIX_EPOCH_TO_SECONDS) * NANOHAL_TIME_CONVERSION_MICRO_TO_SECONDS);
+}
+}

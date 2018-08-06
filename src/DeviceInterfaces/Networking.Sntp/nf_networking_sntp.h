@@ -12,8 +12,11 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 #include <nanoHAL_time.h>
-#include <apps/sntp.h>
 
+extern "C"
+{
+#include <apps/sntp.h>
+}
 
 struct Library_nf_networking_sntp_nanoFramework_Networking_Sntp
 {
