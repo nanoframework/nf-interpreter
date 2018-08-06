@@ -100,20 +100,6 @@ int hal_snprintf_double( char* buffer, size_t len, const char* format, int64_t& 
 
 #else
 
-int hal_snprintf_float( char* buffer, size_t len, const char* format, float f )
-{
-    NATIVE_PROFILE_PAL_CRT();
-
-    return hal_snprintf( buffer, len, format, f );
-}
-
-int hal_snprintf_double( char* buffer, size_t len, const char* format, double d )
-{
-    NATIVE_PROFILE_PAL_CRT();
-
-    return hal_snprintf( buffer, len, format, d );
-}
-
 #endif
 
 // because debug_printf needs to be called in both C and C++ we need a proxy to allow it to be called in 'C'
@@ -128,8 +114,8 @@ extern "C" {
     
         va_start( arg_ptr, format );
     
-        int len = hal_vsnprintf( buffer, sizeof(buffer)-1, format, arg_ptr );
-   
+        int len = vsnprintf( buffer, sizeof(buffer)-1, format, arg_ptr );
+
         DebuggerPort_Write( HalSystemConfig.stdio, buffer, len, 0 ); // skip null terminator
     
         va_end( arg_ptr );
@@ -138,72 +124,6 @@ extern "C" {
 #else
     __inline void debug_printf( const char *format, ... ) {}
 #endif  // !defined(BUILD_RTM)
-}
-
-int hal_printf( const char* format, ... )
-{
-    (void)format;
-
-    NATIVE_PROFILE_PAL_CRT();
-    return 0;
-}
-
-int hal_vprintf( const char* format, va_list arg )
-{
-    (void)format;
-    (void)arg;
-
-    NATIVE_PROFILE_PAL_CRT();
-    return 0;
-}
-
-int hal_fprintf( COM_HANDLE stream, const char* format, ... )
-{
-    (void)stream;
-    (void)format;
-
-    NATIVE_PROFILE_PAL_CRT();
-    return 0;
-}
-
-int hal_vfprintf( COM_HANDLE stream, const char* format, va_list arg )
-{
-    NATIVE_PROFILE_PAL_CRT();
-
-    char buffer[512];
-    int chars = 0;
-
-    chars = hal_vsnprintf( buffer, sizeof(buffer), format, arg );
-    DebuggerPort_Write( stream, buffer, chars, 0 ); // skip null terminator
-
-    return chars;
-}
-
-int hal_snprintf( char* buffer, size_t len, const char* format, ... )
-{
-    NATIVE_PROFILE_PAL_CRT();
-    
-    va_list arg_ptr;
-    int     chars;
-
-    va_start( arg_ptr, format );
-
-    chars = hal_vsnprintf( buffer, len, format, arg_ptr );
-
-    va_end( arg_ptr );
-
-    return chars;
-}
-
-
-int hal_vsnprintf( char* buffer, size_t len, const char* format, va_list arg )
-{
-    NATIVE_PROFILE_PAL_CRT();
-#undef vsnprintf
-    
-    return vsnprintf( buffer, len, format, arg );
-    
-#define vsnprintf  DoNotUse_*printf []
 }
 
 int hal_strcpy_s ( char* strDst, size_t sizeInBytes, const char* strSrc )

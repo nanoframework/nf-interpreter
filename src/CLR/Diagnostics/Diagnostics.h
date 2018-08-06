@@ -11,5 +11,8 @@
 //#include <core.h>
 
 #include <corlib_native.h>
+#if !defined(_WIN32)
+#include <printf.h>
+#endif // !defined(_WIN32)
 //#include <spot_net_native.h>
 

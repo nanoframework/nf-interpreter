@@ -70,7 +70,8 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const c
 bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    int  chars = hal_vsnprintf( szBuffer, iBuffer, format, arg );
+
+    int  chars = vsnprintf( szBuffer, iBuffer, format, arg );
     bool fRes  = (chars >= 0);
 
     if(fRes == false) chars = (int)iBuffer;
@@ -220,21 +221,38 @@ int CLR_Debug::PrintfV( const char *format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
+#if defined(_WIN32)
     char   buffer[512];
+	char*  szBuffer = buffer;
+    int16_t bufferSize = MAXSTRLEN(buffer);
+    size_t iBuffer  = bufferSize;
+#else
+    // this should be more than enough for the existing output needs
+    const int16_t c_BufferSize = 512;
 
-    char*  szBuffer =           buffer;
-    size_t iBuffer  = MAXSTRLEN(buffer);
-
-    bool fRes = CLR_SafeSprintfV( szBuffer, iBuffer, format, arg );
+    char*  buffer = (char*)platform_malloc(c_BufferSize);
+	char*  szBuffer = buffer;
+    size_t iBuffer = c_BufferSize;
+    int16_t bufferSize = c_BufferSize;
+#endif
+    
+    bool fRes = CLR_SafeSprintfV(szBuffer, iBuffer, format, arg );
     
     _ASSERTE(fRes);
 
-    iBuffer = MAXSTRLEN(buffer) - iBuffer;
+    iBuffer = bufferSize - iBuffer;
 
     Emit( buffer, (int)iBuffer );
 
-#if defined WIN32
+#if defined(_WIN32)
 	OutputDebugStringA(buffer);
+#endif
+
+#if !defined(_WIN32)
+    if(buffer != NULL)
+    {
+        platform_free(buffer);
+    }
 #endif
 
     return (int)iBuffer;
@@ -800,7 +818,7 @@ const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
 
     static char s_tmp[ 32 ];
 
-    hal_snprintf( s_tmp, MAXSTRLEN(s_tmp), "0x%08x", hrError );
+    snprintf( s_tmp, MAXSTRLEN(s_tmp), "0x%08x", hrError );
 
     return s_tmp;
 }
