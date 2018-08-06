@@ -45,44 +45,60 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::UpdateNow___ST
 HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_IsStarted___STATIC__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
+        stack.SetResult_Boolean(sntp_enabled());
+    }
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_Server1___STATIC__STRING( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
+        stack.SetResult_String(sntp_getservername(0));
+    }
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server1___STATIC__VOID__STRING( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        // get server name as string
+        char* serverName = (char*)stack.Arg0().RecoverString();  FAULT_ON_NULL(serverName);
 
+        sntp_setservername(0, serverName);
+    }
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_Server2___STATIC__STRING( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
+        stack.SetResult_String(sntp_getservername(1));
+    }
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server2___STATIC__VOID__STRING( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        // get server name as string
+        char* serverName = (char*)stack.Arg0().RecoverString();  FAULT_ON_NULL(serverName);
 
+        sntp_setservername(1, serverName);
+    }
     NANOCLR_NOCLEANUP();
 }
