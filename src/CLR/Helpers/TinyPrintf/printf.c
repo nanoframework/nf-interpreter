@@ -487,7 +487,7 @@ int tiny_snprintf(char *out, unsigned int max_len, const char *format, ...)
     return count;
 }
 
-int tiny_vstringfn(char *out, unsigned int max_len, const char *format, va_list va)
+int tiny_vsnprintf(char *out, unsigned int max_len, const char *format, va_list va)
 {
     max_output_len = (int) max_len;
     curr_output_len = 0;
