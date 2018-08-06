@@ -397,8 +397,16 @@ static THD_FUNCTION(lwip_thread, p) {
                                      &thisif, 0);
 #if LWIP_DHCP
           if (addressMode == NET_ADDRESS_DHCP)
+          {
             dhcp_start(&thisif);
+          }
+
+          // start SNTP request
+          #if SNTP_SERVER_DNS
+          sntp_init();
+          #endif
 #endif
+
         }
         else {
           tcpip_callback_with_block((tcpip_callback_fn) netif_set_link_down,
@@ -407,6 +415,10 @@ static THD_FUNCTION(lwip_thread, p) {
           if (addressMode == NET_ADDRESS_DHCP)
             dhcp_stop(&thisif);
 #endif
+          // no connection, stop SNTP
+          #if SNTP_SERVER_DNS
+          sntp_stop();
+          #endif
         }
       }
     }
