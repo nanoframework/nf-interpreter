@@ -221,8 +221,8 @@ struct Library_corlib_native_System_BitConverter
 
 struct Library_corlib_native_System_Boolean
 {
-    static const int FIELD_STATIC__FalseString = 1;
-    static const int FIELD_STATIC__TrueString = 2;
+    static const int FIELD_STATIC__FalseString = 0;
+    static const int FIELD_STATIC__TrueString = 1;
 
     static const int FIELD___value = 1;
 
@@ -331,8 +331,8 @@ struct Library_corlib_native_System_Convert
 
 struct Library_corlib_native_System_DateTime
 {
-    static const int FIELD_STATIC__MinValue = 3;
-    static const int FIELD_STATIC__MaxValue = 4;
+    static const int FIELD_STATIC__MinValue = 2;
+    static const int FIELD_STATIC__MaxValue = 3;
 
     static const int FIELD___ticks = 1;
 
@@ -453,7 +453,7 @@ struct Library_corlib_native_System_Globalization_NumberFormatInfo
 
 struct Library_corlib_native_System_Guid
 {
-    static const int FIELD_STATIC__Empty = 5;
+    static const int FIELD_STATIC__Empty = 4;
 
     static const int FIELD___a = 1;
     static const int FIELD___b = 2;
@@ -1110,10 +1110,10 @@ struct Library_corlib_native_System_UInt64
 
 struct Library_corlib_native_System_Version
 {
-    static const int FIELD___major = 1;
-    static const int FIELD___minor = 2;
-    static const int FIELD___build = 3;
-    static const int FIELD___revision = 4;
+    static const int FIELD___Major = 1;
+    static const int FIELD___Minor = 2;
+    static const int FIELD___Build = 3;
+    static const int FIELD___Revision = 4;
 
 
     //--//
