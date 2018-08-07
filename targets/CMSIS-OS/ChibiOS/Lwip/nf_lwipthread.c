@@ -383,7 +383,7 @@ static THD_FUNCTION(lwip_thread, p) {
   // setup SNTP
   #if SNTP_SERVER_DNS
   sntp_setoperatingmode(SNTP_OPMODE_POLL);
-  sntp_setservername(0, "pool.ntp.org");
+  sntp_setservername(0, SNTP_SERVER_DEFAULT_ADDRESS);
   sntp_init();
   #endif
 
