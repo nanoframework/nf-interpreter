@@ -15,7 +15,11 @@
 
 extern "C"
 {
+#ifndef PLATFORM_ESP32
 #include <apps/sntp.h>
+#else
+#include <apps/sntp/sntp.h>
+#endif
 }
 
 struct Library_nf_networking_sntp_nanoFramework_Networking_Sntp
