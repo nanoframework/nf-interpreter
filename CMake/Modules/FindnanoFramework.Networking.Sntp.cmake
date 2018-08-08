@@ -5,13 +5,9 @@
 
 
 # set include directories
-# list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
-# list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip)
 list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-# list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
 list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp")
-# list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/${BASE_PATH_FOR_THIS_MODULE}")
 
 
 # source files
