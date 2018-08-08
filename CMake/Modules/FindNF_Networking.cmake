@@ -85,21 +85,27 @@ elseif(USE_SECURITY_OPENSSL_OPTION)
     set(NF_Security_Search_Path "${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/OpenSSL")
 endif()
 
-# 2nd pass: security files if option is selected 
-foreach(SRC_FILE ${NF_Networking_Security_SRCS})
-    set(NF_Networking_SRC_FILE SRC_FILE-NOTFOUND)
-    find_file(NF_Networking_SRC_FILE ${SRC_FILE}
-        PATHS 
+if(USE_SECURITY_MBEDTLS_OPTION OR USE_SECURITY_OPENSSL_OPTION)
 
-            ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
-            ${NF_Security_Search_Path}
- 
-        CMAKE_FIND_ROOT_PATH_BOTH
-    )
-    # message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}") # debug helper
-    list(APPEND NF_Networking_SOURCES ${NF_Networking_SRC_FILE})
-endforeach()
+    # 2nd pass: security files if option is selected 
+    foreach(SRC_FILE ${NF_Networking_Security_SRCS})
+        set(NF_Networking_SRC_FILE SRC_FILE-NOTFOUND)
+        find_file(NF_Networking_SRC_FILE ${SRC_FILE}
+            PATHS 
+
+                ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
+                ${NF_Security_Search_Path}
+    
+            CMAKE_FIND_ROOT_PATH_BOTH
+        )
+        # message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}") # debug helper
+        list(APPEND NF_Networking_SOURCES ${NF_Networking_SRC_FILE})
+    endforeach()
+
+endif()
+
 
 include(FindPackageHandleStandardArgs)
+
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Networking DEFAULT_MSG NF_Networking_INCLUDE_DIRS NF_Networking_SOURCES)
