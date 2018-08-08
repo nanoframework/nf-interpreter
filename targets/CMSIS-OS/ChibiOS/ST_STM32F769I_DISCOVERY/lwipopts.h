@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2018 The nanoFramework project contributors
+// Portions Copyright (c) 2001-2004 Swedish Institute of Computer Science, All Rights Reserved
+// See LICENSE file in the project root for full license information.
+//
 /**
  * @file
  *
@@ -43,7 +48,6 @@
 #define set_errno(err)
 #include <sys/errno.h>
 #include <stdlib.h>
-
 #include <nf_lwipopts_sntp.h>
 
 /*

@@ -10,25 +10,23 @@
 
 #include <time.h>
 #include <nanoWeak.h>
+#include <target_lwip_sntp_opts.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern void SetSystemTimeFromUnixEpoch(uint32_t seconds);
+
+#ifdef __cplusplus
+}
+#endif
 
 // SNTP servers can be IP or full address and are resolved at 
 #define SNTP_SERVER_DNS         1
 
 // use two servers
 #define SNTP_MAX_SERVERS        2
-
-#define SNTP_SERVER_DEFAULT_ADDRESS "0.pool.ntp.org"
-
-// set update delay (in milliseconds)
-#define SNTP_UPDATE_DELAY       3600000
-
-// need a startup delay because we can have DHCP enabled
-#define SNTP_STARTUP_DELAY      30000
-
-// retry timeout (15 minutes)
-#define SNTP_RETRY_TIMEOUT      900000
 
 // call to set the system time with seconds (Unix Epoch time)
 #define SNTP_SET_SYSTEM_TIME    SetSystemTimeFromUnixEpoch   

@@ -41,6 +41,7 @@
 #include "esp_task.h"
 #include "esp_system.h"
 #include "sdkconfig.h"
+#include <nf_lwipopts_sntp.h>
 
 /* Enable all Espressif-only options */
 
