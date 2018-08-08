@@ -32,7 +32,6 @@ struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configu
 
 };
 
-
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
     static const int FIELD_STATIC__NetworkAddressChanged = 0;
@@ -244,14 +243,14 @@ struct Library_sys_net_native_System_Net_Sockets_SocketException
 
 struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate
 {
-    static const int FIELD__m_certificate = 1;
-    static const int FIELD__m_password = 2;
-    static const int FIELD__m_issuer = 3;
-    static const int FIELD__m_subject = 4;
-    static const int FIELD__m_effectiveDate = 5;
-    static const int FIELD__m_expirationDate = 6;
-    static const int FIELD__m_handle = 7;
-    static const int FIELD__m_sessionHandle = 8;
+    static const int FIELD___certificate = 1;
+    static const int FIELD___password = 2;
+    static const int FIELD___issuer = 3;
+    static const int FIELD___subject = 4;
+    static const int FIELD___effectiveDate = 5;
+    static const int FIELD___expirationDate = 6;
+    static const int FIELD___handle = 7;
+    static const int FIELD___sessionHandle = 8;
 
     NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_mscorlibSystemDateTime__BYREF_mscorlibSystemDateTime);
 

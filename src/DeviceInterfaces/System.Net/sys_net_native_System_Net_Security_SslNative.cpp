@@ -125,11 +125,11 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::UpdateCertificates
     FAULT_ON_NULL(hbCert);
     FAULT_ON_NULL(arrCA);
 
-    arrCert    = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_certificate ].DereferenceArray(); FAULT_ON_NULL(arrCert);
+    arrCert    = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___certificate ].DereferenceArray(); FAULT_ON_NULL(arrCert);
 
     sslCert    = arrCert->GetFirstElement();
 
-    hbPwd      = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_password ].Dereference(); FAULT_ON_NULL(hbPwd);
+    hbPwd      = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___password ].Dereference(); FAULT_ON_NULL(hbPwd);
 
     szPwd      = hbPwd->StringText();
     
@@ -141,11 +141,11 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::UpdateCertificates
     {
         hbCert = (CLR_RT_HeapBlock*)arrCA->GetElement( i ); FAULT_ON_NULL(arrCert);
 
-        arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_certificate ].DereferenceArray();
+        arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___certificate ].DereferenceArray();
 
         sslCert = arrCert->GetFirstElement();
 
-        hbPwd      = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_password ].Dereference();
+        hbPwd      = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___password ].Dereference();
         
         szPwd      = hbPwd->StringText();
         
@@ -559,17 +559,17 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
 
     if(hbCert != NULL)
     {
-        arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_certificate ].DereferenceArray(); //FAULT_ON_NULL(arrCert);
+        arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___certificate ].DereferenceArray(); //FAULT_ON_NULL(arrCert);
 
         // If arrCert == NULL then the certificate is an X509Certificate2 which uses a certificate handle
         if(arrCert == NULL)
         {
-            arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_handle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
+            arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___handle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
 
             // pass the certificate handle as the cert data parameter
             sslCert = arrCert->GetFirstElement();
 
-            arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_sessionHandle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
+            arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___sessionHandle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
 
             // pass the session handle as the ssl context parameter
             sslContext = *(int32_t*)arrCert->GetFirstElement();
@@ -583,7 +583,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
         
             sslCert = arrCert->GetFirstElement();
 
-            CLR_RT_HeapBlock *hbPwd = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_password ].Dereference();// FAULT_ON_NULL(hbPwd);
+            CLR_RT_HeapBlock *hbPwd = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___password ].Dereference();// FAULT_ON_NULL(hbPwd);
 
             szPwd = hbPwd->StringText();
         }
@@ -614,18 +614,18 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
             hbCert = (CLR_RT_HeapBlock*)arrCA->GetElement( i ); FAULT_ON_NULL(hbCert);
             hbCert = hbCert->Dereference();                     FAULT_ON_NULL(hbCert);
 
-            arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_certificate ].DereferenceArray(); //FAULT_ON_NULL(arrCert);
+            arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___certificate ].DereferenceArray(); //FAULT_ON_NULL(arrCert);
 
             // If arrCert == NULL then the certificate is an X509Certificate2 which uses a certificate handle
             if(arrCert == NULL)
             {
                 CLR_INT32 sessionCtx = 0;
 
-                arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_handle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
+                arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___handle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
 
                 sslCert = arrCert->GetFirstElement();
 
-                arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_sessionHandle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
+                arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___sessionHandle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
 
                 sessionCtx = *(int32_t*)arrCert->GetFirstElement();
 
@@ -641,7 +641,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
 
                 sslCert = arrCert->GetFirstElement();
 
-                CLR_RT_HeapBlock *hbPwd = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD__m_password ].Dereference(); FAULT_ON_NULL(hbPwd);
+                CLR_RT_HeapBlock *hbPwd = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___password ].Dereference(); FAULT_ON_NULL(hbPwd);
 
                 LPCSTR szCAPwd = hbPwd->StringText();
                 
