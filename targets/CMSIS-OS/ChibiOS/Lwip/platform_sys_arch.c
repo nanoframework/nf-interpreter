@@ -53,24 +53,14 @@
 // the workaround is to use a ChibiOS mailbox and allocate memory for the mailbox and the buffer
 err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 {
-    mailbox_t* mailbox = platform_malloc(sizeof(mailbox_t));
-    if (mailbox == NULL)
-    {
-        return ERR_MEM;
-    }
-
-    // allocate memory for message buffer
-    msg_t* messageBuffer = platform_malloc(sizeof(msg_t) * size);
-    if (messageBuffer == NULL)
+    *mbox = platform_malloc(sizeof(mailbox_t) + sizeof(msg_t) * size);
+    if (*mbox == NULL)
     {
         return ERR_MEM;
     }
 
     // init the mailbox
-    chMBObjectInit(mailbox, messageBuffer, size);
-
-    // need to return this
-    *mbox = (osMessageQId)mailbox;
+    chMBObjectInit((mailbox_t*)*mbox, (void *)(((uint8_t *)*mbox) + sizeof(mailbox_t)), size);
 
 #if SYS_STATS
       ++lwip_stats.sys.mbox.used;
@@ -90,14 +80,13 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 // Because this mailbox was created from heap (see sys_mbox_new above) need to free it here
 void sys_mbox_free(sys_mbox_t *mbox)
 {
-    mailbox_t* mailbox = (mailbox_t*)mbox;
     msg_t msgp;
 
     // check for messages waiting 
     // If there are messages still present in the
     // mailbox when the mailbox is deallocated, it is an indication of a
     // programming error in lwIP and the developer should be notified.
-    if(chMBFetchI(mailbox, &msgp) != MSG_TIMEOUT)
+    if(chMBFetchI((mailbox_t*)*mbox, &msgp) != MSG_TIMEOUT)
 	{
       #if SYS_STATS
 	    lwip_stats.sys.mbox.err++;
@@ -107,14 +96,8 @@ void sys_mbox_free(sys_mbox_t *mbox)
         __asm volatile("BKPT #0\n");	
 	}
 
-    // reset queue
-    chMBResetI(mailbox);
-    
-    // free memory from buffer...
-    platform_free(mailbox->buffer);
-
     // ...free memory from mailbox
-    platform_free(mailbox);
+    platform_free(*mbox);
 }
 
 u32_t sys_now(void) 
