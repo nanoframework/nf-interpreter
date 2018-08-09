@@ -1039,7 +1039,7 @@
  * TCP_LISTEN_BACKLOG: Enable the backlog option for tcp listen pcb.
  */
 #ifndef TCP_LISTEN_BACKLOG
-#define TCP_LISTEN_BACKLOG              0
+#define TCP_LISTEN_BACKLOG              1
 #endif
 
 /**
@@ -1473,7 +1473,7 @@
  * SO_SNDTIMEO processing.
  */
 #ifndef LWIP_SO_SNDTIMEO
-#define LWIP_SO_SNDTIMEO                0
+#define LWIP_SO_SNDTIMEO                1
 #endif
 
 /**
@@ -1481,14 +1481,14 @@
  * SO_RCVTIMEO processing.
  */
 #ifndef LWIP_SO_RCVTIMEO
-#define LWIP_SO_RCVTIMEO                0
+#define LWIP_SO_RCVTIMEO                1
 #endif
 
 /**
  * LWIP_SO_RCVBUF==1: Enable SO_RCVBUF processing.
  */
 #ifndef LWIP_SO_RCVBUF
-#define LWIP_SO_RCVBUF                  0
+#define LWIP_SO_RCVBUF                  1
 #endif
 
 /**
@@ -1502,7 +1502,7 @@
  * SO_REUSE==1: Enable SO_REUSEADDR option.
  */
 #ifndef SO_REUSE
-#define SO_REUSE                        0
+#define SO_REUSE                        1
 #endif
 
 /**
@@ -1511,7 +1511,7 @@
  * WARNING: Adds a memcpy for every packet if passing to more than one pcb!
  */
 #ifndef SO_REUSE_RXTOALL
-#define SO_REUSE_RXTOALL                0
+#define SO_REUSE_RXTOALL                1
 #endif
 
 /*
@@ -2148,6 +2148,6 @@
 
 // in order to enable the lwIP debug output the bellow has to be uncomment and 
 // the options above changed to LWIP_DBG_ON for the features that are to output debug information
-#define LWIP_DEBUG 1
+//#define LWIP_DEBUG 1
 
 #endif /* __LWIPOPT_H__ */
