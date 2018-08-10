@@ -389,7 +389,7 @@ int LWIP_SOCKETS_Driver::Shutdown( SOCK_SOCKET socket, int how )
 
 int LWIP_SOCKETS_Driver::GetAddrInfo(const char* nodename, char* servname, const SOCK_addrinfo* hints, SOCK_addrinfo** res)
 { 
-#if LWIP_DNS
+  #if LWIP_DNS
     NATIVE_PROFILE_PAL_NETWORK();
 
     SOCK_addrinfo *ai;
@@ -397,7 +397,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char* nodename, char* servname, const
     int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
     struct addrinfo *lwipAddrinfo = NULL;
 
-    if(res == NULL) return -1;
+    if(res == NULL) return SOCK_SOCKET_ERROR;
 
     *res = NULL;
 
@@ -415,12 +415,14 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char* nodename, char* servname, const
         }
         memset(ai, 0, total_size);
         sa = (SOCK_sockaddr_in*)((u8_t*)ai + sizeof(SOCK_addrinfo));
+
         /* set up sockaddr */
-#if LWIP_IPV6
+      #if LWIP_IPV6
         sa->sin_addr.S_un.S_addr = networkInterface->ip_addr.u_addr.ip4.addr;
-#else
+      #else
         sa->sin_addr.S_un.S_addr = networkInterface->ip_addr.addr;
-#endif
+      #endif
+
         sa->sin_family = AF_INET;
         sa->sin_port = 0;
         
@@ -482,17 +484,29 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char* nodename, char* servname, const
 
         // free marshalled addrinfo
         lwip_freeaddrinfo(lwipAddrinfo);
-        
+
+        return 0;
     }
     else
     {
-        err = -1;
+        // map DNS error with socket errors
+        switch(err)
+        {
+            case HOST_NOT_FOUND:
+                errno = SOCK_HOST_NOT_FOUND;
+                break;
+
+            default:
+                errno = SOCK_NO_RECOVERY;
+        }
+
     }
  
-    return err;
-#else
-    return -1;
-#endif
+    return SOCK_SOCKET_ERROR;
+
+  #else
+    return SOCK_SOCKET_ERROR;
+  #endif
 }
 
 void LWIP_SOCKETS_Driver::FreeAddrInfo( SOCK_addrinfo* ai )

@@ -147,6 +147,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getaddrinfo___ST
     CLR_INT32         ret;
     bool              fRes = true;
     CLR_INT64*        timeout;
+    uint32_t          socketError = SOCK_SOCKET_ERROR;
 
     hbTimeout.SetInteger( timeout_ms * TIME_CONVERSION__TO_MILLISECONDS );
 
@@ -160,7 +161,10 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getaddrinfo___ST
 
         if(ret == SOCK_SOCKET_ERROR)
         {
-            if(SOCK_getlasterror() == SOCK_EWOULDBLOCK)
+            // get last error from socket
+            socketError = SOCK_getlasterror();
+
+            if(socketError == SOCK_EWOULDBLOCK)
             {
                 // non-blocking - allow other threads to run while we wait for handle activity
                 NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_Socket, fRes ));
@@ -185,6 +189,11 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getaddrinfo___ST
         ThrowError( stack, SOCK_ETIMEDOUT );
     
         NANOCLR_SET_AND_LEAVE( CLR_E_PROCESS_EXCEPTION );
+    }
+    else
+    {
+        // error wasn't a timeout so use socket error
+        ret = socketError;
     }
 
     // getaddrinfo returns a winsock error code rather than SOCK_SOCKET_ERROR, so pass this on to the exception handling
