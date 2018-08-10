@@ -46,6 +46,7 @@ void Watchdog_Init()
         {
             wdgConfig.pr = prescaler[index];
             wdgConfig.rlr = ticksForTimeout;
+            break;
         }
     }  
     wdgStart(&WDGD1,&wdgConfig);   
