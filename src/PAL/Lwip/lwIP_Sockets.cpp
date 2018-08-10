@@ -34,12 +34,7 @@ extern "C"
 }
 
 
-
-#if defined(__RENESAS__)
-volatile int errno;
-#elif !( defined(_MSC_VER) && defined(_WIN32) && defined(_DLL) )
-int errno;
-#endif
+int errorCode;
 
 //--// 
 
@@ -201,7 +196,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
 		if (interfaceNumber == SOCK_SOCKET_ERROR)
 		{
 			DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
-//FIXME			debug_printf("SocketError: %d\n", errno);
+//FIXME			debug_printf("SocketError: %d\n", errorCode);
 			continue;
 		}
 
@@ -493,11 +488,11 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char* nodename, char* servname, const
         switch(err)
         {
             case HOST_NOT_FOUND:
-                errno = SOCK_HOST_NOT_FOUND;
+                errorCode = SOCK_HOST_NOT_FOUND;
                 break;
 
             default:
-                errno = SOCK_NO_RECOVERY;
+                errorCode = SOCK_NO_RECOVERY;
         }
 
     }
@@ -533,7 +528,7 @@ int LWIP_SOCKETS_Driver::GetLastError()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-    return GetNativeError(errno);
+    return GetNativeError(errorCode);
 }
 
 int LWIP_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
@@ -541,9 +536,9 @@ int LWIP_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
     NATIVE_PROFILE_PAL_NETWORK();
 
     // get last error number from socket
-    errno = lwip_socket_get_err(socket);
+    errorCode = lwip_socket_get_err(socket);
 
-    return GetNativeError(errno);
+    return GetNativeError(errorCode);
 }
 
 static int MARSHAL_SOCK_FDSET_TO_FDSET(SOCK_fd_set *sf, fd_set *f)
@@ -607,7 +602,7 @@ int LWIP_SOCKETS_Driver::Select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* wr
                 if(readfds  != NULL) readfds->fd_count = 0;
                 if(writefds != NULL) writefds->fd_count = 0;
 
-                errno = ENETDOWN;
+                errorCode = ENETDOWN;
 
                 return exceptfds->fd_count;
             }
@@ -662,10 +657,10 @@ int LWIP_SOCKETS_Driver::SetSockOpt( SOCK_SOCKET socket, int level, int optname,
             {        
                 // LINGER and DONTLINGER are not implemented in LWIP
                 case SOCK_SOCKO_LINGER:
-                    errno = SOCK_ENOPROTOOPT;
+                    errorCode = SOCK_ENOPROTOOPT;
                     return SOCK_SOCKET_ERROR;
                 case SOCK_SOCKO_DONTLINGER:
-                    errno = SOCK_ENOPROTOOPT;
+                    errorCode = SOCK_ENOPROTOOPT;
                     return SOCK_SOCKET_ERROR;
 				// ignore this item to enable http to work
 				case SOCK_SOCKO_REUSEADDRESS:
@@ -717,10 +712,10 @@ int LWIP_SOCKETS_Driver::GetSockOpt( SOCK_SOCKET socket, int level, int optname,
             {        
                 // LINGER and DONTLINGER are not implemented in LWIP
                 case SOCK_SOCKO_LINGER:
-                    errno = SOCK_ENOPROTOOPT;
+                    errorCode = SOCK_ENOPROTOOPT;
                     return SOCK_SOCKET_ERROR;
                 case SOCK_SOCKO_DONTLINGER:
-                    errno = SOCK_ENOPROTOOPT;
+                    errorCode = SOCK_ENOPROTOOPT;
                     return SOCK_SOCKET_ERROR;
                 default:
                     break;
