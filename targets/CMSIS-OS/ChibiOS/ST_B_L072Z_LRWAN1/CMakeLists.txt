@@ -179,9 +179,8 @@ else()
 endif()
 
 # set linker options
-# using FPU requires enabling printf with FP support for newlib nano, but just for nanoCLR target, don't need to overload nanoBooter with that
-nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf FALSE)
-nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf TRUE)
+nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # add other linker flags
 ###################################################
