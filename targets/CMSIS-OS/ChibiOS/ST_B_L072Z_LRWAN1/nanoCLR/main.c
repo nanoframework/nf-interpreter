@@ -37,12 +37,15 @@ int main(void) {
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
   // create the CLR Startup thread 
-  osThreadCreate(osThread(CLRStartupThread), NULL); 
+  osThreadCreate(osThread(CLRStartupThread), NULL);
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
 
-  while (true) { 
-    osDelay(100);
+  while (true) {
+    palClearPad(GPIOB, GPIOB_LED3);
+    osDelay(250);
+    palSetPad(GPIOB, GPIOB_LED3);
+    osDelay(250);
   }
 }

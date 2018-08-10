@@ -21,8 +21,14 @@ MEMORY
     // flash start address and the declaration of the BlockStorage
     ///////////////////////////////////////////////////////////////////
     */
+    /* 
+    ///////////////////////////////////////////////////////////////////
+    // the flash size bellow IS WRONG 
+    // it's 11k to allow build without error of flash region overflow
+    ///////////////////////////////////////////////////////////////////
+    */
 
-    flash       : org = 0x08000000, len = 10496     /* space reserved for nanoBooter */
+    flash       : org = 0x08000000, len = 11k       /* space reserved for nanoBooter */
     config      : org = 0x00000000, len = 0         /* space reserved for configuration block */
     deployment  : org = 0x00000000, len = 0         /* space reserved for application deployment */
     ramvt       : org = 0x00000000, len = 0         /* initial RAM address is reserved for a copy of the vector table */
