@@ -57,10 +57,8 @@ void Watchdog_Init()
  * the watchdog will trigger and MCU will reset
  */ 
 void Watchdog_Reset()
-{    
-    syssts_t sts = chSysGetStatusAndLockX();
+{        
     wdgReset(&WDGD1);
-    chSysRestoreStatusX(sts);
 }
 
 #endif
