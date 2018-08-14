@@ -11,27 +11,6 @@ void nf_GetFormatString(char* formatStr, char formatCh, int precision, bool isLo
     sprintf(formatStr, "%%%s%d%s%s", isFloat ? "." : isSigned ? "-0" : "0", precision, isLong ? "l" : isFloat ? "f" : "", formatCh == 'X' ? "X" :  isFloat ? "" : isSigned ? "d" : "u");
 }
 
-void nf_RemoveTrailingZeros(char* buffer, int32_t length)
-{
-    for(; length > 0; length--)
-    {
-        if( buffer[length] == '0' ||
-            buffer[length] < '0'  || 
-            buffer[length] > '9')
-        {
-            // NULL every position that is not a digit or '0' (zero)
-            // this is OK because we are moving backwards and want to clear everything except the number representation
-            buffer[length] = 0;
-        }
-        else if(buffer[length] >= '0' || buffer[length] <= '9')
-        {
-            // stop on first char NOT a digit
-            // this is OK because we are moving backwards and want to stop on the first occurrence that is a digit other than 0
-            break;
-        }
-    }
-}
-
 HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJECT__CHAR__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -143,7 +122,6 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
                 nf_GetFormatString(formatStr, formatCh, precision, false, true, false);
 
                 sprintf(result, formatStr, value->NumericByRef().r4);
-                nf_RemoveTrailingZeros(result, ARRAYSIZE(result));
               #else
                 CLR_INT32 f = value->NumericByRef().r4;
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -175,7 +153,6 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
                 nf_GetFormatString(formatStr, formatCh, precision, false, true, false);
                 
                 sprintf(result, formatStr, (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8);
-                nf_RemoveTrailingZeros(result, ARRAYSIZE(result));
               #else
                 CLR_INT64 d = (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8;
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
