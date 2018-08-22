@@ -36,6 +36,9 @@ int main(void) {
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
 
+  // start watchdog
+  Watchdog_Init();
+
   //  Initializes a serial-over-USB CDC driver.
   sduObjectInit(&SDU1);
   sduStart(&SDU1, &serusbcfg);

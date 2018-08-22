@@ -5,16 +5,16 @@
 
 #include <ch.h>
 #include <hal.h>
-#include <hal_wdg_lld.h>
 #include <targetHAL_Watchdog.h>
-#include <swo.h>
+#include <target_common.h>
 
 #if (HAL_USE_WDG == TRUE) 
+
 //Watchdog configuration structure required by ChibiOS
 #if (STM32_IWDG_IS_WINDOWED == TRUE)
-    static WDGConfig wdgConfig = {STM32_IWDG_PR_256,STM32_IWDG_RL(0xFFF), 0x00}; //default is max
+    static WDGConfig wdgConfig = {STM32_IWDG_PR_256, STM32_IWDG_RL(0xFFF), 0x00}; //default is max
 #else
-    static WDGConfig wdgConfig = {STM32_IWDG_PR_256,STM32_IWDG_RL(0xFFF)}; //default is max
+    static WDGConfig wdgConfig = {STM32_IWDG_PR_256, STM32_IWDG_RL(0xFFF)}; //default is max
 #endif
 
 /**
@@ -44,8 +44,8 @@ void Watchdog_Init()
         
         if(ticksForTimeout <= 0xFFF /*The max reload register value*/) 
         {
-            wdgConfig.pr = prescaler[index];
-            wdgConfig.rlr = ticksForTimeout;
+            wdgConfig.pr =   STM32_IWDG_PR_64; //   prescaler[index];
+            wdgConfig.rlr = STM32_IWDG_RL(1000);  //ticksForTimeout;
             break;
         }
     }  

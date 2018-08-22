@@ -55,6 +55,9 @@ int main(void) {
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
 
+  // start watchdog
+  Watchdog_Init();
+
   // Prepares the serial driver 2 using UART2
   sdStart(&SD2, NULL);
 

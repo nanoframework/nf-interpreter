@@ -41,4 +41,7 @@
 // set when filesystem is enabled
 #define HAL_USE_SDC @HAL_USE_SDC_OPTION@
 
+// set when watchod is enabled
+#define HAL_USE_WDG @HAL_USE_WDG_OPTION@
+
 #endif /* _TARGET_CHIBIOS_NANOCLR_H_ */
