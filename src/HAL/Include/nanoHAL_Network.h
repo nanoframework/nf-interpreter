@@ -45,7 +45,7 @@ static const unsigned char c_MARKER_CONFIGURATION_WIRELESS_AP_V1[] = "AP1";
 
 /////////////////////////////////////////////////
 // Description: network interface type 
-typedef enum NetworkInterfaceType
+typedef enum __nfpack NetworkInterfaceType
 {
     NetworkInterfaceType_Unknown        = 1,
     NetworkInterfaceType_Ethernet       = 6,
@@ -59,7 +59,7 @@ typedef enum NetworkInterfaceType
 
 /////////////////////////////////////////////////
 // Description: Startup network IP assigning modes
-typedef enum AddressMode
+typedef enum __nfpack AddressMode
 {
     AddressMode_DHCP       = 0x01,
     AddressMode_Static     = 0x02,
@@ -77,7 +77,7 @@ typedef enum AddressMode
 
 ///////////////////////////////////////////////////////
 // Description: authentication used in wireless network
-typedef enum AuthenticationType
+typedef enum __nfpack AuthenticationType
 {
     AuthenticationType_None     = 0x00,
     AuthenticationType_EAP      = 0x01,
@@ -97,7 +97,7 @@ typedef enum AuthenticationType
 
 ///////////////////////////////////////////////////////
 // Description: encryption used in wireless network
-typedef enum EncryptionType
+typedef enum __nfpack EncryptionType
 {
     EncryptionType_None         = 0x00,
     EncryptionType_WEP          = 0x01,
@@ -115,7 +115,7 @@ typedef enum EncryptionType
 
 ////////////////////////////////////////////////////////////
 // Description: type of radio that the wireless network uses
-typedef enum RadioType
+typedef enum __nfpack RadioType
 {
     RadioType_NotSpecified  = 0x00,
     RadioType_802_11a       = 0x01,
