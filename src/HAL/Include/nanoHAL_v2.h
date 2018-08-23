@@ -211,4 +211,7 @@ bool SystemState_QueryNoLock( SYSTEM_STATE_type state );
 
 #define HAL_COMPLETION_IDLE_VALUE    0x0000FFFFFFFFFFFFull
 
+// Watchdog driver
+#include <nanoHAL_Watchdog.h>
+
 #endif // _NANOHAL_V2_H_

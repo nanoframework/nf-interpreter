@@ -15,6 +15,7 @@
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
+#include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
 // need to declare the Receiver thread here
@@ -37,6 +38,9 @@ int main(void) {
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
+
+  // start watchdog
+  Watchdog_Init();
 
   //  Initializes a serial-over-USB CDC driver.
   sduObjectInit(&SDU1);

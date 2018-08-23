@@ -169,8 +169,7 @@ bool CLR_Messaging::App_ProcessHeader( void* state, WP_Message*  msg )
     NATIVE_PROFILE_CLR_MESSAGING();
     CLR_Messaging* pThis = (CLR_Messaging*)state;
 
-    // UNDONE: FIXME
-    //::Watchdog_ResetCounter();
+    Watchdog_Reset();
 
     if( !pThis->ProcessHeader( msg ) )
     {
@@ -199,8 +198,7 @@ bool CLR_Messaging::App_ProcessPayload( void* state, WP_Message* msg )
     NATIVE_PROFILE_CLR_MESSAGING();
     CLR_Messaging* pThis = (CLR_Messaging*)state;
 
-    // UNDONE: FIXME
-    //::Watchdog_ResetCounter();
+    Watchdog_Reset();
 
     if(pThis->ProcessPayload( msg ) == false)
     {

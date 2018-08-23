@@ -37,6 +37,9 @@ int main(void) {
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
 
+  // start watchdog
+  Watchdog_Init();
+
   // config and init external memory
   // this has to be called after osKernelInitialize, otherwise an hard fault will occur
   Target_ExternalMemoryInit();

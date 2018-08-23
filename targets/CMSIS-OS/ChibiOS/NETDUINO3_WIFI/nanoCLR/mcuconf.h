@@ -347,7 +347,7 @@
 /*
  * WDG driver system settings.
  */
-#define STM32_WDG_USE_IWDG                  FALSE
+#define STM32_WDG_USE_IWDG                  TRUE
 
 // header for nanoFramework overlay drivers
 #include "mcuconf_nf.h"
