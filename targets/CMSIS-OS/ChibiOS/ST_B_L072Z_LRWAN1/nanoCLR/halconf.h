@@ -183,9 +183,10 @@
 /**
  * @brief   Enables the WDG subsystem.
  */
-#if !defined(HAL_USE_WDG) || defined(__DOXYGEN__)
-#define HAL_USE_WDG                         FALSE
-#endif
+// this option is set at target_platform.h (from config file)
+// #if !defined(HAL_USE_WDG) || defined(__DOXYGEN__)
+// #define HAL_USE_WDG                         FALSE
+// #endif
 
 /*===========================================================================*/
 /* PAL driver related settings.                                              */

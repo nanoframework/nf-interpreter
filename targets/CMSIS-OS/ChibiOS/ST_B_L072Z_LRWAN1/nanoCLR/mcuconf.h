@@ -32,7 +32,7 @@
 #define STM32_PLS                           STM32_PLS_LEV0
 #define STM32_HSI16_ENABLED                 TRUE
 #define STM32_HSI16_DIVIDER_ENABLED         FALSE
-#define STM32_LSI_ENABLED                   FALSE
+#define STM32_LSI_ENABLED                   TRUE
 #define STM32_HSE_ENABLED                   FALSE
 #define STM32_LSE_ENABLED                   TRUE
 #define STM32_ADC_CLOCK_ENABLED             TRUE
@@ -205,7 +205,7 @@
 /*
  * WDG driver system settings.
  */
-#define STM32_WDG_USE_IWDG                  FALSE
+#define STM32_WDG_USE_IWDG                  TRUE
 
 // header for nanoFramework overlay drivers
 #include "mcuconf_nf.h"
