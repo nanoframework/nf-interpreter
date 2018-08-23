@@ -8,11 +8,21 @@
 #include <targetHAL_Watchdog.h>
 #include <target_common.h>
 
-#if (HAL_USE_WDG == TRUE) 
+// LSI clock value (series dependent)
+#if defined(STM32L0xx_MCUCONF)
+#define LSI_CLK_TYPICAL   38000
+#elif defined(STM32F0xx_MCUCONF)
+#define LSI_CLK_TYPICAL   40000
+#elif defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF) || defined(STM32H7xx_MCUCONF)
+#define LSI_CLK_TYPICAL   32000
+#else
+#error "The LSI value for this STM32 series hasn't been defined."
+#endif
+
 
 //Watchdog configuration structure required by ChibiOS
 #if (STM32_IWDG_IS_WINDOWED == TRUE)
-    static WDGConfig wdgConfig = {STM32_IWDG_PR_256, STM32_IWDG_RL(0xFFF), 0x00}; //default is max
+    static WDGConfig wdgConfig = {STM32_IWDG_PR_256, STM32_IWDG_RL(0xFFF), 0x0FFF}; //default is max
 #else
     static WDGConfig wdgConfig = {STM32_IWDG_PR_256, STM32_IWDG_RL(0xFFF)}; //default is max
 #endif
@@ -32,24 +42,38 @@ void Watchdog_Init()
         and not exact
     */        
     uint32_t ticksForTimeout=0;
+
     uint16_t prescaler[] = {STM32_IWDG_PR_4,STM32_IWDG_PR_8,STM32_IWDG_PR_16,
                             STM32_IWDG_PR_32,STM32_IWDG_PR_64,STM32_IWDG_PR_128,
                             STM32_IWDG_PR_256};    
+
     uint8_t length = (sizeof(prescaler)/sizeof(prescaler[0]));
-    uint16_t dividor= 4;
+
+    uint16_t divisor= 4;
+
     for(uint8_t index=0; index < length;index++)
     {
-        dividor = 4 << prescaler[index];        
-        ticksForTimeout = (IWATCHDOG_CLK_TYPICAL / dividor) * (IWATCHDOG_TIMEOUT_MILLIS/1000) - 1;
+        divisor = 4 << prescaler[index];        
+        ticksForTimeout = (LSI_CLK_TYPICAL / divisor) * (IWATCHDOG_TIMEOUT_MILLIS/1000) - 1;
         
-        if(ticksForTimeout <= 0xFFF /*The max reload register value*/) 
+        if(ticksForTimeout <= 0xFFF) 
         {
-            wdgConfig.pr =   STM32_IWDG_PR_64; //   prescaler[index];
-            wdgConfig.rlr = STM32_IWDG_RL(1000);  //ticksForTimeout;
+            // the max reload register value
+
+            wdgConfig.pr = prescaler[index];
+            wdgConfig.rlr = ticksForTimeout;
             break;
         }
-    }  
-    wdgStart(&WDGD1,&wdgConfig);   
+    }
+
+    wdgStart(&WDGD1,&wdgConfig);
+
+  #if !defined(BUILD_RTM)
+    // these are required to stop the watchdog peripheral when stopping the core
+    // useful for debugging without the watchdog triggering
+    DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_IWDG_STOP;
+    DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_WWDG_STOP;
+  #endif
 }
 
 /**
@@ -60,5 +84,3 @@ void Watchdog_Reset()
 {        
     wdgReset(&WDGD1);
 }
-
-#endif
