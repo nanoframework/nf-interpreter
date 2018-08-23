@@ -250,7 +250,7 @@ endif()
 
 #################################################################
 # true random number generation option supported by hardware
-option(USE_RNG "option to enable use of true random generator hardware block")
+option(USE_RNG "option to enable use of true random generator hardware block" ON)
 
 if(USE_RNG)
     message(STATUS "Random Number Generation by target MCU is activated")
