@@ -22,10 +22,10 @@ const BlockRange BlockRange1[] =
     // if you really need to debug both images you have to update the 
     // flash start address linker file 
     { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0    , 63   },        // 0x08000000 nanoBooter          
-    { BlockRange_BLOCKTYPE_CODE      ,   64   , 1314 },        // 0x08002000 nanoCLR
+    { BlockRange_BLOCKTYPE_CODE      ,   64   , 1317 },        // 0x08002000 nanoCLR
     //////////////////////////////////////////////////////////////////////////////////////
 
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1315 , 1535 }         // 0x08029180 deployment
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1318 , 1535 }         // 0x08029300 deployment
 };
 
 const BlockRegionInfo BlockRegions[] = 
