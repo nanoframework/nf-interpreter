@@ -105,6 +105,11 @@ static void uart_event_task(void *pvParameters)
         // Waiting for UART event.
         if(xQueueReceive(Uart_Event_Queue[uart_num], (void*)&event, (portTickType)portMAX_DELAY)) {
             switch(event.type) {
+                // Data received
+                case UART_DATA:
+                    // post a managed event with the port index and the chars event code
+					PostManagedEvent(EVENT_SERIAL, 0, uart_num, SerialData_Chars);
+                    break;
 				// Pattern detection used for the WatchChar
                 case UART_PATTERN_DET:
 					// post a managed event with the port index and the watch char event code
@@ -403,8 +408,19 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // Get Uart number for serial device
         uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
 
-        // Wait for 1 sec for data to be sent
-        esp_err_t esp_err = uart_wait_tx_done( uart_num,  (TickType_t) 1000 / portTICK_PERIOD_MS);
+        // get value for writetimeout
+        // the way to access this it's somewhat convoluted but it is what it is
+        // get pointer to the field
+        CLR_RT_HeapBlock* timeout = &pThis[ Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___writeTimeout ];
+
+        // now get a pointer to the actual value
+        int64_t* timeoutTicks = Library_corlib_native_System_TimeSpan::GetValuePtr( *timeout );
+
+        // now get the value in ticks and convert it to milliseconds
+        int64_t timeoutMillisecondsValue = *timeoutTicks / TIME_CONVERSION__TICKUNITS;
+
+        // Wait for max. writetimeout timespan for data to be sent
+        esp_err_t esp_err = uart_wait_tx_done( uart_num,  (TickType_t) timeoutMillisecondsValue / portTICK_PERIOD_MS);
         if (esp_err == ESP_ERR_TIMEOUT)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
@@ -439,7 +455,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         CLR_RT_HeapBlock* timeout;
         int64_t*  timeoutTicks;
-        int64_t  timeoutMilisecondsValue;
+        int64_t  timeoutMillisecondsValue;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -499,9 +515,9 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         timeoutTicks = Library_corlib_native_System_TimeSpan::GetValuePtr( *timeout );
 
         // now get the value in ticks and convert it to miliseconds
-        timeoutMilisecondsValue = *timeoutTicks / TIME_CONVERSION__TICKUNITS;
+        timeoutMillisecondsValue = *timeoutTicks / TIME_CONVERSION__TICKUNITS;
 
-        bytesRead = uart_read_bytes(uart_num, data, toRead, timeoutMilisecondsValue / portTICK_RATE_MS);
+        bytesRead = uart_read_bytes(uart_num, data, toRead, timeoutMillisecondsValue / portTICK_RATE_MS);
         if ( bytesRead < 0 )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
