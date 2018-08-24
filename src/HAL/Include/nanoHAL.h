@@ -1781,22 +1781,22 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 //#include <CPU_GPIO_decl.h>
 //
 
-//// Watchdog driver
-//#include <CPU_WATCHDOG_decl.h>
 
-/// <summary>
-/// Resets the watchdog timer. This method is called periodically by the system to ensure that the watchdog event does not occur, unless the 
-/// system is in a stalled state.
-/// </summary>
-void    Watchdog_ResetCounter( );
 
-/// <summary>
-/// Gets or sets the watchdog enable state.
-/// </summary>
-/// <param name="enabled">Sets the watchdog enabled state when fSet is true; otherwise this parameter is ignored</param>
-/// <param name="fSet">Determines if this call is getting or setting the enabled state</param>
-/// <returns>Returns the current enabled state of the watchdog</returns>
-bool              Watchdog_GetSetEnabled ( bool enabled, bool fSet );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //
 //// SPI driver

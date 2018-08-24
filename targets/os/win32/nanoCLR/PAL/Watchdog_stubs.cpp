@@ -7,22 +7,6 @@
 
 //--//
 
-bool Watchdog_GetSetEnabled( bool enabled, bool fSet )
-{
-    return FALSE;
-}
+void Watchdog_Init(){}
 
-unsigned int Watchdog_GetSetTimeout( signed int timeout_ms , bool fSet )
-{
-    return 0;
-}
-
-//Watchdog_Behavior Watchdog_GetSetBehavior( Watchdog_Behavior behavior, bool fSet )
-//{
-//    return Watchdog_Behavior__None;
-//}
-
-bool Watchdog_LastOccurence( signed __int64& time, signed __int64& timeout, unsigned int& assembly, unsigned int& method, bool fSet )
-{
-    return FALSE;
-}
+void Watchdog_Reset(){}

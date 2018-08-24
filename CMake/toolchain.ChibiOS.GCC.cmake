@@ -95,7 +95,7 @@ function(NF_PRINT_SIZE_OF_TARGETS TARGET)
     else()
       set(FILENAME "${TARGET}")
     endif()
-    add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_SIZE} ${FILENAME})
+    add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_SIZE} -A -x ${FILENAME})
 endfunction()
 
 
@@ -103,8 +103,8 @@ function(NF_SET_OPTIMIZATION_OPTIONS TARGET)
 
     target_compile_options(${TARGET} PRIVATE
         $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-        $<$<CONFIG:Release>:-O3 -flto -fno-strict-aliasing>
-        $<$<CONFIG:MinSizeRel>:-Os -flto -fno-strict-aliasing>
+        $<$<CONFIG:Release>:-O3 -flto -fuse-linker-plugin -fno-fat-lto-objects>
+        $<$<CONFIG:MinSizeRel>:-Os -flto -fuse-linker-plugin -fno-fat-lto-objects>
         $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
     )
 
@@ -135,7 +135,7 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
 
     # set compiler definition for RTM build option
     if(NF_BUILD_RTM)
-        target_compile_definitions(${TARGET} PUBLIC BUILD_RTM)
+        target_compile_definitions(${TARGET} PUBLIC -DBUILD_RTM)
     endif()
 
     # set compiler definition for using Application Domains feature

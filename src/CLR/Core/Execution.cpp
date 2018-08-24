@@ -265,9 +265,6 @@ HRESULT CLR_RT_ExecutionEngine::StartHardware()
 void CLR_RT_ExecutionEngine::Reboot( bool fHard )
 {
     NATIVE_PROFILE_CLR_CORE();
-    
-    // UNDONE: FIXME
-    // ::Watchdog_GetSetEnabled( false, true );
 
     if(fHard)
     {
@@ -1189,8 +1186,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
         }
 
-        // UNDONE: FIXME
-        // ::Watchdog_ResetCounter();
+        Watchdog_Reset();
 
         {
             // Runs the tread until expiration of its quantum or until thread is blocked.
@@ -1214,8 +1210,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             }
         }
 
-        // UNDONE: FIXME
-        // ::Watchdog_ResetCounter();
+        Watchdog_Reset();
 
         PutInProperList( th );
 
@@ -2316,8 +2311,7 @@ void CLR_RT_ExecutionEngine::DeleteLockRequests( CLR_RT_Thread* thTarget, CLR_RT
 void CLR_RT_ExecutionEngine::ProcessHardware()
 {
     NATIVE_PROFILE_CLR_CORE();
-    // UNDONE: FIXME
-    // ::Watchdog_ResetCounter();
+    Watchdog_Reset();
 
     g_CLR_HW_Hardware.ProcessActivity();
 }
@@ -3534,9 +3528,14 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
 
     // UNDONE: FIXME
     // ::Watchdog_GetSetEnabled( bool, bool );
+    // TODO check if the watchdog needs to be feed here... don't think so
+    Watchdog_Reset();
+
     res = ::Events_WaitForEvents( powerLevel, events, timeout );
     // UNDONE: FIXME
     // ::Watchdog_GetSetEnabled( bool, bool );
+    // TODO check if the watchdog needs to be feed here... don't think so
+    Watchdog_Reset();
 
 
 #if defined(NANOCLR_TRACE_SYSTEMEVENTWAIT)

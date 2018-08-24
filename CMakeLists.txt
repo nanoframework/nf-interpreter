@@ -250,7 +250,7 @@ endif()
 
 #################################################################
 # true random number generation option supported by hardware
-option(USE_RNG "option to enable use of true random generator hardware block")
+option(USE_RNG "option to enable use of true random generator hardware block" ON)
 
 if(USE_RNG)
     message(STATUS "Random Number Generation by target MCU is activated")
@@ -501,6 +501,17 @@ endif()
 
 #################################################################
 
+#################################################################
+# CPU watchdog (default is ON so watchdog is included)
+option(NF_FEATURE_WATCHDOG "option to use hardware watchdog" ON)
+
+if(NF_FEATURE_WATCHDOG)
+    set(HAL_USE_WDG_OPTION TRUE CACHE INTERNAL "NF feature watchdog")
+else()    
+    set(HAL_USE_WDG_OPTION FALSE CACHE INTERNAL "NF feature watchdog")
+endif()
+
+#################################################################
 
 #######################
 # ChibiOS
@@ -865,6 +876,13 @@ elseif(RTOS_FREERTOS_CHECK)
 
     if("${TARGET_SERIES}" STREQUAL "ESP32")
         message(STATUS "Platform ESP32")
+
+        # check watchdog feature
+        # EPS32 build has watchdog enabled by default, so setting it to OFF doens't make sense 
+        # becuase the build system can't honour that preference
+        if(NOT NF_FEATURE_WATCHDOG)
+        message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
+        endif()
 
         # Define base path for the class libraries
         set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/nanoCLR")

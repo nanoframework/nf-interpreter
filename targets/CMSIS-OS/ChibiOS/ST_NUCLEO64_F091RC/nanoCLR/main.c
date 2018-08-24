@@ -13,6 +13,7 @@
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
+#include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -54,6 +55,9 @@ int main(void) {
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
+
+  // start watchdog
+  Watchdog_Init();
 
   // Prepares the serial driver 2 using UART2
   sdStart(&SD2, NULL);
