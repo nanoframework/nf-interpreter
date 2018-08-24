@@ -78,6 +78,7 @@ enum SerialData
 static const char* TAG = "SerialDevice";
 
 static char Esp_Serial_Initialised_Flag[UART_NUM_MAX] = {0,0,0};
+static QueueHandle_t Uart_Event_Queue[UART_NUM_MAX];
 
 void Esp32_Serial_UnitializeAll()
 {
@@ -85,23 +86,56 @@ void Esp32_Serial_UnitializeAll()
     {
         if (Esp_Serial_Initialised_Flag[uart_num])
         {
-            // Delete uart driver 
+            // Delete uart driver and send the exit signal to the UART event handling queue
             uart_driver_delete((uart_port_t)uart_num);
+			xQueueSend(Uart_Event_Queue[uart_num], (void*)UART_EVENT_MAX, (portTickType)0);
             Esp_Serial_Initialised_Flag[uart_num] = 0;
         }
     }
+}
+
+static void uart_event_task(void *pvParameters)
+{
+    int uart_num = (int)pvParameters;
+    uart_event_t event;
+    bool run = true;
+	
+	while(run)
+	{
+        // Waiting for UART event.
+        if(xQueueReceive(Uart_Event_Queue[uart_num], (void*)&event, (portTickType)portMAX_DELAY)) {
+            switch(event.type) {
+				// Pattern detection used for the WatchChar
+                case UART_PATTERN_DET:
+					// post a managed event with the port index and the watch char event code
+					PostManagedEvent(EVENT_SERIAL, 0, uart_num, SerialData_WatchChar);
+                    break;
+				// signal to end the task (UART_EVENT_MAX used)
+				case UART_EVENT_MAX:
+					run = false;
+					break;
+                // Others
+                default:
+                    break;
+            }
+        }
+    }
+	vQueueDelete(Uart_Event_Queue[uart_num]);
+    vTaskDelete(NULL);
 }
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
-         // get a pointer to the managed object instance and check that it's not NULL
+		// get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-       // Get Uart number for serial device
+		// Get Uart number for serial device
         uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+		// uninstall the driver and send the exit signal to the UART event handling queue
         uart_driver_delete(uart_num);
+		xQueueSend(Uart_Event_Queue[uart_num], (void*)UART_EVENT_MAX, (portTickType)portMAX_DELAY);
         Esp_Serial_Initialised_Flag[uart_num] = 0;
    }
     NANOCLR_NOCLEANUP();
@@ -134,11 +168,11 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         // Install driver
         esp_err_t esp_err = uart_driver_install(uart_num, 
-                                                UART_RX_BUFER_SIZE, // rx_buffer_size, 
-                                                UART_TX_BUFER_SIZE, // tx_buffer_size, not buffered
-                                                0,                  // queue_size
-                                                NULL,               // QueueHandle_t *uart_queue ( none for now )
-                                                0                   // intr_alloc_flags
+                                                UART_RX_BUFER_SIZE, 			// rx_buffer_size, 
+                                                UART_TX_BUFER_SIZE, 			// tx_buffer_size, not buffered
+                                                20,                  			// queue_size
+                                                &Uart_Event_Queue[uart_num],    // QueueHandle_t *uart_queue ( none for now )
+                                                0                   			// intr_alloc_flags
                                                 );
         if ( esp_err != ESP_OK )
         {
@@ -146,9 +180,14 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }   
         
+		// Create a task to handle UART event from ISR
+		char task_name[16];
+		sprintf(task_name, "uart%d_events", uart_num);
+		xTaskCreate(uart_event_task, task_name, 2048, (void*)uart_num, 12, NULL);
+	
         // Ensure driver gets unitialized during soft reboot
         HAL_AddSoftRebootHandler(Esp32_Serial_UnitializeAll);
-         Esp_Serial_Initialised_Flag[uart_num] = 1;
+        Esp_Serial_Initialised_Flag[uart_num] = 1;
     }
     NANOCLR_NOCLEANUP(); 
 }
@@ -477,19 +516,50 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeSetWatchChar___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+	{
+		// get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
+        if(pThis[ FIELD___disposed ].NumericByRef().u1 != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+		
+		// Get Uart number for serial device
+        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+		
+		// Get the watch char
+        uint8_t watchChar = (uint8_t)pThis[ FIELD___watchChar ].NumericByRef().u1;
+		
+		// Enable pattern detection for the serial device
+		uart_enable_pattern_det_intr(uart_num, watchChar, 1, 0, 0, 0);
+	}
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::get_BytesToRead___U4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+	{
+		// get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
+        if(pThis[ FIELD___disposed ].NumericByRef().u1 != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+		
+		// Get Uart number for serial device
+        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+		
+		// check how many bytes are in the buffer
+        size_t bufferedLength = 0;
+        uart_get_buffered_data_len(uart_num, &bufferedLength);
+		
+		// return how many bytes can be read from the Rx buffer
+        stack.SetResult_U4(bufferedLength);
+	}
+	NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
