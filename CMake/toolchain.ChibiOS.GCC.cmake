@@ -135,7 +135,7 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
 
     # set compiler definition for RTM build option
     if(NF_BUILD_RTM)
-        target_compile_definitions(${TARGET} PUBLIC BUILD_RTM)
+        target_compile_definitions(${TARGET} PUBLIC -DBUILD_RTM)
     endif()
 
     # set compiler definition for using Application Domains feature
