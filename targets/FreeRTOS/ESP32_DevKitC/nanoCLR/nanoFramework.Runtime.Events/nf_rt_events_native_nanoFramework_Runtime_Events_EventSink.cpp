@@ -20,18 +20,25 @@ void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uin
 
 static HRESULT InitializeEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, uint64_t userData )
 {
-   g_Context  = pContext;
+    (void)userData;
+    
+    g_Context  = pContext;
 
-   return S_OK;
+    return S_OK;
 }
 
 static HRESULT EnableDisableEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, bool fEnable )
 {
+    (void)pContext;
+    (void)fEnable;
+
    return S_OK;
 }
 
 static HRESULT CleanupEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContext )
 {
+    (void)pContext;
+
     g_Context = NULL;
 
     CleanupNativeEventsFromHALQueue( pContext );
@@ -41,6 +48,8 @@ static HRESULT CleanupEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContex
 
 HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink::EventConfig___VOID( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+
     return S_OK;
 }
 

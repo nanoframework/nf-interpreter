@@ -9,17 +9,18 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFram
 
 # set include directories
 list(APPEND nanoFramework.Hardware.Esp32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
-list(APPEND nanoFrameworkHardware.Esp32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
-list(APPEND nanoFrameworkHardware.Esp32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND nanoFrameworkHardware.Esp32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
-list(APPEND nanoFrameworkHardware.Esp32_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND nanoFramework.Hardware.Esp32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
+list(APPEND nanoFramework.Hardware.Esp32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
+list(APPEND nanoFramework.Hardware.Esp32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
+list(APPEND nanoFramework.Hardware.Esp32_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
 
 # source files
 set(nanoFramework.Hardware.Esp32_SRCS
+
     nanoFramework_hardware_esp32_native.cpp
-    nanoFramework_hardware_esp32_native.h
     nanoFramework_hardware_esp32_native_Hardware_Esp32_sleep.cpp
     nanoFramework_hardware_esp32_native_Hardware_Esp32_Logging.cpp
+
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Esp32_SRCS})

@@ -4,7 +4,7 @@
 #
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "targets/CMSIS-OS/ChibiOS/nanoCLR/nanoFramework.Runtime.Events")
+set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Runtime.Events")
 
 
 # set include directories
@@ -12,7 +12,7 @@ list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src
 list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
 list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
 list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
-list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
 
 
 # source files
@@ -37,7 +37,7 @@ foreach(SRC_FILE ${nanoFramework.Runtime.Events_SRCS})
         PATHS
 
             # path for source files of this module
-            ${PROJECT_SOURCE_DIR}/${BASE_PATH_FOR_THIS_MODULE}
+            ${BASE_PATH_FOR_THIS_MODULE}
 
             # path for AsyncProcCall and related code
             ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall

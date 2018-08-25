@@ -18,7 +18,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().s4;
-        float res = System::Math::Abs( d );
+        float res = fabs( d );
 
         stack.SetResult_I4( res );
 
@@ -36,9 +36,9 @@
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
 
-        float y = stack.Arg0().NumericByRefConst().s4;
-        float x = stack.Arg1().NumericByRefConst().s4;
-        float res = System::Math::Max( y, x );
+        float x = stack.Arg0().NumericByRefConst().s4;
+        float y = stack.Arg1().NumericByRefConst().s4;
+        float res = x >= y ? x : y;
 
         stack.SetResult_I4( res );
 
@@ -56,9 +56,9 @@
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
 
-        float y = stack.Arg0().NumericByRefConst().r4;
-        float x = stack.Arg1().NumericByRefConst().r4;
-        float res = System::Math::Max( y, x );
+        float x = stack.Arg0().NumericByRefConst().r4;
+        float y = stack.Arg1().NumericByRefConst().r4;
+        float res = x >= y ? x : y;
 
         stack.SetResult_R4( res );
 
@@ -74,9 +74,9 @@
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
 
-        double y = stack.Arg0().NumericByRefConst().r8;
-        double x = stack.Arg1().NumericByRefConst().r8;
-        double res = System::Math::Max( y, x );
+        double x = stack.Arg0().NumericByRefConst().r8;
+        double y = stack.Arg1().NumericByRefConst().r8;
+        double res = x >= y ? x : y;
 
         stack.SetResult_R8( res );
 
@@ -96,9 +96,9 @@
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
 
-        float y = stack.Arg0().NumericByRefConst().s4;
-        float x = stack.Arg1().NumericByRefConst().s4;
-        float res = System::Math::Min( y, x );
+        float x = stack.Arg0().NumericByRefConst().s4;
+        float y = stack.Arg1().NumericByRefConst().s4;
+        float res = x <= y ? x : y;
 
         stack.SetResult_I4( res );
 
@@ -116,9 +116,9 @@
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
 
-        float y = stack.Arg0().NumericByRefConst().r4;
-        float x = stack.Arg1().NumericByRefConst().r4;
-        float res = System::Math::Min( y, x );
+        float x = stack.Arg0().NumericByRefConst().r4;
+        float y = stack.Arg1().NumericByRefConst().r4;
+        float res = x <= y ? x : y;
 
         stack.SetResult_R4( res );
 
@@ -134,9 +134,9 @@
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
 
-        double y = stack.Arg0().NumericByRefConst().r8;
-        double x = stack.Arg1().NumericByRefConst().r8;
-        double res = System::Math::Min( y, x );
+        double x = stack.Arg0().NumericByRefConst().r8;
+        double y = stack.Arg1().NumericByRefConst().r8;
+        double res = x <= y ? x : y;
 
         stack.SetResult_R8( res );
 
@@ -155,7 +155,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Abs( d );
+        double res = fabs( d );
 
         stack.SetResult_R8( res );
 
@@ -176,7 +176,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Abs( d );
+        float res = fabs( d );
 
         stack.SetResult_R4( res );
 
@@ -193,7 +193,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Acos( d );
+        double res = acos( d );
 
         stack.SetResult_R8( res );
 
@@ -214,7 +214,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Acos( d );
+        float res = acos( d );
 
         stack.SetResult_R4( res );
 
@@ -231,7 +231,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Asin( d );
+        double res = asin( d );
 
         stack.SetResult_R8( res );
 
@@ -252,7 +252,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Asin( d );
+        float res = asin( d );
 
         stack.SetResult_R4( res );
 
@@ -269,7 +269,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Atan( d );
+        double res = atan( d );
 
         stack.SetResult_R8( res );
 
@@ -290,7 +290,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Atan( d );
+        float res = atan( d );
 
         stack.SetResult_R4( res );
 
@@ -306,9 +306,9 @@
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
 
-        double y = stack.Arg0().NumericByRefConst().r8;
-        double x = stack.Arg1().NumericByRefConst().r8;
-        double res = System::Math::Atan2( y, x );
+        double x = stack.Arg0().NumericByRefConst().r8;
+        double y = stack.Arg1().NumericByRefConst().r8;
+        double res = atan2( x, y );
 
         stack.SetResult_R8( res );
 
@@ -328,9 +328,9 @@
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
 
-        float y = stack.Arg0().NumericByRefConst().r4;
-        float x = stack.Arg1().NumericByRefConst().r4;
-        float res = System::Math::Atan2( y, x );
+        float x = stack.Arg0().NumericByRefConst().r4;
+        float y = stack.Arg1().NumericByRefConst().r4;
+        float res = atan2( x, y );
 
         stack.SetResult_R4( res );
 
@@ -347,7 +347,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Ceiling( d );
+        double res = ceil( d );
 
         stack.SetResult_R8( res );
 
@@ -369,7 +369,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Ceiling( d );
+        float res = ceil( d );
 
         stack.SetResult_R4( res );
 
@@ -387,7 +387,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Cos( d );
+        double res = cos( d );
 
         stack.SetResult_R8( res );
 
@@ -408,7 +408,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Cos( d );
+        float res = cos( d );
 
         stack.SetResult_R4( res );
 
@@ -425,7 +425,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Cosh( d );
+        double res = cosh( d );
 
         stack.SetResult_R8( res );
 
@@ -446,7 +446,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Cosh( d );
+        float res = cosh( d );
 
         stack.SetResult_R4( res );
 
@@ -464,7 +464,7 @@
 
         double x = stack.Arg0().NumericByRefConst().r8;
         double y = stack.Arg1().NumericByRefConst().r8;
-        double res = System::Math::IEEERemainder(x, y);
+        double res = remainder(x, y);
 
         stack.SetResult_R8( res );
 
@@ -486,7 +486,7 @@
 
         float x = stack.Arg0().NumericByRefConst().r4;
         float y = stack.Arg1().NumericByRefConst().r4;
-        float res = System::Math::IEEERemainder(x, y);
+        float res = remainder(x, y);
 
         stack.SetResult_R4( res );
 
@@ -503,7 +503,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Exp( d );
+        double res = exp( d );
 
         stack.SetResult_R8( res );
 
@@ -524,7 +524,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Exp( d );
+        float res = exp( d );
 
         stack.SetResult_R4( res );
 
@@ -541,7 +541,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Floor( d );
+        double res = floor( d );
 
         stack.SetResult_R8( res );
 
@@ -562,7 +562,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Floor( d );
+        float res = floor( d );
 
         stack.SetResult_R4( res );
 
@@ -579,7 +579,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Log( d );
+        double res = log( d );
 
         stack.SetResult_R8( res );
 
@@ -600,7 +600,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Log( d );
+        float res = log( d );
 
         stack.SetResult_R4( res );
 
@@ -617,7 +617,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Log10( d );
+        double res = log10( d );
 
         stack.SetResult_R8( res );
 
@@ -638,7 +638,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Log10( d );
+        float res = log10( d );
 
         stack.SetResult_R4( res );
 
@@ -656,7 +656,7 @@
         double x = stack.Arg0().NumericByRefConst().r8;
         double y = stack.Arg1().NumericByRefConst().r8;
 
-        double res = System::Math::Pow( x, y );
+        double res = pow( x, y );
 
         stack.SetResult_R8( res );
 
@@ -678,7 +678,7 @@
         float x = stack.Arg0().NumericByRefConst().r4;
         float y = stack.Arg1().NumericByRefConst().r4;
 
-        float res = System::Math::Pow( x, y );
+        float res = pow( x, y );
 
         stack.SetResult_R4( res );
 
@@ -695,18 +695,8 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double hi = d + 0.5;
-        double res = System::Math::Floor( hi );
 
-        //If the number was in the middle of two integers, we need to round to the even one.
-        if(res==hi)
-        {
-            if(System::Math::Fmod( res, 2.0 ) != 0)
-            {
-                //Rounding up made the number odd so we should round down.
-                res -= 1.0;
-            }
-        }
+        double res = round(d);
 
         stack.SetResult_R8( res );
 
@@ -727,18 +717,8 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float hi = d + 0.5;
-        float res = System::Math::Floor( hi );
 
-        //If the number was in the middle of two integers, we need to round to the even one.
-        if(res==hi)
-        {
-            if(System::Math::Fmod( res, 2.0 ) != 0)
-            {
-                //Rounding up made the number odd so we should round down.
-                res -= 1.0;
-            }
-        }
+        float res = roundf(d);
 
         stack.SetResult_R4( res );
 
@@ -797,7 +777,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Sin( d );
+        double res = sin( d );
 
         stack.SetResult_R8( res );
 
@@ -818,7 +798,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Sin( d );
+        float res = sin( d );
 
         stack.SetResult_R4( res );
 
@@ -835,7 +815,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Sinh( d );
+        double res = sinh( d );
 
         stack.SetResult_R8( res );
 
@@ -856,7 +836,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Sinh( d );
+        float res = sinh( d );
 
         stack.SetResult_R4( res );
 
@@ -873,7 +853,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Sqrt( d );
+        double res = sqrt( d );
 
         stack.SetResult_R8( res );
 
@@ -894,7 +874,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Sqrt( d );
+        float res = sqrt( d );
 
         stack.SetResult_R4( res );
 
@@ -911,7 +891,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Tan( d );
+        double res = tan( d );
 
         stack.SetResult_R8( res );
 
@@ -932,7 +912,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Tan( d );
+        float res = tan( d );
 
         stack.SetResult_R4( res );
 
@@ -949,7 +929,7 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
-        double res = System::Math::Tanh( d );
+        double res = tanh( d );
 
         stack.SetResult_R8( res );
 
@@ -970,7 +950,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = System::Math::Tanh( d );
+        float res = tanh( d );
 
         stack.SetResult_R4( res );
 
@@ -1009,7 +989,7 @@
 
         float d = stack.Arg0().NumericByRefConst().r4;
         float res = 0.0;
-        float retVal = System::Math::Truncate(d, res);
+        float retVal = modf(d, (double*)&res); 
 
         stack.SetResult_R4( retVal );
 
