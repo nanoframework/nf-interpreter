@@ -108,7 +108,7 @@ static void uart_event_task(void *pvParameters)
                 // Data received
                 case UART_DATA:
                     // post a managed event with the port index and the chars event code
-					PostManagedEvent(EVENT_SERIAL, 0, uart_num, SerialData_Chars);
+					//PostManagedEvent(EVENT_SERIAL, 0, uart_num, SerialData_Chars);
                     break;
 				// Pattern detection used for the WatchChar
                 case UART_PATTERN_DET:
@@ -548,7 +548,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         uint8_t watchChar = (uint8_t)pThis[ FIELD___watchChar ].NumericByRef().u1;
 		
 		// Enable pattern detection for the serial device
-		uart_enable_pattern_det_intr(uart_num, watchChar, 1, 0, 0, 0);
+		uart_enable_pattern_det_intr(uart_num, watchChar, 1, 10000, 10, 10);
 	}
     NANOCLR_NOCLEANUP();
 }
