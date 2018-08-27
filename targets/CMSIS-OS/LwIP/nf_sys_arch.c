@@ -261,9 +261,7 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg)
 {
     osEvent event;
     
-    // workaround until this bug is fixed in ChibiOS
-    // http://www.chibios.com/forum/viewtopic.php?f=35&t=4781
-    event = osMessageGet (*mbox, 1);
+    event = osMessageGet (*mbox, 0);
     
     if(event.status == osEventMessage)
     {
