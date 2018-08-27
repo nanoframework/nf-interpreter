@@ -89,8 +89,15 @@ static void debounceTimer_Callback( void* arg )
     if(lastPadValue == currentValue)
     {
         // value hasn't change for debounce interval so this is a valid change
-        // post a managed event with the current pin value
-        PostManagedEvent( EVENT_GPIO, 0, pinNumber, currentValue );
+
+        // flag to determine if there are any callbacks registered in managed code
+        bool callbacksRegistered = (pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks ].Dereference() != NULL);
+
+        // post a managed event with the current pin value, only if there is anyone listening otherwise don't bother
+        if(callbacksRegistered)
+        {
+            PostManagedEvent( EVENT_GPIO, 0, pinNumber, currentValue );
+        }
     }
 }
 
@@ -156,8 +163,14 @@ static void GpioEventCallback(void *arg)
         // read pad
         pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___lastInputValue ].NumericByRef().s4 = palReadLine(ioLine);
 
-        // post a managed event with the current pin reading
-        PostManagedEvent( EVENT_GPIO, 0, pinNumber, palReadLine(ioLine) );
+        // flag to determine if there are any callbacks registered in managed code
+        bool callbacksRegistered = (pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks ].Dereference() != NULL);
+
+        // post a managed event with the current pin reading, only if there is anyone listening otherwise don't bother
+        if(callbacksRegistered)
+        {
+            PostManagedEvent( EVENT_GPIO, 0, pinNumber, palReadLine(ioLine) );
+        }
     }
 
     chSysUnlockFromISR();
