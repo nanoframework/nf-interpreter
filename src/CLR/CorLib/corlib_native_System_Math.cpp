@@ -176,7 +176,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = fabs( d );
+        float res = fabsf( d );
 
         stack.SetResult_R4( res );
 
@@ -214,7 +214,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = acos( d );
+        float res = acosf( d );
 
         stack.SetResult_R4( res );
 
@@ -252,7 +252,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = asin( d );
+        float res = asinf( d );
 
         stack.SetResult_R4( res );
 
@@ -290,7 +290,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = atan( d );
+        float res = atanf( d );
 
         stack.SetResult_R4( res );
 
@@ -330,7 +330,7 @@
 
         float x = stack.Arg0().NumericByRefConst().r4;
         float y = stack.Arg1().NumericByRefConst().r4;
-        float res = atan2( x, y );
+        float res = atan2f( x, y );
 
         stack.SetResult_R4( res );
 
@@ -369,7 +369,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = ceil( d );
+        float res = ceilf( d );
 
         stack.SetResult_R4( res );
 
@@ -408,7 +408,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = cos( d );
+        float res = cosf( d );
 
         stack.SetResult_R4( res );
 
@@ -446,7 +446,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = cosh( d );
+        float res = coshf( d );
 
         stack.SetResult_R4( res );
 
@@ -486,7 +486,7 @@
 
         float x = stack.Arg0().NumericByRefConst().r4;
         float y = stack.Arg1().NumericByRefConst().r4;
-        float res = remainder(x, y);
+        float res = remainderf(x, y);
 
         stack.SetResult_R4( res );
 
@@ -524,7 +524,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = exp( d );
+        float res = expf( d );
 
         stack.SetResult_R4( res );
 
@@ -562,7 +562,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = floor( d );
+        float res = floorf( d );
 
         stack.SetResult_R4( res );
 
@@ -600,7 +600,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = log( d );
+        float res = logf( d );
 
         stack.SetResult_R4( res );
 
@@ -638,7 +638,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = log10( d );
+        float res = log10f( d );
 
         stack.SetResult_R4( res );
 
@@ -678,7 +678,7 @@
         float x = stack.Arg0().NumericByRefConst().r4;
         float y = stack.Arg1().NumericByRefConst().r4;
 
-        float res = pow( x, y );
+        float res = powf( x, y );
 
         stack.SetResult_R4( res );
 
@@ -798,7 +798,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = sin( d );
+        float res = sinf( d );
 
         stack.SetResult_R4( res );
 
@@ -836,7 +836,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = sinh( d );
+        float res = sinhf( d );
 
         stack.SetResult_R4( res );
 
@@ -874,7 +874,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = sqrt( d );
+        float res = sqrtf( d );
 
         stack.SetResult_R4( res );
 
@@ -912,7 +912,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = tan( d );
+        float res = tanf( d );
 
         stack.SetResult_R4( res );
 
@@ -950,7 +950,7 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
-        float res = tanh( d );
+        float res = tanhf( d );
 
         stack.SetResult_R4( res );
 
@@ -989,7 +989,7 @@
 
         float d = stack.Arg0().NumericByRefConst().r4;
         float res = 0.0;
-        float retVal = modf(d, (double*)&res); 
+        float retVal = modff(d, &res); 
 
         stack.SetResult_R4( retVal );
 
