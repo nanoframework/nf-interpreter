@@ -256,7 +256,11 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     else
     {
         // no read operation ongoing, so fire an event
+       
         // post a managed event with the port index and event code (check if this is the watch char or just another another)
+        // TODO: check if callbacks are registered so this is called only if there is anyone listening otherwise don't bother
+        // for that to happen ChibiOS callback has to accept arg which we would passing the GpioPin CLR_RT_HeapBlock (see Gpio handler)
+        // check http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
         PostManagedEvent( EVENT_SERIAL, 0, portIndex, (c == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars );
     }
 
