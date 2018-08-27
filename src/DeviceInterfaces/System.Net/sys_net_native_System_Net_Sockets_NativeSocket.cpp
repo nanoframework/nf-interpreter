@@ -176,6 +176,10 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getaddrinfo___ST
         }
         else
         {
+            // return without error, clear socket error
+            socketError = 0;
+
+            // done here
             break;
         }
     }
