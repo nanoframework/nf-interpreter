@@ -18,6 +18,11 @@
 // rx buffer size: 256 bytes
 #define UART_RX_BUFER_SIZE  256
 
+// in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port index 1, 2 or 3 to the uart number 0, 1 or 2
+#define PORT_INDEX_TO_UART_NUM(portIndex)	((portIndex) - 1)
+// in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the uart number 0, 1 or 2 to the port index 1, 2 or 3
+#define UART_NUM_TO_PORT_INDEX(uart_num)	((uart_num) + 1)
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialHandshake (in managed code) !!! //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -77,9 +82,11 @@ enum SerialData
 
 static const char* TAG = "SerialDevice";
 
-static char Esp_Serial_Initialised_Flag[UART_NUM_MAX] = {0,0,0};
+static char Esp_Serial_Initialised_Flag[UART_NUM_MAX] = {0, 0, 0};
 static QueueHandle_t Uart_Event_Queue[UART_NUM_MAX];
-
+static bool Uart_Post_SerialData_Chars_Event[UART_NUM_MAX] = {true, true, true};
+CLR_RT_HeapBlock* Serial_Device_Instance[UART_NUM_MAX];
+										  
 void Esp32_Serial_UnitializeAll()
 {
     for (int uart_num = 0; uart_num < UART_NUM_MAX; uart_num++) 
@@ -89,6 +96,8 @@ void Esp32_Serial_UnitializeAll()
             // Delete uart driver and send the exit signal to the UART event handling queue
             uart_driver_delete((uart_port_t)uart_num);
 			xQueueSend(Uart_Event_Queue[uart_num], (void*)UART_EVENT_MAX, (portTickType)0);
+			Uart_Post_SerialData_Chars_Event[uart_num] = false;
+			Serial_Device_Instance[uart_num] = NULL;
             Esp_Serial_Initialised_Flag[uart_num] = 0;
         }
     }
@@ -107,14 +116,25 @@ static void uart_event_task(void *pvParameters)
             switch(event.type) {
                 // Data received
                 case UART_DATA:
-                    // post a managed event with the port index and the chars event code
-					//PostManagedEvent(EVENT_SERIAL, 0, uart_num, SerialData_Chars);
+					// only if no one is reading the chars already and only if an event handler is attached
+					if (Uart_Post_SerialData_Chars_Event[uart_num] && Serial_Device_Instance[uart_num][Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___callbacksDataReceivedEvent].Dereference() != NULL)
+					{
+						// post a managed event with the port index and the chars event code; uart_num + 1 because UART0 maps to COM1
+						PostManagedEvent(EVENT_SERIAL, 0, UART_NUM_TO_PORT_INDEX(uart_num), SerialData_Chars);
+						// supress the event for the following chars; prevents spamming with the SerialData_Chars event
+						// the flag will be reset if NativeRead will be called
+						Uart_Post_SerialData_Chars_Event[uart_num] = false;
+					}
                     break;
 				// Pattern detection used for the WatchChar
                 case UART_PATTERN_DET:
-					// post a managed event with the port index and the watch char event code
-					PostManagedEvent(EVENT_SERIAL, 0, uart_num, SerialData_WatchChar);
-                    break;
+					// only if an event handler is attached
+					if (Serial_Device_Instance[uart_num][Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___callbacksDataReceivedEvent].Dereference() != NULL)
+					{
+						// post a managed event with the port index and the watch char event code; uart_num + 1 because UART0 maps to COM1
+						PostManagedEvent(EVENT_SERIAL, 0, UART_NUM_TO_PORT_INDEX(uart_num), SerialData_WatchChar);
+					}
+					break;
 				// signal to end the task (UART_EVENT_MAX used)
 				case UART_EVENT_MAX:
 					run = false;
@@ -137,10 +157,12 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 		// Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+        uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[ FIELD___portIndex ].NumericByRef().s4);
 		// uninstall the driver and send the exit signal to the UART event handling queue
         uart_driver_delete(uart_num);
 		xQueueSend(Uart_Event_Queue[uart_num], (void*)UART_EVENT_MAX, (portTickType)portMAX_DELAY);
+		Uart_Post_SerialData_Chars_Event[uart_num] = false;
+		Serial_Device_Instance[uart_num] = NULL;
         Esp_Serial_Initialised_Flag[uart_num] = 0;
    }
     NANOCLR_NOCLEANUP();
@@ -157,12 +179,11 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+        uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[ FIELD___portIndex ].NumericByRef().s4);
         if ( uart_num > UART_NUM_2 || uart_num < 0 )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
-
 
         // call the configure and abort if not OK
         HRESULT res = NativeConfig___VOID(stack);
@@ -185,6 +206,10 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }   
         
+		// receive the SerialData_Chars events and store the SerialDevice instance
+		Uart_Post_SerialData_Chars_Event[uart_num] = true;
+		Serial_Device_Instance[uart_num] = pThis;
+		
 		// Create a task to handle UART event from ISR
 		char task_name[16];
 		sprintf(task_name, "uart%d_events", uart_num);
@@ -210,7 +235,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+        uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[ FIELD___portIndex ].NumericByRef().s4);
         if ( uart_num > UART_NUM_2 || uart_num < 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -362,7 +387,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         length = (size_t)dataBuffer->m_numOfElements;
 
         // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+        uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[ FIELD___portIndex ].NumericByRef().s4);
  
 
         // Write data to ring bufferand start sending
@@ -406,7 +431,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 
         // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+        uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[ FIELD___portIndex ].NumericByRef().s4);
 
         // get value for writetimeout
         // the way to access this it's somewhat convoluted but it is what it is
@@ -481,7 +506,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         options = (InputStreamOptions)stack.Arg3().NumericByRef().s4;
 
        // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+        uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[ FIELD___portIndex ].NumericByRef().s4);
 
         // Bytes requested to read
         toRead = count;
@@ -517,7 +542,11 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // now get the value in ticks and convert it to miliseconds
         timeoutMillisecondsValue = *timeoutTicks / TIME_CONVERSION__TICKUNITS;
 
+		// suppress the SerialData_Chars event during the reading of the chars; prevents spamming with the SerialData_Chars event
+		Uart_Post_SerialData_Chars_Event[uart_num] = false;
         bytesRead = uart_read_bytes(uart_num, data, toRead, timeoutMillisecondsValue / portTICK_RATE_MS);
+		Uart_Post_SerialData_Chars_Event[uart_num] = true;
+		
         if ( bytesRead < 0 )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -542,7 +571,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 		
 		// Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+        uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[ FIELD___portIndex ].NumericByRef().s4);
 		
 		// Get the watch char
         uint8_t watchChar = (uint8_t)pThis[ FIELD___watchChar ].NumericByRef().u1;
@@ -566,7 +595,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 		
 		// Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)(pThis[ FIELD___portIndex ].NumericByRef().s4 - 1);
+        uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[ FIELD___portIndex ].NumericByRef().s4);
 		
 		// check how many bytes are in the buffer
         size_t bufferedLength = 0;
