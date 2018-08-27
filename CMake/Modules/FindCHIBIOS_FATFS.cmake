@@ -10,8 +10,6 @@ execute_process(
 
 
 # List of the required FatFs include files.
-#list(APPEND CHIBIOS_FATFS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various)
-#list(APPEND CHIBIOS_FATFS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/fatfs_bindings)
 list(APPEND CHIBIOS_FATFS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs/src)
 
 
