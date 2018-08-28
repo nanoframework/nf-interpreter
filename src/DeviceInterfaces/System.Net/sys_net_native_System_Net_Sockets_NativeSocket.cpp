@@ -149,7 +149,8 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getaddrinfo___ST
     CLR_INT64*        timeout;
     uint32_t          socketError = SOCK_SOCKET_ERROR;
 
-    hbTimeout.SetInteger( timeout_ms * TIME_CONVERSION__TO_MILLISECONDS );
+    // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
+    hbTimeout.SetInteger( (CLR_INT64)timeout_ms * TIME_CONVERSION__TO_MILLISECONDS );
 
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
@@ -361,7 +362,8 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__B
     }
     else
     {
-        hbTimeout.SetInteger( timeout_us * TIME_CONVERSION__TO_MILLISECONDS / 1000 );
+        // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
+        hbTimeout.SetInteger( (CLR_INT64)timeout_us * TIME_CONVERSION__TO_MILLISECONDS / 1000 );
     }
 
    
