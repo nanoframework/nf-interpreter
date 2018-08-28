@@ -147,11 +147,11 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(HAL_Configuration_NetworkI
     HRESULT hr = S_OK;
     bool success = FALSE;
 
-    const uint32_t c_reInitFlag = SOCK_NETWORKCONFIGURATION_UPDATE_DHCP       | 
-                                SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RENEW | 
-                                SOCK_NETWORKCONFIGURATION_UPDATE_MAC;
+    const uint32_t c_reInitFlag =   UpdateOperation_Dhcp      | 
+                                    UpdateOperation_DhcpRenew | 
+                                    UpdateOperation_Mac;
 
-    const uint32_t c_uninitFlag = c_reInitFlag | SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RELEASE;
+    const uint32_t c_uninitFlag = c_reInitFlag | UpdateOperation_DhcpRelease;
 
     if(0 != (updateFlags & c_uninitFlag))
     {

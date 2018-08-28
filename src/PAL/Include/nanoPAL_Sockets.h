@@ -356,11 +356,19 @@ typedef struct SOCK_timeval {
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__value(x)  (((x) & SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask) >> SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift)
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__set(x)    (((x) << SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift) & SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask)
 
-#define SOCK_NETWORKCONFIGURATION_UPDATE_DNS                0x00000001
-#define SOCK_NETWORKCONFIGURATION_UPDATE_DHCP               0x00000002
-#define SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RENEW         0x00000004
-#define SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RELEASE       0x00000008
-#define SOCK_NETWORKCONFIGURATION_UPDATE_MAC                0x00000010
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkInterface.UpdateOperation (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum UpdateOperation
+{
+    UpdateOperation_Invalid =       0x00,
+    UpdateOperation_Dns =           0x01,
+    UpdateOperation_Dhcp =          0x02,
+    UpdateOperation_DhcpRenew =     0x04,
+    UpdateOperation_DhcpRelease =   0x08,
+    UpdateOperation_Mac =           0x10,
+};
 
 #define SOCK_NETWORKCONFIGURATION_INTERFACETYPE_UNKNOWN        0
 #define SOCK_NETWORKCONFIGURATION_INTERFACETYPE_ETHERNET       6

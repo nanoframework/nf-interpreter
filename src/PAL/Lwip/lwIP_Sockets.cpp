@@ -202,7 +202,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
  		g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
- 		UpdateAdapterConfiguration(i, SOCK_NETWORKCONFIGURATION_UPDATE_DHCP | SOCK_NETWORKCONFIGURATION_UPDATE_DNS, &networkConfiguration);
+ 		UpdateAdapterConfiguration(i, (UpdateOperation_Dhcp | UpdateOperation_Dns), &networkConfiguration);
 
  		networkInterface = netif_find_interface(interfaceNumber);
 
@@ -906,7 +906,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
 
 #if LWIP_DNS
     // when using DHCP do not use the static settings
-    if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DNS))
+    if(0 != (updateFlags & UpdateOperation_Dns))
     {
         // FIXME IPV6
         if(config->AutomaticDNS == 0)
@@ -929,7 +929,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
 #endif
 
 #if LWIP_DHCP
-    if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DHCP))
+    if(0 != (updateFlags & UpdateOperation_Dhcp))
     {
         if(enableDHCP)
         {
@@ -954,19 +954,28 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
 
     if(enableDHCP)
     {
-        // Try Renew before release since renewing after release will fail
-        if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RENEW))
+        // developer note: on legacy source there was a hack of trying to renew before release and
+        // also setting the release flag in managed call when the intent was to renew only
+        // nowadays lwIP seems to be doing what is told, so no need for these hacks anymore
+        // also it's NOT possible to renew & release on the same pass, so adding an extra else-if for that
+        // just in case it's request from the managed code
+
+        if(0 != (updateFlags & UpdateOperation_DhcpRelease))
+        {
+            dhcp_release(networkInterface);
+        }
+        else if(0 != (updateFlags & UpdateOperation_DhcpRenew))
         {
             dhcp_renew(networkInterface);
         }
-        else if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RELEASE))
+        else if(0 != (updateFlags & (UpdateOperation_DhcpRelease | UpdateOperation_DhcpRenew)) )
         {
-            dhcp_release(networkInterface);
+            return CLR_E_INVALID_PARAMETER;
         }
     }
 #endif
 
-    if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_MAC))
+    if(0 != (updateFlags & UpdateOperation_Mac))
     {
         memcpy(networkInterface->hwaddr, config->MacAddress, NETIF_MAX_HWADDR_LEN);
         networkInterface->hwaddr_len = NETIF_MAX_HWADDR_LEN;
@@ -977,7 +986,6 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
     }
 
     return S_OK;
-
 }
 
 int LWIP_SOCKETS_Driver::GetNativeTcpOption (int optname)
