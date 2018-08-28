@@ -87,8 +87,11 @@ void nanoHAL_Uninitialize()
     
     //PalEvent_Uninitialize();
 
+    // TODO need to call this but it's preventing the debug session from starting
+    //Network_Uninitialize();
+
     Events_Uninitialize();
-    
+
     HAL_CONTINUATION::Uninitialize();
     HAL_COMPLETION  ::Uninitialize();
 }
