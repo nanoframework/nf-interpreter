@@ -71,21 +71,21 @@ void LWIP_SOCKETS_Driver::PostAddressChanged(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NETWORK_EVENT_TYPE_ADDRESS_CHANGED, 0);
+	Network_PostEvent(NetworkEventType_AddressChanged, 0);
 }
 
 void LWIP_SOCKETS_Driver::PostAvailabilityOn(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 1);
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkAvailable);
 }
 
 void LWIP_SOCKETS_Driver::PostAvailabilityOff(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 0);
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkNOTAvailable);
 }
 
 #if LWIP_NETIF_LINK_CALLBACK == 1

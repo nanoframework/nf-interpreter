@@ -508,10 +508,26 @@ bool Network_Interface_Close(int index);
 
 //--//
 
-#define NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED 1
-#define NETWORK_EVENT_TYPE_ADDRESS_CHANGED       2
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkChange.NetworkEventType (in managed code) !!! //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define NETWORK_EVENT_FLAGS_IS_AVAILABLE         1
+enum NetworkEventType
+{
+    NetworkEventType_Invalid = 0,
+    NetworkEventType_AvailabilityChanged = 1,
+    NetworkEventType_AddressChanged = 2,
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkChange.NetworkEventFlags (in managed code) !!! //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum NetworkEventFlags
+{
+    NetworkEventFlags_NetworkNOTAvailable = 0x00,
+    NetworkEventFlags_NetworkAvailable = 0x01,
+};
 
 void Network_PostEvent(unsigned int eventType, unsigned int flags);
 
