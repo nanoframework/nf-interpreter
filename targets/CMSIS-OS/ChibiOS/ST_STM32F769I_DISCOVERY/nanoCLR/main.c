@@ -132,6 +132,12 @@ static void InsertHandler(eventid_t id) {
      return;
    }
   fs_ready = TRUE;
+
+  //****** Test - Create a file!
+  FIL fileObj;
+  fr = f_open(&fileObj, "TestMessage.txt", FA_CREATE_ALWAYS);
+  f_close(&fileObj);
+  //******* End Test
 }
 
 /*
