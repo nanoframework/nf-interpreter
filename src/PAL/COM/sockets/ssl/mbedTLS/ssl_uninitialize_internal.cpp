@@ -7,7 +7,8 @@
 #include <ssl.h> 
 #include "mbedtls.h"
 
-extern volatile int ssl_x509_store_ctx_idx;
+// TODO if and when implementing store certificate
+// extern volatile int ssl_x509_store_ctx_idx;
 
 bool ssl_uninitialize_internal()
 {
@@ -27,7 +28,8 @@ bool ssl_uninitialize_internal()
  //   CRYPTO_cleanup_all_ex_data();
  //   EVP_cleanup();
 
-    ssl_x509_store_ctx_idx = -1;
+    // TODO if and when implementing store certificate 
+    //ssl_x509_store_ctx_idx = -1;
 
     return result;
 }
