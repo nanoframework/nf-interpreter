@@ -21,6 +21,8 @@
 #include <string.h>
 #include <ff.h>
 
+#define FATFS_HAL_DEVICE SDCD2
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here 
@@ -136,7 +138,11 @@ static void InsertHandler(eventid_t id) {
   // Temporary to indicate this event being fired
   SwoPrintString("\r\nFatFs: Initializing completed.\r\n");
 
+  osDelay(1000);
+
   SDC_FS = malloc(sizeof (FATFS)); 
+  SwoPrintString("\r\nFatFs: Set Malloc size.\r\n");
+
   err = f_mount(SDC_FS, "/", 1);
 
   if (err != FR_OK)
@@ -160,6 +166,8 @@ static void InsertHandler(eventid_t id) {
 
   if (fs_ready)
   {
+    osDelay(1000);
+
     //****** Test - Create a file!
     FIL fileObj;
     err = f_open(&fileObj, "TestMessage.txt", FA_CREATE_ALWAYS);
@@ -271,7 +279,7 @@ int main(void) {
 
   // *******************************************************
   while (true) { 
-    osDelay(100);
+    //osDelay(100);
     chEvtDispatch(evhndl, chEvtWaitOneTimeout(ALL_EVENTS, TIME_MS2I(500)));
   }
 }

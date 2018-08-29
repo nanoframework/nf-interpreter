@@ -24,13 +24,16 @@
 #include <target_platform.h>
 #include "mcuconf.h"
 
-#define FATFS_HAL_DEVICE SDCD2
-
 /**
  * @brief   Enables the PAL subsystem.
  */
 #if !defined(HAL_USE_PAL) || defined(__DOXYGEN__)
 #define HAL_USE_PAL                         TRUE
+#endif
+
+#if !defined(FATFS_HAL_DEVICE) || defined(__DOXYGEN__)
+//this board requires SDCD2 not SDCD1
+#define FATFS_HAL_DEVICE SDCD2
 #endif
 
 /**
