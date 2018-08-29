@@ -16,6 +16,7 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ff.h>
@@ -107,7 +108,7 @@ static void tmr_init(void *p) {
 /**
  * @brief FS object.
  */
-static FATFS SDC_FS;
+static FATFS *SDC_FS;
 
 /* FS mounted and ready.*/
 static bool fs_ready = FALSE;
@@ -135,27 +136,47 @@ static void InsertHandler(eventid_t id) {
   // Temporary to indicate this event being fired
   SwoPrintString("\r\nFatFs: Initializing completed.\r\n");
 
-  err = f_mount(&SDC_FS, "/", 1);
-  
-  // Temporary to indicate this event being fired
-  tiny_sprintf(&buffer[0], "Error %d", err);
-  SwoPrintString("\r\nFatFs: Mount completed...\r\n");
+  SDC_FS = malloc(sizeof (FATFS)); 
+  err = f_mount(SDC_FS, "/", 1);
 
-  if (err != FR_OK) {
+  if (err != FR_OK)
+  {
+    tiny_sprintf(buffer, "Error Mounting Drive %d", err);
+    SwoPrintString(buffer);
+    osDelay(1000);
+
     sdcDisconnect(&SDCD2);
     return;
   }
-  fs_ready = TRUE;
-  
-  // Temporary: arriving here means we have an initialized and mounted SD Card
-  // Indicated by a green LED
-  palSetLine(LINE_LED2_GREEN);
+  else
+  {
+    SwoPrintString("\r\nFatFs: Mount completed...\r\n");
 
-  //****** Test - Create a file!
-  FIL fileObj;
-  err = f_open(&fileObj, "TestMessage.txt", FA_CREATE_ALWAYS);
-  f_close(&fileObj);
-  //******* End Test
+    fs_ready = TRUE;
+    // Temporary: arriving here means we have an initialized and mounted SD Card
+    // Indicated by a green LED
+    palSetLine(LINE_LED2_GREEN);
+  }
+
+  if (fs_ready)
+  {
+    //****** Test - Create a file!
+    FIL fileObj;
+    err = f_open(&fileObj, "TestMessage.txt", FA_CREATE_ALWAYS);
+    f_close(&fileObj);
+      
+      if (err != FR_OK)
+    {
+      tiny_sprintf(buffer, "Error Creating File %d", err);
+      SwoPrintString(buffer);
+    }
+    else
+    {
+      SwoPrintString("\r\nFatFs: file created...\r\n");
+    }
+    //******* End Test
+  }
+  
 }
 
 /*
