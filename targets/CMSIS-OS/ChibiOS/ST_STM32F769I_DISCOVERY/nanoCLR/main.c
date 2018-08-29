@@ -135,17 +135,16 @@ static void InsertHandler(eventid_t id) {
   // Temporary to indicate this event being fired
   SwoPrintString("\r\nFatFs: Initializing completed.\r\n");
 
-  err = f_mount(&SDC_FS, "", 1);
+  err = f_mount(&SDC_FS, "/", 1);
   
   // Temporary to indicate this event being fired
   tiny_sprintf(&buffer[0], "Error %d", err);
   SwoPrintString("\r\nFatFs: Mount completed...\r\n");
-  
-  err = f_mount(&SDC_FS, "/", 1);
-   if (err != FR_OK) {
-     sdcDisconnect(&SDCD2);
-     return;
-   }
+
+  if (err != FR_OK) {
+    sdcDisconnect(&SDCD2);
+    return;
+  }
   fs_ready = TRUE;
   
   // Temporary: arriving here means we have an initialized and mounted SD Card
