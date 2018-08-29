@@ -269,22 +269,6 @@
   #   - git add .
   #   - git commit --amend --no-edit
 
-  notifications:
-    - provider: Webhook
-      url: 
-        secure: t5RCJvfbPVTAhfyWxTvkwfNeHtrr3i4XdQWwYoLMox7YvD9MAIVa74bxikBlABYBxROuUTqSKrCyqcCQmyAnYsUHc+aGsxxCt4oWhaZN2UBiqo3nEht42VXhNgFR0fnZLj8jpY9WNHneEEQPRGl3oEq2yEN1SyeSQtuLmTZSNiY=
-      method: POST
-      body: >-
-          {
-              "content":  "<{{buildUrl}}|Build {{projectName}} {{buildVersion}} {{status}}>
-                          Commit <{{commitUrl}}|{{commitId}}> by {{commitAuthor}} on {{commitDate}}:
-                          _{{commitMessage}}_"
-          }
-      on_build_status_changed: true
-      on_build_success: false
-      on_build_failure: false
-
-
 ####################################
 # configuration for develop branches
 -
@@ -571,21 +555,6 @@
   #   - git add .
   #   - git commit --amend --no-edit
 
-  notifications:
-    - provider: Webhook
-      url: 
-        secure: t5RCJvfbPVTAhfyWxTvkwfNeHtrr3i4XdQWwYoLMox7YvD9MAIVa74bxikBlABYBxROuUTqSKrCyqcCQmyAnYsUHc+aGsxxCt4oWhaZN2UBiqo3nEht42VXhNgFR0fnZLj8jpY9WNHneEEQPRGl3oEq2yEN1SyeSQtuLmTZSNiY=
-      method: POST
-      body: >-
-          {
-              "content":  "<{{buildUrl}}|Build {{projectName}} {{buildVersion}} {{status}}>
-                          Commit <{{commitUrl}}|{{commitId}}> by {{commitAuthor}} on {{commitDate}}:
-                          _{{commitMessage}}_"
-          }
-      on_build_status_changed: true
-      on_build_success: false
-      on_build_failure: false
-
 ############################################
 # configuration for release candidate branch
 -
@@ -862,18 +831,3 @@
   #   # add here the updated changelog and the updated assembly info files
   #   - git add .
   #   - git commit --amend --no-edit
-
-  notifications:
-    - provider: Webhook
-      url: 
-        secure: t5RCJvfbPVTAhfyWxTvkwfNeHtrr3i4XdQWwYoLMox7YvD9MAIVa74bxikBlABYBxROuUTqSKrCyqcCQmyAnYsUHc+aGsxxCt4oWhaZN2UBiqo3nEht42VXhNgFR0fnZLj8jpY9WNHneEEQPRGl3oEq2yEN1SyeSQtuLmTZSNiY=
-      method: POST
-      body: >-
-          {
-              "content":  "<{{buildUrl}}|Build {{projectName}} {{buildVersion}} {{status}}>
-                          Commit <{{commitUrl}}|{{commitId}}> by {{commitAuthor}} on {{commitDate}}:
-                          _{{commitMessage}}_"
-          }
-      on_build_status_changed: true
-      on_build_success: false
-      on_build_failure: false
