@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.11)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
 
