@@ -6,6 +6,7 @@
 #include <Esp32_os.h>
 
 #include <targetHAL.h>
+#include <nanoCLR_Application.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <LaunchCLR.h>
 #include <string.h>
@@ -42,7 +43,15 @@ void main_task(void *pvParameter)
 {
   (void)pvParameter;
   
-  CLRStartupThread( 0);
+  // CLR settings to launch CLR thread
+  CLR_SETTINGS clrSettings;
+  (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+
+  clrSettings.MaxContextSwitches         = 50;
+  clrSettings.WaitForDebugger            = false;
+  clrSettings.EnterDebuggerLoopAfterExit = true;
+
+  CLRStartupThread(&clrSettings);
  
   vTaskDelete(NULL);
 }
