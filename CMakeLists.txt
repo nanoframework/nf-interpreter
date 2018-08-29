@@ -393,9 +393,10 @@ if(API_System.Net)
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
-    # enable nanoFramework.Networking.Sntp
-    if(NF_NETWORKING_SNTP)
-        set(API_nanoFramework.Networking.Sntp ON CACHE INTERNAL "enable of nanoFramework.Networking.Sntp")
+    if(API_Windows.Devices.Wifi)
+        set(USE_WIFI_OPTION TRUE CACHE INTERNAL  "Wifi for Windows.Devices.WiFi")
+    else()
+        set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
     endif()
 
 endif()
@@ -448,13 +449,6 @@ if(API_Windows.Devices.Spi)
     set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 else()
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-endif()
-
-
-if(API_Windows.Devices.Wifi)
-    set(HAL_USE_WIFI_OPTION TRUE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
-else()
-    set(HAL_USE_WIFI_OPTION FALSE CACHE INTERNAL "HAL Wifi for Windows.Devices.WiFi")
 endif()
 
 

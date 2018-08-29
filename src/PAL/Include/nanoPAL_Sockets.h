@@ -513,7 +513,9 @@ bool  Network_Uninitialize();
 bool Network_Interface_Bind(int index);
 int  Network_Interface_Open(int index);
 bool Network_Interface_Close(int index);
-
+int  Network_Interface_Disconnect(int index);
+int  Network_Interface_Connect(int index, const char * ssid, const char * passphase, int reconOption);
+bool Network_Interface_Start_Scan(int index);
 //--//
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -525,6 +527,16 @@ enum NetworkEventType
     NetworkEventType_Invalid = 0,
     NetworkEventType_AvailabilityChanged = 1,
     NetworkEventType_AddressChanged = 2,
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Windows.Devices.WiFi.WiFiEventType (in managed code) !!! //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum WiFiEventType
+{
+    WiFiEventType_Invalid = 0,
+    WiFiEventType_ScanComplete = 1,
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -131,7 +131,13 @@ macro(ParseNativeAssemblies)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("Windows.Networking.Sockets")
     endif()
-    
+ 
+    # Windows.Devices.Wifi
+    if(API_Windows.Devices.Wifi)
+       ##### API name here (doted name)
+       PerformSettingsForApiEntry("Windows.Devices.Wifi")
+    endif()
+
     # Hardware.Esp32
     if(API_Hardware.Esp32)
         ##### API name here (doted name)

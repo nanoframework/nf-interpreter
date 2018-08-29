@@ -11,6 +11,8 @@
 
 extern "C" void set_signal_sock_function( void (*funcPtr)() );
 
+#define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
+
 //
 // Callback from LWIP on event
 //
@@ -27,18 +29,24 @@ __nfweak void InitialiseEthernet()
 
 static void PostAddressChanged()
 {
-	Network_PostEvent(NETWORK_EVENT_TYPE_ADDRESS_CHANGED, 0);
+	Network_PostEvent(NetworkEventType_AddressChanged, 0);
 }
 
 static void PostAvailabilityOn()
 {
-	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 1);
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, 1);
 }
 
 static void PostAvailabilityOff()
 {
-	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 0);
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, 0);
 }
+
+static void PostScanComplete()
+{
+    PostManagedEvent( EVENT_WIFI, WiFiEventType_ScanComplete, 0, 0 );
+}
+
 
 //
 // Network event loop handler
@@ -46,6 +54,8 @@ static void PostAvailabilityOff()
 static  esp_err_t event_handler(void *ctx, system_event_t *event)
 {
 	(void)ctx;
+
+//ets_printf("Network event %d\n", event->event_id);
 
     switch(event->event_id) {
 
@@ -66,7 +76,7 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 
     case SYSTEM_EVENT_STA_CONNECTED:
 //ets_printf("SYSTEM_EVENT_STA_CONNECTED\n");
-		PostAvailabilityOff();
+		PostAvailabilityOn();
 		break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
 //ets_printf("SYSTEM_EVENT_STA_DISCONNECTED\n");
@@ -75,6 +85,12 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
         //xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
         break;
 	
+	// Scan of available Wifi networks complete
+	case SYSTEM_EVENT_SCAN_DONE:
+//ets_printf("SYSTEM_EVENT_SCAN_DONE\n");
+		PostScanComplete();
+		break;
+
 	case SYSTEM_EVENT_STA_AUTHMODE_CHANGE:
 //		system_event_sta_authmode_change_t *auth_change = &event->event_info.auth_change;
 //ets_printf("SYSTEM_EVENT_STA_AUTHMODE_CHANGE");

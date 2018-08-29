@@ -61,6 +61,16 @@ esp_err_t Esp32_Wireless_Connect(HAL_Configuration_Wireless80211 * pWireless)
 	return ESP_OK;
 }
 
+esp_err_t Esp32_Wireless_Disconnect()
+{
+	esp_err_t ec;
+
+	ec = esp_wifi_disconnect();
+	if(ec != ESP_OK) return ec;
+
+	return ESP_OK;
+}
+
 int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * pConfig) 
 { 
 	(void)index;
@@ -103,6 +113,21 @@ bool Esp32_Wireless_Close(int index)
 		WifiInitialised = false;
 	}
     return false; 
+}
+
+// Start a scan
+int Esp32_Wireless_Scan()
+{
+	wifi_scan_config_t config;
+	memset( &config, 0, sizeof(wifi_scan_config_t));
+
+	config.scan_type = WIFI_SCAN_TYPE_PASSIVE;
+	config.scan_time.passive = 500;                         // 500 ms
+
+	// Start a WIFI scan
+	// When complete a Scan Complete event will be fired
+	esp_err_t res = esp_wifi_scan_start( &config, false );
+	return (int)res;
 }
 
 //
