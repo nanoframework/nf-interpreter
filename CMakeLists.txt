@@ -355,6 +355,10 @@ endif()
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
 
+if(NF_NETWORKING_SNTP)
+    set(API_nanoFramework.Networking.Sntp TRUE CACHE INTERNAL "enable of API_nanoFramework..Networking.Sntp")
+endif()
+
 #################################################################
 # enables filesysytem support in nanoCLR
 # (default is OFF so the filesystem is NOT supported)
