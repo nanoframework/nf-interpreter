@@ -270,10 +270,16 @@
   #   - git commit --amend --no-edit
 
   notifications:
-    - provider: Slack
-      auth_token:
-        secure: 2tqAJTTbN2dm24Vrwo5TXun3Vxc34R5G9l7o3pK3xEuKZAzxx3nbP2yGkMI/kl3+NxHXknjBfZnkhZC5eLYBHb+jO7YVUZwPYOfC/ZGy5HU=
-      channel: '#build-monitor'
+    - provider: Webhook
+      url: 
+        secure: t5RCJvfbPVTAhfyWxTvkwfNeHtrr3i4XdQWwYoLMox7YvD9MAIVa74bxikBlABYBxROuUTqSKrCyqcCQmyAnYsUHc+aGsxxCt4oWhaZN2UBiqo3nEht42VXhNgFR0fnZLj8jpY9WNHneEEQPRGl3oEq2yEN1SyeSQtuLmTZSNiY=
+      method: POST
+      body: >-
+          {
+              "content":  "<{{buildUrl}}|Build {{projectName}} {{buildVersion}} {{status}}>
+                          Commit <{{commitUrl}}|{{commitId}}> by {{commitAuthor}} on {{commitDate}}:
+                          _{{commitMessage}}_"
+          }
       on_build_status_changed: true
       on_build_success: false
       on_build_failure: false
@@ -566,10 +572,16 @@
   #   - git commit --amend --no-edit
 
   notifications:
-    - provider: Slack
-      auth_token:
-        secure: 2tqAJTTbN2dm24Vrwo5TXun3Vxc34R5G9l7o3pK3xEuKZAzxx3nbP2yGkMI/kl3+NxHXknjBfZnkhZC5eLYBHb+jO7YVUZwPYOfC/ZGy5HU=
-      channel: '#build-monitor'
+    - provider: Webhook
+      url: 
+        secure: t5RCJvfbPVTAhfyWxTvkwfNeHtrr3i4XdQWwYoLMox7YvD9MAIVa74bxikBlABYBxROuUTqSKrCyqcCQmyAnYsUHc+aGsxxCt4oWhaZN2UBiqo3nEht42VXhNgFR0fnZLj8jpY9WNHneEEQPRGl3oEq2yEN1SyeSQtuLmTZSNiY=
+      method: POST
+      body: >-
+          {
+              "content":  "<{{buildUrl}}|Build {{projectName}} {{buildVersion}} {{status}}>
+                          Commit <{{commitUrl}}|{{commitId}}> by {{commitAuthor}} on {{commitDate}}:
+                          _{{commitMessage}}_"
+          }
       on_build_status_changed: true
       on_build_success: false
       on_build_failure: false
@@ -852,10 +864,16 @@
   #   - git commit --amend --no-edit
 
   notifications:
-    - provider: Slack
-      auth_token:
-        secure: 2tqAJTTbN2dm24Vrwo5TXun3Vxc34R5G9l7o3pK3xEuKZAzxx3nbP2yGkMI/kl3+NxHXknjBfZnkhZC5eLYBHb+jO7YVUZwPYOfC/ZGy5HU=
-      channel: '#build-monitor'
+    - provider: Webhook
+      url: 
+        secure: t5RCJvfbPVTAhfyWxTvkwfNeHtrr3i4XdQWwYoLMox7YvD9MAIVa74bxikBlABYBxROuUTqSKrCyqcCQmyAnYsUHc+aGsxxCt4oWhaZN2UBiqo3nEht42VXhNgFR0fnZLj8jpY9WNHneEEQPRGl3oEq2yEN1SyeSQtuLmTZSNiY=
+      method: POST
+      body: >-
+          {
+              "content":  "<{{buildUrl}}|Build {{projectName}} {{buildVersion}} {{status}}>
+                          Commit <{{commitUrl}}|{{commitId}}> by {{commitAuthor}} on {{commitDate}}:
+                          _{{commitMessage}}_"
+          }
       on_build_status_changed: true
       on_build_success: false
       on_build_failure: false
