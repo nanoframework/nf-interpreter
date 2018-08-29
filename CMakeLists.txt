@@ -355,10 +355,6 @@ endif()
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
 
-if(NF_NETWORKING_SNTP)
-    set(API_nanoFramework.Networking.Sntp TRUE CACHE INTERNAL "enable of API_nanoFramework..Networking.Sntp")
-endif()
-
 #################################################################
 # enables filesysytem support in nanoCLR
 # (default is OFF so the filesystem is NOT supported)
@@ -401,6 +397,13 @@ if(API_System.Net)
         set(USE_WIFI_OPTION TRUE CACHE INTERNAL  "Wifi for Windows.Devices.WiFi")
     else()
         set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
+    endif()
+
+    # manage inclusion of SNTP
+    if(NF_NETWORKING_SNTP)
+        set(API_nanoFramework.Networking.Sntp ON CACHE INTERNAL "enable API_nanoFramework..Networking.Sntp")
+    else()
+        set(API_nanoFramework.Networking.Sntp OFF CACHE INTERNAL "disable API_nanoFramework..Networking.Sntp")
     endif()
 
 endif()
