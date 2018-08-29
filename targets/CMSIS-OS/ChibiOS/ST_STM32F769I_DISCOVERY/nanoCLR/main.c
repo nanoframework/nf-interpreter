@@ -25,7 +25,9 @@ osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here 
 osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread"); 
 
-
+// Temporary for debug of file system
+extern int tiny_sprintf(char *out, const char *format, ...);
+char buffer[255];
 
   // *************** DEMO CODE FOR FATFS *******************
 
@@ -117,25 +119,42 @@ static bool fs_ready = FALSE;
  * Card insertion event.
  */
 static void InsertHandler(eventid_t id) {
+  
+  // Temporary to indicate this event being fired
+  palSetLine(LINE_LED1_RED);
+  
   FRESULT err;
 
   (void)id;
   /*
    * On insertion SDC initialization and FS mount.
    */
-  if (sdcConnect(&SDCD1))
+  if (sdcConnect(&SDCD2))
     return;
 
+  // Temporary to indicate this event being fired
+  SwoPrintString("\r\nFatFs: Initializing completed.\r\n");
+
+  err = f_mount(&SDC_FS, "", 1);
+  
+  // Temporary to indicate this event being fired
+  tiny_sprintf(&buffer[0], "Error %d", err);
+  SwoPrintString("\r\nFatFs: Mount completed...\r\n");
+  
   err = f_mount(&SDC_FS, "/", 1);
    if (err != FR_OK) {
-     sdcDisconnect(&SDCD1);
+     sdcDisconnect(&SDCD2);
      return;
    }
   fs_ready = TRUE;
+  
+  // Temporary: arriving here means we have an initialized and mounted SD Card
+  // Indicated by a green LED
+  palSetLine(LINE_LED2_GREEN);
 
   //****** Test - Create a file!
   FIL fileObj;
-  fr = f_open(&fileObj, "TestMessage.txt", FA_CREATE_ALWAYS);
+  err = f_open(&fileObj, "TestMessage.txt", FA_CREATE_ALWAYS);
   f_close(&fileObj);
   //******* End Test
 }
@@ -145,8 +164,11 @@ static void InsertHandler(eventid_t id) {
  */
 static void RemoveHandler(eventid_t id) {
 
+  // To indicate we have ejected the sd card
+  palClearLine(LINE_LED1_RED);
+  
   (void)id;
-    sdcDisconnect(&SDCD1);
+  sdcDisconnect(&SDCD2);
   fs_ready = FALSE;
 }
 
@@ -211,29 +233,23 @@ int main(void) {
 
 
   // *************** DEMO CODE FOR FATFS *******************
-static const evhandler_t evhndl[] = {
-    InsertHandler,
-    RemoveHandler
-  };
+  static const evhandler_t evhndl[] = { InsertHandler, RemoveHandler };
   event_listener_t el0, el1;
   /*
-   * Activates the  SDC driver 1 using default configuration.
+   * Activates the  SDC driver 2 using default configuration.
    */
 
-  sdcStart(&SDCD1, NULL);
+  sdcStart(&SDCD2, NULL);
 
   /*
    * Activates the card insertion monitor.
    */
-  tmr_init(&SDCD1);
+  tmr_init(&SDCD2);
 
-chEvtRegister(&inserted_event, &el0, 0);
-chEvtRegister(&removed_event, &el1, 1);
-
-
+  chEvtRegister(&inserted_event, &el0, 0);
+  chEvtRegister(&removed_event, &el1, 1);
 
   // *******************************************************
-
   while (true) { 
     osDelay(100);
     chEvtDispatch(evhndl, chEvtWaitOneTimeout(ALL_EVENTS, TIME_MS2I(500)));
