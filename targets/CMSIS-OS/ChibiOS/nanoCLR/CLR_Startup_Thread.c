@@ -18,7 +18,7 @@
 __attribute__((noreturn))
 void CLRStartupThread(void const * argument)
 {
-  (void)argument;
+  CLR_SETTINGS* clrSettings = (CLR_SETTINGS*)argument;
 
   #if (HAL_USE_STM32_CRC == TRUE)
   // startup crc
@@ -28,14 +28,7 @@ void CLRStartupThread(void const * argument)
   // initialize nanoHAL
   nanoHAL_Initialize_C();
 
-  CLR_SETTINGS clrSettings;
-  (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
-
-  clrSettings.MaxContextSwitches         = 50;
-  clrSettings.WaitForDebugger            = false;
-  clrSettings.EnterDebuggerLoopAfterExit = true;
-
-  ClrStartup(clrSettings);
+  ClrStartup(*clrSettings);
 
   // loop until thread receives a request to terminate
   while (1) {
