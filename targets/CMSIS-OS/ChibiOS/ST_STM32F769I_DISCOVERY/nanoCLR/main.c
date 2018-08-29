@@ -142,6 +142,7 @@ static void InsertHandler(eventid_t id) {
 
   SDC_FS = malloc(sizeof (FATFS)); 
   SwoPrintString("\r\nFatFs: Set Malloc size.\r\n");
+  osDelay(1000);
 
   err = f_mount(SDC_FS, "/", 1);
 
