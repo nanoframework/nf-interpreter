@@ -4,7 +4,7 @@
 #
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Runtime.Events")
+set(BASE_PATH_FOR_THIS_MODULE "${PROJECT_SOURCE_DIR}/src/CLR/Runtime.Events")
 
 
 # set include directories
@@ -28,7 +28,7 @@ set(nanoFramework.Runtime.Events_SRCS
     AsyncCompletions.cpp
     AsyncContinuations.cpp
     nanoPAL_Events_functions.cpp
-    
+
 )
 
 foreach(SRC_FILE ${nanoFramework.Runtime.Events_SRCS})
