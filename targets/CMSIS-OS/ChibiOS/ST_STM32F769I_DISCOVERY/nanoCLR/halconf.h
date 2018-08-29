@@ -18,6 +18,8 @@
 #ifndef HALCONF_H
 #define HALCONF_H
 
+#define FATFS_HAL_DEVICE SDCD2
+
 #define _CHIBIOS_HAL_CONF_
 #define _CHIBIOS_HAL_CONF_VER_6_0_
 
