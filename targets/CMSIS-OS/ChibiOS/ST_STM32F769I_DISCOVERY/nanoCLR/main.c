@@ -137,8 +137,6 @@ static void InsertHandler(eventid_t id) {
   // Temporary to indicate this event being fired
   SwoPrintString("\r\nFatFs: Initializing SD completed.\r\n");
 
-  osDelay(1000);
-
   err = f_mount(&SDC_FS, "/", 1);
 
   if (err != FR_OK)
@@ -162,8 +160,6 @@ static void InsertHandler(eventid_t id) {
 
   if (fs_ready)
   {
-    osDelay(1000);
-
     //****** Test - Create a file!
     FIL fileObj;
     err = f_open(&fileObj, "TestMessage.txt", FA_CREATE_ALWAYS);
@@ -173,6 +169,8 @@ static void InsertHandler(eventid_t id) {
     {
       tiny_sprintf(buffer, "Error Creating File %d", err);
       SwoPrintString(buffer);
+      
+      osDelay(1000);
     }
     else
     {
