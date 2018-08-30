@@ -254,6 +254,13 @@
             }            
           }          
         }
+  # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL
+  on_failure:
+  - ps: |
+
+        cd ..
+
+        .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
 
@@ -540,6 +547,14 @@
           }          
         }
 
+  # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL
+  on_failure:
+  - ps: |
+
+        cd ..
+
+        .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
+
   test: off
 
   artifacts:
@@ -817,6 +832,14 @@
             }            
           }          
         }
+
+  # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL 
+  on_failure:
+  - ps: |
+
+        cd ..
+
+        .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
 
