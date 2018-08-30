@@ -36,6 +36,8 @@
 #define FATFS_HAL_DEVICE SDCD2
 #endif
 
+//#define STM32_SDC_SDMMC_50MHZ               TRUE
+
 /**
  * @brief   Enables the ADC subsystem.
  */

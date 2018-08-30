@@ -110,7 +110,7 @@ static void tmr_init(void *p) {
 /**
  * @brief FS object.
  */
-static FATFS *SDC_FS;
+static FATFS SDC_FS;
 
 /* FS mounted and ready.*/
 static bool fs_ready = FALSE;
@@ -136,15 +136,11 @@ static void InsertHandler(eventid_t id) {
     return;
 
   // Temporary to indicate this event being fired
-  SwoPrintString("\r\nFatFs: Initializing completed.\r\n");
+  SwoPrintString("\r\nFatFs: Initializing SD completed.\r\n");
 
   osDelay(1000);
 
-  SDC_FS = malloc(sizeof (FATFS)); 
-  SwoPrintString("\r\nFatFs: Set Malloc size.\r\n");
-  osDelay(1000);
-
-  err = f_mount(SDC_FS, "/", 1);
+  err = f_mount(&SDC_FS, "/", 1);
 
   if (err != FR_OK)
   {
