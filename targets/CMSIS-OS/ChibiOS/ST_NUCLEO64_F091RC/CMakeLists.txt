@@ -114,6 +114,9 @@ add_executable(
     "${NF_Debugger_SOURCES}"
     "${NF_Diagnostics_SOURCES}"
 
+    # sources for ChibiOS FatFS
+    "${CHIBIOS_FATFS_SOURCES}"
+
     # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
 )
@@ -165,6 +168,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     
     # includes for nanoFramework APIs
     "${TARGET_NANO_APIS_INCLUDES}"
+
+    # includes for ChibiOS FatFS
+    "${CHIBIOS_FATFS_INCLUDE_DIRS}"
 
     # includes for ChibiOS LwIP
     "${CHIBIOS_LWIP_INCLUDE_DIRS}"
