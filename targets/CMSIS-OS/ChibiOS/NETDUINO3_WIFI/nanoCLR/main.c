@@ -110,6 +110,7 @@ static void tmr_init(void *p) {
  * @brief FS object.
  */
 static FATFS SDC_FS;
+static SDCConfig SDC_CFG;
 
 /* FS mounted and ready.*/
 static bool fs_ready = FALSE;
@@ -285,7 +286,7 @@ int main(void) {
    * Activates the  SDC driver 1 using default configuration.
    */
 
-  sdcStart(&SDCD1, NULL);
+  sdcStart(&SDCD2, &SDC_CFG);
 
   /*
    * Activates the card insertion monitor.
