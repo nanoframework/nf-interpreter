@@ -10,11 +10,13 @@
 uint32_t GenericPort_Write( int portNum, const char* data, size_t size )
 {
     (void)portNum;
-
-    char* p = (char*)data;
-    int counter = 0;
+    (void)data;
 
     // TODO fix this when working https://github.com/nanoframework/Home/issues/389
+
+    //char* p = (char*)data;
+    //int counter = 0;
+
     //// send characters directly to the trace port
     //while(*p != '\0' || counter < (int)size)
     //{
