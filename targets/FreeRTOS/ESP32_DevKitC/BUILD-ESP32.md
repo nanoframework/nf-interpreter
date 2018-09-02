@@ -22,16 +22,16 @@ The build is based on CMake tool to ease the development in all major platforms.
 You'll need:
 
 - [Visual Studio Code](http://code.visualstudio.com/)
-- [CMake] (https://cmake.org/download/) Download the latest stable version from and install it (Minimum required version is 3.7).
+- [CMake](https://cmake.org/download/) Download the latest stable version from and install it (Minimum required version is 3.7).
 - [Python 3.6.5](https://www.python.org/ftp/python/3.6.5/python-3.6.5.exe) Required for uploading the nanoCLR to the ESP32.
 
 ## Setting up the build environment for ESP32
 
-To save time, you can use the `install-base.ps1` Power Shell script to download the ESP32 IDF Source, toolchain, prebuilt libraries, OpenOCD (for JTAG debugging) and Ninja Zips. It will download the zips into the repository folder and extract them into the folder:
+To save time, you can use the `install-tools.ps1` Power Shell script to download the ESP32 IDF Source, toolchain, prebuilt libraries, OpenOCD (for JTAG debugging) and Ninja Zips. It will download the zips into the repository folder and extract them into the folder:
 
    - `C:\Esp32_Tools`
 
-Open Power Shell and run the script `.\install-base.ps1`. Subfolders follow the names used in the automated build tool AppVeyor (see manual install below and appveyor.yml)
+Open Power Shell and run the script `.\install-tools.ps1`. Subfolders follow the names used in the automated build tool AppVeyor (see manual install below and appveyor.yml)
 
    - `C:\Esp32_Tools\1.22.0-80`
    - `C:\Esp32_Tools\esp-idf-v3.0`
@@ -198,7 +198,7 @@ You should use the _develop_ branch for mainstream development or the _develop-n
 
 ## Set up Ninja
 
-1. Extract the exe into `C:\Esp32_Tools\ninja` and add the `C:\Esp32_Tools\ninja` directory to your path variable. Note that `install-base.ps1` will do this for you. 
+1. Extract the exe into `C:\Esp32_Tools\ninja` and add the `C:\Esp32_Tools\ninja` directory to your path variable. Note that `install-tools.ps1` will do this for you. 
 
 
 ## Set up Python
@@ -207,7 +207,7 @@ You should use the _develop_ branch for mainstream development or the _develop-n
 ```
 python -m pip install pyserial
 ```
-Note that `install-base.ps1` will install `pyserial` for you if you installed Python prior to running the script. (It is Ok to run multiple times.)
+Note that `install-tools.ps1` will install `pyserial` for you if you installed Python prior to running the script. (It is Ok to run multiple times.)
 
 ## Build nanoCLR
 
