@@ -18,7 +18,7 @@ ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
 	}
 	If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PATH))
 	{
-		$env:ESP32_TOOLCHAIN_PATH= ($env:ESP32_TOOLS_PATH+'\1.22.0-80')
+		$env:ESP32_TOOLCHAIN_PATH= ($env:ESP32_TOOLS_PATH+'\1.22.0-80\xtensa-esp32-elf')
 		Write-Host ("Set User Environment ESP32_TOOLCHAIN_PATH='"+$env:ESP32_TOOLCHAIN_PATH+"'")
 		[System.Environment]::SetEnvironmentVariable("ESP32_TOOLCHAIN_PATH", $env:ESP32_TOOLCHAIN_PATH, "User")
 	}
@@ -64,11 +64,26 @@ ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
 	{
 		Copy-Item "$PSScriptRoot\.vscode\cmake-kits.TEMPLATE-ESP32.json" -Destination "$PSScriptRoot\.vscode\cmake-kits.json" -Force 
 	}
+	
 	$filePathExists = Test-Path "$PSScriptRoot\.vscode\tasks.json" -ErrorAction SilentlyContinue
 	If($filePathExists -eq $False)
 	{
 		Copy-Item "$PSScriptRoot\.vscode\tasks.TEMPLATE-ESP32.json" -Destination "$PSScriptRoot\.vscode\tasks.json" -Force  
 		Write-Warning "Edit paths in $PSScriptRoot\.vscode\tasks.json"
+	}
+	
+	$filePathExists = Test-Path ".\.vscode\launch.json" -ErrorAction SilentlyContinue
+	$filePathExists=$False
+	If($filePathExists -eq $False)
+	{
+		Write-Host "Create .\.vscode\launch.json with install paths from .\vscode\launch.TEMPLATE-ESP32.json"
+		Copy-Item ".\.vscode\launch.TEMPLATE-ESP32.json" -Destination ".\.vscode\launch.json" -Force
+		$buildFolderPath = Resolve-Path .\build
+		$launch = (Get-Content '.\.vscode\launch.json')
+		$launch = $launch.Replace('<absolute-path-to-the-build-folder-mind-the-forward-slashes>', $buildFolderPath.ToString().Replace("\", "/")) 
+		$launch = $launch.Replace('<absolute-path-to-openocd-mind-the-forward-slashes>', $env:ESP32_OPENOCD_PATH.Replace("\", "/")) 
+		$launch = $launch.Replace('<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PATH.Replace("\", "/")) 
+		Set-Content -Path '.\.vscode\launch.json' -Value $launch 
 	}
 }
 Else
