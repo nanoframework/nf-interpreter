@@ -989,9 +989,9 @@
 
         float d = stack.Arg0().NumericByRefConst().r4;
         float res = 0.0;
-        float retVal = modff(d, &res); 
+        modff(d, &res); 
 
-        stack.SetResult_R4( retVal );
+        stack.SetResult_R4( res );
 
         NANOCLR_NOCLEANUP_NOLABEL();
 
