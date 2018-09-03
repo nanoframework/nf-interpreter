@@ -7,6 +7,7 @@
 #include <nanoHAL_Time.h>
 
 const int CummulativeDaysForMonth[13] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
+const int DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 #define IS_LEAP_YEAR(y)             (((y % 4 == 0) && (y % 100 != 0)) || (y % 400 == 0))
 #define NUMBER_OF_LEAP_YEARS(y)     ((((y - 1) / 4) - ((y - 1) / 100) + ((y - 1) / 400)) - BASE_YEAR_LEAPYEAR_ADJUST) /// Number of leap years until base year, not including the target year itself.
@@ -14,6 +15,7 @@ const int CummulativeDaysForMonth[13] = {0, 31, 59, 90, 120, 151, 181, 212, 243,
 
 #define YEARS_TO_DAYS(y)            ((NUMBER_OF_YEARS(y) * DAYS_IN_NORMAL_YEAR) + NUMBER_OF_LEAP_YEARS(y))
 #define MONTH_TO_DAYS(y, m)         (CummulativeDaysForMonth[m - 1] + ((IS_LEAP_YEAR(y) && (m > 2)) ? 1 : 0))
+#define DAYS_IN_MONTH(y, m)         (DaysInMonth[m - 1] + ((IS_LEAP_YEAR(y) && (m == 2)) ? 1 : 0))
 
 #define TIMEUNIT_TO_MINUTES         600000000
 #define TIMEUNIT_TO_MILLISECONDS    10000
@@ -88,7 +90,7 @@ HRESULT HAL_Time_AccDaysInMonth(signed int year, signed int month, signed int* d
 
 HRESULT HAL_Time_DaysInMonth(signed int year, signed int month, signed int* days)
 {
-    *days = MONTH_TO_DAYS(year, month);
+    *days = DAYS_IN_MONTH(year, month);
 
     return S_OK;
 }
