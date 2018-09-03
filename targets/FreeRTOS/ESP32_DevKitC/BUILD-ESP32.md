@@ -265,7 +265,17 @@ Create a `./.vscode/launch.json` from `/.vscode/launch.TEMPLATE-ESP32.json`.
 
 Edit the file and adjust the absolute path `<absolute-path-to-the-build-folder-mind-the-forward-slashes>` to the build folder (**!!mind the forward slashes!!**) to your needs. The following example assumes the OpenOCD tool was installed in the default location. Adjust the path as required if you used custom install path to OpenOCD.
 
+The JTAG connections on ESP32 DEVKITC are:
+```
+TDI -> GPIO12
+TCK -> GPIO13
+TMS ->GPIO14
+TDO -> GPIO15
+TRST -> EN / RST (Reset)
+GND -> GND
+```
 See Gojimmypi for description of JTAG connections: https://gojimmypi.blogspot.com/2017/03/jtag-debugging-for-esp32.html 
+
 
 ```
 {
