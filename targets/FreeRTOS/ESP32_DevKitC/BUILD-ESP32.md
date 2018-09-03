@@ -353,7 +353,7 @@ You can now debug nanoCLR on the ESP32 by pressing F5 in Visual Studio Code.
 
 ## Notes on JTAG debugging on ESP32
 
-If flashing nanoCLR via a COM port (default), then be aware that you need to disconnect the JTAG to avoid it preventing the bootloader from running, and therefore beng unable to reprogram the ESP23. e.g. if you see the following patterin repeating, unplugh the USB-OCD-H, and then the programming will proceed. 
+If flashing nanoCLR via a COM port (default), then be aware that you need to disconnect the JTAG to avoid it preventing the bootloader from running, and therefore being unable to reprogram the ESP23. e.g. if you see the following pattern repeating, unplug the USB-OCD-H, and then the programming will proceed.
 ```
 esptool.py v2.1
 Connecting........_____....._____...
