@@ -8,6 +8,7 @@
 #include <nanoHAL.h>
 #include "Esp32_os.h"
 #include "LWIP_Sockets.h"
+#include "apps/sntp/sntp.h"
 
 extern "C" void set_signal_sock_function( void (*funcPtr)() );
 
@@ -47,6 +48,13 @@ static void PostScanComplete()
     PostManagedEvent( EVENT_WIFI, WiFiEventType_ScanComplete, 0, 0 );
 }
 
+static void initialize_sntp()
+{
+	sntp_stop();
+    sntp_setoperatingmode(SNTP_OPMODE_POLL);
+    sntp_setservername(0, SNTP_SERVER_DEFAULT_ADDRESS);
+    sntp_init();
+}
 
 //
 // Network event loop handler
@@ -68,6 +76,7 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
     case SYSTEM_EVENT_STA_GOT_IP:
 //ets_printf("SYSTEM_EVENT_STA_GOT_IP\n");
 		PostAddressChanged();
+		initialize_sntp();
         //xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
         break;
 	case SYSTEM_EVENT_STA_LOST_IP:
@@ -119,6 +128,7 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 		break;
 	case SYSTEM_EVENT_ETH_GOT_IP:
 		PostAddressChanged();
+		initialize_sntp();
 		break;
     case SYSTEM_EVENT_ETH_DISCONNECTED:
 		PostAvailabilityOff();
