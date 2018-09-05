@@ -14,7 +14,7 @@ HRESULT Library_corlib_native_System_Random::Next___I4( CLR_RT_StackFrame& stack
 
     NANOCLR_CHECK_HRESULT(GetRandom( stack, rand ));
 
-    stack.SetResult_I4( rand->Next() );
+    stack.SetResult_I4( rand->Next() & 0x7FFFFFFF );
 
     NANOCLR_NOCLEANUP();
 }
