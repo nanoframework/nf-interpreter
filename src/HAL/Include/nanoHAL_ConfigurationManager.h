@@ -87,6 +87,13 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
 // needs to be free to implement the storage of the configuration block as they see fit
 bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex);
 
+
+//  Default initialisation for wireless config block
+void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, uint32_t configurationIndex);
+
+//  Default initialisation for Network interface config blocks
+void InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex);
+
 // helper functions
 
 // function that sweeps a memory region searching for network configuration blocks

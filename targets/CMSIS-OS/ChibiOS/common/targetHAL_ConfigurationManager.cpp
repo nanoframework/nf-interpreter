@@ -56,10 +56,17 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBloc
     // requested Index has to exist (array index starts at zero, so need to add one)
     if(configuration == DeviceConfigurationOption_Network)
     {
-        if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 ||
-            (configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
+        if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
         {
-            return FALSE;
+            // there is no network config block, init one with default settings
+            InitialiseNetworkDefaultConfig(NULL, 0);
+        }
+        else
+        {
+            if((configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
+            {
+                return FALSE;
+            }
         }
 
         // set block size
@@ -252,4 +259,36 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(void* configurationB
     }
 
     return success;
+}
+
+//  Default initialisation for wireless config block
+// it's implemented with 'weak' attribute so it can be replaced at target level if different configurations are intended
+__nfweak void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, uint32_t configurationIndex)
+{
+    (void)pconfig;
+    (void)configurationIndex;
+    
+    // currently empty as no ChibiOS target has Wireless 802.11 interface
+}
+
+//  Default initialisation for Network interface config blocks
+// it's implemented with 'weak' attribute so it can be replaced at target level if different configurations are intended
+__nfweak void InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
+{
+    (void)pconfig;
+    (void)configurationIndex;
+
+    HAL_Configuration_NetworkInterface config;
+
+    config.InterfaceType = NetworkInterfaceType_Ethernet;
+
+    // defaults to DHCP and DNS from DHCP
+    config.StartupAddressMode = AddressMode_DHCP;
+    config.AutomaticDNS = TRUE;
+
+    // store this to the 0 index block
+    ConfigurationManager_StoreConfigurationBlock(&config, DeviceConfigurationOption_Network, 0, 0);
+
+    // need to update the block count
+    g_TargetConfiguration.NetworkInterfaceConfigs->Count = 1;
 }

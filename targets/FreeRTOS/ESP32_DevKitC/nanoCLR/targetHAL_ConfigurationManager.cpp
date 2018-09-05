@@ -103,7 +103,8 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
     }
 }
 
-void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, int configurationIndex)
+//  Default initialisation of wireless config blocks for ESP32 targets
+void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, uint32_t configurationIndex)
 {
     memset( pconfig, 0, sizeof(HAL_Configuration_Wireless80211));
 
@@ -142,10 +143,8 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, 
     }
 }
 
-//
-//  Default inialisation of Network interface config blocks
-//
-void InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, int configurationIndex)
+//  Default initialisation of Network interface config blocks for ESP32 targets
+void InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
 {
     memset( pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
     
@@ -229,7 +228,7 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
             bool storeConfig = false;
             itoa(configurationIndex, configName+1, 10);
 
-        // copy the config block content to the pointer in the argument
+            // copy the config block content to the pointer in the argument
             ret = nvs_get_blob(out_handle, configName, (void *)configurationBlock, &blobSize);
             if (ret != ESP_OK)
             {
