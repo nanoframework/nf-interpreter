@@ -9,9 +9,9 @@
 // (value in milliseconds)
 #define SNTP_UPDATE_DELAY       3600000
 
-// better have a startup delay because we can have DHCP enabled (default 30 seconds)
-// value in milliseconds
-#define SNTP_STARTUP_DELAY      30000
+// better have a startup delay because we can have DHCP enabled, value in milliseconds.
+// As we automatically start SNTP when we get the IP address then only a small delay
+#define SNTP_STARTUP_DELAY      1000
 
 // retry timeout (15 minutes)
 // value in milliseconds
