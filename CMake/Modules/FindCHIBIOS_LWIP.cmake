@@ -9,30 +9,18 @@ execute_process(
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
 )
 
-# extract WolfSSL source files
-execute_process(
-    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/wolfssl-3.12.2-patched.7z
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-)
-
 # List of the required lwIp include files.
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Lwip)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings/arch)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip/apps)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip/priv)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip/prot)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/netif)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/netif/ppp)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/netif/ppp/polarssl)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/posix)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/posix/sys)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
 set(LWIP_SRCS
 
-    # bindings
-    lwipthread.c
     # sys_arch.c
 
     # core
@@ -88,7 +76,13 @@ set(LWIP_SRCS
     # api patched files for nanoframework
     nf_api_msg.c
     nf_sockets.c
-    nf_sys_arch.c
+	nf_sys_arch.c
+    
+	# bindings
+	nf_lwipthread.c
+	
+	# platform implementations
+	platform_sys_arch.c
 
     #extras
     evtimer.c
@@ -166,7 +160,8 @@ set(LWIP_SRCS
     # iperf server
     # lwiperf.c
 
-    # SNTP client
+	# SNTP client
+	# this one is added bellow if NF_NETWORKING_SNTP option is ON
     # sntp.c
 
     # MDNS responder
@@ -182,14 +177,15 @@ set(LWIP_SRCS
     # mqtt.c
 )
 
+if(NF_NETWORKING_SNTP)
+    list(APPEND LWIP_SRCS sntp.c)
+endif()
 
 foreach(SRC_FILE ${LWIP_SRCS})
     set(LWIP_SRC_FILE SRC_FILE -NOTFOUND)
     find_file(LWIP_SRC_FILE ${SRC_FILE}
         PATHS 
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings/arch
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv4
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv6
@@ -199,6 +195,7 @@ foreach(SRC_FILE ${LWIP_SRCS})
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif/ppp/polarssl
 
             ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
+            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Lwip
 
             # APPS:
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/snmp
@@ -219,3 +216,18 @@ endforeach()
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CHIBIOS_LWIP DEFAULT_MSG CHIBIOS_LWIP_INCLUDE_DIRS CHIBIOS_LWIP_SOURCES)
+
+# setup target to unzip ChibiOS external network components
+add_custom_target( CHIBIOS_NETWORK_COMPONENTS ALL )
+
+add_custom_command(TARGET CHIBIOS_NETWORK_COMPONENTS
+PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+    DEPENDS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z
+
+    VERBATIM
+)
+
+# this depends on ChibiOS target being already downloaded
+add_dependencies(CHIBIOS_NETWORK_COMPONENTS ChibiOS)

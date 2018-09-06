@@ -16,26 +16,52 @@ uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks)
     return (((int64_t)sysTicks * (int64_t)1000000 + (int64_t)configTICK_RATE_HZ - 1) / (int64_t)configTICK_RATE_HZ) * 10;
 }
 
-// Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
+// Returns the current date time from the RTC 
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-	if (datePartOnly)
-	{
-		SYSTEMTIME st;
-		HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
+    SYSTEMTIME st; 
+ 
+    struct timeval tv;
 
-		st.wHour = 0;
-		st.wMinute = 0;
-		st.wSecond = 0;
-		st.wMilliseconds = 0;
+    gettimeofday(&tv, NULL);
 
-		return HAL_Time_ConvertFromSystemTime(&st);
-	}
-	else
+    // Convert from Unix time(year since 1900) to SYSTEMTIME(Years since 1601)
+    int64_t time = ((int64_t)tv.tv_sec * (int64_t)TIME_CONVERSION__TO_SECONDS) + TIME_UNIX_EPOCH_AS_TICKS;
+
+    HAL_Time_ToSystemTime(time, &st );
+
+    // zero 'time' fields if date part only is required
+    if(datePartOnly)
     {
-        return HAL_Time_CurrentTime();
+        st.wMilliseconds = 0;
+        st.wSecond = 0;
+        st.wMinute = 0;
+        st.wHour = 0;
     }
+
+    return HAL_Time_ConvertFromSystemTime( &st );
 };
+
+void HAL_Time_SetUtcTime(uint64_t utcTime)
+{
+    SYSTEMTIME systemTime;
+
+    HAL_Time_ToSystemTime(utcTime, &systemTime);
+
+    struct tm newTime;
+
+    newTime.tm_year = systemTime.wYear - 1900;      // years since 1900
+    newTime.tm_mon = systemTime.wMonth - 1;         // months since January 0-11
+    newTime.tm_mday = systemTime.wDay;              // day of the month 1-31
+    newTime.tm_wday = systemTime.wDayOfWeek;        // days since Sunday 0-6
+    newTime.tm_hour = (uint32_t)systemTime.wHour;   // hours since midnight 0-23
+    newTime.tm_min = (uint32_t)systemTime.wMinute;  // minutes after the hour 0-59
+    newTime.tm_sec = (uint32_t)systemTime.wSecond;  // seconds after the minute	 0-59
+
+    time_t t = mktime(&newTime);
+    struct timeval now = { .tv_sec = t, .tv_usec = 0 };
+    settimeofday(&now, NULL);
+}
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
 {

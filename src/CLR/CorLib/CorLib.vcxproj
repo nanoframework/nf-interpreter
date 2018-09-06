@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\targets\os\win32\Include\nanoHAL_Time.h" />
     <ClInclude Include="..\..\..\targets\os\win32\Include\target_os.h" />
     <ClInclude Include="CorLib.h" />
     <ClInclude Include="corlib_native.h" />

@@ -23,7 +23,7 @@ uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks)
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-#if defined(HAL_USE_RTC)
+  #if defined(HAL_USE_RTC)
 
     // use RTC to get date time
     SYSTEMTIME st; 
@@ -59,7 +59,7 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 
     return HAL_Time_ConvertFromSystemTime( &st );
 
-#else
+  #else
 	if (datePartOnly)
 	{
 		SYSTEMTIME st;
@@ -76,8 +76,37 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
     {
         return HAL_Time_CurrentTime();
     }
-#endif
+  #endif
 };
+
+void HAL_Time_SetUtcTime(uint64_t utcTime)
+{
+    SYSTEMTIME systemTime;
+
+    HAL_Time_ToSystemTime(utcTime, &systemTime);
+
+  #if defined(HAL_USE_RTC)
+
+    // set RTC
+    RTCDateTime newTime;
+
+    newTime.year = systemTime.wYear - 1980;  // ChibiOS time base is 1980-01-01
+    newTime.month = systemTime.wMonth;
+    newTime.day = systemTime.wDay;
+    newTime.dayofweek = systemTime.wDayOfWeek;
+    newTime.millisecond = ((((uint32_t)systemTime.wHour * 3600) + 
+                            ((uint32_t)systemTime.wMinute * 60) + 
+                            (uint32_t)systemTime.wSecond) * 1000);
+
+    // set RTC time
+    rtcSetTime(&RTCD1, &newTime);
+
+  #else
+    // TODO FIXME
+    // need to add implementation when RTC is not being used
+    // can't mess with the systicks because the scheduling can fail
+  #endif
+}
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
 {

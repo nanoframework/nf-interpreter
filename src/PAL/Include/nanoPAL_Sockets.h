@@ -342,7 +342,7 @@ typedef struct SOCK_timeval {
 #define SOCK_NETWORKCONFIGURATION_FLAGS_DHCP                0x00000001
 #define SOCK_NETWORKCONFIGURATION_FLAGS_DYNAMIC_DNS         0x00000002
 
-/// Bits 19-16 of SOCK_NetworkConfiguration.flags: Type of SOCK_NetworkConfiguration
+/// Bits 19-16 of HAL_Configuration_NetworkInterface.flags: Type of HAL_Configuration_NetworkInterface
 /// 0 - NetworkInterface
 /// 1 - Wireless
 #define SOCK_NETWORKCONFIGURATION_FLAGS_NETWORK_INTERFACE   0
@@ -356,11 +356,19 @@ typedef struct SOCK_timeval {
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__value(x)  (((x) & SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask) >> SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift)
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__set(x)    (((x) << SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift) & SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask)
 
-#define SOCK_NETWORKCONFIGURATION_UPDATE_DNS                0x00000001
-#define SOCK_NETWORKCONFIGURATION_UPDATE_DHCP               0x00000002
-#define SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RENEW         0x00000004
-#define SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RELEASE       0x00000008
-#define SOCK_NETWORKCONFIGURATION_UPDATE_MAC                0x00000010
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkInterface.UpdateOperation (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum UpdateOperation
+{
+    UpdateOperation_Invalid =       0x00,
+    UpdateOperation_Dns =           0x01,
+    UpdateOperation_Dhcp =          0x02,
+    UpdateOperation_DhcpRenew =     0x04,
+    UpdateOperation_DhcpRelease =   0x08,
+    UpdateOperation_Mac =           0x10,
+};
 
 #define SOCK_NETWORKCONFIGURATION_INTERFACETYPE_UNKNOWN        0
 #define SOCK_NETWORKCONFIGURATION_INTERFACETYPE_ETHERNET       6
@@ -372,6 +380,7 @@ typedef struct SOCK_timeval {
 ///
 /// Keep these values in sync with the manged code enumeration Wireless80211.AuthenticationType in wireless.cs
 ///
+// Wireless flags bits 0 - 3
 #define WIRELESS_FLAG_AUTHENTICATION_NONE      0
 #define WIRELESS_FLAG_AUTHENTICATION_EAP       1
 #define WIRELESS_FLAG_AUTHENTICATION_PEAP      2
@@ -386,6 +395,8 @@ typedef struct SOCK_timeval {
 ///
 /// Keep these values in sync with the manged code enumeration Wireless80211.EncryptionType in wireless.cs
 ///
+
+// Wireless flags bits 4 - 7
 #define WIRELESS_FLAG_ENCRYPTION_NONE          0
 #define WIRELESS_FLAG_ENCRYPTION_WEP           1
 #define WIRELESS_FLAG_ENCRYPTION_WPA           2
@@ -399,6 +410,8 @@ typedef struct SOCK_timeval {
 ///
 /// Keep these values in sync with the manged code enumeration Wireless80211.RadioType in wireless.cs
 ///
+
+// Wireless flags bits 8 - 11
 #define WIRELESS_FLAG_RADIO_a                  1
 #define WIRELESS_FLAG_RADIO_b                  2
 #define WIRELESS_FLAG_RADIO_g                  4
@@ -409,12 +422,14 @@ typedef struct SOCK_timeval {
 #define WIRELESS_FLAG_RADIO__set(x)            (((x) << WIRELESS_FLAG_RADIO__shift) & WIRELESS_FLAG_RADIO__mask)
 
 
+// Wireless flags bits 12 - 15
 #define WIRELESS_FLAG_DATA_ENCRYPTED           1
 #define WIRELESS_FLAG_DATA__shift              12
 #define WIRELESS_FLAG_DATA__mask               0x0000F000
 #define WIRELESS_FLAG_DATA__value(x)           (((x) & WIRELESS_FLAG_DATA__mask) >> WIRELESS_FLAG_DATA__shift)
 #define WIRELESS_FLAG_DATA__set(x)             (((x) << WIRELESS_FLAG_DATA__shift) & WIRELESS_FLAG_DATA__mask)
-    
+
+
 //extern const ConfigurationSector g_ConfigurationSector;
 
 //--//
@@ -487,8 +502,8 @@ __inline void SOCK_FD_CLR(int y, SOCK_fd_set* x)
 #endif
 
 
-struct SOCK_NetworkConfiguration;
-struct SOCK_WirelessConfiguration;
+//struct HAL_Configuration_NetworkInterface;
+struct HAL_Configuration_Wireless80211;
 
 //--//
 
@@ -498,15 +513,41 @@ bool  Network_Uninitialize();
 bool Network_Interface_Bind(int index);
 int  Network_Interface_Open(int index);
 bool Network_Interface_Close(int index);
-
+int  Network_Interface_Disconnect(int index);
+int  Network_Interface_Connect(int index, const char * ssid, const char * passphase, int reconOption);
+bool Network_Interface_Start_Scan(int index);
 //--//
 
-#define EVENT_NETWORK                            4
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkChange.NetworkEventType (in managed code) !!! //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED 1
-#define NETWORK_EVENT_TYPE_ADDRESS_CHANGED       2
+enum NetworkEventType
+{
+    NetworkEventType_Invalid = 0,
+    NetworkEventType_AvailabilityChanged = 1,
+    NetworkEventType_AddressChanged = 2,
+};
 
-#define NETWORK_EVENT_FLAGS_IS_AVAILABLE         1
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Windows.Devices.WiFi.WiFiEventType (in managed code) !!! //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum WiFiEventType
+{
+    WiFiEventType_Invalid = 0,
+    WiFiEventType_ScanComplete = 1,
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkChange.NetworkEventFlags (in managed code) !!! //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum NetworkEventFlags
+{
+    NetworkEventFlags_NetworkNOTAvailable = 0x00,
+    NetworkEventFlags_NetworkAvailable = 0x01,
+};
 
 void Network_PostEvent(unsigned int eventType, unsigned int flags);
 
@@ -551,17 +592,9 @@ int SOCK_recvfrom( int s, char* buf, int len, int flags, struct SOCK_sockaddr* f
 int SOCK_sendto( int s, const char* buf, int len, int flags, const struct SOCK_sockaddr* to, int tolen );
 
 //network adapter settings
-
-uint32_t SOCK_CONFIGURATION_GetAdapterCount();
-HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config );
-HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config );
-
-HRESULT SOCK_CONFIGURATION_LoadConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config );
-
-/// Wireless adapter specific settings.
-HRESULT SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
-HRESULT SOCK_CONFIGURATION_UpdateWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
-HRESULT SOCK_CONFIGURATION_SaveAllWirelessConfigurations( );
+HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex);
+HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex, uint32_t updateFlags);
+HRESULT SOCK_CONFIGURATION_LoadConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex);
 
 //--// SSL 
 
@@ -571,9 +604,9 @@ typedef void (*SSL_DATE_TIME_FUNC)(DATE_TIME_INFO* pdt);
 
 bool SSL_Initialize  ();
 bool SSL_Uninitialize();
-bool SSL_ServerInit ( int sslMode, int sslVerify, const char* certificate, int cert_len, const char* certPwd, int& sslContextHandle );
-bool SSL_ClientInit ( int sslMode, int sslVerify, const char* certificate, int cert_len, const char* certPwd, int& sslContextHandle );
-bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int cert_len, const char* certPwd );
+bool SSL_ServerInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle );
+bool SSL_ClientInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle );
+bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int certLength, const char* certPassword );
 void SSL_ClearCertificateAuthority( int sslContextHandle );
 bool SSL_ExitContext( int sslContextHandle );
 int  SSL_Accept     ( int socket, int sslContextHandle );
@@ -583,7 +616,7 @@ int  SSL_Read       ( int socket, char* Data, size_t size );
 int  SSL_CloseSocket( int socket );
 void SSL_GetTime(DATE_TIME_INFO* pdt);
 void SSL_RegisterTimeCallback(SSL_DATE_TIME_FUNC pfn);
-bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* szPwd, X509CertData* certData );
+bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* password, X509CertData* certData );
 int  SSL_DataAvailable( int socket );
 
 //--//
@@ -605,6 +638,7 @@ int HAL_SOCK_getaddrinfo(  const char* nodename, char* servname, const struct SO
 void HAL_SOCK_freeaddrinfo( struct SOCK_addrinfo* ai );
 int HAL_SOCK_ioctl( int socket, int cmd, int* data );
 int HAL_SOCK_getlasterror();
+int HAL_SOCK_getsocklasterror( int socket );
 int HAL_SOCK_select( int socket, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* except, const struct SOCK_timeval* timeout );
 int HAL_SOCK_setsockopt( int socket, int level, int optname, const char* optval, int  optlen );
 int HAL_SOCK_getsockopt( int socket, int level, int optname,       char* optval, int* optlen );
@@ -613,11 +647,8 @@ int HAL_SOCK_getsockname( int socket, struct SOCK_sockaddr* name, int* namelen )
 int HAL_SOCK_recvfrom( int s, char* buf, int len, int flags, struct SOCK_sockaddr* from, int* fromlen );
 int HAL_SOCK_sendto( int s, const char* buf, int len, int flags, const struct SOCK_sockaddr* to, int tolen );
 
-uint32_t HAL_SOCK_CONFIGURATION_GetAdapterCount();
-HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config );
-HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config );
-
-HRESULT HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
+HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex);
+HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex, uint32_t updateFlags);
 
 void* HAL_SOCK_GlobalLockContext();
 void  HAL_SOCK_EventsSet(uint32_t events);

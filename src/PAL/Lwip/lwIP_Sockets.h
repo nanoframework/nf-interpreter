@@ -8,6 +8,7 @@
 #define _LWIP_SOCKETS_H_
 
 #include <nanoHAL.h>
+#include <nanoHAL_ConfigurationManager.h>
 
 #define NATIVE_PROFILE_PAL_NETWORK()
 
@@ -17,7 +18,7 @@
 
 struct LWIP_DRIVER_INTERFACE_DATA
 {
-    int          m_interfaceNumber;
+    int    m_interfaceNumber;
 };
 
 #define SOCK_SOCKADDR_TO_SOCKADDR(ssa, sa, addrLen) \
@@ -72,6 +73,8 @@ struct LWIP_SOCKETS_Driver
 
     static int GetLastError();
 
+    static int GetSockLastError(SOCK_SOCKET socket);
+
     static int GetNativeTcpOption (int optname);
 
     static int GetNativeSockOption (int optname);
@@ -94,18 +97,14 @@ struct LWIP_SOCKETS_Driver
     
     static int SendTo(SOCK_SOCKET s, const char* buf, int len, int flags, const SOCK_sockaddr* to, int tolen );
 
-    static uint32_t GetAdapterCount();
-
-    static HRESULT LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config );
+    static HRESULT LoadAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex);
     
-    static HRESULT UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config );
+    static HRESULT UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config );
 
-    static HRESULT LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig );
+    static HRESULT LoadWirelessConfiguration( uint32_t interfaceIndex, HAL_Configuration_Wireless80211* wirelessConfig );
 
 
 private:
-	static void TcpipInitDone(void* arg);
-
 	static void Status_callback(struct netif *netif);
 
 	static void Link_callback(struct netif *netif);
@@ -116,7 +115,7 @@ private:
 
 	static void PostAvailabilityOff(void* arg);
 
-    LWIP_DRIVER_INTERFACE_DATA m_interfaces[NETWORK_INTERFACE_COUNT];
+    LWIP_DRIVER_INTERFACE_DATA* m_interfaces;
 };
 
 //

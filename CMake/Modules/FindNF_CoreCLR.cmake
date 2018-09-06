@@ -69,6 +69,7 @@ set(NF_CoreCLR_SRCS
     StringTableData.cpp
     TypeSystem.cpp
     nanoSupport_CRC32.c
+    nanoHAL_ConfigurationManager_stubs.c
     nanoHAL_SystemInformation.cpp
 
     # CoreLib

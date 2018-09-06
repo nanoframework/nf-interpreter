@@ -84,6 +84,11 @@ int HAL_SOCK_getlasterror()
     NATIVE_PROFILE_PAL_NETWORK();
     return LWIP_SOCKETS_Driver::GetLastError();
 }
+int HAL_SOCK_getsocklasterror(SOCK_SOCKET socket)
+{ 
+    NATIVE_PROFILE_PAL_NETWORK();
+    return LWIP_SOCKETS_Driver::GetSockLastError(socket);
+}
 int HAL_SOCK_select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* except, const struct SOCK_timeval* timeout )
 { 
     NATIVE_PROFILE_PAL_NETWORK();
@@ -120,26 +125,16 @@ int HAL_SOCK_sendto( SOCK_SOCKET s, const char* buf, int len, int flags, const s
     return LWIP_SOCKETS_Driver::SendTo( s, buf, len, flags, to, tolen );
 }
 
-uint32_t HAL_SOCK_CONFIGURATION_GetAdapterCount()
+HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return LWIP_SOCKETS_Driver::GetAdapterCount();
+    return LWIP_SOCKETS_Driver::LoadAdapterConfiguration(config, interfaceIndex);
 }
-HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config )
-{
-    NATIVE_PROFILE_PAL_NETWORK();
-    return LWIP_SOCKETS_Driver::LoadAdapterConfiguration(interfaceIndex, config);
-}
-HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config )
+
+HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(HAL_Configuration_NetworkInterface* config,  uint32_t interfaceIndex, uint32_t updateFlags)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     return LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(interfaceIndex, updateFlags, config);
-}
-
-HRESULT HAL_SOCK_CONFIGURATION_LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig )
-{
-    NATIVE_PROFILE_PAL_NETWORK();
-    return LWIP_SOCKETS_Driver::LoadWirelessConfiguration(interfaceIndex, wirelessConfig);
 }
 
 void HAL_SOCK_EventsSet( uint32_t events ) 

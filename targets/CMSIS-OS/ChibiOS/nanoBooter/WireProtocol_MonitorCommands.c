@@ -50,9 +50,12 @@ static int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t* buff
             // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
             return stm32FlashIsErased(location, lengthInBytes);
 
-        ///////////////////////////////////
-        // modes NOT supported
         case AccessMemory_Read:
+            // use FLASH driver to perform read operation
+            // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
+            stm32FlashReadBytes(location, lengthInBytes, buffer);
+            return true;
+
         default:
             // default return is FALSE
             return false;
@@ -101,6 +104,21 @@ int Monitor_OemInfo(WP_Message* message)
         
         WP_ReplyToCommand(message, fOK, false, &cmdReply, sizeof(cmdReply));
     }
+
+    return true;
+}
+
+int Monitor_ReadMemory(WP_Message* message)
+{
+    CLR_DBG_Commands_Monitor_ReadMemory* cmd = (CLR_DBG_Commands_Monitor_ReadMemory*)message->m_payload;
+
+    unsigned char buf[ 1024 ];
+    unsigned int len = cmd->length; if(len > sizeof(buf)) len = sizeof(buf);
+    uint32_t errorCode;
+
+    AccessMemory(cmd->address, len, buf, AccessMemory_Read, &errorCode );
+
+    WP_ReplyToCommand(message, true, false, buf, len);
 
     return true;
 }
@@ -162,6 +180,88 @@ int Monitor_EraseMemory(WP_Message* message)
 
     WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
         
+    return true;
+}
+
+int Monitor_QueryConfiguration(WP_Message* message)
+{
+    Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command*)message->m_payload;
+
+    int size          = 0;
+    bool success     = false;
+
+    HAL_Configuration_NetworkInterface configNetworkInterface;
+    HAL_Configuration_Wireless80211 configWireless80211NetworkInterface;
+
+    switch((DeviceConfigurationOption)cmd->Configuration)
+    {
+        case DeviceConfigurationOption_Network:
+
+            if(ConfigurationManager_GetConfigurationBlock((void *)&configNetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
+            {
+                size = sizeof(HAL_Configuration_NetworkInterface);
+                success = true;
+
+                WP_ReplyToCommand( message, success, false, (uint8_t*)&configNetworkInterface, size );
+            }            
+            break;
+
+        case DeviceConfigurationOption_Wireless80211Network:
+
+            if(ConfigurationManager_GetConfigurationBlock((void *)&configWireless80211NetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
+            {
+                size = sizeof(HAL_Configuration_Wireless80211);
+                success = true;
+
+                WP_ReplyToCommand( message, success, false, (uint8_t*)&configWireless80211NetworkInterface, size );
+            }
+            break;
+
+        case DeviceConfigurationOption_WirelessNetworkAP:
+            // TODO missing implementation for now
+            break;
+
+        default:
+            break;            
+    }
+
+    if(!success)
+    {
+        WP_ReplyToCommand( message, success, false, NULL, size );
+    }
+
+    return success;
+}
+
+int Monitor_UpdateConfiguration(WP_Message* message)
+{
+    bool success = false;
+
+    Monitor_UpdateConfiguration_Command* cmd = (Monitor_UpdateConfiguration_Command*)message->m_payload;
+    Monitor_UpdateConfiguration_Reply cmdReply;
+
+    switch((DeviceConfigurationOption)cmd->Configuration)
+    {
+        case DeviceConfigurationOption_Network:
+        case DeviceConfigurationOption_Wireless80211Network:
+        case DeviceConfigurationOption_All:
+            if(ConfigurationManager_StoreConfigurationBlock(cmd->Data, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex, cmd->Length) == true)
+            {
+                cmdReply.ErrorCode = 0;
+                success = true;
+            }
+            else 
+            {
+                cmdReply.ErrorCode = 100;
+            }
+            break;
+
+        default:
+            cmdReply.ErrorCode = 10;
+    }
+  
+    WP_ReplyToCommand(message, success, false, &cmdReply, sizeof(cmdReply));
+
     return true;
 }
 
