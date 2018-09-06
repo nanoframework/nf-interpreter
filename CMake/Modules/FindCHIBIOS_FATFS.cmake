@@ -41,3 +41,18 @@ endforeach()
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CHIBIOS_FATFS DEFAULT_MSG CHIBIOS_FATFS_INCLUDE_DIRS CHIBIOS_FATFS_SOURCES)
+
+# setup target to unzip ChibiOS external filesystem components
+add_custom_target( CHIBIOS_FILESYSTEM_COMPONENTS ALL )
+
+add_custom_command(TARGET CHIBIOS_FILESYSTEM_COMPONENTS
+PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+    DEPENDS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z
+
+    VERBATIM
+)
+
+# this depends on ChibiOS target being already downloaded
+add_dependencies(CHIBIOS_FILESYSTEM_COMPONENTS ChibiOS)

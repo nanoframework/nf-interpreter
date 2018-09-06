@@ -30,11 +30,6 @@ find_package(NF_CoreCLR REQUIRED)
 #######################################
 # optional
 
-# ChibiOS contrib repo
-if(CHIBIOS_CONTRIB_REQUIRED)
-    find_package(ChibiOS-Contrib REQUIRED)
-endif()
-
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
     find_package(NF_Debugger REQUIRED)
@@ -44,11 +39,17 @@ endif()
 # nF feature: networking
 if(USE_NETWORKING_OPTION)
     find_package(CHIBIOS_LWIP REQUIRED)
+	find_package(NF_NETWORKING REQUIRED)
 endif()
 
 # nF feature: filesystem
 if(USE_FILESYSTEM_OPTION)
     find_package(CHIBIOS_FATFS REQUIRED)
+endif()
+
+# security provider is mbedTLS
+if(NF_SECURITY_MBEDTLS)
+    find_package(mbedTLS REQUIRED)
 endif()
 
 #######################################
@@ -67,7 +68,7 @@ add_executable(
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
 
     # need to add configuration manager to allow get/store configuration blocks
-    "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c"
+    "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOBOOTER_PROJECT_SOURCES}
@@ -92,8 +93,6 @@ add_executable(
     ${NANOCLR_PROJECT_NAME}.elf
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
-    # the next one is required is the target implements and it's using external memory
-    "${CMAKE_CURRENT_SOURCE_DIR}/target_external_memory.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
@@ -105,7 +104,6 @@ add_executable(
     ${TARGET_CHIBIOS_NANOCLR_SOURCES}
 
     ${CHIBIOS_SOURCES}
-    ${CHIBIOS_CONTRIB_SOURCES}
     ${ChibiOSnfOverlay_SOURCES}
 
     ${WireProtocol_SOURCES}
@@ -117,6 +115,11 @@ add_executable(
 
     # sources for ChibiOS FatFS
     "${CHIBIOS_FATFS_SOURCES}"
+	
+    # sources for nanoFramework Network LWIP, Sockets and TLS
+    "${CHIBIOS_LWIP_SOURCES}"
+    "${NF_Networking_SOURCES}"
+    "${mbedTLS_SOURCES}"
 
     # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
@@ -157,7 +160,6 @@ include_directories(
 
     ${WireProtocol_INCLUDE_DIRS}
     ${CHIBIOS_INCLUDE_DIRS}
-    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
     ${ChibiOSnfOverlay_INCLUDE_DIRS}
 
     ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
@@ -171,15 +173,18 @@ target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
 
      ${TARGET_CMSIS_NANOBOOTER_INCLUDE_DIRS}
      ${TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS}
+
+    # includes for ChibiOS LwIP
+    "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 )
 
 # include directories for nanoCLR
 target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
-    ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
+     ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
 
-    ${TARGET_CMSIS_NANOCLR_INCLUDE_DIRS}
-    ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+     ${TARGET_CMSIS_NANOCLR_INCLUDE_DIRS}
+     ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
 
     # directories for nanoFramework libraries
     "${NF_CoreCLR_INCLUDE_DIRS}"
@@ -194,11 +199,21 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 
     # includes for ChibiOS LwIP
     "${CHIBIOS_LWIP_INCLUDE_DIRS}"
+
+	# incudes for Networking and TLS
+    "${NF_Networking_INCLUDE_DIRS}"
+    "${mbedTLS_INCLUDE_DIRS}"
 )
 
 # set compiler options
 nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
+
+# mbed TLS requires a config file
+if(NF_SECURITY_MBEDTLS)
+    # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_CURRENT_SOURCE_DIR}/mbedtls_config.h>\"")
+endif()
 
 # set compiler definitions
 nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
@@ -206,11 +221,11 @@ nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F429xI_booter-DEBUG.ld)
-    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F429xI_CLR-DEBUG.ld)
+    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F746xG_booter-DEBUG.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F746xG_CLR-DEBUG.ld)
 else()
-    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F429xI_booter.ld)
-    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F429xI_CLR.ld)
+    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F746xG_booter.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F746xG_CLR.ld)
 endif()
 
 # set linker options
@@ -220,11 +235,8 @@ nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 # add other linker flags
 ###########################################################
 # the sizes of CRT heap and ChibiOS stacks are defined here
-############################################################################
-# CRT heap is assigned to RAM4 region @ CCM SRAM so we are OK to use it all
-############################################################################
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x10000")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x10000")
+set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x2800")
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
