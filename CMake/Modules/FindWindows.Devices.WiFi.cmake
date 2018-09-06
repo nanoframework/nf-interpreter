@@ -19,7 +19,6 @@ list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
 set(Windows.Devices.Wifi_SRCS
 
     win_dev_wifi_native.cpp
-    win_dev_wifi_native.h
     win_dev_wifi_native_Windows_Devices_WIFI_WifiAdapter.cpp
 )
 
@@ -31,7 +30,7 @@ foreach(SRC_FILE ${Windows.Devices.Wifi_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    message("${SRC_FILE} >> ${Windows.Devices.Wifi_SRC_FILE}") # debug helper
+    #message("${SRC_FILE} >> ${Windows.Devices.Wifi_SRC_FILE}") # debug helper
     list(APPEND Windows.Devices.Wifi_SOURCES ${Windows.Devices.Wifi_SRC_FILE})
 endforeach()
 
