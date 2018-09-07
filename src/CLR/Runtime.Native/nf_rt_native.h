@@ -64,6 +64,17 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_Power
 
 };
 
+struct Library_nf_rt_native_nanoFramework_Runtime_Native_ResourceUtility
+{
+    static const int FIELD_STATIC__s_wr = 1;
+
+    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__mscorlibSystemResourcesResourceManager__mscorlibSystemEnum);
+    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__mscorlibSystemResourcesResourceManager__mscorlibSystemEnum__I4__I4);
+
+    //--//
+
+};
+
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc
 {
     NANOCLR_NATIVE_DECLARE(Native_RTC_SetSystemTime___STATIC__BOOLEAN__I4__U1__U1__U1__U1__U1__U1);

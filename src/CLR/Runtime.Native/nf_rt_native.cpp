@@ -35,13 +35,18 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_nf_rt_native_nanoFramework_Runtime_Native_ResourceUtility::GetObject___STATIC__OBJECT__mscorlibSystemResourcesResourceManager__mscorlibSystemEnum,
+    Library_nf_rt_native_nanoFramework_Runtime_Native_ResourceUtility::GetObject___STATIC__OBJECT__mscorlibSystemResourcesResourceManager__mscorlibSystemEnum__I4__I4,
+    NULL,
+    NULL,
+    NULL,
     Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc::Native_RTC_SetSystemTime___STATIC__BOOLEAN__I4__U1__U1__U1__U1__U1__U1,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Native =
 {
     "nanoFramework.Runtime.Native", 
-    0xA3593BC9,
+    0x1AD361FD,
     method_lookup,
     { 1, 0, 0, 0 }
 };
