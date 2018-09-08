@@ -8,6 +8,7 @@
 #define _NANOHAL_H_ 1
 
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
 #include <nanoWeak.h>
@@ -35,7 +36,6 @@
 #include <targetHAL.h>
 #include <nanoHAL_Types.h>
 #include <nanoHAL_ReleaseInfo.h>
-#include <nanoHAL_Network.h>
 
 //#if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
 //#define ENABLE_NATIVE_PROFILER
@@ -620,19 +620,19 @@ extern void HAL_AssertEx();
 #define CT_ASSERT(e)                  CT_ASSERT_UNIQUE_NAME(e,nanoclr)
 #endif
 
+extern "C"
+{
+#if !defined(BUILD_RTM)
 
+void debug_printf( const char *format, ... );
 
+#else
 
+__inline void debug_printf( const char *format, ... ) {}
 
-
-
-
-
-
-
-
-
-
+#endif  // !defined(BUILD_RTM)
+}
+//--//
 
 
 
@@ -1756,7 +1756,7 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 
 //--//
 
-
+#include <nanoPAL_Network.h>
 #include <nanoPAL.h>
 //#include <drivers.h>
 

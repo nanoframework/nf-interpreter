@@ -9,7 +9,7 @@
 #include <nanoHAL_Types.h>
 #include <target_platform.h>
 #include <nanoPAL_BlockStorage.h>
-
+#include <nanoHAL_ConfigurationManager.h>
 
 //
 //  Reboot handlers clean up on reboot
@@ -56,6 +56,8 @@ void nanoHAL_Initialize()
     ::HeapLocation( heapStart, heapSize );
     memset(heapStart, 0, heapSize);
 
+    ConfigurationManager_Initialize();
+
     Events_Initialize();
 
     // no PAL events required until now
@@ -85,8 +87,11 @@ void nanoHAL_Uninitialize()
     
     //PalEvent_Uninitialize();
 
+    // TODO need to call this but it's preventing the debug session from starting
+    //Network_Uninitialize();
+
     Events_Uninitialize();
-    
+
     HAL_CONTINUATION::Uninitialize();
     HAL_COMPLETION  ::Uninitialize();
 }

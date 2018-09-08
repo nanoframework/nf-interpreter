@@ -69,6 +69,7 @@ set(NF_CoreCLR_SRCS
     StringTableData.cpp
     TypeSystem.cpp
     nanoSupport_CRC32.c
+    nanoHAL_ConfigurationManager_stubs.c
     nanoHAL_SystemInformation.cpp
 
     # CoreLib
@@ -138,6 +139,7 @@ set(NF_CoreCLR_SRCS
     nf_rt_native_nanoFramework_Runtime_Native_Debug.cpp
     nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Power.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_ResourceUtility.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp
     
     # Core stubs

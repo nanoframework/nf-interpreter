@@ -20,6 +20,7 @@ Change the following options:-
 - Esp32 specific/Cpu frquency 240Mhz
 - Esp32 specific/Initialize Task Watcho dog Timer in startup = OFF
 - Esp32 specific/Main XTAL frequency = Autodetect
+- LWIP SO RCVbuf
 - Component config/Bluetooth enable
 
 Save and Exit

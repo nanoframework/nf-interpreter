@@ -11,6 +11,88 @@ void nf_GetFormatString(char* formatStr, char formatCh, int precision, bool isLo
     sprintf(formatStr, "%%%s%d%s%s", isFloat ? "." : isSigned ? "-0" : "0", precision, isLong ? "l" : isFloat ? "f" : "", formatCh == 'X' ? "X" :  isFloat ? "" : isSigned ? "d" : "u");
 }
 
+// remove the prepended zeros and (if possible) the decimal point in a float that's formated as string. e.g. "47.1100815000000" => "47.1100815" or "8.0000E-12" => "8E-12"
+void nf_RemovePrependedZeros(char* floatStr)
+{
+    int length = hal_strlen_s(floatStr);
+    // flag for finding the decimal point
+    bool pointFound = false;
+    // if not -1 we found the first zero after the decimal point
+    int firstZero = -1;
+    // if not -1 we found an "e" or "E" after the last zero of this is the string length
+    int nextNonZero = length;
+
+    // iterate thru all chars
+    for (int i = 0; i < length; i++)
+    {
+        // no decimal point found until now?
+        if (!pointFound)
+        {
+            // is it the decimal point?
+            if (floatStr[i] == '.')
+            {
+                pointFound = true;
+            }
+
+            // next char
+            continue;
+        }
+
+        // at this point we found the decimal point
+        // no zero found until now?
+        if (firstZero == -1)
+        {
+            // is it a zero?
+            if (floatStr[i] == '0')
+            {
+                // store the position of the first zero after the decimal point
+                firstZero = i;
+            }
+
+            // next char
+            continue;
+        }
+
+        // at this point we found the decimal point and the first zero
+        // an "e" or "E" char stops the sequence of zeros
+        if (floatStr[i] == 'e' || floatStr[i] == 'E')
+        {
+            // store the position of the e/E char
+            nextNonZero = i;
+            // done! we found the positions for the prepended zeros
+            break;
+        }
+
+        // at this point we found the decimal point and the first zero and the current char is not the e/E char
+        // is this not a zero?
+        if (floatStr[i] != '0')
+        {
+            // reset! we need to find another zero
+            firstZero = -1;
+        }
+    }
+
+    // something to remove?
+    if (pointFound && firstZero != -1 && nextNonZero != -1)
+    {
+        // is the char before the first zero the decimal point? => Remove the decimal point
+        int startIndex = floatStr[firstZero - 1] == '.' ? firstZero - 1 : firstZero;
+        // no e/E char after the last trailing zero?
+        if (nextNonZero == length)
+        {
+            // we can cut away the prepended zeros by terminating the string at first zero
+            floatStr[startIndex] = 0;
+        }
+        else
+        {
+            // otherwise we copy the last part over the prepended zeros and terminate the string
+            int lengthToCopy = length - nextNonZero;
+            memcpy(&floatStr[startIndex], &floatStr[nextNonZero], lengthToCopy);
+            floatStr[startIndex + lengthToCopy] = 0;
+        }
+    }
+}
+
 HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJECT__CHAR__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -25,6 +107,7 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
     char formatStr[ 8 ];
     char formatCh  = (char)pArgs[ 1 ].NumericByRef().u1;
     int  precision =       pArgs[ 2 ].NumericByRef().s4;
+    bool shouldRemovePrependedZeros = false;
 
     NANOCLR_CHECK_HRESULT(desc.InitializeFromObject( *value ));
     NANOCLR_CHECK_HRESULT(value->PerformUnboxing( desc.m_handlerCls ));
@@ -34,6 +117,7 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
     if(formatCh == 'G' && precision == 0)
     {
         precision = 1;
+        shouldRemovePrependedZeros = true;
     }
 
     switch(dt)
@@ -122,6 +206,10 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
                 nf_GetFormatString(formatStr, formatCh, precision, false, true, false);
 
                 sprintf(result, formatStr, value->NumericByRef().r4);
+                if (shouldRemovePrependedZeros)
+                {
+                    nf_RemovePrependedZeros(result);
+                }
               #else
                 CLR_INT32 f = value->NumericByRef().r4;
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -153,6 +241,10 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
                 nf_GetFormatString(formatStr, formatCh, precision, false, true, false);
                 
                 sprintf(result, formatStr, (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8);
+                if (shouldRemovePrependedZeros)
+                {
+                    nf_RemovePrependedZeros(result);
+                }
               #else
                 CLR_INT64 d = (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8;
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);

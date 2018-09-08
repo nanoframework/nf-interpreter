@@ -32,6 +32,7 @@
 
 #define NANOHAL_TIME_CONVERSION_MICRO_TO_SECONDS                1000000
 
+#define TIME_UNIX_EPOCH_AS_TICKS           116444736000000000
 
 /// NOTES: Why origin is at 1/1/1601.
 /// Current civil calendar is named as Gregorian calendar after Pope Gregory XIII as he made adjustments
@@ -59,6 +60,12 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly);
 /// </summary>
 /// <returns>Returns current time in 100ns elapsed since 1/1/1601:00:00:00.000 UTC.</returns>
 uint64_t  HAL_Time_CurrentTime();
+
+/// <summary>
+/// Set UTC time of the system. This will be effective immediately.
+/// </summary>
+/// <param name="utcTime">In 100ns since 1/1/1601:00:00:00.000</param>
+void      HAL_Time_SetUtcTime(uint64_t utcTime);
 
 /// <summary>
 /// Retrieves time since device was booted.

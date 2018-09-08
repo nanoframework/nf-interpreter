@@ -695,8 +695,18 @@
         NANOCLR_HEADER();
 
         double d = stack.Arg0().NumericByRefConst().r8;
+        double hi = d + 0.5;
+        double res = floor( hi );
 
-        double res = round(d);
+        //If the number was in the middle of two integers, we need to round to the even one.
+        if(res==hi)
+        {
+            if(fmod( res, 2.0 ) != 0)
+            {
+                //Rounding up made the number odd so we should round down.
+                res -= 1.0;
+            }
+        }
 
         stack.SetResult_R8( res );
 
@@ -717,9 +727,18 @@
         NANOCLR_HEADER();
 
         float d = stack.Arg0().NumericByRefConst().r4;
+        float hi = d + 0.5;
+        float res = floorf( hi );
 
-        float res = roundf(d);
-
+        //If the number was in the middle of two integers, we need to round to the even one.
+        if(res==hi)
+        {
+            if(fmodf( res, 2.0 ) != 0)
+            {
+                //Rounding up made the number odd so we should round down.
+                res -= 1.0;
+            }
+        }
         stack.SetResult_R4( res );
 
         NANOCLR_NOCLEANUP_NOLABEL();
@@ -989,9 +1008,9 @@
 
         float d = stack.Arg0().NumericByRefConst().r4;
         float res = 0.0;
-        float retVal = modff(d, &res); 
+        modff(d, &res); 
 
-        stack.SetResult_R4( retVal );
+        stack.SetResult_R4( res );
 
         NANOCLR_NOCLEANUP_NOLABEL();
 

@@ -834,8 +834,6 @@ bool CLR_DBG_Debugger::Monitor_MemoryMap( WP_Message* msg)
     return true;
 }
 
-
-
 bool CLR_DBG_Debugger::Monitor_DeploymentMap( WP_Message* msg)
 {
     (void)msg;
@@ -843,7 +841,97 @@ bool CLR_DBG_Debugger::Monitor_DeploymentMap( WP_Message* msg)
     return true;
 }
 
+bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
 
+    Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command*)message->m_payload;
+
+    int size          = 0;
+    bool success     = false;
+
+    HAL_Configuration_NetworkInterface* configNetworkInterface;
+    HAL_Configuration_Wireless80211* configWireless80211NetworkInterface;
+
+    switch((DeviceConfigurationOption)cmd->Configuration)
+    {
+        case DeviceConfigurationOption_Network:
+
+            configNetworkInterface = (HAL_Configuration_NetworkInterface*)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
+
+            if(ConfigurationManager_GetConfigurationBlock(configNetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
+            {
+                size = sizeof(HAL_Configuration_NetworkInterface);
+                success = true;
+
+                WP_ReplyToCommand( message, success, false, (uint8_t*)configNetworkInterface, size );
+                platform_free(configNetworkInterface);
+            }            
+            break;
+
+        case DeviceConfigurationOption_Wireless80211Network:
+
+            configWireless80211NetworkInterface = (HAL_Configuration_Wireless80211*)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+
+            if(ConfigurationManager_GetConfigurationBlock(configWireless80211NetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
+            {
+                size = sizeof(HAL_Configuration_Wireless80211);
+                success = true;
+
+                WP_ReplyToCommand( message, success, false, (uint8_t*)configWireless80211NetworkInterface, size );
+                platform_free(configWireless80211NetworkInterface);
+            }
+            break;
+        
+        case DeviceConfigurationOption_WirelessNetworkAP:
+            // TODO missing implementation for now
+            break;
+
+        default:
+            break;
+    }
+
+    if(!success)
+    {
+        WP_ReplyToCommand( message, success, false, NULL, size );
+    }
+
+    return success;
+}
+
+bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message* message)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    bool success = false;
+
+    Monitor_UpdateConfiguration_Command* cmd = (Monitor_UpdateConfiguration_Command*)message->m_payload;
+    Monitor_UpdateConfiguration_Reply cmdReply;
+
+    switch((DeviceConfigurationOption)cmd->Configuration)
+    {
+        case DeviceConfigurationOption_Network:
+        case DeviceConfigurationOption_Wireless80211Network:
+        case DeviceConfigurationOption_All:
+            if(ConfigurationManager_StoreConfigurationBlock(cmd->Data, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex, cmd->Length) == true)
+            {
+                cmdReply.ErrorCode = 0;
+                success = true;
+            }
+            else 
+            {
+                cmdReply.ErrorCode = 100;
+            }
+            break;
+
+        default:
+            cmdReply.ErrorCode = 10;
+    }
+
+    WP_ReplyToCommand(message, success, false, &cmdReply, sizeof(cmdReply));
+
+    return success;
+}
 
 //--//
 
@@ -3202,4 +3290,3 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC( WP_Message* msg)
 }
 
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-

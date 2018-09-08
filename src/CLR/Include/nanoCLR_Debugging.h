@@ -31,6 +31,8 @@ struct CLR_DBG_Commands
     static const unsigned int c_Monitor_DeploymentMap      = 0x0000000B;
     static const unsigned int c_Monitor_FlashSectorMap     = 0x0000000C;
     static const unsigned int c_Monitor_OemInfo            = 0x0000000E;
+    static const unsigned int c_Monitor_QueryConfiguration = 0x0000000F;
+    static const unsigned int c_Monitor_UpdateConfiguration= 0x00000010;
 
     //--//
 
@@ -1067,6 +1069,8 @@ public:
     static bool Monitor_MemoryMap                       ( WP_Message* msg );
     static bool Monitor_FlashSectorMap                  ( WP_Message* msg );
     static bool Monitor_DeploymentMap                   ( WP_Message* msg );
+    static bool Monitor_QueryConfiguration              ( WP_Message* msg );
+    static bool Monitor_UpdateConfiguration             ( WP_Message* msg );
 
                                              
     static bool Debugging_Execution_BasePtr             ( WP_Message* msg );

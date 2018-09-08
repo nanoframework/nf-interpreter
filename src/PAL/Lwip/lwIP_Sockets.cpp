@@ -4,7 +4,21 @@
 // See LICENSE file in the project root for full license information.
 //
 
+
+
 #include "LWIP_sockets.h"
+
+// Make sure the ESP32 version of FD_xx macro are used
+// as the socket number is offset
+// FIXME - The problem is these MACROs are also defined in the newlib sys/types.h
+#ifdef PLATFORM_ESP32
+#undef FD_SET
+#undef FD_CLR
+#undef FD_ISSET
+#undef FD_ZERO
+#undef _types_fd_set
+#undef fd_set
+#endif
 
 extern "C"
 {
@@ -15,16 +29,12 @@ extern "C"
 #include "lwip\Netdb.h"
 #include "lwip\tcp.h"
 #include "lwip\Sockets.h"
+#include "lwip\dhcp.h"
+#include "lwip\netif.h"
 }
 
-// extern const HAL_CONFIG_BLOCK   g_NetworkConfigHeader;
-// extern NETWORK_CONFIG           g_NetworkConfig;
 
-#if defined(__RENESAS__)
-volatile int errno;
-#elif !( defined(_MSC_VER) && defined(_WIN32) && defined(_DLL) )
-int errno;
-#endif
+int errorCode;
 
 //--// 
 
@@ -37,152 +47,197 @@ int errno;
 
 struct netif *netif_find_interface(int num);
 
+//
+
+// declaration of function not available in standard lwIP API
+extern "C"
+{
+extern uint32_t lwip_socket_get_err(int s);
+}
 //--//
 
 LWIP_SOCKETS_Driver g_LWIP_SOCKETS_Driver;
 
 //--//
-
+#if LWIP_NETIF_STATUS_CALLBACK == 1
 static HAL_CONTINUATION PostAddressChangedContinuation;
+#endif
+#if LWIP_NETIF_LINK_CALLBACK == 1
 static HAL_CONTINUATION PostAvailabilityOnContinuation;
 static HAL_CONTINUATION PostAvailabilityOffContinuation;
+#endif
 
-// void LWIP_SOCKETS_Driver::PostAddressChanged(void* arg)
-// {
-// 	Network_PostEvent(NETWORK_EVENT_TYPE_ADDRESS_CHANGED, 0);
-// }
-
-// void LWIP_SOCKETS_Driver::PostAvailabilityOn(void* arg)
-// {
-// 	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 1);
-// }
-
-// void LWIP_SOCKETS_Driver::PostAvailabilityOff(void* arg)
-// {
-// 	Network_PostEvent(NETWORK_EVENT_TYPE__AVAILABILITY_CHANGED, 0);
-// }
-
-// void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
-// {
-// 	if (netif_is_link_up(netif))
-// 	{
-// 		if (!PostAvailabilityOnContinuation.IsLinked())
-// 			PostAvailabilityOnContinuation.Enqueue();
-// 	}
-// 	else
-// 	{
-// 		if (!PostAvailabilityOffContinuation.IsLinked())
-// 			PostAvailabilityOffContinuation.Enqueue();
-// 	}
-//     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
-//     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
-// }
-
-// TODO Commented out
-// void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
-// {
-// 	if (!PostAddressChangedContinuation.IsLinked())
-// 		PostAddressChangedContinuation.Enqueue();
-
-// #if !defined(BUILD_RTM)
-// 	// lcd_printf("\f\n\n\n\n\n\nLink Update: %s\n", (netif_is_up(netif) ? "UP  " : "DOWN"));
-// 	// lcd_printf("         IP: %d.%d.%d.%d\n", (netif->ip_addr.addr >> 0) & 0xFF,
-// 	// 	(netif->ip_addr.addr >> 8) & 0xFF,
-// 	// 	(netif->ip_addr.addr >> 16) & 0xFF,
-// 	// 	(netif->ip_addr.addr >> 24) & 0xFF);
-// 	// lcd_printf("         SM: %d.%d.%d.%d\n", (netif->netmask.addr >> 0) & 0xFF,
-// 	// 	(netif->netmask.addr >> 8) & 0xFF,
-// 	// 	(netif->netmask.addr >> 16) & 0xFF,
-// 	// 	(netif->netmask.addr >> 24) & 0xFF);
-// 	// lcd_printf("         GW: %d.%d.%d.%d\n", (netif->gw.addr >> 0) & 0xFF,
-// 	// 	(netif->gw.addr >> 8) & 0xFF,
-// 	// 	(netif->gw.addr >> 16) & 0xFF,
-// 	// 	(netif->gw.addr >> 24) & 0xFF);
-// 	debug_printf("IP Address: %d.%d.%d.%d\n", (netif->ip_addr.u_addr.ip4.S_addr >> 0) & 0xFF,
-// 		(netif->ip_addr.addr >> 8) & 0xFF,
-// 		(netif->ip_addr.addr >> 16) & 0xFF,
-// 		(netif->ip_addr.addr >> 24) & 0xFF);
-// #if LWIP_DNS
-// 	if (netif->flags & NETIF_FLAG_DHCP)
-// 	{
-// 		struct ip_addr dns1 = dns_getserver(0);
-// 		struct ip_addr dns2 = dns_getserver(1);
-
-// 		// lcd_printf("         dns1: %d.%d.%d.%d\n", (dns1.addr >> 0) & 0xFF,
-// 		// 	(dns1.addr >> 8) & 0xFF,
-// 		// 	(dns1.addr >> 16) & 0xFF,
-// 		// 	(dns1.addr >> 24) & 0xFF);
-
-// 		// lcd_printf("         dns2: %d.%d.%d.%d\n", (dns2.addr >> 0) & 0xFF,
-// 		// 	(dns2.addr >> 8) & 0xFF,
-// 		// 	(dns2.addr >> 16) & 0xFF,
-// 		// 	(dns2.addr >> 24) & 0xFF);
-// 	}
-// #endif
-// #endif
-//     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
-//     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
-// }
-
-// TODO Commented out
-void LWIP_SOCKETS_Driver::TcpipInitDone(void* arg)
+void LWIP_SOCKETS_Driver::PostAddressChanged(void* arg)
 {
-// 	struct netif *pNetIf;
+    (void)arg;
 
-// 	for (int i = 0; i<g_NetworkConfig.NetworkInterfaceCount; i++)
-// 	{
-// 		int interfaceNumber;
-
-// 		SOCK_NetworkConfiguration *pNetCfg = &g_NetworkConfig.NetworkInterfaces[i];
-
-// 		/* Bind and Open the Ethernet driver */
-// 		Network_Interface_Bind(i);
-// 		interfaceNumber = Network_Interface_Open(i);
-
-// 		if (interfaceNumber == SOCK_SOCKET_ERROR)
-// 		{
-// 			DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
-// 			debug_printf("SocketError: %d\n", errno);
-// 			continue;
-// 		}
-
-// 		g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
-
-// 		UpdateAdapterConfiguration(i, SOCK_NETWORKCONFIGURATION_UPDATE_DHCP | SOCK_NETWORKCONFIGURATION_UPDATE_DNS, pNetCfg);
-
-// 		pNetIf = netif_find_interface(interfaceNumber);
-
-// 		if (pNetIf)
-// 		{		
-// 			netif_set_link_callback(pNetIf, Link_callback);
-// 			if (netif_is_link_up(pNetIf))
-// 				Link_callback(pNetIf);
-
-// 			netif_set_status_callback(pNetIf, Status_callback);
-// 			if (netif_is_up(pNetIf))
-// 				Status_callback(pNetIf);
-
-// 			// default debugger interface
-//             if (0 == i)
-//             {
-//                 uint8_t* addr = (uint8_t*)&pNetIf->ip_addr.addr;
-// //                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
-//                 debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
-//             }
-// 		}
-// 	}
+	Network_PostEvent(NetworkEventType_AddressChanged, 0);
 }
+
+void LWIP_SOCKETS_Driver::PostAvailabilityOn(void* arg)
+{
+    (void)arg;
+
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkAvailable);
+}
+
+void LWIP_SOCKETS_Driver::PostAvailabilityOff(void* arg)
+{
+    (void)arg;
+
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkNOTAvailable);
+}
+
+#if LWIP_NETIF_LINK_CALLBACK == 1
+void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
+{
+	if (netif_is_link_up(netif))
+	{
+		if (!PostAvailabilityOnContinuation.IsLinked())
+			PostAvailabilityOnContinuation.Enqueue();
+	}
+	else
+	{
+		if (!PostAvailabilityOffContinuation.IsLinked())
+			PostAvailabilityOffContinuation.Enqueue();
+	}
+    Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
+    Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
+}
+#endif
+
+#if LWIP_NETIF_STATUS_CALLBACK == 1
+void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
+{
+	if (!PostAddressChangedContinuation.IsLinked())
+		PostAddressChangedContinuation.Enqueue();
+
+#if !defined(BUILD_RTM)
+	// lcd_printf("\f\n\n\n\n\n\nLink Update: %s\n", (netif_is_up(netif) ? "UP  " : "DOWN"));
+	// lcd_printf("         IP: %d.%d.%d.%d\n", (netif->ip_addr.addr >> 0) & 0xFF,
+	// 	(netif->ip_addr.addr >> 8) & 0xFF,
+	// 	(netif->ip_addr.addr >> 16) & 0xFF,
+	// 	(netif->ip_addr.addr >> 24) & 0xFF);
+	// lcd_printf("         SM: %d.%d.%d.%d\n", (netif->netmask.addr >> 0) & 0xFF,
+	// 	(netif->netmask.addr >> 8) & 0xFF,
+	// 	(netif->netmask.addr >> 16) & 0xFF,
+	// 	(netif->netmask.addr >> 24) & 0xFF);
+	// lcd_printf("         GW: %d.%d.%d.%d\n", (netif->gw.addr >> 0) & 0xFF,
+	// 	(netif->gw.addr >> 8) & 0xFF,
+	// 	(netif->gw.addr >> 16) & 0xFF,
+	// 	(netif->gw.addr >> 24) & 0xFF);
+
+//FIXME debug_printf("IP Address: %d.%d.%d.%d\n", (netif->ip_addr.u_addr.ip4.addr >> 0) & 0xFF,
+// 	(netif->ip_addr.u_addr.ip4.addr >> 8) & 0xFF,
+// 	(netif->ip_addr.u_addr.ip4.addr >> 16) & 0xFF,
+// 	(netif->ip_addr.u_addr.ip4.addr >> 24) & 0xFF);
+#if LWIP_DNS
+	if (netif->flags & NETIF_FLAG_ETHARP)
+	{
+		//ip_addr_t * dns1 = dns_getserver(0);
+		//ip_addr_t * dns2 = dns_getserver(1);
+
+		// lcd_printf("         dns1: %d.%d.%d.%d\n", (dns1.addr >> 0) & 0xFF,
+		// 	(dns1.addr >> 8) & 0xFF,
+		// 	(dns1.addr >> 16) & 0xFF,
+		// 	(dns1.addr >> 24) & 0xFF);
+
+		// lcd_printf("         dns2: %d.%d.%d.%d\n", (dns2.addr >> 0) & 0xFF,
+		// 	(dns2.addr >> 8) & 0xFF,
+		// 	(dns2.addr >> 16) & 0xFF,
+		// 	(dns2.addr >> 24) & 0xFF);
+	}
+#endif
+#endif
+    Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
+    Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
+}
+#endif
 
 bool LWIP_SOCKETS_Driver::Initialize()
 {   
     NATIVE_PROFILE_PAL_NETWORK();
 
-    // PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
-    // PostAvailabilityOnContinuation.InitializeCallback(PostAvailabilityOn, NULL);
-    // PostAvailabilityOffContinuation.InitializeCallback(PostAvailabilityOff, NULL);
+	struct netif *networkInterface;
+    HAL_Configuration_NetworkInterface networkConfiguration;
+    int interfaceNumber;
+
+#if LWIP_NETIF_STATUS_CALLBACK == 1
+    PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
+#endif
+#if LWIP_NETIF_LINK_CALLBACK == 1
+    PostAvailabilityOnContinuation.InitializeCallback(PostAvailabilityOn, NULL);
+    PostAvailabilityOffContinuation.InitializeCallback(PostAvailabilityOff, NULL);
+#endif
+
+    // create m_interfaceNumber array
+    int interfaceCount = g_TargetConfiguration.NetworkInterfaceConfigs->Count;
+    g_LWIP_SOCKETS_Driver.m_interfaces = (LWIP_DRIVER_INTERFACE_DATA*)platform_malloc(interfaceCount * sizeof(LWIP_DRIVER_INTERFACE_DATA)); 
 
     /* Initialize the target board lwIP stack */
-    nanoHAL_Network_Initialize(TcpipInitDone);
+    nanoHAL_Network_Initialize();
+
+	for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
+	{
+        // load network interface configuration from storage
+        if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, i))
+        {
+            // failed to load configuration
+            // FIXME output error?
+            // move to the next, if any
+            continue;
+        }
+        _ASSERTE(networkConfiguration.StartupAddressMode > 0);
+
+ 		/* Bind and Open the Ethernet driver */
+ 		Network_Interface_Bind(i);
+ 		interfaceNumber = Network_Interface_Open(i);
+
+		if (interfaceNumber == SOCK_SOCKET_ERROR)
+		{
+			DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
+//FIXME			debug_printf("SocketError: %d\n", errorCode);
+			continue;
+		}
+
+ 		g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
+
+ 		UpdateAdapterConfiguration(i, (UpdateOperation_Dhcp | UpdateOperation_Dns), &networkConfiguration);
+
+ 		networkInterface = netif_find_interface(interfaceNumber);
+
+ 		if (networkInterface)
+ 		{	
+#if LWIP_NETIF_LINK_CALLBACK == 1
+ 			netif_set_link_callback(networkInterface, Link_callback);
+
+			if (netif_is_link_up(networkInterface))
+            {
+			    Link_callback(networkInterface);
+            }
+#endif
+#if LWIP_NETIF_STATUS_CALLBACK == 1
+			netif_set_status_callback(networkInterface, Status_callback);
+
+			if (netif_is_up(networkInterface))
+            {
+			    Status_callback(networkInterface);
+            }
+#endif
+
+			// default debugger interface
+            if (0 == i)
+            {
+#if LWIP_IPV6
+                //uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.u_addr.ip4.addr;
+#else
+                //uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.addr;
+#endif                
+//                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
+// FIXME               debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
+            }
+		}
+	}
 
     return TRUE;
 }
@@ -191,16 +246,21 @@ bool LWIP_SOCKETS_Driver::Uninitialize()
 {
     NATIVE_PROFILE_PAL_NETWORK();      
 
-    // PostAddressChangedContinuation.Abort();
-    // PostAvailabilityOnContinuation.Abort();
-    // PostAvailabilityOffContinuation.Abort();
+#if LWIP_NETIF_STATUS_CALLBACK == 1
+    PostAddressChangedContinuation.Abort();
+#endif
+#if LWIP_NETIF_LINK_CALLBACK == 1
+    PostAvailabilityOnContinuation.Abort();
+    PostAvailabilityOffContinuation.Abort();
+#endif
 
-    // for(int i=0; i<g_NetworkConfig.NetworkInterfaceCount; i++)
-    // {
-    //     Network_Interface_Close(i);
-    // }
+    for(int i=0; i<g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
+    {
+        Network_Interface_Close(i);
+    }
 
-    //tcpip_shutdown();
+//FIXME    tcpip_shutdown();
+// tcpip_shutdown is MS method added to lwip tcpip.c
 
     return TRUE;
 }
@@ -322,122 +382,140 @@ int LWIP_SOCKETS_Driver::Shutdown( SOCK_SOCKET socket, int how )
     return lwip_shutdown (socket, how);
 }
 
-// int LWIP_SOCKETS_Driver::GetAddrInfo(const char* nodename, char* servname, const SOCK_addrinfo* hints, SOCK_addrinfo** res)
-// { 
-// #if LWIP_DNS
-//     NATIVE_PROFILE_PAL_NETWORK();
+int LWIP_SOCKETS_Driver::GetAddrInfo(const char* nodename, char* servname, const SOCK_addrinfo* hints, SOCK_addrinfo** res)
+{ 
+  #if LWIP_DNS
+    NATIVE_PROFILE_PAL_NETWORK();
 
-//     SOCK_addrinfo *ai;
-//     SOCK_sockaddr_in *sa = NULL;
-//     int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
-//     struct addrinfo *lwipAddrinfo = NULL;
+    SOCK_addrinfo *ai;
+    SOCK_sockaddr_in *sa = NULL;
+    int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
+    struct addrinfo *lwipAddrinfo = NULL;
 
-//     if(res == NULL) return -1;
+    if(res == NULL) return SOCK_SOCKET_ERROR;
 
-//     *res = NULL;
+    *res = NULL;
 
-//     // if the nodename == "" then return the IP address of this device
-//     if(nodename[0] == 0 && servname == NULL)
-//     {
-//         struct netif *pNetIf = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[0].m_interfaceNumber);
+    // if the nodename == "" then return the IP address of this device
+    if(nodename[0] == 0 && servname == NULL)
+    {
+        struct netif *networkInterface = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[0].m_interfaceNumber);
 
-//         if(pNetIf == NULL) return -1;
+        if(networkInterface == NULL) return -1;
 
-//         ai = (SOCK_addrinfo*)mem_malloc(total_size);
-//         if (ai == NULL) 
-//         {
-//             return -1;
-//         }
-//         memset(ai, 0, total_size);
-//         sa = (SOCK_sockaddr_in*)((u8_t*)ai + sizeof(SOCK_addrinfo));
-//         /* set up sockaddr */
-//         sa->sin_addr.S_un.S_addr = pNetIf->ip_addr.addr;
-//         sa->sin_family = AF_INET;
-//         sa->sin_port = 0;
+        ai = (SOCK_addrinfo*)mem_malloc(total_size);
+        if (ai == NULL) 
+        {
+            return -1;
+        }
+        memset(ai, 0, total_size);
+        sa = (SOCK_sockaddr_in*)((u8_t*)ai + sizeof(SOCK_addrinfo));
+
+        /* set up sockaddr */
+      #if LWIP_IPV6
+        sa->sin_addr.S_un.S_addr = networkInterface->ip_addr.u_addr.ip4.addr;
+      #else
+        sa->sin_addr.S_un.S_addr = networkInterface->ip_addr.addr;
+      #endif
+
+        sa->sin_family = AF_INET;
+        sa->sin_port = 0;
         
-//         /* set up addrinfo */
-//         ai->ai_family = AF_INET;
-//         if (hints != NULL) 
-//         {
-//             /* copy socktype & protocol from hints if specified */
-//             ai->ai_socktype = hints->ai_socktype;
-//             ai->ai_protocol = hints->ai_protocol;
-//         }
+        /* set up addrinfo */
+        ai->ai_family = AF_INET;
+        if (hints != NULL) 
+        {
+            /* copy socktype & protocol from hints if specified */
+            ai->ai_socktype = hints->ai_socktype;
+            ai->ai_protocol = hints->ai_protocol;
+        }
 
-//         ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
-//         ai->ai_addr = (SOCK_sockaddr*)sa;
+        ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
+        ai->ai_addr = (SOCK_sockaddr*)sa;
 
-//         *res = ai;
+        *res = ai;
 
-//         return 0;
-//     }
+        return 0;
+    }
 
-//     int err = lwip_getaddrinfo(nodename, servname, (addrinfo*)hints, &lwipAddrinfo);
+    int err = lwip_getaddrinfo(nodename, servname, (addrinfo*)hints, &lwipAddrinfo);
 
-//     if(err == 0)
-//     {
-//         ///
-//         /// Marshal addrinfo data
-//         ///
-//         struct sockaddr_in* lwip_sockaddr_in;
+    if(err == 0)
+    {
+        ///
+        /// Marshal addrinfo data
+        ///
+        struct sockaddr_in* lwip_sockaddr_in;
         
-//         ai = (SOCK_addrinfo*)mem_malloc(total_size);
-//         if (ai == NULL) 
-//         {
-//             lwip_freeaddrinfo(lwipAddrinfo);
-//             return -1;
-//         }
-//         memset(ai, 0, total_size);
+        ai = (SOCK_addrinfo*)mem_malloc(total_size);
+        if (ai == NULL) 
+        {
+            lwip_freeaddrinfo(lwipAddrinfo);
+            return -1;
+        }
+        memset(ai, 0, total_size);
 
-//         lwip_sockaddr_in = ((struct sockaddr_in*)lwipAddrinfo->ai_addr);
+        lwip_sockaddr_in = ((struct sockaddr_in*)lwipAddrinfo->ai_addr);
 
-//         sa = (SOCK_sockaddr_in*)((u8_t*)ai + sizeof(SOCK_addrinfo));
-//         /* set up sockaddr */
-//         sa->sin_addr.S_un.S_addr = lwip_sockaddr_in->sin_addr.s_addr;
-//         sa->sin_family = lwip_sockaddr_in->sin_family;
-//         sa->sin_port = lwip_sockaddr_in->sin_port;
+        sa = (SOCK_sockaddr_in*)((u8_t*)ai + sizeof(SOCK_addrinfo));
+        /* set up sockaddr */
+        sa->sin_addr.S_un.S_addr = lwip_sockaddr_in->sin_addr.s_addr;
+        sa->sin_family = lwip_sockaddr_in->sin_family;
+        sa->sin_port = lwip_sockaddr_in->sin_port;
         
-//         /* set up addrinfo */
-//         ai->ai_family = lwipAddrinfo->ai_family;
-//         if (hints != NULL) 
-//         {
-//             /* copy socktype & protocol from hints if specified */
-//             ai->ai_socktype = hints->ai_socktype;
-//             ai->ai_protocol = hints->ai_protocol;
-//         }
+        /* set up addrinfo */
+        ai->ai_family = lwipAddrinfo->ai_family;
+        if (hints != NULL) 
+        {
+            /* copy socktype & protocol from hints if specified */
+            ai->ai_socktype = hints->ai_socktype;
+            ai->ai_protocol = hints->ai_protocol;
+        }
         
-//         ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
-//         ai->ai_addr = (SOCK_sockaddr*)sa;
+        ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
+        ai->ai_addr = (SOCK_sockaddr*)sa;
         
-//         *res = ai;
+        *res = ai;
 
-//         // free marshalled addrinfo
-//         lwip_freeaddrinfo(lwipAddrinfo);
-        
-//     }
-//     else
-//     {
-//         err = -1;
-//     }
+        // free marshalled addrinfo
+        lwip_freeaddrinfo(lwipAddrinfo);
+
+        return 0;
+    }
+    else
+    {
+        // map DNS error with socket errors
+        switch(err)
+        {
+            case HOST_NOT_FOUND:
+                errorCode = SOCK_HOST_NOT_FOUND;
+                break;
+
+            default:
+                errorCode = SOCK_NO_RECOVERY;
+        }
+
+    }
  
-//     return err;
-// #else
-//     return -1;
-// #endif
-// }
+    return SOCK_SOCKET_ERROR;
 
-// void LWIP_SOCKETS_Driver::FreeAddrInfo( SOCK_addrinfo* ai )
-// { 
-//     NATIVE_PROFILE_PAL_NETWORK();
+  #else
+    return SOCK_SOCKET_ERROR;
+  #endif
+}
 
-//     SOCK_addrinfo *next;
+void LWIP_SOCKETS_Driver::FreeAddrInfo( SOCK_addrinfo* ai )
+{ 
+    NATIVE_PROFILE_PAL_NETWORK();
+
+    SOCK_addrinfo *next;
     
-//     while (ai != NULL) {
-//       next = ai->ai_next;
-//       mem_free(ai);
-//       ai = next;
-//     }
-// }
+    while (ai != NULL) {
+      next = ai->ai_next;
+      mem_free(ai);
+      ai = next;
+    }
+}
 
 int LWIP_SOCKETS_Driver::Ioctl( SOCK_SOCKET socket, int cmd, int* data )
 { 
@@ -450,7 +528,17 @@ int LWIP_SOCKETS_Driver::GetLastError()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-    return GetNativeError(errno);
+    return GetNativeError(errorCode);
+}
+
+int LWIP_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+
+    // get last error number from socket
+    errorCode = lwip_socket_get_err(socket);
+
+    return GetNativeError(errorCode);
 }
 
 static int MARSHAL_SOCK_FDSET_TO_FDSET(SOCK_fd_set *sf, fd_set *f)
@@ -489,6 +577,8 @@ static void MARSHAL_FDSET_TO_SOCK_FDSET(SOCK_fd_set *sf, fd_set *f)
 
 int LWIP_SOCKETS_Driver::Select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* exceptfds, const SOCK_timeval* timeout )
 {
+    (void)nfds;
+
     NATIVE_PROFILE_PAL_NETWORK();
     int ret = 0;
 
@@ -500,24 +590,24 @@ int LWIP_SOCKETS_Driver::Select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* wr
     fd_set* pW = (writefds  != NULL) ? &write : NULL;
     fd_set* pE = (exceptfds != NULL) ? &excpt : NULL;
 
-    // // If the network goes down then we should alert any pending socket actions
-    // if(exceptfds != NULL && exceptfds->fd_count > 0)
-    // {
-    //     struct netif *pNetIf = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[0].m_interfaceNumber);
+    // If the network goes down then we should alert any pending socket actions
+    if(exceptfds != NULL && exceptfds->fd_count > 0)
+    {
+        struct netif *networkInterface = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[0].m_interfaceNumber);
 
-    //     if(pNetIf != NULL)
-    //     {
-    //         if(!netif_is_up(pNetIf))
-    //         {
-    //             if(readfds  != NULL) readfds->fd_count = 0;
-    //             if(writefds != NULL) writefds->fd_count = 0;
+        if(networkInterface != NULL)
+        {
+            if(!netif_is_up(networkInterface))
+            {
+                if(readfds  != NULL) readfds->fd_count = 0;
+                if(writefds != NULL) writefds->fd_count = 0;
 
-    //             errno = ENETDOWN;
+                errorCode = ENETDOWN;
 
-    //             return exceptfds->fd_count;
-    //         }
-    //     }
-    // }
+                return exceptfds->fd_count;
+            }
+        }
+    }
 
     MARSHAL_SOCK_FDSET_TO_FDSET(readfds  , pR);
     MARSHAL_SOCK_FDSET_TO_FDSET(writefds , pW);
@@ -567,10 +657,10 @@ int LWIP_SOCKETS_Driver::SetSockOpt( SOCK_SOCKET socket, int level, int optname,
             {        
                 // LINGER and DONTLINGER are not implemented in LWIP
                 case SOCK_SOCKO_LINGER:
-                    errno = SOCK_ENOPROTOOPT;
+                    errorCode = SOCK_ENOPROTOOPT;
                     return SOCK_SOCKET_ERROR;
                 case SOCK_SOCKO_DONTLINGER:
-                    errno = SOCK_ENOPROTOOPT;
+                    errorCode = SOCK_ENOPROTOOPT;
                     return SOCK_SOCKET_ERROR;
 				// ignore this item to enable http to work
 				case SOCK_SOCKO_REUSEADDRESS:
@@ -622,10 +712,10 @@ int LWIP_SOCKETS_Driver::GetSockOpt( SOCK_SOCKET socket, int level, int optname,
             {        
                 // LINGER and DONTLINGER are not implemented in LWIP
                 case SOCK_SOCKO_LINGER:
-                    errno = SOCK_ENOPROTOOPT;
+                    errorCode = SOCK_ENOPROTOOPT;
                     return SOCK_SOCKET_ERROR;
                 case SOCK_SOCKO_DONTLINGER:
-                    errno = SOCK_ENOPROTOOPT;
+                    errorCode = SOCK_ENOPROTOOPT;
                     return SOCK_SOCKET_ERROR;
                 default:
                     break;
@@ -729,55 +819,70 @@ int LWIP_SOCKETS_Driver::SendTo( SOCK_SOCKET socket, const char* buf, int len, i
     return lwip_sendto(socket, buf, len, flags, (sockaddr*)&addr, (u32_t)tolen);
 }
 
-uint32_t LWIP_SOCKETS_Driver::GetAdapterCount()
+HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return NETWORK_INTERFACE_COUNT;
-}
 
-// HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration( uint32_t interfaceIndex, SOCK_NetworkConfiguration* config )
-// {
-//     NATIVE_PROFILE_PAL_NETWORK();
+    if(config->StartupAddressMode == AddressMode_DHCP)
+    {
+        struct netif *networkInterface;
 
-//     if(interfaceIndex >= NETWORK_INTERFACE_COUNT) 
-//     {
-//         return CLR_E_INVALID_PARAMETER;
-//     }
+        if ((networkInterface = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber)))
+        {
+#if LWIP_IPV6
+            config->IPv4Address     = networkInterface->ip_addr.u_addr.ip4.addr;
+            config->IPv4NetMask = networkInterface->netmask.u_addr.ip4.addr;
+            config->IPv4GatewayAddress    = networkInterface->gw.u_addr.ip4.addr;
 
-//     memcpy(config, &g_NetworkConfig.NetworkInterfaces[interfaceIndex], sizeof(g_NetworkConfig.NetworkInterfaces[interfaceIndex]));
+            // FIXME IPV6
+            // config->IPv6Address     = networkInterface->ip_addr.u_addr.ip6.addr;
+            // config->IPv6NetMask = networkInterface->netmask.u_addr.ip6.addr;
+            // config->IPv6GatewayAddress    = networkInterface->gw.u_addr.ip6.addr;
+#else
+            config->IPv4Address     = networkInterface->ip_addr.addr;
+            config->IPv4NetMask = networkInterface->netmask.addr;
+            config->IPv4GatewayAddress    = networkInterface->gw.addr;
+#endif
 
-//     if(config->flags & SOCK_NETWORKCONFIGURATION_FLAGS_DHCP)
-//     {
-//         struct netif *pNetIf;
+#if LWIP_DNS
+#if LWIP_IPV6
+#if LWIP_VERSION_MAJOR == 2 
+            config->IPv4DNSAddress1 = dns_getserver(0)->u_addr.ip4.addr;
+            config->IPv4DNSAddress2 = dns_getserver(1)->u_addr.ip4.addr;
 
-//         if (pNetIf = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber))
-//         {
-//             config->ipaddr     = pNetIf->ip_addr.addr;
-//             config->subnetmask = pNetIf->netmask.addr;
-//             config->gateway    = pNetIf->gw.addr;
-// #if LWIP_DNS
-//             config->dnsServer1 = dns_getserver(0).addr;
-//             config->dnsServer2 = dns_getserver(1).addr;
-// #endif
-//         }
-//         else
-//         {
-//             config->ipaddr     = 0;
-//             config->subnetmask = 0;
-//             config->gateway    = 0;
-//         }
-//     }
+            // FIXME IPV6
+            // config->IPv6DNSAddress1 = dns_getserver(0)->u_addr.ip6.addr;
+            // config->IPv6DNSAddress2 = dns_getserver(1)->u_addr.ip6.addr;
+#else
+            config->IPv4DNSAddress1 = dns_getserver(0).u_addr.ip4.addr;
+            config->IPv4DNSAddress2 = dns_getserver(1).u_addr.ip4.addr;
+
+            // FIXME IPV6
+            // config->IPv6DNSAddress1 = dns_getserver(0).u_addr.ip6.addr;
+            // config->IPv6DNSAddress2 = dns_getserver(1).u_addr.ip6.addr;
+#endif
+#else
+#if LWIP_VERSION_MAJOR == 2 
+              config->IPv4DNSAddress1 = dns_getserver(0)->addr;
+              config->IPv4DNSAddress2 = dns_getserver(1)->addr;
+#else
+              config->IPv4DNSAddress1 = dns_getserver(0).addr;
+              config->IPv4DNSAddress2 = dns_getserver(1).addr;
+#endif
+
+#endif
+#endif
+        }
+        else
+        {
+            config->IPv4Address     = 0;
+            config->IPv4NetMask = 0;
+            config->IPv4GatewayAddress    = 0;
+        }
+    }
     
-//     return S_OK;
-// }
-
-// HRESULT LWIP_SOCKETS_Driver::LoadWirelessConfiguration( uint32_t interfaceIndex, SOCK_WirelessConfiguration* wirelessConfig )
-// {
-//     /// Load wireless specific settings if any. You must return S_OK, otherwise default values will be
-//     /// loaded by PAL.
-
-//     return CLR_E_FAIL;
-// }
+    return S_OK;
+}
 
 struct dhcp_client_id
 {
@@ -787,106 +892,101 @@ struct dhcp_client_id
     uint8_t clientId[6];
 };
 
-// HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, SOCK_NetworkConfiguration* config )
-// {
-//     NATIVE_PROFILE_PAL_NETWORK();
-//     if(interfaceIndex >= NETWORK_INTERFACE_COUNT) 
-//     {
-//         return CLR_E_INVALID_PARAMETER;
-//     }
+HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex, uint32_t updateFlags, HAL_Configuration_NetworkInterface* config )
+{
+    NATIVE_PROFILE_PAL_NETWORK();
     
-//     bool fEnableDhcp = (0 != (config->flags & SOCK_NETWORKCONFIGURATION_FLAGS_DHCP));
-//     bool fDynamicDns = (0 != (config->flags & SOCK_NETWORKCONFIGURATION_FLAGS_DYNAMIC_DNS));
-//     bool fDhcpStarted;
+    bool enableDHCP = (config->StartupAddressMode == AddressMode_DHCP);
 
-//     struct netif *pNetIf = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber);
-//     if (NULL == pNetIf)
-//     {
-//         return CLR_E_FAIL;
-//     }
+    struct netif *networkInterface = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber);
+    if (NULL == networkInterface)
+    {
+        return CLR_E_FAIL;
+    }
 
-//     fDhcpStarted = (0 != (pNetIf->flags & NETIF_FLAG_DHCP));
-
-// #if LWIP_DNS
-//     // when using DHCP do not use the static settings
-//     if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DNS))
-//     {
-//         if(!fDynamicDns && (config->dnsServer1 != 0 || config->dnsServer2 != 0))
-//         {
-//             // user defined DNS addresses
-//             if(config->dnsServer1 != 0)
-//             {
-//                 u8_t idx = 0;
+#if LWIP_DNS
+    // when using DHCP do not use the static settings
+    if(0 != (updateFlags & UpdateOperation_Dns))
+    {
+        // FIXME IPV6
+        if(config->AutomaticDNS == 0)
+        {
+            // user defined DNS addresses
+            if(config->IPv4DNSAddress1 != 0)
+            {
+                u8_t idx = 0;
                 
-//                 dns_setserver(idx, (struct ip_addr *)&config->dnsServer1);
-//             }
-//             if(config->dnsServer2 != 0)
-//             {
-//                 u8_t idx = 1;
+                dns_setserver(idx, (const ip_addr_t *)&config->IPv4DNSAddress1);
+            }
+            if(config->IPv4DNSAddress2 != 0)
+            {
+                u8_t idx = 1;
 
-//                 dns_setserver(idx, (struct ip_addr *)&config->dnsServer2);
-//             }
-//         }
-//     }
-// #endif
+                dns_setserver(idx, (const ip_addr_t *)&config->IPv4DNSAddress2);
+            }
+        }
+    }
+#endif
 
-// #if LWIP_DHCP
-//     if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DHCP))
-//     {
-//         if(fEnableDhcp)
-//         {   
-//             if(!fDhcpStarted)
-//             {
-//                 if(ERR_OK != dhcp_start(pNetIf))
-//                 {
-//                     return CLR_E_FAIL;
-//                 }
-//             }
-//         }
-//         else
-//         {
-//             if(fDhcpStarted)
-//             {
-//                 dhcp_stop(pNetIf);
-//             }
+#if LWIP_DHCP
+    if(0 != (updateFlags & UpdateOperation_Dhcp))
+    {
+        if(enableDHCP)
+        {
+            // need to start DHCP   
+            if(ERR_OK != dhcp_start(networkInterface))
+            {
+                return CLR_E_FAIL;
+            }
+        }
+        else
+        {
+            // stop DHCP
+            dhcp_stop(networkInterface);
 
-//             netif_set_addr(pNetIf, (struct ip_addr *) &config->ipaddr, (struct ip_addr *)&config->subnetmask, (struct ip_addr *)&config->gateway);
+            // set interface with our static IP configs
+            netif_set_addr(networkInterface, (const ip4_addr_t *) &config->IPv4Address, (const ip4_addr_t *)&config->IPv4NetMask, (const ip4_addr_t *)&config->IPv4GatewayAddress);
 
-//             Network_PostEvent( NETWORK_EVENT_TYPE_ADDRESS_CHANGED, 0 );
-//         }
-//     }
+            // we should be polite and let the DHCP server that we are now using a static IP
+            dhcp_inform(networkInterface);
+        }
+    }
 
-//     if(fEnableDhcp && fDhcpStarted)
-//     {
-//         // Try Renew before release since renewing after release will fail
-//         if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RENEW))
-//         {
-//             //netifapi_netif_common(pNetIf, NULL, dhcp_renew);
-//             dhcp_renew(pNetIf);
-//         }
-//         else if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_DHCP_RELEASE))
-//         {
-//             //netifapi_netif_common(pNetIf, NULL, dhcp_release);
-//             dhcp_release(pNetIf);
-//         }
-//     }
-// #endif
+    if(enableDHCP)
+    {
+        // developer note: on legacy source there was a hack of trying to renew before release and
+        // also setting the release flag in managed call when the intent was to renew only
+        // nowadays lwIP seems to be doing what is told, so no need for these hacks anymore
+        // also it's NOT possible to renew & release on the same pass, so adding an extra else-if for that
+        // just in case it's request from the managed code
 
-//     if(0 != (updateFlags & SOCK_NETWORKCONFIGURATION_UPDATE_MAC))
-//     {
-//         int len = __min(config->macAddressLen, sizeof(pNetIf->hwaddr));
-        
-//         memcpy(pNetIf->hwaddr, config->macAddressBuffer, len);
-//         pNetIf->hwaddr_len = len;
+        if(0 != (updateFlags & UpdateOperation_DhcpRelease))
+        {
+            dhcp_release(networkInterface);
+        }
+        else if(0 != (updateFlags & UpdateOperation_DhcpRenew))
+        {
+            dhcp_renew(networkInterface);
+        }
+        else if(0 != (updateFlags & (UpdateOperation_DhcpRelease | UpdateOperation_DhcpRenew)) )
+        {
+            return CLR_E_INVALID_PARAMETER;
+        }
+    }
+#endif
 
-//         // mac address requires stack re-init
-//         Network_Interface_Close(interfaceIndex);
-//         g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber = Network_Interface_Open(interfaceIndex);
-//     }
+    if(0 != (updateFlags & UpdateOperation_Mac))
+    {
+        memcpy(networkInterface->hwaddr, config->MacAddress, NETIF_MAX_HWADDR_LEN);
+        networkInterface->hwaddr_len = NETIF_MAX_HWADDR_LEN;
 
-//     return S_OK;
+        // mac address requires stack re-init
+        Network_Interface_Close(interfaceIndex);
+        g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber = Network_Interface_Open(interfaceIndex);
+    }
 
-// }
+    return S_OK;
+}
 
 int LWIP_SOCKETS_Driver::GetNativeTcpOption (int optname)
 {
@@ -1204,17 +1304,16 @@ int LWIP_SOCKETS_Driver::GetNativeError ( int error )
  * Find a network interface by searching for its number
  * Similar to LWIP's netif_find(char *name)
  */
-// struct netif *netif_find_interface(int num)
-// {
-//     struct netif *pNetIf;
+struct netif *netif_find_interface(int num)
+{
+    struct netif *networkInterface;
 
-//     for (pNetIf = netif_list; pNetIf != NULL; pNetIf = pNetIf->next)
-//     {
-//         if (num == pNetIf->num)
-//         {
-//             return pNetIf;
-//         }
-//     }
-//     return NULL;
-// }
-
+    for (networkInterface = netif_list; networkInterface != NULL; networkInterface = networkInterface->next)
+    {
+        if (num == networkInterface->num)
+        {
+            return networkInterface;
+        }
+    }
+    return NULL;
+}

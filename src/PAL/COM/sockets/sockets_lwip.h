@@ -7,16 +7,9 @@
 #ifndef _SOCKETS_H_
 #define _SOCKETS_H_ 1
 
-extern void debug_printf( const char* format, ... );
-
 //--//
 
 #include "nanoHAL.h"
-
-//--//
-
-//TODO extern NETWORK_CONFIG  g_NetworkConfig;
-//TODO extern WIRELESS_CONFIG g_WirelessConfig;
 
 //--//
 
@@ -81,7 +74,7 @@ struct Sockets_LWIP_Driver
     static bool  Uninitialize();
     static void  CloseConnections(bool fCloseDbg);
 
-    static void SaveConfig(int32_t index, SOCK_NetworkConfiguration *cfg);
+    static void SaveConfig(int32_t index, HAL_Configuration_NetworkInterface *cfg);
 
     // Debugger methods ( socket_debugger.cpp )
     static void Debugger_Initialize();
@@ -92,10 +85,8 @@ struct Sockets_LWIP_Driver
     static bool UninitializeDbgListener( int ComPortNum );
     static int  Write( int ComPortNum, const char* Data, size_t size );
     static int  Read ( int ComPortNum, char*       Data, size_t size );
-    static bool UpgradeToSsl( int ComPortNum, const uint8_t* pCACert, uint32_t caCertLen, const uint8_t* pDeviceCert, uint32_t deviceCertLen, LPCSTR szTargetHost );
+    static bool UpgradeToSsl( int ComPortNum, const int8_t* pCACert, uint32_t caCertLen, const int8_t* pDeviceCert, uint32_t deviceCertLen, const char* szTargetHost );
     static bool IsUsingSsl( int ComPortNum );
-
-    static void ApplyWirelessConfig();
 
     void* GetSocketSslData(SOCK_SOCKET socket)
     {
@@ -171,9 +162,6 @@ private:
 
     static void CloseDebuggerSocket();
     static void OnDebuggerTimeout(void* arg);
-
-    static void ApplyConfig();    
-    static void SaveWirelessConfig(int32_t index, SOCK_NetworkConfiguration *cfg);
     
     static HAL_COMPLETION s_DebuggerTimeoutCompletion;
 

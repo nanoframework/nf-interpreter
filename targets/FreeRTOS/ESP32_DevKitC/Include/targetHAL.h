@@ -16,10 +16,11 @@ extern portMUX_TYPE globalLockMutex;
 #define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
 
 // Definitions for Sockets/Network
-#define GLOBAL_LOCK_SOCKETS(x)       
-#define SOCKETS_MAX_COUNT 16
-#define LPCSTR  const uint8_t*
-#define NETWORK_INTERFACE_COUNT 2
+#define GLOBAL_LOCK_SOCKETS(x)   
+
+#define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT    16
+
+#define LPCSTR  const char*
 
 
 // these macros are to be used at entry/exit of native interrupt handlers

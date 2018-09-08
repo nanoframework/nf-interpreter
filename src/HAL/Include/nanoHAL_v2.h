@@ -12,6 +12,9 @@
 #include <stdbool.h>
 #include <nanoWeak.h>
 
+#include <nanoHAL_Network.h>
+#include <nanoHAL_ConfigurationManager.h>
+
 typedef enum SYSTEM_STATE
 {
     SYSTEM_STATE_ISR,

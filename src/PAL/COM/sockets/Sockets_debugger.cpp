@@ -11,7 +11,7 @@ HAL_COMPLETION Sockets_LWIP_Driver::s_DebuggerTimeoutCompletion;
 
 static HAL_CONTINUATION MulticastResponseContinuation;
 
-int32_t g_DebuggerPort_SslCtx_Handle = -1;
+int g_DebuggerPort_SslCtx_Handle = -1;
 
 //
 //  Methods used by the Network Debugger 
@@ -44,16 +44,18 @@ int32_t SOCKETS_Read( int32_t ComPortNum, char* Data, size_t size )
 
 bool SOCKETS_Flush( int32_t ComPortNum )
 {
+    (void)ComPortNum;
+
     NATIVE_PROFILE_PAL_COM();
     //Events_WaitForEvents(0, 2);
     return TRUE;
 }
 
-// bool SOCKETS_UpgradeToSsl( int32_t ComPortNum, const int8_t* pCACert, uint32_t caCertLen, const int8_t* pDeviceCert, uint32_t deviceCertLen, LPCSTR szTargetHost )
-// {
-//     NATIVE_PROFILE_PAL_COM();
-//     return Sockets_LWIP_Driver::UpgradeToSsl( ComPortNum, pCACert, caCertLen, pDeviceCert, deviceCertLen, szTargetHost );
-// }
+bool SOCKETS_UpgradeToSsl( int32_t ComPortNum, const int8_t* pCACert, uint32_t caCertLen, const int8_t* pDeviceCert, uint32_t deviceCertLen, LPCSTR szTargetHost )
+{
+     NATIVE_PROFILE_PAL_COM();
+     return Sockets_LWIP_Driver::UpgradeToSsl( ComPortNum, pCACert, caCertLen, pDeviceCert, deviceCertLen, szTargetHost );
+}
 
 bool SOCKETS_IsUsingSsl( int32_t ComPortNum )
 {
@@ -129,8 +131,7 @@ bool Sockets_LWIP_Driver::InitializeDbgListener( int ComPortNum )
 
     SOCKET_CHECK_RESULT( HAL_SOCK_setsockopt( g_Sockets_LWIP_Driver.m_SocketDebugListener, SOCK_IPPROTO_TCP, SOCK_TCP_NODELAY, (char*)&optval, sizeof(optval) ) );
 
-// Linger not implemented in LWIP version ?
-//    SOCKET_CHECK_RESULT( HAL_SOCK_setsockopt(g_Sockets_LWIP_Driver.m_SocketDebugListener, SOCK_SOL_SOCKET, SOCK_SOCKO_LINGER, (const char*)&optLinger, sizeof(int32_t)) );
+    SOCKET_CHECK_RESULT( HAL_SOCK_setsockopt(g_Sockets_LWIP_Driver.m_SocketDebugListener, SOCK_SOL_SOCKET, SOCK_SOCKO_LINGER, (const char*)&optLinger, sizeof(int32_t)) );
 
     SOCKET_CHECK_RESULT( SOCK_bind( g_Sockets_LWIP_Driver.m_SocketDebugListener,  (SOCK_sockaddr*)&sockAddr, sizeof(sockAddr) ) );
 
@@ -347,7 +348,7 @@ void Sockets_LWIP_Driver::CloseDebuggerSocket()
     {
         if(g_Sockets_LWIP_Driver.m_usingSSL)
         {
-//            SSL_CloseSocket( g_Sockets_LWIP_Driver.m_SocketDebugStream );
+            SSL_CloseSocket( g_Sockets_LWIP_Driver.m_SocketDebugStream );
         }
         else
         {
@@ -366,6 +367,8 @@ void Sockets_LWIP_Driver::CloseDebuggerSocket()
 
 void Sockets_LWIP_Driver::OnDebuggerTimeout(void* arg)
 {
+    (void)arg;
+
     CloseDebuggerSocket();
 }
 
@@ -382,46 +385,45 @@ bool Sockets_LWIP_Driver::IsUsingSsl( int ComPortNum )
     return FALSE;
 }
 
+bool Sockets_LWIP_Driver::UpgradeToSsl( int ComPortNum, const int8_t* pCACert, uint32_t caCertLen, const int8_t* pDeviceCert, uint32_t deviceCertLen, const char* szTargetHost  )
+{
+    if(ComPortNum != ConvertCOM_SockPort(COM_SOCKET_DBG)) return 0;
+    if(g_Sockets_LWIP_Driver.m_stateDebugSocket == DbgSock_Uninitialized) return 0;
+    
+    if(g_Sockets_LWIP_Driver.m_stateDebugSocket == DbgSock_Connected)
+    {
+        if(g_Sockets_LWIP_Driver.m_usingSSL) return TRUE;
 
-// bool Sockets_LWIP_Driver::UpgradeToSsl( int ComPortNum, const int8_t* pCACert, uint32_t caCertLen, const int8_t* pDeviceCert, uint32_t deviceCertLen, LPCSTR szTargetHost  )
-// {
-//     if(ComPortNum != ConvertCOM_SockPort(COM_SOCKET_DBG)) return 0;
-//     if(g_Sockets_LWIP_Driver.m_stateDebugSocket == DbgSock_Uninitialized) return 0;
+        // TLS only and Verify=Required --> only verify the server
+        if(SSL_ClientInit( 0x10, 0x04, (const char*)pDeviceCert, deviceCertLen, NULL, g_DebuggerPort_SslCtx_Handle ))
+        {
+            int32_t ret;
     
-//     if(g_Sockets_LWIP_Driver.m_stateDebugSocket == DbgSock_Connected)
-//     {
-//         if(g_Sockets_LWIP_Driver.m_usingSSL) return TRUE;
+            SSL_AddCertificateAuthority( g_DebuggerPort_SslCtx_Handle, (const char*)pCACert, caCertLen, NULL);
+    
+            do
+            {
+                ret = SSL_Connect( g_Sockets_LWIP_Driver.m_SocketDebugStream, szTargetHost, g_DebuggerPort_SslCtx_Handle );
+            }
+            while(ret == SOCK_EWOULDBLOCK || ret == SOCK_TRY_AGAIN);
+    
+    
+            if(ret != 0)
+            {
+                SSL_CloseSocket(g_Sockets_LWIP_Driver.m_SocketDebugStream);
+                SSL_ExitContext(g_DebuggerPort_SslCtx_Handle);
+            }
+            else
+            {
+                g_Sockets_LWIP_Driver.m_usingSSL = TRUE;
+            }
+    
+            return ret == 0;
+        }
+    }
 
-//         // TLS only and Verify=Required --> only verify the server
-//         if(SSL_ClientInit( 0x10, 0x04, (const char*)pDeviceCert, deviceCertLen, NULL, g_DebuggerPort_SslCtx_Handle ))
-//         {
-//             int32_t ret;
-    
-//             SSL_AddCertificateAuthority( g_DebuggerPort_SslCtx_Handle, (const char*)pCACert, caCertLen, NULL);
-    
-//             do
-//             {
-//                 ret = SSL_Connect( g_Sockets_LWIP_Driver.m_SocketDebugStream, szTargetHost, g_DebuggerPort_SslCtx_Handle );
-//             }
-//             while(ret == SOCK_EWOULDBLOCK || ret == SOCK_TRY_AGAIN);
-    
-    
-//             if(ret != 0)
-//             {
-//                 SSL_CloseSocket(g_Sockets_LWIP_Driver.m_SocketDebugStream);
-//                 SSL_ExitContext(g_DebuggerPort_SslCtx_Handle);
-//             }
-//             else
-//             {
-//                 g_Sockets_LWIP_Driver.m_usingSSL = TRUE;
-//             }
-    
-//             return ret == 0;
-//         }
-//     }
-
-//     return FALSE;
-// }
+    return FALSE;
+}
 
 //-----------------------------------------------------------------------------
 //
@@ -518,6 +520,8 @@ void Sockets_LWIP_Driver::MulticastDiscoverySchedule()
 
 void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void* arg)
 {
+    (void)arg;
+
     NATIVE_PROFILE_PAL_COM();
     SOCK_sockaddr from;
 
@@ -547,7 +551,7 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void* arg)
         
         if(fFound)
         {
-            // SOCK_NetworkConfiguration current;
+            // HAL_Configuration_NetworkInterface current;
             // SOCK_discoveryinfo info;
             SOCK_sockaddr_in sockAddr;
             SOCK_sockaddr_in sockAddrMulticast;
