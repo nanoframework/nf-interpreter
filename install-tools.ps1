@@ -1,7 +1,7 @@
  [CmdletBinding(SupportsShouldProcess = $true)]
  param (
-    [Parameter(Mandatory=$true,HelpMessage="Please enter one of the following NANOCLR_WINDOWS, ESP32_DEVKITC, STM32.",Position=1)][string]$BOARD_NAME = "ESP32_DEVKITC",
-	[Parameter(Mandatory=$true,HelpMessage="Please enter the COM port for NANOCLR [e.g. COM1 or /dev/ttyUSB0].",Position=2)][string]$COMPORT = "COM1",
+    [Parameter(Mandatory=$true,HelpMessage="Please enter one of the following NANOCLR_WINDOWS, ESP32_DEVKITC, STM32.",Position=1)][string]$BOARD_NAME,
+	[Parameter(Mandatory=$true,HelpMessage="Please enter the COM port for NANOCLR [e.g. COM1 or /dev/ttyUSB0].",Position=2)][string]$COMPORT,
 	[switch]$force = $false
  )
 
@@ -79,13 +79,18 @@ If ($BOARD_NAMES -contains $BOARD_NAME)
 			Copy-Item "$PSScriptRoot\.vscode\cmake-kits.TEMPLATE-ESP32.json" -Destination "$PSScriptRoot\.vscode\cmake-kits.json" -Force 
 		}
 		
+		$buildFolderPath = Resolve-Path .\build
+
 		$filePathExists = Test-Path "$PSScriptRoot\.vscode\tasks.json" -ErrorAction SilentlyContinue
+		$filePathExists=$False
 		If($filePathExists -eq $False -or $force)
 		{
 			Write-Host ("Create .\.vscode\tasks.json with install paths from .\vscode\tasks.TEMPLATE-ESP32.json")
 			Copy-Item "$PSScriptRoot\.vscode\tasks.TEMPLATE-ESP32.json" -Destination "$PSScriptRoot\.vscode\tasks.json" -Force  
 			$tasks = (Get-Content "$PSScriptRoot\.vscode\tasks.json")
 			$tasks = $tasks.Replace('<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>', $env:ESP32_IDF_PATH.ToString().Replace("\", "/")) 
+			$tasks = $tasks.Replace('<absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>', $env:ESP32_LIBS_PATH.ToString().Replace("\", "/"))
+			$tasks = $tasks.Replace('<absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>', $buildFolderPath.ToString().Replace("\", "/"))  
 			$tasks = $tasks.Replace('<COMPORT>', $env:NANOCLR_COMPORT.ToString().Replace("\", "/")) 
 			Set-Content -Path "$PSScriptRoot\.vscode\tasks.json" -Value $tasks 
 		}
@@ -96,7 +101,7 @@ If ($BOARD_NAMES -contains $BOARD_NAME)
 		{
 			Write-Host "Create .\.vscode\launch.json with install paths from .\vscode\launch.TEMPLATE-ESP32.json"
 			Copy-Item ".\.vscode\launch.TEMPLATE-ESP32.json" -Destination ".\.vscode\launch.json" -Force
-			$buildFolderPath = Resolve-Path .\build
+			
 			$launch = (Get-Content '.\.vscode\launch.json')
 			$launch = $launch.Replace('<absolute-path-to-the-build-folder-mind-the-forward-slashes>', $buildFolderPath.ToString().Replace("\", "/")) 
 			$launch = $launch.Replace('<absolute-path-to-openocd-mind-the-forward-slashes>', $env:ESP32_OPENOCD_PATH.Replace("\", "/")) 
@@ -130,3 +135,24 @@ Else
     Write-Host ("Specify the type/name of board you wish to install tools for.")
 	Write-Host ("Set parameter -BOARD_NAME to one of [" +($BOARD_NAMES -Join ',')+ "]")
 }
+
+
+<#
+.SYNOPSIS
+    Install the default tools to build nanoFramework and setup build environemnt.
+.DESCRIPTION
+    Power Shell Script to install the default tools to build nano Framework, including setting the machine path and other environment variables
+.PARAMETER BOARD_NAME
+	Specify the target Board from the following list: NANOCLR_WINDOWS, ESP32_DEVKITC, STM32.
+.PARAMETER COMPORT
+	The COM port for NANOCLR [e.g. COM1 or /dev/ttyUSB0].
+.EXAMPLE
+   .\install-tools.ps1 -BOARD_NAME ESP32_DEVKITC -COMPORT COM19
+   Installed the tools for Espressive ESP32 to default path, define required envisonment variables and update VSCode files with paths and set COM19 in tasks.json
+.NOTES
+    Tested on Windows 10
+    Author:  NanoFramework Contributors
+    Created: September 9th, 2018
+.LINK
+    https://https://github.com/nanoframework/Home
+#>
