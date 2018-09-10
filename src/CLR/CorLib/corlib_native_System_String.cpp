@@ -595,14 +595,15 @@ HRESULT Library_corlib_native_System_String::IndexOf( CLR_RT_StackFrame& stack, 
     const char*               pString;
     const CLR_UINT16*    pChars;
     int                  iChars = 0;
-    CLR_RT_UnicodeHelper uh;
-    int                  len;
-
+    CLR_RT_UnicodeHelper inputIterator;
+    int                  inputLen;
+    int                  searchLen = 1;
+    
     szText  = stack.Arg0().RecoverString(); if(!szText) szText = "";
     pos     = -1;
     pString = NULL;
     pChars  = NULL;
-
+    
     if(mode & c_IndexOf__SingleChar)
     {
         pChars = (CLR_UINT16*)&stack.Arg1().NumericByRefConst().u2;
@@ -618,124 +619,219 @@ HRESULT Library_corlib_native_System_String::IndexOf( CLR_RT_StackFrame& stack, 
     else if(mode & c_IndexOf__String)
     {
         pString = stack.Arg1().RecoverString(); FAULT_ON_NULL(pString);
+        // how long is the search string?
+        inputIterator.SetInputUTF8( pString );
+        searchLen = inputIterator.CountNumberOfCharacters();
     }
 
+    // calculate input string length
+    inputIterator.SetInputUTF8( szText );
+    inputLen = inputIterator.CountNumberOfCharacters();
 
-    uh.SetInputUTF8( szText );
-
-    len = uh.CountNumberOfCharacters();
-
-    //--//
-
+    // calculate start index
     if(mode & c_IndexOf__StartIndex)
     {
         startIndex = stack.Arg2().NumericByRefConst().s4;
-
-        if(startIndex < 0 || startIndex > len) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
     else
     {
-        startIndex = 0;
+        // for mode LastIndex... we are searching backwards toward the start of the string
+        if(mode & c_IndexOf__Last)
+        {
+            startIndex = inputLen - 1;
+        }
+        else
+        {
+            startIndex = 0;
+        }
     }
 
+    // check the start index
+    if(startIndex < 0 || startIndex > inputLen) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+
+    // for mode LastIndex... with string we move the start index back by the search string length -1
+    if((mode & c_IndexOf__String_Last) == c_IndexOf__String_Last)
+    {
+        startIndex -= searchLen - 1;
+        // check the start index; if not in range skip the search
+        if(startIndex < 0 || startIndex > inputLen) goto Exit;
+    }
+ 
+    // calculate the iteration count
     if(mode & c_IndexOf__Count)
     {
+        // count form parameter
         count = stack.Arg3().NumericByRefConst().s4;
-
-        if(startIndex + count > len) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
     else
     {
-        count = len - startIndex;
+        // for mode LastIndex... we are searching from start index backwards toward the start of the string
+        if(mode & c_IndexOf__Last)
+        {
+            // backward until the start of string
+            // one more time than the startIndex because we should iterate until zero
+            count = startIndex + 1;
+        }
+        else
+        {
+            // forward until the end of string
+            count = inputLen - startIndex;
+        }
     }
 
-    //--//
-
-    //
-    // First move to the character, then read it.
-    //
-    if(uh.ConvertFromUTF8( startIndex, true ))
+    // for mode with string we reduce the count by the search string length -1
+    // if we search foreward
+    if((mode & c_IndexOf__String_Last) == c_IndexOf__String)
     {
+        count -= searchLen - 1;
+    }
+    
+    // check the count
+    if(mode & c_IndexOf__Last)
+    {
+        // check for backward mode; no exception; just exit
+        if(count > startIndex + 1) goto Exit;
+    }
+    else
+    {
+        // check for forward mode
+        if(startIndex + count > inputLen) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+        
+    // First move to the character, then read it.
+    if(inputIterator.ConvertFromUTF8( startIndex, true ))
+    {
+        // string mode?
         if(pString)
         {
+            // iterate thru all positions
             while(count-- > 0)
             {
-                CLR_RT_UnicodeHelper uh1; uh1.SetInputUTF8( (const char*)uh.m_inputUTF8 );
-                CLR_RT_UnicodeHelper uh2; uh2.SetInputUTF8(         pString        );
-
+                CLR_RT_UnicodeHelper inputString; inputString.SetInputUTF8( (const char*)inputIterator.m_inputUTF8 );
+                CLR_RT_UnicodeHelper searchString; searchString.SetInputUTF8(         pString        );
+                bool finished = false;
+                
                 while(true)
                 {
-                    CLR_UINT16 buf1[ 3 ];
-                    CLR_UINT16 buf2[ 3 ];
+                    CLR_UINT16 bufInput[ 3 ];
+                    CLR_UINT16 bufSearch[ 3 ];
 
-                    uh1.m_outputUTF16      = buf1;
-                    uh1.m_outputUTF16_size = MAXSTRLEN(buf1);
+                    inputString.m_outputUTF16      = bufInput;
+                    inputString.m_outputUTF16_size = MAXSTRLEN(bufInput);
 
-                    uh2.m_outputUTF16      = buf2;
-                    uh2.m_outputUTF16_size = MAXSTRLEN(buf2);
+                    searchString.m_outputUTF16      = bufSearch;
+                    searchString.m_outputUTF16_size = MAXSTRLEN(bufSearch);
 
-                    if(uh2.ConvertFromUTF8( 1, false ) == false)
+                    // read next char from search string; if no more chars to read (false)
+                    // then we are done and found the search string in the input string
+                    if(searchString.ConvertFromUTF8( 1, false ) == false)
                     {
-                        if((mode & c_IndexOf__Last) || (pos == -1))
-                        {
-                            pos = startIndex;
-                        }
-
+                        pos = startIndex;
+                        finished = true;
                         break;
                     }
 
-                    if(uh1.ConvertFromUTF8( 1, false ) == false)
+                    // read the next char from the input string; if no more chars to read (false)
+                    // we didn't found the search string in the input string; we abort the search now
+                    if(inputString.ConvertFromUTF8( 1, false ) == false)
                     {
+                        finished = true;
                         break;
                     }
 
-                    if(buf1[ 0 ] != buf2[ 0 ])
+                    // does the char from input not match the char from the search string
+                    if(bufInput[ 0 ] != bufSearch[ 0 ])
                     {
+                        // next iteration round but not finished
                         break;
                     }
                 }
 
-                if(uh.ConvertFromUTF8( 1, true ) == false)
+                // finished (with or without a found) then break
+                if (finished)
                 {
                     break;
                 }
-
-                startIndex++;
+                
+                // reading forward or backward
+                if(mode & c_IndexOf__Last)
+                {
+                    startIndex--;
+                    // move one chars backward
+                    if(inputIterator.MoveBackwardInUTF8( szText, 1 ) == false)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    startIndex++;
+                    // move to the next char
+                    if(inputIterator.ConvertFromUTF8( 1, true ) == false)
+                    {
+                        break;
+                    }
+                }
             }
         }
 
+        // char mode?
         if(pChars)
         {
+            // iterate thru all positions
             while(count-- > 0)
             {
                 CLR_UINT16 buf[ 3 ];
 
-                uh.m_outputUTF16      = buf;
-                uh.m_outputUTF16_size = MAXSTRLEN(buf);
+                inputIterator.m_outputUTF16      = buf;
+                inputIterator.m_outputUTF16_size = MAXSTRLEN(buf);
 
-                if(uh.ConvertFromUTF8( 1, false ) == false)
+                // read the next char from the input string; if no more chars to read (false)
+                // we didn't found the search chars in the input string
+                if(inputIterator.ConvertFromUTF8( 1, false ) == false)
                 {
                     break;
                 }
 
+                // test each search char if it's a match
                 for(int i=0; i<iChars; i++)
                 {
+                    // match?
                     if(buf[ 0 ] == pChars[ i ])
                     {
-                        if((mode & c_IndexOf__Last) || (pos == -1))
-                        {
-                            pos = startIndex;
-                        }
-
+                        // position found!
+                        pos = startIndex;
                         break;
                     }
                 }
 
-                startIndex++;
+                // found? => break
+                if (pos != -1)
+                {
+                    break;
+                }
+                
+                // for mode LastIndex... we are searching from start index backwards toward the start of the string
+                if(mode & c_IndexOf__Last)
+                {
+                    // in backward mode
+                    startIndex--;
+                    // move two chars backward, because the current char is already read
+                    if(inputIterator.MoveBackwardInUTF8( szText, 2 ) == false)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    // forward mode; simple advance the start index
+                    startIndex++;
+                }
             }
         }
     }
 
+Exit:
     stack.SetResult_I4( pos );
 
     NANOCLR_NOCLEANUP();
