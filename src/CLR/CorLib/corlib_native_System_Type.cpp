@@ -471,15 +471,19 @@ HRESULT Library_corlib_native_System_Type::GetMethods( CLR_RT_StackFrame& stack,
     int iMethod;
     CLR_RT_HeapBlock& top = stack.PushValueAndClear();
     CLR_RT_HeapBlock*       hbType = stack.Arg0().Dereference();
-    
-    if(bindingFlags == c_BindingFlags_Default) bindingFlags = c_BindingFlags_DefaultLookup;
+    bool staticInstanceOnly = false;
 
+    if(bindingFlags == c_BindingFlags_Default) bindingFlags = c_BindingFlags_DefaultLookup;
+    // in default lookup mode we want the static methods only from the instance not from the base classes    
+    if(bindingFlags == c_BindingFlags_DefaultLookup) staticInstanceOnly = true;
+    
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor( *hbType, tdArg ));
     
     for(int pass = 0; pass < 2; pass++)
     {
         td = tdArg;
         iMethod = 0;
+        bool isInstance = true;
 
         do
         {
@@ -489,6 +493,22 @@ HRESULT Library_corlib_native_System_Type::GetMethods( CLR_RT_StackFrame& stack,
             int                         iTot = tdR->sMethods_Num + tdR->iMethods_Num + tdR->vMethods_Num;
             int                         i;
 
+            if (staticInstanceOnly)
+            {
+                if (isInstance)
+                {
+                    // for the instance we use DefaultLookup
+                    bindingFlags = c_BindingFlags_DefaultLookup;
+                    // goto the else block in the next round
+                    isInstance = false;
+                }
+                else
+                {
+                    // otherwise (for the base classes) we use Instance+Public
+                    bindingFlags = c_BindingFlags_Instance | c_BindingFlags_Public;
+                }
+            }
+            
             for(i=0; i<iTot; i++, md++)
             {
                 if(md->flags & CLR_RECORD_METHODDEF::MD_Static)
