@@ -97,6 +97,9 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
         bool hasMinusSign = false;
         bool hasPlusSign = false;
         int decimalPoint = -1;
+        int exponentialSign = -1;
+        bool hasMinusExponentialSign = false;
+        bool hasPlusExponentialSign = false;
         double returnValue = 0.0;
 
         // first pass, get count of decimal places, integer part and check for valid chars
@@ -106,26 +109,56 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
             switch (*temp)
             {
                 case '-':
-                    if (length == 0)
+                    if (exponentialSign == -1)
                     {
-                        hasMinusSign = true;
+                        if (length == 0)
+                        {
+                            hasMinusSign = true;
+                        }
+                        else 
+                        {
+                            // found a minus signal NOT at the start of the string
+                            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                        }
                     }
-                    else 
+                    else
                     {
-                        // found a minus signal NOT at the start of the string
-                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                        if (length == exponentialSign + 1)
+                        {
+                            hasMinusExponentialSign = true;
+                        }
+                        else 
+                        {
+                            // found a minus signal NOT at the start of the exponent
+                            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                        }
                     }
                     break;
 
                 case '+':
-                    if (length == 0)
+                    if (exponentialSign == -1)
                     {
-                        hasPlusSign = true;
+                        if (length == 0)
+                        {
+                            hasPlusSign = true;
+                        }
+                        else 
+                        {
+                            // found a plus signal NOT at the start of the string
+                            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                        }
                     }
-                    else 
+                    else
                     {
-                        // found a plus signal NOT at the start of the string
-                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                        if (length == exponentialSign + 1)
+                        {
+                            hasPlusExponentialSign = true;
+                        }
+                        else 
+                        {
+                            // found a plus signal NOT at the start of the exponent
+                            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                        }
                     }
                     break;
 
@@ -141,6 +174,19 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
                     }
                     break;
 
+                case 'e':
+                case 'E':
+                    if (exponentialSign == -1)
+                    {
+                        exponentialSign = length;
+                    }
+                    else
+                    {
+                        // already found a exponential sign, can't have another
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                    }
+                    break;
+
                 default:
                     if (*temp < '0' && *temp > '9')
                     {
@@ -152,16 +198,17 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
             temp++;
         }
 
-        //  now parse the string according to it's format            
+        //  now parse the string according to it's format
+        int endOrExponentialPart = exponentialSign == -1 ? length : exponentialSign;
         if (decimalPoint == -1)
         {
             // string doesn't have fractional part, treat as integer
-            returnValue = GetIntegerPart(str, length);
+            returnValue = GetIntegerPart(str, endOrExponentialPart);
         }
         else if (decimalPoint == 0)
         {
             // string starts with the decimal point, only has fractional part
-            returnValue = GetDoubleFractionalPart((str+decimalPoint+1), (length-decimalPoint-1));
+            returnValue = GetDoubleFractionalPart((str+decimalPoint+1), (endOrExponentialPart-decimalPoint-1));
         }
         else if (hasMinusSign || hasPlusSign)
         {
@@ -170,13 +217,13 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
             if(decimalPoint == 1)
             {
                 // ... is followed by a decimal point, only has fractional part
-                returnValue = GetDoubleFractionalPart((str+decimalPoint+1), (length-decimalPoint-1));
+                returnValue = GetDoubleFractionalPart((str+decimalPoint+1), (endOrExponentialPart-decimalPoint-1));
             }
             else
             {
                 // ... has integer and fractional parts
                 returnValue = GetIntegerPart(str+1, decimalPoint-1);
-                returnValue = (returnValue + GetDoubleFractionalPart((str+decimalPoint+1), (length-decimalPoint-1)));
+                returnValue = (returnValue + GetDoubleFractionalPart((str+decimalPoint+1), (endOrExponentialPart-decimalPoint-1)));
             }
 
             if (hasMinusSign)
@@ -188,7 +235,28 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
         {
             // string has integer and fractional parts
             returnValue = GetIntegerPart(str, decimalPoint);
-            returnValue = returnValue + GetDoubleFractionalPart((str+decimalPoint+1), (length-decimalPoint-1));
+            returnValue = returnValue + GetDoubleFractionalPart((str+decimalPoint+1), (endOrExponentialPart-decimalPoint-1));
+        }
+
+        // exponential part found?
+        if (exponentialSign != -1)
+        {
+            // advance by one if a sign (+ or -) is after the exponential sign
+            if (hasMinusExponentialSign || hasPlusExponentialSign) exponentialSign++;
+            // get the exponential part
+            int exponent = GetIntegerPart((str+exponentialSign+1), (length-exponentialSign-1));
+            // each time multiply or divide by 10
+            for (int i = 0; i < exponent; i++)
+            {
+                if (hasMinusExponentialSign)
+                {
+                    returnValue /= 10;
+                }
+                else
+                {
+                    returnValue *= 10;
+                }
+            }
         }
 
         stack.SetResult_R8(returnValue);
