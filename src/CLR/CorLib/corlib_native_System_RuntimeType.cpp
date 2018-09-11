@@ -108,34 +108,63 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
 
     CLR_RT_TypeDef_Instance td;    
     CLR_RT_HeapBlock& top = stack.PushValueAndClear();
-    CLR_RT_HeapBlock* ptr;
+    CLR_RT_HeapBlock* ptr = NULL;
     CLR_RT_HeapBlock* hbType = stack.Arg0().Dereference();
-    
-    NANOCLR_CHECK_HRESULT(GetTypeDescriptor( *hbType, td ));
+    int count = 0;
 
-    //
-    // Scan the list of interfaces.
-    //
-    CLR_RT_SignatureParser          parser; parser.Initialize_Interfaces( td.m_assm, td.m_target );
-    CLR_RT_SignatureParser::Element res;
-    
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, parser.Available(), g_CLR_RT_WellKnownTypes.m_TypeStatic ));
-    
-    ptr = (CLR_RT_HeapBlock*)top.DereferenceArray()->GetFirstElement();
-
-    while(parser.Available() > 0)
+    // 2-pass algorithm. 1. count the interfaces; 2. store the interfaces in an array
+    for (int pass = 1; pass <= 2; pass++)
     {
-        CLR_RT_HeapBlock*     hbObj;
+        NANOCLR_CHECK_HRESULT(GetTypeDescriptor( *hbType, td ));
 
-        NANOCLR_CHECK_HRESULT(parser.Advance( res ));        
+        do
+        {
+            // Scan the list of interfaces.
+            CLR_RT_SignatureParser          parser; parser.Initialize_Interfaces( td.m_assm, td.m_target );
+            CLR_RT_SignatureParser::Element res;
+            
+            // 1. pass count
+            if (pass == 1)
+            {
+                count += parser.Available();
+            }
+            else
+            {
+                // 2. pass fill the data into the array
+                while(parser.Available() > 0)
+                {
+                    CLR_RT_HeapBlock*     hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*ptr, g_CLR_RT_WellKnownTypes.m_TypeStatic));
-        hbObj = ptr->Dereference();
-        hbObj->SetReflection( res.m_cls );
+                    NANOCLR_CHECK_HRESULT(parser.Advance( res ));        
 
-        ptr++;
-    }    
+                    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*ptr, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+                    hbObj = ptr->Dereference();
+                    hbObj->SetReflection( res.m_cls );
 
+                    ptr++;
+                    count--;
+                }
+
+                // array full? => Done
+                if (count == 0)
+                {
+                    break;
+                }
+            }
+        }
+        while(td.SwitchToParent());
+        
+        if (pass == 1)
+        {
+            // create the result array
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, count, g_CLR_RT_WellKnownTypes.m_TypeStatic ));
+            // don't need the second pass if nothing found
+            if (count == 0) break;
+            // get the pointer to the first element
+            ptr = (CLR_RT_HeapBlock*)top.DereferenceArray()->GetFirstElement();
+        }
+    }
+    
     NANOCLR_NOCLEANUP();
 }
 
