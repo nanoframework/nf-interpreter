@@ -724,6 +724,8 @@ struct CLR_RT_UnicodeHelper
     bool ConvertFromUTF8( int iMaxChars, bool fJustMove, int iMaxBytes = -1 );
     bool ConvertToUTF8  ( int iMaxChars, bool fJustMove                     );
 
+    bool MoveBackwardInUTF8( const char* utf8StringStart, int iMaxChars );
+    
 #if defined(_WIN32)
     static void ConvertToUTF8  ( const std::wstring& src, std:: string& dst );
     static void ConvertFromUTF8( const std:: string& src, std::wstring& dst );

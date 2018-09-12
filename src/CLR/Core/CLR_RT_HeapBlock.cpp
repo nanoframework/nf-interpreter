@@ -967,9 +967,16 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode( CLR_RT_HeapBlock* ptr, bool fRecurse, 
             CLR_RT_TypeDef_Instance cls; cls.InitializeFromIndex( ptr->ObjectCls() );
             int                    totFields = cls.CrossReference().m_totalFields;
 
-            while(totFields-- > 0)
+            if (totFields > 0)
             {
-                crc = GetHashCode( ++ptr, false, crc );
+                while(totFields-- > 0)
+                {
+                    crc = GetHashCode( ++ptr, false, crc );
+                }
+            }
+            else
+            {
+                crc = SUPPORT_ComputeCRC( &ptr, sizeof(ptr), crc );
             }
         }
         break;

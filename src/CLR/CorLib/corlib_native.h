@@ -886,6 +886,7 @@ struct Library_corlib_native_System_String
     static const int c_IndexOf__StartIndex    = 0x00000010;
     static const int c_IndexOf__Count         = 0x00000020;
     static const int c_IndexOf__Last          = 0x00000040;
+    static const int c_IndexOf__String_Last   = 0x00000044;
 
     static HRESULT FromCharArray( CLR_RT_StackFrame& stack, int startIndex, int count );
     static HRESULT ToCharArray  ( CLR_RT_StackFrame& stack, int startIndex, int count );
