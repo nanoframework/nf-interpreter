@@ -145,7 +145,7 @@ Else
 .SYNOPSIS
     Install the default tools to build nanoFramework and setup build environemnt.
 .DESCRIPTION
-    Power Shell Script to install the default tools to build nano Framework, including setting the machine path and other environment variables
+    Power Shell Script to install the default tools to build nano Framework, including setting the machine path and other environment variables needed for one of the supported board types (NANOCLR_WINDOWS, ESP32_DEVKITC or STM32)
 .PARAMETER BOARD_NAME
 	Specify the target Board from the following list: NANOCLR_WINDOWS, ESP32_DEVKITC, STM32.
 .PARAMETER COMPORT

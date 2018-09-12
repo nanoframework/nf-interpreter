@@ -31,8 +31,6 @@ The following may be installed [manually](#Manual-Install-of-the-build-environme
 - [Ninja](https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip). This is lightweight build system, designed for speed and it works on Windows and Linux machines. See [here](cmake/ninja-build.md) how to setup Ninja to build **nanoFramework**.
 - [OpenOCD](https://github.com/espressif/openocd-esp32/releases/download/v0.10.0-esp32-20180418/openocd-esp32-win32-0.10.0-esp32-20180418.zip) For on chip debugging of the nanoCLR
 
-## Setting up the build environment for ESP32
-
 ## **nanoFramework** GitHub repo
 
 If you intend to change the nanoCLR for ESP32 and create Pull Requests then you will need to fork the [nanoFramework/nf-interpreter](https://github.com/nanoFramework/nf-interpreter) to your own GitHub repo and clone the forked GitHub repo to your Windows system using an Git client such as the [GitHub Desktop application](https://desktop.github.com/).
@@ -41,6 +39,7 @@ You should use the _develop_ branch for mainstream development or the _develop-n
 
 A guide to making contributions is provided [here] (https://github.com/nanoframework/Home/blob/master/CONTRIBUTING.md)
 
+## Setting up the build environment for ESP32
 
 ## Automated Install of the build environment for ESP32 
 
@@ -52,6 +51,8 @@ Open Power Shell in the root folder of the repository and run the script specify
 
 Example Power Shell command line:
 ```.\install-tools.ps1 -BOARD_NAME ESP32_DEVKITC -COMPORT COM19```
+
+You can force the environemnt variables to be updated by added -Force to the command line. 
 
 The script will create the following subfolders (see manual install below and appveyor.yml)
 
@@ -96,7 +97,7 @@ This has already been done and the libraries can be just be downloaded.
 5. For on chip debugging of the nanoCLR, download OpenOCD from [here](https://github.com/espressif/openocd-esp32/releases/download/v0.10.0-esp32-20180724/openocd-esp32-win32-0.10.0-esp32-20180724.zip) and extract OpenOCD into `C:\Esp32_Tools` so you get `C:\Esp32_Tools\openocd-esp32`.
 
 6. Download the light weight build system Ninja for CMake to generate the build files from [here](https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip). This is lightweight build system, designed for speed and it works on Windows and Linux machines. See [here](cmake/ninja-build.md) how to setup Ninja to build **nanoFramework**.
-  + If you have Visual Studio (full version) you can use the included NMake.
+ - If you have Visual Studio (full version) you can use the included NMake.
   
 7. Define the environment variables to match the install locations. Default locations are:
    - `ESP32_TOOLS_PATH = C:\ESP32_TOOLS`
@@ -226,8 +227,7 @@ Note that `.\install-tools.ps1` will install `pyserial` for you if you installed
 
 4. Create a `./.vscode/tasks.json` from `/.vscode/tasks.TEMPLATE-ESP32.json`.
 
-    For flashing the nanoCLR into the ESP32 or to erase the flash of the ESP32 you will need this in the `tasks.json` file.
-    Adjust the COM port and the path to nanoFramework build directory (**!!mind the forward slashes!!**) to your needs.
+    For flashing the nanoCLR into the ESP32 or to erase the flash of the ESP32 you will need a `tasks.json` file. You can manually copy the template (`tasks.TEMPLATE-ESP32.json`) and then adjust the COM port and the path to nanoFramework build directory (**!!mind the forward slashes!!**) to your needs. The Power Shell script `.\install-tools.ps1` will adjust the file for you.  
 
 ```
 { 
@@ -316,7 +316,9 @@ If you want to debug the nanoCLR on the ESP32 chip you can use the Olimex ARM-US
 
 Create a `./.vscode/launch.json` from `/.vscode/launch.TEMPLATE-ESP32.json`.
 
-Edit the file and adjust the absolute path `<absolute-path-to-the-build-folder-mind-the-forward-slashes>` to the build folder (**!!mind the forward slashes!!**) to your needs. The following example assumes the OpenOCD tool was installed in the default location. Adjust the path as required if you used custom install path to OpenOCD.
+Edit the file and adjust the absolute path `<absolute-path-to-the-build-folder-mind-the-forward-slashes>` to the build folder (**!!mind the forward slashes!!**) to your needs. The Power Shell script `.\install-tools.ps1` will adjust the file for you. 
+
+The following example assumes the OpenOCD tool was installed in the default location. Adjust the path as required if you used a custom install path to OpenOCD.
 
 ```
 {
