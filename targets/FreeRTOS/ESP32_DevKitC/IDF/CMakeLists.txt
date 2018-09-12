@@ -299,7 +299,7 @@ set( DIRECT_LINK_PATH "${ESP32_LIBS_PATH}" )
 
 list(APPEND DIRECT_LINK_LIBS "${DIRECT_LINK_PATH}/libapp_trace.a")
 list(APPEND DIRECT_LINK_LIBS "${DIRECT_LINK_PATH}/libapp_update.a")
-list(APPEND DIRECT_LINK_LIBS "${DIRECT_LINK_PATH}/libaws_iot.a")
+#list(APPEND DIRECT_LINK_LIBS "${DIRECT_LINK_PATH}/libaws_iot.a")
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libbootloader_support.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libbt.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libcoap.a)
@@ -334,6 +334,7 @@ list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libwpa_supplicant.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libpthread.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libwear_levelling.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libxtensa-debug-module.a)
+list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libsmartconfig_ack.a)
 
 # Lwip lib is built separately 
 #list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/liblwip.a)

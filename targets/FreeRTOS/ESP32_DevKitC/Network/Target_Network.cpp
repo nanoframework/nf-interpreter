@@ -29,7 +29,6 @@ bool Network_Interface_Bind(int index)
 
 int  Network_Interface_Open(int configIndex)
 {
-    ets_printf( "Network_Interface_Open %d\n", configIndex);
     HAL_Configuration_NetworkInterface * pConfig;
 
     // Check index in range

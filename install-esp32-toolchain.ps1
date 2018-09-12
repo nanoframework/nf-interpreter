@@ -11,7 +11,7 @@ If($XtensaPathExists -eq $False)
     Write-Host "Downloading Xtensa ESP32 toolchain..."
 
     # Download xtensa ESP32 toolchain and install
-    $url = "https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-75-gbaf03c2-5.2.0.zip"
+    $url = "https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip"
     $output = "$PSScriptRoot\xtensa-esp32-elf-win32.zip"
     
     # download 7zip with toolchain
