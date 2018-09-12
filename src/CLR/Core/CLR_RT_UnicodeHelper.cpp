@@ -328,6 +328,39 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8( int iMaxChars, bool fJustMove, int i
 #pragma GCC diagnostic pop
 #endif
 
+// move backward in the UTF8 input
+bool CLR_RT_UnicodeHelper::MoveBackwardInUTF8( const char* utf8StringStart, int iMaxChars )
+{
+    // already at the beginning or iMaxChars < 1?
+    if (m_inputUTF8 <= (const CLR_UINT8*)utf8StringStart || iMaxChars < 1)
+    {
+        return false;
+    }
+    
+    while (true)
+    {
+        // move back one byte and test if it's 0xxxxxxx or 11xxxxxx, because that are start bytes
+        m_inputUTF8--;
+        char current = m_inputUTF8[0];
+        if ((current & 0x10000000) == 0x00000000 || (current & 0x11000000) == 0x11000000)
+        {
+            iMaxChars--;
+        }
+        
+        // moved back enough?
+        if (iMaxChars == 0)
+        {
+            return true;
+        }
+        
+        // reached the beginning?
+        if (m_inputUTF8 == (const CLR_UINT8*)utf8StringStart)
+        {
+            return false;
+        }
+    }
+}
+
 bool CLR_RT_UnicodeHelper::ConvertToUTF8( int iMaxChars, bool fJustMove )
 {
     NATIVE_PROFILE_CLR_CORE();
