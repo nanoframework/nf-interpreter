@@ -1,7 +1,7 @@
  [CmdletBinding(SupportsShouldProcess = $true)]
  param (
     [Parameter(Mandatory=$true,HelpMessage="Please enter one of the following NANOCLR_WINDOWS, ESP32_DEVKITC, STM32.",Position=1)][string]$BOARD_NAME,
-	[Parameter(Mandatory=$true,HelpMessage="Please enter the COM port for NANOCLR [e.g. COM1 or /dev/ttyUSB0].",Position=2)][string]$COMPORT,
+	[Parameter(HelpMessage="Please enter the COM port for ESP32 flash utility [e.g. COM1 or /dev/ttyUSB0].",Position=2)][string]$COMPORT,
 	[switch]$force = $false
  )
 
@@ -19,7 +19,7 @@ If ($BOARD_NAMES -contains $BOARD_NAME)
 
 	If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
 	{
-
+		Write-Host "Nothing to do for NANOCLR_WINDOWS."
 	}
 	ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
 	{
@@ -91,7 +91,11 @@ If ($BOARD_NAMES -contains $BOARD_NAME)
 			$tasks = $tasks.Replace('<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>', $env:ESP32_IDF_PATH.ToString().Replace("\", "/")) 
 			$tasks = $tasks.Replace('<absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>', $env:ESP32_LIBS_PATH.ToString().Replace("\", "/"))
 			$tasks = $tasks.Replace('<absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>', $buildFolderPath.ToString().Replace("\", "/"))  
-			$tasks = $tasks.Replace('<COMPORT>', $env:NANOCLR_COMPORT.ToString().Replace("\", "/")) 
+			
+			If(![string]::IsNullOrEmpty($COMPORT))
+			{
+				$tasks = $tasks.Replace('<COMPORT>', $env:NANOCLR_COMPORT.ToString()) 
+			}
 			Set-Content -Path "$PSScriptRoot\.vscode\tasks.json" -Value $tasks 
 		}
 		

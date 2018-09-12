@@ -19,19 +19,41 @@ The build is based on CMake tool to ease the development in all major platforms.
 
 ## Prerequisites
 
-You'll need:
-
-- [Visual Studio Code](http://code.visualstudio.com/)
-- [CMake](https://cmake.org/download/) Download the latest stable version from and install it (Minimum required version is 3.7).
+You'll need these installed before your start. 
+- [Visual Studio Code](http://code.visualstudio.com/). Additional extensions and setup steps follow below. [Set up Visual Code](#Set-up-Visual-Code)
 - [Python 3.6.5](https://www.python.org/ftp/python/3.6.5/python-3.6.5.exe) Required for uploading the nanoCLR to the ESP32.
+- [CMake](https://cmake.org/download/) Download the latest stable version and install it (Minimum required version is 3.11).
+- A build system for CMake to generate the build files to. 
+  + If you have Visual Studio (full version) you can use the included NMake.
+  + In Visual Studio Code, use Ninja. Ninja can be installed for you or you can do it manually. 
+
+The following may be installed [manually](#Manual-Install-of-the-build-environment-for-ESP32), or use the Power Shell script `.\install-tools.ps1`
+- [Ninja](https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip). This is lightweight build system, designed for speed and it works on Windows and Linux machines. See [here](cmake/ninja-build.md) how to setup Ninja to build **nanoFramework**.
+- [OpenOCD](https://github.com/espressif/openocd-esp32/releases/download/v0.10.0-esp32-20180418/openocd-esp32-win32-0.10.0-esp32-20180418.zip) For on chip debugging of the nanoCLR
 
 ## Setting up the build environment for ESP32
 
-To save time, you can use the `install-tools.ps1` Power Shell script to download the ESP32 IDF Source, toolchain, prebuilt libraries, OpenOCD (for JTAG debugging) and Ninja Zips. It will download the zips into the repository folder and extract them into the folder:
+## **nanoFramework** GitHub repo
+
+If you intend to change the nanoCLR for ESP32 and create Pull Requests then you will need to fork the [nanoFramework/nf-interpreter](https://github.com/nanoFramework/nf-interpreter) to your own GitHub repo and clone the forked GitHub repo to your Windows system using an Git client such as the [GitHub Desktop application](https://desktop.github.com/).
+
+You should use the _develop_ branch for mainstream development or the _develop-network_ branch to work with the networking features which is currently a work in progress.
+
+A guide to making contributions is provided [here] (https://github.com/nanoframework/Home/blob/master/CONTRIBUTING.md)
+
+
+## Automated Install of the build environment for ESP32 
+
+On Windows, one may use the `.\install-tools.ps1` Power Shell script located in the repository root folder to download the ESP32 IDF Source, toolchain, prebuilt libraries, OpenOCD (for JTAG debugging) and Ninja Zips. It will download the zips into the repository folder and extract them into subfolders of the main tool folder:
 
    - `C:\Esp32_Tools`
 
-Open Power Shell and run the script `.\install-tools.ps1`. Subfolders follow the names used in the automated build tool AppVeyor (see manual install below and appveyor.yml)
+Open Power Shell in the root folder of the repository and run the script specifying `ESP32_DEVKITC` as the target BOARD_NAME. Optionally specify the COM port the ESP32 flash programming utility will use (The COM port is easily changed later. If it is not specified, manually edit tasks.json and change instances of `<COMPORT>` to the required port before flashing the ESP32 nanoCLR firmware.)
+
+Example Power Shell command line:
+```.\install-tools.ps1 -BOARD_NAME ESP32_DEVKITC -COMPORT COM19```
+
+The script will create the following subfolders (see manual install below and appveyor.yml)
 
    - `C:\Esp32_Tools\1.22.0-80`
    - `C:\Esp32_Tools\esp-idf-v3.0`
@@ -39,7 +61,24 @@ Open Power Shell and run the script `.\install-tools.ps1`. Subfolders follow the
    - `C:\Esp32_Tools\ninja`  
    - `C:\Esp32_Tools\openocd-esp32`  
 
-## Setting up the build environment for ESP32 - Manual Download
+The following Environment Variables will be created for the current Windows User. 
+
+   - `ESP32_TOOLS_PATH = C:\ESP32_TOOLS`
+   - `ESP32_TOOLCHAIN_PATH = C:\ESP32_TOOLS\1.22.0-80\xtensa-esp32-elf`
+   - `ESP32_LIBS_PATH = C:\ESP32_TOOLS\libs-v3.0`
+   - `IDF_PATH = C:\ESP32_TOOLS\esp-idf-v3.0`
+   - `NINJA_PATH = C:\ESP32_TOOLS\ninja`
+
+The following ESP32 settings files will be created and the place-holder values set to the respective default install paths.
+
+- `.\cmake-variants.json` as a copy of `.\cmake-variants.TEMPLATE-ESP32.json`
+- `.\.vscode\cmake-kits.json` as a copy of `.\.vscode\cmake-kits.TEMPLATE-ESP32.json`
+- `.\.vscode\tasks.json` as a copy of `.\vscode\tasks.TEMPLATE-ESP32.json` with install paths and COM port set
+- `.\.vscode\launch.json` as a copy of `.\vscode\launch.TEMPLATE-ESP32.json` with install paths set
+
+## Manual Install of the build environment for ESP32
+
+These steps are not required if you used the Automated Install script.
 
 To save time on building the nanoCLR and to avoid having to create a CMakeLists.txt project for the ESP32 IDF files, the ESP32 IDF libraries are prebuilt using the Esp32 Msys32 environment then used for linking in the CMake build of nanoCLR.
 This has already been done and the libraries can be just be downloaded.
@@ -58,15 +97,36 @@ This has already been done and the libraries can be just be downloaded.
 
 6. Download the light weight build system Ninja for CMake to generate the build files from [here](https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip). This is lightweight build system, designed for speed and it works on Windows and Linux machines. See [here](cmake/ninja-build.md) how to setup Ninja to build **nanoFramework**.
   + If you have Visual Studio (full version) you can use the included NMake.
+  
+7. Define the environment variables to match the install locations. Default locations are:
+   - `ESP32_TOOLS_PATH = C:\ESP32_TOOLS`
+   - `ESP32_TOOLCHAIN_PATH = C:\ESP32_TOOLS\1.22.0-80\xtensa-esp32-elf`
+   - `ESP32_LIBS_PATH = C:\ESP32_TOOLS\libs-v3.0`
+   - `IDF_PATH = C:\ESP32_TOOLS\esp-idf-v3.0`
+   - `NINJA_PATH = C:\ESP32_TOOLS\ninja`
  
-## **nanoFramework** GitHub repo
+8. Add Ninja to the PATH (i.e. `C:\ESP32_TOOLS\ninja`)
 
-If you intend to change the nanoCLR for ESP32 and create Pull Requests then you will need to fork the [nanoFramework/nf-interpreter](https://github.com/nanoFramework/nf-interpreter) to your own GitHub repo and clone the forked GitHub repo to your Windows system using an Git client such as the [GitHub Desktop application](https://desktop.github.com/).
+## Set up CMake
 
-You should use the _develop_ branch for mainstream development or the _develop-network_ branch to work with the networking features which is currently a work in progress.
+1. Download the latest stable version from [here](https://cmake.org/download/) and install it.
+
+ 
+## Set up Ninja
+
+1. Extract the exe into `C:\Esp32_Tools\ninja` and add the `C:\Esp32_Tools\ninja` directory to your path variable. Note that `.\install-tools.ps1` will do this for you. 
 
 
-## Set up Visual Code
+## Set up Python
+
+1. Install it and then install the serial driver for python from the command line: 
+```
+python -m pip install pyserial
+```
+Note that `.\install-tools.ps1` will install `pyserial` for you if you installed Python prior to running the script. (It is Ok to run `python -m pip install pyserial` multiple times.)
+
+
+## Set up Visual Studio Code
 
 1. Install the extensions:
 
@@ -76,7 +136,7 @@ You should use the _develop_ branch for mainstream development or the _develop-n
 
 2. Set up the `CMake-variants.json` in root directory of your local nanoFramework/nf-interpreter clone.
     
-    There is a template file called `cmake-variants.TEMPLATE-ESP32.json` that can be copied to `CMake-variants.json` and used if you followed the paths in this guide.
+    There is a template file called `cmake-variants.TEMPLATE-ESP32.json` that can be copied to `CMake-variants.json` and used if you followed the paths in this guide. If different install paths used, then edit the file accordingly.
 
     See `cmake-variants.TEMPLATE.json` for the generalised template. Be aware of the forward slashes in the paths. The TOOLCHAIN_PREFIX should be set to the directory where the xtensa-esp32-elf is the subdirectory. 
  
@@ -134,14 +194,16 @@ You should use the _develop_ branch for mainstream development or the _develop-n
           "NF_FEATURE_RTC" : "ON",
           "NF_FEATURE_USE_APPDOMAINS" : "OFF",
           "NF_FEATURE_USE_FILESYSTEM" : "OFF",
-          "API_System.Net" : "OFF",
+          "NF_SECURITY_OPENSSL" : "ON",
+          "API_System.Net" : "ON",
+          "API_Windows.Networking.Sockets" : "OFF",
+          "API_Windows.Devices.Wifi": "ON",
           "API_Windows.Devices.Adc" : "ON",
           "API_Windows.Devices.Gpio" : "ON",
           "API_Windows.Devices.I2c" : "ON",
           "API_Windows.Devices.Pwm" : "ON",
           "API_Windows.Devices.SerialCommunication" : "ON",
           "API_Windows.Devices.Spi" : "ON",
-          "API_Windows.Networking.Sockets" : "OFF",
           "API_Hardware.Esp32" : "ON"
         }
       }
@@ -196,18 +258,9 @@ You should use the _develop_ branch for mainstream development or the _develop-n
 ```
 
 
-## Set up Ninja
-
-1. Extract the exe into `C:\Esp32_Tools\ninja` and add the `C:\Esp32_Tools\ninja` directory to your path variable. Note that `install-tools.ps1` will do this for you. 
 
 
-## Set up Python
 
-1. Install it and then install the serial driver for python from the command line: 
-```
-python -m pip install pyserial
-```
-Note that `install-tools.ps1` will install `pyserial` for you if you installed Python prior to running the script. (It is Ok to run multiple times.)
 
 ## Build nanoCLR
 
@@ -265,18 +318,6 @@ Create a `./.vscode/launch.json` from `/.vscode/launch.TEMPLATE-ESP32.json`.
 
 Edit the file and adjust the absolute path `<absolute-path-to-the-build-folder-mind-the-forward-slashes>` to the build folder (**!!mind the forward slashes!!**) to your needs. The following example assumes the OpenOCD tool was installed in the default location. Adjust the path as required if you used custom install path to OpenOCD.
 
-The JTAG connections on ESP32 DEVKITC are:
-```
-TDI -> GPIO12
-TCK -> GPIO13
-TMS ->GPIO14
-TDO -> GPIO15
-TRST -> EN / RST (Reset)
-GND -> GND
-```
-See Gojimmypi for description of JTAG connections: https://gojimmypi.blogspot.com/2017/03/jtag-debugging-for-esp32.html 
-
-
 ```
 {
     "version": "0.2.0",
@@ -315,43 +356,7 @@ See Gojimmypi for description of JTAG connections: https://gojimmypi.blogspot.co
                 "exceptions": true,
                 "moduleLoad": true
             }
-        },
-        {
-            "name": "ESP32 nanoCLR - Wrover",
-            "type": "cppdbg",
-            "request": "launch",
-            "MIMode": "gdb",
-            "miDebuggerPath": "C:/ESP32_Tools/1.22.0-80/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
-            "stopAtEntry":true,
-            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS/ESP32_DevKitC/nanoCLR.elf",
-
-            "setupCommands": [
-                {"text": "set logging on"},
-                {"text": "target extended-remote localhost:3333"},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
-                {"text": "monitor reset halt"},
-                {"text": "thb app_main"},
-                {"text": "x $a1=0"}
-            ],
-
-            "launchCompleteCommand": "exec-run",
-            "debugServerPath": "C:/Esp32_Tools/openocd-esp32/bin/openocd.exe",
-            "debugServerArgs": "-s \"C:/Esp32_Tools/openocd-esp32/share/openocd/scripts/\" -f interface/ftdi/esp32_devkitj_v1.cfg -f target/esp32.cfg -c \"adapter_khz 2000\" " ,
-            "serverStarted": "Info : .*Tensilica.*0x1.",
-            "filterStderr": true,
-            "externalConsole": true,
-            "cwd": "${cwd}",
-
-            "logging": {
-                "trace": true,
-                "traceResponse": true,
-                "engineLogging": true,
-                "programOutput": true,
-                "exceptions": true,
-                "moduleLoad": true
-            }
         }
-
     ]
 }
 
@@ -362,6 +367,17 @@ You can now debug nanoCLR on the ESP32 by pressing F5 in Visual Studio Code.
 
 
 ## Notes on JTAG debugging on ESP32
+
+The JTAG connections on ESP32 DEVKITC are:
+```
+TDI -> GPIO12
+TCK -> GPIO13
+TMS ->GPIO14
+TDO -> GPIO15
+TRST -> EN / RST (Reset)
+GND -> GND
+```
+See Gojimmypi for description of JTAG connections: https://gojimmypi.blogspot.com/2017/03/jtag-debugging-for-esp32.html 
 
 If flashing nanoCLR via a COM port (default), then be aware that you need to disconnect the JTAG to avoid it preventing the bootloader from running, and therefore being unable to reprogram the ESP23. e.g. if you see the following pattern repeating, unplug the USB-OCD-H, and then the programming will proceed.
 ```
