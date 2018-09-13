@@ -21,9 +21,9 @@ MEMORY
     ///////////////////////////////////////////////////////////////////
     */
 
-    flash       : org = 0x08002000, len = 192k - 8k - 41472     /* flash size less the space reserved for nanoBooter and application deployment*/
+    flash       : org = 0x08002200, len = 192k - 8704 - 40448   /* flash size less the space reserved for nanoBooter and application deployment*/
     config      : org = 0x00000000, len = 0                     /* space reserved for configuration block */
-    deployment  : org = 0x08025D80, len = 41472                 /* space reserved for application deployment */
+    deployment  : org = 0x08029D00, len = 40448                 /* space reserved for application deployment */
     ramvt       : org = 0x20000000, len = 0                     /* initial RAM address is reserved for a copy of the vector table */
     ram0        : org = 0x20000000, len = 20k                   /* remaining RAM is free for use */
     ram1        : org = 0x00000000, len = 0
