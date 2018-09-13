@@ -24,8 +24,8 @@
             ],
 
             "launchCompleteCommand": "exec-continue",
-            "debugServerPath": "C:/Program Files (x86)/openocd-0.10.0/bin/openocd.exe",
-            "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
+            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
             "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
             "filterStderr": true,
             "externalConsole": true,
@@ -60,8 +60,8 @@
             ],
 
             "launchCompleteCommand": "exec-continue",
-            "debugServerPath": "C:/Program Files (x86)/openocd-0.10.0/bin/openocd.exe",
-            "debugServerArgs": "-s \"C:/Program Files (x86)/openocd-0.10.0/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
+            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
             "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
             "filterStderr": true,
             "externalConsole": true,
