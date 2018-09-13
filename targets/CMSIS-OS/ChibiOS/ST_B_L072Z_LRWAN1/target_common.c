@@ -20,3 +20,5 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
     { RAM1_MEMORY_StartAddress, RAM1_MEMORY_Size },
     { FLASH1_MEMORY_StartAddress, FLASH1_MEMORY_Size }
 };
+
+HAL_TARGET_CONFIGURATION  g_TargetConfiguration;
