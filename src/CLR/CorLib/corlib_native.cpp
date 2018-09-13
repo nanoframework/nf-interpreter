@@ -539,6 +539,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Random::Next___I4,
     Library_corlib_native_System_Random::Next___I4__I4,
     Library_corlib_native_System_Random::NextDouble___R8,
@@ -939,7 +940,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x4811B74B,
+    0x7F67F424,
     method_lookup,
     { 1, 0, 0, 0 }
 };
