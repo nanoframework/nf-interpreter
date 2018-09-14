@@ -14,6 +14,15 @@ If ($BOARD_NAMES -contains $BOARD_NAME)
 	Write-Host "Install Tools to build nanoCLR into default folders and configure json files ..."
 	$env:BOARD_NAME = $BOARD_NAME
 	$env:NANOCLR_COMPORT = $COMPORT
+
+	# check if build folder` already exists
+	$buildPathExists = Test-Path "$PSScriptRoot\build\" -ErrorAction SilentlyContinue
+	If($buildPathExists -eq $False)
+	{
+		md $("$PSScriptRoot\build\" ) 
+
+		Write-Host "Create build folder ..."
+	}
 	
 	Write-Host "BOARD_NAME=" $env:BOARD_NAME
 
