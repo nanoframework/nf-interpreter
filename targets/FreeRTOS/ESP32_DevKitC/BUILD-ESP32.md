@@ -47,12 +47,14 @@ On Windows, one may use the `.\install-tools.ps1` Power Shell script located in 
 
    - `C:\Esp32_Tools`
 
+The power shell script is not signed. Run Power Shell as an Administrator and run `set-executionpolicy remotesigned` to enable execution of the non-signed ps1 script. 
+
 Open Power Shell in the root folder of the repository and run the script specifying `ESP32_DEVKITC` as the target BOARD_NAME. Optionally specify the COM port the ESP32 flash programming utility will use (The COM port is easily changed later. If it is not specified, manually edit tasks.json and change instances of `<COMPORT>` to the required port before flashing the ESP32 nanoCLR firmware.)
 
 Example Power Shell command line:
 ```.\install-tools.ps1 -BOARD_NAME ESP32_DEVKITC -COMPORT COM19```
 
-You can force the environemnt variables to be updated by added -Force to the command line. 
+You can force the environemnt variables to be updated by adding -Force to the command line. 
 
 The script will create the following subfolders (see manual install below and appveyor.yml)
 
