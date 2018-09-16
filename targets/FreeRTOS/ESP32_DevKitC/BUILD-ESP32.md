@@ -27,7 +27,7 @@ You'll need these installed before your start.
 - A build system for CMake to generate the build files to. 
   + If you have Visual Studio (full version) you can use the included NMake.
   + In Visual Studio Code, use Ninja. Ninja can be installed for you or you can do it manually. 
-- [CP210x USB to UART Bridge] (https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers) Driver for the USB to UART Bridge integrated into the standard ESP32 DevKitC. If Windows does not install the driver automatically, then you can download and install manually. If your ESP32 uses a different serila driver, install that and ignore this driver. With the ESP32 DevKetC plugged in, use Windows Device Manager to determine the COM port as this is needed to complete the setup.
+- [CP210x USB to UART Bridge](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers) Driver for the USB to UART Bridge integrated into the standard ESP32 DevKitC. If Windows does not install the driver automatically, then you can download and install manually. If your ESP32 uses a different serila driver, install that and ignore this driver. With the ESP32 DevKetC plugged in, use Windows Device Manager to determine the COM port as this is needed to complete the setup.
 
 The following may be installed [manually](#Manual-Install-of-the-build-environment-for-ESP32), or use the Power Shell script `.\install-esp32-tools.ps1`
 - [Ninja](https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip). This is lightweight build system, designed for speed and it works on Windows and Linux machines. See [here](cmake/ninja-build.md) how to setup Ninja to build **nanoFramework**.
