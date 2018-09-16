@@ -4,12 +4,12 @@
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
-- [Setting up the build environment for ESP32](#Setting-up-the-build-environment-for-ESP32)
-- [Set up Visual Code](#Set-up-Visual-Code)
-- [Build the nanoCLR](#Build-the-nanoCLR)
-- [Flash nanoCLR to ESP32](#Flash-nanoCLR-to-ESP32)
-- [Start with a Hello World C# application](#Start-with-a-Hello-World-C#-application)
-- [Debug the nanoCLR](#Debug-the-nanoCLR)
+- [Setting up the build environment for ESP32](#setting-up-the-build-environment-for-esp32)
+- [Set up Visual Studio Code](#set-up-visual-studio-code)
+- [Build the nanoCLR](#build-nanoclr)
+- [Flash nanoCLR to ESP32](#flash-nanoclr-into-esp32)
+- [Start with a Hello World C# application](#start-with-a-hello-world-c#-application)
+- [Debug the nanoCLR](#debug-the-nanoclr)
 
 **About this document**
 
