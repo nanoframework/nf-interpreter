@@ -41,7 +41,7 @@ If ($BOARD_NAMES -contains $BOARD_NAME)
 		}
 		If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PATH) -or $force)
 		{
-			$env:ESP32_TOOLCHAIN_PATH= ($env:ESP32_TOOLS_PATH+'\1.22.0-80\xtensa-esp32-elf')
+			$env:ESP32_TOOLCHAIN_PATH= ($env:ESP32_TOOLS_PATH+'\1.22.0-80\xtensa-esp32-elf\xtensa-esp32-elf')
 			Write-Host ("Set User Environment ESP32_TOOLCHAIN_PATH='"+$env:ESP32_TOOLCHAIN_PATH+"'")
 			[System.Environment]::SetEnvironmentVariable("ESP32_TOOLCHAIN_PATH", $env:ESP32_TOOLCHAIN_PATH, "User")
 		}
