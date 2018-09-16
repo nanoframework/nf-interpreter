@@ -20,9 +20,8 @@ $env:NANOCLR_COMPORT = $COMPORT
 $buildPathExists = Test-Path "$PSScriptRoot\build\" -ErrorAction SilentlyContinue
 If($buildPathExists -eq $False)
 {
-	md $("$PSScriptRoot\build\" ) 
-
 	Write-Host "Create build folder ..."
+	mkdir $("$PSScriptRoot\build\" ) > $null
 }
 
 Write-Host "BOARD_NAME=" $env:BOARD_NAME
@@ -36,7 +35,7 @@ If([string]::IsNullOrEmpty($env:ESP32_TOOLS_PATH) -or $force)
 }
 If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PATH) -or $force)
 {
-	$env:ESP32_TOOLCHAIN_PATH= ($env:ESP32_TOOLS_PATH+'\1.22.0-80\xtensa-esp32-elf\xtensa-esp32-elf')
+	$env:ESP32_TOOLCHAIN_PATH= ($env:ESP32_TOOLS_PATH+'\1.22.0-80\xtensa-esp32-elf')
 	Write-Host ("Set User Environment ESP32_TOOLCHAIN_PATH='"+$env:ESP32_TOOLCHAIN_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_TOOLCHAIN_PATH", $env:ESP32_TOOLCHAIN_PATH, "User")
 }
