@@ -39,17 +39,21 @@ If you intend to change the nanoCLR for ESP32 and create Pull Requests then you 
 
 You should use the _develop_ branch for mainstream development or the _develop-network_ branch to work with the networking features which is currently a work in progress.
 
-A guide to making contributions is provided [here] (https://github.com/nanoframework/Home/blob/master/CONTRIBUTING.md)
+A guide to making contributions is provided [here](https://github.com/nanoframework/Home/blob/master/CONTRIBUTING.md)
+
 
 ## Setting up the build environment for ESP32
 
-## Automated Install of the build environment for ESP32 
+After cloning the repo, you need to setup the build environemnt. You can use the power shell script or follow the step-by-step instrunctions.
 
-On Windows, one may use the `.\install-esp32-tools.ps1` Power Shell script located in the repository root folder to download the ESP32 IDF Source, toolchain, prebuilt libraries, OpenOCD (for JTAG debugging) and Ninja Zips. It will download the zips into the repository folder and extract them into subfolders of the main tool folder:
+### Automated Install of the build environment for ESP32 
+
+__The following power shell script is not signed. Run Power Shell as an Administrator and run `set-executionpolicy remotesigned` to enable execution of the non-signed script.__ 
+
+On Windows, one may use the `.\install-esp32-tools.ps1` Power Shell script located in the repository root folder to download the ESP32 IDF Source, toolchain, prebuilt libraries, OpenOCD (for JTAG debugging) and Ninja Zips. You may need to use __Run as Administrator__ for power shell to permit installing modules to unzip the downloaded archives. The script will download the zips into the repository folder and extract them into subfolders of the main ESP32 tool folder:
 
    - `C:\Esp32_Tools`
 
-The power shell script is not signed. Run Power Shell as an Administrator and run `set-executionpolicy remotesigned` to enable execution of the non-signed ps1 script. 
 
 Open Power Shell in the root folder of the repository and run the script specifying `ESP32_DEVKITC` as the target BOARD_NAME. Optionally specify the COM port the ESP32 flash programming utility will use (The COM port is easily changed later. If it is not specified, manually edit tasks.json and change instances of `<COMPORT>` to the required port before flashing the ESP32 nanoCLR firmware.)
 
@@ -81,7 +85,7 @@ The following ESP32 settings files will be created and the place-holder values s
 - `.\.vscode\tasks.json` as a copy of `.\vscode\tasks.TEMPLATE-ESP32.json` with install paths and COM port set
 - `.\.vscode\launch.json` as a copy of `.\vscode\launch.TEMPLATE-ESP32.json` with install paths set
 
-## Manual Install of the build environment for ESP32
+### Manual Install of the build environment for ESP32
 
 These steps are not required if you used the Automated Install script.
 
@@ -114,17 +118,17 @@ This has already been done and the libraries can be just be downloaded.
 
 ## Set up CMake
 
-1. Download the latest stable version from [here](https://cmake.org/download/) and install it.
+Download the latest stable version from [here](https://cmake.org/download/) and install it.
 
  
 ## Set up Ninja
 
-1. Extract the exe into `C:\Esp32_Tools\ninja` and add the `C:\Esp32_Tools\ninja` directory to your path variable. Note that `.\install-esp32-tools.ps1` will do this for you. 
+Extract the exe into `C:\Esp32_Tools\ninja` and add the `C:\Esp32_Tools\ninja` directory to your path variable. Note that `.\install-esp32-tools.ps1` will do this for you. 
 
 
 ## Set up Python
 
-1. Install it and then install the serial driver for python from the command line: 
+Install [Python 3.6.5](https://www.python.org/ftp/python/3.6.5/python-3.6.5.exe) and then install the serial driver for python from the command line: 
 ```
 python -m pip install pyserial
 ```
@@ -141,9 +145,11 @@ Note that `.\install-esp32-tools.ps1` will install `pyserial` for you if you ins
 
 2. Set up the `CMake-variants.json` in root directory of your local nanoFramework/nf-interpreter clone.
     
-    There is a template file called `cmake-variants.TEMPLATE-ESP32.json` that can be copied to `CMake-variants.json` and used if you followed the paths in this guide. If different install paths used, then edit the file accordingly.
+    See `cmake-variants.TEMPLATE.json` for the generalised template. Be aware of the forward slashes in the paths. 
+	The TOOLCHAIN_PREFIX should be set to the directory where the xtensa-esp32-elf is the subdirectory. 
 
-    See `cmake-variants.TEMPLATE.json` for the generalised template. Be aware of the forward slashes in the paths. The TOOLCHAIN_PREFIX should be set to the directory where the xtensa-esp32-elf is the subdirectory. 
+    There is a template file called `cmake-variants.TEMPLATE-ESP32.json` that can be copied to `CMake-variants.json` and used if you followed the paths in this guide. If different install paths were used, then edit the file accordingly. 
+
  
 ```
 {
@@ -219,7 +225,7 @@ Note that `.\install-esp32-tools.ps1` will install `pyserial` for you if you ins
 
 3. Create a `./.vscode/cmake-kits.json` from `/.vscode/cmake-kits.TEMPLATE-ESP32.json`.
 
-  The default template file is ok, and may be copied to `./.vscode/cmake-kits.json`
+The default template file is ok, and may be copied to `./.vscode/cmake-kits.json`
 ```
 [
   {
@@ -231,16 +237,16 @@ Note that `.\install-esp32-tools.ps1` will install `pyserial` for you if you ins
 
 4. Create a `./.vscode/tasks.json` from `/.vscode/tasks.TEMPLATE-ESP32.json`.
 
-    For flashing the nanoCLR into the ESP32 or to erase the flash of the ESP32 you will need a `tasks.json` file. You can manually copy the template (`tasks.TEMPLATE-ESP32.json`) and then adjust the COM port and the path to nanoFramework build directory (**!!mind the forward slashes!!**) to your needs. The Power Shell script `.\install-esp32-tools.ps1` will adjust the file for you.  
+    For flashing the nanoCLR into the ESP32 or to erase the flash of the ESP32 you will need a `tasks.json` file. You can manually copy the template (`tasks.TEMPLATE-ESP32.json`) and then adjust the COM port and the varios paths with place holders (**!!mind the forward slashes!!**) to your needs. The Power Shell script `.\install-esp32-tools.ps1` will adjust the file for you if you used it.  Use the paramter '-C COM6' to select COM6 for flashing the ESP32 DevKitC.
 
 ```
 { 
     "version": "2.0.0", 
 	    "tasks": [ 
         { 
-            "taskName": "Flash nanoCLR COM6", 
+            "taskName": "Flash nanoCLR <COMPORT>", 
             "type": "shell", 
-            "command": "python C:/ESP32_Tools/esp-idf-v3.0/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM6\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 C:/ESP32_Tools/libs/bootloader.bin 0x10000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/nanoCLR.bin 0x8000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/partitions_4mb.bin", 
+            "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"<COMPORT>\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 <absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>/bootloader.bin 0x10000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/nanoCLR.bin 0x8000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/partitions_4mb.bin", 
             "presentation": { 
                 "reveal": "always", 
                 "panel": "shared" 
@@ -248,9 +254,9 @@ Note that `.\install-esp32-tools.ps1` will install `pyserial` for you if you ins
             "problemMatcher": [] 
         }, 
         { 
-            "taskName": "Erase flash COM6", 
+            "taskName": "Erase flash <COMPORT>", 
             "type": "shell", 
-            "command": "python C:/ESP32_Tools/esp-idf-v3.0/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM6\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" erase_flash", 
+            "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"<COMPORT>\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" erase_flash", 
             "presentation": { 
                 "reveal": "always", 
                 "panel": "shared" 
@@ -263,12 +269,11 @@ Note that `.\install-esp32-tools.ps1` will install `pyserial` for you if you ins
 
 
 
-
-
-
 ## Build nanoCLR
 
-1. To enter a command into Visual Studio Code use the key combination Ctrl+Shift+P.
+1. Launch Visual Studio and from the __File__ menu, seletc __Open Folder__ and browse to the repo folder. VSCode will prompt asking "Wound you like to configure this project?". Ignore the prompt as you need to select the build varient first. 
+
+To enter a command into Visual Studio Code use the key combination Ctrl+Shift+P.
 
 2. Enter the command 
     ```
