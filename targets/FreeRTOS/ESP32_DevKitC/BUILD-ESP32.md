@@ -46,7 +46,7 @@ A guide to making contributions is provided [here](https://github.com/nanoframew
 
 After cloning the repo, you need to setup the build environemnt. You can use the power shell script or follow the step-by-step instrunctions.
 
-### Automated Install of the build environment for ESP32 
+## Automated Install of the build environment for ESP32 
 
 __The following power shell script is not signed. Run Power Shell as an Administrator and run `set-executionpolicy remotesigned` to enable execution of the non-signed script.__ 
 
@@ -85,7 +85,7 @@ The following ESP32 settings files will be created and the place-holder values s
 - `.\.vscode\tasks.json` as a copy of `.\vscode\tasks.TEMPLATE-ESP32.json` with install paths and COM port set
 - `.\.vscode\launch.json` as a copy of `.\vscode\launch.TEMPLATE-ESP32.json` with install paths set
 
-### Manual Install of the build environment for ESP32
+## Manual Install of the build environment for ESP32
 
 These steps are not required if you used the Automated Install script.
 
@@ -123,7 +123,9 @@ Download the latest stable version from [here](https://cmake.org/download/) and 
  
 ## Set up Ninja
 
-Extract the exe into `C:\Esp32_Tools\ninja` and add the `C:\Esp32_Tools\ninja` directory to your path variable. Note that `.\install-esp32-tools.ps1` will do this for you. 
+Extract the exe into `C:\Esp32_Tools\ninja` and add the `C:\Esp32_Tools\ninja` directory to your path variable. 
+
+Note that `.\install-esp32-tools.ps1` will do this for you. 
 
 
 ## Set up Python
@@ -271,26 +273,28 @@ The default template file is ok, and may be copied to `./.vscode/cmake-kits.json
 
 ## Build nanoCLR
 
-1. Launch Visual Studio and from the __File__ menu, seletc __Open Folder__ and browse to the repo folder. VSCode will prompt asking "Wound you like to configure this project?". Ignore the prompt as you need to select the build varient first. 
+1. Launch Visual Studio and from the __File__ menu, seletc __Open Folder__ and browse to the repo folder. VSCode will prompt asking "Would you like to configure this project?". Ignore the prompt as you need to select the build varient first. 
 
-To enter a command into Visual Studio Code use the key combination Ctrl+Shift+P.
+   To enter a command into Visual Studio Code use the key combination Ctrl+Shift+P.
 
-2. Enter the command 
+2. Click on `CMake` in the Status bar or enter the command
     ```
     CMake: Set build varient
     ```
-    and set it to the `Debug + NanoCLR` build type. Wait for CMake to process the files and build the CMake cache. This can take a while the first time. 
+    and set it to the `Debug + NanoCLR` build type. 
 
 	If it also asks for a kit select `ESP32 Tools`
 
-3. Press F7, click on `Build` in the Status bar or enter the command 
+    Wait for CMake to process the files and build the CMake cache. This can take a while the first time. 
+
+3. Press F7, or click on `Build` in the Status bar or enter the command 
     ```
     CMake: Build
     ```
 
 4. If you get no error you will have in the build directory the files `nanoCLR.bin` and `partitions_4mb.bin`.
 
-5. The third file that gets flashed into the ESP32 is the `C:/ESP32_Tools/libs/bootloader.bin`.
+5. The third file that gets flashed into the ESP32 is the `bootloader.bin` which will be located here `C:/ESP32_Tools/libs/bootloader.bin` if the automated install script is used.
 
 
 ## Flash nanoCLR into ESP32
