@@ -10,7 +10,7 @@
 - [Flash nanoCLR to ESP32](#flash-nanoclr-into-esp32)
 - [Start with a Hello World C# application](#start-with-a-hello-world-c-application)
 - [Debug the nanoCLR](#debugging-nanoclr)
-- [Notes on JTAG Debugging on ESP32] (notes-on-jtag-debugging-on-esp32)
+- [Notes on JTAG Debugging on ESP32](notes-on-jtag-debugging-on-esp32)
 
 **About this document**
 
