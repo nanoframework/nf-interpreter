@@ -13,6 +13,16 @@
             },
             "problemMatcher": []
         },
+        { 
+            "taskName": "Erase flash <COMPORT>", 
+            "type": "shell", 
+            "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"<COMPORT>\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" erase_flash", 
+            "presentation": { 
+                "reveal": "always", 
+                "panel": "shared" 
+            }, 
+            "problemMatcher": [] 
+        }, 
         {
             "taskName": "Flash nanoCLR Wrover <COMPORT>",
             "type": "shell",
