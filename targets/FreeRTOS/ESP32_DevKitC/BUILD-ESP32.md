@@ -8,8 +8,9 @@
 - [Set up Visual Studio Code](#set-up-visual-studio-code)
 - [Build the nanoCLR](#build-nanoclr)
 - [Flash nanoCLR to ESP32](#flash-nanoclr-into-esp32)
-- [Start with a Hello World C# application](#start-with-a-hello-world-c#-application)
-- [Debug the nanoCLR](#debug-the-nanoclr)
+- [Start with a Hello World C# application](#start-with-a-hello-world-c-application)
+- [Debug the nanoCLR](#debugging-nanoclr)
+- [Notes on JTAG Debugging on ESP32] (notes-on-jtag-debugging-on-esp32)
 
 **About this document**
 
@@ -377,7 +378,7 @@ The JTAG connections on ESP32 DEVKITC are:
 ```
 TDI -> GPIO12
 TCK -> GPIO13
-TMS ->GPIO14
+TMS -> GPIO14
 TDO -> GPIO15
 TRST -> EN / RST (Reset)
 GND -> GND
