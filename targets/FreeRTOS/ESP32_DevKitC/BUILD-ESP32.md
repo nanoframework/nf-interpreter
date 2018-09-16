@@ -28,7 +28,7 @@ You'll need these installed before your start.
   + In Visual Studio Code, use Ninja. Ninja can be installed for you or you can do it manually. 
 - [CP210x USB to UART Bridge] (https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers) Driver for the USB to UART Bridge integrated into the standard ESP32 DevKitC. If Windows does not install the driver automatically, then you can download and install manually. If your ESP32 uses a different serila driver, install that and ignore this driver. With the ESP32 DevKetC plugged in, use Windows Device Manager to determine the COM port as this is needed to complete the setup.
 
-The following may be installed [manually](#Manual-Install-of-the-build-environment-for-ESP32), or use the Power Shell script `.\install-tools.ps1`
+The following may be installed [manually](#Manual-Install-of-the-build-environment-for-ESP32), or use the Power Shell script `.\install-esp32-tools.ps1`
 - [Ninja](https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip). This is lightweight build system, designed for speed and it works on Windows and Linux machines. See [here](cmake/ninja-build.md) how to setup Ninja to build **nanoFramework**.
 - [OpenOCD](https://github.com/espressif/openocd-esp32/releases/download/v0.10.0-esp32-20180418/openocd-esp32-win32-0.10.0-esp32-20180418.zip) For on chip debugging of the nanoCLR
 
@@ -44,7 +44,7 @@ A guide to making contributions is provided [here] (https://github.com/nanoframe
 
 ## Automated Install of the build environment for ESP32 
 
-On Windows, one may use the `.\install-tools.ps1` Power Shell script located in the repository root folder to download the ESP32 IDF Source, toolchain, prebuilt libraries, OpenOCD (for JTAG debugging) and Ninja Zips. It will download the zips into the repository folder and extract them into subfolders of the main tool folder:
+On Windows, one may use the `.\install-esp32-tools.ps1` Power Shell script located in the repository root folder to download the ESP32 IDF Source, toolchain, prebuilt libraries, OpenOCD (for JTAG debugging) and Ninja Zips. It will download the zips into the repository folder and extract them into subfolders of the main tool folder:
 
    - `C:\Esp32_Tools`
 
@@ -53,7 +53,7 @@ The power shell script is not signed. Run Power Shell as an Administrator and ru
 Open Power Shell in the root folder of the repository and run the script specifying `ESP32_DEVKITC` as the target BOARD_NAME. Optionally specify the COM port the ESP32 flash programming utility will use (The COM port is easily changed later. If it is not specified, manually edit tasks.json and change instances of `<COMPORT>` to the required port before flashing the ESP32 nanoCLR firmware.)
 
 Example Power Shell command line:
-```.\install-tools.ps1 -BOARD_NAME ESP32_DEVKITC -COMPORT COM19```
+```.\install-esp32-tools.ps1 -BOARD_NAME ESP32_DEVKITC -COMPORT COM19```
 
 You can force the environemnt variables to be updated by adding -Force to the command line. 
 
@@ -118,7 +118,7 @@ This has already been done and the libraries can be just be downloaded.
  
 ## Set up Ninja
 
-1. Extract the exe into `C:\Esp32_Tools\ninja` and add the `C:\Esp32_Tools\ninja` directory to your path variable. Note that `.\install-tools.ps1` will do this for you. 
+1. Extract the exe into `C:\Esp32_Tools\ninja` and add the `C:\Esp32_Tools\ninja` directory to your path variable. Note that `.\install-esp32-tools.ps1` will do this for you. 
 
 
 ## Set up Python
@@ -127,7 +127,7 @@ This has already been done and the libraries can be just be downloaded.
 ```
 python -m pip install pyserial
 ```
-Note that `.\install-tools.ps1` will install `pyserial` for you if you installed Python prior to running the script. (It is Ok to run `python -m pip install pyserial` multiple times.)
+Note that `.\install-esp32-tools.ps1` will install `pyserial` for you if you installed Python prior to running the script. (It is Ok to run `python -m pip install pyserial` multiple times.)
 
 
 ## Set up Visual Studio Code
@@ -230,7 +230,7 @@ Note that `.\install-tools.ps1` will install `pyserial` for you if you installed
 
 4. Create a `./.vscode/tasks.json` from `/.vscode/tasks.TEMPLATE-ESP32.json`.
 
-    For flashing the nanoCLR into the ESP32 or to erase the flash of the ESP32 you will need a `tasks.json` file. You can manually copy the template (`tasks.TEMPLATE-ESP32.json`) and then adjust the COM port and the path to nanoFramework build directory (**!!mind the forward slashes!!**) to your needs. The Power Shell script `.\install-tools.ps1` will adjust the file for you.  
+    For flashing the nanoCLR into the ESP32 or to erase the flash of the ESP32 you will need a `tasks.json` file. You can manually copy the template (`tasks.TEMPLATE-ESP32.json`) and then adjust the COM port and the path to nanoFramework build directory (**!!mind the forward slashes!!**) to your needs. The Power Shell script `.\install-esp32-tools.ps1` will adjust the file for you.  
 
 ```
 { 
@@ -319,7 +319,7 @@ If you want to debug the nanoCLR on the ESP32 chip you can use the Olimex ARM-US
 
 Create a `./.vscode/launch.json` from `/.vscode/launch.TEMPLATE-ESP32.json`.
 
-Edit the file and adjust the absolute path `<absolute-path-to-the-build-folder-mind-the-forward-slashes>` to the build folder (**!!mind the forward slashes!!**) to your needs. The Power Shell script `.\install-tools.ps1` will adjust the file for you. 
+Edit the file and adjust the absolute path `<absolute-path-to-the-build-folder-mind-the-forward-slashes>` to the build folder (**!!mind the forward slashes!!**) to your needs. The Power Shell script `.\install-esp32-tools.ps1` will adjust the file for you. 
 
 The following example assumes the OpenOCD tool was installed in the default location. Adjust the path as required if you used a custom install path to OpenOCD.
 
