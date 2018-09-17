@@ -14,12 +14,12 @@
 
 #if !defined(HAL_USE_STM32_CRC)
 // the default for this driver is to be included
-#define HAL_USE_STM32_CRC                           TRUE
+#define HAL_USE_STM32_CRC                    TRUE
 #endif
 
 #if !defined(HAL_USE_STM32_RNG)
 // the default for this driver is to be included
-#define HAL_USE_STM32_RNG                           TRUE
+#define HAL_USE_STM32_RNG                    TRUE
 #endif
 
 #if !defined(HAL_USE_FSMC)
