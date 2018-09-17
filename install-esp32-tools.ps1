@@ -33,6 +33,12 @@ If([string]::IsNullOrEmpty($env:ESP32_TOOLS_PATH) -or $force)
 	Write-Host ("Set User Environment ESP32_TOOLS_PATH='"+$env:ESP32_TOOLS_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_TOOLS_PATH", $env:ESP32_TOOLS_PATH, "User")
 }
+If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PREFIX) -or $force)
+{
+	$env:ESP32_TOOLCHAIN_PREFIX= ($env:ESP32_TOOLS_PATH+'\1.22.0-80')
+	Write-Host ("Set User Environment ESP32_TOOLCHAIN_PREFIX='"+$env:ESP32_TOOLCHAIN_PREFIX+"'")
+	[System.Environment]::SetEnvironmentVariable("ESP32_TOOLCHAIN_PREFIX", $env:ESP32_TOOLCHAIN_PREFIX, "User")
+}
 If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PATH) -or $force)
 {
 	$env:ESP32_TOOLCHAIN_PATH= ($env:ESP32_TOOLS_PATH+'\1.22.0-80\xtensa-esp32-elf')
@@ -73,7 +79,13 @@ Write-Host ("Adding Ninja to the path "+$env:NINJA_PATH)
 $filePathExists = Test-Path "$PSScriptRoot\cmake-variants.json" -ErrorAction SilentlyContinue
 If($filePathExists -eq $False -or $force)
 {
+	Write-Host ("Create .\cmake-variants.json with install paths from .\cmake-variants.TEMPLATE-ESP32.json")
 	Copy-Item "$PSScriptRoot\cmake-variants.TEMPLATE-ESP32.json" -Destination "$PSScriptRoot\cmake-variants.json" -Force 
+	$variants = (Get-Content "$PSScriptRoot\cmake-variants.json")
+	$variants = $variants.Replace('<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>', $env:ESP32_IDF_PATH.ToString().Replace("\", "/")) 
+	$variants = $variants.Replace('<absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>', $env:ESP32_LIBS_PATH.ToString().Replace("\", "/"))
+	$variants = $variants.Replace('<absolute-path-to-the-toolchain-prefix-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PREFIX.ToString().Replace("\", "/"))  
+	Set-Content -Path "$PSScriptRoot\cmake-variants.json" -Value $variants 
 }
 
 $filePathExists = Test-Path "$PSScriptRoot\.vscode\cmake-kits.json" -ErrorAction SilentlyContinue
@@ -94,7 +106,9 @@ If($filePathExists -eq $False -or $force)
 	$tasks = $tasks.Replace('<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>', $env:ESP32_IDF_PATH.ToString().Replace("\", "/")) 
 	$tasks = $tasks.Replace('<absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>', $env:ESP32_LIBS_PATH.ToString().Replace("\", "/"))
 	$tasks = $tasks.Replace('<absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>', $buildFolderPath.ToString().Replace("\", "/"))  
+	$tasks = $tasks.Replace('<absolute-path-to-the-toolchain-prefix-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PREFIX.ToString().Replace("\", "/"))  
 	
+	# Update the COPORT placeholder if the paramter is supplied.
 	If(![string]::IsNullOrEmpty($COMPORT))
 	{
 		$tasks = $tasks.Replace('<COMPORT>', $env:NANOCLR_COMPORT.ToString()) 

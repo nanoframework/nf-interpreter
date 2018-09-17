@@ -189,9 +189,9 @@ Note that `.\install-esp32-tools.ps1` will install `pyserial` for you if you ins
         "short": "NanoCLR",
           "settings": {
             "BUILD_VERSION" : "0.9.99.999",
-            "TOOLCHAIN_PREFIX" : "C:/ESP32_Tools/1.22.0-80", 
-            "ESP32_IDF_PATH" : "C:/ESP32_Tools/esp-idf-v3.0", 
-            "ESP32_LIBS_PATH" : "C:/ESP32_Tools/libs-v3.0", 
+            "TOOLCHAIN_PREFIX" : "<absolute-path-to-the-toolchain-prefix-folder-mind-the-forward-slashes>", 
+            "ESP32_IDF_PATH" : "<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>", 
+            "ESP32_LIBS_PATH" : "<absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>", 
             "TARGET_SERIES" : "ESP32", 
           "USE_FPU" : "TRUE",
           "RTOS" : "FREERTOS",
