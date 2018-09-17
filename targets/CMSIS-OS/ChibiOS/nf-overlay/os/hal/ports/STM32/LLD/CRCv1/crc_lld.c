@@ -22,7 +22,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #if (STM32_CRC_PROGRAMMABLE == TRUE) || \
-    defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H7XX)
+    defined(STM32F7xx_MCUCONF) || defined(STM32L0xx_MCUCONF) || defined(STM32H7xx_MCUCONF)
 
 // CRC default configuration.
 static const crcConfig defaultConfig = {
@@ -71,7 +71,7 @@ void crc_lld_start(const crcConfig *config) {
     rccEnableCRC(FALSE);
 
 #if (STM32_CRC_PROGRAMMABLE == TRUE) || \
-    defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H7XX)
+    defined(STM32F7xx_MCUCONF) || defined(STM32L0xx_MCUCONF) || defined(STM32H7xx_MCUCONF)
 
     // set configuration, if supplied
     if (config == NULL)
@@ -88,7 +88,7 @@ void crc_lld_start(const crcConfig *config) {
 #endif
 
 #if (STM32_CRC_PROGRAMMABLE == TRUE) || \
-    defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H7XX)
+    defined(STM32F7xx_MCUCONF) || defined(STM32L0xx_MCUCONF) || defined(STM32H7xx_MCUCONF)
 
     WRITE_REG(CRCD1.Instance->INIT, DEFAULT_CRC_INITVALUE);
 
@@ -141,7 +141,7 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
     // get pointer to buffer
     uint8_t* ptr = (uint8_t*)buffer;
 
-#if defined(STM32F1XX) || defined(STM32L1XX) || defined(STM32F2XX) || defined(STM32F4XX)
+#if defined(STM32F1xx_MCUCONF) || defined(STM32L1xx_MCUCONF) || defined(STM32F2xx_MCUCONF) || defined(STM32F4xx_MCUCONF)
     uint32_t size_remainder = 0;
 
     // need to reset CRC peripheral if:
@@ -208,8 +208,10 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
         // Reset CRC Calculation Unit
         crc_lld_reset();
 
+  #if (STM32_CRC_PROGRAMMABLE == TRUE)
         // set initial CRC value
         WRITE_REG(CRCD1.Instance->INIT, initialCrc);
+  #endif 
     }
     
     switch (CRCD1.Config->InputDataFormat)
