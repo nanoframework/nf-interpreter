@@ -16,7 +16,7 @@ If($buildPathExists -eq $False)
 }
 
 Write-Host "BOARD_NAME=" $env:BOARD_NAME
-If([string]::IsNullOrEmpty($env:HEX2DFU_PATH) -or $force)
+If([string]::IsNullOrEmpty($env:GNU_GCC_TOOLCHAIN_PATH) -or $force)
 {
 	$env:GNU_GCC_TOOLCHAIN_PATH='C:\GNU_Tools_ARM_Embedded\7-2017-q4-major'
 	Write-Host ("Set User Environment GNU_GCC_TOOLCHAIN_PATH='"+$env:GNU_GCC_TOOLCHAIN_PATH+"'")
