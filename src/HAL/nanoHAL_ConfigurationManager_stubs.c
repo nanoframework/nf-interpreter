@@ -6,6 +6,10 @@
 #include <string.h>
 #include <nanoHAL_v2.h>
 
+__nfweak void ConfigurationManager_Initialize()
+{
+};
+
 __nfweak void* ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
 {
     (void)startAddress;
