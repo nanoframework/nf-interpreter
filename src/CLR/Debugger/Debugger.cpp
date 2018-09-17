@@ -845,10 +845,13 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command*)message->m_payload;
-
-    int size          = 0;
     bool success     = false;
+
+    // include handling of configuration block only if feature is available
+  #if (HAS_CONFIG_BLOCK == TRUE)
+
+    Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command*)message->m_payload;
+    int size          = 0;
 
     HAL_Configuration_NetworkInterface* configNetworkInterface;
     HAL_Configuration_Wireless80211* configWireless80211NetworkInterface;
@@ -896,6 +899,12 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
         WP_ReplyToCommand( message, success, false, NULL, size );
     }
 
+  #else
+
+    (void)message;
+
+  #endif // (HAS_CONFIG_BLOCK == TRUE)
+
     return success;
 }
 
@@ -904,6 +913,9 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message* message)
     NATIVE_PROFILE_CLR_DEBUGGER();
 
     bool success = false;
+
+    // include handling of configuration block only if feature is available
+  #if (HAS_CONFIG_BLOCK == TRUE)
 
     Monitor_UpdateConfiguration_Command* cmd = (Monitor_UpdateConfiguration_Command*)message->m_payload;
     Monitor_UpdateConfiguration_Reply cmdReply;
@@ -929,6 +941,12 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message* message)
     }
 
     WP_ReplyToCommand(message, success, false, &cmdReply, sizeof(cmdReply));
+
+  #else
+
+    (void)message;
+
+  #endif // (HAS_CONFIG_BLOCK == TRUE)
 
     return success;
 }

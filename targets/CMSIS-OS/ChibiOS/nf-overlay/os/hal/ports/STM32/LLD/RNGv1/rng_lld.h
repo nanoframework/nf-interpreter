@@ -59,7 +59,7 @@ typedef struct RNGDriver {
 // From STMicroelectronics Cube HAL 
 /////////////////////////////////////////////////////////////
 
-#if defined(STM32L0XX)
+#if defined(STM32L0xx_MCUCONF)
 // this series uses different names for the buses
 
 #define rccEnableRNG(lp)  rccEnableAPB2(RCC_AHBENR_RNGEN, lp)

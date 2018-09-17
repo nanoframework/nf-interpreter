@@ -70,14 +70,14 @@ typedef struct CRCDriver {
 // From STMicroelectronics Cube HAL 
 ///////////////////////////////////////////
 
-#if defined(STM32L0XX)
+#if defined(STM32L0xx_MCUCONF)
 // this series uses different names for the buses
 
 #define rccEnableCRC(lp) rccEnableAPB1(RCC_AHBENR_CRCEN, lp)
 #define rccDisableCRC() rccDisableAPB1(RCC_AHBENR_CRCEN)
 #define rccResetCRC() rccResetAPB1(RCC_AHB1RSTR_CRCRST)
 
-#endif //defined(STM32L0XX)
+#endif
 
 /** @defgroup CRC_Default_Polynomial_Value    Default CRC generating polynomial
   * @{

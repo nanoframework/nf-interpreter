@@ -185,10 +185,13 @@ int Monitor_EraseMemory(WP_Message* message)
 
 int Monitor_QueryConfiguration(WP_Message* message)
 {
-    Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command*)message->m_payload;
-
-    int size          = 0;
     bool success     = false;
+
+    // include handling of configuration block only if feature is available
+  #if (HAS_CONFIG_BLOCK == TRUE)
+
+    Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command*)message->m_payload;
+    int size          = 0;
 
     HAL_Configuration_NetworkInterface configNetworkInterface;
     HAL_Configuration_Wireless80211 configWireless80211NetworkInterface;
@@ -230,6 +233,12 @@ int Monitor_QueryConfiguration(WP_Message* message)
         WP_ReplyToCommand( message, success, false, NULL, size );
     }
 
+  #else
+
+    (void)message;
+
+  #endif // (HAS_CONFIG_BLOCK == TRUE)
+
     return success;
 }
 
@@ -237,6 +246,9 @@ int Monitor_UpdateConfiguration(WP_Message* message)
 {
     bool success = false;
 
+    // include handling of configuration block only if feature is available
+  #if (HAS_CONFIG_BLOCK == TRUE)
+    
     Monitor_UpdateConfiguration_Command* cmd = (Monitor_UpdateConfiguration_Command*)message->m_payload;
     Monitor_UpdateConfiguration_Reply cmdReply;
 
@@ -259,10 +271,16 @@ int Monitor_UpdateConfiguration(WP_Message* message)
         default:
             cmdReply.ErrorCode = 10;
     }
-  
+
     WP_ReplyToCommand(message, success, false, &cmdReply, sizeof(cmdReply));
 
-    return true;
+  #else
+
+    (void)message;
+
+  #endif // (HAS_CONFIG_BLOCK == TRUE)
+
+    return success;
 }
 
 int Monitor_CheckMemory(WP_Message* message)
