@@ -6,9 +6,9 @@
 
 #include <hal.h>
 
-#if defined(STM32F0XX) || defined(STM32F1XX) || defined(STM32F2XX) || \
-	defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32L0XX) || \
-	defined(STM32L1XX) || defined(STM32H7XX) 
+#if defined(STM32F0xx_MCUCONF) || defined(STM32F1xx_MCUCONF) || defined(STM32F2xx_MCUCONF) || \
+	defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF) || defined(STM32L0xx_MCUCONF) || \
+	defined(STM32L1xx_MCUCONF) || defined(STM32H7xx_MCUCONF) 
 
 // strong implementation of this function specific to the STM32 targets
 unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc)

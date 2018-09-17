@@ -9,7 +9,7 @@
 #include <hal.h>
 
 
-#if defined(STM32L0XX) || defined(STM32F0XX) || defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX)
+#if defined(STM32L0xx_MCUCONF) || defined(STM32F0xx_MCUCONF) || defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF) || defined(STM32H7xx_MCUCONF)
 
 // Contains available GPIO ports for the current board
 extern stm32_gpio_t* gpioPort[];
