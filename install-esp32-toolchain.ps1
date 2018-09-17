@@ -20,5 +20,5 @@ If($XtensaPathExists -eq $False)
     Write-Host "Installing Xtensa ESP32 toolchain..."
     
     # unzip toolchain
-    Expand-7Zip -ArchiveFileName $output -TargetPath $env:ESP32_TOOLCHAIN_PATH
+    Expand-7Zip -ArchiveFileName $output -TargetPath "$env:ESP32_TOOLCHAIN_PATH\.."
 }
