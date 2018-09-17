@@ -142,7 +142,7 @@ If($filePathExists -eq $False -or $force)
    Installs the tools for Espressive ESP32 to default path, define required envisonment variables and update VSCode files with paths and set COM19 in tasks.json
 .NOTES
     Tested on Windows 10
-    Author:  NanoFramework Contributors
+    Author:  nanoFramework Contributors
     Created: September 9th, 2018
 .LINK
     https://https://github.com/nanoframework/Home
