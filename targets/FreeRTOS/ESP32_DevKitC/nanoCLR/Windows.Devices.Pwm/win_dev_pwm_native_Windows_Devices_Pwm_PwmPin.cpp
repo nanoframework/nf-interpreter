@@ -51,7 +51,7 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::ConfigureAndStart
             LEDC_INTR_DISABLE,
             timer_sel,
             dutyCycle,
-            0xfffff 
+            0 
         };
 
         // Configure Channel which will also start it 
