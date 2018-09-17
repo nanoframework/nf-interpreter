@@ -42,6 +42,7 @@ int main(void) {
   if (!palReadPad(GPIOA, GPIOA_BUTTON))
   {
     // check for valid CLR image 
+    // this target DOES NOT have configuration block, so we need to use the __nanoImage_end__ address here
     if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
     {
       // there seems to be a valid CLR image
