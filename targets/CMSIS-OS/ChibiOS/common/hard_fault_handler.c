@@ -17,7 +17,7 @@ typedef enum {
     UsageFault = 6,
 } FaultType;
 
-#if defined(STM32F4XX) || defined(STM32F7XX)
+#if defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF)
 
 void NMI_Handler(void) {
     while(1);
@@ -46,7 +46,7 @@ void HardFault_Handler(void) {
     volatile FaultType faultType = (FaultType)__get_IPSR();
 
     // these are not available in all the STM32 series
-#if defined(STM32F4XX) || defined(STM32F7XX)
+#if defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF)
 
     //Flags about hardfault / busfault
     //See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
@@ -99,7 +99,7 @@ void UsageFault_Handler(void) {
     (void)faultType;
 
     // these are not available in all the STM32 series
-#if defined(STM32F4XX) || defined(STM32F7XX)
+#if defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF)
     
     //Flags about hardfault / busfault
     //See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
@@ -133,7 +133,7 @@ void MemManage_Handler(void) {
     (void)faultType;
 
     // these are not available in all the STM32 series
-#if defined(STM32F4XX) || defined(STM32F7XX)
+#if defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF)
     
     //For HardFault/BusFault this is the address that was accessed causing the error
     volatile uint32_t faultAddress = SCB->MMFAR;

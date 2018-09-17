@@ -77,7 +77,7 @@ typedef struct CRCDriver {
 #define rccDisableCRC() rccDisableAPB1(RCC_AHBENR_CRCEN)
 #define rccResetCRC() rccResetAPB1(RCC_AHB1RSTR_CRCRST)
 
-#endif //defined(STM32L0xx_MCUCONF)
+#endif
 
 /** @defgroup CRC_Default_Polynomial_Value    Default CRC generating polynomial
   * @{
