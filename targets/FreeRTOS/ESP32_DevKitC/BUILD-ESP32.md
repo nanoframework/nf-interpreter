@@ -55,10 +55,19 @@ On Windows, one may use the `.\install-esp32-tools.ps1` Power Shell script locat
    - `C:\Esp32_Tools`
 
 
+<<<<<<< HEAD
 Open Power Shell in the root folder of the repository and run the script specifying `ESP32_DEVKITC` as the target BOARD_NAME. Optionally specify the COM port the ESP32 flash programming utility will use (The COM port is easily changed later. If it is not specified, manually edit tasks.json and change instances of `<COMPORT>` to the required port before flashing the ESP32 nanoCLR firmware.)
 
 Example Power Shell command line:
 ```.\install-esp32-tools.ps1 -BOARD_NAME ESP32_DEVKITC -COMPORT COM19```
+=======
+Open Power Shell in the root folder of the repository and run the script specifying the COM port the ESP32 flash programming utility will use (The COM port is easily changed later. If it is not specified, manually edit tasks.json and change instances of `<COMPORT>` to the required port before flashing the ESP32 nanoCLR firmware.)
+
+Example Power Shell command line:
+```
+.\install-esp32-tools.ps1 -COMPORT COM19
+```
+>>>>>>> develop
 
 You can force the environemnt variables to be updated by adding -Force to the command line. 
 
