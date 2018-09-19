@@ -5,7 +5,7 @@
 
 #include <hal.h>
 
-#if defined(STM32L0xx_MCUCONF) || defined(STM32F0xx_MCUCONF) || defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF) || defined(STM32H7xx_MCUCONF)
+#if defined(STM32L0XX) || defined(STM32F0XX) || defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX)
 
 stm32_gpio_t* gpioPort[] = { GPIOA, GPIOB
 #if STM32_HAS_GPIOC
