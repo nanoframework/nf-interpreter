@@ -226,7 +226,7 @@ extern uint8_t Uart8_RxBuffer[];
 // the following macro defines a function that initializes an UART struct
 // it gets called in the Windows_Devices_SerialCommunication_SerialDevice::NativeInit function
 
-#if defined(STM32F7xx_MCUCONF) || defined(STM32F0xx_MCUCONF)
+#if defined(STM32F7XX) || defined(STM32F0XX)
 
 // STM32F7 and STM32F0 use UART driver v2
 #define UART_INIT(num, tx_buffer_size, rx_buffer_size) void Init_UART##num() { \
