@@ -38,7 +38,7 @@ This has already been done and the libraries can be just be downloaded.
 1. Create a directory structure such as the following:
 
    - `C:\Esp32_Tools`
-   - `C:\Esp32_Tools\libs`
+   - `C:\Esp32_Tools\libs-v3.1`
 
 2. Download the pre-built libs zip from [here](https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.1.zip)
 and extract it into `C:\Esp32_Tools\libs-v3.1`.
