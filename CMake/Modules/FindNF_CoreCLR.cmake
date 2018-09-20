@@ -69,7 +69,6 @@ set(NF_CoreCLR_SRCS
     StringTableData.cpp
     TypeSystem.cpp
     nanoSupport_CRC32.c
-    nanoHAL_ConfigurationManager_stubs.c
     nanoHAL_SystemInformation.cpp
 
     # CoreLib
@@ -172,6 +171,15 @@ set(NF_CoreCLR_SRCS
     COM_stubs.c
     GenericPort_stubs.c
 )
+
+# include configuration manager file
+if(NF_FEATURE_HAS_CONFIG_BLOCK)
+    # feature enabled, full support
+    list(APPEND NF_CoreCLR_SRCS nanoHAL_ConfigurationManager.c)
+else()
+    # feature disabled, stubs only
+    list(APPEND NF_CoreCLR_SRCS nanoHAL_ConfigurationManager_stubs.c)
+endif()
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
     set(NF_CoreCLR_SRC_FILE SRC_FILE-NOTFOUND)

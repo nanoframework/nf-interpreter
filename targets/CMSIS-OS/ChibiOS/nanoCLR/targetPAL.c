@@ -37,4 +37,4 @@ stm32_gpio_t* gpioPort[] = { GPIOA, GPIOB
 #endif
 };
 
-#endif // defined(STM32F0xx) || defined(STM32F4xx) || defined(STM32F7xx) || defined(STM32H7xx)
+#endif

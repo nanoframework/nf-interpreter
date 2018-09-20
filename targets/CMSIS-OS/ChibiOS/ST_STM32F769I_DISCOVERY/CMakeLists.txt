@@ -94,9 +94,6 @@ add_executable(
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
 
-    # need to add configuration manager to allow get/store configuration blocks
-    "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c"
-    
     # the next one is required is the target implements and it's using external memory
     "${CMAKE_CURRENT_SOURCE_DIR}/target_external_memory.c"
 

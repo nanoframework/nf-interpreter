@@ -208,8 +208,11 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
         // Reset CRC Calculation Unit
         crc_lld_reset();
 
+  #if (STM32_CRC_PROGRAMMABLE == TRUE) || \
+    defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H7XX)
         // set initial CRC value
         WRITE_REG(CRCD1.Instance->INIT, initialCrc);
+  #endif 
     }
     
     switch (CRCD1.Config->InputDataFormat)

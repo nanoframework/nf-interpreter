@@ -13,15 +13,15 @@
             "setupCommands": [
                 {"text": "set logging on"},
                 {"text": "target extended-remote localhost:3333"},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
+                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS/ESP32_DevKitC/nanoCLR.elf"},
                 {"text": "monitor reset halt"},
                 {"text": "thb app_main"},
                 {"text": "x $a1=0"}
             ],
 
             "launchCompleteCommand": "exec-run",
-            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/openocd.exe",
-            "debugServerArgs": "-s \"<absolute-path-to-the-openocd-scripts-mind-the-forward-slashes>/openocd/scripts/\" -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" " ,
+            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" " ,
             "serverStarted": "Info : .*Tensilica.*0x1.",
             "filterStderr": true,
             "externalConsole": true,
@@ -48,15 +48,15 @@
             "setupCommands": [
                 {"text": "set logging on"},
                 {"text": "target extended-remote localhost:3333"},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
+                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS/ESP32_DevKitC/nanoCLR.elf"},
                 {"text": "monitor reset halt"},
                 {"text": "thb app_main"},
                 {"text": "x $a1=0"}
             ],
 
             "launchCompleteCommand": "exec-run",
-            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/openocd.exe",
-            "debugServerArgs": "-s \"<absolute-path-to-the-openocd-scripts-mind-the-forward-slashes>/openocd/scripts/\" -f interface/ftdi/esp32_devkitj_v1.cfg -f target/esp32.cfg -c \"adapter_khz 2000\" " ,
+            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/ftdi/esp32_devkitj_v1.cfg -f target/esp32.cfg -c \"adapter_khz 2000\" " ,
             "serverStarted": "Info : .*Tensilica.*0x1.",
             "filterStderr": true,
             "externalConsole": true,

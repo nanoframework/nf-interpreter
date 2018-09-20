@@ -55,6 +55,7 @@
           "NF_FEATURE_RTC" : "OFF-default-ON-to-enable-hardware-RTC",
           "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
           "NF_FEATURE_WATCHDOG" : "ON-to-enable-hardware-watchdog-ON-is-default",
+          "NF_FEATURE_HAS_CONFIG_BLOCK" : "OFF-default-ON-to-enable-configuration-block-storage",
           "NF_PLATFORM_NO_CLR_TRACE" : "OFF-default-ON-to-disable-all-trace-on-CLR",
           "NF_CLR_NO_IL_INLINE" : "OFF-default-ON-to-disable-CLR-IL-inlining",
           "NF_INTEROP_ASSEMBLIES" : [ "Assembly1-Namespace", "Assembly2-Namespace" ],

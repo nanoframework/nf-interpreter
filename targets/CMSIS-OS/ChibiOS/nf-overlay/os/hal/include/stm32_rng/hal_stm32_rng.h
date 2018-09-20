@@ -8,7 +8,7 @@
 
 #if (HAL_USE_STM32_RNG == TRUE)
 
-#if defined(STM32F0XX)
+#if defined(STM32F0xx_MCUCONF)
 #error "CAN'T ENABLE RNG FOR STM32F0 series"
 #endif
 
