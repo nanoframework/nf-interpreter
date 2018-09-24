@@ -140,7 +140,7 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRa
     uint16_t divider = 0;
     int32_t maxSpiFrequency;
 
-  #if defined(STM32L0xx_MCUCONF)
+  #if defined(STM32L0XX)
 
     // SP1 is feed by APB2 (STM32_PCLK2)
     actualFrequency = STM32_PCLK2;
@@ -154,7 +154,7 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRa
     // from datasheet
     maxSpiFrequency = 12000000;
 
-  #elif defined(STM32F0xx_MCUCONF)
+  #elif defined(STM32F0XX)
 
     (void)busIndex;
 
@@ -164,7 +164,7 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRa
     // from datasheet
     maxSpiFrequency = 18000000;
 
-  #elif defined(STM32F4xx_MCUCONF) || defined(STM32F7xx_MCUCONF)
+  #elif defined(STM32F4XX) || defined(STM32F7XX)
 
     // SP1, SPI4, SPI5 and SPI6 are feed by APB2 (STM32_PCLK2)
     actualFrequency = STM32_PCLK2;
@@ -179,7 +179,7 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRa
     // because ChibiOS doesn't offer that we have to go with minimum common denominator
     maxSpiFrequency = STM32_SPII2S_MAX;
 
-  #elif defined(STM32H7xx_MCUCONF)
+  #elif defined(STM32H7XX)
 
     // SP1, SPI4, SPI5 and SPI6 are feed by APB2 (STM32_PCLK2)
     actualFrequency = STM32_PCLK2;
@@ -269,10 +269,10 @@ void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int 
         if(bufferIs16bits)
         {
             // Set data transfer length to 16 bits
-  #ifdef STM32F4xx_MCUCONF
+  #ifdef STM32F4XX
             llConfig->cr1 |= SPI_CR1_DFF;
   #endif
-  #ifdef STM32F7xx_MCUCONF
+  #ifdef STM32F7XX
             llConfig->cr2 = SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
   #endif
             // Sets the order of bytes transmission : MSB first or LSB first
@@ -285,10 +285,10 @@ void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int 
         else
         {
             // have to force transfer length to 8bit
-  #ifdef STM32F4xx_MCUCONF
+  #ifdef STM32F4XX
             llConfig->cr1 &= ~SPI_CR1_DFF;
   #endif
-  #ifdef STM32F7xx_MCUCONF
+  #ifdef STM32F7XX
             llConfig->cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
   #endif            
         }
@@ -300,10 +300,10 @@ void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int 
         if(bufferIs16bits)
         {
             // have to force transfer length to 16bit 
-  #ifdef STM32F4xx_MCUCONF
+  #ifdef STM32F4XX
             llConfig->cr1 |= SPI_CR1_DFF;
   #endif
-  #ifdef STM32F7xx_MCUCONF
+  #ifdef STM32F7XX
             llConfig->cr2 = SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
   #endif
 
@@ -311,10 +311,10 @@ void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int 
         else
         {
             // set transfer length to 8bits
-  #ifdef STM32F4xx_MCUCONF
+  #ifdef STM32F4XX
             llConfig->cr1 &= ~SPI_CR1_DFF;
   #endif
-  #ifdef STM32F7xx_MCUCONF
+  #ifdef STM32F7XX
             llConfig->cr2 |= SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
   #endif            
         }

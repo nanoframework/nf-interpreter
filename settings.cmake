@@ -1,0 +1,40 @@
+set(BUILD_VERSION "0.9.99.999")
+set(TOOLCHAIN_PREFIX "C:/ESP32_Tools/1.22.0-80")
+set(ESP32_IDF_PATH "C:/ESP32_Tools/esp-idf-v3.0")
+set(ESP32_LIBS_PATH "C:/ESP32_Tools/libs-v3.0")
+set(IDF_PATH "C:/ESP32_Tools/esp-idf-v3.0")
+
+
+set(TARGET_SERIES "ESP32")
+set(USE_FPU "TRUE")
+set(RTOS "FREERTOS")
+set(SWO_OUTPUT "OFF")
+set(NF_BUILD_RTM "OFF")
+
+set(NF_WP_TRACE_ERRORS "OFF")
+set(NF_WP_TRACE_HEADERS "OFF")
+set(NF_WP_TRACE_STATE "OFF")
+set(NF_WP_TRACE_NODATA "OFF")
+set(NF_WP_TRACE_ALL "OFF")
+set(NF_WP_IMPLEMENTS_CRC32 "OFF")
+
+set(NF_FEATURE_DEBUGGER "ON")
+set(NF_FEATURE_RTC "ON")
+set(NF_FEATURE_USE_APPDOMAINS "OFF")
+set(NF_FEATURE_USE_FILESYSTEM "OFF")
+set(NF_SECURITY_OPENSSL "ON")
+
+set(API_System.Net "ON")
+set(API_Windows.Devices.Wifi "ON")
+set(API_Windows.Devices.Adc "ON")
+set(API_Windows.Devices.Gpio "ON")
+set(API_Windows.Devices.I2c "ON")
+set(API_Windows.Devices.Pwm "ON")
+set(API_Windows.Devices.SerialCommunication "ON")
+set(API_Windows.Devices.Spi "ON")
+set(API_Windows.Networking.Sockets "OFF")
+set(API_Hardware.Esp32 "ON")
+
+
+set(PROJECT_SOURCE_DIR "C:/Projects/esp/nf-interpreter")
+set(PROJECT_BINARY_DIR "C:/Projects/esp/nf-interpreter/build")
