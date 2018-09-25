@@ -20,4 +20,3 @@ If($ESP32LibPathExists -eq $False)
     # unzip libs
     Expand-7Zip -ArchiveFileName $output -TargetPath $env:ESP32_LIBS_PATH
 }
-
