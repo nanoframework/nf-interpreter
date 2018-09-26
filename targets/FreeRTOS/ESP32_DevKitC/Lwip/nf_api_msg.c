@@ -538,6 +538,9 @@ accept_function(void *arg, struct tcp_pcb *newpcb, err_t err)
      to the application thread */
   newconn->last_err = err;
 
+  /* handle backlog counter */
+  tcp_backlog_delayed(newpcb);
+
   if (sys_mbox_trypost(&conn->acceptmbox, newconn) != ERR_OK) {
     ESP_STATS_DROP_INC(esp.acceptmbox_post_fail);
     /* When returning != ERR_OK, the pcb is aborted in tcp_process(),
@@ -1087,12 +1090,6 @@ lwip_netconn_do_delconn(void *m)
   } else
 #endif /* LWIP_NETCONN_FULLDUPLEX */
   {
-    if (!(state != NETCONN_CONNECT || IN_NONBLOCKING_CONNECT(msg->conn))) {
-      msg->err = ERR_INPROGRESS;
-      NETCONN_SET_SAFE_ERR(msg->conn, ERR_INPROGRESS);
-      LWIP_DEBUGF(API_MSG_DEBUG, ("netconn error:ERR_INPROGRESS\n"));
-      return;
-    }
     /* Drain and delete mboxes */
     netconn_drain(msg->conn);
 
@@ -1442,7 +1439,7 @@ lwip_netconn_do_listen(void *m)
  *
  * @param msg the api_msg_msg pointing to the connection
  */
-void
+void ESP_IRAM_ATTR
 lwip_netconn_do_send(void *m)
 {
   struct api_msg_msg *msg = (struct api_msg_msg*)m;
@@ -1511,23 +1508,37 @@ lwip_netconn_do_recv(void *m)
   msg->err = ERR_OK;
   if (msg->conn->pcb.tcp != NULL) {
     if (NETCONNTYPE_GROUP(msg->conn->type) == NETCONN_TCP) {
-#if TCP_LISTEN_BACKLOG
-      if (msg->conn->pcb.tcp->state == LISTEN) {
-        tcp_accepted(msg->conn->pcb.tcp);
-      } else
-#endif /* TCP_LISTEN_BACKLOG */
-      {
-        u32_t remaining = msg->msg.r.len;
-        do {
-          u16_t recved = (remaining > 0xffff) ? 0xffff : (u16_t)remaining;
-          tcp_recved(msg->conn->pcb.tcp, recved);
-          remaining -= recved;
-        } while (remaining != 0);
-      }
+      u32_t remaining = msg->msg.r.len;
+      do {
+        u16_t recved = (remaining > 0xffff) ? 0xffff : (u16_t)remaining;
+        tcp_recved(msg->conn->pcb.tcp, recved);
+        remaining -= recved;
+      } while (remaining != 0);
     }
   }
   TCPIP_APIMSG_ACK(msg);
 }
+
+#if TCP_LISTEN_BACKLOG
+/** Indicate that a TCP pcb has been accepted
+ * Called from netconn_accept
+ *
+ * @param m the api_msg pointing to the connection
+ */
+void
+lwip_netconn_do_accepted(void *m)
+{
+  struct api_msg_msg *msg = (struct api_msg_msg *)m;
+
+  msg->err = ERR_OK;
+  if (msg->conn->pcb.tcp != NULL) {
+    if (NETCONNTYPE_GROUP(msg->conn->type) == NETCONN_TCP) {
+      tcp_backlog_accepted(msg->conn->pcb.tcp);
+    }
+  }
+  TCPIP_APIMSG_ACK(msg);
+}
+#endif /* TCP_LISTEN_BACKLOG */
 
 /**
  * See if more data needs to be written from a previous call to netconn_write.

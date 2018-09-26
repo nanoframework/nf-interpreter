@@ -9,8 +9,8 @@ If($ESP32LibPathExists -eq $False)
 
     Write-Host "Downloading ESP32 pre-compiled libs..."
 
-    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.0.zip"
-    $output = "$PSScriptRoot\IDF_libs-v3.0.zip"
+    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.1.zip"
+    $output = "$PSScriptRoot\IDF_libs-v3.1.zip"
  
     # download zip IDF
     (New-Object Net.WebClient).DownloadFile($url, $output)

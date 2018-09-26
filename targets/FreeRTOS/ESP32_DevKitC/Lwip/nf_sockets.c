@@ -278,11 +278,11 @@ do{\
   }\
 }while(0)
 
-#define LWIP_SET_CLOSE_FLAG() \
+#define LWIP_SET_CLOSE_FLAG(_flag) \
 do{\
   LWIP_SOCK_LOCK(__sock);\
   LWIP_DEBUGF(ESP_THREAD_SAFE_DEBUG, ("mark sock closing\n"));\
-  __sock->state = LWIP_SOCK_CLOSING;\
+  __sock->state = (_flag);\
   LWIP_SOCK_UNLOCK(__sock);\
 }while(0)
 
@@ -503,7 +503,7 @@ lwip_socket_thread_cleanup(void)
  * @param s externally used socket index
  * @return struct lwip_sock for the socket or NULL if not found
  */
-static struct lwip_sock *
+static struct lwip_sock * ESP_IRAM_ATTR
 get_socket(int s)
 {
   struct lwip_sock *sock;
@@ -983,7 +983,7 @@ lwip_listen(int s, int backlog)
   return 0;
 }
 
-int
+int ESP_IRAM_ATTR
 lwip_recvfrom(int s, void *mem, size_t len, int flags,
               struct sockaddr *from, socklen_t *fromlen)
 {
@@ -1361,7 +1361,7 @@ lwip_sendmsg(int s, const struct msghdr *msg, int flags)
 #endif /* LWIP_UDP || LWIP_RAW */
 }
 
-int
+int ESP_IRAM_ATTR
 lwip_sendto(int s, const void *data, size_t size, int flags,
        const struct sockaddr *to, socklen_t tolen)
 {
@@ -1838,7 +1838,7 @@ return_copy_fdsets:
  * Callback registered in the netconn layer for each socket-netconn.
  * Processes recvevent (data available) and wakes up tasks waiting for select.
  */
-static void
+static void ESP_IRAM_ATTR
 event_callback(struct netconn *conn, enum netconn_evt evt, u16_t len)
 {
   int s;
@@ -3192,7 +3192,7 @@ static void lwip_socket_drop_registered_memberships(int s)
 
 #if ESP_THREAD_SAFE
 
-int
+int ESP_IRAM_ATTR
 lwip_sendto_r(int s, const void *data, size_t size, int flags,
        const struct sockaddr *to, socklen_t tolen)
 {
@@ -3209,7 +3209,7 @@ lwip_send_r(int s, const void *data, size_t size, int flags)
   LWIP_API_UNLOCK();
 }
 
-int
+int ESP_IRAM_ATTR
 lwip_recvfrom_r(int s, void *mem, size_t len, int flags,
               struct sockaddr *from, socklen_t *fromlen)
 {
@@ -3345,8 +3345,11 @@ int
 lwip_close_r(int s)
 {
   LWIP_API_LOCK();
-  LWIP_SET_CLOSE_FLAG();
+  LWIP_SET_CLOSE_FLAG(LWIP_SOCK_CLOSING);
   __ret = lwip_close(s);
+  if (EWOULDBLOCK == __sock->err) {
+    LWIP_SET_CLOSE_FLAG(LWIP_SOCK_OPEN);
+  }
   LWIP_API_UNLOCK();
 }
 

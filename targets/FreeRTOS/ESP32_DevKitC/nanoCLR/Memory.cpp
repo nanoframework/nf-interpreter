@@ -8,7 +8,7 @@
 
 // Define an area for the CLR managed heap
 #if !defined(MANAGED_HEAP_SIZE)
-#define MANAGED_HEAP_SIZE  (64*1024)
+#define MANAGED_HEAP_SIZE  (96*1024)
 #endif
 
 uint32_t managedHeap[MANAGED_HEAP_SIZE/ sizeof(uint32_t)];
