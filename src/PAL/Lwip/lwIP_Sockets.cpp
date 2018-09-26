@@ -615,7 +615,7 @@ int LWIP_SOCKETS_Driver::Select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* wr
 
     int max_sd = MEMP_NUM_NETCONN;
     #if defined(PLATFORM_ESP32)
-    max_sd = lwip_socket_offset + MEMP_NUM_NETCONN;
+    max_sd = LWIP_SOCKET_OFFSET + MEMP_NUM_NETCONN;
     #endif
 
     ret = lwip_select(max_sd, pR, pW, pE, (struct timeval *)timeout);

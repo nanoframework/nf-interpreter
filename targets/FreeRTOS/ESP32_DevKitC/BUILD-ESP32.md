@@ -67,8 +67,8 @@ You can force the environemnt variables to be updated by adding -Force to the co
 The script will create the following subfolders (see manual install below and appveyor.yml)
 
    - `C:\Esp32_Tools\1.22.0-80`
-   - `C:\Esp32_Tools\esp-idf-v3.0`
-   - `C:\Esp32_Tools\libs-v3.0`
+   - `C:\Esp32_Tools\esp-idf-v3.1`
+   - `C:\Esp32_Tools\libs-v3.1`
    - `C:\Esp32_Tools\ninja`  
    - `C:\Esp32_Tools\openocd-esp32`  
 
@@ -76,8 +76,8 @@ The following Environment Variables will be created for the current Windows User
 
    - `ESP32_TOOLS_PATH = C:\ESP32_TOOLS`
    - `ESP32_TOOLCHAIN_PATH = C:\ESP32_TOOLS\1.22.0-80\xtensa-esp32-elf`
-   - `ESP32_LIBS_PATH = C:\ESP32_TOOLS\libs-v3.0`
-   - `IDF_PATH = C:\ESP32_TOOLS\esp-idf-v3.0`
+   - `ESP32_LIBS_PATH = C:\ESP32_TOOLS\libs-v3.1`
+   - `IDF_PATH = C:\ESP32_TOOLS\esp-idf-v3.1`
    - `NINJA_PATH = C:\ESP32_TOOLS\ninja`
 
 The following ESP32 settings files will be created and the place-holder values set to the respective default install paths.
@@ -97,10 +97,12 @@ This has already been done and the libraries can be just be downloaded.
 1. Create a directory such as the following:
 
    - `C:\Esp32_Tools`
+   - `C:\Esp32_Tools\libs-v3.1`
 
-2. Download the pre-built libs zip from [here](https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.0.zip) and extract it into `C:\Esp32_Tools\libs-v3.0`.
+2. Download the pre-built libs zip from [here](https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.1.zip)
+and extract it into `C:\Esp32_Tools\libs-v3.1`.
 
-3. Download the v3.0 IDF source zip file from [here](https://github.com/espressif/esp-idf/releases/download/v3.0/esp-idf-v3.0.zip) and extract it into `C:\Esp32_Tools` so you get `C:\ESP32_Tools\esp-idf-v3.0\components` etc.
+3. Download the v3.1 IDF source zip file from [here](https://github.com/espressif/esp-idf/releases/download/v3.1/esp-idf-v3.1.zip) and extract it into `C:\Esp32_Tools` so you get `C:\ESP32_Tools\esp-idf-v3.1\components` etc.
 
 4. Download the Esp32 toolchain from [here](https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip) and extract it into `C:\Esp32_Tools\1.22.0.80` so you get `C:\Esp32_Tools\1.22.0.80\xtensa-esp32-elf`.
 
@@ -112,8 +114,8 @@ This has already been done and the libraries can be just be downloaded.
 7. Define the environment variables to match the install locations. Default locations are:
    - `ESP32_TOOLS_PATH = C:\ESP32_TOOLS`
    - `ESP32_TOOLCHAIN_PATH = C:\ESP32_TOOLS\1.22.0-80\xtensa-esp32-elf`
-   - `ESP32_LIBS_PATH = C:\ESP32_TOOLS\libs-v3.0`
-   - `IDF_PATH = C:\ESP32_TOOLS\esp-idf-v3.0`
+   - `ESP32_LIBS_PATH = C:\ESP32_TOOLS\libs-v3.1`
+   - `IDF_PATH = C:\ESP32_TOOLS\esp-idf-v3.1`
    - `NINJA_PATH = C:\ESP32_TOOLS\ninja`
  
 8. Add Ninja to the PATH (i.e. `C:\ESP32_TOOLS\ninja`)
@@ -250,7 +252,7 @@ The default template file is ok, and may be copied to `./.vscode/cmake-kits.json
         { 
             "taskName": "Flash nanoCLR <COMPORT>", 
             "type": "shell", 
-            "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"<COMPORT>\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 <absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>/bootloader.bin 0x10000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/nanoCLR.bin 0x8000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/partitions_4mb.bin", 
+            "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"<COMPORT>\" --baud 460800 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 <absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>/bootloader.bin 0x10000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/nanoCLR.bin 0x8000 <path-to-nanoFramework-build-directory-mind-the-forward-slashes>/partitions_4mb.bin", 
             "presentation": { 
                 "reveal": "always", 
                 "panel": "shared" 
@@ -260,7 +262,7 @@ The default template file is ok, and may be copied to `./.vscode/cmake-kits.json
         { 
             "taskName": "Erase flash <COMPORT>", 
             "type": "shell", 
-            "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"<COMPORT>\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" erase_flash", 
+            "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"<COMPORT>\" --baud 460800 --before \"default_reset\" --after \"hard_reset\" erase_flash", 
             "presentation": { 
                 "reveal": "always", 
                 "panel": "shared" 
@@ -296,7 +298,7 @@ The default template file is ok, and may be copied to `./.vscode/cmake-kits.json
 
 4. If you get no error you will have in the build directory the files `nanoCLR.bin` and `partitions_4mb.bin`.
 
-5. The third file that gets flashed into the ESP32 is the `bootloader.bin` which will be located here `C:/ESP32_Tools/libs/bootloader.bin` if the automated install script is used.
+5. The third file that gets flashed into the ESP32 is the `bootloader.bin` which will be located here `C:/ESP32_Tools/libs-v3.1/bootloader.bin` if the automated install script is used.
 
 
 ## Flash nanoCLR into ESP32

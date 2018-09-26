@@ -13,6 +13,7 @@ extern "C"
 #include "lwip\netif.h"
 }
 
+static const char *TAG = "wifi";
 
 struct netif * Esp32_find_netif(esp_interface_t esp_if);
 
@@ -29,7 +30,6 @@ esp_err_t Esp32_InitaliseWifi()
 		wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 		ec = esp_wifi_init(&cfg);
 		if ( ec != ESP_OK) return ec;
-
 		
 		esp_wifi_set_mode(WIFI_MODE_STA);
 
@@ -47,16 +47,17 @@ esp_err_t Esp32_Wireless_Connect(HAL_Configuration_Wireless80211 * pWireless)
 	esp_err_t ec;
 
 	// Connect directly
-	wifi_config_t sta_config;
+	wifi_config_t sta_config = {};
 	hal_strncpy_s( (char *)sta_config.sta.ssid, sizeof(sta_config.sta.ssid), (char *)pWireless->Ssid, hal_strlen_s((char *)pWireless->Ssid) );
 	hal_strncpy_s( (char*)sta_config.sta.password, sizeof(sta_config.sta.password), (char *)pWireless->Password, hal_strlen_s((char *)pWireless->Password) );
 	sta_config.sta.bssid_set = false;
 	
 	ec = esp_wifi_set_config(WIFI_IF_STA, &sta_config);
-	if(ec != ESP_OK) return ec;
+ 	if(ec != ESP_OK) return ec;
 	
 	ec = esp_wifi_connect();
-	if(ec != ESP_OK) return ec;
+    ESP_LOGI(TAG, "WiFi Connect to %s result %d", sta_config.sta.ssid, ec);
+ 	if(ec != ESP_OK) return ec;
 
 	return ESP_OK;
 }
@@ -118,8 +119,7 @@ bool Esp32_Wireless_Close(int index)
 // Start a scan
 int Esp32_Wireless_Scan()
 {
-	wifi_scan_config_t config;
-	memset( &config, 0, sizeof(wifi_scan_config_t));
+	wifi_scan_config_t config = {};
 
 	config.scan_type = WIFI_SCAN_TYPE_PASSIVE;
 	config.scan_time.passive = 500;                         // 500 ms

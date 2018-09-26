@@ -102,7 +102,8 @@ static void InitSpiBus( spi_host_device_t bus)
        clockPin,         // Clock
         -1,              // Quad Write protect
         -1,              // Quad Hold
-        0                // Default max transfer size ( 4096 )
+        0,               // Default max transfer size ( 4096 )
+        0
     };
 
     esp_err_t ret =  spi_bus_initialize(bus,  &bus_config, 1);
@@ -191,6 +192,7 @@ spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_Spi
         0,          // cs_ena_pretrans
         0,          // cs_ena_posttrans
         clockHz,    // Clock speed in Hz
+        0,          // Input_delay_ns
         csPin,      // Chip select
         flags,      // SPI_DEVICE flags
         1,          // Queue size

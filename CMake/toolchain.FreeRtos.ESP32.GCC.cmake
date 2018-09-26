@@ -53,7 +53,7 @@ set(CMAKE_SIZE ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-size CACHE INTERNAL "size t
 set(CMAKE_DEBUGER ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-gdb CACHE INTERNAL "debuger")
 
 set(GCC_ESP32_LINKER_FLAGS, " -nostdlib -u call_user_start_cpu0  -Wl,--gc-sections -Wl,-static -Wl,--start-group  " CACHE INTERNAL "Gcc esp32 liker flags" )
-set(GCC_ESP32_LINKER_LIBS, " ${ESP32_IDF_PATH}/components/newlib/lib/libc.a ${ESP32_IDF_PATH}/components/newlib/lib/libm.a ${ESP32_IDF_PATH}/components/esp32/libhal.a -L${ESP32_IDF_PATH}/components/esp32/lib -lcore -lrtc -lnet80211 -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lphy -lgcc -lstdc++ "  CACHE INTERNAL "Gcc esp32 liker libs")
+set(GCC_ESP32_LINKER_LIBS, " ${ESP32_IDF_PATH}/components/newlib/lib/libc.a ${ESP32_IDF_PATH}/components/newlib/lib/libm.a ${ESP32_IDF_PATH}/components/esp32/libhal.a -L${ESP32_IDF_PATH}/components/esp32/lib -lcore -lrtc -lnet80211 -lmesh -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lphy -lgcc -lstdc++ "  CACHE INTERNAL "Gcc esp32 liker libs")
 set(GCC_ESP32_LINKER_LD, " -L ${ESP32_IDF_PATH}/components/esp32/ld  -T esp32_out.ld -u ld_include_panic_highint_hdl -T esp32.common.ld -T esp32.rom.ld -T esp32.peripherals.ld "  CACHE INTERNAL "Gcc esp32 liker LD")
 
 # set debug flags

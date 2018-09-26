@@ -120,17 +120,22 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 
 // Ethernet events
 	case SYSTEM_EVENT_ETH_START:
+//ets_printf("SYSTEM_EVENT_ETH_START\n");
 		break;
 	case SYSTEM_EVENT_ETH_STOP:
+//ets_printf("SYSTEM_EVENT_ETH_STOP\n");
 		break;
 	case SYSTEM_EVENT_ETH_CONNECTED:
+//ets_printf("SYSTEM_EVENT_ETH_CONNECTED\n");
 		PostAvailabilityOn();
 		break;
 	case SYSTEM_EVENT_ETH_GOT_IP:
+//ets_printf("SYSTEM_EVENT_ETH_GOT_IP\n");
 		PostAddressChanged();
 		initialize_sntp();
 		break;
     case SYSTEM_EVENT_ETH_DISCONNECTED:
+//ets_printf("SYSTEM_EVENT_ETH_DISCONNECTED\n");
 		PostAvailabilityOff();
 		break;
 
