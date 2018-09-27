@@ -6,6 +6,15 @@
 #include "CorLib.h"
 
 
+HRESULT Library_corlib_native_System_Reflection_ConstructorInfo::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT__SZARRAY_OBJECT( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();

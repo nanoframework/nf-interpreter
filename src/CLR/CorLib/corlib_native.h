@@ -627,6 +627,7 @@ struct Library_corlib_native_System_Reflection_MethodBase
 
 struct Library_corlib_native_System_Reflection_ConstructorInfo
 {
+    NANOCLR_NATIVE_DECLARE(GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(Invoke___OBJECT__SZARRAY_OBJECT);
 
     //--//
@@ -636,6 +637,7 @@ struct Library_corlib_native_System_Reflection_ConstructorInfo
 struct Library_corlib_native_System_Reflection_FieldInfo
 {
     NANOCLR_NATIVE_DECLARE(SetValue___VOID__OBJECT__OBJECT);
+    NANOCLR_NATIVE_DECLARE(GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN);
 
     //--//
 
@@ -666,6 +668,7 @@ struct Library_corlib_native_System_Reflection_RuntimeFieldInfo
 struct Library_corlib_native_System_Reflection_RuntimeMethodInfo
 {
     NANOCLR_NATIVE_DECLARE(get_ReturnType___SystemType);
+    NANOCLR_NATIVE_DECLARE(GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN);
 
     //--//
 
@@ -802,6 +805,7 @@ struct Library_corlib_native_System_RuntimeType
     NANOCLR_NATIVE_DECLARE(GetFields___SZARRAY_SystemReflectionFieldInfo__SystemReflectionBindingFlags);
     NANOCLR_NATIVE_DECLARE(GetInterfaces___SZARRAY_SystemType);
     NANOCLR_NATIVE_DECLARE(GetElementType___SystemType);
+    NANOCLR_NATIVE_DECLARE(GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN);
 
     //--//
 

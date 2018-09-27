@@ -120,3 +120,12 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize( CLR_RT_St
 
     NANOCLR_NOCLEANUP();
 }
+
+HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
