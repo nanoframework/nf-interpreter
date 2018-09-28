@@ -4160,7 +4160,7 @@ void CLR_RT_AttributeEnumerator::Initialize( const CLR_RT_FieldDef_Instance& ins
 void CLR_RT_AttributeEnumerator::Initialize( const CLR_RT_MethodDef_Instance& inst )
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_data.ownerType = TBL_FieldDef;
+    m_data.ownerType = TBL_MethodDef;
     m_data.ownerIdx  = inst.Method();
 
     Initialize( inst.m_assm );
@@ -4208,6 +4208,14 @@ bool CLR_RT_AttributeEnumerator::Advance()
     m_num = num;
 
     return fRes;
+}
+
+void CLR_RT_AttributeEnumerator::GetCurrent( CLR_RT_TypeDef_Instance* instTD )
+{
+    CLR_RT_MethodDef_Instance md;
+
+    md.InitializeFromIndex ( m_match );
+    instTD->InitializeFromMethod( md );
 }
 
 bool CLR_RT_AttributeEnumerator::MatchNext( const CLR_RT_TypeDef_Instance* instTD, const CLR_RT_MethodDef_Instance* instMD )
