@@ -1611,6 +1611,8 @@ struct CLR_RT_AttributeEnumerator
 
     bool MatchNext( const CLR_RT_TypeDef_Instance* instTD, const CLR_RT_MethodDef_Instance* instMD );
 
+    void GetCurrent(CLR_RT_TypeDef_Instance* instTD);
+    
 private:
     void Initialize( CLR_RT_Assembly* assm );
 };
