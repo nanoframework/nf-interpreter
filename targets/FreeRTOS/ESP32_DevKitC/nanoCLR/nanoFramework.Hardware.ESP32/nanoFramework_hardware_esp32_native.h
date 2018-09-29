@@ -36,6 +36,45 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 
 };
 
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResEventListener
+{
+    static const int FIELD__HighResTimers = 1;
+
+
+    //--//
+
+};
+
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer
+{
+    static const int FIELD_STATIC__s_eventListener = 0;
+
+    static const int FIELD___timerHandle = 1;
+    static const int FIELD___disposedValue = 2;
+    static const int FIELD___syncLock = 3;
+    static const int FIELD__OnHighResTimerExpired = 4;
+
+    NANOCLR_NATIVE_DECLARE(NativeEspTimerCreate___I4);
+    NANOCLR_NATIVE_DECLARE(NativeEspTimerDispose___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeStop___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeStartOneShot___VOID__U8);
+    NANOCLR_NATIVE_DECLARE(NativeStartPeriodic___VOID__U8);
+    NANOCLR_NATIVE_DECLARE(NativeGetCurrent___STATIC__U8);
+
+    //--//
+
+};
+
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimerEvent
+{
+    static const int FIELD__EventType = 3;
+    static const int FIELD__TimerHandle = 4;
+
+
+    //--//
+
+};
+
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32;
 
 #endif  //_HARDWARE_ESP32_NATIVE_H_
