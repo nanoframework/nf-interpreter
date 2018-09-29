@@ -20,6 +20,7 @@
 #include "esp_wpa2.h"
 #include "esp_eth.h"
 #include "esp_event_loop.h"
+#include "esp_timer.h"
 
 #include "spi_master.h"
 #include "gpio.h"
@@ -27,7 +28,7 @@
 #include "uart.h"   
 #include "ledc.h"
 #include "adc.h"
-
+#include "timer.h"
 
 // Uncomment to support Ethernet 
 //#define ESP32_ETHERNET_SUPPORT 1
