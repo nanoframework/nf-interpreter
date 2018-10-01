@@ -24,6 +24,9 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
+    - ps: |
+
+        .\checkbuild.ps1   
 
   configuration:
     - MinSizeRel
@@ -258,8 +261,6 @@
   on_failure:
   - ps: |
 
-        cd ..
-
         .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
@@ -311,6 +312,9 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
+    - ps: |
+
+        .\checkbuild.ps1   
 
   configuration:
     - MinSizeRel
@@ -551,8 +555,6 @@
   on_failure:
   - ps: |
 
-        cd ..
-
         .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
@@ -602,6 +604,9 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
+    - ps: |
+
+        .\checkbuild.ps1    
 
   configuration:
     - MinSizeRel
@@ -836,8 +841,6 @@
   # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL 
   on_failure:
   - ps: |
-
-        cd ..
 
         .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
