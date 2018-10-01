@@ -24,6 +24,7 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
+    - ps: .\checkbuild.ps1
 
   configuration:
     - MinSizeRel
@@ -311,6 +312,7 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
+    - ps: .\checkbuild.ps1
 
   configuration:
     - MinSizeRel
@@ -602,6 +604,7 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
+    - ps: .\checkbuild.ps1    
 
   configuration:
     - MinSizeRel
