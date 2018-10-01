@@ -19,6 +19,7 @@
   image: Visual Studio 2017
 
   init:
+    - ps: "if($env:APPVEYOR_REPO_COMMIT_AUTHOR -eq \"nfbot\" -and $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor Blue -ForegroundColor White \n    Exit-AppveyorBuild\n}"
     - git config --global core.autocrlf true
     - git config --global credential.helper store
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
@@ -258,8 +259,6 @@
   on_failure:
   - ps: |
 
-        cd ..
-
         .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
@@ -306,6 +305,7 @@
   image: Visual Studio 2017
 
   init:
+    - ps: "if($env:APPVEYOR_REPO_COMMIT_AUTHOR -eq \"nfbot\" -and $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor Blue -ForegroundColor White \n    Exit-AppveyorBuild\n}"
     - git config --global core.autocrlf true
     - git config --global credential.helper store
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
@@ -551,8 +551,6 @@
   on_failure:
   - ps: |
 
-        cd ..
-
         .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
@@ -597,11 +595,12 @@
   image: Visual Studio 2017
 
   init:
+    - ps: "if($env:APPVEYOR_REPO_COMMIT_AUTHOR -eq \"nfbot\" -and $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor Blue -ForegroundColor White \n    Exit-AppveyorBuild\n}"
     - git config --global core.autocrlf true
     - git config --global credential.helper store
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
-    - git config --global user.name "%GitHubUserName%"
+    - git config --global user.name "%GitHubUserName%" 
 
   configuration:
     - MinSizeRel
@@ -836,8 +835,6 @@
   # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL 
   on_failure:
   - ps: |
-
-        cd ..
 
         .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
