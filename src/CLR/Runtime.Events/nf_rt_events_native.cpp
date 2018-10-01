@@ -54,5 +54,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Event
     "nanoFramework.Runtime.Events", 
     0x9ACFB207,
     method_lookup,
-    { 1, 0, 0, 0 }
+    { 1, 0, 0, 200 }
 };
