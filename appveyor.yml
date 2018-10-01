@@ -63,6 +63,7 @@
     - '%GNU_GCC_TOOLCHAIN_PATH%'
 
   install:
+    - ps: .\checkbuild.ps1   
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
 
@@ -305,12 +306,12 @@
   image: Visual Studio 2017
 
   init:
-    - ps: "if($env:APPVEYOR_REPO_COMMIT_AUTHOR -eq \"nfbot\" -and $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor Blue -ForegroundColor White \n    Exit-AppveyorBuild\n}"
     - git config --global core.autocrlf true
     - git config --global credential.helper store
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
+    - ps: "$headers = @{\n  \"Authorization\" = \"Basic $env:GitRestAuth\"\n  \"Content-type\" = \"application/json\"\n}\n\n$pr = Invoke-RestMethod -Uri \"https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:APPVEYOR_PULL_REQUEST_NUMBER\" -Headers $headers  -Method GET\n\nif($pr.user.login -eq \"nfbot\" -and $pr.body -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a [version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor Blue -ForegroundColor White\n    Exit-AppveyorBuild\n}"
 
   configuration:
     - MinSizeRel
@@ -331,11 +332,13 @@
     GitHubUserName:
       secure: 7OBtVAMTodMWK20wg6pGnQ==
     GitHubUserEmail:
-      secure: HeABB68Sn/Lhbd69C2cUcfWv0ab/rMDEcOLvcxf8gGw=
+      secure: /NpmL1KqwHyHFnF0GlUovA586wDIt8Hg/Q8Dro6kUpk=
     GitHubToken:
-      secure: WOqlCsnwTzfDPJFoNV/h8mEESIpG/9uFn1u6oE8hGZtXwIQQlsY+NyyLt9Y5xoFn
+      secure: i/2hGsqVMwzdM5yIS4rxOIeG3ftx7su7klWYN80s/fHvgk7A5H2fF3oUTNLcyTbw
     BinTrayKey:
       secure: Wz0wwFOzMkDwwzzax1HPzKZB3r/aTprlleqFYX5arxpH9pP3D9glINxEuY+P/BaN
+    GitRestAuth:
+      secure: E3bCMe4LtDdAhHSYRcLp0N6DixJe1m8TNxhYeJW/GnqM3WXdRqsgkHSbwootPjJQtOQJrps4twmzTVzofLSVgPgbzU8PxU0AkJV7zwkyVOE=
 
     matrix:
       - BOARD_NAME: 'STM32'
@@ -353,7 +356,6 @@
   install:
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
-
     - gem install github_changelog_generator --quiet --no-ri --no-rdoc
     - choco install gitversion.portable -pre -y
 
@@ -639,6 +641,7 @@
     - '%GNU_GCC_TOOLCHAIN_PATH%'
 
   install:
+    - ps: .\checkbuild.ps1   
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
 
