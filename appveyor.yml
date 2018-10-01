@@ -24,9 +24,6 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
-    - ps: |
-
-        .\checkbuild.ps1   
 
   configuration:
     - MinSizeRel
@@ -65,6 +62,7 @@
     - '%GNU_GCC_TOOLCHAIN_PATH%'
 
   install:
+    - ps: .\checkbuild.ps1   
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
 
@@ -312,9 +310,6 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
-    - ps: |
-
-        .\checkbuild.ps1   
 
   configuration:
     - MinSizeRel
@@ -355,6 +350,7 @@
     - '%ESP32_TOOLCHAIN_PATH%'
  
   install:
+    - ps: .\checkbuild.ps1   
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
 
@@ -603,10 +599,7 @@
     - git config --global credential.helper store
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
-    - git config --global user.name "%GitHubUserName%"
-    - ps: |
-
-        .\checkbuild.ps1    
+    - git config --global user.name "%GitHubUserName%" 
 
   configuration:
     - MinSizeRel
@@ -645,6 +638,7 @@
     - '%GNU_GCC_TOOLCHAIN_PATH%'
 
   install:
+    - ps: .\checkbuild.ps1   
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
 
