@@ -62,6 +62,7 @@
     - '%GNU_GCC_TOOLCHAIN_PATH%'
 
   install:
+    - ps: .\checkbuild.ps1   
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
 
@@ -258,8 +259,6 @@
   on_failure:
   - ps: |
 
-        cd ..
-
         .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
@@ -351,6 +350,7 @@
     - '%ESP32_TOOLCHAIN_PATH%'
  
   install:
+    - ps: .\checkbuild.ps1   
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
 
@@ -551,8 +551,6 @@
   on_failure:
   - ps: |
 
-        cd ..
-
         .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
@@ -601,7 +599,7 @@
     - git config --global credential.helper store
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
-    - git config --global user.name "%GitHubUserName%"
+    - git config --global user.name "%GitHubUserName%" 
 
   configuration:
     - MinSizeRel
@@ -640,6 +638,7 @@
     - '%GNU_GCC_TOOLCHAIN_PATH%'
 
   install:
+    - ps: .\checkbuild.ps1   
     - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
     - set PATH=%NINJA_PATH%;%PATH%
 
@@ -836,8 +835,6 @@
   # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL 
   on_failure:
   - ps: |
-
-        cd ..
 
         .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
