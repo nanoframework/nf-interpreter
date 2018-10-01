@@ -7,6 +7,30 @@
 //  SPIO, SPI1 are dedicated entirely to flash
 //
 //  HSPI("SPI1") and VSPI("SPI2") are free to use
+//
+//  For maximum speed access the IOMUX must be used ( 80mhz )
+//  if pins are through the GPIO matrix the speed is limited to 26.6mhz ( 40mhz half duplex and no dma )
+//
+//  SPI IOMUX ( direct pins )
+//  GPIO	Function
+//   2      HSPIWP  (WP)
+//   4      HSPIHD  (HD)
+//  12      HSPIQ   (miso) *
+//  13		HSPID   (mosi) *
+//	14		HSPICLK (clockPin) *
+//	15		HSPICS0 (cs)
+//
+//   5    	VSPICS0 (cs)
+//	18		VSPICLK (clockPin) *
+//  19      VSPIQ   (miso) *
+//  21		VSPIHD  (HD)
+//	22		VSPIWP  (WP)
+//	23		VSPID   (mosi) *
+//
+//  The defaults pins for SPI1 are the Wrover SPI display pins
+//  mosiPin = GPIO_NUM_23, misoPin = GPIO_NUM_25, clockPin = GPIO_NUM_19    
+//
+//  SPI2 - The pins are not assigned so need to be assigned.
 
 #include <Esp32_os.h>
 #include <LaunchCLR.h>
@@ -67,6 +91,15 @@ void Remove_Spi_Device(int bus, int deviceIndex)
     spiconfig[bus].deviceId[deviceIndex] = 0;
 }
 
+int FindFreeDeviceSlotSpi(int bus)
+{
+	for (int deviceIndex = 0; deviceIndex < MAX_SPI_DEVICES; deviceIndex++)
+	{
+		if (spiconfig[bus].deviceHandles[deviceIndex] == 0) return deviceIndex;
+	}
+	return -1;
+}
+
 // Unitialise SPI on restart
 void Esp32_Spi_UnitializeAll()
 {
@@ -114,14 +147,18 @@ static void InitSpiBus( spi_host_device_t bus)
     }
 }
 
-
-bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::Add_Spi_Device(int bus, CLR_RT_HeapBlock* pThis)
+//
+//	Add new device and return device index
+//  return -1 if no more devices avalaible
+//
+int Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::Add_Spi_Device(int bus, CLR_RT_HeapBlock* pThis)
 {
     spi_device_interface_config_t dev_config;
     nfSpiBusConfig * pBusConfig = &spiconfig[bus];
 
-    // Check if all device slots used
-    if ( pBusConfig->deviceCount >= MAX_SPI_DEVICES ) return false;
+	int deviceIndex = FindFreeDeviceSlotSpi(bus);
+	// Check if all device slots used
+	if (deviceIndex < 0) return -1;
 
     // Get a complete low-level SPI configuration, depending on user's managed parameters
     dev_config = GetConfig(bus, pThis[ FIELD___connectionSettings ].Dereference());
@@ -131,14 +168,14 @@ bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::Add_Spi_Device(in
     if ( spi_bus_add_device( (spi_host_device_t)bus, &dev_config, &deviceHandle ) != ESP_OK )
     {
         ESP_LOGE( TAG, "Unable to init SPI device");
-        return false; 
+        return -1; 
     }
 
     // Add next Device
-    pBusConfig->deviceId[pBusConfig->deviceCount] = pThis[ FIELD___deviceId ].NumericByRef().s4;
-    pBusConfig->deviceHandles[pBusConfig->deviceCount++ ] = deviceHandle;
-
-    return true;
+    pBusConfig->deviceId[deviceIndex] = pThis[ FIELD___deviceId ].NumericByRef().s4;
+    pBusConfig->deviceHandles[deviceIndex] = deviceHandle;
+    
+	return deviceIndex;
 }
 
 //
@@ -180,7 +217,7 @@ spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_Spi
 
 //ets_printf( "Spi config cspin:%d spiMode:%d bitorder:%d clockHz:%d\n", csPin, spiMode, bitOrder, clockHz);
     uint32_t flags = (bitOrder == 1) ? (SPI_DEVICE_TXBIT_LSBFIRST | SPI_DEVICE_RXBIT_LSBFIRST) : 0;
- 
+
     // Fill in device config    
     spi_device_interface_config_t dev_config
     {
@@ -218,9 +255,12 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
     NANOCLR_HEADER();
     {
         unsigned char * writeData = NULL;
+        unsigned char * originalReadData = NULL;
         unsigned char * readData = NULL;
         int writeSize = 0;
         int readSize = 0;
+
+        stack.m_customState = 1;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -259,78 +299,74 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         {
             // grab the pointer to the array by getting the first element of the array
             if ( data16 )
-               readData = (unsigned char * )readBuffer->GetFirstElementUInt16();
+               originalReadData = (unsigned char * )readBuffer->GetFirstElementUInt16();
             else
-               readData = readBuffer->GetFirstElement();
+               originalReadData = readBuffer->GetFirstElement();
             
             // get the size of the buffer by reading the number of elements in the HeapBlock array
             readSize = readBuffer->m_numOfElements;
         }
 
-        int MaxDatalength = (readSize > writeSize)? readSize: writeSize;
+		// Are we using SPI full-duplex for transfer ?
+        // The SPI doesn't support half duplex operation with DMA and without DMA the receive length is limited to 4 bytes
+        // So we run in full duplex mode all the time and simulate half duplex mode by creating a larger receive buffer for
+        // the whole of the transaction and then copying the rx part to original buffer
+        // For full duplex we just use passed buffers.
+		bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
 
-        int  totalBitLength = databitLength * MaxDatalength;
-        int  rxBitLength = readSize * databitLength;
-
-       // Set up SPI Transaction
-        spi_transaction_t trans_desc;
-        trans_desc.flags  = 0;
-        trans_desc.cmd = 0;
-        trans_desc.addr = 0;
-        trans_desc.length = totalBitLength;
-        trans_desc.rxlength = rxBitLength;
-        trans_desc.user = NULL;
-        trans_desc.tx_buffer = writeData;
-        trans_desc.rx_buffer = readData;
-
-        // Are we using SPI full-duplex for transfer ?
-        bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
-        if ( fullDuplex)
+        int  MaxDatalength;
+        if (fullDuplex)
         {
-            // Do tx and rx
-            esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
-            if ( ret != ESP_OK )
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-            }
+            // for full duplex just use largest element
+            MaxDatalength= (readSize > writeSize)? readSize: writeSize;
+            readData = originalReadData;
         }
         else
         {
-            // Halfduplex, first do TX operation then RX.
+            // for Halfduplex its the length of both items
+            MaxDatalength = writeSize + readSize;
 
-            // Transmit data if any
-            if ( writeSize > 0 )
+            if (readSize)
             {
-                trans_desc.length = writeSize * databitLength;
-                trans_desc.rxlength = 0;
-                esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
-                if ( ret != ESP_OK )
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-                }
-            }
-
-            // Read data if any
-            if ( readSize > 0 )
-            {
-                trans_desc.length = readSize * databitLength;
-                trans_desc.tx_buffer = 0;
-
-                esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
-                if ( ret != ESP_OK )
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-                }
+                // Allocate a new read buffer to include total length(DMA capable)
+                readData = (unsigned char *)heap_caps_malloc(MaxDatalength, MALLOC_CAP_DMA);
+                if ( readData == 0) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
         }
 
-       // null pointers and vars
-        writeData = NULL;
-        readData = NULL;
-        writeBuffer = NULL;
-        readBuffer = NULL;
-        pThis = NULL;
-        pConfig = NULL;
+        // Set up SPI Transaction
+        spi_transaction_t trans_desc;
+
+        trans_desc.flags  = 0;
+        trans_desc.cmd = 0;
+        trans_desc.addr = 0;
+        // length - Full duplex is total length, half duplex the TX length
+        trans_desc.length = databitLength * MaxDatalength;
+        // rxlength - Full duplex is same as length or 0, half duplex is read length 
+        trans_desc.rxlength = 0;
+        trans_desc.user = NULL;
+        trans_desc.tx_buffer = writeData;
+        trans_desc.rx_buffer = readData;
+ 
+        // Start tranfer ( this calls  spi_device_queue_trans & spi_device_get_trans_result)
+        // Next release of IDF has a direct plling mode that should be faster
+        esp_err_t ret = spi_device_transmit( spiconfig[bus].deviceHandles[deviceIndex], &trans_desc);
+        if ( ret != ESP_OK )
+        {
+            if (!fullDuplex) heap_caps_free(readData);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        // Finish up half duplex
+        if (!fullDuplex) 
+        {
+            if (readSize)
+            {
+                // Copy the read data
+                memcpy( originalReadData, readData + writeSize, readSize);
+                heap_caps_free(readData);
+            }
+        }
     }
     NANOCLR_NOCLEANUP();
 }
@@ -360,7 +396,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
         for( int i=0; i<NUM_SPI_BUSES; i++)
         {
             spiconfig[i].spiBusInited = false;
-            spiconfig[i].deviceCount = 0;
             memset( &spiconfig[i].deviceHandles, 0, sizeof(spiconfig[i].deviceHandles) );
         }      
         nfSpiInited = true;  
@@ -377,7 +412,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
     }
 
     // Add new device to bus
-    if ( Add_Spi_Device( bus, pThis) == false )
+    if ( Add_Spi_Device( bus, pThis) < 0  )
     {
        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
