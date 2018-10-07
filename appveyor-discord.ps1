@@ -5,6 +5,9 @@
 $STATUS=$args[0]
 $WEBHOOK_URL=$args[1]
 
+# change directory to clone directory
+cd $env:APPVEYOR_BUILD_FOLDER
+
 Write-Output "[Webhook]: Sending webhook to Discord..."
 
 Switch ($STATUS) {
