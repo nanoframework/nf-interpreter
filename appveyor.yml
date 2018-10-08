@@ -24,7 +24,7 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
-    - ps: "$headers = @{\n  \"Authorization\" = \"Basic $env:GitRestAuth\"\n  \"Content-type\" = \"application/json\"\n}\n\n$pr = Invoke-RestMethod -Uri \"https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:APPVEYOR_PULL_REQUEST_NUMBER\" -Headers $headers  -Method GET\n\nif($pr.user.login -eq \"nfbot\" -and $pr.body -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a [version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor White -ForegroundColor Blue\n    Exit-AppveyorBuild\n}"
+    - ps: "$headers = if($env:APPVEYOR_PULL_REQUEST_NUMBER){\n @{\n  \"Authorization\" = \"Basic $env:GitRestAuth\"\n  \"Content-type\" = \"application/json\"\n}\n\n$pr = Invoke-RestMethod -Uri \"https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:APPVEYOR_PULL_REQUEST_NUMBER\" -Headers $headers  -Method GET\n\nif($pr.user.login -eq \"nfbot\" -and $pr.body -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a [version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor White -ForegroundColor Blue\n    Exit-AppveyorBuild\n} }\n"
 
   configuration:
     - MinSizeRel
@@ -310,7 +310,7 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%"
-    - ps: "$headers = @{\n  \"Authorization\" = \"Basic $env:GitRestAuth\"\n  \"Content-type\" = \"application/json\"\n}\n\n$pr = Invoke-RestMethod -Uri \"https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:APPVEYOR_PULL_REQUEST_NUMBER\" -Headers $headers  -Method GET\n\nif($pr.user.login -eq \"nfbot\" -and $pr.body -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a [version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor White -ForegroundColor Blue\n    Exit-AppveyorBuild\n}"
+    - ps: "$headers = if($env:APPVEYOR_PULL_REQUEST_NUMBER){\n @{\n  \"Authorization\" = \"Basic $env:GitRestAuth\"\n  \"Content-type\" = \"application/json\"\n}\n\n$pr = Invoke-RestMethod -Uri \"https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:APPVEYOR_PULL_REQUEST_NUMBER\" -Headers $headers  -Method GET\n\nif($pr.user.login -eq \"nfbot\" -and $pr.body -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a [version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor White -ForegroundColor Blue\n    Exit-AppveyorBuild\n} }\n"
 
   configuration:
     - MinSizeRel
@@ -602,7 +602,7 @@
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubToken):x-oauth-basic@github.com`n"
     - git config --global user.email "%GitHubUserEmail%"
     - git config --global user.name "%GitHubUserName%" 
-    - ps: "$headers = @{\n  \"Authorization\" = \"Basic $env:GitRestAuth\"\n  \"Content-type\" = \"application/json\"\n}\n\n$pr = Invoke-RestMethod -Uri \"https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:APPVEYOR_PULL_REQUEST_NUMBER\" -Headers $headers  -Method GET\n\nif($pr.user.login -eq \"nfbot\" -and $pr.body -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a [version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor White -ForegroundColor Blue\n    Exit-AppveyorBuild\n}"
+    - ps: "$headers = if($env:APPVEYOR_PULL_REQUEST_NUMBER){\n @{\n  \"Authorization\" = \"Basic $env:GitRestAuth\"\n  \"Content-type\" = \"application/json\"\n}\n\n$pr = Invoke-RestMethod -Uri \"https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:APPVEYOR_PULL_REQUEST_NUMBER\" -Headers $headers  -Method GET\n\nif($pr.user.login -eq \"nfbot\" -and $pr.body -match \"\\[version update\\]\")\n{\n    # commit was from nfbot AND it's taged as a [version update]\n    # OK to skip AppVeyor build \n    \"Version update only. Skipping build.\" | Write-Host -BackgroundColor White -ForegroundColor Blue\n    Exit-AppveyorBuild\n} }\n"
 
   configuration:
     - MinSizeRel
