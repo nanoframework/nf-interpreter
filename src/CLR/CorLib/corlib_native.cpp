@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2017 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -947,5 +947,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
     "mscorlib", 
     0x8899664E,
     method_lookup,
-    { 1, 0, 1, 94 }
+    { 1, 0, 1, 0 }
 };
