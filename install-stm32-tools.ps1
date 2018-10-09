@@ -18,7 +18,7 @@ If($buildPathExists -eq $False)
 Write-Host "BOARD_NAME=" $env:BOARD_NAME
 If([string]::IsNullOrEmpty($env:GNU_GCC_TOOLCHAIN_PATH) -or $force)
 {
-	$env:GNU_GCC_TOOLCHAIN_PATH='C:\GNU_Tools_ARM_Embedded\7-2017-q4-major'
+	$env:GNU_GCC_TOOLCHAIN_PATH='C:\GNU_Tools_ARM_Embedded\7-2018-q2-update'
 	Write-Host ("Set User Environment GNU_GCC_TOOLCHAIN_PATH='"+$env:GNU_GCC_TOOLCHAIN_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("GNU_GCC_TOOLCHAIN_PATH", $env:GNU_GCC_TOOLCHAIN_PATH, "User")
 }
