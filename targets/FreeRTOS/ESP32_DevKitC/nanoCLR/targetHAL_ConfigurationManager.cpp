@@ -144,7 +144,7 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, 
 }
 
 //  Default initialisation of Network interface config blocks for ESP32 targets
-void InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
+bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
 {
     memset( pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
     
@@ -171,6 +171,9 @@ void InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig
             pconfig->StartupAddressMode = AddressMode_DHCP;
             break;
     }
+
+    // always good
+    return TRUE;
 }
 
 // Gets a configuration block from the configuration block stored in the NVS block, 
@@ -239,6 +242,7 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
                 }
                 else if ( configuration == DeviceConfigurationOption_Network )
                 {
+                    // OK to skip checking return value
                     InitialiseNetworkDefaultConfig((HAL_Configuration_NetworkInterface *)configurationBlock,configurationIndex);
                     storeConfig = true;
                 }

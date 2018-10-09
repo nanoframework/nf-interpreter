@@ -92,7 +92,8 @@ bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, Dev
 void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, uint32_t configurationIndex);
 
 //  Default initialisation for Network interface config blocks
-void InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex);
+// returns FALSE if it's not possible to create a default config block
+bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex);
 
 // helper functions
 
