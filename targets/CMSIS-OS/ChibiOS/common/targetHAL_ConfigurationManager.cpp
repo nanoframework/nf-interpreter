@@ -67,7 +67,10 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBloc
         if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
         {
             // there is no network config block, init one with default settings
-            InitialiseNetworkDefaultConfig(NULL, 0);
+            if(!InitialiseNetworkDefaultConfig(NULL, 0))
+            {
+                return FALSE;
+            }
         }
         else
         {
@@ -116,10 +119,11 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
 
     if(configuration == DeviceConfigurationOption_Network)
     {
-        if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 ||
+        if( g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
         {
-            // there is no room for this block, fail the operation
+            // there is no room for this block, or there are no blocks stored at all
+            // failing the operation
             return FALSE;
         }
 
@@ -136,10 +140,11 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
     {
-        if(g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
+        if( g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
         {
-            // there is no room for this block, fail the operation
+            // there is no room for this block, or there are no blocks stored at all
+            // failing the operation
             return FALSE;
         }
 
@@ -281,22 +286,11 @@ __nfweak void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * 
 
 //  Default initialisation for Network interface config blocks
 // it's implemented with 'weak' attribute so it can be replaced at target level if different configurations are intended
-__nfweak void InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
+__nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
 {
     (void)pconfig;
     (void)configurationIndex;
 
-    HAL_Configuration_NetworkInterface config;
-
-    config.InterfaceType = NetworkInterfaceType_Ethernet;
-
-    // defaults to DHCP and DNS from DHCP
-    config.StartupAddressMode = AddressMode_DHCP;
-    config.AutomaticDNS = TRUE;
-
-    // store this to the 0 index block
-    ConfigurationManager_StoreConfigurationBlock(&config, DeviceConfigurationOption_Network, 0, 0);
-
-    // need to update the block count
-    g_TargetConfiguration.NetworkInterfaceConfigs->Count = 1;
+    // can't create a "default" network config because we are lacking definition of a MAC address
+    return FALSE;
 }
