@@ -31,7 +31,7 @@
 
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
-    GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\7-2017-q4-major'
+    GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded'
     ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-80'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
@@ -317,7 +317,7 @@
 
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
-    GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\7-2017-q4-major'
+    GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded'
     ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-80'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
@@ -609,7 +609,7 @@
 
   environment:
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
-    GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded\7-2017-q4-major'
+    GNU_GCC_TOOLCHAIN_PATH: 'C:\GNU_Tools_ARM_Embedded'
     ESP32_TOOLCHAIN_PATH: 'C:\ESP32_Tools\1.22.0-80'
     NINJA_PATH: 'C:\mytools\ninja'
     HEX2DFU_PATH: 'C:\mytools\hex2dfu'
