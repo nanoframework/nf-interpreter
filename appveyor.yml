@@ -162,6 +162,7 @@
 
             Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
             Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+            Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
 
             #upload package only if this not a PR
             if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
@@ -174,7 +175,7 @@
               }
               catch
               {
-                $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                & "$env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1" "warning" "$env:APPVEYOR_DISCORD_WEBHOOK_URL" "Failed to upload package for $env:BOARD_NAME."
               }
 
             }
@@ -199,6 +200,7 @@
               If($env:NEEDS_DFU -eq 'True')
               {
                 Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
               }
 
               #upload package only if this not a PR
@@ -212,7 +214,7 @@
                 }
                 catch
                 {
-                  $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                  & "$env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL 'Failed to upload package for $env:BOARD_NAME.'"
                 }
 
               }
@@ -253,6 +255,7 @@
                 If($env:NEEDS_DFU -eq 'True')
                 {
                   Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                  Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
                 }
                 
                 #upload package only if this not a PR
@@ -266,7 +269,7 @@
                   }
                   catch
                   {
-                    $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                    & "$env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL 'Failed to upload package for $env:BOARD_NAME.'"
                   }
                 }
 
@@ -284,10 +287,6 @@
   - ps: $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
-
-  artifacts:
-    - path: '**\*.zip'
-      name: nanoImage
 
   # before_deploy:
   #   # need this to keep ruby happy
@@ -474,6 +473,7 @@
 
             Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
             Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+            Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
 
             # upload package only if this not a PR 
             # and this is 'develop' (not develop-something)
@@ -487,7 +487,7 @@
               }
               catch
               {
-                $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                & "$env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL 'Failed to upload package for $env:BOARD_NAME.'"
               }
             }
           }
@@ -511,6 +511,7 @@
               If($env:NEEDS_DFU -eq 'True')
               {
                 Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
               }
 
               # upload package only if this not a PR 
@@ -525,7 +526,7 @@
                 }
                 catch
                 {
-                  $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                  & "$env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL 'Failed to upload package for $env:BOARD_NAME.'"
                 }
               }
             }
@@ -565,6 +566,7 @@
                 If($env:NEEDS_DFU -eq 'True')
                 {
                   Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                  Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
                 }
                 
                 # upload package only if this not a PR 
@@ -579,7 +581,7 @@
                   }
                   catch
                   {
-                    $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                    & "$env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL 'Failed to upload package for $env:BOARD_NAME.'"
                   }
                 }
 
@@ -597,10 +599,6 @@
   - ps: $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
-
-  artifacts:
-    - path: '**\*.zip'
-      name: nanoImage
 
   # before_deploy:
   #   # need this to keep ruby happy
@@ -782,6 +780,7 @@
 
             Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
             Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
+            Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
 
             #upload package only if this not a PR
             if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
@@ -794,7 +793,7 @@
               }
               catch
               {
-                $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                & "$env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL 'Failed to upload package for $env:BOARD_NAME.'"
               }
             }
           }
@@ -818,6 +817,7 @@
               If($env:NEEDS_DFU -eq 'True')
               {
                 Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
               }
 
               #upload package only if this not a PR
@@ -831,7 +831,7 @@
                 }
                 catch
                 {
-                  $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                  & "$env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL 'Failed to upload package for $env:BOARD_NAME.'"
                 }
               }
             }
@@ -871,6 +871,7 @@
                 If($env:NEEDS_DFU -eq 'True')
                 {
                   Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+                  Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
                 }
                 
                 #upload package only if this not a PR
@@ -884,7 +885,7 @@
                   }
                   catch
                   {
-                    $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                    & "$env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL 'Failed to upload package for $env:BOARD_NAME.'"
                   }
                 }
 
@@ -902,10 +903,6 @@
   - ps: $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
-
-  artifacts:
-    - path: '**\*.zip'
-      name: nanoImage
 
   # before_deploy:
   #   # need this to keep ruby happy
