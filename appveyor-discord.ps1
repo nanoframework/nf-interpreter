@@ -4,9 +4,7 @@
 
 $STATUS=$args[0]
 $WEBHOOK_URL=$args[1]
-
-# change directory to clone directory
-cd $env:APPVEYOR_BUILD_FOLDER
+$MESSAGE=$args[2]
 
 Write-Output "[Webhook]: Sending webhook to Discord..."
 
@@ -21,6 +19,11 @@ Switch ($STATUS) {
     $STATUS_MESSAGE="Failed"
     Break
   }
+  "warning" {
+    $EMBED_COLOR=12370112
+    $STATUS_MESSAGE="Warning"
+    Break
+  }  
   default {
     Write-Output "Default!"
     Break
@@ -62,7 +65,7 @@ $WEBHOOK_DATA="{
     },
     ""title"": ""$COMMIT_SUBJECT"",
     ""url"": ""$URL"",
-    ""description"": ""$COMMIT_MESSAGE $CREDITS"",
+    ""description"": ""$COMMIT_MESSAGE $CREDITS $MESSAGE"",
     ""fields"": [
       {
         ""name"": ""Commit"",

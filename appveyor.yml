@@ -166,9 +166,17 @@
             #upload package only if this not a PR
             if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
             {
-              $webClient = New-Object System.Net.WebClient
-              $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              try
+              {
+                $webClient = New-Object System.Net.WebClient
+                $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              }
+              catch
+              {
+                $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+              }
+
             }
           }
           Else
@@ -196,9 +204,17 @@
               #upload package only if this not a PR
               if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
               {
-                $webClient = New-Object System.Net.WebClient
-                $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                try
+                {
+                  $webClient = New-Object System.Net.WebClient
+                  $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                }
+                catch
+                {
+                  $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                }
+
               }
             }
             else
@@ -242,9 +258,16 @@
                 #upload package only if this not a PR
                 if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
                 {
-                  $webClient = New-Object System.Net.WebClient
-                  $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                  try
+                  {
+                    $webClient = New-Object System.Net.WebClient
+                    $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                    $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                  }
+                  catch
+                  {
+                    $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                  }
                 }
 
                 cd ..
@@ -255,11 +278,10 @@
             }            
           }          
         }
+
   # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL
   on_failure:
-  - ps: |
-
-        .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
+  - ps: $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
 
@@ -457,9 +479,16 @@
             # and this is 'develop' (not develop-something)
             if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_REPO_BRANCH -eq "develop")
             {
-              $webClient = New-Object System.Net.WebClient
-              $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              try
+              {
+                $webClient = New-Object System.Net.WebClient
+                $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              }
+              catch
+              {
+                $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+              }
             }
           }
           Else
@@ -488,9 +517,16 @@
               # and this is 'develop' (not develop-something)
               if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_REPO_BRANCH -eq "develop")
               {
-                $webClient = New-Object System.Net.WebClient
-                $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                try
+                {
+                  $webClient = New-Object System.Net.WebClient
+                  $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                }
+                catch
+                {
+                  $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                }
               }
             }
             else
@@ -535,9 +571,16 @@
                 # and this is 'develop' (not develop-something)
                 if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_REPO_BRANCH -eq "develop")
                 {
-                  $webClient = New-Object System.Net.WebClient
-                  $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                  try
+                  {
+                    $webClient = New-Object System.Net.WebClient
+                    $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                    $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                  }
+                  catch
+                  {
+                    $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                  }
                 }
 
                 cd ..
@@ -551,16 +594,13 @@
 
   # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL
   on_failure:
-  - ps: |
-
-        .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
+  - ps: $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
 
   artifacts:
     - path: '**\*.zip'
       name: nanoImage
-
 
   # before_deploy:
   #   # need this to keep ruby happy
@@ -746,9 +786,16 @@
             #upload package only if this not a PR
             if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
             {
-              $webClient = New-Object System.Net.WebClient
-              $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-              $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              try
+              {
+                $webClient = New-Object System.Net.WebClient
+                $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              }
+              catch
+              {
+                $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+              }
             }
           }
           Else
@@ -776,9 +823,16 @@
               #upload package only if this not a PR
               if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
               {
-                $webClient = New-Object System.Net.WebClient
-                $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                try
+                {
+                  $webClient = New-Object System.Net.WebClient
+                  $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                }
+                catch
+                {
+                  $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                }
               }
             }
             else
@@ -822,9 +876,16 @@
                 #upload package only if this not a PR
                 if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
                 {
-                  $webClient = New-Object System.Net.WebClient
-                  $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                  $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                  try
+                  {
+                    $webClient = New-Object System.Net.WebClient
+                    $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
+                    $webClient.UploadFile("https://api.bintray.com/content/nfbot/nanoframework-images-dev/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                  }
+                  catch
+                  {
+                    $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
+                  }
                 }
 
                 cd ..
@@ -838,9 +899,7 @@
 
   # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL 
   on_failure:
-  - ps: |
-
-        .\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
+  - ps: $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
   test: off
 
