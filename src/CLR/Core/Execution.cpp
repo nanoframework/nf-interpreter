@@ -2854,7 +2854,12 @@ HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, const CLR_IN
 
     if(timeout < 0)
     {
-        if(timeout != -1L)
+        // because we are expecting the timeout value to be in ticks
+        // need to check for two possible infinite timeouts:
+        // 1. when coding in native it's supposed to use -1L as a timeout infinite
+        // 2. in managed code the constant System.Threading.Timeout.Infinite is -1 milliseconds, therefore needs to be converted to ticks
+        if( (timeout != -1L) &&
+            (timeout != -1L * TIME_CONVERSION__TO_MILLISECONDS))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         }
