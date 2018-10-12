@@ -200,8 +200,8 @@
               If($env:NEEDS_DFU -eq 'True')
               {
                 Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-                Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
               }
+              Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
 
               #upload package only if this not a PR
               if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
@@ -255,9 +255,9 @@
                 If($env:NEEDS_DFU -eq 'True')
                 {
                   Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-                  Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
                 }
-                
+                Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
+
                 #upload package only if this not a PR
                 if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
                 {
@@ -511,8 +511,8 @@
               If($env:NEEDS_DFU -eq 'True')
               {
                 Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-                Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
               }
+              Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
 
               # upload package only if this not a PR 
               # and this is 'develop' (not develop-something)
@@ -566,9 +566,9 @@
                 If($env:NEEDS_DFU -eq 'True')
                 {
                   Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-                  Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
                 }
-                
+                Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
+
                 # upload package only if this not a PR 
                 # and this is 'develop' (not develop-something)
                 if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_REPO_BRANCH -eq "develop")
@@ -817,8 +817,8 @@
               If($env:NEEDS_DFU -eq 'True')
               {
                 Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-                Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
               }
+              Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
 
               #upload package only if this not a PR
               if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
@@ -871,9 +871,9 @@
                 If($env:NEEDS_DFU -eq 'True')
                 {
                   Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-                  Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
                 }
-                
+                Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
+
                 #upload package only if this not a PR
                 if(!$env:APPVEYOR_PULL_REQUEST_NUMBER)
                 {
