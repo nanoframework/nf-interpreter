@@ -233,5 +233,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
     "System.Net", 
     0x85411EE1,
     method_lookup,
-    { 1, 0, 0, 0 }
+    { 1, 0, 1, 0 }
 };
