@@ -105,17 +105,16 @@ void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetI2cConfig(CLR_
     I2cBusSpeed busSpeed = (I2cBusSpeed)managedConfig[ I2cConnectionSettings::FIELD___busSpeed ].NumericByRef().s4;
 
     // set the LL I2C configuration (according to I2C driver version)
-    #if defined(STM32F1XX) || defined(STM32F4XX) || defined(STM32L1XX)
-
+    #if defined(STM32F1xx_MCUCONF) || defined(STM32F4xx_MCUCONF) || defined(STM32L1xx_MCUCONF)
     llConfig->op_mode = OPMODE_I2C;
     llConfig->clock_speed = busSpeed == I2cBusSpeed_StandardMode ? 100000U : 400000U;
     llConfig->duty_cycle = busSpeed == I2cBusSpeed_StandardMode ? STD_DUTY_CYCLE : FAST_DUTY_CYCLE_2;
 
     #endif
 
-    #if defined(STM32F7XX) || defined(STM32F3XX) || defined(STM32F0XX) || \
-            defined(STM32L0XX) ||  defined(STM32L4XX) || \
-            defined(STM32H7XX) 
+    #if defined(STM32F7xx_MCUCONF) || defined(STM32F3xx_MCUCONF) || defined(STM32F0xx_MCUCONF) || \
+            defined(STM32L0xx_MCUCONF) ||  defined(STM32L4xx_MCUCONF) || \
+            defined(STM32H7xx_MCUCONF) 
 
     // Standard mode : 100 KHz, Rise time 120 ns, Fall time 25 ns, 54MHz clock source
     // Fast mode : 400 KHz, Rise time 120 ns, Fall time 25 ns, 54MHz clock source
@@ -346,7 +345,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             palI2c->Address = (i2caddr_t)connectionSettings[Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings::FIELD___slaveAddress].NumericByRef().s4;
 
             // when using I2Cv1 driver the address needs to be loaded in the I2C driver struct
-    #if defined(STM32F1XX) || defined(STM32F4XX) || defined(STM32L1XX)
+    #if defined(STM32F1xx_MCUCONF) || defined(STM32F4xx_MCUCONF) || defined(STM32L1xx_MCUCONF)
             palI2c->Driver->addr = palI2c->Address;
     #endif
 
