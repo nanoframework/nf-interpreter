@@ -12,7 +12,7 @@ if ($env:appveyor_pull_request_number -or
 else
 {
     # need this to keep ruby happy
-    md c:\tmp
+    & md c:\tmp > $null
 
     if ($env:APPVEYOR_REPO_BRANCH -eq "master" -or $env:APPVEYOR_REPO_BRANCH -match "^release*")
     {
