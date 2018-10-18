@@ -173,11 +173,11 @@ build_script:
         Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
 
         # upload package only if this not a PR 
-        # and this is 'develop' (not develop-something) or release or master
+        # and this is 'develop' (not develop-something) or release or master (for these only on tags)
         if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and 
             ( $env:APPVEYOR_REPO_BRANCH -eq "develop" -or 
-              $env:APPVEYOR_REPO_BRANCH -match "^release*" -or
-              $env:APPVEYOR_REPO_BRANCH -eq "master"
+              ($env:APPVEYOR_REPO_BRANCH -match "^release*" -and $env:APPVEYOR_REPO_TAG -eq "true") -or
+              ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_TAG -eq "true")
             ))
         {
           # get bintray repo name (dev or stable)
@@ -225,11 +225,11 @@ build_script:
           Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
 
           # upload package only if this not a PR 
-          # and this is 'develop' (not develop-something) or release or master
+          # and this is 'develop' (not develop-something) or release or master (for these only on tags)
           if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and 
               ( $env:APPVEYOR_REPO_BRANCH -eq "develop" -or 
-                $env:APPVEYOR_REPO_BRANCH -match "^release*" -or
-                $env:APPVEYOR_REPO_BRANCH -eq "master"
+                ($env:APPVEYOR_REPO_BRANCH -match "^release*" -and $env:APPVEYOR_REPO_TAG -eq "true") -or
+                ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_TAG -eq "true")
               ))
           {
             # get bintray repo name (dev or stable)
@@ -293,11 +293,11 @@ build_script:
             Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
 
             # upload package only if this not a PR 
-            # and this is 'develop' (not develop-something) or release or master
+            # and this is 'develop' (not develop-something) or release or master (for these only on tags)
             if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and 
                 ( $env:APPVEYOR_REPO_BRANCH -eq "develop" -or 
-                  $env:APPVEYOR_REPO_BRANCH -match "^release*" -or
-                  $env:APPVEYOR_REPO_BRANCH -eq "master"
+                  ($env:APPVEYOR_REPO_BRANCH -match "^release*" -and $env:APPVEYOR_REPO_TAG -eq "true") -or
+                  ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_TAG -eq "true")
                 ))
             {
               # get bintray repo name (dev or stable)
