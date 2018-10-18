@@ -330,11 +330,27 @@ build_script:
       }          
     }
 
+before_deploy:
+  - ps: |
+  
+      & $env:APPVEYOR_BUILD_FOLDER\generate-change-log.ps1
+
 # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL
 on_failure:
   - ps: |
   
       & $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 failure $env:APPVEYOR_DISCORD_WEBHOOK_URL
 
-before_deploy:
-- ps: .\generate-change-log.ps1
+deploy:
+- provider: GitHub
+  tag: v$(GitVersion_SemVer)
+  release: nanoFramework firmware images v$(GitVersion_SemVer)
+  description: 'Check the [changelog](https://github.com/$(APPVEYOR_REPO_NAME)/blob/$(APPVEYOR_REPO_BRANCH)/CHANGELOG.md)\n\nDownload images from our Bintray repo. See the available images [here](https://github.com/$(APPVEYOR_REPO_NAME)/tree/master#firmware-for-reference-boards).'
+  auth_token:
+    secure: DNixoFFE+pGlwyhj7McfZoln42vOmj0iY1iNV9zXEr3y0NpXlOIgL8k5ehzlFM1S
+  artifact:
+  draft: true
+  prerelease: true
+  force_update: true
+  on:
+    appveyor_repo_tag: false
