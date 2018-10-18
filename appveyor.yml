@@ -78,6 +78,8 @@ cache:
 install:
 - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
 - set PATH=%NINJA_PATH%;%PATH%
+- bundle config --local path vendor/bundle
+- gem install bundler --quiet --no-ri --no-rdoc
 - gem install github_changelog_generator --quiet --no-ri --no-rdoc
 - choco install gitversion.portable -pre -y
 - ps: |
