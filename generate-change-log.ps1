@@ -14,6 +14,8 @@ else
     # need this to keep ruby happy
     & md c:\tmp > $null
 
+    & cd $env:APPVEYOR_BUILD_FOLDER > $null
+
     if ($env:APPVEYOR_REPO_BRANCH -eq "master" -or $env:APPVEYOR_REPO_BRANCH -match "^release*")
     {
         # generate change log including future version
