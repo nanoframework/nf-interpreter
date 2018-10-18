@@ -105,7 +105,7 @@ install:
     }
 
 before_build:
-- md build
+- ps: mkdir build > $null
 - ps: |
 
     If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
@@ -116,7 +116,7 @@ before_build:
     {
       C:\ProgramData\chocolatey\lib\GitVersion.Portable\tools\GitVersion.exe /l console /output buildserver
 
-      cd build
+      &  cd build > $null
       $cmake = "cmake"
 
       If($env:BOARD_NAME -eq "ESP32_DEVKITC")
@@ -321,10 +321,10 @@ build_script:
               }
             }
 
-            cd ..
+            & cd .. > $null
             Rename-Item -NewName build-$env:BOARD_NAME -Path "build" -Force
-            md build
-            cd build
+            & md build > $null
+            & cd build > $null
           }
         }            
       }          

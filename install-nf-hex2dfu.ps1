@@ -5,7 +5,7 @@ $hex2dfuPathExists = Test-Path $env:HEX2DFU_PATH -ErrorAction SilentlyContinue
 
 If($hex2dfuPathExists -eq $False)
 {
-    md $($env:HEX2DFU_PATH) 
+    & md $($env:HEX2DFU_PATH) > $null
 
     Write-Host "Downloading hex2dfu..."
 

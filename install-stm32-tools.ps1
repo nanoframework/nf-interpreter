@@ -10,7 +10,7 @@ $env:NANOCLR_COMPORT = $COMPORT
 $buildPathExists = Test-Path "$PSScriptRoot\build\" -ErrorAction SilentlyContinue
 If($buildPathExists -eq $False)
 {
-	md $("$PSScriptRoot\build\" ) 
+	& md $("$PSScriptRoot\build\" ) > $null
 
 	Write-Host "Create build folder ..."
 }
