@@ -290,7 +290,11 @@ build_script:
             {
               Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
             }
-            Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
+
+            & cd .. > $null
+            Rename-Item -NewName build-$env:BOARD_NAME -Path "build" -Force
+
+            Push-AppveyorArtifact build-$env:BOARD_NAME\$env:BOARD_NAME-$env:GitVersion_SemVer.zip
 
             # upload package only if this not a PR 
             # and this is 'develop' (not develop-something) or release or master (for these only on tags)
@@ -321,8 +325,6 @@ build_script:
               }
             }
 
-            & cd .. > $null
-            Rename-Item -NewName build-$env:BOARD_NAME -Path "build" -Force
             & md build > $null
             & cd build > $null
           }
@@ -331,9 +333,7 @@ build_script:
     }
 
 before_deploy:
-  - ps: |
-  
-      & $env:APPVEYOR_BUILD_FOLDER\generate-change-log.ps1
+  - ps: $env:APPVEYOR_BUILD_FOLDER\generate-change-log.ps1
 
 # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL
 on_failure:
