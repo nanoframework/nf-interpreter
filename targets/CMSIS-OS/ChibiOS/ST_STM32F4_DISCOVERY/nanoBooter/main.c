@@ -11,33 +11,14 @@
 #include <swo.h>
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
+#include <nanoPAL_BlockStorage.h>
 #include <LaunchCLR.h>
 
-void BlinkerThread(void const * argument)
-{
-  (void)argument;
-
-  // loop until thread receives a request to terminate
-  while (!chThdShouldTerminateX()) {
-
-      palSetPad(GPIOD, GPIOD_LED3);
-      osDelay(500);
-      palClearPad(GPIOD, GPIOD_LED3);
-      osDelay(500);
-      
-  }
-  // nothing to deinitialize or cleanup, so it's safe to return
-}
-osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
-
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityNormal, 2048, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 
 //  Application entry point.
 int main(void) {
-
-  osThreadId blinkerThreadId;
-  osThreadId receiverThreadId;
 
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
@@ -60,7 +41,8 @@ int main(void) {
   // the user button in this board has a pull-up resistor so the check has to be inverted
   if (!palReadPad(GPIOA, GPIOA_BUTTON))
   {
-    // check for valid CLR image 
+    // check for valid CLR image
+    // this target DOES NOT have configuration block, so we need to use the __nanoImage_end__ address here
     if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
     {
       // there seems to be a valid CLR image
@@ -80,17 +62,22 @@ int main(void) {
   usbStart(serusbcfg.usbp, &usbcfg);
   usbConnectBus(serusbcfg.usbp);
 
-  // Creates the blinker thread, it does not start immediately.
-  blinkerThreadId = osThreadCreate(osThread(BlinkerThread), NULL);
-
   // create the receiver thread
-  receiverThreadId = osThreadCreate(osThread(ReceiverThread), NULL);
+  osThreadCreate(osThread(ReceiverThread), NULL);
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
 
+  // initialize block storage device
+  // in CLR this is called in nanoHAL_Initialize()
+  // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
+  BlockStorage_AddDevices();
+
   //  Normal main() thread
   while (true) {
-    osDelay(500);
+      palSetPad(GPIOD, GPIOD_LED3);
+      osDelay(500);
+      palClearPad(GPIOD, GPIOD_LED3);
+      osDelay(500);
   }
 }

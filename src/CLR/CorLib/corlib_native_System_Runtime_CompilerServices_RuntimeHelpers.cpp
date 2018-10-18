@@ -194,6 +194,8 @@ HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::Ge
 
 HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::RunClassConstructor___STATIC__VOID__SystemRuntimeTypeHandle( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
@@ -204,6 +206,8 @@ HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::Ru
 
 HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::get_OffsetToStringData___STATIC__I4( CLR_RT_StackFrame& stack )
 {
+    (void)stack;
+
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 

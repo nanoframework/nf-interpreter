@@ -47,34 +47,6 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInterna
                 NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance( top, (const char*)buf, pAssm ));
             }
             break;
-
-        // TODO 
-        // https://github.com/nanoframework/nf-interpreter/issues/304
-        // case CLR_RECORD_RESOURCE::RESOURCE_Bitmap:
-        //     {
-        //         CLR_RT_HeapBlock*        ptr;
-
-        //         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_Bitmap ));
-
-        //         ptr = top.Dereference();
-
-        //         NANOCLR_SET_AND_LEAVE(CLR_GFX_Bitmap::CreateInstance( ptr[ CLR_GFX_Bitmap::FIELD__m_bitmap ], buf, size, pAssm ));
-        //     }
-        //     break;
-
-        // TODO
-        // https://github.com/nanoframework/nf-interpreter/issues/305
-        // case CLR_RECORD_RESOURCE::RESOURCE_Font:
-        //     {
-        //         CLR_RT_HeapBlock*        ptr;
-
-        //         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex( top, g_CLR_RT_WellKnownTypes.m_Font ));
-
-        //         ptr = top.Dereference();
-
-        //         NANOCLR_SET_AND_LEAVE(CLR_GFX_Font::CreateInstance( ptr[ CLR_GFX_Font::FIELD__m_font ], buf, pAssm ));                
-        //     }
-        //     break;
         
         case CLR_RECORD_RESOURCE::RESOURCE_Binary:
             {

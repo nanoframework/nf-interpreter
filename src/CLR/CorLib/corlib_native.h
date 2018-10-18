@@ -221,8 +221,8 @@ struct Library_corlib_native_System_BitConverter
 
 struct Library_corlib_native_System_Boolean
 {
-    static const int FIELD_STATIC__FalseString = 1;
-    static const int FIELD_STATIC__TrueString = 2;
+    static const int FIELD_STATIC__FalseString = 0;
+    static const int FIELD_STATIC__TrueString = 1;
 
     static const int FIELD___value = 1;
 
@@ -317,19 +317,22 @@ struct Library_corlib_native_System_Console
 
 struct Library_corlib_native_System_Convert
 {
-	NANOCLR_NATIVE_DECLARE(NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4);
+    NANOCLR_NATIVE_DECLARE(NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4);
     NANOCLR_NATIVE_DECLARE(NativeToDouble___STATIC__R8__STRING);
     NANOCLR_NATIVE_DECLARE(ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(FromBase64CharArray___STATIC__SZARRAY_U1__SZARRAY_CHAR__I4);
 
     //--//
 
+    static double GetDoubleFractionalPart(char* str, int length);
+    static int64_t GetIntegerPart(char* str, int length);
+    static int64_t GetIntegerFromHexString(char* str);
 };
 
 struct Library_corlib_native_System_DateTime
 {
-    static const int FIELD_STATIC__MinValue = 3;
-    static const int FIELD_STATIC__MaxValue = 4;
+    static const int FIELD_STATIC__MinValue = 2;
+    static const int FIELD_STATIC__MaxValue = 3;
 
     static const int FIELD___ticks = 1;
 
@@ -450,7 +453,7 @@ struct Library_corlib_native_System_Globalization_NumberFormatInfo
 
 struct Library_corlib_native_System_Guid
 {
-    static const int FIELD_STATIC__Empty = 5;
+    static const int FIELD_STATIC__Empty = 4;
 
     static const int FIELD___a = 1;
     static const int FIELD___b = 2;
@@ -499,27 +502,57 @@ struct Library_corlib_native_System_Int64
 
 struct Library_corlib_native_System_Math
 {
+    NANOCLR_NATIVE_DECLARE(Abs___STATIC__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Max___STATIC__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Min___STATIC__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Abs___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Abs___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Acos___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Acos___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Asin___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Asin___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Atan___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Atan___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Atan2___STATIC__R8__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Atan2___STATIC__R4__R4__R4);
     NANOCLR_NATIVE_DECLARE(Ceiling___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Ceiling___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Cos___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Cos___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Cosh___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Cosh___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(IEEERemainder___STATIC__R8__R8__R8);
+    NANOCLR_NATIVE_DECLARE(IEEERemainder___STATIC__R4__R4__R4);
     NANOCLR_NATIVE_DECLARE(Exp___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Exp___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Floor___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Floor___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Log___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Log___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Log10___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Log10___STATIC__R4__R4);
+    NANOCLR_NATIVE_DECLARE(Max___STATIC__R8__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Max___STATIC__R4__R4__R4);
+    NANOCLR_NATIVE_DECLARE(Min___STATIC__R8__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Min___STATIC__R4__R4__R4);
     NANOCLR_NATIVE_DECLARE(Pow___STATIC__R8__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Pow___STATIC__R4__R4__R4);
     NANOCLR_NATIVE_DECLARE(Round___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Round___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Sign___STATIC__I4__R8);
+    NANOCLR_NATIVE_DECLARE(Sign___STATIC__I4__R4);
     NANOCLR_NATIVE_DECLARE(Sin___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Sin___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Sinh___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Sinh___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Sqrt___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Sqrt___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Tan___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Tan___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Tanh___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Tanh___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Truncate___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Truncate___STATIC__R4__R4);
 
     //--//
 
@@ -594,6 +627,7 @@ struct Library_corlib_native_System_Reflection_MethodBase
 
 struct Library_corlib_native_System_Reflection_ConstructorInfo
 {
+    NANOCLR_NATIVE_DECLARE(GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(Invoke___OBJECT__SZARRAY_OBJECT);
 
     //--//
@@ -603,6 +637,7 @@ struct Library_corlib_native_System_Reflection_ConstructorInfo
 struct Library_corlib_native_System_Reflection_FieldInfo
 {
     NANOCLR_NATIVE_DECLARE(SetValue___VOID__OBJECT__OBJECT);
+    NANOCLR_NATIVE_DECLARE(GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN);
 
     //--//
 
@@ -633,6 +668,7 @@ struct Library_corlib_native_System_Reflection_RuntimeFieldInfo
 struct Library_corlib_native_System_Reflection_RuntimeMethodInfo
 {
     NANOCLR_NATIVE_DECLARE(get_ReturnType___SystemType);
+    NANOCLR_NATIVE_DECLARE(GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN);
 
     //--//
 
@@ -769,6 +805,7 @@ struct Library_corlib_native_System_RuntimeType
     NANOCLR_NATIVE_DECLARE(GetFields___SZARRAY_SystemReflectionFieldInfo__SystemReflectionBindingFlags);
     NANOCLR_NATIVE_DECLARE(GetInterfaces___SZARRAY_SystemType);
     NANOCLR_NATIVE_DECLARE(GetElementType___SystemType);
+    NANOCLR_NATIVE_DECLARE(GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN);
 
     //--//
 
@@ -797,7 +834,7 @@ struct Library_corlib_native_System_Single
 
 struct Library_corlib_native_System_String
 {
-    static const int FIELD_STATIC__Empty = 6;
+    static const int FIELD_STATIC__Empty = 5;
 
     NANOCLR_NATIVE_DECLARE(CompareTo___I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(get_Chars___CHAR__I4);
@@ -853,6 +890,7 @@ struct Library_corlib_native_System_String
     static const int c_IndexOf__StartIndex    = 0x00000010;
     static const int c_IndexOf__Count         = 0x00000020;
     static const int c_IndexOf__Last          = 0x00000040;
+    static const int c_IndexOf__String_Last   = 0x00000044;
 
     static HRESULT FromCharArray( CLR_RT_StackFrame& stack, int startIndex, int count );
     static HRESULT ToCharArray  ( CLR_RT_StackFrame& stack, int startIndex, int count );
@@ -995,6 +1033,15 @@ struct Library_corlib_native_System_Threading_Thread
     static HRESULT Join( CLR_RT_StackFrame& stack, const CLR_INT64& timeExpire );
 };
 
+struct Library_corlib_native_System_Threading_Timeout
+{
+    static const int FIELD_STATIC__InfiniteTimeSpan = 6;
+
+
+    //--//
+
+};
+
 struct Library_corlib_native_System_Threading_Timer
 {
     static const int FIELD___timer = 1;
@@ -1019,7 +1066,7 @@ struct Library_corlib_native_System_TimeSpan
     static const int FIELD_STATIC__MaxValue = 8;
     static const int FIELD_STATIC__MinValue = 9;
 
-    static const int FIELD___numberOfTicks = 1;
+    static const int FIELD___ticks = 1;
 
     NANOCLR_NATIVE_DECLARE(Equals___BOOLEAN__OBJECT);
     NANOCLR_NATIVE_DECLARE(ToString___STRING);
@@ -1068,10 +1115,10 @@ struct Library_corlib_native_System_UInt64
 
 struct Library_corlib_native_System_Version
 {
-    static const int FIELD___major = 1;
-    static const int FIELD___minor = 2;
-    static const int FIELD___build = 3;
-    static const int FIELD___revision = 4;
+    static const int FIELD___Major = 1;
+    static const int FIELD___Minor = 2;
+    static const int FIELD___Build = 3;
+    static const int FIELD___Revision = 4;
 
 
     //--//

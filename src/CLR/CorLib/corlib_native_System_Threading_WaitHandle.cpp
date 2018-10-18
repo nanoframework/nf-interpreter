@@ -56,6 +56,8 @@ void Library_corlib_native_System_Threading_WaitHandle::Reset( CLR_RT_StackFrame
     
 HRESULT Library_corlib_native_System_Threading_WaitHandle::Wait( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& blkTimeout, CLR_RT_HeapBlock& blkExitContext, CLR_RT_HeapBlock* objects, int cObjects, bool fWaitAll )
 {
+    (void)blkExitContext;
+
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 

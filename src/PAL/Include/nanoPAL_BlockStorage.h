@@ -117,7 +117,7 @@ typedef enum BlockUsage
 #define BlockRange_BLOCKTYPE_RESERVED   (BlockRange_RESERVED)
 #define BlockRange_BLOCKTYPE_DIRTYBIT   (                            BlockRange_RESERVED |       BlockRange_DATATYPE_RAW         | BlockUsage_CONFIG)    
 // Configuration data that contains all the unique data 
-#define BlockRange_BLOCKTYPE_CONFIG     (BlockRange_ATTRIB_PRIMARY | BlockRange_RESERVED |       BlockRange_DATATYPE_RAW        | BlockUsage_CONFIG)     
+#define BlockRange_BLOCKTYPE_CONFIG     (BlockRange_ATTRIB_PRIMARY | BlockRange_RESERVED |       BlockRange_DATATYPE_RAW         | BlockUsage_CONFIG)     
 
 // Boot loader and boot strap code
 #define BlockRange_BLOCKTYPE_BOOTSTRAP  (BlockRange_EXECUTABLE     | BlockRange_RESERVED |       BlockRange_DATATYPE_NATIVECODE  | BlockUsage_BOOTSTRAP)  
@@ -405,9 +405,17 @@ struct IBLOCKSTORAGEDEVICE
     void (*SetPowerState)(void*, unsigned int state);
 };
 
-/////////////////////////////////////////////////////////////////////
-typedef struct BLOCKSTORAGEDEVICE BlockStorageDevice;
+typedef struct BLOCKSTORAGEDEVICE
+{
+    // from templace class HAL_DblLinkedNode<BlockStorageDevice>
+    struct BLOCKSTORAGEDEVICE* m_nextNode;
+    struct BLOCKSTORAGEDEVICE* m_prevNode;
 
+    IBlockStorageDevice* m_BSD;
+    void*                m_context;
+}BlockStorageDevice;
+
+/////////////////////////////////////////////////////////////////////
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -433,15 +441,6 @@ extern "C" {
 }
 #endif
 
-struct BLOCKSTORAGEDEVICE
-{
-    // from templace class HAL_DblLinkedNode<BlockStorageDevice>
-    BlockStorageDevice* m_nextNode;
-    BlockStorageDevice* m_prevNode;
-
-    IBlockStorageDevice* m_BSD;
-    void*                m_context;
-};
 
 /////////////////////////////////////////////////////
 // BlockStorageStream declarations
@@ -597,9 +596,16 @@ typedef struct MEMORY_MAPPED_NOR_BLOCK_CONFIG
 
 }MEMORY_MAPPED_NOR_BLOCK_CONFIG;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //////////////////////////////////////////////////////////
 // function to included in all target devices to be added
 void BlockStorage_AddDevices();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _NANOPAL_BLOCKSTORAGE_H_

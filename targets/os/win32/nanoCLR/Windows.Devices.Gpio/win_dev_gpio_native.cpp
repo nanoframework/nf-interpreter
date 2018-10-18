@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2017 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -60,5 +60,6 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Gpio =
 {
 	"Windows.Devices.Gpio",
 	0xA7570E44,
-	method_lookup
+	method_lookup,
+    { 1, 0, 0, 0 }
 };

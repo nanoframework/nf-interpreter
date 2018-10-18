@@ -170,106 +170,110 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks( CLR_RT_
 
                 switch(ptr->DataType())
                 {
-                case DATATYPE_OBJECT:
-                case DATATYPE_BYREF:
-                    sub = ptr->Dereference();
-                    break;
+                    case DATATYPE_OBJECT:
+                    case DATATYPE_BYREF:
+                        sub = ptr->Dereference();
+                        break;
 
-                //--//
+                    //--//
 
-#if defined(NANOCLR_APPDOMAINS)
-                case DATATYPE_TRANSPARENT_PROXY:
-                    {
-                        CLR_RT_AppDomain* appDomain = ptr->TransparentProxyAppDomain();
-
-                        if(appDomain)
+                  #if defined(NANOCLR_APPDOMAINS)
+                    case DATATYPE_TRANSPARENT_PROXY:
                         {
-                            if(!appDomain->IsLoaded())
+                            CLR_RT_AppDomain* appDomain = ptr->TransparentProxyAppDomain();
+
+                            if(appDomain)
                             {
-                                //If the AppDomain is unloading, we no longer need to keep the reference around
-                                ptr->SetTransparentProxyReference( NULL, NULL );                                
+                                if(!appDomain->IsLoaded())
+                                {
+                                    //If the AppDomain is unloading, we no longer need to keep the reference around
+                                    ptr->SetTransparentProxyReference( NULL, NULL );                                
+                                }
+                                else
+                                {
+                  #if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION) 
+                                    (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( ptr->TransparentProxyAppDomain() );
+                  #endif
+                                    sub = ptr->TransparentProxyDereference();
+                                }
+                            }             
+                        }
+                        break;
+                  #endif
+
+                    //--//
+
+                    case DATATYPE_ARRAY_BYREF:
+                        sub = (CLR_RT_HeapBlock*)ptr->Array();
+                        break;
+
+                    //--//
+
+                    case DATATYPE_CLASS:
+                    case DATATYPE_VALUETYPE:
+                        //
+                        // This is the real object, mark all its fields.
+                        //
+                        lst = ptr             + 1;
+                        num = ptr->DataSize() - 1;
+                        break;
+
+                    case DATATYPE_SZARRAY:
+                        //
+                        // If the array is full of reference types, mark each of them.
+                        //
+                        {
+                            CLR_RT_HeapBlock_Array* array = (CLR_RT_HeapBlock_Array*)ptr;
+
+                            if(array->m_fReference)
+                            {
+                                lst = (CLR_RT_HeapBlock*)array->GetFirstElement();
+                                num =                    array->m_numOfElements;
+                            }
+                        }
+                        break;
+
+                    case DATATYPE_REFLECTION:
+                        break;
+
+                    case DATATYPE_DELEGATE_HEAD:
+                        {
+                            CLR_RT_HeapBlock_Delegate* dlg = (CLR_RT_HeapBlock_Delegate*)ptr;
+
+                            lst = &dlg->m_object;
+                            num = 1;
+                        }
+                        break;
+
+                    case DATATYPE_BINARY_BLOB_HEAD:
+                        {
+                            CLR_RT_HeapBlock_BinaryBlob* blob = (CLR_RT_HeapBlock_BinaryBlob*)ptr;
+                            
+                            _ASSERTE(blob->BinaryBlobMarkingHandler() == NULL);
+                        }
+                        break;
+
+                    case DATATYPE_DELEGATELIST_HEAD:
+                        {
+                            CLR_RT_HeapBlock_Delegate_List* dlgList = (CLR_RT_HeapBlock_Delegate_List*)ptr;
+
+                            if(dlgList->m_flags & CLR_RT_HeapBlock_Delegate_List::c_Weak)
+                            {
+                                dlgList->ClearData();
+
+                                g_CLR_RT_GarbageCollector.m_weakDelegates_Reachable.LinkAtBack( dlgList );
                             }
                             else
                             {
-#if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION) 
-                                (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( ptr->TransparentProxyAppDomain() );
-#endif
-                                sub = ptr->TransparentProxyDereference();
+                                lst = dlgList->GetDelegates();
+                                num = dlgList->m_length;
                             }
-                        }             
-                    }
-                    break;
-#endif
-
-    //--//
-
-                case DATATYPE_ARRAY_BYREF:
-                    sub = (CLR_RT_HeapBlock*)ptr->Array();
-                    break;
-
-                //--//
-
-                case DATATYPE_CLASS:
-                case DATATYPE_VALUETYPE:
-                    //
-                    // This is the real object, mark all its fields.
-                    //
-                    lst = ptr             + 1;
-                    num = ptr->DataSize() - 1;
-                    break;
-
-                case DATATYPE_SZARRAY:
-                    //
-                    // If the array is full of reference types, mark each of them.
-                    //
-                    {
-                        CLR_RT_HeapBlock_Array* array = (CLR_RT_HeapBlock_Array*)ptr;
-
-                        if(array->m_fReference)
-                        {
-                            lst = (CLR_RT_HeapBlock*)array->GetFirstElement();
-                            num =                    array->m_numOfElements;
                         }
-                    }
-                    break;
+                        break;
 
-                case DATATYPE_REFLECTION:
-                    break;
-
-                case DATATYPE_DELEGATE_HEAD:
-                    {
-                        CLR_RT_HeapBlock_Delegate* dlg = (CLR_RT_HeapBlock_Delegate*)ptr;
-
-                        lst = &dlg->m_object;
-                        num = 1;
-                    }
-                    break;
-
-                case DATATYPE_BINARY_BLOB_HEAD:
-                    {
-                        CLR_RT_HeapBlock_BinaryBlob* blob = (CLR_RT_HeapBlock_BinaryBlob*)ptr;
-
-                        _ASSERTE(blob->BinaryBlobMarkingHandler() == NULL);
-                    }
-                    break;
-
-                case DATATYPE_DELEGATELIST_HEAD:
-                    {
-                        CLR_RT_HeapBlock_Delegate_List* dlgList = (CLR_RT_HeapBlock_Delegate_List*)ptr;
-
-                        if(dlgList->m_flags & CLR_RT_HeapBlock_Delegate_List::c_Weak)
-                        {
-                            dlgList->ClearData();
-
-                            g_CLR_RT_GarbageCollector.m_weakDelegates_Reachable.LinkAtBack( dlgList );
-                        }
-                        else
-                        {
-                            lst = dlgList->GetDelegates();
-                            num = dlgList->m_length;
-                        }
-                    }
-                    break;
+                    default:
+                        // the remaining data types aren't to be handled
+                        break;                          
                 }
                       
                 if(sub)

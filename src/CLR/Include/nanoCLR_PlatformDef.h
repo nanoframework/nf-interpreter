@@ -64,6 +64,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // WINDOWS
 #if defined(_WIN32)
+
 #define NANOCLR_GC_VERBOSE
 #define NANOCLR_TRACE_MEMORY_STATS
 #define NANOCLR_PROFILE_NEW
@@ -78,15 +79,22 @@
 //#define NANOCLR_VALIDATE_APPDOMAIN_ISOLATION
 #define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries 
 #else //RELEASE
-#define NANOCLR_VALIDATE_HEAP NANOCLR_VALIDATE_HEAP_0_None
+#define NANOCLR_VALIDATE_HEAP                   NANOCLR_VALIDATE_HEAP_0_None
 #endif
 #define NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// ARM
-#if defined(PLATFORM_ARM)
-#define NANOCLR_TRACE_MEMORY_STATS
+// ARM & ESP32
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
+// #define NANOCLR_STRESS_GC
+// #define NANOCLR_GC_VERBOSE
+// #define NANOCLR_PROFILE_NEW
+// #define NANOCLR_PROFILE_NEW_CALLS
+// #define NANOCLR_PROFILE_NEW_ALLOCATIONS
+// #define NANOCLR_TRACE_MEMORY_STATS
+// #define NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION
+#define NANOCLR_VALIDATE_HEAP                   NANOCLR_VALIDATE_HEAP_0_CompactionPlus
 #endif
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
@@ -122,6 +130,14 @@
 #define NANOCLR_PROFILE_HANDLER
 #endif
 
+#if defined(NANOCLR_PROFILE_NEW_CALLS) && !defined(NANOCLR_PROFILE_NEW)
+#define NANOCLR_PROFILE_NEW
+#endif
+
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS) && !defined(NANOCLR_PROFILE_NEW)
+#define NANOCLR_PROFILE_NEW
+#endif
+
 //-o-//-o-//-o-//-o-//-o-//-o-//
 // CODE
 //-o-//-o-//-o-//-o-//-o-//-o-//
@@ -151,7 +167,7 @@
 #define ULONGLONGCONSTANT(v) (v##UI64)
 #endif
 
-#if defined(PLATFORM_ARM)
+#if defined(PLATFORM_ARM) | defined(PLATFORM_ESP32)
 #define PROHIBIT_ALL_CONSTRUCTORS(cls)   \
     private:                             \
         cls();                           \
@@ -202,6 +218,7 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -226,17 +243,4 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if defined(NANOCLR_PROFILE_NEW_CALLS) && !defined(NANOCLR_PROFILE_NEW)
-!ERROR "NANOCLR_PROFILER_NEW is required for NANOCLR_PROFILE_NEW_CALLS"
-#endif
-
-#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS) && !defined(NANOCLR_PROFILE_NEW)
-!ERROR "NANOCLR_PROFILER_NEW is required for NANOCLR_PROFILE_NEW_ALLOCATIONS"
-#endif
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
 #endif // _NANOCLR_PLATFORMDEF_H_
-

@@ -12,8 +12,9 @@
  */
 MEMORY
 {
-    flash       : org = 0x08008000, len = 2M - 32k - 1408k      /* flash size less the space reserved for nanoBooter and application deployment*/
-    deployment  : org = 0x080A0000, len = 1408k                 /* space reserved for application deployment */
+    flash       : org = 0x08004000, len = 2M - 16k - 1664k      /* flash size less the space reserved for nanoBooter and application deployment*/
+    config      : org = 0x00000000, len = 0                     /* space reserved for configuration block */
+    deployment  : org = 0x08040000, len = 1664k                 /* space reserved for application deployment */
     ramvt       : org = 0x00000000, len = 0                     /* initial RAM address is reserved for a copy of the vector table */
     ram0        : org = 0x20000000, len = 192k                  /* SRAM1 + SRAM2 + SRAM3 */
     ram1        : org = 0x20000000, len = 112k                  /* SRAM1 */
@@ -23,6 +24,7 @@ MEMORY
     ram5        : org = 0x40024000, len = 4k                    /* BCKP SRAM */
     ram6        : org = 0x00000000, len = 0
     ram7        : org = 0x00000000, len = 0
+    ext_ram     : org = 0xD0000000, len = 8M                    /* external SDRAM */
 }
 
 /* For each data/text section two region are defined, a virtual region
@@ -70,6 +72,6 @@ REGION_ALIAS("BSS_RAM", ram0);
 REGION_ALIAS("HEAP_RAM", ram4);
 
 /* RAM region to be used for the nanoFramework CLR managed heap.*/
-REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ext_ram);
 
 INCLUDE rules.ld

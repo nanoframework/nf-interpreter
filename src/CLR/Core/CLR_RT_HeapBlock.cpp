@@ -157,36 +157,41 @@ HRESULT CLR_RT_HeapBlock::EnsureObjectReference( CLR_RT_HeapBlock*& obj )
 
     switch(this->DataType())
     {
-    case DATATYPE_OBJECT:
-    case DATATYPE_BYREF:
-        {
-            obj = Dereference(); FAULT_ON_NULL(obj);
-
-#if defined(NANOCLR_APPDOMAINS)
-            if(obj->DataType() == DATATYPE_TRANSPARENT_PROXY)
+        case DATATYPE_OBJECT:
+        case DATATYPE_BYREF:
             {
-                NANOCLR_CHECK_HRESULT(obj->TransparentProxyValidate());
-                obj = obj->TransparentProxyDereference(); FAULT_ON_NULL(obj);
+                obj = Dereference(); FAULT_ON_NULL(obj);
+
+    #if defined(NANOCLR_APPDOMAINS)
+                if(obj->DataType() == DATATYPE_TRANSPARENT_PROXY)
+                {
+                    NANOCLR_CHECK_HRESULT(obj->TransparentProxyValidate());
+                    obj = obj->TransparentProxyDereference(); FAULT_ON_NULL(obj);
+                }
+    #endif
+                switch(obj->DataType())
+                {
+                    case DATATYPE_CLASS    :
+                    case DATATYPE_VALUETYPE:
+                    case DATATYPE_DATETIME: // Special case.
+                    case DATATYPE_TIMESPAN: // Special case.
+                        NANOCLR_SET_AND_LEAVE(S_OK);
+                    
+                    default:
+                        // the remaining data types aren't to be handled
+                        break;
+                }
             }
-#endif
-            switch(obj->DataType())
-            {
-            case DATATYPE_CLASS    :
-            case DATATYPE_VALUETYPE:
+            break;
 
-            case DATATYPE_DATETIME: // Special case.
-            case DATATYPE_TIMESPAN: // Special case.
-
-                NANOCLR_SET_AND_LEAVE(S_OK);
-            }
-        }
-        break;
-
-    case DATATYPE_DATETIME: // Special case.
-    case DATATYPE_TIMESPAN: // Special case.
-        obj = this;
-
-        NANOCLR_SET_AND_LEAVE(S_OK);
+        case DATATYPE_DATETIME: // Special case.
+        case DATATYPE_TIMESPAN: // Special case.
+            obj = this;
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        
+        default:
+            // the remaining data types aren't to be handled
+            break;
     }
 
     NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -465,7 +470,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
 
         if(!array->m_fReference)
         {
-            CLR_UINT32 sizeArray = array->m_sizeOfElement;
+            CLR_INT32 sizeArray = array->m_sizeOfElement;
 
             //
             // Cannot copy NULL reference to a primitive type array.
@@ -662,10 +667,11 @@ HRESULT CLR_RT_HeapBlock::Reassign( const CLR_RT_HeapBlock& value )
 void CLR_RT_HeapBlock::AssignAndPinReferencedObject( const CLR_RT_HeapBlock& value )
 {
     // This is very special case that we have local variable with pinned attribute in metadata.
-    // This code is called only if "fixed" keyword is present in the managed code. Executed on assigment to "fixed" pointer.
+    // This code is called only if "fixed" keyword is present in the managed code. Executed on assignment to "fixed" pointer.
     // First check if there is object referenced by the local var. We unpin it, since the reference is replaced.
-    if (m_data.objectReference.ptr != NULL && m_id.type.dataType == DATATYPE_ARRAY_BYREF || m_id.type.dataType == DATATYPE_BYREF)
-    {   // Inpin the object that has been pointed by local variable. 
+    if ((m_data.objectReference.ptr != NULL && m_id.type.dataType == DATATYPE_ARRAY_BYREF) || m_id.type.dataType == DATATYPE_BYREF)
+    {
+        // Unpin the object that has been pointed by local variable. 
         m_data.objectReference.ptr->Unpin();
     }
 
@@ -681,10 +687,10 @@ void CLR_RT_HeapBlock::AssignAndPinReferencedObject( const CLR_RT_HeapBlock& val
         m_id.type.flags    = m_id.type.flags | HB_Pinned;
     }
 
-    // Pin the object refernced by local variable.  
-    if (m_data.objectReference.ptr != NULL && m_id.type.dataType == DATATYPE_ARRAY_BYREF || m_id.type.dataType == DATATYPE_BYREF)
+    // Pin the object referenced by local variable.  
+    if ((m_data.objectReference.ptr != NULL && m_id.type.dataType == DATATYPE_ARRAY_BYREF) || m_id.type.dataType == DATATYPE_BYREF)
     { 
-      m_data.objectReference.ptr->Pin(); 
+        m_data.objectReference.ptr->Pin(); 
     }
 }
 
@@ -759,10 +765,14 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing( const CLR_RT_TypeDef_Instance& cls )
 
             switch(dataType)
             {
-            case DATATYPE_DATETIME: // Special case.
-            case DATATYPE_TIMESPAN: // Special case.
-                dataType = DATATYPE_I8;
-                break;
+                case DATATYPE_DATETIME: // Special case.
+                case DATATYPE_TIMESPAN: // Special case.
+                    dataType = DATATYPE_I8;
+                    break;
+
+                default:
+                    // the remaining data types aren't to be handled
+                    break;
             }
 
             ptr[ 1 ].SetDataId ( CLR_RT_HEAPBLOCK_RAW_ID(dataType,0,1) );
@@ -922,6 +932,10 @@ void CLR_RT_HeapBlock::Promote()
 
         case DATATYPE_CHAR   :
         case DATATYPE_U2     : m_id.type.dataType = DATATYPE_I4; m_data.numeric.u4 = (CLR_UINT32)m_data.numeric.u2; break;
+
+        default:
+            // this data type is not to be promoted
+            break;
     }
 }
 
@@ -953,9 +967,16 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode( CLR_RT_HeapBlock* ptr, bool fRecurse, 
             CLR_RT_TypeDef_Instance cls; cls.InitializeFromIndex( ptr->ObjectCls() );
             int                    totFields = cls.CrossReference().m_totalFields;
 
-            while(totFields-- > 0)
+            if (totFields > 0)
             {
-                crc = GetHashCode( ++ptr, false, crc );
+                while(totFields-- > 0)
+                {
+                    crc = GetHashCode( ++ptr, false, crc );
+                }
+            }
+            else
+            {
+                crc = SUPPORT_ComputeCRC( &ptr, sizeof(ptr), crc );
             }
         }
         break;
@@ -1215,138 +1236,142 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values( const CLR_RT_HeapBlock& left, const 
     {
         switch(leftDataType)
         {
-#if defined(NANOCLR_APPDOMAINS)
-        case DATATYPE_TRANSPARENT_PROXY:
-#endif
-        case DATATYPE_OBJECT:
-        case DATATYPE_BYREF:
-            {
-                CLR_RT_HeapBlock* leftObj  = left .Dereference();
-                CLR_RT_HeapBlock* rightObj = right.Dereference();
-
-                if(!leftObj)
+    #if defined(NANOCLR_APPDOMAINS)
+            case DATATYPE_TRANSPARENT_PROXY:
+    #endif
+            case DATATYPE_OBJECT:
+            case DATATYPE_BYREF:
                 {
-                    return !rightObj ? 0 : -1; // NULL references always compare smaller than non-NULL ones.
-                }
-                else if(!rightObj)
-                {
-                    return 1; // NULL references always compare smaller than non-NULL ones.
-                }
+                    CLR_RT_HeapBlock* leftObj  = left .Dereference();
+                    CLR_RT_HeapBlock* rightObj = right.Dereference();
 
-                return Compare_Values( *leftObj, *rightObj, fSigned );
-            }
+                    if(!leftObj)
+                    {
+                        return !rightObj ? 0 : -1; // NULL references always compare smaller than non-NULL ones.
+                    }
+                    else if(!rightObj)
+                    {
+                        return 1; // NULL references always compare smaller than non-NULL ones.
+                    }
 
-        case DATATYPE_STRING:
-            {
-                CLR_RT_HeapBlock_String* leftStr  = (CLR_RT_HeapBlock_String*)&left ;
-                CLR_RT_HeapBlock_String* rightStr = (CLR_RT_HeapBlock_String*)&right;
-
-                return strcmp( leftStr->StringText(), rightStr->StringText() );
-            }
-
-        case DATATYPE_DELEGATELIST_HEAD:
-            {
-                CLR_RT_HeapBlock_Delegate_List* leftDlg  = (CLR_RT_HeapBlock_Delegate_List*)&left ;
-                CLR_RT_HeapBlock_Delegate_List* rightDlg = (CLR_RT_HeapBlock_Delegate_List*)&right;
-                CLR_RT_HeapBlock*               leftPtr  = leftDlg ->GetDelegates();
-                CLR_RT_HeapBlock*               rightPtr = rightDlg->GetDelegates();
-                CLR_UINT32                      leftLen  = leftDlg ->m_length;
-                CLR_UINT32                      rightLen = rightDlg->m_length;
-
-                while(leftLen > 0 && rightLen > 0)
-                {
-                    int res = CLR_RT_HeapBlock::Compare_Values( *leftPtr++, *rightPtr++, fSigned ); if(res) return res;
-
-                    leftLen--;
-                    rightLen--;
+                    return Compare_Values( *leftObj, *rightObj, fSigned );
                 }
 
-                if(!leftLen)
+            case DATATYPE_STRING:
                 {
-                    return !rightLen ? 0 : -1; // NULL references always compare smaller than non-NULL ones.
-                }
-                else // rightLen != 0 for sure.
-                {
-                    return 1; // NULL references always compare smaller than non-NULL ones.
-                }
-            }
+                    CLR_RT_HeapBlock_String* leftStr  = (CLR_RT_HeapBlock_String*)&left ;
+                    CLR_RT_HeapBlock_String* rightStr = (CLR_RT_HeapBlock_String*)&right;
 
-        case DATATYPE_DELEGATE_HEAD:
-            {
-                CLR_RT_HeapBlock_Delegate* leftDlg   = (CLR_RT_HeapBlock_Delegate*)&left ;
-                CLR_RT_HeapBlock_Delegate* rightDlg  = (CLR_RT_HeapBlock_Delegate*)&right;
-                CLR_UINT32                 leftData  = leftDlg ->DelegateFtn().m_data;
-                CLR_UINT32                 rightData = rightDlg->DelegateFtn().m_data;
-
-                if(leftData > rightData) return  1;
-                if(leftData < rightData) return -1;
-
-                return Compare_Values( leftDlg->m_object, rightDlg->m_object, fSigned );
-            }
-
-        case DATATYPE_CLASS:
-        case DATATYPE_VALUETYPE:
-        case DATATYPE_SZARRAY:
-        case DATATYPE_WEAKCLASS:
-            return CompareValues_Pointers( &left, &right );
-
-        case DATATYPE_REFLECTION:
-            {
-                const CLR_RT_HeapBlock* ptrLeft;
-                const CLR_RT_HeapBlock* ptrRight;
-                CLR_RT_HeapBlock        hbLeft;
-                CLR_RT_HeapBlock        hbRight;
-
-                if(left.ReflectionDataConst().m_kind != right.ReflectionDataConst().m_kind)
-                {
-                    ptrLeft  = FixReflectionForType( left , hbLeft  );
-                    ptrRight = FixReflectionForType( right, hbRight );
-                }
-                else
-                {
-                    ptrLeft  = &left;
-                    ptrRight = &right;
+                    return strcmp( leftStr->StringText(), rightStr->StringText() );
                 }
 
-                return CompareValues_Numeric( *ptrLeft, *ptrRight, false, 8 );
-            }
+            case DATATYPE_DELEGATELIST_HEAD:
+                {
+                    CLR_RT_HeapBlock_Delegate_List* leftDlg  = (CLR_RT_HeapBlock_Delegate_List*)&left ;
+                    CLR_RT_HeapBlock_Delegate_List* rightDlg = (CLR_RT_HeapBlock_Delegate_List*)&right;
+                    CLR_RT_HeapBlock*               leftPtr  = leftDlg ->GetDelegates();
+                    CLR_RT_HeapBlock*               rightPtr = rightDlg->GetDelegates();
+                    CLR_UINT32                      leftLen  = leftDlg ->m_length;
+                    CLR_UINT32                      rightLen = rightDlg->m_length;
 
-            //--//
-#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
+                    while(leftLen > 0 && rightLen > 0)
+                    {
+                        int res = CLR_RT_HeapBlock::Compare_Values( *leftPtr++, *rightPtr++, fSigned ); if(res) return res;
 
-        case DATATYPE_R4:
-            if(left.NumericByRefConst().r4 > right.NumericByRefConst().r4) return  1;
-            if(left.NumericByRefConst().r4 < right.NumericByRefConst().r4) return -1;
-            /************************************************************/ return  0;
+                        leftLen--;
+                        rightLen--;
+                    }
 
-        case DATATYPE_R8:
+                    if(!leftLen)
+                    {
+                        return !rightLen ? 0 : -1; // NULL references always compare smaller than non-NULL ones.
+                    }
+                    else // rightLen != 0 for sure.
+                    {
+                        return 1; // NULL references always compare smaller than non-NULL ones.
+                    }
+                }
 
-            if(left.NumericByRefConst().r8 > right.NumericByRefConst().r8) return  1;
-            if(left.NumericByRefConst().r8 < right.NumericByRefConst().r8) return -1;
-            /************************************************************/ return  0;
+            case DATATYPE_DELEGATE_HEAD:
+                {
+                    CLR_RT_HeapBlock_Delegate* leftDlg   = (CLR_RT_HeapBlock_Delegate*)&left ;
+                    CLR_RT_HeapBlock_Delegate* rightDlg  = (CLR_RT_HeapBlock_Delegate*)&right;
+                    CLR_UINT32                 leftData  = leftDlg ->DelegateFtn().m_data;
+                    CLR_UINT32                 rightData = rightDlg->DelegateFtn().m_data;
 
-#else
-        case DATATYPE_R4      :
-        case DATATYPE_R8      :
-            fSigned = true;
-#endif
+                    if(leftData > rightData) return  1;
+                    if(leftData < rightData) return -1;
 
-        case DATATYPE_BOOLEAN :
-        case DATATYPE_I1      :
-        case DATATYPE_U1      :
+                    return Compare_Values( leftDlg->m_object, rightDlg->m_object, fSigned );
+                }
 
-        case DATATYPE_CHAR    :
-        case DATATYPE_I2      :
-        case DATATYPE_U2      :
+            case DATATYPE_CLASS:
+            case DATATYPE_VALUETYPE:
+            case DATATYPE_SZARRAY:
+            case DATATYPE_WEAKCLASS:
+                return CompareValues_Pointers( &left, &right );
 
-        case DATATYPE_I4      :
-        case DATATYPE_U4      :
+            case DATATYPE_REFLECTION:
+                {
+                    const CLR_RT_HeapBlock* ptrLeft;
+                    const CLR_RT_HeapBlock* ptrRight;
+                    CLR_RT_HeapBlock        hbLeft;
+                    CLR_RT_HeapBlock        hbRight;
 
-        case DATATYPE_I8      :
-        case DATATYPE_U8      :
-        case DATATYPE_DATETIME:
-        case DATATYPE_TIMESPAN:
-            return CompareValues_Numeric( left, right, fSigned, c_CLR_RT_DataTypeLookup[ leftDataType ].m_sizeInBytes );
+                    if(left.ReflectionDataConst().m_kind != right.ReflectionDataConst().m_kind)
+                    {
+                        ptrLeft  = FixReflectionForType( left , hbLeft  );
+                        ptrRight = FixReflectionForType( right, hbRight );
+                    }
+                    else
+                    {
+                        ptrLeft  = &left;
+                        ptrRight = &right;
+                    }
+
+                    return CompareValues_Numeric( *ptrLeft, *ptrRight, false, 8 );
+                }
+
+                //--//
+    #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
+
+            case DATATYPE_R4:
+                if(left.NumericByRefConst().r4 > right.NumericByRefConst().r4) return  1;
+                if(left.NumericByRefConst().r4 < right.NumericByRefConst().r4) return -1;
+                /************************************************************/ return  0;
+
+            case DATATYPE_R8:
+
+                if(left.NumericByRefConst().r8 > right.NumericByRefConst().r8) return  1;
+                if(left.NumericByRefConst().r8 < right.NumericByRefConst().r8) return -1;
+                /************************************************************/ return  0;
+
+    #else
+            case DATATYPE_R4      :
+            case DATATYPE_R8      :
+                fSigned = true;
+    #endif
+
+            case DATATYPE_BOOLEAN :
+            case DATATYPE_I1      :
+            case DATATYPE_U1      :
+
+            case DATATYPE_CHAR    :
+            case DATATYPE_I2      :
+            case DATATYPE_U2      :
+
+            case DATATYPE_I4      :
+            case DATATYPE_U4      :
+
+            case DATATYPE_I8      :
+            case DATATYPE_U8      :
+            case DATATYPE_DATETIME:
+            case DATATYPE_TIMESPAN:
+                return CompareValues_Numeric( left, right, fSigned, c_CLR_RT_DataTypeLookup[ leftDataType ].m_sizeInBytes );
+
+            default:
+                // the remaining data types aren't to be handled
+                break;                
         }
     }
     else

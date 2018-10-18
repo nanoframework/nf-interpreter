@@ -25,7 +25,7 @@ bool BlockStorageStream_Initialize(BlockStorageStream* stream, unsigned int bloc
     if(blockUsage == StorageUsage_CLR)
     {
         // set BaseAddress to the start of the region
-        stream->BaseAddress = &__nanoImage_start__;
+        stream->BaseAddress = (uint32_t)&__nanoImage_start__;
         // set Length to the region size 
         // need to cast the pointers to make sure the compiler implements the correct math
         stream->Length = ((uint32_t)&__nanoImage_end__) - ((uint32_t)&__nanoImage_start__);
@@ -33,7 +33,7 @@ bool BlockStorageStream_Initialize(BlockStorageStream* stream, unsigned int bloc
     else if(blockUsage == StorageUsage_DEPLOYMENT)
     {
         // set BaseAddress to the start of the region
-        stream->BaseAddress = &__deployment_start__;
+        stream->BaseAddress = (uint32_t)&__deployment_start__;
         // set Length to the region size 
         // need to cast the pointers to make sure the compiler implements the correct math
         stream->Length = ((uint32_t)&__deployment_end__) - ((uint32_t)&__deployment_start__);
@@ -46,7 +46,7 @@ bool BlockStorageStream_Initialize(BlockStorageStream* stream, unsigned int bloc
 // BlockStorageList 
 ///////////////////////////////////////////////////
 
-extern struct BlockStorageDevice    Device_BlockStorage;
+extern BlockStorageDevice    Device_BlockStorage;
 extern struct MEMORY_MAPPED_NOR_BLOCK_CONFIG   Device_BlockStorageConfig;
 BlockStorageList             BlockStorage;
 
@@ -73,14 +73,14 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, un
 {
     *pBSD = NULL;
        
-    BlockStorageDevice* block = BlockStorageList_GetFirstDevice;
+    BlockStorageDevice* block = BlockStorageList_GetFirstDevice();
 
     // this has to add to make metadataprocessor happy
     if(!block) return true;
 
-    DeviceBlockInfo* pDeviceInfo = BlockStorageDevice_GetDeviceInfo(&block);
+    DeviceBlockInfo* pDeviceInfo = BlockStorageDevice_GetDeviceInfo(block);
         
-    for(int i=0; i < pDeviceInfo->NumRegions; i++)
+    for(uint32_t i=0; i < pDeviceInfo->NumRegions; i++)
     {
         BlockRegionInfo* pRegion = &pDeviceInfo->Regions[i];
         
@@ -102,6 +102,8 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, un
 
 bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool init)
 {
+    (void)init;
+
     pBSD->m_BSD     = vtable;
     pBSD->m_context = config;
 

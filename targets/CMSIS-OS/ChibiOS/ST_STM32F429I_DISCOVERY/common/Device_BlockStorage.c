@@ -6,36 +6,42 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
+// 16kB blocks
 const BlockRange BlockRange1[] = 
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 1 },            // 08000000 nanoBooter
-    { BlockRange_BLOCKTYPE_CODE      ,   2, 3 }             // 08008000 nanoCLR
+    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 0 },            // 0x08000000 nanoBooter
+    { BlockRange_BLOCKTYPE_CODE      ,   1, 3 }             // 0x08004000 nanoCLR
 };
 
+// 64kB blocks
 const BlockRange BlockRange2[] = 
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 08010000 nanoCLR
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 0x08010000 nanoCLR
 };
 
+// 128kB blocks
 const BlockRange BlockRange3[] =
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 3 },            // 08020000 nanoCLR
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   4, 6 },            // 080A0000 deployment
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 },            // 0x08020000 nanoCLR
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1, 6 },            // 0x08040000 deployment
 };
 
+// 16kB blocks
 const BlockRange BlockRange4[] = 
 {
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 3 }             // 08100000 deployment
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 3 }             // 0x08100000 deployment
 };
 
+// 64kB blocks
 const BlockRange BlockRange5[] = 
 {
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 0 }             // 08110000 deployment
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 0 }             // 0x08110000 deployment
 };
 
+// 128kB blocks
 const BlockRange BlockRange6[] =
 {
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 6 }             // 08120000 deployment
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 6 }             // 0x08120000 deployment
 };
 
 const BlockRegionInfo BlockRegions[] = 
@@ -92,14 +98,9 @@ const BlockRegionInfo BlockRegions[] =
 
 const DeviceBlockInfo Device_BlockInfo =
 {
-    {  
-        false,              // BOOL Removable;
-        true,               // BOOL SupportsXIP;
-        false,              // BOOL WriteProtected;
-        false               // BOOL SupportsCopyBack
-    },
+    (MediaAttribute_SupportsXIP),
     ARRAYSIZE_CONST_EXPR(BlockRegions),     // UINT32 NumRegions;
-    BlockRegions,                           // const BlockRegionInfo* pRegions;
+    (BlockRegionInfo*)BlockRegions,         // const BlockRegionInfo* pRegions;
 };
 
 MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig =
@@ -110,7 +111,7 @@ MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig =
             false,      // BOOL                 ActiveState;
         },
 
-        &Device_BlockInfo,             // BlockDeviceinfo
+        (DeviceBlockInfo*)&Device_BlockInfo,    // BlockDeviceinfo
     },
 
     { // CPU_MEMORY_CONFIG

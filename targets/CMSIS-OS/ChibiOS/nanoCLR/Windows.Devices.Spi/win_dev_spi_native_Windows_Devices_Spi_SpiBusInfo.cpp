@@ -22,7 +22,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::get_MaxClockF
         // SPI2 or SPI3 are on APB1, so divide max frequency by four.
         stack.SetResult_I4 ((bus == 2 or bus == 3) ? SystemCoreClock >>= 2 : SystemCoreClock >> 1);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::get_MinClockFrequency___I4( CLR_RT_StackFrame& stack )
@@ -39,5 +39,5 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::get_MinClockF
         // SPI2 or SPI3 are on APB1, so divide max frequency by four.
         stack.SetResult_I4 ((bus == 2 or bus == 3) ? SystemCoreClock >>= 9 : SystemCoreClock >> 8);
     }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }

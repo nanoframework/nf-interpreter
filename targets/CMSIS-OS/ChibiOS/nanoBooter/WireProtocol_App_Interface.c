@@ -19,10 +19,12 @@ static const CommandHandlerLookup c_Lookup_Request[] =
     DEFINE_CMD(Ping       ),
     DEFINE_CMD(Reboot     ),
     // //
-    // DEFINE_CMD(ReadMemory ),
+    DEFINE_CMD(ReadMemory ),
     DEFINE_CMD(WriteMemory),
     DEFINE_CMD(CheckMemory),
     DEFINE_CMD(EraseMemory),
+    DEFINE_CMD(QueryConfiguration),
+    DEFINE_CMD(UpdateConfiguration),
     // //
     // DEFINE_CMD(Execute    ),
     DEFINE_CMD(MemoryMap  ),
@@ -50,7 +52,7 @@ static const CommandHandlerLookup c_Lookup_Reply[] =
     /*******************************************************************************************************************************************************************/
 };
 
-bool WP_App_ProcessHeader(WP_Message* message)
+int WP_App_ProcessHeader(WP_Message* message)
 {
     // check for reception buffer overflow 
     if(message->m_header.m_size > sizeof(receptionBuffer))
@@ -62,7 +64,7 @@ bool WP_App_ProcessHeader(WP_Message* message)
     return true;
 }
 
-bool WP_App_ProcessPayload(WP_Message* message)
+int WP_App_ProcessPayload(WP_Message* message)
 {
     // Prevent processing duplicate packets
     if(message->m_header.m_seq == lastPacketSequence)
@@ -100,7 +102,7 @@ bool WP_App_ProcessPayload(WP_Message* message)
         if(cmd->command == message->m_header.m_cmd)
         {
             // execute command handler and save the result
-            bool commandHandlerExecuteResult = ((bool* (*)(WP_Message*))cmd->handler)(message);
+            int commandHandlerExecuteResult = ((int(*)(WP_Message*))cmd->handler)(message);
 
             WP_ReplyToCommand(message, commandHandlerExecuteResult, false, NULL, 0);
             return true;

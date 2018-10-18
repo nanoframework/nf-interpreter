@@ -12,21 +12,18 @@
 #include <ch.h>
 
 // Converts CMSIS sysTicks to .NET ticks (100 nanoseconds)
-signed __int64 HAL_Time_SysTicksToTime(unsigned int sysTicks) {
-    
-    // this is a rewrite of ChibiOS ST2US(n) macro because it will overflow if doing the math using uint32_t
-    
+uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) 
+{
     // convert to microseconds from CMSIS SysTicks
-    int64_t microsecondsFromSysTicks = (((sysTicks) * 1000000ULL + (int64_t)CH_CFG_ST_FREQUENCY - 1ULL) / (int64_t)CH_CFG_ST_FREQUENCY);
-
+    // this is a rewrite of ChibiOS TIME_I2US(n) macro because it will overflow if doing the math using uint32_t
     // need to convert from microseconds to 100 nanoseconds
-    return  microsecondsFromSysTicks * 10;
+    return (((sysTicks * (uint64_t)1000000) + (int64_t)CH_CFG_ST_FREQUENCY - 1) / (int64_t)CH_CFG_ST_FREQUENCY) * 10;
 }
 
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
-signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
+uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-#if defined(HAL_USE_RTC)
+  #if defined(HAL_USE_RTC)
 
     // use RTC to get date time
     SYSTEMTIME st; 
@@ -36,7 +33,7 @@ signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
 
     st.wDay = (unsigned short) _dateTime.day;
     st.wMonth = (unsigned short) _dateTime.month;
-    st.wYear = (unsigned short) _dateTime.year;
+    st.wYear = (unsigned short) (_dateTime.year + 1980);    // ChibiOS is counting years since 1980
     st.wDayOfWeek = (unsigned short) _dateTime.dayofweek;
 
     // zero 'time' fields if date part only is required
@@ -45,7 +42,7 @@ signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
         st.wMilliseconds = 0;
         st.wSecond = 0;
         st.wMinute = 0;
-        st.wMinute = 0;
+        st.wHour = 0;
     }
     else
     {
@@ -57,18 +54,59 @@ signed __int64  HAL_Time_CurrentDateTime(bool datePartOnly)
         _dateTime.millisecond /= 60;
         st.wMinute = (unsigned short) (_dateTime.millisecond % 60);
         _dateTime.millisecond /= 60;
-        st.wMinute = (unsigned short) (_dateTime.millisecond % 24);
+        st.wHour = (unsigned short) (_dateTime.millisecond % 24);
     }
 
     return HAL_Time_ConvertFromSystemTime( &st );
 
-#else
+  #else
+	if (datePartOnly)
+	{
+		SYSTEMTIME st;
+		HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
 
-    // use system ticks
-    return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() );
+		st.wHour = 0;
+		st.wMinute = 0;
+		st.wSecond = 0;
+		st.wMilliseconds = 0;
 
-#endif
+		return HAL_Time_ConvertFromSystemTime(&st);
+	}
+	else
+    {
+        return HAL_Time_CurrentTime();
+    }
+  #endif
 };
+
+void HAL_Time_SetUtcTime(uint64_t utcTime)
+{
+    SYSTEMTIME systemTime;
+
+    HAL_Time_ToSystemTime(utcTime, &systemTime);
+
+  #if defined(HAL_USE_RTC)
+
+    // set RTC
+    RTCDateTime newTime;
+
+    newTime.year = systemTime.wYear - 1980;  // ChibiOS time base is 1980-01-01
+    newTime.month = systemTime.wMonth;
+    newTime.day = systemTime.wDay;
+    newTime.dayofweek = systemTime.wDayOfWeek;
+    newTime.millisecond = ((((uint32_t)systemTime.wHour * 3600) + 
+                            ((uint32_t)systemTime.wMinute * 60) + 
+                            (uint32_t)systemTime.wSecond) * 1000);
+
+    // set RTC time
+    rtcSetTime(&RTCD1, &newTime);
+
+  #else
+    // TODO FIXME
+    // need to add implementation when RTC is not being used
+    // can't mess with the systicks because the scheduling can fail
+  #endif
+}
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
 {
@@ -107,7 +145,33 @@ bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len 
     return len != 0;
 }
 
-unsigned __int64 CPU_MiliSecondsToSysTicks(unsigned __int64 miliSeconds)
+bool DateTimeToString(const uint64_t& time, char*& buf, size_t& len )
 {
-    return MS2ST(miliSeconds);
+    SYSTEMTIME st;
+
+    HAL_Time_ToSystemTime( time, &st );
+
+    return CLR_SafeSprintf(buf, len, "%4d/%02d/%02d %02d:%02d:%02d.%03d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds );
+}
+
+char* DateTimeToString(const uint64_t& time)
+{
+    static char rgBuffer[128];
+    char*  szBuffer =           rgBuffer;
+    size_t iBuffer  = ARRAYSIZE(rgBuffer);
+
+    DateTimeToString( time, szBuffer, iBuffer );
+
+    return rgBuffer;
+}
+
+const char* HAL_Time_CurrentDateTimeToString()
+{
+    return DateTimeToString(HAL_Time_CurrentDateTime(false));
+}
+
+uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
+{
+    // this is a rewrite of ChibiOS TIME_MS2I(n) macro because it will overflow if doing the math using uint32_t
+    return (((ticks * (uint64_t)CH_CFG_ST_FREQUENCY) + 999) / (uint64_t)1000);
 }

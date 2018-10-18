@@ -8,9 +8,11 @@
 #include <target_platform.h>
 #include <hal.h>
 
-// events timer
-static virtual_timer_t eventsBoolTimer;
-volatile uint32_t systemEvents;
+uint64_t CPU_MillisecondsToTicks(uint64_t ticks);
+
+// timer for bool events
+static virtual_timer_t boolEventsTimer;
+uint32_t systemEvents;
 
 set_Event_Callback g_Event_Callback     = NULL;
 void*              g_Event_Callback_Arg = NULL;
@@ -31,7 +33,7 @@ bool Events_Uninitialize()
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    chVTResetI(&eventsBoolTimer);
+    chVTResetI(&boolEventsTimer);
 
     return true;
 }
@@ -78,7 +80,11 @@ static void local_Events_SetBoolTimer_Callback( void* arg )
     NATIVE_PROFILE_PAL_EVENTS();
     bool* timerCompleteFlag = (bool*)arg;
 
+    chSysLock();
+    
     *timerCompleteFlag = true;
+
+    chSysUnlock();
 }
 
 void Events_SetCallback( set_Event_Callback pfn, void* arg )
@@ -93,42 +99,67 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    // we assume only 1 can be active, abort previous just in case
-    chVTResetI(&eventsBoolTimer);
-
     if(timerCompleteFlag != NULL)
     {
-        chVTSetI(&eventsBoolTimer, MS2ST(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
+        // no need to stop the timer even if it's running because the API does it anyway
+        chVTSetI(&boolEventsTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
     }
 }
 
-uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeout_Milliseconds )
+uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeoutMilliseconds )
 {
+    // schedule an interrupt for this far in the future
+    // timeout is in milliseconds, need to convert to ticks
+    uint64_t countsRemaining = CPU_MillisecondsToTicks( timeoutMilliseconds );
 
 #if defined(HAL_PROFILE_ENABLED)
     Events_WaitForEvents_Calls++;
 #endif
 
-    if(systemEvents == 0)
+    uint64_t expireTimeInTicks  = HAL_Time_CurrentTime() + countsRemaining;
+    bool runContinuations = true;
+
+    while(true)
     {
-        // no events, wait for timeout_Milliseconds
-        osDelay(timeout_Milliseconds);
+        uint32_t events = Events_MaskedRead( wakeupSystemEvents );
+        if(events)
+        {
+            return events;
+        }
+
+        if(expireTimeInTicks <= HAL_Time_CurrentTime())
+        {
+            break;
+        }
+
+        // first check and possibly run any continuations
+        // but only if we have slept after stalling
+        if(runContinuations && !SystemState_QueryNoLock(SYSTEM_STATE_NO_CONTINUATIONS))
+        {
+            // if we stall on time, don't check again until after we sleep
+            runContinuations = HAL_CONTINUATION::Dequeue_And_Execute();
+        }
+        else
+        {
+            // try stalled continuations again after sleeping
+            runContinuations = true;
+
+            HAL_COMPLETION::WaitForInterrupts(expireTimeInTicks, powerLevel, wakeupSystemEvents );          
+        }
+
+        // no events, pass control to the OS
+        osThreadYield();
     }
 
-    return systemEvents;
+    return 0;
 }
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
-    NATIVE_PROFILE_PAL_EVENTS();
+    (void)category;
+    (void)subCategory;
+    (void)data1;
+    (void)data2;
 
-    // TODO: not sure if this is really needed here... just kept it for further investigation
-    // switch(category)
-    // {
-    //     //case EVENT_GESTURE:
-    //     case EVENT_TOUCH:
-    //         break;
-    //     default:
-    //         break;
-    // }
+    NATIVE_PROFILE_PAL_EVENTS();
 }

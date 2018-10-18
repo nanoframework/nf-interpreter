@@ -37,13 +37,10 @@ HRESULT CLR_HW_Hardware::Hardware_Initialize()
         m_interruptData.m_queuedInterrupts = 0;
 
         m_DebuggerEventsMask  = 0;
-        m_MessagingEventsMask = 0;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         m_DebuggerEventsMask |= ExtractEventFromTransport( HalSystemConfig.DebuggerPort );
 #endif
-
-        m_MessagingEventsMask |= ExtractEventFromTransport( HalSystemConfig.MessagingPort );
 
         m_wakeupEvents = c_Default_WakeupEvents | m_DebuggerEventsMask;
         m_powerLevel   = PowerLevel__Active;
@@ -105,16 +102,11 @@ void CLR_HW_Hardware::ProcessActivity()
     uint32_t events    = ::Events_Get( m_wakeupEvents );    
     uint32_t eventsCLR = 0;
 
-    if(events & m_MessagingEventsMask)
-    {
-        //msg.ProcessCommands();
-    }
-
     if(events & m_DebuggerEventsMask)
     {
         //dbg.ProcessCommands();
 
-#if defined(PLATFORM_ARM)
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
         if(CLR_EE_DBG_IS(RebootPending))
         {
 #if !defined(BUILD_RTM)
@@ -129,15 +121,15 @@ void CLR_HW_Hardware::ProcessActivity()
 #endif
     }
 
-    if( events & (SYSTEM_EVENT_FLAG_COM_IN | SYSTEM_EVENT_FLAG_COM_OUT) )
+    if(events & SYSTEM_EVENT_FLAG_COM_IN)
     {
-        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_SerialPort;
+        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_SerialPortIn;
     }
 
-    // UNDONE: FIXME: if(events & SYSTEM_EVENT_I2C_XACTION)
-    //{
-    //    eventsCLR |= CLR_RT_ExecutionEngine::c_Event_I2C;
-    //}
+    if(events & SYSTEM_EVENT_FLAG_COM_OUT)
+    {
+        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_SerialPortOut;
+    }
 
     if((events & SYSTEM_EVENT_HW_INTERRUPT)
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -150,56 +142,24 @@ void CLR_HW_Hardware::ProcessActivity()
 
     if(events & SYSTEM_EVENT_FLAG_SOCKET)
     {
-        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_Socket;
+         eventsCLR |= CLR_RT_ExecutionEngine::c_Event_Socket;
     }
 
-    if(events & SYSTEM_EVENT_FLAG_IO)
+    if(events & SYSTEM_EVENT_FLAG_SPI_MASTER)
     {
-        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_IO;
+        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_SpiMaster;
     }
 
-    // UNDONE: FIXME: if(events & SYSTEM_EVENT_FLAG_CHARGER_CHANGE)
-    //{
-    //    static unsigned int lastStatus;
-    //    unsigned int        status;
-
-    //    if(::Charger_Status( status ))
-    //    {
-    //        status &= CHARGER_STATUS_ON_AC_POWER;
-
-    //        if(lastStatus != status)
-    //        {
-    //            lastStatus = status;
-
-    //            eventsCLR |= CLR_RT_ExecutionEngine::c_Event_Battery;
-    //        }
-    //    }
-    //}
+    if(events & SYSTEM_EVENT_FLAG_I2C_MASTER)
+    {
+        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_I2cMaster;
+    }
 
     if(eventsCLR)
     {
         g_CLR_RT_ExecutionEngine.SignalEvents( eventsCLR );
     }
 }
-
-//--//
-
-// UNDONE: FIXME: void CLR_HW_Hardware::Screen_Flush( CLR_GFX_Bitmap& bitmap, CLR_UINT16 x, CLR_UINT16 y, CLR_UINT16 width, CLR_UINT16 height )
-//{
-//    NATIVE_PROFILE_CLR_HARDWARE();
-//    CLR_INT32 widthMax  = LCD_SCREEN_WIDTH;
-//    CLR_INT32 heightMax = LCD_SCREEN_HEIGHT;
-//
-//    if((CLR_UINT32)(x + width)  > bitmap.m_bm.m_width ) width  = bitmap.m_bm.m_width  - x;
-//    if((CLR_UINT32)(y + height) > bitmap.m_bm.m_height) height = bitmap.m_bm.m_height - y;    
-//
-//    if(bitmap.m_bm.m_width                 != widthMax                              ) return;
-//    if(bitmap.m_bm.m_height                != heightMax                             ) return;
-//    if(bitmap.m_bm.m_bitsPerPixel          != CLR_GFX_BitmapDescription::c_NativeBpp) return;
-//    if(bitmap.m_palBitmap.transparentColor != PAL_GFX_Bitmap::c_InvalidColor        ) return;
-//
-//    LCD_BitBltEx( x, y, width, height, bitmap.m_palBitmap.data );
-//}
 
 //--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 

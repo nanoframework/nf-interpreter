@@ -9,7 +9,7 @@
 
 # check if the series name is supported 
 
-set(CHIBIOS_SUPPORTED_SERIES "STM32F0xx" "STM32F4xx" "STM32F7xx" CACHE INTERNAL "supported series names for ChibiOS")
+set(CHIBIOS_SUPPORTED_SERIES "STM32L0xx" "STM32F0xx" "STM32F4xx" "STM32F7xx" "STM32H7xx" CACHE INTERNAL "supported series names for ChibiOS")
 list(FIND CHIBIOS_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 if(TARGET_SERIES_NAME_INDEX EQUAL -1)
     message(FATAL_ERROR "\n\nSorry but ${TARGET_SERIES} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
@@ -60,6 +60,7 @@ set(CHIBIOS_SRCS
     
     hal_adc.c
     hal_can.c
+    hal_crypto.c
     hal_dac.c
     hal_ext.c
     hal_gpt.c
@@ -70,6 +71,7 @@ set(CHIBIOS_SRCS
     hal_mmc_spi.c
     hal_pal.c
     hal_pwm.c
+    hal_qspi.c
     hal_rtc.c
     hal_sdc.c
     hal_serial.c
@@ -85,6 +87,7 @@ set(CHIBIOS_SRCS
     # RT
     chsys.c
     chdebug.c
+    chtrace.c
     chvt.c
     chschd.c
     chthreads.c
@@ -102,6 +105,7 @@ set(CHIBIOS_SRCS
     chmboxes.c
     chmemcore.c
     chmempools.c
+    chfactory.c
 
     # required to use malloc and other newlib stuff
     syscalls.c

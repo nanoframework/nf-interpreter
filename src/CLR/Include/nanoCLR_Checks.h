@@ -8,6 +8,11 @@
 
 #include <nanoCLR_Runtime.h>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 struct CLR_RT_DUMP
 {
 #undef DECL_POSTFIX
@@ -51,7 +56,10 @@ struct CLR_Checks
     static HRESULT VerifyUnsupportedInstruction( CLR_OPCODE op         );
 };
 
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif // _NANOCLR_CHECKS_H_
-

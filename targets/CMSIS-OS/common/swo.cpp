@@ -8,6 +8,10 @@
 
 #include "nanoCLR_Types.h"
 
+#if (__CORTEX_M == 0)
+    #error "ITM port is not available on Cortex-M0(+) cores. Need to set CMake option SWO_OUTPUT to OFF."
+#else
+
 extern "C" void SwoInit()
 {
     // set SWO pin (PB3) to alternate mode (0 == the status after RESET) 
@@ -65,15 +69,39 @@ extern "C" void SwoPrintString(const char *s)
     }
 }
 
-int GenericPort_Write( int portNum, const char* data, size_t size )
+// this function is heavily based in the CMSIS ITM_SendChar 
+// but with small performance improvements as we are sending a string not individual chars
+__STATIC_INLINE uint32_t GenericPort_Write_CMSIS(int portNum, const char* data, size_t size)
 {
-    char* p = (char*)data;
-    int counter = 0;
+    (void)portNum;
 
-    // send characters directly to the trace port
-    while(*p != '\0' || counter < size)
+    char* p = (char*)data;
+    uint32_t counter = 0;
+
+    // check if ITM port is enabled before start sending
+    if (((ITM->TCR & ITM_TCR_ITMENA_Msk) != 0UL) &&      /* ITM enabled */
+        ((ITM->TER & 1UL               ) != 0UL)   )     /* ITM Port #0 enabled */
     {
-        ITM_SendChar( *p++ );
-        counter++;
+        while(*p != '\0' || counter < size)
+        {
+            // wait until TX buffer is available
+            while (ITM->PORT[0U].u32 == 0UL)
+            {
+                __NOP();
+            }
+
+            ITM->PORT[0U].u8 = (uint8_t)*p++;
+
+            counter++;
+        }
     }
+
+    return counter;
 }
+
+uint32_t GenericPort_Write(int portNum, const char* data, size_t size)
+{
+    return GenericPort_Write_CMSIS(portNum, data, size);
+}
+
+#endif // (__CORTEX_M == 0)

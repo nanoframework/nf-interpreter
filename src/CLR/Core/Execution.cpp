@@ -40,10 +40,6 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
     m_maximumTimeToActive = c_MaximumTimeToActive;  // CLR_INT64                           m_maximumTimeToActive
                                                     // int                                 m_iDebugger_Conditions;
                                                     //
-                                                    // CLR_INT64                           m_currentMachineTime;
-                                                    // CLR_INT64                           m_currentLocalTime;
-    // UNDONE: FIXME
-    // m_lastTimeZoneOffset =  Time_GetTimeZoneOffset();// CLR_INT32                           m_lastTimeZoneOffset;
 
                                                     // CLR_INT64                           m_currentNextActivityTime;
     m_timerCache    = false;                        // bool                                m_timerCache;
@@ -75,14 +71,8 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
     m_currentUICulture     = NULL;                  // CLR_RT_HeapBlock*                   m_currentUICulture;
 
-#if defined(CLR_COMPONENTIZATION_USE_HANDLER)
-    Handler_Initialize();
-#else
     CLR_RT_HeapBlock_EndPoint::HandlerMethod_Initialize(); 
     CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_Initialize();
-    // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_Initialize();
-
-#endif
 
     m_interruptThread     = NULL;                   // CLR_RT_Thread                       m_interruptThread;
 
@@ -131,8 +121,6 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
     NANOCLR_CHECK_HRESULT(CLR_RT_AppDomain::CreateInstance( "default", m_appDomainCurrent ));
 #endif
 
-    UpdateTime();
-
     m_startTime = HAL_Time_CurrentTime();
 
     CLR_RT_HeapBlock_WeakReference::RecoverObjects( m_heap );
@@ -164,6 +152,14 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
         CLR_RT_HeapCluster* hc   = (CLR_RT_HeapCluster*)                                 heapFirstFree;
         CLR_UINT32          size =                      (heapFree < c_HeapClusterSize) ? heapFree : c_HeapClusterSize;
 
+#if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
+
+        CLR_Debug::Printf( "Heap Cluster information\r\n");
+        CLR_Debug::Printf( "Start:       %08x\r\n", (size_t)heapFirstFree);
+        CLR_Debug::Printf( "Free:        %08x\r\n", (size_t)heapFree);
+        CLR_Debug::Printf( "Block size:  %d\r\n", sizeof(CLR_RT_HeapBlock));
+
+#endif
         ///
         /// Speed up heap initialization for devices with very large heaps > 1MB
         /// Exponentially increase the size of a default heap block
@@ -246,13 +242,8 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_globalLock = NULL;
 #endif
 
-#if defined(CLR_COMPONENTIZATION_USE_HANDLER)
-    Handler_CleanUp();
-#else
     CLR_RT_HeapBlock_EndPoint::HandlerMethod_CleanUp(); 
     CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp();
-    // UNDONE: FIXME: CLR_RT_HeapBlock_I2CXAction::HandlerMethod_CleanUp();
-#endif
 
     m_interruptThread = NULL;    
 
@@ -274,14 +265,6 @@ HRESULT CLR_RT_ExecutionEngine::StartHardware()
 void CLR_RT_ExecutionEngine::Reboot( bool fHard )
 {
     NATIVE_PROFILE_CLR_CORE();
-    
-    // UNDONE: FIXME
-    // ::Watchdog_GetSetEnabled( false, true );
-
-    // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Flush();
-    //g_CLR_RT_Persistence_Manager.m_state = CLR_RT_Persistence_Manager::STATE_FlushNextObject;
-    //g_CLR_RT_Persistence_Manager.m_pending_object = NULL;
-    //g_CLR_RT_Persistence_Manager.Flush();
 
     if(fHard)
     {
@@ -289,7 +272,7 @@ void CLR_RT_ExecutionEngine::Reboot( bool fHard )
     }
     else
     {
-        CLR_EE_REBOOT_SET(ClrOnly);
+        CLR_EE_REBOOT_CLR;
         CLR_EE_DBG_SET(RebootPending);
     }
 }
@@ -414,14 +397,12 @@ void CLR_RT_ExecutionEngine::Relocate()
 
 #if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_globalLock           );
-    CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_outOfMemoryException );
+    //CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_outOfMemoryException );
 #endif
 
     CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_currentUICulture     );
 
     m_weakReferences.Relocate();
-
-    // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Relocate();
 }
 
 //--//
@@ -603,7 +584,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
     NANOCLR_CHECK_HRESULT(WaitForDebugger());
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-    CLR_EE_DBG_SET_MASK(State_ProgramRunning,State_Mask);
+    CLR_EE_DBG_SET_MASK(StateProgramRunning,StateMask);
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
  
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( ref, g_CLR_RT_TypeSystem.m_entryPoint, NULL ));
@@ -622,13 +603,15 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
             //Main entrypoint takes an optional String[] parameter.
             //Set the arg to NULL, if that's the case.
 
-#if defined(WIN32)
+  #if defined(WIN32)
             if(entryPointArgs != NULL)
             {
                 NANOCLR_CHECK_HRESULT(CreateEntryPointArgs( stack->m_arguments[ 0 ], entryPointArgs ));
             }
             else
-#endif
+  #else
+            (void)entryPointArgs;
+  #endif
             {
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( stack->m_arguments[ 0 ], 0, g_CLR_RT_WellKnownTypes.m_String ));
             }
@@ -711,8 +694,6 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
     g_CLR_PRF_Profiler.Stream_Flush();
 #endif
 
-    // UNDONE: FIXME: g_CLR_RT_Persistence_Manager.Flush();
-
 #if defined(WIN32)
 #if defined(NANOCLR_PROFILE_NEW)
     if(CLR_EE_PRF_IS( Enabled ))
@@ -769,6 +750,8 @@ void CLR_RT_ExecutionEngine::SpawnTimer()
 
 void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback( void* arg )
 {
+    (void)arg;
+
     NATIVE_PROFILE_CLR_CORE();
     g_CLR_RT_ExecutionEngine.SpawnStaticConstructor( g_CLR_RT_ExecutionEngine.m_cctorThread );
 }
@@ -983,6 +966,8 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
 
 void CLR_RT_ExecutionEngine::FinalizerTerminationCallback(void* arg)
 {
+    (void)arg;
+
     NATIVE_PROFILE_CLR_CORE();
     g_CLR_RT_ExecutionEngine.SpawnFinalizer();
 }
@@ -1201,8 +1186,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
         }
 
-        // UNDONE: FIXME
-        // ::Watchdog_ResetCounter();
+        Watchdog_Reset();
 
         {
             // Runs the tread until expiration of its quantum or until thread is blocked.
@@ -1226,17 +1210,11 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             }
         }
 
-        // UNDONE: FIXME
-        // ::Watchdog_ResetCounter();
+        Watchdog_Reset();
 
         PutInProperList( th );
-        
-        UpdateTime();
 
         (void)ProcessTimer();
-
-        // relinquish execution to OS
-        NANOCLR_RELINQUISHEXECUTIONCONTROL();
     }
 
     NANOCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);
@@ -1266,8 +1244,6 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
 CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity()
 {
     NATIVE_PROFILE_CLR_CORE();
-
-    UpdateTime();
 
     CLR_INT64 timeoutMin = ProcessTimer();
 
@@ -1940,12 +1916,9 @@ HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CL
             {
                 CLR_RT_HeapBlock_WeakReference* weakref;
 
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_WeakReference::CreateInstance( weakref ));
-
-                if(inst.m_data == g_CLR_RT_WellKnownTypes.m_ExtendedWeakReference.m_data)
-                {
-                    weakref->m_identity.m_flags |= CLR_RT_HeapBlock_WeakReference::WR_ExtendedType;
-                }
+                // this used to be a call to CLR_RT_HeapBlock_WeakReference::CreateInstance                
+                weakref = (CLR_RT_HeapBlock_WeakReference*)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects( DATATYPE_WEAKCLASS, CLR_RT_HeapBlock::HB_InitializeToZero, sizeof(*weakref) );
+                CHECK_ALLOCATION(weakref);
 
                 reference.SetObjectReference( weakref );
             }
@@ -2283,6 +2256,10 @@ CLR_RT_HeapBlock_Lock* CLR_RT_ExecutionEngine::FindLockObject( CLR_RT_HeapBlock&
                 case DATATYPE_VALUETYPE:
                 case DATATYPE_CLASS    :
                     return ptr->ObjectLock();
+
+                default:
+                    // the remaining data types aren't to be handled
+                    break;  
             }
         }
     }
@@ -2334,8 +2311,7 @@ void CLR_RT_ExecutionEngine::DeleteLockRequests( CLR_RT_Thread* thTarget, CLR_RT
 void CLR_RT_ExecutionEngine::ProcessHardware()
 {
     NATIVE_PROFILE_CLR_CORE();
-    // UNDONE: FIXME
-    // ::Watchdog_ResetCounter();
+    Watchdog_Reset();
 
     g_CLR_HW_Hardware.ProcessActivity();
 }
@@ -2369,9 +2345,9 @@ CLR_INT64 CLR_RT_ExecutionEngine::ProcessTimer()
     }
     else
     {
-        if(m_timerCache && m_timerCacheNextTimeout > m_currentMachineTime)
+        if(m_timerCache && m_timerCacheNextTimeout > HAL_Time_CurrentTime())
         {
-            timeoutMin = m_timerCacheNextTimeout - m_currentMachineTime;
+            timeoutMin = m_timerCacheNextTimeout - HAL_Time_CurrentTime();
         }
         //else
         {
@@ -2380,8 +2356,8 @@ CLR_INT64 CLR_RT_ExecutionEngine::ProcessTimer()
             CheckThreads( timeoutMin, m_threadsReady   );
             CheckThreads( timeoutMin, m_threadsWaiting );
 
-            m_timerCacheNextTimeout = timeoutMin + m_currentMachineTime;
-            m_timerCache            = (m_timerCacheNextTimeout > m_currentMachineTime);
+            m_timerCacheNextTimeout = timeoutMin + HAL_Time_CurrentTime();
+            m_timerCache            = (m_timerCacheNextTimeout > HAL_Time_CurrentTime());
         
         }
     }
@@ -2400,9 +2376,7 @@ void CLR_RT_ExecutionEngine::ProcessTimeEvent( CLR_UINT32 event )
     NATIVE_PROFILE_CLR_CORE();
     SYSTEMTIME systemTime;
 
-    // UNDO FORCE UpdateTime();
-
-    HAL_Time_ToSystemTime( m_currentLocalTime, &systemTime );
+    HAL_Time_ToSystemTime( HAL_Time_CurrentTime(), &systemTime );
 
     NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
     {
@@ -2434,14 +2408,13 @@ void CLR_RT_ExecutionEngine::InvalidateTimerCache()
 
 //--//--//
 
-bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin, bool fAbsolute )
+bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_INT64 cmp = (fAbsolute ? m_currentLocalTime : m_currentMachineTime);
 
-    if(timeExpire <= cmp) return true;
+    if(timeExpire <= (CLR_INT64)HAL_Time_CurrentTime()) return true;
 
-    CLR_INT64 diff = timeExpire - cmp;
+    CLR_INT64 diff = timeExpire - HAL_Time_CurrentTime();
 
     if(diff < timeoutMin)
     {
@@ -2475,11 +2448,12 @@ void CLR_RT_ExecutionEngine::CheckTimers( CLR_INT64& timeoutMin )
         if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
         {
             CLR_INT64 expire = timer->m_timeExpire;
-            if(IsTimeExpired( expire, timeoutMin, (timer->m_flags & CLR_RT_HeapBlock_Timer::c_AbsoluteTimer) != 0 ))
+            if(IsTimeExpired( expire, timeoutMin ))
             {
-#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+                
+          #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                 if(CLR_EE_DBG_IS_NOT( PauseTimers ))
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+          #endif
                 {
                     timer->Trigger();
                     fAnyTimersExpired = true;
@@ -2515,7 +2489,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         // Check events.
         //
         expire = th->m_waitForEvents_Timeout;
-        if(IsTimeExpired( expire, timeoutMin, false ))
+        if(IsTimeExpired( expire, timeoutMin ))
         {
             th->m_waitForEvents_Timeout = TIMEOUT_INFINITE;
 
@@ -2531,7 +2505,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
 
             if(wait)
             {
-                if(IsTimeExpired( wait->m_timeExpire, timeoutMin, false ))
+                if(IsTimeExpired( wait->m_timeExpire, timeoutMin ))
                 {
                     th->m_waitForObject_Result = CLR_RT_Thread::TH_WAIT_RESULT_TIMEOUT;
         
@@ -2547,7 +2521,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         {
             NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest,req,lock->m_requests)
             {
-                if(IsTimeExpired( req->m_timeExpire, timeoutMin, false ))
+                if(IsTimeExpired( req->m_timeExpire, timeoutMin ))
                 {
                     CLR_RT_SubThread* sth = req->m_subthreadWaiting;
 
@@ -2567,7 +2541,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         {
             if(sth->m_timeConstraint != TIMEOUT_INFINITE)
             {
-                if(IsTimeExpired( s_compensation.Adjust( sth->m_timeConstraint ), timeoutMin, false ))
+                if(IsTimeExpired( s_compensation.Adjust( sth->m_timeConstraint ), timeoutMin ))
                 {
                     (void)Library_corlib_native_System_Exception::CreateInstance( th->m_currentException, g_CLR_RT_WellKnownTypes.m_ConstraintException, S_OK, th->CurrentFrame() );
 
@@ -2666,7 +2640,7 @@ HRESULT CLR_RT_ExecutionEngine::WaitEvents( CLR_RT_Thread* caller, const CLR_INT
     {
         fSuccess = false;
 
-        if(HAL_Time_CurrentTime() < timeExpire)
+        if((CLR_INT64)HAL_Time_CurrentTime() < timeExpire)
         {
             caller->m_waitForEvents         = events;
             caller->m_waitForEvents_Timeout = timeExpire; CLR_RT_ExecutionEngine::InvalidateTimerCache();
@@ -2880,7 +2854,12 @@ HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, const CLR_IN
 
     if(timeout < 0)
     {
-        if(timeout != -1L)
+        // because we are expecting the timeout value to be in ticks
+        // need to check for two possible infinite timeouts:
+        // 1. when coding in native it's supposed to use -1L as a timeout infinite
+        // 2. in managed code the constant System.Threading.Timeout.Infinite is -1 milliseconds, therefore needs to be converted to ticks
+        if( (timeout != -1L) &&
+            (timeout != -1L * TIME_CONVERSION__TO_MILLISECONDS))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         }
@@ -2926,10 +2905,7 @@ void CLR_RT_ExecutionEngine::DebuggerLoop()
     NATIVE_PROFILE_CLR_CORE();
     ProcessHardware();
 
-    UpdateTime();
-
-    // relinquish execution to OS
-    NANOCLR_RELINQUISHEXECUTIONCONTROL();
+    WaitSystemEvents(SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, TIME_CONVERSION__TO_MILLISECONDS * 100 );
 }
 
 
@@ -3003,7 +2979,6 @@ void CLR_RT_ExecutionEngine::StopOnBreakpoint( CLR_DBG_Commands::Debugging_Execu
             bp = def;
 
             CLR_EE_DBG_SET(Stopped);
-            // UNDONE: FIXME: CLR_RT_EmulatorHooks::Notify_ExecutionStateChanged();
             
             if(th)
             {
@@ -3075,7 +3050,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_System_Event( CLR_DBG_Commands::Debuggin
             th = stack->m_owningThread;
         }
 
-        if(th == NULL || def.m_pid == th->m_pid || def.m_pid == CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_PID_ANY)
+        if(th == NULL || (def.m_pid == th->m_pid) || def.m_pid == CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_PID_ANY)
         {
             if(def.m_flags & event)
             {
@@ -3159,7 +3134,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare( CLR_RT_DblLinkedList& t
                     }
                 }
             }
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
             if(call->m_inlineFrame)
             {
                 if(call->m_inlineFrame->m_frame.m_call.DebuggingInfo().HasBreakpoint())
@@ -3525,39 +3500,6 @@ HRESULT CLR_RT_ExecutionEngine::UnloadAppDomain( CLR_RT_AppDomain* appDomain, CL
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CLR_RT_ExecutionEngine::UpdateTime()
-{
-    NATIVE_PROFILE_CLR_CORE();
-        
-    m_currentMachineTime = HAL_Time_CurrentTime();
-    // FIXME time is now UTC...
-    m_currentLocalTime = HAL_Time_CurrentTime();
-
-    /// Did timezone or daylight offset got adjusted? If yes make some adjustments in timers too.
-    CLR_INT32 timeZoneOffset = 0;//// FIXME time is now UTC...Time_GetTimeZoneOffset();
-
-    if(timeZoneOffset != m_lastTimeZoneOffset)
-    {
-        SYSTEMTIME systemTime;
-    
-        m_lastTimeZoneOffset = timeZoneOffset;
-        HAL_Time_ToSystemTime( m_currentLocalTime, &systemTime );
-    
-        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
-        {
-            if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
-            {
-                if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_AnyChange)
-                {
-                    timer->AdjustNextFixedExpire( systemTime, false );
-                }
-            }
-        }
-        NANOCLR_FOREACH_NODE_END();
-    }
-    
-}
-
 CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -3565,7 +3507,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
     
     CLR_UINT32 res = 0;
 
-    m_currentNextActivityTime = timeExpire + m_currentMachineTime;
+    m_currentNextActivityTime = timeExpire + HAL_Time_CurrentTime();
 
     timeout = (CLR_INT32)timeExpire / TIME_CONVERSION__TO_MILLISECONDS;
 
@@ -3575,7 +3517,6 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
     CLR_INT64 start = HAL_Time_CurrentTime();
 #endif
 
-//#define NANOCLR_STRESS_GC
 #if defined(NANOCLR_STRESS_GC)
     if(timeout > 100)
     {
@@ -3592,9 +3533,14 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
 
     // UNDONE: FIXME
     // ::Watchdog_GetSetEnabled( bool, bool );
+    // TODO check if the watchdog needs to be feed here... don't think so
+    Watchdog_Reset();
+
     res = ::Events_WaitForEvents( powerLevel, events, timeout );
     // UNDONE: FIXME
     // ::Watchdog_GetSetEnabled( bool, bool );
+    // TODO check if the watchdog needs to be feed here... don't think so
+    Watchdog_Reset();
 
 
 #if defined(NANOCLR_TRACE_SYSTEMEVENTWAIT)

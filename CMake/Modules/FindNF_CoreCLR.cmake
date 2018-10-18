@@ -20,6 +20,7 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${PROJECT_SOURCE_DIR}/src/CLR/Startup)
 # others
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Debugger)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf)
 
 
 # source files for nanoFramework Core, CoreLib and CLR startup
@@ -58,6 +59,7 @@ set(NF_CoreCLR_SRCS
     GarbageCollector.cpp
     GarbageCollector_Compaction.cpp
     GarbageCollector_ComputeReachabilityGraph.cpp
+    GarbageCollector_Info.cpp
     Interpreter.cpp
     Random.cpp
     Streams.cpp
@@ -127,15 +129,20 @@ set(NF_CoreCLR_SRCS
     # CLR startup
     CLRStartup.cpp
 
+    # Messaging
+    Messaging.cpp
+
     # Runtime.Native
     nf_rt_native.cpp
     nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Debug.cpp
     nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_Power.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_ResourceUtility.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp
     
     # Core stubs
     Hardware_stub.cpp
-    Heap_Persistence_stub.cpp
     InterruptHandler_stub.cpp
     NativeEventDispatcher_stub.cpp
     RPC_stub.cpp
@@ -146,18 +153,33 @@ set(NF_CoreCLR_SRCS
     Diagnostics_stub.cpp
     Messaging_stub.cpp
     
+    # Helpers
+    printf.c
+
     # HAL
     nanoHAL_Time.cpp
+    nanoHAL_Watchdog.c
 
     # PAL
     nanoPAL_BlockStorage.c
     nanoPAL_NativeDouble.cpp
+    nanoPAL_Network_stubs.cpp
+    nanoPAL_PerformanceCounters_stubs.cpp
 
     # PAL stubs
     Async_stubs.cpp
     COM_stubs.c
     GenericPort_stubs.c
 )
+
+# include configuration manager file
+if(NF_FEATURE_HAS_CONFIG_BLOCK)
+    # feature enabled, full support
+    list(APPEND NF_CoreCLR_SRCS nanoHAL_ConfigurationManager.c)
+else()
+    # feature disabled, stubs only
+    list(APPEND NF_CoreCLR_SRCS nanoHAL_ConfigurationManager_stubs.c)
+endif()
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
     set(NF_CoreCLR_SRC_FILE SRC_FILE-NOTFOUND)
@@ -178,7 +200,6 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
 
             # Core stubs
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/Hardware
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/HeapPersistence
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/InterruptHandler
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/RPC
@@ -189,6 +210,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics
             ${PROJECT_SOURCE_DIR}/src/CLR/Messaging
             
+            # Helpers
+            ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf
+
             # HAL
             ${PROJECT_SOURCE_DIR}/src/HAL
 
@@ -200,6 +224,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             # PAL stubs
             ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall
             ${PROJECT_SOURCE_DIR}/src/PAL/COM
+            ${PROJECT_SOURCE_DIR}/src/PAL/Profiler
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

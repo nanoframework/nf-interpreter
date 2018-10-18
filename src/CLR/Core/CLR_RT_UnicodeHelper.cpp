@@ -122,6 +122,16 @@ int CLR_RT_UnicodeHelper::CountNumberOfBytes( int max )
 
 //--//
 
+// dev note: need the pragma bellow because there are a couple of 'smart' hacks in	
+// the switch cases to improve the algorithm	
+#ifdef __GNUC__	
+#pragma GCC diagnostic push
+// the GCC compiler for ESP32 doesn't know the -Wimplicit-fallthrough option
+#ifndef PLATFORM_ESP32
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
+#endif
+
 bool CLR_RT_UnicodeHelper::ConvertFromUTF8( int iMaxChars, bool fJustMove, int iMaxBytes )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -143,153 +153,153 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8( int iMaxChars, bool fJustMove, int i
 
         switch(ch & 0xF0)
         {
-        case 0x00: if(ch == 0) { inputUTF8--; goto ExitFalse; }
-        case 0x10:
-        case 0x20:
-        case 0x30:
-        case 0x40:
-        case 0x50:
-        case 0x60:
-        case 0x70:
-            if(fJustMove == false)
-            {
-                if(outputUTF16_size < 1)
+            case 0x00: if(ch == 0) { inputUTF8--; goto ExitFalse; }
+            case 0x10:
+            case 0x20:
+            case 0x30:
+            case 0x40:
+            case 0x50:
+            case 0x60:
+            case 0x70:
+                if(fJustMove == false)
+                {
+                    if(outputUTF16_size < 1)
+                    {
+                        // un-read the byte before exiting
+                        inputUTF8--;
+                        goto ExitFalse;
+                    }
+
+                    outputUTF16[ 0 ] = ch;
+
+                    outputUTF16      += 1;
+                    outputUTF16_size -= 1;
+                }
+
+                iMaxChars -= 1;
+                iMaxBytes -= 1;
+                break;
+
+            case 0x80:
+            case 0x90:
+            case 0xA0:
+            case 0xB0:
+                goto ExitFalse; // Illegal characters.
+
+            case 0xC0:
+            case 0xD0:
+                if((ch & 0xFF) < 0xC2) { inputUTF8--; goto ExitFalse; } // illegal - overlong encoding
+
+                if(iMaxBytes >= 2)
+                {
+                    if(fJustMove)
+                    {
+                        inputUTF8++;
+                    }
+                    else
+                    {
+                        if(outputUTF16_size < 1)
+                        {
+                            // un-read the byte before exiting
+                            inputUTF8--;
+                            goto ExitFalse;
+                        }
+                        ch2 = (ch & 0x1F);
+                        UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
+
+                        outputUTF16[ 0 ] = ch2;
+
+                        outputUTF16      += 1;
+                        outputUTF16_size -= 1;
+                    }
+
+                    iMaxChars -= 1;
+                    iMaxBytes -= 2;
+                }
+                else
                 {
                     // un-read the byte before exiting
                     inputUTF8--;
                     goto ExitFalse;
                 }
+                break;
 
-                outputUTF16[ 0 ] = ch;
-
-                outputUTF16      += 1;
-                outputUTF16_size -= 1;
-            }
-
-            iMaxChars -= 1;
-            iMaxBytes -= 1;
-            break;
-
-        case 0x80:
-        case 0x90:
-        case 0xA0:
-        case 0xB0:
-            goto ExitFalse; // Illegal characters.
-
-        case 0xC0:
-        case 0xD0:
-            if((ch & 0xFF) < 0xC2) { inputUTF8--; goto ExitFalse; } // illegal - overlong encoding
-
-            if(iMaxBytes >= 2)
-            {
-                if(fJustMove)
+            case 0xE0:
+                if(iMaxBytes >= 3)
                 {
-                    inputUTF8++;
+                    if(fJustMove)
+                    {
+                        inputUTF8 += 2;
+                    }
+                    else
+                    {
+                        if(outputUTF16_size < 1)
+                        {
+                            // un-read the byte before exiting
+                            inputUTF8--;
+                            goto ExitFalse;
+                        }
+                        ch2 = (ch & 0x0F);
+                        UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
+                        UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
+
+                        outputUTF16[ 0 ] = ch2;
+
+                        outputUTF16      += 1;
+                        outputUTF16_size -= 1;
+                    }
+
+                    iMaxChars -= 1;
+                    iMaxBytes -= 3;
                 }
                 else
                 {
-                    if(outputUTF16_size < 1)
-                    {
-                        // un-read the byte before exiting
-                        inputUTF8--;
-                        goto ExitFalse;
-                    }
-                    ch2 = (ch & 0x1F);
-                    UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
-
-                    outputUTF16[ 0 ] = ch2;
-
-                    outputUTF16      += 1;
-                    outputUTF16_size -= 1;
+                    // un-read the byte before exiting
+                    inputUTF8--;
+                    goto ExitFalse;
                 }
+                break;
 
-                iMaxChars -= 1;
-                iMaxBytes -= 2;
-            }
-            else
-            {
-                // un-read the byte before exiting
-                inputUTF8--;
-                goto ExitFalse;
-            }
-            break;
+            case 0xF0:
+                if((ch & 0xFF) >= 0xF5) { inputUTF8--; goto ExitFalse; } // restricted by RFC 3629
 
-        case 0xE0:
-            if(iMaxBytes >= 3)
-            {
-                if(fJustMove)
+                if(iMaxBytes >= 4)
                 {
-                    inputUTF8 += 2;
+                    if(fJustMove)
+                    {
+                        inputUTF8 += 3;
+                    }
+                    else
+                    {
+                        if(outputUTF16_size < 2)
+                        {
+                            // un-read the byte before exiting
+                            inputUTF8--;
+                            goto ExitFalse;
+                        }
+
+                        ch2 = (ch & 0x07);
+                        UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
+                        UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
+                        UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
+
+                        outputUTF16[ 0 ] = (ch2 >> SURROGATE_HALFSHIFT) + HIGH_SURROGATE_START;
+                        outputUTF16[ 1 ] = (ch2 &  SURROGATE_HALFMASK ) + LOW_SURROGATE_START ;
+
+                        outputUTF16      += 2;
+                        outputUTF16_size -= 2;
+                    }
+
+                    iMaxChars -= 2;
+                    iMaxBytes -= 4;
                 }
                 else
                 {
-                    if(outputUTF16_size < 1)
-                    {
-                        // un-read the byte before exiting
-                        inputUTF8--;
-                        goto ExitFalse;
-                    }
-                    ch2 = (ch & 0x0F);
-                    UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
-                    UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
-
-                    outputUTF16[ 0 ] = ch2;
-
-                    outputUTF16      += 1;
-                    outputUTF16_size -= 1;
+                    // un-read the byte before exiting
+                    inputUTF8--;
+                    goto ExitFalse;
                 }
-
-                iMaxChars -= 1;
-                iMaxBytes -= 3;
-            }
-            else
-            {
-                // un-read the byte before exiting
-                inputUTF8--;
-                goto ExitFalse;
-            }
-            break;
-
-        case 0xF0:
-            if((ch & 0xFF) >= 0xF5) { inputUTF8--; goto ExitFalse; } // restricted by RFC 3629
-
-            if(iMaxBytes >= 4)
-            {
-                if(fJustMove)
-                {
-                    inputUTF8 += 3;
-                }
-                else
-                {
-                    if(outputUTF16_size < 2)
-                    {
-                        // un-read the byte before exiting
-                        inputUTF8--;
-                        goto ExitFalse;
-                    }
-
-                    ch2 = (ch & 0x07);
-                    UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
-                    UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
-                    UTF8_LOAD_LOWPART(ch,ch2,inputUTF8);
-
-                    outputUTF16[ 0 ] = (ch2 >> SURROGATE_HALFSHIFT) + HIGH_SURROGATE_START;
-                    outputUTF16[ 1 ] = (ch2 &  SURROGATE_HALFMASK ) + LOW_SURROGATE_START ;
-
-                    outputUTF16      += 2;
-                    outputUTF16_size -= 2;
-                }
-
-                iMaxChars -= 2;
-                iMaxBytes -= 4;
-            }
-            else
-            {
-                // un-read the byte before exiting
-                inputUTF8--;
-                goto ExitFalse;
-            }
-            break;
+                break;
         }
     }
 
@@ -303,15 +313,52 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8( int iMaxChars, bool fJustMove, int i
     res = true;
     goto Exit;
 
-ExitFalse:
+  ExitFalse:
     res = false;
 
-Exit:
+  Exit:
     m_inputUTF8        = inputUTF8;
     m_outputUTF16      = outputUTF16;
     m_outputUTF16_size = outputUTF16_size;
 
     return res;
+}
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
+// move backward in the UTF8 input
+bool CLR_RT_UnicodeHelper::MoveBackwardInUTF8( const char* utf8StringStart, int iMaxChars )
+{
+    // already at the beginning or iMaxChars < 1?
+    if (m_inputUTF8 <= (const CLR_UINT8*)utf8StringStart || iMaxChars < 1)
+    {
+        return false;
+    }
+    
+    while (true)
+    {
+        // move back one byte and test if it's 0xxxxxxx or 11xxxxxx, because that are start bytes
+        m_inputUTF8--;
+        char current = m_inputUTF8[0];
+        if ((current & 0x10000000) == 0x00000000 || (current & 0x11000000) == 0x11000000)
+        {
+            iMaxChars--;
+        }
+        
+        // moved back enough?
+        if (iMaxChars == 0)
+        {
+            return true;
+        }
+        
+        // reached the beginning?
+        if (m_inputUTF8 == (const CLR_UINT8*)utf8StringStart)
+        {
+            return false;
+        }
+    }
 }
 
 bool CLR_RT_UnicodeHelper::ConvertToUTF8( int iMaxChars, bool fJustMove )

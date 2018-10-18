@@ -1,0 +1,69 @@
+{
+    "buildType": {
+      "default": "debug",
+        "choices": { 
+          "debug": {
+            "short": "Debug",
+            "long": "Emit debug information without performing optimizations",
+            "buildType": "Debug"
+          },
+          "release": {
+            "short": "Release",
+            "long": "Enable optimizations, omit debug info",
+            "buildType": "Release"
+          },
+          "minsize": {
+            "short": "MinSizeRel",
+            "long": "Optimize for smallest binary size",
+            "buildType": "MinSizeRel"
+          },
+          "reldeb": {
+            "short": "RelWithDebInfo",
+            "long": "Perform optimizations AND include debugging information",
+            "buildType": "RelWithDebInfo"
+          }    
+        }
+    },
+  
+    "linkage": {
+      "default": "",
+      "choices": {
+  
+        "Esp32_nanoCLR": { 
+        "short": "NanoCLR",
+          "settings": {
+            "BUILD_VERSION" : "0.9.99.999",
+            "TOOLCHAIN_PREFIX" : "<absolute-path-to-the-toolchain-prefix-folder-mind-the-forward-slashes>", 
+            "ESP32_IDF_PATH" : "<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>", 
+            "ESP32_LIBS_PATH" : "<absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>", 
+            "TARGET_SERIES" : "ESP32", 
+            "USE_FPU" : "TRUE",
+            "RTOS" : "FREERTOS",
+            "SWO_OUTPUT" : "OFF",
+            "NF_BUILD_RTM" : "OFF",
+            "NF_WP_TRACE_ERRORS" : "OFF",
+            "NF_WP_TRACE_HEADERS" : "OFF",
+            "NF_WP_TRACE_STATE" : "OFF",
+            "NF_WP_TRACE_NODATA" : "OFF",
+            "NF_WP_TRACE_ALL" : "OFF",
+            "NF_WP_IMPLEMENTS_CRC32" : "OFF",
+            "NF_FEATURE_DEBUGGER" : "ON",
+            "NF_FEATURE_RTC" : "ON",
+            "NF_FEATURE_USE_APPDOMAINS" : "OFF",
+            "NF_FEATURE_USE_FILESYSTEM" : "OFF",
+            "API_System.Net" : "ON",
+            "NF_SECURITY_OPENSSL" : "ON",
+            "API_Windows.Devices.Wifi": "ON",
+            "API_Windows.Devices.Adc" : "ON",
+            "API_Windows.Devices.Gpio" : "ON",
+            "API_Windows.Devices.I2c" : "ON",
+            "API_Windows.Devices.Pwm" : "ON",
+            "API_Windows.Devices.SerialCommunication" : "ON",
+            "API_Windows.Devices.Spi" : "ON",
+            "API_Windows.Networking.Sockets" : "OFF",
+            "API_Hardware.Esp32" : "ON"
+        }
+      }
+    }
+  }
+}

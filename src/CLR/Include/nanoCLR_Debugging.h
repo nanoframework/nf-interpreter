@@ -31,6 +31,8 @@ struct CLR_DBG_Commands
     static const unsigned int c_Monitor_DeploymentMap      = 0x0000000B;
     static const unsigned int c_Monitor_FlashSectorMap     = 0x0000000C;
     static const unsigned int c_Monitor_OemInfo            = 0x0000000E;
+    static const unsigned int c_Monitor_QueryConfiguration = 0x0000000F;
+    static const unsigned int c_Monitor_UpdateConfiguration= 0x00000010;
 
     //--//
 
@@ -62,12 +64,16 @@ struct CLR_DBG_Commands
         };
     };
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.RebootOptions (in managed code) !!! //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
     struct Monitor_Reboot
     {
         static const unsigned int c_NormalReboot    = 0;
         static const unsigned int c_EnterBootloader = 1;
-        static const unsigned int c_ClrRebootOnly   = 2;
-        static const unsigned int c_ClrStopDebugger = 4;
+        static const unsigned int c_ClrOnly   = 2;
+        static const unsigned int c_WaitForDebugger   = 4;
+        static const unsigned int c_NoShutdown = 8;
 
         unsigned int m_flags;
     };
@@ -218,8 +224,8 @@ struct CLR_DBG_Commands
     static const unsigned int c_Debugging_Value_AllocateArray            = 0x0002003A; // Creates a new instance of an array.
     static const unsigned int c_Debugging_Value_Assign                   = 0x0002003B; // Assigns a value to another value.
                                                                  
-    static const unsigned int c_Debugging_TypeSys_Assemblies             = 0x00020040; // Lists all the assemblies in the system.
-    static const unsigned int c_Debugging_TypeSys_AppDomains             = 0x00020044; // Lists all the AppDomans loaded.
+    static const unsigned int c_Debugging_TypeSys_Assemblies                = 0x00020040; // Lists all the assemblies in the system.
+    static const unsigned int c_Debugging_TypeSys_AppDomains                = 0x00020044; // Lists all the AppDomans loaded.
                                                                  
     static const unsigned int c_Debugging_Resolve_Assembly               = 0x00020050; // Resolves an assembly.
     static const unsigned int c_Debugging_Resolve_Type                   = 0x00020051; // Resolves a type to a string.
@@ -239,10 +245,6 @@ struct CLR_DBG_Commands
     static const unsigned int c_Debugging_UpgradeToSsl                   = 0x00020069; //
 
     //--//                                                       
-                                                                 
-    static const unsigned int c_Debugging_Lcd_NewFrame                   = 0x00020070; // Reports a new frame sent to the LCD.
-    static const unsigned int c_Debugging_Lcd_NewFrameData               = 0x00020071; // Reports a new frame sent to the LCD, with its contents.
-    static const unsigned int c_Debugging_Lcd_GetFrame                   = 0x00020072; // Requests the current frame.
                                                                  
     static const unsigned int c_Debugging_Button_Report                  = 0x00020080; // Reports a button press/release.
     static const unsigned int c_Debugging_Button_Inject                  = 0x00020081; // Injects a button press/release.
@@ -265,36 +267,32 @@ struct CLR_DBG_Commands
     struct Debugging_Execution_QueryCLRCapabilities
     {
         static const CLR_UINT32 c_CapabilityFlags             = 1;
-        static const CLR_UINT32 c_CapabilityLCD               = 2;
         static const CLR_UINT32 c_CapabilityVersion           = 3;
         static const CLR_UINT32 c_HalSystemInfo               = 5;
         static const CLR_UINT32 c_ClrInfo                     = 6;
         static const CLR_UINT32 c_TargetReleaseInfo           = 7;
+        static const CLR_UINT32 c_InteropNativeAssemblies     = 8;
 
-        static const CLR_UINT32 c_CapabilityFlags_FloatingPoint         = 0x00000001;
-        static const CLR_UINT32 c_CapabilityFlags_SourceLevelDebugging  = 0x00000002;
-        static const CLR_UINT32 c_CapabilityFlags_AppDomains            = 0x00000004;
-        static const CLR_UINT32 c_CapabilityFlags_ExceptionFilters      = 0x00000008;
-        static const CLR_UINT32 c_CapabilityFlags_IncrementalDeployment = 0x00000010;
-        static const CLR_UINT32 c_CapabilityFlags_SoftReboot            = 0x00000020;
-        static const CLR_UINT32 c_CapabilityFlags_Profiling             = 0x00000040;
-        static const CLR_UINT32 c_CapabilityFlags_Profiling_Allocations = 0x00000080;
-        static const CLR_UINT32 c_CapabilityFlags_Profiling_Calls       = 0x00000100;
-        static const CLR_UINT32 c_CapabilityFlags_ThreadCreateEx        = 0x00000400;
+        static const CLR_UINT32 c_CapabilityFlags_FloatingPoint             = 0x00000001;
+        static const CLR_UINT32 c_CapabilityFlags_SourceLevelDebugging      = 0x00000002;
+        static const CLR_UINT32 c_CapabilityFlags_AppDomains                = 0x00000004;
+        static const CLR_UINT32 c_CapabilityFlags_ExceptionFilters          = 0x00000008;
+        static const CLR_UINT32 c_CapabilityFlags_IncrementalDeployment     = 0x00000010;
+        static const CLR_UINT32 c_CapabilityFlags_SoftReboot                = 0x00000020;
+        static const CLR_UINT32 c_CapabilityFlags_Profiling                 = 0x00000040;
+        static const CLR_UINT32 c_CapabilityFlags_Profiling_Allocations     = 0x00000080;
+        static const CLR_UINT32 c_CapabilityFlags_Profiling_Calls           = 0x00000100;
+        static const CLR_UINT32 c_CapabilityFlags_ThreadCreateEx            = 0x00000400;
+        static const CLR_UINT32 c_CapabilityFlags_ConfigBlockRequiresErase  = 0x00000800;
+        static const CLR_UINT32 c_CapabilityFlags_HasNanoBooter             = 0x00001000;
 
         CLR_UINT32 m_cmd;
 
-        struct LCD
-        {
-            CLR_UINT32 m_width;
-            CLR_UINT32 m_height;
-            CLR_UINT32 m_bpp;
-        };
-
         struct __nfpack SoftwareVersion
         {
-            char m_buildDate[ 22 ];
-            unsigned int m_compilerVersion;
+            char BuildDate[ 22 ];
+            char CompilerInfo[16];
+            unsigned int CompilerVersion;
         };
 
         struct __nfpack ClrInfo
@@ -303,10 +301,17 @@ struct CLR_DBG_Commands
             NFVersion     m_TargetFrameworkVersion;
         };
         
+        struct __nfpack NativeAssemblyDetails
+        {
+            uint32_t CheckSum;
+            NFVersion Version;
+            uint8_t AssemblyName[128];
+
+        };
+
         union ReplyUnion
         {
             CLR_UINT32          u_capsFlags;
-            LCD                 u_LCD;
             SoftwareVersion     u_SoftwareVersion;
             HalSystemInfo       u_HalSystemInfo;
             ClrInfo             u_ClrInfo;
@@ -364,12 +369,12 @@ struct CLR_DBG_Commands
 
     struct Debugging_Execution_ChangeConditions
     {
-        CLR_UINT32 m_set;
-        CLR_UINT32 m_reset;
+        CLR_UINT32 FlagsToSet;
+        CLR_UINT32 FlagsToReset;
 
         struct Reply
         {
-            CLR_UINT32 m_current;
+            CLR_UINT32 CurrentState;
         };
     };
 
@@ -503,7 +508,7 @@ struct CLR_DBG_Commands
 
         static const CLR_UINT16 c_STEP               = c_STEP_IN | c_STEP_OVER | c_STEP_OUT;
 
-        static const CLR_UINT32 c_PID_ANY            = 0xFFFFFFFF;
+        static const CLR_INT32 c_PID_ANY             = 0x7FFFFFFF;
 
         static const CLR_UINT32 c_DEPTH_EXCEPTION_FIRST_CHANCE    = 0x00000000;
         static const CLR_UINT32 c_DEPTH_EXCEPTION_USERS_CHANCE    = 0x00000001;
@@ -523,7 +528,7 @@ struct CLR_DBG_Commands
         CLR_UINT16             m_id;
         CLR_UINT16             m_flags;
 
-        CLR_UINT32             m_pid;
+        CLR_INT32              m_pid;
         CLR_UINT32             m_depth;
 
         //
@@ -1008,7 +1013,6 @@ struct CLR_DBG_Debugger
 
     //--//
 
-    static void Debugger_Discovery();
     static void Debugger_WaitForCommands();
 
     static HRESULT CreateInstance();
@@ -1033,9 +1037,9 @@ private:
     CLR_RT_AppDomain*  GetAppDomainFromID ( CLR_UINT32 id );
 #endif
 
-    CLR_RT_StackFrame* CheckStackFrame    ( CLR_UINT32 pid, CLR_UINT32 depth, bool& isInline                                        );
+    CLR_RT_StackFrame* CheckStackFrame    ( CLR_INT32 pid, CLR_UINT32 depth, bool& isInline                                        );
     HRESULT            CreateListOfThreads(                 CLR_DBG_Commands::Debugging_Thread_List ::Reply*& cmdReply, int& totLen );
-    HRESULT            CreateListOfCalls  ( CLR_UINT32 pid, CLR_DBG_Commands::Debugging_Thread_Stack::Reply*& cmdReply, int& totLen );
+    HRESULT            CreateListOfCalls  ( CLR_INT32 pid, CLR_DBG_Commands::Debugging_Thread_Stack::Reply*& cmdReply, int& totLen );
 
     CLR_RT_Assembly*   IsGoodAssembly( CLR_IDX                       idxAssm                                  );
     bool               CheckTypeDef  ( const CLR_RT_TypeDef_Index&   td     , CLR_RT_TypeDef_Instance&   inst );
@@ -1051,7 +1055,7 @@ private:
 
        
 public:  
-    static CLR_RT_Thread* GetThreadFromPid ( CLR_UINT32 pid );
+    static CLR_RT_Thread* GetThreadFromPid ( CLR_INT32 pid );
 
     static bool Monitor_Ping                            ( WP_Message* msg );
     static bool Monitor_Reboot                          ( WP_Message* msg );
@@ -1065,6 +1069,8 @@ public:
     static bool Monitor_MemoryMap                       ( WP_Message* msg );
     static bool Monitor_FlashSectorMap                  ( WP_Message* msg );
     static bool Monitor_DeploymentMap                   ( WP_Message* msg );
+    static bool Monitor_QueryConfiguration              ( WP_Message* msg );
+    static bool Monitor_UpdateConfiguration             ( WP_Message* msg );
 
                                              
     static bool Debugging_Execution_BasePtr             ( WP_Message* msg );

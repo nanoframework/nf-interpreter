@@ -8,7 +8,6 @@
 #define _NANOPAL_ASYNCPROCCALLS_DECL_H_ 1
 
 #include <nanoWeak.h>
-#include <netmf_errors.h>
 
 //--//
 
@@ -127,7 +126,7 @@ struct HAL_COMPLETION : public HAL_CONTINUATION
 
     static void DequeueAndExec();
 
-    static void WaitForInterrupts( uint64_t expire, uint32_t sleepLevel, uint64_t wakeEvents );
+    static void WaitForInterrupts( uint64_t expireTimeInSysTicks, uint32_t sleepLevel, uint64_t wakeEvents );
 };
 
 //--//

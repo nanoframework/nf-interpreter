@@ -41,6 +41,11 @@ if(USE_NETWORKING_OPTION)
     find_package(CHIBIOS_LWIP REQUIRED)
 endif()
 
+# nF feature: filesystem
+if(USE_FILESYSTEM_OPTION)
+    find_package(CHIBIOS_FATFS REQUIRED)
+endif()
+
 #######################################
 
 
@@ -56,6 +61,9 @@ add_executable(
     ${NANOBOOTER_PROJECT_NAME}.elf
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+
+    # need to add configuration manager to allow get/store configuration blocks
+    "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOBOOTER_PROJECT_SOURCES}
@@ -92,6 +100,8 @@ add_executable(
 
     ${CHIBIOS_SOURCES}
     ${ChibiOSnfOverlay_SOURCES}
+
+    ${WireProtocol_SOURCES}
 
     # sources for nanoFramework libraries
     "${NF_CoreCLR_SOURCES}"
@@ -159,23 +169,26 @@ nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
 nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DRUNTIME_MEMORY_PROFILE__extrasmall=1)
 
-# set linker file
-nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F091xC_booter.ld)
-nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F091xC_CLR.ld)
+# set linker files
+if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F091xC_booter-DEBUG.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F091xC_CLR-DEBUG.ld)
+else()
+    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F091xC_booter.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F091xC_CLR.ld)
+endif()
 
 # set linker options
-# using FPU requires enabling printf with FP support for newlib nano, but just for nanoCLR target, don't need to overload nanoBooter with that
-nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf FALSE)
-nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf TRUE)
+nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # add other linker flags
-###################################################
-# the size of the CLR managed heap is defined here
-###################################################
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x400")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x1800")
+###########################################################
+# the sizes of CRT heap and ChibiOS stacks are defined here
+set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x1000")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x2800")
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)

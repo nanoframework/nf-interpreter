@@ -279,7 +279,7 @@ HRESULT CLR_RT_HeapBlock::Convert_Internal( CLR_DataType et )
 CLR_RT_Thread::UnwindStack* CLR_RT_Thread::PushEH()
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(m_nestedExceptionsPos < ARRAYSIZE(m_nestedExceptions))
+    if(m_nestedExceptionsPos < (int)ARRAYSIZE(m_nestedExceptions))
     {
         memset(&m_nestedExceptions[ m_nestedExceptionsPos ], 0, sizeof(UnwindStack));
         return &m_nestedExceptions[ m_nestedExceptionsPos++ ];
@@ -321,7 +321,7 @@ void CLR_RT_Thread::PopEH_Inner( CLR_RT_StackFrame* stack, CLR_PMETADATA ip )
             //
             if(ip && (us.m_currentBlockStart <= ip && ip < us.m_currentBlockEnd)) break;
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
             if(stack->m_inlineFrame) break;
 #endif
 
@@ -1513,14 +1513,16 @@ Execute_RestartDecoding:
 
                 switch(op)
                 {
-                case CEE_STIND_I  : size = 4; break;
-                case CEE_STIND_I1 : size = 1; break;
-                case CEE_STIND_I2 : size = 2; break;
-                case CEE_STIND_I4 : size = 4; break;
-                case CEE_STIND_I8 : size = 8; break;
-                case CEE_STIND_R4 : size = 4; break;
-                case CEE_STIND_R8 : size = 8; break;
-                case CEE_STIND_REF: size = 0; break;
+                    case CEE_STIND_I  : size = 4; break;
+                    case CEE_STIND_I1 : size = 1; break;
+                    case CEE_STIND_I2 : size = 2; break;
+                    case CEE_STIND_I4 : size = 4; break;
+                    case CEE_STIND_I8 : size = 8; break;
+                    case CEE_STIND_R4 : size = 4; break;
+                    case CEE_STIND_R8 : size = 8; break;
+                    case CEE_STIND_REF: size = 0; break;
+                    // the remaining op codes aren't to be handled
+                    default: break;
                 }
 
                 evalPos[ 2 ].Promote();
@@ -1927,7 +1929,7 @@ Execute_RestartDecoding:
                 else
 #endif //NANOCLR_APPDOMAINS
                 {
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
                     if(stack->PushInline(ip, assm, evalPos, calleeInst, pThis))
                     {
                         fDirty = true;
@@ -1945,7 +1947,7 @@ Execute_RestartDecoding:
 
             OPDEF(CEE_RET,                        "ret",              VarPop,             Push0,       InlineNone,         IPrimitive,  1,  0xFF,    0x2A,    RETURN)
             {
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
                 if(stack->m_inlineFrame)
                 {
                     stack->m_evalStackPos = evalPos;
@@ -2608,14 +2610,16 @@ Execute_RestartDecoding:
 
                 switch(op)
                 {
-                case CEE_STELEM_I  : size = 4; break;
-                case CEE_STELEM_I1 : size = 1; break;
-                case CEE_STELEM_I2 : size = 2; break;
-                case CEE_STELEM_I4 : size = 4; break;
-                case CEE_STELEM_I8 : size = 8; break;
-                case CEE_STELEM_R4 : size = 4; break;
-                case CEE_STELEM_R8 : size = 8; break;
-                case CEE_STELEM_REF: size = 0; break;
+                    case CEE_STELEM_I  : size = 4; break;
+                    case CEE_STELEM_I1 : size = 1; break;
+                    case CEE_STELEM_I2 : size = 2; break;
+                    case CEE_STELEM_I4 : size = 4; break;
+                    case CEE_STELEM_I8 : size = 8; break;
+                    case CEE_STELEM_R4 : size = 4; break;
+                    case CEE_STELEM_R8 : size = 8; break;
+                    case CEE_STELEM_REF: size = 0; break;
+                    // the remaining op cpdes aren't to be handled
+                    default: break;
                 }
 
                 evalPos[ 3 ].Promote();
@@ -2999,35 +3003,38 @@ Execute_RestartDecoding:
 
                 switch(res.DataType())
                 {
-                case DATATYPE_VOID    :                                                                                               break;
+                    case DATATYPE_VOID    :                                                                                               break;
 
-                case DATATYPE_BOOLEAN : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().u4 = (CLR_UINT32)res.NumericByRef().u1; break;
-                case DATATYPE_I1      : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().s4 = (CLR_INT32 )res.NumericByRef().s1; break;
-                case DATATYPE_U1      : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().u4 = (CLR_UINT32)res.NumericByRef().u1; break;
+                    case DATATYPE_BOOLEAN : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().u4 = (CLR_UINT32)res.NumericByRef().u1; break;
+                    case DATATYPE_I1      : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().s4 = (CLR_INT32 )res.NumericByRef().s1; break;
+                    case DATATYPE_U1      : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().u4 = (CLR_UINT32)res.NumericByRef().u1; break;
 
-                case DATATYPE_CHAR    : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().u4 = (CLR_UINT32)res.NumericByRef().u2; break;
-                case DATATYPE_I2      : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().s4 = (CLR_INT32 )res.NumericByRef().s2; break;
-                case DATATYPE_U2      : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().u4 = (CLR_UINT32)res.NumericByRef().u2; break;
+                    case DATATYPE_CHAR    : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().u4 = (CLR_UINT32)res.NumericByRef().u2; break;
+                    case DATATYPE_I2      : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().s4 = (CLR_INT32 )res.NumericByRef().s2; break;
+                    case DATATYPE_U2      : res.ChangeDataType( DATATYPE_I4 ); res.NumericByRef().u4 = (CLR_UINT32)res.NumericByRef().u2; break;
 
-                case DATATYPE_I4      :                                                                                               break;
-                case DATATYPE_U4      :                                                                                               break;
-                case DATATYPE_R4      :                                                                                               break;
+                    case DATATYPE_I4      :                                                                                               break;
+                    case DATATYPE_U4      :                                                                                               break;
+                    case DATATYPE_R4      :                                                                                               break;
 
-                case DATATYPE_I8      :                                                                                               break;
-                case DATATYPE_U8      :                                                                                               break;
-                case DATATYPE_R8      :                                                                                               break;
-                case DATATYPE_DATETIME:                                                                                               break;
-                case DATATYPE_TIMESPAN:                                                                                               break;
-                case DATATYPE_STRING  :                                                                                               break;
+                    case DATATYPE_I8      :                                                                                               break;
+                    case DATATYPE_U8      :                                                                                               break;
+                    case DATATYPE_R8      :                                                                                               break;
+                    case DATATYPE_DATETIME:                                                                                               break;
+                    case DATATYPE_TIMESPAN:                                                                                               break;
+                    case DATATYPE_STRING  :                                                                                               break;
 
-                case DATATYPE_OBJECT  :
-                    if(evalPos[ 0 ].IsAValueType())
-                    {
-                        UPDATESTACK(stack,evalPos);
+                    case DATATYPE_OBJECT  :
+                        if(evalPos[ 0 ].IsAValueType())
+                        {
+                            UPDATESTACK(stack,evalPos);
 
-                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject( evalPos[ 0 ], evalPos[ 0 ] ));
-                    }
-                    break;
+                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject( evalPos[ 0 ], evalPos[ 0 ] ));
+                        }
+                        break;
+
+                    // the remaining data types aren't to be handled
+                    default: break;
                 }
             }
 

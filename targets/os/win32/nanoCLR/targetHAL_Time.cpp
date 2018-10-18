@@ -24,7 +24,7 @@ unsigned int HAL_Time_CurrentSysTicks()
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTicks();
 }
 
-signed __int64 HAL_Time_SysTicksToTime( unsigned int sysTicks )
+uint64_t HAL_Time_SysTicksToTime( unsigned int sysTicks )
 {
     _ASSERTE(sysTicks <= 0x7FFFFFFF);
     
@@ -34,12 +34,12 @@ signed __int64 HAL_Time_SysTicksToTime( unsigned int sysTicks )
     return sysTicks;
 }
        
-signed __int64 HAL_Time_CurrentTime()
+uint64_t HAL_Time_CurrentTime()
 {
     return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTime();
 }
 
-signed __int64 HAL_Time_CurrentDateTime(bool datePartOnly)
+uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
 {
 	if (datePartOnly)
 	{
@@ -88,7 +88,7 @@ void HAL_COMPLETION::EnqueueDelta( unsigned int uSecFromNow )
     // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->EnqueueCompletion( (IntPtr)this, uSecFromNow ); 
 }
 
-void HAL_COMPLETION::EnqueueTicks( unsigned __int64 EventTimeTicks )
+void HAL_COMPLETION::EnqueueTicks( uint64_t EventTimeTicks )
 {
     _ASSERTE(FALSE);
 }

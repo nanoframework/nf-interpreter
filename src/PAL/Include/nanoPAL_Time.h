@@ -7,7 +7,6 @@
 #define _NANOPAL_TIME_H_ 1
 
 #include <nanoWeak.h>
-#include <netmf_errors.h>
 #include <targetPAL_Time.h>
 
 #ifdef __cplusplus
@@ -18,9 +17,9 @@ extern "C" {
 /// Initializes PAL Time drivers, must be called before any of the Time_* PAL
 /// methods could be used.
 /// </summary>
-HRESULT    Time_Initialize    (                     );
-HRESULT    Time_Uninitialize  (                     );
-void       Time_SetCompare    ( uint64_t compareValue );
+HRESULT    Time_Initialize    (                            );
+HRESULT    Time_Uninitialize  (                            );
+void       Time_SetCompare    ( uint64_t compareValueTicks );
 
 #ifdef __cplusplus
 }

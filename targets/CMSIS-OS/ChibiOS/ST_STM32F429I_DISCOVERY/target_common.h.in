@@ -18,9 +18,9 @@
 // they also must be coherent with what's in the linker file for nanoBooter and nanoCLR
 
 // RAM base address 
-#define RAM1_MEMORY_StartAddress        ((uint32_t)0x200000C0)
+#define RAM1_MEMORY_StartAddress        ((uint32_t)0xD0000000)
 // RAM size 
-#define RAM1_MEMORY_Size                ((uint32_t)0x00030000)
+#define RAM1_MEMORY_Size                ((uint32_t)0x00800000)
 
 // FLASH base address
 #define FLASH1_MEMORY_StartAddress      ((uint32_t)0x08000000)
@@ -28,6 +28,5 @@
 #define FLASH1_MEMORY_Size              ((uint32_t)0x00200000)
 
 /////////////////////////////////////////////////////////////////////////////////////////
-
 
 #endif /* _TARGET_COMMON_H_ */

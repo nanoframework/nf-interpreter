@@ -30,11 +30,22 @@
 // HAL initialization (community part).
 void halCommunityInit(void) {
 
-#if HAL_USE_STM32_FLASH
+#if (HAL_USE_STM32_FLASH == TRUE)
   stm32FlashInit();
+#endif
+
+#if (HAL_USE_STM32_CRC == TRUE)
+  crcInit();
+#endif
+
+#if (HAL_USE_STM32_RNG == TRUE)
+  rngInit();
+#endif
+
+#if HAL_USE_FSMC
+  stm32FsmcInit();
 #endif
 
 }
 
 #endif // HAL_USE_COMMUNITY
-

@@ -6,11 +6,7 @@
 #ifndef _TARGET_HAL_H_
 #define _TARGET_HAL_H_
 
-// #include <nanoHAL_Time.h>
 // #include <nanoHAL_Power.h>
-
-// empty implementation for WIN32
-#define NANOCLR_RELINQUISHEXECUTIONCONTROL()
 
 #if defined(_WIN32)
 #define NANOCLR_STOP() ::DebugBreak()
@@ -29,6 +25,11 @@ inline void __cdecl HARD_Breakpoint()
 
 #define HARD_BREAKPOINT()     HARD_Breakpoint()
 
+inline bool Target_ConfigUpdateRequiresErase()
+{ 
+	return true;
+}
+
 // #if defined(_DEBUG)
 // #define DEBUG_HARD_BREAKPOINT()     HARD_Breakpoint()
 // #else
@@ -41,5 +42,7 @@ inline void __cdecl HARD_Breakpoint()
 // #define DEBUG_HARD_BREAKPOINT()
 
 #endif  // !defined(BUILD_RTM)
+
+inline bool Target_HasNanoBooter() { return false; };
 
 #endif //_TARGET_HAL_H_

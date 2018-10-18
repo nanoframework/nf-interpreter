@@ -106,6 +106,8 @@ HRESULT Library_corlib_native_System_Array::TrySzIndexOf___STATIC__BOOLEAN__Syst
 
 HRESULT Library_corlib_native_System_Array::Clear( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& arg, int index, int length )
 {
+    (void)stack;
+
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
@@ -133,6 +135,8 @@ HRESULT Library_corlib_native_System_Array::Clear( CLR_RT_StackFrame& stack, CLR
 
 HRESULT Library_corlib_native_System_Array::Copy( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& argSrc, int indexSrc, CLR_RT_HeapBlock& argDst, int indexDst, int length )
 {
+    (void)stack;
+
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 

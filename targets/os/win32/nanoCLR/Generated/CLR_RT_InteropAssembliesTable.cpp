@@ -46,7 +46,6 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] =
     //&g_CLR_AssemblyNative_Microsoft_SPOT_EventSink_DriverProcs,
     //&g_CLR_AssemblyNative_Microsoft_SPOT_IO,
     //&g_CLR_AssemblyNative_Microsoft_SPOT_Graphics,
-    //&g_CLR_AssemblyNative_Microsoft_SPOT_Touch,
     //&g_CLR_AssemblyNative_Microsoft_SPOT_Net,
     //&g_CLR_AssemblyNative_Microsoft_SPOT_Net_Security,
     //&g_CLR_AssemblyNative_Microsoft_SPOT_Hardware_Usb,

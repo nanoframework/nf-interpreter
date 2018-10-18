@@ -99,9 +99,11 @@ bool CLR_RT_SubThread::ChangeLockRequestCount( int diff )
 }
 
 void CLR_RT_Thread::BringExecCounterToDate( int iGlobalExecutionCounter, int iDebitForEachRun )
+{
+    (void)iDebitForEachRun;
 
-{   // Normally the condition is false. It becames true if thread was out of execution for some time.
-    // The value of ThreadPriority::System_Highest + 1) is 33. 
+    // Normally the condition is false. It becomes true if thread was out of execution for some time.
+    // The value of (ThreadPriority::System_Highest + 1) is 33. 
     // 33 for ThreadPriority::Highest gives up to 16 cycles to catch up.
     // 33 for ThreadPriority::Lowest we provide only 1 cycle to catch up.
     // If thread was sleeping for some time we forefeet the time it was sleeping and not updating execution counter. 
@@ -707,7 +709,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
     // Try to resume from the frame of the last filter executed.
     CLR_RT_StackFrame*  stack     = us.m_handlerStack;
     
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
     CLR_RT_InlineFrame tmpInline;
     tmpInline.m_IP = NULL;
 #endif
@@ -773,7 +775,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                     us.m_handlerBlockEnd   = eh.m_handlerEnd;
                     us.m_handlerStack      = stack;
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
                     if(tmpInline.m_IP)
                     {
                         us.m_flags |= UnwindStack::c_MagicCatchForInline;
@@ -890,7 +892,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
         if(stack->m_inlineFrame != NULL && tmpInline.m_IP == NULL)
         {
             stack->SaveStack(tmpInline);
@@ -938,7 +940,7 @@ ContinueAndExit:
 
     NANOCLR_CLEANUP();
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
     if(tmpInline.m_IP)
     {
         stack->RestoreStack(tmpInline);
@@ -1011,7 +1013,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                     iterStack->m_flags &=  ~CLR_RT_StackFrame::c_InvalidIP;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
                     if(iterStack->m_inlineFrame == NULL)
 #endif
                     {
@@ -1024,7 +1026,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
 
                 if (iterStack == us.m_handlerStack)
                 {
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
                     if(iterStack->m_inlineFrame == NULL || 0 == (us.m_flags & UnwindStack::c_MagicCatchForInline))
 #endif
                     {
@@ -1048,7 +1050,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                         m_currentException.SetObjectReference( NULL );
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
                         if(iterStack->m_inlineFrame == NULL)
 #endif
                         {
@@ -1123,7 +1125,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             CLR_EE_DBG_SET(BreakpointsDisabled);
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)            
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
             if(iterStack->m_inlineFrame)
             {
                 iterStack->PopInline();
@@ -1157,7 +1159,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)        
 
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
         if(iterStack->m_inlineFrame)
         {
             iterStack->PopInline();

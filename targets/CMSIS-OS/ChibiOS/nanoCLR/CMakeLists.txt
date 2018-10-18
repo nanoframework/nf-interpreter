@@ -3,11 +3,14 @@
 # See LICENSE file in the project root for full license information.
 #
 
-include(NF_API_Namespaces)
+include(NF_NativeAssemblies)
 
 # add header file with common target definitions
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/target_platform.h" @ONLY)
+
+# append nanoHAL
+list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.cpp")
 
 # append target ChibiOS nanoCLR source files
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_App_Interface.c)
@@ -17,6 +20,7 @@ list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetPA
 
 # append target HAL source files
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Time.cpp")
+list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Watchdog.c")
 
 # append target PAL source files
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetPAL_Events.cpp")
@@ -29,11 +33,29 @@ list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Memory.c
 # append nanoCRT
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoCRT.cpp")
 
-# append nanoHAL
-list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.cpp")
+# append files from Runtime.Native
+list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp")
 
-# parse nanoFramework API options
-ParseApiOptions()
+# append TRNG only if option is ON
+if(USE_RNG)
+    
+    # append random implementation for all series, except F0
+    if( ${TARGET_SERIES} STREQUAL "STM32L0xx" OR
+        ${TARGET_SERIES} STREQUAL "STM32F4xx" OR 
+        ${TARGET_SERIES} STREQUAL "STM32F7xx" OR
+        ${TARGET_SERIES} STREQUAL "STM32H7xx")
+
+        list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetRandom.cpp")  
+
+    else()
+        # this series doesn't feature hardware TRNG, report
+        message(ERROR "This CPU doesn't have a Random Number Generation. Please change USE_RNG option to OFF.")
+    endif()
+
+endif()
+
+# add native assemblies
+ParseNativeAssemblies()
 
 # configure code file with Interop Assemblies table and...
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CLR_RT_InteropAssembliesTable.cpp.in"
@@ -51,6 +73,9 @@ list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Co
 
 # append PAL include directory
 list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+
+# append Runtime.Native include directory
+list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Runtime.Native)
 
 # make var global
 set(TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS} CACHE INTERNAL "make global")

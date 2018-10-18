@@ -60,6 +60,8 @@ HRESULT CLR_Checks::VerifyArrayReference( CLR_RT_HeapBlock& ref )
 
 HRESULT CLR_Checks::VerifyUnknownInstruction( CLR_OPCODE op )
 {
+    (void)op;
+
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
@@ -70,6 +72,8 @@ HRESULT CLR_Checks::VerifyUnknownInstruction( CLR_OPCODE op )
 
 HRESULT CLR_Checks::VerifyUnsupportedInstruction( CLR_OPCODE op )
 {
+    (void)op;
+
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
@@ -77,4 +81,3 @@ HRESULT CLR_Checks::VerifyUnsupportedInstruction( CLR_OPCODE op )
 
     NANOCLR_NOCLEANUP();
 }
-

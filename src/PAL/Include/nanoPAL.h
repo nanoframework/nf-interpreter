@@ -10,19 +10,20 @@
 
 #include <nanoHAL.h>
 #include <nanoPAL_Time.h>
+#include <nanoPAL_GPIO.h>
 #include <nanoHAL_v2.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoPAL_Events.h>
 #include <nanoPAL_AsyncProcCalls_decl.h>
+#include <nanoPAL_PerformanceCounters.h>
 
-//#include <StateDebounce_decl.h>
-//#include <Backlight_decl.h>
-//#include <BatteryCharger_decl.h>
-//#include <BatteryMeasurement_decl.h>
+
+
+
 
 #include <nanoPAL_COM.h>
 // 
-
+#include <nanoPAL_Sockets.h>
 
 
 
@@ -92,8 +93,8 @@
 void HeapLocation(unsigned char*& BaseAddress, unsigned int& SizeInBytes);
 
 
-//#include <gesture_decl.h>
-//#include <ink_decl.h>
+
+
 //
 //#include <graphics_decl.h>
 //
@@ -103,8 +104,8 @@ void HeapLocation(unsigned char*& BaseAddress, unsigned int& SizeInBytes);
 //
 //#include <FS_decl.h>
 //
-//#include <GPIO_button_decl.h>
-//#include <piezo_decl.h>
+
+
 //
 
 //#include <Power_decl.h>
@@ -203,47 +204,16 @@ enum POWER_LEVEL
 
 
 //#include <TimeService_decl.h>
-//#include <TouchPanel_decl.h>
+
 
 //#include <nanocrt_decl.h>
 
-#if defined(PLATFORM_ARM)
-#pragma check_printf_formats   /* hint to the compiler to check f/s/printf format */
-#endif
-int hal_vprintf( const char* format, va_list arg );
-
-#if defined(PLATFORM_ARM)
-#pragma check_printf_formats   /* hint to the compiler to check f/s/printf format */
-#endif
-int hal_vfprintf( COM_HANDLE stream, const char* format, va_list arg );
-
-#if defined(PLATFORM_ARM)
-#pragma check_printf_formats   /* hint to the compiler to check f/s/printf format */
-#endif
-int hal_snprintf( char* buffer, size_t len, const char* format, ... );
-
-int hal_vsnprintf( char* buffer, size_t len, const char* format, va_list arg );
-
-#if defined(PLATFORM_ARM)
-#define printf     DoNotUse_*printf []
-//#define sprintf    DoNotUse_*printf []
-#define fprintf    DoNotUse_*printf []
-
-#define _printf    DoNotUse_*printf []
-#define _sprintf   DoNotUse_*printf []
-#define _fprintf   DoNotUse_*printf []
-
-#define snprintf   DoNotUse_*printf []
-#define vsnprintf  DoNotUse_*printf []
-
-#define _snprintf  DoNotUse_*printf []
-#define _vsnprintf DoNotUse_*printf []
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
 
 #define strcpy    DoNotUse_*strcpy  []
 #define strncpy   DoNotUse_*strcpy  []
 #define strlen    DoNotUse_*strlen  []
 #define strncmp   DoNotUse_*strncmp  []
-
 
 int hal_strcpy_s ( char* strDst, size_t sizeInBytes, const char* strSrc );
 int hal_strncpy_s( char* strDst, size_t sizeInBytes, const char* strSrc, size_t count );
@@ -251,6 +221,11 @@ size_t hal_strlen_s (const char * str);
 int hal_strncmp_s( const char* str1, const char* str2, size_t num );
 
 #elif defined(_WIN32)
+
+int hal_vprintf( const char* format, va_list arg );
+int hal_vfprintf( COM_HANDLE stream, const char* format, va_list arg );
+int hal_snprintf( char* buffer, size_t len, const char* format, ... );
+int hal_vsnprintf( char* buffer, size_t len, const char* format, va_list arg );
 
 #define hal_strcpy_s(strDst, sizeInBytes, strSrc) strcpy_s(strDst, sizeInBytes, strSrc)
 #define hal_strncpy_s(strDst, sizeInBytes, strSrc, count) strncpy_s(strDst, sizeInBytes, strSrc, count)

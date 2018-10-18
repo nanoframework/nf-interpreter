@@ -370,7 +370,7 @@ void CLR_RT_EventCache::EventCache_Initialize()
 
     m_lookup_VirtualMethod.Initialize();
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
     m_inlineBufferStart = (CLR_RT_InlineBuffer*)g_scratchInlineBuffer;
 
     num = InlineBufferCount()-1;
@@ -473,8 +473,8 @@ CLR_RT_HeapBlock* CLR_RT_EventCache::Extract_Node_Slow( CLR_UINT32 dataType, CLR
         {
             CLR_RT_HeapBlock_Node* next = &ptr[ blocks ];
 
-            ptr->SetDataId ( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_CACHEDBLOCK,CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event,           blocks) );
-            next->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_CACHEDBLOCK,CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event,bestSize - blocks) );
+            ptr->SetDataId ( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_CACHEDBLOCK, (CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event),             blocks)  );
+            next->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_CACHEDBLOCK, (CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event), (bestSize - blocks)) );
             next->ClearData();
 
             Append_Node( next );
@@ -562,7 +562,7 @@ bool CLR_RT_EventCache::FindVirtualMethod( const CLR_RT_TypeDef_Index& cls, cons
 
 // -- //
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
 bool CLR_RT_EventCache::GetInlineFrameBuffer(CLR_RT_InlineBuffer** ppBuffer)
 {
     if(m_inlineBufferStart != NULL)

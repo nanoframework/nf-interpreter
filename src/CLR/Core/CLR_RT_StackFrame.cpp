@@ -35,7 +35,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
     md            = callInstPtr->m_target;
 
     sizeLocals    = md->numLocals;
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
     sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod + 1;
 #else
     sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod;
@@ -54,7 +54,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
         CLR_UINT32 memorySize = sizeLocals + sizeEvalStack;
 
         if(extraBlocks > 0             ) memorySize += extraBlocks;
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
         if(memorySize  < c_MinimumStack)
         {
             sizeEvalStack += c_MinimumStack - memorySize;
@@ -64,7 +64,16 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
         if(memorySize  < c_MinimumStack) memorySize  = c_MinimumStack;
 #endif
 
+    #ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Winvalid-offsetof"
+    #endif
+
         memorySize += CONVERTFROMSIZETOHEAPBLOCKS(offsetof(CLR_RT_StackFrame,m_extension));
+
+    #ifdef __GNUC__
+    #pragma GCC diagnostic pop
+    #endif
 
         stack = EVENTCACHE_EXTRACT_NODE_AS_BLOCKS(g_CLR_RT_EventCache,CLR_RT_StackFrame,DATATYPE_STACK_FRAME,0,memorySize); CHECK_ALLOCATION(stack);
     }
@@ -94,7 +103,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
                                                             //    void*                  m_customPointer;
                                                             // };
                                                             //
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
         stack->m_inlineFrame     = NULL;
 #endif
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
@@ -238,7 +247,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
     NANOCLR_CLEANUP_END();
 }
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
 bool CLR_RT_StackFrame::PushInline( CLR_PMETADATA& ip, CLR_RT_Assembly*& assm, CLR_RT_HeapBlock*& evalPos, CLR_RT_MethodDef_Instance& calleeInst, CLR_RT_HeapBlock* pThis)
 {
     const CLR_RECORD_METHODDEF* md =  calleeInst.m_target;
@@ -1112,7 +1121,9 @@ void CLR_RT_StackFrame::NegateResult()
 
 //--//
 
-HRESULT CLR_RT_StackFrame::SetupTimeout( CLR_RT_HeapBlock& input, CLR_INT64*& output )
+// input HeapBlock has timeout value **IN TICKS**
+// sometimes you have to force a cast to (CLR_INT64) otherwise the set operations will fail because of the var size mismatch
+HRESULT CLR_RT_StackFrame::SetupTimeoutFromTicks( CLR_RT_HeapBlock& input, CLR_INT64*& output )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -1125,7 +1136,7 @@ HRESULT CLR_RT_StackFrame::SetupTimeout( CLR_RT_HeapBlock& input, CLR_INT64*& ou
         //
         // Initialize timeout and save it on the stack.
         //
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitTimeout( timeExpire, input.NumericByRef().s4 ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitTimeout( timeExpire, input.NumericByRef().s8 ));
 
         ref.SetInteger( timeExpire );
 
@@ -1143,7 +1154,7 @@ void CLR_RT_StackFrame::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
 
-#ifndef NANOCLR_NO_IL_INLINE
+#ifndef CLR_NO_IL_INLINE
     if(m_inlineFrame)
     {
         CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_inlineFrame->m_frame.m_call.m_assm   );

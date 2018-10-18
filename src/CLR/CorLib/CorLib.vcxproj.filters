@@ -24,9 +24,6 @@
     <ClInclude Include="..\..\..\targets\os\win32\Include\target_os.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\targets\os\win32\Include\nanoHAL_Time.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="corlib_native_System_Exception.cpp">

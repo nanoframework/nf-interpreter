@@ -4,6 +4,7 @@
 //
 
 #include <string.h>
+#include <hal.h>
 #include <ch.h>
 
 //See http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/BABBGBEC.html
@@ -16,7 +17,7 @@ typedef enum {
     UsageFault = 6,
 } FaultType;
 
-#if defined(STM32F4xx) || defined(STM32F7xx)
+#if defined(STM32F4XX) || defined(STM32F7XX)
 
 void NMI_Handler(void) {
     while(1);
@@ -25,6 +26,12 @@ void NMI_Handler(void) {
 #endif
 
 // dev note: on all the following the variables need to be declared as volatile so they don't get optimized out by the linker
+// dev note: the pragma bellow is to ignore the warning because the variables aren't actually being used despite needing to remain there for debug
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
 
 void HardFault_Handler(void) {                                                                                   
 
@@ -39,7 +46,7 @@ void HardFault_Handler(void) {
     volatile FaultType faultType = (FaultType)__get_IPSR();
 
     // these are not available in all the STM32 series
-#if defined(STM32F4xx) || defined(STM32F7xx)
+#if defined(STM32F4XX) || defined(STM32F7XX)
 
     //Flags about hardfault / busfault
     //See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
@@ -92,7 +99,7 @@ void UsageFault_Handler(void) {
     (void)faultType;
 
     // these are not available in all the STM32 series
-#if defined(STM32F4xx) || defined(STM32F7xx)
+#if defined(STM32F4XX) || defined(STM32F7XX)
     
     //Flags about hardfault / busfault
     //See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
@@ -126,7 +133,7 @@ void MemManage_Handler(void) {
     (void)faultType;
 
     // these are not available in all the STM32 series
-#if defined(STM32F4xx) || defined(STM32F7xx)
+#if defined(STM32F4XX) || defined(STM32F7XX)
     
     //For HardFault/BusFault this is the address that was accessed causing the error
     volatile uint32_t faultAddress = SCB->MMFAR;
@@ -148,3 +155,7 @@ void MemManage_Handler(void) {
     // If no debugger connected, just reset the board
     NVIC_SystemReset();
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif

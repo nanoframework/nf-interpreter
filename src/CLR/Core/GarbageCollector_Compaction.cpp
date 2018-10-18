@@ -17,7 +17,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
     if(s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf( "GC: performing heap compaction...\r\n" );
+        CLR_Debug::Printf( "GC: performing heap compaction\r\n" );
     }
 #endif
 
@@ -34,6 +34,13 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
     ////////////////////////////////////////////////////////////////////////////////////////////////
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     g_CLR_PRF_Profiler.RecordHeapCompactionEnd();
+#endif
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if(s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
+    {
+        CLR_Debug::Printf( "GC: heap compaction completed\r\n" );
+    }
 #endif
 
     return 0;
@@ -360,9 +367,12 @@ void CLR_RT_GarbageCollector::Heap_Relocate()
 void CLR_RT_GarbageCollector::Heap_Relocate_Pass( RelocateFtn ftn )
 {
     NATIVE_PROFILE_CLR_CORE();
-#if NANOCLR_VALIDATE_HEAP > NANOCLR_VALIDATE_HEAP_0_None
+
+  #if NANOCLR_VALIDATE_HEAP > NANOCLR_VALIDATE_HEAP_0_None
     m_relocWorker = ftn;
-#endif
+  #else
+    (void)ftn;
+  #endif
 
     NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,g_CLR_RT_ExecutionEngine.m_heap)
     {

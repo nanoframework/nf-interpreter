@@ -32,6 +32,7 @@
 
 #define NANOHAL_TIME_CONVERSION_MICRO_TO_SECONDS                1000000
 
+#define TIME_UNIX_EPOCH_AS_TICKS           116444736000000000
 
 /// NOTES: Why origin is at 1/1/1601.
 /// Current civil calendar is named as Gregorian calendar after Pope Gregory XIII as he made adjustments
@@ -44,7 +45,7 @@
 /// if you are to create that date. To stay safe side 1/1/1601 is taken as origin, as was done for Windows.
 
 
-signed long long HAL_Time_SysTicksToTime(unsigned int sysTicks);
+uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks);
 
 /// <summary>
 /// System time and date for DateTime managed class.
@@ -52,13 +53,19 @@ signed long long HAL_Time_SysTicksToTime(unsigned int sysTicks);
 /// The datePartOnly allows returning only the date part with the time fields zeroed.
 /// </summary>
 /// <returns>Returns current time in 100ns elapsed since 1/1/1601:00:00:00.000 UTC.</returns>
-signed long long  HAL_Time_CurrentDateTime(bool datePartOnly);
+uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly);
 
 /// <summary>
 /// Time according to this system. 
 /// </summary>
 /// <returns>Returns current time in 100ns elapsed since 1/1/1601:00:00:00.000 UTC.</returns>
-signed long long  HAL_Time_CurrentTime();
+uint64_t  HAL_Time_CurrentTime();
+
+/// <summary>
+/// Set UTC time of the system. This will be effective immediately.
+/// </summary>
+/// <param name="utcTime">In 100ns since 1/1/1601:00:00:00.000</param>
+void      HAL_Time_SetUtcTime(uint64_t utcTime);
 
 /// <summary>
 /// Retrieves time since device was booted.
@@ -70,7 +77,7 @@ signed long long  HAL_Time_CurrentTime();
 /// Converts 64bit time value to SystemTime structure. 64bit time is assumed as an offset from 1/1/1601:00:00:00.000 in 100ns.
 /// </summary>
 /// <returns>True if conversion is successful.</returns>
-bool HAL_Time_ToSystemTime(signed long long time, SYSTEMTIME* systemTime);
+bool HAL_Time_ToSystemTime(uint64_t time, SYSTEMTIME* systemTime);
 
 /// <summary>
 /// Retrieves number of days given a month and a year. Calculates for leap years.
@@ -88,13 +95,13 @@ HRESULT HAL_Time_AccDaysInMonth(signed int year, signed int month, signed int* d
 /// Converts SYSTEMTIME structure to 64bit time, which is assumed as an offset from 1/1/1601:00:00:00.000 in 100ns.
 /// </summary>
 /// <returns>Time value.</returns>
-signed long long HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime);
+uint64_t HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime);
 
 /// APIs to convert between types
 bool          HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len );
 const char*   HAL_Time_CurrentDateTimeToString();
 
 
-unsigned __int64  CPU_MilisecondsToSysTicks       ( unsigned __int64 miliSeconds    );
+uint64_t  CPU_MillisecondsToTicks       ( uint64_t ticks  );
 
 #endif //_NANOHAL_TIME_H_

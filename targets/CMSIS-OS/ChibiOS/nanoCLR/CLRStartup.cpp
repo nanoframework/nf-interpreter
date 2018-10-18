@@ -40,8 +40,6 @@ struct Settings
         CLR_Debug::Printf( "Started Hardware.\r\n" );
 #endif
 
-        // UNDONE: FIXME: CLR_DBG_Debugger::Debugger_Discovery();
-
         m_fInitialized = true;
 
 
@@ -112,8 +110,6 @@ struct Settings
 #endif
         NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
 
-        g_CLR_RT_Persistence_Manager.Initialize();
-
         NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
 
 #if defined(NANOCLR_PROFILE_HANDLER)
@@ -166,7 +162,7 @@ struct Settings
 
         const CLR_RECORD_ASSEMBLY* header;
         unsigned char * assembliesBuffer ;
-        signed int  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
+        uint32_t  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
         unsigned char * headerBuffer  = NULL;
 
         while(stream.CurrentIndex < stream.Length)
@@ -223,7 +219,7 @@ struct Settings
             assm->m_flags |= CLR_RT_Assembly::Deployed;
         }
                 
-        NANOCLR_NOCLEANUP();
+        NANOCLR_NOCLEANUP_NOLABEL();
     }
 
     HRESULT LoadDeploymentAssemblies()
@@ -249,9 +245,11 @@ struct Settings
 
     void Cleanup()
     {
-        g_CLR_RT_Persistence_Manager.Uninitialize();
-
-        // UNDONE: FIXME: CLR_RT_ExecutionEngine::DeleteInstance();
+        if(!CLR_EE_REBOOT_IS(NoShutdown))
+        {
+            // OK to delete execution engine 
+            CLR_RT_ExecutionEngine::DeleteInstance();
+        }
 
         m_fInitialized = false;
     }
@@ -282,7 +280,7 @@ void ClrStartup(CLR_SETTINGS params)
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "\r\nnanoCLR (Build %d.%d.%d.%d)\r\n\r\n", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION );
         CLR_Debug::Printf( "\r\n%s\r\n\r\n", OEMSYSTEMINFOSTRING );
-        #endif
+#endif
 
         CLR_RT_Memory::Reset();
         
@@ -312,13 +310,13 @@ void ClrStartup(CLR_SETTINGS params)
         if( CLR_EE_DBG_IS_NOT( RebootPending ))
         {
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-            CLR_EE_DBG_SET_MASK(State_ProgramExited, State_Mask);
+            CLR_EE_DBG_SET_MASK(StateProgramExited, StateMask);
             CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, NULL, WP_Flags_c_NonCritical);
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             if(params.EnterDebuggerLoopAfterExit)
             {
-                // UNDONE: FIXME: CLR_DBG_Debugger::Debugger_WaitForCommands();
+                CLR_DBG_Debugger::Debugger_WaitForCommands();
             }
         }
 
@@ -330,19 +328,14 @@ void ClrStartup(CLR_SETTINGS params)
             {
                 softReboot = true;
 
-                params.WaitForDebugger = CLR_EE_REBOOT_IS(ClrOnlyStopDebugger);
+                params.WaitForDebugger = CLR_EE_REBOOT_IS(WaitForDebugger);
                 
                 s_ClrSettings.Cleanup();
 
                 nanoHAL_Uninitialize();
 
-                // UNDONE: FIXME: SmartPtr_IRQ::ForceDisabled();
-
                 //re-init the hal for the reboot (initially it is called in bootentry)
                 nanoHAL_Initialize();
-
-                // make sure interrupts are back on
-                // UNDONE: FIXME: SmartPtr_IRQ::ForceEnabled();
             }
             else
             {

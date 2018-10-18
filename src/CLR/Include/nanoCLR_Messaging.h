@@ -88,37 +88,22 @@ struct CLR_Messaging
 
     CLR_Messaging_CommandHandlerLookups m_Lookup_Requests[ 2 ];
     CLR_Messaging_CommandHandlerLookups m_Lookup_Replies[ 2 ];
-
-    static const CLR_UINT32 c_MaxCacheSize = 5 * 1024;
     
-    //WP_Controller        m_controller;
-
-    CLR_RT_DblLinkedList m_cacheSubordinate;
-    CLR_RT_DblLinkedList m_cacheMaster;
-    CLR_UINT32           m_cacheTotalSize;
-
     COM_HANDLE           m_port;
 
     //--//
 
     static HRESULT CreateInstance();
 
-    void Initialize(COM_HANDLE port, const CLR_Messaging_CommandHandlerLookup* requestLookup, const CLR_UINT32 requestLookupCount, const CLR_Messaging_CommandHandlerLookup* replyLookup, const CLR_UINT32 replyLookupCount );
+    void Initialize(const CLR_Messaging_CommandHandlerLookup* requestLookup, const CLR_UINT32 requestLookupCount, const CLR_Messaging_CommandHandlerLookup* replyLookup, const CLR_UINT32 replyLookupCount );
     void Cleanup();
 
     static HRESULT DeleteInstance();
 
     //void ProcessCommands();
-    void PurgeCache     ();
 
     bool        SendEvent     ( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags );
     static void BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags );
-
-
-
-
-    static bool Phy_ReceiveBytes   ( void* state, unsigned char*& ptr, unsigned int & size );
-    static bool Phy_TransmitMessage( void* state, const WP_Message* msg      );
 
     static bool App_ProcessHeader ( void* state,  WP_Message* msg );
     static bool App_ProcessPayload( void* state,  WP_Message* msg );
@@ -138,9 +123,9 @@ private:
 
 
 
-    void PurgeCache( CLR_RT_DblLinkedList& lst, CLR_INT64 oldest );
+    
 
-    bool TransmitMessage( const WP_Message* msg, bool fQueue );
+    
 
 public:  
     bool ProcessPayload( WP_Message* msg );
@@ -151,11 +136,6 @@ public:
     static bool Messaging_Reply               ( WP_Message* msg );
     static bool Messaging_Reply__Reply        ( WP_Message* msg );
 };
-
-//--//
-
-extern CLR_UINT32        g_scratchMessaging[];
-extern CLR_Messaging    *g_CLR_Messaging;
 
 //--//
 

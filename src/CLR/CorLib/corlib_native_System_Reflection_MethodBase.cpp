@@ -152,6 +152,8 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
 
 HRESULT Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& arg, CLR_RT_MethodDef_Instance& inst )
 {
+    (void)stack;
+
     NATIVE_PROFILE_CLR_CORE();
     return CLR_RT_ReflectionDef_Index::Convert( arg, inst ) ? S_OK : CLR_E_NULL_REFERENCE;
 }

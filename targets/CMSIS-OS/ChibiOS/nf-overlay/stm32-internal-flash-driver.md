@@ -16,16 +16,16 @@ The functions provided by driver are:
   - length: how many bytes to be read from the flash
   - buffer: pointer to the buffer where to read the flash data
 
-- ```bool stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t* buffer)```
+- ```int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t* buffer)```
   - startAddress: the flash start address where to write data to
   - length: how many bytes to be written to the flash
   - buffer: pointer to the buffer whit the data to be written to the flash
 
-- ```bool stm32FlashIsErased(uint32_t startAddress, uint32_t length)```
+- ```int stm32FlashIsErased(uint32_t startAddress, uint32_t length)```
   - startAddress: the flash start address to check if it's erased
   - length: length of the flash segment to check if it's erased
 
-- ```bool stm32FlashErase(uint32_t address)```
+- ```int stm32FlashErase(uint32_t address)```
   - address: the flash address belonging to the segment to be erased (this can be a block or a page depending on the flash organization of the target series)
 
 The driver performs basic and trivial checks on the arguments passed.

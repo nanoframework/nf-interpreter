@@ -95,7 +95,7 @@ function(NF_PRINT_SIZE_OF_TARGETS TARGET)
     else()
       set(FILENAME "${TARGET}")
     endif()
-    add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_SIZE} ${FILENAME})
+    add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_SIZE} -A -x ${FILENAME})
 endfunction()
 
 
@@ -103,8 +103,8 @@ function(NF_SET_OPTIMIZATION_OPTIONS TARGET)
 
     target_compile_options(${TARGET} PRIVATE
         $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-        $<$<CONFIG:Release>:-O3 -flto -fno-strict-aliasing>
-        $<$<CONFIG:MinSizeRel>:-Os -flto -fno-strict-aliasing>
+        $<$<CONFIG:Release>:-O3 -flto -fuse-linker-plugin -fno-fat-lto-objects>
+        $<$<CONFIG:MinSizeRel>:-Os -flto -fuse-linker-plugin -fno-fat-lto-objects>
         $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
     )
 
@@ -128,28 +128,41 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
     # definition for platform (always ARM here)
     target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM ")
 
-    # set compiler definitions related with the build type
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-        # build types that include debug have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
+    # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
+    if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
         target_compile_definitions(${TARGET} PUBLIC "-DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
     endif()
 
     # set compiler definition for RTM build option
     if(NF_BUILD_RTM)
-        target_compile_definitions(${TARGET} PUBLIC BUILD_RTM)
+        target_compile_definitions(${TARGET} PUBLIC -DBUILD_RTM)
     endif()
-
-    # set compiler definition for platform emulated floating point according to FPU
-    # no FPU requires FP emulation from the platform
-    target_compile_definitions(${TARGET} PUBLIC $<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:-DPLATFORM_EMULATED_FLOATINGPOINT>)
-
-    # set compiler definition for CORTEX according to FPU
-    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=$<$<BOOL:USE_FPU_IS_TRUE>:TRUE>$<$<NOT:$<BOOL:USE_FPU_IS_TRUE>>:FALSE>)
 
     # set compiler definition for using Application Domains feature
     if(NF_FEATURE_USE_APPDOMAINS)
         target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
     endif()
+
+    # set compiler definition for implementing (or not) CRC32 in Wire Protocol
+    if(NF_WP_IMPLEMENTS_CRC32)
+        target_compile_definitions(${TARGET} PUBLIC -DWP_IMPLEMENTS_CRC32)
+    endif()
+
+    # set definition for Wire Protocol trace mask
+    target_compile_definitions(${TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
+
+    # set compiler definition regarding inclusion of trace messages and checks on CLR
+    if(NF_PLATFORM_NO_CLR_TRACE)
+        target_compile_definitions(${TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
+    endif()
+
+    # set compiler definition regarding CLR IL inlining
+    if(NF_CLR_NO_IL_INLINE)
+        target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
+    endif()
+
+    # include any extra compiler definitions comming from extra args
+    target_compile_definitions(${TARGET} PUBLIC ${ARGN})
 
 endfunction()
 

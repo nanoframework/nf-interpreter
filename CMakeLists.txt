@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.11)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
 
@@ -13,7 +13,7 @@ include(ExternalProject)
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
-# fatal error and message explaining this 
+# fatal error and message explaining this
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(STATUS "\n-- ###############################################\n")
     message(STATUS "Please run the build outside of the source tree.\n\n")
@@ -45,97 +45,50 @@ string(TIMESTAMP BUILD_TIMESTAMP UTC)
 #######################
 # handle RTOSes choice
 
-# # sanity check here for invalid RTOS option
-# set(RTOS_SUPPORTED CHIBIOS FREERTOS MBEDOS RTXRTOS RTXRTOS2 CACHE INTERNAL "supported RTOS options")
-# list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
-# if(RTOS_INDEX EQUAL -1)
-#     message(FATAL_ERROR "\n\nSorry but ${RTOS} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-# endif()
+if("${RTOS}" STREQUAL "")
+    # no RTOS selected, defaulting to ChibiOS
+    set(RTOS "CHIBIOS")
+endif()
 
-# string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
-# string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
-# string(COMPARE EQUAL "MBEDOS"   "${RTOS}" RTOS_MBEDOS_CHECK)
-# string(COMPARE EQUAL "RTXRTOS"  "${RTOS}" RTOS_RTX_RTOS_CHECK)
-# string(COMPARE EQUAL "RTXRTOS2" "${RTOS}" RTOS_RTX_RTOS2_CHECK)
+# list of supported RTOSes
+# when adding a new RTOS add the corresponding string bellow AND...
+# ... also on the compare block bellow
+set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" CACHE INTERNAL "supported RTOS options")
+
+list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
+if(RTOS_INDEX EQUAL -1)
+    message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
+else()
+    message(STATUS "\nSetting RTOS to ${RTOS}\n")
+endif()
+
+string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
+string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
 
 ##########################################################################
-# default RTOS choice is ChibiOS (no other RTOS is supported at this time)
-set(RTOS_CHIBIOS_CHECK TRUE)
-##########################################################################
 
-if(RTOS_FREERTOS_CHECK) 
+if(RTOS_FREERTOS_CHECK)
     set(RTOS_FREERTOS_CHECK TRUE)
     set(RTOS_CHIBIOS_CHECK FALSE)
-    set(RTOS_MBEDOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS2_CHECK FALSE)
 endif()
 
-if(RTOS_MBEDOS_CHECK) 
-    set(RTOS_MBEDOS_CHECK TRUE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS2_CHECK FALSE)
-endif()
-
-if(RTOS_CHIBIOS_CHECK) 
+if(RTOS_CHIBIOS_CHECK)
     set(RTOS_CHIBIOS_CHECK TRUE)
     set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_MBEDOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS2_CHECK FALSE)
-endif()
-
-if(RTOS_RTX_RTOS_CHECK) 
-    set(RTOS_RTX_RTOS_CHECK TRUE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_MBEDOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS2_CHECK FALSE)
-endif()
-
-if(RTOS_RTX_RTOS2_CHECK) 
-    set(RTOS_RTX_RTOS2_CHECK TRUE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_MBEDOS_CHECK FALSE)
-    set(RTOS_RTX_RTOS_CHECK FALSE)
 endif()
 
 #######################
 
 
 ##########################################
-# handle FPU preference, if any
-set(USE_FPU_IS_TRUE FALSE)
-
-if(USE_FPU)
-    if(NOT "${USE_FPU}" STREQUAL "")
-        if("${USE_FPU}" STREQUAL "TRUE")
-            set(USE_FPU_IS_TRUE TRUE CACHE INTERNAL "FPU preference")
-        elseif("${USE_FPU}" STREQUAL "FALSE")
-            set(USE_FPU_IS_TRUE FALSE CACHE INTERNAL "FPU preference")
-        else()
-            # something other that TRUE or FALSE...
-            message(FATAL_ERROR "\n\n'${USE_FPU}' is an invalid option for USE_FPU. Acceptable values are TRUE or FALSE.\n\n")
-        endif()    
-    endif()
-endif()
-
-# message("FPU preference is: ${USE_FPU_IS_TRUE}")  # debug helper
-##########################################
-
-
-##########################################
 # set default toolchain to GCC
 set(TOOLCHAIN GCC)
 # have it lower case too for file names
-string(TOLOWER TOOLCHAIN_LOWER ${TOOLCHAIN}) 
+string(TOLOWER TOOLCHAIN_LOWER ${TOOLCHAIN})
 ##########################################
 
 if(RTOS_CHIBIOS_CHECK)
-    
+
     # check for toolchain path
     if(NOT TOOLCHAIN_PREFIX)
          message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
@@ -143,16 +96,14 @@ if(RTOS_CHIBIOS_CHECK)
          message(STATUS "########################################\n\n")
          message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
     endif()
-    
+
     message(STATUS "\nSetting Toolchain file for ChibiOS \n")
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
 
-# elseif(RTOS_MBEDOS_CHECK)
-
-#     message(STATUS "\nSetting Toolchain file for mbed \n")
-#     # set toolchain file
-#     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.mbed.${TOOLCHAIN}.cmake)
+elseif(RTOS_FREERTOS_CHECK)
+    message(STATUS "\nSetting Toolchain file for FreeRTOS ESP32 \n")
+    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
 
 # else()
 
@@ -168,13 +119,13 @@ if(RTOS_CHIBIOS_CHECK)
 #         include_directories(STM32CMSIS_INCLUDE_DIRS)
 
 #         # set toolchain file for cross-compiling with CMake
-#         # for this vendor/chip it will be 
+#         # for this vendor/chip it will be
 #     # elseif(CHIP_VENDOR_??_CHECK)
 #     #
 #     #     # vendor is ?? and toolchain is GCC
 #     #     message("Chip vendor is ??. Chip is ???.")
 #     #     set(CMAKE_TOOLCHAIN_FILE CMake/???.cmake)
-#     # 
+#     #
 #     else()
 #         message(STATUS "\n-- ###############################################\n")
 #         message(STATUS "Unknow vendor or chip. Supported vendors/chips:\n-- ST's STM32 (e.g. STM32F407VG)\n")
@@ -236,82 +187,90 @@ if(NF_BUILD_RTM)
 endif()
 #################################################################
 
-        
-#################################################################
-# clear CMAKE_C_FLAGS_INIT and CMAKE_CXX_FLAGS_INIT
-# (this needs to be here and not before because by now 
-# the compiler detection has already occurred)
-set(CMAKE_C_FLAGS "" CACHE INTERNAL "clear c compiler flags")
-set(CMAKE_CXX_FLAGS "" CACHE INTERNAL "clear cxx compiler flags")
-#################################################################
+if(RTOS_CHIBIOS_CHECK)
+
+    #################################################################
+    # clear CMAKE_C_FLAGS_INIT and CMAKE_CXX_FLAGS_INIT
+    # (this needs to be here and not before because by now
+    # the compiler detection has already occurred)
+    set(CMAKE_C_FLAGS "" CACHE INTERNAL "clear c compiler flags")
+    set(CMAKE_CXX_FLAGS "" CACHE INTERNAL "clear cxx compiler flags")
+    #################################################################
 
 
-#################################################################
-# clear some CMake flavor flags that are being set as default 
-# in the GNU compiler init
-# we want to control and fine tune these
-set(CMAKE_C_FLAGS_DEBUG "" CACHE INTERNAL "clear c compiler flags")
-set(CMAKE_C_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c compiler flags")
-set(CMAKE_C_FLAGS_RELEASE "" CACHE INTERNAL "clear c compiler flags")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c compiler flags")
-set(CMAKE_CXX_FLAGS_DEBUG "" CACHE INTERNAL "clear c++ compiler flags")
-set(CMAKE_CXX_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c++ compiler flags")
-set(CMAKE_CXX_FLAGS_RELEASE "" CACHE INTERNAL "clear c++ compiler flags")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c++ compiler flags")
-#################################################################
+    #################################################################
+    # clear some CMake flavor flags that are being set as default
+    # in the GNU compiler init
+    # we want to control and fine tune these
+    set(CMAKE_C_FLAGS_DEBUG "" CACHE INTERNAL "clear c compiler flags")
+    set(CMAKE_C_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c compiler flags")
+    set(CMAKE_C_FLAGS_RELEASE "" CACHE INTERNAL "clear c compiler flags")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c compiler flags")
+    set(CMAKE_CXX_FLAGS_DEBUG "" CACHE INTERNAL "clear c++ compiler flags")
+    set(CMAKE_CXX_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c++ compiler flags")
+    set(CMAKE_CXX_FLAGS_RELEASE "" CACHE INTERNAL "clear c++ compiler flags")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c++ compiler flags")
+    #################################################################
 
 
-#################################################################
-# clear default libraries that are set by CMake
-# we want to control 
-set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c linker default libs")
-set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
-#################################################################
+    #################################################################
+    # clear default libraries that are set by CMake
+    # we want to control
+    set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c linker default libs")
+    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
+    #################################################################
 
-
-#################################################################
-# output FPU option
-if("${USE_FPU}" STREQUAL "TRUE")
-    message(STATUS "Hardware Floating Point enabled")
-elseif("${USE_FPU}" STREQUAL "FALSE")
-    message(STATUS "Emulated Floating Point enabled")
 endif()
 
+#################################################################################
+# chooses if double-point float point support is provided by the platform
+# (default is OFF which means that single-precision floating point is effective)
+option(DP_FLOATINGPOINT "option to enable support for double-precision floating point")
+
+if(DP_FLOATINGPOINT)
+    set(TARGET_DP_FLOATINGPOINT TRUE CACHE INTERNAL "DP FP support")
+    message(STATUS "Double-precision floating point is effective")
+else()
+    set(TARGET_DP_FLOATINGPOINT FALSE CACHE INTERNAL "DP FP support")
+    message(STATUS "Single-precision floating point is effective")
+endif()
+
+###################################################################################
+# chooses if platform provides support for converting string to values on any base
+# (default is OFF which means that conversion to value from base 10 and 16 (partial) is effective)
+option(SUPPORT_ANY_BASE_CONVERSION "option to enable support for converting strings to value on any base")
+
+if(SUPPORT_ANY_BASE_CONVERSION)
+    set(TARGET_SUPPORT_ANY_BASE_CONVERSION TRUE CACHE INTERNAL "Option for string conversion to value from any base")
+    message(STATUS "String conversion to value on any base is effective")
+else()
+    set(TARGET_SUPPORT_ANY_BASE_CONVERSION FALSE CACHE INTERNAL "Option for string conversion to value from base 10 and partial for 16")
+    message(STATUS "String conversion to value from base 10 and 16 (partial) is effective")
+endif()
+
+#################################################################
+# true random number generation option supported by hardware
+option(USE_RNG "option to enable use of true random generator hardware block" ON)
+
+if(USE_RNG)
+    message(STATUS "Random Number Generation by target MCU is activated")
+else()
+    message(STATUS "Random Number Generation by target MCU is NOT activated")
+endif()
 
 #################################################################
 # nanoFramework features
 #################################################################
 
-#################################################################
-# debugger (default is TRUE to include debugger in release image
-set(NF_FEATURE_DEBUGGER TRUE)
+###################################################################
+# debugger (default is OFF so no support for debugging is included
+option(NF_FEATURE_DEBUGGER "option to enable support for debugging")
 
 if(NF_FEATURE_DEBUGGER)
-    if(NOT "${NF_FEATURE_DEBUGGER}" STREQUAL "")
-
-        if("${NF_FEATURE_DEBUGGER}" STREQUAL "TRUE")
-            set(NF_FEATURE_DEBUGGER TRUE CACHE INTERNAL "NF feature DEBUGGER")
-        elseif("${NF_FEATURE_DEBUGGER}" STREQUAL "FALSE")
-            set(NF_FEATURE_DEBUGGER FALSE CACHE INTERNAL "NF feature DEBUGGER")
-        else()
-            # something other that TRUE or FALSE...
-            message(FATAL_ERROR "\n\n'${NF_FEATURE_DEBUGGER}' is an invalid option for NF_FEATURE_DEBUGGER. Acceptable values are TRUE or FALSE.\n\n")
-        endif()    
-
-    endif()
+    message(STATUS "Support for debugging managed applications is included.")
+else()
+    message(STATUS "Support for debugging managed applications IS NOT included.")
 endif()
-
-#################################################################
-# RTC (real time clock) (default is OFF so RTC is NOT included)
-option(NF_FEATURE_RTC "option to use hardware RTC")
-
-if(NF_FEATURE_RTC)
-    set(HAL_USE_RTC_OPTION TRUE CACHE INTERNAL "NF feature RTC")
-else()    
-    set(HAL_USE_RTC_OPTION FALSE CACHE INTERNAL "NF feature RTC")
-endif()
-
-#################################################################
 
 #################################################################
 # enables Application Domains support in nanoCLR
@@ -320,97 +279,262 @@ option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")
 
 if(NF_FEATURE_USE_APPDOMAINS)
     message(STATUS "Application Domains support is included")
-else()    
+else()
     message(STATUS "Application Domains support IS NOT included")
 endif()
 
 #################################################################
+# disable all trace messages and checks on CLR
+# (default is OFF so all traces and checks are enabled)
+option(NF_PLATFORM_NO_CLR_TRACE "option to disable all trace stuff in CLR")
 
-#################################################################
-# ARM Cortex-M Single Wire Output (SWO) 
-# (default is OFF so no SWO output)
-
-option(SWO_OUTPUT "option to enable SWO")
-
-if(SWO_OUTPUT)
-    set(SWO_OUTPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
-    message(STATUS "Single Wire Output (SWO) enabled")
-else()    
-    set(SWO_OUTPUT_OPTION FALSE CACHE INTERNAL "Single Wire Output Option")
+if(NF_PLATFORM_NO_CLR_TRACE)
+    message(STATUS "CLR has all trace messages and checks DISABLED")
+else()
+    message(STATUS "CLR has all trace messages and checks enabled")
 endif()
 
 #################################################################
+# disable CLR IL inlining
+# (default is OFF so CLR IL inline is enabled)
+option(NF_CLR_NO_IL_INLINE "option to disable CLR IL inlining")
+
+if(NF_CLR_NO_IL_INLINE)
+    message(STATUS "CLR IL inlining is DISABLED")
+else()
+    message(STATUS "CLR IL inlining is enabled")
+endif()
+
+#################################################################
+# enables configuration block storage support
+# (default is OFF so Configuration block storage is NOT supported)
+option(NF_FEATURE_HAS_CONFIG_BLOCK "option to enable configuration block storage")
+
+if(NF_FEATURE_HAS_CONFIG_BLOCK)
+    set(TARGET_HAS_CONFIG_BLOCK TRUE CACHE INTERNAL "Option for config block")
+    message(STATUS "Configuration block storage is included")
+else()
+    set(TARGET_HAS_CONFIG_BLOCK FALSE CACHE INTERNAL "Option for config block")
+    message(STATUS "Configuration block storage IS NOT included")
+endif()
+
+#################################################################
+
+if(RTOS_CHIBIOS_CHECK)
+
+    #################################################################
+    # ARM Cortex-M Single Wire Output (SWO)
+    # (default is OFF so no SWO output)
+
+    option(SWO_OUTPUT "option to enable SWO")
+
+    if(SWO_OUTPUT)
+        set(SWO_OUTPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
+        message(STATUS "Single Wire Output (SWO) enabled")
+    else()
+        set(SWO_OUTPUT_OPTION FALSE CACHE INTERNAL "Single Wire Output Option")
+    endif()
+
+    #################################################################
+
+endif()
+
+#################################################################
+# reports Wire Protocol CRC32 implementation
+if(NF_WP_IMPLEMENTS_CRC32)
+    message(STATUS "Wire Protocol implements CRC32")
+else()
+    message(STATUS "Wire Protocol does NOT implement CRC32")
+endif()
 
 #################################################################
 # enables Networking support in nanoCLR
+# declares Networking option
+# needs to show before the API namespaces processing because it's used there
 # (default is OFF so Networking is NOT supported)
-option(NF_FEATURE_USE_NETWORKING "option to use networking")
+option(USE_NETWORKING_OPTION "option to use networking")
 
-if(NF_FEATURE_USE_NETWORKING)
-    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
-    set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for NF_FEATURE_USE_NETWORKING")
-    message(STATUS "Support for networking enabled")
-else()    
-    set(USE_NETWORKING_OPTION FALSE CACHE INTERNAL "NF feature NETWORKING")
-    set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for NF_FEATURE_USE_NETWORKING")
+# (default is OFF so OpenSSL is NOT used)
+option(NF_SECURITY_OPENSSL "option to use OpenSSL as the network security provider")
+
+# (default is OFF so mbed TLS is NOT used)
+option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider")
+
+# sanity check for both providers set
+if(NF_SECURITY_OPENSSL AND NF_SECURITY_MBEDTLS)
+    message(FATAL_ERROR "Can't have both OpenSSL and mbedTLS providers selected. Please choose one or none.")
+endif()
+
+# set default option for SNTP to ON
+option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
+
+#################################################################
+# enables filesysytem support in nanoCLR
+# (default is OFF so the filesystem is NOT supported)
+option(NF_FEATURE_USE_FILESYSTEM "option to use filesystem")
+
+if(NF_FEATURE_USE_FILESYSTEM)
+    set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
+    set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
+    message(STATUS "Support for filesystem enabled")
+else()
+    set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
+    set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
 endif()
 
 #################################################################
 
-#################################################################
-# manage nanoFramework API namespaces
-#################################################################
-include(NF_API_Namespaces)
 
 #################################################################
 # manage HAL/PAL required for API namespaces
 #################################################################
-# for some APIs we need to enable the device in the HAL config 
+# for some APIs we need to enable the device in the HAL config
 # and/or manage other APIs that are required
+
+
+if(API_System.Net)
+    # this API requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
+
+    # set NETWORKING option to true
+    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
+
+    # set Security module to use
+    if(NF_SECURITY_OPENSSL)
+        set(USE_SECURITY_OPENSSL_OPTION TRUE CACHE INTERNAL "NF security OPENSSL")
+    elseif(NF_SECURITY_MBEDTLS )
+        set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
+    endif()
+
+    if(API_Windows.Devices.Wifi)
+        set(USE_WIFI_OPTION TRUE CACHE INTERNAL  "Wifi for Windows.Devices.WiFi")
+    else()
+        set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
+    endif()
+
+    # manage inclusion of SNTP
+    if(NF_NETWORKING_SNTP)
+        set(API_nanoFramework.Networking.Sntp ON CACHE INTERNAL "enable API_nanoFramework..Networking.Sntp")
+    else()
+        set(API_nanoFramework.Networking.Sntp OFF CACHE INTERNAL "disable API_nanoFramework..Networking.Sntp")
+    endif()
+
+endif()
+
+
+if(API_Windows.Devices.Adc)
+    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+else()
+    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+endif()
 
 
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-    
+
     # this API requires nanoFramework.Runtime.Events
     set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
 
-else()    
+else()
     set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-endif()
-
-
-if(API_Windows.Devices.Spi)
-    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-else()    
-    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
 
 if(API_Windows.Devices.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
-else()    
+else()
     set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
 endif()
 
 
 if(API_Windows.Devices.Pwm)
-set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
-else()    
-set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
+    set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
+else()
+    set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
 endif()
 
 
-if(API_Windows.Devices.Adc)
-set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
-else()    
-set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+if(API_Windows.Devices.SerialCommunication)
+    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
+    
+    # this API requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
+
+else()
+    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
 endif()
 
+
+if(API_Windows.Devices.Spi)
+    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
+else()
+    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
+endif()
+
+
+if(API_Windows.Networking.Sockets)
+    # this API requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
+
+    # set NETWORKING option to true
+    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
+endif()
+
+
+#################################################################
+# handles Networking support at HAL level
+
+if(USE_NETWORKING_OPTION)
+    set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
+
+    if(NF_SECURITY_OPENSSL)
+        message(STATUS "Support for networking enabled with security from OpenSSL")
+    elseif(NF_SECURITY_MBEDTLS)
+        message(STATUS "Support for networking enabled with security from mbed TLS")
+    else()
+        message(STATUS "Support for networking enabled WITHOUT security")
+    endif()
+
+else()
+    set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
+    message(STATUS "Support for networking IS NOT enabled")
+endif()
+
+#################################################################
+
+
+#################################################################
+# RTC (real time clock) (default is OFF so RTC is NOT included)
+option(NF_FEATURE_RTC "option to use hardware RTC")
+
+if(NF_FEATURE_RTC)
+    set(HAL_USE_RTC_OPTION TRUE CACHE INTERNAL "NF feature RTC")
+else()
+    set(HAL_USE_RTC_OPTION FALSE CACHE INTERNAL "NF feature RTC")
+endif()
+
+#################################################################
+
+#################################################################
+# CPU watchdog (default is ON so watchdog is included)
+option(NF_FEATURE_WATCHDOG "option to use hardware watchdog" ON)
+
+if(NF_FEATURE_WATCHDOG)
+    set(HAL_USE_WDG_OPTION TRUE CACHE INTERNAL "NF feature watchdog")
+else()    
+    set(HAL_USE_WDG_OPTION FALSE CACHE INTERNAL "NF feature watchdog")
+endif()
+
+#################################################################
 
 #######################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
+
+    # sanity check on SSL provider: ChibiOS only supports mbed TLS
+    if(NF_SECURITY_OPENSSL)
+        message(FATAL "Can't use OpenSSL for ChibiOS. Currently only mbed TLS is supported.")
+    endif()
 
     # check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
     set(NO_CHIBIOS_SOURCE TRUE)
@@ -436,7 +560,7 @@ if(RTOS_CHIBIOS_CHECK)
 
         # ChibiOS version
         set(CHIBIOS_VERSION_EMPTY TRUE)
-        
+
         # check if build was requested with a specifc ChibiOS version
         if(DEFINED CHIBIOS_VERSION)
             if(NOT "${CHIBIOS_VERSION}" STREQUAL "")
@@ -445,19 +569,19 @@ if(RTOS_CHIBIOS_CHECK)
         endif()
 
         if(CHIBIOS_VERSION_EMPTY)
-            # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_17.6.x branch
-            message(STATUS "RTOS is: CHIBIOS (latest available code from stable_17.6.x)")
-            set(CHIBIOS_GIT_TAG "stable_17.6.x")
+            # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_18.2.x branch
+            message(STATUS "RTOS is: CHIBIOS (latest available code from stable_18.2.x)")
+            set(CHIBIOS_GIT_TAG "stable_18.2.x")
         else()
             message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
 
-            # branch naming follows the pattern 'stable_17.6.x'
-            # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter 
+            # branch naming follows the pattern 'stable_18.2.x'
+            # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter
             # find 1st dot in version number
             string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)
             # find 2nd dot in version number
             string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX REVERSE)
-            # extract 'short' version  
+            # extract 'short' version
             string(SUBSTRING ${CHIBIOS_VERSION} 0 ${CHIBIOS_VERSION_DOT_INDEX} CHIBIOS_SHORT_VERSION)
 
             # set branch name
@@ -468,7 +592,7 @@ if(RTOS_CHIBIOS_CHECK)
         # otherwise it won't be available before the actual build step
         configure_file("CMake/ChibiOS.CMakeLists.cmake.in"
                     "${CMAKE_BINARY_DIR}/ChibiOS_Download/CMakeLists.txt")
-        
+
         # setup CMake project for ChibiOS download
         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                         RESULT_VARIABLE result
@@ -478,19 +602,21 @@ if(RTOS_CHIBIOS_CHECK)
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS_Download")
-        
+
         # add ChibiOS as external project
-        ExternalProject_Add( 
+        ExternalProject_Add(
             ChibiOS
             PREFIX ChibiOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
-            GIT_REPOSITORY  https://github.com/ChibiOS/ChibiOS/
+            GIT_REPOSITORY  https://github.com/nanoframework/ChibiOS
             GIT_TAG ${CHIBIOS_GIT_TAG}  # target specified branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
             LOG_DOWNLOAD 1
+
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+
             # Disable all other steps
-            INSTALL_COMMAND ""
             CONFIGURE_COMMAND ""
             BUILD_COMMAND ""
         )
@@ -505,14 +631,160 @@ if(RTOS_CHIBIOS_CHECK)
         if(EXISTS "${CHIBIOS_SOURCE}/")
             message(STATUS "RTOS is: ChibiOS (source from: ${CHIBIOS_SOURCE})")
 
-            file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+                file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+            else()
+                message(STATUS "Using local cache of ChibiOS source from ${CHIBIOS_SOURCE}")
+            endif()
+
             set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
-            # dummy target required for targets that have a declared dependency from ChibiOS
-            add_custom_target(ChibiOS)
         else()
             message(FATAL_ERROR "Couldn't find ChibiOS source at ${CHIBIOS_SOURCE}/")
         endif()
 
+        # add ChibiOS as external project
+        ExternalProject_Add(
+            ChibiOS
+            PREFIX ChibiOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
+
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+        # get source dir for ChibiOS CMake project
+        ExternalProject_Get_Property(ChibiOS SOURCE_DIR)
+
+    endif()
+
+    # if mbed TLS is enabled add it to the build
+    if(NF_SECURITY_MBEDTLS)
+
+        # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
+        set(NO_MBEDTLS_SOURCE TRUE)
+
+        if(MBEDTLS_SOURCE)
+            if(NOT "${MBEDTLS_SOURCE}" STREQUAL "")
+                set(NO_MBEDTLS_SOURCE FALSE)
+            endif()
+        endif()
+
+        # set options for mbed TLS
+        option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
+
+        if(NO_MBEDTLS_SOURCE)
+            # no mbed TLS source specified, download it from it's repo
+
+            # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+            include(Hack_SetGitSearchPath)
+
+            # check for Git (needed here for advanced warning to user if it's not installed)
+            find_package(Git)
+
+            #  check if Git was found, if not report to user and abort
+            if(NOT GIT_EXECUTABLE)
+                message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+            endif()
+
+            # set tag for currently supported version
+            set(MBEDTLS_GIT_TAG "mbedtls-2.11.0")
+
+            # need to setup a separate CMake project to download the code from the GitHub repository
+            # otherwise it won't be available before the actual build step
+            configure_file("CMake/mbedTLS.CMakeLists.cmake.in"
+                        "${CMAKE_BINARY_DIR}/mbedTLS_Download/CMakeLists.txt")
+
+            # setup CMake project for mbedTLS download
+            execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                            RESULT_VARIABLE result
+                            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedTLS_Download")
+
+            # run build on mbedTLS download CMake project to perform the download
+            execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                            RESULT_VARIABLE result
+                            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedTLS_Download")
+
+            # add mbedTLS as external project
+            ExternalProject_Add(
+                mbedTLS
+                PREFIX mbedTLS
+                SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source
+                GIT_REPOSITORY  https://github.com/nanoframework/mbedtls
+                GIT_TAG ${MBEDTLS_GIT_TAG}  # target specified branch
+                GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+                TIMEOUT 10
+                LOG_DOWNLOAD 1
+
+                # Disable all other steps
+                CONFIGURE_COMMAND ""
+                BUILD_COMMAND ""
+                INSTALL_COMMAND ""
+            )
+
+        else()
+            # mbedTLS source was specified
+
+            # sanity check is source path exists
+            if(EXISTS "${MBEDTLS_SOURCE}/")
+
+                # check if we already have the sources, no need to copy again
+                if(NOT EXISTS "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+                    message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")
+                    file(COPY "${MBEDTLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+                else()
+                    message(STATUS "Using local cache of mbedTLS source from ${MBEDTLS_SOURCE}")
+                endif()
+
+                set(MBEDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source/include)
+            else()
+                message(FATAL_ERROR "Couldn't find mbedTLS source at ${MBEDTLS_SOURCE}/")
+            endif()
+
+            # add mbedTLS as external project
+            ExternalProject_Add(
+                mbedTLS
+                PREFIX mbedTLS
+                SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source
+
+                # Disable all other steps
+                CONFIGURE_COMMAND ""
+                BUILD_COMMAND ""
+                INSTALL_COMMAND ""
+            )
+
+        endif()
+
+        # get source dir for mbedTLS CMake project
+        ExternalProject_Get_Property(mbedTLS SOURCE_DIR)
+
+        set(mbedTLS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include")
+        set(mbedTLS_LIBRARIES "${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        include_directories(${mbedTLS_INCLUDE_DIRS})
+
+    endif()
+
+    # Define base path for the class libraries
+    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
+
+    # set target base location
+    # this has to be set before the class library modules are pulled in
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+        # set target base location
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+    else()
+        # try to find board in the Community targets folder
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+            # set target base location
+            set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+        else()
+            # board NOT found in targets folder
+            # can't continue
+            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        endif()
     endif()
 
     # set CMSIS RTOS include directory
@@ -524,12 +796,6 @@ if(RTOS_CHIBIOS_CHECK)
     add_subdirectory(targets/CMSIS-OS/nanoBooter)
     add_subdirectory(targets/CMSIS-OS/nanoCLR)
 
-    # add target ChibiOS dirs
-    add_subdirectory(targets/CMSIS-OS/ChibiOS/Include)
-    add_subdirectory(targets/CMSIS-OS/ChibiOS/common)
-    add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoBooter)
-    add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoCLR)
-
     # need to find board definition files (board.c and board.h)
 
     # assume no community board... until proven otherwise
@@ -540,14 +806,12 @@ if(RTOS_CHIBIOS_CHECK)
         # board found
         # if it's on nF overlay board.c and board.h exist there for sure
         set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")
-
     else()
         # board NOT found in ChibiOS 'overlay'
 
         # try to find it in the target boards
         if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
             # board found
-
             # check if the board definition files are available at the target folder
             if( EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.c AND
                 EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.h)
@@ -556,7 +820,7 @@ if(RTOS_CHIBIOS_CHECK)
 
             else()
                 # board.c and board.h are NOT in the target folder, try to find them in the official distribution
-                
+
                 if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
                     # board found
                     # if it's on the ChibiOS official distribution board.c and board.h exist here for sure
@@ -580,10 +844,16 @@ if(RTOS_CHIBIOS_CHECK)
                 # quit now as there is no were else to search for these
                 message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${CHIBIOS_BOARD} in the available list of ChibiOS supported boards...\n\n")
             endif()
-            
+
         endif()
 
     endif()
+
+    # add target ChibiOS dirs
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/Include)
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/common)
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoBooter)
+    add_subdirectory(targets/CMSIS-OS/ChibiOS/nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
@@ -591,7 +861,7 @@ if(RTOS_CHIBIOS_CHECK)
         # board found
         message(STATUS "Support for target board '${CHIBIOS_BOARD}' found")
         message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
-        
+
         # add TARGET board directory
         add_subdirectory("targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
 
@@ -601,8 +871,8 @@ if(RTOS_CHIBIOS_CHECK)
         if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
             # board found
             message(STATUS "Support for target board '${CHIBIOS_BOARD}' found in Community targets")
-            message(STATUS "$CHIBIOS_BOARD_DEFINITIONS_LOCATION")
-            
+            message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
+
             # add TARGET board directory from Community
             add_subdirectory("targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
 
@@ -614,337 +884,27 @@ if(RTOS_CHIBIOS_CHECK)
 
     endif()
 
+#######################
+# FreeRTOS
+elseif(RTOS_FREERTOS_CHECK)
+
+    if("${TARGET_SERIES}" STREQUAL "ESP32")
+        message(STATUS "Platform ESP32")
+
+        # check watchdog feature
+        # EPS32 build has watchdog enabled by default, so setting it to OFF doens't make sense 
+        # becuase the build system can't honour that preference
+        if(NOT NF_FEATURE_WATCHDOG)
+        message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
+        endif()
+
+        # Define base path for the class libraries
+        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/nanoCLR")
+
+        # set target base location
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC")
+
+ 		add_subdirectory(targets/FreeRTOS/ESP32_DevKitC)
+    endif()
+
 endif()
-
-# #######################
-# # FreeRTOS
-# elseif(RTOS_FREERTOS_CHECK)
-
-#     # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
-#     set(NO_FREERTOS_SOURCE TRUE)
-#     if(FREERTOS_SOURCE)
-#         if(NOT "${FREERTOS_SOURCE}" STREQUAL "")
-#             set(NO_FREERTOS_SOURCE FALSE)
-#         endif()
-#     endif()
-
-#     if(NO_FREERTOS_SOURCE)
-#         # no FreeRTOS source specified, download it from it's repo
-
-#         # check for SVN (needed here for advanced warning to user if it's not installed)
-#         find_package(Subversion)
-
-#         #  check is SVN was found, if not report to user and abort
-#         if(NOT Subversion_SVN_EXECUTABLE)
-#         message(FATAL_ERROR "error: could not find SVN, make sure you have it installed.")
-#         endif()
-
-#         # check if build was requested with a specifc FreeRTOS version
-#         if(DEFINED FREERTOS_VERSION)
-
-#             if("${FREERTOS_VERSION}" STREQUAL "")
-#                 set(FREERTOS_VERSION_EMPTY TRUE)
-#             endif()
-
-#             if(FREERTOS_VERSION_EMPTY)
-#                 # no FreeRTOS version actualy specified, must be empty which is fine, we'll grab the code from the trunk
-#                 message(STATUS "RTOS is: FreeRTOS (latest available code from trunk)")
-#                 set(FREERTOS_SVN_REPOSITORY "https://svn.code.sf.net/p/freertos/code/trunk")
-#             else()
-#                 message(STATUS "RTOS is: FreeRTOS v${FREERTOS_VERSION}")
-#                 set(FREERTOS_SVN_REPOSITORY "https://svn.code.sf.net/p/freertos/code/tags/V${FREERTOS_VERSION}")
-#             endif()
-            
-#         endif()
-
-#         # need to setup a separate CMake project to download the code from the SVN repository
-#         # otherwise it won't be available before the actual build step
-#         configure_file("CMake/FreeRTOS.CMakeLists.cmake.in"
-#                     "${CMAKE_BINARY_DIR}/FreeRTOS_Download/CMakeLists.txt")
-        
-#         # setup CMake project for FreeRTOS download
-#         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-#                         RESULT_VARIABLE result
-#                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
-
-#         # run build on FreeRTOS download CMake project to perform the download
-#         execute_process(COMMAND ${CMAKE_COMMAND} --build .
-#                         RESULT_VARIABLE result
-#                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
-        
-#         # add FreeRTOS as external project
-#         ExternalProject_Add( 
-#             FreeRTOS
-#             PREFIX FreeRTOS
-#             SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
-#             SVN_REPOSITORY ${FREERTOS_SVN_REPOSITORY}/FreeRTOS/Source
-#             TIMEOUT 10
-#             LOG_DOWNLOAD 1
-#             # Disable all other steps
-#             INSTALL_COMMAND ""
-#             CONFIGURE_COMMAND ""
-#             BUILD_COMMAND ""
-#         )
-
-#         # get source dir for FreeRTOS CMake project
-#         ExternalProject_Get_Property(FreeRTOS SOURCE_DIR)
-#         set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
-
-#     else()
-#         # FreeRTOS source was specified
-
-#         # sanity check is source path exists
-#         if(EXISTS "${FREERTOS_SOURCE}/")
-#             message(STATUS "RTOS is: FreeRTOS (source from: ${FREERTOS_SOURCE})")
-
-#             file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
-#             set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
-#         else()
-#             message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
-#         endif()
-
-#     endif()
-
-#     # set CMSIS RTOS include directory
-#     include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
-   
-#     # add source directory
-#     add_subdirectory("src")
-
-# #######################
-# # mbed OS
-# elseif(RTOS_MBEDOS_CHECK)
-
-#     # check if MBEDOS_SOURCE was specified or if it's empty (default is empty)
-#     set(NO_MBEDOS_SOURCE TRUE)
-#     if(MBEDOS_SOURCE)
-#         if(NOT "${MBEDOS_SOURCE}" STREQUAL "")
-#             set(NO_MBEDOS_SOURCE FALSE)
-#         endif()
-#     endif()
-
-#     # check is a target was specified
-#     if(MBED_TARGET)
-#         if(NOT "${MBEDOS_SOURCE}" STREQUAL "")
-#             message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mbed OS is the RTOS option\n\n")
-#         endif()
-#     else()
-#         message(FATAL_ERROR "\n\nYou need to specify a valid ${MBED_TARGET} when mbed OS is the RTOS option\n\n")
-#     endif()
-
-#     if(NO_MBEDOS_SOURCE)
-#         # no mbed RTOS source specified, download it from it's repo
-
-#         # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-#         include(Hack_SetGitSearchPath)
-
-#         # check for Git (needed here for advanced warning to user if it's not installed)
-#         find_package(Git)
-
-#         #  check if Git was found, if not report to user and abort
-#         if(NOT GIT_EXECUTABLE)
-#         message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
-#         endif()
-
-#         message(STATUS "RTOS is: mbed RTOS (latest available code from GitHub repo)")
-
-#         # need to setup a separate CMake project to download the code from the SVN repository
-#         # otherwise it won't be available before the actual build step
-#         configure_file("CMake/mbedOS.CMakeLists.cmake.in"
-#                     "${CMAKE_BINARY_DIR}/mbedOS_Download/CMakeLists.txt")
-        
-#         # setup CMake project for mbed RTOS download
-#         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-#                         RESULT_VARIABLE result
-#                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedOS_Download")
-
-#         # run build on mbed RTOS download CMake project to perform the download
-#         execute_process(COMMAND ${CMAKE_COMMAND} --build .
-#                         RESULT_VARIABLE result
-#                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedOS_Download")
-               
-#         # download mbedOS source from official GitHub repo
-#         ExternalProject_Add( 
-#             mbedOS
-#             PREFIX mbed-OS
-#             SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedOS_Source
-#             GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os/
-#             GIT_TAG master  # target master branch
-#             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
-#             TIMEOUT 10
-#             LOG_DOWNLOAD 1
-            
-#             # Disable all other steps
-#             CONFIGURE_COMMAND ""
-#             BUILD_COMMAND ""
-#             INSTALL_COMMAND ""
-#         )
-
-#         # get source dir for mbed RTOS CMake project
-#         # ExternalProject_Get_Property(mbedOS SOURCE_DIR)
-#         # set(MBEDOS_INCLUDE_DIRS ${MBEDOS_SOURCE_DIR})
-
-#         # set update disconnected to prevent updates on builds
-#         set_property(DIRECTORY ${MBEDOS_SOURCE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1)
-
-#     else()
-#         # mbed OS source location was specified
-
-#         if(NOT EXISTS "${PROJECT_BINARY_DIR}/mbedOS_Source")
-#             # need to copy srouce to build directory
-#             message(STATUS "RTOS is: mbed OS (copying source from: ${MBEDOS_SOURCE})")
-
-#             file(COPY "${MBEDOS_SOURCE}/" DESTINATION "${PROJECT_BINARY_DIR}/mbedOS_Source")
-#         elseif()
-#             # source directory  already at build folder so we are done here
-#             message(STATUS "RTOS is: mbed OS (source from: ${MBEDOS_SOURCE} already at build directory)")
-#         endif()
-
-#         # set(MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source)
-
-#     endif()
-
-#     # find_package(MBEDOPTIONS REQUIRED)
-   
-#     # add source directory
-#     add_subdirectory("targets/os/mbed-os/nanoBooter")
-
-# #######################
-# # RTX RTOS
-# elseif(RTOS_RTX_RTOS_CHECK)
-
-#     # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-#     include(Hack_SetGitSearchPath)
-
-#     # check for Git (needed here for advanced warning to user if it's not installed)
-#     find_package(Git)
-
-#     #  check if Git was found, if not report to user and abort
-#     if(NOT GIT_EXECUTABLE)
-#       message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
-#     endif()
-
-#     # need to setup a separate CMake project to download the code from the SVN repository
-#     # otherwise it won't be available before the actual build step
-#     configure_file("CMake/RTXRTOS.CMakeLists.cmake.in"
-#                    "${CMAKE_BINARY_DIR}/RTXRTOS_Download/CMakeLists.txt")
-    
-#     # setup CMake project for RTX RTOS download
-#     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-#                     RESULT_VARIABLE result
-#                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
-
-#     # run build on RTX RTOS download CMake project to perform the download
-#     execute_process(COMMAND ${CMAKE_COMMAND} --build .
-#                     RESULT_VARIABLE result
-#                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
-    
-#     # download RTX RTOS source from official GitHub repo
-#     ExternalProject_Add( 
-#         RTXRTOS
-#         PREFIX RTX-RTOS
-#         SOURCE_DIR ${CMAKE_BINARY_DIR}/RTXRTOS_Source
-#         GIT_REPOSITORY  https://github.com/ARM-software/CMSIS_5
-#         GIT_TAG master  # target master branch
-#         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
-#         TIMEOUT 10
-#         LOG_DOWNLOAD 1
-        
-#         # Disable all other steps
-#         CONFIGURE_COMMAND ""
-#         BUILD_COMMAND ""
-#         INSTALL_COMMAND ""
-#     )
-
-#     # get source dir for RTX RTOS CMake project
-#     ExternalProject_Get_Property(RTXRTOS SOURCE_DIR)
-#     set(RTXRTOS_INCLUDE_DIRS ${RTXRTOS_SOURCE_DIR})
-   
-#     # add source directory
-#     add_subdirectory("src")
-
-# #######################
-# # RTX RTOS2
-# elseif(RTOS_RTX_RTOS2_CHECK)
-
-#     message(FATAL_ERROR "
-# #############################################################
-# support for RTX RTOS2 is in the works, please check latter...
-# #############################################################")
-
-#     # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-#     include(Hack_SetGitSearchPath)
-
-#     # check for Git (needed here for advanced warning to user if it's not installed)
-#     find_package(Git)
-
-#     #  check if Git was found, if not report to user and abort
-#     if(NOT GIT_EXECUTABLE)
-#       message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
-#     endif()
-
-#     # need to setup a separate CMake project to download the code from the SVN repository
-#     # otherwise it won't be available before the actual build step
-#     configure_file("CMake/RTXRTOS.CMakeLists.cmake.in"
-#                    "${CMAKE_BINARY_DIR}/RTXRTOS_Download/CMakeLists.txt")
-    
-#     # setup CMake project for RTX RTOS2 download (same as RTX RTOS)
-#     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-#                     RESULT_VARIABLE result
-#                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
-
-#     # run build on RTX RTOS2 download CMake project to perform the download
-#     execute_process(COMMAND ${CMAKE_COMMAND} --build .
-#                     RESULT_VARIABLE result
-#                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/RTXRTOS_Download")
-    
-#     # download RTX RTOS2 source from official GitHub repo (same as RTX RTOS)
-#     ExternalProject_Add( 
-#         RTXRTOS2
-#         PREFIX RTX-RTOS
-#         SOURCE_DIR ${CMAKE_BINARY_DIR}/RTXRTOS_Source
-#         GIT_REPOSITORY  https://github.com/ARM-software/CMSIS_5
-#         GIT_TAG master  # target master branch
-#         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
-#         TIMEOUT 10
-#         LOG_DOWNLOAD 1
-        
-#         # Disable all other steps
-#         CONFIGURE_COMMAND ""
-#         BUILD_COMMAND ""
-#         INSTALL_COMMAND ""
-#     )
-
-#     # get source dir for RTX RTOS2 CMake project
-#     ExternalProject_Get_Property(RTXRTOS2 SOURCE_DIR)
-#     set(RTXRTOS2_INCLUDE_DIRS ${RTXRTOS2_SOURCE_DIR})
-   
-#     # add source directory
-#     add_subdirectory("src")
-
-# #######################
-
-# # no RTOS specifed
-# else()
-    
-#     set(NORTOS TRUE)
-
-#     message(STATUS "NO RTOS was specified")
-
-#     # include CMSIS, HAL and drivers  
-#     if(CHIP_VENDOR_STM32_CHECK)
-#         # vendor is ST, chip is STM32
-
-#         # ST Cube package with CMSIS and SMT32 HAL
-#         add_subdirectory("stcube_repository")
-
-#     # elseif(CHIP_VENDOR_??_CHECK)
-#     #
-#     #     # vendor is ?? and toolchain is GCC
-#     #     add_subdirectory("???")
-#     endif()    
-   
-#     # add source directory
-#     add_subdirectory("src")
- 
-# endif()

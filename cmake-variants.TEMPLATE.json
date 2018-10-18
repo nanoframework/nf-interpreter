@@ -1,78 +1,80 @@
 {
   "buildType": {
-    "default$": "debug",
-    "description$": "the build type to use",
-    "debug": {
-      "oneWordSummary$": "Debug",
-      "description$": "Emit debug information without performing optimizations",
-      "buildType": "Debug"
-    },
-    "release": {
-      "oneWordSummary$": "Release",
-      "description$": "Enable optimizations, omit debug info",
-      "buildType": "Release"
-    },
-    "minsize": {
-      "oneWordSummary$": "MinSizeRel",
-      "description$": "Optimize for smallest binary size",
-      "buildType": "MinSizeRel"
-    },
-    "reldeb": {
-      "oneWordSummary$": "RelWithDebInfo",
-      "description$": "Perform optimizations AND include debugging information",
-      "buildType": "RelWithDebInfo"
-    }
+    "default": "debug",
+      "choices": { 
+        "debug": {
+          "short": "Debug",
+          "long": "Emit debug information without performing optimizations",
+          "buildType": "Debug"
+        },
+        "release": {
+          "short": "Release",
+          "long": "Enable optimizations, omit debug info",
+          "buildType": "Release"
+        },
+        "minsize": {
+          "short": "MinSizeRel",
+          "long": "Optimize for smallest binary size",
+          "buildType": "MinSizeRel"
+        },
+        "reldeb": {
+          "short": "RelWithDebInfo",
+          "long": "Perform optimizations AND include debugging information",
+          "buildType": "RelWithDebInfo"
+        }    
+      }
   },
+
   "linkage": {
-      "OPTION1_NAME_HERE": {
-        "oneWordSummary$": "<summary-here>",
-        "description$": "<description-here>",
+    "default": "",
+    "choices": {
+      "OPTION_NAME_HERE": {
+        "short": "<summary-here>",
         "settings": {
-            "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>",
-            "TOOL_HEX2DFU_PREFIX" : "<path-to-hex2dfu-utility-mind-the-forward-slash>",
-            "TARGET_SERIES" : "<series-name-of-the-target-chip-STM32F0xx-STM32F4xx-STM32F7xx>",
-            "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
-            "CHIBIOS_VERSION" : "<N.N.N>",
-            "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
-            "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
-            "SWO_OUTPUT" : "OFF-default-ON-to-enable-ARM-CortexM-Single-Wire-Output",
-			      "NF_BUILD_RTM" : "OFF-default-ON-to-enable-RTM-build",
-            "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger",
-            "NF_FEATURE_RTC" : "OFF-default-ON-to-enable-hardware-RTC",
-            "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
-            "NF_FEATURE_USE_NETWORKING" : "OFF-default-ON-to-enable-support",
-            "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Adc" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API"
-          }
-      },
-      "OPTION2_NAME_HERE": {
-        "oneWordSummary$": "<summary-here>",
-        "description$": "<description-here>",
-        "settings": {
-            "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>",
-            "TOOL_HEX2DFU_PREFIX" : "<path-to-hex2dfu-utility-mind-the-forward-slash>",
-            "TARGET_SERIES" : "<series-name-of-the-target-chip-STM32F0xx-STM32F4xx-STM32F7xx>",
-            "USE_FPU" : "<TRUE-for-using-hardware-floating-point-unit>",
-            "CHIBIOS_VERSION" : "<N.N.N>",
-            "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
-            "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
-            "SWO_OUTPUT" : "OFF-default-ON-to-enable-ARM-CortexM-Single-Wire-Output",
-			      "NF_BUILD_RTM" : "OFF-default-ON-to-enable-RTM-build",
-            "NF_FEATURE_DEBUGGER" : "TRUE-to-include-nF-debugger",
-            "NF_FEATURE_RTC" : "OFF-default-ON-to-enable-hardware-RTC",
-            "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
-            "NF_FEATURE_USE_NETWORKING" : "OFF-default-ON-to-enable-support",
-            "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Adc" : "OFF-default-ON-to-add-this-API",
-            "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API"
+          "BUILD_VERSION" : "0.9.99.999",
+          "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>",
+          "TOOL_HEX2DFU_PREFIX" : "<path-to-hex2dfu-utility-mind-the-forward-slash>",
+          "ESP32_IDF_PATH" : "<path-to-esp32-idf-mind-the-forward-slash>/esp-idf",
+          "ESP32_LIBS_PATH" : "<path-to-esp32-libraries-mind-the-forward-slash>/libs",
+          "TARGET_SERIES" : "<series-name-of-the-target-chip-----STM32F0xx-STM32F4xx-STM32F7xx-ESP32>",
+          "USE_RNG" : "<ON-default-for-using-hardware-true-random-generator-unit>",
+          "DP_FLOATINGPOINT" : "<OFF-default-ON-for-adding-support-for-double-precision-floating-point>",
+          "SUPPORT_ANY_BASE_CONVERSION" : "<OFF-default-ON-for-adding-support-for-conversion-strings-to-values-on-any-base>",
+          "RTOS" : "<one-of-valid-rtos-options----CHIBIOS-FREERTOS>",
+          "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
+          "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
+          "SWO_OUTPUT" : "OFF-default-ON-to-enable-ARM-CortexM-Single-Wire-Output",
+          "NF_BUILD_RTM" : "OFF-default-ON-to-enable-RTM-build",
+          "NF_WP_TRACE_ERRORS" : "OFF-default-ON-to-enable-trace-error-messages-wire-protocol",
+          "NF_WP_TRACE_HEADERS" : "OFF-default-ON-to-enable-trace-header-messages-wire-protocol",
+          "NF_WP_TRACE_STATE" : "OFF-default-ON-to-enable-trace-state-messages-wire-protocol",
+          "NF_WP_TRACE_NODATA" : "OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol",
+          "NF_WP_TRACE_ALL" : "OFF-default-ON-to-enable-trace-all-messages-wire-protocol",
+          "NF_WP_IMPLEMENTS_CRC32" : "OFF-default-ON-to-enable-CRC32-wire-protocol",
+          "NF_FEATURE_DEBUGGER" : "OFF-default-ON-to-include-managed-app-debugging-capability",
+          "NF_FEATURE_RTC" : "OFF-default-ON-to-enable-hardware-RTC",
+          "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
+          "NF_FEATURE_WATCHDOG" : "ON-to-enable-hardware-watchdog-ON-is-default",
+          "NF_FEATURE_HAS_CONFIG_BLOCK" : "OFF-default-ON-to-enable-configuration-block-storage",
+          "NF_PLATFORM_NO_CLR_TRACE" : "OFF-default-ON-to-disable-all-trace-on-CLR",
+          "NF_CLR_NO_IL_INLINE" : "OFF-default-ON-to-disable-CLR-IL-inlining",
+          "NF_INTEROP_ASSEMBLIES" : [ "Assembly1-Namespace", "Assembly2-Namespace" ],
+          "NF_FEATURE_USE_FILESYSTEM" : "OFF-default-ON-to-enable-support",
+          "NF_NETWORKING_SNTP" :  "ON-default-to-add-SNTP-client-requires-networking",
+          "NF_SECURITY_OPENSSL" : "OFF-default-ON-to-add-network-security-from-OpenSSL",
+          "NF_SECURITY_MBEDTLS" : "OFF-default-ON-to-add-network-security-from-mbedTLS",
+          "MBEDTLS_SOURCE" :  "<path-to-mbedtls-source-mind-the-forward-slashes>",
+          "API_System.Net" : "OFF-default-ON-to-add-this-API",
+          "API_Windows.Devices.Adc" : "OFF-default-ON-to-add-this-API",
+          "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
+          "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API",
+          "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API",
+          "API_Windows.Devices.SerialCommunication" : "OFF-default-ON-to-add-this-API",
+          "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
+          "API_Windows.Networking.Sockets" : "OFF-default-ON-to-add-this-API",
+          "API_Hardware.Esp32" : "OFF-default-ON-to-add-this-API"
         }
-      },
-      "default$": "",
-      "description$": "Variant for builds"
+      }
     }
+  }
 }

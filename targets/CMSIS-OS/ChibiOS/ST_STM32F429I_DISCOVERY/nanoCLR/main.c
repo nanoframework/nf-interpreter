@@ -13,16 +13,13 @@
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
-
-// need this definition here because it depends on the specifics of the target (how many INT lines exist on that series/device)
-#if (HAL_USE_EXT == TRUE)
-EXTConfig extInterruptsConfiguration = { .channels = { {EXT_CH_MODE_DISABLED, NULL} }};
-#endif
+#include <nanoHAL_v2.h>
+#include <targetPAL.h>
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityNormal, 2048, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here 
-osThreadDef(CLRStartupThread, osPriorityNormal, 2048, "CLRStartupThread"); 
+osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread"); 
 
 //  Application entry point.
 int main(void) {
@@ -40,6 +37,13 @@ int main(void) {
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
 
+  // start watchdog
+  Watchdog_Init();
+
+  // config and init external memory
+  // this has to be called after osKernelInitialize, otherwise an hard fault will occur
+  Target_ExternalMemoryInit();
+
   //  Initializes a serial-over-USB CDC driver.
   sduObjectInit(&SDU1);
   sduStart(&SDU1, &serusbcfg);
@@ -53,13 +57,17 @@ int main(void) {
 
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
-  // create the CLR Startup thread 
-  osThreadCreate(osThread(CLRStartupThread), NULL); 
 
-  // EXT driver needs to be started from main   
-  #if (HAL_USE_EXT == TRUE)
-  extStart(&EXTD1, &extInterruptsConfiguration);
-  #endif
+  // CLR settings to launch CLR thread
+  CLR_SETTINGS clrSettings;
+  (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+
+  clrSettings.MaxContextSwitches         = 50;
+  clrSettings.WaitForDebugger            = false;
+  clrSettings.EnterDebuggerLoopAfterExit = true;
+
+  // create the CLR Startup thread 
+  osThreadCreate(osThread(CLRStartupThread), &clrSettings);
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();

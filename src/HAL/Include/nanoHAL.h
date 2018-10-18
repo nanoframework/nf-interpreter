@@ -8,6 +8,7 @@
 #define _NANOHAL_H_ 1
 
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
 #include <nanoWeak.h>
@@ -213,7 +214,6 @@
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
 #define ExtractEventFromTransport(x) (ExtractTransport(x) == USART_TRANSPORT     ? SYSTEM_EVENT_FLAG_COM_IN: \
-                                      ExtractTransport(x) == USB_TRANSPORT       ? SYSTEM_EVENT_FLAG_USB_IN: \
                                       ExtractTransport(x) == SOCKET_TRANSPORT    ? SYSTEM_EVENT_FLAG_SOCKET: \
                                       ExtractTransport(x) == GENERIC_TRANSPORT   ? SYSTEM_EVENT_FLAG_GENERIC_PORT: \
                                       ExtractTransport(x) == DEBUG_TRANSPORT     ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY: \
@@ -289,7 +289,8 @@
 // Creates a COM_HANDLE value for a platform specific port number
 #define ConvertCOM_DebugHandle(x)    ((COM_HANDLE)((x) + DEBUG_TRANSPORT     + 1))
 
-
+// Extracts a Socket transport port id from a SOCKET_TRASNPORT COM_HANDLE
+#define ConvertCOM_SockPort(x)      (((x) & PORT_NUMBER_MASK) - 1)
 
 typedef unsigned int FLASH_WORD;
 
@@ -573,7 +574,7 @@ void HAL_Assert  ( const char* Func, int Line, const char* File );
 // HAL_AssertEx is defined in the processor or platform selector files.
 extern void HAL_AssertEx();
 
-#if defined(PLATFORM_ARM)
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
     #if !defined(BUILD_RTM)
         #define       ASSERT(i)  { if(!(i)) HAL_AssertEx(); }
         #define _SIDE_ASSERTE(i) { if(!(i)) HAL_AssertEx(); }
@@ -619,67 +620,20 @@ extern void HAL_AssertEx();
 #define CT_ASSERT(e)                  CT_ASSERT_UNIQUE_NAME(e,nanoclr)
 #endif
 
+extern "C"
+{
+#if !defined(BUILD_RTM)
 
+void debug_printf( const char *format, ... );
 
+#else
 
+__inline void debug_printf( const char *format, ... ) {}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif  // !defined(BUILD_RTM)
+}
 //--//
 
-//These events match emulator events in Framework\Tools\Emulator\Events.cs
-
-#define SYSTEM_EVENT_FLAG_COM_IN                    0x00000001
-#define SYSTEM_EVENT_FLAG_COM_OUT                   0x00000002
-#define SYSTEM_EVENT_FLAG_USB_IN                    0x00000004
-//#define SYSTEM_EVENT_FLAG_USB_OUT                   0x00000008
-#define SYSTEM_EVENT_FLAG_SYSTEM_TIMER              0x00000010
-//#define SYSTEM_EVENT_FLAG_TIMER1                    0x00000020
-//#define SYSTEM_EVENT_FLAG_TIMER2                    0x00000040
-//#define SYSTEM_EVENT_FLAG_BUTTON                    0x00000080
-#define SYSTEM_EVENT_FLAG_GENERIC_PORT              0x00000100
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00000200         0x00000200
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00000400         0x00000400
-//#define SYSTEM_EVENT_FLAG_NETWORK                   0x00000800
-//#define SYSTEM_EVENT_FLAG_TONE_COMPLETE             0x00001000
-//#define SYSTEM_EVENT_FLAG_TONE_BUFFER_EMPTY         0x00002000
-#define SYSTEM_EVENT_FLAG_SOCKET                    0x00004000
-//#define SYSTEM_EVENT_FLAG_SPI                       0x00008000
-//#define SYSTEM_EVENT_FLAG_CHARGER_CHANGE            0x00010000
-//#define SYSTEM_EVENT_FLAG_OEM_RESERVED_1            0x00020000
-//#define SYSTEM_EVENT_FLAG_OEM_RESERVED_2            0x00040000
-#define SYSTEM_EVENT_FLAG_IO                        0x00080000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00100000         0x00100000
-
-
-
-
-
-
-
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00200000         0x00200000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00400000         0x00400000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x00800000         0x00800000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x01000000         0x01000000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x02000000         0x02000000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x04000000         0x04000000
-#define SYSTEM_EVENT_HW_INTERRUPT                   0x08000000
-//#define SYSTEM_EVENT_I2C_XACTION                    0x10000000
-#define SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY         0x20000000
-#define SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY        0x40000000
-//#define SYSTEM_EVENT_FLAG_UNUSED_0x80000000         0x80000000
-#define SYSTEM_EVENT_FLAG_ALL                       0xFFFFFFFF
 
 
 
@@ -700,6 +654,52 @@ extern void HAL_AssertEx();
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//--//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//--//
 
 
 
@@ -792,6 +792,14 @@ public:
 };
 
 //--//
+
+// The use of offsetof below throwns an "invalid offset warning" because CLR_RT_StackFrame is not POD type 
+// C+17 is the first standard that allow this, so until we are using it we have to disable it to keep GCC happy 
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
 
 template <class T> class HAL_DblLinkedList
 {
@@ -917,6 +925,10 @@ public:
         return node;
     }
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 //--//
 
@@ -1129,6 +1141,243 @@ public:
     T* Storage() { return m_data; }
 };
 
+template<typename T> class HAL_RingBuffer 
+{
+    size_t _size;
+    size_t _capacity;
+    size_t _write_index;
+    size_t _read_index;
+    T * _buffer;
+
+public:
+
+    void Initialize(T* data, size_t size)
+    {
+        _capacity = size;
+        _write_index = 0;
+        _read_index = 0;
+        _size = 0;
+
+        _buffer = data;
+    }
+
+    size_t Capacity() { return _capacity; }
+
+    size_t Length() { return _size; }
+
+    // Push a single element to the buffer.
+    size_t Push(const T data)
+    {
+        T* destination = _buffer;
+        destination += _write_index;
+
+        *destination = data;
+        _write_index += 1;
+        
+        // check if we are the end of the capacity
+        if (_write_index == _capacity) _write_index = 0;
+
+        // update ring buffer size
+        _size += 1;
+
+        return 1;
+    }
+
+    // Push N elements to the buffer.
+    size_t Push(const T* data, size_t length)
+    {
+        size_t lengthToWrite = 0;
+
+        // sanity check for 0 length
+        if (length == 0) return 0;
+
+        if(length < _capacity - _size)
+        {
+            lengthToWrite = length;
+        }
+        else
+        {
+            lengthToWrite = _capacity - _size;
+        }
+
+        // single memcpy
+        if (lengthToWrite <= _capacity - _write_index)
+        {
+            memcpy(_buffer + _write_index, data, lengthToWrite);
+            _write_index += lengthToWrite;
+           
+            // check if we are the end of the capacity
+            if (_write_index == _capacity) _write_index = 0;
+        }
+        // need to memcpy in two chunks
+        else
+        {
+            size_t chunk1Size = _capacity - _write_index;
+            memcpy(_buffer + _write_index, data, chunk1Size);
+
+            size_t chunk2Size = lengthToWrite - chunk1Size;
+            memcpy(_buffer, data + chunk1Size, chunk2Size);
+
+            _write_index = chunk2Size;
+        }
+
+        // update ring buffer size
+        _size += lengthToWrite;
+
+        return lengthToWrite;
+    }
+
+    // Pop N elements from ring buffer returning them in the data argument.
+    size_t Pop(T* data, size_t length)
+    {
+        size_t lengthToRead = 0;
+
+        // sanity check for 0 length
+        if (length == 0) return 0;
+
+        if(length < _size)
+        {
+            lengthToRead = length;
+        }
+        else
+        {
+            lengthToRead = _size;
+        }
+
+        // can read in a single memcpy
+        if (lengthToRead <= _capacity - _read_index)
+        {
+            memcpy(data, _buffer + _read_index, lengthToRead);
+            _read_index += lengthToRead;
+
+            // check if we are at end of capacity
+            if (_read_index == _capacity) _read_index = 0;
+        }
+        // need to memcpy in two steps
+        else
+        {
+            size_t chunk1Size = _capacity - _read_index;
+            memcpy(data, _buffer + _read_index, chunk1Size);
+
+            size_t chunk2Size = lengthToRead - chunk1Size;
+            memcpy(data + chunk1Size, _buffer, chunk2Size);
+
+            _read_index = chunk2Size;
+        }
+
+        // update ring buffer size
+        _size -= lengthToRead;
+
+        // check for optimization to improve sequential push
+        // buffer has to be empty and read and write indexes coincide
+        if(_size == 0 && (_write_index == _read_index))
+        {
+            // reset the read/write index
+            _write_index = 0;
+            _read_index = 0;
+        }
+
+        return lengthToRead;
+    }
+
+    // Pop N elements from ring buffer. The elements are not actually returned, just popped from the buffer.
+    size_t Pop(size_t length)
+    {
+        size_t lengthToRead = 0;
+
+        // sanity check for 0 length
+        if (length == 0) return 0;
+
+        if(length < _size)
+        {
+            lengthToRead = length;
+        }
+        else
+        {
+            lengthToRead = _size;
+        }
+
+        // can read in a single memcpy
+        if (lengthToRead <= _capacity - _read_index)
+        {
+            _read_index += lengthToRead;
+
+            // check if we are at end of capacity
+            if (_read_index == _capacity) _read_index = 0;
+        }
+        // need to memcpy in two steps
+        else
+        {
+            size_t chunk1Size = _capacity - _read_index;
+            size_t chunk2Size = lengthToRead - chunk1Size;
+            _read_index = chunk2Size;
+        }
+
+        // update ring buffer size
+        _size -= lengthToRead;
+
+        // check for optimization to improve sequential push
+        // buffer has to be empty and read and write indexes coincide
+        if(_size == 0 && (_write_index == _read_index))
+        {
+            // reset the read/write index
+            _write_index = 0;
+            _read_index = 0;
+        }
+
+        return lengthToRead;
+    }
+
+    void OptimizeSequence()
+    {
+        // no elements, so there is nothing to optimize
+        if(_size == 0) return;
+     
+        // read index is already at index 0, so there is nothing to optimize
+        if(_read_index == 0) return;
+
+        // can move data in a single memcpy
+        if (_read_index < _write_index)
+        {
+            // buffer looks like this
+            // |...xxxxx.....|
+            memcpy(_buffer, _buffer + _read_index, _size);
+        }
+        // need to move data in two steps
+        else
+        {
+            // buffer looks like this
+            // |xxxx......xxxxxx|
+            
+            // store size of tail
+            size_t tailSize = _write_index - 1;
+
+            // 1st move tail to temp buffer (need to malloc first)
+            T* tempBuffer = (T*)platform_malloc(tailSize);
+            
+            memcpy(tempBuffer, _buffer, tailSize);
+            
+            // store size of remaining buffer
+            size_t headSize = _capacity - _read_index;
+
+            // 2nd move head to start of buffer
+            memcpy(_buffer, _buffer + _read_index, headSize);
+
+            // 3rd move temp buffer after head
+            memcpy(_buffer + headSize, tempBuffer, tailSize);
+
+            // free memory
+            platform_free(tempBuffer);
+        }
+
+        // adjust indexes
+        _read_index = 0;
+        _write_index = _size;
+    }
+
+    T* Reader() { return _buffer + _read_index; }
+};
+
 //--//
 
 //#include <..\Initialization\MasterConfig.h>
@@ -1283,16 +1532,8 @@ void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler);
 //--//
 
 
-//
-// This has to be extern "C" because we want to use platform implemented malloc 
-//
-extern "C" {
 
-void* platform_malloc ( size_t size             );
-void  platform_free   ( void*  ptr              );
-void* platform_realloc( void*  ptr, size_t size );
 
-}
 
 
 
@@ -1515,7 +1756,7 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 
 //--//
 
-
+#include <nanoPAL_Network.h>
 #include <nanoPAL.h>
 //#include <drivers.h>
 
@@ -1540,22 +1781,22 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 //#include <CPU_GPIO_decl.h>
 //
 
-//// Watchdog driver
-//#include <CPU_WATCHDOG_decl.h>
 
-/// <summary>
-/// Resets the watchdog timer. This method is called periodically by the system to ensure that the watchdog event does not occur, unless the 
-/// system is in a stalled state.
-/// </summary>
-void    Watchdog_ResetCounter( );
 
-/// <summary>
-/// Gets or sets the watchdog enable state.
-/// </summary>
-/// <param name="enabled">Sets the watchdog enabled state when fSet is true; otherwise this parameter is ignored</param>
-/// <param name="fSet">Determines if this call is getting or setting the enabled state</param>
-/// <returns>Returns the current enabled state of the watchdog</returns>
-bool              Watchdog_GetSetEnabled ( bool enabled, bool fSet );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //
 //// SPI driver
@@ -1582,7 +1823,6 @@ bool              Watchdog_GetSetEnabled ( bool enabled, bool fSet );
 //// Power API
 //#include <Power_decl.h>
 
-void CPU_Reset();
 
 
 //
@@ -1597,13 +1837,12 @@ void CPU_Reset();
 
 #if defined(_WIN32)
 
-#define GLOBAL_LOCK(x)               // UNDONE: FIXME: SmartPtr_IRQ x
+#define GLOBAL_LOCK(x)
 //#define DISABLE_INTERRUPTS()       SmartPtr_IRQ::ForceDisabled()
 //#define ENABLE_INTERRUPTS()        SmartPtr_IRQ::ForceEnabled()
 //#define INTERRUPTS_ENABLED_STATE() SmartPtr_IRQ::GetState()
 //#define GLOBAL_LOCK_SOCKETS(x)     // UNDONE: FIXME: SmartPtr_IRQ x
 #define GLOBAL_UNLOCK(x)
-
 
 #if defined(_DEBUG)
 #define ASSERT_IRQ_MUST_BE_OFF()   ASSERT( HAL_Windows_HasGlobalLock())
@@ -1613,7 +1852,7 @@ void CPU_Reset();
 #define ASSERT_IRQ_MUST_BE_ON()
 #endif
 
-#elif defined(__arm__)
+#elif defined(__arm__)  | defined(PLATFORM_ESP32)
 // nothing to define here just to help the nanoCLR VS project to build hapilly
 #else
 #error Unsupported platform

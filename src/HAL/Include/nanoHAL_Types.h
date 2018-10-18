@@ -6,7 +6,7 @@
 #ifndef _HAL_TYPES_H_
 #define _HAL_TYPES_H_ 1
 
-#include <netmf_errors.h>
+#include <nf_errors_exceptions.h>
 
 #include <stddef.h>
 

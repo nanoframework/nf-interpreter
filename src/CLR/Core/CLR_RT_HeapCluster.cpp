@@ -22,20 +22,68 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize( CLR_UINT32 size, CLR_UINT32 blo
     // Scan memory looking for possible objects to salvage.  This method returns false if HeapPersistence is stubbed
     // which requires us to set up the free list.
     //
-    if(!CLR_RT_HeapBlock_WeakReference::PrepareForRecovery( m_payloadStart, m_payloadEnd, blockSize ))
+    // used to be CLR_RT_HeapBlock_WeakReference::PrepareForRecovery( CLR_RT_HeapBlock_Node* ptr, CLR_RT_HeapBlock_Node* end, CLR_UINT32 blockSize )
+
+    CLR_RT_HeapBlock_Node* ptr = m_payloadStart;
+    CLR_RT_HeapBlock_Node* end = m_payloadEnd;
+
+    while(ptr < end)
     {
-        CLR_RT_HeapBlock_Node *ptr = m_payloadStart;
-        
-        while(ptr < m_payloadEnd)
+        if(ptr->DataType() == DATATYPE_WEAKCLASS)
         {
-            if((unsigned int)(ptr + blockSize) > (unsigned int)m_payloadEnd)
+            CLR_RT_HeapBlock_WeakReference* weak = (CLR_RT_HeapBlock_WeakReference*)ptr;
+
+            if(weak->DataSize() == CONVERTFROMSIZETOHEAPBLOCKS(sizeof(*weak)) && weak->m_targetSerialized != NULL && (weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_SurviveBoot))
             {
-                blockSize = (CLR_UINT32)(m_payloadEnd - ptr);
+                weak->SetNext( NULL );
+                weak->SetPrev( NULL );
+
+                weak->m_identity.m_flags &= ~CLR_RT_HeapBlock_WeakReference::WR_Persisted;
+
+                weak->m_targetDirect = NULL;
+
+                weak->MarkAlive();
+
+                ptr += ptr->DataSize();
+                continue;
             }
-            
-            ptr->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK,0,blockSize) );
-            ptr += blockSize;
         }
+        else if(ptr->DataType() == DATATYPE_SZARRAY)
+        {
+            CLR_RT_HeapBlock_Array* array = (CLR_RT_HeapBlock_Array*)ptr;
+
+            if(array->m_typeOfElement == DATATYPE_U1 && array->m_fReference == 0)
+            {
+                CLR_UINT32 tot = sizeof(*array) + array->m_sizeOfElement * array->m_numOfElements;
+
+                if(array->DataSize() == CONVERTFROMSIZETOHEAPBLOCKS(tot) && (ptr + ptr->DataSize()) <= end)
+                {
+                    array->MarkAlive();
+
+                    ptr += ptr->DataSize();
+                    continue;
+                }
+            }
+        }
+
+        if((unsigned int)(ptr + blockSize) > (unsigned int)end)
+        {
+            blockSize = (CLR_UINT32)(end - ptr);
+        }
+
+        ptr->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK,0,blockSize) );
+        ptr += blockSize;
+    }
+    
+    while(ptr < m_payloadEnd)
+    {
+        if((unsigned int)(ptr + blockSize) > (unsigned int)m_payloadEnd)
+        {
+            blockSize = (CLR_UINT32)(m_payloadEnd - ptr);
+        }
+        
+        ptr->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK,0,blockSize) );
+        ptr += blockSize;
     }
 
     RecoverFromGC();

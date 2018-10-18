@@ -6,11 +6,6 @@
 #ifndef _NANOCLR_RUNTIME__HEAPBLOCK_H_
 #define _NANOCLR_RUNTIME__HEAPBLOCK_H_
 
-#ifdef __arm__
-// ARM compiler does not allow anonymous structs by default
-#pragma anon_unions
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define CLR_RT_HEAPBLOCK_RAW_ID( dataType, flags, size ) ( (dataType & 0x000000FF) | ((flags & 0x000000FF) << 8) | ((size & 0x0000FFFF) << 16))
@@ -49,6 +44,11 @@ struct CLR_RT_HeapBlock_Raw
 {
     CLR_UINT32 data[ 3 ];
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 struct CLR_RT_HeapBlock
 {
@@ -139,18 +139,18 @@ private:
 
             struct U8
             {
-                CLR_UINT32 _L;
-                CLR_UINT32 _H;
+                CLR_UINT32 LL;
+                CLR_UINT32 HH;
 
                 operator CLR_UINT64() const
                 {
-                    return ((CLR_UINT64)_H << 32 | (CLR_UINT64)_L );
+                    return ((CLR_UINT64)HH << 32 | (CLR_UINT64)LL );
                 }
 
                 U8& operator=( const CLR_UINT64 num )
                 {
-                    _L = (CLR_UINT32)((ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)      );
-                    _H = (CLR_UINT32)((ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32);
+                    LL = (CLR_UINT32)((ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)      );
+                    HH = (CLR_UINT32)((ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32);
                     return *this;
                 }
                 U8& operator+=( const U8& num )
@@ -191,8 +191,8 @@ private:
                 U8 operator~( )
                 {
                     U8 ret_value;
-                    ret_value._L = ~_L;                        
-                    ret_value._H = ~_H;
+                    ret_value.LL = ~LL;                        
+                    ret_value.HH = ~HH;
                     return ret_value;
                 }
 
@@ -207,22 +207,22 @@ private:
 
                 U8& operator&=( const U8& num )
                 {
-                    _L &= num._L;
-                    _H &= num._H;
+                    LL &= num.LL;
+                    HH &= num.HH;
                     return *this;
                 }
 
                 U8& operator|=( const U8& num )
                 {
-                    _L |= num._L;
-                    _H |= num._H;
+                    LL |= num.LL;
+                    HH |= num.HH;
                     return *this;
                 }
 
                 U8& operator^=( const U8& num )
                 {
-                    _L ^= num._L;
-                    _H ^= num._H;
+                    LL ^= num.LL;
+                    HH ^= num.HH;
                     return *this;
                 }
 
@@ -275,18 +275,18 @@ private:
 
             struct S8
             {
-                CLR_UINT32 _L;
-                CLR_UINT32 _H;
+                CLR_UINT32 LL;
+                CLR_UINT32 HH;
 
                 operator CLR_INT64() const
                 {
-                     return (((CLR_UINT64)_H) << 32 | (CLR_UINT64)_L);
+                     return (((CLR_UINT64)HH) << 32 | (CLR_UINT64)LL);
                 }
 
                 S8& operator=( const CLR_INT64 num )
                 {
-                    _L = (CLR_UINT32) (( ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)       );
-                    _H = (CLR_UINT32) (( ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32 );
+                    LL = (CLR_UINT32) (( ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)       );
+                    HH = (CLR_UINT32) (( ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32 );
                     return *this;
                 }
 
@@ -327,8 +327,8 @@ private:
                 S8 operator~()
                 {
                     S8 ret_value;
-                    ret_value._L = ~_L;
-                    ret_value._H = ~_H;    
+                    ret_value.LL = ~LL;
+                    ret_value.HH = ~HH;    
                     return ret_value;
                 }
 
@@ -344,22 +344,22 @@ private:
 
                 S8& operator&=( const S8& num )
                 {
-                    _L &= num._L;
-                    _H &= num._H;
+                    LL &= num.LL;
+                    HH &= num.HH;
                     return *this;
                 }
 
                 S8& operator|=( const S8& num )
                 {
-                    _L |= num._L;
-                    _H |= num._H;
+                    LL |= num.LL;
+                    HH |= num.HH;
                     return *this;
                 }
 
                 S8& operator^=( const S8& num )
                 {
-                    _L ^= num._L;
-                    _H ^= num._H;
+                    LL ^= num.LL;
+                    HH ^= num.HH;
                     return *this;
                 }
 
@@ -407,77 +407,77 @@ private:
             } s8;
             //
 
-#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
+          #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
             float      r4;
 
             struct R8
             {
-                CLR_UINT32 _L;
-                CLR_UINT32 _H;
+                CLR_UINT32 LL;
+                CLR_UINT32 HH;
 
                 operator double() const
                 {
                     double ret_val;
 
-#if defined(__GNUC__)
-///
-/// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
-/// When the optimization level is greater than zero, the gcc compiler
-/// code will not work with the unsigned int* conversion, it requires you 
-/// to copy byte by byte.
-///
+            #if defined(__GNUC__)
+            ///
+            /// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
+            /// When the optimization level is greater than zero, the gcc compiler
+            /// code will not work with the unsigned int* conversion, it requires you 
+            /// to copy byte by byte.
+            ///
                     CLR_UINT8* tmp = (CLR_UINT8*)&ret_val;
-                    CLR_UINT8* src = (CLR_UINT8*)&_L;
-                    int i;
+                    CLR_UINT8* src = (CLR_UINT8*)&LL;
+                    uint32_t i;
                     
                     for(i=0; i<sizeof(CLR_UINT32); i++)
                     {
                         *tmp++ = *src++;
                     }
 
-                    src = (CLR_UINT8*)&_H;
+                    src = (CLR_UINT8*)&HH;
                     for(i=0; i<sizeof(CLR_UINT32); i++)
                     {
                         *tmp++ = *src++;
                     }
-#else
+            #else
                     CLR_UINT32 *tmp = (CLR_UINT32*)&ret_val;
-                    tmp[0]=_L;
-                    tmp[1]=_H;
-#endif // defined(__GNUC__)
+                    tmp[0]=LL;
+                    tmp[1]=HH;
+            #endif // defined(__GNUC__)
 
                     return ret_val;
                 }
 
                 R8& operator=( const double num )
                 {
-#if defined(__GNUC__)
-///
-/// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
-/// When the optimization level is greater than zero, the gcc compiler
-/// code will not work with the unsigned int* conversion, it requires you 
-/// to copy byte by byte.
-///
+            #if defined(__GNUC__)
+            ///
+            /// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
+            /// When the optimization level is greater than zero, the gcc compiler
+            /// code will not work with the unsigned int* conversion, it requires you 
+            /// to copy byte by byte.
+            ///
                     CLR_UINT8* src = (CLR_UINT8*)&num;
-                    CLR_UINT8* dst = (CLR_UINT8*)&_L;
-                    int i;
+                    CLR_UINT8* dst = (CLR_UINT8*)&LL;
+                    uint32_t i;
                     
                     for(i=0; i<sizeof(CLR_UINT32); i++)
                     {
                         *dst++ = *src++;
                     }
 
-                    dst = (CLR_UINT8*)&_H;
+                    dst = (CLR_UINT8*)&HH;
                     for(i=0; i<sizeof(CLR_UINT32); i++)
                     {
                         *dst++ = *src++;
                     }
-#else
+            #else
                     CLR_UINT32* tmp= (CLR_UINT32 *) &num;
-                    _L = (CLR_UINT32)tmp[0];
-                    _H = (CLR_UINT32)tmp[1];
-#endif
+                    LL = (CLR_UINT32)tmp[0];
+                    HH = (CLR_UINT32)tmp[1];
+            #endif
 
                     return *this;
                 }
@@ -544,39 +544,39 @@ private:
 
             } r8;
 
-#else  
- /// not using floating point lib, emulated one
+          #else  
+          /// not using floating point lib, emulated one
 
             struct R4 {
                
-                CLR_INT32  _L;
+                CLR_INT32  LL;
 
                 operator CLR_INT32 () const
                 {
-                    return _L;
+                    return LL;
                 }
 
                 R4& operator=( const CLR_INT32 num )
                 {
-                    _L = num;
+                    LL = num;
                     return *this;
                 }
                 R4& operator+=( const R4& num )
                 {
-                    _L += num._L;
+                    LL += num.LL;
                     return *this;
                 }
 
                 R4& operator-=( const R4& num )
                 {
-                    _L -= num._L;
+                    LL -= num.LL;
                    return *this;
                 }
 
 
                 R4& operator%=( const R4& num )
                 {
-                    _L %= num._L;
+                    LL %= num.LL;
                     return *this;
                 }
 
@@ -584,14 +584,14 @@ private:
                 R4 operator*( const R4& num )
                 {
                     R4  ret_value;
-                    ret_value._L = (CLR_INT32)(((CLR_INT64)_L * (CLR_INT64)num._L) >> HB_FloatShift );
+                    ret_value.LL = (CLR_INT32)(((CLR_INT64)LL * (CLR_INT64)num.LL) >> HB_FloatShift );
                     return ret_value;
                 }
 
                 R4 operator/( const R4& num )
                 {
                     R4 ret_value;
-                    ret_value._L = (CLR_INT32)((((CLR_INT64)_L) << HB_FloatShift)  / (CLR_INT64)num._L); 
+                    ret_value.LL = (CLR_INT32)((((CLR_INT64)LL) << HB_FloatShift)  / (CLR_INT64)num.LL); 
                     return ret_value;
                 }
 
@@ -599,18 +599,18 @@ private:
 
             struct R8
             {
-                CLR_UINT32 _L;
-                CLR_UINT32 _H;
+                CLR_UINT32 LL;
+                CLR_UINT32 HH;
 
                 operator CLR_INT64() const
                 {
-                    return ((CLR_INT64)_H << 32 | (CLR_INT64)_L );
+                    return ((CLR_INT64)HH << 32 | (CLR_INT64)LL );
                 }
 
                 R8& operator=( const CLR_INT64 num )
                 {
-                    _L = (CLR_UINT32) (( ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)       );
-                    _H = (CLR_UINT32) (( ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32 );
+                    LL = (CLR_UINT32) (( ULONGLONGCONSTANT(0x00000000FFFFFFFF) & num)       );
+                    HH = (CLR_UINT32) (( ULONGLONGCONSTANT(0xFFFFFFFF00000000) & num) >> 32 );
                     return *this;
                 }
 
@@ -653,14 +653,14 @@ private:
 
                     CLR_UINT64 v;
 
-#define ACCUMULATE(res,op,part) v = op1 * (CLR_UINT16)(op2 >> (16 * part)); res += (16 * part - HB_DoubleShift >= 0) ? (v << (16 * part - HB_DoubleShift)) : (v >> (HB_DoubleShift - 16 * part))
+    #define ACCUMULATE(res,op,part) v = op1 * (CLR_UINT16)(op2 >> (16 * part)); res += (16 * part - HB_DoubleShift >= 0) ? (v << (16 * part - HB_DoubleShift)) : (v >> (HB_DoubleShift - 16 * part))
 
                     ACCUMULATE(res,+=,0);
                     ACCUMULATE(res,+=,1);
                     ACCUMULATE(res,+=,2);
                     ACCUMULATE(res,+=,3);
 
-#undef ACCUMULATE
+    #undef ACCUMULATE
 
                     ret_value = (CLR_INT64)res;
 
@@ -708,7 +708,7 @@ private:
 
             } r8;
 
-#endif
+    #endif
         } numeric;
 
         // The macro CT_ASSERT is used to validate that members of Numeric union start at zero offset in union.
@@ -862,7 +862,18 @@ public:
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     void SetFloat  ( const float       num ) { CLR_RT_HEAPBLOCK_ASSIGN_FLOAT32           (DATATYPE_R4, num); }
     void SetDouble ( const double      num ) { CLR_RT_HEAPBLOCK_ASSIGN_FLOAT64           (DATATYPE_R8, num); }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
     void SetFloatFromBits ( const CLR_UINT32  num ) { SetFloat ( *(const float *)&num ); }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
     void SetDoubleFromBits( const CLR_UINT64& num ) { SetDouble( *(const double*)&num ); }
 #else
     void SetFloat  ( const CLR_INT32   num ) { CLR_RT_HEAPBLOCK_ASSIGN_FLOAT32           (DATATYPE_R4, num); }
@@ -1169,6 +1180,10 @@ private:
 
 };
 
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 //--//
 
 #define NANOCLR_FOREACH_NODE(cls,ptr,lst)                                                            \
@@ -1244,7 +1259,10 @@ private:
         }                                                                                            \
     }
 
-
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 struct CLR_RT_HeapBlock_Node : public CLR_RT_HeapBlock
 {
@@ -1318,6 +1336,10 @@ struct CLR_RT_HeapBlock_Node : public CLR_RT_HeapBlock
 
      void Relocate();
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 struct CLR_RT_DblLinkedList
 {
@@ -1752,10 +1774,8 @@ struct CLR_RT_HeapBlock_Timer : public CLR_RT_ObjectToEvent_Destination // EVENT
 
     static const CLR_UINT32 c_INPUT_Int32      = 0x00100000;
     static const CLR_UINT32 c_INPUT_TimeSpan   = 0x00200000;
-    static const CLR_UINT32 c_INPUT_Absolute   = 0x00400000;
 
     static const CLR_UINT32 c_UNUSED_10000000  = 0x10000000;
-    static const CLR_UINT32 c_AbsoluteTimer    = 0x20000000;
     static const CLR_UINT32 c_Recurring        = 0x40000000;
     static const CLR_UINT32 c_EnabledTimer     = 0x80000000;
 
@@ -1989,9 +2009,6 @@ struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT H
     static const CLR_UINT32 WR_Unused_10000000    = 0x10000000;
     static const CLR_UINT32 WR_Persisted          = 0x20000000;
     static const CLR_UINT32 WR_Restored           = 0x40000000;
-    static const CLR_UINT32 WR_ExtendedType       = 0x80000000;
-
-    static const CLR_UINT32 WR_MaskForStorage = WR_SurviveBoot | WR_SurvivePowerdown | WR_ArrayOfBytes | WR_ExtendedType;
 
     //--//
 
@@ -2017,6 +2034,11 @@ struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT H
 };
 
 //--//
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 struct CLR_RT_Persistence_Manager
 {
@@ -2056,10 +2078,10 @@ struct CLR_RT_Persistence_Manager
 
          ObjectHeader* Next() const;
 
-    private:
-         CLR_UINT32 ComputeCRC() const;
+        private:
+            CLR_UINT32 ComputeCRC() const;
 
-        //--//
+            //--//
     };
 
     struct BankHeader
@@ -2186,32 +2208,32 @@ struct CLR_RT_Persistence_Manager
 
     //--//
 
-     void Initialize();
-     void Uninitialize();
-     void EraseAll  ();
+    void Initialize();
+    void Uninitialize();
+    void EraseAll  ();
 
-     void InvalidateEntry( CLR_RT_HeapBlock_WeakReference* weak );
+    void InvalidateEntry( CLR_RT_HeapBlock_WeakReference* weak );
 
-     void Relocate();
+    void Relocate();
 
-     ObjectHeader* RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref );
+    ObjectHeader* RecoverHeader( CLR_RT_HeapBlock_WeakReference* ref );
 
-     static void Callback( void* arg );
+    static void Callback( void* arg );
 
-#if !defined(BUILD_RTM)
-     void GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse );
-#endif
+  #if !defined(BUILD_RTM)
+    void GenerateStatistics( CLR_UINT32& totalSize, CLR_UINT32& inUse );
+  #endif
 
-     void Flush();
+    void Flush();
 
     //--//
 
-#undef DECL_POSTFIX
-#if defined(NANOCLR_TRACE_PERSISTENCE)
-#define DECL_POSTFIX
-#else
-#define DECL_POSTFIX {}
-#endif
+  #undef DECL_POSTFIX
+  #if defined(NANOCLR_TRACE_PERSISTENCE)
+  #define DECL_POSTFIX
+  #else
+  #define DECL_POSTFIX {}
+  #endif
 
     static void Trace_Emit( char* szText ) DECL_POSTFIX;
 
@@ -2223,12 +2245,16 @@ struct CLR_RT_Persistence_Manager
 
     //--//
 
-private:
+    private:
 
-     bool AdvanceState( bool force );
+        bool AdvanceState( bool force );
 
-     void EnqueueNextCallback();
+        void EnqueueNextCallback();
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 extern CLR_RT_Persistence_Manager g_CLR_RT_Persistence_Manager;
 
@@ -2323,7 +2349,7 @@ public:
     HRESULT Clear();
     HRESULT Insert( CLR_INT32 index, CLR_RT_HeapBlock* value );
     HRESULT RemoveAt( CLR_INT32 index );
-    HRESULT SetCapacity( CLR_INT32 newCapacity );
+    HRESULT SetCapacity( CLR_UINT32 newCapacity );
 
     //--//
     

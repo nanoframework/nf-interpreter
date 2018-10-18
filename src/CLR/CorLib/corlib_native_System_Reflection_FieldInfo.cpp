@@ -19,7 +19,6 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
     CLR_RT_HeapBlock*          obj;
     bool                       fValueType;
     CLR_RT_HeapBlock&          srcVal = stack.Arg2();        
-    CLR_RT_HeapBlock&          srcObj = stack.Arg1();        
     CLR_RT_HeapBlock           val; val.Assign( srcVal );    
     CLR_RT_ProtectFromGC       gc( val );
 
@@ -59,6 +58,8 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
     else
     {
 #if defined(NANOCLR_APPDOMAINS)
+        CLR_RT_HeapBlock&          srcObj = stack.Arg1();        
+
         if(srcObj.IsTransparentProxy())
         {
             _ASSERTE(srcObj.DataType() == DATATYPE_OBJECT);
@@ -72,14 +73,14 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
 
     switch(obj->DataType())
     {
-    case DATATYPE_DATETIME: // Special case.
-    case DATATYPE_TIMESPAN: // Special case.
-        obj->NumericByRef().s8 = val.NumericByRefConst().s8;
-        break;
+        case DATATYPE_DATETIME: // Special case.
+        case DATATYPE_TIMESPAN: // Special case.
+            obj->NumericByRef().s8 = val.NumericByRefConst().s8;
+            break;
 
-    default:
-        obj->Assign( val );
-        break;
+        default:
+            obj->Assign( val );
+            break;
     }
 
     NANOCLR_NOCLEANUP();
@@ -116,6 +117,15 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize( CLR_RT_St
                 
         obj = &obj[ instFD.CrossReference().m_offset ];
     }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
     NANOCLR_NOCLEANUP();
 }

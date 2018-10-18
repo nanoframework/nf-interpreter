@@ -70,7 +70,8 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const c
 bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    int  chars = hal_vsnprintf( szBuffer, iBuffer, format, arg );
+
+    int  chars = vsnprintf( szBuffer, iBuffer, format, arg );
     bool fRes  = (chars >= 0);
 
     if(fRes == false) chars = (int)iBuffer;
@@ -191,8 +192,7 @@ void CLR_Debug::Emit( const char *text, int len )
 
         if(s_chars > 80 || strchr( s_buffer, '\n' ))
         {
-            // UNDONE: FIXME
-            //::Watchdog_ResetCounter();
+            Watchdog_Reset();
 
 #if defined(PLATFORM_WINDOWS_EMULATOR)
             HAL_Windows_Debug_Print( s_buffer );
@@ -203,20 +203,8 @@ void CLR_Debug::Emit( const char *text, int len )
                 CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands::c_Monitor_Message, s_chars, s_buffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
             }
 
-            if(!CLR_EE_DBG_IS( Enabled ) || HalSystemConfig.DebugTextPort != HalSystemConfig.DebuggerPort)
+            if(HalSystemConfig.DebugTextPort != HalSystemConfig.DebuggerPort)
             {
-//#if !defined(PLATFORM_TOOLS)
-// TODO: Fix the build so that PLATFORM_TOOLS can work here
-// (or eliminate the use of native code from the CLR in the tools by converting them all to managed)
-// This entire function could be moved to info_win32.cpp to help.
-// The problem is that the build doesn't distinguish between building the diagnostics lib for
-// desktop tools, X86, WIN32 or the emulator platforms. And this code was written to assume 
-// an equivalence for all - as the idea of a non-win32 emulator port to an x86 device wasn't
-// considered a reality. However, for testing and development purposes a pure non-emulator x86
-// build is useful, not to mention the potential of Quark and Edison x86 family of chip sets
-// targeting IoT. Thus, this needs some re-thinking as DebuggerPort_Write etc... aren't available
-// when building the desktop tools, but should be available when building a WIN32 based test
-// platform
 #if !defined(_WIN32)
                 DebuggerPort_Write( HalSystemConfig.DebugTextPort, s_buffer, s_chars, 0 ); // skip null terminator and don't bother retrying
                 DebuggerPort_Flush( HalSystemConfig.DebugTextPort );                    // skip null terminator
@@ -232,21 +220,38 @@ int CLR_Debug::PrintfV( const char *format, va_list arg )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
+#if defined(_WIN32)
     char   buffer[512];
+	char*  szBuffer = buffer;
+    int16_t bufferSize = MAXSTRLEN(buffer);
+    size_t iBuffer  = bufferSize;
+#else
+    // this should be more than enough for the existing output needs
+    const int16_t c_BufferSize = 512;
 
-    char*  szBuffer =           buffer;
-    size_t iBuffer  = MAXSTRLEN(buffer);
-
-    bool fRes = CLR_SafeSprintfV( szBuffer, iBuffer, format, arg );
-
+    char*  buffer = (char*)platform_malloc(c_BufferSize);
+	char*  szBuffer = buffer;
+    size_t iBuffer = c_BufferSize;
+    int16_t bufferSize = c_BufferSize;
+#endif
+    
+    bool fRes = CLR_SafeSprintfV(szBuffer, iBuffer, format, arg );
+    
     _ASSERTE(fRes);
 
-    iBuffer = MAXSTRLEN(buffer) - iBuffer;
+    iBuffer = bufferSize - iBuffer;
 
     Emit( buffer, (int)iBuffer );
 
-#if defined WIN32
+#if defined(_WIN32)
 	OutputDebugStringA(buffer);
+#endif
+
+#if !defined(_WIN32)
+    if(buffer != NULL)
+    {
+        platform_free(buffer);
+    }
 #endif
 
     return (int)iBuffer;
@@ -616,7 +621,7 @@ void CLR_RT_DUMP::FIELD( const CLR_RT_FieldDef_Index& field )
 void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, const char* text )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-#define PELEMENT_TO_STRING(elem) case DATATYPE_##elem: CLR_Debug::Printf( "%s", #elem ); break
+  #define PELEMENT_TO_STRING(elem) case DATATYPE_##elem: CLR_Debug::Printf( "%s", #elem ); break
 
     CLR_Debug::Printf( "%s - ", text );
 
@@ -631,76 +636,79 @@ void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, const char* text )
 
     switch(ptr->DataType())
     {
-    case DATATYPE_CLASS:
-    case DATATYPE_VALUETYPE:
-        {
-            CLR_RT_DUMP::TYPE( ptr->ObjectCls() );
-        }
-        break;
+        case DATATYPE_CLASS:
+        case DATATYPE_VALUETYPE:
+            {
+                CLR_RT_DUMP::TYPE( ptr->ObjectCls() );
+            }
+            break;
 
-    case DATATYPE_STRING:
-        {
-            CLR_Debug::Printf( "'%s'", ptr->StringText() );
-        }
-        break;
+        case DATATYPE_STRING:
+            {
+                CLR_Debug::Printf( "'%s'", ptr->StringText() );
+            }
+            break;
 
-    case DATATYPE_SZARRAY:
-        {
-            CLR_RT_HeapBlock_Array* array = (CLR_RT_HeapBlock_Array*)ptr;
+        case DATATYPE_SZARRAY:
+            {
+                CLR_RT_HeapBlock_Array* array = (CLR_RT_HeapBlock_Array*)ptr;
 
-            CLR_RT_DUMP::TYPE( array->ReflectionData() );
-        }
-        break;
+                CLR_RT_DUMP::TYPE( array->ReflectionData() );
+            }
+            break;
 
-    case DATATYPE_DELEGATE_HEAD:
-        {
-            CLR_RT_HeapBlock_Delegate* dlg = (CLR_RT_HeapBlock_Delegate*)ptr;
+        case DATATYPE_DELEGATE_HEAD:
+            {
+                CLR_RT_HeapBlock_Delegate* dlg = (CLR_RT_HeapBlock_Delegate*)ptr;
 
-            CLR_RT_DUMP::METHOD( dlg->DelegateFtn() );
-        }
-        break;
+                CLR_RT_DUMP::METHOD( dlg->DelegateFtn() );
+            }
+            break;
 
 
-    PELEMENT_TO_STRING(BOOLEAN);
-    PELEMENT_TO_STRING(CHAR   );
-    PELEMENT_TO_STRING(I1     );
-    PELEMENT_TO_STRING(U1     );
-    PELEMENT_TO_STRING(I2     );
-    PELEMENT_TO_STRING(U2     );
-    PELEMENT_TO_STRING(I4     );
-    PELEMENT_TO_STRING(U4     );
-    PELEMENT_TO_STRING(I8     );
-    PELEMENT_TO_STRING(U8     );
-    PELEMENT_TO_STRING(R4     );
-    PELEMENT_TO_STRING(R8     );
+        PELEMENT_TO_STRING(BOOLEAN);
+        PELEMENT_TO_STRING(CHAR   );
+        PELEMENT_TO_STRING(I1     );
+        PELEMENT_TO_STRING(U1     );
+        PELEMENT_TO_STRING(I2     );
+        PELEMENT_TO_STRING(U2     );
+        PELEMENT_TO_STRING(I4     );
+        PELEMENT_TO_STRING(U4     );
+        PELEMENT_TO_STRING(I8     );
+        PELEMENT_TO_STRING(U8     );
+        PELEMENT_TO_STRING(R4     );
+        PELEMENT_TO_STRING(R8     );
 
-    PELEMENT_TO_STRING(FREEBLOCK             );
-    PELEMENT_TO_STRING(CACHEDBLOCK           );
-    PELEMENT_TO_STRING(ASSEMBLY              );
-    PELEMENT_TO_STRING(WEAKCLASS             );
-    PELEMENT_TO_STRING(REFLECTION            );
-    PELEMENT_TO_STRING(ARRAY_BYREF           );
-    PELEMENT_TO_STRING(DELEGATELIST_HEAD     );
-    PELEMENT_TO_STRING(OBJECT_TO_EVENT       );
-    PELEMENT_TO_STRING(BINARY_BLOB_HEAD      );
+        PELEMENT_TO_STRING(FREEBLOCK             );
+        PELEMENT_TO_STRING(CACHEDBLOCK           );
+        PELEMENT_TO_STRING(ASSEMBLY              );
+        PELEMENT_TO_STRING(WEAKCLASS             );
+        PELEMENT_TO_STRING(REFLECTION            );
+        PELEMENT_TO_STRING(ARRAY_BYREF           );
+        PELEMENT_TO_STRING(DELEGATELIST_HEAD     );
+        PELEMENT_TO_STRING(OBJECT_TO_EVENT       );
+        PELEMENT_TO_STRING(BINARY_BLOB_HEAD      );
 
-    PELEMENT_TO_STRING(THREAD                );
-    PELEMENT_TO_STRING(SUBTHREAD             );
-    PELEMENT_TO_STRING(STACK_FRAME           );
-    PELEMENT_TO_STRING(TIMER_HEAD            );
-    PELEMENT_TO_STRING(LOCK_HEAD             );
-    PELEMENT_TO_STRING(LOCK_OWNER_HEAD       );
-    PELEMENT_TO_STRING(LOCK_REQUEST_HEAD     );
-    PELEMENT_TO_STRING(WAIT_FOR_OBJECT_HEAD  );
-    PELEMENT_TO_STRING(FINALIZER_HEAD        );
-    PELEMENT_TO_STRING(MEMORY_STREAM_HEAD    );
-    PELEMENT_TO_STRING(MEMORY_STREAM_DATA    );
+        PELEMENT_TO_STRING(THREAD                );
+        PELEMENT_TO_STRING(SUBTHREAD             );
+        PELEMENT_TO_STRING(STACK_FRAME           );
+        PELEMENT_TO_STRING(TIMER_HEAD            );
+        PELEMENT_TO_STRING(LOCK_HEAD             );
+        PELEMENT_TO_STRING(LOCK_OWNER_HEAD       );
+        PELEMENT_TO_STRING(LOCK_REQUEST_HEAD     );
+        PELEMENT_TO_STRING(WAIT_FOR_OBJECT_HEAD  );
+        PELEMENT_TO_STRING(FINALIZER_HEAD        );
+        PELEMENT_TO_STRING(MEMORY_STREAM_HEAD    );
+        PELEMENT_TO_STRING(MEMORY_STREAM_DATA    );
 
+        default:
+            // the remaining data types aren't to be handled
+            break;
     }
 
     CLR_Debug::Printf( "\r\n" );
 
-#undef PELEMENT_TO_STRING
+  #undef PELEMENT_TO_STRING
 }
 
 #endif // defined(NANOCLR_TRACE_ERRORS)
@@ -738,26 +746,7 @@ void CLR_RT_DUMP::EXCEPTION( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref )
 
 void CLR_RT_DUMP::POST_PROCESS_EXCEPTION( CLR_RT_HeapBlock& ref )
 {
-    // socket exceptions have an extra field (ErrorCode), so lets display that as well
-    if (CLR_RT_ExecutionEngine::IsInstanceOf( ref, g_CLR_RT_WellKnownTypes.m_SocketException ))
-    {
-        CLR_RT_HeapBlock* obj = ref.Dereference();
-        if(obj != NULL)
-        {
-            // UNDONE: FIXME: CLR_INT32 errorCode = obj[ Library_system_sockets_System_Net_Sockets_SocketException::FIELD___errorCode ].NumericByRef().s4;
-            // UNDONE: FIXME: CLR_Debug::Printf( "    #### SocketException ErrorCode = %d\r\n", errorCode ); 
-        }
-    }
-    else if(CLR_RT_ExecutionEngine::IsInstanceOf( ref, g_CLR_RT_WellKnownTypes.m_CryptoException ))
-    {
-        CLR_RT_HeapBlock* obj = ref.Dereference();
-        if(obj != NULL)
-        {
-            // m_errorCode field 
-            CLR_INT32 errorCode = obj[5].NumericByRef().s4;
-            CLR_Debug::Printf( "    #### CryptoException ErrorCode = %d\r\n", errorCode ); 
-        }
-    }
+    (void)ref;
 }
 
 const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
@@ -828,7 +817,7 @@ const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
 
     static char s_tmp[ 32 ];
 
-    hal_snprintf( s_tmp, MAXSTRLEN(s_tmp), "0x%08x", hrError );
+    snprintf( s_tmp, MAXSTRLEN(s_tmp), "0x%08x", hrError );
 
     return s_tmp;
 }

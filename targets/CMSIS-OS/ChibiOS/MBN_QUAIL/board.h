@@ -201,12 +201,12 @@
 
 #define LINE_RST4                 	PAL_LINE(GPIOD, 0U)
 #define LINE_CS4                 	PAL_LINE(GPIOD, 1U)
-#define LINE_CS4                 	PAL_LINE(GPIOD, 2U)
+#define LINE_CS5                 	PAL_LINE(GPIOD, 2U)
 #define LINE_GPIO11                 PAL_LINE(GPIOD, 3U)
 #define LINE_GPIO12                 PAL_LINE(GPIOD, 4U)
-#define LINE_CS4                 	PAL_LINE(GPIOD, 5U)
+#define LINE_CS6                 	PAL_LINE(GPIOD, 5U)
 #define LINE_RX2                 	PAL_LINE(GPIOD, 6U)
-#define LINE_CS4                 	PAL_LINE(GPIOD, 7U)
+#define LINE_CS7                 	PAL_LINE(GPIOD, 7U)
 #define LINE_TX1                	PAL_LINE(GPIOD, 8U)
 #define LINE_RX1                	PAL_LINE(GPIOD, 9U)
 #define LINE_GPIO14                	PAL_LINE(GPIOD, 10U)
@@ -335,7 +335,7 @@
                                      PIN_PUPDR_FLOATING(GPIOA_AN4) |         \
                                      PIN_PUPDR_FLOATING(GPIOA_AN1) |     \
                                      PIN_PUPDR_FLOATING(GPIOA_AN3) |      \
-                                     PIN_PUPDR_PULLDOWN(GPIOA_FLASH_HOLD) |   \
+                                     PIN_PUPDR_FLOATING(GPIOA_FLASH_HOLD) |   \
                                      PIN_PUPDR_FLOATING(GPIOA_TX4) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_RX4) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_OTG_FS_DM) |     \
@@ -351,7 +351,7 @@
                                      PIN_ODR_LOW(GPIOA_AN4) |             \
                                      PIN_ODR_LOW(GPIOA_AN1) |           \
                                      PIN_ODR_LOW(GPIOA_AN3) |          \
-                                     PIN_ODR_LOW(GPIOA_FLASH_HOLD) |         \
+                                     PIN_ODR_HIGH(GPIOA_FLASH_HOLD) |         \
                                      PIN_ODR_LOW(GPIOA_TX4) |          \
                                      PIN_ODR_LOW(GPIOA_RX4) |          \
                                      PIN_ODR_HIGH(GPIOA_OTG_FS_DM) |           \

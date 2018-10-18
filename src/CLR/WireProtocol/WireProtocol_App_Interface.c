@@ -15,16 +15,19 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 // provided as weak to be replaced by actual implementation in the client application
-__nfweak bool WP_App_ProcessHeader(WP_Message* message)
+__nfweak int WP_App_ProcessHeader(WP_Message* message)
 {
+    (void)(message);
+
     // default to false
     return false;
 }
 
 // provided as weak to be replaced by actual implementation in the client application
-__nfweak bool WP_App_ProcessPayload(WP_Message* message)
+__nfweak int WP_App_ProcessPayload(WP_Message* message)
 {
+    (void)(message);
+
     // default to false
     return false; 
 }
-

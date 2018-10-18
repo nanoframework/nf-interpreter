@@ -126,7 +126,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;VERSION_MAJOR=0;VERSION_MINOR=0;VERSION_BUILD=0;VERSION_REVISION=0;OEMSYSTEMINFOSTRING="WIN_32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..\Include;..\..\..\..\src\CLR\Include;..\..\..\..\src\HAL\Include;..\..\..\..\src\PAL\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\Include;..\..\..\..\src\CLR\Include;..\..\..\..\src\HAL\Include;..\..\..\..\src\PAL\Include;nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -203,15 +203,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\Hardware\Hardware.vcxproj">
       <Project>{5d50772e-dac8-407d-972f-37deb4450b72}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\src\CLR\Core\HeapPersistence\HeapPersistence.vcxproj">
-      <Project>{bc2245b0-32e0-410e-b3f2-e2bfa0b503b3}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\src\CLR\Core\HeapPersistence\HeapPersistence_stub.vcxproj">
-      <Project>{4646f661-9505-45c2-9573-8409a9dd1149}</Project>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <Private>false</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\InterruptHandler\InterruptHandler.vcxproj">
       <Project>{d32ee397-7e49-452d-ac95-afcb3c962e3d}</Project>

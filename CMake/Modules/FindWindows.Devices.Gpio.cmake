@@ -4,7 +4,7 @@
 #
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.Gpio")
+set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.Devices.Gpio")
 
 
 # set include directories
@@ -12,7 +12,7 @@ list(APPEND Windows.Devices.Gpio_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Cor
 list(APPEND Windows.Devices.Gpio_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
 list(APPEND Windows.Devices.Gpio_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
 list(APPEND Windows.Devices.Gpio_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
-list(APPEND Windows.Devices.Gpio_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND Windows.Devices.Gpio_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
 
 
 # source files
@@ -37,7 +37,7 @@ foreach(SRC_FILE ${Windows.Devices.Gpio_SRCS})
         PATHS 
 
             # class library source files
-            "${PROJECT_SOURCE_DIR}/${BASE_PATH_FOR_THIS_MODULE}"
+            "${BASE_PATH_FOR_THIS_MODULE}"
 
             # core source files
             "${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall"
@@ -54,4 +54,4 @@ endforeach()
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Debugger DEFAULT_MSG Windows.Devices.Gpio_INCLUDE_DIRS Windows.Devices.Gpio_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Windows.Devices.Gpio DEFAULT_MSG Windows.Devices.Gpio_INCLUDE_DIRS Windows.Devices.Gpio_SOURCES)

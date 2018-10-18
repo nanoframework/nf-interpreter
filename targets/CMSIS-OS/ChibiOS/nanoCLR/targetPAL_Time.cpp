@@ -8,40 +8,63 @@
 #include <hal.h>
 #include <ch.h>
 
-static uint64_t g_nextEvent;   // tick time of next event to be scheduled
+
+// timer for next event
+static virtual_timer_t nextEventTimer;
+void*  nextEventCallbackDummyArg = NULL;
+
+static void NextEventTimer_Callback( void* arg )
+{
+    (void)arg;
+
+    // this call also schedules the next one, if there is one
+    HAL_COMPLETION::DequeueAndExec();
+}
 
 HRESULT Time_Initialize()
 {
-    g_nextEvent = 0xFFFFFFFFFFFF; // never
+    // need to setup the timer at boot, but stoped
+    chVTSet(&nextEventTimer, TIME_INFINITE, NextEventTimer_Callback, nextEventCallbackDummyArg);
 
-    // nothing to do here has time management is handled by ChibiOS
     return S_OK;
 }
 
 HRESULT Time_Uninitialize()
 {
+    chVTReset(&nextEventTimer);
+
     // nothing to do here has time management is handled by ChibiOS
     return S_OK;
 }
 
-void Time_SetCompare ( uint64_t compareValue )
+void Time_SetCompare ( uint64_t compareValueTicks )
 {
-// TODO
-// setup timer with callback that calls HAL_COMPLETION::DequeueAndExec( );
-// see Events_SetBoolTimer
+    if(compareValueTicks == 0)
+    {
+        // compare value is 0 so dequeue and schedule immediately 
+        NextEventTimer_Callback(nextEventCallbackDummyArg);
+    }
+    else if(compareValueTicks == HAL_COMPLETION_IDLE_VALUE)
+    {
+        // wait for infinity, don't need to do anything here
+        return;
+    }
+    else
+    {
+        if (HAL_Time_CurrentTime() >= compareValueTicks) 
+        { 
+            // already missed the event, dequeue and execute immediately 
+            HAL_COMPLETION::DequeueAndExec();
+        }
+        else
+        {
+            // compareValueTicks is the time (in sys ticks) that is being requested to fire an HAL_COMPLETION::DequeueAndExec()
+            // need to subtract the current system time to set when the timer will fire
+            compareValueTicks -= HAL_Time_CurrentTime();
 
-    g_nextEvent = compareValue;
-}
-
-extern "C" {
-
-void Time_Interrupt_Hook()
-{
-    if (HAL_Time_CurrentSysTicks() >= g_nextEvent && g_nextEvent > 0) 
-    { 
-        // handle event
-        HAL_COMPLETION::DequeueAndExec(); // this also schedules the next one, if there is one
-    }    
-}
-
+            // no need to stop the timer if it's running because the API does it anyway
+            // need to convert from nF ticks to milliseconds and then to ChibiOS sys ticks to load the timer
+            chVTSet(&nextEventTimer, TIME_MS2I(compareValueTicks/ TIME_CONVERSION__TO_MILLISECONDS), NextEventTimer_Callback, nextEventCallbackDummyArg);
+        }
+    }
 }

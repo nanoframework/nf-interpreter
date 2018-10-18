@@ -48,6 +48,22 @@ typedef struct SMT32FlashDriver {
 #define FLASH_KEY2                  ((uint32_t)0xCDEF89ABU)
 #define SECTOR_MASK                 ((uint32_t)0xFFFFFF07)
 
+// FLASH_Error_Code FLASH Error Code
+#define HAL_FLASH_ERROR_NONE         ((uint32_t)0x00000000U)    /*!< No error                      */
+#define HAL_FLASH_ERROR_ERS          ((uint32_t)0x00000002U)    /*!< Programming Sequence error    */
+#define HAL_FLASH_ERROR_PGP          ((uint32_t)0x00000004U)    /*!< Programming Parallelism error */
+#define HAL_FLASH_ERROR_PGA          ((uint32_t)0x00000008U)    /*!< Programming Alignment error   */
+#define HAL_FLASH_ERROR_WRP          ((uint32_t)0x00000010U)    /*!< Write protection error        */
+#define HAL_FLASH_ERROR_OPERATION    ((uint32_t)0x00000020U)    /*!< Operation Error               */
+#define HAL_FLASH_ERROR_RD           ((uint32_t)0x00000040U)    /*!< Read Protection Error         */
+
+// FLASH_Program_Parallelism FLASH Program Parallelism
+#define FLASH_PSIZE_BYTE           ((uint32_t)0x00000000U)
+#define FLASH_PSIZE_HALF_WORD      ((uint32_t)0x00000100U)
+#define FLASH_PSIZE_WORD           ((uint32_t)0x00000200U)
+#define FLASH_PSIZE_DOUBLE_WORD    ((uint32_t)0x00000300U)
+#define CR_PSIZE_MASK              ((uint32_t)0xFFFFFCFFU)
+
 //---------------------------------- STM32F4xx ------------------------------//
 #if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx)|| defined(STM32F439xx) ||\
     defined(STM32F469xx) || defined(STM32F479xx) ||\
@@ -102,13 +118,6 @@ typedef struct SMT32FlashDriver {
 #endif /* FLASH_OPTCR2_PCROP */
 
 #endif
-
-// FLASH_Program_Parallelism FLASH Program Parallelism
-#define FLASH_PSIZE_BYTE           ((uint32_t)0x00000000U)
-#define FLASH_PSIZE_HALF_WORD      ((uint32_t)0x00000100U)
-#define FLASH_PSIZE_WORD           ((uint32_t)0x00000200U)
-#define FLASH_PSIZE_DOUBLE_WORD    ((uint32_t)0x00000300U)
-#define CR_PSIZE_MASK              ((uint32_t)0xFFFFFCFFU)
 
 #define __HAL_FLASH_GET_FLAG(__FLAG__)   ((FLASH->SR & (__FLAG__)))
 #define __HAL_FLASH_CLEAR_FLAG(__FLAG__)   (FLASH->SR = (__FLAG__))
@@ -355,7 +364,7 @@ typedef struct SMT32FlashDriver {
 #define ADDR_FLASH_SECTOR_8     ((uint32_t)0x08100000) /* Base @ of Sector 8, 256 Kbyte */
 #define ADDR_FLASH_SECTOR_9     ((uint32_t)0x08140000) /* Base @ of Sector 9, 256 Kbyte */
 #define ADDR_FLASH_SECTOR_10    ((uint32_t)0x08180000) /* Base @ of Sector 10, 256 Kbyte */
-#define ADDR_FLASH_SECTOR_11    ((uint32_t)0x08C00000) /* Base @ of Sector 11, 256 Kbyte */
+#define ADDR_FLASH_SECTOR_11    ((uint32_t)0x081C0000) /* Base @ of Sector 11, 256 Kbyte */
 
 #elif defined(STM32F722xx)
 
@@ -420,9 +429,9 @@ extern "C" {
   
   void flash_lld_init();
   void flash_lld_readBytes(uint32_t startAddress, uint32_t length, uint8_t* buffer);
-  bool flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffer);
-  bool flash_lld_isErased(uint32_t startAddress, uint32_t length);
-  bool flash_lld_erase(uint32_t address);
+  int  flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffer);
+  int  flash_lld_isErased(uint32_t startAddress, uint32_t length);
+  int  flash_lld_erase(uint32_t address);
   uint8_t flash_lld_getSector(uint32_t address);
 
 #ifdef __cplusplus

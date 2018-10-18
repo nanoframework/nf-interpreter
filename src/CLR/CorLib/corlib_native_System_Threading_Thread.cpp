@@ -97,34 +97,37 @@ HRESULT Library_corlib_native_System_Threading_Thread::Suspend___VOID( CLR_RT_St
     {
         // This is the normal call from managed code.
         case 0: 
-        {
-            CLR_RT_Thread* th;
+            {
+                CLR_RT_Thread* th;
 
-            NANOCLR_CHECK_HRESULT(GetThread( stack, th, true, true ));
+                NANOCLR_CHECK_HRESULT(GetThread( stack, th, true, true ));
 
-            NANOCLR_CHECK_HRESULT(th->Suspend());
-            
-            // If the thread suspends itself, then we need to re-schedule.
-            if ( stack.m_owningThread == th )
-            {   // Set flag in thread stack that thread is re-scheduled.
-                stack.m_customState = 1;
+                NANOCLR_CHECK_HRESULT(th->Suspend());
                 
-                // Call to th->Suspend() was successful and moved thread to suspended list. 
-                // Now the threads should be re-scheduled to make suspension effective immidiately. 
-                // In order to do it we return CLR_E_RESCHEDULE from this function - Suspend___VOID
-                NANOCLR_SET_AND_LEAVE( CLR_E_RESCHEDULE );
+                // If the thread suspends itself, then we need to re-schedule.
+                if ( stack.m_owningThread == th )
+                {   // Set flag in thread stack that thread is re-scheduled.
+                    stack.m_customState = 1;
+                    
+                    // Call to th->Suspend() was successful and moved thread to suspended list. 
+                    // Now the threads should be re-scheduled to make suspension effective immidiately. 
+                    // In order to do it we return CLR_E_RESCHEDULE from this function - Suspend___VOID
+                    NANOCLR_SET_AND_LEAVE( CLR_E_RESCHEDULE );
+                }
             }
-        }
+            break;
         
-        // This is the case when thread is resumed, brought back from suspeneded state.
+        // This is the case when thread is resumed, brought back from suspended state.
         case 1:
-        {   
-            stack.m_customState = 0;
-            NANOCLR_SET_AND_LEAVE(S_OK);
-        }
+            {   
+                stack.m_customState = 0;
+                NANOCLR_SET_AND_LEAVE(S_OK);
+            }
+            break;
 
         default:
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            break;
     }
 
     NANOCLR_NOCLEANUP();

@@ -13,11 +13,6 @@
 #include <nanoCLR_Checks.h>
 #include <hal.h>
 
-struct nfSPIConfig
-{
-    SPIConfig Configuration;
-    SPIDriver * Driver;
-};
 
 struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo
 {
@@ -69,10 +64,49 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice
 
     //--//
 
-    static uint16_t ComputePrescaler (uint8_t bus, int32_t requestedFrequency);
-    static nfSPIConfig GetConfig(int bus, CLR_RT_HeapBlock* config);
+    static uint16_t ComputeBaudRate(uint8_t bus, int32_t requestedFrequency, int32_t& actualFrequency);
+    static void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, bool bufferIs16bits);
+    static bool IsLongRunningOperation(uint32_t writeSize, uint32_t readSize, bool bufferIs16bits, float byteTime, uint32_t& estimatedDurationMiliseconds);
+    static HRESULT NativeTransfer(CLR_RT_StackFrame& stack, bool bufferIs16bits);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi;
+
+// struct representing the SPI 
+struct NF_PAL_SPI
+{
+    SPIDriver*  Driver;
+    SPIConfig   Configuration;
+    float ByteTime;
+    bool SequentialTxRx;
+
+    uint8_t* WriteBuffer;
+    uint16_t WriteSize;
+
+    uint8_t* ReadBuffer;
+    uint16_t ReadSize;
+};
+
+///////////////////////////////////////////
+// declaration of the the SPI PAL strucs //
+///////////////////////////////////////////
+#if STM32_SPI_USE_SPI1
+    extern NF_PAL_SPI SPI1_PAL;
+#endif
+#if STM32_SPI_USE_SPI2
+    extern NF_PAL_SPI SPI2_PAL;
+#endif
+#if STM32_SPI_USE_SPI3
+    extern NF_PAL_SPI SPI3_PAL;
+#endif
+#if STM32_SPI_USE_SPI4
+    extern NF_PAL_SPI SPI4_PAL;
+#endif
+#if STM32_SPI_USE_SPI5
+    extern NF_PAL_SPI SPI5_PAL;
+#endif
+#if STM32_SPI_USE_SPI6
+    extern NF_PAL_SPI SPI6_PAL;
+#endif
 
 #endif  //_WIN_DEV_SPI_NATIVE_H_

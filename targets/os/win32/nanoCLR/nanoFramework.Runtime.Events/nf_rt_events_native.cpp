@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2017 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -53,5 +53,6 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Event
 {
     "nanoFramework.Runtime.Events", 
     0x9ACFB207,
-    method_lookup
+    method_lookup,
+    { 1, 0, 0, 0 }
 };

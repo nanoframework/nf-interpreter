@@ -75,7 +75,6 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJ
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock*          argObj = &stack.Arg1();
     CLR_RT_FieldDef_Instance   instFD;
     CLR_RT_TypeDef_Instance    instTD;
     const CLR_RECORD_FIELDDEF* fd;
@@ -94,6 +93,8 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJ
         dst.Assign( *obj );
 
 #if defined(NANOCLR_APPDOMAINS)
+        CLR_RT_HeapBlock*          argObj = &stack.Arg1();
+
         //Marshal if necessary.
         if(argObj->IsTransparentProxy())
         {
@@ -121,6 +122,8 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJ
 
 bool Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetFieldDescriptor( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& arg, CLR_RT_FieldDef_Instance& inst )
 {
+    (void)stack;
+
     NATIVE_PROFILE_CLR_CORE();
     return CLR_RT_ReflectionDef_Index::Convert( arg, inst );
 }

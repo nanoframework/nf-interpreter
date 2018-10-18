@@ -11,32 +11,15 @@
 #include <swo.h>
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
+#include <nanoPAL_BlockStorage.h>
+#include <nanoHAL_ConfigurationManager.h>
 #include <LaunchCLR.h>
 
-void BlinkerThread(void const * argument)
-{
-  (void)argument;
-
-  // loop until thread receives a request to terminate
-  while (!chThdShouldTerminateX()) {
-
-      palSetLine(LINE_LED2_GREEN);
-      osDelay(500);
-      palClearLine(LINE_LED2_GREEN);
-      osDelay(500);      
-
-  }
-}
-osThreadDef(BlinkerThread, osPriorityNormal, 128, "BlinkerThread");
-
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityNormal, 2048, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 
 //  Application entry point.
 int main(void) {
-
-  osThreadId blinkerThreadId;
-  osThreadId receiverThreadId;
 
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
@@ -59,12 +42,13 @@ int main(void) {
   // the user button in this board has a pull-up resistor so the check has to be inverted
   if (!palReadLine(LINE_BUTTON_USER))
   {
-    // check for valid CLR image 
-    if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
+    // check for valid CLR image
+    // we are checking for a valid image right after the configuration block
+    if(CheckValidCLRImage((uint32_t)&__nanoConfig_end__))
     {
       // there seems to be a valid CLR image
       // launch nanoCLR
-      LaunchCLR((uint32_t)&__nanoImage_end__);
+      LaunchCLR((uint32_t)&__nanoConfig_end__);
     }
   }
 
@@ -79,17 +63,27 @@ int main(void) {
   usbStart(serusbcfg.usbp, &usbcfg);
   usbConnectBus(serusbcfg.usbp);
 
-  // Creates the blinker thread, it does not start immediately.
-  blinkerThreadId = osThreadCreate(osThread(BlinkerThread), NULL);
-
   // create the receiver thread
-  receiverThreadId = osThreadCreate(osThread(ReceiverThread), NULL);
+  osThreadCreate(osThread(ReceiverThread), NULL);
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
 
+  // initialize block storage device
+  // in CLR this is called in nanoHAL_Initialize()
+  // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
+  BlockStorage_AddDevices();
+
+  // initialize configuration manager
+  // in CLR this is called in nanoHAL_Initialize()
+  // for nanoBooter we have to init it here to have access to network configuration blocks
+  ConfigurationManager_Initialize();
+
   //  Normal main() thread
   while (true) {
-    osDelay(500);
+      palSetLine(LINE_LED2_GREEN);
+      osDelay(500);
+      palClearLine(LINE_LED2_GREEN);
+      osDelay(500);   
   }
 }

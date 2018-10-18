@@ -122,7 +122,7 @@
  * @brief   Enables the SERIAL subsystem.
  */
 #if !defined(HAL_USE_SERIAL) || defined(__DOXYGEN__)
-#define HAL_USE_SERIAL              TRUE
+#define HAL_USE_SERIAL              FALSE
 #endif
 
 /**
@@ -303,7 +303,7 @@
  *          buffers.
  */
 #if !defined(SERIAL_USB_BUFFERS_SIZE) || defined(__DOXYGEN__)
-#define SERIAL_USB_BUFFERS_SIZE     256
+#define SERIAL_USB_BUFFERS_SIZE     64
 #endif
 
 /**
@@ -311,7 +311,7 @@
  * @note    The default is 2 buffers.
  */
 #if !defined(SERIAL_USB_BUFFERS_NUMBER) || defined(__DOXYGEN__)
-#define SERIAL_USB_BUFFERS_NUMBER   2
+#define SERIAL_USB_BUFFERS_NUMBER   1
 #endif
 
 /*===========================================================================*/

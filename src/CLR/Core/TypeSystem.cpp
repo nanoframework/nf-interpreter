@@ -52,7 +52,7 @@ int s_CLR_RT_fTrace_SimulateSpeed              = NANOCLR_TRACE_DEFAULT(c_CLR_RT_
 #endif
 
 #if !defined(BUILD_RTM)
-int s_CLR_RT_fTrace_AssemblyOverhead           = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_AssemblyOverhead           = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info,c_CLR_RT_Trace_Info);
 #endif
 
 #if defined(WIN32)
@@ -363,10 +363,14 @@ HRESULT CLR_RT_SignatureParser::Advance( Element& res )
             {
                 switch(ptr->DataType())
                 {
-                case DATATYPE_BYREF:
-                case DATATYPE_ARRAY_BYREF:
-                    res.m_fByRef = true;
-                    break;
+                    case DATATYPE_BYREF:
+                    case DATATYPE_ARRAY_BYREF:
+                        res.m_fByRef = true;
+                        break;
+
+                    default:
+                        // the remaining data types aren't to be handled
+                        break;
                 }
 
                 NANOCLR_CHECK_HRESULT(desc.InitializeFromObject( *ptr ));
@@ -694,18 +698,22 @@ bool CLR_RT_TypeDef_Instance::ResolveToken( CLR_UINT32 tk, CLR_RT_Assembly* assm
 
         switch( CLR_TypeFromTk( tk ) )
         {
-        case TBL_TypeRef:
-            m_data   = assm->m_pCrossReference_TypeRef[ idx ].m_target.m_data;
-            m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
-            m_target = m_assm->GetTypeDef              ( Type    ()   );
-            return true;
+            case TBL_TypeRef:
+                m_data   = assm->m_pCrossReference_TypeRef[ idx ].m_target.m_data;
+                m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
+                m_target = m_assm->GetTypeDef              ( Type    ()   );
+                return true;
 
-        case TBL_TypeDef:
-            Set( assm->m_idx, idx );
+            case TBL_TypeDef:
+                Set( assm->m_idx, idx );
 
-            m_assm   = assm;
-            m_target = assm->GetTypeDef( idx );
-            return true;
+                m_assm   = assm;
+                m_target = assm->GetTypeDef( idx );
+                return true;
+
+            default:
+                // the remaining data types aren't to be handled
+                break;
         }
     }
 
@@ -793,18 +801,22 @@ bool CLR_RT_FieldDef_Instance::ResolveToken( CLR_UINT32 tk, CLR_RT_Assembly* ass
 
         switch(CLR_TypeFromTk( tk ))
         {
-        case TBL_FieldRef:
-            m_data   = assm->m_pCrossReference_FieldRef[ idx ].m_target.m_data;
-            m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
-            m_target = m_assm->GetFieldDef             ( Field   ()   );
-            return true;
+            case TBL_FieldRef:
+                m_data   = assm->m_pCrossReference_FieldRef[ idx ].m_target.m_data;
+                m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
+                m_target = m_assm->GetFieldDef             ( Field   ()   );
+                return true;
 
-        case TBL_FieldDef:
-            Set( assm->m_idx, idx );
+            case TBL_FieldDef:
+                Set( assm->m_idx, idx );
 
-            m_assm   = assm;
-            m_target = m_assm->GetFieldDef( idx );
-            return true;
+                m_assm   = assm;
+                m_target = m_assm->GetFieldDef( idx );
+                return true;
+
+            default:
+                // the remaining data types aren't to be handled
+                break;
         }
     }
 
@@ -852,18 +864,22 @@ bool CLR_RT_MethodDef_Instance::ResolveToken( CLR_UINT32 tk, CLR_RT_Assembly* as
 
         switch(CLR_TypeFromTk( tk ))
         {
-        case TBL_MethodRef:
-            m_data   = assm->m_pCrossReference_MethodRef[ idx ].m_target.m_data;
-            m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
-            m_target = m_assm->GetMethodDef            ( Method  ()   );
-            return true;
+            case TBL_MethodRef:
+                m_data   = assm->m_pCrossReference_MethodRef[ idx ].m_target.m_data;
+                m_assm   = g_CLR_RT_TypeSystem.m_assemblies[ Assembly()-1 ];
+                m_target = m_assm->GetMethodDef            ( Method  ()   );
+                return true;
 
-        case TBL_MethodDef:
-            Set( assm->m_idx, idx );
+            case TBL_MethodDef:
+                Set( assm->m_idx, idx );
 
-            m_assm   = assm;
-            m_target = m_assm->GetMethodDef( idx );
-            return true;
+                m_assm   = assm;
+                m_target = m_assm->GetMethodDef( idx );
+                return true;
+
+            default:
+                // the remaining data types aren't to be handled
+                break;
         }
     }
 
@@ -1119,16 +1135,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject( const CLR_RT_HeapBlock& ref
 
         case DATATYPE_WEAKCLASS:
             {
-                CLR_RT_HeapBlock_WeakReference* weak = (CLR_RT_HeapBlock_WeakReference*)obj;
-
-                if(weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_ExtendedType)
-                {
-                    cls = &g_CLR_RT_WellKnownTypes.m_ExtendedWeakReference;
-                }
-                else
-                {
-                    cls = &g_CLR_RT_WellKnownTypes.m_WeakReference;
-                }
+                cls = &g_CLR_RT_WellKnownTypes.m_WeakReference;
             }
             break;
 
@@ -1324,7 +1331,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( const CLR_RT_HeapBloc
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-// Keep these strings less than 8-character long!! They are stuffed into an 8-byte structure.
+// Keep this string less than 8-character long (including terminator) because it's stuffed into an 8-byte structure.
 //
 static const char c_MARKER_ASSEMBLY_V1[] = "NFMRK1";
 
@@ -1337,7 +1344,7 @@ bool CLR_RECORD_ASSEMBLY::GoodHeader() const
 
     if(this->stringTableVersion != c_CLR_StringTable_Version) return false;
 
-    return memcmp( marker, c_MARKER_ASSEMBLY_V1, sizeof(marker) ) == 0;
+    return memcmp( marker, c_MARKER_ASSEMBLY_V1, sizeof(c_MARKER_ASSEMBLY_V1) ) == 0;
 }
 
 bool CLR_RECORD_ASSEMBLY::GoodAssembly() const
@@ -1538,7 +1545,7 @@ HRESULT CLR_RT_Assembly::CreateInstance( const CLR_RECORD_ASSEMBLY* header, CLR_
     // Compute overall size for assembly data structure.
     //
     {
-        for(int i=0; i<ARRAYSIZE(skeleton->m_pTablesSize)-1; i++)
+        for(uint32_t i = 0; i<ARRAYSIZE(skeleton->m_pTablesSize)-1; i++)
         {
             skeleton->m_pTablesSize[ i ]  = header->SizeOfTable    ( (CLR_TABLESENUM)i );
         }
@@ -2545,7 +2552,7 @@ HRESULT CLR_RT_AppDomainAssembly::AppDomainAssembly_Initialize( CLR_RT_AppDomain
 
     NANOCLR_CHECK_HRESULT(assm->Resolve_AllocateStaticFields( m_pStaticFields ));
 
-    if(!CLR_EE_DBG_IS_MASK(State_Initialize,State_Mask))
+    if(!CLR_EE_DBG_IS_MASK(StateInitialize,StateMask))
     {
         //Only in the non-boot case should we do this. Otherwise, debug events can occur out of order (thread creation of the
         //static constructor before thread creation of the main thread.
@@ -2593,124 +2600,78 @@ struct TypeIndexLookup
 static const TypeIndexLookup c_TypeIndexLookup[] =
 {
 #define TIL(ns,nm,fld) { ns, nm, &g_CLR_RT_WellKnownTypes.fld }
-    TIL( "System"                  , "Boolean"                       , m_Boolean                                            ),
-    TIL( "System"                  , "Char"                          , m_Char                                               ),
-    TIL( "System"                  , "SByte"                         , m_Int8                                               ),
-    TIL( "System"                  , "Byte"                          , m_UInt8                                              ),
-    TIL( "System"                  , "Int16"                         , m_Int16                                              ),
-    TIL( "System"                  , "UInt16"                        , m_UInt16                                             ),
-    TIL( "System"                  , "Int32"                         , m_Int32                                              ),
-    TIL( "System"                  , "UInt32"                        , m_UInt32                                             ),
-    TIL( "System"                  , "Int64"                         , m_Int64                                              ),
-    TIL( "System"                  , "UInt64"                        , m_UInt64                                             ),
-    TIL( "System"                  , "Single"                        , m_Single                                             ),
-    TIL( "System"                  , "Double"                        , m_Double                                             ),
-    TIL( "System"                  , "DateTime"                      , m_DateTime                                           ),
-    TIL( "System"                  , "TimeSpan"                      , m_TimeSpan                                           ),
-    TIL( "System"                  , "String"                        , m_String                                             ),
+    TIL( "System"                           , "Boolean"                       , m_Boolean                                            ),
+    TIL( "System"                           , "Char"                          , m_Char                                               ),
+    TIL( "System"                           , "SByte"                         , m_Int8                                               ),
+    TIL( "System"                           , "Byte"                          , m_UInt8                                              ),
+    TIL( "System"                           , "Int16"                         , m_Int16                                              ),
+    TIL( "System"                           , "UInt16"                        , m_UInt16                                             ),
+    TIL( "System"                           , "Int32"                         , m_Int32                                              ),
+    TIL( "System"                           , "UInt32"                        , m_UInt32                                             ),
+    TIL( "System"                           , "Int64"                         , m_Int64                                              ),
+    TIL( "System"                           , "UInt64"                        , m_UInt64                                             ),
+    TIL( "System"                           , "Single"                        , m_Single                                             ),
+    TIL( "System"                           , "Double"                        , m_Double                                             ),
+    TIL( "System"                           , "DateTime"                      , m_DateTime                                           ),
+    TIL( "System"                           , "TimeSpan"                      , m_TimeSpan                                           ),
+    TIL( "System"                           , "String"                        , m_String                                             ),
 
-    TIL( "System"                  , "Void"                          , m_Void                                               ),
-    TIL( "System"                  , "Object"                        , m_Object                                             ),
-    TIL( "System"                  , "ValueType"                     , m_ValueType                                          ),
-    TIL( "System"                  , "Enum"                          , m_Enum                                               ),
+    TIL( "System"                           , "Void"                          , m_Void                                               ),
+    TIL( "System"                           , "Object"                        , m_Object                                             ),
+    TIL( "System"                           , "ValueType"                     , m_ValueType                                          ),
+    TIL( "System"                           , "Enum"                          , m_Enum                                               ),
 
-    TIL( "System"                  , "AppDomainUnloadedException"    , m_AppDomainUnloadedException                         ),
-    TIL( "System"                  , "ArgumentNullException"         , m_ArgumentNullException                              ),
-    TIL( "System"                  , "ArgumentException"             , m_ArgumentException                                  ),
-    TIL( "System"                  , "ArgumentOutOfRangeException"   , m_ArgumentOutOfRangeException                        ),
-    TIL( "System"                  , "Exception"                     , m_Exception                                          ),
-    TIL( "System"                  , "IndexOutOfRangeException"      , m_IndexOutOfRangeException                           ),
-    TIL( "System"                  , "InvalidCastException"          , m_InvalidCastException                               ),
-    TIL( "System"                  , "InvalidOperationException"     , m_InvalidOperationException                          ),
-    TIL( "System"                  , "NotSupportedException"         , m_NotSupportedException                              ),
-    TIL( "System"                  , "NotImplementedException"       , m_NotImplementedException                            ),
-    TIL( "System"                  , "NullReferenceException"        , m_NullReferenceException                             ),
-    TIL( "System"                  , "OutOfMemoryException"          , m_OutOfMemoryException                               ),
-    TIL( "System"                  , "ObjectDisposedException"       , m_ObjectDisposedException                            ),
-    TIL( "System.IO"               , "IOException"                   , m_IOException                                        ),
-    TIL( "System.Threading"        , "ThreadAbortException"          , m_ThreadAbortException                               ),
-    TIL( "Microsoft.SPOT"          , "ConstraintException"           , m_ConstraintException                                ),
-    TIL( "Microsoft.SPOT"          , "UnknownTypeException"          , m_UnknownTypeException                               ),
+    TIL( "System"                           , "AppDomainUnloadedException"    , m_AppDomainUnloadedException                         ),
+    TIL( "System"                           , "ArgumentNullException"         , m_ArgumentNullException                              ),
+    TIL( "System"                           , "ArgumentException"             , m_ArgumentException                                  ),
+    TIL( "System"                           , "ArgumentOutOfRangeException"   , m_ArgumentOutOfRangeException                        ),
+    TIL( "System"                           , "Exception"                     , m_Exception                                          ),
+    TIL( "System"                           , "IndexOutOfRangeException"      , m_IndexOutOfRangeException                           ),
+    TIL( "System"                           , "InvalidCastException"          , m_InvalidCastException                               ),
+    TIL( "System"                           , "InvalidOperationException"     , m_InvalidOperationException                          ),
+    TIL( "System"                           , "NotSupportedException"         , m_NotSupportedException                              ),
+    TIL( "System"                           , "NotImplementedException"       , m_NotImplementedException                            ),
+    TIL( "System"                           , "NullReferenceException"        , m_NullReferenceException                             ),
+    TIL( "System"                           , "OutOfMemoryException"          , m_OutOfMemoryException                               ),
+    TIL( "System"                           , "ObjectDisposedException"       , m_ObjectDisposedException                            ),
+    TIL( "System.Threading"                 , "ThreadAbortException"          , m_ThreadAbortException                               ),
+    TIL( "nanoFramework.Runtime.Native"     , "ConstraintException"           , m_ConstraintException                                ),
 
-    TIL( "System"                  , "Delegate"                      , m_Delegate                                           ),
-    TIL( "System"                  , "MulticastDelegate"             , m_MulticastDelegate                                  ),
+    TIL( "System"                           , "Delegate"                      , m_Delegate                                           ),
+    TIL( "System"                           , "MulticastDelegate"             , m_MulticastDelegate                                  ),
 
-    TIL( "System"                  , "Array"                         , m_Array                                              ),
-    TIL( "System.Collections"      , "ArrayList"                     , m_ArrayList                                          ),
-    TIL( "System"                  , "ICloneable"                    , m_ICloneable                                         ),
-    TIL( "System.Collections"      , "IList"                         , m_IList                                              ),
+    TIL( "System"                           , "Array"                         , m_Array                                              ),
+    TIL( "System.Collections"               , "ArrayList"                     , m_ArrayList                                          ),
+    TIL( "System"                           , "ICloneable"                    , m_ICloneable                                         ),
+    TIL( "System.Collections"               , "IList"                         , m_IList                                              ),
 
-    TIL( "System.Reflection"       , "Assembly"                      , m_Assembly                                           ),
-    TIL( "System"                  , "Type"                          , m_TypeStatic                                         ),
-    TIL( "System"                  , "RuntimeType"                   , m_Type                                               ),
-    TIL( "System.Reflection"       , "RuntimeConstructorInfo"        , m_ConstructorInfo                                    ),
-    TIL( "System.Reflection"       , "RuntimeMethodInfo"             , m_MethodInfo                                         ),
-    TIL( "System.Reflection"       , "RuntimeFieldInfo"              , m_FieldInfo                                          ),
+    TIL( "System.Reflection"                , "Assembly"                      , m_Assembly                                           ),
+    TIL( "System"                           , "Type"                          , m_TypeStatic                                         ),
+    TIL( "System"                           , "RuntimeType"                   , m_Type                                               ),
+    TIL( "System.Reflection"                , "RuntimeConstructorInfo"        , m_ConstructorInfo                                    ),
+    TIL( "System.Reflection"                , "RuntimeMethodInfo"             , m_MethodInfo                                         ),
+    TIL( "System.Reflection"                , "RuntimeFieldInfo"              , m_FieldInfo                                          ),
 
-    TIL( "System"                  , "WeakReference"                 , m_WeakReference                                      ),
-    TIL( "Microsoft.SPOT"          , "ExtendedWeakReference"         , m_ExtendedWeakReference                              ),
+    TIL( "System"                           , "WeakReference"                 , m_WeakReference                                      ),
 
-    TIL( "Microsoft.SPOT"          , "SerializationHintsAttribute"   , m_SerializationHintsAttribute                        ),
+    TIL( "Microsoft.SPOT"                   , "SerializationHintsAttribute"   , m_SerializationHintsAttribute                        ),
 
-    TIL( "Microsoft.SPOT"          , "ExtendedTimeZone"              , m_ExtendedTimeZone                                   ),
+    TIL( "Microsoft.SPOT.Hardware"          , "WatchdogException"             , m_WatchdogException                                  ),
 
-    TIL( "Microsoft.SPOT"          , "Bitmap"                        , m_Bitmap                                             ),
-    TIL( "Microsoft.SPOT"          , "Font"                          , m_Font                                               ),
-
-    TIL( "Microsoft.SPOT.Touch"    , "TouchEvent"                    , m_TouchEvent                                         ),
-    TIL( "Microsoft.SPOT.Touch"    , "TouchInput"                    , m_TouchInput                                         ),
-
-    TIL( "Microsoft.SPOT.Messaging", "Message"                       , m_Message                                            ),
-
-    TIL( "Microsoft.SPOT.Hardware" , "ScreenMetrics"                 , m_ScreenMetrics                                      ),
-
-    TIL( "Microsoft.SPOT.Hardware" , "WatchdogException"             , m_WatchdogException                                  ),
-
-    TIL( "Microsoft.SPOT.Hardware" , "I2CDevice"                     , m_I2CDevice                                          ),
-    TIL( NULL                      , "I2CReadTransaction"            , m_I2CDevice__I2CReadTransaction                      ),
-    TIL( NULL                      , "I2CWriteTransaction"           , m_I2CDevice__I2CWriteTransaction                     ),
-    
-    TIL( "Microsoft.SPOT.Hardware.UsbClient", "Configuration"        , m_UsbClientConfiguration                             ),
-    TIL( NULL                      , "Descriptor"                    , m_UsbClientConfiguration__Descriptor                 ),
-    TIL( NULL                      , "DeviceDescriptor"              , m_UsbClientConfiguration__DeviceDescriptor           ),
-    TIL( NULL                      , "ClassDescriptor"               , m_UsbClientConfiguration__ClassDescriptor            ),
-    TIL( NULL                      , "Endpoint"                      , m_UsbClientConfiguration__Endpoint                   ),
-    TIL( NULL                      , "UsbInterface"                  , m_UsbClientConfiguration__UsbInterface               ),
-    TIL( NULL                      , "ConfigurationDescriptor"       , m_UsbClientConfiguration__ConfigurationDescriptor    ),
-    TIL( NULL                      , "StringDescriptor"              , m_UsbClientConfiguration__StringDescriptor           ),
-    TIL( NULL                      , "GenericDescriptor"             , m_UsbClientConfiguration__GenericDescriptor          ),
-
-    TIL( "Microsoft.SPOT.Net.NetworkInformation", "NetworkInterface" , m_NetworkInterface                                   ),
-    TIL( "Microsoft.SPOT.Net.NetworkInformation", "Wireless80211"    , m_Wireless80211                                      ),
-
-    TIL( "Microsoft.SPOT.Time"     , "TimeServiceSettings"           , m_TimeServiceSettings                                ),
-    TIL( "Microsoft.SPOT.Time"     , "TimeServiceStatus"             , m_TimeServiceStatus                                  ),
+    TIL( "System.Net.NetworkInformation", "NetworkInterface"             , m_NetworkInterface                               ),
+    TIL( "System.Net.NetworkInformation", "Wireless80211Configuration"   , m_Wireless80211Configuration                     ),
 
 #if defined(NANOCLR_APPDOMAINS)
-    TIL( "System"                  , "AppDomain"                     , m_AppDomain                                          ),
-    TIL( "System"                  , "MarshalByRefObject"            , m_MarshalByRefObject                                 ),
+    TIL( "System"                           , "AppDomain"                     , m_AppDomain                                          ),
+    TIL( "System"                           , "MarshalByRefObject"            , m_MarshalByRefObject                                 ),
 #endif
 
-    TIL( "System.Threading"        , "Thread"                        , m_Thread                                             ),
-    TIL( "System.Resources"        , "ResourceManager"               , m_ResourceManager                                    ),
+    TIL( "System.Threading"                 , "Thread"                        , m_Thread                                             ),
+    TIL( "System.Resources"                 , "ResourceManager"               , m_ResourceManager                                    ),
 
-    TIL( "System.Net.Sockets"      , "SocketException"               , m_SocketException                                    ),
+    TIL( "System.Net.Sockets"               , "SocketException"               , m_SocketException                                    ),
 
-    TIL( "Microsoft.SPOT.IO"       , "NativeFileInfo"                , m_NativeFileInfo                                     ),
-    TIL( "Microsoft.SPOT.IO"       , "VolumeInfo"                    , m_VolumeInfo                                         ),
-
-    TIL( "System.Xml"              , "XmlNameTable_Entry"            , m_XmlNameTable_Entry                                 ),
-    TIL( "System.Xml"              , "XmlReader_XmlNode"             , m_XmlReader_XmlNode                                  ),
-    TIL( "System.Xml"              , "XmlReader_XmlAttribute"        , m_XmlReader_XmlAttribute                             ),
-    TIL( "System.Xml"              , "XmlReader_NamespaceEntry"      , m_XmlReader_NamespaceEntry                           ),
-
-    TIL( "System.Security.Cryptography", "CryptoKey"                 , m_CryptoKey                                          ),
-    TIL( "Microsoft.SPOT.Cryptoki"     , "CryptokiObject"            , m_CryptokiObject                                     ),
-    TIL( "Microsoft.SPOT.Cryptoki"     , "Session"                   , m_CryptokiSession                                    ),
-    TIL( "Microsoft.SPOT.Cryptoki"     , "Slot"                      , m_CryptokiSlot                                       ),
-    TIL( "Microsoft.SPOT.Cryptoki"     , "MechanismType"             , m_CryptokiMechanismType                              ),
-    TIL( "System.Security.Cryptography", "CryptographicException"    , m_CryptoException                                    ),
-    TIL( "Microsoft.SPOT.Cryptoki"     , "CryptokiCertificate"       , m_CryptokiCertificate                                ),
+    TIL( "Windows.Devices.I2c"              , "I2cTransferResult"             , m_I2cTransferResult                                    ),
 
 #undef TIL
 };
@@ -3152,18 +3113,15 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
 
                     hash = ComputeHashForType(  res.m_dt, hash );
 
-                    switch(res.m_dt)
+                    if( (res.m_dt == DATATYPE_VALUETYPE) ||
+                        (res.m_dt == DATATYPE_CLASS))
                     {
-                    case DATATYPE_VALUETYPE:
-                    case DATATYPE_CLASS    :
                         hash = ComputeHashForName( res.m_cls, hash );
-                        break;
                     }
 
                     const char* fieldName = inst.m_assm->GetString( fd->name );
 
-                    // UNDONE: FIXME
-                    // hash = SUPPORT_ComputeCRC( fieldName, (CLR_UINT32)hal_strlen_s(fieldName), hash );
+                    hash = SUPPORT_ComputeCRC( fieldName, (CLR_UINT32)hal_strlen_s(fieldName), hash );
                 }
             }
 
@@ -3378,85 +3336,89 @@ bool CLR_RT_TypeSystem::FindTypeDef( CLR_UINT32 hash, CLR_RT_TypeDef_Index& res 
 
 bool CLR_RT_TypeSystem::FindTypeDef( const char* szClass, CLR_RT_Assembly* assm, CLR_RT_TypeDef_Index& res )
 {
+    (void)szClass;
+    (void)assm;
+    (void)res;
+
     NATIVE_PROFILE_CLR_CORE();
-    // UNDONE: FIXME
-    // char rgName     [ MAXTYPENAMELEN ];
-    // char rgNamespace[ MAXTYPENAMELEN ];
+    
+    char rgName     [ MAXTYPENAMELEN ];
+    char rgNamespace[ MAXTYPENAMELEN ];
 
-    // if(hal_strlen_s(szClass) < ARRAYSIZE(rgNamespace))
-    // {
-    //     const char* szPtr              = szClass;
-    //     const char* szPtr_LastDot      = NULL;
-    //     const char* szPtr_FirstSubType = NULL;
-    //     char   c;
-    //     size_t len;
+    if(hal_strlen_s(szClass) < ARRAYSIZE(rgNamespace))
+    {
+        const char* szPtr              = szClass;
+        const char* szPtr_LastDot      = NULL;
+        const char* szPtr_FirstSubType = NULL;
+        char   c;
+        size_t len;
 
-    //     while(true)
-    //     {
-    //         c = szPtr[ 0 ]; if(!c) break;
+        while(true)
+        {
+            c = szPtr[ 0 ]; if(!c) break;
 
-    //         if(c == '.')
-    //         {
-    //             szPtr_LastDot = szPtr;
-    //         }
-    //         else if(c == '+')
-    //         {
-    //             szPtr_FirstSubType = szPtr;
-    //             break;
-    //         }
+            if(c == '.')
+            {
+                szPtr_LastDot = szPtr;
+            }
+            else if(c == '+')
+            {
+                szPtr_FirstSubType = szPtr;
+                break;
+            }
 
-    //         szPtr++;
-    //     }
+            szPtr++;
+        }
 
-    //     if(szPtr_LastDot)
-    //     {
-    //         len = szPtr_LastDot++ - szClass      ; hal_strncpy_s( rgNamespace, ARRAYSIZE(rgNamespace), szClass      , len );
-    //         len = szPtr           - szPtr_LastDot; hal_strncpy_s( rgName     , ARRAYSIZE(rgName     ), szPtr_LastDot, len );
-    //     }
-    //     else
-    //     {
-    //         rgNamespace[ 0 ] = 0;
-    //         hal_strcpy_s( rgName, ARRAYSIZE(rgName), szClass );
-    //     }
+        if(szPtr_LastDot)
+        {
+            len = szPtr_LastDot++ - szClass      ; hal_strncpy_s( rgNamespace, ARRAYSIZE(rgNamespace), szClass      , len );
+            len = szPtr           - szPtr_LastDot; hal_strncpy_s( rgName     , ARRAYSIZE(rgName     ), szPtr_LastDot, len );
+        }
+        else
+        {
+            rgNamespace[ 0 ] = 0;
+            hal_strcpy_s( rgName, ARRAYSIZE(rgName), szClass );
+        }
 
         
-    //     if(FindTypeDef( rgName, rgNamespace, assm, res ))
-    //     {
-    //         //
-    //         // Found the containing type, let's look for the nested type.
-    //         //
-    //         if(szPtr_FirstSubType)
-    //         {
-    //             CLR_RT_TypeDef_Instance inst;
+        if(FindTypeDef( rgName, rgNamespace, assm, res ))
+        {
+            //
+            // Found the containing type, let's look for the nested type.
+            //
+            if(szPtr_FirstSubType)
+            {
+                CLR_RT_TypeDef_Instance inst;
 
-    //             do
-    //             {
-    //                 szPtr = ++szPtr_FirstSubType;
+                do
+                {
+                    szPtr = ++szPtr_FirstSubType;
 
-    //                 while(true)
-    //                 {
-    //                     c = szPtr_FirstSubType[ 0 ]; if(!c) break;
+                    while(true)
+                    {
+                        c = szPtr_FirstSubType[ 0 ]; if(!c) break;
 
-    //                     if(c == '+') break;
+                        if(c == '+') break;
 
-    //                     szPtr_FirstSubType++;
-    //                 }
+                        szPtr_FirstSubType++;
+                    }
 
-    //                 len = szPtr_FirstSubType - szPtr; hal_strncpy_s( rgName, ARRAYSIZE(rgName), szPtr, len );
+                    len = szPtr_FirstSubType - szPtr; hal_strncpy_s( rgName, ARRAYSIZE(rgName), szPtr, len );
 
-    //                 inst.InitializeFromIndex( res );
+                    inst.InitializeFromIndex( res );
 
-    //                 if(inst.m_assm->FindTypeDef( rgName, res.Type(), res ) == false)
-    //                 {
-    //                     return false;
-    //                 }
+                    if(inst.m_assm->FindTypeDef( rgName, res.Type(), res ) == false)
+                    {
+                        return false;
+                    }
 
-    //             } while(c == '+');
-    //         }
+                } while(c == '+');
+            }
 
-    //         return true;
-    //     }
-    // }
+            return true;
+        }
+    }
 
     res.Clear();
 
@@ -3465,6 +3427,10 @@ bool CLR_RT_TypeSystem::FindTypeDef( const char* szClass, CLR_RT_Assembly* assm,
 
 bool CLR_RT_TypeSystem::FindTypeDef( const char* szClass, CLR_RT_Assembly* assm, CLR_RT_ReflectionDef_Index& reflex )
 {
+    (void)szClass;
+    (void)assm;
+    (void)reflex;
+
     NATIVE_PROFILE_CLR_CORE();
 
     // UNDONE: FIXME
@@ -4194,7 +4160,7 @@ void CLR_RT_AttributeEnumerator::Initialize( const CLR_RT_FieldDef_Instance& ins
 void CLR_RT_AttributeEnumerator::Initialize( const CLR_RT_MethodDef_Instance& inst )
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_data.ownerType = TBL_FieldDef;
+    m_data.ownerType = TBL_MethodDef;
     m_data.ownerIdx  = inst.Method();
 
     Initialize( inst.m_assm );
@@ -4242,6 +4208,14 @@ bool CLR_RT_AttributeEnumerator::Advance()
     m_num = num;
 
     return fRes;
+}
+
+void CLR_RT_AttributeEnumerator::GetCurrent( CLR_RT_TypeDef_Instance* instTD )
+{
+    CLR_RT_MethodDef_Instance md;
+
+    md.InitializeFromIndex ( m_match );
+    instTD->InitializeFromMethod( md );
 }
 
 bool CLR_RT_AttributeEnumerator::MatchNext( const CLR_RT_TypeDef_Instance* instTD, const CLR_RT_MethodDef_Instance* instMD )
