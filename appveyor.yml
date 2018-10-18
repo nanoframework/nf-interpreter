@@ -50,11 +50,12 @@ environment:
   BinTrayKey:
     secure: Wz0wwFOzMkDwwzzax1HPzKZB3r/aTprlleqFYX5arxpH9pP3D9glINxEuY+P/BaN
 
-  # matrix:
-  #   - BOARD_NAME: 'STM32'
-  #   - BOARD_NAME: 'ESP32_DEVKITC'
-  #     BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_OPENSSL=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON'
-  #   - BOARD_NAME: 'NANOCLR_WINDOWS'
+  matrix:
+    - BOARD_NAME: 'STM32'
+    - BOARD_NAME: 'ESP32_DEVKITC'
+      BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_OPENSSL=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON'
+    - BOARD_NAME: 'NANOCLR_WINDOWS'
+    - BOARD_NAME: 'NOT_A_BOARD_CHANGELOG'
 
 matrix:
   fast_finish: true
@@ -84,7 +85,11 @@ install:
 - dotnet tool install -g --version 4.0.0-pullrequest1422-1625 --add-source https://ci.appveyor.com/nuget/gitversion-8nigugxjftrw GitVersion.CommandLine.DotNetCore.Tool
 - ps: |
 
-    If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+    If($env:BOARD_NAME -eq "NOT_A_BOARD_CHANGELOG")
+    {
+      # nothing to install for this build
+    }
+    ElseIf($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
     {
       # nothing to install for this build
     }
@@ -110,12 +115,18 @@ before_build:
 - ps: mkdir build > $null
 - ps: |
 
-    If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+    If($env:BOARD_NAME -eq "NOT_A_BOARD_CHANGELOG")
+    {
+      # need version variables to generate change log
+      dotnet-gitversion /l console /output buildserver
+    }
+    ElseIf($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
     {
       # nothing to do for this build
     }
     Else
     {
+      # need version variables
       dotnet-gitversion /l console /output buildserver
 
       &  cd build > $null
@@ -154,7 +165,11 @@ build_script:
 
     Install-Module 7Zip4PowerShell -Force
 
-    If($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
+    If($env:BOARD_NAME -eq "NOT_A_BOARD_CHANGELOG")
+    {
+      .\generate-change-log.ps1
+    }
+    ElseIf($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
     {
       msbuild targets\os\win32\nanoCLR.sln /p:Configuration=Release /p:Platform=x86 /m /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
     }
@@ -336,9 +351,6 @@ build_script:
 
     & cd $env:APPVEYOR_BUILD_FOLDER > $null
 
-before_deploy:
-  - ps: .\generate-change-log.ps1
-
 # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL
 on_failure:
   - ps: |
@@ -358,3 +370,4 @@ deploy:
   force_update: true
   on:
     appveyor_repo_tag: false
+    BOARD_NAME: NOT_A_BOARD_CHANGELOG
