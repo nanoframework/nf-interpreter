@@ -332,8 +332,10 @@ build_script:
       }          
     }
 
+    & cd $env:APPVEYOR_BUILD_FOLDER > $null
+
 before_deploy:
-  - ps: $env:APPVEYOR_BUILD_FOLDER\generate-change-log.ps1
+  - ps: .\generate-change-log.ps1
 
 # requires APPVEYOR_DISCORD_WEBHOOK_URL enviroment variable set with Discord webhook URL
 on_failure:
