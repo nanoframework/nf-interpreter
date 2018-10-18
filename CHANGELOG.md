@@ -1,0 +1,469 @@
+# Change Log
+
+## [v1.0.0](https://github.com/nanoframework/nf-interpreter/tree/v1.0.0) (2018-10-18)
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v0.0.0...v1.0.0)
+
+**Implemented enhancements:**
+
+- Work on config block [\#904](https://github.com/nanoframework/nf-interpreter/pull/904) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add support for GetCustomAttributes [\#865](https://github.com/nanoframework/nf-interpreter/pull/865) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix for issue \#402: Type.GetInterfaces doesn't return the inherited interfaces [\#851](https://github.com/nanoframework/nf-interpreter/pull/851) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix: Unable to start debug session on ESP32 when using SerialCommunication [\#846](https://github.com/nanoframework/nf-interpreter/pull/846) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Fix for string.LastIndexOf\(char, int\) and string.LastIndexOf\(string, int\) should search toward the beginning of the string \#400 [\#845](https://github.com/nanoframework/nf-interpreter/pull/845) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Add native implementation of resource utility [\#844](https://github.com/nanoframework/nf-interpreter/pull/844) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- SNTP fixes for ESP32 [\#838](https://github.com/nanoframework/nf-interpreter/pull/838) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Fix WiFi version [\#834](https://github.com/nanoframework/nf-interpreter/pull/834) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Move CLR\_SETTINGS to targets [\#832](https://github.com/nanoframework/nf-interpreter/pull/832) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)] [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Implemented WatchChar in ESP32 [\#831](https://github.com/nanoframework/nf-interpreter/pull/831) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Improve posting of managed events [\#830](https://github.com/nanoframework/nf-interpreter/pull/830) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add back GenericPort\_Write to ESP32 [\#829](https://github.com/nanoframework/nf-interpreter/pull/829) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Rework system math implementation [\#823](https://github.com/nanoframework/nf-interpreter/pull/823) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Merge watchdog branch [\#819](https://github.com/nanoframework/nf-interpreter/pull/819) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Independent watchdog skeleton definitions  [\#808](https://github.com/nanoframework/nf-interpreter/pull/808) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on mbed TLS parse certificate [\#807](https://github.com/nanoframework/nf-interpreter/pull/807) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Add new Guid and random for Esp32 [\#804](https://github.com/nanoframework/nf-interpreter/pull/804) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)] [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Clean-up messaging class [\#799](https://github.com/nanoframework/nf-interpreter/pull/799) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)] [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)] [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Correct comment about heap for STM32 targets [\#794](https://github.com/nanoframework/nf-interpreter/pull/794) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update ChibiOS config files for STM32F091RC target [\#793](https://github.com/nanoframework/nf-interpreter/pull/793) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Move booter blinker thread code to main loop [\#790](https://github.com/nanoframework/nf-interpreter/pull/790) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Updates required by ChibiOS fixes [\#787](https://github.com/nanoframework/nf-interpreter/pull/787) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add support for target reporting if it has nanoBooter [\#785](https://github.com/nanoframework/nf-interpreter/pull/785) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)] [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Add support for configurable Wire Protocol packet size [\#784](https://github.com/nanoframework/nf-interpreter/pull/784) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Fix required for build with RelWithDebInfo [\#774](https://github.com/nanoframework/nf-interpreter/pull/774) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Update native implementation of serial comm [\#767](https://github.com/nanoframework/nf-interpreter/pull/767) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add managed event on serial communication [\#766](https://github.com/nanoframework/nf-interpreter/pull/766) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)] [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add native support for runtime.native.power [\#762](https://github.com/nanoframework/nf-interpreter/pull/762) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Work native implementation of Runtime.Native.Rtc [\#761](https://github.com/nanoframework/nf-interpreter/pull/761) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)] [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update native code for nanoFramework.Runtime.Native [\#760](https://github.com/nanoframework/nf-interpreter/pull/760) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Housekeeping on ESP32 code base [\#758](https://github.com/nanoframework/nf-interpreter/pull/758) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Work string to value conversion implementation [\#756](https://github.com/nanoframework/nf-interpreter/pull/756) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Review ESP32 compiler options to enable warnings as errors [\#754](https://github.com/nanoframework/nf-interpreter/pull/754) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)] [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Update TimeSpan native declarations [\#747](https://github.com/nanoframework/nf-interpreter/pull/747) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Add support to String.Format [\#744](https://github.com/nanoframework/nf-interpreter/pull/744) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Rework several RAM assignment for STM32 targets [\#741](https://github.com/nanoframework/nf-interpreter/pull/741) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on compiler warnings 🚧  [\#739](https://github.com/nanoframework/nf-interpreter/pull/739) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix ADC declaration on all targets 🚧  [\#736](https://github.com/nanoframework/nf-interpreter/pull/736) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix Debugging\_Execution\_BreakpointDef [\#735](https://github.com/nanoframework/nf-interpreter/pull/735) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Fix ChibiOS usbcfg code on all STM32 targets 🚧 [\#732](https://github.com/nanoframework/nf-interpreter/pull/732) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Remove unused code from nanoBooter main 🚧 [\#730](https://github.com/nanoframework/nf-interpreter/pull/730) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improvements on BlockStorage declarations 🚧 [\#728](https://github.com/nanoframework/nf-interpreter/pull/728) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Change OS Task priority for ReceiverThread [\#724](https://github.com/nanoframework/nf-interpreter/pull/724) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Remove unused exception [\#721](https://github.com/nanoframework/nf-interpreter/pull/721) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Removed all IRAM\_ATTR attributes [\#718](https://github.com/nanoframework/nf-interpreter/pull/718) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- GLOBAL\_LOCK / GLOBAL\_UNLOCK implemented [\#716](https://github.com/nanoframework/nf-interpreter/pull/716) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Update corlib to support Timeout.InfiniteTimeSpan [\#715](https://github.com/nanoframework/nf-interpreter/pull/715) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Move command to list native interop assemblies to QueryCLRCapabilities [\#714](https://github.com/nanoframework/nf-interpreter/pull/714) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Add WP command to list interop native assemblies [\#710](https://github.com/nanoframework/nf-interpreter/pull/710) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Update board.h [\#708](https://github.com/nanoframework/nf-interpreter/pull/708) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update win\_dev\_gpio\_native\_Windows\_Devices\_Gpio\_GpioPin.cpp [\#704](https://github.com/nanoframework/nf-interpreter/pull/704) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Update GPIO to add support for toggle [\#699](https://github.com/nanoframework/nf-interpreter/pull/699) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Remove UpdateTime from Engine [\#698](https://github.com/nanoframework/nf-interpreter/pull/698) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Improvements GC [\#697](https://github.com/nanoframework/nf-interpreter/pull/697) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Improvements on Time\_Uninitialize [\#696](https://github.com/nanoframework/nf-interpreter/pull/696) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on scheduler, CLR events and sys time related code [\#695](https://github.com/nanoframework/nf-interpreter/pull/695) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improvements with timers from ChibiOS API [\#694](https://github.com/nanoframework/nf-interpreter/pull/694) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add performance counters stubs [\#692](https://github.com/nanoframework/nf-interpreter/pull/692) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on PAL events and PAL time [\#690](https://github.com/nanoframework/nf-interpreter/pull/690) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- General improvements in STM32 USB code [\#689](https://github.com/nanoframework/nf-interpreter/pull/689) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improvements in STM32 I2C class lib code [\#685](https://github.com/nanoframework/nf-interpreter/pull/685) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Implement RTC SetSystemTime [\#684](https://github.com/nanoframework/nf-interpreter/pull/684) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Improvements in ChibiOS SPI native [\#679](https://github.com/nanoframework/nf-interpreter/pull/679) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on STM32 SPI implementation [\#677](https://github.com/nanoframework/nf-interpreter/pull/677) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improvements in STM32 I2C native implementation [\#671](https://github.com/nanoframework/nf-interpreter/pull/671) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Implement ADC feature for ST\_NUCLEO\_F746ZG board [\#667](https://github.com/nanoframework/nf-interpreter/pull/667) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- adc-feature-for-stm32f429i-discovery [\#666](https://github.com/nanoframework/nf-interpreter/pull/666) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add ADC helper class for STM32F769I [\#665](https://github.com/nanoframework/nf-interpreter/pull/665) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Enable external SRAM for STM32F769I-DISCO [\#664](https://github.com/nanoframework/nf-interpreter/pull/664) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix to ADC last change to managed code [\#663](https://github.com/nanoframework/nf-interpreter/pull/663) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Add FSMC driver for STM32 [\#661](https://github.com/nanoframework/nf-interpreter/pull/661) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Remove left overs from previous EXT GPIO stuff [\#660](https://github.com/nanoframework/nf-interpreter/pull/660) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on ADC [\#659](https://github.com/nanoframework/nf-interpreter/pull/659) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add support for ADC in STM32F769I DISCO [\#658](https://github.com/nanoframework/nf-interpreter/pull/658) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on GPIO events [\#657](https://github.com/nanoframework/nf-interpreter/pull/657)
+- Various board updates for Netduino 3 Wifi [\#656](https://github.com/nanoframework/nf-interpreter/pull/656) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on native ADC [\#655](https://github.com/nanoframework/nf-interpreter/pull/655) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improvements in STM32 hard fault handler code [\#654](https://github.com/nanoframework/nf-interpreter/pull/654) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Implement Monitor\_FlashSectorMap for nanoBooter [\#647](https://github.com/nanoframework/nf-interpreter/pull/647) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix and update for STM32 flash driver [\#646](https://github.com/nanoframework/nf-interpreter/pull/646) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Various fixes for ESP32 [\#645](https://github.com/nanoframework/nf-interpreter/pull/645) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Work on random number generator [\#643](https://github.com/nanoframework/nf-interpreter/pull/643) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- STM32 HRNG driver [\#642](https://github.com/nanoframework/nf-interpreter/pull/642) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Support for serial on F4 Discovery board [\#638](https://github.com/nanoframework/nf-interpreter/pull/638) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Develop target specific call [\#633](https://github.com/nanoframework/nf-interpreter/pull/633) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- CRC32 in Wire Protocol is now optional [\#629](https://github.com/nanoframework/nf-interpreter/pull/629) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Networking [\#623](https://github.com/nanoframework/nf-interpreter/pull/623) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Remove "local time" stuff [\#622](https://github.com/nanoframework/nf-interpreter/pull/622) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on UNDONE FIXME [\#621](https://github.com/nanoframework/nf-interpreter/pull/621) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on GC [\#613](https://github.com/nanoframework/nf-interpreter/pull/613) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Improve reboot command execution [\#612](https://github.com/nanoframework/nf-interpreter/pull/612) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Correct implementation of Debugging\_Deployment\_Status [\#610](https://github.com/nanoframework/nf-interpreter/pull/610) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on native events [\#608](https://github.com/nanoframework/nf-interpreter/pull/608) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Add noreturn attribute to thread function [\#606](https://github.com/nanoframework/nf-interpreter/pull/606) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on Gpio [\#603](https://github.com/nanoframework/nf-interpreter/pull/603) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix vars casing to follow code guidelines [\#602](https://github.com/nanoframework/nf-interpreter/pull/602)
+- Allow events to be fired when no threads active [\#601](https://github.com/nanoframework/nf-interpreter/pull/601)
+- Add check for series definition in ChibiOS targetPAL [\#600](https://github.com/nanoframework/nf-interpreter/pull/600) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improvements on Gpio setting of alternate function [\#597](https://github.com/nanoframework/nf-interpreter/pull/597) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on serial [\#585](https://github.com/nanoframework/nf-interpreter/pull/585) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add serial feature to Nucleo F746ZG [\#584](https://github.com/nanoframework/nf-interpreter/pull/584) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add Serial support to ND3 [\#581](https://github.com/nanoframework/nf-interpreter/pull/581) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add Serial feature to F429 Discovery [\#580](https://github.com/nanoframework/nf-interpreter/pull/580) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improve serial operations [\#579](https://github.com/nanoframework/nf-interpreter/pull/579) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on CLR events [\#578](https://github.com/nanoframework/nf-interpreter/pull/578) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Implement read timeout on serial device [\#577](https://github.com/nanoframework/nf-interpreter/pull/577) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update win\_dev\_serial\_native\_Windows\_Devices\_SerialCommunication\_Seri… [\#573](https://github.com/nanoframework/nf-interpreter/pull/573) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on native support for Serial.Communication [\#569](https://github.com/nanoframework/nf-interpreter/pull/569) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improve STM32 v2 flash driver [\#565](https://github.com/nanoframework/nf-interpreter/pull/565) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improve Wire Protocol trace output [\#564](https://github.com/nanoframework/nf-interpreter/pull/564) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improvements in device information [\#563](https://github.com/nanoframework/nf-interpreter/pull/563) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Revert "Rework System.DateTime \(\#553\)" [\#560](https://github.com/nanoframework/nf-interpreter/pull/560) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Add pwm support for STM32F407 [\#559](https://github.com/nanoframework/nf-interpreter/pull/559) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Rework System.DateTime [\#553](https://github.com/nanoframework/nf-interpreter/pull/553) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Drivemode "Alternate" [\#552](https://github.com/nanoframework/nf-interpreter/pull/552) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- FatFS Integration [\#551](https://github.com/nanoframework/nf-interpreter/pull/551) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Clean-up type system [\#544](https://github.com/nanoframework/nf-interpreter/pull/544) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Remove ExtendedWeakReference [\#543](https://github.com/nanoframework/nf-interpreter/pull/543) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Update nanoCLR project [\#542](https://github.com/nanoframework/nf-interpreter/pull/542)
+- Rework bool functions and args [\#539](https://github.com/nanoframework/nf-interpreter/pull/539) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on Debugger conditions in CLR\_RT\_ExecutionEngine [\#538](https://github.com/nanoframework/nf-interpreter/pull/538) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Improvements in Wire Protocol responsivness [\#536](https://github.com/nanoframework/nf-interpreter/pull/536) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+
+**Fixed bugs:**
+
+- Fix bug with infinite timeout handling [\#906](https://github.com/nanoframework/nf-interpreter/pull/906) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Work on config block [\#904](https://github.com/nanoframework/nf-interpreter/pull/904) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fixes to SPI for half duplex/TransferSequential [\#872](https://github.com/nanoframework/nf-interpreter/pull/872) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Fix STM32 series defines throughout the code [\#862](https://github.com/nanoframework/nf-interpreter/pull/862) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix enumeration of config blocks when device has no config block [\#857](https://github.com/nanoframework/nf-interpreter/pull/857) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix Convert::NativeToInt64 for multiple base conversions [\#855](https://github.com/nanoframework/nf-interpreter/pull/855) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix for issue \#390: object.GetHashCode not working [\#852](https://github.com/nanoframework/nf-interpreter/pull/852) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix for issue \\#402: Type.GetInterfaces doesn't return the inherited interfaces [\#851](https://github.com/nanoframework/nf-interpreter/pull/851) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix for issue \#409: NativeToDouble doesn't support the "e"/"E" exponential char [\#850](https://github.com/nanoframework/nf-interpreter/pull/850) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix for issue 403: type.GetMethods returns also static methods of the base class [\#849](https://github.com/nanoframework/nf-interpreter/pull/849) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- The format for 64bit values is "ll" not "l" [\#848](https://github.com/nanoframework/nf-interpreter/pull/848) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Uncommented the CLR\_RT\_TypeSystem::FindTypeDef functionality [\#847](https://github.com/nanoframework/nf-interpreter/pull/847) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix for string.LastIndexOf\\(char, int\\) and string.LastIndexOf\\(string, int\\) should search toward the beginning of the string \\#400 [\#845](https://github.com/nanoframework/nf-interpreter/pull/845) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix for double.ToString\(\) and float.ToString\(\)  [\#841](https://github.com/nanoframework/nf-interpreter/pull/841) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix Random.Next returns negative numbers \#405 [\#840](https://github.com/nanoframework/nf-interpreter/pull/840) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix Math.Round [\#839](https://github.com/nanoframework/nf-interpreter/pull/839) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix DateTime.DaysInMonth [\#837](https://github.com/nanoframework/nf-interpreter/pull/837) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix single precision Truncate\_\_\_STATIC\_\_R4\_\_R4 [\#836](https://github.com/nanoframework/nf-interpreter/pull/836) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Rework math calls [\#827](https://github.com/nanoframework/nf-interpreter/pull/827) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Rework system math implementation [\#823](https://github.com/nanoframework/nf-interpreter/pull/823) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Config changes [\#818](https://github.com/nanoframework/nf-interpreter/pull/818) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Fix number conversion [\#816](https://github.com/nanoframework/nf-interpreter/pull/816) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix ToString for doubles and floats [\#815](https://github.com/nanoframework/nf-interpreter/pull/815) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix tiny printf implementation [\#813](https://github.com/nanoframework/nf-interpreter/pull/813) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)] [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix I2c issues [\#803](https://github.com/nanoframework/nf-interpreter/pull/803) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Remove debug code on SSL Network timeouts [\#802](https://github.com/nanoframework/nf-interpreter/pull/802) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Flash erase fix [\#801](https://github.com/nanoframework/nf-interpreter/pull/801) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Fix ChibiOS ADCv2 config struct [\#789](https://github.com/nanoframework/nf-interpreter/pull/789) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix typo in function name [\#786](https://github.com/nanoframework/nf-interpreter/pull/786) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Fix LaunchCLR to detect valid image [\#780](https://github.com/nanoframework/nf-interpreter/pull/780) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix declaration for build config RelWithDebInfo [\#779](https://github.com/nanoframework/nf-interpreter/pull/779) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fixes required for STM32F0 series [\#778](https://github.com/nanoframework/nf-interpreter/pull/778) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improve code in CheckValidCLRImage [\#776](https://github.com/nanoframework/nf-interpreter/pull/776) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix time methods as per \#350 \#351 [\#770](https://github.com/nanoframework/nf-interpreter/pull/770) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fixes with declarations for SMT32L0 series [\#757](https://github.com/nanoframework/nf-interpreter/pull/757) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improved code to remove compiler warning [\#749](https://github.com/nanoframework/nf-interpreter/pull/749) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix format specifier for double printf [\#743](https://github.com/nanoframework/nf-interpreter/pull/743) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix issue with CLR\_RT\_UnicodeHelper::ConvertFromUTF8 [\#742](https://github.com/nanoframework/nf-interpreter/pull/742) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Various fixes with Devices.Gpio [\#740](https://github.com/nanoframework/nf-interpreter/pull/740) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix System.Math.Truncate [\#734](https://github.com/nanoframework/nf-interpreter/pull/734) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix wrong field declaration in System\_String [\#727](https://github.com/nanoframework/nf-interpreter/pull/727) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Improvement on Serial NativeRead [\#722](https://github.com/nanoframework/nf-interpreter/pull/722) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Correct ConstraintException in type system lookup table [\#720](https://github.com/nanoframework/nf-interpreter/pull/720) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Corrected the device selector string for the ESP32 serial ports [\#717](https://github.com/nanoframework/nf-interpreter/pull/717) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- SPI: Use the max clock frequency if unset \(\#327\) [\#711](https://github.com/nanoframework/nf-interpreter/pull/711) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Fix bug with unwanted read or write after I2C operation  [\#709](https://github.com/nanoframework/nf-interpreter/pull/709) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix ESP32 Gpio toggle [\#703](https://github.com/nanoframework/nf-interpreter/pull/703) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Fix issues with ESP32 time and event functions [\#700](https://github.com/nanoframework/nf-interpreter/pull/700) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Work on STM32 SPI [\#686](https://github.com/nanoframework/nf-interpreter/pull/686) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Correct calls to cache helpers for STM32 targets [\#676](https://github.com/nanoframework/nf-interpreter/pull/676) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix error introduced in last ESP32 I2C change [\#674](https://github.com/nanoframework/nf-interpreter/pull/674) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Improve debug session start [\#669](https://github.com/nanoframework/nf-interpreter/pull/669) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on GPIO events [\#657](https://github.com/nanoframework/nf-interpreter/pull/657)
+- Added header for ESP32 to define uint8\_t etc [\#649](https://github.com/nanoframework/nf-interpreter/pull/649) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Fix and update for STM32 flash driver [\#646](https://github.com/nanoframework/nf-interpreter/pull/646) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Various fixes for ESP32 [\#645](https://github.com/nanoframework/nf-interpreter/pull/645) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Correct code writing single bytes to flash [\#644](https://github.com/nanoframework/nf-interpreter/pull/644) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix var name for config block [\#641](https://github.com/nanoframework/nf-interpreter/pull/641) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix STM32F7 loader files [\#640](https://github.com/nanoframework/nf-interpreter/pull/640) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix wrong button check in booter \(STM32F4 disco\) [\#636](https://github.com/nanoframework/nf-interpreter/pull/636) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Correct code reading Gpio value [\#635](https://github.com/nanoframework/nf-interpreter/pull/635) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Rework code for Serial ouput stream Store [\#607](https://github.com/nanoframework/nf-interpreter/pull/607) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix serial com Store\(\) delay [\#605](https://github.com/nanoframework/nf-interpreter/pull/605) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix Wire Protocol comm issues [\#596](https://github.com/nanoframework/nf-interpreter/pull/596) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Fix inclusion of target source file for serial API [\#587](https://github.com/nanoframework/nf-interpreter/pull/587) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on serial [\#585](https://github.com/nanoframework/nf-interpreter/pull/585) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update win\_dev\_serial\_native\_Windows\_Devices\_SerialCommunication\_Seri… [\#574](https://github.com/nanoframework/nf-interpreter/pull/574) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix UART definition requried for serial support [\#572](https://github.com/nanoframework/nf-interpreter/pull/572)
+- Correct UART\_INIT macro for F4 and F0 targets [\#570](https://github.com/nanoframework/nf-interpreter/pull/570)
+- Correct CRT heap size for nanoBooter [\#556](https://github.com/nanoframework/nf-interpreter/pull/556) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Change Spi Full-duplex buffer size [\#546](https://github.com/nanoframework/nf-interpreter/pull/546) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Amend comparison size of assembly marker [\#541](https://github.com/nanoframework/nf-interpreter/pull/541) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Correct missing call to wait debugger commands [\#537](https://github.com/nanoframework/nf-interpreter/pull/537) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix managed heap initialization [\#534](https://github.com/nanoframework/nf-interpreter/pull/534) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+
+**Documentation and other chores:**
+
+- Merge back changes from Release 1.0.0 [\#928](https://github.com/nanoframework/nf-interpreter/pull/928)
+- Merge 'develop' for Release 1.0.0 [\#927](https://github.com/nanoframework/nf-interpreter/pull/927)
+- Update nanoFramework.CorLib version to 1.0.4 [\#918](https://github.com/nanoframework/nf-interpreter/pull/918)
+- normalize line endings [\#900](https://github.com/nanoframework/nf-interpreter/pull/900)
+- Update nanoFramework.CorLib version to 1.0.1-preview118 [\#898](https://github.com/nanoframework/nf-interpreter/pull/898)
+- High Res Timer added to Nanoframework.Hardware.Esp32 [\#866](https://github.com/nanoframework/nf-interpreter/pull/866)
+- remove obsolete parameter BOARD\_NAME [\#861](https://github.com/nanoframework/nf-interpreter/pull/861)
+- Getting the MinSizeRel build working for the ESP32 [\#796](https://github.com/nanoframework/nf-interpreter/pull/796)
+- Changed build back to Debug [\#783](https://github.com/nanoframework/nf-interpreter/pull/783)
+- Updated the ESP32 build documentation [\#755](https://github.com/nanoframework/nf-interpreter/pull/755)
+- Add FP information about STM32 targets to readme [\#753](https://github.com/nanoframework/nf-interpreter/pull/753) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix for timeout errors on I2C introduced with 3.0 release. [\#746](https://github.com/nanoframework/nf-interpreter/pull/746)
+- Initial ESP32 native hardware support [\#712](https://github.com/nanoframework/nf-interpreter/pull/712)
+- Improvements in ESP32 related docs [\#691](https://github.com/nanoframework/nf-interpreter/pull/691) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Updated the setup procedure for the ESP32 development [\#682](https://github.com/nanoframework/nf-interpreter/pull/682) [[Area: ESP32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20ESP32)]
+- Fix issues that stopped ESP32 build after change to events [\#611](https://github.com/nanoframework/nf-interpreter/pull/611)
+- ESP32 Gpio update to support SetAlternateFunction [\#598](https://github.com/nanoframework/nf-interpreter/pull/598)
+- Update sub module community targets @1d0bc8b0 [\#575](https://github.com/nanoframework/nf-interpreter/pull/575)
+- Update target\_windows\_devices\_serialcommunication\_config.cpp [\#571](https://github.com/nanoframework/nf-interpreter/pull/571)
+- Include community board in select clause for I2C [\#567](https://github.com/nanoframework/nf-interpreter/pull/567)
+- PWM - Add more MCUs [\#558](https://github.com/nanoframework/nf-interpreter/pull/558)
+- PWM support initial commit [\#557](https://github.com/nanoframework/nf-interpreter/pull/557)
+- Update corlib\_native\_System\_Number.cpp [\#550](https://github.com/nanoframework/nf-interpreter/pull/550)
+- Update corlib\_native\_System\_Number.cpp [\#549](https://github.com/nanoframework/nf-interpreter/pull/549)
+- Update targetHAL\_Time.cpp [\#548](https://github.com/nanoframework/nf-interpreter/pull/548)
+
+## [v0.0.0](https://github.com/nanoframework/nf-interpreter/tree/v0.0.0) (2017-09-26)
+**Implemented enhancements:**
+
+- Add exception handlers for debug [\#488](https://github.com/nanoframework/nf-interpreter/pull/488) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update Devces.Gpio native code for 1.0.0.22 [\#470](https://github.com/nanoframework/nf-interpreter/pull/470) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add CR+LF to improve output [\#463](https://github.com/nanoframework/nf-interpreter/pull/463) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add more SetResult\_\* methods [\#460](https://github.com/nanoframework/nf-interpreter/pull/460) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on System.Convert [\#459](https://github.com/nanoframework/nf-interpreter/pull/459) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Enhanced 16bit support [\#457](https://github.com/nanoframework/nf-interpreter/pull/457) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Enable SPI5 \(this is used in the board mems sensor\) [\#453](https://github.com/nanoframework/nf-interpreter/pull/453) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update test app for nanoCLR [\#450](https://github.com/nanoframework/nf-interpreter/pull/450) [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Update native code for System.Globalization [\#446](https://github.com/nanoframework/nf-interpreter/pull/446) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on events [\#441](https://github.com/nanoframework/nf-interpreter/pull/441) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on Events [\#440](https://github.com/nanoframework/nf-interpreter/pull/440) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Improve assembly loading [\#439](https://github.com/nanoframework/nf-interpreter/pull/439) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Correct types in declarations of Async Process calls [\#437](https://github.com/nanoframework/nf-interpreter/pull/437) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Add native code for System.Console [\#431](https://github.com/nanoframework/nf-interpreter/pull/431) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- SPI native code [\#429](https://github.com/nanoframework/nf-interpreter/pull/429) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on Devices.Spi [\#428](https://github.com/nanoframework/nf-interpreter/pull/428) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Move CLRStartup to its own OS thread [\#425](https://github.com/nanoframework/nf-interpreter/pull/425) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on Devices.Spi native [\#424](https://github.com/nanoframework/nf-interpreter/pull/424) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on Devices.Gpio [\#418](https://github.com/nanoframework/nf-interpreter/pull/418) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Rename NativeEvents native code [\#409](https://github.com/nanoframework/nf-interpreter/pull/409) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update nanoCLR test solution [\#406](https://github.com/nanoframework/nf-interpreter/pull/406) [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Minor fixes [\#401](https://github.com/nanoframework/nf-interpreter/pull/401)
+- Fix flash driver for use in SMT32F7 series [\#400](https://github.com/nanoframework/nf-interpreter/pull/400) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Various fixes for MBN\_QUAIL [\#395](https://github.com/nanoframework/nf-interpreter/pull/395) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on Execution [\#375](https://github.com/nanoframework/nf-interpreter/pull/375) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)] [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Update test app in nanoCLR [\#374](https://github.com/nanoframework/nf-interpreter/pull/374) [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Initial work on Events [\#373](https://github.com/nanoframework/nf-interpreter/pull/373) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improve ContiguousBlockAssemblies [\#371](https://github.com/nanoframework/nf-interpreter/pull/371) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Remove endianess checking of assemblies [\#368](https://github.com/nanoframework/nf-interpreter/pull/368) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Aligned CorLib declarations with managed stubs [\#367](https://github.com/nanoframework/nf-interpreter/pull/367) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Fix issues with assemblies loading at startup [\#365](https://github.com/nanoframework/nf-interpreter/pull/365) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Remove addresses from Debugging\_Deployment\_Status [\#362](https://github.com/nanoframework/nf-interpreter/pull/362) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Add error code to reply of access memory commands [\#361](https://github.com/nanoframework/nf-interpreter/pull/361) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Enable IncrementalDeployment in capabilites [\#360](https://github.com/nanoframework/nf-interpreter/pull/360) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on Debugging\_Deployment\_Status [\#359](https://github.com/nanoframework/nf-interpreter/pull/359) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Improvements in flash driver [\#358](https://github.com/nanoframework/nf-interpreter/pull/358) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Work on DeviceBlockInfo\_FindRegionFromAddress [\#357](https://github.com/nanoframework/nf-interpreter/pull/357) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on Debugging\_Deployment\_Status [\#356](https://github.com/nanoframework/nf-interpreter/pull/356) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Sync flags with debugger library code [\#350](https://github.com/nanoframework/nf-interpreter/pull/350) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Remove unsupported c\_Monitor\_SignatureKeyUpdate [\#349](https://github.com/nanoframework/nf-interpreter/pull/349) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Work on ChibiOS v17 USB code [\#344](https://github.com/nanoframework/nf-interpreter/pull/344) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Second try on Windows.Devices.Gpio [\#329](https://github.com/nanoframework/nf-interpreter/pull/329) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update Nuget packages [\#318](https://github.com/nanoframework/nf-interpreter/pull/318) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Update documentation to include API option [\#317](https://github.com/nanoframework/nf-interpreter/pull/317)
+- Add native code for base class library \(mscolib\) [\#310](https://github.com/nanoframework/nf-interpreter/pull/310) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Include support for ChibiOS syscalls to use newlib stuff [\#309](https://github.com/nanoframework/nf-interpreter/pull/309)
+- Add declaration for MDP [\#301](https://github.com/nanoframework/nf-interpreter/pull/301) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Add Interop feature to CLR [\#299](https://github.com/nanoframework/nf-interpreter/pull/299) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- removed unused include for nanoHAL.h [\#298](https://github.com/nanoframework/nf-interpreter/pull/298) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Remove legacy functions [\#293](https://github.com/nanoframework/nf-interpreter/pull/293) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Update Nuget for MSBuild System [\#291](https://github.com/nanoframework/nf-interpreter/pull/291) [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Add code to output to VS console [\#290](https://github.com/nanoframework/nf-interpreter/pull/290) [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Update Nuget packages [\#289](https://github.com/nanoframework/nf-interpreter/pull/289) [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Replace path for mscorlib.pe [\#288](https://github.com/nanoframework/nf-interpreter/pull/288) [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Improve error reporting detail [\#286](https://github.com/nanoframework/nf-interpreter/pull/286) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Fix ComputeAssemblyHash [\#279](https://github.com/nanoframework/nf-interpreter/pull/279) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Moved nanoCLR\_ParseOptions file to src folder [\#277](https://github.com/nanoframework/nf-interpreter/pull/277) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Enable Target\_GetReleaseInfo [\#267](https://github.com/nanoframework/nf-interpreter/pull/267) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Enable GetClrReleaseInfo in Debugger [\#266](https://github.com/nanoframework/nf-interpreter/pull/266) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Revert types to well known defined types [\#251](https://github.com/nanoframework/nf-interpreter/pull/251)
+- Replace types with standard C [\#250](https://github.com/nanoframework/nf-interpreter/pull/250) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Correct declaration to use standard types [\#249](https://github.com/nanoframework/nf-interpreter/pull/249)
+- Replace attributes with define [\#248](https://github.com/nanoframework/nf-interpreter/pull/248) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Complete work on \#195 [\#240](https://github.com/nanoframework/nf-interpreter/pull/240) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Rework code base to have a single debugger and messaging port [\#238](https://github.com/nanoframework/nf-interpreter/pull/238) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Rename ReplyCommand in WireProtocol C implementation [\#236](https://github.com/nanoframework/nf-interpreter/pull/236) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Further work on BlockStorage [\#235](https://github.com/nanoframework/nf-interpreter/pull/235) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Update build-instructions.md [\#229](https://github.com/nanoframework/nf-interpreter/pull/229)
+- Moved linker symbols to targetHAL [\#218](https://github.com/nanoframework/nf-interpreter/pull/218) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update documentation on contributions [\#217](https://github.com/nanoframework/nf-interpreter/pull/217)
+- Add GetSector in STM32 flash driver [\#214](https://github.com/nanoframework/nf-interpreter/pull/214) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- First implement of Monitor\_CheckMemory logic. [\#211](https://github.com/nanoframework/nf-interpreter/pull/211) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Implement Monitor\_MemoryMap command [\#207](https://github.com/nanoframework/nf-interpreter/pull/207) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add flash driver for STM32F7 series [\#200](https://github.com/nanoframework/nf-interpreter/pull/200) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Rework HAL time functions [\#160](https://github.com/nanoframework/nf-interpreter/pull/160) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Cleaned up unused,obsolete and unsupported platforms and toolchains [\#99](https://github.com/nanoframework/nf-interpreter/pull/99) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- WP test app over USB CDC [\#65](https://github.com/nanoframework/nf-interpreter/pull/65) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Implement Wire Protocol in plain C [\#56](https://github.com/nanoframework/nf-interpreter/pull/56) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Moved CLR folder up one level [\#50](https://github.com/nanoframework/nf-interpreter/pull/50)
+- Add test app for mBed RTOS [\#16](https://github.com/nanoframework/nf-interpreter/pull/16)
+- Add demo app for FreeRTOS [\#15](https://github.com/nanoframework/nf-interpreter/pull/15)
+- Add support for specifing RTOS for build [\#14](https://github.com/nanoframework/nf-interpreter/pull/14)
+
+**Fixed bugs:**
+
+- Add missing defines in mcuconf header of ST\_STM32F769I\_DISCOVERY [\#487](https://github.com/nanoframework/nf-interpreter/pull/487) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix linker file for ST\_STM32F769I\_DISCOVERY [\#486](https://github.com/nanoframework/nf-interpreter/pull/486) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Remove references to removed source files [\#447](https://github.com/nanoframework/nf-interpreter/pull/447) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Correct wrong declation of argument in Interop code [\#417](https://github.com/nanoframework/nf-interpreter/pull/417)
+- Correct issue with flash driver for STM32F4XX devices [\#415](https://github.com/nanoframework/nf-interpreter/pull/415) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix flash driver for use in SMT32F7 series [\#400](https://github.com/nanoframework/nf-interpreter/pull/400) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Various fixes for MBN\\_QUAIL [\#395](https://github.com/nanoframework/nf-interpreter/pull/395) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Various fixes in ST\_STM32F429I\_DISCOVERY [\#394](https://github.com/nanoframework/nf-interpreter/pull/394) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix debugger wait loop [\#383](https://github.com/nanoframework/nf-interpreter/pull/383) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Fix ContiguousBlockAssemblies [\#372](https://github.com/nanoframework/nf-interpreter/pull/372) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Correct submodule naming [\#256](https://github.com/nanoframework/nf-interpreter/pull/256)
+- Fixed ram0 start address on linker file [\#206](https://github.com/nanoframework/nf-interpreter/pull/206) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add missing \#ifdef  for Win32 nanoCLR solution [\#175](https://github.com/nanoframework/nf-interpreter/pull/175) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+
+**Documentation and other chores:**
+
+- Fix linker files for SMT32F7 series [\#516](https://github.com/nanoframework/nf-interpreter/pull/516) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix issue \#70 [\#515](https://github.com/nanoframework/nf-interpreter/pull/515)
+- Fix compilation error for F091 with SPI [\#508](https://github.com/nanoframework/nf-interpreter/pull/508)
+- Changed I2C transmit timeout [\#507](https://github.com/nanoframework/nf-interpreter/pull/507)
+- Replace duplicate implementations of SafeSprint\* [\#506](https://github.com/nanoframework/nf-interpreter/pull/506) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add implementation for TimeSpan.ToString\(\) [\#505](https://github.com/nanoframework/nf-interpreter/pull/505) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Remove unused vars and related code file [\#504](https://github.com/nanoframework/nf-interpreter/pull/504) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix I2C for F769I reference board [\#500](https://github.com/nanoframework/nf-interpreter/pull/500) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Increase memory for image of firmware [\#499](https://github.com/nanoframework/nf-interpreter/pull/499) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Activate channels for SPI, I2C [\#498](https://github.com/nanoframework/nf-interpreter/pull/498) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Correct include version for I2C [\#497](https://github.com/nanoframework/nf-interpreter/pull/497) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Definitive fix for I2C and SPI on F7 MCU [\#495](https://github.com/nanoframework/nf-interpreter/pull/495)
+- Work on I2C for STM32F7xx [\#492](https://github.com/nanoframework/nf-interpreter/pull/492)
+- Improve HAL EXT initialization [\#491](https://github.com/nanoframework/nf-interpreter/pull/491) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fixes exception in ToString\(\) [\#490](https://github.com/nanoframework/nf-interpreter/pull/490) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fix ChibiOS rules [\#489](https://github.com/nanoframework/nf-interpreter/pull/489) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Dereference Unsigned shorts in SPI [\#484](https://github.com/nanoframework/nf-interpreter/pull/484) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Remove setting of PB3 for SWO [\#482](https://github.com/nanoframework/nf-interpreter/pull/482) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Improve SWO config [\#481](https://github.com/nanoframework/nf-interpreter/pull/481) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Spi f7 [\#480](https://github.com/nanoframework/nf-interpreter/pull/480) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Remove ST\_NUCLEO144\_F746ZG from nF overlay [\#476](https://github.com/nanoframework/nf-interpreter/pull/476) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Update program with SPI test code [\#474](https://github.com/nanoframework/nf-interpreter/pull/474) [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Correct assembly name [\#473](https://github.com/nanoframework/nf-interpreter/pull/473) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Update nanoCLR test app to latest Nugets [\#472](https://github.com/nanoframework/nf-interpreter/pull/472) [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Disable Gpio on F091 board [\#471](https://github.com/nanoframework/nf-interpreter/pull/471)
+- SetResult - Fix bytes return values [\#469](https://github.com/nanoframework/nf-interpreter/pull/469)
+- Update docs [\#467](https://github.com/nanoframework/nf-interpreter/pull/467)
+- I2c [\#445](https://github.com/nanoframework/nf-interpreter/pull/445)
+- Add missing file to nanoCLR [\#438](https://github.com/nanoframework/nf-interpreter/pull/438) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: WIN32](https://github.com/nanoframework/nf-interpreter/labels/Area:%20WIN32)]
+- Add documentation on using Ninja build [\#436](https://github.com/nanoframework/nf-interpreter/pull/436)
+- Improve documentation [\#426](https://github.com/nanoframework/nf-interpreter/pull/426)
+- Improve communication responsiveness [\#423](https://github.com/nanoframework/nf-interpreter/pull/423) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- refactored template to make it slightly simpler [\#410](https://github.com/nanoframework/nf-interpreter/pull/410)
+- Improvements in documentation for class libraries [\#405](https://github.com/nanoframework/nf-interpreter/pull/405)
+- Corrections for F69I \(deployment still fails\) [\#396](https://github.com/nanoframework/nf-interpreter/pull/396)
+- Fix regions on F746ZG \(\#391\) [\#392](https://github.com/nanoframework/nf-interpreter/pull/392)
+- updates to documentation \(\#386\) [\#389](https://github.com/nanoframework/nf-interpreter/pull/389)
+- fix for USB connection issues with F769I [\#388](https://github.com/nanoframework/nf-interpreter/pull/388)
+- Devices.Gpio fixes [\#387](https://github.com/nanoframework/nf-interpreter/pull/387)
+- F746 device id \(\#380\)  [\#384](https://github.com/nanoframework/nf-interpreter/pull/384)
+- update travis arm toolchain [\#381](https://github.com/nanoframework/nf-interpreter/pull/381)
+- update travis arm toolchain \#196 and cmake to 3.8.2 [\#379](https://github.com/nanoframework/nf-interpreter/pull/379)
+- updated documents [\#378](https://github.com/nanoframework/nf-interpreter/pull/378)
+- Add documenation about thread execution and context switching [\#376](https://github.com/nanoframework/nf-interpreter/pull/376)
+- F7 improvements and attempts at CLR RAM optimisations for some boards [\#370](https://github.com/nanoframework/nf-interpreter/pull/370)
+- clr managed heap document improvements [\#369](https://github.com/nanoframework/nf-interpreter/pull/369)
+- Add doc with explanation about deployment [\#363](https://github.com/nanoframework/nf-interpreter/pull/363)
+- Fix \#353 [\#354](https://github.com/nanoframework/nf-interpreter/pull/354) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Fix issue \#337 [\#338](https://github.com/nanoframework/nf-interpreter/pull/338)
+- Work on new DateTime native side [\#336](https://github.com/nanoframework/nf-interpreter/pull/336)
+- Fixes \#314 [\#315](https://github.com/nanoframework/nf-interpreter/pull/315)
+- Fix declaration of Interop\_Marshal\_GetField for bool type [\#295](https://github.com/nanoframework/nf-interpreter/pull/295)
+- Add stdafx.h include [\#282](https://github.com/nanoframework/nf-interpreter/pull/282) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Update Community Targets submodule [\#280](https://github.com/nanoframework/nf-interpreter/pull/280)
+- Moved nanoCLR\_ParseOptions file to src folder \(\#277\) [\#278](https://github.com/nanoframework/nf-interpreter/pull/278) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Add documentation about cmake-variants.TEMPLATE.json [\#276](https://github.com/nanoframework/nf-interpreter/pull/276)
+- Correct GNU ARM Eclipse OpenOCD link [\#273](https://github.com/nanoframework/nf-interpreter/pull/273)
+- Correct issue when checking for user button pressed [\#271](https://github.com/nanoframework/nf-interpreter/pull/271)
+- Add missing CLRStartup thread to reference boards [\#262](https://github.com/nanoframework/nf-interpreter/pull/262)
+- Fix \#259 [\#261](https://github.com/nanoframework/nf-interpreter/pull/261)
+- Correct linker scripts to aling deployment [\#260](https://github.com/nanoframework/nf-interpreter/pull/260)
+- Correct button check [\#258](https://github.com/nanoframework/nf-interpreter/pull/258)
+- Correction for support of community boards [\#253](https://github.com/nanoframework/nf-interpreter/pull/253)
+- Update gitignore for VS Code [\#246](https://github.com/nanoframework/nf-interpreter/pull/246)
+- Fixes issue \#118 [\#245](https://github.com/nanoframework/nf-interpreter/pull/245)
+- Fix Quail nanoBooter main code [\#244](https://github.com/nanoframework/nf-interpreter/pull/244)
+- Update README.md [\#243](https://github.com/nanoframework/nf-interpreter/pull/243)
+- Fix \#241 [\#242](https://github.com/nanoframework/nf-interpreter/pull/242)
+- update build instructions related to launch.json [\#234](https://github.com/nanoframework/nf-interpreter/pull/234)
+- Initial implementation of Monitor\_FlashSectorMap \(\#215\) [\#223](https://github.com/nanoframework/nf-interpreter/pull/223)
+- Moved some declarations to nanoHAL\_v2 [\#204](https://github.com/nanoframework/nf-interpreter/pull/204)
+- Add dummy flash sector 11 definition [\#203](https://github.com/nanoframework/nf-interpreter/pull/203) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Implement AccessMemory function [\#198](https://github.com/nanoframework/nf-interpreter/pull/198) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Implement Monitor\_EraseMemory command [\#197](https://github.com/nanoframework/nf-interpreter/pull/197) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)] [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- HAL config was missing the  USE\_SERIAL definition [\#194](https://github.com/nanoframework/nf-interpreter/pull/194)
+- Add Travis CI badge to readme [\#193](https://github.com/nanoframework/nf-interpreter/pull/193)
+- Correct filename case [\#190](https://github.com/nanoframework/nf-interpreter/pull/190)
+- Correct file name case [\#189](https://github.com/nanoframework/nf-interpreter/pull/189)
+- Change filename case [\#187](https://github.com/nanoframework/nf-interpreter/pull/187)
+- update Travis file [\#183](https://github.com/nanoframework/nf-interpreter/pull/183)
+- Add Travis file [\#180](https://github.com/nanoframework/nf-interpreter/pull/180)
+- Aligned CMakes for reference boards [\#179](https://github.com/nanoframework/nf-interpreter/pull/179)
+- Enable WireProtocol in nanoBooter [\#177](https://github.com/nanoframework/nf-interpreter/pull/177)
+- Quail board support again [\#168](https://github.com/nanoframework/nf-interpreter/pull/168)
+- Fix mcu configs for NUCLEO901 in nanoCLR [\#167](https://github.com/nanoframework/nf-interpreter/pull/167) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Uncomment line that was causing issues with nanoCLR image detection [\#163](https://github.com/nanoframework/nf-interpreter/pull/163)
+- Lineup the sys tick configurations on all reference boards [\#156](https://github.com/nanoframework/nf-interpreter/pull/156)
+- Add code to check for valid CLR image and launch it [\#155](https://github.com/nanoframework/nf-interpreter/pull/155)
+- Revert ChibiOS setting for using classic periodic timer [\#153](https://github.com/nanoframework/nf-interpreter/pull/153)
+- Add STM32F429I\_DISCOVERY board [\#147](https://github.com/nanoframework/nf-interpreter/pull/147) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Implement HAL\_Time\_TicksToTimeMilliSec [\#145](https://github.com/nanoframework/nf-interpreter/pull/145)
+- Moved include of target\_board header to targetHAL [\#144](https://github.com/nanoframework/nf-interpreter/pull/144)
+- Deleted nanoCLR.VC.db [\#138](https://github.com/nanoframework/nf-interpreter/pull/138)
+- Fixes \#81 [\#137](https://github.com/nanoframework/nf-interpreter/pull/137)
+- Resolves \#133 [\#135](https://github.com/nanoframework/nf-interpreter/pull/135)
+- Rename FLASH in HAL\_SYSTEM\_CONFIG struct [\#129](https://github.com/nanoframework/nf-interpreter/pull/129) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Add logo in common size \(32x32\) [\#117](https://github.com/nanoframework/nf-interpreter/pull/117)
+- Correct "source" directory references in \<root\>/CMakeLists.txt \#96 [\#111](https://github.com/nanoframework/nf-interpreter/pull/111)
+- Rename nanoCLR [\#105](https://github.com/nanoframework/nf-interpreter/pull/105)
+- Added empty line to make GitHub diff happy [\#103](https://github.com/nanoframework/nf-interpreter/pull/103)
+- Correct buffer size for ST\_NUCLEO\_F091RC [\#102](https://github.com/nanoframework/nf-interpreter/pull/102)
+- Add Monitor\_Reboot command [\#100](https://github.com/nanoframework/nf-interpreter/pull/100)
+- \[WIP\] nanoCLR [\#95](https://github.com/nanoframework/nf-interpreter/pull/95)
+- Fixed copyright notice in CMakeLists [\#94](https://github.com/nanoframework/nf-interpreter/pull/94)
+- Fixed project name [\#88](https://github.com/nanoframework/nf-interpreter/pull/88)
+- Import cmake build [\#84](https://github.com/nanoframework/nf-interpreter/pull/84)
+- Renamed keepers to maintainers, fixed links [\#75](https://github.com/nanoframework/nf-interpreter/pull/75)
+- Updated organization name nanoFramework [\#74](https://github.com/nanoframework/nf-interpreter/pull/74)
+- Updated copyright notice header format to handle partial content [\#66](https://github.com/nanoframework/nf-interpreter/pull/66)
+- Fix 58 [\#63](https://github.com/nanoframework/nf-interpreter/pull/63) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Fix variable names in WireProtocol\_Receiver [\#60](https://github.com/nanoframework/nf-interpreter/pull/60) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Added Developer Certificate of Origin documentation [\#52](https://github.com/nanoframework/nf-interpreter/pull/52)
+- Updated copyright notice header format [\#49](https://github.com/nanoframework/nf-interpreter/pull/49)
+- Add official logo files [\#36](https://github.com/nanoframework/nf-interpreter/pull/36)
+- Updated README-s [\#34](https://github.com/nanoframework/nf-interpreter/pull/34)
+- \[WIP\] nanoBooter mbed-os sample implementation [\#32](https://github.com/nanoframework/nf-interpreter/pull/32) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- \[WIP\] Wire protocol proof-of-concept [\#31](https://github.com/nanoframework/nf-interpreter/pull/31) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- cosmetic changes in doc [\#29](https://github.com/nanoframework/nf-interpreter/pull/29)
+- add preliminary versions of documentation [\#25](https://github.com/nanoframework/nf-interpreter/pull/25)
+- update information about build deliverables [\#24](https://github.com/nanoframework/nf-interpreter/pull/24)
+- Small correction on typos [\#17](https://github.com/nanoframework/nf-interpreter/pull/17)
+- Add support for STM32F0 series [\#13](https://github.com/nanoframework/nf-interpreter/pull/13)
+- Add readme file to perform as documentation index [\#12](https://github.com/nanoframework/nf-interpreter/pull/12)
+- Add preliminary version of documentation with build and VS Code debug instructions [\#11](https://github.com/nanoframework/nf-interpreter/pull/11)
+- Initial works on CMake build and debug for VS Code [\#10](https://github.com/nanoframework/nf-interpreter/pull/10)
+- Added README-s, LICENSE and CONTRIBUTORS [\#1](https://github.com/nanoframework/nf-interpreter/pull/1)
+
+
+
+\* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
