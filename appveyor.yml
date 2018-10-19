@@ -82,6 +82,7 @@ install:
 - bundle config --local path vendor/bundle
 - gem install bundler --quiet --no-ri --no-rdoc
 - gem install github_changelog_generator --quiet --no-ri --no-rdoc
+# this needs to be replace with the official version and nuget package as soon as it's released
 - dotnet tool install -g --version 4.0.0-pullrequest1422-1625 --add-source https://ci.appveyor.com/nuget/gitversion-8nigugxjftrw GitVersion.CommandLine.DotNetCore.Tool
 - ps: |
 
@@ -167,6 +168,69 @@ build_script:
 
     If($env:BOARD_NAME -eq "NOT_A_BOARD_CHANGELOG")
     {
+      # download artifacts from the previous jobs
+      # ONLY when build is NOT a pull-request or not a tag (master OR release)
+      if ($env:appveyor_pull_request_number -or 
+        ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_TAG -eq 'true') -or
+        ($env:APPVEYOR_REPO_BRANCH -match "^release*" -and $env:APPVEYOR_REPO_TAG -eq 'true') -or
+        $env:APPVEYOR_REPO_TAG -eq "true")
+      {
+        'Skip getting artifacts...' | Write-Host -ForegroundColor White
+      }
+      else
+      {
+        $headers = @{
+          "Authorization" = "Bearer $env:APPVEYOR_MY_API_TOKEN"
+          "Content-type" = "application/json"
+        }
+
+        # project endpoint
+        $project = Invoke-RestMethod -Uri "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG" -Headers $headers -Method GET
+
+        # STM32 job
+        $jobSTM32Json = $project.build.jobs | where {$_.name -eq "Environment: BOARD_NAME=STM32"}
+        $jobSTM32Id = $jobSTM32Json.jobId
+
+        # get all artifacts from STM32 job
+        $jobSTM32Artifacts = Invoke-RestMethod -Method Get -Uri "https://ci.appveyor.com/api/buildjobs/$jobSTM32Id/artifacts" -Headers $headers
+
+        ForEach($artifact in $jobSTM32Artifacts)
+        {
+          $file = $artifact.fileName
+
+          try
+          {
+            Invoke-RestMethod -Method Get -Uri "https://ci.appveyor.com/api/buildjobs/$jobSTM32Id/artifacts/$file" `
+            -OutFile $env:APPVEYOR_BUILD_FOLDER\$file -Headers $headers
+
+            Push-AppveyorArtifact $env:APPVEYOR_BUILD_FOLDER\$file
+          }
+          catch 
+          {
+            "Error downloading $artifact.fileName artifact" | Write-Host -ForegroundColor White -BackgroundColor Red
+          }
+        }
+        
+        # EPS32 job
+        $jobESP32Json = $project.build.jobs | where {$_.name -eq "Environment: BOARD_NAME=ESP32"}
+        $jobESP32Id = $jobESP32Json.jobId
+
+        # this job has a single artifact
+        $file = ESP32_DEVKITC-$env:GitVersion_FullSemVer.zip
+        try
+        {
+          Invoke-RestMethod -Method Get -Uri "https://ci.appveyor.com/api/buildjobs/$jobESP32Id/artifacts/$file" `
+          -OutFile $env:APPVEYOR_BUILD_FOLDER\$file -Headers $headers
+          
+          Push-AppveyorArtifact $env:APPVEYOR_BUILD_FOLDER\$file
+        }
+        catch 
+        {
+          "Error downloading $file artifact" | Write-Host -ForegroundColor White -BackgroundColor Red
+        } 
+      }
+
+      # generate the change log
       .\generate-change-log.ps1
     }
     ElseIf($env:BOARD_NAME -eq "NANOCLR_WINDOWS")
@@ -186,17 +250,18 @@ build_script:
         }
 
         Copy-Item -Path $env:ESP32_LIBS_PATH\bootloader.bin -Destination bootloader.bin
-        Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-        Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
+        Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip -DisableRecursion
+        Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip
 
         # upload package only if this not a PR 
         # and this is 'develop' (not develop-something) or release or master (for these only on tags)
-        if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and 
-            ( $env:APPVEYOR_REPO_BRANCH -eq "develop" -or 
-              ($env:APPVEYOR_REPO_BRANCH -match "^release*" -and $env:APPVEYOR_REPO_TAG -eq "true") -or
-              ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_TAG -eq "true")
-            ))
+        if( ($env:APPVEYOR_REPO_BRANCH -eq "develop" -and !$env:APPVEYOR_PULL_REQUEST_NUMBER) -or 
+            ($env:APPVEYOR_REPO_BRANCH -match "^release*" -and $env:APPVEYOR_REPO_TAG -eq "true") -or
+            ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_TAG -eq "true")
+          )
         {
+          "Uploading artifact to Bintray..." | Write-Host -ForegroundColor Cyan
+
           # get bintray repo name (dev or stable)
           $images_repo = "nanoframework-images"
 
@@ -210,12 +275,16 @@ build_script:
           {
             $webClient = New-Object System.Net.WebClient
             $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-            $webClient.UploadFile("https://api.bintray.com/content/nfbot/$images_repo/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+            $webClient.UploadFile("https://api.bintray.com/content/nfbot/$images_repo/$env:BOARD_NAME/$env:GitVersion_FullSemVer/$env:BOARD_NAME-$env:GitVersion_FullSemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_FullSemVer.zip")
           }
           catch
           {
             & $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
           }
+        }
+        else
+        {
+          "Skip uploading to Bintray..." | Write-Host -ForegroundColor Cyan
         }
       }
       Else
@@ -232,23 +301,24 @@ build_script:
             throw [System.Exception] "CMake build failed with exit code $lastexitcode."
           }
 
-          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-          Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-          Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+          Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip -DisableRecursion
+          Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip -DisableRecursion -Append
+          Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip -DisableRecursion -Append
           If($env:NEEDS_DFU -eq 'True')
           {
-            Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+            Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip -DisableRecursion -Append
           }
-          Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_SemVer.zip
+          Push-AppveyorArtifact $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip
 
           # upload package only if this not a PR 
           # and this is 'develop' (not develop-something) or release or master (for these only on tags)
-          if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and 
-              ( $env:APPVEYOR_REPO_BRANCH -eq "develop" -or 
-                ($env:APPVEYOR_REPO_BRANCH -match "^release*" -and $env:APPVEYOR_REPO_TAG -eq "true") -or
-                ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_TAG -eq "true")
-              ))
+          if( ($env:APPVEYOR_REPO_BRANCH -eq "develop" -and !$env:APPVEYOR_PULL_REQUEST_NUMBER) -or 
+              ($env:APPVEYOR_REPO_BRANCH -match "^release*" -and $env:APPVEYOR_REPO_TAG -eq "true") -or
+              ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_TAG -eq "true")
+            )
           {
+            "Uploading artifact to Bintray..." | Write-Host -ForegroundColor Cyan
+
             # get bintray repo name (dev or stable)
             $images_repo = "nanoframework-images"
 
@@ -262,12 +332,16 @@ build_script:
             {
               $webClient = New-Object System.Net.WebClient
               $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-              $webClient.UploadFile("https://api.bintray.com/content/nfbot/$images_repo/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+              $webClient.UploadFile("https://api.bintray.com/content/nfbot/$images_repo/$env:BOARD_NAME/$env:GitVersion_FullSemVer/$env:BOARD_NAME-$env:GitVersion_FullSemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_FullSemVer.zip")
             }
             catch
             {
               & $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
             }
+          }
+          else
+          {
+            "Skip uploading to Bintray..." | Write-Host -ForegroundColor Cyan
           }
         }
         else
@@ -300,27 +374,28 @@ build_script:
               throw [System.Exception] "CMake build failed with exit code $lastexitcode."
             }
 
-            Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion
-            Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
-            Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+            Compress-7Zip -Path . -Filter "*.bin" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip -DisableRecursion
+            Compress-7Zip -Path . -Filter "*.hex" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip -DisableRecursion -Append
+            Compress-7Zip -Path . -Filter "*.s19" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip -DisableRecursion -Append
             If($env:NEEDS_DFU -eq 'True')
             {
-              Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_SemVer.zip -DisableRecursion -Append
+              Compress-7Zip -Path . -Filter "*.dfu" -ArchiveFileName $env:BOARD_NAME-$env:GitVersion_FullSemVer.zip -DisableRecursion -Append
             }
 
             & cd .. > $null
             Rename-Item -NewName build-$env:BOARD_NAME -Path "build" -Force
 
-            Push-AppveyorArtifact build-$env:BOARD_NAME\$env:BOARD_NAME-$env:GitVersion_SemVer.zip
+            Push-AppveyorArtifact build-$env:BOARD_NAME\$env:BOARD_NAME-$env:GitVersion_FullSemVer.zip
 
             # upload package only if this not a PR 
             # and this is 'develop' (not develop-something) or release or master (for these only on tags)
-            if(!$env:APPVEYOR_PULL_REQUEST_NUMBER -and 
-                ( $env:APPVEYOR_REPO_BRANCH -eq "develop" -or 
-                  ($env:APPVEYOR_REPO_BRANCH -match "^release*" -and $env:APPVEYOR_REPO_TAG -eq "true") -or
-                  ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_TAG -eq "true")
-                ))
+            if( ($env:APPVEYOR_REPO_BRANCH -eq "develop" -and !$env:APPVEYOR_PULL_REQUEST_NUMBER) -or 
+                ($env:APPVEYOR_REPO_BRANCH -match "^release*" -and $env:APPVEYOR_REPO_TAG -eq "true") -or
+                ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_TAG -eq "true")
+              )
             {
+              "Uploading artifact to Bintray..." | Write-Host -ForegroundColor Cyan
+
               # get bintray repo name (dev or stable)
               $images_repo = "nanoframework-images"
 
@@ -334,12 +409,16 @@ build_script:
               {
                 $webClient = New-Object System.Net.WebClient
                 $webClient.Credentials = new-object System.Net.NetworkCredential("nfbot", $env:BinTrayKey)
-                $webClient.UploadFile("https://api.bintray.com/content/nfbot/$images_repo/$env:BOARD_NAME/$env:GitVersion_SemVer/$env:BOARD_NAME-$env:GitVersion_SemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build\$env:BOARD_NAME-$env:GitVersion_SemVer.zip")
+                $webClient.UploadFile("https://api.bintray.com/content/nfbot/$images_repo/$env:BOARD_NAME/$env:GitVersion_FullSemVer/$env:BOARD_NAME-$env:GitVersion_FullSemVer.zip;publish=1", "PUT", "$env:APPVEYOR_BUILD_FOLDER\build-$env:BOARD_NAME\$env:BOARD_NAME-$env:GitVersion_FullSemVer.zip")
               }
               catch
               {
                 & $env:APPVEYOR_BUILD_FOLDER\appveyor-discord.ps1 warning $env:APPVEYOR_DISCORD_WEBHOOK_URL "Failed to upload package for $env:BOARD_NAME."
               }
+            }
+            else
+            {
+              "Skip uploading to Bintray..." | Write-Host -ForegroundColor Cyan
             }
 
             & md build > $null
@@ -359,8 +438,8 @@ on_failure:
 
 deploy:
 - provider: GitHub
-  tag: v$(GitVersion_SemVer)
-  release: nanoFramework firmware images v$(GitVersion_SemVer)
+  tag: v$(GitVersion_FullSemVer)
+  release: nanoFramework firmware images v$(GitVersion_FullSemVer)
   description: 'Check the [changelog](https://github.com/$(APPVEYOR_REPO_NAME)/blob/$(APPVEYOR_REPO_BRANCH)/CHANGELOG.md)\n\nDownload images from our Bintray repo. See the available images [here](https://github.com/$(APPVEYOR_REPO_NAME)/tree/master#firmware-for-reference-boards).'
   auth_token:
     secure: DNixoFFE+pGlwyhj7McfZoln42vOmj0iY1iNV9zXEr3y0NpXlOIgL8k5ehzlFM1S
