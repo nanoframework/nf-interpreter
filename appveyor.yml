@@ -216,7 +216,7 @@ build_script:
         $jobESP32Id = $jobESP32Json.jobId
 
         # this job has a single artifact
-        $file = ESP32_DEVKITC-$env:GitVersion_FullSemVer.zip
+        $file = "ESP32_DEVKITC-$env:GitVersion_FullSemVer.zip"
         try
         {
           Invoke-RestMethod -Method Get -Uri "https://ci.appveyor.com/api/buildjobs/$jobESP32Id/artifacts/$file" `
