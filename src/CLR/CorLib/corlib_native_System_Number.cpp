@@ -8,7 +8,10 @@
 // compose sprintf format string according to requested parameters
 void nf_GetFormatString(char* formatStr, char formatCh, int precision, bool isLong, bool isFloat, bool isSigned)
 {
-    sprintf(formatStr, "%%%s%d%s%s", isFloat ? "." : isSigned ? "-0" : "0", precision, isLong ? "ll" : isFloat ? "f" : "", formatCh == 'X' ? "X" :  isFloat ? "" : isSigned ? "d" : "u");
+    if(formatCh == 'X' || formatCh=='x')
+		sprintf(formatStr, "%%0%d%sX", precision, isLong ? "ll" : "");
+    else
+        sprintf(formatStr, "%%%s%d%s%s", isFloat ? "." : isSigned ? "-0" : "0", precision, isLong ? "ll" : isFloat ? "f" : "", formatCh == 'X' ? "X" :  isFloat ? "" : isSigned ? "d" : "u");
 }
 
 // remove the prepended zeros and (if possible) the decimal point in a float that's formated as string. e.g. "47.1100815000000" => "47.1100815" or "8.0000E-12" => "8E-12"
