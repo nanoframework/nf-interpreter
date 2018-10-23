@@ -1,5 +1,13 @@
 # Change Log
 
+## [**Changes available only in 'Preview' images:**](https://github.com/nanoframework/nf-interpreter/tree/HEAD)
+
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.0.1...HEAD)
+
+**Fixed bugs:**
+
+- Fixes for issue \#416 [\#933](https://github.com/nanoframework/nf-interpreter/pull/933) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+
 ## [v1.0.1](https://github.com/nanoframework/nf-interpreter/tree/v1.0.1) (2018-10-18)
 [Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.0.0...v1.0.1)
 
