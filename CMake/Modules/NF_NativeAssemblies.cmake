@@ -24,6 +24,11 @@ option(API_Windows.Networking.Sockets           "option for Windows.Networking.S
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
 
+
+# Stm32 only
+option(API_Hardware.Stm32                       "option for Hardware.Esp32")
+
+
 #################################################################
 # macro to perform individual settings to add an API to the build
 macro(PerformSettingsForApiEntry apiNamespace)
@@ -63,6 +68,18 @@ endmacro()
 ############################################################################################
 
 macro(ParseNativeAssemblies)
+
+    # Hardware.Esp32
+    if(API_Hardware.Esp32)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
+    endif()
+
+    # Hardware.Stm32
+    if(API_Hardware.Stm32)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
+    endif()
 
     # nanoFramework.Networking.Sntp
     if(API_nanoFramework.Networking.Sntp)
@@ -136,12 +153,6 @@ macro(ParseNativeAssemblies)
     if(API_Windows.Devices.Wifi)
        ##### API name here (doted name)
        PerformSettingsForApiEntry("Windows.Devices.Wifi")
-    endif()
-
-    # Hardware.Esp32
-    if(API_Hardware.Esp32)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
     endif()
 
     # Interop assemblies
