@@ -6,6 +6,7 @@
 
 **Implemented enhancements:**
 
+- Add native support for Hardware.Stm32 class lib [\#935](https://github.com/nanoframework/nf-interpreter/pull/935) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
 - Implemented Base64 encoding/decoding [\#934](https://github.com/nanoframework/nf-interpreter/pull/934) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
 
 **Fixed bugs:**
