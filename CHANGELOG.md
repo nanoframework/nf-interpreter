@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.0.1...HEAD)
 
+**Implemented enhancements:**
+
+- Implemented Base64 encoding/decoding [\#934](https://github.com/nanoframework/nf-interpreter/pull/934) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+
 **Fixed bugs:**
 
 - Fixes for issue \#416 [\#933](https://github.com/nanoframework/nf-interpreter/pull/933) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
