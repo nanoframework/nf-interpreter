@@ -6,6 +6,7 @@
 
 #include "corlib_native.h"
 #include <ctype.h>
+#include <base64.h>
 
 HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4( CLR_RT_StackFrame& stack )
 {
@@ -291,7 +292,97 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    size_t outputLength;
+    char* outArray = NULL;
+    char* outArrayWitLineBreak = NULL;
+    uint8_t* inArrayPointer = NULL;
+    uint8_t lineBreakCount;
+    uint16_t offsetIndex = 0;
+    uint8_t count = 0;
+
+    CLR_RT_HeapBlock_Array* inArray = stack.Arg0().DereferenceArray(); 
+    size_t offset = (size_t)stack.Arg1().NumericByRef().s4;
+    size_t lenght = (size_t)stack.Arg2().NumericByRef().s4;
+    bool insertLineBreaks = (bool)stack.Arg3().NumericByRefConst().u1;
+
+    if(inArray == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL);
+
+    inArrayPointer = (uint8_t*)inArray->GetFirstElement();
+    inArrayPointer += (offset * sizeof(uint8_t));
+
+    // compute base64 string length
+    outputLength = 4 * ((lenght + 2) / 3);
+
+    // need malloc with base64 string length plus string terminator (+1)
+    outArray = (char*)platform_malloc(outputLength + 1);
+
+    // check if have allocation
+    if (outArray == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+
+    // perform the operation
+    mbedtls_base64_encode( (unsigned char*)outArray, 0, &outputLength, inArrayPointer, lenght );
+
+    if(insertLineBreaks)
+    {
+        // get line break count (line break every 76 chars)
+        lineBreakCount = outputLength / 76;
+
+        // need malloc with base64 string length plus line breaks (line break is 2 char long: CR + LF) plus final line break
+        outArrayWitLineBreak = (char*)platform_malloc(outputLength + (lineBreakCount * 2) + 2);
+
+        for(int i = 0; i <= lineBreakCount; i++)
+        {
+            // how many chars to copy
+            if(outputLength > 76)
+            {
+                // first/next 76 chars
+                count = 76;
+            }
+            else
+            {
+                // last outputLength chars
+                count = outputLength;
+            }
+
+            // copy first/next count chars
+            // because we are using same offset for both arrays, we need to discount line break for tmp array
+            memcpy(outArrayWitLineBreak + offsetIndex, outArray + (offsetIndex - (i * 2)), count);
+
+            // remove copied chars from original output length if more than 76 chars still to be copied
+            if(outputLength >= 76)
+            {
+                // more chars
+
+                // adjust output length
+                outputLength -= 76;
+
+                // add line break
+                outArrayWitLineBreak[count + offsetIndex] = '\r';
+                outArrayWitLineBreak[count + offsetIndex + 1] = '\n';
+
+                // move offset for next copy (including line break +2)
+                offsetIndex += count + 2;
+            }
+            else
+            {
+                // move offset for last position
+                offsetIndex += count;
+                // reached end of array, add terminator
+                outArrayWitLineBreak[offsetIndex] = 0;
+            }
+        }
+        // set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
+        NANOCLR_CHECK_HRESULT(stack.SetResult_String(outArrayWitLineBreak));
+    }
+    else
+    {
+        // set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
+        NANOCLR_CHECK_HRESULT(stack.SetResult_String(outArray));
+    }
+
+    // need to free memory from arrays
+    platform_free((void*)outArray);
+    if(outArrayWitLineBreak != NULL) platform_free((void*)outArrayWitLineBreak);
 
     NANOCLR_NOCLEANUP();
 }
@@ -300,7 +391,70 @@ HRESULT Library_corlib_native_System_Convert::FromBase64CharArray___STATIC__SZAR
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    size_t outputLength;
+    char* outArray = NULL;
+    uint16_t* inArrayPointerTmp = NULL;
+    uint8_t* inArrayPointer = NULL;
+    uint8_t charValue;
+    CLR_UINT8* returnArray;
+    int16_t i = 0;
+
+    CLR_RT_HeapBlock_Array* inArray = stack.Arg0().DereferenceArray();
+    size_t length = (size_t)stack.Arg1().NumericByRef().s4;
+
+    if(inArray == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL);
+
+    outputLength = length / 4 * 3;
+
+    // transform the 16 bits inArray to a 8 bits array so mbed knows how to convert it
+    inArrayPointerTmp = (uint16_t*)inArray->GetFirstElementUInt16();
+    inArrayPointer = (uint8_t*)inArray->GetFirstElement();
+    for(i = 0; i < (int16_t)length; i++)
+    {
+        *inArrayPointer = *inArrayPointerTmp;
+        inArrayPointer++;
+        inArrayPointerTmp++;
+    }
+    
+    // pointer is pointing to the end 
+    // point to last char in array and get it
+    inArrayPointer--;
+    charValue = *inArrayPointer;
+    // adjust output length
+    if (charValue == '=')
+    {
+        outputLength--;
+    }
+    // point to before last char and get it
+    inArrayPointer--;
+    charValue = *inArrayPointer;
+    // adjust output length
+    if (charValue == '=') 
+    {
+        outputLength--;
+    }
+
+    // reset pointer position (-2 because above we already went back two positions)
+    inArrayPointer -= length - 2;
+
+    outArray = (char*)platform_malloc(outputLength + 1);
+    // check malloc success
+    if (outArray == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+
+    // perform the operation
+    mbedtls_base64_decode( (unsigned char*)outArray, 0, &outputLength, inArrayPointer, length );
+
+    // create heap block array instance with appropriate size (the lenght of the output array) and type (byte which is uint8_t)
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( stack.PushValueAndClear() , outputLength, g_CLR_RT_WellKnownTypes.m_UInt8 ));
+
+    // get a pointer to the array in the heap block array just created
+    returnArray = stack.TopValue().DereferenceArray()->GetFirstElement();
+
+    // copy outArray to the returnArray
+    memcpy(returnArray, outArray, outputLength);
+
+    // need to free memory from outArray
+    platform_free(outArray);
 
     NANOCLR_NOCLEANUP();
 }
