@@ -1,53 +1,15 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
-// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) 2018 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
-#include "CorLib.h"
+
+#include "nf_native_system_math.h"
+
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     #include "nanoPAL_NativeDouble.h"
 
-    HRESULT Library_corlib_native_System_Math::Abs___STATIC__I4__I4( CLR_RT_StackFrame& stack )
-    {
-      #if (DP_FLOATINGPOINT == TRUE)
-        stack.NotImplementedStub();  
-      #else
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        float d = stack.Arg0().NumericByRefConst().s4;
-        float res = fabs( d );
-
-        stack.SetResult_I4( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();        
-
-      #endif 
-    }
-
-    HRESULT Library_corlib_native_System_Math::Max___STATIC__I4__I4__I4( CLR_RT_StackFrame& stack )
-    {
-      #if (DP_FLOATINGPOINT == TRUE)
-        return stack.NotImplementedStub();
-      #else
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        float x = stack.Arg0().NumericByRefConst().s4;
-        float y = stack.Arg1().NumericByRefConst().s4;
-        float res = x >= y ? x : y;
-
-        stack.SetResult_I4( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #endif 
-    }
-
-    HRESULT Library_corlib_native_System_Math::Max___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -67,7 +29,7 @@
       #endif 
     }
 
-    HRESULT Library_corlib_native_System_Math::Max___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -87,27 +49,7 @@
       #endif 
     }
 
-    HRESULT Library_corlib_native_System_Math::Min___STATIC__I4__I4__I4( CLR_RT_StackFrame& stack )
-    {
-      #if (DP_FLOATINGPOINT == TRUE)
-        return stack.NotImplementedStub();
-      #else
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        float x = stack.Arg0().NumericByRefConst().s4;
-        float y = stack.Arg1().NumericByRefConst().s4;
-        float res = x <= y ? x : y;
-
-        stack.SetResult_I4( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #endif 
-    }
-
-    HRESULT Library_corlib_native_System_Math::Min___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -127,7 +69,7 @@
       #endif 
     }
 
-    HRESULT Library_corlib_native_System_Math::Min___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -147,7 +89,7 @@
       #endif 
     }
 
-    HRESULT Library_corlib_native_System_Math::Abs___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Abs___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -166,7 +108,7 @@
       #endif 
     }
 
-    HRESULT Library_corlib_native_System_Math::Abs___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Abs___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -185,7 +127,7 @@
       #endif 
     }
 
-    HRESULT Library_corlib_native_System_Math::Acos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Acos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -204,7 +146,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Acos___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Acos___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -223,7 +165,7 @@
       #endif
     }    
 
-    HRESULT Library_corlib_native_System_Math::Asin___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Asin___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -242,7 +184,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Asin___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Asin___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -261,7 +203,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Atan___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Atan___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -280,7 +222,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Atan___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Atan___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -299,7 +241,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Atan2___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Atan2___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -319,7 +261,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Atan2___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Atan2___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -339,7 +281,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Ceiling___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Ceiling___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -359,7 +301,7 @@
 
     }
 
-    HRESULT Library_corlib_native_System_Math::Ceiling___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Ceiling___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -379,7 +321,7 @@
 
     }
 
-    HRESULT Library_corlib_native_System_Math::Cos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Cos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -398,7 +340,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Cos___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Cos___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -417,7 +359,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Cosh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Cosh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -436,7 +378,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Cosh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Cosh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -455,7 +397,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::IEEERemainder___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::IEEERemainder___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -475,7 +417,7 @@
       #endif        
     }
 
-    HRESULT Library_corlib_native_System_Math::IEEERemainder___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::IEEERemainder___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -495,7 +437,7 @@
       #endif        
     }
 
-    HRESULT Library_corlib_native_System_Math::Exp___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Exp___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -514,7 +456,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Exp___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Exp___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -533,7 +475,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Floor___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Floor___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -552,7 +494,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Floor___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Floor___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -571,7 +513,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Log___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Log___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -590,7 +532,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Log___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Log___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -609,7 +551,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Log10___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Log10___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -628,7 +570,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Log10___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Log10___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -647,7 +589,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Pow___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Pow___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         NATIVE_PROFILE_CLR_CORE();
@@ -666,7 +608,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Pow___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Pow___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -687,7 +629,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Round___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Round___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -717,7 +659,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Round___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Round___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -746,7 +688,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Sign___STATIC__I4__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sign___STATIC__I4__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         NATIVE_PROFILE_CLR_CORE();
@@ -766,7 +708,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Sign___STATIC__I4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sign___STATIC__I4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -788,7 +730,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Sin___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sin___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -807,7 +749,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Sin___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sin___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -826,7 +768,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Sinh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sinh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -845,7 +787,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Sinh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sinh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -864,7 +806,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Sqrt___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sqrt___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -883,7 +825,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Sqrt___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sqrt___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -902,7 +844,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Tan___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Tan___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -921,7 +863,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Tan___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Tan___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -940,7 +882,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Tanh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Tanh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
 
@@ -959,7 +901,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Tanh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Tanh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -978,7 +920,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Truncate___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Truncate___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         NATIVE_PROFILE_CLR_CORE();
@@ -997,7 +939,7 @@
       #endif
     }
 
-    HRESULT Library_corlib_native_System_Math::Truncate___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Truncate___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
       #if (DP_FLOATINGPOINT == TRUE)
         return stack.NotImplementedStub();
@@ -1020,8 +962,8 @@
 
 #else
 
-    /// No floating point 
-    HRESULT Library_corlib_native_System_Math::Abs___STATIC__I4__I4( CLR_RT_StackFrame& stack )
+    /// No floating point
+    HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1031,7 +973,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Max___STATIC__I4__I4__I4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1041,7 +983,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Max___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1051,7 +993,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Max___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1061,7 +1003,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Min___STATIC__I4__I4__I4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Abs___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1071,7 +1013,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Min___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Abs___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1081,37 +1023,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Min___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
-    {
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-        NANOCLR_NOCLEANUP();
-    }
-
-    HRESULT Library_corlib_native_System_Math::Abs___STATIC__R8__R8( CLR_RT_StackFrame& stack )
-    {
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-        NANOCLR_NOCLEANUP();
-    }
-
-    HRESULT Library_corlib_native_System_Math::Abs___STATIC__R4__R4( CLR_RT_StackFrame& stack )
-    {
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-        NANOCLR_NOCLEANUP();
-    }
-
-    HRESULT Library_corlib_native_System_Math::Acos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Acos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1121,7 +1033,7 @@
         NANOCLR_NOCLEANUP();
     }
     
-    HRESULT Library_corlib_native_System_Math::Acos___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Acos___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1131,7 +1043,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Asin___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Asin___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1141,7 +1053,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Asin___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Asin___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1151,7 +1063,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Atan___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Atan___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1161,7 +1073,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Atan___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Atan___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1171,7 +1083,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Atan2___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Atan2___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1181,7 +1093,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Atan2___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Atan2___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1191,7 +1103,7 @@
         NANOCLR_NOCLEANUP();
     }
     
-    HRESULT Library_corlib_native_System_Math::Ceiling___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Ceiling___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1205,7 +1117,7 @@
         NANOCLR_NOCLEANUP_NOLABEL();
     }
 
-    HRESULT Library_corlib_native_System_Math::Ceiling___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Ceiling___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1215,7 +1127,7 @@
         NANOCLR_NOCLEANUP();
     }
     
-    HRESULT Library_corlib_native_System_Math::Cos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Cos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1225,7 +1137,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Cos___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Cos___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1235,7 +1147,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Cosh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Cosh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1245,7 +1157,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Cosh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Cosh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1255,7 +1167,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::IEEERemainder___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::IEEERemainder___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1265,7 +1177,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::IEEERemainder___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::IEEERemainder___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1275,7 +1187,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Exp___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Exp___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1285,7 +1197,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Exp___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Exp___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1295,7 +1207,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Floor___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Floor___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1307,7 +1219,7 @@
         NANOCLR_NOCLEANUP_NOLABEL();
     }
 
-    HRESULT Library_corlib_native_System_Math::Floor___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Floor___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1317,7 +1229,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Log___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Log___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1327,7 +1239,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Log___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Log___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1337,7 +1249,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Log10___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Log10___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1347,7 +1259,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Log10___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Log10___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1357,7 +1269,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Pow___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Pow___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1367,7 +1279,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Pow___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Pow___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1377,7 +1289,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Round___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Round___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1394,7 +1306,7 @@
         NANOCLR_NOCLEANUP_NOLABEL();
     }
 
-    HRESULT Library_corlib_native_System_Math::Round___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Round___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1404,7 +1316,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Sign___STATIC__I4__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sign___STATIC__I4__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1414,7 +1326,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Sign___STATIC__I4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sign___STATIC__I4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1424,7 +1336,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Sin___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sin___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1434,7 +1346,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Sin___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sin___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1444,7 +1356,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Sinh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sinh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1454,7 +1366,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Sinh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sinh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1464,7 +1376,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Sqrt___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sqrt___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1474,7 +1386,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Sqrt___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Sqrt___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1484,7 +1396,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Tan___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Tan___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1494,7 +1406,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Tan___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Tan___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1504,7 +1416,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Tanh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Tanh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1514,7 +1426,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Tanh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Tanh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1524,7 +1436,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Truncate___STATIC__R8__R8( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Truncate___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();
@@ -1534,7 +1446,7 @@
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT Library_corlib_native_System_Math::Truncate___STATIC__R4__R4( CLR_RT_StackFrame& stack )
+    HRESULT Library_nf_native_system_math_System_Math::Truncate___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
         NATIVE_PROFILE_CLR_CORE();
         NANOCLR_HEADER();

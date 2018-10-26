@@ -11,6 +11,7 @@
 
 option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
 option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
+option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
 option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
@@ -99,6 +100,12 @@ macro(ParseNativeAssemblies)
         # append to list of entries for Interop Assemblies table
         list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs,")
 
+    endif()
+
+    # System.Math
+    if(API_System.Math)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("System.Math")
     endif()
 
     # System.Net
