@@ -48,5 +48,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Nativ
     "nanoFramework.Runtime.Native", 
     0x1AD361FD,
     method_lookup,
-    { 1, 0, 0, 0 }
+    { 1, 0, 1, 0 }
 };
