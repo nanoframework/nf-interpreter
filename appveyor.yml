@@ -93,6 +93,9 @@ install:
     }
     ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
     {
+
+      Install-Module 7Zip4PowerShell -Force
+
       .\install-esp32-toolchain.ps1
       .\install-ninja.ps1
       .\install-esp32-libs.ps1
@@ -100,6 +103,9 @@ install:
     }
     Else
     {
+
+      Install-Module 7Zip4PowerShell -Force
+
       # get build matrix
       .\get-stm32-targets-to-build.ps1
 
@@ -160,8 +166,6 @@ before_build:
 
 build_script:
 - ps: |
-
-    Install-Module 7Zip4PowerShell -Force
 
     If($env:BOARD_NAME -eq "NOT_A_BOARD_CHANGELOG")
     {
