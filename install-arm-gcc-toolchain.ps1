@@ -5,8 +5,6 @@ $GnuGccPathExists = Test-Path $env:GNU_GCC_TOOLCHAIN_PATH -ErrorAction SilentlyC
 
 If($GnuGccPathExists -eq $False)
 {
-    Install-Module 7Zip4PowerShell -Force
-
     Write-Host "Downloading ARM GNU GCC toolchain..."
     
     $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-7-2018-q2-update-win32.7z"

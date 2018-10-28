@@ -8,9 +8,6 @@ skip_branch_with_pr: true
 
 test: off
 
-pull_requests:
-  do_not_increment_build_number: true
-
 # Skipping commits affecting specific files
 skip_commits:
   files:
@@ -53,7 +50,7 @@ environment:
   matrix:
     - BOARD_NAME: 'STM32'
     - BOARD_NAME: 'ESP32_DEVKITC'
-      BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_OPENSSL=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON'
+      BUILD_OPTIONS: '-DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_OPENSSL=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON'
     - BOARD_NAME: 'NANOCLR_WINDOWS'
     - BOARD_NAME: 'NOT_A_BOARD_CHANGELOG'
 
@@ -96,6 +93,9 @@ install:
     }
     ElseIf($env:BOARD_NAME -eq "ESP32_DEVKITC")
     {
+
+      Install-Module 7Zip4PowerShell -Force
+
       .\install-esp32-toolchain.ps1
       .\install-ninja.ps1
       .\install-esp32-libs.ps1
@@ -103,6 +103,9 @@ install:
     }
     Else
     {
+
+      Install-Module 7Zip4PowerShell -Force
+
       # get build matrix
       .\get-stm32-targets-to-build.ps1
 
@@ -163,8 +166,6 @@ before_build:
 
 build_script:
 - ps: |
-
-    Install-Module 7Zip4PowerShell -Force
 
     If($env:BOARD_NAME -eq "NOT_A_BOARD_CHANGELOG")
     {

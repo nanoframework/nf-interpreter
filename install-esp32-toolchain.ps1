@@ -6,8 +6,6 @@ $XtensaPathExists = Test-Path $env:ESP32_TOOLCHAIN_PATH -ErrorAction SilentlyCon
 
 If($XtensaPathExists -eq $False)
 {
-    Install-Module 7Zip4PowerShell -Force
-
     Write-Host "Downloading Xtensa ESP32 toolchain..."
 
     # Download xtensa ESP32 toolchain and install
@@ -20,5 +18,5 @@ If($XtensaPathExists -eq $False)
     Write-Host "Installing Xtensa ESP32 toolchain..."
     
     # unzip toolchain
-    Expand-7Zip -ArchiveFileName $output -TargetPath "$env:ESP32_TOOLCHAIN_PATH\.."
+    Expand-7Zip -ArchiveFileName $output -TargetPath $env:ESP32_TOOLCHAIN_PATH
 }
