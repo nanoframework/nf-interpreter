@@ -669,7 +669,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 #endif
 #if STM32_UART_USE_UART4
         case 4 :
-            palUart = &Uart6_PAL;
+            palUart = &Uart4_PAL;
             break;
 #endif
 #if STM32_UART_USE_UART5
@@ -848,7 +848,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 #endif
 #if STM32_UART_USE_UART4
         case 4 :
-            palUart = &Uart6_PAL;
+            palUart = &Uart4_PAL;
             break;
 #endif
 #if STM32_UART_USE_UART5
