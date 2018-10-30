@@ -8,11 +8,8 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 
 
 # set include directories
-list(APPEND Windows.Devices.SerialCommunication_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
-list(APPEND Windows.Devices.SerialCommunication_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
-list(APPEND Windows.Devices.SerialCommunication_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND Windows.Devices.SerialCommunication_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
 list(APPEND Windows.Devices.SerialCommunication_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND Windows.Devices.SerialCommunication_INCLUDE_DIRS "${TARGET_BASE_LOCATION}")
 
 
 # source files

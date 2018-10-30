@@ -7,6 +7,7 @@
 #define _WIN_DEV_SERIAL_NATIVE_H_
 
 
+#include <target_windows_devices_serialcommunication_config.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
@@ -148,28 +149,28 @@ struct NF_PAL_UART
 ////////////////////////////////////////////
 // declaration of the the UART PAL strucs //
 ////////////////////////////////////////////
-#if STM32_UART_USE_USART1
+#if NF_SERIAL_COMM_STM32_UART_USE_USART1
     extern NF_PAL_UART Uart1_PAL;
 #endif
-#if STM32_UART_USE_USART2
+#if NF_SERIAL_COMM_STM32_UART_USE_USART2
     extern NF_PAL_UART Uart2_PAL;
 #endif
-#if STM32_UART_USE_USART3
+#if NF_SERIAL_COMM_STM32_UART_USE_USART3
     extern NF_PAL_UART Uart3_PAL;
 #endif
-#if STM32_UART_USE_UART4
+#if NF_SERIAL_COMM_STM32_UART_USE_UART4
     extern NF_PAL_UART Uart4_PAL;
 #endif
-#if STM32_UART_USE_UART5
+#if NF_SERIAL_COMM_STM32_UART_USE_UART5
     extern NF_PAL_UART Uart5_PAL;
 #endif
-#if STM32_UART_USE_USART6
+#if NF_SERIAL_COMM_STM32_UART_USE_USART6
     extern NF_PAL_UART Uart6_PAL;
 #endif
-#if STM32_UART_USE_UART7
+#if NF_SERIAL_COMM_STM32_UART_USE_UART7
     extern NF_PAL_UART Uart7_PAL;
 #endif
-#if STM32_UART_USE_UART8
+#if NF_SERIAL_COMM_STM32_UART_USE_UART8
     extern NF_PAL_UART Uart8_PAL;
 #endif
 
