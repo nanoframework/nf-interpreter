@@ -16,5 +16,10 @@
 #define HAL_USE_STM32_FLASH         TRUE
 #endif
 
+// enables STM32 One Wire driver
+#if !defined(HAL_USE_STM32_ONEWIRE) 
+#define HAL_USE_STM32_ONEWIRE       TRUE
+#endif
+
 #endif // _HALCONF_NF_H_
 

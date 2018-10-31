@@ -46,6 +46,10 @@ void halCommunityInit(void) {
   stm32FsmcInit();
 #endif
 
+#if (HAL_USE_STM32_ONEWIRE == TRUE)
+  oneWireInit();
+#endif
+
 }
 
 #endif // HAL_USE_COMMUNITY

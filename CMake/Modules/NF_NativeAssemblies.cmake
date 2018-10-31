@@ -9,6 +9,7 @@
 # and the namespace designation is 'Windows.Devices.Gpio'
 ###########################################################################################
 
+option(API_nanoFramework.Devices.OneWire        "option for nanoFramework.Devices.OneWire")
 option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
 option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
 option(API_System.Math                          "option for System.Math")
@@ -80,6 +81,12 @@ macro(ParseNativeAssemblies)
     if(API_Hardware.Stm32)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
+    endif()
+
+    # nanoFramework.Devices.OneWire
+    if(API_nanoFramework.Devices.OneWire)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Devices.OneWire")
     endif()
 
     # nanoFramework.Networking.Sntp

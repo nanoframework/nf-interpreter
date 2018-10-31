@@ -155,6 +155,11 @@ void CLR_HW_Hardware::ProcessActivity()
         eventsCLR |= CLR_RT_ExecutionEngine::c_Event_I2cMaster;
     }
 
+    if(events & SYSTEM_EVENT_FLAG_ONEWIRE_MASTER)
+    {
+        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_OneWireMaster;
+    }
+
     if(eventsCLR)
     {
         g_CLR_RT_ExecutionEngine.SignalEvents( eventsCLR );

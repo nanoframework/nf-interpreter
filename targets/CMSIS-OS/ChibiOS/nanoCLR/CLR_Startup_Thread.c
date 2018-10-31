@@ -25,6 +25,11 @@ void CLRStartupThread(void const * argument)
   crcStart(NULL);
   #endif
 
+  #if (HAL_USE_STM32_ONEWIRE == TRUE)
+  // startup 1-Wire driver
+  oneWireStart();
+  #endif
+
   // initialize nanoHAL
   nanoHAL_Initialize_C();
 
