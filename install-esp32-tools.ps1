@@ -35,13 +35,13 @@ If([string]::IsNullOrEmpty($env:ESP32_TOOLS_PATH) -or $force)
 }
 If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PREFIX) -or $force)
 {
-	$env:ESP32_TOOLCHAIN_PREFIX= ($env:ESP32_TOOLS_PATH+'\1.22.0-80')
+	$env:ESP32_TOOLCHAIN_PREFIX= ($env:ESP32_TOOLS_PATH)
 	Write-Host ("Set User Environment ESP32_TOOLCHAIN_PREFIX='"+$env:ESP32_TOOLCHAIN_PREFIX+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_TOOLCHAIN_PREFIX", $env:ESP32_TOOLCHAIN_PREFIX, "User")
 }
 If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PATH) -or $force)
 {
-	$env:ESP32_TOOLCHAIN_PATH= ($env:ESP32_TOOLS_PATH+'\1.22.0-80\xtensa-esp32-elf')
+	$env:ESP32_TOOLCHAIN_PATH= ($env:ESP32_TOOLS_PATH)
 	Write-Host ("Set User Environment ESP32_TOOLCHAIN_PATH='"+$env:ESP32_TOOLCHAIN_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_TOOLCHAIN_PATH", $env:ESP32_TOOLCHAIN_PATH, "User")
 }
