@@ -505,6 +505,11 @@
 #define LWIP_SO_RCVTIMEO                1
 
 /**
+ * LWIP_SO_LINGER==1: Enable linger option for sockets/netconns 
+ */
+#define LWIP_SO_LINGER                  1
+
+/**
  * LWIP_TCP_KEEPALIVE==1: Enable TCP_KEEPIDLE, TCP_KEEPINTVL and TCP_KEEPCNT
  * options processing. Note that TCP_KEEPIDLE and TCP_KEEPINTVL have to be set
  * in seconds. (does not require sockets.c, and will affect tcp.c)

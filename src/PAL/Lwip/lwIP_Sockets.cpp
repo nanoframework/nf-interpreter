@@ -343,7 +343,14 @@ int LWIP_SOCKETS_Driver::Close(SOCK_SOCKET socket)
 { 
     NATIVE_PROFILE_PAL_NETWORK();
 
+#ifdef PLATFORM_ESP32
+    // We have to call lwip_close_r() method otherwise the socket doesn't get freed up and we run out of sockets.
+    // We could also call the posix closesocket() which should work for all platforms and change all other methods to 
+    // call the posix version to be consistent.(TODO)
+    return lwip_close_r(socket);
+#else
     return lwip_close(socket);
+#endif
 }
 
 int LWIP_SOCKETS_Driver::Listen(SOCK_SOCKET socket, int backlog)
@@ -634,6 +641,7 @@ int LWIP_SOCKETS_Driver::SetSockOpt( SOCK_SOCKET socket, int level, int optname,
     int nativeOptionName;
     int nativeIntValue;
     char *pNativeOptionValue = (char*)optval;
+    struct linger lopt = {0,0};
 
     switch(level)
     {
@@ -655,17 +663,22 @@ int LWIP_SOCKETS_Driver::SetSockOpt( SOCK_SOCKET socket, int level, int optname,
 
             switch(optname)
             {        
-                // LINGER and DONTLINGER are not implemented in LWIP
+                // If linger value negative then linger off
+                // otherwise enabled and linger value is number of seconds
                 case SOCK_SOCKO_LINGER:
-                    errorCode = SOCK_ENOPROTOOPT;
-                    return SOCK_SOCKET_ERROR;
+                    {
+                        int lingerValue = *(int*)optval;
+                        if ( lingerValue >= 0  )
+                        {
+                            lopt.l_onoff  =  1;
+                            lopt.l_linger =  abs(lingerValue);
+                        }
+                        pNativeOptionValue = (char*)&lopt;
+                        optlen = sizeof(lopt);
+                    }
+                    break;
+
                 case SOCK_SOCKO_DONTLINGER:
-                    errorCode = SOCK_ENOPROTOOPT;
-                    return SOCK_SOCKET_ERROR;
-				// ignore this item to enable http to work
-				case SOCK_SOCKO_REUSEADDRESS:
-					return 0;
-                
                 case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
                     nativeIntValue     = !*(int*)optval;
                     pNativeOptionValue = (char*)&nativeIntValue;
@@ -708,18 +721,6 @@ int LWIP_SOCKETS_Driver::GetSockOpt( SOCK_SOCKET socket, int level, int optname,
         case SOCK_SOL_SOCKET:
             nativeLevel         = SOL_SOCKET;
             nativeOptionName    = GetNativeSockOption(optname);
-            switch(optname)
-            {        
-                // LINGER and DONTLINGER are not implemented in LWIP
-                case SOCK_SOCKO_LINGER:
-                    errorCode = SOCK_ENOPROTOOPT;
-                    return SOCK_SOCKET_ERROR;
-                case SOCK_SOCKO_DONTLINGER:
-                    errorCode = SOCK_ENOPROTOOPT;
-                    return SOCK_SOCKET_ERROR;
-                default:
-                    break;
-            }
             break;
         default:
             nativeLevel         = level;
@@ -737,6 +738,7 @@ int LWIP_SOCKETS_Driver::GetSockOpt( SOCK_SOCKET socket, int level, int optname,
                 switch(optname)
                 {       
                     case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
+                    case SOCK_SOCKO_DONTLINGER:
                         *optval = !(*(int*)optval != 0);
                         break;
                         
