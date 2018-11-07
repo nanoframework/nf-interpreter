@@ -1485,6 +1485,11 @@
 #endif
 
 /**
+ * LWIP_SO_LINGER==1: Enable linger option for sockets/netconns 
+ */
+#define LWIP_SO_LINGER                  1
+
+/**
  * LWIP_SO_RCVBUF==1: Enable SO_RCVBUF processing.
  */
 #ifndef LWIP_SO_RCVBUF
