@@ -899,5 +899,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
     "mscorlib", 
     0xEF6F3396,
     method_lookup,
-    { 1, 0, 5, 0 }
+    { 1, 0, 6, 1 }
 };
