@@ -19,6 +19,20 @@
 
 **Documentation and other chores:**
 
+- Update nanoFramework.Hardware.Esp32 version to 1.0.2-preview-004 [\#968](https://github.com/nanoframework/nf-interpreter/pull/968)
+- Update Windows.Devices.SerialCommunication version to 1.0.2-preview-004 [\#967](https://github.com/nanoframework/nf-interpreter/pull/967)
+- Update Windows.Devices.WiFi version to 1.0.2-preview-004 [\#966](https://github.com/nanoframework/nf-interpreter/pull/966)
+- Update nanoFramework.System.Net version to 1.0.2-preview-001 [\#965](https://github.com/nanoframework/nf-interpreter/pull/965)
+- Update Windows.Devices.Spi version to 1.0.2-preview-004 [\#964](https://github.com/nanoframework/nf-interpreter/pull/964)
+- Update Windows.Devices.Gpio version to 1.0.2-preview-004 [\#963](https://github.com/nanoframework/nf-interpreter/pull/963)
+- Update nanoFramework.Hardware.Stm32 version to 1.0.2-preview-004 [\#962](https://github.com/nanoframework/nf-interpreter/pull/962)
+- Update nanoFramework.Networking.Sntp version to 1.0.2-preview-005 [\#961](https://github.com/nanoframework/nf-interpreter/pull/961)
+- Update Windows.Devices.I2c version to 1.0.2-preview-004 [\#960](https://github.com/nanoframework/nf-interpreter/pull/960)
+- Update Windows.Devices.Adc version to 1.0.2-preview-004 [\#959](https://github.com/nanoframework/nf-interpreter/pull/959)
+- Update nanoFramework.Runtime.Native version to 1.0.2-preview-004 [\#958](https://github.com/nanoframework/nf-interpreter/pull/958)
+- Update nanoFramework.Runtime.Events version to 1.0.2-preview-004 [\#957](https://github.com/nanoframework/nf-interpreter/pull/957)
+- Update nanoFramework.CorLib version to 1.0.6-preview-001 [\#956](https://github.com/nanoframework/nf-interpreter/pull/956)
+- Update nanoFramework.Networking.Sntp version to 1.0.2-preview-002 [\#954](https://github.com/nanoframework/nf-interpreter/pull/954)
 - Move System.Math to it's own class lib [\#948](https://github.com/nanoframework/nf-interpreter/pull/948)
 
 ## [v1.0.1](https://github.com/nanoframework/nf-interpreter/tree/v1.0.1) (2018-10-18)
