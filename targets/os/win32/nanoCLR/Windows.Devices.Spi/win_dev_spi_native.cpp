@@ -67,5 +67,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi =
     "Windows.Devices.Spi", 
     0x3A9E993E,
     method_lookup,
-    { 1, 0, 0, 0 }
+    { 1, 0, 2, 4 }
 };
