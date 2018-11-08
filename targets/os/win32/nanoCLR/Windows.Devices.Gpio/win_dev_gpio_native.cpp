@@ -61,5 +61,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Gpio =
 	"Windows.Devices.Gpio",
 	0xA7570E44,
 	method_lookup,
-    { 1, 0, 0, 0 }
+    { 1, 0, 2, 4 }
 };
