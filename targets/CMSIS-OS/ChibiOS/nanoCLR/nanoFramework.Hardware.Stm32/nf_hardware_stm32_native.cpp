@@ -52,7 +52,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm32 =
 {
     "nanoFramework.Hardware.Stm32", 
-    0x3D39A14F,
+    0x8D551100,
     method_lookup,
     { 1, 0, 2, 4 }
 };
