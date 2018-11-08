@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2018 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -54,5 +54,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm3
     "nanoFramework.Hardware.Stm32", 
     0x3D39A14F,
     method_lookup,
-    { 1, 0, 0, 0 }
+    { 1, 0, 2, 4 }
 };
