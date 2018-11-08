@@ -13,6 +13,7 @@
 
 **Fixed bugs:**
 
+- Fix mscorlib native checksum for 1.0.6-preview-001  [\#969](https://github.com/nanoframework/nf-interpreter/pull/969) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
 - Socket changes and fixes for HTTP [\#955](https://github.com/nanoframework/nf-interpreter/pull/955) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
 - Fix UART4 setting for Windows.Device.SerialCommunication [\#950](https://github.com/nanoframework/nf-interpreter/pull/950) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
 - Fixes for issue \#416 [\#933](https://github.com/nanoframework/nf-interpreter/pull/933) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
