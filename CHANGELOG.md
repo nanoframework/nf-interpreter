@@ -20,6 +20,10 @@
 
 **Documentation and other chores:**
 
+- Update declaration of Windows.Devices.Gpio [\#973](https://github.com/nanoframework/nf-interpreter/pull/973)
+- Update declaration for Windows.Devices.Spi [\#972](https://github.com/nanoframework/nf-interpreter/pull/972)
+- Update declaration for Windows.Devices.SerialCommunication [\#971](https://github.com/nanoframework/nf-interpreter/pull/971)
+- Update Windows.Devices.I2c declaration [\#970](https://github.com/nanoframework/nf-interpreter/pull/970)
 - Update nanoFramework.Hardware.Esp32 version to 1.0.2-preview-004 [\#968](https://github.com/nanoframework/nf-interpreter/pull/968)
 - Update Windows.Devices.SerialCommunication version to 1.0.2-preview-004 [\#967](https://github.com/nanoframework/nf-interpreter/pull/967)
 - Update Windows.Devices.WiFi version to 1.0.2-preview-004 [\#966](https://github.com/nanoframework/nf-interpreter/pull/966)
