@@ -11,16 +11,50 @@ pr:
 jobs:
 
   # STM32
-- job: Build STM32 targets
+- job: Build_STM32_targets
   pool:
     vmImage: 'VS2017-Win2016'
+
+  strategy:
+    matrix:
+      MBN_QUAIL:
+        BoardName: MBN_QUAIL
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON
+        NeedsDFU: true
+      NETDUINO3_WIFI:
+        BoardName: NETDUINO3_WIFI
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON
+        NeedsDFU: true
+      ST_STM32F429I_DISCOVERY:
+        BoardName: ST_STM32F429I_DISCOVERY
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON
+        NeedsDFU: false
+      ST_STM32F4_DISCOVERY:
+        BoardName: ST_STM32F4_DISCOVERY
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON
+        NeedsDFU: false
+      ST_NUCLEO64_F091RC:
+        BoardName: ST_NUCLEO64_F091RC
+        BuildOptions: -DTARGET_SERIES=STM32F0xx -DRTOS=CHIBIOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON
+        NeedsDFU: false
+      ST_NUCLEO144_F746ZG:
+        BoardName: ST_NUCLEO144_F746ZG 
+        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON
+        NeedsDFU: false
+      ST_STM32F769I_DISCOVERY:
+        BoardName: ST_STM32F769I_DISCOVERY
+        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON
+        NeedsDFU: false     
+
+  variables:
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
 
   steps:
   - task: DotNetCoreCLI@2  
     inputs:
       command: custom
       custom: tool
-      arguments: install --tool-path $(env.TEMP) nbgv
+      arguments: install --tool-path . nbgv
     displayName: Install NBGV tool
 
   - script: nbgv cloud -a -c
@@ -30,147 +64,631 @@ jobs:
   - task: PowerShell@2
     inputs:
         targetType: 'inline'
-        script: 'Install-Module 7Zip4PowerShell -Force'
-    displayName: Install 7Zip4PowerShell
+        script: |
+            Write-Host "Downloading ARM GNU GCC toolchain..."
+            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-7-2018-q2-update-win32.7z"
+            $output = "$PSScriptRoot\gcc-arm.7z"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Downloading ARM GCC toolchain
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.7z' 
+      destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
+    displayName: Extracting ARM GCC toolchain
 
   - task: PowerShell@2
     inputs:
         targetType: 'inline'
-        script: 'Write-Host ("##vso[task.setvariable variable=GNU_GCC_TOOLCHAIN_PATH;]$env:Agent_TempDirectory\GNU_Tools_ARM_Embedded")`Write-Host ("##vso[task.setvariable variable=NINJA_PATH;]$env:Agent_TempDirectory\ninja")`Write-Host ("##vso[task.setvariable variable=HEX2DFU_PATH;]$env:Agent_TempDirectory\hex2dfu")'
-    displayName: Set variables
+        script: |
+            Write-Host "Downloading Ninja..."
+            $url = "https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip"
+            $output = "$PSScriptRoot\ninja.zip"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Download Ninja
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\ninja.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ninja' 
+    displayName: Extract Ninja
 
   - task: PowerShell@2
     inputs:
         targetType: 'inline'
-        script: 'install-arm-gcc-toolchain.ps1'
-    displayName: Install ARM GCC toolchain
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: 'install-ninja.ps1'
-    displayName: Install Ninja
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: 'install-nf-hex2dfu.ps1'
+        script: |
+            Write-Host "Downloading hex2dfu..."
+            $url = "https://github.com/nanoframework/nf-tools/releases/download/v1.0.0/hex2dfu.exe"
+            $output = "$env:Agent_TempDirectory\hex2dfu.exe"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
     displayName: Install HEX2DFU
+    condition: eq(variables['NeedsDFU'], true)
 
+  - script: |
+        echo "##vso[task.prependpath]$(Agent.TempDirectory)\ninja"
+        echo "##vso[task.prependpath]C:\Windows\System32"
+    displayName: Tweak PATH
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            $newPath = "$env:Agent_TempDirectory".Replace('\','/')
+            Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$newPath"
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Adjust HexDFU path
+    condition: eq(variables['NeedsDFU'], true)
+
+  - task: CMake@1
+    inputs:
+      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) ..'
+    displayName: Setup build with CMake and DFU
+    condition: eq(variables['NeedsDFU'], true)
+
+  - task: CMake@1
+    inputs:
+      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) ..'
+    displayName: Setup build with CMake without DFU
+    condition: eq(variables['NeedsDFU'], false)
+
+  - task: CMake@1
+    inputs:
+      cmakeArgs: '--build $(Build.SourcesDirectory)\build --target all --config MinSizeRel'
+    displayName: Build with CMake
+
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)\build
+      Contents: |
+        *.bin
+        *.hex
+        *.s19
+        *.dfu
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      flattenFolders: true
+    displayName: Collecting deployable artifacts
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      ArtifactName: $(BoardName)
+      ArtifactType: Container
+    displayName: Publish deployables artifacts
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(BoardName)' 
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
+      replaceExistingArchive: true
+    displayName: Zip binary files
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            if( $env:Build:SourceBranchName -match "develop" -or 
+                $env:Build:SourceBranchName -match "^release*" )
+            {
+              # this a dev or release branch, publish to Bintray dev repo
+              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
+            }
+            else 
+            {
+              # this master branch, publish to Bintray stable repo
+              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images"
+            }
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Set Bintray repo path
+
+  - task: cURLUploader@2
+    inputs:
+      files: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
+      authType: 'userAndPass'
+      username: 'nfbot'
+      password: '$(BinTrayKey)'
+      url: 'https://api.bintray.com/'
+      remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
+    displayName: Upload artifact to Bintray
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+
+            $STATUS="failure"
+            $WEBHOOK_URL=$env:DISCORD_WEBHOOK_URL
+            $MESSAGE=""
+
+            Write-Output "[Webhook]: Sending webhook to Discord..."
+
+            Switch ($STATUS) {
+              "success" {
+                $EMBED_COLOR=3066993
+                $STATUS_MESSAGE="Passed"
+                Break
+              }
+              "failure" {
+                $EMBED_COLOR=15158332
+                $STATUS_MESSAGE="Failed"
+                Break
+              }
+              "warning" {
+                $EMBED_COLOR=12370112
+                $STATUS_MESSAGE="Warning"
+                Break
+              }  
+              default {
+                Write-Output "Default!"
+                Break
+              }
+            }
+
+            if (!$env:env:Build_SourceVersion) {
+              $env:env:Build_SourceVersion="$(git log -1 --pretty="%H")"
+            }
+
+            $AUTHOR_NAME="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%aN")"
+            $COMMITTER_NAME="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%cN")"
+            $COMMIT_SUBJECT="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%s")"
+            $COMMIT_MESSAGE="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%b")"
+
+            if ($AUTHOR_NAME -eq $COMMITTER_NAME) {
+              $CREDITS = "$AUTHOR_NAME authored & committed"
+            }
+            else {
+              $CREDITS = "$AUTHOR_NAME authored & $COMMITTER_NAME committed"
+            }
+
+            if ($env:env:System_PullRequest_PullRequestId) {
+              $URL="https://github.com/$env:Build_Repository_Name/pull/$env:env:System_PullRequest_PullRequestId"
+            }
+            else {
+              $URL=""
+            }
+
+            $BUILD_VERSION = [uri]::EscapeDataString($env:Build_BuildNumber)
+
+            $WEBHOOK_DATA="{
+              ""embeds"": [ {
+                ""color"": $EMBED_COLOR,
+                ""author"": {
+                  ""name"": ""Job #$env:Build_BuildId (Build #$env:Build_BuildNumber) $STATUS_MESSAGE - $env:env:Build_Repository_Name"",
+                  ""url"": ""$env:env:Build_BuildUri"",
+                  ""icon_url"": ""$AVATAR""
+                },
+                ""title"": ""$COMMIT_SUBJECT"",
+                ""url"": ""$URL"",
+                ""description"": ""$COMMIT_MESSAGE $CREDITS $MESSAGE"",
+                ""fields"": [
+                  {
+                    ""name"": ""Commit"",
+                    ""value"": ""[``$($env:env:Build_SourceVersion.substring(0, 7))``](https://github.com/$env:env:Build_Repository_Name/commit/$env:env:Build_SourceVersion)"",
+                    ""inline"": true
+                  },
+                  {
+                    ""name"": ""Branch/Tag"",
+                    ""value"": ""[``$env:env:Build_SourceBranchName``](https://github.com/$env:env:Build_Repository_Name/tree/$env:env:Build_SourceBranchName)"",
+                    ""inline"": true
+                  }
+                ]
+              } ],
+              ""content"" : """",
+              ""file"": """"
+            }"
+
+            Invoke-RestMethod -Uri $WEBHOOK_URL -Method POST -UserAgent AppVeyor-Webhook -ContentType 'application/json' -Body $WEBHOOK_DATA
+
+            Write-Output "[Webhook]: Successfully sent the webhook."
+
+
+        errorActionPreference: 'silentlyContinue'
+        failOnStderr: 'false'
+    condition: failed()
+    displayName: Report build error
+
+#################
 # ESP32 targets
-- job: Build ESP32 targets
+- job: Build_ESP32_targets
   pool:
     vmImage: 'VS2017-Win2016'
 
-  steps:
+  # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
+  strategy:
+    matrix:
+      ESP32_DEVKITC:
+        BoardName: ESP32_DEVKITC
+        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_OPENSSL=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON
 
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: 'Write-Host ("##vso[task.setvariable variable=ESP32_TOOLCHAIN_PATH;]$env:Agent_TempDirectory\ESP32_Tools")`Write-Host ("##vso[task.setvariable variable=NINJA_PATH;]$env:Agent_TempDirectory\ninja")`Write-Host ("##vso[task.setvariable variable=ESP32_TOOLS_PATH;]$env:Agent_TempDirectory\ESP32_Tools")`Write-Host ("##vso[task.setvariable variable=ESP32_LIBS_PATH;]$env:Agent_TempDirectory\ESP32_Tools\libs-v3.1")`Write-Host ("##vso[task.setvariable variable=ESP32_IDF_PATH;]$env:Agent_TempDirectory\ESP32_Tools\esp-idf-v3.1")'
-    displayName: Set variables
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: 'install-esp32-toolchain.ps1'
-    displayName: Install ESP32 toolchain
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: 'install-ninja.ps1'
-    displayName: Install Ninja
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: 'install-esp32-libs.ps1'
-    displayName: Install ESP32 libraries
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: 'install-esp32-idf.ps1'
-    displayName: Install ESP32 IDF sdk
-
-# WIN32 
-- job: Build WIN32 nanoCLR
-  pool:
-    vmImage: 'VS2017-Win2016'
+  variables:
+    ESP32_TOOLCHAIN_PATH: $(Agent.TempDirectory)\ESP32_Tools
 
   steps:
-  - task: NuGetToolInstaller@0
-
-  - task: VSBuild@1
+  - task: DotNetCoreCLI@2  
     inputs:
-      solution: 'targets\os\win32\nanoCLR.sln'
-      platform: 'Any CPU'
-      configuration: 'Release'
+      command: custom
+      custom: tool
+      arguments: install --tool-path . nbgv
+    displayName: Install NBGV tool
+
+  - script: nbgv cloud -a -c
+    displayName: Set build number
+    condition: ne(variables['system.pullrequest.isfork'], true)
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            Write-Host "Downloading Xtensa ESP32 toolchain..."
+            $url = "https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip"
+            $output = "$PSScriptRoot\xtensa-esp32-elf-win32.zip"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Download xtensa ESP32 toolchain
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\xtensa-esp32-elf-win32.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
+      cleanDestinationFolder: false
+    displayName: Extracting xtensa ESP32 toolchain
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            Write-Host "Downloading Ninja..."
+            $url = "https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip"
+            $output = "$PSScriptRoot\ninja.zip"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Download Ninja
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\ninja.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ninja' 
+    displayName: Extract Ninja
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            Write-Host "Downloading ESP32 pre-compiled libs..."
+            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.1.zip"
+            $output = "$PSScriptRoot\IDF_libs-v3.1.zip"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Downloading ESP32 pre-compiled libs
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\IDF_libs-v3.1.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs-v3.1'
+      cleanDestinationFolder: false
+    displayName: Installing ESP32 pre-compiled libs
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            Write-Host "Downloading ESP32 IDF..."
+            $url = "https://github.com/espressif/esp-idf/releases/download/v3.1/esp-idf-v3.1.zip"
+            $output = "$PSScriptRoot\esp-idf-v3.1.zip"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Downloading ESP32 IDF
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-v3.1.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
+      cleanDestinationFolder: false
+    displayName: Installing Espressif IDF
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: python -m pip install pyserial
+        # the bellow settings are required as the script is installing an outdated version of pyserial
+        errorActionPreference: 'silentlyContinue' 
+        failOnStderr: false
+        ignoreLASTEXITCODE: false
+    displayName: Installing python pyserial
+
+  - script: |
+        echo "##vso[task.prependpath]$(Agent.TempDirectory)\ninja"
+        echo "##vso[task.prependpath]C:\Windows\System32"
+    displayName: Tweak PATH
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            # need to replace forward slash for paths to work with GCC and CMake
+            $tempDirPath = "$env:Agent_TempDirectory".Replace('\','/')
+            Write-Host "$("##vso[task.setvariable variable=ESP32_LIBS_PATH]")$tempDirPath/ESP32_Tools/libs-v3.1"
+            Write-Host "$("##vso[task.setvariable variable=ESP32_IDF_PATH]")$tempDirPath/ESP32_Tools/esp-idf-v3.1"
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Adjust paths
+
+  - task: CMake@1
+    inputs:
+      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(ESP32_TOOLCHAIN_PATH) -DESP32_IDF_PATH=$(ESP32_IDF_PATH) -DESP32_LIBS_PATH=$(ESP32_LIBS_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) $(BuildOptions) ..'
+    displayName: Setup build with CMake
+
+  - task: CMake@1
+    inputs:
+      cmakeArgs: '--build $(Build.SourcesDirectory)\build --target all --config MinSizeRel'
+    displayName: Build with CMake
+
+  - task: PythonScript@0
+    inputs:
+      scriptSource: 'filePath'
+      scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\esptool_py\esptool\esptool.py'
+      arguments: '--chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB -o $(Build.SourcesDirectory)\build\nanoCLR.bin $(Build.SourcesDirectory)\build\targets\FreeRTOS\ESP32_DevKitC\nanoCLR.elf'
+    displayName: Generate nanoCLR bin file for deployment
+
+  # because of permission issues (the python script isn't allowed to write on the output folder)
+  # we need to perform these steps by calling directly the python scripts
+  - task: PythonScript@0
+    inputs:
+      scriptSource: 'filePath'
+      scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
+      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS\ESP32_DevKitC\IDF\partitions_nanoclr_4mb.csv $(Build.SourcesDirectory)\build\partitions_4mb.bin'
+    displayName: Generate Esp32 Partition tables for 4MB flash
+
+  - task: PythonScript@0
+    inputs:
+      scriptSource: 'filePath'
+      scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
+      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS\ESP32_DevKitC\IDF\partitions_nanoclr_2mb.csv $(Build.SourcesDirectory)\build\partitions_2mb.bin'
+    displayName: Generate Esp32 Partition tables for 2MB flash
+
+  - task: PythonScript@0
+    inputs:
+      scriptSource: 'filePath'
+      scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
+      arguments: '$(Build.SourcesDirectory)\build\partitions_2mb.bin'
+    displayName: List flash 4Mb Esp32 Partition tables
+
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)\build
+      Contents: |
+        *.bin
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      flattenFolders: true
+    displayName: Collecting deployable artifacts
+
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(ESP32_LIBS_PATH)
+      Contents: |
+        bootloader.bin
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      flattenFolders: true
+    displayName: Copying bootloader from ESP32 libs
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      ArtifactName: $(BoardName)
+      ArtifactType: Container
+    displayName: Publish deployables artifacts
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(BoardName)' 
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
+      replaceExistingArchive: true
+    displayName: Zip binary files
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            if( $env:Build:SourceBranchName -match "develop" -or 
+                $env:Build:SourceBranchName -match "^release*" )
+            {
+              # this a dev or release branch, publish to Bintray dev repo
+              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
+            }
+            else 
+            {
+              # this master branch, publish to Bintray stable repo
+              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images"
+            }
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Set Bintray repo path
+
+  - task: cURLUploader@2
+    inputs:
+      files: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
+      authType: 'userAndPass'
+      username: 'nfbot'
+      password: '$(BinTrayKey)'
+      url: 'https://api.bintray.com/'
+      remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
+    displayName: Upload artifact to Bintray
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+
+            $STATUS="failure"
+            $WEBHOOK_URL=$env:DISCORD_WEBHOOK_URL
+            $MESSAGE=""
+
+            Write-Output "[Webhook]: Sending webhook to Discord..."
+
+            Switch ($STATUS) {
+              "success" {
+                $EMBED_COLOR=3066993
+                $STATUS_MESSAGE="Passed"
+                Break
+              }
+              "failure" {
+                $EMBED_COLOR=15158332
+                $STATUS_MESSAGE="Failed"
+                Break
+              }
+              "warning" {
+                $EMBED_COLOR=12370112
+                $STATUS_MESSAGE="Warning"
+                Break
+              }  
+              default {
+                Write-Output "Default!"
+                Break
+              }
+            }
+
+            if (!$env:env:Build_SourceVersion) {
+              $env:env:Build_SourceVersion="$(git log -1 --pretty="%H")"
+            }
+
+            $AUTHOR_NAME="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%aN")"
+            $COMMITTER_NAME="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%cN")"
+            $COMMIT_SUBJECT="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%s")"
+            $COMMIT_MESSAGE="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%b")"
+
+            if ($AUTHOR_NAME -eq $COMMITTER_NAME) {
+              $CREDITS = "$AUTHOR_NAME authored & committed"
+            }
+            else {
+              $CREDITS = "$AUTHOR_NAME authored & $COMMITTER_NAME committed"
+            }
+
+            if ($env:env:System_PullRequest_PullRequestId) {
+              $URL="https://github.com/$env:Build_Repository_Name/pull/$env:env:System_PullRequest_PullRequestId"
+            }
+            else {
+              $URL=""
+            }
+
+            $BUILD_VERSION = [uri]::EscapeDataString($env:Build_BuildNumber)
+
+            $WEBHOOK_DATA="{
+              ""embeds"": [ {
+                ""color"": $EMBED_COLOR,
+                ""author"": {
+                  ""name"": ""Job #$env:Build_BuildId (Build #$env:Build_BuildNumber) $STATUS_MESSAGE - $env:env:Build_Repository_Name"",
+                  ""url"": ""$env:env:Build_BuildUri"",
+                  ""icon_url"": ""$AVATAR""
+                },
+                ""title"": ""$COMMIT_SUBJECT"",
+                ""url"": ""$URL"",
+                ""description"": ""$COMMIT_MESSAGE $CREDITS $MESSAGE"",
+                ""fields"": [
+                  {
+                    ""name"": ""Commit"",
+                    ""value"": ""[``$($env:env:Build_SourceVersion.substring(0, 7))``](https://github.com/$env:env:Build_Repository_Name/commit/$env:env:Build_SourceVersion)"",
+                    ""inline"": true
+                  },
+                  {
+                    ""name"": ""Branch/Tag"",
+                    ""value"": ""[``$env:env:Build_SourceBranchName``](https://github.com/$env:env:Build_Repository_Name/tree/$env:env:Build_SourceBranchName)"",
+                    ""inline"": true
+                  }
+                ]
+              } ],
+              ""content"" : """",
+              ""file"": """"
+            }"
+
+            Invoke-RestMethod -Uri $WEBHOOK_URL -Method POST -UserAgent AppVeyor-Webhook -ContentType 'application/json' -Body $WEBHOOK_DATA
+
+            Write-Output "[Webhook]: Successfully sent the webhook."
 
 
-# steps:
-# - task: NuGetToolInstaller@0
+        errorActionPreference: 'silentlyContinue'
+        failOnStderr: 'false'
+    condition: failed()
+    displayName: Report build error
 
-# - task: NuGetCommand@2
-#   inputs:
-#     restoreSolution: '$(solution)'
-#     feedsToUse: config
-#     nugetConfigPath: source/NuGet.config
+# # WIN32 
+# - job: Build_WIN32_nanoCLR
+#   pool:
+#     vmImage: 'VS2017-Win2016'
 
-# - task: DotNetCoreCLI@2  
-#   inputs:
-#     command: custom
-#     custom: tool
-#     arguments: install --tool-path $(env.TEMP) nbgv
-#   displayName: Install NBGV tool
+#   steps:
+#   - task: NuGetToolInstaller@0
 
-# - script: nbgv cloud -a -c
-#   displayName: Set build number
-#   condition: ne(variables['system.pullrequest.isfork'], true)
+#   - task: VSBuild@1
+#     inputs:
+#       solution: 'targets\os\win32\nanoCLR.sln'
+#       platform: 'x86'
+#       configuration: 'Release'
 
-# # install nanoFramework VS extension
-# - task: PowerShell@2
-#   inputs:
-#     filePath: 'install-nf-vs-extension.ps1'
-#     errorActionPreference: 'stop'
+#######################
+# generate change log
+# WIP
+# - job: Generate_change_log
+#   dependsOn:
+#   - Build_STM32_targets
+#   - Build_ESP32_targets
+#   condition: and(succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'))
 
-# # Batch Script
-# - task: BatchScript@1
-#   inputs:
-#     filename: '$(INSTALLER_PATH)'
+#   pool:
+#     vmImage: 'VS2017-Win2016'
 
-# # Run a command line script using cmd.exe on Windows and bash on macOS and Linux.
-# - task: CmdLine@2
-#   inputs:
-#     script: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VSIXInstaller.exe" /q D:\a\_temp\nanoFramework.Tools.VS2017.Extension.vsix'
-#     #workingDirectory: # Optional
-#     #failOnStderr: false # Optional
+#   steps:
+#   - task: DotNetCoreCLI@2  
+#     inputs:
+#       command: custom
+#       custom: tool
+#       arguments: install --tool-path . nbgv
+#     displayName: Install NBGV tool
 
-# - task: VSBuild@1
-#   inputs:
-#     solution: '$(solution)'
-#     platform: '$(buildPlatform)'
-#     configuration: '$(buildConfiguration)'
+#   - script: nbgv cloud -a -c
+#     displayName: Set build number
+#     condition: ne(variables['system.pullrequest.isfork'], true)
 
-# we don't have tests (yet)
-# - task: VSTest@2
-#   inputs:
-#     platform: '$(buildPlatform)'
-#     configuration: '$(buildConfiguration)'
+#   - task: UseRubyVersion@0
+#     inputs:
+#       versionSpec: '>= 2.4' 
+#       addToPath: true
 
-# - task: CopyFiles@1
-#   inputs:
-#     sourceFolder: $(System.DefaultWorkingDirectory)
-#     Contents: |
-#       **source\Nuget.*\*.nupkg
-#     TargetFolder: $(Build.ArtifactStagingDirectory)/deployables
-#     flattenFolders: true
-#   displayName: Collecting deployable artifacts
+#   - script: |
+#         gem install bundler
+#         gem install github_changelog_generator
+#         bundle install --retry=3 --jobs=4
+#     displayName: Install github changelog generator
 
-# - task: PublishBuildArtifacts@1
-#   inputs:
-#     PathtoPublish: $(Build.ArtifactStagingDirectory)/deployables
-#     ArtifactName: deployables
-#     ArtifactType: Container
-#   displayName: Publish deployables artifacts
+#   - task: PowerShell@2
+#     inputs:
+#         targetType: 'inline'
+#         script: |
+#             if ($env:Build:SourceBranchName -eq "master" -or $env:Build:SourceBranchName -match "^release*")
+#             {
+#                 # generate change log including future version
+#                 bundle exec github_changelog_generator --token $env:GitHubToken --future-release "v$(NBGV_Version)"
+#             }
+#             else 
+#             {
+#                 # generate change log
+#                 # version includes commits
+#                 bundle exec github_changelog_generator --token $env:GitHubToken        
+#             }
+#         errorActionPreference: 'stop'
+#         failOnStderr: 'true'
+#     displayName: Gemerate change log
