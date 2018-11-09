@@ -27,6 +27,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::get_BytesToRead___U4,
     NULL,
     NULL,
@@ -73,12 +74,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_SerialCommunication =
 {
     "Windows.Devices.SerialCommunication", 
-    0xD9E305D9,
+    0x093798D6,
     method_lookup,
-    { 1, 0, 2, 4 }
+    { 1, 0, 2, 7 }
 };
