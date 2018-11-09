@@ -16,8 +16,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::get_MaxClockFrequency___I4,
     Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::get_MinClockFrequency___I4,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -64,7 +67,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi =
 {
     "Windows.Devices.Spi", 
-    0x56D25B85,
+    0x83B879F7,
     method_lookup,
-    { 1, 0, 2, 4 }
+    { 1, 0, 2, 8 }
 };
