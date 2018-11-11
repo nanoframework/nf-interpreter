@@ -23,8 +23,10 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cController
 {
-    static const int FIELD_STATIC__s_instance = 0;
-    static const int FIELD_STATIC__s_deviceCollection = 1;
+    static const int FIELD_STATIC___syncLock = 0;
+    static const int FIELD_STATIC__s_instance = 1;
+    static const int FIELD_STATIC__s_deviceCollection = 2;
+    static const int FIELD_STATIC__s_busIdCollection = 3;
 
 
     //--//
