@@ -14,7 +14,7 @@ jobs:
 # STM32
 - job: Build_STM32_targets
   # skip build if this is a PR, submitted by ndbot and the commit message contains [version update]
-  condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains($variables['Build.SourceVersionMessage'], '[version update]') ) )
+  condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
   pool:
     vmImage: 'VS2017-Win2016'
 
@@ -303,7 +303,7 @@ jobs:
 # ESP32 targets
 - job: Build_ESP32_targets
   # skip build if this is a PR, submitted by ndbot and the commit message contains [version update]
-  condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains($variables['Build.SourceVersionMessage'], '[version update]') ) )
+  condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
   pool:
     vmImage: 'VS2017-Win2016'
 
@@ -634,7 +634,7 @@ jobs:
 ## WIN32 
 # - job: Build_WIN32_nanoCLR
 #   # skip build if this is a PR, submitted by ndbot and the commit message contains [version update]
-#   condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains($variables['Build.SourceVersionMessage'], '[version update]') ) )
+#   condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
 #   pool:
 #     vmImage: 'VS2017-Win2016'
 
@@ -652,7 +652,7 @@ jobs:
 # WIP
 # - job: Generate_change_log
 #   # skip build if this is a PR, submitted by ndbot and the commit message contains [version update]
-#   condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains($variables['Build.SourceVersionMessage'], '[version update]') ) )
+#   condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
 #   dependsOn:
 #   - Build_STM32_targets
 #   - Build_ESP32_targets
