@@ -175,7 +175,7 @@ jobs:
     inputs:
         targetType: 'inline'
         script: |
-            if( $env:Build:SourceBranchName -match "develop" -or 
+            if( $env:Build:SourceBranchName -eq "develop" -or 
                 $env:Build:SourceBranchName -match "^release*" )
             {
               # this a dev or release branch, publish to Bintray dev repo
@@ -504,7 +504,7 @@ jobs:
     inputs:
         targetType: 'inline'
         script: |
-            if( $env:Build:SourceBranchName -match "develop" -or 
+            if( $env:Build:SourceBranchName -eq "develop" -or 
                 $env:Build:SourceBranchName -match "^release*" )
             {
               # this a dev or release branch, publish to Bintray dev repo
