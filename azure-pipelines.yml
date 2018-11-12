@@ -175,8 +175,8 @@ jobs:
     inputs:
         targetType: 'inline'
         script: |
-            if( $env:Build:SourceBranchName -eq "develop" -or 
-                $env:Build:SourceBranchName -match "^release*" )
+            if( $env:Build_SourceBranchName -eq "develop" -or 
+                $env:Build_SourceBranchName -match "^release*" )
             {
               # this a dev or release branch, publish to Bintray dev repo
               Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
@@ -277,7 +277,7 @@ jobs:
                   },
                   {
                     ""name"": ""Branch/Tag"",
-                    ""value"": ""[``$env:env:Build_SourceBranchName``](https://github.com/$env:env:Build_Repository_Name/tree/$env:env:Build_SourceBranchName)"",
+                    ""value"": ""[``$env:Build_SourceBranchName``](https://github.com/$env:env:Build_Repository_Name/tree/$env:Build_SourceBranchName)"",
                     ""inline"": true
                   }
                 ]
@@ -504,8 +504,8 @@ jobs:
     inputs:
         targetType: 'inline'
         script: |
-            if( $env:Build:SourceBranchName -eq "develop" -or 
-                $env:Build:SourceBranchName -match "^release*" )
+            if( $env:Build_SourceBranchName -eq "develop" -or 
+                $env:Build_SourceBranchName -match "^release*" )
             {
               # this a dev or release branch, publish to Bintray dev repo
               Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
@@ -606,7 +606,7 @@ jobs:
                   },
                   {
                     ""name"": ""Branch/Tag"",
-                    ""value"": ""[``$env:env:Build_SourceBranchName``](https://github.com/$env:env:Build_Repository_Name/tree/$env:env:Build_SourceBranchName)"",
+                    ""value"": ""[``$env:Build_SourceBranchName``](https://github.com/$env:env:Build_Repository_Name/tree/$env:Build_SourceBranchName)"",
                     ""inline"": true
                   }
                 ]
@@ -678,7 +678,7 @@ jobs:
 #     inputs:
 #         targetType: 'inline'
 #         script: |
-#             if ($env:Build:SourceBranchName -eq "master" -or $env:Build:SourceBranchName -match "^release*")
+#             if ($env:Build:SourceBranchName -eq "master" -or $env:Build_SourceBranchName -match "^release*")
 #             {
 #                 # generate change log including future version
 #                 bundle exec github_changelog_generator --token $env:GitHubToken --future-release "v$(NBGV_Version)"
