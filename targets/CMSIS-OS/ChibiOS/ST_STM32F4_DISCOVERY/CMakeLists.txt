@@ -118,25 +118,6 @@ add_executable(
 add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf ChibiOS)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf ChibiOS)
 
-# add dependencies from CHIBIOS_NETWORK_COMPONENTS (this is required to make sure that ChibiOS network components are unzip at the proper locations before the build starts)
-# only required if networking is ON
-if(USE_NETWORKING_OPTION)
-    add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
-
-    # add dependency for security provider mbedTLS
-    if(NF_SECURITY_MBEDTLS)
-        add_dependencies(${NANOCLR_PROJECT_NAME}.elf mbedTLS)
-    endif()
-endif()
-
-# add dependencies from CHIBIOS_FILESYSTEM_COMPONENTS (this is required to make sure that ChibiOS filesystem components are unzip at the proper locations before the build starts)
-# only required if filesystem is ON
-if(USE_FILESYSTEM_OPTION)
-    add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf CHIBIOS_FILESYSTEM_COMPONENTS)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_FILESYSTEM_COMPONENTS)
-endif()
-
 # include common directories
 include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
