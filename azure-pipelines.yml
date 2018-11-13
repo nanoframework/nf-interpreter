@@ -165,7 +165,7 @@ jobs:
         *.dfu
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       flattenFolders: true
-    condition: ne(variables['Build.Reason'], 'PullRequest')
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
     displayName: Collecting deployable artifacts
 
   - task: PublishBuildArtifacts@1
@@ -173,7 +173,7 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       ArtifactName: $(BoardName)
       ArtifactType: Container
-    condition: ne(variables['Build.Reason'], 'PullRequest')
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
     displayName: Publish deployables artifacts
 
   - task: ArchiveFiles@2
@@ -184,7 +184,7 @@ jobs:
       archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
       replaceExistingArchive: true
     # skip task on PR build and when on branch other than develop, master or release
-    condition: or( ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
     displayName: Zip binary files
 
   - task: PowerShell@2
@@ -205,7 +205,7 @@ jobs:
         errorActionPreference: 'stop'
         failOnStderr: 'true'
     # skip task on PR build and when on branch other than develop, master or release
-    condition: or( ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
     displayName: Set Bintray repo path
 
   - task: cURLUploader@2
@@ -217,7 +217,7 @@ jobs:
       url: 'https://api.bintray.com/'
       remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
     # skip task on PR build and when on branch other than develop, master or release
-    condition: or( ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
     displayName: Upload artifact to Bintray
 
 #################
@@ -376,6 +376,7 @@ jobs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\esptool_py\esptool\esptool.py'
       arguments: '--chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB -o $(Build.SourcesDirectory)\build\nanoCLR.bin $(Build.SourcesDirectory)\build\targets\FreeRTOS\ESP32_DevKitC\nanoCLR.elf'
+    condition: succeeded()
     displayName: Generate nanoCLR bin file for deployment
 
   # because of permission issues (the python script isn't allowed to write on the output folder)
@@ -385,6 +386,7 @@ jobs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
       arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS\ESP32_DevKitC\IDF\partitions_nanoclr_4mb.csv $(Build.SourcesDirectory)\build\partitions_4mb.bin'
+    condition: succeeded()
     displayName: Generate Esp32 Partition tables for 4MB flash
 
   - task: PythonScript@0
@@ -392,6 +394,7 @@ jobs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
       arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS\ESP32_DevKitC\IDF\partitions_nanoclr_2mb.csv $(Build.SourcesDirectory)\build\partitions_2mb.bin'
+    condition: succeeded()
     displayName: Generate Esp32 Partition tables for 2MB flash
 
   - task: PythonScript@0
@@ -399,6 +402,7 @@ jobs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
       arguments: '$(Build.SourcesDirectory)\build\partitions_2mb.bin'
+    condition: succeeded()
     displayName: List flash 4Mb Esp32 Partition tables
 
   - task: CopyFiles@1
@@ -408,7 +412,7 @@ jobs:
         *.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       flattenFolders: true
-    condition: ne(variables['Build.Reason'], 'PullRequest')
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
     displayName: Collecting deployable artifacts
 
   - task: CopyFiles@1
@@ -418,7 +422,7 @@ jobs:
         bootloader.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       flattenFolders: true
-    condition: ne(variables['Build.Reason'], 'PullRequest')
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
     displayName: Copying bootloader from ESP32 libs
 
   - task: PublishBuildArtifacts@1
@@ -426,7 +430,7 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       ArtifactName: $(BoardName)
       ArtifactType: Container
-    condition: ne(variables['Build.Reason'], 'PullRequest')
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
     displayName: Publish deployables artifacts
 
   - task: ArchiveFiles@2
@@ -437,7 +441,7 @@ jobs:
       archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
       replaceExistingArchive: true
     # skip task on PR build and when on branch other than develop, master or release
-    condition: or( ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
     displayName: Zip binary files
 
   - task: PowerShell@2
@@ -458,7 +462,7 @@ jobs:
         errorActionPreference: 'stop'
         failOnStderr: 'true'
     # skip task on PR build and when on branch other than develop, master or release
-    condition: or( ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
     displayName: Set Bintray repo path
 
   - task: cURLUploader@2
@@ -470,7 +474,7 @@ jobs:
       url: 'https://api.bintray.com/'
       remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
     # skip task on PR build and when on branch other than develop, master or release
-    condition: or( ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
     displayName: Upload artifact to Bintray
 
 #################
@@ -555,7 +559,7 @@ jobs:
   - checkout: none #skip checking out the default repository resource
 
   - powershell: |
-      . ./azure-discord.ps1 failure $env:DISCORD_WEBHOOK
+      .\azure-discord.ps1 failure $env:DISCORD_WEBHOOK
     env:
       DISCORD_WEBHOOK: '$(DiscordWebhook)'
     displayName: Report build error
