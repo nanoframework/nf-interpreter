@@ -210,7 +210,7 @@ jobs:
       password: '$(BinTrayKey)'
       url: 'https://api.bintray.com/'
       remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
-    condition: neq(variables['Build.Reason'], 'PullRequest')
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Upload artifact to Bintray
 
   - task: PowerShell@2
@@ -551,7 +551,7 @@ jobs:
       password: '$(BinTrayKey)'
       url: 'https://api.bintray.com/'
       remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
-    condition: neq(variables['Build.Reason'], 'PullRequest')
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Upload artifact to Bintray
 
   - task: PowerShell@2
