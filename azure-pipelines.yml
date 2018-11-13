@@ -13,7 +13,7 @@ jobs:
 #################
 # STM32
 - job: Build_STM32_targets
-  # skip build if this is a PR, submitted by ndbot and the commit message contains [version update]
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
   condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
   pool:
     vmImage: 'VS2017-Win2016'
@@ -217,106 +217,10 @@ jobs:
     condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Upload artifact to Bintray
 
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-
-            $STATUS="failure"
-            $WEBHOOK_URL=$env:DISCORD_WEBHOOK_URL
-            $MESSAGE=""
-
-            Write-Output "[Webhook]: Sending webhook to Discord..."
-
-            Switch ($STATUS) {
-              "success" {
-                $EMBED_COLOR=3066993
-                $STATUS_MESSAGE="Passed"
-                Break
-              }
-              "failure" {
-                $EMBED_COLOR=15158332
-                $STATUS_MESSAGE="Failed"
-                Break
-              }
-              "warning" {
-                $EMBED_COLOR=12370112
-                $STATUS_MESSAGE="Warning"
-                Break
-              }  
-              default {
-                Write-Output "Default!"
-                Break
-              }
-            }
-
-            if (!$env:env:Build_SourceVersion) {
-              $env:env:Build_SourceVersion="$(git log -1 --pretty="%H")"
-            }
-
-            $AUTHOR_NAME="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%aN")"
-            $COMMITTER_NAME="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%cN")"
-            $COMMIT_SUBJECT="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%s")"
-            $COMMIT_MESSAGE="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%b")"
-
-            if ($AUTHOR_NAME -eq $COMMITTER_NAME) {
-              $CREDITS = "$AUTHOR_NAME authored & committed"
-            }
-            else {
-              $CREDITS = "$AUTHOR_NAME authored & $COMMITTER_NAME committed"
-            }
-
-            if ($env:env:System_PullRequest_PullRequestId) {
-              $URL="https://github.com/$env:Build_Repository_Name/pull/$env:env:System_PullRequest_PullRequestId"
-            }
-            else {
-              $URL=""
-            }
-
-            $BUILD_VERSION = [uri]::EscapeDataString($env:Build_BuildNumber)
-
-            $WEBHOOK_DATA="{
-              ""embeds"": [ {
-                ""color"": $EMBED_COLOR,
-                ""author"": {
-                  ""name"": ""Job #$env:Build_BuildId (Build #$env:Build_BuildNumber) $STATUS_MESSAGE - $env:env:Build_Repository_Name"",
-                  ""url"": ""$env:env:Build_BuildUri"",
-                  ""icon_url"": ""$AVATAR""
-                },
-                ""title"": ""$COMMIT_SUBJECT"",
-                ""url"": ""$URL"",
-                ""description"": ""$COMMIT_MESSAGE $CREDITS $MESSAGE"",
-                ""fields"": [
-                  {
-                    ""name"": ""Commit"",
-                    ""value"": ""[``$($env:env:Build_SourceVersion.substring(0, 7))``](https://github.com/$env:env:Build_Repository_Name/commit/$env:env:Build_SourceVersion)"",
-                    ""inline"": true
-                  },
-                  {
-                    ""name"": ""Branch/Tag"",
-                    ""value"": ""[``$env:Build_SourceBranchName``](https://github.com/$env:env:Build_Repository_Name/tree/$env:Build_SourceBranchName)"",
-                    ""inline"": true
-                  }
-                ]
-              } ],
-              ""content"" : """",
-              ""file"": """"
-            }"
-
-            Invoke-RestMethod -Uri $WEBHOOK_URL -Method POST -UserAgent AppVeyor-Webhook -ContentType 'application/json' -Body $WEBHOOK_DATA
-
-            Write-Output "[Webhook]: Successfully sent the webhook."
-
-
-        errorActionPreference: 'silentlyContinue'
-        failOnStderr: 'false'
-    condition: failed()
-    displayName: Report build error
-
 #################
 # ESP32 targets
 - job: Build_ESP32_targets
-  # skip build if this is a PR, submitted by ndbot and the commit message contains [version update]
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
   condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
   pool:
     vmImage: 'VS2017-Win2016'
@@ -549,6 +453,7 @@ jobs:
             }
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Set Bintray repo path
 
   - task: cURLUploader@2
@@ -562,106 +467,10 @@ jobs:
     condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Upload artifact to Bintray
 
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-
-            $STATUS="failure"
-            $WEBHOOK_URL=$env:DISCORD_WEBHOOK_URL
-            $MESSAGE=""
-
-            Write-Output "[Webhook]: Sending webhook to Discord..."
-
-            Switch ($STATUS) {
-              "success" {
-                $EMBED_COLOR=3066993
-                $STATUS_MESSAGE="Passed"
-                Break
-              }
-              "failure" {
-                $EMBED_COLOR=15158332
-                $STATUS_MESSAGE="Failed"
-                Break
-              }
-              "warning" {
-                $EMBED_COLOR=12370112
-                $STATUS_MESSAGE="Warning"
-                Break
-              }  
-              default {
-                Write-Output "Default!"
-                Break
-              }
-            }
-
-            if (!$env:env:Build_SourceVersion) {
-              $env:env:Build_SourceVersion="$(git log -1 --pretty="%H")"
-            }
-
-            $AUTHOR_NAME="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%aN")"
-            $COMMITTER_NAME="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%cN")"
-            $COMMIT_SUBJECT="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%s")"
-            $COMMIT_MESSAGE="$(git log -1 "$env:env:Build_SourceVersion" --pretty="%b")"
-
-            if ($AUTHOR_NAME -eq $COMMITTER_NAME) {
-              $CREDITS = "$AUTHOR_NAME authored & committed"
-            }
-            else {
-              $CREDITS = "$AUTHOR_NAME authored & $COMMITTER_NAME committed"
-            }
-
-            if ($env:env:System_PullRequest_PullRequestId) {
-              $URL="https://github.com/$env:Build_Repository_Name/pull/$env:env:System_PullRequest_PullRequestId"
-            }
-            else {
-              $URL=""
-            }
-
-            $BUILD_VERSION = [uri]::EscapeDataString($env:Build_BuildNumber)
-
-            $WEBHOOK_DATA="{
-              ""embeds"": [ {
-                ""color"": $EMBED_COLOR,
-                ""author"": {
-                  ""name"": ""Job #$env:Build_BuildId (Build #$env:Build_BuildNumber) $STATUS_MESSAGE - $env:env:Build_Repository_Name"",
-                  ""url"": ""$env:env:Build_BuildUri"",
-                  ""icon_url"": ""$AVATAR""
-                },
-                ""title"": ""$COMMIT_SUBJECT"",
-                ""url"": ""$URL"",
-                ""description"": ""$COMMIT_MESSAGE $CREDITS $MESSAGE"",
-                ""fields"": [
-                  {
-                    ""name"": ""Commit"",
-                    ""value"": ""[``$($env:env:Build_SourceVersion.substring(0, 7))``](https://github.com/$env:env:Build_Repository_Name/commit/$env:env:Build_SourceVersion)"",
-                    ""inline"": true
-                  },
-                  {
-                    ""name"": ""Branch/Tag"",
-                    ""value"": ""[``$env:Build_SourceBranchName``](https://github.com/$env:env:Build_Repository_Name/tree/$env:Build_SourceBranchName)"",
-                    ""inline"": true
-                  }
-                ]
-              } ],
-              ""content"" : """",
-              ""file"": """"
-            }"
-
-            Invoke-RestMethod -Uri $WEBHOOK_URL -Method POST -UserAgent AppVeyor-Webhook -ContentType 'application/json' -Body $WEBHOOK_DATA
-
-            Write-Output "[Webhook]: Successfully sent the webhook."
-
-
-        errorActionPreference: 'silentlyContinue'
-        failOnStderr: 'false'
-    condition: failed()
-    displayName: Report build error
-
 #################
 ## WIN32 
 # - job: Build_WIN32_nanoCLR
-#   # skip build if this is a PR, submitted by ndbot and the commit message contains [version update]
+#   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
 #   condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
 #   pool:
 #     vmImage: 'VS2017-Win2016'
@@ -677,56 +486,70 @@ jobs:
 
 #######################
 # generate change log
-# WIP
-# - job: Generate_change_log
-#   # skip build if this is a PR, submitted by ndbot and the commit message contains [version update]
-#   condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
-#   dependsOn:
-#   - Build_STM32_targets
-#   - Build_ESP32_targets
-#   condition: and(succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'))
+- job: Generate_change_log
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), not( and( eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) ) )
 
-#   pool:
-#     vmImage: 'VS2017-Win2016'
+  pool:
+    vmImage: 'VS2017-Win2016'
 
-#   steps:
-#   - task: DotNetCoreCLI@2  
-#     inputs:
-#       command: custom
-#       custom: tool
-#       arguments: install --tool-path . nbgv
-#     displayName: Install NBGV tool
+  steps:
+  - task: DotNetCoreCLI@2  
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . nbgv
+    displayName: Install NBGV tool
 
-#   - script: nbgv cloud -a -c
-#     displayName: Set build number
-#     condition: ne(variables['system.pullrequest.isfork'], true)
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: nbgv cloud -a -c
+        errorActionPreference: 'silentlyContinue'
+        failOnStderr: 'false'
+    displayName: Set build number
+    # condition: ne(variables['system.pullrequest.isfork'], true)
 
-#   - task: UseRubyVersion@0
-#     inputs:
-#       versionSpec: '>= 2.4' 
-#       addToPath: true
+  - task: UseRubyVersion@0
+    inputs:
+      versionSpec: '>= 2.4' 
+      addToPath: true
 
-#   - script: |
-#         gem install bundler
-#         gem install github_changelog_generator
-#         bundle install --retry=3 --jobs=4
-#     displayName: Install github changelog generator
+  # generate change log including future version
+  - script: |
+        gem install bundler
+        bundle install --retry=3 --jobs=4
+        gem install github_changelog_generator
+        bundle exec github_changelog_generator --token $(GitHubToken) --future-release "v$(NBGV_Version)"
+    condition: or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
+    displayName: Generate change log
 
-#   - task: PowerShell@2
-#     inputs:
-#         targetType: 'inline'
-#         script: |
-#             if ($env:Build:SourceBranchName -eq "master" -or $env:Build_SourceBranchName -match "^release*")
-#             {
-#                 # generate change log including future version
-#                 bundle exec github_changelog_generator --token $env:GitHubToken --future-release "v$(NBGV_Version)"
-#             }
-#             else 
-#             {
-#                 # generate change log
-#                 # version includes commits
-#                 bundle exec github_changelog_generator --token $env:GitHubToken        
-#             }
-#         errorActionPreference: 'stop'
-#         failOnStderr: 'true'
-#     displayName: Gemerate change log
+  # generate change log including future version
+  - script: |
+        gem install github_changelog_generator
+        bundle exec github_changelog_generator --token $(GitHubToken)
+    condition: not( or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) 
+    displayName: Generate change log
+
+##################################
+# report build failure to Discord
+- job: Report_Build_Failure
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'))
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  steps:
+  - checkout: none #skip checking out the default repository resource
+
+  - powershell: |
+      . ./azure-discord.ps1 failure $env:DISCORD_WEBHOOK
+    env:
+      DISCORD_WEBHOOK: '$(DiscordWebhook)'
+    displayName: Report build error
