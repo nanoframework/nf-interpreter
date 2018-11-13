@@ -124,7 +124,7 @@ static bool fs_ready = FALSE;
 static void InsertHandler(eventid_t id) {
   
   // Temporary to indicate this event being fired
-  palSetLine(LINE_LED1_RED);
+  //palSetLine(LINE_LED1_RED);
   
   FRESULT err;
 
@@ -136,7 +136,7 @@ static void InsertHandler(eventid_t id) {
     return;
 
   // Temporary to indicate this event being fired
-  SwoPrintString("\r\nFatFs: Initializing SD completed.\r\n");
+  //SwoPrintString("\r\nFatFs: Initializing SD completed.\r\n");
 
   osDelay(1000);
 
@@ -145,7 +145,7 @@ static void InsertHandler(eventid_t id) {
   if (err != FR_OK)
   {
     tiny_sprintf(buffer, "Error Mounting Drive %d", err);
-    SwoPrintString(buffer);
+    //SwoPrintString(buffer);
     osDelay(1000);
 
     sdcDisconnect(&SDCD1);
@@ -153,12 +153,12 @@ static void InsertHandler(eventid_t id) {
   }
   else
   {
-    SwoPrintString("\r\nFatFs: Mount completed...\r\n");
+    //SwoPrintString("\r\nFatFs: Mount completed...\r\n");
 
     fs_ready = TRUE;
     // Temporary: arriving here means we have an initialized and mounted SD Card
     // Indicated by a green LED
-    palSetLine(LINE_LED2_GREEN);
+    //palSetLine(LINE_LED2_GREEN);
   }
 
   if (fs_ready)
@@ -173,11 +173,11 @@ static void InsertHandler(eventid_t id) {
       if (err != FR_OK)
     {
       tiny_sprintf(buffer, "Error Creating File %d", err);
-      SwoPrintString(buffer);
+      //SwoPrintString(buffer);
     }
     else
     {
-      SwoPrintString("\r\nFatFs: file created...\r\n");
+      //SwoPrintString("\r\nFatFs: file created...\r\n");
     }
     //******* End Test
   }
@@ -190,7 +190,7 @@ static void InsertHandler(eventid_t id) {
 static void RemoveHandler(eventid_t id) {
 
   // To indicate we have ejected the sd card
-  palClearLine(LINE_LED1_RED);
+  //palClearLine(LINE_LED1_RED);
   
   (void)id;
   sdcDisconnect(&SDCD1);
@@ -286,7 +286,7 @@ int main(void) {
    * Activates the  SDC driver 1 using default configuration.
    */
 
-  sdcStart(&SDCD2, &SDC_CFG);
+  sdcStart(&SDCD1, &SDC_CFG);
 
   /*
    * Activates the card insertion monitor.
