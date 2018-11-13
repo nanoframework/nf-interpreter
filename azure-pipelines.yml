@@ -165,6 +165,7 @@ jobs:
         *.dfu
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       flattenFolders: true
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Collecting deployable artifacts
 
   - task: PublishBuildArtifacts@1
@@ -172,6 +173,7 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       ArtifactName: $(BoardName)
       ArtifactType: Container
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Publish deployables artifacts
 
   - task: ArchiveFiles@2
@@ -181,6 +183,7 @@ jobs:
       archiveType: 'zip'
       archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
       replaceExistingArchive: true
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Zip binary files
 
   - task: PowerShell@2
@@ -200,6 +203,7 @@ jobs:
             }
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Set Bintray repo path
 
   - task: cURLUploader@2
@@ -497,6 +501,7 @@ jobs:
         *.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       flattenFolders: true
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Collecting deployable artifacts
 
   - task: CopyFiles@1
@@ -506,6 +511,7 @@ jobs:
         bootloader.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       flattenFolders: true
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Copying bootloader from ESP32 libs
 
   - task: PublishBuildArtifacts@1
@@ -513,6 +519,7 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       ArtifactName: $(BoardName)
       ArtifactType: Container
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Publish deployables artifacts
 
   - task: ArchiveFiles@2
@@ -522,6 +529,7 @@ jobs:
       archiveType: 'zip'
       archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
       replaceExistingArchive: true
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Zip binary files
 
   - task: PowerShell@2
