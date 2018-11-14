@@ -1,0 +1,248 @@
+commit e6784e0226043920599c02459888401dd200f4f3
+Author: nfbot <nfbot@users.noreply.github.com>
+Date:   Fri Oct 5 10:17:16 2018 +0100
+
+    Normalize line endings (#886)
+
+:100644 100644 9650b9e de92b30 M	src/DeviceInterfaces/Networking.Sntp/nf_networking_sntp.cpp
+
+commit 958c30afd2bf79dfb5de3f0d55cb43da33dacc08
+Author: nfbot <nfbot@users.noreply.github.com>
+Date:   Fri Oct 5 09:50:07 2018 +0100
+
+    Normalize line endings (#885)
+
+:100644 100644 381eab9 1620721 M	targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.Spi/win_dev_spi_native.cpp
+:100644 100644 381eab9 1620721 M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/Windows.Devices.Spi/win_dev_spi_native.cpp
+:100644 100644 6bbd286 cd12128 M	targets/os/win32/nanoCLR/Windows.Devices.Spi/win_dev_spi_native.cpp
+
+commit a27d774fe44f44cd4e1be8b953e70fcb70228c63
+Author: nfbot <nfbot@users.noreply.github.com>
+Date:   Fri Oct 5 09:24:34 2018 +0100
+
+    Normalize line endings (#884)
+
+:100644 100644 0ba6e85 e9d9075 M	targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.Pwm/win_dev_pwm_native.cpp
+:100644 100644 719f313 d099c01 M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/Windows.Devices.Pwm/win_dev_pwm_native.cpp
+
+commit 6cc6f693b3ecbb26de2cb4bd7d427efe077b06f8
+Author: nfbot <nfbot@users.noreply.github.com>
+Date:   Thu Oct 4 20:01:45 2018 +0100
+
+    Normalize line endings (#883)
+
+:100644 100644 0a41720 d1d2418 M	targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.I2c/win_dev_i2c_native.cpp
+:100644 100644 ac79daa f3f92ff M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/Windows.Devices.I2c/win_dev_i2c_native.cpp
+
+commit 743fe4c9332273f1437f34625b93cc7a8c52aa43
+Author: nfbot <nfbot@users.noreply.github.com>
+Date:   Thu Oct 4 20:00:57 2018 +0100
+
+    Normalize line endings (#882)
+
+:100644 100644 aadd5ab 0db026e M	targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.Adc/win_dev_adc_native.cpp
+:100644 100644 239664c 6fd700c M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/Windows.Devices.Adc/win_dev_adc_native.cpp
+
+commit 3038d672d10b7c240741fc7b43645ce9893bad5c
+Author: nfbot <nfbot@users.noreply.github.com>
+Date:   Thu Oct 4 19:59:50 2018 +0100
+
+    Normalize line endings (#881)
+
+:100644 100644 e0ac536 df9286b M	src/CLR/Runtime.Native/nf_rt_native.cpp
+
+commit e5551b956923253fa89cbcc3f51c8760f8ceeaab
+Author: José Simões <josesimoes@users.noreply.github.com>
+Date:   Mon Oct 1 14:20:11 2018 +0100
+
+    Work on CI (#876)
+
+:100644 100644 a1ce8b9 fcb4709 M	appveyor-discord.ps1
+:100644 100644 f42de05 74580e2 M	appveyor.yml
+
+commit 2b9ad3f99c8c26a07c7e0e10e088b0aebec50f94
+Author: Adrian Soundy <adriansoundy@gmail.com>
+Date:   Tue Oct 2 00:41:50 2018 +1300
+
+    Fixes to SPI for half duplex/TransferSequential (#872)
+
+:100644 100644 822f6de c247679 M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/Windows.Devices.Spi/win_dev_spi_native.h
+:100644 100644 73b3f3f f6a507c M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/Windows.Devices.Spi/win_dev_spi_native_Windows_Devices_Spi_SpiDevice.cpp
+
+commit 877ce31547ee179efacb304ca48f4cf594c13458
+Author: Adrian Soundy <adriansoundy@gmail.com>
+Date:   Sat Sep 29 13:09:14 2018 +1200
+
+    High Res Timer added to Hardware.Esp32 (#866)
+
+:100644 100644 e5a6bd3 5c826af M	CMake/Modules/FindnanoFramework.Hardware.Esp32.cmake
+:100644 100644 a6da257 22daa07 M	targets/FreeRTOS/ESP32_DevKitC/Include/esp32_os.h
+:100644 100644 a1c4016 9ba921d M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/nanoFramework.Hardware.ESP32/nanoFramework_hardware_esp32_native.cpp
+:100644 100644 d421bc4 c56714e M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/nanoFramework.Hardware.ESP32/nanoFramework_hardware_esp32_native.h
+:000000 100644 0000000 c13242f A	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/nanoFramework.Hardware.ESP32/nanoFramework_hardware_esp32_native_Hardware_Esp32_HighResTimer.cpp
+
+commit 13eff359a8857962c7a6eb36bc41e6137c785dc2
+Author: José Simões <josesimoes@users.noreply.github.com>
+Date:   Fri Sep 28 18:49:47 2018 +0100
+
+    Add support for GetCustomAttributes (#865)
+
+:100644 100644 d19c143 12b318d M	src/CLR/CorLib/corlib_native.cpp
+:100644 100644 d5d4f8a e0d2772 M	src/CLR/CorLib/corlib_native.h
+:100644 100644 fb332a4 3c05abc M	src/CLR/CorLib/corlib_native_System_Reflection_ConstructorInfo.cpp
+:100644 100644 435b6b0 04b6902 M	src/CLR/CorLib/corlib_native_System_Reflection_FieldInfo.cpp
+:100644 100644 2caaf1d 1a0e617 M	src/CLR/CorLib/corlib_native_System_Reflection_RuntimeMethodInfo.cpp
+:100644 100644 6cffe65 02fa4ba M	src/CLR/CorLib/corlib_native_System_RuntimeType.cpp
+:100644 100644 bb22223 1d2444a M	src/CLR/Core/TypeSystem.cpp
+:100644 100644 7873500 d3d3c78 M	src/CLR/Include/nanoCLR_Runtime.h
+
+commit 3db5016d12268a28142a9a3d82862d1aeb9423d6
+Author: Adrian Soundy <adriansoundy@gmail.com>
+Date:   Wed Sep 26 15:04:43 2018 +1200
+
+    Upgrade of ESP32 to IDF 3.1 (#863)
+    
+    * Initial changes for IDF 3.1
+    
+    * Changes  for PWm and Network
+    
+    * Update build_esp32.md
+    
+    * Update install-esp32-libs.ps1
+    
+    * Revert "Update install-esp32-libs.ps1"
+    
+    This reverts commit 2382ff09eaeb3a27433361ddfbf2c6e04d1c6872.
+
+:100644 100644 97bd4cd 056a780 M	CMake/toolchain.FreeRtos.ESP32.GCC.cmake
+:100644 100644 fdd4f89 f42de05 M	appveyor.yml
+:100644 100644 58f933c db50289 M	install-esp32-idf.ps1
+:100644 100644 3d13cc6 c1da3d9 M	install-esp32-libs.ps1
+:100644 100644 7c11c2c 49f0cd0 M	install-esp32-toolchain.ps1
+:100644 100644 2fc19ac 0d29058 M	install-esp32-tools.ps1
+:100644 100644 1494a9f acbd034 M	src/PAL/Lwip/lwIP_Sockets.cpp
+:100644 100644 bb97387 53f5e5b M	targets/FreeRTOS/ESP32_DevKitC/BUILD-ESP32.md
+:100644 100644 2258122 8fdef10 M	targets/FreeRTOS/ESP32_DevKitC/Build_ESP32_libraries.md
+:100644 100644 97ac6b2 5825226 M	targets/FreeRTOS/ESP32_DevKitC/CMakeLists.txt
+:100644 100644 9a6690b 3b94461 M	targets/FreeRTOS/ESP32_DevKitC/CopyLibs.cmd
+:100644 100644 1c40215 cbb4af6 M	targets/FreeRTOS/ESP32_DevKitC/IDF/CMakeLists.txt
+:100644 100644 9016f0b e9fea15 M	targets/FreeRTOS/ESP32_DevKitC/Include/targetHAL.h
+:100644 100644 d303d53 3aa5266 M	targets/FreeRTOS/ESP32_DevKitC/Lwip/lwipopts.h
+:100644 100644 a8e7819 a73e903 M	targets/FreeRTOS/ESP32_DevKitC/Lwip/nf_api_msg.c
+:100644 100644 a240fa3 437cba2 M	targets/FreeRTOS/ESP32_DevKitC/Lwip/nf_sockets.c
+:100644 100644 24603b2 21681fa M	targets/FreeRTOS/ESP32_DevKitC/Lwip/nf_sys_arch.c
+:100644 100644 eb64b40 00056bd M	targets/FreeRTOS/ESP32_DevKitC/Network/Esp32_Wireless.cpp
+:100644 100644 229e2b9 75508f8 M	targets/FreeRTOS/ESP32_DevKitC/Network/Target_Network.cpp
+:100644 100644 19500e1 277e14a M	targets/FreeRTOS/ESP32_DevKitC/Network/targetHAL_Network.cpp
+:100644 100644 a2090db 2dbbe76 M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/Memory.cpp
+:100644 100644 5d92eaa b52508a M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/Windows.Devices.Pwm/win_dev_pwm_native_Windows_Devices_Pwm_PwmPin.cpp
+:100644 100644 b59ba4b 73b3f3f M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/Windows.Devices.Spi/win_dev_spi_native_Windows_Devices_Spi_SpiDevice.cpp
+:100644 100644 d291877 6fd6869 M	targets/FreeRTOS/ESP32_DevKitC/sdkconfig.h
+
+commit 3717dd5f8b64537c1f0d7a9d430ad85c3b61a112
+Author: José Simões <josesimoes@users.noreply.github.com>
+Date:   Wed Sep 19 12:30:40 2018 +0100
+
+    Fix STM32 series defines throughout the code (#862)
+
+:100644 100644 9bfa0a4 b8edb90 M	targets/CMSIS-OS/ChibiOS/Include/targetPAL.h
+:100644 100644 80054cf 722190a M	targets/CMSIS-OS/ChibiOS/common/hard_fault_handler.c
+:100644 100644 17915f8 e9f0118 M	targets/CMSIS-OS/ChibiOS/common/nanoSupport_CRC32.c
+:100644 100644 68f48eb 23729aa M	targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.I2c/win_dev_i2c_native_Windows_Devices_I2C_I2cDevice.cpp
+:100644 100644 168823b 0892c7c M	targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.Pwm/win_dev_pwm_native_Windows_Devices_Pwm_PwmController.cpp
+:100644 100644 b5ca3e6 70d59ea M	targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.SerialCommunication/win_dev_serial_native.h
+:100644 100644 5235d89 47b1069 M	targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.Spi/win_dev_spi_native_Windows_Devices_Spi_SpiDevice.cpp
+:100644 100644 4500480 8c63f2e M	targets/CMSIS-OS/ChibiOS/nanoCLR/targetPAL.c
+:100644 100644 d928c0f ce1dc70 M	targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/CRCv1/crc_lld.c
+:100644 100644 5951932 529fb5d M	targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/RNGv1/rng_lld.h
+
+commit 6293e31211f88d2c1b36c9671d72a9a6aadf9afd
+Author: Richard <richard.scott@healthsystemslimited.com>
+Date:   Wed Sep 19 10:13:26 2018 +1200
+
+    Remove obsolete parameter BOARD_NAME (#861)
+
+:100644 100644 3a7995b bb97387 M	targets/FreeRTOS/ESP32_DevKitC/BUILD-ESP32.md
+
+commit 8a885b5642df8ac953dce2a04940b344eb10feac
+Author: Roy Salisbury <RoySalisbury@users.noreply.github.com>
+Date:   Tue Sep 18 03:20:27 2018 -0600
+
+    Updated signatures/checksum for Windows.Devices.Gpio  (#856)
+
+:100644 100644 9c9c1fa 2415363 M	targets/CMSIS-OS/ChibiOS/nanoCLR/Windows.Devices.Gpio/win_dev_gpio_native.cpp
+:100644 100644 9c9c1fa 2415363 M	targets/FreeRTOS/ESP32_DevKitC/nanoCLR/Windows.Devices.Gpio/win_dev_gpio_native.cpp
+
+commit 6bc05e954c2a70aff6d90663334458e8fdfa8a5c
+Author: Richard <richard.scott@healthsystemslimited.com>
+Date:   Tue Sep 18 09:16:24 2018 +1200
+
+    Add PS scripts to install thre requried ESP32 and STM32 tools for build (#835)
+
+:100644 100644 35cdfec 0535681 M	.vscode/launch.TEMPLATE-ESP32.json
+:100644 100644 d0c4efb 633c3b0 M	.vscode/launch.TEMPLATE.json
+:100644 100644 084faf8 58d7228 M	.vscode/tasks.TEMPLATE-ESP32.json
+:000000 100644 0000000 cc7b650 A	Set-PathVariable.ps1
+:000000 100644 0000000 56c2ff0 A	cmake-variants.TEMPLATE-ESP32.json
+:000000 100644 0000000 23008d1 A	install-esp32-openocd.ps1
+:100644 100644 460cf2a 7c11c2c M	install-esp32-toolchain.ps1
+:000000 100644 0000000 2fc19ac A	install-esp32-tools.ps1
+:000000 100644 0000000 dd6012d A	install-stm32-tools.ps1
+:100644 100644 93ffebf 3a7995b M	targets/FreeRTOS/ESP32_DevKitC/BUILD-ESP32.md
+
+commit 569ec7a32b64862e187e31d51afb03b590bb32af
+Author: José Simões <josesimoes@users.noreply.github.com>
+Date:   Mon Sep 17 19:28:52 2018 +0100
+
+    Implement NF_FEATURE_HAS_CONFIG_BLOCK build feature (#860)
+
+:100644 100644 0a7a7e8 0d5b067 M	CMake/ChibiOS_target_os.h.in
+:100644 100644 54b59ec cfb9b0b M	CMake/ESP32_target_os.h.in
+:100644 100644 961db1c 26728dc M	CMake/Modules/FindNF_CoreCLR.cmake
+:100644 100644 54fdc40 ba7aef3 M	CMakeLists.txt
+:100644 100644 be41e4a 1e9a3ea M	cmake-variants.TEMPLATE.json
+:100644 100644 f673901 ff09667 M	get-stm32-targets-to-build.ps1
+:100644 100644 f769831 0f3b37e M	src/CLR/Debugger/Debugger.cpp
+:100644 100644 e938e53 3abe2af M	src/HAL/nanoHAL_ConfigurationManager_stubs.c
+:100644 100644 6b4f761 83bbf0f M	targets/CMSIS-OS/ChibiOS/ST_NUCLEO144_F746ZG/CMakeLists.txt
+:100644 100644 4de03bb f956d3d M	targets/CMSIS-OS/ChibiOS/ST_STM32F769I_DISCOVERY/CMakeLists.txt
+:100644 100644 7dd024a 9c23b5a M	targets/CMSIS-OS/ChibiOS/common/CMakeLists.txt
+:100644 100644 2fd5fd8 a959bce M	targets/CMSIS-OS/ChibiOS/nanoBooter/WireProtocol_MonitorCommands.c
+
+commit ac7ba797c53fc82c4cbefb30c2ac3be3d75bbe07
+Author: José Simões <josesimoes@users.noreply.github.com>
+Date:   Mon Sep 17 18:56:50 2018 +0100
+
+    Fix defines for STM32 series in several locations (#859)
+
+:100644 100644 f9a7d95 9bfa0a4 M	targets/CMSIS-OS/ChibiOS/Include/targetPAL.h
+:100644 100644 722190a 80054cf M	targets/CMSIS-OS/ChibiOS/common/hard_fault_handler.c
+:100644 100644 e9f0118 17915f8 M	targets/CMSIS-OS/ChibiOS/common/nanoSupport_CRC32.c
+:100644 100644 71cb013 4500480 M	targets/CMSIS-OS/ChibiOS/nanoCLR/targetPAL.c
+:100644 100644 1df9242 2b4154f M	targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/include/hal_community.h
+:100644 100644 b6a4ca7 3c3f01b M	targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/include/stm32_rng/hal_stm32_rng.h
+:100644 100644 efd22de d928c0f M	targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/CRCv1/crc_lld.c
+:100644 100644 016ccfd 4d93151 M	targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/CRCv1/crc_lld.h
+:100644 100644 529fb5d 5951932 M	targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/RNGv1/rng_lld.h
+
+commit 30d88d2a64e650a2524d9b7dbffd7e6e7c8a40db
+Author: José Simões <josesimoes@users.noreply.github.com>
+Date:   Mon Sep 17 18:25:33 2018 +0100
+
+    Move globals declaration in linker files to the correct location (#858)
+
+:100644 100644 9721705 80a4931 M	targets/CMSIS-OS/ChibiOS/common/rules_code.ld
+:100644 100644 32472f4 18da278 M	targets/CMSIS-OS/ChibiOS/common/rules_data.ld
+
+commit c414c49380422684de274f59598eb8d29da7ff18
+Author: José Simões <josesimoes@users.noreply.github.com>
+Date:   Mon Sep 17 11:53:26 2018 +0100
+
+    Fix enumeration of config blocks when device has no config block (#857)
+
+:100644 100644 d305170 9bc5afe M	targets/CMSIS-OS/ChibiOS/MBN_QUAIL/nanoBooter/main.c
+:100644 100644 31ba383 2638062 M	targets/CMSIS-OS/ChibiOS/NETDUINO3_WIFI/nanoBooter/main.c
+:100644 100644 957095a 312c6b5 M	targets/CMSIS-OS/ChibiOS/ST_NUCLEO64_F091RC/nanoBooter/main.c
+:100644 100644 f79308f c7aac9c M	targets/CMSIS-OS/ChibiOS/ST_STM32F429I_DISCOVERY/nanoBooter/main.c
+:100644 100644 c292c90 3265a39 M	targets/CMSIS-OS/ChibiOS/ST_STM32F4_DISCOVERY/nanoBooter/main.c
+:100644 100644 57aae11 a40c622 M	targets/CMSIS-OS/ChibiOS/common/targetHAL_ConfigurationManager.cpp
