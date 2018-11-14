@@ -1,13 +1,9 @@
-﻿//
-// Copyright (c) 2017 The nanoFramework project contributors
-// See LICENSE file in the project root for full license information.
-//
-
-#include "win_dev_i2c_native.h"
+#include "win_dev_i2c.h"
 
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -55,7 +51,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_I2c =
 {
     "Windows.Devices.I2c", 
-    0x92D0F27A,
+    0xE6950C49,
     method_lookup,
     { 1, 0, 2, 7 }
 };
