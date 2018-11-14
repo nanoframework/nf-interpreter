@@ -8,6 +8,15 @@ pr:
   branches:
     include: [ "*" ]
 
+# Repo: nf-tools
+# File: azure-pipelines.yml
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: nanoframework/nf-tools
+      endpoint: nanoframework
+
 jobs:
 
 #################
@@ -556,10 +565,10 @@ jobs:
     vmImage: 'VS2017-Win2016'
 
   steps:
-  - checkout: none #skip checking out the default repository resource
 
-  - powershell: |
-      .\azure-discord.ps1 failure $env:DISCORD_WEBHOOK
-    env:
-      DISCORD_WEBHOOK: '$(DiscordWebhook)'
-    displayName: Report build error
+  # step from template @ nf-tools repo
+  - template: azure-pipelines-templates/discord-webhook.yml@templates  
+    parameters:
+      status: 'failure'
+      webhookUrl: '$(DiscordWebhook)'
+      message: ''
