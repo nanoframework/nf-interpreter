@@ -1,4 +1,4 @@
-#include "win_dev_i2c.h"
+#include "win_dev_i2c_native.h"
 
 
 static const CLR_RT_MethodHandler method_lookup[] =
