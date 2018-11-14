@@ -12,7 +12,6 @@ trigger:
     - cmake-variants.TEMPLATE.json
 
 pr:
-  branches:
   paths:
     exclude:
     - doc/*
