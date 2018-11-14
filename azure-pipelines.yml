@@ -1,15 +1,22 @@
 trigger:
-  branches:
-    include: ["master", "*"]  
+  batch: true
   paths:
-    exclude: ["doc", "*.md", ".appveyor.yml"]
+    exclude:
+    - doc/*
+    - *.md
+    - CHANGELOG.md
+    - .appveyor.yml
 
 pr:
   branches:
-    include: [ "*" ]
+  paths:
+    exclude:
+    - doc/*
+    - *.md
+    - CHANGELOG.md
+    - .appveyor.yml
 
-# Repo: nf-tools
-# File: azure-pipelines.yml
+# add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
   repositories:
     - repository: templates
