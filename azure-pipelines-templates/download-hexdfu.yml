@@ -1,0 +1,25 @@
+# Copyright (c) 2018 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            Write-Host "Downloading hex2dfu..."
+            $url = "https://github.com/nanoframework/nf-tools/releases/download/v1.0.0/hex2dfu.exe"
+            $output = "$env:Agent_TempDirectory\hex2dfu.exe"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Install HEX2DFU
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            $newPath = "$env:Agent_TempDirectory".Replace('\','/')
+            Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$newPath"
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Adjust HexDFU path

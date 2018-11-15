@@ -1,10 +1,5 @@
 trigger:
   batch: true
-  branches:
-    include:
-    - master
-    - develop/*
-    - release/*
   paths:
     exclude:
     - .gitignore
@@ -79,16 +74,9 @@ jobs:
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
 
   steps:
-  - task: DotNetCoreCLI@2  
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install --tool-path . nbgv
-    displayName: Install NBGV tool
-
-  - script: nbgv cloud -a -c
-    displayName: Set build number
+  - template: azure-pipelines-templates/nb-gitversioning.yml
     condition: ne(variables['system.pullrequest.isfork'], true)
+   
 
   # Currently Azure pipelines won't let PRs from forks setting the build ID
   # so we need to come up with a versiom number to use for the build
@@ -99,152 +87,21 @@ jobs:
     condition: eq(variables['system.pullrequest.isfork'], true)
     displayName: Set temporary build number
 
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            Write-Host "Downloading ARM GNU GCC toolchain..."
-            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-7-2018-q2-update-win32.7z"
-            $output = "$PSScriptRoot\gcc-arm.7z"
-            (New-Object Net.WebClient).DownloadFile($url, $output)
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    displayName: Downloading ARM GCC toolchain
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
 
-  - task: ExtractFiles@1
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.7z' 
-      destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
-    displayName: Extracting ARM GCC toolchain
+  - template: azure-pipelines-templates/download-install-ninja.yml
 
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            Write-Host "Downloading Ninja..."
-            $url = "https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip"
-            $output = "$PSScriptRoot\ninja.zip"
-            (New-Object Net.WebClient).DownloadFile($url, $output)
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    displayName: Download Ninja
-
-  - task: ExtractFiles@1
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\ninja.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ninja' 
-    displayName: Extract Ninja
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            Write-Host "Downloading hex2dfu..."
-            $url = "https://github.com/nanoframework/nf-tools/releases/download/v1.0.0/hex2dfu.exe"
-            $output = "$env:Agent_TempDirectory\hex2dfu.exe"
-            (New-Object Net.WebClient).DownloadFile($url, $output)
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    displayName: Install HEX2DFU
+  - template: azure-pipelines-templates/download-hexdfu.yml
     condition: eq(variables['NeedsDFU'], true)
 
-  - script: |
-        echo "##vso[task.prependpath]$(Agent.TempDirectory)\ninja"
-        echo "##vso[task.prependpath]C:\Windows\System32"
-    displayName: Tweak PATH
+  - template: azure-pipelines-templates/build-chibios-stm32.yml
 
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            $newPath = "$env:Agent_TempDirectory".Replace('\','/')
-            Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$newPath"
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    displayName: Adjust HexDFU path
-    condition: eq(variables['NeedsDFU'], true)
-
-  - task: CMake@1
-    inputs:
-      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) ..'
-    displayName: Setup build with CMake and DFU
-    condition: eq(variables['NeedsDFU'], true)
-
-  - task: CMake@1
-    inputs:
-      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) ..'
-    displayName: Setup build with CMake without DFU
-    condition: eq(variables['NeedsDFU'], false)
-
-  - task: CMake@1
-    inputs:
-      cmakeArgs: '--build $(Build.SourcesDirectory)\build --target all --config MinSizeRel'
-    displayName: Build with CMake
-
-  - task: CopyFiles@1
-    inputs:
-      sourceFolder: $(Build.SourcesDirectory)\build
-      Contents: |
-        *.bin
-        *.hex
-        *.s19
-        *.dfu
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
-      flattenFolders: true
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
     condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
-    displayName: Collecting deployable artifacts
 
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
-      ArtifactName: $(BoardName)
-      ArtifactType: Container
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
-    displayName: Publish deployables artifacts
-
-  - task: ArchiveFiles@2
-    inputs:
-      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(BoardName)' 
-      includeRootFolder: false
-      archiveType: 'zip'
-      archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
-      replaceExistingArchive: true
+  - template: azure-pipelines-templates/publish-bintray.yml
     # skip task on PR build and when on branch other than develop, master or release
     condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
-    displayName: Zip binary files
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            if( $env:Build_SourceBranchName -eq "develop" -or 
-                $env:Build_SourceBranchName -match "^release*" )
-            {
-              # this a dev or release branch, publish to Bintray dev repo
-              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
-            }
-            else 
-            {
-              # this master branch, publish to Bintray stable repo
-              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images"
-            }
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    # skip task on PR build and when on branch other than develop, master or release
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
-    displayName: Set Bintray repo path
-
-  - task: cURLUploader@2
-    inputs:
-      files: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
-      authType: 'userAndPass'
-      username: 'nfbot'
-      password: '$(BinTrayKey)'
-      url: 'https://api.bintray.com/'
-      remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
-    # skip task on PR build and when on branch other than develop, master or release
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
-    displayName: Upload artifact to Bintray
 
 #################
 # ESP32 targets
@@ -265,15 +122,7 @@ jobs:
     ESP32_TOOLCHAIN_PATH: $(Agent.TempDirectory)\ESP32_Tools
 
   steps:
-  - task: DotNetCoreCLI@2  
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install --tool-path . nbgv
-    displayName: Install NBGV tool
-
-  - script: nbgv cloud -a -c
-    displayName: Set build number
+  - template: azure-pipelines-templates/nb-gitversioning.yml
     condition: ne(variables['system.pullrequest.isfork'], true)
 
   # Currently Azure pipelines won't let PRs from forks setting the build ID
@@ -285,161 +134,11 @@ jobs:
     condition: eq(variables['system.pullrequest.isfork'], true)
     displayName: Set temporary build number
 
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            Write-Host "Downloading Xtensa ESP32 toolchain..."
-            $url = "https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip"
-            $output = "$PSScriptRoot\xtensa-esp32-elf-win32.zip"
-            (New-Object Net.WebClient).DownloadFile($url, $output)
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    displayName: Download xtensa ESP32 toolchain
+  - template: azure-pipelines-templates/download-install-esp32-build-components.yml
 
-  - task: ExtractFiles@1
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\xtensa-esp32-elf-win32.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
-      cleanDestinationFolder: false
-    displayName: Extracting xtensa ESP32 toolchain
+  - template: azure-pipelines-templates/download-install-ninja.yml
 
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            Write-Host "Downloading Ninja..."
-            $url = "https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip"
-            $output = "$PSScriptRoot\ninja.zip"
-            (New-Object Net.WebClient).DownloadFile($url, $output)
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    displayName: Download Ninja
-
-  - task: ExtractFiles@1
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\ninja.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ninja' 
-    displayName: Extract Ninja
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            Write-Host "Downloading ESP32 pre-compiled libs..."
-            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.1.zip"
-            $output = "$PSScriptRoot\IDF_libs-v3.1.zip"
-            (New-Object Net.WebClient).DownloadFile($url, $output)
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    displayName: Downloading ESP32 pre-compiled libs
-
-  - task: ExtractFiles@1
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\IDF_libs-v3.1.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs-v3.1'
-      cleanDestinationFolder: false
-    displayName: Installing ESP32 pre-compiled libs
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            Write-Host "Downloading ESP32 IDF..."
-            $url = "https://github.com/espressif/esp-idf/releases/download/v3.1/esp-idf-v3.1.zip"
-            $output = "$PSScriptRoot\esp-idf-v3.1.zip"
-            (New-Object Net.WebClient).DownloadFile($url, $output)
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    displayName: Downloading ESP32 IDF
-
-  - task: ExtractFiles@1
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-v3.1.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
-      cleanDestinationFolder: false
-    displayName: Installing Espressif IDF
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: python -m pip install pyserial
-        # the bellow settings are required as the script is installing an outdated version of pyserial
-        errorActionPreference: 'silentlyContinue' 
-        failOnStderr: false
-        ignoreLASTEXITCODE: false
-    displayName: Installing python pyserial
-
-  - script: |
-        echo "##vso[task.prependpath]$(Agent.TempDirectory)\ninja"
-        echo "##vso[task.prependpath]C:\Windows\System32"
-    displayName: Tweak PATH
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            # need to replace forward slash for paths to work with GCC and CMake
-            $tempDirPath = "$env:Agent_TempDirectory".Replace('\','/')
-            Write-Host "$("##vso[task.setvariable variable=ESP32_LIBS_PATH]")$tempDirPath/ESP32_Tools/libs-v3.1"
-            Write-Host "$("##vso[task.setvariable variable=ESP32_IDF_PATH]")$tempDirPath/ESP32_Tools/esp-idf-v3.1"
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    displayName: Adjust paths
-
-  - task: CMake@1
-    inputs:
-      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(ESP32_TOOLCHAIN_PATH) -DESP32_IDF_PATH=$(ESP32_IDF_PATH) -DESP32_LIBS_PATH=$(ESP32_LIBS_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) $(BuildOptions) ..'
-    displayName: Setup build with CMake
-
-  - task: CMake@1
-    inputs:
-      cmakeArgs: '--build $(Build.SourcesDirectory)\build --target all --config MinSizeRel'
-    displayName: Build with CMake
-
-  - task: PythonScript@0
-    inputs:
-      scriptSource: 'filePath'
-      scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\esptool_py\esptool\esptool.py'
-      arguments: '--chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB -o $(Build.SourcesDirectory)\build\nanoCLR.bin $(Build.SourcesDirectory)\build\targets\FreeRTOS\ESP32_DevKitC\nanoCLR.elf'
-    condition: succeeded()
-    displayName: Generate nanoCLR bin file for deployment
-
-  # because of permission issues (the python script isn't allowed to write on the output folder)
-  # we need to perform these steps by calling directly the python scripts
-  - task: PythonScript@0
-    inputs:
-      scriptSource: 'filePath'
-      scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
-      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS\ESP32_DevKitC\IDF\partitions_nanoclr_4mb.csv $(Build.SourcesDirectory)\build\partitions_4mb.bin'
-    condition: succeeded()
-    displayName: Generate Esp32 Partition tables for 4MB flash
-
-  - task: PythonScript@0
-    inputs:
-      scriptSource: 'filePath'
-      scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
-      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS\ESP32_DevKitC\IDF\partitions_nanoclr_2mb.csv $(Build.SourcesDirectory)\build\partitions_2mb.bin'
-    condition: succeeded()
-    displayName: Generate Esp32 Partition tables for 2MB flash
-
-  - task: PythonScript@0
-    inputs:
-      scriptSource: 'filePath'
-      scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
-      arguments: '$(Build.SourcesDirectory)\build\partitions_2mb.bin'
-    condition: succeeded()
-    displayName: List flash 4Mb Esp32 Partition tables
-
-  - task: CopyFiles@1
-    inputs:
-      sourceFolder: $(Build.SourcesDirectory)\build
-      Contents: |
-        *.bin
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
-      flattenFolders: true
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
-    displayName: Collecting deployable artifacts
+  - template: azure-pipelines-templates/build-esp32.yml
 
   - task: CopyFiles@1
     inputs:
@@ -451,57 +150,12 @@ jobs:
     condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
     displayName: Copying bootloader from ESP32 libs
 
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
-      ArtifactName: $(BoardName)
-      ArtifactType: Container
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
     condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
-    displayName: Publish deployables artifacts
 
-  - task: ArchiveFiles@2
-    inputs:
-      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(BoardName)' 
-      includeRootFolder: false
-      archiveType: 'zip'
-      archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
-      replaceExistingArchive: true
+  - template: azure-pipelines-templates/publish-bintray.yml
     # skip task on PR build and when on branch other than develop, master or release
     condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
-    displayName: Zip binary files
-
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            if( $env:Build_SourceBranchName -eq "develop" -or 
-                $env:Build_SourceBranchName -match "^release*" )
-            {
-              # this a dev or release branch, publish to Bintray dev repo
-              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
-            }
-            else 
-            {
-              # this master branch, publish to Bintray stable repo
-              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images"
-            }
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    # skip task on PR build and when on branch other than develop, master or release
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
-    displayName: Set Bintray repo path
-
-  - task: cURLUploader@2
-    inputs:
-      files: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
-      authType: 'userAndPass'
-      username: 'nfbot'
-      password: '$(BinTrayKey)'
-      url: 'https://api.bintray.com/'
-      remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
-    # skip task on PR build and when on branch other than develop, master or release
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
-    displayName: Upload artifact to Bintray
 
 #################
 ## WIN32 

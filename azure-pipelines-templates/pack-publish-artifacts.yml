@@ -1,0 +1,22 @@
+# Copyright (c) 2018 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)\build
+      Contents: |
+        *.bin
+        *.hex
+        *.s19
+        *.dfu
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      flattenFolders: true
+    displayName: Collecting deployable artifacts
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      ArtifactName: $(BoardName)
+      ArtifactType: Container
+    displayName: Publish deployables artifacts
