@@ -1,0 +1,21 @@
+# Copyright (c) 2018 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+
+  - task: CMake@1
+    inputs:
+      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) ..'
+    displayName: Setup build with CMake and DFU
+    condition: eq(variables['NeedsDFU'], true)
+
+  - task: CMake@1
+    inputs:
+      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) ..'
+    displayName: Setup build with CMake without DFU
+    condition: eq(variables['NeedsDFU'], false)
+
+  - task: CMake@1
+    inputs:
+      cmakeArgs: '--build $(Build.SourcesDirectory)\build --target all --config MinSizeRel'
+    displayName: Build with CMake
