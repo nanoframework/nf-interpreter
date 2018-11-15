@@ -7,8 +7,7 @@ trigger:
     - release/*
   paths:
     exclude:
-    - doc/*
-    - .git*
+    - .gitignore
     - README.md
     - CHANGELOG.md
     - LICENSE.md
@@ -19,8 +18,7 @@ trigger:
 pr:
   paths:
     exclude:
-    - doc/*
-    - .git*
+    - .gitignore
     - README.md
     - CHANGELOG.md
     - LICENSE.md
