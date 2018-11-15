@@ -2796,6 +2796,7 @@ struct CLR_RT_ExecutionEngine
     static const CLR_UINT32             c_Event_EndPoint            = 0x00000008;
     static const CLR_UINT32             c_Event_I2cMaster           = 0x00000080;
     static const CLR_UINT32             c_Event_SpiMaster           = 0x00000100;
+    static const CLR_UINT32             c_Event_OneWireMaster       = 0x00000200;
     static const CLR_UINT32             c_Event_AppDomain           = 0x02000000;
     static const CLR_UINT32             c_Event_Socket              = 0x20000000;
     static const CLR_UINT32             c_Event_IdleCPU             = 0x40000000;

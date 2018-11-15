@@ -391,6 +391,16 @@ endif()
 # for some APIs we need to enable the device in the HAL config
 # and/or manage other APIs that are required
 
+# FIXME
+if(API_nanoFramework.Devices.OneWire)
+    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
+    
+    # this API requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
+
+else()
+    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
+endif()
 
 if(API_System.Net)
     # this API requires nanoFramework.Runtime.Events
@@ -479,6 +489,9 @@ if(API_Windows.Networking.Sockets)
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
 endif()
+
+# FIXME (rework after adding the include for the managed API declaration)
+# set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL Serial for nanoFramework.Hardware.OneWire")
 
 
 #################################################################
