@@ -17,16 +17,24 @@ steps:
     inputs:
         targetType: 'inline'
         script: |
-            if( $env:Build_SourceBranchName -eq "develop" -or 
-                $env:Build_SourceBranchName -match "^release*" )
+            if( $env:Build_Repository_Name -eq "nf-Community-Targets" )
             {
-              # this a dev or release branch, publish to Bintray dev repo
-              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
+              # this is a build for a community target
+              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-community-targets"
             }
-            else 
+            else
             {
-              # this master branch, publish to Bintray stable repo
-              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images"
+              if( $env:Build_SourceBranchName -eq "develop" -or 
+                  $env:Build_SourceBranchName -match "^release*" )
+              {
+                # this a dev or release branch, publish to Bintray dev repo
+                Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
+              }
+              else 
+              {
+                # this master branch, publish to Bintray stable repo
+                Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images"
+              }
             }
         errorActionPreference: 'stop'
         failOnStderr: 'true'
