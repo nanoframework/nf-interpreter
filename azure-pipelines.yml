@@ -76,15 +76,6 @@ jobs:
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
 
-  # Currently Azure pipelines won't let PRs from forks setting the build ID
-  # so we need to come up with a versiom number to use for the build
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0.$env:System_PullRequest_PullRequestNumber"
-    condition: eq(variables['system.pullrequest.isfork'], true)
-    displayName: Set temporary build number
-
   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
 
   - template: azure-pipelines-templates/download-install-ninja.yml
@@ -117,15 +108,6 @@ jobs:
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
-
-  # Currently Azure pipelines won't let PRs from forks setting the build ID
-  # so we need to come up with a versiom number to use for the build
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0.$env:System_PullRequest_PullRequestNumber"
-    condition: eq(variables['system.pullrequest.isfork'], true)
-    displayName: Set temporary build number
 
   - template: azure-pipelines-templates/download-install-esp32-build-components.yml
 
