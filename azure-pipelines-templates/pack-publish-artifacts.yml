@@ -1,10 +1,13 @@
 # Copyright (c) 2018 The nanoFramework project contributors
 # See LICENSE file in the project root for full license information.
 
+parameters:
+  builDirectory: '$(Build.SourcesDirectory)\build'
+
 steps:
   - task: CopyFiles@1
     inputs:
-      sourceFolder: $(Build.SourcesDirectory)\build
+      sourceFolder: ${{ parameters.builDirectory }}
       Contents: |
         *.bin
         *.hex
