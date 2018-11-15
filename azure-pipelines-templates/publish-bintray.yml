@@ -9,6 +9,8 @@ steps:
       archiveType: 'zip'
       archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
       replaceExistingArchive: true
+    # skip task on PR build and when on branch other than develop, master or release
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
     displayName: Zip binary files
 
   - task: PowerShell@2
@@ -28,6 +30,8 @@ steps:
             }
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+    # skip task on PR build and when on branch other than develop, master or release
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
     displayName: Set Bintray repo path
 
   - task: cURLUploader@2
@@ -38,4 +42,6 @@ steps:
       password: '$(BinTrayKey)'
       url: 'https://api.bintray.com/'
       remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
+    # skip task on PR build and when on branch other than develop, master or release
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
     displayName: Upload artifact to Bintray

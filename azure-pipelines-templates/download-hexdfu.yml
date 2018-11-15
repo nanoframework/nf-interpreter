@@ -12,6 +12,7 @@ steps:
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+    condition: eq(variables['NeedsDFU'], true)
     displayName: Install HEX2DFU
 
   - task: PowerShell@2
@@ -22,4 +23,5 @@ steps:
             Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$newPath"
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+    condition: eq(variables['NeedsDFU'], true)
     displayName: Adjust HexDFU path

@@ -7,8 +7,9 @@ steps:
       command: custom
       custom: tool
       arguments: install --tool-path . nbgv
+    condition: ne(variables['system.pullrequest.isfork'], true)
     displayName: Install NBGV tool
 
   - script: nbgv cloud -a -c
-    displayName: Set build number
     condition: ne(variables['system.pullrequest.isfork'], true)
+    displayName: Set build number

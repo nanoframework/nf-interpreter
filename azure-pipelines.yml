@@ -75,8 +75,6 @@ jobs:
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
-    condition: ne(variables['system.pullrequest.isfork'], true)
-   
 
   # Currently Azure pipelines won't let PRs from forks setting the build ID
   # so we need to come up with a versiom number to use for the build
@@ -92,16 +90,12 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
 
   - template: azure-pipelines-templates/download-hexdfu.yml
-    condition: eq(variables['NeedsDFU'], true)
 
   - template: azure-pipelines-templates/build-chibios-stm32.yml
 
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
 
   - template: azure-pipelines-templates/publish-bintray.yml
-    # skip task on PR build and when on branch other than develop, master or release
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
 
 #################
 # ESP32 targets
@@ -123,7 +117,6 @@ jobs:
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
-    condition: ne(variables['system.pullrequest.isfork'], true)
 
   # Currently Azure pipelines won't let PRs from forks setting the build ID
   # so we need to come up with a versiom number to use for the build
@@ -151,11 +144,8 @@ jobs:
     displayName: Copying bootloader from ESP32 libs
 
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
 
   - template: azure-pipelines-templates/publish-bintray.yml
-    # skip task on PR build and when on branch other than develop, master or release
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
 
 #################
 ## WIN32 
