@@ -1,7 +1,8 @@
 # Copyright (c) 2018 The nanoFramework project contributors
 # See LICENSE file in the project root for full license information.
+
 parameters:
-  builDirectory: 'buid'
+  builDirectory: '$(Build.SourcesDirectory)\build'
 
 steps:
 
@@ -21,6 +22,6 @@ steps:
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '--build $(Build.SourcesDirectory)\build --target all --config MinSizeRel'
+      cmakeArgs: '--build ${{ parameters.builDirectory }} --target all --config MinSizeRel'
       workingDirectory:  ${{ parameters.builDirectory }}
     displayName: Build with CMake
