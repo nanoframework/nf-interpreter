@@ -15,22 +15,6 @@ trigger:
     - CODE_OF_CONDUCT.md
     - cmake-variants.TEMPLATE.json
 
-pr:
-  branches:
-    include: 
-    - master
-    - develop/*
-    - release/*
-  paths:
-    exclude:
-    - .gitignore
-    - README.md
-    - CHANGELOG.md
-    - LICENSE.md
-    - CONTRIBUTING.md
-    - CODE_OF_CONDUCT.md
-    - cmake-variants.TEMPLATE.json
-
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
   repositories:
