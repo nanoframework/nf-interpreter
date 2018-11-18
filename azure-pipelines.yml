@@ -1,5 +1,8 @@
 trigger:
   batch: true
+  branches:
+    include: 
+    - *
   paths:
     exclude:
     - .gitignore
@@ -11,6 +14,9 @@ trigger:
     - cmake-variants.TEMPLATE.json
 
 pr:
+  branches:
+    include: 
+    - *
   paths:
     exclude:
     - .gitignore
