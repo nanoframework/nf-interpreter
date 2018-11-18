@@ -2,7 +2,9 @@ trigger:
   batch: true
   branches:
     include: 
-    - *
+    - master
+    - develop/*
+    - release/*
   paths:
     exclude:
     - .gitignore
@@ -16,7 +18,9 @@ trigger:
 pr:
   branches:
     include: 
-    - *
+    - master
+    - develop/*
+    - release/*
   paths:
     exclude:
     - .gitignore
