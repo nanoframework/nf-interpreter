@@ -56,5 +56,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Adc =
     "Windows.Devices.Adc", 
     0x26B0229A,
     method_lookup,
-    { 1, 0, 2, 4 }
+    { 1, 0, 2, 9 }
 };
