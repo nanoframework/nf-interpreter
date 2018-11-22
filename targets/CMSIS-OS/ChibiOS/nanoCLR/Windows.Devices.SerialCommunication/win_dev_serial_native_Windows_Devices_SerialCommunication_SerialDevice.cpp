@@ -748,20 +748,19 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         // start sending data (DMA will read from the ring buffer)
         uartStartSend(palUart->UartDriver, length, (uint8_t*)palUart->TxRingBuffer.Reader());
-        
-        // done here, release the UART
-        uartReleaseBus(palUart->UartDriver);
     }
 
     while(eventResult)
     {
         // non-blocking wait allowing other threads to run while we wait for the Tx operation to complete
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_SerialPortOut, eventResult ));
+                    
+        // done here, release the UART
+        uartReleaseBus(palUart->UartDriver);
 
         if(eventResult)
         {
             // event occurred
-
             // get from the eval stack how many bytes were buffered to Tx
             length = stack.m_evalStack[1].NumericByRef().s4;
 
