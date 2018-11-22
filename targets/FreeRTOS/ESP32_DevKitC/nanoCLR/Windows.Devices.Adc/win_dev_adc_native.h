@@ -13,10 +13,10 @@
 
 struct Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel
 {
-    static const int FIELD___channelNumber = 1;
-    static const int FIELD___adcController = 2;
-    static const int FIELD___syncLock = 3;
-    static const int FIELD___disposedValue = 4;
+    static const int FIELD___syncLock = 1;
+    static const int FIELD___channelNumber = 2;
+    static const int FIELD___adcController = 3;
+    static const int FIELD___disposed = 4;
 
     NANOCLR_NATIVE_DECLARE(NativeReadValue___I4);
     NANOCLR_NATIVE_DECLARE(NativeDisposeChannel___VOID);
@@ -27,10 +27,10 @@ struct Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel
 
 struct Library_win_dev_adc_native_Windows_Devices_Adc_AdcController
 {
-    static const int FIELD_STATIC__s_deviceCollection = 0;
-
-    static const int FIELD___deviceId = 1;
-    static const int FIELD___channelMode = 2;
+    static const int FIELD___syncLock = 1;
+    static const int FIELD___controllerId = 2;
+    static const int FIELD___channelMode = 3;
+    static const int FIELD__s_deviceCollection = 4;
 
     NANOCLR_NATIVE_DECLARE(NativeOpenChannel___VOID__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetChannelCount___I4);
@@ -40,6 +40,16 @@ struct Library_win_dev_adc_native_Windows_Devices_Adc_AdcController
     NANOCLR_NATIVE_DECLARE(NativeGetResolutionInBits___I4);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
+
+    //--//
+
+};
+
+struct Library_win_dev_adc_native_Windows_Devices_Adc_AdcControllerManager
+{
+    static const int FIELD_STATIC___syncLock = 0;
+    static const int FIELD_STATIC__s_controllersCollection = 1;
+
 
     //--//
 
