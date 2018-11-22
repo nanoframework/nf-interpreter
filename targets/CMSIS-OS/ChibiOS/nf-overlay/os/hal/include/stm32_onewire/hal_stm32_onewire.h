@@ -8,10 +8,6 @@
 
 #if (HAL_USE_STM32_ONEWIRE == TRUE)
 
-#if defined(STM32F0xx_MCUCONF)
-#error "CAN'T ENABLE ONEWIRE FOR STM32F0 series"
-#endif
-
 /*===========================================================================*/
 /* Driver constants.                                                         */
 /*===========================================================================*/
@@ -60,6 +56,9 @@
 /*===========================================================================*/
 /* Driver data structures and types.                                         */
 /*===========================================================================*/
+
+// forward declarations
+typedef struct ONEWIREDriver ONEWIREDriver;
 
 /**
  * @brief   Driver state machine possible states.
