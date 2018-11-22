@@ -7,10 +7,9 @@
 #ifndef ONEWIRE_LLD_H
 #define ONEWIRE_LLD_H
 
-#include <stm32_registry.h>
-#include <string.h>
-
 #if (HAL_USE_STM32_ONEWIRE == TRUE)
+
+#include "hal_uart_lld.h"
 
 /*===========================================================================*/
 /* Driver constants.                                                         */

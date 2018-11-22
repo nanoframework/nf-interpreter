@@ -5,7 +5,6 @@
 
 #include "target_nf_devices_onewire_config.h"
 #include <hal.h>
-#include <onewire_lld.h>
 
 ///////////
 // UART6 //
@@ -14,7 +13,7 @@
 // pin configuration for UART6
 // port for TX pin is: GPIOC
 // TX pin: is GPIOC_6
-// GPIO alternate pin function is 7 (see "Table 9. STM32F405xx and STM32F407xx alternate function mapping" in STM32F405xx/STM32F407xx datasheet)
+// GPIO alternate pin function is 8 (see "Table 9. STM32F405xx and STM32F407xx alternate function mapping" in STM32F405xx/STM32F407xx datasheet)
 UART_CONFIG_PINS(6, GPIOC, 6, 8)
 
 // buffers

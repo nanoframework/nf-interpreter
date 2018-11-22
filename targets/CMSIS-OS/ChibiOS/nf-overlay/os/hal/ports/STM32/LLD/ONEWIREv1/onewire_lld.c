@@ -6,11 +6,19 @@
 
 
 #include <hal.h>
-#include "onewire_lld.h"
 
 #if (HAL_USE_STM32_ONEWIRE == TRUE)
 
 #include <target_nf_devices_onewire_config.h>
+#include <string.h>
+
+#if !NF_ONEWIRE_STM32_UART_USE_USART1 && !NF_ONEWIRE_STM32_UART_USE_USART2 &&  \
+    !NF_ONEWIRE_STM32_UART_USE_USART3 && !NF_ONEWIRE_STM32_UART_USE_USART4 &&  \
+    !NF_ONEWIRE_STM32_UART_USE_USART5 && !NF_ONEWIRE_STM32_UART_USE_USART6 &&  \
+    !NF_ONEWIRE_STM32_UART_USE_USART7 && !NF_ONEWIRE_STM32_UART_USE_USART8
+
+#error "1-Wire driver activated but no USART/UART peripheral assigned. Make sure to assign it @ target_nf_devices_onewire_config.h"
+#endif
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
