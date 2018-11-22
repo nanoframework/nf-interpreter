@@ -92,8 +92,6 @@ static THD_FUNCTION(I2CWorkingThread, arg)
         }
     }
 
-    i2cReleaseBus(palI2c->Driver);
-
     // fire event for I2C transaction complete
     Events_Set(SYSTEM_EVENT_FLAG_I2C_MASTER);
 
@@ -365,8 +363,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             }
             
             // because the bus access is shared, acquire the appropriate bus
-            i2cStart(palI2c->Driver, &palI2c->Configuration);
             i2cAcquireBus(palI2c->Driver);
+            i2cStart(palI2c->Driver, &palI2c->Configuration);
         }
 
         if(isLongRunningOperation)
@@ -385,7 +383,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
                 }
                 
                 // bump custom state
-                stack.m_customState = 2;                      
+                stack.m_customState = 2;
             }
         }
         else
@@ -411,8 +409,6 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
                     transactionResult = i2cMasterReceiveTimeout (palI2c->Driver, palI2c->Address, palI2c->ReadBuffer, palI2c->ReadSize, TIME_MS2I(20));
                 }
             }
-
-            i2cReleaseBus(palI2c->Driver);
         }    
 
         while(eventResult)
@@ -443,6 +439,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         {
             // event occurred
             // OR this is NOT a long running operation
+
+            i2cReleaseBus(palI2c->Driver);
 
             // create the return object (I2cTransferResult)
             // only at this point we are sure that there will be a return from this thread so it's OK to use the managed stack

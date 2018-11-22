@@ -62,6 +62,76 @@ void nanoHAL_Uninitialize()
     //     }
     // }   
 
+    // need to be sure that all mutexes for drivers that use them are released
+#if (HAL_USE_SPI == TRUE)
+
+    #if STM32_SPI_USE_SPI1
+    spiReleaseBus(&SPID1);
+    #endif
+    #if STM32_SPI_USE_SPI2
+    spiReleaseBus(&SPID2);
+    #endif
+    #if STM32_SPI_USE_SPI3
+    spiReleaseBus(&SPID3);
+    #endif
+    #if STM32_SPI_USE_SPI4
+    spiReleaseBus(&SPID4);
+    #endif
+    #if STM32_SPI_USE_SPI5
+    spiReleaseBus(&SPID5);
+    #endif
+    #if STM32_SPI_USE_SPI6
+    spiReleaseBus(&SPID6);
+    #endif
+
+#endif
+
+#if (HAL_USE_I2C == TRUE)
+
+    #if STM32_I2C_USE_I2C1
+    i2cReleaseBus(&I2CD1);
+    #endif
+    #if STM32_I2C_USE_I2C2
+    i2cReleaseBus(&I2CD1);
+    #endif
+    #if STM32_I2C_USE_I2C3
+    i2cReleaseBus(&I2CD3);
+    #endif
+    #if STM32_I2C_USE_I2C4
+    i2cReleaseBus(&I2CD4);
+    #endif
+
+#endif
+
+#if (HAL_USE_UART == TRUE)
+
+    #if NF_SERIAL_COMM_STM32_UART_USE_USART1
+    uartReleaseBus(&UARTD1);
+    #endif
+    #if NF_SERIAL_COMM_STM32_UART_USE_USART2
+    uartReleaseBus(&UARTD2);
+    #endif
+    #if NF_SERIAL_COMM_STM32_UART_USE_USART3
+    uartReleaseBus(&UARTD3);
+    #endif
+    #if NF_SERIAL_COMM_STM32_UART_USE_UART4
+    uartReleaseBus(&UARTD4);
+    #endif
+    #if NF_SERIAL_COMM_STM32_UART_USE_UART5
+    uartReleaseBus(&UARTD5);
+    #endif
+    #if NF_SERIAL_COMM_STM32_UART_USE_USART6
+    uartReleaseBus(&UARTD6);
+    #endif
+    #if NF_SERIAL_COMM_STM32_UART_USE_UART7
+    uartReleaseBus(&UARTD7);
+    #endif
+    #if NF_SERIAL_COMM_STM32_UART_USE_UART8
+    uartReleaseBus(&UARTD8);
+    #endif
+
+#endif
+
     // TODO need to call this but it's preventing the debug session from starting
     //Network_Uninitialize();
 

@@ -124,9 +124,6 @@ static void SpiCallback(SPIDriver *spip)
 
         spiUnselect(palSpi->Driver);
 
-        // Release the bus
-        spiReleaseBus(palSpi->Driver);
-
         // fire event for SPI transaction complete
         Events_Set( SYSTEM_EVENT_FLAG_SPI_MASTER );
     }
@@ -647,6 +644,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         
         if(eventResult)
         {
+            spiReleaseBus(palSpi->Driver);
+
             // event occurred
             if(palSpi->ReadSize > 0)
             {
