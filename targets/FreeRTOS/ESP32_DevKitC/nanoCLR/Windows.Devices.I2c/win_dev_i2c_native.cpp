@@ -62,7 +62,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_I2c =
 {
     "Windows.Devices.I2c", 
-    0x7F0ABA1C,
+    0x0C4EA1B2,
     method_lookup,
     { 1, 0, 2, 20 }
 };
