@@ -92,7 +92,7 @@ void nanoHAL_Uninitialize()
     i2cReleaseBus(&I2CD1);
     #endif
     #if STM32_I2C_USE_I2C2
-    i2cReleaseBus(&I2CD1);
+    i2cReleaseBus(&I2CD2);
     #endif
     #if STM32_I2C_USE_I2C3
     i2cReleaseBus(&I2CD3);
