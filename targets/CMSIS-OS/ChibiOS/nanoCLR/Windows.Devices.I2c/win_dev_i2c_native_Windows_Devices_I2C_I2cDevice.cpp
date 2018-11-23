@@ -160,15 +160,18 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
         // see the comments in the I2cDevice() constructor in managed code for details
         uint8_t busIndex = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
 
+        // config GPIO pins used by the I2C peripheral
         // init the PAL struct for this I2C bus and assign the respective driver
         // all this occurs if not already done
-        // why do we need this? because several I2cDevice objects can be created associated to the same bus just using different addresses
+        // why do we need to check if this is already done? because several I2cDevice objects can be created associated to the same bus just using different addresses
         switch (busIndex)
         {
     #if STM32_I2C_USE_I2C1
             case 1:
                 if(I2C1_PAL.Driver == NULL)
                 {
+                    ConfigPins_I2C1();
+
                     I2C1_PAL.Driver = &I2CD1;
                     palI2c = &I2C1_PAL;
                 }
@@ -178,6 +181,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
             case 2:
                 if(I2C2_PAL.Driver == NULL)
                 {
+                    ConfigPins_I2C2();
+
                     I2C2_PAL.Driver = &I2CD2;
                     palI2c = &I2C2_PAL;
                 }
@@ -187,6 +192,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
             case 3:
                 if(I2C3_PAL.Driver == NULL)
                 {
+                    ConfigPins_I2C3();
+
                     I2C3_PAL.Driver = &I2CD3;
                     palI2c = &I2C3_PAL;
                 }
@@ -196,6 +203,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
             case 4:
                 if(I2C4_PAL.Driver == NULL)
                 {
+                    ConfigPins_I2C4();
+
                     I2C4_PAL.Driver = &I2CD4;
                     palI2c = &I2C4_PAL;
                 }
@@ -498,33 +507,4 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
 
     }
     NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {
-       // declare the device selector string whose max size is "I2C1,I2C2,I2C3,I2C4," + terminator and init with the terminator
-       char deviceSelectorString[20 + 1] = { 0 };
-
-    #if STM32_I2C_USE_I2C1
-        strcat(deviceSelectorString, "I2C1,");
-    #endif
-    #if STM32_I2C_USE_I2C2
-        strcat(deviceSelectorString, "I2C2,");
-    #endif
-    #if STM32_I2C_USE_I2C3
-        strcat(deviceSelectorString, "I2C3,");
-    #endif
-    #if STM32_I2C_USE_I2C4
-        strcat(deviceSelectorString, "I2C4,");
-    #endif
-        // replace the last comma with a terminator
-       deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
-
-       // because the caller is expecting a result to be returned
-       // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
-       stack.SetResult_String(deviceSelectorString);
-    }
-    NANOCLR_NOCLEANUP_NOLABEL();
 }
