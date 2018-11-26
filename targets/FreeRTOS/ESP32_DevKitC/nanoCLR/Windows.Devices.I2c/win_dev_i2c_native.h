@@ -16,17 +16,15 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings
     static const int FIELD___busSpeed = 2;
     static const int FIELD___sharingMode = 3;
 
-
     //--//
 
 };
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cController
 {
-    static const int FIELD_STATIC___syncLock = 0;
-
-    static const int FIELD___controllerId = 1;
-    static const int FIELD__s_deviceCollection = 2;
+    static const int FIELD___syncLock = 1;
+    static const int FIELD___controllerId = 2;
+    static const int FIELD__s_deviceCollection = 3;
 
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
@@ -37,8 +35,8 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cController
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cControllerManager
 {
-    static const int FIELD_STATIC___syncLock = 1;
-    static const int FIELD_STATIC__s_controllersCollection = 2;
+    static const int FIELD_STATIC___syncLock = 0;
+    static const int FIELD_STATIC__s_controllersCollection = 1;
 
 
     //--//
@@ -47,11 +45,10 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cControllerManager
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice
 {
-    static const int FIELD_STATIC___syncLock = 3;
-
-    static const int FIELD___deviceId = 1;
-    static const int FIELD___connectionSettings = 2;
-    static const int FIELD___disposed = 3;
+    static const int FIELD___syncLock = 1;
+    static const int FIELD___deviceId = 2;
+    static const int FIELD___connectionSettings = 3;
+    static const int FIELD___disposed = 4;
 
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
