@@ -22,12 +22,12 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
         // Get channel from _channelNumber field
         int channelNumber = pThis[FIELD___channelNumber].NumericByRef().s4;
 
-        // need to get the deviceId for the ADC controller of this channel
+        // need to get the controllerId for the ADC controller of this channel
         // get pointer to AdcController field
         //CLR_RT_HeapBlock* adcController = pThis[FIELD___adcController].Dereference();
 
-        // get pointer to _deviceId field
-//       int adcNumber = adcController[Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::FIELD___deviceId].NumericByRef().s4;
+        // get pointer to _controllerId field
+//       int adcNumber = adcController[Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::FIELD___controllerId].NumericByRef().s4;
         int adcNumber = channelNumber <= 9 ? 1 : 2;
 
         if ( adcNumber == 1)

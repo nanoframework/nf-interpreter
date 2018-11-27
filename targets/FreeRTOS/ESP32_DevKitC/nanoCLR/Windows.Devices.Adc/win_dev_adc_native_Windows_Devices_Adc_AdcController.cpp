@@ -148,13 +148,13 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit
     NANOCLR_HEADER();
     {
         // Get device Id from argument
-        int deviceId = stack.Arg1().NumericByRef().s4;
+        int controllerId = stack.Arg1().NumericByRef().s4;
 
         // all required initialization for ADC are already handled
-        // this is only to check if the requested deviceId is available in hardware
+        // this is only to check if the requested controllerId is available in hardware
 
         // expect only 1
-        if(deviceId == 1)
+        if(controllerId == 1)
         {
             // we are OK
         }
