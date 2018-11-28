@@ -45,7 +45,7 @@
     <ClCompile Include="corlib_native_System_Globalization_DateTimeFormat.cpp" />
     <ClCompile Include="corlib_native_System_Guid.cpp" />
     <ClCompile Include="corlib_native_System_MarshalByRefObject.cpp" />
-    <ClCompile Include="corlib_native_System_Math.cpp" />
+    <ClCompile Include="corlib_native_System_MathInternal.cpp" />
     <ClCompile Include="corlib_native_System_MulticastDelegate.cpp" />
     <ClCompile Include="corlib_native_System_Number.cpp" />
     <ClCompile Include="corlib_native_System_Object.cpp" />
@@ -183,7 +183,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\..\HAL\Include;..\..\PAL\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

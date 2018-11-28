@@ -123,21 +123,21 @@ jobs:
   - template: azure-pipelines-templates/publish-bintray.yml
 
 #################
-## WIN32 
-# - job: Build_WIN32_nanoCLR
-#   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-#   condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
-#   pool:
-#     vmImage: 'VS2017-Win2016'
+# WIN32 
+- job: Build_WIN32_nanoCLR
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
+  pool:
+    vmImage: 'VS2017-Win2016'
 
-#   steps:
-#   - task: NuGetToolInstaller@0
+  steps:
+  - task: NuGetToolInstaller@0
 
-#   - task: VSBuild@1
-#     inputs:
-#       solution: 'targets\os\win32\nanoCLR.sln'
-#       platform: 'x86'
-#       configuration: 'Release'
+  - task: VSBuild@1
+    inputs:
+      solution: 'targets\os\win32\nanoCLR.sln'
+      platform: 'x86'
+      configuration: 'Release'
 
 #######################
 # generate change log
