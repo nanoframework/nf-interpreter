@@ -22,6 +22,7 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Hardware.h>
 #include <nanoCLR_Application.h>
+#include <base64.h>
 
 #include "nanoCLR_ParseOptions.h"
 

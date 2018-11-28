@@ -56,6 +56,14 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___Windows
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(CLR_RT_StackFrame& stack)
+{
+	NANOCLR_HEADER();
+	{
+	}
+	NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -178,5 +186,12 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
 		}
 
 	}
+	NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlternateFunction___VOID__I4(CLR_RT_StackFrame& stack)
+{
+	NANOCLR_HEADER();
+
 	NANOCLR_NOCLEANUP();
 }

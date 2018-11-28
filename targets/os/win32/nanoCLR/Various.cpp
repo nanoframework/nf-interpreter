@@ -76,6 +76,18 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
 	return true;
 }
 
+int mbedtls_base64_encode(unsigned char *dst, size_t dlen, size_t *olen,
+	const unsigned char *src, size_t slen)
+{
+	return 0;
+}
+
+int mbedtls_base64_decode(unsigned char *dst, size_t dlen, size_t *olen,
+	const unsigned char *src, size_t slen)
+{
+	return 0;
+}
+
 //const ConfigurationSector g_ConfigurationSector =
 //{
 //    // ConfigurationLength
