@@ -1,18 +1,28 @@
 trigger:
   branches:
-    include: 
+    include:
     - master
     - develop/*
     - release/*
+    - refs/tags/*
   paths:
     exclude:
+    - /*.md
     - .gitignore
-    - README.md
-    - CHANGELOG.md
-    - LICENSE.md
-    - CONTRIBUTING.md
-    - CODE_OF_CONDUCT.md
+    - appveyor.yml
     - cmake-variants.TEMPLATE.json
+  # waiting for feature to become available
+  # tags:
+  #   include:
+  #   - v/*
+
+pr:
+  branches:
+    include:
+    - master
+    - develop
+    - release/*
+  autoCancel: true
 
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
