@@ -55,5 +55,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm3
     "nanoFramework.Hardware.Stm32", 
     0x0427DBEE,
     method_lookup,
-    { 1, 0, 2, 17 }
+    { 1, 0, 2, 19 }
 };
