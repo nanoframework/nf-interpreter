@@ -39,9 +39,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory::GetSize___STATIC__I4,
     NULL,
     NULL,
-    NULL,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAlarm___STATIC__mscorlibSystemDateTime,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::Native_RTC_SetAlarm___STATIC__VOID__U1__U1__U1__U1,
-    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::Native_RTC_GetAlarm___STATIC__I8,
     NULL,
     NULL,
     NULL,
@@ -53,7 +52,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm32 =
 {
     "nanoFramework.Hardware.Stm32", 
-    0x0427DBEE,
+    0xFFC9E917,
     method_lookup,
-    { 1, 0, 2, 19 }
+    { 1, 0, 2, 20 }
 };
