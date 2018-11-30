@@ -898,7 +898,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x49ABE593,
+    0x7CCFBEC1,
     method_lookup,
-    { 1, 0, 6, 10 }
+    { 1, 0, 6, 19 }
 };
