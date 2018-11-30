@@ -45,15 +45,26 @@ jobs:
 
   # get commint message
   - powershell: |
-      # check if commit message contains [version update] AND was submitted by "nfbot"
-      if ( ($env:Build_SourceVersionMessage -like "*[version update]*") -and ($env:Build_RequestedForId -match "nfbot") )
+
+      # get commit details, if this is a PR
+      if($env:Build_SourceBranch -like "refs/pull*")
       {
-        echo "##vso[task.setvariable variable=IS_VERSION_UPDATE;isOutput=true]true"  
+        $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
+
+        if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
+        {
+          echo "##vso[task.setvariable variable=IS_VERSION_UPDATE;isOutput=true]true"  
+        }
+        else
+        {
+          echo "##vso[task.setvariable variable=IS_VERSION_UPDATE;isOutput=true]false"  
+        }
       }
       else
       {
         echo "##vso[task.setvariable variable=IS_VERSION_UPDATE;isOutput=true]false"  
       }
+
     name: BuildOptions
     displayName: Evaluate build options
 
@@ -169,7 +180,12 @@ jobs:
 # WIN32 
 - job: Build_WIN32_nanoCLR
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
+  # condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
+  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.IS_VERSION_UPDATE'], true ) ))
+
+  dependsOn:
+  - Check_Build_Options
+
   pool:
     vmImage: 'VS2017-Win2016'
 
