@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2018 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -26,5 +26,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Devices_OneWi
     "nanoFramework.Devices.OneWire", 
     0x4BFAF309,
     method_lookup,
-    { 1, 0, 0, 10 }
+    { 1, 0, 0, 14 }
 };
