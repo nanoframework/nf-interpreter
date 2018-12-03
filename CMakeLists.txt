@@ -375,20 +375,6 @@ endif()
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
 
 #################################################################
-# enables filesysytem support in nanoCLR
-# (default is OFF so the filesystem is NOT supported)
-option(NF_FEATURE_USE_FILESYSTEM "option to use filesystem")
-
-if(NF_FEATURE_USE_FILESYSTEM)
-    set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
-    set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
-    message(STATUS "Support for filesystem enabled")
-else()
-    set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
-    set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
-endif()
-
-#################################################################
 
 
 #################################################################
@@ -521,6 +507,21 @@ if(USE_NETWORKING_OPTION)
 else()
     set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
     message(STATUS "Support for networking IS NOT enabled")
+endif()
+
+#################################################################
+
+
+#################################################################
+# enables filesysytem support in nanoCLR
+
+if(API_Windows.Storage)
+    set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
+    set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
+    message(STATUS "Support for filesystem enabled")
+else()
+    set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
+    set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
 endif()
 
 #################################################################
