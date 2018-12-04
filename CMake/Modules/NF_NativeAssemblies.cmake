@@ -9,6 +9,7 @@
 # and the namespace designation is 'Windows.Devices.Gpio'
 ###########################################################################################
 
+option(API_nanoFramework.Devices.Can            "option for nanoFramework.Devices.Can")
 option(API_nanoFramework.Devices.OneWire        "option for nanoFramework.Devices.OneWire")
 option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
 option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
