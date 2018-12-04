@@ -46,6 +46,12 @@
 // #if !defined(HAL_USE_CAN) || defined(__DOXYGEN__)
 // #define HAL_USE_CAN                         FALSE
 // #endif
+=======
+// this option is set at target_platform.h (from config file)
+// #if !defined(HAL_USE_CAN) || defined(__DOXYGEN__)
+// #define HAL_USE_CAN                         FALSE
+// #endif
+>>>>>>> f6a685d5... Add native support for CAN Bus
 
 /**
  * @brief   Enables the cryptographic subsystem.
