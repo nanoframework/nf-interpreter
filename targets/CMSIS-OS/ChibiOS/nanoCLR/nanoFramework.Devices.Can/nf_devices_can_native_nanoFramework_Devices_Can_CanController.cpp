@@ -19,6 +19,8 @@ enum CanEvent
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
+typedef Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage ManagedCanMessage;
+
 // CAN receiver thread
 static THD_FUNCTION(CanReceiverThread, arg)
 {
@@ -168,10 +170,16 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
 {
     NANOCLR_HEADER();
 
+    CLR_RT_TypeDef_Index    canMessageTypeDef;
+    CLR_RT_HeapBlock*       canMessage = NULL;
+    CLR_RT_HeapBlock*       hbObj = NULL;
+    
     CANRxFrame canFrame;
     NF_PAL_CAN* palCan;
     uint8_t controllerIndex;
     size_t messageCount = 0;
+
+    CLR_RT_HeapBlock& top   = stack.PushValue();
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -207,6 +215,49 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
     if(messageCount == 1)
     {
         // we have a message
+        
+        // find <CanMessage> type, don't bother checking the result as the type exists for sure
+        g_CLR_RT_TypeSystem.FindTypeDef( "CanMessage", "nanoFramework.Devices.Can", canMessageTypeDef );
+
+        // create an instance of <StorageFolder>
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*canMessage, canMessageTypeDef));
+
+        // dereference the object in order to reach its fields
+        hbObj = canMessage->Dereference();
+        
+        // get pointer to each managed field and set appropriate value 
+        CLR_RT_HeapBlock&  isSIDFieldRef = hbObj[ ManagedCanMessage::FIELD___isSID ];
+        // CLR_INT64* pRes = (CLR_INT64*)&fieldRef.NumericByRef().u1;
+
+        uint8_t* p = (uint8_t*)&isSIDFieldRef.NumericByRef().u1;
+        *p = canFrame.IDE;
+
+        CLR_RT_HeapBlock&  idFieldRef = hbObj[ ManagedCanMessage::FIELD___id ];
+        uint32_t* p32 = (uint32_t*)&idFieldRef.NumericByRef().u4;
+
+        if(canFrame.IDE == 0)
+        {
+            *p32 = canFrame.SID;
+        }
+        else
+        {
+            *p32 = canFrame.EID;
+        }
+
+        if(canFrame.data8)
+        {
+            CLR_RT_HeapBlock_Array* dataArrayField = hbObj[ ManagedCanMessage::FIELD___byteMessage ].DereferenceArray();
+            // create an array of <bytes>
+            NANOCLR_CHECK_HRESULT( CLR_RT_HeapBlock_Array::CreateInstance( *dataArrayField, 8, g_CLR_RT_WellKnownTypes.m_UInt8 ) );
+            // get a pointer to the first object in the array
+            uint8_t* dataBuffer = dataArrayField->GetFirstElement();
+            memcpy(dataBuffer, canFrame.data8, 8);
+        }
+    }
+    else
+    {
+        // no more messages, return null
+        top.SetObjectReference( NULL );
     }
 
     NANOCLR_NOCLEANUP();
