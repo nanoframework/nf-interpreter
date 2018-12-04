@@ -4,8 +4,7 @@
 //
 
 #include <Target_Windows_Storage.h>
-
-#include <swo.h>
+#include <target_windows_storage_config.h>
 
 static FATFS SDC_FS;
 static SDCConfig SDC_CFG;
@@ -79,9 +78,6 @@ static void StartCardMonitor(void *p)
 // Card insertion event handler
 static void InsertHandler(eventid_t id)
 {
-  // Temporary to indicate this event being fired
-  palSetLine(LINE_LED1_RED);
-  
   FRESULT err;
 
   (void)id;
@@ -89,32 +85,23 @@ static void InsertHandler(eventid_t id)
   /*
    * On insertion SDC initialization and FS  mount.
    */
-  if (sdcConnect(&SDCD2))
+  if (sdcConnect(&SD_CARD_DRIVER))
   {
     return;
   }
-
-  // Temporary to indicate this event being fired
-  SwoPrintString("\r\nFatFs: Initializing SD completed.\r\n");
 
   err = f_mount(&SDC_FS, "D:", 1);
 
   if (err != FR_OK)
   {
-    SwoPrintString("Error Mounting Drive");
     osDelay(1000);
 
-    sdcDisconnect(&SDCD2);
+    sdcDisconnect(&SD_CARD_DRIVER);
     return;
   }
   else
   {
-    SwoPrintString("\r\nFatFs: Mount completed...\r\n");
-
     fileSystemReady = TRUE;
-    // Temporary: arriving here means we have an initialized and mounted SD Card
-    // Indicated by a green LED
-    palSetLine(LINE_LED2_GREEN);
   }
 
   if (fileSystemReady)
@@ -124,15 +111,13 @@ static void InsertHandler(eventid_t id)
     err = f_open(&fileObj, "TestMessage.txt", FA_CREATE_ALWAYS);
     f_close(&fileObj);
       
-      if (err != FR_OK)
+    if (err != FR_OK)
     {
-      SwoPrintString("Error Creating File");
-      
       osDelay(1000);
     }
     else
     {
-      SwoPrintString("\r\nFatFs: file created...\r\n");
+
     }
     //******* End Test
   }
@@ -142,11 +127,8 @@ static void InsertHandler(eventid_t id)
 static void RemoveHandler(eventid_t id)
 {
   (void)id;
-
-  // To indicate we have ejected the sd card
-  palClearLine(LINE_LED1_RED);
   
-  sdcDisconnect(&SDCD2);
+  sdcDisconnect(&SD_CARD_DRIVER);
 
   fileSystemReady = FALSE;
 }
@@ -157,10 +139,10 @@ event_listener_t eventListener0, eventListener1;
 void Target_FileSystemInit()
 {
   // activates the  SDC driver 2 using default configuration
-  sdcStart(&SDCD2, &SDC_CFG);
+  sdcStart(&SD_CARD_DRIVER, &SDC_CFG);
 
   // activates the card insertion monitor
-  StartCardMonitor(&SDCD2);
+  StartCardMonitor(&SD_CARD_DRIVER);
 
   chEvtRegister(&insertedEvent, &eventListener0, 0);
   chEvtRegister(&removedEvent, &eventListener1, 1);

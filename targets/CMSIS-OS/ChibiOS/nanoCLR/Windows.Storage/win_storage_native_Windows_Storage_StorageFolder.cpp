@@ -3,8 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_storage_native.h"
 #include <ff.h>
+#include "win_storage_native.h"
+#include <target_windows_storage_config.h>
 
 
 // FatFs define for size of file name members
@@ -56,7 +57,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
     hbObj->SetObjectReference( NULL );
 
     // is there an SD card inserted and is driver in ready state?
-    if(sdc_lld_is_card_inserted(&SDCD2) && SDCD2.state == BLK_READY)
+    if(sdc_lld_is_card_inserted(&SD_CARD_DRIVER) && SD_CARD_DRIVER.state == BLK_READY)
     {
         driveCount++;
     }
@@ -65,7 +66,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
     // is there an USB thumb driver inserted?
     // driveCount++;
 
-    if(sdc_lld_is_card_inserted(&SDCD2) && SDCD2.state == BLK_READY)
+    if(sdc_lld_is_card_inserted(&SD_CARD_DRIVER) && SD_CARD_DRIVER.state == BLK_READY)
     {
         // find <StorageFolder> type definition, don't bother checking the result as it exists for sure
         g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storateFolderTypeDef );
@@ -147,7 +148,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
     
     // is there an SD card inserted and is driver in ready state?
-    if(!sdc_lld_is_card_inserted(&SDCD2) || SDCD2.state != BLK_READY)
+    if(!sdc_lld_is_card_inserted(&SD_CARD_DRIVER) || SD_CARD_DRIVER.state != BLK_READY)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
     }
