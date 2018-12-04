@@ -42,9 +42,10 @@
 /**
  * @brief   Enables the CAN subsystem.
  */
-#if !defined(HAL_USE_CAN) || defined(__DOXYGEN__)
-#define HAL_USE_CAN                         FALSE
-#endif
+// this option is set at target_platform.h (from config file)
+// #if !defined(HAL_USE_CAN) || defined(__DOXYGEN__)
+// #define HAL_USE_CAN                         FALSE
+// #endif
 
 /**
  * @brief   Enables the cryptographic subsystem.

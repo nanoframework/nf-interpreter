@@ -44,4 +44,7 @@
 // set when watchod is enabled
 #define HAL_USE_WDG @HAL_USE_WDG_OPTION@
 
+// enable CAN
+#define HAL_USE_CAN @HAL_USE_CAN_OPTION@
+
 #endif /* _TARGET_CHIBIOS_NANOCLR_H_ */
