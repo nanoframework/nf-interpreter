@@ -84,6 +84,12 @@ macro(ParseNativeAssemblies)
         PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
     endif()
 
+    # nanoFramework.Devices.Can
+    if(API_nanoFramework.Devices.Can)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Devices.Can")
+    endif()
+
     # nanoFramework.Devices.OneWire
     if(API_nanoFramework.Devices.OneWire)
         ##### API name here (doted name)
