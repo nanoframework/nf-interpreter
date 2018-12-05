@@ -24,62 +24,97 @@ typedef Library_nf_devices_can_native_nanoFramework_Devices_Can_CanSettings CanS
 typedef Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage ManagedCanMessage;
 
 // CAN receiver thread
-static THD_FUNCTION(CanReceiverThread, arg)
-{
-    NF_PAL_CAN* palCan = (NF_PAL_CAN*)arg;
-    event_listener_t eventListener;
-    CANRxFrame rxMsg;
-    int controllerId;
+// static THD_FUNCTION(CanReceiverThread, arg)
+// {
+//     NF_PAL_CAN* palCan = (NF_PAL_CAN*)arg;
+//     event_listener_t eventListener;
+//     CANRxFrame rxMsg;
+//     int controllerId;
 
-  #if STM32_CAN_USE_CAN1
-        if(palCan->Driver == &CAND1)
-        {
-           controllerId = 1;
-        }
-  #endif
-  #if STM32_CAN_USE_CAN2
-        if(palCan->Driver == &CAND2)
-        {
-           controllerId = 2;
-        }
-  #endif
+//   #if STM32_CAN_USE_CAN1
+//         if(palCan->Driver == &CAND1)
+//         {
+//            controllerId = 1;
+//         }
+//   #endif
+//   #if STM32_CAN_USE_CAN2
+//         if(palCan->Driver == &CAND2)
+//         {
+//            controllerId = 2;
+//         }
+//   #endif
 
-    // set event listener for CAN RX
-    chEvtRegister(&palCan->Driver->rxfull_event, &eventListener, 0);
+//     // set event listener for CAN RX
+//     chEvtRegister(&palCan->Driver->rxfull_event, &eventListener, 0);
     
-    // wrap working code inside this call to process abort request with chThdTerminate()
-    while (!chThdShouldTerminateX())
-    {
-        if (chEvtWaitAnyTimeout(ALL_EVENTS, TIME_MS2I(100)) == 0)
-        {
-            continue;
-        }
+//     // wrap working code inside this call to process abort request with chThdTerminate()
+//     while (!chThdShouldTerminateX())
+//     {
+//         if (chEvtWaitAnyTimeout(ALL_EVENTS, TIME_MS2I(100)) == 0)
+//         {
+//             continue;
+//         }
 
-        while (canReceiveTimeout(palCan->Driver, CAN_ANY_MAILBOX, &rxMsg, TIME_IMMEDIATE) == MSG_OK)
-        {
-            // got message
-            uint32_t id = rxMsg.EID;
-            uint8_t array[8];
-            memcpy(array, rxMsg.data8, 8);
+        
+//         while (canReceiveTimeout(palCan->Driver, CAN_ANY_MAILBOX, &rxMsg, TIME_IMMEDIATE) == MSG_OK)
+//         {
+//             // got message
             
-            // store message into the CAN buffer
-            // don't care about the success of the operation, if it's full we are droping the message anyway
-            palCan->MsgRingBuffer.Push(rxMsg);
+//             // store message into the CAN buffer
+//             // don't care about the success of the operation, if it's full we are droping the message anyway
+//             palCan->MsgRingBuffer.Push(rxMsg);
 
-            // fire event for CAN message received
-            PostManagedEvent( EVENT_CAN, 0, controllerId, CanEvent_MessageReceived );
+//             // fire event for CAN message received
+//             PostManagedEvent( EVENT_CAN, 0, controllerId, CanEvent_MessageReceived );
+//        }
+//     }
 
-            (void)id;
-            (void)array;
-       }
+//     // unregister CAN RX event
+//     chEvtUnregister(&palCan->Driver->rxfull_event, &eventListener);
+
+//     // need to set thread exit code before leaving
+//     chThdExit(MSG_OK);
+// }
+
+static void RxMessage(CANDriver *canp, uint32_t flags) 
+{
+    NATIVE_INTERRUPT_START
+
+    NF_PAL_CAN* palCan;
+    uint8_t controllerId = 0;
+    CANRxFrame rxMsg;
+
+    (void)flags;
+
+    #if STM32_CAN_USE_CAN1
+    if (canp == &CAND1)
+    {
+        palCan = &Can1_PAL;
+        controllerId = 1;
+    }
+    #endif
+    #if STM32_CAN_USE_CAN1
+    if (canp == &CAND2)
+    {
+        palCan = &Can2_PAL;
+        controllerId = 2;
+    }
+    #endif
+  
+    while (canReceiveTimeout(palCan->Driver, CAN_ANY_MAILBOX, &rxMsg, TIME_IMMEDIATE) == MSG_OK)
+    {
+        // got message
+        
+        // store message into the CAN buffer
+        // don't care about the success of the operation, if it's full we are droping the message anyway
+        palCan->MsgRingBuffer.Push(rxMsg);
+
+        // fire event for CAN message received
+        PostManagedEvent( EVENT_CAN, 0, controllerId, CanEvent_MessageReceived );
     }
 
-    // unregister CAN RX event
-    chEvtUnregister(&palCan->Driver->rxfull_event, &eventListener);
-    // need to set thread exit code before leaving
-    chThdExit(MSG_OK);
+    NATIVE_INTERRUPT_END
 }
-
 
 /////////////////////////////////////////////////////////
 // CAN PAL strucs delcared in nf_devices_can_native.h  //
@@ -244,24 +279,17 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
 
     messageCount = palCan->MsgRingBuffer.Pop(&canFrame, 1);
 
+    // find <CanMessage> type, don't bother checking the result as the type exists for sure
+    g_CLR_RT_TypeSystem.FindTypeDef( "CanMessage", "nanoFramework.Devices.Can", canMessageTypeDef );
 
-    messageCount = palCan->MsgRingBuffer.Pop(&canFrame, 1);
+    // create an instance of <StorageFolder>
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), canMessageTypeDef));
 
+    canMessage = stack.TopValue().Dereference();
 
     if(messageCount == 1)
     {
         // we have a message
-        
-        // find <CanMessage> type, don't bother checking the result as the type exists for sure
-        g_CLR_RT_TypeSystem.FindTypeDef( "CanMessage", "nanoFramework.Devices.Can", canMessageTypeDef );
-
-        // create an instance of <StorageFolder>
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), canMessageTypeDef));
-
-        canMessage = stack.TopValue().Dereference();
-
-        // dereference the object in order to reach its fields
-        // hbObj = canMessage->Dereference();
         
         // get pointer to each managed field and set appropriate value 
         CLR_RT_HeapBlock&  isSIDFieldRef = canMessage[ ManagedCanMessage::FIELD___isSID ];
@@ -296,9 +324,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
     else
     {
         // no more messages, return null
-        CLR_RT_HeapBlock& top = stack.PushValue();
-        top.Dereference()->SetObjectReference( NULL );
-        stack.SetResult_Boolean(false);
+        stack.SetResult_Object(NULL);
     }
 
     NANOCLR_NOCLEANUP();
@@ -665,6 +691,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
                 ConfigPins_CAN1();
                 Can1_PAL.Driver = &CAND1;
                 palCan = &Can1_PAL;
+                palCan->Driver->rxfull_cb = RxMessage;
                 break;
     #endif
     #if STM32_CAN_USE_CAN2
@@ -673,6 +700,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
                 ConfigPins_CAN2();
                 Can2_PAL.Driver = &CAND2;
                 palCan = &Can2_PAL;
+                palCan->Driver->rxfull_cb = RxMessage;
                 break;
     #endif
             default:
@@ -727,8 +755,8 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
                 // there is someone listening on the managed end
 
                 // create rx thread
-                palCan->ReceiverThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(256),
-                                            "CAN1RT", NORMALPRIO, CanReceiverThread, palCan);
+                // palCan->ReceiverThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(256),
+                //                             "CAN1RT", NORMALPRIO, CanReceiverThread, palCan);
             }
             else
             {
@@ -756,8 +784,8 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
                 // there is someone listening on the managed end
 
                 // create rx thread
-                palCan->ReceiverThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(256),
-                                            "CAN2RT", NORMALPRIO, CanReceiverThread, palCan);
+                // palCan->ReceiverThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(256),
+                //                             "CAN2RT", NORMALPRIO, CanReceiverThread, palCan);
             }
             else
             {
