@@ -19,6 +19,8 @@ enum CanEvent
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
+// define these types here to make it shorter and improve code readability
+typedef Library_nf_devices_can_native_nanoFramework_Devices_Can_CanSettings CanSettings;
 typedef Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage ManagedCanMessage;
 
 // CAN receiver thread
@@ -56,6 +58,9 @@ static THD_FUNCTION(CanReceiverThread, arg)
         while (canReceiveTimeout(palCan->Driver, CAN_ANY_MAILBOX, &rxMsg, TIME_IMMEDIATE) == MSG_OK)
         {
             // got message
+            uint32_t id = rxMsg.EID;
+            uint8_t array[8];
+            memcpy(array, rxMsg.data8, 8);
             
             // store message into the CAN buffer
             // don't care about the success of the operation, if it's full we are droping the message anyway
@@ -63,12 +68,14 @@ static THD_FUNCTION(CanReceiverThread, arg)
 
             // fire event for CAN message received
             PostManagedEvent( EVENT_CAN, 0, controllerId, CanEvent_MessageReceived );
-        }
+
+            (void)id;
+            (void)array;
+       }
     }
 
     // unregister CAN RX event
     chEvtUnregister(&palCan->Driver->rxfull_event, &eventListener);
-
     // need to set thread exit code before leaving
     chThdExit(MSG_OK);
 }
@@ -84,52 +91,77 @@ static THD_FUNCTION(CanReceiverThread, arg)
     NF_PAL_CAN Can2_PAL;
 #endif
 
-// define this type here to make it shorter and improve code readability
-typedef Library_nf_devices_can_native_nanoFramework_Devices_Can_CanSettings CanSettings;
-
 HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::WriteMessage___VOID__nanoFrameworkDevicesCanCanMessage( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
-        // NF_PAL_CAN* palCan = NULL;
         uint32_t id;
         bool isSID, isDataFrame;
         CLR_RT_HeapBlock_Array* message;
-        CLR_UINT8* msgArray;
+
         CANTxFrame txmsg;
         uint8_t msgLength = 0;
+        uint8_t dataSize = 0;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        CLR_RT_HeapBlock* pMessage = stack.Arg0().Dereference();
+        CLR_RT_HeapBlock* pMessage = stack.Arg1().Dereference();
         
         // get controller index
         uint8_t controllerIndex = (uint8_t)(pThis[ FIELD___controllerId ].NumericByRef().s4);
 
-        // dereference tx parameters
+        // dereference message fields
         id = (uint32_t)(pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___id ].NumericByRef().u4);
         isSID = (bool)(pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___isSID ].NumericByRefConst().u1 != 0);
         isDataFrame = (bool)(pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___isDataFrame ].NumericByRefConst().u1 != 0);
+
+        // need to handle message data differently because it's one of the 4 possible types (byte, short, int, long)
         message = pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___byteMessage ].DereferenceArray();
-        msgLength = 8;
+
+        if(message != NULL)
+        {
+            // BYTE -> 1 byte
+            dataSize = 1;
+
+            // get message lenght
+            msgLength = dataSize * message->m_numOfElements;
+            memcpy(txmsg.data8, (uint8_t*)message->GetFirstElement(), msgLength);
+        }
         if(message == NULL)
         {
             message = pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___uShortMessage ].DereferenceArray();
-            msgLength = 4;
+            // INT16 -> 2 bytes
+            dataSize = 2;
+
+            // get message lenght
+            msgLength = dataSize * message->m_numOfElements;
+            memcpy(txmsg.data16, (uint16_t*)message->GetFirstElement(), msgLength);
         }
         if(message == NULL)
         {
             message = pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___uIntMessage ].DereferenceArray();
-            msgLength = 2;
+            // INT32 -> 4 bytes
+            dataSize = 4;
+
+            // get message lenght
+            msgLength = dataSize * message->m_numOfElements;
+            memcpy(txmsg.data32, (uint32_t*)message->GetFirstElement(), msgLength);
         }
         if(message == NULL)
         {
             message = pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___uLongMessage ].DereferenceArray();
-            msgLength = 1;
-        }
-        FAULT_ON_NULL(message);
-        msgArray = message->GetFirstElement();
+            // LONG -> 8 bytes
+            dataSize = 8;
 
+            // get message lenght
+            msgLength = dataSize * message->m_numOfElements;
+            memcpy(txmsg.data64, (uint64_t*)message->GetFirstElement(), msgLength);
+        }
+        
+        // COMEMTS COMENTS + COMENTS
+        FAULT_ON_NULL(message);
+
+        
         if(isSID)
         {
             txmsg.IDE = CAN_IDE_STD;
@@ -142,18 +174,17 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::W
         }
         txmsg.RTR = isDataFrame ? CAN_RTR_DATA : CAN_RTR_REMOTE;
         txmsg.DLC = msgLength;
-        memcpy(&msgArray[0], &txmsg.data8[0], msgLength);
 
         switch (controllerIndex)
         {
     #if STM32_CAN_USE_CAN1
             case 1:
-                canTransmit(&CAND1, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
+                canTransmit(Can1_PAL.Driver, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
                 break;
     #endif
     #if STM32_CAN_USE_CAN2
             case 2:
-                canTransmit(&CAND2, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
+                canTransmit(Can2_PAL.Driver, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
                 break;
     #endif
             default:
@@ -172,14 +203,12 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
 
     CLR_RT_TypeDef_Index    canMessageTypeDef;
     CLR_RT_HeapBlock*       canMessage = NULL;
-    CLR_RT_HeapBlock*       hbObj = NULL;
+    // CLR_RT_HeapBlock*       hbObj = NULL;
     
     CANRxFrame canFrame;
     NF_PAL_CAN* palCan;
     uint8_t controllerIndex;
     size_t messageCount = 0;
-
-    CLR_RT_HeapBlock& top   = stack.PushValue();
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -210,7 +239,14 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
             break;
     }
 
+    // create return value
+    // stack.PushValue();
+
     messageCount = palCan->MsgRingBuffer.Pop(&canFrame, 1);
+
+
+    messageCount = palCan->MsgRingBuffer.Pop(&canFrame, 1);
+
 
     if(messageCount == 1)
     {
@@ -220,19 +256,21 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
         g_CLR_RT_TypeSystem.FindTypeDef( "CanMessage", "nanoFramework.Devices.Can", canMessageTypeDef );
 
         // create an instance of <StorageFolder>
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*canMessage, canMessageTypeDef));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), canMessageTypeDef));
+
+        canMessage = stack.TopValue().Dereference();
 
         // dereference the object in order to reach its fields
-        hbObj = canMessage->Dereference();
+        // hbObj = canMessage->Dereference();
         
         // get pointer to each managed field and set appropriate value 
-        CLR_RT_HeapBlock&  isSIDFieldRef = hbObj[ ManagedCanMessage::FIELD___isSID ];
+        CLR_RT_HeapBlock&  isSIDFieldRef = canMessage[ ManagedCanMessage::FIELD___isSID ];
         // CLR_INT64* pRes = (CLR_INT64*)&fieldRef.NumericByRef().u1;
 
         uint8_t* p = (uint8_t*)&isSIDFieldRef.NumericByRef().u1;
         *p = canFrame.IDE;
 
-        CLR_RT_HeapBlock&  idFieldRef = hbObj[ ManagedCanMessage::FIELD___id ];
+        CLR_RT_HeapBlock&  idFieldRef = canMessage[ ManagedCanMessage::FIELD___id ];
         uint32_t* p32 = (uint32_t*)&idFieldRef.NumericByRef().u4;
 
         if(canFrame.IDE == 0)
@@ -246,18 +284,21 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
 
         if(canFrame.data8)
         {
-            CLR_RT_HeapBlock_Array* dataArrayField = hbObj[ ManagedCanMessage::FIELD___byteMessage ].DereferenceArray();
+            CLR_RT_HeapBlock& dataArrayField = canMessage[ ManagedCanMessage::FIELD___byteMessage ];
             // create an array of <bytes>
-            NANOCLR_CHECK_HRESULT( CLR_RT_HeapBlock_Array::CreateInstance( *dataArrayField, 8, g_CLR_RT_WellKnownTypes.m_UInt8 ) );
+            NANOCLR_CHECK_HRESULT( CLR_RT_HeapBlock_Array::CreateInstance( dataArrayField, 8, g_CLR_RT_WellKnownTypes.m_UInt8 ) );
+
             // get a pointer to the first object in the array
-            uint8_t* dataBuffer = dataArrayField->GetFirstElement();
-            memcpy(dataBuffer, canFrame.data8, 8);
+            CLR_UINT8* dataBuffer = (CLR_UINT8*)(dataArrayField.DereferenceArray()->GetFirstElement());
+            memcpy(dataBuffer, &canFrame.data8[0], 8);
         }
     }
     else
     {
         // no more messages, return null
-        top.SetObjectReference( NULL );
+        CLR_RT_HeapBlock& top = stack.PushValue();
+        top.Dereference()->SetObjectReference( NULL );
+        stack.SetResult_Boolean(false);
     }
 
     NANOCLR_NOCLEANUP();
@@ -603,6 +644,8 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
 {
     NANOCLR_HEADER();
     {
+        NF_PAL_CAN* palCan = NULL;
+
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
         
@@ -618,38 +661,18 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
         {
     #if STM32_CAN_USE_CAN1
             case 1:
+                Init_Can1();
+                ConfigPins_CAN1();
                 Can1_PAL.Driver = &CAND1;
-                // palCan = &Can1_PAL;
-
-                // build CAN config
-                Can1_PAL.Configuration = {
-                    CAN_MCR_ABOM | CAN_MCR_AWUM | CAN_MCR_TXFP,
-                    CAN_BTR_LBKM | 
-                    CAN_BTR_SJW(pConfig[ CanSettings::FIELD___syncJumpWidth ].NumericByRef().u4) | 
-                    CAN_BTR_TS2(pConfig[ CanSettings::FIELD___phaseSegment2 ].NumericByRef().u4) |
-                    CAN_BTR_TS1(pConfig[ CanSettings::FIELD___phaseSegment1 ].NumericByRef().u4) | 
-                    CAN_BTR_BRP(pConfig[ CanSettings::FIELD___baudRatePrescaler ].NumericByRef().u4)
-                    };
-
-                canStart(&CAND1, &Can1_PAL.Configuration);
+                palCan = &Can1_PAL;
                 break;
     #endif
     #if STM32_CAN_USE_CAN2
             case 2:
+                Init_Can2();
+                ConfigPins_CAN2();
                 Can2_PAL.Driver = &CAND2;
-                // palCan = &Can2_PAL;
-
-                // build CAN config
-                Can2_PAL.Configuration = {
-                    CAN_MCR_ABOM | CAN_MCR_AWUM | CAN_MCR_TXFP,
-                    CAN_BTR_LBKM | 
-                    CAN_BTR_SJW(pConfig[ CanSettings::FIELD___syncJumpWidth ].NumericByRef().u4) | 
-                    CAN_BTR_TS2(pConfig[ CanSettings::FIELD___phaseSegment2 ].NumericByRef().u4) |
-                    CAN_BTR_TS1(pConfig[ CanSettings::FIELD___phaseSegment1 ].NumericByRef().u4) | 
-                    CAN_BTR_BRP(pConfig[ CanSettings::FIELD___baudRatePrescaler ].NumericByRef().u4)
-                    };
-
-                canStart(&CAND2, &Can2_PAL.Configuration);
+                palCan = &Can2_PAL;
                 break;
     #endif
             default:
@@ -657,6 +680,21 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
                 break;
         }
+
+        // get config
+        palCan->Configuration = {
+            CAN_MCR_ABOM | CAN_MCR_AWUM | CAN_MCR_TXFP,
+                (uint32_t)(
+                CAN_BTR_SJW((uint8_t)pConfig[ CanSettings::FIELD___syncJumpWidth ].NumericByRef().u1) | 
+                CAN_BTR_TS2((uint8_t)pConfig[ CanSettings::FIELD___phaseSegment2 ].NumericByRef().u1) |
+                CAN_BTR_TS1((uint8_t)pConfig[ CanSettings::FIELD___phaseSegment1 ].NumericByRef().u1) | 
+                CAN_BTR_BRP((uint8_t)pConfig[ CanSettings::FIELD___baudRatePrescaler ].NumericByRef().u1)
+                )
+            };
+
+            // CAN_BTR_LBKM | 
+        // start CAN
+        canStart(palCan->Driver, &palCan->Configuration);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -690,7 +728,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
 
                 // create rx thread
                 palCan->ReceiverThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(256),
-                                            "CAN1RT", NORMALPRIO, CanReceiverThread, (void *)&palCan);
+                                            "CAN1RT", NORMALPRIO, CanReceiverThread, palCan);
             }
             else
             {
@@ -719,7 +757,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
 
                 // create rx thread
                 palCan->ReceiverThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(256),
-                                            "CAN2RT", NORMALPRIO, CanReceiverThread, (void *)&palCan);
+                                            "CAN2RT", NORMALPRIO, CanReceiverThread, palCan);
             }
             else
             {

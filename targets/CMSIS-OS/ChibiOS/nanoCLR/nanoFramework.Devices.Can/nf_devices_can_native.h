@@ -22,7 +22,6 @@ struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController
     static const int FIELD___controllerId = 4;
     static const int FIELD___settings = 5;
     static const int FIELD___message = 6;
-    static const int FIELD___disposedValue = 7;
 
     NANOCLR_NATIVE_DECLARE(WriteMessage___VOID__nanoFrameworkDevicesCanCanMessage);
     NANOCLR_NATIVE_DECLARE(GetMessage___nanoFrameworkDevicesCanCanMessage);
