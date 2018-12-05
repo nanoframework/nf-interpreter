@@ -244,7 +244,7 @@
  * @brief   Enforces the driver to use direct callbacks rather than OSAL events.
  */
 #if !defined(CAN_ENFORCE_USE_CALLBACKS) || defined(__DOXYGEN__)
-#define CAN_ENFORCE_USE_CALLBACKS           FALSE
+#define CAN_ENFORCE_USE_CALLBACKS           TRUE
 #endif
 
 /*===========================================================================*/
