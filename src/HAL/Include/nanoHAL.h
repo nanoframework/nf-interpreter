@@ -1171,6 +1171,13 @@ public:
     // Push a single element to the buffer.
     size_t Push(const T data)
     {
+        // check for buffer full
+        if(_size == _capacity)
+        {
+            // buffer full
+            return 0;
+        }
+
         T* destination = _buffer;
         destination += _write_index;
 
@@ -1193,6 +1200,13 @@ public:
 
         // sanity check for 0 length
         if (length == 0) return 0;
+
+        // check for buffer full
+        if(_size == _capacity)
+        {
+            // buffer full
+            return 0;
+        }
 
         if( (length * _dataSize) < (_capacity - _size))
         {
@@ -1237,6 +1251,12 @@ public:
 
         // sanity check for 0 length
         if (length == 0) return 0;
+
+        // check for buffer empty
+        if(_size == 0)
+        {
+            return 0;
+        }
 
         lengthToRead = (length * _dataSize);
 
@@ -1283,6 +1303,12 @@ public:
 
         // sanity check for 0 length
         if (length == 0) return 0;
+
+        // check for buffer empty
+        if(_size == 0)
+        {
+            return 0;
+        }
 
         lengthToRead = (length * _dataSize);
 
