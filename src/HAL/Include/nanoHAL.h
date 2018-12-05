@@ -1143,6 +1143,7 @@ public:
 
 template<typename T> class HAL_RingBuffer 
 {
+    size_t _dataSize;
     size_t _size;
     size_t _capacity;
     size_t _write_index;
@@ -1153,7 +1154,9 @@ public:
 
     void Initialize(T* data, size_t size)
     {
-        _capacity = size;
+        _dataSize = sizeof(T);
+
+        _capacity = (size * _dataSize);
         _write_index = 0;
         _read_index = 0;
         _size = 0;
@@ -1161,24 +1164,31 @@ public:
         _buffer = data;
     }
 
-    size_t Capacity() { return _capacity; }
+    size_t Capacity() { return (_capacity / _dataSize); }
 
-    size_t Length() { return _size; }
+    size_t Length() { return (_size / _dataSize); }
 
     // Push a single element to the buffer.
     size_t Push(const T data)
     {
+        // check for buffer full
+        if(_size == _capacity)
+        {
+            // buffer full
+            return 0;
+        }
+
         T* destination = _buffer;
         destination += _write_index;
 
         *destination = data;
-        _write_index += 1;
+        _write_index += _dataSize;
         
         // check if we are the end of the capacity
         if (_write_index == _capacity) _write_index = 0;
 
         // update ring buffer size
-        _size += 1;
+        _size += _dataSize;
 
         return 1;
     }
@@ -1191,13 +1201,20 @@ public:
         // sanity check for 0 length
         if (length == 0) return 0;
 
-        if(length < _capacity - _size)
+        // check for buffer full
+        if(_size == _capacity)
         {
-            lengthToWrite = length;
+            // buffer full
+            return 0;
+        }
+
+        if( (length * _dataSize) < (_capacity - _size))
+        {
+            lengthToWrite = (length * _dataSize);
         }
         else
         {
-            lengthToWrite = _capacity - _size;
+            lengthToWrite = (_capacity - _size);
         }
 
         // single memcpy
@@ -1224,7 +1241,7 @@ public:
         // update ring buffer size
         _size += lengthToWrite;
 
-        return lengthToWrite;
+        return (lengthToWrite / _dataSize);
     }
 
     // Pop N elements from ring buffer returning them in the data argument.
@@ -1235,14 +1252,13 @@ public:
         // sanity check for 0 length
         if (length == 0) return 0;
 
-        if(length < _size)
+        // check for buffer empty
+        if(_size == 0)
         {
-            lengthToRead = length;
+            return 0;
         }
-        else
-        {
-            lengthToRead = _size;
-        }
+
+        lengthToRead = (length * _dataSize);
 
         // can read in a single memcpy
         if (lengthToRead <= _capacity - _read_index)
@@ -1277,7 +1293,7 @@ public:
             _read_index = 0;
         }
 
-        return lengthToRead;
+        return (lengthToRead / _dataSize);
     }
 
     // Pop N elements from ring buffer. The elements are not actually returned, just popped from the buffer.
@@ -1288,14 +1304,13 @@ public:
         // sanity check for 0 length
         if (length == 0) return 0;
 
-        if(length < _size)
+        // check for buffer empty
+        if(_size == 0)
         {
-            lengthToRead = length;
+            return 0;
         }
-        else
-        {
-            lengthToRead = _size;
-        }
+
+        lengthToRead = (length * _dataSize);
 
         // can read in a single memcpy
         if (lengthToRead <= _capacity - _read_index)
@@ -1325,7 +1340,7 @@ public:
             _read_index = 0;
         }
 
-        return lengthToRead;
+        return (lengthToRead / _dataSize);
     }
 
     void OptimizeSequence()
@@ -1350,7 +1365,7 @@ public:
             // |xxxx......xxxxxx|
             
             // store size of tail
-            size_t tailSize = _write_index - 1;
+            size_t tailSize = _write_index - (1 * _dataSize);
 
             // 1st move tail to temp buffer (need to malloc first)
             T* tempBuffer = (T*)platform_malloc(tailSize);
