@@ -70,9 +70,6 @@ add_executable(
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
 
-    # need to add configuration manager to allow get/store configuration blocks
-    "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c"
-
     ${COMMON_PROJECT_SOURCES}
     ${TARGET_ESP32_COMMON_SOURCES}
     
