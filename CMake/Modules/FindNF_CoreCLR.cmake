@@ -162,6 +162,9 @@ set(NF_CoreCLR_SRCS
     nanoHAL_Time.cpp
     nanoHAL_Watchdog.c
 
+    # HAL stubs
+    nanoHAL_ConfigurationManager_stubs.c
+    
     # PAL
     nanoPAL_BlockStorage.c
     nanoPAL_NativeDouble.cpp
@@ -174,13 +177,9 @@ set(NF_CoreCLR_SRCS
     GenericPort_stubs.c
 )
 
-# include configuration manager file
+# include configuration manager implementation, if feature is enabled
 if(NF_FEATURE_HAS_CONFIG_BLOCK)
-    # feature enabled, full support
     list(APPEND NF_CoreCLR_SRCS nanoHAL_ConfigurationManager.c)
-else()
-    # feature disabled, stubs only
-    list(APPEND NF_CoreCLR_SRCS nanoHAL_ConfigurationManager_stubs.c)
 endif()
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
