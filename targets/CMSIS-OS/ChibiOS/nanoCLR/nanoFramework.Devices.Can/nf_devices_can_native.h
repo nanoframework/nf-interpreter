@@ -112,6 +112,9 @@ struct NF_PAL_CAN
 #if STM32_CAN_USE_CAN2
     extern NF_PAL_CAN Can2_PAL;
 #endif
+#if STM32_CAN_USE_CAN3
+    extern NF_PAL_CAN Can3_PAL;
+#endif
 
 // the following macro defines a function that configures the GPIO pins for a STM32 CAN
 // it gets called in the can_lld_start function// this is required because the CAN peripherals can use multiple GPIO configuration combinations
@@ -128,6 +131,7 @@ struct NF_PAL_CAN
 ///////////////////////////////////////////////////////////////////////////////////////////
 void ConfigPins_CAN1();
 void ConfigPins_CAN2();
+void ConfigPins_CAN3();
 
 
 /////////////////////////////////////
@@ -136,6 +140,7 @@ void ConfigPins_CAN2();
 /////////////////////////////////////
 extern CANRxFrame Can1_MsgBuffer[];
 extern CANRxFrame Can2_MsgBuffer[];
+extern CANRxFrame Can3_MsgBuffer[];
 
 // 
 #define CAN_INIT(num, buffer_size) void Init_Can##num() { \
@@ -147,5 +152,6 @@ extern CANRxFrame Can2_MsgBuffer[];
 // in the target folder @ target_nf_devices_can_config.cpp
 void Init_Can1();
 void Init_Can2();
+void Init_Can3();
 
 #endif  //_NF_DEVICES_CAN_NATIVE_H_

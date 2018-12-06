@@ -60,11 +60,18 @@ static void RxMessage(CANDriver *canp, uint32_t flags)
         controllerId = 1;
     }
     #endif
-    #if STM32_CAN_USE_CAN1
+    #if STM32_CAN_USE_CAN2
     if (canp == &CAND2)
     {
         palCan = &Can2_PAL;
         controllerId = 2;
+    }
+    #endif
+    #if STM32_CAN_USE_CAN3
+    if (canp == &CAND3)
+    {
+        palCan = &Can3_PAL;
+        controllerId = 3;
     }
     #endif
   
@@ -91,6 +98,9 @@ static void RxMessage(CANDriver *canp, uint32_t flags)
 #endif
 #if STM32_CAN_USE_CAN2
     NF_PAL_CAN Can2_PAL;
+#endif
+#if STM32_CAN_USE_CAN3
+    NF_PAL_CAN Can3_PAL;
 #endif
 
 HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::WriteMessage___VOID__nanoFrameworkDevicesCanCanMessage( CLR_RT_StackFrame& stack )
@@ -155,6 +165,11 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::W
                 canTransmit(Can2_PAL.Driver, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
                 break;
     #endif
+    #if STM32_CAN_USE_CAN3
+            case 3:
+                canTransmit(Can3_PAL.Driver, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
+                break;
+    #endif
             default:
                 // this CAN bus is not valid
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -197,6 +212,13 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
       #if STM32_CAN_USE_CAN2
         case 2:
             palCan = &Can2_PAL;
+
+            break;
+      #endif
+
+      #if STM32_CAN_USE_CAN3
+        case 3:
+            palCan = &Can3_PAL;
 
             break;
       #endif
@@ -314,6 +336,14 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
                 palCan = &Can2_PAL;
                 break;
     #endif
+    #if STM32_CAN_USE_CAN3
+            case 3:
+                Init_Can3();
+                ConfigPins_CAN3();
+                Can3_PAL.Driver = &CAND3;
+                palCan = &Can3_PAL;
+                break;
+    #endif
             default:
                 // this CAN bus is not valid
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -365,6 +395,11 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
             palCan = &Can2_PAL;
             break;
       #endif
+      #if STM32_CAN_USE_CAN3
+        case 3:
+            palCan = &Can3_PAL;
+            break;
+      #endif
         default:
             // this CAN bus is not valid
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -405,6 +440,9 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
    #endif
    #if STM32_CAN_USE_CAN2
        strcat(deviceSelectorString, "CAN2,");
+   #endif
+   #if STM32_CAN_USE_CAN3
+       strcat(deviceSelectorString, "CAN3,");
    #endif
 
        // replace the last comma with a terminator
