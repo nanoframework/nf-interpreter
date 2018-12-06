@@ -457,6 +457,13 @@ else()
 endif()
 
 
+if(API_nanoFramework.Devices.Can)
+    set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
+else()
+    set(HAL_USE_CAN_OPTION FALSE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
+endif()
+
+
 #################################################################
 # manage dependent APIs required for some API namespaces
 #################################################################
@@ -466,7 +473,8 @@ if( API_nanoFramework.Devices.OneWire OR
     API_System.Net OR
     API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
-    API_Windows.Networking.Sockets)
+    API_Windows.Networking.Sockets OR
+    API_nanoFramework.Devices.Can)
 
     # these APIs requires nanoFramework.Runtime.Events
     set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
