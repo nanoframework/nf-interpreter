@@ -22,6 +22,7 @@ struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController
     static const int FIELD___controllerId = 4;
     static const int FIELD___settings = 5;
     static const int FIELD___message = 6;
+    static const int FIELD__ControllerId = 7;
 
     NANOCLR_NATIVE_DECLARE(WriteMessage___VOID__nanoFrameworkDevicesCanCanMessage);
     NANOCLR_NATIVE_DECLARE(GetMessage___nanoFrameworkDevicesCanCanMessage);
@@ -56,12 +57,9 @@ struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanControllerMana
 struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage
 {
     static const int FIELD___id = 1;
-    static const int FIELD___isSID = 2;
-    static const int FIELD___isDataFrame = 3;
-    static const int FIELD___byteMessage = 4;
-    static const int FIELD___uShortMessage = 5;
-    static const int FIELD___uIntMessage = 6;
-    static const int FIELD___uLongMessage = 7;
+    static const int FIELD___identifierType = 2;
+    static const int FIELD___frameType = 3;
+    static const int FIELD___message = 4;
 
 
     //--//
@@ -72,15 +70,6 @@ struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessageEvent
 {
     static const int FIELD__ControllerIndex = 3;
     static const int FIELD__Event = 4;
-
-
-    //--//
-
-};
-
-struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessageReceivedEventArgs
-{
-    static const int FIELD___message = 1;
 
 
     //--//
@@ -98,6 +87,8 @@ struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanSettings
     //--//
 
 };
+
+
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Devices_Can;
 

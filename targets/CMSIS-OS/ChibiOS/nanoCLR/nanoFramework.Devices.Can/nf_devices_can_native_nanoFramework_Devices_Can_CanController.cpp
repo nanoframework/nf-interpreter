@@ -16,65 +16,32 @@ enum CanEvent
     CanEvent_ErrorOccurred,
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Devices.Can.CanMessageIdType (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+enum CanMessageIdType
+{
+    CanMessageIdType_SID = 0,
+    CanMessageIdType_EID,
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Devices.Can.CanMessageFrameType (in managed code) !!! //
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+enum CanMessageFrameType
+{
+    CanMessageFrameType_Data = 0,
+    CanMessageFrameType_RemoteRequest,
+};
+
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
 // define these types here to make it shorter and improve code readability
 typedef Library_nf_devices_can_native_nanoFramework_Devices_Can_CanSettings CanSettings;
 typedef Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage ManagedCanMessage;
-
-// CAN receiver thread
-// static THD_FUNCTION(CanReceiverThread, arg)
-// {
-//     NF_PAL_CAN* palCan = (NF_PAL_CAN*)arg;
-//     event_listener_t eventListener;
-//     CANRxFrame rxMsg;
-//     int controllerId;
-
-//   #if STM32_CAN_USE_CAN1
-//         if(palCan->Driver == &CAND1)
-//         {
-//            controllerId = 1;
-//         }
-//   #endif
-//   #if STM32_CAN_USE_CAN2
-//         if(palCan->Driver == &CAND2)
-//         {
-//            controllerId = 2;
-//         }
-//   #endif
-
-//     // set event listener for CAN RX
-//     chEvtRegister(&palCan->Driver->rxfull_event, &eventListener, 0);
-    
-//     // wrap working code inside this call to process abort request with chThdTerminate()
-//     while (!chThdShouldTerminateX())
-//     {
-//         if (chEvtWaitAnyTimeout(ALL_EVENTS, TIME_MS2I(100)) == 0)
-//         {
-//             continue;
-//         }
-
-        
-//         while (canReceiveTimeout(palCan->Driver, CAN_ANY_MAILBOX, &rxMsg, TIME_IMMEDIATE) == MSG_OK)
-//         {
-//             // got message
-            
-//             // store message into the CAN buffer
-//             // don't care about the success of the operation, if it's full we are droping the message anyway
-//             palCan->MsgRingBuffer.Push(rxMsg);
-
-//             // fire event for CAN message received
-//             PostManagedEvent( EVENT_CAN, 0, controllerId, CanEvent_MessageReceived );
-//        }
-//     }
-
-//     // unregister CAN RX event
-//     chEvtUnregister(&palCan->Driver->rxfull_event, &eventListener);
-
-//     // need to set thread exit code before leaving
-//     chThdExit(MSG_OK);
-// }
 
 static void RxMessage(CANDriver *canp, uint32_t flags) 
 {
@@ -104,8 +71,8 @@ static void RxMessage(CANDriver *canp, uint32_t flags)
     while (canReceiveTimeout(palCan->Driver, CAN_ANY_MAILBOX, &rxMsg, TIME_IMMEDIATE) == MSG_OK)
     {
         // got message
-        
-        // store message into the CAN buffer
+
+        // store message in the CAN buffer
         // don't care about the success of the operation, if it's full we are droping the message anyway
         palCan->MsgRingBuffer.Push(rxMsg);
 
@@ -131,12 +98,10 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::W
     NANOCLR_HEADER();
     {
         uint32_t id;
-        bool isSID, isDataFrame;
+        CanMessageIdType msgIdType;
+        CanMessageFrameType msgFrameType;
         CLR_RT_HeapBlock_Array* message;
-
         CANTxFrame txmsg;
-        uint8_t msgLength = 0;
-        uint8_t dataSize = 0;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -147,57 +112,23 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::W
 
         // dereference message fields
         id = (uint32_t)(pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___id ].NumericByRef().u4);
-        isSID = (bool)(pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___isSID ].NumericByRefConst().u1 != 0);
-        isDataFrame = (bool)(pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___isDataFrame ].NumericByRefConst().u1 != 0);
+        msgIdType = (CanMessageIdType)(pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___identifierType ].NumericByRefConst().u1);
+        msgFrameType = (CanMessageFrameType)(pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___frameType ].NumericByRefConst().u1);
 
-        // need to handle message data differently because it's one of the 4 possible types (byte, short, int, long)
-        message = pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___byteMessage ].DereferenceArray();
+        // get message to transmite
+        message = pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___message ].DereferenceArray();
 
+        // message max length is 8 bytes
+        if(message->m_numOfElements > 8) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+
+        // compose the transmite packet to send
         if(message != NULL)
         {
-            // BYTE -> 1 byte
-            dataSize = 1;
-
-            // get message lenght
-            msgLength = dataSize * message->m_numOfElements;
-            memcpy(txmsg.data8, (uint8_t*)message->GetFirstElement(), msgLength);
+            // copy message to structure
+            memcpy(txmsg.data8, (uint8_t*)message->GetFirstElement(), message->m_numOfElements);
         }
-        if(message == NULL)
-        {
-            message = pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___uShortMessage ].DereferenceArray();
-            // INT16 -> 2 bytes
-            dataSize = 2;
-
-            // get message lenght
-            msgLength = dataSize * message->m_numOfElements;
-            memcpy(txmsg.data16, (uint16_t*)message->GetFirstElement(), msgLength);
-        }
-        if(message == NULL)
-        {
-            message = pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___uIntMessage ].DereferenceArray();
-            // INT32 -> 4 bytes
-            dataSize = 4;
-
-            // get message lenght
-            msgLength = dataSize * message->m_numOfElements;
-            memcpy(txmsg.data32, (uint32_t*)message->GetFirstElement(), msgLength);
-        }
-        if(message == NULL)
-        {
-            message = pMessage[ Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___uLongMessage ].DereferenceArray();
-            // LONG -> 8 bytes
-            dataSize = 8;
-
-            // get message lenght
-            msgLength = dataSize * message->m_numOfElements;
-            memcpy(txmsg.data64, (uint64_t*)message->GetFirstElement(), msgLength);
-        }
-        
-        // COMEMTS COMENTS + COMENTS
-        FAULT_ON_NULL(message);
-
-        
-        if(isSID)
+        // message id according to it's type
+        if(msgIdType == CanMessageIdType_SID)
         {
             txmsg.IDE = CAN_IDE_STD;
             txmsg.SID = id;
@@ -207,8 +138,10 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::W
             txmsg.IDE = CAN_IDE_EXT;
             txmsg.EID = id;
         }
-        txmsg.RTR = isDataFrame ? CAN_RTR_DATA : CAN_RTR_REMOTE;
-        txmsg.DLC = msgLength;
+        // remote transmission request
+        txmsg.RTR = msgFrameType == CanMessageFrameType_Data ? CAN_RTR_DATA : CAN_RTR_REMOTE;
+        // data length
+        txmsg.DLC = message->m_numOfElements;
 
         switch (controllerIndex)
         {
@@ -238,7 +171,6 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
 
     CLR_RT_TypeDef_Index    canMessageTypeDef;
     CLR_RT_HeapBlock*       canMessage = NULL;
-    // CLR_RT_HeapBlock*       hbObj = NULL;
     
     CANRxFrame canFrame;
     NF_PAL_CAN* palCan;
@@ -265,6 +197,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
       #if STM32_CAN_USE_CAN2
         case 2:
             palCan = &Can2_PAL;
+
             break;
       #endif
 
@@ -274,9 +207,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
             break;
     }
 
-    // create return value
-    // stack.PushValue();
-
+    // get next CAN frame from ring buffer
     messageCount = palCan->MsgRingBuffer.Pop(&canFrame, 1);
 
     // find <CanMessage> type, don't bother checking the result as the type exists for sure
@@ -292,27 +223,34 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
         // we have a message
         
         // get pointer to each managed field and set appropriate value 
-        CLR_RT_HeapBlock&  isSIDFieldRef = canMessage[ ManagedCanMessage::FIELD___isSID ];
-        // CLR_INT64* pRes = (CLR_INT64*)&fieldRef.NumericByRef().u1;
+        CLR_RT_HeapBlock&  identifierTypeFieldRef = canMessage[ ManagedCanMessage::FIELD___identifierType ];
+        CLR_RT_HeapBlock&  frameTypeFieldRef = canMessage[ ManagedCanMessage::FIELD___frameType ];
 
-        uint8_t* p = (uint8_t*)&isSIDFieldRef.NumericByRef().u1;
-        *p = canFrame.IDE;
+        // get message frame type
+        uint8_t* fr = (uint8_t*)&frameTypeFieldRef.NumericByRef().u1;
+        *fr = canFrame.RTR;
 
+        // get message id type
+        uint8_t* idType = (uint8_t*)&identifierTypeFieldRef.NumericByRef().u1;
+        *idType = canFrame.IDE;
+
+        // get message id
         CLR_RT_HeapBlock&  idFieldRef = canMessage[ ManagedCanMessage::FIELD___id ];
-        uint32_t* p32 = (uint32_t*)&idFieldRef.NumericByRef().u4;
+        uint32_t* id = (uint32_t*)&idFieldRef.NumericByRef().u4;
 
         if(canFrame.IDE == 0)
         {
-            *p32 = canFrame.SID;
+            *id = canFrame.SID;
         }
         else
         {
-            *p32 = canFrame.EID;
+            *id = canFrame.EID;
         }
 
+        // get data if any
         if(canFrame.data8)
         {
-            CLR_RT_HeapBlock& dataArrayField = canMessage[ ManagedCanMessage::FIELD___byteMessage ];
+            CLR_RT_HeapBlock& dataArrayField = canMessage[ ManagedCanMessage::FIELD___message ];
             // create an array of <bytes>
             NANOCLR_CHECK_HRESULT( CLR_RT_HeapBlock_Array::CreateInstance( dataArrayField, 8, g_CLR_RT_WellKnownTypes.m_UInt8 ) );
 
@@ -330,331 +268,6 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
     NANOCLR_NOCLEANUP();
 }
 
-/*
-HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::WriteMessage___VOID__U4__BOOLEAN__BOOLEAN__SZARRAY_U1( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {
-        // NF_PAL_CAN* palCan = NULL;
-        uint32_t id;
-        bool isSID, isDataFrame;
-        CLR_RT_HeapBlock_Array* message;
-        CLR_UINT8* msgArray;
-        CANTxFrame txmsg;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
-        // get controller index
-        uint8_t controllerIndex = (uint8_t)(pThis[ FIELD___controllerId ].NumericByRef().s4);
-
-    //     switch (controllerIndex)
-    //     {
-    // #if STM32_CAN_USE_CAN1
-    //         case 1:
-    //             palCan = &Can1_PAL;
-    //             break;
-    // #endif
-    // #if STM32_CAN_USE_CAN2
-    //         case 2:
-    //             palCan = &Can2_PAL;
-    //             break;
-    // #endif
-    //         default:
-    //             // this CAN bus is not valid
-    //             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    //             break;
-    //     }
-
-        // dereference tx parameters
-        id = stack.Arg0().NumericByRef().u4;
-        isSID = stack.Arg1().NumericByRefConst().u1 != 0;
-        isDataFrame = stack.Arg2().NumericByRefConst().u1 != 0;
-        message = stack.Arg3().DereferenceArray();
-        msgArray = message->GetFirstElement();
-
-        if(isSID)
-        {
-            txmsg.IDE = CAN_IDE_STD;
-            txmsg.SID = id;
-        }
-        else
-        {
-            txmsg.IDE = CAN_IDE_EXT;
-            txmsg.EID = id;
-        }
-        txmsg.RTR = isDataFrame ? CAN_RTR_DATA : CAN_RTR_REMOTE;
-        txmsg.DLC = 8;
-        memcpy(&msgArray[0], &txmsg.data8[0], 8);
-        // txmsg.data8[0] = (uint8_t)message->GetElement(0);
-        // txmsg.data8[1] = (uint8_t)message->GetElement(1);
-        // txmsg.data8[2] = (uint8_t)message->GetElement(2);
-        // txmsg.data8[3] = (uint8_t)message->GetElement(3);
-        // txmsg.data8[4] = (uint8_t)message->GetElement(4);
-        // txmsg.data8[5] = (uint8_t)message->GetElement(5);
-        // txmsg.data8[6] = (uint8_t)message->GetElement(6);
-        // txmsg.data8[7] = (uint8_t)message->GetElement(7);
-
-        switch (controllerIndex)
-        {
-    #if STM32_CAN_USE_CAN1
-            case 1:
-                canTransmit(&CAND1, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
-                break;
-    #endif
-    #if STM32_CAN_USE_CAN2
-            case 2:
-                canTransmit(&CAND2, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
-                break;
-    #endif
-            default:
-                // this CAN bus is not valid
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-                break;
-        }
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::WriteMessage___VOID__U4__BOOLEAN__BOOLEAN__SZARRAY_U2( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {
-        // NF_PAL_CAN* palCan = NULL;
-        uint32_t id;
-        bool isSID, isDataFrame;
-        CLR_RT_HeapBlock_Array* message;
-        CLR_UINT8* msgArray;
-        CANTxFrame txmsg;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
-        // get controller index
-        uint8_t controllerIndex = (uint8_t)(pThis[ FIELD___controllerId ].NumericByRef().s4);
-
-    //     switch (controllerIndex)
-    //     {
-    // #if STM32_CAN_USE_CAN1
-    //         case 1:
-    //             palCan = &Can1_PAL;
-    //             break;
-    // #endif
-    // #if STM32_CAN_USE_CAN2
-    //         case 2:
-    //             palCan = &Can2_PAL;
-    //             break;
-    // #endif
-    //         default:
-    //             // this CAN bus is not valid
-    //             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    //             break;
-    //     }
-
-        // dereference tx parameters
-        id = stack.Arg0().NumericByRef().u4;
-        isSID = stack.Arg1().NumericByRefConst().u1 != 0;
-        isDataFrame = stack.Arg2().NumericByRefConst().u1 != 0;
-        message = stack.Arg3().DereferenceArray();
-        msgArray = message->GetFirstElement();
-
-        if(isSID)
-        {
-            txmsg.IDE = CAN_IDE_STD;
-            txmsg.SID = id;
-        }
-        else
-        {
-            txmsg.IDE = CAN_IDE_EXT;
-            txmsg.EID = id;
-        }
-        txmsg.RTR = isDataFrame ? CAN_RTR_DATA : CAN_RTR_REMOTE;
-        txmsg.DLC = 4;
-        memcpy(&msgArray[0], &txmsg.data16[0], 4);
-        // txmsg.data16[0] = (uint16_t)message->GetElementUInt16(0);
-        // txmsg.data16[1] = (uint16_t)message->GetElementUInt16(1);
-        // txmsg.data16[2] = (uint16_t)message->GetElementUInt16(2);
-        // txmsg.data16[3] = (uint16_t)message->GetElementUInt16(3);
-
-        switch (controllerIndex)
-        {
-    #if STM32_CAN_USE_CAN1
-            case 1:
-                canTransmit(&CAND1, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
-                break;
-    #endif
-    #if STM32_CAN_USE_CAN2
-            case 2:
-                canTransmit(&CAND2, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
-                break;
-    #endif
-            default:
-                // this CAN bus is not valid
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-                break;
-        }
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::WriteMessage___VOID__U4__BOOLEAN__BOOLEAN__SZARRAY_U4( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {
-        // NF_PAL_CAN* palCan = NULL;
-        uint32_t id;
-        bool isSID, isDataFrame;
-        CLR_RT_HeapBlock_Array* message;
-        CLR_UINT8* msgArray;
-        CANTxFrame txmsg;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
-        // get controller index
-        uint8_t controllerIndex = (uint8_t)(pThis[ FIELD___controllerId ].NumericByRef().s4);
-
-    //     switch (controllerIndex)
-    //     {
-    // #if STM32_CAN_USE_CAN1
-    //         case 1:
-    //             palCan = &Can1_PAL;
-    //             break;
-    // #endif
-    // #if STM32_CAN_USE_CAN2
-    //         case 2:
-    //             palCan = &Can2_PAL;
-    //             break;
-    // #endif
-    //         default:
-    //             // this CAN bus is not valid
-    //             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    //             break;
-    //     }
-
-        // dereference tx parameters
-        id = stack.Arg0().NumericByRef().u4;
-        isSID = stack.Arg1().NumericByRefConst().u1 != 0;
-        isDataFrame = stack.Arg2().NumericByRefConst().u1 != 0;
-        message = stack.Arg3().DereferenceArray();
-        msgArray = message->GetFirstElement();
-
-        if(isSID)
-        {
-            txmsg.IDE = CAN_IDE_STD;
-            txmsg.SID = id;
-        }
-        else
-        {
-            txmsg.IDE = CAN_IDE_EXT;
-            txmsg.EID = id;
-        }
-        txmsg.RTR = isDataFrame ? CAN_RTR_DATA : CAN_RTR_REMOTE;
-        txmsg.DLC = 2;
-        memcpy(&msgArray[0], &txmsg.data32[0], 2);
-        // txmsg.data32[0] = message->GetAtomicDataUsedBytes();
-        // txmsg.data32[1] = message->GetAtomicDataUsedBytes();
-
-        switch (controllerIndex)
-        {
-    #if STM32_CAN_USE_CAN1
-            case 1:
-                canTransmit(&CAND1, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
-                break;
-    #endif
-    #if STM32_CAN_USE_CAN2
-            case 2:
-                canTransmit(&CAND2, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
-                break;
-    #endif
-            default:
-                // this CAN bus is not valid
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-                break;
-        }
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::WriteMessage___VOID__U4__BOOLEAN__BOOLEAN__U8( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {
-        // NF_PAL_CAN* palCan = NULL;
-        uint32_t id;
-        bool isSID, isDataFrame;
-        uint64_t message;
-        CANTxFrame txmsg;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
-        // get controller index
-        uint8_t controllerIndex = (uint8_t)(pThis[ FIELD___controllerId ].NumericByRef().s4);
-
-    //     switch (controllerIndex)
-    //     {
-    // #if STM32_CAN_USE_CAN1
-    //         case 1:
-    //             palCan = &Can1_PAL;
-    //             break;
-    // #endif
-    // #if STM32_CAN_USE_CAN2
-    //         case 2:
-    //             palCan = &Can2_PAL;
-    //             break;
-    // #endif
-    //         default:
-    //             // this CAN bus is not valid
-    //             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    //             break;
-    //     }
-
-        // dereference tx parameters
-        id = stack.Arg0().NumericByRef().u4;
-        isSID = stack.Arg1().NumericByRefConst().u1 != 0;
-        isDataFrame = stack.Arg2().NumericByRefConst().u1 != 0;
-        message = stack.Arg0().NumericByRef().s8;
-
-        if(isSID)
-        {
-            txmsg.IDE = CAN_IDE_STD;
-            txmsg.SID = id;
-        }
-        else
-        {
-            txmsg.IDE = CAN_IDE_EXT;
-            txmsg.EID = id;
-        }
-        txmsg.RTR = isDataFrame ? CAN_RTR_DATA : CAN_RTR_REMOTE;
-        txmsg.DLC = 1;
-        txmsg.data64[0] = message;
-
-        switch (controllerIndex)
-        {
-    #if STM32_CAN_USE_CAN1
-            case 1:
-                canTransmit(&CAND1, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
-                break;
-    #endif
-    #if STM32_CAN_USE_CAN2
-            case 2:
-                canTransmit(&CAND2, CAN_ANY_MAILBOX, &txmsg, TIME_MS2I(100));
-                break;
-    #endif
-            default:
-                // this CAN bus is not valid
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-                break;
-        }
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-*/
 HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
     (void)stack;
@@ -691,7 +304,6 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
                 ConfigPins_CAN1();
                 Can1_PAL.Driver = &CAND1;
                 palCan = &Can1_PAL;
-                palCan->Driver->rxfull_cb = RxMessage;
                 break;
     #endif
     #if STM32_CAN_USE_CAN2
@@ -700,7 +312,6 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
                 ConfigPins_CAN2();
                 Can2_PAL.Driver = &CAND2;
                 palCan = &Can2_PAL;
-                palCan->Driver->rxfull_cb = RxMessage;
                 break;
     #endif
             default:
@@ -720,7 +331,6 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
                 )
             };
 
-            // CAN_BTR_LBKM | 
         // start CAN
         canStart(palCan->Driver, &palCan->Configuration);
     }
@@ -734,7 +344,6 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
     NF_PAL_CAN* palCan = NULL;
     bool callbacksRegistered;
     uint8_t controllerIndex;
-    msg_t dummy;
 
     CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
@@ -749,59 +358,11 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
       #if STM32_CAN_USE_CAN1
         case 1:
             palCan = &Can1_PAL;
-        
-            if(callbacksRegistered)
-            {
-                // there is someone listening on the managed end
-
-                // create rx thread
-                // palCan->ReceiverThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(256),
-                //                             "CAN1RT", NORMALPRIO, CanReceiverThread, palCan);
-            }
-            else
-            {
-                // no one listening, OK to remove
-
-                // send terminating flag to thread
-                chThdTerminate(palCan->ReceiverThread);
-
-                // ChibiOS requirement: need to call chThdWait for working thread in order to have it's memory released to the heap, otherwise it won't be returned
-                dummy = chThdWait(palCan->ReceiverThread);
-                (void)dummy;
-
-                // null thread pointer
-                palCan->ReceiverThread = NULL;
-            }
-
             break;
       #endif
       #if STM32_CAN_USE_CAN2
         case 2:
             palCan = &Can2_PAL;
-        
-            if(callbacksRegistered)
-            {
-                // there is someone listening on the managed end
-
-                // create rx thread
-                // palCan->ReceiverThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(256),
-                //                             "CAN2RT", NORMALPRIO, CanReceiverThread, palCan);
-            }
-            else
-            {
-                // no one listening, OK to remove
-
-                // send terminating flag to thread
-                chThdTerminate(palCan->ReceiverThread);
-
-                // ChibiOS requirement: need to call chThdWait for working thread in order to have it's memory released to the heap, otherwise it won't be returned
-                dummy = chThdWait(palCan->ReceiverThread);
-                (void)dummy;
-
-                // null thread pointer
-                palCan->ReceiverThread = NULL;
-            }
-
             break;
       #endif
         default:
@@ -809,6 +370,25 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             break;
     }
+
+    // need to start CAN again
+    // it's safe to stop first
+    canStop(palCan->Driver);
+
+    if(callbacksRegistered)
+    {
+        // there is someone listening on the managed end
+        palCan->Driver->rxfull_cb = RxMessage;
+    }
+    else
+    {
+        // no one listening, OK to remove
+        palCan->Driver->rxfull_cb = NULL;
+    }
+
+    // start CAN
+    canStart(palCan->Driver, &palCan->Configuration);
+
 
     NANOCLR_NOCLEANUP();
 }
