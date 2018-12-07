@@ -4,6 +4,7 @@
 //
 
 #include <nanoPAL_Events.h>
+#include <nanoCLR_Runtime.h>
 #include <nanoPAL.h>
 #include <target_platform.h>
 #include <hal.h>
@@ -149,6 +150,12 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
 
         // no events, pass control to the OS
         osThreadYield();
+
+        // check if reboot or exit flags were set when the other OS threads executed
+        if(CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))
+        {
+            break;
+        }
     }
 
     return 0;
