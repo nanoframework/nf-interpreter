@@ -59,8 +59,7 @@ struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiConnectionResult
 struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiEvent
 {
     static const int FIELD__EventType = 3;
-    static const int FIELD__Flags = 4;
-    static const int FIELD__Time = 5;
+    static const int FIELD__Time = 4;
 
 
     //--//
