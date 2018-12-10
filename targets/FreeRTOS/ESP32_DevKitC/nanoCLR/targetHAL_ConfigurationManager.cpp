@@ -341,7 +341,7 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
         while( pConfig < (pConfig + blockSize) )
         {
             // Network interface block ?
-            if ( *pConfig == 'C')
+            if ( *pConfig == 'N')
             {
                 HAL_Configuration_NetworkInterface * pNetConfig = (HAL_Configuration_NetworkInterface*)pConfig;
                 pConfig += sizeof(HAL_Configuration_NetworkInterface);
