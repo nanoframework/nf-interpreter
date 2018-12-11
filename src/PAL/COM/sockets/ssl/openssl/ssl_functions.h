@@ -36,7 +36,6 @@ BOOL ssl_exit_context_internal(int sslContextHandle );
 BOOL ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, int certLength, const char* pwd, int& sslContextHandle, BOOL isServer );
 BOOL ssl_initialize_internal();
 BOOL ssl_uninitialize_internal();
-void ssl_clear_cert_auth_internal(int sslContextHandle );
 BOOL ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, 	int certLength, const char* certPassword );
 
 #endif

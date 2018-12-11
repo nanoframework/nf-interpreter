@@ -161,6 +161,7 @@ typedef struct Monitor_UpdateConfiguration_Command
     uint32_t Configuration;
     uint32_t BlockIndex;
     uint32_t Length;
+    uint32_t Offset;
     uint8_t Data[1];
 
 }Monitor_UpdateConfiguration_Command;
