@@ -50,12 +50,6 @@ __nfweak bool SSL_AddCertificateAuthority( int sslContextHandle, const char* cer
     return TRUE;
 }
 
-__nfweak void SSL_ClearCertificateAuthority( int sslContextHandle )
-{
-    (void)sslContextHandle; 
-    NATIVE_PROFILE_PAL_COM();
-}
-
 __nfweak bool SSL_ExitContext( int sslContextHandle )
 { 
     (void)sslContextHandle; 

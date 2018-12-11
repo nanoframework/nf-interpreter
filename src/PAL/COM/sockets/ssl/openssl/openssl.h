@@ -22,6 +22,5 @@ X509* ssl_parse_certificate(void* pCert, size_t certLen, const char* pwd, EVP_PK
 
 // Define disable functions that are not available - openssl wrapper 
 #define NO_LIBRARY_INIT 
-#define NO_CERT_STORE 
 #define NO_CHECK_PRIVATE_KEY 
 #endif
