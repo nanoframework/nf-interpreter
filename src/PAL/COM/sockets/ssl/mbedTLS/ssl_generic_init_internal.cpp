@@ -164,9 +164,12 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     // parse certificate if passed
     if(certificate != NULL && certLength > 0)
     {
-        // need to add an extra byte here because the mbed TLS API is expecting 
-        // the buffer length INCLUDING the terminator
-        if(mbedtls_x509_crt_parse( context->x509_crt, (const unsigned char*)certificate, certLength + 1 ) != 0)
+        /////////////////////////////////////////////////////////////////////////////////////////////////
+        // developer notes:                                                                            //
+        // this call parses certificates in both string and binary formats                             //
+        // when the formart is a string it has to include the terminator otherwise the parse will fail //
+        /////////////////////////////////////////////////////////////////////////////////////////////////
+        if(mbedtls_x509_crt_parse( context->x509_crt, (const unsigned char*)certificate, certLength ) != 0)
         {
             // x509_crt_parse_failed
             goto error;
