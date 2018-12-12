@@ -29,9 +29,12 @@ bool ssl_parse_certificate_internal(void * certificate, size_t size, void* pwd, 
     mbedtls_x509_crt cacert;
     mbedtls_x509_crt_init(&cacert);
     
-    // need to add an extra byte here because the mbed TLS API is expecting 
-    // the buffer length INCLUDING the terminator 
-    ret = mbedtls_x509_crt_parse(&cacert, (const unsigned char *)certificate, size + 1 );
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    // developer notes:                                                                            //
+    // this call parses certificates in both string and binary formats                             //
+    // when the formart is a string it has to include the terminator otherwise the parse will fail //
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    ret = mbedtls_x509_crt_parse(&cacert, (const unsigned char *)certificate, size);
     if(ret < 0)
     {
         return false;
