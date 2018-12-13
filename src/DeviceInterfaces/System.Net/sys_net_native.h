@@ -125,8 +125,8 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 
 struct Library_sys_net_native_System_Net_Security_SslNative
 {
-    NANOCLR_NATIVE_DECLARE(SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate);
-    NANOCLR_NATIVE_DECLARE(SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate);
+    NANOCLR_NATIVE_DECLARE(SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate);
+    NANOCLR_NATIVE_DECLARE(SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate);
     NANOCLR_NATIVE_DECLARE(UpdateCertificates___STATIC__VOID__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate);
     NANOCLR_NATIVE_DECLARE(SecureAccept___STATIC__VOID__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(SecureConnect___STATIC__VOID__I4__STRING__OBJECT);
@@ -160,8 +160,9 @@ struct Library_sys_net_native_System_Net_Sockets_NetworkStream
 
 struct Library_sys_net_native_System_Net_Security_SslStream
 {
-    static const int FIELD___sslContext = 6;
-    static const int FIELD___isServer = 7;
+    static const int FIELD___sslVerification = 6;
+    static const int FIELD___sslContext = 7;
+    static const int FIELD___isServer = 8;
 
 
     //--//

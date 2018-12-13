@@ -95,14 +95,14 @@ void Time_GetDateTime(DATE_TIME_INFO* dt)
  }
 
 // Initalise SSL as a server
-HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     return InitHelper( stack, true );
 }
 
 // Initalise SSL as a client
-HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     return InitHelper( stack, false );
@@ -508,11 +508,10 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
     CLR_INT32 sslMode               = stack.Arg0().NumericByRef().s4;
     CLR_INT32 sslVerify             = stack.Arg1().NumericByRef().s4;
     CLR_RT_HeapBlock *hbCert        = stack.Arg2().Dereference(); 
-    CLR_RT_HeapBlock_Array* arrCA   = stack.Arg3().DereferenceArray(); 
+    CLR_RT_HeapBlock* caCert        = stack.Arg3().Dereference(); 
     CLR_RT_HeapBlock_Array* arrCert = NULL;
     CLR_UINT8*  sslCert             = NULL;
     int         result;
-    int         i;
     bool        isFirstCall = false;
     const char * szPwd = "";
 
@@ -607,48 +606,42 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
         GenerateNewSslSeed();
     }
 
-    if(arrCA != NULL)
+    if(caCert != NULL)
     {
-        for(i=0; i<(int)arrCA->m_numOfElements; i++)
+        arrCert = caCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___certificate ].DereferenceArray(); //FAULT_ON_NULL(arrCert);
+
+        // If arrCert == NULL then the certificate is an X509Certificate2 which uses a certificate handle
+        if(arrCert == NULL)
         {
-            hbCert = (CLR_RT_HeapBlock*)arrCA->GetElement( i ); FAULT_ON_NULL(hbCert);
-            hbCert = hbCert->Dereference();                     FAULT_ON_NULL(hbCert);
+            CLR_INT32 sessionCtx = 0;
 
-            arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___certificate ].DereferenceArray(); //FAULT_ON_NULL(arrCert);
+            arrCert = caCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___handle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
 
-            // If arrCert == NULL then the certificate is an X509Certificate2 which uses a certificate handle
-            if(arrCert == NULL)
-            {
-                CLR_INT32 sessionCtx = 0;
+            sslCert = arrCert->GetFirstElement();
 
-                arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___handle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
+            arrCert = caCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___sessionHandle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
 
-                sslCert = arrCert->GetFirstElement();
+            sessionCtx = *(int32_t*)arrCert->GetFirstElement();
 
-                arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___sessionHandle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
+            // pass the session handle down as the password paramter and the certificate handle as the data parameter
+            result = (SSL_AddCertificateAuthority( sslContext, (const char*)sslCert, arrCert->m_numOfElements, (LPCSTR)&sessionCtx ) ? 0 : -1);
+            
+            NANOCLR_CHECK_HRESULT(ThrowOnError( stack, result ));
+        }
+        else
+        {
 
-                sessionCtx = *(int32_t*)arrCert->GetFirstElement();
+            arrCert->Pin();
 
-                // pass the session handle down as the password paramter and the certificate handle as the data parameter
-                result = (SSL_AddCertificateAuthority( sslContext, (const char*)sslCert, arrCert->m_numOfElements, (LPCSTR)&sessionCtx ) ? 0 : -1);
-                
-                NANOCLR_CHECK_HRESULT(ThrowOnError( stack, result ));
-            }
-            else
-            {
+            sslCert = arrCert->GetFirstElement();
 
-                arrCert->Pin();
+            CLR_RT_HeapBlock *hbPwd = caCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___password ].Dereference(); FAULT_ON_NULL(hbPwd);
 
-                sslCert = arrCert->GetFirstElement();
-
-                CLR_RT_HeapBlock *hbPwd = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___password ].Dereference(); FAULT_ON_NULL(hbPwd);
-
-                LPCSTR szCAPwd = hbPwd->StringText();
-                
-                result = (SSL_AddCertificateAuthority( sslContext, (const char*)sslCert, arrCert->m_numOfElements, szCAPwd ) ? 0 : -1);
-                
-                NANOCLR_CHECK_HRESULT(ThrowOnError( stack, result ));
-            }
+            LPCSTR szCAPwd = hbPwd->StringText();
+            
+            result = (SSL_AddCertificateAuthority( sslContext, (const char*)sslCert, arrCert->m_numOfElements, szCAPwd ) ? 0 : -1);
+            
+            NANOCLR_CHECK_HRESULT(ThrowOnError( stack, result ));
         }
     }
 
