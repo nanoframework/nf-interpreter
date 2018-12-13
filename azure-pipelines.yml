@@ -2,8 +2,11 @@ trigger:
   branches:
     include:
     - master
-    - develop/*
-    - release/*
+    - dev/*
+    - develop
+    - develop-sdcard
+    - develop-STM32L0-target
+    - release-/*
     - refs/tags/*
   paths:
     exclude:
