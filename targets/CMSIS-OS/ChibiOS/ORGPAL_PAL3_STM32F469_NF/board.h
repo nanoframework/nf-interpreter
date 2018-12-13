@@ -1371,7 +1371,7 @@ The user should also disable the MCO pin of the clock output if not used.
 * PI7  - KEYPAD_3                  (input pullup).
 * PI8  - PIN8                      (input pullup).
 * PI9  - PIN9                      (input pullup).
-* PI10 - RMII_RXER                 (alternate 7).
+* PI10 - RMII_RXER                 (alternate 11).
 * PI11 - PIN11                     (input pullup).
 * PI12 - RS485_RE                  (output floating).
 * PI13 - RS485_SHDN                (output floating).
