@@ -26,6 +26,10 @@
 #define HAL_USE_FSMC                         FALSE
 #endif
 
+#if !defined(HAL_USE_STM32_ONEWIRE)
+// the default for this driver is NOT to be included
+#define HAL_USE_STM32_ONEWIRE                FALSE
+#endif
 
 // Abstract interfaces
 
@@ -37,6 +41,7 @@
 #include "hal_stm32_crc.h"
 #include "hal_stm32_rng.h"
 #include "hal_stm32_fsmc.h"
+#include "hal_stm32_onewire.h"
 
 // Complex drivers
 // #include "hal_nnnn.h"

@@ -66,7 +66,7 @@ You can force the environemnt variables to be updated by adding -Force to the co
 
 The script will create the following subfolders (see manual install below and appveyor.yml)
 
-   - `C:\Esp32_Tools\1.22.0-80`
+   - `C:\Esp32_Tools`
    - `C:\Esp32_Tools\esp-idf-v3.1`
    - `C:\Esp32_Tools\libs-v3.1`
    - `C:\Esp32_Tools\ninja`  
@@ -75,7 +75,7 @@ The script will create the following subfolders (see manual install below and ap
 The following Environment Variables will be created for the current Windows User. 
 
    - `ESP32_TOOLS_PATH = C:\ESP32_TOOLS`
-   - `ESP32_TOOLCHAIN_PATH = C:\ESP32_TOOLS\1.22.0-80\xtensa-esp32-elf`
+   - `ESP32_TOOLCHAIN_PATH = C:\ESP32_TOOLS`
    - `ESP32_LIBS_PATH = C:\ESP32_TOOLS\libs-v3.1`
    - `IDF_PATH = C:\ESP32_TOOLS\esp-idf-v3.1`
    - `NINJA_PATH = C:\ESP32_TOOLS\ninja`
@@ -104,7 +104,7 @@ and extract it into `C:\Esp32_Tools\libs-v3.1`.
 
 3. Download the v3.1 IDF source zip file from [here](https://github.com/espressif/esp-idf/releases/download/v3.1/esp-idf-v3.1.zip) and extract it into `C:\Esp32_Tools` so you get `C:\ESP32_Tools\esp-idf-v3.1\components` etc.
 
-4. Download the Esp32 toolchain from [here](https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip) and extract it into `C:\Esp32_Tools\1.22.0.80` so you get `C:\Esp32_Tools\1.22.0.80\xtensa-esp32-elf`.
+4. Download the Esp32 toolchain from [here](https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip) and extract it into `C:\Esp32_Tools` so you get `C:\Esp32_Tools\xtensa-esp32-elf`.
 
 5. For on chip debugging of the nanoCLR, download OpenOCD from [here](https://github.com/espressif/openocd-esp32/releases/download/v0.10.0-esp32-20180724/openocd-esp32-win32-0.10.0-esp32-20180724.zip) and extract OpenOCD into `C:\Esp32_Tools` so you get `C:\Esp32_Tools\openocd-esp32`.
 
@@ -113,7 +113,7 @@ and extract it into `C:\Esp32_Tools\libs-v3.1`.
   
 7. Define the environment variables to match the install locations. Default locations are:
    - `ESP32_TOOLS_PATH = C:\ESP32_TOOLS`
-   - `ESP32_TOOLCHAIN_PATH = C:\ESP32_TOOLS\1.22.0-80\xtensa-esp32-elf`
+   - `ESP32_TOOLCHAIN_PATH = C:\ESP32_TOOLS`
    - `ESP32_LIBS_PATH = C:\ESP32_TOOLS\libs-v3.1`
    - `IDF_PATH = C:\ESP32_TOOLS\esp-idf-v3.1`
    - `NINJA_PATH = C:\ESP32_TOOLS\ninja`
@@ -346,7 +346,7 @@ The following example assumes the OpenOCD tool was installed in the default loca
             "type": "cppdbg",
             "request": "launch",
             "MIMode": "gdb",
-            "miDebuggerPath": "C:/ESP32_Tools/1.22.0-80/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
+            "miDebuggerPath": "C:/ESP32_Tools/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
             "stopAtEntry":true,
             "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS/ESP32_DevKitC/nanoCLR.elf",
 

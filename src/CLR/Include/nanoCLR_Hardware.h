@@ -63,7 +63,8 @@ struct CLR_HW_Hardware
                                                      SYSTEM_EVENT_HW_INTERRUPT           |
                                                      SYSTEM_EVENT_FLAG_SOCKET            |
                                                      SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY |
-                                                     SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY;
+                                                     SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY|
+                                                     SYSTEM_EVENT_FLAG_ONEWIRE_MASTER;
 
     //--//
 

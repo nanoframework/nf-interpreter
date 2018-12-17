@@ -1,5 +1,53 @@
 # Change Log
 
+## [**Changes available only in 'Preview' images:**](https://github.com/nanoframework/nf-interpreter/tree/HEAD)
+
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.0.1...HEAD)
+
+**Implemented enhancements:**
+
+- Socket changes and fixes for HTTP [\#955](https://github.com/nanoframework/nf-interpreter/pull/955) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Rework inclusion of UART declarations in STM32 [\#951](https://github.com/nanoframework/nf-interpreter/pull/951) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Add native support for Hardware.Stm32 class lib [\#935](https://github.com/nanoframework/nf-interpreter/pull/935) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Implemented Base64 encoding/decoding [\#934](https://github.com/nanoframework/nf-interpreter/pull/934) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+
+**Fixed bugs:**
+
+- Fix mscorlib native checksum for 1.0.6-preview-001  [\#969](https://github.com/nanoframework/nf-interpreter/pull/969) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+- Socket changes and fixes for HTTP [\#955](https://github.com/nanoframework/nf-interpreter/pull/955) [[Area: Common libs](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Common%20libs)]
+- Fix UART4 setting for Windows.Device.SerialCommunication [\#950](https://github.com/nanoframework/nf-interpreter/pull/950) [[Area: STM32-ChibiOS](https://github.com/nanoframework/nf-interpreter/labels/Area:%20STM32-ChibiOS)]
+- Fixes for issue \#416 [\#933](https://github.com/nanoframework/nf-interpreter/pull/933) [[Area: Interpreter](https://github.com/nanoframework/nf-interpreter/labels/Area:%20Interpreter)]
+
+**Documentation and other chores:**
+
+- Update nanoFramework.Hardware.Esp32 version to 1.0.2-preview-009 [\#980](https://github.com/nanoframework/nf-interpreter/pull/980)
+- Update Windows.Devices.Gpio version to 1.0.2-preview-008 [\#979](https://github.com/nanoframework/nf-interpreter/pull/979)
+- Update Windows.Devices.SerialCommunication version to 1.0.2-preview-009 [\#978](https://github.com/nanoframework/nf-interpreter/pull/978)
+- Update Windows.Devices.Spi version to 1.0.2-preview-007 [\#977](https://github.com/nanoframework/nf-interpreter/pull/977)
+- Update Windows.Devices.I2c version to 1.0.2-preview-007 [\#976](https://github.com/nanoframework/nf-interpreter/pull/976)
+- Update declaration of Windows.Devices.Gpio [\#973](https://github.com/nanoframework/nf-interpreter/pull/973)
+- Update declaration for Windows.Devices.Spi [\#972](https://github.com/nanoframework/nf-interpreter/pull/972)
+- Update declaration for Windows.Devices.SerialCommunication [\#971](https://github.com/nanoframework/nf-interpreter/pull/971)
+- Update Windows.Devices.I2c declaration [\#970](https://github.com/nanoframework/nf-interpreter/pull/970)
+- Update nanoFramework.Hardware.Esp32 version to 1.0.2-preview-004 [\#968](https://github.com/nanoframework/nf-interpreter/pull/968)
+- Update Windows.Devices.SerialCommunication version to 1.0.2-preview-004 [\#967](https://github.com/nanoframework/nf-interpreter/pull/967)
+- Update Windows.Devices.WiFi version to 1.0.2-preview-004 [\#966](https://github.com/nanoframework/nf-interpreter/pull/966)
+- Update nanoFramework.System.Net version to 1.0.2-preview-001 [\#965](https://github.com/nanoframework/nf-interpreter/pull/965)
+- Update Windows.Devices.Spi version to 1.0.2-preview-004 [\#964](https://github.com/nanoframework/nf-interpreter/pull/964)
+- Update Windows.Devices.Gpio version to 1.0.2-preview-004 [\#963](https://github.com/nanoframework/nf-interpreter/pull/963)
+- Update nanoFramework.Hardware.Stm32 version to 1.0.2-preview-004 [\#962](https://github.com/nanoframework/nf-interpreter/pull/962)
+- Update nanoFramework.Networking.Sntp version to 1.0.2-preview-005 [\#961](https://github.com/nanoframework/nf-interpreter/pull/961)
+- Update Windows.Devices.I2c version to 1.0.2-preview-004 [\#960](https://github.com/nanoframework/nf-interpreter/pull/960)
+- Update Windows.Devices.Adc version to 1.0.2-preview-004 [\#959](https://github.com/nanoframework/nf-interpreter/pull/959)
+- Update nanoFramework.Runtime.Native version to 1.0.2-preview-004 [\#958](https://github.com/nanoframework/nf-interpreter/pull/958)
+- Update nanoFramework.Runtime.Events version to 1.0.2-preview-004 [\#957](https://github.com/nanoframework/nf-interpreter/pull/957)
+- Update nanoFramework.CorLib version to 1.0.6-preview-001 [\#956](https://github.com/nanoframework/nf-interpreter/pull/956)
+- Update nanoFramework.Networking.Sntp version to 1.0.2-preview-002 [\#954](https://github.com/nanoframework/nf-interpreter/pull/954)
+- Move System.Math to it's own class lib [\#948](https://github.com/nanoframework/nf-interpreter/pull/948)
+
+## [v1.0.1](https://github.com/nanoframework/nf-interpreter/tree/v1.0.1) (2018-10-18)
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.0.0...v1.0.1)
+
 ## [v1.0.0](https://github.com/nanoframework/nf-interpreter/tree/v1.0.0) (2018-10-18)
 [Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v0.0.0...v1.0.0)
 

@@ -9,8 +9,11 @@
 # and the namespace designation is 'Windows.Devices.Gpio'
 ###########################################################################################
 
+option(API_nanoFramework.Devices.Can            "option for nanoFramework.Devices.Can")
+option(API_nanoFramework.Devices.OneWire        "option for nanoFramework.Devices.OneWire")
 option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
 option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
+option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
 option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
@@ -23,6 +26,11 @@ option(API_Windows.Networking.Sockets           "option for Windows.Networking.S
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
+
+
+# Stm32 only
+option(API_Hardware.Stm32                       "option for Hardware.Esp32")
+
 
 #################################################################
 # macro to perform individual settings to add an API to the build
@@ -64,6 +72,30 @@ endmacro()
 
 macro(ParseNativeAssemblies)
 
+    # Hardware.Esp32
+    if(API_Hardware.Esp32)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
+    endif()
+
+    # Hardware.Stm32
+    if(API_Hardware.Stm32)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
+    endif()
+
+    # nanoFramework.Devices.Can
+    if(API_nanoFramework.Devices.Can)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Devices.Can")
+    endif()
+
+    # nanoFramework.Devices.OneWire
+    if(API_nanoFramework.Devices.OneWire)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Devices.OneWire")
+    endif()
+
     # nanoFramework.Networking.Sntp
     if(API_nanoFramework.Networking.Sntp)
         ##### API name here (doted name)
@@ -82,6 +114,12 @@ macro(ParseNativeAssemblies)
         # append to list of entries for Interop Assemblies table
         list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs,")
 
+    endif()
+
+    # System.Math
+    if(API_System.Math)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("System.Math")
     endif()
 
     # System.Net
@@ -136,12 +174,6 @@ macro(ParseNativeAssemblies)
     if(API_Windows.Devices.Wifi)
        ##### API name here (doted name)
        PerformSettingsForApiEntry("Windows.Devices.Wifi")
-    endif()
-
-    # Hardware.Esp32
-    if(API_Hardware.Esp32)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
     endif()
 
     # Interop assemblies

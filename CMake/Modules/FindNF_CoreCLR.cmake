@@ -21,6 +21,7 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${PROJECT_SOURCE_DIR}/src/CLR/Startup)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Debugger)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/Base64)
 
 
 # source files for nanoFramework Core, CoreLib and CLR startup
@@ -92,7 +93,7 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Globalization_DateTimeFormat.cpp
     corlib_native_System_Guid.cpp
     corlib_native_System_MarshalByRefObject.cpp
-    corlib_native_System_Math.cpp
+    corlib_native_System_MathInternal.cpp
     corlib_native_System_MulticastDelegate.cpp
     corlib_native_System_Number.cpp
     corlib_native_System_Object.cpp
@@ -155,11 +156,12 @@ set(NF_CoreCLR_SRCS
     
     # Helpers
     printf.c
+    base64.c
 
     # HAL
     nanoHAL_Time.cpp
     nanoHAL_Watchdog.c
-
+    
     # PAL
     nanoPAL_BlockStorage.c
     nanoPAL_NativeDouble.cpp
@@ -212,6 +214,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             
             # Helpers
             ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf
+            ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/Base64
 
             # HAL
             ${PROJECT_SOURCE_DIR}/src/HAL

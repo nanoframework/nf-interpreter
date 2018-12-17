@@ -1,0 +1,85 @@
+# Copyright (c) 2018 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            Write-Host "Downloading Xtensa ESP32 toolchain..."
+            $url = "https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip"
+            $output = "$PSScriptRoot\xtensa-esp32-elf-win32.zip"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Download xtensa ESP32 toolchain
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\xtensa-esp32-elf-win32.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
+      cleanDestinationFolder: false
+    displayName: Extracting xtensa ESP32 toolchain
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            Write-Host "Downloading ESP32 pre-compiled libs..."
+            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.1.zip"
+            $output = "$PSScriptRoot\IDF_libs-v3.1.zip"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Downloading ESP32 pre-compiled libs
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\IDF_libs-v3.1.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs-v3.1'
+      cleanDestinationFolder: false
+    displayName: Installing ESP32 pre-compiled libs
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            Write-Host "Downloading ESP32 IDF..."
+            $url = "https://github.com/espressif/esp-idf/releases/download/v3.1/esp-idf-v3.1.zip"
+            $output = "$PSScriptRoot\esp-idf-v3.1.zip"
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Downloading ESP32 IDF
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-v3.1.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
+      cleanDestinationFolder: false
+    displayName: Installing Espressif IDF
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: python -m pip install pyserial
+        # the bellow settings are required as the script is installing an outdated version of pyserial
+        errorActionPreference: 'silentlyContinue' 
+        failOnStderr: false
+        ignoreLASTEXITCODE: false
+    displayName: Installing python pyserial
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+            # need to replace forward slash for paths to work with GCC and CMake
+            $tempDirPath = "$env:Agent_TempDirectory".Replace('\','/')
+            Write-Host "$("##vso[task.setvariable variable=ESP32_LIBS_PATH]")$tempDirPath/ESP32_Tools/libs-v3.1"
+            Write-Host "$("##vso[task.setvariable variable=ESP32_IDF_PATH]")$tempDirPath/ESP32_Tools/esp-idf-v3.1"
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    displayName: Adjust paths
+
+  - script: echo "##vso[task.prependpath]C:\Windows\System32"
+    displayName: Tweak PATH to reach cmd

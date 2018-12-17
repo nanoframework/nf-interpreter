@@ -1,0 +1,267 @@
+trigger:
+  branches:
+    include:
+    - master
+    - dev/*
+    - develop
+    - develop-sdcard
+    - develop-STM32L0-target
+    - release-/*
+    - refs/tags/*
+  paths:
+    exclude:
+    - /*.md
+    - .gitignore
+    - appveyor.yml
+    - cmake-variants.TEMPLATE.json
+  # waiting for feature to become available
+  # tags:
+  #   include:
+  #   - v/*
+
+pr:
+  branches:
+    include:
+    - master
+    - develop
+    - release/*
+  autoCancel: true
+
+# add nf-tools repo to resources (for Azure Pipelines templates)
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: nanoframework/nf-tools
+      endpoint: nanoframework
+
+jobs:
+
+##############################
+- job: Check_Build_Options
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  steps:
+  - checkout: self
+    fetchDepth: 1
+
+  # get commint message
+  - powershell: |
+
+      # get commit details, if this is a PR
+      if($env:Build_SourceBranch -like "refs/pull*")
+      {
+        $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
+
+        if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
+        {
+          echo "##vso[task.setvariable variable=IS_VERSION_UPDATE;isOutput=true]true"  
+        }
+        else
+        {
+          echo "##vso[task.setvariable variable=IS_VERSION_UPDATE;isOutput=true]false"  
+        }
+      }
+      else
+      {
+        echo "##vso[task.setvariable variable=IS_VERSION_UPDATE;isOutput=true]false"  
+      }
+
+    name: BuildOptions
+    displayName: Evaluate build options
+
+#################
+# STM32
+- job: Build_STM32_targets
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  # not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
+  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.IS_VERSION_UPDATE'], true ) ))
+
+  dependsOn:
+  - Check_Build_Options
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  strategy:
+    matrix:
+      MBN_QUAIL:
+        BoardName: MBN_QUAIL
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_nanoFramework.Devices.OneWire=ON
+        NeedsDFU: true
+      NETDUINO3_WIFI:
+        BoardName: NETDUINO3_WIFI
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.Devices.OneWire=ON
+        NeedsDFU: true
+      ST_STM32F429I_DISCOVERY:
+        BoardName: ST_STM32F429I_DISCOVERY
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON
+        NeedsDFU: false
+      ST_NUCLEO64_F091RC:
+        BoardName: ST_NUCLEO64_F091RC
+        BuildOptions: -DTARGET_SERIES=STM32F0xx -DRTOS=CHIBIOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON
+        NeedsDFU: false
+      ST_STM32F769I_DISCOVERY:
+        BoardName: ST_STM32F769I_DISCOVERY
+        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON
+        NeedsDFU: false  
+
+  variables:
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+
+  steps:
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+
+  - template: azure-pipelines-templates/download-install-ninja.yml
+
+  - template: azure-pipelines-templates/download-hexdfu.yml
+
+  - template: azure-pipelines-templates/build-chibios-stm32.yml
+
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+
+  - template: azure-pipelines-templates/publish-bintray.yml
+
+#################
+# ESP32 targets
+- job: Build_ESP32_targets
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  # condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
+  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.IS_VERSION_UPDATE'], true ) ))
+
+  dependsOn:
+  - Check_Build_Options
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
+  strategy:
+    matrix:
+      ESP32_DEVKITC:
+        BoardName: ESP32_DEVKITC
+        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_OPENSSL=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON
+
+  variables:
+    ESP32_TOOLCHAIN_PATH: $(Agent.TempDirectory)\ESP32_Tools
+
+  steps:
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+
+  - template: azure-pipelines-templates/download-install-esp32-build-components.yml
+
+  - template: azure-pipelines-templates/download-install-ninja.yml
+
+  - template: azure-pipelines-templates/build-esp32.yml
+
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(ESP32_LIBS_PATH)
+      Contents: |
+        bootloader.bin
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      flattenFolders: true
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
+    displayName: Copying bootloader from ESP32 libs
+
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+
+  - template: azure-pipelines-templates/publish-bintray.yml
+
+#################
+# WIN32 
+- job: Build_WIN32_nanoCLR
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  # condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
+  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.IS_VERSION_UPDATE'], true ) ))
+
+  dependsOn:
+  - Check_Build_Options
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  steps:
+  - task: NuGetToolInstaller@0
+
+  - task: VSBuild@1
+    inputs:
+      solution: 'targets\os\win32\nanoCLR.sln'
+      platform: 'x86'
+      configuration: 'Release'
+
+#######################
+# generate change log
+- job: Generate_change_log
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), not( and( eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) ) )
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  steps:
+  - task: DotNetCoreCLI@2  
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . nbgv
+    displayName: Install NBGV tool
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: nbgv cloud -a -c
+        errorActionPreference: 'silentlyContinue'
+        failOnStderr: 'false'
+    displayName: Set build number
+    # condition: ne(variables['system.pullrequest.isfork'], true)
+
+  - task: UseRubyVersion@0
+    inputs:
+      versionSpec: '>= 2.4' 
+      addToPath: true
+
+  # generate change log including future version
+  - script: |
+        gem install bundler
+        bundle install --retry=3 --jobs=4
+        gem install github_changelog_generator
+        bundle exec github_changelog_generator --token $(GitHubToken) --future-release "v$(NBGV_Version)"
+    condition: or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
+    displayName: Generate change log
+
+  # generate change log including future version
+  - script: |
+        gem install github_changelog_generator
+        bundle exec github_changelog_generator --token $(GitHubToken)
+    condition: not( or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) 
+    displayName: Generate change log
+
+##################################
+# report build failure to Discord
+- job: Report_Build_Failure
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'))
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  steps:
+
+  - checkout: self
+    fetchDepth: 1
+
+  # step from template @ nf-tools repo
+  - template: azure-pipelines-templates/discord-webhook.yml@templates  
+    parameters:
+      status: 'failure'
+      webhookUrl: '$(DiscordWebhook)'
+      message: ''

@@ -36,19 +36,19 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
         // Get channel from _channelNumber field
         int channelNumber = pThis[FIELD___channelNumber].NumericByRef().s4;
 
-        // need to get the deviceId for the ADC controller of this channel
+        // need to get the controllerId for the ADC controller of this channel
         // get pointer to AdcController field
         CLR_RT_HeapBlock* adcController = pThis[FIELD___adcController].Dereference();
 
-        // get pointer to _deviceId field in AdcController
-        int deviceId = adcController[Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::FIELD___deviceId].NumericByRef().s4;
+        // get pointer to _controllerId field in AdcController
+        int controllerId = adcController[Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::FIELD___controllerId].NumericByRef().s4;
 
         // we are filling this bellow with the appropriate ADC port pin config and ADC driver
         NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
         ADCDriver* adcDriver = NULL;
 
         // only one ADC controller for now, but check it anyways
-        if(deviceId == 1)
+        if(controllerId == 1)
         {
             adcDefinition = AdcPortPinConfig[channelNumber];
 

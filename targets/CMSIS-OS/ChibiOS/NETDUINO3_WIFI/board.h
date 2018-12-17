@@ -143,6 +143,18 @@
 #define GPIOH_PIN15                 15U
 
 /*
+ * IO lines assignments.
+ */
+#define LINE_LED1                   PAL_LINE(GPIOA, 10U)
+#define LINE_SD_DETECT              PAL_LINE(GPIOB, 11U)
+
+#define LINE_LED_GOPORT1            PAL_LINE(GPIOE, 9U)
+
+#define LINE_LED_GOPORT2            PAL_LINE(GPIOE, 11U)
+
+#define LINE_LED_GOPORT3            PAL_LINE(GPIOE, 14U)
+
+/*
  * I/O ports initial setup, this configuration is established soon after reset
  * in the initialization code.
  * Please refer to the STM32 Reference Manual for details.

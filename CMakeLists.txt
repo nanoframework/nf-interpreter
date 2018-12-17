@@ -391,10 +391,17 @@ endif()
 # for some APIs we need to enable the device in the HAL config
 # and/or manage other APIs that are required
 
+if( API_nanoFramework.Devices.OneWire OR
+    API_Windows.Devices.SerialCommunication)
 
-if(API_System.Net)
-    # this API requires nanoFramework.Runtime.Events
-    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
+    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
+
+else()
+    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
+endif()
+
+if( API_System.Net OR
+    API_Windows.Networking.Sockets)
 
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
@@ -412,13 +419,6 @@ if(API_System.Net)
         set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
     endif()
 
-    # manage inclusion of SNTP
-    if(NF_NETWORKING_SNTP)
-        set(API_nanoFramework.Networking.Sntp ON CACHE INTERNAL "enable API_nanoFramework..Networking.Sntp")
-    else()
-        set(API_nanoFramework.Networking.Sntp OFF CACHE INTERNAL "disable API_nanoFramework..Networking.Sntp")
-    endif()
-
 endif()
 
 
@@ -431,10 +431,6 @@ endif()
 
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-
-    # this API requires nanoFramework.Runtime.Events
-    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
-
 else()
     set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
 endif()
@@ -454,17 +450,6 @@ else()
 endif()
 
 
-if(API_Windows.Devices.SerialCommunication)
-    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
-    
-    # this API requires nanoFramework.Runtime.Events
-    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
-
-else()
-    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL Serial for Windows.Devices.SerialCommunication")
-endif()
-
-
 if(API_Windows.Devices.Spi)
     set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 else()
@@ -472,12 +457,37 @@ else()
 endif()
 
 
-if(API_Windows.Networking.Sockets)
-    # this API requires nanoFramework.Runtime.Events
+if(API_nanoFramework.Devices.Can)
+    set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
+else()
+    set(HAL_USE_CAN_OPTION FALSE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
+endif()
+
+
+#################################################################
+# manage dependent APIs required for some API namespaces
+#################################################################
+
+# include nanoFramework.Runtime.Events API
+if( API_nanoFramework.Devices.OneWire OR 
+    API_System.Net OR
+    API_Windows.Devices.Gpio OR
+    API_Windows.Devices.SerialCommunication OR
+    API_Windows.Networking.Sockets OR
+    API_nanoFramework.Devices.Can)
+
+    # these APIs requires nanoFramework.Runtime.Events
     set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
 
-    # set NETWORKING option to true
-    set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
+endif()
+
+if(API_System.Net)
+    # manage inclusion of SNTP
+    if(NF_NETWORKING_SNTP)
+        set(API_nanoFramework.Networking.Sntp ON CACHE INTERNAL "enable API_nanoFramework..Networking.Sntp")
+    else()
+        set(API_nanoFramework.Networking.Sntp OFF CACHE INTERNAL "disable API_nanoFramework..Networking.Sntp")
+    endif()
 endif()
 
 

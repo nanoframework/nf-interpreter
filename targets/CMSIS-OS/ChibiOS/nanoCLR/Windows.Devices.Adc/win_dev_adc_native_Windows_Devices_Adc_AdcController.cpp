@@ -25,15 +25,15 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
         // Get channel from argument
         int channel = stack.Arg1().NumericByRef().s4;
 
-        // get device ID
-        int deviceId = pThis[FIELD___deviceId].NumericByRef().s4;
+        // get controller ID
+        int controllerId = pThis[FIELD___controllerId].NumericByRef().s4;
 
         // we are filling this bellow with the appropriate ADC port pin config and ADC driver
         NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
         ADCDriver* adcDriver = NULL;
 
         // only one ADC controller for now, but check it anyways
-        if(deviceId == 1)
+        if(controllerId == 1)
         {
             adcDefinition = AdcPortPinConfig[channel];
 
@@ -88,9 +88,9 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetC
 
         CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-        int deviceId = pThis[ FIELD___deviceId ].NumericByRefConst().s4;
+        int controllerId = pThis[ FIELD___controllerId ].NumericByRefConst().s4;
 
-        switch(deviceId)
+        switch(controllerId)
         {
             case 1: 
                 channelCount = AdcChannelCount;
@@ -151,21 +151,26 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetR
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+
+    int controllerId;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+    // get pointer to _controllerId field in AdcController
+    controllerId = pThis[FIELD___controllerId].NumericByRef().s4;
+
+    // all required initialization for ADC is already handled in ChibiOS driver
+
+    switch(controllerId)
     {
-        // Get device Id from argument
-        int deviceId = stack.Arg1().NumericByRef().s4;
+        case 1: 
+            break;
 
-        // all required initialization for ADC is already handled in ChibiOS driver
- 
-        switch(deviceId)
-        {
-            case 1: 
-                break;
-
-            default: 
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
+        default: 
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
     NANOCLR_NOCLEANUP();
 }
 

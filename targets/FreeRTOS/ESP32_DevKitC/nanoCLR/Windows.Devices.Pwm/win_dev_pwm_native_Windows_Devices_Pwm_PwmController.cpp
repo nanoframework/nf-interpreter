@@ -50,7 +50,7 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::NativeSetD
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         // Retrieves the needed parameters from private class properties ( 0 - 7 )
-        int timerId = (int)(pThis[ FIELD___deviceId ].NumericByRef().u4);
+        int timerId = (int)(pThis[ FIELD___controllerId ].NumericByRef().u4);
         
         unsigned int desiredFrequency = (unsigned int)stack.Arg1().NumericByRef().u4;
 

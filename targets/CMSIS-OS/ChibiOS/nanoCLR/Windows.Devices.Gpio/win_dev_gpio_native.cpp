@@ -14,6 +14,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController::get_PinCount___I4,
     NULL,
     NULL,
@@ -79,8 +80,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Gpio =
 {
-    "Windows.Devices.Gpio",
-    0xC75E250A,
+    "Windows.Devices.Gpio", 
+    0xF8E84C07,
     method_lookup,
-    { 1, 0, 0, 0 }
+    { 1, 0, 2, 2 }
 };

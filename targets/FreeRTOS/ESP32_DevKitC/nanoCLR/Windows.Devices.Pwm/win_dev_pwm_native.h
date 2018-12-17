@@ -24,7 +24,7 @@ enum PwmPulsePolarity
 
 struct Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController
 {
-    static const int FIELD___deviceId = 1;
+    static const int FIELD___controllerId = 1;
     static const int FIELD___actualFrequency = 2;
     static const int FIELD___pwmTimer = 3;
 
@@ -33,6 +33,16 @@ struct Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController
     NANOCLR_NATIVE_DECLARE(get_PinCount___I4);
     NANOCLR_NATIVE_DECLARE(NativeSetDesiredFrequency___U4__U4);
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
+
+    //--//
+
+};
+
+struct Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmControllerManager
+{
+    static const int FIELD_STATIC___syncLock = 0;
+    static const int FIELD_STATIC__s_controllersCollection = 1;
+
 
     //--//
 
@@ -48,7 +58,7 @@ struct Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin
     static const int FIELD___pinNumber = 6;
     static const int FIELD___pwmTimer = 7;
     static const int FIELD___isStarted = 8;
-    static const int FIELD___disposedValue = 9;
+    static const int FIELD___disposed = 9;
 
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeSetActiveDutyCyclePercentage___VOID__U4);
@@ -63,8 +73,6 @@ struct Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin
     static uint32_t CalculateDuty(int timerId, uint32_t dutyCycle, PwmPulsePolarity polarity);
     static HRESULT  ConfigureAndStart(CLR_RT_HeapBlock* pThis, bool create, bool noStart);
 
- //   static int GetAlternateFunction (int timerId);
- 
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Pwm;

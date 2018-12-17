@@ -21,6 +21,7 @@ set(Windows.Devices.I2c_SRCS
     win_dev_i2c_native.cpp
     win_dev_i2c_native.h
     win_dev_i2c_native_Windows_Devices_I2C_I2cDevice.cpp
+    win_dev_i2c_native_Windows_Devices_I2c_I2cController.cpp
 
     target_windows_devices_i2c_config.cpp
 )

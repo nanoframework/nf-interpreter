@@ -66,8 +66,6 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_Power
 
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_ResourceUtility
 {
-    static const int FIELD_STATIC__s_wr = 1;
-
     NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__mscorlibSystemResourcesResourceManager__mscorlibSystemEnum);
     NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__mscorlibSystemResourcesResourceManager__mscorlibSystemEnum__I4__I4);
 

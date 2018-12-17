@@ -21,6 +21,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_win_dev_i2c_native_Windows_Devices_I2c_I2cController::NativeInit___VOID,
+    NULL,
+    Library_win_dev_i2c_native_Windows_Devices_I2c_I2cController::GetDeviceSelector___STATIC__STRING,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -37,7 +45,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit___WindowsDevicesI2cI2cTransferResult__SZARRAY_U1__SZARRAY_U1,
     NULL,
     NULL,
-    Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetDeviceSelector___STATIC__STRING,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -52,7 +60,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_I2c =
 {
     "Windows.Devices.I2c", 
-    0xA170B1E0,
+    0x0C4EA1B2,
     method_lookup,
-    { 1, 0, 0, 0 }
+    { 1, 1, 0, 2 }
 };

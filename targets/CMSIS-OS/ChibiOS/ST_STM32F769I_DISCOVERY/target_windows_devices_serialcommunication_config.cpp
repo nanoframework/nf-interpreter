@@ -3,7 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_serial_native.h"
+#include "target_windows_devices_serialcommunication_config.h"
+#include <win_dev_serial_native.h>
 
 
 ///////////
@@ -17,12 +18,6 @@
 // RX pin: is GPIOC_7
 // GPIO alternate pin function is 8 (see "Table 13. STM32F765xx, STM32F767xx, STM32F768Ax and STM32F769xx alternate function mapping" in STM32F769I datasheet)
 UART_CONFIG_PINS(6, GPIOC, GPIOC, 6, 7, 8)
-
-// buffers size
-// tx buffer size: 256 bytes
-#define UART6_TX_SIZE  256
-// rx buffer size: 256 bytes
-#define UART6_RX_SIZE  256
 
 // buffers
 // buffers that are R/W by DMA are recommended to be aligned with 32 bytes cache page size boundary

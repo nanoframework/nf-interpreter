@@ -1,0 +1,62 @@
+# Copyright (c) 2018 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(BoardName)' 
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
+      replaceExistingArchive: true
+    # skip task on PR build and when on branch other than develop, master or release
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
+    displayName: Zip binary files
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+
+            $repoName = $env:Build_Repository_Name
+            $branchName = $env:Build_SourceBranchName
+
+            Write-Host "repo name is: $repoName"
+            Write-Host "branch name is: $branchName"
+
+            if( $env:Build_Repository_Name -like "*nf-Community-Targets" )
+            {
+              # this is a build for a community target
+              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-community-targets"
+            }
+            else
+            {
+              if( $env:Build_SourceBranchName -eq "develop" -or 
+                  $env:Build_SourceBranchName -match "^release*" )
+              {
+                # this a dev or release branch, publish to Bintray dev repo
+                Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
+              }
+              else 
+              {
+                # this master branch, publish to Bintray stable repo
+                Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images"
+              }
+            }
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    # skip task on PR build and when on branch other than develop, master or release
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
+    displayName: Set Bintray repo path
+
+  - task: cURLUploader@2
+    inputs:
+      files: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
+      authType: 'userAndPass'
+      username: 'nfbot'
+      password: '$(BinTrayKey)'
+      url: 'https://api.bintray.com/'
+      remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
+    # skip task on PR build and when on branch other than develop, master or release
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
+    displayName: Upload artifact to Bintray
