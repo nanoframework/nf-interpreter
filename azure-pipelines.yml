@@ -102,10 +102,6 @@ jobs:
         BoardName: ST_NUCLEO64_F091RC
         BuildOptions: -DTARGET_SERIES=STM32F0xx -DRTOS=CHIBIOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON
         NeedsDFU: false
-      ST_NUCLEO144_F746ZG:
-        BoardName: ST_NUCLEO144_F746ZG 
-        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.Devices.OneWire=ON
-        NeedsDFU: false
       ST_STM32F769I_DISCOVERY:
         BoardName: ST_STM32F769I_DISCOVERY
         BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON
