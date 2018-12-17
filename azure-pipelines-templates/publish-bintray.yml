@@ -17,6 +17,13 @@ steps:
     inputs:
         targetType: 'inline'
         script: |
+
+            $repoName = $env:Build_Repository_Name
+            $branchName = $env:Build_SourceBranchName
+
+            Write-Host "repo name is: $repoName"
+            Write-Host "branch name is: $branchName"
+
             if( $env:Build_Repository_Name -eq "nf-Community-Targets" )
             {
               # this is a build for a community target
