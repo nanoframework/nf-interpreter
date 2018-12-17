@@ -24,7 +24,7 @@ steps:
             Write-Host "repo name is: $repoName"
             Write-Host "branch name is: $branchName"
 
-            if( $env:Build_Repository_Name -eq "nf-Community-Targets" )
+            if( $env:Build_Repository_Name -like "*nf-Community-Targets" )
             {
               # this is a build for a community target
               Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-community-targets"
