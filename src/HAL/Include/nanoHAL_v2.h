@@ -155,6 +155,7 @@ extern "C" {
 #endif
 
 void nanoHAL_Initialize_C();
+void nanoHAL_Uninitialize_C();
 void HeapLocation_C(unsigned char** baseAddress, unsigned int* sizeInBytes);
 
 // Call to the external memory configuration and initialization function
