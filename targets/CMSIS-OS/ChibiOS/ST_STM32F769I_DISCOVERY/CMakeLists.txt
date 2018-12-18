@@ -235,6 +235,6 @@ if(${VISUAL_STUDIO})
     # Use the CopyBuildOutput.cmd manually do the same thing
 elseif()
     # generate output files
-   # nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
-   # nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+    nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
+    nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
 endif()
