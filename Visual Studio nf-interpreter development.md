@@ -39,8 +39,10 @@ I made a decision to put the code at the top level to reduce path length of file
 
 <br>
 
-### Directory structure for the project
-#### 1. nf-interpreterVS/Build
+## Directory structure for the project
+### c:\nf-interpreterVS
+THe nf-interpreter repository
+#### 1. c:\nf-interpreterVS\Build
 This directory contains the build output, the files in here are transient. When the CMake cache is deleted, files in this directory are deleted.
 The files in this directory are only visible when selecting "Show All Files". These files are not part of the GIT repository.
 At the end of a successful build the build outputs are copied to the *\Build* directory.
@@ -54,15 +56,16 @@ Sometime the CMake server goes away, shutting down Visual Studio and restarting 
 >It is necessary to manually delete the directory from file explorer and generate the cache for the copy to run.
 >_
 
-#### 2. nf-support
-##### 2a. ChibiOS
+#### 2. c:\nf-support 
+ Create directory to contain the following ( see CMakeSettings.json and launch.vs.json)
+##### 2a. c:\nf-support\ChibiOS
 >Copy of the ChibiOS repository cloned from https://github.com/nanoframework/ChibiOS.git
 
-##### 2b. Tools\openocd
+##### 2b. C:\nf-support\Tools\openocd
 >Copy of the openocd installation http://www.freddiechopin.info/en/download/category/4-openocd
 >Currently version 0.10.0
 >
-##### 2c. Tools
+##### 2c. C:\nf-support\ToolsTools
 >hex to Dfu tool 
 >
 
