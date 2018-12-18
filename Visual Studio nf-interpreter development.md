@@ -34,40 +34,43 @@ I made a decision to put the code at the top level to reduce path length of file
 
 
 ##### launch.vs.json
-> Setups up the debugging environment using the gdbserver debugging via configurations.
+> Sets up the debugging environment using the gdbserver debugging via configurations.
 > The example references the openocd application.
 
 <br>
 
-## Directory structure for the project
-### c:\nf-interpreterVS
-THe nf-interpreter repository
-#### 1. c:\nf-interpreterVS\Build
-This directory contains the build output, the files in here are transient. When the CMake cache is deleted, files in this directory are deleted.
+### Directory structure for the project
+Two top level directories have been created to support the development with Visual Studio.
+`c:\nf-interpreter and c:\nf-support`
+
+#### c:\nf-interpreter
+- The nf-interpreter repository is cloned to this directory.
+######  c:\nf-interpreter\Build
+- This directory contains the build output, the files in here are transient. When the CMake cache is deleted, files in this directory are deleted.
 The files in this directory are only visible when selecting "Show All Files". These files are not part of the GIT repository.
 At the end of a successful build the build outputs are copied to the *\Build* directory.
-Under the *\Build* directory are many folders and files created and managed by the CMake/ninja build process.
->Note: It is sometimes necessary to delete the contents of these folders if Visual Studio misbehaves.
+
+> - Note: It is sometimes necessary to delete the contents of these folders if Visual Studio misbehaves.
 Using Visual Studio with CMake results in what appears to be inconsistencies at times.
 Sometime the CMake server goes away, shutting down Visual Studio and restarting usually fixes the problem.
 <br>
-> Note: After clearing the Cmake cache, on occassions the build/chibios_source directory is left empty or only containing the .git file
+> - Note: After clearing the Cmake cache, on occassions the build/chibios_source directory is left empty or only containing the .git file
 >due to some conflict. The current CMakeLists.txt file finds the directory and does not re-copy the code.
 >It is necessary to manually delete the directory from file explorer and generate the cache for the copy to run.
 >_
 
-#### 2. c:\nf-support 
- Create directory to contain the following ( see CMakeSettings.json and launch.vs.json)
-##### 2a. c:\nf-support\ChibiOS
->Copy of the ChibiOS repository cloned from https://github.com/nanoframework/ChibiOS.git
+#### c:\nf-support 
+ Manually create this directory to contain the following folders.
+###### c:\nf-support\ChibiOS
++ Copy of the ChibiOS repository cloned from https://github.com/nanoframework/ChibiOS.git
 
-##### 2b. C:\nf-support\Tools\openocd
->Copy of the openocd installation http://www.freddiechopin.info/en/download/category/4-openocd
->Currently version 0.10.0
->
-##### 2c. C:\nf-support\ToolsTools
->hex to Dfu tool 
->
+######  C:\nf-support\Tools\openocd
++ Copy of the openocd installation http://www.freddiechopin.info/en/download/category/4-openocd
++ > Currently version 0.10.0
+
+###### C:\nf-support\Tools\
++ Place a copy of the hex2dfu.exe tool here
+
 
 #### Setup and Installation
 
