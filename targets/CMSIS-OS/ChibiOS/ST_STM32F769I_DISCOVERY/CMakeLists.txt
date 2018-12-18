@@ -69,6 +69,7 @@ add_executable(
 
     # need to add configuration manager to allow get/store configuration blocks
     "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c"
+    "${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common/targetHAL_ConfigurationManager.cpp"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOBOOTER_PROJECT_SOURCES}
@@ -228,6 +229,12 @@ nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x2000")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x3B000")
 
-# generate output files
-nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+
+if(${VISUAL_STUDIO})
+    # CMAKE command add_custom_Command 'POST_BUILD' currently fails,  "CMD.EXE" not recognised
+    # Use the CopyBuildOutput.cmd manually do the same thing
+elseif()
+    # generate output files
+   # nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
+   # nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+endif()

@@ -1,0 +1,215 @@
+﻿{
+  "configurations": [
+    {
+      "name": "STM769IDiscovery",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [
+        "gcc-arm"
+      ],
+      "buildRoot": "C:\\nf-interpreter\\Build\\${name}",
+      "installRoot": "C:\\nf-interpreter\\Build\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "linux-gcc-arm",
+      "variables": [
+        {
+          "name": "VISUAL_STUDIO",
+          "value": "TRUE"
+        },
+        {
+          "name": "EXECUTABLE_OUTPUT_PATH",
+          "value": "C:/nf-interpreter/build/${name}"
+        },
+        {
+          "name": "TOOLCHAIN_PREFIX",
+          "value": "C:/Program Files (x86)/GNU Tools Arm Embedded/7 2018-q2-update"
+          //"value": "${env.GCCPATH}"   // Standard Visual Studio Install of GCC 6.3.1 
+        },
+        {
+          "name": "CMAKE_SYSTEM_NAME",
+          "value": "Generic"
+        },
+        {
+          "name": "GIT_EXECUTABLE",
+          "value": "${env.VSINSTALLDIR}/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/Git/cmd/git.exe"
+        },
+        {
+          "name": "GIT_VERSION_STRING",
+          "value": "2.19.0"
+        },
+        {
+          "name": "TARGET_SERIES",
+          "value": "STM32F7xx"
+        },
+        {
+          "name": "CHIBIOS_BOARD",
+          "value": "ST_STM32F769I_DISCOVERY"
+        },
+        {
+          "name": "CHIBIOS_SOURCE", // manually download, problems at the moment with value="", sub process access denied at build?
+          "value": "C:\\nf-support\\ChibiOS"
+        },
+        {
+          "name": "CHIBIOS_VERSION", // default blank, set to specific version ( Not working with Visual Studio, clone and checkout specific manually)
+          "value": ""
+        },
+        {
+          "name": "USE_RNG", //option to enable use of true random generator hardware block
+          "value": "ON"
+        },
+        {
+          "name": "TARGET_DP_FLOATINGPOINT",
+          "value": "FALSE"
+        },
+        {
+          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION", //"Option for string conversion to value from base 10 and partial for 16"
+          "value": "FALSE"
+        },
+        {
+          "name": "TOOL_HEX2DFU_PREFIX", //"PATH for HEX TOOL"
+          "value": "C:/nf-support/Tools"
+        },
+        {
+          "name": "RTOS", //"Selected Operating system
+          "value": "CHIBIOS"
+        },
+        {
+          "name": "SWO_OUTPUT_OPTION", // Single Wire Output Option
+          "value": "TRUE"
+        },
+        {
+          "name": "NF_BUILD_RTM", // OFF-default-ON-to-enable-RTM-build
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_ERRORS", //OFF-default-ON-to-enable-trace-error-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_HEADERS", //OFF-default-ON-to-enable-trace-header-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_STATE", //OFF-default-ON-to-enable-trace-state-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_NODATA", //OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_ALL", //OFF-default-ON-to-enable-trace-all-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_IMPLEMENTS_CRC32", //OFF-default-ON-to-enable-CRC32-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_FEATURE_DEBUGGER", //OFF-default-ON-to-include-managed-app-debugging-capability
+          "value": "OFF"
+        },
+        {
+          "name": "NF_FEATURE_RTC", //OFF-default-ON-to-enable-hardware-RTC
+          "value": "ON"
+        },
+        {
+          "name": "NF_FEATURE_USE_APPDOMAINS", //OFF-default-ON-to-enable-support-for-Application-Domains
+          "value": "OFF"
+        },
+        {
+          "name": "NF_FEATURE_WATCHDOG", //ON-to-enable-hardware-watchdog-ON-is-default
+          "value": "ON"
+        },
+        {
+          "name": "NF_FEATURE_HAS_CONFIG_BLOCK", //OFF-default-ON-to-enable-configuration-block-storage
+          "value": "OFF"
+        },
+        {
+          "name": "NF_PLATFORM_NO_CLR_TRACE", //OFF-default-ON-to-disable-all-trace-on-CLR
+          "value": "OFF"
+        },
+        {
+          "name": "NF_CLR_NO_IL_INLINE", //OFF-default-ON-to-disable-CLR-IL-inlining
+          "value": "OFF"
+        },
+        {
+          "name": "NF_INTEROP_ASSEMBLIES", //OFF-default-ON-to-disable-CLR-IL-inlining
+          "value": "OFF"
+        },
+        {
+          "name": "NF_FEATURE_USE_FILESYSTEM", //OFF-default-ON-to-enable-support
+          "value": "OFF"
+        },
+        {
+          "name": "NF_NETWORKING_SNTP", //ON-default-to-add-SNTP-client-requires-networking
+          "value": "OFF"
+        },
+        {
+          "name": "NF_SECURITY_OPENSSL", //OFF-default-ON-to-add-network-security-from-OpenSSL
+          "value": "OFF"
+        },
+        {
+          "name": "NF_SECURITY_MBEDTLS", //OFF-default-ON-to-add-network-security-from-mbedTLS
+          "value": "OFF"
+        },
+        {
+          "name": "MBEDTLS_SOURCE", //path-to-mbedtls-source-mind-the-forward-slashes
+          "value": ""
+        },
+
+        // LIBRARIES
+        {
+          "name": "API_nanoFramework.Devices.OneWire", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_System.Math", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_System.Net", //OFF-default-ON-to-add-this-API
+          "value": "OFF"
+        },
+        {
+          "name": "API_Windows.Devices.Adc", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.Gpio", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.I2c", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.Pwm", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.SerialCommunication", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.Spi", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Networking.Sockets", //OFF-default-ON-to-add-this-API
+          "value": "OFF"
+        },
+        {
+          "name": "API_Hardware.Esp32", //OFF-default-ON-to-add-this-API
+          "value": "OFF"
+        },
+        {
+          "name": "API_Hardware.Stm32", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        }
+      ]
+    }
+  ]
+}

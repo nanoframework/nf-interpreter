@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.11)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
 
-# set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
+ set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
 
 # the following prevents launchin a build in the source tree
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -548,10 +548,8 @@ if(RTOS_CHIBIOS_CHECK)
 
     # check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
     set(NO_CHIBIOS_SOURCE TRUE)
-    if(CHIBIOS_SOURCE)
-        if(NOT "${CHIBIOS_SOURCE}" STREQUAL "")
-            set(NO_CHIBIOS_SOURCE FALSE)
-        endif()
+    if(NOT "${CHIBIOS_SOURCE}" STREQUAL "")
+       set(NO_CHIBIOS_SOURCE FALSE)
     endif()
 
     if(NO_CHIBIOS_SOURCE)
@@ -643,6 +641,7 @@ if(RTOS_CHIBIOS_CHECK)
 
             # check if we already have the sources, no need to copy again
             if(NOT EXISTS "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+                message(status "File Copy: ${CMAKE_BINARY_DIR}/ChibiOS_Source")
                 file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
             else()
                 message(STATUS "Using local cache of ChibiOS source from ${CHIBIOS_SOURCE}")
