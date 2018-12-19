@@ -69,7 +69,6 @@ add_executable(
 
     # need to add configuration manager to allow get/store configuration blocks
     "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c"
-    "${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common/targetHAL_ConfigurationManager.cpp"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOBOOTER_PROJECT_SOURCES}

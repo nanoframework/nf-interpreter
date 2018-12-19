@@ -125,7 +125,7 @@
         },
         {
           "name": "NF_FEATURE_HAS_CONFIG_BLOCK", //OFF-default-ON-to-enable-configuration-block-storage
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "NF_PLATFORM_NO_CLR_TRACE", //OFF-default-ON-to-disable-all-trace-on-CLR
