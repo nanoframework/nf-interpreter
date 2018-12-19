@@ -119,6 +119,8 @@ foreach(SRC_FILE ${src_crypto})
     list(APPEND mbedTLS_SOURCES ${MBEDTLS_SRC_FILE})
 endforeach()
 
+# unset this warning as error required for this source file
+SET_SOURCE_FILES_PROPERTIES( ${PROJECT_BINARY_DIR}/mbedTLS_Source/library/hmac_drbg.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
 
 foreach(SRC_FILE ${src_x509})
     set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)
