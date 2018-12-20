@@ -388,16 +388,20 @@ void CPU_Shutdown()
     ClrExit();
 }
 
-//void
-//CPU_Reset()
-//{
-//    ::ExitProcess( 0 );
-//}
+void CPU_Reset()
+{
+    ::ExitProcess( 0 );
+}
 
-//bool CPU_IsSoftRebootSupported ()
-//{
-//    return TRUE;
-//}
+bool CPU_IsSoftRebootSupported ()
+{
+    return TRUE;
+}
+
+void CPU_SetPowerMode(PowerLevel_type powerLevel)
+{
+	(void)powerLevel;
+}
 
 char nanoCLR_Dat_Start[512*1024];
 char nanoCLR_Dat_End  [1       ];

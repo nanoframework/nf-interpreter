@@ -13,6 +13,7 @@
 #include <nanoWeak.h>
 
 #include <nanoHAL_Network.h>
+#include <nanoHAL_Power.h>
 #include <nanoHAL_ConfigurationManager.h>
 
 typedef enum SYSTEM_STATE
@@ -170,6 +171,7 @@ extern "C" {
 
 void CPU_Reset();
 void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents);
+void CPU_SetPowerMode(PowerLevel_type powerLevel);
 
 #ifdef __cplusplus
 }

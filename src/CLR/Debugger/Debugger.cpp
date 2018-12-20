@@ -6,6 +6,7 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Debugging.h>
 #include <nanoHAL.h>
+#include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
@@ -1126,7 +1127,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_AppDomains;
 #endif
 
-            if (::CPU_IsSoftRebootSupported ())
+            if (CPU_IsSoftRebootSupported())
             {
                 reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_SoftReboot;
             }
