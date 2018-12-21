@@ -21,5 +21,10 @@
 #define HAL_USE_STM32_ONEWIRE       TRUE
 #endif
 
+// enables STM32 Can driver
+#if !defined(HAL_USE_STM32_CAN) 
+#define HAL_USE_STM32_CAN       TRUE
+#endif
+
 #endif // _HALCONF_NF_H_
 
