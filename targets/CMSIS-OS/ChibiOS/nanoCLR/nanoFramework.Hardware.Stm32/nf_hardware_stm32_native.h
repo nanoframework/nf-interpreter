@@ -25,6 +25,14 @@ struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemor
     static const int BACKUP_SIZE = RTC_BKP_NUMBER * sizeof(RTC_BKP0R_Msk);
 };
 
+struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power
+{
+    NANOCLR_NATIVE_DECLARE(EnterStandbyMode___STATIC__VOID);
+
+    //--//
+
+};
+
 struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC
 {
     NANOCLR_NATIVE_DECLARE(GetAlarm___STATIC__mscorlibSystemDateTime);

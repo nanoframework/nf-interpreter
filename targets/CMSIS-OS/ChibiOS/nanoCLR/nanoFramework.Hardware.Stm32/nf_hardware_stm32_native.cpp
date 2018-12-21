@@ -4,7 +4,7 @@
 //
 
 #include "nf_hardware_stm32_native.h"
-
+#include <hal.h>
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
@@ -38,6 +38,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory::WriteBytes___STATIC__VOID__U4__SZARRAY_U1,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory::GetSize___STATIC__I4,
     NULL,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::EnterStandbyMode___STATIC__VOID,
     NULL,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAlarm___STATIC__mscorlibSystemDateTime,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::Native_RTC_SetAlarm___STATIC__VOID__U1__U1__U1__U1,
@@ -54,5 +55,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm3
     "nanoFramework.Hardware.Stm32", 
     0xD9749E72,
     method_lookup,
-    { 1, 0, 3 }
+    { 1, 0, 3, 0 }
 };

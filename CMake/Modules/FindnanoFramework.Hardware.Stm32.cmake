@@ -21,6 +21,7 @@ set(nanoFramework.Hardware.Stm32_SRCS
 
     nf_hardware_stm32_native.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory.cpp
+    nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Utilities.cpp
 )
