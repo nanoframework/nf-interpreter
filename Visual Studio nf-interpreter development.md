@@ -120,6 +120,35 @@ Also, the whole system is a bit flakey. The openocd program is run as sub proces
 system fails, and you must run up task manager to end the openocd.exe task listed as a process of Visual Studio.
 
 
+#### Diagnosing problems with the debug and launch.vs.json
+
+You can get a better understanding of problems that may be occuring with the gdb/openocd debug setup.
+In Visual Studio select the Command Window Ctrl+Alt+A, and turn on debug logging with the following command.
+
+`debug.midebuglog /On:c:\Temp\debug.log`
+
+Run a debugging session to collect data and turn it off with the following command.
+
+`debug.midebuglog /Off`
+
+This will give you a log of the operation and communications occuring. ( Good luck!)
+
+
+__*An example snippet displays error for "Monitor reset halt ( not quite sure why?)*__
+
+        8: (1976730) ->^done
+        8: (1976730) <-1005-interpreter-exec console  "monitor reset halt"
+        8: (1976730) ->(gdb)`
+        8: (1976741) ->&"\"monitor\" command not supported by this target.\n"
+        8: (1976742) ->1005^error,msg="\"monitor\" command not supported by this target."
+        8: (1976742) ->(gdb)
+        8: (1976742) 1005: elapsed time 11
+        8: (1976742) <-1006-interpreter-exec console "monitor reset init"
+        8: (1976742) ->&"\n"
+        8: (1976742) ->^done
+        8: (1976742) ->(gdb)
+
+
 
 
 ## Feedback and documentation
