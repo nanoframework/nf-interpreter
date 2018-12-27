@@ -25,7 +25,7 @@
         {
           "name": "TOOLCHAIN_PREFIX",
           "value": "C:/Program Files (x86)/GNU Tools Arm Embedded/7 2018-q2-update"
-          //"value": "${env.GCCPATH}"   // Standard Visual Studio Install of GCC 6.3.1 
+          //"value": "${env.GCCPATH}"   // Standard Visual Studio Install of GCC 6.3.1
         },
         {
           "name": "CMAKE_SYSTEM_NAME",
@@ -159,7 +159,10 @@
           "name": "MBEDTLS_SOURCE", //path-to-mbedtls-source-mind-the-forward-slashes
           "value": ""
         },
-
+        {
+          "name": "NF_FEATURE_GRAPHICS", //Include graphics support
+          "value": "TRUE"
+        },
         // LIBRARIES
         {
           "name": "API_nanoFramework.Devices.OneWire", //OFF-default-ON-to-add-this-API
