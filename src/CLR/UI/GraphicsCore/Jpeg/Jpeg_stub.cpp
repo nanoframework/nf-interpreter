@@ -2,18 +2,16 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _NANOCLR_SPOT_TOUCH_NATIVE_H_
-#define _NANOCLR_SPOT_TOUCH_NATIVE_H_
+#include "..\graphics.h"
 
-#include <TinyCLR_Runtime.h>
-#include <TinyCLR_Checks.h>
-#include <TinyCLR_Diagnostics.h>
-#include <TinyCLR_Graphics.h>
-#include <TinyCLR_Hardware.h>
+HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg( CLR_RT_HeapBlock& ref, const CLR_UINT8* data, const CLR_UINT32 size )
+{
+    NATIVE_PROFILE_CLR_GRAPHICS();
+    NANOCLR_FEATURE_STUB_RETURN();
+}
 
-#include <TinyCLR_Version.h>
+CLR_UINT32 CLR_GFX_Bitmap::CreateInstanceJpegHelper( int x, int y, CLR_UINT32 flags, CLR_UINT16& opacity, void* param )
+{
+    return 0;
+}
 
-#include <SPOT_native.h>
-#include <CorLib_native.h>
-
-#endif

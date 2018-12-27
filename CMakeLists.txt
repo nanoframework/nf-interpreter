@@ -919,5 +919,5 @@ elseif(RTOS_FREERTOS_CHECK)
 endif()
  
 if(NF_FEATURE_GRAPHICS)
-   add_subdirectory(src/CLR/Graphics)
+   add_subdirectory(src/CLR/UI)
 endif()

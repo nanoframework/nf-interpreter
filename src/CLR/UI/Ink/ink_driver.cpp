@@ -2,7 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <tinyhal.h>
+#include "Graphics.h"
+#include <nanohal.h>
 #include "ink_driver.h"
 
 InkDriver g_InkDriver;
@@ -61,10 +62,10 @@ HRESULT InkDriver::SetRegion(InkRegionInfo* inkRegionInfo)
     }
 
 
-    UINT32 flags = GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
-    UINT16 source = 0;
-    UINT16 x = 0;
-    UINT16 y = 0;
+    CLR_UINT32 flags = GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
+    CLR_UINT16 source = 0;
+    CLR_UINT16 x = 0;
+    CLR_UINT16 y = 0;
     INT64 time = 0;
 
     if (TOUCH_PANEL_GetTouchPoint(&flags, &source, &x, &y, &time) == S_OK)
@@ -106,13 +107,13 @@ void InkDriver::InkContinuationRoutine(void *arg)
 void InkDriver::DrawInk(void *arg)
 {
     HRESULT hr = S_OK;
-    UINT32 flags = (m_index << 16) | GetTouchPointFlags_NextPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
-    UINT16 source = 0;
-    UINT16 x = 0;
-    UINT16 y = 0;
+    CLR_UINT32 flags = (m_index << 16) | GetTouchPointFlags_NextPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
+    CLR_UINT16 source = 0;
+    CLR_UINT16 x = 0;
+    CLR_UINT16 y = 0;
     INT64 time = 0;
-    INT16 dx = m_InkRegionInfo.X1;
-    INT16 dy = m_InkRegionInfo.Y1;
+    CLR_INT16 dx = m_InkRegionInfo.X1;
+    CLR_INT16 dy = m_InkRegionInfo.Y1;
 
     while((hr = TOUCH_PANEL_GetTouchPoint(&flags, &source, &x, &y, &time)) == S_OK)
     {

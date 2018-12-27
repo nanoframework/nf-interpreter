@@ -17,9 +17,9 @@ TOUCH_PANEL_SamplingSettings g_TouchPanel_Sampling_Settings = {1, 2, 400, FALSE,
 #define TOUCH_POINT_RUNNINGAVG_BUFFER_SIZE 4
 
 TouchPoint g_PAL_TouchPointBuffer[TOUCH_POINT_BUFFER_SIZE];
-UINT32     g_PAL_TouchPointBufferSize = TOUCH_POINT_BUFFER_SIZE;
+CLR_UINT32     g_PAL_TouchPointBufferSize = TOUCH_POINT_BUFFER_SIZE;
 TOUCH_PANEL_Point g_PAL_RunningAvg_Buffer[TOUCH_POINT_RUNNINGAVG_BUFFER_SIZE];
-UINT32     g_PAL_RunningAvg_Buffer_Size = TOUCH_POINT_RUNNINGAVG_BUFFER_SIZE;
+CLR_UINT32     g_PAL_RunningAvg_Buffer_Size = TOUCH_POINT_RUNNINGAVG_BUFFER_SIZE;
 
 #if defined(ADS_LINKER_BUG__NOT_ALL_UNUSED_VARIABLES_ARE_REMOVED)
 #pragma arm section rwdata

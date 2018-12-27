@@ -159,10 +159,6 @@
           "name": "MBEDTLS_SOURCE", //path-to-mbedtls-source-mind-the-forward-slashes
           "value": ""
         },
-        {
-          "name": "NF_FEATURE_GRAPHICS", //Include graphics support
-          "value": "TRUE"
-        },
         // LIBRARIES
         {
           "name": "API_nanoFramework.Devices.OneWire", //OFF-default-ON-to-add-this-API
@@ -211,6 +207,19 @@
         {
           "name": "API_Hardware.Stm32", //OFF-default-ON-to-add-this-API
           "value": "ON"
+        },
+        // Graphics
+        {
+          "name": "NF_FEATURE_GRAPHICS", //Include graphics support
+          "value": "TRUE"
+        },
+        {
+          "name": "NF_FEATURE_GRAPHICS_JPEG", //Include jpeg support
+          "value": "FALSE"
+        },
+        {
+          "name": "NF_FEATURE_GRAPHICS_GIF", //Include gif support
+          "value": "FALSE"
         }
       ]
     }
