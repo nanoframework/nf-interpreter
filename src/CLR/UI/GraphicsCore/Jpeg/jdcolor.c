@@ -754,11 +754,14 @@ gray_rgb16_convert (j_decompress_ptr cinfo,
  * Empty method for start_pass.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 start_pass_dcolor (j_decompress_ptr cinfo)
 {
   /* no work needed */
 }
+#pragma GCC diagnostic pop
 
 
 /*

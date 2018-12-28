@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////#include "lzwread.h"
 
+#include "lzwread.h"
+
 /*----------------------------------------------------------------------------
 	Reset the decompressor state.  This API is provided so the same object
 	can be used to decompress multiple images within a GIF stream.  The LZWIO

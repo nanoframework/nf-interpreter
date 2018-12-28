@@ -70,11 +70,14 @@ typedef my_downsampler * my_downsample_ptr;
  * Initialize for a downsampling pass.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 start_pass_downsample (j_compress_ptr cinfo)
 {
   /* no work for now */
 }
+#pragma GCC diagnostic pop
 
 
 /*

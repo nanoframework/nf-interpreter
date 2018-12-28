@@ -23,12 +23,6 @@
 
 #include "graphics_decl.h"
 
-
-#include "Bmp.h"
-
-#include "gif.h"
-#include "giffile.h"
-
 #include "nanoCLR_Types.h"
 #include "nanoCLR_Interop.h"
 #include "nanoCLR_Runtime.h"

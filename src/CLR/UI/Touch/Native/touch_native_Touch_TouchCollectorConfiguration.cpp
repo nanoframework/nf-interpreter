@@ -3,8 +3,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#include "spot_touch_native.h"
-#include "spot_touch.h"
+#include "touch_native.h"
+#include "touch.h"
 #include "spot_graphics_native.h"
 
 HRESULT Library_touch_native_TouchCollectorConfiguration::EnableTouchCollection___STATIC__VOID__I4__I4__I4__I4__I4__GraphicsBitmap( CLR_RT_StackFrame& stack )

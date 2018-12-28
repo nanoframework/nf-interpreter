@@ -14,6 +14,8 @@
 #include "jinclude.h"
 #include "jpeglib.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wall"
 
 /* We use a full-image coefficient buffer when doing Huffman optimization,
  * and also for writing multiple-scan JPEG files.  In all cases, the DCT
@@ -98,6 +100,8 @@ start_iMCU_row (j_compress_ptr cinfo)
 /*
  * Initialize for a processing pass.
  */
+
+
 
 METHODDEF(void)
 start_pass_coef (j_compress_ptr cinfo, J_BUF_MODE pass_mode)
@@ -451,3 +455,4 @@ jinit_c_coef_controller (j_compress_ptr cinfo, boolean need_full_buffer)
     coef->whole_image[0] = NULL; /* flag for no virtual arrays */
   }
 }
+#pragma GCC diagnostic pop

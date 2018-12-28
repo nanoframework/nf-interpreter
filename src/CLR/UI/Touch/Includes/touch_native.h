@@ -6,7 +6,7 @@
 #ifndef _SPOT_TOUCH_NATIVE_H_
 #define _SPOT_TOUCH_NATIVE_H_
 
-#include <TinyCLR_Runtime.h>
+#include <nanoCLR_Runtime.h>
 
 //--//
 

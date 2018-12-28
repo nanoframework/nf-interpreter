@@ -2,7 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Graphics.h"
+#include "gif.h"
+#include "lzwread.h"
 
 // Initialization routine for GifDecoder struct. When it's finished, 
 // the header field would be loaded already.
@@ -196,7 +197,7 @@ HRESULT GifDecoder::ProcessImageChunk()
     param.done = false;
     param.currentDecBufferIndex = 0;
 
-    output->SetPixelsHelper( rect, PAL_GFX_Bitmap::c_SetPixelsConfig_NoClip | PAL_GFX_Bitmap::c_SetPixelsConfig_NoClipChecks, &ProcessImageChunkHelper, &param );
+    output->SetPixelsHelper( rect, PAL_GFX_Bitmap::c_SetPixelsConfig_NoClip | PAL_GFX_Bitmap::c_SetPixelsConfig_NoClipChecks, (GFX_SetPixelsCallback)&ProcessImageChunkHelper, &param );
     
     NANOCLR_CLEANUP();
 
@@ -277,7 +278,7 @@ bool GifDecoder::DecodeUntilFlush( void* p )
 
 }
 
-CLR_UINT32 GifDecoder::ProcessImageChunkHelper( int x, int y, CLR_UINT32 flags, CLR_UINT16& opacity, void* param )
+CLR_UINT32 GifDecoder::ProcessImageChunkHelper(  CLR_UINT32 flags, CLR_UINT16& opacity, void* param )
 {
     ProcessImageChunkHelperParam* myParam = (ProcessImageChunkHelperParam*)param;
 

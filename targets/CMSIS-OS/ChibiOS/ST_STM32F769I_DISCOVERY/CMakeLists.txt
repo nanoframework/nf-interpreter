@@ -124,9 +124,8 @@ add_executable(
     # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
 
-    # sources to support graphics operations
-    "${GRAPHICS_SOURCE}"
-
+    # sources for UI
+    "${UI_SOURCE}"
 )
 
 # add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
@@ -198,7 +197,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${NF_Networking_INCLUDE_DIRS}"
     "${mbedTLS_INCLUDE_DIRS}"
 
-    "${GRAPHICS_INCLUDES}"
+    # UI Includes
+    "${UI_INCLUDES}"
+
 )
 
 # set compiler options
@@ -244,4 +245,3 @@ elseif()
     nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
 endif()
 
-message(STATUS ,"FOGG - ${GRAPHICS_SOURCE}")

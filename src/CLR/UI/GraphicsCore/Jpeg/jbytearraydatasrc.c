@@ -13,11 +13,15 @@ typedef struct {
 
 typedef my_source_mgr * my_src_ptr;
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 init_source (j_decompress_ptr cinfo)
 {
     // do nothing
 }
+#pragma GCC diagnostic pop
 
 METHODDEF(boolean)
 fill_input_buffer (j_decompress_ptr cinfo)
@@ -65,11 +69,14 @@ skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 }
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 term_source (j_decompress_ptr cinfo)
 {
     // do nothing
 }
+#pragma GCC diagnostic pop
 
 GLOBAL(void)
 jpeg_byte_array_src (j_decompress_ptr cinfo, CLR_UINT8 * source, size_t size)

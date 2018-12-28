@@ -84,8 +84,8 @@ bool SimpleHeap_IsAllocated( void *ptr )
         else
         {
             // corrupt pointer to memory
-            hal_printf( "SimpleHeap: Bad Ptr: 0x%08x\r\n", (size_t)ptr );
-            ASSERT(0);
+           // hal_printf( "SimpleHeap: Bad Ptr: 0x%08x\r\n", (size_t)ptr );
+           // ASSERT(0);
             return FALSE;
         }
     }
@@ -111,44 +111,44 @@ void SimpleHeap_Release( void* ptr )
         struct BlockHeader* prev;
         struct BlockHeader* blk = (struct BlockHeader*)ptr; blk--;
 
-#if defined(SIMPLEHEAD_DEBUG)
-        if(blk->signature != c_Busy)
-        {
-            if(blk->signature != c_Free)
-            {
-                hal_printf( "    Memory(%08x): CORRUPTION: %08x %08x\r\n", (CLR_UINT32) ptr, blk->signature, blk->length );
-            }
-            else
-            {
-                hal_printf( "    Memory(%08x): RELEASE TWICE: %08x\r\n", (CLR_UINT32) ptr, blk->length );
-            }
-            HARD_BREAKPOINT();
-        }
-#endif
+//#if defined(SIMPLEHEAD_DEBUG)
+//        if(blk->signature != c_Busy)
+//        {
+//            if(blk->signature != c_Free)
+//            {
+//                hal_printf( "    Memory(%08x): CORRUPTION: %08x %08x\r\n", (CLR_UINT32) ptr, blk->signature, blk->length );
+//            }
+//            else
+//            {
+//                hal_printf( "    Memory(%08x): RELEASE TWICE: %08x\r\n", (CLR_UINT32) ptr, blk->length );
+//            }
+//            HARD_BREAKPOINT();
+//        }
+//#endif
 
-#if defined(SIMPLE_HEAP_GUARDWORD)
-        if(blk->head_guard != c_Guard)
-        {
-            hal_printf( "SimpleHeap_Release: Memory block head corruption: %08x %08x\r\n", blk->head_guard, blk->length );
-            HARD_BREAKPOINT();
-        }
-
-        if(*(CLR_UINT32*)((CLR_UINT32)&blk[0] + blk->length - sizeof( c_Guard )) != c_Guard)
-        {
-            hal_printf( "SimpleHeap_Release: Memory block tail corruption: %08x %08x\r\n", *(CLR_UINT32 *)((CLR_UINT32)&blk[0] + blk->length - sizeof( c_Guard )), blk->length );
-            HARD_BREAKPOINT();
-        }
-#endif
+//#if defined(SIMPLE_HEAP_GUARDWORD)
+//        if(blk->head_guard != c_Guard)
+//        {
+//            hal_printf( "SimpleHeap_Release: Memory block head corruption: %08x %08x\r\n", blk->head_guard, blk->length );
+//            HARD_BREAKPOINT();
+//        }
+//
+//        if(*(CLR_UINT32*)((CLR_UINT32)&blk[0] + blk->length - sizeof( c_Guard )) != c_Guard)
+//        {
+//            hal_printf( "SimpleHeap_Release: Memory block tail corruption: %08x %08x\r\n", *(CLR_UINT32 *)((CLR_UINT32)&blk[0] + blk->length - sizeof( c_Guard )), blk->length );
+//            HARD_BREAKPOINT();
+//        }
+//#endif
 
         //--//
 
         blk->signature = c_Free;
 
-#if defined(SIMPLEHEAP_VERBOSE)
-        *p_heapmem_used -= blk->length;
-
-        hal_printf("F:%4d:%08x T:%6d\r\n", blk->length, (CLR_UINT32) ptr, *p_heapmem_used);
-#endif
+//#if defined(SIMPLEHEAP_VERBOSE)
+//        *p_heapmem_used -= blk->length;
+//
+//        hal_printf("F:%4d:%08x T:%6d\r\n", blk->length, (CLR_UINT32) ptr, *p_heapmem_used);
+//#endif
         //
         // First merge with the following block, if free.
         //
@@ -234,7 +234,7 @@ void* SimpleHeap_Allocate( size_t len )
                 struct BlockHeader* next;
 
                 prev = ptr;
-                ptr = (struct BlockHeader*)((UINT8*)ptr + ptr->length - len);
+                ptr = (struct BlockHeader*)((CLR_UINT8*)ptr + ptr->length - len);
                 next = prev->next;
 
                 ptr->next = next;
@@ -255,25 +255,25 @@ void* SimpleHeap_Allocate( size_t len )
     if(ptr)
     {
         ptr->signature  = c_Busy;
-#if defined(SIMPLE_HEAP_GUARDWORD)
-        ptr->head_guard = c_Guard;                                          // set the head guard word
-        *(CLR_UINT32 *)((CLR_UINT32)&ptr[0] + ptr->length - sizeof( c_Guard )) = c_Guard;   // set the tail guard word
-#endif
+//#if defined(SIMPLE_HEAP_GUARDWORD)
+//        ptr->head_guard = c_Guard;                                          // set the head guard word
+//        *(CLR_UINT32 *)((CLR_UINT32)&ptr[0] + ptr->length - sizeof( c_Guard )) = c_Guard;   // set the tail guard word
+//#endif
 
-#if defined(SIMPLEHEAP_VERBOSE)
-        *p_heapmem_used += ptr->length;
-
-        hal_printf("A:%4d:%08x T:%6d\r\n", len, (CLR_UINT32) &ptr[1], *p_heapmem_used);
-#endif
+//#if defined(SIMPLEHEAP_VERBOSE)
+//        *p_heapmem_used += ptr->length;
+//
+//        hal_printf("A:%4d:%08x T:%6d\r\n", len, (CLR_UINT32) &ptr[1], *p_heapmem_used);
+//#endif
         return &ptr[1];
     }
     else
     {
-        hal_printf( "    Memory: OUTOFMEMORY!! %d\r\n", len );
+       // hal_printf( "    Memory: OUTOFMEMORY!! %d\r\n", len );
 
-#if defined(SIMPLEHEAP_VERBOSE)
-        hal_printf("SimpleHeap_Allocate(%d)=0x%08x\r\n", len, NULL);
-#endif
+//#if defined(SIMPLEHEAP_VERBOSE)
+//        hal_printf("SimpleHeap_Allocate(%d)=0x%08x\r\n", len, NULL);
+//#endif
 
         return NULL;
     }

@@ -2,9 +2,22 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _NANOCLR_SPOT_TOUCH_NATIVE_H_
-#define _NANOCLR_SPOT_TOUCH_NATIVE_H_
+#ifndef _TSC2046_DRIVER_H_
+#define _TSC2046_DRIVER_H_ 1
 
-#include <nanoCLR_Runtime.h>
+
+#include <tinyhal.h>
+
+struct TSC2046_Driver
+{
+    static BOOL Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc);
+    static BOOL Disable();
+    static void GetPoint(TOUCH_PANEL_SAMPLE_FLAGS* pTipState, int* pSource, int* pUnCalX, int* pUnCalY );
+    static HRESULT GetDeviceCaps(unsigned int iIndex, void* lpOutput);
+
+private:
+    static BOOL CalibrationPointGet(TOUCH_PANEL_CALIBRATION_POINT *pTCP);
+
+};
 
 #endif

@@ -422,11 +422,14 @@ null_convert (j_compress_ptr cinfo,
  * Empty method for start_pass.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 null_method (j_compress_ptr cinfo)
 {
   /* no work needed */
 }
+#pragma GCC diagnostic pop
 
 
 /*

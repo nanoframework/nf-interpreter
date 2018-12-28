@@ -217,6 +217,8 @@ emit_dht (j_compress_ptr cinfo, int index, boolean is_ac)
   }
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 LOCAL(void)
 emit_dac (j_compress_ptr cinfo)
@@ -259,6 +261,8 @@ emit_dac (j_compress_ptr cinfo)
   }
 #endif /* C_ARITH_CODING_SUPPORTED */
 }
+
+#pragma GCC diagnostic pop
 
 
 LOCAL(void)

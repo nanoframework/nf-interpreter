@@ -224,12 +224,14 @@ decompress_onepass (j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
  * Dummy consume-input routine for single-pass operation.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(int)
 dummy_consume_data (j_decompress_ptr cinfo)
 {
   return JPEG_SUSPENDED;	/* Always indicate nothing was done */
 }
-
+#pragma GCC diagnostic pop
 
 #ifdef D_MULTISCAN_FILES_SUPPORTED
 
