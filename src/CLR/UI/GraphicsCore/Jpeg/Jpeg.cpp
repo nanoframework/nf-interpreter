@@ -131,7 +131,8 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg( CLR_RT_HeapBlock& ref, const CLR_UIN
 
     NANOCLR_CLEANUP_END();
 }
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 CLR_UINT32 CLR_GFX_Bitmap::CreateInstanceJpegHelper( int x, int y, CLR_UINT32 flags, CLR_UINT16& opacity, void* param )
 {
     CreateInstanceJpegHelperParam* myParam = (CreateInstanceJpegHelperParam*)param;
@@ -153,3 +154,4 @@ CLR_UINT32 CLR_GFX_Bitmap::CreateInstanceJpegHelper( int x, int y, CLR_UINT32 fl
 
     return r | (g << 8) | (b << 16);
 }
+#pragma GCC diagnostic pop

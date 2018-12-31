@@ -224,10 +224,6 @@
         {
           "name": "TouchController", //Include ink support
           "value": "C:\\nf-interpreter\\src\\CLR\\UI\\Touch\\TouchSensors\\FT6206"
-        },
-        {
-          "name": "NF_FEATURE_UI_INK", //Include ink support
-          "value": "TRUE"
         }
       ]
     }

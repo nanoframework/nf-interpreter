@@ -154,6 +154,9 @@ emit_message (j_common_ptr cinfo, int msg_level)
  * Few applications should need to override this method.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 format_message (j_common_ptr cinfo, char * buffer)
 {
@@ -201,6 +204,7 @@ format_message (j_common_ptr cinfo, char * buffer)
 	 //   err->msg_parm.i[4], err->msg_parm.i[5],
 	 //   err->msg_parm.i[6], err->msg_parm.i[7]);
 }
+#pragma GCC diagnostic pop
 
 
 /*

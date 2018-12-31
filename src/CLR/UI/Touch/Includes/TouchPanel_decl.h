@@ -2,8 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//#include <CPU_GPIO_decl.h>
-//#include <CPU_SPI_decl.h>
+#include "CPU_GPIO_decl.h"
+#include "CPU_SPI_decl.h"
 
 #ifndef _DRIVERS_TOUCHPANEL_DECL_H_
 #define _DRIVERS_TOUCHPANEL_DECL_H_ 1
@@ -11,6 +11,7 @@
 //--//
 
 #include "nanoCLR_Types.h"
+#include "graphics_decl.h"
 
 //--//  Touch Panel Driver  //--//
 

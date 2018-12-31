@@ -15,6 +15,14 @@
 #include "jinclude.h"
 #include "jpeglib.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
+#ifndef MAX
+#define MAX(a,b)   (a > b      ? a : b)
+#define MIN(a,b)   (a < b      ? a : b)
+#endif
+
 
 /* Private state */
 
@@ -588,3 +596,4 @@ jinit_c_master_control (j_compress_ptr cinfo, boolean transcode_only)
   else
     master->total_passes = cinfo->num_scans;
 }
+#pragma GCC diagnostic pop

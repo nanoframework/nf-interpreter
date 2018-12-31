@@ -5,14 +5,17 @@
 
 #include "touch_native.h"
 #include "touch.h"
-#include "spot_graphics_native.h"
+#include "Graphics.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 HRESULT Library_touch_native_TouchCollectorConfiguration::EnableTouchCollection___STATIC__VOID__I4__I4__I4__I4__I4__GraphicsBitmap( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
     NANOCLR_NOCLEANUP_NOLABEL();   
 }
+#pragma GCC diagnostic pop
 
 HRESULT Library_touch_native_TouchCollectorConfiguration::GetTouchPoints___STATIC__VOID__BYREF_I4__SZARRAY_I2__SZARRAY_I2( CLR_RT_StackFrame& stack )
 {

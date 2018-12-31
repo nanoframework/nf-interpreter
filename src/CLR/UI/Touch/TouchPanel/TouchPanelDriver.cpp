@@ -2,13 +2,17 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <nanohal.h>
+#include "nanohal.h"
+#include "nanoCLR_Interop.h"
+#include "gesture_decl.h"
+#include "ink_driver.h"
 
 #ifndef _TOUCH_PANEL_DRIVER_H_
 #include "TouchPanelDriver.h"
 #endif
 
 //--//
+#define ONE_MHZ  1000000
 
 #define abs(a) (((a) < 0) ? -(a) : (a))
 #define sign(a) (((a) < 0) ? -1 : 1)
@@ -17,13 +21,13 @@ TOUCH_PANEL_CalibrationData g_TouchPanel_DefaultCalibration_Config = { 1, 1, 0, 
 TouchPanel_Driver g_TouchPanel_Driver;
 
 /// Divide a by b, and return rounded integer.
-INT32 RoundDiv(INT32 a, INT32 b)
+CLR_INT32 RoundDiv(CLR_INT32 a, CLR_INT32 b)
 {
     if (b == 0)
         return 0xFFFF;
 
-    INT32 d = a / b;
-    INT32 r = abs(a) % abs(b);
+    CLR_INT32 d = a / b;
+    CLR_INT32 r = abs(a) % abs(b);
 
     if ((r * 2) > abs(a))
     {
@@ -83,7 +87,7 @@ HRESULT TouchPanel_Driver::Uninitialize()
 }
 
 /// Calibrate an uncalibrated point.
-void TouchPanel_Driver::TouchPanelCalibratePoint(INT32 UncalX, INT32 UncalY, INT32 *pCalX, INT32 *pCalY)
+void TouchPanel_Driver::TouchPanelCalibratePoint(CLR_INT32 UncalX, CLR_INT32 UncalY, CLR_INT32 *pCalX, CLR_INT32 *pCalY)
 {
     /// Doing simple linear calibration for now.
     /// ASSUMPTION: uncalibrated x, y touch co-ordinates are independent. In reality this is not correct.
@@ -101,7 +105,7 @@ void TouchPanel_Driver::TouchPanelCalibratePoint(INT32 UncalX, INT32 UncalY, INT
         *pCalY = 0;
 }
 
-HRESULT TouchPanel_Driver::GetDeviceCaps(UINT32 iIndex, void* lpOutput)
+HRESULT TouchPanel_Driver::GetDeviceCaps(CLR_UINT32 iIndex, void* lpOutput)
 {
     return HAL_TOUCH_PANEL_GetDeviceCaps(iIndex, lpOutput);
 }
@@ -113,7 +117,7 @@ HRESULT TouchPanel_Driver::ResetCalibration()
     return S_OK;
 }
 
-HRESULT TouchPanel_Driver::SetCalibration(INT32 pointCount, short* sx, short* sy, short* ux, short* uy)
+HRESULT TouchPanel_Driver::SetCalibration(CLR_INT32 pointCount, short* sx, short* sy, short* ux, short* uy)
 {
     if (pointCount != 5)
         return CLR_E_FAIL;
@@ -139,17 +143,19 @@ void TouchPanel_Driver::TouchCompletion(void* arg)
     g_TouchPanel_Driver.PollTouchPoint(arg);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 void TouchPanel_Driver::PollTouchPoint(void* arg)
 {
     TOUCH_PANEL_SAMPLE_FLAGS flags;
-    INT32 x = 0;
-    INT32 y = 0;
-    INT32 ux = 0; /// Uncalibrated x.
-    INT32 uy = 0; /// Uncalibrated y.
-    INT32 source = 0;
+    CLR_INT32 x = 0;
+    CLR_INT32 y = 0;
+    CLR_INT32 ux = 0; /// Uncalibrated x.
+    CLR_INT32 uy = 0; /// Uncalibrated y.
+    CLR_INT32 source = 0;
     bool fProcessUp = false;
 
-    INT64 time = ::Time_GetMachineTime();
+    CLR_INT64 time = ::Time_GetMachineTime();
 
 
     GLOBAL_LOCK(irq);
@@ -173,7 +179,7 @@ void TouchPanel_Driver::PollTouchPoint(void* arg)
 
             if (NULL != (point = AddTouchPoint(0, x, y, time)))
             {
-                PostManagedEvent(EVENT_TOUCH, TouchPanelStylusDown, 1, (UINT32)point);
+                PostManagedEvent(EVENT_TOUCH, TouchPanelStylusDown, 1, (CLR_UINT32)point);
             }
 
             m_InternalFlags |= Contact_WasDown;
@@ -196,10 +202,10 @@ void TouchPanel_Driver::PollTouchPoint(void* arg)
                 }
                 else
                 {
-                    if (((UINT32)m_startMovePtr > (UINT32)point) ||
+                    if (((CLR_UINT32)m_startMovePtr > (CLR_UINT32)point) ||
                         (time - m_startMovePtr->time) > (g_TouchPanel_Sampling_Settings.SampleRate.MaxTimeForMoveEvent_ticks))
                     {
-                        PostManagedEvent(EVENT_TOUCH, TouchPanelStylusMove, m_touchMoveIndex, (UINT32)m_startMovePtr);
+                        PostManagedEvent(EVENT_TOUCH, TouchPanelStylusMove, m_touchMoveIndex, (CLR_UINT32)m_startMovePtr);
 
                         m_startMovePtr = NULL;
                         m_touchMoveIndex = 0;
@@ -214,7 +220,7 @@ void TouchPanel_Driver::PollTouchPoint(void* arg)
             // set the start move ptr to the latest point
             else if (m_startMovePtr == NULL)
             {
-                UINT32 touchflags = GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
+                CLR_UINT32 touchflags = GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
 
                 if (SUCCEEDED(GetTouchPoint(&touchflags, &point)))
                 {
@@ -225,7 +231,7 @@ void TouchPanel_Driver::PollTouchPoint(void* arg)
             // We should always send a move event if we cross the max time boundary for a move event, even if it is just one point
             else if ((time - m_startMovePtr->time) > (g_TouchPanel_Sampling_Settings.SampleRate.MaxTimeForMoveEvent_ticks))
             {
-                PostManagedEvent(EVENT_TOUCH, TouchPanelStylusMove, m_touchMoveIndex, (UINT32)m_startMovePtr);
+                PostManagedEvent(EVENT_TOUCH, TouchPanelStylusMove, m_touchMoveIndex, (CLR_UINT32)m_startMovePtr);
 
                 if (m_touchMoveIndex > 1)
                 {
@@ -245,7 +251,7 @@ void TouchPanel_Driver::PollTouchPoint(void* arg)
 
     if (fProcessUp)
     {
-        UINT32 touchflags = GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
+        CLR_UINT32 touchflags = GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
 
         TouchPoint* point = NULL;
 
@@ -253,7 +259,7 @@ void TouchPanel_Driver::PollTouchPoint(void* arg)
         /// TouchUp event should suffice
         if (m_touchMoveIndex > 2 && m_startMovePtr != NULL)
         {
-            PostManagedEvent(EVENT_TOUCH, TouchPanelStylusMove, m_touchMoveIndex, (UINT32)m_startMovePtr);
+            PostManagedEvent(EVENT_TOUCH, TouchPanelStylusMove, m_touchMoveIndex, (CLR_UINT32)m_startMovePtr);
         }
 
         m_startMovePtr = NULL;
@@ -280,7 +286,7 @@ void TouchPanel_Driver::PollTouchPoint(void* arg)
             point = &m_tmpUpTouch;
         }
 
-        PostManagedEvent(EVENT_TOUCH, TouchPanelStylusUp, 1, (UINT32)point);
+        PostManagedEvent(EVENT_TOUCH, TouchPanelStylusUp, 1, (CLR_UINT32)point);
 
         m_InternalFlags &= ~Contact_WasDown;
     }
@@ -301,11 +307,12 @@ void TouchPanel_Driver::PollTouchPoint(void* arg)
         }
     }
 }
+#pragma GCC diagnostic pop
 
-TouchPoint* TouchPanel_Driver::AddTouchPoint(UINT16 source, UINT16 x, UINT16 y, INT64 time, BOOL fIgnoreDuplicate)
+TouchPoint* TouchPanel_Driver::AddTouchPoint(CLR_UINT16 source, CLR_UINT16 x, CLR_UINT16 y, CLR_INT64 time, bool fIgnoreDuplicate)
 {
-    static UINT16 lastAddedX = 0xFFFF;
-    static UINT16 lastAddedY = 0xFFFF;
+    static CLR_UINT16 lastAddedX = 0xFFFF;
+    static CLR_UINT16 lastAddedY = 0xFFFF;
 
     GLOBAL_LOCK(irq);
 
@@ -325,9 +332,9 @@ TouchPoint* TouchPanel_Driver::AddTouchPoint(UINT16 source, UINT16 x, UINT16 y, 
         if (lastAddedX != 0xFFFF)
         {
             /// dist2 is distance squared.
-            INT32 dx = abs(x - lastAddedX);
-            INT32 dy = abs(y - lastAddedY);
-            INT32 dist2 = dx * dx + dy * dy;
+            CLR_INT32 dx = abs(x - lastAddedX);
+            CLR_INT32 dy = abs(y - lastAddedY);
+            CLR_INT32 dist2 = dx * dx + dy * dy;
 
             /// Ignore this point if it is too far from last point.
             if (dist2 > g_TouchPanel_Sampling_Settings.MaxFilterDistance) return NULL;
@@ -335,10 +342,10 @@ TouchPoint* TouchPanel_Driver::AddTouchPoint(UINT16 source, UINT16 x, UINT16 y, 
 
         if (g_PAL_RunningAvg_Buffer_Size > 1)
         {
-            if (m_runavgIndex >= (INT32)g_PAL_RunningAvg_Buffer_Size)
+            if (m_runavgIndex >= (CLR_INT32)g_PAL_RunningAvg_Buffer_Size)
                 m_runavgIndex = 0;
 
-            if (m_runavgCount >= (INT32)g_PAL_RunningAvg_Buffer_Size)
+            if (m_runavgCount >= (CLR_INT32)g_PAL_RunningAvg_Buffer_Size)
             {
                 m_runavgTotalX -= g_PAL_RunningAvg_Buffer[m_runavgIndex].sx;
                 m_runavgTotalY -= g_PAL_RunningAvg_Buffer[m_runavgIndex].sy;
@@ -366,8 +373,8 @@ TouchPoint* TouchPanel_Driver::AddTouchPoint(UINT16 source, UINT16 x, UINT16 y, 
         ///
         if (fIgnoreDuplicate)
         {
-            UINT32 dx = abs(x - lastAddedX);
-            UINT32 dy = abs(y - lastAddedY);
+            CLR_UINT32 dx = abs(x - lastAddedX);
+            CLR_UINT32 dy = abs(y - lastAddedY);
 
             if (dx <= 2 && dy <= 2) return NULL;
         }
@@ -376,8 +383,8 @@ TouchPoint* TouchPanel_Driver::AddTouchPoint(UINT16 source, UINT16 x, UINT16 y, 
         lastAddedY = y;
     }
 
-    UINT32 location = (x & 0x3FFF) | ((y & 0x3FFF) << 14) | (source << 28);
-    UINT32 contact = TouchPointContactFlags_Primary | TouchPointContactFlags_Pen;
+    CLR_UINT32 location = (x & 0x3FFF) | ((y & 0x3FFF) << 14) | (source << 28);
+    CLR_UINT32 contact = TouchPointContactFlags_Primary | TouchPointContactFlags_Pen;
     TouchPoint& point = g_PAL_TouchPointBuffer[m_tail];
     point.time = time;
     point.location = location;
@@ -387,20 +394,22 @@ TouchPoint* TouchPanel_Driver::AddTouchPoint(UINT16 source, UINT16 x, UINT16 y, 
     {
         m_tail++;
 
-        if (m_tail >= (INT32)g_PAL_TouchPointBufferSize) m_tail = 0;
+        if (m_tail >= (CLR_INT32)g_PAL_TouchPointBufferSize) m_tail = 0;
 
         if (m_tail == m_head)
         {
             m_head++;
 
-            if (m_head >= (INT32)g_PAL_TouchPointBufferSize) m_head = 0;
+            if (m_head >= (CLR_INT32)g_PAL_TouchPointBufferSize) m_head = 0;
         }
     }
 
     return &point;
 }
 
-void TouchPanel_Driver::TouchIsrProc(GPIO_PIN pin, BOOL pinState, void* context)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+void TouchPanel_Driver::TouchIsrProc(GPIO_PIN pin, bool pinState, void* context)
 {
     if (pinState == g_TouchPanel_Sampling_Settings.ActivePinStateForTouchDown)
     {
@@ -418,7 +427,10 @@ void TouchPanel_Driver::TouchIsrProc(GPIO_PIN pin, BOOL pinState, void* context)
     }
     g_TouchPanel_Driver.m_touchCompletion.EnqueueDelta(0);
 }
+#pragma GCC diagnostic pop
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 HRESULT TouchPanel_Driver::GetTouchPoints(int* pointCount, short* sx, short* sy)
 {
     GLOBAL_LOCK(irq);
@@ -426,14 +438,15 @@ HRESULT TouchPanel_Driver::GetTouchPoints(int* pointCount, short* sx, short* sy)
 
     return S_OK;
 }
+#pragma GCC diagnostic pop
 
-HRESULT TouchPanel_Driver::GetSetTouchInfo(UINT32 flags, INT32* param1, INT32* param2, INT32* param3)
+HRESULT TouchPanel_Driver::GetSetTouchInfo(CLR_UINT32 flags, CLR_INT32* param1, CLR_INT32* param2, CLR_INT32* param3)
 {
     if (flags & TouchInfo_Set) /// SET.
     {
         if (flags & TouchInfo_SamplingDistance)
         {
-            INT32 samplesPerSecond = ONE_MHZ / *param1;
+            CLR_INT32 samplesPerSecond = ONE_MHZ / *param1;
 
             /// Minimum of 500us otherwise the system will be overrun
             if (samplesPerSecond >= g_TouchPanel_Sampling_Settings.SampleRate.SamplesPerSecondLow &&
@@ -450,9 +463,9 @@ HRESULT TouchPanel_Driver::GetSetTouchInfo(UINT32 flags, INT32* param1, INT32* p
         }
         else if (flags & TouchInfo_StylusMoveFrequency)
         {
-            INT32 ms_per_touchmove_event = *param1; // *param1 is in milliseconds
-            INT32 min_ms_per_touchsample = 1000 / g_TouchPanel_Sampling_Settings.SampleRate.SamplesPerSecondLow;
-            INT32 ticks;
+            CLR_INT32 ms_per_touchmove_event = *param1; // *param1 is in milliseconds
+            CLR_INT32 min_ms_per_touchsample = 1000 / g_TouchPanel_Sampling_Settings.SampleRate.SamplesPerSecondLow;
+            CLR_INT32 ticks;
 
             // zero value indicates turning move notifications based on time off
             if (ms_per_touchmove_event == 0)         ticks = 0x7FFFFFFF;
@@ -493,11 +506,11 @@ HRESULT TouchPanel_Driver::GetSetTouchInfo(UINT32 flags, INT32* param1, INT32* p
 
         if (flags & TouchInfo_LastTouchPoint)
         {
-            UINT16 x = 0;
-            UINT16 y = 0;
-            UINT32 flags = GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
-            UINT16 source = 0;
-            INT64 time = 0;
+            CLR_UINT16 x = 0;
+            CLR_UINT16 y = 0;
+            CLR_UINT32 flags = GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
+            CLR_UINT16 source = 0;
+            CLR_INT64 time = 0;
             GetTouchPoint(&flags, &source, &x, &y, &time);
             *param1 = x;
             *param2 = y;
@@ -534,11 +547,11 @@ HRESULT TouchPanel_Driver::GetSetTouchInfo(UINT32 flags, INT32* param1, INT32* p
     return S_OK;
 }
 
-HRESULT TouchPanel_Driver::GetTouchPoint(UINT32* flags, TouchPoint **point)
+HRESULT TouchPanel_Driver::GetTouchPoint(CLR_UINT32* flags, TouchPoint **point)
 {
     UINT8 searchFlag = *flags & 0xF;
     UINT8 conditionalFlag = *flags & 0xF0;
-    UINT32 index = 0;
+    CLR_UINT32 index = 0;
 
     GLOBAL_LOCK(irq);
 
@@ -573,7 +586,7 @@ HRESULT TouchPanel_Driver::GetTouchPoint(UINT32* flags, TouchPoint **point)
     return S_OK;
 }
 
-HRESULT TouchPanel_Driver::GetTouchPoint(UINT32* flags, UINT32* location, INT64* time)
+HRESULT TouchPanel_Driver::GetTouchPoint(CLR_UINT32* flags, CLR_UINT32* location, CLR_INT64* time)
 {
     TouchPoint* point;
 
@@ -589,9 +602,11 @@ HRESULT TouchPanel_Driver::GetTouchPoint(UINT32* flags, UINT32* location, INT64*
     return S_OK;
 }
 
-HRESULT TouchPanel_Driver::GetTouchPoint(UINT32* flags, UINT16* source, UINT16* x, UINT16* y, INT64* time)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+HRESULT TouchPanel_Driver::GetTouchPoint(CLR_UINT32* flags, CLR_UINT16* source, CLR_UINT16* x, CLR_UINT16* y, CLR_INT64* time)
 {
-    UINT32 location = 0;
+    CLR_UINT32 location = 0;
     HRESULT hr = GetTouchPoint(flags, &location, time);
     if (hr != S_OK)
     {
@@ -604,4 +619,5 @@ HRESULT TouchPanel_Driver::GetTouchPoint(UINT32* flags, UINT16* source, UINT16* 
 
     return S_OK;
 }
+#pragma GCC diagnostic pop
 

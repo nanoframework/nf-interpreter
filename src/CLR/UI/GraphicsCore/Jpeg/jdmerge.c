@@ -157,7 +157,8 @@ start_pass_merged_upsample (j_decompress_ptr cinfo)
  *
  * The control routine just handles the row buffering considerations.
  */
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 merged_2v_upsample (j_decompress_ptr cinfo,
 		    JSAMPIMAGE input_buf, JDIMENSION *in_row_group_ctr,
@@ -205,8 +206,10 @@ merged_2v_upsample (j_decompress_ptr cinfo,
   if (! upsample->spare_full)
     (*in_row_group_ctr)++;
 }
+#pragma GCC diagnostic pop
 
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 merged_1v_upsample (j_decompress_ptr cinfo,
 		    JSAMPIMAGE input_buf, JDIMENSION *in_row_group_ctr,
@@ -224,6 +227,7 @@ merged_1v_upsample (j_decompress_ptr cinfo,
   (*out_row_ctr)++;
   (*in_row_group_ctr)++;
 }
+#pragma GCC diagnostic pop
 
 
 /*

@@ -112,6 +112,8 @@ start_pass_upsample (j_decompress_ptr cinfo)
  * color conversion a row at a time.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 sep_upsample (j_decompress_ptr cinfo,
 	      JSAMPIMAGE input_buf, JDIMENSION *in_row_group_ctr,
@@ -165,6 +167,7 @@ sep_upsample (j_decompress_ptr cinfo,
   if (upsample->next_row_out >= cinfo->max_v_samp_factor)
     (*in_row_group_ctr)++;
 }
+#pragma GCC diagnostic pop
 
 
 /*
@@ -180,12 +183,15 @@ sep_upsample (j_decompress_ptr cinfo,
  * "consumed" until we are done color converting and emitting it.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 fullsize_upsample (j_decompress_ptr cinfo, jpeg_component_info * compptr,
 		   JSAMPARRAY input_data, JSAMPARRAY * output_data_ptr)
 {
   *output_data_ptr = input_data;
 }
+#pragma GCC diagnostic pop
 
 
 /*
@@ -193,12 +199,15 @@ fullsize_upsample (j_decompress_ptr cinfo, jpeg_component_info * compptr,
  * These components will not be referenced by color conversion.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 noop_upsample (j_decompress_ptr cinfo, jpeg_component_info * compptr,
 	       JSAMPARRAY input_data, JSAMPARRAY * output_data_ptr)
 {
   *output_data_ptr = NULL;	/* safety check */
 }
+#pragma GCC diagnostic pop
 
 
 /*
@@ -256,6 +265,8 @@ int_upsample (j_decompress_ptr cinfo, jpeg_component_info * compptr,
  * It's still a box filter.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 h2v1_upsample (j_decompress_ptr cinfo, jpeg_component_info * compptr,
 	       JSAMPARRAY input_data, JSAMPARRAY * output_data_ptr)
@@ -277,13 +288,15 @@ h2v1_upsample (j_decompress_ptr cinfo, jpeg_component_info * compptr,
     }
   }
 }
-
+#pragma GCC diagnostic pop
 
 /*
  * Fast processing for the common case of 2:1 horizontal and 2:1 vertical.
  * It's still a box filter.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 METHODDEF(void)
 h2v2_upsample (j_decompress_ptr cinfo, jpeg_component_info * compptr,
 	       JSAMPARRAY input_data, JSAMPARRAY * output_data_ptr)
@@ -310,6 +323,7 @@ h2v2_upsample (j_decompress_ptr cinfo, jpeg_component_info * compptr,
     outrow += 2;
   }
 }
+#pragma GCC diagnostic pop
 
 
 /*

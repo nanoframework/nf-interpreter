@@ -15,6 +15,11 @@
 #include "jinclude.h"
 #include "jpeglib.h"
 
+#ifndef MAX
+#define MAX(a,b)   (a > b      ? a : b)
+#define MIN(a,b)   (a < b      ? a : b)
+#endif
+
 
 /* Private state */
 

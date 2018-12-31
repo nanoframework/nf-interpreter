@@ -4,6 +4,8 @@
 
 #include "gif.h"
 #include "lzwread.h"
+#include "Graphics.h"
+
 
 // Initialization routine for GifDecoder struct. When it's finished, 
 // the header field would be loaded already.
@@ -277,8 +279,9 @@ bool GifDecoder::DecodeUntilFlush( void* p )
     }
 
 }
-
-CLR_UINT32 GifDecoder::ProcessImageChunkHelper(  CLR_UINT32 flags, CLR_UINT16& opacity, void* param )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+CLR_UINT32 GifDecoder::ProcessImageChunkHelper( int x,int y, CLR_UINT32 flags, CLR_UINT16& opacity, void* param )
 {
     ProcessImageChunkHelperParam* myParam = (ProcessImageChunkHelperParam*)param;
 
@@ -320,6 +323,8 @@ CLR_UINT32 GifDecoder::ProcessImageChunkHelper(  CLR_UINT32 flags, CLR_UINT16& o
 
     return color;
 }
+
+#pragma GCC diagnostic pop
 
 HRESULT GifDecoder::ProcessGraphicControlChunk()
 {

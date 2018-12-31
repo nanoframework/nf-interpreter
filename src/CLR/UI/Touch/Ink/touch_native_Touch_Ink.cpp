@@ -3,9 +3,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#include "spot_touch_native.h"
-#include "spot_touch.h"
-#include "spot_graphics_native.h"
+#include "touch_native.h"
+#include "touch.h"
+#include "graphics_native.h"
+#include "ink_decl.h"
 
 CLR_RT_HeapBlock* Library_touch_native_Ink::m_InkPinnedBitmap = NULL;
 
@@ -73,6 +74,8 @@ HRESULT Library_touch_native_Ink::SetInkRegion___STATIC__VOID__U4__I4__I4__I4__I
     NANOCLR_NOCLEANUP();   
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 HRESULT Library_touch_native_Ink::ResetInkRegion___STATIC__VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -81,3 +84,4 @@ HRESULT Library_touch_native_Ink::ResetInkRegion___STATIC__VOID( CLR_RT_StackFra
 
     NANOCLR_NOCLEANUP();  
 }
+#pragma GCC diagnostic pop

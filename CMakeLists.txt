@@ -922,7 +922,7 @@ endif()
 # User Interface (UI) code
 if(NF_FEATURE_UI_GRAPHICS)
    add_subdirectory(src/CLR/UI)
-  # add_subdirectory(${GraphicsController})
+ # add_subdirectory(${GraphicsController})
 endif()
 
 #if(NF_FEATURE_UI_TOUCH)
@@ -930,7 +930,4 @@ endif()
 #   add_subdirectory(${TouchController})
 #endif()
 #
-#if(NF_FEATURE_UI_INK)
-#   add_subdirectory(src/CLR/UI/INK)
-#endif()
 

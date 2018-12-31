@@ -18,6 +18,10 @@
 #include "jinclude.h"
 #include "jpeglib.h"
 
+#ifndef MAX
+    #define MAX(a,b)   (a > b      ? a : b)
+    #define MIN(a,b)   (a < b      ? a : b)
+#endif
 
 /* At present, jcsample.c can request context rows only for smoothing.
  * In the future, we might also need context rows for CCIR601 sampling

@@ -2,20 +2,24 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Graphics.h"
+#include "ink_driver.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg( CLR_RT_HeapBlock& ref, const CLR_UINT8* data, const CLR_UINT32 size )
+HRESULT Ink_Initialize()
 {
-    NATIVE_PROFILE_CLR_GRAPHICS();
-    NANOCLR_FEATURE_STUB_RETURN();
+    return g_InkDriver.Initialize();
 }
 
-CLR_UINT32 CLR_GFX_Bitmap::CreateInstanceJpegHelper( int x, int y, CLR_UINT32 flags, CLR_UINT16& opacity, void* param )
+HRESULT Ink_Uninitialize()
 {
-    return 0;
+    return g_InkDriver.Uninitialize();
 }
 
-#pragma GCC diagnostic pop
+HRESULT Ink_SetRegion(InkRegionInfo* inkRegionInfo)
+{
+    return g_InkDriver.SetRegion(inkRegionInfo);
+}
+
+HRESULT Ink_ResetRegion()
+{
+    return g_InkDriver.ResetRegion();
+}

@@ -11,8 +11,8 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <tinyhal.h>
-#include "touchpanel_driver.h"
+#include "nanohal.h"
+#include "TouchPanelDriver.h"
 
 //--//
 
@@ -41,11 +41,14 @@ HRESULT TOUCH_PANEL_SetCalibration(int pointCount, short* sx, short* sy, short* 
     return TouchPanel_Driver::SetCalibration(pointCount, sx, sy, ux, uy);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 HRESULT TOUCH_PANEL_EnableTouchCollection(int flags, int x1, int x2, int y1, int y2, PAL_GFX_Bitmap* bmp)
 {
     // return TouchPanel_Driver::EnableTouchCollection(flags, x1, x2, y1, y2, bmp);
     return S_OK;
 }
+#pragma GCC diagnostic pop
 
 
 HRESULT TOUCH_PANEL_GetTouchPoints(int* pointCount, short* sx, short* sy)
@@ -53,12 +56,12 @@ HRESULT TOUCH_PANEL_GetTouchPoints(int* pointCount, short* sx, short* sy)
     return TouchPanel_Driver::GetTouchPoints(pointCount, sx, sy);
 }
 
-HRESULT TOUCH_PANEL_GetSetTouchInfo(UINT32 flags, INT32* param1, INT32* param2, INT32* param3)
+HRESULT TOUCH_PANEL_GetSetTouchInfo(CLR_UINT32 flags, CLR_INT32* param1, CLR_INT32* param2, CLR_INT32* param3)
 {
     return TouchPanel_Driver::GetSetTouchInfo(flags, param1, param2, param3);
 }
 
-HRESULT TOUCH_PANEL_GetTouchPoint(UINT32* flags, UINT16* source, UINT16* x, UINT16* y, INT64* time)
+HRESULT TOUCH_PANEL_GetTouchPoint(CLR_UINT32* flags, CLR_UINT16* source, CLR_UINT16* x, CLR_UINT16* y, CLR_INT64* time)
 {
     return TouchPanel_Driver::GetTouchPoint(flags, source, x, y, time);
 }

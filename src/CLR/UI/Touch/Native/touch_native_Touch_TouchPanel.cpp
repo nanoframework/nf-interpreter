@@ -3,8 +3,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#include "spot_touch_native.h"
-#include "spot_touch.h"
+#include "TouchPanel_decl.h"
+#include "touch_native.h"
+#include "Graphics.h"
 
 
 HRESULT Library_touch_native_TouchPanel::EnableInternal___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
@@ -39,6 +40,8 @@ HRESULT Library_touch_native_TouchPanel::GetCalibrationPointCount___VOID__BYREF_
     NANOCLR_NOCLEANUP();
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 HRESULT Library_touch_native_TouchPanel::StartCalibration___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -47,6 +50,7 @@ HRESULT Library_touch_native_TouchPanel::StartCalibration___VOID( CLR_RT_StackFr
 
     NANOCLR_NOCLEANUP();
 }
+#pragma GCC diagnostic pop
 
 HRESULT Library_touch_native_TouchPanel::GetCalibrationPoint___VOID__I4__BYREF_I4__BYREF_I4( CLR_RT_StackFrame& stack )
 {

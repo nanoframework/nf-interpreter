@@ -21,6 +21,12 @@
 #include "jpeglib.h"
 #include "transupp.h"		/* My own external interface */
 
+
+#ifndef MAX
+#define MAX(a,b)   (a > b      ? a : b)
+#define MIN(a,b)   (a < b      ? a : b)
+#endif
+
 #if TRANSFORMS_SUPPORTED
 
 /*
@@ -727,6 +733,8 @@ trim_bottom_edge (j_compress_ptr dstinfo)
  * to jpeg_write_coefficients().
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 GLOBAL(jvirt_barray_ptr *)
 jtransform_adjust_parameters (j_decompress_ptr srcinfo,
 			      j_compress_ptr dstinfo,
@@ -803,6 +811,7 @@ jtransform_adjust_parameters (j_decompress_ptr srcinfo,
     return info->workspace_coef_arrays;
   return src_coef_arrays;
 }
+#pragma GCC diagnostic pop
 
 
 /* Execute the actual transformation, if any.
@@ -881,6 +890,8 @@ jcopy_markers_setup (j_decompress_ptr srcinfo, JCOPY_OPTION option)
  * JFIF APP0 or Adobe APP14 markers if selected.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 GLOBAL(void)
 jcopy_markers_execute (j_decompress_ptr srcinfo, j_compress_ptr dstinfo,
 		       JCOPY_OPTION option)
@@ -925,3 +936,5 @@ jcopy_markers_execute (j_decompress_ptr srcinfo, j_compress_ptr dstinfo,
 #endif
   }
 }
+#pragma GCC diagnostic pop
+

@@ -30,15 +30,22 @@
 #include "jpeglib.h"
 #include "jmemsys.h"		/* import the system-dependent declarations */
 
+
+#ifndef MAX
+#define MAX(a,b)   (a > b      ? a : b)
+#define MIN(a,b)   (a < b      ? a : b)
+#endif
+
+
 #ifndef NO_GETENV
 #ifndef HAVE_STDLIB_H		/* <stdlib.h> should declare getenv() */
 extern char * getenv JPP((const char * name));
 #endif
 #endif
 
-#if !defined(__RENESAS__)
-#pragma warning(disable:4267) //conversion from 'size_t' to 'long', possible loss of data
-#endif
+//#if !defined(__RENESAS__)
+//#pragma warning(disable:4267) //conversion from 'size_t' to 'long', possible loss of data
+//#endif
 /*
  * Some important notes:
  *   The allocation routines provided here must never return NULL.

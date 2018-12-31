@@ -21,6 +21,9 @@ extern "C"
     void  CLR_RT_Memory__Release ( void*  ptr ) {        CLR_RT_Memory::Release ( ptr    ); }
     void* CLR_RT_Memory__Allocate( size_t len ) { return CLR_RT_Memory::Allocate( len, 0 ); }
 
+    
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
     GLOBAL(void *)
     jpeg_get_small( j_common_ptr cinfo, size_t sizeofobject )
     {
@@ -72,3 +75,4 @@ extern "C"
         // Do nothing
     }
 }
+#pragma GCC diagnostic pop

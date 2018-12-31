@@ -5,8 +5,7 @@
 #ifndef _GIF_H_
 #define _GIF_H_
 
-#include "nanoCLR_Types.h"
-#include "nanoCLR_Runtime.h"
+#include "graphics.h"
 #include "giffile.h"
 
 struct GifDecoder

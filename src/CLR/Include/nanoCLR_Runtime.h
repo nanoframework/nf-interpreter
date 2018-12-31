@@ -1262,6 +1262,14 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index m_I2cTransferResult;
 
+#if defined(NANOCLR_USE_GRAPHICS)
+    CLR_RT_TypeDef_Index m_Bitmap;
+    CLR_RT_TypeDef_Index m_Font;
+    CLR_RT_TypeDef_Index m_TouchEvent;
+    CLR_RT_TypeDef_Index m_TouchInput;
+#endif
+
+
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_WellKnownTypes);
 };
 

@@ -104,6 +104,8 @@ void InkDriver::InkContinuationRoutine(void *arg)
     g_InkDriver.DrawInk(arg);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 void InkDriver::DrawInk(void *arg)
 {
     HRESULT hr = S_OK;
@@ -152,5 +154,6 @@ void InkDriver::DrawInk(void *arg)
         if (!m_InkCompletion.IsLinked()) m_InkCompletion.EnqueueDelta(INK_COMPLETION_TIME_USEC);
     }    
 }
+#pragma GCC diagnostic pop
 
 

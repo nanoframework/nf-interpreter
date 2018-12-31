@@ -78,6 +78,68 @@ struct Library_touch_native_TouchPanel
 
 };
 
+struct Library_native_BaseEvent
+{
+    static const int FIELD__Source = 1;
+    static const int FIELD__EventMessage = 2;
+
+
+    //--//
+
+};
+
+
+struct Library_native_Touch_TouchEvent
+{
+    static const int FIELD__Time = 3;
+    static const int FIELD__Touches = 4;
+
+
+    //--//
+
+};
+
+struct Library_native_Touch_TouchGestureEventArgs
+{
+    static const int FIELD__Timestamp = 1;
+    static const int FIELD__Gesture = 2;
+    static const int FIELD__X = 3;
+    static const int FIELD__Y = 4;
+    static const int FIELD__Arguments = 5;
+
+
+    //--//
+
+};
+
+struct Library_native_Touch_TouchInput
+{
+    static const int FIELD__X = 1;
+    static const int FIELD__Y = 2;
+    static const int FIELD__SourceID = 3;
+    static const int FIELD__Flags = 4;
+    static const int FIELD__ContactWidth = 5;
+    static const int FIELD__ContactHeight = 6;
+
+    static const CLR_UINT32 FLAG__None = 0x00;
+    static const CLR_UINT32 FLAG__Primary = 0x10;
+    static const CLR_UINT32 FLAG__Pen = 0x40;
+    static const CLR_UINT32 FLAG__Palm = 0x80;
+
+    //--//
+
+};
+
+struct Library_native_Touch_TouchScreenEventArgs
+{
+    static const int FIELD__Touches = 1;
+    static const int FIELD__TimeStamp = 2;
+    static const int FIELD__Target = 3;
+
+    //--//
+
+};
+
 
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Touch;

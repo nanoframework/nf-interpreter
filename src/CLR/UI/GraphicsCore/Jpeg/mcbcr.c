@@ -118,7 +118,7 @@ YUVtoRGB:
 	paddd	mm5, mm6			; G3*256/G2*256		(mm6 free)
 	punpcklwd	mm4, mm0		; Y1/U1'/Y0/U0'
 
-	pmaddwd	mm4, const_YUmul	; byY1+buU1'/byY0'+buU0'
+	pmaddwd	mm4, const_YUmul	; //byY1+buU1'/byY0'+buU0'
 	psrad	mm5, 8				; G3/G2
 
 	psrad	mm3, 8				; R1/R0
@@ -128,7 +128,7 @@ YUVtoRGB:
 	psrad	mm4, 8				; B1/B0
 	movq	mm6, mm3
 
-	pmaddwd	mm7, const_YUmul	; byY3+buU3'/byY2'+buU2'
+	pmaddwd	mm7, const_YUmul	; //byY3+buU3'/byY2'+buU2'
 	punpckhwd	mm1, mm0		; Y3/V3'/Y2/V2'		
 	
 	pmaddwd	mm1, const_YVmul	; ryY3+rvV3'/ryY2+rvV2'
