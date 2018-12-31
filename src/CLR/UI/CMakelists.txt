@@ -73,7 +73,6 @@ list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsCore/Jpeg/jmorecfg.h"
 list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsCore/Jpeg/Jpeg.cpp")
 list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsCore/Jpeg/jpegint.h")
 list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsCore/Jpeg/jpeglib.h")
-list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsCore/Jpeg/Jpeg_stub.cpp")
 list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsCore/Jpeg/jquant1.c")
 list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsCore/Jpeg/jquant2.c")
 list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsCore/Jpeg/jutils.c")
