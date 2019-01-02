@@ -7,6 +7,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
+#include <serialcfg.h>
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoPAL_BlockStorage.h>
@@ -41,8 +42,8 @@ int main(void) {
     }
   }
 
-  // Prepares the serial driver 2 using UART2
-  sdStart(&SD2, NULL);
+  // starts the serial driver
+  sdStart(&SERIAL_DRIVER, NULL);
 
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
