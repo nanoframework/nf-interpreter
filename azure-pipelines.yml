@@ -180,7 +180,7 @@ jobs:
         NeedsDFU: false
       MXCHIP_AZ3166:
         BoardName: MXCHIP_AZ3166
-        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=OFF -DAPI_Hardware.Stm32=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=OFF -DAPI_Hardware.Stm32=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=OFF
         GccArm_Version:
         NeedsDFU: false
 
