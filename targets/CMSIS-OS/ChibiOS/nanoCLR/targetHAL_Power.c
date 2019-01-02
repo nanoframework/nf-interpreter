@@ -22,6 +22,9 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
     switch(powerLevel)
     {
         case PowerLevel__Off:
+            // stop watchdog
+            wdgStop(&WDGD1);
+
             // gracefully shutdown everything
             nanoHAL_Uninitialize_C();
 
