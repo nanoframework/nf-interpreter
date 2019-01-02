@@ -9,6 +9,9 @@
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::DisableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::EnableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::EnterStandbyMode___STATIC__VOID,
     NULL,
     NULL,
     NULL,
@@ -38,7 +41,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory::WriteBytes___STATIC__VOID__U4__SZARRAY_U1,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory::GetSize___STATIC__I4,
     NULL,
-    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::EnterStandbyMode___STATIC__VOID,
     NULL,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAlarm___STATIC__mscorlibSystemDateTime,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::Native_RTC_SetAlarm___STATIC__VOID__U1__U1__U1__U1,
@@ -53,7 +55,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm32 =
 {
     "nanoFramework.Hardware.Stm32", 
-    0xD9749E72,
+    0x6982371A,
     method_lookup,
     { 1, 0, 3, 0 }
 };
