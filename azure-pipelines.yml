@@ -6,6 +6,8 @@ trigger:
     - develop
     - develop-sdcard
     - develop-STM32L0-target
+    - develop-mxchip-az3166
+    - develop-nucleo144-f439zi
     - release-/*
     - refs/tags/*
   paths:
