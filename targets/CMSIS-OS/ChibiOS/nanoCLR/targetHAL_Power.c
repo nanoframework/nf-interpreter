@@ -23,7 +23,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
     {
         case PowerLevel__Off:
             // gracefully shutdown everything
-            nanoHAL_Initialize_C();
+            nanoHAL_Uninitialize_C();
 
             chSysDisable();
 
