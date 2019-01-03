@@ -102,9 +102,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetNetworkInterfaceCount___STATIC__I4,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPAddressFromString___STATIC__U4__STRING,
+    NULL,
+    NULL,
+    Library_sys_net_native_System_Net_Security_CertificateManager::AddCaCertificateBundle___STATIC__BOOLEAN__SZARRAY_U1,
     Library_sys_net_native_System_Net_Security_SslNative::SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate,
     Library_sys_net_native_System_Net_Security_SslNative::SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate,
-    Library_sys_net_native_System_Net_Security_SslNative::UpdateCertificates___STATIC__VOID__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate,
     Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STATIC__VOID__I4__OBJECT,
     Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___STATIC__VOID__I4__STRING__OBJECT,
     Library_sys_net_native_System_Net_Security_SslNative::SecureRead___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4,
@@ -112,7 +114,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_sys_net_native_System_Net_Security_SslNative::SecureCloseSocket___STATIC__I4__OBJECT,
     Library_sys_net_native_System_Net_Security_SslNative::ExitSecureContext___STATIC__I4__I4,
     Library_sys_net_native_System_Net_Security_SslNative::DataAvailable___STATIC__I4__OBJECT,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -234,7 +235,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net", 
-    0xFD8EBD9C,
+    0x001C1FB9,
     method_lookup,
-    { 1, 0, 2, 2 }
+    { 1, 0, 3, 0 }
 };

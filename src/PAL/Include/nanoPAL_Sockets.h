@@ -607,7 +607,6 @@ bool SSL_Uninitialize();
 bool SSL_ServerInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle );
 bool SSL_ClientInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle );
 bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int certLength, const char* certPassword );
-void SSL_ClearCertificateAuthority( int sslContextHandle );
 bool SSL_ExitContext( int sslContextHandle );
 int  SSL_Accept     ( int socket, int sslContextHandle );
 int  SSL_Connect    ( int socket, const char* szTargetHost, int sslContextHandle );

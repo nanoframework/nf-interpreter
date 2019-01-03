@@ -19,6 +19,9 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     int authMode = MBEDTLS_SSL_VERIFY_NONE;
     int endpoint = 0;
 
+    // we only have one CA root bundle, so this is fixed to 0
+    uint32_t configIndex = 0;
+
     ///////////////////////
     mbedTLS_NFContext* context;
 
@@ -51,9 +54,6 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     if(isServer)
     {
         endpoint = MBEDTLS_SSL_IS_SERVER;
-
-        // TODO NOT IMPLEMENTED
-        // // TODO:  we should be setting up the CA list
     }
     else
     {
@@ -161,22 +161,55 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
 
     mbedtls_ssl_conf_rng( context->conf, mbedtls_ctr_drbg_random, context->ctr_drbg );
 
-    // parse certificate if passed
-    if(certificate != NULL && certLength > 0)
+    // CA root certs from store, if available
+    if(g_TargetConfiguration.CertificateStore->Count > 0)
     {
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // developer notes:                                                                            //
+        // don't care about failure in processing the CA cert bundle                                   //
+        // the outcome is that the CA certs won't be loaded into the trusted CA chain                  //
         // this call parses certificates in both string and binary formats                             //
         // when the formart is a string it has to include the terminator otherwise the parse will fail //
         /////////////////////////////////////////////////////////////////////////////////////////////////
-        if(mbedtls_x509_crt_parse( context->x509_crt, (const unsigned char*)certificate, certLength ) != 0)
-        {
-            // x509_crt_parse_failed
-            goto error;
-        }
+        mbedtls_x509_crt_parse( 
+            context->x509_crt, 
+            (const unsigned char*)g_TargetConfiguration.CertificateStore->Certificates[configIndex]->Certificate, 
+            g_TargetConfiguration.CertificateStore->Certificates[configIndex]->CertificateSize );
 
-        mbedtls_ssl_conf_ca_chain( context->conf, context->x509_crt, NULL );
     }
+
+    // parse "own" certificate if passed
+    if(certificate != NULL && certLength > 0)
+    {
+        // TODO
+        // this isn't required for client authentication
+
+        // mbedtls_x509_crt_init( &clicert );
+
+        // /////////////////////////////////////////////////////////////////////////////////////////////////
+        // // developer notes:                                                                            //
+        // // this call parses certificates in both string and binary formats                             //
+        // // when the formart is a string it has to include the terminator otherwise the parse will fail //
+        // /////////////////////////////////////////////////////////////////////////////////////////////////
+        // if(mbedtls_x509_crt_parse( &clicert, (const unsigned char*)certificate, certLength ) != 0)
+        // {
+        //     // x509_crt_parse_failed
+        //     goto error;
+        // }
+
+        // if( mbedtls_pk_parse_key( &pkey, (const unsigned char *) mbedtls_test_cli_key, mbedtls_test_cli_key_len, NULL, 0 ) != 0)
+        // {
+        //     // failed parsing the 
+        // }
+
+        // if( mbedtls_ssl_conf_own_cert( &conf, &clicert, &pkey ) != 0 )
+        // {
+        //     // configuring own certificate failed
+        //     goto error;
+        // }
+    }
+
+    mbedtls_ssl_conf_ca_chain( context->conf, context->x509_crt, NULL );
 
     // set certificate verification
     // the current options provided by mbed TLS are only verify or don't verify

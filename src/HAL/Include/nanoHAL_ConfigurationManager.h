@@ -29,6 +29,9 @@ typedef enum DeviceConfigurationOption
     // Wireless Network as AP configuration block
     DeviceConfigurationOption_WirelessNetworkAP = 3,
 
+    // X509 CA Root Certificates bundle block
+    DeviceConfigurationOption_X509CaRootBundle = 4,
+
     // All configuration blocks
     DeviceConfigurationOption_All = 255,
 
@@ -58,12 +61,25 @@ typedef struct HAL_CONFIGURATION_NETWORK_WIRELESS80211
 
 } HAL_CONFIGURATION_NETWORK_WIRELESS80211;
 
+// certificate store struct
+// declared with a flexible array member to allow N config blocks totally independent of compilation
+typedef struct HAL_CONFIGURATION_X509_CERTIFICATE
+{
+    // count of the configs elements
+    uint8_t Count;
+
+    // pointer to the certificates
+    HAL_Configuration_X509CaRootBundle* Certificates[];
+
+} HAL_CONFIGURATION_X509_CERTIFICATE;
+
 // target configuration storage struct
 // the memory allocation for these will have to be done as required according to the number and type of blocks found in memory
 typedef struct HAL_TARGET_CONFIGURATION
 {
     HAL_CONFIGURATION_NETWORK* NetworkInterfaceConfigs;
     HAL_CONFIGURATION_NETWORK_WIRELESS80211* Wireless80211Configs;
+    HAL_CONFIGURATION_X509_CERTIFICATE* CertificateStore;
 
 } HAL_TARGET_CONFIGURATION;
 
@@ -81,7 +97,7 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
 
 // StoreConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target 
 // needs to be free to implement the storage of the configuration block as they see fit
-bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize);
+bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset);
 
 // UpdateConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target 
 // needs to be free to implement the storage of the configuration block as they see fit
@@ -102,6 +118,9 @@ void* ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t startAddress,
 
 // function that sweeps a memory region searching for wireless network configuration blocks
 void* ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(uint32_t startAddress, uint32_t endAddress);
+
+// function that sweeps a memory region searching for X509 certificates configuration blocks
+void* ConfigurationManager_FindX509CertificateConfigurationBlocks(uint32_t startAddress, uint32_t endAddress);
 
 // gets the HAL_Configuration_Wireless80211 configuration block that has the specified Id, if that exists 
 // defined as weak needs to be free to implement the storage of the configuration block as they see fit

@@ -54,6 +54,8 @@ list(APPEND TARGET_ESP32_IDF_INCLUDES "${COMPONENT_PATH}/ulp/include")
 
 list(APPEND TARGET_ESP32_IDF_INCLUDES "${COMPONENT_PATH}/ulp/include")
 
+list(APPEND TARGET_ESP32_IDF_INCLUDES "${COMPONENT_PATH}/spiffs/include")
+
 #sdkconfig reference
 list(APPEND TARGET_ESP32_IDF_INCLUDES "${ESP32_IDF_PATH}/examples/get-started/blink/build/include")
 
@@ -335,6 +337,7 @@ list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libpthread.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libwear_levelling.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libxtensa-debug-module.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libsmartconfig_ack.a)
+list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libspiffs.a)
 
 # Lwip lib is built separately 
 #list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/liblwip.a)

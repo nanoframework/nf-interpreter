@@ -6,22 +6,6 @@
 #include <ssl.h>
 #include "mbedtls.h"
 
-// TODO FIXME - no Certificate store
-
-#ifdef NO_CERT_STORE
-
-bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, int certLength, const char* certPassword )
-{
-    (void)sslContextHandle;
-    (void)certificate;
-    (void)certLength;
-    (void)certPassword;
-    
-    return false;
-}
-
-#else
-
 bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, int certLength, const char* certPassword )
 {
     (void)certPassword;
@@ -57,5 +41,3 @@ bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, 
 
     return false;
 }
-
-#endif

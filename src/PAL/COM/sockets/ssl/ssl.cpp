@@ -72,11 +72,6 @@ bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate,
     return ssl_add_cert_auth_internal(sslContextHandle, certificate, certLength, certPassword);    
 }
 
-void SSL_ClearCertificateAuthority( int sslContextHandle )
-{
-    ssl_clear_cert_auth_internal(sslContextHandle);
-}
-
 bool SSL_ExitContext( int sslContextHandle )
 { 
     return ssl_exit_context_internal(sslContextHandle);
