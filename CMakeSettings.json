@@ -7,8 +7,8 @@
       "inheritEnvironments": [
         "gcc-arm"
       ],
-      "buildRoot": "C:\\nf-interpreter\\Build\\${name}",
-      "installRoot": "C:\\nf-interpreter\\Build\\install\\${name}",
+      "buildRoot": "C:\\nanoFramework\\nf-interpreter\\Build\\${name}",
+      "installRoot": "C:\\nanoFramework\\nf-interpreter\\Build\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
@@ -20,12 +20,13 @@
         },
         {
           "name": "EXECUTABLE_OUTPUT_PATH",
-          "value": "C:/nf-interpreter/build/${name}"
+          "value": "C:/nanoFramework/nf-interpreter/build/${name}"
         },
         {
           "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/Program Files (x86)/GNU Tools Arm Embedded/7 2018-q2-update"
-          //"value": "${env.GCCPATH}"   // Standard Visual Studio Install of GCC 6.3.1
+          "value": "C:/nanoFramework_Tools/GNU_ARM_Toolchain/7 2018-q2-update"
+          //"value": "C:/Program Files (x86)/GNU Tools Arm Embedded/7 2018-q2-update",
+          //"value": "${env.GCCPATH}"   // Standard Visual Studio Install of GCC 6.3.1 !!Note: This version is a number of years old
         },
         {
           "name": "CMAKE_SYSTEM_NAME",
@@ -48,8 +49,8 @@
           "value": "ST_STM32F769I_DISCOVERY"
         },
         {
-          "name": "CHIBIOS_SOURCE", // manually download, problems at the moment with value="", sub process access denied at build?
-          "value": "C:\\nf-support\\ChibiOS"
+          "name": "CHIBIOS_SOURCE", // manually download, problems at the moment with value="" which forces a auto copy; causes failure with access denied at build? ( on .git directory)
+          "value": "C:/nanoFramework_Tools/ChibiOS"
         },
         {
           "name": "CHIBIOS_VERSION", // default blank, set to specific version ( Not working with Visual Studio, clone and checkout specific manually)
@@ -69,7 +70,7 @@
         },
         {
           "name": "TOOL_HEX2DFU_PREFIX", //"PATH for HEX TOOL"
-          "value": "C:/nf-support/Tools"
+          "value": "C:/nanoFramework_Tools/Tools"
         },
         {
           "name": "RTOS", //"Selected Operating system
@@ -215,7 +216,7 @@
         },
         {
           "name": "GraphicsController", //Include ink support
-          "value": "C:\\nf-interpreter\\src\\CLR\\UI\\Displays\\OTM8009A"
+          "value": "C:\\nanoFramework\\nf-interpreter\\src\\CLR\\UI\\Displays\\OTM8009A"
         },
         {
           "name": "NF_FEATURE_UI_TOUCH", //Include touch support
@@ -223,7 +224,7 @@
         },
         {
           "name": "TouchController", //Include ink support
-          "value": "C:\\nf-interpreter\\src\\CLR\\UI\\Touch\\TouchSensors\\FT6206"
+          "value": "C:\\nanoFramework\\nf-interpreter\\src\\CLR\\UI\\Touch\\TouchSensors\\FT6206"
         }
       ]
     }

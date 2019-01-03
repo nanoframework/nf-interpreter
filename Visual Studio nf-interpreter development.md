@@ -41,11 +41,12 @@ I made a decision to put the code at the top level to reduce path length of file
 
 ### Directory structure for the project
 Two top level directories have been created to support the development with Visual Studio.
-`c:\nf-interpreter and c:\nf-support`
+* `c:\nanoFramework\nf-interpreter`
+* `c:\nanoFramework_Tools`
 
-#### c:\nf-interpreter
+#### c:\nanoFramework\nf-interpreter
 - The nf-interpreter repository is cloned to this directory.
-######  c:\nf-interpreter\Build
+######  c:\nanoFramework\nf-interpreter\Build
 - This directory contains the build output, the files in here are transient. When the CMake cache is deleted, files in this directory are deleted.
 The files in this directory are only visible when selecting "Show All Files". These files are not part of the GIT repository.
 At the end of a successful build the build outputs are copied to the *\Build* directory.
@@ -59,16 +60,16 @@ Sometime the CMake server goes away, shutting down Visual Studio and restarting 
 >It is necessary to manually delete the directory from file explorer and generate the cache for the copy to run.
 >_
 
-#### c:\nf-support 
+#### c:\nanoFramework_Tools\
  Manually create this directory to contain the following folders.
-###### c:\nf-support\ChibiOS
+###### c:\nanoFramework_Tools\ChibiOS
 + Copy of the ChibiOS repository cloned from https://github.com/nanoframework/ChibiOS.git
 
-######  C:\nf-support\Tools\openocd
+######  C:\nanoFramework_Tools\Tools\openocd
 + Copy of the openocd installation http://www.freddiechopin.info/en/download/category/4-openocd
 + > Currently version 0.10.0
 
-###### C:\nf-support\Tools\
+###### C:\nanoFramework_Tools\Tools\
 + Place a copy of the hex2dfu.exe tool here
 
 

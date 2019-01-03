@@ -19,7 +19,7 @@
           "text": "-environment-cd ${workspaceRoot}\\Build"
         },
         {
-          "text": "-file-exec-and-symbols c:/nf-interpreter/BUILD/nanobooter.elf",
+          "text": "-file-exec-and-symbols c:/nanoFramework/nf-interpreter/BUILD/nanobooter.elf",  // must use forward slashes and hard code path (at the moment)
           "description": "load file",
           "ignoreFailures": false
         },
@@ -39,8 +39,8 @@
       "showDisplayString": true,
       "miDebuggerServerAddress": "localhost:3333",
       "launchCompleteCommand": "None",
-      "debugServerPath": "C:\\nf-support\\Tools\\openocd\\bin\\openocd.exe",
-      "debugServerArgs": "-s \"C:\\nf-support\\Tools\\openocd\\bin\\scripts/\" -f interface/stlink-v2-1.cfg -f board/stm32f7discovery.cfg",
+      "debugServerPath": "C:\\nanoFramework_Tools\\Tools\\openocd\\bin\\openocd.exe",
+      "debugServerArgs": "-s \"C:\\nanoFramework_Tools\\Tools\\openocd\\bin\\scripts/\" -f interface/stlink-v2-1.cfg -f board/stm32f7discovery.cfg",
       "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
       "filterStderr": true,
       "filterStdout": true

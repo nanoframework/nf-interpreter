@@ -59,7 +59,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Graphics =
 {
-    "Microsoft.SPOT.Graphics", 
+    "nano.Graphics", 
     0x46930647,
     method_lookup
 };
