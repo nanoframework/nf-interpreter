@@ -3,6 +3,8 @@
 nvs,      data, nvs,     0x9000,  0x6000,
 phy_init, data, phy,     0xf000,  0x1000,
 factory,  0,    0,      0x10000,  1M,
-deploy,   data, 0x84,   0x110000,  2M,
-
+# Config data for Network, Wireless, certificates, user data  256K
+config,   data, spiffs, 0x110000, 256K, 
+# Deployment area for Managed code 1792K
+deploy,   data, 0x84,   0x150000, 0x1C0000, 
 

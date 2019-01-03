@@ -6,7 +6,6 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Debugging.h>
 #include <nanoHAL.h>
-#include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
@@ -871,8 +870,8 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
                 success = true;
 
                 WP_ReplyToCommand( message, success, false, (uint8_t*)configNetworkInterface, size );
-                platform_free(configNetworkInterface);
             }            
+            platform_free(configNetworkInterface);
             break;
 
         case DeviceConfigurationOption_Wireless80211Network:
@@ -885,13 +884,13 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
                 success = true;
 
                 WP_ReplyToCommand( message, success, false, (uint8_t*)configWireless80211NetworkInterface, size );
-                platform_free(configWireless80211NetworkInterface);
             }
+            platform_free(configWireless80211NetworkInterface);
             break;
     
         case DeviceConfigurationOption_X509CaRootBundle:
 
-            if(g_TargetConfiguration.CertificateStore->Count > 0)
+            if(g_TargetConfiguration.CertificateStore->Count > cmd->BlockIndex )
             {
                 // because X509 certificate has a variable length need to compute the block size in two steps
                 sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
@@ -906,8 +905,8 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
                 success = true;
 
                 WP_ReplyToCommand( message, success, false, (uint8_t*)x509Certificate, size );
-                platform_free(x509Certificate);
             }
+            platform_free(x509Certificate);
             break;
     
         case DeviceConfigurationOption_WirelessNetworkAP:
