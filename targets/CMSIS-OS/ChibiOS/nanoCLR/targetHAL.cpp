@@ -22,7 +22,7 @@ extern "C" {
 
     void nanoHAL_Uninitialize_C()
     {
-        void nanoHAL_Uninitialize();
+        nanoHAL_Uninitialize();
     } 
 }
 
