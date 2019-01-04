@@ -104,4 +104,7 @@ const char*   HAL_Time_CurrentDateTimeToString();
 
 uint64_t  CPU_MillisecondsToTicks       ( uint64_t ticks  );
 
+
+uint64_t Time_GetMachineTime();
+
 #endif //_NANOHAL_TIME_H_

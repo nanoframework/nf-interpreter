@@ -215,16 +215,16 @@
           "value": "TRUE"
         },
         {
-          "name": "GraphicsController", //Include ink support
-          "value": "C:\\nanoFramework\\nf-interpreter\\src\\CLR\\UI\\Displays\\OTM8009A"
+          "name": "PrimaryGraphicsController", //Include ink support
+          "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\UI\\Displays\\OTM8009A"
         },
         {
           "name": "NF_FEATURE_UI_TOUCH", //Include touch support
           "value": "TRUE"
         },
         {
-          "name": "TouchController", //Include ink support
-          "value": "C:\\nanoFramework\\nf-interpreter\\src\\CLR\\UI\\Touch\\TouchSensors\\FT6206"
+          "name": "PrimaryTouchController", //Include ink support
+          "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\UI\\TouchSensors\\FT6206"
         }
       ]
     }

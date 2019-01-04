@@ -5,6 +5,8 @@
 #include "Graphics.h"
 #include <nanohal.h>
 #include "ink_driver.h"
+#include "Touchpanel_decl.h"
+
 
 InkDriver g_InkDriver;
 
@@ -66,7 +68,7 @@ HRESULT InkDriver::SetRegion(InkRegionInfo* inkRegionInfo)
     CLR_UINT16 source = 0;
     CLR_UINT16 x = 0;
     CLR_UINT16 y = 0;
-    INT64 time = 0;
+    CLR_INT64 time = 0;
 
     if (TOUCH_PANEL_GetTouchPoint(&flags, &source, &x, &y, &time) == S_OK)
     {
@@ -113,7 +115,7 @@ void InkDriver::DrawInk(void *arg)
     CLR_UINT16 source = 0;
     CLR_UINT16 x = 0;
     CLR_UINT16 y = 0;
-    INT64 time = 0;
+    CLR_INT64 time = 0;
     CLR_INT16 dx = m_InkRegionInfo.X1;
     CLR_INT16 dy = m_InkRegionInfo.Y1;
 

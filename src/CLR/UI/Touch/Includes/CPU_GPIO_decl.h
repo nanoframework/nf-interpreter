@@ -7,6 +7,7 @@
 
 
 #include "nanoCLR_Types.h"
+#include "CPU_GPIO_decl.h"
 
 #define GPIO_PIN_NONE               0xFFFFFFFF
 

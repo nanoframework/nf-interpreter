@@ -5,6 +5,7 @@
 
 #include "touch_native.h"
 #include "touch.h"
+#include "touchpanel_decl.h"
 #include "Graphics.h"
 
 #pragma GCC diagnostic push

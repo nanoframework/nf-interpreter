@@ -94,3 +94,7 @@ HRESULT HAL_Time_DaysInMonth(signed int year, signed int month, signed int* days
 
     return S_OK;
 }
+uint64_t Time_GetMachineTime()
+{
+    return HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks());
+}

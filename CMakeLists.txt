@@ -917,17 +917,16 @@ elseif(RTOS_FREERTOS_CHECK)
     endif()
 
 endif()
- 
 
-# User Interface (UI) code
+####################### User Interface (UI) code
 if(NF_FEATURE_UI_GRAPHICS)
-   add_subdirectory(src/CLR/UI)
- # add_subdirectory(${GraphicsController})
+   add_subdirectory(src/CLR/UI/Graphics)
+   add_subdirectory("${PrimaryGraphicsController}")
 endif()
 
-#if(NF_FEATURE_UI_TOUCH)
-#   add_subdirectory(src/CLR/UI/TOUCH)
-#   add_subdirectory(${TouchController})
-#endif()
-#
+if(NF_FEATURE_UI_TOUCH)
+   add_subdirectory(src/CLR/UI/TOUCH)
+   add_subdirectory("${PrimaryTouchController}")
+endif()
+
 

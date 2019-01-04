@@ -66,8 +66,16 @@ static const CLR_RT_MethodHandler method_lookup[] =
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Touch =
 {
-    "Microsoft.SPOT.Touch", 
+    "UI.Touch", 
     0x2D4E2DCC,
-    method_lookup
+    method_lookup,
+       { 1, 0, 2, 2 }  // Dummy version to stop [-Werror=missing-field-initializers]
 };
 
+const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events =
+{
+    "nanoFramework.Runtime.Events",
+    0xBFF88292,
+    method_lookup,
+    { 1, 0, 2, 2 }
+};

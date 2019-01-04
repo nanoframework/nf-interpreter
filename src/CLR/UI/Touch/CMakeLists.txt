@@ -1,6 +1,6 @@
 
-list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/TouchPanel/TouchPanelDriver.cpp")
-list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}//TouchPanel/TouchPanelFunctions.cpp")
+list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/Core/TouchPanelDriver.cpp")
+list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/Core/TouchPanelFunctions.cpp")
             
 list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/Native/touch_native_Touch_TouchCollectorConfiguration.cpp")
 list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/Native/touch_native_Touch_TouchEventProcessor.cpp")
