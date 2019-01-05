@@ -1,18 +1,9 @@
 trigger:
-  branches:
-    include:
-    - master
-    - dev/*
-    - develop
-    - develop-sdcard
-    - develop-STM32L0-target
-    - develop-mxchip-az3166
-    - develop-nucleo144-f439zi
-    - release-/*
-    - refs/tags/*
+  # no branches config, we want to trigger builds for all branches
   paths:
     exclude:
-    - /*.md
+    - README.md
+    - CHANGELOG.md
     - .gitignore
     - appveyor.yml
     - cmake-variants.TEMPLATE.json
@@ -21,13 +12,7 @@ trigger:
   #   include:
   #   - v/*
 
-pr:
-  branches:
-    include:
-    - master
-    - develop/*
-    - release/*
-  autoCancel: true
+# no pr config, we want to trigger builds for all PRs on all branches
 
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
