@@ -1,6 +1,7 @@
 trigger:
   batch: true
-  include: [ '*' ]
+  branches:
+    include: [ ]
   paths:
     exclude:
     - README.md
