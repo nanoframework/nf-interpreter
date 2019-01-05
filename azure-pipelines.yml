@@ -1,5 +1,6 @@
 trigger:
-  # no branches config, we want to trigger builds for all branches
+  batch: true
+  include: [ '*' ]
   paths:
     exclude:
     - README.md
