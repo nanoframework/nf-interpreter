@@ -25,8 +25,6 @@
         {
           "name": "TOOLCHAIN_PREFIX",
           "value": "C:/nanoFramework_Tools/GNU_ARM_Toolchain/7 2018-q2-update"
-          //"value": "C:/Program Files (x86)/GNU Tools Arm Embedded/7 2018-q2-update",
-          //"value": "${env.GCCPATH}"   // Standard Visual Studio Install of GCC 6.3.1 !!Note: This version is a number of years old
         },
         {
           "name": "CMAKE_SYSTEM_NAME",
@@ -215,16 +213,24 @@
           "value": "TRUE"
         },
         {
-          "name": "PrimaryGraphicsController", //Include ink support
-          "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\UI\\Displays\\OTM8009A"
+          "name": "PrimaryGraphicsController", // Main graphics display
+          "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\GUI\\Displays\\OTM8009A"
         },
         {
-          "name": "NF_FEATURE_UI_TOUCH", //Include touch support
+          "name": "SecondaryGraphicsController", // Potential use of a secondary
+          "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\GUI\\Displays\\ST7735"
+        },
+        {
+          "name": "NF_FEATURE_UI_TOUCH", // Include touch support
           "value": "TRUE"
         },
         {
-          "name": "PrimaryTouchController", //Include ink support
+          "name": "PrimaryTouchController", // Include ink support
           "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\UI\\TouchSensors\\FT6206"
+        },
+        {
+          "name": "SecondaryTouchController", // Potential use of a secondary
+          "value": ""
         }
       ]
     }

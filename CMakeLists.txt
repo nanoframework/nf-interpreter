@@ -7,6 +7,8 @@ cmake_minimum_required(VERSION 3.11)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
 
+ include(${CMAKE_SOURCE_DIR}/CMakeUserFunctions.cmake)
+
  set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
 
 # the following prevents launchin a build in the source tree
@@ -918,15 +920,18 @@ elseif(RTOS_FREERTOS_CHECK)
 
 endif()
 
-####################### User Interface (UI) code
-if(NF_FEATURE_UI_GRAPHICS)
-   add_subdirectory(src/CLR/UI/Graphics)
-   add_subdirectory("${PrimaryGraphicsController}")
-endif()
 
-if(NF_FEATURE_UI_TOUCH)
-   add_subdirectory(src/CLR/UI/TOUCH)
-   add_subdirectory("${PrimaryTouchController}")
-endif()
+    #########################################
+    # Graphics - see CMakeUserFunctions.cmake
+    #########################################
+    if(NF_FEATURE_UI_GRAPHICS)
+        Graphics("${PrimaryGraphicsController}" "${SecondaryGraphicsController}")
+    endif()
 
+    ##############################################
+    # Touch and Ink - see CMakeUserFunctions.cmake
+    ##############################################
+    if(NF_FEATURE_UI_TOUCH)
+        TouchAndInk("${PrimaryTouchController}" "${SecondaryTouchController}")
+    endif()
 

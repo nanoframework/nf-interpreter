@@ -2,8 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _ft6x06_DRIVER_H_
-#define _ft6x06_DRIVER_H_ 1
+#ifndef _Touch_DRIVER_H_
+#define _Touch_DRIVER_H_ 1
 
 
 #include <nanohal.h>
@@ -12,7 +12,7 @@
 #include "TouchPanel_decl.h"
 
 
-struct ft6x06_Driver
+struct Touch_Driver
 {
     static bool Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc);
     static bool Disable();

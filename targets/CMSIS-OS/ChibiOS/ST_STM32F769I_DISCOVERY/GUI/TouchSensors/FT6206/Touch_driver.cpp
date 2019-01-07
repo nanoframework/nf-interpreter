@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "ft6x06_driver.h"
+#include "Touch.h"
 #include "CPU_GPIO_decl.h"
 #include "TouchPanel_decl.h"
 #include "Display_Driver.h"
@@ -11,7 +11,7 @@
 extern TOUCH_SPI_CONFIGURATION g_ft6x06_Config;
 extern TOUCH_PANEL_SamplingSettings g_TouchPanel_Sampling_Settings;
 
-bool ft6x06_Driver::Enable( GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc )
+bool Touch_Driver::Enable( GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc )
 {     
     if (!::CPU_GPIO_ReservePin( g_ft6x06_Config.SpiConfiguration.DeviceCS, TRUE ))
     {
@@ -33,21 +33,17 @@ bool ft6x06_Driver::Enable( GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc )
         return FALSE;
     }    
 
-    ::CPU_SPI_Initialize();
+   // FIXME ::CPU_SPI_Initialize();
 
     return TRUE;
 }
-
-bool ft6x06_Driver::Disable()
+bool Touch_Driver::Disable()
 {
     CPU_GPIO_DisablePin( g_ft6x06_Config.InterruptPin, RESISTOR_DISABLED, 0, GPIO_ALT_PRIMARY);
     
     return true;
 }
-
-
-
-void ft6x06_Driver::GetPoint( TOUCH_PANEL_SAMPLE_FLAGS* pTipState, int* pSource, int* pUnCalX, int* pUnCalY )
+void Touch_Driver::GetPoint( TOUCH_PANEL_SAMPLE_FLAGS* pTipState, int* pSource, int* pUnCalX, int* pUnCalY )
 {
     *pTipState = 0;
     *pUnCalX = 0;
@@ -75,11 +71,15 @@ void ft6x06_Driver::GetPoint( TOUCH_PANEL_SAMPLE_FLAGS* pTipState, int* pSource,
 
     for(i = 0; i < totalReads; i++)
     {    
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
         static unsigned char writeBufferX[4] = {0x90, 0, 0, 0};
+#pragma GCC diagnostic pop
         static unsigned char readBuffer[3] =  {0, 0, 0};
 
         d2 = d1;
-        ::CPU_SPI_nWrite8_nRead8(g_ft6x06_Config.SpiConfiguration, writeBufferX, 4, readBuffer, 3, 1);
+        // FIXME  ::CPU_SPI_nWrite8_nRead8(g_ft6x06_Config.SpiConfiguration, writeBufferX, 4, readBuffer, 3, 1);
     
         d1 = readBuffer[0];                
         d1 <<= 8;
@@ -96,11 +96,14 @@ void ft6x06_Driver::GetPoint( TOUCH_PANEL_SAMPLE_FLAGS* pTipState, int* pSource,
     d2 = 0;
     for(i = 0; i < g_TouchPanel_Sampling_Settings.ReadsPerSample; i++)
     {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
         static unsigned char writeBufferY[4] = {0xD0, 0, 0, 0};
+#pragma GCC diagnostic pop
         static unsigned char readBuffer[3] =  {0, 0, 0};
 
         d2 = d1;
-        ::CPU_SPI_nWrite8_nRead8(g_ft6x06_Config.SpiConfiguration, writeBufferY, 4, readBuffer, 3, 1);
+        // FIXME   ::CPU_SPI_nWrite8_nRead8(g_ft6x06_Config.SpiConfiguration, writeBufferY, 4, readBuffer, 3, 1);
     
         d1 = readBuffer[0];                
         d1 <<= 8;
@@ -143,8 +146,7 @@ void ft6x06_Driver::GetPoint( TOUCH_PANEL_SAMPLE_FLAGS* pTipState, int* pSource,
         stylusDown = false;       
     }    
 }
-
-bool ft6x06_Driver::CalibrationPointGet(TOUCH_PANEL_CALIBRATION_POINT *pTCP)
+bool Touch_Driver::CalibrationPointGet(TOUCH_PANEL_CALIBRATION_POINT *pTCP)
 {
 
     CLR_INT32   cDisplayWidth  = pTCP->cDisplayWidth;
@@ -189,9 +191,7 @@ bool ft6x06_Driver::CalibrationPointGet(TOUCH_PANEL_CALIBRATION_POINT *pTCP)
     
     return TRUE;
 }
-
-
-HRESULT ft6x06_Driver::GetDeviceCaps(unsigned int iIndex, void* lpOutput)
+HRESULT Touch_Driver::GetDeviceCaps(unsigned int iIndex, void* lpOutput)
 {
     if ( lpOutput == NULL )
     {
@@ -229,4 +229,3 @@ HRESULT ft6x06_Driver::GetDeviceCaps(unsigned int iIndex, void* lpOutput)
 
     return TRUE;
 }
-
