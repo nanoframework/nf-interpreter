@@ -514,9 +514,13 @@ bool Network_Interface_Bind(int index);
 int  Network_Interface_Open(int index);
 bool Network_Interface_Close(int index);
 int  Network_Interface_Disconnect(int index);
-int  Network_Interface_Connect(int index, const char * ssid, const char * passphase, int reconOption);
+int  Network_Interface_Connect(int index, const char * ssid, const char * passphase, int options);
 bool Network_Interface_Start_Scan(int index);
 //--//
+
+// Network_Interface_Connect options
+#define NETWORK_CONNECT_SAVE_CONFIG         1
+#define NETWORK_CONNECT_RECONNECT           2
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkChange.NetworkEventType (in managed code) !!! //

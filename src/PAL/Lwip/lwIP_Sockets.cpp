@@ -8,18 +8,6 @@
 
 #include "LWIP_sockets.h"
 
-// Make sure the ESP32 version of FD_xx macro are used
-// as the socket number is offset
-// FIXME - The problem is these MACROs are also defined in the newlib sys/types.h
-#ifdef PLATFORM_ESP32
-#undef FD_SET
-#undef FD_CLR
-#undef FD_ISSET
-#undef FD_ZERO
-#undef _types_fd_set
-#undef fd_set
-#endif
-
 extern "C"
 {
 #include "lwip\init.h"
@@ -625,7 +613,7 @@ int LWIP_SOCKETS_Driver::Select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* wr
     max_sd = LWIP_SOCKET_OFFSET + MEMP_NUM_NETCONN;
     #endif
 
-    ret = lwip_select(max_sd, pR, pW, pE, (struct timeval *)timeout);
+    ret = select(max_sd, pR, pW, pE, (struct timeval *)timeout);
 
     MARSHAL_FDSET_TO_SOCK_FDSET(readfds  , pR);
     MARSHAL_FDSET_TO_SOCK_FDSET(writefds , pW);
