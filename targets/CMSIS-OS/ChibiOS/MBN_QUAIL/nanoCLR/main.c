@@ -26,6 +26,12 @@ osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
 //  Application entry point.
 int main(void) {
 
+  // first things first: need to clear any possible wakeup flags
+  // if this is not done here the next standby -> wakeup sequence won't work
+  CLEAR_BIT(RTC->CR, RTC_CR_ALRAIE);
+  CLEAR_BIT(RTC->ISR, RTC_ISR_ALRAF);
+  SET_BIT(PWR->CR, PWR_CR_CWUF);
+
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
@@ -40,6 +46,9 @@ int main(void) {
   osKernelInitialize();
 
   // start watchdog
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // for STM32F4 family if watchdog is enabled can't use standby mode because the IWDG can't be stoped //
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
   Watchdog_Init();
 
   //  Initializes a serial-over-USB CDC driver.
