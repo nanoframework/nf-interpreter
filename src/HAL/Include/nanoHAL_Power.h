@@ -7,6 +7,7 @@
 #define _NANOHAL_POWER_H_ 1
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,6 +21,12 @@ typedef enum PowerLevel
     PowerLevel__DeepSleep,
     PowerLevel__Off
 }PowerLevel_type;
+
+
+// this is used to store the CPU wakeup reason
+// a target implementation can use it or not
+// if it's used suggest to add the variable at targetHAL_Power.c 
+extern uint32_t WakeupReasonStore;
 
 bool CPU_IsSoftRebootSupported();
 

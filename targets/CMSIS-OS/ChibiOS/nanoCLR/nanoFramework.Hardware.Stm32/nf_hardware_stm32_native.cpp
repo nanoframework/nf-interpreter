@@ -9,6 +9,7 @@
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::get_WakeupReason___STATIC__nanoFrameworkHardwareStm32PowerWakeupReasonType,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::DisableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::EnableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::EnterStandbyMode___STATIC__VOID,
@@ -55,7 +56,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm32 =
 {
     "nanoFramework.Hardware.Stm32", 
-    0x6982371A,
+    0xC85F9307,
     method_lookup,
     { 1, 0, 3, 0 }
 };

@@ -10,6 +10,8 @@
 #include <hal.h>
 #include <ch.h>
 
+uint32_t WakeupReasonStore;
+
 inline void CPU_Reset(){ NVIC_SystemReset(); };
 
 inline bool CPU_IsSoftRebootSupported() { return true; };
