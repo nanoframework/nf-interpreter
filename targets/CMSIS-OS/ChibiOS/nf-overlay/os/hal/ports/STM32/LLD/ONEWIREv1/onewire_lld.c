@@ -128,19 +128,19 @@ void oneWire_lld_start() {
     ConfigPins_UART1();
     ONEWIRED1.UartDriver = &UARTD1;
     ONEWIRED1.TxBuffer = Uart1_TxBuffer;
-    ONEWIRED1.RxBuffer = Uart1_TxBuffer;
+    ONEWIRED1.RxBuffer = Uart1_RxBuffer;
 #endif
 #if NF_ONEWIRE_STM32_UART_USE_USART2
     ConfigPins_UART2();
     ONEWIRED1.UartDriver = &UARTD2;
     ONEWIRED1.TxBuffer = Uart2_TxBuffer;
-    ONEWIRED1.RxBuffer = Uart2_TxBuffer;
+    ONEWIRED1.RxBuffer = Uart2_RxBuffer;
 #endif
 #if NF_ONEWIRE_STM32_UART_USE_USART3
     ConfigPins_UART3();
     ONEWIRED1.UartDriver = &UARTD3;
     ONEWIRED1.TxBuffer = Uart3_TxBuffer;
-    ONEWIRED1.RxBuffer = Uart3_TxBuffer;
+    ONEWIRED1.RxBuffer = Uart3_RxBuffer;
 #endif
 #if NF_ONEWIRE_STM32_UART_USE_USART4
     ConfigPins_UART4();
@@ -152,25 +152,25 @@ void oneWire_lld_start() {
     ConfigPins_UART5();
     ONEWIRED1.UartDriver = &UARTD5;
     ONEWIRED1.TxBuffer = Uart5_TxBuffer;
-    ONEWIRED1.RxBuffer = Uart5_TxBuffer;
+    ONEWIRED1.RxBuffer = Uart5_RxBuffer;
 #endif
 #if NF_ONEWIRE_STM32_UART_USE_USART6
     ConfigPins_UART6();
     ONEWIRED1.UartDriver = &UARTD6;
     ONEWIRED1.TxBuffer = Uart6_TxBuffer;
-    ONEWIRED1.RxBuffer = Uart6_TxBuffer;
+    ONEWIRED1.RxBuffer = Uart6_RxBuffer;
 #endif
 #if NF_ONEWIRE_STM32_UART_USE_USART7
     ConfigPins_UART7();
     ONEWIRED1.UartDriver = &UARTD7;
     ONEWIRED1.TxBuffer = Uart7_TxBuffer;
-    ONEWIRED1.RxBuffer = Uart7_TxBuffer;
+    ONEWIRED1.RxBuffer = Uart7_RxBuffer;
 #endif
 #if NF_ONEWIRE_STM32_UART_USE_USART8
     ConfigPins_UART8();
     ONEWIRED1.UartDriver = &UARTD8;
     ONEWIRED1.TxBuffer = Uart8_TxBuffer;
-    ONEWIRED1.RxBuffer = Uart8_TxBuffer;
+    ONEWIRED1.RxBuffer = Uart8_RxBuffer;
 #endif    
 
     uartSetSpeed(9600);
