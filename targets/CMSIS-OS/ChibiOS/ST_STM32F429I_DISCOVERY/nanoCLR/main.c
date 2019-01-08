@@ -24,6 +24,23 @@ osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
 //  Application entry point.
 int main(void) {
 
+  // find out wakeup reason
+  if((RTC->ISR & RTC_ISR_ALRAF) == RTC_ISR_ALRAF)
+  {
+    // standby, match WakeupReason_FromStandby enum
+    WakeupReasonStore = 1;
+  }
+  else if((PWR->CSR & PWR_CSR_WUF) == PWR_CSR_WUF)
+  {
+    // wake from pin, match WakeupReason_FromPin enum
+    WakeupReasonStore = 2;
+  }
+  else
+  {
+    // undetermined reason, match WakeupReason_Undetermined enum
+    WakeupReasonStore = 0;
+  }
+
   // first things first: need to clear any possible wakeup flags
   // if this is not done here the next standby -> wakeup sequence won't work
   CLEAR_BIT(RTC->CR, RTC_CR_ALRAIE);
