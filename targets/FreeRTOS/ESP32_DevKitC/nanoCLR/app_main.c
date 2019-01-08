@@ -11,8 +11,6 @@
 #include <LaunchCLR.h>
 #include <string.h>
 
-#include <wifi_smart_config.h>
-
 extern void CLRStartupThread(void const * argument);
 
 // Mutex for GLOBAL_LOCK / GLOBAL_UNLOCK
@@ -66,9 +64,7 @@ void  app_main()
 
   ESP_ERROR_CHECK( nvs_flash_init() );
 
- //initialise_wifi_smart_config();
-
-  Esp32FlashDriver_InitializeDevice(0);
+   Esp32FlashDriver_InitializeDevice(0);
  
  	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL, 1);
   
