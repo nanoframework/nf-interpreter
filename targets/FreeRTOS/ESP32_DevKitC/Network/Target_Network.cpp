@@ -19,6 +19,8 @@ int  Esp32_Wireless_Scan();
 int  Esp32_Wireless_Disconnect();
 int  Esp32_Wireless_Connect(HAL_Configuration_Wireless80211 * pWireless);
 
+bool StoreConfigBlock(DeviceConfigurationOption configType, uint32_t configurationIndex, void * pConfigBlock, size_t writeSize );
+
 
 bool Network_Interface_Bind(int index)
 {
@@ -118,17 +120,24 @@ bool GetWirelessConfig(int configIndex, HAL_Configuration_Wireless80211 ** pWire
 //
 //  Connect to wireless network SSID using passphase
 //
-int  Network_Interface_Connect(int configIndex, const char * ssid, const char * passphase, int reconOption)
+int  Network_Interface_Connect(int configIndex, const char * ssid, const char * passphase, int options)
 {    
-    (void)reconOption;
-
     HAL_Configuration_Wireless80211 * pWireless;
 
     if ( GetWirelessConfig(configIndex,  & pWireless) == false )  return SOCK_SOCKET_ERROR;
     
+    // TODO update Reconnect option ( ) - first we need a space for it in config block
+    //pWireless->reconnect = options & NETWORK_CONNECT_RECONNECT;
+
     // Update Wireless structure with new SSID and passphase
     hal_strcpy_s( (char *)pWireless->Ssid, sizeof(pWireless->Ssid), ssid );
     hal_strcpy_s( (char *)pWireless->Password, sizeof(pWireless->Password), passphase );
+
+    // Option to Save new config 
+    if ( options & NETWORK_CONNECT_SAVE_CONFIG)
+    {
+        StoreConfigBlock( DeviceConfigurationOption_Wireless80211Network, configIndex, pWireless, sizeof(HAL_Configuration_Wireless80211) );
+    }
 
     switch((tcpip_adapter_if_t)configIndex)
     {
