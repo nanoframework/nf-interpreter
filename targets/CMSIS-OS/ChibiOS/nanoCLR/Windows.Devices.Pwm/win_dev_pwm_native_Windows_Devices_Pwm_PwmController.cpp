@@ -102,7 +102,9 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::NativeSetD
                 {PWM_OUTPUT_ACTIVE_HIGH, NULL}
             },
             0,
+          #if STM32_PWM_USE_ADVANCED
             0,
+          #endif            
             0,
         };
 
