@@ -15,5 +15,18 @@ inline bool CPU_IsSoftRebootSupported() { return true; };
 
 void CPU_SetPowerMode(PowerLevel_type powerLevel)
 {
-    (void)powerLevel;
+    switch(powerLevel)
+    {
+        case PowerLevel__Off:
+            // gracefully shutdown everything
+            nanoHAL_Uninitialize_C();
+
+            esp_deep_sleep_start();
+
+            break;
+
+        default:
+            // all the other power modes are unsupported here
+            break;
+    }
 }
