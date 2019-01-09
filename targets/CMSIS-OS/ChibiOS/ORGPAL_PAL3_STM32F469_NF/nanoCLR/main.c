@@ -24,6 +24,29 @@ osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
 //  Application entry point.
 int main(void) {
 
+  // find out wakeup reason
+  if((RTC->ISR & RTC_ISR_ALRAF) == RTC_ISR_ALRAF)
+  {
+    // standby, match WakeupReason_FromStandby enum
+    WakeupReasonStore = 1;
+  }
+  else if((PWR->CSR & PWR_CSR_WUF) == PWR_CSR_WUF)
+  {
+    // wake from pin, match WakeupReason_FromPin enum
+    WakeupReasonStore = 2;
+  }
+  else
+  {
+    // undetermined reason, match WakeupReason_Undetermined enum
+    WakeupReasonStore = 0;
+  }
+
+  // first things first: need to clear any possible wakeup flags
+  // if this is not done here the next standby -> wakeup sequence won't work
+  CLEAR_BIT(RTC->CR, RTC_CR_ALRAIE);
+  CLEAR_BIT(RTC->ISR, RTC_ISR_ALRAF);
+  SET_BIT(PWR->CR, PWR_CR_CWUF);
+
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
@@ -36,9 +59,6 @@ int main(void) {
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
-
-  // start watchdog
-  Watchdog_Init();
 
   // config and init external memory
   // this has to be called after osKernelInitialize, otherwise an hard fault will occur
