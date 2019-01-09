@@ -57,6 +57,12 @@ int main(void) {
   SwoInit();
   #endif
 
+  // start watchdog
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // for STM32F4 family if watchdog is enabled can't use standby mode because the IWDG can't be stoped //
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  Watchdog_Init();
+
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
