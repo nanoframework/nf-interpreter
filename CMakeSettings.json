@@ -207,30 +207,32 @@
           "name": "API_Hardware.Stm32", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
+        // --------
         // Graphics
+        // --------
         {
-          "name": "NF_FEATURE_UI_GRAPHICS", //Include graphics support
+          "name": "NF_FEATURE_UI_GRAPHICS",     //Include graphics support
           "value": "TRUE"
         },
         {
-          "name": "PrimaryGraphicsController", // Main graphics display
-          "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\GUI\\Displays\\OTM8009A"
+          "name": "CpuToGraphicsDisplay",
+          "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\GUI\\Display\\SPI"
         },
         {
-          "name": "SecondaryGraphicsController", // Potential use of a secondary
-          "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\GUI\\Displays\\ST7735"
+          "name": "GraphicsDisplay",
+          "value": "C:\\nanoFramework\\nf-interpreter\\src\\CLR\\GUI\\Devices\\Displays\\STM7735"
         },
         {
-          "name": "NF_FEATURE_UI_TOUCH", // Include touch support
+          "name": "NF_FEATURE_UI_TOUCH",      // Include touch support
           "value": "TRUE"
         },
         {
-          "name": "PrimaryTouchController", // Include ink support
-          "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\UI\\TouchSensors\\FT6206"
+          "name": "CpuToTouchSensor",
+          "value": "C:\\nanoFramework\\nf-interpreter\\targets\\CMSIS-OS\\ChibiOS\\ST_STM32F769I_DISCOVERY\\GUI\\TouchSensor\\SPI"
         },
         {
-          "name": "SecondaryTouchController", // Potential use of a secondary
-          "value": ""
+          "name": "TouchSensor",
+          "value": "C:\\nanoFramework\\nf-interpreter\\src\\CLR\\GUI\\Devices\\Touch\\FT6206"
         }
       ]
     }

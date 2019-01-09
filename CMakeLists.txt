@@ -920,18 +920,18 @@ elseif(RTOS_FREERTOS_CHECK)
 
 endif()
 
-
     #########################################
     # Graphics - see CMakeUserFunctions.cmake
     #########################################
     if(NF_FEATURE_UI_GRAPHICS)
-        Graphics("${PrimaryGraphicsController}" "${SecondaryGraphicsController}")
+         Graphics(${CpuToGraphicsDisplay} ${GraphicsDisplay} )
     endif()
 
     ##############################################
     # Touch and Ink - see CMakeUserFunctions.cmake
     ##############################################
     if(NF_FEATURE_UI_TOUCH)
-        TouchAndInk("${PrimaryTouchController}" "${SecondaryTouchController}")
+         Message(STATUS, "\nTouch feature selected\n")
+         Touch(${CpuToTouchSensor} ${TouchSensor} )
     endif()
 

@@ -1,0 +1,8 @@
+
+list(APPEND UI_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/CPU_To_Graphics_Display_OTM8009A.cpp")
+
+list(APPEND UI_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")
+
+# make var global
+set(UI_SOURCE ${UI_SOURCE} CACHE INTERNAL "make global")
+set(UI_INCLUDES ${UI_INCLUDES} CACHE INTERNAL "make global")
