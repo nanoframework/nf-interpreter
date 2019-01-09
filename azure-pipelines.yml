@@ -1,12 +1,5 @@
-trigger:
-  # no branches config, we want to trigger builds for all branches
-  paths:
-    exclude:
-    - README.md
-    - CHANGELOG.md
-    - .gitignore
-    - appveyor.yml
-    - cmake-variants.TEMPLATE.json
+# no trigger config here, this is handled at Azure Pipelines interface
+
   # waiting for feature to become available
   # tags:
   #   include:

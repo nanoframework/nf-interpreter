@@ -16,6 +16,25 @@ enum WakeupPin
     WakeupPin_Pin3
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Hardware.Stm32.Power.WakeupReason (in managed code) !!!   //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+enum WakeupReason
+{
+    WakeupReason_Undetermined = 0,
+    WakeupReason_FromStandby,
+    WakeupReason_FromPin
+}; 
+
+HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::get_WakeupReason___STATIC__nanoFrameworkHardwareStm32PowerWakeupReasonType( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    stack.SetResult_U4( WakeupReasonStore );
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
 HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::DisableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();

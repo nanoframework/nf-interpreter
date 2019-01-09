@@ -10,6 +10,8 @@
 #include <hal.h>
 #include <ch.h>
 
+uint32_t WakeupReasonStore;
+
 inline void CPU_Reset(){ NVIC_SystemReset(); };
 
 inline bool CPU_IsSoftRebootSupported() { return true; };
@@ -88,6 +90,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
             // set power control register to: power down deep sleep
           #if defined(STM32F0XX) || defined(STM32F1XX) || defined(STM32F2XX) || \
             defined(STM32F3XX) ||defined(STM32F4XX) || defined(STM32L0XX) || defined(STM32L1XX)
+            SET_BIT(RTC->CR, RTC_CR_ALRAIE);
             SET_BIT(PWR->CR, PWR_CR_PDDS);
           #endif
 
