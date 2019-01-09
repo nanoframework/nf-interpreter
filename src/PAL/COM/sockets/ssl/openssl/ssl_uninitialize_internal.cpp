@@ -14,8 +14,6 @@
 // #include <openssl.h>
 // #include <Crypto/crypto.h>
 
-extern volatile int ssl_x509_store_ctx_idx;
-
 bool ssl_uninitialize_internal()
 {
     bool result = TRUE;
@@ -33,8 +31,6 @@ bool ssl_uninitialize_internal()
 // TODO - FIXME
  //   CRYPTO_cleanup_all_ex_data();
  //   EVP_cleanup();
-
-    ssl_x509_store_ctx_idx = -1;
 
     return result;
 }

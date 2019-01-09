@@ -46,6 +46,8 @@ typedef struct SMT32FlashDriver {
 #define HAL_IS_BIT_SET(REG, BIT)    (((REG) & (BIT)) != RESET)
 #define FLASH_KEY1                  ((uint32_t)0x45670123U)
 #define FLASH_KEY2                  ((uint32_t)0xCDEF89ABU)
+#define FLASH_OPT_KEY1              ((uint32_t)0x08192A3BU)
+#define FLASH_OPT_KEY2              ((uint32_t)0x4C5D6E7FU)
 #define SECTOR_MASK                 ((uint32_t)0xFFFFFF07)
 
 // FLASH_Error_Code FLASH Error Code
@@ -426,7 +428,10 @@ SMT32FlashDriver STM32FLASH;
 #ifdef __cplusplus
 extern "C" {
 #endif
-  
+  bool HAL_FLASH_Unlock(void);
+  void HAL_FLASH_Lock(void);
+  bool FLASH_WaitForLastOperation(uint32_t timeout);
+
   void flash_lld_init();
   void flash_lld_readBytes(uint32_t startAddress, uint32_t length, uint8_t* buffer);
   int  flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffer);

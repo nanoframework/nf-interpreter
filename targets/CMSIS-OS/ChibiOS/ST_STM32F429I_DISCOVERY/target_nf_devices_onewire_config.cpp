@@ -4,17 +4,17 @@
 //
 
 #include "target_nf_devices_onewire_config.h"
-#include <hal.h>
+#include <nf_devices_onewire_native.h>
 
 ///////////
-// UART6 //
+// UART4 //
 ///////////
 
-// pin configuration for UART6
+// pin configuration for UART4
 // port for TX pin is: GPIOC
-// TX pin: is GPIOC_6
+// TX pin: is GPIOC_10
 // GPIO alternate pin function is 8 (see "Table 9. STM32F405xx and STM32F407xx alternate function mapping" in STM32F405xx/STM32F407xx datasheet)
-UART_CONFIG_PINS(6, GPIOC, 6, 8)
+UART_CONFIG_PINS(4, GPIOC, 10, 8)
 
 // buffers
 // buffers that are R/W by DMA are recommended to be aligned with 32 bytes cache page size boundary
@@ -22,8 +22,8 @@ UART_CONFIG_PINS(6, GPIOC, 6, 8)
 #if defined(__GNUC__)
 __attribute__((aligned (32)))
 #endif
-uint8_t Uart6_TxBuffer[UART6_TX_SIZE];
+uint8_t Uart4_TxBuffer[UART4_TX_SIZE];
 #if defined(__GNUC__)
 __attribute__((aligned (32)))
 #endif
-uint8_t Uart6_RxBuffer[UART6_RX_SIZE];
+uint8_t Uart4_RxBuffer[UART4_RX_SIZE];

@@ -65,9 +65,24 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::Nativ
 
         alarmTime.alrmr = alarmRegister;
 
-  #else
-    #error "Setting an alarm for this series in not supported. Care to look into it and submit a PR?"
-  #endif
+      #else
+        #error "Setting an alarm for this series in not supported. Care to look into it and submit a PR?"
+      #endif
+
+      #if defined(STM32F0XX) || defined(STM32F1XX) || defined(STM32F2XX) || \
+      defined(STM32F3XX) ||defined(STM32F4XX) || defined(STM32L0XX) || defined(STM32L1XX)
+        // clear PWR wake up Flag
+        PWR->CR |=  PWR_CSR_WUF;
+      #endif
+
+      #if defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX)
+        // clear PWR wake up Flag
+        PWR->CR1 |=  PWR_CR1_CSBF;
+        
+        EXTI->EMR |= EXTI_IMR_IM17;
+        EXTI->RTSR |= EXTI_RTSR_TR17;
+  
+      #endif 
 
         rtcSetAlarm(&RTCD1, ALARM_ID, &alarmTime);
 

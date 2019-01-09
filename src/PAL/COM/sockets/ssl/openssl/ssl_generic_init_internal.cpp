@@ -53,6 +53,9 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
 
     int                 sslCtxIndex = -1;
 
+    // we only have one CA root bundle, so this is fixed to 0
+    uint32_t configIndex = 0;
+
     for(uint32_t i=0; i<ARRAYSIZE(g_SSL_Driver.m_sslContextArray); i++)
     { 
         if(g_SSL_Driver.m_sslContextArray[i].SslContext == NULL)
@@ -199,11 +202,23 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     
     if (ssl == NULL) goto err;
 
-    if(certLength != sizeof(INT32))
+    // CA root certs from store, if available
+    if(g_TargetConfiguration.CertificateStore->Count > 0)
+    {
+        cert_x509 = ssl_parse_certificate(
+            (void*)g_TargetConfiguration.CertificateStore->Certificates[configIndex]->Certificate,
+            g_TargetConfiguration.CertificateStore->Certificates[configIndex]->CertificateSize, NULL, NULL);
+
+        if(cert_x509 != NULL)
+        {
+            X509_STORE_add_cert(SSL_CTX_get_cert_store(ctx), cert_x509);
+        }
+    }
+
+    if(certLength != sizeof(INT32) || cert_x509 != NULL)
     {
         if(cert_x509 != NULL) X509_free(cert_x509);
     }
-    
 
     // NANOCLR_SSL_VERIFY_XXX >> 1 == SSL_VERIFY_xxx
     ssl->verify_mode = (sslVerify >> 1);

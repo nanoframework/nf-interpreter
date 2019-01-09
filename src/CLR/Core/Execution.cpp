@@ -1274,7 +1274,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity( CLR_UINT32 powerLevel, CLR_U
 {
     NATIVE_PROFILE_CLR_CORE();
  
-    if(powerLevel != CLR_HW_Hardware::PowerLevel__Active)
+    if(powerLevel != PowerLevel__Active)
     {
         return WaitSystemEvents( powerLevel, events, timeout_ms );
     }

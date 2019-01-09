@@ -12,13 +12,18 @@
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
 
-// because nanoHAL_Initialize needs to be called in both C and C++ we need a proxy to allow it to be called in 'C'
+// because nanoHAL_Initialize/Uninitialize needs to be called in both C and C++ we need a proxy to allow it to be called in 'C'
 extern "C" {
     
     void nanoHAL_Initialize_C()
     {
         nanoHAL_Initialize();
     }
+
+    void nanoHAL_Uninitialize_C()
+    {
+        nanoHAL_Uninitialize();
+    } 
 }
 
 void nanoHAL_Initialize()

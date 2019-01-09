@@ -34,7 +34,6 @@ set(NF_Networking_Security_SRCS
     ssl.cpp
     ssl_accept_internal.cpp
     ssl_add_cert_auth_internal.cpp
-    ssl_clear_cert_auth_internal.cpp
     ssl_closesocket_internal.cpp
     ssl_connect_internal.cpp
     ssl_exit_context_internal.cpp

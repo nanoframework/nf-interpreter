@@ -20,10 +20,5 @@
 #define HAL_USE_STM32_RNG           FALSE
 #endif
 
-// enables STM32 One Wire driver
-#if !defined(HAL_USE_STM32_ONEWIRE) 
-#define HAL_USE_STM32_ONEWIRE       FALSE
-#endif
-
 #endif // _HALCONF_NF_H_
 

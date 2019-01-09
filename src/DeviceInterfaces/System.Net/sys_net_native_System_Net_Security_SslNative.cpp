@@ -108,53 +108,6 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureClientInit__
     return InitHelper( stack, false );
 }
 
-HRESULT Library_sys_net_native_System_Net_Security_SslNative::UpdateCertificates___STATIC__VOID__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SZARRAY_SystemSecurityCryptographyX509CertificatesX509Certificate( CLR_RT_StackFrame& stack )
-{
-    NATIVE_PROFILE_CLR_NETWORK();
-    NANOCLR_HEADER();
-
-    CLR_INT32               sslContext = stack.Arg0().NumericByRef().s4;
-    CLR_RT_HeapBlock*       hbCert     = stack.Arg1().Dereference(); 
-    CLR_RT_HeapBlock_Array* arrCA      = stack.Arg2().DereferenceArray(); 
-    CLR_RT_HeapBlock_Array* arrCert;
-    CLR_UINT8* sslCert;
-    int        i;
-    CLR_RT_HeapBlock*       hbPwd;
-    const char * szPwd;
-
-    FAULT_ON_NULL(hbCert);
-    FAULT_ON_NULL(arrCA);
-
-    arrCert    = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___certificate ].DereferenceArray(); FAULT_ON_NULL(arrCert);
-
-    sslCert    = arrCert->GetFirstElement();
-
-    hbPwd      = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___password ].Dereference(); FAULT_ON_NULL(hbPwd);
-
-    szPwd      = hbPwd->StringText();
-    
-    SSL_ClearCertificateAuthority( sslContext );
-
-    if(!SSL_AddCertificateAuthority( sslContext, (const char*)sslCert, arrCert->m_numOfElements, szPwd )) NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-
-    for(i=0; i<(int)arrCA->m_numOfElements; i++)
-    {
-        hbCert = (CLR_RT_HeapBlock*)arrCA->GetElement( i ); FAULT_ON_NULL(arrCert);
-
-        arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___certificate ].DereferenceArray();
-
-        sslCert = arrCert->GetFirstElement();
-
-        hbPwd      = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___password ].Dereference();
-        
-        szPwd      = hbPwd->StringText();
-        
-        if(!SSL_AddCertificateAuthority( sslContext, (const char*)sslCert, arrCert->m_numOfElements, szPwd )) NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
 //
 //  Server - socket connected now accept connection by doing the server SSL handshake   
 //

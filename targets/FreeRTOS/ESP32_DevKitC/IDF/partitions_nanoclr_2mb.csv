@@ -2,7 +2,11 @@
 # Note: if you change the phy_init or app partition offset, make sure to change the offset in Kconfig.projbuild
 nvs,      data, nvs,     0x9000,  0x4000,
 phy_init, data, phy,     0xf000,  0x1000,
-factory,  0,    0,       0x10000,  1M,
-deploy,   data, 0x84,    0x110000,  512K,
+# Factory area for NanoCLR - 1MB
+factory,  0,    0,       0x10000, 0x100000,
+# Deployment area for Managed code 448K
+deploy,   data, 0x84,    0x110000, 0x70000,
+# Config data for Network, Wireless, certificates, user data  64K
+config,   data, spiffs,  0x180000, 0x10000,
 
 

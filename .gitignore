@@ -4,6 +4,8 @@
 # ignore build folder contents but not the folder
 /build/*
 !build/README.md
+/build/
+/build/.gitkeep
 
 # ignore cmake-variants file (will change frequently per user/board setup, use should derive content from cmake-variants.TEMPLATE.json)
 cmake-variants.json
