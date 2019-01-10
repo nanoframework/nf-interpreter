@@ -37,9 +37,9 @@ int main(void) {
   // the following IF is not mandatory, it's just providing a way for a user to 'force'
   // the board to remain in nanoBooter and not launching nanoCLR
 
-  // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
+  // if the USER/BOOT1 button is pressed, skip the check for a valid CLR image and remain in booter
   // the user button in this board has a pull-up resistor so the check has to be inverted
-  if (!palReadPad(GPIOA, GPIOA_BUTTON))
+  if (palReadPad(GPIOK, GPIOK_BUTTON_BOOT))
   {
     // check for valid CLR image 
     // this target DOES NOT have configuration block, so we need to use the __nanoImage_end__ address here
