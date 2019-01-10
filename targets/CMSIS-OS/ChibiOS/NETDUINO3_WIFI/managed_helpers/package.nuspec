@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>nanoFramework.Targets.NETDUINO3_WIFI</id>
+    <title>nanoFramework.Targets.NETDUINO3_WIFI</title>
+    <version>1.0.0</version>
+    <authors>nanoFramework project contributors</authors>
+    <owners>nanoFramework project contributors</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      Helper classes to use NETDUINO3_WIFI target in C# applications.
+    </description>
+    <releaseNotes>
+    </releaseNotes>
+    <summary>
+      This is an extension for .NET nanoFramework enhacing support for Windows.Devices.Gpio.GpioController when using STM32 MCUs.
+    </summary>
+    <projectUrl>https://github.com/nanoframework</projectUrl>
+    <iconUrl>https://secure.gravatar.com/avatar/97d0e092247f0716db6d4b47b7d1d1ad</iconUrl>
+    <licenseUrl>https://github.com/nanoframework/nf-interpreter/blob/develop/LICENSE.md</licenseUrl>
+    <copyright>Copyright (c) 2019 The nanoFramework project contributors</copyright>
+    <references></references>
+    <tags>nanoFramework, nano Framework, NETNF, NETMF, Micro Framework, STM32, .net, NETDUINO3_WIFI </tags>
+  </metadata>
+  <files>
+    <file src="NETDUINO3_WIFI.Adc.cs" target="content" />
+  </files>
+</package>
