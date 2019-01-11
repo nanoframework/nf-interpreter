@@ -6,8 +6,8 @@
 
 #include <nanoHAL_Time.h>
 
-const int CummulativeDaysForMonth[13] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
-const int DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+const int CummulativeDaysForMonth[13] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 };
+const int DaysInMonth[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 #define IS_LEAP_YEAR(y)             (((y % 4 == 0) && (y % 100 != 0)) || (y % 400 == 0))
 #define NUMBER_OF_LEAP_YEARS(y)     ((((y - 1) / 4) - ((y - 1) / 100) + ((y - 1) / 400)) - BASE_YEAR_LEAPYEAR_ADJUST) /// Number of leap years until base year, not including the target year itself.
@@ -25,8 +25,8 @@ const int DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 #define HOURS_TO_DAY                24
 
 uint64_t  HAL_Time_CurrentTime()
-{ 
-    return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() );
+{
+    return HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks());
 };
 
 /// <summary>
@@ -35,16 +35,16 @@ uint64_t  HAL_Time_CurrentTime()
 uint64_t HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime)
 {
     uint64_t r = YEARS_TO_DAYS(systemTime->wYear) + MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth) + systemTime->wDay - 1;
-    r = (((( (r * HOURS_TO_DAY) + systemTime->wHour) * MINUTES_TO_HOUR + systemTime->wMinute) * SECONDS_TO_MINUTES + systemTime->wSecond) * MILLISECONDS_TO_SECONDS + systemTime->wMilliseconds) * TIMEUNIT_TO_MILLISECONDS;
+    r = (((((r * HOURS_TO_DAY) + systemTime->wHour) * MINUTES_TO_HOUR + systemTime->wMinute) * SECONDS_TO_MINUTES + systemTime->wSecond) * MILLISECONDS_TO_SECONDS + systemTime->wMilliseconds) * TIMEUNIT_TO_MILLISECONDS;
 
-    return r;   
+    return r;
 }
 
 bool HAL_Time_ToSystemTime(uint64_t time, SYSTEMTIME* systemTime)
 {
     uint32_t ytd = 0;
     uint32_t mtd = 0;
-    
+
     time /= TIMEUNIT_TO_MILLISECONDS;
     systemTime->wMilliseconds = time % MILLISECONDS_TO_SECONDS;
     time /= MILLISECONDS_TO_SECONDS;
@@ -71,14 +71,14 @@ bool HAL_Time_ToSystemTime(uint64_t time, SYSTEMTIME* systemTime)
 
     if (time >= mtd)
     {
-        systemTime->wMonth++;    
+        systemTime->wMonth++;
     }
 
     mtd = MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth);
 
     systemTime->wDay = (unsigned short)(time - mtd + 1);
 
-    return true;    
+    return true;
 }
 
 HRESULT HAL_Time_AccDaysInMonth(signed int year, signed int month, signed int* days)
