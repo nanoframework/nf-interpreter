@@ -24,6 +24,8 @@ osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
 //  Application entry point.
 int main(void) {
 
+  bool forceReset = false;
+
   // find out wakeup reason
   if((RTC->ISR & RTC_ISR_ALRAF) == RTC_ISR_ALRAF)
   {
@@ -41,11 +43,30 @@ int main(void) {
     WakeupReasonStore = 0;
   }
 
+  // check if waking from STDBY mode
+  if(PWR->CSR & PWR_CSR_SBF)
+  {
+    // silicone bug in STM32F469x
+    // errata ES0321 Rev6
+    // 2.2.7 Wakeup from Standby mode  with RTC
+    // need to force a reset after clearing the SBF flag
+    forceReset = true;
+  }
+
   // first things first: need to clear any possible wakeup flags
   // if this is not done here the next standby -> wakeup sequence won't work
   CLEAR_BIT(RTC->CR, RTC_CR_ALRAIE);
   CLEAR_BIT(RTC->ISR, RTC_ISR_ALRAF);
   SET_BIT(PWR->CR, PWR_CR_CWUF);
+  SET_BIT(PWR->CR, PWR_CR_CSBF);
+
+  if(forceReset)
+  {
+      // silicone bug in STM32F469x
+      // errata ES0321 Rev6
+      // 2.2.7 Wakeup from Standby mode  with RTC 
+      CPU_Reset();
+  }
 
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
@@ -71,7 +92,7 @@ int main(void) {
   // Activates the USB driver and then the USB bus pull-up on D+.
   // Note, a delay is inserted in order to not have to disconnect the cable after a reset
   usbDisconnectBus(serusbcfg.usbp);
-  chThdSleepMilliseconds(1500);
+  chThdSleepMilliseconds(100);
   usbStart(serusbcfg.usbp, &usbcfg);
   usbConnectBus(serusbcfg.usbp);
 
