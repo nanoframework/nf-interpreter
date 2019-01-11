@@ -17,7 +17,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
 set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
-
 find_package(BuildUtils REQUIRED)
 find_package(CHIBIOS REQUIRED)
 find_package(ChibiOSnfOverlay REQUIRED)
@@ -85,6 +84,7 @@ add_executable(
 
     ${WireProtocol_SOURCES}
 )
+
 #######################
 # nanoCLR executable
 
@@ -123,9 +123,6 @@ add_executable(
 
     # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
-
-    # sources for UI
-    "${UI_SOURCE}"
 )
 
 # add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
@@ -196,10 +193,6 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     # incudes for Networking and TLS
     "${NF_Networking_INCLUDE_DIRS}"
     "${mbedTLS_INCLUDE_DIRS}"
-
-    # UI Includes
-    "${UI_INCLUDES}"
-
 )
 
 # set compiler options
@@ -235,13 +228,6 @@ nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x2000")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x3B000")
 
-
-if(${VISUAL_STUDIO})
-    # CMAKE command add_custom_Command 'POST_BUILD' currently fails,  "CMD.EXE" not recognised
-    # Use the CopyBuildOutput.cmd manually do the same thing
-elseif()
-    # generate output files
-    nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
-    nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
-endif()
-
+# generate output files
+nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
+nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)

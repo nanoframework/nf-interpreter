@@ -22,6 +22,12 @@ endfunction()
 
 function(NF_GENERATE_BUILD_OUTPUT_FILES TARGET)
 
+    if(${VISUAL_STUDIO})
+        # CMAKE command add_custom_Command 'POST_BUILD' currently fails,  "CMD.EXE" not recognised
+        # Use the CopyBuildOutput.cmd in the VisualStudioDevelopment folder to manually perform the same function
+        return()
+    endif()
+
     # need to remove the .elf suffix from target name
     string(FIND ${TARGET} "." TARGET_EXTENSION_DOT_INDEX)
     string(SUBSTRING ${TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)

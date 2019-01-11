@@ -1,4 +1,9 @@
-cd Build\STM769IDiscovery
+Rem  --------------------------------------------------------------------------------
+Rem  -- Open a command prompt at your build target root to run the following commands
+Rem  -- For example
+Rem  -- Open a command prompt at  "Build\<YourTargetFolderNameHere>"
+Rem  --------------------------------------------------------------------------------
+
 copy nanobooter.elf ..\nanobooter.elf 
 "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Linux/gcc_arm/bin/arm-none-eabi-objcopy.exe"  -Oihex nanobooter.elf ..\nanobooter.hex 
 "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Linux/gcc_arm/bin/arm-none-eabi-objcopy.exe"  -Osrec nanobooter.elf ..\nanobooter.s19
@@ -12,4 +17,3 @@ copy nanoCLR.elf ..\nanoCLR.elf
 "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Linux/gcc_arm/bin/arm-none-eabi-objcopy.exe"  -Obinary nanoCLR.elf ..\nanoCLR.bin
 "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Linux/gcc_arm/bin/arm-none-eabi-objdump.exe"  -d -EL -S nanoCLR.elf > ..\nanoCLR.lst
 "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Linux/gcc_arm/bin/arm-none-eabi-size.exe"  nanoCLR.elf > ..\nanoCLR.size.txt
-

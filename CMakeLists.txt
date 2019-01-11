@@ -7,9 +7,7 @@ cmake_minimum_required(VERSION 3.11)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
 
- include(${CMAKE_SOURCE_DIR}/CMakeUserFunctions.cmake)
-
- set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
+# set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
 
 # the following prevents launchin a build in the source tree
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -466,6 +464,13 @@ else()
 endif()
 
 
+if(API_nanoFramework.Devices.OneWire)
+    set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+else()
+    set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+endif()
+
+
 #################################################################
 # manage dependent APIs required for some API namespaces
 #################################################################
@@ -550,8 +555,10 @@ if(RTOS_CHIBIOS_CHECK)
 
     # check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
     set(NO_CHIBIOS_SOURCE TRUE)
-    if(NOT "${CHIBIOS_SOURCE}" STREQUAL "")
-       set(NO_CHIBIOS_SOURCE FALSE)
+    if(CHIBIOS_SOURCE)
+        if(NOT "${CHIBIOS_SOURCE}" STREQUAL "")
+            set(NO_CHIBIOS_SOURCE FALSE)
+        endif()
     endif()
 
     if(NO_CHIBIOS_SOURCE)
@@ -643,7 +650,6 @@ if(RTOS_CHIBIOS_CHECK)
 
             # check if we already have the sources, no need to copy again
             if(NOT EXISTS "${CMAKE_BINARY_DIR}/ChibiOS_Source")
-                message(status "File Copy: ${CMAKE_BINARY_DIR}/ChibiOS_Source")
                 file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
             else()
                 message(STATUS "Using local cache of ChibiOS source from ${CHIBIOS_SOURCE}")
@@ -702,7 +708,7 @@ if(RTOS_CHIBIOS_CHECK)
             endif()
 
             # set tag for currently supported version
-            set(MBEDTLS_GIT_TAG "mbedtls-2.11.0")
+            set(MBEDTLS_GIT_TAG "mbedtls-2.14")
 
             # need to setup a separate CMake project to download the code from the GitHub repository
             # otherwise it won't be available before the actual build step
@@ -919,19 +925,3 @@ elseif(RTOS_FREERTOS_CHECK)
     endif()
 
 endif()
-
-    #########################################
-    # Graphics - see CMakeUserFunctions.cmake
-    #########################################
-    if(NF_FEATURE_UI_GRAPHICS)
-         Graphics(${CpuToGraphicsDisplay} ${GraphicsDisplay} )
-    endif()
-
-    ##############################################
-    # Touch and Ink - see CMakeUserFunctions.cmake
-    ##############################################
-    if(NF_FEATURE_UI_TOUCH)
-         Message(STATUS, "\nTouch feature selected\n")
-         Touch(${CpuToTouchSensor} ${TouchSensor} )
-    endif()
-
