@@ -98,13 +98,10 @@ HRESULT HAL_Time_AccDaysInMonth(signed int year, signed int month, signed int* d
 uint64_t HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime);
 
 /// APIs to convert between types
-bool          HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len );
+bool          HAL_Time_TimeSpanToStringEx(const int64_t& ticks, char*& buf, size_t& len);
 const char*   HAL_Time_CurrentDateTimeToString();
 
 
-uint64_t  CPU_MillisecondsToTicks       ( uint64_t ticks  );
-
-
-uint64_t Time_GetMachineTime();
+uint64_t  CPU_MillisecondsToTicks(uint64_t ticks);
 
 #endif //_NANOHAL_TIME_H_
