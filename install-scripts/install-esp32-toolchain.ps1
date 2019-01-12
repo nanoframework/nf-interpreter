@@ -5,6 +5,7 @@
 if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
 #Set location of nf-interpreter top-level
 $nfRoot = "$PSScriptRoot\.."
+$zipRoot = "$nfRoot\zips\"
 
 # check if path already exists
 $XtensaPathExists = Test-Path $env:ESP32_TOOLCHAIN_PATH -ErrorAction SilentlyContinue
@@ -15,9 +16,15 @@ If($XtensaPathExists -eq $False)
 
     # Download xtensa ESP32 toolchain and install
     $url = "https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip"
-    $output = "$nfRoot\xtensa-esp32-elf-win32.zip"
-    
-    # download 7zip with toolchain
+    $output = "$zipRoot\xtensa-esp32-elf-win32.zip"
+     
+     # Stop security tripping us up
+    [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
+
+    # Create directory for zip files if necessary
+    md -Force $zipRoot | Out-Null
+
+    # download zip with toolchain
     (New-Object Net.WebClient).DownloadFile($url, $output)
 
     Write-Host "Installing Xtensa ESP32 toolchain..."

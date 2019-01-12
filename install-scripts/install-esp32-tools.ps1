@@ -22,13 +22,8 @@ if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Par
 #Set location of nf-interpreter top-level
 $nfRoot = "$PSScriptRoot\.."
 
-# check if build folder` already exists
-$buildPathExists = Test-Path "$nfRoot\build\" -ErrorAction SilentlyContinue
-If($buildPathExists -eq $False)
-{
-	Write-Host "Create build folder ..."
-	mkdir $("$nfRoot\build\" ) > $null
-}
+# create build folder if necessary
+md -Force "$nfRoot\build" | Out-Null
 
 #Write-Host $PSScriptRoot
 #Write-Host $nfRoot
