@@ -26,7 +26,7 @@ const int DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 uint64_t  HAL_Time_CurrentTime()
 { 
-    return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() );
+    return HAL_Time_SysTicksToTime( HAL_Time_CurrentSysTicks() ); 
 };
 
 /// <summary>
@@ -35,9 +35,9 @@ uint64_t  HAL_Time_CurrentTime()
 uint64_t HAL_Time_ConvertFromSystemTime(const SYSTEMTIME* systemTime)
 {
     uint64_t r = YEARS_TO_DAYS(systemTime->wYear) + MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth) + systemTime->wDay - 1;
-    r = (((( (r * HOURS_TO_DAY) + systemTime->wHour) * MINUTES_TO_HOUR + systemTime->wMinute) * SECONDS_TO_MINUTES + systemTime->wSecond) * MILLISECONDS_TO_SECONDS + systemTime->wMilliseconds) * TIMEUNIT_TO_MILLISECONDS;
+    r = (((( (r * HOURS_TO_DAY) + systemTime->wHour) * MINUTES_TO_HOUR + systemTime->wMinute) * SECONDS_TO_MINUTES + systemTime->wSecond ) * MILLISECONDS_TO_SECONDS + systemTime->wMilliseconds) * TIMEUNIT_TO_MILLISECONDS;
 
-    return r;   
+    return r;    
 }
 
 bool HAL_Time_ToSystemTime(uint64_t time, SYSTEMTIME* systemTime)
@@ -71,12 +71,12 @@ bool HAL_Time_ToSystemTime(uint64_t time, SYSTEMTIME* systemTime)
 
     if (time >= mtd)
     {
-        systemTime->wMonth++;    
+        systemTime->wMonth++;        
     }
 
     mtd = MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth);
 
-    systemTime->wDay = (unsigned short)(time - mtd + 1);
+    systemTime->wDay = (unsigned short)(time - mtd + 1); 
 
     return true;    
 }
