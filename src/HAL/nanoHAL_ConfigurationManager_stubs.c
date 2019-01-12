@@ -26,6 +26,14 @@ __nfweak void* ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
     return NULL;
 }
 
+__nfweak void* ConfigurationManager_FindX509CertificateConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
+{
+    (void)startAddress;
+    (void)endAddress;
+
+    return NULL;
+}
+
 __nfweak HAL_Configuration_Wireless80211* ConfigurationManager_GetWirelessConfigurationFromId(uint32_t configurationId)
 {
     (void)configurationId;

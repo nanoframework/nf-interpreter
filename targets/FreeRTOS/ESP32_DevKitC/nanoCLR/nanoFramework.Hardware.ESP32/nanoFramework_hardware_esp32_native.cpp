@@ -68,7 +68,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32 =
 {
     "nanoFramework.Hardware.Esp32", 
-    0xF8079179,
+    0xF8079179, 
     method_lookup,
-    { 1, 0, 3, 2 }
+    { 1, 0, 5, 3 }
 };

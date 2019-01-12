@@ -852,9 +852,11 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
 
     Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command*)message->m_payload;
     int size          = 0;
+    int sizeOfBlock = 0;
 
     HAL_Configuration_NetworkInterface* configNetworkInterface;
     HAL_Configuration_Wireless80211* configWireless80211NetworkInterface;
+    HAL_Configuration_X509CaRootBundle* x509Certificate;
 
     switch((DeviceConfigurationOption)cmd->Configuration)
     {
@@ -868,8 +870,8 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
                 success = true;
 
                 WP_ReplyToCommand( message, success, false, (uint8_t*)configNetworkInterface, size );
-                platform_free(configNetworkInterface);
             }            
+            platform_free(configNetworkInterface);
             break;
 
         case DeviceConfigurationOption_Wireless80211Network:
@@ -882,10 +884,31 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
                 success = true;
 
                 WP_ReplyToCommand( message, success, false, (uint8_t*)configWireless80211NetworkInterface, size );
-                platform_free(configWireless80211NetworkInterface);
             }
+            platform_free(configWireless80211NetworkInterface);
             break;
-        
+    
+        case DeviceConfigurationOption_X509CaRootBundle:
+
+            if(g_TargetConfiguration.CertificateStore->Count > cmd->BlockIndex )
+            {
+                // because X509 certificate has a variable length need to compute the block size in two steps
+                sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
+                sizeOfBlock += g_TargetConfiguration.CertificateStore->Certificates[cmd->BlockIndex]->CertificateSize;
+            }
+
+            x509Certificate = (HAL_Configuration_X509CaRootBundle*)platform_malloc(sizeOfBlock);
+
+            if(ConfigurationManager_GetConfigurationBlock(x509Certificate, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
+            {
+                size = sizeOfBlock;
+                success = true;
+
+                WP_ReplyToCommand( message, success, false, (uint8_t*)x509Certificate, size );
+            }
+            platform_free(x509Certificate);
+            break;
+    
         case DeviceConfigurationOption_WirelessNetworkAP:
             // TODO missing implementation for now
             break;
@@ -924,8 +947,9 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message* message)
     {
         case DeviceConfigurationOption_Network:
         case DeviceConfigurationOption_Wireless80211Network:
+        case DeviceConfigurationOption_X509CaRootBundle:
         case DeviceConfigurationOption_All:
-            if(ConfigurationManager_StoreConfigurationBlock(cmd->Data, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex, cmd->Length) == true)
+            if(ConfigurationManager_StoreConfigurationBlock(cmd->Data, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex, cmd->Length, cmd->Offset) == true)
             {
                 cmdReply.ErrorCode = 0;
                 success = true;
@@ -1126,7 +1150,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
             reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_AppDomains;
 #endif
 
-            if (::CPU_IsSoftRebootSupported ())
+            if (CPU_IsSoftRebootSupported())
             {
                 reply.u_capsFlags |= CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_SoftReboot;
             }

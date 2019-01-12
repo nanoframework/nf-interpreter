@@ -14,10 +14,14 @@ extern "C"
 }
 
 static const char *TAG = "wifi";
-
-struct netif * Esp32_find_netif(esp_interface_t esp_if);
-
 static bool WifiInitialised = false;
+
+// Forward / external references
+struct netif * Esp32_find_netif(esp_interface_t esp_if);
+int Esp32_Wait_NetNumber(esp_interface_t esp_if);
+void Start_wifi_smart_config();
+
+
 
 esp_err_t Esp32_InitaliseWifi()
 {
@@ -28,6 +32,10 @@ esp_err_t Esp32_InitaliseWifi()
 		// Init WiFi Alloc resource for WiFi driver, such as WiFi control structure, 
 		// RX/TX buffer, WiFi NVS structure etc, this WiFi also start WiFi task. 
 		wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+		
+		// Don't store Wireless params in NVS
+		cfg.nvs_enable = 0;
+
 		ec = esp_wifi_init(&cfg);
 		if ( ec != ESP_OK) return ec;
 		
@@ -89,19 +97,14 @@ int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * pConfig
 	{
 	 	Esp32_Wireless_Connect(pWireless); 
 	}
-	
-	// FIXME find a better way to get the netif ptr
-	struct netif *pNetIf;
-	while(true)
+	else
 	{
- 		vTaskDelay(100 / portTICK_PERIOD_MS);
+		// Start Samrt config (if enabled (TODO) )
+		// probably best to have a config flag for this, but for now just start if no Wireless config set up
+		Start_wifi_smart_config();
+	}	
 
-    	// Return NetIf number for Esp32 wireless station
-		pNetIf = Esp32_find_netif(ESP_IF_WIFI_STA);
-		if (pNetIf != NULL) break; 
-	}
-
-    return pNetIf->num;
+	return Esp32_Wait_NetNumber(ESP_IF_WIFI_STA);
 }
 
 bool Esp32_Wireless_Close(int index)
@@ -145,4 +148,27 @@ extern struct netif * Esp32_find_netif(esp_interface_t esp_if)
         }
     }
     return NULL;
+}
+
+// Esp32_Wait_NetNumber
+//
+// 	Find the NetiF number used by esp_interface_t
+//  If not availbale then loop and wait for interface to start
+//
+int Esp32_Wait_NetNumber(esp_interface_t esp_if)
+{
+	int number = 0;
+
+	// FIXME find a better way to get the netif ptr
+	struct netif *pNetIf;
+	while(true)
+	{
+    	// Return NetIf number for Esp32 wireless station
+		pNetIf = Esp32_find_netif(esp_if);
+		if (pNetIf != NULL) break; 
+
+ 		vTaskDelay(20 / portTICK_PERIOD_MS);
+	}
+
+	return pNetIf->num;
 }

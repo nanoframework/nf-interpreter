@@ -23,6 +23,7 @@ set(System.Net_SRCS
 
     # System.Net.Security
     sys_net_native_System_Net_Security_SslNative.cpp
+    sys_net_native_System_Net_Security_CertificateManager.cpp
 
 )
 

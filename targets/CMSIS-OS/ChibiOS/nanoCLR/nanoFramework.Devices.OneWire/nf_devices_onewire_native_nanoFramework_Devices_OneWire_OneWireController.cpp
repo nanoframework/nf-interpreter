@@ -4,7 +4,6 @@
 //
 
 #include "nf_devices_onewire_native.h"
-#include <hal_stm32_onewire.h>
 
 // working thread to execute long running 1-Wire operations
 static thread_t* OneWireWorkingThread;

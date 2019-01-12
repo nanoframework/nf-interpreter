@@ -5,6 +5,7 @@
 
 #include <nanoHAL.h>
 #include <nanoCLR_Application.h>
+#include <nanoCLR_Hardware.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Types.h>
 #include <CLRStartup.h>
@@ -305,6 +306,12 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf( "Done.\r\n" );
 #endif
             }
+        }
+
+        // process setting of power mode, if reboot was requested along with a power mode "higher" then PowerLevel__Active
+        if(CLR_EE_REBOOT_IS( ClrOnly ) && g_CLR_HW_Hardware.m_powerLevel > PowerLevel__Active)
+        {
+            CPU_SetPowerMode(g_CLR_HW_Hardware.m_powerLevel);
         }
 
         if( CLR_EE_DBG_IS_NOT( RebootPending ))

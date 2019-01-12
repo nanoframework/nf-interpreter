@@ -18,7 +18,7 @@ set(nanoFramework.Devices.OneWire_SRCS
     nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController.cpp
     nf_devices_onewire_native.cpp
 
-    target_nf_devices_onewire_config.c
+    target_nf_devices_onewire_config.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Devices.OneWire_SRCS})

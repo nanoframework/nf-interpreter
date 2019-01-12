@@ -39,6 +39,9 @@ static const unsigned char c_MARKER_CONFIGURATION_WIRELESS80211_V1[] = "WN1";
 // Wireless AP configuration block start marker
 static const unsigned char c_MARKER_CONFIGURATION_WIRELESS_AP_V1[] = "AP1";
 
+// X509 certificate configuration block start marker
+static const unsigned char c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1[] = "XB1";
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkInterfaceType (in managed code) !!! //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,6 +208,20 @@ typedef struct __nfpack HAL_Configuration_Wireless80211 {
     uint8_t Password[64];
 
 } HAL_Configuration_Wireless80211;
+
+typedef struct __nfpack HAL_Configuration_X509CaRootBundle {
+
+    // this is the marker placeholder for this configuration block
+    uint8_t Marker[4];
+
+    // Size of the X509 CA Root certificate bundle
+    uint32_t CertificateSize;
+
+    // X509 CA Root certificate bundle
+    uint8_t Certificate[1];
+
+} HAL_Configuration_X509CaRootBundle;
+
 
 void 	nanoHAL_Network_Initialize();
 void    sys_signal_sock_event();

@@ -464,6 +464,13 @@ else()
 endif()
 
 
+if(API_nanoFramework.Devices.OneWire)
+    set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+else()
+    set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+endif()
+
+
 #################################################################
 # manage dependent APIs required for some API namespaces
 #################################################################
@@ -701,7 +708,7 @@ if(RTOS_CHIBIOS_CHECK)
             endif()
 
             # set tag for currently supported version
-            set(MBEDTLS_GIT_TAG "mbedtls-2.11.0")
+            set(MBEDTLS_GIT_TAG "mbedtls-2.14")
 
             # need to setup a separate CMake project to download the code from the GitHub repository
             # otherwise it won't be available before the actual build step

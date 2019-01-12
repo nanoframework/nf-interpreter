@@ -1,31 +1,11 @@
-trigger:
-  branches:
-    include:
-    - master
-    - dev/*
-    - develop
-    - develop-sdcard
-    - develop-STM32L0-target
-    - release-/*
-    - refs/tags/*
-  paths:
-    exclude:
-    - /*.md
-    - .gitignore
-    - appveyor.yml
-    - cmake-variants.TEMPLATE.json
+# no trigger config here, this is handled at Azure Pipelines interface
+
   # waiting for feature to become available
   # tags:
   #   include:
   #   - v/*
 
-pr:
-  branches:
-    include:
-    - master
-    - develop
-    - release/*
-  autoCancel: true
+# no pr config, we want to trigger builds for all PRs on all branches
 
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
@@ -109,6 +89,7 @@ jobs:
 
   variables:
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
@@ -124,6 +105,8 @@ jobs:
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
 
   - template: azure-pipelines-templates/publish-bintray.yml
+
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
 # ESP32 targets
