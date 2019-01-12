@@ -3236,3 +3236,4 @@ CT_ASSERT( sizeof(CLR_RT_HeapBlock_Raw)  == sizeof(CLR_RT_HeapBlock) )
 #endif
 
 #endif // _NANOCLR_RUNTIME_H_
+
