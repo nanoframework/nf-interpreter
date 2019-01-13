@@ -25,6 +25,9 @@ If($GnuGccPathExists -eq $False)
     # download 7zip with toolchain
     (New-Object Net.WebClient).DownloadFile($url, $output)
 
+    # Install 7Zip4PowerShell module from PSGallery if not already installed
+    Install-Module -Name 7Zip4Powershell -RequiredVersion 1.8.0 -Scope CurrentUser
+
     Write-Host "Installing ARM GNU GCC toolchain..."
     
     # unzip toolchain

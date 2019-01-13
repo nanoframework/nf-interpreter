@@ -35,8 +35,8 @@ If([string]::IsNullOrEmpty($env:NINJA_PATH) -or $force)
 	[System.Environment]::SetEnvironmentVariable("NINJA_PATH", $env:NINJA_PATH, "User")
 }
 
-# get build matrix
-Invoke-Expression -Command $PSScriptRoot\get-stm32-targets-to-build.ps1
+# get build matrix (Not used anymore)
+#Invoke-Expression -Command $PSScriptRoot\get-stm32-targets-to-build.ps1
 
 # install tools and utilities
 Invoke-Expression -Command $PSScriptRoot\install-arm-gcc-toolchain.ps1
