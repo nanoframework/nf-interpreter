@@ -464,6 +464,13 @@ else()
 endif()
 
 
+if(API_nanoFramework.Devices.OneWire)
+    set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+else()
+    set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+endif()
+
+
 #################################################################
 # manage dependent APIs required for some API namespaces
 #################################################################
