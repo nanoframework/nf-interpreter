@@ -4,7 +4,7 @@
 //
 
 #include "target_nf_devices_onewire_config.h"
-#include <hal.h>
+#include <nf_devices_onewire_native.h>
 
 ///////////
 // UART4 //

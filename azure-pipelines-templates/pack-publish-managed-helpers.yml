@@ -1,0 +1,62 @@
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+
+  # check if managed helper files where changed
+  - powershell: |
+      git config --global user.email "nanoframework@outlook.com"
+      git config --global user.name "nfbot"
+
+      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)"))))"
+
+      $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+      Write-host "Files changed:"
+      $commit.files | % {$_.filename}
+
+      if ( $commit.files.filename -like "*$(BoardName)/managed_helpers*" )
+      {
+        echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
+
+        $counter = $env:HelperPackageVersion
+        $version = [int]$counter
+        $packageVersion = "1.0." + $version.ToString()
+
+        echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
+
+        Write-host "Package version is: $packageVersion"
+      }
+      else
+      {
+        echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]False"  
+      }
+
+    condition: succeeded()
+    displayName: Check if managed helpers files were changed
+
+  - task: NuGetCommand@2
+    inputs:
+      command: 'custom' 
+      arguments: 'pack targets\CMSIS-OS\ChibiOS\$(BoardName)\managed_helpers\package.nuspec -Version $(PACKAGE_NUGET_VERSION)'
+    condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
+    displayName: Pack managed helpers NuGet
+
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)
+      Contents: |
+        **\nanoFramework.Targets*.nupkg
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      flattenFolders: true
+    condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
+    displayName: Collecting managed helpers deployable artifacts
+
+  # push NuGet packages to NuGet (happens except on PR builds)
+  - task: NuGetCommand@2
+    inputs:
+      command: push
+      nuGetFeedType: external
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      publishFeedCredentials: 'NuGet'
+    condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ) )
+    displayName: Push managed helpers NuGet packages to NuGet

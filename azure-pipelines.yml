@@ -89,6 +89,7 @@ jobs:
 
   variables:
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
@@ -104,6 +105,8 @@ jobs:
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
 
   - template: azure-pipelines-templates/publish-bintray.yml
+
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
 # ESP32 targets
