@@ -1,7 +1,7 @@
 # This PS installs the ARM GNU GCC toolchain from our Bintray repository if it's not already available
 
-#Set script path in case running in psISE
-if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
+if($psISE) { $PSScriptRoot = Split-Path -Path $psISE.CurrentFile.FullPath} #In case running in psISE
+if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent } # or older PS
 #Set location of nf-interpreter top-level
 $nfRoot = "$PSScriptRoot\.."
 $zipRoot = "$nfRoot\zips\"

@@ -1,8 +1,8 @@
 # This PS installs the OpenOCD ESP32 toolchain from Espressif downloads repository 
 # if it's not already available at ESP32_TOOLS_PATH\openocd-esp32
 
-#Set script path in case running in psISE
-if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
+if($psISE) { $PSScriptRoot = Split-Path -Path $psISE.CurrentFile.FullPath} #In case running in psISE
+if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent } # or older PS
 #Set location of nf-interpreter top-level
 $nfRoot = "$PSScriptRoot\.."
 $zipRoot = "$nfRoot\zips\"

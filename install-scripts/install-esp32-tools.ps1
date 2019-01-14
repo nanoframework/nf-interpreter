@@ -16,8 +16,8 @@ If([string]::IsNullOrEmpty($COMPORT))
 
 $env:NANOCLR_COMPORT = $COMPORT
 
-#Set script path in case running in psISE
-if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
+if($psISE) { $PSScriptRoot = Split-Path -Path $psISE.CurrentFile.FullPath} #In case running in psISE
+if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent } # or older PS
 
 #Set location of nf-interpreter top-level
 $nfRoot = "$PSScriptRoot\.."
@@ -69,7 +69,6 @@ If([string]::IsNullOrEmpty($env:NINJA_PATH) -or $force)
 	[System.Environment]::SetEnvironmentVariable("NINJA_PATH", $env:NINJA_PATH, "User")
 }
 
-
 Invoke-Expression -Command $PSScriptRoot\install-esp32-toolchain.ps1
 Invoke-Expression -Command $PSScriptRoot\install-esp32-libs.ps1
 Invoke-Expression -Command $PSScriptRoot\install-esp32-idf.ps1
@@ -118,7 +117,6 @@ If($filePathExists -eq $False -or $force)
 	}
 	Set-Content -Path "$nfRoot\.vscode\tasks.json" -Value $tasks 
 }
-
 $filePathExists = Test-Path "$nfRoot\.vscode\launch.json" -ErrorAction SilentlyContinue
 $filePathExists=$False
 If($filePathExists -eq $False -or $force)
@@ -126,13 +124,12 @@ If($filePathExists -eq $False -or $force)
 	Write-Host "Create .\.vscode\launch.json with install paths from .\vscode\launch.TEMPLATE-ESP32.json"
 	Copy-Item "$nfRoot\.vscode\launch.TEMPLATE-ESP32.json" -Destination "$nfRoot\.vscode\launch.json" -Force
 	
-	$launch = (Get-Content '$nfRoot\.vscode\launch.json')
+	$launch = (Get-Content "$nfRoot\.vscode\launch.json")
 	$launch = $launch.Replace('<absolute-path-to-the-build-folder-mind-the-forward-slashes>', $buildFolderPath.ToString().Replace("\", "/")) 
 	$launch = $launch.Replace('<absolute-path-to-openocd-mind-the-forward-slashes>', $env:ESP32_OPENOCD_PATH.Replace("\", "/")) 
 	$launch = $launch.Replace('<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PATH.Replace("\", "/")) 
-	Set-Content -Path '$nfRoot\.vscode\launch.json' -Value $launch 
+	Set-Content -Path "$nfRoot\.vscode\launch.json" -Value $launch 
 }
-
 <#
 .SYNOPSIS
     Install the default ESP32 tools and libraries neede to build nanoFramework, and setup the build environemnt.

@@ -6,8 +6,8 @@ Write-Host "Install Tools to build nanoCLR into default folders and configure js
 $env:BOARD_NAME = $BOARD_NAME
 $env:NANOCLR_COMPORT = $COMPORT
 
-#Set script path in case running in psISE
-if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
+if($psISE) { $PSScriptRoot = Split-Path -Path $psISE.CurrentFile.FullPath} #In case running in psISE
+if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent } # or older PS
 
 #Set location of nf-interpreter
 $nfRoot = "$PSScriptRoot\.."
