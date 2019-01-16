@@ -1,16 +1,6 @@
 ### Developing firmware for the nanoframework using Visual Studio 2017 community edition 
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![#yourfirstpr](https://img.shields.io/badge/first--timers--only-friendly-blue.svg)](https://github.com/nanoframework/Home/blob/master/CONTRIBUTING.md) 
- [![Discord](https://img.shields.io/discord/478725473862549535.svg)](https://discord.gg/gCyBu8T)
-
-
-![nanoFramework logo](https://github.com/nanoframework/Home/blob/master/resources/logo/nanoFramework-repo-logo.png)
-
------
-
-
-
-##### IMPORTANT : The firmware build for Visual Studio is under construction.
+##### 🚧 IMPORTANT : The firmware build for Visual Studio is under construction. 🚧 
 Some compromises were required to get this to a working stage.
 I made a decision to put the code at the top level to reduce path length of files which caused warnings of the potential to overflow the command line.
 >Hard coded paths are used to ensure it works with the current CMake coding and the Microsoft usage of CMake
@@ -82,7 +72,7 @@ Sometime the CMake server goes away, shutting down Visual Studio and restarting 
 
 #### Setup and Installation
 
-| Software Component | Notes|Link}
+| Software Component | Notes | Link |
 |:-|---|---|
 | Visual Studio 2017 community edition |Linux development with C++|
 |option|Visual C++ tools for Cmake and Linux   
@@ -153,26 +143,6 @@ __*An example snippet displays error for "Monitor reset halt ( not quite sure wh
         8: (1976742) ->^done
         8: (1976742) ->(gdb)
 
+#### Feedback 
 
-
-
-## Feedback and documentation
-
-For documentation, providing feedback, issues and finding out how to contribute please refer to the [Home repo](https://github.com/nanoframework/Home).
-
-Join our Discord community [here](https://discord.gg/gCyBu8T).
-
-
-## Credits
-
-The list of contributors to this project can be found at [CONTRIBUTORS](https://github.com/nanoframework/Home/blob/master/CONTRIBUTORS.md).
-
-
-## License
-
-The nanoFramework Interpreter is licensed under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
-
-
-## Code of Conduct
-This project has adopted the code of conduct defined by the [Contributor Covenant](CODE_OF_CONDUCT.md)
-to clarify expected behavior in our community.
+If you are using this your feedback is greatly appreciated. Please join our [Discord community](https://discord.gg/gCyBu8T) and start chatting about this.
