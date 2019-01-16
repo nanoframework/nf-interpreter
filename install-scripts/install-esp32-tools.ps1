@@ -11,19 +11,22 @@ $env:BOARD_NAME = "ESP32_DEVKITC"
 
 If([string]::IsNullOrEmpty($COMPORT))
 {
-	Write-Warning ("Please use paramter -C <comport> to set COM port for ESP32 flash utility [e.g. -C COM1], or edit tasks.json")
+	Write-Warning ("Please use parameter -C <comport> to set COM port for ESP32 flash utility [e.g. -C COM1], or edit tasks.json")
 }
 
 $env:NANOCLR_COMPORT = $COMPORT
 
-# check if build folder` already exists
-$buildPathExists = Test-Path "$PSScriptRoot\build\" -ErrorAction SilentlyContinue
-If($buildPathExists -eq $False)
-{
-	Write-Host "Create build folder ..."
-	mkdir $("$PSScriptRoot\build\" ) > $null
-}
+if($psISE) { $PSScriptRoot = Split-Path -Path $psISE.CurrentFile.FullPath} #In case running in psISE
+if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent } # or older PS
 
+#Set location of nf-interpreter top-level
+$nfRoot = "$PSScriptRoot\.."
+
+# create build folder if necessary
+md -Force "$nfRoot\build" | Out-Null
+
+#Write-Host $PSScriptRoot
+#Write-Host $nfRoot
 Write-Host "BOARD_NAME=" $env:BOARD_NAME
 
 Write-Host "Set User Environment Variables ... (can be slow if many Applications running.)"
@@ -66,70 +69,67 @@ If([string]::IsNullOrEmpty($env:NINJA_PATH) -or $force)
 	[System.Environment]::SetEnvironmentVariable("NINJA_PATH", $env:NINJA_PATH, "User")
 }
 
-
-Invoke-Expression -Command .\install-esp32-toolchain.ps1
-Invoke-Expression -Command .\install-esp32-libs.ps1
-Invoke-Expression -Command .\install-esp32-idf.ps1
-Invoke-Expression -Command .\install-ninja.ps1
-Invoke-Expression -Command .\install-esp32-openocd.ps1
+Invoke-Expression -Command $PSScriptRoot\install-esp32-toolchain.ps1
+Invoke-Expression -Command $PSScriptRoot\install-esp32-libs.ps1
+Invoke-Expression -Command $PSScriptRoot\install-esp32-idf.ps1
+Invoke-Expression -Command $PSScriptRoot\install-ninja.ps1
+Invoke-Expression -Command $PSScriptRoot\install-esp32-openocd.ps1
 	
 Write-Host ("Adding Ninja to the path "+$env:NINJA_PATH)
-.\Set-PathVariable.ps1 -NewLocation $env:NINJA_PATH
+Invoke-Expression -Command "$PSScriptRoot\Set-PathVariable.ps1 -NewLocation $env:NINJA_PATH"
 
-$filePathExists = Test-Path "$PSScriptRoot\cmake-variants.json" -ErrorAction SilentlyContinue
+$filePathExists = Test-Path "$nfRoot\cmake-variants.json" -ErrorAction SilentlyContinue
 If($filePathExists -eq $False -or $force)
 {
 	Write-Host ("Create .\cmake-variants.json with install paths from .\cmake-variants.TEMPLATE-ESP32.json")
-	Copy-Item "$PSScriptRoot\cmake-variants.TEMPLATE-ESP32.json" -Destination "$PSScriptRoot\cmake-variants.json" -Force 
-	$variants = (Get-Content "$PSScriptRoot\cmake-variants.json")
+	Copy-Item "$nfRoot\cmake-variants.TEMPLATE-ESP32.json" -Destination "$nfRoot\cmake-variants.json" -Force 
+	$variants = (Get-Content "$nfRoot\cmake-variants.json")
 	$variants = $variants.Replace('<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>', $env:ESP32_IDF_PATH.ToString().Replace("\", "/")) 
 	$variants = $variants.Replace('<absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>', $env:ESP32_LIBS_PATH.ToString().Replace("\", "/"))
 	$variants = $variants.Replace('<absolute-path-to-the-toolchain-prefix-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PREFIX.ToString().Replace("\", "/"))  
-	Set-Content -Path "$PSScriptRoot\cmake-variants.json" -Value $variants 
+	Set-Content -Path "$nfRoot\cmake-variants.json" -Value $variants 
 }
 
-$filePathExists = Test-Path "$PSScriptRoot\.vscode\cmake-kits.json" -ErrorAction SilentlyContinue
+$filePathExists = Test-Path "$nfRoot\.vscode\cmake-kits.json" -ErrorAction SilentlyContinue
 If($filePathExists -eq $False -or $force)
 {
-	Copy-Item "$PSScriptRoot\.vscode\cmake-kits.TEMPLATE-ESP32.json" -Destination "$PSScriptRoot\.vscode\cmake-kits.json" -Force 
+	Copy-Item "$nfRoot\.vscode\cmake-kits.TEMPLATE-ESP32.json" -Destination "$nfRoot\.vscode\cmake-kits.json" -Force 
 }
 
-$buildFolderPath = Resolve-Path .\build
+$buildFolderPath = Resolve-Path $nfRoot\build
 
-$filePathExists = Test-Path "$PSScriptRoot\.vscode\tasks.json" -ErrorAction SilentlyContinue
+$filePathExists = Test-Path "$nfRoot\.vscode\tasks.json" -ErrorAction SilentlyContinue
 $filePathExists=$False
 If($filePathExists -eq $False -or $force)
 {
 	Write-Host ("Create .\.vscode\tasks.json with install paths from .\vscode\tasks.TEMPLATE-ESP32.json")
-	Copy-Item "$PSScriptRoot\.vscode\tasks.TEMPLATE-ESP32.json" -Destination "$PSScriptRoot\.vscode\tasks.json" -Force  
-	$tasks = (Get-Content "$PSScriptRoot\.vscode\tasks.json")
+	Copy-Item "$nfRoot\.vscode\tasks.TEMPLATE-ESP32.json" -Destination "$nfRoot\.vscode\tasks.json" -Force  
+	$tasks = (Get-Content "$nfRoot\.vscode\tasks.json")
 	$tasks = $tasks.Replace('<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>', $env:ESP32_IDF_PATH.ToString().Replace("\", "/")) 
 	$tasks = $tasks.Replace('<absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>', $env:ESP32_LIBS_PATH.ToString().Replace("\", "/"))
 	$tasks = $tasks.Replace('<absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>', $buildFolderPath.ToString().Replace("\", "/"))  
 	$tasks = $tasks.Replace('<absolute-path-to-the-toolchain-prefix-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PREFIX.ToString().Replace("\", "/"))  
 	
-	# Update the COPORT placeholder if the paramter is supplied.
+	# Update the COMPORT placeholder if the paramter is supplied.
 	If(![string]::IsNullOrEmpty($COMPORT))
 	{
 		$tasks = $tasks.Replace('<COMPORT>', $env:NANOCLR_COMPORT.ToString()) 
 	}
-	Set-Content -Path "$PSScriptRoot\.vscode\tasks.json" -Value $tasks 
+	Set-Content -Path "$nfRoot\.vscode\tasks.json" -Value $tasks 
 }
-
-$filePathExists = Test-Path ".\.vscode\launch.json" -ErrorAction SilentlyContinue
+$filePathExists = Test-Path "$nfRoot\.vscode\launch.json" -ErrorAction SilentlyContinue
 $filePathExists=$False
 If($filePathExists -eq $False -or $force)
 {
 	Write-Host "Create .\.vscode\launch.json with install paths from .\vscode\launch.TEMPLATE-ESP32.json"
-	Copy-Item ".\.vscode\launch.TEMPLATE-ESP32.json" -Destination ".\.vscode\launch.json" -Force
+	Copy-Item "$nfRoot\.vscode\launch.TEMPLATE-ESP32.json" -Destination "$nfRoot\.vscode\launch.json" -Force
 	
-	$launch = (Get-Content '.\.vscode\launch.json')
+	$launch = (Get-Content "$nfRoot\.vscode\launch.json")
 	$launch = $launch.Replace('<absolute-path-to-the-build-folder-mind-the-forward-slashes>', $buildFolderPath.ToString().Replace("\", "/")) 
 	$launch = $launch.Replace('<absolute-path-to-openocd-mind-the-forward-slashes>', $env:ESP32_OPENOCD_PATH.Replace("\", "/")) 
 	$launch = $launch.Replace('<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PATH.Replace("\", "/")) 
-	Set-Content -Path '.\.vscode\launch.json' -Value $launch 
+	Set-Content -Path "$nfRoot\.vscode\launch.json" -Value $launch 
 }
-
 <#
 .SYNOPSIS
     Install the default ESP32 tools and libraries neede to build nanoFramework, and setup the build environemnt.

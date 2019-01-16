@@ -1,5 +1,6 @@
 # ignore all ZIP files
 *.zip
+/zips/
 
 # ignore build folder
 /build/
