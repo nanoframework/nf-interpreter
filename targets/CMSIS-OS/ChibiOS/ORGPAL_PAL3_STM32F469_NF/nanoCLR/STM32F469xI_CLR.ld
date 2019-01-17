@@ -7,14 +7,14 @@
 */
 
 /*
- * ST32F429xI memory setup.
+ * ST32F469xI memory setup.
  * Note: Use of ram1, ram2 and ram3 is mutually exclusive with use of ram0.
  */
 MEMORY
 {
-    flash       : org = 0x08008000, len = 2M - 16k - 16k - 1408k /* flash size less the space reserved for nanoBooter and application deployment*/
-    config      : org = 0x08040000, len = 16k                   /* space reserved for configuration block */
-    deployment  : org = 0x080A0000, len = 1408k                 /* space reserved for application deployment */
+    flash       : org = 0x0800C000, len = 2M - 32k -16k - 1664k /* flash size less the space reserved for nanoBooter and application deployment*/
+    config      : org = 0x08008000, len = 16k                   /* space reserved for configuration block */
+    deployment  : org = 0x08080000, len = 1664k                 /* space reserved for application deployment */
     ramvt       : org = 0x00000000, len = 0                     /* initial RAM address is reserved for a copy of the vector table */
     ram0        : org = 0x20000000, len = 192k                  /* SRAM1 + SRAM2 + SRAM3 */
     ram1        : org = 0x20000000, len = 112k                  /* SRAM1 */
