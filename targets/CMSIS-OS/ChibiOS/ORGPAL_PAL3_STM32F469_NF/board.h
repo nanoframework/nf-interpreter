@@ -1134,12 +1134,12 @@ The user should also disable the MCO pin of the clock output if not used.
 * PG4  - FMC_BA0                   (alternate 12).
 * PG5  - FMC_BA1                   (alternate 12).
 * PG6  - LED1                      (output pushpull maximum).
-* PG7  - LED2						(output pushpull maximum).
+* PG7  - LED2					   (output pushpull maximum).
 * PG8  - FMC_SDCLK                 (alternate 12).
 * PG9  - IO0_P13_IO                (input pullup).
 * PG10 - IO0_P19_IO                (input pullup).
 * PG11 - RMII_TX_EN                (alternate 11).
-* PG12 - RMII_RST                  (alternate 0).
+* PG12 - RMII_RST                  (output pushpull maximum)
 * PG13 - RMII_TXD0                 (alternate 11).
 * PG14 - RMII_TXD1                 (alternate 11).
 * PG15 - FMC_SDNCAS                (alternate 12).
@@ -1204,7 +1204,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_PUPDR_PULLUP(GPIOG_IO0_P13_IO) |         \
                                      PIN_PUPDR_PULLUP(GPIOG_IO0_P19_IO) |     \
                                      PIN_PUPDR_FLOATING(GPIOG_RMII_TX_EN) |     \
-                                     PIN_PUPDR_FLOATING(GPIOG_RMII_RST) |     \
+                                     PIN_PUPDR_PULLUP(GPIOG_RMII_RST) |     \
                                      PIN_PUPDR_FLOATING(GPIOG_RMII_TXD0) |  \
                                      PIN_PUPDR_FLOATING(GPIOG_RMII_TXD1) |  \
                                      PIN_PUPDR_FLOATING(GPIOG_FMC_SDNCAS))
@@ -1220,7 +1220,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_ODR_HIGH(GPIOG_IO0_P13_IO) |             \
                                      PIN_ODR_HIGH(GPIOG_IO0_P19_IO) |           \
                                      PIN_ODR_HIGH(GPIOG_RMII_TX_EN) |           \
-                                     PIN_ODR_LOW(GPIOG_RMII_RST) |           \
+                                     PIN_ODR_HIGH(GPIOG_RMII_RST) |           \
                                      PIN_ODR_HIGH(GPIOG_RMII_TXD0) |        \
                                      PIN_ODR_HIGH(GPIOG_RMII_TXD1) |        \
                                      PIN_ODR_HIGH(GPIOG_FMC_SDNCAS))
@@ -1388,7 +1388,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_MODE_INPUT(GPIOI_KEYPAD_3) |           \
                                      PIN_MODE_INPUT(GPIOI_PIN8) |           \
                                      PIN_MODE_INPUT(GPIOI_PIN9) |           \
-                                     PIN_MODE_ALTERNATE(GPIOI_RMII_RXER) |          \
+                                     PIN_MODE_INPUT(GPIOI_RMII_RXER) |          \
                                      PIN_MODE_INPUT(GPIOI_PIN11) |          \
                                      PIN_MODE_OUTPUT(GPIOI_RS485_RE) |          \
                                      PIN_MODE_OUTPUT(GPIOI_RS485_SHDN) |          \
