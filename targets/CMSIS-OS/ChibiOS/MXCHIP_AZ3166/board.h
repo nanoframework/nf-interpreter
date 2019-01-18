@@ -57,8 +57,8 @@
 #define GPIOA_USB_SOF               8U
 #define GPIOA_USB_VBUS              9U
 #define GPIOA_USB_ID                10U
-#define GPIOA_USART6_TX                11U
-#define GPIOA_USART6_RX                12U
+#define GPIOA_USART6_TX             11U
+#define GPIOA_USART6_RX             12U
 #define GPIOA_SWDIO                 13U
 #define GPIOA_SWCLK                 14U
 #define GPIOA_LED3                  15U
@@ -93,7 +93,7 @@
 #define GPIOC_ZIO_D45               10U
 #define GPIOC_ZIO_D46               11U
 #define GPIOC_ZIO_D47               12U
-#define GPIOC_LED2                13U
+#define GPIOC_LED2                  13U
 #define GPIOC_OSC32_IN              14U
 #define GPIOC_OSC32_OUT             15U
 
@@ -239,18 +239,18 @@
 #define LINE_ZIO_D32                PAL_LINE(GPIOA, 0U)
 #define LINE_ZIO_A8                 PAL_LINE(GPIOA, 2U)
 #define LINE_ARD_A0                 PAL_LINE(GPIOA, 3U)
-#define LINE_KEY_A                PAL_LINE(GPIOA, 4U)
+#define LINE_KEY_A                  PAL_LINE(GPIOA, 4U)
 #define LINE_ARD_D13                PAL_LINE(GPIOA, 5U)
 #define LINE_ARD_D12                PAL_LINE(GPIOA, 6U)
 #define LINE_ARD_D11                PAL_LINE(GPIOA, 7U)
 #define LINE_USB_SOF                PAL_LINE(GPIOA, 8U)
 #define LINE_USB_VBUS               PAL_LINE(GPIOA, 9U)
 #define LINE_USB_ID                 PAL_LINE(GPIOA, 10U)
-#define LINE_USART6_TX                 PAL_LINE(GPIOA, 11U)
-#define LINE_USART6_RX                 PAL_LINE(GPIOA, 12U)
+#define LINE_USART6_TX              PAL_LINE(GPIOA, 11U)
+#define LINE_USART6_RX              PAL_LINE(GPIOA, 12U)
 #define LINE_SWDIO                  PAL_LINE(GPIOA, 13U)
 #define LINE_SWCLK                  PAL_LINE(GPIOA, 14U)
-#define LINE_LED3                PAL_LINE(GPIOA, 15U)
+#define LINE_LED3                   PAL_LINE(GPIOA, 15U)
 #define LINE_ZIO_D33                PAL_LINE(GPIOB, 0U)
 #define LINE_ZIO_A6                 PAL_LINE(GPIOB, 1U)
 #define LINE_LED1                   PAL_LINE(GPIOB, 2U)
@@ -379,9 +379,9 @@
  * PA2  - ZIO_A8 ADC1_IN2           (input pullup).
  * PA3  - ARD_A0 ADC1_IN3           (input pullup).
  * PA4  - KEY_A                     (input).
- * PA5  - ARD_D13 SPI1_SCK          (input pullup).
- * PA6  - ARD_D12 SPI1_MISO         (input pullup).
- * PA7  - ARD_D11 SPI1_MOSI ZIO_D71 (input pullup).
+ * PA5  - ARD_D13                   (input pullup).
+ * PA6  - ARD_D12                   (input pullup).
+ * PA7  - ARD_D11                   (input pullup).
  * PA8  - USB_SOF                   (alternate 10).
  * PA9  - USB_VBUS                  (analog).
  * PA10 - USB_ID                    (alternate 10).
@@ -1085,12 +1085,12 @@
  * PG6  - USB_GPIO_OUT              (output pushpull maximum).
  * PG7  - USB_GPIO_IN               (input pullup).
  * PG8  - PIN8                      (input pullup).
- * PG9  - ARD_D0           (input pullup).
+ * PG9  - ARD_D0                    (input pullup).
  * PG10 - PIN10                     (input pullup).
  * PG11 - PIN11                     (input pullup).
  * PG12 - PIN12                     (input pullup).
  * PG13 - PIN13                     (input pullup).
- * PG14 - ARD_D1           (input pullup).
+ * PG14 - ARD_D1                    (input pullup).
  * PG15 - PIN15                     (input pullup).
  */
 #define VAL_GPIOG_MODER             (PIN_MODE_INPUT(GPIOG_ZIO_D65) |        \
