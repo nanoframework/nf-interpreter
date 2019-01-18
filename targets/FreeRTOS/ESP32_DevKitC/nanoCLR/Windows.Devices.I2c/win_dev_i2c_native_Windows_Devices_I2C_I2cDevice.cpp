@@ -10,6 +10,7 @@
 #include "Esp32_DeviceMapping.h"
 
  
+static const char* TAG = "I2C";
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cSharingMode (in managed code) !!!    //
@@ -186,17 +187,21 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         }
 
         i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-        i2c_master_start(cmd);
-        int ReadWrite = (readSize > 0) ? I2C_MASTER_READ : I2C_MASTER_WRITE;
-        i2c_master_write_byte( cmd, ( slaveAddress << 1 ) | ReadWrite, 1);
 
         if ( writeSize != 0 )  // Write
         {
-            i2c_master_write(cmd, &writeData[0], writeSize,  true);
+            i2c_master_start(cmd);
+            i2c_master_write_byte( cmd, ( slaveAddress << 1 ) | I2C_MASTER_WRITE, 1);
+            i2cStatus = i2c_master_write(cmd, &writeData[0], writeSize,  true);
+            if (i2cStatus != ESP_OK) ESP_LOGE( TAG, "i2c_master_write error:%d", i2cStatus );
+
         }
         if (readSize != 0 )  // Read
         {
+            i2c_master_start(cmd);
+            i2c_master_write_byte( cmd, ( slaveAddress << 1 ) | I2C_MASTER_READ, 1);
             i2cStatus = i2c_master_read(cmd, &readData[0], readSize, I2C_MASTER_ACK );
+            if (i2cStatus != ESP_OK) ESP_LOGE( TAG, "i2c_master_read error:%d", i2cStatus );
         }
 
         i2c_master_stop(cmd);
@@ -210,15 +215,23 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
 
         if (i2cStatus != ESP_OK)
         {
+            uint32_t transferResult = I2cTransferStatus_FullTransfer;
+
             // set the result field
             if ( i2cStatus == ESP_FAIL )
             {
-                result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___status ].SetInteger((CLR_UINT32)I2cTransferStatus_SlaveAddressNotAcknowledged);
+                transferResult = I2cTransferStatus_SlaveAddressNotAcknowledged;
+            }
+            else if (i2cStatus == ESP_ERR_TIMEOUT )
+            {
+                transferResult = I2cTransferStatus_ClockStretchTimeout;
             }
             else
             {
-                result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___status ].SetInteger((CLR_UINT32)I2cTransferStatus_UnknownError);
+                transferResult = I2cTransferStatus_UnknownError;
             }
+
+            result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___status ].SetInteger((CLR_UINT32)transferResult);
 
             // set the bytes transferred field
             result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___bytesTransferred ].SetInteger(0);
