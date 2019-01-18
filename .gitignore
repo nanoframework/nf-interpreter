@@ -1,5 +1,6 @@
 # ignore all ZIP files
 *.zip
+/zips/
 
 # ignore build folder
 /build/
@@ -41,8 +42,10 @@ CMake/Modules/FindINTEROP*.cmake
 [Bb]in/
 [Oo]bj/
 
-# Visual Studio 2015 cache/options directory
-.vs/
+# Visual Studio cache/options directory contents but not the example launch.vs.json
+!.vs/
+.vs/*
+!.vs/launch.vs.json
 
 # Visual C++ cache files
 *.VC.db

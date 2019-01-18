@@ -664,7 +664,7 @@ switch (timerId)
             break;
     }
 #endif
-#if defined(STM32F407xx)
+#if defined(STM32F407xx) || defined(STM32F405xx)
     switch (timerId)
     {
         case 1 :
