@@ -823,7 +823,7 @@
  * PD2  - WIFI_TX                   (alternate 8).
  * PD3  - DFSDM_CKOUT               (alternate 3).
  * PD4  - OTG_HS_OVER_CURRENT       (input floating).
- * PD5  - RMII_RXER                 (alternate 7).
+ * PD5  - RMII_RXER                 (alternate 11).
  * PD6  - SD_CLK                    (alternate 11).
  * PD7  - SD_CMD                    (alternate 11).
  * PD8  - FMC_D13                   (alternate 12).
@@ -920,7 +920,7 @@
                                      PIN_AFIO_AF(GPIOD_WIFI_TX, 8U) |       \
                                      PIN_AFIO_AF(GPIOD_DFSDM_CKOUT, 3U) |   \
                                      PIN_AFIO_AF(GPIOD_OTG_HS_OVER_CURRENT, 0U) |\
-                                     PIN_AFIO_AF(GPIOD_RMII_RXER, 7U) |     \
+                                     PIN_AFIO_AF(GPIOD_RMII_RXER, 11U) |     \
                                      PIN_AFIO_AF(GPIOD_SD_CLK, 11U) |       \
                                      PIN_AFIO_AF(GPIOD_SD_CMD, 11U))
 #define VAL_GPIOD_AFRH              (PIN_AFIO_AF(GPIOD_FMC_D13, 12U) |      \
