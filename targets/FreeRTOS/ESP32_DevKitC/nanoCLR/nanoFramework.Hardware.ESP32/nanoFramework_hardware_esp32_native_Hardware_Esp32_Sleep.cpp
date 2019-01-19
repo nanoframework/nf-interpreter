@@ -93,7 +93,9 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     // ... and set power level to OFF
     g_CLR_HW_Hardware.m_powerLevel = PowerLevel__Off;
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::NativeGetWakeupCause___STATIC__nanoFrameworkHardwareEsp32SleepWakeupCause( CLR_RT_StackFrame& stack )
