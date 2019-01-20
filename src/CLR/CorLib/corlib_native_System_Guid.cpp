@@ -24,6 +24,7 @@ HRESULT Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1(
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, 16, g_CLR_RT_WellKnownTypes.m_UInt8 ));
     buf = top.DereferenceArray()->GetFirstElement();
 
+    rand.Initialize();
     rand.NextBytes(buf, 16);           // fill with random numbers
 
     buf[7] =  (buf[7] & 0x0f) | 0x40;  // Set verion
