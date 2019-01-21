@@ -15,7 +15,7 @@ struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power
     NANOCLR_NATIVE_DECLARE(get_WakeupReason___STATIC__nanoFrameworkHardwareStm32PowerWakeupReasonType);
     NANOCLR_NATIVE_DECLARE(DisableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin);
     NANOCLR_NATIVE_DECLARE(EnableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin);
-    NANOCLR_NATIVE_DECLARE(EnterStandbyMode___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(NativeEnterStandbyMode___STATIC__VOID);
 
     //--//
 
