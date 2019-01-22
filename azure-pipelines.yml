@@ -34,7 +34,7 @@ jobs:
       {
         $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
 
-        if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
+        if( ($commit.commit.author.name -eq "nfbot") -and (($commit.commit.message -like "*[version update]*") -or ($commit.commit.message -like "***NO_CI***")) )
         {
           echo "##vso[task.setvariable variable=IS_VERSION_UPDATE;isOutput=true]true"  
         }
