@@ -65,5 +65,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Devices_Can =
     "nanoFramework.Devices.Can", 
     0xD2E9416A,
     method_lookup,
-    { 1, 0, 1, 2 }
+    { 1, 0, 3, 2 }
 };
