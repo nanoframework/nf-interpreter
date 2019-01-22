@@ -14,7 +14,7 @@
 int Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetChannel (int pin, int timerId)
 {
     int channel = -1;
-#if defined(STM32F427xx) || defined(STM32F429xx)  || defined(STM32F469xx)  || defined(STM32F479xx)
+#if defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F439xx) || defined(STM32F469xx)  || defined(STM32F479xx)
     switch (timerId)
     {
         case 1 :
