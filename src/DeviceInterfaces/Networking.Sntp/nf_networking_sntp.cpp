@@ -23,5 +23,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sn
     "nanoFramework.Networking.Sntp", 
     0x733B4551,
     method_lookup,
-    { 1, 0, 2, 2 }
+    { 1, 0, 4, 3 }
 };

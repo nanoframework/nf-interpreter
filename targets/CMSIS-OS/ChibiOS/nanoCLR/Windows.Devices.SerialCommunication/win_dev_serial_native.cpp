@@ -83,5 +83,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_SerialCommu
     "Windows.Devices.SerialCommunication", 
     0x093798D6,
     method_lookup,
-    { 1, 0, 4, 0 }
+    { 1, 0, 5, 3 }
 };

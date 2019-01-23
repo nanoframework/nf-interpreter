@@ -66,5 +66,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Math =
     "System.Math", 
     0x4BDCF00F,
     method_lookup,
-    { 1, 0, 2, 2 }
+    { 1, 0, 4, 3 }
 };
