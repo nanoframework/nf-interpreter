@@ -5,7 +5,8 @@
 
 # set include directories for ChibiOS-Contrib
 
-list(APPEND CHIBIOS_CONTRIB_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/include/)
+# the path is one folder UP from the includes directory to allow a selective inclusion of our own hal_community.h
+list(APPEND CHIBIOS_CONTRIB_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal)
 
 ####################################################################################
 # WHEN ADDING A NEW ChibiOS-Contrib component add the include directory(ies) bellow
@@ -14,11 +15,12 @@ list(APPEND CHIBIOS_CONTRIB_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_S
 #list(APPEND CHIBIOS_CONTRIB_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/include/IMACOMPONENT)
 
 
-#######################################################################################################################################
-# Because we've "hacked" ChibiOS overlay mechanism used by the community contributions we can't add the "official" hal_community.c
-# Instead we have to add the requried and equivalent calls existing in the official source file
-# in our hal_community.c @ targets\CMSIS-OS\ChibiOS\nf-overlay\os\hal\src\hal_community.c
-#########################################################################################################################
+####################################################################################################################################
+# Because we've "hacked" ChibiOS overlay mechanism used by the community contributions we can't add the "official" hal_community.c #
+# Instead we have to add the required and equivalent calls that exist in the official source file                                  #
+# in our hal_community.c @ targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/hal_community.c                                          #
+# the include paths are to be added to our hal_community.h @ targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/include/hal_community.h    #
+####################################################################################################################################
 
 
 ####################################################################################################
