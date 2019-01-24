@@ -3,9 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "hal.h"
-
-#if (HAL_USE_COMMUNITY == TRUE) 
+#include <hal.h>
+#include <hal_nf_community.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver local definitions.                                                 //
@@ -51,5 +50,3 @@ void halCommunityInit(void) {
 #endif
 
 }
-
-#endif // HAL_USE_COMMUNITY

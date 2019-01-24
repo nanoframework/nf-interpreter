@@ -8,7 +8,8 @@
 // This driver has been tested with the following STM32 series: F4
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "hal.h"
+#include <hal.h>
+#include <hal_nf_community.h>
 
 #if (HAL_USE_STM32_FLASH == TRUE)
 

@@ -8,7 +8,8 @@
 // so there is no point on wasting memory with calling functions with dummy arguments.
 
 
-#include "hal.h"
+#include <hal.h>
+#include <hal_nf_community.h>
 
 #if (HAL_USE_STM32_CRC == TRUE)
 

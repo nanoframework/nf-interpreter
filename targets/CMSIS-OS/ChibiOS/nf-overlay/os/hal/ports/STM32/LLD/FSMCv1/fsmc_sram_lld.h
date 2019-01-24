@@ -8,6 +8,7 @@
 #define HAL_FSMC_SRAM_H_
 
 #include "hal_stm32_fsmc.h"
+#include <hal_nf_community.h>
 
 #if (STM32_USE_FSMC_SRAM == TRUE)
 

@@ -4,7 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "hal.h"
+#include <hal.h>
+#include <hal_nf_community.h>
 #include "hal_stm32_fsmc.h"
 
 #if (HAL_USE_FSMC == TRUE)
