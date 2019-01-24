@@ -8,6 +8,7 @@
 #define FLASH_LLD_H
 
 #include "stm32_registry.h"
+#include <hal_nf_community.h>
 
 #if (HAL_USE_STM32_FLASH == TRUE)
 

@@ -9,6 +9,7 @@
 #include <ch.h>
 #include <hal.h>
 #include <nanoPAL_BlockStorage.h>
+#include <hal_nf_community.h>
 
 #ifdef __cplusplus
 extern "C" {

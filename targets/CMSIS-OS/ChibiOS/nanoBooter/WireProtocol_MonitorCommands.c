@@ -7,6 +7,7 @@
 #include <cmsis_os.h>
 #include <nanoHAL_v2.h>
 #include <hal.h>
+#include <hal_nf_community.h>
 #include <WireProtocol.h>
 #include <Debugger.h>
 #include <WireProtocol_MonitorCommands.h>

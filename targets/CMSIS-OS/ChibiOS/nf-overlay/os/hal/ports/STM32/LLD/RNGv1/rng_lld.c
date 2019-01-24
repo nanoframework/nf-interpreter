@@ -10,6 +10,7 @@
 // https://github.com/ChibiOS/ChibiOS-Contrib/blob/master/os/hal/src/hal_rng.c
 
 #include <hal.h>
+#include <hal_nf_community.h>
 
 #if (HAL_USE_STM32_RNG == TRUE)
 

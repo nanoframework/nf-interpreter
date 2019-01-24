@@ -5,6 +5,7 @@
 //
 
 #include <hal.h>
+#include <hal_nf_community.h>
 
 #if defined(STM32F0XX) || defined(STM32F1XX) || defined(STM32F2XX) || \
 	defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32L0XX) || \

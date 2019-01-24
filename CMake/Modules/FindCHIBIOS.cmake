@@ -39,6 +39,11 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ext/CMSIS/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/ext/CMSIS/ST/${TARGET_SERIES})
 
+# append dummy include directory when not using ChibiOS-Contrib
+if(NOT CHIBIOS_CONTRIB_REQUIRED)
+    list(APPEND CHIBIOS_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/include/dummy_includes")
+endif()
+
 # append include directory for boards in the nanoFramework ChibiOS 'overlay'
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
 
