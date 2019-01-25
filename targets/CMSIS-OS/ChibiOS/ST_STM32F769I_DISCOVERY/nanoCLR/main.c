@@ -15,6 +15,13 @@
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
+#include <Target_Windows_Storage.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+extern evhandler_t sdcardEventHandler[];
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
@@ -29,7 +36,7 @@ int main(void) {
   halInit();
 
   // init SWO as soon as possible to make it available to output ASAP
-  #if (SWO_OUTPUT == TRUE)  
+  #if (SWO_OUTPUT == TRUE)
   SwoInit();
   #endif
 
@@ -72,7 +79,11 @@ int main(void) {
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
 
+  // start file system sub-system
+  Target_FileSystemInit();
+
   while (true) { 
-    osDelay(100);
+    //osDelay(100);
+    chEvtDispatch(sdcardEventHandler, chEvtWaitOneTimeout(ALL_EVENTS, TIME_MS2I(500)));
   }
 }

@@ -30,11 +30,6 @@ find_package(NF_CoreCLR REQUIRED)
 #######################################
 # optional
 
-# ChibiOS contrib repo
-if(CHIBIOS_CONTRIB_REQUIRED)
-    find_package(ChibiOS-Contrib REQUIRED)
-endif()
-
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
     find_package(NF_Debugger REQUIRED)
@@ -63,7 +58,7 @@ add_subdirectory("nanoCLR")
 add_executable(
     # executables for project, project sources
     ${NANOBOOTER_PROJECT_NAME}.elf
-
+    
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
 
     # need to add configuration manager to allow get/store configuration blocks
@@ -90,10 +85,8 @@ add_executable(
 add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
-
+    
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
-    # the next one is required is the target implements and it's using external memory
-    "${CMAKE_CURRENT_SOURCE_DIR}/target_external_memory.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
@@ -105,7 +98,6 @@ add_executable(
     ${TARGET_CHIBIOS_NANOCLR_SOURCES}
 
     ${CHIBIOS_SOURCES}
-    ${CHIBIOS_CONTRIB_SOURCES}
     ${ChibiOSnfOverlay_SOURCES}
 
     ${WireProtocol_SOURCES}
@@ -138,7 +130,6 @@ include_directories(
 
     ${WireProtocol_INCLUDE_DIRS}
     ${CHIBIOS_INCLUDE_DIRS}
-    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
     ${ChibiOSnfOverlay_INCLUDE_DIRS}
 
     ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
@@ -187,11 +178,11 @@ nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F429xI_booter-DEBUG.ld)
-    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F429xI_CLR-DEBUG.ld)
+    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F407xG_booter-DEBUG.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F407xG_CLR-DEBUG.ld)
 else()
-    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F429xI_booter.ld)
-    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F429xI_CLR.ld)
+    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F407xG_booter.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F407xG_CLR.ld)
 endif()
 
 # set linker options

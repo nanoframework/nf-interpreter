@@ -375,20 +375,6 @@ endif()
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
 
 #################################################################
-# enables filesysytem support in nanoCLR
-# (default is OFF so the filesystem is NOT supported)
-option(NF_FEATURE_USE_FILESYSTEM "option to use filesystem")
-
-if(NF_FEATURE_USE_FILESYSTEM)
-    set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
-    set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
-    message(STATUS "Support for filesystem enabled")
-else()
-    set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
-    set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
-endif()
-
-#################################################################
 
 
 #################################################################
@@ -527,6 +513,21 @@ endif()
 
 
 #################################################################
+# enables filesysytem support in nanoCLR
+
+if(API_Windows.Storage)
+    set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
+    set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
+    message(STATUS "Support for filesystem enabled")
+else()
+    set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
+    set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for NF_FEATURE_USE_FILESYSTEM")
+endif()
+
+#################################################################
+
+
+#################################################################
 # RTC (real time clock) (default is OFF so RTC is NOT included)
 option(NF_FEATURE_RTC "option to use hardware RTC")
 
@@ -645,7 +646,10 @@ if(RTOS_CHIBIOS_CHECK)
             TIMEOUT 10
             LOG_DOWNLOAD 1
 
+            # install command has to perform TWO extracts
+            # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
             INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+                    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
 
             # Disable all other steps
             CONFIGURE_COMMAND ""
@@ -680,8 +684,10 @@ if(RTOS_CHIBIOS_CHECK)
             PREFIX ChibiOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
 
-            INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-
+            # install command has to perform TWO extracts
+            # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/ COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+            
             # Disable all other steps
             CONFIGURE_COMMAND ""
             BUILD_COMMAND ""

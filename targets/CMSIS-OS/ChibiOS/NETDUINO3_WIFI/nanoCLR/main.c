@@ -3,8 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// Using Devantech LCD03 display in I2C mode @ address 0xC8
-
 #include <ch.h>
 #include <hal.h>
 #include <cmsis_os.h>
@@ -17,6 +15,13 @@
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
+#include <Target_Windows_Storage.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+extern evhandler_t sdcardEventHandler[];
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
@@ -52,7 +57,7 @@ int main(void) {
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
-  
+
   // init SWO as soon as possible to make it available to output ASAP
   #if (SWO_OUTPUT == TRUE)  
   SwoInit();
@@ -95,8 +100,12 @@ int main(void) {
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
-  
+
+  // start file system sub-system
+  Target_FileSystemInit();
+
   while (true) { 
-    osDelay(100);
+    //osDelay(100);
+    chEvtDispatch(sdcardEventHandler, chEvtWaitOneTimeout(ALL_EVENTS, TIME_MS2I(500)));
   }
 }
