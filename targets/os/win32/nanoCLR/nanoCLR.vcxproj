@@ -22,7 +22,7 @@
     <ProjectGuid>{B5515C8A-B056-4320-8EA4-8CACE21A7D2E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>nanoCLR</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
