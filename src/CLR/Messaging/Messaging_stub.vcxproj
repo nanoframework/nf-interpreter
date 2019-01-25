@@ -25,7 +25,7 @@
     <ProjectGuid>{8ACD05E8-42FB-4A49-9D8B-79239F0EED25}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Messaging_stub</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
