@@ -71,10 +71,10 @@ struct Library_corlib_native_System_Collections_Hashtable__Entry
 
 struct Library_corlib_native_System_Collections_Hashtable__HashtableEnumerator
 {
-    static const int FIELD___ht = 1;
-    static const int FIELD___temp = 2;
-    static const int FIELD___index = 3;
-    static const int FIELD___returnType = 4;
+    static const int FIELD__ht = 1;
+    static const int FIELD__temp = 2;
+    static const int FIELD__index = 3;
+    static const int FIELD__returnType = 4;
 
 
     //--//
@@ -113,7 +113,7 @@ struct Library_corlib_native_System_Exception
 
 struct Library_corlib_native_System_Collections_Hashtable__KeyCollection
 {
-    static const int FIELD___ht = 1;
+    static const int FIELD__ht = 1;
 
 
     //--//
@@ -1103,7 +1103,7 @@ struct Library_corlib_native_System_Array__SzArrayEnumerator
 
 struct Library_corlib_native_System_Collections_Hashtable__ValueCollection
 {
-    static const int FIELD___ht = 1;
+    static const int FIELD__ht = 1;
 
 
     //--//
