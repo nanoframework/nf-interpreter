@@ -139,10 +139,6 @@
           "value": "OFF"
         },
         {
-          "name": "NF_FEATURE_USE_FILESYSTEM", //OFF-default-ON-to-enable-support
-          "value": "OFF"
-        },
-        {
           "name": "NF_NETWORKING_SNTP", //ON-default-to-add-SNTP-client-requires-networking
           "value": "OFF"
         },
@@ -199,6 +195,10 @@
           "name": "API_Windows.Networking.Sockets", //OFF-default-ON-to-add-this-API
           "value": "OFF"
         },
+        {
+          "name": "API_Windows.Storage", //OFF-default-ON-to-add-this-API
+          "value": "OFF"
+        },    
         {
           "name": "API_Hardware.Esp32", //OFF-default-ON-to-add-this-API
           "value": "OFF"
@@ -348,10 +348,6 @@
           "value": "OFF"
         },
         {
-          "name": "NF_FEATURE_USE_FILESYSTEM", //OFF-default-ON-to-enable-support
-          "value": "OFF"
-        },
-        {
           "name": "NF_NETWORKING_SNTP", //ON-default-to-add-SNTP-client-requires-networking
           "value": "OFF"
         },
@@ -408,6 +404,10 @@
           "name": "API_Windows.Networking.Sockets", //OFF-default-ON-to-add-this-API
           "value": "OFF"
         },
+        {
+          "name": "API_Windows.Storage", //OFF-default-ON-to-add-this-API
+          "value": "OFF"
+        },        
         {
           "name": "API_Hardware.Esp32", //OFF-default-ON-to-add-this-API
           "value": "ON"
