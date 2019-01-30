@@ -9,6 +9,7 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <hal.h>
+#include <hal_nf_community.h>
 
 struct Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController
 {

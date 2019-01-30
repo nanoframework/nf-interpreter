@@ -7,6 +7,7 @@
  * Hardware Abstraction Layer for ONEWIRE Unit
  */
 #include <hal.h>
+#include <hal_nf_community.h>
 
 #if (HAL_USE_STM32_ONEWIRE == TRUE)
 

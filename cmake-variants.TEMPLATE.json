@@ -42,6 +42,8 @@
           "SUPPORT_ANY_BASE_CONVERSION" : "<OFF-default-ON-for-adding-support-for-conversion-strings-to-values-on-any-base>",
           "RTOS" : "<one-of-valid-rtos-options----CHIBIOS-FREERTOS>",
           "CHIBIOS_SOURCE" : "<path-to-chibios-source-mind-the-forward-slash>",
+          "CHIBIOS_CONTRIB_REQUIRED" : "OFF-default-ON-to-include_ChibiOS-Contrib-repository-in-the-build",
+          "CHIBIOS_CONTRIB_SOURCE" : "<path-to-local-ChibiOS-contrib-source-mind-the-forward-slash>",
           "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
           "SWO_OUTPUT" : "OFF-default-ON-to-enable-ARM-CortexM-Single-Wire-Output",
           "NF_BUILD_RTM" : "OFF-default-ON-to-enable-RTM-build",
@@ -59,7 +61,6 @@
           "NF_PLATFORM_NO_CLR_TRACE" : "OFF-default-ON-to-disable-all-trace-on-CLR",
           "NF_CLR_NO_IL_INLINE" : "OFF-default-ON-to-disable-CLR-IL-inlining",
           "NF_INTEROP_ASSEMBLIES" : [ "Assembly1-Namespace", "Assembly2-Namespace" ],
-          "NF_FEATURE_USE_FILESYSTEM" : "OFF-default-ON-to-enable-support",
           "NF_NETWORKING_SNTP" :  "ON-default-to-add-SNTP-client-requires-networking",
           "NF_SECURITY_OPENSSL" : "OFF-default-ON-to-add-network-security-from-OpenSSL",
           "NF_SECURITY_MBEDTLS" : "OFF-default-ON-to-add-network-security-from-mbedTLS",
@@ -75,6 +76,7 @@
           "API_Windows.Devices.SerialCommunication" : "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
           "API_Windows.Networking.Sockets" : "OFF-default-ON-to-add-this-API",
+          "API_Windows.Storage" : "OFF-default-ON-to-add-this-API",
           "API_Hardware.Esp32" : "OFF-default-ON-to-add-this-API",
           "API_Hardware.Stm32" : "OFF-default-ON-to-add-this-API"
         }

@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 2.8.2)
+
+project(ChibiOS-Contrib-download NONE)
+
+include(ExternalProject)
+
+# download ChibiOS Community contributions source from GitHub repo
+ExternalProject_Add( 
+    ChibiOS-Contrib
+    PREFIX ChibiOS-Contrib
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source
+    GIT_REPOSITORY  https://github.com/ChibiOS/ChibiOS-Contrib
+    GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+    TIMEOUT 10
+    LOG_DOWNLOAD 1
+    # Disable all other steps
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)

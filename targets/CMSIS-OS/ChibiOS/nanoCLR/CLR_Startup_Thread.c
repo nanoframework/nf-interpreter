@@ -5,6 +5,7 @@
 
 #include <ch.h>
 #include <hal.h>
+#include <hal_nf_community.h>
 #include <cmsis_os.h>
 
 #include <nanoCLR_Application.h>

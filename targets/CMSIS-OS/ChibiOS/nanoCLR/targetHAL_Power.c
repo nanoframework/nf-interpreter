@@ -8,6 +8,7 @@
 #include <target_platform.h>
 #include <cmsis_os.h>
 #include <hal.h>
+#include <hal_nf_community.h>
 #include <ch.h>
 
 uint32_t WakeupReasonStore;

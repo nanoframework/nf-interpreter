@@ -25,7 +25,7 @@
     <ProjectGuid>{C337041D-344D-49FE-AD99-B137E7FD0188}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Serialization_stub</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -31,6 +31,13 @@
 #define HAL_USE_PAL                         TRUE
 #endif
 
+#if !defined(FATFS_HAL_DEVICE) || defined(__DOXYGEN__)
+//this board requires SDCD2 not SDCD1
+#define FATFS_HAL_DEVICE SDCD2
+#endif
+
+//#define STM32_SDC_SDMMC_50MHZ               TRUE
+
 /**
  * @brief   Enables the ADC subsystem.
  */
