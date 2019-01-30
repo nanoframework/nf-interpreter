@@ -394,22 +394,15 @@ struct Settings
 
     void Cleanup()
     {
-        if(!CLR_EE_REBOOT_IS(NoShutdown))
-        {
-            // OK to delete execution engine 
-            CLR_RT_ExecutionEngine::DeleteInstance();
-        }
+        CLR_RT_ExecutionEngine::DeleteInstance();
 
-#if defined(_WIN32)
         memset( &g_CLR_RT_ExecutionEngine, 0, sizeof(g_CLR_RT_ExecutionEngine));
         memset( &g_CLR_RT_WellKnownTypes, 0, sizeof(g_CLR_RT_WellKnownTypes));
-
         memset( &g_CLR_RT_WellKnownMethods, 0, sizeof(g_CLR_RT_WellKnownMethods));
         memset( &g_CLR_RT_TypeSystem, 0, sizeof(g_CLR_RT_TypeSystem));
         memset( &g_CLR_RT_EventCache, 0, sizeof(g_CLR_RT_EventCache));
         memset( &g_CLR_RT_GarbageCollector, 0, sizeof(g_CLR_RT_GarbageCollector));
         memset( &g_CLR_HW_Hardware, 0, sizeof(g_CLR_HW_Hardware));
-#endif
 
         m_fInitialized = false;
     }
