@@ -73,7 +73,6 @@ struct CLR_DBG_Commands
         static const unsigned int c_EnterBootloader = 1;
         static const unsigned int c_ClrOnly   = 2;
         static const unsigned int c_WaitForDebugger   = 4;
-        static const unsigned int c_NoShutdown = 8;
 
         unsigned int m_flags;
     };
