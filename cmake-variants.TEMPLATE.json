@@ -61,7 +61,6 @@
           "NF_PLATFORM_NO_CLR_TRACE" : "OFF-default-ON-to-disable-all-trace-on-CLR",
           "NF_CLR_NO_IL_INLINE" : "OFF-default-ON-to-disable-CLR-IL-inlining",
           "NF_INTEROP_ASSEMBLIES" : [ "Assembly1-Namespace", "Assembly2-Namespace" ],
-          "NF_FEATURE_USE_FILESYSTEM" : "OFF-default-ON-to-enable-support",
           "NF_NETWORKING_SNTP" :  "ON-default-to-add-SNTP-client-requires-networking",
           "NF_SECURITY_OPENSSL" : "OFF-default-ON-to-add-network-security-from-OpenSSL",
           "NF_SECURITY_MBEDTLS" : "OFF-default-ON-to-add-network-security-from-mbedTLS",

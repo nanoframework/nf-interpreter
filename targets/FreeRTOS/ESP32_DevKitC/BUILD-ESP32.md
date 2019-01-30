@@ -210,7 +210,6 @@ Note that `.\install-esp32-tools.ps1` will install `pyserial` for you if you ins
           "NF_FEATURE_DEBUGGER" : "ON",
           "NF_FEATURE_RTC" : "ON",
           "NF_FEATURE_USE_APPDOMAINS" : "OFF",
-          "NF_FEATURE_USE_FILESYSTEM" : "OFF",
           "NF_SECURITY_OPENSSL" : "ON",
           "API_System.Net" : "ON",
           "API_Windows.Networking.Sockets" : "OFF",
