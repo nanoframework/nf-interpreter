@@ -7,7 +7,7 @@ param (
 
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 Write-Host "Install Tools to build nanoCLR into default folders and configure json files ..."
-$env:BOARD_NAME = "ESP32_DEVKITC"
+$env:BOARD_NAME = "ESP32_WROOM_32"
 
 If([string]::IsNullOrEmpty($COMPORT))
 {
