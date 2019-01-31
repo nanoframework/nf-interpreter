@@ -12,7 +12,7 @@
  */
 MEMORY
 {
-    flash       : org = 0x08010000, len = 1M - 32k - 768k     /* flash size less the space reserved for nanoBooter and application deployment*/
+    flash       : org = 0x08004000, len = 1M - 32k - 768k     /* flash size less the space reserved for nanoBooter and application deployment*/
     config      : org = 0x00000000, len = 0                   /* space reserved for configuration block */
     deployment  : org = 0x08040000, len = 768k                /* space reserved for application deployment */
     ramvt       : org = 0x00000000, len = 0                   /* initial RAM address is reserved for a copy of the vector table */
