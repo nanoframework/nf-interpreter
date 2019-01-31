@@ -281,7 +281,7 @@
         },
         {
           "name": "RTOS", //"Selected Operating system
-          "value": "FREERTOS"
+          "value": "FREERTOS_ESP32"
         },
         {
           "name": "SWO_OUTPUT_OPTION", // Single Wire Output Option
