@@ -1120,7 +1120,7 @@ elseif(RTOS_FREERTOS_CHECK)
 
 #######################
 # FreeRTOS ESP32
-elseif()
+elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     if("${TARGET_SERIES}" STREQUAL "ESP32")
         message(STATUS "Platform ESP32 target board: ${ESP32_BOARD}")
