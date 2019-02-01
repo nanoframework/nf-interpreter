@@ -56,7 +56,8 @@ endif()
 # list of supported RTOSes
 # when adding a new RTOS add the corresponding string below AND...
 # ... also on the compare block below
-set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS_ESP32" "TI_SIMPLELINK" CACHE INTERNAL "supported RTOS options")
+set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" "FREERTOS_ESP32" "TI_SIMPLELINK" CACHE INTERNAL "supported RTOS options")
+
 
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
@@ -66,12 +67,20 @@ else()
 endif()
 
 string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
+string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
 string(COMPARE EQUAL "FREERTOS_ESP32" "${RTOS}" RTOS_FREERTOS_ESP32_CHECK)
 string(COMPARE EQUAL "TI_SIMPLELINK" "${RTOS}" RTOS_TI_SIMPLELINK_CHECK)
 
 ##########################################################################
 
+if(RTOS_FREERTOS_CHECK)
+    set(RTOS_FREERTOS_CHECK TRUE)
+    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
+    set(RTOS_CHIBIOS_CHECK FALSE)
+endif()
+
 if(RTOS_FREERTOS_ESP32_CHECK)
+    set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_FREERTOS_ESP32_CHECK TRUE)
     set(RTOS_TI_SIMPLELINK_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
@@ -79,6 +88,7 @@ endif()
 
 if(RTOS_CHIBIOS_CHECK)
     set(RTOS_CHIBIOS_CHECK TRUE)
+    set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
     set(RTOS_TI_SIMPLELINK_CHECK FALSE)
 endif()
@@ -113,14 +123,10 @@ if(RTOS_CHIBIOS_CHECK)
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
 
-	# Set up short path substitution on Windows
-	if(WIN32)
-		if(EXISTS ${CMAKE_SOURCE_DIR}/SetNFRoot.bat)
-			execute_process(COMMAND ${CMAKE_SOURCE_DIR}/SetNFRoot.bat OUTPUT_VARIABLE NFROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
-			set(ENV{nfRoot} ${NFROOT})
-		endif()
-	endif()
-
+elseif(RTOS_FREERTOS_CHECK)
+    message(STATUS "\nSetting Toolchain file for FreeRTOS \n")
+    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.${TOOLCHAIN}.cmake)
+    
 elseif(RTOS_FREERTOS_ESP32_CHECK)
     message(STATUS "\nSetting Toolchain file for FreeRTOS ESP32 \n")
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
@@ -661,7 +667,142 @@ if(RTOS_CHIBIOS_CHECK)
     endif()
 
 #######################
-# FreeRTOS_ESP32
+# FreeRTOS
+elseif(RTOS_FREERTOS_CHECK)
+
+    # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_FREERTOS_SOURCE TRUE)
+    if(FREERTOS_SOURCE)
+        if(NOT "${FREERTOS_SOURCE}" STREQUAL "")
+            set(NO_FREERTOS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_FREERTOS_SOURCE)
+        # no FREERTOS source specified, download it from it's repo
+        
+        # check for SVN (needed here for advanced warning to user if it's not installed)
+        find_package(Subversion)
+
+        #  check if SVN was found, if not report to user and abort
+        if(NOT SUBVERSION_FOUND)
+            message(FATAL_ERROR "error: could not find SVN, make sure you have it installed.")
+        endif()
+
+        # FreeRTOS version
+        set(FREERTOS_VERSION_EMPTY TRUE)
+
+        # check if build was requested with a specifc FreeRTOS version
+        if(DEFINED FREERTOS_VERSION)
+            if(NOT "${FREERTOS_VERSION}" STREQUAL "")
+                set(FREERTOS_VERSION_EMPTY FALSE)
+            endif()
+        endif()
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("CMake/FreeRTOS.CMakeLists.cmake.in"
+        "${CMAKE_BINARY_DIR}/FreeRTOS_Download/CMakeLists.txt")
+
+        # setup CMake project for FreeRTOS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
+
+        # run build on FreeRTOS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
+    
+    else ()
+        message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
+    endif()
+
+    # check if CMSIS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_CMSIS_SOURCE TRUE)
+    if(CMSIS_SOURCE)
+        if(NOT "${CMSIS_SOURCE}" STREQUAL "")
+            set(NO_CMSIS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_FREERTOS_SOURCE)
+    
+        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+        include(Hack_SetGitSearchPath)
+
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("CMake/CMSIS.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/CMSIS_Download/CMakeLists.txt")
+
+        # setup CMake project for CMSIS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMSIS_Download")
+
+        # run build on CMSIS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMSIS_Download")
+    else ()
+        message(FATAL_ERROR "Couldn't find CMSIS source at ${CMSIS_SOURCE}/")
+    endif()
+
+    # set target base location
+    # this has to be set before the class library modules are pulled in
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD})
+        # set target base location
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD}")
+    else()
+        # try to find board in the Community targets folder
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/${FREERTOS_BOARD})
+            # set target base location
+            set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/${FREERTOS_BOARD}")
+        else()
+            # board NOT found in targets folder
+            # can't continue
+            message(FATAL_ERROR "\n\nSorry but support for ${FREERTOS_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        endif()
+    endif()
+
+    # now add the subdirectory for the board
+    # try to find board in the targets folder
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD})
+        # board found
+        message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
+
+        # add TARGET board directory
+        add_subdirectory("targets/FreeRTOS/${FREERTOS_BOARD}")
+
+    else()
+
+        # try to find board in the Community targets folder
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/${FREERTOS_BOARD})
+            # board found
+            message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
+
+            # add TARGET board directory from Community
+            add_subdirectory("targets-community/FreeRTOS/${FREERTOS_BOARD}")
+
+        else()
+        # board NOT found in targets folder
+            # board NOT found in targets folder
+            message(FATAL_ERROR "\n\nSorry but support for ${FREERTOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        endif()
+
+    endif()
+
+#######################
+# FreeRTOS ESP32
 elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     if("${TARGET_SERIES}" STREQUAL "ESP32")
