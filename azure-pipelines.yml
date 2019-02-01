@@ -327,7 +327,7 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_WIN32_nanoCLR
-  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
+  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
 
   pool:
     vmImage: 'VS2017-Win2016'
