@@ -40,7 +40,7 @@ function(NF_SET_LINKER_OPTIONS TARGET)
     endif()
        
     # set optimization flags
-    nf_set_optimization_options(${TARGET})
+    # nf_set_optimization_options(${TARGET})
     
     # set link map
     nf_set_link_map(${TARGET})
