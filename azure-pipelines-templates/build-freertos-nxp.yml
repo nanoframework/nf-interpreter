@@ -10,7 +10,7 @@ steps:
     inputs:
       cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DFREERTOS_BOARD=$(BoardName) $(BuildOptions) ..'
       workingDirectory:  ${{ parameters.builDirectory }}
-    displayName: Setup build with CMake without DFU
+    displayName: Setup build with CMake
 
   - task: CMake@1
     inputs:
