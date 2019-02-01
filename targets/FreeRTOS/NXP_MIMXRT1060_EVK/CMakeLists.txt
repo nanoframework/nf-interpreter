@@ -58,7 +58,7 @@ add_executable(
 # )
 
 # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
-# add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf FreeRTOS)
+add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf FreeRTOS)
 # add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS)
 
 # include common directories
@@ -123,30 +123,18 @@ target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
 
 # set compiler options
 nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
-# nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
-
-# set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
-# nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
+# nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
     nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/MIMXRT10xx.ld)
-    # nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F407xG_CLR-DEBUG.ld)
 else()
     nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/MIMXRT10xx.ld)
-    # nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F407xG_CLR.ld)
 endif()
 
 # set linker options
 nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
 # nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
-
-# add other linker flags
-###########################################################
-# the sizes of CRT heap and ChibiOS stacks are defined here
-# set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x2000")
-# set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x3B000")
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
