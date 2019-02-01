@@ -5,8 +5,18 @@
 
 INCLUDE(CMakeForceCompiler)
 
-# Stop cmake trying to check if compiler works
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY )
+###################################################
+# set C and C++ flags for compiler detection tests
+###################################################
+# IMPORTANT: these flags need to be removed after 
+# the compiler detection otherwise they'll get 
+# added to all compiler build calls and 
+# will colide with the use of nano.specs
+###################################################
+set(CMAKE_C_FLAGS_INIT "-specs=nosys.specs")
+set(CMAKE_CXX_FLAGS_INIT "-specs=nosys.specs")
+###################################################
+
 
 # set toolchain directories
 set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/bin)
@@ -28,7 +38,6 @@ endmacro()
 if(NOT CMAKE_C_COMPILER)
     SET_COMPILER_VAR(C_COMPILER gcc)
 endif()
-SET_COMPILER_VAR(C_COMPILER gcc)
 
 # setup C++ compiler
 if(NOT CMAKE_CXX_COMPILER)
