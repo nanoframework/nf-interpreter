@@ -11,6 +11,7 @@ set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(BuildUtils REQUIRED)
 find_package(FreeRTOS REQUIRED)
+find_package(CMSIS REQUIRED)
 find_package(WireProtocol REQUIRED)
 
 # packages for nanoFramework libraries
@@ -66,7 +67,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/common
     ${CMAKE_CURRENT_SOURCE_DIR}/common/board
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/CMSIS
     ${CMAKE_CURRENT_SOURCE_DIR}/common/component/serial_manager
     ${CMAKE_CURRENT_SOURCE_DIR}/common/component/uart
     ${CMAKE_CURRENT_SOURCE_DIR}/common/device
@@ -81,9 +81,7 @@ include_directories(
 
     ${WireProtocol_INCLUDE_DIRS}
     ${FREERTOS_INCLUDE_DIRS}
-
-    ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
-    ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
+    ${CMSIS_INCLUDE_DIRS}
 )
 
 # include directories for nanoBooter
