@@ -43,7 +43,7 @@ Pre-configured cmake-variants.json for this board
           "RTOS" : "FREERTOS", 
           "FREERTOS_BOARD" : "NXP_MIMXRT1060_EVK",
           "FREERTOS_VERSION" : "V10.1.1",
-          "CMSIS_GIT_TAG" : "5.4.0",
+          "CMSIS_VERSION" : "5.4.0",
           "NF_BUILD_RTM" : "OFF", 
           "NF_FEATURE_DEBUGGER" : "ON", 
           "NF_FEATURE_RTC" : "OFF",
