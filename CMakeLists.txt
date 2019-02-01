@@ -679,7 +679,7 @@ elseif(RTOS_FREERTOS_CHECK)
     endif()
 
     if(NO_FREERTOS_SOURCE)
-        # no FREERTOS source specified, download it from it's repo
+        # no FreeRTOS source specified, download it from it's repo
         
         # check for SVN (needed here for advanced warning to user if it's not installed)
         find_package(Subversion)
@@ -699,6 +699,20 @@ elseif(RTOS_FREERTOS_CHECK)
             endif()
         endif()
 
+        # FreeRTOS version
+        set(FREERTOS_VERSION_EMPTY TRUE)
+
+        # check if build was requested with a specifc FreeRTOS version
+        if(FREERTOS_VERSION_EMPTY)
+            # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
+            set(FREERTOS_VERSION_TAG "V10.1.1")
+        else()
+            # set SVN tag
+            set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")
+        endif()
+
+        message(STATUS "RTOS is: FreeRTOS ${FREERTOS_VERSION} from GitHub repo")
+
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
         configure_file("CMake/FreeRTOS.CMakeLists.cmake.in"
@@ -714,8 +728,39 @@ elseif(RTOS_FREERTOS_CHECK)
                         RESULT_VARIABLE result
                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
     
-    else ()
-        message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
+    else()
+        # FreeRTOS source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${FREERTOS_SOURCE}/")
+            message(STATUS "RTOS is: FreeRTOS (source from: ${FREERTOS_SOURCE})")
+
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
+                file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
+            else()
+                message(STATUS "Using local cache of FreeRTOS source from ${FREERTOS_SOURCE}")
+            endif()
+
+            set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
+        else()
+            message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
+        endif()
+
+        # add FreeRTOS as external project
+        ExternalProject_Add(
+            FreeRTOS
+            PREFIX FreeRTOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )        
+
+        # get source dir for FreeRTOS CMake project
+        ExternalProject_Get_Property(FreeRTOS SOURCE_DIR)
+
     endif()
 
     # check if CMSIS_SOURCE was specified or if it's empty (default is empty)
@@ -726,7 +771,7 @@ elseif(RTOS_FREERTOS_CHECK)
         endif()
     endif()
 
-    if(NO_FREERTOS_SOURCE)
+    if(NO_CMSIS_SOURCE)
     
         # hack to make the FindGit to work in Windows platforms (check the module comment for details)
         include(Hack_SetGitSearchPath)
@@ -738,6 +783,27 @@ elseif(RTOS_FREERTOS_CHECK)
         if(NOT GIT_EXECUTABLE)
             message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
         endif()
+
+        # CMSIS version
+        set(CMSIS_VERSION_EMPTY TRUE)
+
+        # check if build was requested with a specifc CMSIS version
+        if(DEFINED CMSIS_VERSION)
+            if(NOT "${CMSIS_VERSION}" STREQUAL "")
+                set(CMSIS_VERSION_EMPTY FALSE)
+            endif()
+        endif()
+
+        # check if build was requested with a specifc CMSIS version
+        if(CMSIS_VERSION_EMPTY)
+            # no CMSIS version actualy specified, must be empty which is fine, we'll default to a known good version
+            set(CMSIS_GIT_TAG "5.4.0")
+        else()
+            # set Git tag
+            set(CMSIS_GIT_TAG "${CMSIS_VERSION}")
+        endif()            
+
+        message(STATUS "CMSIS v${CMSIS_VERSION} from GitHub repo")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
@@ -753,8 +819,39 @@ elseif(RTOS_FREERTOS_CHECK)
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMSIS_Download")
-    else ()
-        message(FATAL_ERROR "Couldn't find CMSIS source at ${CMSIS_SOURCE}/")
+    else()
+        # CMSIS source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${CMSIS_SOURCE}/")
+            message(STATUS "CMSIS ${CMSIS_VERSION} (source from: ${CMSIS_SOURCE})")
+
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/CMSIS_Source")
+                file(COPY "${CMSIS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/CMSIS_Source")
+            else()
+                message(STATUS "Using local cache of CMSIS source from ${CMSIS_SOURCE}")
+            endif()
+
+            set(CMSIS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/CMSIS_Source/include)
+        else()
+            message(FATAL_ERROR "Couldn't find CMSIS source at ${CMSIS_SOURCE}/")
+        endif()
+
+        # add CMSIS as external project
+        ExternalProject_Add(
+            CMSIS
+            PREFIX CMSIS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/CMSIS_Source
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )        
+
+        # get source dir for CMSIS CMake project
+        ExternalProject_Get_Property(CMSIS SOURCE_DIR)
+
     endif()
 
     # set target base location
