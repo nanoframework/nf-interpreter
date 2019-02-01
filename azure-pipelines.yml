@@ -167,6 +167,44 @@ jobs:
   - template: azure-pipelines-templates/publish-bintray.yml
 
 #################
+# NXP
+- job: Build_NXP_targets
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  # not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
+  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
+
+  dependsOn:
+  - Check_Build_Options
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  strategy:
+    matrix:
+      NXP_MIMXRT1060_EVK:
+        BoardName: NXP_MIMXRT1060_EVK
+        BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FREERTOS
+        NeedsDFU: true
+
+  variables:
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+
+  steps:
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+
+  - template: azure-pipelines-templates/download-install-ninja.yml
+
+  - template: azure-pipelines-templates/build-freertos-nxp.yml
+
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+
+  - template: azure-pipelines-templates/publish-bintray.yml
+
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+#################
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
@@ -233,9 +271,10 @@ jobs:
   dependsOn:
   - Build_STM32_targets
   - Build_ESP32_targets
+  - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), not( and( eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) ) )
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), not( and( eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) ) )
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -284,9 +323,10 @@ jobs:
   dependsOn:
   - Build_STM32_targets
   - Build_ESP32_targets
+  - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_WIN32_nanoCLR
-  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
+  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
 
   pool:
     vmImage: 'VS2017-Win2016'
