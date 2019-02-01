@@ -1074,6 +1074,45 @@ elseif(RTOS_FREERTOS_CHECK)
         message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
     endif()
 
+    # check if CMSIS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_CMSIS_SOURCE TRUE)
+    if(CMSIS_SOURCE)
+        if(NOT "${CMSIS_SOURCE}" STREQUAL "")
+            set(NO_CMSIS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_FREERTOS_SOURCE)
+    
+        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+        include(Hack_SetGitSearchPath)
+
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("CMake/CMSIS.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/CMSIS_Download/CMakeLists.txt")
+
+        # setup CMake project for CMSIS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMSIS_Download")
+
+        # run build on CMSIS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMSIS_Download")
+    else ()
+        message(FATAL_ERROR "Couldn't find CMSIS source at ${CMSIS_SOURCE}/")
+    endif()
+
     # set target base location
     # this has to be set before the class library modules are pulled in
     if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD})
