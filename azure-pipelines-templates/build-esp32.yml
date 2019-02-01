@@ -7,7 +7,7 @@ parameters:
 steps:
   - task: CMake@1
     inputs:
-      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(ESP32_TOOLCHAIN_PATH) -DESP32_IDF_PATH=$(ESP32_IDF_PATH) -DESP32_LIBS_PATH=$(ESP32_LIBS_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) $(BuildOptions) ..'
+      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(ESP32_TOOLCHAIN_PATH) -DESP32_IDF_PATH=$(ESP32_IDF_PATH) -DESP32_LIBS_PATH=$(ESP32_LIBS_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DESP32_BOARD=$(BoardName) $(BuildOptions) ..'
       workingDirectory:  ${{ parameters.builDirectory }}
     displayName: Setup build with CMake
 
@@ -21,7 +21,7 @@ steps:
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\esptool_py\esptool\esptool.py'
-      arguments: '--chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB -o ${{ parameters.builDirectory }}\nanoCLR.bin ${{ parameters.builDirectory }}\targets\FreeRTOS\ESP32_DevKitC\nanoCLR.elf'
+      arguments: '--chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB -o ${{ parameters.builDirectory }}\nanoCLR.bin ${{ parameters.builDirectory }}\targets\FreeRTOS_ESP32\$(BoardName)\nanoCLR.elf'
     condition: succeeded()
     displayName: Generate nanoCLR bin file for deployment
 
@@ -31,7 +31,7 @@ steps:
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
-      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS\ESP32_DevKitC\IDF\partitions_nanoclr_4mb.csv ${{ parameters.builDirectory }}\partitions_4mb.bin'
+      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS_ESP32\$(BoardName)\IDF\partitions_nanoclr_4mb.csv ${{ parameters.builDirectory }}\partitions_4mb.bin'
     condition: succeeded()
     displayName: Generate Esp32 Partition tables for 4MB flash
 
@@ -39,7 +39,7 @@ steps:
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
-      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS\ESP32_DevKitC\IDF\partitions_nanoclr_2mb.csv ${{ parameters.builDirectory }}\partitions_2mb.bin'
+      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS_ESP32\$(BoardName)\IDF\partitions_nanoclr_2mb.csv ${{ parameters.builDirectory }}\partitions_2mb.bin'
     condition: succeeded()
     displayName: Generate Esp32 Partition tables for 2MB flash
 

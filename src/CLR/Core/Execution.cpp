@@ -203,6 +203,15 @@ HRESULT CLR_RT_ExecutionEngine::DeleteInstance()
 
 void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
 {
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    // developer notes:
+    // Most of the following calls are just for pure ceremony and gracefully terminating stuff,
+    // cleaning collections and such.
+    // In particular the previous existing calls to Abort threads were completely irrelevant 
+    // because the execution engine wasn't running anymore so whatever code that is on those threads 
+    // there to be executed wouldn't never be executed anyways.
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+
     NATIVE_PROFILE_CLR_CORE();
     m_fShuttingDown = true;
 
@@ -227,9 +236,6 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_cctorThread = NULL;
 
     m_timerThread = NULL;
-
-    AbortAllThreads  ( m_threadsReady   );
-    AbortAllThreads  ( m_threadsWaiting );
 
     ReleaseAllThreads( m_threadsReady   );
     ReleaseAllThreads( m_threadsWaiting );

@@ -55,6 +55,7 @@ endif()
 # ... also on the compare block bellow
 set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" "FREERTOS_ESP32" CACHE INTERNAL "supported RTOS options")
 
+
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
     message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
@@ -1073,9 +1074,6 @@ elseif(RTOS_FREERTOS_CHECK)
         message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
     endif()
 
-    # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
-
     # set target base location
     # this has to be set before the class library modules are pulled in
     if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD})
@@ -1125,7 +1123,7 @@ elseif(RTOS_FREERTOS_CHECK)
 elseif()
 
     if("${TARGET_SERIES}" STREQUAL "ESP32")
-        message(STATUS "Platform ESP32")
+        message(STATUS "Platform ESP32 target board: ${ESP32_BOARD}")
 
         # check watchdog feature
         # EPS32 build has watchdog enabled by default, so setting it to OFF doens't make sense 
@@ -1135,12 +1133,12 @@ elseif()
         endif()
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/nanoCLR")
+        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}/nanoCLR")
 
         # set target base location
-        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC")
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}")
+ 		add_subdirectory(targets/FreeRTOS_ESP32/${ESP32_BOARD})
 
-        add_subdirectory(targets/FreeRTOS/ESP32_DevKitC)
     endif()
 
 endif()
