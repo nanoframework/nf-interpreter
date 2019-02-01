@@ -1,9 +1,12 @@
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// Portions Copyright (c) 2013-2015, Freescale Semiconductor, Inc. All rights reserved.
+// Portions Copyright 2016-2018 NXP. All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+
+
 /*
- * Copyright (c) 2013 - 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2018 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
  *
  * Debug console shall provide input and output functions to scan and print formatted data.
  * o Support a format specifier for PRINTF follows this prototype "%[flags][width][.precision][length]specifier"

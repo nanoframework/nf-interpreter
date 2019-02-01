@@ -1,3 +1,10 @@
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// Portions Copyright 1997-2016 Freescale Semiconductor, Inc.. All rights reserved.
+// Portions Copyright 2016-2018 NXP. All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+
 /*
 ** ###################################################################
 **     Processors:          MIMXRT1062CVJ5A
@@ -18,14 +25,6 @@
 **     Abstract:
 **         CMSIS Peripheral Access Layer for MIMXRT1062
 **
-**     Copyright 1997-2016 Freescale Semiconductor, Inc.
-**     Copyright 2016-2018 NXP
-**     All rights reserved.
-**
-**     SPDX-License-Identifier: BSD-3-Clause
-**
-**     http:                 www.nxp.com
-**     mail:                 support@nxp.com
 **
 **     Revisions:
 **     - rev. 0.1 (2017-01-10)

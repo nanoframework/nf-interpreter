@@ -1,10 +1,8 @@
-/*
- * Copyright 2018 NXP
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// Portions Copyright 2018 NXP. All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
 
 #ifndef __HAL_UART_ADAPTER_H__
 #define __HAL_UART_ADAPTER_H__

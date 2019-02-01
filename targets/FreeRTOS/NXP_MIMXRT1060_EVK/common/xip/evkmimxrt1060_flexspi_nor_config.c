@@ -1,9 +1,8 @@
-/*
- * Copyright 2018 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// Portions Copyright 2018 NXP. All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
 
 #include "evkmimxrt1060_flexspi_nor_config.h"
 

@@ -1,3 +1,11 @@
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// Portions Copyright 1999-2000 MOTOROLA, INC., Inc. All rights reserved.
+// Portions Copyright (c) 2015, Freescale Semiconductor, Inc. All rights reserved.
+// Portions Copyright 2016-2018 NXP. All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+
 /*
  * This is a modified version of the file printf.c, which was distributed
  * by Motorola as part of the M5407C3BOOT.zip package used to initialize
@@ -28,11 +36,6 @@
  *
  *  Motorola assumes no responsibility for the maintenance and support
  *  of this software
-
- * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2018 NXP
- *
- * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <stdarg.h>
