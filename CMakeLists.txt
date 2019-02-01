@@ -727,7 +727,21 @@ elseif(RTOS_FREERTOS_CHECK)
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
-    
+
+        # add FreeRTOS as external project
+        ExternalProject_Add( 
+            FreeRTOS
+            PREFIX FreeRTOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
+            SVN_REPOSITORY https://svn.code.sf.net/p/freertos/code/tags/${FREERTOS_VERSION_TAG}/FreeRTOS/Source/
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )                     
+
     else()
         # FreeRTOS source was specified
 
