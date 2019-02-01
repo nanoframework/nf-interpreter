@@ -1,3 +1,10 @@
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// Portions Copyright 2016 Freescale Semiconductor, Inc.. All rights reserved.
+// Portions Copyright 2016-2018 NXP. All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+
 /*
 ** ###################################################################
 **     Version:             rev. 1.0, 2018-11-16
@@ -6,14 +13,6 @@
 **     Abstract:
 **         Chip specific module features.
 **
-**     Copyright 2016 Freescale Semiconductor, Inc.
-**     Copyright 2016-2018 NXP
-**     All rights reserved.
-**
-**     SPDX-License-Identifier: BSD-3-Clause
-**
-**     http:                 www.nxp.com
-**     mail:                 support@nxp.com
 **
 **     Revisions:
 **     - rev. 0.1 (2017-01-10)

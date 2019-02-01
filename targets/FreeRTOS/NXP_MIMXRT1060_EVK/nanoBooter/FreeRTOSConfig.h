@@ -1,6 +1,11 @@
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// Portions Copyright (C) 2017 Amazon.com, Inc. or its affiliates. All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+
 /*
  * FreeRTOS Kernel V10.0.1
- * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
