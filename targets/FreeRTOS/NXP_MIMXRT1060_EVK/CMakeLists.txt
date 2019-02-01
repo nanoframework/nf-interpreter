@@ -122,7 +122,7 @@ target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
 # )
 
 # set compiler options
-nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
 # nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
