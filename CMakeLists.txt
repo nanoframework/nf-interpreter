@@ -53,7 +53,7 @@ endif()
 # list of supported RTOSes
 # when adding a new RTOS add the corresponding string bellow AND...
 # ... also on the compare block bellow
-set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" CACHE INTERNAL "supported RTOS options")
+set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS_ESP32" CACHE INTERNAL "supported RTOS options")
 
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
@@ -63,18 +63,18 @@ else()
 endif()
 
 string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
-string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
+string(COMPARE EQUAL "FREERTOS_ESP32" "${RTOS}" RTOS_FREERTOS_ESP32_CHECK)
 
 ##########################################################################
 
-if(RTOS_FREERTOS_CHECK)
-    set(RTOS_FREERTOS_CHECK TRUE)
+if(RTOS_FREERTOS_ESP32_CHECK)
+    set(RTOS_FREERTOS_ESP32_CHECK TRUE)
     set(RTOS_CHIBIOS_CHECK FALSE)
 endif()
 
 if(RTOS_CHIBIOS_CHECK)
     set(RTOS_CHIBIOS_CHECK TRUE)
-    set(RTOS_FREERTOS_CHECK FALSE)
+    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
 endif()
 
 #######################
@@ -101,7 +101,7 @@ if(RTOS_CHIBIOS_CHECK)
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
 
-elseif(RTOS_FREERTOS_CHECK)
+elseif(RTOS_FREERTOS_ESP32_CHECK)
     message(STATUS "\nSetting Toolchain file for FreeRTOS ESP32 \n")
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
 
@@ -1009,11 +1009,11 @@ if(RTOS_CHIBIOS_CHECK)
     endif()
 
 #######################
-# FreeRTOS
-elseif(RTOS_FREERTOS_CHECK)
+# FreeRTOS_ESP32
+elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     if("${TARGET_SERIES}" STREQUAL "ESP32")
-        message(STATUS "Platform ESP32")
+        message(STATUS "Platform ESP32 target board: ${ESP32_BOARD}")
 
         # check watchdog feature
         # EPS32 build has watchdog enabled by default, so setting it to OFF doens't make sense 
@@ -1023,12 +1023,12 @@ elseif(RTOS_FREERTOS_CHECK)
         endif()
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC/nanoCLR")
+        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}/nanoCLR")
 
         # set target base location
-        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ESP32_DevKitC")
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}")
+ 		add_subdirectory(targets/FreeRTOS_ESP32/${ESP32_BOARD})
 
- 		add_subdirectory(targets/FreeRTOS/ESP32_DevKitC)
     endif()
 
 endif()
