@@ -14,6 +14,11 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include <WireProtocol_ReceiverThread.h>
+#include <nanoCLR_Application.h>
+
+#include "CLR_Startup_Thread.h"
+
 #define LED_GPIO GPIO1
 #define LED_GPIO_PIN (9U)
 
@@ -27,12 +32,10 @@ static void blink_task(void *pvParameters)
     /* Init output LED GPIO. */
     GPIO_PinInit(LED_GPIO, LED_GPIO_PIN, &led_config);
 
-    int i = 0;
     for (;;)
     {
-        vTaskDelay(1000);
+        vTaskDelay(500);
         GPIO_PortToggle(LED_GPIO, 1u << LED_GPIO_PIN);
-        PRINTF("%d\n", i++);
     }
 }
 
@@ -40,13 +43,19 @@ int main(void)
 {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
-    /* Init FSL debug console. */
-    BOARD_InitDebugConsole();
+    BOARD_InitBootPeripherals();    
+
+    CLR_SETTINGS clrSettings;
+    (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+
+    clrSettings.MaxContextSwitches         = 50;
+    clrSettings.WaitForDebugger            = false;
+    clrSettings.EnterDebuggerLoopAfterExit = true;
 
     xTaskCreate(blink_task, "blink_task", configMINIMAL_STACK_SIZE + 10, NULL, configMAX_PRIORITIES - 1, NULL);
+    xTaskCreate(ReceiverThread, "ReceiverThread", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
+    xTaskCreate(CLRStartupThread, "CLRStartupThread", 15000, &clrSettings, configMAX_PRIORITIES - 1, NULL);
 
-    PRINTF("Start\n");
     vTaskStartScheduler();
 
     for (;;)
