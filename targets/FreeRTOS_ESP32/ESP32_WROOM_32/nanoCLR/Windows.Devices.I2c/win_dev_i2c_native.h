@@ -16,6 +16,7 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings
     static const int FIELD___busSpeed = 2;
     static const int FIELD___sharingMode = 3;
 
+
     //--//
 
 };

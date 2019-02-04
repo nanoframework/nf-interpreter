@@ -89,8 +89,9 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceController
 {
-    static const int FIELD_STATIC__s_instance = 1;
-    static const int FIELD_STATIC__s_deviceCollection = 2;
+    static const int FIELD_STATIC___syncLock = 1;
+    static const int FIELD_STATIC__s_instance = 2;
+    static const int FIELD_STATIC__s_deviceCollection = 3;
 
 
     //--//
