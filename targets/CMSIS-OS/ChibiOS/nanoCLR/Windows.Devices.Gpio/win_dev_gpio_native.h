@@ -15,7 +15,8 @@
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
 {
-    static const int FIELD_STATIC__s_instance = 0;
+    static const int FIELD_STATIC___syncLock = 0;
+    static const int FIELD_STATIC__s_instance = 1;
 
     NANOCLR_NATIVE_DECLARE(get_PinCount___I4);
 
@@ -25,7 +26,7 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin
 {
-    static const int FIELD_STATIC__s_eventListener = 1;
+    static const int FIELD_STATIC__s_eventListener = 2;
 
     static const int FIELD___syncLock = 1;
     static const int FIELD___pinNumber = 2;
