@@ -32,7 +32,7 @@ endif()
 
 add_subdirectory("common")
 add_subdirectory("nanoBooter")
-# add_subdirectory("nanoCLR")
+add_subdirectory("nanoCLR")
 
 #######################
 # nanoBooter executable
@@ -52,14 +52,19 @@ add_executable(
 #######################
 # nanoCLR executable
 
-# add_executable(
-#     # executables for project, project sources
-#     ${NANOCLR_PROJECT_NAME}.elf    
-# )
+add_executable(
+    # executables for project, project sources
+    ${NANOCLR_PROJECT_NAME}.elf  
+    
+    ${COMMON_PROJECT_SOURCES}
+    ${NANOCLR_PROJECT_SOURCES}
+
+    ${FREERTOS_SOURCES}
+)
 
 # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
 add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf FreeRTOS)
-# add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS)
 
 # include common directories
 include_directories(
@@ -94,48 +99,52 @@ target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
 
 )
 
-# # include directories for nanoCLR
-# target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
-#     "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
-#      ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
+# include directories for nanoCLR
+target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
+    "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
+     ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
 
-#      ${TARGET_CMSIS_NANOCLR_INCLUDE_DIRS}
-#      ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+     ${TARGET_CMSIS_NANOCLR_INCLUDE_DIRS}
+     ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS}
 
-#     # directories for nanoFramework libraries
-#     "${NF_CoreCLR_INCLUDE_DIRS}"
-#     "${NF_Debugger_INCLUDE_DIRS}"
-#     "${NF_Diagnostics_INCLUDE_DIRS}"
+    # directories for nanoFramework libraries
+    "${NF_CoreCLR_INCLUDE_DIRS}"
+    "${NF_Debugger_INCLUDE_DIRS}"
+    "${NF_Diagnostics_INCLUDE_DIRS}"
     
-#     # includes for nanoFramework APIs
-#     "${TARGET_NANO_APIS_INCLUDES}"
+    # # includes for nanoFramework APIs
+    # "${TARGET_NANO_APIS_INCLUDES}"
 
-#     # includes for ChibiOS FatFS
-#     "${CHIBIOS_FATFS_INCLUDE_DIRS}"
+    # # includes for ChibiOS FatFS
+    # "${CHIBIOS_FATFS_INCLUDE_DIRS}"
 
-#     # includes for ChibiOS LwIP
-#     "${CHIBIOS_LWIP_INCLUDE_DIRS}"
+    # # includes for ChibiOS LwIP
+    # "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 
-#     # incudes for Networking and TLS
-#     "${NF_Networking_INCLUDE_DIRS}"
-#     "${mbedTLS_INCLUDE_DIRS}"
-# )
+    # # incudes for Networking and TLS
+    # "${NF_Networking_INCLUDE_DIRS}"
+    # "${mbedTLS_INCLUDE_DIRS}"
+)
 
 # set compiler options
 nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
-# nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
+nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
     nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/MIMXRT10xx.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/MIMXRT10xx.ld)
 else()
     nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/MIMXRT10xx.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/MIMXRT10xx.ld)
 endif()
+
+
 
 # set linker options
 nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
-# nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
+nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
-# nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
