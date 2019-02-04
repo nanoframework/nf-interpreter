@@ -207,8 +207,8 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     // developer notes:
     // Most of the following calls are just for pure ceremony and gracefully terminating stuff,
     // cleaning collections and such.
-    // In particular the previous existing calls to Abort threads were completely irrelevant 
-    // because the execution engine wasn't running anymore so whatever code that is on those threads 
+    // In particular the previous existing calls to Abort threads and ReleaseAllThreads is completely irrelevant 
+    // because the execution engine wasn't running anymore. Whatever code that is on those threads 
     // there to be executed wouldn't never be executed anyways.
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -234,12 +234,11 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_finalizersPending.DblLinkedList_PushToCache();
     m_finalizerThread = NULL;
     m_cctorThread = NULL;
-
     m_timerThread = NULL;
 
-    ReleaseAllThreads( m_threadsReady   );
-    ReleaseAllThreads( m_threadsWaiting );
-    ReleaseAllThreads( m_threadsZombie  );
+    m_threadsReady.DblLinkedList_Release();
+    m_threadsWaiting.DblLinkedList_Release();
+    m_threadsZombie.DblLinkedList_Release();
 
     g_CLR_RT_TypeSystem.TypeSystem_Cleanup();
     g_CLR_RT_EventCache.EventCache_Cleanup();
