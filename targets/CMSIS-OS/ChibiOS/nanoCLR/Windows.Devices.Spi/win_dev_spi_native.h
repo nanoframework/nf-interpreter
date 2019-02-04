@@ -16,7 +16,7 @@
 
 struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo
 {
-    static const int FIELD___ChipSelectLineCount = 1;
+    static const int FIELD___chipSelectLineCount = 1;
 
     NANOCLR_NATIVE_DECLARE(get_MaxClockFrequency___I4);
     NANOCLR_NATIVE_DECLARE(get_MinClockFrequency___I4);
@@ -53,7 +53,7 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiController
 
 struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiControllerManager
 {
-    static const int FIELD_STATIC___syncLock = 0;
+    static const int FIELD_STATIC__s_syncLock = 0;
     static const int FIELD_STATIC__s_controllersCollection = 1;
 
 
