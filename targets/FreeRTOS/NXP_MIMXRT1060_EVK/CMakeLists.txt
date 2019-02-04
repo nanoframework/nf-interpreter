@@ -6,6 +6,13 @@
 cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
+configure_file("${CMAKE_SOURCE_DIR}/CMake/FreeRTOS_target_os.h.in"
+               "${CMAKE_BINARY_DIR}/targets/FreeRTOS/NXP_MIMXRT1060_EVK/target_os.h" @ONLY)
+
 set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
@@ -60,6 +67,13 @@ add_executable(
     ${NANOCLR_PROJECT_SOURCES}
 
     ${FREERTOS_SOURCES}
+
+    ${WireProtocol_SOURCES}
+
+    # sources for nanoFramework libraries
+    "${NF_CoreCLR_SOURCES}"
+    "${NF_Debugger_SOURCES}"
+    "${NF_Diagnostics_SOURCES}"
 )
 
 # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
@@ -76,6 +90,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/common/component/uart
     ${CMAKE_CURRENT_SOURCE_DIR}/common/device
     ${CMAKE_CURRENT_SOURCE_DIR}/common/drivers
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/drivers/freertos
     ${CMAKE_CURRENT_SOURCE_DIR}/common/utilities
     ${CMAKE_CURRENT_SOURCE_DIR}/common/xip
 
@@ -139,7 +154,9 @@ else()
     nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/MIMXRT10xx.ld)
 endif()
 
-
+# set compiler definitions
+nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
 
 # set linker options
 nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
