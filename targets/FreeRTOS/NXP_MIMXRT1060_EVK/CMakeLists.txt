@@ -63,8 +63,8 @@ add_executable(
 )
 
 # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
-add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf FreeRTOS)
-add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS)
+add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf FreeRTOS CMSIS)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS CMSIS)
 
 # include common directories
 include_directories(
