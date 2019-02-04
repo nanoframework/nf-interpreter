@@ -61,5 +61,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_I2c =
     "Windows.Devices.I2c", 
     0xA44C698B,
     method_lookup,
-    { 1, 1, 3, 0 }
+    { 1, 1, 3, 1 }
 };
