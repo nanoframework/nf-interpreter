@@ -236,10 +236,6 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_cctorThread = NULL;
     m_timerThread = NULL;
 
-    m_threadsReady.DblLinkedList_Release();
-    m_threadsWaiting.DblLinkedList_Release();
-    m_threadsZombie.DblLinkedList_Release();
-
     g_CLR_RT_TypeSystem.TypeSystem_Cleanup();
     g_CLR_RT_EventCache.EventCache_Cleanup();
 
