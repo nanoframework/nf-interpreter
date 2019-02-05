@@ -48,6 +48,8 @@ add_executable(
     # executables for project, project sources
     ${NANOBOOTER_PROJECT_NAME}.elf
 
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+
     ${COMMON_PROJECT_SOURCES}
     ${NANOBOOTER_PROJECT_SOURCES}
 
@@ -62,9 +64,14 @@ add_executable(
 add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf  
+
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
     
     ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
+
+    ${TARGET_CMSIS_COMMON_SOURCES}
+    ${TARGET_CMSIS_NANOCLR_SOURCES}
 
     ${FREERTOS_SOURCES}
 
@@ -119,26 +126,19 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
      ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
 
-     ${TARGET_CMSIS_NANOCLR_INCLUDE_DIRS}
-     ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS}
-
     # directories for nanoFramework libraries
     "${NF_CoreCLR_INCLUDE_DIRS}"
     "${NF_Debugger_INCLUDE_DIRS}"
     "${NF_Diagnostics_INCLUDE_DIRS}"
+
+    # directories for nanoFramework libraries
+    "${NF_CoreCLR_INCLUDE_DIRS}"
+    "${NF_Debugger_INCLUDE_DIRS}"
+	"${NF_Networking_INCLUDE_DIRS}"
+
+    # includes for nanoFramework APIs
+    "${TARGET_NANO_APIS_INCLUDES}"
     
-    # # includes for nanoFramework APIs
-    # "${TARGET_NANO_APIS_INCLUDES}"
-
-    # # includes for ChibiOS FatFS
-    # "${CHIBIOS_FATFS_INCLUDE_DIRS}"
-
-    # # includes for ChibiOS LwIP
-    # "${CHIBIOS_LWIP_INCLUDE_DIRS}"
-
-    # # incudes for Networking and TLS
-    # "${NF_Networking_INCLUDE_DIRS}"
-    # "${mbedTLS_INCLUDE_DIRS}"
 )
 
 # set compiler options

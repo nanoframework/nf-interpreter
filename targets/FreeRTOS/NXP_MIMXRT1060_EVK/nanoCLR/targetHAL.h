@@ -28,6 +28,11 @@
 #define NATIVE_INTERRUPT_END    SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS ); \
                                 SystemState_ClearNoLock( SYSTEM_STATE_ISR              );
 
+// TODO: Doesn't seem to be defined anywhere, used  clr corlib math
+#define INT32 int32_t
+#define TRUE  true
+#define FALSE false
+
 #if !defined(BUILD_RTM)
 
 inline void HARD_Breakpoint() { };
