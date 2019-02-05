@@ -6,6 +6,9 @@
 #ifndef _FLEXSPI_NOR_FLASH_OPS_H_
 #define _FLEXSPI_NOR_FLASH_OPS_H_
 
+#include "fsl_flexspi.h"
+
+#define FLASH_SIZE 0x1C00 /* 7168kB */
 #define FLASH_PAGE_SIZE 256
 #define SECTOR_SIZE 0x1000 /* 4K */
 

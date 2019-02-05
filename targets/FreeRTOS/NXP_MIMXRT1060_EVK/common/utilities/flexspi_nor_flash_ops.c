@@ -5,7 +5,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "fsl_flexspi.h"
 #include "flexspi_nor_flash_ops.h"
 
 /*******************************************************************************
