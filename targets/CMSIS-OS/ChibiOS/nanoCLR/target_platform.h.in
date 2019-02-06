@@ -31,10 +31,6 @@
 // enable UART subsystem
 #define HAL_USE_UART @HAL_USE_UART_OPTION@
 
-//DISABLED AS NOT REQUIRED FOR STM32 IN CHIBIOS 18.2
-// enable EXT subsystem because it's required for interrupt handling when GPIO is enable
-//#define HAL_USE_EXT @HAL_USE_GPIO_OPTION@
-
 // set when networking is enabled
 #define HAL_USE_MAC @HAL_USE_MAC_OPTION@
 
