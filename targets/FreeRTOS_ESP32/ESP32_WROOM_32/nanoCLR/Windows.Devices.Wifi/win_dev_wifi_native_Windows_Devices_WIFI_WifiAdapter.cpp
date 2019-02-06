@@ -216,7 +216,9 @@ int  StoreApRecordsToString( uint8_t * pTarget, wifi_ap_record_t * apRecords, ui
 HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNativeScanReport___SZARRAY_U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
-    wifi_ap_record_t * ap_records = 0;  // Temporary ap record storage
+
+    // Temporary ap record storage
+    wifi_ap_record_t * ap_records = 0; 
     {
         CLR_RT_HeapBlock&   top = stack.PushValueAndClear();           
         CLR_RT_HeapBlock_Array* array;
@@ -257,7 +259,9 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNativeS
         StoreApRecordsToString( buf, ap_records, number );
     }
     NANOCLR_CLEANUP();
-    if(ap_records) platform_free(ap_records);
+    if(ap_records) {
+        platform_free(ap_records);
+    }
     NANOCLR_CLEANUP_END();
 }
 
