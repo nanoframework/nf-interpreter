@@ -30,6 +30,7 @@ list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetPAL_Event
 
 list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage.c")
 list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Device_BlockStorage.c")
+list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage_iMXRTFlashDriver.c")
 
 # add native assemblies
 ParseNativeAssemblies()

@@ -42,5 +42,12 @@ static inline void flexspi_clock_init(void)
     CLOCK_SetDiv(kCLOCK_FlexspiDiv, 2);   /* flexspi clock 133M. */
 }
 
+void flexspi_nor_flash_init(FLEXSPI_Type *base);
+status_t flexspi_nor_erase_chip(FLEXSPI_Type *base);
+status_t flexspi_nor_get_vendor_id(FLEXSPI_Type *base, uint8_t *vendorId);
+status_t flexspi_nor_flash_page_program(FLEXSPI_Type *base, uint32_t dstAddr, const uint32_t *src);
+status_t flexspi_nor_flash_erase_sector(FLEXSPI_Type *base, uint32_t address);
+status_t flexspi_nor_enable_quad_mode(FLEXSPI_Type *base);
+
 /*${prototype:end}*/
 #endif /* _FLEXSPI_NOR_FLASH_OPS_H_ */
