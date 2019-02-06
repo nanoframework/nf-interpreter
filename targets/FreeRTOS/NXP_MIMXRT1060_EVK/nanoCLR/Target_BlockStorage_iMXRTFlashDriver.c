@@ -5,6 +5,7 @@
 
 #include "MIMXRT1062.h"
 #include "flexspi_nor_flash_ops.h"
+#include "fsl_cache.h"
 #include "fsl_flexspi.h"
 #include "string.h"
 #include <Target_BlockStorage_iMXRTFlashDriver.h>
@@ -49,7 +50,7 @@ bool iMXRTFlexSPIDriver_Write(void *context, ByteAddress startAddress,
     return false;
 
   for (uint32_t i = 0; i < numBytes / FLASH_PAGE_SIZE; i++) {
-    (void)numBytes;
+
     status_t status = flexspi_nor_flash_page_program(
         FLEXSPI, startAddress + i * FLASH_PAGE_SIZE,
         (void *)buffer + i * FLASH_PAGE_SIZE);
@@ -57,6 +58,10 @@ bool iMXRTFlexSPIDriver_Write(void *context, ByteAddress startAddress,
     if (status != kStatus_Success) {
       return false;
     }
+
+    DCACHE_CleanInvalidateByRange(FlexSPI_AMBA_BASE + startAddress +
+                                      i * FLASH_PAGE_SIZE,
+                                  FLASH_PAGE_SIZE);
   }
   return true;
 }
@@ -90,6 +95,7 @@ bool iMXRTFlexSPIDriver_EraseBlock(void *context, ByteAddress address) {
     return false;
   }
 
+  DCACHE_CleanInvalidateByRange(FlexSPI_AMBA_BASE + address, FLASH_PAGE_SIZE);
   return true;
 }
 
