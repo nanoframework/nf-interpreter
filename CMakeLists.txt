@@ -629,6 +629,109 @@ endif()
 
 #################################################################
 
+
+#################################################################
+# handling TI Simplelink CC32xx SDK 
+
+# check if TI_SL_CC32xx_SDK_SOURCE was specified or if it's empty (default is empty)
+set(NO_TI_SL_CC32xx_SDK_SOURCE TRUE)
+if(TI_SL_CC32xx_SDK_SOURCE)
+    if(NOT "${TI_SL_CC32xx_SDK_SOURCE}" STREQUAL "")
+        set(NO_TI_SL_CC32xx_SDK_SOURCE FALSE)
+    endif()
+endif()
+
+if(NO_TI_SL_CC32xx_SDK_SOURCE)
+    # no TI Simplelink CC32xx SDK source specified, download it from it's repo
+
+    # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+    include(Hack_SetGitSearchPath)
+
+    # check for Git (needed here for advanced warning to user if it's not installed)
+    find_package(Git)
+
+    #  check if Git was found, if not report to user and abort
+    if(NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+    endif()
+
+    message(STATUS "TI Simplelink CC32xx SDK (latest available code from v2.40.01.01")
+    set(TI_SL_CC32xx_SDK_TAG "2.40.01.01")
+
+    # need to setup a separate CMake project to download the code from the GitHub repository
+    # otherwise it won't be available before the actual build step
+    configure_file("CMake/SimpleLinkCC32xxSdk.CMakeLists.cmake.in"
+                "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Download/CMakeLists.txt")
+
+    # setup CMake project for TI Simplelink CC32xx SDK download
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Download")
+
+    # run build on TI Simplelink CC32xx SDK download CMake project to perform the download
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Download")
+
+    # add TI Simplelink CC32xx SDK as external project
+    ExternalProject_Add(
+        SLCC32xxSDK
+        PREFIX SimpleLinkCC32xxSdk
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source
+        GIT_REPOSITORY  https://github.com/nanoframework/ChibiOS
+        GIT_TAG ${TI_SL_CC32xx_SDK_TAG}  # target specified branch
+        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+        TIMEOUT 10
+        LOG_DOWNLOAD 1
+
+        # Disable all other steps
+        INSTALL_COMMAND ""
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+    )
+
+    # get source dir for TI Simplelink CC32xx SDK CMake project
+    ExternalProject_Get_Property(SLCC32xxSDK SOURCE_DIR)
+
+else()
+    # TI Simplelink CC32xx SDK source was specified
+
+    # sanity check is source path exists
+    if(EXISTS "${TI_SL_CC32xx_SDK_SOURCE}/")
+        message(STATUS "TI Simplelink CC32xx SDK source from: ${TI_SL_CC32xx_SDK_SOURCE}")
+
+        # check if we already have the sources, no need to copy again
+        if(NOT EXISTS "${CMAKE_BINARY_DIR}/TI_SL_CC32xx_SDK_SOURCE")
+            file(COPY "${TI_SL_CC32xx_SDK_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source")
+        else()
+            message(STATUS "Using local cache of TI Simplelink CC32xx SDK source from ${TI_SL_CC32xx_SDK_SOURCE}")
+        endif()
+
+        set(SLCC32xxSDK_INCLUDE_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdkS_Source/include)
+    else()
+        message(FATAL_ERROR "Couldn't find TI Simplelink CC32xx SDK source at ${TI_SL_CC32xx_SDK_SOURCE}/")
+    endif()
+
+    # add TI Simplelink CC32xx SDK as external project
+    ExternalProject_Add(
+        SLCC32xxSDK
+        PREFIX SimpleLinkCC32xxSdk
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source
+
+        # Disable all other steps
+        INSTALL_COMMAND ""
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+    )
+
+    # get source dir for TI Simplelink CC32xx SDK CMake project
+    ExternalProject_Get_Property(SLCC32xxSDK SOURCE_DIR)
+
+endif()
+
+#################################################################
+
+
 #######################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
