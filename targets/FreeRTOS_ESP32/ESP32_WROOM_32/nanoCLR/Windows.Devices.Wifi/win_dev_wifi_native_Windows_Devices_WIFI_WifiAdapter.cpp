@@ -258,10 +258,14 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNativeS
         // Store into returned uint8 array
         StoreApRecordsToString( buf, ap_records, number );
     }
+  
     NANOCLR_CLEANUP();
-    if(ap_records) {
+  
+    if(ap_records)
+    {
         platform_free(ap_records);
     }
+  
     NANOCLR_CLEANUP_END();
 }
 
