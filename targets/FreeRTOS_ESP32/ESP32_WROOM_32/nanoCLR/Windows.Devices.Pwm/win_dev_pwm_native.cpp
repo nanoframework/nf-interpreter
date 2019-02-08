@@ -48,7 +48,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
     Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeInit___VOID,
     Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeSetActiveDutyCyclePercentage___VOID__U4,
     Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeSetPolarity___VOID__U1,
@@ -60,7 +59,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Pwm =
 {
     "Windows.Devices.Pwm", 
-    0x84B1FBF8,
+    0x75280B26,
     method_lookup,
-    { 1, 1, 2, 2 }
+    { 1, 1, 3, 1 }
 };

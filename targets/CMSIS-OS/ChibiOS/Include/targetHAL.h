@@ -29,9 +29,13 @@
 
 #if !defined(BUILD_RTM)
 
-inline void HARD_Breakpoint() { };
+inline void HARD_Breakpoint() 
+{
+    __BKPT(0);
+    while(true) { /*nop*/ }
+};
 
-#define HARD_BREAKPOINT()     HardFault_Handler()
+#define HARD_BREAKPOINT()     HARD_Breakpoint()
 
 // #if defined(_DEBUG)
 // #define DEBUG_HARD_BREAKPOINT()     HARD_Breakpoint()

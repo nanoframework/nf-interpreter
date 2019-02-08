@@ -216,6 +216,9 @@ int  StoreApRecordsToString( uint8_t * pTarget, wifi_ap_record_t * apRecords, ui
 HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNativeScanReport___SZARRAY_U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+
+    // Temporary ap record storage
+    wifi_ap_record_t * ap_records = 0; 
     {
         CLR_RT_HeapBlock&   top = stack.PushValueAndClear();           
         CLR_RT_HeapBlock_Array* array;
@@ -229,11 +232,9 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNativeS
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // Allocate room for ap records
-        wifi_ap_record_t * ap_records = 0;
-
         if ( number != 0 )
         { 
+            // Allocate room for ap records
             ap_records = (wifi_ap_record_t *)platform_malloc(sizeof(wifi_ap_record_t) * number );
             if (ap_records == 0) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
 
@@ -256,10 +257,16 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNativeS
 
         // Store into returned uint8 array
         StoreApRecordsToString( buf, ap_records, number );
-
-        free(ap_records);
     }
-    NANOCLR_NOCLEANUP();
+  
+    NANOCLR_CLEANUP();
+  
+    if(ap_records)
+    {
+        platform_free(ap_records);
+    }
+  
+    NANOCLR_CLEANUP_END();
 }
 
 //

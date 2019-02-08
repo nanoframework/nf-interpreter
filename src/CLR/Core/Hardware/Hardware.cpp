@@ -115,7 +115,7 @@ void CLR_HW_Hardware::ProcessActivity()
 
             if(!CLR_EE_REBOOT_IS(ClrOnly))
             {
-                CLR_RT_ExecutionEngine::Reboot( true );
+                CLR_RT_ExecutionEngine::Reboot( false );
             }
         }
 #endif
