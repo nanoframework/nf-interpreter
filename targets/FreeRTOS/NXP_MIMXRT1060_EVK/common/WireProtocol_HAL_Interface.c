@@ -31,7 +31,6 @@ static bool WP_Port_Intitialised = false;
 static lpuart_rtos_handle_t handle;
 static struct _lpuart_handle t_handle;
 uint8_t background_buffer[256];
-const char *msg = "\r\nReceived!\r\n";
 
 lpuart_rtos_config_t lpuart_config = {
     .baudrate = 115200,
@@ -50,7 +49,6 @@ bool WP_Initialise()
     lpuart_config.base = LPUART1;
 
     LPUART_RTOS_Init(&handle, &t_handle, &lpuart_config);
-    LPUART_RTOS_Send(&handle, (uint8_t *)msg, strlen(msg));
     WP_Port_Intitialised = true;
  
     return true;
