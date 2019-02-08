@@ -23,6 +23,6 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 
 HAL_TARGET_CONFIGURATION  g_TargetConfiguration;
 
-// FIXME TODO
-uint32_t __nanoImage_start__ = 0;
-uint32_t __nanoImage_end__ = 0;
+// these addresses are the start and end address of flash region FLASH
+uint32_t __nanoImage_start__ = FLASH1_MEMORY_StartAddress;
+uint32_t __nanoImage_end__ = (FLASH1_MEMORY_StartAddress + FLASH1_MEMORY_Size);
