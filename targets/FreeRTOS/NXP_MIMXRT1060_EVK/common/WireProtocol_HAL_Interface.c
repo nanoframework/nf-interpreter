@@ -102,7 +102,7 @@ int WP_TransmitMessage(WP_Message* message)
     if(message->m_header.m_size && message->m_payload)
     {
         if (kStatus_Success !=
-                LPUART_RTOS_Send(&handle, (uint8_t *)&message->m_payload, message->m_header.m_size)) {
+                LPUART_RTOS_Send(&handle, (uint8_t *)message->m_payload, message->m_header.m_size)) {
                     return false;
                 }
     }
