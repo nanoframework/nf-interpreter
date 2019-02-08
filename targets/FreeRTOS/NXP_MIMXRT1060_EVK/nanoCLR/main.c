@@ -48,7 +48,7 @@ int main(void)
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();    
-
+    SCB_DisableDCache();
     CLR_SETTINGS clrSettings;
     (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
