@@ -12,14 +12,13 @@ void WP_Message_Initialize(WP_Message* a);
 void WP_Message_PrepareReception(WP_Message* a);
 void WP_Message_Process(WP_Message* a);
 
-void ReceiverThread(void const * argument)
+void* ReceiverThread(void* argument)
 {
     (void)argument;
 
     // loop forever
     while (1) 
     {
-
         WP_Message_Initialize(&inboundMessage);
         WP_Message_PrepareReception(&inboundMessage);
 

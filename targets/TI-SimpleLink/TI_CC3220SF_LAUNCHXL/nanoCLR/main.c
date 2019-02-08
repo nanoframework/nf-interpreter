@@ -19,11 +19,8 @@
 #include <WireProtocol_ReceiverThread.h>
 #include <string.h>
 
-extern void CLRStartupThread(void const * argument);
-
-
-extern void * mainThread(void *arg0);
-
+extern void * CLRStartupThread(void *arg0);
+extern void * ReceiverThread(void *arg0);
 
 //////////////////////////////
 #define SL_STOP_TIMEOUT         (200)
@@ -43,40 +40,65 @@ int main(void)
     pthread_t thread;
     pthread_attr_t pAttrs;
     struct sched_param priParam;
+
+    pthread_t receiverThread;
+    pthread_attr_t receiverThreadAttributes;
+    struct sched_param receiverThreadParams;
+
+    pthread_t nanoCLRThread;
+    pthread_attr_t nanoCLRThreadAttributes;
+    struct sched_param nanoCLRThreadParams;
+
+
     int retc;
-    int detachState;
 
     /* Call board init functions */
     Board_initGeneral();
 
-    /* Set priority and stack size attributes */
-    pthread_attr_init(&pAttrs);
-    priParam.sched_priority = 1;
+    GPIO_init();
+    UART_init();
+    SPI_init();
+    I2C_init();
 
-    detachState = PTHREAD_CREATE_DETACHED;
-    retc = pthread_attr_setdetachstate(&pAttrs, detachState);
+    // receiver thread
+    receiverThreadParams.sched_priority = 1;
+    retc = pthread_attr_setschedparam(&receiverThreadAttributes, &receiverThreadParams);
+    retc |= pthread_attr_setdetachstate(&receiverThreadAttributes, PTHREAD_CREATE_DETACHED);
+    retc |= pthread_attr_setstacksize(&receiverThreadAttributes, 2048);
+    if (retc != 0) {
+        /* failed to set attributes */
+        while (1) {}
+    }
+
+    retc = pthread_create(&thread, &receiverThreadAttributes, ReceiverThread, NULL);
     if(retc != 0)
     {
-        /* pthread_attr_setdetachstate() failed */
+        /* pthread_create() failed */
         while(1)
         {
             ;
         }
     }
 
-    pthread_attr_setschedparam(&pAttrs, &priParam);
-
-    retc |= pthread_attr_setstacksize(&pAttrs, THREADSTACKSIZE);
-    if(retc != 0)
-    {
-        /* pthread_attr_setstacksize() failed */
-        while(1)
-        {
-            ;
-        }
+    // CLR thread
+    nanoCLRThreadParams.sched_priority = 1;
+    retc = pthread_attr_setschedparam(&nanoCLRThreadAttributes, &nanoCLRThreadParams);
+    retc |= pthread_attr_setdetachstate(&nanoCLRThreadAttributes, PTHREAD_CREATE_DETACHED);
+    retc |= pthread_attr_setstacksize(&nanoCLRThreadAttributes, 15000);
+    if (retc != 0) {
+        /* failed to set attributes */
+        while (1) {}
     }
 
-    retc = pthread_create(&thread, &pAttrs, mainThread, NULL);
+    // CLR settings to launch CLR thread
+    CLR_SETTINGS clrSettings;
+    (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+
+    clrSettings.MaxContextSwitches         = 50;
+    clrSettings.WaitForDebugger            = false;
+    clrSettings.EnterDebuggerLoopAfterExit = false;
+
+    retc = pthread_create(&thread, &nanoCLRThreadAttributes, CLRStartupThread, &clrSettings);
     if(retc != 0)
     {
         /* pthread_create() failed */
@@ -310,10 +332,6 @@ void * mainThread(void *arg)
     pthread_attr_t pAttrs_spawn;
     struct sched_param priParam;
     struct timespec ts = {0};
-
-    GPIO_init();
-    SPI_init();
-    I2C_init();
 
     /* init Terminal, and print App name */
     //InitTerm();

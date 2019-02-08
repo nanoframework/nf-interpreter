@@ -7,7 +7,7 @@
 #include <nanoHAL_v2.h>
 #include <string.h>
 
-void CLRStartupThread(void const * argument)
+void* CLRStartupThread(void* argument)
 {
   CLR_SETTINGS* clrSettings = (CLR_SETTINGS*)argument;
   

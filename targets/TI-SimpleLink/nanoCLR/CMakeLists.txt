@@ -12,9 +12,9 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in"
 # append nanoHAL
 list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.cpp")
 
-# append target ChibiOS nanoCLR source files
-# list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_App_Interface.c)
-# list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_MonitorCommands.c)
+# append target nanoCLR source files
+list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_App_Interface.c)
+list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_MonitorCommands.c)
 list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/CLR_Startup_Thread.c") 
 list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetPAL.c") 
 

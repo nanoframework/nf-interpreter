@@ -2,8 +2,10 @@
 // Copyright (c) 2019 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
-#include <FreeRTOS.h>
 
+#include <FreeRTOS.h>
+#include <ti/drivers/UART.h>
+#include <board.h>
 #include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
@@ -22,120 +24,118 @@ bool WP_Initialise(COM_HANDLE port);
 // - serial port (UART/USART) 
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
-#if (HAL_USE_SERIAL == TRUE)
 
-static bool WP_Port_Intitialised = false;
-// static uart_port_t WP_Port = UART_NUM_0;
-
-// #define ESP32_UART_RXD_PINS {3,32,16}    
-// #define ESP32_UART_TXD_PINS {1,33,17}  
-// #define ESP32_UART_CTS_PINS {19,6,8}
-// #define ESP32_UART_RTS_PINS {22,11,7}
-
-
-// // Pins
-// static const char g_ESP32_Uart_RxD_Pins[] = ESP32_UART_RXD_PINS;
-// static const char g_ESP32_Uart_TxD_Pins[] = ESP32_UART_TXD_PINS;
-
+UART_Handle uart = NULL;
+UART_Params uartParams;
 
 bool WP_Initialise(COM_HANDLE port)
 {
     (void)port;
 
-    // if ( WP_Port > UART_NUM_2 ) return false;
- 
-    // uart_config_t uart_config = {
-    //     .baud_rate = 115200,                                 //baudrate
-    //     .data_bits = UART_DATA_8_BITS,                       //data bit mode
-    //     .parity    = UART_PARITY_DISABLE,                    //parity mode
-    //     .stop_bits = UART_STOP_BITS_1,                       //stop bit mode
-    //     .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,               //hardware flow control(cts/rts)
-    //     .rx_flow_ctrl_thresh = 120,                          //flow control threshold
-    // };
-    
-    // uart_param_config(WP_Port, &uart_config);
+    // Create a UART with data processing off
+    UART_Params_init(&uartParams);
+    uartParams.readTimeout = 500;
+    uartParams.writeDataMode = UART_DATA_BINARY;
+    uartParams.readDataMode = UART_DATA_BINARY;
+    uartParams.readReturnMode = UART_RETURN_FULL;
+    uartParams.readEcho = UART_ECHO_OFF;
+    uartParams.baudRate = 115200;
 
-    // uart_set_pin(WP_Port, g_ESP32_Uart_TxD_Pins[WP_Port], g_ESP32_Uart_RxD_Pins[WP_Port], UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-    
-    // // Setup UART driver(without UART queue)
-    // uart_driver_install(WP_Port, 1024 * 2, 512, 0, NULL, 0);
-    
-    WP_Port_Intitialised = true;
+    uart = UART_open(Board_UART0, &uartParams);
+
+    if (uart == NULL)
+    {
+        // UART_open() failed
+        while (1);
+    }
  
     return true;
 }
 
-
 int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
 {
-    // TODO: Initialise Port if not already done, Wire Protocol should be calling this directly at startup
-    //if (!WP_Port_Intitialised) WP_Initialise(WP_Port);
+    if(uart == NULL)
+    {
+        WP_Initialise(NULL);
+    }
 
     // save for latter comparison
     uint16_t requestedSize = *size;
 
-    // //int readData = 0;
-    // // sanity check for request of 0 size
-    // if(*size)
-    // {
-    //     //////////////////////////////////////////////////////////
-    //     //               PORTING CHANGE REQUIRED HERE           //
-    //     //////////////////////////////////////////////////////////
-    //     // change here to read (size) bytes from the input stream
-    //     // preferably with read timeout and being able to check 
-    //     // if the requested number of bytes was actually read
-    //     //////////////////////////////////////////////////////////
+    //int readData = 0;
+    // sanity check for request of 0 size
+    if(*size)
+    {
+        //////////////////////////////////////////////////////////
+        //               PORTING CHANGE REQUIRED HERE           //
+        //////////////////////////////////////////////////////////
+        // change here to read (size) bytes from the input stream
+        // preferably with read timeout and being able to check 
+        // if the requested number of bytes was actually read
+        //////////////////////////////////////////////////////////
         
-    //     // non blocking read from serial port with 100ms timeout
-    //     volatile size_t read = uart_read_bytes( WP_Port, ptr, (uint32_t)requestedSize, (TickType_t) 100 / portTICK_PERIOD_MS);
+        // non blocking read from serial port with 100ms timeout
+        size_t read = UART_read(uart, ptr, requestedSize);
 
-    //     ptr  += read;
-    //     *size -= read;
+        ptr  += read;
+        *size -= read;
 
-    //     // check if the requested read matches the actual read count
-    //     return (requestedSize == read);
-    // }
+        // check if the requested read matches the actual read count
+        return (requestedSize == read);
+    }
 
     return true;
 }
 
-#else
-#error "Wire Protocol needs a transport."
-#endif
-
-#if (HAL_USE_SERIAL == TRUE)
-
 int WP_TransmitMessage(WP_Message* message)
 {
+    uint32_t writeResult;
+    bool operationResult = false;
+
+    if(uart == NULL)
+    {
+        WP_Initialise(NULL);
+    }
+
     ///////////////////////////////////////////////////////////
     //              PORTING CHANGE REQUIRED HERE             //
     ///////////////////////////////////////////////////////////
     // change here to write (size) bytes to the output stream
     // preferably with timeout and being able to check 
-    // if the write was sucessfull or at least buffered
+    // if the write was successfull or at least buffered
     //////////////////////////////////////////////////////////
 
-    //if (!WP_Port_Intitialised) WP_Initialise(WP_Port);
+    TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
 
-    //TODO Check if timeout required
-    // write header to output stream 
-    
-    //if ( uart_write_bytes( WP_Port, (const char*)&message->m_header, sizeof(message->m_header) ) != sizeof(message->m_header)) return false;
+    // write header to uart
+    writeResult = UART_write(uart, (const void *)&message->m_header, sizeof(message->m_header));
 
-    // if there is anything on the payload send it to the output stream
-    if(message->m_header.m_size && message->m_payload)
+    if(writeResult == sizeof(message->m_header))
     {
-        ///////////////////////////////////////////////////////////
-        //              PORTING CHANGE REQUIRED HERE             //
-        ///////////////////////////////////////////////////////////
-        // see description above
-        //////////////////////////////////////////////////////////
-        //if (uart_write_bytes(WP_Port, (const char*)message->m_payload, message->m_header.m_size ) != (int)message->m_header.m_size ) return false;
+        operationResult = true;
+
+        // if there is anything on the payload send it to the output stream
+        if(message->m_header.m_size && message->m_payload)
+        {
+            ///////////////////////////////////////////////////////////
+            //              PORTING CHANGE REQUIRED HERE             //
+            ///////////////////////////////////////////////////////////
+            // see description above
+            //////////////////////////////////////////////////////////
+
+            // reset flag
+            operationResult = false;
+
+            writeResult = UART_write(uart, (const void *)message->m_payload, message->m_header.m_size);
+
+            if(writeResult == message->m_header.m_size)
+            {
+                operationResult = true;
+
+                TRACE0( TRACE_ERRORS, "TXMSG: OK\n");                    
+            }
+        }
     }
 
-    return true;    
+    return operationResult;
 }
-
-#else
-#error "Wire Protocol needs a transport."
-#endif
