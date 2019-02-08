@@ -32,7 +32,7 @@ bool BlockStorageStream_Initialize(BlockStorageStream* stream, unsigned int bloc
     else if(blockUsage == StorageUsage_DEPLOYMENT)
     {
         // set BaseAddress to the start of the region
-        stream->BaseAddress = (unsigned int)__deployment_start__;
+        stream->BaseAddress = (unsigned int)&__deployment_start__;
         // set Length to the region size 
         // need to cast the pointers to make sure the compiler implements the correct math
         stream->Length = ((uint32_t)&__deployment_end__) - ((uint32_t)&__deployment_start__);
