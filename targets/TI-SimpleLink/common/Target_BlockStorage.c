@@ -5,7 +5,7 @@
 
 #include <nanoPAL_BlockStorage.h>
 #include <targetHAL.h>
-// #include <Target_BlockStorage_ESP32FlashDriver.h>
+#include <Target_BlockStorage_CC32xxFlashDriver.h>
 
 ///////////////////////////////////////////////////
 // BlockStream 
@@ -33,7 +33,7 @@ bool BlockStorageStream_Initialize(BlockStorageStream* stream, unsigned int bloc
     {
         // set BaseAddress to the start of the region
         // FIXME TODO
-        //stream->BaseAddress = (unsigned int)g_esp32_flash_start_ptr;
+        //stream->BaseAddress = (unsigned int)g_CC32xx_flash_start_ptr;
         // set Length to the region size 
         // need to cast the pointers to make sure the compiler implements the correct math
         // FIXME TODO
@@ -51,24 +51,23 @@ extern struct BlockStorageDevice    Device_BlockStorage;
 extern struct MEMORY_MAPPED_NOR_BLOCK_CONFIG   Device_BlockStorageConfig;
 BlockStorageList             BlockStorage;
 
-// map here the Block Storage Interface to the ESP32 driver
-IBlockStorageDevice ESP32Flash_BlockStorageInterface =
+// map here the Block Storage Interface to the CC32xx driver
+IBlockStorageDevice CC32xxFlash_BlockStorageInterface =
 {
-    // FIXME TODO                          
-    // &Esp32FlashDriver_InitializeDevice,
-    // &Esp32FlashDriver_UninitializeDevice,
-    // &Esp32FlashDriver_GetDeviceInfo,
-    // &Esp32FlashDriver_Read,
-    // &Esp32FlashDriver_Write,
-    // NULL,
-    // &Esp32FlashDriver_IsBlockErased,
-    // &Esp32FlashDriver_EraseBlock,
-    // &Esp32FlashDriver_SetPowerState
+    &CC32xxFlashDriver_InitializeDevice,
+    &CC32xxFlashDriver_UninitializeDevice,
+    &CC32xxFlashDriver_GetDeviceInfo,
+    &CC32xxFlashDriver_Read,
+    &CC32xxFlashDriver_Write,
+    NULL,
+    &CC32xxFlashDriver_IsBlockErased,
+    &CC32xxFlashDriver_EraseBlock,
+    &CC32xxFlashDriver_SetPowerState
 };
 
 void BlockStorage_AddDevices()
 {
-    BlockStorageList_AddDevice( (BlockStorageDevice*)&Device_BlockStorage, &ESP32Flash_BlockStorageInterface, &Device_BlockStorageConfig, false);
+    BlockStorageList_AddDevice( (BlockStorageDevice*)&Device_BlockStorage, &CC32xxFlash_BlockStorageInterface, &Device_BlockStorageConfig, false);
 }
 
 bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress)
