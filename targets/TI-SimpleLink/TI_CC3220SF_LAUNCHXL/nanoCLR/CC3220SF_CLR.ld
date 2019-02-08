@@ -139,4 +139,7 @@ SECTIONS {
     } > REGION_STACK AT> REGION_STACK
 }
 
+/* nanoCLR rules inclusion.*/
+INCLUDE rules_clr.ld
+
 ENTRY(resetISR)

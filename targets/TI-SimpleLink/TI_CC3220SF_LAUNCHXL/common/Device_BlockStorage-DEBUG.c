@@ -1,38 +1,14 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
-// 32kB blocks
 const BlockRange BlockRange1[] =
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 0 },            // 08000000 nanoBooter
-
-    ///////////////////////////////////////////////////////////////////////////////////////
-    // because this target is using a configuration block need to add the
-    // configuration manager files to the CMake and call ConfigurationManager_Initialize()
-    // in nanoBooter so the configuration can be managed when in booter mode
-    ///////////////////////////////////////////////////////////////////////////////////////
-    { BlockRange_BLOCKTYPE_CONFIG    ,   1, 1 },            // 08008000 configuration block
-    ///////////////////////////////////////////////////////////////////////////////////////
-    
-    { BlockRange_BLOCKTYPE_CODE      ,   2, 3 }             // 08010000 nanoCLR
-};
-
-//128kB block
-const BlockRange BlockRange2[] =
-{
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 }             // 08020000 nanoCLR          
-};
-
-// 256kB blocks
-const BlockRange BlockRange3[] =
-{
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 1 },            // 08040000 nanoCLR  
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   2, 6 }             // 080C0000 deployment  
+    { BlockRange_BLOCKTYPE_DEPLOYMENT    ,   1, 1 },            // 08008000 configuration block
 };
 
 const BlockRegionInfo BlockRegions[] = 
@@ -44,23 +20,6 @@ const BlockRegionInfo BlockRegions[] =
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
     },
-
-    {
-        0x08020000,                         // start address for block region
-        1,                                  // total number of blocks in this region
-        0x20000,                            // total number of bytes per block
-        ARRAYSIZE_CONST_EXPR(BlockRange2),
-        BlockRange2,
-    },
-
-    {
-        0x08040000,                         // start address for block region
-        7,                                  // total number of blocks in this region
-        0x40000,                            // total number of bytes per block
-        ARRAYSIZE_CONST_EXPR(BlockRange3),
-        BlockRange3,
-    },
-
 };
 
 const DeviceBlockInfo Device_BlockInfo =

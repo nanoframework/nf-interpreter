@@ -1130,7 +1130,13 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
         # can't continue
         message(FATAL_ERROR "\n\nSorry but support for ${TI_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
     endif()
-    
+
+    # add target TI SimpliLink dirs
+    add_subdirectory(targets/TI-SimpleLink/common)
+    add_subdirectory(targets/TI-SimpleLink/Include)
+    add_subdirectory(targets/TI-SimpleLink/nanoCLR)
+
+
     if("${TARGET_SERIES}" STREQUAL "CC32xx")
         
         # CC32xx series is using TI SimpleLink CC32xx SDK and FreeRTOS

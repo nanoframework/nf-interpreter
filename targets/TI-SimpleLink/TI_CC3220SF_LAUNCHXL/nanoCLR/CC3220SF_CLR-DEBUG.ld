@@ -139,4 +139,10 @@ SECTIONS {
     } > REGION_STACK AT> REGION_STACK
 }
 
+/* RAM region to be used for the nanoFramework CLR managed heap.*/
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", SRAM);
+
+/* nanoCLR rules inclusion.*/
+INCLUDE rules_clr.ld
+
 ENTRY(resetISR)

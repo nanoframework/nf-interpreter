@@ -22,3 +22,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 };
 
 HAL_TARGET_CONFIGURATION  g_TargetConfiguration;
+
+// FIXME TODO
+uint32_t __nanoImage_start__ = 0;
+uint32_t __nanoImage_end__ = 0;

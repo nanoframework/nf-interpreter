@@ -1,5 +1,6 @@
-#include <stdint.h>
 
+#include <stdint.h>
+#include <nanoCLR_Application.h>
 /* POSIX Header files */
 #include <pthread.h>
 
@@ -12,6 +13,14 @@
 
 /* Example/Board Header files */
 #include "Board.h"
+
+#include <targetHAL.h>
+#include <nanoCLR_Application.h>
+#include <WireProtocol_ReceiverThread.h>
+#include <string.h>
+
+extern void CLRStartupThread(void const * argument);
+
 
 extern void * mainThread(void *arg0);
 

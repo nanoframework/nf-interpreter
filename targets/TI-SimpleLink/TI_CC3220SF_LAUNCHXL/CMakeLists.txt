@@ -5,27 +5,23 @@
 
 cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
-# set(CMAKE_ASM_SOURCE_FILE_EXTENSIONS sm4g)
 
 # add header files with common OS definitions and board definitions specific for each image
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
-
-configure_file("${CMAKE_SOURCE_DIR}/CMake/TI_SimpleLink_target_os.h.in"
-                "${CMAKE_BINARY_DIR}/targets/TI-SimpleLink/TI_CC3220SF_LAUNCHXL/target_os.h" @ONLY)
  
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(BuildUtils REQUIRED)
 find_package(TI_SimpleLink REQUIRED)
-# find_package(WireProtocol REQUIRED)
+find_package(WireProtocol REQUIRED)
 
 # packages for nanoFramework libraries
 #######################################
 # mandatory 
-# find_package(NF_CoreCLR REQUIRED)
+find_package(NF_CoreCLR REQUIRED)
 
 #######################################
 # optional
@@ -38,7 +34,7 @@ endif()
 
 #######################################
 
-# add_subdirectory("common")
+add_subdirectory("common")
 add_subdirectory("nanoCLR")
 
 #######################
@@ -48,52 +44,54 @@ add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
 
-    # "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
 
-    # ${COMMON_PROJECT_SOURCES}
+    ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
     
+    ${TARGET_TI_SimpleLink_COMMON_SOURCES}
+
     ${TARGET_TI_SimpleLink_NANOCLR_SOURCES}
 
     ${TI_SimpleLink_SOURCES}
 
-    # ${WireProtocol_SOURCES}
+    ${WireProtocol_SOURCES}
 
     # sources for nanoFramework libraries
-    # "${NF_CoreCLR_SOURCES}"
-    # "${NF_Debugger_SOURCES}"
-    # "${NF_Diagnostics_SOURCES}"
+    "${NF_CoreCLR_SOURCES}"
+    "${NF_Debugger_SOURCES}"
+    "${NF_Diagnostics_SOURCES}"
 
     # sources for nanoFramework APIs
-    # "${TARGET_NANO_APIS_SOURCES}"
+    "${TARGET_NANO_APIS_SOURCES}"
 )
 
 # add dependency from TI SimpleLink CC32xx SDK and FreeRTOS (this is required to make sure that those repos are downloaded before the build starts)
-add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC32xxSDK)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC32xxSDK)
 
 # include common directories
 include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/common
-    ${PROJECT_SOURCE_DIR}/src/CLR/Core
-    ${PROJECT_SOURCE_DIR}/src/CLR/Include
-    ${PROJECT_SOURCE_DIR}/src/HAL/Include
-    ${PROJECT_SOURCE_DIR}/src/PAL/Include
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/common"
+    "${PROJECT_SOURCE_DIR}/src/CLR/Core"
+    "${PROJECT_SOURCE_DIR}/src/CLR/Include"
+    "${PROJECT_SOURCE_DIR}/src/HAL/Include"
+    "${PROJECT_SOURCE_DIR}/src/PAL/Include"
 
-    ${WireProtocol_INCLUDE_DIRS}
-    ${TI_SimpleLink_INCLUDE_DIRS}
+    "${WireProtocol_INCLUDE_DIRS}"
+    "${TI_SimpleLink_INCLUDE_DIRS}"
 
-    ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
+    "${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}"
 )
 
 # include directories for nanoCLR
 target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
-     ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
+    "${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR"
 
-     ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS}
+    "${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS}"
 
     # directories for nanoFramework libraries
     "${NF_CoreCLR_INCLUDE_DIRS}"
@@ -123,7 +121,7 @@ nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 # add other linker flags
 ###########################################################
 # the size of CRT heap stacks is defined here
-# set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x1800")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__crt_heap_size__=0x0")
 
 # generate output files
 nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)

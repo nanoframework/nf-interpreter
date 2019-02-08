@@ -33,4 +33,6 @@
 #define PLATFORM_HAS_RNG       TRUE
 /////////////////////////////////////
 
+#define OEMSYSTEMINFOSTRING "nanoCLR running @ @TI_BOARD@ built with TI SL CC32xx SDK v2.40.01.01"
+
 #endif /* _TARGET_COMMON_H_ */
