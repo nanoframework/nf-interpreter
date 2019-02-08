@@ -8,17 +8,29 @@
 
 const BlockRange BlockRange1[] =
 {
-    { BlockRange_BLOCKTYPE_DEPLOYMENT    ,   1, 1 },            // 08008000 configuration block
+    { BlockRange_BLOCKTYPE_CODE    ,   0, 0 },            // 0x01000800 nanoCLR
+};
+
+const BlockRange BlockRange2[] =
+{
+    { BlockRange_BLOCKTYPE_DEPLOYMENT    ,   0, 0 },      // 0x08000000 nanoCLR
 };
 
 const BlockRegionInfo BlockRegions[] = 
 {
     {
-        0x08000000,                         // start address for block region
-        4,                                  // total number of blocks in this region
-        0x8000,                             // total number of bytes per block
+        0x01000800,                         // start address for block region
+        1,                                  // total number of blocks in this region
+        0x0FF800,                           // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
+    },
+    {
+        0x08000000,                         // start address for block region
+        1,                                  // total number of blocks in this region
+        0x0FF800,                           // total number of bytes per block
+        ARRAYSIZE_CONST_EXPR(BlockRange1),
+        BlockRange2,
     },
 };
 
