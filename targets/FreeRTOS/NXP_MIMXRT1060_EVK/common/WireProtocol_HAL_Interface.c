@@ -48,10 +48,14 @@ bool WP_Initialise()
     lpuart_config.srcclk = BOARD_DebugConsoleSrcFreq();
     lpuart_config.base = LPUART1;
 
-    LPUART_RTOS_Init(&handle, &t_handle, &lpuart_config);
-    WP_Port_Intitialised = true;
+    int ret = LPUART_RTOS_Init(&handle, &t_handle, &lpuart_config);
+    WP_Port_Intitialised = (ret == 0);
  
-    return true;
+    if (!WP_Port_Intitialised) {
+        vTaskSuspend(NULL);
+    }
+    
+    return WP_Port_Intitialised;
 }
 
 
