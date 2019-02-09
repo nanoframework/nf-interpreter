@@ -101,6 +101,8 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/common/utilities
     ${CMAKE_CURRENT_SOURCE_DIR}/common/xip
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+
     ${PROJECT_SOURCE_DIR}/src/CLR/Core
     ${PROJECT_SOURCE_DIR}/src/CLR/Include
     ${PROJECT_SOURCE_DIR}/src/HAL/Include
