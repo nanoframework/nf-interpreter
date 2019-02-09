@@ -14,6 +14,10 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+//configure heap memory
+__attribute__((section(".noinit.$SRAM_OC.ucHeap")))
+uint8_t ucHeap[configTOTAL_HEAP_SIZE];
+
 #define LED_GPIO GPIO1
 #define LED_GPIO_PIN (9U)
 
