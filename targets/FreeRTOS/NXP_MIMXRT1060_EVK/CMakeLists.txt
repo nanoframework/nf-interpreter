@@ -57,7 +57,7 @@ add_executable(
 
     ${FREERTOS_SOURCES}
 
-    #${WireProtocol_SOURCES}
+    ${WireProtocol_SOURCES}
 )
 
 #######################
