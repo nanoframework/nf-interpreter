@@ -30,7 +30,7 @@ bool WP_Initialise();
 static bool WP_Port_Intitialised = false;
 static lpuart_rtos_handle_t handle;
 static struct _lpuart_handle t_handle;
-uint8_t background_buffer[256];
+uint8_t background_buffer[1024];
 
 lpuart_rtos_config_t lpuart_config = {
     .baudrate = 115200,
