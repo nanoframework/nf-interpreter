@@ -8,6 +8,8 @@
 #include "fsl_cache.h"
 #include "fsl_flexspi.h"
 #include "string.h"
+#include <nanoPAL_BlockStorage.h>
+#include "targetHAL.h"
 #include <Target_BlockStorage_iMXRTFlashDriver.h>
 
 bool iMXRTFlexSPIDriver_InitializeDevice(void *context) {
@@ -46,8 +48,9 @@ bool iMXRTFlexSPIDriver_Write(void *context, ByteAddress startAddress,
   (void)context;
 
   // Read-modify-write is used for FAT filesystems only
-  if (readModifyWrite)
+  if (readModifyWrite) {
     return false;
+  }
 
   for (uint32_t i = 0; i < numBytes / FLASH_PAGE_SIZE; i++) {
 
@@ -89,13 +92,13 @@ bool iMXRTFlexSPIDriver_IsBlockErased(void *context, ByteAddress blockAddress,
 
 bool iMXRTFlexSPIDriver_EraseBlock(void *context, ByteAddress address) {
   (void)context;
-  status_t status = flexspi_nor_flash_erase_sector(FLEXSPI, address);
+  status_t status = flexspi_nor_flash_erase_sector(FLEXSPI, address - __deployment_start__);
 
   if (status != kStatus_Success) {
     return false;
   }
 
-  DCACHE_CleanInvalidateByRange(FlexSPI_AMBA_BASE + address, FLASH_PAGE_SIZE);
+  DCACHE_CleanInvalidateByRange(address, SECTOR_SIZE);
   return true;
 }
 
