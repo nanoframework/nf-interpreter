@@ -55,17 +55,16 @@ bool iMXRTFlexSPIDriver_Write(void *context, ByteAddress startAddress,
   for (uint32_t i = 0; i < numBytes / FLASH_PAGE_SIZE; i++) {
 
     status_t status = flexspi_nor_flash_page_program(
-        FLEXSPI, startAddress + i * FLASH_PAGE_SIZE,
+        FLEXSPI, startAddress - __deployment_start__ + i * FLASH_PAGE_SIZE,
         (void *)buffer + i * FLASH_PAGE_SIZE);
 
     if (status != kStatus_Success) {
       return false;
     }
 
-    DCACHE_CleanInvalidateByRange(FlexSPI_AMBA_BASE + startAddress +
-                                      i * FLASH_PAGE_SIZE,
-                                  FLASH_PAGE_SIZE);
   }
+  DCACHE_CleanInvalidateByRange(startAddress, numBytes);
+
   return true;
 }
 
