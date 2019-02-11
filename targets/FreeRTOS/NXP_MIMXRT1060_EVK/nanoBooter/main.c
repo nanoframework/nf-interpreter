@@ -17,6 +17,7 @@
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoPAL_BlockStorage.h>
+#include "Target_BlockStorage_iMXRTFlashDriver.h"
 
 //configure heap memory
 __attribute__((section(".noinit.$SRAM_OC.ucHeap")))
@@ -47,6 +48,14 @@ int main(void)
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
+
+    SCB_DisableDCache();
+
+    for (volatile uint32_t i = 0; i < 100000000; i++) {
+        __asm("nop");
+    }
+
+    iMXRTFlexSPIDriver_InitializeDevice(NULL);
 
     // initialize block storage device
     // in CLR this is called in nanoHAL_Initialize()
