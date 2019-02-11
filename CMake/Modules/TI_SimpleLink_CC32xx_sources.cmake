@@ -133,6 +133,45 @@ foreach(SRC_FILE ${DriversLibrary_SRCS})
     list(APPEND TI_SimpleLink_SOURCES ${DriversLibrary_SCR_FILE})
 endforeach()
 
+# source files for SimpleLink 
+set(SimpleLink_SRCS
+
+    device.c
+    driver.c
+    flowcont.c
+    fs.c
+    netapp.c
+    netcfg.c
+    netutil.c
+    nonos.c
+    sl_socket.c
+    spawn.c
+    wlan.c
+    cc_pal.c
+    eventreg.c
+    wlanconfig.c
+
+    # eventreg.c
+
+)
+
+foreach(SRC_FILE ${SimpleLink_SRCS})
+    set(SimpleLink_SCR_FILE SRC_FILE -NOTFOUND)
+    find_file(SimpleLink_SCR_FILE ${SRC_FILE}
+        PATHS
+
+        #drivers library
+        "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/drivers/net/wifi"
+        "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/drivers/net/wifi/porting"
+        "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/drivers/net/wifi/source"
+
+        CMAKE_FIND_ROOT_PATH_BOTH
+    )
+    # message("${SRC_FILE} >> ${SimpleLink_SCR_FILE}") # debug helper
+    list(APPEND TI_SimpleLink_SOURCES ${SimpleLink_SCR_FILE})
+endforeach()
+
+
 # other source files
 set(Other_SRCS
     
