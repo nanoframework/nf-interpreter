@@ -75,6 +75,7 @@ __nfweak bool Target_ConfigUpdateRequiresErase() { return true; };
 extern int HeapBegin;
 extern int HeapEnd;
 
+extern uint32_t __flash_start__;
 extern uint32_t __nanoImage_start__;
 extern uint32_t __nanoImage_end__;
 extern uint32_t __nanoConfig_start__;

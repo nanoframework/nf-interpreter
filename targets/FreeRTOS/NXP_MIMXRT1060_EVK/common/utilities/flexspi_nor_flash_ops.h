@@ -36,6 +36,7 @@
  * Prototypes
  ******************************************************************************/
 /*${prototype:start}*/
+__attribute__ ((section(".ramfunc.$RAM2")))
 static inline void flexspi_clock_init(void)
 {
     CLOCK_SetMux(kCLOCK_FlexspiMux, 0x2); /* Choose PLL2 PFD2 clock as flexspi source clock. 396M */

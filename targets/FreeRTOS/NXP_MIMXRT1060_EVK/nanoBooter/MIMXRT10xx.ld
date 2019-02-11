@@ -46,6 +46,7 @@ MEMORY
   __top_BOARD_SDRAM = 0x80000000 + 0x2000000 ; /* 32M bytes */  
   __top_RAM4 = 0x80000000 + 0x2000000 ; /* 32M bytes */  
 
+__flash_start__         = ORIGIN(BOARD_FLASH);
 __nanoImage_start__     = ORIGIN(BOARD_FLASH);
 __nanoImage_size__      = LENGTH(BOARD_FLASH);
 __nanoImage_end__       = __nanoImage_start__ + __nanoImage_size__;

@@ -12,6 +12,9 @@
 #include "targetHAL.h"
 #include <Target_BlockStorage_iMXRTFlashDriver.h>
 
+#include "FreeRTOS.h"
+
+__attribute__ ((section(".ramfunc.$RAM2")))
 bool iMXRTFlexSPIDriver_InitializeDevice(void *context) {
   (void)context;
 
@@ -54,10 +57,11 @@ bool iMXRTFlexSPIDriver_Write(void *context, ByteAddress startAddress,
 
   for (uint32_t i = 0; i < numBytes / FLASH_PAGE_SIZE; i++) {
 
+    portENTER_CRITICAL();
     status_t status = flexspi_nor_flash_page_program(
-        FLEXSPI, startAddress - __deployment_start__ + i * FLASH_PAGE_SIZE,
+        FLEXSPI, startAddress - (uint32_t)&__flash_start__ + i * FLASH_PAGE_SIZE,
         (void *)buffer + i * FLASH_PAGE_SIZE);
-
+    portEXIT_CRITICAL();
     if (status != kStatus_Success) {
       return false;
     }
@@ -91,8 +95,9 @@ bool iMXRTFlexSPIDriver_IsBlockErased(void *context, ByteAddress blockAddress,
 
 bool iMXRTFlexSPIDriver_EraseBlock(void *context, ByteAddress address) {
   (void)context;
-  status_t status = flexspi_nor_flash_erase_sector(FLEXSPI, address - __deployment_start__);
-
+  portENTER_CRITICAL();
+  status_t status = flexspi_nor_flash_erase_sector(FLEXSPI, address - (uint32_t)&__flash_start__);
+  portEXIT_CRITICAL();
   if (status != kStatus_Success) {
     return false;
   }
