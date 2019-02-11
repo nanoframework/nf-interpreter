@@ -150,5 +150,5 @@ const char* HAL_Time_CurrentDateTimeToString()
 
 uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
 {
-    return ticks * portTICK_PERIOD_MS / 1000;
+    return ticks * portTICK_PERIOD_MS;
 }
