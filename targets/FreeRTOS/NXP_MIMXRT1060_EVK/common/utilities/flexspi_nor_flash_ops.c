@@ -35,8 +35,7 @@ flexspi_device_config_t deviceconfig = {
     .AHBWriteWaitUnit = kFLEXSPI_AhbWriteWaitUnit2AhbCycle,
     .AHBWriteWaitInterval = 0,
 };
-
-const uint32_t customLUT[CUSTOM_LUT_LENGTH] = {
+uint32_t customLUT[CUSTOM_LUT_LENGTH] = {
         /* Normal read mode -SDR */
         [4 * NOR_CMD_LUT_SEQ_IDX_READ_NORMAL] =
             FLEXSPI_LUT_SEQ(kFLEXSPI_Command_SDR, kFLEXSPI_1PAD, 0x03, kFLEXSPI_Command_RADDR_SDR, kFLEXSPI_1PAD, 0x18),
@@ -108,6 +107,7 @@ const uint32_t customLUT[CUSTOM_LUT_LENGTH] = {
 /*******************************************************************************
  * Code
  ******************************************************************************/
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t flexspi_nor_write_enable(FLEXSPI_Type *base, uint32_t baseAddr)
 {
     flexspi_transfer_t flashXfer;
@@ -125,6 +125,7 @@ status_t flexspi_nor_write_enable(FLEXSPI_Type *base, uint32_t baseAddr)
     return status;
 }
 
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t flexspi_nor_wait_bus_busy(FLEXSPI_Type *base)
 {
     /* Wait status ready. */
@@ -177,6 +178,7 @@ status_t flexspi_nor_wait_bus_busy(FLEXSPI_Type *base)
     return status;
 }
 
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t flexspi_nor_enable_quad_mode(FLEXSPI_Type *base)
 {
     flexspi_transfer_t flashXfer;
@@ -211,6 +213,7 @@ status_t flexspi_nor_enable_quad_mode(FLEXSPI_Type *base)
     return status;
 }
 
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t flexspi_nor_flash_erase_sector(FLEXSPI_Type *base, uint32_t address)
 {
     status_t status;
@@ -247,6 +250,7 @@ status_t flexspi_nor_flash_erase_sector(FLEXSPI_Type *base, uint32_t address)
     return status;
 }
 
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t flexspi_nor_flash_page_program(FLEXSPI_Type *base, uint32_t dstAddr, const uint32_t *src)
 {
     status_t status;
@@ -280,6 +284,7 @@ status_t flexspi_nor_flash_page_program(FLEXSPI_Type *base, uint32_t dstAddr, co
     return status;
 }
 
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t flexspi_nor_get_vendor_id(FLEXSPI_Type *base, uint8_t *vendorId)
 {
     uint32_t temp;
@@ -299,6 +304,7 @@ status_t flexspi_nor_get_vendor_id(FLEXSPI_Type *base, uint8_t *vendorId)
     return status;
 }
 
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t flexspi_nor_erase_chip(FLEXSPI_Type *base)
 {
     status_t status;
@@ -330,6 +336,7 @@ status_t flexspi_nor_erase_chip(FLEXSPI_Type *base)
     return status;
 }
 
+__attribute__ ((section(".ramfunc.$RAM2")))
 void flexspi_nor_flash_init(FLEXSPI_Type *base)
 {
     flexspi_config_t config;

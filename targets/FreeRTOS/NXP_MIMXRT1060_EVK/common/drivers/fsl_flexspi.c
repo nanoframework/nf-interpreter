@@ -97,7 +97,7 @@ static void *s_flexspiHandle[ARRAY_SIZE(s_flexspiBases)];
 /*******************************************************************************
  * Code
  ******************************************************************************/
-
+__attribute__ ((section(".ramfunc.$RAM2")))
 uint32_t FLEXSPI_GetInstance(FLEXSPI_Type *base)
 {
     uint32_t instance;
@@ -116,6 +116,7 @@ uint32_t FLEXSPI_GetInstance(FLEXSPI_Type *base)
     return instance;
 }
 
+__attribute__ ((section(".ramfunc.$RAM2")))
 static uint32_t FLEXSPI_ConfigureDll(FLEXSPI_Type *base, flexspi_device_config_t *config)
 {
     bool isUnifiedConfig = true;
@@ -170,6 +171,7 @@ static uint32_t FLEXSPI_ConfigureDll(FLEXSPI_Type *base, flexspi_device_config_t
     return flexspiDllValue;
 }
 
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t FLEXSPI_CheckAndClearError(FLEXSPI_Type *base, uint32_t status)
 {
     status_t result = kStatus_Success;
@@ -216,6 +218,7 @@ status_t FLEXSPI_CheckAndClearError(FLEXSPI_Type *base, uint32_t status)
  * param base FLEXSPI peripheral base address.
  * param config FLEXSPI configure structure.
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 void FLEXSPI_Init(FLEXSPI_Type *base, const flexspi_config_t *config)
 {
     uint32_t configValue = 0;
@@ -300,6 +303,7 @@ void FLEXSPI_Init(FLEXSPI_Type *base, const flexspi_config_t *config)
  *
  * param config FLEXSPI configuration structure.
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 void FLEXSPI_GetDefaultConfig(flexspi_config_t *config)
 {
     /* Initializes the configure structure to zero. */
@@ -339,6 +343,7 @@ void FLEXSPI_GetDefaultConfig(flexspi_config_t *config)
  * Clears the FLEXSPI state and  FLEXSPI module registers.
  * param base FLEXSPI peripheral base address.
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 void FLEXSPI_Deinit(FLEXSPI_Type *base)
 {
     /* Reset peripheral. */
@@ -356,6 +361,7 @@ void FLEXSPI_Deinit(FLEXSPI_Type *base)
  * param config Flash configuration parameters.
  * param port FLEXSPI Operation port.
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 void FLEXSPI_SetFlashConfig(FLEXSPI_Type *base, flexspi_device_config_t *config, flexspi_port_t port)
 {
     uint32_t configValue = 0;
@@ -435,6 +441,7 @@ void FLEXSPI_SetFlashConfig(FLEXSPI_Type *base, flexspi_device_config_t *config,
 * param cmd Command sequence array.
 * param count Number of sequences.
 */
+__attribute__ ((section(".ramfunc.$RAM2")))
 void FLEXSPI_UpdateLUT(FLEXSPI_Type *base, uint32_t index, const uint32_t *cmd, uint32_t count)
 {
     assert(index < 64U);
@@ -473,6 +480,7 @@ void FLEXSPI_UpdateLUT(FLEXSPI_Type *base, uint32_t index, const uint32_t *cmd, 
  * retval kStatus_FLEXSPI_IpCommandSequenceError IP command sequencen error detected
  * retval kStatus_FLEXSPI_IpCommandGrantTimeout IP command grant timeout detected
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t FLEXSPI_WriteBlocking(FLEXSPI_Type *base, uint32_t *buffer, size_t size)
 {
     uint8_t txWatermark = ((base->IPTXFCR & FLEXSPI_IPTXFCR_TXWMRK_MASK) >> FLEXSPI_IPTXFCR_TXWMRK_SHIFT) + 1;
@@ -532,6 +540,7 @@ status_t FLEXSPI_WriteBlocking(FLEXSPI_Type *base, uint32_t *buffer, size_t size
  * retval kStatus_FLEXSPI_IpCommandSequenceError IP command sequencen error detected
  * retval kStatus_FLEXSPI_IpCommandGrantTimeout IP command grant timeout detected
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t FLEXSPI_ReadBlocking(FLEXSPI_Type *base, uint32_t *buffer, size_t size)
 {
     uint8_t rxWatermark = ((base->IPRXFCR & FLEXSPI_IPRXFCR_RXWMRK_MASK) >> FLEXSPI_IPRXFCR_RXWMRK_SHIFT) + 1;
@@ -611,6 +620,7 @@ status_t FLEXSPI_ReadBlocking(FLEXSPI_Type *base, uint32_t *buffer, size_t size)
  * retval kStatus_FLEXSPI_IpCommandSequenceError IP command sequencen error detected
  * retval kStatus_FLEXSPI_IpCommandGrantTimeout IP command grant timeout detected
 */
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t FLEXSPI_TransferBlocking(FLEXSPI_Type *base, flexspi_transfer_t *xfer)
 {
     uint32_t configValue = 0;
@@ -676,6 +686,7 @@ status_t FLEXSPI_TransferBlocking(FLEXSPI_Type *base, flexspi_transfer_t *xfer)
  * param callback pointer to user callback function.
  * param userData user parameter passed to the callback function.
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 void FLEXSPI_TransferCreateHandle(FLEXSPI_Type *base,
                                   flexspi_handle_t *handle,
                                   flexspi_transfer_callback_t callback,
@@ -716,6 +727,7 @@ void FLEXSPI_TransferCreateHandle(FLEXSPI_Type *base,
  * retval kStatus_Success Successfully start the data transmission.
  * retval kStatus_FLEXSPI_Busy Previous transmission still not finished.
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t FLEXSPI_TransferNonBlocking(FLEXSPI_Type *base, flexspi_handle_t *handle, flexspi_transfer_t *xfer)
 {
     uint32_t configValue = 0;
@@ -791,6 +803,7 @@ status_t FLEXSPI_TransferNonBlocking(FLEXSPI_Type *base, flexspi_handle_t *handl
  * retval kStatus_InvalidArgument count is Invalid.
  * retval kStatus_Success Successfully return the count.
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 status_t FLEXSPI_TransferGetCount(FLEXSPI_Type *base, flexspi_handle_t *handle, size_t *count)
 {
     (void)base;
@@ -819,6 +832,7 @@ status_t FLEXSPI_TransferGetCount(FLEXSPI_Type *base, flexspi_handle_t *handle, 
  * param base FLEXSPI peripheral base address.
  * param handle pointer to flexspi_handle_t structure which stores the transfer state
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 void FLEXSPI_TransferAbort(FLEXSPI_Type *base, flexspi_handle_t *handle)
 {
     assert(handle);
@@ -833,6 +847,7 @@ void FLEXSPI_TransferAbort(FLEXSPI_Type *base, flexspi_handle_t *handle)
  * param base FLEXSPI peripheral base address.
  * param handle pointer to flexspi_handle_t structure.
  */
+__attribute__ ((section(".ramfunc.$RAM2")))
 void FLEXSPI_TransferHandleIRQ(FLEXSPI_Type *base, flexspi_handle_t *handle)
 {
     uint8_t status;
