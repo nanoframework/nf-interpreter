@@ -54,21 +54,28 @@ bool iMXRTFlexSPIDriver_Write(void *context, ByteAddress startAddress,
   if (readModifyWrite) {
     return false;
   }
+  portENTER_CRITICAL();
+  uint32_t pagesNum = numBytes / FLASH_PAGE_SIZE;
 
-  for (uint32_t i = 0; i < numBytes / FLASH_PAGE_SIZE; i++) {
+  if (numBytes % FLASH_PAGE_SIZE) {
+    pagesNum++;
+  }
 
-    portENTER_CRITICAL();
+  for (uint32_t i = 0; i < pagesNum; i++) {   
     status_t status = flexspi_nor_flash_page_program(
         FLEXSPI, startAddress - (uint32_t)&__flash_start__ + i * FLASH_PAGE_SIZE,
         (void *)buffer + i * FLASH_PAGE_SIZE);
-    portEXIT_CRITICAL();
+    
     if (status != kStatus_Success) {
+      portEXIT_CRITICAL();
       return false;
     }
 
   }
-  DCACHE_CleanInvalidateByRange(startAddress, numBytes);
 
+
+  DCACHE_CleanInvalidateByRange(startAddress, numBytes);
+  portEXIT_CRITICAL();
   return true;
 }
 
