@@ -80,6 +80,9 @@ add_executable(
     "${NF_CoreCLR_SOURCES}"
     "${NF_Debugger_SOURCES}"
     "${NF_Diagnostics_SOURCES}"
+
+    # sources for nanoFramework APIs
+    "${TARGET_NANO_APIS_SOURCES}"
 )
 
 # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
