@@ -54,13 +54,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Adc =
 {
     "Windows.Devices.Adc", 
-    0xD21F3E86,
+    0xE5D11571,
     method_lookup,
-    { 1, 1, 2, 3 }
+    { 1, 1, 3, 1 }
 };
