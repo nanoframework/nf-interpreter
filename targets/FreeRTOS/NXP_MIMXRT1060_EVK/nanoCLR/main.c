@@ -16,7 +16,7 @@
 
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
-
+#include "Target_BlockStorage_iMXRTFlashDriver.h"
 #include "CLR_Startup_Thread.h"
 
 #define LED_GPIO GPIO1
@@ -49,6 +49,13 @@ int main(void)
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();    
     SCB_DisableDCache();
+
+    // for (volatile uint32_t i = 0; i < 100000000; i++) {
+    //     __asm("nop");
+    // }
+
+    iMXRTFlexSPIDriver_InitializeDevice(NULL);
+
     CLR_SETTINGS clrSettings;
     (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
@@ -58,7 +65,7 @@ int main(void)
 
     xTaskCreate(blink_task, "blink_task", configMINIMAL_STACK_SIZE + 10, NULL, configMAX_PRIORITIES - 1, NULL);
     xTaskCreate(ReceiverThread, "ReceiverThread", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
-    xTaskCreate(CLRStartupThread, "CLRStartupThread", 4096, &clrSettings, configMAX_PRIORITIES - 1, NULL);
+    xTaskCreate(CLRStartupThread, "CLRStartupThread", 8192, &clrSettings, configMAX_PRIORITIES - 1, NULL);
 
     vTaskStartScheduler();
 
