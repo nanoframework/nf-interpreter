@@ -13,7 +13,6 @@
 #include <string.h>
 
 
-__attribute__((noreturn))
 void CLRStartupThread(void * argument)
 {
   CLR_SETTINGS* clrSettings = (CLR_SETTINGS*)argument;
@@ -23,10 +22,7 @@ void CLRStartupThread(void * argument)
 
   ClrStartup(*clrSettings);
 
-  // loop until thread receives a request to terminate
-  while (1) {
-    vTaskDelay(500);
-  }
+  vTaskDelete(NULL);
 
   // this function never returns
 }
