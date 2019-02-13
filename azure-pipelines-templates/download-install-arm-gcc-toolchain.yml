@@ -7,8 +7,6 @@ steps:
         targetType: 'inline'
         script: |
 
-            Write-Host "Downloading ARM GNU GCC toolchain..."
-
             if("$(GccArm_Version)" -ne "")
             {
                 if("$(GccArm_Version)" -eq "5-2016-q3-update")
@@ -28,6 +26,8 @@ steps:
                 # current default is , this is is "7-2018-q2-update"
                 $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-7-2018-q2-update-win32.7z"
             }
+
+            Write-Host "Downloading ARM GNU GCC toolchain $(GccArm_Version)..."
 
             $output = "$PSScriptRoot\gcc-arm.7z"
             (New-Object Net.WebClient).DownloadFile($url, $output)
