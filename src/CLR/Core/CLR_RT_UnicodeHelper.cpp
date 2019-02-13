@@ -126,8 +126,8 @@ int CLR_RT_UnicodeHelper::CountNumberOfBytes( int max )
 // the switch cases to improve the algorithm	
 #ifdef __GNUC__	
 #pragma GCC diagnostic push
-// the GCC compiler for ESP32 doesn't know the -Wimplicit-fallthrough option
-#ifndef PLATFORM_ESP32
+// -Wimplicit-fallthrough option was added in GCC 7
+#if (__GNUC__ >= 7)
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #endif
 #endif
