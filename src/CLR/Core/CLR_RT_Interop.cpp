@@ -677,10 +677,20 @@ CLR_RT_HeapBlock* Interop_Marshal_RetrieveManagedObject( CLR_RT_StackFrame &stac
 **
 ** Returns:   Reference to the field.
 **********************************************************************/
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
 bool &Interop_Marshal_GetField_bool(   CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )
 {
     return (bool&)pThis[ fieldIndex ].NumericByRef().u1;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 unsigned char &Interop_Marshal_GetField_UINT8(  CLR_RT_HeapBlock *pThis, unsigned int fieldIndex )         
 {
