@@ -19,7 +19,7 @@
           "text": "-environment-cd ${workspaceRoot}\\Build"
         },
         {
-          "text": "-file-exec-and-symbols c:/nanoFramework/nf-interpreter/BUILD/nanobooter.elf",  // must use forward slashes and hard code path (at the moment)
+          "text": "-file-exec-and-symbols c:/nanoFramework/nf-interpreter/BUILD/nanobooter.elf",
           "description": "load file",
           "ignoreFailures": false
         },
@@ -42,6 +42,53 @@
       "debugServerPath": "C:\\nanoFramework_Tools\\Tools\\openocd\\bin\\openocd.exe",
       "debugServerArgs": "-s \"C:\\nanoFramework_Tools\\Tools\\openocd\\bin\\scripts/\" -f interface/stlink-v2-1.cfg -f board/stm32f7discovery.cfg",
       "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+      "filterStderr": true,
+      "filterStdout": true
+    },
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "nanoCLR.elf",
+      "name": "nanoCLR.elf"
+    },
+    {
+      "type": "cppdbg",
+      "name": "C:\\usr\\src\\NanoFramework\\nf-interpreter",
+      "project": "",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}\\BUILD\\${workspaceRootFolderName}.elf",
+      "MIMode": "gdb",
+      "externalConsole": true,
+      "inheritEnvironments": [
+        "gcc_arm"
+      ],
+      "miDebuggerPath": "${env.gccpath}\\bin\\arm-none-eabi-gdb.exe",
+      "setupCommands": [
+        {
+          "text": "Documentation: Learn how to configure embedded debugging",
+          "description": "See here for more info http://aka.ms/vsembeddeddebug",
+          "ignoreFailures": true
+        },
+        {
+          "text": "-environment-cd ${workspaceRoot}/BUILD"
+        },
+        {
+          "text": "-file-exec-and-symbols ${workspaceRootFolderName}.elf",
+          "description": "load file",
+          "ignoreFailures": false
+        },
+        {
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "visualizerFile": "${debugInfo.linuxNatvisPath}",
+      "showDisplayString": true,
+      "miDebuggerServerAddress": "localhost:3333",
+      "launchCompleteCommand": "None",
+      "debugServerPath": "path-to-your\\gdbserver.exe",
+      "debugServerArgs": "-f path-to-your/board.cfg",
+      "serverStarted": "GDB\\ server\\ started",
       "filterStderr": true,
       "filterStdout": true
     }
