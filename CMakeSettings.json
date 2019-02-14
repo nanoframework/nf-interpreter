@@ -216,6 +216,11 @@
       "inheritEnvironments": [
         "gcc-arm"
       ],
+      "environments": [
+        {
+          "PATH": "C:\\Windows\\system32" // Work around for Ninja not finding Cmd.exe with add_custom_command
+        }
+      ],
       "buildRoot": "C:\\nanoFramework\\nf-interpreter\\Build\\${name}",
       "installRoot": "C:\\nanoFramework\\nf-interpreter\\Build\\install\\${name}",
       "cmakeCommandArgs": "",
@@ -233,19 +238,19 @@
         },
         {
           "name": "ESP32_TOOLCHAIN_PATH",
-          "value": "C:/nanoFramework_Tools/Espressif_Tools"
+          "value": "C:/ESP32_TOOLS"
         },
         {
           "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/nanoFramework_Tools/Espressif_Tools"
+          "value": "C:/ESP32_TOOLS"
         },
         {
           "name": "ESP32_IDF_PATH",
-          "value": "C:/nanoFramework_Tools/Espressif_Tools"
+          "value": "C:/ESP32_TOOLS/esp-idf-v3.1"
         },
         {
           "name": "ESP32_LIBS_PATH",
-          "value": "C:/nanoFramework_Tools/Espressif_Tools"
+          "value": "C:/ESP32_TOOLS/libs-v3.1"
         },
         {
           "name": "CMAKE_SYSTEM_NAME",
@@ -264,6 +269,10 @@
           "value": "ESP32"
         },
         {
+          "name": "ESP32_BOARD",
+          "value": "ESP32_WROOM_32"
+        },
+        {
           "name": "USE_RNG", //option to enable use of true random generator hardware block
           "value": "ON"
         },
@@ -276,16 +285,8 @@
           "value": "FALSE"
         },
         {
-          "name": "TOOL_HEX2DFU_PREFIX", //"PATH for HEX TOOL"
-          "value": "C:/nanoFramework_Tools/Tools"
-        },
-        {
           "name": "RTOS", //"Selected Operating system
           "value": "FREERTOS_ESP32"
-        },
-        {
-          "name": "SWO_OUTPUT_OPTION", // Single Wire Output Option
-          "value": "TRUE"
         },
         {
           "name": "NF_BUILD_RTM", // OFF-default-ON-to-enable-RTM-build
@@ -317,7 +318,7 @@
         },
         {
           "name": "NF_FEATURE_DEBUGGER", //OFF-default-ON-to-include-managed-app-debugging-capability
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "NF_FEATURE_RTC", //OFF-default-ON-to-enable-hardware-RTC
@@ -349,19 +350,15 @@
         },
         {
           "name": "NF_NETWORKING_SNTP", //ON-default-to-add-SNTP-client-requires-networking
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "NF_SECURITY_OPENSSL", //OFF-default-ON-to-add-network-security-from-OpenSSL
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "NF_SECURITY_MBEDTLS", //OFF-default-ON-to-add-network-security-from-mbedTLS
           "value": "OFF"
-        },
-        {
-          "name": "MBEDTLS_SOURCE", //path-to-mbedtls-source-mind-the-forward-slashes
-          "value": ""
         },
         // LIBRARIES
         {
@@ -374,7 +371,7 @@
         },
         {
           "name": "API_System.Net", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "API_Windows.Devices.Adc", //OFF-default-ON-to-add-this-API
@@ -407,14 +404,10 @@
         {
           "name": "API_Windows.Storage", //OFF-default-ON-to-add-this-API
           "value": "OFF"
-        },        
+        },
         {
           "name": "API_Hardware.Esp32", //OFF-default-ON-to-add-this-API
           "value": "ON"
-        },
-        {
-          "name": "API_Hardware.STM32", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
         }
       ]
     }
