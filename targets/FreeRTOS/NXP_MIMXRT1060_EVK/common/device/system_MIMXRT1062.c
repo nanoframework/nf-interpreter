@@ -57,6 +57,61 @@
 uint32_t SystemCoreClock = DEFAULT_SYSTEM_CLOCK;
 
 /* ----------------------------------------------------------------------------
+   -- SystemInit()
+   ---------------------------------------------------------------------------- */
+
+void SystemInit (void) {
+#if ((__FPU_PRESENT == 1) && (__FPU_USED == 1))
+    SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));    /* set CP10, CP11 Full Access */
+#endif /* ((__FPU_PRESENT == 1) && (__FPU_USED == 1)) */
+
+
+    extern uint32_t g_pfnVectors[];  // Vector table defined in startup code
+    SCB->VTOR = (uint32_t)g_pfnVectors;
+
+
+    /* Disable Watchdog Power Down Counter */
+    WDOG1->WMCR &= ~WDOG_WMCR_PDE_MASK;
+    WDOG2->WMCR &= ~WDOG_WMCR_PDE_MASK;
+
+/* Watchdog disable */
+
+#if (DISABLE_WDOG)
+    if (WDOG1->WCR & WDOG_WCR_WDE_MASK)
+    {
+        WDOG1->WCR &= ~WDOG_WCR_WDE_MASK;
+    }
+    if (WDOG2->WCR & WDOG_WCR_WDE_MASK)
+    {
+        WDOG2->WCR &= ~WDOG_WCR_WDE_MASK;
+    }
+    RTWDOG->CNT = 0xD928C520U; /* 0xD928C520U is the update key */
+    RTWDOG->TOVAL = 0xFFFF;
+    RTWDOG->CS = (uint32_t) ((RTWDOG->CS) & ~RTWDOG_CS_EN_MASK) | RTWDOG_CS_UPDATE_MASK;
+#endif /* (DISABLE_WDOG) */
+
+    /* Disable Systick which might be enabled by bootrom */
+    if (SysTick->CTRL & SysTick_CTRL_ENABLE_Msk)
+    {
+        SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+    }
+
+/* Enable instruction and data caches */
+#if defined(__ICACHE_PRESENT) && __ICACHE_PRESENT
+    if (SCB_CCR_IC_Msk != (SCB_CCR_IC_Msk & SCB->CCR)) {
+        SCB_EnableICache();
+    }
+#endif
+#if defined(__DCACHE_PRESENT) && __DCACHE_PRESENT
+    if (SCB_CCR_DC_Msk != (SCB_CCR_DC_Msk & SCB->CCR)) {
+        SCB_EnableDCache();
+    }
+#endif
+
+    SystemInitHook();
+}
+
+/* ----------------------------------------------------------------------------
    -- SystemCoreClockUpdate()
    ---------------------------------------------------------------------------- */
 
@@ -159,4 +214,12 @@ void SystemCoreClockUpdate (void) {
 
     SystemCoreClock = (freq / (((CCM->CBCDR & CCM_CBCDR_AHB_PODF_MASK) >> CCM_CBCDR_AHB_PODF_SHIFT) + 1U));
 
+}
+
+/* ----------------------------------------------------------------------------
+   -- SystemInitHook()
+   ---------------------------------------------------------------------------- */
+
+__attribute__ ((weak)) void SystemInitHook (void) {
+  /* Void implementation of the weak function. */
 }
