@@ -699,9 +699,6 @@ elseif(RTOS_FREERTOS_CHECK)
             endif()
         endif()
 
-        # FreeRTOS version
-        set(FREERTOS_VERSION_EMPTY TRUE)
-
         # check if build was requested with a specifc FreeRTOS version
         if(FREERTOS_VERSION_EMPTY)
             # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
@@ -833,6 +830,22 @@ elseif(RTOS_FREERTOS_CHECK)
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMSIS_Download")
+
+        # add CMSIS as external project
+        ExternalProject_Add( 
+            CMSIS
+            PREFIX CMSIS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/CMSIS_Source
+            GIT_REPOSITORY  https://github.com/ARM-software/CMSIS_5.git
+            GIT_TAG ${CMSIS_GIT_TAG}  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )  
     else()
         # CMSIS source was specified
 
