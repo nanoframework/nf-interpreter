@@ -31,13 +31,14 @@ bool BlockStorageStream_Initialize(BlockStorageStream* stream, unsigned int bloc
     }
     else if(blockUsage == StorageUsage_DEPLOYMENT)
     {
-        // set BaseAddress to the start of the region
+        // deployment is stored at SPI flash
+        // if there is a DEPLOYMENT file, get it's size
+
         // FIXME TODO
-        //stream->BaseAddress = (unsigned int)g_CC32xx_flash_start_ptr;
-        // set Length to the region size 
-        // need to cast the pointers to make sure the compiler implements the correct math
-        // FIXME TODO
-        //stream->Length = (uint32_t)g_pFlashDriver_partition->size;
+
+        // if not, return 0 as stream length
+        stream->BaseAddress = 0;
+        stream->Length = 0;        
     }
 
     return true;
@@ -49,7 +50,7 @@ bool BlockStorageStream_Initialize(BlockStorageStream* stream, unsigned int bloc
 
 extern struct BlockStorageDevice    Device_BlockStorage;
 extern struct MEMORY_MAPPED_NOR_BLOCK_CONFIG   Device_BlockStorageConfig;
-BlockStorageList             BlockStorage;
+extern BlockStorageList             g_BlockStorage;
 
 // map here the Block Storage Interface to the CC32xx driver
 IBlockStorageDevice CC32xxFlash_BlockStorageInterface =
@@ -64,56 +65,3 @@ IBlockStorageDevice CC32xxFlash_BlockStorageInterface =
     &CC32xxFlashDriver_EraseBlock,
     &CC32xxFlashDriver_SetPowerState
 };
-
-void BlockStorage_AddDevices()
-{
-    BlockStorageList_AddDevice( (BlockStorageDevice*)&Device_BlockStorage, &CC32xxFlash_BlockStorageInterface, &Device_BlockStorageConfig, false);
-}
-
-bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress)
-{
-    *pBSD = NULL;
-       
-    BlockStorageDevice* block = (BlockStorageDevice*)BlockStorageList_GetFirstDevice;
-
-    // this has to add to make metadataprocessor happy
-    if(!block) return true;
-
-    DeviceBlockInfo* pDeviceInfo = BlockStorageDevice_GetDeviceInfo((BlockStorageDevice*)&block);
-        
-    for(unsigned int i=0; i < pDeviceInfo->NumRegions; i++)
-    {
-        BlockRegionInfo* pRegion = &pDeviceInfo->Regions[i];
-        
-        if(pRegion->Start <= physicalAddress && physicalAddress < (pRegion->Start + pRegion->NumBlocks * pRegion->BytesPerBlock))
-        {
-            *pBSD = block; 
-
-            // get block start address 
-            *blockAddress = (ByteAddress)((physicalAddress - pRegion->Start) / pRegion->BytesPerBlock);
-            *blockAddress *= pRegion->BytesPerBlock;
-            *blockAddress += pRegion->Start;
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool init)
-{
-    (void)init;
-
-    pBSD->m_BSD     = vtable;
-    pBSD->m_context = config;
-
-    BlockStorage.PrimaryDevice = pBSD;
-
-    return true;
-}
-
-BlockStorageDevice* BlockStorageList_GetFirstDevice()
-{
-    return BlockStorage.PrimaryDevice;
-}

@@ -51,8 +51,12 @@ void nanoHAL_Initialize()
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION  ::InitializeList();
 
+    BlockStorageList_Initialize();
+
     // initialize block storage devices
     BlockStorage_AddDevices();
+
+    BlockStorageList_InitializeDevices();
 
     // clear managed heap region
     unsigned char* heapStart = NULL;
@@ -90,6 +94,8 @@ void nanoHAL_Uninitialize()
         }
     }   
     
+    BlockStorageList_UnInitializeDevices();
+
     //PalEvent_Uninitialize();
 
     // TODO need to call this but it's preventing the debug session from starting
