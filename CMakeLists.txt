@@ -640,7 +640,7 @@ if(RTOS_CHIBIOS_CHECK)
             ChibiOS
             PREFIX ChibiOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
-            GIT_REPOSITORY  https://github.com/alex31/chibios_svn_mirror
+            GIT_REPOSITORY  https://github.com/nanoframework/chibios
             GIT_TAG ${CHIBIOS_GIT_TAG}  # target specified branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
