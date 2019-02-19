@@ -72,6 +72,7 @@ int main(void) {
   // initialize block storage device
   // in CLR this is called in nanoHAL_Initialize()
   // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
+  BlockStorageList_Initialize();
   BlockStorage_AddDevices();
 
   // initialize configuration manager

@@ -16,17 +16,6 @@ extern void CLRStartupThread(void const * argument);
 // Mutex for GLOBAL_LOCK / GLOBAL_UNLOCK
 portMUX_TYPE globalLockMutex = portMUX_INITIALIZER_UNLOCKED;
 
-// These are offsets in the Deployment partition
-uint32_t  __deployment_start__ = 0;
-uint32_t  __deployment_end__ = 1024*1024 - 1;
-
-// Not used, Well i couldn't find anywhere !
-uint32_t __nanoImage_start__ = 0;
-uint32_t __nanoImage_end__ = 0;
-
-extern bool Esp32FlashDriver_InitializeDevice(void* context);
-
-
 void receiver_task(void *pvParameter)
 {
   (void)pvParameter;
@@ -63,8 +52,6 @@ void  app_main()
   esp_log_level_set("*", ESP_LOG_NONE);         
 
   ESP_ERROR_CHECK( nvs_flash_init() );
-
-   Esp32FlashDriver_InitializeDevice(0);
  
  	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL, 1);
   

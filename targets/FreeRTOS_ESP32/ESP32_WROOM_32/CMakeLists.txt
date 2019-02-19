@@ -69,6 +69,7 @@ add_executable(
     ${NANOCLR_PROJECT_NAME}.elf
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${TARGET_ESP32_COMMON_SOURCES}

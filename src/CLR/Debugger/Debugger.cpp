@@ -66,13 +66,11 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
     NANOCLR_CHECK_HRESULT(g_CLR_DBG_Debugger->Debugger_Initialize(HalSystemConfig.DebuggerPort));
 
     BlockStorageStream stream;
+    memset(&stream, 0, sizeof(BlockStorageStream));
 
     if (BlockStorageStream_Initialize(&stream, BlockUsage_DEPLOYMENT ))
     {
-        //m_deploymentStorageDevice = stream.Device;
-        // TODO replacing this for now with a call to GetFirstDevice
-        // until the block storage is redesigned 
-        m_deploymentStorageDevice = BlockStorageList_GetFirstDevice();
+        m_deploymentStorageDevice = stream.Device;
     }
     else
     {
@@ -712,13 +710,16 @@ bool CLR_DBG_Debugger::Monitor_ReadMemory( WP_Message* msg)
     unsigned int                                len = cmd->m_length; if(len > sizeof(buf)) len = sizeof(buf);
     unsigned int errorCode;
 
-    if (m_deploymentStorageDevice == NULL) return false;
-    g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, len, buf, AccessMemory_Read, &errorCode );
+    if (m_deploymentStorageDevice != NULL)
+    {
+        g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, len, buf, AccessMemory_Read, &errorCode );
 
-    WP_ReplyToCommand( msg, true, false, buf, len );
+        WP_ReplyToCommand( msg, true, false, buf, len );
 
-    return true;
+        return true;
+    }
 
+    return false;
 }
 
 bool CLR_DBG_Debugger::Monitor_WriteMemory( WP_Message* msg)
@@ -728,13 +729,17 @@ bool CLR_DBG_Debugger::Monitor_WriteMemory( WP_Message* msg)
     CLR_DBG_Commands::Monitor_WriteMemory* cmd = (CLR_DBG_Commands::Monitor_WriteMemory*)msg->m_payload;
     CLR_DBG_Commands::Monitor_WriteMemory::Reply cmdReply;
 
-    if (m_deploymentStorageDevice == NULL) return false;
+    if (m_deploymentStorageDevice != NULL)
+    {
 
-    g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, cmd->m_length, cmd->m_data, AccessMemory_Write, &cmdReply.ErrorCode );
+        g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, cmd->m_length, cmd->m_data, AccessMemory_Write, &cmdReply.ErrorCode );
 
-    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+        WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
 
-    return true;
+        return true;
+    }
+
+    return false;
 }
 
 bool CLR_DBG_Debugger::Monitor_CheckMemory( WP_Message* msg)
@@ -760,13 +765,16 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory( WP_Message* msg)
     CLR_DBG_Commands::Monitor_EraseMemory* cmd = (CLR_DBG_Commands::Monitor_EraseMemory*)msg->m_payload;
     CLR_DBG_Commands::Monitor_EraseMemory::Reply cmdReply;
 
-    if (m_deploymentStorageDevice == NULL) return false;
+    if (m_deploymentStorageDevice != NULL)
+    {
+        g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, cmd->m_length, NULL, AccessMemory_Erase, &cmdReply.ErrorCode );
 
-    g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, cmd->m_length, NULL, AccessMemory_Erase, &cmdReply.ErrorCode );
+        WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
 
-    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 bool CLR_DBG_Debugger::Monitor_Execute( WP_Message* msg)

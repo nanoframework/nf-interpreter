@@ -54,12 +54,6 @@ inline bool Target_HasNanoBooter() { return true; };
 
 #define NANOCLR_STOP() CPU_Reset();
 
-inline void HAL_AssertEx()
-{
-    __BKPT(0);
-    while(true) { /*nop*/ }
-}
-
 // Provides information whether the configuration block storage requires erase command before sending the update command
 // The 'weak' implementation for ChibiOS targets is true
 // If a target implements the store differently it has to provide a 'strong' implementation of this.

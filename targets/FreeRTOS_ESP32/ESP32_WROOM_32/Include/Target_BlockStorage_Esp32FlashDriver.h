@@ -24,6 +24,7 @@ bool Esp32FlashDriver_Write(void*, ByteAddress startAddress, unsigned int numByt
 bool Esp32FlashDriver_IsBlockErased(void*, ByteAddress blockAddress, unsigned int length);
 bool Esp32FlashDriver_EraseBlock(void*, ByteAddress address);
 void Esp32FlashDriver_SetPowerState(void*, unsigned int state);
+bool Esp32FlashDriver_GetMemoryMappedAddress(void*, unsigned int blockRegionIndex, unsigned int blockRangeIndex, unsigned int* address);
 
 extern const DRAM_ATTR esp_partition_t * g_pFlashDriver_partition;
 extern const void * g_esp32_flash_start_ptr;
