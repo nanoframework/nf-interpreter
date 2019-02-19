@@ -20,6 +20,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY )
 set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf/bin)
 set(TOOLCHAIN_INC_DIR ${ESP32_IDF_PATH}/components/newlib/include)
 set(TOOLCHAIN_LIB_DIR ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf/xtensa-esp32-elf/lib)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
 # the name of the operating system for which CMake is to build
 set(CMAKE_SYSTEM_NAME Generic)
