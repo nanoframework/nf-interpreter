@@ -112,9 +112,3 @@ bool iMXRTFlexSPIDriver_EraseBlock(void *context, ByteAddress address) {
   DCACHE_CleanInvalidateByRange(address, SECTOR_SIZE);
   return true;
 }
-
-void iMXRTFlexSPIDriver_SetPowerState(void *context, unsigned int state) {
-  (void)context;
-  (void)state;
-  // nothing to be done here
-}
