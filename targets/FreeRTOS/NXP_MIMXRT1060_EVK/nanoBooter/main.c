@@ -57,9 +57,10 @@ int main(void)
 
     iMXRTFlexSPIDriver_InitializeDevice(NULL);
 
-    // initialize block storage device
+    // initialize block storage list and devices
     // in CLR this is called in nanoHAL_Initialize()
     // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
+    BlockStorageList_Initialize();
     BlockStorage_AddDevices();
 
     xTaskCreate(blink_task, "blink_task", configMINIMAL_STACK_SIZE + 10, NULL, configMAX_PRIORITIES - 1, NULL);
