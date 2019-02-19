@@ -25,6 +25,7 @@ const BlockRange BlockRange2[] = // 4KB blocks
 const BlockRegionInfo BlockRegions[] = 
 {
     {
+        (0),                            // no attributes for this region
         // Allocated in nanoBooter partition 8K
         0x60000000,                     // start address for block region
         0x2,                            // total number of blocks in this region
@@ -33,19 +34,21 @@ const BlockRegionInfo BlockRegions[] =
         BlockRange0,
     },
     {
+        (0),                            // no attributes for this region
         // Allocated in nanoCLR partition 1M
-        0x60002000,                   // start address for block region
-        0xFE,                        // total number of blocks in this region
-        0x1000,   //  4K              // total number of bytes per block
+        0x60002000,                     // start address for block region
+        0xFE,                           // total number of blocks in this region
+        0x1000,   //  4K                // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
     },
 
     {
+        (0),                                // no attributes for this region
         // Allocated in Deployment partition 1M
-        0x60100000,                   // start address for block region
-        0x100,                        // total number of blocks in this region
-        0x1000,   //  4K              // total number of bytes per block
+        0x60100000,                         // start address for block region
+        0x100,                              // total number of blocks in this region
+        0x1000,   //  4K                    // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange2),
         BlockRange2,
     }
@@ -54,7 +57,8 @@ const BlockRegionInfo BlockRegions[] =
 
 const DeviceBlockInfo Device_BlockInfo =
 {
-    (MediaAttribute_SupportsXIP),
+    (MediaAttribute_SupportsXIP),           // iMXRT flash memory is XIP
+    2,                                      // UINT32 BytesPerSector
     ARRAYSIZE_CONST_EXPR(BlockRegions),     // UINT32 NumRegions;
     (BlockRegionInfo*)BlockRegions,         // const BlockRegionInfo* pRegions;
 };
