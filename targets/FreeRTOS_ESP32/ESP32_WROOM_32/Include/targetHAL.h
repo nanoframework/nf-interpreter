@@ -58,28 +58,11 @@ inline bool Target_HasNanoBooter() { return false; };
 
 #define NANOCLR_STOP() HARD_BREAKPOINT()
 
-inline void HAL_AssertEx()
-{
- //   __BKPT(0);
-    while(true) { /*nop*/ }
-}
-
 // Provides information whether the configuration block storage requires erase command before sending the update command
 // ESP32 is storing this using its non-volatile storage therefore no erase is required.
 __nfweak bool Target_ConfigUpdateRequiresErase() { return false; };
 
 extern int HeapBegin;
 extern int HeapEnd;
-
-// FIXME uncomment? declaration needed here as external?
-// extern char * nanoCLR_Dat_Start;
-// extern char * nanoCLR_Dat_End;
-
-extern uint32_t __nanoImage_start__;
-extern uint32_t __nanoImage_end__;
-extern uint32_t __nanoConfig_start__;
-extern uint32_t __nanoConfig_end__;
-extern uint32_t __deployment_start__;
-extern uint32_t __deployment_end__;
 
 #endif //_TARGET_HAL_H_

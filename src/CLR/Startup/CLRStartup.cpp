@@ -189,7 +189,11 @@ struct Settings
                 break;
             }
 
-            if(!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes )) break;
+            if(!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes ))
+            {
+                // failed to read 
+                break;
+            }
 
             header = (const CLR_RECORD_ASSEMBLY*)headerBuffer;
 
@@ -243,9 +247,10 @@ struct Settings
 
         // perform initialization of BlockStorageStream structure
         BlockStorageStream stream;
+        memset(&stream, 0, sizeof(BlockStorageStream));
 
         // init the stream for deployment storage
-        if (!BlockStorageStream_Initialize(&stream, StorageUsage_DEPLOYMENT))
+        if (!BlockStorageStream_Initialize(&stream, BlockUsage_DEPLOYMENT))
         {
 #if !defined(BUILD_RTM)
             CLR_Debug::Printf( "ERROR: failed to initialize DEPLOYMENT storage\r\n" );

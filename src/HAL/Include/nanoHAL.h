@@ -567,72 +567,9 @@ typedef void (*LOGGING_CALLBACK)(const char* text);
 
 
 
-//--//
-// Function macros
+// //--//
 
-void HAL_Assert  ( const char* Func, int Line, const char* File );
-// HAL_AssertEx is defined in the processor or platform selector files.
-extern void HAL_AssertEx();
-
-#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
-    #if !defined(BUILD_RTM)
-        #define       ASSERT(i)  { if(!(i)) HAL_AssertEx(); }
-        #define _SIDE_ASSERTE(i) { if(!(i)) HAL_AssertEx(); }
-    #endif
-#else
-    #if defined(_DEBUG)
-#if !defined _ASSERTE
-#error
-#endif
-        #define       ASSERT(i)  _ASSERTE(i)
-        #define _SIDE_ASSERTE(i) _ASSERTE(i)
-    #endif
-#endif
-
-#ifndef ASSERT
-#define ASSERT(i)
-#endif
-
-#ifndef _ASSERTE
-#define _ASSERTE(expr) ASSERT(expr)
-#endif
-
-#ifndef _SIDE_ASSERTE
-#define _SIDE_ASSERTE(expr) (expr)
-#endif
-
-#if STATIC_ASSERT_SUPPORTED
-#define CT_ASSERT_STRING( x ) #x
-#define CT_ASSERT_UNIQUE_NAME(e,name)static_assert( (e), CT_ASSERT_STRING( name ) "@" __FILE__ CT_ASSERT_STRING(__LINE__) ); 
-#define CT_ASSERT(e) static_assert( (e), __FILE__ CT_ASSERT_STRING(__LINE__) );
-#else
-// CT_ASSERT (compile-time assert) macro is used to test condition at compiler time and generate
-// compiler error if condition is bool.
-// Example: CT_ASSERT( sizeof( unsigned int ) == 2 ) would cause compilation error.
-//          CT_ASSERT( sizeof( unsigned int ) == 4 ) compiles without error.
-// Since this declaration is just typedef - it does not create any CPU code.
-//
-// Reason for CT_ASSERT_UNIQUE_NAME
-// The possible problem with the macro - it creates multiple identical typedefs.
-// It is not a problem in global scope, but if macro is used inside of struct - it generates warnings.
-// CT_ASSERT_UNIQUE_NAME is the same in essence, but it provides a way to customize the name of the type.
-#define CT_ASSERT_UNIQUE_NAME(e,name) typedef char __CT_ASSERT__##name[(e)?1:-1];
-#define CT_ASSERT(e)                  CT_ASSERT_UNIQUE_NAME(e,nanoclr)
-#endif
-
-extern "C"
-{
-#if !defined(BUILD_RTM)
-
-void debug_printf( const char *format, ... );
-
-#else
-
-__inline void debug_printf( const char *format, ... ) {}
-
-#endif  // !defined(BUILD_RTM)
-}
-//--//
+// //--//
 
 
 
