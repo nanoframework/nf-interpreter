@@ -184,6 +184,7 @@ jobs:
       NXP_MIMXRT1060_EVK:
         BoardName: NXP_MIMXRT1060_EVK
         BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FREERTOS
+        GccArm_Version:        
         NeedsDFU: true
 
   variables:
