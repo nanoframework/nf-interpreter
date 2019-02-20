@@ -11,5 +11,5 @@ extern IBlockStorageDevice CC32xxFlash_BlockStorageInterface;
 
 void BlockStorage_AddDevices()
 {
-    BlockStorageList_AddDevice( (BlockStorageDevice*)&Device_BlockStorage, &CC32xxFlash_BlockStorageInterface, &Device_BlockStorageConfig, false);
+    BlockStorageList_AddDevice( (BlockStorageDevice*)&Device_BlockStorage, &CC32xxFlash_BlockStorageInterface, &Device_BlockStorageConfig, true);
 }

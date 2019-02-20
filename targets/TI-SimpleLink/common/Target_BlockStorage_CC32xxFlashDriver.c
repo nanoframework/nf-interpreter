@@ -23,8 +23,6 @@ bool CC32xxFlashDriver_UninitializeDevice(void* context)
 
 DeviceBlockInfo* CC32xxFlashDriver_GetDeviceInfo(void* context)
 {
-	(void)context;
-
     MEMORY_MAPPED_NOR_BLOCK_CONFIG* config = context;
     
     return config->BlockConfig.BlockDeviceInformation;  
@@ -57,12 +55,4 @@ bool CC32xxFlashDriver_EraseBlock(void* context, ByteAddress address)
 	(void)context;
 
 	return true;   
-}
-
-void CC32xxFlashDriver_SetPowerState(void* context, unsigned int state)
-{
-	(void)context;
-	(void)state;
-
-    // nothing to be done here
 }
