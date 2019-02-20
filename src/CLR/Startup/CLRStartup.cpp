@@ -176,9 +176,27 @@ struct Settings
         NANOCLR_HEADER();
 
         const CLR_RECORD_ASSEMBLY* header;
-        unsigned char * assembliesBuffer ;
+        unsigned char* assembliesBuffer;
         uint32_t  headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
-        unsigned char * headerBuffer  = NULL;
+        unsigned char* headerBuffer  = NULL;
+
+        // for the context it's being used (read the assemblies) 
+        // XIP and memory mapped block regions are equivalent so they can be ORed
+        bool isXIP = (stream.Flags & BLOCKSTORAGESTREAM_c_BlockStorageStream__XIP) ||
+                     (stream.Flags & BLOCKSTORAGESTREAM_c_BlockStorageStream__MemoryMapped);
+
+        if(!isXIP)
+        {
+            headerBuffer = (unsigned char*)platform_malloc(headerInBytes);
+
+            if (headerBuffer == NULL) 
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            }            
+
+            // clear the buffer
+            memset(headerBuffer, 0, headerInBytes);
+        }
 
         while(stream.CurrentIndex < stream.Length)
         {
@@ -206,17 +224,46 @@ struct Settings
 
             unsigned int assemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
 
+            if(!isXIP)
+            {
+                // setup buffer for assembly
+                /////////////////////////////////////////////////////////////////////////////////////
+                // because we need to map to the functions, the assembly needs to remain on memory //
+                // so platform_free can't be called for this                                       //
+                /////////////////////////////////////////////////////////////////////////////////////
+                assembliesBuffer = (unsigned char*)platform_malloc(assemblySizeInByte);
+
+                if (assembliesBuffer == NULL) 
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                }
+
+                // clear the buffer
+                memset(assembliesBuffer, 0, assemblySizeInByte);
+            }
+
             // advance stream beyond header
             BlockStorageStream_Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
 
             // read the assembly
-            if(!BlockStorageStream_Read(&stream, &assembliesBuffer, assemblySizeInByte)) break;
+            if(!BlockStorageStream_Read(&stream, &assembliesBuffer, assemblySizeInByte))
+            {
+                // something wrong with the read, can't continue
+                break;
+            }
 
             header = (const CLR_RECORD_ASSEMBLY*)assembliesBuffer;
 
             if(!header->GoodAssembly())
             {
-                // check failed, try to continue to the next 
+                // check failed, try to continue to the next
+
+                if(!isXIP && assembliesBuffer != NULL)
+                {
+                    // release the assembliesBuffer
+                    platform_free(assembliesBuffer);
+                }
+
                 continue;
             }
                 
@@ -230,15 +277,28 @@ struct Settings
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem 
             if (FAILED(LoadAssembly(header, assm)))
             {
-                // load failed, try to continue to the next 
+                // load failed, try to continue to the next
+
+                if(!isXIP && assembliesBuffer != NULL)
+                {
+                    // release the assembliesBuffer which has being used and leave
+                    platform_free(assembliesBuffer);
+                }
+
                 continue;
             }
 
             // load successfull, mark as deployed
             assm->m_flags |= CLR_RT_Assembly::Deployed;
         }
+
+        if(!isXIP && headerBuffer != NULL)
+        {
+            // release the headerbuffer which has being used and leave
+            platform_free(headerBuffer);
+        }
                 
-        NANOCLR_NOCLEANUP_NOLABEL();
+        NANOCLR_NOCLEANUP();
     }
 
     HRESULT LoadDeploymentAssemblies()
