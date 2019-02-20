@@ -420,7 +420,7 @@
       ],
       "environments": [
         {
-          "PATH": "C:\\Windows\\system32" // Work around for Ninja not finding Cmd.exe with add_custom_command
+          "PATH": "C:\\Windows\\system32;${env.PATH}" // Work around for Ninja not finding Cmd.exe with add_custom_command
         }
       ],
       "buildRoot": "${workspaceRoot}\\Build\\${name}",
@@ -565,11 +565,11 @@
         // LIBRARIES
         {
           "name": "API_nanoFramework.Devices.OneWire", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "value": "OFF" // DAV
         },
         {
           "name": "API_System.Math", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "value": "OFF" // DAV
         },
         {
           "name": "API_System.Net", //OFF-default-ON-to-add-this-API
@@ -597,6 +597,10 @@
         },
         {
           "name": "API_Windows.Devices.Spi", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.WiFi", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {

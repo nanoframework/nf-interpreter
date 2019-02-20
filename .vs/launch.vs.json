@@ -53,43 +53,52 @@
     },
     {
       "type": "cppdbg",
-      "name": "C:\\usr\\src\\NanoFramework\\nf-interpreter",
+      "name": "ESP32 nanoCLR - Segger JLink",
       "project": "",
       "cwd": "${workspaceRoot}",
-      "program": "${workspaceRoot}\\BUILD\\${workspaceRootFolderName}.elf",
+      "program": "${workspaceRoot}/Build/ESP32_2/nanoCLR.elf",
       "MIMode": "gdb",
-      "externalConsole": true,
-      "inheritEnvironments": [
-        "gcc_arm"
-      ],
-      "miDebuggerPath": "${env.gccpath}\\bin\\arm-none-eabi-gdb.exe",
+      "stopAtEntry": true,
+      "externalConsole": false,
+      "miDebuggerPath": "C:/Esp32_Tools/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
       "setupCommands": [
+        { "text": "set logging on" },
+        { "text": "target extended-remote localhost:3333" },
+        { "text": "-file-exec-and-symbols C:/usr/src/NanoFramework/nf-interpreter/build/ESP32_2/nanoCLR.elf" },
+        //        { "text": "file C:/usr/src/NanoFramework/nf-interpreter/build/ESP32_2/nanoCLR.elf" },
+        // { "text": "file C:/usr/src/NanoFramework/nf-interpreter/build/ESP32_2/targets/FreeRTOS_ESP32/ESP32_WROOM_32/nanoCLR.elf" },
         {
-          "text": "Documentation: Learn how to configure embedded debugging",
-          "description": "See here for more info http://aka.ms/vsembeddeddebug",
+          "text": "monitor reset halt",
           "ignoreFailures": true
         },
         {
-          "text": "-environment-cd ${workspaceRoot}/BUILD"
+          "text": "monitor reset init",
+          "ignoreFailures": true
         },
         {
-          "text": "-file-exec-and-symbols ${workspaceRootFolderName}.elf",
-          "description": "load file",
-          "ignoreFailures": false
-        },
-        {
-          "text": "-enable-pretty-printing",
+          "text": "x $a1=0",
           "ignoreFailures": true
         }
       ],
-      "visualizerFile": "${debugInfo.linuxNatvisPath}",
-      "showDisplayString": true,
+      //"visualizerFile": "${debugInfo.linuxNatvisPath}",
+      //"showDisplayString": true,
       "miDebuggerServerAddress": "localhost:3333",
       "launchCompleteCommand": "None",
-      "debugServerPath": "path-to-your\\gdbserver.exe",
-      "debugServerArgs": "-f path-to-your/board.cfg",
-      "serverStarted": "GDB\\ server\\ started",
-      "filterStderr": true,
+      // Test
+      //"debugServerPath": "${env.COMSPEC}",
+      //"debugServerArgs": "/C start /WAIT echo Info 1>&2",
+      //"debugServerArgs": "/C start /WAIT C:/Esp32_Tools/openocd-esp32/bin/openocd.exe -s C:/Esp32_Tools/openocd-esp32/share/openocd/scripts -f interface/jlink.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
+
+      // Newer
+      "debugServerPath": "C:/Esp32_Tools/openocd-esp32/bin/openocd.exe",
+      "debugServerArgs": "-s C:/Esp32_Tools/openocd-esp32/share/openocd/scripts -f interface/jlink.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
+
+      // Original
+      //"debugServerPath": "C:\\Esp32_Tools\\openocd-esp32\\bin\\openocd.exe",
+      // "debugServerArgs": "-s \"C:\\Esp32_Tools\\openocd-esp32\\share\\openocd\\scripts\\\" -f interface\\jlink.cfg -f target\\esp32.cfg -c \"adapter_khz 3000\" ",
+      "serverStarted": "Info",
+      //      "serverStarted": "Info : .*Tensilica.*0x1.",
+      "filterStderr": false,
       "filterStdout": true
     }
   ]
