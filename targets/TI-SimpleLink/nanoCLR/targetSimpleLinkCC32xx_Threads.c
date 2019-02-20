@@ -855,26 +855,26 @@ void * mainThread(void *arg)
         }
     }
 
-    // // CLR thread
-    // pthread_attr_init(&slThreadAttributes);
-    // priorityParams.sched_priority = 1;
-    // retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
-    // retc |= pthread_attr_setstacksize(&threadAttributes, 10000);
-    // if (retc != 0) {
-    //     /* failed to set attributes */
-    //     while (1) {}
-    // }
+    // CLR thread
+    pthread_attr_init(&slThreadAttributes);
+    priorityParams.sched_priority = 1;
+    retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
+    retc |= pthread_attr_setstacksize(&threadAttributes, 10000);
+    if (retc != 0) {
+        /* failed to set attributes */
+        while (1) {}
+    }
 
-    // // forward CLR_SETTINGS to CLR startup thread
-    // retc = pthread_create(&nanoCLRThread, &threadAttributes, CLRStartupThread, arg);
-    // if(retc != 0)
-    // {
-    //     /* pthread_create() failed */
-    //     while(1)
-    //     {
-    //         ;
-    //     }
-    // }
+    // forward CLR_SETTINGS to CLR startup thread
+    retc = pthread_create(&nanoCLRThread, &threadAttributes, CLRStartupThread, arg);
+    if(retc != 0)
+    {
+        /* pthread_create() failed */
+        while(1)
+        {
+            ;
+        }
+    }
 
 
 while(1)
