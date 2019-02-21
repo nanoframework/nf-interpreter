@@ -1130,12 +1130,14 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
         # can't continue
         message(FATAL_ERROR "\n\nSorry but support for ${TI_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
     endif()
+   
+    # Define base path for the class libraries
+    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR")
 
-    # add target TI SimpliLink dirs
+    # add target TI SimpleLink dirs
     add_subdirectory(targets/TI-SimpleLink/common)
     add_subdirectory(targets/TI-SimpleLink/Include)
     add_subdirectory(targets/TI-SimpleLink/nanoCLR)
-
 
     if("${TARGET_SERIES}" STREQUAL "CC32xx")
         
@@ -1343,8 +1345,8 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
 
         endif()
 
-        # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD}/nanoCLR")
+        # # Define base path for the class libraries
+        # set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR")
 
         add_subdirectory(targets/TI-SimpleLink/${TI_BOARD})
 
