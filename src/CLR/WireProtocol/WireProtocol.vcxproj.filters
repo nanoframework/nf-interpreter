@@ -27,5 +27,8 @@
     <ClCompile Include="WireProtocol_MonitorCommands.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="targetHAL_time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
