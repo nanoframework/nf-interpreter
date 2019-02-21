@@ -33,7 +33,7 @@ Sometime the CMake server goes away, shutting down Visual Studio and restarting 
 #### c:\nanoFramework_Tools\
  Manually create this directory to contain the following folders.
 ###### c:\nanoFramework_Tools\ChibiOS
-+ Copy of the ChibiOS repository cloned from https://github.com/nanoframework/ChibiOS.git
++ Copy of the ChibiOS repository cloned from https://github.com/nanoframework/chibios.git
 
 ######  C:\nanoFramework_Tools\Tools\openocd
 + Copy of the openocd installation http://www.freddiechopin.info/en/download/category/4-openocd
