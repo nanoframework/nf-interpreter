@@ -11,15 +11,6 @@
 #include <hal.h>
 #include <ch.h>
 
-// Converts CMSIS sysTicks to .NET ticks (100 nanoseconds)
-uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) 
-{
-    // convert to microseconds from CMSIS SysTicks
-    // this is a rewrite of ChibiOS TIME_I2US(n) macro because it will overflow if doing the math using uint32_t
-    // need to convert from microseconds to 100 nanoseconds
-    return (((sysTicks * (uint64_t)1000000) + (int64_t)CH_CFG_ST_FREQUENCY - 1) / (int64_t)CH_CFG_ST_FREQUENCY) * 10;
-}
-
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
