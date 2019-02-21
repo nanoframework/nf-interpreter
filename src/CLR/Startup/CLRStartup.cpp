@@ -437,6 +437,11 @@ void ClrStartup(CLR_SETTINGS params)
 
     } while( softReboot );
 
+  #if !defined(BUILD_RTM)
+    CLR_Debug::Printf( "Exiting.\r\n" );
+  #endif
+
+    CPU_Reset();
 }
 
 #endif // WIN32
