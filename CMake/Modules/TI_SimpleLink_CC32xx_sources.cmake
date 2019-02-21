@@ -172,28 +172,6 @@ foreach(SRC_FILE ${SimpleLink_SRCS})
     list(APPEND TI_SimpleLink_SOURCES ${SimpleLink_SCR_FILE})
 endforeach()
 
-
-# other source files
-set(Other_SRCS
-    
-    # board files
-    CC3220SF_LAUNCHXL.c
-
-)
-
-foreach(SRC_FILE ${Other_SRCS})
-    set(Other_SCR_FILE SRC_FILE -NOTFOUND)
-    find_file(Other_SCR_FILE ${SRC_FILE}
-        PATHS
-
-        "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/boards/CC3220SF_LAUNCHXL"
-
-        CMAKE_FIND_ROOT_PATH_BOTH
-    )
-    # message("${SRC_FILE} >> ${Other_SCR_FILE}") # debug helper
-    list(APPEND TI_SimpleLink_SOURCES ${Other_SCR_FILE})
-endforeach()
-
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SimpleLinkCC32xxSDK DEFAULT_MSG TI_SimpleLink_INCLUDE_DIRS TI_SimpleLink_SOURCES)
