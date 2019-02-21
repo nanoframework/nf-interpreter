@@ -298,6 +298,18 @@ __inline void debug_printf( const char *format, ... ) {}
 #endif
 //--//
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+bool Target_HasNanoBooter();
+void HARD_Breakpoint();
+bool Target_ConfigUpdateRequiresErase();
+
+#ifdef __cplusplus
+}
+#endif
+
 // Watchdog driver
 #include <nanoHAL_Watchdog.h>
 
