@@ -7,7 +7,6 @@
 #define _TARGET_HAL_H_
 
 #include <target_board.h>
-#include <nanoWeak.h>
 #include <esp32_os.h>
 
 extern portMUX_TYPE globalLockMutex;
@@ -37,8 +36,6 @@ extern portMUX_TYPE globalLockMutex;
 
 #if !defined(BUILD_RTM)
 
-inline void HARD_Breakpoint() { };
-
 #define HARD_BREAKPOINT()     HARD_Breakpoint()
 
 // #if defined(_DEBUG)
@@ -54,13 +51,7 @@ inline void HARD_Breakpoint() { };
 
 #endif  // !defined(BUILD_RTM)
 
-inline bool Target_HasNanoBooter() { return false; };
-
 #define NANOCLR_STOP() HARD_BREAKPOINT()
-
-// Provides information whether the configuration block storage requires erase command before sending the update command
-// ESP32 is storing this using its non-volatile storage therefore no erase is required.
-__nfweak bool Target_ConfigUpdateRequiresErase() { return false; };
 
 extern int HeapBegin;
 extern int HeapEnd;

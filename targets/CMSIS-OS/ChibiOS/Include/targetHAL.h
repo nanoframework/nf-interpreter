@@ -7,8 +7,8 @@
 #define _TARGET_HAL_H_
 
 #include <target_board.h>
-#include <nanoWeak.h>
 #include <cmsis_gcc.h>
+#include <nanoHAL_v2.h>
 
 #define GLOBAL_LOCK(x)              chSysLock();
 #define GLOBAL_UNLOCK(x);           chSysUnlock();
@@ -29,12 +29,6 @@
 
 #if !defined(BUILD_RTM)
 
-inline void HARD_Breakpoint() 
-{
-    __BKPT(0);
-    while(true) { /*nop*/ }
-};
-
 #define HARD_BREAKPOINT()     HARD_Breakpoint()
 
 // #if defined(_DEBUG)
@@ -50,14 +44,7 @@ inline void HARD_Breakpoint()
 
 #endif  // !defined(BUILD_RTM)
 
-inline bool Target_HasNanoBooter() { return true; };
-
 #define NANOCLR_STOP() CPU_Reset();
-
-// Provides information whether the configuration block storage requires erase command before sending the update command
-// The 'weak' implementation for ChibiOS targets is true
-// If a target implements the store differently it has to provide a 'strong' implementation of this.
-__nfweak bool Target_ConfigUpdateRequiresErase() { return true; };
 
 extern int HeapBegin;
 extern int HeapEnd;
