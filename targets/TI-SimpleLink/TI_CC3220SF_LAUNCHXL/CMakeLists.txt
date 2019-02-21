@@ -106,7 +106,10 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
+###############################################
+# add -DUSE_CC3220_ROM_DRV_API to use ROM API #
+###############################################
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DDeviceFamily_CC3220)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
