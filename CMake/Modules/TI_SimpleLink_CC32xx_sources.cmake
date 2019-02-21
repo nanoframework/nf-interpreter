@@ -5,6 +5,7 @@
 
 # includes for SimpleLink CC32xx SDK
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source")
+list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/drivers")
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/posix/gcc")
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/boards/CC3220SF_LAUNCHXL")
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/devices/cc32xx")
