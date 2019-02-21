@@ -1,27 +1,28 @@
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
 
 #include <stdint.h>
 #include <nanoCLR_Application.h>
-/* POSIX Header files */
+// POSIX Header files
 #include <pthread.h>
 #include <unistd.h>
 
-/* RTOS header files */
+// RTOS header files
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* Example/Board Header files */
+// board Header files
 #include "Board.h"
 
 //////////////////////////////
 
-/* Stack size in bytes */
+// Stack size in bytes
 #define THREADSTACKSIZE   2024
 
 extern void * mainThread(void *arg0);
 
-/*
- *  ======== main ========
- */
 int main(void)
 {
     pthread_t thread;
@@ -30,9 +31,8 @@ int main(void)
     
     int retc;
 
-    /* Call board init functions */
+    // Call board init functions
     Board_initGeneral();
-
 
     // CLR settings to launch CLR thread
     CLR_SETTINGS clrSettings;
@@ -40,9 +40,9 @@ int main(void)
 
     clrSettings.MaxContextSwitches         = 50;
     clrSettings.WaitForDebugger            = false;
-    clrSettings.EnterDebuggerLoopAfterExit = false;
+    clrSettings.EnterDebuggerLoopAfterExit = true;
 
-    /* Set priority and stack size attributes */
+    // Set priority and stack size attributes
     pthread_attr_init(&threadAttributes);
     priorityParameters.sched_priority = 1;
 
@@ -53,14 +53,14 @@ int main(void)
     retc |= pthread_create(&thread, &threadAttributes, mainThread, &clrSettings);
     if(retc != 0)
     {
-        /* pthread_create() failed */
+        // pthread_create()
         while(1)
         {
             ;
         }
     }
 
-    /* Start the FreeRTOS scheduler */
+    // Start the FreeRTOS scheduler
     vTaskStartScheduler();
 
     return (0);

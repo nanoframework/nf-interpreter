@@ -6,18 +6,18 @@
 
 #include <stdint.h>
 #include <nanoCLR_Application.h>
-/* POSIX Header files */
+// POSIX Header files
 #include <pthread.h>
 #include <unistd.h>
 
-/* RTOS header files */
+// RTOS header files
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* TI-RTOS Header files */
+// TI-RTOS Header files
 #include <ti/drivers/GPIO.h>
 
-/* Example/Board Header files */
+// Example/Board Header files
 #include "Board.h"
 #include <ti/drivers/net/wifi/simplelink.h>
 
@@ -42,7 +42,7 @@ extern void * ReceiverThread(void *arg0);
 
 //////////////////////////////
 
-/* Stack size in bytes */
+// Stack size in bytes
 #define THREADSTACKSIZE   4096
 
 pthread_t provisioningThread = (pthread_t)NULL;
@@ -78,16 +78,15 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
         CLR_STATUS_BIT(nF_ControlBlock.status,
                        AppStatusBits_Ipv6gAcquired);
 
-        /*
-           Information about the connected AP (like name, MAC etc) will be
-           available in 'slWlanConnectAsyncResponse_t'-Applications
-           can use it if required:
+        //    Information about the connected AP (like name, MAC etc) will be
+        //    available in 'slWlanConnectAsyncResponse_t'-Applications
+        //    can use it if required:
 
-           slWlanConnectAsyncResponse_t *pEventData = NULL;
-           pEventData = &pWlanEvent->EventData.STAandP2PModeWlanConnected;
-         */
+        //    slWlanConnectAsyncResponse_t *pEventData = NULL;
+        //    pEventData = &pWlanEvent->EventData.STAandP2PModeWlanConnected;
+        
 
-        /* Copy new connection SSID and BSSID to global parameters */
+        // Copy new connection SSID and BSSID to global parameters
         // memcpy(nF_ControlBlock.connectionSSID,
         //        pWlanEvent->Data.Connect.SsidName,
         //        pWlanEvent->Data.Connect.SsidLen);
@@ -126,9 +125,9 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
 
         pEventData = &pWlanEvent->Data.Disconnect;
 
-        /*  If the user has initiated 'Disconnect' request,
-            'reason_code' is SL_WLAN_DISCONNECT_USER_INITIATED.
-         */
+        //  If the user has initiated 'Disconnect' request,
+        //    'reason_code' is SL_WLAN_DISCONNECT_USER_INITIATED.
+        
         if(SL_WLAN_DISCONNECT_USER_INITIATED == pEventData->ReasonCode)
         {
             //UART_PRINT(
@@ -261,8 +260,8 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
         case SL_WLAN_PROVISIONING_AUTO_STARTED:
         {
             //UART_PRINT("[WLAN EVENT] Auto-Provisioning Started\r\n");
-            /* stop auto provisioning - 
-                 may trigger in case of returning to default */
+            // stop auto provisioning - 
+            // may trigger in case of returning to default
             // SignalProvisioningEvent(PrvnEvent_Stopped);
         }
         break;
@@ -287,8 +286,8 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
                     // nF_ControlBlock.ssidLen =
                     //     pWlanEvent->Data.ProvisioningStatus.Ssidlen;
 
-                    /* Provisioning is stopped by the device and
-                       provisioning is done successfully */
+                    // Provisioning is stopped by the device and
+                    // provisioning is done successfully
                     // SignalProvisioningEvent(PrvnEvent_Stopped);
 
                     break;
@@ -304,8 +303,8 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
                     CLR_STATUS_BIT(nF_ControlBlock.status,
                                    AppStatusBits_Ipv6gAcquired);
 
-                    /* Provisioning is stopped by the device and provisioning 
-                    is not done yet, still need to connect to AP */
+                    // Provisioning is stopped by the device and provisioning 
+                    // is not done yet, still need to connect to AP
                     // SignalProvisioningEvent(PrvnEvent_WaitForConn);
 
                     break;
@@ -472,10 +471,10 @@ void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
 
         SET_STATUS_BIT(nF_ControlBlock.status, AppStatusBits_IpAcquired);
 
-        /* Ip Acquired Event Data */
+        // Ip Acquired Event Data
         pEventData = &pNetAppEvent->Data.IpAcquiredV4;
 
-        /* Gateway IP address */
+        // Gateway IP address
         // nF_ControlBlock.gatewayIP = pEventData->Gateway;
 
         //UART_PRINT("[NETAPP EVENT] IP Acquired: IP=%d.%d.%d.%d , "
@@ -600,7 +599,7 @@ void SimpleLinkHttpServerEventHandler(SlNetAppHttpServerEvent_t *pHttpEvent,
     SlNetAppHttpServerResponse_t *
     pHttpResponse)
 {
-    /* Unused in this application */
+    // Unused in this application
     //UART_PRINT("[HTTP SERVER EVENT] Unexpected HTTP server event \n\r");
 }
 
@@ -618,10 +617,9 @@ void SimpleLinkGeneralEventHandler(SlDeviceEvent_t *pDevEvent)
     uint8_t msg = 4;
     int32_t msgqRetVal;
 
-    /*
-        Most of the general errors are not FATAL are are to be handled
-        appropriately by the application.
-     */
+    // Most of the general errors are not FATAL are are to be handled
+    // appropriately by the application.
+    
     if(NULL == pDevEvent)
     {
         return;
@@ -696,7 +694,7 @@ void SimpleLinkSockEventHandler(SlSockEvent_t *pSock)
         }
     }
 
-    /* This application doesn't work w/ socket - Events are not expected */
+    // This application doesn't work w/ socket - Events are not expected
     switch(pSock->Event)
     {
     case SL_SOCKET_TX_FAILED_EVENT:
@@ -724,7 +722,7 @@ void SimpleLinkSockEventHandler(SlSockEvent_t *pSock)
 
 void SimpleLinkNetAppRequestMemFreeEventHandler(uint8_t *buffer)
 {
-    /* Unused in this application */
+    // Unused in this application
 }
 
 
@@ -736,12 +734,6 @@ void SimpleLinkSocketTriggerEventHandler(SlSockTriggerEvent_t *pSlTriggerEvent)
     (void)pSlTriggerEvent;
 }
 
-
-
-
-/*
- *  ======== main ========
- */
 void * mainThread(void *arg)
 {
     struct sched_param priorityParams;
@@ -752,20 +744,19 @@ void * mainThread(void *arg)
     int retc;
     struct timespec ts = {0};
 
-
     GPIO_init();
     UART_init();
     SPI_init();
     I2C_init();
 
-    /* initialize the realtime clock */
+    // initialize the realtime clock
     clock_settime(CLOCK_REALTIME, &ts);
 
     // Switch off all LEDs on boards
     GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
 
 
-    /* clear SimpleLink Status */
+    // clear SimpleLink Status
     nF_ControlBlock.status = 0;
 
     // initializes signals for all tasks
@@ -788,7 +779,7 @@ void * mainThread(void *arg)
 
     if(retc)
     {
-        /* Handle Error */
+        // Handle Error
         ////UART_PRINT("Unable to create sl_Task thread \n");
         while(1)
         {
@@ -820,14 +811,14 @@ void * mainThread(void *arg)
     // retc |= pthread_attr_setstacksize(&threadAttributes, TASK_STACK_SIZE);
     // retc = pthread_create(&provisioningThread, &threadAttributes, provisioningTask, NULL);
     // if (retc != 0) {
-    //     /* failed to set attributes */
+    //     // failed to set attributes
     //     while (1) {}
     // }
 
     // retc |= pthread_attr_setstacksize(&threadAttributes, 2048);
     // if(retc)
     // {
-    //     /* Handle Error */
+    //     // Handle Error
     //     // UART_PRINT("Unable to create provisioningTask thread \n");
     //     while(1)
     //     {
@@ -841,14 +832,14 @@ void * mainThread(void *arg)
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
     retc |= pthread_attr_setstacksize(&threadAttributes, 2048);
     if (retc != 0) {
-        /* failed to set attributes */
+        // failed to set attributes
         while (1) {}
     }
 
     retc = pthread_create(&receiverThread, &threadAttributes, ReceiverThread, NULL);
     if(retc != 0)
     {
-        /* pthread_create() failed */
+        // pthread_create() failed
         while(1)
         {
             ;
@@ -861,7 +852,7 @@ void * mainThread(void *arg)
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
     retc |= pthread_attr_setstacksize(&threadAttributes, 10000);
     if (retc != 0) {
-        /* failed to set attributes */
+        // failed to set attributes
         while (1) {}
     }
 
@@ -869,23 +860,13 @@ void * mainThread(void *arg)
     retc = pthread_create(&nanoCLRThread, &threadAttributes, CLRStartupThread, arg);
     if(retc != 0)
     {
-        /* pthread_create() failed */
+        // pthread_create() failed
         while(1)
         {
             ;
         }
     }
 
-
-while(1)
-{
-    
-    GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_ON);
-    vTaskDelay(500);
-    GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
-    vTaskDelay(500);
-
-}
     return (0);
 }
 
@@ -900,7 +881,7 @@ while(1)
 //*****************************************************************************
 void vApplicationMallocFailedHook()
 {
-    /* Handle Memory Allocation Errors */
+    // Handle Memory Allocation Errors
     while(1)
     {
     }
@@ -926,13 +907,12 @@ void vApplicationStackOverflowHook(TaskHandle_t pxTask,
 
 void vApplicationTickHook(void)
 {
-    /*
-     * This function will be called by each tick interrupt if
-     * configUSE_TICK_HOOK is set to 1 in FreeRTOSConfig.h.  User code can be
-     * added here, but the tick hook is called from an interrupt context, so
-     * code must not attempt to block, and only the interrupt safe FreeRTOS API
-     * functions can be used (those that end in FromISR()).
-     */
+    //  This function will be called by each tick interrupt if
+    //  configUSE_TICK_HOOK is set to 1 in FreeRTOSConfig.h.  User code can be
+    //  added here, but the tick hook is called from an interrupt context, so
+    //  code must not attempt to block, and only the interrupt safe FreeRTOS API
+    //  functions can be used (those that end in FromISR()).
+    
 }
 
 void vPreSleepProcessing(uint32_t ulExpectedIdleTime)
@@ -951,7 +931,7 @@ void vPreSleepProcessing(uint32_t ulExpectedIdleTime)
 void
 vApplicationIdleHook(void)
 {
-    /* Handle Idle Hook for Profiling, Power Management etc */
+    // Handle Idle Hook for Profiling, Power Management etc
 }
 
 //*****************************************************************************
@@ -966,7 +946,7 @@ vApplicationIdleHook(void)
 //*****************************************************************************
 void * _sbrk(uint32_t delta)
 {
-    extern char _end;     /* Defined by the linker */
+    extern char _end;     // Defined by the linker
     extern char __HeapLimit;
     static char *heap_end;
     static char *heap_limit;
@@ -991,98 +971,6 @@ void * _sbrk(uint32_t delta)
 // /*****************************************************************************
 //                  Local Functions
 // *****************************************************************************/
-// //*****************************************************************************
-// //
-// //! Application Boarders display on UART
-// //!
-// //! \param  ch - Character to be displayed , n - number of time to display
-// //!
-// //! \return none
-// //!
-// //*****************************************************************************
-// void printBorder(char ch,
-//                  int n)
-// {
-//     int i = 0;
-
-//     for(i = 0; i < n; i++)
-//     {
-//         putch(ch);
-//     }
-// }
-
-// //*****************************************************************************
-// //
-// //! Application startup display on UART
-// //!
-// //! \param  none
-// //!
-// //! \return none
-// //!
-// //*****************************************************************************
-// int32_t DisplayBanner(char * AppName,
-//                       char * AppVer)
-// {
-//     int32_t ret = 0;
-//     uint8_t macAddress[SL_MAC_ADDR_LEN];
-//     uint16_t macAddressLen = SL_MAC_ADDR_LEN;
-//     uint16_t ConfigSize = 0;
-//     uint8_t ConfigOpt = SL_DEVICE_GENERAL_VERSION;
-//     SlDeviceVersion_t ver = {0};
-//     char lineBreak[] = "\n\r";
-//     ConfigSize = sizeof(SlDeviceVersion_t);
-
-//     /* Print device version info. */
-//     ret =
-//         sl_DeviceGet(SL_DEVICE_GENERAL, &ConfigOpt, &ConfigSize,
-//                      (uint8_t*)(&ver));
-//     ASSERT_ON_ERROR(ret);
-
-//     /* Print device Mac address */
-//     ret = sl_NetCfgGet(SL_NETCFG_MAC_ADDRESS_GET, 0, &macAddressLen,
-//                        &macAddress[0]);
-//     ASSERT_ON_ERROR(ret);
-
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t");
-//     printBorder('=', 44);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t   %s Example Ver: %s",AppName, AppVer);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t");
-//     printBorder('=', 44);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t CHIP: 0x%x",ver.ChipId);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t MAC:  %d.%d.%d.%d",ver.FwVersion[0],ver.FwVersion[1],
-//                ver.FwVersion[2],
-//                ver.FwVersion[3]);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t PHY:  %d.%d.%d.%d",ver.PhyVersion[0],ver.PhyVersion[1],
-//                ver.PhyVersion[2],
-//                ver.PhyVersion[3]);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t NWP:  %d.%d.%d.%d",ver.NwpVersion[0],ver.NwpVersion[1],
-//                ver.NwpVersion[2],
-//                ver.NwpVersion[3]);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t ROM:  %d",ver.RomVersion);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t HOST: %s", SL_DRIVER_VERSION);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t MAC address: %02x:%02x:%02x:%02x:%02x:%02x", macAddress[0],
-//                macAddress[1], macAddress[2], macAddress[3], macAddress[4],
-//                macAddress[5]);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT("\t");
-//     printBorder('=', 44);
-//     //UART_PRINT(lineBreak);
-//     //UART_PRINT(lineBreak);
-
-//     return(ret);
-// }
 
 //*****************************************************************************
 //
@@ -1104,7 +992,7 @@ void Platform_TimerInit(void (*timerIntHandler)(sigval val),
 {
     sigevent sev;
 
-    /* Create Timer */
+    // Create Timer
     sev.sigev_notify = SIGEV_SIGNAL;
     sev.sigev_notify_function = timerIntHandler;
     timer_create(CLOCK_MONOTONIC, &sev, timerId);
@@ -1116,7 +1004,7 @@ void Platform_TimerStart(uint32_t asyncEvtTimeoutMsec,
 {
     struct itimerspec value;
 
-    /* set the timeout */
+    // set the timeout
     value.it_value.tv_sec = (asyncEvtTimeoutMsec / 1000);
     value.it_value.tv_nsec = (asyncEvtTimeoutMsec % 1000) * 1000000;
 
@@ -1125,18 +1013,18 @@ void Platform_TimerStart(uint32_t asyncEvtTimeoutMsec,
 
     if(periodic)
     {
-        /* set as periodic timer */
+        // set as periodic timer
         value.it_interval.tv_sec = value.it_value.tv_sec;
         value.it_interval.tv_nsec = value.it_value.tv_nsec;
     }
     else
     {
-        /* set as one shot timer */
+        // set as one shot timer
         value.it_interval.tv_sec = 0;
         value.it_interval.tv_nsec = 0;
     }
 
-    /* kick the timer */
+    // kick the timer
     timer_settime(timerId, 0, &value, NULL);
 }
 
@@ -1144,7 +1032,7 @@ void Platform_TimerStop(timer_t timerId)
 {
     struct itimerspec value;
 
-    /* stop timer */
+    // stop timer
     value.it_interval.tv_sec = 0;
     value.it_interval.tv_nsec = 0;
     value.it_value.tv_sec = 0;
@@ -1154,7 +1042,7 @@ void Platform_TimerStop(timer_t timerId)
 
 void Platform_TimerInterruptClear(void)
 {
-    /* Do nothing... */
+    // Do nothing...
 }
 
 //*****************************************************************************
@@ -1168,11 +1056,11 @@ void Platform_TimerInterruptClear(void)
 //****************************************************************************
 void mcuReboot(void)
 {
-    /* stop network processor activities before reseting the MCU */
+    // stop network processor activities before reseting the MCU
     sl_Stop(SL_STOP_TIMEOUT);
 
     // UART_PRINT("[Common] CC32xx MCU reset request\r\n");
 
-    /* Reset the MCU in order to test the bundle */
+    // Reset the MCU in order to test the bundle
     PRCMHibernateCycleTrigger();
 }
