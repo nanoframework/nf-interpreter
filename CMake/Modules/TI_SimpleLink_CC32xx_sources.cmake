@@ -10,6 +10,8 @@ list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSD
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/boards/CC3220SF_LAUNCHXL")
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/devices/cc32xx")
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/devices/cc32xx/driverlib")
+list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/net")
+list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/bsd")
 
 # source files for board drivers 
 set(BoardDrivers_SRCS
@@ -170,6 +172,42 @@ foreach(SRC_FILE ${SimpleLink_SRCS})
     )
     # message("${SRC_FILE} >> ${SimpleLink_SCR_FILE}") # debug helper
     list(APPEND TI_SimpleLink_SOURCES ${SimpleLink_SCR_FILE})
+endforeach()
+
+
+# source files for SimpleLink net Wi-Fi 
+set(SLNetWiFi_SRCS
+
+    slnetsock.c
+    slnetutils.c
+    slnetif.c
+    
+    # bsd
+    netdb.c
+    socket.c
+    errnoutil.c
+
+    # drivers
+    eventreg.c
+    slnetifwifi.c
+)
+
+foreach(SRC_FILE ${SLNetWiFi_SRCS})
+    set(SLNetWiFi_SCR_FILE SRC_FILE -NOTFOUND)
+    find_file(SLNetWiFi_SCR_FILE ${SRC_FILE}
+        PATHS
+
+        "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/net"
+        "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/net/bsd"
+
+        # drivers
+        "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/drivers/net/wifi"
+        "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/drivers/net/wifi/slnetif"
+
+        CMAKE_FIND_ROOT_PATH_BOTH
+    )
+    # message("${SRC_FILE} >> ${SLNetWiFi_SCR_FILE}") # debug helper
+    list(APPEND TI_SimpleLink_SOURCES ${SLNetWiFi_SCR_FILE})
 endforeach()
 
 include(FindPackageHandleStandardArgs)
