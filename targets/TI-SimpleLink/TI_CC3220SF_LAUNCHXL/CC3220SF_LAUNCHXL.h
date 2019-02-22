@@ -100,8 +100,8 @@ typedef enum CC3220SF_LAUNCHXL_GPIOName {
      *  I2C and PWM peripherals. In order for those examples to work, these
      *  LEDs are  taken out of gpioPinCOnfig[]
      */
-    /* CC3220SF_LAUNCHXL_GPIO_LED_D9, */
-    /* CC3220SF_LAUNCHXL_GPIO_LED_D8, */
+    CC3220SF_LAUNCHXL_GPIO_LED_D9,
+    CC3220SF_LAUNCHXL_GPIO_LED_D8,
 
     CC3220SF_LAUNCHXL_GPIO_TMP116_EN,
 
