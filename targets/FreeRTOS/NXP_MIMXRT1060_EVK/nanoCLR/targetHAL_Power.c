@@ -5,7 +5,8 @@
 
 #include <nanoHAL_v2.h>
 
-inline void CPU_Reset(){
+inline void CPU_Reset()
+{
     //TODO reset
 };
 

@@ -12,12 +12,6 @@
 #include "time.h"
 #include <sys/time.h>
 
-// Converts FreeRTOS Tickcount to .NET ticks (100 nanoseconds)
-uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) 
-{
-    return (((int64_t)sysTicks * (int64_t)1000000 + (int64_t)configTICK_RATE_HZ - 1) / (int64_t)configTICK_RATE_HZ) * 10;
-}
-
 // Returns the current date time from the RTC 
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
