@@ -6,9 +6,11 @@
 
 #include <stdint.h>
 #include <nanoCLR_Application.h>
+
 // POSIX Header files
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 
 // RTOS header files
 #include "FreeRTOS.h"
@@ -16,10 +18,11 @@
 
 // TI-RTOS Header files
 #include <ti/drivers/GPIO.h>
-
-// Example/Board Header files
-#include "Board.h"
 #include <ti/drivers/net/wifi/simplelink.h>
+#include <ti/drivers/net/wifi/slnetifwifi.h>
+
+// Board Header files
+#include "Board.h"
 
 #include <targetHAL.h>
 #include <nanoCLR_Application.h>
@@ -27,7 +30,6 @@
 #include <targetSimpleLinkCC32xx_Threads.h>
 #include <targetSimpleLinkCC32xx_LinkLocalTask.h>
 #include <targetSimpleLinkCC32xx_ProvisioningTask.h>
-#include <string.h>
 
 extern void * CLRStartupThread(void *arg0);
 extern void * ReceiverThread(void *arg0);
@@ -37,8 +39,10 @@ extern void * ReceiverThread(void *arg0);
 #define APPLICATION_NAME        "out of box"
 #define APPLICATION_VERSION     "1.00.00.09"
 
-#define SPAWN_TASK_PRIORITY             (9)
-#define TASK_STACK_SIZE         (2048)
+#define SPAWN_TASK_PRIORITY                 (9)
+#define TASK_STACK_SIZE                     (2048)
+
+#define SLNET_IF_WIFI_PRIO                  (5)
 
 //////////////////////////////
 
@@ -71,11 +75,11 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
     {
     case SL_WLAN_EVENT_CONNECT:
     {
-        SET_STATUS_BIT(nF_ControlBlock.status, AppStatusBits_Connection);
-        CLR_STATUS_BIT(nF_ControlBlock.status, AppStatusBits_IpAcquired);
-        CLR_STATUS_BIT(nF_ControlBlock.status,
+        SET_STATUS_BIT(nF_ControlBlock.Status, AppStatusBits_Connection);
+        CLR_STATUS_BIT(nF_ControlBlock.Status, AppStatusBits_IpAcquired);
+        CLR_STATUS_BIT(nF_ControlBlock.Status,
                        AppStatusBits_Ipv6lAcquired);
-        CLR_STATUS_BIT(nF_ControlBlock.status,
+        CLR_STATUS_BIT(nF_ControlBlock.Status,
                        AppStatusBits_Ipv6gAcquired);
 
         //    Information about the connected AP (like name, MAC etc) will be
@@ -116,11 +120,11 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
     {
         SlWlanEventDisconnect_t*    pEventData = NULL;
 
-        CLR_STATUS_BIT(nF_ControlBlock.status, AppStatusBits_Connection);
-        CLR_STATUS_BIT(nF_ControlBlock.status, AppStatusBits_IpAcquired);
-        CLR_STATUS_BIT(nF_ControlBlock.status,
+        CLR_STATUS_BIT(nF_ControlBlock.Status, AppStatusBits_Connection);
+        CLR_STATUS_BIT(nF_ControlBlock.Status, AppStatusBits_IpAcquired);
+        CLR_STATUS_BIT(nF_ControlBlock.Status,
                        AppStatusBits_Ipv6lAcquired);
-        CLR_STATUS_BIT(nF_ControlBlock.status,
+        CLR_STATUS_BIT(nF_ControlBlock.Status,
                        AppStatusBits_Ipv6gAcquired);
 
         pEventData = &pWlanEvent->Data.Disconnect;
@@ -192,14 +196,14 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
 
     case SL_WLAN_EVENT_PROVISIONING_STATUS:
     {
-        uint16_t status =
+        uint16_t Status =
             pWlanEvent->Data.ProvisioningStatus.ProvisioningStatus;
-        switch(status)
+        switch(Status)
         {
         case SL_WLAN_PROVISIONING_GENERAL_ERROR:
         case SL_WLAN_PROVISIONING_ERROR_ABORT:
         {
-            //UART_PRINT("[WLAN EVENT] Provisioning Error status=%d\r\n",status);
+            //UART_PRINT("[WLAN EVENT] Provisioning Error Status=%d\r\n",Status);
             // SignalProvisioningEvent(PrvnEvent_Error);
         }
         break;
@@ -207,7 +211,7 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
         case SL_WLAN_PROVISIONING_ERROR_ABORT_HTTP_SERVER_DISABLED:
         case SL_WLAN_PROVISIONING_ERROR_ABORT_PROFILE_LIST_FULL:
         {
-            //UART_PRINT("[WLAN EVENT] Provisioning Error status=%d\r\n",status);
+            //UART_PRINT("[WLAN EVENT] Provisioning Error Status=%d\r\n",Status);
             // SignalProvisioningEvent(PrvnEvent_StartFailed);
         }
         break;
@@ -294,13 +298,13 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
                 }
                 else
                 {
-                    CLR_STATUS_BIT(nF_ControlBlock.status,
+                    CLR_STATUS_BIT(nF_ControlBlock.Status,
                                    AppStatusBits_Connection);
-                    CLR_STATUS_BIT(nF_ControlBlock.status,
+                    CLR_STATUS_BIT(nF_ControlBlock.Status,
                                    AppStatusBits_IpAcquired);
-                    CLR_STATUS_BIT(nF_ControlBlock.status,
+                    CLR_STATUS_BIT(nF_ControlBlock.Status,
                                    AppStatusBits_Ipv6lAcquired);
-                    CLR_STATUS_BIT(nF_ControlBlock.status,
+                    CLR_STATUS_BIT(nF_ControlBlock.Status,
                                    AppStatusBits_Ipv6gAcquired);
 
                     // Provisioning is stopped by the device and provisioning 
@@ -324,13 +328,13 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
 
         case SL_WLAN_PROVISIONING_CONFIRMATION_WLAN_CONNECT:
         {
-            SET_STATUS_BIT(nF_ControlBlock.status,
+            SET_STATUS_BIT(nF_ControlBlock.Status,
                            AppStatusBits_Connection);
-            CLR_STATUS_BIT(nF_ControlBlock.status,
+            CLR_STATUS_BIT(nF_ControlBlock.Status,
                            AppStatusBits_IpAcquired);
-            CLR_STATUS_BIT(nF_ControlBlock.status,
+            CLR_STATUS_BIT(nF_ControlBlock.Status,
                            AppStatusBits_Ipv6lAcquired);
-            CLR_STATUS_BIT(nF_ControlBlock.status,
+            CLR_STATUS_BIT(nF_ControlBlock.Status,
                            AppStatusBits_Ipv6gAcquired);
 
             //UART_PRINT("[WLAN EVENT] Connection to AP succeeded\r\n");
@@ -339,7 +343,7 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
 
         case SL_WLAN_PROVISIONING_CONFIRMATION_IP_ACQUIRED:
         {
-            SET_STATUS_BIT(nF_ControlBlock.status,
+            SET_STATUS_BIT(nF_ControlBlock.Status,
                            AppStatusBits_IpAcquired);
 
             //UART_PRINT("[WLAN EVENT] IP address acquired\r\n");
@@ -469,7 +473,7 @@ void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
     {
         SlIpV4AcquiredAsync_t   *pEventData = NULL;
 
-        SET_STATUS_BIT(nF_ControlBlock.status, AppStatusBits_IpAcquired);
+        SET_STATUS_BIT(nF_ControlBlock.Status, AppStatusBits_IpAcquired);
 
         // Ip Acquired Event Data
         pEventData = &pNetAppEvent->Data.IpAcquiredV4;
@@ -494,16 +498,16 @@ void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
 
     case SL_NETAPP_EVENT_IPV6_ACQUIRED:
     {
-        if(!GET_STATUS_BIT(nF_ControlBlock.status,
+        if(!GET_STATUS_BIT(nF_ControlBlock.Status,
                            AppStatusBits_Ipv6lAcquired))
         {
-            SET_STATUS_BIT(nF_ControlBlock.status,
+            SET_STATUS_BIT(nF_ControlBlock.Status,
                            AppStatusBits_Ipv6lAcquired);
             //UART_PRINT("[NETAPP EVENT] Local IPv6 Acquired\n\r");
         }
         else
         {
-            SET_STATUS_BIT(nF_ControlBlock.status,
+            SET_STATUS_BIT(nF_ControlBlock.Status,
                            AppStatusBits_Ipv6gAcquired);
             //UART_PRINT("[NETAPP EVENT] Global IPv6 Acquired\n\r");
         }
@@ -514,7 +518,7 @@ void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
 
     case SL_NETAPP_EVENT_DHCPV4_LEASED:
     {
-        SET_STATUS_BIT(nF_ControlBlock.status, AppStatusBits_IpLeased);
+        SET_STATUS_BIT(nF_ControlBlock.Status, AppStatusBits_IpLeased);
 
         //UART_PRINT(
             // "[NETAPP EVENT] IPv4 leased %d.%d.%d.%d for "
@@ -534,7 +538,7 @@ void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
 
     case SL_NETAPP_EVENT_DHCPV4_RELEASED:
     {
-        CLR_STATUS_BIT(nF_ControlBlock.status, AppStatusBits_IpLeased);
+        CLR_STATUS_BIT(nF_ControlBlock.Status, AppStatusBits_IpLeased);
 
         //UART_PRINT(
             // "[NETAPP EVENT] IPv4 released %d.%d.%d.%d for "
@@ -738,12 +742,13 @@ void * mainThread(void *arg)
 {
     struct sched_param priorityParams;
 
-    pthread_attr_t slThreadAttributes;
     pthread_attr_t threadAttributes;
 
     int retc;
     struct timespec ts = {0};
 
+    // peripherals initialization
+    // make this dependent on having the corresponding NF FEATURE enabled
     GPIO_init();
     UART_init();
     SPI_init();
@@ -755,9 +760,15 @@ void * mainThread(void *arg)
     // Switch off all LEDs on boards
     GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
 
-
     // clear SimpleLink Status
-    nF_ControlBlock.status = 0;
+    nF_ControlBlock.Status = 0;
+
+    // reset control block vars
+    nF_ControlBlock.socket = -1;
+    nF_ControlBlock.sockTcpServer = -1;
+    nF_ControlBlock.configurationDone = 0;
+    nF_ControlBlock.tcpConnected = 0;
+
 
     // initializes signals for all tasks
     sem_init(&Provisioning_ControlBlock.connectionAsyncEvent, 0, 0);
@@ -768,15 +779,19 @@ void * mainThread(void *arg)
     sem_init(&LinkLocal_ControlBlock.otaReportServerStartSignal, 0, 0);
     sem_init(&LinkLocal_ControlBlock.otaReportServerStopSignal, 0, 0);
 
-
-    // create the sl_Task 
-    pthread_attr_init(&slThreadAttributes);
+    // Create the sl_Task internal spawn thread
+    pthread_attr_init(&threadAttributes);
     priorityParams.sched_priority = SPAWN_TASK_PRIORITY;
-    retc = pthread_attr_setschedparam(&slThreadAttributes, &priorityParams);
-    retc |= pthread_attr_setstacksize(&slThreadAttributes, TASK_STACK_SIZE);
+    retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
+    retc |= pthread_attr_setstacksize(&threadAttributes, TASK_STACK_SIZE);
 
-    retc = pthread_create(&slThread, &slThreadAttributes, sl_Task, NULL);
-
+    // The SimpleLink host driver architecture mandate spawn 
+    // thread to be created prior to calling Sl_start (turning the NWP on).
+    // The purpose of this thread is to handle
+    // asynchronous events sent from the NWP.
+    // Every event is classified and later handled 
+    // by the Host driver event handlers.
+    retc = pthread_create(&slThread, &threadAttributes, sl_Task, NULL);
     if(retc)
     {
         // Handle Error
@@ -787,10 +802,24 @@ void * mainThread(void *arg)
         }
     }
 
+    // Before turning on the NWP on, reset any previously configured parameters
+    // TODO: check if we should have a better reset implementation instead of using the standard one
+    retc = sl_WifiConfig();
+    if(retc < 0)
+    {
+        // Handle Error
+        //UART_PRINT("Network Terminal - Couldn't configure Network Processor - %d\n",RetVal);
+        return(NULL);
+    }
+
+    // start network processor
     retc = sl_Start(NULL, NULL, NULL);
     if(retc > 0)
     {
         // we are good!
+        // sl_Start returns on success the role that device started on
+        nF_ControlBlock.Role = retc;
+
     }
     else if((retc < 0) && (retc != SL_ERROR_RESTORE_IMAGE_COMPLETE))
     {
@@ -827,11 +856,12 @@ void * mainThread(void *arg)
     // }
 
     // receiver thread
-    pthread_attr_init(&slThreadAttributes);
+    pthread_attr_init(&threadAttributes);
     priorityParams.sched_priority = 1;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
     retc |= pthread_attr_setstacksize(&threadAttributes, 2048);
-    if (retc != 0) {
+    if (retc != 0)
+    {
         // failed to set attributes
         while (1) {}
     }
@@ -847,11 +877,12 @@ void * mainThread(void *arg)
     }
 
     // CLR thread
-    pthread_attr_init(&slThreadAttributes);
+    pthread_attr_init(&threadAttributes);
     priorityParams.sched_priority = 1;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
     retc |= pthread_attr_setstacksize(&threadAttributes, 10000);
-    if (retc != 0) {
+    if (retc != 0)
+    {
         // failed to set attributes
         while (1) {}
     }

@@ -703,7 +703,7 @@ int32_t otaPutCallback(uint8_t requestIdx,
     uint8_t *argvArray;
     uint16_t metadataLen;
     uint8_t *filename;
-    int32_t status;
+    int32_t Status;
     uint32_t flags;
     uint32_t fileLen = 0;
     uint16_t elementType;
@@ -715,7 +715,7 @@ int32_t otaPutCallback(uint8_t requestIdx,
 
     StartLedEvtTimer(LED_TOGGLE_OTA_PROCESS_TIMEOUT);
 
-    status = 0;
+    Status = 0;
     accumulatedLen = 0;
     deviceType = getDeviceType();
     argvArray = *argvCallback;
@@ -762,7 +762,7 @@ int32_t otaPutCallback(uint8_t requestIdx,
     {
         //UART_PRINT(
             // "[Link local task] OTA filename should be in *.tar format\n\r");
-        status = -1;
+        Status = -1;
         goto exit_ota_put;
     }
 
@@ -771,7 +771,7 @@ int32_t otaPutCallback(uint8_t requestIdx,
 
     sl_Memcpy(gPayloadBuffer, netAppRequest->requestData.pPayload,
               netAppRequest->requestData.PayloadLen);
-    // status =
+    // Status =
     //     (int32_t)OtaArchive_Process(&gOtaArcive, gPayloadBuffer,
     //                                 netAppRequest->requestData.PayloadLen,
     //                                 &processedBytes);
@@ -779,11 +779,11 @@ int32_t otaPutCallback(uint8_t requestIdx,
             //    netAppRequest->requestData.PayloadLen,
             //    processedBytes);
 
-    // if(status < 0)
+    // if(Status < 0)
     // {
     //     goto exit_ota_put;
     // }
-    // else if(status == ARCHIVE_STATUS_DOWNLOAD_DONE)
+    // else if(Status == ARCHIVE_STATUS_DOWNLOAD_DONE)
     // {
     //     otaProgressBar = 100;
     //     mq_send(LinkLocal_ControlBlock.reportServerMQueue,
@@ -796,7 +796,7 @@ int32_t otaPutCallback(uint8_t requestIdx,
     //         // "Download file completed %s\r\n",
     //         // filename);
 
-    //     status = 0;
+    //     Status = 0;
 
     //     goto exit_ota_put;
     // }
@@ -821,18 +821,18 @@ int32_t otaPutCallback(uint8_t requestIdx,
         if(OOB_IS_NETAPP_MORE_DATA(flags))
         {
             chunkLen = NETAPP_MAX_RX_FRAGMENT_LEN - unprocessedBytes;
-            status =
+            Status =
                 sl_NetAppRecv(netAppRequest->Handle, (uint16_t *)&chunkLen,
                               &gPayloadBuffer[unprocessedBytes],
                               (unsigned long *)&flags);
             //INFO_PRINT(
                 // "[Link local task] sl_NetAppRecv payload=%d, flags=%d \n\r",
                 // chunkLen, flags);
-            if(status < 0)
+            if(Status < 0)
             {
                 //UART_PRINT(
                     // "[Link local task] sl_NetAppRecv error=%d, flags=%d \n\r",
-                    // status, flags);
+                    // Status, flags);
                 /* Stop the parsing of the archive file */
                // OtaArchive_Abort(&gOtaArcive);
 
@@ -847,7 +847,7 @@ int32_t otaPutCallback(uint8_t requestIdx,
             //INFO_PRINT(
                 // "[Link local task] No more data in NetApp but archive module "
 				// "still has processing to do \n\r");
-            status = 0;
+            Status = 0;
             chunkLen = 0;
         }
 
@@ -899,7 +899,7 @@ int32_t otaPutCallback(uint8_t requestIdx,
         // }
 
         otaChunkLen = chunkLen + unprocessedBytes;
-        // status =
+        // Status =
         //     (int32_t)OtaArchive_Process(&gOtaArcive, gPayloadBuffer,
         //                                 otaChunkLen,
         //                                 &processedBytes);
@@ -907,12 +907,12 @@ int32_t otaPutCallback(uint8_t requestIdx,
         //INFO_PRINT(
             // "[Link local task] Received OTA payload=%d. Processed=%d \n\r",
             // otaChunkLen, processedBytes);
-        if(status < 0)
+        if(Status < 0)
         {
-            //UART_PRINT("[Link local task] OtaArchive error %d \n\r", status);
+            //UART_PRINT("[Link local task] OtaArchive error %d \n\r", Status);
             goto exit_ota_put;
         }
-        // else if(status == ARCHIVE_STATUS_DOWNLOAD_DONE)
+        // else if(Status == ARCHIVE_STATUS_DOWNLOAD_DONE)
         // {
         //     clock_gettime(CLOCK_REALTIME, &ts);
         //     ts.tv_nsec += 1000000;
@@ -932,7 +932,7 @@ int32_t otaPutCallback(uint8_t requestIdx,
         //         // "file completed %s\r\n",
         //         // filename);
 
-        //     status = 0;
+        //     Status = 0;
 
         //     goto exit_ota_put;
         // }
@@ -962,7 +962,7 @@ exit_ota_put:
     
     ▼use case▼|  good  |  bad  |  no rx bufer |  internal error |
     ---------------------------------------------------------------
-    status      |   0    |  <0   |      0       |       0         |
+    Status      |   0    |  <0   |      0       |       0         |
     ---------------------------------------------------------------
     progress bar|  100   | <100  |     <100     |      <100       |
     ---------------------------------------------------------------
@@ -979,10 +979,10 @@ exit_ota_put:
     /* progress bar is not yet 100% - bad case*/
     if(otaProgressBar != 100)
     {
-        status = -1;
+        Status = -1;
     }
-    //UART_PRINT("[Link local task] ota put done. status=%d \r\n", status);
-    if(status == 0)
+    //UART_PRINT("[Link local task] ota put done. Status=%d \r\n", Status);
+    if(Status == 0)
     {
         /* flush the netapp data from client */
         otaFlushNetappReq(netAppRequest, &flags);
@@ -996,14 +996,14 @@ exit_ota_put:
     }
     else
     {
-        metadataLen = preparePostMetadata(status);
+        metadataLen = preparePostMetadata(Status);
 
         //INFO_PRINT("[Link local task] ota put, sending metadata \r\n");
         sl_NetAppSend (netAppRequest->Handle, metadataLen, gMetadataBuffer,
                        SL_NETAPP_REQUEST_RESPONSE_FLAGS_METADATA);
     }
 
-    if(status != 0)
+    if(Status != 0)
     {
         /* mark progress bar to 0xFF so ota task
            would get restarted to reopen socket */
@@ -1029,7 +1029,7 @@ exit_ota_put:
     sem_wait(&LinkLocal_ControlBlock.otaReportServerStopSignal);
 
     StopLedEvtTimer();
-    if(status == 0)
+    if(Status == 0)
     {
         //GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_ON);
     }
@@ -1038,14 +1038,14 @@ exit_ota_put:
         //GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
     }
 
-    if(status == 0)
+    if(Status == 0)
     {
         /* it means Tar file is downloaded and parsed correctly.
             Need to reset the MCU */
         mcuReboot();
     }
 
-    return(status);
+    return(Status);
 }
 
 //*****************************************************************************
@@ -1070,7 +1070,7 @@ int32_t otaGetCallback(uint8_t requestIdx,
 {
     uint8_t *argvArray, *pPayload;
     uint16_t metadataLen, elementType;
-    int32_t status = 0;
+    int32_t Status = 0;
 
     argvArray = *argvCallback;
     pPayload = gPayloadBuffer;
@@ -1085,14 +1085,14 @@ int32_t otaGetCallback(uint8_t requestIdx,
             {
             case OtaIdx_Version:
 
-                // status = OtaArchive_GetCurrentVersion(gOtaVersion);
-                // if(status < 0)
+                // Status = OtaArchive_GetCurrentVersion(gOtaVersion);
+                // if(Status < 0)
                 // {
                 //     //UART_PRINT(
                 //         // "[Link local task] ota bundle version file does "
                 //         // "not exist\r\n");
                 //     strcpy((char *)gMetadataBuffer, "no version file exists");
-                //     status = 0;
+                //     Status = 0;
                 // }
                 // else
                 // {
@@ -1132,7 +1132,7 @@ int32_t otaGetCallback(uint8_t requestIdx,
     *(pPayload - 1) = '\0';
 
     metadataLen =
-        prepareGetMetadata(status, strlen(
+        prepareGetMetadata(Status, strlen(
                                (const char *)gPayloadBuffer),
                            HttpContentTypeList_UrlEncoded);
 
@@ -1148,7 +1148,7 @@ int32_t otaGetCallback(uint8_t requestIdx,
     //INFO_PRINT("[Link local task] Data Sent, len = %d\n\r",
             //    strlen ((const char *)gPayloadBuffer));
 
-    return(status);
+    return(Status);
 }
 
 //*****************************************************************************
@@ -1360,22 +1360,22 @@ int32_t sensorGetCallback(uint8_t requestIdx,
     uint8_t *argvArray, *pPayload;
     uint16_t metadataLen, elementType;
     int16_t value = 0;
-    int32_t status;
+    int32_t Status;
 
     argvArray = *argvCallback;
     pPayload = gPayloadBuffer;
 
     /* Read accelerometer axis values */
-    status = accelarometerReading();
-    if(status != 0)
+    Status = accelarometerReading();
+    if(Status != 0)
     {
         //UART_PRINT(
             // "[Link local task] Failed to read data from accelerometer\n\r");
     }
 
     /* Read temperature sensor values */
-    status = temperatureReading();
-    if(status != 0)
+    Status = temperatureReading();
+    if(Status != 0)
     {
         //UART_PRINT(
             // "[Link local task] Failed to"
@@ -1472,7 +1472,7 @@ int32_t deviceGetCallback(uint8_t requestIdx,
 {
     uint8_t *argvArray, *pPayload;
     uint16_t metadataLen, elementType;
-    int32_t status;
+    int32_t Status;
     uint32_t deviceType;
 
     argvArray = *argvCallback;
@@ -1488,29 +1488,29 @@ int32_t deviceGetCallback(uint8_t requestIdx,
             switch(*(argvArray + ARGV_VALUE_OFFSET))
             {
             case DeviceIdx_Ssid:
-                status = getDeviceSSID();
-                if(status != 0)
+                Status = getDeviceSSID();
+                if(Status != 0)
                 {
                     //UART_PRINT(
                         // "[Link local task] failed to get SSID.  IP_ACQ=%d, "
                         // "IP_LEASED=%d\n\r",
-                        // GET_STATUS_BIT(OutOfBox_ControlBlock.status,
+                        // GET_STATUS_BIT(OutOfBox_ControlBlock.Status,
                         //                AppStatusBits_IpAcquired),
-                        // GET_STATUS_BIT(OutOfBox_ControlBlock.status,
+                        // GET_STATUS_BIT(OutOfBox_ControlBlock.Status,
                         //                AppStatusBits_IpLeased));
                     goto exit_device_get;
                 }
                 break;
             case DeviceIdx_IpAddress:
-                status = getDeviceIpAddress();
-                if(status != 0)
+                Status = getDeviceIpAddress();
+                if(Status != 0)
                 {
                     goto exit_device_get;
                 }
                 break;
             case DeviceIdx_MacAddress:
-                status = getDeviceMacAddress(gMetadataBuffer);
-                if(status != 0)
+                Status = getDeviceMacAddress(gMetadataBuffer);
+                if(Status != 0)
                 {
                     goto exit_device_get;
                 }
@@ -1546,12 +1546,12 @@ int32_t deviceGetCallback(uint8_t requestIdx,
                     //UART_PRINT(
                         // "[Link local task] device type %d is not supported\n\r",
                         // deviceType);
-                    status = -1;
+                    Status = -1;
 
                     goto exit_device_get;
                 }
 
-                status = 0;
+                Status = 0;
 
                 break;
             }
@@ -1584,16 +1584,16 @@ int32_t deviceGetCallback(uint8_t requestIdx,
     /* NULL terminate the payload */
     *(pPayload - 1) = '\0';
 
-    status = 0;
+    Status = 0;
 
 exit_device_get:
-    if(status != 0)
+    if(Status != 0)
     {
         strcpy((char *)gPayloadBuffer, (const char *)pageNotFound);
     }
 
     metadataLen =
-        prepareGetMetadata(status,
+        prepareGetMetadata(Status,
         strlen((const char *)gPayloadBuffer),
         HttpContentTypeList_UrlEncoded);
 
@@ -1607,7 +1607,7 @@ exit_device_get:
     //INFO_PRINT("[Link local task] Data Sent, len = %d\n\r",
             //    strlen ((const char *)gPayloadBuffer));
 
-    return(status);
+    return(Status);
 }
 
 //*****************************************************************************
@@ -1651,18 +1651,18 @@ int32_t getDeviceMacAddress(uint8_t *macAddress)
 {
     uint8_t macAddressVal[6];
     uint16_t macAddressLen;
-    int32_t status;
+    int32_t Status;
 
     macAddress[0] = '\0';
 
     /* Get the device's MAC address */
     macAddressLen = 6;
-    status =
+    Status =
         sl_NetCfgGet(SL_NETCFG_MAC_ADDRESS_GET,NULL,&macAddressLen,
                      (uint8_t *)macAddressVal);
-    if(status < 0)
+    if(Status < 0)
     {
-        return(status);
+        return(Status);
     }
 
     snprintf((char *)macAddress, MAC_ADDR_STR_LEN,
@@ -1689,7 +1689,7 @@ int32_t getDeviceMacAddress(uint8_t *macAddress)
 uint8_t accelarometerReading(void)
 {
     int8_t xValRead, yValRead, zValRead;
-    int32_t status;
+    int32_t Status;
 
     if(sensorLockObj != NULL)
     {
@@ -1697,19 +1697,19 @@ uint8_t accelarometerReading(void)
     }
 
     /* Read accelarometer axis values */
-    status = BMA2xxReadNew(i2cHandle, &xValRead, &yValRead, &zValRead);
-    if(status != 0)
+    Status = BMA2xxReadNew(i2cHandle, &xValRead, &yValRead, &zValRead);
+    if(Status != 0)
     {
         /* try to read again */
-        status = BMA2xxReadNew(i2cHandle, &xValRead, &yValRead, &zValRead);
-        if(status != 0)     /* leave previous values */
+        Status = BMA2xxReadNew(i2cHandle, &xValRead, &yValRead, &zValRead);
+        if(Status != 0)     /* leave previous values */
         {
             //UART_PRINT(
                 // "[Link local task] Failed to read data from accelarometer\n\r");
         }
     }
 
-    if(status == 0)
+    if(Status == 0)
     {
         xVal = xValRead;
         yVal = yValRead;
@@ -1721,7 +1721,7 @@ uint8_t accelarometerReading(void)
         pthread_mutex_unlock(sensorLockObj);
     }
 
-    return(status);
+    return(Status);
 }
 
 //*****************************************************************************
@@ -1735,16 +1735,16 @@ uint8_t accelarometerReading(void)
 //*****************************************************************************
 uint8_t temperatureReading(void)
 {
-    int32_t status;
+    int32_t Status;
     float fTempRead;
 
     /* Read temperature axis values */
-    status = TMP006DrvGetTemp(i2cHandle, &fTempRead);
-    if(status != 0)
+    Status = TMP006DrvGetTemp(i2cHandle, &fTempRead);
+    if(Status != 0)
     {
         /* try to read again */
-        status = TMP006DrvGetTemp(i2cHandle, &fTempRead);
-        if(status != 0)     /* leave previous values */
+        Status = TMP006DrvGetTemp(i2cHandle, &fTempRead);
+        if(Status != 0)     /* leave previous values */
         {
             //UART_PRINT(
                 // "[Link local task] Failed to read data from"
@@ -1752,13 +1752,13 @@ uint8_t temperatureReading(void)
         }
     }
 
-    if(status == 0)
+    if(Status == 0)
     {
         fTempRead = (fTempRead > 100) ? 100 : fTempRead;
         temperatureVal = fTempRead;
     }
 
-    return(status);
+    return(Status);
 }
 
 //*****************************************************************************
@@ -1811,7 +1811,7 @@ uint16_t prepareGetMetadata(int32_t parsingStatus,
 
     pMetadata = gMetadataBuffer;
 
-    /* http status */
+    /* http Status */
     *pMetadata = (uint8_t) SL_NETAPP_REQUEST_METADATA_TYPE_STATUS;
     pMetadata++;
     *(uint16_t *)pMetadata = (uint16_t) 2;
@@ -1865,7 +1865,7 @@ uint16_t preparePostMetadata(int32_t parsingStatus)
 
     pMetadata = gMetadataBuffer;
 
-    /* http status */
+    /* http Status */
     *pMetadata = (uint8_t) SL_NETAPP_REQUEST_METADATA_TYPE_STATUS;
     pMetadata++;
     *(uint16_t *)pMetadata = (uint16_t) 2;
@@ -1903,19 +1903,19 @@ int32_t getDeviceIpAddress(void)
     uint16_t ConfigOpt;
     uint16_t ipLen;
     SlNetCfgIpV4Args_t ipV4 = {0};
-    int32_t status;
+    int32_t Status;
 
     gMetadataBuffer[0] = '\0';
 
     /* Get the device's IP address */
     ipLen = sizeof(SlNetCfgIpV4Args_t);
     ConfigOpt = 0;
-    status =
+    Status =
         sl_NetCfgGet(SL_NETCFG_IPV4_STA_ADDR_MODE,&ConfigOpt,&ipLen,
                      (uint8_t *)&ipV4);
-    if(status < 0)
+    if(Status < 0)
     {
-        return(status);
+        return(Status);
     }
 
     snprintf((char *)gMetadataBuffer, IP_ADDR_STR_LEN, "%d.%d.%d.%d",
@@ -1941,9 +1941,9 @@ int32_t getDeviceSSID(void)
     uint16_t len = 32;
     uint16_t config_opt = SL_WLAN_AP_OPT_SSID;
     /* simplelink as station connected to AP */
-    if(GET_STATUS_BIT(nF_ControlBlock.status,
+    if(GET_STATUS_BIT(nF_ControlBlock.Status,
                       AppStatusBits_IpAcquired) &&
-       GET_STATUS_BIT(nF_ControlBlock.status, AppStatusBits_Connection))
+       GET_STATUS_BIT(nF_ControlBlock.Status, AppStatusBits_Connection))
     {
         // sl_Memcpy ((uint8_t *)gMetadataBuffer,
         //            (const uint8_t *)nF_ControlBlock.connectionSSID,
@@ -1951,9 +1951,9 @@ int32_t getDeviceSSID(void)
         // gMetadataBuffer[nF_ControlBlock.ssidLen] = '\0';
     }
     /* simplelink as AP with connected client */
-    else if(GET_STATUS_BIT(nF_ControlBlock.status,
+    else if(GET_STATUS_BIT(nF_ControlBlock.Status,
                            AppStatusBits_IpAcquired) &&
-            GET_STATUS_BIT(nF_ControlBlock.status, AppStatusBits_IpLeased))                                                                                
+            GET_STATUS_BIT(nF_ControlBlock.Status, AppStatusBits_IpLeased))                                                                                
     {
         // sl_WlanGet(SL_WLAN_CFG_AP_ID, &config_opt, &len,
         //            (uint8_t *)nF_ControlBlock.connectionSSID);
@@ -1985,24 +1985,24 @@ int32_t getDeviceSSID(void)
 int32_t otaFlushNetappReq(SlNetAppRequest_t *netAppRequest,
                           uint32_t *flags)
 {
-    int32_t status;
+    int32_t Status;
     int32_t chunkLen;
 
-    status = 0;
+    Status = 0;
 
     while((*flags & SL_NETAPP_REQUEST_RESPONSE_FLAGS_CONTINUATION) ==
           SL_NETAPP_REQUEST_RESPONSE_FLAGS_CONTINUATION)
     {
         chunkLen = NETAPP_MAX_RX_FRAGMENT_LEN;
-        status =
+        Status =
             sl_NetAppRecv(netAppRequest->Handle, (uint16_t *)&chunkLen,
                           gPayloadBuffer,
                           (_u32 *)flags);
         //INFO_PRINT("[Link local task] flushing NetApp packet, len=%d \n\r",
                 //    chunkLen);
-        if(status < 0)
+        if(Status < 0)
         {
-            return(status);
+            return(Status);
         }
 
         if(*flags == 0)
@@ -2011,7 +2011,7 @@ int32_t otaFlushNetappReq(SlNetAppRequest_t *netAppRequest,
         }
     }
 
-    return(status);
+    return(Status);
 }
 
 //*****************************************************************************
@@ -2090,7 +2090,7 @@ int32_t parseUrlEncoded(uint8_t requestIdx,
 {
     uint8_t *token;
     uint8_t characteristic, value, isValueExpected, loopIdx;
-    int32_t status = -1;
+    int32_t Status = -1;
     uint8_t *argvArray;
     uint8_t remainingLen, actualLen;
     uint16_t elementType;
@@ -2139,7 +2139,7 @@ int32_t parseUrlEncoded(uint8_t requestIdx,
 
     while(token && ((pPhrase + phraseLen) > token))
     {
-        status = -1;
+        Status = -1;
         characteristic = 0;
 
         /* run over all possible characteristics, if exist */
@@ -2154,7 +2154,7 @@ int32_t parseUrlEncoded(uint8_t requestIdx,
                                [
                                    characteristic].characteristic)))
             {
-                status = 0;
+                Status = 0;
 
                 /* found a characteristic. save its index number */
                 (*argcCallback)++;
@@ -2183,16 +2183,16 @@ int32_t parseUrlEncoded(uint8_t requestIdx,
             }
         }
         /* it means the characteristics is not valid/known */
-        if(-1 == status)         
+        if(-1 == Status)         
         {
-            return(status);
+            return(Status);
         }
 
         token = (uint8_t *)strtok(NULL, "=&");
 
         if(isValueExpected)
         {
-            status = -1;
+            Status = -1;
             value = 0;
 
             if(token != NULL)
@@ -2202,7 +2202,7 @@ int32_t parseUrlEncoded(uint8_t requestIdx,
                    httpRequest[requestIdx].
                    charValues[characteristic].value[value])
                 {
-                    status = 0;
+                    Status = 0;
 
                     /* found a string value. copy its content */
                     (*argcCallback)++;
@@ -2241,7 +2241,7 @@ int32_t parseUrlEncoded(uint8_t requestIdx,
                                            ].charValues[
                                                characteristic].value[value])))
                         {
-                            status = 0;
+                            Status = 0;
 
                             /* found a value. save its index number */
                             (*argcCallback)++;
@@ -2267,9 +2267,9 @@ int32_t parseUrlEncoded(uint8_t requestIdx,
                         }
                     }
                     /* it means the value is not valid/known */
-                    if(-1 == status)         
+                    if(-1 == Status)         
                     {
-                        return(status);
+                        return(Status);
                     }
                 }
             }
@@ -2277,7 +2277,7 @@ int32_t parseUrlEncoded(uint8_t requestIdx,
         }
     }
 
-    return(status);
+    return(Status);
 }
 
 //*****************************************************************************
@@ -2338,7 +2338,7 @@ int32_t parseHttpRequestMetadata(uint8_t requestType,
     uint8_t *pTlv;
     uint8_t *pEnd;
 
-    int32_t status = -1;
+    int32_t Status = -1;
     uint8_t loopIdx;
     uint8_t type;
     uint16_t len;
@@ -2386,7 +2386,7 @@ int32_t parseHttpRequestMetadata(uint8_t requestType,
 
         case SL_NETAPP_REQUEST_METADATA_TYPE_HTTP_CONTENT_LEN:
         /* it means there is a content length and URI is OK. Add it to the argv */
-            if(0 == status)         
+            if(0 == Status)         
             {
                 /* it means parameters already exist from query type */
                 if(*argcCallback > 0)             
@@ -2431,7 +2431,7 @@ int32_t parseHttpRequestMetadata(uint8_t requestType,
                 {
                     if(requestType == httpRequest[loopIdx].httpMethod)
                     {
-                        status = 0;
+                        Status = 0;
                         *requestIdx = httpRequest[loopIdx].requestIdx;
                         //INFO_PRINT ("%s\n\r", httpRequest[loopIdx].service);
 
@@ -2440,7 +2440,7 @@ int32_t parseHttpRequestMetadata(uint8_t requestType,
                 }
             }
 
-            if(status != 0)
+            if(Status != 0)
             {
                 //INFO_PRINT ("unknown service\n\r");
             }
@@ -2448,12 +2448,12 @@ int32_t parseHttpRequestMetadata(uint8_t requestType,
             break;
 
         case SL_NETAPP_REQUEST_METADATA_TYPE_HTTP_QUERY_STRING:
-            if(0 == status)
+            if(0 == Status)
             {
-                status = parseUrlEncoded(*requestIdx, pTlv, len, argcCallback,
+                Status = parseUrlEncoded(*requestIdx, pTlv, len, argcCallback,
                                          argvCallback);
 
-                if(status != 0)
+                if(Status != 0)
                 {
                     //INFO_PRINT (
                     //    "query string in metadata section is not"
@@ -2474,7 +2474,7 @@ int32_t parseHttpRequestMetadata(uint8_t requestType,
         pTlv += len;
     }
 
-    return(status);
+    return(Status);
 }
 
 //*****************************************************************************
@@ -2501,19 +2501,19 @@ int32_t parseHttpRequestPayload(uint8_t requestIdx,
                                 uint8_t *argcCallback,
                                 uint8_t **argvCallback)
 {
-    int32_t status = -1;
+    int32_t Status = -1;
 
-    status = parseUrlEncoded(requestIdx, pPayload, payloadLen, argcCallback,
+    Status = parseUrlEncoded(requestIdx, pPayload, payloadLen, argcCallback,
                              argvCallback);
 
-    if(status != 0)
+    if(Status != 0)
     {
         //UART_PRINT (
             // "[Link local task] query string in payload section is "
             // "not valid/known\n\r");
     }
 
-    return(status);
+    return(Status);
 }
 
 //*****************************************************************************
@@ -2540,14 +2540,14 @@ int32_t httpCheckContentInDB(SlNetAppRequest_t *netAppRequest,
                              uint8_t *argcCallback,
                              uint8_t **argvCallback)
 {
-    int32_t status = -1;
+    int32_t Status = -1;
 
     if(netAppRequest->AppId != SL_NETAPP_HTTP_SERVER_ID)
     {
-        return(status);
+        return(Status);
     }
 
-    status =
+    Status =
         parseHttpRequestMetadata(netAppRequest->Type,
                                  netAppRequest->requestData.pMetadata,
                                  netAppRequest->requestData.MetadataLen,
@@ -2555,10 +2555,10 @@ int32_t httpCheckContentInDB(SlNetAppRequest_t *netAppRequest,
                                  argvCallback);
 
     /* PUT does not contain parseable data - only POST does */
-    if((0 == status) && (netAppRequest->requestData.PayloadLen != 0) &&
+    if((0 == Status) && (netAppRequest->requestData.PayloadLen != 0) &&
        (netAppRequest->Type != SL_NETAPP_REQUEST_HTTP_PUT))
     {
-        status =
+        Status =
             parseHttpRequestPayload(*requestIdx,
                                     netAppRequest->requestData.pPayload,
                                     netAppRequest->requestData.PayloadLen,
@@ -2566,7 +2566,7 @@ int32_t httpCheckContentInDB(SlNetAppRequest_t *netAppRequest,
                                     argvCallback);
     }
 
-    return(status);
+    return(Status);
 }
 
 //*****************************************************************************
@@ -2581,7 +2581,7 @@ int32_t httpCheckContentInDB(SlNetAppRequest_t *netAppRequest,
 void httpGetHandler(SlNetAppRequest_t *netAppRequest)
 {
     uint16_t metadataLen;
-    int32_t status;
+    int32_t Status;
     uint8_t requestIdx;
 
     uint8_t argcCallback;
@@ -2590,13 +2590,13 @@ void httpGetHandler(SlNetAppRequest_t *netAppRequest)
 
     argvArray = gHttpGetBuffer;
 
-    status = httpCheckContentInDB(netAppRequest, &requestIdx, &argcCallback,
+    Status = httpCheckContentInDB(netAppRequest, &requestIdx, &argcCallback,
                                   argvCallback);
 
-    if(status < 0)
+    if(Status < 0)
     {
         metadataLen =
-            prepareGetMetadata(status, strlen (
+            prepareGetMetadata(Status, strlen (
                                    (const char *)pageNotFound),
                                HttpContentTypeList_TextHtml);
 
@@ -2633,7 +2633,7 @@ void httpGetHandler(SlNetAppRequest_t *netAppRequest)
 void httpPostHandler(SlNetAppRequest_t *netAppRequest)
 {
     uint16_t metadataLen;
-    int32_t status;
+    int32_t Status;
     uint8_t requestIdx;
 
     uint8_t argcCallback;
@@ -2642,12 +2642,12 @@ void httpPostHandler(SlNetAppRequest_t *netAppRequest)
 
     argvArray = gHttpPostBuffer;
 
-    status = httpCheckContentInDB(netAppRequest,&requestIdx,&argcCallback,
+    Status = httpCheckContentInDB(netAppRequest,&requestIdx,&argcCallback,
                                   argvCallback);
 
-    if(status < 0)
+    if(Status < 0)
     {
-        metadataLen = preparePostMetadata(status);
+        metadataLen = preparePostMetadata(Status);
 
         sl_NetAppSend (netAppRequest->Handle, metadataLen, gMetadataBuffer,
                        SL_NETAPP_REQUEST_RESPONSE_FLAGS_METADATA);

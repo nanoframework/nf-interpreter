@@ -86,9 +86,16 @@ typedef enum
 // nF Control block for SimpleLink
 typedef struct nanoFramework_ControlBlock_t
 {
-    
-    uint32_t status;/* SimpleLink Status */
-    
+    // This bit-wise status variable shows the state of the NWP
+    uint32_t Status;
+    // This field keeps the device's role (STA, P2P or AP)
+    uint32_t Role;
+
+    int16_t socket;
+    int16_t sockTcpServer;
+    uint8_t configurationDone;
+    uint8_t tcpConnected;
+  
     // uint32_t gatewayIP;/* Network Gateway IP address */
     
     // uint8_t connectionSSID[SL_WLAN_SSID_MAX_LENGTH + 1];/* Connection SSID */
