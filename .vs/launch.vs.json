@@ -58,47 +58,35 @@
       "cwd": "${workspaceRoot}",
       "program": "${workspaceRoot}/Build/ESP32_2/nanoCLR.elf",
       "MIMode": "gdb",
-      "stopAtEntry": true,
-      "externalConsole": false,
+      "stopAtEntry": false,
+      "externalConsole": true,
       "miDebuggerPath": "C:/Esp32_Tools/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
       "setupCommands": [
         { "text": "set logging on" },
+        { "text": "!${workspaceRoot}/startocd.bat" },
         { "text": "target extended-remote localhost:3333" },
         { "text": "-file-exec-and-symbols C:/usr/src/NanoFramework/nf-interpreter/build/ESP32_2/nanoCLR.elf" },
-        //        { "text": "file C:/usr/src/NanoFramework/nf-interpreter/build/ESP32_2/nanoCLR.elf" },
-        // { "text": "file C:/usr/src/NanoFramework/nf-interpreter/build/ESP32_2/targets/FreeRTOS_ESP32/ESP32_WROOM_32/nanoCLR.elf" },
-        {
-          "text": "monitor reset halt",
-          "ignoreFailures": true
-        },
-        {
-          "text": "monitor reset init",
-          "ignoreFailures": true
-        },
-        {
-          "text": "x $a1=0",
-          "ignoreFailures": true
-        }
+        { "text": "set remote hardware-watchpoint-limit 2" },
+        { "text": "monitor reset halt" },
+        { "text": "flushregs" },
+        { "text": "thb app_main" }
       ],
       //"visualizerFile": "${debugInfo.linuxNatvisPath}",
       //"showDisplayString": true,
-      "miDebuggerServerAddress": "localhost:3333",
+      //"miDebuggerServerAddress": "localhost:3333",
       "launchCompleteCommand": "None",
-      // Test
-      //"debugServerPath": "${env.COMSPEC}",
-      //"debugServerArgs": "/C start /WAIT echo Info 1>&2",
-      //"debugServerArgs": "/C start /WAIT C:/Esp32_Tools/openocd-esp32/bin/openocd.exe -s C:/Esp32_Tools/openocd-esp32/share/openocd/scripts -f interface/jlink.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
 
-      // Newer
-      "debugServerPath": "C:/Esp32_Tools/openocd-esp32/bin/openocd.exe",
-      "debugServerArgs": "-s C:/Esp32_Tools/openocd-esp32/share/openocd/scripts -f interface/jlink.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
+      // It appears VS2017 issues the setup commands before it has started the debugServer, and as many of them don't make sense at that stage GDB returns "Error"
+      // The only way I've found around it so far is to launch the debugServer (OpenOCD) as a shell command from within GDB, via a batch file
+      // As it isn't a captive process it hangs around for re-use. GDB attempts to launch further copies silently fail as the resources are locked
+      // DAV 25FEB19
 
-      // Original
-      //"debugServerPath": "C:\\Esp32_Tools\\openocd-esp32\\bin\\openocd.exe",
-      // "debugServerArgs": "-s \"C:\\Esp32_Tools\\openocd-esp32\\share\\openocd\\scripts\\\" -f interface\\jlink.cfg -f target\\esp32.cfg -c \"adapter_khz 3000\" ",
-      "serverStarted": "Info",
-      //      "serverStarted": "Info : .*Tensilica.*0x1.",
-      "filterStderr": false,
+      //"debugServerPath": "C:/Esp32_Tools/openocd-esp32/bin/openocd.exe",
+      //"debugServerArgs": "-s C:/Esp32_Tools/openocd-esp32/share/openocd/scripts -f interface/jlink.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
+
+      //"serverStarted": "Open On-Chip Debugger",
+      "serverStarted": "Info : .*Tensilica.*0x1.",
+      "filterStderr": true,
       "filterStdout": true
     }
   ]

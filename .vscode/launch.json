@@ -15,7 +15,11 @@
                 {"text": "set logging on"},
                 {"text": "target extended-remote localhost:3333"},
                 {"text": "file ${command:extension.workspaceFolderFS}/build/nanoCLR.elf"},
+                {"text": "set remote hardware-watchpoint-limit 2"},
                 {"text": "monitor reset halt"},
+                {"text": "flushregs"},
+                {"text": "thb app_main"},
+//                {"text": "continue"}
                 {"text": "x $a1=0"}
             ],
 
