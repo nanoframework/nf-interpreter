@@ -63,7 +63,9 @@
       "miDebuggerPath": "C:/Esp32_Tools/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
       "setupCommands": [
         { "text": "set logging on" },
-        { "text": "!${workspaceRoot}/startocd.bat" },
+        { "text": "!${workspaceRoot}/startocd.bat ESP32_JLINK" },
+//        { "text": "!${workspaceRoot}/startocd.bat ESP32_OLIMEX" },
+//        { "text": "!${workspaceRoot}/startocd.bat STM32_STLINK" },
         { "text": "target extended-remote localhost:3333" },
         { "text": "-file-exec-and-symbols C:/usr/src/NanoFramework/nf-interpreter/build/ESP32_2/nanoCLR.elf" },
         { "text": "set remote hardware-watchpoint-limit 2" },
