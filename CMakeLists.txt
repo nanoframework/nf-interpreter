@@ -319,6 +319,26 @@ else()
 endif()
 
 #################################################################
+# enables USB Mass Storage support
+# (default is OFF so USB Mass Storage is NOT supported)
+option(NF_FEATURE_HAS_USB_MSD "option to enable USB Mass Storage")
+
+if(NF_FEATURE_HAS_USB_MSD)
+
+    # this feature currently is supported only on ChibiOS
+    if(NOT RTOS_CHIBIOS_CHECK)
+        message(FATAL_ERROR "Support for USB Mass Storage is only available for ChibiOS Cortex-M targets.")
+    endif()
+
+    # this feature requires inclusion of ChibiOS contribution repository
+    set(CHIBIOS_CONTRIB_REQUIRED ON CACHE INTERNAL "Forcing ChibiOS contribution repo option to ON")
+
+    message(STATUS "Support for USB Mass Storage is included")
+else()
+    message(STATUS "Support for USB Mass Storage IS NOT included")
+endif()
+
+#################################################################
 
 if(RTOS_CHIBIOS_CHECK)
 
