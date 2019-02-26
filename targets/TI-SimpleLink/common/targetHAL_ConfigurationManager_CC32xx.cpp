@@ -7,10 +7,111 @@
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 
+#include <ti/drivers/net/wifi/simplelink.h>
+
+// we'll store up to 4 network configuration blocks
+#define NETWORK_CONFIG_MAX_COUNT            (4)
+// files with network configuration have this namming patter "network-config-N.bin"
+#define NETWORK_CONFIG_FILE_NAME            "nf/network-config0.bin"
+// position of the index in the file name above (that's the 0)
+#define NETWORK_CONFIG_FILE_INDEX_POSITION  (17)
+
+typedef struct
+{
+    SlFileAttributes_t attribute;
+    char fileName[SL_FS_MAX_FILE_NAME_LENGTH];
+}slGetfileList_t;
 
 // This configuration manager implementation is valid for CC32xx devices.
 // Because everything that is meant to be stored in the configure block is handled by the SimpleLink 
 // persistent storage, this code is either empty or acts as a proxy to the SimpleLink API
+
+// network configuration blocks are stored as files in file storage
+void* ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks()
+{
+    int32_t ret = 1;
+    int32_t retGetFileList = 1;
+    slGetfileList_t* fileList;
+    int32_t index = -1;
+
+    int32_t i;
+    uint32_t fileCount = 0;
+
+    // allocate memory for file list buffer
+    fileList = (slGetfileList_t*)platform_malloc(sizeof(slGetfileList_t) * NETWORK_CONFIG_MAX_COUNT);
+
+    // check succesfull malloc
+    if (fileList == NULL)
+    {
+        return NULL;
+    }
+
+    // clear memory
+    memset(fileList, 0x0, sizeof(sizeof(SlFileAttributes_t) * NETWORK_CONFIG_MAX_COUNT));
+
+    // first pass: find out how many files of this type we have
+    while(retGetFileList > 0)
+    {
+        retGetFileList = sl_FsGetFileList( &index, NETWORK_CONFIG_MAX_COUNT, 
+                                                (uint8_t)(SL_FS_MAX_FILE_NAME_LENGTH + sizeof(SlFileAttributes_t)),
+                                                (unsigned char*)fileList, SL_FS_GET_FILE_ATTRIBUTES);
+        if (retGetFileList < 0)
+        {
+            // error getting file list, or no more files
+            break;
+        }
+        
+        for (i = 0; i < retGetFileList; i++)
+        {
+            // check file name
+            if(memcmp(fileList[i].fileName, NETWORK_CONFIG_FILE_NAME, sizeof(NETWORK_CONFIG_FILE_NAME)) == 0)
+            {
+                fileCount++;
+            }
+        }
+    }
+
+    // allocate config struct
+    HAL_CONFIGURATION_NETWORK *networkConfigs = (HAL_CONFIGURATION_NETWORK *)platform_malloc(offsetof(HAL_CONFIGURATION_NETWORK, Configs) + fileCount * sizeof(networkConfigs->Configs[0]));
+    // set collection count
+    networkConfigs->Count = fileCount;
+
+    // clear memory for file list
+    platform_free(fileList);
+
+    return networkConfigs;
+}
+
+// wireless profiles are stored as SimpleLink WLAN profile 
+void* ConfigurationManagerCC32xx_FindNetworkWireless80211ConfigurationBlocks()
+{
+    uint16_t index, status;
+    signed char name[32];
+    int16_t nameLength;
+    unsigned char macAddr[6];
+    SlWlanSecParams_t secParams;
+    SlWlanGetSecParamsExt_t secExtParams;
+    uint32_t priority;
+    uint16_t profileCount = 0;
+
+    // first pass: find out how many profiles are stored
+    for(index = 0; index < SL_WLAN_MAX_PROFILES; index++)
+    {
+        status = sl_WlanProfileGet(index, name, &nameLength, macAddr, &secParams, &secExtParams, &priority);
+        if( status > 0)
+        {
+            profileCount++;
+        }
+    }
+
+    // allocate config struct
+    HAL_CONFIGURATION_NETWORK_WIRELESS80211 *networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) + profileCount * sizeof(networkWirelessConfigs->Configs[0]));
+
+    // set collection count
+    networkWirelessConfigs->Count = profileCount;
+
+    return networkWirelessConfigs;
+}
 
 // initialization of configuration manager
 void ConfigurationManager_Initialize()
@@ -22,105 +123,95 @@ void ConfigurationManager_Initialize()
 // Enumerates the configuration blocks from the configuration flash sector 
 void ConfigurationManager_EnumerateConfigurationBlocks()
 {
-    // // find network configuration blocks
-    // HAL_CONFIGURATION_NETWORK* networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManager_FindNetworkConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
+    // find network configuration blocks
+    HAL_CONFIGURATION_NETWORK* networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks();
 
-    // // find wireless 80211 network configuration blocks
-    // HAL_CONFIGURATION_NETWORK_WIRELESS80211* networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211*)ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
+    // find wireless 80211 network configuration blocks
+    HAL_CONFIGURATION_NETWORK_WIRELESS80211* networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211*)ConfigurationManagerCC32xx_FindNetworkWireless80211ConfigurationBlocks();
 
     // // find X509 certificate blocks
     // HAL_CONFIGURATION_X509_CERTIFICATE* certificateStore = (HAL_CONFIGURATION_X509_CERTIFICATE*)ConfigurationManager_FindX509CertificateConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
 
-    // // alloc memory for g_TargetConfiguration
-    // // because this is a struct of structs that use flexible members the memory has to be allocated from the heap
-    // // the malloc size for each struct is computed separately 
-    // uint32_t sizeOfNetworkInterfaceConfigs = offsetof(HAL_CONFIGURATION_NETWORK, Configs) + networkConfigs->Count * sizeof(networkConfigs->Configs[0]);
-    // uint32_t sizeOfWireless80211Configs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) + networkWirelessConfigs->Count * sizeof(networkWirelessConfigs->Configs[0]);
+    // alloc memory for g_TargetConfiguration
+    // because this is a struct of structs that use flexible members the memory has to be allocated from the heap
+    // the malloc size for each struct is computed separately 
+    uint32_t sizeOfNetworkInterfaceConfigs = offsetof(HAL_CONFIGURATION_NETWORK, Configs) + networkConfigs->Count * sizeof(networkConfigs->Configs[0]);
+    uint32_t sizeOfWireless80211Configs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) + networkWirelessConfigs->Count * sizeof(networkWirelessConfigs->Configs[0]);
     // uint32_t sizeOfX509CertificateStore = offsetof(HAL_CONFIGURATION_X509_CERTIFICATE, Certificates) + certificateStore->Count * sizeof(certificateStore->Certificates[0]);
 
-    // g_TargetConfiguration.NetworkInterfaceConfigs = (HAL_CONFIGURATION_NETWORK*)platform_malloc(sizeOfNetworkInterfaceConfigs);
-    // g_TargetConfiguration.Wireless80211Configs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211*)platform_malloc(sizeOfWireless80211Configs);
+    g_TargetConfiguration.NetworkInterfaceConfigs = (HAL_CONFIGURATION_NETWORK*)platform_malloc(sizeOfNetworkInterfaceConfigs);
+    g_TargetConfiguration.Wireless80211Configs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211*)platform_malloc(sizeOfWireless80211Configs);
     // g_TargetConfiguration.CertificateStore = (HAL_CONFIGURATION_X509_CERTIFICATE*)platform_malloc(sizeOfX509CertificateStore);
 
-    // // copy structs to g_TargetConfiguration
-    // memcpy((HAL_CONFIGURATION_NETWORK*)g_TargetConfiguration.NetworkInterfaceConfigs, networkConfigs, sizeOfNetworkInterfaceConfigs);
-    // memcpy((HAL_CONFIGURATION_NETWORK_WIRELESS80211*)g_TargetConfiguration.Wireless80211Configs, networkWirelessConfigs, sizeOfWireless80211Configs);
+    // copy structs to g_TargetConfiguration
+    memcpy((HAL_CONFIGURATION_NETWORK*)g_TargetConfiguration.NetworkInterfaceConfigs, networkConfigs, sizeOfNetworkInterfaceConfigs);
+    memcpy((HAL_CONFIGURATION_NETWORK_WIRELESS80211*)g_TargetConfiguration.Wireless80211Configs, networkWirelessConfigs, sizeOfWireless80211Configs);
     // memcpy((HAL_CONFIGURATION_X509_CERTIFICATE*)g_TargetConfiguration.CertificateStore, certificateStore, sizeOfX509CertificateStore);
 
-    // // now free the memory of the original structs
-    // platform_free(networkConfigs);
-    // platform_free(networkWirelessConfigs);
+    // now free the memory of the original structs
+    platform_free(networkConfigs);
+    platform_free(networkWirelessConfigs);
     // platform_free(certificateStore);
 }
 
 // Gets the network configuration block from the configuration flash sector 
 bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex)
 {
-    // int sizeOfBlock = 0;
-    // uint8_t* blockAddress = NULL;
+    int sizeOfBlock = 0;
 
-    // // validate if the requested block exists
-    // // Count has to be non zero
-    // // requested Index has to exist (array index starts at zero, so need to add one)
-    // if(configuration == DeviceConfigurationOption_Network)
-    // {
-    //     if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
-    //     {
-    //         // there is no network config block, init one with default settings
-    //         if(!InitialiseNetworkDefaultConfig(NULL, 0))
-    //         {
-    //             return FALSE;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         if((configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
-    //         {
-    //             return FALSE;
-    //         }
-    //     }
+    // validate if the requested block exists
+    // Count has to be non zero
+    // requested Index has to exist (array index starts at zero, so need to add one)
+    if(configuration == DeviceConfigurationOption_Network)
+    {
+        if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
+        {
+            // there is no network config block, init one with default settings
+            if(!InitialiseNetworkDefaultConfig((HAL_Configuration_NetworkInterface*)configurationBlock, 0))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if((configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
+            {
+                return false;
+            }
+        }
 
-    //     // set block size
-    //     sizeOfBlock = sizeof(HAL_Configuration_NetworkInterface);
+        // set block size
+        sizeOfBlock = sizeof(HAL_Configuration_NetworkInterface);
+    }
+    else if(configuration == DeviceConfigurationOption_Wireless80211Network)
+    {
+        if(g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
+        {
+            return false;
+        }
 
-    //     // get block address
-    //     blockAddress = (uint8_t*)g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configurationIndex];
-    // }
-    // else if(configuration == DeviceConfigurationOption_Wireless80211Network)
-    // {
-    //     if(g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
-    //         (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
-    //     {
-    //         return FALSE;
-    //     }
+        // set block size
+        sizeOfBlock = sizeof(HAL_Configuration_Wireless80211);
+    }
+    else if(configuration == DeviceConfigurationOption_X509CaRootBundle)
+    {
+        if(g_TargetConfiguration.CertificateStore->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
+        {
+            return false;
+        }
 
-    //     // set block size
-    //     sizeOfBlock = sizeof(HAL_Configuration_Wireless80211);
+        // // get block address
+        // blockAddress = (uint8_t*)g_TargetConfiguration.CertificateStore->Certificates[configurationIndex];
 
-    //     // get block address
-    //     blockAddress = (uint8_t*)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex];
-    // }
-    // else if(configuration == DeviceConfigurationOption_X509CaRootBundle)
-    // {
-    //     if(g_TargetConfiguration.CertificateStore->Count == 0 ||
-    //         (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
-    //     {
-    //         return FALSE;
-    //     }
+        // // set block size
+        // // because X509 certificate has a variable length need to compute the block size in two steps
+        // sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
+        // sizeOfBlock += ((HAL_Configuration_X509CaRootBundle*)blockAddress)->CertificateSize;
+    }
 
-    //     // get block address
-    //     blockAddress = (uint8_t*)g_TargetConfiguration.CertificateStore->Certificates[configurationIndex];
-
-    //     // set block size
-    //     // because X509 certificate has a variable length need to compute the block size in two steps
-    //     sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-    //     sizeOfBlock += ((HAL_Configuration_X509CaRootBundle*)blockAddress)->CertificateSize;
-    // }
-
-    // // copy the config block content to the pointer in the argument
-    // memcpy(configurationBlock, blockAddress, sizeOfBlock);
-
-    return TRUE;
+    return true;
 }
 
 // Stores the configuration block to the configuration flash sector
@@ -131,6 +222,57 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
     // ByteAddress storageAddress = 0;
     // bool requiresEnumeration = FALSE;
     bool success = FALSE;
+
+    unsigned char* fileName = NULL;
+
+    int32_t fileHandle;
+    uint32_t token = 0;
+    int32_t retVal;
+
+    if(configuration == DeviceConfigurationOption_Network)
+    {
+        // network config blocks are stored as files
+
+        // compose file name
+        fileName = (unsigned char*)platform_malloc(sizeof(NETWORK_CONFIG_FILE_NAME));
+        memcpy(fileName, NETWORK_CONFIG_FILE_NAME, sizeof(NETWORK_CONFIG_FILE_NAME));
+        // insert index number at position N as char
+        fileName[NETWORK_CONFIG_FILE_INDEX_POSITION] = '0' + configurationIndex;
+
+        fileHandle = sl_FsOpen( fileName,
+                                SL_FS_CREATE | SL_FS_OVERWRITE |
+                                SL_FS_CREATE_MAX_SIZE(sizeof(HAL_Configuration_NetworkInterface)) |
+                                SL_FS_CREATE_PUBLIC_WRITE | SL_FS_CREATE_NOSIGNATURE,
+                                (uint32_t *)&token);
+        
+        // on error there is no file handle, rather a negative error code
+        if(fileHandle > 0)
+        {
+            // make sure the config block marker is set
+            memcpy(configurationBlock, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1)); 
+
+            retVal = sl_FsWrite(fileHandle, 0, (unsigned char*)configurationBlock, sizeof(HAL_Configuration_NetworkInterface));
+            
+            // on success the return value is the amount of bytes written
+            if(retVal == sizeof(HAL_Configuration_NetworkInterface))
+            {
+                retVal = sl_FsClose(fileHandle, 0, 0, 0);
+
+                if( retVal < 0 )
+                {
+                    // error closing file, API ceremony suggests calling "abort" operation
+                    uint8_t signature = 'A';
+                    sl_FsClose(fileHandle, 0, &signature, 1);
+                }
+            }
+        }
+
+        if(fileName != NULL)
+        {
+            platform_free(fileName);
+        }
+    }
+
 
     // if(configuration == DeviceConfigurationOption_Network)
     // {
@@ -334,9 +476,16 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, 
 //  Default initialisation for Network interface config blocks
 bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
 {
-    (void)pconfig;
-    (void)configurationIndex;
+    uint8_t  macAddress[SL_MAC_ADDR_LEN];
+    uint16_t macAddressLen = SL_MAC_ADDR_LEN;
 
-    // TODO
+    memset(pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
+    
+    pconfig->InterfaceType = NetworkInterfaceType_Wireless80211;
+    pconfig->StartupAddressMode = AddressMode_DHCP;
+    pconfig->SpecificConfigId = 0;
+
+    sl_NetCfgGet(SL_NETCFG_MAC_ADDRESS_GET, 0, &macAddressLen, pconfig->MacAddress);
+
     return true;
 }
