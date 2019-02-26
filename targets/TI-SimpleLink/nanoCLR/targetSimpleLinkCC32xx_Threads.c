@@ -753,6 +753,9 @@ void * mainThread(void *arg)
     UART_init();
     SPI_init();
     I2C_init();
+    ADC_init();
+    PWM_init();
+
 
     // initialize the realtime clock
     clock_settime(CLOCK_REALTIME, &ts);
