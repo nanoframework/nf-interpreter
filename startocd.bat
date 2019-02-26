@@ -33,6 +33,10 @@ goto start
 set iface=-f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/esp32.cfg -c "adapter_khz 3000"
 goto start
 
+:ESP32_WROVER
+set iface=-f interface/ftdi/esp32_devkitj_v1.cfg -f board/esp-wroom-32.cfg 
+goto start
+
 :STM32_STLINK
 set iface=-f interface/stlink-v2-1.cfg -f board/stm32f7discovery.cfg
 goto start
