@@ -122,6 +122,9 @@ add_executable(
     "${NF_Debugger_SOURCES}"
     "${NF_Diagnostics_SOURCES}"
 
+    # sources for ChibiOS FatFS
+    "${CHIBIOS_FATFS_SOURCES}"
+
     # sources for nanoFramework Network LWIP, Sockets and TLS
     "${CHIBIOS_LWIP_SOURCES}"
     "${NF_Networking_SOURCES}"
@@ -147,6 +150,13 @@ if(USE_NETWORKING_OPTION)
     endif()
 endif()
 
+# add dependencies from CHIBIOS_FILESYSTEM_COMPONENTS (this is required to make sure that ChibiOS filesystem components are unzip at the proper locations before the build starts)
+# only required if filesystem is ON
+if(USE_FILESYSTEM_OPTION)
+    add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf CHIBIOS_FILESYSTEM_COMPONENTS)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_FILESYSTEM_COMPONENTS)
+endif()
+
 # include common directories
 include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
@@ -159,8 +169,8 @@ include_directories(
 
     ${WireProtocol_INCLUDE_DIRS}
     ${CHIBIOS_INCLUDE_DIRS}
-    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
     ${ChibiOSnfOverlay_INCLUDE_DIRS}
+    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
 
     ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
@@ -193,6 +203,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 
     # includes for nanoFramework APIs
     "${TARGET_NANO_APIS_INCLUDES}"
+
+    # includes for ChibiOS FatFS
+    "${CHIBIOS_FATFS_INCLUDE_DIRS}"
 
     # includes for ChibiOS LwIP
     "${CHIBIOS_LWIP_INCLUDE_DIRS}"

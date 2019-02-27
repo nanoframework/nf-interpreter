@@ -532,6 +532,7 @@
 
 // header for nanoFramework overlay
 #include "halconf_nf.h"
+#include "halconf_community.h"
 
 #endif /* HALCONF_H */
 
