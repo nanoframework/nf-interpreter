@@ -6,13 +6,7 @@
 #include <ff.h>
 #include "win_storage_native.h"
 #include <target_windows_storage_config.h>
-
-
-// FatFs define for size of file name members
-// ANSI/OEM at DBCS
-#define FF_LFN_BUF  255
-#define SDCARD_DRIVE_LETTER  "D:\\"
-
+#include <Target_Windows_Storage.h>
 
 // defining this type here to make it shorter and improve code readability
 typedef Library_win_storage_native_Windows_Storage_StorageFolder StorageFolderType;
@@ -56,17 +50,21 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
     hbObj = top.Dereference();
     hbObj->SetObjectReference( NULL );
 
+  #if HAL_USE_SDC
     // is there an SD card inserted and is driver in ready state?
-    if(sdc_lld_is_card_inserted(&SD_CARD_DRIVER) && SD_CARD_DRIVER.state == BLK_READY)
+    if(sdcIsCardInserted(&SD_CARD_DRIVER) && SD_CARD_DRIVER.state == BLK_READY)
     {
         driveCount++;
     }
+  #endif
 
+  #if HAL_USBH_USE_MSD
     // FIXME (no support for USB thumb drive)
     // is there an USB thumb driver inserted?
     // driveCount++;
+  #endif
 
-    if(sdc_lld_is_card_inserted(&SD_CARD_DRIVER) && SD_CARD_DRIVER.state == BLK_READY)
+    if(driveCount > 0)
     {
         // find <StorageFolder> type definition, don't bother checking the result as it exists for sure
         g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storateFolderTypeDef );
@@ -80,44 +78,54 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
         // create an instance of <StorageFolder>
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFolder, storateFolderTypeDef));
 
-        // dereference the object in order to reach its fields
-        hbObj = storageFolder->Dereference();
-
-        // set the managed fields
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ FIELD___name ], SDCARD_DRIVE_LETTER ));
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ FIELD___path ], SDCARD_DRIVE_LETTER ));
-
-        // malloc stringBuffer to work with FS
-        stringBuffer = (char*)platform_malloc(FF_LFN_BUF + 1);
-
-        // sanity check for successfull malloc
-        if(stringBuffer == NULL)
+      #if HAL_USE_SDC
+        if(sdcIsCardInserted(&SD_CARD_DRIVER) && SD_CARD_DRIVER.state == BLK_READY)
         {
-            // failed to allocate memory
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
-        else
-        {
-            // read the drive volume label
-            // don't bother checking the result, if anything goes wrong we'll end up with an empty string which is OK
-            f_getlabel(SDCARD_DRIVE_LETTER, stringBuffer, NULL);
+            // dereference the object in order to reach its fields
+            hbObj = storageFolder->Dereference();
 
-            // add the driver letter separated it with an empty space, if the volume label isn't empty
-            if(*stringBuffer != '\0')
+            // set the managed fields
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ FIELD___name ], SDCARD_DRIVE_PATH ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ FIELD___path ], SDCARD_DRIVE_PATH ));
+
+            // malloc stringBuffer to work with FS
+            stringBuffer = (char*)platform_malloc(FF_LFN_BUF + 1);
+
+            // sanity check for successfull malloc
+            if(stringBuffer == NULL)
             {
-                strcat(stringBuffer, " ");
+                // failed to allocate memory
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
-            strcat(stringBuffer, "(");
-            strcat(stringBuffer, SDCARD_DRIVE_LETTER);
-            strcat(stringBuffer, ")");
+            else
+            {
+                // read the drive volume label
+                // don't bother checking the result, if anything goes wrong we'll end up with an empty string which is OK
+                f_getlabel(SDCARD_DRIVE_PATH, stringBuffer, NULL);
 
-            // set the field with the volume label
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ FIELD___name ], stringBuffer ));
+                // add the driver letter separated it with an empty space, if the volume label isn't empty
+                if(*stringBuffer != '\0')
+                {
+                    strcat(stringBuffer, " ");
+                }
+                strcat(stringBuffer, "(");
+                strcat(stringBuffer, SDCARD_DRIVE_PATH);
+                strcat(stringBuffer, ")");
+
+                // set the field with the volume label
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ FIELD___name ], stringBuffer ));
 
 
-            // free stringBuffer
-            platform_free(stringBuffer);
+                // free stringBuffer
+                platform_free(stringBuffer);
+            }
         }
+      #endif
+
+      #if HAL_USBH_USE_MSD
+        // FIXME (no support for USB thumb drive)
+      #endif
+
     }
 
     NANOCLR_NOCLEANUP();
@@ -147,11 +155,17 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
     
+  #if HAL_USE_SDC    
     // is there an SD card inserted and is driver in ready state?
-    if(!sdc_lld_is_card_inserted(&SD_CARD_DRIVER) || SD_CARD_DRIVER.state != BLK_READY)
+    if(!sdcIsCardInserted(&SD_CARD_DRIVER) || SD_CARD_DRIVER.state != BLK_READY)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
     }
+  #endif
+
+  #if HAL_USBH_USE_MSD
+    // FIXME (no support for USB thumb drive)
+  #endif
         
     // copy the first 2 letters of the path for the drive
     // path is 'D:\folder\file.txt', so we need 'D:'
