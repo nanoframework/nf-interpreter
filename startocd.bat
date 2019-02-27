@@ -38,6 +38,7 @@ set iface=-f interface/ftdi/esp32_devkitj_v1.cfg -f board/esp-wroom-32.cfg
 goto start
 
 :STM32_STLINK
+set cmd=C:/nanoFramework_Tools/Tools/openocd/bin/openocd.exe -s C:/nanoFramework_Tools/Tools/openocd/bin/scripts
 set iface=-f interface/stlink-v2-1.cfg -f board/stm32f7discovery.cfg
 goto start
 
