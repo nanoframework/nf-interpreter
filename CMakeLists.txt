@@ -560,6 +560,13 @@ if(USE_NETWORKING_OPTION)
         message(STATUS "Support for networking enabled WITHOUT security")
     endif()
 
+    # sanity check for missing configuration block option
+    # which is required for network
+
+    if(NOT NF_FEATURE_HAS_CONFIG_BLOCK)
+        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that on your cmake-variants or in the build command line.")
+    endif()
+
 else()
     set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
     message(STATUS "Support for networking IS NOT enabled")
