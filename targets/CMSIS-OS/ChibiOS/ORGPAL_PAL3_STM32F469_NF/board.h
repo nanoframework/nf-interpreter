@@ -305,6 +305,7 @@
 #define LINE_FMC_D1                 PAL_LINE(GPIOD, 15U)
 #define LINE_FMC_NBL0               PAL_LINE(GPIOE, 0U)
 #define LINE_FMC_NBL1               PAL_LINE(GPIOE, 1U)
+#define LINE_SD_CARD_DETECT         PAL_LINE(GPIOE, 5U) 
 #define LINE_FMC_D4                 PAL_LINE(GPIOE, 7U)
 #define LINE_FMC_D5                 PAL_LINE(GPIOE, 8U)
 #define LINE_FMC_D6                 PAL_LINE(GPIOE, 9U)
