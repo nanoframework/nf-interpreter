@@ -22,6 +22,11 @@
 #define BOARD_PHY_RMII
 
 /*
+ * The board has an ULPI USB PHY.
+ */
+#define BOARD_OTG2_USES_ULPI
+
+/*
  * Board oscillators-related settings.
  */
 #if !defined(STM32_LSECLK)
@@ -436,7 +441,7 @@ The user should also disable the MCO pin of the clock output if not used.
 * PA7  - RMII_CRS_DV               (alternate 11).
 * PA8  - I2C3_SCL                  (input pullup).
 * PA9  - OTG_FS_VBUS               (analog).
-* PA10 - OTG_FS_ID					(alternate 10).
+* PA10 - OTG_FS_ID				   (alternate 10).
 * PA11 - OTG_FS_DM                 (alternate 10).
 * PA12 - OTG_FS_DP                 (alternate 10).
 * PA13 - SWDIO                     (alternate 0).
@@ -553,9 +558,9 @@ The user should also disable the MCO pin of the clock output if not used.
 * PB7  - PIN7                      (input pullup).
 * PB8  - GPIOB_IO1_P7_IO           (input floating).
 * PB9  - GPIOB_IO1_P8_IO           (input floating).
-* PB10  - USART3_TX				(alternate 7).
-* PB11  - USART3_RX				(alternate 7).
-* PB12 - OTG_HS_ID                 (alternate 12).
+* PB10  - USART3_TX				   (alternate 7).
+* PB11  - USART3_RX				   (alternate 7).
+* PB12 - OTG_HS_ID                 (input pulldown).
 * PB13 - OTG_HS_VBUS               (input pulldown).
 * PB14 - OTG_HS_DM                 (alternate 12).
 * PB15 - OTG_HS_DP                 (alternate 12).
@@ -572,7 +577,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_MODE_INPUT(GPIOB_IO1_P8_IO) |     \
                                      PIN_MODE_ALTERNATE(GPIOB_IO1_USART3_TX) |     \
                                      PIN_MODE_ALTERNATE(GPIOB_IO1_USART3_RX) |     \
-                                     PIN_MODE_ALTERNATE(GPIOB_OTG_HS_ID) |  \
+                                     PIN_MODE_ANALOG(GPIOB_OTG_HS_ID) |  \
                                      PIN_MODE_ANALOG(GPIOB_OTG_HS_VBUS) |    \
                                      PIN_MODE_ALTERNATE(GPIOB_OTG_HS_DM) |  \
                                      PIN_MODE_ALTERNATE(GPIOB_OTG_HS_DP))
@@ -652,7 +657,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_AFIO_AF(GPIOB_IO1_P8_IO, 0U) |       \
                                      PIN_AFIO_AF(GPIOB_IO1_USART3_TX, 7U) |       \
                                      PIN_AFIO_AF(GPIOB_IO1_USART3_RX, 7U) |       \
-                                     PIN_AFIO_AF(GPIOB_OTG_HS_ID, 12U) |    \
+                                     PIN_AFIO_AF(GPIOB_OTG_HS_ID, 0U) |    \
                                      PIN_AFIO_AF(GPIOB_OTG_HS_VBUS, 0U) |   \
                                      PIN_AFIO_AF(GPIOB_OTG_HS_DM, 12U) |    \
                                      PIN_AFIO_AF(GPIOB_OTG_HS_DP, 12U))

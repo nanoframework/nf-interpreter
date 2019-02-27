@@ -354,5 +354,6 @@
 
 // header for nanoFramework overlay drivers
 #include "mcuconf_nf.h"
+#include "mcuconf_community.h"
 
 #endif /* MCUCONF_H */
