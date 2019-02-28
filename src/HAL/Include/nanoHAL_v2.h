@@ -313,4 +313,6 @@ bool Target_ConfigUpdateRequiresErase();
 // Watchdog driver
 #include <nanoHAL_Watchdog.h>
 
+#include <nanoHAL_Windows_Storage.h>
+
 #endif // _NANOHAL_V2_H_
