@@ -16,6 +16,11 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
+#include <Target_Windows_Storage.h>
+
+extern evhandler_t sdcardEventHandler[];
+extern evhandler_t usbEventHandler[];
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here 
@@ -113,7 +118,21 @@ int main(void) {
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
 
+  // start file system sub-system
+  Target_FileSystemInit();
+
   while (true) { 
-    osDelay(100);
+    //osDelay(100);
+
+  #if HAL_USE_SDC
+    // event dispatcher for SD Card
+    chEvtDispatch(sdcardEventHandler, chEvtWaitOneTimeout(ALL_EVENTS, TIME_MS2I(500)));
+  #endif
+
+  #if HAL_USBH_USE_MSD
+    // event dispatcher for USB MSD
+    //chEvtDispatch(usbEventHandler, chEvtWaitOneTimeout(ALL_EVENTS, TIME_MS2I(500)));
+
+  #endif    
   }
 }
