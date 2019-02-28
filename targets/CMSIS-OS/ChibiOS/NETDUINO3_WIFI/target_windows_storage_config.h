@@ -3,5 +3,5 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// the following macro defines a function that configures the GPIO pins for a STM32 UART/USART
+// maps the SD Card driver
 #define SD_CARD_DRIVER      SDCD1

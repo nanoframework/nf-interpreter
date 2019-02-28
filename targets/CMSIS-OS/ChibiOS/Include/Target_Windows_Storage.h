@@ -11,8 +11,23 @@
 #include <hal.h>
 #include <ff.h>
 
-#define POLLING_INTERVAL                10
-#define POLLING_DELAY                   10
+#define SDCARD_POLLING_INTERVAL                1000
+#define SDCARD_POLLING_DELAY                   500
+
+
+#define USB_MSD_POLLING_INTERVAL               1000
+#define USB_MSD_POLLING_DELAY                  500
+
+
+// FatFs define for size of file name members
+// ANSI/OEM at DBCS
+#define FF_LFN_BUF  255
+
+// driver letters and paths
+#define SDCARD_DRIVE_LETTER     "D:"
+#define SDCARD_DRIVE_PATH       SDCARD_DRIVE_LETTER"\\"
+#define USB_MSD_DRIVE_LETTER    "E:"
+#define USB_MSD_DRIVE_PATH      USB_MSD_DRIVE_LETTER"\\"
 
 // void RemoveHandler(eventid_t id);
 // void InsertHandler(eventid_t id);
