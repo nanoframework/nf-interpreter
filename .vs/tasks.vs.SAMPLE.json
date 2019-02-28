@@ -1,0 +1,63 @@
+{
+  "version": "0.2.1",
+  "outDir": "\"${env.EXECUTABLE_OUTPUT_PATH}\"",
+  "tasks": [
+    {
+      "taskName": "task-CMakeLists",
+      "appliesTo": "CMakeLists.txt",
+      "type": "launch"
+    },
+    {
+      "taskName": "task-nf-interpreter",
+      "appliesTo": "/",
+      "type": "launch"
+    },
+    {
+      "taskName": "Print Output Directory",
+      "appliesTo": "*",
+      "type": "default",
+      "command": "${env.COMSPEC}",
+      "args": [
+        "echo  Output Directory:  ${outDir}",
+      ]
+    },
+    {
+      "taskName": "Erase Flash ESP32 COM3",
+      "appliesTo": "*",
+      "type": "default",
+      "command": "${env.COMSPEC}",
+      "args": [
+        "start \"Erasing Flash\" /wait python C:/ESP32_TOOLS/esp-idf-v3.1/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM3\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" erase_flash"
+      ]
+    },
+    {
+      "taskName": "Flash nanoCLR ESP32 COM3",
+      "appliesTo": "*",
+      "type": "default",
+      "command": "${env.COMSPEC}",
+      "args": [
+        "start \"Flashing nanoCLR\" /wait python C:/ESP32_TOOLS/esp-idf-v3.1/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM3\" --baud 921600 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 C:/ESP32_TOOLS/libs-v3.1/bootloader.bin 0x10000 ${outDir}/nanoCLR.bin 0x8000 ${outDir}/partitions_4mb.bin"
+      ]
+    },
+    {
+      "taskName": "task-nf-interpreter",
+      "appliesTo": "/",
+      "type": "launch"
+    },
+    {
+      "taskName": "task-CMakeLists",
+      "appliesTo": "CMakeLists.txt",
+      "type": "launch"
+    },
+    {
+      "taskName": "task-nf-interpreter",
+      "appliesTo": "/",
+      "type": "launch"
+    },
+    {
+      "taskName": "task-CMakeLists",
+      "appliesTo": "CMakeLists.txt",
+      "type": "launch"
+    }
+  ]
+}

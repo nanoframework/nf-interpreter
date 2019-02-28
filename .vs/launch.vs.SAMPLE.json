@@ -1,0 +1,96 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "cppdbg",
+      "name": "nanobooter.elf",
+      "project": "Build\\nanobooter.elf",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}\\BUILD\\nanobooter.elf",
+      "MIMode": "gdb",
+      "externalConsole": true,
+      "inheritEnvironments": [
+        "gcc_arm"
+      ],
+      "miDebuggerPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Linux\\gcc_arm\\bin\\arm-none-eabi-gdb.exe",
+      "setupCommands": [
+        {
+          "text": "-environment-cd ${workspaceRoot}\\Build"
+        },
+        {
+          "text": "-file-exec-and-symbols c:/nanoFramework/nf-interpreter/BUILD/nanobooter.elf",
+          "description": "load file",
+          "ignoreFailures": false
+        },
+        {
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "text": "monitor halt",
+          "ignoreFailures": true
+        },
+        {
+          "text": "reset init",
+          "ignoreFailures": true
+        }
+      ],
+      "showDisplayString": true,
+      "miDebuggerServerAddress": "localhost:3333",
+      "launchCompleteCommand": "None",
+      "debugServerPath": "C:\\nanoFramework_Tools\\Tools\\openocd\\bin\\openocd.exe",
+      "debugServerArgs": "-s \"C:\\nanoFramework_Tools\\Tools\\openocd\\bin\\scripts/\" -f interface/stlink-v2-1.cfg -f board/stm32f7discovery.cfg",
+      "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+      "filterStderr": true,
+      "filterStdout": true
+    },
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "nanoCLR.elf",
+      "name": "nanoCLR.elf"
+    },
+    {
+      "type": "cppdbg",
+      "name": "ESP32 nanoCLR - Segger JLink",
+      "project": "",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/Build/ESP32_2/nanoCLR.elf",
+      "MIMode": "gdb",
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "miDebuggerPath": "C:/Esp32_Tools/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
+      "setupCommands": [
+        { "text": "set logging on" },
+        { "text": "!${workspaceRoot}/startocd.bat ESP32_JLINK" },
+        //{ "text": "!${workspaceRoot}/startocd.bat ESP32_OLIMEX" },
+        //{ "text": "!${workspaceRoot}/startocd.bat STM32_STLINK" },
+        { "text": "target extended-remote localhost:3333" },
+        { "text": "-file-exec-and-symbols C:/usr/src/NanoFramework/nf-interpreter/build/ESP32_2/nanoCLR.elf" },
+        { "text": "set remote hardware-watchpoint-limit 2" },
+        { "text": "monitor reset halt" },
+        //{ "text": "monitor gdb_breakpoint_override hard" },
+        { "text": "flushregs" },
+        { "text": "thb app_main" }
+      ],
+      //"visualizerFile": "${debugInfo.linuxNatvisPath}",
+      //"showDisplayString": true,
+      //"miDebuggerServerAddress": "localhost:3333",
+      "launchCompleteCommand": "None",
+
+      // It appears VS2017 issues the setup commands before it has started the debugServer, and as many of them don't make sense at that stage GDB returns "Error"
+      // The only way I've found around it so far is to launch the debugServer (OpenOCD) as a shell command from within GDB, via a batch file
+      // As it isn't a captive process it hangs around for re-use. GDB attempts to launch further copies silently fail as the resources are locked
+      // DAV 25FEB19
+
+      //"debugServerPath": "C:/Esp32_Tools/openocd-esp32/bin/openocd.exe",
+      //"debugServerArgs": "-s C:/Esp32_Tools/openocd-esp32/share/openocd/scripts -f interface/jlink.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
+
+      //"serverStarted": "Open On-Chip Debugger",
+      "serverStarted": "Info : .*Tensilica.*0x1.",
+      "filterStderr": true,
+      "filterStdout": true
+    }
+  ]
+}

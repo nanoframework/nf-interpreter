@@ -198,7 +198,7 @@
         {
           "name": "API_Windows.Storage", //OFF-default-ON-to-add-this-API
           "value": "OFF"
-        },    
+        },
         {
           "name": "API_Hardware.Esp32", //OFF-default-ON-to-add-this-API
           "value": "OFF"
@@ -395,6 +395,212 @@
         },
         {
           "name": "API_Windows.Devices.Spi", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Networking.Sockets", //OFF-default-ON-to-add-this-API
+          "value": "OFF"
+        },
+        {
+          "name": "API_Windows.Storage", //OFF-default-ON-to-add-this-API
+          "value": "OFF"
+        },
+        {
+          "name": "API_Hardware.Esp32", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        }
+      ]
+    },
+    {
+      "name": "ESP32_2",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [
+        "gcc-arm"
+      ],
+      "environments": [
+        {
+          "PATH": "C:\\Windows\\system32;${env.PATH}" // Work around for Ninja not finding Cmd.exe with add_custom_command
+        }
+      ],
+      "buildRoot": "${workspaceRoot}\\Build\\${name}",
+      "installRoot": "${workspaceRoot}\\Build\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "linux-gcc-arm",
+      "variables": [
+        {
+          "name": "VISUAL_STUDIO",
+          "value": "TRUE"
+        },
+        {
+          "name": "EXECUTABLE_OUTPUT_PATH",
+          "value": "${workspaceRoot}\\Build/${name}"
+        },
+        {
+          "name": "ESP32_TOOLCHAIN_PATH",
+          "value": "C:/ESP32_TOOLS"
+        },
+        {
+          "name": "TOOLCHAIN_PREFIX",
+          "value": "C:/ESP32_TOOLS"
+        },
+        {
+          "name": "ESP32_IDF_PATH",
+          "value": "C:/ESP32_TOOLS/esp-idf-v3.1"
+        },
+        {
+          "name": "ESP32_LIBS_PATH",
+          "value": "C:/ESP32_TOOLS/libs-v3.1"
+        },
+        {
+          "name": "CMAKE_SYSTEM_NAME",
+          "value": "Generic"
+        },
+        {
+          "name": "GIT_EXECUTABLE",
+          "value": "${env.VSINSTALLDIR}/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/Git/cmd/git.exe"
+        },
+        {
+          "name": "GIT_VERSION_STRING",
+          "value": "2.19.0"
+        },
+        {
+          "name": "TARGET_SERIES",
+          "value": "ESP32"
+        },
+        {
+          "name": "ESP32_BOARD",
+          "value": "ESP32_WROOM_32"
+        },
+        {
+          "name": "USE_RNG", //option to enable use of true random generator hardware block
+          "value": "ON"
+        },
+        {
+          "name": "TARGET_DP_FLOATINGPOINT",
+          "value": "FALSE"
+        },
+        {
+          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION", //"Option for string conversion to value from base 10 and partial for 16"
+          "value": "FALSE"
+        },
+        {
+          "name": "RTOS", //"Selected Operating system
+          "value": "FREERTOS_ESP32"
+        },
+        {
+          "name": "NF_BUILD_RTM", // OFF-default-ON-to-enable-RTM-build
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_ERRORS", //OFF-default-ON-to-enable-trace-error-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_HEADERS", //OFF-default-ON-to-enable-trace-header-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_STATE", //OFF-default-ON-to-enable-trace-state-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_NODATA", //OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_ALL", //OFF-default-ON-to-enable-trace-all-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_IMPLEMENTS_CRC32", //OFF-default-ON-to-enable-CRC32-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_FEATURE_DEBUGGER", //OFF-default-ON-to-include-managed-app-debugging-capability
+          "value": "ON"
+        },
+        {
+          "name": "NF_FEATURE_RTC", //OFF-default-ON-to-enable-hardware-RTC
+          "value": "ON"
+        },
+        {
+          "name": "NF_FEATURE_USE_APPDOMAINS", //OFF-default-ON-to-enable-support-for-Application-Domains
+          "value": "OFF"
+        },
+        {
+          "name": "NF_FEATURE_WATCHDOG", //ON-to-enable-hardware-watchdog-ON-is-default
+          "value": "ON"
+        },
+        {
+          "name": "NF_FEATURE_HAS_CONFIG_BLOCK", //OFF-default-ON-to-enable-configuration-block-storage
+          "value": "ON"
+        },
+        {
+          "name": "NF_PLATFORM_NO_CLR_TRACE", //OFF-default-ON-to-disable-all-trace-on-CLR
+          "value": "OFF"
+        },
+        {
+          "name": "NF_CLR_NO_IL_INLINE", //OFF-default-ON-to-disable-CLR-IL-inlining
+          "value": "OFF"
+        },
+        {
+          "name": "NF_INTEROP_ASSEMBLIES", //OFF-default-ON-to-disable-CLR-IL-inlining
+          "value": "OFF"
+        },
+        {
+          "name": "NF_NETWORKING_SNTP", //ON-default-to-add-SNTP-client-requires-networking
+          "value": "ON"
+        },
+        {
+          "name": "NF_SECURITY_OPENSSL", //OFF-default-ON-to-add-network-security-from-OpenSSL
+          "value": "ON"
+        },
+        {
+          "name": "NF_SECURITY_MBEDTLS", //OFF-default-ON-to-add-network-security-from-mbedTLS
+          "value": "OFF"
+        },
+        // LIBRARIES
+        {
+          "name": "API_nanoFramework.Devices.OneWire", //OFF-default-ON-to-add-this-API
+          "value": "OFF" // DAV
+        },
+        {
+          "name": "API_System.Math", //OFF-default-ON-to-add-this-API
+          "value": "OFF" // DAV
+        },
+        {
+          "name": "API_System.Net", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.Adc", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.Gpio", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.I2c", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.Pwm", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.SerialCommunication", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.Spi", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.WiFi", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
