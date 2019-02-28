@@ -13,10 +13,9 @@
 
 struct Library_win_storage_native_Windows_Storage_StorageFile
 {
-    static const int FIELD___contentType = 1;
-    static const int FIELD___fileType = 2;
-    static const int FIELD___name = 3;
-    static const int FIELD___path = 4;
+    static const int FIELD___dateCreated = 1;
+    static const int FIELD___name = 2;
+    static const int FIELD___path = 3;
 
 
     //--//
@@ -32,6 +31,7 @@ struct Library_win_storage_native_Windows_Storage_StorageFolder
 
     NANOCLR_NATIVE_DECLARE(GetRemovableStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder);
     NANOCLR_NATIVE_DECLARE(GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder);
+    NANOCLR_NATIVE_DECLARE(GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile__U4__U4);
 
     //--//
 
