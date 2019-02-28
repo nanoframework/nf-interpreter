@@ -15,10 +15,6 @@ configure_file("${CMAKE_SOURCE_DIR}/CMake/ESP32_target_os.h.in"
                "${CMAKE_BINARY_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/target_os.h" @ONLY)
 
 
-if(NOT DEFINED EXECUTABLE_OUTPUT_PATH)
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
-endif()
-
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 
