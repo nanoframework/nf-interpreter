@@ -211,7 +211,11 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
 
         // set a timeout equal to the estimated transaction duration in milliseconds
         // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
-        hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
+//        hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
+        // we set this to an infinite timeout
+        // the catch is that the working thread MUST ALWAYS return at some point
+        // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
+        hbTimeout.SetInteger((CLR_INT64)-1);
 
         NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
         
@@ -243,7 +247,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             // non-blocking wait allowing other threads to run while we wait for the I2C transaction to complete
             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_I2cMaster, eventResult ));
 
-            if(!eventResult)
+            if(eventResult)
             {
                 // event occurred
 
@@ -259,6 +263,13 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
 
                 // set the bytes transferred field
                 result[ Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___bytesTransferred ].SetInteger((CLR_UINT32)(palI2c->i2cTransaction.writeCount + palI2c->i2cTransaction.readCount));
+
+                // done here
+                break;
+            }
+            else
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
             }
         }
 
