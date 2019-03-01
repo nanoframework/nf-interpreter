@@ -77,8 +77,6 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_I2c;
 // struct representing the I2C 
 struct NF_PAL_I2C
 {
-    float ByteTime;
-
     I2C_Handle      i2c;
     I2C_Params      i2cParams;
     I2C_Transaction i2cTransaction;

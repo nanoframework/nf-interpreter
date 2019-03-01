@@ -55,23 +55,6 @@ void HostI2C_CallbackFxn(I2C_Handle handle, I2C_Transaction *transaction, bool t
     NATIVE_INTERRUPT_END
 }
 
-// estimate the time required to perform the I2C transaction
-uint32_t GetEstimatedDuration(uint16_t writeSize, uint16_t readSize, float byteTime)
-{
-    // add an extra byte to account for the address
-    uint32_t estimatedDurationMiliseconds = byteTime * (writeSize + readSize + 1);
-
-    // despite the transaction taking less than the thread time quantum 
-    // we need to set it's timeout to a reasonable value
-    // because this will always execute on the next thread execution
-    if(estimatedDurationMiliseconds < CLR_RT_Thread::c_TimeQuantum_Milliseconds)
-    {
-        return CLR_RT_Thread::c_TimeQuantum_Milliseconds;
-    }
-    
-    return estimatedDurationMiliseconds;
-}
-
 HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -115,18 +98,6 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
         palI2c->i2cParams.transferCallbackFxn = HostI2C_CallbackFxn;
         palI2c->i2c = I2C_open(Board_I2C_TMP, &palI2c->i2cParams); FAULT_ON_NULL(palI2c->i2c);
         palI2c->i2cTransaction.slaveAddress = (I2cBusSpeed)pConfig[ I2cConnectionSettings::FIELD___slaveAddress ].NumericByRef().s4;
-
-        // compute rough estimate on the time to tx/rx a byte (in milliseconds)
-        if((I2cBusSpeed)pConfig[ I2cConnectionSettings::FIELD___busSpeed ].NumericByRef().s4 == I2cBusSpeed_StandardMode)
-        {
-            // 100kbit/s: this is roughly 0.10ms per byte, give or take
-            palI2c->ByteTime = 0.1;
-        }
-        else
-        {
-            // 400kbit/s: this is roughly 0.02ms per byte, give or take
-            palI2c->ByteTime = 0.02;
-        }
     }
     NANOCLR_NOCLEANUP();
 }
@@ -206,13 +177,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             palI2c->i2cTransaction.readCount = 0;
         }
 
-        // calculate estimated transaction duration
-        estimatedDurationMiliseconds = GetEstimatedDuration(palI2c->i2cTransaction.writeCount, palI2c->i2cTransaction.readCount, palI2c->ByteTime);
-
-        // set a timeout equal to the estimated transaction duration in milliseconds
-        // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
-//        hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
-        // we set this to an infinite timeout
+        // set a timeout to an infinite timeout
         // the catch is that the working thread MUST ALWAYS return at some point
         // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
         hbTimeout.SetInteger((CLR_INT64)-1);
