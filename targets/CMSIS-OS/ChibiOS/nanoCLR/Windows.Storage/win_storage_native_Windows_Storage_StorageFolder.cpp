@@ -13,8 +13,9 @@
 #include "usbh/dev/msd.h"
 #endif
 
-// defining this type here to make it shorter and improve code readability
-typedef Library_win_storage_native_Windows_Storage_StorageFolder StorageFolderType;
+// defining these types here to make it shorter and improve code readability
+typedef Library_win_storage_native_Windows_Storage_StorageFolder StorageFolder;
+typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
 
 SYSTEMTIME GetDateTime(uint16_t date, uint16_t time)
 {
@@ -39,7 +40,7 @@ SYSTEMTIME GetDateTime(uint16_t date, uint16_t time)
     return fileTime;
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
+HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -124,8 +125,8 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
             hbObj = storageFolder->Dereference();
 
             // set the managed fields
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], workingDrive ));
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], workingDrive ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___name ], workingDrive ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___path ], workingDrive ));
 
             // malloc stringBuffer to work with FS
             stringBuffer = (char*)platform_malloc(FF_LFN_BUF + 1);
@@ -155,7 +156,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
                 strcat(stringBuffer, ")");
 
                 // set the field with the volume label
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], stringBuffer ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___name ], stringBuffer ));
 
 
                 // free stringBuffer
@@ -170,7 +171,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
+HRESULT StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -180,7 +181,6 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
     SYSTEMTIME              fileInfoTime;
 
     const char* workingPath;
-    char workingDrive[DRIVE_LETTER_LENGTH];
 
     DIR             currentDirectory;
     FRESULT         operationResult;
@@ -194,35 +194,83 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
         
-    // copy the first 2 letters of the path for the drive
-    // path is 'D:\folder\file.txt', so we need 'D:'
-    memcpy(workingDrive, pThis[ FIELD___path ].DereferenceString()->StringText(), DRIVE_LETTER_LENGTH);
-        
     // get a pointer to the path in managed field
-    workingPath = pThis[ FIELD___path ].DereferenceString()->StringText();
+    workingPath = pThis[ StorageFolder::FIELD___path ].DereferenceString()->StringText();
 
-    // change drive
-    if(f_chdrive(workingDrive) == FR_OK)
+    // open directory
+    operationResult = f_opendir(&currentDirectory, workingPath);
+
+    if(operationResult != FR_OK)
     {
-        // open directory
-        operationResult = f_opendir(&currentDirectory, workingPath);
-
-        if(operationResult != FR_OK)
+        if(operationResult == FR_INVALID_DRIVE)
         {
-            // error or directory empty
-            // find <StorageFolder> type, don't bother checking the result as it exists for sure
-            g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storageFolderTypeDef );
-
-            // create an array of <StorageFolder>
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, directoryCount, storageFolderTypeDef ));
+            // failed to change drive
+            NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
         }
-        else
-        {
-            // need to perform this in two steps
-            // 1st: count the directory objects
-            // 2nd: create the array items with each directory object
 
-            // perform 1st pass
+        // error or directory empty
+        // find <StorageFolder> type, don't bother checking the result as it exists for sure
+        g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storageFolderTypeDef );
+
+        // create an array of <StorageFolder>
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, directoryCount, storageFolderTypeDef ));
+    }
+    else
+    {
+        // need to perform this in two steps
+        // 1st: count the directory objects
+        // 2nd: create the array items with each directory object
+
+        // perform 1st pass
+        for (;;)
+        {
+            // read next directory item
+            operationResult = f_readdir(&currentDirectory, &fileInfo);
+            
+            // break on error or at end of dir
+            if (operationResult != FR_OK || fileInfo.fname[0] == 0)
+            {
+                break;
+            }
+
+            // check if this is a directory
+            // but skip if:
+            // - has system attribute set
+            // - has hidden attribute set
+            if ((fileInfo.fattrib & AM_DIR) &&
+                !(fileInfo.fattrib & AM_SYS) &&
+                !(fileInfo.fattrib & AM_HID))
+            {
+                directoryCount++;
+            }
+        }
+
+        // find <StorageFolder> type, don't bother checking the result as it exists for sure
+        g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storageFolderTypeDef );
+
+        // create an array of <StorageFolder>
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, directoryCount, storageFolderTypeDef ));
+        
+        // get a pointer to the first object in the array (which is of type <StorageFolder>)
+        storageFolder = (CLR_RT_HeapBlock*)top.DereferenceArray()->GetFirstElement();
+
+        if(directoryCount > 0)
+        {
+            // allocate memory for buffers
+            stringBuffer = (char*)platform_malloc(FF_LFN_BUF + 1);
+            workingBuffer = (char*)platform_malloc(2 * FF_LFN_BUF + 1);
+
+            // sanity check for successfull malloc
+            if(stringBuffer == NULL || workingBuffer == NULL)
+            {
+                // failed to allocate memory
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            }
+
+            // perform 2nd pass
+            // need to rewind the directory read index first
+            f_readdir(&currentDirectory, NULL);
+            
             for (;;)
             {
                 // read next directory item
@@ -242,93 +290,38 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
                     !(fileInfo.fattrib & AM_SYS) &&
                     !(fileInfo.fattrib & AM_HID))
                 {
-                    directoryCount++;
-                }
-            }
+                    // create an instance of <StorageFolder>
+                    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFolder, storageFolderTypeDef));
 
-            // find <StorageFolder> type, don't bother checking the result as it exists for sure
-            g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storageFolderTypeDef );
+                    // dereference the object in order to reach its fields
+                    hbObj = storageFolder->Dereference();
 
-            // create an array of <StorageFolder>
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, directoryCount, storageFolderTypeDef ));
-            
-            // get a pointer to the first object in the array (which is of type <StorageFolder>)
-            storageFolder = (CLR_RT_HeapBlock*)top.DereferenceArray()->GetFirstElement();
+                    // directory name
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___name ], fileInfo.fname ));
 
-            if(directoryCount > 0)
-            {
-                // allocate memory for buffers
-                stringBuffer = (char*)platform_malloc(FF_LFN_BUF + 1);
-                workingBuffer = (char*)platform_malloc(2 * FF_LFN_BUF + 1);
+                    // clear working buffer
+                    memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
 
-                // sanity check for successfull malloc
-                if(stringBuffer == NULL || workingBuffer == NULL)
-                {
-                    // failed to allocate memory
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-                }
-
-                // perform 2nd pass
-                // need to rewind the directory read index first
-                f_readdir(&currentDirectory, NULL);
-                
-                for (;;)
-                {
-                    // read next directory item
-                    operationResult = f_readdir(&currentDirectory, &fileInfo);
+                    // compose directory path
+                    strcat(workingBuffer, workingPath);
+                    strcat(workingBuffer, fileInfo.fname);
                     
-                    // break on error or at end of dir
-                    if (operationResult != FR_OK || fileInfo.fname[0] == 0)
-                    {
-                        break;
-                    }
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___path ], workingBuffer ));
+                    
+                    // compute directory date
+                    fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-                    // check if this is a directory
-                    // but skip if:
-                    // - has system attribute set
-                    // - has hidden attribute set
-                    if ((fileInfo.fattrib & AM_DIR) &&
-                        !(fileInfo.fattrib & AM_SYS) &&
-                        !(fileInfo.fattrib & AM_HID))
-                    {
-                        // create an instance of <StorageFolder>
-                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFolder, storageFolderTypeDef));
+                    // get a reference to the dateCreated managed field...
+                    CLR_RT_HeapBlock& dateFieldRef = hbObj[ StorageFolder::FIELD___dateCreated ];
+                    CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+                    // ...and set it with the fileInfoTime
+                    *pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
 
-                        // dereference the object in order to reach its fields
-                        hbObj = storageFolder->Dereference();
-
-                        // directory name
-                        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], fileInfo.fname ));
-
-                        // clear working buffer
-                        memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
-
-                        // compose directory path
-                        strcat(workingBuffer, workingPath);
-                        strcat(workingBuffer, fileInfo.fname);
-                        
-                        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], workingBuffer ));
-                        
-                        // compute directory date
-                        fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
-
-                        // get a reference to the dateCreated managed field...
-                        CLR_RT_HeapBlock& dateFieldRef = hbObj[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated ];
-                        CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
-                        // ...and set it with the fileInfoTime
-                        *pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
-
-                        // move the storage folder pointer to the next item in the array
-                        storageFolder++;
-                    }
+                    // move the storage folder pointer to the next item in the array
+                    storageFolder++;
                 }
             }
         }
-    }
-    else
-    {
-        // failed to change drive
-        NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
     }
 
     NANOCLR_CLEANUP();
@@ -349,7 +342,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile__U4__U4( CLR_RT_StackFrame& stack )
+HRESULT StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile__U4__U4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -385,10 +378,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
 
     // copy the first 2 letters of the path for the drive
     // path is 'D:\folder\file.txt', so we need 'D:'
-    memcpy(workingDrive, pThis[ FIELD___path ].DereferenceString()->StringText(), DRIVE_LETTER_LENGTH);
+    memcpy(workingDrive, pThis[ StorageFolder::FIELD___path ].DereferenceString()->StringText(), DRIVE_LETTER_LENGTH);
         
     // get a pointer to the path in managed field
-    workingPath = pThis[ FIELD___path ].DereferenceString()->StringText();
+    workingPath = pThis[ StorageFolder::FIELD___path ].DereferenceString()->StringText();
 
     // change drive
     if(f_chdrive(workingDrive) == FR_OK)
@@ -503,7 +496,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
                             hbObj = storageFile->Dereference();
 
                             // file name
-                            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ Library_win_storage_native_Windows_Storage_StorageFile::FIELD___name ], fileInfo.fname ));
+                            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFile::FIELD___name ], fileInfo.fname ));
 
                             // clear working buffer
                             memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
@@ -512,13 +505,13 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
                             strcat(workingBuffer, workingPath);
                             strcat(workingBuffer, fileInfo.fname);
 
-                            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path ], workingBuffer ));
+                            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFile::FIELD___path ], workingBuffer ));
 
                             // compute directory date
                             fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
                             // get a reference to the dateCreated managed field...
-                            CLR_RT_HeapBlock& dateFieldRef = hbObj[ Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated ];
+                            CLR_RT_HeapBlock& dateFieldRef = hbObj[ StorageFile::FIELD___dateCreated ];
                             CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
                             // ...and set it with the fileInfoTime
                             *pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
@@ -565,6 +558,301 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
     if(workingBuffer != NULL)
     {
         platform_free(workingBuffer);
+    }
+
+    NANOCLR_CLEANUP_END();
+}
+
+HRESULT StorageFolder::CreateFileNative___WindowsStorageStorageFile__STRING__U4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Index    storageFileTypeDef;
+    CLR_RT_HeapBlock*       storageFile;
+
+    const char* fileName;
+    const char* workingPath;
+
+    CreationCollisionOption options;
+
+    FIL             file;
+    static FILINFO  fileInfo;
+    SYSTEMTIME      fileInfoTime;    
+    FRESULT         operationResult;
+    uint8_t         modeFlags = 0;
+    char*           filePath = NULL;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+    // get creation collision options
+    options = (CreationCollisionOption)stack.Arg2().NumericByRef().u4;
+        
+    // get a pointer to the StorageFolder path in managed field
+    workingPath = pThis[ StorageFolder::FIELD___path ].DereferenceString()->StringText();
+
+    // get a pointer to the desired file name
+    fileName = stack.Arg1().DereferenceString()->StringText();
+
+    // setup file path
+    filePath = (char*)platform_malloc(2 * FF_LFN_BUF + 1);
+
+    // sanity check for successfull malloc
+    if(filePath == NULL)
+    {
+        // failed to allocate memory
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // clear working buffer
+    memset(filePath, 0, 2 * FF_LFN_BUF + 1);
+
+    // compose file path
+    strcat(filePath, workingPath);
+    strcat(filePath, fileName);
+
+    // change directory
+    operationResult = f_chdir(workingPath);
+
+    if(operationResult != FR_OK)
+    {
+        if(operationResult == FR_INVALID_DRIVE)
+        {
+            // failed to change drive
+            NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
+        }
+        // error opening the directoty
+        NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+    }
+    else
+    {
+        // compute mode flags from CreationCollisionOption
+        switch (options)
+        {
+            case CreationCollisionOption_ReplaceExisting:
+                modeFlags = FA_CREATE_ALWAYS;
+                break;
+
+            case CreationCollisionOption_FailIfExists:
+                modeFlags = FA_CREATE_NEW;
+                break;
+
+            case CreationCollisionOption_OpenIfExists:
+                modeFlags = FA_OPEN_EXISTING;
+                break;
+        
+            case CreationCollisionOption_GenerateUniqueName:
+                // this operation is not supported in nanoFramework
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+
+            default:
+                break;
+        }
+
+        // open file
+        operationResult = f_open(&file, filePath, modeFlags);
+
+        // process operation result according to creation options
+        if( (operationResult == FR_EXIST) &&
+            (options == CreationCollisionOption_FailIfExists))
+        {
+            // file already exists
+            NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
+        }
+        if( (operationResult == FR_NO_FILE) &&
+            (options == CreationCollisionOption_OpenIfExists))
+        {
+            // file doesn't exist
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
+        }
+
+        if(operationResult == FR_OK)
+        {
+            // file created (or opened) succesfully
+            // OK to close it
+            f_close(&file);
+            
+            // now get the details
+            f_stat(fileName, &fileInfo);
+
+            // compose return object
+            // find <StorageFile> type, don't bother checking the result as it exists for sure
+            g_CLR_RT_TypeSystem.FindTypeDef( "StorageFile", "Windows.Storage", storageFileTypeDef );
+
+            // create a <StorageFile>
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), storageFileTypeDef));
+            
+            // get a handle to the storage file
+            storageFile = stack.TopValue().Dereference();
+
+            // file name
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFile[ StorageFile::FIELD___name ], fileName ));
+
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFile[ StorageFile::FIELD___path ], filePath ));
+
+            // get the date time details and fill in the managed field
+            // compute directory date
+            fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
+
+            // get a reference to the dateCreated managed field...
+            CLR_RT_HeapBlock& dateFieldRef = storageFile[ StorageFile::FIELD___dateCreated ];
+            CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+            // ...and set it with the fileInfoTime
+            *pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
+        }
+        else
+        {
+            // failed to create the file
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+        }
+    }
+
+    NANOCLR_CLEANUP();
+
+    // free buffer memory, if allocated
+    if(filePath != NULL)
+    {
+        platform_free(filePath);
+    }
+
+    NANOCLR_CLEANUP_END();
+}
+
+HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING__U4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Index    storageFolderTypeDef;
+    CLR_RT_HeapBlock*       storageFolder;
+
+    const char* folderName;
+    const char* workingPath;
+
+    CreationCollisionOption options;
+
+    static FILINFO  fileInfo;
+    SYSTEMTIME      fileInfoTime;    
+    FRESULT         operationResult;
+    char*           folderPath = NULL;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+    // get creation collision options
+    options = (CreationCollisionOption)stack.Arg2().NumericByRef().u4;
+        
+    // get a pointer to the path in managed field
+    workingPath = pThis[ StorageFolder::FIELD___path ].DereferenceString()->StringText();
+
+    // get a pointer to the desired folder name
+    folderName = stack.Arg1().DereferenceString()->StringText();
+
+    folderPath = (char*)platform_malloc(2 * FF_LFN_BUF + 1);
+
+    // sanity check for successfull malloc
+    if(folderPath == NULL)
+    {
+        // failed to allocate memory
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // clear working buffer
+    memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
+
+    // compose folder path
+    strcat(folderPath, workingPath);
+    strcat(folderPath, folderName);
+
+    // change directory
+    operationResult = f_chdir(workingPath);
+
+    if(operationResult != FR_OK)
+    {
+        if(operationResult == FR_INVALID_DRIVE)
+        {
+            // failed to change drive
+            NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
+        }
+        
+        // error opening the directoty
+        NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+    }
+    else
+    {
+        // handle request for open if it exists and replace exisitng
+        if( (options == CreationCollisionOption_OpenIfExists) ||
+            (options == CreationCollisionOption_ReplaceExisting))
+        {
+            operationResult = f_stat(folderName, &fileInfo);
+        }
+        else
+        {
+            // create directoy
+            operationResult = f_mkdir(folderName);
+        }
+
+        // process operation result according to creation options
+        if( (operationResult != FR_OK) &&
+            (options == CreationCollisionOption_FailIfExists))
+        {
+            // folder already exists
+            NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
+        }
+        if( (operationResult == FR_NO_FILE) &&
+            (options == CreationCollisionOption_OpenIfExists))
+        {
+            // folder doesn't exist
+            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+        }
+        
+        if(operationResult == FR_OK)
+        {
+            // folder created get the details or...
+            // ...(if already exists) skip
+            if(fileInfo.fattrib == 0)
+            {
+                f_stat(folderName, &fileInfo);
+            }
+
+            // compose return object
+            // find <StorageFolder> type, don't bother checking the result as it exists for sure
+            g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storageFolderTypeDef );
+
+            // create a <StorageFolder>
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), storageFolderTypeDef));
+            
+            // get a handle to the storage folder
+            storageFolder = stack.TopValue().Dereference();
+
+            // folder name
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[ StorageFolder::FIELD___name ], folderName ));
+
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[ StorageFolder::FIELD___path ], folderPath ));
+
+            // get the date time details and fill in the managed field
+            // compute directory date
+            fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
+
+            // get a reference to the dateCreated managed field...
+            CLR_RT_HeapBlock& dateFieldRef = storageFolder[ StorageFolder::FIELD___dateCreated ];
+            CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+            // ...and set it with the fileInfoTime
+            *pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
+        }
+        else
+        {
+            // failed to create the folder
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+        }
+    }
+
+    NANOCLR_CLEANUP();
+
+    // free buffer memory, if allocated
+    if(folderPath != NULL)
+    {
+        platform_free(folderPath);
     }
 
     NANOCLR_CLEANUP_END();

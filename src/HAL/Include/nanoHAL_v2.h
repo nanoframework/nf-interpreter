@@ -39,6 +39,7 @@ typedef enum SLEEP_LEVEL
 
 #define SYSTEM_EVENT_FLAG_COM_IN                    0x00000001
 #define SYSTEM_EVENT_FLAG_COM_OUT                   0x00000002
+#define SYSTEM_EVENT_FLAG_STORAGE_IO                0x00000004
 #define SYSTEM_EVENT_FLAG_SYSTEM_TIMER              0x00000010
 //#define SYSTEM_EVENT_FLAG_TIMER1                    0x00000020
 //#define SYSTEM_EVENT_FLAG_TIMER2                    0x00000040

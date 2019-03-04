@@ -2794,6 +2794,7 @@ struct CLR_RT_ExecutionEngine
     static const CLR_UINT32             c_Event_SerialPortIn        = 0x00000002;
     static const CLR_UINT32             c_Event_SerialPortOut       = 0x00000004;
     static const CLR_UINT32             c_Event_EndPoint            = 0x00000008;
+    static const CLR_UINT32             c_Event_StorageIo           = 0x00000020;
     static const CLR_UINT32             c_Event_I2cMaster           = 0x00000080;
     static const CLR_UINT32             c_Event_SpiMaster           = 0x00000100;
     static const CLR_UINT32             c_Event_OneWireMaster       = 0x00000200;

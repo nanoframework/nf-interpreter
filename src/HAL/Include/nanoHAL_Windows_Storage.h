@@ -31,6 +31,18 @@ typedef enum Storage_Drives
 #define DRIVE_LETTER_LENGTH     sizeof(SDCARD_DRIVE_LETTER)
 #define DRIVE_PATH_LENGTH       sizeof(SDCARD_DRIVE_PATH)
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Windows.Storage.CreationCollisionOption (in managed code) !!! //
+/////////////////////////////////////////////////////////////////////////////////////////
+
+enum CreationCollisionOption
+{
+    CreationCollisionOption_GenerateUniqueName = 0,
+    CreationCollisionOption_ReplaceExisting,
+    CreationCollisionOption_FailIfExists,
+    CreationCollisionOption_OpenIfExists
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
