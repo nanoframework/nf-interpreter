@@ -23,7 +23,7 @@ typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
 
 struct ReadTextOperation
 {
-    FIL*    File;
+    FIL*    File;  
     int32_t ContentLength;
 };
 
@@ -41,32 +41,34 @@ static thread_t* fileIoWorkingThread;
 // ReadText working thread
 static THD_FUNCTION(ReadTextWorkingThread, arg)
 {
-    CLR_RT_HeapBlock            hbContent;
-    CLR_RT_HeapBlock_String*    content;
-
     ReadTextOperation*  fileIoOperation = (ReadTextOperation*)arg;
 
-    // create HB string
-    CLR_RT_HeapBlock_String::CreateInstance( hbContent, fileIoOperation->ContentLength);
-    // protect it from GC
-    CLR_RT_ProtectFromGC gcStorageFile( hbContent );
-    // get a pointer to the HB string
-    content = hbContent.DereferenceString();
+    // need an extra one for the terminator
+    uint32_t readLength = fileIoOperation->ContentLength + 1;
 
-    // read string
-    f_gets((TCHAR*)content->StringText(), fileIoOperation->ContentLength, fileIoOperation->File);
+    // allocate buffer for reading string
+    char* buffer = (char*)platform_malloc(readLength);
+    if(buffer)
+    {
+        // read string
+        f_gets((TCHAR*)buffer, readLength, fileIoOperation->File);
 
-    // close file
-    f_close(fileIoOperation->File);
+        // close file
+        f_close(fileIoOperation->File);
 
-    // free memory
-    platform_free(fileIoOperation->File);
-    platform_free(fileIoOperation);
+        // free memory
+        platform_free(fileIoOperation->File);
+        platform_free(fileIoOperation);
 
-    // fire event for FileIO operation complete
-    Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
-  
-    chThdExit((msg_t)&hbContent);
+        // fire event for FileIO operation complete
+        Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
+
+        chThdExit((msg_t)buffer);
+    }
+    else
+    {
+        chThdExit((msg_t)NULL);
+    }
 }
 
 // WriteText working thread
@@ -100,7 +102,6 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadText___STATIC__ST
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock*   content = NULL;
     CLR_RT_HeapBlock    hbTimeout;
     CLR_INT64*          timeout;
     bool                eventResult = true;
@@ -109,6 +110,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadText___STATIC__ST
 
     char workingDrive[DRIVE_LETTER_LENGTH];
     const TCHAR*        filePath;
+    char*               buffer = NULL;
 
     FIL*                file;
     static FILINFO      fileInfo;
@@ -146,8 +148,8 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadText___STATIC__ST
         }
 
         // open file (which is supposed to already exist)
-        // need to use FA_OPEN_ALWAYS because we are writting the file content from start
-        operationResult = f_open(file, filePath, FA_OPEN_ALWAYS | FA_WRITE);
+        // need to use FA_OPEN_EXISTING because we are reading an existing file content from start
+        operationResult = f_open(file, filePath, FA_OPEN_EXISTING | FA_READ);
         
         if(operationResult != FR_OK)
         {
@@ -155,7 +157,6 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadText___STATIC__ST
         }
         else
         {
-
             // get file details
             f_stat(filePath, &fileInfo);
 
@@ -189,7 +190,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadText___STATIC__ST
             // event occurred
 
             // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to the heap, otherwise it won't be returned
-            content = (CLR_RT_HeapBlock*)chThdWait(fileIoWorkingThread);
+            buffer = (char*)chThdWait(fileIoWorkingThread);
 
             // done here
             break;
@@ -203,8 +204,21 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadText___STATIC__ST
     // pop timeout heap block from stack
     stack.PopValue();
 
-    // set return value
-    stack.PushValueAndAssign(*content);
+    // set return value, if the buffer has content
+    if(buffer)
+    {
+        stack.SetResult_String( buffer );
+    }
+    else
+    {
+        // OK to leave without freeing buffer memory as it seems it wasn't allocated anyway
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+    
+    if(buffer)
+    {
+        platform_free(buffer);
+    }
 
     NANOCLR_NOCLEANUP();
 }

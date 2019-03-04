@@ -780,16 +780,16 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
     }
     else
     {
-        // handle request for open if it exists and replace exisitng
+        // handle request for open if it exists and replace existing
         if( (options == CreationCollisionOption_OpenIfExists) ||
             (options == CreationCollisionOption_ReplaceExisting))
         {
-            operationResult = f_stat(folderName, &fileInfo);
+            operationResult = f_stat(folderPath, &fileInfo);
         }
         else
         {
-            // create directoy
-            operationResult = f_mkdir(folderName);
+            // create directory
+            operationResult = f_mkdir(folderPath);
         }
 
         // process operation result according to creation options
@@ -812,7 +812,7 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
             // ...(if already exists) skip
             if(fileInfo.fattrib == 0)
             {
-                f_stat(folderName, &fileInfo);
+                f_stat(folderPath, &fileInfo);
             }
 
             // compose return object
