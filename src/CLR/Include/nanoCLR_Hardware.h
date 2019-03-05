@@ -46,6 +46,7 @@ struct CLR_HW_Hardware
     static const CLR_UINT32 c_Default_PowerLevel   = PowerLevel__Sleep; 
     static const CLR_UINT32 c_Default_WakeupEvents = SYSTEM_EVENT_FLAG_COM_IN            |
                                                      SYSTEM_EVENT_FLAG_COM_OUT           |
+                                                     SYSTEM_EVENT_FLAG_STORAGE_IO        |
                                                      SYSTEM_EVENT_FLAG_SYSTEM_TIMER      |
                                                      SYSTEM_EVENT_FLAG_SPI_MASTER        |
                                                      SYSTEM_EVENT_FLAG_I2C_MASTER        |

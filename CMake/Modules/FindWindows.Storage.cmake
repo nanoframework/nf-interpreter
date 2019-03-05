@@ -15,6 +15,7 @@ list(APPEND Windows.Storage_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
 # source files
 set(Windows.Storage_SRCS
 
+    win_storage_native_Windows_Storage_FileIO.cpp
     win_storage_native_Windows_Storage_StorageFolder.cpp  
     win_storage_native.cpp
 

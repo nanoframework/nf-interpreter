@@ -11,6 +11,15 @@
 #include <nanoCLR_Runtime.h>
 #include <hal.h>
 
+struct Library_win_storage_native_Windows_Storage_FileIO
+{
+    NANOCLR_NATIVE_DECLARE(ReadText___STATIC__STRING__WindowsStorageIStorageFile);
+    NANOCLR_NATIVE_DECLARE(WriteText___STATIC__VOID__WindowsStorageIStorageFile__STRING);
+
+    //--//
+
+};
+
 struct Library_win_storage_native_Windows_Storage_StorageFile
 {
     static const int FIELD___dateCreated = 1;
@@ -32,6 +41,8 @@ struct Library_win_storage_native_Windows_Storage_StorageFolder
     NANOCLR_NATIVE_DECLARE(GetRemovableStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder);
     NANOCLR_NATIVE_DECLARE(GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder);
     NANOCLR_NATIVE_DECLARE(GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile__U4__U4);
+    NANOCLR_NATIVE_DECLARE(CreateFileNative___WindowsStorageStorageFile__STRING__U4);
+    NANOCLR_NATIVE_DECLARE(CreateFolderNative___WindowsStorageStorageFolder__STRING__U4);
 
     //--//
 
