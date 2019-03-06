@@ -13,8 +13,10 @@
 
 struct Library_win_storage_native_Windows_Storage_FileIO
 {
-    NANOCLR_NATIVE_DECLARE(ReadText___STATIC__STRING__WindowsStorageIStorageFile);
+    NANOCLR_NATIVE_DECLARE(WriteBytes___STATIC__VOID__WindowsStorageIStorageFile__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(WriteText___STATIC__VOID__WindowsStorageIStorageFile__STRING);
+    NANOCLR_NATIVE_DECLARE(ReadBufferNative___STATIC__VOID__WindowsStorageIStorageFile__BYREF_SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(ReadTextNative___STATIC__VOID__WindowsStorageIStorageFile__BYREF_STRING);
 
     //--//
 
