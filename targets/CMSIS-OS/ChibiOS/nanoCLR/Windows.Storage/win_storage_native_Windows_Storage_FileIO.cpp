@@ -8,7 +8,6 @@
 #include <ff.h>
 #include "win_storage_native.h"
 #include <target_windows_storage_config.h>
-#include <Target_Windows_Storage.h>
 #include <nanoHAL_Windows_Storage.h>
 
 #if HAL_USBH_USE_MSD

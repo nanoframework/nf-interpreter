@@ -5,6 +5,8 @@
 #ifndef _NANOHAL_WINDOWS_STORAGE_H_
 #define _NANOHAL_WINDOWS_STORAGE_H_ 1
 
+#include <Target_Windows_Storage.h>
+
 // FatFs define for size of file name members
 // ANSI/OEM at DBCS
 #define FF_LFN_BUF  255

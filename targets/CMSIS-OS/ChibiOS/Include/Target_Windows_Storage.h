@@ -7,11 +7,11 @@
 #define _TARGET_WINDOWS_STORAGE_H_ 1
 
 #define SDCARD_POLLING_INTERVAL                (1000)
-#define SDCARD_POLLING_DELAY                   (2)
+#define SDCARD_POLLING_DELAY                   (10)
 
 
 #define USB_MSD_POLLING_INTERVAL               (1000)
-#define USB_MSD_POLLING_DELAY                  (2)
+#define USB_MSD_POLLING_DELAY                  (10)
 
 // void RemoveHandler(eventid_t id);
 // void InsertHandler(eventid_t id);
@@ -20,7 +20,8 @@
 extern "C" {
 #endif
 
-// declaration of RTOS thread
+// declaration of RTOS working threads
+void SdCardWorkingThread(void const * argument);
 void UsbMsdWorkingThread(void const * argument);
 
 #ifdef __cplusplus
