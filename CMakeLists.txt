@@ -792,11 +792,13 @@ if(RTOS_CHIBIOS_CHECK)
                             WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download")
 
             # add ChibiOS-Contrib as external project
+            # need to specify nanoframework as the active branch
             ExternalProject_Add( 
                 ChibiOS-Contrib
                 PREFIX ChibiOS-Contrib
                 SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source
                 GIT_REPOSITORY  https://github.com/ChibiOS/ChibiOS-Contrib
+                GIT_TAG nanoframework  # target specified branch
                 GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
                 TIMEOUT 10
                 LOG_DOWNLOAD 1
