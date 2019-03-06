@@ -14,13 +14,16 @@
 #include "usbh/dev/msd.h"
 #endif
 
-// FS for SD Card mounted and ready
-static bool sdCardFileSystemReady = false;
-
 ///////////////////////////////////////////
 // code specific to USB MSD
 
 #if HAL_USE_SDC
+
+// declare SD Card working thread here 
+osThreadDef(SdCardWorkingThread, osPriorityNormal, 256, "SDCWT"); 
+
+// FS for SD Card mounted and ready
+static bool sdCardFileSystemReady = false;
 
 static FATFS sdCard_FS;
 static SDCConfig SDC_CFG;
@@ -33,7 +36,7 @@ static unsigned sdDebounceCounter;
 static event_source_t sdInsertedEvent, sdRemovedEvent;
 
 // Insertion monitor timer callback function.
-static void SdcardInsertionMonitorCallback(void *p) 
+static void SdCardInsertionMonitorCallback(void *p) 
 {
     BaseBlockDevice *bbdp = p;
 
@@ -50,19 +53,19 @@ static void SdcardInsertionMonitorCallback(void *p)
         }
         else
         {
-            sdDebounceCounter = SDCARD_POLLING_DELAY;
+            sdDebounceCounter = SDCARD_POLLING_INTERVAL;
         }
     }
     else 
     {
         if (!blkIsInserted(bbdp))
         {
-            sdDebounceCounter = SDCARD_POLLING_DELAY;
+            sdDebounceCounter = SDCARD_POLLING_INTERVAL;
             chEvtBroadcastI(&sdRemovedEvent);
         }
     }
 
-    chVTSetI(&sdCardMonitorTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdcardInsertionMonitorCallback, bbdp);
+    chVTSetI(&sdCardMonitorTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdCardInsertionMonitorCallback, bbdp);
     chSysUnlockFromISR();
 }
 
@@ -75,7 +78,7 @@ static void StartCardMonitor(void *p)
     chSysLock();
 
     sdDebounceCounter = SDCARD_POLLING_INTERVAL;
-    chVTSetI(&sdCardMonitorTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdcardInsertionMonitorCallback, p);
+    chVTSetI(&sdCardMonitorTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdCardInsertionMonitorCallback, p);
 
     chSysUnlock();
 }
@@ -109,7 +112,7 @@ static void SdcardInsertHandler(eventid_t id)
 }
 
 // Card removal event handler
-static void SdcardRemoveHandler(eventid_t id)
+static void SdCardRemoveHandler(eventid_t id)
 {
     (void)id;
 
@@ -118,8 +121,31 @@ static void SdcardRemoveHandler(eventid_t id)
     sdCardFileSystemReady = FALSE;
 }
 
-const evhandler_t sdcardEventHandler[] = { SdcardInsertHandler, SdcardRemoveHandler };
-event_listener_t sdEventListener0, sdEventListener1;
+
+__attribute__((noreturn))
+void SdCardWorkingThread(void const * argument)
+{
+    (void)argument;
+
+    static const evhandler_t sdcardEventHandler[] = 
+    { 
+        SdcardInsertHandler,
+        SdCardRemoveHandler 
+    };
+
+    event_listener_t sdEventListener0, sdEventListener1;
+
+    // activates the card insertion monitor
+    StartCardMonitor(&SD_CARD_DRIVER);
+
+    chEvtRegister(&sdInsertedEvent, &sdEventListener0, 0);
+    chEvtRegister(&sdRemovedEvent, &sdEventListener1, 1);
+
+    for(;;)
+    {
+        chEvtDispatch(sdcardEventHandler, chEvtWaitOneTimeout(ALL_EVENTS, TIME_MS2I(500)));
+    }
+}
 
 #endif
 
@@ -129,7 +155,7 @@ event_listener_t sdEventListener0, sdEventListener1;
 // code specific to USB MSD
 #if HAL_USBH_USE_MSD
 
-// declare CLRStartup thread here 
+// declare USB MSD thread here 
 osThreadDef(UsbMsdWorkingThread, osPriorityNormal, 1024, "UsbMsdThread"); 
 
 // FS for USB MSD mounted and ready
@@ -141,7 +167,7 @@ static FATFS usbMsd_FS;
 //static virtual_timer_t usbMsdMonitorTimer;
 
 // USB MSD event sources
-static event_source_t usbInsertedEvent;
+//static event_source_t usbInsertedEvent;
 
 // Insertion monitor timer callback function.
 // static void UsbMsdMonitorCallback(void *p) 
@@ -179,20 +205,24 @@ static event_source_t usbInsertedEvent;
 // }
 
 // USB MSD insertion event handler
-static void UsbMsdInsertHandler(eventid_t id)
-{
-    (void)id;
+// static void UsbMsdInsertHandler(eventid_t id)
+// {
+//     (void)id;
 
-    // TODO
-}
-
-const evhandler_t usbEventHandler[] = { UsbMsdInsertHandler };
-event_listener_t usbEventListener0;
+//     // TODO
+// }
 
 __attribute__((noreturn))
 void UsbMsdWorkingThread(void const * argument)
 {
     FRESULT err;
+
+    // static const evhandler_t usbEventHandler[] = 
+    // { 
+    //     UsbMsdInsertHandler 
+    // };
+    
+    // event_listener_t usbEventListener0;
 
     USBHMassStorageLUNDriver* msBlk = (USBHMassStorageLUNDriver*)argument;
 
@@ -243,25 +273,18 @@ void Target_FileSystemInit()
     // activates the SDC driver using default configuration
     sdcStart(&SD_CARD_DRIVER, &SDC_CFG);
 
-    // activates the card insertion monitor
-    StartCardMonitor(&SD_CARD_DRIVER);
+    // creates the SD card working thread 
+    osThreadCreate(osThread(SdCardWorkingThread), NULL);
 
-    chEvtRegister(&sdInsertedEvent, &sdEventListener0, 0);
-    chEvtRegister(&sdRemovedEvent, &sdEventListener1, 1);
   #endif
 
   #if HAL_USBH_USE_MSD
-
-    // activates the USB insertion monitor
-    //StartUsbMsdMonitor(&MSBLKD[0]);
 
     // start USB host
     usbhStart(&USB_MSD_DRIVER);
 
     // create the USB MSD working thread 
     osThreadCreate(osThread(UsbMsdWorkingThread), &MSBLKD[0]);
-
-    chEvtRegister(&usbInsertedEvent, &usbEventListener0, 0);
 
   #endif
 
