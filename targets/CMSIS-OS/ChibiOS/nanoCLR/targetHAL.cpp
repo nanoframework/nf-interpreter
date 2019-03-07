@@ -38,8 +38,6 @@ void nanoHAL_Initialize()
 
     BlockStorageList_InitializeDevices();
 
-    Target_FileSystemInit();
-
     // clear managed heap region
     unsigned char* heapStart = NULL;
     unsigned int heapSize  = 0;

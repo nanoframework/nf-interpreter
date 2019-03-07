@@ -24,7 +24,16 @@
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here 
-osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread"); 
+osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
+
+#if HAL_USE_SDC
+// declare SD Card working thread here 
+osThreadDef(SdCardWorkingThread, osPriorityNormal, 1024, "SDCWT"); 
+#endif
+#if HAL_USBH_USE_MSD
+// declare USB MSD thread here 
+osThreadDef(UsbMsdWorkingThread, osPriorityNormal, 1024, "USBMSDWT"); 
+#endif
 
 //  Application entry point.
 int main(void) {
@@ -65,6 +74,16 @@ int main(void) {
 
   // create the CLR Startup thread 
   osThreadCreate(osThread(CLRStartupThread), &clrSettings);
+
+  #if HAL_USE_SDC
+  // creates the SD card working thread 
+  osThreadCreate(osThread(SdCardWorkingThread), NULL);
+  #endif
+
+  #if HAL_USBH_USE_MSD
+  // create the USB MSD working thread
+  osThreadCreate(osThread(UsbMsdWorkingThread), &MSBLKD[0]);
+  #endif
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
