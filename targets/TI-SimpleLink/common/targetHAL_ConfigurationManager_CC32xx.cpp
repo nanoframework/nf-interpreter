@@ -157,7 +157,11 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
 // Gets the network configuration block from the configuration flash sector 
 bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex)
 {
-    int sizeOfBlock = 0;
+    unsigned char* fileName = NULL;
+
+    int32_t fileHandle;
+    uint32_t token = 0;
+    int32_t retVal;
 
     // validate if the requested block exists
     // Count has to be non zero
@@ -167,9 +171,9 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
         if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
         {
             // there is no network config block, init one with default settings
-            if(!InitialiseNetworkDefaultConfig((HAL_Configuration_NetworkInterface*)configurationBlock, 0))
+            if(InitialiseNetworkDefaultConfig((HAL_Configuration_NetworkInterface*)configurationBlock, 0))
             {
-                return false;
+                return true;
             }
         }
         else
@@ -179,9 +183,6 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
                 return false;
             }
         }
-
-        // set block size
-        sizeOfBlock = sizeof(HAL_Configuration_NetworkInterface);
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
     {
@@ -190,9 +191,6 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
         {
             return false;
         }
-
-        // set block size
-        sizeOfBlock = sizeof(HAL_Configuration_Wireless80211);
     }
     else if(configuration == DeviceConfigurationOption_X509CaRootBundle)
     {
@@ -210,6 +208,46 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
         // sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
         // sizeOfBlock += ((HAL_Configuration_X509CaRootBundle*)blockAddress)->CertificateSize;
     }
+
+    if(configuration == DeviceConfigurationOption_Network)
+    {
+        // network config blocks are stored as files
+
+        // compose file name
+        fileName = (unsigned char*)platform_malloc(sizeof(NETWORK_CONFIG_FILE_NAME));
+        memcpy(fileName, NETWORK_CONFIG_FILE_NAME, sizeof(NETWORK_CONFIG_FILE_NAME));
+        // insert index number at position N as char
+        fileName[NETWORK_CONFIG_FILE_INDEX_POSITION] = '0' + configurationIndex;
+
+        fileHandle = sl_FsOpen( fileName,
+                                SL_FS_READ,
+                                (uint32_t *)&token);
+        
+        // on error there is no file handle, rather a negative error code
+        if(fileHandle > 0)
+        {
+            retVal = sl_FsRead(fileHandle, 0, (unsigned char*)configurationBlock, sizeof(HAL_Configuration_NetworkInterface));
+            
+            // on success the return value is the amount of bytes written
+            if(retVal == sizeof(HAL_Configuration_NetworkInterface))
+            {
+                retVal = sl_FsClose(fileHandle, 0, 0, 0);
+
+                if( retVal < 0 )
+                {
+                    // error closing file, API ceremony suggests calling "abort" operation
+                    uint8_t signature = 'A';
+                    sl_FsClose(fileHandle, 0, &signature, 1);
+                }
+            }
+        }
+
+        if(fileName != NULL)
+        {
+            platform_free(fileName);
+        }
+    }
+
 
     return true;
 }
