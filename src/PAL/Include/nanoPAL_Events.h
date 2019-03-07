@@ -9,22 +9,6 @@
 #include <nanoHAL.h>
 #include <nanoWeak.h>
 
-////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH nanoFramework.Runtime.Events.EventCategory (in managed code) !!! //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-#define EVENT_UNKNOWN     0
-#define EVENT_CUSTOM      10
-#define EVENT_GPIO        20
-#define EVENT_SERIAL      30
-#define EVENT_NETWORK     40
-#define EVENT_WIFI        50
-#define EVENT_CAN         60
-
-////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
-
-
 typedef void (*set_Event_Callback)( void* );
 
 #define EVENTS_TIMEOUT_INFINITE 0xFFFFFFFF
@@ -68,7 +52,16 @@ __inline uint32_t Events_WaitForEvents( uint32_t wakeupSystemEvents, uint32_t ti
  void Events_SetCallback( set_Event_Callback pfn, void* arg );
  void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
-void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
+
+#ifdef __cplusplus
+}
+#endif
 
 //--//
 

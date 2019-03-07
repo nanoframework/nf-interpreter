@@ -77,6 +77,23 @@ typedef enum SLEEP_LEVEL
 #define SYSTEM_EVENT_FLAG_ALL                       0xFFFFFFFF
 
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Runtime.Events.EventCategory (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#define EVENT_UNKNOWN     0
+#define EVENT_CUSTOM      10
+#define EVENT_GPIO        20
+#define EVENT_SERIAL      30
+#define EVENT_NETWORK     40
+#define EVENT_WIFI        50
+#define EVENT_CAN         60
+#define EVENT_STORAGE     70
+
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
 // COM_HANDLE Defines a type representing both a port type or "transport" and a port number
 // The COM_HANDLE is a multi bit field value with the following bit fields usage
 //    |--------+--------+--------+--------|
