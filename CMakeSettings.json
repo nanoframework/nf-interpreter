@@ -7,8 +7,8 @@
       "inheritEnvironments": [
         "gcc-arm"
       ],
-      "buildRoot": "C:\\nanoFramework\\nf-interpreter\\Build\\${name}",
-      "installRoot": "C:\\nanoFramework\\nf-interpreter\\Build\\install\\${name}",
+      "buildRoot": "${workspaceRoot}/Build/${name}",
+      "installRoot": "${workspaceRoot}/Build/install/${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
@@ -19,12 +19,12 @@
           "value": "TRUE"
         },
         {
-          "name": "EXECUTABLE_OUTPUT_PATH",
-          "value": "C:/nanoFramework/nf-interpreter/build/${name}"
+          "name": "EXECUTABLE_OUTPUT_PATH:PATH",
+          "value": "${workspaceRoot}/Build/${name}"
         },
         {
-          "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/nanoFramework_Tools/GNU_ARM_Toolchain/7 2018-q2-update"
+          "name": "TOOLCHAIN_PREFIX:PATH",
+          "value": "${env.GNU_GCC_TOOLCHAIN_PATH}"
         },
         {
           "name": "CMAKE_SYSTEM_NAME",
@@ -39,172 +39,176 @@
           "value": "2.19.0"
         },
         {
-          "name": "TARGET_SERIES",
+          "name": "TARGET_SERIES:STRING",
           "value": "STM32F7xx"
         },
         {
-          "name": "CHIBIOS_BOARD",
+          "name": "CHIBIOS_BOARD:STRING",
           "value": "ST_STM32F769I_DISCOVERY"
         },
         {
-          "name": "CHIBIOS_SOURCE", // manually download, problems at the moment with value="" which forces a auto copy; causes failure with access denied at build? ( on .git directory)
-          "value": "C:/nanoFramework_Tools/ChibiOS"
+          "name": "CHIBIOS_SOURCE:PATH", // manually download, problems at the moment with value="" which forces a auto copy; causes failure with access denied at build? ( on .git directory)
+          "value": "C:/usr/src/NanoFramework/ChibiOS"
         },
         {
           "name": "CHIBIOS_VERSION", // default blank, set to specific version ( Not working with Visual Studio, clone and checkout specific manually)
           "value": ""
         },
         {
-          "name": "USE_RNG", //option to enable use of true random generator hardware block
+          "name": "USE_RNG:BOOL", //option to enable use of true random generator hardware block
           "value": "ON"
         },
         {
-          "name": "TARGET_DP_FLOATINGPOINT",
+          "name": "TARGET_DP_FLOATINGPOINT:BOOL",
           "value": "FALSE"
         },
         {
-          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION", //"Option for string conversion to value from base 10 and partial for 16"
+          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION:BOOL", //"Option for string conversion to value from base 10 and partial for 16"
           "value": "FALSE"
         },
         {
-          "name": "TOOL_HEX2DFU_PREFIX", //"PATH for HEX TOOL"
-          "value": "C:/nanoFramework_Tools/Tools"
+          "name": "TOOL_HEX2DFU_PREFIX:PATH", //"PATH for HEX TOOL"
+          "value": "${env.HEX2DFU_PATH}"
         },
         {
-          "name": "RTOS", //"Selected Operating system
+          "name": "RTOS:STRING", //"Selected Operating system
           "value": "CHIBIOS"
         },
         {
-          "name": "SWO_OUTPUT_OPTION", // Single Wire Output Option
+          "name": "SWO_OUTPUT_OPTION:BOOL", // Single Wire Output Option
           "value": "TRUE"
         },
         {
-          "name": "NF_BUILD_RTM", // OFF-default-ON-to-enable-RTM-build
+          "name": "NF_BUILD_RTM:BOOL", // OFF-default-ON-to-enable-RTM-build
           "value": "OFF"
         },
         {
-          "name": "NF_WP_TRACE_ERRORS", //OFF-default-ON-to-enable-trace-error-messages-wire-protocol
+          "name": "NF_WP_TRACE_ERRORS:BOOL", //OFF-default-ON-to-enable-trace-error-messages-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_WP_TRACE_HEADERS", //OFF-default-ON-to-enable-trace-header-messages-wire-protocol
+          "name": "NF_WP_TRACE_HEADERS:BOOL", //OFF-default-ON-to-enable-trace-header-messages-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_WP_TRACE_STATE", //OFF-default-ON-to-enable-trace-state-messages-wire-protocol
+          "name": "NF_WP_TRACE_STATE:BOOL", //OFF-default-ON-to-enable-trace-state-messages-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_WP_TRACE_NODATA", //OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol
+          "name": "NF_WP_TRACE_NODATA:BOOL", //OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_WP_TRACE_ALL", //OFF-default-ON-to-enable-trace-all-messages-wire-protocol
+          "name": "NF_WP_TRACE_ALL:BOOL", //OFF-default-ON-to-enable-trace-all-messages-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_WP_IMPLEMENTS_CRC32", //OFF-default-ON-to-enable-CRC32-wire-protocol
+          "name": "NF_WP_IMPLEMENTS_CRC32:BOOL", //OFF-default-ON-to-enable-CRC32-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_FEATURE_DEBUGGER", //OFF-default-ON-to-include-managed-app-debugging-capability
+          "name": "NF_FEATURE_DEBUGGER:BOOL", //OFF-default-ON-to-include-managed-app-debugging-capability
           "value": "OFF"
         },
         {
-          "name": "NF_FEATURE_RTC", //OFF-default-ON-to-enable-hardware-RTC
+          "name": "NF_FEATURE_RTC:BOOL", //OFF-default-ON-to-enable-hardware-RTC
           "value": "ON"
         },
         {
-          "name": "NF_FEATURE_USE_APPDOMAINS", //OFF-default-ON-to-enable-support-for-Application-Domains
+          "name": "NF_FEATURE_USE_APPDOMAINS:BOOL", //OFF-default-ON-to-enable-support-for-Application-Domains
           "value": "OFF"
         },
         {
-          "name": "NF_FEATURE_WATCHDOG", //ON-to-enable-hardware-watchdog-ON-is-default
+          "name": "NF_FEATURE_WATCHDOG:BOOL", //ON-to-enable-hardware-watchdog-ON-is-default
           "value": "ON"
         },
         {
-          "name": "NF_FEATURE_HAS_CONFIG_BLOCK", //OFF-default-ON-to-enable-configuration-block-storage
+          "name": "NF_FEATURE_HAS_CONFIG_BLOCK:BOOL", //OFF-default-ON-to-enable-configuration-block-storage
           "value": "ON"
         },
         {
-          "name": "NF_PLATFORM_NO_CLR_TRACE", //OFF-default-ON-to-disable-all-trace-on-CLR
+          "name": "NF_FEATURE_HAS_SDCARD:BOOL", //OFF-default-ON-to-enable-sd-card
+          "value": "ON"
+        },
+        {
+          "name": "NF_PLATFORM_NO_CLR_TRACE:BOOL", //OFF-default-ON-to-disable-all-trace-on-CLR
           "value": "OFF"
         },
         {
-          "name": "NF_CLR_NO_IL_INLINE", //OFF-default-ON-to-disable-CLR-IL-inlining
+          "name": "NF_CLR_NO_IL_INLINE:BOOL", //OFF-default-ON-to-disable-CLR-IL-inlining
           "value": "OFF"
         },
         {
-          "name": "NF_INTEROP_ASSEMBLIES", //OFF-default-ON-to-disable-CLR-IL-inlining
+          "name": "NF_INTEROP_ASSEMBLIES:BOOL", //OFF-default-ON-to-disable-CLR-IL-inlining
           "value": "OFF"
         },
         {
-          "name": "NF_NETWORKING_SNTP", //ON-default-to-add-SNTP-client-requires-networking
+          "name": "NF_NETWORKING_SNTP:BOOL", //ON-default-to-add-SNTP-client-requires-networking
           "value": "OFF"
         },
         {
-          "name": "NF_SECURITY_OPENSSL", //OFF-default-ON-to-add-network-security-from-OpenSSL
+          "name": "NF_SECURITY_OPENSSL:BOOL", //OFF-default-ON-to-add-network-security-from-OpenSSL
           "value": "OFF"
         },
         {
-          "name": "NF_SECURITY_MBEDTLS", //OFF-default-ON-to-add-network-security-from-mbedTLS
+          "name": "NF_SECURITY_MBEDTLS:BOOL", //OFF-default-ON-to-add-network-security-from-mbedTLS
           "value": "OFF"
         },
         {
-          "name": "MBEDTLS_SOURCE", //path-to-mbedtls-source-mind-the-forward-slashes
+          "name": "MBEDTLS_SOURCE:PATH", //path-to-mbedtls-source-mind-the-forward-slashes
           "value": ""
         },
         // LIBRARIES
         {
-          "name": "API_nanoFramework.Devices.OneWire", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_System.Math", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_System.Net", //OFF-default-ON-to-add-this-API
+          "name": "API_nanoFramework.Devices.OneWire:BOOL", //OFF-default-ON-to-add-this-API
           "value": "OFF"
         },
         {
-          "name": "API_Windows.Devices.Adc", //OFF-default-ON-to-add-this-API
+          "name": "API_System.Math:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Gpio", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.I2c", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Pwm", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.SerialCommunication", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Spi", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Networking.Sockets", //OFF-default-ON-to-add-this-API
+          "name": "API_System.Net:BOOL", //OFF-default-ON-to-add-this-API
           "value": "OFF"
         },
         {
-          "name": "API_Windows.Storage", //OFF-default-ON-to-add-this-API
+          "name": "API_Windows.Devices.Adc:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.Gpio:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.I2c:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.Pwm:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.SerialCommunication:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.Spi:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Networking.Sockets:BOOL", //OFF-default-ON-to-add-this-API
           "value": "OFF"
         },
         {
-          "name": "API_Hardware.Esp32", //OFF-default-ON-to-add-this-API
+          "name": "API_Windows.Storage:BOOL", //OFF-default-ON-to-add-this-API
           "value": "OFF"
         },
         {
-          "name": "API_Hardware.Stm32", //OFF-default-ON-to-add-this-API
+          "name": "API_Hardware.Esp32:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "OFF"
+        },
+        {
+          "name": "API_Hardware.Stm32:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         }
       ]
@@ -218,213 +222,11 @@
       ],
       "environments": [
         {
-          "PATH": "C:\\Windows\\system32" // Work around for Ninja not finding Cmd.exe with add_custom_command
-        }
-      ],
-      "buildRoot": "C:\\nanoFramework\\nf-interpreter\\Build\\${name}",
-      "installRoot": "C:\\nanoFramework\\nf-interpreter\\Build\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "-v",
-      "ctestCommandArgs": "",
-      "intelliSenseMode": "linux-gcc-arm",
-      "variables": [
-        {
-          "name": "VISUAL_STUDIO",
-          "value": "TRUE"
-        },
-        {
-          "name": "EXECUTABLE_OUTPUT_PATH",
-          "value": "C:/nanoFramework/nf-interpreter/build/${name}"
-        },
-        {
-          "name": "ESP32_TOOLCHAIN_PATH",
-          "value": "C:/ESP32_TOOLS"
-        },
-        {
-          "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/ESP32_TOOLS"
-        },
-        {
-          "name": "ESP32_IDF_PATH",
-          "value": "C:/ESP32_TOOLS/esp-idf-v3.1"
-        },
-        {
-          "name": "ESP32_LIBS_PATH",
-          "value": "C:/ESP32_TOOLS/libs-v3.1"
-        },
-        {
-          "name": "CMAKE_SYSTEM_NAME",
-          "value": "Generic"
-        },
-        {
-          "name": "GIT_EXECUTABLE",
-          "value": "${env.VSINSTALLDIR}/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/Git/cmd/git.exe"
-        },
-        {
-          "name": "GIT_VERSION_STRING",
-          "value": "2.19.0"
-        },
-        {
-          "name": "TARGET_SERIES",
-          "value": "ESP32"
-        },
-        {
-          "name": "ESP32_BOARD",
-          "value": "ESP32_WROOM_32"
-        },
-        {
-          "name": "USE_RNG", //option to enable use of true random generator hardware block
-          "value": "ON"
-        },
-        {
-          "name": "TARGET_DP_FLOATINGPOINT",
-          "value": "FALSE"
-        },
-        {
-          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION", //"Option for string conversion to value from base 10 and partial for 16"
-          "value": "FALSE"
-        },
-        {
-          "name": "RTOS", //"Selected Operating system
-          "value": "FREERTOS_ESP32"
-        },
-        {
-          "name": "NF_BUILD_RTM", // OFF-default-ON-to-enable-RTM-build
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_TRACE_ERRORS", //OFF-default-ON-to-enable-trace-error-messages-wire-protocol
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_TRACE_HEADERS", //OFF-default-ON-to-enable-trace-header-messages-wire-protocol
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_TRACE_STATE", //OFF-default-ON-to-enable-trace-state-messages-wire-protocol
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_TRACE_NODATA", //OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_TRACE_ALL", //OFF-default-ON-to-enable-trace-all-messages-wire-protocol
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_IMPLEMENTS_CRC32", //OFF-default-ON-to-enable-CRC32-wire-protocol
-          "value": "OFF"
-        },
-        {
-          "name": "NF_FEATURE_DEBUGGER", //OFF-default-ON-to-include-managed-app-debugging-capability
-          "value": "ON"
-        },
-        {
-          "name": "NF_FEATURE_RTC", //OFF-default-ON-to-enable-hardware-RTC
-          "value": "ON"
-        },
-        {
-          "name": "NF_FEATURE_USE_APPDOMAINS", //OFF-default-ON-to-enable-support-for-Application-Domains
-          "value": "OFF"
-        },
-        {
-          "name": "NF_FEATURE_WATCHDOG", //ON-to-enable-hardware-watchdog-ON-is-default
-          "value": "ON"
-        },
-        {
-          "name": "NF_FEATURE_HAS_CONFIG_BLOCK", //OFF-default-ON-to-enable-configuration-block-storage
-          "value": "ON"
-        },
-        {
-          "name": "NF_PLATFORM_NO_CLR_TRACE", //OFF-default-ON-to-disable-all-trace-on-CLR
-          "value": "OFF"
-        },
-        {
-          "name": "NF_CLR_NO_IL_INLINE", //OFF-default-ON-to-disable-CLR-IL-inlining
-          "value": "OFF"
-        },
-        {
-          "name": "NF_INTEROP_ASSEMBLIES", //OFF-default-ON-to-disable-CLR-IL-inlining
-          "value": "OFF"
-        },
-        {
-          "name": "NF_NETWORKING_SNTP", //ON-default-to-add-SNTP-client-requires-networking
-          "value": "ON"
-        },
-        {
-          "name": "NF_SECURITY_OPENSSL", //OFF-default-ON-to-add-network-security-from-OpenSSL
-          "value": "ON"
-        },
-        {
-          "name": "NF_SECURITY_MBEDTLS", //OFF-default-ON-to-add-network-security-from-mbedTLS
-          "value": "OFF"
-        },
-        // LIBRARIES
-        {
-          "name": "API_nanoFramework.Devices.OneWire", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_System.Math", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_System.Net", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Adc", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Gpio", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.I2c", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Pwm", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.SerialCommunication", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Spi", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Networking.Sockets", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
-        },
-        {
-          "name": "API_Windows.Storage", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
-        },
-        {
-          "name": "API_Hardware.Esp32", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        }
-      ]
-    },
-    {
-      "name": "ESP32_2",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "inheritEnvironments": [
-        "gcc-arm"
-      ],
-      "environments": [
-        {
           "PATH": "C:\\Windows\\system32;${env.PATH}" // Work around for Ninja not finding Cmd.exe with add_custom_command
         }
       ],
-      "buildRoot": "${workspaceRoot}\\Build\\${name}",
-      "installRoot": "${workspaceRoot}\\Build\\install\\${name}",
+      "buildRoot": "${workspaceRoot}/Build\\${name}",
+      "installRoot": "${workspaceRoot}/Build/install/${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
@@ -435,187 +237,187 @@
           "value": "TRUE"
         },
         {
-          "name": "EXECUTABLE_OUTPUT_PATH",
-          "value": "${workspaceRoot}\\Build/${name}"
+          "name": "EXECUTABLE_OUTPUT_PATH:PATH",
+          "value": "${workspaceRoot}/Build/${name}"
         },
         {
-          "name": "ESP32_TOOLCHAIN_PATH",
+          "name": "ESP32_TOOLCHAIN_PATH:PATH",
           "value": "C:/ESP32_TOOLS"
         },
         {
-          "name": "TOOLCHAIN_PREFIX",
+          "name": "TOOLCHAIN_PREFIX:PATH",
           "value": "C:/ESP32_TOOLS"
         },
         {
-          "name": "ESP32_IDF_PATH",
+          "name": "ESP32_IDF_PATH:PATH",
           "value": "C:/ESP32_TOOLS/esp-idf-v3.1"
         },
         {
-          "name": "ESP32_LIBS_PATH",
+          "name": "ESP32_LIBS_PATH:PATH",
           "value": "C:/ESP32_TOOLS/libs-v3.1"
         },
         {
-          "name": "CMAKE_SYSTEM_NAME",
+          "name": "CMAKE_SYSTEM_NAME:STRING",
           "value": "Generic"
         },
         {
-          "name": "GIT_EXECUTABLE",
+          "name": "GIT_EXECUTABLE:FILEPATH",
           "value": "${env.VSINSTALLDIR}/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/Git/cmd/git.exe"
         },
         {
-          "name": "GIT_VERSION_STRING",
+          "name": "GIT_VERSION_STRING:STRING",
           "value": "2.19.0"
         },
         {
-          "name": "TARGET_SERIES",
+          "name": "TARGET_SERIES:STRING",
           "value": "ESP32"
         },
         {
-          "name": "ESP32_BOARD",
+          "name": "ESP32_BOARD:STRING",
           "value": "ESP32_WROOM_32"
         },
         {
-          "name": "USE_RNG", //option to enable use of true random generator hardware block
+          "name": "USE_RNG:BOOL", //option to enable use of true random generator hardware block
           "value": "ON"
         },
         {
-          "name": "TARGET_DP_FLOATINGPOINT",
+          "name": "TARGET_DP_FLOATINGPOINT:BOOL",
           "value": "FALSE"
         },
         {
-          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION", //"Option for string conversion to value from base 10 and partial for 16"
+          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION:BOOL", //"Option for string conversion to value from base 10 and partial for 16"
           "value": "FALSE"
         },
         {
-          "name": "RTOS", //"Selected Operating system
+          "name": "RTOS:STRING", //"Selected Operating system
           "value": "FREERTOS_ESP32"
         },
         {
-          "name": "NF_BUILD_RTM", // OFF-default-ON-to-enable-RTM-build
+          "name": "NF_BUILD_RTM:BOOL", // OFF-default-ON-to-enable-RTM-build
           "value": "OFF"
         },
         {
-          "name": "NF_WP_TRACE_ERRORS", //OFF-default-ON-to-enable-trace-error-messages-wire-protocol
+          "name": "NF_WP_TRACE_ERRORS:BOOL", //OFF-default-ON-to-enable-trace-error-messages-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_WP_TRACE_HEADERS", //OFF-default-ON-to-enable-trace-header-messages-wire-protocol
+          "name": "NF_WP_TRACE_HEADERS:BOOL", //OFF-default-ON-to-enable-trace-header-messages-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_WP_TRACE_STATE", //OFF-default-ON-to-enable-trace-state-messages-wire-protocol
+          "name": "NF_WP_TRACE_STATE:BOOL", //OFF-default-ON-to-enable-trace-state-messages-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_WP_TRACE_NODATA", //OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol
+          "name": "NF_WP_TRACE_NODATA:BOOL", //OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_WP_TRACE_ALL", //OFF-default-ON-to-enable-trace-all-messages-wire-protocol
+          "name": "NF_WP_TRACE_ALL:BOOL", //OFF-default-ON-to-enable-trace-all-messages-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_WP_IMPLEMENTS_CRC32", //OFF-default-ON-to-enable-CRC32-wire-protocol
+          "name": "NF_WP_IMPLEMENTS_CRC32:BOOL", //OFF-default-ON-to-enable-CRC32-wire-protocol
           "value": "OFF"
         },
         {
-          "name": "NF_FEATURE_DEBUGGER", //OFF-default-ON-to-include-managed-app-debugging-capability
+          "name": "NF_FEATURE_DEBUGGER:BOOL", //OFF-default-ON-to-include-managed-app-debugging-capability
           "value": "ON"
         },
         {
-          "name": "NF_FEATURE_RTC", //OFF-default-ON-to-enable-hardware-RTC
+          "name": "NF_FEATURE_RTC:BOOL", //OFF-default-ON-to-enable-hardware-RTC
           "value": "ON"
         },
         {
-          "name": "NF_FEATURE_USE_APPDOMAINS", //OFF-default-ON-to-enable-support-for-Application-Domains
+          "name": "NF_FEATURE_USE_APPDOMAINS:BOOL", //OFF-default-ON-to-enable-support-for-Application-Domains
           "value": "OFF"
         },
         {
-          "name": "NF_FEATURE_WATCHDOG", //ON-to-enable-hardware-watchdog-ON-is-default
+          "name": "NF_FEATURE_WATCHDOG:BOOL", //ON-to-enable-hardware-watchdog-ON-is-default
           "value": "ON"
         },
         {
-          "name": "NF_FEATURE_HAS_CONFIG_BLOCK", //OFF-default-ON-to-enable-configuration-block-storage
+          "name": "NF_FEATURE_HAS_CONFIG_BLOCK:BOOL", //OFF-default-ON-to-enable-configuration-block-storage
           "value": "ON"
         },
         {
-          "name": "NF_PLATFORM_NO_CLR_TRACE", //OFF-default-ON-to-disable-all-trace-on-CLR
+          "name": "NF_PLATFORM_NO_CLR_TRACE:BOOL", //OFF-default-ON-to-disable-all-trace-on-CLR
           "value": "OFF"
         },
         {
-          "name": "NF_CLR_NO_IL_INLINE", //OFF-default-ON-to-disable-CLR-IL-inlining
+          "name": "NF_CLR_NO_IL_INLINE:BOOL", //OFF-default-ON-to-disable-CLR-IL-inlining
           "value": "OFF"
         },
         {
-          "name": "NF_INTEROP_ASSEMBLIES", //OFF-default-ON-to-disable-CLR-IL-inlining
+          "name": "NF_INTEROP_ASSEMBLIES:BOOL", //OFF-default-ON-to-disable-CLR-IL-inlining
           "value": "OFF"
         },
         {
-          "name": "NF_NETWORKING_SNTP", //ON-default-to-add-SNTP-client-requires-networking
+          "name": "NF_NETWORKING_SNTP:BOOL", //ON-default-to-add-SNTP-client-requires-networking
           "value": "ON"
         },
         {
-          "name": "NF_SECURITY_OPENSSL", //OFF-default-ON-to-add-network-security-from-OpenSSL
+          "name": "NF_SECURITY_OPENSSL:BOOL", //OFF-default-ON-to-add-network-security-from-OpenSSL
           "value": "ON"
         },
         {
-          "name": "NF_SECURITY_MBEDTLS", //OFF-default-ON-to-add-network-security-from-mbedTLS
+          "name": "NF_SECURITY_MBEDTLS:BOOL", //OFF-default-ON-to-add-network-security-from-mbedTLS
           "value": "OFF"
         },
         // LIBRARIES
         {
-          "name": "API_nanoFramework.Devices.OneWire", //OFF-default-ON-to-add-this-API
-          "value": "OFF" // DAV
-        },
-        {
-          "name": "API_System.Math", //OFF-default-ON-to-add-this-API
-          "value": "OFF" // DAV
-        },
-        {
-          "name": "API_System.Net", //OFF-default-ON-to-add-this-API
+          "name": "API_nanoFramework.Devices.OneWire:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Adc", //OFF-default-ON-to-add-this-API
+          "name": "API_System.Math:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Gpio", //OFF-default-ON-to-add-this-API
+          "name": "API_System.Net:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.I2c", //OFF-default-ON-to-add-this-API
+          "name": "API_Windows.Devices.Adc:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Pwm", //OFF-default-ON-to-add-this-API
+          "name": "API_Windows.Devices.Gpio:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.SerialCommunication", //OFF-default-ON-to-add-this-API
+          "name": "API_Windows.Devices.I2c:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Spi", //OFF-default-ON-to-add-this-API
+          "name": "API_Windows.Devices.Pwm:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.WiFi", //OFF-default-ON-to-add-this-API
+          "name": "API_Windows.Devices.SerialCommunication:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
-          "name": "API_Windows.Networking.Sockets", //OFF-default-ON-to-add-this-API
+          "name": "API_Windows.Devices.Spi:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Devices.WiFi:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_Windows.Networking.Sockets:BOOL", //OFF-default-ON-to-add-this-API
           "value": "OFF"
         },
         {
-          "name": "API_Windows.Storage", //OFF-default-ON-to-add-this-API
+          "name": "API_Windows.Storage:BOOL", //OFF-default-ON-to-add-this-API
           "value": "OFF"
         },
         {
-          "name": "API_Hardware.Esp32", //OFF-default-ON-to-add-this-API
+          "name": "API_Hardware.Esp32:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         }
       ]
-    }
+    }  
   ]
 }
