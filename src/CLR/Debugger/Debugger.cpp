@@ -871,6 +871,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
         case DeviceConfigurationOption_Network:
 
             configNetworkInterface = (HAL_Configuration_NetworkInterface*)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
+            memset(configNetworkInterface, 0, sizeof(HAL_Configuration_NetworkInterface));
 
             if(ConfigurationManager_GetConfigurationBlock(configNetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
             {
@@ -885,6 +886,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
         case DeviceConfigurationOption_Wireless80211Network:
 
             configWireless80211NetworkInterface = (HAL_Configuration_Wireless80211*)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+            memset(configWireless80211NetworkInterface, 0, sizeof(HAL_Configuration_Wireless80211));
 
             if(ConfigurationManager_GetConfigurationBlock(configWireless80211NetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
             {
@@ -906,6 +908,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
             }
 
             x509Certificate = (HAL_Configuration_X509CaRootBundle*)platform_malloc(sizeOfBlock);
+            memset(x509Certificate, 0, sizeof(sizeOfBlock));
 
             if(ConfigurationManager_GetConfigurationBlock(x509Certificate, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
             {
