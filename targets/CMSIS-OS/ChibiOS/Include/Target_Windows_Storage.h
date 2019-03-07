@@ -10,7 +10,7 @@
 #define SDCARD_POLLING_DELAY                   (500)
 
 
-#define USB_MSD_POLLING_INTERVAL               (2)
+#define USB_MSD_POLLING_INTERVAL               (1000)
 #define USB_MSD_POLLING_DELAY                  (1000)
 
 #ifdef __cplusplus

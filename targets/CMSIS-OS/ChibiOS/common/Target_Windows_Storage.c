@@ -9,10 +9,13 @@
 #include <target_windows_storage_config.h>
 #include <nanoHAL_Windows_Storage.h>
 #include <Target_Windows_Storage.h>
+#include <nanoHAL_v2.h>
 
 #if HAL_USBH_USE_MSD
 #include "usbh/dev/msd.h"
 #endif
+
+extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
 ///////////////////////////////////////////
 // code specific to USB MSD
@@ -101,6 +104,9 @@ void SdcardInsertHandler(eventid_t id)
     else
     {
         sdCardFileSystemReady = true;
+
+        // post event to managed app
+        PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_INSERTION, Storage_Drives_SDCard );
     }
 }
 
@@ -112,6 +118,9 @@ void SdCardRemoveHandler(eventid_t id)
     sdcDisconnect(&SD_CARD_DRIVER);
 
     sdCardFileSystemReady = false;
+
+    // post event to managed app
+    PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_REMOVAL, Storage_Drives_SDCard );
 }
 
 __attribute__((noreturn))
@@ -167,66 +176,10 @@ static bool usbCardFileSystemReady = false;
 
 static FATFS usbMsd_FS;
 
-// USB MSD monitor timer
-//static virtual_timer_t usbMsdMonitorTimer;
-
-// USB MSD event sources
-//static event_source_t usbInsertedEvent;
-
-// Insertion monitor timer callback function.
-// static void UsbMsdMonitorCallback(void *p) 
-// {
-//     USBHMassStorageLUNDriver* msBlk = p;
-
-//     chSysLockFromISR();
-
-//     if (blkGetDriverState(msBlk) == BLK_ACTIVE)
-//     {
-//         // BLK: Active, connect
-//         usbhmsdLUNConnect(msBlk);
-//     }
-
-//     if (blkGetDriverState(msBlk) == BLK_READY)
-//     {
-//         // BLK: Ready
-//         chEvtBroadcastI(&usbInsertedEvent);
-//     }
-
-//     chVTSetI(&usbMsdMonitorTimer, TIME_MS2I(USB_MSD_POLLING_DELAY), UsbMsdMonitorCallback, msBlk);
-//     chSysUnlockFromISR();
-// }
-
-// USB Mass storage device monitor
-// static void StartUsbMsdMonitor(void *p)
-// {
-//     chEvtObjectInit(&usbInsertedEvent);
-
-//     chSysLock();
-
-//     chVTSetI(&usbMsdMonitorTimer, TIME_MS2I(USB_MSD_POLLING_DELAY), UsbMsdMonitorCallback, p);
-
-//     chSysUnlock();
-// }
-
-// USB MSD insertion event handler
-// static void UsbMsdInsertHandler(eventid_t id)
-// {
-//     (void)id;
-
-//     // TODO
-// }
-
 __attribute__((noreturn))
 void UsbMsdWorkingThread(void const * argument)
 {
     FRESULT err;
-
-    // static const evhandler_t usbEventHandler[] = 
-    // { 
-    //     UsbMsdInsertHandler 
-    // };
-    
-    // event_listener_t usbEventListener0;
 
     // start USB host
     usbhStart(&USB_MSD_DRIVER);
@@ -263,9 +216,22 @@ void UsbMsdWorkingThread(void const * argument)
                 else
                 {
                     usbCardFileSystemReady = true;
+
+                    // post event to managed app
+                    PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_INSERTION, Storage_Drives_UsbMsd );
                 }                
             }
-            //chEvtBroadcastI(&usbInsertedEvent);
+        }
+
+        if (blkGetDriverState(msBlk) == BLK_STOP)
+        {
+            if(usbCardFileSystemReady)
+            {
+                usbCardFileSystemReady = false;
+
+                // post event to managed app
+                PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_REMOVAL, Storage_Drives_UsbMsd );
+            }
         }
 
         usbhMainLoop(&USB_MSD_DRIVER);
