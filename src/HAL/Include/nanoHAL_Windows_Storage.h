@@ -17,6 +17,10 @@
 #define USB_MSD_DRIVE_LETTER    "E:"
 #define USB_MSD_DRIVE_PATH      USB_MSD_DRIVE_LETTER"\\"
 
+// Storage events sub-categories
+#define EVENT_STORAGE_DEVICE_INSERTION      0x01
+#define EVENT_STORAGE_DEVICE_REMOVAL        0x02
+
 // enum with the supported drives in Windows.Storage
 typedef enum Storage_Drives
 {
