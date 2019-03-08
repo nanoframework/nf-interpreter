@@ -30,7 +30,7 @@ option(API_Hardware.Esp32                       "option for Hardware.Esp32")
 
 
 # Stm32 only
-option(API_Hardware.Stm32                       "option for Hardware.Esp32")
+option(API_Hardware.Stm32                       "option for Hardware.Stm32")
 
 
 #################################################################
