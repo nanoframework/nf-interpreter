@@ -43,6 +43,10 @@
 
 #define ROLE_SELECTION_BY_SL                            (0xFF)
 
+/* OCP register used to store device role when coming out of hibernate */
+#define OCP_REGISTER_INDEX              (0)
+/* if ocpRegOffset is set -> AP role, otherwise -> STATION role    */
+#define OCP_REGISTER_OFFSET             (10)    
 
 /*!
  *  \brief  Provisioning modes
@@ -1123,95 +1127,92 @@ static int32_t validateLocalLinkConnection(SlWlanMode_e *deviceRole)
         ASSERT_ON_ERROR(retVal);
     }
 
-    // /* if in AP role
-    //  * 1) check OCP register value
-    //  * 2) if set, it means user set AP mode via switch.
-    //  *       check for IP_ACQUIRED to indicate NWP is running
-    //  * 4) if not set, procede with STATION role
-    //  */
-    // if(retVal == ROLE_AP)
-    // {
-    //     *deviceRole = ROLE_AP;
-    //     ocpRegVal = MAP_PRCMOCRRegisterRead(OCP_REGISTER_INDEX);
-    //     ocpRegVal &= (1 << OCP_REGISTER_OFFSET);
-    //     if(ocpRegVal)
-    //     {
-    //         if(IS_IP_ACQUIRED(OutOfBox_ControlBlock.status))
-    //         {
-    //             return(0);
-    //         }
-    //         else
-    //         {
-    //             clock_gettime(CLOCK_REALTIME, &ts);
-    //             ts.tv_sec += PROFILE_ASYNC_EVT_TIMEOUT;
+    /* if in AP role
+     * 1) check OCP register value
+     * 2) if set, it means user set AP mode via switch.
+     *       check for IP_ACQUIRED to indicate NWP is running
+     * 4) if not set, procede with STATION role
+     */
+    if(retVal == ROLE_AP)
+    {
+        *deviceRole = ROLE_AP;
+        ocpRegVal = MAP_PRCMOCRRegisterRead(OCP_REGISTER_INDEX);
+        ocpRegVal &= (1 << OCP_REGISTER_OFFSET);
+        if(ocpRegVal)
+        {
+            if(IS_IP_ACQUIRED(nF_ControlBlock.Status))
+            {
+                return(0);
+            }
+            else
+            {
+                clock_gettime(CLOCK_REALTIME, &ts);
+                ts.tv_sec += PROFILE_ASYNC_EVT_TIMEOUT;
 
-    //             retVal = sem_timedwait(
-    //                 &Provisioning_ControlBlock.connectionAsyncEvent, &ts);
-    //                  /* freertos return -1 in case of timeout */
-    //             if((retVal == 116) || (retVal == -1))                  
-    //             {
-    //                 UART_PRINT(
-    //                    "[Provisioning task] AP role failed to initialize\n\r");
-    //                 GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
-    //                 retVal = -1;
-    //             }
-    //             return(retVal);
-    //         }
-    //     }
-    // }
+                retVal = sem_timedwait(
+                    &Provisioning_ControlBlock.connectionAsyncEvent, &ts);
+                     /* freertos return -1 in case of timeout */
+                if((retVal == 116) || (retVal == -1))                  
+                {
+                    // UART_PRINT("[Provisioning task] AP role failed to initialize\n\r");
+                    GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
+                    retVal = -1;
+                }
+                return(retVal);
+            }
+        }
+    }
 
-    // if(retVal != ROLE_STA)
-    // {
-    //     retVal = sl_WlanSetMode(ROLE_STA);
-    //     ASSERT_ON_ERROR(retVal);
+    if(retVal != ROLE_STA)
+    {
+        retVal = sl_WlanSetMode(ROLE_STA);
+        ASSERT_ON_ERROR(retVal);
 
-    //     retVal = sl_Stop(SL_STOP_TIMEOUT);
-    //     ASSERT_ON_ERROR(retVal);
+        retVal = sl_Stop(SL_STOP_TIMEOUT);
+        ASSERT_ON_ERROR(retVal);
 
-    //     retVal = sl_Start(0, 0, 0);
-    //     if(retVal < 0 || (retVal != ROLE_STA))
-    //     {
-    //         ASSERT_ON_ERROR(retVal);
-    //     }
-    //     UART_PRINT("[Provisioning task] Device started as STATION \n\r");
-    // }
+        retVal = sl_Start(0, 0, 0);
+        if(retVal < 0 || (retVal != ROLE_STA))
+        {
+            ASSERT_ON_ERROR(retVal);
+        }
+        // UART_PRINT("[Provisioning task] Device started as STATION \n\r");
+    }
 
-    // *deviceRole = ROLE_STA;
+    *deviceRole = ROLE_STA;
 
-    // while(((!IS_IPV6L_ACQUIRED(OutOfBox_ControlBlock.status) ||
-    //         !IS_IPV6G_ACQUIRED(OutOfBox_ControlBlock.status)) &&
-    //        !IS_IP_ACQUIRED(OutOfBox_ControlBlock.status)) ||
-    //       !IS_CONNECTED(OutOfBox_ControlBlock.status))
-    // {
-    //     clock_gettime(CLOCK_REALTIME, &ts);
-    //     ts.tv_sec += PROFILE_ASYNC_EVT_TIMEOUT;
+    while(((!IS_IPV6L_ACQUIRED(nF_ControlBlock.Status) ||
+            !IS_IPV6G_ACQUIRED(nF_ControlBlock.Status)) &&
+            !IS_IP_ACQUIRED(nF_ControlBlock.Status)) ||
+            !IS_CONNECTED(nF_ControlBlock.Status))
+    {
+        clock_gettime(CLOCK_REALTIME, &ts);
+        ts.tv_sec += PROFILE_ASYNC_EVT_TIMEOUT;
 
-    //     retVal = sem_timedwait(&Provisioning_ControlBlock.connectionAsyncEvent,
-    //                            &ts);
-    //                            /* freertos return -1 in case of timeout */
-    //     if((retVal == 116) || (retVal == -1))           
-    //     {
-    //         UART_PRINT(
-    //             "[Provisioning task] Cannot connect to AP or"
-    //             " profile does not exist\n\r");
-    //         GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
-    //         retVal = -1;
+        retVal = sem_timedwait(&Provisioning_ControlBlock.connectionAsyncEvent, &ts);
+        // freertos return -1 in case of timeout
+        if((retVal == 116) || (retVal == -1))           
+        {
+            // UART_PRINT(
+            //     "[Provisioning task] Cannot connect to AP or"
+            //     " profile does not exist\n\r");
+            GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
+            retVal = -1;
 
-    //         return(retVal);
-    //     }
-    // }
+            return(retVal);
+        }
+    }
 
     // UART_PRINT("[Provisioning task] Connection to AP succeeded\n\r");
 
-    // /* Get the device's IP address */
-    // ipLen = sizeof(SlNetCfgIpV4Args_t);
-    // ConfigOpt = 0;
-    // sl_NetCfgGet(SL_NETCFG_IPV4_STA_ADDR_MODE,&ConfigOpt,&ipLen,
-    //              (uint8_t *)&ipV4);
-    // if(retVal < 0)
-    // {
-    //     return(retVal);
-    // }
+    // Get the device's IP address
+    ipLen = sizeof(SlNetCfgIpV4Args_t);
+    ConfigOpt = 0;
+    sl_NetCfgGet(SL_NETCFG_IPV4_STA_ADDR_MODE, &ConfigOpt, &ipLen, (uint8_t *)&ipV4);
+    if(retVal < 0)
+    {
+        return(retVal);
+    }
 
     // UART_PRINT("[Provisioning task] IP address is %d.%d.%d.%d\n\r", \
     //            SL_IPV4_BYTE(ipV4.Ip,3),  \
@@ -1457,9 +1458,9 @@ void * provisioningTask(void *pvParameters)
     flash and connect immediately
      * 2) check if pending commit and set commit the bundle
      * 3) On failure, reset the MCU to rollback */
-/* it means OtaArchive is in
-    SL_FS_BUNDLE_STATE_PENDING_COMMIT */
-    // if(OtaArchive_GetPendingCommit())           
+	 /* it means OtaArchive is in
+		 SL_FS_BUNDLE_STATE_PENDING_COMMIT */
+		 // if(OtaArchive_GetPendingCommit())           
     // {/* validation of new ota bundle failed,
     //     reverting to previous bundle */
     //     if(retVal != 0)                 
@@ -1503,36 +1504,36 @@ void * provisioningTask(void *pvParameters)
 
     if(deviceRole == ROLE_STA)
     {
-        /* it means a connection to AP has been established, 
-        no need to trigger provisioning */
-        if(retVal == 0)
+		/* it means a connection to AP has been established,
+		no need to trigger provisioning */
+		if(retVal == 0)
         {
             GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_ON);
 
-            /* signal to linklocal task */
-            sem_post(&Provisioning_ControlBlock.provisioningDoneSignal);
+			/* signal to linklocal task */
+			sem_post(&Provisioning_ControlBlock.provisioningDoneSignal);
 
-            /* signal to report server task */
-            sem_post(
+			/* signal to report server task */
+			sem_post(
                 &Provisioning_ControlBlock.
                 provisioningConnDoneToOtaServerSignal);
         }
-        /* it means a connection to AP failed, trigger provisioning */
-        else if(retVal < 0)
+		/* it means a connection to AP failed, trigger provisioning */
+		else if(retVal < 0)
         {
             SignalProvisioningEvent(PrvnEvent_Triggered);
         }
     }
-/* it means device is initialized as AP, no need to trigger provisioning */
-    if((retVal == 0) && (deviceRole == ROLE_AP))                
+	/* it means device is initialized as AP, no need to trigger provisioning */
+	if((retVal == 0) && (deviceRole == ROLE_AP))
     {
         GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_ON);
 
-        /* signal to linklocal task */
-        sem_post(&Provisioning_ControlBlock.provisioningDoneSignal);
+		/* signal to linklocal task */
+		sem_post(&Provisioning_ControlBlock.provisioningDoneSignal);
 
-        /* signal to report server task */
-        sem_post(
+		/* signal to report server task */
+		sem_post(
             &Provisioning_ControlBlock.provisioningConnDoneToOtaServerSignal);
     }
 
@@ -1540,7 +1541,7 @@ void * provisioningTask(void *pvParameters)
     {
         retVal = provisioningAppTask();
     }
-    while(!retVal);  /* Exit on failure */
+	while(!retVal);  /* Exit on failure */
 
     return(0);
 }

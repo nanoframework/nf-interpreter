@@ -48,6 +48,18 @@
 #define APPS_WDT_START_KEY          0xAE42DB15
 #define HWREG(x) (*((volatile unsigned long *)(x)))
 
+#define IS_CONNECTED(status_variable)       \
+    GET_STATUS_BIT(status_variable, AppStatusBits_Connection)
+
+#define IS_IP_ACQUIRED(status_variable)     \
+    GET_STATUS_BIT(status_variable, AppStatusBits_IpAcquired)
+
+#define IS_IPV6L_ACQUIRED(status_variable)  \
+    GET_STATUS_BIT(status_variable, AppStatusBits_Ipv6lAcquired)
+
+#define IS_IPV6G_ACQUIRED(status_variable)  \
+    GET_STATUS_BIT(status_variable, AppStatusBits_Ipv6gAcquired)
+
 typedef enum
 {
     /* If this bit is set: Network Processor is powered up */

@@ -817,12 +817,23 @@ void * mainThread(void *arg)
 
     // start network processor
     retc = sl_Start(NULL, NULL, NULL);
-    if(retc > 0)
+    if(retc >= 0)
     {
         // we are good!
         // sl_Start returns on success the role that device started on
         nF_ControlBlock.Role = retc;
-
+        ////////////////////////////////////// **** uncomment this if using provisioning
+        // retc = sl_Stop(SL_STOP_TIMEOUT);
+        // if(retc < 0)
+        // {
+        //     /* Handle Error */
+        //     // UART_PRINT("\n sl_Stop failed\n");
+        //     while(1)
+        //     {
+        //         ;
+        //     }
+        // }
+        ////////////////////////////////////// ****
     }
     else if((retc < 0) && (retc != SL_ERROR_RESTORE_IMAGE_COMPLETE))
     {
@@ -841,9 +852,18 @@ void * mainThread(void *arg)
     // priorityParams.sched_priority = 1;
     // retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
     // retc |= pthread_attr_setstacksize(&threadAttributes, TASK_STACK_SIZE);
+    // if(retc)
+    // {
+    //     // Handle Error
+    //     // UART_PRINT("Unable to configure provisioningTask thread parameters \n");
+    //     while(1)
+    //     {
+    //         ;
+    //     }
+    // }
     // retc = pthread_create(&provisioningThread, &threadAttributes, provisioningTask, NULL);
     // if (retc != 0) {
-    //     // failed to set attributes
+    //     // Unable to create provisioningTask thread
     //     while (1) {}
     // }
 
