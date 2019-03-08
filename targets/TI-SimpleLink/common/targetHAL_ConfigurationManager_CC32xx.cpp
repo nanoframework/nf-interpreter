@@ -85,7 +85,7 @@ void* ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks()
 // wireless profiles are stored as SimpleLink WLAN profile 
 void* ConfigurationManagerCC32xx_FindNetworkWireless80211ConfigurationBlocks()
 {
-    uint16_t index, status;
+    int16_t index, status;
     signed char name[32];
     int16_t nameLength;
     unsigned char macAddr[6];
@@ -154,6 +154,50 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
     // platform_free(certificateStore);
 }
 
+EncryptionType GetEncryption(SlWlanSecParams_t secParams)
+{
+    switch (secParams.Type)
+    {
+        case SL_WLAN_SEC_TYPE_WEP:
+            return EncryptionType_WEP;
+    
+        // deprecated
+        // case SL_WLAN_SEC_TYPE_WPA:
+        //     return EncryptionType_WPA;
+    
+        case SL_WLAN_SEC_TYPE_WPA_WPA2:
+            return EncryptionType_WPA2;
+    
+        default:
+            return EncryptionType_None;
+    }
+}
+
+AuthenticationType GetAuthentication(SlWlanSecParams_t secParams)
+{
+    switch (secParams.Type)
+    {
+        case SL_WLAN_SEC_TYPE_OPEN:
+            return AuthenticationType_Open;
+    
+        case SL_WLAN_SEC_TYPE_WEP:
+            return AuthenticationType_WEP;
+    
+        // deprecated
+        // case SL_WLAN_SEC_TYPE_WPA:
+        //     return AuthenticationType_WPA;
+    
+        case SL_WLAN_SEC_TYPE_WPA_WPA2:
+            return AuthenticationType_WPA2;
+    
+        case SL_WLAN_SEC_TYPE_WEP_SHARED:
+            return AuthenticationType_Shared;
+    
+        default:
+            return AuthenticationType_None;
+    }
+}
+
 // Gets the network configuration block from the configuration flash sector 
 bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex)
 {
@@ -162,6 +206,13 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
     int32_t fileHandle;
     uint32_t token = 0;
     int32_t retVal;
+    SlWlanSecParams_t secParams;
+    int16_t dummyNameLen;
+    uint8_t dummyMAC[SL_MAC_ADDR_LEN];
+    uint32_t dummyPriority;
+
+    HAL_Configuration_Wireless80211* wirelessConfigBlock = NULL;
+
 
     // validate if the requested block exists
     // Count has to be non zero
@@ -173,7 +224,20 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
             // there is no network config block, init one with default settings
             if(InitialiseNetworkDefaultConfig((HAL_Configuration_NetworkInterface*)configurationBlock, 0))
             {
-                return true;
+                // force storing profile
+                if(ConfigurationManager_StoreConfigurationBlock(configurationBlock, DeviceConfigurationOption_Network, 0, sizeof(HAL_Configuration_NetworkInterface), 0))
+                {
+                    // need to enumerate blocks
+                    ConfigurationManager_EnumerateConfigurationBlocks();
+
+                    // done here
+                    return true;
+                }
+                else
+                {
+                    // couldn't store the config block
+                    return false;
+                }
             }
         }
         else
@@ -246,10 +310,61 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
         {
             platform_free(fileName);
         }
+
+        // done!
+        return true;
+    }
+    else if(configuration == DeviceConfigurationOption_Wireless80211Network)
+    {
+        wirelessConfigBlock = (HAL_Configuration_Wireless80211*)configurationBlock;
+
+        // make sure the config block marker is set
+        memcpy(configurationBlock, c_MARKER_CONFIGURATION_WIRELESS80211_V1, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
+
+        // get profile from SimpleLink
+        retVal = sl_WlanProfileGet(configurationIndex, (signed char *)wirelessConfigBlock->Ssid, &dummyNameLen, &dummyMAC[0], &secParams, NULL, &dummyPriority);
+        if(retVal == SL_ERROR_WLAN_GET_PROFILE_INVALID_INDEX)
+        {
+            return false;
+        }
+
+        // fill struct fields
+        wirelessConfigBlock->Id = configurationIndex;
+        wirelessConfigBlock->Authentication = GetAuthentication(secParams);
+        wirelessConfigBlock->Encryption = GetEncryption(secParams);
+
+        // password is hidden, NULL the string
+        memset(wirelessConfigBlock->Password, 0, sizeof(wirelessConfigBlock->Password));
+        //wirelessConfigBlock->Radio 
+        
+
+        // done
+        return true;
     }
 
+    return false;
+}
 
-    return true;
+uint8_t GetSecurityType(AuthenticationType authentication)
+{
+    switch (authentication)
+    {
+        case AuthenticationType_Open:
+            return SL_WLAN_SEC_TYPE_OPEN;
+    
+        case AuthenticationType_WEP:
+            return SL_WLAN_SEC_TYPE_WEP;
+    
+        case AuthenticationType_WPA:
+        case AuthenticationType_WPA2:
+            return SL_WLAN_SEC_TYPE_WPA_WPA2;
+    
+        case AuthenticationType_Shared:
+            return SL_WLAN_SEC_TYPE_WEP_SHARED;
+    
+        default:
+            return SL_WLAN_SEC_TYPE_OPEN;
+    }
 }
 
 // Stores the configuration block to the configuration flash sector
@@ -266,6 +381,7 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
     int32_t fileHandle;
     uint32_t token = 0;
     int32_t retVal;
+    SlWlanSecParams_t secParams;
 
     if(configuration == DeviceConfigurationOption_Network)
     {
@@ -309,6 +425,25 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
         {
             platform_free(fileName);
         }
+    }
+    else if(configuration == DeviceConfigurationOption_Wireless80211Network)
+    {
+        HAL_Configuration_Wireless80211* wirelessConfigBlock = (HAL_Configuration_Wireless80211*)configurationBlock;
+
+        secParams.Type = GetSecurityType(wirelessConfigBlock->Authentication);
+        secParams.Key = (signed char *)wirelessConfigBlock->Password;
+        secParams.KeyLen = hal_strlen_s((const char *)secParams.Key);
+
+        // add profile to SimpleLink
+        // TODO - default priority is 0
+        retVal = sl_WlanProfileAdd((const signed char *)wirelessConfigBlock->Ssid, hal_strlen_s((const char *)(wirelessConfigBlock->Ssid)), NULL, &secParams, NULL, 0, 0);
+        if(retVal < 0)
+        {
+            return false;
+        }
+
+        // done
+        success = true;
     }
 
 
@@ -514,10 +649,12 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, 
 //  Default initialisation for Network interface config blocks
 bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
 {
-    uint8_t  macAddress[SL_MAC_ADDR_LEN];
     uint16_t macAddressLen = SL_MAC_ADDR_LEN;
 
     memset(pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
+
+    // make sure the config block marker is set
+    memcpy(pconfig->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
     
     pconfig->InterfaceType = NetworkInterfaceType_Wireless80211;
     pconfig->StartupAddressMode = AddressMode_DHCP;
