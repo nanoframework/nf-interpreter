@@ -172,7 +172,6 @@ set(NF_CoreCLR_SRCS
     Async_stubs.cpp
     COM_stubs.c
     GenericPort_stubs.c
-    nanoPAL_Windows_Storage_stubs.c
 
     # target specifics
     target_BlockStorage.c
