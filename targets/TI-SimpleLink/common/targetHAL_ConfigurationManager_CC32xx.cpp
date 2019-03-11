@@ -418,6 +418,11 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
                     uint8_t signature = 'A';
                     sl_FsClose(fileHandle, 0, &signature, 1);
                 }
+                else
+                {
+                    // configuration stored
+                    success = TRUE;
+                }
             }
         }
 
