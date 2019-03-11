@@ -13,6 +13,14 @@
 #include "usbh/dev/msd.h"
 #endif
 
+// flags for file system ready
+#if HAL_USE_SDC
+extern bool sdCardFileSystemReady;
+#endif
+#if HAL_USBH_USE_MSD
+extern bool usbMsdFileSystemReady;
+#endif
+
 // defining these types here to make it shorter and improve code readability
 typedef Library_win_storage_native_Windows_Storage_StorageFolder StorageFolder;
 typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
@@ -49,9 +57,6 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
     char workingDrive[sizeof(DRIVE_PATH_LENGTH)];
     uint16_t driveIterator = (uint16_t)Storage_Drives_SDCard;
 
-    bool sdCardDrivePresent = false;
-    bool usbMsdDrivePresent = false;
-
     CLR_RT_HeapBlock* storageFolder;
     CLR_RT_TypeDef_Index storageFolderTypeDef;
     CLR_RT_HeapBlock* hbObj;
@@ -62,26 +67,20 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
     hbObj->SetObjectReference( NULL );
 
   #if HAL_USE_SDC
-    // is there an SD card inserted and is driver in ready state?
-    if(sdcIsCardInserted(&SD_CARD_DRIVER) && SD_CARD_DRIVER.state == BLK_READY)
+    // is the SD card file system ready?
+    if(sdCardFileSystemReady)
     {
         // add count
         driveCount++;
-
-        // flag present
-        sdCardDrivePresent = true;
     }
   #endif
 
   #if HAL_USBH_USE_MSD
-    // is there an USB thumb driver inserted and its driver is in ready state?
-    if(blkGetDriverState(&MSBLKD[0]) == BLK_READY)
+    // is the USB mass storage device file system ready?
+    if(usbMsdFileSystemReady)
     {
         // add count
         driveCount++;
-
-        // flag present
-        usbMsdDrivePresent = true;
     }    
   #endif
 
@@ -104,21 +103,23 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
 
         // loop until we've loaded all the possible drives
         // because we are iterating through an enum, need to use its integer values
-        for(; driveIterator < SUPPORTED_DRIVES_COUNT; driveIterator++ )
+        for(; driveIterator < driveCount; driveIterator++ )
         {
             // fill the folder name and path
-            if((Storage_Drives)driveIterator == Storage_Drives_SDCard && sdCardDrivePresent)
+            switch(driveIterator)
             {
-                memcpy(workingDrive, SDCARD_DRIVE_PATH, DRIVE_PATH_LENGTH);
-            }
-            else if((Storage_Drives)driveIterator == Storage_Drives_UsbMsd && usbMsdDrivePresent)
-            {
-                memcpy(workingDrive, USB_MSD_DRIVE_PATH, DRIVE_PATH_LENGTH);
-            }
-            else
-            {
-                // skip this drive type
-                continue;
+                case 0:
+                    memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                    break;
+
+                case 1:
+                    memcpy(workingDrive, INDEX1_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                    break;
+
+                default:
+                    // shouldn't reach here
+                    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+                    break;
             }
 
             // dereference the object in order to reach its fields

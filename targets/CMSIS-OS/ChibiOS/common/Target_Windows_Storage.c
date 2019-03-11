@@ -15,15 +15,28 @@
 #include "usbh/dev/msd.h"
 #endif
 
+// need to declare this here as extern
 extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
+// the drive indexes have to be used instead of fixed drive letters because a target can have one or more 
+// and those have to follow the sequence that is used in ChibiOS FatFS wrappers
+// SD Card (or SPI) is 1st and USB MAS is 2nd (if SD Card is enabled)
+#if defined(HAL_USE_SDC) && defined(HAL_USBH_USE_MSD)
+#define SD_CARD_DRIVE_INDEX     "0"
+#define USB_MSD_DRIVE_INDEX     "1"
+#elif defined(HAL_USE_SDC) && !defined(HAL_USBH_USE_MSD)
+#define SD_CARD_DRIVE_INDEX     "0"
+#elif !defined(HAL_USE_SDC) && defined(HAL_USBH_USE_MSD)
+#define USB_MSD_DRIVE_INDEX     "0"
+#endif
+
 ///////////////////////////////////////////
-// code specific to USB MSD
+// code specific to SD Card
 
 #if HAL_USE_SDC
 
 // FS for SD Card mounted and ready
-static bool sdCardFileSystemReady = false;
+bool sdCardFileSystemReady;
 
 static FATFS sdCard_FS;
 static SDCConfig SDC_CFG;
@@ -92,7 +105,7 @@ void SdcardInsertHandler(eventid_t id)
         return;
     }
 
-    err = f_mount(&sdCard_FS, SDCARD_DRIVE_LETTER, 1);
+    err = f_mount(&sdCard_FS, SD_CARD_DRIVE_INDEX, 1);
 
     if (err != FR_OK)
     {
@@ -136,6 +149,8 @@ void SdCardWorkingThread(void const * argument)
         SdCardRemoveHandler 
     };
 
+    sdCardFileSystemReady = false;
+
     // activates the SDC driver using default configuration
     sdcStart(&SD_CARD_DRIVER, &SDC_CFG);
 
@@ -172,7 +187,7 @@ void SdCardWorkingThread(void const * argument)
 #if HAL_USBH_USE_MSD
 
 // FS for USB MSD mounted and ready
-static bool usbCardFileSystemReady = false;
+bool usbMsdFileSystemReady;
 
 static FATFS usbMsd_FS;
 
@@ -180,6 +195,8 @@ __attribute__((noreturn))
 void UsbMsdWorkingThread(void const * argument)
 {
     FRESULT err;
+
+    usbMsdFileSystemReady = false;
 
     // start USB host
     usbhStart(&USB_MSD_DRIVER);
@@ -193,7 +210,7 @@ void UsbMsdWorkingThread(void const * argument)
         if (blkGetDriverState(msBlk) == BLK_ACTIVE)
         {
             // file system can't be ready
-            usbCardFileSystemReady = false;
+            usbMsdFileSystemReady = false;
 
             // BLK: Active, connect
             usbhmsdLUNConnect(msBlk);
@@ -202,11 +219,11 @@ void UsbMsdWorkingThread(void const * argument)
         if (blkGetDriverState(msBlk) == BLK_READY)
         {
             // BLK: Ready
-            if(!usbCardFileSystemReady)
+            if(!usbMsdFileSystemReady)
             {
                 // USB MSD file system not ready
                 // mount drive
-                err = f_mount(&usbMsd_FS, USB_MSD_DRIVE_LETTER, 1);
+                err = f_mount(&usbMsd_FS, USB_MSD_DRIVE_INDEX, 1);
 
                 if (err != FR_OK)
                 {
@@ -215,7 +232,7 @@ void UsbMsdWorkingThread(void const * argument)
                 }
                 else
                 {
-                    usbCardFileSystemReady = true;
+                    usbMsdFileSystemReady = true;
 
                     // post event to managed app
                     PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_INSERTION, Storage_Drives_UsbMsd );
@@ -225,9 +242,9 @@ void UsbMsdWorkingThread(void const * argument)
 
         if (blkGetDriverState(msBlk) == BLK_STOP)
         {
-            if(usbCardFileSystemReady)
+            if(usbMsdFileSystemReady)
             {
-                usbCardFileSystemReady = false;
+                usbMsdFileSystemReady = false;
 
                 // post event to managed app
                 PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_REMOVAL, Storage_Drives_UsbMsd );
