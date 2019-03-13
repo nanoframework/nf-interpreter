@@ -73,4 +73,13 @@ typedef osThreadId    sys_thread_t;
 /* let sys.h use binary semaphores for mutexes */
 #define LWIP_COMPAT_MUTEX 1
 
+#if LWIP_NETCONN_SEM_PER_THREAD
+sys_sem_t* sys_arch_netconn_sem_get(void);
+void sys_arch_netconn_sem_alloc(void);
+void sys_arch_netconn_sem_free(void);
+#define LWIP_NETCONN_THREAD_SEM_GET()   sys_arch_netconn_sem_get()
+#define LWIP_NETCONN_THREAD_SEM_ALLOC() sys_arch_netconn_sem_alloc()
+#define LWIP_NETCONN_THREAD_SEM_FREE()  sys_arch_netconn_sem_free()
+#endif // LWIP_NETCONN_SEM_PER_THREAD
+
 #endif /* __SYS_ARCH_H__ */

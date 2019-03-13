@@ -346,6 +346,10 @@ static THD_FUNCTION(lwip_thread, p) {
 
   macStart(&ETHD1, &mac_config);
 
+#if LWIP_NETCONN_SEM_PER_THREAD
+  sys_arch_netconn_sem_alloc();
+#endif
+
   /* Add interface. */
   result = netifapi_netif_add(&thisif, &ip, &netmask, &gateway, NULL, ethernetif_init, tcpip_input);
   if (result != ERR_OK)
@@ -444,6 +448,10 @@ static THD_FUNCTION(lwip_thread, p) {
       }
     }
   }
+
+#if LWIP_NETCONN_SEM_PER_THREAD
+  sys_arch_netconn_sem_free();
+#endif  
 }
 
 /**
