@@ -496,6 +496,8 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
     NATIVE_PROFILE_CLR_DEBUGGER();
     TRACE("AccessMemory( 0x%08X, 0x%08x, 0x%08X, %s)\n", location, lengthInBytes, buf, AccessMemoryModeNames[mode] );
 
+    bool success = false;
+
     // reset error code
     *errorCode = AccessMemoryErrorCode_NoError;
 
@@ -507,12 +509,11 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
         const DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(m_deploymentStorageDevice);
 
         // start from the block where the sector sits.
-        ByteAddress   accessAddress = location;
+        ByteAddress    accessAddress    = location;
 
-        unsigned char*         bufPtr           = buf;
-        bool          success          = true;
-        signed int         accessLenInBytes = lengthInBytes;
-        signed int         blockOffset      = BlockRegionInfo_OffsetFromBlock(((BlockRegionInfo*)(&deviceInfo->Regions[iRegion])), accessAddress);
+        unsigned char* bufPtr           = buf;
+        signed int     accessLenInBytes = lengthInBytes;
+        signed int     blockOffset      = BlockRegionInfo_OffsetFromBlock(((BlockRegionInfo*)(&deviceInfo->Regions[iRegion])), accessAddress);
 
         for(;iRegion < deviceInfo->NumRegions; iRegion++)
         {
@@ -549,7 +550,8 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
                     // set error code
                     *errorCode = AccessMemoryErrorCode_PermissionDenied;
 
-                    return false;
+                    // done here
+                    return success;
                 }
 
                 switch(mode)
@@ -574,7 +576,8 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
                                     // set error code
                                     *errorCode = AccessMemoryErrorCode_PermissionDenied;
 
-                                    return false;
+                                    // done here
+                                    return success;
                                 }
                             }
 
@@ -627,16 +630,17 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
             iRange     = 0;
 
            if ((accessLenInBytes <= 0) || (!success))
+           {
                break;
+           }
         }
-
     }
     else
     {
-    //--// RAM write
+        //--// RAM write
         ByteAddress sectAddr = location;
 
-#if defined(_WIN32)
+      #if defined(_WIN32)
 
         bool proceed = false;
         void * temp;
@@ -657,7 +661,7 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
         }
 
         if(proceed)
-#else
+      #else
 
         unsigned int sectAddrEnd     = sectAddr + lengthInBytes;
         unsigned int ramStartAddress = HalSystemConfig.RAM1.Base;
@@ -666,39 +670,41 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
         if((sectAddr <ramStartAddress) || (sectAddr >=ramEndAddress) || (sectAddrEnd >ramEndAddress) )
         {
             TRACE(" Invalid address %x and range %x Ram Start %x, Ram end %x\r\n", sectAddr, lengthInBytes, ramStartAddress, ramEndAddress);
-            return false;
+            return success;
         }
         else
-#endif
+      #endif
         {
             switch(mode)
             {
-            case AccessMemory_Check:
-                break;
+                case AccessMemory_Check:
+                    break;
 
-            case AccessMemory_Read:
-                memcpy( buf, (const void*)sectAddr, lengthInBytes );
-                break;
+                case AccessMemory_Read:
+                    memcpy( buf, (const void*)sectAddr, lengthInBytes );
+                    break;
 
-            case AccessMemory_Write:
-                unsigned char * memPtr;
-                memPtr = (unsigned char*)sectAddr;
-                memcpy( memPtr, buf, lengthInBytes );
-                break;
+                case AccessMemory_Write:
+                    unsigned char * memPtr;
+                    memPtr = (unsigned char*)sectAddr;
+                    memcpy( memPtr, buf, lengthInBytes );
+                    break;
 
-            case AccessMemory_Erase:
-                memPtr = (unsigned char*)sectAddr;
-                if (lengthInBytes !=0)
-                    memset( memPtr, 0xFF, lengthInBytes );
-                break;
+                case AccessMemory_Erase:
+                    memPtr = (unsigned char*)sectAddr;
+                    if (lengthInBytes !=0)
+                        memset( memPtr, 0xFF, lengthInBytes );
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
     }
+
     TRACE0( "=> SUCCESS\n");
-    return true;
+
+    return success;
 }
 
 bool CLR_DBG_Debugger::Monitor_ReadMemory( WP_Message* msg)
