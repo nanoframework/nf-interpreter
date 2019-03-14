@@ -44,6 +44,21 @@
 
 #endif  // !defined(BUILD_RTM)
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// DEBUGGER HELPER                                                                                 //
+// The line bellow is meant to be used as helper on checking that the execution engine is running. //
+// This can be inferred by checking if Events_WaitForEvents loop is running.                       //
+// The implementation should is to be provided by each target at target_common.h.in                //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#if defined(BUILD_RTM)
+    #define EVENTS_HEART_BEAT
+#else
+    #ifndef EVENTS_HEART_BEAT
+    #define EVENTS_HEART_BEAT __NOP()
+    #endif // EVENTS_HEART_BEAT
+#endif
+
 #define NANOCLR_STOP() CPU_Reset();
 
 extern int HeapBegin;
