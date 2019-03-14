@@ -3349,4 +3349,3 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC( WP_Message* msg)
 }
 
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-AccessMemory
