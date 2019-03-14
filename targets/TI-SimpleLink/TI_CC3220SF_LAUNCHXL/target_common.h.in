@@ -35,4 +35,8 @@
 
 #define OEMSYSTEMINFOSTRING "nanoCLR running @ @TI_BOARD@ built with TI SL CC32xx SDK v2.40.01.01"
 
+/////////////////////////////////////
+//#define EVENTS_HEART_BEAT       GPIO_toggle(Board_GPIO_LED0)
+/////////////////////////////////////
+
 #endif /* _TARGET_COMMON_H_ */
