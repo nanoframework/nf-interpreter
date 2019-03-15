@@ -54,6 +54,20 @@
 
 #define NANOCLR_STOP() CPU_Reset();
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// DEBUGGER HELPER                                                                                 //
+// The line bellow is meant to be used as helper on checking that the execution engine is running. //
+// This can be inferred by checking if Events_WaitForEvents loop is running.                       //
+// The implementation should is to be provided by each target at target_common.h.in                //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#if defined(BUILD_RTM)
+    #define EVENTS_HEART_BEAT
+#else
+    #ifndef EVENTS_HEART_BEAT
+    #define EVENTS_HEART_BEAT __asm__ __volatile__ ("nop")
+    #endif // EVENTS_HEART_BEAT
+#endif
+
 extern int HeapBegin;
 extern int HeapEnd;
 
