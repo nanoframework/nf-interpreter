@@ -14,6 +14,9 @@ extern portMUX_TYPE globalLockMutex;
 #define GLOBAL_UNLOCK(x)            portEXIT_CRITICAL(&globalLockMutex);
 #define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
 
+// platform dependent delay
+#define PLATFORM_DELAY(milliSecs)   vTaskDelay(milliSecs);
+
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)   
 
