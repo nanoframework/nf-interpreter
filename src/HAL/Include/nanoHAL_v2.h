@@ -236,6 +236,9 @@ bool SystemState_QueryNoLock( SYSTEM_STATE_type state );
 
 #define HAL_COMPLETION_IDLE_VALUE    0x0000FFFFFFFFFFFFull
 
+// provide platform dependent delay to CLR code
+#define PLATFORM_DELAY(milliSecs)
+
 //--//
 // Function macros
 
