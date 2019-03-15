@@ -1016,7 +1016,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions( WP_Message* msg)
     g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions |=  cmd->FlagsToSet;
     g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions &= ~cmd->FlagsToReset;
 
-    // updating the debugger conditions requires sometime to propagate
+    // updating the debugging execution conditions requires sometime to propagate
     // make sure we allow enough time for that to happen
     PLATFORM_DELAY(100);
 
