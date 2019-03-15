@@ -71,6 +71,13 @@ void nanoHAL_Uninitialize()
     //     }
     // }   
 
+    SOCKETS_CloseConnections();
+
+  #if !defined(HAL_REDUCESIZE)
+    // TODO need to call this but it's preventing the debug session from starting
+    //Network_Uninitialize();
+  #endif
+
     BlockStorageList_UnInitializeDevices();
 
     // need to be sure that all mutexes for drivers that use them are released
@@ -142,9 +149,6 @@ void nanoHAL_Uninitialize()
     #endif
 
 #endif
-
-    // TODO need to call this but it's preventing the debug session from starting
-    //Network_Uninitialize();
 
     Events_Uninitialize();
     

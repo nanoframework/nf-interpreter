@@ -14,3 +14,8 @@ __nfweak bool  Network_Uninitialize()
 {
     return true;
 };
+
+__nfweak void SOCKETS_CloseConnections()
+{
+    NATIVE_PROFILE_PAL_COM();
+}
