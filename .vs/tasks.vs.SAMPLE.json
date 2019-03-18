@@ -1,6 +1,9 @@
 {
   "version": "0.2.1",
   "outDir": "\"${env.EXECUTABLE_OUTPUT_PATH}\"",
+  "port": "\"COM3\"",
+  "esptool": "python ${env.ESP32_IDF_PATH}/components/esptool_py/esptool/esptool.py",
+  "comment": "This is a comment",
   "tasks": [
     {
       "taskName": "task-CMakeLists",
@@ -18,46 +21,37 @@
       "type": "default",
       "command": "${env.COMSPEC}",
       "args": [
-        "echo  Output Directory:  ${outDir}",
+        "echo  Output Directory:  ${outDir} "
       ]
     },
     {
-      "taskName": "Erase Flash ESP32 COM3",
+      "taskName": "Erase Flash ESP32 on port ${port}",
       "appliesTo": "*",
       "type": "default",
       "command": "${env.COMSPEC}",
       "args": [
-        "start \"Erasing Flash\" /wait python C:/ESP32_TOOLS/esp-idf-v3.1/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM3\" --baud 115200 --before \"default_reset\" --after \"hard_reset\" erase_flash"
+        "start \"Erasing Flash ESP32 on ${port}\" /wait runcmd -5",
+        "${esptool} --chip esp32 --port ${port} --baud 115200 --before \"default_reset\" --after \"hard_reset\" erase_flash"
       ]
     },
     {
-      "taskName": "Flash nanoCLR ESP32 COM3",
+      "taskName": "Flash nanoCLR ESP32 on port ${port}",
       "appliesTo": "*",
       "type": "default",
       "command": "${env.COMSPEC}",
       "args": [
-        "start \"Flashing nanoCLR\" /wait python C:/ESP32_TOOLS/esp-idf-v3.1/components/esptool_py/esptool/esptool.py --chip esp32 --port \"COM3\" --baud 921600 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 C:/ESP32_TOOLS/libs-v3.1/bootloader.bin 0x10000 ${outDir}/nanoCLR.bin 0x8000 ${outDir}/partitions_4mb.bin"
+        "start \"ESP32 - Flashing nanoCLR ESP32 on port ${port}\" /wait runcmd -5",
+        "${esptool} --chip esp32 --port ${port} --baud 921600 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 ${env.ESP32_LIBS_PATH}/bootloader.bin 0x10000 ${outDir}/nanoCLR.bin 0x8000 ${outDir}/partitions_4mb.bin"
       ]
     },
     {
-      "taskName": "task-nf-interpreter",
-      "appliesTo": "/",
-      "type": "launch"
-    },
-    {
-      "taskName": "task-CMakeLists",
-      "appliesTo": "CMakeLists.txt",
-      "type": "launch"
-    },
-    {
-      "taskName": "task-nf-interpreter",
-      "appliesTo": "/",
-      "type": "launch"
-    },
-    {
-      "taskName": "task-CMakeLists",
-      "appliesTo": "CMakeLists.txt",
-      "type": "launch"
+      "taskName": "Erase Flash ESP32 port ${port} (Working auto-program)",
+      "appliesTo": "*",
+      "type": "default",
+      "command": "${env.COMSPEC}",
+      "args": [
+        "${esptool} --chip esp32 --port ${port} --baud 921600 --before \"default_reset\" --after \"hard_reset\" erase_flash"
+      ]
     }
   ]
 }

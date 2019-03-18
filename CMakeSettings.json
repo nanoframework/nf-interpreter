@@ -19,7 +19,7 @@
           "value": "TRUE"
         },
         {
-          "name": "EXECUTABLE_OUTPUT_PATH:PATH",
+          "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}"
         },
         {
@@ -161,7 +161,7 @@
         // LIBRARIES
         {
           "name": "API_nanoFramework.Devices.OneWire:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "API_System.Math:BOOL", //OFF-default-ON-to-add-this-API
@@ -237,7 +237,7 @@
           "value": "TRUE"
         },
         {
-          "name": "EXECUTABLE_OUTPUT_PATH:PATH",
+          "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}"
         },
         {
