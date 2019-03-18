@@ -13,19 +13,19 @@
 const BlockRange BlockRange1[] =
 {
     // factory
-    { BlockRange_BLOCKTYPE_CODE      ,   1, 15 },            // 0x010000   nanoCLR
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 },             // 0x010000   nanoCLR
 };
 
 const BlockRange BlockRange2[] =
 {
     // deploy
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 27 },            // 0x110000   deployment  
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 0 },             // 0x110000   deployment  
 };
 
 const BlockRange BlockRange3[] =
 {
     // config
-    { BlockRange_BLOCKTYPE_CONFIG    ,   0, 3 }             // 0x2D0000   config
+    { BlockRange_BLOCKTYPE_CONFIG    ,   0, 0 }              // 0x2D0000   config
 };
 
 const BlockRegionInfo BlockRegions[] = 
@@ -33,8 +33,8 @@ const BlockRegionInfo BlockRegions[] =
     {
         (0),                                // no attributes for this region
         0x010000,                           // start address for block region (initially this is set as the partition start address)
-        16,                                 // total number of blocks in this region
-        0x10000,  //  64K                   // total number of bytes per block
+        1,                                  // total number of blocks in this region
+        0x100000,                           // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1
     },
@@ -42,8 +42,8 @@ const BlockRegionInfo BlockRegions[] =
     {
         (BlockRegionAttribute_MemoryMapped),    // this region is memory mapped
         0x110000,                               // start address for block region (initially this is set as the partition start address)
-        28,                                     // total number of blocks in this region
-        0x10000,  //  64K                       // total number of bytes per block
+        1,                                      // total number of blocks in this region
+        0x1C0000,                               // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange2),
         BlockRange2
     },
@@ -51,8 +51,8 @@ const BlockRegionInfo BlockRegions[] =
     {
         (0),                                // no attributes for this region
         0x2D0000,                           // start address for block region (initially this is set as the partition start address)
-        4,                                  // total number of blocks in this region
-        0x10000,  //  64K                   // total number of bytes per block
+        1,                                  // total number of blocks in this region
+        0x40000,                            // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange3),
         BlockRange3
     }
