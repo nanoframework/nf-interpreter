@@ -613,7 +613,14 @@ int LWIP_SOCKETS_Driver::Select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* wr
     max_sd = LWIP_SOCKET_OFFSET + MEMP_NUM_NETCONN;
     #endif
 
-    ret = select(max_sd, pR, pW, pE, (struct timeval *)timeout);
+    // developer note: 
+    // our declaration of SOCK_timeval is dependent of "long" type which is platform dependent
+    // so it's not safe to cast it to "timeval"
+    timeval timeoutCopy;
+    timeoutCopy.tv_sec = timeout->tv_sec;
+    timeoutCopy.tv_usec = timeout->tv_usec;
+
+    ret = select(max_sd, pR, pW, pE, &timeoutCopy);
 
     MARSHAL_FDSET_TO_SOCK_FDSET(readfds  , pR);
     MARSHAL_FDSET_TO_SOCK_FDSET(writefds , pW);

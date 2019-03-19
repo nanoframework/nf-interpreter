@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) 2018 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -27,7 +27,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration::GetWireless82011ConfigurationCount___STATIC__I4,
     Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration::GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4,
     Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration::UpdateConfiguration___STATIC__VOID,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -235,7 +234,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net", 
-    0x001C1FB9,
+    0x3E9CB40D,
     method_lookup,
     { 1, 0, 6, 0 }
 };

@@ -12,10 +12,12 @@
 #define FF_LFN_BUF  255
 
 // driver letters and paths
-#define SDCARD_DRIVE_LETTER     "D:"
-#define SDCARD_DRIVE_PATH       SDCARD_DRIVE_LETTER"\\"
-#define USB_MSD_DRIVE_LETTER    "E:"
-#define USB_MSD_DRIVE_PATH      USB_MSD_DRIVE_LETTER"\\"
+#define INDEX0_DRIVE_LETTER     "D:"
+#define INDEX0_DRIVE_PATH       INDEX0_DRIVE_LETTER"\\"
+#define INDEX1_DRIVE_LETTER     "E:"
+#define INDEX1_DRIVE_PATH       INDEX1_DRIVE_LETTER"\\"
+#define INDEX2_DRIVE_LETTER     "F:"
+#define INDEX2_DRIVE_PATH       INDEX2_DRIVE_LETTER"\\"
 
 // Storage events sub-categories
 #define EVENT_STORAGE_DEVICE_INSERTION      0x01
@@ -34,8 +36,8 @@ typedef enum Storage_Drives
 
 // constants to be used throughout the code
 #define SUPPORTED_DRIVES_COUNT  (2)
-#define DRIVE_LETTER_LENGTH     sizeof(SDCARD_DRIVE_LETTER)
-#define DRIVE_PATH_LENGTH       sizeof(SDCARD_DRIVE_PATH)
+#define DRIVE_LETTER_LENGTH     sizeof(INDEX0_DRIVE_LETTER)
+#define DRIVE_PATH_LENGTH       sizeof(INDEX0_DRIVE_PATH)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Storage.CreationCollisionOption (in managed code) !!! //

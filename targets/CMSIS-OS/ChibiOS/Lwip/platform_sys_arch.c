@@ -115,7 +115,72 @@ u32_t sys_now(void)
 
 // need to implement this calling the CMSIS implementation because ChibiOS declares this
 // TODO can be removed if we ever stop using ChibiOS lwIP source
-void sys_sem_signal_S(sys_sem_t *sem)
+void sys_sem_signal_S(sys_sem_t* sem)
 {
     sys_sem_signal(sem);
 }
+
+#if LWIP_NETCONN_SEM_PER_THREAD
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// required for LWIP_NETCONN_SEM_PER_THREAD
+// need to implement this with ChibiOS API because CMSIS RTOS doesn't have an API to deal with this
+//
+// For this to work ChibiOS thread struct has to be extended at target level.
+// This is accomplished by adding the following line at the target 'chconf.h' file
+//   void* localStorage;
+
+sys_sem_t* sys_arch_netconn_sem_get(void)
+{
+    thread_t* currentThread = chThdGetSelfX();
+    LWIP_ASSERT("thread != NULL", currentThread != NULL);
+volatile char* tName = (char*)currentThread->name;
+(void)tName;
+    return currentThread->localStorage;
+}
+
+void sys_arch_netconn_sem_alloc(void)
+{
+    void* storage;
+
+    thread_t* currentThread = chThdGetSelfX();
+    LWIP_ASSERT("thread != NULL", currentThread != NULL);
+
+    storage = currentThread->localStorage;
+    if(storage == NULL)
+    {
+        // semaphore doesn't exist
+        sys_sem_t* semaphore = NULL;
+        err_t err;
+
+        err = sys_sem_new(semaphore, 0);
+        LWIP_ASSERT("err == ERR_OK", err == ERR_OK);
+        LWIP_ASSERT("semaphore invalid", sys_sem_valid(semaphore));
+
+        // store it in thread struc
+        currentThread->localStorage = semaphore;
+    }
+}
+
+void sys_arch_netconn_sem_free(void)
+{
+    void* storage;
+
+    thread_t* currentThread = chThdGetSelfX();
+    LWIP_ASSERT("thread != NULL", currentThread != NULL);
+
+    storage = currentThread->localStorage;
+    if(storage == NULL)
+    {
+        // there is a semaphore
+        sys_sem_t* semaphore = storage;
+
+        // free memory allocation
+        sys_sem_free(semaphore);
+        
+        // clear pointer in thread struct
+        currentThread->localStorage = NULL;
+    }
+}
+
+#endif // LWIP_NETCONN_SEM_PER_THREAD

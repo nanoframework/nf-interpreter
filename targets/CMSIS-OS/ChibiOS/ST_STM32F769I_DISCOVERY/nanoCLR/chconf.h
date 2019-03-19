@@ -576,6 +576,8 @@
  * @details User fields added to the end of the @p thread_t structure.
  */
 #define CH_CFG_THREAD_EXTRA_FIELDS                                          \
+  // this field is required in case lwIP options has LWIP_NETCONN_SEM_PER_THREAD
+  //  void* localStorage;
   /* Add threads custom fields here.*/
 
 /**
