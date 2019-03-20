@@ -807,6 +807,7 @@ void * mainThread(void *arg)
     {
         // Handle Error
         ////UART_PRINT("Unable to create sl_Task thread \n");
+        HAL_AssertEx();
         while(1)
         {
             ;
@@ -820,6 +821,7 @@ void * mainThread(void *arg)
     {
         // Handle Error
         //UART_PRINT("Network Terminal - Couldn't configure Network Processor - %d\n",RetVal);
+        HAL_AssertEx();
         return(NULL);
     }
 
@@ -849,6 +851,7 @@ void * mainThread(void *arg)
         // //UART_PRINT("\n sl_Start failed\n");
         // //UART_PRINT("\n %s Example Ver. %s\n",APPLICATION_NAME,
         //            APPLICATION_VERSION);
+        HAL_AssertEx();
         while(1)
         {
             ;
@@ -901,6 +904,7 @@ void * mainThread(void *arg)
     if(retc != 0)
     {
         // pthread_create() failed
+        HAL_AssertEx();
         while(1)
         {
             ;
@@ -923,6 +927,7 @@ void * mainThread(void *arg)
     if(retc != 0)
     {
         // pthread_create() failed
+        HAL_AssertEx();
         while(1)
         {
             ;
