@@ -756,6 +756,14 @@ void * mainThread(void *arg)
     ADC_init();
     PWM_init();
 
+    // Initialize SlNetSock layer
+    SlNetIf_init(0);
+    SlNetIf_add(SLNETIF_ID_1, "nF",
+                (const SlNetIf_Config_t *)&SlNetIfConfigWifi,
+                SLNET_IF_WIFI_PRIO);
+
+    SlNetSock_init(0);
+    SlNetUtil_init(0);
 
     // initialize the realtime clock
     clock_settime(CLOCK_REALTIME, &ts);
