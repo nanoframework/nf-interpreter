@@ -915,7 +915,7 @@ void * mainThread(void *arg)
     pthread_attr_init(&threadAttributes);
     priorityParams.sched_priority = 1;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
-    retc |= pthread_attr_setstacksize(&threadAttributes, 10000);
+    retc |= pthread_attr_setstacksize(&threadAttributes, 8192);
     if (retc != 0)
     {
         // failed to set attributes
