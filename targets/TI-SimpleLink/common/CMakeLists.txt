@@ -26,5 +26,11 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigurationManager_CC32xx.cpp")
 endif()
 
+# append sockets and SSL driver
+list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/simplelink_sockets_functions.cpp")
+# list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/simplelink_sockets.cpp")
+list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/sockets_simplelink.cpp")
+list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ssl_simplelink.cpp")
+
 # make var global
 set(TARGET_TI_SimpleLink_COMMON_SOURCES ${TARGET_TI_SimpleLink_COMMON_SOURCES} CACHE INTERNAL "make global")
