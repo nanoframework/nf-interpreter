@@ -11,8 +11,7 @@
 #ifndef _TARGET_TI_SIMPLELINK_NANOCLR_H_
 #define _TARGET_TI_SIMPLELINK_NANOCLR_H_
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// THIS FILE IS BLANK ON PURPOSE BECAUSE THIS TARGET DOESN'T REQUIRE THIS SPECIFIC CONFIGURATION //
-///////////////////////////////////////////////////////////////////////////////////////////////////
+// enable SNTP app
+#define SL_APP_SNTP         @NF_NETWORKING_SNTP@
 
 #endif /* _TARGET_TI_SIMPLELINK_NANOCLR_H_ */

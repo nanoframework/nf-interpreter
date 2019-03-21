@@ -21,6 +21,8 @@
 #include <ti/drivers/net/wifi/simplelink.h>
 #include <ti/drivers/net/wifi/slnetifwifi.h>
 
+#include <targetSimpleLinkCC32xx_Sntp.h>
+
 // Board Header files
 #include "Board.h"
 
@@ -33,6 +35,7 @@
 
 extern void * CLRStartupThread(void *arg0);
 extern void * ReceiverThread(void *arg0);
+extern void sntp_init(void);
 
 //////////////////////////////
 #define SL_STOP_TIMEOUT         (200)
@@ -794,7 +797,7 @@ void * mainThread(void *arg)
     pthread_attr_init(&threadAttributes);
     priorityParams.sched_priority = SPAWN_TASK_PRIORITY;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
-    retc |= pthread_attr_setstacksize(&threadAttributes, TASK_STACK_SIZE);
+    retc |= pthread_attr_setstacksize(&threadAttributes, 2 * TASK_STACK_SIZE);
 
     // The SimpleLink host driver architecture mandate spawn 
     // thread to be created prior to calling Sl_start (turning the NWP on).
@@ -915,7 +918,7 @@ void * mainThread(void *arg)
     pthread_attr_init(&threadAttributes);
     priorityParams.sched_priority = 1;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
-    retc |= pthread_attr_setstacksize(&threadAttributes, 8192);
+    retc |= pthread_attr_setstacksize(&threadAttributes, 4092);
     if (retc != 0)
     {
         // failed to set attributes
@@ -933,6 +936,11 @@ void * mainThread(void *arg)
             ;
         }
     }
+
+  #ifdef SL_APP_SNTP
+    sntp_setservername(0, SNTP_SERVER_DEFAULT_ADDRESS);
+    sntp_init();
+  #endif
 
     return (0);
 }

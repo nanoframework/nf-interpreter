@@ -27,6 +27,11 @@ list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ta
 #     list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Watchdog.c")
 # endif()
 
+# append SNTP only if option is ON
+if(NF_NETWORKING_SNTP)
+    list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetSimpleLinkCC32xx_Sntp.c")
+endif()
+
 # append target PAL source files
 list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetPAL_Events.cpp")
 list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetPAL_Time.cpp")
