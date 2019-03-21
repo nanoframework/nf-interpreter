@@ -367,7 +367,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_PIPES)
-#define CH_CFG_USE_PIPES                    FALSE /* temporary */
+#define CH_CFG_USE_PIPES                    TRUE
 #endif
 
 /**

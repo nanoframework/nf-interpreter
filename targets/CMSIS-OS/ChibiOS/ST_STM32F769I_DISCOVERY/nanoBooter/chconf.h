@@ -306,7 +306,7 @@
  */
 #define CH_CFG_USE_OBJ_FIFOS                TRUE
 
-#define CH_CFG_USE_PIPES                    FALSE /* temporary */
+#define CH_CFG_USE_PIPES                    TRUE
 
 
 /**
