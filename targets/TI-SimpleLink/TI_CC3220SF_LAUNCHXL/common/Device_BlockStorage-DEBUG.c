@@ -11,8 +11,8 @@ const BlockRange BlockRange1[] =
 {
     // the 1st block is reserved for the flash header 
     // so we don't take it into account for the map
-    { BlockRange_BLOCKTYPE_CODE          ,   0  , 116 },           // 0x01000800 nanoCLR
-    { BlockRange_BLOCKTYPE_DEPLOYMENT    ,   117, 510 },           // 0x0103A800 deployment
+    { BlockRange_BLOCKTYPE_CODE          ,   0  , 117 },           // 0x01000800 nanoCLR
+    { BlockRange_BLOCKTYPE_DEPLOYMENT    ,   118, 510 },           // 0x0103B000 deployment
 };
 
 const BlockRegionInfo BlockRegions[] = 
