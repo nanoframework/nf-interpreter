@@ -1048,10 +1048,6 @@ int LWIP_SOCKETS_Driver::GetNativeSockOption (int optname)
         case SOCK_SOCKO_ACCEPTCONNECTION:
             nativeOptionName = SO_ACCEPTCONN;
             break;
-        case SOCK_SOCKO_TYPE:
-            nativeOptionName = SO_TYPE;
-            break;
-            
         case SOCK_SOCKO_USELOOPBACK:
             nativeOptionName = SO_USELOOPBACK;
             break;
