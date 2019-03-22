@@ -234,6 +234,7 @@ struct Library_sys_net_native_System_Net_Sockets_Socket
     static const int FIELD__m_localEndPoint = 3;
     static const int FIELD__m_recvTimeout = 4;
     static const int FIELD__m_sendTimeout = 5;
+    static const int FIELD___socketType = 6;
 
 
     //--//
