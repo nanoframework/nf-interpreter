@@ -51,6 +51,156 @@ static void MARSHAL_SL_SDSET_TO_SOCK_FDSET(SOCK_fd_set* sf, SlNetSock_SdSet_t* f
     }
 }
 
+int GetNativeTcpOption (int optname)
+{
+    int nativeOptionName = 0;
+
+    switch(optname)
+    {
+        case SOCK_TCP_NODELAY:
+            nativeOptionName = SLNETSOCK_TCP_NODELAY;
+            break;
+
+        // case SOCK_SOCKO_KEEPALIVE:
+        //     nativeOptionName = TCP_KEEPALIVE;
+        //     break;
+
+        // allow the C# user to specify LWIP options that our managed enum
+        // doesn't support
+        default:
+            nativeOptionName = optname;
+            break;
+    }
+    return nativeOptionName;
+}
+
+int GetNativeSockOption (int optname)
+{
+    int nativeOptionName = 0;
+
+    switch(optname)
+    {
+        case SOCK_SOCKO_DONTLINGER:
+        case SOCK_SOCKO_LINGER:    
+            nativeOptionName = SLNETSOCK_OPSOCK_LINGER;
+            break;
+        // case SOCK_SOCKO_SENDTIMEOUT:          
+        //     nativeOptionName = SO_SNDTIMEO;
+        //     break;
+        case SOCK_SOCKO_RECEIVETIMEOUT:       
+            nativeOptionName = SLNETSOCK_OPSOCK_RCV_TIMEO;
+            break;
+        // case SOCK_SOCKO_EXCLUSIVEADDRESSUSE: 
+        // case SOCK_SOCKO_REUSEADDRESS:         
+        //     nativeOptionName = SO_REUSEADDR;
+        //     break;
+        case SOCK_SOCKO_KEEPALIVE:  
+            nativeOptionName = SLNETSOCK_OPSOCK_KEEPALIVE;
+            break;
+        case SOCK_SOCKO_ERROR:                  
+            nativeOptionName = SLNETSOCK_OPSOCK_ERROR;
+            break;
+        case SOCK_SOCKO_BROADCAST:              
+            nativeOptionName = SLNETSOCK_OPSOCK_BROADCAST;
+            break;
+        case SOCK_SOCKO_RECEIVEBUFFER:
+            nativeOptionName =  SLNETSOCK_OPSOCK_RCV_BUF;
+            break;
+        // case SOCK_SOCKO_SENDBUFFER:
+        //     nativeOptionName = SO_SNDBUF;
+        //     break;
+        // case SOCK_SOCKO_ACCEPTCONNECTION:
+        //     nativeOptionName = SO_ACCEPTCONN;
+        //     break;
+        // case SOCK_SOCKO_USELOOPBACK:
+        //     nativeOptionName = SO_USELOOPBACK;
+        //     break;
+        // case SOCK_SOCKO_DONTROUTE:  
+        //     nativeOptionName = SO_DONTROUTE;
+        //     break;
+        // case SOCK_SOCKO_OUTOFBANDINLINE:
+        //     nativeOptionName = SO_OOBINLINE;
+        //     break;
+
+        // case SOCK_SOCKO_DEBUG:
+        //     nativeOptionName = SO_DEBUG;
+        //     break;
+            
+        // case SOCK_SOCKO_SENDLOWWATER:
+        //     nativeOptionName = SO_SNDLOWAT;
+        //     break;
+            
+        // case SOCK_SOCKO_RECEIVELOWWATER:
+        //     nativeOptionName = SO_RCVLOWAT;
+        //     break;
+            
+ //        case SOCK_SOCKO_MAXCONNECTIONS:         //don't support
+        // case SOCK_SOCKO_UPDATE_ACCEPT_CTX:
+        // case SOCK_SOCKO_UPDATE_CONNECT_CTX:
+        //     nativeOptionName = 0;
+        //     break;
+            
+        // allow the C# user to specify LWIP options that our managed enum
+        // doesn't support
+        default:
+            nativeOptionName = optname;
+            break;
+            
+    }
+
+    return nativeOptionName;
+}
+
+int GetNativeIPOption (int optname)
+{
+    int nativeOptionName = 0;
+
+    switch(optname)
+    {
+        // case SOCK_IPO_TTL:           
+        //     nativeOptionName = IP_TTL;
+        //     break;
+        // case SOCK_IPO_TOS:    
+        //     nativeOptionName = IP_TOS;
+        //     break;
+
+        // case SOCK_IPO_MULTICAST_IF:
+        //     nativeOptionName = IP_MULTICAST_IF;
+        //     break;
+        // case SOCK_IPO_MULTICAST_TTL:  
+        //     nativeOptionName = SLNETSOCK_OPIP_MULTICAST_TTL;
+        //     break;
+        // case SOCK_IPO_MULTICAST_LOOP: 
+        //     nativeOptionName = IP_MULTICAST_LOOP;
+        //     break;
+        case SOCK_IPO_ADD_MEMBERSHIP:
+            nativeOptionName = SLNETSOCK_OPIP_ADD_MEMBERSHIP;
+            break;
+        case SOCK_IPO_DROP_MEMBERSHIP:
+            nativeOptionName = SLNETSOCK_OPIP_DROP_MEMBERSHIP;
+            break;
+
+        // case SOCK_IPO_ADD_SOURCE_MEMBERSHIP:
+        // case SOCK_IPO_DROP_SOURCE_MEMBERSHIP:
+        // case SOCK_IPO_OPTIONS:
+        // case SOCK_IPO_HDRINCL:
+        // case SOCK_IPO_IP_DONTFRAGMENT:
+        // case SOCK_IPO_BLOCK_SOURCE:
+        // case SOCK_IPO_UBLOCK_SOURCE:
+        // case SOCK_IPO_PACKET_INFO: 
+        //     nativeOptionName = 0;
+        //     break;
+
+        // allow the C# user to specify LWIP options that our managed enum
+        // doesn't support
+        default:
+            nativeOptionName = optname;
+            break;
+    }
+    
+    return nativeOptionName;
+}
+
 SOCK_SOCKET SOCK_socket( int family, int type, int protocol ) 
 { 
     NATIVE_PROFILE_PAL_COM();
@@ -523,7 +673,58 @@ int SOCK_getsockopt( SOCK_SOCKET socket, int level, int optname, char* optval, i
 { 
     NATIVE_PROFILE_PAL_COM();
 
-    socketErrorCode = SlNetSock_getOpt( socket, level, optname, (void *)optval, (SlNetSocklen_t *)optlen );
+    int         nativeLevel;
+    int         nativeOptionName;
+    char*       pNativeOptval = optval;
+    int         ret;
+    
+    switch(level)
+    {
+        case SOCK_IPPROTO_IP:
+            nativeLevel         = SLNETSOCK_LVL_PHY;
+            nativeOptionName    = GetNativeIPOption(optname);
+            break;
+        case SOCK_IPPROTO_TCP:    
+            nativeLevel         = SLNETSOCK_PROTO_TCP;
+            nativeOptionName    = GetNativeTcpOption(optname);
+            break;
+        case SOCK_IPPROTO_UDP: 
+        case SOCK_IPPROTO_ICMP:
+        case SOCK_IPPROTO_IGMP:
+        case SOCK_IPPROTO_IPV4:
+        case SOCK_SOL_SOCKET:
+            nativeLevel         = SLNETSOCK_LVL_SOCKET;
+            nativeOptionName    = GetNativeSockOption(optname);
+            break;
+        default:
+            nativeLevel         = level;
+            nativeOptionName    = optname;
+            break;
+    }
+
+    socketErrorCode = SlNetSock_getOpt( socket, nativeLevel, nativeOptionName, (void *)pNativeOptval, (SlNetSocklen_t *)optlen );
+
+    if(socketErrorCode == 0)
+    {
+        switch(level)
+        {
+            case SOCK_SOL_SOCKET:
+                switch(optname)
+                {       
+                    case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
+                    case SOCK_SOCKO_DONTLINGER:
+                        *optval = !(*(int*)optval != 0);
+                        break;
+                        
+                    case SOCK_SOCKO_ACCEPTCONNECTION:
+                    case SOCK_SOCKO_BROADCAST:
+                    case SOCK_SOCKO_KEEPALIVE:
+                        *optval = (*(int*)optval != 0);
+                        break;
+                }
+                break;
+        }
+    }
 
     return socketErrorCode;
 }
