@@ -7,14 +7,8 @@
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 
+#include <targetHAL_ConfigurationManager_CC32xx.h>
 #include <ti/drivers/net/wifi/simplelink.h>
-
-// we'll store up to 4 network configuration blocks
-#define NETWORK_CONFIG_MAX_COUNT            (4)
-// files with network configuration have this namming patter "network-config-N.bin"
-#define NETWORK_CONFIG_FILE_NAME            "nf/network-config0.bin"
-// position of the index in the file name above (that's the 0)
-#define NETWORK_CONFIG_FILE_INDEX_POSITION  (17)
 
 typedef struct
 {
