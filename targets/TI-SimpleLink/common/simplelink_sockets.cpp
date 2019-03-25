@@ -4,22 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 #include "simplelink_sockets.h"
-
-// extern "C"
-// {
-// #include "lwip\init.h"
-// #include "lwip\tcpip.h"
-// #include "lwip\dns.h"
-// #include "lwip\netifapi.h"
-// #include "lwip\Netdb.h"
-// #include "lwip\tcp.h"
-// #include "lwip\Sockets.h"
-// #include "lwip\dhcp.h"
-// #include "lwip\netif.h"
-// }
-
 
 //--// 
 
@@ -32,51 +17,50 @@
 
 //--//
 
-SimpleLink_SOCKETS_Driver g_SimpleLink_SOCKETS_Driver;
-
 //--//
 static HAL_CONTINUATION PostAddressChangedContinuation;
 static HAL_CONTINUATION PostAvailabilityOnContinuation;
 static HAL_CONTINUATION PostAvailabilityOffContinuation;
 
-void SimpleLink_SOCKETS_Driver::PostAddressChanged(void* arg)
+void PostAddressChanged(void* arg)
 {
     (void)arg;
 
 	Network_PostEvent(NetworkEventType_AddressChanged, 0);
 }
 
-void SimpleLink_SOCKETS_Driver::PostAvailabilityOn(void* arg)
+void PostAvailabilityOn(void* arg)
 {
     (void)arg;
 
 	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkAvailable);
 }
 
-void SimpleLink_SOCKETS_Driver::PostAvailabilityOff(void* arg)
+void PostAvailabilityOff(void* arg)
 {
     (void)arg;
 
 	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkNOTAvailable);
 }
 
-void SimpleLink_SOCKETS_Driver::Link_callback()
+void Link_callback(bool linkUp)
 {
-	// if (netif_is_link_up(netif))
-	// {
-	// 	if (!PostAvailabilityOnContinuation.IsLinked())
-	// 		PostAvailabilityOnContinuation.Enqueue();
-	// }
-	// else
-	// {
-	// 	if (!PostAvailabilityOffContinuation.IsLinked())
-	// 		PostAvailabilityOffContinuation.Enqueue();
-	// }
+	if (linkUp)
+	{
+		if (!PostAvailabilityOnContinuation.IsLinked())
+			PostAvailabilityOnContinuation.Enqueue();
+	}
+	else
+	{
+		if (!PostAvailabilityOffContinuation.IsLinked())
+			PostAvailabilityOffContinuation.Enqueue();
+	}
+
     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
 
-void SimpleLink_SOCKETS_Driver::Status_callback()
+void Status_callback()
 {
 	if (!PostAddressChangedContinuation.IsLinked())
 		PostAddressChangedContinuation.Enqueue();
@@ -122,396 +106,24 @@ void SimpleLink_SOCKETS_Driver::Status_callback()
 }
 #endif
 
-bool SimpleLink_SOCKETS_Driver::Initialize()
+bool SimpleLink_SOCKETS_Initialize()
 {   
     NATIVE_PROFILE_PAL_NETWORK();
-
-	struct netif *networkInterface;
-    HAL_Configuration_NetworkInterface networkConfiguration;
-    int interfaceNumber;
 
     PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
     PostAvailabilityOnContinuation.InitializeCallback(PostAvailabilityOn, NULL);
     PostAvailabilityOffContinuation.InitializeCallback(PostAvailabilityOff, NULL);
 
-    // create m_interfaceNumber array
-    int interfaceCount = g_TargetConfiguration.NetworkInterfaceConfigs->Count;
-    // FIXME
-    // g_SimpleLink_SOCKETS_Driver.m_interfaces = (LWIP_DRIVER_INTERFACE_DATA*)platform_malloc(interfaceCount * sizeof(LWIP_DRIVER_INTERFACE_DATA)); 
-
-    // FIXME 
-    // already done?
-    /* Initialize the target board lwIP stack */
-    //nanoHAL_Network_Initialize();
-
-	for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
-	{
-        // load network interface configuration from storage
-        if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, i))
-        {
-            // failed to load configuration
-            // FIXME output error?
-            // move to the next, if any
-            continue;
-        }
-        _ASSERTE(networkConfiguration.StartupAddressMode > 0);
-
- 		/* Bind and Open the Ethernet driver */
- 		Network_Interface_Bind(i);
- 		interfaceNumber = Network_Interface_Open(i);
-
-		if (interfaceNumber == SOCK_SOCKET_ERROR)
-		{
-			DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
-//FIXME			debug_printf("SocketError: %d\n", errorCode);
-			continue;
-		}
-
- 		g_SimpleLink_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
-
-//  		UpdateAdapterConfiguration(i, (UpdateOperation_Dhcp | UpdateOperation_Dns), &networkConfiguration);
-
-//  		networkInterface = netif_find_interface(interfaceNumber);
-
-//  		if (networkInterface)
-//  		{	
-//  			netif_set_link_callback(networkInterface, Link_callback);
-
-// 			if (netif_is_link_up(networkInterface))
-//             {
-// 			    Link_callback(networkInterface);
-//             }
-
-// 			netif_set_status_callback(networkInterface, Status_callback);
-
-// 			if (netif_is_up(networkInterface))
-//             {
-// 			    Status_callback(networkInterface);
-//             }
-
-// 			// default debugger interface
-//             if (0 == i)
-//             {
-// #if LWIP_IPV6
-//                 //uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.u_addr.ip4.addr;
-// #else
-//                 //uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.addr;
-// #endif                
-// //                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
-// // FIXME               debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
-//             }
-// 		}
-	}
-
-    return TRUE;
+    return true;
 }
 
-bool SimpleLink_SOCKETS_Driver::Uninitialize()
+bool SimpleLink_SOCKETS_Uninitialize()
 {
-    NATIVE_PROFILE_PAL_NETWORK();      
+    NATIVE_PROFILE_PAL_NETWORK();
 
     PostAddressChangedContinuation.Abort();
     PostAvailabilityOnContinuation.Abort();
     PostAvailabilityOffContinuation.Abort();
 
-    for(int i=0; i<g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
-    {
-        Network_Interface_Close(i);
-    }
-
-//FIXME    tcpip_shutdown();
-// tcpip_shutdown is MS method added to lwip tcpip.c
-
-    return TRUE;
-}
-
-SOCK_SOCKET SimpleLink_SOCKETS_Driver::Accept(SOCK_SOCKET socket, SOCK_sockaddr* address, int* addressLen)
-{ 
-    NATIVE_PROFILE_PAL_NETWORK();
-    SOCK_SOCKET ret;
-
-    sockaddr_in addr;
-
-    if (address)
-    {
-        SOCK_SOCKADDR_TO_SOCKADDR(address, addr, addressLen);
-    }
-    
-    ret = lwip_accept(socket, address?(sockaddr*)&addr:NULL, (u32_t*)addressLen);
-    
-    if(address)
-    {
-        SOCKADDR_TO_SOCK_SOCKADDR(address, addr, addressLen);
-    }
-    
-    return ret;
-}
-
-int SimpleLink_SOCKETS_Driver::SetSockOpt( SOCK_SOCKET socket, int level, int optname, const char* optval, int  optlen )
-{ 
-    NATIVE_PROFILE_PAL_NETWORK();
-    int nativeLevel;
-    int nativeOptionName;
-    int nativeIntValue;
-    char *pNativeOptionValue = (char*)optval;
-    struct linger lopt = {0,0};
-
-    switch(level)
-    {
-        case SOCK_IPPROTO_IP:
-            nativeLevel = IPPROTO_IP;
-            nativeOptionName = GetNativeIPOption(optname);
-            break;
-        case SOCK_IPPROTO_TCP:    
-            nativeLevel = IPPROTO_TCP;
-            nativeOptionName = GetNativeTcpOption(optname);
-            break;
-        case SOCK_IPPROTO_UDP: 
-        case SOCK_IPPROTO_ICMP:
-        case SOCK_IPPROTO_IGMP:
-        case SOCK_IPPROTO_IPV4:
-        case SOCK_SOL_SOCKET:
-            nativeLevel      = SOL_SOCKET;
-            nativeOptionName = GetNativeSockOption(optname);            
-
-            switch(optname)
-            {        
-                // If linger value negative then linger off
-                // otherwise enabled and linger value is number of seconds
-                case SOCK_SOCKO_LINGER:
-                    {
-                        int lingerValue = *(int*)optval;
-                        if ( lingerValue >= 0  )
-                        {
-                            lopt.l_onoff  =  1;
-                            lopt.l_linger =  abs(lingerValue);
-                        }
-                        pNativeOptionValue = (char*)&lopt;
-                        optlen = sizeof(lopt);
-                    }
-                    break;
-
-                case SOCK_SOCKO_DONTLINGER:
-                case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
-                    nativeIntValue     = !*(int*)optval;
-                    pNativeOptionValue = (char*)&nativeIntValue;
-                    break;
-                default:
-                    break;
-            }
-            break;
-        default:
-            nativeLevel         = 0;
-            nativeOptionName    = 0;
-            break;
-    }
-
-    return lwip_setsockopt(socket, nativeLevel, nativeOptionName, pNativeOptionValue, optlen);
-}
-
-int SimpleLink_SOCKETS_Driver::GetSockName( SOCK_SOCKET socket, SOCK_sockaddr* name, int* namelen )
-{ 
-    NATIVE_PROFILE_PAL_NETWORK();
-    int ret;
-
-    sockaddr_in addr;
-
-    SOCK_SOCKADDR_TO_SOCKADDR(name, addr, namelen);
-
-    ret = lwip_getsockname(socket, (sockaddr*)&addr, (u32_t*)namelen);
-
-    SOCKADDR_TO_SOCK_SOCKADDR(name, addr, namelen);
-
-    return ret;
-}
-
-int SimpleLink_SOCKETS_Driver::RecvFrom( SOCK_SOCKET socket, char* buf, int len, int flags, SOCK_sockaddr* from, int* fromlen )
-{ 
-    NATIVE_PROFILE_PAL_NETWORK();
-    sockaddr_in addr;
-    sockaddr *pFrom = NULL;
-    int ret;
-
-    if(from)
-    {
-        SOCK_SOCKADDR_TO_SOCKADDR(from, addr, fromlen);
-        pFrom = (sockaddr*)&addr;
-    }
-        
-    ret = lwip_recvfrom(socket, buf, len, flags, pFrom, (u32_t*)fromlen);
-
-    if(from && ret != SOCK_SOCKET_ERROR)
-    {
-        SOCKADDR_TO_SOCK_SOCKADDR(from, addr, fromlen);
-    }
-
-    return ret;
-}
-
-int SimpleLink_SOCKETS_Driver::SendTo( SOCK_SOCKET socket, const char* buf, int len, int flags, const SOCK_sockaddr* to, int tolen )
-{ 
-    NATIVE_PROFILE_PAL_NETWORK();
-
-    sockaddr_in addr;
-
-    SOCK_SOCKADDR_TO_SOCKADDR(to, addr, &tolen);
-
-    return lwip_sendto(socket, buf, len, flags, (sockaddr*)&addr, (u32_t)tolen);
-}
-
-struct dhcp_client_id
-{
-    uint8_t code;
-    uint8_t length;
-    uint8_t type;
-    uint8_t clientId[6];
-};
-
-int SimpleLink_SOCKETS_Driver::GetNativeError ( int error )
-{
-    NATIVE_PROFILE_PAL_NETWORK();
-    int ret;
-
-    switch(error)
-    {
-        case EINTR:
-            ret = SOCK_EINTR;
-            break;
-
-        case EACCES:
-            ret = SOCK_EACCES;
-            break;
-
-        case EFAULT:
-            ret = SOCK_EFAULT;
-            break;
-
-        case EINVAL:
-            ret = SOCK_EINVAL;
-            break;
-
-        case EMFILE:
-            ret = SOCK_EMFILE;
-            break;
-
-        case EAGAIN:
-        case EBUSY:
-        /* case EWOULDBLOCK: same as EINPROGRESS */ 
-        case EINPROGRESS:
-            ret = SOCK_EWOULDBLOCK;
-            break;
-
-        case EALREADY:
-            ret = SOCK_EALREADY;
-            break;
-
-        case ENOTSOCK:
-            ret = SOCK_ENOTSOCK;
-            break;
-
-        case EDESTADDRREQ:
-            ret = SOCK_EDESTADDRREQ;
-            break;
-
-        case EMSGSIZE:
-            ret = SOCK_EMSGSIZE;
-            break;
-
-        case EPROTOTYPE:
-            ret = SOCK_EPROTOTYPE;
-            break;
-
-        case ENOPROTOOPT:
-            ret = SOCK_ENOPROTOOPT;
-            break;
-
-        case EPROTONOSUPPORT:
-            ret = SOCK_EPROTONOSUPPORT;
-            break;
-// TODO nanoframework check why missing
-        // case ESOCKTNOSUPPORT:
-        //     ret = SOCK_ESOCKTNOSUPPORT;
-        //     break;
-
-        case EPFNOSUPPORT:
-            ret = SOCK_EPFNOSUPPORT;
-            break;
-
-        case EAFNOSUPPORT:
-            ret = SOCK_EAFNOSUPPORT;
-            break;
-
-        case EADDRINUSE:
-            ret = SOCK_EADDRINUSE;
-            break;
-
-        case EADDRNOTAVAIL:
-            ret = SOCK_EADDRNOTAVAIL;
-            break;
-
-        case ENETDOWN:
-            ret = SOCK_ENETDOWN;
-            break;
-
-        case ENETUNREACH:
-            ret = SOCK_ENETUNREACH;
-            break;
-
-        case ENETRESET:
-            ret = SOCK_ENETRESET;
-            break;
-
-        case ECONNABORTED:
-            ret = SOCK_ECONNABORTED;
-            break;
-
-        case ECONNRESET:
-            ret = SOCK_ECONNRESET;
-            break;
-
-        case ENOBUFS:
-        case ENOMEM:
-            ret = SOCK_ENOBUFS;
-            break;
-
-        case EISCONN:
-            ret = SOCK_EISCONN;
-            break;
-
-        case ENOTCONN:
-            ret = SOCK_EISCONN;
-            break;
-
-#if !defined(__GNUC__) // same as ENOTSOCK for GCC
-        case ESHUTDOWN:
-            ret = SOCK_ESHUTDOWN;
-            break;
-#endif
-
-        case ETIMEDOUT:
-            ret = SOCK_ETIMEDOUT;
-            break;
-
-        case ECONNREFUSED:
-            ret = SOCK_ECONNREFUSED;
-            break;
-
-        case EHOSTDOWN:
-            ret = SOCK_EHOSTDOWN;
-            break;
-
-        case EHOSTUNREACH:
-            ret = SOCK_EHOSTUNREACH;
-            break;
-
-        case ENODATA:
-            ret = SOCK_NO_DATA;
-            break;
-
-        default:
-            ret = error;
-            break;
-    } 
-    
-    return (ret);   
+    return true;
 }

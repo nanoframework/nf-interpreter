@@ -170,6 +170,9 @@ void CC3220SF_LAUNCHXL_initGeneral(void)
 {
     PRCMCC3200MCUInit();
     Power_init();
+
+    // Mux Pin62 to mode 1 for outputing NWP logs
+    //MAP_PinTypeUART(PIN_62, PIN_MODE_1);
 }
 
 /*

@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-//#include "sockets_simplelink.h"
 #include <nanoHAL.h>
+#include "simplelink_sockets.h"
 
 #include <ti/drivers/net/wifi/slnetifwifi.h>
 #include <ti/drivers/net/wifi/errors.h>
@@ -14,7 +14,7 @@
 //--//
 
 // this is to store the return value of the calls to sockets APIs
-static int socketErrorCode = 0;
+int socketErrorCode;
 
 static int MARSHAL_SOCK_FDSET_TO_SL_SDSET(SOCK_fd_set* sf, SlNetSock_SdSet_t* f)
 {
@@ -769,6 +769,9 @@ bool Network_Initialize()
 {
     NATIVE_PROFILE_PAL_COM();
 
+    // call our equivalent to lwIP driver
+    return SimpleLink_SOCKETS_Initialize();
+
     // network initialization is taken care of by SimpleLink
     return true;
 }
@@ -836,14 +839,6 @@ HRESULT SOCK_CONFIGURATION_LoadConfiguration(HAL_Configuration_NetworkInterface*
 
     return hr;
 }
-
-#define SOCKET_SHUTDOWN_READ         0
-#define SOCKET_SHUTDOWN_WRITE        1
-#define SOCKET_SHUTDOWN_READ_WRITE   2
-
-#define ISSET_SOCKET_FLAG(x,y) ((y) == ((y) & (x).m_flags))
-#define SET_SOCKET_FLAG(x,y)   (x).m_flags |= (y)
-#define CLEAR_SOCKET_FLAG(x,y) (x).m_flags &= ~(y)
 
 bool  SOCKETS_DbgInitialize( int ComPortNum )
 {

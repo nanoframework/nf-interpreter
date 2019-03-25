@@ -33,6 +33,10 @@
 #include <targetSimpleLinkCC32xx_LinkLocalTask.h>
 #include <targetSimpleLinkCC32xx_ProvisioningTask.h>
 
+// externals from Simple Link sockets
+extern void Status_callback();
+extern void Link_callback(bool linkUp);
+
 extern void * CLRStartupThread(void *arg0);
 extern void * ReceiverThread(void *arg0);
 extern void sntp_init(void);
@@ -116,6 +120,8 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
             // nF_ControlBlock.connectionBSSID[5]);
 
         sem_post(&Provisioning_ControlBlock.connectionAsyncEvent);
+
+        Link_callback(true);
     }
     break;
 
@@ -166,6 +172,8 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
         //        sizeof(nF_ControlBlock.connectionSSID));
         // memset(nF_ControlBlock.connectionBSSID, 0,
         //        sizeof(nF_ControlBlock.connectionBSSID));
+
+        Link_callback(false);
     }
     break;
 
@@ -496,6 +504,8 @@ void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
                 //    SL_IPV4_BYTE(pNetAppEvent->Data.IpAcquiredV4.Gateway,0));
 
         sem_post(&Provisioning_ControlBlock.connectionAsyncEvent);
+
+        Status_callback();
     }
     break;
 
@@ -516,6 +526,8 @@ void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
         }
 
         sem_post(&Provisioning_ControlBlock.connectionAsyncEvent);
+
+        Status_callback();        
     }
     break;
 
@@ -672,58 +684,65 @@ void SimpleLinkSockEventHandler(SlSockEvent_t *pSock)
 {
     if(SL_SOCKET_ASYNC_EVENT == pSock->Event)
     {
-        //UART_PRINT("[SOCK ERROR] an event received on socket %d\r\n",
-                //    pSock->SocketAsyncEvent.SockAsyncData.Sd);
-        switch(pSock->SocketAsyncEvent.SockAsyncData.Type)
-        {
-        case SL_SSL_NOTIFICATION_CONNECTED_SECURED:
-            //UART_PRINT("[SOCK ERROR] SSL handshake done");
-            break;
-        case SL_SSL_NOTIFICATION_HANDSHAKE_FAILED:
-            //UART_PRINT("[SOCK ERROR] SSL handshake failed with error %d\r\n",
-                    //    pSock->SocketAsyncEvent.SockAsyncData.Val);
-            break;
-        case SL_SSL_ACCEPT:
-            //UART_PRINT(
-                // "[SOCK ERROR] Recoverable error occurred "
-                // "during the handshake %d\r\n",
-                // pSock->SocketAsyncEvent.SockAsyncData.Val);
-            break;
-        case SL_OTHER_SIDE_CLOSE_SSL_DATA_NOT_ENCRYPTED:
-            //UART_PRINT("[SOCK ERROR] Other peer terminated the SSL layer.\r\n");
-            break;
-        case SL_SSL_NOTIFICATION_WRONG_ROOT_CA:
-            //UART_PRINT("[SOCK ERROR] Used wrong CA to verify the peer.\r\n");
+        nFSlSocketAsyncEvent_t event;
+        event.Sd = pSock->SocketAsyncEvent.SockAsyncData.Sd;
+        event.Type = pSock->SocketAsyncEvent.SockAsyncData.Type;
 
-            break;
-        default:
-            break;
-        }
+        mq_send(nF_ControlBlock.socketAsyncEvent,
+            (char *)&event, sizeof(nFSlSocketAsyncEvent_t), 0);
+
+        // //UART_PRINT("[SOCK ERROR] an event received on socket %d\r\n",
+        //         //    pSock->SocketAsyncEvent.SockAsyncData.Sd);
+        //switch(pSock->SocketAsyncEvent.SockAsyncData.Type)
+        // {
+        //     case SL_SSL_NOTIFICATION_CONNECTED_SECURED:
+        //         //UART_PRINT("[SOCK ERROR] SSL handshake done");
+        //         break;
+        //     case SL_SSL_NOTIFICATION_HANDSHAKE_FAILED:
+        //         //UART_PRINT("[SOCK ERROR] SSL handshake failed with error %d\r\n",
+        //                 //    pSock->SocketAsyncEvent.SockAsyncData.Val);
+        //         break;
+        //     case SL_SSL_ACCEPT:
+        //         //UART_PRINT(
+        //             // "[SOCK ERROR] Recoverable error occurred "
+        //             // "during the handshake %d\r\n",
+        //             // pSock->SocketAsyncEvent.SockAsyncData.Val);
+        //         break;
+        //     case SL_OTHER_SIDE_CLOSE_SSL_DATA_NOT_ENCRYPTED:
+        //         //UART_PRINT("[SOCK ERROR] Other peer terminated the SSL layer.\r\n");
+        //         break;
+        //     case SL_SSL_NOTIFICATION_WRONG_ROOT_CA:
+        //         //UART_PRINT("[SOCK ERROR] Used wrong CA to verify the peer.\r\n");
+
+        //         break;
+        //     default:
+        //         break;
+        // }
     }
 
     // This application doesn't work w/ socket - Events are not expected
     switch(pSock->Event)
     {
-    case SL_SOCKET_TX_FAILED_EVENT:
-        switch(pSock->SocketAsyncEvent.SockTxFailData.Status)
-        {
-        case SL_ERROR_BSD_ECLOSE:
-            //UART_PRINT("[SOCK ERROR] - close socket (%d) operation "
-                    //    "failed to transmit all queued packets\n\r",
-                    //    pSock->SocketAsyncEvent.SockTxFailData.Sd);
+        case SL_SOCKET_TX_FAILED_EVENT:
+            switch(pSock->SocketAsyncEvent.SockTxFailData.Status)
+            {
+            case SL_ERROR_BSD_ECLOSE:
+                //UART_PRINT("[SOCK ERROR] - close socket (%d) operation "
+                        //    "failed to transmit all queued packets\n\r",
+                        //    pSock->SocketAsyncEvent.SockTxFailData.Sd);
+                break;
+            default:
+                //UART_PRINT("[SOCK ERROR] - TX FAILED  :  socket %d , "
+                        //    "reason (%d) \n\n",
+                        //    pSock->SocketAsyncEvent.SockTxFailData.Sd,
+                        //    pSock->SocketAsyncEvent.SockTxFailData.Status);
+                break;
+            }
             break;
-        default:
-            //UART_PRINT("[SOCK ERROR] - TX FAILED  :  socket %d , "
-                    //    "reason (%d) \n\n",
-                    //    pSock->SocketAsyncEvent.SockTxFailData.Sd,
-                    //    pSock->SocketAsyncEvent.SockTxFailData.Status);
-            break;
-        }
-        break;
 
-    default:
-        //UART_PRINT("[SOCK EVENT] - Unexpected Event [%x0x]\n\n",pSock->Event);
-        break;
+        default:
+            //UART_PRINT("[SOCK EVENT] - Unexpected Event [%x0x]\n\n",pSock->Event);
+            break;
     }
 }
 
@@ -783,6 +802,11 @@ void * mainThread(void *arg)
     nF_ControlBlock.configurationDone = 0;
     nF_ControlBlock.tcpConnected = 0;
 
+    // Create sockets Async event queue
+    mq_attr attr;
+    attr.mq_maxmsg = SLNETSOCK_MAX_CONCURRENT_SOCKETS;
+    attr.mq_msgsize = sizeof(nFSlSocketAsyncEvent_t);
+    nF_ControlBlock.socketAsyncEvent = mq_open("", O_CREAT, 0, &attr);
 
     // initializes signals for all tasks
     sem_init(&Provisioning_ControlBlock.connectionAsyncEvent, 0, 0);

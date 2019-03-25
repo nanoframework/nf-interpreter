@@ -28,7 +28,7 @@ endif()
 
 # append sockets and SSL driver
 list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/simplelink_sockets_functions.cpp")
-# list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/simplelink_sockets.cpp")
+list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/simplelink_sockets.cpp")
 list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/sockets_simplelink.cpp")
 list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ssl_simplelink.cpp")
 

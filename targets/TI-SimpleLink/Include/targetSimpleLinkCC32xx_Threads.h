@@ -13,6 +13,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include <time.h>
+#include <mqueue.h>
 
 #include <stdlib.h>
 // #include <string.h>
@@ -59,6 +60,12 @@
 
 #define IS_IPV6G_ACQUIRED(status_variable)  \
     GET_STATUS_BIT(status_variable, AppStatusBits_Ipv6gAcquired)
+
+typedef struct
+{
+    _u8   Sd;
+    _u8   Type;
+} nFSlSocketAsyncEvent_t;
 
 typedef enum
 {
@@ -107,6 +114,8 @@ typedef struct nanoFramework_ControlBlock_t
     int16_t sockTcpServer;
     uint8_t configurationDone;
     uint8_t tcpConnected;
+
+    mqd_t socketAsyncEvent;
   
     // uint32_t gatewayIP;/* Network Gateway IP address */
     

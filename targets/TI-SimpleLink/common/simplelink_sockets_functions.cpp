@@ -6,10 +6,23 @@
 
 #include <nanoHAL.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include "simplelink_sockets.h"
 
 #include <ti/drivers/net/wifi/simplelink.h>
 
 #define NATIVE_PROFILE_PAL_NETWORK()
+
+bool HAL_SOCK_Initialize()
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    return SimpleLink_SOCKETS_Initialize();
+}
+
+bool HAL_SOCK_Uninitialize()
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    return SimpleLink_SOCKETS_Uninitialize();
+}
 
 HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface* config, uint32_t interfaceIndex)
 {
