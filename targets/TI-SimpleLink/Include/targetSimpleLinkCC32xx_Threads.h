@@ -110,10 +110,7 @@ typedef struct nanoFramework_ControlBlock_t
     // This field keeps the device's role (STA, P2P or AP)
     uint32_t Role;
 
-    int16_t socket;
-    int16_t sockTcpServer;
     uint8_t configurationDone;
-    uint8_t tcpConnected;
 
     mqd_t socketAsyncEvent;
   
