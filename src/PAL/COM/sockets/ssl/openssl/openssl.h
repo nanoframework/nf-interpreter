@@ -7,6 +7,8 @@
 #ifndef _SOCKETS_OPENSSL_H_
 #define _SOCKETS_OPENSSL_H_ 1
 
+#include <sockets_lwip.h>
+
 void ERR_print_errors_fp();
 
 X509* ssl_parse_certificate(void* pCert, size_t certLen, const char* pwd, EVP_PKEY** privateKey);
