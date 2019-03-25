@@ -58,16 +58,17 @@ bool HAL_CONTINUATION::Dequeue_And_Execute()
         return FALSE;
     }
     
-    //SystemState_SetNoLock( SYSTEM_STATE_NO_CONTINUATIONS );
+    SystemState_SetNoLock( SYSTEM_STATE_NO_CONTINUATIONS );
 
     HAL_CALLBACK call = ptr->Callback;
 
     GLOBAL_UNLOCK(irq);
 
     call.Execute();
-    //irq.Acquire();
 
-    //SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS );   // nestable
+    GLOBAL_LOCK(irq);
+
+    SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS );   // nestable
 
     GLOBAL_UNLOCK(irq);
     return TRUE;
