@@ -361,14 +361,11 @@ uint8_t GetSecurityType(AuthenticationType authentication)
     }
 }
 
-// Stores the configuration block to the configuration flash sector
-// NOTE: because inserting or removing a configuration block it's very 'RAM expensive' we choose not to support those operations
-// the host debugger will have to be used to manage these operations on the device configuration collection 
+// Stores the configuration block to the file system 
 bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset)
 {
-    // ByteAddress storageAddress = 0;
-    // bool requiresEnumeration = FALSE;
-    bool success = FALSE;
+    bool requiresEnumeration = false;
+    bool success = false;
 
     unsigned char* fileName = NULL;
 
@@ -415,7 +412,8 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
                 else
                 {
                     // configuration stored
-                    success = TRUE;
+                    success = true;
+                    requiresEnumeration = true;
                 }
             }
         }
@@ -443,8 +441,14 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
 
         // done
         success = true;
+        requiresEnumeration = true;
     }
-
+    else if(configuration == DeviceConfigurationOption_X509CaRootBundle)
+    {
+        // CA root certificate bundle is stored as a file /sys/certstore.lst
+        // currently we don't support updating this
+        success = false;
+    }
 
     // if(configuration == DeviceConfigurationOption_Network)
     // {
@@ -524,19 +528,16 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
     //     }
     // }
 
-    // // copy the config block content to the config block storage
-    // success = STM32FlashDriver_Write(NULL, storageAddress, blockSize, (unsigned char*)configurationBlock, true);
+    if(success == true && requiresEnumeration)
+    {
+        // free the current allocation(s)
+        platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
+        platform_free(g_TargetConfiguration.Wireless80211Configs);
+        platform_free(g_TargetConfiguration.CertificateStore);
 
-    // if(success == TRUE && requiresEnumeration)
-    // {
-    //     // free the current allocation(s)
-    //     platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
-    //     platform_free(g_TargetConfiguration.Wireless80211Configs);
-    //     platform_free(g_TargetConfiguration.CertificateStore);
-
-    //     // perform enumeration of configuration blocks
-    //     ConfigurationManager_EnumerateConfigurationBlocks();
-    // }
+        // perform enumeration of configuration blocks
+        ConfigurationManager_EnumerateConfigurationBlocks();
+    }
 
     return success;
 }
