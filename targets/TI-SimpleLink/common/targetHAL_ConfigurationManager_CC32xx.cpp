@@ -465,84 +465,6 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
         success = false;
     }
 
-    // if(configuration == DeviceConfigurationOption_Network)
-    // {
-    //     if( g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 ||
-    //         (configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
-    //     {
-    //         // there is no room for this block, or there are no blocks stored at all
-    //         // failing the operation
-    //         return FALSE;
-    //     }
-
-    //     // set storage address from block address, plus the requested offset
-    //     storageAddress = (ByteAddress)g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configurationIndex] + offset;
-
-    //     // set block size, in case it's not already set
-    //     blockSize = sizeof(HAL_Configuration_NetworkInterface);
-
-    //     // make sure the config block marker is set
-    //     memcpy(configurationBlock, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1)); 
-    
-    //     _ASSERTE(((HAL_Configuration_NetworkInterface*)configurationBlock)->StartupAddressMode > 0);
-    // }
-    // else if(configuration == DeviceConfigurationOption_Wireless80211Network)
-    // {
-    //     if( g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
-    //         (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
-    //     {
-    //         // there is no room for this block, or there are no blocks stored at all
-    //         // failing the operation
-    //         return FALSE;
-    //     }
-
-    //     // set storage address from block address, plus the requested offset
-    //     storageAddress = (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex] + offset;
-
-    //     // set block size, in case it's not already set
-    //     blockSize = sizeof(HAL_Configuration_Wireless80211);
-
-    //     // make sure the config block marker is set
-    //     memcpy(configurationBlock, c_MARKER_CONFIGURATION_WIRELESS80211_V1, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));        
-    // }
-    // else if(configuration == DeviceConfigurationOption_X509CaRootBundle)
-    // {
-    //     if( g_TargetConfiguration.CertificateStore->Count == 0 ||
-    //         (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
-    //     {
-    //         // there is no room for this block, or there are no blocks stored at all
-    //         // failing the operation
-    //         return FALSE;
-    //     }
-
-    //     // set storage address from block address, plus the requested offset
-    //     storageAddress = (ByteAddress)g_TargetConfiguration.CertificateStore->Certificates[configurationIndex] + offset;
-
-    //     // set block size, in case it's not already set
-    //     // because X509 certificate has a variable length need to compute the block size in two steps
-    //     blockSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-    //     blockSize += ((HAL_Configuration_X509CaRootBundle*)configurationBlock)->CertificateSize;
-
-    //     // make sure the config block marker is set
-    //     memcpy(configurationBlock, c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1, sizeof(c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1));        
-    // }
-    // else if(configuration == DeviceConfigurationOption_All)
-    // {
-    //     // particular situation where we are receiving the full configuration block
-
-    //     // set storage address as the start of the flash configuration sector, plus the requested offset
-    //     storageAddress = (ByteAddress)&__nanoConfig_start__ + offset;
-
-    //     // always enumerate the blocks again after storing it
-    //     requiresEnumeration = TRUE;
-
-    //     // for save all the block size has to be provided, check that 
-    //     if(blockSize == 0)
-    //     {
-    //         return FALSE;
-    //     }
-    // }
-
     if(success == true && requiresEnumeration)
     {
         // free the current allocation(s)
@@ -560,96 +482,20 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
 // Updates a configuration block
 bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex)
 {
-    // ByteAddress storageAddress;
-    // uint32_t blockOffset;
-    // uint8_t* blockAddressInCopy;
-    // uint32_t blockSize;
-    bool success = FALSE;
+    // CC32xx stores the config blocks on the file system so we don't care about sizes
 
-    // // config sector size
-    // int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
+    switch(configuration)
+    {
+        case DeviceConfigurationOption_Network:
+        case DeviceConfigurationOption_Wireless80211Network:
+            return ConfigurationManager_StoreConfigurationBlock(configurationBlock, configuration, configurationIndex, 0, 0);    
 
-    // // allocate memory from CRT heap
-    // uint8_t* configSectorCopy = (uint8_t*)platform_malloc(sizeOfConfigSector);
-
-    // if(configSectorCopy != NULL)
-    // {
-    //     // copy config sector from flash to RAM
-    //     memcpy(configSectorCopy, &__nanoConfig_start__, sizeOfConfigSector);
-
-    //     // find out the address for the config block to update in the configSectorCopy
-    //     // because we are copying back the config block to flash and just replacing the config block content
-    //     // the addresses in g_TargetConfiguration will remain the same
-    //     // plus we can calculate the offset of the config block from g_TargetConfiguration
-    //     if(configuration == DeviceConfigurationOption_Network)
-    //     {
-    //         // get storage address from block address
-    //         storageAddress = (ByteAddress)g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configurationIndex];
-
-    //         // set block size, in case it's not already set
-    //         blockSize = sizeof(HAL_Configuration_NetworkInterface);
-                
-    //         // make sure the config block marker is set
-    //         memcpy(configurationBlock, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
-
-    //         _ASSERTE(((HAL_Configuration_NetworkInterface*)configurationBlock)->StartupAddressMode > 0);
-    //     }
-    //     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
-    //     {
-    //         // storage address from block address
-    //         storageAddress = (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex];
-
-    //         // set block size, in case it's not already set
-    //         blockSize = sizeof(HAL_Configuration_Wireless80211);
-
-    //         // make sure the config block marker is set
-    //         memcpy(configurationBlock, c_MARKER_CONFIGURATION_WIRELESS80211_V1, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
-    //     }
-    //     else if(configuration == DeviceConfigurationOption_X509CaRootBundle)
-    //     {
-    //         // storage address from block address
-    //         storageAddress = (ByteAddress)g_TargetConfiguration.CertificateStore->Certificates[configurationIndex];
-
-    //         // set block size, in case it's not already set
-    //         // because X509 certificate has a variable length need to compute the block size in two steps
-    //         blockSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-    //         blockSize += ((HAL_Configuration_X509CaRootBundle*)configurationBlock)->CertificateSize;
-
-    //         // make sure the config block marker is set
-    //         memcpy(configurationBlock, c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1, sizeof(c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1));
-    //     }
-    //     else
-    //     {
-    //         // this not a valid configuration option to update, quit
-    //         // free memory first
-    //         platform_free(configSectorCopy);
-
-    //         return FALSE;
-    //     }
-    
-    //     // erase config sector
-    //     if(STM32FlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
-    //     {
-    //         // flash block is erased
-
-    //         // subtract the start address of config sector to get the offset
-    //         blockOffset = storageAddress - (uint32_t)&__nanoConfig_start__;
-
-    //         // set pointer to block to udpate
-    //         blockAddressInCopy = configSectorCopy + blockOffset;
-            
-    //         // replace config block with new content by replacing memory
-    //         memcpy(blockAddressInCopy, configSectorCopy, blockSize);
-
-    //         // copy the config block copy back to the config block storage
-    //         success = STM32FlashDriver_Write(NULL, (uint32_t)&__nanoConfig_start__, sizeOfConfigSector, (unsigned char*)configSectorCopy, true);
-    //     }
-
-    //     // free memory
-    //     platform_free(configSectorCopy);
-    // }
-
-    return success;
+        // this configuration option is not supported
+        case DeviceConfigurationOption_X509CaRootBundle:
+        default:
+            // shouldn't ever reach here
+            return FALSE;
+    }
 }
 
 //  Default initialisation for wireless config block
