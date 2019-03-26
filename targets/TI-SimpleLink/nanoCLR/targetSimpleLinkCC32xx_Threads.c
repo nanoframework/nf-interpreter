@@ -697,6 +697,13 @@ void * mainThread(void *arg)
         return(NULL);
     }
 
+    // need to setup the network interface to enable IPv6 otherwise there are errors in socket 
+    // when IPv6 addresses are brought in (for example on a response to a DNS query)
+    // this can probably go away when support for IPv6 is official
+    uint32_t ifBitmap = 0;
+    ifBitmap = SL_NETCFG_IF_IPV6_LOCAL_STATEFUL | SL_NETCFG_IF_IPV6_GLOBAL_STATEFUL;
+    sl_NetCfgSet(SL_NETCFG_IF, SL_NETCFG_IF_STATE, sizeof(ifBitmap), &ifBitmap);
+
     // start network processor
     retc = sl_Start(NULL, NULL, NULL);
     if(retc >= 0)
