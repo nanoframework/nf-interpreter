@@ -120,6 +120,21 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
     // find network configuration blocks
     HAL_CONFIGURATION_NETWORK* networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks();
 
+    // check network configs count
+    if(networkConfigs->Count == 0)
+    {
+        // there is no network config block available, get a default
+        HAL_Configuration_NetworkInterface* networkConfig = (HAL_Configuration_NetworkInterface*)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
+        InitialiseNetworkDefaultConfig(networkConfig, 0);
+        
+        // store it
+        ConfigurationManager_StoreConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0, sizeof(HAL_Configuration_NetworkInterface), 0);
+        platform_free(networkConfig);
+
+        // have to enumerate again to pick it up
+        networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks();
+    }
+
     // find wireless 80211 network configuration blocks
     HAL_CONFIGURATION_NETWORK_WIRELESS80211* networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211*)ConfigurationManagerCC32xx_FindNetworkWireless80211ConfigurationBlocks();
 
