@@ -43,8 +43,6 @@ extern void sntp_init(void);
 
 //////////////////////////////
 #define SL_STOP_TIMEOUT         (200)
-#define APPLICATION_NAME        "out of box"
-#define APPLICATION_VERSION     "1.00.00.09"
 
 #define SPAWN_TASK_PRIORITY                 (9)
 #define TASK_STACK_SIZE                     (2048)
@@ -727,9 +725,6 @@ void * mainThread(void *arg)
     else if((retc < 0) && (retc != SL_ERROR_RESTORE_IMAGE_COMPLETE))
     {
         // Handle Error
-        // //UART_PRINT("\n sl_Start failed\n");
-        // //UART_PRINT("\n %s Example Ver. %s\n",APPLICATION_NAME,
-        //            APPLICATION_VERSION);
         HAL_AssertEx();
         while(1)
         {
