@@ -1,11 +1,11 @@
 //
 // Copyright (c) 2017 The nanoFramework project contributors
-// Portions Copyright (c) 2006..2015 Giovanni Di Sirio.  All rights reserved.
+// Portions Copyright (c) 2006..2015 Giovanni Di Sirio. All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
 /**
- * @file    templates/chconf.h
+ * @file    rt/templates/chconf.h
  * @brief   Configuration file template.
  * @details A copy of this file must be placed in each project directory, it
  *          contains the application specific kernel settings.
@@ -19,7 +19,7 @@
 #define CHCONF_H
 
 #define _CHIBIOS_RT_CONF_
-#define _CHIBIOS_RT_CONF_VER_5_1_
+#define _CHIBIOS_RT_CONF_VER_6_0_
 
 /*===========================================================================*/
 /**
@@ -216,7 +216,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_MUTEXES)
-#define CH_CFG_USE_MUTEXES                  TRUE
+#define CH_CFG_USE_MUTEXES                  FALSE
 #endif
 
 /**
@@ -240,7 +240,7 @@
  * @note    Requires @p CH_CFG_USE_MUTEXES.
  */
 #if !defined(CH_CFG_USE_CONDVARS)
-#define CH_CFG_USE_CONDVARS                 TRUE
+#define CH_CFG_USE_CONDVARS                 FALSE
 #endif
 
 /**
@@ -252,7 +252,7 @@
  * @note    Requires @p CH_CFG_USE_CONDVARS.
  */
 #if !defined(CH_CFG_USE_CONDVARS_TIMEOUT)
-#define CH_CFG_USE_CONDVARS_TIMEOUT         TRUE
+#define CH_CFG_USE_CONDVARS_TIMEOUT         FALSE
 #endif
 
 /**
@@ -285,7 +285,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_MESSAGES)
-#define CH_CFG_USE_MESSAGES                 TRUE
+#define CH_CFG_USE_MESSAGES                 FALSE
 #endif
 
 /**
@@ -350,7 +350,7 @@
 #endif
 
 /**
- * @brief  Objects FIFOs APIs.
+ * @brief   Objects FIFOs APIs.
  * @details If enabled then the objects FIFOs APIs are included
  *          in the kernel.
  *
@@ -358,6 +358,17 @@
  */
 #if !defined(CH_CFG_USE_OBJ_FIFOS)
 #define CH_CFG_USE_OBJ_FIFOS                TRUE
+#endif
+
+/**
+ * @brief   Pipes APIs.
+ * @details If enabled then the pipes APIs are included
+ *          in the kernel.
+ *
+ * @note    The default is @p TRUE.
+ */
+#if !defined(CH_CFG_USE_PIPES)
+#define CH_CFG_USE_PIPES                    TRUE
 #endif
 
 /**
@@ -435,6 +446,13 @@
  */
 #if !defined(CH_CFG_FACTORY_OBJ_FIFOS)
 #define CH_CFG_FACTORY_OBJ_FIFOS            TRUE
+#endif
+
+/**
+ * @brief   Enables factory for Pipes.
+ */
+#if !defined(CH_CFG_FACTORY_PIPES) || defined(__DOXYGEN__)
+#define CH_CFG_FACTORY_PIPES                TRUE
 #endif
 
 /** @} */
@@ -568,7 +586,7 @@
  * @details User initialization code added to the @p chSysInit() function
  *          just before interrupts are enabled globally.
  */
-#define CH_CFG_SYSTEM_INIT_HOOK(tp) {                                       \
+#define CH_CFG_SYSTEM_INIT_HOOK() {                                         \
   /* Add threads initialization code here.*/                                \
 }
 
@@ -684,4 +702,3 @@
 #endif  /* CHCONF_H */
 
 /** @} */
-

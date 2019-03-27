@@ -42,7 +42,7 @@
  */
 
 // the CPU type is actually STM32L072xx, but this is not supported by ChibiOS at the moment
-#define STM32L073xx
+#define STM32L072xx
 
 /*
  * IO pins assignments.
