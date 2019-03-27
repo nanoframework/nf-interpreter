@@ -59,9 +59,7 @@ int main(void) {
 
   //  Normal main() thread
   while (true) {
-    palClearPad(GPIOB, GPIOB_LED1);
-    osDelay(500);
-    palSetPad(GPIOB, GPIOB_LED1);
+    palTogglePad(GPIOB, GPIOB_LED1);
     osDelay(500);
   }
 
