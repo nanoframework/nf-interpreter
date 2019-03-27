@@ -662,8 +662,8 @@ if(RTOS_CHIBIOS_CHECK)
 
         if(CHIBIOS_VERSION_EMPTY)
             # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_18.2.x branch
-            message(STATUS "RTOS is: CHIBIOS (latest available code from stable_18.2.x)")
-            set(CHIBIOS_GIT_TAG "stable_18.2.x")
+            message(STATUS "RTOS is: CHIBIOS (latest available code from stable_19.1.x)")
+            set(CHIBIOS_GIT_TAG "stable_19.1.x")
         else()
             message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
 
@@ -700,7 +700,7 @@ if(RTOS_CHIBIOS_CHECK)
             ChibiOS
             PREFIX ChibiOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
-            GIT_REPOSITORY  https://github.com/nanoframework/ChibiOS
+            GIT_REPOSITORY  https://github.com/nanoframework/chibios
             GIT_TAG ${CHIBIOS_GIT_TAG}  # target specified branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
