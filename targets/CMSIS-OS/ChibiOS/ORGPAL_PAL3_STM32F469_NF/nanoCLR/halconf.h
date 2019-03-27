@@ -42,9 +42,10 @@
 /**
  * @brief   Enables the CAN subsystem.
  */
-#if !defined(HAL_USE_CAN) || defined(__DOXYGEN__)
-#define HAL_USE_CAN                         FALSE
-#endif
+// this option is set at target_platform.h (from config file)
+// #if !defined(HAL_USE_CAN) || defined(__DOXYGEN__)
+// #define HAL_USE_CAN                         FALSE
+// #endif
 
 /**
  * @brief   Enables the cryptographic subsystem.
@@ -183,6 +184,7 @@
 /**
  * @brief   Enables the WDG subsystem.
  */
+
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_WDG) || defined(__DOXYGEN__)
 // #define HAL_USE_WDG                         FALSE
@@ -243,7 +245,7 @@
  * @brief   Enforces the driver to use direct callbacks rather than OSAL events.
  */
 #if !defined(CAN_ENFORCE_USE_CALLBACKS) || defined(__DOXYGEN__)
-#define CAN_ENFORCE_USE_CALLBACKS           FALSE
+#define CAN_ENFORCE_USE_CALLBACKS           TRUE
 #endif
 
 /*===========================================================================*/
