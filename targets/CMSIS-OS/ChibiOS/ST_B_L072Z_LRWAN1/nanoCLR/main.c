@@ -57,9 +57,7 @@ int main(void) {
   osKernelStart();
 
   while (true) {
-    palClearPad(GPIOB, GPIOB_LED3);
-    osDelay(250);
-    palSetPad(GPIOB, GPIOB_LED3);
+    palTogglePad(GPIOB, GPIOB_LED3);
     osDelay(250);
   }
 }
