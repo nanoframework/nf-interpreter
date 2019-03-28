@@ -45,7 +45,7 @@
 ///////////
 
 // enable UART7
-#define NF_SERIAL_COMM_STM32_UART_USE_UART7    FALSE
+#define NF_SERIAL_COMM_STM32_UART_USE_UART7    TRUE
 
 // buffers size
 #define UART7_TX_SIZE  256
