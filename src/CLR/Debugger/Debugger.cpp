@@ -597,8 +597,14 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
                         break;
 
                     case AccessMemory_Erase:
-                        if (!BlockStorageDevice_IsBlockErased(m_deploymentStorageDevice, accessAddress, NumOfBytes))
+                        if (BlockStorageDevice_IsBlockErased(m_deploymentStorageDevice, accessAddress, NumOfBytes))
                         {
+                            // block is erased, we are good
+                            success = true;
+                        }
+                        else
+                        {
+                            // need to erase block
                             success = BlockStorageDevice_EraseBlock(m_deploymentStorageDevice, accessAddress);
                         }
                         break;

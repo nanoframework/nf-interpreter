@@ -24,7 +24,6 @@ static void NextEventTimer_Callback( void* arg )
 HRESULT Time_Initialize()
 {
     // need to setup the timer at boot, but stoped
-    chVTObjectInit(&nextEventTimer);
     chVTSet(&nextEventTimer, TIME_INFINITE, NextEventTimer_Callback, nextEventCallbackDummyArg);
 
     return S_OK;

@@ -13,19 +13,19 @@
 const BlockRange BlockRange1[] =
 {
     // factory
-    { BlockRange_BLOCKTYPE_CODE      ,   1, 15 },            // 0x010000   nanoCLR
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 1 },             // 0x010000   nanoCLR
 };
 
 const BlockRange BlockRange2[] =
 {
     // deploy
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 5 },             // 0x110000   deployment  
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 0 },             // 0x110000   deployment  
 };
 
 const BlockRange BlockRange3[] =
 {
     // config
-    { BlockRange_BLOCKTYPE_CONFIG    ,   0, 1 }             // 0x2D0000   config
+    { BlockRange_BLOCKTYPE_CONFIG    ,   0, 0 }              // 0x2D0000   config
 };
 
 const BlockRegionInfo BlockRegions[] = 
@@ -33,8 +33,8 @@ const BlockRegionInfo BlockRegions[] =
     {
         (0),                                // no attributes for this region
         0x010000,                           // start address for block region
-        16,                                 // total number of blocks in this region
-        0x10000,  //  64K                   // total number of bytes per block
+        1,                                  // total number of blocks in this region
+        0x100000,                           // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
     },
@@ -42,8 +42,8 @@ const BlockRegionInfo BlockRegions[] =
     {
         (BlockRegionAttribute_MemoryMapped),    // this region is memory mapped
         0x110000,                               // start address for block region
-        6,                                      // total number of blocks in this region
-        0x10000,  //  64K                       // total number of bytes per block
+        1,                                      // total number of blocks in this region
+        0x70000,                                // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange2),
         BlockRange2,
     },
@@ -51,8 +51,8 @@ const BlockRegionInfo BlockRegions[] =
     {
         (0),                                // no attributes for this region
         0x0,                                // start address for block region
-        2,                                  // total number of blocks in this region
-        0x10000,  //  64K                   // total number of bytes per block
+        1,                                  // total number of blocks in this region
+        0x10000,                            // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange3),
         BlockRange3,
     }

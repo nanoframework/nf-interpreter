@@ -9,7 +9,6 @@
 
 #include <ssl_types.h>
 #include <ssl_functions.h>
-#include <sockets_lwip.h>
 
 struct SSL_Driver
 {
