@@ -11,7 +11,7 @@
 
 // better have a startup delay because we can have DHCP enabled (default 30 seconds)
 // value in milliseconds
-#define SNTP_STARTUP_DELAY      30000
+#define SNTP_STARTUP_DELAY      5*1000
 
 // retry timeout (15 minutes)
 // value in milliseconds
