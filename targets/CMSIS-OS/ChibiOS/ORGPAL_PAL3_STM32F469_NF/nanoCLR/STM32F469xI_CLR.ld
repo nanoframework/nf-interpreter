@@ -55,23 +55,50 @@ REGION_ALIAS("RAM_INIT_FLASH_LMA", flash);
 
 /* RAM region to be used for Main stack. This stack accommodates the processing
    of all exceptions and interrupts.*/
-REGION_ALIAS("MAIN_STACK_RAM", ram0);
+REGION_ALIAS("MAIN_STACK_RAM", ram4);
 
 /* RAM region to be used for the process stack. This is the stack used by
    the main() function.*/
-REGION_ALIAS("PROCESS_STACK_RAM", ram0);
+REGION_ALIAS("PROCESS_STACK_RAM", ram4);
 
 /* RAM region to be used for data segment.*/
-REGION_ALIAS("DATA_RAM", ram0);
+REGION_ALIAS("DATA_RAM", ram3);
 REGION_ALIAS("DATA_RAM_LMA", flash);
 
 /* RAM region to be used for BSS segment.*/
-REGION_ALIAS("BSS_RAM", ram0);
+REGION_ALIAS("BSS_RAM", ram3);
 
 /* RAM region to be used for the default heap.*/
-REGION_ALIAS("HEAP_RAM", ram4);
+REGION_ALIAS("HEAP_RAM", ram0);
 
 /* RAM region to be used for the nanoFramework CLR managed heap.*/
 REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ext_ram);
 
-INCLUDE rules.ld
+/* rules inclusion.*/
+INCLUDE rules_stacks.ld
+
+/* RAM region to be used for eth segment.*/
+REGION_ALIAS("ETH_RAM", ram4);
+
+SECTIONS
+{
+    /* Special section for Ethernet DMA non cache-able areas.*/
+    .eth (NOLOAD) : ALIGN(4)
+    {
+        __eth_base__ = .;
+        *(.eth)
+        *(.eth.*)
+        *(.bss.__eth_*)
+        . = ALIGN(4);
+        __eth_end__ = .;
+    } > ETH_RAM
+}
+
+/* Code rules inclusion.*/
+INCLUDE rules_code.ld
+
+/* Data rules inclusion.*/
+INCLUDE rules_data.ld
+
+/* nanoCLR rules inclusion.*/
+INCLUDE rules_clr.ld
