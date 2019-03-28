@@ -81,9 +81,9 @@ int main(void) {
 
   //  Normal main() thread
   while (true) {
-      palSetLine(LINE_LED2_GREEN);
+      palSetLine(LINE_LED2);
       osDelay(500);
-      palClearLine(LINE_LED2_GREEN);
+      palClearLine(LINE_LED2);
       osDelay(500);   
   }
 }
