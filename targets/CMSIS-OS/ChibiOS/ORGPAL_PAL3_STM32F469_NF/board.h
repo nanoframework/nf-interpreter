@@ -1210,7 +1210,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_PUPDR_PULLUP(GPIOG_IO0_P13_IO) |         \
                                      PIN_PUPDR_PULLUP(GPIOG_IO0_P19_IO) |     \
                                      PIN_PUPDR_FLOATING(GPIOG_RMII_TX_EN) |     \
-                                     PIN_PUPDR_PULLUP(GPIOG_RMII_RST) |     \
+                                     PIN_PUPDR_PULLDOWN(GPIOG_RMII_RST) |     \
                                      PIN_PUPDR_FLOATING(GPIOG_RMII_TXD0) |  \
                                      PIN_PUPDR_FLOATING(GPIOG_RMII_TXD1) |  \
                                      PIN_PUPDR_FLOATING(GPIOG_FMC_SDNCAS))
