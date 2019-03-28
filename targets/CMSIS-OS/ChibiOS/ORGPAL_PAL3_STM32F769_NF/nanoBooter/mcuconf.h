@@ -22,6 +22,7 @@
  */
 
 #define STM32F7xx_MCUCONF
+#define STM32F769_MCUCONF
 
 /*
  * HAL driver system settings.
@@ -364,8 +365,8 @@
 /*
  * USB driver system settings.
  */
-#define STM32_USB_USE_OTG1                  FALSE
-#define STM32_USB_USE_OTG2                  TRUE
+#define STM32_USB_USE_OTG1                  TRUE
+#define STM32_USB_USE_OTG2                  FALSE
 #define STM32_USB_OTG1_IRQ_PRIORITY         14
 #define STM32_USB_OTG2_IRQ_PRIORITY         14
 #define STM32_USB_OTG1_RX_FIFO_SIZE         512
@@ -378,5 +379,8 @@
  * WDG driver system settings.
  */
 #define STM32_WDG_USE_IWDG                  FALSE
+
+// header for nanoFramework overlay drivers
+#include "mcuconf_nf.h"
 
 #endif /* MCUCONF_H */

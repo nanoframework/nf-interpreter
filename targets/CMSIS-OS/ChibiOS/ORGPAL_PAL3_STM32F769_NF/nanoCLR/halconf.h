@@ -19,7 +19,7 @@
 #define HALCONF_H
 
 #define _CHIBIOS_HAL_CONF_
-#define _CHIBIOS_HAL_CONF_VER_6_0_
+#define _CHIBIOS_HAL_CONF_VER_7_0_
 
 #include <target_platform.h>
 #include "mcuconf.h"
@@ -36,15 +36,16 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_ADC) || defined(__DOXYGEN__)
-// #define HAL_USE_ADC                          FALSE
+// #define HAL_USE_ADC                         FALSE
 // #endif
 
 /**
  * @brief   Enables the CAN subsystem.
  */
-#if !defined(HAL_USE_CAN) || defined(__DOXYGEN__)
-#define HAL_USE_CAN                         FALSE
-#endif
+// this option is set at target_platform.h (from config file)
+// #if !defined(HAL_USE_CAN) || defined(__DOXYGEN__)
+// #define HAL_USE_CAN                         FALSE
+// #endif
 
 /**
  * @brief   Enables the cryptographic subsystem.
@@ -61,14 +62,6 @@
 #endif
 
 /**
- * @brief   Enables the EXT subsystem.
- */
-// this option is set at target_platform.h (from config file)
-// #if !defined(HAL_USE_EXT) || defined(__DOXYGEN__)
-// #define HAL_USE_EXT                          FALSE
-// #endif
-
-/**
  * @brief   Enables the GPT subsystem.
  */
 #if !defined(HAL_USE_GPT) || defined(__DOXYGEN__)
@@ -80,7 +73,7 @@
  */
 // this option is set at target_platform.h (from config file)
 //#if !defined(HAL_USE_I2C) || defined(__DOXYGEN__)
-//#define HAL_USE_I2C                       TRUE
+//#define HAL_USE_I2C                          TRUE
 //#endif
 
 /**
@@ -117,7 +110,7 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_PWM) || defined(__DOXYGEN__)
-// #define HAL_USE_PWM                          FALSE
+// #define HAL_USE_PWM                         FALSE
 // #endif
 
 /**
@@ -158,12 +151,27 @@
 #endif
 
 /**
+ * @brief   Enables the SIO subsystem.
+ */
+#if !defined(HAL_USE_SIO) || defined(__DOXYGEN__)
+#define HAL_USE_SIO                         FALSE
+#endif
+
+
+/**
  * @brief   Enables the SPI subsystem.
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_SPI) || defined(__DOXYGEN__)
 // #define HAL_USE_SPI                          FALSE
 // #endif
+
+/**
+ * @brief   Enables the TRNG subsystem.
+ */
+#if !defined(HAL_USE_TRNG) || defined(__DOXYGEN__)
+#define HAL_USE_TRNG                        FALSE
+#endif
 
 /**
  * @brief   Enables the UART subsystem.
@@ -482,6 +490,22 @@
 #define SPI_SELECT_MODE                     SPI_SELECT_MODE_PAD
 #endif
 
+/**
+ * @brief   Handling method for SPI CS line.
+ * @note    Disabling this option saves both code and data space.
+ */
+#if !defined(SPI_SELECT_MODE) || defined(__DOXYGEN__)
+#define SPI_SELECT_MODE                     SPI_SELECT_MODE_PAD
+#endif
+
+/**
+ * @brief   Handling method for SPI CS line.
+ * @note    Disabling this option saves both code and data space.
+ */
+#if !defined(SPI_SELECT_MODE) || defined(__DOXYGEN__)
+#define SPI_SELECT_MODE                     SPI_SELECT_MODE_PAD
+#endif
+
 /*===========================================================================*/
 /* UART driver related settings.                                             */
 /*===========================================================================*/
@@ -514,8 +538,31 @@
 #define USB_USE_WAIT                        FALSE
 #endif
 
+/*===========================================================================*/
+/* WSPI driver related settings.                                             */
+/*===========================================================================*/
+
+/**
+ * @brief   Enables synchronous APIs.
+ * @note    Disabling this option saves both code and data space.
+ */
+#if !defined(WSPI_USE_WAIT) || defined(__DOXYGEN__)
+#define WSPI_USE_WAIT                       TRUE
+#endif
+
+/**
+ * @brief   Enables the @p wspiAcquireBus() and @p wspiReleaseBus() APIs.
+ * @note    Disabling this option saves both code and data space.
+ */
+#if !defined(WSPI_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
+#define WSPI_USE_MUTUAL_EXCLUSION           TRUE
+#endif
+
+
 // header for nanoFramework overlay
 #include "halconf_nf.h"
+#include "halconf_community.h"
+
 #endif /* HALCONF_H */
 
 /** @} */

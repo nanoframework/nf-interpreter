@@ -221,7 +221,7 @@ bool sdc_lld_is_card_inserted(SDCDriver *sdcp) {
 
   (void)sdcp;
 
-  return !palReadLine(LINE_SD_DETECT);
+  return !palReadLine(LINE_SD_CARD_DETECT);
 }
 
 /**
