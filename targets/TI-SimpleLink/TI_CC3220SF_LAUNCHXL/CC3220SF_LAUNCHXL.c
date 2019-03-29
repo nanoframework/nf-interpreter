@@ -18,6 +18,7 @@
 #include <ti/devices/cc32xx/driverlib/rom.h>
 #include <ti/devices/cc32xx/driverlib/rom_map.h>
 #include <ti/devices/cc32xx/driverlib/adc.h>
+#include <ti/devices/cc32xx/driverlib/crc.h>
 #include <ti/devices/cc32xx/driverlib/gpio.h>
 #include <ti/devices/cc32xx/driverlib/pin.h>
 #include <ti/devices/cc32xx/driverlib/prcm.h>
@@ -170,6 +171,12 @@ void CC3220SF_LAUNCHXL_initGeneral(void)
 {
     PRCMCC3200MCUInit();
     Power_init();
+
+    // enable clock on the DTHE
+    MAP_PRCMPeripheralClkEnable(PRCM_DTHE, PRCM_RUN_MODE_CLK);
+
+    // init CRC engine
+    MAP_CRCConfigSet(DTHE_BASE, (CRC_CFG_INIT_SEED | CRC_CFG_SIZE_8BIT | CRC_CFG_TYPE_P4C11DB7) );
 
     // Mux Pin62 to mode 1 for outputing NWP logs
     //MAP_PinTypeUART(PIN_62, PIN_MODE_1);
