@@ -139,7 +139,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
     }
 
     // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
-    hbTimeout.SetInteger( (CLR_INT64)timeout_ms );
+    hbTimeout.SetInteger( (CLR_INT64)timeout_ms * TIME_CONVERSION__TO_MILLISECONDS );
         
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
@@ -339,7 +339,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::ReadWriteHelper( C
     FAULT_ON_NULL(arrData);
 
     // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
-    hbTimeout.SetInteger( (CLR_INT64)timeout_ms );
+    hbTimeout.SetInteger( (CLR_INT64)timeout_ms * TIME_CONVERSION__TO_MILLISECONDS );
       
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
