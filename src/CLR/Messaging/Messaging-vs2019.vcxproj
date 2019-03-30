@@ -22,7 +22,7 @@
     <ClCompile Include="Messaging.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WireProtocol\WireProtocol.vcxproj">
+    <ProjectReference Include="..\WireProtocol\WireProtocol-vs2019.vcxproj">
       <Project>{2337c4a4-3ab4-4014-9c29-9ebe32f4510e}</Project>
       <Private>false</Private>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
