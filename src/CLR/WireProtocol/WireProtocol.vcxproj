@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="targetHAL_time.cpp" />
     <ClCompile Include="WireProtocol_App_Interface.c" />
     <ClCompile Include="WireProtocol_HAL_Interface.c" />
     <ClCompile Include="WireProtocol_Message.c" />

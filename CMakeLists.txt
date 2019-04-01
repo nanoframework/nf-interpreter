@@ -333,6 +333,51 @@ else()
 endif()
 
 #################################################################
+# enables support for SD Card
+# (default is OFF so SD Card is NOT supported)
+option(NF_FEATURE_HAS_SDCARD "option to enable USB Mass Storage")
+
+if(NF_FEATURE_HAS_SDCARD)
+
+    # this feature currently is supported only on ChibiOS
+    if(NOT RTOS_CHIBIOS_CHECK)
+        message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M targets.")
+    endif()
+
+    # force inclusion of Windows.Storage API
+    set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
+
+    message(STATUS "Support for SD Card is included")
+else()
+    message(STATUS "Support for SD Card IS NOT included")
+endif()
+
+#################################################################
+
+#################################################################
+# enables USB Mass Storage support
+# (default is OFF so USB Mass Storage is NOT supported)
+option(NF_FEATURE_HAS_USB_MSD "option to enable USB Mass Storage")
+
+if(NF_FEATURE_HAS_USB_MSD)
+
+    # this feature currently is supported only on ChibiOS
+    if(NOT RTOS_CHIBIOS_CHECK)
+        message(FATAL_ERROR "Support for USB Mass Storage is only available for ChibiOS Cortex-M targets.")
+    endif()
+
+    # this feature requires inclusion of ChibiOS contribution repository
+    set(CHIBIOS_CONTRIB_REQUIRED ON CACHE INTERNAL "Forcing ChibiOS contribution repo option to ON")
+
+    # force inclusion of Windows.Storage API
+    set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
+
+    message(STATUS "Support for USB Mass Storage is included")
+else()
+    message(STATUS "Support for USB Mass Storage IS NOT included")
+endif()
+
+#################################################################
 
 if(RTOS_CHIBIOS_CHECK)
 
@@ -476,6 +521,17 @@ else()
     set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
 endif()
 
+if(NF_FEATURE_HAS_SDCARD)
+    set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_HAS_SDCARD")
+else()
+    set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for NF_FEATURE_HAS_SDCARD")
+endif()
+
+if(NF_FEATURE_HAS_USB_MSD)
+    set(HAL_USBH_USE_MSDC_OPTION TRUE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
+else()
+    set(HAL_USBH_USE_MSDC_OPTION FALSE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
+endif()
 
 #################################################################
 # manage dependent APIs required for some API namespaces
@@ -518,6 +574,13 @@ if(USE_NETWORKING_OPTION)
         message(STATUS "Support for networking enabled WITHOUT security")
     endif()
 
+    # sanity check for missing configuration block option
+    # which is required for network
+
+    if(NOT NF_FEATURE_HAS_CONFIG_BLOCK)
+        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that on your cmake-variants or in the build command line.")
+    endif()
+
 else()
     set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
     message(STATUS "Support for networking IS NOT enabled")
@@ -529,13 +592,10 @@ endif()
 #################################################################
 # enables filesysytem support in nanoCLR
 
-if(API_Windows.Storage)
+if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     set(USE_FILESYSTEM_OPTION TRUE CACHE INTERNAL "NF feature FILESYSTEM")
-    set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for USE_FILESYSTEM_OPTION")
-    message(STATUS "Support for filesystem enabled")
 else()
     set(USE_FILESYSTEM_OPTION FALSE CACHE INTERNAL "NF feature FILESYSTEM")
-    set(HAL_USE_SDC_OPTION FALSE CACHE INTERNAL "HAL SDC for USE_FILESYSTEM_OPTION")
 endif()
 
 #################################################################
@@ -616,8 +676,8 @@ if(RTOS_CHIBIOS_CHECK)
 
         if(CHIBIOS_VERSION_EMPTY)
             # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_18.2.x branch
-            message(STATUS "RTOS is: CHIBIOS (latest available code from stable_18.2.x)")
-            set(CHIBIOS_GIT_TAG "stable_18.2.x")
+            message(STATUS "RTOS is: CHIBIOS (latest available code from stable_19.1.x)")
+            set(CHIBIOS_GIT_TAG "stable_19.1.x")
         else()
             message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
 
@@ -654,7 +714,7 @@ if(RTOS_CHIBIOS_CHECK)
             ChibiOS
             PREFIX ChibiOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
-            GIT_REPOSITORY  https://github.com/nanoframework/ChibiOS
+            GIT_REPOSITORY  https://github.com/nanoframework/chibios
             GIT_TAG ${CHIBIOS_GIT_TAG}  # target specified branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
@@ -746,11 +806,13 @@ if(RTOS_CHIBIOS_CHECK)
                             WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download")
 
             # add ChibiOS-Contrib as external project
+            # need to specify nanoframework as the active branch
             ExternalProject_Add( 
                 ChibiOS-Contrib
                 PREFIX ChibiOS-Contrib
                 SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source
                 GIT_REPOSITORY  https://github.com/ChibiOS/ChibiOS-Contrib
+                GIT_TAG nanoframework  # target specified branch
                 GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
                 TIMEOUT 10
                 LOG_DOWNLOAD 1

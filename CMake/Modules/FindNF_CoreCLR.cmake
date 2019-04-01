@@ -172,6 +172,9 @@ set(NF_CoreCLR_SRCS
     Async_stubs.cpp
     COM_stubs.c
     GenericPort_stubs.c
+
+    # target specifics
+    target_BlockStorage.c
 )
 
 # include configuration manager file
@@ -228,6 +231,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall
             ${PROJECT_SOURCE_DIR}/src/PAL/COM
             ${PROJECT_SOURCE_DIR}/src/PAL/Profiler
+
+            # target
+            "${TARGET_BASE_LOCATION}"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

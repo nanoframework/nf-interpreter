@@ -183,7 +183,6 @@ typedef int SOCK_SOCKET;
 #define SOCK_SOCKO_SENDTIMEOUT           0x1005           // send timeout
 #define SOCK_SOCKO_RECEIVETIMEOUT        0x1006           // receive timeout
 #define SOCK_SOCKO_ERROR                 0x1007           // get error status and clear
-#define SOCK_SOCKO_TYPE                  0x1008           // get socket type
 #define SOCK_SOCKO_UPDATE_ACCEPT_CTX     0x700B           // This option updates the properties of the socket which are inherited from the listening socket.
 #define SOCK_SOCKO_UPDATE_CONNECT_CTX    0x7010           // This option updates the properties of the socket after the connection is established.
 #define SOCK_SOCKO_MAXCONNECTIONS        0x7FFFFFFF       // Maximum queue length specifiable by listen.

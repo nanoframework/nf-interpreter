@@ -8,12 +8,12 @@
             "MIMode": "gdb",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/xtensa-esp32-elf-gdb.exe",
             "stopAtEntry":true,
-            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS_ESP32/ESP32_WROOM_32/nanoCLR.elf",
+            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf",
 
             "setupCommands": [
                 {"text": "set logging on"},
                 {"text": "target extended-remote localhost:3333"},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS_ESP32/ESP32_WROOM_32/nanoCLR.elf"},
+                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
                 {"text": "monitor reset halt"},
                 {"text": "thb app_main"},
                 {"text": "x $a1=0"}
@@ -43,12 +43,12 @@
             "MIMode": "gdb",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/xtensa-esp32-elf-gdb.exe",
             "stopAtEntry":true,
-            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS_ESP32/ESP32_WROOM_32/nanoCLR.elf",
+            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf",
 
             "setupCommands": [
                 {"text": "set logging on"},
                 {"text": "target extended-remote localhost:3333"},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/targets/FreeRTOS_ESP32/ESP32_WROOM_32/nanoCLR.elf"},
+                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
                 {"text": "monitor reset halt"},
                 {"text": "thb app_main"},
                 {"text": "x $a1=0"}

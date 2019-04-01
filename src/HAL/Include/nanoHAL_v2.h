@@ -39,6 +39,7 @@ typedef enum SLEEP_LEVEL
 
 #define SYSTEM_EVENT_FLAG_COM_IN                    0x00000001
 #define SYSTEM_EVENT_FLAG_COM_OUT                   0x00000002
+#define SYSTEM_EVENT_FLAG_STORAGE_IO                0x00000004
 #define SYSTEM_EVENT_FLAG_SYSTEM_TIMER              0x00000010
 //#define SYSTEM_EVENT_FLAG_TIMER1                    0x00000020
 //#define SYSTEM_EVENT_FLAG_TIMER2                    0x00000040
@@ -74,6 +75,23 @@ typedef enum SLEEP_LEVEL
 #define SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY        0x40000000
 //#define SYSTEM_EVENT_FLAG_UNUSED_0x80000000         0x80000000
 #define SYSTEM_EVENT_FLAG_ALL                       0xFFFFFFFF
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Runtime.Events.EventCategory (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#define EVENT_UNKNOWN     0
+#define EVENT_CUSTOM      10
+#define EVENT_GPIO        20
+#define EVENT_SERIAL      30
+#define EVENT_NETWORK     40
+#define EVENT_WIFI        50
+#define EVENT_CAN         60
+#define EVENT_STORAGE     70
+
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // COM_HANDLE Defines a type representing both a port type or "transport" and a port number
@@ -218,7 +236,108 @@ bool SystemState_QueryNoLock( SYSTEM_STATE_type state );
 
 #define HAL_COMPLETION_IDLE_VALUE    0x0000FFFFFFFFFFFFull
 
+// provide platform dependent delay to CLR code
+#if defined(_WIN32)
+#define OS_DELAY(milliSecs);
+#else
+#define OS_DELAY(milliSecs)         PLATFORM_DELAY(milliSecs)
+#endif
+
+//--//
+// Function macros
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void HAL_Assert  ( const char* Func, int Line, const char* File );
+// HAL_AssertEx is to be defined at platform layer
+void HAL_AssertEx();
+
+#ifdef __cplusplus
+}
+#endif
+
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
+    #if !defined(BUILD_RTM)
+        #define       ASSERT(i)  { if(!(i)) HAL_AssertEx(); }
+        #define _SIDE_ASSERTE(i) { if(!(i)) HAL_AssertEx(); }
+    #endif
+#else
+    #if defined(_DEBUG)
+#if !defined _ASSERTE
+#error
+#endif
+        #define       ASSERT(i)  _ASSERTE(i)
+        #define _SIDE_ASSERTE(i) _ASSERTE(i)
+    #endif
+#endif
+
+#ifndef ASSERT
+#define ASSERT(i)
+#endif
+
+#ifndef _ASSERTE
+#define _ASSERTE(expr) ASSERT(expr)
+#endif
+
+#ifndef _SIDE_ASSERTE
+#define _SIDE_ASSERTE(expr) (expr)
+#endif
+
+#if STATIC_ASSERT_SUPPORTED
+#define CT_ASSERT_STRING( x ) #x
+#define CT_ASSERT_UNIQUE_NAME(e,name)static_assert( (e), CT_ASSERT_STRING( name ) "@" __FILE__ CT_ASSERT_STRING(__LINE__) ); 
+#define CT_ASSERT(e) static_assert( (e), __FILE__ CT_ASSERT_STRING(__LINE__) );
+#else
+// CT_ASSERT (compile-time assert) macro is used to test condition at compiler time and generate
+// compiler error if condition is bool.
+// Example: CT_ASSERT( sizeof( unsigned int ) == 2 ) would cause compilation error.
+//          CT_ASSERT( sizeof( unsigned int ) == 4 ) compiles without error.
+// Since this declaration is just typedef - it does not create any CPU code.
+//
+// Reason for CT_ASSERT_UNIQUE_NAME
+// The possible problem with the macro - it creates multiple identical typedefs.
+// It is not a problem in global scope, but if macro is used inside of struct - it generates warnings.
+// CT_ASSERT_UNIQUE_NAME is the same in essence, but it provides a way to customize the name of the type.
+#define CT_ASSERT_UNIQUE_NAME(e,name) typedef char __CT_ASSERT__##name[(e)?1:-1];
+#define CT_ASSERT(e)                  CT_ASSERT_UNIQUE_NAME(e,nanoclr)
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if !defined(BUILD_RTM)
+
+void debug_printf( const char *format, ... );
+
+#else
+
+__inline void debug_printf( const char *format, ... ) {}
+
+#endif  // !defined(BUILD_RTM)
+
+#ifdef __cplusplus
+}
+#endif
+//--//
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+bool Target_HasNanoBooter();
+void HARD_Breakpoint();
+bool Target_ConfigUpdateRequiresErase();
+
+#ifdef __cplusplus
+}
+#endif
+
 // Watchdog driver
 #include <nanoHAL_Watchdog.h>
+
+#include <nanoHAL_Windows_Storage.h>
 
 #endif // _NANOHAL_V2_H_

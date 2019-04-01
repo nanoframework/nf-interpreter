@@ -7,26 +7,33 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include "usbcfg.h"
+#include <serialcfg.h>
 #include <swo.h>
+#include <targetHAL.h>
 #include <CLR_Startup_Thread.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
-#include <Target_Windows_Storage.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-extern evhandler_t sdcardEventHandler[];
-
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here 
-osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread"); 
+osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
+
+#if HAL_USE_SDC
+// declare SD Card working thread here 
+osThreadDef(SdCardWorkingThread, osPriorityNormal, 1024, "SDCWT"); 
+#endif
+#if HAL_USBH_USE_MSD
+// declare USB MSD thread here 
+osThreadDef(UsbMsdWorkingThread, osPriorityNormal, 1024, "USBMSDWT"); 
+#endif
 
 //  Application entry point.
 int main(void) {
@@ -51,16 +58,8 @@ int main(void) {
   // this has to be called after osKernelInitialize, otherwise an hard fault will occur
   Target_ExternalMemoryInit();
 
-  //  Initializes a serial-over-USB CDC driver.
-  sduObjectInit(&SDU1);
-  sduStart(&SDU1, &serusbcfg);
-
-  // Activates the USB driver and then the USB bus pull-up on D+.
-  // Note, a delay is inserted in order to not have to disconnect the cable after a reset
-  usbDisconnectBus(serusbcfg.usbp);
-  chThdSleepMilliseconds(1500);
-  usbStart(serusbcfg.usbp, &usbcfg);
-  usbConnectBus(serusbcfg.usbp);
+  // starts the serial driver
+  sdStart(&SERIAL_DRIVER, NULL);
 
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
@@ -76,14 +75,20 @@ int main(void) {
   // create the CLR Startup thread 
   osThreadCreate(osThread(CLRStartupThread), &clrSettings);
 
+  #if HAL_USE_SDC
+  // creates the SD card working thread 
+  osThreadCreate(osThread(SdCardWorkingThread), NULL);
+  #endif
+
+  #if HAL_USBH_USE_MSD
+  // create the USB MSD working thread
+  osThreadCreate(osThread(UsbMsdWorkingThread), &MSBLKD[0]);
+  #endif
+
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
 
-  // start file system sub-system
-  Target_FileSystemInit();
-
   while (true) { 
-    //osDelay(100);
-    chEvtDispatch(sdcardEventHandler, chEvtWaitOneTimeout(ALL_EVENTS, TIME_MS2I(500)));
+    osDelay(100);
   }
 }

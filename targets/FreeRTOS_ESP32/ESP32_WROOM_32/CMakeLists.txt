@@ -69,6 +69,7 @@ add_executable(
     ${NANOCLR_PROJECT_NAME}.elf
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${TARGET_ESP32_COMMON_SOURCES}
@@ -228,14 +229,14 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.map")
 
 # Create bin file from elf
-set(GEN_ESP32_BIN_PATH ${PROJECT_SOURCE_DIR}/build )
+set(GEN_ESP32_BIN_PATH ${EXECUTABLE_OUTPUT_PATH} )
 set(NANOCLR_BIN_FILE ${GEN_ESP32_BIN_PATH}/${NANOCLR_PROJECT_NAME}.bin)
 set(ESPTOOL_PY_FILE ${ESP32_IDF_PATH}/components/esptool_py/esptool/esptool.py )
 set(ESPTOOL_PY_FLAGS "--chip esp32 elf2image --flash_mode \"dio\" --flash_freq \"40m\" --flash_size \"4MB\" " )
 set(GEN_ESP32PART_PY_FILE ${ESP32_IDF_PATH}/components/partition_table/gen_esp32part.py )
 
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${ESPTOOL_PY_FILE} ${ESPTOOL_PY_FLAGS} -o ${NANOCLR_BIN_FILE}   ${NANOCLR_PROJECT_NAME}.elf
+	COMMAND ${ESPTOOL_PY_FILE} ${ESPTOOL_PY_FLAGS} -o ${NANOCLR_BIN_FILE}   ${EXECUTABLE_OUTPUT_PATH}/${NANOCLR_PROJECT_NAME}.elf
 	COMMENT "Generate nanoClr BIN file for deployment" )
     
 # # Create partition table

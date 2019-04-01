@@ -23,7 +23,7 @@ extern "C" {
     void nanoHAL_Uninitialize_C()
     {
         nanoHAL_Uninitialize();
-    } 
+    }
 }
 
 void nanoHAL_Initialize()
@@ -31,8 +31,12 @@ void nanoHAL_Initialize()
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION  ::InitializeList();
 
+    BlockStorageList_Initialize();
+
     // initialize block storage devices
     BlockStorage_AddDevices();
+
+    BlockStorageList_InitializeDevices();
 
     // clear managed heap region
     unsigned char* heapStart = NULL;
@@ -66,6 +70,15 @@ void nanoHAL_Uninitialize()
     //         break;
     //     }
     // }   
+
+    SOCKETS_CloseConnections();
+
+  #if !defined(HAL_REDUCESIZE)
+    // TODO need to call this but it's preventing the debug session from starting
+    //Network_Uninitialize();
+  #endif
+
+    BlockStorageList_UnInitializeDevices();
 
     // need to be sure that all mutexes for drivers that use them are released
 #if (HAL_USE_SPI == TRUE)
@@ -136,9 +149,6 @@ void nanoHAL_Uninitialize()
     #endif
 
 #endif
-
-    // TODO need to call this but it's preventing the debug session from starting
-    //Network_Uninitialize();
 
     Events_Uninitialize();
     

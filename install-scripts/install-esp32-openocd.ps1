@@ -15,7 +15,7 @@ If($OpenOCDPathExists -eq $False)
 {
     Write-Host "Downloading OpenOCD for ESP32 ..."
 
-    $url = "https://github.com/espressif/openocd-esp32/releases/download/v0.10.0-esp32-20180724/openocd-esp32-win32-0.10.0-esp32-20180724.zip"
+    $url = "https://github.com/espressif/openocd-esp32/releases/download/v0.10.0-esp32-20190212/openocd-esp32-win32-0.10.0-esp32-20190212.zip"
     $output = "$zipRoot\openocd-esp32.zip"
 
      # Stop security tripping us up

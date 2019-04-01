@@ -126,6 +126,7 @@ typedef struct WP_Message
 
     uint8_t*       m_pos;
     uint16_t       m_size;
+    uint64_t       m_payloadTicks;
     int            m_rxState;
 
     void (*Initialize)(WP_Controller* parent);

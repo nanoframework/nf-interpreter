@@ -6,22 +6,20 @@
 #ifndef _TARGET_WINDOWS_STORAGE_H_
 #define _TARGET_WINDOWS_STORAGE_H_ 1
 
-#include <ch.h>
-#include <cmsis_os.h>
-#include <hal.h>
-#include <ff.h>
+#define SDCARD_POLLING_INTERVAL                (10)
+#define SDCARD_POLLING_DELAY                   (500)
 
-#define POLLING_INTERVAL                10
-#define POLLING_DELAY                   10
 
-// void RemoveHandler(eventid_t id);
-// void InsertHandler(eventid_t id);
+#define USB_MSD_POLLING_INTERVAL               (1000)
+#define USB_MSD_POLLING_DELAY                  (1000)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void Target_FileSystemInit(void);
+    // declaration of storage working threads
+    void SdCardWorkingThread(void const * argument);
+    void UsbMsdWorkingThread(void const * argument);
 
 #ifdef __cplusplus
 }

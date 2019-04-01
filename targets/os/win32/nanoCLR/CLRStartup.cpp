@@ -238,7 +238,7 @@ struct Settings
         {    
             const DeviceBlockInfo * deviceInfo= BlockStorageDevice_GetDeviceInfo(device);
 
-            if (!deviceInfo->Attribute & MediaAttribute_SupportsXIP)
+            if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
             {
                 unsigned char * datAssembliesBuffer = (unsigned char*)CLR_RT_Memory::Allocate_And_Erase( datSize, CLR_RT_HeapBlock ::HB_Unmovable );  CHECK_ALLOCATION(datAssembliesBuffer);
 

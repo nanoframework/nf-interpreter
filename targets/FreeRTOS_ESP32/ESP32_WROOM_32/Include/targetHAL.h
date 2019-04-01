@@ -7,13 +7,15 @@
 #define _TARGET_HAL_H_
 
 #include <target_board.h>
-#include <nanoWeak.h>
 #include <esp32_os.h>
 
 extern portMUX_TYPE globalLockMutex;
 #define GLOBAL_LOCK(x)              portENTER_CRITICAL(&globalLockMutex);
 #define GLOBAL_UNLOCK(x)            portEXIT_CRITICAL(&globalLockMutex);
 #define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
+
+// platform dependent delay
+#define PLATFORM_DELAY(milliSecs)   vTaskDelay(milliSecs);
 
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)   
@@ -37,8 +39,6 @@ extern portMUX_TYPE globalLockMutex;
 
 #if !defined(BUILD_RTM)
 
-inline void HARD_Breakpoint() { };
-
 #define HARD_BREAKPOINT()     HARD_Breakpoint()
 
 // #if defined(_DEBUG)
@@ -54,32 +54,24 @@ inline void HARD_Breakpoint() { };
 
 #endif  // !defined(BUILD_RTM)
 
-inline bool Target_HasNanoBooter() { return false; };
-
 #define NANOCLR_STOP() HARD_BREAKPOINT()
 
-inline void HAL_AssertEx()
-{
- //   __BKPT(0);
-    while(true) { /*nop*/ }
-}
 
-// Provides information whether the configuration block storage requires erase command before sending the update command
-// ESP32 is storing this using its non-volatile storage therefore no erase is required.
-__nfweak bool Target_ConfigUpdateRequiresErase() { return false; };
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// DEBUGGER HELPER                                                                                 //
+// The line bellow is meant to be used as helper on checking that the execution engine is running. //
+// This can be inferred by checking if Events_WaitForEvents loop is running.                       //
+// The implementation should is to be provided by each target at target_common.h.in                //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#if defined(BUILD_RTM)
+    #define EVENTS_HEART_BEAT
+#else
+    #ifndef EVENTS_HEART_BEAT
+    #define EVENTS_HEART_BEAT __asm__ __volatile__ ("nop")
+    #endif // EVENTS_HEART_BEAT
+#endif
 
 extern int HeapBegin;
 extern int HeapEnd;
-
-// FIXME uncomment? declaration needed here as external?
-// extern char * nanoCLR_Dat_Start;
-// extern char * nanoCLR_Dat_End;
-
-extern uint32_t __nanoImage_start__;
-extern uint32_t __nanoImage_end__;
-extern uint32_t __nanoConfig_start__;
-extern uint32_t __nanoConfig_end__;
-extern uint32_t __deployment_start__;
-extern uint32_t __deployment_end__;
 
 #endif //_TARGET_HAL_H_

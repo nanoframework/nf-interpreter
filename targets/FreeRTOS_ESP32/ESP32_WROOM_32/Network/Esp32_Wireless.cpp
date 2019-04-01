@@ -101,7 +101,11 @@ int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * pConfig
 	{
 		// Start Samrt config (if enabled (TODO) )
 		// probably best to have a config flag for this, but for now just start if no Wireless config set up
-		Start_wifi_smart_config();
+	
+		// FIXME
+		// Disable for now, When the smart_config starts it scans for wireless AP
+		// If it doesn't find any AP it ends up with a exception which causes the device to restart
+		//Start_wifi_smart_config();
 	}	
 
 	return Esp32_Wait_NetNumber(ESP_IF_WIFI_STA);

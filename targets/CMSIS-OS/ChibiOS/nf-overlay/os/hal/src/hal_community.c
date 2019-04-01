@@ -29,6 +29,18 @@
 // HAL initialization (community part).
 void halCommunityInit(void) {
 
+///////////////////////////////
+// from ChibiOS-Contrib repo //
+///////////////////////////////
+
+#if HAL_USE_USBH || defined(__DOXYGEN__)
+  usbhInit();
+#endif
+
+///////////////////////////
+// nanoFramework overlay //
+///////////////////////////
+
 #if (HAL_USE_STM32_FLASH == TRUE)
   stm32FlashInit();
 #endif

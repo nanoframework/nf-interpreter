@@ -7,6 +7,7 @@
 #define _TARGET_HAL_TIME_H_ 1
 
 
+#define HAL_Time_CurrentSysTicks    HAL_Time_CurrentSysTicks
 unsigned int HAL_Time_CurrentSysTicks();
 
 
