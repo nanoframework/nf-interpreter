@@ -22,7 +22,6 @@ bool STM32FlashDriver_Read(void*, ByteAddress startAddress, unsigned int numByte
 bool STM32FlashDriver_Write(void*, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite);
 bool STM32FlashDriver_IsBlockErased(void*, ByteAddress blockAddress, unsigned int length);
 bool STM32FlashDriver_EraseBlock(void*, ByteAddress address);
-void STM32FlashDriver_SetPowerState(void*, unsigned int state);
 
 #ifdef __cplusplus
 }

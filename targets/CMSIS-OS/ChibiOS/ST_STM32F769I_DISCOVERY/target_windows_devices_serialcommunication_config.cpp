@@ -6,6 +6,36 @@
 #include "target_windows_devices_serialcommunication_config.h"
 #include <win_dev_serial_native.h>
 
+///////////
+// UART5 //
+///////////
+
+// pin configuration for UART5
+// port for TX pin is: GPIOD
+// port for RX pin is: GPIOC
+// TX pin: is GPIOD_2
+// RX pin: is GPIOC_12
+// GPIO alternate pin function is 8 (see "Table 13. STM32F765xx, STM32F767xx, STM32F768Ax and STM32F769xx alternate function mapping" in STM32F769I datasheet)
+UART_CONFIG_PINS(5, GPIOD, GPIOC, 2, 12, 8)
+
+// buffers
+// buffers that are R/W by DMA are recommended to be aligned with 32 bytes cache page size boundary
+// because of issues with cache coherency and DMA (this is particularly important with Cortex-M7 because of cache)
+#if defined(__GNUC__)
+__attribute__((aligned (32)))
+#endif
+uint8_t Uart5_TxBuffer[UART5_TX_SIZE];
+
+#if defined(__GNUC__)
+__attribute__((aligned (32)))
+#endif
+uint8_t Uart5_RxBuffer[UART5_RX_SIZE];
+
+// initialization for UART5
+UART_INIT(5, UART5_TX_SIZE, UART5_RX_SIZE)
+
+// un-initialization for UART5
+UART_UNINIT(5)
 
 ///////////
 // UART6 //

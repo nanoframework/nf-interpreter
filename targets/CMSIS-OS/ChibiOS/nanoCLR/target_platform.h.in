@@ -31,10 +31,6 @@
 // enable UART subsystem
 #define HAL_USE_UART @HAL_USE_UART_OPTION@
 
-//DISABLED AS NOT REQUIRED FOR STM32 IN CHIBIOS 18.2
-// enable EXT subsystem because it's required for interrupt handling when GPIO is enable
-//#define HAL_USE_EXT @HAL_USE_GPIO_OPTION@
-
 // set when networking is enabled
 #define HAL_USE_MAC @HAL_USE_MAC_OPTION@
 
@@ -49,5 +45,8 @@
 
 // enable STM32 ONEWIRE (from nf overlay)
 #define HAL_USE_STM32_ONEWIRE @HAL_USE_STM32_ONEWIRE_OPTION@
+
+// enable USB MSD (from ChibiOS Contrib)
+ #define HAL_USBH_USE_MSD     @HAL_USBH_USE_MSDC_OPTION@
 
 #endif /* _TARGET_CHIBIOS_NANOCLR_H_ */

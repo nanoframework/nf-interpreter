@@ -32,8 +32,8 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispa
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink
 {
-    static const int FIELD_STATIC___eventSink = 0;
-    static const int FIELD_STATIC___eventInfoTable = 1;
+    static const int FIELD_STATIC__s_eventSink = 0;
+    static const int FIELD_STATIC__s_eventInfoTable = 1;
 
     NANOCLR_NATIVE_DECLARE(EventConfig___VOID);
 

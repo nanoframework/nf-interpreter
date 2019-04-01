@@ -6,14 +6,19 @@
 
 #include <nanoWeak.h>
 #include <nanoSupport.h>
+#include <targetHAL_Time.h>
 #include "WireProtocol_Message.h"
 
 uint8_t receptionBuffer[sizeof(WP_Packet) + WP_PACKET_SIZE];
 static uint16_t lastOutboundMessage;
-// FIXME #146 uint32_t m_payloadTicks;
 static uint8_t* marker;
 
+// timeout to receive WP payload before bailing out
+// 5 secs (100 nsecs units)
+static const uint64_t c_PayloadTimeout = 50000000;
+
 extern void debug_printf( const char* format, ... );
+extern uint64_t HAL_Time_SysTicksToTime_C(unsigned int sysTicks);
 
 //////////////////////////////////////////
 // helper functions
@@ -57,6 +62,7 @@ void WP_Message_Initialize(WP_Message* message)
     message->m_payload = NULL;
     message->m_pos     = NULL;
     message->m_size    = 0;
+    message->m_payloadTicks = 0; 
     message->m_rxState = ReceiveState_Idle;
 }
 
@@ -280,10 +286,10 @@ int WP_Message_Process(WP_Message* message)
                             }
                             else
                             {
-                                // FIXME #146 m_payloadTicks = HAL_Time_CurrentSysTicks();
-                                message->m_rxState = ReceiveState_ReadingPayload;
-                                message->m_pos     = message->m_payload;
-                                message->m_size    = message->m_header.m_size;
+                                message->m_payloadTicks = HAL_Time_CurrentSysTicks();
+                                message->m_rxState      = ReceiveState_ReadingPayload;
+                                message->m_pos          = message->m_payload;
+                                message->m_size         = message->m_header.m_size;
                             }
                         }
                         else
@@ -308,16 +314,32 @@ int WP_Message_Process(WP_Message* message)
             case ReceiveState_ReadingPayload:
                 {
                     TRACE( TRACE_STATE, "RxState=ReadingPayload. Expecting %d bytes.\n", message->m_size);
-                    if(WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
-                    {
-                        // didn't receive the expected amount of bytes, returning false
-                        TRACE0( TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
-                        return false;
-                    }
 
-                    if(message->m_size == 0)
+                    uint64_t curTicks = HAL_Time_CurrentSysTicks();
+
+                    // If the time between consecutive payload bytes exceeds the timeout threshold then assume that
+                    // the rest of the payload is not coming. Reinitialize to synch on the next header. 
+
+                    if(HAL_Time_SysTicksToTime_C( curTicks - message->m_payloadTicks ) < c_PayloadTimeout)
                     {
-                        message->m_rxState = ReceiveState_CompletePayload;
+                        message->m_payloadTicks = curTicks;
+
+                        if(WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
+                        {
+                            // didn't receive the expected amount of bytes, returning false
+                            TRACE0( TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
+                            return false;
+                        }
+
+                        if(message->m_size == 0)
+                        {
+                            message->m_rxState = ReceiveState_CompletePayload;
+                        }
+                    }
+                    else
+                    {
+                        TRACE0( TRACE_ERRORS, "RxError: Payload InterCharacterTimeout exceeded\n");
+                        message->m_rxState = ReceiveState_Initialize;
                     }
                 }
                 break;

@@ -21,6 +21,7 @@ InteropAssemblies/*
 .vscode/extensions.json
 .vscode/c_cpp_properties.json
 .vscode/cmake-kits.json
+.vscode/ipch
 
 # ignore CMake modules for Interop assemblies
 CMake/Modules/FindINTEROP*.cmake
@@ -45,7 +46,8 @@ CMake/Modules/FindINTEROP*.cmake
 # Visual Studio cache/options directory contents but not the example launch.vs.json
 !.vs/
 .vs/*
-!.vs/launch.vs.json
+!.vs/launch.vs.SAMPLE.json
+!.vs/tasks.vs.SAMPLE.json
 
 # Visual C++ cache files
 *.VC.db

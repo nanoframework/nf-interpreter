@@ -81,6 +81,9 @@
 #define NO_SYS_NO_TIMERS                0
 #endif
 
+// empty on purpose
+#define LWIP_TCPIP_THREAD_ALIVE()
+
 /**
  * MEMCPY: override this if you have a faster implementation at hand than the
  * one included in your C library
@@ -705,6 +708,8 @@
 #define DHCP_DOES_ARP_CHECK             ((LWIP_DHCP) && (LWIP_ARP))
 #endif
 
+#define LWIP_DHCP_CHECK_LINK_UP         1
+
 /*
    ------------------------------------
    ---------- AUTOIP options ----------
@@ -1272,7 +1277,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef TCPIP_THREAD_PRIO
-#define TCPIP_THREAD_PRIO               (NORMALPRIO + 1)
+#define TCPIP_THREAD_PRIO               (NORMALPRIO)
 #endif
 
 /**
@@ -1306,7 +1311,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef SLIPIF_THREAD_PRIO
-#define SLIPIF_THREAD_PRIO              (NORMALPRIO + 1)
+#define SLIPIF_THREAD_PRIO              (NORMALPRIO)
 #endif
 
 /**
@@ -1331,7 +1336,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef PPP_THREAD_PRIO
-#define PPP_THREAD_PRIO                 (NORMALPRIO + 1)
+#define PPP_THREAD_PRIO                 (NORMALPRIO)
 #endif
 
 /**
@@ -1356,7 +1361,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef DEFAULT_THREAD_PRIO
-#define DEFAULT_THREAD_PRIO             (NORMALPRIO + 1)
+#define DEFAULT_THREAD_PRIO             (NORMALPRIO)
 #endif
 
 /**
@@ -2151,8 +2156,12 @@
 #define DNS_DEBUG                       LWIP_DBG_OFF
 #endif
 
-// in order to enable the lwIP debug output the bellow has to be uncomment and 
+// in order to enable the lwIP debug output the bellow has to be uncomment and
 // the options above changed to LWIP_DBG_ON for the features that are to output debug information
 //#define LWIP_DEBUG 1
+
+// enable full duplex comms on multiple threads
+// this requires adding an extra field in ChibiOS thread_t (see comment on platform_sys_arch.c)
+//#define LWIP_NETCONN_FULLDUPLEX         1
 
 #endif /* __LWIPOPT_H__ */

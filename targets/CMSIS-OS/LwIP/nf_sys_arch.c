@@ -40,6 +40,7 @@
 #include "lwip/mem.h"
 #include "lwip/sys.h"
 #include "lwip/stats.h"
+#include "lwip/api.h"
 
 #include "arch/cc.h"
 #include "arch/sys_arch.h"
@@ -294,7 +295,11 @@ void sys_mbox_set_invalid(sys_mbox_t *mbox)
 sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize, int prio)
 {
     const osThreadDef_t os_thread_def = { (os_pthread)thread, (osPriority)prio, stacksize, (char *)name };
-    return osThreadCreate(&os_thread_def, arg);
+    sys_thread_t newThread = osThreadCreate(&os_thread_def, arg);
+
+    netconn_thread_init();
+
+    return newThread;
 }
 
 sys_prot_t sys_arch_protect(void) 
@@ -308,6 +313,29 @@ void sys_arch_unprotect(sys_prot_t pval)
     (void) pval;
     osMutexRelease(lwip_sys_mutex);
 }
+
+#if LWIP_NETCONN_SEM_PER_THREAD
+
+/////////////////////////////////////////////////////////
+// NEEDS to be implementated at platform level
+// CMSIS RTOS API doesn't have a decent API to tackle
+/////////////////////////////////////////////////////////
+
+// sys_sem_t* sys_arch_netconn_sem_get(void)
+// {
+//     return 0;
+// }
+
+// void sys_arch_netconn_sem_alloc(void)
+// {
+// }
+
+// void sys_arch_netconn_sem_free(void)
+// {
+// }
+
+#endif // LWIP_NETCONN_SEM_PER_THREAD
+
 
 ////////////////////////////////////////////////////
 // nanoFramework "hack" extending LwIP original code

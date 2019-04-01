@@ -15,14 +15,12 @@ list(APPEND CHIBIOS_FATFS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
 
 set(FATFS_SRCS
     # bindings
-    fatfs_diskio.c
     fatfs_syscall.c
 
     # fatfs
     ff.c
     ffunicode.c
 )
-
 
 foreach(SRC_FILE ${FATFS_SRCS})
     set(FATFS_SRC_FILE SRC_FILE -NOTFOUND)
@@ -37,6 +35,14 @@ foreach(SRC_FILE ${FATFS_SRCS})
     list(APPEND CHIBIOS_FATFS_SOURCES ${FATFS_SRC_FILE})
 endforeach()
 
+# fatfs_diskio is hacked because of USB Host, so we need to use the source from the appropriate location
+if(NF_FEATURE_HAS_USB_MSD)
+    # get it from ChibiOS contribution
+    list(APPEND CHIBIOS_FATFS_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/various/fatfs_bindings/fatfs_diskio.c)
+else()
+    # get it from standard ChibiOS
+    list(APPEND CHIBIOS_FATFS_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/fatfs_bindings/fatfs_diskio.c)
+endif()
 
 include(FindPackageHandleStandardArgs)
 

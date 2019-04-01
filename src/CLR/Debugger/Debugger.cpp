@@ -66,13 +66,11 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
     NANOCLR_CHECK_HRESULT(g_CLR_DBG_Debugger->Debugger_Initialize(HalSystemConfig.DebuggerPort));
 
     BlockStorageStream stream;
+    memset(&stream, 0, sizeof(BlockStorageStream));
 
     if (BlockStorageStream_Initialize(&stream, BlockUsage_DEPLOYMENT ))
     {
-        //m_deploymentStorageDevice = stream.Device;
-        // TODO replacing this for now with a call to GetFirstDevice
-        // until the block storage is redesigned 
-        m_deploymentStorageDevice = BlockStorageList_GetFirstDevice();
+        m_deploymentStorageDevice = stream.Device;
     }
     else
     {
@@ -498,6 +496,8 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
     NATIVE_PROFILE_CLR_DEBUGGER();
     TRACE("AccessMemory( 0x%08X, 0x%08x, 0x%08X, %s)\n", location, lengthInBytes, buf, AccessMemoryModeNames[mode] );
 
+    bool success = false;
+
     // reset error code
     *errorCode = AccessMemoryErrorCode_NoError;
 
@@ -509,12 +509,11 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
         const DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(m_deploymentStorageDevice);
 
         // start from the block where the sector sits.
-        ByteAddress   accessAddress = location;
+        ByteAddress    accessAddress    = location;
 
-        unsigned char*         bufPtr           = buf;
-        bool          success          = true;
-        signed int         accessLenInBytes = lengthInBytes;
-        signed int         blockOffset      = BlockRegionInfo_OffsetFromBlock(((BlockRegionInfo*)(&deviceInfo->Regions[iRegion])), accessAddress);
+        unsigned char* bufPtr           = buf;
+        signed int     accessLenInBytes = lengthInBytes;
+        signed int     blockOffset      = BlockRegionInfo_OffsetFromBlock(((BlockRegionInfo*)(&deviceInfo->Regions[iRegion])), accessAddress);
 
         for(;iRegion < deviceInfo->NumRegions; iRegion++)
         {
@@ -551,7 +550,8 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
                     // set error code
                     *errorCode = AccessMemoryErrorCode_PermissionDenied;
 
-                    return false;
+                    // done here
+                    return success;
                 }
 
                 switch(mode)
@@ -576,7 +576,8 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
                                     // set error code
                                     *errorCode = AccessMemoryErrorCode_PermissionDenied;
 
-                                    return false;
+                                    // done here
+                                    return success;
                                 }
                             }
 
@@ -596,8 +597,14 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
                         break;
 
                     case AccessMemory_Erase:
-                        if (!BlockStorageDevice_IsBlockErased(m_deploymentStorageDevice, accessAddress, NumOfBytes))
+                        if (BlockStorageDevice_IsBlockErased(m_deploymentStorageDevice, accessAddress, NumOfBytes))
                         {
+                            // block is erased, we are good
+                            success = true;
+                        }
+                        else
+                        {
+                            // need to erase block
                             success = BlockStorageDevice_EraseBlock(m_deploymentStorageDevice, accessAddress);
                         }
                         break;
@@ -629,16 +636,17 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
             iRange     = 0;
 
            if ((accessLenInBytes <= 0) || (!success))
+           {
                break;
+           }
         }
-
     }
     else
     {
-    //--// RAM write
+        //--// RAM write
         ByteAddress sectAddr = location;
 
-#if defined(_WIN32)
+      #if defined(_WIN32)
 
         bool proceed = false;
         void * temp;
@@ -659,7 +667,7 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
         }
 
         if(proceed)
-#else
+      #else
 
         unsigned int sectAddrEnd     = sectAddr + lengthInBytes;
         unsigned int ramStartAddress = HalSystemConfig.RAM1.Base;
@@ -668,39 +676,41 @@ bool CLR_DBG_Debugger::AccessMemory( CLR_UINT32 location, unsigned int lengthInB
         if((sectAddr <ramStartAddress) || (sectAddr >=ramEndAddress) || (sectAddrEnd >ramEndAddress) )
         {
             TRACE(" Invalid address %x and range %x Ram Start %x, Ram end %x\r\n", sectAddr, lengthInBytes, ramStartAddress, ramEndAddress);
-            return false;
+            return success;
         }
         else
-#endif
+      #endif
         {
             switch(mode)
             {
-            case AccessMemory_Check:
-                break;
+                case AccessMemory_Check:
+                    break;
 
-            case AccessMemory_Read:
-                memcpy( buf, (const void*)sectAddr, lengthInBytes );
-                break;
+                case AccessMemory_Read:
+                    memcpy( buf, (const void*)sectAddr, lengthInBytes );
+                    break;
 
-            case AccessMemory_Write:
-                unsigned char * memPtr;
-                memPtr = (unsigned char*)sectAddr;
-                memcpy( memPtr, buf, lengthInBytes );
-                break;
+                case AccessMemory_Write:
+                    unsigned char * memPtr;
+                    memPtr = (unsigned char*)sectAddr;
+                    memcpy( memPtr, buf, lengthInBytes );
+                    break;
 
-            case AccessMemory_Erase:
-                memPtr = (unsigned char*)sectAddr;
-                if (lengthInBytes !=0)
-                    memset( memPtr, 0xFF, lengthInBytes );
-                break;
+                case AccessMemory_Erase:
+                    memPtr = (unsigned char*)sectAddr;
+                    if (lengthInBytes !=0)
+                        memset( memPtr, 0xFF, lengthInBytes );
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
     }
+
     TRACE0( "=> SUCCESS\n");
-    return true;
+
+    return success;
 }
 
 bool CLR_DBG_Debugger::Monitor_ReadMemory( WP_Message* msg)
@@ -712,13 +722,16 @@ bool CLR_DBG_Debugger::Monitor_ReadMemory( WP_Message* msg)
     unsigned int                                len = cmd->m_length; if(len > sizeof(buf)) len = sizeof(buf);
     unsigned int errorCode;
 
-    if (m_deploymentStorageDevice == NULL) return false;
-    g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, len, buf, AccessMemory_Read, &errorCode );
+    if (m_deploymentStorageDevice != NULL)
+    {
+        g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, len, buf, AccessMemory_Read, &errorCode );
 
-    WP_ReplyToCommand( msg, true, false, buf, len );
+        WP_ReplyToCommand( msg, true, false, buf, len );
 
-    return true;
+        return true;
+    }
 
+    return false;
 }
 
 bool CLR_DBG_Debugger::Monitor_WriteMemory( WP_Message* msg)
@@ -728,13 +741,17 @@ bool CLR_DBG_Debugger::Monitor_WriteMemory( WP_Message* msg)
     CLR_DBG_Commands::Monitor_WriteMemory* cmd = (CLR_DBG_Commands::Monitor_WriteMemory*)msg->m_payload;
     CLR_DBG_Commands::Monitor_WriteMemory::Reply cmdReply;
 
-    if (m_deploymentStorageDevice == NULL) return false;
+    if (m_deploymentStorageDevice != NULL)
+    {
 
-    g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, cmd->m_length, cmd->m_data, AccessMemory_Write, &cmdReply.ErrorCode );
+        g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, cmd->m_length, cmd->m_data, AccessMemory_Write, &cmdReply.ErrorCode );
 
-    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+        WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
 
-    return true;
+        return true;
+    }
+
+    return false;
 }
 
 bool CLR_DBG_Debugger::Monitor_CheckMemory( WP_Message* msg)
@@ -760,13 +777,16 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory( WP_Message* msg)
     CLR_DBG_Commands::Monitor_EraseMemory* cmd = (CLR_DBG_Commands::Monitor_EraseMemory*)msg->m_payload;
     CLR_DBG_Commands::Monitor_EraseMemory::Reply cmdReply;
 
-    if (m_deploymentStorageDevice == NULL) return false;
+    if (m_deploymentStorageDevice != NULL)
+    {
+        g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, cmd->m_length, NULL, AccessMemory_Erase, &cmdReply.ErrorCode );
 
-    g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, cmd->m_length, NULL, AccessMemory_Erase, &cmdReply.ErrorCode );
+        WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
 
-    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 bool CLR_DBG_Debugger::Monitor_Execute( WP_Message* msg)
@@ -863,6 +883,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
         case DeviceConfigurationOption_Network:
 
             configNetworkInterface = (HAL_Configuration_NetworkInterface*)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
+            memset(configNetworkInterface, 0, sizeof(HAL_Configuration_NetworkInterface));
 
             if(ConfigurationManager_GetConfigurationBlock(configNetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
             {
@@ -877,6 +898,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
         case DeviceConfigurationOption_Wireless80211Network:
 
             configWireless80211NetworkInterface = (HAL_Configuration_Wireless80211*)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+            memset(configWireless80211NetworkInterface, 0, sizeof(HAL_Configuration_Wireless80211));
 
             if(ConfigurationManager_GetConfigurationBlock(configWireless80211NetworkInterface, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
             {
@@ -898,6 +920,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration( WP_Message* message)
             }
 
             x509Certificate = (HAL_Configuration_X509CaRootBundle*)platform_malloc(sizeOfBlock);
+            memset(x509Certificate, 0, sizeof(sizeOfBlock));
 
             if(ConfigurationManager_GetConfigurationBlock(x509Certificate, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex) == true)
             {
@@ -998,6 +1021,10 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions( WP_Message* msg)
 
     g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions |=  cmd->FlagsToSet;
     g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions &= ~cmd->FlagsToReset;
+
+    // updating the debugging execution conditions requires sometime to propagate
+    // make sure we allow enough time for that to happen
+    OS_DELAY(100);
 
     if((msg->m_header.m_flags & WP_Flags_c_NonCritical) == 0)
     {

@@ -1,11 +1,13 @@
 # Name,   Type, SubType, Offset,   Size
 # Note: if you change the phy_init or app partition offset, make sure to change the offset in Kconfig.projbuild
-nvs,      data, nvs,     0x9000,  0x6000,
-phy_init, data, phy,     0xf000,  0x1000,
+###############################################################################################################################
+# if you change the partitions here, make sure to update the BlockRegions array in the device BlockStorage configuration file #
+###############################################################################################################################
+nvs,      data, nvs,     0x9000,   0x6000,
+phy_init, data, phy,     0xf000,   0x1000,
 # Factory area for NanoCLR - 1MB
-factory,  0,    0,      0x10000,  0x100000,
+factory,  0,    0,       0x10000,  0x100000,
 # Deployment area for Managed code 1792K
-deploy,   data, 0x84,   0x110000, 0x1C0000, 
+deploy,   data, 0x84,    0x110000, 0x1C0000, 
 # Config data for Network, Wireless, certificates, user data  256K
-config,   data, spiffs, 0x2D0000, 0x40000, 
-
+config,   data, spiffs,  0x2D0000, 0x40000, 
