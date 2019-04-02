@@ -39,15 +39,8 @@ int main(void)
 
     iMXRTFlexSPIDriver_InitializeDevice(NULL);
 
-    CLR_SETTINGS clrSettings;
-    (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
-
-    clrSettings.MaxContextSwitches         = 50;
-    clrSettings.WaitForDebugger            = false;
-    clrSettings.EnterDebuggerLoopAfterExit = true;
-
     xTaskCreate(ReceiverThread, "ReceiverThread", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
-    xTaskCreate(CLRStartupThread, "CLRStartupThread", 8192, &clrSettings, configMAX_PRIORITIES - 1, NULL);
+    xTaskCreate(CLRStartupThread, "CLRStartupThread", 8192, NULL, configMAX_PRIORITIES - 2, NULL);
 
     vTaskStartScheduler();
 
