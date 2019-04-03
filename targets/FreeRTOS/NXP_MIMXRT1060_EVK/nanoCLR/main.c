@@ -28,11 +28,11 @@ int main(void)
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();    
-    SCB_DisableDCache();
+    //SCB_DisableDCache();
 
-    // for (volatile uint32_t i = 0; i < 100000000; i++) {
-    //     __asm("nop");
-    // }
+    for (volatile uint32_t i = 0; i < 100000000; i++) {
+        __asm("nop");
+    }
 
     iMXRTFlexSPIDriver_InitializeDevice(NULL);
 
