@@ -55,7 +55,7 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
     char* stringBuffer;
     uint32_t driveCount = 0;
     char workingDrive[sizeof(DRIVE_PATH_LENGTH)];
-    uint16_t driveIterator = (uint16_t)Storage_Drives_SDCard;
+    uint16_t driveIterator = 0;
 
     CLR_RT_HeapBlock* storageFolder;
     CLR_RT_TypeDef_Index storageFolderTypeDef;

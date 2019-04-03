@@ -11,6 +11,37 @@
 #include <nanoCLR_Runtime.h>
 #include <hal.h>
 
+struct Library_win_storage_native_Windows_Storage_RemovableDeviceEventArgs
+{
+    static const int FIELD___path = 1;
+    static const int FIELD___event = 2;
+
+
+    //--//
+
+};
+
+struct Library_win_storage_native_Windows_Storage_StorageEventManager
+{
+    static const int FIELD_STATIC__RemovableDeviceInserted = 0;
+    static const int FIELD_STATIC__RemovableDeviceRemoved = 1;
+
+
+    //--//
+
+};
+
+struct Library_win_storage_native_Windows_Storage_StorageEventManager__StorageEvent
+{
+    static const int FIELD__EventType = 3;
+    static const int FIELD__DriveIndex = 4;
+    static const int FIELD__Time = 5;
+
+
+    //--//
+
+};
+
 struct Library_win_storage_native_Windows_Storage_FileIO
 {
     NANOCLR_NATIVE_DECLARE(WriteBytes___STATIC__VOID__WindowsStorageIStorageFile__SZARRAY_U1);

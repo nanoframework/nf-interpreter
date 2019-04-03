@@ -19,20 +19,22 @@
 #define INDEX2_DRIVE_LETTER     "F:"
 #define INDEX2_DRIVE_PATH       INDEX2_DRIVE_LETTER"\\"
 
+//////////////////////////////////////////////////////////////////////////
+// Keep in sync with StorageEventManager.StorageEventType in managed code
 // Storage events sub-categories
-#define EVENT_STORAGE_DEVICE_INSERTION      0x01
-#define EVENT_STORAGE_DEVICE_REMOVAL        0x02
-
-// enum with the supported drives in Windows.Storage
-typedef enum Storage_Drives
+//////////////////////////////////////////////////////////////////////////
+typedef enum StorageEventType
 {
-    // SD Card
-    Storage_Drives_SDCard    = 0,
+    // INVALID
+    StorageEventType_Invalid                    = 0x00,
 
-    // USB mass storage device
-    Storage_Drives_UsbMsd = 1,
+    // removable device inserted
+    StorageEventType_RemovableDeviceInsertion   = 0x01,
 
-}Storage_Drives;
+    // removable device removed
+    StorageEventType_RemovableDeviceRemoval     = 0x02,
+
+}StorageEventType;
 
 // constants to be used throughout the code
 #define SUPPORTED_DRIVES_COUNT  (2)
