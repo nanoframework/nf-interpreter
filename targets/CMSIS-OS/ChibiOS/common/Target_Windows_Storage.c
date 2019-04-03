@@ -22,12 +22,22 @@ extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t dat
 // and those have to follow the sequence that is used in ChibiOS FatFS wrappers
 // SD Card (or SPI) is 1st and USB MAS is 2nd (if SD Card is enabled)
 #if defined(HAL_USE_SDC) && defined(HAL_USBH_USE_MSD)
-#define SD_CARD_DRIVE_INDEX     "0"
-#define USB_MSD_DRIVE_INDEX     "1"
+
+#define SD_CARD_DRIVE_INDEX             "0"
+#define SD_CARD_DRIVE_INDEX_NUMERIC     (0)
+#define USB_MSD_DRIVE_INDEX             "1"
+#define USB_MSD_DRIVE_INDEX_NUMERIC     (1)
+
 #elif defined(HAL_USE_SDC) && !defined(HAL_USBH_USE_MSD)
-#define SD_CARD_DRIVE_INDEX     "0"
+
+#define SD_CARD_DRIVE_INDEX             "0"
+#define SD_CARD_DRIVE_INDEX_NUMERIC     (0)
+
 #elif !defined(HAL_USE_SDC) && defined(HAL_USBH_USE_MSD)
-#define USB_MSD_DRIVE_INDEX     "0"
+
+#define USB_MSD_DRIVE_INDEX             "0"
+#define USB_MSD_DRIVE_INDEX_NUMERIC     (0)
+
 #endif
 
 ///////////////////////////////////////////
@@ -119,7 +129,7 @@ void SdcardInsertHandler(eventid_t id)
         sdCardFileSystemReady = true;
 
         // post event to managed app
-        PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_INSERTION, Storage_Drives_SDCard );
+        PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceInsertion, SD_CARD_DRIVE_INDEX_NUMERIC );
     }
 }
 
@@ -133,7 +143,7 @@ void SdCardRemoveHandler(eventid_t id)
     sdCardFileSystemReady = false;
 
     // post event to managed app
-    PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_REMOVAL, Storage_Drives_SDCard );
+    PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceRemoval, SD_CARD_DRIVE_INDEX_NUMERIC );
 }
 
 __attribute__((noreturn))
@@ -235,7 +245,7 @@ void UsbMsdWorkingThread(void const * argument)
                     usbMsdFileSystemReady = true;
 
                     // post event to managed app
-                    PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_INSERTION, Storage_Drives_UsbMsd );
+                    PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceInsertion, USB_MSD_DRIVE_INDEX_NUMERIC );
                 }                
             }
         }
@@ -247,7 +257,7 @@ void UsbMsdWorkingThread(void const * argument)
                 usbMsdFileSystemReady = false;
 
                 // post event to managed app
-                PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_REMOVAL, Storage_Drives_UsbMsd );
+                PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceRemoval, USB_MSD_DRIVE_INDEX_NUMERIC );
             }
         }
 
