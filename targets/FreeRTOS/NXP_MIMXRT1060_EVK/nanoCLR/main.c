@@ -19,9 +19,6 @@
 #include "Target_BlockStorage_iMXRTFlashDriver.h"
 #include "CLR_Startup_Thread.h"
 
-#define LED_GPIO GPIO1
-#define LED_GPIO_PIN (9U)
-
 //configure heap memory
 __attribute__((section(".noinit.$SRAM_OC.ucHeap")))
 uint8_t ucHeap[configTOTAL_HEAP_SIZE];
@@ -31,23 +28,16 @@ int main(void)
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();    
-    SCB_DisableDCache();
+    //SCB_DisableDCache();
 
-    // for (volatile uint32_t i = 0; i < 100000000; i++) {
-    //     __asm("nop");
-    // }
+    for (volatile uint32_t i = 0; i < 100000000; i++) {
+        __asm("nop");
+    }
 
     iMXRTFlexSPIDriver_InitializeDevice(NULL);
 
-    CLR_SETTINGS clrSettings;
-    (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
-
-    clrSettings.MaxContextSwitches         = 50;
-    clrSettings.WaitForDebugger            = false;
-    clrSettings.EnterDebuggerLoopAfterExit = true;
-
     xTaskCreate(ReceiverThread, "ReceiverThread", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
-    xTaskCreate(CLRStartupThread, "CLRStartupThread", 8192, &clrSettings, configMAX_PRIORITIES - 1, NULL);
+    xTaskCreate(CLRStartupThread, "CLRStartupThread", 8192, NULL, configMAX_PRIORITIES - 2, NULL);
 
     vTaskStartScheduler();
 
