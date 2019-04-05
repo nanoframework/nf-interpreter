@@ -1,5 +1,5 @@
 @echo off
-REM GetShortPath - Find/Create and return short path for current directory
+REM SetNFRoot - Find/Create and return short path for current directory
 REM DAV 01APR19
 setlocal
 
@@ -20,13 +20,17 @@ goto :end
 set v=%shortpath:~0,2%
 echo Remove subst of %mypath% on %v%
 if [%rmsubst%]==[-d] subst /D %v%
-endlocal & set "ShortPath=%_mypath%"
+endlocal & set "nfRoot=%_mypath%"
+setx nfRoot %nfRoot% >nul
+echo %nfRoot%
 goto :eof
 
 :end
 :: Clear %errorlevel%
-call set _a=a > null
-endlocal & set "ShortPath=%shortpath%"
+call set _a=a > nul
+endlocal & set "nfRoot=%shortpath%"
+setx nfRoot %nfRoot% >nul
+echo %nfRoot%
 rem  popd
 ::exit
 goto :eof
@@ -72,22 +76,22 @@ echo ERROR: No free drive letter found, staying on original path
 goto :haveshortpath
 
 :cont
-echo Found free drive letter: %driveletter%
+echo Found free drive letter: %driveletter% 1>&2
 pushd %mypath%
 subst %driveletter% .
 popd
 set shortpath=%driveletter%\
-echo Created new  subst for %mypath% on %driveletter%
-echo You can remove it with subst %driveletter% /D
+echo Created new  subst for %mypath% on %driveletter% 1>&2
+echo You can remove it with subst %driveletter% /D 1>&2
 goto :haveshortpath
 
 :foundsubst
 set shortpath=%sdg:~0,3%
-echo Using existing subst for %mypath% on %shortpath%
+echo Using existing subst for %mypath% on %shortpath% 1>&2
 goto :haveshortpath
 
 :haveshortpath
-echo Using short path %shortpath% for %mypath%
+echo Using short path %shortpath% for %mypath% 1>&2
 REM So now we have a short path if it was possible
 goto :eof
 

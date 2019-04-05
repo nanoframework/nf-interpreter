@@ -12,7 +12,7 @@
           "PATH": "C:\\Windows\\system32;${env.PATH}" // Work around for Ninja not finding Cmd.exe with add_custom_command
         }
       ],
-      "buildRoot": "B:/Build/${name}",
+      "buildRoot": "${env.nfRoot}Build/${name}",
       "installRoot": "${workspaceRoot}/Build/install/${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
