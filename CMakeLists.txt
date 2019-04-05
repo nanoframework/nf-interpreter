@@ -881,6 +881,9 @@ elseif(RTOS_FREERTOS_CHECK)
 
     endif()
 
+    # Define base path for the class libraries
+    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD}/nanoCLR")
+
     # set target base location
     # this has to be set before the class library modules are pulled in
     if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD})
