@@ -5,8 +5,9 @@
 //
 
 
-#include <MIMXRT1062.h>
-#include <fsl_gpio.h>
+#include "MIMXRT1062.h"
+#include "fsl_gpio.h"
+#include "fsl_gpio_ext.h"
 #undef MIN
 #undef MAX
 
@@ -43,9 +44,6 @@ enum GpioPinValue
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-#define GPIO_BASE(pin) (s_gpioBases[(uint32_t)(pin) / 32 + 1])   
-#define GPIO_PIN(pin) ((uint32_t)(pin) % 32)
-
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -58,7 +56,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___Windows
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        signed int pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+        int32_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
 
         uint32_t val = GPIO_PinRead(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber));
 
@@ -79,7 +77,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        signed int pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+        int32_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
         
         GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
 
@@ -90,7 +88,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
             (driveMode == GpioPinDriveMode_OutputOpenSource) ||
             (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
         {
-            GPIO_PortToggle(GPIO_BASE(pinNumber), 1u << GPIO_PIN(pinNumber));
+            GPIO_PortToggle(GPIO_BASE(pinNumber), 0x1u << GPIO_PIN(pinNumber));
 
             // // store new state
             pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = (GpioPinValue)(GpioPinValue_High ^ (GpioPinValue)pThis[ FIELD___lastOutputValue ].NumericByRef().s4);
@@ -105,16 +103,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative_
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-
-        // get IoLine from pin number
-        // ioline_t ioLine = GetIoLine(pThis[ FIELD___pinNumber ].NumericByRefConst().s4);
-
-        // disable the EXT interrupt channel
-        // it's OK to do always this, no matter if it's enabled or not
-        // palDisableLineEvent(ioLine);
-
-        // set pin to input to save power
-        // palSetLineMode(ioLine, PAL_MODE_INPUT);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -127,7 +115,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveM
 
         bool driveModeSupported = false;
 
-        // check if the requested drive mode is support by ChibiOS config
+        // check if the requested drive mode is supported
         if ((driveMode == GpioPinDriveMode_Input) ||
             (driveMode == GpioPinDriveMode_InputPullDown) ||
             (driveMode == GpioPinDriveMode_InputPullUp) ||
@@ -154,23 +142,58 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        signed int pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+        int32_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
         
         // it's better cast this this to the appropriate enum
         GpioPinDriveMode driveMode = (GpioPinDriveMode)stack.Arg1().NumericByRef().s4;
 
+        // check if drive mode is input
+        bool driveModeIsInput = false;
+
+        if( driveMode == GpioPinDriveMode_Input ||
+            driveMode == GpioPinDriveMode_InputPullDown ||
+            driveMode == GpioPinDriveMode_InputPullUp)
+            {
+                driveModeIsInput = true;
+            }
+
+        // flag to signal that interrupts need to be setup
+        bool setupInterrupt = false;
+
+        // flag to determine if there are any callbacks registered in managed code
+        bool callbacksRegistered = (pThis[ FIELD___callbacks ].Dereference() != NULL);
+        
         gpio_pin_direction_t direction;         
+        uint32_t pinConfig;
 
         switch (driveMode)
         {
             case GpioPinDriveMode_Input:
+                direction = kGPIO_DigitalInput;
+                pinConfig = GPIO_IO;
+                setupInterrupt = true;
+                break;
+
             case GpioPinDriveMode_InputPullDown:
+                direction = kGPIO_DigitalInput;
+                pinConfig = GPIO_IN_PULLDOWN;
+                setupInterrupt = true;
+                break;
+
             case GpioPinDriveMode_InputPullUp:
                 direction = kGPIO_DigitalInput;
+                pinConfig = GPIO_IN_PULLUP;
+                setupInterrupt = true;
                 break;
+    
             case GpioPinDriveMode_Output:
+                direction = kGPIO_DigitalOutput;
+                pinConfig = GPIO_IO;
+                break;
+
             case GpioPinDriveMode_OutputOpenDrain:
                 direction = kGPIO_DigitalOutput;
+                pinConfig = GPIO_OUT_OPENDRAIN;
                 break;
 
             default:
@@ -181,7 +204,27 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 
         gpio_pin_config_t config = {direction, 0, kGPIO_NoIntmode};
 
+        GPIO_PinMux(GPIO_PORT(pinNumber), GPIO_PIN(pinNumber), 0x5u);
+        GPIO_PinConfig(GPIO_PORT(pinNumber), GPIO_PIN(pinNumber), pinConfig);
         GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
+        
+        // if drive mode is output, read the pad to update the managed field _lastOutputValue
+        if(!driveModeIsInput)
+        {
+            uint32_t val = GPIO_PinRead(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber));
+            pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = val;
+        }
+
+        if(callbacksRegistered && setupInterrupt)
+        {
+            // there are callbacks registered and...
+            // the drive mode is input so need to setup the interrupt
+
+            // protect this from GC so that the callback is where it's supposed to
+            //CLR_RT_ProtectFromGC         gc( *pThis );
+            
+            // read pad and store current value to check on debounce callback
+        }
     }
     NANOCLR_NOCLEANUP();
 }
@@ -190,8 +233,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___B
 {
     NANOCLR_HEADER();
     {
-        //int16_t pinNumber = stack.Arg1().NumericByRef().s4;
-
         // TODO is probably a good idea keep track of the used pins, so we can check that here
         // TODO is probably a good idea to check if this pin exists
 
@@ -224,7 +265,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        signed int pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+        int32_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
 
         GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
 
@@ -262,13 +303,11 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlter
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        // get IoLine from pin number
-        // ioline_t ioLine = GetIoLine(pThis[ FIELD___pinNumber ].NumericByRefConst().s4);
+        int32_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
 
-        // get alternate function argument
-		// int32_t alternateFunction = stack.Arg1().NumericByRef().s4;
+        int32_t alternateFunction = stack.Arg1().NumericByRef().s4;
 
-        // palSetLineMode(ioLine, PAL_MODE_ALTERNATE(alternateFunction));
+        GPIO_PinMux(GPIO_PORT(pinNumber), GPIO_PIN(pinNumber), alternateFunction);
 
     }
     NANOCLR_NOCLEANUP();
