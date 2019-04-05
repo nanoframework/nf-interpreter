@@ -27,7 +27,7 @@ int main(void)
 {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
-    BAARD_InitBootPeripherals();
+    BOARD_InitBootPeripherals();
     BOARD_InitSEMC();
     //SCB_DisableDCache();
 
