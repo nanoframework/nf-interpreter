@@ -73,6 +73,12 @@ typedef struct
 #define GPIO_BASE(pin) (s_gpioBases[GPIO_PORT(pin)])
 #define GPIO_PIN(pin)  ((uint32_t)(pin) % 32)
 
+#define GPIO_IO (IOMUXC_SW_PAD_CTL_PAD_DSE(0x6u) | IOMUXC_SW_PAD_CTL_PAD_SPEED(0x2u))
+#define GPIO_ENABLE_PULL (IOMUXC_SW_PAD_CTL_PAD_PKE(0x1u) | IOMUXC_SW_PAD_CTL_PAD_PUE(0x1u))
+#define GPIO_IN_PULLDOWN (GPIO_IO | GPIO_ENABLE_PULL | IOMUXC_SW_PAD_CTL_PAD_PUS(0x0u))
+#define GPIO_IN_PULLUP (GPIO_IO | GPIO_ENABLE_PULL | IOMUXC_SW_PAD_CTL_PAD_PUS(0x2u))
+#define GPIO_OUT_OPENDRAIN (GPIO_IO | IOMUXC_SW_PAD_CTL_PAD_ODE(0x1u))
+
 /*******************************************************************************
  * API
  ******************************************************************************/

@@ -65,7 +65,7 @@ void GPIO_PinMux(uint32_t base, uint32_t pin, uint32_t muxMode)
 
     if (muxRegister)
     {
-        IOMUXC_SetPinMux(muxRegister, muxMode, 0, 0, 0, 1);
+        IOMUXC_SetPinMux(muxRegister, muxMode, 0, 0, 0, 0);
     }
 }
 
