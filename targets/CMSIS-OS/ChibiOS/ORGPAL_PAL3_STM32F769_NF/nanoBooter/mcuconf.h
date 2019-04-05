@@ -30,7 +30,7 @@
 #define STM32_NO_INIT                       FALSE
 #define STM32_PVD_ENABLE                    FALSE
 #define STM32_PLS                           STM32_PLS_LEV0
-#define STM32_BKPRAM_ENABLE                 FALSE
+#define STM32_BKPRAM_ENABLE                 TRUE
 #define STM32_HSI_ENABLED                   TRUE
 #define STM32_LSI_ENABLED                   TRUE
 #define STM32_HSE_ENABLED                   TRUE
@@ -80,7 +80,7 @@
 #define STM32_I2C3SEL                       STM32_I2C3SEL_PCLK1
 #define STM32_I2C4SEL                       STM32_I2C4SEL_PCLK1
 #define STM32_LPTIM1SEL                     STM32_LPTIM1SEL_PCLK1
-#define STM32_CECSEL                        STM32_CECSEL_LSE
+#define STM32_CECSEL                        STM32_CECSEL_HSIDIV488
 #define STM32_CK48MSEL                      STM32_CK48MSEL_PLL
 #define STM32_SDMMCSEL                      STM32_SDMMCSEL_PLL48CLK
 #define STM32_SRAM2_NOCACHE                 FALSE
