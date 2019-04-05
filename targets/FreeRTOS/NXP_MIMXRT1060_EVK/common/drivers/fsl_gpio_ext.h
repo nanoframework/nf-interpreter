@@ -69,6 +69,10 @@ typedef struct
 #define MUX_REGISTER (0u)
 #define CNF_REGISTER (1u)
 
+#define GPIO_PORT(pin) ((uint32_t)(pin) / 32 + 1)
+#define GPIO_BASE(pin) (s_gpioBases[GPIO_PORT(pin)])
+#define GPIO_PIN(pin)  ((uint32_t)(pin) % 32)
+
 /*******************************************************************************
  * API
  ******************************************************************************/
@@ -77,8 +81,8 @@ typedef struct
 extern "C" {
 #endif
 
-void GPIO_PinMux(uint32_t base, uint32_t pin, const uint32_t muxMode);
-void GPIO_PinConfig(uint32_t base, uint32_t pin, const uint32_t configValue);
+void GPIO_PinMux(uint32_t port, uint32_t pin, const uint32_t muxMode);
+void GPIO_PinConfig(uint32_t port, uint32_t pin, const uint32_t configValue);
 
 #if defined(__cplusplus)
 }

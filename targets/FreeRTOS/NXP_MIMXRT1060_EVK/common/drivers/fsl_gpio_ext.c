@@ -6,9 +6,9 @@ static const GPIO_Ext gpioExt3[] = GPIO_EXT_3;
 
 static uint32_t GPIO_GetRegister1245(uint32_t base, uint32_t pin, uint8_t type)
 {
-    if(pin < gpioExt1245[base - 1].NUM_OF_GPIO)
+    if (pin < gpioExt1245[base - 1].NUM_OF_GPIO)
     {
-         switch(type)
+        switch (type)
         {
             case CNF_REGISTER:
                 return gpioExt1245[base - 1].CNF + pin * 4u;
@@ -22,11 +22,11 @@ static uint32_t GPIO_GetRegister1245(uint32_t base, uint32_t pin, uint8_t type)
 
 static uint32_t GPIO_GetRegister3(uint32_t pin, uint8_t type)
 {
-    for(uint32_t i = 0; i < ARRAY_SIZE(gpioExt3); i++)
+    for (uint32_t i = 0; i < ARRAY_SIZE(gpioExt3); i++)
     {
-        if(pin < gpioExt3[i].NUM_OF_GPIO)
+        if (pin < gpioExt3[i].NUM_OF_GPIO)
         {
-            switch(type)
+            switch (type)
             {
                 case CNF_REGISTER:
                     return gpioExt3[i].CNF + pin * 4u;
@@ -43,30 +43,38 @@ static uint32_t GPIO_GetRegister3(uint32_t pin, uint8_t type)
 
 static uint32_t GPIO_GetRegister(uint32_t base, uint32_t pin, uint8_t type)
 {
-    if(base == 3) 
+    switch (base)
     {
-        return GPIO_GetRegister3(pin, type);
+        case 1:
+        case 2:
+        case 4:
+        case 5:
+            return GPIO_GetRegister1245(base, pin, type);
+            break;
+        case 3:
+            return GPIO_GetRegister3(pin, type);
+            break;
     }
 
-    return GPIO_GetRegister1245(base, pin, type);
+    return 0;
 }
 
-void GPIO_PinMux(uint32_t base, uint32_t pin, const uint32_t muxMode)
+void GPIO_PinMux(uint32_t base, uint32_t pin, uint32_t muxMode)
 {
     uint32_t muxRegister = GPIO_GetRegister(base, pin, MUX_REGISTER);
 
     if (muxRegister)
     {
-        IOMUXC_SetPinMux(muxRegister, muxMode, 0, 0, 0, 0);
+        IOMUXC_SetPinMux(muxRegister, muxMode, 0, 0, 0, 1);
     }
 }
 
-void GPIO_PinConfig(uint32_t base, uint32_t pin, const uint32_t configValue)
+void GPIO_PinConfig(uint32_t base, uint32_t pin, uint32_t configValue)
 {
-     uint32_t configRegister = GPIO_GetRegister(base, pin, CNF_REGISTER);
+    uint32_t configRegister = GPIO_GetRegister(base, pin, CNF_REGISTER);
 
-     if (configRegister)
-     {
-         IOMUXC_SetPinConfig(0, 0, 0, 0, configRegister, configValue);
-     }
+    if (configRegister)
+    {
+        IOMUXC_SetPinConfig(0, 0, 0, 0, configRegister, configValue);
+    }
 }
