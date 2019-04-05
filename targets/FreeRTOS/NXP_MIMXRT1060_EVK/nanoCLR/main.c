@@ -27,10 +27,12 @@ int main(void)
 {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();    
+    BOARD_InitBootPeripherals();
+    BOARD_InitSEMC();
     //SCB_DisableDCache();
 
-    for (volatile uint32_t i = 0; i < 100000000; i++) {
+    for (volatile uint32_t i = 0; i < 100000000; i++)
+    {
         __asm("nop");
     }
 

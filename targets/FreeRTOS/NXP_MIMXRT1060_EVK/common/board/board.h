@@ -217,6 +217,8 @@ void BOARD_ConfigMPU(void);
 void BOARD_SD_Pin_Config(uint32_t speed, uint32_t strength);
 void BOARD_MMC_Pin_Config(uint32_t speed, uint32_t strength);
 
+status_t BOARD_InitSEMC(void);
+
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */
