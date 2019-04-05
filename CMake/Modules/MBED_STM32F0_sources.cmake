@@ -1,14 +1,14 @@
 ###########################################################################
 # WHEN ADDING A NEW SERIES add the include to the vendor source code bellow
 ###########################################################################
-include(MBED_STM_sources)
+include(MBEDOS_STM_sources)
 
 #######################################################################################
 # WHEN ADDING A NEW TARGET add the source code file for the series\device folder bellow
 #######################################################################################
 
 # sources in series\device folder
-set(MBED_VENDOR_SERIES_DEVICE_SRCS
+set(MBEDOS_VENDOR_SERIES_DEVICE_SRCS
     stm32f0xx_hal.c
     stm32f0xx_hal_adc.c
     stm32f0xx_hal_adc_ex.c
@@ -50,11 +50,11 @@ set(MBED_VENDOR_SERIES_DEVICE_SRCS
     stm32f0xx_hal_usart.c
     stm32f0xx_hal_wwdg.c
 )
-foreach(SRC_FILE ${MBED_VENDOR_SERIES_DEVICE_SRCS})
+foreach(SRC_FILE ${MBEDOS_VENDOR_SERIES_DEVICE_SRCS})
     set(MBEDOS_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(MBEDOS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/device
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/device
         CMAKE_FIND_ROOT_PATH_BOTH
     )
     # message("${SRC_FILE} >> ${MBEDOS_SRC_FILE}") # debug helper
@@ -85,14 +85,14 @@ set(MBED_VENDOR_SERIES_AND_TARGET_SRCS
     cmsis_nvic.c
     system_stm32f0xx.c
 )
-foreach(SRC_FILE ${MBED_VENDOR_SERIES_AND_TARGET_SRCS})
+foreach(SRC_FILE ${MBEDOS_VENDOR_SERIES_AND_TARGET_SRCS})
     set(MBEDOS_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(MBEDOS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES} 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/TARGET_${MBED_TARGET} 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/TARGET_${MBED_TARGET}/device 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/TARGET_${MBED_TARGET}/device/TOOLCHAIN_GCC_ARM
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES} 
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/TARGET_${MBEDOS_TARGET} 
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/TARGET_${MBEDOS_TARGET}/device 
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/TARGET_${MBEDOS_TARGET}/device/TOOLCHAIN_GCC_ARM
         CMAKE_FIND_ROOT_PATH_BOTH
     )
     # message("${SRC_FILE} >> ${MBEDOS_SRC_FILE}") # debug helper
@@ -104,8 +104,8 @@ endforeach()
 #######################################################################################################################################
 
 # startup file
-if(${MBED_TARGET} STREQUAL "NUCLEO_F091RC")
-    list(APPEND MBEDOS_SOURCES ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/TARGET_NUCLEO_F091RC/device/TOOLCHAIN_GCC_ARM/startup_stm32f091xc.S)
+if(${MBEDOS_TARGET} STREQUAL "NUCLEO_F091RC")
+    list(APPEND MBEDOS_SOURCES ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/TARGET_NUCLEO_F091RC/device/TOOLCHAIN_GCC_ARM/startup_stm32f091xc.S)
     set(LINKER_FILE "STM32F091XC")
 endif()
 
@@ -116,13 +116,13 @@ endif()
 # WHEN ADDING A NEW TARGET check if the linker file bellow works
 ################################################################
 
-function(MBED_SET_LINKER_OPTIONS TARGET)
+function(MBEDOS_SET_LINKER_OPTIONS TARGET)
 
     get_target_property(TARGET_LD_FLAGS ${TARGET} LINK_FLAGS)
     if(TARGET_LD_FLAGS)
-        set(TARGET_LD_FLAGS "-T${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/TARGET_${MBED_TARGET}/device/TOOLCHAIN_GCC_ARM/${LINKER_FILE}.LD ${TARGET_LD_FLAGS}")
+        set(TARGET_LD_FLAGS "-T${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/TARGET_${MBEDOS_TARGET}/device/TOOLCHAIN_GCC_ARM/${LINKER_FILE}.LD ${TARGET_LD_FLAGS}")
     else()
-        set(TARGET_LD_FLAGS "-T${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/TARGET_${MBED_TARGET}/device/TOOLCHAIN_GCC_ARM/${LINKER_FILE}.LD")
+        set(TARGET_LD_FLAGS "-T${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/TARGET_${MBEDOS_TARGET}/device/TOOLCHAIN_GCC_ARM/${LINKER_FILE}.LD")
     endif()
     set_target_properties(${TARGET} PROPERTIES LINK_FLAGS ${TARGET_LD_FLAGS})
 

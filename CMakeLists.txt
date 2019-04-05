@@ -53,7 +53,7 @@ endif()
 # list of supported RTOSes
 # when adding a new RTOS add the corresponding string bellow AND...
 # ... also on the compare block bellow
-set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS_ESP32" CACHE INTERNAL "supported RTOS options")
+set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS_ESP32" "MBEDOS" CACHE INTERNAL "supported RTOS options")
 
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
@@ -64,20 +64,29 @@ endif()
 
 string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
 string(COMPARE EQUAL "FREERTOS_ESP32" "${RTOS}" RTOS_FREERTOS_ESP32_CHECK)
+string(COMPARE EQUAL "MBEDOS" "${RTOS}" RTOS_MBEDOS_CHECK)
 
 ##########################################################################
 
 if(RTOS_FREERTOS_ESP32_CHECK)
     set(RTOS_FREERTOS_ESP32_CHECK TRUE)
     set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_MBEDOS_CHECK FALSE)
 endif()
 
 if(RTOS_CHIBIOS_CHECK)
     set(RTOS_CHIBIOS_CHECK TRUE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
+    set(RTOS_MBEDOS_CHECK FALSE)
 endif()
 
-#######################
+if(RTOS_MBEDOS_CHECK)
+    set(RTOS_MBEDOS_CHECK TRUE)
+    set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
+endif()
+
+###########################################################################
 
 
 ##########################################
@@ -104,6 +113,10 @@ if(RTOS_CHIBIOS_CHECK)
 elseif(RTOS_FREERTOS_ESP32_CHECK)
     message(STATUS "\nSetting Toolchain file for FreeRTOS ESP32 \n")
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
+
+elseif(RTOS_MBEDOS_CHECK)
+    message(STATUS "\nSetting Toolchain file for mbedOS \n")
+    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.mbedOS.${TOOLCHAIN}.cmake)
 
 # else()
 
@@ -611,7 +624,7 @@ endif()
 
 #################################################################
 
-#######################
+#################################################################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
 
@@ -667,7 +680,7 @@ if(RTOS_CHIBIOS_CHECK)
         else()
             message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
 
-            # branch naming follows the pattern 'stable_18.2.x'
+            # branch naming follows the pattern 'stable_19.1.x'
             # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter
             # find 1st dot in version number
             string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)
@@ -969,7 +982,7 @@ if(RTOS_CHIBIOS_CHECK)
         else()
             # board NOT found in targets folder
             # can't continue
-            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for it.\n\n")
         endif()
     endif()
 
@@ -1065,7 +1078,7 @@ if(RTOS_CHIBIOS_CHECK)
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for it.\n\n")
         endif()
 
     endif()
@@ -1092,5 +1105,360 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
  		add_subdirectory(targets/FreeRTOS_ESP32/${ESP32_BOARD})
 
     endif()
+#################################################################
 
+#################################################################
+# mbedOS
+elseif(RTOS_MBEDOS_CHECK)
+    message(STATUS "Platform mbedOS: we're working on it!") #TODO: remove when it actually works!
+
+
+    # sanity check on SSL provider: MbedOS only supports mbed TLS
+    if(NF_SECURITY_OPENSSL)
+        message(FATAL "Can't use OpenSSL for mbedOS. Currently only mbed TLS is supported.")
+    endif()
+
+    # check if MBEDOS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_MBEDOS_SOURCE TRUE)
+    if(MBEDOS_SOURCE)
+        if(NOT "${MBEDOS_SOURCE}" STREQUAL "")
+            set(NO_MBEDOS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_MBEDOS_SOURCE)
+        # no MBEDOS source specified, download it from it's repo
+
+        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+        include(Hack_SetGitSearchPath)
+
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        # mbedOS version
+        set(MBEDOS_VERSION_EMPTY TRUE)
+
+        # check if build was requested with a specifc mbedOS version
+        if(DEFINED MBEDOS_VERSION)
+            if(NOT "${MBEDOS_VERSION}" STREQUAL "")
+                set(MBEDOS_VERSION_EMPTY FALSE)
+            endif()
+        endif()
+
+        if(MBEDOS_VERSION_EMPTY)
+            # no mbedOS version actualy specified, must be empty which is fine, we'll grab the code from the mbed-os-15.12 branch
+            message(STATUS "RTOS is: mbedOS (latest available code from mbed-os-15.12.0)")
+            set(MBEDOS_GIT_TAG "mbed-os-15.12.0")
+        else()
+            message(STATUS "RTOS is: mbedOS v${MBEDOS_VERSION}")
+
+            # branch naming follows the pattern 'mbed-os-15.12'
+            # need to extract the major and minor numbers from the MBEDOS_VERSION parameter
+            # find 1st dot in version number
+            string(FIND ${MBEDOS_VERSION} "." MBEDOS_VERSION_DOT_INDEX)
+            # find 2nd dot in version number
+            string(FIND ${MBEDOS_VERSION} "." MBEDOS_VERSION_DOT_INDEX REVERSE)
+            # extract 'short' version
+            string(SUBSTRING ${MBEDOS_VERSION} 0 ${MBEDOS_VERSION_DOT_INDEX} MBEDOS_SHORT_VERSION)
+
+            # set branch name
+            set(MBEDOS_GIT_TAG "mbed-os-${MBEDOS_SHORT_VERSION}.0")
+        endif()
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("CMake/mbedOS.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/mbedOS_Download/CMakeLists.txt")
+
+        # setup CMake project for mbedOS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedOS_Download")
+
+        # run build on mbedOS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedOS_Download")
+
+        # add ChibiOS as external project
+        ExternalProject_Add(
+            mbedOS
+            PREFIX mbedOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedOS_Source
+            GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os
+            GIT_TAG ${MBEDOS_GIT_TAG}  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+        # get source dir for mbedOS CMake project
+        ExternalProject_Get_Property(mbedOS SOURCE_DIR)
+
+    else()
+        # mbedOS source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${MBEDOS_SOURCE}/")
+            message(STATUS "RTOS is: mbedOS (source from: ${MBEDOS_SOURCE})")
+
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/mbedOS_Source")
+                file(COPY "${MBEDOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mbedOS_Source")
+            else()
+                message(STATUS "Using local cache of mbedOS source from ${MBEDOS_SOURCE}")
+            endif()
+
+            #set(MBEDOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedOS_Source/include) #TODO: where is the include files?
+        else()
+            message(FATAL_ERROR "Couldn't find mbedOS source at ${MBEDOS_SOURCE}/")
+        endif()
+
+        # add ChibiOS as external project
+        ExternalProject_Add(
+            mbedOS
+            PREFIX mbedOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedOS_Source
+            
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+        # get source dir for mbedOS CMake project
+        ExternalProject_Get_Property(mbedOS SOURCE_DIR)
+
+    endif()
+
+    # if mbed TLS is enabled add it to the build
+    if(NF_SECURITY_MBEDTLS)
+
+        # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
+        set(NO_MBEDTLS_SOURCE TRUE)
+
+        if(MBEDTLS_SOURCE)
+            if(NOT "${MBEDTLS_SOURCE}" STREQUAL "")
+                set(NO_MBEDTLS_SOURCE FALSE)
+            endif()
+        endif()
+
+        # set options for mbed TLS
+        option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
+
+        if(NO_MBEDTLS_SOURCE)
+            # no mbed TLS source specified, download it from it's repo
+
+            # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+            include(Hack_SetGitSearchPath)
+
+            # check for Git (needed here for advanced warning to user if it's not installed)
+            find_package(Git)
+
+            #  check if Git was found, if not report to user and abort
+            if(NOT GIT_EXECUTABLE)
+                message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+            endif()
+
+            # set tag for currently supported version
+            set(MBEDTLS_GIT_TAG "mbedtls-2.14")
+
+            # need to setup a separate CMake project to download the code from the GitHub repository
+            # otherwise it won't be available before the actual build step
+            configure_file("CMake/mbedTLS.CMakeLists.cmake.in"
+                        "${CMAKE_BINARY_DIR}/mbedTLS_Download/CMakeLists.txt")
+
+            # setup CMake project for mbedTLS download
+            execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                            RESULT_VARIABLE result
+                            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedTLS_Download")
+
+            # run build on mbedTLS download CMake project to perform the download
+            execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                            RESULT_VARIABLE result
+                            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedTLS_Download")
+
+            # add mbedTLS as external project
+            ExternalProject_Add(
+                mbedTLS
+                PREFIX mbedTLS
+                SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source
+                GIT_REPOSITORY  https://github.com/nanoframework/mbedtls
+                GIT_TAG ${MBEDTLS_GIT_TAG}  # target specified branch
+                GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+                TIMEOUT 10
+                LOG_DOWNLOAD 1
+
+                # Disable all other steps
+                CONFIGURE_COMMAND ""
+                BUILD_COMMAND ""
+                INSTALL_COMMAND ""
+            )
+
+        else()
+            # mbedTLS source was specified
+
+            # sanity check is source path exists
+            if(EXISTS "${MBEDTLS_SOURCE}/")
+
+                # check if we already have the sources, no need to copy again
+                if(NOT EXISTS "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+                    message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")
+                    file(COPY "${MBEDTLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+                else()
+                    message(STATUS "Using local cache of mbedTLS source from ${MBEDTLS_SOURCE}")
+                endif()
+
+                set(MBEDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source/include)
+            else()
+                message(FATAL_ERROR "Couldn't find mbedTLS source at ${MBEDTLS_SOURCE}/")
+            endif()
+
+            # add mbedTLS as external project
+            ExternalProject_Add(
+                mbedTLS
+                PREFIX mbedTLS
+                SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source
+
+                # Disable all other steps
+                CONFIGURE_COMMAND ""
+                BUILD_COMMAND ""
+                INSTALL_COMMAND ""
+            )
+
+        endif()
+
+        # get source dir for mbedTLS CMake project
+        ExternalProject_Get_Property(mbedTLS SOURCE_DIR)
+
+        set(mbedTLS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include")
+        set(mbedTLS_LIBRARIES "${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        include_directories(${mbedTLS_INCLUDE_DIRS})
+
+    endif()
+
+    # Define base path for the class libraries
+    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/mbedOS/nanoCLR")
+
+    # set target base location
+    # this has to be set before the class library modules are pulled in
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/MbedOS/${MBEDOS_TARGET})
+        # set target base location
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/mbedOS/${MBEDOS_TARGET}")
+    else()
+        # try to find board in the Community targets folder
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/mbedOS/${MBEDOS_TARGET})
+            # set target base location
+            set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/mbedOS/${MBEDOS_TARGET}")
+        else()
+            # board NOT found in targets folder
+            # can't continue
+            message(FATAL_ERROR "\n\nSorry but support for ${MBEDOS_TARGET} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for it.\n\n")
+        endif()
+    endif()
+
+    # set CMSIS RTOS include directory
+    include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
+
+    # add target CMSIS OS folders
+    add_subdirectory(targets/CMSIS-OS/common/Include)
+    add_subdirectory(targets/CMSIS-OS/common)
+    add_subdirectory(targets/CMSIS-OS/nanoBooter)
+    add_subdirectory(targets/CMSIS-OS/nanoCLR)
+
+
+    # assume no community board... until proven otherwise
+    set(MBEDOS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
+
+    # start search in nanoFramework mbedOS 'overlay' folder
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/mbedOS/nf-overlay/os/hal/boards/${MBEDOS_TARGET})
+        # board found
+        # if it's on nF overlay board.c and board.h exist there for sure
+        set(MBEDOS_TARGET_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")
+    else()
+        # board NOT found in ChibiOS 'overlay'
+
+        # try to find it in the target boards
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/mbedOS/${MBEDOS_TARGET})
+            # board found
+            # check if the board definition files are available at the target folder
+            if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/mbedOS/${MBEDOS_TARGET}/device.h)
+                # definition files found
+                set(MBEDOS_TARGET_DEFINITIONS_LOCATION "Board definition files taken from target folder" CACHE INTERNAL "Location of board definition files")
+
+            else()
+                # board.c and board.h are NOT in the target folder, try to find them in the official distribution
+
+                if(EXISTS ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/${MBEDOS_TARGET}) #TODO: need to find the board definitions from the JSON?! or do we just use the full folder path?
+                # or do mbed targets need to always be added to nanoframework source so we can control it?
+                    # board found
+                    # if it's on the mbedOS official distribution the files exist here for sure
+                    set(MBEDOS_TARGET_DEFINITIONS_LOCATION "Board definition files taken from official mbedOS distribution" CACHE INTERNAL "Location of board definition files")
+
+                else()
+                    # board NOT found in official distribution
+                    # quit now as there is no were else to search for these
+                    message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${MBEDOS_TARGET} in the available list of mbedOS supported boards...\n\n")
+
+                #endif()
+            endif()
+
+        else()
+            # try to find board in the Community targets folder
+            if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/mbedOS/${MBEDOS_TARGET})
+                # set flag for this being a community board
+                set(MBEDOS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
+            else()
+                # board NOT found in official distribution
+                # quit now as there is no were else to search for these
+                message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${MBEDOS_TARGET} in the available list of mbedOS supported boards...\n\n")
+            endif()
+
+        endif()
+
+    endif()
+
+    # add target mbedOS dirs
+    add_subdirectory(targets/CMSIS-OS/mbedOS/Include)
+    add_subdirectory(targets/CMSIS-OS/mbedOS/common)
+    add_subdirectory(targets/CMSIS-OS/mbedOS/nanoBooter)
+    add_subdirectory(targets/CMSIS-OS/mbedOS/nanoCLR)
+
+    # now add the subdirectory for the board
+    # try to find board in the targets folder
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/mbedOS/${MBEDOS_TARGET})
+        # board found
+        message(STATUS "Support for target board '${MBEDOS_TARGET}' found")
+        message(STATUS "${MBEDOS_TARGET_DEFINITIONS_LOCATION}")
+
+        # add TARGET board directory
+        add_subdirectory("targets/CMSIS-OS/mbedOS/${MBEDOS_TARGET}")
+
+    else()
+
+        # try to find board in the Community targets folder
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/mbedOS/${MBEDOS_TARGET})
+            # board found
+            message(STATUS "Support for target board '${MBEDOS_TARGET}' found in Community targets")
+            message(STATUS "${MBEDOS_TARGET_DEFINITIONS_LOCATION}")
+
+            # add TARGET board directory from Community
+            add_subdirectory("targets-community/CMSIS-OS/mbedOS/${MBEDOS_TARGET}")
+
+        else()
+        # board NOT found in targets folder
+            # board NOT found in targets folder
+            message(FATAL_ERROR "\n\nSorry but support for ${MBEDOS_TARGET} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for it.\n\n")
+        endif()
+
+    endif()
+    #########################################################################
 endif()

@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
 INCLUDE(CMakeForceCompiler)
 # if( DEFINED CMAKE_CROSSCOMPILING )
 #     # subsequent toolchain loading is not really needed
@@ -72,7 +77,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
-function(MBED_ADD_HEX_BIN_DUMP_TARGETS TARGET)
+function(MBEDOS_ADD_HEX_BIN_DUMP_TARGETS TARGET)
     if(EXECUTABLE_OUTPUT_PATH)
         set(FILENAME "${EXECUTABLE_OUTPUT_PATH}/${TARGET}")
     else()
@@ -86,7 +91,7 @@ function(MBED_ADD_HEX_BIN_DUMP_TARGETS TARGET)
     add_custom_target(${TARGET}.dump DEPENDS ${TARGET} COMMAND ${CMAKE_OBJDUMP} -d -EL -S ${FILENAME} ${FILENAME}.dump)
 endfunction()
 
-function(MBED_PRINT_SIZE_OF_TARGETS TARGET)
+function(MBEDOS_PRINT_SIZE_OF_TARGETS TARGET)
     if(EXECUTABLE_OUTPUT_PATH)
       set(FILENAME "${EXECUTABLE_OUTPUT_PATH}/${TARGET}")
     else()

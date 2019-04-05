@@ -1,17 +1,17 @@
 include(JSONParser)
 
-# read mBed targets file
-file(READ "${PROJECT_BINARY_DIR}/mBedOS_Source/targets/targets.json" TARGETS_JSON)
+# read mbedOS targets file
+file(READ "${PROJECT_BINARY_DIR}/mbedOS_Source/targets/targets.json" TARGETS_JSON)
 
 # try to find target
-string(FIND ${TARGETS_JSON} ${MBED_TARGET} FOUND_TARGET)
+string(FIND ${TARGETS_JSON} ${MBEDOS_TARGET} FOUND_TARGET)
 
-# message(STATUS "${MBED_TARGET} @ ${FOUND_TARGET}")
+ message(STATUS "${MBEDOS_TARGET} @ ${FOUND_TARGET}")
 
 if(${FOUND_TARGET} GREATER -1)
     # target found
     
-    message(STATUS "mBed target '${MBED_TARGET}' found")
+    message(STATUS "mbedOS target '${MBEDOS_TARGET}' found")
     # get substring with data
     math(EXPR FOUND_TARGET "${FOUND_TARGET} - 1")
     
@@ -19,155 +19,155 @@ if(${FOUND_TARGET} GREATER -1)
     # the downside is that for most target this overuns to the next target
     string(SUBSTRING "${TARGETS_JSON}" ${FOUND_TARGET} 2000 TARGET_TENTATIVE_JSON)
 else()
-    message(FATAL_ERROR "\n\nSorry but ${MBED_TARGET} seems to be missing in the list of the mBed supported targets...\n\n")
+    message(FATAL_ERROR "\n\nSorry but ${MBEDOS_TARGET} seems to be missing in the list of the mbedOS supported targets...\n\n")
 endif()
 
 # parse target data
-sbeParseJson(MBED_TARGET_DATA TARGET_TENTATIVE_JSON)
+sbeParseJson(MBEDOS_TARGET_DATA TARGET_TENTATIVE_JSON)
 
 # try to extract relevant data 
-foreach(var ${MBED_TARGET_DATA})
+foreach(var ${MBEDOS_TARGET_DATA})
 
     # sanity check when json parse has overun to the next target
-    string(FIND ${var} "MBED_TARGET_DATA.${MBED_TARGET}" MBED_TARGET_NAME_FOUND)
-    if(MBED_TARGET_NAME_FOUND GREATER -1)
+    string(FIND ${var} "MBEDOS_TARGET_DATA.${MBEDOS_TARGET}" MBEDOS_TARGET_NAME_FOUND)
+    if(MBEDOS_TARGET_NAME_FOUND GREATER -1)
         
         # seems to belong to target, extract data
         #message("${var} : ${${var}}") # debug helper
 
         # core 
-        string(FIND ${var} "core" MBED_TARGET_CORE_INDEX)
-        if(${MBED_TARGET_CORE_INDEX} GREATER -1)
-            set(MBED_TARGET_CORE ${${var}})
+        string(FIND ${var} "core" MBEDOS_TARGET_CORE_INDEX)
+        if(${MBEDOS_TARGET_CORE_INDEX} GREATER -1)
+            set(MBEDOS_TARGET_CORE ${${var}})
         endif()
 
         # extra labels 0 is: target vendor
-        string(FIND ${var} "MBED_TARGET_DATA.${MBED_TARGET}.extra_labels_0" MBED_TARGET_VENDOR_INDEX)
-        if(${MBED_TARGET_VENDOR_INDEX} GREATER -1)
-            set(MBED_TARGET_VENDOR ${${var}})
+        string(FIND ${var} "MBEDOS_TARGET_DATA.${MBEDOS_TARGET}.extra_labels_0" MBEDOS_TARGET_VENDOR_INDEX)
+        if(${MBEDOS_TARGET_VENDOR_INDEX} GREATER -1)
+            set(MBEDOS_TARGET_VENDOR ${${var}})
         endif()
 
         # extra labels 1 is: target series/variant
-        string(FIND ${var} "MBED_TARGET_DATA.${MBED_TARGET}.extra_labels_1" MBED_TARGET_SERIES_INDEX)
-        if(${MBED_TARGET_SERIES_INDEX} GREATER -1)
-            set(MBED_TARGET_SERIES ${${var}})
+        string(FIND ${var} "MBEDOS_TARGET_DATA.${MBEDOS_TARGET}.extra_labels_1" MBEDOS_TARGET_SERIES_INDEX)
+        if(${MBEDOS_TARGET_SERIES_INDEX} GREATER -1)
+            set(MBEDOS_TARGET_SERIES ${${var}})
         endif()
         
         # extra labels 2 is used for compiler defs
-        string(FIND ${var} "MBED_TARGET_DATA.${MBED_TARGET}.extra_labels_2" MBED_TARGET_EXTRA_LABEL2_INDEX)
-        if(${MBED_TARGET_EXTRA_LABEL2_INDEX} GREATER -1)
-            set(MBED_TARGET_EXTRA_LABEL2 ${${var}})
+        string(FIND ${var} "MBEDOS_TARGET_DATA.${MBEDOS_TARGET}.extra_labels_2" MBEDOS_TARGET_EXTRA_LABEL2_INDEX)
+        if(${MBEDOS_TARGET_EXTRA_LABEL2_INDEX} GREATER -1)
+            set(MBEDOS_TARGET_EXTRA_LABEL2 ${${var}})
         endif()
 
         # 'macros' lists target aditional macros
-        string(FIND ${var} "MBED_TARGET_DATA.${MBED_TARGET}.macros_" MBED_TARGET_MACROS_INDEX)
-        if(${MBED_TARGET_MACROS_INDEX} GREATER -1)
-            list(APPEND MBED_TARGET_MACROS ${${var}})
+        string(FIND ${var} "MBEDOS_TARGET_DATA.${MBEDOS_TARGET}.macros_" MBEDOS_TARGET_MACROS_INDEX)
+        if(${MBEDOS_TARGET_MACROS_INDEX} GREATER -1)
+            list(APPEND MBEDOS_TARGET_MACROS ${${var}})
         endif()
 
         # 'device has' lists target features
-        string(FIND ${var} "MBED_TARGET_DATA.${MBED_TARGET}.device_has_" MBED_TARGET_DEVICE_HAS_INDEX)
-        if(${MBED_TARGET_DEVICE_HAS_INDEX} GREATER -1)
-            list(APPEND MBED_TARGET_FEATURES ${${var}})
+        string(FIND ${var} "MBEDOS_TARGET_DATA.${MBEDOS_TARGET}.device_has_" MBEDOS_TARGET_DEVICE_HAS_INDEX)
+        if(${MBEDOS_TARGET_DEVICE_HAS_INDEX} GREATER -1)
+            list(APPEND MBEDOS_TARGET_FEATURES ${${var}})
         endif()
 
         # 'supported form factors' lists supported form factors for board
-        string(FIND ${var} "MBED_TARGET_DATA.${MBED_TARGET}.supported_form_factors_" MBED_TARGET_DEVICE_FORM_FACTORS_INDEX)
-        if(${MBED_TARGET_DEVICE_FORM_FACTORS_INDEX} GREATER -1)
-            list(APPEND MBED_TARGET_DEVICE_FORM_FACTORS ${${var}})
+        string(FIND ${var} "MBEDOS_TARGET_DATA.${MBEDOS_TARGET}.supported_form_factors_" MBEDOS_TARGET_DEVICE_FORM_FACTORS_INDEX)
+        if(${MBEDOS_TARGET_DEVICE_FORM_FACTORS_INDEX} GREATER -1)
+            list(APPEND MBEDOS_TARGET_DEVICE_FORM_FACTORS ${${var}})
         endif()
 
     endif()
     
 endforeach()
 
-message("mBed target has ${MBED_TARGET_CORE}")
-message("mBed target vendor is ${MBED_TARGET_VENDOR}")
-message("mBed target series is ${MBED_TARGET_SERIES}")
-#message("mBed target features: ${MBED_TARGET_FEATURES}")
+message("mbedOS target has ${MBEDOS_TARGET_CORE}")
+message("mbedOS target vendor is ${MBEDOS_TARGET_VENDOR}")
+message("mbedOS target series is ${MBEDOS_TARGET_SERIES}")
+#message("mbedOS target features: ${MBEDOS_TARGET_FEATURES}")
 
 # get target core short name
-string(REPLACE "Cortex-" "" MBED_TARGET_CORE_SHORT ${MBED_TARGET_CORE} )
+string(REPLACE "Cortex-" "" MBEDOS_TARGET_CORE_SHORT ${MBEDOS_TARGET_CORE} )
 
 # set compiler options (general)
-string(APPEND MBEDOS_COMPILE_OPTIONS "-D__CORTEX_${MBED_TARGET_CORE_SHORT} -D__MBED__=1 -DTARGET_LIKE_MBED -D__MBED_CMSIS_RTOS_CM -DTOOLCHAIN_object -D__CMSIS_RTOS -DTOOLCHAIN_GCC -DTARGET_CORTEX_M -DARM_MATH_C${MBED_TARGET_CORE_SHORT} -DTARGET_${MBED_TARGET_CORE_SHORT} -DTOOLCHAIN_GCC_ARM -DTARGET_RELEASE -DTARGET_LIKE_CORTEX_${MBED_TARGET_CORE_SHORT} -D__CORTEX_${MBED_TARGET_CORE_SHORT} -DTARGET_${MBED_TARGET_VENDOR} -DTARGET_${MBED_TARGET_SERIES} -DTARGET_UVISOR_UNSUPPORTED -DTARGET_${MBED_TARGET}")
+string(APPEND MBEDOS_COMPILE_OPTIONS "-D__CORTEX_${MBEDOS_TARGET_CORE_SHORT} -D__MBEDOS__=1 -DTARGET_LIKE_MBEDOS -D__MBEDOS_CMSIS_RTOS_CM -DTOOLCHAIN_object -D__CMSIS_RTOS -DTOOLCHAIN_GCC -DTARGET_CORTEX_M -DARM_MATH_C${MBEDOS_TARGET_CORE_SHORT} -DTARGET_${MBEDOS_TARGET_CORE_SHORT} -DTOOLCHAIN_GCC_ARM -DTARGET_RELEASE -DTARGET_LIKE_CORTEX_${MBEDOS_TARGET_CORE_SHORT} -D__CORTEX_${MBEDOS_TARGET_CORE_SHORT} -DTARGET_${MBEDOS_TARGET_VENDOR} -DTARGET_${MBEDOS_TARGET_SERIES} -DTARGET_UVISOR_UNSUPPORTED -DTARGET_${MBEDOS_TARGET}")
 
 # extra compiler def from extra label 2
-if(MBED_TARGET_EXTRA_LABEL2)
-    string(APPEND MBEDOS_COMPILE_OPTIONS " -DTARGET_${MBED_TARGET_EXTRA_LABEL2}")
+if(MBEDOS_TARGET_EXTRA_LABEL2)
+    string(APPEND MBEDOS_COMPILE_OPTIONS " -DTARGET_${MBEDOS_TARGET_EXTRA_LABEL2}")
 endif()
 
 # set compiler options (target specific features)
-foreach(feature ${MBED_TARGET_FEATURES})
+foreach(feature ${MBEDOS_TARGET_FEATURES})
     string(APPEND MBEDOS_COMPILE_OPTIONS " -DDEVICE_${feature}=1")
 endforeach()
 
 # set compiler options (form factors)
-foreach(ff ${MBED_TARGET_DEVICE_FORM_FACTORS})
+foreach(ff ${MBEDOS_TARGET_DEVICE_FORM_FACTORS})
     string(APPEND MBEDOS_COMPILE_OPTIONS " -DTARGET_FF_${ff}")
 endforeach()
 
 # set compiler options (macros)
-foreach(macro ${MBED_TARGET_MACROS})
+foreach(macro ${MBEDOS_TARGET_MACROS})
     string(APPEND MBEDOS_COMPILE_OPTIONS " -D${macro}")
 endforeach()
 
 #message(">>MBEDOS_COMPILE_OPTIONS: ${MBEDOS_COMPILE_OPTIONS}<<") # debug helper
 
-# set include directories for mBed RTOS
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/cmsis)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/cmsis/TOOLCHAIN_GCC)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/docs)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/drivers)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/events)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/events/equeue)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/greentea-client)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/greentea-client/greentea-client)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/greentea-client/source)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/unity)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/unity/source)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/unity/unity)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/utest)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/utest/source)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/utest/utest)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/mbedtls)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/mbedtls/importer)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/mbedtls/inc)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/mbedtls/inc/mbedtls)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/mbedtls/platform)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/mbedtls/platform/inc)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/mbedtls/platform/src)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/mbedtls/src)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/nanostack)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/netsocket)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/features/storage)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/hal)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/hal/storage_abstraction)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/platform)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/rtos)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/rtos/rtx)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/rtos/rtx/TARGET_CORTEX_M)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/rtos/rtx/TARGET_CORTEX_M/TARGET_${MBED_TARGET_CORE_SHORT})
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/rtos/rtx/TARGET_CORTEX_M/TARGET_${MBED_TARGET_CORE_SHORT}/TOOLCHAIN_GCC)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/targets)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR})
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES})
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/device)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/TARGET_${MBED_TARGET})
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/TARGET_${MBED_TARGET}/device)
-list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mBedOS_Source/targets/TARGET_${MBED_TARGET_VENDOR}/TARGET_${MBED_TARGET_SERIES}/TARGET_${MBED_TARGET}/device/TOOLCHAIN_GCC_ARM)
+# set include directories for mbedOS RTOS
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/cmsis)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/cmsis/TOOLCHAIN_GCC)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/docs)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/drivers)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/events)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/events/equeue)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/greentea-client)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/greentea-client/greentea-client)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/greentea-client/source)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/unity)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/unity/source)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/unity/unity)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/utest)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/utest/source)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/utest/utest)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/mbedtls)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/mbedtls/importer)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/mbedtls/inc)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/mbedtls/inc/mbedtls)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/mbedtls/platform)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/mbedtls/platform/inc)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/mbedtls/platform/src)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/mbedtls/src)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/nanostack)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/netsocket)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/features/storage)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/hal)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/hal/storage_abstraction)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/platform)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/rtos)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/rtos/rtx)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/rtos/rtx/TARGET_CORTEX_M)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/rtos/rtx/TARGET_CORTEX_M/TARGET_${MBEDOS_TARGET_CORE_SHORT})
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/rtos/rtx/TARGET_CORTEX_M/TARGET_${MBEDOS_TARGET_CORE_SHORT}/TOOLCHAIN_GCC)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/targets)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR})
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES})
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/device)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/TARGET_${MBEDOS_TARGET})
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/TARGET_${MBEDOS_TARGET}/device)
+list(APPEND MBEDOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedOS_Source/targets/TARGET_${MBEDOS_TARGET_VENDOR}/TARGET_${MBEDOS_TARGET_SERIES}/TARGET_${MBEDOS_TARGET}/device/TOOLCHAIN_GCC_ARM)
 
 # source files and GCC options according to target vendor and series
 if("${MBED_TARGET_VENDOR}" STREQUAL "STM")
-    include(MBED_${MBED_TARGET_SERIES}_sources)
-    include(MBED_${MBED_TARGET_SERIES}_GCC_options)
+    include(MBEDOS_${MBEDOS_TARGET_SERIES}_sources)
+    include(MBEDOS_${MBEDOS_TARGET_SERIES}_GCC_options)
 endif()
 
 # source files for RTOS
-set(MBEDRTOS_SRCS
+set(MBEDOSRTOS_SRCS
     # drivers
     AnalogIn.cpp
     BusIn.cpp
@@ -348,29 +348,29 @@ set(MBEDRTOS_SRCS
     rt_Timer.c
 )
 
-foreach(SRC_FILE ${MBEDRTOS_SRCS})
+foreach(SRC_FILE ${MBEDOSRTOS_SRCS})
     set(MBEDOS_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(MBEDOS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/drivers
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/events
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/events/equeue
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/greentea-client/source
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/unity/source
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/utest
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/features/frameworks/utest/source
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/drivers
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/events
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/events/equeue
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/greentea-client/source
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/unity/source
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/utest
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/features/frameworks/utest/source
             
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/features/mbedtls/platform/src
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/features/mbedtls/src
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/features/netsocket
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/features/mbedtls/platform/src
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/features/mbedtls/src
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/features/netsocket
 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/hal
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/hal
 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/platform
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/platform
 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/rtos 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/rtos/rtx 
-            ${PROJECT_BINARY_DIR}/mBedOS_Source/rtos/rtx/TARGET_CORTEX_M 
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/rtos 
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/rtos/rtx 
+            ${PROJECT_BINARY_DIR}/mbedOS_Source/rtos/rtx/TARGET_CORTEX_M 
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

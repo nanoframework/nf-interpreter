@@ -4,7 +4,7 @@ project(ChibiOS-download NONE)
 
 include(ExternalProject)
 
-# download ChibiOS source from official SVN repo
+# download ChibiOS source from nanoframework mirror
 ExternalProject_Add( 
     ChibiOS
     PREFIX ChibiOS

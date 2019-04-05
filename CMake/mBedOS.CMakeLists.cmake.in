@@ -1,22 +1,22 @@
 cmake_minimum_required(VERSION 2.8.2)
 
-project(mBedOS-download NONE)
+project(mbedOS-download NONE)
 
 include(ExternalProject)
 
-# download mBed RTOS source from official mBed GitHub repo
+# download mbedOS RTOS source from official mbedOS GitHub repo
     ExternalProject_Add( 
-        mBedOS
-        PREFIX mBedOS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/mBedOS_Source
-        GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os/
-        GIT_TAG master  # target master branch
+        mbedOS
+        PREFIX mbedOS
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedOS_Source
+        GIT_REPOSITORY  https://github.com/ARMmbed/mbed-os
+        GIT_TAG ${MBEDOS_GIT_TAG} # target specified branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
         
         # Disable all other steps
+        INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
-        INSTALL_COMMAND ""
     )
