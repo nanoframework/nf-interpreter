@@ -18,9 +18,9 @@
 // they also must be coherent with what's in the linker file for nanoBooter and nanoCLR
 
 // RAM base address 
-#define RAM1_MEMORY_StartAddress        ((uint32_t)0xC0000000)
+#define RAM1_MEMORY_StartAddress        ((uint32_t)0xD0000000)
 // RAM size 
-#define RAM1_MEMORY_Size                ((uint32_t)0x01000000)
+#define RAM1_MEMORY_Size                ((uint32_t)0x00800000)
 
 // FLASH base address
 #define FLASH1_MEMORY_StartAddress      ((uint32_t)0x08000000)
@@ -31,6 +31,10 @@
 
 /////////////////////////////////////
 #define PLATFORM_HAS_RNG       TRUE
+/////////////////////////////////////
+
+/////////////////////////////////////
+//#define EVENTS_HEART_BEAT       palToggleLine(GPIOG_LED2)
 /////////////////////////////////////
 
 #endif /* _TARGET_COMMON_H_ */

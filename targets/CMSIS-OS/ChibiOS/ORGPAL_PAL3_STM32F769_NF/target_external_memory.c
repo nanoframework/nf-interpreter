@@ -67,21 +67,21 @@
 #define FMC_Write_Protection_Disable       ((uint32_t)0x00000000)
 #define FMC_Write_Protection_Enable        ((uint32_t)0x00000200)
 
-#define SDRAM_SIZE       (16 * 1024 * 1024)
-#define SDRAM_START      ((void *)FSMC_Bank5_MAP_BASE)
+#define SDRAM_SIZE       (8 * 1024 * 1024)
+#define SDRAM_START      ((void *)FSMC_Bank6_MAP_BASE)
 
 
 // SDRAM driver configuration structure.
 static const SDRAMConfig sdram_cfg = {
   .sdcr = (uint32_t) FMC_ColumnBits_Number_8b |
                      FMC_RowBits_Number_12b |
-                     FMC_SDMemory_Width_32b |
+                     FMC_SDMemory_Width_16b |
                      FMC_InternalBank_Number_4 |
                      FMC_CAS_Latency_3 |
                      FMC_Write_Protection_Disable |
                      FMC_SDClock_Period_2 |
                      FMC_Read_Burst_Enable |
-                     FMC_ReadPipe_Delay_0,
+                     FMC_ReadPipe_Delay_1,
   .sdtr = (uint32_t) (2   - 1) | // FMC_LoadToActiveDelay = 2 (TMRD: 2 Clock cycles)
                      (7 <<  4) | // FMC_ExitSelfRefreshDelay = 7 (TXSR: min=70ns (7x11.11ns))
                      (4 <<  8) | // FMC_SelfRefreshTime = 4 (TRAS: min=42ns (4x11.11ns) max=120k (ns))
@@ -102,10 +102,5 @@ static const SDRAMConfig sdram_cfg = {
 void Target_ExternalMemoryInit()
 {
     fsmcSdramInit();
-
-    // FIXME 
-    // this swaps SDRAM address to 0x60000000 and makes it L1 cacheable    
-    //SYSCFG->MEMRMP |= SYSCFG_MEMRMP_SWP_FMC_0;
-
     fsmcSdramStart(&SDRAMD, &sdram_cfg);
 }
