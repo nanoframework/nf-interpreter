@@ -23,6 +23,7 @@ list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoCRT.cpp")
 
 # append target PAL source files
 list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetPAL_Events.cpp")
+list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetPAL_Time.cpp")
 
 # add native assemblies
 ParseNativeAssemblies()
