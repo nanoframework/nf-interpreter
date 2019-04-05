@@ -30,7 +30,7 @@ MEMORY
     ram5        : org = 0x40024000, len = 4k                        /* BCKP SRAM */
     ram6        : org = 0x00000000, len = 0
     ram7        : org = 0x00000000, len = 0
-    ext_ram     : org = 0xC0000000, len = 16M                       /* external SDRAM */
+    ext_ram     : org = 0xC0000000, len = 8M                        /* external SDRAM */
 }
 
 /* For each data/text section two region are defined, a virtual region
@@ -78,7 +78,7 @@ REGION_ALIAS("BSS_RAM", ram3);
 REGION_ALIAS("HEAP_RAM", ram0);
 
 /* RAM region to be used for the nanoFramework CLR managed heap.*/
-REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ext_ram);
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
 
 /* rules inclusion.*/
 INCLUDE rules_stacks.ld
