@@ -4,10 +4,11 @@
 //
 
 #include <nanoHAL_v2.h>
+#include "MIMXRT1062.h"
 
 inline void CPU_Reset()
 {
-    //TODO reset
+    NVIC_SystemReset();
 };
 
 // CPU sleep is not currently implemented in this target

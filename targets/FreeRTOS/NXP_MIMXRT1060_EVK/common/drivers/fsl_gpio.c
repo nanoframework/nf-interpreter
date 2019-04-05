@@ -17,7 +17,7 @@
  ******************************************************************************/
 
 /* Array of GPIO peripheral base address. */
-static GPIO_Type *const s_gpioBases[] = GPIO_BASE_PTRS;
+GPIO_Type *const s_gpioBases[] = GPIO_BASE_PTRS;
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /* Array of GPIO clock name. */

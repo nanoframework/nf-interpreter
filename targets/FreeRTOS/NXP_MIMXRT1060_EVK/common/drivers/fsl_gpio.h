@@ -25,6 +25,8 @@
 #define FSL_GPIO_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
 /*@}*/
 
+extern GPIO_Type *const s_gpioBases[];
+
 /*! @brief GPIO direction definition. */
 typedef enum _gpio_pin_direction
 {

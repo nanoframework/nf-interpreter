@@ -12,15 +12,21 @@
 #include <nanoHAL_v2.h>
 #include <string.h>
 
-
-void CLRStartupThread(void * argument)
+void CLRStartupThread(void *argument)
 {
-  CLR_SETTINGS* clrSettings = (CLR_SETTINGS*)argument;
+  (void)argument;
+
+  CLR_SETTINGS clrSettings;
+  (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+
+  clrSettings.MaxContextSwitches = 50;
+  clrSettings.WaitForDebugger = false;
+  clrSettings.EnterDebuggerLoopAfterExit = true;
 
   // initialize nanoHAL
   nanoHAL_Initialize_C();
 
-  ClrStartup(*clrSettings);
+  ClrStartup(clrSettings);
 
   vTaskDelete(NULL);
 
