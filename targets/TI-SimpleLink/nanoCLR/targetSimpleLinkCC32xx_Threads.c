@@ -45,6 +45,7 @@ extern void sntp_init(void);
 #define SL_STOP_TIMEOUT         (200)
 
 #define SPAWN_TASK_PRIORITY                 (9)
+#define NF_TASK_PRIORITY                    (5)
 #define TASK_STACK_SIZE                     (2048)
 
 #define SLNET_IF_WIFI_PRIO                  (5)
@@ -734,7 +735,7 @@ void * mainThread(void *arg)
 
     // // provisioning task
     // pthread_attr_init(&threadAttributes);
-    // priorityParams.sched_priority = 1;
+    // priorityParams.sched_priority = NF_TASK_PRIORITY;
     // retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
     // retc |= pthread_attr_setstacksize(&threadAttributes, TASK_STACK_SIZE);
     // if(retc)
@@ -765,7 +766,7 @@ void * mainThread(void *arg)
 
     // receiver thread
     pthread_attr_init(&threadAttributes);
-    priorityParams.sched_priority = 1;
+    priorityParams.sched_priority = NF_TASK_PRIORITY;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
     retc |= pthread_attr_setstacksize(&threadAttributes, 2048);
     if (retc != 0)
@@ -787,7 +788,7 @@ void * mainThread(void *arg)
 
     // CLR thread
     pthread_attr_init(&threadAttributes);
-    priorityParams.sched_priority = 1;
+    priorityParams.sched_priority = NF_TASK_PRIORITY;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
     retc |= pthread_attr_setstacksize(&threadAttributes, 4092);
     if (retc != 0)
