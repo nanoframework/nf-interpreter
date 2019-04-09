@@ -2819,6 +2819,7 @@ struct CLR_RT_ExecutionEngine
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static const int                    c_fDebugger_StateInitialize          = 0x00000000;
+    static const int                    c_fDebugger_StateResolutionFailed    = 0x00000001;
     static const int                    c_fDebugger_StateProgramRunning      = 0x00000400;
     static const int                    c_fDebugger_StateProgramExited       = 0x00000800;
     static const int                    c_fDebugger_StateMask                = c_fDebugger_StateProgramRunning + c_fDebugger_StateProgramExited;

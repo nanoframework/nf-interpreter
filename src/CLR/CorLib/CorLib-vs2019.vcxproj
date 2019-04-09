@@ -1,0 +1,214 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\targets\os\win32\Include\target_os.h" />
+    <ClInclude Include="CorLib.h" />
+    <ClInclude Include="corlib_native.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="corlib_native.cpp" />
+    <ClCompile Include="corlib_native_System_AppDomain.cpp" />
+    <ClCompile Include="corlib_native_System_Array.cpp" />
+    <ClCompile Include="corlib_native_System_Attribute.cpp" />
+    <ClCompile Include="corlib_native_System_BitConverter.cpp" />
+    <ClCompile Include="corlib_native_System_Collections_ArrayList.cpp" />
+    <ClCompile Include="corlib_native_System_Collections_Queue.cpp" />
+    <ClCompile Include="corlib_native_System_Collections_Stack.cpp" />
+    <ClCompile Include="corlib_native_System_Console.cpp" />
+    <ClCompile Include="corlib_native_System_Convert.cpp" />
+    <ClCompile Include="corlib_native_System_DateTime.cpp" />
+    <ClCompile Include="corlib_native_System_Delegate.cpp" />
+    <ClCompile Include="corlib_native_System_Diagnostics_Debugger.cpp" />
+    <ClCompile Include="corlib_native_System_Double.cpp" />
+    <ClCompile Include="corlib_native_System_Enum.cpp" />
+    <ClCompile Include="corlib_native_System_Exception.cpp" />
+    <ClCompile Include="corlib_native_System_GC.cpp" />
+    <ClCompile Include="corlib_native_System_Globalization_CultureInfo.cpp" />
+    <ClCompile Include="corlib_native_System_Globalization_DateTimeFormat.cpp" />
+    <ClCompile Include="corlib_native_System_Guid.cpp" />
+    <ClCompile Include="corlib_native_System_MarshalByRefObject.cpp" />
+    <ClCompile Include="corlib_native_System_MathInternal.cpp" />
+    <ClCompile Include="corlib_native_System_MulticastDelegate.cpp" />
+    <ClCompile Include="corlib_native_System_Number.cpp" />
+    <ClCompile Include="corlib_native_System_Object.cpp" />
+    <ClCompile Include="corlib_native_System_Random.cpp" />
+    <ClCompile Include="corlib_native_System_Reflection_Assembly.cpp" />
+    <ClCompile Include="corlib_native_System_Reflection_Binder.cpp" />
+    <ClCompile Include="corlib_native_System_Reflection_ConstructorInfo.cpp" />
+    <ClCompile Include="corlib_native_System_Reflection_FieldInfo.cpp" />
+    <ClCompile Include="corlib_native_System_Reflection_MemberInfo.cpp" />
+    <ClCompile Include="corlib_native_System_Reflection_MethodBase.cpp" />
+    <ClCompile Include="corlib_native_System_Reflection_PropertyInfo.cpp" />
+    <ClCompile Include="corlib_native_System_Reflection_RuntimeFieldInfo.cpp" />
+    <ClCompile Include="corlib_native_System_Reflection_RuntimeMethodInfo.cpp" />
+    <ClCompile Include="corlib_native_System_Resources_ResourceManager.cpp" />
+    <ClCompile Include="corlib_native_System_RuntimeType.cpp" />
+    <ClCompile Include="corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp" />
+    <ClCompile Include="corlib_native_System_Runtime_Remoting_RemotingServices.cpp" />
+    <ClCompile Include="corlib_native_System_String.cpp" />
+    <ClCompile Include="corlib_native_System_Text_UTF8Decoder.cpp" />
+    <ClCompile Include="corlib_native_System_Text_UTF8Encoding.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_AutoResetEvent.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_Interlocked.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_ManualResetEvent.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_Monitor.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_Thread.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_Timer.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_WaitHandle.cpp" />
+    <ClCompile Include="corlib_native_System_TimeSpan.cpp" />
+    <ClCompile Include="corlib_native_System_Type.cpp" />
+    <ClCompile Include="corlib_native_System_ValueType.cpp" />
+    <ClCompile Include="corlib_native_System_WeakReference.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{58E950CC-2FF6-423C-B006-A70A19272F20}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>CorLib</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <ProjectName>CorLib</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
