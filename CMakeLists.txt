@@ -1408,7 +1408,7 @@ elseif(RTOS_MBEDOS_CHECK)
                     # quit now as there is no were else to search for these
                     message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${MBEDOS_TARGET} in the available list of mbedOS supported boards...\n\n")
 
-                #endif()
+                endif()
             endif()
 
         else()
