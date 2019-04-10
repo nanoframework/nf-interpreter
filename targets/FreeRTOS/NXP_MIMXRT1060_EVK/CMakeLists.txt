@@ -103,6 +103,8 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/common/drivers/freertos
     ${CMAKE_CURRENT_SOURCE_DIR}/common/utilities
     ${CMAKE_CURRENT_SOURCE_DIR}/common/xip
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/sdmmc/inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/sdmmc/port
 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 

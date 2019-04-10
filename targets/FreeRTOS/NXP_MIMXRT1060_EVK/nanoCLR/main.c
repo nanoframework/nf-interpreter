@@ -14,6 +14,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "sdcard.h"
+
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoCLR_Application.h>
 #include "Target_BlockStorage_iMXRTFlashDriver.h"
@@ -29,6 +31,7 @@ int main(void)
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
     BOARD_InitSEMC();
+    BOARD_USDHCClockConfiguration();
     //SCB_DisableDCache();
 
     for (volatile uint32_t i = 0; i < 100000000; i++)
@@ -38,8 +41,9 @@ int main(void)
 
     iMXRTFlexSPIDriver_InitializeDevice(NULL);
 
-    xTaskCreate(ReceiverThread, "ReceiverThread", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
-    xTaskCreate(CLRStartupThread, "CLRStartupThread", 8192, NULL, configMAX_PRIORITIES - 2, NULL);
+    SDCardInit();
+    //xTaskCreate(ReceiverThread, "ReceiverThread", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
+    //xTaskCreate(CLRStartupThread, "CLRStartupThread", 8192, NULL, configMAX_PRIORITIES - 2, NULL);
 
     vTaskStartScheduler();
 
