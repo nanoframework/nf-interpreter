@@ -37,6 +37,11 @@ if(NF_FEATURE_DEBUGGER)
     find_package(NF_Diagnostics REQUIRED)
 endif()
 
+# nF feature: filesystem
+if(USE_FILESYSTEM_OPTION)
+    find_package(FATFS REQUIRED)
+endif()
+
 #######################################
 
 add_subdirectory("common")
@@ -81,6 +86,9 @@ add_executable(
     "${NF_CoreCLR_SOURCES}"
     "${NF_Debugger_SOURCES}"
     "${NF_Diagnostics_SOURCES}"
+
+    # sources for FatFS
+    "${FATFS_SOURCES}"
 
     # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
@@ -140,6 +148,10 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 
     # includes for nanoFramework APIs
     "${TARGET_NANO_APIS_INCLUDES}"
+
+    # includes for FatFS
+    ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/fatfs
+    "${FATFS_INCLUDE_DIRS}"
     
 )
 
