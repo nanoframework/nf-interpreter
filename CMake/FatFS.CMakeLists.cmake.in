@@ -4,7 +4,7 @@ project(FatFS-download NONE)
 
 include(ExternalProject)
 
-# download FatFS source from official website
+# download FatFS source from MateuszKlatecki git repo
 ExternalProject_Add( 
     FatFS
     PREFIX FatFS
