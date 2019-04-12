@@ -24,67 +24,66 @@ struct FileOperation
     uint32_t    ContentLength;
 };
 
-// // this is the FileIO working thread
-// // because FatFS is supposed to be atomic we won't have any concurrent threads
-// static thread_t* fileIoWorkingThread;
+// this is the FileIO working thread
+// because FatFS is supposed to be atomic we won't have any concurrent threads
+static TaskHandle_t fileIoWorkingThread = NULL;
+FRESULT threadOperationResult;
 
-// // ReadText working thread
-// static THD_FUNCTION(ReadTextWorkingThread, arg)
-// {
-//     FRESULT         operationResult;
+// ReadText working thread
+static void ReadTextWorkingThread(void * arg)
+{
 
-//     FileOperation*  fileIoOperation = (FileOperation*)arg;
+    FileOperation*  fileIoOperation = (FileOperation*)arg;
 
-//     // need an extra one for the terminator
-//     uint32_t readLength = fileIoOperation->ContentLength + 1;
+    // need an extra one for the terminator
+    uint32_t readLength = fileIoOperation->ContentLength + 1;
     
-//     // read string
-//     if(f_gets((TCHAR*)fileIoOperation->Content, readLength, fileIoOperation->File))
-//     {
-//         operationResult = FR_OK;
-//     }
-//     else
-//     {
-//         operationResult = (FRESULT)f_error(fileIoOperation->File);
-//     }
+    // read string
+    if(f_gets((TCHAR*)fileIoOperation->Content, readLength, fileIoOperation->File))
+    {
+        threadOperationResult = FR_OK;
+    }
+    else
+    {
+        threadOperationResult = (FRESULT)f_error(fileIoOperation->File);
+    }
 
-//     // close file
-//     f_close(fileIoOperation->File);
+    // close file
+    f_close(fileIoOperation->File);
 
-//     // free memory
-//     platform_free(fileIoOperation->File);
-//     platform_free(fileIoOperation);
+    // free memory
+    platform_free(fileIoOperation->File);
+    platform_free(fileIoOperation);
 
-//     // fire event for FileIO operation complete
-//     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
+    // fire event for FileIO operation complete
+    Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
 
-//     chThdExit((msg_t)operationResult);
-// }
+    vTaskDelete(NULL);
+}
 
-// // WriteText working thread
-// static THD_FUNCTION(WriteTextWorkingThread, arg)
-// {
-//     FRESULT         operationResult;
+// WriteText working thread
+static void WriteTextWorkingThread(void *arg)
+{
 
-//     FileOperation*  fileIoOperation = (FileOperation*)arg;
-//     if(f_puts(fileIoOperation->Content, fileIoOperation->File) == (int)fileIoOperation->ContentLength)
-//     {
-//         // expected number of bytes written
-//         operationResult = FR_OK;
-//     }
+    FileOperation*  fileIoOperation = (FileOperation*)arg;
+    if(f_puts(fileIoOperation->Content, fileIoOperation->File) == (int)fileIoOperation->ContentLength)
+    {
+        // expected number of bytes written
+        threadOperationResult = FR_OK;
+    }
 
-//     // close file
-//     f_close(fileIoOperation->File);
+    // close file
+    f_close(fileIoOperation->File);
 
-//     // free memory
-//     platform_free(fileIoOperation->File);
-//     platform_free(fileIoOperation);
+    // free memory
+    platform_free(fileIoOperation->File);
+    platform_free(fileIoOperation);
 
-//     // fire event for FileIO operation complete
-//     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
+    // fire event for FileIO operation complete
+    Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
   
-//     chThdExit(operationResult);
-// }
+    vTaskDelete(NULL);
+}
 
 // // WriteBinary working thread
 // static THD_FUNCTION(WriteBinaryWorkingThread, arg)
@@ -356,14 +355,13 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
             fileIoOperation->ContentLength = hal_strlen_s(fileIoOperation->Content);
 
             // spawn working thread to perform the write transaction
-            //TODO
-            // fileIoWorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(2048),
-            //                             "STWT", NORMALPRIO, WriteTextWorkingThread, fileIoOperation);
+            BaseType_t ret;
+            ret = xTaskCreate(WriteTextWorkingThread, "WriteText", 2048, fileIoOperation, configMAX_PRIORITIES - 2, &fileIoWorkingThread);
 
-            // if(fileIoWorkingThread == NULL)
-            // {
-            //     NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
-            // }
+            if (ret != pdPASS)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+            }
 
             // bump custom state
             stack.m_customState = 2;
@@ -383,15 +381,15 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
             //TODO
             //operationResult = (FRESULT)chThdWait(fileIoWorkingThread);
 
-            if(operationResult == FR_DISK_ERR)
+            if(threadOperationResult == FR_DISK_ERR)
             {
                 NANOCLR_SET_AND_LEAVE( CLR_E_FILE_IO );
             }
-            else if(operationResult == FR_NO_FILE)
+            else if(threadOperationResult == FR_NO_FILE)
             {
                 NANOCLR_SET_AND_LEAVE( CLR_E_FILE_NOT_FOUND );
             }
-            else if(operationResult == FR_INVALID_DRIVE)
+            else if(threadOperationResult == FR_INVALID_DRIVE)
             {
                 // failed to change drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -627,14 +625,13 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
             fileIoOperation->ContentLength = fileInfo.fsize;
 
             // spawn working thread to perform the read transaction
-            //TODO
-            // fileIoWorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(2048),
-            //                             "STRT", NORMALPRIO, ReadTextWorkingThread, fileIoOperation);
+            BaseType_t ret;
+            ret = xTaskCreate(ReadTextWorkingThread, "ReadText", 2048, fileIoOperation, configMAX_PRIORITIES - 2, &fileIoWorkingThread);
 
-            // if(fileIoWorkingThread == NULL)
-            // {
-            //     NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
-            // }
+            if (ret != pdPASS)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+            }
 
             // bump custom state
             stack.m_customState = 2;
@@ -654,15 +651,15 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
             //TODO
             //operationResult = (FRESULT)chThdWait(fileIoWorkingThread);
 
-            if(operationResult == FR_DISK_ERR)
+            if(threadOperationResult == FR_DISK_ERR)
             {
                 NANOCLR_SET_AND_LEAVE( CLR_E_FILE_IO );
             }
-            else if(operationResult == FR_NO_FILE)
+            else if(threadOperationResult == FR_NO_FILE)
             {
                 NANOCLR_SET_AND_LEAVE( CLR_E_FILE_NOT_FOUND );
             }
-            else if(operationResult == FR_INVALID_DRIVE)
+            else if(threadOperationResult == FR_INVALID_DRIVE)
             {
                 // failed to change drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
