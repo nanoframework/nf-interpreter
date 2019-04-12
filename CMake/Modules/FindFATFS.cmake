@@ -26,11 +26,6 @@ foreach(SRC_FILE ${FATFS_SRCS})
     list(APPEND FATFS_SOURCES ${FATFS_SRC_FILE})
 endforeach()
 
-##
-if(EXISTS "${CMAKE_BINARY_DIR}/FatFS_Source/source/ffconf.h")
-    file(RENAME ${CMAKE_BINARY_DIR}/FatFS_Source/source/ffconf.h ${CMAKE_BINARY_DIR}/FatFS_Source/source/_ffconf.h)
-endif()
-
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(FATFS DEFAULT_MSG FATFS_INCLUDE_DIRS FATFS_SOURCES)
