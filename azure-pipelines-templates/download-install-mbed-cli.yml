@@ -2,13 +2,7 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-  - task: PythonScript@0
-    inputs:
-      targetType: 'inline'
-      script: |
-        print('Installing mbed-cli')
-        pip install --upgrade pip mbed-cli
-        print('Adding GCC toolchain')
-        mbed config -G GCC_ARM_PATH "$(GNU_GCC_TOOLCHAIN_PATH)"
-        print('Finishing up')
+  - script: |
+        python -m pip install --upgrade pip mbed-cli
+        python -m mbed config -G GCC_ARM_PATH "$(GNU_GCC_TOOLCHAIN_PATH)"
     displayName: 'Install mbed-cli'
