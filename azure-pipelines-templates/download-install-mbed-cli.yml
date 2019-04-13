@@ -6,6 +6,9 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-          pip install --upgrade pip mbed-cli
-          mbed config -G GCC_ARM_PATH "$(GNU_GCC_TOOLCHAIN_PATH)"
+        print('Installing mbed-cli')
+        pip install --upgrade pip mbed-cli
+        print('Adding GCC toolchain')
+        mbed config -G GCC_ARM_PATH "$(GNU_GCC_TOOLCHAIN_PATH)"
+        print('Finishing up')
     displayName: 'Install mbed-cli'
