@@ -6,8 +6,8 @@ parameters:
 
 steps:
   - script: |
-      mbed import $(parameters.buildDirectory)
-      cd $(parameters.buildDirectory)
+      mbed import $(parameters.builDirectory)
+      cd $(parameters.builDirectory)
       echo todo... run command - mbed compile -m K64F -t ARM
       mbed config --list
     displayName: 'build target using mbed-cli'
