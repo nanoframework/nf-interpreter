@@ -1,0 +1,12 @@
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: PythonScript@0
+    inputs:
+      targetType: 'inline'
+      script: |
+        pip install --upgrade pip mbed-cli
+        mbed config -G GCC_ARM_PATH $(GNU_GCC_TOOLCHAIN_PATH)
+  displayName: 'Install mbed-cli'
+# TODO: use correct path to GCC toolchain!

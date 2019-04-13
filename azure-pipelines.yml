@@ -166,6 +166,50 @@ jobs:
 
   - template: azure-pipelines-templates/publish-bintray.yml
 
+
+#################
+# MBEDOS targets
+- job: Build_MBEDOS_targets
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  # condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
+  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
+
+  dependsOn:
+  - Check_Build_Options
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  # There are many built in MBED targets, but we only currently build against one. However this is setup as a matrix to make it easy to add more.
+  strategy:
+    matrix:
+      ST_STM32F769I_DISCOVERY:
+        TargetName: ST_STM32F769I_DISCOVERY
+        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=MBEDOS # -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON -DAPI_Windows.Storage=ON
+        GccArm_Version:
+        NeedsDFU: false 
+
+  variables:
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+
+  steps:
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+
+  - template: azure-pipelines-templates/download-install-mbed-cli.yml
+
+  #- template: azure-pipelines-templates/download-install-ninja.yml
+
+  - template: azure-pipelines-templates/build-mbedos-targets.yml
+
+  #- template: azure-pipelines-templates/pack-publish-artifacts.yml
+
+  #- template: azure-pipelines-templates/publish-bintray.yml
+
+  #- template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
 #################
 # WIN32 
 - job: Build_WIN32_nanoCLR
