@@ -7,7 +7,7 @@ parameters:
 steps:
   - task: CopyFiles@1
     inputs:
-      sourceFolder: ${{ parameters.builDirectory }}
+      sourceFolder: ${{ parameters.buildDirectory }}
       Contents: |
         *.bin
         *.hex
