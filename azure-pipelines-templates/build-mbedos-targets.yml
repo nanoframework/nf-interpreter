@@ -5,16 +5,6 @@ parameters:
   builDirectory: '$(Build.SourcesDirectory)\build'
 
 steps:
-
-  #- task: CMake@1
-  #  inputs:
-  #    cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) ..'
-  #    workingDirectory:  ${{ parameters.builDirectory }}
-  #  displayName: Setup build with CMake
-
-  - task: PythonScript@0
-    inputs:
-      targetType: 'inline'
-      script: |
-        
+  - script: |
+      mbed config --list
     displayName: 'build target using mbed-cli'
