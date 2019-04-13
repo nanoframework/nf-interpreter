@@ -8,4 +8,4 @@ steps:
       script: |
           pip install --upgrade pip mbed-cli
           mbed config -G GCC_ARM_PATH "$(GNU_GCC_TOOLCHAIN_PATH)"
-  displayName: 'Install mbed-cli'
+    displayName: 'Install mbed-cli'

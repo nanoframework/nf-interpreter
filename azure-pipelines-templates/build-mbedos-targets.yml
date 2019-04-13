@@ -17,4 +17,4 @@ steps:
       targetType: 'inline'
       script: |
         
-  displayName: 'build target using mbed-cli'
+    displayName: 'build target using mbed-cli'
