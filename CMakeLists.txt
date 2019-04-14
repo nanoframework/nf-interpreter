@@ -1299,6 +1299,102 @@ elseif(RTOS_FREERTOS_CHECK)
 
     endif()
 
+    # check if FATFS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_FATFS_SOURCE TRUE)
+    if(FATFS_SOURCE)
+        if(NOT "${FATFS_SOURCE}" STREQUAL "")
+            set(NO_FATFS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_FATFS_SOURCE)
+    
+
+        # FatFS version
+        set(FATFS_VERSION_EMPTY TRUE)
+
+        # check if build was requested with a specifc FatFS version
+        if(DEFINED FATFS_VERSION)
+            if(NOT "${FATFS_VERSION}" STREQUAL "")
+                set(FATFS_VERSION_EMPTY FALSE)
+            endif()
+        endif()
+
+        # check if build was requested with a specifc FatFS version
+        if(FATFS_VERSION_EMPTY)
+            # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
+            set(FATFS_VERSION_TAG "13c")
+        else()
+            # set version 
+            set(FATFS_VERSION_TAG "${FATFS_VERSION}")
+        endif()
+
+        message(STATUS "FatFS version is: ${FATFS_VERSION}")
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("CMake/FatFS.CMakeLists.cmake.in"
+        "${CMAKE_BINARY_DIR}/FatFS_Download/CMakeLists.txt")
+
+        # setup CMake project for FatFS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FatFS_Download")
+
+        # run build on FatFS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FatFS_Download")
+
+        # add FatFS as external project
+        ExternalProject_Add( 
+            FatFS
+            PREFIX FatFS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
+            GIT_REPOSITORY https://github.com/MateuszKlatecki/fatfs.git
+            GIT_TAG ${FATFS_VERSION_TAG}  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+    else()
+        # FatFS source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${FATFS_SOURCE}/")
+            message(STATUS "FatFS ${FATFS_VERSION} (source from: ${FATFS_SOURCE})")
+
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/FatFS_Source")
+                file(COPY "${FATFS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FatFS_Source")
+            else()
+                message(STATUS "Using local cache of FatFS source from ${FATFS_SOURCE}")
+            endif()
+        else()
+            message(FATAL_ERROR "Couldn't find FatFS source at ${FATFS_SOURCE}/")
+        endif()
+
+        # add FatFS as external project
+        ExternalProject_Add(
+            FatFS
+            PREFIX FatFS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )        
+
+        # get source dir for FatFS CMake project
+        ExternalProject_Get_Property(FatFS SOURCE_DIR)
+
+    endif()
+
     # Define base path for the class libraries
     set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD}/nanoCLR")
 
