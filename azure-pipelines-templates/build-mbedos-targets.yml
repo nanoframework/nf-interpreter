@@ -19,5 +19,5 @@ steps:
       
       echo todo - add macros e.g. -DUVISOR_PRESENT
       echo todo - add nf directories
-      mbed compile -m K64F -t GCC_ARM -vv --source $(Build.SourcesDirectory)\targets\mbedOS $(Build.SourcesDirectory)\src
+      mbed compile -m K64F -t GCC_ARM -vv --source $(Build.SourcesDirectory)\targets\mbedOS --source $(Build.SourcesDirectory)\src
     displayName: 'build target using mbed-cli'
