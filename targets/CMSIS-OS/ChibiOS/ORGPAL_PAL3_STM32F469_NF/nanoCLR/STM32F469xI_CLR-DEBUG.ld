@@ -78,7 +78,7 @@ REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ext_ram);
 INCLUDE rules_stacks.ld
 
 /* RAM region to be used for eth segment.*/
-REGION_ALIAS("ETH_RAM", ram4);
+REGION_ALIAS("ETH_RAM", ram3);
 
 SECTIONS
 {
