@@ -11,6 +11,8 @@ parameters:
 
 steps:
   - script: |
+      cd $(parameters.mbedDirectory)
+      mbed new .
       cd $(parameters.buildDirectory)
       echo todo - add macros e.g. -DUVISOR_PRESENT
       echo todo - add nf directories
