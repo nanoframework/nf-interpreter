@@ -2,12 +2,18 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  buildDirectory: '$(Build.SourcesDirectory)\src\targets\mbedOS'
+  buildDirectory: '$(Build.SourcesDirectory)\build'
+  mbedDirectory: '$(Build.SourcesDirectory)\src\targets\mbedOS'
+  nfCLRDirectory: '$(Build.SourcesDirectory)\src\CLR'
+  nfHALDirectory: '$(Build.SourcesDirectory)\src\HAL'
+  nfPALDirectory: '$(Build.SourcesDirectory)\src\PAL'
+  nfDevIfDirectory: '$(Build.SourcesDirectory)\src\DeviceInterfaces'
 
 steps:
   - script: |
-      mbed import $(parameters.buildDirectory)
       cd $(parameters.buildDirectory)
-      echo todo... run command - mbed compile -m K64F -t ARM
+      echo todo - add macros e.g. -DUVISOR_PRESENT
+      echo todo - add nf directories
+      mbed compile -m K64F -t GCC_ARM -vv --sources $(parameters.mbedDirectory)
       mbed config --list
     displayName: 'build target using mbed-cli'
