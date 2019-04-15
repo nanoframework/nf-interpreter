@@ -1,91 +1,67 @@
 //
 // Copyright (c) 2019 The nanoFramework project contributors
-// Portions Copyright 2017-2018 NXP. All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-// ****************************************************************************
-// semihost_hardfault.c
-//                - Provides hard fault handler to allow semihosting code not
-//                  to hang application when debugger not connected.
-//
-// ****************************************************************************
-//
-//                       ===== DESCRIPTION =====
-//
-// One of the issues with applications that make use of semihosting operations
-// (such as printf calls) is that the code will not execute correctly when the
-// debugger is not connected. Generally this will show up with the application
-// appearing to just hang. This may include the application running from reset
-// or powering up the board (with the application already in FLASH), and also
-// as the application failing to continue to execute after a debug session is
-// terminated.
-//
-// The problem here is that the "bottom layer" of the semihosted variants of
-// the C library, semihosting is implemented by a "BKPT 0xAB" instruction.
-// When the debug tools are not connected, this instruction triggers a hard
-// fault - and the default hard fault handler within an application will
-// typically just contains an infinite loop - causing the application to
-// appear to have hang when no debugger is connected.
-//
-// The below code provides an example hard fault handler which instead looks
-// to see what the instruction that caused the hard fault was - and if it
-// was a "BKPT 0xAB", then it instead returns back to the user application.
-//
-// In most cases this will allow applications containing semihosting
-// operations to execute (to some degree) when the debugger is not connected.
-//
-// == NOTE ==
-//
-// Correct execution of the application containing semihosted operations
-// which are vectored onto this hard fault handler cannot be guaranteed. This
-// is because the handler may not return data or return codes that the higher
-// level C library code or application code expects. This hard fault handler
-// is meant as a development aid, and it is not recommended to leave
-// semihosted code in a production build of your application!
-//
-// ****************************************************************************
+#include "MIMXRT1062.h"
 
-// Allow handler to be removed by setting a define (via command line)
-#if !defined (__SEMIHOST_HARDFAULT_DISABLE)
+void prvGetRegistersFromStack( unsigned int *pulFaultStackAddress )
+{
+    /* These are volatile to try and prevent the compiler/linker optimising them
+    away as the variables never actually get used.  If the debugger won't show the
+    values of the variables, make them global my moving their declaration outside
+    of this function. */
+    volatile unsigned int r0;
+    volatile unsigned int r1;
+    volatile unsigned int r2;
+    volatile unsigned int r3;
+    volatile unsigned int r12;
+    volatile unsigned int lr; /* Link register. */
+    volatile unsigned int pc; /* Program counter. */
+    volatile unsigned int psr;/* Program status register. */
 
-__attribute__((naked))
-void HardFault_Handler(void){
-    __asm(  ".syntax unified\n"
-        // Check which stack is in use
-            "MOVS   R0, #4  \n"
-            "MOV    R1, LR  \n"
-            "TST    R0, R1  \n"
-            "BEQ    _MSP    \n"
-            "MRS    R0, PSP \n"
-            "B  _process      \n"
-            "_MSP:  \n"
-            "MRS    R0, MSP \n"
-        // Load the instruction that triggered hard fault
-        "_process:     \n"
-            "LDR    R1,[R0,#24] \n"
-            "LDRH    R2,[r1] \n"
-        // Semihosting instruction is "BKPT 0xAB" (0xBEAB)
-            "LDR    R3,=0xBEAB \n"
-            "CMP     R2,R3 \n"
-            "BEQ    _semihost_return \n"
-        // Wasn't semihosting instruction so enter infinite loop
-            "B . \n"
-        // Was semihosting instruction, so adjust location to
-        // return to by 1 instruction (2 bytes), then exit function
-        "_semihost_return: \n"
-            "ADDS    R1,#2 \n"
-            "STR    R1,[R0,#24] \n"
-    	// Set a return value from semihosting operation.
-    	// 32 is slightly arbitrary, but appears to allow most
-    	// C Library IO functions sitting on top of semihosting to
-    	// continue to operate to some degree
-    		    "MOVS   R1,#32 \n"
-    		    "STR R1,[ R0,#0 ] \n" // R0 is at location 0 on stack
-    	// Return from hard fault handler to application
-            "BX LR \n"
-        ".syntax divided\n") ;
+    r0 = pulFaultStackAddress[ 0 ];
+    r1 = pulFaultStackAddress[ 1 ];
+    r2 = pulFaultStackAddress[ 2 ];
+    r3 = pulFaultStackAddress[ 3 ];
+
+    r12 = pulFaultStackAddress[ 4 ];
+    lr = pulFaultStackAddress[ 5 ];
+    pc = pulFaultStackAddress[ 6 ];
+    psr = pulFaultStackAddress[ 7 ];
+
+    (void)r0;
+    (void)r1;
+    (void)r2;
+    (void)r3;
+    (void)r12;
+    (void)lr;
+    (void)pc;
+    (void)psr;
+
+    // forces a breakpoint causing the debugger to stop
+    // if no debugger is attached this is ignored
+    __asm volatile("BKPT #0\n");
+
+    // If no debugger connected, just reset the board
+    NVIC_SystemReset();
+
+    for( ;; );
 }
 
-#endif
+__attribute__((naked))
+void HardFault_Handler(void)
+{
+    __asm volatile
+    (
+        " tst lr, #4                                                \n"
+        " ite eq                                                    \n"
+        " mrseq r0, msp                                             \n"
+        " mrsne r0, psp                                             \n"
+        " ldr r1, [r0, #24]                                         \n"
+        " ldr r2, handler2_address_const                            \n"
+        " bx r2                                                     \n"
+        " handler2_address_const: .word prvGetRegistersFromStack    \n"
+    );
+}
 
