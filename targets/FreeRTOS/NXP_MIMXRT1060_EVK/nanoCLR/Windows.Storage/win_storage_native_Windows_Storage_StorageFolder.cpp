@@ -8,10 +8,6 @@
 #include <Target_Windows_Storage.h>
 #include <nanoHAL_Windows_Storage.h>
 
-#if HAL_USBH_USE_MSD
-#include "usbh/dev/msd.h"
-#endif
-
 // flags for file system ready
 extern bool sdCardFileSystemReady;
 
@@ -288,6 +284,7 @@ HRESULT StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFo
 
                     // compose directory path
                     strcat(workingBuffer, workingPath);
+                    strcat(workingBuffer, "\\");
                     strcat(workingBuffer, fileInfo.fname);
                     
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___path ], workingBuffer ));
