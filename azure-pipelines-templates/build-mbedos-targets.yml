@@ -1,4 +1,4 @@
-# Copyright (c) 2018 The nanoFramework project contributors
+# Copyright (c) 2019 The nanoFramework project contributors
 # See LICENSE file in the project root for full license information.
 
 parameters:
@@ -8,16 +8,20 @@ parameters:
 
 steps:
   - script: |
-      :: echo switching to $(Build.SourcesDirectory)\targets\mbedOS
-      :: cd $(Build.SourcesDirectory)\targets\mbedOS
-      :: echo switching to $(Build.SourcesDirectory)\build
       mkdir $(Build.SourcesDirectory)\build
-      cd $(Build.SourcesDirectory)\build
+
+      :: TODO - currently having problems adding multiple sources, so for the moment we will hack it
+      :: by just copying the source required into its own folder
+
+      mkdir $(Build.SourcesDirectory)\mbedProject
+      cd $(Build.SourcesDirectory)\mbedProject
+      xcopy $(Build.SourcesDirectory)\targets\mbedOS /e
+      xcopy $(Build.SourcesDirectory)\src /e
       
       mbed new .
       mbed config --list
       
       echo todo - add macros e.g. -DUVISOR_PRESENT
       echo todo - add nf directories
-      mbed compile -m K64F -t GCC_ARM -vv --source $(Build.SourcesDirectory)\targets\mbedOS --source $(Build.SourcesDirectory)\src
+      mbed compile -m K64F -t GCC_ARM -vv --source . --build $(Build.SourcesDirectory)\build
     displayName: 'build target using mbed-cli'
