@@ -79,6 +79,7 @@ static void CardDetectTask(void *pvParameters)
 
         /* take card detect semaphore */
         xSemaphoreTake(s_CardDetectSemaphore, portMAX_DELAY);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
         if (s_cardInserted)
         {
             //Card inserted.
