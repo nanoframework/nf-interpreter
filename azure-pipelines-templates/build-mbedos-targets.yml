@@ -2,12 +2,12 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  builDirectory: '$(Build.SourcesDirectory)\build'
+  buildDirectory: '$(parameters.SourceDirectory)\src\targets\mbedOS'
 
 steps:
   - script: |
-      mbed import $(parameters.builDirectory)
-      cd $(parameters.builDirectory)
+      mbed import $(parameters.buildDirectory)
+      cd $(parameters.buildDirectory)
       echo todo... run command - mbed compile -m K64F -t ARM
       mbed config --list
     displayName: 'build target using mbed-cli'
