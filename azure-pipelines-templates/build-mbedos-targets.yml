@@ -18,7 +18,7 @@ steps:
       mbed config --list
       
       echo todo - add macros e.g. -DUVISOR_PRESENT
-      echo todo - add nf directories
-      mbed compile -m K64F -t GCC_ARM -vv --source=. --source=$(Build.SourcesDirectory)\src --build $(Build.SourcesDirectory)\build --app-config=.\mbed_app.json
+      echo todo - make target configurable
+      mbed compile -m DISCO_F769NI -t GCC_ARM -vv --source=. --source=$(Build.SourcesDirectory)\src --build $(Build.SourcesDirectory)\build --app-config=.\mbed_app.json
 
     displayName: 'build target using mbed-cli'
