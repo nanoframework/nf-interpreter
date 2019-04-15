@@ -8,13 +8,15 @@ parameters:
 
 steps:
   - script: |
-      echo switching to $(Build.SourcesDirectory)\targets\mbedOS
-      cd $(Build.SourcesDirectory)\targets\mbedOS
-      mbed new .
-      mbed config --list
-      echo switching to $(Build.SourcesDirectory)\build
+      :: echo switching to $(Build.SourcesDirectory)\targets\mbedOS
+      :: cd $(Build.SourcesDirectory)\targets\mbedOS
+      :: echo switching to $(Build.SourcesDirectory)\build
       mkdir $(Build.SourcesDirectory)\build
       cd $(Build.SourcesDirectory)\build
+      
+      mbed new .
+      mbed config --list
+      
       echo todo - add macros e.g. -DUVISOR_PRESENT
       echo todo - add nf directories
       mbed compile -m K64F -t GCC_ARM -vv --sources $(Build.SourcesDirectory)\targets\mbedOS $(Build.SourcesDirectory)\src
