@@ -2,7 +2,7 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  buildDirectory: '$(parameters.SourceDirectory)\src\targets\mbedOS'
+  buildDirectory: '$(Build.SourcesDirectory)\src\targets\mbedOS'
 
 steps:
   - script: |
