@@ -113,7 +113,7 @@
 #define GPIOD_RJ45_USART2_RTS       4U
 #define GPIOD_RJ45_USART2_TX        5U
 #define GPIOD_RJ45_USART2_RX        6U
-#define GPIOD_PIN7                  7U
+#define GPIOD_ETHERNET_POWER        7U
 #define GPIOD_FMC_D13               8U
 #define GPIOD_FMC_D14               9U
 #define GPIOD_FMC_D15               10U
@@ -299,6 +299,7 @@
 #define LINE_RJ45_USART2_RTS        PAL_LINE(GPIOD, 4U)
 #define LINE_RJ45_USART2_TX         PAL_LINE(GPIOD, 5U)
 #define LINE_RJ45_USART2_RX         PAL_LINE(GPIOD, 6U)
+#define LINE_ETHERNET_POWER         PAL_LINE(GPIOD, 7U)
 #define LINE_FMC_D13                PAL_LINE(GPIOD, 8U)
 #define LINE_FMC_D14                PAL_LINE(GPIOD, 9U)
 #define LINE_FMC_D15                PAL_LINE(GPIOD, 10U)
@@ -623,8 +624,8 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_PUPDR_PULLUP(GPIOB_PIN7) |         \
                                      PIN_PUPDR_FLOATING(GPIOB_IO1_P7_IO) |     \
                                      PIN_PUPDR_FLOATING(GPIOB_IO1_P8_IO) |     \
-                                     PIN_PUPDR_FLOATING(GPIOB_IO1_USART3_TX) |     \
-                                     PIN_PUPDR_FLOATING(GPIOB_IO1_USART3_RX) |     \
+                                     PIN_PUPDR_PULLUP(GPIOB_IO1_USART3_TX) |     \
+                                     PIN_PUPDR_PULLUP(GPIOB_IO1_USART3_RX) |     \
                                      PIN_PUPDR_FLOATING(GPIOB_OTG_HS_ID) |  \
                                      PIN_PUPDR_FLOATING(GPIOB_OTG_HS_VBUS) |\
                                      PIN_PUPDR_FLOATING(GPIOB_OTG_HS_DM) |  \
@@ -736,8 +737,8 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_PUPDR_PULLUP(GPIOC_ADC1_IN13_TEMP) |         \
                                      PIN_PUPDR_FLOATING(GPIOC_RMII_RXD0) |  \
                                      PIN_PUPDR_FLOATING(GPIOC_RMII_RXD1) |  \
-                                     PIN_PUPDR_FLOATING(GPIOC_IO0_USART6_TX) |  \
-                                     PIN_PUPDR_FLOATING(GPIOC_IO0_USART6_RX) |     \
+                                     PIN_PUPDR_PULLUP(GPIOC_IO0_USART6_TX) |  \
+                                     PIN_PUPDR_PULLUP(GPIOC_IO0_USART6_RX) |     \
                                      PIN_PUPDR_FLOATING(GPIOC_SD_D0) |         \
                                      PIN_PUPDR_FLOATING(GPIOC_SD_D1) |   \
                                      PIN_PUPDR_FLOATING(GPIOC_SD_D2) |     \
@@ -789,7 +790,7 @@ The user should also disable the MCO pin of the clock output if not used.
 * PD4  - USART2_RTS                (alternate 7).
 * PD5  - USART2_TX                 (alternate 7).
 * PD6  - USART2_RX                 (alternate 7).
-* PD7  - PIN7                      (input pullup).
+* PD7  - ETHERNET_POWER            (output pushpull maximum).
 * PD8  - FMC_D13                   (alternate 12).
 * PD9  - FMC_D14                   (alternate 12).
 * PD10 - FMC_D15                   (alternate 12).
@@ -806,7 +807,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_MODE_ALTERNATE(GPIOD_RJ45_USART2_RTS) |           \
                                      PIN_MODE_ALTERNATE(GPIOD_RJ45_USART2_TX) |           \
                                      PIN_MODE_ALTERNATE(GPIOD_RJ45_USART2_RX) |     \
-                                     PIN_MODE_INPUT(GPIOD_PIN7) |           \
+                                     PIN_MODE_OUTPUT(GPIOD_ETHERNET_POWER) |           \
                                      PIN_MODE_ALTERNATE(GPIOD_FMC_D13) |    \
                                      PIN_MODE_ALTERNATE(GPIOD_FMC_D14) |    \
                                      PIN_MODE_ALTERNATE(GPIOD_FMC_D15) |    \
@@ -822,7 +823,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_OTYPE_PUSHPULL(GPIOD_RJ45_USART2_RTS) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOD_RJ45_USART2_TX) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOD_RJ45_USART2_RX) |     \
-                                     PIN_OTYPE_PUSHPULL(GPIOD_PIN7) |       \
+                                     PIN_OTYPE_PUSHPULL(GPIOD_ETHERNET_POWER) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOD_FMC_D13) |    \
                                      PIN_OTYPE_PUSHPULL(GPIOD_FMC_D14) |    \
                                      PIN_OTYPE_PUSHPULL(GPIOD_FMC_D15) |    \
@@ -838,7 +839,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_OSPEED_HIGH(GPIOD_RJ45_USART2_RTS) |       \
                                      PIN_OSPEED_HIGH(GPIOD_RJ45_USART2_TX) |       \
                                      PIN_OSPEED_HIGH(GPIOD_RJ45_USART2_RX) |        \
-                                     PIN_OSPEED_VERYLOW(GPIOD_PIN7) |       \
+                                     PIN_OSPEED_HIGH(GPIOD_ETHERNET_POWER) |       \
                                      PIN_OSPEED_HIGH(GPIOD_FMC_D13) |       \
                                      PIN_OSPEED_HIGH(GPIOD_FMC_D14) |       \
                                      PIN_OSPEED_HIGH(GPIOD_FMC_D15) |       \
@@ -852,9 +853,9 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_PUPDR_FLOATING(GPIOD_SD_CMD) |         \
                                      PIN_PUPDR_FLOATING(GPIOD_RJ45_USART2_CTS) |     \
                                      PIN_PUPDR_FLOATING(GPIOD_RJ45_USART2_RTS) |         \
-                                     PIN_PUPDR_FLOATING(GPIOD_RJ45_USART2_TX) |         \
-                                     PIN_PUPDR_FLOATING(GPIOD_RJ45_USART2_RX) |     \
-                                     PIN_PUPDR_PULLUP(GPIOD_PIN7) |         \
+                                     PIN_PUPDR_PULLUP(GPIOD_RJ45_USART2_TX) |         \
+                                     PIN_PUPDR_PULLUP(GPIOD_RJ45_USART2_RX) |     \
+                                     PIN_PUPDR_PULLUP(GPIOD_ETHERNET_POWER) |         \
                                      PIN_PUPDR_FLOATING(GPIOD_FMC_D13) |    \
                                      PIN_PUPDR_FLOATING(GPIOD_FMC_D14) |    \
                                      PIN_PUPDR_FLOATING(GPIOD_FMC_D15) |    \
@@ -870,7 +871,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_ODR_HIGH(GPIOD_RJ45_USART2_RTS) |             \
                                      PIN_ODR_HIGH(GPIOD_RJ45_USART2_TX) |             \
                                      PIN_ODR_HIGH(GPIOD_RJ45_USART2_RX) |           \
-                                     PIN_ODR_HIGH(GPIOD_PIN7) |             \
+                                     PIN_ODR_HIGH(GPIOD_ETHERNET_POWER) |             \
                                      PIN_ODR_HIGH(GPIOD_FMC_D13) |          \
                                      PIN_ODR_HIGH(GPIOD_FMC_D14) |          \
                                      PIN_ODR_HIGH(GPIOD_FMC_D15) |          \
@@ -886,7 +887,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_AFIO_AF(GPIOD_RJ45_USART2_RTS, 7U) |          \
                                      PIN_AFIO_AF(GPIOD_RJ45_USART2_TX, 7U) |          \
                                      PIN_AFIO_AF(GPIOD_RJ45_USART2_RX, 7U) |       \
-                                     PIN_AFIO_AF(GPIOD_PIN7, 0U))
+                                     PIN_AFIO_AF(GPIOD_ETHERNET_POWER, 0U))
 #define VAL_GPIOD_AFRH              (PIN_AFIO_AF(GPIOD_FMC_D13, 12U) |      \
                                      PIN_AFIO_AF(GPIOD_FMC_D14, 12U) |      \
                                      PIN_AFIO_AF(GPIOD_FMC_D15, 12U) |      \
@@ -1087,8 +1088,8 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_PUPDR_FLOATING(GPIOF_FMC_A3) |     \
                                      PIN_PUPDR_FLOATING(GPIOF_FMC_A4) |     \
                                      PIN_PUPDR_FLOATING(GPIOF_FMC_A5) |     \
-                                     PIN_PUPDR_FLOATING(GPIOF_RS485_UART7_RX) |    \
-                                     PIN_PUPDR_FLOATING(GPIOF_RS485_UART7_TX) |    \
+                                     PIN_PUPDR_PULLUP(GPIOF_RS485_UART7_RX) |    \
+                                     PIN_PUPDR_PULLUP(GPIOF_RS485_UART7_TX) |    \
                                      PIN_PUPDR_FLOATING(GPIOF_IO0_ADC3_IN6) |  \
                                      PIN_PUPDR_FLOATING(GPIOF_IO0_ADC3_IN7) |  \
                                      PIN_PUPDR_FLOATING(GPIOF_FLASH_QSPI_CLK) |     \
