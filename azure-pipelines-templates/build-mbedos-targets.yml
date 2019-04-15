@@ -13,15 +13,12 @@ steps:
       :: TODO - currently having problems adding multiple sources, so for the moment we will hack it
       :: by just copying the source required into its own folder
 
-      mkdir $(Build.SourcesDirectory)\mbedProject
-      cd $(Build.SourcesDirectory)\mbedProject
-      xcopy $(Build.SourcesDirectory)\targets\mbedOS /e
-      xcopy $(Build.SourcesDirectory)\src /e
-      
+      cd $(Build.SourcesDirectory)\targets\mbedOS      
       mbed new .
       mbed config --list
       
       echo todo - add macros e.g. -DUVISOR_PRESENT
       echo todo - add nf directories
-      mbed compile -m K64F -t GCC_ARM -vv --source . --build $(Build.SourcesDirectory)\build
+      mbed compile -m K64F -t GCC_ARM -vv --source=. --source=$(Build.SourcesDirectory)\src --build $(Build.SourcesDirectory)\build --app-config=.\mbed_app.json
+
     displayName: 'build target using mbed-cli'
