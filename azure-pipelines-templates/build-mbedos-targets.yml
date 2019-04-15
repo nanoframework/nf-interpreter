@@ -8,13 +8,13 @@ parameters:
 
 steps:
   - script: |
-      echo switching to $(parameters.mbedDirectory)
-      cd $(parameters.mbedDirectory)
+      echo switching to $(Build.SourcesDirectory)\targets\mbedOS
+      cd $(Build.SourcesDirectory)\targets\mbedOS
       mbed new .
-      echo switching to $(parameters.buildDirectory)
-      cd $(parameters.buildDirectory)
+      echo switching to "$(Build.SourcesDirectory)\build"
+      cd "$(Build.SourcesDirectory)\build"
       echo todo - add macros e.g. -DUVISOR_PRESENT
       echo todo - add nf directories
-      mbed compile -m K64F -t GCC_ARM -vv --sources $(parameters.mbedDirectory)
+      mbed compile -m K64F -t GCC_ARM -vv --sources '$(Build.SourcesDirectory)\targets\mbedOS'
       mbed config --list
     displayName: 'build target using mbed-cli'
