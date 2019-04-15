@@ -11,10 +11,11 @@ steps:
       echo switching to $(Build.SourcesDirectory)\targets\mbedOS
       cd $(Build.SourcesDirectory)\targets\mbedOS
       mbed new .
-      echo switching to "$(Build.SourcesDirectory)\build"
-      cd "$(Build.SourcesDirectory)\build"
+      mbed config --list
+      echo switching to $(Build.SourcesDirectory)\build
+      mkdir $(Build.SourcesDirectory)\build
+      cd $(Build.SourcesDirectory)\build
       echo todo - add macros e.g. -DUVISOR_PRESENT
       echo todo - add nf directories
-      mbed compile -m K64F -t GCC_ARM -vv --sources '$(Build.SourcesDirectory)\targets\mbedOS'
-      mbed config --list
+      mbed compile -m K64F -t GCC_ARM -vv --sources $(Build.SourcesDirectory)\targets\mbedOS $(Build.SourcesDirectory)\src
     displayName: 'build target using mbed-cli'
