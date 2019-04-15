@@ -25,9 +25,7 @@ struct FileOperation
 };
 
 // this is the FileIO working thread
-// because FatFS is supposed to be atomic we won't have any concurrent threads
-static TaskHandle_t fileIoWorkingThread = NULL;
-FRESULT threadOperationResult;
+static volatile FRESULT threadOperationResult;
 
 // ReadText working thread
 static void ReadTextWorkingThread(void * arg)
@@ -85,65 +83,63 @@ static void WriteTextWorkingThread(void *arg)
     vTaskDelete(NULL);
 }
 
-// // WriteBinary working thread
-// static THD_FUNCTION(WriteBinaryWorkingThread, arg)
-// {
-//     FRESULT     operationResult;
-//     UINT        bytesWritten;
+// WriteBinary working thread
+static void WriteBinaryWorkingThread(void *arg)
+{
+    UINT        bytesWritten;
 
-//     FileOperation*  fileIoOperation = (FileOperation*)arg;
+    FileOperation*  fileIoOperation = (FileOperation*)arg;
 
-//     operationResult = f_write(fileIoOperation->File, fileIoOperation->Content, fileIoOperation->ContentLength, &bytesWritten);
+    threadOperationResult = f_write(fileIoOperation->File, fileIoOperation->Content, fileIoOperation->ContentLength, &bytesWritten);
 
-//     if( (operationResult == FR_OK) && 
-//         (bytesWritten == fileIoOperation->ContentLength))
-//     {
-//         // expected number of bytes written
-//         operationResult = FR_OK;
-//     }
+    if( (threadOperationResult == FR_OK) && 
+        (bytesWritten == fileIoOperation->ContentLength))
+    {
+        // expected number of bytes written
+        threadOperationResult = FR_OK;
+    }
 
-//     // close file
-//     f_close(fileIoOperation->File);
+    // close file
+    f_close(fileIoOperation->File);
 
-//     // free memory
-//     platform_free(fileIoOperation->File);
-//     platform_free(fileIoOperation);
+    // free memory
+    platform_free(fileIoOperation->File);
+    platform_free(fileIoOperation);
 
-//     // fire event for FileIO operation complete
-//     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
+    // fire event for FileIO operation complete
+    Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
   
-//     chThdExit(operationResult);
-// }
+    vTaskDelete(NULL);
+}
 
-// // ReadBinary working thread
-// static THD_FUNCTION(ReadBinaryWorkingThread, arg)
-// {
-//     FRESULT     operationResult;
-//     UINT        bytesRead;
+// ReadBinary working thread
+static void ReadBinaryWorkingThread(void *arg)
+{
+    UINT        bytesRead;
 
-//     FileOperation*  fileIoOperation = (FileOperation*)arg;
+    FileOperation*  fileIoOperation = (FileOperation*)arg;
 
-//     operationResult = f_read(fileIoOperation->File, fileIoOperation->Content, fileIoOperation->ContentLength, &bytesRead);
+    threadOperationResult = f_read(fileIoOperation->File, fileIoOperation->Content, fileIoOperation->ContentLength, &bytesRead);
 
-//     if( (operationResult == FR_OK) && 
-//         (bytesRead == fileIoOperation->ContentLength))
-//     {
-//         // expected number of bytes read
-//         operationResult = FR_OK;
-//     }
+    if( (threadOperationResult == FR_OK) && 
+        (bytesRead == fileIoOperation->ContentLength))
+    {
+        // expected number of bytes read
+        threadOperationResult = FR_OK;
+    }
 
-//     // close file
-//     f_close(fileIoOperation->File);
+    // close file
+    f_close(fileIoOperation->File);
 
-//     // free memory
-//     platform_free(fileIoOperation->File);
-//     platform_free(fileIoOperation);
+    // free memory
+    platform_free(fileIoOperation->File);
+    platform_free(fileIoOperation);
 
-//     // fire event for FileIO operation complete
-//     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
+    // fire event for FileIO operation complete
+    Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
   
-//     chThdExit(operationResult);
-// }
+    vTaskDelete(NULL);
+}
 
 ////////////////////////////////////////////////
 // Developer notes:
@@ -231,14 +227,13 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__
             fileIoOperation->ContentLength = bufferLength;
 
             // spawn working thread to perform the write transaction
-            //TODO
-            // fileIoWorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(2048),
-            //                             "STWT", NORMALPRIO, WriteBinaryWorkingThread, fileIoOperation);
+            BaseType_t ret;
+            ret = xTaskCreate(WriteBinaryWorkingThread, "WriteBin", 2048, fileIoOperation, configMAX_PRIORITIES - 2, NULL);
 
-            // if(fileIoWorkingThread == NULL)
-            // {
-            //     NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
-            // }
+            if (ret != pdPASS)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+            }
 
             // bump custom state
             stack.m_customState = 2;
@@ -253,10 +248,6 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__
         if(eventResult)
         {
             // event occurred
-
-            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to the heap, otherwise it won't be returned
-            //TODO
-            //operationResult = (FRESULT)chThdWait(fileIoWorkingThread);
 
             if(operationResult == FR_DISK_ERR)
             {
@@ -356,7 +347,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
 
             // spawn working thread to perform the write transaction
             BaseType_t ret;
-            ret = xTaskCreate(WriteTextWorkingThread, "WriteText", 2048, fileIoOperation, configMAX_PRIORITIES - 2, &fileIoWorkingThread);
+            ret = xTaskCreate(WriteTextWorkingThread, "WriteText", 2048, fileIoOperation, configMAX_PRIORITIES - 2, NULL);
 
             if (ret != pdPASS)
             {
@@ -376,10 +367,6 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
         if(eventResult)
         {
             // event occurred
-
-            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to the heap, otherwise it won't be returned
-            //TODO
-            //operationResult = (FRESULT)chThdWait(fileIoWorkingThread);
 
             if(threadOperationResult == FR_DISK_ERR)
             {
@@ -489,14 +476,13 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___ST
             fileIoOperation->ContentLength = bufferArray->m_numOfElements;
 
             // spawn working thread to perform the read transaction
-            //TODO
-            // fileIoWorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(2048),
-            //                             "STRB", NORMALPRIO, ReadBinaryWorkingThread, fileIoOperation);
+            BaseType_t ret;
+            ret = xTaskCreate(ReadBinaryWorkingThread, "ReadBin", 2048, fileIoOperation, configMAX_PRIORITIES - 2, NULL);
 
-            // if(fileIoWorkingThread == NULL)
-            // {
-            //     NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
-            // }
+            if (ret != pdPASS)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+            }
 
             // bump custom state
             stack.m_customState = 2;
@@ -511,10 +497,6 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___ST
         if(eventResult)
         {
             // event occurred
-
-            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to the heap, otherwise it won't be returned
-            //TODO
-            //operationResult = (FRESULT)chThdWait(fileIoWorkingThread);
 
             if(operationResult == FR_DISK_ERR)
             {
@@ -626,7 +608,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
 
             // spawn working thread to perform the read transaction
             BaseType_t ret;
-            ret = xTaskCreate(ReadTextWorkingThread, "ReadText", 2048, fileIoOperation, configMAX_PRIORITIES - 2, &fileIoWorkingThread);
+            ret = xTaskCreate(ReadTextWorkingThread, "ReadText", 2048, fileIoOperation, configMAX_PRIORITIES - 2, NULL);
 
             if (ret != pdPASS)
             {
@@ -646,10 +628,6 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
         if(eventResult)
         {
             // event occurred
-
-            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to the heap, otherwise it won't be returned
-            //TODO
-            //operationResult = (FRESULT)chThdWait(fileIoWorkingThread);
 
             if(threadOperationResult == FR_DISK_ERR)
             {
