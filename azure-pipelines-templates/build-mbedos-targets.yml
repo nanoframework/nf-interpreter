@@ -3,16 +3,15 @@
 
 parameters:
   buildDirectory: '$(Build.SourcesDirectory)\build'
-  mbedDirectory: '$(Build.SourcesDirectory)\src\targets\mbedOS'
-  nfCLRDirectory: '$(Build.SourcesDirectory)\src\CLR'
-  nfHALDirectory: '$(Build.SourcesDirectory)\src\HAL'
-  nfPALDirectory: '$(Build.SourcesDirectory)\src\PAL'
-  nfDevIfDirectory: '$(Build.SourcesDirectory)\src\DeviceInterfaces'
+  mbedDirectory: '$(Build.SourcesDirectory)\targets\mbedOS'
+  nfSrcDirectory: '$(Build.SourcesDirectory)\src'
 
 steps:
   - script: |
+      echo switching to $(parameters.mbedDirectory)
       cd $(parameters.mbedDirectory)
       mbed new .
+      echo switching to $(parameters.buildDirectory)
       cd $(parameters.buildDirectory)
       echo todo - add macros e.g. -DUVISOR_PRESENT
       echo todo - add nf directories
