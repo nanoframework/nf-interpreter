@@ -76,11 +76,9 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::Nativ
       #endif
 
       #if defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX)
-        // clear PWR wake up Flag
-        PWR->CR1 |=  PWR_CR1_CSBF;
-        
-        EXTI->EMR |= EXTI_IMR_IM17;
-        EXTI->RTSR |= EXTI_RTSR_TR17;
+
+        CLEAR_BIT(RTC->CR, RTC_CR_ALRAIE);
+        CLEAR_BIT(RTC->ISR, RTC_ISR_ALRAF);
   
       #endif 
 

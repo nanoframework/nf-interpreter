@@ -218,11 +218,6 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Ena
   #endif
 
   #if defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX)
-    // clear PWR wake up Flag
-    PWR->CR1 |=  PWR_CR1_CSBF;
-
-    // disable the wake up pin
-    CLEAR_BIT(PWR->CSR2, wakeUpPin);
 
     // enable the wake up pin
     SET_BIT(PWR->CSR2, wakeUpPin);
