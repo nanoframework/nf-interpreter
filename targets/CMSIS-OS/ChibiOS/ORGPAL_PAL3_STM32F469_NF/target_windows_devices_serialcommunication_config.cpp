@@ -84,26 +84,26 @@ UART_INIT(6, UART6_TX_SIZE, UART6_RX_SIZE)
 // un-initialization for UART6
 UART_UNINIT(6)
 
-///////////
-// UART7 //
-///////////
+// ///////////
+// // UART7 //
+// ///////////
 
-// pin configuration for UART7
-UART_CONFIG_PINS(7, GPIOF, GPIOF, 7, 6, 8)
+// // pin configuration for UART7
+// UART_CONFIG_PINS(7, GPIOF, GPIOF, 7, 6, 8)
 
-// buffers
-#if defined(__GNUC__)
-__attribute__((aligned (32)))
-#endif
-uint8_t Uart7_TxBuffer[UART7_TX_SIZE];
+// // buffers
+// #if defined(__GNUC__)
+// __attribute__((aligned (32)))
+// #endif
+// uint8_t Uart7_TxBuffer[UART7_TX_SIZE];
 
-#if defined(__GNUC__)
-__attribute__((aligned (32)))
-#endif
-uint8_t Uart7_RxBuffer[UART7_RX_SIZE];
+// #if defined(__GNUC__)
+// __attribute__((aligned (32)))
+// #endif
+// uint8_t Uart7_RxBuffer[UART7_RX_SIZE];
 
-// initialization for UART7
-UART_INIT(7, UART7_TX_SIZE, UART7_RX_SIZE)
+// // initialization for UART7
+// UART_INIT(7, UART7_TX_SIZE, UART7_RX_SIZE)
 
-// un-initialization for UART7
-UART_UNINIT(7)
+// // un-initialization for UART7
+// UART_UNINIT(7)
