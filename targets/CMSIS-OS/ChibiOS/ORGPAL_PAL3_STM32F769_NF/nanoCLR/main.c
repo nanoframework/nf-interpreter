@@ -33,6 +33,31 @@ osThreadDef(UsbMsdWorkingThread, osPriorityNormal, 1024, "USBMSDWT");
 //  Application entry point.
 int main(void) {
 
+  // find out wakeup reason
+  if((PWR->CSR1 & PWR_CSR1_WUIF) == PWR_CSR1_WUIF)
+  {
+    // standby, match WakeupReason_FromStandby enum
+    WakeupReasonStore = 1;
+  }
+  else if((PWR->CSR2 & (PWR_CSR2_WUPF3 | PWR_CSR2_WUPF2 | PWR_CSR2_WUPF1)))
+  {
+    // wake from pin, match WakeupReason_FromPin enum
+    WakeupReasonStore = 2;
+  }
+  else
+  {
+    // undetermined reason, match WakeupReason_Undetermined enum
+    WakeupReasonStore = 0;
+  }
+
+  // first things first: need to clear any possible wakeup flags
+  // clear wakeup flags from GPIOs
+  PWR->CR2 |= (PWR_CR2_CWUPF3 | PWR_CR2_CWUPF2 | PWR_CR2_CWUPF1);
+  // clear standby Flag
+  PWR->CR1 |=  PWR_CR1_CSBF;
+
+  __ISB();
+
   // HAL initialization, this also initializes the configured device drivers
   // and performs the board-specific initializations.
   halInit();
