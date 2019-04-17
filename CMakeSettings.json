@@ -29,8 +29,7 @@
         },
         {
           "name": "TOOLCHAIN_PREFIX:PATH",
-          "value": "C:/nanoFramework_Tools/GNU_ARM_Toolchain"
-          //"value": "${env.GNU_GCC_TOOLCHAIN_PATH}"
+          "value": "${env.GNU_GCC_TOOLCHAIN_PATH}"
         },
         {
           "name": "CMAKE_SYSTEM_NAME",
@@ -54,7 +53,7 @@
         },
         {
           "name": "CHIBIOS_SOURCE:PATH", // manually download, problems at the moment with value="" which forces a auto copy; causes failure with access denied at build? ( on .git directory)
-          "value": "C:/nanoFramework_Tools/ChibiOS"
+          "value": "C:/usr/src/NanoFramework/ChibiOS"
         },
         {
           "name": "CHIBIOS_VERSION", // default blank, set to specific version ( Not working with Visual Studio, clone and checkout specific manually)
@@ -74,8 +73,7 @@
         },
         {
           "name": "TOOL_HEX2DFU_PREFIX:PATH", //"PATH for HEX TOOL"
-          "value": "C:/nanoFramework_Tools"
-          //"value": "${env.HEX2DFU_PATH}"
+          "value": "${env.HEX2DFU_PATH}"
         },
         {
           "name": "RTOS:STRING", //"Selected Operating system
@@ -236,8 +234,8 @@
           "PATH": "C:\\Windows\\system32;${env.PATH}" // Work around for Ninja not finding Cmd.exe with add_custom_command
         }
       ],
-      "buildRoot": "${workspaceRoot}/../Build/${name}",
-      "installRoot": "${workspaceRoot}/../Build/install/${name}",
+      "buildRoot": "${workspaceRoot}/Build\\${name}",
+      "installRoot": "${workspaceRoot}/Build/install/${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
@@ -348,10 +346,6 @@
           "value": "ON"
         },
         {
-          "name": "NF_FEATURE_HAS_SDCARD:BOOL", //OFF-default-ON-to-enable-Sdcard-support
-          "value": "ON"
-        },
-        {
           "name": "NF_FEATURE_HAS_CONFIG_BLOCK:BOOL", //OFF-default-ON-to-enable-configuration-block-storage
           "value": "ON"
         },
@@ -426,7 +420,7 @@
         },
         {
           "name": "API_Windows.Storage:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "value": "OFF"
         },
         {
           "name": "API_Hardware.Esp32:BOOL", //OFF-default-ON-to-add-this-API
