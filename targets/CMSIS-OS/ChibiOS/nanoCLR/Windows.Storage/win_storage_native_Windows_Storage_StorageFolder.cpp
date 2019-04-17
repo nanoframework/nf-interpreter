@@ -172,6 +172,17 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetInternalStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder(CLR_RT_StackFrame& stack)
+{
+    NANOCLR_HEADER(); 
+ 
+    (void)stack; 
+ 
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub()); 
+ 
+    NANOCLR_NOCLEANUP(); 
+}
+
 HRESULT StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
