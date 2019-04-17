@@ -11,8 +11,17 @@
 #ifndef _TARGET_ESP32_NANOCLR_H_
 #define _TARGET_ESP32_NANOCLR_H_
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// THIS FILE IS BLANK ON PURPOSE BECAUSE THIS TARGET DOESN'T REQUIRE THIS SPECIFIC CONFIGURATION //
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+// set when SD card is enabled
+#define HAL_USE_SDC @HAL_USE_SDC_OPTION@
+#if defined(HAL_USE_SDC)
+
+#define SDC_MAX_OPEN_FILES	5
+
+
+
+#endif
+
+
 
 #endif /* _TARGET_ESP32_NANOCLR_H_ */

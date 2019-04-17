@@ -1,12 +1,12 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
 #include "win_storage_native.h"
 
 
-sstatic const CLR_RT_MethodHandler method_lookup[] =
+static const CLR_RT_MethodHandler method_lookup[] =
 {
 	NULL,
 	NULL,

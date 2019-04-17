@@ -23,7 +23,12 @@ list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_
 
 # Either NVS or SPIFSS storage for config, NVS is unable to store large Certificate bundles(over 1864 bytes)
 #list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigStorageNVS.cpp")
+
 list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigStorageSPIFFS.cpp")
+
+# alternative to using NVS or Spiffs but requires minimum of 528K partition size
+#list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigStorageFATFS.cpp")
+
 list(APPEND TARGET_ESP32_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigurationManager.cpp")
 
 # append target PAL source files

@@ -16,6 +16,9 @@
 #define SDCARD_DRIVE_PATH       SDCARD_DRIVE_LETTER"\\"
 #define USB_MSD_DRIVE_LETTER    "E:"
 #define USB_MSD_DRIVE_PATH      USB_MSD_DRIVE_LETTER"\\"
+#define INTERNAL_DRIVE_LETTER   "I:"
+#define INTERNAL_DRIVE_PATH     INTERNAL_DRIVE_LETTER"\\"
+
 
 // Storage events sub-categories
 #define EVENT_STORAGE_DEVICE_INSERTION      0x01
@@ -25,15 +28,18 @@
 typedef enum Storage_Drives
 {
     // SD Card
-    Storage_Drives_SDCard    = 0,
+    Storage_Drives_SDCard  = 0,
 
     // USB mass storage device
     Storage_Drives_UsbMsd = 1,
 
+	// Internal Flash driver
+	Storage_Internal_Drive = 2,
+
 }Storage_Drives;
 
 // constants to be used throughout the code
-#define SUPPORTED_DRIVES_COUNT  (2)
+#define SUPPORTED_DRIVES_COUNT  (3)
 #define DRIVE_LETTER_LENGTH     sizeof(SDCARD_DRIVE_LETTER)
 #define DRIVE_PATH_LENGTH       sizeof(SDCARD_DRIVE_PATH)
 

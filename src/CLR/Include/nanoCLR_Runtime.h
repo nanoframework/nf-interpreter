@@ -174,9 +174,12 @@ struct CLR_RT_FileStore
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+#if !defined(MAX)
 #define MAX(a,b)   (a > b      ? a : b)
+#endif
+#if !defined(MIN)
 #define MIN(a,b)   (a < b      ? a : b)
+#endif
 #define ABS(x)     (x > 0      ? x : (-x))
 #define FLOOR32(x) ((CLR_INT32)x)
 #define FRAC(x)    (x - FLOOR32(x))

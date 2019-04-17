@@ -1,53 +1,59 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
+// Allocate a FATFS for config
+//
+// minimum size is 528K wih 4096 allocation unit size
+// minimum size is 128K wih 512 allocation unit size
+// CONFIG_WL_SECTOR_SIZE
+//
 #include <nanoHAL.h>
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 #include "Esp32_os.h"
 #include "targetHAL_ConfigStorage.h"
 
-// SPIFFS config
-#define SPIFFS_Base_Path        "/I"
-//#define SPIFFS_Base_Path        "/config"
-#define SPIFFS_Base_Config_Name "con_"
-#define SPIFFS_Partition_Label  "config"
-#define SPIFFS_MaxFileNameLen   20
+#include "esp_vfs.h"
+#include "esp_vfs_fat.h"
+
+// FATFS config
+#define FATFS_Base_Path       "/I"
+#define FATFS_Base_Config_Name "con_"
+#define FATFS_Partition_Label  "config"
+#define FATFS_MaxFileNameLen   30
 
 static const char *TAG = "Config"; 
 
 enum  ConfigIoType { Read, Write, GetSize };
+
+// Handle of the wear levelling library instance
+static wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
 
 // Initialise SPIFFS
 void Config_Initialise()
 { 
     esp_err_t ret; 
     
-     esp_vfs_spiffs_conf_t conf = {
-      .base_path = SPIFFS_Base_Path,
-      .partition_label = SPIFFS_Partition_Label,
-      .max_files = 5,
-      .format_if_mount_failed = true
+	esp_vfs_fat_mount_config_t mount_config = {
+		.format_if_mount_failed = true,
+		.max_files = 5,
+		.allocation_unit_size = CONFIG_WL_SECTOR_SIZE
     };
-    
-    ret = esp_vfs_spiffs_register(&conf);
+	 
+	ret = esp_vfs_fat_spiflash_mount(FATFS_Base_Path, FATFS_Partition_Label, &mount_config, &s_wl_handle);
     if (ret != ESP_OK) {
         if (ret == ESP_FAIL) {
             ESP_LOGE(TAG, "Failed to mount or format filesystem");
         } else if (ret == ESP_ERR_NOT_FOUND) {
-            ESP_LOGE(TAG, "Failed to find SPIFFS partition");
-        } else {
+            ESP_LOGE(TAG, "Failed to find config FATFS partition");
+		} else if (ret == ESP_ERR_NO_MEM) {
+			ESP_LOGE(TAG, "Failed to mount FATFS partition as no memory");
+		} 
+		else {
             ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
         } 
-    }
-
-    size_t total = 0, used = 0;
-    ret = esp_spiffs_info(SPIFFS_Partition_Label, &total, &used);
-    if (ret == ESP_OK) 
-    {
-        ESP_LOGI(TAG, "SPIFFS Partition size: total: %d, used: %d", total, used);
     }
 }
 
@@ -61,13 +67,13 @@ void Config_GetConfigFileName(DeviceConfigurationOption configuration, uint32_t 
     char * startName = configName;
 
     // Add filesystem name
-    hal_strcpy_s(configName, SPIFFS_MaxFileNameLen, SPIFFS_Base_Path );
+    hal_strcpy_s(configName, FATFS_MaxFileNameLen, FATFS_Base_Path );
     configName += hal_strlen_s(configName);
     
     *configName++ = '/';
 
     // Add basename
-    hal_strcpy_s( configName, SPIFFS_MaxFileNameLen - (int)(configName-startName), SPIFFS_Base_Config_Name );
+    hal_strcpy_s( configName, FATFS_MaxFileNameLen - (int)(configName-startName), FATFS_Base_Config_Name );
     configName += hal_strlen_s(configName);
 
 	switch (configuration)
@@ -110,26 +116,26 @@ void Config_GetConfigFileName(DeviceConfigurationOption configuration, uint32_t 
 //    true  : returns handle
 //    false -1
 //
-uint32_t Config_OpenFile( DeviceConfigurationOption configuration, uint32_t configurationIndex, bool write )
+uint32_t Config_OpenFile(DeviceConfigurationOption configuration, uint32_t configurationIndex, bool write)
 {
-    char FileName[SPIFFS_MaxFileNameLen+1] = {0};
+	char FileName[FATFS_MaxFileNameLen + 1] = { 0 };
 
-    Config_GetConfigFileName( configuration, configurationIndex, FileName);
+	Config_GetConfigFileName(configuration, configurationIndex, FileName);
 
-    // Open SPIFFS config storage 
-    FILE * file = fopen( FileName, write?"wb":"rb" );
-    if ( file != NULL ) 
-    {
-        return (uint32_t)file;
-    }
-
-    ESP_LOGE(TAG, "Failed to open file (%s)", FileName );
-    return CONFIG_ERROR;
+	// Open FATFS config storage 
+	FILE * file = fopen(FileName, write ? "wb" : "rb");
+	if (file != NULL)
+	{
+		return (uint32_t)file;
+	}
+	
+	ESP_LOGE(TAG, "Failed to open file (%s) %d", FileName, errno);
+	return CONFIG_ERROR;
 }
 
 
 //
-//  Config_CloseFile - Close opened file / NVS system
+//  Config_CloseFile - Close opened file 
 //  
 // Parameters:-
 //   handle : Handle returned from Config_openFile
@@ -209,7 +215,7 @@ int32_t Config_FileSize( uint32_t handle )
 }
 
 //
-//  Config_WriteFile -  Write data to NVS system
+//  Config_WriteFile -  Write data to file
 //
 // Parameters:-
 //   handle    : Handle returned from Config_openFile
@@ -226,7 +232,7 @@ bool Config_WriteFile(uint32_t handle, uint8_t * pData, int32_t writeSize )
 }
 
 //
-// Config_ReadFile - Read the data from file opened in NVS
+// Config_ReadFile - Read the data from file 
 //
 // Parameters:-
 //   handle : Handle returned from Config_openFile

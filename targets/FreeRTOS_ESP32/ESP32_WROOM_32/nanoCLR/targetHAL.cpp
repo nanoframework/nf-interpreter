@@ -11,6 +11,9 @@
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
 
+void Storage_Initialize();
+void Storage_Uninitialize();
+
 //
 //  Reboot handlers clean up on reboot
 //
@@ -69,6 +72,8 @@ void nanoHAL_Initialize()
 
     Events_Initialize();
 
+	Storage_Initialize();
+
     // no PAL events required until now
     //PalEvent_Initialize();
 	
@@ -96,6 +101,7 @@ void nanoHAL_Uninitialize()
     
     BlockStorageList_UnInitializeDevices();
 
+	Storage_Uninitialize();
     //PalEvent_Uninitialize();
 
     // TODO need to call this but it's preventing the debug session from starting

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -9,7 +9,7 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
-#include <hal.h>
+
 
 struct Library_win_storage_native_Windows_Storage_Devices_SDCard
 {
@@ -73,6 +73,7 @@ struct Library_win_storage_native_Windows_Storage_StorageProvider
 	//--//
 
 };
+
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage;
 
