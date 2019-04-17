@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -20,6 +20,37 @@ struct Library_win_storage_native_Windows_Storage_Devices_SDCard
 	NANOCLR_NATIVE_DECLARE(UnmountNative___STATIC__VOID);
 
 	//--//
+
+}
+
+struct Library_win_storage_native_Windows_Storage_RemovableDeviceEventArgs
+{
+    static const int FIELD___path = 1;
+    static const int FIELD___event = 2;
+
+
+    //--//
+
+};
+
+struct Library_win_storage_native_Windows_Storage_StorageEventManager
+{
+    static const int FIELD_STATIC__RemovableDeviceInserted = 0;
+    static const int FIELD_STATIC__RemovableDeviceRemoved = 1;
+
+
+    //--//
+
+};
+
+struct Library_win_storage_native_Windows_Storage_StorageEventManager__StorageEvent
+{
+    static const int FIELD__EventType = 3;
+    static const int FIELD__DriveIndex = 4;
+    static const int FIELD__Time = 5;
+
+
+    //--//
 
 };
 

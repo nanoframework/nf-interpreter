@@ -98,14 +98,19 @@ void nanoHAL_Uninitialize()
             break;
         }
     }   
-    
-    BlockStorageList_UnInitializeDevices();
 
 	Storage_Uninitialize();
-    //PalEvent_Uninitialize();
 
+	SOCKETS_CloseConnections();
+
+  #if !defined(HAL_REDUCESIZE)
     // TODO need to call this but it's preventing the debug session from starting
     //Network_Uninitialize();
+  #endif
+ 
+    BlockStorageList_UnInitializeDevices();
+
+    //PalEvent_Uninitialize();
 
     Events_Uninitialize();
 

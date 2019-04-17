@@ -107,6 +107,9 @@ struct Settings
     {
         NANOCLR_HEADER();
 
+        // cler flag, in case EE wasn't restarted
+        CLR_EE_DBG_CLR(StateResolutionFailed);
+
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Create TS.\r\n" );
 #endif
@@ -116,7 +119,7 @@ struct Settings
         CLR_Debug::Printf( "Loading Deployment Assemblies.\r\n" );
 #endif
 
-        LoadDeploymentAssemblies();
+        NANOCLR_CHECK_HRESULT(LoadDeploymentAssemblies());
 
         //--//
 
@@ -134,7 +137,13 @@ struct Settings
         NANOCLR_CLEANUP();
 
 #if !defined(BUILD_RTM)
-        if(FAILED(hr)) CLR_Debug::Printf( "Error: %08x\r\n", hr );
+        if(FAILED(hr))
+        {
+            CLR_Debug::Printf( "Error: %08x\r\n", hr );
+
+            // exception occurred in assembly loading or type resolution
+            CLR_EE_DBG_SET(StateResolutionFailed);
+        }
 #endif
 
         NANOCLR_CLEANUP_END();
@@ -318,7 +327,7 @@ struct Settings
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
-        ContiguousBlockAssemblies(stream);
+        NANOCLR_CHECK_HRESULT(ContiguousBlockAssemblies(stream));
         
         NANOCLR_NOCLEANUP();
     }

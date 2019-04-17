@@ -128,6 +128,8 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
 
     while(true)
     {
+        EVENTS_HEART_BEAT;
+
         uint32_t events = Events_MaskedRead( wakeupSystemEvents );
         if(events)
         {

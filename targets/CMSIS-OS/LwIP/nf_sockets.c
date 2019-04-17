@@ -1688,7 +1688,12 @@ again:
 #if !SYS_LIGHTWEIGHT_PROT
         sys_sem_signal(&scb->sem);
 #else
+  #if LWIP_NETCONN_SEM_PER_THREAD
+        sys_sem_signal_S(scb->sem);
+  #else
         sys_sem_signal_S(&scb->sem);
+  #endif
+
 #endif
       }
     }

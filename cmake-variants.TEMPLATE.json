@@ -58,6 +58,7 @@
           "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
           "NF_FEATURE_WATCHDOG" : "ON-to-enable-hardware-watchdog-ON-is-default",
           "NF_FEATURE_HAS_CONFIG_BLOCK" : "OFF-default-ON-to-enable-configuration-block-storage",
+          "NF_FEATURE_HAS_SDCARD" : "OFF-default-ON-to-enable-support-for-SDCard-storage-device",
           "NF_FEATURE_HAS_USB_MSD" : "OFF-default-ON-to-enable-support-for-USB-Mass-storage-device",
           "NF_PLATFORM_NO_CLR_TRACE" : "OFF-default-ON-to-disable-all-trace-on-CLR",
           "NF_CLR_NO_IL_INLINE" : "OFF-default-ON-to-disable-CLR-IL-inlining",
@@ -77,7 +78,6 @@
           "API_Windows.Devices.SerialCommunication" : "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Spi" : "OFF-default-ON-to-add-this-API",
           "API_Windows.Networking.Sockets" : "OFF-default-ON-to-add-this-API",
-          "API_Windows.Storage" : "OFF-default-ON-to-add-this-API",
           "API_Hardware.Esp32" : "OFF-default-ON-to-add-this-API",
           "API_Hardware.Stm32" : "OFF-default-ON-to-add-this-API"
         }

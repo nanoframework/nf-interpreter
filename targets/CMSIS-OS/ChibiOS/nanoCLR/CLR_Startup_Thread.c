@@ -69,6 +69,15 @@ void CLRStartupThread(void const * argument)
   #endif
   ///////////////////////////////////////////
 
+#if LWIP_NETCONN_SEM_PER_THREAD
+  // need to create a semaphore for lwIP
+  semaphore_t *semaphore = chPoolAlloc(NULL);
+  chSemObjectInit(semaphore, (cnt_t)1);
+  chSemWaitTimeout(semaphore, 0);
+  thread_t* currentThread = chThdGetSelfX();
+  currentThread->localStorage = semaphore;
+#endif
+
   ClrStartup(*clrSettings);
 
   // loop until thread receives a request to terminate

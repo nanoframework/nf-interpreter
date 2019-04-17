@@ -12,36 +12,37 @@
 #define FF_LFN_BUF  255
 
 // driver letters and paths
-#define SDCARD_DRIVE_LETTER     "D:"
-#define SDCARD_DRIVE_PATH       SDCARD_DRIVE_LETTER"\\"
-#define USB_MSD_DRIVE_LETTER    "E:"
-#define USB_MSD_DRIVE_PATH      USB_MSD_DRIVE_LETTER"\\"
+#define INDEX0_DRIVE_LETTER     "D:"
+#define INDEX0_DRIVE_PATH       INDEX0_DRIVE_LETTER"\\"
+#define INDEX1_DRIVE_LETTER     "E:"
+#define INDEX1_DRIVE_PATH       INDEX1_DRIVE_LETTER"\\"
+#define INDEX2_DRIVE_LETTER     "F:"
+#define INDEX2_DRIVE_PATH       INDEX2_DRIVE_LETTER"\\"
+
 #define INTERNAL_DRIVE_LETTER   "I:"
 #define INTERNAL_DRIVE_PATH     INTERNAL_DRIVE_LETTER"\\"
 
-
+//////////////////////////////////////////////////////////////////////////
+// Keep in sync with StorageEventManager.StorageEventType in managed code
 // Storage events sub-categories
-#define EVENT_STORAGE_DEVICE_INSERTION      0x01
-#define EVENT_STORAGE_DEVICE_REMOVAL        0x02
-
-// enum with the supported drives in Windows.Storage
-typedef enum Storage_Drives
+//////////////////////////////////////////////////////////////////////////
+typedef enum StorageEventType
 {
-    // SD Card
-    Storage_Drives_SDCard  = 0,
+    // INVALID
+    StorageEventType_Invalid                    = 0x00,
 
-    // USB mass storage device
-    Storage_Drives_UsbMsd = 1,
+    // removable device inserted
+    StorageEventType_RemovableDeviceInsertion   = 0x01,
 
-	// Internal Flash driver
-	Storage_Internal_Drive = 2,
+    // removable device removed
+    StorageEventType_RemovableDeviceRemoval     = 0x02,
 
-}Storage_Drives;
+}StorageEventType;
 
 // constants to be used throughout the code
-#define SUPPORTED_DRIVES_COUNT  (3)
-#define DRIVE_LETTER_LENGTH     sizeof(SDCARD_DRIVE_LETTER)
-#define DRIVE_PATH_LENGTH       sizeof(SDCARD_DRIVE_PATH)
+#define SUPPORTED_DRIVES_COUNT  (2)
+#define DRIVE_LETTER_LENGTH     sizeof(INDEX0_DRIVE_LETTER)
+#define DRIVE_PATH_LENGTH       sizeof(INDEX0_DRIVE_PATH)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Storage.CreationCollisionOption (in managed code) !!! //

@@ -244,7 +244,7 @@ jobs:
   dependsOn:
   - Build_STM32_targets
   - Build_ESP32_targets
-  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'))
+  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_WIN32_nanoCLR'))
 
   pool:
     vmImage: 'VS2017-Win2016'

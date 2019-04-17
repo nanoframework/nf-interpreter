@@ -2,26 +2,26 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  builDirectory: '$(Build.SourcesDirectory)\build'
+  buildDirectory: '$(Build.SourcesDirectory)\build'
 
 steps:
 
   - task: CMake@1
     inputs:
       cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) ..'
-      workingDirectory:  ${{ parameters.builDirectory }}
+      workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Setup build with CMake and DFU
     condition: eq(variables['NeedsDFU'], true)
 
   - task: CMake@1
     inputs:
       cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) ..'
-      workingDirectory:  ${{ parameters.builDirectory }}
+      workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Setup build with CMake without DFU
     condition: eq(variables['NeedsDFU'], false)
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '--build ${{ parameters.builDirectory }} --target all --config MinSizeRel'
-      workingDirectory:  ${{ parameters.builDirectory }}
+      cmakeArgs: '--build ${{ parameters.buildDirectory }} --target all --config MinSizeRel'
+      workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Build with CMake
