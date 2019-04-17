@@ -120,7 +120,7 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
     char* stringBuffer;
     uint32_t driveCount = 0;
     char workingDrive[sizeof(DRIVE_PATH_LENGTH)];
-    uint16_t driveIterator = (uint16_t)Storage_Drives_SDCard;
+    uint16_t driveIterator = 0;
 
     bool sdCardDrivePresent = false;
 
@@ -134,7 +134,7 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
      // add count
      driveCount++;
 
-     // flag present
+     // Esp32 doesn't currently have card present so make always true
      sdCardDrivePresent = true;
  #endif
 
@@ -160,9 +160,9 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
         for(; driveIterator < SUPPORTED_DRIVES_COUNT; driveIterator++ )
         {
             // fill the folder name and path
-            if ((Storage_Drives)driveIterator == Storage_Drives_SDCard && sdCardDrivePresent == true )
+            if (driveIterator == 0 && sdCardDrivePresent == true )
             {
-                memcpy(workingDrive, SDCARD_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
             }
             else
             {

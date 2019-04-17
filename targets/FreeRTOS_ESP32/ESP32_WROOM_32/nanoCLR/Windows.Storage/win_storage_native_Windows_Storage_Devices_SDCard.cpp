@@ -24,7 +24,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountMMCNativ
 
 #if defined(HAL_USE_SDC)
     bool bit1Mode = stack.Arg0().NumericByRef().s4;
-	char     mountPoint[] = SDCARD_DRIVE_LETTER;
+	char     mountPoint[] = INDEX0_DRIVE_LETTER;
 
 	// Change fatfs drive letter to mount point  D: -> /D
 	mountPoint[1] = mountPoint[0];
@@ -50,7 +50,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNativ
 
     int      spiBus;
     uint32_t CSPin;
-    char     mountPoint[] = SDCARD_DRIVE_LETTER;
+    char     mountPoint[] = INDEX0_DRIVE_LETTER;
 
 	// Change fatfs drive letter to mount point  D: -> /D
 	mountPoint[1] = mountPoint[0]; 
