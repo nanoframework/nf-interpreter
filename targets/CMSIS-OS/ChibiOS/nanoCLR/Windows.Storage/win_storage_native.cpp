@@ -6,7 +6,7 @@
 #include "win_storage_native.h"
 
 
-sstatic const CLR_RT_MethodHandler method_lookup[] =
+static const CLR_RT_MethodHandler method_lookup[] =
 {
 	NULL,
 	NULL,
