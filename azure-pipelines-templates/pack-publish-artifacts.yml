@@ -2,12 +2,12 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  builDirectory: '$(Build.SourcesDirectory)\build'
+  buildDirectory: '$(Build.SourcesDirectory)\build'
 
 steps:
   - task: CopyFiles@1
     inputs:
-      sourceFolder: ${{ parameters.builDirectory }}
+      sourceFolder: ${{ parameters.buildDirectory }}
       Contents: |
         *.bin
         *.hex
