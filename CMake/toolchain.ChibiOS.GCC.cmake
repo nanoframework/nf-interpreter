@@ -81,11 +81,14 @@ function(NF_ADD_HEX_BIN_DUMP_TARGETS TARGET)
         set(FILENAME "${TARGET}")
     endif()
 
+	#get_filename_component(FNSHORT ${FILENAME} NAME_WE)
+	string(REGEX REPLACE "\\.[^.]*$" "" FNSHORT ${FILENAME})
+
     # add targets for HEX, BIN and S19 formats with no output so they will always be built
-    add_custom_target(${TARGET}.hex DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Oihex ${FILENAME} ${FILENAME}.hex)
-    add_custom_target(${TARGET}.s19 DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Osrec ${FILENAME} ${FILENAME}.s19)
-    add_custom_target(${TARGET}.bin DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Obinary ${FILENAME} ${FILENAME}.bin)
-    add_custom_target(${TARGET}.dump DEPENDS ${TARGET} COMMAND ${CMAKE_OBJDUMP} -d -EL -S ${FILENAME} ${FILENAME}.dump)
+    add_custom_target(${TARGET}.hex DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Oihex ${FILENAME} ${FNSHORT}.hex)
+    add_custom_target(${TARGET}.s19 DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Osrec ${FILENAME} ${FNSHORT}.s19)
+    add_custom_target(${TARGET}.bin DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Obinary ${FILENAME} ${FNSHORT}.bin)
+    add_custom_target(${TARGET}.dump DEPENDS ${TARGET} COMMAND ${CMAKE_OBJDUMP} -d -EL -S ${FILENAME} ${FNSHORT}.dump)
 endfunction()
 
 
@@ -118,7 +121,7 @@ function(NF_SET_LINK_MAP TARGET)
     string(SUBSTRING ${TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
     
     # add linker flags to generate map file
-    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${TARGET_SHORT}.map,--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
+    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_BINARY_DIR}/${TARGET_SHORT}.map,--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
 
 endfunction()
 

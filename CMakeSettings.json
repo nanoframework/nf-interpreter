@@ -7,7 +7,12 @@
       "inheritEnvironments": [
         "gcc-arm"
       ],
-      "buildRoot": "${workspaceRoot}/Build/${name}",
+      "environments": [
+        {
+          "PATH": "C:\\Windows\\system32;${env.PATH}" // Work around for Ninja not finding Cmd.exe with add_custom_command
+        }
+      ],
+      "buildRoot": "${env.nfRoot}Build/${name}",
       "installRoot": "${workspaceRoot}/Build/install/${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
@@ -19,7 +24,7 @@
           "value": "TRUE"
         },
         {
-          "name": "EXECUTABLE_OUTPUT_PATH:PATH",
+          "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}"
         },
         {
@@ -64,7 +69,7 @@
         },
         {
           "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION:BOOL", //"Option for string conversion to value from base 10 and partial for 16"
-          "value": "FALSE"
+          "value": "ON"
         },
         {
           "name": "TOOL_HEX2DFU_PREFIX:PATH", //"PATH for HEX TOOL"
@@ -161,7 +166,7 @@
         // LIBRARIES
         {
           "name": "API_nanoFramework.Devices.OneWire:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "API_System.Math:BOOL", //OFF-default-ON-to-add-this-API
@@ -201,7 +206,11 @@
         },
         {
           "name": "API_Windows.Storage:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
+          "value": "ON"
+        },
+        {
+          "name": "API_nanoFramework.Devices.Can:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
         },
         {
           "name": "API_Hardware.Esp32:BOOL", //OFF-default-ON-to-add-this-API
@@ -237,7 +246,7 @@
           "value": "TRUE"
         },
         {
-          "name": "EXECUTABLE_OUTPUT_PATH:PATH",
+          "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}"
         },
         {
