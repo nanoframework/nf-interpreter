@@ -8,15 +8,21 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 
 
 # set include directories
-list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs/src")
-list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Include")
+if(RTOS_CHIBIOS_CHECK)
+    list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs/src")
+	set( PROJECT_COMMON_PATH "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
+endif()
+
+list(APPEND Windows.Storage_INCLUDE_DIRS "${TARGET_BASE_LOCATION}/Include")
 list(APPEND Windows.Storage_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
 
 # source files
 set(Windows.Storage_SRCS
 
     win_storage_native_Windows_Storage_FileIO.cpp
+    win_storage_native_Windows_Storage_StorageFile.cpp  
     win_storage_native_Windows_Storage_StorageFolder.cpp  
+    win_storage_native_Windows_Storage_Devices_SDCard.cpp
     win_storage_native.cpp
 
     Target_Windows_Storage.c
@@ -28,8 +34,8 @@ foreach(SRC_FILE ${Windows.Storage_SRCS})
         PATHS
 
             "${BASE_PATH_FOR_THIS_MODULE}"
-            "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common"
-
+            "${TARGET_BASE_LOCATION}"
+            "${PROJECT_COMMON_PATH}"
         CMAKE_FIND_ROOT_PATH_BOTH
     )
     # message("${SRC_FILE} >> ${Windows.Storage_SRC_FILE}") # debug helper

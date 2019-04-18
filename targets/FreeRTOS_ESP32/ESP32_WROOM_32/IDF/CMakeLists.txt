@@ -55,6 +55,7 @@ list(APPEND TARGET_ESP32_IDF_INCLUDES "${COMPONENT_PATH}/ulp/include")
 list(APPEND TARGET_ESP32_IDF_INCLUDES "${COMPONENT_PATH}/ulp/include")
 
 list(APPEND TARGET_ESP32_IDF_INCLUDES "${COMPONENT_PATH}/spiffs/include")
+list(APPEND TARGET_ESP32_IDF_INCLUDES "${COMPONENT_PATH}/fatfs/src")
 
 #sdkconfig reference
 list(APPEND TARGET_ESP32_IDF_INCLUDES "${ESP32_IDF_PATH}/examples/get-started/blink/build/include")

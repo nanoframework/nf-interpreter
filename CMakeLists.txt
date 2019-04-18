@@ -334,8 +334,8 @@ option(NF_FEATURE_HAS_SDCARD "option to enable USB Mass Storage")
 if(NF_FEATURE_HAS_SDCARD)
 
     # this feature currently is supported only on ChibiOS
-    if(NOT RTOS_CHIBIOS_CHECK)
-        message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M targets.")
+    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_ESP32_CHECK)
+        message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M and ESP32 targets.")
     endif()
 
     # force inclusion of Windows.Storage API

@@ -9,7 +9,7 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
-#include <hal.h>
+
 
 struct Library_win_storage_native_Windows_Storage_RemovableDeviceEventArgs
 {
@@ -104,6 +104,7 @@ struct Library_win_storage_native_Windows_Storage_StorageProvider
 	//--//
 
 };
+
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage;
 

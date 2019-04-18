@@ -19,6 +19,9 @@
 #define INDEX2_DRIVE_LETTER     "F:"
 #define INDEX2_DRIVE_PATH       INDEX2_DRIVE_LETTER"\\"
 
+#define INTERNAL_DRIVE_LETTER   "I:"
+#define INTERNAL_DRIVE_PATH     INTERNAL_DRIVE_LETTER"\\"
+
 //////////////////////////////////////////////////////////////////////////
 // Keep in sync with StorageEventManager.StorageEventType in managed code
 // Storage events sub-categories
