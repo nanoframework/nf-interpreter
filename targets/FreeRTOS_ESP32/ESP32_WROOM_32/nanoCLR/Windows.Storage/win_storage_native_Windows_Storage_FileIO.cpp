@@ -188,10 +188,12 @@ void StorageIOTask(void *pvParameters)
             xQueueSend(StorageResultQueue, &operationResult, portMAX_DELAY);
 
             // fire event for FileIO operation complete
-            Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
+			if (fileOpMessage.Operation != EXIT)
+				Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
         }
     }
 
+	vTaskDelete(NULL);
 }
 
 void CreateStorageIOTask()

@@ -162,3 +162,8 @@ bool SystemState_Query(SYSTEM_STATE_type state)
 
     GLOBAL_UNLOCK(irq);
 }
+
+
+// Just in case storage is not configured
+__nfweak void Storage_Initialize() {};
+__nfweak void Storage_Uninitialize() {};
