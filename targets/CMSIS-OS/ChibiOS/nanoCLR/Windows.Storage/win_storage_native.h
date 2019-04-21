@@ -71,6 +71,8 @@ struct Library_win_storage_native_Windows_Storage_StorageFile
 	static const int FIELD___name = 2;
 	static const int FIELD___path = 3;
 
+	NANOCLR_NATIVE_DECLARE(DeleteFileNative___VOID);
+	NANOCLR_NATIVE_DECLARE(RenameFileNative___VOID__STRING);
 	NANOCLR_NATIVE_DECLARE(CheckFileNative___STATIC__VOID__STRING);
 
 	//--//
@@ -90,6 +92,9 @@ struct Library_win_storage_native_Windows_Storage_StorageFolder
 	NANOCLR_NATIVE_DECLARE(GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile__U4__U4);
 	NANOCLR_NATIVE_DECLARE(CreateFileNative___WindowsStorageStorageFile__STRING__U4);
 	NANOCLR_NATIVE_DECLARE(CreateFolderNative___WindowsStorageStorageFolder__STRING__U4);
+	NANOCLR_NATIVE_DECLARE(DeleteFolderNative___VOID);
+	NANOCLR_NATIVE_DECLARE(RenameFolderNative___VOID__STRING);
+	NANOCLR_NATIVE_DECLARE(GetFolderNative___WindowsStorageStorageFolder__STRING);
 
 	//--//
 
