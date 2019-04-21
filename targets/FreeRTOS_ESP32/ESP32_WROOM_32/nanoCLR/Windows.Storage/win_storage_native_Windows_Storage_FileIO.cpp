@@ -185,7 +185,7 @@ void StorageIOTask(void *pvParameters)
             };
 
             // Queue result and fire event
-            xQueueSend(StorageResultQueue, &operationResult, portMAX_DELAY);
+			xQueueSend(StorageResultQueue, &operationResult, portMAX_DELAY);
 
             // fire event for FileIO operation complete
 			if (fileOpMessage.Operation != EXIT)
