@@ -6,6 +6,9 @@
 #include <ff.h>
 #include "win_storage_native.h"
 
+// defining these types here to make it shorter and improve code readability
+typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
+
 HRESULT Library_win_storage_native_Windows_Storage_StorageFile::CheckFileNative___STATIC__VOID__STRING(CLR_RT_StackFrame& stack)
 {
     NANOCLR_HEADER();
