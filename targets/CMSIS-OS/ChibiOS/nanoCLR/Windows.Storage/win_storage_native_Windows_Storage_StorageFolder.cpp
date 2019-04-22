@@ -950,10 +950,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 	CLR_RT_HeapBlock*       storageFolder;
 
 	const char* folderName;
-	char*       workingPath = NULL;
 	const char* workingPath;
 
 	FILINFO     fileInfo;
+	SYSTEMTIME  fileInfoTime;
 
 	FRESULT     operationResult;
 	char*       folderPath = NULL;
@@ -980,7 +980,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 	memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
 
 	// compose folder path
-	strcat(folderPath, managedPath);
+	strcat(folderPath, workingPath);
 
 	// Add "\" to path if required
 	if (folderPath[hal_strlen_s(folderPath) - 1] != '\\')
@@ -999,7 +999,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 	}
 
 	// Is this a file ?
-	if (if ( !(fileInfo.fattrib & AM_DIR) )
+	if ( !(fileInfo.fattrib & AM_DIR) )
 	{
 		// Path represents a file
 		NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
@@ -1020,11 +1020,6 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 	NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFolder[StorageFolder::FIELD___name], folderName));
 
 	NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFolder[StorageFolder::FIELD___path], folderPath));
-
-	// get the date time details and fill in the managed field
-	// get a reference to the dateCreated managed field...
-	CLR_RT_HeapBlock& dateFieldRef = storageFolder[StorageFolder::FIELD___dateCreated];
-	CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
 
 	// get the date time details and fill in the managed field
 	// compute directory date
