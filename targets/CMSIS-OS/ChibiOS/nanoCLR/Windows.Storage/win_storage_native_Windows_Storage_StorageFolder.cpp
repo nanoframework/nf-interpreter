@@ -959,7 +959,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 	char*       folderPath = NULL;
 	
 	CLR_INT64*  pRes;
-	CLR_RT_HeapBlock& dateFieldRef
+	CLR_RT_HeapBlock& dateFieldRef;
 
 	// get a pointer to the managed object instance and check that it's not NULL
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
