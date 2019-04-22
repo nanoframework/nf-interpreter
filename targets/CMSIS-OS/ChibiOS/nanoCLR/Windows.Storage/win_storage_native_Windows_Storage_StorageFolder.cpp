@@ -957,6 +957,9 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 
 	FRESULT     operationResult;
 	char*       folderPath = NULL;
+	
+	CLR_INT64*  pRes;
+	CLR_RT_HeapBlock& dateFieldRef
 
 	// get a pointer to the managed object instance and check that it's not NULL
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -1026,11 +1029,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 	fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
 	// get a reference to the dateCreated managed field...
-	CLR_RT_HeapBlock& dateFieldRef = storageFolder[StorageFolder::FIELD___dateCreated];
-	CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+	dateFieldRef = storageFolder[StorageFolder::FIELD___dateCreated];
+	pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
 	// ...and set it with the fileInfoTime
 	*pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
-
 
 	NANOCLR_CLEANUP();
 
