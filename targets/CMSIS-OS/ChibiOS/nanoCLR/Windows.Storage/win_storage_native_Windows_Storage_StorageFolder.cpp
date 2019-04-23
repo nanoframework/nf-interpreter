@@ -869,3 +869,180 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
 
     NANOCLR_CLEANUP_END();
 }
+
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNative___VOID(CLR_RT_StackFrame& stack)
+{
+	NANOCLR_HEADER();
+
+	const char* workingPath;
+	FRESULT     operationResult;
+
+	// get a pointer to the managed object instance and check that it's not NULL
+	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+	// get a pointer to the path in managed field
+	workingPath = pThis[StorageFolder::FIELD___path].DereferenceString()->StringText();
+
+	// remove folder
+	operationResult = f_unlink(workingPath);
+	if (operationResult == FR_INVALID_NAME)
+	{
+		// Invalid path
+		NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+	}
+	else if (operationResult == FR_DENIED)
+	{
+		// folder not empty
+		NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_EMPTY);
+	}
+
+	else if (operationResult != FR_OK)
+	{
+		// folder doesn't exist
+		NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+	}
+
+	NANOCLR_CLEANUP();
+
+	NANOCLR_CLEANUP_END();
+}
+
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNative___VOID__STRING(CLR_RT_StackFrame& stack)
+{
+	NANOCLR_HEADER();
+
+	const char* workingPath;
+	const char* desiredPath;
+	FRESULT     operationResult;
+
+	// get a pointer to the managed object instance and check that it's not NULL
+	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+	// get a pointer to the path in managed field
+	workingPath = pThis[StorageFolder::FIELD___path].DereferenceString()->StringText();
+
+	// get a pointer to the desired folder name
+	desiredPath = stack.Arg1().DereferenceString()->StringText();
+
+	// rename folder
+	operationResult = f_rename(workingPath, desiredPath);
+	if (operationResult == FR_INVALID_NAME)
+	{
+		// invalid path
+		NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+	}
+	else if (operationResult != FR_OK)
+	{
+		// folder doesn't exist
+		NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+	}
+
+	NANOCLR_CLEANUP();
+
+	NANOCLR_CLEANUP_END();
+}
+
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING(CLR_RT_StackFrame& stack)
+{
+	NANOCLR_HEADER();
+
+	CLR_RT_TypeDef_Index    storageFolderTypeDef;
+	CLR_RT_HeapBlock*       storageFolder;
+
+	const char* folderName;
+	const char* workingPath;
+
+	FILINFO     fileInfo;
+	SYSTEMTIME  fileInfoTime;
+
+	FRESULT     operationResult;
+	char*       folderPath = NULL;
+	
+	CLR_INT64*  pRes;
+
+	// get a pointer to the managed object instance and check that it's not NULL
+	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+	// get a pointer to the path in managed field
+	workingPath = pThis[StorageFolder::FIELD___path].DereferenceString()->StringText();
+
+	// get a pointer to the desired folder name
+	folderName = stack.Arg1().DereferenceString()->StringText();
+
+	folderPath = (char*)platform_malloc(2 * FF_LFN_BUF + 1);
+
+	// sanity check for successfull malloc
+	if (folderPath == NULL)
+	{
+		// failed to allocate memory
+		NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+	}
+
+	// clear working buffer
+	memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
+
+	// compose folder path
+	strcat(folderPath, workingPath);
+
+	// Add "\" to path if required
+	if (folderPath[hal_strlen_s(folderPath) - 1] != '\\')
+	{
+		strcat(folderPath, "\\");
+	}
+
+	strcat(folderPath, folderName);
+
+	// check if directory exists
+	operationResult = f_stat(folderPath, &fileInfo);
+	if (operationResult != FR_OK)
+	{
+		// folder doesn't exist
+		NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+	}
+    else
+    {
+        // is this a file?
+        if ( !(fileInfo.fattrib & AM_DIR) )
+        {
+            // Path represents a file
+            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+        }
+        else
+        {
+            // compose return object
+            // find <StorageFolder> type, don't bother checking the result as it exists for sure
+            g_CLR_RT_TypeSystem.FindTypeDef("StorageFolder", "Windows.Storage", storageFolderTypeDef);
+
+            // create a <StorageFolder>
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), storageFolderTypeDef));
+
+            // get a handle to the storage folder
+            storageFolder = stack.TopValue().Dereference();
+
+            // folder name
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFolder[StorageFolder::FIELD___name], folderName));
+
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFolder[StorageFolder::FIELD___path], folderPath));
+
+            // get the date time details and fill in the managed field
+            // compute directory date
+            fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
+
+            // get a reference to the dateCreated managed field...
+            CLR_RT_HeapBlock& dateFieldRef = storageFolder[StorageFolder::FIELD___dateCreated];
+            pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+            // ...and set it with the fileInfoTime
+            *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+        }
+    }
+
+	NANOCLR_CLEANUP();
+
+	// free buffer memory, if allocated
+	if (folderPath != NULL)
+	{
+		platform_free(folderPath);
+	}
+
+	NANOCLR_CLEANUP_END();
+}

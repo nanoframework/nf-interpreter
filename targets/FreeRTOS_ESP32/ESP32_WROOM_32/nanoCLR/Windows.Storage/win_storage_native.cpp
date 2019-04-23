@@ -63,7 +63,15 @@ static const CLR_RT_MethodHandler method_lookup[] =
 	NULL,
 	NULL,
 	NULL,
+	NULL,
+	Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative___VOID,
+	Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative___VOID__STRING,
+	NULL,
+	NULL,
 	Library_win_storage_native_Windows_Storage_StorageFile::CheckFileNative___STATIC__VOID__STRING,
+	NULL,
+	NULL,
+	NULL,
 	NULL,
 	NULL,
 	NULL,
@@ -87,6 +95,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 	Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile__U4__U4,
 	Library_win_storage_native_Windows_Storage_StorageFolder::CreateFileNative___WindowsStorageStorageFile__STRING__U4,
 	Library_win_storage_native_Windows_Storage_StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING__U4,
+	Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNative___VOID,
+	Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNative___VOID__STRING,
+	Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING,
 	NULL,
 	NULL,
 	NULL,
@@ -95,7 +106,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage =
 {
 	"Windows.Storage",
-	0xF673462F,
+	0x3BE02CF0,
 	method_lookup,
 	{ 1, 0, 0, 0 }
 };
