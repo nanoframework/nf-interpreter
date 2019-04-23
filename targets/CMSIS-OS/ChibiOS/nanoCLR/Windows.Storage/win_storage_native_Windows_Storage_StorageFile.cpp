@@ -87,7 +87,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
 	operationResult = f_rename(workingPath, desiredPath);
 	if (operationResult == FR_INVALID_NAME)
 	{
-		// Invalid path
+		// invalid path
 		NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 	}
 	else if (operationResult != FR_OK)
