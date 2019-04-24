@@ -50,8 +50,13 @@ uint8_t hal_spiffs_config()
     spiffs_cfg.phys_size = SPIFFS_TOTAL_SIZE;
     spiffs_cfg.phys_addr = 0;
     spiffs_cfg.phys_erase_block = SPIFFS_ERASE_BLOCK_SIZE;
+<<<<<<< HEAD
     spiffs_cfg.log_block_size = SPIFFS_LOGICAL_BLOCK_SIZE;
     spiffs_cfg.log_page_size = SPIFFS_LOGICAL_PAGE_SIZE;
+=======
+    spiffs_cfg.log_block_size = SPIFFS_BLOCK_SIZE;
+    spiffs_cfg.log_page_size = LOG_PAGE_SIZE;
+>>>>>>> Initial work adding SPIFFS to STM32
 
     // setup pointers to HAL functions
     spiffs_cfg.hal_erase_f = hal_spiffs_erase;
