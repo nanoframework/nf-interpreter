@@ -36,12 +36,18 @@
 #define HAL_USE_STM32_USB_MSD                FALSE
 #endif
 
+#if !defined(HAL_USE_STM32_QSPI)
+// the default for this driver is NOT to be included
+#define HAL_USE_STM32_QSPI                   FALSE
+#endif
+
 // Abstract interfaces
 
 // Shared headers
 // #include "hal_nnnn.h"
 
 // Normal drivers
+#include <hal_stm32_qspi.h>
 #include <hal_stm32_flash.h>
 #include <hal_stm32_crc.h>
 #include <hal_stm32_rng.h>

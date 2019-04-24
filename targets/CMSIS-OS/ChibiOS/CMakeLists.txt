@@ -55,7 +55,7 @@ if(NO_CHIBIOS_SOURCE)
 
     #  check if Git was found, if not report to user and abort
     if(NOT GIT_EXECUTABLE)
-    message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
     endif()
 
     # ChibiOS version
@@ -179,7 +179,7 @@ if(CHIBIOS_CONTRIB_REQUIRED)
 
         #  check if Git was found, if not report to user and abort
         if(NOT GIT_EXECUTABLE)
-        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
         endif()
 
         message(STATUS "ChibiOS-Contrib source from GitHub repo")
@@ -441,6 +441,111 @@ endif()
 option(STM32_CUBE_PACKAGE_REQUIRED "option to include STM Cube pcakge in the build")
 if(STM32_CUBE_PACKAGE_REQUIRED)
     ProcessSTM32CubePackage()
+endif()
+
+# if support for SPIFFS is enabled add it to the build
+if(NF_FEATURE_USE_SPIFFS)
+
+    # SPIFFS needs STM Cube package option
+    if(NOT STM32_CUBE_PACKAGE_REQUIRED)
+        message(FATAL_ERROR "error: SPIFFS requires STM Cube package option, make sure you have STM32_CUBE_PACKAGE_REQUIRED build option set to ON.")
+    endif()
+
+    # check if SPIFFS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_SPIFFS_SOURCE TRUE)
+
+    if(SPIFFS_SOURCE)
+        if(NOT "${SPIFFS_SOURCE}" STREQUAL "")
+            set(NO_SPIFFS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_SPIFFS_SOURCE)
+        # no SPIFFS source specified, download it from it's repo
+
+        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+        include(Hack_SetGitSearchPath)
+
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("CMake/SPIFFS.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/SPIFFS_Download/CMakeLists.txt")
+
+        # setup CMake project for SPIFFS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/SPIFFS_Download")
+
+        # run build on SPIFFS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/SPIFFS_Download")
+
+        # add SPIFFS as external project
+        ExternalProject_Add(
+            SPIFFS
+            PREFIX SPIFFS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/SPIFFS_Source
+            GIT_REPOSITORY  https://github.com/nanoframework/spiffs
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND ""
+        )
+
+    else()
+        # SPIFFS source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${SPIFFS_SOURCE}/")
+
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/SPIFFS_Source")
+                message(STATUS "SPIFFS source from: ${SPIFFS_SOURCE}")
+                file(COPY "${SPIFFS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SPIFFS_Source")
+            else()
+                message(STATUS "Using local cache of SPIFFS source from ${SPIFFS_SOURCE}")
+            endif()
+
+            set(SPIFFS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/SPIFFS_Source/include)
+        else()
+            message(FATAL_ERROR "Couldn't find SPIFFS source at ${SPIFFS_SOURCE}/")
+        endif()
+
+        # add SPIFFS as external project
+        ExternalProject_Add(
+            SPIFFS
+            PREFIX SPIFFS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/SPIFFS_Source
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND ""
+        )
+
+    endif()
+
+    # get source dir for SPIFFS CMake project
+    ExternalProject_Get_Property(SPIFFS SOURCE_DIR)
+
+    set(SPIFFS_LIBRARIES "${CMAKE_SHARED_LIBRARY_PREFIX}SPIFFS${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    include_directories(${SPIFFS_INCLUDE_DIRS})
+
+    add_subdirectory(spiffs)
+
 endif()
 
 # add target ChibiOS dirs

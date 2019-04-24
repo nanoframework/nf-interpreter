@@ -44,7 +44,9 @@ typedef struct SMT32FlashDriver {
 
 // From STMicroelectronics Cube HAL 
 #define FLASH                       ((FLASH_TypeDef *) FLASH_R_BASE)
+#ifndef HAL_IS_BIT_SET
 #define HAL_IS_BIT_SET(REG, BIT)    (((REG) & (BIT)) != RESET)
+#endif
 #define FLASH_KEY1                  ((uint32_t)0x45670123U)
 #define FLASH_KEY2                  ((uint32_t)0xCDEF89ABU)
 #define FLASH_OPT_KEY1              ((uint32_t)0x08192A3BU)

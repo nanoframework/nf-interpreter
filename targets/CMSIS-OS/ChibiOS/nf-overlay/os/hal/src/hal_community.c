@@ -61,4 +61,8 @@ void halCommunityInit(void) {
   oneWireInit();
 #endif
 
+#if (HAL_USE_STM32_QSPI == TRUE)
+  qspiInit();
+#endif
+
 }

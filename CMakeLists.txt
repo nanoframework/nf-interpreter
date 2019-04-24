@@ -293,11 +293,11 @@ endif()
 #################################################################
 # enables support for SD Card
 # (default is OFF so SD Card is NOT supported)
-option(NF_FEATURE_HAS_SDCARD "option to enable USB Mass Storage")
+option(NF_FEATURE_HAS_SDCARD "option to enable support for SD Card")
 
 if(NF_FEATURE_HAS_SDCARD)
 
-    # this feature currently is supported only on ChibiOS
+    # this feature currently is supported only on ChibiOS and ESP32 FreeRTOS
     if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_ESP32_CHECK)
         message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M and ESP32 targets.")
     endif()
@@ -333,6 +333,31 @@ if(NF_FEATURE_HAS_USB_MSD)
     message(STATUS "Support for USB Mass Storage is included")
 else()
     message(STATUS "Support for USB Mass Storage IS NOT included")
+endif()
+
+#################################################################
+
+#################################################################
+# enables support for SPI file system
+# (default is OFF so SPIFFS is NOT supported)
+option(NF_FEATURE_USE_SPIFFS "option to enable support for SPI file system")
+
+if(NF_FEATURE_USE_SPIFFS)
+
+    # this feature currently is supported only on ChibiOS and ESP32
+    if(NOT RTOS_CHIBIOS_CHECK)
+        message(FATAL_ERROR "Support for SPIFFS is only available for ChibiOS Cortex-M and ESP32 targets.")
+    endif()
+
+    # force inclusion of Windows.Storage API
+    set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
+
+    set(NF_FEATURE_USE_SPIFFS_OPTION TRUE CACHE INTERNAL "Set nF SPIFFS feature TRUE")
+
+    message(STATUS "Support for SPIFFS is included")
+else()
+    set(NF_FEATURE_USE_SPIFFS_OPTION FALSE CACHE INTERNAL "Set nF SPIFFS feature FALSE")
+    message(STATUS "Support for SPIFFS IS NOT included")
 endif()
 
 #################################################################

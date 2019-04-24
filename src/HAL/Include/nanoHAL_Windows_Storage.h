@@ -12,13 +12,16 @@
 #define FF_LFN_BUF  255
 
 // driver letters and paths
+// drive letter for SD Card
 #define INDEX0_DRIVE_LETTER     "D:"
 #define INDEX0_DRIVE_PATH       INDEX0_DRIVE_LETTER"\\"
+// drive letter for USB mass storage device
 #define INDEX1_DRIVE_LETTER     "E:"
 #define INDEX1_DRIVE_PATH       INDEX1_DRIVE_LETTER"\\"
+// spare drive letter
 #define INDEX2_DRIVE_LETTER     "F:"
 #define INDEX2_DRIVE_PATH       INDEX2_DRIVE_LETTER"\\"
-
+// drive letter for internal drive (SPIFFS)
 #define INTERNAL_DRIVE_LETTER   "I:"
 #define INTERNAL_DRIVE_PATH     INTERNAL_DRIVE_LETTER"\\"
 

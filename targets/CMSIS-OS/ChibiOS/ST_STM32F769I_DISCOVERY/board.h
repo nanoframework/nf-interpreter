@@ -99,7 +99,7 @@
 #define GPIOB_SD_D2                 3U
 #define GPIOB_SD_D3                 4U
 #define GPIOB_ULPI_D7               5U
-#define GPIOB_QSPI_NCS              6U
+#define GPIOB_QUADSPI_BK1_NCS       6U
 #define GPIOB_AUDIO_SDA             7U
 #define GPIOB_LCD_SDA               7U
 #define GPIOB_ARD_D15               8U
@@ -292,7 +292,7 @@
 #define LINE_SD_D2                  PAL_LINE(GPIOB, 3U)
 #define LINE_SD_D3                  PAL_LINE(GPIOB, 4U)
 #define LINE_ULPI_D7                PAL_LINE(GPIOB, 5U)
-#define LINE_QSPI_NCS               PAL_LINE(GPIOB, 6U)
+#define LINE_QUADSPI_BK1_NCS        PAL_LINE(GPIOB, 6U)
 #define LINE_AUDIO_SDA              PAL_LINE(GPIOB, 7U)
 #define LINE_LCD_SDA                PAL_LINE(GPIOB, 7U)
 #define LINE_ARD_D15                PAL_LINE(GPIOB, 8U)
@@ -586,11 +586,11 @@
  *
  * PB0  - ULPI_D1                   (alternate 10).
  * PB1  - ULPI_D2                   (alternate 10).
- * PB2  - QSPI_CLK                  (input pullup).
+ * PB2  - QSPI_CLK                  (alternate 9).
  * PB3  - SD_D2                     (alternate 10).
  * PB4  - SD_D3                     (alternate 10).
  * PB5  - ULPI_D7                   (alternate 10).
- * PB6  - QSPI_NCS                  (input pullup).
+ * PB6  - QUADSPI_BK1_NCS           (alternate 10).
  * PB7  - AUDIO_SDA LCD_SDA         (alternate 11).
  * PB8  - ARD_D15                   (input pullup).
  * PB9  - ARD_D14                   (input pullup).
@@ -603,11 +603,11 @@
  */
 #define VAL_GPIOB_MODER             (PIN_MODE_ALTERNATE(GPIOB_ULPI_D1) |    \
                                      PIN_MODE_ALTERNATE(GPIOB_ULPI_D2) |    \
-                                     PIN_MODE_INPUT(GPIOB_QSPI_CLK) |       \
+                                     PIN_MODE_ALTERNATE(GPIOB_QSPI_CLK) |   \
                                      PIN_MODE_ALTERNATE(GPIOB_SD_D2) |      \
                                      PIN_MODE_ALTERNATE(GPIOB_SD_D3) |      \
                                      PIN_MODE_ALTERNATE(GPIOB_ULPI_D7) |    \
-                                     PIN_MODE_INPUT(GPIOB_QSPI_NCS) |       \
+                                     PIN_MODE_ALTERNATE(GPIOB_QUADSPI_BK1_NCS) | \
                                      PIN_MODE_ALTERNATE(GPIOB_AUDIO_SDA) |  \
                                      PIN_MODE_ALTERNATE(GPIOB_I2C1_SCL) |   \
                                      PIN_MODE_ALTERNATE(GPIOB_I2C1_SDA) |   \
@@ -623,7 +623,7 @@
                                      PIN_OTYPE_PUSHPULL(GPIOB_SD_D2) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOB_SD_D3) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOB_ULPI_D7) |    \
-                                     PIN_OTYPE_PUSHPULL(GPIOB_QSPI_NCS) |   \
+                                     PIN_OTYPE_PUSHPULL(GPIOB_QUADSPI_BK1_NCS) | \
                                      PIN_OTYPE_PUSHPULL(GPIOB_AUDIO_SDA) |  \
                                      PIN_OTYPE_OPENDRAIN(GPIOB_I2C1_SCL) |  \
                                      PIN_OTYPE_OPENDRAIN(GPIOB_I2C1_SDA) |  \
@@ -639,7 +639,7 @@
                                      PIN_OSPEED_HIGH(GPIOB_SD_D2) |         \
                                      PIN_OSPEED_HIGH(GPIOB_SD_D3) |         \
                                      PIN_OSPEED_HIGH(GPIOB_ULPI_D7) |       \
-                                     PIN_OSPEED_HIGH(GPIOB_QSPI_NCS) |      \
+                                     PIN_OSPEED_HIGH(GPIOB_QUADSPI_BK1_NCS) | \
                                      PIN_OSPEED_HIGH(GPIOB_AUDIO_SDA) |     \
                                      PIN_OSPEED_HIGH(GPIOB_I2C1_SCL) |      \
                                      PIN_OSPEED_HIGH(GPIOB_I2C1_SDA) |      \
@@ -651,11 +651,11 @@
                                      PIN_OSPEED_HIGH(GPIOB_ARD_D11))
 #define VAL_GPIOB_PUPDR             (PIN_PUPDR_PULLUP(GPIOB_ULPI_D1) |      \
                                      PIN_PUPDR_FLOATING(GPIOB_ULPI_D2) |    \
-                                     PIN_PUPDR_PULLUP(GPIOB_QSPI_CLK) |     \
+                                     PIN_PUPDR_FLOATING(GPIOB_QSPI_CLK) |   \
                                      PIN_PUPDR_FLOATING(GPIOB_SD_D2) |      \
                                      PIN_PUPDR_FLOATING(GPIOB_SD_D3) |      \
                                      PIN_PUPDR_PULLUP(GPIOB_ULPI_D7) |      \
-                                     PIN_PUPDR_PULLUP(GPIOB_QSPI_NCS) |     \
+                                     PIN_PUPDR_FLOATING(GPIOB_QUADSPI_BK1_NCS) | \
                                      PIN_PUPDR_FLOATING(GPIOB_AUDIO_SDA) |  \
                                      PIN_PUPDR_FLOATING(GPIOB_I2C1_SCL) |   \
                                      PIN_PUPDR_FLOATING(GPIOB_I2C1_SDA) |   \
@@ -671,7 +671,7 @@
                                      PIN_ODR_HIGH(GPIOB_SD_D2) |            \
                                      PIN_ODR_HIGH(GPIOB_SD_D3) |            \
                                      PIN_ODR_HIGH(GPIOB_ULPI_D7) |          \
-                                     PIN_ODR_HIGH(GPIOB_QSPI_NCS) |         \
+                                     PIN_ODR_HIGH(GPIOB_QUADSPI_BK1_NCS) |  \
                                      PIN_ODR_HIGH(GPIOB_AUDIO_SDA) |        \
                                      PIN_ODR_LOW(GPIOB_I2C1_SCL) |          \
                                      PIN_ODR_LOW(GPIOB_I2C1_SDA) |          \
@@ -683,11 +683,11 @@
                                      PIN_ODR_HIGH(GPIOB_ARD_D11))
 #define VAL_GPIOB_AFRL              (PIN_AFIO_AF(GPIOB_ULPI_D1, 10U) |      \
                                      PIN_AFIO_AF(GPIOB_ULPI_D2, 10U) |      \
-                                     PIN_AFIO_AF(GPIOB_QSPI_CLK, 0U) |      \
+                                     PIN_AFIO_AF(GPIOB_QSPI_CLK, 9U) |      \
                                      PIN_AFIO_AF(GPIOB_SD_D2, 10U) |        \
                                      PIN_AFIO_AF(GPIOB_SD_D3, 10U) |        \
                                      PIN_AFIO_AF(GPIOB_ULPI_D7, 10U) |      \
-                                     PIN_AFIO_AF(GPIOB_QSPI_NCS, 0U) |      \
+                                     PIN_AFIO_AF(GPIOB_QUADSPI_BK1_NCS, 10U) | \
                                      PIN_AFIO_AF(GPIOB_AUDIO_SDA, 11U))
 #define VAL_GPIOB_AFRH              (PIN_AFIO_AF(GPIOB_I2C1_SCL, 4U) |      \
                                      PIN_AFIO_AF(GPIOB_I2C1_SDA, 4U) |      \
@@ -831,7 +831,7 @@
  * PD10 - FMC_D15                   (alternate 12).
  * PD11 - SPDIF_I2S                 (alternate 10).
  * PD12 - AUDIO_SCL LCD_SCL         (alternate 4).
- * PD13 - QSPI_D3                   (input pullup).
+ * PD13 - QSPI_D3                   (alternate 9).
  * PD14 - FMC_D0                    (alternate 12).
  * PD15 - FMC_D1                    (alternate 12).
  */
@@ -848,7 +848,7 @@
                                      PIN_MODE_ALTERNATE(GPIOD_FMC_D15) |    \
                                      PIN_MODE_ALTERNATE(GPIOD_SPDIF_I2S) |  \
                                      PIN_MODE_ALTERNATE(GPIOD_AUDIO_SCL) |  \
-                                     PIN_MODE_INPUT(GPIOD_QSPI_D3) |        \
+                                     PIN_MODE_ALTERNATE(GPIOD_QSPI_D3) |    \
                                      PIN_MODE_ALTERNATE(GPIOD_FMC_D0) |     \
                                      PIN_MODE_ALTERNATE(GPIOD_FMC_D1))
 #define VAL_GPIOD_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOD_FMC_D2) |     \
@@ -896,7 +896,7 @@
                                      PIN_PUPDR_FLOATING(GPIOD_FMC_D15) |    \
                                      PIN_PUPDR_FLOATING(GPIOD_SPDIF_I2S) |  \
                                      PIN_PUPDR_FLOATING(GPIOD_AUDIO_SCL) |  \
-                                     PIN_PUPDR_PULLUP(GPIOD_QSPI_D3) |      \
+                                     PIN_PUPDR_FLOATING(GPIOD_QSPI_D3) |    \
                                      PIN_PUPDR_FLOATING(GPIOD_FMC_D0) |     \
                                      PIN_PUPDR_FLOATING(GPIOD_FMC_D1))
 #define VAL_GPIOD_ODR               (PIN_ODR_HIGH(GPIOD_FMC_D2) |           \
@@ -912,7 +912,7 @@
                                      PIN_ODR_HIGH(GPIOD_FMC_D15) |          \
                                      PIN_ODR_HIGH(GPIOD_SPDIF_I2S) |        \
                                      PIN_ODR_HIGH(GPIOD_AUDIO_SCL) |        \
-                                     PIN_ODR_LOW(GPIOD_QSPI_D3) |           \
+                                     PIN_ODR_HIGH(GPIOD_QSPI_D3) |          \
                                      PIN_ODR_LOW(GPIOD_FMC_D0) |            \
                                      PIN_ODR_LOW(GPIOD_FMC_D1))
 #define VAL_GPIOD_AFRL              (PIN_AFIO_AF(GPIOD_FMC_D2, 12U) |       \
@@ -928,7 +928,7 @@
                                      PIN_AFIO_AF(GPIOD_FMC_D15, 12U) |      \
                                      PIN_AFIO_AF(GPIOD_SPDIF_I2S, 10U) |    \
                                      PIN_AFIO_AF(GPIOD_AUDIO_SCL, 4U) |     \
-                                     PIN_AFIO_AF(GPIOD_QSPI_D3, 0U) |       \
+                                     PIN_AFIO_AF(GPIOD_QSPI_D3, 9U) |       \
                                      PIN_AFIO_AF(GPIOD_FMC_D0, 12U) |       \
                                      PIN_AFIO_AF(GPIOD_FMC_D1, 12U))
 
@@ -937,7 +937,7 @@
  *
  * PE0  - FMC_NBL0                  (alternate 12).
  * PE1  - FMC_NBL1                  (alternate 12).
- * PE2  - QSPI_D2                   (input pullup).
+ * PE2  - QSPI_D2                   (alternate 9).
  * PE3  - SAI1_SDB                  (alternate 6).
  * PE4  - SAI1_FSA                  (alternate 6).
  * PE5  - SAI1_SCKA                 (alternate 6).
@@ -954,7 +954,7 @@
  */
 #define VAL_GPIOE_MODER             (PIN_MODE_ALTERNATE(GPIOE_FMC_NBL0) |   \
                                      PIN_MODE_ALTERNATE(GPIOE_FMC_NBL1) |   \
-                                     PIN_MODE_INPUT(GPIOE_QSPI_D2) |        \
+                                     PIN_MODE_ALTERNATE(GPIOE_QSPI_D2) |    \
                                      PIN_MODE_ALTERNATE(GPIOE_SAI1_SDB) |   \
                                      PIN_MODE_ALTERNATE(GPIOE_SAI1_FSA) |   \
                                      PIN_MODE_ALTERNATE(GPIOE_SAI1_SCKA) |  \
@@ -1002,7 +1002,7 @@
                                      PIN_OSPEED_HIGH(GPIOE_FMC_D12))
 #define VAL_GPIOE_PUPDR             (PIN_PUPDR_FLOATING(GPIOE_FMC_NBL0) |   \
                                      PIN_PUPDR_FLOATING(GPIOE_FMC_NBL1) |   \
-                                     PIN_PUPDR_PULLUP(GPIOE_QSPI_D2) |      \
+                                     PIN_PUPDR_FLOATING(GPIOE_QSPI_D2) |    \
                                      PIN_PUPDR_FLOATING(GPIOE_SAI1_SDB) |   \
                                      PIN_PUPDR_FLOATING(GPIOE_SAI1_FSA) |   \
                                      PIN_PUPDR_FLOATING(GPIOE_SAI1_SCKA) |  \
@@ -1034,7 +1034,7 @@
                                      PIN_ODR_HIGH(GPIOE_FMC_D12))
 #define VAL_GPIOE_AFRL              (PIN_AFIO_AF(GPIOE_FMC_NBL0, 12U) |     \
                                      PIN_AFIO_AF(GPIOE_FMC_NBL1, 12U) |     \
-                                     PIN_AFIO_AF(GPIOE_QSPI_D2, 0U) |       \
+                                     PIN_AFIO_AF(GPIOE_QSPI_D2, 9U) |       \
                                      PIN_AFIO_AF(GPIOE_SAI1_SDB, 6U) |      \
                                      PIN_AFIO_AF(GPIOE_SAI1_FSA, 6U) |      \
                                      PIN_AFIO_AF(GPIOE_SAI1_SCKA, 6U) |     \

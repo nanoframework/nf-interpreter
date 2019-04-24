@@ -11,6 +11,9 @@
 #ifndef _TARGET_CHIBIOS_NANOCLR_H_
 #define _TARGET_CHIBIOS_NANOCLR_H_
 
+// enable SPIFFS
+#define NF_FEATURE_USE_SPIFFS @NF_FEATURE_USE_SPIFFS_OPTION@
+
 // set preference to enable (or not) the RTC subsystem
 #define HAL_USE_RTC @HAL_USE_RTC_OPTION@
 

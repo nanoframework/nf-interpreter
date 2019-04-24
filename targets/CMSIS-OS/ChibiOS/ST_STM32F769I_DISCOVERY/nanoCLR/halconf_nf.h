@@ -18,7 +18,12 @@
 
 // enables STM32 Can driver
 #if !defined(HAL_USE_STM32_CAN) 
-#define HAL_USE_STM32_CAN       TRUE
+#define HAL_USE_STM32_CAN           TRUE
+#endif
+
+// enables STM32 QSPI driver
+#if !defined(HAL_USE_STM32_QSPI)
+#define HAL_USE_STM32_QSPI          FALSE
 #endif
 
 #endif // _HALCONF_NF_H_
