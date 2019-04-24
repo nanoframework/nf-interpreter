@@ -87,15 +87,9 @@ uint8_t target_spiffs_init()
         return QSPI_ERROR;
     }
     
-<<<<<<< HEAD
     // // invalidate cache over read buffer to ensure that content from DMA is read
     // // (only required for Cortex-M7)
     // cacheBufferInvalidate(device_id, 3);
-=======
-    // invalidate cache over read buffer to ensure that content from DMA is read
-    // (only required for Cortex-M7)
-    cacheBufferInvalidate(device_id, 3);
->>>>>>> Initial work adding SPIFFS to STM32
 
     // constants from ID Definitions table in MX25L51245G datasheet
     ASSERT(device_id[0] == MX25L512_MANUFACTURER_ID);
@@ -171,10 +165,7 @@ static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
     {
         return QSPI_ERROR;
     }
-<<<<<<< HEAD
 
-=======
->>>>>>> Initial work adding SPIFFS to STM32
     /* Send the reset memory command */
     s_command.Instruction = RESET_MEMORY_CMD;
     if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
@@ -209,10 +200,6 @@ static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
     s_config.Interval        = 0x10;
     s_config.AutomaticStop   = QSPI_AUTOMATIC_STOP_ENABLE;
 
-<<<<<<< HEAD
-=======
-    s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
->>>>>>> Initial work adding SPIFFS to STM32
     s_command.Instruction     = READ_STATUS_REG_CMD;
     s_command.DataMode        = QSPI_DATA_1_LINE;
 
@@ -222,21 +209,8 @@ static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
     }
 
     /* Initialize the reading of status register */
-<<<<<<< HEAD
     s_command.Instruction       = READ_STATUS_REG_CMD;
     s_command.NbData            = 1;
-=======
-    s_command.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction       = READ_STATUS_REG_CMD;
-    s_command.AddressMode       = QSPI_ADDRESS_NONE;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode          = QSPI_DATA_1_LINE;
-    s_command.DummyCycles       = 0;
-    s_command.NbData            = 1;
-    s_command.DdrMode           = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
->>>>>>> Initial work adding SPIFFS to STM32
 
     /* Configure the command */
     if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
@@ -252,22 +226,10 @@ static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
 
     /* Enable write operations, command in 1 bit */
     /* Enable write operations */
-<<<<<<< HEAD
     s_command.Instruction       = WRITE_ENABLE_CMD;
     s_command.DataMode          = QSPI_DATA_NONE;
     s_command.DummyCycles       = 0;
     s_command.NbData            = 0;
-=======
-    s_command.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction       = WRITE_ENABLE_CMD;
-    s_command.AddressMode       = QSPI_ADDRESS_NONE;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode          = QSPI_DATA_NONE;
-    s_command.DummyCycles       = 0;
-    s_command.DdrMode           = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
->>>>>>> Initial work adding SPIFFS to STM32
 
     if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
     {
@@ -284,10 +246,7 @@ static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
 
     s_command.Instruction    = READ_STATUS_REG_CMD;
     s_command.DataMode       = QSPI_DATA_1_LINE;
-<<<<<<< HEAD
     s_command.NbData         = 0;
-=======
->>>>>>> Initial work adding SPIFFS to STM32
 
     if (HAL_QSPI_AutoPolling(hqspi, &s_command, &s_config, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
     {
@@ -295,22 +254,9 @@ static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
     }
 
     /* Update the configuration register with new dummy cycles */
-<<<<<<< HEAD
     s_command.Instruction       = WRITE_STATUS_CFG_REG_CMD;
     s_command.DataMode          = QSPI_DATA_1_LINE;
     s_command.NbData            = 1;
-=======
-    s_command.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction       = WRITE_STATUS_CFG_REG_CMD;
-    s_command.AddressMode       = QSPI_ADDRESS_NONE;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode          = QSPI_DATA_1_LINE;
-    s_command.DummyCycles       = 0;
-    s_command.NbData            = 1;
-    s_command.DdrMode           = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
->>>>>>> Initial work adding SPIFFS to STM32
 
     /* Enable the Quad IO on the QSPI memory (Non-volatile bit) */
     reg |= MX25L512_SR_QUADEN;
@@ -328,7 +274,6 @@ static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
     }
     
     /* 40ms  Write Status/Configuration Register Cycle Time */
-<<<<<<< HEAD
     HAL_Delay( 40 );
 
     // read back register to check MX25L512_SR_QUADEN 
@@ -357,11 +302,6 @@ static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
     {
         return QSPI_ERROR;
     }    
-=======
-    HAL_Delay( 40 );  
-
-    return QSPI_OK;
->>>>>>> Initial work adding SPIFFS to STM32
 }
 
 static uint8_t QSPI_DummyCyclesCfg(QSPI_HandleTypeDef *hqspi)
@@ -562,12 +502,9 @@ static uint8_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi)
 
 static uint8_t QSPI_WriteEnable(QSPI_HandleTypeDef *hqspi)
 {
-<<<<<<< HEAD
    
     //HAL_QSPI_Abort(&QSPID1);
 
-=======
->>>>>>> Initial work adding SPIFFS to STM32
     QSPI_CommandTypeDef     s_command;
     QSPI_AutoPollingTypeDef s_config;
     
@@ -581,11 +518,7 @@ static uint8_t QSPI_WriteEnable(QSPI_HandleTypeDef *hqspi)
     s_command.DdrMode           = QSPI_DDR_MODE_DISABLE;
     s_command.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
     s_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> Initial work adding SPIFFS to STM32
     if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
     {
         return QSPI_ERROR;
@@ -601,11 +534,7 @@ static uint8_t QSPI_WriteEnable(QSPI_HandleTypeDef *hqspi)
     
     s_command.Instruction    = READ_STATUS_REG_CMD;
     s_command.DataMode       = QSPI_DATA_4_LINES;
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> Initial work adding SPIFFS to STM32
     if (HAL_QSPI_AutoPolling(hqspi, &s_command, &s_config, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
     {
         return QSPI_ERROR;
@@ -798,24 +727,15 @@ uint8_t QSPI_Read(uint8_t* pData, uint32_t readAddr, uint32_t size)
         return QSPI_ERROR;
     }
     
-<<<<<<< HEAD
     // // invalidate cache over read buffer to ensure that content from DMA is read
     // // (only required for Cortex-M7)
     // cacheBufferInvalidate(pData, size);
-=======
-    // invalidate cache over read buffer to ensure that content from DMA is read
-    // (only required for Cortex-M7)
-    cacheBufferInvalidate(pData, size);
->>>>>>> Initial work adding SPIFFS to STM32
 
     /* Restore S# timing for nonRead commands */
     MODIFY_REG(QSPID1.Instance->DCR, QUADSPI_DCR_CSHT, QSPI_CS_HIGH_TIME_4_CYCLE);
 
-<<<<<<< HEAD
 SET_BIT(QSPID1.Instance->CR, QUADSPI_CR_ABORT);
 
-=======
->>>>>>> Initial work adding SPIFFS to STM32
     return QSPI_OK;
 }
 
@@ -839,11 +759,7 @@ uint8_t QSPI_Write(uint8_t* pData, uint32_t writeAddr, uint32_t size)
 
     /* Initialize the program command */
     s_command.InstructionMode   = QSPI_INSTRUCTION_4_LINES;
-<<<<<<< HEAD
     s_command.Instruction       = PAGE_PROG_CMD;
-=======
-    s_command.Instruction       = QSPI_PAGE_PROG_4_BYTE_ADDR_CMD;
->>>>>>> Initial work adding SPIFFS to STM32
     s_command.AddressMode       = QSPI_ADDRESS_4_LINES;
     s_command.AddressSize       = QSPI_ADDRESS_32_BITS;
     s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
@@ -871,15 +787,9 @@ uint8_t QSPI_Write(uint8_t* pData, uint32_t writeAddr, uint32_t size)
             return QSPI_ERROR;
         }
         
-<<<<<<< HEAD
         // // flush DMA buffer to ensure cache coherency
         // // (only required for Cortex-M7)
         // cacheBufferFlush(pData, current_size);
-=======
-        // flush DMA buffer to ensure cache coherency
-        // (only required for Cortex-M7)
-        cacheBufferFlush(pData, current_size);
->>>>>>> Initial work adding SPIFFS to STM32
 
         /* Transmission of the data */
         if (HAL_QSPI_Transmit(&QSPID1, pData, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
@@ -910,11 +820,7 @@ uint8_t QSPI_Erase_Block(uint32_t blockAddress)
 
     /* Initialize the erase command */
     s_command.InstructionMode   = QSPI_INSTRUCTION_4_LINES;
-<<<<<<< HEAD
     s_command.Instruction       = SECTOR_ERASE_4_BYTE_ADDR_CMD;
-=======
-    s_command.Instruction       = SUBSECTOR_ERASE_4_BYTE_ADDR_CMD;
->>>>>>> Initial work adding SPIFFS to STM32
     s_command.AddressMode       = QSPI_ADDRESS_4_LINES;
     s_command.AddressSize       = QSPI_ADDRESS_32_BITS;
     s_command.Address           = blockAddress;
@@ -938,14 +844,11 @@ uint8_t QSPI_Erase_Block(uint32_t blockAddress)
     }
     
     /* Configure automatic polling mode to wait for end of erase */  
-<<<<<<< HEAD
     if (QSPI_AutoPollingMemReady(&QSPID1, MX25L512_SECTOR_ERASE_MAX_TIME) != QSPI_OK)
-=======
-    if (QSPI_AutoPollingMemReady(&QSPID1, MX25L512_SUBSECTOR_ERASE_MAX_TIME) != QSPI_OK)
->>>>>>> Initial work adding SPIFFS to STM32
     {
         return QSPI_ERROR;
     }
 
     return QSPI_OK;
 }
+

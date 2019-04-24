@@ -54,7 +54,7 @@ int main(void) {
   osKernelInitialize();
 
   // start watchdog
-  Watchdog_Init();
+  //Watchdog_Init();
 
   // config and init external memory
   // this has to be called after osKernelInitialize, otherwise an hard fault will occur
