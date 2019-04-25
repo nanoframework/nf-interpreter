@@ -112,13 +112,18 @@ HRESULT StorageFile::RenameFileNative___VOID__STRING(CLR_RT_StackFrame& stack)
 	if (operationResult < 0) operationResult = errno;
 	if (operationResult == ENOENT)
 	{
-		// Invalid path
-		NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+		// Invalid path/file not found
+		NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
+	}
+	else if (operationResult == EEXIST)
+	{
+		// file already exists
+		NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
 	}
 	else if (operationResult != 0)
 	{
-		// folder doesn't exist
-		NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+		// SOem other error
+		NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
 	}
 
 	NANOCLR_CLEANUP();
