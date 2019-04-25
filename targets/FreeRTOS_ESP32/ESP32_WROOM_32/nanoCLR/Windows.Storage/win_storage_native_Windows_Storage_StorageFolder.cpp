@@ -221,7 +221,7 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetInternalStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder(CLR_RT_StackFrame& stack)
+HRESULT StorageFolder::GetInternalStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder(CLR_RT_StackFrame& stack)
 {
     NANOCLR_HEADER();
     {
@@ -815,6 +815,8 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
 
     int             operationResult;
     char*           folderPath = NULL;
+	bool            folderAlreadyExists = false;
+
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -855,40 +857,38 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
     // return allocated converted path, must be freed
     workingPath = ConvertToESP32Path(folderPath);
 
-    // handle request for open if it exists and replace existing
-    if( (options == CreationCollisionOption_OpenIfExists) ||
-        (options == CreationCollisionOption_ReplaceExisting))
-    {
-        operationResult = stat(workingPath, &fileInfo);
-        if (operationResult < 0) operationResult = errno;
-    }
-    else
+	//First check if folder already exists
+	operationResult = stat(workingPath, &fileInfo);
+	if (operationResult == 0) folderAlreadyExists = true;
+
+
+ 	// Folder doesn't exist so create it
+    if ( !folderAlreadyExists )
     {
         // create directory
         operationResult = mkdir(workingPath,0);
         if (operationResult < 0) operationResult = errno;
-
-        if (operationResult == ENOTSUP)
-        {
-            // Folders not supported, SPIFFS volume
-            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-        }
     }
+	else
+	{
+		// Folder already exists
+		if ( options == CreationCollisionOption_FailIfExists )
+		{
+			// folder already exists - fail
+			operationResult = EEXIST;
+		}
 
-    // process operation result according to creation options
-    if( (operationResult == EEXIST ) &&
-        (options == CreationCollisionOption_FailIfExists))
-    {
-        // folder already exists
-        NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
-    }
-
-    if( (operationResult == ENOENT) &&
-        (options == CreationCollisionOption_OpenIfExists))
-    {
-        // folder doesn't exist
-        NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
-    }
+		// handle request for open if it exists and replace existing
+		if ((options == CreationCollisionOption_OpenIfExists) ||
+			(options == CreationCollisionOption_ReplaceExisting))
+		{
+			operationResult = 0;
+		}
+		else
+		{
+			operationResult = EEXIST; 
+		}
+	}
 
     if(operationResult == 0)
     {
@@ -919,8 +919,23 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
     }
     else
     {
-        // failed to create the folder
-        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+		switch(operationResult)
+		{
+			case ENOTSUP:
+				// Folders not supported, SPIFFS volume
+				NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+			case ENOENT:
+				// Invalid path
+				NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+
+			case EEXIST:
+				NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
+
+			default:
+				// failed to create the folder
+				NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+		}
     }
 
     NANOCLR_CLEANUP();
@@ -938,7 +953,7 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNative___VOID(CLR_RT_StackFrame& stack)
+HRESULT StorageFolder::DeleteFolderNative___VOID(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -987,7 +1002,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNa
 	NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNative___VOID__STRING(CLR_RT_StackFrame& stack)
+HRESULT StorageFolder::RenameFolderNative___VOID__STRING(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -1040,7 +1055,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNa
 	NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING(CLR_RT_StackFrame& stack)
+HRESULT StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 

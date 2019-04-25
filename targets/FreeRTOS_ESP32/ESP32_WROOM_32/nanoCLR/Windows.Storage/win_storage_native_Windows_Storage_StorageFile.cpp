@@ -11,7 +11,7 @@ extern char * ConvertToESP32Path(const char * filepath);
 typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
 
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFile::CheckFileNative___STATIC__VOID__STRING(CLR_RT_StackFrame& stack)
+HRESULT StorageFile::CheckFileNative___STATIC__VOID__STRING(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -44,7 +44,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::CheckFileNative_
 	NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative___VOID(CLR_RT_StackFrame& stack)
+HRESULT StorageFile::DeleteFileNative___VOID(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -83,7 +83,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative
 
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative___VOID__STRING(CLR_RT_StackFrame& stack)
+HRESULT StorageFile::RenameFileNative___VOID__STRING(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 

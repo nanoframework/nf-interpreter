@@ -201,7 +201,7 @@ void CreateStorageIOTask()
     StorageInputQueue = xQueueCreate(StorageQueueLength, sizeof(FileOperation));
     StorageResultQueue = xQueueCreate(StorageQueueLength, sizeof(OperationResult));
 
-    xTaskCreate(StorageIOTask, "StorageIOTask", 1500, 0, 6, NULL);
+    xTaskCreate(StorageIOTask, "StorageIOTask", 2500, 0, 6, NULL);
 }
 
 void DeleteQueues()
@@ -277,7 +277,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__
         // need to use FA_OPEN_ALWAYS("w+") because we are writting the file content from start
         workingPath = ConvertToESP32Path(filePath);
         file = fopen(workingPath, "w+");
-        if(file != NULL)
+        if(file == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
         }
