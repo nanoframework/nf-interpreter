@@ -48,7 +48,7 @@ SYSTEMTIME GetDateTime(uint16_t date, uint16_t time)
     return fileTime;
 }
 
-HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -183,7 +183,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetInternalSto
     NANOCLR_NOCLEANUP(); 
 }
 
-HRESULT StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -354,7 +354,7 @@ HRESULT StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFo
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile__U4__U4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile__U4__U4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -575,7 +575,7 @@ HRESULT StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT StorageFolder::CreateFileNative___WindowsStorageStorageFile__STRING__U4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFileNative___WindowsStorageStorageFile__STRING__U4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -731,7 +731,7 @@ HRESULT StorageFolder::CreateFileNative___WindowsStorageStorageFile__STRING__U4(
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING__U4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING__U4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
