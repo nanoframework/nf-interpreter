@@ -1,10 +1,9 @@
-/*
- * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2018 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// Portions Copyright (c) 2015, Freescale Semiconductor, Inc. All rights reserved.
+// Portions Copyright 2016-2018 NXP All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
 
 #ifndef _FSL_SDMMC_HOST_H
 #define _FSL_SDMMC_HOST_H
