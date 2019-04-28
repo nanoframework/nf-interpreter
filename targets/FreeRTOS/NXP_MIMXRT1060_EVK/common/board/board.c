@@ -200,3 +200,14 @@ status_t BOARD_InitSEMC(void)
     sdramconfig.refreshBurstLen = 1;
     return SEMC_ConfigureSDRAM(SEMC, kSEMC_SDRAM_CS0, &sdramconfig, clockFrq);
 }
+
+void BOARD_USDHCClockConfiguration(void)
+{
+    /* Set USDHC clock to 198 MHz */
+
+    /*configure system pll PFD0 fractional divider to 24*/
+    CLOCK_InitSysPfd(kCLOCK_Pfd0, 24U);
+    /* Configure USDHC clock source and divider */
+    CLOCK_SetDiv(kCLOCK_Usdhc1Div, 1U);
+    CLOCK_SetMux(kCLOCK_Usdhc1Mux, 1U);
+}
