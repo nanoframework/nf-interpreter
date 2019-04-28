@@ -14,7 +14,7 @@
 #define ASSERT_IRQ_MUST_BE_OFF()    // TODO need to determine if this needs implementation
 
 // platform dependent delay
-#define PLATFORM_DELAY(milliSecs)   vTaskDelay(milliSecs);
+#define PLATFORM_DELAY(milliSecs)   vTaskDelay(milliSecs / portTICK_PERIOD_MS);
 
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)       
