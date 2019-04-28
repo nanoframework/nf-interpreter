@@ -7,11 +7,8 @@
 
 extern char * ConvertToESP32Path(const char * filepath);
 
-// defining these types here to make it shorter and improve code readability
-typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
 
-
-HRESULT StorageFile::CheckFileNative___STATIC__VOID__STRING(CLR_RT_StackFrame& stack)
+HRESULT Library_win_storage_native_Windows_Storage_StorageFile::CheckFileNative___STATIC__VOID__STRING(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -44,7 +41,7 @@ HRESULT StorageFile::CheckFileNative___STATIC__VOID__STRING(CLR_RT_StackFrame& s
 	NANOCLR_CLEANUP_END();
 }
 
-HRESULT StorageFile::DeleteFileNative___VOID(CLR_RT_StackFrame& stack)
+HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative___VOID(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -56,7 +53,7 @@ HRESULT StorageFile::DeleteFileNative___VOID(CLR_RT_StackFrame& stack)
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 	// get a pointer to the path in managed field
-	managedPath = pThis[StorageFile::FIELD___path].DereferenceString()->StringText();
+	managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path].DereferenceString()->StringText();
 
 	// Convert to ESP32 form path ( linux like )
 	// return allocated converted path, must be freed
@@ -83,7 +80,7 @@ HRESULT StorageFile::DeleteFileNative___VOID(CLR_RT_StackFrame& stack)
 
 }
 
-HRESULT StorageFile::RenameFileNative___VOID__STRING(CLR_RT_StackFrame& stack)
+HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative___VOID__STRING(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -97,7 +94,7 @@ HRESULT StorageFile::RenameFileNative___VOID__STRING(CLR_RT_StackFrame& stack)
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 	// get a pointer to the path in managed field
-	managedPath = pThis[StorageFile::FIELD___path].DereferenceString()->StringText();
+	managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path].DereferenceString()->StringText();
 
 	// Convert to ESP32 form path ( linux like )
 	// return allocated converted path, must be freed

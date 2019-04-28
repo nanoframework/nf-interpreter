@@ -12,9 +12,6 @@
 
 #include "dirent.h"
 
-// defining these types here to make it shorter and improve code readability
-typedef Library_win_storage_native_Windows_Storage_StorageFolder StorageFolder;
-typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
 
 //
 //  Converts from windows type path       "c:\folder\folder\file.ext"
@@ -113,7 +110,7 @@ uint64_t GetFileTimeFromPath(char * path)
 }
 
 
-HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -174,8 +171,8 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
             hbObj = storageFolder->Dereference();
 
             // set the managed fields
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___name ], workingDrive ));
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___path ], workingDrive ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], workingDrive ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], workingDrive ));
 
             // malloc stringBuffer to work with FS
             stringBuffer = (char*)platform_malloc(FF_LFN_BUF + 1);
@@ -206,7 +203,7 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
                 strcat(stringBuffer, ")");
 
                 // set the field with the volume label
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___name ], stringBuffer ));
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], stringBuffer ));
 
 
                 // free stringBuffer
@@ -221,7 +218,7 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT StorageFolder::GetInternalStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder(CLR_RT_StackFrame& stack)
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetInternalStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder(CLR_RT_StackFrame& stack)
 {
     NANOCLR_HEADER();
     {
@@ -258,15 +255,15 @@ HRESULT StorageFolder::GetInternalStorageFoldersNative___SZARRAY_WindowsStorageS
             memcpy(workingDrive, INTERNAL_DRIVE_PATH, DRIVE_PATH_LENGTH);
 
             // set the managed fields
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbObj[StorageFolder::FIELD___name], workingDrive));
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbObj[StorageFolder::FIELD___path], workingDrive));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name], workingDrive));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path], workingDrive));
         }
     }
     NANOCLR_NOCLEANUP();
 }
 
 
-HRESULT StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -290,7 +287,7 @@ HRESULT StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFo
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
         
     // get a pointer to the path in managed field
-    managedPath = pThis[ StorageFolder::FIELD___path ].DereferenceString()->StringText();
+    managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ].DereferenceString()->StringText();
 
     // Convert to ESP32 form path for VFS ( linux like )
     // returns allocated converted path, must be freed	
@@ -372,7 +369,7 @@ HRESULT StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFo
                     hbObj = storageFolder->Dereference();
 
                     // directory name
-                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___name ], dirInfo->d_name));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], dirInfo->d_name));
 
                     // clear working buffer
                     memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
@@ -382,10 +379,10 @@ HRESULT StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFo
                     strcat(workingBuffer, "\\");
                     strcat(workingBuffer, dirInfo->d_name);
                     
-                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ StorageFolder::FIELD___path ], workingBuffer ));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], workingBuffer ));
 
                     // get a reference to the dateCreated managed field...
-                    CLR_RT_HeapBlock& dateFieldRef = hbObj[ StorageFolder::FIELD___dateCreated ];
+                    CLR_RT_HeapBlock& dateFieldRef = hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated ];
                     CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
                     // ...and set it 
                     *pRes = GetFileTimeFromPath(workingBuffer);
@@ -435,7 +432,7 @@ HRESULT StorageFolder::GetStorageFoldersNative___SZARRAY_WindowsStorageStorageFo
 
 
 
-HRESULT StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile__U4__U4(CLR_RT_StackFrame& stack)
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile__U4__U4(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -469,7 +466,7 @@ HRESULT StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile
 
 
 	// get a pointer to the path in managed field
-	managedPath = pThis[StorageFolder::FIELD___path].DereferenceString()->StringText();
+	managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path].DereferenceString()->StringText();
 
 	// Convert to ESP32 form path ( linux like )
 	// return allocated converted path, must be freed
@@ -566,7 +563,7 @@ HRESULT StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile
 						hbObj = storageFile->Dereference();
 
 						// file name
-						NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbObj[StorageFile::FIELD___name], dirInfo->d_name));
+						NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___name], dirInfo->d_name));
 
 						// clear working buffer
 						memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
@@ -576,10 +573,10 @@ HRESULT StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile
 						strcat(workingBuffer, "\\");
 						strcat(workingBuffer, dirInfo->d_name);
 
-						NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbObj[StorageFile::FIELD___path], workingBuffer));
+						NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path], workingBuffer));
 
 						// get a reference to the dateCreated managed field...
-						CLR_RT_HeapBlock& dateFieldRef = hbObj[StorageFile::FIELD___dateCreated];
+						CLR_RT_HeapBlock& dateFieldRef = hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
 						CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
 						// ...and set it 
 						*pRes = GetFileTimeFromPath(workingBuffer);
@@ -642,7 +639,7 @@ HRESULT StorageFolder::GetStorageFilesNative___SZARRAY_WindowsStorageStorageFile
 }
 
 
-HRESULT StorageFolder::CreateFileNative___WindowsStorageStorageFile__STRING__U4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFileNative___WindowsStorageStorageFile__STRING__U4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -667,7 +664,7 @@ HRESULT StorageFolder::CreateFileNative___WindowsStorageStorageFile__STRING__U4(
     options = (CreationCollisionOption)stack.Arg2().NumericByRef().u4;
         
     // get a pointer to the StorageFolder path in managed field
-    managedPath = pThis[ StorageFolder::FIELD___path ].DereferenceString()->StringText();
+    managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ].DereferenceString()->StringText();
 
     // get a pointer to the desired file name
     fileName = stack.Arg1().DereferenceString()->StringText();
@@ -762,13 +759,13 @@ HRESULT StorageFolder::CreateFileNative___WindowsStorageStorageFile__STRING__U4(
         storageFile = stack.TopValue().Dereference();
             
         // file name
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFile[ StorageFile::FIELD___name ], fileName ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___name ], fileName ));
         
         // file path
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFile[ StorageFile::FIELD___path ], filePath ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path ], filePath ));
 
         // get a reference to the dateCreated managed field...
-        CLR_RT_HeapBlock& dateFieldRef = storageFile[ StorageFile::FIELD___dateCreated ];
+        CLR_RT_HeapBlock& dateFieldRef = storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated ];
         CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
 
         // ...and set it 
@@ -798,7 +795,7 @@ HRESULT StorageFolder::CreateFileNative___WindowsStorageStorageFile__STRING__U4(
 
 
 
-HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING__U4( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING__U4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -825,7 +822,7 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
     options = (CreationCollisionOption)stack.Arg2().NumericByRef().u4;
         
     // get a pointer to the path in managed field
-    managedPath = pThis[ StorageFolder::FIELD___path ].DereferenceString()->StringText();
+    managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ].DereferenceString()->StringText();
 
     // get a pointer to the desired folder name
     folderName = stack.Arg1().DereferenceString()->StringText();
@@ -903,13 +900,13 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
         storageFolder = stack.TopValue().Dereference();
 
         // folder name
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[ StorageFolder::FIELD___name ], folderName ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], folderName ));
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[ StorageFolder::FIELD___path ], folderPath ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], folderPath ));
 
         // get the date time details and fill in the managed field
         // get a reference to the dateCreated managed field...
-        CLR_RT_HeapBlock& dateFieldRef = storageFolder[ StorageFolder::FIELD___dateCreated ];
+        CLR_RT_HeapBlock& dateFieldRef = storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated ];
         CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
 
         // get the date time details and fill in the managed field
@@ -953,7 +950,7 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT StorageFolder::DeleteFolderNative___VOID(CLR_RT_StackFrame& stack)
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNative___VOID(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -965,7 +962,7 @@ HRESULT StorageFolder::DeleteFolderNative___VOID(CLR_RT_StackFrame& stack)
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 	// get a pointer to the path in managed field
-	managedPath = pThis[StorageFolder::FIELD___path].DereferenceString()->StringText();
+	managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path].DereferenceString()->StringText();
 
 	// Convert to ESP32 form path ( linux like )
 	// return allocated converted path, must be freed
@@ -1002,7 +999,7 @@ HRESULT StorageFolder::DeleteFolderNative___VOID(CLR_RT_StackFrame& stack)
 	NANOCLR_CLEANUP_END();
 }
 
-HRESULT StorageFolder::RenameFolderNative___VOID__STRING(CLR_RT_StackFrame& stack)
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNative___VOID__STRING(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -1016,7 +1013,7 @@ HRESULT StorageFolder::RenameFolderNative___VOID__STRING(CLR_RT_StackFrame& stac
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 	// get a pointer to the path in managed field
-	managedPath = pThis[StorageFolder::FIELD___path].DereferenceString()->StringText();
+	managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path].DereferenceString()->StringText();
 
 	// Convert to ESP32 form path ( linux like )
 	// return allocated converted path, must be freed
@@ -1055,7 +1052,7 @@ HRESULT StorageFolder::RenameFolderNative___VOID__STRING(CLR_RT_StackFrame& stac
 	NANOCLR_CLEANUP_END();
 }
 
-HRESULT StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING(CLR_RT_StackFrame& stack)
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
@@ -1075,7 +1072,7 @@ HRESULT StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING(CLR
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 	// get a pointer to the path in managed field
-	managedPath = pThis[StorageFolder::FIELD___path].DereferenceString()->StringText();
+	managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path].DereferenceString()->StringText();
 
 	// get a pointer to the desired folder name
 	folderName = stack.Arg1().DereferenceString()->StringText();
@@ -1138,13 +1135,13 @@ HRESULT StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING(CLR
 		storageFolder = stack.TopValue().Dereference();
 
 		// folder name
-		NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFolder[StorageFolder::FIELD___name], folderName));
+		NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name], folderName));
 
-		NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFolder[StorageFolder::FIELD___path], folderPath));
+		NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path], folderPath));
 
 		// get the date time details and fill in the managed field
 		// get a reference to the dateCreated managed field...
-		CLR_RT_HeapBlock& dateFieldRef = storageFolder[StorageFolder::FIELD___dateCreated];
+		CLR_RT_HeapBlock& dateFieldRef = storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
 		CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
 
 		// get the date time details and fill in the managed field

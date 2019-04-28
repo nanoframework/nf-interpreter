@@ -6,8 +6,6 @@
 #include <ff.h>
 #include "win_storage_native.h"
 
-// defining these types here to make it shorter and improve code readability
-typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
 
 HRESULT Library_win_storage_native_Windows_Storage_StorageFile::CheckFileNative___STATIC__VOID__STRING(CLR_RT_StackFrame& stack)
 {
@@ -52,7 +50,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 	// get a pointer to the path in managed field
-	workingPath = pThis[StorageFile::FIELD___path].DereferenceString()->StringText();
+	workingPath = pThis[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path].DereferenceString()->StringText();
 
 	// Delete folder
 	operationResult = f_unlink(workingPath);
@@ -78,7 +76,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 	// get a pointer to the path in managed field
-	workingPath = pThis[StorageFile::FIELD___path].DereferenceString()->StringText();
+	workingPath = pThis[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path].DereferenceString()->StringText();
 
 	// get a pointer to the desired folder path
 	desiredPath = stack.Arg1().DereferenceString()->StringText();
