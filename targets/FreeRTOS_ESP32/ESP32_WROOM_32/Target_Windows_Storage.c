@@ -47,6 +47,16 @@ static const char *TAG = "SDCard";
 //#define PIN_NUM_CLK  14
 //#define PIN_NUM_CS  13
 
+#if defined(HAL_USE_SDC)
+
+bool Storage_UnMountSDCard()
+{
+	if (esp_vfs_fat_sdmmc_unmount() != ESP_OK)
+		return false;
+
+	return true;
+}
+
 //
 //	Mount the SDCard device as a FAT device on the VFS
 //
@@ -61,6 +71,13 @@ bool Storage_MountSDCard(char * vfsName, sdmmc_host_t * host, void* slot_config,
 
 	sdmmc_card_t* card;
 	esp_err_t ret = esp_vfs_fat_sdmmc_mount(vfsName, host, (sdmmc_slot_config_t*)slot_config, &mount_config, &card);
+	if (ret == ESP_ERR_INVALID_STATE)
+	{
+		// Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code
+		// and the code has already run & mounted
+		Storage_UnMountSDCard();
+		ret = esp_vfs_fat_sdmmc_mount(vfsName, host, (sdmmc_slot_config_t*)slot_config, &mount_config, &card);
+	}
 
 	if (ret != ESP_OK) {
 		if (ret == ESP_FAIL) {
@@ -75,17 +92,6 @@ bool Storage_MountSDCard(char * vfsName, sdmmc_host_t * host, void* slot_config,
 	return true;
 }
 
-
-bool Storage_UnMountSDCard()
-{
-	if (esp_vfs_fat_sdmmc_unmount() != ESP_OK)
-		return false;
-
-	return true;
-}
-
-
-//#if defined(HAL_USE_SDC)
 
 //  Storage_InitSDCardMMC
 //	Initial the SD card Slot 1 - 4/1 bit ( hs2_* signals )
@@ -128,7 +134,6 @@ bool Storage_InitSDCardMMC(char * vfsName, int maxFiles, bool bit1Mode)
 
 	return Storage_MountSDCard(vfsName, &host, &slot_config, false, maxFiles);
 }
-//#endif
 
 //  Storage_InitSDCardSPI
 //	Initial the SD card connected by SPI)
@@ -152,4 +157,5 @@ bool Storage_InitSDCardSPI(char * vfsName, int maxFiles, int pin_Miso, int pin_M
 	return Storage_MountSDCard(vfsName, &host, &slot_config, false, maxFiles);
 }
 
+#endif
 
