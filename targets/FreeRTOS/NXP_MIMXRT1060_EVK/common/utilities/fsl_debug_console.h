@@ -44,7 +44,7 @@
 
 /*! @brief Definition to select sdk or toolchain printf, scanf. */
 #ifndef SDK_DEBUGCONSOLE
-#define SDK_DEBUGCONSOLE 1U
+#define SDK_DEBUGCONSOLE 2U
 #endif
 
 /*! @brief Definition to select redirect toolchain printf, scanf to uart or not. */
