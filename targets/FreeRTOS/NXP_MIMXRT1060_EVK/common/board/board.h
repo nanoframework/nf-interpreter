@@ -126,8 +126,8 @@
 #define BOARD_USDHC_SDCARD_POWER_CONTROL(state) \
     (GPIO_PinWrite(BOARD_SD_POWER_RESET_GPIO, BOARD_SD_POWER_RESET_GPIO_PIN, state))
 
-#define BOARD_USDHC1_CLK_FREQ (CLOCK_GetSysPfdFreq(kCLOCK_Pfd2) / (CLOCK_GetDiv(kCLOCK_Usdhc1Div) + 1U))
-#define BOARD_USDHC2_CLK_FREQ (CLOCK_GetSysPfdFreq(kCLOCK_Pfd2) / (CLOCK_GetDiv(kCLOCK_Usdhc2Div) + 1U))
+#define BOARD_USDHC1_CLK_FREQ (CLOCK_GetSysPfdFreq(kCLOCK_Pfd0) / (CLOCK_GetDiv(kCLOCK_Usdhc1Div) + 1U))
+#define BOARD_USDHC2_CLK_FREQ (CLOCK_GetSysPfdFreq(kCLOCK_Pfd0) / (CLOCK_GetDiv(kCLOCK_Usdhc2Div) + 1U))
 
 #define BOARD_SD_HOST_BASEADDR BOARD_USDHC1_BASEADDR
 #define BOARD_SD_HOST_CLK_FREQ BOARD_USDHC1_CLK_FREQ
@@ -218,6 +218,9 @@ void BOARD_SD_Pin_Config(uint32_t speed, uint32_t strength);
 void BOARD_MMC_Pin_Config(uint32_t speed, uint32_t strength);
 
 status_t BOARD_InitSEMC(void);
+
+void BOARD_USDHCClockConfiguration(void);
+
 
 #if defined(__cplusplus)
 }
