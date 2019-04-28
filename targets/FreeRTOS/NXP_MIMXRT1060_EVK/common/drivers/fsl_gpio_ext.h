@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
+
 #ifndef __FSL_GPIO_EXT_H_
 #define __FSL_GPIO_EXT_H_
 

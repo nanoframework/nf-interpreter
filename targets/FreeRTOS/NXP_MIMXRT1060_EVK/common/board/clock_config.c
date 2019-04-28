@@ -201,13 +201,13 @@ void BOARD_BootClockRUN(void)
     /* Set USDHC1_PODF. */
     CLOCK_SetDiv(kCLOCK_Usdhc1Div, 1);
     /* Set Usdhc1 clock source. */
-    CLOCK_SetMux(kCLOCK_Usdhc1Mux, 0);
+    CLOCK_SetMux(kCLOCK_Usdhc1Mux, 1);
     /* Disable USDHC2 clock gate. */
     CLOCK_DisableClock(kCLOCK_Usdhc2);
     /* Set USDHC2_PODF. */
     CLOCK_SetDiv(kCLOCK_Usdhc2Div, 1);
     /* Set Usdhc2 clock source. */
-    CLOCK_SetMux(kCLOCK_Usdhc2Mux, 0);
+    CLOCK_SetMux(kCLOCK_Usdhc2Mux, 1);
 /* In SDK projects, SDRAM (configured by SEMC) will be initialized in either debug script or dcd.
  * With this macro SKIP_SYSCLK_INIT, system pll (selected to be SEMC source clock in SDK projects) will be left
  * unchanged.
@@ -366,11 +366,11 @@ void BOARD_BootClockRUN(void)
     /* Init System PLL. */
     CLOCK_InitSysPll(&sysPllConfig_BOARD_BootClockRUN);
     /* Init System pfd0. */
-    CLOCK_InitSysPfd(kCLOCK_Pfd0, 27);
+    CLOCK_InitSysPfd(kCLOCK_Pfd0, 24);
     /* Init System pfd1. */
     CLOCK_InitSysPfd(kCLOCK_Pfd1, 16);
     /* Init System pfd2. */
-    CLOCK_InitSysPfd(kCLOCK_Pfd2, 24);
+    CLOCK_InitSysPfd(kCLOCK_Pfd2, 29);
     /* Init System pfd3. */
     CLOCK_InitSysPfd(kCLOCK_Pfd3, 16);
 #endif
