@@ -923,6 +923,8 @@ void BOARD_InitUSDHC(void);
  */
 void BOARD_InitHyperFlash(void);
 
+void BOARD_SD_Pin_Config(uint32_t speed, uint32_t strength);
+
 #if defined(__cplusplus)
 }
 #endif
