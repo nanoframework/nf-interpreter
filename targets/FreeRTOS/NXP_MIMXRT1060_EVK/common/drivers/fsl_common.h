@@ -28,6 +28,8 @@
  * Definitions
  ******************************************************************************/
 
+#define FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL 1
+
 /*! @brief Construct a status code value from a group and code number. */
 #define MAKE_STATUS(group, code) ((((group)*100) + (code)))
 
