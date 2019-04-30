@@ -5,10 +5,9 @@
 #include "Core.h"
 #include "fsl_trng.h"
 
-trng_config_t trngConfig;
-
 void CLR_RT_Random::Initialize()
 {
+    trng_config_t trngConfig;
     TRNG_GetDefaultConfig(&trngConfig);
     TRNG_Init(TRNG, &trngConfig);
 }
@@ -16,6 +15,7 @@ void CLR_RT_Random::Initialize()
 void CLR_RT_Random::Initialize( int seed )
 {
     (void)seed;
+    trng_config_t trngConfig;
     TRNG_GetDefaultConfig(&trngConfig);
     TRNG_Init(TRNG, &trngConfig);
 }
