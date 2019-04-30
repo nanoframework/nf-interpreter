@@ -23,14 +23,14 @@ void CLR_RT_Random::Initialize( int seed )
 uint32_t CLR_RT_Random::Next()
 {
     uint32_t data = 0;
-    TRNG_GetRandomData(TRNG, &data, sizeof(data));
+    TRNG_GetRandomData(TRNG, (void *) &data, sizeof(data));
     return data;
 }
 
 double CLR_RT_Random::NextDouble()
 {
     uint32_t data = 0;
-    TRNG_GetRandomData(TRNG, &data, sizeof(data));
+    TRNG_GetRandomData(TRNG, (void *) &data, sizeof(data));
     // the hardware generator returns a value between 0 - 0xFFFFFFFF
     return ((double)data) / ((double)0xFFFFFFFF);
 }
