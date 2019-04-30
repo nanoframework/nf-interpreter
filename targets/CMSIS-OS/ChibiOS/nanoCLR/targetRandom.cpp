@@ -3,38 +3,39 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "Core.h"
-#include <hal.h>
-#include <hal_nf_community.h>
+#include "fsl_trng.h"
+
+trng_config_t trngConfig;
 
 void CLR_RT_Random::Initialize()
 {
-    rngStart();
+    TRNG_GetDefaultConfig(&trngConfig);
+    TRNG_Init(TRNG0, &trngConfig);
 }
 
 void CLR_RT_Random::Initialize( int seed )
 {
     (void)seed;
-
-    rngStart();
+    TRNG_GetDefaultConfig(&trngConfig);
+    TRNG_Init(TRNG0, &trngConfig);
 }
 
 uint32_t CLR_RT_Random::Next()
 {
-    return rngGenerateRandomNumber();
+    uint32_t data = 0;
+    TRNG_GetRandomData(TRNG, &data, sizeof(data));
+    return data;
 }
 
 double CLR_RT_Random::NextDouble()
 {
+    uint32_t data = 0;
+    TRNG_GetRandomData(TRNG, &data, sizeof(data));
     // the hardware generator returns a value between 0 - 0xFFFFFFFF
-    return ((double)rngGenerateRandomNumber()) / ((double)0xFFFFFFFF);
+    return ((double)data()) / ((double)0xFFFFFFFF);
 }
 
 void CLR_RT_Random::NextBytes(unsigned char* buffer, unsigned int count)
 {
-    unsigned int i;
-
-    for(i = 0; i < count; i++)
-    {
-        buffer[i] = (unsigned char)rngGenerateRandomNumber();
-    }
+    TRNG_GetRandomData(TRNG, buffer, count);    
 }

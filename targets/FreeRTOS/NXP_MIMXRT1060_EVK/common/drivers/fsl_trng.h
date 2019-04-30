@@ -10,7 +10,6 @@
 
 #include "fsl_common.h"
 
-#if defined(FSL_FEATURE_SOC_TRNG_COUNT) && FSL_FEATURE_SOC_TRNG_COUNT
 
 /*!
  * @addtogroup trng
@@ -216,5 +215,4 @@ status_t TRNG_GetRandomData(TRNG_Type *base, void *data, size_t dataSize);
 
 /*! @}*/
 
-#endif /* FSL_FEATURE_SOC_TRNG_COUNT */
 #endif /*_FSL_TRNG_H_*/
