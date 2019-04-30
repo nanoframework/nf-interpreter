@@ -7,9 +7,6 @@
 
 extern char * ConvertToESP32Path(const char * filepath);
 
-// defining these types here to make it shorter and improve code readability
-typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
-
 
 HRESULT Library_win_storage_native_Windows_Storage_StorageFile::CheckFileNative___STATIC__VOID__STRING(CLR_RT_StackFrame& stack)
 {
@@ -56,7 +53,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 	// get a pointer to the path in managed field
-	managedPath = pThis[StorageFile::FIELD___path].DereferenceString()->StringText();
+	managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path].DereferenceString()->StringText();
 
 	// Convert to ESP32 form path ( linux like )
 	// return allocated converted path, must be freed
@@ -97,7 +94,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 	// get a pointer to the path in managed field
-	managedPath = pThis[StorageFile::FIELD___path].DereferenceString()->StringText();
+	managedPath = pThis[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path].DereferenceString()->StringText();
 
 	// Convert to ESP32 form path ( linux like )
 	// return allocated converted path, must be freed
@@ -112,13 +109,18 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
 	if (operationResult < 0) operationResult = errno;
 	if (operationResult == ENOENT)
 	{
-		// Invalid path
-		NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+		// Invalid path/file not found
+		NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
+	}
+	else if (operationResult == EEXIST)
+	{
+		// file already exists
+		NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
 	}
 	else if (operationResult != 0)
 	{
-		// folder doesn't exist
-		NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+		// SOem other error
+		NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
 	}
 
 	NANOCLR_CLEANUP();
