@@ -7,11 +7,6 @@
           "long": "Emit debug information without performing optimizations",
           "buildType": "Debug"
         },
-        "release": {
-          "short": "Release",
-          "long": "Enable optimizations, omit debug info",
-          "buildType": "Release"
-        },
         "minsize": {
           "short": "MinSizeRel",
           "long": "Optimize for smallest binary size",
