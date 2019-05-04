@@ -35,7 +35,7 @@ STACKSIZE = 0x800;
 MEMORY
 {
     FLASH_HDR (RX)  : ORIGIN = 0x01000000, LENGTH = 0x7FF
-    FLASH     (RX)  : ORIGIN = 0x01000800, LENGTH = 0x0FF800
+    FLASH     (RX)  : ORIGIN = 0x01000800, LENGTH = 0x03C000
     SRAM      (RWX) : ORIGIN = 0x20000000, LENGTH = 0x00040000
 }
 
@@ -138,6 +138,9 @@ SECTIONS {
         __stack_end = .;
     } > REGION_STACK AT> REGION_STACK
 }
+
+/* RAM region to be used for the nanoFramework CLR managed heap.*/
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", SRAM);
 
 /* nanoCLR rules inclusion.*/
 INCLUDE rules_clr.ld
