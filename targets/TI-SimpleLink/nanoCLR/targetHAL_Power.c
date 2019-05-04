@@ -6,6 +6,7 @@
 #include <nanoHAL_v2.h>
 
 #define SL_STOP_TIMEOUT         (200)
+extern uint16_t sl_Stop(const uint16_t Timeout);
 
 // FIXME TODO
 void CPU_Reset()
