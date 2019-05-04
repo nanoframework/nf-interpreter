@@ -68,3 +68,7 @@ Meaning that `System.Math` API supports only the `float` overloads. The `double`
 ## nanoBooter
 
 Because this CPU uses a proprietary boot mechanism that copies the application from the SPI flash memory to the Cortex-M application core, it does not use nanoBooter.
+
+## Flashing nanoCLR
+
+Follow the instructions [here](http://docs.nanoframework.net/articles/ti-cc32xx/flash-nanoclr.html) on how to flash nanoCLR image in the board.
