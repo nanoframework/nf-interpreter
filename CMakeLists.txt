@@ -1190,7 +1190,7 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
                 SimpleLinkCC32xxSDK
                 PREFIX SimpleLinkCC32xxSdk
                 SOURCE_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source
-                GIT_REPOSITORY  https://github.com/nanoframework/ChibiOS
+                GIT_REPOSITORY  https://github.com/nanoframework/SimpleLink_CC32xx_SDK
                 GIT_TAG ${TI_SL_CC32xx_SDK_TAG}  # target specified branch
                 GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
                 TIMEOUT 10
