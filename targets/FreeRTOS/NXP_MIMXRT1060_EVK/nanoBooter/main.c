@@ -54,6 +54,29 @@ static void  boot_nanoCLR(void){
 
      /* Init input GPIO*/
     GPIO_PinInit(BOARD_USER_BUTTON_GPIO, BOARD_USER_BUTTON_GPIO_PIN, &button_config);
+    button = GPIO_PinRead(BOARD_USER_BUTTON_GPIO,BOARD_USER_BUTTON_GPIO_PIN);
+
+    /* Load nanoCLR if button is not pressed else init reciver Task */
+    if (button) 
+    {
+        void (*nanoCLR)(void);
+        nanoCLR = (void *) *((uint32_t *) 0x60102004);
+        nanoCLR();
+    } 
+    else 
+    {
+    }
+}
+
+static void  boot_nanoCLR(void){
+
+    uint32_t button = 1;
+
+    /* Define the init structure for the input button pin*/
+    gpio_pin_config_t button_config = {kGPIO_DigitalInput, 0, kGPIO_NoIntmode};
+
+     /* Init input GPIO*/
+    GPIO_PinInit(BOARD_USER_BUTTON_GPIO, BOARD_USER_BUTTON_GPIO_PIN, &button_config);
     button = GPIO_PinRead(BOARD_USER_BUTTON_GPIO, BOARD_USER_BUTTON_GPIO_PIN);
 
     /* Button is active low.
