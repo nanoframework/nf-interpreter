@@ -1,0 +1,471 @@
+#
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
+########################################################
+# check availability of hex2dfu tool if specified
+# only relevant if this is running on a Windows machine
+if(WIN32)
+    if(NOT "${TOOL_HEX2DFU_PREFIX}" STREQUAL "")
+        if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe)
+            message(STATUS "")
+            message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe")
+            message(STATUS "Make sure that the CMake option TOOL_HEX2DFU_PREFIX has the correct path.")
+            message(STATUS "If you don't have this tool download it from https://github.com/nanoframework/nf-tools/releases")
+            message(STATUS "")
+            message(FATAL_ERROR "hex2dfu tool not found")
+        else()
+            set(HEX2DFU_TOOL_AVAILABLE TRUE CACHE INTERNAL "hex2dfu tool available")
+        endif()
+    endif()
+endif()
+
+# sanity check on SSL provider: ChibiOS only supports mbed TLS
+if(NF_SECURITY_OPENSSL)
+    message(FATAL "Can't use OpenSSL for ChibiOS. Currently only mbed TLS is supported.")
+endif()
+
+# check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
+set(NO_CHIBIOS_SOURCE TRUE)
+if(CHIBIOS_SOURCE)
+    if(NOT "${CHIBIOS_SOURCE}" STREQUAL "")
+        set(NO_CHIBIOS_SOURCE FALSE)
+    endif()
+endif()
+
+# check if CHIBIOS-Contrib_SOURCE was specified or if it's empty (default is empty)
+set(NO_CHIBIOS_CONTRIB_SOURCE TRUE)
+if(CHIBIOS_CONTRIB_SOURCE)
+    if(NOT "${CHIBIOS_CONTRIB_SOURCE}" STREQUAL "")
+        set(NO_CHIBIOS_CONTRIB_SOURCE FALSE)
+    endif()
+endif()
+
+if(NO_CHIBIOS_SOURCE)
+    # no CHIBIOS source specified, download it from it's repo
+
+    # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+    include(Hack_SetGitSearchPath)
+
+    # check for Git (needed here for advanced warning to user if it's not installed)
+    find_package(Git)
+
+    #  check if Git was found, if not report to user and abort
+    if(NOT GIT_EXECUTABLE)
+    message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+    endif()
+
+    # ChibiOS version
+    set(CHIBIOS_VERSION_EMPTY TRUE)
+
+    # check if build was requested with a specifc ChibiOS version
+    if(DEFINED CHIBIOS_VERSION)
+        if(NOT "${CHIBIOS_VERSION}" STREQUAL "")
+            set(CHIBIOS_VERSION_EMPTY FALSE)
+        endif()
+    endif()
+
+    if(CHIBIOS_VERSION_EMPTY)
+        # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_18.2.x branch
+        message(STATUS "RTOS is: CHIBIOS (latest available code from stable_19.1.x)")
+        set(CHIBIOS_GIT_TAG "stable_19.1.x")
+    else()
+        message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
+
+        # branch naming follows the pattern 'stable_18.2.x'
+        # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter
+        # find 1st dot in version number
+        string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)
+        # find 2nd dot in version number
+        string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX REVERSE)
+        # extract 'short' version
+        string(SUBSTRING ${CHIBIOS_VERSION} 0 ${CHIBIOS_VERSION_DOT_INDEX} CHIBIOS_SHORT_VERSION)
+
+        # set branch name
+        set(CHIBIOS_GIT_TAG "stable_${CHIBIOS_SHORT_VERSION}.x")
+    endif()
+
+    # need to setup a separate CMake project to download the code from the GitHub repository
+    # otherwise it won't be available before the actual build step
+    configure_file("${PROJECT_SOURCE_DIR}/CMake/ChibiOS.CMakeLists.cmake.in"
+                "${CMAKE_BINARY_DIR}/ChibiOS_Download/CMakeLists.txt")
+
+    # setup CMake project for ChibiOS download
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS_Download")
+
+    # run build on ChibiOS download CMake project to perform the download
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS_Download")
+
+    # add ChibiOS as external project
+    ExternalProject_Add(
+        ChibiOS
+        PREFIX ChibiOS
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
+        GIT_REPOSITORY  https://github.com/nanoframework/chibios
+        GIT_TAG ${CHIBIOS_GIT_TAG}  # target specified branch
+        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+        TIMEOUT 10
+        LOG_DOWNLOAD 1
+
+        # install command has to perform TWO extracts
+        # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+                COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+
+        # Disable all other steps
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+    )
+
+    # get source dir for ChibiOS CMake project
+    ExternalProject_Get_Property(ChibiOS SOURCE_DIR)
+
+else()
+    # ChibiOS source was specified
+
+    # sanity check is source path exists
+    if(EXISTS "${CHIBIOS_SOURCE}/")
+        message(STATUS "RTOS is: ChibiOS (source from: ${CHIBIOS_SOURCE})")
+
+        # check if we already have the sources, no need to copy again
+        if(NOT EXISTS "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+            file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+        else()
+            message(STATUS "Using local cache of ChibiOS source from ${CHIBIOS_SOURCE}")
+        endif()
+
+        set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
+    else()
+        message(FATAL_ERROR "Couldn't find ChibiOS source at ${CHIBIOS_SOURCE}/")
+    endif()
+
+    # add ChibiOS as external project
+    ExternalProject_Add(
+        ChibiOS
+        PREFIX ChibiOS
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
+
+        # install command has to perform TWO extracts
+        # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+                COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+        
+        # Disable all other steps
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+    )
+
+    # get source dir for ChibiOS CMake project
+    ExternalProject_Get_Property(ChibiOS SOURCE_DIR)
+
+endif()
+
+if(CHIBIOS_CONTRIB_REQUIRED)
+    if(NO_CHIBIOS_CONTRIB_SOURCE)
+        # no CHIBIOS_CONTRIB source specified, download it from it's repo
+
+        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+        include(Hack_SetGitSearchPath)
+
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        message(STATUS "ChibiOS-Contrib source from GitHub repo")
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("${PROJECT_SOURCE_DIR}/CMake/ChibiOS-Contrib.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download/CMakeLists.txt")
+
+        # setup CMake project for ChibiOS-Contrib download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download")
+
+        # run build on ChibiOS-Contrib download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download")
+
+        # add ChibiOS-Contrib as external project
+        # need to specify nanoframework as the active branch
+        ExternalProject_Add( 
+            ChibiOS-Contrib
+            PREFIX ChibiOS-Contrib
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source
+            GIT_REPOSITORY  https://github.com/ChibiOS/ChibiOS-Contrib
+            GIT_TAG nanoframework  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )        
+
+        # get source dir for ChibiOS-Contrib CMake project
+        ExternalProject_Get_Property(ChibiOS-Contrib SOURCE_DIR)
+
+    else()
+        # ChibiOS-Contrib source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${CHIBIOS_CONTRIB_SOURCE}/")
+            message(STATUS "ChibiOS-Contrib source from: ${CHIBIOS_CONTRIB_SOURCE}")
+
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source")
+                file(COPY "${CHIBIOS_CONTRIB_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source")
+            else()
+                message(STATUS "Using local cache of ChibiOS-Contrib source from ${CHIBIOS_CONTRIB_SOURCE}")
+            endif()
+
+            set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
+        else()
+            message(FATAL_ERROR "Couldn't find ChibiOS-Contrib source at ${CHIBIOS_CONTRIB_SOURCE}/")
+        endif()
+
+        # add ChibiOS-Contrib as external project
+        ExternalProject_Add(
+            ChibiOS-Contrib
+            PREFIX ChibiOS-Contrib
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+        # get source dir for ChibiOS-Contrib CMake project
+        ExternalProject_Get_Property(ChibiOS-Contrib SOURCE_DIR)
+
+    endif()
+endif()
+
+# if mbed TLS is enabled add it to the build
+if(NF_SECURITY_MBEDTLS)
+
+    # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_MBEDTLS_SOURCE TRUE)
+
+    if(MBEDTLS_SOURCE)
+        if(NOT "${MBEDTLS_SOURCE}" STREQUAL "")
+            set(NO_MBEDTLS_SOURCE FALSE)
+        endif()
+    endif()
+
+    # set options for mbed TLS
+    option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
+
+    if(NO_MBEDTLS_SOURCE)
+        # no mbed TLS source specified, download it from it's repo
+
+        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+        include(Hack_SetGitSearchPath)
+
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        # set tag for currently supported version
+        set(MBEDTLS_GIT_TAG "mbedtls-2.14")
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("${PROJECT_SOURCE_DIR}/CMake/mbedTLS.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/mbedTLS_Download/CMakeLists.txt")
+
+        # setup CMake project for mbedTLS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedTLS_Download")
+
+        # run build on mbedTLS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedTLS_Download")
+
+        # add mbedTLS as external project
+        ExternalProject_Add(
+            mbedTLS
+            PREFIX mbedTLS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source
+            GIT_REPOSITORY  https://github.com/nanoframework/mbedtls
+            GIT_TAG ${MBEDTLS_GIT_TAG}  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND ""
+        )
+
+    else()
+        # mbedTLS source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${MBEDTLS_SOURCE}/")
+
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+                message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")
+                file(COPY "${MBEDTLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+            else()
+                message(STATUS "Using local cache of mbedTLS source from ${MBEDTLS_SOURCE}")
+            endif()
+
+            set(MBEDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source/include)
+        else()
+            message(FATAL_ERROR "Couldn't find mbedTLS source at ${MBEDTLS_SOURCE}/")
+        endif()
+
+        # add mbedTLS as external project
+        ExternalProject_Add(
+            mbedTLS
+            PREFIX mbedTLS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/mbedTLS_Source
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND ""
+        )
+
+    endif()
+
+    # get source dir for mbedTLS CMake project
+    ExternalProject_Get_Property(mbedTLS SOURCE_DIR)
+
+    set(mbedTLS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include")
+    set(mbedTLS_LIBRARIES "${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    include_directories(${mbedTLS_INCLUDE_DIRS})
+
+endif()
+
+# Define base path for the class libraries
+set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
+
+# set target base location
+# this has to be set before the class library modules are pulled in
+if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+    # set target base location
+    set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+else()
+    # try to find board in the Community targets folder
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+        # set target base location
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+    else()
+        # board NOT found in targets folder
+        # can't continue
+        message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+    endif()
+endif()
+
+# set CMSIS RTOS include directory
+include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
+
+# need to find board definition files (board.c and board.h)
+
+# assume no community board... until proven otherwise
+set(CHIBIOS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
+
+# start search in nanoFramework ChibiOS 'overlay' folder
+if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
+    # board found
+    # if it's on nF overlay board.c and board.h exist there for sure
+    set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")
+else()
+    # board NOT found in ChibiOS 'overlay'
+
+    # try to find it in the target boards
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+        # board found
+        # check if the board definition files are available at the target folder
+        if( EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.c AND
+            EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.h)
+            # definition files found
+            set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from target folder" CACHE INTERNAL "Location of board definition files")
+
+        else()
+            # board.c and board.h are NOT in the target folder, try to find them in the official distribution
+
+            if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
+                # board found
+                # if it's on the ChibiOS official distribution board.c and board.h exist here for sure
+                set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from official ChibiOS distribution" CACHE INTERNAL "Location of board definition files")
+
+            else()
+                # board NOT found in official distribution
+                # quit now as there is no were else to search for these
+                message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${CHIBIOS_BOARD} in the available list of ChibiOS supported boards...\n\n")
+
+            endif()
+        endif()
+
+    else()
+        # try to find board in the Community targets folder
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+            # set flag for this being a community board
+            set(CHIBIOS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
+        else()
+            # board NOT found in official distribution
+            # quit now as there is no were else to search for these
+            message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${CHIBIOS_BOARD} in the available list of ChibiOS supported boards...\n\n")
+        endif()
+
+    endif()
+
+endif()
+
+# add target ChibiOS dirs
+add_subdirectory(Include)
+add_subdirectory(common)
+add_subdirectory(nanoBooter)
+add_subdirectory(nanoCLR)
+
+# now add the subdirectory for the board
+# try to find board in the targets folder
+if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+    # board found
+    message(STATUS "Support for target board '${CHIBIOS_BOARD}' found")
+    message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
+
+    # add TARGET board directory
+    add_subdirectory("${CHIBIOS_BOARD}")
+
+else()
+
+    # try to find board in the Community targets folder
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+        # board found
+        message(STATUS "Support for target board '${CHIBIOS_BOARD}' found in Community targets")
+        message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
+
+        # add TARGET board directory from Community
+        add_subdirectory("targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+
+    else()
+    # board NOT found in targets folder
+        # board NOT found in targets folder
+        message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+    endif()
+
+endif()
