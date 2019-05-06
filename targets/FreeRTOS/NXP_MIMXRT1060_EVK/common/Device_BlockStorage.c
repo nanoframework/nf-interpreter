@@ -14,12 +14,12 @@ const BlockRange BlockRange0[] = // 4KB blocks
 
 const BlockRange BlockRange1[] = // 4KB blocks
 {
-    { BlockRange_BLOCKTYPE_CODE,   0, 0xFD }                    // 0x60002000 nanoCLR  
+    { BlockRange_BLOCKTYPE_CODE,   0, 0xFD }                    // 0x60100000 nanoCLR  
 };
 
 const BlockRange BlockRange2[] = // 4KB blocks
 {
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 0xFF }             // 0x60100000 deployment  
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   0, 0xFF }             // 0x60200000 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 
@@ -36,7 +36,7 @@ const BlockRegionInfo BlockRegions[] =
     {
         (0),                            // no attributes for this region
         // Allocated in nanoCLR partition 1M
-        0x60002000,                     // start address for block region
+        0x60102000,                     // start address for block region
         0xFE,                           // total number of blocks in this region
         0x1000,   //  4K                // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
@@ -46,7 +46,7 @@ const BlockRegionInfo BlockRegions[] =
     {
         (0),                                // no attributes for this region
         // Allocated in Deployment partition 1M
-        0x60100000,                         // start address for block region
+        0x60200000,                         // start address for block region
         0x100,                              // total number of blocks in this region
         0x1000,   //  4K                    // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange2),
