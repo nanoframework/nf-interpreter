@@ -40,6 +40,8 @@
           "CHIBIOS_CONTRIB_REQUIRED" : "OFF-default-ON-to-include_ChibiOS-Contrib-repository-in-the-build",
           "CHIBIOS_CONTRIB_SOURCE" : "<path-to-local-ChibiOS-contrib-source-mind-the-forward-slash>",
           "CHIBIOS_BOARD" : "<valid-chibios-board-name-from-boards-collection>",
+          "STM32_CUBE_PACKAGE_REQUIRED" : "<OFF-default-ON-to-include_STM-cube-package-in-the-build>",
+          "STM32_CUBE_PACKAGE_SOURCE" : "<path-to-stm32-cubemx-package-mind-the-forward-slash>",
           "TI_BOARD" : "<valid-TI-board-name-from-boards-collection>",
           "TI_SL_CC32xx_SDK_SOURCE" : "<path-to-local-TI-SimpleLink-CC32xx-SDK-source-mind-the-forward-slash>",
           "SWO_OUTPUT" : "OFF-default-ON-to-enable-ARM-CortexM-Single-Wire-Output",

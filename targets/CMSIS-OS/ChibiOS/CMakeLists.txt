@@ -3,6 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(STM32_CubePackage)
+
 ########################################################
 # check availability of hex2dfu tool if specified
 # only relevant if this is running on a Windows machine
@@ -433,6 +435,12 @@ else()
 
     endif()
 
+endif()
+
+# (default is OFF so STM Cube package is NOT included)
+option(STM32_CUBE_PACKAGE_REQUIRED "option to include STM Cube pcakge in the build")
+if(STM32_CUBE_PACKAGE_REQUIRED)
+    ProcessSTM32CubePackage()
 endif()
 
 # add target ChibiOS dirs
