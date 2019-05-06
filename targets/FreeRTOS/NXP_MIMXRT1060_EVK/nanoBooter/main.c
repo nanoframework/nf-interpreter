@@ -54,18 +54,16 @@ static void  boot_nanoCLR(void){
 
      /* Init input GPIO*/
     GPIO_PinInit(BOARD_USER_BUTTON_GPIO, BOARD_USER_BUTTON_GPIO_PIN, &button_config);
-    button = GPIO_PinRead(BOARD_USER_BUTTON_GPIO,BOARD_USER_BUTTON_GPIO_PIN);
+    button = GPIO_PinRead(BOARD_USER_BUTTON_GPIO, BOARD_USER_BUTTON_GPIO_PIN);
 
-    /* Load nanoCLR if button is not pressed else init reciver Task */
+    /* Button is active low.
+       Load nanoCLR program through resetISR or if button is pressed init reciver Task */
     if (button) 
     {
         void (*nanoCLR)(void);
-        nanoCLR = (void *) *((uint32_t *) 0x60102004);
+        nanoCLR = (void *) *((uint32_t *) 0x60102004); // resetISR address
         nanoCLR();
     } 
-    else 
-    {
-    }
 }
 
 static void  boot_nanoCLR(void){
