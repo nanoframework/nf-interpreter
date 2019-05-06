@@ -9,10 +9,23 @@
 
 # check if the series name is supported 
 
-set(CHIBIOS_SUPPORTED_SERIES "STM32L0xx" "STM32F0xx" "STM32F4xx" "STM32F7xx" "STM32H7xx" CACHE INTERNAL "supported series names for ChibiOS")
-list(FIND CHIBIOS_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
+set(CHIBIOS_STM_SUPPORTED_SERIES "STM32F0xx" "STM32F4xx" "STM32F7xx" "STM32H7xx" "TICC3200" CACHE INTERNAL "supported STM series names for ChibiOS")
+set(CHIBIOS_TI_SUPPORTED_SERIES "TICC3200" CACHE INTERNAL "supported TI series names for ChibiOS")
+
+list(FIND CHIBIOS_STM_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 if(TARGET_SERIES_NAME_INDEX EQUAL -1)
-    message(FATAL_ERROR "\n\nSorry but ${TARGET_SERIES} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+    # series is NOT supported by STM 
+    # try TI 
+    list(FIND CHIBIOS_TI_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
+    if(TARGET_SERIES_NAME_INDEX EQUAL -1)
+        message(FATAL_ERROR "\n\nSorry but ${TARGET_SERIES} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+    else()
+        # series is supported by TI
+        set(TARGET_VENDOR "TI" CACHE INTERNAL "target vendor is TI")
+    endif()
+else()
+    # series is supported by STM
+    set(TARGET_VENDOR "STM" CACHE INTERNAL "target vendor is STM")
 endif()
 
 # including here the CMake files for the source files specific to the target series
@@ -49,6 +62,10 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/
 
 # append include directory for boards in the nanoFramework ChibiOS 'overlay' provideded by the community
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
+
+#
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/common/ext/CMSIS/TI/${TARGET_SERIES})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/common/startup/ARMCMx/devices/${TARGET_SERIES})
 
 
 # source files and GCC options according to target vendor and series

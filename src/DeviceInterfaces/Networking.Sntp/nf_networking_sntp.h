@@ -15,10 +15,12 @@
 
 extern "C"
 {
-#ifndef PLATFORM_ESP32
-#include <apps/sntp.h>
-#else
+#ifdef PLATFORM_ESP32
 #include <apps/sntp/sntp.h>
+#elif CC32XX
+#include <targetSimpleLinkCC32xx_Sntp.h>
+#else
+#include <apps/sntp.h>
 #endif
 }
 

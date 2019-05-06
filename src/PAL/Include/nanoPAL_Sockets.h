@@ -586,6 +586,7 @@ int SOCK_getaddrinfo(  const char* nodename, char* servname, const struct SOCK_a
 void SOCK_freeaddrinfo( struct SOCK_addrinfo* ai );
 int SOCK_ioctl( int socket, int cmd, int* data );
 int SOCK_getlasterror();
+int SOCK_getsocklasterror( int socket );
 int SOCK_select( int socket, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* except, const struct SOCK_timeval* timeout );
 int SOCK_setsockopt( int socket, int level, int optname, const char* optval, int  optlen );
 int SOCK_getsockopt( int socket, int level, int optname,       char* optval, int* optlen );

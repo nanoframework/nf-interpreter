@@ -71,6 +71,7 @@ set(NF_CoreCLR_SRCS
     TypeSystem.cpp
     nanoSupport_CRC32.c
     nanoHAL_SystemInformation.cpp
+    # Various.cpp
 
     # CoreLib
     corlib_native_System_AppDomain.cpp

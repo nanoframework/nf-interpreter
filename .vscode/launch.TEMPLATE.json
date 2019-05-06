@@ -65,12 +65,39 @@
             "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
             "filterStderr": true,
             "externalConsole": true,
-            "cwd": "${cwd}",
+            "cwd": "${cwd}"
             // Enable the following to debug GDB
             //"logging": {
             //    "engineLogging": true,
             //    "traceResponse": true
             //},
+        },
+
+        {
+            "MIMode": "gdb",
+            "name": "CC3200 Launchpad nanoCLR TEMPLATE",
+            "type": "cppdbg",
+            "request": "launch",
+
+            "setupCommands": [
+                {"text": "target remote | e:/openocd-0.10.0/bin/openocd.exe -c \"gdb_port pipe; log_output openocd.log\" -f <cc3200.cfg-config-file-usually-in-the-sdk-tools-folder>"},
+                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf>"},
+                {"text": "load"},
+                {"text": "set $sp = g_pfnVectors[0]"},
+                {"text": "set $pc = g_pfnVectors[1]"},
+                {"text": "break main"},
+                {"text": "continue", "ignoreFailures": true }
+            ],
+
+            "miDebuggerPath": "<path-to-gdb-inside-the-gcc-toolchain-mind-the-forward-slash>",
+            "targetArchitecture": "ARM",
+            "program": "${workspaceRoot}/build/nanoCLR.elf",
+
+            "launchCompleteCommand": "None",
+            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "filterStderr": true,
+            "externalConsole": true,
+            "cwd": "${cwd}"
         }
     ]
 }

@@ -9,7 +9,7 @@ ExternalProject_Add(
     FreeRTOS
     PREFIX FreeRTOS
     SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
-    SVN_REPOSITORY ${FREERTOS_SVN_REPOSITORY}/FreeRTOS/Source
+    SVN_REPOSITORY https://svn.code.sf.net/p/freertos/code/tags/${FREERTOS_VERSION_TAG}/FreeRTOS/Source/
     TIMEOUT 10
     LOG_DOWNLOAD 1
     # Disable all other steps
