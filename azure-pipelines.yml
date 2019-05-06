@@ -203,7 +203,7 @@ jobs:
 
   - template: azure-pipelines-templates/publish-bintray.yml
 
-  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+  - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
 #################
 # WIN32 
