@@ -17,7 +17,7 @@ MEMORY
 {
   /* Define each memory region */
   BOARD_FLASH (rx) : ORIGIN = 0x60000000, LENGTH = 0x100000 /* 1M bytes (alias Flash) */  
-  DEPLOYMENT_FLASH (rx) : ORIGIN = 0x60100000, LENGTH = 0x100000 /* 1M bytes */  
+  DEPLOYMENT_FLASH (rx) : ORIGIN = 0x60200000, LENGTH = 0x100000 /* 1M bytes */  
   SRAM_DTC (rwx) : ORIGIN = 0x20000000, LENGTH = 0x20000 /* 128K bytes (alias RAM) */  
   SRAM_ITC (rwx) : ORIGIN = 0x0, LENGTH = 0x20000 /* 128K bytes (alias RAM2) */  
   SRAM_OC (rwx) : ORIGIN = 0x20200000, LENGTH = 0xc0000 /* 768K bytes (alias RAM3) */  
