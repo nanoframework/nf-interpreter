@@ -92,7 +92,7 @@ void* ConfigurationManagerCC32xx_FindNetworkWireless80211ConfigurationBlocks()
     for(index = 0; index < SL_WLAN_MAX_PROFILES; index++)
     {
         status = sl_WlanProfileGet(index, name, &nameLength, macAddr, &secParams, &secExtParams, &priority);
-        if( status > 0)
+        if( status >= 0)
         {
             profileCount++;
         }
