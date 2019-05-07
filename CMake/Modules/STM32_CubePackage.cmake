@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# include the appropriate STM32 Cube package, if requested
+# include the STM32 Cube package for the appropriate series, if requested
 
 # check if cube package source was specified or if it's empty (default is empty)
 macro(ProcessSTM32CubePackage)
