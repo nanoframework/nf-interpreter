@@ -4,12 +4,15 @@
 #
 
 # set include directories
-list(APPEND STM32_CubePackage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/STM32_CubePackage_Source/Drivers/STM32H7xx_HAL_Driver/Src")
+list(APPEND STM32_CubePackage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/STM32_CubePackage_Source/Drivers/STM32H7xx_HAL_Driver/Inc")
 
 # source files
 set(STM32_CubePackage_SRCS
 
     # add HAL files here as required
+
+    # SPIFFS
+    stm32h7xx_hal_qspi.c
 )
 
 foreach(SRC_FILE ${STM32_CubePackage_SRCS})

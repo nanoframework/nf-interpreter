@@ -4,7 +4,7 @@
 #
 
 # set include directories
-list(APPEND STM32_CubePackage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/STM32_CubePackage_Source/Drivers/STM32L0xx_HAL_Driver/Src")
+list(APPEND STM32_CubePackage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/STM32_CubePackage_Source/Drivers/STM32L0xx_HAL_Driver/Inc")
 
 # source files
 set(STM32_CubePackage_SRCS
