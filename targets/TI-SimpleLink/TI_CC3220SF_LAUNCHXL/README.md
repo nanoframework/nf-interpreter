@@ -17,8 +17,8 @@ The following table lists the Board names of the resources and their correspondi
   |`Board_CAPTURE0`|P04 |
   |`Board_CAPTURE1`|P05 |
   |`Board_GPIO_LED0`|P64  (__LED EN__ must be jumpered)|
-  |`Board_GPIO_LED1`|P64  (__LED EN__ must be jumpered)|
-  |`Board_GPIO_LED2`|P64  (__LED EN__ must be jumpered)|
+  |`Board_GPIO_LED1`|P01  (__LED EN__ must be jumpered)|
+  |`Board_GPIO_LED2`|P02  (__LED EN__ must be jumpered)|
   |`Board_GPIO_BUTTON0`|P04  (`SW2`)|
   |`Board_GPIO_BUTTON1`|P15  (`SW3`)|
   |`Board_I2C0`|P01 - `SCL`, P02 - `SDA`|
