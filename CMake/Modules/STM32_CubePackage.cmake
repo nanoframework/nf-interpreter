@@ -107,7 +107,4 @@ macro(ProcessSTM32CubePackage)
 
     endif()
 
-    # include the source files
-    include(STM32_${TARGET_SERIES_SHORT}_CubePackage_sources)
-
 endmacro()
