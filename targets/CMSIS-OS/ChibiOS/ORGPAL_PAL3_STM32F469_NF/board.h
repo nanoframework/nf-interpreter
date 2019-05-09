@@ -305,7 +305,7 @@
 #define LINE_FMC_D15                PAL_LINE(GPIOD, 10U)
 #define LINE_FLASH_QSPI_D0          PAL_LINE(GPIOD, 11U)
 #define LINE_FLASH_QSPI_D1          PAL_LINE(GPIOD, 12U)
-#define LINE_FLASH_QSPI_D2          PAL_LINE(GPIOE, 2U) 
+#define LINE_FLASH_QSPI_D2          PAL_LINE(GPIOD, 2U) 
 #define LINE_FLASH_QSPI_D3          PAL_LINE(GPIOD, 13U)
 #define LINE_FMC_D0                 PAL_LINE(GPIOD, 14U)
 #define LINE_FMC_D1                 PAL_LINE(GPIOD, 15U)
@@ -555,7 +555,7 @@ The user should also disable the MCO pin of the clock output if not used.
 * PB3  - SWO                       (alternate 0).
 * PB4  - JTRST                     (alternate 0).
 * PB5  - SPI1_MOSI                 (alternate 5).
-* PB6  - QSPI_NCS                  (alternate 9).
+* PB6  - QSPI_NCS                  (alternate 10).
 * PB7  - PIN7                      (input pullup).
 * PB8  - GPIOB_IO1_P7_IO           (input floating).
 * PB9  - GPIOB_IO1_P8_IO           (input floating).
@@ -652,7 +652,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_AFIO_AF(GPIOB_SWO, 0U) |           \
                                      PIN_AFIO_AF(GPIOB_JTRST, 0U) |          \
                                      PIN_AFIO_AF(GPIOB_FLASH_SPI1_MOSI, 5U) |   \
-                                     PIN_AFIO_AF(GPIOB_FLASH_QSPI_NCS, 9U) |      \
+                                     PIN_AFIO_AF(GPIOB_FLASH_QSPI_NCS, 10U) |      \
                                      PIN_AFIO_AF(GPIOB_PIN7, 0U))
 #define VAL_GPIOB_AFRH              (PIN_AFIO_AF(GPIOB_IO1_P7_IO, 0U) |       \
                                      PIN_AFIO_AF(GPIOB_IO1_P8_IO, 0U) |       \
