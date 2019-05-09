@@ -50,13 +50,9 @@ uint8_t hal_spiffs_config()
     spiffs_cfg.phys_size = SPIFFS_TOTAL_SIZE;
     spiffs_cfg.phys_addr = 0;
     spiffs_cfg.phys_erase_block = SPIFFS_ERASE_BLOCK_SIZE;
-<<<<<<< HEAD
     spiffs_cfg.log_block_size = SPIFFS_LOGICAL_BLOCK_SIZE;
     spiffs_cfg.log_page_size = SPIFFS_LOGICAL_PAGE_SIZE;
-=======
-    spiffs_cfg.log_block_size = SPIFFS_BLOCK_SIZE;
-    spiffs_cfg.log_page_size = LOG_PAGE_SIZE;
->>>>>>> Initial work adding SPIFFS to STM32
+
 
     // setup pointers to HAL functions
     spiffs_cfg.hal_erase_f = hal_spiffs_erase;
@@ -104,25 +100,26 @@ uint8_t hal_spiffs_config()
   #endif
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // // code block to assist testing SPIFFS
+    // code block to assist testing SPIFFS
     // char writeBuf[] = {"Hello! if you get this message, congratulations, that's because SPIFFS is working on your device!!"};
-    // char readBuf[sizeof(writeBuf)];
-    
+    // char readBuf[80];
+
     // spiffs_file fd = SPIFFS_open(&fs, "file1.txt", SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
     // if (SPIFFS_write(&fs, fd, writeBuf, sizeof(writeBuf)) < 0)
     // {
     //     return -1;
     // }
-    
+
     // SPIFFS_close(&fs, fd);    
     // fd = SPIFFS_open(&fs, "file1.txt", SPIFFS_RDWR, 0);
-    // if (SPIFFS_read(&fs, fd, readBuf, sizeof(readBuf)) < 0)
+
+    // if (SPIFFS_read(&fs, fd, readBuf, sizeof(writeBuf)) < 0)
     // {
     //     return -1;
     // }
-    
+
     // SPIFFS_close(&fs, fd);
-    
+
     // uint32_t total = 0;
     // uint32_t used_space = 0;
     // SPIFFS_info(&fs, &total, &used_space);
