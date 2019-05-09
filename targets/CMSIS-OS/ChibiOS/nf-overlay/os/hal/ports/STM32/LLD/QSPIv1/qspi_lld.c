@@ -51,14 +51,10 @@ void qspi_lld_init()
 
 void qspi_lld_start(QSPI_HandleTypeDef* qspi)
 {
-<<<<<<< HEAD
     QSPI_CLK_ENABLE();
     QSPI_FORCE_RESET();
     QSPI_RELEASE_RESET();
-=======
-    rccEnableQUADSPI1(true);
-    rccResetQUADSPI1();
->>>>>>> Initial work adding SPIFFS to STM32
+
 
     nvicEnableVector(STM32_QUADSPI1_NUMBER, STM32_QSPI_QUADSPI1_IRQ_PRIORITY);
 

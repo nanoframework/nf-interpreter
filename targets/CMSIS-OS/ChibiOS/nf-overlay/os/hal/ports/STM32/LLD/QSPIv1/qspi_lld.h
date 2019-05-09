@@ -10,7 +10,6 @@
 #define QSPI_LLD_H
 
 #include <hal.h>
-<<<<<<< HEAD
 
 #if defined(STM32F4XX)
 #include <stm32f4xx_hal.h>
@@ -18,9 +17,7 @@
 #if defined(STM32F7XX)
 #include <stm32f7xx_hal.h>
 #endif
-=======
-#include <stm32f7xx_hal.h>
->>>>>>> Initial work adding SPIFFS to STM32
+
 
 #if (HAL_NF_USE_STM32_QSPI == TRUE)
 
@@ -40,14 +37,11 @@
 #define STM32_QSPI_QUADSPI1_IRQ_PRIORITY    10
 #endif
 
-<<<<<<< HEAD
 #define QSPI_CLK_ENABLE()             __HAL_RCC_QSPI_CLK_ENABLE()
 #define QSPI_CLK_DISABLE()            __HAL_RCC_QSPI_CLK_DISABLE()
 #define QSPI_FORCE_RESET()            __HAL_RCC_QSPI_FORCE_RESET()
 #define QSPI_RELEASE_RESET()          __HAL_RCC_QSPI_RELEASE_RESET()
 
-=======
->>>>>>> Initial work adding SPIFFS to STM32
 /*===========================================================================*/
 /* Derived constants and error checks.                                       */
 /*===========================================================================*/
