@@ -6,38 +6,7 @@
 #include <ff.h>
 #include "win_storage_native.h"
 
-
-HRESULT Library_win_storage_native_Windows_Storage_StorageFile::CheckFileNative___STATIC__VOID__STRING(CLR_RT_StackFrame& stack)
-{
-    NANOCLR_HEADER();
-
-    const char* filePath;
-    FRESULT fr;
-    FILINFO fileInfo;
-
-    // get a pointer to the file path
-    filePath = stack.Arg1().DereferenceString()->StringText();
-
-    fr = f_stat(filePath, &fileInfo);
-
-    if(fr == FR_OK)
-    {
-        // file exists, we are good
-    }
-    else if(fr == FR_NO_FILE)
-    {
-        // file doesn't exist
-        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);		
-    }
-    else
-    {
-        // IO error
-	NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
+extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 
 HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative___VOID(CLR_RT_StackFrame& stack)
 {
@@ -98,3 +67,75 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
 	NANOCLR_CLEANUP_END();
 }
 
+HRESULT Library_win_storage_native_Windows_Storage_StorageFile::GetFileFromPathNative___STATIC__WindowsStorageStorageFile__STRING__STRING( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+	CLR_RT_TypeDef_Index    storageFileTypeDef;
+	CLR_RT_HeapBlock*       storageFile;
+
+    const char* filePath;
+	const char* fileName;
+
+    FRESULT fr;
+    FILINFO fileInfo;
+	SYSTEMTIME  fileInfoTime;
+
+    // get a pointer to the file path
+    filePath = stack.Arg0().DereferenceString()->StringText();
+
+	// get a pointer to the file name
+	fileName = stack.Arg1().DereferenceString()->StringText();
+
+    fr = f_stat(filePath, &fileInfo);
+    if(fr == FR_OK)
+    {
+        // is this a file?
+        if ( !(fileInfo.fattrib & AM_DIR) )
+        {
+            // path represents a file, we are good
+
+            // compose return object
+            // find <StorageFile> type, don't bother checking the result as it exists for sure
+            g_CLR_RT_TypeSystem.FindTypeDef("StorageFile", "Windows.Storage", storageFileTypeDef);
+
+            // create a <StorageFile>
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), storageFileTypeDef));
+
+            // get a handle to the storage file
+            storageFile = stack.TopValue().Dereference();
+			
+            // file name
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___name], fileName));
+
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path], filePath));
+
+            // get the date time details and fill in the managed field
+            // compute directory date
+            fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
+
+            // get a reference to the dateCreated managed field...
+            CLR_RT_HeapBlock& dateFieldRef = storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
+			CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+			// ...and set it with the fileInfoTime
+			*pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
+        }
+		else
+		{
+	        // path exists but it's a folder
+			NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
+		}
+    }
+    else if(fr == FR_NO_FILE)
+    {
+        // file doesn't exist
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
+    }
+    else
+    {
+        // IO error
+		NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    NANOCLR_NOCLEANUP();
+}

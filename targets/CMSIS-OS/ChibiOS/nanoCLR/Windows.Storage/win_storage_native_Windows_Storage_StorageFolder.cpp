@@ -939,7 +939,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNa
 	NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING(CLR_RT_StackFrame& stack)
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING( CLR_RT_StackFrame& stack )
 {
 	NANOCLR_HEADER();
 

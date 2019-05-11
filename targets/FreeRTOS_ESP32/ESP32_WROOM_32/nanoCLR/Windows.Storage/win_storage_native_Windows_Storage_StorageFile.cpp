@@ -6,40 +6,7 @@
 #include "win_storage_native.h"
 
 extern char * ConvertToESP32Path(const char * filepath);
-
-
-HRESULT Library_win_storage_native_Windows_Storage_StorageFile::CheckFileNative___STATIC__VOID__STRING(CLR_RT_StackFrame& stack)
-{
-	NANOCLR_HEADER();
-
-	const char* managedfilePath;
-	char *      filePath = NULL;
-	FILE *		file;
-
-	// get a pointer to the file path
-	managedfilePath = stack.Arg0().DereferenceString()->StringText();
-
-	filePath = ConvertToESP32Path(managedfilePath);
-
-	// Check file exists 
-	file = fopen(filePath, "r");
-
-	if (file == NULL)
-	{
-		NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
-	}
-	fclose(file);
-
-	NANOCLR_CLEANUP();
-
-	// free buffer memory, if allocated
-	if (filePath != NULL)
-	{
-		platform_free(filePath);
-	}
-
-	NANOCLR_CLEANUP_END();
-}
+extern uint64_t GetFileTimeFromPath(char * path);
 
 HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative___VOID(CLR_RT_StackFrame& stack)
 {
@@ -138,3 +105,90 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
 	NANOCLR_CLEANUP_END();
 }
 
+HRESULT Library_win_storage_native_Windows_Storage_StorageFile::GetFileFromPathNative___STATIC__WindowsStorageStorageFile__STRING__STRING( CLR_RT_StackFrame& stack )
+{
+	NANOCLR_HEADER();
+
+	CLR_RT_TypeDef_Index    storageFileTypeDef;
+	CLR_RT_HeapBlock*       storageFile;
+
+	const char* fileName;
+	const char* managedfilePath;
+	char *      workingPath = NULL;
+
+	static struct stat fileInfo;
+
+	int         operationResult;
+
+	// get a pointer to the file path
+	managedfilePath = stack.Arg0().DereferenceString()->StringText();
+
+	// get a pointer to the file name
+	fileName = stack.Arg1().DereferenceString()->StringText();
+
+	workingPath = ConvertToESP32Path(managedfilePath);
+
+	// check if path exists
+	operationResult = stat(workingPath, &fileInfo);
+	if(operationResult < 0)
+	{
+		operationResult = errno;
+	}
+
+	if( operationResult == ENOENT )
+	{
+		// path doesn't exist
+		NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
+	}
+
+
+	if( operationResult == 0 )
+	{
+		// Is this a file
+		if (fileInfo.st_mode & S_IFREG)
+		{
+			// path represents a file, we are good
+
+            // compose return object
+            // find <StorageFile> type, don't bother checking the result as it exists for sure
+            g_CLR_RT_TypeSystem.FindTypeDef("StorageFile", "Windows.Storage", storageFileTypeDef);
+
+            // create a <StorageFile>
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), storageFileTypeDef));
+
+            // get a handle to the storage file
+            storageFile = stack.TopValue().Dereference();
+			
+            // file name
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___name], fileName));
+
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path], managedfilePath));
+
+			// get the date time details and fill in the managed field
+			// get a reference to the dateCreated managed field...
+			CLR_RT_HeapBlock& dateFieldRef = storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
+			CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+
+			// get the date time details and fill in the managed field
+			// compute file date
+			// ...and set it 
+			*pRes = GetFileTimeFromPath(workingPath);
+		}
+		else
+		{
+			 // path exists but it's a folder
+			NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
+		}
+	}
+
+
+	NANOCLR_CLEANUP();
+
+	// free buffer memory, if allocated
+	if (workingPath != NULL)
+	{
+		platform_free(workingPath);
+	}
+
+	NANOCLR_CLEANUP_END();
+}
