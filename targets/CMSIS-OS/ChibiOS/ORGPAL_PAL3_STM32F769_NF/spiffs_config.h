@@ -183,7 +183,7 @@ typedef uint8_t u8_t;
 // not on mount point. If not, SPIFFS_format must be called prior to mounting
 // again.
 #ifndef SPIFFS_USE_MAGIC
-#define SPIFFS_USE_MAGIC                (1)
+#define SPIFFS_USE_MAGIC                (0)
 #endif
 
 #if SPIFFS_USE_MAGIC
@@ -193,7 +193,7 @@ typedef uint8_t u8_t;
 // be accepted for mounting with a configuration defining the filesystem as 2
 // megabytes.
 #ifndef SPIFFS_USE_MAGIC_LENGTH
-#define SPIFFS_USE_MAGIC_LENGTH         (1)
+#define SPIFFS_USE_MAGIC_LENGTH         (0)
 #endif
 #endif
 
