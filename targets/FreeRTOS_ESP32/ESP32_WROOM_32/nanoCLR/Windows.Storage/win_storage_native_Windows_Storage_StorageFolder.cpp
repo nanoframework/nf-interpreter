@@ -726,10 +726,16 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFileNati
         break;
 
     case CreationCollisionOption_OpenIfExists:
-        // Open existing file & truncate
-        mode[0] = 'r';
-        mode[1] = '+';
-        break;
+		if (fileExists)
+		{
+			// Open existing file 
+			mode[0] = 'r';
+		}
+		else
+		{
+			NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
+		}
+		break;
 
     case CreationCollisionOption_GenerateUniqueName:
         // this operation is not supported in nanoFramework
