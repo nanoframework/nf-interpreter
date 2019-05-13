@@ -59,7 +59,7 @@ endif()
 
 # SPIFFS
 if(NF_FEATURE_USE_SPIFFS)
-    find_package(STM32_F4_CubePackage REQUIRED)
+    find_package(STM32F4_CubePackage REQUIRED)
     find_package(SPIFFS REQUIRED)
 endif()
 
@@ -120,7 +120,7 @@ add_executable(
     ${CHIBIOS_SOURCES}
     ${CHIBIOS_CONTRIB_SOURCES}
     ${ChibiOSnfOverlay_SOURCES}
-    ${STM32_F4_CubePackage_SOURCES}
+    ${STM32F4_CubePackage_SOURCES}
     ${WireProtocol_SOURCES}
 
     # sources for nanoFramework libraries
@@ -180,7 +180,7 @@ include_directories(
     ${CHIBIOS_INCLUDE_DIRS}
     ${ChibiOSnfOverlay_INCLUDE_DIRS}
     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-    ${STM32_F4_CubePackage_INCLUDE_DIRS}
+    ${STM32F4_CubePackage_INCLUDE_DIRS}
 
     ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
