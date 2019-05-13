@@ -16,7 +16,7 @@
  * FSMC SDRAM driver system settings.
  */
 #define STM32_USE_FSMC_SDRAM                TRUE
-#define STM32_SDRAM_USE_FSMC_SDRAM1         TRUE
-#define STM32_SDRAM_USE_FSMC_SDRAM2         FALSE
+#define STM32_SDRAM_USE_FSMC_SDRAM1         FALSE
+#define STM32_SDRAM_USE_FSMC_SDRAM2         TRUE
 
 #endif // _MCUCONF_NF_H_
