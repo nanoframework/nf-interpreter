@@ -30,36 +30,34 @@ macro(ProcessSTM32CubePackage)
 
         #  check if Git was found, if not report to user and abort
         if(NOT GIT_EXECUTABLE)
-        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
         endif()
 
-        # set repo for current STM32 series
-        set(CUBEPACKAGE_REPO ${TARGET_SERIES_SHORT})
-
-        message(STATUS "STM32 Cube package from GitHub repo")
+        message(STATUS "STM32 ${TARGET_SERIES_SHORT} Cube package from GitHub repo")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
         configure_file("${PROJECT_SOURCE_DIR}/CMake/STM32.CubePackage.CMakeLists.cmake.in"
-                    "${CMAKE_BINARY_DIR}/STM32-CubePackage_Download/CMakeLists.txt")
+                    "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}-CubePackage_Download/CMakeLists.txt")
 
         # setup CMake project for STM32_CubePackage download
         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/STM32_CubePackage_Download")
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}_CubePackage_Download")
 
         # run build on STM32_CubePackage download CMake project to perform the download
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/STM32_CubePackage_Download")
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}_CubePackage_Download")
 
         # add STM32_CubePackage as external project
         # need to specify nanoframework as the active branch
         ExternalProject_Add( 
-            STM32_CubePackage
-            PREFIX STM32_CubePackage
-            SOURCE_DIR ${CMAKE_BINARY_DIR}/STM32_CubePackage_Source
-            GIT_REPOSITORY  https://github.com/nanoframework/STM32Cube${CUBEPACKAGE_REPO}
+            STM32${TARGET_SERIES_SHORT}_CubePackage
+            PREFIX STM32${TARGET_SERIES_SHORT}_CubePackage
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}_CubePackage_Source
+            GIT_REPOSITORY  https://github.com/nanoframework/STM32Cube${TARGET_SERIES_SHORT}
+            GIT_TAG "nf-build"  # target specific branch        
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
             LOG_DOWNLOAD 1
@@ -70,7 +68,7 @@ macro(ProcessSTM32CubePackage)
         )      
 
         # get source dir for STM32_CubePackage CMake project
-        ExternalProject_Get_Property(STM32_CubePackage SOURCE_DIR)
+        ExternalProject_Get_Property(STM32${TARGET_SERIES_SHORT}_CubePackage SOURCE_DIR)
 
     else()
         # STM32 Cube package source was specified
@@ -80,22 +78,20 @@ macro(ProcessSTM32CubePackage)
             message(STATUS "STM32 Cube package source from: ${STM32_CUBE_PACKAGE_SOURCE}")
 
             # check if we already have the sources, no need to copy again
-            if(NOT EXISTS "${CMAKE_BINARY_DIR}/STM32_CubePackage_Source")
-                file(COPY "${STM32_CUBE_PACKAGE_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/STM32_CubePackage_Source")
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}_CubePackage_Source")
+                file(COPY "${STM32_CUBE_PACKAGE_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}_CubePackage_Source")
             else()
                 message(STATUS "Using local cache of STM32 Cube package source from ${STM32_CUBE_PACKAGE_SOURCE}")
             endif()
-
-            set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
         else()
             message(FATAL_ERROR "Couldn't find STM32 Cube package source at ${STM32_CUBE_PACKAGE_SOURCE}/")
         endif()
 
         # add STM32_CubePackage as external project
         ExternalProject_Add(
-            STM32_CubePackage
-            PREFIX STM32_CubePackage
-            SOURCE_DIR ${CMAKE_BINARY_DIR}/STM32_CubePackage_Source
+            STM32${TARGET_SERIES_SHORT}_CubePackage
+            PREFIX STM32${TARGET_SERIES_SHORT}_CubePackage
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}_CubePackage_Source
             # Disable all other steps
             INSTALL_COMMAND ""
             CONFIGURE_COMMAND ""
@@ -103,7 +99,7 @@ macro(ProcessSTM32CubePackage)
         )
 
         # get source dir for STM32_CubePackage CMake project
-        ExternalProject_Get_Property(STM32_CubePackage SOURCE_DIR)
+        ExternalProject_Get_Property(STM32${TARGET_SERIES_SHORT}_CubePackage SOURCE_DIR)
 
     endif()
 

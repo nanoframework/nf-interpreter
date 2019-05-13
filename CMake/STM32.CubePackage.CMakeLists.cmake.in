@@ -9,10 +9,11 @@ include(ExternalProject)
 
 # download STM32 Cube Package source from nanoFramework GitHub fork
 ExternalProject_Add( 
-    STM32_CubePackage
-    PREFIX STM32_CubePackage
-    SOURCE_DIR ${CMAKE_BINARY_DIR}/STM32_CubePackage_Source
-    GIT_REPOSITORY  https://github.com/nanoframework/STM32Cube${CUBEPACKAGE_REPO}
+    STM32${TARGET_SERIES_SHORT}_CubePackage
+    PREFIX STM32${TARGET_SERIES_SHORT}_CubePackage
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}_CubePackage_Source
+    GIT_REPOSITORY  https://github.com/nanoframework/STM32Cube${TARGET_SERIES_SHORT}
+    GIT_TAG "nf-build"  # target specific branch
     GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
     TIMEOUT 10
     LOG_DOWNLOAD 1
