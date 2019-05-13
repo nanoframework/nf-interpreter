@@ -1,0 +1,23 @@
+#
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
+project(SPIFFS-download NONE)
+
+include(ExternalProject)
+
+# download SPIFFS source from nanoFramework GitHub fork
+ExternalProject_Add( 
+    SPIFFS
+    PREFIX SPIFFS
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/SPIFFS_Source
+    GIT_REPOSITORY  https://github.com/nanoframework/spiffs
+    GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+    TIMEOUT 10
+    LOG_DOWNLOAD 1
+    # Disable all other steps
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)

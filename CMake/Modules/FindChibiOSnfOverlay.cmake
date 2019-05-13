@@ -14,6 +14,8 @@ list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS
 list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/include/stm32_fsmc)
 # component STM32_ONEWIRE (One Wire driver)
 list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/include/stm32_onewire)
+# component STM32_QSPI (QSPI driver)
+list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/include/stm32_qspi)
 
 ##################################################################################################################################
 # Add above the required include directory(ies) for a new nanoFramework overlay component that you are adding
@@ -44,6 +46,8 @@ list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Chib
 list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_fsmc/hal_stm32_fsmc.c)
 # component STM32_ONEWIRE (One Wire driver)
 list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_onewire/hal_stm32_onewire.c)
+# component STM32_QSPI (QSPI driver)
+list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_qspi/hal_stm32_qspi.c)
 
 #########################################################################################################################
 # Add above ALL the source code file(s) required for a new nanoFramework overlay component that you are adding

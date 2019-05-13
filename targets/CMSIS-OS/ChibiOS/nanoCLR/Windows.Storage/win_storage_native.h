@@ -112,4 +112,7 @@ struct Library_win_storage_native_Windows_Storage_StorageProvider
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage;
 
+
+#define WORKING_DRIVE_IS_INTERNAL_DRIVE         memcmp(workingDrive, INTERNAL_DRIVE_LETTER, sizeof(INTERNAL_DRIVE_LETTER) - 1) == 0
+
 #endif  //_WIN_STORAGE_NATIVE_H_

@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <string.h>
 
+extern uint8_t hal_spiffs_config();
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here 
@@ -58,6 +60,11 @@ int main(void) {
   // this has to be called after osKernelInitialize, otherwise an hard fault will occur
   Target_ExternalMemoryInit();
 
+  #if NF_FEATURE_USE_SPIFFS
+  // config and init SPIFFS
+  hal_spiffs_config();
+  #endif
+  
   // starts the serial driver
   sdStart(&SERIAL_DRIVER, NULL);
 
