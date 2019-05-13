@@ -154,7 +154,7 @@ typedef uint8_t u8_t;
 // zero-termination character, meaning maximum string of characters
 // can at most be SPIFFS_OBJ_NAME_LEN - 1.
 #ifndef SPIFFS_OBJ_NAME_LEN
-#define SPIFFS_OBJ_NAME_LEN             (256)
+#define SPIFFS_OBJ_NAME_LEN             (32)
 #endif
 
 // Maximum length of the metadata associated with an object.
