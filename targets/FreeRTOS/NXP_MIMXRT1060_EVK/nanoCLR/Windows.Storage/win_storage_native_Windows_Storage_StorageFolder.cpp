@@ -45,7 +45,7 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
     char* stringBuffer;
     uint32_t driveCount = 0;
     char workingDrive[sizeof(DRIVE_PATH_LENGTH)];
-    uint16_t driveIterator = (uint16_t)Storage_Drives_SDCard;
+    uint16_t driveIterator = 0;
 
     CLR_RT_HeapBlock* storageFolder;
     CLR_RT_TypeDef_Index storageFolderTypeDef;
@@ -147,6 +147,16 @@ HRESULT StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorage
             storageFolder++;
         }
     }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetInternalStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder(CLR_RT_StackFrame& stack)
+{
+    NANOCLR_HEADER();
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
     NANOCLR_NOCLEANUP();
 }
@@ -837,4 +847,33 @@ HRESULT StorageFolder::CreateFolderNative___WindowsStorageStorageFolder__STRING_
     }
 
     NANOCLR_CLEANUP_END();
+}
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNative___VOID(CLR_RT_StackFrame& stack)
+{
+    NANOCLR_HEADER();
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNative___VOID__STRING(CLR_RT_StackFrame& stack)
+{
+    NANOCLR_HEADER();
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
 }
