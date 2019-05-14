@@ -7,19 +7,22 @@
 #include <nanoHAL_Types.h>
 #include <nanoCLR_Types.h>
 #include <nanoHAL_Time.h>
-
 #include "FreeRTOS.h"
-#include "time.h"
-#include <sys/time.h>
 
-#include "fsl_snvs_hp.h"
+#if defined(HAL_USE_RTC)
+    #include "fsl_snvs_hp.h"
+#else
+    #include "time.h"
+    #include <sys/time.h>
+#endif
+
 
 // Returns the current date time from the RTC 
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-// #if defined(HAL_USE_RTC)
+#if defined(HAL_USE_RTC)
+    
     SYSTEMTIME st;
-
     snvs_hp_rtc_datetime_t rtcDate;
  
     SNVS_HP_RTC_GetDatetime(SNVS, &rtcDate);
@@ -39,51 +42,37 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
         st.wMinute = 0;
         st.wHour = 0;
     }
+	else
+    {
+        return HAL_Time_CurrentTime();
+    }
+    
     return HAL_Time_ConvertFromSystemTime( &st );
 }
-    
-// #else
-    // if (datePartOnly)
-	// {
-	// 	SYSTEMTIME st;
-	// 	HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
 
-	// 	st.wHour = 0;
-	// 	st.wMinute = 0;
-	// 	st.wSecond = 0;
-	// 	st.wMilliseconds = 0;
-
-	// 	return HAL_Time_ConvertFromSystemTime(&st);
-	// }
-	// else
-    // {
-    //     return HAL_Time_CurrentTime();
-    // }
-//   #endif
-
-
+#else
 void HAL_Time_SetUtcTime(uint64_t utcTime)
 {
     (void) utcTime;
-    // SYSTEMTIME systemTime;
+    SYSTEMTIME systemTime;
 
-    // HAL_Time_ToSystemTime(utcTime, &systemTime);
+    HAL_Time_ToSystemTime(utcTime, &systemTime);
 
-    // struct tm newTime;
+    struct tm newTime;
 
-    // newTime.tm_year = systemTime.wYear - 1900;      // years since 1900
-    // newTime.tm_mon = systemTime.wMonth - 1;         // months since January 0-11
-    // newTime.tm_mday = systemTime.wDay;              // day of the month 1-31
-    // newTime.tm_wday = systemTime.wDayOfWeek;        // days since Sunday 0-6
-    // newTime.tm_hour = (uint32_t)systemTime.wHour;   // hours since midnight 0-23
-    // newTime.tm_min = (uint32_t)systemTime.wMinute;  // minutes after the hour 0-59
-    // newTime.tm_sec = (uint32_t)systemTime.wSecond;  // seconds after the minute	 0-59
+    newTime.tm_year = systemTime.wYear - 1900;      // years since 1900
+    newTime.tm_mon = systemTime.wMonth - 1;         // months since January 0-11
+    newTime.tm_mday = systemTime.wDay;              // day of the month 1-31
+    newTime.tm_wday = systemTime.wDayOfWeek;        // days since Sunday 0-6
+    newTime.tm_hour = (uint32_t)systemTime.wHour;   // hours since midnight 0-23
+    newTime.tm_min = (uint32_t)systemTime.wMinute;  // minutes after the hour 0-59
+    newTime.tm_sec = (uint32_t)systemTime.wSecond;  // seconds after the minute	 0-59
 
-    // time_t t = mktime(&newTime);
-    // struct timeval now = { .tv_sec = t, .tv_usec = 0 };
-    // settimeofday(&now, NULL);
-
+    time_t t = mktime(&newTime);
+    struct timeval now = { .tv_sec = t, .tv_usec = 0 };
+    settimeofday(&now, NULL);
 }
+#endif
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
 {

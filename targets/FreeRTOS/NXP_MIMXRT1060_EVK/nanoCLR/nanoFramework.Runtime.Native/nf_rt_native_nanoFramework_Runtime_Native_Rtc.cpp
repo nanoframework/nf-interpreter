@@ -24,17 +24,18 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc::Native_RTC_SetSys
     {
         snvs_hp_rtc_datetime_t rtcDate;
 
+        // Stop the RTC before setting date
         SNVS_HP_RTC_StopTimer(SNVS);
 
         rtcDate.year = (uint16_t) stack.Arg0().NumericByRef().s4;  
-        rtcDate.month = (uint8_t) stack.Arg1().NumericByRef().u1 - 1; 
+        rtcDate.month = (uint8_t) stack.Arg1().NumericByRef().u1; 
         rtcDate.day = (uint8_t) stack.Arg2().NumericByRef().u1;   
         rtcDate.hour = (uint8_t) stack.Arg4().NumericByRef().u1;  
         rtcDate.minute = (uint8_t )stack.Arg5().NumericByRef().u1;
         rtcDate.second = (uint8_t) stack.Arg6().NumericByRef().u1; 
 
+        // Set new date and start RTC
         SNVS_HP_RTC_SetDatetime(SNVS, &rtcDate);
-
         SNVS_HP_RTC_StartTimer(SNVS);
 
         // Return value to the managed application

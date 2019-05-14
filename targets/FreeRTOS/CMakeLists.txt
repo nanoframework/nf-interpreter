@@ -151,7 +151,7 @@ if(NO_CMSIS_SOURCE)
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
-    configure_file("CMake/CMSIS.CMakeLists.cmake.in"
+    configure_file("${PROJECT_SOURCE_DIR}/CMake/CMSIS.CMakeLists.cmake.in"
                 "${CMAKE_BINARY_DIR}/CMSIS_Download/CMakeLists.txt")
 
     # setup CMake project for CMSIS download
@@ -159,6 +159,7 @@ if(NO_CMSIS_SOURCE)
                     RESULT_VARIABLE result
                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMSIS_Download")
 
+                    
     # run build on CMSIS download CMake project to perform the download
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
                     RESULT_VARIABLE result
