@@ -159,7 +159,7 @@ NANOCLR_HEADER();
         // find <StorageFolder> type definition, don't bother checking the result as it exists for sure
         g_CLR_RT_TypeSystem.FindTypeDef("StorageFolder", "Windows.Storage", storageFolderTypeDef);
 
-        // create an array of <StorageFolder>
+        // create an empty array of <StorageFolder>
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 0, storageFolderTypeDef));
     }
     NANOCLR_NOCLEANUP();
@@ -1044,33 +1044,4 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 	}
 
 	NANOCLR_CLEANUP_END();
-}
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNative___VOID(CLR_RT_StackFrame& stack)
-{
-    NANOCLR_HEADER();
-    (void)stack;
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNative___VOID__STRING(CLR_RT_StackFrame& stack)
-{
-    NANOCLR_HEADER();
-    (void)stack;
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    (void)stack;
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
 }
