@@ -526,7 +526,8 @@ if( API_nanoFramework.Devices.OneWire OR
     API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
     API_Windows.Networking.Sockets OR
-    API_nanoFramework.Devices.Can)
+    API_nanoFramework.Devices.Can OR
+    API_Windows.Storage)
 
     # these APIs requires nanoFramework.Runtime.Events
     set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
