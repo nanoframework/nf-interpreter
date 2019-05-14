@@ -18,7 +18,8 @@
 // need to declare this here as extern
 extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
-#define SD_CARD_DRIVE_INDEX     "0"
+#define SD_CARD_DRIVE_INDEX             "0"
+#define SD_CARD_DRIVE_INDEX_NUMERIC     (0)
 
 
 ///////////////////////////////////////////
@@ -101,7 +102,7 @@ static void CardDetectTask(void *pvParameters)
             sdCardFileSystemReady = true;
 
             // post event to managed app
-            PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_INSERTION, Storage_Drives_SDCard );
+            PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceInsertion, SD_CARD_DRIVE_INDEX_NUMERIC );
         }
         else
         {
@@ -111,7 +112,7 @@ static void CardDetectTask(void *pvParameters)
             sdCardFileSystemReady = false;
 
             // post event to managed app
-            PostManagedEvent( EVENT_STORAGE, 0, EVENT_STORAGE_DEVICE_REMOVAL, Storage_Drives_SDCard );
+            PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceRemoval, SD_CARD_DRIVE_INDEX_NUMERIC );
         }
     }
 }
