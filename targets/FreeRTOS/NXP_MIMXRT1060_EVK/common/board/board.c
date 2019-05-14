@@ -211,3 +211,27 @@ void BOARD_USDHCClockConfiguration(void)
     CLOCK_SetDiv(kCLOCK_Usdhc1Div, 1U);
     CLOCK_SetMux(kCLOCK_Usdhc1Mux, 1U);
 }
+
+
+/* Init SNVS_HP that implements a real time counter */
+void BOARD_InitRTC(void)
+{
+    snvs_hp_rtc_config_t snvsRtcConfig;
+    snvs_hp_rtc_datetime_t rtcDate;
+
+    SNVS_HP_RTC_GetDefaultConfig(&snvsRtcConfig);
+    SNVS_HP_RTC_Init(SNVS, &snvsRtcConfig);
+
+    /* Set a start date time and start RT */
+    rtcDate.year = 2019U;
+    rtcDate.month = 12U;
+    rtcDate.day = 25U;
+    rtcDate.hour = 10U;
+    rtcDate.minute = 0;
+    rtcDate.second = 0;
+
+    /* Set RTC time to default time and start the RTC */
+    SNVS_HP_RTC_SetDatetime(SNVS, &rtcDate);
+    (void) rtcDate;
+    SNVS_HP_RTC_StartTimer(SNVS);
+}
