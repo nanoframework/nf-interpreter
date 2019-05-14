@@ -15,6 +15,8 @@
     #include <sys/time.h>
 #endif
 
+#include "fsl_snvs_hp.h"
+
 // Returns the current date time from the RTC 
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
@@ -45,21 +47,12 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 
 #else
 void HAL_Time_SetUtcTime(uint64_t utcTime)
-{
     (void) utcTime;
     SYSTEMTIME systemTime;
 
-    HAL_Time_ToSystemTime(utcTime, &systemTime);
-
-    struct tm newTime;
-
-    newTime.tm_year = systemTime.wYear - 1900;      // years since 1900
-    newTime.tm_mon = systemTime.wMonth - 1;         // months since January 0-11
-    newTime.tm_mday = systemTime.wDay;              // day of the month 1-31
-    newTime.tm_wday = systemTime.wDayOfWeek;        // days since Sunday 0-6
-    newTime.tm_hour = (uint32_t)systemTime.wHour;   // hours since midnight 0-23
-    newTime.tm_min = (uint32_t)systemTime.wMinute;  // minutes after the hour 0-59
-    newTime.tm_sec = (uint32_t)systemTime.wSecond;  // seconds after the minute	 0-59
+    // time_t t = mktime(&newTime);
+    // struct timeval now = { .tv_sec = t, .tv_usec = 0 };
+    // settimeofday(&now, NULL);
 
     time_t t = mktime(&newTime);
     struct timeval now = { .tv_sec = t, .tv_usec = 0 };
