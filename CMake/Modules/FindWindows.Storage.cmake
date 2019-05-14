@@ -11,10 +11,13 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 if(RTOS_CHIBIOS_CHECK)
     list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs/src")
     list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Include")
-	set( PROJECT_COMMON_PATH "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
+
+    set( PROJECT_COMMON_PATH "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
 elseif(RTOS_FREERTOS_CHECK)
     list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FatFS_Source/source")
     list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP_MIMXRT1060_EVK/include")
+
+    set( PROJECT_COMMON_PATH "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP_MIMXRT1060_EVK/common")
 endif()
 
 list(APPEND Windows.Storage_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
@@ -41,7 +44,6 @@ if(RTOS_CHIBIOS_CHECK)
 			"${PROJECT_COMMON_PATH}"
             "${BASE_PATH_FOR_THIS_MODULE}"
             "${TARGET_BASE_LOCATION}"
-            "${PROJECT_COMMON_PATH}"
             CMAKE_FIND_ROOT_PATH_BOTH
         )
         # message("${SRC_FILE} >> ${Windows.Storage_SRC_FILE}") # debug helper
@@ -54,7 +56,7 @@ elseif(RTOS_FREERTOS_CHECK)
             PATHS
 
                 "${BASE_PATH_FOR_THIS_MODULE}"
-                "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP_MIMXRT1060_EVK/common"
+                "${PROJECT_COMMON_PATH}"
 
             CMAKE_FIND_ROOT_PATH_BOTH
         )
