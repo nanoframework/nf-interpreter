@@ -914,7 +914,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
     CLR_RT_HeapBlock    hbTimeout;
     CLR_INT64*          timeout;
     bool                eventResult = true;
-    uint32_t            fileSize;
+    uint32_t            fileSize = 0;
 
     char workingDrive[DRIVE_LETTER_LENGTH];
     const char*         filePath;
