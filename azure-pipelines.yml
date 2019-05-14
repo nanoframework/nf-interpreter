@@ -183,13 +183,8 @@ jobs:
     matrix:
       NXP_MIMXRT1060_EVK:
         BoardName: NXP_MIMXRT1060_EVK
-<<<<<<< HEAD
         BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FREERTOS -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_DEBUGGER=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON
         GccArm_Version:
-=======
-        BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FREERTOS
-        NeedsDFU: true
->>>>>>> Add FreeRTOS and NXP targets to Azure Pipelines
 
   variables:
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
@@ -331,8 +326,6 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_WIN32_nanoCLR
-  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
-  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
   condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
 
   pool:
