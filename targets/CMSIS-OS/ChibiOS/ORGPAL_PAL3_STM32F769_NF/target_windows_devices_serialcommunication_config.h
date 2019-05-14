@@ -2,6 +2,7 @@
 // Copyright (c) 2017 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
+
 ///////////
 // UART2 //
 ///////////
@@ -39,13 +40,13 @@
 // rx buffer size: 256 bytes
 #define UART6_RX_SIZE  256
 
-// ///////////
-// // UART7 //
-// ///////////
+///////////
+// UART7 //
+///////////
 
-// // enable UART7
-// #define NF_SERIAL_COMM_STM32_UART_USE_UART7    TRUE
+// enable UART7
+#define NF_SERIAL_COMM_STM32_UART_USE_UART7    TRUE
 
-// // buffers size
-// #define UART7_TX_SIZE  256
-// #define UART7_RX_SIZE  256
+// buffers size
+#define UART7_TX_SIZE  256
+#define UART7_RX_SIZE  256
