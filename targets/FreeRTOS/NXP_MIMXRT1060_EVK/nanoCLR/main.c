@@ -35,6 +35,7 @@ int main(void)
     BOARD_InitBootPeripherals();
     BOARD_InitSEMC();
     BOARD_USDHCClockConfiguration();
+    BOARD_InitRTC();
     //SCB_DisableDCache();
 
     for (volatile uint32_t i = 0; i < 100000000; i++)
