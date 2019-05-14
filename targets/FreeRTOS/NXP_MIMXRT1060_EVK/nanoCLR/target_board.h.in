@@ -13,6 +13,44 @@
 
 #include <target_common.h>
 
+// enable SPIFFS
+#define NF_FEATURE_USE_SPIFFS @NF_FEATURE_USE_SPIFFS_OPTION@
+
+// set preference to enable (or not) the RTC subsystem
+#define HAL_USE_RTC @HAL_USE_RTC_OPTION@
+
+// takes care of enabling the HAL subsystems required for API options
+
+// enable SPI
+#define HAL_USE_SPI @HAL_USE_SPI_OPTION@
+
+// enable I2C
+#define HAL_USE_I2C @HAL_USE_I2C_OPTION@
+
+// enable PWM
+#define HAL_USE_PWM @HAL_USE_PWM_OPTION@
+
+// enable ADC
+#define HAL_USE_ADC @HAL_USE_ADC_OPTION@
+
+// enable UART subsystem
+#define HAL_USE_UART @HAL_USE_UART_OPTION@
+
+// set when networking is enabled
+#define HAL_USE_MAC @HAL_USE_MAC_OPTION@
+
+// set when filesystem is enabled
+#define HAL_USE_SDC @HAL_USE_SDC_OPTION@
+
+// set when watchod is enabled
+#define HAL_USE_WDG @HAL_USE_WDG_OPTION@
+
+// enable CAN
+#define HAL_USE_CAN @HAL_USE_CAN_OPTION@
+
+// enable USB MSD (from ChibiOS Contrib)
+ #define HAL_USBH_USE_MSD     @HAL_USBH_USE_MSDC_OPTION@
+
 #define OEMSYSTEMINFOSTRING "nanoCLR running @ @FREERTOS_BOARD@ built with FREERTOS @FREERTOS_VERSION@"
 
 #endif /* _TARGET_BOARD_NANOCLR_H_ */
