@@ -204,7 +204,9 @@ bool SystemState_Query(SYSTEM_STATE_type state)
 {
     GLOBAL_LOCK();
 
-    return SystemState_QueryNoLock(state);
-
+    bool systemStateCopy = SystemState_QueryNoLock(state);
+    
     GLOBAL_UNLOCK();
+
+    return systemStateCopy;
 }
