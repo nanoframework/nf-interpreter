@@ -59,34 +59,8 @@ if(NO_CHIBIOS_SOURCE)
     endif()
 
     # ChibiOS version
-    set(CHIBIOS_VERSION_EMPTY TRUE)
-
-    # check if build was requested with a specifc ChibiOS version
-    if(DEFINED CHIBIOS_VERSION)
-        if(NOT "${CHIBIOS_VERSION}" STREQUAL "")
-            set(CHIBIOS_VERSION_EMPTY FALSE)
-        endif()
-    endif()
-
-    if(CHIBIOS_VERSION_EMPTY)
-        # no ChibiOS version actualy specified, must be empty which is fine, we'll grab the code from the stable_18.2.x branch
-        message(STATUS "RTOS is: CHIBIOS (latest available code from stable_19.1.x)")
-        set(CHIBIOS_GIT_TAG "stable_19.1.x")
-    else()
-        message(STATUS "RTOS is: ChibiRTOS v${CHIBIOS_VERSION}")
-
-        # branch naming follows the pattern 'stable_18.2.x'
-        # need to extract the major and minor numbers from the CHIBIOS_VERSION parameter
-        # find 1st dot in version number
-        string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX)
-        # find 2nd dot in version number
-        string(FIND ${CHIBIOS_VERSION} "." CHIBIOS_VERSION_DOT_INDEX REVERSE)
-        # extract 'short' version
-        string(SUBSTRING ${CHIBIOS_VERSION} 0 ${CHIBIOS_VERSION_DOT_INDEX} CHIBIOS_SHORT_VERSION)
-
-        # set branch name
-        set(CHIBIOS_GIT_TAG "stable_${CHIBIOS_SHORT_VERSION}.x")
-    endif()
+    set(CHIBIOS_GIT_TAG "stable_19.1.x")
+    message(STATUS "RTOS is: CHIBIOS (latest available code from ${CHIBIOS_GIT_TAG})")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
