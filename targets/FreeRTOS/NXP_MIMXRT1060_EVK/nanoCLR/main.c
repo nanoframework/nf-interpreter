@@ -37,11 +37,6 @@ int main(void)
     BOARD_USDHCClockConfiguration();
     //SCB_DisableDCache();
 
-    for (volatile uint32_t i = 0; i < 100000000; i++)
-    {
-        __asm("nop");
-    }
-
     iMXRTFlexSPIDriver_InitializeDevice(NULL);
     
     xTaskCreate(ReceiverThread, "ReceiverThread", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
