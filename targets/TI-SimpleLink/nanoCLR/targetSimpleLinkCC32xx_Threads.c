@@ -766,7 +766,7 @@ void * mainThread(void *arg)
 
     // receiver thread
     pthread_attr_init(&threadAttributes);
-    priorityParams.sched_priority = NF_TASK_PRIORITY;
+    priorityParams.sched_priority = NF_TASK_PRIORITY + 1;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
     retc |= pthread_attr_setstacksize(&threadAttributes, 2048);
     if (retc != 0)

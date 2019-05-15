@@ -16,8 +16,6 @@ HAL_DblLinkedList<HAL_CONTINUATION> g_HAL_Completion_List;
 void HAL_COMPLETION::Execute()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    // TODO check if we need this 
-    //ASSERT_IRQ_MUST_BE_OFF();
 
 #if defined(_DEBUG)
     this->Start_RTC_Ticks = 0;
@@ -48,33 +46,33 @@ void HAL_COMPLETION::InitializeList()
 void HAL_COMPLETION::DequeueAndExec()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    GLOBAL_LOCK(irq);
 
-    HAL_COMPLETION* ptr     = (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode();
-    HAL_COMPLETION* ptrNext = (HAL_COMPLETION*)ptr->Next();
+    NANOCLR_LOCKED_ACCESS_DECLARATION(HAL_COMPLETION*, ptr);
+    NANOCLR_LOCKED_ACCESS_DECLARATION(HAL_COMPLETION*, ptrNext);
+
+    NANOCLR_LOCKED_ACCESS_EXECUTE(ptr, (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode());
+    NANOCLR_LOCKED_ACCESS_EXECUTE(ptrNext, (HAL_COMPLETION*)(NANOCLR_LOCKED_ACCESS_GET(ptr))->Next());
 
     // waitforevents does not have an associated completion, therefore we need to verify
     // than their is a next completion and that the current one has expired.
-    if(ptrNext)
+    if(NANOCLR_LOCKED_ACCESS_GET(ptrNext))
     {
         Events_Set(SYSTEM_EVENT_FLAG_SYSTEM_TIMER);
 
-        ptr->Unlink();
+        NANOCLR_LOCKED_ACCESS_GET(ptr)->Unlink();
 
         //
         // In case there's no other request to serve, set the next interrupt to be 356 years since last powerup (@25kHz).
         //
-        Time_SetCompare( ptrNext->Next() ? ptrNext->EventTimeTicks : HAL_COMPLETION_IDLE_VALUE );
+        Time_SetCompare( NANOCLR_LOCKED_ACCESS_GET(ptrNext)->Next() ? NANOCLR_LOCKED_ACCESS_GET(ptrNext)->EventTimeTicks : HAL_COMPLETION_IDLE_VALUE );
 
-#if defined(_DEBUG)
-        ptr->EventTimeTicks = 0;
-#endif  // defined(_DEBUG)
+  #if defined(_DEBUG)
+        NANOCLR_LOCKED_ACCESS_GET(ptr)->EventTimeTicks = 0;
+  #endif  // defined(_DEBUG)
 
-        // let the ISR turn on interrupts, if it needs to
-        ptr->Execute();
+        //// let the ISR turn on interrupts, if it needs to
+        NANOCLR_LOCKED_ACCESS_GET(ptr)->Execute();
     }
-
-    GLOBAL_UNLOCK(irq);
 }
 
 //--//
@@ -83,47 +81,41 @@ void HAL_COMPLETION::EnqueueTicks( uint64_t eventTimeTicks )
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
     ASSERT(eventTimeTicks != 0);
-    GLOBAL_LOCK(irq);
+
+    NANOCLR_LOCKED_ACCESS_DECLARATION(HAL_COMPLETION*, ptr);
+    NANOCLR_LOCKED_ACCESS_DECLARATION(HAL_COMPLETION*, ptrNext);
 
     this->EventTimeTicks  = eventTimeTicks;
 #if defined(_DEBUG)
     this->Start_RTC_Ticks = HAL_Time_CurrentSysTicks();
 #endif
 
-    HAL_COMPLETION* ptr     = (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode();
-    HAL_COMPLETION* ptrNext;
+    NANOCLR_LOCKED_ACCESS_EXECUTE(ptr, (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode());
 
-    for(;(ptrNext = (HAL_COMPLETION*)ptr->Next()); ptr = ptrNext)
+    do
     {
-        if(eventTimeTicks < ptr->EventTimeTicks) break;
-    }
+        NANOCLR_LOCKED_ACCESS_EXECUTE(ptrNext, (HAL_COMPLETION*)(NANOCLR_LOCKED_ACCESS_GET(ptr))->Next());
 
-    g_HAL_Completion_List.InsertBeforeNode( ptr, this );
+        if( eventTimeTicks < NANOCLR_LOCKED_ACCESS_GET(ptr)->EventTimeTicks )
+        {
+            break;
+        }
+
+        NANOCLR_LOCKED_ACCESS_GET(ptr) = NANOCLR_LOCKED_ACCESS_GET(ptrNext);
+    }
+    while(NANOCLR_LOCKED_ACCESS_GET(ptr));
     
-    if(this == g_HAL_Completion_List.FirstNode())
+
+    GLOBAL_LOCK();
+    g_HAL_Completion_List.InsertBeforeNode( NANOCLR_LOCKED_ACCESS_GET(ptr), this );
+    GLOBAL_UNLOCK();
+
+    NANOCLR_LOCKED_ACCESS_EXECUTE(ptr, (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode());
+
+    if(this == NANOCLR_LOCKED_ACCESS_GET(ptr))
     {
         Time_SetCompare( eventTimeTicks );
     }
-
-    GLOBAL_UNLOCK(irq);
-}
-
-// the argument to enqueue is in milliseconds as we don't need anything bellow this in a reasonale use case scenario
-void HAL_COMPLETION::EnqueueDelta64( uint64_t milliSecondsFromNow )
-{
-    NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    // grab time first to be closest to now as possible from when this function was called
-    uint64_t now            = HAL_Time_CurrentSysTicks();
-    uint64_t eventTimeTicks = CPU_MillisecondsToTicks( milliSecondsFromNow * 1000);
-
-    EnqueueTicks( now + eventTimeTicks );
-}
-
-// the argument to enqueue is in miliseconds as we don't need anything bellow this in a reasonale use case scenario
-void HAL_COMPLETION::EnqueueDelta( uint32_t milliSecondsFromNow )
-{
-    NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    EnqueueDelta64( (uint64_t)milliSecondsFromNow );
 }
 
 //--//
@@ -131,9 +123,10 @@ void HAL_COMPLETION::EnqueueDelta( uint32_t milliSecondsFromNow )
 void HAL_COMPLETION::Abort()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    GLOBAL_LOCK(irq);
 
-    HAL_COMPLETION* firstNode = (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode();
+    NANOCLR_LOCKED_ACCESS_DECLARATION(HAL_COMPLETION*, firstNode);
+
+    NANOCLR_LOCKED_ACCESS_EXECUTE(firstNode, (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode());
 
     this->Unlink();
 
@@ -141,11 +134,15 @@ void HAL_COMPLETION::Abort()
     this->Start_RTC_Ticks = 0;
 #endif
 
-    if(firstNode == this)
+    if(NANOCLR_LOCKED_ACCESS_GET(firstNode) == this)
     {
         uint64_t nextTicks;
 
-        if(g_HAL_Completion_List.IsEmpty())
+        GLOBAL_LOCK();
+        bool completionListIsEmpty = g_HAL_Completion_List.IsEmpty();
+        GLOBAL_UNLOCK();
+
+        if(completionListIsEmpty)
         {
             //
             // In case there's no other request to serve, set the next interrupt to be 356 years since last power up (@25kHz).
@@ -154,15 +151,14 @@ void HAL_COMPLETION::Abort()
         }
         else
         {
-            firstNode = (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode();
+            NANOCLR_LOCKED_ACCESS_EXECUTE(firstNode, (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode());
+            //firstNode = (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode();
 
-            nextTicks = firstNode->EventTimeTicks;
+            nextTicks = NANOCLR_LOCKED_ACCESS_GET(firstNode)->EventTimeTicks;
         }
 
         Time_SetCompare( nextTicks );
     }
-
-    GLOBAL_UNLOCK(irq);
 }
 
 //--//
@@ -174,8 +170,6 @@ void HAL_COMPLETION::WaitForInterrupts(uint64_t expireTimeInTicks, uint32_t slee
     const int setCompare   = 1;
     const int resetCompare = 2;
     const int nilCompare   = 4;
-
-    ASSERT_IRQ_MUST_BE_OFF();
 
     HAL_COMPLETION* ptr = (HAL_COMPLETION*)g_HAL_Completion_List.FirstNode();
     int             state;
@@ -212,13 +206,14 @@ void HAL_COMPLETION::WaitForInterrupts(uint64_t expireTimeInTicks, uint32_t slee
 void HAL_COMPLETION::Uninitialize()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    GLOBAL_LOCK(irq);
     
     HAL_COMPLETION* ptr;
 
     while(TRUE)
     {
+        GLOBAL_LOCK();
         ptr = (HAL_COMPLETION*)g_HAL_Completion_List.ExtractFirstNode();
+        GLOBAL_UNLOCK();
 
         if(!ptr) 
         {
@@ -226,6 +221,4 @@ void HAL_COMPLETION::Uninitialize()
         }
         
     }
-
-    GLOBAL_UNLOCK(irq);
 }

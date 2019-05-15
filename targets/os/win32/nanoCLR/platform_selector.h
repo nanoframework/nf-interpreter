@@ -17,21 +17,6 @@
 //#define FAT_FS__DO_NOT_UPDATE_FILE_ACCESS_TIME  1
 #define FAT_FS__CACHE_FLUSH_TIMEOUT_USEC        (5*1000*1000)
 
-// UNDONE: FIXME: nanoHAL.h
-//#define GLOBAL_LOCK(x)             SmartPtr_IRQ x
-////#define DISABLE_INTERRUPTS()       SmartPtr_IRQ::ForceDisabled()
-////#define ENABLE_INTERRUPTS()        SmartPtr_IRQ::ForceEnabled()
-////#define INTERRUPTS_ENABLED_STATE() SmartPtr_IRQ::GetState()
-//#define GLOBAL_LOCK_SOCKETS(x)     SmartPtr_IRQ x
-//
-//#if defined(_DEBUG)
-//#define ASSERT_IRQ_MUST_BE_OFF()   ASSERT( HAL_Windows_HasGlobalLock())
-//#define ASSERT_IRQ_MUST_BE_ON()    ASSERT(!HAL_Windows_HasGlobalLock())
-//#else
-//#define ASSERT_IRQ_MUST_BE_OFF()
-//#define ASSERT_IRQ_MUST_BE_ON()
-//#endif
-
 //
 // macros
 //

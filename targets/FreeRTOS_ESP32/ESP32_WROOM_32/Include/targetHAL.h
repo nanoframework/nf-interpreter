@@ -9,10 +9,10 @@
 #include <target_board.h>
 #include <esp32_os.h>
 
+// global mutex protecting the internal state of the interpreter, including event flags
 extern portMUX_TYPE globalLockMutex;
-#define GLOBAL_LOCK(x)              portENTER_CRITICAL(&globalLockMutex);
-#define GLOBAL_UNLOCK(x)            portEXIT_CRITICAL(&globalLockMutex);
-#define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
+#define GLOBAL_LOCK()               portENTER_CRITICAL(&globalLockMutex);
+#define GLOBAL_UNLOCK()             portEXIT_CRITICAL(&globalLockMutex);
 
 // platform dependent delay
 #define PLATFORM_DELAY(milliSecs)   vTaskDelay(milliSecs);

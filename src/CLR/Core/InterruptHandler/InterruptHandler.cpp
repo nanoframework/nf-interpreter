@@ -80,7 +80,7 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
         HalInterruptRecord* rec;
 
         {
-            GLOBAL_LOCK(irq1);
+            GLOBAL_LOCK();
 
             rec = m_interruptData.m_HalQueue.Peek();
 
@@ -100,7 +100,7 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
         m_interruptData.m_applicationQueue.LinkAtBack( queueRec ); ++m_interruptData.m_queuedInterrupts;
 
         {
-            GLOBAL_LOCK(irq2);
+            GLOBAL_LOCK();
 
             m_interruptData.m_HalQueue.Pop();
 
@@ -119,7 +119,7 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
     {
         // if there is no memory left discard all interrupts to avoid getting into a death spiral of OOM exceptions
         {
-            GLOBAL_LOCK(irq3);
+            GLOBAL_LOCK();
 
             while(!m_interruptData.m_HalQueue.IsEmpty())
             {
