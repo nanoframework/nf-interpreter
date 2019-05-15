@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 The nanoFramework project contributors
+# Copyright (c) 2019 The nanoFramework project contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -13,8 +13,6 @@ if(RTOS_CHIBIOS_CHECK)
     set( PROJECT_COMMON_PATH "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
 elseif(RTOS_FREERTOS_CHECK)
     list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FatFS_Source/source")
-    list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP_MIMXRT1060_EVK/include")
-
     set( PROJECT_COMMON_PATH "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP_MIMXRT1060_EVK/common")
 endif()
 
