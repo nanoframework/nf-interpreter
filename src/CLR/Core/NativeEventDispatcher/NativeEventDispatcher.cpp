@@ -141,21 +141,26 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
 {
     // Since we are going to analyze and update the queue we need to disable interrupts.
     // Interrupt service routines add records to this queue.
-    //GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
     CLR_UINT32 elemCount = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.NumberOfElements();
-    
+    GLOBAL_UNLOCK();
+
     // For all elements in the queue
     for ( CLR_UINT32 curElem = 0; curElem < elemCount; curElem++ )
     {
         // Retrieve the element ( actually remove it from the queue )
+        GLOBAL_LOCK();
         CLR_HW_Hardware::HalInterruptRecord* testRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Pop();
+        GLOBAL_UNLOCK();
         
         // Check if context of this record points to the instance of CLR_RT_HeapBlock_NativeEventDispatcher
         // If the "context" is the same as "this", then we skip the "Push" and record is removed.
         if ( testRec->m_context != this )
         {
             // If it is different from this instance of CLR_RT_HeapBlock_NativeEventDispatcher, thin push it back
+            GLOBAL_LOCK();
             CLR_HW_Hardware::HalInterruptRecord* newRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Push();
+            GLOBAL_UNLOCK();
 
             newRec->AssignFrom( *testRec );
         }
@@ -165,8 +170,6 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
 void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue( uint32_t data1, uint32_t data2 )
 {
     NATIVE_PROFILE_CLR_IOPORT();
-
-    ASSERT_IRQ_MUST_BE_OFF();
 
     CLR_HW_Hardware::HalInterruptRecord* rec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Push();
 

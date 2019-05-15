@@ -10,9 +10,8 @@
 #include <Board.h>
 #include <gpio.h>
 
-#define GLOBAL_LOCK(x)              portENTER_CRITICAL();
-#define GLOBAL_UNLOCK(x)            portEXIT_CRITICAL();
-#define ASSERT_IRQ_MUST_BE_OFF()   // TODO need to determine if this needs implementation
+#define GLOBAL_LOCK()              vPortEnterCritical();
+#define GLOBAL_UNLOCK()            vPortExitCritical();
 
 // platform dependent delay
 #define PLATFORM_DELAY(milliSecs)   vTaskDelay(milliSecs);

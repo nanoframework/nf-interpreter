@@ -420,7 +420,7 @@ typedef HRESULT (*CleanupInterruptsProc)( CLR_RT_HeapBlock_NativeEventDispatcher
 **  static void ISR_TestProc( CLR_RT_HeapBlock_NativeEventDispatcher *pContext )
 **
 **  {
-**      GLOBAL_LOCK(irq);
+**      GLOBAL_LOCK();
 **      // To do - Initialize userData1 and userData2 to userData.
 **      unsigned int userData1;
 **      unsigned int userData2;

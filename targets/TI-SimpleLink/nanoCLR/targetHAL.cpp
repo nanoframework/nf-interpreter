@@ -127,27 +127,27 @@ bool SystemState_QueryNoLock(SYSTEM_STATE_type state)
 
 void SystemState_Set(SYSTEM_STATE_type state)
 {
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
 
     SystemState_SetNoLock(state);
 
-    GLOBAL_UNLOCK(irq);
+    GLOBAL_UNLOCK();
 }
 
 void SystemState_Clear(SYSTEM_STATE_type state)
 {
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
 
     SystemState_ClearNoLock(state );
 
-    GLOBAL_UNLOCK(irq);
+    GLOBAL_UNLOCK();
 }
 
 bool SystemState_Query(SYSTEM_STATE_type state)
 {
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
 
     return SystemState_QueryNoLock(state);
 
-    GLOBAL_UNLOCK(irq);
+    GLOBAL_UNLOCK();
 }

@@ -41,20 +41,21 @@ void Time_SetCompare ( uint64_t compareValueTicks )
 {
     if(compareValueTicks == 0)
     {
-        // compare value is 0 so dequeue and schedule immediately 
-        NextEventTimer_Callback(nextEventCallbackDummyArg);
+        // compare value is 0 so dequeue and schedule immediately
+        // can't call chVTSet with 'immidiate delay value', so use value 1 to get it executed ASAP
+        chVTSet(&nextEventTimer, 1, NextEventTimer_Callback, nextEventCallbackDummyArg);
     }
     else if(compareValueTicks == HAL_COMPLETION_IDLE_VALUE)
     {
         // wait for infinity, don't need to do anything here
-        return;
     }
     else
     {
         if (HAL_Time_CurrentTime() >= compareValueTicks) 
         { 
-            // already missed the event, dequeue and execute immediately 
-            HAL_COMPLETION::DequeueAndExec();
+            // already missed the event, dequeue and execute immediately
+            // can't call chVTSet with 'immidiate delay value', so use value 1 to get it executed ASAP
+            chVTSet(&nextEventTimer, 1, NextEventTimer_Callback, nextEventCallbackDummyArg);
         }
         else
         {

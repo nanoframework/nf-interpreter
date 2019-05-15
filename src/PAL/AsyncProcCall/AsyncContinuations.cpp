@@ -28,50 +28,54 @@ void HAL_CONTINUATION::Enqueue()
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
     if(this->GetEntryPoint() != NULL)
     {
-        GLOBAL_LOCK(irq);
+        GLOBAL_LOCK();
 
         g_HAL_Continuation_List.LinkAtBack( this );
 
-        GLOBAL_UNLOCK(irq);
+        GLOBAL_UNLOCK();
     }
 }
 
 void HAL_CONTINUATION::Abort()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
 
     this->Unlink();
 
-    GLOBAL_UNLOCK(irq);
+    GLOBAL_UNLOCK();
 }
 
 bool HAL_CONTINUATION::Dequeue_And_Execute()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    GLOBAL_LOCK(irq);
-    
+
+    // use this as the return value
+    // helpfull to make the call to release the global mutext happens 
+    bool result;
+
+    GLOBAL_LOCK();
     HAL_CONTINUATION* ptr = g_HAL_Continuation_List.ExtractFirstNode();
+    GLOBAL_UNLOCK();
+
     if(ptr == NULL )
     {
-        GLOBAL_UNLOCK(irq);
-        return FALSE;
+        result = false;
     }
-    
-    SystemState_SetNoLock( SYSTEM_STATE_NO_CONTINUATIONS );
+    else
+    {
+        //SystemState_SetNoLock( SYSTEM_STATE_NO_CONTINUATIONS );
 
-    HAL_CALLBACK call = ptr->Callback;
+        HAL_CALLBACK call = ptr->Callback;
 
-    GLOBAL_UNLOCK(irq);
+        call.Execute();
 
-    call.Execute();
+        //SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS );   // nestable
 
-    GLOBAL_LOCK(irq);
+        result = true;
+    }
 
-    SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS );   // nestable
-
-    GLOBAL_UNLOCK(irq);
-    return TRUE;
+    return result;
 }
 
 void HAL_CONTINUATION::InitializeCallback( HAL_CALLBACK_FPN entryPoint, void* argument )
@@ -85,7 +89,7 @@ void HAL_CONTINUATION::InitializeCallback( HAL_CALLBACK_FPN entryPoint, void* ar
 void HAL_CONTINUATION::Uninitialize()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
     
     HAL_CONTINUATION* ptr;
 
@@ -99,5 +103,5 @@ void HAL_CONTINUATION::Uninitialize()
         }
     }
     
-    GLOBAL_UNLOCK(irq);
+    GLOBAL_UNLOCK();
 }
