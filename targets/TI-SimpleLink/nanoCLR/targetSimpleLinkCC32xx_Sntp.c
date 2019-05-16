@@ -35,7 +35,7 @@ void sntp_init(void)
         pthread_attr_init(&threadAttributes);
         priorityParams.sched_priority = 1;
         retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
-        retc |= pthread_attr_setstacksize(&threadAttributes, 2048);
+        retc |= pthread_attr_setstacksize(&threadAttributes, 1024);
         if (retc != 0)
         {
             // failed to set attributes
@@ -324,6 +324,12 @@ void* SntpWorkingThread(void* argument)
     timeval.tv_sec = NTP_REPLY_WAIT_TIME;
     timeval.tv_usec = 0;
 
+    // delay 1st request, if configured
+    if(SNTP_STARTUP_DELAY > 0)
+    {
+        sleep(SNTP_STARTUP_DELAY);
+    }
+
     while(1)
     {
         // Get the time use the SNTP_ServersList
@@ -333,6 +339,9 @@ void* SntpWorkingThread(void* argument)
         {
             // sleep before retrying
             sleep(SNTP_RETRY_TIMEOUT);
+
+            // retry, starting over
+            continue;
         }
 
         currentTime = ntpTimeStamp >> 32;
