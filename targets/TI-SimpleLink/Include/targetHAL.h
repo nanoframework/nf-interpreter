@@ -9,12 +9,13 @@
 #include <target_board.h>
 #include <Board.h>
 #include <gpio.h>
+#include <ti/drivers/dpl/ClockP.h>
 
 #define GLOBAL_LOCK()              vPortEnterCritical();
 #define GLOBAL_UNLOCK()            vPortExitCritical();
 
 // platform dependent delay
-#define PLATFORM_DELAY(milliSecs)   vTaskDelay(milliSecs);
+#define PLATFORM_DELAY(milliSecs)   ClockP_usleep(milliSecs * 1000);
 
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)   
