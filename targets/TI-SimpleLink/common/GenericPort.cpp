@@ -3,27 +3,30 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nanoCLR_Types.h"
-#include "nanoCLR_Runtime.h"
+#include <nanoCLR_Types.h>
+#include <nanoCLR_Runtime.h>
+#include <ti/drivers/UART.h>
+
+extern UART_Handle uart;
 
 uint32_t GenericPort_Write( int portNum, const char* data, size_t size )
 {
     (void)portNum;
-    if (g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions == CLR_RT_ExecutionEngine::c_fDebugger_StateProgramRunning)
-    {
-        char* p = (char*)data;
-        int counter = 0;
 
-        // send characters directly to the trace port
-        while(*p != '\0' || counter < (int)size)
-        {
-            // ets_printf( "%c", *p++); 
-            counter++;
-        }
-        return counter;
+    // developer note:
+    // Outputing to board UART can be done only if there is no debugger attached, because it uses the same UART.
+
+    if( (g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions & CLR_RT_ExecutionEngine::c_fDebugger_Enabled) == CLR_RT_ExecutionEngine::c_fDebugger_Enabled)
+    {
+        // debugger port is in use, don't output to UART
     }
     else
     {
-        return (uint32_t)size;
+        // send characters directly to the UART port
+        UART_write(uart, data, size);
+
+        return size;
     }
+
+    return (uint32_t)size;
 }
