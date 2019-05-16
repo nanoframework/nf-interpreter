@@ -22,11 +22,6 @@
 
 #define SL_STOP_TIMEOUT         (200)
 
-#define UART_PRINT Report
-#define DBG_PRINT  Report
-// #define ERR_PRINT(x) Report("Error [%d] at line [%d] in function [%s]  \n\r",\
-//                                                                 x, __LINE__, \
-//                                                                  __FUNCTION__)
 #define ERR_PRINT(x) 
 
 /* check the error code and handle it */
