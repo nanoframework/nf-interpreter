@@ -33,7 +33,7 @@
 #define PLATFORM_HAS_RNG       TRUE
 /////////////////////////////////////
 
-#define OEMSYSTEMINFOSTRING "nanoCLR running @ @TI_BOARD@ built with TI SL CC32xx SDK v2.40.01.01"
+#define OEMSYSTEMINFOSTRING "nanoCLR running @ @TI_BOARD@ built with TI SL CC32xx SDK v3.10.00.04"
 
 /////////////////////////////////////
 //#define EVENTS_HEART_BEAT       GPIO_toggle(Board_GPIO_LED0)

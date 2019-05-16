@@ -49,8 +49,8 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
             message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
         endif()
 
-        message(STATUS "TI SimpleLink CC32xx SDK (latest available code from v2.40.02.00")
-        set(TI_SL_CC32xx_SDK_TAG "2.40.02.00")
+        message(STATUS "TI SimpleLink CC32xx SDK (latest available code from v3.10.00.04")
+        set(TI_SL_CC32xx_SDK_TAG "3.10.00.04")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
