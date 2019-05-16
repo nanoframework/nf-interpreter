@@ -21,6 +21,8 @@
 
 
 #define SL_STOP_TIMEOUT         (200)
+#define NF_TASK_PRIORITY        (5)
+
 
 #define ERR_PRINT(x) 
 
