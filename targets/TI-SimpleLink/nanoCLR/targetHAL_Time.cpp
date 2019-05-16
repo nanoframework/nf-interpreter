@@ -15,16 +15,15 @@
 // Returns the current date time from the RTC 
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-    SYSTEMTIME st; 
- 
-    //struct timeval tv;
+    SYSTEMTIME st;
+    struct timespec tspec;
 
-    //gettimeofday(&tv, NULL);
+    clock_gettime(CLOCK_REALTIME, &tspec);
 
     // Convert from Unix time(year since 1900) to SYSTEMTIME(Years since 1601)
-    //int64_t time = ((int64_t)tv.tv_sec * (int64_t)TIME_CONVERSION__TO_SECONDS) + TIME_UNIX_EPOCH_AS_TICKS;
+    int64_t time = ((int64_t)tspec.tv_sec * (int64_t)TIME_CONVERSION__TO_SECONDS) + TIME_UNIX_EPOCH_AS_TICKS;
 
-    //HAL_Time_ToSystemTime(time, &st );
+    HAL_Time_ToSystemTime(time, &st );
 
     // zero 'time' fields if date part only is required
     if(datePartOnly)
@@ -41,10 +40,10 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 void HAL_Time_SetUtcTime(uint64_t utcTime)
 {
     SYSTEMTIME systemTime;
+    struct tm newTime;
+    struct timespec tspec;
 
     HAL_Time_ToSystemTime(utcTime, &systemTime);
-
-    struct tm newTime;
 
     newTime.tm_year = systemTime.wYear - 1900;      // years since 1900
     newTime.tm_mon = systemTime.wMonth - 1;         // months since January 0-11
@@ -55,8 +54,10 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
     newTime.tm_sec = (uint32_t)systemTime.wSecond;  // seconds after the minute	 0-59
 
     time_t t = mktime(&newTime);
-    //struct timeval now = { .tv_sec = t, .tv_usec = 0 };
-    //settimeofday(&now, NULL);
+    tspec.tv_sec = t;
+    tspec.tv_nsec = 0;
+
+    clock_settime(CLOCK_REALTIME, &tspec);
 }
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
