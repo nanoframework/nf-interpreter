@@ -5,8 +5,11 @@
 
 #include <ti/drivers/UART.h>
 #include <board.h>
+#include <ti/drivers/dpl/SemaphoreP.h>
 
 extern UART_Handle uart;
+
+SemaphoreP_Handle uartMutex;
 
 // Need to have calls to these two functions in C code.
 // Because they are called only on asm code, GCC linker with LTO option thinks they are not used and just removes them.
@@ -41,5 +44,24 @@ void ConfigUART()
     {
         // UART_open() failed
         while (1);
+    }
+
+    uartMutex = SemaphoreP_createBinary(1);
+    if (uartMutex == NULL)
+    {
+        // failed to create semaphore
+        while (1);
     }    
+}
+
+void __error__(char *pcFilename, unsigned long ulLine)
+{
+  //
+  // Something horrible happened! You need to look
+  // at file "pcFilename" at line "ulLine" to see
+  // what error is being reported.
+  //
+  while(1)
+  {
+  }
 }

@@ -49,6 +49,30 @@
 
 #endif  // !defined(BUILD_RTM)
 
+// map TI SimpleLink calls to UART output to nanoFramework API
+// this is valid only for debug buils
+// release and RTM build don't call these
+#if defined(BUILD_RTM)
+
+#define UART_PRINT(x,...)
+#define INFO_PRINT(x,...)
+
+#else
+
+#if defined(DEBUG) || defined(_DEBUG)
+
+#define UART_PRINT      DebuggerPort_WriteProxy
+#define INFO_PRINT      DebuggerPort_WriteProxy
+
+#else
+
+#define UART_PRINT(x,...)
+#define INFO_PRINT(x,...)
+
+#endif // DEBUG
+
+#endif // defined(BUILD_RTM)
+
 #define NANOCLR_STOP() HARD_BREAKPOINT()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
