@@ -48,7 +48,6 @@ extern void ConfigUART();
 #define SL_STOP_TIMEOUT         (200)
 
 #define SPAWN_TASK_PRIORITY                 (9)
-#define NF_TASK_PRIORITY                    (5)
 #define TASK_STACK_SIZE                     (2048)
 
 #define SLNET_IF_WIFI_PRIO                  (5)
@@ -144,9 +143,11 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
             
             if(SL_WLAN_DISCONNECT_USER_INITIATED == pEventData->ReasonCode)
             {
+                UART_PRINT("[WLAN EVENT]Device disconnected from the AP");
             }
             else
             {
+                UART_PRINT("[WLAN ERROR]Device disconnected from the AP");
             }
             // memset(nF_ControlBlock.connectionSSID, 0,
             //        sizeof(nF_ControlBlock.connectionSSID));
@@ -159,24 +160,37 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
 
         case SL_WLAN_EVENT_STA_ADDED:
         {
+            UART_PRINT(
+                "[WLAN EVENT] External Station connected to SimpleLink AP\r\n");
+
+            UART_PRINT("[WLAN EVENT] STA BSSID: %02x:%02x:%02x:%02x:%02x:%02x\r\n",
+                    pWlanEvent->Data.STAAdded.Mac[0],
+                    pWlanEvent->Data.STAAdded.Mac[1],
+                    pWlanEvent->Data.STAAdded.Mac[2],
+                    pWlanEvent->Data.STAAdded.Mac[3],
+                    pWlanEvent->Data.STAAdded.Mac[4],
+                    pWlanEvent->Data.STAAdded.Mac[5]);
         }
         break;
 
         case SL_WLAN_EVENT_STA_REMOVED:
         {
+            UART_PRINT(
+                "[WLAN EVENT] External Station disconnected from SimpleLink AP\r\n");
         }
         break;
 
         case SL_WLAN_EVENT_PROVISIONING_PROFILE_ADDED:
         {
+            UART_PRINT("[WLAN EVENT] Profile Added\r\n");
         }
         break;
 
         case SL_WLAN_EVENT_PROVISIONING_STATUS:
         {
-            uint16_t Status =
+            uint16_t status =
                 pWlanEvent->Data.ProvisioningStatus.ProvisioningStatus;
-            switch(Status)
+            switch(status)
             {
                 case SL_WLAN_PROVISIONING_GENERAL_ERROR:
                 case SL_WLAN_PROVISIONING_ERROR_ABORT:
@@ -189,24 +203,27 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
                 case SL_WLAN_PROVISIONING_ERROR_ABORT_HTTP_SERVER_DISABLED:
                 case SL_WLAN_PROVISIONING_ERROR_ABORT_PROFILE_LIST_FULL:
                 {
+                    UART_PRINT("[WLAN EVENT] Provisioning Error status=%d\r\n", status);
                     // SignalProvisioningEvent(PrvnEvent_StartFailed);
                 }
                 break;
 
                 case SL_WLAN_PROVISIONING_ERROR_ABORT_PROVISIONING_ALREADY_STARTED:
                 {
-
+                    UART_PRINT("[WLAN EVENT] Provisioning already started");
                 }
                 break;
 
                 case SL_WLAN_PROVISIONING_CONFIRMATION_STATUS_FAIL_NETWORK_NOT_FOUND:
                 {
+                    UART_PRINT("[WLAN EVENT] Confirmation fail: network not found\r\n");
                     // SignalProvisioningEvent(PrvnEvent_ConfirmationFailed);
                 }
                 break;
 
                 case SL_WLAN_PROVISIONING_CONFIRMATION_STATUS_FAIL_CONNECTION_FAILED:
                 {
+                    UART_PRINT("[WLAN EVENT] Confirmation fail: Connection failed\r\n");
                     // SignalProvisioningEvent(PrvnEvent_ConfirmationFailed);
                 }
                 break;
@@ -214,25 +231,33 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
                 case
                     SL_WLAN_PROVISIONING_CONFIRMATION_STATUS_CONNECTION_SUCCESS_IP_NOT_ACQUIRED
                     :
-                {
-                    // SignalProvisioningEvent(PrvnEvent_ConfirmationFailed);
-                }
+                    {
+                        UART_PRINT(
+                            "[WLAN EVENT] Confirmation fail: IP address not acquired\r\n");
+                        // SignalProvisioningEvent(PrvnEvent_ConfirmationFailed);
+                    }
                 break;
 
                 case SL_WLAN_PROVISIONING_CONFIRMATION_STATUS_SUCCESS_FEEDBACK_FAILED:
                 {
+                    UART_PRINT(
+                        "[WLAN EVENT] Connection Success "
+                        "(feedback to Smartphone app failed)\r\n");                    
                     // SignalProvisioningEvent(PrvnEvent_ConfirmationFailed);
                 }
                 break;
 
                 case SL_WLAN_PROVISIONING_CONFIRMATION_STATUS_SUCCESS:
                 {
+                    UART_PRINT("[WLAN EVENT] Confirmation Success!\r\n");
                     // SignalProvisioningEvent(PrvnEvent_ConfirmationSuccess);
                 }
                 break;
 
                 case SL_WLAN_PROVISIONING_AUTO_STARTED:
                 {
+                    UART_PRINT("[WLAN EVENT] Auto-Provisioning Started\r\n");
+
                     // stop auto provisioning - 
                     // may trigger in case of returning to default
                     // SignalProvisioningEvent(PrvnEvent_Stopped);
@@ -243,9 +268,14 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
                 {
                     if(ROLE_STA == pWlanEvent->Data.ProvisioningStatus.Role)
                     {
+                        UART_PRINT(" [WLAN EVENT] - WLAN Connection Status:%d\r\n",
+                           pWlanEvent->Data.ProvisioningStatus.WlanStatus);
+
                         if(SL_WLAN_STATUS_CONNECTED ==
                         pWlanEvent->Data.ProvisioningStatus.WlanStatus)
                         {
+                            UART_PRINT(" [WLAN EVENT] - Connected to SSID:%s\r\n",
+                                    pWlanEvent->Data.ProvisioningStatus.Ssid);
                             // memcpy (nF_ControlBlock.connectionSSID,
                             //         pWlanEvent->Data.ProvisioningStatus.Ssid,
                             //         pWlanEvent->Data.ProvisioningStatus.Ssidlen);
@@ -282,6 +312,7 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
 
                 case SL_WLAN_PROVISIONING_SMART_CONFIG_SYNCED:
                 {
+                    UART_PRINT("[WLAN EVENT] Smart Config Synced!\r\n");
                 }
                 break;
 
@@ -295,6 +326,8 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
                                 AppStatusBits_Ipv6lAcquired);
                     CLR_STATUS_BIT(nF_ControlBlock.Status,
                                 AppStatusBits_Ipv6gAcquired);
+
+                    UART_PRINT("[WLAN EVENT] Connection to AP succeeded\r\n");
                 }
                 break;
 
@@ -302,16 +335,21 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
                 {
                     SET_STATUS_BIT(nF_ControlBlock.Status,
                                 AppStatusBits_IpAcquired);
+
+                    UART_PRINT("[WLAN EVENT] IP address acquired\r\n");
                 }
                 break;
 
                 case SL_WLAN_PROVISIONING_SMART_CONFIG_SYNC_TIMEOUT:
                 {
+                    UART_PRINT("[WLAN EVENT] Smart Config Sync timeout\r\n");
                 }
                 break;
 
                 default:
                 {
+                    UART_PRINT("[WLAN EVENT] Unknown Provisioning Status: %d\r\n",
+                            pWlanEvent->Data.ProvisioningStatus.ProvisioningStatus);
                 }
                 break;
             }
@@ -320,6 +358,9 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
 
         default:
         {
+            UART_PRINT("[WLAN EVENT] Unexpected event [0x%x]\n\r",
+                    pWlanEvent->Id);
+
             // SignalProvisioningEvent(PrvnEvent_Error);
         }
         break;
