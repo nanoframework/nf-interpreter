@@ -18,6 +18,8 @@
 #include <ti/drivers/net/wifi/slnetifwifi.h>
 #include <ti/net/slnetsock.h>
 
+// nanoFramework header files
+#include <targetHAL.h>
 
 static struct sntp_server SNTP_ServersList[NTP_SERVERS];
 
@@ -47,6 +49,8 @@ void sntp_init(void)
         {
             // pthread_create() failed
             HAL_AssertEx();
+            UART_PRINT("Unable to create SNTP thread \n");
+
             while(1)
             {
                 ;
@@ -324,19 +328,27 @@ void* SntpWorkingThread(void* argument)
     timeval.tv_sec = NTP_REPLY_WAIT_TIME;
     timeval.tv_usec = 0;
 
+    UART_PRINT("[SNTP task] started\n\r");
+
     // delay 1st request, if configured
     if(SNTP_STARTUP_DELAY > 0)
     {
+        UART_PRINT("[SNTP task] start delay: %d\n\r", SNTP_STARTUP_DELAY);
+
         sleep(SNTP_STARTUP_DELAY);
     }
 
     while(1)
     {
+        UART_PRINT("[SNTP task] getting time...\n\r");
+
         // Get the time use the SNTP_ServersList
         retval = SNTP_getTime(&timeval, &ntpTimeStamp);
 
         if (retval != 0)
         {
+            UART_PRINT("[SNTP task] failed to get time. Error: %d\n\r", retval);
+
             // sleep before retrying
             sleep(SNTP_RETRY_TIMEOUT);
 
@@ -349,6 +361,8 @@ void* SntpWorkingThread(void* argument)
 
         tspec.tv_nsec = 0;
         tspec.tv_sec = currentTime;
+
+        UART_PRINT("[SNTP task] updated time: %d\n\r", currentTime);
 
         if (clock_settime(CLOCK_REALTIME, &tspec) != 0)
         {

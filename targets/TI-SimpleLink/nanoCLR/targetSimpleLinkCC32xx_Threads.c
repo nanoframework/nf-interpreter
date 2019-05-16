@@ -109,16 +109,16 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
             //        pWlanEvent->Data.Connect.Bssid,
             //        SL_WLAN_BSSID_LENGTH);
 
-            //UART_PRINT(
-                // "[WLAN EVENT] STA Connected to the AP: %s ,"
-                // "BSSID: %x:%x:%x:%x:%x:%x\n\r",
-                // nF_ControlBlock.connectionSSID,
-                // nF_ControlBlock.connectionBSSID[0],
-                // nF_ControlBlock.connectionBSSID[1],
-                // nF_ControlBlock.connectionBSSID[2],
-                // nF_ControlBlock.connectionBSSID[3],
-                // nF_ControlBlock.connectionBSSID[4],
-                // nF_ControlBlock.connectionBSSID[5]);
+            UART_PRINT(
+                "[WLAN EVENT] STA Connected to the AP: %s ,"
+                "BSSID: %x:%x:%x:%x:%x:%x\n\r",
+                pWlanEvent->Data.Connect.SsidName,
+                pWlanEvent->Data.Connect.Bssid[0],
+                pWlanEvent->Data.Connect.Bssid[1],
+                pWlanEvent->Data.Connect.Bssid[2],
+                pWlanEvent->Data.Connect.Bssid[3],
+                pWlanEvent->Data.Connect.Bssid[4],
+                pWlanEvent->Data.Connect.Bssid[5]);
 
             sem_post(&Provisioning_ControlBlock.connectionAsyncEvent);
 
@@ -683,7 +683,7 @@ void * mainThread(void *arg)
     if(retc)
     {
         // Handle Error
-        ////UART_PRINT("Unable to create sl_Task thread \n");
+        UART_PRINT("Unable to create sl_Task thread \n");
         HAL_AssertEx();
         while(1)
         {
@@ -697,7 +697,7 @@ void * mainThread(void *arg)
     if(retc < 0)
     {
         // Handle Error
-        //UART_PRINT("Network Terminal - Couldn't configure Network Processor - %d\n",RetVal);
+        UART_PRINT("Network Terminal - Couldn't configure Network Processor - %d\n", retc);
         HAL_AssertEx();
         return(NULL);
     }
@@ -785,6 +785,7 @@ void * mainThread(void *arg)
     if(retc != 0)
     {
         // pthread_create() failed
+        UART_PRINT("Unable to create receiver thread \n");
         HAL_AssertEx();
         while(1)
         {
@@ -808,6 +809,7 @@ void * mainThread(void *arg)
     if(retc != 0)
     {
         // pthread_create() failed
+        UART_PRINT("Unable to create CLR thread \n");
         HAL_AssertEx();
         while(1)
         {
