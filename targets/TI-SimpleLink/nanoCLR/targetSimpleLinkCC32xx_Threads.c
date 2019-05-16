@@ -41,6 +41,9 @@ extern void * CLRStartupThread(void *arg0);
 extern void * ReceiverThread(void *arg0);
 extern void sntp_init(void);
 
+// other externals
+extern void ConfigUART();
+
 //////////////////////////////
 #define SL_STOP_TIMEOUT         (200)
 
@@ -625,6 +628,9 @@ void * mainThread(void *arg)
     ADC_init();
     PWM_init();
 
+    // initialize UART (need UART to be functional ASAP in order to output to terminal, if required)
+    ConfigUART();
+
     // Initialize SlNetSock layer
     SlNetIf_init(0);
     SlNetIf_add(SLNETIF_ID_1, "nF",
@@ -790,7 +796,7 @@ void * mainThread(void *arg)
     pthread_attr_init(&threadAttributes);
     priorityParams.sched_priority = NF_TASK_PRIORITY;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
-    retc |= pthread_attr_setstacksize(&threadAttributes, 4092);
+    retc |= pthread_attr_setstacksize(&threadAttributes, 5116);
     if (retc != 0)
     {
         // failed to set attributes
