@@ -37,6 +37,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 ######################################################
 
+# add compiler define for DEBUG
+add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
+
 ######################################################
 # set time stamp of build
 string(TIMESTAMP BUILD_TIMESTAMP UTC)
