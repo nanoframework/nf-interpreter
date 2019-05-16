@@ -353,34 +353,31 @@ const uint_least8_t I2C_count = CC3220SF_LAUNCHXL_I2CCOUNT;
  *  =============================== I2S ===============================
  */
 #include <ti/drivers/I2S.h>
-#include <ti/drivers/i2s/I2SCC32XXDMA.h>
+#include <ti/drivers/i2s/I2SCC32XX.h>
 
-I2SCC32XXDMA_Object i2sCC3220SObjects[CC3220SF_LAUNCHXL_I2SCOUNT];
+I2SCC32XX_Object i2sCC3220SObjects[CC3220S_LAUNCHXL_I2SCOUNT];
 
-const I2SCC32XXDMA_HWAttrsV1 i2sCC3220SHWAttrs[CC3220SF_LAUNCHXL_I2SCOUNT] = {
+const I2SCC32XX_HWAttrs i2sCC3220SHWAttrs[CC3220S_LAUNCHXL_I2SCOUNT] = {
     {
-        .baseAddr = I2S_BASE,
-        .intNum = INT_I2S,
-        .intPriority = (~0),
-        .rxChannelIndex = UDMA_CH4_I2S_RX,
-        .txChannelIndex = UDMA_CH5_I2S_TX,
-        .xr0Pin = I2SCC32XXDMA_PIN_64_McAXR0,
-        .xr1Pin = I2SCC32XXDMA_PIN_50_McAXR1,
-        .clkxPin = I2SCC32XXDMA_PIN_62_McACLKX,
-        .clkPin = I2SCC32XXDMA_PIN_53_McACLK,
-        .fsxPin = I2SCC32XXDMA_PIN_63_McAFSX,
+      .pinSD1           =  I2SCC32XX_PIN_50_SD1,
+      .pinSD0           =  I2SCC32XX_PIN_64_SD0,
+      .pinSCK           =  I2SCC32XX_PIN_53_SCK,
+      .pinSCKX          =  I2SCC32XX_PIN_UNUSED,
+      .pinWS            =  I2SCC32XX_PIN_63_WS,
+      .rxChannelIndex   =  UDMA_CH4_I2S_RX,
+      .txChannelIndex   =  UDMA_CH5_I2S_TX,
+      .intPriority      =  0x40,
     }
 };
 
-const I2S_Config I2S_config[CC3220SF_LAUNCHXL_I2SCOUNT] = {
+const I2S_Config I2S_config[CC3220S_LAUNCHXL_I2SCOUNT] = {
     {
-        .fxnTablePtr = &I2SCC32XXDMA_fxnTable,
-        .object = &i2sCC3220SObjects[CC3220SF_LAUNCHXL_I2S0],
-        .hwAttrs = &i2sCC3220SHWAttrs[CC3220SF_LAUNCHXL_I2S0]
+        .object = &i2sCC3220SObjects[CC3220S_LAUNCHXL_I2S0],
+        .hwAttrs = &i2sCC3220SHWAttrs[CC3220S_LAUNCHXL_I2S0]
     }
 };
 
-const uint_least8_t I2S_count = CC3220SF_LAUNCHXL_I2SCOUNT;
+const uint_least8_t I2S_count = CC3220S_LAUNCHXL_I2SCOUNT;
 
 /*
  *  =============================== Power ===============================

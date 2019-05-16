@@ -41,7 +41,6 @@ set(BoardDrivers_SRCS
     I2C.c
     I2CCC32XX.c
     I2S.c
-    I2SCC32XXDMA.c
     PowerCC32XX.c
     PowerCC32XX_asm.sm4g
     PWM.c
