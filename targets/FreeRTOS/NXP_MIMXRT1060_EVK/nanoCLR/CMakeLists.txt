@@ -35,6 +35,9 @@ if(USE_FILESYSTEM_OPTION)
     list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/fatfs/ffsystem.c")
 endif()
 
+# append files from Runtime.Native
+list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp")
+
 # add native assemblies
 ParseNativeAssemblies()
 
