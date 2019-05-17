@@ -5,7 +5,8 @@
 
 #include "MIMXRT1062.h"
 
-void prvGetRegistersFromStack( unsigned int *pulFaultStackAddress )
+__attribute__((used))
+void prvGetRegistersFromStack( unsigned int *pulFaultStackAddress ) 
 {
     /* These are volatile to try and prevent the compiler/linker optimising them
     away as the variables never actually get used.  If the debugger won't show the
