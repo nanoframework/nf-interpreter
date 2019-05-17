@@ -184,8 +184,7 @@ jobs:
       NXP_MIMXRT1060_EVK:
         BoardName: NXP_MIMXRT1060_EVK
         BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FREERTOS -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_DEBUGGER=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON
-        GccArm_Version:        
-        NeedsDFU: true
+        GccArm_Version:
 
   variables:
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
@@ -206,6 +205,7 @@ jobs:
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
+
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
@@ -327,7 +327,7 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_WIN32_nanoCLR
-  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
+  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
 
   pool:
     vmImage: 'VS2017-Win2016'
