@@ -62,7 +62,7 @@ typedef struct _ivt_ {
 #define IVT_HEADER           (IVT_TAG_HEADER | (IVT_SIZE << 8) | (IVT_PAR << 24))
 
 
-extern uint32_t __Vectors[];
+extern void * __Vectors[];
 extern uint32_t __boot_hdr_start__[];
 #define IMAGE_ENTRY_ADDRESS ((uint32_t)__Vectors)
 #define FLASH_BASE          ((uint32_t)__boot_hdr_start__)

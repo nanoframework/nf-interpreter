@@ -42,7 +42,6 @@ void Time_SetCompare ( uint64_t compareValueTicks )
     else if(compareValueTicks == HAL_COMPLETION_IDLE_VALUE)
     {
         // wait for infinity, don't need to do anything here
-        return;
     }    
     else
     {
