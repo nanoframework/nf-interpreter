@@ -184,7 +184,7 @@ jobs:
       NXP_MIMXRT1060_EVK:
         BoardName: NXP_MIMXRT1060_EVK
         BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FREERTOS -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_DEBUGGER=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON
-        GccArm_Version:
+        GccArm_Version: 
 
   variables:
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
