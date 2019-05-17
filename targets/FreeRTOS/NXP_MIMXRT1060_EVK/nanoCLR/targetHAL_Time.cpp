@@ -8,24 +8,29 @@
 #include <nanoCLR_Types.h>
 #include <nanoHAL_Time.h>
 
-#include "FreeRTOS.h"
-#include "time.h"
-#include <sys/time.h>
+#if defined(NXP_USE_RTC)
+    #include "fsl_snvs_hp.h"
+#else
+    #include "time.h"
+    #include <sys/time.h>
+#endif
 
 // Returns the current date time from the RTC 
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-#if defined(HAL_USE_RTC)
-    SYSTEMTIME st; 
+#if defined(NXP_USE_RTC)
+    
+    SYSTEMTIME st;
+    snvs_hp_rtc_datetime_t rtcDate;
  
-    struct timeval tv;
+    SNVS_HP_RTC_GetDatetime(SNVS, &rtcDate);
 
-    gettimeofday(&tv, NULL);
-
-    // Convert from Unix time(year since 1900) to SYSTEMTIME(Years since 1601)
-    int64_t time = ((int64_t)tv.tv_sec * (int64_t)TIME_CONVERSION__TO_SECONDS) + TIME_UNIX_EPOCH_AS_TICKS;
-
-    HAL_Time_ToSystemTime(time, &st );
+    st.wYear = rtcDate.year;
+    st.wMonth = rtcDate.month;
+    st.wDay = rtcDate.day;
+    st.wHour = rtcDate.hour;
+    st.wMinute = rtcDate.minute;
+    st.wSecond = rtcDate.second;
 
     // zero 'time' fields if date part only is required
     if(datePartOnly)
@@ -35,36 +40,13 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
         st.wMinute = 0;
         st.wHour = 0;
     }
+	return HAL_Time_ConvertFromSystemTime( &st );
+}
 
-    return HAL_Time_ConvertFromSystemTime( &st );
 #else
-    if (datePartOnly)
-	{
-		SYSTEMTIME st;
-		HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
-
-		st.wHour = 0;
-		st.wMinute = 0;
-		st.wSecond = 0;
-		st.wMilliseconds = 0;
-
-		return HAL_Time_ConvertFromSystemTime(&st);
-	}
-	else
-    {
-        return HAL_Time_CurrentTime();
-    }
-  #endif
-};
-
 void HAL_Time_SetUtcTime(uint64_t utcTime)
-{
+    (void) utcTime;
     SYSTEMTIME systemTime;
-
-    HAL_Time_ToSystemTime(utcTime, &systemTime);
-
-#if defined(HAL_USE_RTC)
-    struct tm newTime;
 
     newTime.tm_year = systemTime.wYear - 1900;      // years since 1900
     newTime.tm_mon = systemTime.wMonth - 1;         // months since January 0-11
@@ -77,8 +59,8 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
     time_t t = mktime(&newTime);
     struct timeval now = { .tv_sec = t, .tv_usec = 0 };
     settimeofday(&now, NULL);
-#endif
 }
+#endif
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
 {
