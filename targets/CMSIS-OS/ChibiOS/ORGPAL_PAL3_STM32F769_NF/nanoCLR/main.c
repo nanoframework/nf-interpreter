@@ -54,7 +54,7 @@ int main(void) {
 
   // first things first: need to clear any possible wakeup flags
   // clear wakeup flags from GPIOs
-  PWR->CR2 |= (PWR_CR2_CWUPF3 | PWR_CR2_CWUPF2 | PWR_CR2_CWUPF1);
+  PWR->CR2 |= (PWR_CR2_CWUPF6 | PWR_CR2_CWUPF5 | PWR_CR2_CWUPF4 | PWR_CR2_CWUPF3 | PWR_CR2_CWUPF2 | PWR_CR2_CWUPF1);
   // clear standby Flag
   PWR->CR1 |=  PWR_CR1_CSBF;
 
