@@ -159,6 +159,7 @@ if(NO_CMSIS_SOURCE)
                     RESULT_VARIABLE result
                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMSIS_Download")
 
+                    
     # run build on CMSIS download CMake project to perform the download
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
                     RESULT_VARIABLE result
