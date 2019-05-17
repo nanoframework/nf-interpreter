@@ -49,8 +49,12 @@ void nanoHAL_Initialize()
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION  ::InitializeList();
 
+    BlockStorageList_Initialize();
+
     // initialize block storage devices
     BlockStorage_AddDevices();
+
+    BlockStorageList_InitializeDevices();
 
     // clear managed heap region
     unsigned char* heapStart = NULL;
@@ -88,10 +92,16 @@ void nanoHAL_Uninitialize()
         }
     }   
     
-    //PalEvent_Uninitialize();
+    SOCKETS_CloseConnections();
 
+  #if !defined(HAL_REDUCESIZE)
     // TODO need to call this but it's preventing the debug session from starting
     //Network_Uninitialize();
+  #endif
+
+    BlockStorageList_UnInitializeDevices();
+
+    //PalEvent_Uninitialize();
 
     Events_Uninitialize();
 
@@ -119,27 +129,29 @@ bool SystemState_QueryNoLock(SYSTEM_STATE_type state)
 
 void SystemState_Set(SYSTEM_STATE_type state)
 {
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
 
     SystemState_SetNoLock(state);
 
-    GLOBAL_UNLOCK(irq);
+    GLOBAL_UNLOCK();
 }
 
 void SystemState_Clear(SYSTEM_STATE_type state)
 {
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
 
     SystemState_ClearNoLock(state );
 
-    GLOBAL_UNLOCK(irq);
+    GLOBAL_UNLOCK();
 }
 
 bool SystemState_Query(SYSTEM_STATE_type state)
 {
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
 
-    return SystemState_QueryNoLock(state);
+    bool systemStateCopy = SystemState_QueryNoLock(state);
 
-    GLOBAL_UNLOCK(irq);
+    GLOBAL_UNLOCK();
+
+    return systemStateCopy;
 }
