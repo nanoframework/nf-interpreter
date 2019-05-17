@@ -7,20 +7,18 @@
 #include <nanoHAL_Types.h>
 #include <nanoCLR_Types.h>
 #include <nanoHAL_Time.h>
-#include "FreeRTOS.h"
 
-#if defined(HAL_USE_RTC)
+#if defined(NXP_USE_RTC)
     #include "fsl_snvs_hp.h"
 #else
     #include "time.h"
     #include <sys/time.h>
 #endif
 
-
 // Returns the current date time from the RTC 
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-#if defined(HAL_USE_RTC)
+#if defined(NXP_USE_RTC)
     
     SYSTEMTIME st;
     snvs_hp_rtc_datetime_t rtcDate;
@@ -42,12 +40,7 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
         st.wMinute = 0;
         st.wHour = 0;
     }
-	else
-    {
-        return HAL_Time_CurrentTime();
-    }
-    
-    return HAL_Time_ConvertFromSystemTime( &st );
+	return HAL_Time_ConvertFromSystemTime( &st );
 }
 
 #else
