@@ -11,6 +11,8 @@
 #include "fsl_common.h"
 #include "fsl_gpio.h"
 #include "fsl_clock.h"
+#include "fsl_snvs_hp.h"
+#include "fsl_snvs_lp.h"
 
 /*******************************************************************************
  * Definitions
@@ -221,6 +223,7 @@ status_t BOARD_InitSEMC(void);
 
 void BOARD_USDHCClockConfiguration(void);
 
+void BOARD_InitRTC(void);
 
 #if defined(__cplusplus)
 }
