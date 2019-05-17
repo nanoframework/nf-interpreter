@@ -111,8 +111,14 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
           #endif
 
           #if defined(STM32F7XX)
-            SET_BIT(RTC->CR, RTC_CR_ALRAIE);
+            
+            //////////////////////////////////////////////////////////////////////////////////////////////////////
+            // workaround recommended in section 2.2.2 at STM32F77xxx errata document (DM00257543 - ES0334 Rev 5) //
+            PWR->CSR1 |= PWR_CSR1_EIWUP;
+            //////////////////////////////////////////////////////////////////////////////////////////////////////
+
             SET_BIT(PWR->CR1, PWR_CR1_PDDS);
+
           #endif
 
           #if defined(STM32H7XX)
