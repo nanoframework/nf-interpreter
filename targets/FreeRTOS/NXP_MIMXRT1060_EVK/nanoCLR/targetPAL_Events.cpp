@@ -15,7 +15,6 @@ uint64_t CPU_MillisecondsToTicks(uint64_t ticks);
 
 // timer for bool events
 static TimerHandle_t boolEventsTimer;
-static bool*  saveTimerCompleteFlag = 0;
 
 volatile uint32_t systemEvents;
 
@@ -29,7 +28,9 @@ bool Events_Initialize()
     NATIVE_PROFILE_PAL_EVENTS();
 
     // init events
+    GLOBAL_LOCK();
     systemEvents = 0;
+    GLOBAL_UNLOCK();
 
     boolEventsTimer = xTimerCreate( "boolEventsTimer", 10, pdFALSE, (void *)0, local_Events_SetBoolTimer_Callback);
  
@@ -50,7 +51,9 @@ void Events_Set( uint32_t events )
     NATIVE_PROFILE_PAL_EVENTS();
 
     // set events
+    GLOBAL_LOCK();
     systemEvents |= events;
+    GLOBAL_UNLOCK();
 
     if( g_Event_Callback != NULL )
     {
@@ -66,7 +69,9 @@ uint32_t Events_Get( uint32_t eventsOfInterest )
     uint32_t returnEvents = (systemEvents & eventsOfInterest);
 
     // ... clear the requested flags atomically
+    GLOBAL_LOCK();
     systemEvents &= ~eventsOfInterest;
+    GLOBAL_UNLOCK();
     
     // give the caller notice of just the events they asked for ( and were cleared already )
     return returnEvents;
@@ -80,11 +85,9 @@ uint32_t Events_MaskedRead( uint32_t eventsOfInterest )
 
 static void local_Events_SetBoolTimer_Callback(  TimerHandle_t xTimer  )
 {
-    (void)xTimer;
-
     NATIVE_PROFILE_PAL_EVENTS();
-
-    *saveTimerCompleteFlag = true;
+    bool* timerCompleteFlag = (bool*)pvTimerGetTimerID( xTimer );
+    *timerCompleteFlag = true;
 }
 
 void Events_SetCallback( set_Event_Callback pfn, void* arg )
@@ -104,14 +107,8 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
 
     if(timerCompleteFlag != NULL)
     {
-
+        vTimerSetTimerID( boolEventsTimer, (void*) timerCompleteFlag );
         xTimerChangePeriod( boolEventsTimer, millisecondsFromNow / portTICK_PERIOD_MS,  0 );
-
-// Was going to just change existing timer but vTimerSetTimerID() does not exist in this version of FreeRTOS
-// As only one timer running at a time we will just save it in global memory
-        saveTimerCompleteFlag = timerCompleteFlag;
-        //        vTimerSetTimerID( boolEventsTimer, (void *)timerCompleteFlag );
-        xTimerStart(boolEventsTimer, 0);
     }
 }
 
@@ -130,6 +127,8 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
 
     while(true)
     {
+        EVENTS_HEART_BEAT;
+
         uint32_t events = Events_MaskedRead( wakeupSystemEvents );
         if(events)
         {
