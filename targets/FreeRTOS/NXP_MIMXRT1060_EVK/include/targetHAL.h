@@ -9,9 +9,9 @@
 #include <target_board.h>
 #include "cmsis_gcc.h"
 
-#define GLOBAL_LOCK(x)              portENTER_CRITICAL();
-#define GLOBAL_UNLOCK(x);           portEXIT_CRITICAL();
-#define ASSERT_IRQ_MUST_BE_OFF()    // TODO need to determine if this needs implementation
+// global mutex protecting the internal state of the interpreter, including event flags
+#define GLOBAL_LOCK()              portENTER_CRITICAL();
+#define GLOBAL_UNLOCK();           portEXIT_CRITICAL();
 
 // platform dependent delay
 #define PLATFORM_DELAY(milliSecs)   vTaskDelay(milliSecs / portTICK_PERIOD_MS);

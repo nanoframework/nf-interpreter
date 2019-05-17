@@ -66,7 +66,7 @@ void SystemInit (void) {
 #endif /* ((__FPU_PRESENT == 1) && (__FPU_USED == 1)) */
 
 
-    extern uint32_t g_pfnVectors[];  // Vector table defined in startup code
+    extern void * g_pfnVectors[];  // Vector table defined in startup code
     SCB->VTOR = (uint32_t)g_pfnVectors;
 
 
