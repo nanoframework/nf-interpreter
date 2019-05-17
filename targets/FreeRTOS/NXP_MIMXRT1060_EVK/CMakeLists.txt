@@ -120,6 +120,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/src/CLR/Include
     ${PROJECT_SOURCE_DIR}/src/HAL/Include
     ${PROJECT_SOURCE_DIR}/src/PAL/Include
+    ${PROJECT_SOURCE_DIR}/src/CLR/Runtime.Native
 
     ${WireProtocol_INCLUDE_DIRS}
     ${FREERTOS_INCLUDE_DIRS}
