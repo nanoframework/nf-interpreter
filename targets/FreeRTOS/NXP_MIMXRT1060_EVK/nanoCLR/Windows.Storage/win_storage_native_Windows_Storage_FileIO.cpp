@@ -249,15 +249,15 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__
         {
             // event occurred
 
-            if(operationResult == FR_DISK_ERR)
+            if(threadOperationResult == FR_DISK_ERR)
             {
                 NANOCLR_SET_AND_LEAVE( CLR_E_FILE_IO );
             }
-            else if(operationResult == FR_NO_FILE)
+            else if(threadOperationResult == FR_NO_FILE)
             {
                 NANOCLR_SET_AND_LEAVE( CLR_E_FILE_NOT_FOUND );
             }
-            else if(operationResult == FR_INVALID_DRIVE)
+            else if(threadOperationResult == FR_INVALID_DRIVE)
             {
                 // failed to change drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -498,15 +498,15 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___ST
         {
             // event occurred
 
-            if(operationResult == FR_DISK_ERR)
+            if(threadOperationResult == FR_DISK_ERR)
             {
                 NANOCLR_SET_AND_LEAVE( CLR_E_FILE_IO );
             }
-            else if(operationResult == FR_NO_FILE)
+            else if(threadOperationResult == FR_NO_FILE)
             {
                 NANOCLR_SET_AND_LEAVE( CLR_E_FILE_NOT_FOUND );
             }
-            else if(operationResult == FR_INVALID_DRIVE)
+            else if(threadOperationResult == FR_INVALID_DRIVE)
             {
                 // failed to change drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
