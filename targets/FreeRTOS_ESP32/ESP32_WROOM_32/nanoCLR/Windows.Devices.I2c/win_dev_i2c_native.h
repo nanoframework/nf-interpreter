@@ -52,7 +52,7 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice
     static const int FIELD___disposed = 4;
 
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
-    NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeDispose___VOID__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTransmit___WindowsDevicesI2cI2cTransferResult__SZARRAY_U1__SZARRAY_U1);
 
     //--//

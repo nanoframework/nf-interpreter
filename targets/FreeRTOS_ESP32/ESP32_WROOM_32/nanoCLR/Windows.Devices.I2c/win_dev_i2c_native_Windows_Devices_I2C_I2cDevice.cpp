@@ -117,7 +117,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
    NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::DisposeNative___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeDispose___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
