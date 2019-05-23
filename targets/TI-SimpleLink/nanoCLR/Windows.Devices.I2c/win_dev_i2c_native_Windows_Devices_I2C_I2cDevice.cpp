@@ -96,21 +96,51 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
         palI2c->i2cParams.bitRate = (I2cBusSpeed)pConfig[ I2cConnectionSettings::FIELD___busSpeed ].NumericByRef().s4 == I2cBusSpeed_StandardMode ? I2C_100kHz : I2C_400kHz;
         palI2c->i2cParams.transferMode = I2C_MODE_CALLBACK;
         palI2c->i2cParams.transferCallbackFxn = HostI2C_CallbackFxn;
-        palI2c->i2c = I2C_open(Board_I2C_TMP, &palI2c->i2cParams); FAULT_ON_NULL(palI2c->i2c);
+        palI2c->i2c = I2C_open(Board_I2C0, &palI2c->i2cParams); FAULT_ON_NULL(palI2c->i2c);
         palI2c->i2cTransaction.slaveAddress = (I2cBusSpeed)pConfig[ I2cConnectionSettings::FIELD___slaveAddress ].NumericByRef().s4;
     }
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::DisposeNative___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeDispose___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
 {
-    (void)stack;
-
     NANOCLR_HEADER();
 
-    I2C_close(I2C1_PAL.i2c);
+    uint8_t busIndex;
+    NF_PAL_I2C* palI2c = NULL;
+    bool disposeController = false;
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+    // get disposeController
+    disposeController = (bool)stack.Arg0().NumericByRef().u1;
+
+    if(disposeController)
+    {
+        // get bus index
+        // this is coded with a multiplication, need to perform and int division to get the number
+        // see the comments in the I2cDevice() constructor in managed code for details
+        busIndex = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
+
+        // get the driver for the I2C bus
+        switch (busIndex)
+        {
+            case 1:
+                // deactivates the I2C peripheral
+                I2C_close(palI2c->i2c);
+                I2C1_PAL.i2c == NULL;
+                break;
+
+            default:
+                // this I2C bus is not valid
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+        }
+
+    }
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit___WindowsDevicesI2cI2cTransferResult__SZARRAY_U1__SZARRAY_U1( CLR_RT_StackFrame& stack )
