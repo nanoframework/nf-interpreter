@@ -5,7 +5,6 @@
 
 #include "win_dev_adc_native.h"
 
-
 const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
 
     // ADC1
