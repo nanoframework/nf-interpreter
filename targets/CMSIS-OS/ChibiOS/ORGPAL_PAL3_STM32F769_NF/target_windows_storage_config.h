@@ -13,4 +13,4 @@
 #define USB_MSD_DRIVER      USBHD2
 
 // includes SPIFFS in storage
-#define USE_SPIFFS_FOR_STORAGE  TRUE
+#define USE_SPIFFS_FOR_STORAGE  FALSE
