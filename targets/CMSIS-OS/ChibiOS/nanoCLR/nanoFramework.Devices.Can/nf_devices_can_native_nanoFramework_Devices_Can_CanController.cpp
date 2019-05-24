@@ -292,13 +292,51 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::G
 
 HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
-    (void)stack;
-
     NANOCLR_HEADER();
-    {
 
+    uint8_t controllerIndex;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+    // get controller index
+    controllerIndex = (uint8_t)(pThis[ FIELD___controllerId ].NumericByRef().s4);
+
+    // init the PAL struct for this CAN bus and assign the respective driver
+    // all this occurs if not already done
+    switch (controllerIndex)
+    {
+      #if STM32_CAN_USE_CAN1
+        case 1:
+            Can1_PAL.Driver = NULL;
+            // stop CAN
+            canStop(&CAND1);
+            break;
+      #endif
+
+      #if STM32_CAN_USE_CAN2
+        case 2:
+            Can2_PAL.Driver = NULL;
+            // stop CAN
+            canStop(&CAND2);
+            break;
+      #endif
+
+      #if STM32_CAN_USE_CAN3
+        case 3:
+            Can3_PAL.Driver = NULL;
+            // stop CAN
+            canStop(&CAND3);
+            break;
+      #endif
+
+        default:
+            // this CAN bus is not valid
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            break;
     }
-    NANOCLR_NOCLEANUP_NOLABEL();
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::NativeInit___VOID( CLR_RT_StackFrame& stack )

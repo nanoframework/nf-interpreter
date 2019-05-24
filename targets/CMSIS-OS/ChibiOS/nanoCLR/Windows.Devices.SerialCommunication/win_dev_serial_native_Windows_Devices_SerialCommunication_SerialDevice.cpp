@@ -269,38 +269,95 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID( CLR_RT_StackFrame& stack )
 {
-    (void)stack;
-
     NANOCLR_HEADER();
+
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+    // Choose the driver for this SerialDevice
+    switch ((int)pThis[ FIELD___portIndex ].NumericByRef().s4)
     {
 
-    #if NF_SERIAL_COMM_STM32_UART_USE_USART1
-        UnInit_UART1();
-    #endif
-    #if NF_SERIAL_COMM_STM32_UART_USE_USART2
-        UnInit_UART2();
-    #endif
-    #if NF_SERIAL_COMM_STM32_UART_USE_USART3
-        UnInit_UART3();
-    #endif
-    #if NF_SERIAL_COMM_STM32_UART_USE_UART4
-        UnInit_UART4();
-    #endif
-    #if NF_SERIAL_COMM_STM32_UART_USE_UART5
-        UnInit_UART5();
-    #endif
-    #if NF_SERIAL_COMM_STM32_UART_USE_USART6
-        UnInit_UART6();
-    #endif
-    #if NF_SERIAL_COMM_STM32_UART_USE_UART7
-        UnInit_UART7();
-    #endif
-    #if NF_SERIAL_COMM_STM32_UART_USE_UART8
-        UnInit_UART8();
-    #endif
+      #if NF_SERIAL_COMM_STM32_UART_USE_USART1
+        case 1 :
+            UnInit_UART1();
+            // stop UART
+            uartStop(&UARTD1);
+            Uart1_PAL.UartDriver = NULL;
+            break;
+      #endif
 
+      #if NF_SERIAL_COMM_STM32_UART_USE_USART2
+        case 2 :
+            UnInit_UART2();
+            // stop UART
+            uartStop(&UARTD2);
+            Uart2_PAL.UartDriver = NULL;
+            break;
+      #endif
+
+      #if NF_SERIAL_COMM_STM32_UART_USE_USART3
+        case 3 :
+            UnInit_UART3();
+            // stop UART
+            uartStop(&UARTD3);
+            Uart3_PAL.UartDriver = NULL;
+            break;
+      #endif
+
+      #if NF_SERIAL_COMM_STM32_UART_USE_UART4
+        case 4 :
+            UnInit_UART4();
+            // stop UART
+            uartStop(&UARTD4);
+            Uart4_PAL.UartDriver = NULL;
+            break;
+      #endif
+
+      #if NF_SERIAL_COMM_STM32_UART_USE_UART5
+        case 5 :
+            UnInit_UART5();
+            // stop UART
+            uartStop(&UARTD5);
+            Uart5_PAL.UartDriver = NULL;
+            break;                
+      #endif
+
+      #if NF_SERIAL_COMM_STM32_UART_USE_USART6
+        case 6 :
+            UnInit_UART6();
+            // stop UART
+            uartStop(&UARTD6);
+            Uart6_PAL.UartDriver = NULL;
+            break;                
+      #endif
+
+      #if NF_SERIAL_COMM_STM32_UART_USE_UART7
+        case 7 :
+            UnInit_UART7();
+            // stop UART
+            uartStop(&UARTD7);
+            Uart7_PAL.UartDriver = NULL;
+            break;
+      #endif
+
+      #if NF_SERIAL_COMM_STM32_UART_USE_UART8
+        case 8 :
+            UnInit_UART8();
+            // stop UART
+            uartStop(&UARTD8);
+            Uart8_PAL.UartDriver = NULL;
+            break;
+      #endif
+
+        default:
+            // this COM port is not valid
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            break;
     }
-    NANOCLR_NOCLEANUP_NOLABEL();
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )

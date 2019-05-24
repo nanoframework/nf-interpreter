@@ -770,11 +770,68 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
 
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
-    (void)stack;
-
     NANOCLR_HEADER();
-    {
 
+    uint8_t busIndex;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+    // get bus index
+    // this is coded with a multiplication, need to perform and int division to get the number
+    // see the comments in the SpiDevice() constructor in managed code for details
+    busIndex = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
+
+    // get the PAL struct for the SPI bus
+    switch (busIndex)
+    {
+      #if STM32_SPI_USE_SPI1
+        case 1:
+            spiStop(&SPID1);
+            SPI1_PAL.Driver = NULL;
+            break;
+      #endif
+
+      #if STM32_SPI_USE_SPI2
+        case 2:
+            spiStop(&SPID2);
+            SPI2_PAL.Driver = NULL;
+            break;
+      #endif
+
+      #if STM32_SPI_USE_SPI3
+        case 3:
+            spiStop(&SPID3);
+            SPI3_PAL.Driver = NULL;
+            break;
+      #endif
+
+      #if STM32_SPI_USE_SPI4
+        case 4:
+            spiStop(&SPID4);
+            SPI4_PAL.Driver = NULL;
+            break;
+      #endif
+
+      #if STM32_SPI_USE_SPI5
+        case 5:
+            spiStop(&SPID5);
+            SPI5_PAL.Driver = NULL;
+            break;
+      #endif
+
+      #if STM32_SPI_USE_SPI6
+        case 6:
+            spiStop(&SPID6);
+            SPI6_PAL.Driver = NULL;
+            break;
+      #endif
+
+        default:
+            // the requested SPI bus is not valid
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            break;
     }
-    NANOCLR_NOCLEANUP_NOLABEL();
+
+    NANOCLR_NOCLEANUP();
 }
