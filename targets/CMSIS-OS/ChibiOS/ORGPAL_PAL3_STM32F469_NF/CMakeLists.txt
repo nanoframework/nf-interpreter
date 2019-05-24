@@ -186,7 +186,7 @@ include_directories(
     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
 
     # includes for SPIFFS
-    "${SPIFFS_INCLUDE_DIRS}"
+    ${SPIFFS_INCLUDE_DIRS}
 )
 
 # include directories for nanoBooter
