@@ -48,6 +48,18 @@ char * ConvertToESP32Path(const char * filepath)
     return startPath;
 }
 
+void CombinePath(char * outpath, const char * path1, const char * path2)
+{
+	strcat(outpath, path1);
+	
+	// Add "\" to path if required
+	if (outpath[hal_strlen_s(outpath) - 1] != '\\')
+	{
+		strcat(outpath, "\\");
+	}
+	strcat(outpath, path2);
+}
+
 SYSTEMTIME GetDateTime(time_t * time)
 {
     SYSTEMTIME fileTime;
@@ -375,9 +387,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
                     memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
 
                     // compose return directory path
-                    strcat(workingBuffer, managedPath);
-                    strcat(workingBuffer, "\\");
-                    strcat(workingBuffer, dirInfo->d_name);
+                    CombinePath(workingBuffer, managedPath, (const char*)dirInfo->d_name);
                     
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], workingBuffer ));
 
@@ -569,9 +579,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
 						memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
 
 						// compose file path
-						strcat(workingBuffer, managedPath);
-						strcat(workingBuffer, "\\");
-						strcat(workingBuffer, dirInfo->d_name);
+						CombinePath(workingBuffer, managedPath, (const char*)dirInfo->d_name);
 
 						NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path], workingBuffer));
 
@@ -683,15 +691,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFileNati
     memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose file path
-    strcat(filePath, managedPath);
-
-	// Add "\" to path if required
-	if (filePath[hal_strlen_s(filePath) - 1] != '\\')
-	{
-		strcat(filePath, "\\");
-	}
-	
-	strcat(filePath, fileName);
+	CombinePath(filePath, managedPath, fileName);
 
     // Convert to ESP32 VFS path 
     // return allocated converted path, must be freed
@@ -846,15 +846,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFolderNa
     memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose folder path
-    strcat(folderPath, managedPath);
-	
-	// Add "\" to path if required
-	if (folderPath[hal_strlen_s(folderPath) - 1] != '\\')
-	{
-		strcat(folderPath, "\\");
-	}
-
-    strcat(folderPath, folderName);
+    CombinePath(folderPath, managedPath, folderName);
 
     // Convert to ESP32 form path ( linux like )
     // return allocated converted path, must be freed
@@ -1096,15 +1088,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 	memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
 
 	// compose folder path
-	strcat(folderPath, managedPath);
-
-	// Add "\" to path if required
-	if (folderPath[hal_strlen_s(folderPath) - 1] != '\\')
-	{
-		strcat(folderPath, "\\");
-	}
-
-	strcat(folderPath, folderName);
+	CombinePath(folderPath, managedPath, folderName);
 
 	// Convert to ESP32 form path ( linux like )
 	// return allocated converted path, must be freed

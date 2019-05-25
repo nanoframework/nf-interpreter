@@ -86,7 +86,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
 	}
 	else if (operationResult != 0)
 	{
-		// SOem other error
+		// Some other error
 		NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
 	}
 
