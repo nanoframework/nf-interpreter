@@ -31,13 +31,14 @@ const BlockRange BlockRange2[] =
 // 256kB blocks
 const BlockRange BlockRange3[] =
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 },            // 08040000 nanoCLR  
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1, 6 }             // 08080000 deployment  
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 1 },            // 08040000 nanoCLR  
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   2, 6 }             // 080C0000 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 
 {
     {
+        (0),                                // no attributes for this region
         0x08000000,                         // start address for block region
         4,                                  // total number of blocks in this region
         0x8000,                             // total number of bytes per block
@@ -46,6 +47,7 @@ const BlockRegionInfo BlockRegions[] =
     },
 
     {
+        (0),                                // no attributes for this region
         0x08020000,                         // start address for block region
         1,                                  // total number of blocks in this region
         0x20000,                            // total number of bytes per block
@@ -54,6 +56,7 @@ const BlockRegionInfo BlockRegions[] =
     },
 
     {
+        (0),                                // no attributes for this region
         0x08040000,                         // start address for block region
         7,                                  // total number of blocks in this region
         0x40000,                            // total number of bytes per block
@@ -65,7 +68,8 @@ const BlockRegionInfo BlockRegions[] =
 
 const DeviceBlockInfo Device_BlockInfo =
 {
-    (MediaAttribute_SupportsXIP),
+    (MediaAttribute_SupportsXIP),           // STM32 flash memory is XIP
+    2,                                      // UINT32 BytesPerSector
     ARRAYSIZE_CONST_EXPR(BlockRegions),     // UINT32 NumRegions;
     (BlockRegionInfo*)BlockRegions,         // const BlockRegionInfo* pRegions;
 };
