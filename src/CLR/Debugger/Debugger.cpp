@@ -437,6 +437,8 @@ bool CLR_DBG_Debugger::CheckPermission( ByteAddress address, int mode )
             switch(range.RangeType)
             {
                 case BlockRange_BLOCKTYPE_CONFIG:         // fall through
+                case BlockRange_BLOCKTYPE_BOOTSTRAP:      // fall through
+                case BlockRange_BLOCKTYPE_CODE:           // fall through
                 case BlockRange_BLOCKTYPE_DIRTYBIT:       // fall through
                 case BlockRange_BLOCKTYPE_DEPLOYMENT:     // fall through
                 case BlockRange_BLOCKTYPE_FILESYSTEM:     // fall through
@@ -717,18 +719,44 @@ bool CLR_DBG_Debugger::Monitor_ReadMemory( WP_Message* msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Monitor_ReadMemory* cmd = (CLR_DBG_Commands::Monitor_ReadMemory*)msg->m_payload;
-    unsigned char                                 buf[ 1024 ];
-    unsigned int                                len = cmd->m_length; if(len > sizeof(buf)) len = sizeof(buf);
-    unsigned int errorCode;
+    CLR_DBG_Commands::Monitor_ReadMemory*       cmd = (CLR_DBG_Commands::Monitor_ReadMemory*)msg->m_payload;
+    CLR_DBG_Commands::Monitor_ReadMemory::Reply* cmdReply = NULL;    
+
+    uint32_t allocationSize = 0;
+    uint32_t len = cmd->m_length; 
+    
+    // adjust length, if bigger than the WP packet size
+    if (len > WP_PACKET_SIZE)
+    {
+        len = WP_PACKET_SIZE;
+    }
 
     if (m_deploymentStorageDevice != NULL)
     {
-        g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, len, buf, AccessMemory_Read, &errorCode );
+        // start computing allocation size, fist the ErrorCode field...
+        allocationSize = offsetof(CLR_DBG_Commands::Monitor_ReadMemory::Reply, m_data);
+        // ... and the buffer
+        allocationSize += len;
 
-        WP_ReplyToCommand( msg, true, false, buf, len );
+        // allocate memory
+        cmdReply = (CLR_DBG_Commands::Monitor_ReadMemory::Reply*)platform_malloc(allocationSize);
 
-        return true;
+        // sanity check
+        if(cmdReply != NULL)
+        {
+            // clear allocated memory
+            memset(cmdReply, 0, allocationSize);
+
+            g_CLR_DBG_Debugger->AccessMemory( cmd->m_address, len, (unsigned char*)&cmdReply->m_data, AccessMemory_Read, &cmdReply->ErrorCode );
+
+            WP_ReplyToCommand( msg, true, false, cmdReply, allocationSize );
+
+            // free allocated memory
+            platform_free(cmdReply);
+
+            // done here
+            return true;
+        }
     }
 
     return false;
