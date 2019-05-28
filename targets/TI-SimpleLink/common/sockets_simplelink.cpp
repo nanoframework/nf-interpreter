@@ -651,13 +651,25 @@ int SOCK_select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_
     // The original code, being lwIP based, uses the convention that 0 is infinite timeout
     // Because SimpleLink infinite timeout is negative or NULL we need to translate it.
     SlNetSock_Timeval_t timeoutCopy;
-    if(timeout->tv_sec == 0 && timeout->tv_usec == 0)
+    bool isInfiniteTimeout = false;
+
+    if(timeout->tv_sec > 0 || timeout->tv_usec > 0)
     {
-        timeoutCopy.tv_sec = -1;
-        timeoutCopy.tv_usec = 0;
+        timeoutCopy.tv_sec = timeout->tv_sec;
+        timeoutCopy.tv_usec = timeout->tv_usec;
+    }
+    else
+    {
+        isInfiniteTimeout = true;
     }
 
-    ret = SlNetSock_select( SLNETSOCK_MAX_CONCURRENT_SOCKETS, (SlNetSock_SdSet_t*)readfds, (SlNetSock_SdSet_t*)writefds, (SlNetSock_SdSet_t*)exceptfds, &timeoutCopy );
+    ret = SlNetSock_select( 
+        SLNETSOCK_MAX_CONCURRENT_SOCKETS, 
+        (SlNetSock_SdSet_t*)readfds, 
+        (SlNetSock_SdSet_t*)writefds, 
+        (SlNetSock_SdSet_t*)exceptfds, 
+        isInfiniteTimeout ? NULL : &timeoutCopy );
+
     socketErrorCode = ret;
 
     // developer notes:
