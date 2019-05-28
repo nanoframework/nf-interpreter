@@ -613,14 +613,24 @@ int SOCK_getsocklasterror(SOCK_SOCKET socket)
 int SOCK_select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* exceptfds, const struct SOCK_timeval* timeout )
 { 
     NATIVE_PROFILE_PAL_COM();
-    
-    int ret = 0;
 
-    // TODO
+    int ret = 0;
+    uint32_t networkInterfaceID;
+
     // If the network goes down then we should alert any pending socket actions
     if(exceptfds != NULL && exceptfds->fd_count > 0)
     {
-        if(SlNetIf_getConnectionStatus(0) == SLNETIF_STATUS_DISCONNECTED)
+        // find the network interface for this socket
+        // the socket handle is "burried" inside the exceptfds struct (see the caller code in Helper__SelectSocket)
+        networkInterfaceID = SlNetSock_getIfID(exceptfds->fd_array[0]);
+        if ( networkInterfaceID == SLNETERR_RET_CODE_INVALID_INPUT )
+        {
+            socketErrorCode = ENOTSOCK;
+
+            return SOCK_SOCKET_ERROR;
+        }
+
+        if ( SlNetIf_getConnectionStatus(networkInterfaceID) == SLNETIF_STATUS_DISCONNECTED )
         {
             if(readfds  != NULL)
             {
@@ -641,13 +651,25 @@ int SOCK_select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_
     // The original code, being lwIP based, uses the convention that 0 is infinite timeout
     // Because SimpleLink infinite timeout is negative or NULL we need to translate it.
     SlNetSock_Timeval_t timeoutCopy;
-    if(timeout->tv_sec == 0 && timeout->tv_usec == 0)
+    bool isInfiniteTimeout = false;
+
+    if(timeout->tv_sec > 0 || timeout->tv_usec > 0)
     {
-        timeoutCopy.tv_sec = -1;
-        timeoutCopy.tv_usec = 0;
+        timeoutCopy.tv_sec = timeout->tv_sec;
+        timeoutCopy.tv_usec = timeout->tv_usec;
+    }
+    else
+    {
+        isInfiniteTimeout = true;
     }
 
-    ret = SlNetSock_select( SLNETSOCK_MAX_CONCURRENT_SOCKETS, (SlNetSock_SdSet_t*)readfds, (SlNetSock_SdSet_t*)writefds, (SlNetSock_SdSet_t*)exceptfds, &timeoutCopy );
+    ret = SlNetSock_select( 
+        SLNETSOCK_MAX_CONCURRENT_SOCKETS, 
+        (SlNetSock_SdSet_t*)readfds, 
+        (SlNetSock_SdSet_t*)writefds, 
+        (SlNetSock_SdSet_t*)exceptfds, 
+        isInfiniteTimeout ? NULL : &timeoutCopy );
+
     socketErrorCode = ret;
 
     // developer notes:

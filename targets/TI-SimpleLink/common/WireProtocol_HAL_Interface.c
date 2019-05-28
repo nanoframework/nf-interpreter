@@ -42,7 +42,7 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         // if the requested number of bytes was actually read
         //////////////////////////////////////////////////////////
         
-        // non blocking read from serial port with 100ms timeout
+        // non blocking read from serial port with 500ms timeout
         size_t read = UART_read(uart, ptr, requestedSize);
 
         ptr  += read;

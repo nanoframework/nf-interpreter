@@ -37,6 +37,7 @@ void ConfigUART()
     uartParams.readReturnMode = UART_RETURN_FULL;
     uartParams.readEcho = UART_ECHO_OFF;
     uartParams.baudRate = 115200;
+    uartParams.readTimeout = 500;
 
     uart = UART_open(Board_UART0, &uartParams);
 
