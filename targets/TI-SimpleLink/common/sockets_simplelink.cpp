@@ -613,14 +613,24 @@ int SOCK_getsocklasterror(SOCK_SOCKET socket)
 int SOCK_select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* exceptfds, const struct SOCK_timeval* timeout )
 { 
     NATIVE_PROFILE_PAL_COM();
-    
-    int ret = 0;
 
-    // TODO
+    int ret = 0;
+    uint32_t networkInterfaceID;
+
     // If the network goes down then we should alert any pending socket actions
     if(exceptfds != NULL && exceptfds->fd_count > 0)
     {
-        if(SlNetIf_getConnectionStatus(0) == SLNETIF_STATUS_DISCONNECTED)
+        // find the network interface for this socket
+        // the socket handle is "burried" inside the exceptfds struct (see the caller code in Helper__SelectSocket)
+        networkInterfaceID = SlNetSock_getIfID(exceptfds->fd_array[0]);
+        if ( networkInterfaceID == SLNETERR_RET_CODE_INVALID_INPUT )
+        {
+            socketErrorCode = ENOTSOCK;
+
+            return SOCK_SOCKET_ERROR;
+        }
+
+        if ( SlNetIf_getConnectionStatus(networkInterfaceID) == SLNETIF_STATUS_DISCONNECTED )
         {
             if(readfds  != NULL)
             {
