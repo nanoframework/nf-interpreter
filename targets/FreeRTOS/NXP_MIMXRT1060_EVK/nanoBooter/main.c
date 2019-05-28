@@ -61,7 +61,7 @@ static void  boot_nanoCLR(void){
     if (button) 
     {
         void (*nanoCLR)(void);
-        nanoCLR = (void *) *((uint32_t *) 0x60102004); // resetISR address
+        nanoCLR = (void *) *((uint32_t *) 0x60020004); // resetISR address
         nanoCLR();
     } 
 }
@@ -73,10 +73,6 @@ int main(void)
     BOARD_InitBootPeripherals();
 
    // SCB_DisableDCache();
-
-    for (volatile uint32_t i = 0; i < 100000000; i++) {
-        __asm("nop");
-    }
 
     boot_nanoCLR();
 
