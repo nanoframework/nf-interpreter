@@ -84,6 +84,7 @@ struct CLR_DBG_Commands
 
         struct Reply
         {
+            unsigned int  ErrorCode;
             unsigned char m_data[ 1 ];
         };
     };
