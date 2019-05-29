@@ -6,19 +6,22 @@
 function(NF_GENERATE_DFU_PACKAGE FILE1 ADDRESS1 FILE2 ADDRESS2 OUTPUTFILENAME)
 
     add_custom_command(
+            
         TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+
         COMMAND ${TOOL_HEX2DFU_PREFIX}/hex2dfu 
-        
+
         -b="${FILE1}" -a="${ADDRESS1}"
         -b="${FILE2}" -a="${ADDRESS2}"
         -o="${OUTPUTFILENAME}"
-        
+
         WORKING_DIRECTORY ${TOOL_HEX2DFU_PREFIX} 
-        
-        DEPENDS ${FILE1} ${FILE2}
 
         COMMENT "exporting bin files to DFU image" 
     )
+
+    # need to add a dependency of NANOCLR to NANOBOOTER because DFU util needs bin outputs of both targets
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
 
 endfunction()
 
