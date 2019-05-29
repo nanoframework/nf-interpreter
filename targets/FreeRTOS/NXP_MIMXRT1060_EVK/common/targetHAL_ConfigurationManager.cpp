@@ -214,7 +214,7 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
     }
 
     // copy the config block content to the config block storage
-    success = iMXRTFlexSPIDriver_Write(NULL, storageAddress, blockSize, (unsigned char*)configurationBlock, true);
+    success = iMXRTFlexSPIDriver_Write(NULL, storageAddress, blockSize, (unsigned char*)configurationBlock, false);
 
     if(success == TRUE && requiresEnumeration)
     {
@@ -316,7 +316,7 @@ bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, Dev
             memcpy(blockAddressInCopy, configSectorCopy, blockSize);
 
             // copy the config block copy back to the config block storage
-            success = iMXRTFlexSPIDriver_Write(NULL, (uint32_t)&__nanoConfig_start__, sizeOfConfigSector, (unsigned char*)configSectorCopy, true);
+            success = iMXRTFlexSPIDriver_Write(NULL, (uint32_t)&__nanoConfig_start__, sizeOfConfigSector, (unsigned char*)configSectorCopy, false);
         }
 
         // free memory
