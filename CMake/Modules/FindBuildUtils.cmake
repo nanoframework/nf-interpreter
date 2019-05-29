@@ -15,6 +15,8 @@ function(NF_GENERATE_DFU_PACKAGE FILE1 ADDRESS1 FILE2 ADDRESS2 OUTPUTFILENAME)
         
         WORKING_DIRECTORY ${TOOL_HEX2DFU_PREFIX} 
         
+        DEPENDS ${FILE1} ${FILE2}
+
         COMMENT "exporting bin files to DFU image" 
     )
 
