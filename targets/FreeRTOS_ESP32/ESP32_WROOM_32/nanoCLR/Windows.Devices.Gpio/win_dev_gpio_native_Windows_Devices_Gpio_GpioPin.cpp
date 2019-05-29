@@ -255,13 +255,14 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
                         pull_down_en = GPIO_PULLDOWN_ENABLE;
                         break;
             case GpioPinDriveMode_InputPullUp :    
+                        mode = GPIO_MODE_INPUT; 
                         pull_up_en = GPIO_PULLUP_ENABLE;
                         break;
             case GpioPinDriveMode_Output :    
                         mode = GPIO_MODE_OUTPUT;
                         break;
             case GpioPinDriveMode_OutputOpenDrain :    
-                        driveMode = GPIO_MODE_OUTPUT_OD;
+                        mode = GPIO_MODE_OUTPUT_OD;
                         break;
             case GpioPinDriveMode_OutputOpenDrainPullUp :    
                         mode = GPIO_MODE_OUTPUT_OD;
