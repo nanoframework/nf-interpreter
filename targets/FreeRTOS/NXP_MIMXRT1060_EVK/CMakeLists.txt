@@ -58,6 +58,9 @@ add_executable(
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c"
 
+    # need to add configuration manager to allow get/store configuration blocks
+    "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c"
+
     ${COMMON_PROJECT_SOURCES}
     ${NANOBOOTER_PROJECT_SOURCES}
 
