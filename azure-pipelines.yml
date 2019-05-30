@@ -183,7 +183,7 @@ jobs:
     matrix:
       NXP_MIMXRT1060_EVK:
         BoardName: NXP_MIMXRT1060_EVK
-        BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FREERTOS -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_DEBUGGER=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON
+        BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FREERTOS -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_DEBUGGER=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
         GccArm_Version: 
 
   variables:

@@ -16,8 +16,9 @@ GROUP (
 MEMORY
 {
   /* Define each memory region */
-  BOARD_FLASH (rx) : ORIGIN = 0x60000000, LENGTH = 0x100000 /* 1M bytes (alias Flash) */  
-  DEPLOYMENT_FLASH (rx) : ORIGIN = 0x60200000, LENGTH = 0x100000 /* 1M bytes */  
+  BOARD_FLASH (rx) : ORIGIN = 0x60000000, LENGTH = 0x10000 /* 64k bytes (alias Flash) */  
+  CONFIG_FLASH (r) : ORIGIN = 0x60010000, LENGTH = 0x10000 /* 64k bytes space reserved for configuration block */  
+  DEPLOYMENT_FLASH (r) : ORIGIN = 0x60200000, LENGTH = 0x100000 /* 1M bytes */  
   SRAM_DTC (rwx) : ORIGIN = 0x20000000, LENGTH = 0x20000 /* 128K bytes (alias RAM) */  
   SRAM_ITC (rwx) : ORIGIN = 0x0, LENGTH = 0x20000 /* 128K bytes (alias RAM2) */  
   SRAM_OC (rwx) : ORIGIN = 0x20200000, LENGTH = 0xc0000 /* 768K bytes (alias RAM3) */  
@@ -27,8 +28,8 @@ MEMORY
   /* Define a symbol for the top of each memory region */
   __base_BOARD_FLASH = 0x60000000  ; /* BOARD_FLASH */  
   __base_Flash = 0x60000000 ; /* Flash */  
-  __top_BOARD_FLASH = 0x60000000 + 0x100000 ; /* 1M bytes */  
-  __top_Flash = 0x60000000 + 0x100000 ; /* 1M bytes */  
+  __top_BOARD_FLASH = 0x60000000 + 0x10000 ; /* 64k bytes */  
+  __top_Flash = 0x60000000 + 0x10000 ; /* 64k bytes */  
   __base_SRAM_DTC = 0x20000000  ; /* SRAM_DTC */  
   __base_RAM = 0x20000000 ; /* RAM */  
   __top_SRAM_DTC = 0x20000000 + 0x20000 ; /* 128K bytes */  
@@ -50,6 +51,9 @@ __flash_start__         = ORIGIN(BOARD_FLASH);
 __nanoImage_start__     = ORIGIN(BOARD_FLASH);
 __nanoImage_size__      = LENGTH(BOARD_FLASH);
 __nanoImage_end__       = __nanoImage_start__ + __nanoImage_size__;
+__nanoConfig_start__    = ORIGIN(CONFIG_FLASH);
+__nanoConfig_size__     = LENGTH(CONFIG_FLASH);
+__nanoConfig_end__      = __nanoConfig_start__ + __nanoConfig_size__;
 __deployment_start__    = ORIGIN(DEPLOYMENT_FLASH);
 __deployment_size__     = LENGTH(DEPLOYMENT_FLASH);
 __deployment_end__      = __deployment_start__ + __deployment_size__;
