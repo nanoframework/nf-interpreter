@@ -17,6 +17,7 @@
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoPAL_BlockStorage.h>
+#include "nanoHAL_ConfigurationManager.h"
 #include "Target_BlockStorage_iMXRTFlashDriver.h"
 
 //configure heap memory
@@ -61,7 +62,7 @@ static void  boot_nanoCLR(void){
     if (button) 
     {
         void (*nanoCLR)(void);
-        nanoCLR = (void *) *((uint32_t *) 0x60102004); // resetISR address
+        nanoCLR = (void *) *((uint32_t *) 0x60020004); // resetISR address
         nanoCLR();
     } 
 }
@@ -74,10 +75,6 @@ int main(void)
 
    // SCB_DisableDCache();
 
-    for (volatile uint32_t i = 0; i < 100000000; i++) {
-        __asm("nop");
-    }
-
     boot_nanoCLR();
 
     iMXRTFlexSPIDriver_InitializeDevice(NULL);
@@ -86,7 +83,12 @@ int main(void)
     // in CLR this is called in nanoHAL_Initialize()
     // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
     BlockStorageList_Initialize();
-    BlockStorage_AddDevices();    
+    BlockStorage_AddDevices();
+
+    // initialize configuration manager
+    // in CLR this is called in nanoHAL_Initialize()
+    // for nanoBooter we have to init it here to have access to network configuration blocks
+    ConfigurationManager_Initialize();    
 
     xTaskCreate(blink_task, "blink_task", configMINIMAL_STACK_SIZE + 10, NULL, configMAX_PRIORITIES - 1, NULL);
     xTaskCreate(ReceiverThread, "ReceiverThread", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
