@@ -308,6 +308,111 @@ else()
 
 endif()
 
+# check if LWIP_SOURCE was specified or if it's empty (default is empty)
+set(NO_LWIP_SOURCE TRUE)
+if(LWIP_SOURCE)
+    if(NOT "${LWIP_SOURCE}" STREQUAL "")
+        set(NO_LWIP_SOURCE FALSE)
+    endif()
+endif()
+
+if(NO_LWIP_SOURCE)
+
+    # hack to make the FindGit to work in Windows platforms (check the module comment for details)
+    include(Hack_SetGitSearchPath)
+
+    # check for Git (needed here for advanced warning to user if it's not installed)
+    find_package(Git)
+
+    #  check if Git was found, if not report to user and abort
+    if(NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+    endif()
+
+    # LWIP version
+    set(LWIP_VERSION_EMPTY TRUE)
+
+    # check if build was requested with a specifc LWIP version
+    if(DEFINED LWIP_VERSION)
+        if(NOT "${LWIP_VERSION}" STREQUAL "")
+            set(LWIP_VERSION_EMPTY FALSE)
+        endif()
+    endif()
+
+    # check if build was requested with a specifc LWIP version
+    if(LWIP_VERSION_EMPTY)
+        # no LWIP version actualy specified, must be empty which is fine, we'll default to a known good version
+        set(LWIP_GIT_TAG "STABLE-2_1_2_RELEASE")
+    else()
+        # set Git tag
+        set(LWIP_GIT_TAG "${LWIP_VERSION}")
+    endif()            
+
+    message(STATUS "LWIP v${LWIP_VERSION} from savannah.nongnu.org repo")
+
+    # need to setup a separate CMake project to download the code from the GitHub repository
+    # otherwise it won't be available before the actual build step
+    configure_file("CMake/LWIP.CMakeLists.cmake.in"
+                "${CMAKE_BINARY_DIR}/LWIP_Download/CMakeLists.txt")
+
+    # setup CMake project for LWIP download
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/LWIP_Download")
+
+    # run build on LWIP download CMake project to perform the download
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/LWIP_Download")
+
+    # add LWIP as external project
+    ExternalProject_Add( 
+        LWIP
+        PREFIX LWIP
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/LWIP_Source
+        GIT_REPOSITORY  https://git.savannah.nongnu.org/git/lwip.git
+        GIT_TAG ${LWIP_GIT_TAG}  # target specified branch
+        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+        TIMEOUT 10
+        LOG_DOWNLOAD 1
+        # Disable all other steps
+        INSTALL_COMMAND ""
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+    )  
+else()
+    # LWIP source was specified
+
+    # sanity check is source path exists
+    if(EXISTS "${LWIP_SOURCE}/")
+        message(STATUS "LWIP ${LWIP_VERSION} (source from: ${LWIP_SOURCE})")
+
+        # check if we already have the sources, no need to copy again
+        if(NOT EXISTS "${CMAKE_BINARY_DIR}/LWIP_Source")
+            file(COPY "${LWIP_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/LWIP_Source")
+        else()
+            message(STATUS "Using local cache of LWIP source from ${LWIP_SOURCE}")
+        endif()
+    else()
+        message(FATAL_ERROR "Couldn't find LWIP source at ${LWIP_SOURCE}/")
+    endif()
+
+    # add LWIP as external project
+    ExternalProject_Add(
+        LWIP
+        PREFIX LWIP
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/LWIP_Source
+        # Disable all other steps
+        INSTALL_COMMAND ""
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+    )        
+
+    # get source dir for LWIP CMake project
+    ExternalProject_Get_Property(LWIP SOURCE_DIR)
+
+endif()
+
 # set target base location
 # this has to be set before the class library modules are pulled in
 if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD})
