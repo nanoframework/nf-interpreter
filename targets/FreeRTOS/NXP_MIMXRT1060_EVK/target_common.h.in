@@ -23,9 +23,9 @@
 #define RAM1_MEMORY_Size                ((uint32_t)0x000c0000)
 
 // FLASH base address
-#define FLASH1_MEMORY_StartAddress      ((uint32_t)0x60002000)
+#define FLASH1_MEMORY_StartAddress      ((uint32_t)0x60000000)
 // FLASH size
-#define FLASH1_MEMORY_Size              ((uint32_t)0x001FE000)
+#define FLASH1_MEMORY_Size              ((uint32_t)0x00800000)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 

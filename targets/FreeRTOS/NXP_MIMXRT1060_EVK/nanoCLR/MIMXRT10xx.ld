@@ -16,8 +16,9 @@ GROUP (
 MEMORY
 {
   /* Define each memory region */
-  BOARD_FLASH (rx) : ORIGIN = 0x60100000, LENGTH = 0x100000 /* 1M bytes (alias Flash) */  
-  DEPLOYMENT_FLASH (rx) : ORIGIN = 0x60200000, LENGTH = 0x100000 /* 1M bytes */  
+  CONFIG_FLASH (r) : ORIGIN = 0x60010000, LENGTH = 0x10000 /* 64k bytes space reserved for configuration block */
+  BOARD_FLASH (rx) : ORIGIN = 0x60020000, LENGTH = 0x1E0000 /* 1920kB bytes (alias Flash) */  
+  DEPLOYMENT_FLASH (r) : ORIGIN = 0x60200000, LENGTH = 0x100000 /* 1M bytes space reserved for application deployment */  
   SRAM_DTC (rwx) : ORIGIN = 0x20000000, LENGTH = 0x20000 /* 128K bytes (alias RAM) */  
   SRAM_ITC (rwx) : ORIGIN = 0x0, LENGTH = 0x20000 /* 128K bytes (alias RAM2) */  
   SRAM_OC (rwx) : ORIGIN = 0x20200000, LENGTH = 0xc0000 /* 768K bytes (alias RAM3) */  
@@ -50,6 +51,9 @@ __flash_start__         = __base_BOARD_FLASH;
 __nanoImage_start__     = ORIGIN(BOARD_FLASH);
 __nanoImage_size__      = LENGTH(BOARD_FLASH);
 __nanoImage_end__       = __nanoImage_start__ + __nanoImage_size__;
+__nanoConfig_start__    = ORIGIN(CONFIG_FLASH);
+__nanoConfig_size__     = LENGTH(CONFIG_FLASH);
+__nanoConfig_end__      = __nanoConfig_start__ + __nanoConfig_size__;
 __deployment_start__    = ORIGIN(DEPLOYMENT_FLASH);
 __deployment_size__     = LENGTH(DEPLOYMENT_FLASH);
 __deployment_end__      = __deployment_start__ + __deployment_size__;
@@ -58,22 +62,6 @@ ENTRY(ResetISR)
 
 SECTIONS
 {
-    /* Image Vector Table and Boot Data for booting from external flash */
-    .boot_hdr : ALIGN(4)
-    {
-        FILL(0xff)
-        __boot_hdr_start__ = ABSOLUTE(.) ;
-        KEEP(*(.boot_hdr.conf))
-        . = 0x1000 ;
-        KEEP(*(.boot_hdr.ivt))
-        . = 0x1020 ;
-        KEEP(*(.boot_hdr.boot_data))
-        . = 0x1030 ;
-        KEEP(*(.boot_hdr.dcd_data))
-        __boot_hdr_end__ = ABSOLUTE(.) ;
-        . = 0x2000 ;
-    } >BOARD_FLASH
-
     /* MAIN TEXT SECTION */
     .text : ALIGN(4)
     {

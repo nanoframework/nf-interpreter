@@ -11,6 +11,18 @@
 // flags for file system ready
 extern bool sdCardFileSystemReady;
 
+void CombinePath(char * outpath, const char * path1, const char * path2)
+{
+	strcat(outpath, path1);
+	
+	// Add "\" to path if required
+	if (outpath[hal_strlen_s(outpath) - 1] != '\\')
+	{
+		strcat(outpath, "\\");
+	}
+	strcat(outpath, path2);
+}
+
 SYSTEMTIME GetDateTime(uint16_t date, uint16_t time)
 {
     SYSTEMTIME fileTime;
@@ -297,9 +309,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
                     memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
 
                     // compose directory path
-                    strcat(workingBuffer, workingPath);
-                    strcat(workingBuffer, "\\");
-                    strcat(workingBuffer, fileInfo.fname);
+                    CombinePath(workingBuffer, workingPath, fileInfo.fname);
                     
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], workingBuffer ));
                     
@@ -494,9 +504,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
                         memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
 
                         // compose file path
-                        strcat(workingBuffer, workingPath);
-                        strcat(workingBuffer, "\\");
-                        strcat(workingBuffer, fileInfo.fname);
+                        CombinePath(workingBuffer, workingPath, fileInfo.fname);
 
                         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[ Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path ], workingBuffer ));
 
@@ -595,15 +603,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFileNati
     memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose file path
-    strcat(filePath, workingPath);
-
-	// Add "\" to path if required
-	if (filePath[hal_strlen_s(filePath) - 1] != '\\')
-	{
-		strcat(filePath, "\\");
-	}
-
-    strcat(filePath, fileName);
+    CombinePath(filePath, workingPath, fileName);
 
     // compute mode flags from CreationCollisionOption
     switch (options)
@@ -740,16 +740,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFolderNa
     memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose folder path
-    strcat(folderPath, workingPath);
-
-    // Add "\" to path if required
-	if (folderPath[hal_strlen_s(folderPath) - 1] != '\\')
-	{
-		strcat(folderPath, "\\");
-	}
-
-    strcat(folderPath, folderName);
-    
+    CombinePath(folderPath, workingPath, folderName);  
     
     //check if folder exists
     operationResult = f_stat(folderPath, &fileInfo);
@@ -938,15 +929,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 	memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
 
 	// compose folder path
-	strcat(folderPath, workingPath);
-
-	// Add "\" to path if required
-	if (folderPath[hal_strlen_s(folderPath) - 1] != '\\')
-	{
-		strcat(folderPath, "\\");
-	}
-
-	strcat(folderPath, folderName);
+    CombinePath(folderPath, workingPath, folderName);  
 
 	// check if directory exists
 	operationResult = f_stat(folderPath, &fileInfo);
