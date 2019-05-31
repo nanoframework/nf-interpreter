@@ -28,7 +28,7 @@ int main(void) {
   palClearPad(GPIOE, GPIOE_PIN4);
   palClearLine(LINE_RELAY);
   palSetPad(GPIOJ, GPIOJ_PIN13);
-  palSetPad(GPIOJ, GPIOJ_PIN14);
+  palClearPad(GPIOJ, GPIOJ_PIN14);
   palClearLine(LINE_LCD_ENABLE);
 
   // init SWO as soon as possible to make it available to output ASAP
