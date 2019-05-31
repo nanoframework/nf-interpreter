@@ -232,9 +232,10 @@ struct Library_sys_net_native_System_Net_Sockets_Socket
     static const int FIELD__m_Handle = 1;
     static const int FIELD__m_fBlocking = 2;
     static const int FIELD__m_localEndPoint = 3;
-    static const int FIELD__m_recvTimeout = 4;
-    static const int FIELD__m_sendTimeout = 5;
-    static const int FIELD___socketType = 6;
+    static const int FIELD___remoteEndPoint = 4;
+    static const int FIELD__m_recvTimeout = 5;
+    static const int FIELD__m_sendTimeout = 6;
+    static const int FIELD___socketType = 7;
 
 
     //--//
