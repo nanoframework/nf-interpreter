@@ -13,7 +13,6 @@
     #error "Need the RTC to be enabled. Please set CMake option NF_FEATURE_RTC to ON."
 #endif
 
-#include "fsl_snvs_hp.h"
 #include "fsl_snvs_lp.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +26,6 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc::Native_RTC_SetSys
     {
         snvs_lp_srtc_datetime_t srtcDate;
 
-        // Stop the RTC before setting date
         srtcDate.year = (uint16_t) stack.Arg0().NumericByRef().s4;  
         srtcDate.month = (uint8_t) stack.Arg1().NumericByRef().u1; 
         srtcDate.day = (uint8_t) stack.Arg2().NumericByRef().u1;   
@@ -37,7 +35,6 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc::Native_RTC_SetSys
 
         // Set new date and start RTC        
         SNVS_LP_SRTC_SetDatetime(SNVS, &srtcDate);
-        SNVS_HP_RTC_TimeSynchronize(SNVS);
 
         // Return value to the managed application
         stack.SetResult_Boolean(true);
