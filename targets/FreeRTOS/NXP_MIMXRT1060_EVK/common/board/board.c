@@ -215,16 +215,10 @@ void BOARD_USDHCClockConfiguration(void)
 /* Init SNVS_HP and SNVS_LP that implements a real time counter */
 void BOARD_InitRTC(void)
 {
-    snvs_hp_rtc_config_t snvsRtcConfig;
     snvs_lp_srtc_config_t snvsSrtcConfig;
 
-    SNVS_HP_RTC_GetDefaultConfig(&snvsRtcConfig);
-    SNVS_HP_RTC_Init(SNVS, &snvsRtcConfig);
     SNVS_LP_SRTC_GetDefaultConfig(&snvsSrtcConfig);
     SNVS_LP_SRTC_Init(SNVS, &snvsSrtcConfig);
 
     SNVS_LP_SRTC_StartTimer(SNVS);
-
-    SNVS_HP_RTC_TimeSynchronize(SNVS);
-    SNVS_HP_RTC_StartTimer(SNVS);
 }
