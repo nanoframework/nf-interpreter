@@ -11,7 +11,6 @@
 #include "fsl_common.h"
 #include "fsl_gpio.h"
 #include "fsl_clock.h"
-#include "fsl_snvs_hp.h"
 #include "fsl_snvs_lp.h"
 
 /*******************************************************************************
