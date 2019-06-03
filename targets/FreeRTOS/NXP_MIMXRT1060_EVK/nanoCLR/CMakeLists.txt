@@ -35,6 +35,18 @@ if(USE_FILESYSTEM_OPTION)
     list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/fatfs/ffsystem.c")
 endif()
 
+# append networking files, if enabled
+if(USE_NETWORKING_OPTION)
+    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Network.cpp")
+    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_Network.cpp")
+
+    # append mbed TLS entropy generator, if hardware has it
+    # if(NF_SECURITY_MBEDTLS AND USE_RNG)
+    #     list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/mbedtls_entropy_hardware_pool.c")
+    # endif()
+
+endif()
+
 # append files from Runtime.Native
 list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp")
 

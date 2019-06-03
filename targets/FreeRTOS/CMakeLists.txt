@@ -348,11 +348,11 @@ if(NO_LWIP_SOURCE)
         set(LWIP_GIT_TAG "${LWIP_VERSION}")
     endif()            
 
-    message(STATUS "LWIP v${LWIP_VERSION} from savannah.nongnu.org repo")
+    message(STATUS "LWIP ${LWIP_VERSION} from savannah.nongnu.org repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
-    configure_file("CMake/LWIP.CMakeLists.cmake.in"
+    configure_file("${PROJECT_SOURCE_DIR}/CMake/LWIP.CMakeLists.cmake.in"
                 "${CMAKE_BINARY_DIR}/LWIP_Download/CMakeLists.txt")
 
     # setup CMake project for LWIP download
