@@ -125,13 +125,6 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     // configure protocol
     switch((SslProtocols)sslMode)
     {
-        case SslProtocols_SSLv3:
-            context->conf->min_major_ver = 3;
-            context->conf->min_minor_ver = 0;
-            context->conf->max_major_ver = 3;
-            context->conf->max_minor_ver = 0;
-            break;
-
         case SslProtocols_TLSv1:
             context->conf->min_major_ver = 1;
             context->conf->min_minor_ver = 0;

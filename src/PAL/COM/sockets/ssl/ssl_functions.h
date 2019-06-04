@@ -19,7 +19,6 @@
 enum SslProtocols
 {
         SslProtocols_None =     0x00,
-        SslProtocols_SSLv3 =    0x08,
         SslProtocols_TLSv1 =    0x10,
         SslProtocols_TLSv11 =   0x20,
         SslProtocols_TLSv12 =   0x40,

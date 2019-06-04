@@ -92,10 +92,6 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     // configure protocol
     switch((SslProtocols)sslMode)
     {
-        case SslProtocols_SSLv3:
-            securityMethod = SLNETSOCK_SEC_METHOD_SSLV3;
-            break;
-
         case SslProtocols_TLSv1:
             securityMethod = SLNETSOCK_SEC_METHOD_TLSV1;
             break;
