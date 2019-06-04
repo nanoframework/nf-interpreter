@@ -134,8 +134,6 @@ bool ssl_parse_certificate_internal(void * bytes, size_t size, void* pwd, void* 
 {
     (void)x509CertData;
 
-//    char *name,*subject;
-//    X509CertData* x509 = (X509CertData*)x509CertData;
     X509* x = ssl_parse_certificate(bytes, size, (LPCSTR)pwd, NULL);
 
     if (x == NULL)
@@ -157,6 +155,10 @@ bool ssl_parse_certificate_internal(void * bytes, size_t size, void* pwd, void* 
 //    ssl_get_ASN1_UTCTIME(X509_get_notAfter(x), &x509->ExpirationDate);
 
 #if defined(DEBUG) || defined(_DEBUG)
+
+    char *name,*subject;
+    X509CertData* x509 = (X509CertData*)x509CertData;
+
     NANOCLR_SSL_PRINTF("\n        Issuer: ");
     NANOCLR_SSL_PRINTF(name);
     NANOCLR_SSL_PRINTF("\n");
@@ -183,6 +185,7 @@ bool ssl_parse_certificate_internal(void * bytes, size_t size, void* pwd, void* 
     NANOCLR_SSL_PRINTF("        Subject: ");
     NANOCLR_SSL_PRINTF(subject);
     NANOCLR_SSL_PRINTF("\n");
+
 #endif
 
 // TODO - FIXME - from above, not allocated
