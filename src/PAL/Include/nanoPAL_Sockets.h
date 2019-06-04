@@ -433,15 +433,10 @@ enum UpdateOperation
 
 //--//
 
-#if defined(NETMF_TARGET_LITTLE_ENDIAN)
 #define SOCK_htons(x) ( (((x) & 0x000000FFUL) <<  8) | (((x) & 0x0000FF00UL) >>  8) )
 #define SOCK_htonl(x) ( (((x) & 0x000000FFUL) << 24) | (((x) & 0x0000FF00UL) << 8) | (((x) & 0x00FF0000UL) >> 8) | (((x) & 0xFF000000UL) >> 24) )
 #define SOCK_ntohs(x) SOCK_htons(x)
-#else
-#define SOCK_htons(x) ( x )
-#define SOCK_htonl(x) ( x )
-#define SOCK_ntohs(x) ((UINT16)(x))
-#endif
+#define SOCK_ntohl(x) ( (((x) & 0x000000FFUL) << 24) | (((x) & 0x0000FF00UL) << 8) | (((x) & 0x00FF0000UL) >> 8) | (((x) & 0xFF000000UL) >> 24) )
 
 #define SOCK_FD_ZERO(x)     memset(x, 0, sizeof(*x))
 __inline bool SOCK_FD_ISSET(int y, SOCK_fd_set* x)        
