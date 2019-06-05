@@ -65,7 +65,7 @@ endmacro()
 
 
 ############################################################################################
-# WHEN ADDING A NEW API add the corresponding block bellow 
+# WHEN ADDING A NEW API add the corresponding block below 
 # required changes:
 # 1. change the 'IF' to match the CMake option 
 # 2. change the call to PerformSettingsForApiEntry() macro with the API name (doted naming)

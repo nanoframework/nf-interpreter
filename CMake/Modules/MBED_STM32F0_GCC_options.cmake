@@ -1,5 +1,10 @@
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
 #################################################################
-# WHEN ADDING A NEW TARGET add the appropriate GCC options bellow
+# WHEN ADDING A NEW TARGET add the appropriate GCC options below
 #################################################################
 
 set(CMAKE_C_FLAGS "-mthumb -mcpu=cortex-m0 -fno-builtin -std=c11 -g -Wall -ffunction-sections -fdata-sections -fomit-frame-pointer -mlong-calls -mabi=aapcs -fno-exceptions -fno-unroll-loops -ftree-vectorize -specs=nano.specs" CACHE INTERNAL "c compiler flags")

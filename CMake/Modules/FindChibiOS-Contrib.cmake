@@ -27,7 +27,7 @@ list(APPEND CHIBIOS_CONTRIB_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_S
 
 
 ####################################################################################################
-# WHEN ADDING A NEW ChibiOS-Contrib component add the source file(s) specific to it bellow 
+# WHEN ADDING A NEW ChibiOS-Contrib component add the source file(s) specific to it below 
 ####################################################################################################
 # component IMACOMPONENT
 # list(APPEND CHIBIOS_CONTRIB_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/src/IMACOMPONENT/source-file-1.c)
