@@ -312,7 +312,7 @@ int  ssl_write_internal( int sd, const char* data, size_t req_len)
 
     socketErrorCode = SlNetSock_send(sd, (const void*)data, req_len, 0);
 
-    // anything bellow 0 is considered an error, so we have to report that no bytes were sent
+    // anything below 0 is considered an error, so we have to report that no bytes were sent
     if (socketErrorCode < 0)
     {
         return 0;

@@ -15,7 +15,7 @@ bool WP_Initialise(COM_HANDLE port);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// The functions bellow are the ones that need to be ported to new channels/HALs when required
+// The functions below are the ones that need to be ported to new channels/HALs when required
 // These are to be considered as a reference implementations when working on new ports
 // 
 // This reference implementation provides communication through:

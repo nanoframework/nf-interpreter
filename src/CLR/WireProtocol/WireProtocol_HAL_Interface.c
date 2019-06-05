@@ -8,7 +8,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
-// The functions bellow are the ones that need to be ported to new channels/HALs when required
+// The functions below are the ones that need to be ported to new channels/HALs when required
 //
 // Please check the reference implementation provided for ChibiOS in:
 // RTOS\ChibiOS\WireProtocol_HAL_Interface.c

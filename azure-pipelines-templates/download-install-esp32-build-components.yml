@@ -71,7 +71,7 @@ steps:
     inputs:
         targetType: 'inline'
         script: python -m pip install pyserial
-        # the bellow settings are required as the script is installing an outdated version of pyserial
+        # the below settings are required as the script is installing an outdated version of pyserial
         errorActionPreference: 'silentlyContinue' 
         failOnStderr: false
         ignoreLASTEXITCODE: false

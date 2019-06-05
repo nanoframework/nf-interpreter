@@ -41,7 +41,7 @@ void CLRStartupThread(void const * argument)
   #if !defined(BUILD_RTM)
 
   // if the target Device_BlockStorageConfig (and collections) and the linker file have an address mismatch
-  // the assertions bellow will cause an exception
+  // the assertions below will cause an exception
   // these checks are only included when RTM build option isn't specified
   BlockStorageStream stream;
   memset(&stream, 0, sizeof(BlockStorageStream));

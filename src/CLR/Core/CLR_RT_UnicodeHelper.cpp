@@ -122,7 +122,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfBytes( int max )
 
 //--//
 
-// dev note: need the pragma bellow because there are a couple of 'smart' hacks in	
+// dev note: need the pragma below because there are a couple of 'smart' hacks in	
 // the switch cases to improve the algorithm	
 #ifdef __GNUC__	
 #pragma GCC diagnostic push

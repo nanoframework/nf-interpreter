@@ -221,7 +221,7 @@ nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
 if(HEX2DFU_TOOL_AVAILABLE)
 
     ####################################################################################################
-    ## when changing the linker file make sure to update the new addresses for the image files bellow ##
+    ## when changing the linker file make sure to update the new addresses for the image files below  ##
     ## DO NOT use the leading 0x notation, just the address in plain hexadecimal formating            ##
     ####################################################################################################
 

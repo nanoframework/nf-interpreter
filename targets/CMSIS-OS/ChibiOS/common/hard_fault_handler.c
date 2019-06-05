@@ -26,7 +26,7 @@ void NMI_Handler(void) {
 #endif
 
 // dev note: on all the following the variables need to be declared as volatile so they don't get optimized out by the linker
-// dev note: the pragma bellow is to ignore the warning because the variables aren't actually being used despite needing to remain there for debug
+// dev note: the pragma below is to ignore the warning because the variables aren't actually being used despite needing to remain there for debug
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push

@@ -4,7 +4,7 @@
 #
 
 ###################################################################################################################################
-# WHEN ADDING A NEW series add the respective name to the list bellow along with the CMake files with GCC options and source files
+# WHEN ADDING A NEW series add the respective name to the list below along with the CMake files with GCC options and source files
 ###################################################################################################################################
 
 # check if the series name is supported 

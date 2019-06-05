@@ -54,8 +54,8 @@ if("${RTOS}" STREQUAL "")
 endif()
 
 # list of supported RTOSes
-# when adding a new RTOS add the corresponding string bellow AND...
-# ... also on the compare block bellow
+# when adding a new RTOS add the corresponding string below AND...
+# ... also on the compare block below
 set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS_ESP32" "TI_SIMPLELINK" CACHE INTERNAL "supported RTOS options")
 
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)

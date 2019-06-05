@@ -587,7 +587,7 @@ struct BLOCKSTORAGELIST
 };
 
 //////////////////////////////////////////////////////////
-// TODO: evaluate if these typedefs bellow should go away 
+// TODO: evaluate if these typedefs below should go away 
 // and be replaced with others or completely ditched 
 
 

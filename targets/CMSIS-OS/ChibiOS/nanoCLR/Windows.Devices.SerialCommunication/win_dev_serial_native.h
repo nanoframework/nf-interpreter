@@ -184,7 +184,7 @@ struct NF_PAL_UART
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// when a UART/USART is defined the declarations bellow will have the real function/configuration 
+// when a UART/USART is defined the declarations below will have the real function/configuration 
 // in the target folder @ target_windows_devices_serialcommunication_config.cpp
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void ConfigPins_UART1();
@@ -271,7 +271,7 @@ extern uint8_t Uart8_RxBuffer[];
 #endif
 
 
-// when a UART/USART is defined the declarations bellow will have the real function/configuration 
+// when a UART/USART is defined the declarations below will have the real function/configuration 
 // in the target folder @ target_windows_devices_serialcommunication_config.cpp
 void Init_UART1();
 void Init_UART2();
@@ -287,7 +287,7 @@ void Init_UART8();
 // it gets called in the Windows_Devices_SerialCommunication_SerialDevice::NativeDispose function
 #define UART_UNINIT(num) void UnInit_UART##num() { return; }
 
-// when a UART/USART is defined the declarations bellow will have the real function/configuration 
+// when a UART/USART is defined the declarations below will have the real function/configuration 
 // in the target folder @ target_windows_devices_serialcommunication_config.cpp
 void UnInit_UART1();
 void UnInit_UART2();

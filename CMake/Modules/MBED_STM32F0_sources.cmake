@@ -105,7 +105,7 @@ foreach(SRC_FILE ${MBED_VENDOR_SERIES_AND_TARGET_SRCS})
 endforeach()
 
 #######################################################################################################################################
-# WHEN ADDING A NEW TARGET add the respective if clause bellow along with the startup file and the linker file name (without extension)
+# WHEN ADDING A NEW TARGET add the respective if clause below along with the startup file and the linker file name (without extension)
 #######################################################################################################################################
 
 # startup file

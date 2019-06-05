@@ -9,7 +9,7 @@
 list(APPEND CHIBIOS_CONTRIB_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/include)
 
 ####################################################################################
-# WHEN ADDING A NEW ChibiOS-Contrib component add the include directory(ies) bellow
+# WHEN ADDING A NEW ChibiOS-Contrib component add the include directory(ies) below
 ####################################################################################
 # component IMACOMPONENT
 #list(APPEND CHIBIOS_CONTRIB_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/include/IMACOMPONENT)

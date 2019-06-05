@@ -160,7 +160,7 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
         target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
     endif()
 
-    # include any extra compiler definitions comming from extra args
+    # include any extra compiler definitions coming from extra args
     target_compile_definitions(${TARGET} PUBLIC ${ARGN})
 
 endfunction()
