@@ -1,5 +1,5 @@
 # this hack is required to make the search for Git path to work in Windows platforms
-# it can safely be removed after:
+# it can safelly be removed after:
 # https://gitlab.kitware.com/cmake/cmake/merge_requests/332 is MERGED
 # and makes it to a release version of CMake, then we need to have that version as minimum required
 # 
