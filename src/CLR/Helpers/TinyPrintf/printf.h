@@ -24,7 +24,7 @@ int tiny_vsnprintf(char *out, unsigned int max_len, const char *format, va_list 
 }
 #endif
 
-// the defines bellow allow using the regular calls to sprintf
+// the defines below allow using the regular calls to sprintf
 #define sprintf tiny_sprintf 
 #define snprintf tiny_snprintf
 #define vsnprintf tiny_vsnprintf

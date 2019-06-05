@@ -2156,7 +2156,7 @@
 #define DNS_DEBUG                       LWIP_DBG_OFF
 #endif
 
-// in order to enable the lwIP debug output the bellow has to be uncomment and
+// in order to enable the lwIP debug output the below has to be uncomment and
 // the options above changed to LWIP_DBG_ON for the features that are to output debug information
 //#define LWIP_DEBUG 1
 

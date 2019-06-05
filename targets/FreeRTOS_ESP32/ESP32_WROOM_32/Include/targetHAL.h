@@ -59,7 +59,7 @@ extern portMUX_TYPE globalLockMutex;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // DEBUGGER HELPER                                                                                 //
-// The line bellow is meant to be used as helper on checking that the execution engine is running. //
+// The line below is meant to be used as helper on checking that the execution engine is running. //
 // This can be inferred by checking if Events_WaitForEvents loop is running.                       //
 // The implementation should is to be provided by each target at target_common.h.in                //
 ////////////////////////////////////////////////////////////////////////////////////////////////////

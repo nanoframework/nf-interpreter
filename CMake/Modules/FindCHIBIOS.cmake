@@ -4,7 +4,7 @@
 #
 
 ###################################################################################################################################
-# WHEN ADDING A NEW series add the respective name to the list bellow along with the CMake files with GCC options and source files
+# WHEN ADDING A NEW series add the respective name to the list below along with the CMake files with GCC options and source files
 ###################################################################################################################################
 
 # check if the series name is supported 
@@ -18,7 +18,7 @@ if(TARGET_SERIES_NAME_INDEX EQUAL -1)
     # try TI 
     list(FIND CHIBIOS_TI_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
     if(TARGET_SERIES_NAME_INDEX EQUAL -1)
-        message(FATAL_ERROR "\n\nSorry but ${TARGET_SERIES} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        message(FATAL_ERROR "\n\nSorry but the ${TARGET_SERIES} is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
     else()
         # series is supported by TI
         set(TARGET_VENDOR "TI" CACHE INTERNAL "target vendor is TI")

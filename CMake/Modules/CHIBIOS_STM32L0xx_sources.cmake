@@ -103,7 +103,7 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/por
 
 
 ####################################################################################
-# WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) bellow 
+# WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) below 
 ####################################################################################
 # component STM32_FLASH
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/FLASHv3)
@@ -116,14 +116,14 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/
 
 ###############################################################################################################################
 # Add above the required include directory(ies) for a new nanoFramework overlay component that you are adding
-# following the template bellow. 
+# following the template below. 
 #
 # list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/<path-here>)
 ###############################################################################################################################
 
 
 ####################################################################################################
-# WHEN ADDING A NEW CHIBIOS OVERLAY component add the source file(s) specific to this series bellow 
+# WHEN ADDING A NEW CHIBIOS OVERLAY component add the source file(s) specific to this series below 
 ####################################################################################################
 # component STM32_FLASH
 list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/FLASHv3/flash_lld.c)
@@ -136,7 +136,7 @@ list(APPEND ChibiOSnfOverlay_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Chib
 
 ##########################################################################################################################
 # Add above ALL the source code file(s) low level driver specif for a series required for a new nanoFramework 
-# overlay component that you are adding following the template bellow. 
+# overlay component that you are adding following the template below. 
 #
 # list(APPEND CHIBIOS_SOURCES ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/<path-here>)
 ##########################################################################################################################

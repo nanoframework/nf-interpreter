@@ -4,7 +4,7 @@
 #
 
 # because of issues when passing the config file as a string when using ExternalProject_Add with mbedTLS
-# we are replicating their CMakeList where. Actually this is more a simplified version...
+# we are replicating their CMakeList here. Actually this is more a simplified version...
 
 # List of the required include paths
 list(APPEND mbedTLS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/mbedTLS_Source/include/)

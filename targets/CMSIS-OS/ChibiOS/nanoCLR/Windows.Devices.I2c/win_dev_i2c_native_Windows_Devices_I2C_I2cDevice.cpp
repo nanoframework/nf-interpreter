@@ -394,7 +394,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         if(isLongRunningOperation)
         {
             // if this is a long running operation, set a timeout equal to the estimated transaction duration in milliseconds
-            // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
+            // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() below
             hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
 
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));

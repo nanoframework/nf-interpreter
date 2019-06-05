@@ -117,7 +117,7 @@ struct NF_PAL_I2C
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-// when an I2C is defined the declarations bellow will have the real function/configuration //
+// when an I2C is defined the declarations below will have the real function/configuration //
 // in the target folder @ target_windows_devices_i2c_config.cpp                             //
 //////////////////////////////////////////////////////////////////////////////////////////////
 void ConfigPins_I2C1();

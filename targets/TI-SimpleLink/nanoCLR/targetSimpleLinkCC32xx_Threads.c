@@ -643,7 +643,7 @@ void SimpleLinkNetAppRequestMemFreeEventHandler(uint8_t *buffer)
 }
 
 
-//////////// these are comming from link task, they probably don't belong here
+//////////// these are coming from link task, they probably don't belong here
 
 void SimpleLinkSocketTriggerEventHandler(SlSockTriggerEvent_t *pSlTriggerEvent)
 {

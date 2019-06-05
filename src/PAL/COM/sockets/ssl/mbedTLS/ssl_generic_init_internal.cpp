@@ -106,7 +106,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     }
     mbedtls_entropy_init( context->entropy );
 
-    // TODO: review if we can add some instance-unique data to the custom argument bellow
+    // TODO: review if we can add some instance-unique data to the custom argument below
     if( mbedtls_ctr_drbg_seed( context->ctr_drbg, mbedtls_entropy_func, context->entropy, NULL, 0 ) != 0 )
     {
         // ctr_drbg_seed_failed
@@ -212,7 +212,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     }
     mbedtls_ssl_conf_authmode( context->conf, authMode );
 
-    // set bellow the threshold level for debug messages
+    // set below the threshold level for debug messages
     // check mbed TLS mbedtls/debug.h header for details.
     // Debug levels:
     // 0 No debug

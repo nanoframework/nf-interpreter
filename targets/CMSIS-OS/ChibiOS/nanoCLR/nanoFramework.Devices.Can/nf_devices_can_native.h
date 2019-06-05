@@ -126,7 +126,7 @@ struct NF_PAL_CAN
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-// when a CAN is defined the declarations bellow will have the real function/configuration 
+// when a CAN is defined the declarations below will have the real function/configuration 
 // in the target folder @ target_nf_devices_can_config.cpp
 ///////////////////////////////////////////////////////////////////////////////////////////
 void ConfigPins_CAN1();
@@ -148,7 +148,7 @@ extern CANRxFrame Can3_MsgBuffer[];
     Can##num##_PAL.MsgRingBuffer.Initialize( Can##num##_PAL.MsgBuffer, buffer_size); \
 }
 
-// when a CAN is defined the declarations bellow will have the real function/configuration 
+// when a CAN is defined the declarations below will have the real function/configuration 
 // in the target folder @ target_nf_devices_can_config.cpp
 void Init_Can1();
 void Init_Can2();

@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
 INCLUDE(CMakeForceCompiler)
 # if( DEFINED CMAKE_CROSSCOMPILING )
 #     # subsequent toolchain loading is not really needed
@@ -88,5 +93,3 @@ set(CMAKE_FIND_ROOT_PATH ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf ${EXTRA_FIND_PATH}
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-
-

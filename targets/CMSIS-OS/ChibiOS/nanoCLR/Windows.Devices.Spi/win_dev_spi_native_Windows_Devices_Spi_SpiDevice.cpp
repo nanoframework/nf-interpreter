@@ -210,7 +210,7 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRa
         if(actualFrequency <= requestedFrequency)
         {
             // best match for the requested frequency
-            // just check if it's bellow the max SPI frequency
+            // just check if it's below the max SPI frequency
             if(actualFrequency <= maxSpiFrequency)
             {
                 // we are good with this value
@@ -447,7 +447,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         if(isLongRunningOperation)
         {
             // if this is a long running operation, set a timeout equal to the estimated transaction duration in milliseconds
-            // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
+            // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() below
             hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
 
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));

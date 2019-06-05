@@ -1,6 +1,11 @@
-#####################################################################"######
-# WHEN ADDING A NEW VENDOR add the source code from the vendor folder bellow
-######################################################################"#####
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
+############################################################################
+# WHEN ADDING A NEW VENDOR add the source code from the vendor folder below
+############################################################################
 
 # source files common for all STM targets
 set(MBED_VENDOR_SRCS
