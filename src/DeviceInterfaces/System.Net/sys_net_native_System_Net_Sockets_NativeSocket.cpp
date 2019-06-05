@@ -300,13 +300,13 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::recvfrom___STATI
     return SendRecvHelper( stack, false, true );
 }
 
-HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getpeername___STATIC__VOID__OBJECT__BYREF_SZARRAY_U1( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getpeername___STATIC__VOID__OBJECT__BYREF_SystemNetEndPoint( CLR_RT_StackFrame& stack )
 {
    NATIVE_PROFILE_CLR_NETWORK();
    return SockNameHelper( stack, true );
 }
 
-HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getsockname___STATIC__VOID__OBJECT__BYREF_SZARRAY_U1( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getsockname___STATIC__VOID__OBJECT__BYREF_SystemNetEndPoint( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     return SockNameHelper( stack, false );
