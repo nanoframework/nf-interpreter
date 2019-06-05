@@ -223,7 +223,30 @@ int SOCK_connect(SOCK_SOCKET socket, const struct SOCK_sockaddr* address, int ad
 { 
     NATIVE_PROFILE_PAL_COM();
 
-    socketErrorCode = SlNetSock_connect(socket, (const SlNetSock_Addr_t*)address, addressLen);
+    // Simple Link connect API requires it to be called over and over until connection is established (or fails!)
+    // See chapter 6.7.1 of CC3X20 Programmer's Guide (doc SWRU455G).
+    // Our current sockets implementation handles this as blocking connect, so we have to deal with it here
+    // it's not optimal because it prevents the execution engine from performing task switching
+    // this should be addressed at the caller level be implementing a timeout execution within the connect code.
+
+    socketErrorCode = -1;
+
+    // loop until socket is connected (or error is returned)
+    while(socketErrorCode < 0)
+    {
+        socketErrorCode = SlNetSock_connect(socket, (const SlNetSock_Addr_t*)address, addressLen);
+        
+        if( socketErrorCode == SL_ERROR_BSD_EALREADY )
+        {
+            ClockP_usleep(10*1000);
+            continue;
+        }
+        else if(socketErrorCode < 0)
+        {
+            sl_Close(socket);
+        }
+        break;
+    }
 
     return socketErrorCode;
 }
