@@ -74,10 +74,6 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
 
         switch((SslProtocols)sslMode)
         {
-            case SslProtocols_SSLv3:
-                meth = (SSL_METHOD*)SSLv3_server_method();
-                break;
-
             case SslProtocols_TLSv1:
                 meth = (SSL_METHOD*)TLSv1_server_method();
                 break;
@@ -99,10 +95,6 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     {
         switch((SslProtocols)sslMode)
         {
-            case SslProtocols_SSLv3:
-                meth = (SSL_METHOD*)SSLv3_client_method();
-                break;
-
             case SslProtocols_TLSv1:
                 meth = (SSL_METHOD*)TLSv1_client_method();
                 break;

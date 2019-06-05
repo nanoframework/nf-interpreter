@@ -95,6 +95,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::InitializeNetworkInterfaceSettings___VOID,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::UpdateConfiguration___VOID__I4,
     NULL,
@@ -157,9 +161,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_sys_net_native_System_Net_Sockets_NativeSocket::socket___STATIC__I4__I4__I4__I4,
-    Library_sys_net_native_System_Net_Sockets_NativeSocket::bind___STATIC__VOID__OBJECT__SZARRAY_U1,
-    Library_sys_net_native_System_Net_Sockets_NativeSocket::connect___STATIC__VOID__OBJECT__SZARRAY_U1__BOOLEAN,
+    Library_sys_net_native_System_Net_Sockets_NativeSocket::bind___STATIC__VOID__OBJECT__SystemNetEndPoint,
+    Library_sys_net_native_System_Net_Sockets_NativeSocket::connect___STATIC__VOID__OBJECT__SystemNetEndPoint__BOOLEAN,
     Library_sys_net_native_System_Net_Sockets_NativeSocket::send___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4,
     Library_sys_net_native_System_Net_Sockets_NativeSocket::recv___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4,
     Library_sys_net_native_System_Net_Sockets_NativeSocket::close___STATIC__I4__OBJECT,
@@ -167,8 +174,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_sys_net_native_System_Net_Sockets_NativeSocket::accept___STATIC__I4__OBJECT,
     Library_sys_net_native_System_Net_Sockets_NativeSocket::getaddrinfo___STATIC__VOID__STRING__BYREF_STRING__BYREF_SZARRAY_SZARRAY_U1,
     Library_sys_net_native_System_Net_Sockets_NativeSocket::shutdown___STATIC__VOID__OBJECT__I4__BYREF_I4,
-    Library_sys_net_native_System_Net_Sockets_NativeSocket::sendto___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__SZARRAY_U1,
-    Library_sys_net_native_System_Net_Sockets_NativeSocket::recvfrom___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__BYREF_SZARRAY_U1,
+    Library_sys_net_native_System_Net_Sockets_NativeSocket::sendto___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__SystemNetEndPoint,
+    Library_sys_net_native_System_Net_Sockets_NativeSocket::recvfrom___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__BYREF_SystemNetEndPoint,
     Library_sys_net_native_System_Net_Sockets_NativeSocket::getpeername___STATIC__VOID__OBJECT__BYREF_SZARRAY_U1,
     Library_sys_net_native_System_Net_Sockets_NativeSocket::getsockname___STATIC__VOID__OBJECT__BYREF_SZARRAY_U1,
     Library_sys_net_native_System_Net_Sockets_NativeSocket::getsockopt___STATIC__VOID__OBJECT__I4__I4__SZARRAY_U1,
@@ -228,14 +235,15 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_mscorlibSystemDateTime__BYREF_mscorlibSystemDateTime,
     NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
-    "System.Net",
-    0x808BAB84,
+    "System.Net", 
+    0xB541AF57,
     method_lookup,
-    { 1, 0, 7, 0 }
+    { 1, 1, 0, 0 }
 };

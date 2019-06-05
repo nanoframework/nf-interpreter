@@ -7,9 +7,6 @@
 
 #include "sys_net_native.h"
 
-// FIXME -  Check if required, for now just ignore
-#define SwapEndianIfBEc16(x)    (x)
-
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::socket___STATIC__I4__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -29,17 +26,18 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::socket___STATIC_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::bind___STATIC__VOID__OBJECT__SZARRAY_U1( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::bind___STATIC__VOID__OBJECT__SystemNetEndPoint( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     return BindConnectHelper( stack, true );
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::connect___STATIC__VOID__OBJECT__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::connect___STATIC__VOID__OBJECT__SystemNetEndPoint__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     return BindConnectHelper( stack, false );
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
@@ -290,13 +288,13 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::shutdown___STATI
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::sendto___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__SZARRAY_U1( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::sendto___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__SystemNetEndPoint( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     return SendRecvHelper( stack, true, true );
 }
 
-HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::recvfrom___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__BYREF_SZARRAY_U1( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::recvfrom___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__BYREF_SystemNetEndPoint( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     return SendRecvHelper( stack, false, true );
@@ -335,7 +333,6 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__B
     CLR_INT32 handle;
     CLR_INT32 mode       = stack.Arg1().NumericByRef().s4;    
     CLR_INT32 timeout_us = stack.Arg2().NumericByRef().s4;
-//    uint64_t ct = 0;
     CLR_RT_HeapBlock hbTimeout;
 
     CLR_INT32 res = 0;
@@ -420,6 +417,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::BindConnectHelpe
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock* socket = stack.Arg0().Dereference();
+
     CLR_INT32 handle;
     SOCK_sockaddr addr;
     CLR_UINT32 addrLen = sizeof(addr);
@@ -492,7 +490,6 @@ CLR_INT32 Library_sys_net_native_System_Net_Sockets_NativeSocket::Helper__Select
         exceptfds               = &fdsExcept;
     }
 
-
     timeval.tv_sec  = 0;
     timeval.tv_usec = 0;
 
@@ -509,65 +506,109 @@ CLR_INT32 Library_sys_net_native_System_Net_Sockets_NativeSocket::Helper__Select
     }
 
     return res;
-    
 }
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddress( CLR_RT_HeapBlock& blkDst, const struct SOCK_sockaddr* addrSrc, CLR_UINT32 addrLenSrc )
 {
     NATIVE_PROFILE_CLR_NETWORK();
+
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array* arr = NULL;
+    (void)addrLenSrc;
 
-    CLR_RT_HeapBlock blkArr; blkArr.SetObjectReference( NULL );
-    CLR_RT_ProtectFromGC gc( blkArr );
-    SOCK_sockaddr_in* dst;
     SOCK_sockaddr_in* src = (SOCK_sockaddr_in*)addrSrc;
+
+    CLR_RT_TypeDef_Index ipAddressTypeDef;
+    CLR_RT_TypeDef_Index ipEndPointTypeDef;
+    CLR_RT_HeapBlock* ipAddressHbObj;
+    CLR_RT_HeapBlock* ipEndPointHbObj;
+
+    CLR_RT_HeapBlock ipAddress; ipAddress.SetObjectReference( NULL );
+    CLR_RT_ProtectFromGC gc1( ipAddress );
+
+    CLR_RT_HeapBlock ipEndPoint; ipEndPoint.SetObjectReference( NULL );
+    CLR_RT_ProtectFromGC gc2( ipEndPoint );
+
+    // find <IPAddress> type definition, don't bother checking the result as it exists for sure
+    g_CLR_RT_TypeSystem.FindTypeDef( "IPAddress", "System.Net", ipAddressTypeDef );
+
+    // create an instance of <IPAddress>
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(ipAddress, ipAddressTypeDef));
+
+    // find <IPEndPoint> type definition, don't bother checking the result as it exists for sure
+    g_CLR_RT_TypeSystem.FindTypeDef( "IPEndPoint", "System.Net", ipEndPointTypeDef );
+
+    // create an instance of <IPEndPoint>
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(ipEndPoint, ipEndPointTypeDef));
+
+    // dereference the objects in order to reach their fields
+    ipAddressHbObj = ipAddress.Dereference();
+    ipEndPointHbObj = ipEndPoint.Dereference();
+
+    {
+        // get a reference to the managed fields and set them
+
+        // IPAddress _address field
+        // CLR_INT64 fields need to be accessed by pointer
+        CLR_RT_HeapBlock& addressFieldRef = ipAddressHbObj[ Library_sys_net_native_System_Net_IPAddress::FIELD___address ];
+        CLR_INT64* pRes = (CLR_INT64*)&addressFieldRef.NumericByRef().s8;
+        *pRes = src->sin_addr.S_un.S_addr;
         
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( blkArr, addrLenSrc, g_CLR_RT_WellKnownTypes.m_UInt8 ));
-    
-    arr = blkArr.DereferenceArray();
+        // IPAddress _family field
+        ipAddressHbObj[ Library_sys_net_native_System_Net_IPAddress::FIELD___family ].NumericByRef().s4 = src->sin_family;
+        
+        // IPEndPoint _port field
+        // take care of endianess swapping
+        ipEndPointHbObj[ Library_sys_net_native_System_Net_IPEndPoint::FIELD___port ].NumericByRef().s4 = SOCK_ntohs(src->sin_port);
 
-    _ASSERTE(arr);
+        // set IPEndPoint address with IPAddress heap block object
+        ipEndPointHbObj[ Library_sys_net_native_System_Net_IPEndPoint::FIELD___address ].SetObjectReference( ipAddressHbObj );
+    }
 
-    dst = (SOCK_sockaddr_in*)arr->GetFirstElement();
+    _ASSERTE(blkDst.DataType() == DATATYPE_BYREF);
 
-    dst->sin_family           = SwapEndianIfBEc16(src->sin_family);
-    dst->sin_port             = src->sin_port;
-    dst->sin_addr.S_un.S_addr = src->sin_addr.S_un.S_addr;
-
-    memcpy(dst->sin_zero, src->sin_zero, sizeof(dst->sin_zero));
-
-    _ASSERTE(blkDst.DataType() == DATATYPE_BYREF || blkDst.DataType() == DATATYPE_ARRAY_BYREF);
-
-    NANOCLR_CHECK_HRESULT(blkArr.StoreToReference( blkDst, 0 ));
+    // store the new IPEndPoint object to reference
+    NANOCLR_CHECK_HRESULT(ipEndPoint.StoreToReference( blkDst, 0 ));
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddress( struct SOCK_sockaddr* addrDst, CLR_UINT32& addrLen, const CLR_RT_HeapBlock& blkSockAddress )
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddress( struct SOCK_sockaddr* addrDst, CLR_UINT32& addrLenDst, const CLR_RT_HeapBlock& blkEndPointAddress )
 {        
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array* ptrSockAddress;
     SOCK_sockaddr_in* dst = (SOCK_sockaddr_in*)addrDst;
-    SOCK_sockaddr_in* src;    
 
-    ptrSockAddress = blkSockAddress.DereferenceArray();                    
-    FAULT_ON_NULL(ptrSockAddress);
+    CLR_RT_HeapBlock* endPointAddress;
+    CLR_RT_HeapBlock* remoteEndPointAddress;
+    int64_t address;
+    int32_t port;
 
-    if(ptrSockAddress->m_numOfElements > addrLen) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    endPointAddress = blkEndPointAddress.Dereference();                    
+    FAULT_ON_NULL(endPointAddress);
 
-    src = (SOCK_sockaddr_in*)ptrSockAddress->GetFirstElement();
+    // get a pointer to the managed field object instance for m_Address
+    remoteEndPointAddress = endPointAddress[ Library_sys_net_native_System_Net_IPEndPoint::FIELD___address ].Dereference();
+    FAULT_ON_NULL(remoteEndPointAddress);
 
-    dst->sin_family           = SwapEndianIfBEc16(src->sin_family);
-    dst->sin_port             = src->sin_port;
-    dst->sin_addr.S_un.S_addr = src->sin_addr.S_un.S_addr; //already in network byte order
+    // get value of m_Address field (type long)
+    address = (CLR_INT64)remoteEndPointAddress[ Library_sys_net_native_System_Net_IPAddress::FIELD___address ].NumericByRef().s8;
 
-    memcpy(dst->sin_zero, src->sin_zero, sizeof(dst->sin_zero));
+    // get value of m_Port field (type int)
+    port = endPointAddress[ Library_sys_net_native_System_Net_IPEndPoint::FIELD___port ].NumericByRef().s4;
 
-    addrLen = ptrSockAddress->m_numOfElements;
+    // clear struct
+    memset(dst, 0, sizeof(SOCK_sockaddr));
+
+    dst->sin_family           = SOCK_AF_INET;
+    // need to convert port number to network order
+    dst->sin_port             = SOCK_htons(port);
+
+    //address already in network byte order
+    memcpy((int8_t*)&dst->sin_addr.S_un.S_addr, (int8_t*)&address, sizeof(address));
+
+    addrLenDst = sizeof(address);
 
     NANOCLR_NOCLEANUP();
 }
@@ -583,7 +624,6 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper( 
     CLR_UINT32              offset    = stack.Arg2().NumericByRef().u4;
     CLR_UINT32              count     = stack.Arg3().NumericByRef().u4;
     CLR_INT32               flags     = stack.Arg4().NumericByRef().s4;
-//    CLR_INT32               timeout_ms = stack.Arg5().NumericByRef().s4;
     CLR_RT_HeapBlock        hbTimeout;
 
     CLR_INT64* timeout;
@@ -806,7 +846,6 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SockNameHelper( 
     
     NANOCLR_NOCLEANUP();
 }
-
 
 void Library_sys_net_native_System_Net_Sockets_NativeSocket::ThrowError( CLR_RT_StackFrame& stack, CLR_INT32 errorCode )
 {        
