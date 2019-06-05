@@ -38,9 +38,6 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     if(NO_TI_SL_CC32xx_SDK_SOURCE)
         # no TI SimpleLink CC32xx SDK source specified, download it from our repo
 
-        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-        include(Hack_SetGitSearchPath)
-
         # check for Git (needed here for advanced warning to user if it's not installed)
         find_package(Git)
 

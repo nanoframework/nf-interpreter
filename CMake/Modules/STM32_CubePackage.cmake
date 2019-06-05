@@ -22,9 +22,6 @@ macro(ProcessSTM32CubePackage)
     if(NO_STM32_CUBE_PACKAGE_SOURCE)
         # no STM Cube package source specified, download it from nanoFramework fork
 
-        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-        include(Hack_SetGitSearchPath)
-
         # check for Git (needed here for advanced warning to user if it's not installed)
         find_package(Git)
 

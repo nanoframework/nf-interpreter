@@ -44,9 +44,6 @@ endif()
 if(NO_CHIBIOS_SOURCE)
     # no CHIBIOS source specified, download it from it's repo
 
-    # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-    include(Hack_SetGitSearchPath)
-
     # check for Git (needed here for advanced warning to user if it's not installed)
     find_package(Git)
 
@@ -141,9 +138,6 @@ endif()
 if(CHIBIOS_CONTRIB_REQUIRED)
     if(NO_CHIBIOS_CONTRIB_SOURCE)
         # no CHIBIOS_CONTRIB source specified, download it from it's repo
-
-        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-        include(Hack_SetGitSearchPath)
 
         # check for Git (needed here for advanced warning to user if it's not installed)
         find_package(Git)
@@ -243,9 +237,6 @@ if(NF_SECURITY_MBEDTLS)
 
     if(NO_MBEDTLS_SOURCE)
         # no mbed TLS source specified, download it from it's repo
-
-        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-        include(Hack_SetGitSearchPath)
 
         # check for Git (needed here for advanced warning to user if it's not installed)
         find_package(Git)
@@ -433,9 +424,6 @@ if(NF_FEATURE_USE_SPIFFS)
 
     if(NO_SPIFFS_SOURCE)
         # no SPIFFS source specified, download it from it's repo
-
-        # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-        include(Hack_SetGitSearchPath)
 
         # check for Git (needed here for advanced warning to user if it's not installed)
         find_package(Git)
