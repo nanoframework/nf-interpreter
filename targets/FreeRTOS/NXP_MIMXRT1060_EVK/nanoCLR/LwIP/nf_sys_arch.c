@@ -93,7 +93,6 @@ u32_t lwip_rand(void)
 	return((u32_t)(_rand_value>>16u) % (32767u + 1u));
 }
 
-#if !NO_SYS
 /*---------------------------------------------------------------------------*
  * Routine:  sys_mbox_new
  *---------------------------------------------------------------------------*
@@ -637,89 +636,31 @@ void sys_arch_unprotect( sys_prot_t xValue )
     }
 }
 
-
-#else /* Bare-metal */
-
-static volatile uint32_t time_now = 0;
-
-void time_isr(void)
+// need to implement this calling the CMSIS implementation because ChibiOS declares this
+// TODO can be removed if we ever stop using ChibiOS lwIP source
+void sys_sem_signal_S(sys_sem_t* sem)
 {
-#ifdef __CA7_REV
-    SystemClearSystickFlag();
-#endif
-  time_now++;
+    sys_sem_signal(sem);
 }
 
-void time_init(void)
+////////////////////////////////////////////////////
+// nanoFramework "hack" extending LwIP original code
+// with this callback here we don't need any reference to CLR nor need to include any nanoFramework headers here
+void (*signal_sock_functionPtr)() = 0;
+
+void set_signal_sock_function( void (*funcPtr)() )
 {
-#ifdef __CA7_REV
-    /* special for i.mx6ul */
-    SystemSetupSystick(1000U, (void *)time_isr, 0U);
-    SystemClearSystickFlag();
-#else
-    /* Set SysTick period to 1 ms and enable its interrupts */
-    SysTick_Config(USEC_TO_COUNT(1000U, sourceClock));
-#endif
+   signal_sock_functionPtr = funcPtr;
 }
 
-
-/*
-This optional function returns the current time in milliseconds (don't care
-  for wraparound, this is only used for time diffs).
-  Not implementing this function means you cannot use some modules (e.g. TCP
-  timestamps, internal timeouts for NO_SYS==1).
-  */
-
-u32_t sys_now(void)
+void sys_signal_sock_event()
 {
-    return (u32_t)time_now;
+  if ( signal_sock_functionPtr != 0 )
+     signal_sock_functionPtr();    
 }
 
-/*---------------------------------------------------------------------------*
- * Routine:  sys_arch_protect
- *---------------------------------------------------------------------------*
- * Description:
- *      This optional function does a "fast" critical region protection and
- *      returns the previous protection level. This function is only called
- *      during very short critical regions. An embedded system which supports
- *      ISR-based drivers might want to implement this function by disabling
- *      interrupts. Task-based systems might want to implement this by using
- *      a mutex or disabling tasking. This function should support recursive
- *      calls from the same task or interrupt. In other words,
- *      sys_arch_protect() could be called while already protected. In
- *      that case the return value indicates that it is already protected.
- *
- *      sys_arch_protect() is only required if your port is supporting an
- *      operating system.
- * Outputs:
- *      sys_prot_t              -- Previous protection level (not used here)
- *---------------------------------------------------------------------------*/
-sys_prot_t sys_arch_protect( void )
-{
-    sys_prot_t result;
+////////////////////////////////////////////////////
 
-    result = (sys_prot_t)DisableGlobalIRQ();
-
-    return result;
-}
-
-/*---------------------------------------------------------------------------*
- * Routine:  sys_arch_unprotect
- *---------------------------------------------------------------------------*
- * Description:
- *      This optional function does a "fast" set of critical region
- *      protection to the value specified by pval. See the documentation for
- *      sys_arch_protect() for more information. This function is only
- *      required if your port is supporting an operating system.
- * Inputs:
- *      sys_prot_t              -- Previous protection level (not used here)
- *---------------------------------------------------------------------------*/
-void sys_arch_unprotect( sys_prot_t xValue )
-{
-    EnableGlobalIRQ((uint32_t)xValue);
-}
-
-#endif /*NO_SYS*/
 /*-------------------------------------------------------------------------*
  * End of File:  sys_arch.c
  *-------------------------------------------------------------------------*/

@@ -39,6 +39,7 @@ endif()
 if(USE_NETWORKING_OPTION)
     list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Network.cpp")
     list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_Network.cpp")
+    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/LwIP/ethernetif.c")
 
     # append mbed TLS entropy generator, if hardware has it
     # if(NF_SECURITY_MBEDTLS AND USE_RNG)
@@ -56,7 +57,7 @@ ParseNativeAssemblies()
 # configure code file with Interop Assemblies table and...
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CLR_RT_InteropAssembliesTable.cpp.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
-# ... now add Interop Assemblies table to Esp32 nanoCLR sources list
+# ... now add Interop Assemblies table to nanoCLR sources list
 list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
 
 # make vars global

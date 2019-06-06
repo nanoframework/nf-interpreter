@@ -5,7 +5,7 @@
 //
 
 #include <nanoHAL.h>
-#include <lwip/netifapi.h>
+#include <lwip/netif.h>
 
 extern "C" struct netif * nf_getNetif();
 

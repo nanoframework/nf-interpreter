@@ -88,14 +88,20 @@ typedef u32_t          mem_ptr_t;
 
 #define PACK_STRUCT_FIELD(x) x
 
-// Platform specific diagnostic output
-#include "sys_arch.h"//FSL
 
 
 // non-fatal, print a message.
 #define LWIP_PLATFORM_DIAG(x)                     do {PRINTF x;PRINTF("\r\n");} while(0)
 
-// fatal, print message and abandon execution.
-#define LWIP_PLATFORM_ASSERT(x)                   sys_assert( x )
+/**
+ * @brief   Halt the system on lwIP assert failure by default.
+ */
+#if !defined(LWIP_PLATFORM_ASSERT)
+#define LWIP_PLATFORM_ASSERT(x)     __asm volatile("BKPT #0\n");
+#endif
+
+// Platform specific diagnostic output
+#include "sys_arch.h"//FSL
+
 
 #endif /* __CC_H__ */
