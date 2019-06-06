@@ -107,7 +107,7 @@ struct Settings
     {
         NANOCLR_HEADER();
 
-        // cler flag, in case EE wasn't restarted
+        // clear flag (in case EE wasn't restarted)
         CLR_EE_DBG_CLR(StateResolutionFailed);
 
 #if !defined(BUILD_RTM)
@@ -141,8 +141,11 @@ struct Settings
         {
             CLR_Debug::Printf( "Error: %08x\r\n", hr );
 
-            // exception occurred in assembly loading or type resolution
-            CLR_EE_DBG_SET(StateResolutionFailed);
+            if(hr == CLR_E_TYPE_UNAVAILABLE)
+            {
+                // exception occurred during type resolution
+                CLR_EE_DBG_SET(StateResolutionFailed);
+            }
         }
 #endif
 
