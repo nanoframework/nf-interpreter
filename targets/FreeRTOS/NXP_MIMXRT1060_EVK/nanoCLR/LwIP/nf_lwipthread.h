@@ -1,10 +1,7 @@
-
-/**
- * @file lwipthread.h
- * @brief LWIP wrapper thread macros and structures.
- * @addtogroup LWIP_THREAD
- * @{
- */
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
 
 #ifndef LWIPTHREAD_H
 #define LWIPTHREAD_H

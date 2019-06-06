@@ -1,14 +1,7 @@
-/**
- ******************************************************************************
- * @file    lwipopts.h
- * This file is based on \src\include\lwip\opt.h
- ******************************************************************************
- * Copyright (c) 2013-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2018 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
 
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
