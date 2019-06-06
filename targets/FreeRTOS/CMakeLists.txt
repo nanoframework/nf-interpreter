@@ -117,9 +117,6 @@ endif()
 
 if(NO_CMSIS_SOURCE)
 
-    # hack to make the FindGit to work in Windows platforms (check the module comment for details)
-    include(Hack_SetGitSearchPath)
-
     # check for Git (needed here for advanced warning to user if it's not installed)
     find_package(Git)
 
