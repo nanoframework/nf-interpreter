@@ -4,7 +4,7 @@
 #
 
 ###################################################################################################################################
-# WHEN ADDING A NEW series add the respective name to the list below along with the CMake files with GCC options and source files
+# WHEN ADDING A NEW SERIES, add the respective name to the list below along with the CMake files with GCC options and source files
 ###################################################################################################################################
 
 # check if the series name is supported 
@@ -84,7 +84,6 @@ set(CHIBIOS_SRCS
     hal_can.c
     hal_crypto.c
     hal_dac.c
-    #hal_ext.c #notfound
     hal_gpt.c
     hal_i2c.c
     hal_i2s.c
@@ -93,18 +92,17 @@ set(CHIBIOS_SRCS
     hal_mmc_spi.c
     hal_pal.c
     hal_pwm.c
-    #hal_qspi.c #notfound
     hal_rtc.c
     hal_sdc.c
     hal_serial.c
     hal_serial_usb.c
-    hal_sio.c #new
+    hal_sio.c
     hal_spi.c
-    hal_trng.c #new
+    hal_trng.c
     hal_uart.c
     hal_usb.c
     hal_wdg.c
-    hal_wspi.c #new
+    hal_wspi.c
 
     # OSAL RT
     osal.c
