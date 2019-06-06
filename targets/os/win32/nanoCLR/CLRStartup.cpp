@@ -123,6 +123,9 @@ struct Settings
     {
         NANOCLR_HEADER();
 
+        // clear flag (in case EE wasn't restarted)
+        CLR_EE_DBG_CLR(StateResolutionFailed);
+
 #if defined(_WIN32)
         CLR_RT_StringVector vec;
 
@@ -219,7 +222,16 @@ struct Settings
         NANOCLR_CLEANUP();
 
 #if !defined(BUILD_RTM)
-        if(FAILED(hr)) CLR_Debug::Printf( "Error: %08x\r\n", hr );
+        if(FAILED(hr))
+        {
+            CLR_Debug::Printf( "Error: %08x\r\n", hr );
+
+            if(hr == CLR_E_TYPE_UNAVAILABLE)
+            {
+                // exception occurred during type resolution
+                CLR_EE_DBG_SET(StateResolutionFailed);
+            }
+        }
 #endif
 
         NANOCLR_CLEANUP_END();
