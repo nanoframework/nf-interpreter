@@ -35,7 +35,7 @@ if(NO_FREERTOS_SOURCE)
     # check if build was requested with a specifc FreeRTOS version
     if(FREERTOS_VERSION_EMPTY)
         # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(FREERTOS_VERSION_TAG "V10.1.1")
+        set(FREERTOS_VERSION_TAG "V10.2.1")
     else()
         # set SVN tag
         set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")
@@ -138,7 +138,7 @@ if(NO_CMSIS_SOURCE)
     # check if build was requested with a specifc CMSIS version
     if(CMSIS_VERSION_EMPTY)
         # no CMSIS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(CMSIS_GIT_TAG "5.4.0")
+        set(CMSIS_GIT_TAG "5.5.1")
     else()
         # set Git tag
         set(CMSIS_GIT_TAG "${CMSIS_VERSION}")
@@ -339,7 +339,7 @@ if(NO_LWIP_SOURCE)
     # check if build was requested with a specifc LWIP version
     if(LWIP_VERSION_EMPTY)
         # no LWIP version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(LWIP_GIT_TAG "STABLE-2_1_2_RELEASE")
+        set(LWIP_GIT_TAG "STABLE-2_0_3_RELEASE")
     else()
         # set Git tag
         set(LWIP_GIT_TAG "${LWIP_VERSION}")
