@@ -37,6 +37,12 @@ if(NF_FEATURE_DEBUGGER)
     find_package(NF_Diagnostics REQUIRED)
 endif()
 
+# nF feature: networking
+if(USE_NETWORKING_OPTION)
+    find_package(LWIP REQUIRED)
+    find_package(NF_NETWORKING REQUIRED)
+endif()
+
 # nF feature: filesystem
 if(USE_FILESYSTEM_OPTION)
     find_package(FATFS REQUIRED)
@@ -92,6 +98,11 @@ add_executable(
 
     # sources for FatFS
     "${FATFS_SOURCES}"
+
+    # sources for nanoFramework Network LWIP, Sockets and TLS
+    "${LWIP_SOURCES}"
+    "${NF_Networking_SOURCES}"
+    #"${mbedTLS_SOURCES}"
 
     # sources for nanoFramework APIs
     "${TARGET_NANO_APIS_SOURCES}"
@@ -156,6 +167,13 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     # includes for FatFS
     ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/fatfs
     "${FATFS_INCLUDE_DIRS}"
+
+    # includes for LwIP
+    "${LWIP_INCLUDE_DIRS}"
+
+    # incudes for Networking and TLS
+    "${NF_Networking_INCLUDE_DIRS}"
+    #"${mbedTLS_INCLUDE_DIRS}"
     
 )
 
