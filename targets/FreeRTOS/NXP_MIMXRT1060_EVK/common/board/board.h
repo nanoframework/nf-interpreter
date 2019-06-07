@@ -202,6 +202,8 @@
 #define BOARD_CAMERA_I2C_CLOCK_FREQ \
     (CLOCK_GetFreq(kCLOCK_Usb1PllClk) / 8 / (BOARD_CAMERA_I2C_CLOCK_SOURCE_DIVIDER + 1U))
 
+#define FSL_FEATURE_PHYKSZ8081_USE_RMII50M_MODE
+
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
