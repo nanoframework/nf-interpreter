@@ -88,14 +88,14 @@ typedef enum CC3220SF_LAUNCHXL_I2CName {
 } CC3220SF_LAUNCHXL_I2CName;
 
 /*!
- *  @def    CC3220S_LAUNCHXL_I2SName
- *  @brief  Enum of I2S names on the CC3220S_LAUNCHXL dev board
+ *  @def    CC3220SF_LAUNCHXL_I2SName
+ *  @brief  Enum of I2S names on the CC3220SF_LAUNCHXL dev board
  */
-typedef enum CC3220S_LAUNCHXL_I2SName {
-    CC3220S_LAUNCHXL_I2S0 = 0,
+typedef enum CC3220SF_LAUNCHXL_I2SName {
+    CC3220SF_LAUNCHXL_I2S0 = 0,
 
-    CC3220S_LAUNCHXL_I2SCOUNT
-} CC3220S_LAUNCHXL_I2SName;
+    CC3220SF_LAUNCHXL_I2SCOUNT
+} CC3220SF_LAUNCHXL_I2SName;
 
 /*!
  *  @def    CC3220SF_LAUNCHXL_PWMName

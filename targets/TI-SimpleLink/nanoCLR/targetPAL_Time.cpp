@@ -5,20 +5,14 @@
 
 #include <nanoPAL.h>
 #include <target_platform.h>
-// #include <FreeRTOS.h>
-// #include <timers.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <xdc/runtime/Error.h>
 
-// static TimerHandle_t nextEventTimer;
 static Clock_Handle nextEventTimer;
 
-// static void NextEventTimer_Callback( TimerHandle_t xTimer )
 static void NextEventTimer_Callback( UArg arg )
 {
     (void)arg;
-    
-    //Clock_stop(nextEventTimer);
 
     // this call also schedules the next one, if there is one
     HAL_COMPLETION::DequeueAndExec();
@@ -26,7 +20,6 @@ static void NextEventTimer_Callback( UArg arg )
 
 HRESULT Time_Initialize()
 {
-    // nextEventTimer = xTimerCreate( "NextEventTimer", 10, pdFALSE, (void *)0, NextEventTimer_Callback);
     Clock_Params params;
 
     Clock_Params_init(&params);
@@ -41,7 +34,6 @@ HRESULT Time_Initialize()
 
 HRESULT Time_Uninitialize()
 {
-    // xTimerDelete(nextEventTimer, 0);
     Clock_stop(nextEventTimer);
 
     return S_OK;
@@ -61,20 +53,19 @@ void Time_SetCompare ( uint64_t compareValueTicks )
     }    
     else
     {
-        if (HAL_Time_CurrentTime() >= compareValueTicks) 
+        if (HAL_Time_CurrentSysTicks() >= compareValueTicks) 
         { 
             // already missed the event, dequeue and execute immediately 
             HAL_COMPLETION::DequeueAndExec();
         }
         else
         {
-            // xTimerStop( nextEventTimer, 0 );
             // need to stop the timer, in case it's running
             Clock_stop(nextEventTimer);
 
             // compareValueTicks is the time (in sys ticks) that is being requested to fire an HAL_COMPLETION::DequeueAndExec()
             // need to subtract the current system time to set when the timer will fire
-            compareValueTicks -= HAL_Time_CurrentTime();
+            compareValueTicks -= HAL_Time_CurrentSysTicks();
             
             if (compareValueTicks == 0) 
             {

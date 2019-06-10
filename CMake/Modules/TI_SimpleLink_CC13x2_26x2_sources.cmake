@@ -16,5 +16,6 @@ list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_2
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/ti/devices/cc13x2_cc26x2/driverlib")
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/ti/net")
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/ti/bsd")
+list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages")
 
 # the sources files are pulled into the build in the target CMakelists through the XDS tools command line
