@@ -196,12 +196,17 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
             if (i2cStatus != ESP_OK) ESP_LOGE( TAG, "i2c_master_write error:%d", i2cStatus );
 
         }
-        if (readSize != 0 )  // Read
-        {
-            i2c_master_start(cmd);
-            i2c_master_write_byte( cmd, ( slaveAddress << 1 ) | I2C_MASTER_READ, 1);
-            i2cStatus = i2c_master_read(cmd, &readData[0], readSize, I2C_MASTER_ACK );
-            if (i2cStatus != ESP_OK) ESP_LOGE( TAG, "i2c_master_read error:%d", i2cStatus );
+		if (readSize != 0)  // Read
+		{
+			i2c_master_start(cmd);
+			i2c_master_write_byte(cmd, (slaveAddress << 1) | I2C_MASTER_READ, 1);
+			if (readSize > 1)
+			{
+				// Additional read bytes with ACK
+				i2c_master_read(cmd, &readData[0], readSize - 1, I2C_MASTER_ACK);
+			}
+			// Last read byte with NACK
+			i2c_master_read_byte(cmd, &readData[readSize - 1], I2C_MASTER_NACK);
         }
 
         i2c_master_stop(cmd);
