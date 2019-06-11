@@ -57,7 +57,7 @@ add_subdirectory("nanoCLR")
 # Build the networking components as a separate library
 # This is done this way to stop "Createprocess: file no found" errors in linker when object input file is greater than 32k
 if(USE_NETWORKING_OPTION)
-add_library(NetworkLib STATIC "${NF_Networking_SOURCES}" "${TARGET_ESP32_NETWORK_SOURCES}"  "${TARGET_LWIP_SOURCES}" )
+add_library(NetworkLib STATIC ${NF_Networking_SOURCES} "${TARGET_ESP32_NETWORK_SOURCES}"  "${TARGET_LWIP_SOURCES}" )
 endif()
 
 
@@ -81,17 +81,17 @@ add_executable(
     ${WireProtocol_SOURCES}
 
     # sources for nanoFramework libraries
-    "${NF_CoreCLR_SOURCES}"
-    "${NF_Debugger_SOURCES}"
-    "${NF_Diagnostics_SOURCES}"
+    ${NF_CoreCLR_SOURCES}
+    ${NF_Debugger_SOURCES}
+    ${NF_Diagnostics_SOURCES}
     
 	# sources for nanoFramework Network sockets & LWIP
-#    "${NF_Networking_SOURCES}"
+#    ${NF_Networking_SOURCES}
 #    "${TARGET_ESP32_NETWORK_SOURCES}"  
 #    "${TARGET_LWIP_SOURCES}"
     
     # # sources for nanoFramework APIs
-    "${TARGET_NANO_APIS_SOURCES}"
+    ${TARGET_NANO_APIS_SOURCES}
 )
 
 
@@ -139,7 +139,7 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 
 # include common directories
 include_directories(
-    "${CMAKE_CURRENT_BINARY_DIR}"
+    ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/common
@@ -159,24 +159,24 @@ include_directories(
 
 # include directories for nanoCLR
 target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
+    ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
      ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
 
     # directories for nanoFramework libraries
-    "${NF_CoreCLR_INCLUDE_DIRS}"
-    "${NF_Debugger_INCLUDE_DIRS}"
-	"${NF_Networking_INCLUDE_DIRS}"
+  ${NF_CoreCLR_INCLUDE_DIRS}
+    ${NF_Debugger_INCLUDE_DIRS}
+	${NF_Networking_INCLUDE_DIRS}
 
     # includes for nanoFramework APIs
-    "${TARGET_NANO_APIS_INCLUDES}"
+    ${TARGET_NANO_APIS_INCLUDES}
 )
 
 # Set Includes & compile definition for Network library
 if(USE_NETWORKING_OPTION)
     target_include_directories(NetworkLib PUBLIC
-        "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
-        "${NF_CoreCLR_INCLUDE_DIRS}"
-        "${NF_Networking_INCLUDE_DIRS}"
+        ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
+      ${NF_CoreCLR_INCLUDE_DIRS}
+        ${NF_Networking_INCLUDE_DIRS}
     )
 
     target_compile_definitions(NetworkLib PUBLIC "-DPLATFORM_ESP32 " )
