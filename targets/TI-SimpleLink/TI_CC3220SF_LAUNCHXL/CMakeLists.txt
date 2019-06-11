@@ -59,12 +59,12 @@ add_executable(
     ${WireProtocol_SOURCES}
 
     # sources for nanoFramework libraries
-    "${NF_CoreCLR_SOURCES}"
-    "${NF_Debugger_SOURCES}"
-    "${NF_Diagnostics_SOURCES}"
+    ${NF_CoreCLR_SOURCES}
+    ${NF_Debugger_SOURCES}
+    ${NF_Diagnostics_SOURCES}
 
     # sources for nanoFramework APIs
-    "${TARGET_NANO_APIS_SOURCES}"
+    ${TARGET_NANO_APIS_SOURCES}
 )
 
 # add dependency from TI SimpleLink CC32xx SDK and FreeRTOS (this is required to make sure that those repos are downloaded before the build starts)
@@ -73,7 +73,7 @@ add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC32xxSDK)
 
 # include common directories
 include_directories(
-    "${CMAKE_CURRENT_BINARY_DIR}"
+    ${CMAKE_CURRENT_BINARY_DIR}
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/common"
     "${PROJECT_SOURCE_DIR}/src/CLR/Core"
@@ -89,18 +89,18 @@ include_directories(
 
 # include directories for nanoCLR
 target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR"
+    ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
     "${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR"
 
     "${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS}"
 
     # directories for nanoFramework libraries
-    "${NF_CoreCLR_INCLUDE_DIRS}"
-    "${NF_Debugger_INCLUDE_DIRS}"
-    "${NF_Diagnostics_INCLUDE_DIRS}"
+  ${NF_CoreCLR_INCLUDE_DIRS}
+    ${NF_Debugger_INCLUDE_DIRS}
+    ${NF_Diagnostics_INCLUDE_DIRS}
     
     # includes for nanoFramework APIs
-    "${TARGET_NANO_APIS_INCLUDES}"
+    ${TARGET_NANO_APIS_INCLUDES}
 )
 
 # set compiler options
