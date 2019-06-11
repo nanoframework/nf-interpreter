@@ -20,7 +20,7 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
     gettimeofday(&tv, NULL);
 
     // Convert from Unix time(year since 1900) to SYSTEMTIME(Years since 1601)
-    int64_t time = ((int64_t)tv.tv_sec * (int64_t)TIME_CONVERSION__TO_SECONDS) + TIME_UNIX_EPOCH_AS_TICKS;
+    int64_t time = ((int64_t)tv.tv_sec * (int64_t)TIME_CONVERSION__TO_SECONDS) + ((int64_t)tv.tv_usec * (int64_t)TIME_CONVERSION__TO_MILLISECONDS ) + TIME_UNIX_EPOCH_AS_TICKS;
 
     HAL_Time_ToSystemTime(time, &st );
 
