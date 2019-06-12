@@ -18,6 +18,26 @@ void CLR_Debug::RedirectToString( std::string* str )
     s_redirectedString = str;
 }
 
+static std::string s_messageString = "";
+
+void CLR_Debug::SaveMessage(std::string str)
+{
+	NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+	// clear LR & CR
+	int pos;
+	if ((pos = str.find('\n')) != std::string::npos)
+	{
+		str.erase(pos);
+	}
+	if ((pos = str.find('\r')) != std::string::npos)
+	{
+		str.erase(pos);
+	}
+
+	s_messageString = str;
+}
+
 HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const char* szFile, int line )
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
@@ -245,6 +265,10 @@ int CLR_Debug::PrintfV( const char *format, va_list arg )
 
 #if defined(_WIN32)
 	OutputDebugStringA(buffer);
+
+	std::string outputString(buffer, iBuffer);
+	SaveMessage(outputString);
+
 #endif
 
 #if !defined(_WIN32)
@@ -821,6 +845,13 @@ const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
 
     return s_tmp;
 }
+
+#if defined(_WIN32)
+const char* CLR_RT_DUMP::GETERRORDETAIL()
+{
+	return s_messageString.c_str();
+}
+#endif
 
 #endif // defined(NANOCLR_TRACE_EXCEPTIONS)
 
