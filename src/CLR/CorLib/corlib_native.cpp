@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) 2017 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -269,7 +269,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Collections_Stack::Peek___OBJECT,
     Library_corlib_native_System_Collections_Stack::Pop___OBJECT,
     Library_corlib_native_System_Collections_Stack::Push___VOID__OBJECT,
-    NULL,
     NULL,
     NULL,
     Library_corlib_native_System_Console::OutNative___STATIC__VOID__STRING__BOOLEAN,
@@ -903,7 +902,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x7CCFBEC1,
+    0xDF5364AB,
     method_lookup,
-    { 1, 1, 1, 7 }
+    { 1, 2, 0, 0 }
 };
