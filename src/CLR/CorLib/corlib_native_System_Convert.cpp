@@ -17,7 +17,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
 		char* str = (char*)stack.Arg0().RecoverString();
         signed int radix = stack.Arg4().NumericByRef().s4;
 
-      #if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
+#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
         // suport for conversion from any base
         char* endptr = NULL;
 
@@ -85,8 +85,9 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         } else {
             stack.SetResult_I8(result);
         }
-        
-      #else
+    }
+    NANOCLR_NOCLEANUP();
+#else
         // support for conversion from base 10 and 16 (partial)
 
         if(radix == 10)
@@ -127,10 +128,10 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         }
 
         stack.SetResult_I8(result);
-
-      #endif // defined(SUPPORT_ANY_BASE_CONVERSION)
-	}
-    NANOCLR_NOCLEANUP();
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+    #endif // defined(SUPPORT_ANY_BASE_CONVERSION)
+    
 }
 
 HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING( CLR_RT_StackFrame& stack )
