@@ -26,6 +26,18 @@ extern bool sdCardFileSystemReady;
 extern bool usbMsdFileSystemReady;
 #endif
 
+void CombinePath(char * outpath, const char * path1, const char * path2)
+{
+	strcat(outpath, path1);
+	
+	// Add "\" to path if required
+	if (outpath[hal_strlen_s(outpath) - 1] != '\\')
+	{
+		strcat(outpath, "\\");
+	}
+	strcat(outpath, path2);
+}
+
 SYSTEMTIME GetDateTime(uint16_t date, uint16_t time)
 {
     SYSTEMTIME fileTime;
@@ -388,8 +400,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
                     memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
 
                     // compose directory path
-                    strcat(workingBuffer, workingPath);
-                    strcat(workingBuffer, fileInfo.fname);
+                    CombinePath(workingBuffer, workingPath, fileInfo.fname);
                     
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], workingBuffer ));
                     
@@ -607,8 +618,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
                             memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
 
                             // compose file path
-                            strcat(workingBuffer, workingPath);
-                            strcat(workingBuffer, fileInfo.fname);
+                            CombinePath(workingBuffer, workingPath, fileInfo.fname);
 
                             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path ], workingBuffer ));
 
@@ -715,8 +725,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
                     memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
 
                     // compose file path
-                    strcat(workingBuffer, workingPath);
-                    strcat(workingBuffer, (const char*)pe->name);
+                    CombinePath(workingBuffer, workingPath, (const char*)pe->name);
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path ], workingBuffer ));
 
@@ -809,8 +818,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
             memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
 
             // compose file path
-            strcat(workingBuffer, workingPath);
-            strcat(workingBuffer, (const char*)pe->name);
+            CombinePath(workingBuffer, workingPath, (const char*)pe->name);
 
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path ], workingBuffer ));
 
@@ -897,8 +905,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFileNati
     memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose file path
-    strcat(filePath, workingPath);
-    strcat(filePath, fileName);
+    CombinePath(filePath, workingPath, fileName);
 
     // change directory
     operationResult = f_chdir(workingPath);
@@ -1114,8 +1121,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFileNati
     memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose file path
-    strcat(filePath, workingPath);
-    strcat(filePath, fileName);
+    CombinePath(filePath, workingPath, fileName);
                
     // compute mode flags from CreationCollisionOption
     switch (options)
@@ -1247,108 +1253,77 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFolderNa
     memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose folder path
-    strcat(folderPath, workingPath);
-    strcat(folderPath, folderName);
+    CombinePath(folderPath, workingPath, folderName);
+    
+    // check if folder exists
+    operationResult = f_stat(folderPath, &fileInfo);
 
-    // change directory
-    operationResult = f_chdir(workingPath);
-
-    if(operationResult != FR_OK)
+    // folder doesn't exist
+    if (operationResult == FR_NO_FILE)
     {
-        if(operationResult == FR_INVALID_DRIVE)
-        {
-            // check if the working drive is the SPIFFS drive
-          #if (USE_SPIFFS_FOR_STORAGE == TRUE)
-            if(WORKING_DRIVE_IS_INTERNAL_DRIVE)
-            {
-                // this is the SPIFFS drive
-                // throw not supported exception because folders aren't supported in SPIFFS
-                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-            }
-            else
-            {
-          #else
-            {
-          #endif
-                // invalid drive
-                NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
-            }            
-        }
-        else
-        {
-            // error opening the directory
-            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
-        }
-    }
-    else
-    {
-        // handle request for open if it exists and replace existing
-        if( (options == CreationCollisionOption_OpenIfExists) ||
-            (options == CreationCollisionOption_ReplaceExisting))
-        {
-            operationResult = f_stat(folderPath, &fileInfo);
-        }
-        else
-        {
-            // create directory
-            operationResult = f_mkdir(folderPath);
-        }
-
-        // process operation result according to creation options
-        if( (operationResult != FR_OK) &&
-            (options == CreationCollisionOption_FailIfExists))
-        {
-            // folder already exists
-            NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
-        }
-        if( (operationResult == FR_NO_FILE) &&
-            (options == CreationCollisionOption_OpenIfExists))
+        if (options == CreationCollisionOption_OpenIfExists)
         {
             // folder doesn't exist
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
-        
-        if(operationResult == FR_OK)
+        else 
         {
-            // folder created get the details or...
-            // ...(if already exists) skip
-            if(fileInfo.fattrib == 0)
+            // create directory
+            operationResult = f_mkdir(folderPath);
+
+            if(operationResult == FR_OK)
             {
-                f_stat(folderPath, &fileInfo);
+                operationResult = f_stat(folderPath, &fileInfo);              
             }
-
-            // compose return object
-            // find <StorageFolder> type, don't bother checking the result as it exists for sure
-            g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storageFolderTypeDef );
-
-            // create a <StorageFolder>
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), storageFolderTypeDef));
-            
-            // get a handle to the storage folder
-            storageFolder = stack.TopValue().Dereference();
-
-            // folder name
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], folderName ));
-
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], folderPath ));
-
-            // get the date time details and fill in the managed field
-            // compute directory date
-            fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
-
-            // get a reference to the dateCreated managed field...
-            CLR_RT_HeapBlock& dateFieldRef = storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated ];
-            CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
-            // ...and set it with the fileInfoTime
-            *pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
+            else
+            {
+                // failed to create the folder
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+            }
         }
-        else
+    }
+    else 
+    {
+        if (options == CreationCollisionOption_FailIfExists)
         {
-            // failed to create the folder
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+            // folder already exists
+            NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
         }
     }
 
+    if(operationResult == FR_OK)
+    {
+        // compose return object
+        // find <StorageFolder> type, don't bother checking the result as it exists for sure
+        g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storageFolderTypeDef );
+
+        // create a <StorageFolder>
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), storageFolderTypeDef));
+        
+        // get a handle to the storage folder
+        storageFolder = stack.TopValue().Dereference();
+
+        // folder name
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], folderName ));
+
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], folderPath ));
+
+        // get the date time details and fill in the managed field
+        // compute directory date
+        fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
+
+        // get a reference to the dateCreated managed field...
+        CLR_RT_HeapBlock& dateFieldRef = storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated ];
+        CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+        // ...and set it with the fileInfoTime
+        *pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
+    }
+    else
+    {
+        // failed to get folder details
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+    
   #elif (USE_SPIFFS_FOR_STORAGE == TRUE)
 
     // throw not supported exception because folders aren't supported in SPIFFS
@@ -1540,15 +1515,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 	memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
 
 	// compose folder path
-	strcat(folderPath, workingPath);
-
-	// Add "\" to path if required
-	if (folderPath[hal_strlen_s(folderPath) - 1] != '\\')
-	{
-		strcat(folderPath, "\\");
-	}
-
-	strcat(folderPath, folderName);
+    CombinePath(folderPath, workingPath, folderName);
 
 	// check if directory exists
 	operationResult = f_stat(folderPath, &fileInfo);
