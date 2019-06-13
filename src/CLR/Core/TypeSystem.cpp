@@ -1796,7 +1796,12 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf( "Resolve: unknown scope: %08x\r\n", src->scope );
 #endif
-                NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown scope: %08x\r\n", src->scope);
+
+#if defined(_WIN32)
+				NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown scope: %08x\r\n", src->scope);
+#else
+				NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown scope: %08x\r\n", src->scope);
+#endif
             }
 
             const char* szName = GetString( src->name );
@@ -1805,7 +1810,12 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf( "Resolve: unknown type: %s\r\n", szName );
 #endif
+
+#if defined(_WIN32)
+				NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown type: %s\r\n", szName);
+#else
 				NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown type: %s\r\n", szName);
+#endif
             }
         }
         else
@@ -1824,7 +1834,11 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
                 CLR_Debug::Printf( "Resolve: unknown type: %s.%s\r\n", szNameSpace, szName );
 #endif
 
+#if defined(_WIN32)
+				NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown type: %s.%s\r\n", szNameSpace, szName);
+#else
 				NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown type: %s\r\n", szName);
+#endif
             }
         }
     }
@@ -1849,7 +1863,11 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
             CLR_Debug::Printf( "Resolve Field: unknown scope: %08x\r\n", src->container );
 #endif
 
+#if defined(_WIN32)
+			NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve Field: unknown scope: %08x\r\n", src->container);
+#else
 			NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve Field: unknown scope: %08x\r\n", src->container);
+#endif
         }
 
         const char* szName = GetString( src->name );
@@ -1860,7 +1878,11 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
             CLR_Debug::Printf( "Resolve: unknown field: %s\r\n", szName );
 #endif
 
+#if defined(_WIN32)
+			NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown field: %s\r\n", szName);
+#else
 			NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown field: %s\r\n", szName);
+#endif
         }
     }
 
@@ -1884,7 +1906,11 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             CLR_Debug::Printf( "Resolve Field: unknown scope: %08x\r\n", src->container );
 #endif
 
+#if defined(_WIN32)
+			NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve Field: unknown scope: %08x\r\n", src->container);
+#else
 			NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve Field: unknown scope: %08x\r\n", src->container);
+#endif
         }
 
         const char* name = GetString( src->name );
@@ -1912,7 +1938,11 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             CLR_Debug::Printf( "Resolve: unknown method: %s.%s.%s\r\n", qASSM->GetString( qTD->nameSpace ), qASSM->GetString( qTD->name ), name );
 #endif
 
+#if defined(_WIN32)
+			NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown method: %s\r\n", name);
+#else
 			NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown method: %s\r\n", name);
+#endif
         }
     }
 
