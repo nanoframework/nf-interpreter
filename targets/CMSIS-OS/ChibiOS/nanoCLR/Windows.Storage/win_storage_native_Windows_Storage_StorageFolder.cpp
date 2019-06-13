@@ -68,6 +68,8 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
     hbObj->SetObjectReference( NULL );
 
   #if HAL_USE_SDC
+    bool sdCardEnumerated = false;
+
     // is the SD card file system ready?
     if(sdCardFileSystemReady)
     {
@@ -77,6 +79,8 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
   #endif
 
   #if HAL_USBH_USE_MSD
+    bool usbMsdEnumerated = false;
+
     // is the USB mass storage device file system ready?
     if(usbMsdFileSystemReady)
     {
@@ -109,21 +113,28 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
         for(; driveIterator < driveCount; driveIterator++ )
         {
             // fill the folder name and path
-            switch(driveIterator)
+
+          #if HAL_USE_SDC
+            // is the SD card file system ready?
+            if(sdCardFileSystemReady && !sdCardEnumerated)
             {
-                case 0:
-                    memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
-                    break;
+                memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
 
-                case 1:
-                    memcpy(workingDrive, INDEX1_DRIVE_PATH, DRIVE_PATH_LENGTH);
-                    break;
-
-                default:
-                    // shouldn't reach here
-                    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-                    break;
+                // flag as enumerated
+                sdCardEnumerated = true;
             }
+          #endif
+
+          #if HAL_USBH_USE_MSD
+            // is the USB mass storage device file system ready?
+            if(usbMsdFileSystemReady && !usbMsdEnumerated)
+            {
+                memcpy(workingDrive, INDEX1_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                
+                // flag as enumerated
+                usbMsdEnumerated = true;
+            }    
+          #endif
 
             // dereference the object in order to reach its fields
             hbObj = storageFolder->Dereference();
