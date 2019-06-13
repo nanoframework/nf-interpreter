@@ -27,7 +27,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
     Library_win_storage_native_Windows_Storage_Devices_SDCard::MountMMCNative___STATIC__VOID__BOOLEAN,
     Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNative___STATIC__VOID__I4__I4,
     Library_win_storage_native_Windows_Storage_Devices_SDCard::UnmountNative___STATIC__VOID,
@@ -106,7 +105,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage =
 {
     "Windows.Storage", 
-    0x53942C94,
+    0x8D8C8026,
     method_lookup,
-    { 1, 0, 0, 1 }
+    { 1, 0, 1, 0 }
 };
