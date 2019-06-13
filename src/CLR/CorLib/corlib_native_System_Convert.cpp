@@ -17,40 +17,74 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
 		char* str = (char*)stack.Arg0().RecoverString();
         signed int radix = stack.Arg4().NumericByRef().s4;
 
-      #if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
+#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
         // suport for conversion from any base
+        char* endptr = NULL;
 
-        int64_t zero = 0;
+        bool isUInt64 = false;
 
         bool isSigned = (bool)stack.Arg1().NumericByRef().u1;
         long long minValue = stack.Arg2().NumericByRef().s8;
         long long maxValue = stack.Arg3().NumericByRef().s8;
-
-        // normally we check if the result is in the given range
-        bool check = true;
         
-        // Int64? => use also strtoull the result will be casted to Int64
-        if (isSigned && maxValue == 0x7FFFFFFFFFFFFFFF) isSigned = false;
-
-        // UInt64? => use also strtoull the result will be casted to Int64 and bypass the range check
-        if (minValue == 0 && maxValue == 0)
-        {
+        // UInt64? => use also strtoull the result will be casted to Int64
+        if (minValue == 0 && maxValue == 0) {
+            isUInt64 = true;
             isSigned = false;
-            check = false;
+
+            //allow spaces before digits
+            while (*str == ' ') {
+                str++;
+            }
+
+            //UInt64 can't begin with minus
+            if (*str == '-' ) {
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+            }
         }
 
         // convert via strtoll / strtoull
-        result = isSigned ? strtoll(str, nullptr, radix) : (long long) strtoull(str, nullptr, radix);
+        result = isSigned ? strtoll(str, &endptr, radix) : (long long) strtoull(str, &endptr, radix);
 
+        // TODO: 
+        // If the value in input string is out of the range of representable values
+        // by a long long int / unsigned long int, the function returns 
+        // LLONG_MAX or LLONG_MIN for signed conversion 
+        // and ULONG_MAX for unsigned conversion
+        // It is necessary to add a check
+
+        // if no valid conversion endptr is equal str
+        if (str == endptr) {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        // allow spaces after digits
+        while (*endptr == ' ') {
+            endptr++;
+        }
+
+        // should reach end of string no aditional chars
+        if (*endptr != 0) {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+        
         // the signed values for SByte, Int16 and Int32 are always positive for base 2, 8 or 16 conversions
         // because the 64-bit function strtoll is used; need the post process the value
         // if the result is greater max and smaller (max + 1) * 2 this value should be subtracted
-        if (isSigned && result > maxValue && result < (maxValue + 1) * 2) result -= (maxValue + 1) * 2;
-        
-        // for UInt64 the check will be bypassed
-        stack.SetResult_I8 ((check && (result > maxValue || result < minValue)) ? zero : result);
-        
-      #else
+        if (radix == 2 || radix == 8 || radix == 16) {
+            if (isSigned && result > maxValue && result < (maxValue + 1) * 2) result -= (maxValue + 1) * 2;
+        }
+
+        if (!isUInt64 && !isSigned && (uint64_t)result > (uint64_t)maxValue) {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        } else if (!isUInt64 && (result > maxValue || result < minValue)) {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        } else {
+            stack.SetResult_I8(result);
+        }
+    }
+    NANOCLR_NOCLEANUP();
+#else
         // support for conversion from base 10 and 16 (partial)
 
         if(radix == 10)
@@ -91,10 +125,10 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         }
 
         stack.SetResult_I8(result);
-
-      #endif // defined(SUPPORT_ANY_BASE_CONVERSION)
-	}
+    }
     NANOCLR_NOCLEANUP_NOLABEL();
+#endif // defined(SUPPORT_ANY_BASE_CONVERSION)
+    
 }
 
 HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING( CLR_RT_StackFrame& stack )
