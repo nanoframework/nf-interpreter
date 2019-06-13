@@ -21,7 +21,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         // suport for conversion from any base
         char* endptr = NULL;
 
-        bool UInt64 = false;
+        bool isUInt64 = false;
 
         bool isSigned = (bool)stack.Arg1().NumericByRef().u1;
         long long minValue = stack.Arg2().NumericByRef().s8;
@@ -29,7 +29,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         
         // UInt64? => use also strtoull the result will be casted to Int64
         if (minValue == 0 && maxValue == 0) {
-            UInt64 = true;
+            isUInt64 = true;
             isSigned = false;
 
             //allow spaces before digits
@@ -75,12 +75,9 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
             if (isSigned && result > maxValue && result < (maxValue + 1) * 2) result -= (maxValue + 1) * 2;
         }
 
-        if (UInt64) {
-            // for UInt64 the check will be bypassed
-            stack.SetResult_I8(result);
-        } else if (!isSigned && maxValue != 0x7FFFFFFFFFFFFFFF && (uint64_t)result > (uint64_t)maxValue) {
+        if (!isUInt64 && !isSigned && (uint64_t)result > (uint64_t)maxValue) {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-        } else if (result > maxValue || result < minValue) {
+        } else if (!isUInt64 && (result > maxValue || result < minValue)) {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         } else {
             stack.SetResult_I8(result);
@@ -130,7 +127,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         stack.SetResult_I8(result);
     }
     NANOCLR_NOCLEANUP_NOLABEL();
-    #endif // defined(SUPPORT_ANY_BASE_CONVERSION)
+#endif // defined(SUPPORT_ANY_BASE_CONVERSION)
     
 }
 
