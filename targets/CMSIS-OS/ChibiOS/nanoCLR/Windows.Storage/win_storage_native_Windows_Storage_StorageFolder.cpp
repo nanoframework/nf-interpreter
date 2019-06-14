@@ -1358,7 +1358,8 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNa
 	NANOCLR_HEADER();
 
 	const char* workingPath;
-    char workingDrive[DRIVE_LETTER_LENGTH];
+    // need extra room for the change dir command
+    char workingDrive[DRIVE_LETTER_LENGTH + 2];
 
   #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
 
@@ -1366,10 +1367,6 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNa
 
 	// get a pointer to the managed object instance and check that it's not NULL
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-
-    // copy the first 2 letters of the path for the drive
-    // path is 'D:\folder\file.txt', so we need 'D:'
-    memcpy(workingDrive, pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ].DereferenceString()->StringText(), DRIVE_LETTER_LENGTH);
 
 	// get a pointer to the path in managed field
 	workingPath = pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path].DereferenceString()->StringText();
@@ -1383,8 +1380,33 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNa
 	}
 	else if (operationResult == FR_DENIED)
 	{
-		// folder not empty
-		NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_EMPTY);
+        // this could be because the folder is not empty or because it's the current folder
+        
+        // change directory to the parent directory using f_chdir("2:..")
+
+        // copy the first 2 letters of the path for the drive
+        // path is 'D:\folder\file.txt', so we need 'D:'
+        memcpy(workingDrive, pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ].DereferenceString()->StringText(), DRIVE_LETTER_LENGTH);
+        // make sure there is a terminator
+        workingDrive[2] = '\0';
+        strcat(workingDrive, "..");
+
+        // change dir to parent
+        operationResult = f_chdir(workingDrive);
+
+        // try remove again
+        operationResult = f_unlink(workingPath);
+
+        if (operationResult == FR_DENIED)
+        {
+            // folder not empty
+            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_EMPTY);
+        }
+        else if (operationResult != FR_OK)
+        {
+            // something else is failing
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+        }
 	}
 	else if (operationResult != FR_OK)
 	{
