@@ -87,7 +87,8 @@ static char Esp_Serial_Initialised_Flag[UART_NUM_MAX] = {0, 0, 0};
 static QueueHandle_t Uart_Event_Queue[UART_NUM_MAX];
 static bool Uart_Post_SerialData_Chars_Event[UART_NUM_MAX] = {true, true, true};
 CLR_RT_HeapBlock* Serial_Device_Instance[UART_NUM_MAX];
-										  
+static int Uart_writeLength[UART_NUM_MAX];
+
 void Esp32_Serial_UnitializeAll()
 {
     for (int uart_num = 0; uart_num < UART_NUM_MAX; uart_num++) 
@@ -219,6 +220,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // Ensure driver gets unitialized during soft reboot
         HAL_AddSoftRebootHandler(Esp32_Serial_UnitializeAll);
         Esp_Serial_Initialised_Flag[uart_num] = 1;
+
+		Uart_writeLength[uart_num] = 0;
     }
     NANOCLR_NOCLEANUP(); 
 }
@@ -382,6 +385,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
         
+		Uart_writeLength[uart_num] += bytesWritten;
+
         // // need to update the _unstoredBufferLength field in the SerialDeviceOutputStream
         // // get pointer to outputStream field
         // CLR_RT_HeapBlock* outputStream = pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___outputStream].Dereference();
@@ -402,7 +407,6 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 {
     NANOCLR_HEADER();
     {
-        size_t length = 0;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -438,7 +442,9 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 
         // return how many bytes were send to the UART
-        stack.SetResult_U4(length);
+        stack.SetResult_U4(Uart_writeLength[uart_num]);
+
+		Uart_writeLength[uart_num] = 0;
 
         // null pointers and vars
         pThis = NULL;
