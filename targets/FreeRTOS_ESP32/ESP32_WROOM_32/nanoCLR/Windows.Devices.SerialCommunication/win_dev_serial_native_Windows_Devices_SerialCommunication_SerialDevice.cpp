@@ -10,6 +10,7 @@
 // #include <string.h>
 #include <nanoHAL.h>
 #include "win_dev_serial_native.h"
+#include "Esp32_DeviceMapping.h"
 
 
 // buffers size
@@ -229,7 +230,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 {
     NANOCLR_HEADER();
     {
-        uart_config_t uart_config;
+		uart_config_t uart_config;
     
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -289,8 +290,10 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 break;
         }
 
-       bool EnableXonXoff = false;
-       switch ((SerialHandshake)pThis[ FIELD___handshake ].NumericByRef().s4)
+	   uart_config.rx_flow_ctrl_thresh = 0;
+
+	   bool EnableXonXoff = false;
+	   switch ((SerialHandshake)pThis[ FIELD___handshake ].NumericByRef().s4)
         {
            default:
             case SerialHandshake_None :
@@ -298,11 +301,13 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 break;
            case SerialHandshake_RequestToSend :
                 uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS ;                      
-                break;
+				uart_config.rx_flow_ctrl_thresh = 122;
+				break;
          
          case SerialHandshake_RequestToSendXOnXOff :
                 uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS ;     
-                EnableXonXoff = true;                 
+				uart_config.rx_flow_ctrl_thresh = 122;
+				EnableXonXoff = true;
                 break;
 
          case SerialHandshake_XOnXOff :
@@ -315,34 +320,11 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
        if ( EnableXonXoff )
             uart_set_sw_flow_ctrl(uart_num, true, 20, 40);
 
-
-       // By default set the direct GPIO pins
-       int txPin = UART_NUM_0_TXD_DIRECT_GPIO_NUM;      // 1
-       int rxPin = UART_NUM_0_RXD_DIRECT_GPIO_NUM;      // 3
-       int rtsPin = UART_NUM_0_CTS_DIRECT_GPIO_NUM;     // 19
-       int ctsPin = UART_NUM_0_RTS_DIRECT_GPIO_NUM;     // 22
-
-       switch(uart_num)
-       {
-           case UART_NUM_1:
-                txPin = UART_NUM_1_TXD_DIRECT_GPIO_NUM;  // 10
-                rxPin = UART_NUM_1_RXD_DIRECT_GPIO_NUM;  // 9
-                rtsPin = UART_NUM_1_CTS_DIRECT_GPIO_NUM; // 6
-                ctsPin = UART_NUM_1_RTS_DIRECT_GPIO_NUM; // 11
-                break;
-
-           case UART_NUM_2:
-                //txPin = UART_NUM_2_TXD_DIRECT_GPIO_NUM;  // 17
-                txPin = 33;
-                //rxPin = UART_NUM_2_RXD_DIRECT_GPIO_NUM;  // 16  
-                rxPin = 32;
-                rtsPin = UART_NUM_2_CTS_DIRECT_GPIO_NUM; // 8
-                ctsPin = UART_NUM_2_RTS_DIRECT_GPIO_NUM; // 7
-                break;
-
-            default:
-                break;
-       }
+	   // Map to currently assigned pins
+	   int txPin  = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, 0); 
+	   int rxPin  = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, 1);
+	   int rtsPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, 2);
+	   int ctsPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, 3);
 
        // Don't use RTS/CTS if no hardware handshake enabled
        if ( uart_config.flow_ctrl == UART_HW_FLOWCTRL_DISABLE )
