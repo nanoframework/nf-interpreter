@@ -24,13 +24,13 @@ int8_t Esp32_SPI_DevicePinMap[2][3] =
 int8_t Esp32_SERIAL_DevicePinMap[3][4] = 
 {
     // COM 1 - pins 1, 3, 19, 22
-    {UART_NUM_0_TXD_DIRECT_GPIO_NUM, UART_NUM_0_RXD_DIRECT_GPIO_NUM, UART_NUM_0_RTS_DIRECT_GPIO_NUM, UART_NUM_0_RTS_DIRECT_GPIO_NUM},
+    {UART_NUM_0_TXD_DIRECT_GPIO_NUM, UART_NUM_0_RXD_DIRECT_GPIO_NUM, UART_NUM_0_RTS_DIRECT_GPIO_NUM, UART_NUM_0_CTS_DIRECT_GPIO_NUM},
     
     // COM 2 - 10, 9, 6, 11
-    {UART_NUM_1_TXD_DIRECT_GPIO_NUM, UART_NUM_1_RXD_DIRECT_GPIO_NUM, UART_NUM_1_RTS_DIRECT_GPIO_NUM, UART_NUM_1_RTS_DIRECT_GPIO_NUM},
+    {UART_NUM_1_TXD_DIRECT_GPIO_NUM, UART_NUM_1_RXD_DIRECT_GPIO_NUM, UART_NUM_1_RTS_DIRECT_GPIO_NUM, UART_NUM_1_CTS_DIRECT_GPIO_NUM},
     
     // COM3 - 17, 16, 8, 7
-    {UART_NUM_2_TXD_DIRECT_GPIO_NUM, UART_NUM_2_RXD_DIRECT_GPIO_NUM, UART_NUM_2_RTS_DIRECT_GPIO_NUM, UART_NUM_2_RTS_DIRECT_GPIO_NUM}
+    {UART_NUM_2_TXD_DIRECT_GPIO_NUM, UART_NUM_2_RXD_DIRECT_GPIO_NUM, UART_NUM_2_RTS_DIRECT_GPIO_NUM, UART_NUM_2_CTS_DIRECT_GPIO_NUM}
  };
 
 // =============================================
@@ -84,11 +84,11 @@ int  Esp32_GetMappedDevicePins( Esp32_MapDeviceType deviceType, int DevNumber, i
             case DEV_TYPE_I2C:
                 return (int)Esp32_I2C_DevicePinMap[DevNumber][PinIndex];
             
-            case DEV_TYPE_LED_PWM: 
+			case DEV_TYPE_SERIAL:
+				return (int)Esp32_SERIAL_DevicePinMap[DevNumber][PinIndex];
+			
+			case DEV_TYPE_LED_PWM:
                 return (int)Esp32_LED_DevicePinMap[DevNumber];
-
-            case DEV_TYPE_SERIAL:
-                return (int)Esp32_SERIAL_DevicePinMap[DevNumber][PinIndex];
 
             default:
                 break;
@@ -131,19 +131,20 @@ void Esp32_SetMappedDevicePins( uint8_t pin, int32_t alternateFunction )
             }
             break;
 
-        case DEV_TYPE_LED_PWM:
+		case DEV_TYPE_SERIAL:
+			if (deviceIndex <= 2 && mapping <= 3)
+			{
+				Esp32_SERIAL_DevicePinMap[deviceIndex][mapping] = pin;
+			}
+			break;
+		
+		case DEV_TYPE_LED_PWM:
             if (deviceIndex <= 15 ) 
             {
                 Esp32_LED_DevicePinMap[deviceIndex] = pin;
             }
             break;
 
-        case DEV_TYPE_SERIAL:
-            if (deviceIndex <= 2 &&  mapping <= 3) 
-            {
-                Esp32_SERIAL_DevicePinMap[deviceIndex][mapping] = pin;
-            }
-            break;
 
         default:  // ignore
             break;

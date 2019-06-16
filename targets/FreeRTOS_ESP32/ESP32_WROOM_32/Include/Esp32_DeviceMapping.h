@@ -21,9 +21,9 @@ enum Esp32_MapDeviceType
     DEV_TYPE_GPIO,
     DEV_TYPE_SPI,
     DEV_TYPE_I2C,
-    DEV_TYPE_LED_PWM,
     DEV_TYPE_SERIAL,
-    DEV_TYPE_MAX,
+	DEV_TYPE_LED_PWM,
+	DEV_TYPE_MAX,
 };
 
 int  Esp32_GetMappedDevicePins( Esp32_MapDeviceType DevType, int DevNumber, int PinIndex);
