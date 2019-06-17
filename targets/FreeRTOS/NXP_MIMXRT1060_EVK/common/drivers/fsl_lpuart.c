@@ -2093,3 +2093,22 @@ void ADMA_UART3_INT_DriverIRQHandler(void)
 #endif
 }
 #endif
+
+uint32_t GetSrcFreq(void)
+{
+    uint32_t freq;
+
+    /* To make it simple, we assume default PLL and divider settings, and the only variable
+       from application is use PLL3 source or OSC source */
+    if (CLOCK_GetMux(kCLOCK_UartMux) == 0) /* PLL3 div6 80M */
+    {
+        freq = (CLOCK_GetPllFreq(kCLOCK_PllUsb1) / 6U) / (CLOCK_GetDiv(kCLOCK_UartDiv) + 1U);
+    }
+    else
+    {
+        freq = CLOCK_GetOscFreq() / (CLOCK_GetDiv(kCLOCK_UartDiv) + 1U);
+    }
+
+    return freq;
+}
+
