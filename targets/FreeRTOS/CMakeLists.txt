@@ -35,7 +35,7 @@ if(NO_FREERTOS_SOURCE)
     # check if build was requested with a specifc FreeRTOS version
     if(FREERTOS_VERSION_EMPTY)
         # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(FREERTOS_VERSION_TAG "V10.2.1")
+        set(FREERTOS_VERSION_TAG "v1.4.8")
     else()
         # set SVN tag
         set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")
@@ -63,7 +63,9 @@ if(NO_FREERTOS_SOURCE)
         FreeRTOS
         PREFIX FreeRTOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
-        SVN_REPOSITORY https://svn.code.sf.net/p/freertos/code/tags/${FREERTOS_VERSION_TAG}/FreeRTOS/Source/
+        GIT_REPOSITORY https://github.com/aws/amazon-freertos.git
+        GIT_TAG ${FREERTOS_VERSION_TAG}  # target specified branch
+        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
         # Disable all other steps

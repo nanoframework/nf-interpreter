@@ -4,12 +4,14 @@ project(FreeRTOS-download NONE)
 
 include(ExternalProject)
 
-# download FreeRTOS source from official SVN repo
+# download FreeRTOS source from official Amazon GitHub repo
 ExternalProject_Add( 
     FreeRTOS
     PREFIX FreeRTOS
     SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
-    SVN_REPOSITORY https://svn.code.sf.net/p/freertos/code/tags/${FREERTOS_VERSION_TAG}/FreeRTOS/Source/
+    GIT_REPOSITORY https://github.com/aws/amazon-freertos.git
+    GIT_TAG ${FREERTOS_VERSION_TAG}  # target specified branch
+    GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
     TIMEOUT 10
     LOG_DOWNLOAD 1
     # Disable all other steps
