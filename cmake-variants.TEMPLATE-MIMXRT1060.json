@@ -52,6 +52,7 @@
           "API_Windows.Devices.Adc": "OFF",
           "API_Windows.Devices.Pwm": "OFF",
           "API_Windows.Devices.Wifi": "OFF",
+          "API_Windows.Devices.SerialCommunication": "ON",
           "API_System.Net": "ON",
           "API_System.Math": "ON",
           "API_Windows.Storage": "ON"
