@@ -14,12 +14,12 @@ endif()
 if(NO_FREERTOS_SOURCE)
     # no FreeRTOS source specified, download it from it's repo
     
-    # check for SVN (needed here for advanced warning to user if it's not installed)
-    find_package(Subversion)
+    # check for Git (needed here for advanced warning to user if it's not installed)
+    find_package(Git)
 
-    #  check if SVN was found, if not report to user and abort
-    if(NOT SUBVERSION_FOUND)
-        message(FATAL_ERROR "error: could not find SVN, make sure you have it installed.")
+    #  check if Git was found, if not report to user and abort
+    if(NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
     endif()
 
     # FreeRTOS version
@@ -35,7 +35,7 @@ if(NO_FREERTOS_SOURCE)
     # check if build was requested with a specifc FreeRTOS version
     if(FREERTOS_VERSION_EMPTY)
         # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(FREERTOS_VERSION_TAG "V10.2.1")
+        set(FREERTOS_VERSION_TAG "v1.4.8")
     else()
         # set SVN tag
         set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")
@@ -63,7 +63,9 @@ if(NO_FREERTOS_SOURCE)
         FreeRTOS
         PREFIX FreeRTOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
-        SVN_REPOSITORY https://svn.code.sf.net/p/freertos/code/tags/${FREERTOS_VERSION_TAG}/FreeRTOS/Source/
+        GIT_REPOSITORY https://github.com/aws/amazon-freertos.git
+        GIT_TAG ${FREERTOS_VERSION_TAG}  # target specified branch
+        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
         # Disable all other steps
@@ -81,12 +83,12 @@ else()
 
         # check if we already have the sources, no need to copy again
         if(NOT EXISTS "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
-            file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
+            file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS")
         else()
             message(STATUS "Using local cache of FreeRTOS source from ${FREERTOS_SOURCE}")
         endif()
 
-        set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
+        set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/include)
     else()
         message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
     endif()
