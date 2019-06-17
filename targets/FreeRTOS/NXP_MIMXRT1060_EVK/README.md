@@ -40,7 +40,7 @@ Pre-configured cmake-variants.json for this board
           "TARGET_SERIES": "IMXRT10xx",
           "RTOS": "FREERTOS",
           "FREERTOS_BOARD": "NXP_MIMXRT1060_EVK",
-          "FREERTOS_VERSION": "V10.0.1",
+          "FREERTOS_VERSION": "v1.4.8",
           "CMSIS_VERSION": "5.4.0",
           "FATFS_VERSION": "R0.13c",
           "NF_BUILD_RTM": "OFF",
