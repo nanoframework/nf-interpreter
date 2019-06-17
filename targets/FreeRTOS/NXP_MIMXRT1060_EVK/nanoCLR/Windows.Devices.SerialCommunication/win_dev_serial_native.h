@@ -18,7 +18,7 @@
 #include "stream_buffer.h"
 
 #define UART_TX_BUFER_SIZE 256
-#define UART_RX_BUFER_SIZE 16
+#define UART_RX_BUFER_SIZE 256
 
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_ErrorReceivedEventArgs
 {

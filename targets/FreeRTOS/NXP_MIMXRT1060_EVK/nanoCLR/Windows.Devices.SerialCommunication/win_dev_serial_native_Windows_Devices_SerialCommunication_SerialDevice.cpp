@@ -11,7 +11,7 @@
 // tx buffer size: 256 bytes
 #define UART_TX_BUFER_SIZE  256
 // rx buffer size: 256 bytes
-#define UART_RX_BUFER_SIZE  16
+#define UART_RX_BUFER_SIZE  256
 
 #define LPUART_TX_DMA_CHANNEL 0U
 
@@ -138,7 +138,7 @@ static void TxEnd(LPUART_Type *base, lpuart_edma_handle_t *handle, status_t stat
     NATIVE_INTERRUPT_END
 }
 
-void RX_Handle(LPUART_Type *base)
+static void RX_Handle(LPUART_Type *base)
 {
     NATIVE_INTERRUPT_START
 
@@ -163,10 +163,12 @@ void RX_Handle(LPUART_Type *base)
 */
 extern "C"
 {
-void LPUART1_IRQHandler(void)
+/* LPUART1 is used for debugging, disable it or will collide with debugger */
+/* void LPUART1_IRQHandler(void)
 {
     RX_Handle(LPUART1);
 }
+*/
 void LPUART2_IRQHandler(void)
 {
     RX_Handle(LPUART2);
@@ -179,7 +181,7 @@ void LPUART4_IRQHandler(void)
 {
     RX_Handle(LPUART4);
 }
-void LPUART5_IRQHandler(void)
+ void LPUART5_IRQHandler(void)
 {
     RX_Handle(LPUART5);
 }
@@ -247,13 +249,9 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         /* Quit if parameters or device is invalid or out of range */
         if (base == NULL || uartNum > 8) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);  
 
-        /* Allocate memory for TX and RX cricular buffers */
-        Uart_PAL[uartNum]->TxBuffer = (uint8_t *) malloc(UART_TX_BUFER_SIZE * sizeof(uint8_t));
+        /* Allocate memory for TX and RX circular buffers */
+        Uart_PAL[uartNum]->TxBuffer = (uint8_t *) platform_malloc(UART_TX_BUFER_SIZE * sizeof(uint8_t));
         if (Uart_PAL[uartNum]->TxBuffer == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-
-        /* Allocate stream buffer for RX  */
-        Uart_PAL[uartNum]->xReceiveBuffer = xStreamBufferCreate(xStreamBufferSizeBytes, xTriggerLevel);
-        if( Uart_PAL[uartNum]->xReceiveBuffer == NULL ) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY); 
 
         /* Initialize buffers  */
         Uart_PAL[uartNum]->TxRingBuffer.Initialize(Uart_PAL[uartNum]->TxBuffer, UART_TX_BUFER_SIZE);
@@ -311,6 +309,9 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                                 tskIDLE_PRIORITY + 3,
                                 &Uart_PAL[uartNum]->xWriteTaskToNotify );
         if (xReturned == errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);    
+        /* Allocate stream buffer for RX  */
+        Uart_PAL[uartNum]->xReceiveBuffer = xStreamBufferCreate(xStreamBufferSizeBytes, xTriggerLevel);
+        if( Uart_PAL[uartNum]->xReceiveBuffer == NULL ) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY); 
     }
     NANOCLR_NOCLEANUP(); 
 }
