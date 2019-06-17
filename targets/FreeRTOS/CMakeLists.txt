@@ -14,12 +14,12 @@ endif()
 if(NO_FREERTOS_SOURCE)
     # no FreeRTOS source specified, download it from it's repo
     
-    # check for SVN (needed here for advanced warning to user if it's not installed)
-    find_package(Subversion)
+    # check for Git (needed here for advanced warning to user if it's not installed)
+    find_package(Git)
 
-    #  check if SVN was found, if not report to user and abort
-    if(NOT SUBVERSION_FOUND)
-        message(FATAL_ERROR "error: could not find SVN, make sure you have it installed.")
+    #  check if Git was found, if not report to user and abort
+    if(NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
     endif()
 
     # FreeRTOS version
@@ -83,12 +83,12 @@ else()
 
         # check if we already have the sources, no need to copy again
         if(NOT EXISTS "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
-            file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
+            file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS")
         else()
             message(STATUS "Using local cache of FreeRTOS source from ${FREERTOS_SOURCE}")
         endif()
 
-        set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
+        set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/include)
     else()
         message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
     endif()
