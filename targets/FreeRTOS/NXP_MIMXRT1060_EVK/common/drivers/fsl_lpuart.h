@@ -844,6 +844,9 @@ void LPUART_TransferHandleIRQ(LPUART_Type *base, lpuart_handle_t *handle);
  */
 void LPUART_TransferHandleErrorIRQ(LPUART_Type *base, lpuart_handle_t *handle);
 
+uint32_t GetSrcFreq(void);
+
+
 /* @} */
 
 #if defined(__cplusplus)
