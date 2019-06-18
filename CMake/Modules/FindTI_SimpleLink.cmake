@@ -28,15 +28,15 @@ include(TI_SimpleLink_${TARGET_SERIES}_sources)
 include(TI_SimpleLink_${TARGET_SERIES}_GCC_options)
 
 # includes for FreeRTOS
-list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/include")
-list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM3")
+list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/include")
+list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/include/private")
+list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/portable/GCC/ARM_CM3")
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${TARGET_BASE_LOCATION}")
 
 # source files for FreeRTOS
 set(FreeRTOS_SRCS
 
     # FreeRTOS
-    croutine.c
     event_groups.c
     list.c
     queue.c
@@ -80,9 +80,9 @@ foreach(SRC_FILE ${FreeRTOS_SRCS})
         "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/source"
         "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/kernel/freertos/dpl"
         "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/kernel/freertos/startup"
-        "${PROJECT_BINARY_DIR}/FreeRTOS_Source/portable/MemMang"
-        "${PROJECT_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM3"
-        "${PROJECT_BINARY_DIR}/FreeRTOS_Source"
+        "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/portable/MemMang"
+        "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/portable/GCC/ARM_CM3"
+        "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
