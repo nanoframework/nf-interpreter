@@ -9,7 +9,7 @@ If($hex2dfuPathExists -eq $False)
 
     Write-Host "Downloading hex2dfu..."
 
-    $url = "https://github.com/nanoframework/nf-tools/releases/download/v1.0.0/hex2dfu.exe"
+    $url = "https://github.com/nanoframework/hex2dfu/releases/latest/download/hex2dfu.exe"
 
     $output = "$env:HEX2DFU_PATH\hex2dfu.exe"
     
