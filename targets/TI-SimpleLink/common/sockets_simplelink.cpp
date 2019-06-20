@@ -894,5 +894,7 @@ bool  SOCKETS_DbgInitialize( int ComPortNum )
 
 bool  SOCKETS_DbgUninitialize( int ComPortNum )
 {
+    NATIVE_PROFILE_PAL_COM();
+
     return true;
 }

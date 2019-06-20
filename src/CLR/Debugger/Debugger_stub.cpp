@@ -53,3 +53,19 @@ __nfweak void NFReleaseInfo::Init( NFReleaseInfo& NFReleaseInfo, unsigned short 
         hal_strncpy_s( (char*)&NFReleaseInfo.InfoString[0], sizeof(NFReleaseInfo.InfoString), info, len );
     }
 }
+
+__nfweak bool SOCKETS_DbgInitialize( int ComPortNum )
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    (void)ComPortNum;
+    return true;
+}
+
+__nfweak bool SOCKETS_DbgUninitialize( int ComPortNum )
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    (void)ComPortNum;
+    return true;
+}
