@@ -33,7 +33,11 @@
 #define PLATFORM_HAS_RNG       TRUE
 /////////////////////////////////////
 
+//////////////////////////////////////////////
 #define OEMSYSTEMINFOSTRING "nanoCLR running @ @TI_BOARD@ built with TI SL CC32xx SDK v3.10.00.04"
+#define TARGETNAMESTRING "@TI_BOARD@"
+#define PLATFORMNAMESTRING "TI_SL_CC32xx"
+//////////////////////////////////////////////
 
 //////////////////////////////////////////////
 // set Wire Protocol packet size

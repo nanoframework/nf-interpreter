@@ -43,14 +43,31 @@ __nfweak void CLR_DBG_Debugger::BroadcastEvent( unsigned int cmd, unsigned int p
     NATIVE_PROFILE_CLR_DEBUGGER();
 }
 
-__nfweak void NFReleaseInfo::Init( NFReleaseInfo& NFReleaseInfo, unsigned short int major, unsigned short int minor, unsigned short int build, unsigned short int revision, const char *info, size_t infoLen )
+__nfweak void NFReleaseInfo::Init(
+    NFReleaseInfo& NFReleaseInfo, 
+    unsigned short int major, 
+    unsigned short int minor, 
+    unsigned short int build, 
+    unsigned short int revision, 
+    const char *info, 
+    size_t infoLen,
+    const char *target, 
+    size_t targetLen,
+    const char *platform, 
+    size_t platformLen)
 {
     NFVersion::Init( NFReleaseInfo.Version, major, minor, build, revision );
     NFReleaseInfo.InfoString[ 0 ] = 0;
     if ( NULL != info && infoLen > 0 )
     {
-        const size_t len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString)-1);
+        size_t len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString)-1);
         hal_strncpy_s( (char*)&NFReleaseInfo.InfoString[0], sizeof(NFReleaseInfo.InfoString), info, len );
+        
+        len = MIN(targetLen, sizeof(NFReleaseInfo.TargetName)-1);
+        hal_strncpy_s( (char*)&NFReleaseInfo.TargetName[0], sizeof(NFReleaseInfo.TargetName), target, len );
+        
+        len = MIN(platformLen, sizeof(NFReleaseInfo.PlatformName)-1);
+        hal_strncpy_s( (char*)&NFReleaseInfo.PlatformName[0], sizeof(NFReleaseInfo.PlatformName), platform, len );
     }
 }
 

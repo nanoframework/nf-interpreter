@@ -31,6 +31,8 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo
     NANOCLR_NATIVE_DECLARE(get_OEM___STATIC__U1);
     NANOCLR_NATIVE_DECLARE(get_Model___STATIC__U1);
     NANOCLR_NATIVE_DECLARE(get_SKU___STATIC__U2);
+    NANOCLR_NATIVE_DECLARE(get_TargetName___STATIC__STRING);
+    NANOCLR_NATIVE_DECLARE(get_PlatformName___STATIC__STRING);
     NANOCLR_NATIVE_DECLARE(GetNativeFloatingPointSupport___STATIC__U1);
 
     //--//

@@ -53,10 +53,20 @@
 // All solutions are expected to provide an implementation of this
 bool Target_GetReleaseInfo(NFReleaseInfo& releaseInfo)
 {
-    NFReleaseInfo::Init(releaseInfo,
-                        VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION,
-                        OEMSYSTEMINFOSTRING, hal_strlen_s(OEMSYSTEMINFOSTRING)
-                        );
+    NFReleaseInfo::Init(
+        releaseInfo,
+        VERSION_MAJOR,
+        VERSION_MINOR,
+        VERSION_BUILD,
+        VERSION_REVISION,
+        OEMSYSTEMINFOSTRING,
+        hal_strlen_s(OEMSYSTEMINFOSTRING),
+        TARGETNAMESTRING,
+        hal_strlen_s(TARGETNAMESTRING),
+        PLATFORMNAMESTRING,
+        hal_strlen_s(PLATFORMNAMESTRING)
+    );
+
     return true; // alternatively, return false if you didn't initialize the releaseInfo structure.
 }
 

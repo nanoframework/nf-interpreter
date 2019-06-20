@@ -1070,7 +1070,19 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions( WP_Message* msg)
 
 static void GetClrReleaseInfo(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::ClrInfo& clrInfo)
 {
-    NFReleaseInfo::Init( clrInfo.m_clrReleaseInfo, VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION, OEMSYSTEMINFOSTRING, hal_strlen_s(OEMSYSTEMINFOSTRING) );
+    NFReleaseInfo::Init( 
+        clrInfo.m_clrReleaseInfo, 
+        VERSION_MAJOR, 
+        VERSION_MINOR, 
+        VERSION_BUILD, 
+        VERSION_REVISION, 
+        OEMSYSTEMINFOSTRING, 
+        hal_strlen_s(OEMSYSTEMINFOSTRING),
+        TARGETNAMESTRING,
+        hal_strlen_s(TARGETNAMESTRING),
+        PLATFORMNAMESTRING,
+        hal_strlen_s(PLATFORMNAMESTRING)
+        );
 
     if ( g_CLR_RT_TypeSystem.m_assemblyMscorlib &&
          g_CLR_RT_TypeSystem.m_assemblyMscorlib->m_header)
@@ -1084,18 +1096,6 @@ static void GetClrReleaseInfo(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapa
     else
     {
         NFVersion::Init( clrInfo.m_TargetFrameworkVersion, 0, 0, 0, 0 );
-    }
-}
-
-
-void NFReleaseInfo::Init(NFReleaseInfo& NFReleaseInfo, unsigned short int major, unsigned short int minor, unsigned short int build, unsigned short int revision, const char *info, size_t infoLen)
-{
-    NFVersion::Init( NFReleaseInfo.Version, major, minor, build, revision );
-    NFReleaseInfo.InfoString[ 0 ] = 0;
-    if ( NULL != info && infoLen > 0 )
-    {
-        const size_t len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString)-1);
-        hal_strncpy_s( (char*)&NFReleaseInfo.InfoString[ 0 ], sizeof(NFReleaseInfo.InfoString), info, len );
     }
 }
 
