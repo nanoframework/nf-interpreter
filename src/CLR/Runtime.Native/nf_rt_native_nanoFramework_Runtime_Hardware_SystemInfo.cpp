@@ -108,18 +108,23 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::get_Target
 
     Target_GetReleaseInfo( releaseInfo );
 
-    NANOCLR_SET_AND_LEAVE(stack.SetResult_String( (char*)releaseInfo.InfoString ));
+    NANOCLR_SET_AND_LEAVE(stack.SetResult_String( (char*)releaseInfo.TargetName ));
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::get_PlatformName___STATIC__STRING( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::get_Platform___STATIC__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
 
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NFReleaseInfo releaseInfo;
+
+    Target_GetReleaseInfo( releaseInfo );
+
+    NANOCLR_SET_AND_LEAVE(stack.SetResult_String( (char*)releaseInfo.PlatformName ));
 
     NANOCLR_NOCLEANUP();
 }
