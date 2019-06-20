@@ -14,7 +14,7 @@
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
-  #if defined(HAL_USE_RTC)
+  #if (HAL_USE_RTC == TRUE)
 
     // use RTC to get date time
     SYSTEMTIME st; 
@@ -51,6 +51,7 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
     return HAL_Time_ConvertFromSystemTime( &st );
 
   #else
+
 	if (datePartOnly)
 	{
 		SYSTEMTIME st;
@@ -67,6 +68,7 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
     {
         return HAL_Time_CurrentTime();
     }
+
   #endif
 };
 
@@ -76,7 +78,7 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
 
     HAL_Time_ToSystemTime(utcTime, &systemTime);
 
-  #if defined(HAL_USE_RTC)
+  #if (HAL_USE_RTC == TRUE)
 
     // set RTC
     RTCDateTime newTime;
@@ -93,9 +95,11 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
     rtcSetTime(&RTCD1, &newTime);
 
   #else
+
     // TODO FIXME
     // need to add implementation when RTC is not being used
     // can't mess with the systicks because the scheduling can fail
+
   #endif
 }
 
