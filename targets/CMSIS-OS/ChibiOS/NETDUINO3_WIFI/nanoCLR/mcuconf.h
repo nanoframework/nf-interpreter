@@ -41,8 +41,10 @@
 #define STM32_HPRE                          STM32_HPRE_DIV1
 #define STM32_PPRE1                         STM32_PPRE1_DIV4
 #define STM32_PPRE2                         STM32_PPRE2_DIV2
-#define STM32_RTCSEL                        STM32_RTCSEL_LSI
-#define STM32_RTCPRE_VALUE                  8       // 8
+#define STM32_RTCSEL                        STM32_RTCSEL_HSEDIV
+#define STM32_RTCPRE_VALUE                  25
+#define STM32_RTC_PRESA_VALUE               125
+#define STM32_RTC_PRESS_VALUE               8000
 #define STM32_MCO1SEL                       STM32_MCO1SEL_HSI
 #define STM32_MCO1PRE                       STM32_MCO1PRE_DIV1
 #define STM32_MCO2SEL                       STM32_MCO2SEL_SYSCLK
