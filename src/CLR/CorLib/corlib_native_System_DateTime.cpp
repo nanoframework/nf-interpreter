@@ -3,11 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include "CorLib.h"
-
-CLR_INT64 s_UTCMask   = ULONGLONGCONSTANT(0x8000000000000000);
-CLR_INT64 s_TickMask  = ULONGLONGCONSTANT(0x7FFFFFFFFFFFFFFF);
-
 
 HRESULT Library_corlib_native_System_DateTime::_ctor___VOID__I4__I4__I4__I4__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
@@ -179,7 +176,7 @@ HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTi
     CLR_INT64* pRes = NewObject( stack );
 
     // request full date&time
-    *pRes = HAL_Time_CurrentDateTime(false) | s_UTCMask;
+    *pRes = HAL_Time_CurrentDateTime(false);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -192,7 +189,7 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
     CLR_INT64* pRes = NewObject( stack );
 
     // request date part only
-    *pRes = HAL_Time_CurrentDateTime(true) | s_UTCMask;
+    *pRes = HAL_Time_CurrentDateTime(true);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -255,10 +252,7 @@ void Library_corlib_native_System_DateTime::Expand( CLR_RT_StackFrame& stack, SY
 
     if(val)
     {
-    // The most significant bit of *val keeps flag if time is UTC.
-    // We cannot change *val, so we create copy and clear the bit.
-    // FIXME time now is always UTC
-        CLR_INT64 ticks = *val & s_TickMask;
+        CLR_INT64 ticks = *val;
         HAL_Time_ToSystemTime( ticks, &st );
     }
 }
