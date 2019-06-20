@@ -22,7 +22,9 @@
 HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc::Native_RTC_SetSystemTime___STATIC__BOOLEAN__I4__U1__U1__U1__U1__U1__U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
-    {
+
+      #if (HAL_USE_RTC == TRUE)
+
         RTCDateTime newTime;
 
         newTime.year = stack.Arg0().NumericByRef().s4 - 1980;  // ChibiOS time base is 1980-01-01
@@ -38,6 +40,17 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc::Native_RTC_SetSys
         
         // Return value to the managed application
         stack.SetResult_Boolean(true);
-    }
-    NANOCLR_NOCLEANUP_NOLABEL();
+
+        NANOCLR_NOCLEANUP_NOLABEL();
+
+      #else
+
+        (void)stack;
+
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+        NANOCLR_NOCLEANUP();
+
+      #endif // (HAL_USE_RTC == TRUE)
+
 }
