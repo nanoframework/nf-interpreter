@@ -328,10 +328,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4,
     NULL,
     Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTime,
     Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTime,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -902,7 +904,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0xDF5364AB,
+    0x2F98F004,
     method_lookup,
-    { 1, 2, 0, 0 }
+    { 1, 2, 1, 0 }
 };

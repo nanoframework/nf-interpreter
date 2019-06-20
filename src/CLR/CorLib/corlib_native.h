@@ -333,6 +333,7 @@ struct Library_corlib_native_System_DateTime
 {
     static const int FIELD_STATIC__MinValue = 2;
     static const int FIELD_STATIC__MaxValue = 3;
+    static const int FIELD_STATIC__UnixEpoch = 4;
 
     static const int FIELD___ticks = 1;
 
