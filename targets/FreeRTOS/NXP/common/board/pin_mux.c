@@ -390,6 +390,18 @@ void BOARD_InitDEBUG_UART(void) {
                                                  Pull / Keep Select Field: Keeper
                                                  Pull Up / Down Config. Field: 100K Ohm Pull Down
                                                  Hyst. Enable Field: Hysteresis Disabled */
+    IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_B1_06_LPUART3_TX,         /* GPIO_AD_B1_06 is configured as CSI_VSYNC */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+    IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_B1_07_LPUART3_RX,         /* GPIO_AD_B1_07 is configured as CSI_HSYNC */
+      0U);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_06_LPUART3_TX,        /* GPIO_AD_B0_12 PAD functional properties : */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_07_LPUART3_RX,        /* GPIO_AD_B0_12 PAD functional properties : */
+        0x10B0u);     
 }
 
 
@@ -1028,12 +1040,6 @@ void BOARD_InitCSI(void) {
       0U);                                    /* Software Input On Field: Input Path is determined by functionality */
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_AD_B1_05_CSI_MCLK,          /* GPIO_AD_B1_05 is configured as CSI_MCLK */
-      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
-  IOMUXC_SetPinMux(
-      IOMUXC_GPIO_AD_B1_06_CSI_VSYNC,         /* GPIO_AD_B1_06 is configured as CSI_VSYNC */
-      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
-  IOMUXC_SetPinMux(
-      IOMUXC_GPIO_AD_B1_07_CSI_HSYNC,         /* GPIO_AD_B1_07 is configured as CSI_HSYNC */
       0U);                                    /* Software Input On Field: Input Path is determined by functionality */
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_AD_B1_08_CSI_DATA09,        /* GPIO_AD_B1_08 is configured as CSI_DATA09 */
