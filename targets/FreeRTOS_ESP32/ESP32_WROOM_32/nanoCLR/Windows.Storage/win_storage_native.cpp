@@ -107,5 +107,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage =
     "Windows.Storage", 
     0x8D8C8026,
     method_lookup,
-    { 1, 0, 1, 0 }
+    { 100, 0, 1, 0 }
 };

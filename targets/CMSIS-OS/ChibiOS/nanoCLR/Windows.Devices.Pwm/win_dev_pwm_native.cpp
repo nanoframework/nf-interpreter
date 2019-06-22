@@ -22,7 +22,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
     Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::get_MaxFrequency___R8,
     Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::get_MinFrequency___R8,
     Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::get_PinCount___I4,
@@ -59,7 +58,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Pwm =
 {
     "Windows.Devices.Pwm", 
-    0x75280B26,
+    0x8E93FB40,
     method_lookup,
-    { 1, 1, 3, 1 }
+    { 100, 1, 3, 1 }
 };
