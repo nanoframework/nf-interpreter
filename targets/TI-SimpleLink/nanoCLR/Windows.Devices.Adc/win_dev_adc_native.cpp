@@ -20,7 +20,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
     Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadValue___I4,
     Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeDisposeChannel___VOID,
     NULL,
@@ -59,7 +58,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Adc =
 {
     "Windows.Devices.Adc", 
-    0xE5D11571,
+    0xA84B23D2,
     method_lookup,
-    { 1, 1, 3, 1 }
+    { 100, 1, 3, 1 }
 };

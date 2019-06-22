@@ -7,7 +7,6 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    NULL,
     Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::TouchReset___BOOLEAN,
     Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::TouchBit___BOOLEAN__BOOLEAN,
     Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::TouchByte___U1__U1,
@@ -24,7 +23,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Devices_OneWire =
 {
     "nanoFramework.Devices.OneWire", 
-    0x4BFAF309,
+    0xC7BEAEBC,
     method_lookup,
-    { 1, 0, 3, 3 }
+    { 100, 0, 3, 3 }
 };

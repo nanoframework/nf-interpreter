@@ -431,7 +431,6 @@ struct Library_corlib_native_System_Globalization_DateTimeFormatInfo
     static const int FIELD___generalShortTimePattern = 1;
     static const int FIELD___generalLongTimePattern = 2;
     static const int FIELD___fullDateTimePattern = 3;
-    static const int FIELD__CultureInfo = 4;
 
 
     //--//
@@ -454,7 +453,7 @@ struct Library_corlib_native_System_Globalization_NumberFormatInfo
 
 struct Library_corlib_native_System_Guid
 {
-    static const int FIELD_STATIC__Empty = 4;
+    static const int FIELD_STATIC__Empty = 5;
 
     static const int FIELD___a = 1;
     static const int FIELD___b = 2;
@@ -787,7 +786,7 @@ struct Library_corlib_native_System_Single
 
 struct Library_corlib_native_System_String
 {
-    static const int FIELD_STATIC__Empty = 5;
+    static const int FIELD_STATIC__Empty = 6;
 
     NANOCLR_NATIVE_DECLARE(CompareTo___I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(get_Chars___CHAR__I4);
@@ -988,7 +987,7 @@ struct Library_corlib_native_System_Threading_Thread
 
 struct Library_corlib_native_System_Threading_Timeout
 {
-    static const int FIELD_STATIC__InfiniteTimeSpan = 6;
+    static const int FIELD_STATIC__InfiniteTimeSpan = 7;
 
 
     //--//
@@ -1015,9 +1014,9 @@ struct Library_corlib_native_System_Threading_Timer
 
 struct Library_corlib_native_System_TimeSpan
 {
-    static const int FIELD_STATIC__Zero = 7;
-    static const int FIELD_STATIC__MaxValue = 8;
-    static const int FIELD_STATIC__MinValue = 9;
+    static const int FIELD_STATIC__Zero = 8;
+    static const int FIELD_STATIC__MaxValue = 9;
+    static const int FIELD_STATIC__MinValue = 10;
 
     static const int FIELD___ticks = 1;
 

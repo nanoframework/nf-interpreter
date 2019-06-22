@@ -64,7 +64,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Math =
 {
     "System.Math", 
-    0x4BDCF00F,
+    0xC5A2A195,
     method_lookup,
-    { 1, 0, 4, 3 }
+    { 100, 0, 4, 3 }
 };
