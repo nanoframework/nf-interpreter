@@ -15,7 +15,6 @@ const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
 
     // ADC3
     {3, GPIOF, 8, ADC_CHANNEL_IN6},
-    {3, GPIOB, 8, ADC_CHANNEL_IN7},
 
     // these are the internal sources, available only at ADC1
     {1, NULL, 0, ADC_CHANNEL_SENSOR},
