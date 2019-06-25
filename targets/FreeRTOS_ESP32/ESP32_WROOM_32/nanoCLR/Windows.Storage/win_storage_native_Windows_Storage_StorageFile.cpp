@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_storage_native.h"
+#include "win_storage_native_target.h"
 
 extern char * ConvertToESP32Path(const char * filepath);
 extern uint64_t GetFileTimeFromPath(char * path);

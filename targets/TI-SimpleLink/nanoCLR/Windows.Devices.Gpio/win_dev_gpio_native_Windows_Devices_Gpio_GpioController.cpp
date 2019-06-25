@@ -5,7 +5,7 @@
 //
 
 
-#include "win_dev_gpio_native.h"
+#include "win_dev_gpio_native_target.h"
 
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController::get_PinCount___I4( CLR_RT_StackFrame& stack )

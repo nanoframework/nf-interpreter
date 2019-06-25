@@ -4,7 +4,7 @@
 #
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "${PROJECT_SOURCE_DIR}/src/CLR/Runtime.Events")
+set(BASE_PATH_FOR_THIS_MODULE "${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Events")
 
 
 # set include directories

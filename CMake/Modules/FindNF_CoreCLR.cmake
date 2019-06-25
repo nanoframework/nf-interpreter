@@ -22,7 +22,7 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Debugger)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/Base64)
-
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
 
 # source files for nanoFramework Core, CoreLib and CLR startup
 set(NF_CoreCLR_SRCS
@@ -202,7 +202,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${PROJECT_SOURCE_DIR}/src/CLR/Startup
 
             # Runtime.Native
-            ${PROJECT_SOURCE_DIR}/src/CLR/Runtime.Native
+            ${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Native
 
             # Core stubs
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/Hardware

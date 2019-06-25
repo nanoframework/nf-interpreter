@@ -8,9 +8,11 @@
 #include <cmsis_os.h>
 #include <targetPAL.h>
 #include <swo.h>
-#include "win_dev_pwm_native.h"
+#include "win_dev_pwm_native_target.h"
 
 PWMConfig _pwmConfig;
+
+extern PWMDriver* GetDriver(int timerId);
 
 HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::get_MaxFrequency___R8( CLR_RT_StackFrame& stack )
 {
@@ -80,7 +82,7 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::NativeSetD
 
         // Gets the PWM driver associated with the requested timer
         PWMDriver * _drv;
-        _drv = Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetDriver(timerId);
+        _drv = GetDriver(timerId);
 
         // Sets the period to something able to be precise enough with low and high frequencies
         // and that allows the clock frequency parameter to fit in an unsigned int

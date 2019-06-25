@@ -27,11 +27,11 @@ foreach(SRC_FILE ${nanoFramework.Hardware.Esp32_SRCS})
     set(nanoFramework.Hardware.Esp32_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(nanoFramework.Hardware.Esp32_SRC_FILE ${SRC_FILE}
         PATHS 
-            "${BASE_PATH_FOR_THIS_MODULE}"
+            ${BASE_PATH_FOR_THIS_MODULE}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${Hardware.Esp32_SRC_FILE}") # debug helper
+    # message("${SRC_FILE} >> ${nanoFramework.Hardware.Esp32_SRC_FILE}") # debug helper
     list(APPEND nanoFramework.Hardware.Esp32_SOURCES ${nanoFramework.Hardware.Esp32_SRC_FILE})
 endforeach()
 

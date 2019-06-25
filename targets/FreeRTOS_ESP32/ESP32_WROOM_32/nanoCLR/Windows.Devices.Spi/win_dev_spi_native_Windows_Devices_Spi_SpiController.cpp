@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_spi_native.h"
+#include "win_dev_spi_native_target.h"
 
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiController::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
 {

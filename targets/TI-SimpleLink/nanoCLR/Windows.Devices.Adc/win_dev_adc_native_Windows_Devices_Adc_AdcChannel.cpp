@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_adc_native.h"
+#include "win_dev_adc_native_target.h"
 
 // // this has to be an array because ChibiOS ADC API expects that
 // static adcsample_t sampleBuffer[1 * 1];

@@ -7,11 +7,10 @@
 #include <hal.h>
 #include <cmsis_os.h>
 #include <targetPAL.h>
-#include "win_dev_pwm_native.h"
+#include "win_dev_pwm_native_target.h"
 #include <swo.h>
 
-
-int Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetChannel (int pin, int timerId)
+int GetChannel (int pin, int timerId)
 {
     int channel = -1;
 #if defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F439xx) || defined(STM32F469xx)  || defined(STM32F479xx)
@@ -815,14 +814,14 @@ switch (timerId)
     return channel;
 }
 
-int Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetAlternateFunction (int timerId)
+int GetAlternateFunction (int timerId)
 {
     if (timerId >= 8) return 3;
     if (timerId >= 3) return 2;
     return 1;
 }
 
-PWMDriver * Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetDriver(int timerId)
+PWMDriver * GetDriver(int timerId)
 {
     PWMDriver * _drv = NULL;
 
