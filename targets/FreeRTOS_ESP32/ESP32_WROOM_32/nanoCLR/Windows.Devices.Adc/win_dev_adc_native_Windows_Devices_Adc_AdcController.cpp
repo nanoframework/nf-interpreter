@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_adc_native.h"
+#include "win_dev_adc_native_target.h"
 
 // ESP32 ADC controller
 //
@@ -28,15 +28,6 @@
 //  8               - Internal Temperture sensor
 //  9               - Internal Hall Sensor
 // ADC2 / 10 - 19   - 10 Channels -( GPIOs 0, 2, 4, 12 - 15 and 25 - 27. )
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Adc.AdcChannelMode (in managed code) !!!    //
-///////////////////////////////////////////////////////////////////////////////////////
-enum AdcChannelMode
-{
-        SingleEnded = 0,
-        Differential
-};
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpenChannel___VOID__I4( CLR_RT_StackFrame& stack )
 {

@@ -6,41 +6,10 @@
 
 #include <string.h>
 #include <targetPAL.h>
-#include "win_dev_i2c_native.h"
+#include "win_dev_i2c_native_target.h"
 #include "Esp32_DeviceMapping.h"
 
- 
 static const char* TAG = "I2C";
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cSharingMode (in managed code) !!!    //
-///////////////////////////////////////////////////////////////////////////////////////
-enum I2cSharingMode
-{
-    Exclusive = 0,
-    Shared
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cTransferStatus (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
- enum I2cTransferStatus
-{
-    I2cTransferStatus_FullTransfer = 0,
-    I2cTransferStatus_ClockStretchTimeout,
-    I2cTransferStatus_PartialTransfer,
-    I2cTransferStatus_SlaveAddressNotAcknowledged,
-    I2cTransferStatus_UnknownError
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cBusSpeed (in managed code) !!!       //
-///////////////////////////////////////////////////////////////////////////////////////
-enum I2cBusSpeed
-{
-    I2cBusSpeed_StandardMode = 0,
-    I2cBusSpeed_FastMode
-};
 
 typedef Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings I2cConnectionSettings;
 
@@ -59,7 +28,7 @@ void Esp32_I2c_UnitializeAll()
     }
 }
 
-void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::SetConfig(i2c_port_t bus, CLR_RT_HeapBlock* config)
+void SetConfig(i2c_port_t bus, CLR_RT_HeapBlock* config)
 {
     int busSpeed = config[ I2cConnectionSettings::FIELD___busSpeed ].NumericByRef().s4;
 

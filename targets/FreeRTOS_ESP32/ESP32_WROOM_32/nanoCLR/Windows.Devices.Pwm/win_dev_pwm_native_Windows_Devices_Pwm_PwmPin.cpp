@@ -4,10 +4,7 @@
 //
 
 #include <targetPAL.h>
-#include "win_dev_pwm_native.h"
-
-
-
+#include "win_dev_pwm_native_target.h"
 
 // Used to map a PWM channel number to a pin number for High and low speed channels
 static char HighSpeedPinMap[8] = { 255,255,255,255,255,255,255,255 };
@@ -19,16 +16,57 @@ static char LowSpeedPinMap[8] =  { 255,255,255,255,255,255,255,255 };
 extern uint32_t PwmController_Timer_resolution[8];
 
 
+//
+//  Look up Pin number to find channel, if create true and not present then add pin
+//  return channel number or -1 if error
+//
+int  GetChannel (int pin, int timerId, bool create)
+{
+    int channel = -1;  // Return if not found
+    
+    // Selct map depending if high or low speed timers
+    char * pMap =  (timerId > 3)? LowSpeedPinMap: HighSpeedPinMap;
+    char * pMap2 = pMap;
 
-HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::ConfigureAndStart(CLR_RT_HeapBlock* pThis, bool create, bool noStart)
+    //look for pin in map
+    for( int index=0; index<8; index++, pMap++ )
+    {
+        if (*pMap == pin ) { channel = index; break; }
+    }
+
+    if ( create && channel == -1) 
+    {
+        // if pin/channel not found then allocate one
+        for( int index=0; index<8; index++, pMap2++ )
+        {
+            if (*pMap2 == 255 ) { channel = index; *pMap2 = pin; break; }
+        }
+    }
+    
+    return channel;
+}
+
+//
+// Work out the duty Cycle for the current duty resolution and polarity
+// 
+uint32_t CalculateDuty(int timerId, uint32_t dutyCycle, PwmPulsePolarity polarity)
+{
+    // if polarity Active low then reverse duty cycle
+    if (polarity == ActiveLow ) dutyCycle = 10000 - dutyCycle;
+
+    // Return a duy cycle in the range of the current timer duty resolution
+    return PwmController_Timer_resolution[timerId] * dutyCycle / 10000;
+}
+
+HRESULT ConfigureAndStart(CLR_RT_HeapBlock* pThis, bool create, bool noStart)
 {
     NANOCLR_HEADER();
     {
        // Retrieves the needed parameters from private class properties or method parameters
-        int timerId   = (int)(pThis[ FIELD___pwmTimer ].NumericByRef().u4);
-        int pinNumber = (int)(pThis[ FIELD___pinNumber ].NumericByRef().u4);
-        uint32_t dutyCycle = (uint32_t)(pThis[ FIELD___dutyCycle ].NumericByRef().u4);
-        PwmPulsePolarity polarity = (PwmPulsePolarity)(pThis[ FIELD___polarity ].NumericByRef().u4);
+        int timerId   = (int)(pThis[ Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::FIELD___pwmTimer ].NumericByRef().u4);
+        int pinNumber = (int)(pThis[ Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::FIELD___pinNumber ].NumericByRef().u4);
+        uint32_t dutyCycle = (uint32_t)(pThis[ Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::FIELD___dutyCycle ].NumericByRef().u4);
+        PwmPulsePolarity polarity = (PwmPulsePolarity)(pThis[ Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::FIELD___polarity ].NumericByRef().u4);
 
         // Configure channel
         ledc_mode_t  mode = GetSpeedMode(timerId);
@@ -62,48 +100,6 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::ConfigureAndStart
 
     }
     NANOCLR_NOCLEANUP();
-}
-
-//
-//  Look up Pin number to find channel, if create true and not present then add pin
-//  return channel number or -1 if error
-//
-int  Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetChannel (int pin, int timerId, bool create)
-{
-    int channel = -1;  // Return if not found
-    
-    // Selct map depending if high or low speed timers
-    char * pMap =  (timerId > 3)? LowSpeedPinMap: HighSpeedPinMap;
-    char * pMap2 = pMap;
-
-    //look for pin in map
-    for( int index=0; index<8; index++, pMap++ )
-    {
-        if (*pMap == pin ) { channel = index; break; }
-    }
-
-    if ( create && channel == -1) 
-    {
-        // if pin/channel not found then allocate one
-        for( int index=0; index<8; index++, pMap2++ )
-        {
-            if (*pMap2 == 255 ) { channel = index; *pMap2 = pin; break; }
-        }
-    }
-    
-    return channel;
-}
-
-//
-// Work out the duty Cycle for the current duty resolution and polarity
-// 
-uint32_t  Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::CalculateDuty(int timerId, uint32_t dutyCycle, PwmPulsePolarity polarity)
-{
-    // if polarity Active low then reverse duty cycle
-    if (polarity == ActiveLow ) dutyCycle = 10000 - dutyCycle;
-
-    // Return a duy cycle in the range of the current timer duty resolution
-    return PwmController_Timer_resolution[timerId] * dutyCycle / 10000;
 }
 
 //

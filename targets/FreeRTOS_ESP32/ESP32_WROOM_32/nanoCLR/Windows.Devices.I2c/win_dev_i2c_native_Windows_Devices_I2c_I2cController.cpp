@@ -5,7 +5,7 @@
 
 #include <string.h>
 #include <targetPAL.h>
-#include "win_dev_i2c_native.h"
+#include "win_dev_i2c_native_target.h"
 #include "Esp32_DeviceMapping.h"
 
 

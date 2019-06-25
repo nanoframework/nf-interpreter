@@ -8,7 +8,7 @@
 #if (HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE)
 #include <ff.h>
 #endif
-#include "win_storage_native.h"
+#include "win_storage_native_target.h"
 #include <target_windows_storage_config.h>
 #include <nanoHAL_Windows_Storage.h>
 

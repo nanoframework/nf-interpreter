@@ -30,7 +30,7 @@ foreach(SRC_FILE ${nanoFramework.Hardware.Stm32_SRCS})
     set(nanoFramework.Hardware.Stm32_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(nanoFramework.Hardware.Stm32_SRC_FILE ${SRC_FILE}
         PATHS 
-            "${BASE_PATH_FOR_THIS_MODULE}"
+            ${BASE_PATH_FOR_THIS_MODULE}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

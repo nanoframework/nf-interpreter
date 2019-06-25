@@ -4,46 +4,14 @@
 //
 
 #include <string.h>
-#include "win_dev_i2c_native.h"
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cSharingMode (in managed code) !!!    //
-///////////////////////////////////////////////////////////////////////////////////////
-enum I2cSharingMode
-{
-    Exclusive = 0,
-    Shared
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cTransferStatus (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
- enum I2cTransferStatus
-{
-    I2cTransferStatus_FullTransfer = 0,
-    I2cTransferStatus_ClockStretchTimeout,
-    I2cTransferStatus_PartialTransfer,
-    I2cTransferStatus_SlaveAddressNotAcknowledged,
-    I2cTransferStatus_UnknownError
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cBusSpeed (in managed code) !!!       //
-///////////////////////////////////////////////////////////////////////////////////////
-enum I2cBusSpeed
-{
-    I2cBusSpeed_StandardMode = 0,
-    I2cBusSpeed_FastMode
-};
+#include "win_dev_i2c_native_target.h"
 
 typedef Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings I2cConnectionSettings;
-
 
 /////////////////////////////////////////////////////
 // I2C PAL strucs declared in win_dev_i2c_native.h //
 /////////////////////////////////////////////////////
 NF_PAL_I2C I2C1_PAL;
-
 
 void HostI2C_CallbackFxn(I2C_Handle handle, I2C_Transaction *transaction, bool transferStatus)
 {

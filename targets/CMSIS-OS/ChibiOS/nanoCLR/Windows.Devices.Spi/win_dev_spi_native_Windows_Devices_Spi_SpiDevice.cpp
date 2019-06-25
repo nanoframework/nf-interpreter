@@ -10,32 +10,8 @@
 #include <LaunchCLR.h>
 #include <string.h>
 #include <targetPAL.h>
-#include "win_dev_spi_native.h"
+#include "win_dev_spi_native_target.h"
 
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum DataBitOrder
-{
-    DataBitOrder_MSB = 0,
-    DataBitOrder_LSB
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum SpiModes
-{
-    SpiModes_Mode0 = 0,
-    SpiModes_Mode1,
-    SpiModes_Mode2,
-    SpiModes_Mode3
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
 
 // define this type here to make it shorter and improve code readability
 typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings SpiConnectionSettings;
@@ -132,7 +108,7 @@ static void SpiCallback(SPIDriver *spip)
 };
 
 // Computes the SPI peripheral baud rate according to the requested frequency
-uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRate(uint8_t busIndex, int32_t requestedFrequency, int32_t& actualFrequency)
+uint16_t ComputeBaudRate(uint8_t busIndex, int32_t requestedFrequency, int32_t& actualFrequency)
 {
     uint16_t divider = 0;
     int32_t maxSpiFrequency;
@@ -224,7 +200,7 @@ uint16_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::ComputeBaudRa
 }
 
 // Give a complete low-level SPI configuration from user's managed connectionSettings
-void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, bool bufferIs16bits)
+void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, bool bufferIs16bits)
 {
     int32_t actualFrequency;
 
@@ -327,7 +303,7 @@ void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int 
 }
 
 // estimate the time required to perform the SPI transaction
-bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::IsLongRunningOperation(uint32_t writeSize, uint32_t readSize, bool bufferIs16bits, float byteTime, uint32_t& estimatedDurationMiliseconds)
+bool IsLongRunningOperation(uint32_t writeSize, uint32_t readSize, bool bufferIs16bits, float byteTime, uint32_t& estimatedDurationMiliseconds)
 {
     if(bufferIs16bits)
     {
@@ -358,7 +334,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 {
     return NativeTransfer( stack, true );
 }
-
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer( CLR_RT_StackFrame& stack, bool bufferIs16bits )
 {
     NANOCLR_HEADER();

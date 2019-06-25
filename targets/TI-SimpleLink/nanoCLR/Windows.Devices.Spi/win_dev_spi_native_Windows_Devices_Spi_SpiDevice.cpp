@@ -5,32 +5,7 @@
 
 
 #include <string.h>
-#include "win_dev_spi_native.h"
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum DataBitOrder
-{
-    DataBitOrder_MSB = 0,
-    DataBitOrder_LSB
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum SpiModes
-{
-    SpiModes_Mode0 = 0,
-    SpiModes_Mode1,
-    SpiModes_Mode2,
-    SpiModes_Mode3
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
+#include "win_dev_spi_native_target.h"
 
 // define this type here to make it shorter and improve code readability
 typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings SpiConnectionSettings;
@@ -63,7 +38,7 @@ void SpiCallback(SPI_Handle handle, SPI_Transaction *transaction)
 }
 
 // Give a complete low-level SPI configuration from user's managed connectionSettings
-void Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, bool bufferIs16bits)
+void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, bool bufferIs16bits)
 {
     SPI_Params spiParams;
 

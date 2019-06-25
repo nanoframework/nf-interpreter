@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_pwm_native.h"
+#include "win_dev_pwm_native_target.h"
 
 // PWMConfig _pwmConfig;
 

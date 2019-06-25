@@ -4,8 +4,8 @@
 //
 
 
-#ifndef _WIN_DEV_WIFI_NATIVE_H_
-#define _WIN_DEV_WIFI_NATIVE_H_
+#ifndef _WIN_DEV_WIFI_NATIVE_TARGET_H_
+#define _WIN_DEV_WIFI_NATIVE_TARGET_H_
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -86,4 +86,4 @@ struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiNetworkReport
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Wifi;
 
-#endif
+#endif //_WIN_DEV_WIFI_NATIVE_TARGET_H_

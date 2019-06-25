@@ -4,7 +4,7 @@
 //
 
 #include <targetPAL.h>
-#include "win_dev_pwm_native.h"
+#include "win_dev_pwm_native_target.h"
 
 uint32_t PwmController_Timer_resolution[8];
 

@@ -36,37 +36,12 @@
 #include <LaunchCLR.h>
 #include <string.h>
 #include <targetPAL.h>
-#include "win_dev_spi_native.h"
+#include "win_dev_spi_native_target.h"
 #include "Esp32_DeviceMapping.h"
 
 static nfSpiBusConfig  spiconfig[NUM_SPI_BUSES];
 static bool nfSpiInited = false;
 
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum DataBitOrder
-{
-    DataBitOrder_MSB = 0,
-    DataBitOrder_LSB
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum SpiModes
-{
-    SpiModes_Mode0 = 0,
-    SpiModes_Mode1,
-    SpiModes_Mode2,
-    SpiModes_Mode3
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
 
 // define this type here to make it shorter and improve code readability
 typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings SpiConnectionSettings;
@@ -147,60 +122,8 @@ static void InitSpiBus( spi_host_device_t bus)
     }
 }
 
-//
-//	Add new device and return device index
-//  return -1 if no more devices avalaible
-//
-int Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::Add_Spi_Device(int bus, CLR_RT_HeapBlock* pThis)
-{
-    spi_device_interface_config_t dev_config;
-    nfSpiBusConfig * pBusConfig = &spiconfig[bus];
-
-	int deviceIndex = FindFreeDeviceSlotSpi(bus);
-	// Check if all device slots used
-	if (deviceIndex < 0) return -1;
-
-    // Get a complete low-level SPI configuration, depending on user's managed parameters
-    dev_config = GetConfig(bus, pThis[ FIELD___connectionSettings ].Dereference());
-    
-     // Add device to bus
-    spi_device_handle_t deviceHandle;
-    if ( spi_bus_add_device( (spi_host_device_t)bus, &dev_config, &deviceHandle ) != ESP_OK )
-    {
-        ESP_LOGE( TAG, "Unable to init SPI device");
-        return -1; 
-    }
-
-    // Add next Device
-    pBusConfig->deviceId[deviceIndex] = pThis[ FIELD___deviceId ].NumericByRef().s4;
-    pBusConfig->deviceHandles[deviceIndex] = deviceHandle;
-    
-	return deviceIndex;
-}
-
-//
-//  Get the Bus and device index
-//  return false if error
-//
-bool Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetDevice( CLR_RT_HeapBlock* pThis, uint8_t * pBus, int * pDeviceIndex)
-{
-    int32_t deviceId = pThis[ FIELD___deviceId ].NumericByRef().s4;
-    *pBus = (uint8_t)(deviceId / 1000);
-        
-    // Find device in spiconfig
-    for( int index=0; index < MAX_SPI_DEVICES; index++)
-    {
-        if ( spiconfig[*pBus].deviceId[index] == deviceId )
-        {
-            // Device found with same deviceId
-            *pDeviceIndex = index;
-            return true;
-        }
-    }
-    return false;
-}
 // Give a complete low-level SPI configuration from user's managed connectionSettings
-spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::GetConfig( int bus, CLR_RT_HeapBlock* config)
+spi_device_interface_config_t GetConfig( int bus, CLR_RT_HeapBlock* config)
 {
     (void)bus;
 
@@ -215,7 +138,7 @@ spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_Spi
         clockHz = MAX_CLOCK_FREQUENCY;
     }
 
-//ets_printf( "Spi config cspin:%d spiMode:%d bitorder:%d clockHz:%d\n", csPin, spiMode, bitOrder, clockHz);
+    //ets_printf( "Spi config cspin:%d spiMode:%d bitorder:%d clockHz:%d\n", csPin, spiMode, bitOrder, clockHz);
     uint32_t flags = (bitOrder == 1) ? (SPI_DEVICE_TXBIT_LSBFIRST | SPI_DEVICE_RXBIT_LSBFIRST) : 0;
 
     // Fill in device config    
@@ -238,6 +161,59 @@ spi_device_interface_config_t Library_win_dev_spi_native_Windows_Devices_Spi_Spi
     };
 
     return dev_config;
+}
+
+//
+//	Add new device and return device index
+//  return -1 if no more devices avalaible
+//
+int Add_Spi_Device(int bus, CLR_RT_HeapBlock* pThis)
+{
+    spi_device_interface_config_t dev_config;
+    nfSpiBusConfig * pBusConfig = &spiconfig[bus];
+
+	int deviceIndex = FindFreeDeviceSlotSpi(bus);
+	// Check if all device slots used
+	if (deviceIndex < 0) return -1;
+
+    // Get a complete low-level SPI configuration, depending on user's managed parameters
+    dev_config = GetConfig(bus, pThis[ Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::FIELD___connectionSettings ].Dereference());
+    
+     // Add device to bus
+    spi_device_handle_t deviceHandle;
+    if ( spi_bus_add_device( (spi_host_device_t)bus, &dev_config, &deviceHandle ) != ESP_OK )
+    {
+        ESP_LOGE( TAG, "Unable to init SPI device");
+        return -1; 
+    }
+
+    // Add next Device
+    pBusConfig->deviceId[deviceIndex] = pThis[ Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::FIELD___deviceId ].NumericByRef().s4;
+    pBusConfig->deviceHandles[deviceIndex] = deviceHandle;
+    
+	return deviceIndex;
+}
+
+//
+//  Get the Bus and device index
+//  return false if error
+//
+bool GetDevice( CLR_RT_HeapBlock* pThis, uint8_t * pBus, int * pDeviceIndex)
+{
+    int32_t deviceId = pThis[ Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::FIELD___deviceId ].NumericByRef().s4;
+    *pBus = (uint8_t)(deviceId / 1000);
+        
+    // Find device in spiconfig
+    for( int index=0; index < MAX_SPI_DEVICES; index++)
+    {
+        if ( spiconfig[*pBus].deviceId[index] == deviceId )
+        {
+            // Device found with same deviceId
+            *pDeviceIndex = index;
+            return true;
+        }
+    }
+    return false;
 }
 
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )

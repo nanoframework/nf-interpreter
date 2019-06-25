@@ -3,15 +3,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
-//#include <ff.h>
-#include "win_storage_native.h"
+#include "win_storage_native_target.h"
 #include <target_windows_storage_config.h>
 #include <Target_Windows_Storage.h>
 #include <nanoHAL_Windows_Storage.h>
 #include <target_platform.h>
-
 #include "dirent.h"
-
 
 //
 //  Converts from windows type path       "c:\folder\folder\file.ext"

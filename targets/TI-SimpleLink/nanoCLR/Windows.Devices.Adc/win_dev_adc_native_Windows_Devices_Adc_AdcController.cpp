@@ -4,16 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_adc_native.h"
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Adc.AdcChannelMode (in managed code) !!!    //
-///////////////////////////////////////////////////////////////////////////////////////
-enum AdcChannelMode
-{
-        SingleEnded = 0,
-        Differential
-};
+#include "win_dev_adc_native_target.h"
 
 extern const uint_least8_t ADC_count;
 

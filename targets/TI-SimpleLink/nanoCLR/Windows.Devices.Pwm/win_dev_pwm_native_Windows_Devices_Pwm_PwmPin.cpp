@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_pwm_native.h"
+#include "win_dev_pwm_native_target.h"
 
 ////////////////////////////////////////////////////////////////////
 
@@ -11,7 +11,7 @@
 PWM_Handle PwmPins[PWM_PIN_COUNT];
 
 
-int Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetChannel (int pin, int timerId)
+int GetChannel (int pin, int timerId)
 {
     // TODO 
     return -1;

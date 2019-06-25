@@ -3,15 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
-//#include <hal.h>
-// #include <cmsis_os.h>
-// #include <LaunchCLR.h>
-// #include <string.h>
 #include <nanoHAL.h>
-#include "win_dev_serial_native.h"
+#include "win_dev_serial_native_target.h"
 #include "Esp32_DeviceMapping.h"
-
 
 // buffers size
 // tx buffer size: 256 bytes
@@ -23,63 +17,6 @@
 #define PORT_INDEX_TO_UART_NUM(portIndex)	((portIndex) - 1)
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the uart number 0, 1 or 2 to the port index 1, 2 or 3
 #define UART_NUM_TO_PORT_INDEX(uart_num)	((uart_num) + 1)
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialHandshake (in managed code) !!! //
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum SerialHandshake
-{
-    SerialHandshake_None = 0,
-    SerialHandshake_RequestToSend,
-    SerialHandshake_RequestToSendXOnXOff,
-    SerialHandshake_XOnXOff
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialParity (in managed code) !!! //
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum SerialParity
-{
-    SerialParity_None = 0,
-    SerialParity_Even,
-    SerialParity_Mark,
-    SerialParity_Odd,
-    SerialParity_Space
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialStopBitCount (in managed code) !!! //
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum SerialStopBitCount
-{
-    SerialStopBitCount_One = 0,
-    SerialStopBitCount_OnePointFive,
-    SerialStopBitCount_Two
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH  Windows.Storage.Streams.InputStreamOptions (in managed code) !!! //
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-enum InputStreamOptions
-{
-    InputStreamOptions_None = 0,
-    InputStreamOptions_Partial,
-    InputStreamOptions_ReadAhead
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialData (in managed code) !!! //
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum SerialData
-{
-    SerialData_Chars = 0,
-    SerialData_WatchChar,
-};
 
 static const char* TAG = "SerialDevice";
 

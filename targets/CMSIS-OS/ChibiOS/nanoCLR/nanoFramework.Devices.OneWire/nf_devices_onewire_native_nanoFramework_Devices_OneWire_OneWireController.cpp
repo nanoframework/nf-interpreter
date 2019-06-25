@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nf_devices_onewire_native.h"
+#include "nf_devices_onewire_native_target.h"
 
 // working thread to execute long running 1-Wire operations
 static thread_t* OneWireWorkingThread;

@@ -4,38 +4,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_gpio_native.h"
+#include "win_dev_gpio_native_target.h"
 #include "nf_rt_events_native.h"
 
 #include <timers.h>
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioPinDriveMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum GpioPinDriveMode
-{
-    GpioPinDriveMode_Input = 0,
-    GpioPinDriveMode_InputPullDown,
-    GpioPinDriveMode_InputPullUp,
-    GpioPinDriveMode_Output,
-    GpioPinDriveMode_OutputOpenDrain,
-    GpioPinDriveMode_OutputOpenDrainPullUp,
-    GpioPinDriveMode_OutputOpenSource,
-    GpioPinDriveMode_OutputOpenSourcePullDown
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioPinValue (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////
-
-enum GpioPinValue
-{
-    GpioPinValue_Low = 0,
-    GpioPinValue_High,
-};
-
-///////////////////////////////////////////////////////////////////////////////////
 
 // this array points to the GPIO managed object that has interrupt active
 CLR_RT_HeapBlock* indexPinMapping[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
