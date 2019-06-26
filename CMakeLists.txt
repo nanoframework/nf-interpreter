@@ -670,29 +670,26 @@ if(RTOS_CHIBIOS_CHECK)
 # FreeRTOS
 elseif(RTOS_FREERTOS_CHECK)
 
-    # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD}/nanoCLR")
-
     add_subdirectory(targets/FreeRTOS)
-    
+   
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/${FREERTOS_BOARD})
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
         # board found
         message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
 
         # add TARGET board directory
-        add_subdirectory("targets/FreeRTOS/${FREERTOS_BOARD}")
+        add_subdirectory("targets/FreeRTOS/NXP/${FREERTOS_BOARD}")
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/${FREERTOS_BOARD})
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
             # board found
             message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
 
             # add TARGET board directory from Community
-            add_subdirectory("targets-community/FreeRTOS/${FREERTOS_BOARD}")
+            add_subdirectory("targets-community/FreeRTOS/NXP/${FREERTOS_BOARD}")
 
         else()
         # board NOT found in targets folder
