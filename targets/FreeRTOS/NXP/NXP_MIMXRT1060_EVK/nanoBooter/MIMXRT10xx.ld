@@ -16,8 +16,8 @@ GROUP (
 MEMORY
 {
   /* Define each memory region */
-  BOARD_FLASH (rx) : ORIGIN = 0x60000000, LENGTH = 0x20000 /* 64k bytes (alias Flash) */  
-  CONFIG_FLASH (r) : ORIGIN = 0x60020000, LENGTH = 0x10000 /* 64k bytes space reserved for configuration block */  
+  BOARD_FLASH (rx) : ORIGIN = 0x60000000, LENGTH = 0x10000 /* 64k bytes (alias Flash) */  
+  CONFIG_FLASH (r) : ORIGIN = 0x60010000, LENGTH = 0x10000 /* 64k bytes space reserved for configuration block */  
   DEPLOYMENT_FLASH (r) : ORIGIN = 0x60200000, LENGTH = 0x100000 /* 1M bytes */  
   SRAM_DTC (rwx) : ORIGIN = 0x20000000, LENGTH = 0x20000 /* 128K bytes (alias RAM) */  
   SRAM_ITC (rwx) : ORIGIN = 0x0, LENGTH = 0x20000 /* 128K bytes (alias RAM2) */  
