@@ -11,7 +11,7 @@ list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/LWIP_Source/src/include/neti
 list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/LWIP_Source/src/include/compat)
 list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/LWIP_Source/src/include/compat/posix)
 list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP_MIMXRT1060_EVK/nanoCLR/LwIP)
+list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/LwIP)
 
 set(LWIP_SRCS
 
@@ -186,7 +186,8 @@ foreach(SRC_FILE ${LWIP_SRCS})
             ${PROJECT_BINARY_DIR}/LWIP_Source/src/netif/ppp/polarssl
 
 			# ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
-			${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP_MIMXRT1060_EVK/nanoCLR/LwIP
+			# TODO: this needs to be changed so it's not platform dependent
+			${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/LwIP
 
             # APPS:
             ${PROJECT_BINARY_DIR}/LWIP_Source/src/apps/snmp
