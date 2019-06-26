@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_serial_native.h"
+#include <win_dev_serial_native_target.h>
 
 ///////////
 // UART1 //
