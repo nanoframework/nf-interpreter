@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_i2c_native.h"
+#include <win_dev_i2c_native_target.h>
 
 //////////
 // I2C2 //

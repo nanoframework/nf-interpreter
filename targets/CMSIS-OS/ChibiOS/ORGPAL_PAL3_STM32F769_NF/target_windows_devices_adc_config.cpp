@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_adc_native.h"
+#include <win_dev_adc_native_target.h>
 
 const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
     
