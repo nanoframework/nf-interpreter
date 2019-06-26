@@ -9,16 +9,17 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 
 # set include directories
 if(RTOS_CHIBIOS_CHECK)
-    list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs/src")
-    set( PROJECT_COMMON_PATH "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
+    list(APPEND Windows.Storage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs/src)
+    set( PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common)
 elseif(RTOS_FREERTOS_CHECK)
-    list(APPEND Windows.Storage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FatFS_Source/source")
-    set( PROJECT_COMMON_PATH "${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP_MIMXRT1060_EVK/common")
+    list(APPEND Windows.Storage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FatFS_Source/source)
+    # TODO: this needs to be changed so it's not platform & target dependent
+    set( PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/common)
 endif()
 
-list(APPEND Windows.Storage_INCLUDE_DIRS "${TARGET_BASE_LOCATION}/Include")
-list(APPEND Windows.Storage_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
-
+list(APPEND Windows.Storage_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/Include)
+list(APPEND Windows.Storage_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
+list(APPEND Windows.Storage_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/Windows.Storage)
 
 # source files
 set(Windows.Storage_SRCS
@@ -37,9 +38,11 @@ foreach(SRC_FILE ${Windows.Storage_SRCS})
     find_file(Windows.Storage_SRC_FILE ${SRC_FILE}
         PATHS
 
-            "${BASE_PATH_FOR_THIS_MODULE}"
-            "${TARGET_BASE_LOCATION}"
-            "${PROJECT_COMMON_PATH}"
+            ${BASE_PATH_FOR_THIS_MODULE}
+            ${TARGET_BASE_LOCATION}
+            ${PROJECT_COMMON_PATH}
+            ${PROJECT_SOURCE_DIR}/src/Windows.Storage
+
         CMAKE_FIND_ROOT_PATH_BOTH
     )
     # message("${SRC_FILE} >> ${Windows.Storage_SRC_FILE}") # debug helper
