@@ -336,6 +336,8 @@ extern "C" {
 bool Target_HasNanoBooter();
 void HARD_Breakpoint();
 bool Target_ConfigUpdateRequiresErase();
+uint32_t GetPlatformCapabilities();
+uint32_t GetTargetCapabilities();
 
 #ifdef __cplusplus
 }
