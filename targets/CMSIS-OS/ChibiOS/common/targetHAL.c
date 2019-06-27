@@ -5,6 +5,7 @@
 
 #include <ch.h>
 #include <nanoWeak.h>
+#include <platform_target_capabilities.h>
 
 void HAL_AssertEx()
 {
@@ -33,4 +34,17 @@ __nfweak bool Target_ConfigUpdateRequiresErase()
 bool Target_HasNanoBooter()
 { 
     return false; 
+};
+
+// declarations of platform capabilities
+uint32_t GetPlatformCapabilities()
+{ 
+    return 0; 
+};
+
+// declarations of target capabilities
+// If a target has something to declare it has to provide a 'strong' implementation of this.
+__nfweak uint32_t GetTargetCapabilities()
+{ 
+    return TargetCapabilities_JtagUpdate; 
 };
