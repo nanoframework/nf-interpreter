@@ -93,8 +93,11 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
         memcpy( &config.MacAddress, pMACAddress->GetFirstElement(), NETIF_MAX_HWADDR_LEN ); 
     }
 
+    // if updateFlags is only DhcpRelease or DhcpRenew then updateConfigurationBlock is not necessary
+    const bool c_updateConfigurationBlock = ((updateFlags & ~(UpdateOperation_DhcpRelease | UpdateOperation_DhcpRenew)) != 0);
+
     // store configuration, updating the configuration block
-    if(ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex) != TRUE)
+    if(c_updateConfigurationBlock && ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex) != TRUE)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
