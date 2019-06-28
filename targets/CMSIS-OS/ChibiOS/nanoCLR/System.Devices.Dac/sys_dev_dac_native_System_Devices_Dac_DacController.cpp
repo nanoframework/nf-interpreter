@@ -1,12 +1,12 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_adc_native_target.h"
+#include "sys_dev_dac_native_target.h"
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpenChannel___VOID__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeOpenChannel___VOID__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -20,33 +20,33 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
         int controllerId = pThis[FIELD___controllerId].NumericByRef().s4;
 
         // we are filling this below with the appropriate ADC port pin config and ADC driver
-        NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
-        ADCDriver* adcDriver = NULL;
+        NF_PAL_DAC_PORT_PIN_CHANNEL dacDefinition;
+        DACDriver* dacDriver = NULL;
 
-        // only one ADC controller for now, but check it anyways
+        // only one DAC controller for now, but check it anyways
         if(controllerId == 1)
         {
-            adcDefinition = AdcPortPinConfig[channel];
+            dacDefinition = DacPortPinConfig[channel];
 
             // we should remove form the build the ADC options that aren't implemented
             // plus we have to use the default to catch invalid ADC Ids
-            switch(adcDefinition.adcIndex)
+            switch(dacDefinition.dacIndex)
             {
-   #if STM32_ADC_USE_ADC1
+   #if STM32_DAC_USE_DAC1
                 case 1: 
-                    adcDriver = &ADCD1;
+                    dacDriver = &DACD1;
                     break;
    #endif
 
-   #if STM32_ADC_USE_ADC2
+   #if STM32_DAC_USE_DAC2
                 case 2:
-                    adcDriver = &ADCD2;
+                    dacDriver = &DACD2;
                     break;
    #endif
 
-   #if STM32_ADC_USE_ADC3
+   #if STM32_DAC_USE_DAC3
                 case 3:
-                    adcDriver = &ADCD3;
+                    dacDriver = &DACD3;
                     break;
    #endif
                 default: 
@@ -59,19 +59,19 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        if(adcDefinition.portId != NULL)
+        if(dacDefinition.portId != NULL)
         {
-            palSetGroupMode(adcDefinition.portId, PAL_PORT_BIT(adcDefinition.pin), 0, PAL_MODE_INPUT_ANALOG);
+            palSetGroupMode(dacDefinition.portId, PAL_PORT_BIT(dacDefinition.pin), 0, PAL_MODE_INPUT_ANALOG);
         }
 
-        // start ADC
-        adcStart(adcDriver, NULL);
+        // start DAC
+        dacStart(dacDriver, NULL);
 
     }
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetChannelCount___I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_adc_native_System_Devices_Dac_DacController::NativeGetChannelCount___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -84,7 +84,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetC
         switch(controllerId)
         {
             case 1: 
-                channelCount = AdcChannelCount;
+                channelCount = DacChannelCount;
                 break;
 
             default: 
@@ -97,7 +97,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetC
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetMaxValue___I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeGetMaxValue___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -107,7 +107,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetM
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetMinValue___I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeGetMinValue___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -116,20 +116,20 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetM
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeIsChannelModeSupported___BOOLEAN__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeIsChannelModeSupported___BOOLEAN__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
         int mode = stack.Arg1().NumericByRef().s4;
         
         // Only support Single ended mode for now
-        stack.SetResult_Boolean( (mode == (int)AdcChannelMode::SingleEnded) ) ;
+        stack.SetResult_Boolean( (mode == (int)DacChannelMode::SingleEnded) ) ;
     }
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetResolutionInBits___I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeGetResolutionInBits___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -139,7 +139,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetR
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -165,13 +165,13 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
        // because the caller is expecting a result to be returned
        // we need set a return result in the stack argument using the appropriate SetResult according to the variable type (a string here)
-       stack.SetResult_String("ADC1");
+       stack.SetResult_String("DAC1");
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
