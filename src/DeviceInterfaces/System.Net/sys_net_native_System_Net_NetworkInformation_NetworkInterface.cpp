@@ -94,7 +94,27 @@ inline bool operator!=(const HAL_Configuration_NetworkInterface &lhs, const HAL_
     return true;
   }
 
-  if (memcmp(lhs.MacAddress, rhs.MacAddress, 6)) {
+  if (memcmp(lhs.MacAddress, rhs.MacAddress, sizeof(rhs.MacAddress))) {
+    return true;
+  }
+
+  if (memcmp(lhs.IPv6Address, rhs.IPv6Address, sizeof(rhs.IPv6Address))) {
+    return true;
+  }
+
+  if (memcmp(lhs.IPv6NetMask, rhs.IPv6NetMask, sizeof(rhs.IPv6NetMask))) {
+    return true;
+  }
+
+  if (memcmp(lhs.IPv6GatewayAddress, rhs.IPv6GatewayAddress, sizeof(rhs.IPv6GatewayAddress))) {
+    return true;
+  }
+
+  if (memcmp(lhs.IPv6DNSAddress1, rhs.IPv6DNSAddress1, sizeof(rhs.IPv6DNSAddress1))) {
+    return true;
+  }
+
+  if (memcmp(lhs.IPv6DNSAddress2, rhs.IPv6DNSAddress2, sizeof(rhs.IPv6DNSAddress2))) {
     return true;
   }
 
