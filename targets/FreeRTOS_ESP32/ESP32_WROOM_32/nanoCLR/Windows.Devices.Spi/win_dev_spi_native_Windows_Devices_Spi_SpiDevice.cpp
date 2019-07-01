@@ -254,6 +254,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 
         // get data bit length
         int databitLength = pConfig[ SpiConnectionSettings::FIELD___databitLength ].NumericByRef().s4;
+        if (databitLength <= 0) databitLength = 8;
         if ( data16 ) databitLength = 16;
 
         // dereference the write and read buffers from the arguments
