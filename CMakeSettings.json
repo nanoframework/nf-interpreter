@@ -181,6 +181,10 @@
           "value": "ON"
         },
         {
+          "name": "API_System.Devices.Dac:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "OFF"
+        },
+        {
           "name": "API_Windows.Devices.Gpio:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
@@ -389,6 +393,10 @@
         {
           "name": "API_Windows.Devices.Adc:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
+        },
+        {
+          "name": "API_System.Devices.Dac:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "OFF"
         },
         {
           "name": "API_Windows.Devices.Gpio:BOOL", //OFF-default-ON-to-add-this-API
