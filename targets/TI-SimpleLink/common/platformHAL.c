@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 #include <stdbool.h>
 
@@ -34,4 +35,17 @@ __nfweak bool Target_ConfigUpdateRequiresErase()
 bool Target_HasNanoBooter()
 { 
     return false; 
+};
+
+// declarations of platform capabilities
+uint32_t GetPlatformCapabilities()
+{ 
+    return 0; 
+};
+
+// declarations of target capabilities
+// If a target has something to declare it has to provide a 'strong' implementation of this.
+__nfweak uint32_t GetTargetCapabilities()
+{ 
+    return 0; 
 };

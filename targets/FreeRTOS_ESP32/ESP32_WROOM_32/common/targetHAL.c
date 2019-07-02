@@ -34,3 +34,17 @@ inline bool Target_HasNanoBooter()
 { 
     return false; 
 };
+
+// declarations of platform capabilities
+uint32_t GetPlatformCapabilities()
+{ 
+    return 0; 
+};
+
+// declarations of target capabilities
+// If a target has something to declare it has to provide a 'strong' implementation of this.
+__nfweak uint32_t GetTargetCapabilities()
+{ 
+    return 0; 
+};
+

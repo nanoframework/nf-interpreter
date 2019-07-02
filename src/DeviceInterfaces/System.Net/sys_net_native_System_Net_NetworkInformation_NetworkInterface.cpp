@@ -57,18 +57,84 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
     NANOCLR_NOCLEANUP();
 }
 
+inline bool operator!=(const HAL_Configuration_NetworkInterface &lhs, const HAL_Configuration_NetworkInterface &rhs) {
+  if (lhs.IPv4Address != rhs.IPv4Address) {
+    return true;
+  }
+
+  if (lhs.IPv4GatewayAddress != rhs.IPv4GatewayAddress) {
+    return true;
+  }
+
+  if (lhs.IPv4NetMask != rhs.IPv4NetMask) {
+    return true;
+  }
+
+  if (lhs.IPv4DNSAddress1 != rhs.IPv4DNSAddress1) {
+    return true;
+  }
+
+  if (lhs.IPv4DNSAddress2 != rhs.IPv4DNSAddress2) {
+    return true;
+  }
+
+  if (lhs.AutomaticDNS != rhs.AutomaticDNS) {
+    return true;
+  }
+
+  if (lhs.InterfaceType != rhs.InterfaceType) {
+    return true;
+  }
+
+  if (lhs.SpecificConfigId != rhs.SpecificConfigId) {
+    return true;
+  }
+
+  if (lhs.StartupAddressMode != rhs.StartupAddressMode) {
+    return true;
+  }
+
+  if (memcmp(lhs.MacAddress, rhs.MacAddress, sizeof(rhs.MacAddress))) {
+    return true;
+  }
+
+  if (memcmp(lhs.IPv6Address, rhs.IPv6Address, sizeof(rhs.IPv6Address))) {
+    return true;
+  }
+
+  if (memcmp(lhs.IPv6NetMask, rhs.IPv6NetMask, sizeof(rhs.IPv6NetMask))) {
+    return true;
+  }
+
+  if (memcmp(lhs.IPv6GatewayAddress, rhs.IPv6GatewayAddress, sizeof(rhs.IPv6GatewayAddress))) {
+    return true;
+  }
+
+  if (memcmp(lhs.IPv6DNSAddress1, rhs.IPv6DNSAddress1, sizeof(rhs.IPv6DNSAddress1))) {
+    return true;
+  }
+
+  if (memcmp(lhs.IPv6DNSAddress2, rhs.IPv6DNSAddress2, sizeof(rhs.IPv6DNSAddress2))) {
+    return true;
+  }
+
+  return false;
+}
+
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::UpdateConfiguration___VOID__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
-    HAL_Configuration_NetworkInterface config; 
+    HAL_Configuration_NetworkInterface config, storageConfig;
+    bool configChanged;
     CLR_RT_HeapBlock* pConfig           = stack.Arg0().Dereference();  _ASSERTE(pConfig != NULL);
     CLR_UINT32 interfaceIndex           = pConfig[ FIELD___interfaceIndex ].NumericByRefConst().u4;
     CLR_UINT32 updateFlags              = stack.Arg1().NumericByRef().u4;
     CLR_RT_HeapBlock_Array* pMACAddress = pConfig[ FIELD___macAddress ].DereferenceArray();
 
     NANOCLR_CLEAR(config);
+    NANOCLR_CLEAR(storageConfig);
 
     config.IPv4Address           = pConfig[ FIELD___ipv4Address        ].NumericByRef().u4;
     config.IPv4GatewayAddress    = pConfig[ FIELD___ipv4GatewayAddress ].NumericByRef().u4;
@@ -93,8 +159,17 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
         memcpy( &config.MacAddress, pMACAddress->GetFirstElement(), NETIF_MAX_HWADDR_LEN ); 
     }
 
+    // load network interface configuration from storage
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&storageConfig, DeviceConfigurationOption_Network, interfaceIndex))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // save the configuration only if there has been a change
+    configChanged = (config != storageConfig);
+
     // store configuration, updating the configuration block
-    if(ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex) != TRUE)
+    if(configChanged && ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex) != TRUE)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
