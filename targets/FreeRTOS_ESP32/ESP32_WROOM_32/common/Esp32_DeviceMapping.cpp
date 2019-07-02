@@ -70,6 +70,24 @@ int8_t Esp32_LED_DevicePinMap[16] =
     -1,     // 16
 };
 
+// We use "ADC1" for 20 logical channels
+// Mapped to ESP32 controllers
+// ESP32 ADC1 channels 0 - 7
+//  "    ADC1 channel  8 - Internal Temperture sensor (VP)
+//  "    ADC1 channel  9 - Internal Hall Sensor (VN)
+//  "    ADC2 channels 10 - 19      
+int8_t Esp32_ADC_DevicePinMap[20] =
+{
+	// 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
+	  36, 37, 38, 39, 32, 33, 34, 35, 36, 39, 04, 00, 02, 15, 13, 12, 14, 27, 25, 26
+};
+
+void  Esp32_DecodeAlternateFunction(uint32_t alternateFunction, Esp32_MapDeviceType & deviceType, uint8_t & busIndex, uint16_t & PinIndex)
+{
+	deviceType = (Esp32_MapDeviceType)((alternateFunction >> 16) & 0x00ff);
+	busIndex   = (uint8_t)((alternateFunction >> 8) & 0x00ff) - 1;
+	PinIndex   = (uint16_t)(alternateFunction & 0x00ff);
+}
 
 int  Esp32_GetMappedDevicePins( Esp32_MapDeviceType deviceType, int DevNumber, int PinIndex)
 {
@@ -78,7 +96,6 @@ int  Esp32_GetMappedDevicePins( Esp32_MapDeviceType deviceType, int DevNumber, i
         switch( deviceType )
         {
             case DEV_TYPE_SPI:
-                DevNumber--;        // 0 index not used
                 return (int)Esp32_SPI_DevicePinMap[DevNumber][PinIndex];
         
             case DEV_TYPE_I2C:
@@ -90,12 +107,27 @@ int  Esp32_GetMappedDevicePins( Esp32_MapDeviceType deviceType, int DevNumber, i
 			case DEV_TYPE_LED_PWM:
                 return (int)Esp32_LED_DevicePinMap[DevNumber];
 
-            default:
+			case DEV_TYPE_ADC:
+				return (int)Esp32_ADC_DevicePinMap[PinIndex];
+			
+			default:
                 break;
         };
     }
     return -1;
 }
+
+int  Esp32_GetMappedDevicePinsWithFunction(uint32_t alternateFunction)
+{
+	Esp32_MapDeviceType deviceType;
+	uint8_t deviceIndex;
+	uint16_t pinIndex;
+
+	Esp32_DecodeAlternateFunction(alternateFunction, deviceType, deviceIndex, pinIndex);
+
+	return Esp32_GetMappedDevicePins(deviceType, deviceIndex, pinIndex);
+}
+
 
 // Esp32_SetMappedDevicePins
 //
@@ -106,9 +138,11 @@ int  Esp32_GetMappedDevicePins( Esp32_MapDeviceType deviceType, int DevNumber, i
 //      
 void Esp32_SetMappedDevicePins( uint8_t pin, int32_t alternateFunction )
 {
-    Esp32_MapDeviceType deviceType   = (Esp32_MapDeviceType)((alternateFunction >> 16 ) & 0x00ff);
-    uint8_t deviceIndex  = (uint8_t)((alternateFunction >> 8 ) & 0x00ff) - 1;
-    uint16_t mapping     = (uint16_t)(alternateFunction & 0x00ff);
+	Esp32_MapDeviceType deviceType;
+	uint8_t deviceIndex;
+	uint16_t mapping; 
+
+	Esp32_DecodeAlternateFunction(alternateFunction, deviceType, deviceIndex, mapping);
 
     // Set the pins used by a device type / index
     switch( deviceType )

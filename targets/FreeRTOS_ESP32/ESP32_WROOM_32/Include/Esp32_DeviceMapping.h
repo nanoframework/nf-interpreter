@@ -23,10 +23,12 @@ enum Esp32_MapDeviceType
     DEV_TYPE_I2C,
     DEV_TYPE_SERIAL,
 	DEV_TYPE_LED_PWM,
+	DEV_TYPE_ADC,
 	DEV_TYPE_MAX,
 };
 
-int  Esp32_GetMappedDevicePins( Esp32_MapDeviceType DevType, int DevNumber, int PinIndex);
+int  Esp32_GetMappedDevicePins(Esp32_MapDeviceType DevType, int DevNumber, int PinIndex);
+int  Esp32_GetMappedDevicePinsWithFunction(uint32_t alternateFunction);
 
 void Esp32_SetMappedDevicePins( uint8_t pin, int32_t alternateFunction );
 
