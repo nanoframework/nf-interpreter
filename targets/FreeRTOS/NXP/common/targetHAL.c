@@ -48,5 +48,5 @@ uint32_t GetPlatformCapabilities()
 // If a target has something to declare it has to provide a 'strong' implementation of this.
 __nfweak uint32_t GetTargetCapabilities()
 { 
-    return TargetCapabilities_JtagUpdate; 
+    return 0; 
 };
