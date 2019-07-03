@@ -15,7 +15,7 @@ static dacsample_t sampleBuffer[1 * 1];
 #endif
 
 // not used, just left here if needed for debugging purposes
-static void dacerrorcallback(DACDriver *adcp, adcerror_t err)
+static void dacerrorcallback(DACDriver *dacp, dacerror_t err)
 {
   (void)dacp;
   (void)err;
@@ -43,7 +43,7 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
         // get pointer to _controllerId field in DacController
         int controllerId = dacController[Library_sys_dev_dac_native_System_Devices_Dac_DacController::FIELD___controllerId].NumericByRef().s4;
 
-        // we are filling this below with the appropriate ADC port pin config and ADC driver
+        // we are filling this below with the appropriate DAC port pin config and DAC driver
         NF_PAL_DAC_PORT_PIN_CHANNEL dacDefinition;
         DACDriver* dacDriver = NULL;
 
@@ -56,21 +56,15 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
             // plus we have to use the default to catch invalid DAC Ids
             switch(dacDefinition.dacIndex)
             {
-   #if STM32_DAC_USE_DAC1
+   #if STM32_DAC_USE_DAC1_CH1
                 case 1: 
-                    adcDriver = &DACD1;
+                    dacDriver = &DACD1;
                     break;
    #endif
 
-   #if STM32_DAC_USE_DAC2
+   #if STM32_DAC_USE_DAC2_CH2
                 case 2:
-                    adcDriver = &DACD2;
-                    break;
-   #endif
-
-   #if STM32_DAC_USE_DAC3
-                case 3:
-                    adcDriver = &DACD3;
+                    dacDriver = &DACD2;
                     break;
    #endif
                 default: 
@@ -83,27 +77,27 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        bool enableVref = (dacDefinition.dacChannel == DAC_CHANNEL_SENSOR)  \
-                        | (dacDefinition.dacChannel == DAC_CHANNEL_VREFINT) \
-                        | (dacDefinition.dacChannel == DAC_CHANNEL_VBAT);
+        // bool enableVref = (dacDefinition.dacChannel == DAC_CHANNEL_SENSOR)  \
+        //                 | (dacDefinition.dacChannel == DAC_CHANNEL_VREFINT) \
+        //                 | (dacDefinition.dacChannel == DAC_CHANNEL_VBAT);
         
-        // need to enable VREF?
-        if(enableVref)
-        {
-            dacSTM32EnableTSVREFE();
+        // // need to enable VREF?
+        // if(enableVref)
+        // {
+        //     dacSTM32EnableTSVREFE();
 
-            osDelay(10);
-        }
+        //     osDelay(10);
+        // }
 
         // need to setup the conversion group parameters
         DACConversionGroup dacgrpcfg1 = {
             FALSE,
             1,
             NULL,
-            NULL,  // replace with adcerrorcallback if required for debug
+            NULL,  // replace with dacerrorcallback if required for debug
             0,                                      /* CR1 */
             DAC_CR2_SWSTART,                        /* CR2 */
-            DAC_SMPR1_SMP_AN11(ADC_SAMPLE_3),       /* SMPR1 */
+            DAC_SMPR1_SMP_AN11(DAC_SAMPLE_3),       /* SMPR1 */
             0,                                      /* SMPR2 */
             0,                                      /* HTR */
             0,                                      /* LTR */
@@ -115,11 +109,11 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
         // perform the conversion
         dacConvert(dacDriver, &dacgrpcfg1, sampleBuffer, 1);
 
-        // need to turn off VREF?
-        if(enableVref)
-        {
-            dacSTM32DisableTSVREFE();
-        }
+        // // need to turn off VREF?
+        // if(enableVref)
+        // {
+        //     dacSTM32DisableTSVREFE();
+        // }
 
         // set the return result with the conversion value from the array
         stack.SetResult_I4(sampleBuffer[0]);

@@ -7,19 +7,11 @@
 
 const NF_PAL_DAC_PORT_PIN_CHANNEL DacPortPinConfig[] = {
     
-    // ADC1
-    {1, GPIOA, 6, ADC_CHANNEL_IN6},
-    {1, GPIOA, 4, ADC_CHANNEL_IN4},
-    {1, GPIOC, 2, ADC_CHANNEL_IN12},
-    {1, GPIOF, 10, ADC_CHANNEL_IN8},
+    // DAC1
+    {1, GPIOA, 4, DAC_CHANNEL_OUT4}//,
 
     // ADC3
-    {3, GPIOF, 8, ADC_CHANNEL_IN6},
-
-    // these are the internal sources, available only at ADC1
-    {1, NULL, 0, ADC_CHANNEL_SENSOR},
-    {1, NULL, 0, ADC_CHANNEL_VREFINT},
-    {1, NULL, 0, ADC_CHANNEL_VBAT},
+    //{3, GPIOF, 8, ADC_CHANNEL_IN6}
 };
 
 const int DacChannelCount = ARRAYSIZE(DacPortPinConfig);

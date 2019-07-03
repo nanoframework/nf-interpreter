@@ -23,10 +23,10 @@ struct Library_sys_dev_dac_native_System_Devices_Dac_DacChannel
 {
     static const int FIELD___syncLock = 1;
     static const int FIELD___channelNumber = 2;
-    static const int FIELD___adcController = 3;
+    static const int FIELD___dacController = 3;
     static const int FIELD___disposed = 4;
 
-    NANOCLR_NATIVE_DECLARE(NativeReadValue___I4);
+    NANOCLR_NATIVE_DECLARE(NativeWriteValue___I4);
     NANOCLR_NATIVE_DECLARE(NativeDisposeChannel___VOID);
 
     //--//
