@@ -62,9 +62,21 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
                     break;
    #endif
 
-   #if STM32_DAC_USE_DAC2_CH2
+   #if STM32_DAC_USE_DAC1_CH2
                 case 2:
                     dacDriver = &DACD2;
+                    break;
+   #endif
+
+   #if STM32_DAC_USE_DAC2_CH1
+                case 3: 
+                    dacDriver = &DACD3;
+                    break;
+   #endif
+
+   #if STM32_DAC_USE_DAC2_CH2
+                case 4:
+                    dacDriver = &DACD4;
                     break;
    #endif
                 default: 
@@ -91,19 +103,10 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
 
         // need to setup the conversion group parameters
         DACConversionGroup dacgrpcfg1 = {
-            FALSE,
-            1,
-            NULL,
-            NULL,  // replace with dacerrorcallback if required for debug
-            0,                                      /* CR1 */
-            DAC_CR2_SWSTART,                        /* CR2 */
-            DAC_SMPR1_SMP_AN11(DAC_SAMPLE_3),       /* SMPR1 */
-            0,                                      /* SMPR2 */
-            0,                                      /* HTR */
-            0,                                      /* LTR */
-            0,                                      /* SQR1 */
-            0,                                      /* SQR2 */
-            DAC_SQR3_SQ1_N(dacDefinition.dacChannel)
+            .num_channels = 1U,
+            .end_cb       = end_cb1,
+            .error_cb     = error_cb1,
+            .trigger      = DAC_TRG(PORTAB_DAC_TRIG)
         };
 
         // perform the conversion

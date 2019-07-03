@@ -59,10 +59,10 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeOpenC
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        if(dacDefinition.portId != NULL)
-        {
-            palSetGroupMode(dacDefinition.portId, PAL_PORT_BIT(dacDefinition.pin), 0, PAL_MODE_INPUT_ANALOG);
-        }
+        // if(dacDefinition.portId != NULL)
+        // {
+        //     palSetGroupMode(dacDefinition.portId, PAL_PORT_BIT(dacDefinition.pin), 0, PAL_MODE_INPUT_ANALOG);
+        // }
 
         // start DAC
         dacStart(dacDriver, NULL);
@@ -71,7 +71,7 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeOpenC
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_adc_native_System_Devices_Dac_DacController::NativeGetChannelCount___I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeGetChannelCount___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
