@@ -89,9 +89,9 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // bool enableVref = (dacDefinition.dacChannel == DAC_CHANNEL_SENSOR)  \
-        //                 | (dacDefinition.dacChannel == DAC_CHANNEL_VREFINT) \
-        //                 | (dacDefinition.dacChannel == DAC_CHANNEL_VBAT);
+        /* bool enableVref = (dacDefinition.dacChannel == DAC_CHANNEL_SENSOR)  \
+                         | (dacDefinition.dacChannel == DAC_CHANNEL_VREFINT) \
+                         | (dacDefinition.dacChannel == DAC_CHANNEL_VBAT);
         
         // // need to enable VREF?
         // if(enableVref)
@@ -100,13 +100,14 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
 
         //     osDelay(10);
         // }
+        */
 
         // need to setup the conversion group parameters
         DACConversionGroup dacgrpcfg1 = {
             .num_channels = 1U,
             .end_cb       = end_cb1,
             .error_cb     = error_cb1,
-            .trigger      = DAC_TRG(PORTAB_DAC_TRIG)
+            .trigger      = DAC_TRG(0) // should be settable
         };
 
         // perform the conversion
