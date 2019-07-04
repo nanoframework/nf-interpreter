@@ -49,7 +49,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeGetResolutionInBits___I4,
     Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeInit___VOID,
     NULL,
-    Library_sys_dev_dac_native_Windows_Devices_Dac_DacController::GetDeviceSelector___STATIC__STRING,
+    Library_sys_dev_dac_native_System_Devices_Dac_DacController::GetDeviceSelector___STATIC__STRING,
     NULL,
     NULL,
     NULL,
