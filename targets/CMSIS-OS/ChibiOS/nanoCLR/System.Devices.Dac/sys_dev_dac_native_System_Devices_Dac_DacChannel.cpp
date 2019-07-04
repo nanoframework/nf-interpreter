@@ -26,10 +26,13 @@ static void dacerrorcallback(DACDriver *dacp, dacerror_t err)
 #endif
 
 
-HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteValue___I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteValue___VOID__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
+        // assign the value to the buffer
+        sampleBuffer[0] = stack.Arg1().NumericByRef().r4;
+
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
@@ -89,19 +92,6 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        /* bool enableVref = (dacDefinition.dacChannel == DAC_CHANNEL_SENSOR)  \
-                         | (dacDefinition.dacChannel == DAC_CHANNEL_VREFINT) \
-                         | (dacDefinition.dacChannel == DAC_CHANNEL_VBAT);
-        
-        // // need to enable VREF?
-        // if(enableVref)
-        // {
-        //     dacSTM32EnableTSVREFE();
-
-        //     osDelay(10);
-        // }
-        */
-
         // need to setup the conversion group parameters
         DACConversionGroup dacgrpcfg1 = {
             .num_channels = 1U,
@@ -113,14 +103,9 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
         // perform the conversion
         dacConvert(dacDriver, &dacgrpcfg1, sampleBuffer, 1);
 
-        // // need to turn off VREF?
-        // if(enableVref)
-        // {
-        //     dacSTM32DisableTSVREFE();
-        // }
-
         // set the return result with the conversion value from the array
-        stack.SetResult_I4(sampleBuffer[0]);
+        //stack.SetResult_I4(sampleBuffer[0]);
+
     }
     NANOCLR_NOCLEANUP();
 }

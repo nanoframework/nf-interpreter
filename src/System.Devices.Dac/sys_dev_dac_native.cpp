@@ -20,7 +20,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteValue___I4, //TODO: needs changing to bool with double
+    Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteValue___VOID__I4, //TODO: needs changing to bool with double
     Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeDisposeChannel___VOID,
     NULL,
     NULL,
