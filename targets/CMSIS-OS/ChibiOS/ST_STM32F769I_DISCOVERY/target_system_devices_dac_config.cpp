@@ -8,7 +8,7 @@
 const NF_PAL_DAC_PORT_PIN_CHANNEL DacPortPinConfig[] = {
     
     // DAC1 
-    {1, GPIOA, 4, ADC_CHANNEL_IN4}//,
+    {1, GPIOA, 4, PAL_MODE_INPUT_ANALOG}//,
 
     // ADC3
     //{3, GPIOF, 8, ADC_CHANNEL_IN6}

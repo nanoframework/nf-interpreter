@@ -105,8 +105,8 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
         // need to setup the conversion group parameters
         DACConversionGroup dacgrpcfg1 = {
             .num_channels = 1U,
-            .end_cb       = end_cb1,
-            .error_cb     = error_cb1,
+            .end_cb       = NULL,
+            .error_cb     = NULL,
             .trigger      = DAC_TRG(0) // should be settable
         };
 
