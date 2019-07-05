@@ -35,7 +35,7 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
     // we are filling this below with the appropriate DAC port pin config and DAC driver
     NF_PAL_DAC_PORT_PIN_CHANNEL dacDefinition;
     DACDriver* dacDriver = NULL;
-    DACConversionGroup dacgrpcfg1;
+    DACConversionGroup dacConversionGroupConfig;
     int channelNumber;
     int controllerId;
 
@@ -98,7 +98,7 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
     }
 
     // need to setup the conversion group parameters
-    dacgrpcfg1 = {
+    dacConversionGroupConfig = {
         .num_channels = 1U,
         .end_cb       = NULL,
         .error_cb     = NULL,
@@ -106,7 +106,7 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
     };
 
     // perform the conversion
-    dacConvert(dacDriver, &dacgrpcfg1, sampleBuffer, 1);
+    dacConvert(dacDriver, &dacConversionGroupConfig, sampleBuffer, 1);
 
     NANOCLR_NOCLEANUP();
 }
