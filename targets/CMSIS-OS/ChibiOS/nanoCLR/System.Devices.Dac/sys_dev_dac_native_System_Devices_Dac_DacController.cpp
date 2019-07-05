@@ -13,10 +13,10 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacController::NativeOpenC
     // we are filling this below with the appropriate ADC port pin config and ADC driver
     NF_PAL_DAC_PORT_PIN_CHANNEL dacDefinition;
     DACDriver* dacDriver = NULL;
-    volatile int controllerId;
+    int controllerId;
 
     // Get channel from argument
-    volatile int channel = stack.Arg1().NumericByRef().s4;
+    int channel = stack.Arg1().NumericByRef().s4;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
