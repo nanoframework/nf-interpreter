@@ -47,5 +47,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Devices_Dac =
     "System.Devices.Dac", 
     0x12640AF3,
     method_lookup,
-    { 100, 0, 0, 2 }
+    { 100, 0, 0, 3 }
 };
