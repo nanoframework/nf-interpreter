@@ -18,7 +18,7 @@ struct Library_win_dev_dac_native_System_Devices_Dac_DacChannel
     static const int FIELD___disposed = 4;
 
     NANOCLR_NATIVE_DECLARE(NativeWriteValue___VOID__U2);
-    NANOCLR_NATIVE_DECLARE(NativeDisposeChannel___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeDispose___VOID__BOOLEAN);
 
     //--//
 

@@ -111,13 +111,58 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeDisposeChannel___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeDispose___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
 {
-    (void)stack;
-
     NANOCLR_HEADER();
 
-    // left empty on purpose, nothing to do here
+    NF_PAL_DAC_PORT_PIN_CHANNEL dacDefinition;
+    int channelNumber;
+    bool disposeController = false;
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+    // get disposeController
+    disposeController = (bool)stack.Arg0().NumericByRef().u1;
+
+    // Get channel from _channelNumber field
+    channelNumber = pThis[FIELD___channelNumber].NumericByRef().s4;
+
+    if(disposeController)
+    {
+        dacDefinition = DacPortPinConfig[channelNumber];
+
+        // we should remove form the build the DAC options that aren't implemented
+        // plus we have to use the default to catch invalid DAC Ids
+        switch(dacDefinition.dacIndex)
+        {
+#if STM32_DAC_USE_DAC1_CH1
+            case 1:
+                dacStop(&DACD1);
+                break;
+#endif
+
+#if STM32_DAC_USE_DAC1_CH2
+            case 2:
+                dacStop(&DACD2); 
+                break;
+#endif
+
+#if STM32_DAC_USE_DAC2_CH1
+            case 3: 
+                dacStop(&DACD3);
+                break;
+#endif
+
+#if STM32_DAC_USE_DAC2_CH2
+            case 4:
+                dacStop(&DACD4);
+                break;
+#endif
+            default: 
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);            
+        }       
+    }
+
+    NANOCLR_NOCLEANUP();
 }
