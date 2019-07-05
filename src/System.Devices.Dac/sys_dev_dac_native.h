@@ -10,41 +10,28 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH System.Devices.Dac.DacChannelMode (in managed code) !!!    //
-///////////////////////////////////////////////////////////////////////////////////////
-enum DacChannelMode
-{
-        SingleEnded = 0,
-        Differential
-};
-
-struct Library_sys_dev_dac_native_System_Devices_Dac_DacChannel
+struct Library_win_dev_dac_native_System_Devices_Dac_DacChannel
 {
     static const int FIELD___syncLock = 1;
     static const int FIELD___channelNumber = 2;
     static const int FIELD___dacController = 3;
     static const int FIELD___disposed = 4;
 
-    NANOCLR_NATIVE_DECLARE(NativeWriteValue___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(NativeWriteValue___VOID__U2);
     NANOCLR_NATIVE_DECLARE(NativeDisposeChannel___VOID);
 
     //--//
 
 };
 
-struct Library_sys_dev_dac_native_System_Devices_Dac_DacController
+struct Library_win_dev_dac_native_System_Devices_Dac_DacController
 {
     static const int FIELD___syncLock = 1;
     static const int FIELD___controllerId = 2;
-    static const int FIELD___channelMode = 3;
-    static const int FIELD__s_deviceCollection = 4;
+    static const int FIELD__s_deviceCollection = 3;
 
     NANOCLR_NATIVE_DECLARE(NativeOpenChannel___VOID__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetChannelCount___I4);
-    NANOCLR_NATIVE_DECLARE(NativeGetMaxValue___I4);
-    NANOCLR_NATIVE_DECLARE(NativeGetMinValue___I4);
-    NANOCLR_NATIVE_DECLARE(NativeIsChannelModeSupported___BOOLEAN__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetResolutionInBits___I4);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
@@ -53,7 +40,7 @@ struct Library_sys_dev_dac_native_System_Devices_Dac_DacController
 
 };
 
-struct Library_sys_dev_dac_native_System_Devices_Dac_DacControllerManager
+struct Library_win_dev_dac_native_System_Devices_Dac_DacControllerManager
 {
     static const int FIELD_STATIC___syncLock = 0;
     static const int FIELD_STATIC__s_controllersCollection = 1;
@@ -65,4 +52,4 @@ struct Library_sys_dev_dac_native_System_Devices_Dac_DacControllerManager
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Devices_Dac;
 
-#endif  //_WIN_DEV_ADC_NATIVE_H_
+#endif  //_SYS_DEV_DAC_NATIVE_H_

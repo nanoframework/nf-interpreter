@@ -21,4 +21,4 @@ struct NF_PAL_DAC_PORT_PIN_CHANNEL
 extern const NF_PAL_DAC_PORT_PIN_CHANNEL DacPortPinConfig[];
 extern const int DacChannelCount;
 
-#endif  //_WIN_DEV_ADC_NATIVE_TARGET_H_
+#endif  //_SYS_DEV_DAC_NATIVE_TARGET_H_
