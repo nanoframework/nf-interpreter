@@ -12,6 +12,7 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacController::NativeOpenC
     
     // we are filling this below with the appropriate ADC port pin config and ADC driver
     NF_PAL_DAC_PORT_PIN_CHANNEL dacDefinition;
+    DACConfig dacConfig;
     DACDriver* dacDriver = NULL;
     int controllerId;
 
@@ -71,8 +72,15 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacController::NativeOpenC
         palSetGroupMode(dacDefinition.portId, PAL_PORT_BIT(dacDefinition.pin), 0, PAL_MODE_INPUT_ANALOG);
     }
 
+    // config DAC, 12 bits, others to defaults
+    memset(&dacConfig, 0, sizeof(DACConfig));
+
+    dacConfig.init      = 2047U;
+    dacConfig.datamode  = DAC_DHRM_12BIT_RIGHT;
+    dacConfig.cr        = 0;
+
     // start DAC
-    dacStart(dacDriver, NULL);
+    dacStart(dacDriver, &dacConfig);
 
     NANOCLR_NOCLEANUP();
 }
