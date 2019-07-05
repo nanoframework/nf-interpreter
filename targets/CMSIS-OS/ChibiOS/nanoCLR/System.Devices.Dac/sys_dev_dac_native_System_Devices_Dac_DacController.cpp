@@ -13,10 +13,10 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacController::NativeOpenC
     // we are filling this below with the appropriate ADC port pin config and ADC driver
     NF_PAL_DAC_PORT_PIN_CHANNEL dacDefinition;
     DACDriver* dacDriver = NULL;
-    int controllerId;
+    volatile int controllerId;
 
     // Get channel from argument
-    int channel = stack.Arg1().NumericByRef().s4;
+    volatile int channel = stack.Arg1().NumericByRef().s4;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -33,21 +33,27 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacController::NativeOpenC
         // plus we have to use the default to catch invalid ADC Ids
         switch(dacDefinition.dacIndex)
         {
-#if STM32_DAC_USE_DAC1
+#if STM32_DAC_USE_DAC1_CH1
             case 1: 
                 dacDriver = &DACD1;
                 break;
 #endif
 
-#if STM32_DAC_USE_DAC2
+#if STM32_DAC_USE_DAC1_CH2
             case 2:
                 dacDriver = &DACD2;
                 break;
 #endif
 
-#if STM32_DAC_USE_DAC3
-            case 3:
+#if STM32_DAC_USE_DAC2_CH1
+            case 3: 
                 dacDriver = &DACD3;
+                break;
+#endif
+
+#if STM32_DAC_USE_DAC2_CH2
+            case 4:
+                dacDriver = &DACD4;
                 break;
 #endif
             default: 
