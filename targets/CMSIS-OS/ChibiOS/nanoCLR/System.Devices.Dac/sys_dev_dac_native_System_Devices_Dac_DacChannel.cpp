@@ -40,7 +40,7 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
     int controllerId;
 
     // assign the value to the buffer
-    sampleBuffer[0] = stack.Arg1().NumericByRef().r4;
+    sampleBuffer[0] = stack.Arg1().NumericByRef().u2;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
