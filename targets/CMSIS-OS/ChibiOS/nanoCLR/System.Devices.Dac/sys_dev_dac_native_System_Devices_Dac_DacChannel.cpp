@@ -26,7 +26,7 @@ static void dacerrorcallback(DACDriver *dacp, dacerror_t err)
 #endif
 
 
-HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteValue___VOID__U2( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteValue___VOID__U2( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -53,7 +53,7 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
     dacController = pThis[FIELD___dacController].Dereference();
 
     // get pointer to _controllerId field in DacController
-    controllerId = dacController[Library_win_dev_dac_native_System_Devices_Dac_DacController::FIELD___controllerId].NumericByRef().s4;
+    controllerId = dacController[Library_sys_dev_dac_native_System_Devices_Dac_DacController::FIELD___controllerId].NumericByRef().s4;
 
     // only one DAC controller for now, but check it anyways
     if(controllerId == 1)
@@ -111,7 +111,7 @@ HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_dac_native_System_Devices_Dac_DacChannel::NativeDispose___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeDispose___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
