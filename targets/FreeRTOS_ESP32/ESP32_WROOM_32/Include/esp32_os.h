@@ -28,6 +28,7 @@
 #include "uart.h"   
 #include "ledc.h"
 #include "adc.h"
+#include "dac.h"
 #include "timer.h"
 #include "esp_spiffs.h"
 
