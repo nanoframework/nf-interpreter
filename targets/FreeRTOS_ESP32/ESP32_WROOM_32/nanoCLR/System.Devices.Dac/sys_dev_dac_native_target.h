@@ -14,4 +14,4 @@
 #define      DacChannelCount        2
 #define      DacResolutionInBits	8
 
-#endif  //_WIN_DEV_ADC_NATIVE_TARGET_H_
+#endif  //_SYS_DEV_DAC_NATIVE_TARGET_H_

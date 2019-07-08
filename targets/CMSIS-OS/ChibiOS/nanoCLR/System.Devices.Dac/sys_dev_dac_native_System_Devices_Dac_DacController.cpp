@@ -159,10 +159,10 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeInit_
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    // get pointer to _controllerId field in AdcController
+    // get pointer to _controllerId field in DacController
     controllerId = pThis[FIELD___controllerId].NumericByRef().s4;
 
-    // all required initialization for ADC is already handled in ChibiOS driver
+    // all required initialization for DAC is already handled in ChibiOS driver
 
     switch(controllerId)
     {
