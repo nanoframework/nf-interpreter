@@ -6,14 +6,29 @@
 
 #include "sys_dev_dac_native_target.h"
 
+////////////////////////////////////////////////////////////
+// DAC PAL strucs delcared in sys_dev_dac_native_target.h //
+////////////////////////////////////////////////////////////
+#if STM32_DAC_USE_DAC1_CH1
+NF_PAL_DAC Dac1_1_PAL;
+#endif
+#if STM32_DAC_USE_DAC1_CH2
+NF_PAL_DAC Dac1_2_PAL;
+#endif
+#if STM32_DAC_USE_DAC2_CH1
+NF_PAL_DAC Dac2_1_PAL;
+#endif
+#if STM32_DAC_USE_DAC2_CH2
+NF_PAL_DAC Dac2_2_PAL;
+#endif
+
 HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeOpenChannel___VOID__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     
     // we are filling this below with the appropriate ADC port pin config and ADC driver
     NF_PAL_DAC_PORT_PIN_CHANNEL dacDefinition;
-    DACConfig dacConfig;
-    DACDriver* dacDriver = NULL;
+    NF_PAL_DAC* palDac;
     int controllerId;
 
     // Get channel from argument
@@ -30,60 +45,70 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeOpenC
     {
         dacDefinition = DacPortPinConfig[channel];
 
-        // we should remove form the build the ADC options that aren't implemented
-        // plus we have to use the default to catch invalid ADC Ids
-        switch(dacDefinition.dacIndex)
+        switch(ENCODED_DAC_REF(dacDefinition.dacIndex, dacDefinition.dacChannel))
         {
-#if STM32_DAC_USE_DAC1_CH1
-            case 1: 
-                dacDriver = &DACD1;
+          #if STM32_DAC_USE_DAC1_CH1
+            case 11:
+                Dac1_1_PAL.Driver = &DACD1;
+                palDac = &Dac1_1_PAL;
+                // unlike STM documentation, ChibiOS uses a 0 index for DAC channels
+                palDac->Channel = 1 - 1;
                 break;
-#endif
+          #endif
 
-#if STM32_DAC_USE_DAC1_CH2
-            case 2:
-                dacDriver = &DACD2;
+          #if STM32_DAC_USE_DAC1_CH2
+            case 12:
+                Dac1_2_PAL.Driver = &DACD2;
+                palDac = &Dac1_2_PAL;
+                // unlike STM documentation, ChibiOS uses a 0 index for DAC channels
+                palDac->Channel = 2 - 1;
                 break;
-#endif
+          #endif
 
-#if STM32_DAC_USE_DAC2_CH1
-            case 3: 
-                dacDriver = &DACD3;
+          #if STM32_DAC_USE_DAC2_CH1
+            case 21:
+                Dac2_1_PAL.Driver = &DACD3;
+                palDac = &Dac2_1_PAL;
+                // unlike STM documentation, ChibiOS uses a 0 index for DAC channels
+                palDac->Channel = 1 - 1;
                 break;
-#endif
+          #endif
 
-#if STM32_DAC_USE_DAC2_CH2
-            case 4:
-                dacDriver = &DACD4;
+          #if STM32_DAC_USE_DAC2_CH2
+            case 22:
+                Dac2_2_PAL.Driver = &DACD4;
+                palDac = &Dac2_2_PAL;
+                // unlike STM documentation, ChibiOS uses a 0 index for DAC channels
+                palDac->Channel = 2 - 1;
                 break;
-#endif
+          #endif
+
             default: 
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);            
         }
-
     }
     else
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // only start DAC driver if it's not already started
-    if(dacDriver->state < DAC_READY)
+    // start DAC driver if it's not already started
+    if(palDac->Driver->state < DAC_READY)
     {
         if(dacDefinition.portId != NULL)
         {
-            palSetGroupMode(dacDefinition.portId, PAL_PORT_BIT(dacDefinition.pin), 0, PAL_MODE_INPUT_ANALOG);
+            palSetPadMode(dacDefinition.portId, dacDefinition.pin, PAL_MODE_INPUT_ANALOG);
         }
 
-        // config DAC, 12 bits, others to defaults
-        memset(&dacConfig, 0, sizeof(DACConfig));
+        // set DAC config: 12 bits data mode, others registers to defaults
+        memset(&palDac->Config, 0, sizeof(DACConfig));
 
-        dacConfig.init      = 2047U;
-        dacConfig.datamode  = DAC_DHRM_12BIT_RIGHT;
-        dacConfig.cr        = 0;
+        palDac->Config.init      = 0;
+        palDac->Config.datamode  = DAC_DHRM_12BIT_RIGHT;
+        palDac->Config.cr        = 0;
 
         // start DAC
-        dacStart(dacDriver, &dacConfig);
+        dacStart(palDac->Driver, &palDac->Config);
     }
 
     NANOCLR_NOCLEANUP();

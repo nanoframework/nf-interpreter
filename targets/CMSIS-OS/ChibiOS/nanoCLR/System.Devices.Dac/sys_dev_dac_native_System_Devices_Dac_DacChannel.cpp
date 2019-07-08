@@ -6,9 +6,6 @@
 
 #include "sys_dev_dac_native_target.h"
 
-// this has to be an array because ChibiOS DAC API expects that
-static dacsample_t sampleBuffer[1 * 1];
-
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -34,13 +31,14 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
 
     // we are filling this below with the appropriate DAC port pin config and DAC driver
     NF_PAL_DAC_PORT_PIN_CHANNEL dacDefinition;
-    DACDriver* dacDriver = NULL;
-    DACConversionGroup dacConversionGroupConfig;
+    NF_PAL_DAC* palDac;
+    
+    dacsample_t sample;
     int channelNumber;
     int controllerId;
 
     // assign the value to the buffer
-    sampleBuffer[0] = stack.Arg1().NumericByRef().u2;
+    sample = (dacsample_t)stack.Arg1().NumericByRef().u2;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -60,53 +58,45 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
     {
         dacDefinition = DacPortPinConfig[channelNumber];
 
-        // we should remove form the build the DAC options that aren't implemented
+        // we should remove form the build the DAC controller & channel combinations that aren't implemented
         // plus we have to use the default to catch invalid DAC Ids
-        switch(dacDefinition.dacIndex)
+        switch(ENCODED_DAC_REF(dacDefinition.dacIndex, dacDefinition.dacChannel))
         {
-#if STM32_DAC_USE_DAC1_CH1
-            case 1: 
-                dacDriver = &DACD1;
+          #if STM32_DAC_USE_DAC1_CH1
+            case 11:
+                palDac = &Dac1_1_PAL;
                 break;
-#endif
+          #endif
 
-#if STM32_DAC_USE_DAC1_CH2
-            case 2:
-                dacDriver = &DACD2;
+          #if STM32_DAC_USE_DAC1_CH2
+            case 12:
+                palDac = &Dac1_2_PAL;
                 break;
-#endif
+          #endif
 
-#if STM32_DAC_USE_DAC2_CH1
-            case 3: 
-                dacDriver = &DACD3;
+          #if STM32_DAC_USE_DAC2_CH1
+            case 21:
+                palDac = &Dac2_1_PAL;
                 break;
-#endif
+          #endif
 
-#if STM32_DAC_USE_DAC2_CH2
-            case 4:
-                dacDriver = &DACD4;
+          #if STM32_DAC_USE_DAC2_CH2
+            case 22:
+                palDac = &Dac2_2_PAL;
                 break;
-#endif
+          #endif
+
             default: 
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);            
         }
-
     }
     else
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // need to setup the conversion group parameters
-    dacConversionGroupConfig = {
-        .num_channels = 1U,
-        .end_cb       = NULL,
-        .error_cb     = NULL,
-        .trigger      = DAC_TRG(0) // should be settable
-    };
-
     // perform the conversion
-    dacConvert(dacDriver, &dacConversionGroupConfig, sampleBuffer, 1);
+    dacPutChannelX(palDac->Driver, palDac->Channel, sample);
 
     NANOCLR_NOCLEANUP();
 }
@@ -132,36 +122,35 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeDispose_
     {
         dacDefinition = DacPortPinConfig[channelNumber];
 
-        // we should remove form the build the DAC options that aren't implemented
-        // plus we have to use the default to catch invalid DAC Ids
-        switch(dacDefinition.dacIndex)
+        switch(ENCODED_DAC_REF(dacDefinition.dacIndex, dacDefinition.dacChannel))
         {
-#if STM32_DAC_USE_DAC1_CH1
-            case 1:
+          #if STM32_DAC_USE_DAC1_CH1
+            case 11:
                 dacStop(&DACD1);
                 break;
-#endif
+          #endif
 
-#if STM32_DAC_USE_DAC1_CH2
-            case 2:
-                dacStop(&DACD2); 
+          #if STM32_DAC_USE_DAC1_CH2
+            case 12:
+                dacStop(&DACD2);
                 break;
-#endif
+          #endif
 
-#if STM32_DAC_USE_DAC2_CH1
-            case 3: 
+          #if STM32_DAC_USE_DAC2_CH1
+            case 21:
                 dacStop(&DACD3);
                 break;
-#endif
+          #endif
 
-#if STM32_DAC_USE_DAC2_CH2
-            case 4:
+          #if STM32_DAC_USE_DAC2_CH2
+            case 22:
                 dacStop(&DACD4);
                 break;
-#endif
+          #endif
+
             default: 
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);            
-        }       
+        }     
     }
 
     NANOCLR_NOCLEANUP();
