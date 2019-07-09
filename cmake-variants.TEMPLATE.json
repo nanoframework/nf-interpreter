@@ -73,6 +73,7 @@
           "API_System.Math" : "OFF-default-ON-to-add-this-API",
           "API_System.Net" : "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Adc" : "OFF-default-ON-to-add-this-API",
+          "API_System.Devices.Dac" : "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Gpio" : "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.I2c" : "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Pwm" : "OFF-default-ON-to-add-this-API",
