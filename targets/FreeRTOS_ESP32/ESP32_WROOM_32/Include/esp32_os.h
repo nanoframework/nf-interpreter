@@ -30,6 +30,7 @@
 #include "adc.h"
 #include "timer.h"
 #include "esp_spiffs.h"
+#include "pcnt.h"
 
 // Uncomment to support Ethernet 
 //#define ESP32_ETHERNET_SUPPORT 1
