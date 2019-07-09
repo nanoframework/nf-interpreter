@@ -58,6 +58,7 @@
             "NF_SECURITY_OPENSSL": "ON",
             "API_Windows.Devices.Wifi": "ON",
             "API_Windows.Devices.Adc": "ON",
+            "API_System.Devices.Dac" : "OFF",
             "API_Windows.Devices.Gpio": "ON",
             "API_Windows.Devices.I2c": "ON",
             "API_Windows.Devices.Pwm": "ON",
