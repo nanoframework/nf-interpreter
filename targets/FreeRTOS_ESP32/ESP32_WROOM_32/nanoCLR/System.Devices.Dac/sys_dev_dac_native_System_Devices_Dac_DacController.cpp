@@ -31,11 +31,11 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeOpenC
 
         switch(channelNumber)
         {
-            case 1: 
+            case 0: 
 				dacChannel = DAC_CHANNEL_1;
                 break;
  
-            case 2:
+            case 1:
 				dacChannel = DAC_CHANNEL_2;
                 break;
    
