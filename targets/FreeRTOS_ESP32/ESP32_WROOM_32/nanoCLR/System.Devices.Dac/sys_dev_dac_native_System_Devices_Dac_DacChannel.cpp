@@ -17,8 +17,8 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
 		int controllerId;
 		dac_channel_t dacChannel = DAC_CHANNEL_1;
 
-		// Get value argumant and scale to 8 bits
-		uint16_t value = (stack.Arg1().NumericByRefConst().u2 >> 8);
+		// Get value argumant and mask to 0 - 255 range
+		uint16_t value = (stack.Arg1().NumericByRefConst().u2 & 0xff);
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -41,11 +41,11 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacChannel::NativeWriteVal
 
         switch(channelNumber)
         {
-                case 1: 
+                case 0: 
 					dacChannel = DAC_CHANNEL_1;
                     break;
  
-                case 2:
+                case 1:
 					dacChannel = DAC_CHANNEL_2;
                     break;
 
