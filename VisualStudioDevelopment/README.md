@@ -91,7 +91,7 @@ In CMakeSettings.json the following variables determine the build tool.
 
         {
           "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/Program Files (x86)/GNU Tools Arm Embedded/7 2018-q2-update"
+          "value": "C:/Program Files (x86)/GNU Tools Arm Embedded/8 2019-q3-update"
           // "value": "${env.GCCPATH}"   // Standard Visual Studio Install of GCC 6.3.1 
         },
 
