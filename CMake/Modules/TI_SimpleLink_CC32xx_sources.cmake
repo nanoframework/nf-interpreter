@@ -193,6 +193,9 @@ set(SLNetWiFi_SRCS
     # drivers
     eventreg.c
     slnetifwifi.c
+
+    # utils
+    clock_sync.c
 )
 
 foreach(SRC_FILE ${SLNetWiFi_SRCS})
@@ -206,6 +209,9 @@ foreach(SRC_FILE ${SLNetWiFi_SRCS})
         # drivers
         "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/drivers/net/wifi"
         "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/drivers/net/wifi/slnetif"
+
+        # utils
+        "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/net/utils"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
