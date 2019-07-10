@@ -16,6 +16,62 @@ HRESULT Library_corlib_native_System_Delegate::Equals___BOOLEAN__OBJECT( CLR_RT_
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
+HRESULT Library_corlib_native_System_Delegate::GetInvocationList___SZARRAY_SystemDelegate( CLR_RT_StackFrame& stack )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_Delegate *dlg = stack.Arg0().DereferenceDelegate();
+    CLR_RT_HeapBlock_Delegate_List *lst = (CLR_RT_HeapBlock_Delegate_List *)dlg;
+
+    int delegatesCount = 0;
+    CLR_RT_HeapBlock *returnArray = NULL;
+
+    // put the return array on the stack
+    CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+
+    if (dlg) {
+        if (dlg->DataType() == DATATYPE_DELEGATELIST_HEAD) {
+            delegatesCount = lst->m_length;
+        } else {
+            delegatesCount = 1;
+        }
+    }
+
+    // create the result array
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, delegatesCount, g_CLR_RT_WellKnownTypes.m_Delegate));
+
+    if (delegatesCount > 0) {
+
+        // get the pointer to the first element
+        returnArray = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+       
+        if (delegatesCount > 1) {
+            CLR_RT_HeapBlock *ptr = lst->GetDelegates();
+            // fill the array with the delegates
+            for (int i = 0; i < delegatesCount; i++) {
+
+                // create an instance of delegate
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, g_CLR_RT_WellKnownTypes.m_Delegate));
+
+                //fetch delegate from list
+                dlg = ptr[i].DereferenceDelegate();
+                //set delegate reference to return element
+                returnArray->SetObjectReference(dlg);
+
+                returnArray++;
+            }
+        } else {
+            // create an instance of delegate
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, g_CLR_RT_WellKnownTypes.m_Delegate));
+            //set delegate reference to return element
+            returnArray->SetObjectReference(dlg);
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_Delegate::get_Method___SystemReflectionMethodInfo( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();

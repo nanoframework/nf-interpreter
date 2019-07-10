@@ -165,6 +165,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_corlib_native_System_Array::TrySzIndexOf___STATIC__BOOLEAN__SystemArray__I4__I4__OBJECT__BYREF_I4,
     Library_corlib_native_System_Delegate::Equals___BOOLEAN__OBJECT,
+    Library_corlib_native_System_Delegate::GetInvocationList___SZARRAY_SystemDelegate,
     Library_corlib_native_System_Delegate::get_Method___SystemReflectionMethodInfo,
     Library_corlib_native_System_Delegate::get_Target___OBJECT,
     NULL,
@@ -903,7 +904,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x17723A6B,
+    0x6AC9143D,
     method_lookup,
-    { 100, 2, 1, 0 }
+    { 100, 2, 2, 0 }
 };
