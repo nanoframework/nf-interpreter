@@ -16,6 +16,12 @@
 
 //--//
 
+// need to declare this here because the SimpleLink header doesn't have the appropriate C++ wrappers
+extern "C" 
+{
+    int32_t ClockSync_convert(uint32_t gmTime, struct tm *localTime);
+}
+
 // TODO
 bool ssl_parse_certificate_internal(void* buf, size_t size, void* pwd, void* x509 ){(void)buf;(void)size;(void)pwd;(void)x509;}
 int ssl_accept_internal( int socket, int sslContextHandle ){(void)socket;(void)sslContextHandle;}
@@ -217,10 +223,8 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
 {
     SlSSL_Context* context;
     int32_t status;
-    int nonblock = 0;
-    int32_t dummyVar;
-    nFSlSocketAsyncEvent_t handShakeResult;
     struct timespec ts;
+    struct tm rtcTime;
 
     // Check sslContextHandle range
     if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
@@ -250,53 +254,48 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
         }
     }
 
-    // setup socket for blocking operation
-    SOCK_ioctl(sd, SOCK_FIONBIO, &nonblock);
+    // in order to validate certificates, the device has to have it's date/time set
+    // get current time
+    clock_gettime(CLOCK_REALTIME, &ts);
+
+    // need to convert between structs
+    ClockSync_convert(ts.tv_sec, &rtcTime);
+    
+    SlDateTime_t dateTime;
+    dateTime.tm_sec = rtcTime.tm_sec;
+    dateTime.tm_min = rtcTime.tm_min;
+    dateTime.tm_hour = rtcTime.tm_hour;
+    dateTime.tm_day = rtcTime.tm_mday;
+    // tm_mon starts month 0
+    dateTime.tm_mon = rtcTime.tm_mon + 1;
+    // tm_year starts in 1970
+    dateTime.tm_year = rtcTime.tm_year + 1970;
+
+    sl_DeviceSet(SL_DEVICE_GENERAL, 
+                SL_DEVICE_GENERAL_DATE_TIME,
+                sizeof(SlDateTime_t), 
+                (uint8_t *)(&dateTime));
+
+    // DON'T setup socket for blocking operation
 
     // start security context on socket
-    status = SlNetSock_startSec(context->SocketFd, context->SecurityAttributes, context->IsServer ?
-            (SLNETSOCK_SEC_BIND_CONTEXT_ONLY | SLNETSOCK_SEC_IS_SERVER) :
-            (SLNETSOCK_SEC_BIND_CONTEXT_ONLY));
-    if (status < 0)
+    status = SlNetSock_startSec(context->SocketFd, 
+                context->SecurityAttributes, context->IsServer ?
+                (SLNETSOCK_SEC_START_SECURITY_SESSION_ONLY | SLNETSOCK_SEC_IS_SERVER) :
+                (SLNETSOCK_SEC_START_SECURITY_SESSION_ONLY | SLNETSOCK_SEC_BIND_CONTEXT_ONLY));
+
+    if ( (status < 0) && 
+        (status != SLNETERR_ESEC_UNKNOWN_ROOT_CA) &&
+        (status != SLNETERR_ESEC_HAND_SHAKE_TIMED_OUT) &&
+        (status != SLNETERR_ESEC_DATE_ERROR) &&
+        (status != SLNETERR_ESEC_SNO_VERIFY))
     {
         return status;
     }
 
-    // perform SSL handshake
-    sl_SetSockOpt(context->SocketFd, SL_SOL_SOCKET, SL_SO_STARTTLS, &dummyVar, sizeof(dummyVar));
+    // got here, handshake is completed 
 
-    // wait 2 seconds for TLS handshake to complete
-    // TODO: evaluate this to use CLR events
-    clock_gettime(CLOCK_REALTIME, &ts);
-    ts.tv_sec += 2;
-
-    while(true)
-    {
-        if(mq_timedreceive(nF_ControlBlock.socketAsyncEvent,
-            (char*)&handShakeResult, sizeof(nFSlSocketAsyncEvent_t), NULL, &ts) < 0)
-        {
-            // timeout occurred without receiving any message
-            return SOCK_SOCKET_ERROR;
-        }
-        else
-        {
-            // this event matches the socket we are waiting for
-            if(handShakeResult.Sd == sd)
-            {
-                break;
-            }
-        }
-    }
-
-    // setup socket to non blocking operation
-    nonblock = 1;
-    SOCK_ioctl(sd, SOCK_FIONBIO, &nonblock);
-
-    // go here, handshake is completed 
-    // return handshake operation result
-    status = (handShakeResult.Type == SL_SSL_NOTIFICATION_CONNECTED_SECURED) ? 0 : SOCK_SOCKET_ERROR;
-
-    return status;
+    return 0;
 }
 
 int ssl_pending_internal( int sd )
