@@ -5,7 +5,7 @@
 ![nanoFramework logo](https://github.com/nanoframework/Home/blob/master/resources/logo/nanoFramework-repo-logo.png)
 
 -----
-文档语言: [English](readme.md) | [中文简体](readme.zh-cn.md)
+文档语言: [English](README.md) | [中文简体](README.zh-cn.md)
 
 ### 欢迎使用 **nanoFramework** 解析器！
 

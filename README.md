@@ -5,7 +5,7 @@
 ![nanoFramework logo](https://github.com/nanoframework/Home/blob/master/resources/logo/nanoFramework-repo-logo.png)
 
 -----
-Document Language: [English](readme.md) | [中文简体](readme.zh-cn.md)
+Document Language: [English](README.md) | [中文简体](README.zh-cn.md)
 
 ### Welcome to the **nanoFramework** Interpreter repository!
 
