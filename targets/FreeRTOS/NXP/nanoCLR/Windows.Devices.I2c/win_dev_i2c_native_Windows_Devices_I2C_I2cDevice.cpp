@@ -116,7 +116,7 @@ static status_t I2C_ReadProcedure(uint8_t busIndex, i2c_structure_t *pI2Cx)
     {
         return i2cStatus;
     }
-    i2cStatus = LPI2C_MasterSend(i2cBaseAddress[busIndex], pI2Cx->txBuffer, 2);
+    i2cStatus = LPI2C_MasterSend(i2cBaseAddress[busIndex], pI2Cx->txBuffer, pI2Cx->txSize);
     if(i2cStatus != kStatus_Success)
     {
         return i2cStatus;
