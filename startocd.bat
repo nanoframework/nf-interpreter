@@ -34,11 +34,12 @@ set iface=-f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/esp32.cfg -c "ada
 goto start
 
 :ESP32_WROVER
-set iface=-f interface/ftdi/esp32_devkitj_v1.cfg -f board/esp-wroom-32.cfg 
+set iface=-f interface/ftdi/esp32_devkitj_v1.cfg -f board/esp32-wrover.cfg 
 goto start
 
 :STM32_STLINK
-set cmd=C:/nanoFramework_Tools/Tools/openocd/bin/openocd.exe -s C:/nanoFramework_Tools/Tools/openocd/bin/scripts
+REM Note: I tried using the Eclipse OpenOCD without much success here, then switched to the ESP32 version, and it works right out of the box!
+REM set cmd=C:/nanoFramework_Tools/Tools/openocd/bin/openocd.exe -s C:/nanoFramework_Tools/Tools/openocd/bin/scripts
 set iface=-f interface/stlink-v2-1.cfg -f board/stm32f7discovery.cfg
 goto start
 
