@@ -47,12 +47,6 @@ list(APPEND TARGET_NXP_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nanoFramewor
 # add native assemblies
 ParseNativeAssemblies()
 
-# configure code file with Interop Assemblies table and...
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CLR_RT_InteropAssembliesTable.cpp.in"
-                "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
-# ... now add Interop Assemblies table to nanoCLR sources list
-list(APPEND TARGET_NXP_NANOCLR_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
-
 # append target nanoCLR include directory
 list(APPEND TARGET_NXP_NANOCLR_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
 
