@@ -333,10 +333,11 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     uint8_t lineBreakCount;
     uint16_t offsetIndex = 0;
     uint8_t count = 0;
+    uint16_t result;
 
     CLR_RT_HeapBlock_Array* inArray = stack.Arg0().DereferenceArray(); 
     size_t offset = (size_t)stack.Arg1().NumericByRef().s4;
-    size_t lenght = (size_t)stack.Arg2().NumericByRef().s4;
+    size_t length = (size_t)stack.Arg2().NumericByRef().s4;
     bool insertLineBreaks = (bool)stack.Arg3().NumericByRefConst().u1;
 
     if(inArray == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL);
@@ -345,7 +346,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     inArrayPointer += (offset * sizeof(uint8_t));
 
     // compute base64 string length
-    outputLength = 4 * ((lenght + 2) / 3);
+    outputLength = 4 * ((length + 2) / 3);
 
     // need malloc with base64 string length plus string terminator (+1)
     outArray = (char*)platform_malloc(outputLength + 1);
@@ -354,7 +355,19 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     if (outArray == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
 
     // perform the operation
-    mbedtls_base64_encode( (unsigned char*)outArray, 0, &outputLength, inArrayPointer, lenght );
+    // need to tweak the parameter with the output length because it includes room for the terminator
+    result = mbedtls_base64_encode( 
+        (unsigned char*)outArray, 
+        (outputLength + 1), 
+        &outputLength, 
+        inArrayPointer, 
+        length );
+
+    if(result != 0)
+    {
+        // internal error occurred
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
 
     if(insertLineBreaks)
     {
@@ -416,7 +429,11 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
 
     // need to free memory from arrays
     platform_free((void*)outArray);
-    if(outArrayWitLineBreak != NULL) platform_free((void*)outArrayWitLineBreak);
+
+    if(outArrayWitLineBreak != NULL)
+    {
+        platform_free((void*)outArrayWitLineBreak);
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -432,6 +449,7 @@ HRESULT Library_corlib_native_System_Convert::FromBase64CharArray___STATIC__SZAR
     uint8_t charValue;
     CLR_UINT8* returnArray;
     int16_t i = 0;
+    uint16_t result;
 
     CLR_RT_HeapBlock_Array* inArray = stack.Arg0().DereferenceArray();
     size_t length = (size_t)stack.Arg1().NumericByRef().s4;
@@ -459,6 +477,7 @@ HRESULT Library_corlib_native_System_Convert::FromBase64CharArray___STATIC__SZAR
     {
         outputLength--;
     }
+
     // point to before last char and get it
     inArrayPointer--;
     charValue = *inArrayPointer;
@@ -476,9 +495,21 @@ HRESULT Library_corlib_native_System_Convert::FromBase64CharArray___STATIC__SZAR
     if (outArray == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
 
     // perform the operation
-    mbedtls_base64_decode( (unsigned char*)outArray, 0, &outputLength, inArrayPointer, length );
+    // need to tweak the parameter with the output length because it includes room for the terminator
+    result = mbedtls_base64_decode( 
+        (unsigned char*)outArray, 
+        (outputLength + 1), 
+        &outputLength, 
+        inArrayPointer, 
+        length );
 
-    // create heap block array instance with appropriate size (the lenght of the output array) and type (byte which is uint8_t)
+    if(result != 0)
+    {
+        // internal error occurred
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // create heap block array instance with appropriate size (the length of the output array) and type (byte which is uint8_t)
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( stack.PushValueAndClear() , outputLength, g_CLR_RT_WellKnownTypes.m_UInt8 ));
 
     // get a pointer to the array in the heap block array just created
