@@ -126,24 +126,30 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     switch((SslProtocols)sslMode)
     {
         case SslProtocols_TLSv1:
-            context->conf->min_major_ver = 1;
-            context->conf->min_minor_ver = 0;
-            context->conf->max_major_ver = 1;
-            context->conf->max_minor_ver = 0;
+            mbedtls_ssl_conf_min_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_1 );
+            mbedtls_ssl_conf_max_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_1 );
             break;
 
         case SslProtocols_TLSv11:
-            context->conf->min_major_ver = 1;
-            context->conf->min_minor_ver = 1;
-            context->conf->max_major_ver = 1;
-            context->conf->max_minor_ver = 1;
+            mbedtls_ssl_conf_min_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_2 );
+            mbedtls_ssl_conf_max_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_2 );
             break;
 
         case SslProtocols_TLSv12:
-            context->conf->min_major_ver = 1;
-            context->conf->min_minor_ver = 2;
-            context->conf->max_major_ver = 1;
-            context->conf->max_minor_ver = 2;
+            mbedtls_ssl_conf_min_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_3 );
+            mbedtls_ssl_conf_max_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_3 );
             break;
 
         default:
@@ -212,16 +218,12 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     }
     mbedtls_ssl_conf_authmode( context->conf, authMode );
 
-    // set below the threshold level for debug messages
-    // check mbed TLS mbedtls/debug.h header for details.
-    // Debug levels:
-    // 0 No debug
-    // 1 Error
-    // 2 State change
-    // 3 Informational
-    // 4 Verbose
-    mbedtls_debug_set_threshold( 2 );
+    // setup debug stuff
+    // only required if output debug is enabled in mbedtls_config.h
+  #ifdef MBEDTLS_DEBUG_C
+    mbedtls_debug_set_threshold( MBEDTLS_DEBUG_THRESHOLD );
     mbedtls_ssl_conf_dbg( context->conf, nf_debug, stdout );
+  #endif
 
     if( mbedtls_ssl_setup( context->ssl, context->conf ) != 0 )
     {

@@ -236,7 +236,8 @@ nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 # mbed TLS requires a config file
 if(NF_SECURITY_MBEDTLS)
     # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_CURRENT_SOURCE_DIR}/mbedtls_config.h>\"")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
 endif()
 
 # set compiler definitions
