@@ -5,58 +5,57 @@
 ![nanoFramework logo](https://github.com/nanoframework/Home/blob/master/resources/logo/nanoFramework-repo-logo.png)
 
 -----
-Document Language: [English](README.md) | [中文简体](README.zh-cn.md)
+文档语言: [English](README.md) | [中文简体](README.zh-cn.md)
 
-### Welcome to the **nanoFramework** Interpreter repository!
+### 欢迎使用 **nanoFramework** 解析器！
 
-This repo contains:
+本库包括：
 
-* **nanoFramework** agnostic blocks
+* **nanoFramework** 核心板块
   * [CLR](src/CLR)
   * [HAL](src/HAL)
   * [PAL](src/PAL)
-* Target reference for CMSIS OS
+* CMSIS OS 移植
   * [ChibiOS](targets/CMSIS-OS/ChibiOS)
-    * Reference target boards
+    * 板卡移植
       * [Mikrobus QUAIL](targets/CMSIS-OS/ChibiOS/MBN_QUAIL)
       * [ST NUCLEO64 F091RC](targets/CMSIS-OS/ChibiOS/ST_NUCLEO64_F091RC)
       * [ST STM32F429I DISCOVERY](targets/CMSIS-OS/ChibiOS/ST_STM32F429I_DISCOVERY)
       * [ST STM32F769I DISCOVERY](targets/CMSIS-OS/ChibiOS/ST_STM32F769I_DISCOVERY)
       * [Wilderness Labs Netduino3 WiFi](targets/CMSIS-OS/ChibiOS/NETDIUNO3_WIFI)
-    * ChibiOS overlay for **nanoFramework**
+    * ChibiOS 增强 **nanoFramework**
       * [STM32 1.Wire driver](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_onewire)
       * [STM32 CRC32 driver](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_crc)
       * [STM32 Flash driver](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_flash)
       * [STM32 Flexible Memory Controller driver](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_fsmc)
       * [STM32 Random number generator driver](targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/stm32_rng)
-* Target reference for FreeRTOS
+* FreeRTOS 移植
   * [ESP32_WROOM_32](targets/FreeRTOS_ESP32/ESP32_WROOM_32)
-* Target references for TI SimpleLink
+* TI SimpleLink 移植
   * [TI CC3220SF_LAUNCHXL](targets/TI-SimpleLink/TI_CC3220SF_LAUNCHXL)
-* Target reference for other OSes
+* 其它系统移植
   * [Win32 OS (test project only at this time)](targets/os/win32)
-* [CMake files for the build system](CMake)
+* [CMake 编译文件](CMake)
 
 
-## Build status
+## 编译状态
 
-| Component | Build Status | Build Status (develop) |
+| 组件 | 编译状态 | 编译状态（开发） |
 |:-|---|---|
 | nanoBooter + nanoCLR | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?branchName=master)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34?branchName=master) | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?branchName=develop)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34?branchName=develop) |
 | Win32 test project | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?branchName=master)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34?branchName=master) | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?branchName=develop)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34?branchName=develop) |
 
 
-## Firmware for reference boards
+## 评估板固件
 
 
-Each of the following ZIP files contains the image files for nanoBooter and nanoCLR in various formats (HEX, BIN and DFU). They should be flashed in the target boards using an appropriate software utility.
+以下每个ZIP文件包括了nanoBooter和nanoCLR镜像（HEX，BIN，DFU）。可以使用相应烧写工具把它们写入目标板卡中。
 
-The **stable** versions are RTM builds with the smallest possible size. They include the latest stable version. The debugging feature is disabled and only minimal (or none) error messages.
+**稳定** 版是RTM最小大小编译。它包含了最后稳定版本，关闭调试功能，仅有最少或没有错误信息。
+**预览** 版是目标板持续编译。它包含所有功能和错误修正的最后版本，也包括调试信息和详细错误信息。
 
-The **preview** versions are continuous builds of the reference targets. They include the latest version of all features and bug corrections. They also have the debugging feature enabled along with detailed error messages.
 
-
-| Target | Stable | Preview |
+| 目标 | 稳定 | 预览 |
 |:-|---|---|
 | ST_STM32F429I_DISCOVERY | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images/ST_STM32F429I_DISCOVERY/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images/ST_STM32F429I_DISCOVERY/_latestVersion) | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images-dev/ST_STM32F429I_DISCOVERY/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images-dev/ST_STM32F429I_DISCOVERY/_latestVersion) |
 | ST_NUCLEO64_F091RC | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images/ST_NUCLEO64_F091RC/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images/ST_NUCLEO64_F091RC/_latestVersion) | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images-dev/ST_NUCLEO64_F091RC/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images-dev/ST_NUCLEO64_F091RC/_latestVersion) |
@@ -67,7 +66,7 @@ The **preview** versions are continuous builds of the reference targets. They in
 | TI_CC3220SF_LAUNCHXL | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images/TI_CC3220SF_LAUNCHXL/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images/TI_CC3220SF_LAUNCHXL/_latestVersion) | [ ![Download](https://api.bintray.com/packages/nfbot/nanoframework-images-dev/TI_CC3220SF_LAUNCHXL/images/download.svg) ](https://bintray.com/nfbot/nanoframework-images-dev/TI_CC3220SF_LAUNCHXL/_latestVersion) |
 
 
-The above firmware builds include support for the class libraries and features marked below.
+以上固件支持以下类库和功能。
 
 
 | Target                  | Gpio               | Spi                | I2c                | Pwm                | Adc                | Dac                | Serial             | OneWire            | Events             | SWO                | Networking         | Large Heap         |
@@ -81,23 +80,22 @@ The above firmware builds include support for the class libraries and features m
 | TI_CC3220SF_LAUNCHXL    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    |                    |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    |
 
 
-## Feedback and documentation
+## 文档反馈
 
-For documentation, providing feedback, issues and finding out how to contribute please refer to the [Home repo](https://github.com/nanoframework/Home).
+有关文档、提供反馈、问题以及如何做出贡献的信息，请参阅 [Home repo](https://github.com/nanoframework/Home).
 
-Join our Discord community [here](https://discord.gg/gCyBu8T).
+加入我们的讨论社区 [here](https://discord.gg/gCyBu8T).
 
 
 ## Credits
 
-The list of contributors to this project can be found at [CONTRIBUTORS](https://github.com/nanoframework/Home/blob/master/CONTRIBUTORS.md).
+本项目贡献者可在 [CONTRIBUTORS](https://github.com/nanoframework/Home/blob/master/CONTRIBUTORS.md) 中找到。
 
 
-## License
+## 授权
 
-The nanoFramework Interpreter is licensed under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
+nanoFramework 解析器基于 [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0) 授权。
 
 
-## Code of Conduct
-This project has adopted the code of conduct defined by the [Contributor Covenant](CODE_OF_CONDUCT.md)
-to clarify expected behavior in our community.
+## 行为准则
+本项目采用了 [Contributor Covenant](CODE_OF_CONDUCT.md) 规范来阐明社区预期行为。
