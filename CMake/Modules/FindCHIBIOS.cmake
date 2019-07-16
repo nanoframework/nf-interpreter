@@ -9,20 +9,12 @@
 
 # check if the series name is supported 
 
-set(CHIBIOS_STM_SUPPORTED_SERIES "STM32F0xx" "STM32F4xx" "STM32F7xx" "STM32H7xx" "TICC3200" CACHE INTERNAL "supported STM series names for ChibiOS")
-set(CHIBIOS_TI_SUPPORTED_SERIES "TICC3200" CACHE INTERNAL "supported TI series names for ChibiOS")
+set(CHIBIOS_STM_SUPPORTED_SERIES "STM32F0xx" "STM32F4xx" "STM32F7xx" "STM32H7xx" "STM32L0xx" CACHE INTERNAL "supported STM series names for ChibiOS")
 
 list(FIND CHIBIOS_STM_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 if(TARGET_SERIES_NAME_INDEX EQUAL -1)
     # series is NOT supported by STM 
-    # try TI 
-    list(FIND CHIBIOS_TI_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
-    if(TARGET_SERIES_NAME_INDEX EQUAL -1)
-        message(FATAL_ERROR "\n\nSorry but the ${TARGET_SERIES} is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
-    else()
-        # series is supported by TI
-        set(TARGET_VENDOR "TI" CACHE INTERNAL "target vendor is TI")
-    endif()
+    message(FATAL_ERROR "\n\nSorry but the ${TARGET_SERIES} is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
 else()
     # series is supported by STM
     set(TARGET_VENDOR "STM" CACHE INTERNAL "target vendor is STM")
