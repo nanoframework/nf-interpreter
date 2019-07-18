@@ -42,9 +42,21 @@ void ERR_print_errors_fp()
 
 
 
-bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, 
-    int certLength, const char* certPassword, int& sslContextHandle, bool isServer )
+bool ssl_generic_init_internal( 
+    int sslMode, 
+    int sslVerify, 
+    const char* certificate, 
+    int certLength, 
+    const uint8_t* privateKey,
+    int privateKeyLength,
+    const char* password, 
+    int passwordLength,
+    int& sslContextHandle, 
+    bool isServer )
 {
+    (void)privateKeyLength;
+    (void)passwordLength;
+
     SSL*                ssl = NULL;
     SSL_CTX*            ctx = NULL;
     SSL_METHOD*         meth = NULL;
@@ -149,7 +161,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
         }
         else
         {
-            cert_x509 = ssl_parse_certificate((void*)certificate, certLength, certPassword, &pkey);
+            cert_x509 = ssl_parse_certificate((void*)certificate, certLength, password, &pkey);
 
             if (cert_x509 == NULL || pkey == NULL)
             {

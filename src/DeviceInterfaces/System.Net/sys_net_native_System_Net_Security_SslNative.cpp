@@ -457,16 +457,20 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
+    CLR_RT_TypeDef_Index    x509Certificate2TypeDef;
+
     CLR_INT32 sslContext            = -1;
     CLR_INT32 sslMode               = stack.Arg0().NumericByRef().s4;
     CLR_INT32 sslVerify             = stack.Arg1().NumericByRef().s4;
     CLR_RT_HeapBlock *hbCert        = stack.Arg2().Dereference(); 
     CLR_RT_HeapBlock* caCert        = stack.Arg3().Dereference(); 
     CLR_RT_HeapBlock_Array* arrCert = NULL;
+    CLR_RT_HeapBlock_Array*    privateKey  = NULL;
     CLR_UINT8*  sslCert             = NULL;
     int         result;
     bool        isFirstCall = false;
-    const char * szPwd = "";
+    const char * password = "";
+    uint8_t*    pk                  = NULL;
 
     if(!g_SSL_SeedData.Initialized)
     {
@@ -511,45 +515,36 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
 
     if(hbCert != NULL)
     {
+        g_CLR_RT_TypeSystem.FindTypeDef( "X509Certificate2", "System.Security.Cryptography.X509Certificates", x509Certificate2TypeDef );
+
         arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___certificate ].DereferenceArray(); //FAULT_ON_NULL(arrCert);
+        arrCert->Pin();
 
-        // If arrCert == NULL then the certificate is an X509Certificate2 which uses a certificate handle
-        if(arrCert == NULL)
+        // there is a client certificate, find if it's a X509Certificate2
+        if(hbCert->ObjectCls().Type() == x509Certificate2TypeDef.Type())
         {
-            arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___handle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
-
-            // pass the certificate handle as the cert data parameter
-            sslCert = arrCert->GetFirstElement();
-
-            arrCert = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___sessionHandle ].DereferenceArray(); FAULT_ON_NULL(arrCert);    
-
-            // pass the session handle as the ssl context parameter
-            sslContext = *(int32_t*)arrCert->GetFirstElement();
-
-            // the certificate has already been loaded so just pass an empty string
-            szPwd = "";
+            // get private key 
+            privateKey = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2::FIELD___privateKey ].DereferenceArray();
+            pk = privateKey->GetFirstElement();
         }
-        else
-        {
-            arrCert->Pin();
-        
-            sslCert = arrCert->GetFirstElement();
 
-            CLR_RT_HeapBlock *hbPwd = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___password ].Dereference();// FAULT_ON_NULL(hbPwd);
+        // get certificate    
+        sslCert = arrCert->GetFirstElement();
 
-            szPwd = hbPwd->StringText();
-        }
+        // get password
+        CLR_RT_HeapBlock *hbPwd = hbCert[ Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::FIELD___password ].Dereference();// FAULT_ON_NULL(hbPwd);
+        password = hbPwd->StringText();
     }
 
     SSL_RegisterTimeCallback( Time_GetDateTime );
 
     if(isServer)
     {
-        result = (SSL_ServerInit( sslMode, sslVerify, (const char*)sslCert, sslCert == NULL ? 0 : arrCert->m_numOfElements, szPwd, sslContext ) ? 0 : -1);
+        result = (SSL_ServerInit( sslMode, sslVerify, (const char*)sslCert, sslCert == NULL ? 0 : arrCert->m_numOfElements, pk, pk == NULL ? 0 : privateKey->m_numOfElements, password, hal_strlen_s(password), sslContext ) ? 0 : -1);
     }
     else
     {
-        result = (SSL_ClientInit( sslMode, sslVerify, (const char*)sslCert, sslCert == NULL ? 0 : arrCert->m_numOfElements, szPwd, sslContext ) ? 0 : -1);
+        result = (SSL_ClientInit( sslMode, sslVerify, (const char*)sslCert, sslCert == NULL ? 0 : arrCert->m_numOfElements, pk, pk == NULL ? 0 : privateKey->m_numOfElements, password, hal_strlen_s(password), sslContext ) ? 0 : -1);
     }
 
     NANOCLR_CHECK_HRESULT(ThrowOnError( stack, result ));

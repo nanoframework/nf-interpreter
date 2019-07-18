@@ -49,6 +49,7 @@ enum SslVerification
 #define FORMAT_IISSGC   8  
 
 bool ssl_parse_certificate_internal(void* buf, size_t size, void* pwd, void* x509 );
+int ssl_decode_private_key_internal( const unsigned char *key, size_t keyLength, const unsigned char *pwd, size_t pwdLength );
 int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle);
 int ssl_accept_internal( int socket, int sslContextHandle );
 int ssl_read_internal( int socket, char* Data, size_t size );
@@ -56,7 +57,7 @@ int ssl_write_internal( int socket, const char* Data, size_t size);
 int ssl_closesocket_internal( int sd );
 int ssl_pending_internal( int sd );
 bool ssl_exit_context_internal(int sslContextHandle );
-bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, int certLength, const char* pwd, int& sslContextHandle, bool isServer );
+bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle, bool isServer );
 bool ssl_initialize_internal();
 bool ssl_uninitialize_internal();
 bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, 	int certLength, const char* certPassword );

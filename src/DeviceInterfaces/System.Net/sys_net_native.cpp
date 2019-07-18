@@ -237,12 +237,25 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_mscorlibSystemDateTime__BYREF_mscorlibSystemDateTime,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2::DecodePrivateKeyNative___STATIC__VOID__SZARRAY_U1__STRING,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net", 
-    0x3AD3B5E6,
-    method_lookup,
-    { 100, 1, 1, 0 }
+    0x7721D4BC,
+    method_lookup, 
+    { 100, 1, 2, 0 }
 };

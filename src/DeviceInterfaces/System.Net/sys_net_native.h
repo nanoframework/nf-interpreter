@@ -256,6 +256,16 @@ struct Library_sys_net_native_System_Net_Sockets_SocketException
 
 };
 
+struct Library_sys_net_native_System_Security_Cryptography_AsymmetricAlgorithm
+{
+    static const int FIELD___keySizeValue = 1;
+    static const int FIELD___keyPairValue = 2;
+
+
+    //--//
+
+};
+
 struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate
 {
     static const int FIELD___certificate = 1;
@@ -268,6 +278,16 @@ struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509
     static const int FIELD___sessionHandle = 8;
 
     NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_mscorlibSystemDateTime__BYREF_mscorlibSystemDateTime);
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2
+{
+    static const int FIELD___privateKey = 9;
+
+    NANOCLR_NATIVE_DECLARE(DecodePrivateKeyNative___STATIC__VOID__SZARRAY_U1__STRING);
 
     //--//
 

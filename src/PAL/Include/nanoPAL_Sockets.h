@@ -603,8 +603,8 @@ typedef void (*SSL_DATE_TIME_FUNC)(DATE_TIME_INFO* pdt);
 
 bool SSL_Initialize  ();
 bool SSL_Uninitialize();
-bool SSL_ServerInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle );
-bool SSL_ClientInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle );
+bool SSL_ServerInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle );
+bool SSL_ClientInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle );
 bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int certLength, const char* certPassword );
 bool SSL_ExitContext( int sslContextHandle );
 int  SSL_Accept     ( int socket, int sslContextHandle );
@@ -615,6 +615,7 @@ int  SSL_CloseSocket( int socket );
 void SSL_GetTime(DATE_TIME_INFO* pdt);
 void SSL_RegisterTimeCallback(SSL_DATE_TIME_FUNC pfn);
 bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* password, X509CertData* certData );
+int  SSL_DecodePrivateKey( const unsigned char *key, size_t keyLength, const unsigned char *password, size_t passwordLength );
 int  SSL_DataAvailable( int socket );
 
 //--//
