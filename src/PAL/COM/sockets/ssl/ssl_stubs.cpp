@@ -29,16 +29,16 @@ __nfweak bool SSL_Uninitialize()
     return TRUE;
 }
 
-__nfweak bool SSL_ServerInit( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle )
+__nfweak bool SSL_ServerInit( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle )
 { 
-    (void)sslMode; (void)sslVerify; (void)certificate; (void)certLength; (void)certPassword;  (void)sslContextHandle;
+    (void)sslMode; (void)sslVerify; (void)certificate; (void)certLength; (void)privateKey; (void)privateKeyLength; (void)password; (void)passwordLength; (void)sslContextHandle;
     NATIVE_PROFILE_PAL_COM();
     return TRUE; 
 }
 
-__nfweak bool SSL_ClientInit( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle )
+__nfweak bool SSL_ClientInit( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle )
 { 
-    (void)sslMode; (void)sslVerify; (void)certificate; (void)certLength; (void)certPassword;  (void)sslContextHandle;
+    (void)sslMode; (void)sslVerify; (void)certificate; (void)certLength; (void)privateKey; (void)privateKeyLength; (void)password; (void)passwordLength; (void)sslContextHandle;
     NATIVE_PROFILE_PAL_COM();
     return TRUE; 
 }
@@ -110,6 +110,22 @@ __nfweak bool SSL_ParseCertificate( const char* certificate, size_t certLength, 
 
     NATIVE_PROFILE_PAL_COM();
     return TRUE;
+}
+
+__nfweak int SSL_DecodePrivateKey( 
+    const unsigned char *key, 
+    size_t keyLength, 
+    const unsigned char *pwd, 
+    size_t pwdLength )
+{
+    (void)key;
+    (void)keyLength;
+    (void)pwd;
+    (void)pwdLength;
+
+    NATIVE_PROFILE_PAL_COM();
+
+    return -1;
 }
 
 __nfweak int SSL_DataAvailable( SOCK_SOCKET socket )

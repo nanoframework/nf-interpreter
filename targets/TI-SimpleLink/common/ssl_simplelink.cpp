@@ -24,6 +24,21 @@ extern "C"
 
 // TODO
 bool ssl_parse_certificate_internal(void* buf, size_t size, void* pwd, void* x509 ){(void)buf;(void)size;(void)pwd;(void)x509;}
+
+int ssl_decode_private_key_internal(
+    const unsigned char *key, 
+    size_t keyLength, 
+    const unsigned char *password, 
+    size_t passwordLength)
+{
+    (void)key;
+    (void)keyLength;
+    (void)password;
+    (void)passwordLength;
+
+    return 0;    
+}
+
 int ssl_accept_internal( int socket, int sslContextHandle ){(void)socket;(void)sslContextHandle;}
 bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, int certLength, const char* certPassword ){(void)sslContextHandle;(void)certificate;(void)certLength;(void)certPassword;}
 
@@ -46,10 +61,22 @@ bool ssl_initialize_internal()
     return true;
 }
 
-bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, 
-    int certLength, const char* certPassword, int& sslContextHandle, bool isServer )
+bool ssl_generic_init_internal( 
+    int sslMode, 
+    int sslVerify, 
+    const char* certificate, 
+    int certLength, 
+    const uint8_t* privateKey,
+    int privateKeyLength,
+    const char* password,
+    int passwordLength,
+    int& sslContextHandle, 
+    bool isServer )
 {
-    (void)certPassword;
+    (void)password;
+    (void)passwordLength;
+    (void)privateKey;
+    (void)privateKeyLength;
 
     int sslContexIndex = -1;
 

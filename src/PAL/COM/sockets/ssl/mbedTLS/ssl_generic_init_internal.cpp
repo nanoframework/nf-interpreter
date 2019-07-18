@@ -9,15 +9,25 @@
 #include "mbedtls.h"
 #include "mbedtls/debug.h"
 
-bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, 
-    int certLength, const char* certPassword, int& sslContextHandle, bool isServer )
+bool ssl_generic_init_internal( 
+    int sslMode, 
+    int sslVerify, 
+    const char* certificate, 
+    int certLength, 
+    const uint8_t* privateKey,
+    int privateKeyLength,
+    const char* password,
+    int passwordLength,
+    int& sslContextHandle, 
+    bool isServer )
 {
     (void)sslMode;
-    (void)certPassword;
 
     int sslContexIndex = -1;
     int authMode = MBEDTLS_SSL_VERIFY_NONE;
     int endpoint = 0;
+
+    mbedtls_x509_crt* ownCertificate = NULL;
 
     // we only have one CA root bundle, so this is fixed to 0
     uint32_t configIndex = 0;
@@ -180,32 +190,53 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     // parse "own" certificate if passed
     if(certificate != NULL && certLength > 0)
     {
-        // TODO
-        // this isn't required for client authentication
+        // create and init private key context
+        // this needs to be freed in ssl_exit_context_internal
+        context->pk = (mbedtls_pk_context*)platform_malloc(sizeof(mbedtls_pk_context));
+        if(context->pk == NULL)
+        {
+            goto error;
+        }
 
-        // mbedtls_x509_crt_init( &clicert );
+        mbedtls_pk_init( context->pk  );
 
-        // /////////////////////////////////////////////////////////////////////////////////////////////////
-        // // developer notes:                                                                            //
-        // // this call parses certificates in both string and binary formats                             //
-        // // when the formart is a string it has to include the terminator otherwise the parse will fail //
-        // /////////////////////////////////////////////////////////////////////////////////////////////////
-        // if(mbedtls_x509_crt_parse( &clicert, (const unsigned char*)certificate, certLength ) != 0)
-        // {
-        //     // x509_crt_parse_failed
-        //     goto error;
-        // }
+        // is there a private key?
+        if(privateKey != NULL && privateKeyLength > 0)
+        {
 
-        // if( mbedtls_pk_parse_key( &pkey, (const unsigned char *) mbedtls_test_cli_key, mbedtls_test_cli_key_len, NULL, 0 ) != 0)
-        // {
-        //     // failed parsing the 
-        // }
+            if( mbedtls_pk_parse_key(
+                context->pk, 
+                privateKey,
+                privateKeyLength, 
+                (const unsigned char *)password, 
+                passwordLength) < 0)
+            {
+                // private key parse failed
+                goto error;
+            }
+        }
+    
+        // parse certificate
+        ownCertificate = (mbedtls_x509_crt*)platform_malloc(sizeof(mbedtls_x509_crt));
+        if(ownCertificate == NULL)
+        {
+            goto error;
+        }
 
-        // if( mbedtls_ssl_conf_own_cert( &conf, &clicert, &pkey ) != 0 )
-        // {
-        //     // configuring own certificate failed
-        //     goto error;
-        // }
+        mbedtls_x509_crt_init( ownCertificate );
+
+        if( mbedtls_x509_crt_parse( ownCertificate, (const unsigned char *) certificate, certLength ) )
+        {
+            // failed parsing own certificate failed
+            goto error;
+        }            
+
+        if( mbedtls_ssl_conf_own_cert( context->conf, ownCertificate, context->pk ) ) 
+        {
+            // configuring own certificate failed
+            goto error;
+        }
+
     }
 
     mbedtls_ssl_conf_ca_chain( context->conf, context->x509_crt, NULL );
@@ -249,6 +280,8 @@ error:
     if(context->ctr_drbg != NULL) platform_free(context->ctr_drbg);
     if(context->server_fd != NULL) platform_free(context->server_fd);
     if(context->x509_crt != NULL) platform_free(context->x509_crt);
+    if(context->pk != NULL) platform_free(context->pk);
+    if(ownCertificate != NULL) mbedtls_x509_crt_free( ownCertificate );
 
     return FALSE;
 }
