@@ -24,7 +24,8 @@ bool ssl_exit_context_internal(int sslContextHandle )
     {
         return FALSE;
     }
-
+    
+    mbedtls_pk_free(context->pk);
     mbedtls_net_free(context->server_fd);
     mbedtls_ctr_drbg_free( context->ctr_drbg );
     mbedtls_entropy_free( context->entropy );
@@ -33,6 +34,7 @@ bool ssl_exit_context_internal(int sslContextHandle )
     memset(context->ssl, 0, sizeof(mbedtls_ssl_context));
 
     // free memory
+    platform_free(context->pk);
     platform_free(context->server_fd);
     platform_free(context->entropy);
     platform_free(context->ctr_drbg);

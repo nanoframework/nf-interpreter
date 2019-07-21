@@ -165,6 +165,7 @@ struct Library_corlib_native_System_Array
 struct Library_corlib_native_System_Delegate
 {
     NANOCLR_NATIVE_DECLARE(Equals___BOOLEAN__OBJECT);
+    NANOCLR_NATIVE_DECLARE(GetInvocationList___SZARRAY_SystemDelegate);
     NANOCLR_NATIVE_DECLARE(get_Method___SystemReflectionMethodInfo);
     NANOCLR_NATIVE_DECLARE(get_Target___OBJECT);
     NANOCLR_NATIVE_DECLARE(Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);

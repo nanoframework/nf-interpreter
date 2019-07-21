@@ -26,6 +26,7 @@ typedef struct mbedTLS_NFContext
     mbedtls_ssl_context* ssl;
     mbedtls_net_context* server_fd;
     mbedtls_x509_crt* x509_crt;
+    mbedtls_pk_context* pk;
 }mbedTLS_NFContext;
 
 int net_would_block( const mbedtls_net_context *ctx );

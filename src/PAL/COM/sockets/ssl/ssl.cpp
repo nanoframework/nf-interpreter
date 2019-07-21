@@ -34,10 +34,10 @@ bool SSL_Uninitialize()
     return retVal;
 }
 
-static bool SSL_GenericInit( int sslMode, int sslVerify, const char* certificate, int certLength, const char* pwd, int& sslContextHandle, bool isServer )
+static bool SSL_GenericInit( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle, bool isServer )
 {
     if (!s_init_done) s_init_done=ssl_initialize_internal();
-    return ssl_generic_init_internal( sslMode, sslVerify, certificate, certLength, pwd, sslContextHandle, isServer );     
+    return ssl_generic_init_internal( sslMode, sslVerify, certificate, certLength, privateKey, privateKeyLength, password, passwordLength, sslContextHandle, isServer );     
 }
 
 bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* password, X509CertData* certData )
@@ -49,22 +49,39 @@ bool SSL_ParseCertificate( const char* certificate, size_t certLength, const cha
                                           (void*)password, (void*)certData);
 }
 
+int SSL_DecodePrivateKey( 
+    const unsigned char *key,
+    size_t keyLength, 
+    const unsigned char *pwd, 
+    size_t pwdLength )
+{
+    if (!s_init_done) s_init_done=ssl_initialize_internal();
+    
+    NATIVE_PROFILE_PAL_COM();
+
+    return ssl_decode_private_key_internal(
+        key,
+        keyLength, 
+        pwd, 
+        pwdLength );
+}
+
 void SSL_RegisterTimeCallback(SSL_DATE_TIME_FUNC pfn)
 {
     NATIVE_PROFILE_PAL_COM();
     g_SSL_Driver.m_pfnGetTimeFuncPtr = pfn;
 }
 
-bool SSL_ServerInit( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle )
+bool SSL_ServerInit( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle )
 {
     NATIVE_PROFILE_PAL_COM();
-    return SSL_GenericInit( sslMode, sslVerify, certificate, certLength, certPassword, sslContextHandle, TRUE );
+    return SSL_GenericInit( sslMode, sslVerify, certificate, certLength, privateKey, privateKeyLength, password, passwordLength, sslContextHandle, TRUE );
 }
 
-bool SSL_ClientInit( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle )
+bool SSL_ClientInit( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle )
 { 
     NATIVE_PROFILE_PAL_COM();
-    return SSL_GenericInit( sslMode, sslVerify, certificate, certLength, certPassword, sslContextHandle, FALSE );
+    return SSL_GenericInit( sslMode, sslVerify, certificate, certLength, privateKey, privateKeyLength, password, passwordLength, sslContextHandle, FALSE );
 }
 
 bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int certLength, const char* certPassword )

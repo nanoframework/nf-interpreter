@@ -2519,8 +2519,8 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
     static void  ProtectFromGCCallback( void* state );
 
-    static HRESULT Execute_DelegateInvoke( CLR_RT_StackFrame* stack );
-    static HRESULT Execute_IL            ( CLR_RT_StackFrame* stack );
+    static HRESULT Execute_DelegateInvoke( CLR_RT_StackFrame& stack );
+    static HRESULT Execute_IL            ( CLR_RT_StackFrame& stack );
 
     //--//
 

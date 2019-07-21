@@ -82,6 +82,16 @@ int8_t Esp32_ADC_DevicePinMap[20] =
 	  36, 37, 38, 39, 32, 33, 34, 35, 36, 39, 04, 00, 02, 15, 13, 12, 14, 27, 25, 26
 };
 
+//
+// We use "DAC1" for 2 DAC channels on ESP32
+// These are fixed pins so can't be re-assigned
+//
+int8_t Esp32_DAC_DevicePinMap[2] =
+{
+	// 0   1
+	  25, 26
+};
+
 void  Esp32_DecodeAlternateFunction(uint32_t alternateFunction, Esp32_MapDeviceType & deviceType, uint8_t & busIndex, uint16_t & PinIndex)
 {
 	deviceType = (Esp32_MapDeviceType)((alternateFunction >> 16) & 0x00ff);
@@ -110,6 +120,9 @@ int  Esp32_GetMappedDevicePins( Esp32_MapDeviceType deviceType, int DevNumber, i
 			case DEV_TYPE_ADC:
 				return (int)Esp32_ADC_DevicePinMap[PinIndex];
 			
+			case DEV_TYPE_DAC:
+				return (int)Esp32_DAC_DevicePinMap[PinIndex];
+
 			default:
                 break;
         };

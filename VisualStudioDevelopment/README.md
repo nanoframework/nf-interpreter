@@ -77,7 +77,7 @@ Sometime the CMake server goes away, shutting down Visual Studio and restarting 
 | Visual Studio 2017 community edition |Linux development with C++|
 |option|Visual C++ tools for Cmake and Linux   
 |option|Embedded and IoT Development|GCC version 6.3.1. December/2018
-|GCC Tool Chain - Version 7-2018-q2-update|GNU Arm Embedded Toolchain|https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads#
+|GCC Tool Chain - Version 8-2019-q3-update|GNU Arm Embedded Toolchain|https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads#
 
 
 #### GCC Toolchain NOTES
@@ -91,7 +91,7 @@ In CMakeSettings.json the following variables determine the build tool.
 
         {
           "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/Program Files (x86)/GNU Tools Arm Embedded/7 2018-q2-update"
+          "value": "C:/Program Files (x86)/GNU Tools Arm Embedded/8 2019-q3-update"
           // "value": "${env.GCCPATH}"   // Standard Visual Studio Install of GCC 6.3.1 
         },
 

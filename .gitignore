@@ -11,6 +11,8 @@ cmake-variants.json
 
 # ignore any content inside the Interop assemblies folder
 InteropAssemblies/*
+!InteropAssemblies/CLR_RT_InteropAssembliesTable.cpp.in
+!InteropAssemblies/README.md
 
 # Visual Studio Code
 # ignore C/C++ launch file (will change frequently per user/board setup, use should derive content from launch.TEMPLATE.json)

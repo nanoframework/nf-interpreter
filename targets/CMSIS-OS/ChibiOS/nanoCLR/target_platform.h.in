@@ -31,6 +31,9 @@
 // enable ADC
 #define HAL_USE_ADC @HAL_USE_ADC_OPTION@
 
+// enable DAC
+#define HAL_USE_DAC @HAL_USE_DAC_OPTION@
+
 // enable UART subsystem
 #define HAL_USE_UART @HAL_USE_UART_OPTION@
 

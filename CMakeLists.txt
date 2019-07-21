@@ -466,6 +466,13 @@ else()
 endif()
 
 
+if(API_System.Devices.Dac)
+    set(HAL_USE_DAC_OPTION TRUE CACHE INTERNAL "HAL DAC for System.Devices.Dac")
+else()
+    set(HAL_USE_DAC_OPTION FALSE CACHE INTERNAL "HAL DAC for System.Devices.Dac")
+endif()
+
+
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
 else()

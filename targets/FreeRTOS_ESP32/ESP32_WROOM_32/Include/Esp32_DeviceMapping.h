@@ -24,6 +24,7 @@ enum Esp32_MapDeviceType
     DEV_TYPE_SERIAL,
 	DEV_TYPE_LED_PWM,
 	DEV_TYPE_ADC,
+	DEV_TYPE_DAC,
 	DEV_TYPE_MAX,
 };
 
