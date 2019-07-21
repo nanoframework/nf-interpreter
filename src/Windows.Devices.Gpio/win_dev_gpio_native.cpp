@@ -22,11 +22,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
 	NULL,
 	NULL,
 	NULL,
+	NULL,
 	Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeInit___VOID,
 	Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeRead___U8__BOOLEAN,
 	Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeStart___VOID,
 	Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeStop___VOID,
-	Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeReset___VOID,
 	Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeDispose___VOID,
 	NULL,
 	NULL,
@@ -96,7 +96,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Gpio =
 {
 	"Windows.Devices.Gpio",
-	0x21C0164A,
-    method_lookup,
+	0xD7F65BB7,
+	method_lookup,
     { 100, 1, 0, 0 }
 };

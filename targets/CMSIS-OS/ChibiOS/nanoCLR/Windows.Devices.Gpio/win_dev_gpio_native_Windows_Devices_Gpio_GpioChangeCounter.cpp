@@ -58,17 +58,6 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeReset___VOID( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {
-        //CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
-
-        //int pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
-    }
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeDispose___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
