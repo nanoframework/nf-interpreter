@@ -25,8 +25,12 @@ set(NF_Networking_SRCS
     LwIP_Sockets.cpp
     LwIP_Sockets_functions.cpp 
 
-    ssl_stubs.cpp
 )
+
+# need a conditional include because of ESP32 building network as a library 
+if(NOT USE_SECURITY_MBEDTLS_OPTION)
+    list(APPEND NF_Networking_SRCS ssl_stubs.cpp)
+endif()
 
 # source files for security layer
 set(NF_Networking_Security_SRCS
@@ -66,7 +70,7 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
 
             if(USE_SECURITY_MBEDTLS_OPTION)
-                # ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+                ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
             elseif(USE_SECURITY_OPENSSL_OPTION)
                 ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/openssl
             endif()
