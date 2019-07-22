@@ -47,9 +47,13 @@
 #define STM32_MCO1PRE                       STM32_MCO1PRE_DIV1
 #define STM32_MCO2SEL                       STM32_MCO2SEL_SYSCLK
 #define STM32_MCO2PRE                       STM32_MCO2PRE_DIV5
-#define STM32_I2SSRC                        STM32_I2SSRC_CKIN
+#define STM32_PLLI2SSRC                     STM32_PLLI2SSRC_PLLSRC
+#define STM32_I2SCKIN_VALUE                 0
+#define STM32_PLLI2SM_VALUE                 16
 #define STM32_PLLI2SN_VALUE                 192
+#define STM32_PLLI2SP_VALUE                 2
 #define STM32_PLLI2SR_VALUE                 2
+#define STM32_PLLI2SQ_VALUE                 2
 #define STM32_PVD_ENABLE                    FALSE
 #define STM32_PLS                           STM32_PLS_LEV0
 #define STM32_BKPRAM_ENABLE                 FALSE
