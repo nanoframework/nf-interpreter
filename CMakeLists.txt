@@ -625,11 +625,14 @@ endif()
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
 
-    add_subdirectory(targets/CMSIS-OS/common/Include)
+    # Define base path for the class libraries
+    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
+
+    add_subdirectory(targets/CMSIS-OS/ChibiOS)
     add_subdirectory(targets/CMSIS-OS/common)
+    add_subdirectory(targets/CMSIS-OS/common/Include)
     add_subdirectory(targets/CMSIS-OS/nanoBooter)
     add_subdirectory(targets/CMSIS-OS/nanoCLR)
-    add_subdirectory(targets/CMSIS-OS/ChibiOS)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
@@ -676,6 +679,8 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 
         # Define base path for the class libraries
         set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}/nanoCLR")
+
+        add_subdirectory(targets/FreeRTOS_ESP32)
 
         # set target base location
         set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}")
