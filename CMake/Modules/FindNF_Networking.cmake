@@ -11,8 +11,6 @@ list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/DeviceInterface
 
 if(USE_SECURITY_MBEDTLS_OPTION)
     list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl/mbedTLS)
-elseif(USE_SECURITY_OPENSSL_OPTION)
-    list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl/openssl)
 endif()
 
 # source files for nanoFramework Networking
@@ -25,8 +23,12 @@ set(NF_Networking_SRCS
     LwIP_Sockets.cpp
     LwIP_Sockets_functions.cpp 
 
-    ssl_stubs.cpp
 )
+
+# need a conditional include because of ESP32 building network as a library 
+if(NOT USE_SECURITY_MBEDTLS_OPTION)
+    list(APPEND NF_Networking_SRCS ssl_stubs.cpp)
+endif()
 
 # source files for security layer
 set(NF_Networking_Security_SRCS
@@ -36,6 +38,7 @@ set(NF_Networking_Security_SRCS
     ssl_add_cert_auth_internal.cpp
     ssl_closesocket_internal.cpp
     ssl_connect_internal.cpp
+    ssl_decode_private_key_internal.cpp
     ssl_exit_context_internal.cpp
     ssl_generic.cpp
     ssl_generic_init_internal.cpp
@@ -64,11 +67,7 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets
             ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
 
-            if(USE_SECURITY_MBEDTLS_OPTION)
-                # ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
-            elseif(USE_SECURITY_OPENSSL_OPTION)
-                ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/openssl
-            endif()
+            ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
 
             ${PROJECT_SOURCE_DIR}/src/PAL/Lwip
             ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
@@ -81,11 +80,9 @@ endforeach()
 
 if(USE_SECURITY_MBEDTLS_OPTION)
     set(NF_Security_Search_Path "${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS")
-elseif(USE_SECURITY_OPENSSL_OPTION)
-    set(NF_Security_Search_Path "${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/OpenSSL")
 endif()
 
-if(USE_SECURITY_MBEDTLS_OPTION OR USE_SECURITY_OPENSSL_OPTION)
+if(USE_SECURITY_MBEDTLS_OPTION)
 
     # 2nd pass: security files if option is selected 
     foreach(SRC_FILE ${NF_Networking_Security_SRCS})

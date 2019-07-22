@@ -20,11 +20,6 @@ if(NOT "${TOOL_HEX2DFU_PREFIX}" STREQUAL "")
     endif()
 endif()
 
-# sanity check on SSL provider: ChibiOS only supports mbed TLS
-if(NF_SECURITY_OPENSSL)
-    message(FATAL "Can't use OpenSSL for ChibiOS. Currently only mbed TLS is supported.")
-endif()
-
 # check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
 set(NO_CHIBIOS_SOURCE TRUE)
 if(CHIBIOS_SOURCE)
@@ -314,17 +309,11 @@ if(NF_SECURITY_MBEDTLS)
 
     endif()
 
-    # get source dir for mbedTLS CMake project
-    ExternalProject_Get_Property(mbedTLS SOURCE_DIR)
-
     set(mbedTLS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include")
     set(mbedTLS_LIBRARIES "${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX}")
     include_directories(${mbedTLS_INCLUDE_DIRS})
 
 endif()
-
-# Define base path for the class libraries
-set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
 
 # set target base location
 # this has to be set before the class library modules are pulled in

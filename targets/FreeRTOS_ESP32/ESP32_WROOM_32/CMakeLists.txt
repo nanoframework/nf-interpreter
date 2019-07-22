@@ -46,6 +46,11 @@ else()
     set(HAL_USE_RTC_OPTION FALSE CACHE INTERNAL "NF feature RTC")
 endif()
 
+# security provider is mbedTLS
+if(USE_SECURITY_MBEDTLS_OPTION)
+    find_package(mbedTLS REQUIRED)
+endif()
+
 #######################################
 
 add_subdirectory("common")
@@ -54,12 +59,23 @@ add_subdirectory("IDF")
 add_subdirectory("Network")
 add_subdirectory("nanoCLR")
 
+# mbed TLS requires a config file
+if(USE_SECURITY_MBEDTLS_OPTION)
+    # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+endif()
+
 # Build the networking components as a separate library
 # This is done this way to stop "Createprocess: file no found" errors in linker when object input file is greater than 32k
 if(USE_NETWORKING_OPTION)
-add_library(NetworkLib STATIC ${NF_Networking_SOURCES} "${TARGET_ESP32_NETWORK_SOURCES}"  "${TARGET_LWIP_SOURCES}" )
+    add_library(NetworkLib STATIC ${NF_Networking_SOURCES} ${TARGET_ESP32_NETWORK_SOURCES} ${TARGET_LWIP_SOURCES} ${mbedTLS_SOURCES} )
 endif()
 
+# add dependency for security provider mbedTLS
+if(USE_SECURITY_MBEDTLS_OPTION)
+    add_dependencies(NetworkLib mbedTLS)
+endif()
 
 #######################
 # nanoCLR executable
@@ -129,8 +145,20 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
         endif()   
 endforeach( IDF_libraries )
 
+# mbed TLS requires a config file
+if(USE_SECURITY_MBEDTLS_OPTION)
+    # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+endif()
+
+# add dependency for security provider mbedTLS
+if(USE_SECURITY_MBEDTLS_OPTION)
+    add_dependencies(NetworkLib mbedTLS)
+endif()
+
 if(USE_NETWORKING_OPTION)
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lNetworkLib " )
+    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lNetworkLib " )
 endif()
 
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -lgcc -lstdc++ -Wl,--end-group -Wl,-EL  ")
@@ -175,8 +203,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 if(USE_NETWORKING_OPTION)
     target_include_directories(NetworkLib PUBLIC
         ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
-      ${NF_CoreCLR_INCLUDE_DIRS}
+        ${NF_CoreCLR_INCLUDE_DIRS}
         ${NF_Networking_INCLUDE_DIRS}
+        ${mbedTLS_INCLUDE_DIRS}
     )
 
     target_compile_definitions(NetworkLib PUBLIC "-DPLATFORM_ESP32 " )
@@ -227,6 +256,11 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 
 # add linker flags to generate map file
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.map")
+
+# add dependency for networking
+if(USE_SECURITY_MBEDTLS_OPTION)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf NetworkLib)
+endif()
 
 # Create bin file from elf
 set(GEN_ESP32_BIN_PATH ${EXECUTABLE_OUTPUT_PATH} )

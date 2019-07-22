@@ -152,10 +152,6 @@
           "value": "OFF"
         },
         {
-          "name": "NF_SECURITY_OPENSSL:BOOL", //OFF-default-ON-to-add-network-security-from-OpenSSL
-          "value": "OFF"
-        },
-        {
           "name": "NF_SECURITY_MBEDTLS:BOOL", //OFF-default-ON-to-add-network-security-from-mbedTLS
           "value": "OFF"
         },
@@ -367,10 +363,6 @@
         },
         {
           "name": "NF_NETWORKING_SNTP:BOOL", //ON-default-to-add-SNTP-client-requires-networking
-          "value": "ON"
-        },
-        {
-          "name": "NF_SECURITY_OPENSSL:BOOL", //OFF-default-ON-to-add-network-security-from-OpenSSL
           "value": "ON"
         },
         {

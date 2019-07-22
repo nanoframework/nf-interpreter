@@ -32,12 +32,6 @@ endif()
 if(USE_NETWORKING_OPTION)
     list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Network.cpp")
     list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_Network.cpp")
-
-    # append mbed TLS entropy generator, if hardware has it
-    if(NF_SECURITY_MBEDTLS AND USE_RNG)
-        list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/mbedtls_entropy_hardware_pool.c")
-    endif()
-
 endif()
 
 # make var global

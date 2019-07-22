@@ -20,6 +20,7 @@ set(System.Net_SRCS
 
     # System.Security.Cryptography.X509Certificates 
     sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate.cpp
+    sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2.cpp
 
     # System.Net.Security
     sys_net_native_System_Net_Security_SslNative.cpp
