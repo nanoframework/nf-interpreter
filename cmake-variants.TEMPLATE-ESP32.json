@@ -55,7 +55,7 @@
             "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
             "NF_FEATURE_HAS_SDCARD": "ON",
             "API_System.Net": "ON",
-            "NF_SECURITY_OPENSSL": "ON",
+            "NF_SECURITY_MBEDTLS": "ON",
             "API_Windows.Devices.Wifi": "ON",
             "API_Windows.Devices.Adc": "ON",
             "API_System.Devices.Dac" : "OFF",

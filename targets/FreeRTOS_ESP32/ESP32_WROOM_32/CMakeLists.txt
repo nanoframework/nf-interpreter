@@ -47,7 +47,7 @@ else()
 endif()
 
 # security provider is mbedTLS
-if(NF_SECURITY_MBEDTLS)
+if(USE_SECURITY_MBEDTLS_OPTION)
     find_package(mbedTLS REQUIRED)
 endif()
 
@@ -144,6 +144,18 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
         set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--undefined=uxTopUsedPriority " )
         endif()   
 endforeach( IDF_libraries )
+
+# mbed TLS requires a config file
+if(USE_SECURITY_MBEDTLS_OPTION)
+    # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+endif()
+
+# add dependency for security provider mbedTLS
+if(USE_SECURITY_MBEDTLS_OPTION)
+    add_dependencies(NetworkLib mbedTLS)
+endif()
 
 if(USE_NETWORKING_OPTION)
     set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lNetworkLib " )

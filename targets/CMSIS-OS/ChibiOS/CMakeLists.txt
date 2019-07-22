@@ -20,11 +20,6 @@ if(NOT "${TOOL_HEX2DFU_PREFIX}" STREQUAL "")
     endif()
 endif()
 
-# sanity check on SSL provider: ChibiOS only supports mbed TLS
-if(NF_SECURITY_OPENSSL)
-    message(FATAL "Can't use OpenSSL for ChibiOS. Currently only mbed TLS is supported.")
-endif()
-
 # check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
 set(NO_CHIBIOS_SOURCE TRUE)
 if(CHIBIOS_SOURCE)
