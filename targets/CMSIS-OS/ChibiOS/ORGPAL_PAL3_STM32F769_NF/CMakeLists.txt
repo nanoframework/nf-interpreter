@@ -53,7 +53,7 @@ if(USE_FILESYSTEM_OPTION)
 endif()
 
 # security provider is mbedTLS
-if(NF_SECURITY_MBEDTLS)
+if(USE_SECURITY_MBEDTLS_OPTION)
     find_package(mbedTLS REQUIRED)
 endif()
 
@@ -154,7 +154,7 @@ if(USE_NETWORKING_OPTION)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
 
     # add dependency for security provider mbedTLS
-    if(NF_SECURITY_MBEDTLS)
+    if(USE_SECURITY_MBEDTLS_OPTION)
         add_dependencies(${NANOCLR_PROJECT_NAME}.elf mbedTLS)
     endif()
 endif()
@@ -233,9 +233,10 @@ nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # mbed TLS requires a config file
-if(NF_SECURITY_MBEDTLS)
+if(USE_SECURITY_MBEDTLS_OPTION)
     # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_CURRENT_SOURCE_DIR}/mbedtls_config.h>\"")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
 endif()
 
 # set compiler definitions
