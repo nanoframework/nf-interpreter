@@ -27,7 +27,7 @@ steps:
 
   # because of permission issues (the python script isn't allowed to write on the output folder)
   # we need to perform these steps by calling directly the python scripts
- - task: PythonScript@0
+  - task: PythonScript@0
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
@@ -35,7 +35,7 @@ steps:
     condition: succeeded()
     displayName: Generate Esp32 Partition tables for 16MB flash
 
- - task: PythonScript@0
+  - task: PythonScript@0
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
