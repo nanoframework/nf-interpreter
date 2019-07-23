@@ -7,7 +7,7 @@
 # we are replicating their CMakeList here. Actually this is more a simplified version...
 
 # List of the required include paths
-list(APPEND mbedTLS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/mbedTLS_Source/include/)
+list(APPEND mbedTLS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedTLS_Source/include/)
 
 option(USE_PKCS11_HELPER_LIBRARY "Build mbed TLS with the pkcs11-helper library." OFF)
 option(ENABLE_ZLIB_SUPPORT "Build mbed TLS with zlib library." OFF)
@@ -81,6 +81,9 @@ set(src_crypto
     version.c
     version_features.c
     xtea.c
+
+    # platform implementation of hardware random provider
+    mbedtls_entropy_hardware_pool.c
 )
 
 set(src_x509
@@ -113,6 +116,8 @@ foreach(SRC_FILE ${src_crypto})
         PATHS 
             ${PROJECT_BINARY_DIR}/mbedTLS_Source/library
 
+            ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/
+
         CMAKE_FIND_ROOT_PATH_BOTH
     )
     # message("${SRC_FILE} >> ${MBEDTLS_SRC_FILE}") # debug helper
@@ -121,6 +126,7 @@ endforeach()
 
 # unset this warning as error required for this source file
 SET_SOURCE_FILES_PROPERTIES( ${PROJECT_BINARY_DIR}/mbedTLS_Source/library/hmac_drbg.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
+SET_SOURCE_FILES_PROPERTIES( ${PROJECT_BINARY_DIR}/mbedTLS_Source/library/x509_crt.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
 
 foreach(SRC_FILE ${src_x509})
     set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)

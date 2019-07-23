@@ -405,16 +405,8 @@ endif()
 # (default is OFF so Networking is NOT supported)
 option(USE_NETWORKING_OPTION "option to use networking")
 
-# (default is OFF so OpenSSL is NOT used)
-option(NF_SECURITY_OPENSSL "option to use OpenSSL as the network security provider")
-
 # (default is OFF so mbed TLS is NOT used)
 option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider")
-
-# sanity check for both providers set
-if(NF_SECURITY_OPENSSL AND NF_SECURITY_MBEDTLS)
-    message(FATAL_ERROR "Can't have both OpenSSL and mbedTLS providers selected. Please choose one or none.")
-endif()
 
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
@@ -444,9 +436,7 @@ if( API_System.Net OR
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
 
     # set Security module to use
-    if(NF_SECURITY_OPENSSL)
-        set(USE_SECURITY_OPENSSL_OPTION TRUE CACHE INTERNAL "NF security OPENSSL")
-    elseif(NF_SECURITY_MBEDTLS )
+    if(NF_SECURITY_MBEDTLS )
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
@@ -560,10 +550,8 @@ endif()
 if(USE_NETWORKING_OPTION)
     set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
 
-    if(NF_SECURITY_OPENSSL)
-        message(STATUS "Support for networking enabled with security from OpenSSL")
-    elseif(NF_SECURITY_MBEDTLS)
-        message(STATUS "Support for networking enabled with security from mbed TLS")
+    if(NF_SECURITY_MBEDTLS)
+        message(STATUS "Support for networking enabled with security from mbedTLS")
     elseif(RTOS_TI_SIMPLELINK_CHECK)
         message(STATUS "Support for networking enabled with security")
     else()
@@ -625,11 +613,14 @@ endif()
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
 
-    add_subdirectory(targets/CMSIS-OS/common/Include)
+    # Define base path for the class libraries
+    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
+
+    add_subdirectory(targets/CMSIS-OS/ChibiOS)
     add_subdirectory(targets/CMSIS-OS/common)
+    add_subdirectory(targets/CMSIS-OS/common/Include)
     add_subdirectory(targets/CMSIS-OS/nanoBooter)
     add_subdirectory(targets/CMSIS-OS/nanoCLR)
-    add_subdirectory(targets/CMSIS-OS/ChibiOS)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
@@ -676,6 +667,8 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 
         # Define base path for the class libraries
         set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}/nanoCLR")
+
+        add_subdirectory(targets/FreeRTOS_ESP32)
 
         # set target base location
         set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}")

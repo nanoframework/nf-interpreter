@@ -169,11 +169,6 @@
           "type": "BOOL"
         },
         {
-          "name": "NF_SECURITY_OPENSSL",
-          "value": "OFF",
-          "type": "BOOL"
-        },
-        {
           "name": "NF_SECURITY_MBEDTLS",
           "value": "OFF",
           "type": "BOOL"
@@ -425,11 +420,6 @@
         },
         {
           "name": "NF_NETWORKING_SNTP",
-          "value": "OFF",
-          "type": "BOOL"
-        },
-        {
-          "name": "NF_SECURITY_OPENSSL",
           "value": "OFF",
           "type": "BOOL"
         },
