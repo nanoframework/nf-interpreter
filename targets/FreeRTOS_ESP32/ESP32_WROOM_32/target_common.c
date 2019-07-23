@@ -8,6 +8,8 @@
 #include "target_board.h"
 #include "target_common.h"
 
+#include <spi_flash.h>
+
 HAL_SYSTEM_CONFIG HalSystemConfig =
 {
     { true }, // HAL_DRIVER_CONFIG_HEADER Header;
@@ -22,3 +24,9 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 };
 
 HAL_TARGET_CONFIGURATION  g_TargetConfiguration;
+
+
+void FixUpHalSystemConfig()
+{
+	HalSystemConfig.FLASH1.Size = g_rom_flashchip.chip_size; 
+}
