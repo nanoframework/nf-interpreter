@@ -6,7 +6,7 @@ In _halconf.g_ (in both nanoBooter and nanoCLR folders), when compared with a de
 - HAL_USE_SERIAL to TRUE
 - HAL_USE_SERIAL_USB to TRUE
 - HAL_USE_USB to TRUE
-- SERIAL_DEFAULT_BITRATE to 115200
+- SERIAL_DEFAULT_BITRATE to 921600
 
 In _mcuconf.h_ (in both nanoBooter and nanoCLR folders), when compared with a default file:
 - STM32_SERIAL_USE_USART2 to TRUE
