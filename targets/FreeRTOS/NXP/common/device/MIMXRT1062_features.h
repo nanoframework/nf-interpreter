@@ -53,7 +53,7 @@
 /* @brief ENC availability on the SoC. */
 #define FSL_FEATURE_SOC_ENC_COUNT (4)
 /* @brief ENET availability on the SoC. */
-#define FSL_FEATURE_SOC_ENET_COUNT (2)
+#define FSL_FEATURE_SOC_ENET_COUNT (3)
 /* @brief EWM availability on the SoC. */
 #define FSL_FEATURE_SOC_EWM_COUNT (1)
 /* @brief FLEXCAN availability on the SoC. */
