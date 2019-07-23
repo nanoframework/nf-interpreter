@@ -521,7 +521,7 @@ void LPUART_GetDefaultConfig(lpuart_config_t *config)
     /* Initializes the configure structure to zero. */
     memset(config, 0, sizeof(*config));
 
-    config->baudRate_Bps = 115200U;
+    config->baudRate_Bps = 921600U;
     config->parityMode = kLPUART_ParityDisabled;
     config->dataBitsCount = kLPUART_EightDataBits;
     config->isMsb = false;

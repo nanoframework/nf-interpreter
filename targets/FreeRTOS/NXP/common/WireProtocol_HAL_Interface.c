@@ -33,7 +33,7 @@ static struct _lpuart_handle t_handle;
 uint8_t background_buffer[1024];
 
 lpuart_rtos_config_t lpuart_config = {
-    .baudrate = 115200,
+    .baudrate = 921600,
     .parity = kLPUART_ParityDisabled,
     .stopbits = kLPUART_OneStopBit,
     .buffer = background_buffer,
