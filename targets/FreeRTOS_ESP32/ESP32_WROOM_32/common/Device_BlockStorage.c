@@ -113,7 +113,7 @@ void FixUpBlockRegionInfo()
 {
 	// nanoCLR
 	const esp_partition_t * part_nanoClr = esp_partition_find_first(ESP_PARTITION_TYPE_APP, 0, 0);
-	if (part_nanClr)
+	if (part_nanoClr)
 	{
 		BlockRegions[0].Start = part_nanoClr->address;
 		BlockRegions[0].BytesPerBlock = part_nanoClr->size; 
