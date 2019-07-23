@@ -48,7 +48,7 @@
 
 /*@}*/
 #define CCM_TUPLE(reg, shift, mask, busyShift)                               \
-    (int)((((uint32_t)(&((CCM_Type *)0U)->reg)) & 0xFFU) | ((shift) << 8U) | \
+    (((uint32_t)offsetof(CCM_Type,reg) & 0xFFU ) | ((shift) << 8U) | \
           ((((mask) >> (shift)) & 0x1FFFU) << 13U) | ((busyShift) << 26U))
 #define CCM_TUPLE_REG(base, tuple) (*((volatile uint32_t *)(((uint32_t)(base)) + ((tuple)&0xFFU))))
 #define CCM_TUPLE_SHIFT(tuple) (((tuple) >> 8U) & 0x1FU)
@@ -60,7 +60,7 @@
 /*!
  * @brief CCM ANALOG tuple macros to map corresponding registers and bit fields.
  */
-#define CCM_ANALOG_TUPLE(reg, shift) ((((uint32_t)(&((CCM_ANALOG_Type *)0U)->reg) & 0xFFFU) << 16U) | (shift))
+#define CCM_ANALOG_TUPLE(reg, shift) ((((uint32_t)offsetof(CCM_ANALOG_Type,reg) & 0xFFFU) << 16U) | (shift))
 #define CCM_ANALOG_TUPLE_SHIFT(tuple) (((uint32_t)tuple) & 0x1FU)
 #define CCM_ANALOG_TUPLE_REG_OFF(base, tuple, off) \
     (*((volatile uint32_t *)((uint32_t)base + (((uint32_t)tuple >> 16U) & 0xFFFU) + off)))
