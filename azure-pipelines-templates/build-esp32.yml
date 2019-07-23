@@ -27,6 +27,22 @@ steps:
 
   # because of permission issues (the python script isn't allowed to write on the output folder)
   # we need to perform these steps by calling directly the python scripts
+ - task: PythonScript@0
+    inputs:
+      scriptSource: 'filePath'
+      scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
+      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS_ESP32\$(BoardName)\IDF\partitions_nanoclr_16mb.csv ${{ parameters.buildDirectory }}\partitions_16mb.bin'
+    condition: succeeded()
+    displayName: Generate Esp32 Partition tables for 16MB flash
+
+ - task: PythonScript@0
+    inputs:
+      scriptSource: 'filePath'
+      scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
+      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS_ESP32\$(BoardName)\IDF\partitions_nanoclr_8mb.csv ${{ parameters.buildDirectory }}\partitions_8mb.bin'
+    condition: succeeded()
+    displayName: Generate Esp32 Partition tables for 8MB flash
+
   - task: PythonScript@0
     inputs:
       scriptSource: 'filePath'
