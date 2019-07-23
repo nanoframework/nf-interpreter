@@ -33,7 +33,7 @@ const BlockRange BlockRange3[] =
 
 BlockRegionInfo BlockRegions[] = 
 {
-	// NanoClr
+	// nanoCLR
     {
         (0),                                // no attributes for this region
         0x010000,                           // start address for block region
@@ -112,11 +112,11 @@ BlockStorageDevice    Device_BlockStorage;
 void FixUpBlockRegionInfo()
 {
 	// nanoCLR
-	const esp_partition_t * part_nanClr = esp_partition_find_first(ESP_PARTITION_TYPE_APP, 0, 0);
+	const esp_partition_t * part_nanoClr = esp_partition_find_first(ESP_PARTITION_TYPE_APP, 0, 0);
 	if (part_nanClr)
 	{
-		BlockRegions[0].Start = part_nanClr->address;
-		BlockRegions[0].BytesPerBlock = part_nanClr->size; 
+		BlockRegions[0].Start = part_nanoClr->address;
+		BlockRegions[0].BytesPerBlock = part_nanoClr->size; 
 	}
 	// Deployment
 	const esp_partition_t * part_deploy = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, 0x84, 0);
