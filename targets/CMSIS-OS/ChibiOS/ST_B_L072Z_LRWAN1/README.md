@@ -4,7 +4,7 @@ For a successful build the following changes are required:
 
 In _halconf.g_ (in both nanoBooter and nanoCLR folders), when compared with a default file:
 - HAL_USE_SERIAL to TRUE
-- SERIAL_DEFAULT_BITRATE to 115200
+- SERIAL_DEFAULT_BITRATE to 921600
 - SERIAL_BUFFERS_SIZE has to be at least 64 (2x the Wire Protocol packet size) otherwise the transmission will be garbled as the packets overrun each other
 
 In _mcuconf.h_ (in both nanoBooter and nanoCLR folders), when compared with a default file:
