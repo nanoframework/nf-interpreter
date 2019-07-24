@@ -216,7 +216,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetInternalSto
     hbObj = top.Dereference();
     hbObj->SetObjectReference( NULL );
 
-  #if USE_SPIFFS_FOR_STORAGE
+  #if (USE_SPIFFS_FOR_STORAGE == TRUE)
     // is the SPIFFS file system available and mounted?
     if(spiffsFileSystemReady)
     {
