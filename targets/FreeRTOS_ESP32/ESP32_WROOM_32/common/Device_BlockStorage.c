@@ -6,14 +6,17 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
+#include <esp32_os.h>
+#include <esp_partition.h>
+
 // the block ranges mirror the partition table
 // spliting each partition on it's own block range is required to use memory mapping
 
-// 64kB blocks
+
 const BlockRange BlockRange1[] =
 {
     // factory
-    { BlockRange_BLOCKTYPE_CODE      ,   0, 1 },             // 0x010000   nanoCLR
+    { BlockRange_BLOCKTYPE_CODE      ,   0, 0 },             // 0x010000   nanoCLR
 };
 
 const BlockRange BlockRange2[] =
@@ -28,8 +31,9 @@ const BlockRange BlockRange3[] =
     { BlockRange_BLOCKTYPE_CONFIG    ,   0, 0 }              // 0x2D0000   config
 };
 
-const BlockRegionInfo BlockRegions[] = 
+BlockRegionInfo BlockRegions[] = 
 {
+	// nanoCLR
     {
         (0),                                // no attributes for this region
         0x010000,                           // start address for block region
@@ -39,6 +43,7 @@ const BlockRegionInfo BlockRegions[] =
         BlockRange1,
     },
 
+	// Deployment area
     {
         (BlockRegionAttribute_MemoryMapped),    // this region is memory mapped
         0x110000,                               // start address for block region
@@ -48,6 +53,7 @@ const BlockRegionInfo BlockRegions[] =
         BlockRange2,
     },
 
+	// Config, SPIFS partition
     {
         (0),                                // no attributes for this region
         0x0,                                // start address for block region
@@ -97,3 +103,35 @@ MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig =
 };
 
 BlockStorageDevice    Device_BlockStorage;
+
+
+
+//
+//  Fix up Block region info based on current partion layout
+//
+void FixUpBlockRegionInfo()
+{
+	// nanoCLR
+	const esp_partition_t * part_nanoClr = esp_partition_find_first(ESP_PARTITION_TYPE_APP, 0, 0);
+	if (part_nanoClr)
+	{
+		BlockRegions[0].Start = part_nanoClr->address;
+		BlockRegions[0].BytesPerBlock = part_nanoClr->size; 
+	}
+	// Deployment
+	const esp_partition_t * part_deploy = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, 0x84, 0);
+	if (part_deploy)
+	{
+		BlockRegions[1].Start = part_deploy->address;
+		BlockRegions[1].BytesPerBlock = part_deploy->size;
+	}
+	
+	// Config
+	const esp_partition_t * part_config = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, 0);
+	if (part_config)
+	{
+		BlockRegions[2].Start = part_config->address;
+		BlockRegions[2].BytesPerBlock = part_config->size;
+	}
+	
+}
