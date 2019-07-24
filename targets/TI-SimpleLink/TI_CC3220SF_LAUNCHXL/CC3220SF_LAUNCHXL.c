@@ -272,7 +272,7 @@ static uint_least8_t sharpDisplayBuf[BOARD_DISPLAY_SHARP_SIZE * BOARD_DISPLAY_SH
 
 const DisplayUart_HWAttrs displayUartHWAttrs = {
     .uartIdx = 0,
-    .baudRate = 115200,
+    .baudRate = 921600,
     .mutexTimeout = (unsigned int)(-1),
     .strBuf = displayBuf,
     .strBufLen = MAXPRINTLEN

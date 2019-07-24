@@ -157,7 +157,6 @@ set(NF_CoreCLR_SRCS
     
     # Helpers
     printf.c
-    base64.c
 
     # HAL
     nanoHAL_Time.cpp
@@ -177,6 +176,11 @@ set(NF_CoreCLR_SRCS
     # target specifics
     target_BlockStorage.c
 )
+
+# need a conditional include because of ESP32 building network as a library 
+if(NOT USE_SECURITY_MBEDTLS_OPTION)
+    list(APPEND NF_CoreCLR_SRCS base64.c)
+endif()
 
 # include configuration manager file
 if(NF_FEATURE_HAS_CONFIG_BLOCK)
