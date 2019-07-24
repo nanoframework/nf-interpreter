@@ -56,18 +56,32 @@ __nfweak void NFReleaseInfo::Init(
     const char *platform, 
     size_t platformLen)
 {
+    size_t len;
+
     NFVersion::Init( NFReleaseInfo.Version, major, minor, build, revision );
+    
+    // better set these to empty strings, in case there is nothing to fill in
     NFReleaseInfo.InfoString[ 0 ] = 0;
-    if ( NULL != info && infoLen > 0 )
+    NFReleaseInfo.TargetName[ 0 ] = 0;
+    NFReleaseInfo.PlatformName[ 0 ] = 0;
+
+    // fill each one, if it was provided
+    if ( NULL != info )
     {
-        size_t len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString)-1);
-        hal_strncpy_s( (char*)&NFReleaseInfo.InfoString[0], sizeof(NFReleaseInfo.InfoString), info, len );
-        
-        len = MIN(targetLen, sizeof(NFReleaseInfo.TargetName)-1);
-        hal_strncpy_s( (char*)&NFReleaseInfo.TargetName[0], sizeof(NFReleaseInfo.TargetName), target, len );
-        
-        len = MIN(platformLen, sizeof(NFReleaseInfo.PlatformName)-1);
-        hal_strncpy_s( (char*)&NFReleaseInfo.PlatformName[0], sizeof(NFReleaseInfo.PlatformName), platform, len );
+        len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString));
+        memcpy(NFReleaseInfo.InfoString, info, len);
+    }
+
+    if ( NULL != target )
+    {
+        len = MIN(targetLen, sizeof(NFReleaseInfo.TargetName));
+        memcpy(NFReleaseInfo.TargetName, target, len);
+    }
+
+    if ( NULL != platform )
+    {
+        len = MIN(platformLen, sizeof(NFReleaseInfo.PlatformName));
+        memcpy(NFReleaseInfo.PlatformName, platform, len);
     }
 }
 

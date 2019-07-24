@@ -185,8 +185,9 @@ typedef struct ReleaseInfo
 {
 
     VersionInfo version;
-
-    uint8_t infoString[64-sizeof(VersionInfo)];
+    uint8_t InfoString[128];
+    uint8_t TargetName[32];
+    uint8_t PlatformName[32];
 
 }ReleaseInfo;
 
