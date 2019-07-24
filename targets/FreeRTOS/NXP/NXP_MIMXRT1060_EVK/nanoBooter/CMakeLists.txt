@@ -6,10 +6,8 @@
 # PAL source files 
 list(APPEND NANOBOOTER_PROJECT_SOURCES "${PROJECT_SOURCE_DIR}/src/PAL/BlockStorage/nanoPAL_BlockStorage.c")
 
-# # append nanoBooter source files
+# append nanoBooter source files
 list(APPEND NANOBOOTER_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.c")
-list(APPEND NANOBOOTER_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_MonitorCommands.c")
-list(APPEND NANOBOOTER_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_App_Interface.c")
 
 # append include directory for debugger
 list(APPEND TARGET_FREERTOS_NANOBOOTER_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Debugger")
