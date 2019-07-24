@@ -33,4 +33,5 @@ set(NANOCLR_PROJECT_INCLUDE_DIRS ${NANOCLR_PROJECT_INCLUDE_DIRS} CACHE INTERNAL 
 # add platform dirs
 add_subdirectory(include)
 add_subdirectory(common)
+add_subdirectory(nanoBooter)
 add_subdirectory(nanoCLR)

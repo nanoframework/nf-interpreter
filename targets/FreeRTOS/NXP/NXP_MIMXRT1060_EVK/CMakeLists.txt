@@ -65,6 +65,7 @@ add_executable(
     "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c"
 
     ${TARGET_NXP_COMMON_SOURCES}
+    ${TARGET_NXP_NANOBOOTER_SOURCES}
     ${NANOBOOTER_PROJECT_SOURCES}
 
     ${FREERTOS_SOURCES}
