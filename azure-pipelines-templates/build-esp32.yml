@@ -63,6 +63,6 @@ steps:
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.1\components\partition_table\gen_esp32part.py'
-      arguments: '${{ parameters.buildDirectory }}\partitions_2mb.bin'
+      arguments: '${{ parameters.buildDirectory }}\partitions_4mb.bin'
     condition: succeeded()
     displayName: List flash 4Mb Esp32 Partition tables

@@ -6,5 +6,5 @@ Check the details at the documentation website [here](http://docs.nanoframework.
 
 Getting started guides and build instructions can also be found at the documentation website:
 
-- [Build instructions](http://docs.nanoframework.net/articles/getting-started-guides/build-esp32.html)
-- [Getting started with managed code (C#)](http://docs.nanoframework.net/articles/getting-started-guides/getting-started-managed.html)
+- [Build instructions](https://docs.nanoframework.net/content/getting-started-guides/build-esp32.html)
+- [Getting started with managed code (C#)](https://docs.nanoframework.net/content/getting-started-guides/getting-started-managed.html)
