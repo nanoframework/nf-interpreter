@@ -115,16 +115,26 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 
 		int16_t pinNumber = pThis[FIELD___pinNumber].NumericByRefConst().s4;
 
-		int index = FindFreeCounter(pinNumber);
-		if (index == -1)
+		bool InputMode = (bool)pThis[FIELD___inputMode].NumericByRefConst().u1;
+		if (InputMode)
 		{
-			// No free counters
+			int index = FindFreeCounter(pinNumber);
+			if (index == -1)
+			{
+				// No free counters
+				NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+			}
+
+			// Make sure GPIO pin doesn't have a GPIO Isr asscoiatted with it otherwise it will not support
+			// faster count frequencies
+			Remove_Gpio_Interrupt((gpio_num_t)pinNumber);
+		}
+		else
+		{
+			// Output not currently supported
 			NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 		}
 
-		// Make sure GPIO pin doesn't have a GPIO Isr asscoiatted with it otherwise it will not support
-		// faster count frequencies
-		Remove_Gpio_Interrupt((gpio_num_t)pinNumber);
 	}
 	NANOCLR_NOCLEANUP();
 }

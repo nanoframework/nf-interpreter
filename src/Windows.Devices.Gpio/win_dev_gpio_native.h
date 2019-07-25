@@ -66,11 +66,12 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCount
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter
 {
 	static const int FIELD___pinNumber = 1;
-	static const int FIELD___polarity = 2;
-	static const int FIELD___CountActive = 3;
-	static const int FIELD___readTime = 4;
-	static const int FIELD___syncLock = 5;
-	static const int FIELD___disposedValue = 6;
+	static const int FIELD___inputMode = 2;
+	static const int FIELD___polarity = 3;
+	static const int FIELD___CountActive = 4;
+	static const int FIELD___readTime = 5;
+	static const int FIELD___syncLock = 6;
+	static const int FIELD___disposedValue = 7;
 
 	NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
 	NANOCLR_NATIVE_DECLARE(NativeRead___U8__BOOLEAN);
@@ -81,6 +82,7 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter
 	//--//
 
 };
+
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
 {

@@ -13,6 +13,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
         //CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         //int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+		//bool InputMode = (bool)pThis[FIELD___inputMode].NumericByRefConst().u1;
 
 		NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
