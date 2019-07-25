@@ -8,6 +8,8 @@
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
+	(void)stack;
+
     NANOCLR_HEADER();
     {
         //CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -22,16 +24,21 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeRead___U8__BOOLEAN( CLR_RT_StackFrame& stack )
 {
-    NANOCLR_HEADER();
+	(void)stack;
+	
+	NANOCLR_HEADER();
     {
- 
+		NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
     }
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeStart___VOID( CLR_RT_StackFrame& stack )
 {
-    NANOCLR_HEADER();
+	(void)stack;
+	
+	NANOCLR_HEADER();
     {
         //CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
@@ -41,7 +48,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 
 
 		// TODO
-	
+		NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
 	
 	}
     NANOCLR_NOCLEANUP();
@@ -49,11 +57,14 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeStop___VOID( CLR_RT_StackFrame& stack )
 {
-    NANOCLR_HEADER();
+	(void)stack;
+
+	NANOCLR_HEADER();
     {
         //CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         //int pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+		NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 
     }
     NANOCLR_NOCLEANUP();
@@ -61,11 +72,14 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeDispose___VOID( CLR_RT_StackFrame& stack )
 {
-    NANOCLR_HEADER();
+	(void)stack;
+	
+	NANOCLR_HEADER();
     {
         //CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         //int pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+		NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 
     }
     NANOCLR_NOCLEANUP();
