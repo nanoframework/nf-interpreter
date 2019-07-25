@@ -236,7 +236,7 @@
       "environments": [
         {
           "PATH": "C:\\Windows\\system32;${env.PATH}",  // Work around for Ninja not finding Cmd.exe with add_custom_command
-          // ESP32 paths set up in enviroment so we can use in variables
+          // ESP32 paths set up in environment so we can use in variables
           "ESP32_IDF_VERSION": "v3.1",
           "ESP32_TOOLS": "C:\\ESP32_TOOLS",
           "ESP32_IDF": "${env.ESP32_TOOLS}\\esp-idf-${env.ESP32_IDF_VERSION}",
