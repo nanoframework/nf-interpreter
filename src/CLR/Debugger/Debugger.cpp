@@ -1077,11 +1077,11 @@ static void GetClrReleaseInfo(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapa
         VERSION_BUILD, 
         VERSION_REVISION, 
         OEMSYSTEMINFOSTRING, 
-        hal_strlen_s(OEMSYSTEMINFOSTRING),
+        ARRAYSIZE(OEMSYSTEMINFOSTRING),
         TARGETNAMESTRING,
-        hal_strlen_s(TARGETNAMESTRING),
+        ARRAYSIZE(TARGETNAMESTRING),
         PLATFORMNAMESTRING,
-        hal_strlen_s(PLATFORMNAMESTRING)
+        ARRAYSIZE(PLATFORMNAMESTRING)
         );
 
     if ( g_CLR_RT_TypeSystem.m_assemblyMscorlib &&
