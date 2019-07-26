@@ -294,12 +294,16 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, 
 bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
 {
     memset( pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
-    
+
+    // make sure the config block marker is set
+    memcpy(pconfig->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
+  
     switch(configurationIndex)
     {
         case 0: // Wireless Station
             pconfig->InterfaceType = NetworkInterfaceType_Wireless80211;
             pconfig->StartupAddressMode = AddressMode_DHCP;
+            pconfig->AutomaticDNS = 1;
             pconfig->SpecificConfigId = 0;
             break;
 
@@ -316,8 +320,12 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig
         case 2: // Ethernet
             pconfig->InterfaceType = NetworkInterfaceType_Ethernet;
             pconfig->StartupAddressMode = AddressMode_DHCP;
+            pconfig->AutomaticDNS = 1;
             break;
     }
+
+    // get default MAC
+    esp_efuse_mac_get_default(pconfig->MacAddress);
 
     // always good
     return TRUE;

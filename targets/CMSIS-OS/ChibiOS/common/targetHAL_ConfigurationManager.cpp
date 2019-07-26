@@ -26,6 +26,24 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
         // find network configuration blocks
         HAL_CONFIGURATION_NETWORK* networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManager_FindNetworkConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
 
+        // check network configs count
+        if(networkConfigs->Count == 0)
+        {
+            // there is no network config block available, get a default
+            HAL_Configuration_NetworkInterface* networkConfig = (HAL_Configuration_NetworkInterface*)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
+            
+            if(InitialiseNetworkDefaultConfig(networkConfig, 0))
+            {
+                // config block created, store it
+                ConfigurationManager_StoreConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0, sizeof(HAL_Configuration_NetworkInterface), 0);
+
+                // have to enumerate again to pick it up
+                networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManager_FindNetworkConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
+            }
+
+            platform_free(networkConfig);
+        }
+
         // find wireless 80211 network configuration blocks
         HAL_CONFIGURATION_NETWORK_WIRELESS80211* networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211*)ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
 
@@ -71,20 +89,11 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBloc
     // requested Index has to exist (array index starts at zero, so need to add one)
     if(configuration == DeviceConfigurationOption_Network)
     {
-        if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
+        if( g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
         {
-            // there is no network config block, init one with default settings
-            if(!InitialiseNetworkDefaultConfig(NULL, 0))
-            {
-                return FALSE;
-            }
-        }
-        else
-        {
-            if((configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
-            {
-                return FALSE;
-            }
+            // the requested config block is beyond the available count
+            return false;
         }
 
         // set block size
@@ -142,16 +151,26 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
 
     if(configuration == DeviceConfigurationOption_Network)
     {
-        if( g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 ||
-            (configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
+        if( g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 &&
+            configurationIndex == 0 )
         {
-            // there is no room for this block, or there are no blocks stored at all
-            // failing the operation
-            return FALSE;
+            // there is no network config block, we are storing the default one
+            // THIS IS THE ONLY CONFIG BLOCK THAT'S AUTO-CREATED
+            // OK to continue
+            // set storage address as the start of the flash configuration sector
+            storageAddress = (ByteAddress)&__nanoConfig_start__;
         }
+        else
+        {
+            // the requested config block is beyond the available count
+            if((configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
+            {
+                return FALSE;
+            }
 
-        // set storage address from block address, plus the requested offset
-        storageAddress = (ByteAddress)g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configurationIndex] + offset;
+            // set storage address from block address, plus the requested offset
+            storageAddress = (ByteAddress)g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configurationIndex] + offset;
+        }
 
         // set block size, in case it's not already set
         blockSize = sizeof(HAL_Configuration_NetworkInterface);
