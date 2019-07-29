@@ -33,7 +33,7 @@ static struct _lpuart_handle t_handle;
 uint8_t background_buffer[1024];
 
 lpuart_rtos_config_t lpuart_config = {
-    .baudrate = 921600,
+    .baudrate = 490384,                 //NOTE: is should be 921600 but due to bug in FreeLink serial port configuration real baud is 490384
     .parity = kLPUART_ParityDisabled,
     .stopbits = kLPUART_OneStopBit,
     .buffer = background_buffer,
