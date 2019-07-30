@@ -110,6 +110,8 @@ void* ConfigurationManagerCC32xx_FindNetworkWireless80211ConfigurationBlocks()
 // initialization of configuration manager
 void ConfigurationManager_Initialize()
 {
+    memset( (void*)&g_TargetConfiguration, 0, sizeof(g_TargetConfiguration));
+
     // enumerate the blocks
     ConfigurationManager_EnumerateConfigurationBlocks();
 };
