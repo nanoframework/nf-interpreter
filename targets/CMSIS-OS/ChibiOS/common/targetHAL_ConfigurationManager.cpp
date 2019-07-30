@@ -12,6 +12,9 @@
 // provided as weak so it can be replaced at target level, if required because of the target implementing the storage with a mechanism other then saving to flash
 __nfweak void ConfigurationManager_Initialize()
 {
+    // init g_TargetConfiguration
+    memset(&g_TargetConfiguration, 0, sizeof(HAL_TARGET_CONFIGURATION));
+
     // enumerate the blocks
     ConfigurationManager_EnumerateConfigurationBlocks();
 };
@@ -151,8 +154,9 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
 
     if(configuration == DeviceConfigurationOption_Network)
     {
-        if( g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 &&
-            configurationIndex == 0 )
+        if( g_TargetConfiguration.NetworkInterfaceConfigs == NULL || 
+            ( g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 &&
+            configurationIndex == 0 ))
         {
             // there is no network config block, we are storing the default one
             // THIS IS THE ONLY CONFIG BLOCK THAT'S AUTO-CREATED
@@ -182,8 +186,9 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
     {
-        if( g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
-            (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
+        if( g_TargetConfiguration.Wireless80211Configs == NULL ||
+            (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count))
         {
             // there is no room for this block, or there are no blocks stored at all
             // failing the operation
@@ -201,8 +206,9 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
     }
     else if(configuration == DeviceConfigurationOption_X509CaRootBundle)
     {
-        if( g_TargetConfiguration.CertificateStore->Count == 0 ||
-            (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
+        if( g_TargetConfiguration.Wireless80211Configs == NULL ||
+            (g_TargetConfiguration.CertificateStore->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count))
         {
             // there is no room for this block, or there are no blocks stored at all
             // failing the operation
