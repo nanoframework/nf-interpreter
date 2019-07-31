@@ -6,7 +6,10 @@
 #include <ssl.h>
 #include "mbedtls.h"
 
-int  ssl_read_internal( int sd, char* data, size_t size )
+int  ssl_read_internal( 
+    int sd, 
+    char* data, 
+    size_t size )
 {
     mbedTLS_NFContext* context= (mbedTLS_NFContext*)SOCKET_DRIVER.GetSocketSslData(sd);
     mbedtls_ssl_context *ssl = context->ssl;

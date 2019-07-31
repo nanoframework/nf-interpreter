@@ -9,32 +9,38 @@
 #include "mbedtls.h"
 
 
-bool ssl_exit_context_internal(int sslContextHandle )
+bool ssl_exit_context_internal( int contextHandle )
 {
-    mbedTLS_NFContext* context = NULL;
+    mbedTLS_NFContext* context;
 
-    // Check sslContextHandle range
-    if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0) || (g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext == NULL))
+    // Check contextHandle range
+    if((contextHandle >= (int)ARRAYSIZE(g_SSL_Driver.ContextArray)) || (contextHandle < 0) || (g_SSL_Driver.ContextArray[contextHandle].Context == NULL))
     {
-        return FALSE;
+        return false;
     }
 
-    context = (mbedTLS_NFContext*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
+    context = (mbedTLS_NFContext*)g_SSL_Driver.ContextArray[contextHandle].Context;
     if (context == NULL)
     {
-        return FALSE;
+        return false;
     }
     
     mbedtls_pk_free(context->pk);
     mbedtls_net_free(context->server_fd);
     mbedtls_ctr_drbg_free( context->ctr_drbg );
     mbedtls_entropy_free( context->entropy );
+    mbedtls_ssl_config_free( context->conf );
+    mbedtls_x509_crt_free(context->x509_crt);
+    mbedtls_ssl_free(context->ssl);
 
     // zero memory to wipe any security critical info in RAM
     memset(context->ssl, 0, sizeof(mbedtls_ssl_context));
 
     // free memory
-    platform_free(context->pk);
+    if(context->pk != NULL)
+    {
+        platform_free(context->pk);
+    }
     platform_free(context->server_fd);
     platform_free(context->entropy);
     platform_free(context->ctr_drbg);
@@ -43,9 +49,9 @@ bool ssl_exit_context_internal(int sslContextHandle )
     platform_free(context->ssl);
     platform_free(context);
 
-    NANOCLR_SSL_MEMSET(&g_SSL_Driver.m_sslContextArray[sslContextHandle], 0, sizeof(g_SSL_Driver.m_sslContextArray[sslContextHandle]));
+    memset(&g_SSL_Driver.ContextArray[contextHandle], 0, sizeof(g_SSL_Driver.ContextArray[contextHandle]));
 
-    g_SSL_Driver.m_sslContextCount --;
+    g_SSL_Driver.ContextCount --;
 
-    return TRUE;
+    return true;
 }

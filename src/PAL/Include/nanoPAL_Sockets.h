@@ -612,8 +612,6 @@ int  SSL_Connect    ( int socket, const char* szTargetHost, int sslContextHandle
 int  SSL_Write      ( int socket, const char* Data, size_t size );
 int  SSL_Read       ( int socket, char* Data, size_t size );
 int  SSL_CloseSocket( int socket );
-void SSL_GetTime(DATE_TIME_INFO* pdt);
-void SSL_RegisterTimeCallback(SSL_DATE_TIME_FUNC pfn);
 bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* password, X509CertData* certData );
 int  SSL_DecodePrivateKey( const unsigned char *key, size_t keyLength, const unsigned char *password, size_t passwordLength );
 int  SSL_DataAvailable( int socket );
