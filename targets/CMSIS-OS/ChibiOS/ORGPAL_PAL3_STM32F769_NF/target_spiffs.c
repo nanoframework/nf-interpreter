@@ -6,9 +6,254 @@
 
 #include <hal.h>
 #include <hal_spiffs.h>
-#include <hal_stm32_qspi.h>
 #include "target_spiffs.h"
 #include <nanoHAL_v2.h>
+
+#ifdef SPIFFS_SPI1
+
+bool SPI_Erase_Block(u32_t addr);
+bool SPI_Read(uint8_t* pData, uint32_t readAddr, uint32_t size);
+bool SPI_Write(uint8_t* pData, uint32_t writeAddr, uint32_t size);
+
+extern uint32_t HAL_GetTick(void);
+
+static const SPIConfig spiConfig = {
+  false,
+  NULL,
+  PAL_PORT(LINE_FLASH_SPI1_CS),
+  PAL_PAD(LINE_FLASH_SPI1_CS),
+  // CPHA=0, CPOL=0, MSb first
+  0,//SPI_CR1_CPOL | SPI_CR1_BR_0,
+  // transfer length to 8bit
+  SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0
+};
+
+#if defined(__GNUC__)
+__attribute__((aligned (32)))
+#endif
+uint8_t writeBuffer[4];
+#if defined(__GNUC__)
+__attribute__((aligned (32)))
+#endif
+uint8_t readBuffer[4];
+
+// initialization of everything required for SPIFFS
+// for this target is the SPI driver
+uint8_t target_spiffs_init()
+{
+    // init driver
+    spiAcquireBus(&SPID1);
+    spiStart(&SPID1, &spiConfig);
+
+    ////////////////////////////////////////////////////////////////////////
+    // no need to worry with cache issues at this early stage of the boot //
+    ////////////////////////////////////////////////////////////////////////
+
+    // resume from deep power down
+    // have to send this to make sure device is functional after sleep
+    writeBuffer[0] = RESUME_DEEP_PD_CMD;
+
+    spiSelect(&SPID1);
+    spiSend(&SPID1, 1, writeBuffer);
+    spiUnselect(&SPID1);
+
+    // sanity check: read device ID and unique ID
+    writeBuffer[0] = READ_ID_CMD2;
+
+    spiSelect(&SPID1);
+    spiExchange(&SPID1, 4, writeBuffer, readBuffer);
+    spiUnselect(&SPID1);
+
+    // constants from ID Definitions table in AT25SF081 datasheet
+    ASSERT(readBuffer[1] == AT25SF081_MANUFACTURER_ID);
+    ASSERT(readBuffer[2] == AT25SF081_DEVICE_ID1);
+    ASSERT(readBuffer[3] == AT25SF081_DEVICE_ID2);
+
+    return 1;
+}
+
+// target specific implementation of hal_spiffs_erase
+s32_t hal_spiffs_erase(u32_t addr, u32_t size)
+{
+    uint32_t i = 0;
+
+    // how many sectors need to be erased?
+    uint32_t erase_count = (size + SPIFFS_ERASE_BLOCK_SIZE - 1) / SPIFFS_ERASE_BLOCK_SIZE;
+
+    for (i = 0; i < erase_count; i++)
+    {
+        if( !SPI_Erase_Block(addr) )
+        {
+            return SPIFFS_ERROR;
+        }
+
+        // adjust sector address
+        addr += i * SPIFFS_ERASE_BLOCK_SIZE;
+    }    
+
+    return SPIFFS_SUCCESS;
+}
+
+// target specific implementation of hal_spiffs_read
+s32_t hal_spiffs_read(u32_t addr, u32_t size, u8_t *dst)
+{
+    if( !SPI_Read(dst, addr, size))
+    {
+        return SPIFFS_ERROR;
+    }
+
+    //  ensure that content from DMA is read
+    // (only required for Cortex-M7)
+    cacheBufferInvalidate(dst, size);
+
+    return SPIFFS_SUCCESS;
+}
+
+// target specific implementation of hal_spiffs_write
+s32_t hal_spiffs_write(u32_t addr, u32_t size, u8_t *src)
+{
+    if( !SPI_Write(src, addr, size) )
+    {
+        return SPIFFS_ERROR;
+    }
+
+    return SPIFFS_SUCCESS;
+}
+
+bool SPI_WaitOnBusy()
+{
+    uint32_t tickstart = HAL_GetTick();
+
+    writeBuffer[0] = READ_STATUS_REG1_CMD;
+
+    spiSelect(&SPID1);
+
+    // send read status register 1
+    spiSend(&SPID1, 1, writeBuffer);
+
+    while(true)
+    {
+        // read register value
+        spiReceive(&SPID1, 1, readBuffer);
+        
+        //  ensure that content from DMA is read
+        // (only required for Cortex-M7)
+        cacheBufferInvalidate(readBuffer, 1);
+
+        if( !(readBuffer[0] & AT25SF081_SR_BUSY) )
+        {
+            // BuSY bit is cleared
+            break;          
+        }
+
+        if((HAL_GetTick() - tickstart) > HAL_SPI_TIMEOUT_DEFAULT_VALUE)
+        {
+            // operation timeout
+            
+            // unselect SPI
+            spiUnselect(&SPID1);
+
+            return false;
+        }
+    }
+
+    spiUnselect(&SPID1);
+
+    return true;
+}
+
+bool SPI_Erase_Block(u32_t addr)
+{
+    // send write enable
+    writeBuffer[0] = WRITE_ENABLE_CMD;
+
+    spiSelect(&SPID1);
+    spiSend(&SPID1, 1, writeBuffer);
+    spiUnselect(&SPID1);
+
+    // send block erase
+    writeBuffer[0] = SECTOR_ERASE_CMD;
+    writeBuffer[1] = (uint8_t)(addr >> 16);
+    writeBuffer[2] = (uint8_t)(addr >> 8);
+    writeBuffer[3] = (uint8_t)addr;
+
+    // flush DMA buffer to ensure cache coherency
+    // (only required for Cortex-M7)
+    cacheBufferFlush(writeBuffer, 4);
+
+    spiSelect(&SPID1);
+    spiSend(&SPID1, 4, writeBuffer);
+    spiUnselect(&SPID1);
+
+    // wait for erase operation to complete
+    return SPI_WaitOnBusy();
+}
+
+bool SPI_Read(uint8_t* pData, uint32_t readAddr, uint32_t size)
+{
+    // send read page command
+    writeBuffer[0] = READ_CMD;
+    writeBuffer[1] = (uint8_t)(readAddr >> 16);
+    writeBuffer[2] = (uint8_t)(readAddr >> 8);
+    writeBuffer[3] = (uint8_t)readAddr;
+
+    // flush DMA buffer to ensure cache coherency
+    // (only required for Cortex-M7)
+    cacheBufferFlush(writeBuffer, 4);
+
+    spiSelect(&SPID1);
+    spiSend(&SPID1, 4, writeBuffer);
+    spiReceive(&SPID1, size, pData);
+    spiUnselect(&SPID1);
+
+    return true;
+}
+
+bool SPI_Write(uint8_t* pData, uint32_t writeAddr, uint32_t size)
+{
+    // send write enable
+    writeBuffer[0] = WRITE_ENABLE_CMD;
+
+    spiSelect(&SPID1);
+    spiSend(&SPID1, 1, writeBuffer);
+    spiUnselect(&SPID1);
+
+    // send write page
+    writeBuffer[0] = PAGE_PROG_CMD;
+    writeBuffer[1] = (uint8_t)(writeAddr >> 16);
+    writeBuffer[2] = (uint8_t) (writeAddr >> 8);
+    writeBuffer[3] = (uint8_t)writeAddr;
+
+    // flush DMA buffer to ensure cache coherency
+    // (only required for Cortex-M7)
+    cacheBufferFlush(writeBuffer, 4);
+    cacheBufferFlush(pData, size);
+
+    spiSelect(&SPID1);
+    spiSend(&SPID1, 4, writeBuffer);
+    spiSend(&SPID1, size, pData);
+    spiUnselect(&SPID1);
+
+    // wait for erase operation to complete
+    SPI_WaitOnBusy();
+
+    // send write disable
+    writeBuffer[0] = WRITE_DISABLE_CMD;
+    cacheBufferFlush(writeBuffer, 1);
+
+    spiSelect(&SPID1);
+    spiSend(&SPID1, 1, writeBuffer);
+    spiUnselect(&SPID1);
+
+    return true;
+}
+
+#endif // SPIFFS_SPI1
+
+
+#ifdef SPIFFS_QSPI
+
+#include <hal_stm32_qspi.h>
 
 static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi);
 // static uint8_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi);
@@ -548,3 +793,5 @@ uint8_t QSPI_Erase_Block(uint32_t blockAddress)
 
     return QSPI_OK;
 }
+
+#endif // SPIFFS_QSPI
