@@ -397,11 +397,6 @@ endif()
 # if support for SPIFFS is enabled add it to the build
 if(NF_FEATURE_USE_SPIFFS)
 
-    # SPIFFS needs STM Cube package option
-    if(NOT STM32_CUBE_PACKAGE_REQUIRED)
-        message(FATAL_ERROR "error: SPIFFS requires STM Cube package option, make sure you have STM32_CUBE_PACKAGE_REQUIRED build option set to ON.")
-    endif()
-
     # check if SPIFFS_SOURCE was specified or if it's empty (default is empty)
     set(NO_SPIFFS_SOURCE TRUE)
 
@@ -443,6 +438,7 @@ if(NF_FEATURE_USE_SPIFFS)
             PREFIX SPIFFS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/SPIFFS_Source
             GIT_REPOSITORY  https://github.com/nanoframework/spiffs
+            GIT_TAG "nf-build"  # target nanoFramework modified branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
             LOG_DOWNLOAD 1
