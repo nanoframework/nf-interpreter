@@ -205,7 +205,7 @@
 #define GPIOI_RS485_RE              12U
 #define GPIOI_RS485_SHDN            13U
 #define GPIOI_RS485_BUS_TERM        14U
-#define GPIOI_PIN15                 15U
+#define GPIOI_FLASH_SPI1_CS         15U
 
 
 #define GPIOJ_IO0_PWR_ON_OFF        0U
@@ -360,6 +360,7 @@
 #define LINE_KEYPAD_4               PAL_LINE(GPIOI, 6U)
 #define LINE_KEYPAD_3               PAL_LINE(GPIOI, 7U)
 #define LINE_RMII_RXER              PAL_LINE(GPIOI, 10U)
+#define LINE_FLASH_SPI1_CS          PAL_LINE(GPIOI, 15U)
 #define LINE_SPI_FLASH_WP           PAL_LINE(GPIOJ, 3U)
 #define LINE_SPI_FLASH_HOLD         PAL_LINE(GPIOJ, 4U)
 #define LINE_RELAY			        PAL_LINE(GPIOJ, 5U)
@@ -1380,7 +1381,7 @@ The user should also disable the MCO pin of the clock output if not used.
 * PI12 - RS485_RE                  (output floating).
 * PI13 - RS485_SHDN                (output floating).
 * PI14 - RS485_BUS_TERM            (output floating).
-* PI15 - PIN15                     (input pullup).
+* PI15 - PIN15                     (output pullup).
 */
 #define VAL_GPIOI_MODER             (PIN_MODE_OUTPUT(GPIOI_IO0_P20_ON_OFF) |           \
                                      PIN_MODE_ALTERNATE(GPIOH_IO0_P24_IO) |           \
@@ -1397,7 +1398,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_MODE_OUTPUT(GPIOI_RS485_RE) |          \
                                      PIN_MODE_OUTPUT(GPIOI_RS485_SHDN) |          \
                                      PIN_MODE_OUTPUT(GPIOI_RS485_BUS_TERM) |          \
-                                     PIN_MODE_INPUT(GPIOI_PIN15))
+                                     PIN_MODE_OUTPUT(GPIOI_FLASH_SPI1_CS))
 #define VAL_GPIOI_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOI_IO0_P20_ON_OFF) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOH_IO0_P24_IO) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOH_IO0_P5_IO) |       \
@@ -1413,7 +1414,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_OTYPE_PUSHPULL(GPIOI_RS485_RE) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOI_RS485_SHDN) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOI_RS485_BUS_TERM) |      \
-                                     PIN_OTYPE_PUSHPULL(GPIOI_PIN15))
+                                     PIN_OTYPE_PUSHPULL(GPIOI_FLASH_SPI1_CS))
 #define VAL_GPIOI_OSPEEDR           (PIN_OSPEED_LOW(GPIOI_IO0_P20_ON_OFF) |       \
                                      PIN_OSPEED_HIGH(GPIOH_IO0_P24_IO) |       \
                                      PIN_OSPEED_HIGH(GPIOH_IO0_P5_IO) |       \
@@ -1429,7 +1430,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_OSPEED_LOW(GPIOI_RS485_RE) |      \
                                      PIN_OSPEED_LOW(GPIOI_RS485_SHDN) |      \
                                      PIN_OSPEED_LOW(GPIOI_RS485_BUS_TERM) |      \
-                                     PIN_OSPEED_VERYLOW(GPIOI_PIN15))
+                                     PIN_OSPEED_HIGH(GPIOI_FLASH_SPI1_CS))
 #define VAL_GPIOI_PUPDR             (PIN_PUPDR_FLOATING(GPIOI_IO0_P20_ON_OFF) |         \
                                      PIN_PUPDR_FLOATING(GPIOH_IO0_P24_IO) |         \
                                      PIN_PUPDR_FLOATING(GPIOH_IO0_P5_IO) |         \
@@ -1445,7 +1446,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_PUPDR_FLOATING(GPIOI_RS485_RE) |        \
                                      PIN_PUPDR_FLOATING(GPIOI_RS485_SHDN) |        \
                                      PIN_PUPDR_FLOATING(GPIOI_RS485_BUS_TERM) |        \
-                                     PIN_PUPDR_PULLUP(GPIOI_PIN15))
+                                     PIN_PUPDR_FLOATING(GPIOI_FLASH_SPI1_CS))
 #define VAL_GPIOI_ODR               (PIN_ODR_HIGH(GPIOI_IO0_P20_ON_OFF) |             \
                                      PIN_ODR_HIGH(GPIOH_IO0_P24_IO) |             \
                                      PIN_ODR_HIGH(GPIOH_IO0_P5_IO) |             \
@@ -1461,7 +1462,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_ODR_HIGH(GPIOI_RS485_RE) |            \
                                      PIN_ODR_HIGH(GPIOI_RS485_SHDN) |            \
                                      PIN_ODR_HIGH(GPIOI_RS485_BUS_TERM) |            \
-                                     PIN_ODR_HIGH(GPIOI_PIN15))
+                                     PIN_ODR_HIGH(GPIOI_FLASH_SPI1_CS))
 #define VAL_GPIOI_AFRL              (PIN_AFIO_AF(GPIOI_IO0_P20_ON_OFF, 0U) |          \
                                      PIN_AFIO_AF(GPIOH_IO0_P24_IO, 5U) |          \
                                      PIN_AFIO_AF(GPIOH_IO0_P5_IO, 5U) |          \
@@ -1477,7 +1478,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_AFIO_AF(GPIOI_RS485_RE, 0U) |         \
                                      PIN_AFIO_AF(GPIOI_RS485_SHDN, 0U) |         \
                                      PIN_AFIO_AF(GPIOI_RS485_BUS_TERM, 0U) |         \
-                                     PIN_AFIO_AF(GPIOI_PIN15, 0U))
+                                     PIN_AFIO_AF(GPIOI_FLASH_SPI1_CS, 0U))
 
 
 
