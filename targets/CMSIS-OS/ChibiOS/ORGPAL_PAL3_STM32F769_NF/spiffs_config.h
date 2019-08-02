@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <nanoHAL_v2.h>
 
 /////////////////////////////////////
 // need to map these types
@@ -354,6 +355,9 @@ extern void hal_spiffs_unlock();
 #define SPIFFS_TEST_VIS_DATA_STR(id)      "d"
 #endif
 #endif
+
+// hook for long running operations (feeding watchdog)
+#define LONG_RUNNING_OPERATION_HOOK     Watchdog_Reset()
 
 // Types depending on configuration such as the amount of flash bytes
 // given to spiffs file system in total (spiffs_file_system_size),
