@@ -7,7 +7,10 @@
 #include <ssl.h> 
 #include "mbedtls.h"
 
-int  ssl_write_internal( int sd, const char* data, size_t req_len)
+int  ssl_write_internal( 
+    int sd, 
+    const char* data, 
+    size_t req_len)
 {
     int ret;
 

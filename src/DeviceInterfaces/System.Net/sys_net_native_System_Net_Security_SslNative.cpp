@@ -536,8 +536,6 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper( CLR_RT
         password = hbPwd->StringText();
     }
 
-    SSL_RegisterTimeCallback( Time_GetDateTime );
-
     if(isServer)
     {
         result = (SSL_ServerInit( sslMode, sslVerify, (const char*)sslCert, sslCert == NULL ? 0 : arrCert->m_numOfElements, pk, pk == NULL ? 0 : privateKey->m_numOfElements, password, hal_strlen_s(password), sslContext ) ? 0 : -1);

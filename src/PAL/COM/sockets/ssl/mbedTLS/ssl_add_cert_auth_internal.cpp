@@ -6,21 +6,25 @@
 #include <ssl.h>
 #include "mbedtls.h"
 
-bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, int certLength, const char* certPassword )
+bool ssl_add_cert_auth_internal( 
+    int contextHandle, 
+    const char* certificate, 
+    int certLength, 
+    const char* certPassword )
 {
     (void)certPassword;
 
     mbedTLS_NFContext* context;
 
-    // Check sslContextHandle range
-    if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
+    // Check contextHandle range
+    if((contextHandle >= (int)ARRAYSIZE(g_SSL_Driver.ContextArray)) || (contextHandle < 0))
     {
-        return FALSE;
+        return false;
     }
 
     // Retrieve SSL struct from g_SSL_Driver    
     // sd should already have been created
-    context = (mbedTLS_NFContext*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
+    context = (mbedTLS_NFContext*)g_SSL_Driver.ContextArray[contextHandle].Context;
 
     if (context != NULL)
     {
@@ -32,10 +36,13 @@ bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, 
         if( mbedtls_x509_crt_parse(context->x509_crt, (const unsigned char*)certificate, certLength ) == 0)
         {
             // add to CA chain
-            mbedtls_ssl_conf_ca_chain( context->conf, context->x509_crt, NULL );
+            mbedtls_ssl_conf_ca_chain( 
+                context->conf, 
+                context->x509_crt, 
+                NULL );
 
             // done
-            return TRUE;
+            return true;
         }
     }
 
