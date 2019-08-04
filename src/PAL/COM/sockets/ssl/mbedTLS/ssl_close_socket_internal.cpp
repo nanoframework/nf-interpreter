@@ -23,5 +23,5 @@ int ssl_close_socket_internal( int sd )
 
     SOCK_close( sd );
 
-    return true;
+    return 0;
 }
