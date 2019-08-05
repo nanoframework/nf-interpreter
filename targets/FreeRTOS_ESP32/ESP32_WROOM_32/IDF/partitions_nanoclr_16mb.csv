@@ -9,5 +9,5 @@ phy_init, data, phy,     0xf000,   0x1000,
 factory,  0,    0,       0x10000,  0x110000,
 # Deployment area for Managed code 1769K
 deploy,   data, 0x84,    0x120000, 0x1B0000, 
-# Config data for Network, Wireless, certificates, user data  1MB
-config,   data, spiffs,  0x2D0000, 0x100000, 
+# Config data for Network, Wireless, certificates, user data  2MB
+config,   data, spiffs,  0x2D0000, 0x200000, 
