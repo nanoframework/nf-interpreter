@@ -249,7 +249,6 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes___SZARRAY_
     CLR_RT_HeapBlock*       callerType = NULL;
     CLR_RT_TypeDef_Instance instanceTypeDef;
     CLR_RT_TypeDef_Instance typeDefinition;
-    CLR_RT_HeapBlock*       hbObj;
     int count = 0;
 
     // put the return array on the stack
@@ -277,7 +276,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes___SZARRAY_
             // done sweeping attributes
 
             // create the result array
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, count, g_CLR_RT_WellKnownTypes.m_TypeStatic ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, count, g_CLR_RT_WellKnownTypes.m_Object ));
 
             // use this to skip the 2nd pass if no attribute was found
             if (count == 0) break;
@@ -306,10 +305,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes___SZARRAY_
             attributeType.Set(instanceTypeDef.Assembly(), instanceTypeDef.Type());
 
             // create a new object for the attribute type and put it on the return array
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, g_CLR_RT_WellKnownTypes.m_TypeStatic));
-            hbObj = returnArray->Dereference();
-            // make sure the reflection is pointing to the attribute type
-            hbObj->SetReflection( attributeType );
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, attributeType));
 
             returnArray++;
             count--;
