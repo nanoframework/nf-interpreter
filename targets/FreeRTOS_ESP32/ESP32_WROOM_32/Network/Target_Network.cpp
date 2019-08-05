@@ -13,6 +13,8 @@
 	
 int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * config);
 bool Esp32_Wireless_Close(int index);
+int  Esp32_WirelessAP_Open(int index, HAL_Configuration_NetworkInterface * config);
+bool Esp32_WirelessAP_Close(int index);
 int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config);
 bool Esp32_Ethernet_Close(int index);
 int  Esp32_Wireless_Scan();
@@ -39,9 +41,6 @@ int  Network_Interface_Open(int configIndex)
     // load network interface configuration from storage
     pConfig = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
 
-    // Check valid config
-//    _ASSERTE(pConfig->StartupAddressMode > 0);
-
     switch((tcpip_adapter_if_t)configIndex)
     {
         // Wireless 
@@ -50,7 +49,7 @@ int  Network_Interface_Open(int configIndex)
 
        // Soft AP
         case TCPIP_ADAPTER_IF_AP:
-            break;
+            return Esp32_WirelessAP_Open(configIndex, pConfig);
 
 #if ESP32_ETHERNET_SUPPORT
         // Ethernet
@@ -73,7 +72,7 @@ bool Network_Interface_Close(int configIndex)
 
        // Soft AP
        case TCPIP_ADAPTER_IF_AP:
-            break;
+            return Esp32_WirelessAP_Close(configIndex);
 
 #if ESP32_ETHERNET_SUPPORT
         // Ethernet
@@ -126,8 +125,12 @@ int  Network_Interface_Connect(int configIndex, const char * ssid, const char * 
 
     if ( GetWirelessConfig(configIndex,  & pWireless) == false )  return SOCK_SOCKET_ERROR;
     
-    // TODO update Reconnect option ( ) - first we need a space for it in config block
-    //pWireless->reconnect = options & NETWORK_CONNECT_RECONNECT;
+    pWireless->Flags = WirelessFlags_Enable;
+
+    if ( options & NETWORK_CONNECT_RECONNECT)
+        pWireless->Flags |= WirelessFlags_Auto;
+    else
+        pWireless->Flags ^= WirelessFlags_Auto;
 
     // Update Wireless structure with new SSID and passphase
     hal_strcpy_s( (char *)pWireless->Ssid, sizeof(pWireless->Ssid), ssid );

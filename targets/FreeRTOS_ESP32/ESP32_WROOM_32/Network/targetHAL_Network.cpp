@@ -14,6 +14,9 @@ extern "C" void set_signal_sock_function( void (*funcPtr)() );
 
 #define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
 
+#define 	NetEventPrint 	1
+
+
 //
 // Callback from LWIP on event
 //
@@ -28,24 +31,29 @@ __nfweak void InitialiseEthernet()
 {
 }
 
-static void PostAddressChanged()
+static void PostAddressChanged(uint netIndex)
 {
-	Network_PostEvent(NetworkEventType_AddressChanged, 0);
+	Network_PostEvent(NetworkEventType_AddressChanged, 0, netIndex);
 }
 
-static void PostAvailabilityOn()
+static void PostAvailabilityOn(uint netIndex)
 {
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, 1);
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, 1, netIndex);
 }
 
-static void PostAvailabilityOff()
+static void PostAvailabilityOff(uint netIndex)
 {
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, 0);
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, 0, netIndex);
 }
 
-static void PostScanComplete()
+static void PostScanComplete(uint netIndex)
 {
-    PostManagedEvent( EVENT_WIFI, WiFiEventType_ScanComplete, 0, 0 );
+    PostManagedEvent( EVENT_WIFI, WiFiEventType_ScanComplete, 0, netIndex );
+}
+
+static void PostAPClientChanged(uint connect, uint netIndex)
+{
+	Network_PostEvent(NetworkEventType_APClientChanged, connect, netIndex);
 }
 
 static void initialize_sntp()
@@ -63,80 +71,156 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 {
 	(void)ctx;
 
-//ets_printf("Network event %d\n", event->event_id);
-
+#ifdef NetEventPrint
+    ets_printf("Network event %d\n", event->event_id);
+#endif
     switch(event->event_id) {
 
 // Wifi station events
     case SYSTEM_EVENT_STA_START:
        // Smart config commented out as giving exception when running
        // xTaskCreate(smartconfig_task, "smartconfig_example_task", 4096, NULL, 3, NULL);
-//ets_printf("SYSTEM_EVENT_STA_START\n");
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_STA_START\n");
+#endif
         break;
     case SYSTEM_EVENT_STA_GOT_IP:
-//ets_printf("SYSTEM_EVENT_STA_GOT_IP\n");
-		PostAddressChanged();
+#ifdef NetEventPrint
+ 	ets_printf("SYSTEM_EVENT_STA_GOT_IP\n");
+#endif
+		PostAddressChanged(TCPIP_ADAPTER_IF_STA);
 		initialize_sntp();
         //xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
         break;
 	case SYSTEM_EVENT_STA_LOST_IP:
-//ets_printf("SYSTEM_EVENT_STA_LOST_IP\n");
+		PostAddressChanged(TCPIP_ADAPTER_IF_STA);
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_STA_LOST_IP\n");
+#endif
 		break;
 
     case SYSTEM_EVENT_STA_CONNECTED:
-//ets_printf("SYSTEM_EVENT_STA_CONNECTED\n");
-		PostAvailabilityOn();
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_STA_CONNECTED\n");
+#endif
+		PostAvailabilityOn(TCPIP_ADAPTER_IF_STA);
 		break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
-//ets_printf("SYSTEM_EVENT_STA_DISCONNECTED\n");
-		PostAvailabilityOff();
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_STA_DISCONNECTED\n");
+#endif
+		PostAvailabilityOff(TCPIP_ADAPTER_IF_STA);
         esp_wifi_connect();
         //xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
         break;
 	
 	// Scan of available Wifi networks complete
 	case SYSTEM_EVENT_SCAN_DONE:
-//ets_printf("SYSTEM_EVENT_SCAN_DONE\n");
-		PostScanComplete();
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_SCAN_DONE\n");
+#endif
+		PostScanComplete(TCPIP_ADAPTER_IF_STA);
 		break;
 
 	case SYSTEM_EVENT_STA_AUTHMODE_CHANGE:
 //		system_event_sta_authmode_change_t *auth_change = &event->event_info.auth_change;
-//ets_printf("SYSTEM_EVENT_STA_AUTHMODE_CHANGE");
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_STA_AUTHMODE_CHANGE");
+#endif
 		break;
 	case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:
-//ets_printf("SYSTEM_EVENT_STA_WPS_ER_SUCCESS\n");
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_STA_WPS_ER_SUCCESS\n");
+#endif
 		break;
 	case SYSTEM_EVENT_STA_WPS_ER_FAILED:
-//ets_printf("SYSTEM_EVENT_STA_WPS_ER_FAILED\n");
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_STA_WPS_ER_FAILED\n");
+#endif
 		break;
 
 	case SYSTEM_EVENT_STA_WPS_ER_TIMEOUT:
-//ets_printf("SYSTEM_EVENT_STA_WPS_ER_TIMEOUT\n");
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_STA_WPS_ER_TIMEOUT\n");
+#endif
 		break;
 	case SYSTEM_EVENT_STA_WPS_ER_PIN:
-//ets_printf("SYSTEM_EVENT_STA_WPS_ER_PIN\n");
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_STA_WPS_ER_PIN\n");
+#endif
 		break;
+
+// Wireless AP events
+
+	case SYSTEM_EVENT_AP_START:
+	PostAvailabilityOn(TCPIP_ADAPTER_IF_AP);
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_AP_START\n");
+#endif
+	break;
+	case SYSTEM_EVENT_AP_STOP:
+	PostAvailabilityOff(TCPIP_ADAPTER_IF_AP);
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_AP_STOP\n");
+#endif
+	break;
+	case SYSTEM_EVENT_AP_STACONNECTED:
+
+//	event->event_info.sta_connected.mac
+//	event->event_info.sta_connected.aid
+// esp_err_t esp_wifi_deauth_sta(uint16_t aid)
+
+	PostAPClientChanged( 1, TCPIP_ADAPTER_IF_AP);
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_AP_STACONNECTED\n");
+#endif
+	break;
+	case SYSTEM_EVENT_AP_STADISCONNECTED:
+	PostAPClientChanged( 0, TCPIP_ADAPTER_IF_AP);
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_AP_STADISCONNECTED\n");
+#endif
+	break;
+	case SYSTEM_EVENT_AP_STA_GOT_IP6:
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_AP_STA_GOT_IP6\n");
+#endif
+	break;
+	case SYSTEM_EVENT_AP_PROBEREQRECVED:
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_AP_PROBEREQRECVEDxz\n");
+#endif
+	break;
 
 // Ethernet events
 	case SYSTEM_EVENT_ETH_START:
-//ets_printf("SYSTEM_EVENT_ETH_START\n");
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_ETH_START\n");
+#endif
 		break;
 	case SYSTEM_EVENT_ETH_STOP:
-//ets_printf("SYSTEM_EVENT_ETH_STOP\n");
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_ETH_STOP\n");
+#endif
 		break;
 	case SYSTEM_EVENT_ETH_CONNECTED:
-//ets_printf("SYSTEM_EVENT_ETH_CONNECTED\n");
-		PostAvailabilityOn();
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_ETH_CONNECTED\n");
+#endif
+		PostAvailabilityOn(TCPIP_ADAPTER_IF_ETH);
 		break;
 	case SYSTEM_EVENT_ETH_GOT_IP:
-//ets_printf("SYSTEM_EVENT_ETH_GOT_IP\n");
-		PostAddressChanged();
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_ETH_GOT_IP\n");
+#endif
+		PostAddressChanged(TCPIP_ADAPTER_IF_ETH);
 		initialize_sntp();
 		break;
     case SYSTEM_EVENT_ETH_DISCONNECTED:
-//ets_printf("SYSTEM_EVENT_ETH_DISCONNECTED\n");
-		PostAvailabilityOff();
+#ifdef NetEventPrint
+	ets_printf("SYSTEM_EVENT_ETH_DISCONNECTED\n");
+#endif
+		PostAvailabilityOff(TCPIP_ADAPTER_IF_ETH);
 		break;
 
     default:
