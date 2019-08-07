@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/AArnott/Nerdbank.GitVersioning/master/src/NerdBank.GitVersioning/version.schema.json",
-  "version": "1.0.4-preview.{height}",
-  "buildNumberOffset": 80,
+  "version": "1.0.5-preview.{height}",
+  "buildNumberOffset": 0,
   "release": {
     "branchName" : "release-v{version}",
     "versionIncrement" : "minor",
