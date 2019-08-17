@@ -525,6 +525,7 @@ enum NetworkEventType
     NetworkEventType_Invalid = 0,
     NetworkEventType_AvailabilityChanged = 1,
     NetworkEventType_AddressChanged = 2,
+	NetworkEventType_APClientChanged = 3,
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -547,7 +548,7 @@ enum NetworkEventFlags
     NetworkEventFlags_NetworkAvailable = 0x01,
 };
 
-void Network_PostEvent(unsigned int eventType, unsigned int flags);
+void Network_PostEvent(unsigned int eventType, unsigned int flags, unsigned int index);
 
 //--//
 // Debugger Methods

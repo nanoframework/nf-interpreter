@@ -23,20 +23,46 @@ struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configu
     static const int FIELD___radio = 5;
     static const int FIELD___password = 6;
     static const int FIELD___ssid = 7;
+    static const int FIELD___flags = 8;
 
     NANOCLR_NATIVE_DECLARE(GetWireless82011ConfigurationCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
     NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(NativeConnect___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(NativeDisconnect___STATIC__VOID);
 
     //--//
 
 };
 
+struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration
+{
+    static const int FIELD___apConfigurationIndex = 1;
+    static const int FIELD___apId = 2;
+    static const int FIELD___apAuthentication = 3;
+    static const int FIELD___apEncryption = 4;
+    static const int FIELD___apRadio = 5;
+    static const int FIELD___apPassword = 6;
+    static const int FIELD___apSsid = 7;
+    static const int FIELD___apFlags = 8;
+    static const int FIELD___apChannel = 9;
+    static const int FIELD___apMaxConnections = 10;
+
+    NANOCLR_NATIVE_DECLARE(GetWirelessAPConfigurationCount___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4);
+    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(NativeGetConnectedClients___STATIC__STRING);
+
+	//--//
+
+};
+
+
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
     static const int FIELD_STATIC__NetworkAddressChanged = 0;
     static const int FIELD_STATIC__NetworkAvailabilityChanged = 1;
-
+    static const int FIELD_STATIC__NetworkAPClientChanged = 3;
 
     //--//
 
@@ -46,8 +72,8 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange__Netwo
 {
     static const int FIELD__EventType = 3;
     static const int FIELD__Flags = 4;
-    static const int FIELD__Time = 5;
-
+    static const int FIELD__Index = 5;
+    static const int FIELD__Time = 6;
 
     //--//
 
@@ -87,6 +113,16 @@ struct Library_sys_net_native_System_Net_IPHostEntry
 
 };
 
+
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAPClientEventArgs
+{
+    static const int FIELD___macAddress = 1;
+    static const int FIELD___isConnected = 2;
+
+    //--//
+
+};
+
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityEventArgs
 {
     static const int FIELD___isAvailable = 1;
@@ -120,6 +156,17 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
     NANOCLR_NATIVE_DECLARE(GetNetworkInterfaceCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4);
     NANOCLR_NATIVE_DECLARE(IPAddressFromString___STATIC__U4__STRING);
+
+    //--//
+
+};
+
+
+struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPClient
+{
+    static const int FIELD___MacAddress = 1;
+    static const int FIELD___Rssi = 2;
+    static const int FIELD___PhyModes = 3;
 
     //--//
 
