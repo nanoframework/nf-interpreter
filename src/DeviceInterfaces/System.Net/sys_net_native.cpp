@@ -55,10 +55,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
 	NULL,
 	NULL,
 	NULL,
+	NULL,
 	Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::GetWirelessAPConfigurationCount___STATIC__I4,
 	Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4,
 	Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::UpdateConfiguration___STATIC__VOID,
-	Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::NativeGetConnectedClients___STATIC__STRING,
+	Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4,
+	Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::NativeDeauthStation___STATIC__STRING__I4,
 	NULL,
 	NULL,
 	NULL,
@@ -300,7 +302,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
 	"System.Net",
-	0xEBF27C31,
+	0xC3043C45,
 	method_lookup,
     { 100, 1, 3, 0 }
 };

@@ -169,3 +169,97 @@ int  Network_Interface_Disconnect(int configIndex)
 
     return false;
 }
+
+
+wifi_sta_info_t wireless_sta[ESP_WIFI_MAX_CONN_NUM] = { 0 };
+
+//
+//	Update save stations with rssi
+//
+void Network_Interface_update_Stations()
+{
+	esp_err_t ec;
+	wifi_sta_list_t stations;
+
+	ec = esp_wifi_ap_get_sta_list(&stations);
+
+	if (ec == ESP_OK)
+	{
+		// Find save station and update
+		for (int x = 0; x < stations.num; x++)
+		{
+			for (int y = 0; y < ESP_WIFI_MAX_CONN_NUM; y++)
+			{
+				if (wireless_sta[y].reserved)
+				{
+					if (memcmp( wireless_sta[y].mac, stations.sta[x].mac, 6) == 0 )
+					{
+						memcpy(&wireless_sta[y], &stations.sta[x], sizeof(wifi_sta_info_t));
+						wireless_sta[y].reserved = 1;
+						break;
+					}
+				}
+			}
+		}
+
+	}
+}
+
+//
+//	Add a station to our list of Stations
+//
+void Network_Interface_Add_Station(uint16_t index, uint8_t * macAddress)
+{
+	if (index < ESP_WIFI_MAX_CONN_NUM)
+	{
+		memcpy( wireless_sta[index].mac, macAddress , 6);
+		wireless_sta[index].reserved = 1;
+		Network_Interface_update_Stations();
+	}
+}
+
+//
+// Remove a station from our list of stations
+void Network_Interface_Remove_Station(uint16_t index)
+{
+	if (index < ESP_WIFI_MAX_CONN_NUM)
+	{
+		wireless_sta[index].reserved = 0;
+		Network_Interface_update_Stations();
+	}
+}
+
+// Return the maximum number of stations
+int Network_Interface_Max_Stations()
+{
+	return ESP_WIFI_MAX_CONN_NUM;
+}
+
+//
+//  
+//
+bool Network_Interface_Get_Station(uint16_t index, uint8_t * macAddress, uint8_t * rssi, uint32_t * phyModes)
+{
+	if (wireless_sta[index].reserved)
+	{
+		memcpy(macAddress, wireless_sta[index].mac,  6);
+		*rssi = wireless_sta[index].rssi;
+		*phyModes =  wireless_sta[index].phy_11b | 
+					(wireless_sta[index].phy_11g << 1) | 
+					(wireless_sta[index].phy_11n << 2) | 
+					(wireless_sta[index].phy_lr << 3);
+		return true;
+	}
+
+	return false;
+}
+
+//
+// De-Auth connected stations
+//
+void Network_Interface_Deauth_Station(uint16_t stationIndex)
+{
+	stationIndex++;
+	if (stationIndex>=1 && stationIndex<= ESP_WIFI_MAX_CONN_NUM)
+		esp_wifi_deauth_sta(stationIndex);
+}

@@ -37,26 +37,26 @@ struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configu
 
 struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration
 {
-    static const int FIELD___apConfigurationIndex = 1;
-    static const int FIELD___apId = 2;
-    static const int FIELD___apAuthentication = 3;
-    static const int FIELD___apEncryption = 4;
-    static const int FIELD___apRadio = 5;
-    static const int FIELD___apPassword = 6;
-    static const int FIELD___apSsid = 7;
-    static const int FIELD___apFlags = 8;
-    static const int FIELD___apChannel = 9;
-    static const int FIELD___apMaxConnections = 10;
+	static const int FIELD___apConfigurationIndex = 1;
+	static const int FIELD___apId = 2;
+	static const int FIELD___apAuthentication = 3;
+	static const int FIELD___apEncryption = 4;
+	static const int FIELD___apRadio = 5;
+	static const int FIELD___apPassword = 6;
+	static const int FIELD___apSsid = 7;
+	static const int FIELD___apFlags = 8;
+	static const int FIELD___apChannel = 9;
+	static const int FIELD___apMaxConnections = 10;
 
-    NANOCLR_NATIVE_DECLARE(GetWirelessAPConfigurationCount___STATIC__I4);
-    NANOCLR_NATIVE_DECLARE(GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4);
-    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
-    NANOCLR_NATIVE_DECLARE(NativeGetConnectedClients___STATIC__STRING);
+	NANOCLR_NATIVE_DECLARE(GetWirelessAPConfigurationCount___STATIC__I4);
+	NANOCLR_NATIVE_DECLARE(GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4);
+	NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
+	NANOCLR_NATIVE_DECLARE(NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4);
+	NANOCLR_NATIVE_DECLARE(NativeDeauthStation___STATIC__STRING__I4);
 
 	//--//
 
 };
-
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
@@ -70,12 +70,14 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange__NetworkEvent
 {
-    static const int FIELD__EventType = 3;
-    static const int FIELD__Flags = 4;
-    static const int FIELD__Index = 5;
-    static const int FIELD__Time = 6;
+	static const int FIELD__EventType = 3;
+	static const int FIELD__Flags = 4;
+	static const int FIELD__Index = 5;
+	static const int FIELD__Data = 6;
+	static const int FIELD__Time = 7;
 
-    //--//
+
+	//--//
 
 };
 
@@ -116,10 +118,11 @@ struct Library_sys_net_native_System_Net_IPHostEntry
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAPClientEventArgs
 {
-    static const int FIELD___macAddress = 1;
-    static const int FIELD___isConnected = 2;
+	static const int FIELD___stationIndex = 1;
+	static const int FIELD___isConnected = 2;
 
-    //--//
+
+	//--//
 
 };
 
@@ -162,15 +165,17 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 };
 
 
-struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPClient
+struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation
 {
-    static const int FIELD___MacAddress = 1;
-    static const int FIELD___Rssi = 2;
-    static const int FIELD___PhyModes = 3;
+	static const int FIELD___MacAddress = 1;
+	static const int FIELD___Rssi = 2;
+	static const int FIELD___PhyModes = 3;
 
-    //--//
+
+	//--//
 
 };
+
 
 struct Library_sys_net_native_System_Net_Security_CertificateManager
 {

@@ -74,8 +74,6 @@ wifi_mode_t Esp32_CheckWifiMode()
 		}
 	}
 	
-	ets_printf("Esp32_CheckWifiMode %d\n", (int)mode);
-
 	return mode;
 }
 
@@ -137,34 +135,6 @@ esp_err_t Esp32_InitaliseWifi()
 
 	return ec;
 }
-
-
-// esp_err_t Esp32_InitaliseWifi()
-// {
-// 	esp_err_t ec = ESP_OK;
-
-// 	if (!WifiInitialised)
-// 	{
-// 		// Init WiFi Alloc resource for WiFi driver, such as WiFi control structure, 
-// 		// RX/TX buffer, WiFi NVS structure etc, this WiFi also start WiFi task. 
-// 		wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-		
-// 		// Don't store Wireless params in NVS
-// 		cfg.nvs_enable = 0;
-
-// 		ec = esp_wifi_init(&cfg);
-// 		if ( ec != ESP_OK) return ec;
-		
-// 		esp_wifi_set_mode(WIFI_MODE_STA);
-
-// 		ec = esp_wifi_start();
-// 		if ( ec != ESP_OK) return ec;
-
-// 		WifiInitialised = true;
-// 	}
-
-// 	return ec;
-// }
 
 esp_err_t Esp32_Wireless_Connect(HAL_Configuration_Wireless80211 * pWireless)
 {
@@ -282,11 +252,9 @@ esp_err_t Esp32_WirelessAP_Configure(HAL_Configuration_NetworkInterface * pConfi
 {
 	esp_err_t ec;
 
-ets_printf( "Esp32_WirelessAP_Configure id:%d \n", pConfig->SpecificConfigId  );
 	tcpip_adapter_ip_info_t tcpip_info;
 
 	ec = tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_AP, &tcpip_info);
-ets_printf( "Get AP tcpip %d %X", ec, tcpip_info.ip.addr);
 
 	if ( pConfig->IPv4Address != 0 )
 	{
@@ -294,34 +262,41 @@ ets_printf( "Get AP tcpip %d %X", ec, tcpip_info.ip.addr);
 		tcpip_info.netmask.addr = pConfig->IPv4NetMask;
 		tcpip_info.gw.addr = pConfig->IPv4GatewayAddress;
 		ec = tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_AP, &tcpip_info );
-ets_printf( "Set AP tcpip %d %X", ec, tcpip_info.ip.addr);
 	}
 	else
 	{
 		pConfig->IPv4Address = tcpip_info.ip.addr;
 		pConfig->IPv4NetMask = tcpip_info.netmask.addr;
 		pConfig->IPv4GatewayAddress = tcpip_info.gw.addr;
-ets_printf( "Update config with current address");
-
 	}
 
 	HAL_Configuration_WirelessAP * pWireless = ConfigurationManager_GetWirelessAPConfigurationFromId(pConfig->SpecificConfigId);
     if (pWireless == 0 ) return ESP_FAIL;
 
-    wifi_config_t ap_config = {};
+    wifi_config_t ap_config = { 0 };
+	
 	hal_strncpy_s( (char *)ap_config.ap.ssid, sizeof(ap_config.ap.ssid), (char *)pWireless->Ssid, hal_strlen_s((char *)pWireless->Ssid) );
 	hal_strncpy_s( (char*)ap_config.ap.password, sizeof(ap_config.ap.password), (char *)pWireless->Password, hal_strlen_s((char *)pWireless->Password) );
 
+	ap_config.ap.ssid_len = hal_strlen_s((char *)pWireless->Ssid);
     ap_config.ap.channel = pWireless->Channel;
     ap_config.ap.ssid_hidden = (pWireless->Flags & WirelessAPFlags_Hidden_SSID)? 1 : 0;
-    ap_config.ap.authmode = MapAuthenication(pWireless->Authentication);
+    
+	ap_config.ap.authmode = MapAuthenication(pWireless->Authentication);
+	if (hal_strlen_s((char *)ap_config.ap.password) == 0)
+		ap_config.ap.authmode = WIFI_AUTH_OPEN;
+
+	// Max connections for ESP32
     ap_config.ap.max_connection = pWireless->MaxConnections;
+	if (ap_config.ap.max_connection > ESP_WIFI_MAX_CONN_NUM) ap_config.ap.max_connection = ESP_WIFI_MAX_CONN_NUM;
+
     ap_config.ap.beacon_interval = 100;
 
   	ec = esp_wifi_set_config(ESP_IF_WIFI_AP, &ap_config);
-
-ets_printf( "Esp32_WirelessAP_Configure esp_wifi_set_config %d \n", ec );
-	 
+	if (ec != ESP_OK)
+	{
+		ESP_LOGE(TAG, "WiFi set AP config - result %d", ec);
+	}
 	 return ec;
 }
 
@@ -337,8 +312,6 @@ int  Esp32_WirelessAP_Open(int index, HAL_Configuration_NetworkInterface * pConf
     (void)index;
 	esp_err_t ec;
 
-ets_printf( "Esp32_WirelessAP_Open id:%d \n", pConfig->SpecificConfigId  );
-   
     // Initialise Wifi stack if required
     ec = Esp32_InitaliseWifi();
     if(ec != ESP_OK) return SOCK_SOCKET_ERROR;
@@ -366,7 +339,6 @@ bool Esp32_WirelessAP_Close(int index)
 
     Esp32_DeinitWifi();
 
-ets_printf( "Esp32_WirelessAP_close Esp32_DeinitWifi\n");
  	return true;
 }
 

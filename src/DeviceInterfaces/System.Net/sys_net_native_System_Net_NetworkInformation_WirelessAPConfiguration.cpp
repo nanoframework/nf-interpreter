@@ -108,11 +108,87 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 
 }
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::NativeGetConnectedClients___STATIC__STRING(CLR_RT_StackFrame& stack)
+
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4(CLR_RT_StackFrame& stack)
 {
 	NANOCLR_HEADER();
 
-	NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+	CLR_RT_TypeDef_Index    apStationTypeDef;
+	CLR_RT_HeapBlock*       apStation;
+	CLR_RT_HeapBlock*       hbObj;
+
+	uint16_t                stationCount = 0;
+
+	uint8_t  mac[6];
+	uint8_t  rssi;
+	uint32_t phyModes = 0;
+
+	CLR_RT_HeapBlock& top = stack.PushValue();
+
+	// Get index of station info required or if index == 0 then return all connected stations 
+	uint16_t index = (uint16_t)stack.Arg0().NumericByRef().u4;
+
+
+	// find <WirelessAPStation> type, don't bother checking the result as it exists for sure
+	g_CLR_RT_TypeSystem.FindTypeDef("WirelessAPStation", "System.Net.NetworkInformation", apStationTypeDef);
+
+	// Count stations connected
+	for (int x = 0; x < Network_Interface_Max_Stations(); x++)
+	{
+		if (index != 0 && x != index) continue;
+
+		if (Network_Interface_Get_Station(x, mac, &rssi, &phyModes))
+			stationCount++;
+	}
+
+	// Create an array of <WirelessAPStation>
+	NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, stationCount, apStationTypeDef));
+
+	// get a pointer to the first object in the array (which is of type <WirelessAPStation>)
+	apStation = (CLR_RT_HeapBlock*)top.DereferenceArray()->GetFirstElement();
+
+	// Create Array
+	if (stationCount > 0)
+	{
+		for (int x = 0; x < Network_Interface_Max_Stations(); x++)
+		{
+			if (index != 0 && x != index) continue;
+
+			if (Network_Interface_Get_Station(x, mac, &rssi, &phyModes))
+			{
+				// create an instance of <WirelessAPStation>
+				NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*apStation, apStationTypeDef));
+
+				// dereference the object in order to reach its fields
+				hbObj = apStation->Dereference();
+
+				NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___MacAddress], 6, g_CLR_RT_WellKnownTypes.m_UInt8));
+				memcpy(hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___MacAddress].DereferenceArray()->GetFirstElement(), mac, 6);
+
+
+				CLR_RT_HeapBlock& rssiFieldRef = hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___Rssi];
+				CLR_INT8* pRes2 = (CLR_INT8*)&rssiFieldRef.NumericByRef().s1;
+				*pRes2 = rssi;
+
+				CLR_RT_HeapBlock& phyModesFieldRef = hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___PhyModes];
+				CLR_INT32* pRes3 = (CLR_INT32*)&phyModesFieldRef.NumericByRef().s4;
+				*pRes3 = phyModes;
+
+				apStation++;
+			}
+		}
+	}
 
 	NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::NativeDeauthStation___STATIC__STRING__I4(CLR_RT_StackFrame& stack)
+{
+	NANOCLR_HEADER();
+
+	uint16_t index = (uint16_t)stack.Arg0().NumericByRef().u4;
+	
+	Network_Interface_Deauth_Station(index);
+
+	NANOCLR_NOCLEANUP_NOLABEL();
 }
