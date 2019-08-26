@@ -11,12 +11,12 @@
             "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf",
 
             "setupCommands": [
-                {"text": "set logging on"},
-                {"text": "target extended-remote localhost:3333"},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
-                {"text": "monitor reset halt"},
-                {"text": "thb app_main"},
-                {"text": "x $a1=0"}
+                {"description":"" , "text" : "set logging on"},
+                {"description":"" , "text" : "target extended-remote localhost:3333"},
+                {"description":"" , "text" : "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
+                {"description":"" , "text" : "monitor reset halt"},
+                {"description":"" , "text" : "thb app_main"},
+                {"description":"" , "text" : "x $a1=0"}
             ],
 
             "launchCompleteCommand": "exec-run",
@@ -46,12 +46,12 @@
             "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf",
 
             "setupCommands": [
-                {"text": "set logging on"},
-                {"text": "target extended-remote localhost:3333"},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
-                {"text": "monitor reset halt"},
-                {"text": "thb app_main"},
-                {"text": "x $a1=0"}
+                {"description":"" , "text" : "set logging on"},
+                {"description":"" , "text" : "target extended-remote localhost:3333"},
+                {"description":"" , "text" : "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
+                {"description":"" , "text" : "monitor reset halt"},
+                {"description":"" , "text" : "thb app_main"},
+                {"description":"" , "text" : "x $a1=0"}
             ],
 
             "launchCompleteCommand": "exec-run",
