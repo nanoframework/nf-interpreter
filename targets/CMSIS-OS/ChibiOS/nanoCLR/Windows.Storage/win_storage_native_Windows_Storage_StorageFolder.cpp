@@ -75,13 +75,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
     CLR_RT_HeapBlock* hbObj;
     CLR_RT_HeapBlock& top   = stack.PushValue();
 
-    //  default to NULL (which is the expected outcome when no devices are connected)
-    hbObj = top.Dereference();
-    hbObj->SetObjectReference( NULL );
-
   #if HAL_USE_SDC
     bool sdCardEnumerated = false;
+  #endif
 
+  #if HAL_USE_SDC
     // is the SD card file system ready?
     if(sdCardFileSystemReady)
     {
@@ -211,10 +209,6 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetInternalSto
     CLR_RT_TypeDef_Index storageFolderTypeDef;
     CLR_RT_HeapBlock* hbObj;
     CLR_RT_HeapBlock& top   = stack.PushValue();
-
-    //  default to NULL (which is the expected outcome when no devices are connected)
-    hbObj = top.Dereference();
-    hbObj->SetObjectReference( NULL );
 
   #if (USE_SPIFFS_FOR_STORAGE == TRUE)
     // is the SPIFFS file system available and mounted?
