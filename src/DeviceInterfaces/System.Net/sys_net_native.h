@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -16,22 +16,20 @@
 
 struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration
 {
-    static const int FIELD___configurationIndex = 1;
-    static const int FIELD___id = 2;
-    static const int FIELD___authentication = 3;
-    static const int FIELD___encryption = 4;
-    static const int FIELD___radio = 5;
-    static const int FIELD___password = 6;
-    static const int FIELD___ssid = 7;
-    static const int FIELD___flags = 8;
+	static const int FIELD___configurationIndex = 1;
+	static const int FIELD___id = 2;
+	static const int FIELD___authentication = 3;
+	static const int FIELD___encryption = 4;
+	static const int FIELD___radio = 5;
+	static const int FIELD___password = 6;
+	static const int FIELD___ssid = 7;
+	static const int FIELD___flags = 8;
 
-    NANOCLR_NATIVE_DECLARE(GetWireless82011ConfigurationCount___STATIC__I4);
-    NANOCLR_NATIVE_DECLARE(GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
-    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
-    NANOCLR_NATIVE_DECLARE(NativeConnect___STATIC__VOID);
-    NANOCLR_NATIVE_DECLARE(NativeDisconnect___STATIC__VOID);
+	NANOCLR_NATIVE_DECLARE(GetWireless82011ConfigurationCount___STATIC__I4);
+	NANOCLR_NATIVE_DECLARE(GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
+	NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
 
-    //--//
+	//--//
 
 };
 

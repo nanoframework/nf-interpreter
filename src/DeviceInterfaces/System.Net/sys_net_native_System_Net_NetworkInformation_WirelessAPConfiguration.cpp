@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -9,18 +9,27 @@
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::GetWirelessAPConfigurationCount___STATIC__I4( CLR_RT_StackFrame& stack )
 {
-    NATIVE_PROFILE_CLR_NETWORK();
+#ifdef PLATFORM_ESP32
+	NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
     // grab the count right from the structure
     stack.SetResult_I4(g_TargetConfiguration.WirelessAPConfigs->Count);    
 
     NANOCLR_NOCLEANUP_NOLABEL();
+#else
+	NANOCLR_HEADER();
+
+	NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+	NANOCLR_NOCLEANUP();
+#endif
 }
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4( CLR_RT_StackFrame& stack )
 {
-    NATIVE_PROFILE_CLR_NETWORK();
+#ifdef PLATFORM_ESP32
+	NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
     HAL_Configuration_WirelessAP config; 
@@ -59,11 +68,19 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(pConfig[FIELD___apSsid], (const char*)config.Ssid));
 
     NANOCLR_NOCLEANUP();
+#else
+	NANOCLR_HEADER();
+
+	NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+	NANOCLR_NOCLEANUP();
+#endif
 }
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::UpdateConfiguration___STATIC__VOID( CLR_RT_StackFrame& stack )
 {
-    NATIVE_PROFILE_CLR_NETWORK();
+#ifdef PLATFORM_ESP32
+	NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
     HAL_Configuration_WirelessAP config; 
@@ -105,12 +122,19 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     }
 
     NANOCLR_NOCLEANUP();
+#else
+	NANOCLR_HEADER();
 
+	NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+	NANOCLR_NOCLEANUP();
+#endif
 }
 
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4(CLR_RT_StackFrame& stack)
 {
+#ifdef PLATFORM_ESP32
 	NANOCLR_HEADER();
 
 	CLR_RT_TypeDef_Index    apStationTypeDef;
@@ -180,10 +204,18 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 	}
 
 	NANOCLR_NOCLEANUP();
+#else
+	NANOCLR_HEADER();
+
+	NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+	NANOCLR_NOCLEANUP();
+#endif
 }
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::NativeDeauthStation___STATIC__STRING__I4(CLR_RT_StackFrame& stack)
 {
+#ifdef PLATFORM_ESP32
 	NANOCLR_HEADER();
 
 	uint16_t index = (uint16_t)stack.Arg0().NumericByRef().u4;
@@ -191,4 +223,11 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 	Network_Interface_Deauth_Station(index);
 
 	NANOCLR_NOCLEANUP_NOLABEL();
+#else
+	NANOCLR_HEADER();
+
+	NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+	NANOCLR_NOCLEANUP();
+#endif
 }
