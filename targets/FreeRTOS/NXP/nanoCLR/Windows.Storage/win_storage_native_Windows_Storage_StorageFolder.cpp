@@ -60,10 +60,6 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
     CLR_RT_HeapBlock* hbObj;
     CLR_RT_HeapBlock& top   = stack.PushValue();
 
-    //  default to NULL (which is the expected outcome when no devices are connected)
-    hbObj = top.Dereference();
-    hbObj->SetObjectReference( NULL );
-
     // is the SD card file system ready?
     if(sdCardFileSystemReady)
     {
@@ -161,7 +157,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
 
 HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetInternalStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder(CLR_RT_StackFrame& stack)
 {
-NANOCLR_HEADER();
+    NANOCLR_HEADER();
     {
 
         CLR_RT_TypeDef_Index storageFolderTypeDef;
