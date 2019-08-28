@@ -58,11 +58,12 @@ struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigurat
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
-    static const int FIELD_STATIC__NetworkAddressChanged = 0;
-    static const int FIELD_STATIC__NetworkAvailabilityChanged = 1;
-    static const int FIELD_STATIC__NetworkAPClientChanged = 3;
+	static const int FIELD_STATIC__NetworkAddressChanged = 0;
+	static const int FIELD_STATIC__NetworkAvailabilityChanged = 1;
+	static const int FIELD_STATIC__NetworkAPStationChanged = 2;
 
-    //--//
+
+	//--//
 
 };
 
@@ -81,15 +82,15 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange__Netwo
 
 struct Library_sys_net_native_System_Net_IPAddress
 {
-    static const int FIELD_STATIC__Any = 2;
-    static const int FIELD_STATIC__Loopback = 3;
+	static const int FIELD_STATIC__Any = 3;
+	static const int FIELD_STATIC__Loopback = 4;
 
-    static const int FIELD___address = 1;
-    static const int FIELD___family = 2;
-    static const int FIELD___numbers = 3;
+	static const int FIELD___address = 1;
+	static const int FIELD___family = 2;
+	static const int FIELD___numbers = 3;
 
 
-    //--//
+	//--//
 
 };
 
