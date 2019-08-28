@@ -70,6 +70,7 @@ static void initialize_sntp()
 static  esp_err_t event_handler(void *ctx, system_event_t *event)
 {
 	(void)ctx;
+	int stationIndex;
 
   #ifdef NetEventPrint
 	ets_printf("Network event %d\n", event->event_id);
@@ -173,7 +174,7 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 			break;
 
 		case SYSTEM_EVENT_AP_STACONNECTED:
-			int stationIndex = event->event_info.sta_connected.aid - 1;
+			stationIndex = event->event_info.sta_connected.aid - 1;
 			Network_Interface_Add_Station(stationIndex, event->event_info.sta_connected.mac);
 
 			// Post the Network interface + Client ID in top 8 bits 
@@ -184,7 +185,7 @@ static  esp_err_t event_handler(void *ctx, system_event_t *event)
 			break;
 
 		case SYSTEM_EVENT_AP_STADISCONNECTED:
-			int stationIndex = event->event_info.sta_connected.aid - 1;
+			stationIndex = event->event_info.sta_connected.aid - 1;
 			Network_Interface_Remove_Station(stationIndex);
 			PostAPStationChanged(0, TCPIP_ADAPTER_IF_AP + (stationIndex << 8));
 		  #ifdef NetEventPrint
