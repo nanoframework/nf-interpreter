@@ -90,10 +90,10 @@ typedef struct HAL_CONFIGURATION_X509_CERTIFICATE
 // the memory allocation for these will have to be done as required according to the number and type of blocks found in memory
 typedef struct HAL_TARGET_CONFIGURATION
 {
-    HAL_CONFIGURATION_NETWORK* NetworkInterfaceConfigs;
-    HAL_CONFIGURATION_NETWORK_WIRELESS80211* Wireless80211Configs;
-    HAL_CONFIGURATION_NETWORK_WIRELESSAP*    WirelessAPConfigs;
-    HAL_CONFIGURATION_X509_CERTIFICATE* CertificateStore;
+    HAL_CONFIGURATION_NETWORK*                  NetworkInterfaceConfigs;
+    HAL_CONFIGURATION_NETWORK_WIRELESS80211*    Wireless80211Configs;
+    HAL_CONFIGURATION_NETWORK_WIRELESSAP*       WirelessAPConfigs;
+    HAL_CONFIGURATION_X509_CERTIFICATE*         CertificateStore;
 
 } HAL_TARGET_CONFIGURATION;
 

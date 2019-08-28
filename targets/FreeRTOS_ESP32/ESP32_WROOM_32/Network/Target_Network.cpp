@@ -128,9 +128,13 @@ int  Network_Interface_Connect(int configIndex, const char * ssid, const char * 
     pWireless->Flags = WirelessFlags_Enable;
 
     if ( options & NETWORK_CONNECT_RECONNECT)
+    {
         pWireless->Flags |= WirelessFlags_Auto;
+    }
     else
+    {
         pWireless->Flags ^= WirelessFlags_Auto;
+    }
 
     // Update Wireless structure with new SSID and passphase
     hal_strcpy_s( (char *)pWireless->Ssid, sizeof(pWireless->Ssid), ssid );
@@ -261,5 +265,7 @@ void Network_Interface_Deauth_Station(uint16_t stationIndex)
 {
 	stationIndex++;
 	if (stationIndex>=1 && stationIndex<= ESP_WIFI_MAX_CONN_NUM)
+    {
 		esp_wifi_deauth_sta(stationIndex);
+    }
 }

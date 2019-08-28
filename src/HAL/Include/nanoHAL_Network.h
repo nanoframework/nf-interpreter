@@ -199,7 +199,6 @@ typedef enum __nfpack WirelessAPFlags
     WirelessAPFlags_Hidden_SSID   = 0x04,     // Wireless AP uses hidden SSID
 } WirelessAPFlags;
 
-
 typedef struct __nfpack HAL_Configuration_Wireless80211 {
 
     // this is the marker placeholder for this configuration block

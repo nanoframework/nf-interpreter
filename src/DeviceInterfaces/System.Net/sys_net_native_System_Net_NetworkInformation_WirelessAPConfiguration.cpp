@@ -162,7 +162,9 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 		if (index != 0 && x != index) continue;
 
 		if (Network_Interface_Get_Station(x, mac, &rssi, &phyModes))
+		{
 			stationCount++;
+		}
 	}
 
 	// Create an array of <WirelessAPStation>

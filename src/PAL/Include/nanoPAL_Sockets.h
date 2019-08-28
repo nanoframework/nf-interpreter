@@ -533,7 +533,7 @@ enum NetworkEventType
     NetworkEventType_Invalid = 0,
     NetworkEventType_AvailabilityChanged = 1,
     NetworkEventType_AddressChanged = 2,
-	NetworkEventType_APClientChanged = 3,
+    NetworkEventType_APClientChanged = 3,
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

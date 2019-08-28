@@ -68,7 +68,6 @@ wifi_mode_t Esp32_CheckWifiMode()
 				{
 					// Use STATION + AP or just AP
 					mode = ( mode == WIFI_MODE_STA)? WIFI_MODE_APSTA : WIFI_MODE_AP;
-					//mode = WIFI_MODE_APSTA;
 				}
 			}
 		}
@@ -231,9 +230,9 @@ int Esp32_Wireless_Scan()
 	return (int)res;
 }
 
-wifi_auth_mode_t MapAuthenication( AuthenticationType type)
+wifi_auth_mode_t MapAuthentication( AuthenticationType type)
 {
-     wifi_auth_mode_t mapAuth[] = { 
+    wifi_auth_mode_t mapAuth[] = { 
 		WIFI_AUTH_OPEN, 		// 0 None
 		WIFI_AUTH_OPEN, 		// 1 EAP
 		WIFI_AUTH_OPEN, 		// 2 PEAP
@@ -281,14 +280,19 @@ esp_err_t Esp32_WirelessAP_Configure(HAL_Configuration_NetworkInterface * pConfi
 	ap_config.ap.ssid_len = hal_strlen_s((char *)pWireless->Ssid);
     ap_config.ap.channel = pWireless->Channel;
     ap_config.ap.ssid_hidden = (pWireless->Flags & WirelessAPFlags_Hidden_SSID)? 1 : 0;
-    
-	ap_config.ap.authmode = MapAuthenication(pWireless->Authentication);
+	ap_config.ap.authmode = MapAuthentication(pWireless->Authentication);
+
 	if (hal_strlen_s((char *)ap_config.ap.password) == 0)
+	{
 		ap_config.ap.authmode = WIFI_AUTH_OPEN;
+	}
 
 	// Max connections for ESP32
     ap_config.ap.max_connection = pWireless->MaxConnections;
-	if (ap_config.ap.max_connection > ESP_WIFI_MAX_CONN_NUM) ap_config.ap.max_connection = ESP_WIFI_MAX_CONN_NUM;
+	if (ap_config.ap.max_connection > ESP_WIFI_MAX_CONN_NUM)
+	{
+		ap_config.ap.max_connection = ESP_WIFI_MAX_CONN_NUM;
+	}
 
     ap_config.ap.beacon_interval = 100;
 
@@ -297,9 +301,9 @@ esp_err_t Esp32_WirelessAP_Configure(HAL_Configuration_NetworkInterface * pConfi
 	{
 		ESP_LOGE(TAG, "WiFi set AP config - result %d", ec);
 	}
-	 return ec;
-}
 
+	return ec;
+}
 
 //
 //	Open Wireless Soft AP
@@ -318,7 +322,9 @@ int  Esp32_WirelessAP_Open(int index, HAL_Configuration_NetworkInterface * pConf
 
 	// AP mode enabled ?
 	if ( !(Esp32_GetWifiMode() & WIFI_MODE_AP) )
+	{
 		return SOCK_SOCKET_ERROR;
+	}
 
 	// Return NetIf number
    	// FIXME find a better way to get the netif ptr
