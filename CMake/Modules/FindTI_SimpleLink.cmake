@@ -27,90 +27,81 @@ include(TI_SimpleLink_${TARGET_SERIES}_sources)
 # and here the GCC options tuned for the target series 
 include(TI_SimpleLink_${TARGET_SERIES}_GCC_options)
 
-# includes for FreeRTOS
-list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/include")
-list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/include/private")
-list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/portable/GCC/ARM_CM3")
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${TARGET_BASE_LOCATION}")
 
-# source files for FreeRTOS
-set(FreeRTOS_SRCS
-
-    # FreeRTOS
-    event_groups.c
-    list.c
-    queue.c
-    stream_buffer.c
-    tasks.c
-    timers.c
-    port.c
-    heap_4.c
-    clock.c
-    memory.c
-    mqueue.c
-    pthread_barrier.c
-    pthread_cond.c
-    pthread.c
-    pthread_mutex.c
-    pthread_rwlock.c
-    sched.c
-    semaphore.c
-    sleep.c
-    timer.c
-    PTLS.c
-    aeabi_portable.c
-    
-    
-    
-    
-    
-)
-
 if(TARGET_SERIES STREQUAL "CC32xx")
-    
-    # files specific for series
-    list(APPEND FreeRTOS_SRCS HwiPCC32XX_freertos.c)
-    list(APPEND FreeRTOS_SRCS PowerCC32XX_freertos.c)
-    list(APPEND FreeRTOS_SRCS startup_cc32xx_gcc.c)
-    list(APPEND FreeRTOS_SRCS ClockP_freertos.c)
-    list(APPEND FreeRTOS_SRCS DebugP_freertos.c)
-    list(APPEND FreeRTOS_SRCS MutexP_freertos.c)
-    list(APPEND FreeRTOS_SRCS SemaphoreP_freertos.c)
-    list(APPEND FreeRTOS_SRCS SystemP_freertos.c)
 
-    # root path for series SDK
-    set(SimpleLinkSDKFolder "SimpleLinkCC32xxSDK_Source")
+    # includes for FreeRTOS
+    list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/include")
+    list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/include/private")
+    list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/portable/GCC/ARM_CM3")
+
+    # source files for FreeRTOS
+    set(FreeRTOS_SRCS
+
+        # FreeRTOS
+        event_groups.c
+        list.c
+        queue.c
+        stream_buffer.c
+        tasks.c
+        timers.c
+        port.c
+        heap_4.c
+        clock.c
+        memory.c
+        mqueue.c
+        pthread_barrier.c
+        pthread_cond.c
+        pthread.c
+        pthread_mutex.c
+        pthread_rwlock.c
+        sched.c
+        semaphore.c
+        sleep.c
+        timer.c
+        PTLS.c
+        aeabi_portable.c
+
+        HwiPCC32XX_freertos.c
+        PowerCC32XX_freertos.c
+        startup_cc32xx_gcc.c
+        ClockP_freertos.c
+        DebugP_freertos.c
+        MutexP_freertos.c
+        SemaphoreP_freertos.c
+        SystemP_freertos.c 
+
+    )
+
+    foreach(SRC_FILE ${FreeRTOS_SRCS})
+        set(FreeRTOS_SCR_FILE SRC_FILE -NOTFOUND)
+        find_file(FreeRTOS_SCR_FILE ${SRC_FILE}
+            PATHS
+
+            # FreeRTOS
+            "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/ti/posix/freertos"
+            "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/kernel/tirtos/dpl"
+            "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSDK_Source/kernel/freertos/startup"
+            "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/portable/MemMang"
+            "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/portable/GCC/ARM_CM3"
+            "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS"
+
+            CMAKE_FIND_ROOT_PATH_BOTH
+        )
+        # message("${SRC_FILE} >> ${FreeRTOS_SCR_FILE}") # debug helper
+        list(APPEND TI_SimpleLink_SOURCES ${FreeRTOS_SCR_FILE})
+    endforeach()
 
 elseif(TARGET_SERIES STREQUAL "CC13x2_26x2")
 
-    # files specific for series
-    list(APPEND FreeRTOS_SRCS HwiPCC26XX_tirtos.c)
-    list(APPEND FreeRTOS_SRCS PowerCC26XX_tirtos.c)
-    # list(APPEND FreeRTOS_SRCS startup_cc32xx_gcc.c)
+    # includes for TI-RTOS
+    list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages")
 
-    # root path for series SDK
-    set(SimpleLinkSDKFolder "SimpleLinkCC13x2_26x2SDK_Source")
+    # includes for XDC Tools
+    list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/TI_XDCTools_Source/packages")
 
 endif()
-
-foreach(SRC_FILE ${FreeRTOS_SRCS})
-    set(FreeRTOS_SCR_FILE SRC_FILE -NOTFOUND)
-    find_file(FreeRTOS_SCR_FILE ${SRC_FILE}
-        PATHS
-
-        # FreeRTOS
-        "${PROJECT_BINARY_DIR}/${SimpleLinkSDKFolder}/ti/posix/freertos"
-        "${PROJECT_BINARY_DIR}/${SimpleLinkSDKFolder}/kernel/tirtos/dpl"
-        "${PROJECT_BINARY_DIR}/${SimpleLinkSDKFolder}/kernel/freertos/startup"
-        "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/portable/MemMang"
-        "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/portable/GCC/ARM_CM3"
-        "${PROJECT_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS"
-
-        CMAKE_FIND_ROOT_PATH_BOTH
-    )
-    message("${SRC_FILE} >> ${FreeRTOS_SCR_FILE}") # debug helper
-    list(APPEND TI_SimpleLink_SOURCES ${FreeRTOS_SCR_FILE})
-endforeach()
 
 include(FindPackageHandleStandardArgs)
 

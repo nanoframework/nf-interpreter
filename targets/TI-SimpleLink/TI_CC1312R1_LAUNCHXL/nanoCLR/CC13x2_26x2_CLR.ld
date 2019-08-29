@@ -1,142 +1,139 @@
 /*
- * Copyright (c) 2016-2017, Texas Instruments Incorporated
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * *  Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * *  Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * *  Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ @file      cc26x2r1f.lds
+ @brief     CC26x2R1F rev2 linker configuration file for GNU compiler.
 
-STACKSIZE = 0x800;
+ Revised    $Date$
+ Revision   $Revision$
 
+ This file is auto-generated.
+
+  Copyright (C) 2017 Texas Instruments Incorporated - http:www.ti.com/
+
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+    Neither the name of Texas Instruments Incorporated nor the names of
+    its contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/* Entry Point */
+ENTRY( ResetISR )
+
+/* System memory map */
 MEMORY
 {
-    FLASH_HDR (RX)  : ORIGIN = 0x01000000, LENGTH = 0x7FF
-    FLASH     (RX)  : ORIGIN = 0x01000800, LENGTH = 0x02F000
-    SRAM      (RWX) : ORIGIN = 0x20000000, LENGTH = 0x00040000
+    /* Application is stored in and executes from internal flash */
+    FLASH (RX) : ORIGIN = 0x0, LENGTH = 0x57FA8
+    /* Customer Configuration Area (CCFG) */
+    FLASH_CCFG (RX) : ORIGIN = 0x57FA8, LENGTH = 88
+    /* Application uses internal RAM for data */
+    SRAM (RWX) : ORIGIN = 0x20000000, LENGTH = 0x14000
+    /* Application can use GPRAM region as RAM if cache is disabled in the CCFG
+       (DEFAULT_CCFG_SIZE_AND_DIS_FLAGS.SET_CCFG_SIZE_AND_DIS_FLAGS_DIS_GPRAM = 0) */
+    GPRAM (RWX) : ORIGIN = 0x11000000, LENGTH = 0x2000
 }
 
-REGION_ALIAS("REGION_HDR", FLASH_HDR);
-REGION_ALIAS("REGION_TEXT", FLASH);
-REGION_ALIAS("REGION_BSS", SRAM);
-REGION_ALIAS("REGION_DATA", SRAM);
-REGION_ALIAS("REGION_STACK", SRAM);
-REGION_ALIAS("REGION_HEAP", SRAM);
-REGION_ALIAS("REGION_ARM_EXIDX", FLASH);
-REGION_ALIAS("REGION_ARM_EXTAB", FLASH);
+/*. Highest address of the stack. Used in startup file .*/
+_estack = ORIGIN(SRAM) + LENGTH(SRAM); /*end of SRAM .*/
 
-SECTIONS {
+/*. Generate a link error if heap and stack does not fit into RAM .*/
+_Min_Heap_Size = 0;
+_Min_Stack_Size = 0x100;
 
-    .dbghdr : ALIGN (2048) {
-        KEEP (*(.dbghdr))
-    } > REGION_HDR
 
-    PROVIDE (_resetVecs_base_address =
-        DEFINED(_resetVecs_base_address) ? _resetVecs_base_address : 0x01000800);
-
-    .resetVecs (_resetVecs_base_address) : AT (_resetVecs_base_address) {
-        KEEP (*(.resetVecs))
-    } > REGION_TEXT
-
-    .ramVecs (NOLOAD) : ALIGN(1024) {
-        KEEP (*(.ramVecs))
-    } > REGION_DATA
-
-    .text : {
-        CREATE_OBJECT_SYMBOLS
-        *(.text)
-        *(.text.*)
-        . = ALIGN(0x4);
-        KEEP (*(.ctors))
-        . = ALIGN(0x4);
-        KEEP (*(.dtors))
-        . = ALIGN(0x4);
-        __init_array_start = .;
-        KEEP (*(.init_array*))
-        __init_array_end = .;
+/* Section allocation in memory */
+SECTIONS
+{
+    .text :
+    {
+        _text = .;
+        KEEP(*(.vectors))
+        *(.text*)
+        *(.rodata*)
         *(.init)
         *(.fini*)
-    } > REGION_TEXT AT> REGION_TEXT
+        *(.eh_frame*)
+        _etext = .;
+    } > FLASH = 0
 
-    PROVIDE (__etext = .);
-    PROVIDE (_etext = .);
-    PROVIDE (etext = .);
-
-    .rodata : {
-        *(.rodata)
-        *(.rodata*)
-    } > REGION_TEXT AT> REGION_TEXT
-
-    .data : ALIGN (4) {
-        __data_load__ = LOADADDR (.data);
-        __data_start__ = .;
-        *(.data)
-        *(.data*)
-        . = ALIGN (4);
-        __data_end__ = .;
-    } > REGION_DATA AT> REGION_TEXT
-
-    .ARM.exidx : {
+   .ARM.exidx :
+    {
         __exidx_start = .;
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
         __exidx_end = .;
-    } > REGION_ARM_EXIDX AT> REGION_ARM_EXIDX
+    } > FLASH
 
-    .ARM.extab : {
+    .ARM.extab :
+    {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > REGION_ARM_EXTAB AT> REGION_ARM_EXTAB
+    } > FLASH
 
-    .bss : {
+    .init_array :
+    {
+        _init_array = .;
+        KEEP(*(SORT(.init_array.*)))
+        KEEP(*(.init_array*))
+        _einit_array = .;
+    } > FLASH
+
+    .data :
+    {
+        _data = .;
+        *(vtable)
+        *(.data*)
+        _edata = .;
+    } > SRAM AT > FLASH
+    _ldata = LOADADDR(.data);
+
+    .bss :
+    {
         __bss_start__ = .;
-        *(.shbss)
-        *(.bss)
-        *(.bss.*)
+        _bss = .;
+        *(.bss*)
         *(COMMON)
-        . = ALIGN (4);
+        _ebss = .;
         __bss_end__ = .;
-    } > REGION_BSS AT> REGION_BSS
+    } > SRAM
 
-    .heap : {
-        __heap_start__ = .;
-        end = __heap_start__;
-        _end = end;
-        __end = end;
-        KEEP(*(.heap))
-        __heap_end__ = .;
-        __HeapLimit = __heap_end__;
-    } > REGION_HEAP AT> REGION_HEAP
+    .ccfg :
+    {
+        KEEP(*(.ccfg));
+    } > FLASH_CCFG
 
-    .stack (NOLOAD) : ALIGN(0x8) {
-        _stack = .;
-        __stack = .;
-        KEEP(*(.stack))
-        . += STACKSIZE;
-        _stack_end = .;
-        __stack_end = .;
-    } > REGION_STACK AT> REGION_STACK
+    /* User_heap_stack section, used to check that there is enough SRAM left */
+    ._user_heap_stack :
+    {
+      . = ALIGN(4);
+      . = . + _Min_Heap_Size;
+      . = . + _Min_Stack_Size;
+      . = ALIGN(4);
+    } > SRAM
+
+    .gpram :
+    {
+    } > GPRAM
 }
 
 /* RAM region to be used for the nanoFramework CLR managed heap.*/
@@ -144,5 +141,3 @@ REGION_ALIAS("CLR_MANAGED_HEAP_RAM", SRAM);
 
 /* nanoCLR rules inclusion.*/
 INCLUDE rules_clr.ld
-
-ENTRY(resetISR)

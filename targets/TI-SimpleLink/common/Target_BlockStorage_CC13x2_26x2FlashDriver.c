@@ -6,7 +6,7 @@
 #include <Target_BlockStorage_CC13x2_26x2FlashDriver.h>
 
 // includes from SimpleLink
-#include "inc/hw_types.h"
+// #include "inc/hw_types.h"
 #include <flash.h>
 
 // local defines

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Texas Instruments Incorporated
+ * Copyright (c) 2015-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,105 +30,127 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*!****************************************************************************
- *  @file       Board.h
- *  @brief      Portable board-specific symbols
- *
- *  The Board header file should be included in an application as follows:
- *  @code
- *  #include "Board.h"
- *  @endcode
- *
- *  This header serves as device-independent interface for applications using
- *  peripherals connected to the device via standard digital interfaces; e.g,
- *  GPIO, SPI, I2C, UART, etc. Its purpose is to enable application code that
- *  references a peripheral to be portable to any device and board that
- *  supports the peripheral.
- *
- *  ## Usage ##
- *
- *  @anchor ti_drivers_Board_Synopsis
- *  ### Synopsis #
- *  @anchor ti_drivers_Board_Synopsis_Code
- *  @code
- *  #include "Board.h"
- *
- *  void main(void)
- *  {
- *      Board_init();
- *       :
- *  }
- *  @endcode
- *  
- *  ## Initializing the hardware ##
- *
- *  \p Board_init() must be called before any other driver API. This function
- *  calls the device specific initialization code that is required to as soon
- *  as possible after a device reset; e.g., to initialize clocks and power
- *  management functionality.
- *
- *  ## Portable peripheral usage
- *
- *  Each driver module declares symbols in \p Board.h that, if used, will
- *  improve code portability between both different devices and boards.
- *
- *  @anchor ti_drivers_I2C_Example_portable
- *  For example, the I2C driver adds \p Board.h symbol definitions of the form
- *  * <I>bus_name</I> - the I2C bus instance ID, 
- *  * <I>bus_name</I>_MAXBITRATE - the maximum supported BITRATE for the bus
- *    <I>bus_name</I>, and
- *  * Board_I2C_<I>comp_name</I>_ADDR - the slave address for the named I2C
- *    component
- *  where <I>comp_name</I> is the name given to an I2C peripheral by the
- *  board manufacturer, and <I>bus_name</I> is the user defined name of the
- *  I2C bus instance.  These symbols enable applications to portably acquire
- *  an I2C bus handle and control an I2C slave on that bus.
- *  @code
- *  #include <ti/drivers/I2C.h>
- *  #include "Board.h"
- *
- *  // portably open an I2C bus instance
- *  I2C_Params i2cParams;
- *  I2C_Params_init(&i2cParams);
- *  i2cParams.bitRate = Board_I2C0_MAXBITRATE;  // bus name == Board_I2C0
- *  i2cHandle = I2C_open(Board_I2C0, &i2cParams);
- *
- *  // portably read from an I2C slave
- *  I2C_Transaction trans;
- *  trans.slaveAddress = Board_I2C_TMP006_ADDR; // component name = TMP006
- *  trans.readBuf = ...;
- *  trans.readCount = ...;
- *  trans.writeCount = 0;
- *  I2C_transfer(i2cHandle, &trans);
- *  @endcode
- ******************************************************************************
- */
+#ifndef __BOARD_H
+#define __BOARD_H
 
-#ifndef ti_boards_Board__include
-#define ti_boards_Board__include
+#define Board_CC1312R1_LAUNCHXL
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*!
- *  @brief  Performs "early" board-level initialization required by TI-DRIVERS
- *
- *  Board_init() must be called before any other TI-DRIVER API. This function
- *  calls all device and board specific initialization functions needed by
- *  TI-DRIVERS; e.g., to initialize clocks and power management functionality.
- *
- *  This function should only be called once and as early in the application's
- *  startup as possible.  In most applications, a call to Board_init() is the
- *  first statement in \p main().
- *
- *  @pre    \p Board_init must be called after every CPU reset and _prior_ to
- *          enabling any interrupts.
- */
-extern void Board_init(void);
+#include <ti/drivers/Board.h>
+
+#define Board_initGeneral()     Board_init()  /* deprecated */
+
+#include "CC1312R1_LAUNCHXL.h"
+
+#define Board_shutDownExtFlash() CC1312R1_LAUNCHXL_shutDownExtFlash()
+#define Board_wakeUpExtFlash() CC1312R1_LAUNCHXL_wakeUpExtFlash()
+
+/* These #defines allow us to reuse TI-RTOS across other device families */
+
+#define Board_ADC0              CC1312R1_LAUNCHXL_ADC0
+#define Board_ADC1              CC1312R1_LAUNCHXL_ADC1
+
+#define Board_ADCBUF0           CC1312R1_LAUNCHXL_ADCBUF0
+#define Board_ADCBUF0CHANNEL0   CC1312R1_LAUNCHXL_ADCBUF0CHANNEL0
+#define Board_ADCBUF0CHANNEL1   CC1312R1_LAUNCHXL_ADCBUF0CHANNEL1
+
+#define Board_ECDH0             CC1312R1_LAUNCHXL_ECDH0
+#define Board_ECDSA0            CC1312R1_LAUNCHXL_ECDSA0
+#define Board_ECJPAKE0          CC1312R1_LAUNCHXL_ECJPAKE0
+#define Board_AESCCM0           CC1312R1_LAUNCHXL_AESCCM0
+#define Board_AESGCM0           CC1312R1_LAUNCHXL_AESGCM0
+#define Board_AESCBC0           CC1312R1_LAUNCHXL_AESCBC0
+#define Board_AESCTR0           CC1312R1_LAUNCHXL_AESCTR0
+#define Board_AESECB0           CC1312R1_LAUNCHXL_AESECB0
+#define Board_AESCTRDRBG0       CC1312R1_LAUNCHXL_AESCTRDRBG0
+#define Board_SHA20             CC1312R1_LAUNCHXL_SHA20
+#define Board_TRNG0             CC1312R1_LAUNCHXL_TRNG0
+
+#define Board_DIO0              CC1312R1_LAUNCHXL_DIO0
+#define Board_DIO1              CC1312R1_LAUNCHXL_DIO1
+#define Board_DIO12             CC1312R1_LAUNCHXL_DIO12
+#define Board_DIO15             CC1312R1_LAUNCHXL_DIO15
+#define Board_DIO16_TDO         CC1312R1_LAUNCHXL_DIO16_TDO
+#define Board_DIO17_TDI         CC1312R1_LAUNCHXL_DIO17_TDI
+#define Board_DIO21             CC1312R1_LAUNCHXL_DIO21
+#define Board_DIO22             CC1312R1_LAUNCHXL_DIO22
+
+#define Board_GPIO_BUTTON0      CC1312R1_LAUNCHXL_GPIO_S1
+#define Board_GPIO_BUTTON1      CC1312R1_LAUNCHXL_GPIO_S2
+#define Board_GPIO_BTN1         CC1312R1_LAUNCHXL_GPIO_S1
+#define Board_GPIO_BTN2         CC1312R1_LAUNCHXL_GPIO_S2
+#define Board_GPIO_LED0         CC1312R1_LAUNCHXL_GPIO_LED_RED
+#define Board_GPIO_LED1         CC1312R1_LAUNCHXL_GPIO_LED_GREEN
+#define Board_GPIO_RLED         CC1312R1_LAUNCHXL_GPIO_LED_RED
+#define Board_GPIO_GLED         CC1312R1_LAUNCHXL_GPIO_LED_GREEN
+#define Board_GPIO_LED_ON       CC1312R1_LAUNCHXL_GPIO_LED_ON
+#define Board_GPIO_LED_OFF      CC1312R1_LAUNCHXL_GPIO_LED_OFF
+#define Board_GPIO_TMP116_EN    CC1312R1_LAUNCHXL_GPIO_TMP116_EN
+
+#define Board_GPTIMER0A         CC1312R1_LAUNCHXL_GPTIMER0A
+#define Board_GPTIMER0B         CC1312R1_LAUNCHXL_GPTIMER0B
+#define Board_GPTIMER1A         CC1312R1_LAUNCHXL_GPTIMER1A
+#define Board_GPTIMER1B         CC1312R1_LAUNCHXL_GPTIMER1B
+#define Board_GPTIMER2A         CC1312R1_LAUNCHXL_GPTIMER2A
+#define Board_GPTIMER2B         CC1312R1_LAUNCHXL_GPTIMER2B
+#define Board_GPTIMER3A         CC1312R1_LAUNCHXL_GPTIMER3A
+#define Board_GPTIMER3B         CC1312R1_LAUNCHXL_GPTIMER3B
+
+#define Board_I2C0              CC1312R1_LAUNCHXL_I2C0
+#define Board_I2C_TMP           CC1312R1_LAUNCHXL_I2C0
+
+#define Board_I2S0              CC1312R1_LAUNCHXL_I2S0
+#define Board_I2S_ADO           CC1312R1_LAUNCHXL_I2S_ADO
+#define Board_I2S_ADI           CC1312R1_LAUNCHXL_I2S_ADI
+#define Board_I2S_BCLK          CC1312R1_LAUNCHXL_I2S_BCLK
+#define Board_I2S_MCLK          CC1312R1_LAUNCHXL_I2S_MCLK
+#define Board_I2S_WCLK          CC1312R1_LAUNCHXL_I2S_WCLK
+
+#define Board_NVSINTERNAL       CC1312R1_LAUNCHXL_NVSCC26XX0
+#define Board_NVSEXTERNAL       CC1312R1_LAUNCHXL_NVSSPI25X0
+
+#define Board_PIN_BUTTON0       CC1312R1_LAUNCHXL_PIN_BTN1
+#define Board_PIN_BUTTON1       CC1312R1_LAUNCHXL_PIN_BTN2
+#define Board_PIN_BTN1          CC1312R1_LAUNCHXL_PIN_BTN1
+#define Board_PIN_BTN2          CC1312R1_LAUNCHXL_PIN_BTN2
+#define Board_PIN_LED0          CC1312R1_LAUNCHXL_PIN_RLED
+#define Board_PIN_LED1          CC1312R1_LAUNCHXL_PIN_GLED
+#define Board_PIN_LED2          CC1312R1_LAUNCHXL_PIN_RLED
+#define Board_PIN_RLED          CC1312R1_LAUNCHXL_PIN_RLED
+#define Board_PIN_GLED          CC1312R1_LAUNCHXL_PIN_GLED
+
+#define Board_PWM0              CC1312R1_LAUNCHXL_PWM0
+#define Board_PWM1              CC1312R1_LAUNCHXL_PWM1
+#define Board_PWM2              CC1312R1_LAUNCHXL_PWM2
+#define Board_PWM3              CC1312R1_LAUNCHXL_PWM3
+#define Board_PWM4              CC1312R1_LAUNCHXL_PWM4
+#define Board_PWM5              CC1312R1_LAUNCHXL_PWM5
+#define Board_PWM6              CC1312R1_LAUNCHXL_PWM6
+#define Board_PWM7              CC1312R1_LAUNCHXL_PWM7
+
+#define Board_SD0               CC1312R1_LAUNCHXL_SDSPI0
+
+#define Board_SPI0              CC1312R1_LAUNCHXL_SPI0
+#define Board_SPI1              CC1312R1_LAUNCHXL_SPI1
+#define Board_SPI_FLASH_CS      CC1312R1_LAUNCHXL_SPI_FLASH_CS
+#define Board_FLASH_CS_ON       0
+#define Board_FLASH_CS_OFF      1
+
+#define Board_SPI_MASTER        CC1312R1_LAUNCHXL_SPI0
+#define Board_SPI_SLAVE         CC1312R1_LAUNCHXL_SPI0
+#define Board_SPI_MASTER_READY  CC1312R1_LAUNCHXL_SPI_MASTER_READY
+#define Board_SPI_SLAVE_READY   CC1312R1_LAUNCHXL_SPI_SLAVE_READY
+
+#define Board_UART0             CC1312R1_LAUNCHXL_UART0
+#define Board_UART1             CC1312R1_LAUNCHXL_UART1
+
+#define Board_WATCHDOG0         CC1312R1_LAUNCHXL_WATCHDOG0
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ti_boards_Board_include */
+#endif /* __BOARD_H */

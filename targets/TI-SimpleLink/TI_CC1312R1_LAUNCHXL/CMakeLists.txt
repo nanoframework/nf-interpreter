@@ -7,15 +7,15 @@ cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
 
 # add header files with common OS definitions and board definitions specific for each image
-# configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
-#                 "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
  
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(BuildUtils REQUIRED)
-# find_package(TI_SimpleLink REQUIRED)
+find_package(TI_SimpleLink REQUIRED)
 find_package(WireProtocol REQUIRED)
 
 # packages for nanoFramework libraries
@@ -71,6 +71,7 @@ add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
 
+    "${CMAKE_CURRENT_SOURCE_DIR}/ccfg.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/CC1312R1_LAUNCHXL.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/CC1312R1_LAUNCHXL_fxns.c"
@@ -82,6 +83,7 @@ add_executable(
 
     ${TARGET_TI_SimpleLink_NANOCLR_SOURCES}
 
+    ${TI_SimpleLink_SOURCES}
 
     ${WireProtocol_SOURCES}
 
@@ -94,10 +96,17 @@ add_executable(
     ${TARGET_NANO_APIS_SOURCES}
 )
 
+target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/ti/display/lib/display.am4fg)
+target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/ti/grlib/lib/gcc/m4f/grlib.a)
+target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/ti/drivers/rf/lib/rf_multiMode_cc13x2.am4fg)
+target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/ti/drivers/lib/drivers_cc13x2.am4fg)
+target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/ti/dpl/lib/dpl_cc13x2.am4fg)
+target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/ti/devices/cc13x2_cc26x2/driverlib/bin/gcc/driverlib.lib)
+
 # add dependency from TI SimpleLink CC32xx SDK and FreeRTOS (this is required to make sure that those repos are downloaded before the build starts)
 # add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf FreeRTOS)
 # add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf SimpleLinkCC13x2_26x2SDK)
-add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf TI_XDCTools)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC13x2_26x2SDK)
 
 # include common directories
@@ -111,6 +120,7 @@ include_directories(
     "${PROJECT_SOURCE_DIR}/src/PAL/Include"
 
     "${WireProtocol_INCLUDE_DIRS}"
+    "${TI_SimpleLink_INCLUDE_DIRS}"
 
     "${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}"
 )
@@ -133,7 +143,7 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS}"
 
     # directories for nanoFramework libraries
-  ${NF_CoreCLR_INCLUDE_DIRS}
+    ${NF_CoreCLR_INCLUDE_DIRS}
     ${NF_Debugger_INCLUDE_DIRS}
     ${NF_Diagnostics_INCLUDE_DIRS}
     

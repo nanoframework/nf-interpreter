@@ -4,8 +4,8 @@
 //
 
 #include "WireProtocol_HAL_Interface.h"
-#include <FreeRTOS.h>
-#include <task.h>
+// #include <FreeRTOS.h>
+// #include <task.h>
 
 extern WP_Message inboundMessage;
 
@@ -26,6 +26,6 @@ void* ReceiverThread(void* argument)
         WP_Message_Process(&inboundMessage);
 
         // Allow other tasks a chance to run
-        taskYIELD();
+        Task_yield();
     }
 }

@@ -1,0 +1,25 @@
+#
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
+project(TI_XDCTools-download NONE)
+
+include(ExternalProject)
+
+# download TI XDCTools from nanoFramework repo
+ExternalProject_Add(
+    TI_XDCTools
+    PREFIX TI_XDCTools
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/TI_XDCTools_Source
+    GIT_REPOSITORY  https://github.com/nanoframework/TI_XDCTools
+    GIT_TAG ${TI_XDCTools_TAG}  # target specified branch
+    GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+    TIMEOUT 10
+    LOG_DOWNLOAD 1
+
+    # Disable all other steps
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)

@@ -9,7 +9,7 @@
 #include <target_platform.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
-#include <FreeRTOS.h>
+// #include <FreeRTOS.h>
 
 //
 //  Reboot handlers clean up on reboot
