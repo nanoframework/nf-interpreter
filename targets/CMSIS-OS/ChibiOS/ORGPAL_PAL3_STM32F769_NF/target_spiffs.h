@@ -25,12 +25,12 @@
 // max timming for write & erase operations (except chip erase) 
 #define HAL_SPI_TIMEOUT_DEFAULT_VALUE       ((uint32_t)4000)
 
-#define AT25SL641_FLASH_SIZE                0x800000  /* 64 Mbits => 8 MByte */
-#define AT25SL641_SECTOR_SIZE               0x10000   /* 128 sectors of 64kBytes */
-#define AT25SL641_SUBSECTOR_SIZE            0x1000    /* 2048 subsectors of 4kBytes */
-#define AT25SL641_PAGE_SIZE                 0x100     /* 32768 pages of 256 bytes */
+#define AT25SF641_FLASH_SIZE                0x800000  /* 64 Mbits => 8 MByte */
+#define AT25SF641_SECTOR_SIZE               0x10000   /* 128 sectors of 64kBytes */
+#define AT25SF641_SUBSECTOR_SIZE            0x1000    /* 2048 subsectors of 4kBytes */
+#define AT25SF641_PAGE_SIZE                 0x100     /* 32768 pages of 256 bytes */
 
-// AT25SL641 Commands
+// AT25SF641 Commands
 #define READ_CMD                            0x03
 
 #define BLOCK_ERASE_CMD                     0xD8
@@ -62,18 +62,18 @@
 #define DEEP_POWER_DOWN_CMD                 0xB9
 
 
-#define AT25SL641_MANUFACTURER_ID           ((uint8_t)0x1F)
-#define AT25SL641_DEVICE_ID1                ((uint8_t)0x43)
-#define AT25SL641_DEVICE_ID2                ((uint8_t)0x17)
+#define AT25SF641_MANUFACTURER_ID           ((uint8_t)0x1F)
+#define AT25SF641_DEVICE_ID1                ((uint8_t)0x32)
+#define AT25SF641_DEVICE_ID2                ((uint8_t)0x17)
 
 // Status Register 1
-#define AT25SL641_SR_BUSY                   ((uint8_t)0x01)
+#define AT25SF641_SR_BUSY                   ((uint8_t)0x01)
 
 ////////////////////////////////
 // remapping into SPIFFS defines
 
-#define SPIFFS_TOTAL_SIZE               AT25SL641_FLASH_SIZE
-#define SPIFFS_ERASE_BLOCK_SIZE         AT25SL641_SECTOR_SIZE
+#define SPIFFS_TOTAL_SIZE               AT25SF641_FLASH_SIZE
+#define SPIFFS_ERASE_BLOCK_SIZE         AT25SF641_SECTOR_SIZE
 #define SPIFFS_LOGICAL_BLOCK_SIZE       (64*1024)
 
 
