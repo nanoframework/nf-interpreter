@@ -64,10 +64,10 @@ uint8_t target_spiffs_init()
     spiExchange(&SPID1, 4, writeBuffer, readBuffer);
     spiUnselect(&SPID1);
 
-    // constants from ID Definitions table in AT25SL641 datasheet
-    ASSERT(readBuffer[1] == AT25SL641_MANUFACTURER_ID);
-    ASSERT(readBuffer[2] == AT25SL641_DEVICE_ID1);
-    ASSERT(readBuffer[3] == AT25SL641_DEVICE_ID2);
+    // constants from ID Definitions table in AT25SF641 datasheet
+    ASSERT(readBuffer[1] == AT25SF641_MANUFACTURER_ID);
+    ASSERT(readBuffer[2] == AT25SF641_DEVICE_ID1);
+    ASSERT(readBuffer[3] == AT25SF641_DEVICE_ID2);
 
     return 1;
 }
@@ -140,7 +140,7 @@ bool SPI_WaitOnBusy()
         // (only required for Cortex-M7)
         cacheBufferInvalidate(readBuffer, 1);
 
-        if( !(readBuffer[0] & AT25SL641_SR_BUSY) )
+        if( !(readBuffer[0] & AT25SF641_SR_BUSY) )
         {
             // BuSY bit is cleared
             break;          
