@@ -82,6 +82,8 @@ s32_t hal_spiffs_erase(u32_t addr, u32_t size)
 
     for (i = 0; i < erase_count; i++)
     {
+        Watchdog_Reset();
+
         if( !SPI_Erase_Block(addr) )
         {
             return SPIFFS_ERROR;
