@@ -126,7 +126,7 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
 
 elseif(RTOS_TI_SIMPLELINK_CHECK)
-    message(STATUS "\nSetting Toolchain file for FreeRTOS CC32XX \n")
+    message(STATUS "\nSetting Toolchain file for TI SimpleLink \n")
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.TI_SimpleLink.${TOOLCHAIN}.cmake)
 
 endif()

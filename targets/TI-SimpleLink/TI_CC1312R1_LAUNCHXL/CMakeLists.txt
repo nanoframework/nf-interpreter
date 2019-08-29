@@ -7,15 +7,15 @@ cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
 
 # add header files with common OS definitions and board definitions specific for each image
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
-                "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
+# configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
+#                 "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
  
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(BuildUtils REQUIRED)
-find_package(TI_SimpleLink REQUIRED)
+# find_package(TI_SimpleLink REQUIRED)
 find_package(WireProtocol REQUIRED)
 
 # packages for nanoFramework libraries
@@ -35,7 +35,34 @@ endif()
 #######################################
 
 add_subdirectory("common")
+# add_subdirectory("nanoBooter")
 add_subdirectory("nanoCLR")
+
+# #######################
+# # nanoBooter executable
+
+# add_executable(
+#     # executables for project, project sources
+#     ${NANOBOOTER_PROJECT_NAME}.elf
+
+#     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+#     # "${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c"
+
+#     # need to add configuration manager to allow get/store configuration blocks
+#     "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c"
+ 
+#     ${COMMON_PROJECT_SOURCES}
+#     ${NANOCLR_PROJECT_SOURCES}
+    
+#     ${TARGET_TI_SimpleLink_COMMON_SOURCES}
+
+#     # ${TARGET_TI_SimpleLink_NANOBOOTER_SOURCES}
+
+# #     ${TI_SimpleLink_SOURCES}
+
+#     ${WireProtocol_SOURCES}
+
+# )
 
 #######################
 # nanoCLR executable
@@ -45,7 +72,8 @@ add_executable(
     ${NANOCLR_PROJECT_NAME}.elf
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/CC3220SF_LAUNCHXL.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/CC1312R1_LAUNCHXL.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/CC1312R1_LAUNCHXL_fxns.c"
 
     ${COMMON_PROJECT_SOURCES}
     ${NANOCLR_PROJECT_SOURCES}
@@ -54,7 +82,6 @@ add_executable(
 
     ${TARGET_TI_SimpleLink_NANOCLR_SOURCES}
 
-    ${TI_SimpleLink_SOURCES}
 
     ${WireProtocol_SOURCES}
 
@@ -68,8 +95,10 @@ add_executable(
 )
 
 # add dependency from TI SimpleLink CC32xx SDK and FreeRTOS (this is required to make sure that those repos are downloaded before the build starts)
+# add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf FreeRTOS)
+# add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf SimpleLinkCC13x2_26x2SDK)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS)
-add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC32xxSDK)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC13x2_26x2SDK)
 
 # include common directories
 include_directories(
@@ -82,10 +111,19 @@ include_directories(
     "${PROJECT_SOURCE_DIR}/src/PAL/Include"
 
     "${WireProtocol_INCLUDE_DIRS}"
-    "${TI_SimpleLink_INCLUDE_DIRS}"
 
     "${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}"
 )
+
+
+# # include directories for nanoBooter
+# target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
+#     "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter"
+#      ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter
+
+#     #  ${TARGET_CMSIS_NANOBOOTER_INCLUDE_DIRS}
+#     #  ${TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS}
+# )
 
 # include directories for nanoCLR
 target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
@@ -104,28 +142,35 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 )
 
 # set compiler options
+# nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
 ###############################################
 # add -DUSE_CC3220_ROM_DRV_API to use ROM API #
 ###############################################
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DCC32XX -DDeviceFamily_CC3220 -DPTLS_TLS_INDEX=0 -DBOARD_DISPLAY_USE_UART_ANSI=0 -DBOARD_DISPLAY_USE_LCD=0 -DconfigNUM_THREAD_LOCAL_STORAGE_POINTERS=1 -DSL_PLATFORM_MULTI_THREADED)
+# nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf -DDeviceFamily_CC13X2)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DDeviceFamily_CC13X2)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/CC3220SF_CLR-DEBUG.ld)
+    # nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/CC13x2_26x2_booter-DEBUG.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/CC13x2_26x2_CLR-DEBUG.ld)
 else()
-    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/CC3220SF_CLR.ld)
+    # nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/CC13x2_26x2_booter.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/CC13x2_26x2_CLR.ld)
 endif()
 
 # set linker options
+# nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # add other linker flags
 ###########################################################
 # the size of CRT heap stacks is defined here
+# set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__crt_heap_size__=0x0")
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__crt_heap_size__=0x0")
 
 # generate output files
+# nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)

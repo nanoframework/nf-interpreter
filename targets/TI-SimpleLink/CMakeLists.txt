@@ -23,6 +23,7 @@ add_subdirectory(common)
 add_subdirectory(Include)
 add_subdirectory(nanoCLR)
 
+########################################
 if("${TARGET_SERIES}" STREQUAL "CC32xx")
     
     # CC32xx series is using TI SimpleLink CC32xx SDK and FreeRTOS
@@ -230,4 +231,213 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
 
     add_subdirectory(${TI_BOARD})
 
+############################################
+elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
+    
+    # CC13x2 and CC26x2 series are using TI SimpleLink CC13x2_26x2 SDK and FreeRTOS
+
+    # check if TI_SL_CC13x2_26x2_SDK_SOURCE was specified or if it's empty (default is empty)
+    set(NO_TI_SL_CC13x2_26x2_SDK_SOURCE TRUE)
+    if(TI_SL_CC13x2_26x2_SDK_SOURCE)
+        if(NOT "${TI_SL_CC13x2_26x2_SDK_SOURCE}" STREQUAL "")
+            set(NO_TI_SL_CC13x2_26x2_SDK_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_TI_SL_CC13x2_26x2_SDK_SOURCE)
+        # no TI SimpleLink CC13x2_26x2 SDK source specified, download it from our repo
+
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        message(STATUS "TI SimpleLink CC13x2_26x2 SDK (latest available code from v3.20.00.68")
+        set(TI_SL_CC13x2_26x2_SDK_TAG "3.20.00.68")
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("${PROJECT_SOURCE_DIR}/CMake/SimpleLinkCC13x2_26x2Sdk.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Download/CMakeLists.txt")
+
+        # setup CMake project for TI SimpleLink CC13x2_26x2 SDK download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Download")
+
+        # run build on TI SimpleLink CC13x2_26x2 SDK download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Download")
+
+        # add TI SimpleLink CC13x2_26x2 SDK as external project
+        ExternalProject_Add(
+            SimpleLinkCC13x2_26x2SDK
+            PREFIX SimpleLinkCC13x2_26x2Sdk
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source
+            GIT_REPOSITORY  https://github.com/nanoframework/SimpleLink_CC13x2_26x2_SDK
+            GIT_TAG ${TI_SL_CC32xx_SDK_TAG}  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+        # get source dir for TI SimpleLink CC13x2_26x2 SDK CMake project
+        ExternalProject_Get_Property(SimpleLinkCC13x2_26x2SDK SOURCE_DIR)
+
+    else()
+        # TI SimpleLink CC13x2_26x2 SDK source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${TI_SL_CC13x2_26x2_SDK_SOURCE}/")
+            message(STATUS "TI SimpleLink CC13x2_26x2 SDK source from: ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
+
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/TI_SL_CC13x2_26x2_SDK_SOURCE")
+                file(COPY "${TI_SL_CC13x2_26x2_SDK_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source")
+            else()
+                message(STATUS "Using local cache of TI SimpleLink CC13x2_26x2 SDK source from ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
+            endif()
+
+            set(SimpleLinkCC13x2_26x2SDK_INCLUDE_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SdkS_Source/ti/devices/cc32xx)
+        else()
+            message(FATAL_ERROR "Couldn't find TI SimpleLink CC13x2_26x2 SDK source at ${TI_SL_CC13x2_26x2_SDK_SOURCE}/")
+        endif()
+
+        # add TI SimpleLink CC13x2_26x2 SDK as external project
+        ExternalProject_Add(
+            SimpleLinkCC13x2_26x2SDK
+            PREFIX SimpleLinkCC13x2_26x2Sdk
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source
+
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+        # get source dir for TI SimpleLink CC13x2_26x2 SDK CMake project
+        ExternalProject_Get_Property(SimpleLinkCC13x2_26x2SDK SOURCE_DIR)
+    endif()
+    
+    # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_FREERTOS_SOURCE TRUE)
+    if(FREERTOS_SOURCE)
+        if(NOT "${FREERTOS_SOURCE}" STREQUAL "")
+            set(NO_FREERTOS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_FREERTOS_SOURCE)
+        # no FreeRTOS source specified, download it from it's repo
+        
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        # FreeRTOS version
+        set(FREERTOS_VERSION_EMPTY TRUE)
+
+        # check if build was requested with a specifc FreeRTOS version
+        if(DEFINED FREERTOS_VERSION)
+            if(NOT "${FREERTOS_VERSION}" STREQUAL "")
+                set(FREERTOS_VERSION_EMPTY FALSE)
+            endif()
+        endif()
+
+        # FreeRTOS version
+        set(FREERTOS_VERSION_EMPTY TRUE)
+
+        # check if build was requested with a specifc FreeRTOS version
+        if(FREERTOS_VERSION_EMPTY)
+            # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
+            set(FREERTOS_VERSION_TAG "v1.4.8")
+        else()
+            # set SVN tag
+            set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")
+        endif()
+
+        message(STATUS "RTOS is: FreeRTOS ${FREERTOS_VERSION} from GitHub repo")
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("${PROJECT_SOURCE_DIR}/CMake/FreeRTOS.CMakeLists.cmake.in"
+        "${CMAKE_BINARY_DIR}/FreeRTOS_Download/CMakeLists.txt")
+
+        # setup CMake project for FreeRTOS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
+
+        # run build on FreeRTOS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FreeRTOS_Download")
+
+        # add FreeRTOS as external project
+        ExternalProject_Add( 
+            FreeRTOS
+            PREFIX FreeRTOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
+            GIT_REPOSITORY https://github.com/aws/amazon-freertos.git
+            GIT_TAG ${FREERTOS_VERSION_TAG}  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )   
+
+    else()
+        # FreeRTOS source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${FREERTOS_SOURCE}/")
+            message(STATUS "RTOS is: FreeRTOS (source from: ${FREERTOS_SOURCE})")
+
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
+                file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
+            else()
+                message(STATUS "Using local cache of FreeRTOS source from ${FREERTOS_SOURCE}")
+            endif()
+
+            set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
+        else()
+            message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
+        endif()
+
+        # add FreeRTOS as external project
+        ExternalProject_Add(
+            FreeRTOS
+            PREFIX FreeRTOS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )        
+
+        # get source dir for FreeRTOS CMake project
+        ExternalProject_Get_Property(FreeRTOS SOURCE_DIR)
+
+    endif()
+
+    add_subdirectory(${TI_BOARD})
+
 endif()
+
