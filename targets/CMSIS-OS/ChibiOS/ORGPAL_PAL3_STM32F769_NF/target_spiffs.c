@@ -102,10 +102,6 @@ s32_t hal_spiffs_read(u32_t addr, u32_t size, u8_t *dst)
         return SPIFFS_ERROR;
     }
 
-    //  ensure that content from DMA is read
-    // (only required for Cortex-M7)
-    cacheBufferInvalidate(dst, size);
-
     return SPIFFS_SUCCESS;
 }
 
@@ -135,10 +131,6 @@ bool SPI_WaitOnBusy()
     {
         // read register value
         spiReceive(&SPID1, 1, readBuffer);
-        
-        //  ensure that content from DMA is read
-        // (only required for Cortex-M7)
-        cacheBufferInvalidate(readBuffer, 1);
 
         if( !(readBuffer[0] & AT25SF641_SR_BUSY) )
         {
