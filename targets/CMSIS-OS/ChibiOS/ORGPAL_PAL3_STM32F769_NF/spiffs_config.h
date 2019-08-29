@@ -356,9 +356,6 @@ extern void hal_spiffs_unlock();
 #endif
 #endif
 
-// hook for long running operations (feeding watchdog)
-#define LONG_RUNNING_OPERATION_HOOK     Watchdog_Reset()
-
 // Types depending on configuration such as the amount of flash bytes
 // given to spiffs file system in total (spiffs_file_system_size),
 // the logical block size (log_block_size), and the logical page size
