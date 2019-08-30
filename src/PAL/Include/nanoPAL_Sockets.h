@@ -510,6 +510,14 @@ bool Network_Interface_Close(int index);
 int  Network_Interface_Disconnect(int index);
 int  Network_Interface_Connect(int index, const char * ssid, const char * passphase, int options);
 bool Network_Interface_Start_Scan(int index);
+
+// Wireless AP methods
+void Network_Interface_Add_Station(uint16_t index, uint8_t * macAddress);
+void Network_Interface_Remove_Station(uint16_t index);
+int  Network_Interface_Max_Stations();
+bool Network_Interface_Get_Station(uint16_t index, uint8_t * macAddress, uint8_t * rssi, uint32_t * phyModes);
+void Network_Interface_Deauth_Station(uint16_t index);
+
 //--//
 
 // Network_Interface_Connect options
@@ -525,6 +533,7 @@ enum NetworkEventType
     NetworkEventType_Invalid = 0,
     NetworkEventType_AvailabilityChanged = 1,
     NetworkEventType_AddressChanged = 2,
+    NetworkEventType_APClientChanged = 3,
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -547,7 +556,7 @@ enum NetworkEventFlags
     NetworkEventFlags_NetworkAvailable = 0x01,
 };
 
-void Network_PostEvent(unsigned int eventType, unsigned int flags);
+void Network_PostEvent(unsigned int eventType, unsigned int flags, unsigned int index);
 
 //--//
 // Debugger Methods

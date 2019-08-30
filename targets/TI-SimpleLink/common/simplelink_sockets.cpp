@@ -26,21 +26,21 @@ void PostAddressChanged(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AddressChanged, 0);
+	Network_PostEvent(NetworkEventType_AddressChanged, 0, 0);
 }
 
 void PostAvailabilityOn(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkAvailable);
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkAvailable, 0);
 }
 
 void PostAvailabilityOff(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkNOTAvailable);
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkNOTAvailable, 0);
 }
 
 void Link_callback(bool linkUp)
