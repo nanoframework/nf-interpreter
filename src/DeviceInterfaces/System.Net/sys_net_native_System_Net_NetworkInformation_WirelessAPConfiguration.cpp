@@ -56,7 +56,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     pConfig[FIELD___apAuthentication].SetInteger((CLR_UINT32)config.Authentication);
     pConfig[FIELD___apEncryption].SetInteger((CLR_UINT32)config.Encryption);
     pConfig[FIELD___apRadio].SetInteger((CLR_UINT32)config.Radio);
-    pConfig[FIELD___apFlags].SetInteger((CLR_UINT8)config.Flags);
+    pConfig[FIELD___options].SetInteger((CLR_UINT8)config.Flags);
     pConfig[FIELD___apChannel].SetInteger((CLR_UINT8)config.Channel);
     pConfig[FIELD___apMaxConnections].SetInteger((CLR_UINT8)config.MaxConnections);
  
@@ -99,7 +99,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     config.Authentication = (AuthenticationType)pConfig[FIELD___apAuthentication].NumericByRef().u4;
     config.Encryption = (EncryptionType)pConfig[FIELD___apEncryption].NumericByRef().u4;
     config.Radio = (RadioType)pConfig[FIELD___apRadio].NumericByRef().u4;
-    config.Flags = (uint8_t)pConfig[FIELD___apFlags].NumericByRef().u1;
+    config.Flags = (uint8_t)pConfig[FIELD___options].NumericByRef().u1;
     config.Channel = (uint8_t)pConfig[FIELD___apChannel].NumericByRef().u1;
     config.MaxConnections = (uint8_t)pConfig[FIELD___apMaxConnections].NumericByRef().u1;
 
@@ -188,15 +188,15 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 				// dereference the object in order to reach its fields
 				hbObj = apStation->Dereference();
 
-				NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___MacAddress], 6, g_CLR_RT_WellKnownTypes.m_UInt8));
-				memcpy(hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___MacAddress].DereferenceArray()->GetFirstElement(), mac, 6);
+				NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___macAddress], 6, g_CLR_RT_WellKnownTypes.m_UInt8));
+				memcpy(hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___macAddress].DereferenceArray()->GetFirstElement(), mac, 6);
 
 
-				CLR_RT_HeapBlock& rssiFieldRef = hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___Rssi];
+				CLR_RT_HeapBlock& rssiFieldRef = hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___rssi];
 				CLR_INT8* pRes2 = (CLR_INT8*)&rssiFieldRef.NumericByRef().s1;
 				*pRes2 = rssi;
 
-				CLR_RT_HeapBlock& phyModesFieldRef = hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___PhyModes];
+				CLR_RT_HeapBlock& phyModesFieldRef = hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___phyModes];
 				CLR_INT32* pRes3 = (CLR_INT32*)&phyModesFieldRef.NumericByRef().s4;
 				*pRes3 = phyModes;
 
