@@ -40,3 +40,10 @@ __nfweak HAL_Configuration_Wireless80211* ConfigurationManager_GetWirelessConfig
 
     return NULL;
 }
+
+__nfweak HAL_Configuration_WirelessAP* ConfigurationManager_GetWirelessAPConfigurationFromId(uint32_t configurationId)
+{
+    (void)configurationId;
+
+    return NULL;
+}
