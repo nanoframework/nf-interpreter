@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -10,8 +10,7 @@ SSL_Driver g_SSL_Driver;
 
 // Flag to postpone init until after heap has been cleared
 // in tinyhal.cpp
-static bool s_init_done = false;
-
+static bool s_InitDone = false;
 
 bool SSL_Initialize()
 {
@@ -25,28 +24,70 @@ bool SSL_Initialize()
 bool SSL_Uninitialize()
 {
     NATIVE_PROFILE_PAL_COM();
-    bool retVal = true;
 
-    retVal = ssl_uninitialize_internal();
+    for(uint32_t i = 0; i<ARRAYSIZE(g_SSL_Driver.ContextArray); i++)
+    {
+        if(g_SSL_Driver.ContextArray[i].Context != NULL)
+        {
+            ssl_exit_context_internal( i );
+        }
+    }
+      
+    g_SSL_Driver.ContextCount = 0;
 
-    s_init_done = FALSE;
+    s_InitDone = false;
     
-    return retVal;
+    return true;
 }
 
-static bool SSL_GenericInit( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle, bool isServer )
+static bool SSL_GenericInit( 
+    int sslMode, 
+    int sslVerify, 
+    const char* certificate, 
+    int certLength, 
+    const uint8_t* privateKey, 
+    int privateKeyLength, 
+    const char* password, 
+    int passwordLength, 
+    int& contextHandle, 
+    bool isServer )
 {
-    if (!s_init_done) s_init_done=ssl_initialize_internal();
-    return ssl_generic_init_internal( sslMode, sslVerify, certificate, certLength, privateKey, privateKeyLength, password, passwordLength, sslContextHandle, isServer );     
+    if (!s_InitDone)
+    {
+        s_InitDone = ssl_initialize_internal();
+    }
+
+    return ssl_generic_init_internal( 
+        sslMode, 
+        sslVerify, 
+        certificate, 
+        certLength, 
+        privateKey, 
+        privateKeyLength, 
+        password, 
+        passwordLength, 
+        contextHandle, 
+        isServer );     
 }
 
-bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* password, X509CertData* certData )
+bool SSL_ParseCertificate( 
+    const char* certificate, 
+    size_t certLength, 
+    const char* password, 
+    X509CertData* certData )
 {
-    if (!s_init_done) s_init_done=ssl_initialize_internal();
+    if (!s_InitDone)
+    {
+        s_InitDone = ssl_initialize_internal();
+    }
+
     NATIVE_PROFILE_PAL_COM();
-    return ssl_parse_certificate_internal((void *)certificate,
-                                          certLength,
-                                          (void*)password, (void*)certData);
+
+    return ssl_parse_certificate_internal(
+        (void *)certificate,
+        certLength,
+        (void*)password, 
+        (void*)certData);
 }
 
 int SSL_DecodePrivateKey( 
@@ -55,7 +96,10 @@ int SSL_DecodePrivateKey(
     const unsigned char *pwd, 
     size_t pwdLength )
 {
-    if (!s_init_done) s_init_done=ssl_initialize_internal();
+    if (!s_InitDone)
+    {
+        s_InitDone = ssl_initialize_internal();
+    }
     
     NATIVE_PROFILE_PAL_COM();
 
@@ -66,62 +110,129 @@ int SSL_DecodePrivateKey(
         pwdLength );
 }
 
-void SSL_RegisterTimeCallback(SSL_DATE_TIME_FUNC pfn)
+bool SSL_ServerInit( 
+    int sslMode, 
+    int sslVerify, 
+    const char* certificate, 
+    int certLength, 
+    const uint8_t* privateKey, 
+    int privateKeyLength, 
+    const char* password, 
+    int passwordLength, 
+    int& contextHandle )
 {
     NATIVE_PROFILE_PAL_COM();
-    g_SSL_Driver.m_pfnGetTimeFuncPtr = pfn;
+
+    return SSL_GenericInit( 
+        sslMode, 
+        sslVerify, 
+        certificate, 
+        certLength, 
+        privateKey, 
+        privateKeyLength, 
+        password, 
+        passwordLength, 
+        contextHandle, 
+        true );
 }
 
-bool SSL_ServerInit( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle )
+bool SSL_ClientInit( 
+    int sslMode, 
+    int sslVerify, 
+    const char* certificate, 
+    int certLength, 
+    const uint8_t* privateKey, 
+    int privateKeyLength, 
+    const char* password, 
+    int passwordLength, 
+    int& contextHandle )
+{ 
+    NATIVE_PROFILE_PAL_COM();
+
+    return SSL_GenericInit( 
+        sslMode, 
+        sslVerify, 
+        certificate, 
+        certLength, 
+        privateKey, 
+        privateKeyLength, 
+        password, 
+        passwordLength, 
+        contextHandle, 
+        false );
+}
+
+bool SSL_AddCertificateAuthority( 
+    int contextHandle, 
+    const char* certificate, 
+    int certLength, 
+    const char* certPassword )
 {
-    NATIVE_PROFILE_PAL_COM();
-    return SSL_GenericInit( sslMode, sslVerify, certificate, certLength, privateKey, privateKeyLength, password, passwordLength, sslContextHandle, TRUE );
+    return ssl_add_cert_auth_internal(
+        contextHandle, 
+        certificate, 
+        certLength, 
+        certPassword);    
 }
 
-bool SSL_ClientInit( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle )
+bool SSL_ExitContext( int contextHandle )
+{ 
+    return ssl_exit_context_internal(contextHandle);
+}
+
+int SSL_Accept( 
+    SOCK_SOCKET socket, 
+    int contextHandle )
 { 
     NATIVE_PROFILE_PAL_COM();
-    return SSL_GenericInit( sslMode, sslVerify, certificate, certLength, privateKey, privateKeyLength, password, passwordLength, sslContextHandle, FALSE );
+
+    return ssl_accept_internal(
+        socket, 
+        contextHandle);
 }
 
-bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int certLength, const char* certPassword )
-{
-    return ssl_add_cert_auth_internal(sslContextHandle, certificate, certLength, certPassword);    
-}
-
-bool SSL_ExitContext( int sslContextHandle )
-{ 
-    return ssl_exit_context_internal(sslContextHandle);
-}
-
-int SSL_Accept( SOCK_SOCKET socket, int sslContextHandle )
+int SSL_Connect( 
+    SOCK_SOCKET socket, 
+    const char* szTargetHost, 
+    int contextHandle )
 { 
     NATIVE_PROFILE_PAL_COM();
-    return ssl_accept_internal(socket, sslContextHandle);
+
+    return ssl_connect_internal(
+        socket, 
+        szTargetHost, 
+        contextHandle);
 }
 
-int SSL_Connect( SOCK_SOCKET socket, const char* szTargetHost, int sslContextHandle )
+int SSL_Write( 
+    SOCK_SOCKET socket, 
+    const char* data, 
+    size_t size  )
 { 
     NATIVE_PROFILE_PAL_COM();
-    return ssl_connect_internal(socket, szTargetHost, sslContextHandle);
+
+    return ssl_write_internal(
+        socket,
+        data, 
+        size);
 }
 
-
-int SSL_Write( SOCK_SOCKET socket, const char* Data, size_t size  )
+int SSL_Read( 
+    SOCK_SOCKET socket, 
+    char* data, 
+    size_t size )
 { 
     NATIVE_PROFILE_PAL_COM();
-    return ssl_write_internal(socket, Data, size);
-}
 
-int SSL_Read( SOCK_SOCKET socket, char* Data, size_t size )
-{ 
-    NATIVE_PROFILE_PAL_COM();
-    return ssl_read_internal(socket, Data, size);
+    return ssl_read_internal(
+        socket, 
+        data, 
+        size);
 }
 
 int SSL_CloseSocket( SOCK_SOCKET socket )
 {
-    return ssl_closesocket_internal(socket);
+    return ssl_close_socket_internal(socket);
 }
 
 int SSL_DataAvailable( SOCK_SOCKET socket )

@@ -149,11 +149,11 @@
         },
         {
           "name": "NF_NETWORKING_SNTP:BOOL", //ON-default-to-add-SNTP-client-requires-networking
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "NF_SECURITY_MBEDTLS:BOOL", //OFF-default-ON-to-add-network-security-from-mbedTLS
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "MBEDTLS_SOURCE:PATH", //path-to-mbedtls-source-mind-the-forward-slashes
@@ -170,7 +170,7 @@
         },
         {
           "name": "API_System.Net:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "API_Windows.Devices.Adc:BOOL", //OFF-default-ON-to-add-this-API
@@ -178,7 +178,7 @@
         },
         {
           "name": "API_System.Devices.Dac:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "API_Windows.Devices.Gpio:BOOL", //OFF-default-ON-to-add-this-API
@@ -231,7 +231,13 @@
       ],
       "environments": [
         {
-          "PATH": "C:\\Windows\\system32;${env.PATH}" // Work around for Ninja not finding Cmd.exe with add_custom_command
+          "PATH": "C:\\Windows\\system32;${env.PATH}", // Work around for Ninja not finding Cmd.exe with add_custom_command
+          // ESP32 paths set up in environment so we can use in variables
+          "ESP32_IDF_VERSION": "v3.1",
+          "ESP32_TOOLS": "C:\\ESP32_TOOLS",
+          "ESP32_IDF": "${env.ESP32_TOOLS}\\esp-idf-${env.ESP32_IDF_VERSION}",
+          "ESP32_LIB": "${env.ESP32_TOOLS}\\libs-${env.ESP32_IDF_VERSION}",
+          "ESP32_MBEDTLS_SOURCE": "${env.ESP32_IDF}/Components/mbedtls/mbedtls"
         }
       ],
       "buildRoot": "${workspaceRoot}/Build\\${name}",
@@ -251,19 +257,19 @@
         },
         {
           "name": "ESP32_TOOLCHAIN_PATH:PATH",
-          "value": "C:/ESP32_TOOLS"
+          "value": "${env.ESP32_TOOLS}"
         },
         {
           "name": "TOOLCHAIN_PREFIX:PATH",
-          "value": "C:/ESP32_TOOLS"
+          "value": "${env.ESP32_TOOLS}"
         },
         {
           "name": "ESP32_IDF_PATH:PATH",
-          "value": "C:/ESP32_TOOLS/esp-idf-v3.1"
+          "value": "${env.ESP32_IDF}"
         },
         {
           "name": "ESP32_LIBS_PATH:PATH",
-          "value": "C:/ESP32_TOOLS/libs-v3.1"
+          "value": "${env.ESP32_LIB}"
         },
         {
           "name": "CMAKE_SYSTEM_NAME:STRING",
@@ -366,8 +372,12 @@
           "value": "ON"
         },
         {
-          "name": "NF_SECURITY_MBEDTLS:BOOL", //OFF-default-ON-to-add-network-security-from-mbedTLS
-          "value": "OFF"
+          "name": "NF_SECURITY_MBEDTLS:BOOL",
+          "value": "ON"
+        },
+        {
+          "name": "MBEDTLS_SOURCE:PATH", //path-to-mbedtls-source-mind-the-forward-slashes
+          "value": "${env.ESP32_MBEDTLS_SOURCE}"
         },
         // LIBRARIES
         {
@@ -388,7 +398,7 @@
         },
         {
           "name": "API_System.Devices.Dac:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "API_Windows.Devices.Gpio:BOOL", //OFF-default-ON-to-add-this-API

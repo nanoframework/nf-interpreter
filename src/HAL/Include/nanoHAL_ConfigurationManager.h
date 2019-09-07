@@ -61,6 +61,19 @@ typedef struct HAL_CONFIGURATION_NETWORK_WIRELESS80211
 
 } HAL_CONFIGURATION_NETWORK_WIRELESS80211;
 
+// network wireless interface configuration struct
+// declared with a flexible array member to allow N config blocks totally independent of compilation
+typedef struct HAL_CONFIGURATION_NETWORK_WIRELESSAP
+{
+    // count of the configs elements
+    uint8_t Count;
+
+    // pointer to the wireless network interface configuration
+    HAL_Configuration_WirelessAP* Configs[];
+
+} HAL_CONFIGURATION_NETWORK_WIRELESSAP;
+
+
 // certificate store struct
 // declared with a flexible array member to allow N config blocks totally independent of compilation
 typedef struct HAL_CONFIGURATION_X509_CERTIFICATE
@@ -77,9 +90,10 @@ typedef struct HAL_CONFIGURATION_X509_CERTIFICATE
 // the memory allocation for these will have to be done as required according to the number and type of blocks found in memory
 typedef struct HAL_TARGET_CONFIGURATION
 {
-    HAL_CONFIGURATION_NETWORK* NetworkInterfaceConfigs;
-    HAL_CONFIGURATION_NETWORK_WIRELESS80211* Wireless80211Configs;
-    HAL_CONFIGURATION_X509_CERTIFICATE* CertificateStore;
+    HAL_CONFIGURATION_NETWORK*                  NetworkInterfaceConfigs;
+    HAL_CONFIGURATION_NETWORK_WIRELESS80211*    Wireless80211Configs;
+    HAL_CONFIGURATION_NETWORK_WIRELESSAP*       WirelessAPConfigs;
+    HAL_CONFIGURATION_X509_CERTIFICATE*         CertificateStore;
 
 } HAL_TARGET_CONFIGURATION;
 
@@ -107,6 +121,9 @@ bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, Dev
 //  Default initialisation for wireless config block
 void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, uint32_t configurationIndex);
 
+//  Default initialisation for wireless AP config block
+void InitialiseWirelessAPDefaultConfig(HAL_Configuration_WirelessAP * pconfig, uint32_t configurationIndex);
+
 //  Default initialisation for Network interface config blocks
 // returns FALSE if it's not possible to create a default config block
 bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex);
@@ -126,6 +143,9 @@ void* ConfigurationManager_FindX509CertificateConfigurationBlocks(uint32_t start
 // defined as weak needs to be free to implement the storage of the configuration block as they see fit
 HAL_Configuration_Wireless80211* ConfigurationManager_GetWirelessConfigurationFromId(uint32_t configurationId);
 
+// gets the HAL_Configuration_WirelessAP configuration block that has the specified Id, if that exists 
+// defined as weak needs to be free to implement the storage of the configuration block as they see fit
+HAL_Configuration_WirelessAP* ConfigurationManager_GetWirelessAPConfigurationFromId(uint32_t configurationId);
 
 #ifdef __cplusplus
 }

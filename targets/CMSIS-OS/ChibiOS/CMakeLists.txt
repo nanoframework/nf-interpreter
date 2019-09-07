@@ -77,12 +77,8 @@ if(NO_CHIBIOS_SOURCE)
         TIMEOUT 10
         LOG_DOWNLOAD 1
 
-        # install command has to perform TWO extracts
-        # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-                COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-
         # Disable all other steps
+        INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
     )
@@ -114,13 +110,9 @@ else()
         ChibiOS
         PREFIX ChibiOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
-
-        # install command has to perform TWO extracts
-        # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-                COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
         
         # Disable all other steps
+        INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
     )
@@ -397,11 +389,6 @@ endif()
 # if support for SPIFFS is enabled add it to the build
 if(NF_FEATURE_USE_SPIFFS)
 
-    # SPIFFS needs STM Cube package option
-    if(NOT STM32_CUBE_PACKAGE_REQUIRED)
-        message(FATAL_ERROR "error: SPIFFS requires STM Cube package option, make sure you have STM32_CUBE_PACKAGE_REQUIRED build option set to ON.")
-    endif()
-
     # check if SPIFFS_SOURCE was specified or if it's empty (default is empty)
     set(NO_SPIFFS_SOURCE TRUE)
 
@@ -443,6 +430,7 @@ if(NF_FEATURE_USE_SPIFFS)
             PREFIX SPIFFS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/SPIFFS_Source
             GIT_REPOSITORY  https://github.com/nanoframework/spiffs
+            GIT_TAG "nf-build"  # target nanoFramework modified branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
             LOG_DOWNLOAD 1

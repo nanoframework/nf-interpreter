@@ -18,7 +18,7 @@ bool ssl_generic_init_internal(
     int privateKeyLength,
     const char* password,
     int passwordLength,
-    int& sslContextHandle, 
+    int& contextHandle, 
     bool isServer )
 {
     (void)sslMode;
@@ -26,6 +26,7 @@ bool ssl_generic_init_internal(
     int sslContexIndex = -1;
     int authMode = MBEDTLS_SSL_VERIFY_NONE;
     int endpoint = 0;
+    int ret = 0;
 
     mbedtls_x509_crt* ownCertificate = NULL;
 
@@ -35,9 +36,9 @@ bool ssl_generic_init_internal(
     ///////////////////////
     mbedTLS_NFContext* context;
 
-    for(uint32_t i=0; i<ARRAYSIZE(g_SSL_Driver.m_sslContextArray); i++)
+    for(uint32_t i=0; i<ARRAYSIZE(g_SSL_Driver.ContextArray); i++)
     { 
-        if(g_SSL_Driver.m_sslContextArray[i].SslContext == NULL)
+        if(g_SSL_Driver.ContextArray[i].Context == NULL)
         {
             sslContexIndex = i;           
             break;
@@ -238,6 +239,11 @@ bool ssl_generic_init_internal(
         }
 
     }
+    else
+    {
+        // no PK, need to set it to NULL
+        context->pk = NULL;
+    }
 
     mbedtls_ssl_conf_ca_chain( context->conf, context->x509_crt, NULL );
 
@@ -256,7 +262,8 @@ bool ssl_generic_init_internal(
     mbedtls_ssl_conf_dbg( context->conf, nf_debug, stdout );
   #endif
 
-    if( mbedtls_ssl_setup( context->ssl, context->conf ) != 0 )
+    ret = mbedtls_ssl_setup( context->ssl, context->conf );
+    if( ret  != 0 )
     {
         // ssl_setup_failed
         goto error;
@@ -264,14 +271,21 @@ bool ssl_generic_init_internal(
 
     //////////////////////////////////////
 
-    g_SSL_Driver.m_sslContextArray[sslContexIndex].SslContext = context;
-    g_SSL_Driver.m_sslContextCount++;
+    g_SSL_Driver.ContextArray[sslContexIndex].Context = context;
+    g_SSL_Driver.ContextCount++;
 
-    sslContextHandle = sslContexIndex;
+    contextHandle = sslContexIndex;
 
-    return TRUE;
+    return true;
 
 error:
+    mbedtls_pk_free(context->pk);
+    mbedtls_net_free(context->server_fd);
+    mbedtls_ctr_drbg_free( context->ctr_drbg );
+    mbedtls_entropy_free( context->entropy );
+    mbedtls_x509_crt_free(context->x509_crt);
+    mbedtls_ssl_config_free( context->conf );
+    mbedtls_ssl_free(context->ssl);
 
     // check for any memory allocation that needs to be freed before exiting
     if(context->ssl != NULL) platform_free(context->ssl);
@@ -281,7 +295,16 @@ error:
     if(context->server_fd != NULL) platform_free(context->server_fd);
     if(context->x509_crt != NULL) platform_free(context->x509_crt);
     if(context->pk != NULL) platform_free(context->pk);
-    if(ownCertificate != NULL) mbedtls_x509_crt_free( ownCertificate );
+   
+    if(ownCertificate != NULL)
+    {
+        mbedtls_x509_crt_free( ownCertificate );
+        platform_free(ownCertificate);
+    }
+    if(context->pk != NULL)
+    {
+        platform_free(context);
+    }
 
-    return FALSE;
+    return false;
 }

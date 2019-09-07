@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -18,18 +18,13 @@ struct SSL_Driver
 
     struct SSL_Context
     {
-        // TODO - FIXME
-        //mbedtls_ssl_context SslContext;
-        void * SslContext;
+        void * Context;
     };
 
-   SSL_Context    m_sslContextArray[c_MaxSslContexts];
-   int32_t        m_sslContextCount;   
-   SSL_DATE_TIME_FUNC m_pfnGetTimeFuncPtr;
- 
+   SSL_Context    ContextArray[c_MaxSslContexts];
+   int32_t        ContextCount; 
 };
 
 extern SSL_Driver g_SSL_Driver;
 
-
-#endif
+#endif // _NANO_SSL_H_

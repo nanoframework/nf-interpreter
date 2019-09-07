@@ -83,6 +83,18 @@ void Add_Gpio_Interrupt(gpio_num_t pinNumber)
 }
 
 
+void Remove_Gpio_Interrupt(gpio_num_t pinNumber)
+{
+	if (channelPinMapping[pinNumber] != NULL)
+	{
+		// Remove from interrupts
+		gpio_isr_handler_remove((gpio_num_t)pinNumber);
+
+		// clear this channel in channel pin mapping
+		channelPinMapping[pinNumber] = NULL;
+	}
+}
+
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -147,15 +159,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative_
         // releases the pin
         int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
         
-        
-        if ( channelPinMapping[pinNumber] != NULL )
-        {
-            // Remove from interrupts
-            gpio_isr_handler_remove((gpio_num_t)pinNumber);
-
-            // clear this channel in channel pin mapping
-            channelPinMapping[pinNumber] = NULL;
-        }
+		Remove_Gpio_Interrupt((gpio_num_t)pinNumber);
     }
     NANOCLR_NOCLEANUP();
 }

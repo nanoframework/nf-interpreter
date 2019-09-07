@@ -36,7 +36,7 @@ set(NF_Networking_Security_SRCS
     ssl.cpp
     ssl_accept_internal.cpp
     ssl_add_cert_auth_internal.cpp
-    ssl_closesocket_internal.cpp
+    ssl_close_socket_internal.cpp
     ssl_connect_internal.cpp
     ssl_decode_private_key_internal.cpp
     ssl_exit_context_internal.cpp
@@ -49,7 +49,6 @@ set(NF_Networking_Security_SRCS
     ssl_uninitialize_internal.cpp
     ssl_write_internal.cpp
 
-    # ssl_types.cpp
 )
 
 

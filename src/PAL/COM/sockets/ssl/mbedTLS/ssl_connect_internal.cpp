@@ -8,15 +8,18 @@
 #include <ssl.h>
 #include "mbedtls.h"
 
-int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
+int ssl_connect_internal(
+    int sd, 
+    const char* szTargetHost, 
+    int contextHandle)
 {
     mbedTLS_NFContext* context;
     int nonblock = 0;
 
     int ret = SOCK_SOCKET_ERROR;
 
-    // Check sslContextHandle range
-    if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
+    // Check contextHandle range
+    if((contextHandle >= (int)ARRAYSIZE(g_SSL_Driver.ContextArray)) || (contextHandle < 0))
     {
         goto error;
     }
@@ -24,7 +27,7 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
     // Retrieve SSL struct from g_SSL_Driver    
     // sd should already have been created
     // Now do the SSL negotiation
-    context = (mbedTLS_NFContext*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
+    context = (mbedTLS_NFContext*)g_SSL_Driver.ContextArray[contextHandle].Context;
     if (context == NULL)
     {
         return false;

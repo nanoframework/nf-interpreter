@@ -39,7 +39,50 @@ enum GpioPinValue
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioChangePolarity (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////
+
+enum GpioChangePolarity
+{
+	Both = 0,
+	Falling, 
+	Rising
+};
+
+
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
+struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCount
+{
+	static const int FIELD__Count = 1;
+	static const int FIELD__RelativeTime = 2;
+
+
+	//--//
+
+};
+
+struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter
+{
+	static const int FIELD___pinNumber = 1;
+	static const int FIELD___inputMode = 2;
+	static const int FIELD___polarity = 3;
+	static const int FIELD___CountActive = 4;
+	static const int FIELD___readTime = 5;
+	static const int FIELD___syncLock = 6;
+	static const int FIELD___disposedValue = 7;
+
+	NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
+	NANOCLR_NATIVE_DECLARE(NativeRead___U8__BOOLEAN);
+	NANOCLR_NATIVE_DECLARE(NativeStart___VOID);
+	NANOCLR_NATIVE_DECLARE(NativeStop___VOID);
+	NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
+
+	//--//
+
+};
+
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
 {

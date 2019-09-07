@@ -110,6 +110,8 @@ void* ConfigurationManagerCC32xx_FindNetworkWireless80211ConfigurationBlocks()
 // initialization of configuration manager
 void ConfigurationManager_Initialize()
 {
+    memset( (void*)&g_TargetConfiguration, 0, sizeof(g_TargetConfiguration));
+
     // enumerate the blocks
     ConfigurationManager_EnumerateConfigurationBlocks();
 };
@@ -125,14 +127,16 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
     {
         // there is no network config block available, get a default
         HAL_Configuration_NetworkInterface* networkConfig = (HAL_Configuration_NetworkInterface*)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
-        InitialiseNetworkDefaultConfig(networkConfig, 0);
-        
-        // store it
-        ConfigurationManager_StoreConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0, sizeof(HAL_Configuration_NetworkInterface), 0);
-        platform_free(networkConfig);
+        if(InitialiseNetworkDefaultConfig(networkConfig, 0))
+        {
+            // config block created, store it
+            ConfigurationManager_StoreConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0, sizeof(HAL_Configuration_NetworkInterface), 0);
+            
+            // have to enumerate again to pick it up
+            networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks();
+        }
 
-        // have to enumerate again to pick it up
-        networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks();
+        platform_free(networkConfig);
     }
 
     // find wireless 80211 network configuration blocks
@@ -228,33 +232,11 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
     // requested Index has to exist (array index starts at zero, so need to add one)
     if(configuration == DeviceConfigurationOption_Network)
     {
-        if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
+        if( g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
         {
-            // there is no network config block, init one with default settings
-            if(InitialiseNetworkDefaultConfig((HAL_Configuration_NetworkInterface*)configurationBlock, 0))
-            {
-                // force storing profile
-                if(ConfigurationManager_StoreConfigurationBlock(configurationBlock, DeviceConfigurationOption_Network, 0, sizeof(HAL_Configuration_NetworkInterface), 0))
-                {
-                    // need to enumerate blocks
-                    ConfigurationManager_EnumerateConfigurationBlocks();
-
-                    // done here
-                    return true;
-                }
-                else
-                {
-                    // couldn't store the config block
-                    return false;
-                }
-            }
-        }
-        else
-        {
-            if((configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
-            {
-                return false;
-            }
+            // the requested config block is beyond the available count
+            return false;
         }
     }
     else if(configuration == DeviceConfigurationOption_Wireless80211Network)
@@ -510,6 +492,8 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 * pconfig, 
 //  Default initialisation for Network interface config blocks
 bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
 {
+    (void)configurationIndex;
+
     uint16_t macAddressLen = SL_MAC_ADDR_LEN;
 
     memset(pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
@@ -519,6 +503,7 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig
     
     pconfig->InterfaceType = NetworkInterfaceType_Wireless80211;
     pconfig->StartupAddressMode = AddressMode_DHCP;
+    pconfig->AutomaticDNS = 1;
     pconfig->SpecificConfigId = 0;
 
     sl_NetCfgGet(SL_NETCFG_MAC_ADDRESS_GET, 0, &macAddressLen, pconfig->MacAddress);

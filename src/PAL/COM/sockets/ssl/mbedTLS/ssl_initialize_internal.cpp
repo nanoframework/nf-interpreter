@@ -10,7 +10,7 @@
 
 bool ssl_initialize_internal()
 {
-    NANOCLR_SSL_MEMSET(&g_SSL_Driver, 0, sizeof(g_SSL_Driver));
+    memset(&g_SSL_Driver, 0, sizeof(g_SSL_Driver));
 
-    return TRUE;
+    return true;
 }
