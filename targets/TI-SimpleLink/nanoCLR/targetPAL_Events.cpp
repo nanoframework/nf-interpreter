@@ -135,7 +135,8 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
         // As only one timer running at a time we will just save it
         saveTimerCompleteFlag = timerCompleteFlag;
 
-        Clock_setPeriod(boolEventsTimer, millisecondsFromNow / Clock_tickPeriod);
+        // need to convert from milliseconds to ticks
+        Clock_setPeriod(boolEventsTimer, millisecondsFromNow * (1000 / Clock_tickPeriod));
         Clock_start(boolEventsTimer);
     }
 }
@@ -155,7 +156,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
 
     while(true)
     {
-        EVENTS_HEART_BEAT;
+        //EVENTS_HEART_BEAT;
 
         uint32_t events = Events_MaskedRead( wakeupSystemEvents );
         if(events)

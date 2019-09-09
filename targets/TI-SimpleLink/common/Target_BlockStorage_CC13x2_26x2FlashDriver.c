@@ -7,10 +7,14 @@
 
 // includes from SimpleLink
 // #include "inc/hw_types.h"
-#include <flash.h>
+#include <driverlib/flash.h>
+#include <driverlib/vims.h>
 
 // local defines
 #define FLASH_ERASED_WORD        0x0FFFFFFFFU
+
+static uint32_t disableFlashCache(void);
+static void restoreFlashCache(uint32_t mode);
 
 bool CC13x2_26x2FlashDriver_InitializeDevice(void* context)
 {
@@ -39,21 +43,31 @@ bool CC13x2_26x2FlashDriver_Read(void* context, ByteAddress startAddress, unsign
 {
 	(void)context;
 
+    // direct read from memory...
+    memcpy(buffer, (void *)startAddress, (size_t)numBytes);
+
     // ... and always return true
     return true;
 }
 
 bool CC13x2_26x2FlashDriver_Write(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
 {
+    bool result = false;
+    uint32_t mode;
+
 	(void)context;
 	(void)readModifyWrite;
 
+    mode = disableFlashCache();
+
 	if(FlashProgram((unsigned long*)buffer, (unsigned long) startAddress, (unsigned long) numBytes) == 0)
 	{
-		return true;
+		result = true;
 	}
+
+    restoreFlashCache(mode);
 	
-	return false;
+	return result;
 }
 
 bool CC13x2_26x2FlashDriver_IsBlockErased(void* context, ByteAddress blockAddress, unsigned int length)
@@ -80,12 +94,59 @@ bool CC13x2_26x2FlashDriver_IsBlockErased(void* context, ByteAddress blockAddres
 
 bool CC13x2_26x2FlashDriver_EraseBlock(void* context, ByteAddress address)
 {
+    bool result = false;
+    uint32_t mode;
+
 	(void)context;
 
-	if(FlashErase((unsigned long) address) == 0)
+    mode = disableFlashCache();
+    
+	if(FlashSectorErase((unsigned long) address) == 0)
 	{
-		return true;
+		result = true;
 	}
 
-	return false;
+    restoreFlashCache(mode);
+
+	return result;
+}
+
+/**
+ * Disable Flash data caching and instruction pre-fetching.
+ *
+ * It is necessary to disable the caching and VIMS to ensure the cache has
+ * valid data while the program is executing.
+ *
+ * @return The VIMS state before being disabled.
+ */
+static uint32_t disableFlashCache(void)
+{
+    uint32_t mode = VIMSModeGet(VIMS_BASE);
+
+    VIMSLineBufDisable(VIMS_BASE);
+
+    if (mode != VIMS_MODE_DISABLED)
+    {
+        VIMSModeSet(VIMS_BASE, VIMS_MODE_DISABLED);
+
+        while (VIMSModeGet(VIMS_BASE) != VIMS_MODE_DISABLED)
+            ;
+    }
+
+    return mode;
+}
+
+/**
+ * Restore the Flash data caching and instruction pre-fetching.
+ *
+ * @param [in] mode The VIMS mode returned by @ref disableFlashCache.
+ */
+static void restoreFlashCache(uint32_t mode)
+{
+    if (mode != VIMS_MODE_DISABLED)
+    {
+        VIMSModeSet(VIMS_BASE, mode);
+    }
+
+    VIMSLineBufEnable(VIMS_BASE);
 }

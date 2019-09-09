@@ -4,6 +4,7 @@
 //
 
 #include "WireProtocol_HAL_Interface.h"
+#include <ti/sysbios/knl/Task.h>
 // #include <FreeRTOS.h>
 // #include <task.h>
 

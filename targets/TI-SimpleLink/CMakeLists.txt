@@ -3,6 +3,38 @@
 # See LICENSE file in the project root for full license information.
 #
 
+
+# now add the subdirectory for the board
+# try to find board in the targets folder
+if(EXISTS ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD})
+
+    # add TARGET board directory
+    set(TI_BOARD_DEFINITIONS_LOCATION ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD})
+
+    # board found
+    message(STATUS "Support for target board '${TI_BOARD}' found")
+    message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
+
+else()
+
+    # try to find board in the Community targets folder
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TI_BOARD})
+
+        # add TARGET board directory from Community
+        set(TI_BOARD_DEFINITIONS_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TI_BOARD})
+    
+        # board found
+        message(STATUS "Support for target board '${TI_BOARD}' found in Community targets")
+        message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
+
+    else()
+    # board NOT found in targets folder
+        # board NOT found in targets folder
+        message(FATAL_ERROR "\n\nSorry but support for ${TI_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+    endif()
+
+endif()
+
 # set target base location
 # this has to be set before the class library modules are pulled in
 if(EXISTS ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD})
@@ -438,7 +470,8 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
 
     endif()
 
-    add_subdirectory(${TI_BOARD})
+    # add board folder
+    add_subdirectory(${TI_BOARD_DEFINITIONS_LOCATION})
 
 endif()
 

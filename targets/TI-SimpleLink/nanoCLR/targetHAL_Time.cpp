@@ -122,5 +122,5 @@ const char* HAL_Time_CurrentDateTimeToString()
 
 uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
 {
-    return ((ticks * (uint64_t)Clock_tickPeriod) / 1000);
+    return ((ticks * (uint64_t)1000) / Clock_tickPeriod);
 }

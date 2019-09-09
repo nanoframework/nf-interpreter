@@ -1,0 +1,2 @@
+runtime_xdc_noinit.o: \
+ E:/GitHub/nf-interpreter/build/TI_XDCTools_Source/packages/xdc/runtime/xdc_noinit.c

@@ -20,8 +20,8 @@ set(CMAKE_CXX_FLAGS_INIT "-specs=nosys.specs")
 
 # set toolchain directories
 set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/bin)
-set(TOOLCHAIN_INC_DIR ${TOOLCHAIN_PREFIX}/arm-none-eabi/include)
-set(TOOLCHAIN_LIB_DIR ${TOOLCHAIN_PREFIX}/arm-none-eabi/lib)
+set(TOOLCHAIN_INC_DIR ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
+set(TOOLCHAIN_LIB_DIR ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
 
 # the name of the operating system for which CMake is to build
 set(CMAKE_SYSTEM_NAME Generic)
@@ -169,6 +169,6 @@ endfunction()
 function(NF_SET_LINKER_FILE TARGET LINKER_FILE_NAME)
 
     # set linker file name
-    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "-T${LINKER_FILE_NAME}")
+    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "-Wl,-T${LINKER_FILE_NAME}")
 
 endfunction()

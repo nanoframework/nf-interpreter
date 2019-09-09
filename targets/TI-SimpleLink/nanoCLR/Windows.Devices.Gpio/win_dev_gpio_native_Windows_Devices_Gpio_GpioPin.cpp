@@ -7,7 +7,7 @@
 #include "win_dev_gpio_native_target.h"
 #include "nf_rt_events_native.h"
 
-#include <timers.h>
+// #include <timers.h>
 
 // this array points to the GPIO managed object that has interrupt active
 CLR_RT_HeapBlock* indexPinMapping[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };

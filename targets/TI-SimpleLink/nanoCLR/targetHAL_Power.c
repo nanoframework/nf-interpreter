@@ -5,19 +5,6 @@
 
 #include <nanoHAL_v2.h>
 
-#define SL_STOP_TIMEOUT         (200)
-extern uint16_t sl_Stop(const uint16_t Timeout);
-
-// FIXME TODO
-void CPU_Reset()
-{
-    // stop network processor activities before reseting the MCU
-    sl_Stop(SL_STOP_TIMEOUT);
-
-    // Reset the MCU
-    PRCMHibernateCycleTrigger();    
-};
-
 // CPU sleep is not currently implemented in this target
 inline void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents){ (void)level; (void)wakeEvents; };
 

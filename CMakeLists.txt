@@ -162,7 +162,7 @@ if(NF_BUILD_RTM)
 endif()
 #################################################################
 
-if(RTOS_CHIBIOS_CHECK)
+if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
 
     #################################################################
     # clear CMAKE_C_FLAGS_INIT and CMAKE_CXX_FLAGS_INIT

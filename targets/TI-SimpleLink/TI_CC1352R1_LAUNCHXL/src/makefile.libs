@@ -1,0 +1,62 @@
+#
+# This file was generated based on the configuration script:
+#     E:\GitHub\nf-interpreter\targets\TI-SimpleLink\TI_CC1352R1_LAUNCHXL\debug.cfg
+#
+# This makefile may be included in other makefiles that need to build
+# the libraries containing the compiled source files generated as
+# part of the configuration step.
+
+#
+# ======== GEN_SRC_DIR =========
+# The path to the sources generated during configuration
+#
+# This path must be either absolute or relative to the build directory.
+#
+# The absolute path to the generated source directory (at the time the
+# sources were generated) is:
+#    E:\GitHub\nf-interpreter\targets\TI-SimpleLink\TI_CC1352R1_LAUNCHXL\src
+#
+GEN_SRC_DIR ?= ../../../../targets/TI-SimpleLink/TI_CC1352R1_LAUNCHXL/src
+
+ifeq (,$(wildcard $(GEN_SRC_DIR)))
+$(error "ERROR: GEN_SRC_DIR must be set to the directory containing the generated sources")
+endif
+
+#
+# ======== .force ========
+# The .force goal is used to force the build of any goal that names it as
+# a prerequisite
+#
+.PHONY: .force
+      
+#
+# ======== library macros ========
+#
+sysbios_SRC = $(GEN_SRC_DIR)/sysbios
+sysbios_LIB = $(GEN_SRC_DIR)/sysbios/sysbios.am4fg
+
+#
+# ======== dependencies ========
+#
+all: $(sysbios_LIB)
+clean: .sysbios_clean
+
+
+# ======== convenient build goals ========
+.PHONY: sysbios
+sysbios: $(GEN_SRC_DIR)/sysbios/sysbios.am4fg
+
+# CDT managed make executables depend on $(OBJS)
+OBJS += $(sysbios_LIB)
+
+#
+# ======== rules ========
+#
+$(sysbios_LIB): .force 
+	@echo making $@ ...
+	@$(MAKE) -C $(sysbios_SRC)
+
+.sysbios_clean:
+	@echo cleaning $(sysbios_SRC) ...
+	-@$(MAKE) --no-print-directory -C $(sysbios_SRC) clean
+
