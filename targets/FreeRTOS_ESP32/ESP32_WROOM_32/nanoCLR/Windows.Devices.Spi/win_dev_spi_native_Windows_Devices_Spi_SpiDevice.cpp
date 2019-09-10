@@ -99,9 +99,11 @@ void Esp32_Spi_UnitializeAll()
 // Inialise the SPI Bus
 static void InitSpiBus( spi_host_device_t bus)
 {
-    gpio_num_t mosiPin  = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, bus, 0);
-    gpio_num_t misoPin  = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, bus, 1);
-    gpio_num_t clockPin = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, bus, 2);
+	int busIndex = bus - 1;
+
+    gpio_num_t mosiPin  = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, busIndex, 0);
+    gpio_num_t misoPin  = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, busIndex, 1);
+    gpio_num_t clockPin = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, busIndex, 2);
  
     spi_bus_config_t bus_config 
     {

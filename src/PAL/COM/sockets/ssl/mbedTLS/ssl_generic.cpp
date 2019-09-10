@@ -12,7 +12,10 @@
 // this one lives in lwIPSocket.cpp
 extern int errno;
 
-int sslRecv(void *ctx, unsigned char *buf, size_t len)
+int sslRecv(
+    void *ctx, 
+    unsigned char *buf, 
+    size_t len)
 {
     (void)buf;
     (void)len;
@@ -31,8 +34,13 @@ int sslRecv(void *ctx, unsigned char *buf, size_t len)
     return 0;
 }
 
-// mbed TLS requires a function with this signature, so we are wrapping the call to our debug_printf here 
-void nf_debug( void *ctx, int level, const char *file, int line, const char *str )
+// mbedTLS requires a function with this signature, so we are wrapping the call to our debug_printf here 
+void nf_debug( 
+    void *ctx, 
+    int level, 
+    const char *file, 
+    int line, 
+    const char *str )
 {
     (void)level;
     (void)ctx;
@@ -71,7 +79,10 @@ int net_would_block( const mbedtls_net_context *ctx )
     return( 0 );
 }
 
-int mbedtls_net_recv( void *ctx, unsigned char *buf, size_t len )
+int mbedtls_net_recv( 
+    void *ctx, 
+    unsigned char *buf, 
+    size_t len )
 {
     int32_t ret;
     int32_t fd = ((mbedtls_net_context *) ctx)->fd;
@@ -106,7 +117,10 @@ int mbedtls_net_recv( void *ctx, unsigned char *buf, size_t len )
     return ret;
 }
 
-int mbedtls_net_send( void *ctx, const unsigned char *buf, size_t len )
+int mbedtls_net_send( 
+    void *ctx, 
+    const unsigned char *buf, 
+    size_t len )
 {
     int32_t ret;
     int fd = ((mbedtls_net_context *) ctx)->fd;
@@ -141,7 +155,11 @@ int mbedtls_net_send( void *ctx, const unsigned char *buf, size_t len )
     return ret;
 }
 
-int mbedtls_net_recv_timeout( void *ctx, unsigned char *buf, size_t len, uint32_t timeout )
+int mbedtls_net_recv_timeout( 
+    void *ctx, 
+    unsigned char *buf, 
+    size_t len, 
+    uint32_t timeout )
 {
     int ret;
     struct timeval tv;

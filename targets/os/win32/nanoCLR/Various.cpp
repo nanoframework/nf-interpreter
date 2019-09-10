@@ -59,7 +59,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
     DEBUGGER_PORT,
 
     DEBUG_TEXT_PORT,
-    115200,
+    921600,
     0,  // STDIO = COM2 or COM1
 
     { 0, 0 },   // { SRAM1_MEMORY_Base, SRAM1_MEMORY_Size },

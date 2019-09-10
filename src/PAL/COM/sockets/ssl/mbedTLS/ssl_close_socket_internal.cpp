@@ -6,21 +6,20 @@
 #include <ssl.h>
 #include "mbedtls.h"
 
-int  ssl_closesocket_internal( int sd )
+int ssl_close_socket_internal( int sd )
 {
     mbedTLS_NFContext* context= (mbedTLS_NFContext*)SOCKET_DRIVER.GetSocketSslData(sd);
-    mbedtls_ssl_context *ssl = context->ssl;
 
     // sanity check
-    if(ssl == NULL)
+    if(context != NULL)
     {
-        return SOCK_SOCKET_ERROR;
-    }
+        mbedtls_ssl_context *ssl = context->ssl;
 
-    SOCKET_DRIVER.SetSocketSslData(sd, NULL);
-    SOCKET_DRIVER.UnregisterSocket(sd);
-    
-    mbedtls_ssl_close_notify(ssl);
+        // be nice and notify the peer that the connection is being closed
+        mbedtls_ssl_close_notify(ssl);
+
+        SOCKET_DRIVER.SetSocketSslData(sd, NULL);
+    }
 
     SOCK_close( sd );
 

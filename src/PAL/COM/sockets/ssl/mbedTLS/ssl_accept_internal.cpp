@@ -6,20 +6,22 @@
 #include <ssl.h>
 #include "mbedtls.h"
 
-int ssl_accept_internal( int sd, int sslContextHandle )
+int ssl_accept_internal( 
+    int sd, 
+    int contextHandle )
 {
     mbedTLS_NFContext* context;
     mbedtls_ssl_context *ssl;
     int nonblock = 0;
     int ret = SOCK_SOCKET_ERROR;
 
-    // Check sslContextHandle range
-    if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
+    // Check contextHandle range
+    if((contextHandle >= (int)ARRAYSIZE(g_SSL_Driver.ContextArray)) || (contextHandle < 0))
     {
         goto error;
     }
 
-    context = (mbedTLS_NFContext*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
+    context = (mbedTLS_NFContext*)g_SSL_Driver.ContextArray[contextHandle].Context;
     ssl = context->ssl;
 
     // sanity check
@@ -29,7 +31,6 @@ int ssl_accept_internal( int sd, int sslContextHandle )
     }
 
     // TODO check how to handle server certificates and certificate chain parsing
-
 
     // if( ( ret = mbedtls_net_bind( context->server_fd, NULL, "4433", MBEDTLS_NET_PROTO_TCP ) ) != 0 )
     // {

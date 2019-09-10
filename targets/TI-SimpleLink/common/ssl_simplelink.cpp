@@ -23,16 +23,61 @@ extern "C"
 }
 
 // TODO
-bool ssl_parse_certificate_internal(void* buf, size_t size, void* pwd, void* x509 ){(void)buf;(void)size;(void)pwd;(void)x509;}
-int ssl_accept_internal( int socket, int sslContextHandle ){(void)socket;(void)sslContextHandle;}
-bool ssl_add_cert_auth_internal( int sslContextHandle, const char* certificate, int certLength, const char* certPassword ){(void)sslContextHandle;(void)certificate;(void)certLength;(void)certPassword;}
+bool ssl_parse_certificate_internal(
+    void* buf, 
+    size_t size, 
+    void* pwd, 
+    void* x509 )
+{
+    (void)buf;
+    (void)size;
+    (void)pwd;
+    (void)x509;
+}
+
+int ssl_decode_private_key_internal(
+    const unsigned char *key, 
+    size_t keyLength, 
+    const unsigned char *password, 
+    size_t passwordLength)
+{
+    (void)key;
+    (void)keyLength;
+    (void)password;
+    (void)passwordLength;
+
+    return 0;    
+}
+
+int ssl_accept_internal( 
+    int socket, 
+    int contextHandle )
+{
+    (void)socket;
+    (void)contextHandle;
+}
+
+bool ssl_add_cert_auth_internal( 
+    int contextHandle, 
+    const char* certificate, 
+    int certLength,
+    const char* certPassword )
+{
+    (void)contextHandle;
+    (void)certificate;
+    (void)certLength;
+    (void)certPassword;
+
+}
 
 // declared at sockets_simplelink
 extern int socketErrorCode;
 
 extern "C"
 {
-void ssl_rand_seed(const void *seed, int length)
+void ssl_rand_seed(
+    const void *seed, 
+    int length)
 {
     (void)seed;
     (void)length;
@@ -46,10 +91,22 @@ bool ssl_initialize_internal()
     return true;
 }
 
-bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, 
-    int certLength, const char* certPassword, int& sslContextHandle, bool isServer )
+bool ssl_generic_init_internal( 
+    int sslMode, 
+    int sslVerify, 
+    const char* certificate, 
+    int certLength, 
+    const uint8_t* privateKey,
+    int privateKeyLength,
+    const char* password,
+    int passwordLength,
+    int& contextHandle, 
+    bool isServer )
 {
-    (void)certPassword;
+    (void)password;
+    (void)passwordLength;
+    (void)privateKey;
+    (void)privateKeyLength;
 
     int sslContexIndex = -1;
 
@@ -64,9 +121,9 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     uint32_t configIndex = 0;
 
     ///////////////////////
-    for(uint32_t i=0; i<ARRAYSIZE(g_SSL_Driver.m_sslContextArray); i++)
+    for(uint32_t i=0; i<ARRAYSIZE(g_SSL_Driver.ContextArray); i++)
     { 
-        if(g_SSL_Driver.m_sslContextArray[i].SslContext == NULL)
+        if(g_SSL_Driver.ContextArray[i].Context == NULL)
         {
             sslContexIndex = i;           
             break;
@@ -83,9 +140,8 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
         goto error;
     }  
 
-
     // create security attribute
-    // this is the equivalent of SSL context in mbedTls and OpenSSL
+    // this is the equivalent of SSL context in mbedTLS
     // it needs to be freed in ssl_exit_context_internal
     context->SecurityAttributes = SlNetSock_secAttribCreate();
     if (context->SecurityAttributes == NULL)
@@ -114,6 +170,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
             // shouldn't reach here!
             goto error;
     }
+
     status = SlNetSock_secAttribSet(context->SecurityAttributes, SLNETSOCK_SEC_ATTRIB_METHOD, (void *)&(securityMethod), sizeof(securityMethod));
     if (status < 0)
     {
@@ -148,7 +205,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     //     //     // failed parsing the 
     //     // }
 
-    //     // if( mbedtls_ssl_conf_own_cert( &conf, &clicert, &pkey ) != 0 )
+    //     // if( mbedtls_tls_conf_own_cert( &conf, &clicert, &pkey ) != 0 )
     //     // {
     //     //     // configuring own certificate failed
     //     //     goto error;
@@ -169,10 +226,10 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     //////////////////////////////////////
 
     // the equivalent of SSL contex in Simple Link is the Security Attribute that we've been building
-    g_SSL_Driver.m_sslContextArray[sslContexIndex].SslContext = context;
-    g_SSL_Driver.m_sslContextCount++;
+    g_SSL_Driver.ContextArray[sslContexIndex].Context = context;
+    g_SSL_Driver.ContextCount++;
 
-    sslContextHandle = sslContexIndex;
+    contextHandle = sslContexIndex;
 
     return true;
 
@@ -192,17 +249,17 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     return false;
 }
 
-bool ssl_exit_context_internal(int sslContextHandle)
+bool ssl_exit_context_internal(int contextHandle)
 {
     SlSSL_Context* context = NULL;
 
-    // Check sslContextHandle range
-    if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0) || (g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext == NULL))
+    // Check contextHandle range
+    if((contextHandle >= (int)ARRAYSIZE(g_SSL_Driver.ContextArray)) || (contextHandle < 0) || (g_SSL_Driver.ContextArray[contextHandle].Context == NULL))
     {
         return false;
     }
 
-    context = (SlSSL_Context*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
+    context = (SlSSL_Context*)g_SSL_Driver.ContextArray[contextHandle].Context;
     if (context == NULL)
     {
         return false;
@@ -212,22 +269,25 @@ bool ssl_exit_context_internal(int sslContextHandle)
 
     platform_free(context);
 
-    memset(&g_SSL_Driver.m_sslContextArray[sslContextHandle], 0, sizeof(g_SSL_Driver.m_sslContextArray[sslContextHandle]));
+    memset(&g_SSL_Driver.ContextArray[contextHandle], 0, sizeof(g_SSL_Driver.ContextArray[contextHandle]));
 
-    g_SSL_Driver.m_sslContextCount --;
+    g_SSL_Driver.ContextCount --;
 
     return true;
 }
 
-int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
+int ssl_connect_internal(
+    int sd, 
+    const char* szTargetHost, 
+    int contextHandle)
 {
     SlSSL_Context* context;
     int32_t status;
     struct timespec ts;
     struct tm rtcTime;
 
-    // Check sslContextHandle range
-    if((sslContextHandle >= (int)ARRAYSIZE(g_SSL_Driver.m_sslContextArray)) || (sslContextHandle < 0))
+    // Check contextHandle range
+    if((contextHandle >= (int)ARRAYSIZE(g_SSL_Driver.ContextArray)) || (contextHandle < 0))
     {
         return SOCK_SOCKET_ERROR;
     }
@@ -235,7 +295,7 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
     // Retrieve SSL context from g_SSL_Driver    
     // sd should already have been created
     // Now do the SSL negotiation
-    context = (SlSSL_Context*)g_SSL_Driver.m_sslContextArray[sslContextHandle].SslContext;
+    context = (SlSSL_Context*)g_SSL_Driver.ContextArray[contextHandle].Context;
     if (context == NULL)
     {
         return SOCK_SOCKET_ERROR;
@@ -246,7 +306,11 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
 
     if(szTargetHost != NULL && szTargetHost[0] != 0)
     {
-        status = SlNetSock_secAttribSet(context->SecurityAttributes, SLNETSOCK_SEC_ATTRIB_DOMAIN_NAME, (void *)szTargetHost, hal_strlen_s(szTargetHost));
+        status = SlNetSock_secAttribSet(
+            context->SecurityAttributes, 
+            SLNETSOCK_SEC_ATTRIB_DOMAIN_NAME, 
+            (void *)szTargetHost, 
+            hal_strlen_s(szTargetHost));
         if (status < 0)
         {
             // hostname_failed
@@ -271,18 +335,20 @@ int ssl_connect_internal(int sd, const char* szTargetHost, int sslContextHandle)
     // tm_year starts in 1970
     dateTime.tm_year = rtcTime.tm_year + 1970;
 
-    sl_DeviceSet(SL_DEVICE_GENERAL, 
-                SL_DEVICE_GENERAL_DATE_TIME,
-                sizeof(SlDateTime_t), 
-                (uint8_t *)(&dateTime));
+    sl_DeviceSet(
+        SL_DEVICE_GENERAL, 
+        SL_DEVICE_GENERAL_DATE_TIME,
+        sizeof(SlDateTime_t), 
+        (uint8_t *)(&dateTime));
 
     // DON'T setup socket for blocking operation
 
     // start security context on socket
-    status = SlNetSock_startSec(context->SocketFd, 
-                context->SecurityAttributes, context->IsServer ?
-                (SLNETSOCK_SEC_START_SECURITY_SESSION_ONLY | SLNETSOCK_SEC_IS_SERVER) :
-                (SLNETSOCK_SEC_START_SECURITY_SESSION_ONLY | SLNETSOCK_SEC_BIND_CONTEXT_ONLY));
+    status = SlNetSock_startSec(
+        context->SocketFd, 
+        context->SecurityAttributes, context->IsServer ?
+        (SLNETSOCK_SEC_START_SECURITY_SESSION_ONLY | SLNETSOCK_SEC_IS_SERVER) :
+        (SLNETSOCK_SEC_START_SECURITY_SESSION_ONLY | SLNETSOCK_SEC_BIND_CONTEXT_ONLY));
 
     if ( (status < 0) && 
         (status != SLNETERR_ESEC_UNKNOWN_ROOT_CA) &&
@@ -305,11 +371,18 @@ int ssl_pending_internal( int sd )
     return 0;
 }
 
-int  ssl_write_internal( int sd, const char* data, size_t req_len)
+int  ssl_write_internal( 
+    int sd, 
+    const char* data, 
+    size_t req_len)
 {
     int32_t status;
 
-    socketErrorCode = SlNetSock_send(sd, (const void*)data, req_len, 0);
+    socketErrorCode = SlNetSock_send(
+        sd, 
+        (const void*)data,
+        req_len, 
+        0);
 
     // anything below 0 is considered an error, so we have to report that no bytes were sent
     if (socketErrorCode < 0)
@@ -320,32 +393,24 @@ int  ssl_write_internal( int sd, const char* data, size_t req_len)
     return req_len;
 }
 
-int  ssl_read_internal( int sd, char* data, size_t size )
+int  ssl_read_internal( 
+    int sd, 
+    char* data, 
+    size_t size )
 {
-    socketErrorCode = SlNetSock_recv(sd, (unsigned char *)(data), size, 0);
+    socketErrorCode = SlNetSock_recv(
+        sd, 
+        (unsigned char *)(data), 
+        size, 
+        0);
 
     return socketErrorCode;
 }
 
-int  ssl_closesocket_internal( int sd )
+int  ssl_close_socket_internal( int sd )
 {
     // Simple Link takes care of everything for us, just call close socket
     SOCK_close( sd );
-
-    return 0;
-}
-
-bool ssl_uninitialize_internal()
-{
-    for(uint32_t i = 0; i<ARRAYSIZE(g_SSL_Driver.m_sslContextArray); i++)
-    {
-        if(g_SSL_Driver.m_sslContextArray[i].SslContext != NULL)
-        {
-            ssl_exit_context_internal( i );
-        }
-    }
-
-    g_SSL_Driver.m_sslContextCount = 0;
 
     return true;
 }

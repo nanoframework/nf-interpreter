@@ -395,7 +395,7 @@ bool Sockets_LWIP_Driver::UpgradeToSsl( int ComPortNum, const int8_t* pCACert, u
         if(g_Sockets_LWIP_Driver.m_usingSSL) return TRUE;
 
         // TLS only and Verify=Required --> only verify the server
-        if(SSL_ClientInit( 0x10, 0x04, (const char*)pDeviceCert, deviceCertLen, NULL, g_DebuggerPort_SslCtx_Handle ))
+        if(SSL_ClientInit( 0x10, 0x04, (const char*)pDeviceCert, deviceCertLen, NULL, 0 , NULL, 0, g_DebuggerPort_SslCtx_Handle ))
         {
             int32_t ret;
     

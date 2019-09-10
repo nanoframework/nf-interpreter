@@ -20,11 +20,6 @@ if(NOT "${TOOL_HEX2DFU_PREFIX}" STREQUAL "")
     endif()
 endif()
 
-# sanity check on SSL provider: ChibiOS only supports mbed TLS
-if(NF_SECURITY_OPENSSL)
-    message(FATAL "Can't use OpenSSL for ChibiOS. Currently only mbed TLS is supported.")
-endif()
-
 # check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
 set(NO_CHIBIOS_SOURCE TRUE)
 if(CHIBIOS_SOURCE)
@@ -82,12 +77,8 @@ if(NO_CHIBIOS_SOURCE)
         TIMEOUT 10
         LOG_DOWNLOAD 1
 
-        # install command has to perform TWO extracts
-        # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-                COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-
         # Disable all other steps
+        INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
     )
@@ -119,13 +110,9 @@ else()
         ChibiOS
         PREFIX ChibiOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
-
-        # install command has to perform TWO extracts
-        # in order to set multiple commands with INSTALL_COMMAND they have to be concatenated by a COMMAND keyword 
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-                COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
         
         # Disable all other steps
+        INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
     )
@@ -314,17 +301,11 @@ if(NF_SECURITY_MBEDTLS)
 
     endif()
 
-    # get source dir for mbedTLS CMake project
-    ExternalProject_Get_Property(mbedTLS SOURCE_DIR)
-
     set(mbedTLS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include")
     set(mbedTLS_LIBRARIES "${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX}")
     include_directories(${mbedTLS_INCLUDE_DIRS})
 
 endif()
-
-# Define base path for the class libraries
-set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
 
 # set target base location
 # this has to be set before the class library modules are pulled in
@@ -408,11 +389,6 @@ endif()
 # if support for SPIFFS is enabled add it to the build
 if(NF_FEATURE_USE_SPIFFS)
 
-    # SPIFFS needs STM Cube package option
-    if(NOT STM32_CUBE_PACKAGE_REQUIRED)
-        message(FATAL_ERROR "error: SPIFFS requires STM Cube package option, make sure you have STM32_CUBE_PACKAGE_REQUIRED build option set to ON.")
-    endif()
-
     # check if SPIFFS_SOURCE was specified or if it's empty (default is empty)
     set(NO_SPIFFS_SOURCE TRUE)
 
@@ -454,6 +430,7 @@ if(NF_FEATURE_USE_SPIFFS)
             PREFIX SPIFFS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/SPIFFS_Source
             GIT_REPOSITORY  https://github.com/nanoframework/spiffs
+            GIT_TAG "nf-build"  # target nanoFramework modified branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
             LOG_DOWNLOAD 1

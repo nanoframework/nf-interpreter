@@ -22,6 +22,7 @@ set(Windows.Devices.Gpio_SRCS
     # class library source files
     win_dev_gpio_native_Windows_Devices_Gpio_GpioController.cpp
     win_dev_gpio_native_Windows_Devices_Gpio_GpioPin.cpp
+	win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter.cpp
     win_dev_gpio_native.cpp
 
     # core source files

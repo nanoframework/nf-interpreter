@@ -200,6 +200,12 @@ macro(ParseNativeAssemblies)
     string(REPLACE ";" "\n    " CLR_RT_NativeAssemblyDataTableEntries "${CLR_RT_NativeAssemblyDataTableEntriesList}")
 
 
+    # configure code file with Interop Assemblies table and...
+    configure_file("${PROJECT_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTable.cpp.in"
+                    "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
+    # ... now add Interop Assemblies table to ChibiOS nanoCLR sources list
+    list(APPEND TARGET_NANO_APIS_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
+
     # make the vars global
     set(TARGET_NANO_APIS_INCLUDES ${TARGET_NANO_APIS_INCLUDES} CACHE INTERNAL "make global")
     set(TARGET_NANO_APIS_SOURCES ${TARGET_NANO_APIS_SOURCES} CACHE INTERNAL "make global")

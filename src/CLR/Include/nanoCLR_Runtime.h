@@ -1252,6 +1252,8 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index m_NetworkInterface;
     CLR_RT_TypeDef_Index m_Wireless80211Configuration;
+    CLR_RT_TypeDef_Index m_WirelessAPConfiguration;
+    CLR_RT_TypeDef_Index m_WirelessAPStation;
 
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_TypeDef_Index m_AppDomain;
@@ -2519,8 +2521,8 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
     static void  ProtectFromGCCallback( void* state );
 
-    static HRESULT Execute_DelegateInvoke( CLR_RT_StackFrame* stack );
-    static HRESULT Execute_IL            ( CLR_RT_StackFrame* stack );
+    static HRESULT Execute_DelegateInvoke( CLR_RT_StackFrame& stack );
+    static HRESULT Execute_IL            ( CLR_RT_StackFrame& stack );
 
     //--//
 

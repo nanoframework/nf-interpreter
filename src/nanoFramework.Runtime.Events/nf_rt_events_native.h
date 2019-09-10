@@ -14,6 +14,36 @@
 #include <nanoCLR_Checks.h>
 
 
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEvent
+{
+    static const int FIELD_STATIC__CustomEventPosted = 0;
+
+
+    //--//
+
+};
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_BaseEvent
+{
+    static const int FIELD__Source = 1;
+    static const int FIELD__Message = 2;
+
+
+    //--//
+
+};
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEvent__CustomEventInternal
+{
+    static const int FIELD__Data1 = 3;
+    static const int FIELD__Data2 = 4;
+    static const int FIELD__Time = 5;
+
+
+    //--//
+
+};
+
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher
 {
     static const int FIELD__threadSpawn = 1;
@@ -34,8 +64,8 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispa
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink
 {
-    static const int FIELD_STATIC__s_eventSink = 0;
-    static const int FIELD_STATIC__s_eventInfoTable = 1;
+    static const int FIELD_STATIC__s_eventSink = 1;
+    static const int FIELD_STATIC__s_eventInfoTable = 2;
 
     NANOCLR_NATIVE_DECLARE(EventConfig___VOID);
 
@@ -55,19 +85,19 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink__Event
 
 };
 
-struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_BaseEvent
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventArgs
 {
-    static const int FIELD__Source = 1;
-    static const int FIELD__Message = 2;
+    static const int FIELD_STATIC__Empty = 3;
 
 
     //--//
 
 };
 
-struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventArgs
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEventArgs
 {
-    static const int FIELD_STATIC__Empty = 2;
+    static const int FIELD___data1 = 1;
+    static const int FIELD___data2 = 2;
 
 
     //--//
