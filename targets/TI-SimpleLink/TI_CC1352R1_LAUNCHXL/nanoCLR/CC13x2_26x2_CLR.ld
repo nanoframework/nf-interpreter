@@ -38,106 +38,220 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/* Entry Point */
-ENTRY( ResetISR )
+STACKSIZE = 2048;
+HEAPSIZE = 0x2500; /* Size of heap buffer used by HeapMem */
 
-/* System memory map */
 MEMORY
 {
-    /* Application is stored in and executes from internal flash */
-    FLASH (RX) : ORIGIN = 0x0, LENGTH = 0x57FA8
-    /* Customer Configuration Area (CCFG) */
-    FLASH_CCFG (RX) : ORIGIN = 0x57FA8, LENGTH = 88
-    /* Application uses internal RAM for data */
-    SRAM (RWX) : ORIGIN = 0x20000000, LENGTH = 0x14000
-    /* Application can use GPRAM region as RAM if cache is disabled in the CCFG
-       (DEFAULT_CCFG_SIZE_AND_DIS_FLAGS.SET_CCFG_SIZE_AND_DIS_FLAGS_DIS_GPRAM = 0) */
-    GPRAM (RWX) : ORIGIN = 0x11000000, LENGTH = 0x2000
+    /* original flash LENGTH was 0x00057fa8 */
+    FLASH (RX)      : ORIGIN = 0x00000000, LENGTH = 0x00032000
+    /*
+     * Customer Configuration Area and Bootloader Backdoor configuration in
+     * flash, 40 bytes
+     */
+    FLASH_CCFG (RX) : ORIGIN = 0x00057fa8, LENGTH = 0x00000058
+    SRAM (RWX)      : ORIGIN = 0x20000000, LENGTH = 0x00014000
+    GPRAM (RWX)     : ORIGIN = 0x11000000, LENGTH = 0x00002000
 }
 
-/*. Highest address of the stack. Used in startup file .*/
-_estack = ORIGIN(SRAM) + LENGTH(SRAM); /*end of SRAM .*/
+REGION_ALIAS("REGION_TEXT", FLASH);
+REGION_ALIAS("REGION_BSS", SRAM);
+REGION_ALIAS("REGION_DATA", SRAM);
+REGION_ALIAS("REGION_STACK", SRAM);
+REGION_ALIAS("REGION_HEAP", SRAM);
+REGION_ALIAS("REGION_ARM_EXIDX", FLASH);
+REGION_ALIAS("REGION_ARM_EXTAB", FLASH);
 
-/*. Generate a link error if heap and stack does not fit into RAM .*/
-_Min_Heap_Size = 0;
-_Min_Stack_Size = 0x100;
+SECTIONS {
+
+    PROVIDE (_intvecs_base_address =
+        DEFINED(_intvecs_base_address) ? _intvecs_base_address : 0x0);
+
+    .intvecs (_intvecs_base_address) : AT (_intvecs_base_address) {
+        KEEP (*(.intvecs))
+    } > REGION_TEXT
+
+    PROVIDE (_vtable_base_address =
+        DEFINED(_vtable_base_address) ? _vtable_base_address : 0x20000000);
+
+    .vtable (_vtable_base_address) (NOLOAD) : {
+        KEEP (*(.vtable))
+    } > REGION_DATA
+
+    /* if a ROM-only symbol is present, then ROM is being used.
+     * Reserve memory for surgically placed module states.
+     */
+    _rom_data_start = 0x20000100;
+    _rom_data_size = DEFINED(ROM_DATA_SIZE) ? 12 : DEFINED(ROM_DATA_SIZE_NO_OAD) ? 0x108 : 0;
+
+    .rom_data_reserve (_rom_data_start): {
+        . += _rom_data_size;
+    } > REGION_DATA
+
+    /*
+     * UDMACC26XX_CONFIG_BASE below must match UDMACC26XX_CONFIG_BASE defined
+     * by ti/drivers/dma/UDMACC26XX.h
+     * The user is allowed to change UDMACC26XX_CONFIG_BASE to move it away from
+     * the default address 0x2000_1800, but remember it must be 1024 bytes aligned.
+     */
+    UDMACC26XX_CONFIG_BASE = 0x20001800;
+
+    /*
+     * Define absolute addresses for the DMA channels.
+     * DMA channels must always be allocated at a fixed offset from the DMA base address.
+     * --------- DO NOT MODIFY -----------
+     */
+    DMA_SPI0_RX_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x30);
+    DMA_SPI0_TX_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x40);
+    DMA_ADC_PRI_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x70);
+    DMA_GPT0A_PRI_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x90);
+    DMA_SPI1_RX_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x100);
+    DMA_SPI1_TX_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x110);
+
+    DMA_SPI0_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x230);
+    DMA_SPI0_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x240);
+    DMA_ADC_ALT_CONTROL_TABLE_ENTRY_ADDRESS     = (UDMACC26XX_CONFIG_BASE + 0x270);
+    DMA_GPT0A_ALT_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x290);
+    DMA_SPI1_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x300);
+    DMA_SPI1_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x310);
+
+    /*
+     * Allocate SPI0, SPI1, ADC, and GPTimer0 DMA descriptors at absolute addresses.
+     * --------- DO NOT MODIFY -----------
+     */
+    UDMACC26XX_dmaSpi0RxControlTableEntry_is_placed = 0;
+    .dmaSpi0RxControlTableEntry DMA_SPI0_RX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI0_RX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi0RxControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaSpi0TxControlTableEntry_is_placed = 0;
+    .dmaSpi0TxControlTableEntry DMA_SPI0_TX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI0_TX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi0TxControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaADCPriControlTableEntry_is_placed = 0;
+    .dmaADCPriControlTableEntry DMA_ADC_PRI_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_ADC_PRI_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaADCPriControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaGPT0APriControlTableEntry_is_placed = 0;
+    .dmaGPT0APriControlTableEntry DMA_GPT0A_PRI_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_GPT0A_PRI_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaGPT0APriControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaSpi1RxControlTableEntry_is_placed = 0;
+    .dmaSpi1RxControlTableEntry DMA_SPI1_RX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI1_RX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi1RxControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaSpi1TxControlTableEntry_is_placed = 0;
+    .dmaSpi1TxControlTableEntry DMA_SPI1_TX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI1_TX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi1TxControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaSpi0RxAltControlTableEntry_is_placed = 0;
+    .dmaSpi0RxAltControlTableEntry DMA_SPI0_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI0_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi0RxAltControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaSpi0TxAltControlTableEntry_is_placed = 0;
+    .dmaSpi0TxAltControlTableEntry DMA_SPI0_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI0_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi0TxAltControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaADCAltControlTableEntry_is_placed = 0;
+    .dmaADCAltControlTableEntry DMA_ADC_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_ADC_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaADCAltControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaGPT0AAltControlTableEntry_is_placed = 0;
+    .dmaGPT0AAltControlTableEntry DMA_GPT0A_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_GPT0A_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaGPT0AAltControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaSpi1RxAltControlTableEntry_is_placed = 0;
+    .dmaSpi1RxAltControlTableEntry DMA_SPI1_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI1_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi1RxAltControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_dmaSpi1TxAltControlTableEntry_is_placed = 0;
+    .dmaSpi1TxAltControlTableEntry DMA_SPI1_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI1_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi1TxAltControlTableEntry)} > REGION_DATA
 
 
-/* Section allocation in memory */
-SECTIONS
-{
-    .text :
-    {
-        _text = .;
-        KEEP(*(.vectors))
-        *(.text*)
-        *(.rodata*)
+
+    /* if a ROM-only symbol is present, then ROM is being used.
+     * Reserve memory for surgically placed config constants.
+     */
+    _rom_rodata_start = 0x2000;
+    _rom_rodata_size = DEFINED(ROM_RODATA_SIZE) ? 0 : DEFINED(ROM_RODATA_SIZE_NO_OAD) ? 0x330 : 0;
+
+    .rom_rodata_reserve (_rom_rodata_start): {
+        . += _rom_rodata_size;
+    } > REGION_TEXT AT> REGION_TEXT
+
+    .text : {
+        CREATE_OBJECT_SYMBOLS
+        *(.text)
+        *(.text.*)
+        . = ALIGN(0x4);
+        KEEP (*(.ctors))
+        . = ALIGN(0x4);
+        KEEP (*(.dtors))
+        . = ALIGN(0x4);
+        __init_array_start = .;
+        KEEP (*(.init_array*))
+        __init_array_end = .;
         *(.init)
         *(.fini*)
-        *(.eh_frame*)
-        _etext = .;
-    } > FLASH = 0
+    } > REGION_TEXT AT> REGION_TEXT
 
-   .ARM.exidx :
-    {
+    PROVIDE (__etext = .);
+    PROVIDE (_etext = .);
+    PROVIDE (etext = .);
+
+    .rodata : {
+        *(.rodata)
+        *(.rodata.*)
+    } > REGION_TEXT AT> REGION_TEXT
+
+    .data : ALIGN(4) {
+        __data_load__ = LOADADDR (.data);
+        __data_start__ = .;
+        *(.data)
+        *(.data.*)
+        . = ALIGN (4);
+        __data_end__ = .;
+    } > REGION_DATA AT> REGION_TEXT
+
+    .ARM.exidx : {
         __exidx_start = .;
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
         __exidx_end = .;
-    } > FLASH
+    } > REGION_ARM_EXIDX AT> REGION_ARM_EXIDX
 
-    .ARM.extab :
-    {
+    .ARM.extab : {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > FLASH
+    } > REGION_ARM_EXTAB AT> REGION_ARM_EXTAB
 
-    .init_array :
-    {
-        _init_array = .;
-        KEEP(*(SORT(.init_array.*)))
-        KEEP(*(.init_array*))
-        _einit_array = .;
-    } > FLASH
 
-    .data :
-    {
-        _data = .;
-        *(vtable)
-        *(.data*)
-        _edata = .;
-    } > SRAM AT > FLASH
-    _ldata = LOADADDR(.data);
+    .nvs (NOLOAD) : ALIGN(0x2000) {
+        *(.nvs)
+    } > REGION_TEXT
 
-    .bss :
-    {
+    .ccfg : {
+        KEEP (*(.ccfg))
+    } > FLASH_CCFG AT> FLASH_CCFG
+
+    .bss : {
         __bss_start__ = .;
-        _bss = .;
-        *(.bss*)
+        *(.shbss)
+        *(.bss)
+        *(.bss.*)
         *(COMMON)
-        _ebss = .;
+        . = ALIGN (4);
         __bss_end__ = .;
-    } > SRAM
+    } > REGION_BSS AT> REGION_BSS
 
-    .ccfg :
-    {
-        KEEP(*(.ccfg));
-    } > FLASH_CCFG
+    .heap : {
+        __heap_start__ = .;
+        end = __heap_start__;
+        _end = end;
+        __end = end;
+        KEEP(*(.heap))
+        __heap_end__ = .;
+        __HeapLimit = __heap_end__;
+    } > REGION_HEAP AT> REGION_HEAP
 
-    /* User_heap_stack section, used to check that there is enough SRAM left */
-    ._user_heap_stack :
-    {
-      . = ALIGN(4);
-      . = . + _Min_Heap_Size;
-      . = . + _Min_Stack_Size;
-      . = ALIGN(4);
-    } > SRAM
+    /* Heap buffer used by HeapMem */
+    .priheap : {
+        . = ALIGN (8);
+        __primary_heap_start__ = .;
+        . += HEAPSIZE;
+        __primary_heap_end__ = .;
+    } > REGION_HEAP AT> REGION_HEAP
 
-    .gpram :
-    {
-    } > GPRAM
+    .stack (NOLOAD) : ALIGN(0x8) {
+        _stack = .;
+        __stack = .;
+        KEEP(*(.stack))
+        . += STACKSIZE;
+    } > REGION_STACK AT> REGION_STACK
 }
-
-/* RAM region to be used for the nanoFramework CLR managed heap.*/
-REGION_ALIAS("CLR_MANAGED_HEAP_RAM", SRAM);
-
-/* nanoCLR rules inclusion.*/
-INCLUDE rules_clr.ld
