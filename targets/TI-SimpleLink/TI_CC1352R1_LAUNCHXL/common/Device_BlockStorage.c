@@ -6,22 +6,22 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
-// 2k blocks
+// 8k blocks
 const BlockRange BlockRange1[] =
 {
-    // the 1st block is reserved for the flash header 
+    // the last block is reserved for Customer Configuration Area and Bootloader Backdoor configuration
     // so we don't take it into account for the map
-    { BlockRange_BLOCKTYPE_CODE          ,   0  , 93 },           // 0x01000800 nanoCLR
-    { BlockRange_BLOCKTYPE_DEPLOYMENT    ,   94, 510 },           // 0x0102F800 deployment
+    { BlockRange_BLOCKTYPE_CODE          ,   0  , 24 },           // 0x00000000 nanoCLR
+    { BlockRange_BLOCKTYPE_DEPLOYMENT    ,   25 , 42 },           // 0x00032000 deployment
 };
 
 const BlockRegionInfo BlockRegions[] = 
 {
     {
         (0),                                // no attributes for this region
-        0x01000800,                         // start address for block region
-        511,                                // total number of blocks in this region
-        0x800,                              // total number of bytes per block
+        0x00000000,                         // start address for block region
+        43,                                 // total number of blocks in this region
+        0x2000,                             // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
     }
