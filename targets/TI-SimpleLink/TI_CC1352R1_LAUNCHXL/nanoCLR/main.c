@@ -23,7 +23,7 @@
 //////////////////////////////
 
 // Stack size in bytes
-#define THREADSTACKSIZE   1024
+#define THREADSTACKSIZE   2048
 
 extern void * mainThread(void *arg0);
 Task_Handle receiverHandle;
@@ -49,10 +49,12 @@ int main(void)
     GPIO_write(Board_GPIO_RLED, Board_GPIO_LED_OFF);
     GPIO_write(Board_GPIO_GLED, Board_GPIO_LED_OFF);
 
-    /* Construct writer/reader Task threads */
+    // setup Task thread
     Task_Params_init(&taskParams);
-    taskParams.stackSize = 2*THREADSTACKSIZE;
+    taskParams.stackSize = THREADSTACKSIZE;
     taskParams.priority = 1;
+
+    // create Receiver
     receiverHandle = Task_create((Task_FuncPtr)ReceiverThread, &taskParams, Error_IGNORE);
     if (receiverHandle == NULL) {
         while (1);
@@ -66,33 +68,13 @@ int main(void)
     clrSettings.WaitForDebugger            = false;
     clrSettings.EnterDebuggerLoopAfterExit = true;
 
+    // create CLR
     clrHandle = Task_create((Task_FuncPtr)CLRStartupThread, &taskParams, Error_IGNORE);
     if (clrHandle == NULL) {
         while (1);
     }
     
     BIOS_start();
-
-    // // Set priority and stack size attributes
-    // pthread_attr_init(&threadAttributes);
-    // priorityParameters.sched_priority = 1;
-
-    // retc = pthread_attr_setdetachstate(&threadAttributes, PTHREAD_CREATE_DETACHED);
-
-    // pthread_attr_setschedparam(&threadAttributes, &priorityParameters);
-    // retc |= pthread_attr_setstacksize(&threadAttributes, THREADSTACKSIZE);
-    // retc |= pthread_create(&thread, &threadAttributes, mainThread, &clrSettings);
-    // if(retc != 0)
-    // {
-    //     // pthread_create()
-    //     while(1)
-    //     {
-    //         ;
-    //     }
-    // }
-
-    // // Start the FreeRTOS scheduler
-    // vTaskStartScheduler();
 
     return (0);
 }
