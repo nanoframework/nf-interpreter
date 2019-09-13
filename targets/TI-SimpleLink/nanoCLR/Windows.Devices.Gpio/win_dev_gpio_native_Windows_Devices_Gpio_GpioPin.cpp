@@ -8,55 +8,48 @@
 #include "nf_rt_events_native.h"
 
 // #include <timers.h>
+#include <ti/sysbios/knl/Clock.h>
+#include <xdc/runtime/Error.h>
 
 // this array points to the GPIO managed object that has interrupt active
 CLR_RT_HeapBlock* indexPinMapping[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 
 // this array points to the active debounce timers
-TimerHandle_t debounceTimerMapping[ARRAYSIZE_CONST_EXPR(indexPinMapping)];
-
+// TimerHandle_t debounceTimerMapping[ARRAYSIZE_CONST_EXPR(indexPinMapping)];
+Clock_Handle debounceTimerMapping[ARRAYSIZE_CONST_EXPR(indexPinMapping)];
 // this arrays points to the last read value to be used by the debounce timers
 uint_fast8_t lastReadValueMapping[ARRAYSIZE_CONST_EXPR(indexPinMapping)];
 
-static void debounceTimer_Callback(TimerHandle_t xTimer)
+// static void debounceTimer_Callback(TimerHandle_t xTimer)
+static void debounceTimer_Callback(UArg arg)
 {
-    (void)xTimer;
+    int16_t index = (int16_t)arg;
 
-    int16_t index;
+    // get current value
+    uint_fast8_t currentValue = GPIO_read(index);
 
-    // loop through timers to find the index for this
-    for(index = 0; index < ARRAYSIZE_CONST_EXPR(indexPinMapping); index++)
+    // get last read value
+    uint_fast8_t lastRead = lastReadValueMapping[index];
+
+    if(lastRead == currentValue)
     {
-        if(debounceTimerMapping[index] == xTimer)
+        // value hasn't change during debounce interval so this is a valid change
+
+        // get managed GPIO object
+        CLR_RT_HeapBlock*  pThis = (CLR_RT_HeapBlock*)indexPinMapping[index];
+
+        // flag to determine if there are any callbacks registered in managed code
+        bool callbacksRegistered = (pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks ].Dereference() != NULL);
+
+        // post a managed event with the current pin value, only if there is anyone listening otherwise don't bother
+        if(callbacksRegistered)
         {
-            // found it!
-                    
-            // get current value
-            uint_fast8_t currentValue = GPIO_read(index);
-
-            // get last read value
-            uint_fast8_t lastRead = (uint_fast8_t) pvTimerGetTimerID( xTimer );
-
-            if(lastRead == currentValue)
-            {
-                // value hasn't change during debounce interval so this is a valid change
-
-                // get managed GPIO object
-                CLR_RT_HeapBlock*  pThis = (CLR_RT_HeapBlock*)indexPinMapping[index];
-
-                // flag to determine if there are any callbacks registered in managed code
-                bool callbacksRegistered = (pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks ].Dereference() != NULL);
-
-                // post a managed event with the current pin value, only if there is anyone listening otherwise don't bother
-                if(callbacksRegistered)
-                {
-                    PostManagedEvent( EVENT_GPIO, 0, index, currentValue );
-                }
-            }
-
-            xTimerDelete(xTimer, 0);
+            PostManagedEvent( EVENT_GPIO, 0, index, currentValue );
         }
     }
+
+    //xTimerDelete(xTimer, 0);
+    Clock_delete(&debounceTimerMapping[index]);
 }
 
 static void GpioEventCallback(uint_least8_t index)
@@ -84,7 +77,7 @@ static void GpioEventCallback(uint_least8_t index)
     int64_t debounceTimeoutMilsec = (CLR_INT64_TEMP_CAST) pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___debounceTimeout ].NumericByRefConst().s8 / TIME_CONVERSION__TO_MILLISECONDS;
 
     // store current value
-    uint_fast8_t lastRead = GPIO_read(index);
+    lastReadValueMapping[index] = GPIO_read(index);
 
     if(debounceTimeoutMilsec > 0)
     {
@@ -98,13 +91,22 @@ static void GpioEventCallback(uint_least8_t index)
         }
 
         // setup timer
-        debounceTimerMapping[index] = xTimerCreate( NULL, (debounceTimeoutMilsec / portTICK_PERIOD_MS), pdFALSE, (void*)lastRead, debounceTimer_Callback);
-        xTimerStart(debounceTimerMapping[index], 0);
+        Clock_Params params;
+
+        Clock_Params_init(&params);
+        params.arg = (UArg)index;
+        params.startFlag = true;
+        params.period = debounceTimeoutMilsec / Clock_tickPeriod;
+
+        debounceTimerMapping[index] = Clock_create(debounceTimer_Callback, 0, &params, Error_IGNORE);
+
+        // debounceTimerMapping[index] = xTimerCreate( NULL, (debounceTimeoutMilsec / portTICK_PERIOD_MS), pdFALSE, (void*)lastRead, debounceTimer_Callback);
+        // xTimerStart(debounceTimerMapping[index], 0);
     }
     else
     {
         // read pin
-        pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___lastInputValue ].NumericByRef().s4 = lastRead;
+        pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___lastInputValue ].NumericByRef().s4 = lastReadValueMapping[index];
 
         // flag to determine if there are any callbacks registered in managed code
         bool callbacksRegistered = (pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks ].Dereference() != NULL);
@@ -112,7 +114,7 @@ static void GpioEventCallback(uint_least8_t index)
         // post a managed event with the current pin reading, only if there is anyone listening otherwise don't bother
         if(callbacksRegistered)
         {
-            PostManagedEvent( EVENT_GPIO, 0, index, lastRead );
+            PostManagedEvent( EVENT_GPIO, 0, index, lastReadValueMapping[index] );
         }
     }    
 
