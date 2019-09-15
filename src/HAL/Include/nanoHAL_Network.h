@@ -53,7 +53,7 @@ typedef enum __nfpack NetworkInterfaceType
     NetworkInterfaceType_Unknown        = 1,
     NetworkInterfaceType_Ethernet       = 6,
     NetworkInterfaceType_Wireless80211  = 71,
-
+    NetworkInterfaceType_WirelessAP     = 72,
 }NetworkInterfaceType;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -183,6 +183,21 @@ typedef struct __nfpack HAL_Configuration_NetworkInterface {
 
 } HAL_Configuration_NetworkInterface;
 
+typedef enum __nfpack WirelessFlags
+{
+    WirelessFlags_None          = 0x00,
+    WirelessFlags_Enable        = 0x01,     // Enable Station or AP ( Wifi component started & memory allocated )
+    WirelessFlags_Auto          = 0x02,     // Wireless station automatically connects on CLR start
+    WirelessFlags_SmartConfig   = 0x04      // Enable Smart config
+} WirelessFlags;
+
+typedef enum __nfpack WirelessAPFlags
+{
+    WirelessAPFlags_None          = 0x00,
+    WirelessAPFlags_Enable        = 0x01,     // Enable Wireless AP ( Wifi component started & memory allocated )
+    WirelessAPFlags_Auto          = 0x02,     // Wireless AP automatically starts on CLR start
+    WirelessAPFlags_Hidden_SSID   = 0x04,     // Wireless AP uses hidden SSID
+} WirelessAPFlags;
 
 typedef struct __nfpack HAL_Configuration_Wireless80211 {
 
@@ -192,7 +207,7 @@ typedef struct __nfpack HAL_Configuration_Wireless80211 {
     // Id of the configuration
     uint32_t Id;
 
-    // Type of authentication used on the wireless network
+    // Type of authentication used on the wireless network, For AP is the type of Authenication to use on network.
     AuthenticationType Authentication;
 
     // Type of encryption used on the wireless network.
@@ -201,13 +216,52 @@ typedef struct __nfpack HAL_Configuration_Wireless80211 {
     // Type of radio used by the wireless network adapter.
     RadioType Radio;
 
-    // Network SSID
+    // Network SSID - For AP if no SSID given a default value of nano_xxx where xxx is last part of MAC address
     uint8_t Ssid[32];
 
     // Network password
     uint8_t Password[64];
 
+    // Wireless Flags, depends if wireless Station
+    uint8_t Flags;
+
+     // Rssi, station only
+
 } HAL_Configuration_Wireless80211;
+
+typedef struct __nfpack HAL_Configuration_WirelessAP {
+
+    // this is the marker placeholder for this configuration block
+    uint8_t Marker[4];
+
+    // Id of the configuration
+    uint32_t Id;
+
+    // Type of authentication used on the wireless network, For AP is the type of Authenication to use on network.
+    AuthenticationType Authentication;
+
+    // Type of encryption used on the wireless network.
+    EncryptionType Encryption;
+
+    // Type of radio used by the wireless network adapter.
+    RadioType Radio;
+
+    // Network SSID - For AP if no SSID given a default value of nano_xxx where xxx is last part of MAC address
+    uint8_t Ssid[32];
+
+    // Network password
+    uint8_t Password[64];
+
+    // Wireless Flags for AP
+    uint8_t Flags;
+
+    // channel used for AP
+    uint8_t Channel; 
+
+    // Max client connections
+    uint8_t MaxConnections;
+ 
+} HAL_Configuration_WirelessAP;
 
 typedef struct __nfpack HAL_Configuration_X509CaRootBundle {
 

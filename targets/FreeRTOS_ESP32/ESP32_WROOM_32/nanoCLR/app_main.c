@@ -48,13 +48,13 @@ void main_task(void *pvParameter)
 //
 void  app_main()
 {
-  // Switch off logging so as not to interfere with WireProtocol over Uart0
-  esp_log_level_set("*", ESP_LOG_NONE);         
+	// Switch off logging so as not to interfere with WireProtocol over Uart0
+	esp_log_level_set("*", ESP_LOG_NONE);         
 
-  ESP_ERROR_CHECK( nvs_flash_init() );
+	ESP_ERROR_CHECK( nvs_flash_init() );
  
- 	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL, 1);
+	xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL, 1);
   
-  // Start the main task pinned to 2nd core
+	// Start the main task pinned to 2nd core
 	xTaskCreatePinnedToCore(&main_task, "main_task", 15000, NULL, 5, NULL, 1);
 }

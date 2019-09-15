@@ -165,3 +165,17 @@ __nfweak HAL_Configuration_Wireless80211* ConfigurationManager_GetWirelessConfig
     // not found
     return NULL;
 }
+
+__nfweak HAL_Configuration_WirelessAP* ConfigurationManager_GetWirelessAPConfigurationFromId(uint32_t configurationId)
+{
+    for(int i = 0; i < g_TargetConfiguration.WirelessAPConfigs->Count; i++)
+    {
+        if(g_TargetConfiguration.WirelessAPConfigs->Configs[i]->Id == configurationId)
+        {
+            return g_TargetConfiguration.WirelessAPConfigs->Configs[i];
+        }
+    }
+
+    // not found
+    return NULL;
+}

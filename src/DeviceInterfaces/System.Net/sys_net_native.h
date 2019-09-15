@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -23,6 +23,7 @@ struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configu
     static const int FIELD___radio = 5;
     static const int FIELD___password = 6;
     static const int FIELD___ssid = 7;
+    static const int FIELD___options = 8;
 
     NANOCLR_NATIVE_DECLARE(GetWireless82011ConfigurationCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
@@ -32,10 +33,34 @@ struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configu
 
 };
 
+struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration
+{
+    static const int FIELD___apConfigurationIndex = 1;
+    static const int FIELD___apId = 2;
+    static const int FIELD___apAuthentication = 3;
+    static const int FIELD___apEncryption = 4;
+    static const int FIELD___apRadio = 5;
+    static const int FIELD___apPassword = 6;
+    static const int FIELD___apSsid = 7;
+    static const int FIELD___options = 8;
+    static const int FIELD___apChannel = 9;
+    static const int FIELD___apMaxConnections = 10;
+
+    NANOCLR_NATIVE_DECLARE(GetWirelessAPConfigurationCount___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4);
+    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4);
+    NANOCLR_NATIVE_DECLARE(NativeDeauthStation___STATIC__STRING__I4);
+
+    //--//
+
+};
+
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
     static const int FIELD_STATIC__NetworkAddressChanged = 0;
     static const int FIELD_STATIC__NetworkAvailabilityChanged = 1;
+    static const int FIELD_STATIC__NetworkAPStationChanged = 2;
 
 
     //--//
@@ -46,7 +71,9 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange__Netwo
 {
     static const int FIELD__EventType = 3;
     static const int FIELD__Flags = 4;
-    static const int FIELD__Time = 5;
+    static const int FIELD__Index = 5;
+    static const int FIELD__Data = 6;
+    static const int FIELD__Time = 7;
 
 
     //--//
@@ -55,8 +82,8 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange__Netwo
 
 struct Library_sys_net_native_System_Net_IPAddress
 {
-    static const int FIELD_STATIC__Any = 2;
-    static const int FIELD_STATIC__Loopback = 3;
+    static const int FIELD_STATIC__Any = 3;
+    static const int FIELD_STATIC__Loopback = 4;
 
     static const int FIELD___address = 1;
     static const int FIELD___family = 2;
@@ -81,6 +108,16 @@ struct Library_sys_net_native_System_Net_IPHostEntry
 {
     static const int FIELD__hostName = 1;
     static const int FIELD__addressList = 2;
+
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAPStationEventArgs
+{
+    static const int FIELD___stationIndex = 1;
+    static const int FIELD___isConnected = 2;
 
 
     //--//
@@ -120,6 +157,17 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
     NANOCLR_NATIVE_DECLARE(GetNetworkInterfaceCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4);
     NANOCLR_NATIVE_DECLARE(IPAddressFromString___STATIC__U4__STRING);
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation
+{
+    static const int FIELD___macAddress = 1;
+    static const int FIELD___rssi = 2;
+    static const int FIELD___phyModes = 3;
+
 
     //--//
 
@@ -208,9 +256,9 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
     NANOCLR_NATIVE_DECLARE(setsockopt___STATIC__VOID__OBJECT__I4__I4__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(poll___STATIC__BOOLEAN__OBJECT__I4__I4);
     NANOCLR_NATIVE_DECLARE(ioctl___STATIC__VOID__OBJECT__U4__BYREF_U4);
- 
+
     //--//
-    static HRESULT MarshalSockAddress( struct SOCK_sockaddr* addrDst, CLR_UINT32& addrLenDst, const CLR_RT_HeapBlock& blkEndPointAddress );
+        static HRESULT MarshalSockAddress( struct SOCK_sockaddr* addrDst, CLR_UINT32& addrLenDst, const CLR_RT_HeapBlock& blkEndPointAddress );
     static HRESULT MarshalSockAddress( CLR_RT_HeapBlock& blkDst, const struct SOCK_sockaddr* addrSrc, CLR_UINT32 addrLenSrc );
     static HRESULT SendRecvHelper( CLR_RT_StackFrame& stack, bool fSend, bool fAddress );
     static HRESULT SockOptHelper( CLR_RT_StackFrame& stack, bool fGet );
@@ -250,16 +298,6 @@ struct Library_sys_net_native_System_Net_Sockets_Socket
 struct Library_sys_net_native_System_Net_Sockets_SocketException
 {
     static const int FIELD___errorCode = 5;
-
-
-    //--//
-
-};
-
-struct Library_sys_net_native_System_Security_Cryptography_AsymmetricAlgorithm
-{
-    static const int FIELD___keySizeValue = 1;
-    static const int FIELD___keyPairValue = 2;
 
 
     //--//
