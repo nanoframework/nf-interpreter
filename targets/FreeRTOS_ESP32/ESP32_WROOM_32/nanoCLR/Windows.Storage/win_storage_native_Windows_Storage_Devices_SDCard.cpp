@@ -63,7 +63,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNativ
     CSPin = stack.Arg1().NumericByRef().s4;
 
     // Get current gpio pins used by SPI device 
-	spiBus--;  // Spi devnumber 0 & 1
+    spiBus--;  // Spi devnumber 0 & 1
     int mosiPin =  Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 0);
     int misoPin =  Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 1);
     int clockPin = Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 2);
