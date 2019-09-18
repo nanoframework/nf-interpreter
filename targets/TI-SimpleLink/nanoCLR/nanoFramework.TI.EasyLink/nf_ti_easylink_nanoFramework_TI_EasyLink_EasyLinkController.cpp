@@ -11,7 +11,7 @@ typedef Library_nf_ti_easylink_nanoFramework_TI_EasyLink_TransmitPacket Transmit
 void TxDone(EasyLink_Status status)
 {
     // fire event for Tx completed
-    Events_Set(SYSTEM_EVENT_FLAG_RADIO_TX1);
+    Events_Set(SYSTEM_EVENT_FLAG_RADIO_TX);
 }
 
 HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::get_AbsoluteTime___U4( CLR_RT_StackFrame& stack )
