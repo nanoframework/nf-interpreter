@@ -17,6 +17,7 @@ set(System.Net_SRCS
     # System.Net.NetworkInformation
     sys_net_native_System_Net_NetworkInformation_NetworkInterface.cpp
     sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration.cpp
+    sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration.cpp
 
     # System.Security.Cryptography.X509Certificates 
     sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate.cpp
