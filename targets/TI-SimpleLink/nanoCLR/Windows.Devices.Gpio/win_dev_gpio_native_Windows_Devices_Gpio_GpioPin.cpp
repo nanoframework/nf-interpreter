@@ -256,17 +256,17 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
         switch (driveMode)
         {
             case GpioPinDriveMode_Input:
-                GPIO_setConfig(pinNumber, GPIO_CFG_IN_NOPULL | PIN_HYSTERESIS);
+                GPIO_setConfig(pinNumber, GPIO_CFG_IN_NOPULL);
                 setupInterrupt = true;
                 break;
 
             case GpioPinDriveMode_InputPullDown:
-                GPIO_setConfig(pinNumber, GPIO_CFG_IN_PD | PIN_HYSTERESIS);
+                GPIO_setConfig(pinNumber, GPIO_CFG_IN_PD);
                 setupInterrupt = true;
                 break;
 
             case GpioPinDriveMode_InputPullUp:
-                GPIO_setConfig(pinNumber, GPIO_CFG_IN_PU | PIN_HYSTERESIS);
+                GPIO_setConfig(pinNumber, GPIO_CFG_IN_PU);
                 setupInterrupt = true;
                 break;
 
