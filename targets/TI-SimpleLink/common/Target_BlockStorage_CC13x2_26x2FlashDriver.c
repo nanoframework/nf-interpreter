@@ -9,12 +9,16 @@
 // #include "inc/hw_types.h"
 #include <driverlib/flash.h>
 #include <driverlib/vims.h>
+#include <ti/sysbios/hal/Hwi.h>
+#include <ti/sysbios/knl/Task.h>
+#include <ti/sysbios/knl/Clock.h>
+#include <ti/sysbios/knl/Swi.h>
 
 // local defines
 #define FLASH_ERASED_WORD        0x0FFFFFFFFU
 
-static uint32_t disableFlashCache(void);
-static void restoreFlashCache(uint32_t mode);
+static uint8_t DisableCache();
+static void EnableCache( uint8_t state );
 
 bool CC13x2_26x2FlashDriver_InitializeDevice(void* context)
 {
@@ -52,20 +56,32 @@ bool CC13x2_26x2FlashDriver_Read(void* context, ByteAddress startAddress, unsign
 
 bool CC13x2_26x2FlashDriver_Write(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
 {
+    uint_least16_t swiState;
+    uint_least16_t hwiState;
+    uint8_t state;
     bool result = false;
-    uint32_t mode;
 
 	(void)context;
 	(void)readModifyWrite;
 
-    mode = disableFlashCache();
+    // enter critical section
+    swiState = Swi_disable();
+    hwiState = Hwi_disable();
+
+    state = DisableCache();
 
 	if(FlashProgram((unsigned long*)buffer, (unsigned long) startAddress, (unsigned long) numBytes) == 0)
 	{
 		result = true;
 	}
 
-    restoreFlashCache(mode);
+    EnableCache(state);
+
+    //Task_sleep(100000 / Clock_tickPeriod);
+    
+    // exit critical section
+    Hwi_restore(hwiState);
+    Swi_restore(swiState);
 	
 	return result;
 }
@@ -94,46 +110,41 @@ bool CC13x2_26x2FlashDriver_IsBlockErased(void* context, ByteAddress blockAddres
 
 bool CC13x2_26x2FlashDriver_EraseBlock(void* context, ByteAddress address)
 {
+    uint_least16_t swiState;
+    uint_least16_t hwiState;
+    uint8_t state;
     bool result = false;
-    uint32_t mode;
 
 	(void)context;
 
-    mode = disableFlashCache();
+    // enter critical section
+    swiState = Swi_disable();
+    hwiState = Hwi_disable();
+
+    state = DisableCache();
     
 	if(FlashSectorErase((unsigned long) address) == 0)
 	{
 		result = true;
 	}
 
-    restoreFlashCache(mode);
+    EnableCache(state);
+
+    // exit critical section
+    Hwi_restore(hwiState);
+    Swi_restore(swiState);
 
 	return result;
 }
 
-/**
- * Disable Flash data caching and instruction pre-fetching.
- *
- * It is necessary to disable the caching and VIMS to ensure the cache has
- * valid data while the program is executing.
- *
- * @return The VIMS state before being disabled.
- */
-static uint32_t disableFlashCache(void)
+// Disable Flash data caching
+static void EnableCache( uint8_t state )
 {
-    uint32_t mode = VIMSModeGet(VIMS_BASE);
-
-    VIMSLineBufDisable(VIMS_BASE);
-
-    if (mode != VIMS_MODE_DISABLED)
+    if ( state != VIMS_MODE_DISABLED )
     {
-        VIMSModeSet(VIMS_BASE, VIMS_MODE_DISABLED);
-
-        while (VIMSModeGet(VIMS_BASE) != VIMS_MODE_DISABLED)
-            ;
+        // Enable the Cache.
+        VIMSModeSet( VIMS_BASE, VIMS_MODE_ENABLED );
     }
-
-    return mode;
 }
 
 /**
@@ -141,12 +152,20 @@ static uint32_t disableFlashCache(void)
  *
  * @param [in] mode The VIMS mode returned by @ref disableFlashCache.
  */
-static void restoreFlashCache(uint32_t mode)
+static uint8_t DisableCache()
 {
-    if (mode != VIMS_MODE_DISABLED)
+    uint8_t state = VIMSModeGet( VIMS_BASE );
+    
+    // Check VIMS state
+    if( state != VIMS_MODE_DISABLED )
     {
-        VIMSModeSet(VIMS_BASE, mode);
+        // Invalidate cache
+        VIMSModeSet( VIMS_BASE, VIMS_MODE_DISABLED );
+    
+        // Wait for disabling to be complete
+        while( VIMSModeGet( VIMS_BASE ) != VIMS_MODE_DISABLED ); 
+        
     }
-
-    VIMSLineBufEnable(VIMS_BASE);
+    
+    return state;
 }
