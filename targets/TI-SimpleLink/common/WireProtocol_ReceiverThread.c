@@ -5,6 +5,7 @@
 
 #include "WireProtocol_HAL_Interface.h"
 #include <ti/sysbios/knl/Task.h>
+#include <xdc/std.h>
 // #include <FreeRTOS.h>
 // #include <task.h>
 
@@ -14,9 +15,10 @@ void WP_Message_Initialize(WP_Message* a);
 void WP_Message_PrepareReception(WP_Message* a);
 void WP_Message_Process(WP_Message* a);
 
-void* ReceiverThread(void* argument)
+void ReceiverThread(UArg arg0, UArg arg1)
 {
-    (void)argument;
+    (void)arg0;
+    (void)arg1;
 
     // loop forever
     while (1) 
