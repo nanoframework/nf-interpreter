@@ -39,12 +39,12 @@
 */
 
 STACKSIZE = 2048;
-HEAPSIZE = 0x2500; /* Size of heap buffer used by HeapMem */
+HEAPSIZE = 0x3000; /* Size of heap buffer used by HeapMem */
 
 MEMORY
 {
     /* original flash LENGTH was 0x00057fa8 */
-    FLASH (RX)      : ORIGIN = 0x00000000, LENGTH = 0x00032000
+    FLASH (RX)      : ORIGIN = 0x00000000, LENGTH = 0x00036000
     /*
      * Customer Configuration Area and Bootloader Backdoor configuration in
      * flash, 40 bytes
