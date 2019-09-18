@@ -33,6 +33,9 @@ option(API_Hardware.Esp32                       "option for Hardware.Esp32")
 # Stm32 only
 option(API_Hardware.Stm32                       "option for Hardware.Stm32")
 
+# TI CC13xxCC26xx
+option(API_nanoFramework.TI.EasyLink            "option for nanoFramework.TI.EasyLink API")
+
 
 #################################################################
 # macro to perform individual settings to add an API to the build
@@ -102,6 +105,12 @@ macro(ParseNativeAssemblies)
     if(API_nanoFramework.Networking.Sntp)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("nanoFramework.Networking.Sntp")
+    endif()
+
+    # nanoFramework.TI.EasyLink
+    if(API_nanoFramework.TI.EasyLink)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.TI.EasyLink")
     endif()
 
     # nanoFramework.Runtime.Events
