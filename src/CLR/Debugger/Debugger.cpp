@@ -350,16 +350,21 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg)
         unsigned int rangeCount = 0;
         unsigned int rangeIndex = 0;
 
+        // get pointer to the 1st storage device
+        BlockStorageDevice* device = BlockStorageList_GetFirstDevice();
+
+        // sanity check
+        if(device == NULL)
+        {
+            WP_ReplyToCommand( msg, true, false, NULL, 0 );
+            return false;
+        }
+
+        // now get info of storage device
+        DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
+
         for(int cnt = 0; cnt < 2; cnt++)
         {
-            BlockStorageDevice* device = BlockStorageList_GetFirstDevice();
-
-            if(device == NULL)
-            {
-                WP_ReplyToCommand( msg, true, false, NULL, 0 );
-                return false;
-            }
-
             if(cnt == 1)
             {
                 pData = (struct Flash_BlockRegionInfo*)platform_malloc(rangeCount * sizeof(struct Flash_BlockRegionInfo));
@@ -370,8 +375,6 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg)
                     return false;
                 }
             }
-
-            DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
 
             for(unsigned int i = 0; i < deviceInfo->NumRegions;  i++)
             {
