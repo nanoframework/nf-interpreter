@@ -312,7 +312,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 
             // set interrupt on both edges
             GPIO_setConfig(pinNumber, currentPinConfig | GPIO_CFG_IN_INT_BOTH_EDGES);
-            GPIO_setCallback(pinNumber, &GpioEventCallback);
+            GPIO_setCallback(pinNumber, GpioEventCallback);
 
             GPIO_enableInt(pinNumber);
 
