@@ -6,17 +6,15 @@
 #include <Target_BlockStorage_CC13x2_26x2FlashDriver.h>
 
 // includes from SimpleLink
-// #include "inc/hw_types.h"
 #include <driverlib/flash.h>
 #include <driverlib/vims.h>
 #include <ti/sysbios/hal/Hwi.h>
-#include <ti/sysbios/knl/Task.h>
-#include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Swi.h>
 
 // local defines
 #define FLASH_ERASED_WORD        0x0FFFFFFFFU
 
+// need these prototypes here
 static uint8_t DisableCache();
 static void EnableCache( uint8_t state );
 
@@ -56,17 +54,17 @@ bool CC13x2_26x2FlashDriver_Read(void* context, ByteAddress startAddress, unsign
 
 bool CC13x2_26x2FlashDriver_Write(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
 {
-    uint_least16_t swiState;
-    uint_least16_t hwiState;
-    uint8_t state;
-    bool result = false;
-
 	(void)context;
 	(void)readModifyWrite;
 
-    // enter critical section
-    swiState = Swi_disable();
-    hwiState = Hwi_disable();
+    // uint_least16_t swiState;
+    // uint_least16_t hwiState;
+    uint8_t state;
+    bool result = false;
+
+    // // enter critical section
+    // swiState = Swi_disable();
+    // hwiState = Hwi_disable();
 
     state = DisableCache();
 
@@ -76,12 +74,10 @@ bool CC13x2_26x2FlashDriver_Write(void* context, ByteAddress startAddress, unsig
 	}
 
     EnableCache(state);
-
-    //Task_sleep(100000 / Clock_tickPeriod);
     
-    // exit critical section
-    Hwi_restore(hwiState);
-    Swi_restore(swiState);
+    // // exit critical section
+    // Hwi_restore(hwiState);
+    // Swi_restore(swiState);
 	
 	return result;
 }
@@ -110,16 +106,16 @@ bool CC13x2_26x2FlashDriver_IsBlockErased(void* context, ByteAddress blockAddres
 
 bool CC13x2_26x2FlashDriver_EraseBlock(void* context, ByteAddress address)
 {
-    uint_least16_t swiState;
-    uint_least16_t hwiState;
+	(void)context;
+
+    // uint_least16_t swiState;
+    // uint_least16_t hwiState;
     uint8_t state;
     bool result = false;
 
-	(void)context;
-
-    // enter critical section
-    swiState = Swi_disable();
-    hwiState = Hwi_disable();
+    // // enter critical section
+    // swiState = Swi_disable();
+    // hwiState = Hwi_disable();
 
     state = DisableCache();
     
@@ -130,9 +126,9 @@ bool CC13x2_26x2FlashDriver_EraseBlock(void* context, ByteAddress address)
 
     EnableCache(state);
 
-    // exit critical section
-    Hwi_restore(hwiState);
-    Swi_restore(swiState);
+    // // exit critical section
+    // Hwi_restore(hwiState);
+    // Swi_restore(swiState);
 
 	return result;
 }
@@ -147,11 +143,7 @@ static void EnableCache( uint8_t state )
     }
 }
 
-/**
- * Restore the Flash data caching and instruction pre-fetching.
- *
- * @param [in] mode The VIMS mode returned by @ref disableFlashCache.
- */
+// Restore the Flash data caching and instruction pre-fetching.
 static uint8_t DisableCache()
 {
     uint8_t state = VIMSModeGet( VIMS_BASE );
