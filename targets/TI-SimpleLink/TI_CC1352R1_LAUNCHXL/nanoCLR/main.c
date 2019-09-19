@@ -62,7 +62,7 @@ int main(void)
     // setup CLR task
     taskParams.arg0 = (UArg)&clrSettings;
     taskParams.stackSize = THREADSTACKSIZE;
-    taskParams.priority = 2;
+    taskParams.priority = 4;
     clrHandle = Task_create(CLRStartupThread, &taskParams, Error_IGNORE);
     if (clrHandle == NULL)
     {
