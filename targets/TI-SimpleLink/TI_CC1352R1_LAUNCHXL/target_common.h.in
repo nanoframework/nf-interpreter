@@ -43,11 +43,11 @@
 // set Wire Protocol packet size
 // valid sizes are 1024, 512, 256, 128
 // check Monitor_Ping_Source_Flags enum
-#define WP_PACKET_SIZE                  256U
+#define WP_PACKET_SIZE                  512U
 //////////////////////////////////////////////
 
 /////////////////////////////////////
-#define MANAGED_HEAP_SIZE       (34*1024)
+#define MANAGED_HEAP_SIZE       (35*1024)
 /////////////////////////////////////
 
 /////////////////////////////////////
