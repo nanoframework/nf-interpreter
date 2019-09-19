@@ -101,6 +101,9 @@ elseif(TARGET_SERIES STREQUAL "CC13x2_26x2")
     # includes for XDC Tools
     list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/TI_XDCTools_Source/packages")
 
+    # need a dummy include for the sources
+    list(APPEND TI_SimpleLink_SOURCES " ")
+
 endif()
 
 include(FindPackageHandleStandardArgs)
