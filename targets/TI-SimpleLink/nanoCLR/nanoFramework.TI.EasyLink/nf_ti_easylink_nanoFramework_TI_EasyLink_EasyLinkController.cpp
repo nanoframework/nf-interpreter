@@ -11,7 +11,7 @@ typedef Library_nf_ti_easylink_nanoFramework_TI_EasyLink_TransmitPacket Transmit
 void TxDone(EasyLink_Status status)
 {
     // fire event for Tx completed
-    Events_Set(SYSTEM_EVENT_FLAG_RADIO_TX);
+    Events_Set(SYSTEM_EVENT_FLAG_RADIO);
 }
 
 HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::get_AbsoluteTime___U4( CLR_RT_StackFrame& stack )
@@ -226,7 +226,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
     while(eventResult)
     {
         // non-blocking wait allowing other threads to run while we wait for the Spi transaction to complete
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_RadioTx, eventResult ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_Radio, eventResult ));
     
         if(eventResult)
         {

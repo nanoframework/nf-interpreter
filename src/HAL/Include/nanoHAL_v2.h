@@ -52,9 +52,7 @@ typedef enum SLEEP_LEVEL
 //#define SYSTEM_EVENT_FLAG_TONE_BUFFER_EMPTY         0x00002000
 #define SYSTEM_EVENT_FLAG_SOCKET                    0x00004000
 #define SYSTEM_EVENT_FLAG_ONEWIRE_MASTER            0x00008000
-
-#define SYSTEM_EVENT_FLAG_RADIO_TX                  0x00010000
-#define SYSTEM_EVENT_FLAG_RADIO_RX                  0x00020000
+#define SYSTEM_EVENT_FLAG_RADIO                     0x00010000
 
 //#define SYSTEM_EVENT_FLAG_SPI                       0x00008000
 //#define SYSTEM_EVENT_FLAG_OEM_RESERVED_1            0x00020000

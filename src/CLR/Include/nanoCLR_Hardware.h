@@ -55,8 +55,7 @@ struct CLR_HW_Hardware
                                                      SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY |
                                                      SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY|
                                                      SYSTEM_EVENT_FLAG_ONEWIRE_MASTER    |
-                                                     SYSTEM_EVENT_FLAG_RADIO_TX          |
-                                                     SYSTEM_EVENT_FLAG_RADIO_RX;
+                                                     SYSTEM_EVENT_FLAG_RADIO;
 
     //--//
 
