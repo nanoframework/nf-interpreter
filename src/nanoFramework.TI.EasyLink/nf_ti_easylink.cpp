@@ -24,14 +24,16 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::SetConfiguration___nanoFrameworkTIEasyLinkStatus__nanoFrameworkTIEasyLinkControlOption__U4,
+    NULL,
+    NULL,
     Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::GetConfiguration___U4__nanoFrameworkTIEasyLinkControlOption,
     NULL,
-    Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::InitNative___STATIC__VOID,
+    Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::SetConfigurationNative___I4__nanoFrameworkTIEasyLinkControlOption__U4,
     Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::DisposeNative___STATIC__VOID,
     Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::EnableRxAddressFilterNative___STATIC__VOID,
-    Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::TransmitNative___STATIC__nanoFrameworkTIEasyLinkStatus__nanoFrameworkTIEasyLinkTransmitPacket__mscorlibSystemTimeSpan__I4,
-    Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::ReceiveNative___STATIC__nanoFrameworkTIEasyLinkStatus__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__mscorlibSystemTimeSpan,
+    Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::InitNative___STATIC__I4,
+    Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::ReceiveNative___STATIC__I4__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__mscorlibSystemTimeSpan,
+    Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::TransmitNative___STATIC__I4__nanoFrameworkTIEasyLinkTransmitPacket__mscorlibSystemTimeSpan__I4,
     NULL,
     NULL,
     NULL,
@@ -46,7 +48,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_TI_EasyLink =
 {
     "nanoFramework.TI.EasyLink", 
-    0x781A5339,
+    0xCA4D32D8,
     method_lookup,
     { 100, 0, 0, 0 }
 };

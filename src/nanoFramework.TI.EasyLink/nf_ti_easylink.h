@@ -14,8 +14,8 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
 {
     static const int FIELD___syncLock = 1;
     static const int FIELD___phyType = 2;
-    static const int FIELD___addressFilter = 3;
-    static const int FIELD___disposedValue = 4;
+    static const int FIELD___addressFilter = 4;
+    static const int FIELD___disposedValue = 5;
 
     NANOCLR_NATIVE_DECLARE(get_AbsoluteTime___U4);
     NANOCLR_NATIVE_DECLARE(get_Rssi___I1);
@@ -24,16 +24,17 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
     NANOCLR_NATIVE_DECLARE(get_RfPower___I1);
     NANOCLR_NATIVE_DECLARE(set_RfPower___VOID__I1);
     NANOCLR_NATIVE_DECLARE(get_IeeeAddress___SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(SetConfiguration___nanoFrameworkTIEasyLinkStatus__nanoFrameworkTIEasyLinkControlOption__U4);
     NANOCLR_NATIVE_DECLARE(GetConfiguration___U4__nanoFrameworkTIEasyLinkControlOption);
-    NANOCLR_NATIVE_DECLARE(InitNative___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(SetConfigurationNative___I4__nanoFrameworkTIEasyLinkControlOption__U4);
     NANOCLR_NATIVE_DECLARE(DisposeNative___STATIC__VOID);
     NANOCLR_NATIVE_DECLARE(EnableRxAddressFilterNative___STATIC__VOID);
-    NANOCLR_NATIVE_DECLARE(TransmitNative___STATIC__nanoFrameworkTIEasyLinkStatus__nanoFrameworkTIEasyLinkTransmitPacket__mscorlibSystemTimeSpan__I4);
-    NANOCLR_NATIVE_DECLARE(ReceiveNative___STATIC__nanoFrameworkTIEasyLinkStatus__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__mscorlibSystemTimeSpan);
+    NANOCLR_NATIVE_DECLARE(InitNative___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(ReceiveNative___STATIC__I4__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__mscorlibSystemTimeSpan);
+    NANOCLR_NATIVE_DECLARE(TransmitNative___STATIC__I4__nanoFrameworkTIEasyLinkTransmitPacket__mscorlibSystemTimeSpan__I4);
 
     //--//
 
+    static HRESULT EnableRxAddressFilter( CLR_RT_StackFrame& stack );
 };
 
 struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_ReceivedPacket
