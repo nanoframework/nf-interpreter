@@ -5,7 +5,6 @@
 
 #include "nf_ti_easylink_target.h"
 
-
 typedef Library_nf_ti_easylink_nanoFramework_TI_EasyLink_TransmitPacket TransmitPacket;
 typedef Library_nf_ti_easylink_nanoFramework_TI_EasyLink_ReceivedPacket ReceivedPacket;
 
@@ -122,7 +121,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Set
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::DisposeNative___STATIC__VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -131,16 +130,12 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Dis
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::EnableRxAddressFilterNative___STATIC__VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::UpdateRxAddressFilterNative___VOID( CLR_RT_StackFrame& stack )
 {
-    NANOCLR_HEADER();
-
-    NANOCLR_CHECK_HRESULT(EnableRxAddressFilter(stack));
-
-    NANOCLR_NOCLEANUP();
+    return UpdateRxAddressFilter(stack);
 }
 
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::InitNative___STATIC__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::InitNative___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -191,7 +186,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Ini
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::ReceiveNative___STATIC__I4__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__mscorlibSystemTimeSpan( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::ReceiveNative___I4__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -209,7 +204,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
     // get value for timeout parameter
-    timeout_ms = stack.Arg1().NumericByRef().s4;
+    timeout_ms = stack.Arg2().NumericByRef().s4;
 
     // set timeout
     rxTimeout.SetInteger( timeout_ms );
@@ -308,7 +303,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::TransmitNative___STATIC__I4__nanoFrameworkTIEasyLinkTransmitPacket__mscorlibSystemTimeSpan__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::TransmitNative___I4__nanoFrameworkTIEasyLinkTransmitPacket__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -414,24 +409,26 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
 }
 
 // To make it more efficient this processing is separated, making it reusable  
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::EnableRxAddressFilter( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::UpdateRxAddressFilter( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
     uint8_t* addressTable = NULL;
     uint8_t* addressTableCursor = NULL;
-    uint8_t addressCount, addressSize;
+    uint8_t addressSize;
+    // need to initialize these because they are passed by ref
+    int addressCount = 0, capacity = 0;
+    CLR_RT_HeapBlock_Array* addressList = NULL;
 
-    CLR_RT_HeapBlock_Array* addressList;
     CLR_RT_HeapBlock_Array* address;
+    CLR_RT_HeapBlock* addressField;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    addressList = pThis[ FIELD___addressFilter ].DereferenceArray();
+    addressField = &pThis[ FIELD___addressFilter ];
 
-    // check collection length...
-    addressCount = addressList->m_numOfElements;
+    NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( *addressField, addressList, addressCount, capacity ));
 
     if(addressCount > 0)
     {
@@ -454,7 +451,8 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Ena
         addressTableCursor = addressTable;
 
         // now loop through the collection to fill the table
-        for(int i = 0; i < addressList->m_numOfElements; i++)
+        // have to use the items count and NOT the number of elements because that's the array list capacity
+        for(int i = 0; i < addressCount; i++)
         {
             address = ((CLR_RT_HeapBlock_Array*)addressList->GetElement(i))->DereferenceArray();
             if(address != NULL)
