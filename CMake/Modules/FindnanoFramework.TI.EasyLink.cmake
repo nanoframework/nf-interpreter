@@ -23,7 +23,7 @@ set(nanoFramework.TI.EasyLink_SRCS
     smartrf_settings.c
     smartrf_settings_predefined.c
 
-    targetEasyLinkCC13xx_CC26xx_RadioTask.c
+    # targetEasyLinkCC13xx_CC26xx_RadioTask.c
 
     # source files of the assembly
     nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController.cpp

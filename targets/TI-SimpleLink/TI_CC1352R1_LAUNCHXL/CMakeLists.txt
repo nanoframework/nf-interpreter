@@ -58,6 +58,8 @@ add_executable(
 
     ${TARGET_TI_SimpleLink_NANOCLR_SOURCES}
 
+    ${TARGET_TI_SimpleLink_SOURCES}
+
     ${WireProtocol_SOURCES}
 
     # sources for nanoFramework libraries
