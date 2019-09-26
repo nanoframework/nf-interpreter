@@ -13,7 +13,7 @@
 struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
 {
     static const int FIELD___syncLock = 1;
-    static const int FIELD___disposedValue = 2;
+    static const int FIELD___disposed = 2;
     static const int FIELD___phyType = 3;
     static const int FIELD___addressFilter = 4;
 
