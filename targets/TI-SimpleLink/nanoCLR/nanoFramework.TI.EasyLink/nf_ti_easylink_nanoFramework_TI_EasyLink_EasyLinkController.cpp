@@ -11,7 +11,8 @@ typedef Library_nf_ti_easylink_nanoFramework_TI_EasyLink_ReceivedPacket Received
 static EasyLink_RxPacket latestRxPacket;
 static EasyLink_Status latestOperationStatus;
 
-void TxDone(EasyLink_Status status)
+// handler for TX operation done
+static void TxDone(EasyLink_Status status)
 {
     // store status
     latestOperationStatus = status;
@@ -20,6 +21,7 @@ void TxDone(EasyLink_Status status)
     Events_Set(SYSTEM_EVENT_FLAG_RADIO);
 }
 
+// handler for RX operation done
 static void RxDone(EasyLink_RxPacket* rxPacket, EasyLink_Status status)
 {
     // store status
@@ -31,10 +33,6 @@ static void RxDone(EasyLink_RxPacket* rxPacket, EasyLink_Status status)
         // copy packet
         memcpy(&latestRxPacket, rxPacket, sizeof(EasyLink_RxPacket));
     }
-    else
-    {
-        // TODO
-    }
 
     // fire event for Rx completed
     Events_Set(SYSTEM_EVENT_FLAG_RADIO);
@@ -44,7 +42,17 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::get
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    EasyLink_Status status;
+    uint32_t absoluteTime;
+
+    status = EasyLink_getAbsTime(&absoluteTime);
+    if(status != EasyLink_Status_Success)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // set result to the value of the absolute time
+    stack.SetResult_U4(absoluteTime);
 
     NANOCLR_NOCLEANUP();
 }
@@ -53,7 +61,17 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::get
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    EasyLink_Status status;
+    int8_t rssi;
+
+    status = EasyLink_getRssi(&rssi);
+    if(status != EasyLink_Status_Success)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // set result to the value of the RSSI
+    stack.SetResult_I1(rssi);
 
     NANOCLR_NOCLEANUP();
 }
@@ -62,7 +80,16 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::get
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    uint32_t status;
+
+    status = EasyLink_getFrequency();
+    if(status == EasyLink_Status_Config_Error)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // set result to the value of the frequency (in units of kHz)
+    stack.SetResult_U4(status);
 
     NANOCLR_NOCLEANUP();
 }
@@ -71,8 +98,18 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::set
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    uint16_t frequency;
+    EasyLink_Status status;
 
+    // get value for the frequency
+    frequency = (uint16_t)stack.Arg0().NumericByRef().u4;
+
+    status = EasyLink_setFrequency(frequency);
+    if(status != EasyLink_Status_Success)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+  
     NANOCLR_NOCLEANUP();
 }
 
@@ -80,7 +117,17 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::get
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    EasyLink_Status status;
+    int8_t power;
+
+    status = EasyLink_getRfPower(&power);
+    if(status != EasyLink_Status_Success)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // set result to the value of the RF power
+    stack.SetResult_I1(power);
 
     NANOCLR_NOCLEANUP();
 }
@@ -89,7 +136,17 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::set
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    EasyLink_Status status;
+    int8_t power;
+
+    // get value for the tx power
+    power = (int8_t)stack.Arg0().NumericByRef().u4;
+
+    status = EasyLink_setRfPower(power);
+    if(status != EasyLink_Status_Success)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -107,7 +164,21 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Get
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    EasyLink_Status status;
+    EasyLink_CtrlOption option; 
+    uint32_t optionValue;
+
+    // get control option from argument
+    option = (EasyLink_CtrlOption)stack.Arg0().NumericByRef().u4;
+
+    status = EasyLink_getCtrl(option, &optionValue);
+    if(status != EasyLink_Status_Success)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // set result to the control option value
+    stack.SetResult_U4(optionValue);
 
     NANOCLR_NOCLEANUP();
 }
@@ -116,7 +187,18 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Set
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    EasyLink_Status status;
+    EasyLink_CtrlOption option; 
+    uint32_t optionValue;
+
+    // get control option
+    option = (EasyLink_CtrlOption)stack.Arg0().NumericByRef().u4;
+    optionValue = stack.Arg1().NumericByRef().u4;
+
+    status = EasyLink_setCtrl(option, optionValue);
+
+    // set result to the operation return status
+    stack.SetResult_I1(status);
 
     NANOCLR_NOCLEANUP();
 }
@@ -125,7 +207,11 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Dis
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    (void)stack;
+
+    // stop any ongoing async operation that could be occurring
+    // don't bother checking the return result
+    EasyLink_abort();
 
     NANOCLR_NOCLEANUP();
 }
@@ -203,7 +289,25 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+    
+    // check disposed
+    if(pThis[ FIELD___disposed ].NumericByRef().u1 != 0)
+    {
+        // don't throw if the execution has reached here from an aborted async operation
+        if( latestOperationStatus == EasyLink_Status_Aborted)
+        {
+            // return operation status
+            stack.SetResult_I4(latestOperationStatus);
 
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+        else
+        {
+            // has to throw exception on all other situations
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+    }
+    
     // get value for timeout parameter
     timeout_ms = stack.Arg2().NumericByRef().s4;
 
@@ -232,48 +336,47 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
     {
         // non-blocking wait allowing other threads to run while we wait for the receive operation to complete
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_Radio, eventResult ));
-    
+
+        // set to NULL and protect from GC
+        hbObj.SetObjectReference( NULL );
+        CLR_RT_ProtectFromGC gc1( hbObj );
+
         if(eventResult)
         {
             // event occurred!!
-            // need to create ReceivedPacket object to return on "out" argument
 
-            // find <ReceivedPacket> type definition, don't bother checking the result as it exists for sure
-            g_CLR_RT_TypeSystem.FindTypeDef( "ReceivedPacket", "nanoFramework.TI.EasyLink", receivedPacketTypeDef );
+            // check operation status
+            if( latestOperationStatus == EasyLink_Status_Success)
+            {
+                // RX operation successful, OK to populate class
 
-            // set to NULL and protect from GC
-            hbObj.SetObjectReference( NULL );
-            CLR_RT_ProtectFromGC gc1( hbObj );
+                // need to create ReceivedPacket object to return on "out" argument
+                // find <ReceivedPacket> type definition, don't bother checking the result as it exists for sure
+                g_CLR_RT_TypeSystem.FindTypeDef( "ReceivedPacket", "nanoFramework.TI.EasyLink", receivedPacketTypeDef );
 
-            // create instance of <ReceivedPacket>
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(hbObj, receivedPacketTypeDef));
-            
-            // need to dereference to access class fields
-            packet = hbObj.Dereference();
+                // create instance of <ReceivedPacket>
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(hbObj, receivedPacketTypeDef));
 
-            // fill fields
-            packet[ ReceivedPacket::FIELD___rxTimeout ].NumericByRef().u4 = latestRxPacket.rxTimeout;
-            packet[ ReceivedPacket::FIELD___rssi ].NumericByRef().s1 = latestRxPacket.rssi;
-            packet[ ReceivedPacket::FIELD___absoluteTime ].NumericByRef().u4 = latestRxPacket.absTime;
+                // need to dereference to access class fields
+                packet = hbObj.Dereference();
 
-            // address it's an array
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( packet[ ReceivedPacket::FIELD___address ], (CLR_UINT32)ARRAYSIZE(latestRxPacket.dstAddr), g_CLR_RT_WellKnownTypes.m_UInt8 ));
-            buffer = packet[ ReceivedPacket::FIELD___address ].DereferenceArray();
-            // copy address
-            memcpy(buffer->GetFirstElement(), latestRxPacket.dstAddr, ARRAYSIZE(latestRxPacket.dstAddr));
+                // fill fields
+                packet[ ReceivedPacket::FIELD___rxTimeout ].NumericByRef().u4 = latestRxPacket.rxTimeout;
+                packet[ ReceivedPacket::FIELD___rssi ].NumericByRef().s1 = latestRxPacket.rssi;
+                packet[ ReceivedPacket::FIELD___absoluteTime ].NumericByRef().u4 = latestRxPacket.absTime;
 
-            // payload it's an array
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( packet[ ReceivedPacket::FIELD___payload ], (CLR_UINT32)ARRAYSIZE(latestRxPacket.payload), g_CLR_RT_WellKnownTypes.m_UInt8 ));
-            buffer = packet[ ReceivedPacket::FIELD___payload ].DereferenceArray();
-            // copy payload content
-            memcpy(buffer->GetFirstElement(), latestRxPacket.payload, ARRAYSIZE(latestRxPacket.payload));
+                // address it's an array
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( packet[ ReceivedPacket::FIELD___address ], (CLR_UINT32)ARRAYSIZE(latestRxPacket.dstAddr), g_CLR_RT_WellKnownTypes.m_UInt8 ));
+                buffer = packet[ ReceivedPacket::FIELD___address ].DereferenceArray();
+                // copy address
+                memcpy(buffer->GetFirstElement(), latestRxPacket.dstAddr, ARRAYSIZE(latestRxPacket.dstAddr));
 
-            // sanity check
-            _ASSERTE(stack.Arg1().DataType() == DATATYPE_BYREF);
-
-            // packet it's passed as "out" meaning BYREF
-            // need to store the ReceivedPacket object in its reference
-            NANOCLR_CHECK_HRESULT(hbObj.StoreToReference( stack.Arg1(), 0 ));
+                // payload it's an array
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( packet[ ReceivedPacket::FIELD___payload ], (CLR_UINT32)ARRAYSIZE(latestRxPacket.payload), g_CLR_RT_WellKnownTypes.m_UInt8 ));
+                buffer = packet[ ReceivedPacket::FIELD___payload ].DereferenceArray();
+                // copy payload content
+                memcpy(buffer->GetFirstElement(), latestRxPacket.payload, ARRAYSIZE(latestRxPacket.payload));
+            }
 
             // done here
             break;
@@ -281,9 +384,29 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
         else
         {
             // timeout occurred
-            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+
+            // stop ongoing RX async operation
+            // don't bother checking the return result
+            EasyLink_abort();
+           
+            // set return
+            latestOperationStatus = EasyLink_Status_Aborted;
+
+            // instead of throwing a timeout exception return OK 
+            // the failure it's already on the return result
+
+            // done here
+            break;       
         }
     }
+
+    // sanity check
+    _ASSERTE(stack.Arg1().DataType() == DATATYPE_BYREF);
+
+    // packet it's passed as "out" meaning BYREF
+    // need to store the ReceivedPacket object in its reference
+    // hbObj it's either NULL or it's a properly formated ReceivedPacket object
+    NANOCLR_CHECK_HRESULT(hbObj.StoreToReference( stack.Arg1(), 0 ));
 
     // pop timeout heap block from stack
     stack.PopValue();
@@ -313,6 +436,24 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+    
+    // check disposed
+    if(pThis[ FIELD___disposed ].NumericByRef().u1 != 0)
+    {
+        // don't throw if the execution has reached here from an aborted async operation
+        if( latestOperationStatus == EasyLink_Status_Aborted)
+        {
+            // return operation status
+            stack.SetResult_I4(latestOperationStatus);
+
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+        else
+        {
+            // has to throw exception on all other situations
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+    }
 
     // get value for timeout parameter
     timeout_ms = stack.Arg1().NumericByRef().s4;
@@ -384,7 +525,19 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
         else
         {
             // timeout occurred
-            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+            
+            // stop ongoing TX async operation
+            // don't bother checking the return result
+            EasyLink_abort();
+
+            // set return
+            latestOperationStatus = EasyLink_Status_Aborted;
+
+            // instead of throwing a timeout exception return OK 
+            // the failure it's already on the return result
+
+            // done here
+            break;
         }
     }
 
