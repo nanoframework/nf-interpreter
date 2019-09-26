@@ -190,11 +190,12 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array* payloadBuffer;
-    CLR_RT_HeapBlock_Array* address;
+    CLR_RT_TypeDef_Index    receivedPacketTypeDef;
+    CLR_RT_HeapBlock_Array* buffer;
+    CLR_RT_HeapBlock        rxTimeout;
+    CLR_RT_HeapBlock*       packet;
+    CLR_RT_HeapBlock        hbObj;
 
-    CLR_RT_HeapBlock    rxTimeout;
-    CLR_RT_HeapBlock*   packet;
     CLR_INT64*          timeoutTicks;
     CLR_INT32           timeout_ms;
     EasyLink_Status     status;
@@ -208,33 +209,11 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
 
     // set timeout
     rxTimeout.SetInteger( timeout_ms );
-
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( rxTimeout, timeoutTicks ));
 
-    // setup the operation and init buffers
+    // setup the operation
     if(stack.m_customState == 1)
     {
-        // // get pointer to managed TransmitPacket
-        // packet = stack.Arg0().Dereference();  FAULT_ON_NULL(packet);
-
-        // // dereference the payload buffer
-        // payloadBuffer = packet[ TransmitPacket::FIELD___payload ].DereferenceArray();
-
-        // // get payload length
-        // txPacket.len = payloadBuffer->m_numOfElements;
-
-        // // copy buffer to packet
-        // memcpy(txPacket.payload, payloadBuffer->GetFirstElement(), txPacket.len);
-
-        // // dereference the address buffer
-        // address = packet[ TransmitPacket::FIELD___address ].DereferenceArray();
-
-        // // get payload length
-        // txPacket.len = payloadBuffer->m_numOfElements;
-
-        // // copy buffer to packet
-        // memcpy(txPacket.dstAddr, address->GetFirstElement(), address->m_numOfElements);
-
         // enter receive mode
         status = EasyLink_receiveAsync(RxDone, 0);
         if(status != EasyLink_Status_Success)
@@ -256,13 +235,21 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
     
         if(eventResult)
         {
-            // event occurred
+            // event occurred!!
+            // need to create ReceivedPacket object to return on "out" argument
 
-            // get argument BYREF
-            CLR_RT_HeapBlock& packetBlock = stack.Arg0();
+            // find <ReceivedPacket> type definition, don't bother checking the result as it exists for sure
+            g_CLR_RT_TypeSystem.FindTypeDef( "ReceivedPacket", "nanoFramework.TI.EasyLink", receivedPacketTypeDef );
+
+            // set to NULL and protect from GC
+            hbObj.SetObjectReference( NULL );
+            CLR_RT_ProtectFromGC gc1( hbObj );
+
+            // create instance of <ReceivedPacket>
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(hbObj, receivedPacketTypeDef));
             
             // need to dereference to access class fields
-            CLR_RT_HeapBlock* packet = packetBlock.Dereference();
+            packet = hbObj.Dereference();
 
             // fill fields
             packet[ ReceivedPacket::FIELD___rxTimeout ].NumericByRef().u4 = latestRxPacket.rxTimeout;
@@ -270,16 +257,23 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
             packet[ ReceivedPacket::FIELD___absoluteTime ].NumericByRef().u4 = latestRxPacket.absTime;
 
             // address it's an array
-            address = packet[ ReceivedPacket::FIELD___address ].DereferenceArray();
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( *address, (CLR_UINT32)ARRAYSIZE(latestRxPacket.dstAddr), g_CLR_RT_WellKnownTypes.m_UInt8 ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( packet[ ReceivedPacket::FIELD___address ], (CLR_UINT32)ARRAYSIZE(latestRxPacket.dstAddr), g_CLR_RT_WellKnownTypes.m_UInt8 ));
+            buffer = packet[ ReceivedPacket::FIELD___address ].DereferenceArray();
             // copy address
-            memcpy(address->GetFirstElement(), latestRxPacket.dstAddr, ARRAYSIZE(latestRxPacket.dstAddr));
+            memcpy(buffer->GetFirstElement(), latestRxPacket.dstAddr, ARRAYSIZE(latestRxPacket.dstAddr));
 
             // payload it's an array
-            payloadBuffer = packet[ ReceivedPacket::FIELD___payload ].DereferenceArray();
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( *payloadBuffer, (CLR_UINT32)ARRAYSIZE(latestRxPacket.payload), g_CLR_RT_WellKnownTypes.m_UInt8 ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( packet[ ReceivedPacket::FIELD___payload ], (CLR_UINT32)ARRAYSIZE(latestRxPacket.payload), g_CLR_RT_WellKnownTypes.m_UInt8 ));
+            buffer = packet[ ReceivedPacket::FIELD___payload ].DereferenceArray();
             // copy payload content
-            memcpy(payloadBuffer->GetFirstElement(), latestRxPacket.payload, ARRAYSIZE(latestRxPacket.payload));
+            memcpy(buffer->GetFirstElement(), latestRxPacket.payload, ARRAYSIZE(latestRxPacket.payload));
+
+            // sanity check
+            _ASSERTE(stack.Arg1().DataType() == DATATYPE_BYREF);
+
+            // packet it's passed as "out" meaning BYREF
+            // need to store the ReceivedPacket object in its reference
+            NANOCLR_CHECK_HRESULT(hbObj.StoreToReference( stack.Arg1(), 0 ));
 
             // done here
             break;
@@ -294,11 +288,8 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
     // pop timeout heap block from stack
     stack.PopValue();
 
-    // TODO: should return the real status
+    // return operation status
     stack.SetResult_I4(latestOperationStatus);
-
-    // null pointers and vars
-    pThis = NULL;
 
     NANOCLR_NOCLEANUP();
 }
@@ -309,9 +300,9 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
 
     CLR_RT_HeapBlock_Array* payloadBuffer;
     CLR_RT_HeapBlock_Array* address;
+    CLR_RT_HeapBlock        txTimeout;
+    CLR_RT_HeapBlock*       packet;
 
-    CLR_RT_HeapBlock    txTimeout;
-    CLR_RT_HeapBlock*   packet;
     CLR_INT64*          timeoutTicks;
     CLR_INT32           timeout_ms;
     uint32_t            dueTime;
@@ -401,9 +392,6 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
     stack.PopValue();
 
     stack.SetResult_I4(latestOperationStatus);
-
-    // null pointers and vars
-    pThis = NULL;
 
     NANOCLR_NOCLEANUP();
 }
