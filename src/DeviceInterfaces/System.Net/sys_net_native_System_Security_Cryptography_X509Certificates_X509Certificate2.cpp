@@ -6,8 +6,6 @@
 
 #include "sys_net_native.h"
 
-typedef Library_sys_net_native_System_Security_Cryptography_AsymmetricAlgorithm asymmetricAlgorithmType;
-
 HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2::DecodePrivateKeyNative___STATIC__VOID__SZARRAY_U1__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();

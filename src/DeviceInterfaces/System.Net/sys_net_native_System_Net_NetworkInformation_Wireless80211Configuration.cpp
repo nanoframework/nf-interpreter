@@ -46,6 +46,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
     pConfig[FIELD___authentication].SetInteger((CLR_UINT32)config.Authentication);
     pConfig[FIELD___encryption].SetInteger((CLR_UINT32)config.Encryption);
     pConfig[FIELD___radio].SetInteger((CLR_UINT32)config.Radio);
+    pConfig[FIELD___options].SetInteger((CLR_UINT8)config.Flags);
 
     // the following ones are strings so a simple assignment isn't enough, need to create a managed string instance and copy over 
     // make sure the terminators are there
@@ -78,7 +79,8 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
     config.Authentication = (AuthenticationType)pConfig[FIELD___authentication].NumericByRef().u4;
     config.Encryption = (EncryptionType)pConfig[FIELD___encryption].NumericByRef().u4;
     config.Radio = (RadioType)pConfig[FIELD___radio].NumericByRef().u4;
-
+    config.Flags = (uint8_t)pConfig[FIELD___options].NumericByRef().u1;
+ 
     // the following ones are strings
     // make sure the terminators are there
     hbPassword = pConfig[FIELD___password].DereferenceString(); FAULT_ON_NULL(hbPassword);     

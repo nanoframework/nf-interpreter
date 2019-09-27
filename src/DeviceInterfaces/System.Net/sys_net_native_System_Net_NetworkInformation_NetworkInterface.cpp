@@ -6,9 +6,9 @@
 
 #include "sys_net_native.h"
 
-void Network_PostEvent( unsigned int eventType, unsigned int flags )
+void Network_PostEvent( unsigned int eventType, unsigned int flags, unsigned int index)
 {
-    PostManagedEvent( EVENT_NETWORK, eventType, flags, 0 );
+    PostManagedEvent( EVENT_NETWORK, eventType, flags, index );
 }
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::InitializeNetworkInterfaceSettings___VOID( CLR_RT_StackFrame& stack )

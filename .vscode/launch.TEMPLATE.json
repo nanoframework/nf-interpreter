@@ -10,17 +10,17 @@
             "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoBooter.elf",
 
             "setupCommands": [
-                {"text": "target extended-remote localhost:3333"},
-                {"text": "monitor reset_config none separate"},
-                {"text": "monitor reset halt"},
-                {"text": "monitor flash write_image erase \"<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoBooter.hex\" "},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoBooter.elf"},
-                {"text": "monitor reset halt"}
+                {"description":"" , "text" : "target extended-remote localhost:3333"},
+                {"description":"" , "text" : "monitor reset_config none separate"},
+                {"description":"" , "text" : "monitor reset halt"},
+                {"description":"" , "text" : "monitor flash write_image erase \"<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoBooter.hex\" "},
+                {"description":"" , "text" : "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoBooter.elf"},
+                {"description":"" , "text" : "monitor reset halt"}
             ],
 
             "customLaunchSetupCommands": [
-                {"text": "monitor reset_config none separate"},
-                {"text": "monitor reset halt"}
+                {"description":"" , "text" : "monitor reset_config none separate"},
+                {"description":"" , "text" : "monitor reset halt"}
             ],
 
             "launchCompleteCommand": "exec-continue",
@@ -46,17 +46,17 @@
             "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf",
 
             "setupCommands": [
-                {"text": "target extended-remote localhost:3333"},
-                {"text": "monitor reset_config none separate"},
-                {"text": "monitor reset halt"},
-                {"text": "monitor flash write_image erase \"<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.hex\" "},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
-                {"text": "monitor reset halt"}
+                {"description":"" , "text" : "target extended-remote localhost:3333"},
+                {"description":"" , "text" : "monitor reset_config none separate"},
+                {"description":"" , "text" : "monitor reset halt"},
+                {"description":"" , "text" : "monitor flash write_image erase \"<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.hex\" "},
+                {"description":"" , "text" : "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"},
+                {"description":"" , "text" : "monitor reset halt"}
             ],
 
             "customLaunchSetupCommands": [
-                {"text": "monitor reset_config none separate"},
-                {"text": "monitor reset halt"}
+                {"description":"" , "text" : "monitor reset_config none separate"},
+                {"description":"" , "text" : "monitor reset halt"}
             ],
 
             "launchCompleteCommand": "exec-continue",
@@ -80,13 +80,13 @@
             "request": "launch",
 
             "setupCommands": [
-                {"text": "target remote | e:/openocd-0.10.0/bin/openocd.exe -c \"gdb_port pipe; log_output openocd.log\" -f <cc3200.cfg-config-file-usually-in-the-sdk-tools-folder>"},
-                {"text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf>"},
-                {"text": "load"},
-                {"text": "set $sp = g_pfnVectors[0]"},
-                {"text": "set $pc = g_pfnVectors[1]"},
-                {"text": "break main"},
-                {"text": "continue", "ignoreFailures": true }
+                {"description":"" , "text" : "target remote | e:/openocd-0.10.0/bin/openocd.exe -c \"gdb_port pipe; log_output openocd.log\" -f <cc3200.cfg-config-file-usually-in-the-sdk-tools-folder>"},
+                {"description":"" , "text" : "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf>"},
+                {"description":"" , "text" : "load"},
+                {"description":"" , "text" : "set $sp = g_pfnVectors[0]"},
+                {"description":"" , "text" : "set $pc = g_pfnVectors[1]"},
+                {"description":"" , "text" : "break main"},
+                {"description":"" , "text" : "continue", "ignoreFailures": true }
             ],
 
             "miDebuggerPath": "<path-to-gdb-inside-the-gcc-toolchain-mind-the-forward-slash>",

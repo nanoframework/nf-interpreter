@@ -6,7 +6,7 @@
 
 #include <nanoPAL_BlockStorage.h>
 #include <nanoWeak.h>
-
+#include <nanoHAL_v2.h>
 
 BlockStorageList             g_BlockStorage;
 
@@ -503,7 +503,7 @@ BlockStorageDevice* BlockStorageDevice_Prev(BlockStorageDevice* device)
 //    Initializes a given block device for use
 // 
 // Returns:
-//   true if succesful; false if not
+//   true if successful; false if not
 //
 // Remarks:
 //    No other functions in this interface may be called
@@ -511,6 +511,9 @@ BlockStorageDevice* BlockStorageDevice_Prev(BlockStorageDevice* device)
 //
 bool BlockStorageDevice_InitializeDevice(BlockStorageDevice* device)
 {
+    ASSERT(device != NULL);
+    ASSERT(device->m_context != NULL);
+
     return device->m_BSD->InitializeDevice(device->m_context);
 }
 
@@ -519,13 +522,16 @@ bool BlockStorageDevice_InitializeDevice(BlockStorageDevice* device)
 //    Initializes a given block device for use
 // 
 // Returns:
-//   true if succesful; false if not
+//   true if successful; false if not
 //
 // Remarks:
 //   De initializes the device when no longer needed
 //
 bool BlockStorageDevice_UninitializeDevice(BlockStorageDevice* device)
 {
+    ASSERT(device != NULL);
+    ASSERT(device->m_context != NULL);
+
     return device->m_BSD->UninitializeDevice(device->m_context);
 }
 
@@ -535,6 +541,9 @@ bool BlockStorageDevice_UninitializeDevice(BlockStorageDevice* device)
 //
 DeviceBlockInfo* BlockStorageDevice_GetDeviceInfo(BlockStorageDevice* device)
 {
+    ASSERT(device != NULL);
+    ASSERT(device->m_context != NULL);
+
     return device->m_BSD->GetDeviceInfo(device->m_context);
 }
 
@@ -553,7 +562,7 @@ DeviceBlockInfo* BlockStorageDevice_GetDeviceInfo(BlockStorageDevice* device)
 //                      for the extra sector information.
 // 
 // Returns:
-//   true if succesful; false if not
+//   true if successful; false if not
 //
 // Remarks:
 //   This function reads the number of sectors specified from the device.
@@ -568,6 +577,9 @@ DeviceBlockInfo* BlockStorageDevice_GetDeviceInfo(BlockStorageDevice* device)
 //
 bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int startAddress, unsigned int numBytes, unsigned char* buffer)
 {
+    ASSERT(device != NULL);
+    ASSERT(device->m_context != NULL);
+
      return device->m_BSD->Read(device->m_context, startAddress, numBytes, buffer);
 }
 
@@ -586,7 +598,7 @@ bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int startAddre
 //                      for the extra sector information.
 // 
 // Returns:
-//   true if succesful; false if not
+//   true if successful; false if not
 //
 // Remarks:
 //   This function reads the number of sectors specified from the device.
@@ -604,11 +616,17 @@ bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int startAddre
 //
 bool BlockStorageDevice_Write(BlockStorageDevice* device, unsigned int startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
 {
+    ASSERT(device != NULL);
+    ASSERT(device->m_context != NULL);
+
     return device->m_BSD->Write(device->m_context, startAddress, numBytes, buffer, readModifyWrite);
 }
 
 bool BlockStorageDevice_Memset(BlockStorageDevice* device, unsigned int startAddress, unsigned char buffer, unsigned int numBytes)
 {
+    ASSERT(device != NULL);
+    ASSERT(device->m_context != NULL);
+
     return device->m_BSD->Memset(device->m_context, startAddress, buffer, numBytes);
 }
 
@@ -630,6 +648,9 @@ bool BlockStorageDevice_Memset(BlockStorageDevice* device, unsigned int startAdd
 //  
 bool BlockStorageDevice_IsBlockErased(BlockStorageDevice* device, unsigned int blockStartAddress, unsigned int length)
 {
+    ASSERT(device != NULL);
+    ASSERT(device->m_context != NULL);
+
     return device->m_BSD->IsBlockErased(device->m_context, blockStartAddress, length);
 }
 
@@ -641,13 +662,16 @@ bool BlockStorageDevice_IsBlockErased(BlockStorageDevice* device, unsigned int b
 //    Address - Logical Sector Address
 //
 // Returns:
-//   true if succesful; false if not
+//   true if successful; false if not
 //
 // Remarks:
 //    Erases the block containing the sector address specified.
 //
 bool BlockStorageDevice_EraseBlock(BlockStorageDevice* device, unsigned int address)
 {
+    ASSERT(device != NULL);
+    ASSERT(device->m_context != NULL);
+
     return device->m_BSD->EraseBlock(device->m_context, address);
 }
 
@@ -665,11 +689,16 @@ bool BlockStorageDevice_EraseBlock(BlockStorageDevice* device, unsigned int addr
 //
 void BlockStorageDevice_SetPowerState(BlockStorageDevice* device, unsigned int state)
 {
+    ASSERT(device != NULL);
+    ASSERT(device->m_context != NULL);
+
     device->m_BSD->SetPowerState(device->m_context, state);
 }
 
 bool BlockStorageDevice_FindRegionFromAddress(BlockStorageDevice* device, unsigned int address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
 {
+    ASSERT(device != NULL);
+
     DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
 
     return DeviceBlockInfo_FindRegionFromAddress(deviceInfo, address, blockRegionIndex, blockRangeIndex);
@@ -677,6 +706,8 @@ bool BlockStorageDevice_FindRegionFromAddress(BlockStorageDevice* device, unsign
 
 bool BlockStorageDevice_FindForBlockUsage(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
 {
+    ASSERT(device != NULL);
+
     DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
 
     return DeviceBlockInfo_FindForBlockUsage(deviceInfo, blockUsage, address, blockRegionIndex, blockRangeIndex);
@@ -684,6 +715,8 @@ bool BlockStorageDevice_FindForBlockUsage(BlockStorageDevice* device, unsigned i
 
 bool BlockStorageDevice_FindNextUsageBlock(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
 {
+    ASSERT(device != NULL);
+
     DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
 
     return DeviceBlockInfo_FindNextUsageBlock(deviceInfo, blockUsage, address, blockRegionIndex, blockRangeIndex);
@@ -691,6 +724,9 @@ bool BlockStorageDevice_FindNextUsageBlock(BlockStorageDevice* device, unsigned 
 
 bool BlockStorageDevice_GetMemoryMappedAddress(BlockStorageDevice* device, unsigned int blockRegionIndex, unsigned int blockRangeIndex, unsigned int* address)
 {
+    ASSERT(device != NULL);
+    ASSERT(device->m_context != NULL);
+
     return device->m_BSD->GetMemoryMappedAddress(device->m_context, blockRegionIndex, blockRangeIndex, address);
 }
 
@@ -743,7 +779,7 @@ bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* v
                 success = BlockStorageDevice_InitializeDevice(pBSD);
             }
           
-            // add device to list only init was succesfull
+            // add device to list only init was successful
             if(success)
             {
                 // add the BSD
@@ -762,7 +798,6 @@ bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* v
 
 bool BlockStorageList_RemoveDevice(BlockStorageDevice* pBSD, bool unInit)
 {
-
     // find device
     for(int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
     {

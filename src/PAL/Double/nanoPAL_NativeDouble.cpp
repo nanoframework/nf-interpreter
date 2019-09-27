@@ -66,7 +66,7 @@ using namespace System;
 //     Greater than zero 
 //         This instance is greater than value. -or- 
 //         This instance is a number and value is not a number (System.Double.NaN).
-int32_t Double::CompareTo( double d, double val )
+int32_t System::Double::CompareTo( double d, double val )
 {
 
     if (__isnand(d))
@@ -110,7 +110,7 @@ int32_t Double::CompareTo( double d, double val )
 // Returns:
 //     true if d evaluates to System.Double.PositiveInfinity or System.Double.NegativeInfinity;
 //     otherwise, false.
-bool Double::IsInfinity( double d )
+bool System::Double::IsInfinity( double d )
 {
     if(__isnand(d)) 
         return false;
@@ -132,7 +132,7 @@ bool Double::IsInfinity( double d )
 //
 // Returns:
 //     true if d evaluates to System.Double.NaN; otherwise, false.
-bool Double::IsNaN( double d )
+bool System::Double::IsNaN( double d )
 {
     /* Return 1 if __x is a NaN, 0 otherwise */
     /* Used by isnan macro */
@@ -151,7 +151,7 @@ bool Double::IsNaN( double d )
 //
 // Returns:
 //     true if d evaluates to System.Double.NegativeInfinity; otherwise, false.
-bool Double::IsNegativeInfinity( double d )
+bool System::Double::IsNegativeInfinity( double d )
 {
     if(__isnand(d) != 0) 
         return false;
@@ -178,7 +178,7 @@ bool Double::IsNegativeInfinity( double d )
 //
 // Returns:
 //     true if d evaluates to System.Double.PositiveInfinity; otherwise, false.
-bool Double::IsPositiveInfinity( double d )
+bool System::Double::IsPositiveInfinity( double d )
 {
     if(__isnand(d) != 0) 
         return false;
