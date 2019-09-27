@@ -456,7 +456,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
     }
 
     // get value for timeout parameter
-    timeout_ms = stack.Arg1().NumericByRef().s4;
+    timeout_ms = stack.Arg2().NumericByRef().s4;
 
     // set timeout
     txTimeout.SetInteger( timeout_ms );
@@ -467,7 +467,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
     if(stack.m_customState == 1)
     {
         // get pointer to managed TransmitPacket
-        packet = stack.Arg0().Dereference();  FAULT_ON_NULL(packet);
+        packet = stack.Arg1().Dereference();  FAULT_ON_NULL(packet);
 
         // dereference the payload buffer
         payloadBuffer = packet[ TransmitPacket::FIELD___payload ].DereferenceArray();
@@ -488,7 +488,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
         memcpy(txPacket.dstAddr, address->GetFirstElement(), address->m_numOfElements);
 
         // get dueTime managed argument
-        dueTime = stack.Arg2().NumericByRef().s4;
+        dueTime = stack.Arg3().NumericByRef().s4;
 
         if(dueTime > 0)
         {
