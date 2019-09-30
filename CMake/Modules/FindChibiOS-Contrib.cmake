@@ -38,6 +38,7 @@ list(APPEND CHIBIOS_CONTRIB_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_S
 list(APPEND CHIBIOS_CONTRIB_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/src/hal_usbh.c)
 list(APPEND CHIBIOS_CONTRIB_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/src/usbh/hal_usbh_msd.c)
 list(APPEND CHIBIOS_CONTRIB_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/src/usbh/hal_usbh_desciter.c)
+list(APPEND CHIBIOS_CONTRIB_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/src/usbh/hal_usbh_ftdi.c)
 list(APPEND CHIBIOS_CONTRIB_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/src/usbh/hal_usbh_hub.c)
 list(APPEND CHIBIOS_CONTRIB_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/src/hal_usb_msd.c)
 list(APPEND CHIBIOS_CONTRIB_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/hal/ports/STM32/LLD/USBHv1/hal_usbh_lld.c)

@@ -365,6 +365,31 @@ endif()
 
 #################################################################
 
+#################################################################
+# enables USB CDC Host support
+# (default is OFF so USB CDC Host is NOT supported)
+option(NF_FEATURE_HAS_USB_CDC "option to enable USB CDC Host")
+
+if(NF_FEATURE_HAS_USB_CDC)
+
+    # this feature currently is supported only on ChibiOS
+    if(NOT RTOS_CHIBIOS_CHECK)
+        message(FATAL_ERROR "Support for USB CDC Host is only available for ChibiOS Cortex-M targets.")
+    endif()
+
+    # this feature requires inclusion of ChibiOS contribution repository
+    set(CHIBIOS_CONTRIB_REQUIRED ON CACHE INTERNAL "Forcing ChibiOS contribution repo option to ON")
+
+    # force inclusion of Windows.Devices.SerialCommunication API
+    set(API_Windows.Devices.SerialCommunication ON CACHE INTERNAL "Forcing Windows.Devices.SerialCommunication API option to ON")
+
+    message(STATUS "Support for USB CDC Host is included")
+else()
+    message(STATUS "Support for USB CDC Host IS NOT included")
+endif()
+
+#################################################################
+
 if(RTOS_CHIBIOS_CHECK)
 
     #################################################################

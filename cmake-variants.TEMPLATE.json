@@ -61,6 +61,7 @@
           "NF_FEATURE_HAS_SDCARD" : "OFF-default-ON-to-enable-support-for-SDCard-storage-device",
           "NF_FEATURE_HAS_USB_MSD" : "OFF-default-ON-to-enable-support-for-USB-Mass-storage-device",
           "NF_FEATURE_USE_SPIFFS" : "OFF-default-ON-to-enable-support-for-SPI-flash-file-system",
+          "NF_FEATURE_HAS_USB_CDC" : "OFF-default-ON-to-enable-support-for-USB-Mass-storage-device",
           "NF_PLATFORM_NO_CLR_TRACE" : "OFF-default-ON-to-disable-all-trace-on-CLR",
           "NF_CLR_NO_IL_INLINE" : "OFF-default-ON-to-disable-CLR-IL-inlining",
           "NF_INTEROP_ASSEMBLIES" : [ "Assembly1-Namespace", "Assembly2-Namespace" ],
