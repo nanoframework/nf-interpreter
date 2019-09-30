@@ -10,6 +10,15 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoHAL.h>
 
+// TI-RTOS Header files
+#include <ti/drivers/rf/RF.h>
+
+// Board Header files
+#include <Board.h>
+
+// EasyLink API Header files
+#include <easylink/EasyLink.h>
+
 struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
 {
     static const int FIELD___syncLock = 1;
