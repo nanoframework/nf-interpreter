@@ -94,25 +94,6 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::get
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::set_Frequency___VOID__U4( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-
-    uint16_t frequency;
-    EasyLink_Status status;
-
-    // get value for the frequency
-    frequency = (uint16_t)stack.Arg0().NumericByRef().u4;
-
-    status = EasyLink_setFrequency(frequency);
-    if(status != EasyLink_Status_Success)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-  
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::get_RfPower___I1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -128,25 +109,6 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::get
 
     // set result to the value of the RF power
     stack.SetResult_I1(power);
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::set_RfPower___VOID__I1( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-
-    EasyLink_Status status;
-    int8_t power;
-
-    // get value for the tx power
-    power = (int8_t)stack.Arg0().NumericByRef().u4;
-
-    status = EasyLink_setRfPower(power);
-    if(status != EasyLink_Status_Success)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -183,26 +145,6 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Get
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::SetConfigurationNative___I4__nanoFrameworkTIEasyLinkControlOption__U4( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-
-    EasyLink_Status status;
-    EasyLink_CtrlOption option; 
-    uint32_t optionValue;
-
-    // get control option
-    option = (EasyLink_CtrlOption)stack.Arg0().NumericByRef().u4;
-    optionValue = stack.Arg1().NumericByRef().u4;
-
-    status = EasyLink_setCtrl(option, optionValue);
-
-    // set result to the operation return status
-    stack.SetResult_I1(status);
-
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::DisposeNative___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -221,7 +163,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Upd
     return UpdateRxAddressFilter(stack);
 }
 
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::InitNative___I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::InitNative___U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -260,19 +202,19 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Ini
     if(status != EasyLink_Status_Success)
     {
         // fail to start
-        stack.SetResult_I4(status);
+        stack.SetResult_U1(status);
 
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
     latestOperationStatus = EasyLink_Status_Success;
 
-    stack.SetResult_I4(status);
+    stack.SetResult_U1(status);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::ReceiveNative___I4__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::ReceiveNative___U1__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -297,7 +239,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
         if( latestOperationStatus == EasyLink_Status_Aborted)
         {
             // return operation status
-            stack.SetResult_I4(latestOperationStatus);
+            stack.SetResult_U1(latestOperationStatus);
 
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
@@ -323,7 +265,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
         if(status != EasyLink_Status_Success)
         {
             // fail to start
-            stack.SetResult_I4(status);
+            stack.SetResult_U1(status);
 
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
@@ -412,12 +354,68 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
     stack.PopValue();
 
     // return operation status
-    stack.SetResult_I4(latestOperationStatus);
+    stack.SetResult_U1(latestOperationStatus);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::TransmitNative___I4__nanoFrameworkTIEasyLinkTransmitPacket__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::SetConfigurationNative___U1__nanoFrameworkTIEasyLinkControlOption__U4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    EasyLink_Status status;
+    EasyLink_CtrlOption option; 
+    uint32_t optionValue;
+
+    // get control option
+    option = (EasyLink_CtrlOption)stack.Arg0().NumericByRef().u4;
+    optionValue = stack.Arg1().NumericByRef().u4;
+
+    status = EasyLink_setCtrl(option, optionValue);
+
+    // set result to the operation return status
+    stack.SetResult_U1(status);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::SetFrequencyNative___U1__U4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    uint16_t frequency;
+    EasyLink_Status status;
+
+    // get value for the frequency
+    frequency = (uint16_t)stack.Arg0().NumericByRef().u4;
+
+    status = EasyLink_setFrequency(frequency);
+  
+    // set result to the operation return status
+    stack.SetResult_U1(status);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::SetRfPowerNative___U1__I1( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    EasyLink_Status status;
+    int8_t power;
+
+    // get value for the tx power
+    power = (int8_t)stack.Arg0().NumericByRef().u1;
+
+    status = EasyLink_setRfPower(power);
+  
+    // set result to the operation return status
+    stack.SetResult_U1(status);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::TransmitNative___U1__nanoFrameworkTIEasyLinkTransmitPacket__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -444,7 +442,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
         if( latestOperationStatus == EasyLink_Status_Aborted)
         {
             // return operation status
-            stack.SetResult_I4(latestOperationStatus);
+            stack.SetResult_U1(latestOperationStatus);
 
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
@@ -501,7 +499,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
         if(status != EasyLink_Status_Success)
         {
             // fail to start
-            stack.SetResult_I4(status);
+            stack.SetResult_U1(status);
 
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
@@ -544,7 +542,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
     // pop timeout heap block from stack
     stack.PopValue();
 
-    stack.SetResult_I4(latestOperationStatus);
+    stack.SetResult_U1(latestOperationStatus);
 
     NANOCLR_NOCLEANUP();
 }

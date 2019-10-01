@@ -23,23 +23,24 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
 {
     static const int FIELD___syncLock = 1;
     static const int FIELD___disposed = 2;
-    static const int FIELD___phyType = 3;
-    static const int FIELD___addressFilter = 4;
+    static const int FIELD___initialized = 3;
+    static const int FIELD___phyType = 4;
+    static const int FIELD___addressFilter = 5;
 
     NANOCLR_NATIVE_DECLARE(get_AbsoluteTime___U4);
     NANOCLR_NATIVE_DECLARE(get_Rssi___I1);
     NANOCLR_NATIVE_DECLARE(get_Frequency___U4);
-    NANOCLR_NATIVE_DECLARE(set_Frequency___VOID__U4);
     NANOCLR_NATIVE_DECLARE(get_RfPower___I1);
-    NANOCLR_NATIVE_DECLARE(set_RfPower___VOID__I1);
     NANOCLR_NATIVE_DECLARE(get_IeeeAddress___SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(GetConfiguration___U4__nanoFrameworkTIEasyLinkControlOption);
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(UpdateRxAddressFilterNative___VOID);
-    NANOCLR_NATIVE_DECLARE(InitNative___I4);
-    NANOCLR_NATIVE_DECLARE(ReceiveNative___I4__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__I4);
-    NANOCLR_NATIVE_DECLARE(SetConfigurationNative___I4__nanoFrameworkTIEasyLinkControlOption__U4);
-    NANOCLR_NATIVE_DECLARE(TransmitNative___I4__nanoFrameworkTIEasyLinkTransmitPacket__I4__I4);
+    NANOCLR_NATIVE_DECLARE(InitNative___U1);
+    NANOCLR_NATIVE_DECLARE(ReceiveNative___U1__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__I4);
+    NANOCLR_NATIVE_DECLARE(SetConfigurationNative___U1__nanoFrameworkTIEasyLinkControlOption__U4);
+    NANOCLR_NATIVE_DECLARE(SetFrequencyNative___U1__U4);
+    NANOCLR_NATIVE_DECLARE(SetRfPowerNative___U1__I1);
+    NANOCLR_NATIVE_DECLARE(TransmitNative___U1__nanoFrameworkTIEasyLinkTransmitPacket__I4__I4);
 
     //--//
 
