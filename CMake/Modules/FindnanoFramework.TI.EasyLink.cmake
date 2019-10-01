@@ -36,9 +36,10 @@ foreach(SRC_FILE ${nanoFramework.TI.EasyLink_SRCS})
 
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
+            ${TARGET_BASE_LOCATION}/smartrf_settings
+            ${TARGET_BASE_LOCATION}/easylink
             ${PROJECT_SOURCE_DIR}/src/nanoFramework.TI.EasyLink
             ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/common/easylink
-            ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/common/smartrf_settings
             ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR
 
         CMAKE_FIND_ROOT_PATH_BOTH
