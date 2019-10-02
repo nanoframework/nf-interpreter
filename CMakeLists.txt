@@ -445,7 +445,9 @@ if( API_System.Net OR
     else()
         set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
     endif()
-
+else()
+    # need to force SNTP to OFF
+    set(NF_NETWORKING_SNTP FALSE CACHE INTERNAL "SNTP is off as there is no network support")
 endif()
 
 
