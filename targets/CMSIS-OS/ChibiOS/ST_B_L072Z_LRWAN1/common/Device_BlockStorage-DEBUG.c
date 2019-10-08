@@ -21,11 +21,11 @@ const BlockRange BlockRange1[] =
     // so make sure that you DO NOT deploy nanoBooter in debug flavour
     // if you really need to debug both images you have to update the 
     // flash start address linker file 
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0    , 67   },        // 0x08000000 nanoBooter          
-    { BlockRange_BLOCKTYPE_CODE      ,   68   , 1450 },        // 0x08002200 nanoCLR
+    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0    , 69   },        // 0x08000000 nanoBooter          
+    { BlockRange_BLOCKTYPE_CODE      ,   70   , 1466 },        // 0x08002300 nanoCLR
     //////////////////////////////////////////////////////////////////////////////////////
 
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1451 , 1535 }         // 0x0802D580 deployment
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1467 , 1535 }         // 0x0802DD80 deployment
 };
 
 const BlockRegionInfo BlockRegions[] = 
