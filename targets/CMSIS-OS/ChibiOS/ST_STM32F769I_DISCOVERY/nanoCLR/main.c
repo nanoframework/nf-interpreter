@@ -37,6 +37,10 @@ osThreadDef(SdCardWorkingThread, osPriorityNormal, 1024, "SDCWT");
 osThreadDef(UsbMsdWorkingThread, osPriorityNormal, 1024, "USBMSDWT"); 
 #endif
 
+#if HAL_USBH_USE_FTDI
+    osThreadDef(UsbFtdiWorkingThread, osPriorityNormal, 1024, "USBFTDIWT");
+#endif
+
 //  Application entry point.
 int main(void) {
 
@@ -90,6 +94,11 @@ int main(void) {
   #if HAL_USBH_USE_MSD
   // create the USB MSD working thread
   osThreadCreate(osThread(UsbMsdWorkingThread), &MSBLKD[0]);
+  #endif
+
+   #if HAL_USBH_USE_FTDI
+  // create the USB MSD working thread
+  osThreadCreate(osThread(UsbFtdiWorkingThread), NULL);
   #endif
 
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal

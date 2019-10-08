@@ -368,9 +368,9 @@ endif()
 #################################################################
 # enables USB CDC Host support
 # (default is OFF so USB CDC Host is NOT supported)
-option(NF_FEATURE_HAS_USB_CDC "option to enable USB CDC Host")
+option(NF_FEATURE_HAS_USB_CDC_HOST "option to enable USB CDC Host")
 
-if(NF_FEATURE_HAS_USB_CDC)
+if(NF_FEATURE_HAS_USB_CDC_HOST)
 
     # this feature currently is supported only on ChibiOS
     if(NOT RTOS_CHIBIOS_CHECK)
@@ -539,6 +539,12 @@ if(NF_FEATURE_HAS_USB_MSD)
     set(HAL_USBH_USE_MSDC_OPTION TRUE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
 else()
     set(HAL_USBH_USE_MSDC_OPTION FALSE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
+endif()
+
+if(NF_FEATURE_HAS_USB_CDC_HOST)
+    set(HAL_USBH_USE_CDC_HOST_OPTION TRUE CACHE INTERNAL "HAL USBH_USE_FTDI for NF_FEATURE_HAS_USB_CDC_HOST")
+else()
+    set(HAL_USBH_USE_CDC_HOST_OPTION FALSE CACHE INTERNAL "HAL USBH_USE_FTDI for NF_FEATURE_HAS_USB_CDC_HOST")
 endif()
 
 #################################################################

@@ -184,7 +184,7 @@
  * @brief   Enables the USB subsystem.
  */
 #if !defined(HAL_USE_USB) || defined(__DOXYGEN__)
-#define HAL_USE_USB                         FALSE
+#define HAL_USE_USB                         TRUE
 #endif
 
 /**
@@ -530,6 +530,7 @@
 
 // header for nanoFramework overlay
 #include "halconf_nf.h"
+#include "halconf_community.h"
 #endif /* HALCONF_H */
 
 /** @} */

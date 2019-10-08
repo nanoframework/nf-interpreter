@@ -28,3 +28,7 @@
 // #define UART6_TX_SIZE  256
 // // rx buffer size: 256 bytes
 // #define UART6_RX_SIZE  256
+
+
+// the following macro maps the USB FTDI CDC Host device driver
+#define USB_FTDI_DRIVER      USBHD2
