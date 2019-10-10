@@ -52,7 +52,8 @@ bool CheckValidCLRImage(uint32_t address)
     // see os\common\startup\ARMCMx\compilers\GCC\vectors.S
 
     // sanity check for invalid address (out of flash range which causes a hard fault)
-    if( (uint32_t)((uint32_t*)nanoCLRVectorTable->reset_handler) > (FLASH1_MEMORY_StartAddress + FLASH1_MEMORY_Size) )
+    if( (uint32_t)((uint32_t*)nanoCLRVectorTable->reset_handler) <= FLASH1_MEMORY_StartAddress ||
+        (uint32_t)((uint32_t*)nanoCLRVectorTable->reset_handler) >= (FLASH1_MEMORY_StartAddress + FLASH1_MEMORY_Size) )
     {
         // check failed, doesn't seem to be a valid CLR image
         return false;
