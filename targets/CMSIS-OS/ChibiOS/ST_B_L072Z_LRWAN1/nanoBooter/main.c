@@ -43,7 +43,7 @@ int main(void) {
   // the board to remain in nanoBooter and not launching nanoCLR
 
   // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
-  if (!palReadPad(GPIOB, GPIOB_USER_BUTTON))
+  if (palReadPad(GPIOB, GPIOB_USER_BUTTON))
   {
     // check for valid CLR image at address contiguous to nanoBooter
     if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
