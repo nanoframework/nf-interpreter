@@ -22,6 +22,18 @@ osThreadDef(ReceiverThread, osPriorityHigh, 512, "");
 // declare CLRStartup thread here 
 osThreadDef(CLRStartupThread, osPriorityNormal, 4096, ""); 
 
+// configuration for debugger serial port
+// dev notes:
+// conservative baud rate value as 921600 has a high error percentage on baud rate clocking
+// OVER8 bit on CR1 to further decrease baud rate clocking error 
+static const SerialConfig uartConfig =
+{
+  460800,
+  USART_CR1_OVER8,
+  USART_CR2_STOP1_BITS,
+  0
+};
+
 //  Application entry point.
 int main(void) {
 
@@ -37,7 +49,7 @@ int main(void) {
   Watchdog_Init();
 
   // starts the serial driver
-  sdStart(&SERIAL_DRIVER, NULL);
+  sdStart(&SERIAL_DRIVER, &uartConfig);
 
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);

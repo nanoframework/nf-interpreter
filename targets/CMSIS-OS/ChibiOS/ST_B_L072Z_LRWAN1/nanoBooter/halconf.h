@@ -377,9 +377,10 @@
  * @details Configuration parameter, this is the baud rate selected for the
  *          default configuration.
  */
-#if !defined(SERIAL_DEFAULT_BITRATE) || defined(__DOXYGEN__)
-#define SERIAL_DEFAULT_BITRATE              921600
-#endif
+// this option is set at main.c (from config file)
+// #if !defined(SERIAL_DEFAULT_BITRATE) || defined(__DOXYGEN__)
+// #define SERIAL_DEFAULT_BITRATE              921600
+// #endif
 
 /**
  * @brief   Serial buffers size.
