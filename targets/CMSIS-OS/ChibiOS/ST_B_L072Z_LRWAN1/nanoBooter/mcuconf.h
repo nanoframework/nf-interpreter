@@ -40,8 +40,8 @@
 #define STM32_MSIRANGE                      STM32_MSIRANGE_2M
 #define STM32_SW                            STM32_SW_PLL
 #define STM32_PLLSRC                        STM32_PLLSRC_HSI16
-#define STM32_PLLMUL_VALUE                  4
-#define STM32_PLLDIV_VALUE                  2
+#define STM32_PLLMUL_VALUE                  6
+#define STM32_PLLDIV_VALUE                  3
 #define STM32_HPRE                          STM32_HPRE_DIV1
 #define STM32_PPRE1                         STM32_PPRE1_DIV1
 #define STM32_PPRE2                         STM32_PPRE2_DIV1
