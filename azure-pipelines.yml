@@ -340,7 +340,7 @@ jobs:
     vmImage: 'VS2017-Win2016'
 
   steps:
-  
+  # create or update GitHub release
   - task: GitHubReleasePublish@1
     inputs:
       githubEndpoint: 'nanoframework'
@@ -348,7 +348,23 @@ jobs:
       githubRepositoryName: nf-interpreter
       githubTag: v$(NBGV_Version)
       githubReleaseTitle: 'nf Interpreter v$(NBGV_Version)'
-      githubReleaseNotes: 
+      githubTargetCommitsh: $(Build.SourceVersion)
+      githubReleaseDraft: true
+      githubReleasePrerelease: true
+      githubReuseDraftOnly: true
+      githubReuseRelease: true
+      githubEditRelease: true
+      githubDeleteEmptyTag: true
+    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ), not( startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+    displayName: Create/Update GitHub release
+    
+  - task: GitHubReleasePublish@1
+    inputs:
+      githubEndpoint: 'nanoframework'
+      githubOwner: 'nanoframework'
+      githubRepositoryName: nf-interpreter
+      githubTag: v$(NBGV_Version)
+      githubReleaseTitle: 'nf Interpreter v$(NBGV_Version)'
       githubTargetCommitsh: $(Build.SourceVersion)
       githubReleaseDraft: false
       githubReleasePrerelease: false
