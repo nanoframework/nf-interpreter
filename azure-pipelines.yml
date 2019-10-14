@@ -1,9 +1,15 @@
-# no trigger config here, this is handled at Azure Pipelines interface
-
-  # waiting for feature to become available
-  # tags:
-  #   include:
-  #   - v/*
+trigger:
+  branches:
+    include:
+    - master
+    - develop
+    - release/*
+    - refs/tags/*
+  paths:
+    exclude:
+    - CHANGELOG.md
+    - /*.md
+    - .gitignore
 
 # no pr config, we want to trigger builds for all PRs on all branches
 
@@ -326,6 +332,39 @@ jobs:
         bundle exec github_changelog_generator --token $(GitHubToken)
     condition: not( or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) 
     displayName: Generate change log
+
+# create or update GitHub release ON tags from release or master branches
+- job: Publish_Release
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  - Build_TI_SimpleLink_targets
+  - Build_WIN32_nanoCLR
+  - Generate_change_log
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  steps:
+  
+  - task: GitHubReleasePublish@1
+    inputs:
+      githubEndpoint: 'nanoframework'
+      githubOwner: 'nanoframework'
+      githubRepositoryName: nf-interpreter
+      githubTag: v$(NBGV_Version)
+      githubReleaseTitle: 'nf Interpreter v$(NBGV_Version)'
+      githubReleaseNotes: 
+      githubTargetCommitsh: $(Build.SourceVersion)
+      githubReleaseDraft: false
+      githubReleasePrerelease: false
+      githubReuseDraftOnly: false
+      githubReuseRelease: true
+      githubEditRelease: false
+      githubDeleteEmptyTag: true
+      githubReleaseAsset:
+    condition: and( succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'), not(contains(variables['Build.SourceBranch'], 'preview') ), ne( variables['StartReleaseCandidate'], true ) )
+    displayName: Create/Update GitHub stable release
 
 ##################################
 # report build failure to Discord
