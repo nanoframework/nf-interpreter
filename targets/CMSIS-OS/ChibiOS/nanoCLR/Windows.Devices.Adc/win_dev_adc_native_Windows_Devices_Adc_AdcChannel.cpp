@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_adc_native.h"
+#include "win_dev_adc_native_target.h"
 
 // this has to be an array because ChibiOS ADC API expects that
 static adcsample_t sampleBuffer[1 * 1];
@@ -43,7 +43,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
         // get pointer to _controllerId field in AdcController
         int controllerId = adcController[Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::FIELD___controllerId].NumericByRef().s4;
 
-        // we are filling this bellow with the appropriate ADC port pin config and ADC driver
+        // we are filling this below with the appropriate ADC port pin config and ADC driver
         NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
         ADCDriver* adcDriver = NULL;
 

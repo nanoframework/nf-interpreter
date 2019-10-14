@@ -43,6 +43,17 @@ inline bool Target_ConfigUpdateRequiresErase()
 
 #endif  // !defined(BUILD_RTM)
 
+
 inline bool Target_HasNanoBooter() { return false; };
+
+inline uint32_t GetPlatformCapabilities()
+{ 
+    return 0; 
+};
+
+inline uint32_t GetTargetCapabilities()
+{
+    return 0; 
+};
 
 #endif //_TARGET_HAL_H_

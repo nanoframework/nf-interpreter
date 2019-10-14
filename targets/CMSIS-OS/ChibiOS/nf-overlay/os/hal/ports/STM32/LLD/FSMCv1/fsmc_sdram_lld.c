@@ -4,7 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "hal.h"
+#include <hal.h>
+#include <hal_nf_community.h>
 
 #if (defined(STM32F427xx) || defined(STM32F437xx) || \
      defined(STM32F429xx) || defined(STM32F439xx) || \

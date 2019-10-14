@@ -1,10 +1,15 @@
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
 ###########################################################################
-# WHEN ADDING A NEW SERIES add the include to the vendor source code bellow
+# WHEN ADDING A NEW SERIES add the include to the vendor source code below
 ###########################################################################
 include(MBED_STM_sources)
 
 #######################################################################################
-# WHEN ADDING A NEW TARGET add the source code file for the series\device folder bellow
+# WHEN ADDING A NEW TARGET add the source code file for the series\device folder below
 #######################################################################################
 
 # sources in series\device folder
@@ -62,7 +67,7 @@ foreach(SRC_FILE ${MBED_VENDOR_SERIES_DEVICE_SRCS})
 endforeach()
 
 ##########################################################################
-# WHEN ADDING A NEW TARGET add the source code file for the series bellow
+# WHEN ADDING A NEW TARGET add the source code file for the series below
 ##########################################################################
 
 set(MBED_VENDOR_SERIES_AND_TARGET_SRCS
@@ -100,7 +105,7 @@ foreach(SRC_FILE ${MBED_VENDOR_SERIES_AND_TARGET_SRCS})
 endforeach()
 
 #######################################################################################################################################
-# WHEN ADDING A NEW TARGET add the respective if clause bellow along with the startup file and the linker file name (without extension)
+# WHEN ADDING A NEW TARGET add the respective if clause below along with the startup file and the linker file name (without extension)
 #######################################################################################################################################
 
 # startup file
@@ -113,7 +118,7 @@ endif()
 
 
 ################################################################
-# WHEN ADDING A NEW TARGET check if the linker file bellow works
+# WHEN ADDING A NEW TARGET check if the linker file below works
 ################################################################
 
 function(MBED_SET_LINKER_OPTIONS TARGET)

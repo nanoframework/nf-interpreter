@@ -30,9 +30,23 @@ struct __nfpack NFVersion
 struct __nfpack NFReleaseInfo
 {
     NFVersion Version;
-    unsigned char InfoString[128-sizeof(NFVersion)];
+    unsigned char InfoString[128];
+    unsigned char TargetName[32];
+    unsigned char PlatformName[32];
     
-    static void Init(NFReleaseInfo& releaseInfo, unsigned short major=0, unsigned short minor=0, unsigned short build=0, unsigned short revision=0, const char *info=(const char *)NULL, size_t infoLen=0);
+    static void Init(
+        NFReleaseInfo& releaseInfo, 
+        unsigned short major=0, 
+        unsigned short minor=0, 
+        unsigned short build=0, 
+        unsigned short revision=0, 
+        const char *info=(const char *)NULL, 
+        size_t infoLen=0,
+        const char *target=(const char *)NULL, 
+        size_t targetLen=0,
+        const char *platform=(const char *)NULL, 
+        size_t platformLen=0
+        );
 };
 
 struct __nfpack OEM_MODEL_SKU
@@ -66,7 +80,7 @@ bool GetHalSystemInfo(HalSystemInfo& systemInfo);
 unsigned int nanoBooter_GetReleaseInfo(NFReleaseInfo& releaseInfo);
 
 // target specific function, provide this to allow access to a vendor-provided
-// informative string and build-time version information.
+// informative string, platform, target and build-time version information.
 bool Target_GetReleaseInfo(NFReleaseInfo&);
 
 //--//

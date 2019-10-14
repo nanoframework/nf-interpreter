@@ -4,6 +4,7 @@
 //
 #include "Core.h"
 #include <hal.h>
+#include <hal_nf_community.h>
 
 void CLR_RT_Random::Initialize()
 {

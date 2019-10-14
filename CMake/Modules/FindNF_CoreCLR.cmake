@@ -22,7 +22,7 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Debugger)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/Base64)
-
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
 
 # source files for nanoFramework Core, CoreLib and CLR startup
 set(NF_CoreCLR_SRCS
@@ -71,6 +71,7 @@ set(NF_CoreCLR_SRCS
     TypeSystem.cpp
     nanoSupport_CRC32.c
     nanoHAL_SystemInformation.cpp
+    # Various.cpp
 
     # CoreLib
     corlib_native_System_AppDomain.cpp
@@ -156,7 +157,6 @@ set(NF_CoreCLR_SRCS
     
     # Helpers
     printf.c
-    base64.c
 
     # HAL
     nanoHAL_Time.cpp
@@ -172,7 +172,15 @@ set(NF_CoreCLR_SRCS
     Async_stubs.cpp
     COM_stubs.c
     GenericPort_stubs.c
+
+    # target specifics
+    target_BlockStorage.c
 )
+
+# need a conditional include because of ESP32 building network as a library 
+if(NOT USE_SECURITY_MBEDTLS_OPTION)
+    list(APPEND NF_CoreCLR_SRCS base64.c)
+endif()
 
 # include configuration manager file
 if(NF_FEATURE_HAS_CONFIG_BLOCK)
@@ -198,7 +206,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${PROJECT_SOURCE_DIR}/src/CLR/Startup
 
             # Runtime.Native
-            ${PROJECT_SOURCE_DIR}/src/CLR/Runtime.Native
+            ${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Native
 
             # Core stubs
             ${PROJECT_SOURCE_DIR}/src/CLR/Core/Hardware
@@ -228,6 +236,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall
             ${PROJECT_SOURCE_DIR}/src/PAL/COM
             ${PROJECT_SOURCE_DIR}/src/PAL/Profiler
+
+            # target
+            "${TARGET_BASE_LOCATION}"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

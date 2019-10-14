@@ -1,0 +1,25 @@
+#
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
+project(SimpleLinkCC32xxSDK-download NONE)
+
+include(ExternalProject)
+
+# download SimpleLinkCC32xx SDK from nanoFramework repo
+ExternalProject_Add(
+    SimpleLinkCC32xxSDK
+    PREFIX SimpleLinkCC32xxSdk
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source
+    GIT_REPOSITORY  https://github.com/nanoframework/SimpleLink_CC32xx_SDK
+    GIT_TAG ${TI_SL_CC32xx_SDK_TAG}  # target specified branch
+    GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+    TIMEOUT 10
+    LOG_DOWNLOAD 1
+
+    # Disable all other steps
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)

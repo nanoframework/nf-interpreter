@@ -8,7 +8,8 @@
 // This driver has been tested with the following STM32 series: F4
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "hal.h"
+#include <hal.h>
+#include <hal_nf_community.h>
 
 #if (HAL_USE_STM32_FLASH == TRUE)
 
@@ -271,7 +272,7 @@ uint8_t flash_lld_getSector(uint32_t address)
     sector = FLASH_SECTOR_3;
   }
 
-// need to wrap the else ifs bellow because not all target devices have all the sectors defined
+// need to wrap the else ifs below because not all target devices have all the sectors defined
 #if defined(FLASH_SECTOR_4)
   else if((address < ADDR_FLASH_SECTOR_5) && (address >= ADDR_FLASH_SECTOR_4))
   {

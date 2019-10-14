@@ -10,38 +10,7 @@
 #include <cmsis_os.h>
 
 #include <targetPAL.h>
-#include "win_dev_gpio_native.h"
-#include "nf_rt_events_native.h"
-
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioPinDriveMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum GpioPinDriveMode
-{
-    GpioPinDriveMode_Input = 0,
-    GpioPinDriveMode_InputPullDown,
-    GpioPinDriveMode_InputPullUp,
-    GpioPinDriveMode_Output,
-    GpioPinDriveMode_OutputOpenDrain,
-    GpioPinDriveMode_OutputOpenDrainPullUp,
-    GpioPinDriveMode_OutputOpenSource,
-    GpioPinDriveMode_OutputOpenSourcePullDown
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioPinValue (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////
-
-enum GpioPinValue
-{
-    GpioPinValue_Low = 0,
-    GpioPinValue_High,
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
+#include "win_dev_gpio_native_target.h"
 
 // this timer is used to handle the debounce time
 static virtual_timer_t debounceTimer;

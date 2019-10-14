@@ -805,6 +805,7 @@ struct CLR_Debug
 
 #if defined(_WIN32)
      static void RedirectToString( std::string* str );
+	 static void SaveMessage	 (std::string str   );
 #endif
 };
 

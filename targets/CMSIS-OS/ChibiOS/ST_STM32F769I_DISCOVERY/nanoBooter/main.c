@@ -7,7 +7,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include <usbcfg.h>
+#include <serialcfg.h>
 #include <swo.h>
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
@@ -52,16 +52,12 @@ int main(void) {
     }
   }
 
-  //  Initializes a serial-over-USB CDC driver.
-  sduObjectInit(&SDU1);
-  sduStart(&SDU1, &serusbcfg);
+  // The kernel is initialized but not started yet, this means that
+  // main() is executing with absolute priority but interrupts are already enabled.
+  osKernelInitialize();
 
-  // Activates the USB driver and then the USB bus pull-up on D+.
-  // Note, a delay is inserted in order to not have to disconnect the cable after a reset.
-  usbDisconnectBus(serusbcfg.usbp);
-  chThdSleepMilliseconds(1500);
-  usbStart(serusbcfg.usbp, &usbcfg);
-  usbConnectBus(serusbcfg.usbp);
+  // starts the serial driver
+  sdStart(&SERIAL_DRIVER, NULL);
 
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
@@ -69,9 +65,10 @@ int main(void) {
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
 
-  // initialize block storage device
+  // initialize block storage list and devices
   // in CLR this is called in nanoHAL_Initialize()
   // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
+  BlockStorageList_Initialize();
   BlockStorage_AddDevices();
 
   // initialize configuration manager

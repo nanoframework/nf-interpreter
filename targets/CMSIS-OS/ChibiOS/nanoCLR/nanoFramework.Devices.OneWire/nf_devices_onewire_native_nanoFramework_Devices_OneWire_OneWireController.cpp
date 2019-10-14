@@ -3,8 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nf_devices_onewire_native.h"
-#include <hal_stm32_onewire.h>
+#include "nf_devices_onewire_native_target.h"
 
 // working thread to execute long running 1-Wire operations
 static thread_t* OneWireWorkingThread;
@@ -107,7 +106,7 @@ HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireC
     bool                eventResult = true;
 
     // set an infinite timeout to wait forever for the operation to complete
-    // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
+    // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() below
     hbTimeout.SetInteger((CLR_INT64)-1);
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 
@@ -190,7 +189,7 @@ HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireC
     bool                eventResult = true;
 
     // set an infinite timeout to wait forever for the operation to complete
-    // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
+    // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() below
     hbTimeout.SetInteger((CLR_INT64)-1);
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
 

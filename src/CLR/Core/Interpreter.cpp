@@ -795,10 +795,12 @@ HRESULT CLR_RT_Thread::Execute_Inner()
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT CLR_RT_Thread::Execute_DelegateInvoke( CLR_RT_StackFrame* stack )
+HRESULT CLR_RT_Thread::Execute_DelegateInvoke( CLR_RT_StackFrame& stackArg )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
+    
+    CLR_RT_StackFrame* stack = &stackArg;
 
     const CLR_RECORD_METHODDEF* md;
     CLR_RT_HeapBlock_Delegate*  dlg;
@@ -860,10 +862,12 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke( CLR_RT_StackFrame* stack )
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_Thread::Execute_IL( CLR_RT_StackFrame* stack )
+HRESULT CLR_RT_Thread::Execute_IL( CLR_RT_StackFrame& stackArg )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
+    
+    CLR_RT_StackFrame* stack = &stackArg;
 
     CLR_RT_Thread*     th   = stack->m_owningThread;
     CLR_RT_Assembly*   assm = stack->m_call.m_assm;

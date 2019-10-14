@@ -43,20 +43,10 @@
 
 struct CLR_HW_Hardware
 {
-    enum PowerLevel
-    {
-        PowerLevel__Active,
-        PowerLevel__SelectiveOff,
-        PowerLevel__Sleep,
-        PowerLevel__DeepSleep,
-        PowerLevel__Off
-    };
-
-    //--//
-   
     static const CLR_UINT32 c_Default_PowerLevel   = PowerLevel__Sleep; 
     static const CLR_UINT32 c_Default_WakeupEvents = SYSTEM_EVENT_FLAG_COM_IN            |
                                                      SYSTEM_EVENT_FLAG_COM_OUT           |
+                                                     SYSTEM_EVENT_FLAG_STORAGE_IO        |
                                                      SYSTEM_EVENT_FLAG_SYSTEM_TIMER      |
                                                      SYSTEM_EVENT_FLAG_SPI_MASTER        |
                                                      SYSTEM_EVENT_FLAG_I2C_MASTER        |
@@ -101,7 +91,7 @@ struct CLR_HW_Hardware
 
     CLR_UINT32    m_DebuggerEventsMask;
 
-    CLR_UINT32    m_powerLevel;
+    PowerLevel_type    m_powerLevel;
     CLR_UINT32    m_wakeupEvents;
     
     //--//

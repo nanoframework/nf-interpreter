@@ -125,7 +125,82 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes__
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    CLR_RT_HeapBlock*           callerField;
+    CLR_RT_HeapBlock*           returnArray = NULL;
+    CLR_RT_FieldDef_Instance    fieldDefinition;
+    int count = 0;
+
+    // put the return array on the stack
+    CLR_RT_HeapBlock& top = stack.PushValueAndClear();
+
+    // get the caller field
+    callerField = stack.Arg0().Dereference();
+
+    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetFieldDescriptor( stack, *callerField, fieldDefinition ));
+
+    // setup attribute enumerator
+    CLR_RT_AttributeEnumerator attributeEnumerator;
+    attributeEnumerator.Initialize( fieldDefinition );
+
+    // 1st pass: count attributes
+    do
+    {
+        // move to the next attribute in the collection, if any
+        if(attributeEnumerator.Advance())
+        {
+            count++;
+        }
+        else
+        {
+            // done sweeping attributes
+
+            // create the result array
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, count, g_CLR_RT_WellKnownTypes.m_TypeStatic ));
+
+            // use this to skip the 2nd pass if no attribute was found
+            if (count == 0) break;
+
+            // get the pointer to the first element
+            returnArray = (CLR_RT_HeapBlock*)top.DereferenceArray()->GetFirstElement();
+
+            // reset attribute enumerator
+            attributeEnumerator.Initialize( fieldDefinition );
+
+            break;
+        }
+    } 
+    while(true);
+
+    // 2nd pass: fill the array with the attributes types, if any
+    while(count > 0)
+    {
+        // move to the next attribute in the collection, if any
+        if(attributeEnumerator.Advance())
+        {
+            CLR_RT_TypeDef_Instance instanceTypeDef;
+            CLR_RT_HeapBlock*     hbObj;
+            
+            // get the type def for the current attribute
+            attributeEnumerator.GetCurrent(&instanceTypeDef);
+
+            CLR_RT_TypeDef_Index attributeType;
+            attributeType.Set(instanceTypeDef.Assembly(), instanceTypeDef.Type());
+
+            // create a new object for the attribute type and put it on the return array
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+            hbObj = returnArray->Dereference();
+            // make sure the reflection is pointing to the attribute type
+            hbObj->SetReflection( attributeType );
+
+            returnArray++;
+            count--;
+        }
+        else
+        {
+            // no more attributes
+            break;
+        }
+    } 
 
     NANOCLR_NOCLEANUP();
 }

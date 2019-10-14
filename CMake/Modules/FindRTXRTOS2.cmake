@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2017 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
 if(NOT STM32_CHIP_TYPE)
     STM32_GET_CHIP_TYPE(${TARGET_CHIP} STM32_CHIP_TYPE)
     if(NOT STM32_CHIP_TYPE)

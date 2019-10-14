@@ -42,7 +42,8 @@
 #define NANOCLR_SET_AND_LEAVE(expr)					{ hr = (expr); NANOCLR_LEAVE(); }
 #if defined(_MSC_VER)
 #define NANOCLR_MSG_SET_AND_LEAVE(expr, msg)		{ wprintf(msg); hr = (expr); NANOCLR_LEAVE(); }
-#define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, arg)	{ wprintf(msg, arg); hr = (expr); NANOCLR_LEAVE(); }
+#define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, ...)	{ wprintf(msg,  __VA_ARGS__); hr = (expr); NANOCLR_LEAVE(); }
+#define NANOCLR_CHARMSG_SET_AND_LEAVE(expr, msg, ...)	{ printf(msg, __VA_ARGS__); hr = (expr); NANOCLR_LEAVE(); }
 #else
 #define NANOCLR_MSG_SET_AND_LEAVE(expr, msg)		{ hr = (expr); NANOCLR_LEAVE(); }
 #define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, arg)	{ hr = (expr); NANOCLR_LEAVE(); }
@@ -420,7 +421,7 @@ typedef HRESULT (*CleanupInterruptsProc)( CLR_RT_HeapBlock_NativeEventDispatcher
 **  static void ISR_TestProc( CLR_RT_HeapBlock_NativeEventDispatcher *pContext )
 **
 **  {
-**      GLOBAL_LOCK(irq);
+**      GLOBAL_LOCK();
 **      // To do - Initialize userData1 and userData2 to userData.
 **      unsigned int userData1;
 **      unsigned int userData2;

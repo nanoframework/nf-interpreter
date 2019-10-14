@@ -5,7 +5,7 @@
 
 ## Motivation and Context
 <!--- Why is this change required? What problem does it solve? -->
-<!--- If it fixes/closes/resolves an open issue, please link to the issue here using the template bellow (mind the link as all issues are open in the Home repository, not in this one) -->
+<!--- If it fixes/closes/resolves an open issue, please link to the issue here using the template below (mind the link as all issues are open in the Home repository, not in this one) -->
 - Fixes/Closes/Resolves nanoFramework/Home#NNNN
 
 ## How Has This Been Tested?<!-- (if applicable) -->

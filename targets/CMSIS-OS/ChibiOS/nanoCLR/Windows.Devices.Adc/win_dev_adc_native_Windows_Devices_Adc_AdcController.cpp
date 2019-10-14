@@ -4,16 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_adc_native.h"
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Adc.AdcChannelMode (in managed code) !!!    //
-///////////////////////////////////////////////////////////////////////////////////////
-enum AdcChannelMode
-{
-        SingleEnded = 0,
-        Differential
-};
+#include "win_dev_adc_native_target.h"
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpenChannel___VOID__I4( CLR_RT_StackFrame& stack )
 {
@@ -28,7 +19,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
         // get controller ID
         int controllerId = pThis[FIELD___controllerId].NumericByRef().s4;
 
-        // we are filling this bellow with the appropriate ADC port pin config and ADC driver
+        // we are filling this below with the appropriate ADC port pin config and ADC driver
         NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
         ADCDriver* adcDriver = NULL;
 

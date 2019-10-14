@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) 2017 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -165,6 +165,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_corlib_native_System_Array::TrySzIndexOf___STATIC__BOOLEAN__SystemArray__I4__I4__OBJECT__BYREF_I4,
     Library_corlib_native_System_Delegate::Equals___BOOLEAN__OBJECT,
+    Library_corlib_native_System_Delegate::GetInvocationList___SZARRAY_SystemDelegate,
     Library_corlib_native_System_Delegate::get_Method___SystemReflectionMethodInfo,
     Library_corlib_native_System_Delegate::get_Target___OBJECT,
     NULL,
@@ -271,7 +272,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Collections_Stack::Push___VOID__OBJECT,
     NULL,
     NULL,
-    NULL,
     Library_corlib_native_System_Console::OutNative___STATIC__VOID__STRING__BOOLEAN,
     NULL,
     NULL,
@@ -329,10 +329,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4,
     NULL,
     Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTime,
     Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTime,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -877,11 +879,15 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_corlib_native_System_WeakReference::get_IsAlive___BOOLEAN,
     Library_corlib_native_System_WeakReference::get_Target___OBJECT,
     Library_corlib_native_System_WeakReference::set_Target___VOID__OBJECT,
     Library_corlib_native_System_WeakReference::_ctor___VOID__OBJECT,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -898,7 +904,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x7CCFBEC1,
+    0x6AC9143D,
     method_lookup,
-    { 1, 1, 0, 4 }
+    { 100, 2, 2, 0 }
 };

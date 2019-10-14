@@ -9,22 +9,36 @@
 #include "mbedtls.h"
 #include "mbedtls/debug.h"
 
-bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certificate, 
-    int certLength, const char* certPassword, int& sslContextHandle, bool isServer )
+bool ssl_generic_init_internal( 
+    int sslMode, 
+    int sslVerify, 
+    const char* certificate, 
+    int certLength, 
+    const uint8_t* privateKey,
+    int privateKeyLength,
+    const char* password,
+    int passwordLength,
+    int& contextHandle, 
+    bool isServer )
 {
     (void)sslMode;
-    (void)certPassword;
 
     int sslContexIndex = -1;
     int authMode = MBEDTLS_SSL_VERIFY_NONE;
     int endpoint = 0;
+    int ret = 0;
+
+    mbedtls_x509_crt* ownCertificate = NULL;
+
+    // we only have one CA root bundle, so this is fixed to 0
+    uint32_t configIndex = 0;
 
     ///////////////////////
     mbedTLS_NFContext* context;
 
-    for(uint32_t i=0; i<ARRAYSIZE(g_SSL_Driver.m_sslContextArray); i++)
+    for(uint32_t i=0; i<ARRAYSIZE(g_SSL_Driver.ContextArray); i++)
     { 
-        if(g_SSL_Driver.m_sslContextArray[i].SslContext == NULL)
+        if(g_SSL_Driver.ContextArray[i].Context == NULL)
         {
             sslContexIndex = i;           
             break;
@@ -51,9 +65,6 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     if(isServer)
     {
         endpoint = MBEDTLS_SSL_IS_SERVER;
-
-        // TODO NOT IMPLEMENTED
-        // // TODO:  we should be setting up the CA list
     }
     else
     {
@@ -106,7 +117,7 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     }
     mbedtls_entropy_init( context->entropy );
 
-    // TODO: review if we can add some instance-unique data to the custom argument bellow
+    // TODO: review if we can add some instance-unique data to the custom argument below
     if( mbedtls_ctr_drbg_seed( context->ctr_drbg, mbedtls_entropy_func, context->entropy, NULL, 0 ) != 0 )
     {
         // ctr_drbg_seed_failed
@@ -125,32 +136,31 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     // configure protocol
     switch((SslProtocols)sslMode)
     {
-        case SslProtocols_SSLv3:
-            context->conf->min_major_ver = 3;
-            context->conf->min_minor_ver = 0;
-            context->conf->max_major_ver = 3;
-            context->conf->max_minor_ver = 0;
-            break;
-
         case SslProtocols_TLSv1:
-            context->conf->min_major_ver = 1;
-            context->conf->min_minor_ver = 0;
-            context->conf->max_major_ver = 1;
-            context->conf->max_minor_ver = 0;
+            mbedtls_ssl_conf_min_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_1 );
+            mbedtls_ssl_conf_max_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_1 );
             break;
 
         case SslProtocols_TLSv11:
-            context->conf->min_major_ver = 1;
-            context->conf->min_minor_ver = 1;
-            context->conf->max_major_ver = 1;
-            context->conf->max_minor_ver = 1;
+            mbedtls_ssl_conf_min_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_2 );
+            mbedtls_ssl_conf_max_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_2 );
             break;
 
         case SslProtocols_TLSv12:
-            context->conf->min_major_ver = 1;
-            context->conf->min_minor_ver = 2;
-            context->conf->max_major_ver = 1;
-            context->conf->max_minor_ver = 2;
+            mbedtls_ssl_conf_min_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_3 );
+            mbedtls_ssl_conf_max_version( 
+                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+                MBEDTLS_SSL_MINOR_VERSION_3 );
             break;
 
         default:
@@ -161,22 +171,81 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
 
     mbedtls_ssl_conf_rng( context->conf, mbedtls_ctr_drbg_random, context->ctr_drbg );
 
-    // parse certificate if passed
-    if(certificate != NULL && certLength > 0)
+    // CA root certs from store, if available
+    if(g_TargetConfiguration.CertificateStore->Count > 0)
     {
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // developer notes:                                                                            //
+        // don't care about failure in processing the CA cert bundle                                   //
+        // the outcome is that the CA certs won't be loaded into the trusted CA chain                  //
         // this call parses certificates in both string and binary formats                             //
         // when the formart is a string it has to include the terminator otherwise the parse will fail //
         /////////////////////////////////////////////////////////////////////////////////////////////////
-        if(mbedtls_x509_crt_parse( context->x509_crt, (const unsigned char*)certificate, certLength ) != 0)
+        mbedtls_x509_crt_parse( 
+            context->x509_crt, 
+            (const unsigned char*)g_TargetConfiguration.CertificateStore->Certificates[configIndex]->Certificate, 
+            g_TargetConfiguration.CertificateStore->Certificates[configIndex]->CertificateSize );
+
+    }
+
+    // parse "own" certificate if passed
+    if(certificate != NULL && certLength > 0)
+    {
+        // create and init private key context
+        // this needs to be freed in ssl_exit_context_internal
+        context->pk = (mbedtls_pk_context*)platform_malloc(sizeof(mbedtls_pk_context));
+        if(context->pk == NULL)
         {
-            // x509_crt_parse_failed
             goto error;
         }
 
-        mbedtls_ssl_conf_ca_chain( context->conf, context->x509_crt, NULL );
+        mbedtls_pk_init( context->pk  );
+
+        // is there a private key?
+        if(privateKey != NULL && privateKeyLength > 0)
+        {
+
+            if( mbedtls_pk_parse_key(
+                context->pk, 
+                privateKey,
+                privateKeyLength, 
+                (const unsigned char *)password, 
+                passwordLength) < 0)
+            {
+                // private key parse failed
+                goto error;
+            }
+        }
+    
+        // parse certificate
+        ownCertificate = (mbedtls_x509_crt*)platform_malloc(sizeof(mbedtls_x509_crt));
+        if(ownCertificate == NULL)
+        {
+            goto error;
+        }
+
+        mbedtls_x509_crt_init( ownCertificate );
+
+        if( mbedtls_x509_crt_parse( ownCertificate, (const unsigned char *) certificate, certLength ) )
+        {
+            // failed parsing own certificate failed
+            goto error;
+        }            
+
+        if( mbedtls_ssl_conf_own_cert( context->conf, ownCertificate, context->pk ) ) 
+        {
+            // configuring own certificate failed
+            goto error;
+        }
+
     }
+    else
+    {
+        // no PK, need to set it to NULL
+        context->pk = NULL;
+    }
+
+    mbedtls_ssl_conf_ca_chain( context->conf, context->x509_crt, NULL );
 
     // set certificate verification
     // the current options provided by mbed TLS are only verify or don't verify
@@ -186,18 +255,15 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
     }
     mbedtls_ssl_conf_authmode( context->conf, authMode );
 
-    // set bellow the threshold level for debug messages
-    // check mbed TLS mbedtls/debug.h header for details.
-    // Debug levels:
-    // 0 No debug
-    // 1 Error
-    // 2 State change
-    // 3 Informational
-    // 4 Verbose
-    mbedtls_debug_set_threshold( 2 );
+    // setup debug stuff
+    // only required if output debug is enabled in mbedtls_config.h
+  #ifdef MBEDTLS_DEBUG_C
+    mbedtls_debug_set_threshold( MBEDTLS_DEBUG_THRESHOLD );
     mbedtls_ssl_conf_dbg( context->conf, nf_debug, stdout );
+  #endif
 
-    if( mbedtls_ssl_setup( context->ssl, context->conf ) != 0 )
+    ret = mbedtls_ssl_setup( context->ssl, context->conf );
+    if( ret  != 0 )
     {
         // ssl_setup_failed
         goto error;
@@ -205,14 +271,21 @@ bool ssl_generic_init_internal( int sslMode, int sslVerify, const char* certific
 
     //////////////////////////////////////
 
-    g_SSL_Driver.m_sslContextArray[sslContexIndex].SslContext = context;
-    g_SSL_Driver.m_sslContextCount++;
+    g_SSL_Driver.ContextArray[sslContexIndex].Context = context;
+    g_SSL_Driver.ContextCount++;
 
-    sslContextHandle = sslContexIndex;
+    contextHandle = sslContexIndex;
 
-    return TRUE;
+    return true;
 
 error:
+    mbedtls_pk_free(context->pk);
+    mbedtls_net_free(context->server_fd);
+    mbedtls_ctr_drbg_free( context->ctr_drbg );
+    mbedtls_entropy_free( context->entropy );
+    mbedtls_x509_crt_free(context->x509_crt);
+    mbedtls_ssl_config_free( context->conf );
+    mbedtls_ssl_free(context->ssl);
 
     // check for any memory allocation that needs to be freed before exiting
     if(context->ssl != NULL) platform_free(context->ssl);
@@ -221,6 +294,17 @@ error:
     if(context->ctr_drbg != NULL) platform_free(context->ctr_drbg);
     if(context->server_fd != NULL) platform_free(context->server_fd);
     if(context->x509_crt != NULL) platform_free(context->x509_crt);
+    if(context->pk != NULL) platform_free(context->pk);
+   
+    if(ownCertificate != NULL)
+    {
+        mbedtls_x509_crt_free( ownCertificate );
+        platform_free(ownCertificate);
+    }
+    if(context->pk != NULL)
+    {
+        platform_free(context);
+    }
 
-    return FALSE;
+    return false;
 }

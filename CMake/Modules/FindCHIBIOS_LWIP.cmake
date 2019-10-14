@@ -161,7 +161,7 @@ set(LWIP_SRCS
     # lwiperf.c
 
 	# SNTP client
-	# this one is added bellow if NF_NETWORKING_SNTP option is ON
+	# this one is added below if NF_NETWORKING_SNTP option is ON
     # sntp.c
 
     # MDNS responder

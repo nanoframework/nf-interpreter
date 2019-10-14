@@ -73,7 +73,6 @@ struct CLR_DBG_Commands
         static const unsigned int c_EnterBootloader = 1;
         static const unsigned int c_ClrOnly   = 2;
         static const unsigned int c_WaitForDebugger   = 4;
-        static const unsigned int c_NoShutdown = 8;
 
         unsigned int m_flags;
     };
@@ -85,6 +84,7 @@ struct CLR_DBG_Commands
 
         struct Reply
         {
+            unsigned int  ErrorCode;
             unsigned char m_data[ 1 ];
         };
     };
@@ -285,6 +285,10 @@ struct CLR_DBG_Commands
         static const CLR_UINT32 c_CapabilityFlags_ThreadCreateEx            = 0x00000400;
         static const CLR_UINT32 c_CapabilityFlags_ConfigBlockRequiresErase  = 0x00000800;
         static const CLR_UINT32 c_CapabilityFlags_HasNanoBooter             = 0x00001000;
+        static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_0       = 0x00010000;
+        static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_1       = 0x00020000;
+        static const CLR_UINT32 c_CapabilityFlags_TargetCapabiliy_0         = 0x00040000;
+        static const CLR_UINT32 c_CapabilityFlags_TargetCapabiliy_1         = 0x00080000;
 
         CLR_UINT32 m_cmd;
 

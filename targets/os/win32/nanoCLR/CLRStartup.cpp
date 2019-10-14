@@ -123,6 +123,9 @@ struct Settings
     {
         NANOCLR_HEADER();
 
+        // clear flag (in case EE wasn't restarted)
+        CLR_EE_DBG_CLR(StateResolutionFailed);
+
 #if defined(_WIN32)
         CLR_RT_StringVector vec;
 
@@ -219,7 +222,16 @@ struct Settings
         NANOCLR_CLEANUP();
 
 #if !defined(BUILD_RTM)
-        if(FAILED(hr)) CLR_Debug::Printf( "Error: %08x\r\n", hr );
+        if(FAILED(hr))
+        {
+            CLR_Debug::Printf( "Error: %08x\r\n", hr );
+
+            if(hr == CLR_E_TYPE_UNAVAILABLE)
+            {
+                // exception occurred during type resolution
+                CLR_EE_DBG_SET(StateResolutionFailed);
+            }
+        }
 #endif
 
         NANOCLR_CLEANUP_END();
@@ -238,7 +250,7 @@ struct Settings
         {    
             const DeviceBlockInfo * deviceInfo= BlockStorageDevice_GetDeviceInfo(device);
 
-            if (!deviceInfo->Attribute & MediaAttribute_SupportsXIP)
+            if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
             {
                 unsigned char * datAssembliesBuffer = (unsigned char*)CLR_RT_Memory::Allocate_And_Erase( datSize, CLR_RT_HeapBlock ::HB_Unmovable );  CHECK_ALLOCATION(datAssembliesBuffer);
 
@@ -394,22 +406,15 @@ struct Settings
 
     void Cleanup()
     {
-        if(!CLR_EE_REBOOT_IS(NoShutdown))
-        {
-            // OK to delete execution engine 
-            CLR_RT_ExecutionEngine::DeleteInstance();
-        }
+        CLR_RT_ExecutionEngine::DeleteInstance();
 
-#if defined(_WIN32)
         memset( &g_CLR_RT_ExecutionEngine, 0, sizeof(g_CLR_RT_ExecutionEngine));
         memset( &g_CLR_RT_WellKnownTypes, 0, sizeof(g_CLR_RT_WellKnownTypes));
-
         memset( &g_CLR_RT_WellKnownMethods, 0, sizeof(g_CLR_RT_WellKnownMethods));
         memset( &g_CLR_RT_TypeSystem, 0, sizeof(g_CLR_RT_TypeSystem));
         memset( &g_CLR_RT_EventCache, 0, sizeof(g_CLR_RT_EventCache));
         memset( &g_CLR_RT_GarbageCollector, 0, sizeof(g_CLR_RT_GarbageCollector));
         memset( &g_CLR_HW_Hardware, 0, sizeof(g_CLR_HW_Hardware));
-#endif
 
         m_fInitialized = false;
     }
@@ -684,6 +689,12 @@ void ClrStartup( CLR_SETTINGS params )
                 CLR_Debug::Printf( "Done.\r\n" );
 #endif
             }
+        }
+
+        // process setting of power mode, if reboot was requested along with a power mode "higher" then PowerLevel__Active
+        if(CLR_EE_REBOOT_IS( ClrOnly ) && g_CLR_HW_Hardware.m_powerLevel > PowerLevel__Active)
+        {
+            CPU_SetPowerMode(g_CLR_HW_Hardware.m_powerLevel);
         }
 
         if( CLR_EE_DBG_IS_NOT( RebootPending ))

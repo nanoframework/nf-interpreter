@@ -9,8 +9,9 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFram
 
 
 # set include directories
-list(APPEND nanoFramework.Devices.Can_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
-list(APPEND nanoFramework.Devices.Can_INCLUDE_DIRS "${TARGET_BASE_LOCATION}")
+list(APPEND nanoFramework.Devices.Can_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
+list(APPEND nanoFramework.Devices.Can_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
+list(APPEND nanoFramework.Devices.Can_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/nanoFramework.Devices.Can)
 
 # source files
 set(nanoFramework.Devices.Can_SRCS
@@ -25,8 +26,9 @@ foreach(SRC_FILE ${nanoFramework.Devices.Can_SRCS})
     set(nanoFramework.Devices.Can_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(nanoFramework.Devices.Can_SRC_FILE ${SRC_FILE}
         PATHS 
-            "${BASE_PATH_FOR_THIS_MODULE}"
-            "${TARGET_BASE_LOCATION}"
+            ${BASE_PATH_FOR_THIS_MODULE}
+            ${TARGET_BASE_LOCATION}
+            ${PROJECT_SOURCE_DIR}/src/nanoFramework.Devices.Can
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

@@ -21,6 +21,7 @@ set(nanoFramework.Hardware.Stm32_SRCS
 
     nf_hardware_stm32_native.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory.cpp
+    nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Utilities.cpp
 )
@@ -29,7 +30,7 @@ foreach(SRC_FILE ${nanoFramework.Hardware.Stm32_SRCS})
     set(nanoFramework.Hardware.Stm32_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(nanoFramework.Hardware.Stm32_SRC_FILE ${SRC_FILE}
         PATHS 
-            "${BASE_PATH_FOR_THIS_MODULE}"
+            ${BASE_PATH_FOR_THIS_MODULE}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

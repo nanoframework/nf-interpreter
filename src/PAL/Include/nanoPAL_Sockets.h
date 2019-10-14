@@ -183,7 +183,6 @@ typedef int SOCK_SOCKET;
 #define SOCK_SOCKO_SENDTIMEOUT           0x1005           // send timeout
 #define SOCK_SOCKO_RECEIVETIMEOUT        0x1006           // receive timeout
 #define SOCK_SOCKO_ERROR                 0x1007           // get error status and clear
-#define SOCK_SOCKO_TYPE                  0x1008           // get socket type
 #define SOCK_SOCKO_UPDATE_ACCEPT_CTX     0x700B           // This option updates the properties of the socket which are inherited from the listening socket.
 #define SOCK_SOCKO_UPDATE_CONNECT_CTX    0x7010           // This option updates the properties of the socket after the connection is established.
 #define SOCK_SOCKO_MAXCONNECTIONS        0x7FFFFFFF       // Maximum queue length specifiable by listen.
@@ -434,15 +433,10 @@ enum UpdateOperation
 
 //--//
 
-#if defined(NETMF_TARGET_LITTLE_ENDIAN)
 #define SOCK_htons(x) ( (((x) & 0x000000FFUL) <<  8) | (((x) & 0x0000FF00UL) >>  8) )
 #define SOCK_htonl(x) ( (((x) & 0x000000FFUL) << 24) | (((x) & 0x0000FF00UL) << 8) | (((x) & 0x00FF0000UL) >> 8) | (((x) & 0xFF000000UL) >> 24) )
 #define SOCK_ntohs(x) SOCK_htons(x)
-#else
-#define SOCK_htons(x) ( x )
-#define SOCK_htonl(x) ( x )
-#define SOCK_ntohs(x) ((UINT16)(x))
-#endif
+#define SOCK_ntohl(x) ( (((x) & 0x000000FFUL) << 24) | (((x) & 0x0000FF00UL) << 8) | (((x) & 0x00FF0000UL) >> 8) | (((x) & 0xFF000000UL) >> 24) )
 
 #define SOCK_FD_ZERO(x)     memset(x, 0, sizeof(*x))
 __inline bool SOCK_FD_ISSET(int y, SOCK_fd_set* x)        
@@ -514,9 +508,21 @@ bool Network_Interface_Bind(int index);
 int  Network_Interface_Open(int index);
 bool Network_Interface_Close(int index);
 int  Network_Interface_Disconnect(int index);
-int  Network_Interface_Connect(int index, const char * ssid, const char * passphase, int reconOption);
+int  Network_Interface_Connect(int index, const char * ssid, const char * passphase, int options);
 bool Network_Interface_Start_Scan(int index);
+
+// Wireless AP methods
+void Network_Interface_Add_Station(uint16_t index, uint8_t * macAddress);
+void Network_Interface_Remove_Station(uint16_t index);
+int  Network_Interface_Max_Stations();
+bool Network_Interface_Get_Station(uint16_t index, uint8_t * macAddress, uint8_t * rssi, uint32_t * phyModes);
+void Network_Interface_Deauth_Station(uint16_t index);
+
 //--//
+
+// Network_Interface_Connect options
+#define NETWORK_CONNECT_SAVE_CONFIG         1
+#define NETWORK_CONNECT_RECONNECT           2
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkChange.NetworkEventType (in managed code) !!! //
@@ -527,6 +533,7 @@ enum NetworkEventType
     NetworkEventType_Invalid = 0,
     NetworkEventType_AvailabilityChanged = 1,
     NetworkEventType_AddressChanged = 2,
+    NetworkEventType_APClientChanged = 3,
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -549,7 +556,7 @@ enum NetworkEventFlags
     NetworkEventFlags_NetworkAvailable = 0x01,
 };
 
-void Network_PostEvent(unsigned int eventType, unsigned int flags);
+void Network_PostEvent(unsigned int eventType, unsigned int flags, unsigned int index);
 
 //--//
 // Debugger Methods
@@ -583,6 +590,7 @@ int SOCK_getaddrinfo(  const char* nodename, char* servname, const struct SOCK_a
 void SOCK_freeaddrinfo( struct SOCK_addrinfo* ai );
 int SOCK_ioctl( int socket, int cmd, int* data );
 int SOCK_getlasterror();
+int SOCK_getsocklasterror( int socket );
 int SOCK_select( int socket, SOCK_fd_set* readfds, SOCK_fd_set* writefds, SOCK_fd_set* except, const struct SOCK_timeval* timeout );
 int SOCK_setsockopt( int socket, int level, int optname, const char* optval, int  optlen );
 int SOCK_getsockopt( int socket, int level, int optname,       char* optval, int* optlen );
@@ -604,19 +612,17 @@ typedef void (*SSL_DATE_TIME_FUNC)(DATE_TIME_INFO* pdt);
 
 bool SSL_Initialize  ();
 bool SSL_Uninitialize();
-bool SSL_ServerInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle );
-bool SSL_ClientInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const char* certPassword, int& sslContextHandle );
+bool SSL_ServerInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle );
+bool SSL_ClientInit ( int sslMode, int sslVerify, const char* certificate, int certLength, const uint8_t* privateKey, int privateKeyLength, const char* password, int passwordLength, int& sslContextHandle );
 bool SSL_AddCertificateAuthority( int sslContextHandle, const char* certificate, int certLength, const char* certPassword );
-void SSL_ClearCertificateAuthority( int sslContextHandle );
 bool SSL_ExitContext( int sslContextHandle );
 int  SSL_Accept     ( int socket, int sslContextHandle );
 int  SSL_Connect    ( int socket, const char* szTargetHost, int sslContextHandle );
 int  SSL_Write      ( int socket, const char* Data, size_t size );
 int  SSL_Read       ( int socket, char* Data, size_t size );
 int  SSL_CloseSocket( int socket );
-void SSL_GetTime(DATE_TIME_INFO* pdt);
-void SSL_RegisterTimeCallback(SSL_DATE_TIME_FUNC pfn);
 bool SSL_ParseCertificate( const char* certificate, size_t certLength, const char* password, X509CertData* certData );
+int  SSL_DecodePrivateKey( const unsigned char *key, size_t keyLength, const unsigned char *password, size_t passwordLength );
 int  SSL_DataAvailable( int socket );
 
 //--//

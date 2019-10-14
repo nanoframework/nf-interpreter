@@ -7,6 +7,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
+#include <serialcfg.h>
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoPAL_BlockStorage.h>
@@ -42,8 +43,8 @@ int main(void) {
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
 
-  // Prepares the serial driver 2 using UART2
-  sdStart(&SD2, NULL);
+  // starts the serial driver
+  sdStart(&SERIAL_DRIVER, NULL);
 
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);
@@ -51,9 +52,10 @@ int main(void) {
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
 
-  // initialize block storage device
+  // initialize block storage list and devices
   // in CLR this is called in nanoHAL_Initialize()
   // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
+  BlockStorageList_Initialize();
   BlockStorage_AddDevices();
 
   //  Normal main() thread

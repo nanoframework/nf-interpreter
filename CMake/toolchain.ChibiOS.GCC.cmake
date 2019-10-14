@@ -81,11 +81,14 @@ function(NF_ADD_HEX_BIN_DUMP_TARGETS TARGET)
         set(FILENAME "${TARGET}")
     endif()
 
+	#get_filename_component(FNSHORT ${FILENAME} NAME_WE)
+	string(REGEX REPLACE "\\.[^.]*$" "" FNSHORT ${FILENAME})
+
     # add targets for HEX, BIN and S19 formats with no output so they will always be built
-    add_custom_target(${TARGET}.hex DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Oihex ${FILENAME} ${FILENAME}.hex)
-    add_custom_target(${TARGET}.s19 DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Osrec ${FILENAME} ${FILENAME}.s19)
-    add_custom_target(${TARGET}.bin DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Obinary ${FILENAME} ${FILENAME}.bin)
-    add_custom_target(${TARGET}.dump DEPENDS ${TARGET} COMMAND ${CMAKE_OBJDUMP} -d -EL -S ${FILENAME} ${FILENAME}.dump)
+    add_custom_target(${TARGET}.hex DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Oihex ${FILENAME} ${FNSHORT}.hex)
+    add_custom_target(${TARGET}.s19 DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Osrec ${FILENAME} ${FNSHORT}.s19)
+    add_custom_target(${TARGET}.bin DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Obinary ${FILENAME} ${FNSHORT}.bin)
+    add_custom_target(${TARGET}.dump DEPENDS ${TARGET} COMMAND ${CMAKE_OBJDUMP} -d -EL -S ${FILENAME} ${FNSHORT}.dump)
 endfunction()
 
 
@@ -118,15 +121,17 @@ function(NF_SET_LINK_MAP TARGET)
     string(SUBSTRING ${TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
     
     # add linker flags to generate map file
-    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${TARGET_SHORT}.map,--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
+    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_BINARY_DIR}/${TARGET_SHORT}.map,--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
 
 endfunction()
 
 
 function(NF_SET_COMPILER_DEFINITIONS TARGET)
 
-    # definition for platform (always ARM here)
-    target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM ")
+    # definition for platform 
+    # (always ARM here)
+    # ChibiOS HAL community always include (nanoFramework overlay and official community contributions optionally)
+    target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM -DHAL_USE_COMMUNITY")
 
     # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
     if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
@@ -161,7 +166,7 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
         target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
     endif()
 
-    # include any extra compiler definitions comming from extra args
+    # include any extra compiler definitions coming from extra args
     target_compile_definitions(${TARGET} PUBLIC ${ARGN})
 
 endfunction()

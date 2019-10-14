@@ -4,11 +4,15 @@
 //
 
 #include "nf_hardware_stm32_native.h"
-
+#include <hal.h>
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::get_WakeupReason___STATIC__nanoFrameworkHardwareStm32PowerWakeupReasonType,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::DisableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::EnableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::NativeEnterStandbyMode___STATIC__VOID,
     NULL,
     NULL,
     NULL,
@@ -52,7 +56,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm32 =
 {
     "nanoFramework.Hardware.Stm32", 
-    0xFFC9E917,
+    0x3E87EA8A,
     method_lookup,
-    { 1, 0, 2, 2 }
+    { 100, 0, 4, 3 }
 };

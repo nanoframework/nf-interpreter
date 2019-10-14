@@ -16,12 +16,14 @@ option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtim
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
+option(API_System.Devices.Dac                   "option for System.Devices.Dac API")
 option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
 option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
 option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
 option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
 option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
 option(API_Windows.Networking.Sockets           "option for Windows.Networking.Sockets")
+option(API_Windows.Storage                      "option for Windows.Storage")
 
 
 # Esp32 only
@@ -29,7 +31,7 @@ option(API_Hardware.Esp32                       "option for Hardware.Esp32")
 
 
 # Stm32 only
-option(API_Hardware.Stm32                       "option for Hardware.Esp32")
+option(API_Hardware.Stm32                       "option for Hardware.Stm32")
 
 
 #################################################################
@@ -64,7 +66,7 @@ endmacro()
 
 
 ############################################################################################
-# WHEN ADDING A NEW API add the corresponding block bellow 
+# WHEN ADDING A NEW API add the corresponding block below 
 # required changes:
 # 1. change the 'IF' to match the CMake option 
 # 2. change the call to PerformSettingsForApiEntry() macro with the API name (doted naming)
@@ -134,6 +136,12 @@ macro(ParseNativeAssemblies)
         PerformSettingsForApiEntry("Windows.Devices.Adc")
     endif()
 
+    # System.Devices.Dac
+    if(API_System.Devices.Dac)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("System.Devices.Dac")
+    endif()
+
     # Windows.Devices.Gpio
     if(API_Windows.Devices.Gpio)
         ##### API name here (doted name)
@@ -175,6 +183,12 @@ macro(ParseNativeAssemblies)
        ##### API name here (doted name)
        PerformSettingsForApiEntry("Windows.Devices.Wifi")
     endif()
+ 
+    # Windows.Storage
+    if(API_Windows.Storage)
+       ##### API name here (doted name)
+       PerformSettingsForApiEntry("Windows.Storage")
+    endif()
 
     # Interop assemblies
     ParseInteropAssemblies()
@@ -185,6 +199,12 @@ macro(ParseNativeAssemblies)
     # parse the list to have new lines, ',' and identation
     string(REPLACE ";" "\n    " CLR_RT_NativeAssemblyDataTableEntries "${CLR_RT_NativeAssemblyDataTableEntriesList}")
 
+
+    # configure code file with Interop Assemblies table and...
+    configure_file("${PROJECT_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTable.cpp.in"
+                    "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
+    # ... now add Interop Assemblies table to ChibiOS nanoCLR sources list
+    list(APPEND TARGET_NANO_APIS_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
 
     # make the vars global
     set(TARGET_NANO_APIS_INCLUDES ${TARGET_NANO_APIS_INCLUDES} CACHE INTERNAL "make global")

@@ -8,40 +8,9 @@
 #include <string.h>
 #include <targetPAL.h>
 #include <nanoHAL.h>
-#include "win_dev_i2c_native.h"
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cSharingMode (in managed code) !!!    //
-///////////////////////////////////////////////////////////////////////////////////////
-enum I2cSharingMode
-{
-    Exclusive = 0,
-    Shared
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cTransferStatus (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
- enum I2cTransferStatus
-{
-    I2cTransferStatus_FullTransfer = 0,
-    I2cTransferStatus_ClockStretchTimeout,
-    I2cTransferStatus_PartialTransfer,
-    I2cTransferStatus_SlaveAddressNotAcknowledged,
-    I2cTransferStatus_UnknownError
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cBusSpeed (in managed code) !!!       //
-///////////////////////////////////////////////////////////////////////////////////////
-enum I2cBusSpeed
-{
-    I2cBusSpeed_StandardMode = 0,
-    I2cBusSpeed_FastMode
-};
+#include "win_dev_i2c_native_target.h"
 
 typedef Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings I2cConnectionSettings;
-
 
 /////////////////////////////////////////////////////
 // I2C PAL strucs declared in win_dev_i2c_native.h //
@@ -98,7 +67,7 @@ static THD_FUNCTION(I2CWorkingThread, arg)
     chThdExit(result);
 }
 
-void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetI2cConfig(CLR_RT_HeapBlock* managedConfig, I2CConfig* llConfig)
+void GetI2cConfig(CLR_RT_HeapBlock* managedConfig, I2CConfig* llConfig)
 {
     I2cBusSpeed busSpeed = (I2cBusSpeed)managedConfig[ I2cConnectionSettings::FIELD___busSpeed ].NumericByRef().s4;
 
@@ -127,7 +96,7 @@ void Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::GetI2cConfig(CLR_
 }
 
 // estimate the time required to perform the I2C transaction
-bool Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::IsLongRunningOperation(uint16_t writeSize, uint16_t readSize, float byteTime, uint32_t& estimatedDurationMiliseconds)
+bool IsLongRunningOperation(uint16_t writeSize, uint16_t readSize, float byteTime, uint32_t& estimatedDurationMiliseconds)
 {
     // add an extra byte to account for the address
     estimatedDurationMiliseconds = byteTime * (writeSize + readSize + 1);
@@ -236,15 +205,73 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::DisposeNative___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeDispose___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
 {
-    (void)stack;
-
     NANOCLR_HEADER();
-    {
 
+    uint8_t busIndex;
+    bool disposeController = false;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+    // get disposeController
+    disposeController = (bool)stack.Arg0().NumericByRef().u1;
+
+    if(disposeController)
+    {
+        // get bus index
+        // this is coded with a multiplication, need to perform and int division to get the number
+        // see the comments in the I2cDevice() constructor in managed code for details
+        busIndex = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
+
+        // get the driver for the I2C bus
+        switch (busIndex)
+        {
+          #if STM32_I2C_USE_I2C1
+            case 1 :
+                // deactivates the I2C peripheral
+                i2cStop(&I2CD1);
+                // nulls driver
+                I2C1_PAL.Driver = NULL;
+                break;
+          #endif
+
+          #if STM32_I2C_USE_I2C2
+            case 2 :
+                // deactivates the I2C peripheral
+                i2cStop(&I2CD2);
+                // nulls driver
+                I2C2_PAL.Driver = NULL;
+                break;
+          #endif
+
+          #if STM32_I2C_USE_I2C3
+            case 3 :
+                // deactivates the I2C peripheral
+                i2cStop(&I2CD3);
+                // nulls driver
+                I2C3_PAL.Driver = NULL;
+                break;
+          #endif
+
+          #if STM32_I2C_USE_I2C4
+            case 4 :
+                // deactivates the I2C peripheral
+                i2cStop(&I2CD4);
+                // nulls driver
+                I2C4_PAL.Driver = NULL;
+                break;
+          #endif
+
+            default:
+                // the requested I2C bus is not valid
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+        }
     }
-    NANOCLR_NOCLEANUP_NOLABEL();
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit___WindowsDevicesI2cI2cTransferResult__SZARRAY_U1__SZARRAY_U1( CLR_RT_StackFrame& stack )
@@ -336,7 +363,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit
         if(isLongRunningOperation)
         {
             // if this is a long running operation, set a timeout equal to the estimated transaction duration in milliseconds
-            // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() bellow
+            // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() below
             hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
 
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));

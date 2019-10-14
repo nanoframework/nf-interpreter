@@ -115,7 +115,7 @@ void CLR_HW_Hardware::ProcessActivity()
 
             if(!CLR_EE_REBOOT_IS(ClrOnly))
             {
-                CLR_RT_ExecutionEngine::Reboot( true );
+                CLR_RT_ExecutionEngine::Reboot( false );
             }
         }
 #endif
@@ -158,6 +158,11 @@ void CLR_HW_Hardware::ProcessActivity()
     if(events & SYSTEM_EVENT_FLAG_ONEWIRE_MASTER)
     {
         eventsCLR |= CLR_RT_ExecutionEngine::c_Event_OneWireMaster;
+    }
+
+    if(events & SYSTEM_EVENT_FLAG_STORAGE_IO)
+    {
+        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_StorageIo;
     }
 
     if(eventsCLR)

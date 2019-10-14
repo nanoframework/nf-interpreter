@@ -36,23 +36,18 @@ namespace nanoFramework.Targets.STM32F769I_DISCOVERY
         public const int Channel_4 = 4;
 
         /// <summary>
-        /// Channel 5, exposed on A5, connected to PB8 (ADC3 - IN7)
+        /// Channel 5, internal temperature sensor, connected to ADC1
         /// </summary>
-        public const int Channel_5 = 5;
+        public const int Channel_TemperatureSensor = 5;
 
         /// <summary>
-        /// Channel 6, internal temperature sensor, connected to ADC1
+        /// Channel 6, internal voltage reference, connected to ADC1
         /// </summary>
-        public const int Channel_TemperatureSensor = 6;
+        public const int Channel_VrefIn = 6;
 
         /// <summary>
-        /// Channel 7, internal voltage reference, connected to ADC1
+        /// Channel 7, connected to VBatt pin, ADC1
         /// </summary>
-        public const int Channel_VrefIn = 7;
-
-        /// <summary>
-        /// Channel 8, connected to VBatt pin, ADC1
-        /// </summary>
-        public const int Channel_Vbatt = 8;
+        public const int Channel_Vbatt = 7;
     }
 }

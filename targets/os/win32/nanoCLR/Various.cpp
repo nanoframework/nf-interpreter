@@ -59,7 +59,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
     DEBUGGER_PORT,
 
     DEBUG_TEXT_PORT,
-    115200,
+    921600,
     0,  // STDIO = COM2 or COM1
 
     { 0, 0 },   // { SRAM1_MEMORY_Base, SRAM1_MEMORY_Size },
@@ -388,16 +388,20 @@ void CPU_Shutdown()
     ClrExit();
 }
 
-//void
-//CPU_Reset()
-//{
-//    ::ExitProcess( 0 );
-//}
+void CPU_Reset()
+{
+    ::ExitProcess( 0 );
+}
 
-//bool CPU_IsSoftRebootSupported ()
-//{
-//    return TRUE;
-//}
+bool CPU_IsSoftRebootSupported ()
+{
+    return TRUE;
+}
+
+void CPU_SetPowerMode(PowerLevel_type powerLevel)
+{
+	(void)powerLevel;
+}
 
 char nanoCLR_Dat_Start[512*1024];
 char nanoCLR_Dat_End  [1       ];
@@ -611,54 +615,3 @@ size_t CPU_GetUncachableAddress( size_t address )
 }
 
 ///////////////////////////////////////////////////////////////
-
-//SmartPtr_IRQ::SmartPtr_IRQ(void* context)
-//{
-//    m_context = context;
-//    Disable();
-//}
-//
-//SmartPtr_IRQ::~SmartPtr_IRQ()
-//{
-//    Restore();
-//}
-//
-//void SmartPtr_IRQ::Release()
-//{
-//    HAL_Windows_ReleaseGlobalLock();
-//}
-//
-//void SmartPtr_IRQ::Disable()
-//{
-//    HAL_Windows_AcquireGlobalLock();
-//}
-//
-//void SmartPtr_IRQ::Restore()
-//{
-//    HAL_Windows_ReleaseGlobalLock();
-//}
-//
-//bool SmartPtr_IRQ::ForceDisabled(void* context)
-//{
-//    bool ret = GetState();
-//
-//    HAL_Windows_AcquireGlobalLock();
-//
-//    return ret;
-//}
-//
-//bool SmartPtr_IRQ::ForceEnabled(void* context)
-//{
-//    bool ret = GetState();
-//
-//    HAL_Windows_ReleaseGlobalLock();
-//
-//    return ret;
-//}
-//
-//
-//bool SmartPtr_IRQ::GetState(void* context)
-//{
-//    return HAL_Windows_HasGlobalLock();
-//}
-

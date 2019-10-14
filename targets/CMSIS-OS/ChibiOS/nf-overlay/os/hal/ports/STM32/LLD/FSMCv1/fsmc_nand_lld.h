@@ -8,6 +8,7 @@
 #define HAL_NAND_LLD_H_
 
 #include "hal_stm32_fsmc"
+#include <hal_nf_community.h>
 
 #if (HAL_USE_NAND == TRUE)
 

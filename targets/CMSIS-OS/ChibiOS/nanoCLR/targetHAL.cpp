@@ -12,22 +12,37 @@
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
 
-// because nanoHAL_Initialize needs to be called in both C and C++ we need a proxy to allow it to be called in 'C'
+// global mutex protecting the internal state of the interpreter, including event flags
+//mutex_t interpreterGlobalMutex;
+
+// because nanoHAL_Initialize/Uninitialize needs to be called in both C and C++ we need a proxy to allow it to be called in 'C'
 extern "C" {
     
     void nanoHAL_Initialize_C()
     {
         nanoHAL_Initialize();
     }
+
+    void nanoHAL_Uninitialize_C()
+    {
+        nanoHAL_Uninitialize();
+    }
 }
 
 void nanoHAL_Initialize()
 {
+    // initialize global mutex
+    //chMtxObjectInit(&interpreterGlobalMutex);
+
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION  ::InitializeList();
 
+    BlockStorageList_Initialize();
+
     // initialize block storage devices
     BlockStorage_AddDevices();
+
+    BlockStorageList_InitializeDevices();
 
     // clear managed heap region
     unsigned char* heapStart = NULL;
@@ -49,6 +64,9 @@ void nanoHAL_Initialize()
 
 void nanoHAL_Uninitialize()
 {
+    // release the global mutex, just in case it's locked somewhere
+    //chMtxUnlock(&interpreterGlobalMutex);
+
     // TODO check for s_rebootHandlers
     // for(int i = 0; i< ARRAYSIZE(s_rebootHandlers); i++)
     // {
@@ -61,6 +79,15 @@ void nanoHAL_Uninitialize()
     //         break;
     //     }
     // }   
+
+    SOCKETS_CloseConnections();
+
+  #if !defined(HAL_REDUCESIZE)
+    // TODO need to call this but it's preventing the debug session from starting
+    //Network_Uninitialize();
+  #endif
+
+    BlockStorageList_UnInitializeDevices();
 
     // need to be sure that all mutexes for drivers that use them are released
 #if (HAL_USE_SPI == TRUE)
@@ -132,9 +159,6 @@ void nanoHAL_Uninitialize()
 
 #endif
 
-    // TODO need to call this but it's preventing the debug session from starting
-    //Network_Uninitialize();
-
     Events_Uninitialize();
     
     HAL_CONTINUATION::Uninitialize();
@@ -160,27 +184,29 @@ bool SystemState_QueryNoLock(SYSTEM_STATE_type state)
 
 void SystemState_Set(SYSTEM_STATE_type state)
 {
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
 
     SystemState_SetNoLock(state);
 
-    GLOBAL_UNLOCK(irq);
+    GLOBAL_UNLOCK();
 }
 
 void SystemState_Clear(SYSTEM_STATE_type state)
 {
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
 
     SystemState_ClearNoLock(state );
 
-    GLOBAL_UNLOCK(irq);
+    GLOBAL_UNLOCK();
 }
 
 bool SystemState_Query(SYSTEM_STATE_type state)
 {
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
 
-    return SystemState_QueryNoLock(state);
+    bool systemStateCopy = SystemState_QueryNoLock(state);
+    
+    GLOBAL_UNLOCK();
 
-    GLOBAL_UNLOCK(irq);
+    return systemStateCopy;
 }

@@ -5,7 +5,16 @@
 
 #include "nf_native_system_math.h"
 
-
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// TODO expose this build option to remove uncommonly used math functions //
+////////////////////////////////////////////////////////////////////////////
+#ifndef NANOCLR_LIGHT_MATH
+#define NANOCLR_LIGHT_MATH  FALSE
+#endif
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+ 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     #include "nanoPAL_NativeDouble.h"
 
@@ -129,462 +138,604 @@
 
     HRESULT Library_nf_native_system_math_System_Math::Acos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = acos( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-    
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = acos( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+      
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Acos___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = acosf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = acosf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();        
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();        
+
+        #endif
 
       #endif
     }    
 
     HRESULT Library_nf_native_system_math_System_Math::Asin___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = asin( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+        
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = asin( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Asin___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = asinf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = asinf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Atan___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = atan( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = atan( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Atan___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = atanf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = atanf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Atan2___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double x = stack.Arg0().NumericByRefConst().r8;
-        double y = stack.Arg1().NumericByRefConst().r8;
-        double res = atan2( x, y );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double x = stack.Arg0().NumericByRefConst().r8;
+          double y = stack.Arg1().NumericByRefConst().r8;
+          double res = atan2( x, y );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Atan2___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float x = stack.Arg0().NumericByRefConst().r4;
-        float y = stack.Arg1().NumericByRefConst().r4;
-        float res = atan2f( x, y );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float x = stack.Arg0().NumericByRefConst().r4;
+          float y = stack.Arg1().NumericByRefConst().r4;
+          float res = atan2f( x, y );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Ceiling___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = ceil( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
-      #endif
+      #else
 
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = ceil( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
+      #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Ceiling___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = ceilf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = ceilf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
-
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Cos___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = cos( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = cos( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Cos___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = cosf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = cosf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Cosh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = cosh( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-     
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = cosh( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+      
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Cosh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = coshf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = coshf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::IEEERemainder___STATIC__R8__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double x = stack.Arg0().NumericByRefConst().r8;
-        double y = stack.Arg1().NumericByRefConst().r8;
-        double res = remainder(x, y);
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
-      #endif        
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double x = stack.Arg0().NumericByRefConst().r8;
+          double y = stack.Arg1().NumericByRefConst().r8;
+          double res = remainder(x, y);
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
+      #endif      
     }
 
     HRESULT Library_nf_native_system_math_System_Math::IEEERemainder___STATIC__R4__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float x = stack.Arg0().NumericByRefConst().r4;
-        float y = stack.Arg1().NumericByRefConst().r4;
-        float res = remainderf(x, y);
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float x = stack.Arg0().NumericByRefConst().r4;
+          float y = stack.Arg1().NumericByRefConst().r4;
+          float res = remainderf(x, y);
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
 
-      #endif        
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
+
+      #endif      
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Exp___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = exp( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();;
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = exp( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();;
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Exp___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = expf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = expf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();;
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();;
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Floor___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = floor( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = floor( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Floor___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = floorf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = floorf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Log___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = log( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = log( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Log___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = logf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = logf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Log10___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = log10( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = log10( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Log10___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = log10f( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = log10f( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
@@ -732,190 +883,250 @@
 
     HRESULT Library_nf_native_system_math_System_Math::Sin___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = sin( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = sin( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Sin___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = sinf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = sinf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Sinh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = sinh( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = sinh( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Sinh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = sinhf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = sinhf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Sqrt___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = sqrt( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = sqrt( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Sqrt___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = sqrtf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = sqrtf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Tan___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = tan( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-     
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = tan( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+      
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Tan___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = tanf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = tanf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Tanh___STATIC__R8__R8( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
-
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
-
-        double d = stack.Arg0().NumericByRefConst().r8;
-        double res = tanh( d );
-
-        stack.SetResult_R8( res );
-
-        NANOCLR_NOCLEANUP_NOLABEL();
-
-      #else
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
+      #else
+
+        #if (DP_FLOATINGPOINT == TRUE)
+
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
+
+          double d = stack.Arg0().NumericByRefConst().r8;
+          double res = tanh( d );
+
+          stack.SetResult_R8( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #else
+          return stack.NotImplementedStub();
+        #endif
+
       #endif
     }
 
     HRESULT Library_nf_native_system_math_System_Math::Tanh___STATIC__R4__R4( CLR_RT_StackFrame& stack )
     {
-      #if (DP_FLOATINGPOINT == TRUE)
+      #if (NANOCLR_LIGHT_MATH == TRUE)
         return stack.NotImplementedStub();
       #else
 
-        NATIVE_PROFILE_CLR_CORE();
-        NANOCLR_HEADER();
+        #if (DP_FLOATINGPOINT == TRUE)
+          return stack.NotImplementedStub();
+        #else
 
-        float d = stack.Arg0().NumericByRefConst().r4;
-        float res = tanhf( d );
+          NATIVE_PROFILE_CLR_CORE();
+          NANOCLR_HEADER();
 
-        stack.SetResult_R4( res );
+          float d = stack.Arg0().NumericByRefConst().r4;
+          float res = tanhf( d );
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+          stack.SetResult_R4( res );
+
+          NANOCLR_NOCLEANUP_NOLABEL();
+
+        #endif
 
       #endif
     }
@@ -956,8 +1167,7 @@
 
         NANOCLR_NOCLEANUP_NOLABEL();
 
-      #endif 
-
+      #endif
     }
 
 #else

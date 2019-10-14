@@ -12,24 +12,17 @@
 
 bool ssl_uninitialize_internal()
 {
-    bool result = TRUE;
+    bool result = true;
     
-    for(uint32_t i = 0; i<ARRAYSIZE(g_SSL_Driver.m_sslContextArray); i++)
+    for(uint32_t i = 0; i<ARRAYSIZE(g_SSL_Driver.ContextArray); i++)
     {
-        if(g_SSL_Driver.m_sslContextArray[i].SslContext != NULL)
+        if(g_SSL_Driver.ContextArray[i].Context != NULL)
         {
             ssl_exit_context_internal( i );
         }
     }
       
-    g_SSL_Driver.m_sslContextCount = 0;
-
-// TODO - FIXME
- //   CRYPTO_cleanup_all_ex_data();
- //   EVP_cleanup();
-
-    // TODO if and when implementing store certificate 
-    //ssl_x509_store_ctx_idx = -1;
+    g_SSL_Driver.ContextCount = 0;
 
     return result;
 }

@@ -5,23 +5,16 @@
 
 #include "nf_hardware_stm32_native.h"
 
-// copied from corlib_native_System_DateTime.cpp
-static CLR_INT64 s_UTCMask   = ULONGLONGCONSTANT(0x8000000000000000);
-
-
 // we are using always Alarm 0 (alarm A, if there are two alarms)
 #define ALARM_ID    0
-
-// for all these to work we need the RTC to be enabled 
-#if !defined(HAL_USE_RTC) 
-    #error "Need the RTC to be enabled. Please set CMake option NF_FEATURE_RTC to ON."
-#endif
 
 
 HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::Native_RTC_SetAlarm___STATIC__VOID__U1__U1__U1__U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
-    {
+
+      #if (HAL_USE_RTC == TRUE)
+
         RTCAlarm alarmTime;
 
         uint32_t value = 0;
@@ -65,19 +58,44 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::Nativ
 
         alarmTime.alrmr = alarmRegister;
 
-  #else
-    #error "Setting an alarm for this series in not supported. Care to look into it and submit a PR?"
-  #endif
+      #else
+        #error "Setting an alarm for this series in not supported. Care to look into it and submit a PR?"
+      #endif
+
+      #if defined(STM32F0XX) || defined(STM32F1XX) || defined(STM32F2XX) || \
+      defined(STM32F3XX) ||defined(STM32F4XX) || defined(STM32L0XX) || defined(STM32L1XX)
+        // clear PWR wake up Flag
+        PWR->CR |=  PWR_CSR_WUF;
+      #endif
+
+      #if defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX)
+
+        CLEAR_BIT(RTC->CR, RTC_CR_ALRAIE);
+        CLEAR_BIT(RTC->ISR, RTC_ISR_ALRAF);
+  
+      #endif 
 
         rtcSetAlarm(&RTCD1, ALARM_ID, &alarmTime);
 
-    }
-    NANOCLR_NOCLEANUP_NOLABEL();
+        NANOCLR_NOCLEANUP_NOLABEL();
+
+      #else
+
+        (void)stack;
+
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+        NANOCLR_NOCLEANUP();
+
+      #endif // (HAL_USE_RTC == TRUE)
+
 }
 
 HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAlarm___STATIC__mscorlibSystemDateTime( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+
+  #if (HAL_USE_RTC == TRUE)
 
     RTCAlarm alarmValue;
     RTCDateTime currentTime;
@@ -167,7 +185,18 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAl
     ref.ClearData();
 
     CLR_INT64* pRes = (CLR_INT64*)&ref.NumericByRef().s8;
-    *pRes = HAL_Time_ConvertFromSystemTime( &alarmTime ) | s_UTCMask;
-
+    *pRes = HAL_Time_ConvertFromSystemTime( &alarmTime );
+  
     NANOCLR_NOCLEANUP_NOLABEL();
+
+  #else
+
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+    NANOCLR_NOCLEANUP();
+
+  #endif // (HAL_USE_RTC == TRUE)
+
 }

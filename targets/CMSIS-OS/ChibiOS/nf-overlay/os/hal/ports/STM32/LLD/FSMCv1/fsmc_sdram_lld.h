@@ -7,6 +7,8 @@
 #ifndef HAL_FMC_SDRAM_H_
 #define HAL_FMC_SDRAM_H_
 
+#include <hal_nf_community.h>
+
 #if (defined(STM32F427xx) || defined(STM32F437xx) || \
      defined(STM32F429xx) || defined(STM32F439xx) || \
 	 defined(STM32F469xx) || defined(STM32F479xx) || \

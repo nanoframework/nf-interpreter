@@ -9,14 +9,15 @@
 //2kB block
 const BlockRange BlockRange1[] = 
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,    0, 3    },            // 0x08000000 nanoBooter          
-    { BlockRange_BLOCKTYPE_CODE      ,    4, 82   },            // 0x08002000 nanoCLR    
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   83, 127  }             // 0x08029800 deployment  
+    { BlockRange_BLOCKTYPE_BOOTSTRAP ,    0, 4    },            // 0x08000000 nanoBooter          
+    { BlockRange_BLOCKTYPE_CODE      ,    5, 83   },            // 0x08002800 nanoCLR    
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   84, 127  }             // 0x0802A000 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 
 {
     {
+        (0),                                // no attributes for this region
         0x08000000,                         // start address for block region
         128,                                // total number of blocks in this region
         0x800,                              // total number of bytes per block
@@ -27,7 +28,8 @@ const BlockRegionInfo BlockRegions[] =
 
 const DeviceBlockInfo Device_BlockInfo =
 {
-    (MediaAttribute_SupportsXIP),
+    (MediaAttribute_SupportsXIP),           // STM32 flash memory is XIP
+    2,                                      // UINT32 BytesPerSector
     ARRAYSIZE_CONST_EXPR(BlockRegions),     // UINT32 NumRegions;
     (BlockRegionInfo*)BlockRegions,         // const BlockRegionInfo* pRegions;
 };

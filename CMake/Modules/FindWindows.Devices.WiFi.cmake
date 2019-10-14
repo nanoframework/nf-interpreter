@@ -8,11 +8,12 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 
 
 # set include directories
-list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
-list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
-list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
-list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
+list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
+list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
+list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
+list(APPEND Windows.Devices.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/Windows.Devices.Wifi)
 
 
 # source files
@@ -26,7 +27,8 @@ foreach(SRC_FILE ${Windows.Devices.Wifi_SRCS})
     set(Windows.Devices.Wifi_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(Windows.Devices.Wifi_SRC_FILE ${SRC_FILE}
         PATHS 
-            "${BASE_PATH_FOR_THIS_MODULE}"
+            ${BASE_PATH_FOR_THIS_MODULE}
+            ${PROJECT_SOURCE_DIR}/src/Windows.Devices.Wifi
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

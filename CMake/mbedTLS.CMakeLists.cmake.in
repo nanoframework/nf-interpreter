@@ -1,10 +1,13 @@
-cmake_minimum_required(VERSION 2.8.2)
+#
+# Copyright (c) 2018 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
 
 project(mbedTLS-download NONE)
 
 include(ExternalProject)
 
-# download mbedTLS source from official SVN repo
+# download mbedTLS source from official GitHub repo
 ExternalProject_Add( 
     mbedTLS
     PREFIX mbedTLS

@@ -7,6 +7,7 @@
 #include <cmsis_os.h>
 #include <nanoHAL_v2.h>
 #include <hal.h>
+#include <hal_nf_community.h>
 #include <WireProtocol.h>
 #include <Debugger.h>
 #include <WireProtocol_MonitorCommands.h>
@@ -21,9 +22,11 @@ int NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
     releaseInfo->version.usMajor = VERSION_MAJOR;
     releaseInfo->version.usMinor = VERSION_MINOR;
     releaseInfo->version.usBuild = VERSION_BUILD;
-    releaseInfo->version.usRevision = 0;
+    releaseInfo->version.usRevision = VERSION_REVISION;
 
-    memcpy(&releaseInfo->infoString, OEMSYSTEMINFOSTRING, sizeof(releaseInfo->infoString));
+    memcpy(&releaseInfo->InfoString, OEMSYSTEMINFOSTRING, ARRAYSIZE(OEMSYSTEMINFOSTRING));
+    memcpy(&releaseInfo->TargetName, TARGETNAMESTRING, ARRAYSIZE(TARGETNAMESTRING));
+    memcpy(&releaseInfo->PlatformName, PLATFORMNAMESTRING, ARRAYSIZE(PLATFORMNAMESTRING));
 
     return true;
 }
@@ -256,8 +259,9 @@ int Monitor_UpdateConfiguration(WP_Message* message)
     {
         case DeviceConfigurationOption_Network:
         case DeviceConfigurationOption_Wireless80211Network:
+        case DeviceConfigurationOption_X509CaRootBundle:
         case DeviceConfigurationOption_All:
-            if(ConfigurationManager_StoreConfigurationBlock(cmd->Data, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex, cmd->Length) == true)
+            if(ConfigurationManager_StoreConfigurationBlock(cmd->Data, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex, cmd->Length, cmd->Offset) == true)
             {
                 cmdReply.ErrorCode = 0;
                 success = true;

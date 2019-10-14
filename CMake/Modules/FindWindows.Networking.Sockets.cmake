@@ -9,11 +9,12 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.N
 
 
 # set include directories
-list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
-list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
-list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
-list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
+list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
+list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
+list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
+list(APPEND Windows.Networking.Sockets_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/Windows.Networking.Sockets)
 
 
 # source files
@@ -29,7 +30,8 @@ foreach(SRC_FILE ${Windows.Networking.Sockets_SRCS})
     set(Windows.Networking.Sockets_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(Windows.Networking.Sockets_SRC_FILE ${SRC_FILE}
         PATHS 
-            "${BASE_PATH_FOR_THIS_MODULE}"
+            ${BASE_PATH_FOR_THIS_MODULE}
+            ${PROJECT_SOURCE_DIR}/src/Windows.Networking.Sockets
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

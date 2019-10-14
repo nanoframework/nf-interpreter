@@ -3,9 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "hal.h"
-
-#if (HAL_USE_COMMUNITY == TRUE) 
+#include <hal.h>
+#include <hal_nf_community.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver local definitions.                                                 //
@@ -30,6 +29,18 @@
 // HAL initialization (community part).
 void halCommunityInit(void) {
 
+///////////////////////////////
+// from ChibiOS-Contrib repo //
+///////////////////////////////
+
+#if HAL_USE_USBH || defined(__DOXYGEN__)
+  usbhInit();
+#endif
+
+///////////////////////////
+// nanoFramework overlay //
+///////////////////////////
+
 #if (HAL_USE_STM32_FLASH == TRUE)
   stm32FlashInit();
 #endif
@@ -50,6 +61,8 @@ void halCommunityInit(void) {
   oneWireInit();
 #endif
 
-}
+#if (HAL_USE_STM32_QSPI == TRUE)
+  qspiInit();
+#endif
 
-#endif // HAL_USE_COMMUNITY
+}

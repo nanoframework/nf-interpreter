@@ -8,18 +8,18 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 
 
 # set include directories
-list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
-list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
-list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
-list(APPEND Windows.Devices.I2c_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND Windows.Devices.I2c_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
+list(APPEND Windows.Devices.I2c_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
+list(APPEND Windows.Devices.I2c_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
+list(APPEND Windows.Devices.I2c_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND Windows.Devices.I2c_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
+list(APPEND Windows.Devices.I2c_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/Windows.Devices.I2c)
 
 
 # source files
 set(Windows.Devices.I2c_SRCS
 
     win_dev_i2c_native.cpp
-    win_dev_i2c_native.h
     win_dev_i2c_native_Windows_Devices_I2C_I2cDevice.cpp
     win_dev_i2c_native_Windows_Devices_I2c_I2cController.cpp
 
@@ -30,8 +30,9 @@ foreach(SRC_FILE ${Windows.Devices.I2c_SRCS})
     set(Windows.Devices.I2c_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(Windows.Devices.I2c_SRC_FILE ${SRC_FILE}
         PATHS 
-            "${BASE_PATH_FOR_THIS_MODULE}"
-            "${TARGET_BASE_LOCATION}"
+            ${BASE_PATH_FOR_THIS_MODULE}
+            ${TARGET_BASE_LOCATION}
+            ${PROJECT_SOURCE_DIR}/src/Windows.Devices.I2c
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

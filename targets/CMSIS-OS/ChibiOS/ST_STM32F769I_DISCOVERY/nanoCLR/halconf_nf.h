@@ -6,11 +6,6 @@
 #ifndef _HALCONF_NF_H_
 #define _HALCONF_NF_H_ 1
 
-// Enables the ChibiOS community overlay.
-#if !defined(HAL_USE_COMMUNITY) 
-#define HAL_USE_COMMUNITY           TRUE
-#endif
-
 // enables STM32 Flash driver
 #if !defined(HAL_USE_STM32_FLASH) 
 #define HAL_USE_STM32_FLASH         TRUE
@@ -21,14 +16,14 @@
 #define HAL_USE_FSMC                TRUE
 #endif
 
-// enables STM32 One Wire driver
-#if !defined(HAL_USE_STM32_ONEWIRE) 
-#define HAL_USE_STM32_ONEWIRE       TRUE
-#endif
-
 // enables STM32 Can driver
 #if !defined(HAL_USE_STM32_CAN) 
-#define HAL_USE_STM32_CAN       TRUE
+#define HAL_USE_STM32_CAN           TRUE
+#endif
+
+// enables STM32 QSPI driver
+#if !defined(HAL_USE_STM32_QSPI)
+#define HAL_USE_STM32_QSPI          FALSE
 #endif
 
 #endif // _HALCONF_NF_H_

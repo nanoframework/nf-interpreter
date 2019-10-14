@@ -7,17 +7,13 @@
 #include <hal.h>
 #include <cmsis_os.h>
 #include <targetPAL.h>
-#include "win_dev_pwm_native.h"
+#include "win_dev_pwm_native_target.h"
 #include <swo.h>
 
-
-int Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetChannel (int pin, int timerId)
+int GetChannel (int pin, int timerId)
 {
-    (void)pin;
-    (void)timerId;
-
-    int channel = 0;
-#if defined(STM32F427xx) || defined(STM32F429xx)  || defined(STM32F469xx)  || defined(STM32F479xx)
+    int channel = -1;
+#if defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F439xx) || defined(STM32F469xx)  || defined(STM32F479xx)
     switch (timerId)
     {
         case 1 :
@@ -178,7 +174,7 @@ int Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetChannel (int pin, 
             break;
     }
 #endif
-#if defined(STM32F411xx) || defined(STM32F401xx)
+#if defined(STM32F411xx) || defined(STM32F412xx) || defined(STM32F401xx)
 switch (timerId)
     {
         case 1 :
@@ -667,7 +663,7 @@ switch (timerId)
             break;
     }
 #endif
-#if defined(STM32F407xx)
+#if defined(STM32F407xx) || defined(STM32F405xx)
     switch (timerId)
     {
         case 1 :
@@ -818,14 +814,14 @@ switch (timerId)
     return channel;
 }
 
-int Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetAlternateFunction (int timerId)
+int GetAlternateFunction (int timerId)
 {
     if (timerId >= 8) return 3;
     if (timerId >= 3) return 2;
     return 1;
 }
 
-PWMDriver * Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::GetDriver(int timerId)
+PWMDriver * GetDriver(int timerId)
 {
     PWMDriver * _drv = NULL;
 
@@ -881,8 +877,15 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeSetActiveDu
         // Gets the PWM driver associated with the requested timer
         _drv = GetDriver(timerId);
 
+        // get channel for this pin and timer
+        int channelId = GetChannel(pinNumber, timerId);
+        if(channelId < 0)
+        {
+            // no channel available for combination pinNumber/timerId provided
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
         // Enables the channel associated with the selected pin on that timer
-        pwmEnableChannel(_drv, GetChannel(pinNumber, timerId),PWM_PERCENTAGE_TO_WIDTH(_drv, dutyCycle));
+        pwmEnableChannel(_drv, channelId ,PWM_PERCENTAGE_TO_WIDTH(_drv, dutyCycle));
     }
     NANOCLR_NOCLEANUP();
 }
@@ -913,9 +916,16 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeStart___VOI
         // Gets the PWM driver associated with the requested timer
         _drv = GetDriver(timerId);
 
+        // get channel for this pin and timer
+        int channelId = GetChannel(pinNumber, timerId);
+        if(channelId < 0)
+        {
+            // no channel available for combination pinNumber/timerId provided
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
         // Sets the pin to the correct pwm alternate functin and enables the associated channel
         palSetPadMode(GPIO_PORT(pinNumber), pinNumber % 16, PAL_MODE_ALTERNATE(GetAlternateFunction(timerId)));
-        pwmEnableChannel(_drv, GetChannel(pinNumber, timerId),PWM_PERCENTAGE_TO_WIDTH(_drv, dutyCycle));
+        pwmEnableChannel(_drv, channelId,PWM_PERCENTAGE_TO_WIDTH(_drv, dutyCycle));
     }
 
     NANOCLR_NOCLEANUP();
@@ -932,8 +942,15 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeStop___VOID
         int timerId = (int)(pThis[ FIELD___pwmTimer ].NumericByRef().u4);
         int pinNumber = (int)(pThis[ FIELD___pinNumber ].NumericByRef().u4);
         
+        // get channel for this pin and timer
+        int channelId = GetChannel(pinNumber, timerId);
+        if(channelId < 0)
+        {
+            // no channel available for combination pinNumber/timerId provided
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
         // Stops pwm output on the channel associated with the selected pin
-        pwmDisableChannel(GetDriver(timerId), GetChannel(pinNumber, timerId));
+        pwmDisableChannel(GetDriver(timerId), channelId);
     }
 
     NANOCLR_NOCLEANUP();

@@ -8,11 +8,12 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 
 
 # set include directories
-list(APPEND Windows.Devices.Spi_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
-list(APPEND Windows.Devices.Spi_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
-list(APPEND Windows.Devices.Spi_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND Windows.Devices.Spi_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
-list(APPEND Windows.Devices.Spi_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
+list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
+list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
+list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
+list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/Windows.Devices.Spi)
 
 
 # source files
@@ -30,8 +31,9 @@ foreach(SRC_FILE ${Windows.Devices.Spi_SRCS})
     set(Windows.Devices.Spi_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(Windows.Devices.Spi_SRC_FILE ${SRC_FILE}
         PATHS 
-            "${BASE_PATH_FOR_THIS_MODULE}"
-            "${TARGET_BASE_LOCATION}"
+            ${BASE_PATH_FOR_THIS_MODULE}
+            ${TARGET_BASE_LOCATION}
+            ${PROJECT_SOURCE_DIR}/src/Windows.Devices.Spi
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

@@ -8,18 +8,6 @@
 
 #include "LWIP_sockets.h"
 
-// Make sure the ESP32 version of FD_xx macro are used
-// as the socket number is offset
-// FIXME - The problem is these MACROs are also defined in the newlib sys/types.h
-#ifdef PLATFORM_ESP32
-#undef FD_SET
-#undef FD_CLR
-#undef FD_ISSET
-#undef FD_ZERO
-#undef _types_fd_set
-#undef fd_set
-#endif
-
 extern "C"
 {
 #include "lwip\init.h"
@@ -71,21 +59,21 @@ void LWIP_SOCKETS_Driver::PostAddressChanged(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AddressChanged, 0);
+	Network_PostEvent(NetworkEventType_AddressChanged, 0, 0);
 }
 
 void LWIP_SOCKETS_Driver::PostAvailabilityOn(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkAvailable);
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkAvailable, 0);
 }
 
 void LWIP_SOCKETS_Driver::PostAvailabilityOff(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkNOTAvailable);
+	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkNOTAvailable, 0);
 }
 
 #if LWIP_NETIF_LINK_CALLBACK == 1
@@ -625,7 +613,14 @@ int LWIP_SOCKETS_Driver::Select( int nfds, SOCK_fd_set* readfds, SOCK_fd_set* wr
     max_sd = LWIP_SOCKET_OFFSET + MEMP_NUM_NETCONN;
     #endif
 
-    ret = lwip_select(max_sd, pR, pW, pE, (struct timeval *)timeout);
+    // developer note: 
+    // our declaration of SOCK_timeval is dependent of "long" type which is platform dependent
+    // so it's not safe to cast it to "timeval"
+    timeval timeoutCopy;
+    timeoutCopy.tv_sec = timeout->tv_sec;
+    timeoutCopy.tv_usec = timeout->tv_usec;
+
+    ret = select(max_sd, pR, pW, pE, &timeoutCopy);
 
     MARSHAL_FDSET_TO_SOCK_FDSET(readfds  , pR);
     MARSHAL_FDSET_TO_SOCK_FDSET(writefds , pW);
@@ -1053,10 +1048,6 @@ int LWIP_SOCKETS_Driver::GetNativeSockOption (int optname)
         case SOCK_SOCKO_ACCEPTCONNECTION:
             nativeOptionName = SO_ACCEPTCONN;
             break;
-        case SOCK_SOCKO_TYPE:
-            nativeOptionName = SO_TYPE;
-            break;
-            
         case SOCK_SOCKO_USELOOPBACK:
             nativeOptionName = SO_USELOOPBACK;
             break;

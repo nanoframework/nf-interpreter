@@ -203,6 +203,15 @@ HRESULT CLR_RT_ExecutionEngine::DeleteInstance()
 
 void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
 {
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    // developer notes:
+    // Most of the following calls are just for pure ceremony and gracefully terminating stuff,
+    // cleaning collections and such.
+    // In particular the previous existing calls to Abort threads and ReleaseAllThreads is completely irrelevant 
+    // because the execution engine wasn't running anymore. Whatever code that is on those threads 
+    // there to be executed wouldn't never be executed anyways.
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+
     NATIVE_PROFILE_CLR_CORE();
     m_fShuttingDown = true;
 
@@ -225,15 +234,7 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_finalizersPending.DblLinkedList_PushToCache();
     m_finalizerThread = NULL;
     m_cctorThread = NULL;
-
     m_timerThread = NULL;
-
-    AbortAllThreads  ( m_threadsReady   );
-    AbortAllThreads  ( m_threadsWaiting );
-
-    ReleaseAllThreads( m_threadsReady   );
-    ReleaseAllThreads( m_threadsWaiting );
-    ReleaseAllThreads( m_threadsZombie  );
 
     g_CLR_RT_TypeSystem.TypeSystem_Cleanup();
     g_CLR_RT_EventCache.EventCache_Cleanup();
@@ -1274,7 +1275,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity( CLR_UINT32 powerLevel, CLR_U
 {
     NATIVE_PROFILE_CLR_CORE();
  
-    if(powerLevel != CLR_HW_Hardware::PowerLevel__Active)
+    if(powerLevel != PowerLevel__Active)
     {
         return WaitSystemEvents( powerLevel, events, timeout_ms );
     }
