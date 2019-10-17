@@ -1,9 +1,15 @@
-# no trigger config here, this is handled at Azure Pipelines interface
-
-  # waiting for feature to become available
-  # tags:
-  #   include:
-  #   - v/*
+trigger:
+  branches:
+    include:
+    - master
+    - develop
+    - release/*
+    - refs/tags/*
+  paths:
+    exclude:
+    - CHANGELOG.md
+    - /*.md
+    - .gitignore
 
 # no pr config, we want to trigger builds for all PRs on all branches
 
@@ -29,41 +35,90 @@ jobs:
   # get commint message
   - powershell: |
 
-      # get commit details, if this is a PR
-      if($env:Build_SourceBranch -like "refs/pull*")
+      if($env:StartReleaseCandidate -like "true")
       {
-        $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
-
-        if( ($commit.commit.author.name -eq "nfbot") -and (($commit.commit.message -like "*[version update]*") -or ($commit.commit.message -like "***NO_CI***")) )
-        {
-          echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"  
-        }
-        else
-        {
-          echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"  
-        }
+        # this is a release prep so NO build
+        echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
+        
+        Write-Host "Release preparation, skipping build."
       }
       else
       {
-        if($commit.commit.message -like "***NO_CI***")
+        # get commit details, if this is a PR
+        if($env:Build_SourceBranch -like "refs/pull*")
         {
-          echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"  
+          $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
+
+          if( ($commit.commit.author.name -eq "nfbot") -and (($commit.commit.message -like "*[version update]*") -or ($commit.commit.message -like "***NO_CI***")) )
+          {
+            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"  
+          }
+          else
+          {
+            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"  
+          }
         }
         else
         {
-          echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
+          if($commit.commit.message -like "***NO_CI***")
+          {
+            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"  
+          }
+          else
+          {
+            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
+          }
         }
       }
 
     name: BuildOptions
     displayName: Evaluate build options
 
+  - task: DotNetCoreCLI@2  
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install -g nbgv
+    condition: eq( variables['StartReleaseCandidate'], true )
+    displayName: Install NBGV tool
+
+  - powershell: |
+
+      # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+      # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+
+      cd "$env:Agent_TempDirectory" > $null
+
+      git init "$env:Agent_TempDirectory\repo"
+      cd repo > $null
+      git remote add origin "$env:Build_Repository_Uri"
+      git config --global gc.auto 0
+      git config --global user.name nfbot
+      git config --global user.email nanoframework@outlook.com
+      git config --global core.autocrlf true
+      git -c http.extraheader="AUTHORIZATION: $auth" fetch --progress origin
+      
+      git checkout develop
+
+      nbgv prepare-release
+  
+      # get commit message for the merge
+      $commitMessage = git log -1 --pretty=%B
+
+      # amend commit message to skip build
+      git commit --amend -m "$commitMessage" -m "***NO_CI***" > $null
+
+      # push all changes to github
+      git -c http.extraheader="AUTHORIZATION: $auth" push --all origin
+
+    condition: eq( variables['StartReleaseCandidate'], true )
+    displayName: NBGV prepare release
+
 #################
 # STM32
 - job: Build_STM32_targets
-  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  # not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
-  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
+  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
@@ -123,9 +178,7 @@ jobs:
 #################
 # ESP32 targets
 - job: Build_ESP32_targets
-  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  # condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
-  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
+  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
@@ -169,9 +222,7 @@ jobs:
 #################
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
-  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  # not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
-  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
+  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
@@ -208,9 +259,7 @@ jobs:
 #################
 # WIN32 
 - job: Build_WIN32_nanoCLR
-  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  # condition: not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
-  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
+  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
@@ -277,6 +326,38 @@ jobs:
         bundle exec github_changelog_generator --token $(GitHubToken)
     condition: not( or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) 
     displayName: Generate change log
+
+#######################
+# create or update GitHub release ON tags from release or master branches
+- job: Publish_Release
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  - Build_TI_SimpleLink_targets
+  - Build_WIN32_nanoCLR
+  - Generate_change_log
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  steps:
+  - task: GitHubReleasePublish@1
+    inputs:
+      githubEndpoint: 'nanoframework'
+      githubOwner: 'nanoframework'
+      githubRepositoryName: nf-interpreter
+      githubTag: v$(NBGV_Version)
+      githubReleaseTitle: 'nf Interpreter v$(NBGV_Version)'
+      githubTargetCommitsh: $(Build.SourceVersion)
+      githubReleaseDraft: false
+      githubReleasePrerelease: false
+      githubReuseDraftOnly: false
+      githubReuseRelease: true
+      githubEditRelease: false
+      githubDeleteEmptyTag: true
+      githubReleaseAsset:
+    condition: and( succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'), not(contains(variables['Build.SourceBranch'], 'preview') ), ne( variables['StartReleaseCandidate'], true ) )
+    displayName: Create/Update GitHub stable release
 
 ##################################
 # report build failure to Discord
