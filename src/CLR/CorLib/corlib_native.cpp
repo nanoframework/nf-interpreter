@@ -417,7 +417,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -904,7 +907,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x6AC9143D,
+    0x91CE6848,
     method_lookup,
-    { 100, 2, 2, 0 }
+    { 100, 2, 3, 0 }
 };
