@@ -38,7 +38,6 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo
     //--//
 
 };
-
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_Debug
 {
     NANOCLR_NATIVE_DECLARE(GC___STATIC__U4__BOOLEAN);
@@ -47,7 +46,6 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_Debug
     //--//
 
 };
-
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint
 {
     NANOCLR_NATIVE_DECLARE(Install___STATIC__VOID__I4__I4);
@@ -65,16 +63,6 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_Power
     //--//
 
 };
-
-struct Library_nf_rt_native_nanoFramework_Runtime_Native_ResourceUtility
-{
-    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__mscorlibSystemResourcesResourceManager__mscorlibSystemEnum);
-    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__mscorlibSystemResourcesResourceManager__mscorlibSystemEnum__I4__I4);
-
-    //--//
-
-};
-
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc
 {
     NANOCLR_NATIVE_DECLARE(Native_RTC_SetSystemTime___STATIC__BOOLEAN__I4__U1__U1__U1__U1__U1__U1);

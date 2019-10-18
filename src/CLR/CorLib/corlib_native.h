@@ -627,26 +627,6 @@ struct Library_corlib_native_System_Reflection_RuntimeMethodInfo
 
 };
 
-struct Library_corlib_native_System_Resources_ResourceManager
-{
-    static const int FIELD___resourceFileId = 1;
-    static const int FIELD___assembly = 2;
-    static const int FIELD___baseAssembly = 3;
-    static const int FIELD___baseName = 4;
-    static const int FIELD___cultureName = 5;
-    static const int FIELD___rmFallback = 6;
-
-    NANOCLR_NATIVE_DECLARE(GetObjectInternal___OBJECT__I2);
-    NANOCLR_NATIVE_DECLARE(GetObjectInternal___OBJECT__I2__I4__I4);
-    NANOCLR_NATIVE_DECLARE(FindResource___STATIC__I4__STRING__SystemReflectionAssembly);
-    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum);
-
-    //--//
-
-    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum__I4__I4);    
-
-};
-
 struct Library_corlib_native_System_Runtime_CompilerServices_AccessedThroughPropertyAttribute
 {
     static const int FIELD___propertyName = 1;
