@@ -69,6 +69,7 @@
           "MBEDTLS_SOURCE" :  "<path-to-mbedtls-source-mind-the-forward-slashes>",
           "API_nanoFramework.Devices.Can" : "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.Devices.OneWire" : "OFF-default-ON-to-add-this-API",
+          "API_nanoFramework.ResourceManager" : "OFF-default-ON-to-add-this-API",
           "API_System.Math" : "OFF-default-ON-to-add-this-API",
           "API_System.Net" : "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Adc" : "OFF-default-ON-to-add-this-API",

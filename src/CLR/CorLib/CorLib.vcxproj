@@ -59,7 +59,6 @@
     <ClCompile Include="corlib_native_System_Reflection_PropertyInfo.cpp" />
     <ClCompile Include="corlib_native_System_Reflection_RuntimeFieldInfo.cpp" />
     <ClCompile Include="corlib_native_System_Reflection_RuntimeMethodInfo.cpp" />
-    <ClCompile Include="corlib_native_System_Resources_ResourceManager.cpp" />
     <ClCompile Include="corlib_native_System_RuntimeType.cpp" />
     <ClCompile Include="corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp" />
     <ClCompile Include="corlib_native_System_Runtime_Remoting_RemotingServices.cpp" />
