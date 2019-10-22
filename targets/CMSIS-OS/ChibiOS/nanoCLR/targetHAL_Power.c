@@ -13,6 +13,7 @@
 
 #if (HAL_USE_FSMC == TRUE)
 #include <fsmc_sdram_lld.h>
+#include <fsmc_sram_lld.h>
 #endif
 
 uint32_t WakeupReasonStore;
@@ -46,10 +47,26 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
             // stop watchdog
             wdgStop(&WDGD1);
 
-          #if (HAL_USE_FSMC == TRUE)
-            // shutdown memory
-            fsmcSdramStop(&SDRAMD);
-          #endif
+            #if (HAL_USE_FSMC == TRUE)
+                // shutdown memory
+                #if (STM32_USE_FSMC_SDRAM == TRUE)
+				  fsmcSdramStop(&SDRAMD);
+			    #endif
+			    #if (STM32_USE_FSMC_SRAM == TRUE)
+				    #if (STM32_SRAM_USE_FSMC_SRAM1 == TRUE)
+					    fsmcSramStop(&SRAMD1);
+				    #endif
+				    #if (STM32_SRAM_USE_FSMC_SRAM2 == TRUE)
+					    fsmcSramStop(&SRAMD2);
+				    #endif
+				    #if (STM32_SRAM_USE_FSMC_SRAM3 == TRUE)
+					    fsmcSramStop(&SRAMD3);
+				    #endif
+				    #if (STM32_SRAM_USE_FSMC_SRAM4 == TRUE)
+					    fsmcSramStop(&SRAMD4);
+				    #endif
+			    #endif
+            #endif
 
             // gracefully shutdown everything
             nanoHAL_Uninitialize_C();
