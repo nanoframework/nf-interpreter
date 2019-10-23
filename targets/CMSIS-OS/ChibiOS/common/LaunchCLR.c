@@ -7,6 +7,7 @@
 #include <ch.h>
 #include <hal.h>
 #include <vectors.h>
+#include <target_common.h>
 
 void LaunchCLR(uint32_t address)
 {
@@ -34,6 +35,8 @@ void LaunchCLR(uint32_t address)
 
 bool CheckValidCLRImage(uint32_t address)
 {
+    uint32_t resetVectorAddress;
+
     // load nanoCLR vector table
     const vectors_t* nanoCLRVectorTable = (vectors_t*) address;
 
@@ -49,6 +52,32 @@ bool CheckValidCLRImage(uint32_t address)
     // 2nd check: the content pointed by the reset vector has to be 0xE002 
     // that's an assembly "b.n" (branch instruction) the very first one in the Reset_Handler function
     // see os\common\startup\ARMCMx\compilers\GCC\vectors.S
+
+
+    // for series that have ART Accelerator the handlers addresses stored in the vector table are for ITCM access 
+    // need to parsed them to reach the equivalent address in AXI access
+    #ifdef FLASHITCM_BASE
+    
+    // read address (ITCM)
+    resetVectorAddress = (uint32_t)((uint32_t*)nanoCLRVectorTable->reset_handler);
+    // parse it to get the address in the AXI range
+    resetVectorAddress -= FLASHITCM_BASE;
+    resetVectorAddress += FLASHAXI_BASE;
+
+    #else
+    
+    // "regular" address mapping
+    resetVectorAddress = (uint32_t)((uint32_t*)nanoCLRVectorTable->reset_handler);
+    
+    #endif
+
+    // sanity check for invalid address (out of flash range which causes a hard fault)
+    if( resetVectorAddress <= FLASH1_MEMORY_StartAddress ||
+        resetVectorAddress >= (FLASH1_MEMORY_StartAddress + FLASH1_MEMORY_Size) )
+    {
+        // check failed, doesn't seem to be a valid CLR image
+        return false;
+    }
 
     // the linker can place this anywhere on the address space because of optimizations so we better check where the reset pointer points to
     uint32_t opCodeAddress = (uint32_t)((uint32_t**)nanoCLRVectorTable->reset_handler);

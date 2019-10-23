@@ -413,6 +413,22 @@ option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking o
 
 #################################################################
 
+#############################################
+# handles inclusion of System.Reflection API
+#############################################
+
+# set default option for SNTP to ON
+option(NF_FEATURE_SUPPORT_REFLECTION "option to add support for System.Reflection API" ON)
+
+if(NF_FEATURE_SUPPORT_REFLECTION)
+    set(TARGET_NANOCLR_REFLECTION TRUE CACHE INTERNAL "enable support for System.Reflection API")
+    message(STATUS "Support for System.Reflection API enabled")
+else()
+    set(TARGET_NANOCLR_REFLECTION FALSE CACHE INTERNAL "DISABLE support for System.Reflection API")
+    message(STATUS "Support for System.Reflection API **IS NOT** enabled")
+endif()
+
+#################################################################
 
 #################################################################
 # manage HAL/PAL required for API namespaces
