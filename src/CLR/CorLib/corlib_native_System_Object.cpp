@@ -28,6 +28,8 @@ HRESULT Library_corlib_native_System_Object::GetHashCode___I4( CLR_RT_StackFrame
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
+#if (NANOCLR_REFLECTION == TRUE)
+
 HRESULT Library_corlib_native_System_Object::GetType___SystemType( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -65,6 +67,8 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType( CLR_RT_StackF
 
     NANOCLR_NOCLEANUP();
 }
+
+#endif // NANOCLR_REFLECTION
 
 HRESULT Library_corlib_native_System_Object::MemberwiseClone___OBJECT( CLR_RT_StackFrame& stack )
 {
