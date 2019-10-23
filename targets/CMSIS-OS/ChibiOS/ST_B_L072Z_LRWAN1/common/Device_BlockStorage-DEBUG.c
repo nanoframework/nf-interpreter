@@ -6,6 +6,13 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
+///////////////////////////////////////////////////////////////////
+// because of the way the VTOR works the address of the vectors
+// the RAM table must be correctly aligned with 256 byte boundary
+// failing to do so will bring all sorts of evil and frustration
+// so MAKE SURE to respect this when changing BLOCKTYPE_CODE address
+///////////////////////////////////////////////////////////////////
+
 // 128 bytes block
 const BlockRange BlockRange1[] = 
 {
