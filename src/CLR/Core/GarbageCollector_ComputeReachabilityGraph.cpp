@@ -99,7 +99,7 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks( CLR_RT_
                     if(stackNext->Next() != NULL)
                     {                        
                         COMPUTEREACHABILITY_SAVESTATE();
-                        stackList = stackNext;
+                        g_CLR_RT_GarbageCollector.m_markStack = stackNext;
                         COMPUTEREACHABILITY_LOADSTATE();
                     }
                     else

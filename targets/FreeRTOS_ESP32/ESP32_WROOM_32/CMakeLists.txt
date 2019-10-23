@@ -59,8 +59,9 @@ add_subdirectory("nanoCLR")
 # mbed TLS requires a config file
 if(USE_SECURITY_MBEDTLS_OPTION)
     # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+	file(TO_CMAKE_PATH "${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h" MBED_CONFILE)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${MBED_CONFILE}>\"")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${MBED_CONFILE}>\"")
 endif()
 
 # Build the networking components as a separate library
