@@ -5,9 +5,9 @@
 ###############################################################################################################################
 nvs,      data, nvs,     0x9000,   0x6000,
 phy_init, data, phy,     0xf000,   0x1000,
-# Factory area for NanoCLR - 1088KB
-factory,  0,    0,       0x10000,  0x110000,
+# Factory area for NanoCLR - 1536KB
+factory,  0,    0,       0x10000,  0x180000,
 # Deployment area for Managed code 1769K
-deploy,   data, 0x84,    0x120000, 0x1B0000, 
+deploy,   data, 0x84,    0x190000, 0x1B0000, 
 # Config data for Network, Wireless, certificates, user data  256K
-config,   data, spiffs,  0x2D0000, 0x40000, 
+config,   data, spiffs,  0x340000, 0x40000, 

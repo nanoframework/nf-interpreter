@@ -20,10 +20,6 @@
       "intelliSenseMode": "linux-gcc-arm",
       "variables": [
         {
-          "name": "VISUAL_STUDIO",
-          "value": "TRUE"
-        },
-        {
           "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}"
         },
@@ -231,13 +227,17 @@
       ],
       "environments": [
         {
-          "PATH": "C:\\Windows\\system32;${env.PATH}", // Work around for Ninja not finding Cmd.exe with add_custom_command
+          // Work around for Ninja not finding Cmd.exe with add_custom_command
+          "PATH": "C:\\Windows\\system32;C:\\Program Files\\Espressif\\ESP-IDF Tools\\mconf-idf;c:\\python27;${env.PATH}",
+
           // ESP32 paths set up in environment so we can use in variables
-          "ESP32_IDF_VERSION": "v3.1",
+          "ESP32_IDF_VERSION": "v3.3",
           "ESP32_TOOLS": "C:\\ESP32_TOOLS",
           "ESP32_IDF": "${env.ESP32_TOOLS}\\esp-idf-${env.ESP32_IDF_VERSION}",
           "ESP32_LIB": "${env.ESP32_TOOLS}\\libs-${env.ESP32_IDF_VERSION}",
-          "ESP32_MBEDTLS_SOURCE": "${env.ESP32_IDF}/Components/mbedtls/mbedtls"
+          "ESP32_MBEDTLS_SOURCE": "${env.ESP32_IDF}/Components/mbedtls/mbedtls",
+
+          "IDF_PATH": "${env.ESP32_IDF}"
         }
       ],
       "buildRoot": "${workspaceRoot}/Build\\${name}",
@@ -421,8 +421,8 @@
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.WiFi:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_Windows.Devices.Wifi:BOOL",
+          "value": "True"
         },
         {
           "name": "API_Windows.Networking.Sockets:BOOL", //OFF-default-ON-to-add-this-API
@@ -430,7 +430,7 @@
         },
         {
           "name": "API_Windows.Storage:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "API_Hardware.Esp32:BOOL", //OFF-default-ON-to-add-this-API

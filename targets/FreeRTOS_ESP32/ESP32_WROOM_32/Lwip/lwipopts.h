@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without modification, 
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -11,21 +11,21 @@
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission. 
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
- * 
+ *
  * Author: Simon Goldschmidt
  *
  */
@@ -43,7 +43,11 @@
 #include "esp_task.h"
 #include "esp_system.h"
 #include "sdkconfig.h"
+
+#include "netif/dhcp_state.h"
+
 #include <nf_lwipopts_sntp.h>
+#include <sys/errno.h> 
 
 /* Enable all Espressif-only options */
 
@@ -221,6 +225,19 @@
  */
 #define DHCP_DOES_ARP_CHECK             CONFIG_LWIP_DHCP_DOES_ARP_CHECK
 
+
+/**
+ * CONFIG_LWIP_DHCP_RESTORE_LAST_IP==1: Last valid IP address obtained from DHCP server
+ * is restored after reset/power-up.
+ */
+#if CONFIG_LWIP_DHCP_RESTORE_LAST_IP
+
+#define LWIP_DHCP_IP_ADDR_RESTORE()     dhcp_ip_addr_restore(netif)
+#define LWIP_DHCP_IP_ADDR_STORE()       dhcp_ip_addr_store(netif)
+#define LWIP_DHCP_IP_ADDR_ERASE()       dhcp_ip_addr_erase(esp_netif[tcpip_if])
+
+#endif
+
 /*
    ------------------------------------
    ---------- AUTOIP options ----------
@@ -302,7 +319,7 @@
  * scenario happens: 192.168.0.2 -> 0.0.0.0 -> 192.168.0.2 or 192.168.0.2 -> 0.0.0.0
  */
 
-#define ESP_TCP_KEEP_CONNECTION_WHEN_IP_CHANGES  CONFIG_ESP_TCP_KEEP_CONNECTION_WHEN_IP_CHANGES 
+#define ESP_TCP_KEEP_CONNECTION_WHEN_IP_CHANGES  CONFIG_ESP_TCP_KEEP_CONNECTION_WHEN_IP_CHANGES
 /*
  *     LWIP_EVENT_API==1: The user defines lwip_tcp_event() to receive all
  *         events (accept, sent, etc) that happen in the system.
@@ -347,6 +364,19 @@
 #endif
 #ifndef TCP_OVERSIZE
 #error "One of CONFIG_TCP_OVERSIZE_xxx options should be set by sdkconfig"
+#endif
+
+/**
+ * LWIP_WND_SCALE and TCP_RCV_SCALE:
+ * Set LWIP_WND_SCALE to 1 to enable window scaling.
+ * Set TCP_RCV_SCALE to the desired scaling factor (shift count in the
+ * range of [0..14]).
+ * When LWIP_WND_SCALE is enabled but TCP_RCV_SCALE is 0, we can use a large
+ * send window while having a small receive window only.
+ */
+#ifdef CONFIG_LWIP_WND_SCALE
+#define LWIP_WND_SCALE                  1
+#define TCP_RCV_SCALE                   CONFIG_TCP_RCV_SCALE
 #endif
 
 /*
@@ -505,8 +535,8 @@
 #define LWIP_SO_RCVTIMEO                1
 
 /**
- * LWIP_SO_LINGER==1: Enable linger option for sockets/netconns 
- */
+  * LWIP_SO_LINGER==1: Enable linger option for sockets/netconns
+  */
 #define LWIP_SO_LINGER                  1
 
 /**
@@ -566,6 +596,11 @@
 #define PPP_SUPPORT                     CONFIG_PPP_SUPPORT
 
 #if PPP_SUPPORT
+
+/**
+ * PPP_NOTIFY_PHASE==1: Support PPP notify phase.
+ */
+#define PPP_NOTIFY_PHASE                CONFIG_PPP_NOTIFY_PHASE_SUPPORT
 
 /**
  * PAP_SUPPORT==1: Support PAP.
@@ -632,7 +667,6 @@
    ---------------------------------------
 */
 #define LWIP_HOOK_IP4_ROUTE_SRC         ip4_route_src_hook
-
 /*
    ---------------------------------------
    ---------- Debugging options ----------
@@ -726,7 +760,7 @@
 
 #define ESP_LWIP                        1
 #define ESP_LWIP_ARP                    1
-#define ESP_PER_SOC_TCP_WND             1
+#define ESP_PER_SOC_TCP_WND             0
 #define ESP_THREAD_SAFE                 1
 #define ESP_THREAD_SAFE_DEBUG           LWIP_DBG_OFF
 #define ESP_DHCP                        1
@@ -741,18 +775,17 @@
 #define ESP_STATS_DROP                  CONFIG_LWIP_STATS
 #define ESP_STATS_TCP                   0
 #define ESP_DHCP_TIMER                  1
+#define ESP_DHCPS_TIMER                 1
 #define ESP_LWIP_LOGI(...)              ESP_LOGI("lwip", __VA_ARGS__)
 #define ESP_PING                        1
 #define ESP_HAS_SELECT                  1
+#define ESP_AUTO_RECV                   1
+#define ESP_GRATUITOUS_ARP              CONFIG_ESP_GRATUITOUS_ARP
 
-#if CONFIG_LWIP_IRAM_OPTIMIZATION
-#define ESP_IRAM_ATTR                   IRAM_ATTR
-#else
-#define ESP_IRAM_ATTR                   
+#ifdef ESP_IRAM_ATTR
+#undef ESP_IRAM_ATTR
 #endif
-
-#define TCP_WND_DEFAULT                 CONFIG_TCP_WND_DEFAULT
-#define TCP_SND_BUF_DEFAULT             CONFIG_TCP_SND_BUF_DEFAULT
+#define ESP_IRAM_ATTR
 
 #if ESP_PERF
 #define DBG_PERF_PATH_SET(dir, point)
@@ -774,13 +807,22 @@ enum {
 };
 
 #else
-#define DBG_PERF_PATH_SET(dir, point)   
+#define DBG_PERF_PATH_SET(dir, point)
 #define DBG_PERF_FILTER_LEN             1000
 #endif
 
+#define TCP_SND_BUF                     CONFIG_TCP_SND_BUF_DEFAULT
+#define TCP_WND                         CONFIG_TCP_WND_DEFAULT
+
 #if ESP_PER_SOC_TCP_WND
+#define TCP_WND_DEFAULT                 CONFIG_TCP_WND_DEFAULT
+#define TCP_SND_BUF_DEFAULT             CONFIG_TCP_SND_BUF_DEFAULT
 #define TCP_WND(pcb)                    (pcb->per_soc_tcp_wnd)
 #define TCP_SND_BUF(pcb)                (pcb->per_soc_tcp_snd_buf)
+#define TCP_SND_QUEUELEN(pcb)           ((4 * (TCP_SND_BUF((pcb))) + (TCP_MSS - 1))/(TCP_MSS))
+#define TCP_SNDLOWAT(pcb)               LWIP_MIN(LWIP_MAX(((TCP_SND_BUF((pcb)))/2), (2 * TCP_MSS) + 1), (TCP_SND_BUF((pcb))) - 1)
+#define TCP_SNDQUEUELOWAT(pcb)          LWIP_MAX(((TCP_SND_QUEUELEN((pcb)))/2), 5)
+#define TCP_WND_UPDATE_THRESHOLD(pcb)   LWIP_MIN((TCP_WND((pcb)) / 4), (TCP_MSS * 4))
 #endif
 
 /**

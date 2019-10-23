@@ -14,11 +14,6 @@
       "intelliSenseMode": "linux-gcc-arm",
       "variables": [
         {
-          "name": "VISUAL_STUDIO",
-          "value": "TRUE",
-          "type": "STRING"
-        },
-        {
           "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}",
           "type": "PATH"
@@ -268,11 +263,6 @@
       "ctestCommandArgs": "",
       "intelliSenseMode": "linux-gcc-arm",
       "variables": [
-        {
-          "name": "VISUAL_STUDIO",
-          "value": "TRUE",
-          "type": "STRING"
-        },
         {
           "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}",
