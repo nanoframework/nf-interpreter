@@ -52,6 +52,7 @@
             "NF_FEATURE_DEBUGGER": "ON",
             "NF_FEATURE_RTC": "ON",
             "NF_FEATURE_USE_APPDOMAINS": "OFF",
+            "NF_FEATURE_SUPPORT_REFLECTION" : "ON",
             "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
             "NF_FEATURE_HAS_SDCARD": "ON",
             "API_System.Net": "ON",
