@@ -6,19 +6,11 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
-///////////////////////////////////////////////////////////////////
-// because of the way the VTOR works the address of the vectors
-// the RAM table must be correctly aligned with 256 byte boundary
-// failing to do so will bring all sorts of evil and frustration
-// so MAKE SURE to respect this when changing BLOCKTYPE_CODE address
-///////////////////////////////////////////////////////////////////
-
 // 128 bytes block
 const BlockRange BlockRange1[] = 
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0    , 69   },        // 0x08000000 nanoBooter          
-    { BlockRange_BLOCKTYPE_CODE      ,   70   , 1055 },        // 0x08002300 nanoCLR
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1056 , 1535 }         // 0x08021000 deployment  
+    { BlockRange_BLOCKTYPE_CODE      ,   0    , 986  },        // 0x08000000 nanoCLR
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   987  , 1535 }         // 0x0801ED80 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 

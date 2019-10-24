@@ -7,14 +7,11 @@ cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
 
 # add header files with common OS definitions and board definitions specific for each image
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in"
-                "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
 
-set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(BuildUtils REQUIRED)
@@ -55,36 +52,15 @@ endif()
 
 
 add_subdirectory("common")
-add_subdirectory("nanoBooter")
 add_subdirectory("nanoCLR")
 
-#######################
-# nanoBooter executable
+#############################################
+# nanoBooter executable                     #
+#                                           #
+# this target DOES NOT implement nanoBooter #
+#############################################
 
-add_executable(
-    # executables for project, project sources
-    ${NANOBOOTER_PROJECT_NAME}.elf
 
-    "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c"
-
-    # need to add configuration manager to allow get/store configuration blocks
-    "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c"
-
-    ${COMMON_PROJECT_SOURCES}
-    ${NANOBOOTER_PROJECT_SOURCES}
-
-    ${TARGET_CMSIS_COMMON_SOURCES}
-    ${TARGET_CMSIS_NANOBOOTER_SOURCES}
-    
-    ${TARGET_CHIBIOS_COMMON_SOURCES}
-    ${TARGET_CHIBIOS_NANOBOOTER_SOURCES}
-
-    ${CHIBIOS_SOURCES}
-    ${ChibiOSnfOverlay_SOURCES}
-
-    ${WireProtocol_SOURCES}
-)
 
 #######################
 # nanoCLR executable
@@ -120,7 +96,6 @@ add_executable(
 )
 
 # add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
-add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf ChibiOS)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf ChibiOS)
 
 # include common directories
@@ -140,15 +115,6 @@ include_directories(
 
     ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-)
-
-# include directories for nanoBooter
-target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter"
-     ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter
-
-     ${TARGET_CMSIS_NANOBOOTER_INCLUDE_DIRS}
-     ${TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS}
 )
 
 # include directories for nanoCLR
@@ -172,32 +138,26 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 )
 
 # set compiler options
-nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DRUNTIME_MEMORY_PROFILE__extrasmall=1)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DRUNTIME_MEMORY_PROFILE__extrasmall=1 -DPORT_IGNORE_GCC_VERSION_CHECK=TRUE)
 
 # set linker file
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32L072xZ_booter-DEBUG.ld)
     nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32L072xZ_CLR-DEBUG.ld)
 else()
-    nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32L072xZ_booter.ld)
     nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32L072xZ_CLR.ld)
 endif()
 
 # set linker options
-nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # add other linker flags
 ###################################################
 # the size of the CLR managed heap is defined here
 ###################################################
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x300,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
     set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x300,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x3000")
@@ -206,5 +166,4 @@ else()
 endif()
 
 # generate output files
-nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)

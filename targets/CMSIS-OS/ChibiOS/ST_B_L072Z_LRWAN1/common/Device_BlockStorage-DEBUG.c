@@ -6,33 +6,11 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
-///////////////////////////////////////////////////////////////////
-// because of the way the VTOR works the address of the vectors
-// the RAM table must be correctly aligned with 256 byte boundary
-// failing to do so will bring all sorts of evil and frustration
-// so MAKE SURE to respect this when changing BLOCKTYPE_CODE address
-///////////////////////////////////////////////////////////////////
-
 // 128 bytes block
 const BlockRange BlockRange1[] = 
 {
-    //////////////////////////////////////////////////////////////////////////////////////
-    // the configuration bellow is the appropriate one to build an image in debug flavour
-    // { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0    , 81   },        // 0x08000000 nanoBooter          
-    // { BlockRange_BLOCKTYPE_CODE      ,   82   , 1447 },        // 0x08002900 nanoCLR
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    // the configuration bellow assumes that the target  has nanoBooter deployed
-    // in MinRelSize flavour
-    // so make sure that you DO NOT deploy nanoBooter in debug flavour
-    // if you really need to debug both images you have to update the 
-    // flash start address linker file 
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0    , 69   },        // 0x08000000 nanoBooter          
-    { BlockRange_BLOCKTYPE_CODE      ,   70   , 1466 },        // 0x08002300 nanoCLR
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1467 , 1535 }         // 0x0802DD80 deployment
+    { BlockRange_BLOCKTYPE_CODE      ,   0    , 1307 },        // 0x08000000 nanoCLR
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1308 , 1535 }         // 0x08028E00 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 
