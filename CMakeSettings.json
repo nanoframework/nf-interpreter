@@ -248,10 +248,6 @@
       "intelliSenseMode": "linux-gcc-arm",
       "variables": [
         {
-          "name": "VISUAL_STUDIO",
-          "value": "TRUE"
-        },
-        {
           "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}"
         },
@@ -297,7 +293,7 @@
         },
         {
           "name": "TARGET_DP_FLOATINGPOINT:BOOL",
-          "value": "FALSE"
+          "value": "TRUE"
         },
         {
           "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION:BOOL", //"Option for string conversion to value from base 10 and partial for 16"
@@ -393,6 +389,10 @@
           "value": "ON"
         },
         {
+          "name": "API_nanoFramework.ResourceManager:BOOL",
+          "value": "ON"
+        },
+        {
           "name": "API_Windows.Devices.Adc:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
@@ -435,6 +435,16 @@
         {
           "name": "API_Hardware.Esp32:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
+        },
+        {
+          "name": "NF_FEATURE_USE_SPIFFS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_FEATURE_HAS_SDCARD",
+          "value": "True",
+          "type": "BOOL"
         }
       ]
     }  
