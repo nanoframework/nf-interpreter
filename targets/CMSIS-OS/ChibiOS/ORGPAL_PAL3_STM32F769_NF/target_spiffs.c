@@ -31,11 +31,11 @@ static const SPIConfig spiConfig = {
 #if defined(__GNUC__)
 __attribute__((aligned (32)))
 #endif
-uint8_t writeBuffer[4];
+uint8_t writeBuffer[SPIFFS_LOGICAL_PAGE_SIZE];
 #if defined(__GNUC__)
 __attribute__((aligned (32)))
 #endif
-uint8_t readBuffer[4];
+uint8_t readBuffer[SPIFFS_LOGICAL_PAGE_SIZE];
 
 // initialization of everything required for SPIFFS
 // for this target is the SPI driver
@@ -197,8 +197,19 @@ bool SPI_Read(uint8_t* pData, uint32_t readAddr, uint32_t size)
 
     spiSelect(&SPID1);
     spiSend(&SPID1, 4, writeBuffer);
-    spiReceive(&SPID1, size, pData);
+
+    // clear read buffer
+    memset(readBuffer, 0, SPIFFS_LOGICAL_PAGE_SIZE);
+
+    spiReceive(&SPID1, size, readBuffer);
     spiUnselect(&SPID1);
+
+    // invalidate cache
+    // (only required for Cortex-M7)
+    cacheBufferInvalidate(readBuffer, size);
+
+    // copy to pointer
+    memcpy(pData, readBuffer, size);
 
     return true;
 }
@@ -221,11 +232,18 @@ bool SPI_Write(uint8_t* pData, uint32_t writeAddr, uint32_t size)
     // flush DMA buffer to ensure cache coherency
     // (only required for Cortex-M7)
     cacheBufferFlush(writeBuffer, 4);
-    cacheBufferFlush(pData, size);
 
     spiSelect(&SPID1);
     spiSend(&SPID1, 4, writeBuffer);
-    spiSend(&SPID1, size, pData);
+
+    // copy from buffer
+    memcpy(writeBuffer, pData, size);
+
+    // flush DMA buffer to ensure cache coherency
+    // (only required for Cortex-M7)
+    cacheBufferFlush(writeBuffer, size);
+
+    spiSend(&SPID1, size, writeBuffer);
     spiUnselect(&SPID1);
 
     // wait for erase operation to complete
