@@ -8,7 +8,8 @@
 #include <nanoHAL.h>
 #include "Esp32_os.h"
 #include "LWIP_Sockets.h"
-#include "apps/sntp/sntp.h"
+#include "apps/sntp.h"
+#include <target_lwip_sntp_opts.h>
 
 extern "C" void set_signal_sock_function( void (*funcPtr)() );
 
