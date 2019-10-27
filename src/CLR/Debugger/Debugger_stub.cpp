@@ -65,24 +65,27 @@ __nfweak void NFReleaseInfo::Init(
     NFReleaseInfo.TargetName[ 0 ] = 0;
     NFReleaseInfo.PlatformName[ 0 ] = 0;
 
-    // fill each one, if it was provided
-    if ( NULL != info )
-    {
-        len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString));
-        memcpy(NFReleaseInfo.InfoString, info, len);
-    }
+	// fill each one, if it was provided
+	if (NULL != info)
+	{
+		len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString) - 1);
+		memcpy(NFReleaseInfo.InfoString, info, len);
+		NFReleaseInfo.InfoString[len] = 0;
+	}
 
-    if ( NULL != target )
-    {
-        len = MIN(targetLen, sizeof(NFReleaseInfo.TargetName));
-        memcpy(NFReleaseInfo.TargetName, target, len);
-    }
+	if (NULL != target)
+	{
+		len = MIN(targetLen, sizeof(NFReleaseInfo.TargetName) - 1);
+		memcpy(NFReleaseInfo.TargetName, target, len);
+		NFReleaseInfo.TargetName[len] = 0;
+	}
 
-    if ( NULL != platform )
-    {
-        len = MIN(platformLen, sizeof(NFReleaseInfo.PlatformName));
-        memcpy(NFReleaseInfo.PlatformName, platform, len);
-    }
+	if (NULL != platform)
+	{
+		len = MIN(platformLen, sizeof(NFReleaseInfo.PlatformName) - 1);
+		memcpy(NFReleaseInfo.PlatformName, platform, len);
+		NFReleaseInfo.PlatformName[len] = 0;
+	}
 }
 
 __nfweak bool SOCKETS_DbgInitialize( int ComPortNum )
