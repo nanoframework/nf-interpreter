@@ -6,20 +6,27 @@
 #ifndef _ESP32_OS_H_
 #define _ESP32_OS_H_
 
+#include <string.h>
+#include <stdlib.h>
+#include  <sys/time.h>
+#include  <time.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/timers.h"
 #include "freertos/event_groups.h"
-#include "string.h"
 #include "esp_system.h"
 #include "esp_attr.h"
 #include "esp_log.h"
 #include "task.h"
 #include "nvs_flash.h"
+
+// TODO ONly with network
 #include "esp_wifi.h"
 #include "esp_wpa2.h"
 #include "esp_eth.h"
 #include "esp_event_loop.h"
+
 #include "esp_timer.h"
 
 #include "spi_master.h"
