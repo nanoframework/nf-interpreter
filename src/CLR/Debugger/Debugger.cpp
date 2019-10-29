@@ -350,19 +350,27 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg)
         unsigned int rangeCount = 0;
         unsigned int rangeIndex = 0;
 
-        // get pointer to the 1st storage device
-        BlockStorageDevice* device = BlockStorageList_GetFirstDevice();
+        // get the number of available block storage devices
+	unsigned int numDevices = BlockStorageList_GetNumDevices();
 
-        // sanity check
-        if(device == NULL)
-        {
-            WP_ReplyToCommand( msg, true, false, NULL, 0 );
-            return false;
-        }
+	// get an array of pointer to all the storage devices in the list and then request the device info
+	BlockStorageDevice* devices[numDevices];
+	DeviceBlockInfo* deviceInfos[numDevices];
 
-        // now get info of storage device
-        DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
-
+	for(unsigned int i = 0; i < numDevices; i++){
+	    if(i == 0){
+		devices[i] = BlockStorageList_GetFirstDevice();
+	    } else {
+		devices[i] = BlockStorageList_GetNextDevice(devices[i-1]);
+	    }
+	    // sanity check
+	    if(devices[i] == NULL){
+		WP_ReplyToCommand( msg, true, false, NULL, 0 );
+		return false;
+	    }
+	    deviceInfos[i] = BlockStorageDevice_GetDeviceInfo(devices[i]);
+	}
+	    
         for(int cnt = 0; cnt < 2; cnt++)
         {
             if(cnt == 1)
@@ -375,28 +383,30 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg)
                     return false;
                 }
             }
+	    for(unsigned int i = 0; i < numDevices; i++)
+	    {
+		for(unsigned int j = 0; j < deviceInfos[i]->NumRegions;  j++)
+		{
+		    const BlockRegionInfo* pRegion = &deviceInfos[i]->Regions[ j ];
 
-            for(unsigned int i = 0; i < deviceInfo->NumRegions;  i++)
-            {
-                const BlockRegionInfo* pRegion = &deviceInfo->Regions[ i ];
+		    for(unsigned int k = 0; k < pRegion->NumBlockRanges; k++)
+		    {
 
-                for(unsigned int j = 0; j < pRegion->NumBlockRanges; j++)
-                {
-
-                    if(cnt == 0)
-                    {
-                        rangeCount++;
-                    }
-                    else
-                    {
-                        pData[ rangeIndex ].StartAddress  = BlockRegionInfo_BlockAddress(pRegion, pRegion->BlockRanges[ j ].StartBlock);
-                        pData[ rangeIndex ].NumBlocks = BlockRange_GetBlockCount(pRegion->BlockRanges[j]);
-                        pData[ rangeIndex ].BytesPerBlock = pRegion->BytesPerBlock;
-                        pData[ rangeIndex ].Usage  = pRegion->BlockRanges[ j ].RangeType & BlockRange_USAGE_MASK;
-                        rangeIndex++;
-                    }
-                }
-            }
+		        if(cnt == 0)
+		        {
+			    rangeCount++;
+		        }
+		        else
+		        {
+			    pData[ rangeIndex ].StartAddress  = BlockRegionInfo_BlockAddress(pRegion, pRegion->BlockRanges[ k ].StartBlock);
+			    pData[ rangeIndex ].NumBlocks = BlockRange_GetBlockCount(pRegion->BlockRanges[k]);
+			    pData[ rangeIndex ].BytesPerBlock = pRegion->BytesPerBlock;
+			    pData[ rangeIndex ].Usage  = pRegion->BlockRanges[ k ].RangeType & BlockRange_USAGE_MASK;
+			    rangeIndex++;
+			}
+		    }
+		}
+	    }
         }
 
 
