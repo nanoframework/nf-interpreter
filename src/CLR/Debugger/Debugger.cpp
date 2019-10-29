@@ -334,7 +334,7 @@ bool CLR_DBG_Debugger::Monitor_Ping( WP_Message* msg)
 
 bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg)
 {
-    NATIVE_PROFILE_CLR_DEBUGGER();
+	NATIVE_PROFILE_CLR_DEBUGGER();
 
     if((msg->m_header.m_flags & WP_Flags_c_Reply) == 0)
     {
@@ -351,25 +351,30 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg)
         unsigned int rangeIndex = 0;
 
         // get the number of available block storage devices
-	unsigned int numDevices = BlockStorageList_GetNumDevices();
+        unsigned int numDevices = BlockStorageList_GetNumDevices();
 
-	// get an array of pointer to all the storage devices in the list and then request the device info
-	BlockStorageDevice** devices = (BlockStorageDevice**) platform_malloc(numDevices * sizeof(BlockStorageDevice*));
-	DeviceBlockInfo** deviceInfos = (DeviceBlockInfo**) platform_malloc(numDevices * sizeof(DeviceBlockInfo*));
+        // get an array of pointer to all the storage devices in the list and then request the device info
+        BlockStorageDevice** devices = (BlockStorageDevice**) platform_malloc(numDevices * sizeof(BlockStorageDevice*));
+        DeviceBlockInfo** deviceInfos = (DeviceBlockInfo**) platform_malloc(numDevices * sizeof(DeviceBlockInfo*));
 
-	for(unsigned int i = 0; i < numDevices; i++){
-	    if(i == 0){
-		devices[i] = BlockStorageList_GetFirstDevice();
-	    } else {
-		devices[i] = BlockStorageList_GetNextDevice(devices[i-1]);
-	    }
-	    // sanity check
-	    if(devices[i] == NULL){
-		WP_ReplyToCommand( msg, true, false, NULL, 0 );
-		return false;
-	    }
-	    deviceInfos[i] = BlockStorageDevice_GetDeviceInfo(devices[i]);
-	}
+        for(unsigned int i = 0; i < numDevices; i++)
+        {
+	        if(i == 0)
+            {
+                devices[i] = BlockStorageList_GetFirstDevice();
+            } 
+            else
+            {
+                devices[i] = BlockStorageList_GetNextDevice(devices[i-1]);
+            }
+            // sanity check
+            if(devices[i] == NULL)
+            {
+                WP_ReplyToCommand( msg, true, false, NULL, 0 );
+                return false;
+            }
+            deviceInfos[i] = BlockStorageDevice_GetDeviceInfo(devices[i]);
+        }
 	    
         for(int cnt = 0; cnt < 2; cnt++)
         {
@@ -383,38 +388,38 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg)
                     return false;
                 }
             }
-	    for(unsigned int i = 0; i < numDevices; i++)
-	    {
-		for(unsigned int j = 0; j < deviceInfos[i]->NumRegions;  j++)
-		{
-		    const BlockRegionInfo* pRegion = &deviceInfos[i]->Regions[ j ];
+            for(unsigned int i = 0; i < numDevices; i++)
+            {
+                for(unsigned int j = 0; j < deviceInfos[i]->NumRegions;  j++)
+                {
+                    const BlockRegionInfo* pRegion = &deviceInfos[i]->Regions[ j ];
 
-		    for(unsigned int k = 0; k < pRegion->NumBlockRanges; k++)
-		    {
+                    for(unsigned int k = 0; k < pRegion->NumBlockRanges; k++)
+                    {
 
-		        if(cnt == 0)
-		        {
-			    rangeCount++;
-		        }
-		        else
-		        {
-			    pData[ rangeIndex ].StartAddress  = BlockRegionInfo_BlockAddress(pRegion, pRegion->BlockRanges[ k ].StartBlock);
-			    pData[ rangeIndex ].NumBlocks = BlockRange_GetBlockCount(pRegion->BlockRanges[k]);
-			    pData[ rangeIndex ].BytesPerBlock = pRegion->BytesPerBlock;
-			    pData[ rangeIndex ].Usage  = pRegion->BlockRanges[ k ].RangeType & BlockRange_USAGE_MASK;
-			    rangeIndex++;
-			}
-		    }
-		}
-	    }
+                        if(cnt == 0)
+                        {
+                            rangeCount++;
+                        }
+                        else
+                        {
+                            pData[ rangeIndex ].StartAddress  = BlockRegionInfo_BlockAddress(pRegion, pRegion->BlockRanges[ k ].StartBlock);
+                            pData[ rangeIndex ].NumBlocks = BlockRange_GetBlockCount(pRegion->BlockRanges[k]);
+                            pData[ rangeIndex ].BytesPerBlock = pRegion->BytesPerBlock;
+                            pData[ rangeIndex ].Usage  = pRegion->BlockRanges[ k ].RangeType & BlockRange_USAGE_MASK;
+                            rangeIndex++;
+                        }
+                    }
+                }
+            }
         }
 
 
         WP_ReplyToCommand( msg, true, false, (void*)pData, rangeCount * sizeof (struct Flash_BlockRegionInfo) );
 
         platform_free(pData);
-	platform_free(devices);
-	platform_free(deviceInfos);
+        platform_free(devices);
+        platform_free(deviceInfos);
     }
 
     return true;
