@@ -359,7 +359,7 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap( WP_Message* msg)
 
         for(unsigned int i = 0; i < numDevices; i++)
         {
-	        if(i == 0)
+            if(i == 0)
             {
                 devices[i] = BlockStorageList_GetFirstDevice();
             } 
