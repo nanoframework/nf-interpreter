@@ -562,9 +562,9 @@ extern "C" {
     // Find the right Device with the corresponding phyiscal address.
     bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress);
     BlockStorageDevice* BlockStorageList_GetFirstDevice();
-    // BlockStorageDevice* BlockStorageList_GetNextDevice(BlockStorageDevice* device);
+    BlockStorageDevice* BlockStorageList_GetNextDevice(BlockStorageDevice* device);
     // returns number of devices has been declared in the system
-    // unsigned int BlockStorageList_GetNumDevices();
+    unsigned int BlockStorageList_GetNumDevices();
 
 #ifdef __cplusplus
 }
