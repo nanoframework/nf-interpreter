@@ -844,9 +844,15 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkI
 #if LWIP_DNS
 #if LWIP_IPV6
 #if LWIP_VERSION_MAJOR == 2 
-            config->IPv4DNSAddress1 = dns_getserver(0)->u_addr.ip4.addr;
-            config->IPv4DNSAddress2 = dns_getserver(1)->u_addr.ip4.addr;
 
+#if defined(PLATFORM_ESP32)
+			// ESP32 return ip_addr_t instead of ip_addr_t * on statndard lwip
+			config->IPv4DNSAddress1 = dns_getserver(0).u_addr.ip4.addr;
+			config->IPv4DNSAddress2 = dns_getserver(1).u_addr.ip4.addr;
+#else			
+			config->IPv4DNSAddress1 = dns_getserver(0)->u_addr.ip4.addr;
+            config->IPv4DNSAddress2 = dns_getserver(1)->u_addr.ip4.addr;
+#endif
             // FIXME IPV6
             // config->IPv6DNSAddress1 = dns_getserver(0)->u_addr.ip6.addr;
             // config->IPv6DNSAddress2 = dns_getserver(1)->u_addr.ip6.addr;

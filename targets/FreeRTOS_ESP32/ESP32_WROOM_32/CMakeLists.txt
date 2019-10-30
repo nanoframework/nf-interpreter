@@ -105,12 +105,10 @@ add_executable(
 
 # Add link flags
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--start-group ")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS "  ${ESP32_IDF_PATH}/components/esp32/libhal.a ")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/lib -lcore -lrtc -lnet80211 -lmesh -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lphy ")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L  ${CMAKE_CURRENT_SOURCE_DIR} -T esp32_out.ld ")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/ld -u ld_include_panic_highint_hdl -T esp32.common.ld -T esp32.rom.ld -T esp32.peripherals.ld -T esp32.rom.spiram_incompatible_fns.ld ")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS "  ${ESP32_IDF_PATH}/components/newlib/lib/libc.a ")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS "  ${ESP32_IDF_PATH}/components/newlib/lib/libm.a ")
+
+if(USE_SECURITY_MBEDTLS_OPTION)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf NetworkLib)
+endif()
 
 #message( "project libs:${PROJECT_LINK_LIBS} " )
 set(LIBPATHSAVE "")
@@ -126,13 +124,36 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
         set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -L${LIBPATH} " )
     endif()
 
+	# Add psram workarounds for newlib
+    if( "${LIBSHORT}" STREQUAL "newlib" )
+	    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libc-psram-workaround.a " )
+	    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libm-psram-workaround.a " )
+	endif()
+
     set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -l${LIBSHORT} " )
     
+    if( "${LIBSHORT}" STREQUAL "app_update" )
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -u esp_app_desc " )
+    endif()
+
+	if( "${LIBSHORT}" STREQUAL "bt" )
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${ESP32_IDF_PATH}/components/bt/lib -lbtdm_app " )
+    endif()
+
     # Add options into LINK_FLAGS in same position as IDF link
     if( "${LIBSHORT}" STREQUAL "cxx" )
         # Cxx Library needs an undefine
-        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -u __cxa_guard_dummy " )
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -u __cxa_guard_dummy -u __cxx_fatal_exception  " )
     endif()
+
+	if( "${LIBSHORT}" STREQUAL "esp32" )
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/esp32/libhal.a  " )
+		set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/lib -lcore -lrtc -lnet80211  -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lespnow -lphy -lmesh")
+	
+		set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L  ${CMAKE_CURRENT_SOURCE_DIR} -T esp32_out.ld ")
+		set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/ld -u ld_include_panic_highint_hdl -T esp32.project.ld -T esp32.rom.ld -T esp32.peripherals.ld -T esp32.rom.libgcc.ld   ")
+	endif()
+
 
     if( "${LIBSHORT}" STREQUAL "freertos" )
         # Cxx Library needs an undefine
@@ -141,18 +162,12 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
 
 endforeach( IDF_libraries )
 
-# add dependency for security provider mbedTLS
-if(USE_SECURITY_MBEDTLS_OPTION)
-    add_dependencies(NetworkLib mbedTLS)
-endif()
 
 if(USE_NETWORKING_OPTION)
     set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lNetworkLib " )
 endif()
 
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -lgcc -lstdc++ -Wl,--end-group -Wl,-EL  ")
-
-#message( "wireprotol :${WireProtocol_INCLUDE_DIRS}")
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -lgcc -lstdc++ -lgcov -Wl,--end-group -Wl,-EL  ")
 
 # include common directories
 include_directories(
@@ -245,6 +260,8 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 
 # add linker flags to generate map file
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.map")
+# Verbose linking, uncomment to enable
+#set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--verbose ")
 
 # add dependency for networking
 if(USE_SECURITY_MBEDTLS_OPTION)

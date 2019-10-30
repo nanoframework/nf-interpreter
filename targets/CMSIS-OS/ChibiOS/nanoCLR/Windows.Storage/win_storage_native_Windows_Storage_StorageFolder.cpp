@@ -25,6 +25,10 @@ extern bool sdCardFileSystemReady;
 #if (HAL_USBH_USE_MSD == TRUE)
 extern bool usbMsdFileSystemReady;
 #endif
+#if USE_SPIFFS_FOR_STORAGE
+extern bool spiffsFileSystemReady;
+extern spiffs fs;
+#endif
 
 void CombinePath(char * outpath, const char * path1, const char * path2)
 {
@@ -665,7 +669,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
         // ... that the path is the drive root (because SPIFFS doesn't support folders)
       #if (USE_SPIFFS_FOR_STORAGE == TRUE)
         if( (WORKING_DRIVE_IS_INTERNAL_DRIVE) &&
-            (hal_strlen_s(workingPath) == DRIVE_PATH_LENGTH))
+            (hal_strlen_s(workingPath) == DRIVE_PATH_LENGTH - 1))
         {
             // this is the SPIFFS drive
             spiffs_DIR drive;
@@ -714,6 +718,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
                 // and reset the file iterator vars too
                 itemIndex = 0;
                 fileCount = 0;
+                pe = &e;
                 
                 while ((pe = SPIFFS_readdir(&drive, pe)))
                 {

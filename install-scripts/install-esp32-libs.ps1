@@ -11,8 +11,8 @@ $ESP32LibPathExists = Test-Path $env:ESP32_LIBS_PATH -ErrorAction SilentlyContin
 
 If($ESP32LibPathExists -eq $False)
 {
-    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.1.zip"
-    $output = "$zipRoot\IDF_libs-v3.1.zip"
+    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.3.zip"
+    $output = "$zipRoot\IDF_libs-v3.3.zip"
 
     # Don't download again if already exists. User can remove from zips to force... 
     if(![System.IO.File]::Exists($output)){    
