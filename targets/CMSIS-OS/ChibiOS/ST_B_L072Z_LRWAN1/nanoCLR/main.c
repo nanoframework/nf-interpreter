@@ -28,7 +28,7 @@ osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "");
 // OVER8 bit on CR1 to further decrease baud rate clocking error 
 static const SerialConfig uartConfig =
 {
-  460800,
+  115200,
   USART_CR1_OVER8,
   USART_CR2_STOP1_BITS,
   0
