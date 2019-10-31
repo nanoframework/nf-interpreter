@@ -9,8 +9,8 @@
 // 128 bytes block
 const BlockRange BlockRange1[] = 
 {
-    { BlockRange_BLOCKTYPE_CODE      ,   0    , 1307 },        // 0x08000000 nanoCLR
-    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1308 , 1535 }         // 0x08028E00 deployment  
+    { BlockRange_BLOCKTYPE_CODE      ,   0    , 1102 },        // 0x08000000 nanoCLR
+    { BlockRange_BLOCKTYPE_DEPLOYMENT,   1103 , 1535 }         // 0x08022780 deployment  
 };
 
 const BlockRegionInfo BlockRegions[] = 
