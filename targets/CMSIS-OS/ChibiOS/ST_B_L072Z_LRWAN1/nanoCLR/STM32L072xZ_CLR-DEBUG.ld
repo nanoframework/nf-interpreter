@@ -10,6 +10,12 @@
 /*
  * STM32L072xZ memory setup.
  */
+
+/* good for debug build */
+/*    flash       : org = 0x08000000, len = 192k - 29056          */
+/*    config      : org = 0x00000000, len = 0                     */
+/*    deployment  : org = 0x08028E00, len = 29056                 */
+
 MEMORY
 {
     flash       : org = 0x08000000, len = 192k - 55296          /* flash size less the space reserved for application deployment*/

@@ -7,6 +7,15 @@
 #include <nanoPAL_BlockStorage.h>
 
 // 128 bytes block
+
+// good for debug build
+// const BlockRange BlockRange1[] = 
+// {
+//     { BlockRange_BLOCKTYPE_CODE      ,   0    , 1307 },        // 0x08000000 nanoCLR
+//     { BlockRange_BLOCKTYPE_DEPLOYMENT,   1308 , 1535 }         // 0x08028E00 deployment  
+// };
+
+
 const BlockRange BlockRange1[] = 
 {
     { BlockRange_BLOCKTYPE_CODE      ,   0    , 1102 },        // 0x08000000 nanoCLR
