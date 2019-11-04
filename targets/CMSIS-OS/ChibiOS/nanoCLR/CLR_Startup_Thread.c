@@ -58,15 +58,15 @@ void CLRStartupThread(void const * argument)
     oneWireStart();
     #endif
 
+    // initialize nanoHAL
+    nanoHAL_Initialize_C();
+
     ///////////////////////////////////////////
     // sanity check of block storage addresses
   #if !defined(BUILD_RTM)
     AssertBlockStorage();
   #endif
     ///////////////////////////////////////////
-
-    // initialize nanoHAL
-    nanoHAL_Initialize_C();
 
   #if LWIP_NETCONN_SEM_PER_THREAD
     // need to create a semaphore for lwIP
