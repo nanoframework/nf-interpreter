@@ -5,6 +5,9 @@
 //
 #include "Core.h"
 
+#if (NANOCLR_SYSTEM_COLLECTIONS == TRUE)
+#include <nf_system_collections.h>
+
 HRESULT CLR_RT_HeapBlock_Queue::Dequeue( CLR_RT_HeapBlock*& value )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -162,7 +165,9 @@ HRESULT CLR_RT_HeapBlock_Queue::CopyTo( CLR_RT_HeapBlock_Array* toArray, CLR_INT
 
 //--//
 
-CT_ASSERT(Library_corlib_native_System_Collections_Queue__FIELD___array == Library_corlib_native_System_Collections_Queue::FIELD___array);
-CT_ASSERT(Library_corlib_native_System_Collections_Queue__FIELD___head  == Library_corlib_native_System_Collections_Queue::FIELD___head );
-CT_ASSERT(Library_corlib_native_System_Collections_Queue__FIELD___tail  == Library_corlib_native_System_Collections_Queue::FIELD___tail );
-CT_ASSERT(Library_corlib_native_System_Collections_Queue__FIELD___size  == Library_corlib_native_System_Collections_Queue::FIELD___size );
+CT_ASSERT(Library_nf_system_collections_System_Collections_Queue__FIELD___array == Library_nf_system_collections_System_Collections_Queue::FIELD___array);
+CT_ASSERT(Library_nf_system_collections_System_Collections_Queue__FIELD___head  == Library_nf_system_collections_System_Collections_Queue::FIELD___head );
+CT_ASSERT(Library_nf_system_collections_System_Collections_Queue__FIELD___tail  == Library_nf_system_collections_System_Collections_Queue::FIELD___tail );
+CT_ASSERT(Library_nf_system_collections_System_Collections_Queue__FIELD___size  == Library_nf_system_collections_System_Collections_Queue::FIELD___size );
+
+#endif

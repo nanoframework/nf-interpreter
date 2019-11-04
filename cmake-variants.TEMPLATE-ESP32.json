@@ -58,6 +58,7 @@
             "API_System.Net": "ON",
             "NF_SECURITY_MBEDTLS": "ON",
             "API_nanoFramework.ResourceManager" : "ON",
+            "API_nanoFramework.System.Collections" : "ON",
             "API_Windows.Devices.Wifi": "ON",
             "API_Windows.Devices.Adc": "ON",
             "API_System.Devices.Dac" : "OFF",
