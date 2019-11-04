@@ -3,7 +3,11 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include "Core.h"
+
+#if (NANOCLR_SYSTEM_COLLECTIONS == TRUE)
+#include <nf_system_collections.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 HRESULT CLR_RT_HeapBlock_Stack::Pop( CLR_RT_HeapBlock*& value )
@@ -101,6 +105,7 @@ HRESULT CLR_RT_HeapBlock_Stack::Clear()
 
 //--//
 
-CT_ASSERT(Library_corlib_native_System_Collections_Stack__FIELD___array == Library_corlib_native_System_Collections_Stack::FIELD___array);
-CT_ASSERT(Library_corlib_native_System_Collections_Stack__FIELD___size  == Library_corlib_native_System_Collections_Stack::FIELD___size );
+CT_ASSERT(Library_nf_system_collections_System_Collections_Stack__FIELD___array == Library_nf_system_collections_System_Collections_Stack::FIELD___array);
+CT_ASSERT(Library_nf_system_collections_System_Collections_Stack__FIELD___size  == Library_nf_system_collections_System_Collections_Stack::FIELD___size );
 
+#endif
