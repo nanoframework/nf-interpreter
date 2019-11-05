@@ -69,6 +69,10 @@ typedef enum
 #define FLASH_SIZE                (uint32_t)((*((uint32_t *)FLASHSIZE_BASE)&0xFFFF) * 1024U)
 #define FLASH_PAGE_SIZE           ((uint32_t)128U)  /*!< FLASH Page Size in bytes */
 
+#define FLASH_FLAG_ALL_ERRORS  (  FLASH_FLAG_WRPERR  | FLASH_FLAG_PGAERR  | FLASH_FLAG_SIZERR | \
+                                  FLASH_FLAG_OPTVERR | FLASH_FLAG_RDERR   | FLASH_FLAG_FWWERR | \
+                                  FLASH_FLAG_NOTZEROERR )
+
 /**
   * @brief  Get the specified FLASH flag status. 
   * @param  __FLAG__ specifies the FLASH flag to check.

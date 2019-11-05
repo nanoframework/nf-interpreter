@@ -40,9 +40,7 @@ set(NF_CoreCLR_SRCS
     CLR_RT_HeapBlock_Finalizer.cpp
     CLR_RT_HeapBlock_Lock.cpp
     CLR_RT_HeapBlock_LockRequest.cpp
-    CLR_RT_HeapBlock_Queue.cpp
     CLR_RT_HeapBlock_Node.cpp
-    CLR_RT_HeapBlock_Stack.cpp
     CLR_RT_HeapBlock_String.cpp
     CLR_RT_HeapBlock_Timer.cpp
     CLR_RT_HeapBlock_WaitForObject.cpp
@@ -79,8 +77,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Attribute.cpp
     corlib_native_System_BitConverter.cpp
     corlib_native_System_Collections_ArrayList.cpp
-    corlib_native_System_Collections_Queue.cpp
-    corlib_native_System_Collections_Stack.cpp
     corlib_native_System_Console.cpp
     corlib_native_System_Convert.cpp
     corlib_native_System_DateTime.cpp
@@ -177,6 +173,12 @@ if(NF_FEATURE_SUPPORT_REFLECTION)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_RuntimeMethodInfo.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_RuntimeType.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Type.cpp)
+endif()
+
+# include Collection support files depending on build option
+if(API_nanoFramework.System.Collections)
+    list(APPEND NF_CoreCLR_SRCS CLR_RT_HeapBlock_Queue.cpp)
+    list(APPEND NF_CoreCLR_SRCS CLR_RT_HeapBlock_Stack.cpp)
 endif()
 
 # need a conditional include because of ESP32 building network as a library 

@@ -20,7 +20,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::NativeInit___VOID,
     Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::NativeUpdateCallbacks___VOID,
     NULL,
+    NULL,
     Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::GetDeviceSelector___STATIC__STRING,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -62,7 +64,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Devices_Can =
 {
     "nanoFramework.Devices.Can", 
-    0xD40BCEBF,
+    0xC90BF0BB,
     method_lookup,
-    { 100, 0, 3, 0 }
+    { 100, 0, 4, 0 }
 };
