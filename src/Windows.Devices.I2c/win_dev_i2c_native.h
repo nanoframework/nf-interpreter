@@ -90,7 +90,6 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice
 
     //--//
 
-
 };
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult

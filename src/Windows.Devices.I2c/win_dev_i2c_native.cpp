@@ -22,6 +22,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_win_dev_i2c_native_Windows_Devices_I2c_I2cController::NativeInit___VOID,
     NULL,
+    NULL,
     Library_win_dev_i2c_native_Windows_Devices_I2c_I2cController::GetDeviceSelector___STATIC__STRING,
     NULL,
     NULL,
@@ -53,12 +54,13 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_I2c =
 {
     "Windows.Devices.I2c", 
-    0x100B5D05,
+    0x8D1C8F95,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
