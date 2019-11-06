@@ -2,18 +2,18 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  builDirectory: '$(Build.SourcesDirectory)\build'
+  buildDirectory: '$(Build.SourcesDirectory)\build'
 
 steps:
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DFREERTOS_BOARD=$(BoardName) $(BuildOptions) ..'
-      workingDirectory:  ${{ parameters.builDirectory }}
+      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_AssemblyVersion) -DFREERTOS_BOARD=$(BoardName) $(BuildOptions) ..'
+      workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Setup build with CMake
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '--build ${{ parameters.builDirectory }} --target all --config MinSizeRel'
-      workingDirectory:  ${{ parameters.builDirectory }}
+      cmakeArgs: '--build ${{ parameters.buildDirectory }} --target all --config MinSizeRel'
+      workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Build with CMake
