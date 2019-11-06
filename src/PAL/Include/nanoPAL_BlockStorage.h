@@ -606,8 +606,6 @@ typedef struct CPU_MEMORY_CONFIG
 
 }CPU_MEMORY_CONFIG;
 
-typedef unsigned int GPIO_PIN;
-
 typedef struct GPIO_FLAG
 {
     GPIO_PIN  Pin;
