@@ -5,7 +5,7 @@
 //
 
 
-#include "win_dev_gpio_native_target.h"
+#include "win_dev_gpio_native.h"
 
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController::get_PinCount___I4( CLR_RT_StackFrame& stack )
@@ -15,7 +15,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController::get_Pin
         CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         // Return value to the managed application
-        stack.SetResult_I4( GPIO_PIN_COUNT ); 
+        stack.SetResult_I4(CPU_GPIO_GetPinCount());
     }
     NANOCLR_NOCLEANUP();
 }

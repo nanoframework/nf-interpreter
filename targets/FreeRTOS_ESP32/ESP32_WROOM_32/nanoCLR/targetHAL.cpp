@@ -83,6 +83,8 @@ void nanoHAL_Initialize()
 
 	Storage_Initialize();
 
+	CPU_GPIO_Initialize();
+
     // no PAL events required until now
     //PalEvent_Initialize();
 	
@@ -118,6 +120,8 @@ void nanoHAL_Uninitialize()
   #endif
  
     BlockStorageList_UnInitializeDevices();
+
+	CPU_GPIO_Uninitialize();
 
     //PalEvent_Uninitialize();
 

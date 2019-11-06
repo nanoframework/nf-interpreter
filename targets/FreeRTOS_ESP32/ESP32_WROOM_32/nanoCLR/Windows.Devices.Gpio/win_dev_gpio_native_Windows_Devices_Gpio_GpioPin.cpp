@@ -12,39 +12,34 @@
 //
 
 #include <targetPAL.h>
-#include "win_dev_gpio_native_target.h"
+#include "win_dev_gpio_native.h"
 #include "nf_rt_events_native.h"
 
 #include "Esp32_DeviceMapping.h"
 
-static const char* TAG = "GpioPin";
-static bool  Gpio_Initialised = false;
 
-// this array keeps track of the Gpio pins that are assigned to each channel
-CLR_RT_HeapBlock* channelPinMapping[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+///////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioPinValue (in managed code) !!! //
+///////////////////////////////////////////////////////////////////////////////////
 
-
-void Initialize_gpio()
+enum GpioPinValue
 {
-    esp_err_t ret = gpio_install_isr_service( 0);
-    if ( ret != ESP_OK )
-    {
-        ESP_LOGE( TAG, "Install isr service");
-    }
-}
+    GpioPinValue_Low = 0,
+    GpioPinValue_High,
+};
 
-void Gpio_Interupt_ISR(void * args)
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
+
+void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void* param )
 {
-   uint32_t pinNumber = (uint32_t)args;
-
    NATIVE_INTERRUPT_START
 
-   CLR_RT_HeapBlock*  pThis = channelPinMapping[pinNumber];
+   CLR_RT_HeapBlock*  pThis = (CLR_RT_HeapBlock * )param;
    if ( pThis == NULL )
    {
        NATIVE_INTERRUPT_END
-
        return;
    }
     
@@ -61,38 +56,10 @@ void Gpio_Interupt_ISR(void * args)
    if ( callbacksRegistered )
    {
         // if handle registed then post a managed event with the current pin reading
-        PostManagedEvent( EVENT_GPIO, 0, pinNumber, gpio_get_level((gpio_num_t)pinNumber)  );
+        PostManagedEvent( EVENT_GPIO, 0, (uint16_t)pinNumber, pinState?1:0 );
    }
 
     NATIVE_INTERRUPT_END
-}
-
-void Add_Gpio_Interrupt(gpio_num_t pinNumber)
-{
-    if ( !Gpio_Initialised )
-    {
-        Initialize_gpio();
-        Gpio_Initialised = true;
-    }
-
-    esp_err_t ret = gpio_isr_handler_add( pinNumber, Gpio_Interupt_ISR, (void *)pinNumber);
-    if ( ret != ESP_OK )
-    {
-        ESP_LOGE( TAG, "Add interrupt to pin");
-    }
-}
-
-
-void Remove_Gpio_Interrupt(gpio_num_t pinNumber)
-{
-	if (channelPinMapping[pinNumber] != NULL)
-	{
-		// Remove from interrupts
-		gpio_isr_handler_remove((gpio_num_t)pinNumber);
-
-		// clear this channel in channel pin mapping
-		channelPinMapping[pinNumber] = NULL;
-	}
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )
@@ -106,9 +73,9 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___Windows
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        gpio_num_t pinNumber = (gpio_num_t)pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+		GPIO_PIN pinNumber = (GPIO_PIN)pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
 
-        stack.SetResult_I4( gpio_get_level(pinNumber) );
+        stack.SetResult_I4( CPU_GPIO_GetPinState(pinNumber)?1:0 );
     }
     NANOCLR_NOCLEANUP();
 }
@@ -125,7 +92,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+		GPIO_PIN pinNumber = (GPIO_PIN)pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
         GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
         
         // sanity check for drive mode set to output so we don't mess up writing to an input pin
@@ -139,7 +106,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
             GpioPinValue newState = (GpioPinValue)(GpioPinValue_High ^ (GpioPinValue)pThis[ FIELD___lastOutputValue ].NumericByRef().s4);
             
             // ...write back to the GPIO...
-            gpio_set_level((gpio_num_t)pinNumber, newState);
+			CPU_GPIO_SetPinState(pinNumber, newState != 0 );
 
             // ... and finally store it
             pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = newState;
@@ -157,9 +124,9 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative_
         // set pin to input to save power
         // clear interrupts
         // releases the pin
-        int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+		GPIO_PIN pinNumber = (GPIO_PIN)pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
         
-		Remove_Gpio_Interrupt((gpio_num_t)pinNumber);
+		CPU_GPIO_DisablePin(pinNumber, GpioPinDriveMode_Input, GPIO_ALT_PRIMARY);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -168,24 +135,16 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveM
 {
     NANOCLR_HEADER();
     {
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+
+		GPIO_PIN pinNumber = (GPIO_PIN)pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+
         GpioPinDriveMode driveMode = (GpioPinDriveMode)stack.Arg1().NumericByRef().s4;
 
-        bool driveModeSupported = false;
-
-        // check if the requested drive mode is support by ChibiOS config
-        if ((driveMode == GpioPinDriveMode_Input) ||
-            (driveMode == GpioPinDriveMode_InputPullDown) ||
-            (driveMode == GpioPinDriveMode_InputPullUp) ||
-            (driveMode == GpioPinDriveMode_Output) ||
-            (driveMode == GpioPinDriveMode_OutputOpenDrain))
-        {
-            driveModeSupported = true;
-        }
-
-        // Return value to the managed application
-        stack.SetResult_Boolean( driveModeSupported ) ;
+		// Return value to the managed application
+        stack.SetResult_Boolean(CPU_GPIO_DriveModeSupported(pinNumber, driveMode)) ;
     }
-    NANOCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode( CLR_RT_StackFrame& stack )
@@ -193,79 +152,31 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
+		bool validPin;
 
         if(pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue ].NumericByRef().u1 != 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        signed int pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
-        signed int driveMode = stack.Arg1().NumericByRef().s4;
+		GPIO_PIN pinNumber = (GPIO_PIN)pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+		GpioPinDriveMode driveMode = (GpioPinDriveMode)stack.Arg1().NumericByRef().s4;
 
-        // Valid PinNumber
-        if ( ! GPIO_IS_VALID_GPIO(pinNumber) ) 
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
- 
-        // Check Pin is output capable
-        if ( driveMode >= 3 && !GPIO_IS_VALID_OUTPUT_GPIO(pinNumber) ) 
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-  
-        gpio_mode_t     mode         = GPIO_MODE_DISABLE;
-        gpio_pullup_t   pull_up_en   = GPIO_PULLUP_DISABLE;
-        gpio_pulldown_t pull_down_en = GPIO_PULLDOWN_DISABLE;
-        gpio_int_type_t intr_type    = GPIO_INTR_ANYEDGE;
+		if (driveMode >= (int)GpioPinDriveMode_Output)
+		{
+			validPin = CPU_GPIO_EnableOutputPin(pinNumber, false, driveMode);
+		}
+		else
+		{
+            int64_t debounceTimeoutMilsec = (CLR_INT64_TEMP_CAST) pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___debounceTimeout ].NumericByRefConst().s8 / TIME_CONVERSION__TO_MILLISECONDS;
+			
+            validPin = CPU_GPIO_EnableInputPin(pinNumber, debounceTimeoutMilsec, Gpio_Interupt_ISR, (void*)pThis, GPIO_INT_EDGE_BOTH, driveMode);
+		}
 
-        switch (driveMode)
-        {
-            case GpioPinDriveMode_Input :   
-                        mode = GPIO_MODE_INPUT; 
-                        break;
-            case GpioPinDriveMode_InputPullDown :    
-                        mode = GPIO_MODE_INPUT; 
-                        pull_down_en = GPIO_PULLDOWN_ENABLE;
-                        break;
-            case GpioPinDriveMode_InputPullUp :    
-                        mode = GPIO_MODE_INPUT; 
-                        pull_up_en = GPIO_PULLUP_ENABLE;
-                        break;
-            case GpioPinDriveMode_Output :    
-                        mode = GPIO_MODE_OUTPUT;
-                        break;
-            case GpioPinDriveMode_OutputOpenDrain :    
-                        mode = GPIO_MODE_OUTPUT_OD;
-                        break;
-            case GpioPinDriveMode_OutputOpenDrainPullUp :    
-                        mode = GPIO_MODE_OUTPUT_OD;
-                        pull_up_en = GPIO_PULLUP_ENABLE;
-                        break;
-            case GpioPinDriveMode_OutputOpenSource:
-                        mode = GPIO_MODE_OUTPUT_OD;
-                        break;
-            case GpioPinDriveMode_OutputOpenSourcePullDown:
-                        mode = GPIO_MODE_OUTPUT_OD;
-                        pull_down_en = GPIO_PULLDOWN_ENABLE;
-                        break;
-        }
-
-        gpio_config_t GPIOConfig;
-        
-        GPIOConfig.pin_bit_mask = (1ULL << pinNumber);
-        GPIOConfig.mode = mode;
-        GPIOConfig.pull_up_en = pull_up_en;
-        GPIOConfig.pull_down_en = pull_down_en;
-        GPIOConfig.intr_type = intr_type;
-
-        gpio_config( &GPIOConfig );
-
-        // Enable interrupts for all pins
-        Add_Gpio_Interrupt( (gpio_num_t)pinNumber );
-
-        // save pin reference
-        channelPinMapping[pinNumber] = pThis;
+		if (!validPin)
+		{
+			NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+		}
 
         // protect this from GC so that the callback is where it's supposed to
         CLR_RT_ProtectFromGC         gc( *pThis );
@@ -281,31 +192,33 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___B
     {
         CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-        int16_t pinNumber = stack.Arg1().NumericByRef().s4;
+		GPIO_PIN pinNumber = (GPIO_PIN)stack.Arg1().NumericByRef().s4;
 
-        // TODO is probably a good idea keep track of the used pins, so we can check that here
-        // TODO is probably a good idea to check if this pin exists
-
-        if ( !GPIO_IS_VALID_GPIO((gpio_num_t)pinNumber) )
+        if ( !CPU_GPIO_ReservePin(pinNumber, true) )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
         // Return value to the managed application
-        stack.SetResult_Boolean(true );
+        stack.SetResult_Boolean(true);
     }
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebounceTimeout___VOID( CLR_RT_StackFrame& stack )
 {
-    (void)stack;
-    
-    NANOCLR_HEADER();
+   NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    // nothing to do here as the debounce timeout is grabbed from the managed object when required
+		GPIO_PIN pinNumber = (GPIO_PIN)stack.Arg1().NumericByRef().s4;
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+        int64_t debounceTimeoutMilsec = (CLR_INT64_TEMP_CAST) pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___debounceTimeout ].NumericByRefConst().s8 / TIME_CONVERSION__TO_MILLISECONDS;
+
+        CPU_GPIO_SetPinDebounce( pinNumber, debounceTimeoutMilsec );
+
+    }
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___VOID__WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )
@@ -320,19 +233,15 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        int16_t pinNumber = pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
-        GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
+		GPIO_PIN pinNumber = (GPIO_PIN)pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
+		GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
 
         GpioPinValue state = (GpioPinValue)stack.Arg1().NumericByRef().s4;
-        
-        // sanity check for drive mode set to output so we don't mess up writing to an input pin
-        if ((driveMode == GpioPinDriveMode_Output) ||
-            (driveMode == GpioPinDriveMode_OutputOpenDrain) ||
-            (driveMode == GpioPinDriveMode_OutputOpenDrainPullUp) ||
-            (driveMode == GpioPinDriveMode_OutputOpenSource) ||
-            (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
+ 		
+		// sanity check for drive mode set to output so we don't mess up writing to an input pin
+        if ((driveMode >= GpioPinDriveMode_Output) )
         {
-            gpio_set_level( (gpio_num_t)pinNumber, state);
+			CPU_GPIO_SetPinState(pinNumber, (state != 0) );
 
             // store the output value in the field
             pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = state;

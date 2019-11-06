@@ -16,6 +16,8 @@
 #include <nanoHAL_Power.h>
 #include <nanoHAL_ConfigurationManager.h>
 
+typedef uint32_t GPIO_PIN;
+
 typedef enum SYSTEM_STATE
 {
     SYSTEM_STATE_ISR,
