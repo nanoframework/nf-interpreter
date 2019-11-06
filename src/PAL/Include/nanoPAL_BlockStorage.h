@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 #include <target_BlockStorage.h>
 
