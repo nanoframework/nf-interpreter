@@ -32,6 +32,15 @@ enum GpioPinDriveMode
     GpioPinDriveMode_OutputOpenSourcePullDown
 };
 
+///////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioPinValue (in managed code) !!! //
+///////////////////////////////////////////////////////////////////////////////////
+
+enum GpioPinValue
+{
+	GpioPinValue_Low = 0,
+	GpioPinValue_High,
+};
 
 enum GPIO_INT_EDGE
 {
