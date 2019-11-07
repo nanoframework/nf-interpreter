@@ -14,8 +14,8 @@ HRESULT Library_corlib_native_System_Double::CompareTo___STATIC__I4__R8__R8( CLR
     NANOCLR_HEADER();
 
     double d = stack.Arg0().NumericByRefConst().r8;
-    double val = stack.Arg0().NumericByRefConst().r8;
-    CLR_UINT32 res = System::Double::CompareTo( d, val );
+    double val = stack.Arg1().NumericByRefConst().r8;
+    CLR_INT32 res = System::Double::CompareTo( d, val );
 
     stack.PushValue().SetInteger( res );
 
