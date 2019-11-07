@@ -431,6 +431,22 @@ endif()
 #################################################################
 
 #################################################################
+
+#############################################
+# handles inclusion of System.Collections API
+#############################################
+
+if(API_nanoFramework.System.Collections)
+    set(TARGET_SYSTEM_COLLECTIONS TRUE CACHE INTERNAL "enable support for System.Collections API")
+    message(STATUS "Support for System.Collections API enabled")
+else()
+    set(TARGET_SYSTEM_COLLECTIONS FALSE CACHE INTERNAL "DISABLE support for System.Collections API")
+    message(STATUS "Support for System.Collections API **IS NOT** enabled")
+endif()
+
+#################################################################
+
+#################################################################
 # manage HAL/PAL required for API namespaces
 #################################################################
 # for some APIs we need to enable the device in the HAL config

@@ -264,47 +264,6 @@ struct Library_corlib_native_System_Collections_ArrayList
 
 };
 
-struct Library_corlib_native_System_Collections_DictionaryEntry
-{
-    static const int FIELD__Key = 1;
-    static const int FIELD__Value = 2;
-
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_Collections_Queue
-{
-    static const int FIELD___array = 1;
-    static const int FIELD___head = 2;
-    static const int FIELD___tail = 3;
-    static const int FIELD___size = 4;
-
-    NANOCLR_NATIVE_DECLARE(Clear___VOID);
-    NANOCLR_NATIVE_DECLARE(CopyTo___VOID__SystemArray__I4);
-    NANOCLR_NATIVE_DECLARE(Enqueue___VOID__OBJECT);
-    NANOCLR_NATIVE_DECLARE(Dequeue___OBJECT);
-    NANOCLR_NATIVE_DECLARE(Peek___OBJECT);
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_Collections_Stack
-{
-    static const int FIELD___array = 1;
-    static const int FIELD___size = 2;
-
-    NANOCLR_NATIVE_DECLARE(Clear___VOID);
-    NANOCLR_NATIVE_DECLARE(Peek___OBJECT);
-    NANOCLR_NATIVE_DECLARE(Pop___OBJECT);
-    NANOCLR_NATIVE_DECLARE(Push___VOID__OBJECT);
-
-    //--//
-
-};
-
 struct Library_corlib_native_System_Console
 {
     NANOCLR_NATIVE_DECLARE(OutNative___STATIC__VOID__STRING__BOOLEAN);

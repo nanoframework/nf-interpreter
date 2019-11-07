@@ -3,10 +3,11 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include "CorLib.h"
+
+#include "nf_system_collections.h"
 
 
-HRESULT Library_corlib_native_System_Collections_Stack::Clear___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_collections_System_Collections_Stack::Clear___VOID( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -18,7 +19,7 @@ HRESULT Library_corlib_native_System_Collections_Stack::Clear___VOID( CLR_RT_Sta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Collections_Stack::Peek___OBJECT( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_collections_System_Collections_Stack::Peek___OBJECT( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -34,7 +35,7 @@ HRESULT Library_corlib_native_System_Collections_Stack::Peek___OBJECT( CLR_RT_St
 
 }
 
-HRESULT Library_corlib_native_System_Collections_Stack::Pop___OBJECT( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_collections_System_Collections_Stack::Pop___OBJECT( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -49,7 +50,7 @@ HRESULT Library_corlib_native_System_Collections_Stack::Pop___OBJECT( CLR_RT_Sta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Collections_Stack::Push___VOID__OBJECT( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_collections_System_Collections_Stack::Push___VOID__OBJECT( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
