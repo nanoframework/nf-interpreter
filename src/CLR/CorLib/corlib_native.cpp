@@ -206,6 +206,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN,
     NULL,
     NULL,
@@ -262,6 +263,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_corlib_native_System_Diagnostics_Debugger::get_IsAttached___STATIC__BOOLEAN,
     Library_corlib_native_System_Diagnostics_Debugger::Break___STATIC__VOID,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -541,6 +543,13 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_SystemType,
     Library_corlib_native_System_RuntimeType::GetElementType___SystemType,
     Library_corlib_native_System_RuntimeType::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -994,6 +1003,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN,
     NULL,
     NULL,
@@ -1050,6 +1060,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_corlib_native_System_Diagnostics_Debugger::get_IsAttached___STATIC__BOOLEAN,
     Library_corlib_native_System_Diagnostics_Debugger::Break___STATIC__VOID,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -1212,6 +1223,13 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::RunClassConstructor___STATIC__VOID__SystemRuntimeTypeHandle,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::get_OffsetToStringData___STATIC__I4,
     Library_corlib_native_System_Runtime_Remoting_RemotingServices::IsTransparentProxy___STATIC__BOOLEAN__OBJECT,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -1483,11 +1501,17 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
     "mscorlib", 
 
 #if (NANOCLR_REFLECTION == TRUE)
-    0xE69C4858,
+
+    0xDCB6AEBA,
+
+#elif (NANOCLR_REFLECTION == FALSE)
+
+    0x7E26EC5E,
+
 #else
-    0xCE9CF574,
+#error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 4, 3, 0 }
+    { 100, 4, 5, 0 }
 };
