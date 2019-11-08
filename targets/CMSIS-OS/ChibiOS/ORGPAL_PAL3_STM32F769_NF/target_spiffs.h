@@ -11,8 +11,8 @@
 #define SPIFFS_FILE_DESCRIPTORS_SPACE   (32 * 2)
 #define SPIFFS_CACHE_SIZE               ((SPIFFS_LOGICAL_PAGE_SIZE + 32) * 4)
 
-#define SPIFFS_SPI1
-//#define SPIFFS_QSPI
+//#define SPIFFS_SPI1
+#define SPIFFS_QSPI
 
 
 #if defined(SPIFFS_SPI1) && defined(SPIFFS_QSPI)
