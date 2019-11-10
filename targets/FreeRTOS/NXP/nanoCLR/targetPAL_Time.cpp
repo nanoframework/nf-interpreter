@@ -6,7 +6,7 @@
 #include <nanoPAL.h>
 
 #include "FreeRTOS.h"
-#include <timers.h >
+#include <timers.h>
 
 static TimerHandle_t nextEventTimer;
 
