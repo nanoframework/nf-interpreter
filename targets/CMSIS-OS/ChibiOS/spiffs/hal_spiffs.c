@@ -53,7 +53,6 @@ uint8_t hal_spiffs_config()
     spiffs_cfg.log_block_size = SPIFFS_LOGICAL_BLOCK_SIZE;
     spiffs_cfg.log_page_size = SPIFFS_LOGICAL_PAGE_SIZE;
 
-
     // setup pointers to HAL functions
     spiffs_cfg.hal_erase_f = hal_spiffs_erase;
     spiffs_cfg.hal_read_f = hal_spiffs_read;
