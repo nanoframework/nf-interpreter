@@ -141,7 +141,7 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DRUNTIME_MEMORY_PROFILE__extrasmall=1 -DPORT_IGNORE_GCC_VERSION_CHECK=TRUE)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DRUNTIME_MEMORY_PROFILE__extrasmall=1)
 
 # set linker file
 # set linker files
