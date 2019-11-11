@@ -967,9 +967,9 @@
 
         double d = stack.Arg0().NumericByRefConst().r8;
         double res = 0.0;
-        double retVal = System::Math::Truncate(d, res);
+        modf(d, &res);
 
-        stack.SetResult_R8( retVal );
+        stack.SetResult_R8( res );
 
         NANOCLR_NOCLEANUP_NOLABEL();
      
