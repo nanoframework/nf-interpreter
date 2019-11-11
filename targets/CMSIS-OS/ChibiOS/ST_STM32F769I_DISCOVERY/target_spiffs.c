@@ -851,4 +851,3 @@ uint8_t QSPI_Erase_Block(uint32_t blockAddress)
 
     return QSPI_OK;
 }
-

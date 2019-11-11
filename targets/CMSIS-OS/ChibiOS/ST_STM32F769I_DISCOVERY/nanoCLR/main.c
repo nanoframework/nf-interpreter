@@ -55,7 +55,7 @@ int main(void) {
   osKernelInitialize();
 
   // start watchdog
-  //Watchdog_Init();
+  Watchdog_Init();
 
   #if (HAL_NF_USE_STM32_CRC == TRUE)
   // startup crc

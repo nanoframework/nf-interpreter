@@ -72,7 +72,6 @@ bool HAL_CONTINUATION::Dequeue_And_Execute()
         call.Execute();
 
         //SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS );   // nestable
-    //irq.Acquire();
 
         result = true;
     }

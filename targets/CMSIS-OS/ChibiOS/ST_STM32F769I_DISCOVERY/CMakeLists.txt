@@ -177,9 +177,6 @@ include_directories(
 
     ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-
-    # includes for SPIFFS
-    "${SPIFFS_INCLUDE_DIRS}"
 )
 
 # include directories for nanoBooter
