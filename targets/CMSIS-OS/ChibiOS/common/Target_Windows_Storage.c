@@ -200,6 +200,8 @@ static FATFS usbMsd_FS;
 __attribute__((noreturn))
 void UsbMsdWorkingThread(void const * argument)
 {
+    (void)argument;
+
     FRESULT err;
 
     usbMsdFileSystemReady = false;
@@ -207,7 +209,7 @@ void UsbMsdWorkingThread(void const * argument)
     // start USB host
     usbhStart(&USB_MSD_DRIVER);
 
-    USBHMassStorageLUNDriver* msBlk = (USBHMassStorageLUNDriver*)argument;
+    USBHMassStorageLUNDriver* msBlk = (USBHMassStorageLUNDriver*)&MSBLKD[0];
 
     for(;;)
     {
