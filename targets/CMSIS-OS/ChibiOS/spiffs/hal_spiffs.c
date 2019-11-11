@@ -21,8 +21,19 @@ spiffs fs;
 spiffs_config spiffs_cfg;
 bool spiffsFileSystemReady;
 
+#if defined(__GNUC__)
+__attribute__((aligned (32)))
+#endif
 uint8_t spiffs_work_buffer[SPIFFS_WORK_BUFFER_SIZE];
+
+#if defined(__GNUC__)
+__attribute__((aligned (32)))
+#endif
 uint8_t spiffs_fd_space[SPIFFS_FILE_DESCRIPTORS_SPACE];
+
+#if defined(__GNUC__)
+__attribute__((aligned (32)))
+#endif
 uint8_t spiffs_cache[SPIFFS_CACHE_SIZE];
 
 // initialization of SPIFFS: configurations, data structures, drivers and lock
@@ -88,29 +99,28 @@ uint8_t hal_spiffs_config()
   #endif
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // code block to assist testing SPIFFS
-    char writeBuf[] = {"Hello! if you get this message, congratulations, that's because SPIFFS is working on your device!!"};
-    char readBuf[80];
-
-    spiffs_file fd = SPIFFS_open(&fs, "file1.txt", SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
-    if (SPIFFS_write(&fs, fd, writeBuf, sizeof(writeBuf)) < 0)
-    {
-        return -1;
-    }
-
-    SPIFFS_close(&fs, fd);    
-    fd = SPIFFS_open(&fs, "file1.txt", SPIFFS_RDWR, 0);
-
-    if (SPIFFS_read(&fs, fd, readBuf, sizeof(writeBuf)) < 0)
-    {
-        return -1;
-    }
-
-    SPIFFS_close(&fs, fd);
-
-    uint32_t total = 0;
-    uint32_t used_space = 0;
-    SPIFFS_info(&fs, &total, &used_space);
+    // // code block to assist testing SPIFFS
+    // char writeBuf[] = {"Hello! if you get this message, congratulations, that's because SPIFFS is working on your device!!"};
+    // char readBuf[sizeof(writeBuf)];
+    
+    // spiffs_file fd = SPIFFS_open(&fs, "file1.txt", SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
+    // if (SPIFFS_write(&fs, fd, writeBuf, sizeof(writeBuf)) < 0)
+    // {
+    //     return -1;
+    // }
+    
+    // SPIFFS_close(&fs, fd);    
+    // fd = SPIFFS_open(&fs, "file1.txt", SPIFFS_RDWR, 0);
+    // if (SPIFFS_read(&fs, fd, readBuf, sizeof(readBuf)) < 0)
+    // {
+    //     return -1;
+    // }
+    
+    // SPIFFS_close(&fs, fd);
+    
+    // uint32_t total = 0;
+    // uint32_t used_space = 0;
+    // SPIFFS_info(&fs, &total, &used_space);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

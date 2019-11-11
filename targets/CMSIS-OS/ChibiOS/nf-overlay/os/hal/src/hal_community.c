@@ -33,7 +33,7 @@ void halCommunityInit(void) {
 // from ChibiOS-Contrib repo //
 ///////////////////////////////
 
-#if HAL_USE_USBH || defined(__DOXYGEN__)
+#if (HAL_USE_USBH == TRUE)
   usbhInit();
 #endif
 

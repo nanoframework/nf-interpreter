@@ -40,12 +40,12 @@ macro(ProcessSTM32CubePackage)
         # setup CMake project for STM32_CubePackage download
         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}_CubePackage_Download")
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}-CubePackage_Download")
 
         # run build on STM32_CubePackage download CMake project to perform the download
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}_CubePackage_Download")
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}-CubePackage_Download")
 
         # add STM32_CubePackage as external project
         # need to specify nanoframework as the active branch

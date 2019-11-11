@@ -411,7 +411,7 @@ if(NF_FEATURE_USE_SPIFFS)
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("CMake/SPIFFS.CMakeLists.cmake.in"
+        configure_file("${PROJECT_SOURCE_DIR}/CMake/SPIFFS.CMakeLists.cmake.in"
                     "${CMAKE_BINARY_DIR}/SPIFFS_Download/CMakeLists.txt")
 
         # setup CMake project for SPIFFS download
