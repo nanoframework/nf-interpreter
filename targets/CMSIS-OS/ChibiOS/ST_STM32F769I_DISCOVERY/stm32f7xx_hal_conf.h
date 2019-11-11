@@ -14,8 +14,8 @@
 #endif
 
 #define HAL_DMA_MODULE_ENABLED
-#define HAL_RCC_MODULE_ENABLED
 #define HAL_QSPI_MODULE_ENABLED   
+#define HAL_RCC_MODULE_ENABLED
 
 #define  USE_HAL_DMA2D_REGISTER_CALLBACKS       0U /* DMA2D register callback disabled     */
 #define  USE_HAL_QSPI_REGISTER_CALLBACKS        0U /* QSPI register callback disabled      */
@@ -23,7 +23,6 @@
 #ifdef HAL_RCC_MODULE_ENABLED
   #include "stm32f7xx_hal_rcc.h"
 #endif /* HAL_RCC_MODULE_ENABLED */
-
 
 #ifdef HAL_DMA_MODULE_ENABLED
   #include "stm32f7xx_hal_dma.h"

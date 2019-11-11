@@ -5,13 +5,11 @@
 
 ////////////////////////////////////
 // buffers configuration
-
 #define SPIFFS_LOGICAL_PAGE_SIZE        (256)
 
 #define SPIFFS_WORK_BUFFER_SIZE         (SPIFFS_LOGICAL_PAGE_SIZE * 2)
 #define SPIFFS_FILE_DESCRIPTORS_SPACE   (32 * 2)
 #define SPIFFS_CACHE_SIZE               ((SPIFFS_LOGICAL_PAGE_SIZE + 32) * 4)
-
 
 #define SPIFFS_DRIVER_QSPI              (1)
 
@@ -145,9 +143,6 @@
 
 ////////////////////////////////
 
-
 #define SPIFFS_TOTAL_SIZE               MX25L512_FLASH_SIZE
-
 #define SPIFFS_ERASE_BLOCK_SIZE         MX25L512_SECTOR_SIZE
-
 #define SPIFFS_LOGICAL_BLOCK_SIZE       (64*1024)
