@@ -154,8 +154,8 @@ void SdCardWorkingThread(void const * argument)
     sdcStart(&SD_CARD_DRIVER, &SDC_CFG);
 
     // setup line event in SD Card detect GPIO
-    palEnableLineEvent(LINE_SD_DETECT, PAL_EVENT_MODE_BOTH_EDGES);
-    palSetLineCallback(LINE_SD_DETECT, SdCardDetectCallback, &SD_CARD_DRIVER);
+    palEnableLineEvent(SDCARD_LINE_DETECT, PAL_EVENT_MODE_BOTH_EDGES);
+    palSetLineCallback(SDCARD_LINE_DETECT, SdCardDetectCallback, &SD_CARD_DRIVER);
 
     // init timer
     chVTObjectInit(&sdCardDebounceTimer);
