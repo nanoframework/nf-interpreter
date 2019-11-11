@@ -55,7 +55,6 @@ void qspi_lld_start(QSPI_HandleTypeDef* qspi)
     QSPI_FORCE_RESET();
     QSPI_RELEASE_RESET();
 
-
     nvicEnableVector(STM32_QUADSPI1_NUMBER, STM32_QSPI_QUADSPI1_IRQ_PRIORITY);
 
     qspi->Instance = QUADSPI;
