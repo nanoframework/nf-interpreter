@@ -166,6 +166,12 @@ if(USE_FILESYSTEM_OPTION)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_FILESYSTEM_COMPONENTS)
 endif()
 
+# add dependencies from STM32F7_CubePackage and SPIFFS (this is required to make sure that components are unzip at the proper locations before the build starts)
+if(NF_FEATURE_USE_SPIFFS)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf STM32F7_CubePackage)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf SPIFFS)
+endif()
+
 # include common directories
 include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
