@@ -126,7 +126,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 			}
 
 			// Disable GPIO input pin as we use separate counter
-			CPU_GPIO_DisablePin(pinNumber, GpioPinDriveMode::GpioPinDriveMode_Input, GPIO_ALT_PRIMARY);
+			CPU_GPIO_DisablePin(pinNumber, GpioPinDriveMode::GpioPinDriveMode_Input, 0);
 
 			// Reserve pin for Counter use
 			CPU_GPIO_ReservePin(pinNumber, true);

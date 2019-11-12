@@ -1,26 +1,15 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-//  ESP32 GPIO ( 40 physical GPIO pads)
-//
-//  GPIO6-11 used for PSI flash
-//
-//  GPIO34-39 Only input mode
-//
-
 #include <targetPAL.h>
-#include "win_dev_gpio_native.h"
+#include "win_dev_gpio_native_target.h"
 #include "nf_rt_events_native.h"
 
-#include "Esp32_DeviceMapping.h"
-
-
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
-
 
 void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void* param )
 {
@@ -46,7 +35,7 @@ void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void* param )
    if ( callbacksRegistered )
    {
 		// if handle registed then post a managed event with the current pin reading
-		PostManagedEvent( EVENT_GPIO, 0, (uint16_t)pinNumber, pinState?1:0 );
+		PostManagedEvent( EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState );
    }
 
 	NATIVE_INTERRUPT_END
@@ -65,7 +54,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___Windows
 
 		GPIO_PIN pinNumber = (GPIO_PIN)pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
 
-		stack.SetResult_I4( CPU_GPIO_GetPinState(pinNumber)?1:0 );
+		stack.SetResult_I4( CPU_GPIO_GetPinState(pinNumber) );
 	}
 	NANOCLR_NOCLEANUP();
 }
@@ -86,19 +75,13 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
 		GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[ FIELD___driveMode ].NumericByRefConst().s4;
 		
 		// sanity check for drive mode set to output so we don't mess up writing to an input pin
-		if ((driveMode == GpioPinDriveMode_Output) ||
-			(driveMode == GpioPinDriveMode_OutputOpenDrain) ||
-			(driveMode == GpioPinDriveMode_OutputOpenDrainPullUp) ||
-			(driveMode == GpioPinDriveMode_OutputOpenSource) ||
-			(driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
+		if (driveMode >=  GpioPinDriveMode_Output) 
 		{
-			// ESP32 GPIO API doesn't offer a 'toggle', so need to rely on the last output value field and toggle that one
+			// Not all lower level API offer a 'toggle', so need to rely on the last output value field and toggle that one
 			GpioPinValue newState = (GpioPinValue)(GpioPinValue_High ^ (GpioPinValue)pThis[ FIELD___lastOutputValue ].NumericByRef().s4);
 			
 			// ...write back to the GPIO...
-//			CPU_GPIO_SetPinState(pinNumber, newState != 0 );
-			gpio_set_level((gpio_num_t)pinNumber, newState);
-
+			CPU_GPIO_SetPinState(pinNumber, newState );
 
 			// ... and finally store it
 			pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = newState;
@@ -118,7 +101,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative_
 		// releases the pin
 		GPIO_PIN pinNumber = (GPIO_PIN)pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
 		
-		CPU_GPIO_DisablePin(pinNumber, GpioPinDriveMode_Input, GPIO_ALT_PRIMARY);
+		CPU_GPIO_DisablePin(pinNumber, GpioPinDriveMode_Input, 0) ;
 	}
 	NANOCLR_NOCLEANUP();
 }
@@ -156,7 +139,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 
 		if (driveMode >= (int)GpioPinDriveMode_Output)
 		{
-			validPin = CPU_GPIO_EnableOutputPin(pinNumber, false, driveMode);
+			validPin = CPU_GPIO_EnableOutputPin(pinNumber, GpioPinValue_Low, driveMode);
 		}
 		else
 		{
@@ -226,7 +209,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
 		// sanity check for drive mode set to output so we don't mess up writing to an input pin
 		if ((driveMode >= GpioPinDriveMode_Output) )
 		{
-			CPU_GPIO_SetPinState(pinNumber, (state != 0) );
+			CPU_GPIO_SetPinState(pinNumber, state );
 
 			// store the output value in the field
 			pThis[ FIELD___lastOutputValue ].NumericByRef().s4 = state;
@@ -257,7 +240,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlter
 		// get alternate function argument
 		int32_t alternateFunction = stack.Arg1().NumericByRef().s4;
 
-		Esp32_SetMappedDevicePins( (uint8_t)pinNumber, alternateFunction );
+		CPU_GPIO_DisablePin( pinNumber, GpioPinDriveMode_Input, alternateFunction);
 	}
 	NANOCLR_NOCLEANUP();
 }

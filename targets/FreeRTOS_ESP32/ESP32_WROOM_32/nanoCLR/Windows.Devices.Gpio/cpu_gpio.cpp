@@ -3,10 +3,20 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
+//  ESP32 GPIO ( 40 physical GPIO pads)
+//
+//  GPIO6-11 used for PSI flash
+//
+//  GPIO34-39 Only input mode
+//
+
 #include <targetHAL.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
+
+#include "Esp32_DeviceMapping.h"
 
 static const char* TAG = "cpu_Gpio";
 
@@ -109,6 +119,10 @@ bool   CPU_GPIO_Initialize()
 
 	// Make sure all pins are not reserved
 	memset(pinReserved, 0, sizeof(pinReserved));
+	
+	// Reserve Pins 6-11 as used by Spi flash
+	for (int pinNumber = 6; pinNumber <= 11; pinNumber++)
+		CPU_GPIO_ReservePin(pinNumber, true);
 
 	// Install ISR service for GPIO
 	esp_err_t ret = gpio_install_isr_service(0);
@@ -177,15 +191,15 @@ int32_t CPU_GPIO_GetPinCount()
 }
 
 // Get current state of pin
-bool CPU_GPIO_GetPinState(GPIO_PIN pin)
+GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN pin)
 {
-	return gpio_get_level((gpio_num_t)pin);
+	return (GpioPinValue)gpio_get_level((gpio_num_t)pin);
 }
 
 // Set Pin state
-void CPU_GPIO_SetPinState(GPIO_PIN pin, bool PinState)
+void CPU_GPIO_SetPinState(GPIO_PIN pin, GpioPinValue PinState)
 {
-	gpio_set_level((gpio_num_t)pin, PinState ? 1 : 0);
+	gpio_set_level((gpio_num_t)pin, (uint32_t)PinState);
 }
 
 // ISR called by IDF
@@ -291,7 +305,7 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMillisecond
 // driveMode    -   Drive mode and resistors
 // return       -   True if succesful, false invalid pin, pin not putput, invalid drive mode for ouptput
 //
-bool  CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, bool InitialState, GpioPinDriveMode driveMode)
+bool  CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, GpioPinDriveMode driveMode)
 {
 	// check not an output drive mode
 	if (driveMode < (int)GpioPinDriveMode_Output) return false;
@@ -307,20 +321,24 @@ bool  CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, bool InitialState, GpioPinDri
 }
 
 
-void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, GPIO_ALT_MODE AltFunction)
+void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_t alternateFunction)
 {
-	(void)AltFunction;
-
 	GLOBAL_LOCK();
-
+	
 	DeleteInputState(pinNumber);
 
 	CPU_GPIO_SetDriveMode(pinNumber, driveMode);
+	
+	if (alternateFunction != 0)
+	{
+		Esp32_SetMappedDevicePins((uint8_t)pinNumber, alternateFunction);
+	}
 
 	GLOBAL_UNLOCK();
 
 	CPU_GPIO_ReservePin(pinNumber, false);
 }
+
 
 // Validate pin and set drive mode
 // return true if ok

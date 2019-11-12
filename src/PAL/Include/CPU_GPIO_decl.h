@@ -59,20 +59,6 @@ enum GPIO_INT_EDGE
 //     GPIO_RESISTOR Resistor;
 // };
 
-// Generic enum for GPIO Primary/Alternate/Mux function 
-// Different processor have different defintion for the mode
-enum GPIO_ALT_MODE
-{
-    GPIO_ALT_PRIMARY    = 0,
-    GPIO_ALT_MODE_1     = 1,
-    GPIO_ALT_MODE_2     = 2,
-    GPIO_ALT_MODE_3     = 3,
-    GPIO_ALT_MODE_4     = 4,
-    GPIO_ALT_MODE_5     = 5,
-    GPIO_ALT_MODE_6     = 6,
-    GPIO_ALT_MODE_7     = 7,
-    GPIO_ALT_MODE_8     = 8,
-};
 
 typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)( GPIO_PIN Pin, bool PinState, void* Param );
 
@@ -80,7 +66,7 @@ bool   CPU_GPIO_Initialize     ();
 bool   CPU_GPIO_Uninitialize   ();
 
 
-void   CPU_GPIO_DisablePin     ( GPIO_PIN Pin, GpioPinDriveMode driveMode, GPIO_ALT_MODE AltFunction );
+void   CPU_GPIO_DisablePin     ( GPIO_PIN Pin, GpioPinDriveMode driveMode, uint32_t alternateFunction);
 
 //
 // CPU_GPIO_EnableOutputPin
@@ -90,14 +76,14 @@ void   CPU_GPIO_DisablePin     ( GPIO_PIN Pin, GpioPinDriveMode driveMode, GPIO_
 // Pin               
 //   The number of the input pin to be enabled.
 // InitialState
-//   InialState of pin
+//   Inial value of pin
 // GpioPinDriveMode
 //   Pin resistor driver mode
 //
 // Return Value
 //   true if the specified pin was successfully enabled as output; otherwise, false.
 //
-bool   CPU_GPIO_EnableOutputPin( GPIO_PIN Pin, bool InitialState, GpioPinDriveMode driveMode );
+bool   CPU_GPIO_EnableOutputPin( GPIO_PIN Pin, GpioPinValue InitialState, GpioPinDriveMode driveMode );
 
 //
 // CPU_GPIO_EnableInputPin
@@ -122,10 +108,10 @@ bool   CPU_GPIO_EnableOutputPin( GPIO_PIN Pin, bool InitialState, GpioPinDriveMo
 bool   CPU_GPIO_EnableInputPin( GPIO_PIN Pin, int64_t debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE PIN_ISR, void* ISR_Param, GPIO_INT_EDGE IntEdge, GpioPinDriveMode driveMode );
 
 //  Return current gpio pin state
-bool   CPU_GPIO_GetPinState    ( GPIO_PIN Pin );
+GpioPinValue   CPU_GPIO_GetPinState    ( GPIO_PIN Pin );
 
 //  Set state of output gpio pin
-void   CPU_GPIO_SetPinState    ( GPIO_PIN Pin, bool PinState );
+void   CPU_GPIO_SetPinState    ( GPIO_PIN Pin, GpioPinValue PinState );
 
 //  Check if pin is already reserved
 //  Returns true if pin is already reserved

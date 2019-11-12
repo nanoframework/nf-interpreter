@@ -14,7 +14,7 @@
 //volatile uint16_t lastPadValue;
 
 
-#define GPIO_MAX_PIN  		144 
+#define GPIO_MAX_PIN  		256 
 #define TOTAL_GPIO_PORTS   ((GPIO_MAX_PIN + 15) / 16)
 
 // Double linkedlist to hold the state of each Input pin
@@ -35,7 +35,7 @@ static uint16_t pinReserved[TOTAL_GPIO_PORTS];        //  reserved - 1 bit per p
 
 
 // this is an utility function to get a ChibiOS PAL IoLine from our "encoded" pin number
-ioline_t GetIoLine(int16_t pinNumber)
+static ioline_t GetIoLine(int16_t pinNumber)
 {
 	stm32_gpio_t* port = GPIO_PORT(pinNumber);
 	int16_t pad = pinNumber % 16;
@@ -224,15 +224,15 @@ int32_t CPU_GPIO_GetPinCount()
 }
 
 // Get current state of pin
-bool CPU_GPIO_GetPinState(GPIO_PIN pin)
+GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN pin)
 {
-	return palReadLine(GetIoLine(pin));
+	return (GpioPinValue)palReadLine(GetIoLine(pin));
 }
 
 // Set Pin state
-void CPU_GPIO_SetPinState(GPIO_PIN pin, bool PinState)
+void CPU_GPIO_SetPinState(GPIO_PIN pin, GpioPinValue PinState)
 {
-	palWriteLine(GetIoLine(pin), PinState ? 1 : 0);
+	palWriteLine(GetIoLine(pin), (int)PinState);
 }
 
 bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE Pin_ISR, void* ISR_Param, GPIO_INT_EDGE IntEdge, GpioPinDriveMode driveMode)
@@ -298,7 +298,7 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMillisecond
 // driveMode    -   Drive mode and resistors
 // return       -   True if succesful, false invalid pin, pin not putput, invalid drive mode for ouptput
 //
-bool  CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, bool InitialState, GpioPinDriveMode driveMode)
+bool  CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, GpioPinDriveMode driveMode)
 {
 	// check not an output drive mode
 	if (driveMode < (int)GpioPinDriveMode_Output) return false;
@@ -314,15 +314,17 @@ bool  CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, bool InitialState, GpioPinDri
 }
 
 
-void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, GPIO_ALT_MODE AltFunction)
+void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_t alternateFunction)
 {
-	(void)AltFunction;
-
 	GLOBAL_LOCK();
 
 	DeleteInputState(pinNumber);
 
 	CPU_GPIO_SetDriveMode(pinNumber, driveMode);
+
+	// get IoLine from pin number
+	ioline_t ioLine = GetIoLine(pinNumber);
+	palSetLineMode(ioLine, PAL_MODE_ALTERNATE(alternateFunction));
 
 	GLOBAL_UNLOCK();
 
