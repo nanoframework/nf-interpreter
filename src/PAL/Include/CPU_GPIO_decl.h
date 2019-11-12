@@ -128,13 +128,16 @@ bool   CPU_GPIO_GetPinState    ( GPIO_PIN Pin );
 void   CPU_GPIO_SetPinState    ( GPIO_PIN Pin, bool PinState );
 
 //  Check if pin is already reserved
+//  Returns true if pin is already reserved
 bool   CPU_GPIO_PinIsBusy      ( GPIO_PIN Pin );
 
-//  Reserved or unreserve gpio pin
-bool   CPU_GPIO_ReservePin     ( GPIO_PIN Pin, bool fReserve );
+//  Reserved or Unreserve gpio pin
+//  if clearing reserve always return true
+//  If reserving pin then return false if already reserved 
+bool   CPU_GPIO_ReservePin    ( GPIO_PIN Pin, bool fReserve );
 
 
-//  Return count of number of gpio pins avaiable
+//  Return count of gpio pins avaiable
 int32_t  CPU_GPIO_GetPinCount    ();
 
 
@@ -144,10 +147,10 @@ bool   CPU_GPIO_SetPinDebounce(GPIO_PIN Pin, int64_t debounceTimeMilliseconds);
 
 
 // Validate pin and set drive mode
-// return true if ok
+// return true if pin ok
 bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, GpioPinDriveMode driveMode);
 
-// Check drive mode
+// Check if drive mode supported
 // return true if drive mode supported
 bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, GpioPinDriveMode driveMode);
 
