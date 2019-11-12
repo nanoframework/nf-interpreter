@@ -23,6 +23,8 @@ bool ssl_generic_init_internal(
 {
     (void)sslMode;
 
+    int minVersion = MBEDTLS_SSL_MINOR_VERSION_3;
+    int maxVersion = MBEDTLS_SSL_MINOR_VERSION_1;
     int sslContexIndex = -1;
     int authMode = MBEDTLS_SSL_VERIFY_NONE;
     int endpoint = 0;
@@ -133,42 +135,40 @@ bool ssl_generic_init_internal(
         goto error;
     }
 
-    // configure protocol
-    switch((SslProtocols)sslMode)
+    // figure out the min and max protocol version to support
+    // sanity check for none, application has to set the supported protocols
+    if((SslProtocols)sslMode == SslProtocols_None)
     {
-        case SslProtocols_TLSv1:
-            mbedtls_ssl_conf_min_version( 
-                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
-                MBEDTLS_SSL_MINOR_VERSION_1 );
-            mbedtls_ssl_conf_max_version( 
-                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
-                MBEDTLS_SSL_MINOR_VERSION_1 );
-            break;
-
-        case SslProtocols_TLSv11:
-            mbedtls_ssl_conf_min_version( 
-                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
-                MBEDTLS_SSL_MINOR_VERSION_2 );
-            mbedtls_ssl_conf_max_version( 
-                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
-                MBEDTLS_SSL_MINOR_VERSION_2 );
-            break;
-
-        case SslProtocols_TLSv12:
-            mbedtls_ssl_conf_min_version( 
-                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
-                MBEDTLS_SSL_MINOR_VERSION_3 );
-            mbedtls_ssl_conf_max_version( 
-                context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
-                MBEDTLS_SSL_MINOR_VERSION_3 );
-            break;
-
-        default:
-            // shouldn't reach here!
-            return FALSE;
+        goto error;
     }
 
+    // find minimum version
+    if(sslMode & (SslProtocols_TLSv11 | SslProtocols_TLSv1))
+    {
+        minVersion = MBEDTLS_SSL_MINOR_VERSION_2;
+    }
+    if(sslMode & SslProtocols_TLSv1)
+    {
+        minVersion = MBEDTLS_SSL_MINOR_VERSION_1;
+    }
+    mbedtls_ssl_conf_min_version( 
+        context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+        minVersion );
 
+    // find maximum version
+    if(sslMode & (SslProtocols_TLSv12 | SslProtocols_TLSv11))
+    {
+        maxVersion = MBEDTLS_SSL_MINOR_VERSION_2;
+    }
+    if(sslMode & SslProtocols_TLSv12)
+    {
+        maxVersion = MBEDTLS_SSL_MINOR_VERSION_3;
+    }
+    mbedtls_ssl_conf_max_version( 
+        context->conf, MBEDTLS_SSL_MAJOR_VERSION_3,
+        maxVersion );
+
+    // configure random generator
     mbedtls_ssl_conf_rng( context->conf, mbedtls_ctr_drbg_random, context->ctr_drbg );
 
     // CA root certs from store, if available
