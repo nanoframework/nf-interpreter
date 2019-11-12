@@ -25,7 +25,7 @@ extern bool sdCardFileSystemReady;
 #if (HAL_USBH_USE_MSD == TRUE)
 extern bool usbMsdFileSystemReady;
 #endif
-#if USE_SPIFFS_FOR_STORAGE
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
 extern bool spiffsFileSystemReady;
 extern spiffs fs;
 #endif

@@ -2,7 +2,7 @@ trigger:
   branches:
     include:
     - master
-    - develop
+    - develop/*
     - release/*
     - refs/tags/*
   paths:
@@ -100,8 +100,11 @@ jobs:
       git -c http.extraheader="AUTHORIZATION: $auth" fetch --progress origin
       
       git checkout develop
+      
+      cd source
 
-      nbgv prepare-release
+      # prepare release and capture output
+      $release = nbgv prepare-release
   
       # get commit message for the merge
       $commitMessage = git log -1 --pretty=%B
@@ -111,6 +114,35 @@ jobs:
 
       # push all changes to github
       git -c http.extraheader="AUTHORIZATION: $auth" push --all origin
+
+      # get release branch name
+      $branch = $release.Split(' ')[0]
+
+      # start PR for release
+      $prRequestBody = @{title="Release $branch";body="";head="$branch";base="master"} | ConvertTo-Json
+      $githubApiEndpoint = "https://api.github.com/repos/$env:Build_Repository_Name/pulls"
+      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+      $headers = @{}
+      $headers.Add("Authorization","$auth")
+      $headers.Add("Accept","application/vnd.github.symmetra-preview+json")
+
+      try 
+      {
+          $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri  $githubApiEndpoint -Header $headers -ContentType "application/json" -Body $prRequestBody
+          'Started PR for new release...' | Write-Host -NoNewline
+          'OK' | Write-Host -ForegroundColor Green
+      }
+      catch 
+      {
+          $result = $_.Exception.Response.GetResponseStream()
+          $reader = New-Object System.IO.StreamReader($result)
+          $reader.BaseStream.Position = 0
+          $reader.DiscardBufferedData()
+          $responseBody = $reader.ReadToEnd();
+
+          "Error starting PR: $responseBody" | Write-Host -ForegroundColor Red
+      }
 
     condition: eq( variables['StartReleaseCandidate'], true )
     displayName: NBGV prepare release
