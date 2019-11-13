@@ -30,24 +30,30 @@ int ssl_accept_internal(
         return SOCK_SOCKET_ERROR;
     }
 
-    // TODO check how to handle server certificates and certificate chain parsing
+    // set socket in network context
+    context->server_fd->fd = sd;
 
-    // if( ( ret = mbedtls_net_bind( context->server_fd, NULL, "4433", MBEDTLS_NET_PROTO_TCP ) ) != 0 )
-    // {
-    //     goto error;
-    // }
+    // setup internal SSL context and calls to transport layer send, receive and receive with timeout
+    mbedtls_ssl_set_bio( context->ssl, context->server_fd, mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout );
 
-    // // Set socket against this SSL context 
-    // mbedtls_ssl_set_bio(pSsl, static_cast<void *>(sd), sslSend, sslRecv, NULL);
- 
     // Set non blocking socket
     SOCK_ioctl(sd, SOCK_FIONBIO, &nonblock);
 
-    // // Connecion is set up now do SSL handshake  
-    // mbedtls_ssl_handshake()
+    // connection is set up now proceed to SSL handshake  
+
+    // perform SSL handshake
+    while( ( ret = mbedtls_ssl_handshake( context->ssl ) ) != 0 )
+    {
+        if( ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE )
+        {
+            // SSL handshake failed
+            //mbedtls_printf( " failed\n  ! mbedtls_ssl_handshake returned -0x%x\n\n", -ret );
+            goto error;
+        }
+    }
     
-    // nonblock = 1;
-    // SOCK_ioctl(sd, SOCK_FIONBIO, &nonblock);
+    nonblock = 1;
+    SOCK_ioctl(sd, SOCK_FIONBIO, &nonblock);
 
     // Save SSL context against socket
     SOCKET_DRIVER.SetSocketSslData(sd, (void*)context);
