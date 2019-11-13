@@ -69,6 +69,11 @@
           "type": "BOOL"
         },
         {
+          "name": "TARGET_LIGHT_MATH",
+          "value": "FALSE",
+          "type": "BOOL"
+        },
+        {
           "name": "TARGET_DP_FLOATINGPOINT",
           "value": "FALSE",
           "type": "BOOL"
@@ -306,6 +311,11 @@
         {
           "name": "USE_RNG",
           "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "TARGET_LIGHT_MATH",
+          "value": "FALSE",
           "type": "BOOL"
         },
         {

@@ -60,6 +60,10 @@
           "value": "ON"
         },
         {
+          "name": "TARGET_LIGHT_MATH:BOOL", //option to build without complex math function
+          "value": "FALSE"
+        },
+        {
           "name": "TARGET_DP_FLOATINGPOINT:BOOL",
           "value": "FALSE"
         },
@@ -290,6 +294,10 @@
         {
           "name": "USE_RNG:BOOL", //option to enable use of true random generator hardware block
           "value": "ON"
+        },
+        {
+          "name": "TARGET_LIGHT_MATH:BOOL", //option to build without complex math function
+          "value": "FALSE"
         },
         {
           "name": "TARGET_DP_FLOATINGPOINT:BOOL",

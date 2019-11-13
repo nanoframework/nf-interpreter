@@ -210,6 +210,19 @@ else()
     message(STATUS "Single-precision floating point is effective")
 endif()
 
+#################################################################################
+# chooses if build without complex math functions
+# (default is OFF which means that all floating point math functions are available)
+option(NF_FEATURE_LIGHT_MATH "option to build without complex math functions")
+
+if(NF_FEATURE_LIGHT_MATH)
+    set(TARGET_LIGHT_MATH TRUE CACHE INTERNAL "Complex Math functions disabled")
+    message(STATUS "Complex math functions not available")
+else()
+    set(TARGET_LIGHT_MATH FALSE CACHE INTERNAL "Complex Math functions enabled")
+    message(STATUS "Complex math functions available")
+endif()
+
 ###################################################################################
 # chooses if platform provides support for converting string to values on any base
 # (default is OFF which means that conversion to value from base 10 and 16 (partial) is effective)
