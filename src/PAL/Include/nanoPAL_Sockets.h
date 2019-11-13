@@ -248,13 +248,13 @@ typedef struct SOCK_sockaddr {
 
 CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr)==(16), SOCK_SOCKADDR)
 
-typedef ADS_PACKED struct GNU_PACKED SOCK_in_addr{  
-    ADS_PACKED union GNU_PACKED {    
-        ADS_PACKED struct GNU_PACKED {      
+typedef struct GNU_PACKED SOCK_in_addr{  
+    union GNU_PACKED {    
+        struct GNU_PACKED {      
             u_char s_b1,s_b2,s_b3,s_b4;    
         } S_un_b;    
         
-        ADS_PACKED struct GNU_PACKED {      
+        struct GNU_PACKED {      
             u_short s_w1,s_w2;    
         } S_un_w;    
         
@@ -262,7 +262,7 @@ typedef ADS_PACKED struct GNU_PACKED SOCK_in_addr{
     } S_un;
 } SOCK_in_addr;
 
-typedef ADS_PACKED struct GNU_PACKED SOCK_sockaddr_in {
+typedef struct GNU_PACKED SOCK_sockaddr_in {
         short   sin_family;
         u_short sin_port;
         SOCK_in_addr sin_addr;
