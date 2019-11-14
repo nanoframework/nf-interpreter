@@ -1,15 +1,8 @@
 trigger:
   branches:
-    include:
-    - master
-    - develop/*
-    - release/*
-    - refs/tags/*
+    include: ["master", "develop-*", "release-*", "refs/tags/*" ]
   paths:
-    exclude:
-    - CHANGELOG.md
-    - /*.md
-    - .gitignore
+    exclude: [ "doc", "*.md", ".gitignore", "README.md" ]
 
 # no pr config, we want to trigger builds for all PRs on all branches
 
