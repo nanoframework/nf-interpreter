@@ -459,6 +459,20 @@ endif()
 
 #################################################################
 
+#############################################
+# handles inclusion of System.Text API
+#############################################
+
+if(API_nanoFramework.System.Text)
+    set(TARGET_SYSTEM_TEXT TRUE CACHE INTERNAL "enable support for System.Text API")
+    message(STATUS "Support for System.Text API enabled")
+else()
+    set(TARGET_SYSTEM_TEXT FALSE CACHE INTERNAL "DISABLE support for System.Text API")
+    message(STATUS "Support for System.Text API **IS NOT** enabled")
+endif()
+
+#################################################################
+
 #################################################################
 # manage HAL/PAL required for API namespaces
 #################################################################
