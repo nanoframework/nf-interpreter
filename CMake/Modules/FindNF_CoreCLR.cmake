@@ -100,8 +100,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp
     corlib_native_System_Runtime_Remoting_RemotingServices.cpp
     corlib_native_System_String.cpp
-    corlib_native_System_Text_UTF8Decoder.cpp
-    corlib_native_System_Text_UTF8Encoding.cpp
     corlib_native_System_Threading_AutoResetEvent.cpp
     corlib_native_System_Threading_Interlocked.cpp
     corlib_native_System_Threading_ManualResetEvent.cpp

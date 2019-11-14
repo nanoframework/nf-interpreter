@@ -210,6 +210,19 @@ else()
     message(STATUS "Single-precision floating point is effective")
 endif()
 
+#################################################################################
+# chooses if build without complex math functions
+# (default is OFF which means that all floating point math functions are available)
+option(NF_FEATURE_LIGHT_MATH "option to build without complex math functions")
+
+if(NF_FEATURE_LIGHT_MATH)
+    set(TARGET_LIGHT_MATH TRUE CACHE INTERNAL "Complex Math functions disabled")
+    message(STATUS "Complex math functions not available")
+else()
+    set(TARGET_LIGHT_MATH FALSE CACHE INTERNAL "Complex Math functions enabled")
+    message(STATUS "Complex math functions available")
+endif()
+
 ###################################################################################
 # chooses if platform provides support for converting string to values on any base
 # (default is OFF which means that conversion to value from base 10 and 16 (partial) is effective)
@@ -442,6 +455,20 @@ if(API_nanoFramework.System.Collections)
 else()
     set(TARGET_SYSTEM_COLLECTIONS FALSE CACHE INTERNAL "DISABLE support for System.Collections API")
     message(STATUS "Support for System.Collections API **IS NOT** enabled")
+endif()
+
+#################################################################
+
+#############################################
+# handles inclusion of System.Text API
+#############################################
+
+if(API_nanoFramework.System.Text)
+    set(TARGET_SYSTEM_TEXT TRUE CACHE INTERNAL "enable support for System.Text API")
+    message(STATUS "Support for System.Text API enabled")
+else()
+    set(TARGET_SYSTEM_TEXT FALSE CACHE INTERNAL "DISABLE support for System.Text API")
+    message(STATUS "Support for System.Text API **IS NOT** enabled")
 endif()
 
 #################################################################

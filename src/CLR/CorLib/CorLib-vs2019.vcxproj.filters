@@ -125,12 +125,6 @@
     <ClCompile Include="corlib_native_System_RuntimeType.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="corlib_native_System_Text_UTF8Decoder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="corlib_native_System_Text_UTF8Encoding.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="corlib_native_System_Threading_WaitHandle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

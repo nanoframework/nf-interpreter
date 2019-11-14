@@ -1012,7 +1012,7 @@ bool oneWireFindNext (bool doReset, bool alarmOnly)
     }
     while (romByteIndex < 8);  // loop until we have all ROM bytes
 
-    if (romBitIndex < (65 || lastcrc8))
+    if ((romBitIndex < 65) || (lastcrc8 != 0))
     {
         // search was unsuccessful reset the last discrepancy
         LastDiscrepancy = 0;

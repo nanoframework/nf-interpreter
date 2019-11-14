@@ -3,10 +3,11 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include "CorLib.h"
+
+#include "nf_system_text.h"
 
 
-HRESULT Library_corlib_native_System_Text_UTF8Decoder::Convert___VOID__SZARRAY_U1__I4__I4__SZARRAY_CHAR__I4__I4__BOOLEAN__BYREF_I4__BYREF_I4__BYREF_BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_text_System_Text_UTF8Decoder::Convert___VOID__SZARRAY_U1__I4__I4__SZARRAY_CHAR__I4__I4__BOOLEAN__BYREF_I4__BYREF_I4__BYREF_BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_UTF8_DECODER();
     NANOCLR_HEADER();
