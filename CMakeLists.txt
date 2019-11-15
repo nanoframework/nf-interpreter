@@ -124,6 +124,14 @@ if(RTOS_CHIBIOS_CHECK)
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
 
+    # Set up short path substitution on Windows
+	if(WIN32)
+		if(EXISTS ${CMAKE_SOURCE_DIR}/SetNFRoot.bat)
+    		execute_process(COMMAND ${CMAKE_SOURCE_DIR}/SetNFRoot.bat OUTPUT_VARIABLE NFROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
+			set(ENV{nfRoot} ${NFROOT})
+    	endif()
+    endif()
+
 elseif(RTOS_FREERTOS_CHECK)
     message(STATUS "\nSetting Toolchain file for FreeRTOS \n")
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.${TOOLCHAIN}.cmake)
