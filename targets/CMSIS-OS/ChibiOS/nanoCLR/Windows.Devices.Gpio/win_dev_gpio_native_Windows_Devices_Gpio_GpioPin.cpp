@@ -13,30 +13,23 @@
 
 void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void* param )
 {
-   NATIVE_INTERRUPT_START
+	NATIVE_INTERRUPT_START
 
-   CLR_RT_HeapBlock*  pThis = (CLR_RT_HeapBlock * )param;
-   if ( pThis == NULL )
-   {
-	   NATIVE_INTERRUPT_END
-	   return;
-   }
-	
-   // check if object has been disposed
-   if( pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue ].NumericByRef().u1 != 0)
-   {
-	   // object has been disposed, leave now
-	   NATIVE_INTERRUPT_END
-	   return;
-   }
-
-   // flag to determine if there are any callbacks registered in managed code
-   bool callbacksRegistered = (pThis[  Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks ].Dereference() != NULL);
-   if ( callbacksRegistered )
-   {
-		// if handle registed then post a managed event with the current pin reading
-		PostManagedEvent( EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState );
-   }
+	CLR_RT_HeapBlock *pThis = (CLR_RT_HeapBlock *)param;
+	if (pThis != NULL)
+	{
+		// check if object has been disposed
+		if (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue].NumericByRef().u1 == 0)
+		{
+			// flag to determine if there are any callbacks registered in managed code
+			bool callbacksRegistered = (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks].Dereference() != NULL);
+			if (callbacksRegistered)
+			{
+				// if handle registed then post a managed event with the current pin reading
+				PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState);
+			}
+		}
+	}
 
 	NATIVE_INTERRUPT_END
 }
