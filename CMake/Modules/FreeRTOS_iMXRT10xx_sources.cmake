@@ -3,6 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
+list(APPEND FREERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FreeRTOS_Source/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1)
+
 # List of the FreeRTOS generic iMXRTxx startup and CMSIS files.
 
 set(FREERTOS_PORT_SRCS

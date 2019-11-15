@@ -4,18 +4,30 @@
 #
 
 # FreeRTOS common includes
-set(TARGET_FREERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "make global")
+list(APPEND TARGET_FREERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
+list(APPEND TARGET_FREERTOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/FreeRTOS)
 
 # add header with target platform definitions
 configure_file(${CMAKE_SOURCE_DIR}/CMake/FreeRTOS_target_os.h.in
-               ${CMAKE_BINARY_DIR}/targets/FreeRTOS/include/target_os.h @ONLY)
+               ${CMAKE_BINARY_DIR}/targets/FreeRTOS/target_os.h @ONLY)
 
 # append common source files
-list(APPEND TARGET_FREERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/hardfault.c)
 list(APPEND TARGET_FREERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/platform_heap.c)
 
+if(${TARGET_SERIES} EQUAL IMXRT10xx)
+
+    # hard fault handler for Cortex-M7
+    list(APPEND TARGET_FREERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/hardfault.c)
+
+elseif(${TARGET_SERIES} EQUAL STM32L0xx)
+
+    # hard fault handler for Cortex-M0
+    list(APPEND TARGET_FREERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/hardfault_cortex_m0.c)
+
+endif()
+
+
 # append nanoHAL
-list(APPEND TARGET_FREERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.c)
 list(APPEND TARGET_FREERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Time.cpp)
 
 list(APPEND TARGET_FREERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_ReceiverThread.c)
