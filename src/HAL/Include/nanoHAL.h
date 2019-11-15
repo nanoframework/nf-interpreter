@@ -61,7 +61,6 @@
 
 #if defined(_MSC_VER)
 
-#define ADS_PACKED
 #define GNU_PACKED
 
 
@@ -71,7 +70,6 @@
 #elif defined(__GNUC__)
 
 
-#define ADS_PACKED
 #define GNU_PACKED  __attribute__((packed))
 
 
