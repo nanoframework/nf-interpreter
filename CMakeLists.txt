@@ -56,7 +56,7 @@ endif()
 # list of supported RTOSes
 # when adding a new RTOS add the corresponding string below AND...
 # ... also on the compare block below
-set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS_ESP32" "TI_SIMPLELINK" CACHE INTERNAL "supported RTOS options")
+set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" "FREERTOS_ESP32" "TI_SIMPLELINK" CACHE INTERNAL "supported RTOS options")
 
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
@@ -66,12 +66,21 @@ else()
 endif()
 
 string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
+string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
 string(COMPARE EQUAL "FREERTOS_ESP32" "${RTOS}" RTOS_FREERTOS_ESP32_CHECK)
 string(COMPARE EQUAL "TI_SIMPLELINK" "${RTOS}" RTOS_TI_SIMPLELINK_CHECK)
 
 ##########################################################################
 
+if(RTOS_FREERTOS_CHECK)
+    set(RTOS_FREERTOS_CHECK TRUE)
+    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
+    set(RTOS_TI_SIMPLELINK_CHECK FALSE)
+    set(RTOS_CHIBIOS_CHECK FALSE)
+endif()
+
 if(RTOS_FREERTOS_ESP32_CHECK)
+    set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_FREERTOS_ESP32_CHECK TRUE)
     set(RTOS_TI_SIMPLELINK_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
@@ -79,12 +88,14 @@ endif()
 
 if(RTOS_CHIBIOS_CHECK)
     set(RTOS_CHIBIOS_CHECK TRUE)
+    set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
     set(RTOS_TI_SIMPLELINK_CHECK FALSE)
 endif()
 
 if(RTOS_TI_SIMPLELINK_CHECK)
     set(RTOS_TI_SIMPLELINK_CHECK TRUE)
+    set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
 endif()
@@ -113,14 +124,18 @@ if(RTOS_CHIBIOS_CHECK)
     # set toolchain file
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
 
-	# Set up short path substitution on Windows
+    # Set up short path substitution on Windows
 	if(WIN32)
 		if(EXISTS ${CMAKE_SOURCE_DIR}/SetNFRoot.bat)
-			execute_process(COMMAND ${CMAKE_SOURCE_DIR}/SetNFRoot.bat OUTPUT_VARIABLE NFROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
+    		execute_process(COMMAND ${CMAKE_SOURCE_DIR}/SetNFRoot.bat OUTPUT_VARIABLE NFROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
 			set(ENV{nfRoot} ${NFROOT})
-		endif()
-	endif()
+    	endif()
+    endif()
 
+elseif(RTOS_FREERTOS_CHECK)
+    message(STATUS "\nSetting Toolchain file for FreeRTOS \n")
+    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.${TOOLCHAIN}.cmake)
+    
 elseif(RTOS_FREERTOS_ESP32_CHECK)
     message(STATUS "\nSetting Toolchain file for FreeRTOS ESP32 \n")
     set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
@@ -313,9 +328,9 @@ option(NF_FEATURE_HAS_SDCARD "option to enable support for SD Card")
 
 if(NF_FEATURE_HAS_SDCARD)
 
-    # this feature currently is supported only on ChibiOS and ESP32 FreeRTOS
-    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_ESP32_CHECK)
-        message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M and ESP32 targets.")
+    # this feature currently is supported only on ChibiOS, iMX.RT FreeRTOS and ESP32 FreeRTOS
+    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_CHECK AND NOT RTOS_FREERTOS_ESP32_CHECK)
+        message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M targets, iMX.RT FreeRTOS and ESP32 targets..")
     endif()
 
     # force inclusion of Windows.Storage API
@@ -709,9 +724,46 @@ if(RTOS_CHIBIOS_CHECK)
         endif()
 
     endif()
+#######################
+# FreeRTOS
+elseif(RTOS_FREERTOS_CHECK)
+
+    add_subdirectory(targets/FreeRTOS)
 
 #######################
-# FreeRTOS_ESP32
+# FreeRTOS
+elseif(RTOS_FREERTOS_CHECK)
+
+    add_subdirectory(targets/FreeRTOS)
+   
+    # now add the subdirectory for the board
+    # try to find board in the targets folder
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
+        # board found
+        message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
+
+        # add TARGET board directory
+        add_subdirectory("targets/FreeRTOS/NXP/${FREERTOS_BOARD}")
+
+    else()
+
+        # try to find board in the Community targets folder
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
+            # board found
+            message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
+
+            # add TARGET board directory from Community
+            add_subdirectory("targets-community/FreeRTOS/NXP/${FREERTOS_BOARD}")
+
+        else()
+        # board NOT found in targets folder
+            # board NOT found in targets folder
+            message(FATAL_ERROR "\n\nSorry but support for ${FREERTOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        endif()
+
+    endif()
+#######################
+# FreeRTOS ESP32
 elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     if("${TARGET_SERIES}" STREQUAL "ESP32")
