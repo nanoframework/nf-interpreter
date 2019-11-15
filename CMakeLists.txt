@@ -58,7 +58,6 @@ endif()
 # ... also on the compare block below
 set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" "FREERTOS_ESP32" "TI_SIMPLELINK" CACHE INTERNAL "supported RTOS options")
 
-
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
     message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
@@ -76,6 +75,7 @@ string(COMPARE EQUAL "TI_SIMPLELINK" "${RTOS}" RTOS_TI_SIMPLELINK_CHECK)
 if(RTOS_FREERTOS_CHECK)
     set(RTOS_FREERTOS_CHECK TRUE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
+    set(RTOS_TI_SIMPLELINK_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
 endif()
 
@@ -95,6 +95,7 @@ endif()
 
 if(RTOS_TI_SIMPLELINK_CHECK)
     set(RTOS_TI_SIMPLELINK_CHECK TRUE)
+    set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
 endif()
@@ -715,6 +716,11 @@ if(RTOS_CHIBIOS_CHECK)
         endif()
 
     endif()
+#######################
+# FreeRTOS
+elseif(RTOS_FREERTOS_CHECK)
+
+    add_subdirectory(targets/FreeRTOS)
 
 #######################
 # FreeRTOS

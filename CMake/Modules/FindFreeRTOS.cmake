@@ -9,10 +9,14 @@
 
 # check if the series name is supported 
 
-set(FREERTOS_SUPPORTED_SERIES "IMXRT10xx" CACHE INTERNAL "supported series names for FreeRTOS")
+set(FREERTOS_SUPPORTED_SERIES IMXRT10xx CACHE INTERNAL "supported series names for FreeRTOS")
+
 list(FIND FREERTOS_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
+
 if(TARGET_SERIES_NAME_INDEX EQUAL -1)
+
     message(FATAL_ERROR "\n\nSorry but ${TARGET_SERIES} is not supported at this time...\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+
 endif()
 
 # including here the CMake files for the source files specific to the target series
@@ -44,7 +48,8 @@ set(FREERTOS_SRCS
 foreach(SRC_FILE ${FREERTOS_SRCS})
     set(FREERTOS_SRC_FILE SRC_FILE -NOTFOUND)
     find_file(FREERTOS_SRC_FILE ${SRC_FILE}
-        PATHS 
+        PATHS
+
             ${PROJECT_BINARY_DIR}/FreeRTOS_Source/FreeRTOS/Source
 
         CMAKE_FIND_ROOT_PATH_BOTH
