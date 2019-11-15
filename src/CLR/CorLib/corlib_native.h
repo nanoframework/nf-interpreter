@@ -811,39 +811,6 @@ struct Library_corlib_native_System_String
     static HRESULT ConvertToCharArray( const char* szText           , CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_Array*& array, int startIndex, int length );
 };
 
-struct Library_corlib_native_System_Text_StringBuilder
-{
-    static const int FIELD___maxCapacity = 1;
-    static const int FIELD___chunkChars = 2;
-    static const int FIELD___chunkLength = 3;
-    static const int FIELD___chunkPrevious = 4;
-    static const int FIELD___chunkOffset = 5;
-
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_Text_UTF8Decoder
-{
-    NANOCLR_NATIVE_DECLARE(Convert___VOID__SZARRAY_U1__I4__I4__SZARRAY_CHAR__I4__I4__BOOLEAN__BYREF_I4__BYREF_I4__BYREF_BOOLEAN);
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_Text_UTF8Encoding
-{
-    NANOCLR_NATIVE_DECLARE(GetBytes___SZARRAY_U1__STRING);
-    NANOCLR_NATIVE_DECLARE(GetBytes___I4__STRING__I4__I4__SZARRAY_U1__I4);
-    NANOCLR_NATIVE_DECLARE(GetChars___SZARRAY_CHAR__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(GetChars___SZARRAY_CHAR__SZARRAY_U1__I4__I4);
-
-    //--//
-
-    static HRESULT Helper__GetChars(CLR_RT_StackFrame& stack, bool fIndexed);
-};
-
 struct Library_corlib_native_System_Threading_WaitHandle
 {
     NANOCLR_NATIVE_DECLARE(WaitOne___BOOLEAN__I4__BOOLEAN);

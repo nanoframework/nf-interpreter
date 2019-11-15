@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 2.8.2)
+
+project(LWIP-download NONE)
+
+include(ExternalProject)
+
+# download LWIP source from official GIT repo
+ExternalProject_Add( 
+    LWIP
+    PREFIX LWIP
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/LWIP_Source
+    GIT_REPOSITORY  https://git.savannah.nongnu.org/git/lwip.git
+    GIT_TAG ${LWIP_GIT_TAG}  # target specified branch
+    GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+    TIMEOUT 10
+    LOG_DOWNLOAD 1
+    # Disable all other steps
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)

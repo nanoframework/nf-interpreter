@@ -5,7 +5,7 @@
 //
 
 #include "sockets_lwip.h"
-
+#include <lwIP_Sockets.h>
 
 HAL_COMPLETION Sockets_LWIP_Driver::s_DebuggerTimeoutCompletion;
 
@@ -107,6 +107,7 @@ bool Sockets_LWIP_Driver::InitializeDbgListener( int ComPortNum )
     int nonblocking = 1;
     int32_t optval = 1;
     int32_t optLinger = 0;
+    void *dummyPtr;
     SOCKET_CHECK_ENTER();
 
     Debugger_Initialize();
@@ -133,7 +134,16 @@ bool Sockets_LWIP_Driver::InitializeDbgListener( int ComPortNum )
 
     SOCKET_CHECK_RESULT( HAL_SOCK_setsockopt(g_Sockets_LWIP_Driver.m_SocketDebugListener, SOCK_SOL_SOCKET, SOCK_SOCKO_LINGER, (const char*)&optLinger, sizeof(int32_t)) );
 
-    SOCKET_CHECK_RESULT( SOCK_bind( g_Sockets_LWIP_Driver.m_SocketDebugListener,  (SOCK_sockaddr*)&sockAddr, sizeof(sockAddr) ) );
+    // need this to keep the compiler happy about the cast to SOCK_sockaddr
+    // which is intended and perfectly safe
+    dummyPtr = &sockAddr;
+
+    SOCKET_CHECK_RESULT( 
+        SOCK_bind( 
+            g_Sockets_LWIP_Driver.m_SocketDebugListener,
+            (const SOCK_sockaddr*)dummyPtr,
+            sizeof(sockAddr)) 
+    );
 
     SOCKET_CHECK_RESULT( SOCK_listen( g_Sockets_LWIP_Driver.m_SocketDebugListener, 1 ) );
 
@@ -239,8 +249,8 @@ int Sockets_LWIP_Driver::Read( int ComPortNum, char* Data, size_t size )
 {
     NATIVE_PROFILE_PAL_COM();
     SOCK_SOCKET sock;
-    SOCK_sockaddr_in addr;
-    int len = sizeof(addr);
+    SOCK_sockaddr addr;
+    int len;
     int32_t ret = 0;
     SOCK_timeval timeout;
     SOCK_fd_set  readSet;
@@ -285,9 +295,9 @@ int Sockets_LWIP_Driver::Read( int ComPortNum, char* Data, size_t size )
     if(SOCK_SOCKET_ERROR != HAL_SOCK_select( SOCK_FD_SETSIZE, &readSet, NULL, NULL, &timeout))
     {
         // we always perform an accept so that we handle pending connections
-        // if we alread are connected and the debug stream socket is still active, then we immediately close
+        // if we already are connected and the debug stream socket is still active, then we immediately close
         // the pending connection
-        sock = Accept( g_Sockets_LWIP_Driver.m_SocketDebugListener, (SOCK_sockaddr*)&addr, &len, TRUE );
+        sock = Accept( g_Sockets_LWIP_Driver.m_SocketDebugListener, &addr, &len, TRUE );
 
         if(SOCK_SOCKET_ERROR != sock)
         {
@@ -436,6 +446,7 @@ bool Sockets_LWIP_Driver::InitializeMulticastDiscovery()
     NATIVE_PROFILE_PAL_COM();
     SOCKET_CHECK_ENTER(); 
     SOCK_sockaddr_in sockAddr;
+    void *dummyPtr;
     int nonblocking = 1;
 
     if(g_Sockets_LWIP_Driver.s_discoveryInitialized) return TRUE;
@@ -460,8 +471,17 @@ bool Sockets_LWIP_Driver::InitializeMulticastDiscovery()
     SOCKET_CHECK_RESULT( SOCK_ioctl(g_Sockets_LWIP_Driver.m_multicastSocket, SOCK_FIONBIO, &nonblocking) );
 
     SOCKET_CHECK_RESULT( SOCK_setsockopt( g_Sockets_LWIP_Driver.m_multicastSocket, SOCK_IPPROTO_IP, SOCK_IPO_ADD_MEMBERSHIP, (const char*)&multicast, sizeof(multicast) ) );
+    
+    // need this to keep the compiler happy about the cast to SOCK_sockaddr
+    // which is intended and perfectly safe
+    dummyPtr = &sockAddr;
 
-    SOCKET_CHECK_RESULT( SOCK_bind( g_Sockets_LWIP_Driver.m_multicastSocket, (SOCK_sockaddr*)&sockAddr, sizeof(sockAddr) ) );
+    SOCKET_CHECK_RESULT(
+        SOCK_bind(
+            g_Sockets_LWIP_Driver.m_multicastSocket,
+            (const SOCK_sockaddr*)&dummyPtr,
+            sizeof(sockAddr))
+    );
 
     g_Sockets_LWIP_Driver.s_discoveryInitialized = TRUE;
 
@@ -524,6 +544,7 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void* arg)
 
     NATIVE_PROFILE_PAL_COM();
     SOCK_sockaddr from;
+    void *dummyPtr;
 
     char data[64];
     int fromlen = sizeof(from);
@@ -573,7 +594,7 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void* arg)
             memset( &sockAddr, 0, sizeof(sockAddr) );
             sockAddr.sin_family           = SOCK_AF_INET;
             sockAddr.sin_port             = SOCK_htons(0);
-          //  sockAddr.sin_addr.S_un.S_addr = info.ipaddr;
+            //  sockAddr.sin_addr.S_un.S_addr = info.ipaddr;
 
             memset( &sockAddrMulticast, 0, sizeof(sockAddrMulticast) );
             sockAddrMulticast.sin_family           = SOCK_AF_INET;
@@ -582,9 +603,20 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void* arg)
 
             SOCKET_CHECK_RESULT(HAL_SOCK_ioctl(sock, SOCK_FIONBIO, &nonblocking));
             SOCKET_CHECK_RESULT(HAL_SOCK_setsockopt(sock, SOCK_IPPROTO_IP, SOCK_IPO_MULTICAST_TTL, (const char *) &opt, sizeof(opt)));
-            SOCKET_CHECK_RESULT(HAL_SOCK_bind(sock,  (SOCK_sockaddr*)&sockAddr, sizeof(sockAddr)));
+
+            // need this to keep the compiler happy about the cast to SOCK_sockaddr
+            // which is intended and perfectly safe
+            dummyPtr = &sockAddr;
+
+            SOCKET_CHECK_RESULT(
+                HAL_SOCK_bind(
+                    sock,
+                    (const SOCK_sockaddr*)&dummyPtr,
+                    sizeof(sockAddr))
+            );
+            
             // send a multicast socket back to the caller
-         //   SOCKET_CHECK_RESULT(SendTo(sock, (const char*)&info, sizeof(info), 0, (SOCK_sockaddr*)&sockAddrMulticast, sizeof(sockAddrMulticast)));
+            //   SOCKET_CHECK_RESULT(SendTo(sock, (const char*)&info, sizeof(info), 0, (SOCK_sockaddr*)&sockAddrMulticast, sizeof(sockAddrMulticast)));
 
             SOCK_close(sock);
 

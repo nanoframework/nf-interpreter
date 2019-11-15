@@ -1,15 +1,8 @@
 trigger:
   branches:
-    include:
-    - master
-    - develop/*
-    - release/*
-    - refs/tags/*
+    include: ["master", "develop*", "release-*", "refs/tags/*" ]
   paths:
-    exclude:
-    - CHANGELOG.md
-    - /*.md
-    - .gitignore
+    exclude: [ "doc", "*.md", ".gitignore", "README.md" ]
 
 # no pr config, we want to trigger builds for all PRs on all branches
 
@@ -162,17 +155,17 @@ jobs:
     matrix:
       MBN_QUAIL:
         BoardName: MBN_QUAIL
-        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
         NeedsDFU: true
       NETDUINO3_WIFI:
         BoardName: NETDUINO3_WIFI
-        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Devices.Dac=OFF -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_Windows.Storage=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Devices.Dac=OFF -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_Windows.Storage=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
         NeedsDFU: true
       ST_STM32F429I_DISCOVERY:
         BoardName: ST_STM32F429I_DISCOVERY
-        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
         NeedsDFU: false
       ST_NUCLEO64_F091RC:
@@ -182,7 +175,7 @@ jobs:
         NeedsDFU: false
       ST_STM32F769I_DISCOVERY:
         BoardName: ST_STM32F769I_DISCOVERY
-        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Devices.Dac=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON -DAPI_Windows.Storage=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON
+        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Devices.Dac=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON -DAPI_Windows.Storage=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
         NeedsDFU: false 
 
@@ -223,7 +216,7 @@ jobs:
     matrix:
       ESP32_WROOM_32:
         BoardName: ESP32_WROOM_32
-        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS_ESP32 -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DAPI_Windows.Storage=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON
+        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS_ESP32 -DNF_WP_IMPLEMENTS_CRC32=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DAPI_Windows.Storage=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
 
   variables:
     ESP32_TOOLCHAIN_PATH: $(Agent.TempDirectory)\ESP32_Tools
@@ -252,6 +245,44 @@ jobs:
   - template: azure-pipelines-templates/publish-bintray.yml
 
 #################
+# NXP
+- job: Build_NXP_targets
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  # not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
+  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
+
+  dependsOn:
+  - Check_Build_Options
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  strategy:
+    matrix:
+      NXP_MIMXRT1060_EVK:
+        BoardName: NXP_MIMXRT1060_EVK
+        BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FREERTOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Net=ON -DAPI_Windows.Storage=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.I2c=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        GccArm_Version: 
+
+  variables:
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+
+  steps:
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+
+  - template: azure-pipelines-templates/download-install-ninja.yml
+
+  - template: azure-pipelines-templates/build-freertos-nxp.yml
+
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+
+  - template: azure-pipelines-templates/publish-bintray.yml
+
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+#################
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
   condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
@@ -266,7 +297,7 @@ jobs:
     matrix:
       TI_CC3220SF_LAUNCHXL:
         BoardName: TI_CC3220SF_LAUNCHXL
-        BuildOptions: -DTARGET_SERIES=CC32xx -DRTOS=TI_SIMPLELINK -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_nanoFramework.System.Collections=ON
+        BuildOptions: -DTARGET_SERIES=CC32xx -DRTOS=TI_SIMPLELINK -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
 
   variables:
@@ -314,9 +345,10 @@ jobs:
   dependsOn:
   - Build_STM32_targets
   - Build_ESP32_targets
+  - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), not( and( eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) ) )
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), not( and( eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) ) )
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -397,9 +429,10 @@ jobs:
   dependsOn:
   - Build_STM32_targets
   - Build_ESP32_targets
+  - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_WIN32_nanoCLR
-  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
+  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
 
   pool:
     vmImage: 'VS2017-Win2016'

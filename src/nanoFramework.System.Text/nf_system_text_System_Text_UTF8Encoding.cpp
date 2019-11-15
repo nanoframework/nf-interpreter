@@ -3,10 +3,11 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include "CorLib.h"
+
+#include "nf_system_text.h"
 
 
-HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetBytes___SZARRAY_U1__STRING( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetBytes___SZARRAY_U1__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -28,7 +29,7 @@ HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetBytes___SZARRAY_U1__S
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetBytes___I4__STRING__I4__I4__SZARRAY_U1__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetBytes___I4__STRING__I4__I4__SZARRAY_U1__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -70,7 +71,7 @@ HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetBytes___I4__STRING__I
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetChars___SZARRAY_CHAR__SZARRAY_U1( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetChars___SZARRAY_CHAR__SZARRAY_U1( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -80,7 +81,7 @@ HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetChars___SZARRAY_CHAR_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetChars___SZARRAY_CHAR__SZARRAY_U1__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetChars___SZARRAY_CHAR__SZARRAY_U1__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -90,7 +91,7 @@ HRESULT Library_corlib_native_System_Text_UTF8Encoding::GetChars___SZARRAY_CHAR_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT_StackFrame& stack, bool fIndexed)
+HRESULT Library_nf_system_text_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT_StackFrame& stack, bool fIndexed)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
