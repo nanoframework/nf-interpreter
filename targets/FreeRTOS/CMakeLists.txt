@@ -165,12 +165,12 @@ if(NO_CMSIS_SOURCE)
         set(CMSIS_GIT_TAG "${CMSIS_VERSION}")
     endif()            
 
-    message(STATUS "CMSIS v${CMSIS_VERSION} from GitHub repo")
+    message(STATUS "CMSIS v${CMSIS_GIT_TAG} from GitHub repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
-    configure_file("${PROJECT_SOURCE_DIR}/CMake/CMSIS.CMakeLists.cmake.in"
-                "${CMAKE_BINARY_DIR}/CMSIS_Download/CMakeLists.txt")
+    configure_file( ${PROJECT_SOURCE_DIR}/CMake/CMSIS.CMakeLists.cmake.in
+                    ${CMAKE_BINARY_DIR}/CMSIS_Download/CMakeLists.txt)
 
     # setup CMake project for CMSIS download
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -203,7 +203,7 @@ else()
 
     # sanity check is source path exists
     if(EXISTS "${CMSIS_SOURCE}/")
-        message(STATUS "CMSIS ${CMSIS_VERSION} (source from: ${CMSIS_SOURCE})")
+        message(STATUS "CMSIS (source from: ${CMSIS_SOURCE})")
 
         # check if we already have the sources, no need to copy again
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/CMSIS_Source/ SOURCE_EXISTS)
