@@ -5,6 +5,8 @@
 
 ENABLE_LANGUAGE(ASM)
 
+include(LoRaMacNodePackage)
+
 # add header files with common OS definitions and board definitions specific for each image
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h" @ONLY)
@@ -18,9 +20,11 @@ set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(BuildUtils REQUIRED)
 find_package(FreeRTOS REQUIRED)
-find_package(CMSIS REQUIRED)
-find_package(STM32L0_CubePackage REQUIRED)
+# find_package(CMSIS REQUIRED)
+# find_package(STM32L0_CubePackage REQUIRED)
 find_package(WireProtocol REQUIRED)
+
+ProcessLoRaMacNodePackage()
 
 # packages for nanoFramework libraries
 #######################################
@@ -53,10 +57,11 @@ endif()
 
 #######################################
 
+find_package(LoRaMacNode REQUIRED)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/common)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter)
-# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR)
 
 #######################
 # nanoBooter executable
@@ -81,7 +86,8 @@ add_executable(
     # ${TARGET_CHIBIOS_NANOBOOTER_SOURCES}
 
     ${FREERTOS_SOURCES}
-    ${STM32L0_CubePackage_SOURCES}
+    ${LoRaMacNode_SOURCES}
+    # ${STM32L0_CubePackage_SOURCES}
     # ${ChibiOSnfOverlay_SOURCES}
 
     ${WireProtocol_SOURCES}
@@ -97,7 +103,7 @@ add_executable(
     ${CMAKE_CURRENT_SOURCE_DIR}/target_common.c
 
     ${COMMON_PROJECT_SOURCES}
-    # ${NANOCLR_PROJECT_SOURCES}
+    ${NANOCLR_PROJECT_SOURCES}
 
     ${TARGET_FREERTOS_COMMON_SOURCES}
     # ${TARGET_CMSIS_NANOCLR_SOURCES}
@@ -106,7 +112,8 @@ add_executable(
     ${TARGET_FREERTOS_NANOCLR_SOURCES}
 
     ${FREERTOS_SOURCES}
-    ${STM32L0_CubePackage_SOURCES}
+    ${LoRaMacNode_SOURCES}
+    # ${STM32L0_CubePackage_SOURCES}
     # ${CHIBIOS_CONTRIB_SOURCES}
     # ${ChibiOSnfOverlay_SOURCES}
 
@@ -124,9 +131,9 @@ add_executable(
     ${TARGET_NANO_APIS_SOURCES}
 )
 
-# add dependency from FreeRTOS and CMSIS (this is required to make sure the repos are downloaded before the build starts)
-add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf FreeRTOS CMSIS)
-add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS CMSIS)
+# add dependency from LoRaMacNode (this is required to make sure the repos are downloaded before the build starts)
+add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf FreeRTOS STM32L0_CubePackage)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS STM32L0_CubePackage)
 
 # include common directories
 include_directories(
@@ -140,19 +147,20 @@ include_directories(
     
     ${WireProtocol_INCLUDE_DIRS}
     ${FREERTOS_INCLUDE_DIRS}
-    ${STM32L0_CubePackage_INCLUDE_DIRS}
+    ${LoRaMacNode_INCLUDE_DIRS}
+    # ${STM32L0_CubePackage_INCLUDE_DIRS}
     # ${ChibiOSnfOverlay_INCLUDE_DIRS}
     # ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
 
     ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
     ${TARGET_FREERTOS_ST_COMMON_INCLUDE_DIRS}
-    ${CMSIS_INCLUDE_DIRS}
+    # ${CMSIS_INCLUDE_DIRS}
 )
 
 # include directories for nanoBooter
 target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter"
-     ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter
+    ${CMAKE_CURRENT_BINARY_DIR}/nanoBooter
+    ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter
 
     ${TARGET_FREERTOS_NANOBOOTER_INCLUDE_DIRS}
     #  ${TARGET_FREERTOS_NANOBOOTER_INCLUDE_DIRS}
@@ -186,13 +194,13 @@ nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf -DSTM32L073xx -DUSE_STM32L0XX_NUCLEO -DUSE_HAL_DRIVER)
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DRUNTIME_MEMORY_PROFILE__extrasmall=1 -DSTM32L073xx -DUSE_STM32L0XX_NUCLEO -DUSE_HAL_DRIVER)
+nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf -DSTM32L072xx -DUSE_HAL_DRIVER)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DRUNTIME_MEMORY_PROFILE__extrasmall=1 -DSTM32L072xx -DUSE_HAL_DRIVER)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
     nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32L073RZTx_FLASH.ld)
-    # nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F091xC_CLR-DEBUG.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32L073RZTx_FLASH.ld)
 else()
     # nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32F091xC_booter.ld)
     # nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32F091xC_CLR.ld)

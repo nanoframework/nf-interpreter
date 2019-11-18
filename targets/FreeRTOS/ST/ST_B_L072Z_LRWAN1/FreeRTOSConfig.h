@@ -32,7 +32,9 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-#include "stddef.h"
+/* Ensure stdint is only used by the compiler, and not the assembler. */
+#include <stdint.h>
+extern uint32_t SystemCoreClock;
 
 /*-----------------------------------------------------------
  * Application specific definitions.
@@ -47,8 +49,10 @@
  *----------------------------------------------------------*/
 
 #define configUSE_PREEMPTION                    1
-#define configUSE_TICKLESS_IDLE                 0
-#define configCPU_CLOCK_HZ                      00000000000000000
+#define configUSE_IDLE_HOOK                     0
+#define configUSE_TICK_HOOK                     0
+#define configUSE_TICKLESS_IDLE                 1
+#define configCPU_CLOCK_HZ                      ( SystemCoreClock )
 #define configTICK_RATE_HZ                      ((TickType_t)1000)
 #define configMAX_PRIORITIES                    5
 #define configMINIMAL_STACK_SIZE                ((unsigned short)90)
@@ -75,7 +79,7 @@
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-#define configTOTAL_HEAP_SIZE                   ((size_t)(2 * 1024))
+#define configTOTAL_HEAP_SIZE                   ((size_t)(6 * 1024))
 #define configAPPLICATION_ALLOCATED_HEAP        1
 
 /* Hook function related definitions. */
@@ -153,6 +157,8 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 standard names. */
 #define vPortSVCHandler SVC_Handler
 #define xPortPendSVHandler PendSV_Handler
-#define xPortSysTickHandler SysTick_Handler
+/* IMPORTANT: This define MUST be commented when used with STM32Cube firmware,
+              to prevent overwriting SysTick_Handler defined within STM32Cube HAL */
+/* #define xPortSysTickHandler SysTick_Handler */
 
 #endif /* FREERTOS_CONFIG_H */

@@ -1,8 +1,10 @@
 /**
   ******************************************************************************
-  * @file      startup_stm32l073xx.s
+  * @file      startup_stm32l072xx.s
   * @author    MCD Application Team
-  * @brief     STM32L073xx Devices vector table for GCC toolchain.
+  * @version   V1.7.1
+  * @date      25-November-2016
+  * @brief     STM32L072xx Devices vector table for Atollic TrueSTUDIO toolchain.
   *            This module performs:
   *                - Set the initial SP
   *                - Set the initial PC == Reset_Handler,
@@ -180,7 +182,7 @@ g_pfnVectors:
   .word     USART1_IRQHandler                 /* USART1                       */
   .word     USART2_IRQHandler                 /* USART2                       */
   .word     RNG_LPUART1_IRQHandler            /* RNG and LPUART1              */
-  .word     LCD_IRQHandler                    /* LCD                          */
+  .word     0                                 /* Reserved                     */
   .word     USB_IRQHandler                    /* USB                          */
 
 /*******************************************************************************
@@ -292,9 +294,6 @@ g_pfnVectors:
 
    .weak      RNG_LPUART1_IRQHandler
    .thumb_set RNG_LPUART1_IRQHandler,Default_Handler
-
-   .weak      LCD_IRQHandler
-   .thumb_set LCD_IRQHandler,Default_Handler
 
    .weak      USB_IRQHandler
    .thumb_set USB_IRQHandler,Default_Handler

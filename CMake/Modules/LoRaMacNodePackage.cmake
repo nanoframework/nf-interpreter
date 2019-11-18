@@ -7,7 +7,7 @@
 macro(ProcessLoRaMacNodePackage)
 
     set(NO_LORAMAC_NODE_PACKAGE_SOURCE TRUE)
-    if(NO_LORAMAC_NODE_PACKAGE_SOURCE)
+    if(LORAMAC_NODE_PACKAGE_SOURCE)
         if(NOT "${LORAMAC_NODE_PACKAGE_SOURCE}" STREQUAL "")
             set(NO_LORAMAC_NODE_PACKAGE_SOURCE FALSE)
         endif()
@@ -89,7 +89,7 @@ macro(ProcessLoRaMacNodePackage)
 
             # check if we already have the sources, no need to copy again
             if(NOT EXISTS "${CMAKE_BINARY_DIR}/LoRaMacNode_Source")
-                file(COPY "${LORAMAC_NODE_PACKAGE_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/LoRaMacNodeSource")
+                file(COPY "${LORAMAC_NODE_PACKAGE_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/LoRaMacNode_Source")
             else()
                 message(STATUS "Using local cache of LoRaMac Node Package  source from ${LORAMAC_NODE_PACKAGE_SOURCE}")
             endif()

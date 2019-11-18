@@ -2,16 +2,16 @@
 // Copyright (c) 2019 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
-
+// #include "st_cmsis_defines.h"
 #include "stdint.h"
 #include "stdbool.h"
-#include "cmsis_gcc.h"
+// #include "cmsis_gcc.h"
 #include <nanoWeak.h>
 #include <platform_target_capabilities.h>
 
 void HAL_AssertEx()
 {
-    __BKPT(0);
+    __asm volatile ("bkpt ");
     while(true) { /*nop*/ }
 }
 
@@ -19,7 +19,7 @@ void HAL_AssertEx()
 
 void HARD_Breakpoint() 
 {
-    __BKPT(0);
+    __asm volatile ("bkpt ");
     while(true) { /*nop*/ }
 };
 
