@@ -1,0 +1,24 @@
+#
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
+project(LoRaMacNode-download NONE)
+
+include(ExternalProject)
+
+# download LoRaMacNode source from official GitHub repo
+ExternalProject_Add( 
+    LoRaMacNode
+    PREFIX LoRaMacNode
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/LoRaMacNode_Source
+    GIT_REPOSITORY  https://github.com/Lora-net/LoRaMac-node
+    GIT_TAG ${LORA_MAC_NODE_GIT_TAG}  # target specified branch
+    GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+    TIMEOUT 10
+    LOG_DOWNLOAD 1
+    # Disable all other steps
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)
