@@ -35,7 +35,7 @@ steps:
             }
             else
             {
-              if( $env:Build_SourceBranchName -eq "develop" -or 
+              if( $env:Build_SourceBranchName -match "^develop*" -or 
                   $env:Build_SourceBranchName -match "^release*" )
               {
                 # this a dev or release branch, publish to Bintray dev repo
