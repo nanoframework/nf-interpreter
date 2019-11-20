@@ -1728,7 +1728,7 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 //#include <CPU_INTC_decl.h>
 //
 //// Gp I/O driver
-//#include <CPU_GPIO_decl.h>
+#include <CPU_GPIO_decl.h>
 //
 
 

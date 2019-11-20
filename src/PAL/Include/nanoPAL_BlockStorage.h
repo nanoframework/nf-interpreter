@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 #include <target_BlockStorage.h>
 
@@ -605,8 +606,6 @@ typedef struct CPU_MEMORY_CONFIG
     unsigned char   ExternalBufferEnable;   // 0,1
 
 }CPU_MEMORY_CONFIG;
-
-typedef unsigned int GPIO_PIN;
 
 typedef struct GPIO_FLAG
 {

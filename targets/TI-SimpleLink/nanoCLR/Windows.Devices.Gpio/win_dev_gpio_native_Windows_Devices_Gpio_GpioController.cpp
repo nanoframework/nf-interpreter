@@ -12,8 +12,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController::get_Pin
 {
     NANOCLR_HEADER();
     {
-        // return count ot available GPIO pins
-        stack.SetResult_I4( 256 ); // Fixme: temporary arbitrary value
+        // Return value to the managed application
+        stack.SetResult_I4(CPU_GPIO_GetPinCount());
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
