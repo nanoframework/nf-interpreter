@@ -111,7 +111,7 @@ static void GpioEventCallback(void *arg)
 gpio_input_state * GetInputState(GPIO_PIN pinNumber)
 {
 	gpio_input_state * ptr = gpioInputList.FirstNode();
-	while (ptr != NULL)
+	while (ptr->Next() != NULL)
 	{
 		if (ptr->pinNumber == pinNumber) return ptr;
 		ptr = ptr->Next();
@@ -168,12 +168,15 @@ bool   CPU_GPIO_Initialize()
 
 bool   CPU_GPIO_Uninitialize()
 {
-	gpio_input_state * pState;
+	gpio_input_state * pGpio;
 
-	// Clean up input list
-	while ((pState = gpioInputList.FirstNode()))
+	pGpio = gpioInputList.FirstNode();
+
+	// Clean up input state list
+	while (pGpio->Next() != NULL)
 	{
-		UnlinkInputState(pState);
+		UnlinkInputState(pGpio);
+		pGpio = pGpio->Next();
 	}
 
 	return true;
