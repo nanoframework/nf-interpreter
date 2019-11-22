@@ -11,6 +11,9 @@
 #include <LaunchCLR.h>
 #include <string.h>
 
+#ifdef GRAPHICS
+extern void GraphicsInitialize();
+#endif
 extern void CLRStartupThread(void const * argument);
 
 // Mutex for GLOBAL_LOCK / GLOBAL_UNLOCK
@@ -28,6 +31,10 @@ void receiver_task(void *pvParameter)
 // Main task start point
 void main_task(void *pvParameter)
 {
+#ifdef GRAPHICS
+	GraphicsInitialize();
+#endif		
+
   (void)pvParameter;
   
   // CLR settings to launch CLR thread

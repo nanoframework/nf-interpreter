@@ -95,6 +95,12 @@ macro(ParseNativeAssemblies)
         PerformSettingsForApiEntry("nanoFramework.Devices.Can")
     endif()
 
+    # nanoFramework.Graphics.Wpf
+    if(API_nanoFramework.Graphics.Wpf)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Graphics.Wpf")
+    endif()
+
     # nanoFramework.Devices.OneWire
     if(API_nanoFramework.Devices.OneWire)
         ##### API name here (doted name)

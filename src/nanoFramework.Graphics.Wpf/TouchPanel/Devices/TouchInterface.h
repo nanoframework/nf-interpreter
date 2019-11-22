@@ -1,0 +1,19 @@
+//
+// Copyright (c) 2019 The nanoFramework project contributors
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+
+#ifndef _TOUCHINTERFACE_H_
+#define _TOUCHINTERFACE_H_ 1
+
+struct TouchInterface
+{
+public:
+	bool Initialize();
+	CLR_UINT8 Write_Read(CLR_UINT8 value);
+};
+
+#endif // _TOUCHINTERFACE_H_
+
+

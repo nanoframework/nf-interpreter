@@ -3,7 +3,11 @@
 # See LICENSE file in the project root for full license information.
 #
 
+set(NANOCLR_PROJECT_NAME "nanoCLR")
+add_executable(${NANOCLR_PROJECT_NAME}.elf)	# This is the program we are building, ESP32 has its own pre-built bootloader.bin, so no nanoBooter
+
 ENABLE_LANGUAGE(ASM)
+include(Features.CMake)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
                "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
@@ -13,7 +17,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
 configure_file("${CMAKE_SOURCE_DIR}/CMake/ESP32_target_os.h.in"
                "${CMAKE_BINARY_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/target_os.h" @ONLY)
 
-set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(WireProtocol REQUIRED)
 
@@ -23,6 +26,11 @@ find_package(NF_CoreCLR REQUIRED)
 
 #######################################
 # optional
+
+if(API_nanoFramework.Graphics.Wpf)
+	GraphicsWpf()
+	GraphicsWpfCompileDefinitions()
+endif()
 
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
@@ -78,9 +86,10 @@ endif()
 #######################
 # nanoCLR executable
 
-add_executable(
+target_sources(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
+	PUBLIC
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c"
@@ -99,7 +108,7 @@ add_executable(
     ${NF_Debugger_SOURCES}
     ${NF_Diagnostics_SOURCES}
   
-    # # sources for nanoFramework APIs
+    # sources for nanoFramework APIs
     ${TARGET_NANO_APIS_SOURCES}
 )
 
@@ -198,6 +207,7 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     ${NF_CoreCLR_INCLUDE_DIRS}
     ${NF_Debugger_INCLUDE_DIRS}
 	${NF_Networking_INCLUDE_DIRS}
+							${Graphics_Includes}
 
     # includes for nanoFramework APIs
     ${TARGET_NANO_APIS_INCLUDES}
@@ -285,6 +295,7 @@ add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
 	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_8mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_8mb.bin
 	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_4mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
 	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_2mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_2mb.bin
+	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_graphics_4mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_nanoclr_graphics_4mb.bin
 	COMMENT "Generate Esp32 Partition tables for 2MB, 4MB, 8MB and 16MB flash" )
 
 # list partition table

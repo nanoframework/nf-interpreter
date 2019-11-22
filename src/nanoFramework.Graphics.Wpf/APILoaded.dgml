@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="13316831-3060-47c9-91d4-abed2f660a831" Bounds="-922.907623945201,-155.807584812773,76.5633333333335,25.96" Label="New Node" UseManualLocation="True" />
+    <Node Id="ASSERT(sizeof(CLR_RT_HeapBlock_Raw)==Sizeof(CLR_RT_HeapBlock));" Category="Comment" Bounds="-884.419763453423,-608.601298594668,246.9,89.8" Label="The following doesn't seem to be useful at runtime, if its not correct at design time its not correct.&#xD;&#xA;ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock));" UseManualLocation="True" />
+    <Node Id="App_main" Bounds="-1128.26129941282,-720.721698594668,112.35,85.9602" Group="Expanded" Label="app_main" UseManualLocation="True" />
+    <Node Id="CLRStartup.cpp" Bounds="-945.53750746006,-488.801298594668,136.16,85.9602" Group="Expanded" UseManualLocation="True" />
+    <Node Id="CLRStartupThread.cpp" Bounds="-1076.84986345342,-604.761498594668,162.43,85.9602" Group="Expanded" Label="CLRStartup_Thread.cpp" UseManualLocation="True" />
+    <Node Id="CLR_RT_Assembly::InitiString" Category="Comment" Bounds="-985.911199412825,-696.481298594668,222.803333333333,57.8800000000001" Label="CLR_RT_Assembly::InitiString()&#xD;&#xA;Void parameter call does nothing, also same in original NetMF" UseManualLocation="True" />
+    <Node Id="CLR_RT_Memory.cpp" Bounds="-499.26751575779,-628.036394813544,184.903333517533,197.8795523224" Group="Expanded" UseManualLocation="True" />
+    <Node Id="CLR_RT_Memory::Reset(" Bounds="-479.267515573591,-476.116842491943,144.903333333333,25.96" Label="CLR_RT_Memory::Reset(" />
+    <Node Id="COM_Stubs.c" Bounds="-165.374676117449,-337.009456820389,168.276666666667,85.9602" Group="Expanded" />
+    <Node Id="ClrStartup" Bounds="-1050.36153012009,-564.787017868851,109.453333333333,25.96" Label="ClrStartupThread" />
+    <Node Id="CreateInstance" Bounds="-396.702940886291,19.6598407004285,216.84,44" Group="Expanded" Label="CLR_RT_Assembly::CreateInstance" UseManualLocation="True" />
+    <Node Id="CreateInstance1" Bounds="-878.205798719885,-307.615835443708,98.1900000000001,25.96" Label="CreateInstance" />
+    <Node Id="DebugOutput" Bounds="-192.18801767985,-576.349028637696,221.903333333333,345.299489257813" Group="Expanded" Label="Debug output" />
+    <Node Id="DebuggerPort_Write1" Bounds="-145.374676117449,-297.009748166223,128.276666666667,25.96" Label="DebuggerPort_Write" />
+    <Node Id="Emi" Bounds="-106.23634277251,-456.348727305324,50,25.96" Label="Emit" />
+    <Node Id="GenericPort.cpp" Bounds="-389.858932053218,-283.166816614777,155.36,85.9602" Group="Expanded" UseManualLocation="True" />
+    <Node Id="GenericPort_Write" Bounds="-369.858932053218,-243.166716614777,115.36,25.96" Label="GenericPort_Write" />
+    <Node Id="HapLocation" Bounds="-710.015698719885,-281.146760766602,270.156666666667,149.8002" Group="Expanded" Label="HeapLocation" UseManualLocation="True" />
+    <Node Id="Info.cpp" Bounds="-172.18801767985,-536.348928637696,181.903333333333,145.9604" Group="Expanded" />
+    <Node Id="LoadAssembly" Bounds="-542.863040886291,9.6598407004285,116.16,44" Group="Expanded" UseManualLocation="True" />
+    <Node Id="LoadAssembly1" Bounds="-925.537507460061,-448.824150949905,96.16,25.96" Label="LoadAssembly" />
+    <Node Id="LoadAssembly2" Bounds="-479.26767575779,-588.036714813544,96.1600000000001,25.96" Label="LoadAssembly" />
+    <Node Id="LoadKnownAssemblies" Bounds="-479.26751575779,-532.076842492744,140.873333333333,25.96" Label="LoadKnownAssemblies" />
+    <Node Id="LookUpAssemblyNativeDataByName" Bounds="-1022.07028846502,-211.813232811994,214.433333333333,25.96" UseManualLocation="True" />
+    <Node Id="Main_task" Bounds="-1108.26129941283,-680.693137351273,72.3499999999999,25.96" Label="main_task" />
+    <Node Id="Memory.cpp" Bounds="-730.015698719885,-321.146860766602,310.156666666667,209.8004" Group="Expanded" UseManualLocation="True" />
+    <Node Id="PlatformSpecific" Category="Comment" Bounds="-366.583781468212,-339.126816614778,107.463333333333,25.96" Label="Platform specific" UseManualLocation="True" />
+    <Node Id="PrintfV" Bounds="-152.18801767985,-496.348828637696,141.903333333333,85.9602" Group="Expanded" Label="CLR_Debug::PrintfV" />
+    <Node Id="TypeSystem.cpp" Bounds="-898.205798719885,-347.615935443708,138.19,85.9602" Group="Expanded" UseManualLocation="True" />
+    <Node Id="Uint32_tManagedHeap[MANAGER_HEAP_SIZE/sizeof(uint32_t)]" Category="Comment" Bounds="-690.015698719885,-241.146660766602,230.156666666667,89.8" Label="uint32_t managedHeap[MANAGER_HEAP_SIZE/sizeof(uint32_t)]&#xD;&#xA;baseAddress = (unsigned char*)&amp;managedHeap;&#xD;&#xA;    sizeInBytes = sizeof(managedHeap);" />
+  </Nodes>
+  <Links>
+    <Link Source="ASSERT(sizeof(CLR_RT_HeapBlock_Raw)==Sizeof(CLR_RT_HeapBlock));" Target="CLRStartup.cpp" Bounds="-828.659030713312,-518.801298594668,23.3196093965345,23.598344281333" />
+    <Link Source="App_main" Target="Main_task" Category="Contains" />
+    <Link Source="CLRStartup.cpp" Target="LoadAssembly1" Category="Contains" />
+    <Link Source="CLRStartupThread.cpp" Target="ClrStartup" Category="Contains" />
+    <Link Source="CLR_RT_Assembly::InitiString" Target="CLRStartup.cpp" Bounds="-899.14794921875,-638.601318359375,19.2144775390625,141.193725585938" />
+    <Link Source="CLR_RT_Memory.cpp" Target="CLR_RT_Memory::Reset(" Category="Contains" />
+    <Link Source="CLR_RT_Memory.cpp" Target="LoadAssembly2" Category="Contains" />
+    <Link Source="CLR_RT_Memory.cpp" Target="LoadKnownAssemblies" Category="Contains" />
+    <Link Source="COM_Stubs.c" Target="DebuggerPort_Write1" Category="Contains" />
+    <Link Source="ClrStartup" Target="CLRStartup.cpp" Bounds="-1108.48652913411,-549.582302131104,198.11741864271,0.337301396540852" />
+    <Link Source="DebugOutput" Target="COM_Stubs.c" Category="Contains" />
+    <Link Source="DebugOutput" Target="Info.cpp" Category="Contains" />
+    <Link Source="Emi" Target="DebuggerPort_Write1" Bounds="-81.2363427725098,-430.388727305324,4.2632564145606E-14,124.437631117761" />
+    <Link Source="GenericPort.cpp" Target="GenericPort_Write" Category="Contains" />
+    <Link Source="HapLocation" Target="Uint32_tManagedHeap[MANAGER_HEAP_SIZE/sizeof(uint32_t)]" Category="Contains" />
+    <Link Source="Info.cpp" Target="PrintfV" Category="Contains" />
+    <Link Source="LoadAssembly1" Target="CreateInstance1" Bounds="-1059.04320300289,-490.633494873047,200.978070311679,58.4850257526012" />
+    <Link Source="LookUpAssemblyNativeDataByName" Target="13316831-3060-47c9-91d4-abed2f660a831" Bounds="-907.834054801971,-185.830400282936,11.9145048052603,22.0795635962558" />
+    <Link Source="Main_task" Target="ClrStartup" Bounds="-1397.53856201172,-564.402083414955,170.616420826202,10.7227018398322" />
+    <Link Source="Memory.cpp" Target="HapLocation" Category="Contains" />
+    <Link Source="PlatformSpecific" Target="GenericPort.cpp" Bounds="-312.750464011548,-313.166816614778,0.164460296048048,21.0002759717768" />
+    <Link Source="PrintfV" Target="Emi" Category="Contains" />
+    <Link Source="TypeSystem.cpp" Target="CreateInstance1" Category="Contains" />
+    <Link Source="Uint32_tManagedHeap[MANAGER_HEAP_SIZE/sizeof(uint32_t)]" Target="HapLocation" Bounds="-574.937377929688,-151.346664428711,12.322265625,33.5001068115234" />
+  </Links>
+  <Categories>
+    <Category Id="Comment" Label="Comment" Description="Represents a user defined comment on the diagram" CanBeDataDriven="True" IsProviderRoot="False" NavigationActionLabel="Comments" />
+    <Category Id="Contains" Label="Contains" Description="Whether the source of the link contains the target object" CanBeDataDriven="False" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Contained By" IsContainment="True" OutgoingActionLabel="Contains" />
+  </Categories>
+  <Properties>
+    <Property Id="Bounds" DataType="System.Windows.Rect" />
+    <Property Id="CanBeDataDriven" Label="CanBeDataDriven" Description="CanBeDataDriven" DataType="System.Boolean" />
+    <Property Id="CanLinkedNodesBeDataDriven" Label="CanLinkedNodesBeDataDriven" Description="CanLinkedNodesBeDataDriven" DataType="System.Boolean" />
+    <Property Id="Expression" DataType="System.String" />
+    <Property Id="Group" Label="Group" Description="Display the node as a group" DataType="Microsoft.VisualStudio.GraphModel.GraphGroupStyle" />
+    <Property Id="GroupLabel" DataType="System.String" />
+    <Property Id="IncomingActionLabel" Label="IncomingActionLabel" Description="IncomingActionLabel" DataType="System.String" />
+    <Property Id="IsContainment" DataType="System.Boolean" />
+    <Property Id="IsEnabled" DataType="System.Boolean" />
+    <Property Id="IsProviderRoot" Label="IsProviderRoot" Description="IsProviderRoot" DataType="System.Boolean" />
+    <Property Id="Label" Label="Label" Description="Displayable label of an Annotatable object" DataType="System.String" />
+    <Property Id="NavigationActionLabel" Label="NavigationActionLabel" Description="NavigationActionLabel" DataType="System.String" />
+    <Property Id="OutgoingActionLabel" Label="OutgoingActionLabel" Description="OutgoingActionLabel" DataType="System.String" />
+    <Property Id="TargetType" DataType="System.Type" />
+    <Property Id="UseManualLocation" DataType="System.Boolean" />
+    <Property Id="Value" DataType="System.String" />
+    <Property Id="ValueLabel" DataType="System.String" />
+  </Properties>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="Comment" ValueLabel="Has comment">
+      <Condition Expression="HasCategory('Comment')" />
+      <Setter Property="Background" Value="#FFFFFACD" />
+      <Setter Property="Stroke" Value="#FFE5C365" />
+      <Setter Property="StrokeThickness" Value="1" />
+      <Setter Property="NodeRadius" Value="2" />
+      <Setter Property="MaxWidth" Value="250" />
+    </Style>
+  </Styles>
+</DirectedGraph>

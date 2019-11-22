@@ -6,6 +6,14 @@
 cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
 
+set(NANOBOOTER_PROJECT_NAME "nanoBooter")
+set(NANOCLR_PROJECT_NAME "nanoCLR")
+
+include(Features.CMake)
+
+add_executable(${NANOBOOTER_PROJECT_NAME}.elf)
+add_executable(${NANOCLR_PROJECT_NAME}.elf)
+
 # add header files with common OS definitions and board definitions specific for each image
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h" @ONLY)
@@ -14,13 +22,15 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
 
-set(NANOBOOTER_PROJECT_NAME "nanoBooter")
-set(NANOCLR_PROJECT_NAME "nanoCLR")
-
 find_package(BuildUtils REQUIRED)
 find_package(CHIBIOS REQUIRED)
 find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
+
+if(API_nanoFramework.Graphics.Wpf)
+	GraphicsWpf()
+	GraphicsWpfCompileDefinitions()
+endif()
 
 # packages for nanoFramework libraries
 #######################################
@@ -72,9 +82,10 @@ add_subdirectory("nanoCLR")
 #######################
 # nanoBooter executable
 
-add_executable(
+target_sources (
     # executables for project, project sources
     ${NANOBOOTER_PROJECT_NAME}.elf
+	PUBLIC
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c"
@@ -100,9 +111,10 @@ add_executable(
 #######################
 # nanoCLR executable
 
-add_executable(
+target_sources(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
+	PUBLIC
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
 
@@ -142,6 +154,8 @@ add_executable(
 
     # sources for nanoFramework APIs
     ${TARGET_NANO_APIS_SOURCES}
+
+	${Graphics_Sources}
 )
 
 # add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
@@ -227,6 +241,8 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 
     # includes for SPIFFS
     ${SPIFFS_INCLUDE_DIRS}
+
+	${Graphics_Includes}
 )
 
 # set compiler options

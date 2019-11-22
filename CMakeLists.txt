@@ -439,7 +439,13 @@ option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provi
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
 
-#################################################################
+# Graphics options Wpf
+option(USE_GRAPHICS_WPF "option to use Wpf style graphics")
+if(API_nanoFramework.Graphics.Wpf)
+    set(USE_GRAPHICS_WPF TRUE CACHE INTERNAL "Include Wpf Graphics")
+else()
+    set(USE_GRAPHICS_WPF FALSE CACHE INTERNAL "Include Wpf Graphics")
+endif()
 
 #############################################
 # handles inclusion of System.Reflection API

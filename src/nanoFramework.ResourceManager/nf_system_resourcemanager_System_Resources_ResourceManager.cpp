@@ -5,6 +5,11 @@
 //
 
 #include "nf_system_resourcemanager.h"
+#include <target_board.h>
+
+#ifdef GRAPHICS
+#include "Graphics.h"
+#endif
 
 
 HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2( CLR_RT_StackFrame& stack )
@@ -47,7 +52,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
                 NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance( top, (const char*)buf, pAssm ));
             }
             break;
-        
+
         case CLR_RECORD_RESOURCE::RESOURCE_Binary:
             {
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, size, g_CLR_RT_WellKnownTypes.m_UInt8 ));
@@ -55,6 +60,32 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
                 memcpy( top.DereferenceArray()->GetFirstElement(), buf, size );
             }
             break;
+#ifdef GRAPHICS
+
+		case CLR_RECORD_RESOURCE::RESOURCE_Bitmap:
+		{
+			CLR_RT_HeapBlock* ptr;
+
+			NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Bitmap));
+
+			ptr = top.Dereference();
+
+			NANOCLR_SET_AND_LEAVE(CLR_GFX_Bitmap::CreateInstance(ptr[CLR_GFX_Bitmap::FIELD__m_bitmap], buf, size, pAssm));
+		}
+		break;
+
+		case CLR_RECORD_RESOURCE::RESOURCE_Font:
+		{
+			CLR_RT_HeapBlock* ptr;
+
+			NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Font));
+
+			ptr = top.Dereference();
+
+			NANOCLR_SET_AND_LEAVE(CLR_GFX_Font::CreateInstance(ptr[CLR_GFX_Font::FIELD__m_font], buf, pAssm));
+		}
+		break;
+#endif
 
         default:
             _ASSERTE(false); 

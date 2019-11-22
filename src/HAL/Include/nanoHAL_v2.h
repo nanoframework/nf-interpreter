@@ -91,6 +91,12 @@ typedef enum SLEEP_LEVEL
 #define EVENT_WIFI        50
 #define EVENT_CAN         60
 #define EVENT_STORAGE     70
+#define EVENT_TOUCH       80
+#define EVENT_GESTURE     90
+
+#define PAL_EVENT_TOUCH 0x1
+#define PAL_EVENT_KEY   0x2
+#define PAL_EVENT_MOUSE 0x4
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////

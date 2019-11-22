@@ -2686,6 +2686,12 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
 
     TIL( "Microsoft.SPOT"                   , "SerializationHintsAttribute"   , m_SerializationHintsAttribute                        ),
 
+    TIL( "nanoFramework.UI"					        , "Bitmap"                        , m_Bitmap                                             ),
+    TIL( "nanoFramework.UI"					        , "Font"                          , m_Font                                               ),
+
+    TIL( "nanoFramework.Touch"			       	, "TouchEvent"                    , m_TouchEvent                                         ),
+    TIL( "nanoFramework.Touch"			      	, "TouchInput"                    , m_TouchInput                                         ),
+
     TIL( "Microsoft.SPOT.Hardware"          , "WatchdogException"             , m_WatchdogException                                  ),
 
     TIL( "System.Net.NetworkInformation"    , "NetworkInterface"              , m_NetworkInterface                                   ),
