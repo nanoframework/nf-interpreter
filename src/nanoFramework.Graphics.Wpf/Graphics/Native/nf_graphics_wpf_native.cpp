@@ -690,6 +690,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_nf_graphics_wpf_native_nanoFramework_Touch_Ink::SetInkRegion___STATIC__VOID__U4__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkUIBitmap,
     Library_nf_graphics_wpf_native_nanoFramework_Touch_Ink::ResetInkRegion___STATIC__VOID,
     NULL,
@@ -949,7 +950,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Graphics_Wpf =
 {
     "nanoFramework.Graphics.Wpf", 
-    0x5D1DB17A,
+	0xFB09D903,
     method_lookup,
     ////////////////////////////////////////////////////////////////////////////////////
     // check if the version bellow matches the one in AssemblyNativeVersion attribute //

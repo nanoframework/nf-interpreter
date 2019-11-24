@@ -809,7 +809,7 @@ struct Library_nf_graphics_wpf_native_nanoFramework_Presentation_Window
 
 struct Library_nf_graphics_wpf_native_nanoFramework_Presentation_WindowManager
 {
-    static const int FIELD_STATIC__Instance = 37;
+    static const int FIELD_STATIC__Instance = 23;
 
     static const int FIELD___postRenderHandler = 37;
 
@@ -841,8 +841,8 @@ struct Library_nf_graphics_wpf_native_nanoFramework_Touch_Ink
 
 struct Library_nf_graphics_wpf_native_nanoFramework_Touch_Touch
 {
-    static const int FIELD_STATIC___initialized = 38;
-    static const int FIELD_STATIC___activeTouchPanel = 39;
+    static const int FIELD_STATIC___initialized = 24;
+    static const int FIELD_STATIC___activeTouchPanel = 25;
 
 
     //--//
@@ -1031,12 +1031,12 @@ struct Library_nf_graphics_wpf_native_nanoFramework_UI_Input_ButtonEventArgs
 
 struct Library_nf_graphics_wpf_native_nanoFramework_UI_Input_Buttons
 {
-    static const int FIELD_STATIC__PreviewButtonDownEvent = 40;
-    static const int FIELD_STATIC__PreviewButtonUpEvent = 41;
-    static const int FIELD_STATIC__ButtonDownEvent = 42;
-    static const int FIELD_STATIC__ButtonUpEvent = 43;
-    static const int FIELD_STATIC__GotFocusEvent = 44;
-    static const int FIELD_STATIC__LostFocusEvent = 45;
+    static const int FIELD_STATIC__PreviewButtonDownEvent = 26;
+    static const int FIELD_STATIC__PreviewButtonUpEvent = 27;
+    static const int FIELD_STATIC__ButtonDownEvent = 28;
+    static const int FIELD_STATIC__ButtonUpEvent = 29;
+    static const int FIELD_STATIC__GotFocusEvent = 30;
+    static const int FIELD_STATIC__LostFocusEvent = 31;
 
 
     //--//
@@ -1074,7 +1074,7 @@ struct Library_nf_graphics_wpf_native_nanoFramework_UI_Input_GenericEventArgs
 
 struct Library_nf_graphics_wpf_native_nanoFramework_UI_Input_GenericEvents
 {
-    static const int FIELD_STATIC__GenericStandardEvent = 46;
+    static const int FIELD_STATIC__GenericStandardEvent = 32;
 
 
     //--//
@@ -1182,7 +1182,7 @@ struct Library_nf_graphics_wpf_native_nanoFramework_UI_Input_StagingAreaInputIte
 
 struct Library_nf_graphics_wpf_native_nanoFramework_UI_Input_TouchCapture
 {
-    static const int FIELD_STATIC___captureElement = 47;
+    static const int FIELD_STATIC___captureElement = 33;
 
 
     //--//
@@ -1210,9 +1210,9 @@ struct Library_nf_graphics_wpf_native_nanoFramework_UI_Input_TouchEventArgs
 
 struct Library_nf_graphics_wpf_native_nanoFramework_UI_Input_TouchEvents
 {
-    static const int FIELD_STATIC__TouchDownEvent = 48;
-    static const int FIELD_STATIC__TouchMoveEvent = 49;
-    static const int FIELD_STATIC__TouchUpEvent = 50;
+    static const int FIELD_STATIC__TouchDownEvent = 34;
+    static const int FIELD_STATIC__TouchMoveEvent = 35;
+    static const int FIELD_STATIC__TouchUpEvent = 36;
 
 
     //--//
