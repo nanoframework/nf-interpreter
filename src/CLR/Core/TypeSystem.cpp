@@ -4299,6 +4299,8 @@ HRESULT CLR_RT_AttributeParser::Initialize( const CLR_RT_AttributeEnumerator& en
     m_currentPos  = 0;
     m_fixed_Count = m_md.m_target->numArgs - 1;
     m_named_Count = -1;
+    m_constructorParsed = false;
+    m_mdIdx = en.m_match;
 
     NANOCLR_NOCLEANUP();
 }
@@ -4313,18 +4315,316 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
         NANOCLR_READ_UNALIGNED_UINT16(m_named_Count,m_blob);
     }
 
-    if(m_currentPos < m_fixed_Count)
+    if( m_fixed_Count == 0 && 
+        m_named_Count == 0 &&
+        !m_constructorParsed )
     {
+        // Attribute class has no fields, no properties and only default constructor
+
+        m_lastValue.m_mode = Value::c_DefaultConstructor;
+        m_lastValue.m_name = NULL;
+
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( m_lastValue.m_value, m_td ));
+
+        res = &m_lastValue;
+
+        m_constructorParsed = true;
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
+
+    }
+    else if((m_currentPos < m_fixed_Count) &&
+            !m_constructorParsed )
+    {
+        // Attribute class has a constructor
+
         m_lastValue.m_mode = Value::c_ConstructorArgument;
         m_lastValue.m_name = NULL;
 
+        // int i= m_mdIdx.Method();
+        // CLR_RT_MethodDef_Index ctor;
+        // ctor.Set( m_assm->m_idx, i );
+
+        ////////////////////////////////////////////////
+        // need to read the arguments from the blob
+
+        NANOCLR_CHECK_HRESULT(m_parser.Advance( m_res ));
         //
-        // attribute contructor support is currently not implemented
+        // Skip value info.
         //
-        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        m_blob += sizeof(CLR_UINT8);
+
+        const CLR_RT_DataTypeLookup& dtl = c_CLR_RT_DataTypeLookup[ m_res.m_dt ];
+
+        if(dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
+        {
+            CLR_UINT32 size = (dtl.m_sizeInBits + 7) / 8;
+            uint8_t buffer[4];
+
+            m_lastValue.m_value.SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(m_res.m_dt, 0, 1) );
+
+            memcpy( &buffer[0], m_blob, size ); m_blob += size;
+
+            m_lastValue.m_value.SetInteger( (CLR_INT32)buffer );
+        }
+        else if(m_res.m_dt == DATATYPE_STRING)
+        {
+            CLR_UINT32 tk; NANOCLR_READ_UNALIGNED_UINT16(tk,m_blob);
+
+            CLR_RT_HeapBlock_String::CreateInstance( m_lastValue.m_value, CLR_TkFromType( TBL_Strings, tk ), m_assm );
+        }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+
+    //     //NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( m_lastValue.m_value, m_td ));
+
+    //     // protect the new object from GC so the working thread can access those
+    //     //CLR_RT_ProtectFromGC gcContent( m_lastValue.m_value );
+
+    //     // if(!g_CLR_RT_ExecutionEngine.EnsureSystemThread(g_CLR_RT_ExecutionEngine.m_cctorThread, ThreadPriority::System_Highest))
+    //     // {
+    //     //     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    //     // }
+
+    //     CLR_RT_HeapBlock     delegate; delegate.SetObjectReference( NULL );
+    //     CLR_RT_ProtectFromGC gc( delegate );
+    //     CLR_RT_Thread* th;
+
+    //     int i= m_mdIdx.Method();
+    //     CLR_RT_MethodDef_Index ctor;
+    //     ctor.Set( m_assm->m_idx, i );
+
+    //     CLR_RT_MethodDef_Instance calleeInst; if(calleeInst.InitializeFromIndex( m_mdIdx ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        
+    //     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( delegate, ctor, NULL ));
+
+    //     //delegate.SetObjectReference( &m_lastValue.m_value );
+
+    //     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewThread( th, delegate.DereferenceDelegate(), ThreadPriority::Highest, -1 ));
+
+    //     {
+    //         CLR_RT_HeapBlock*           top;
+    //         CLR_RT_HeapBlock*           evalPos;
+    //         CLR_RT_StackFrame*          stack   = th->CurrentFrame();
+    //         const CLR_RECORD_METHODDEF* target  = m_assm->GetMethodDef( i );
+    //         CLR_UINT8                   numArgs = target->numArgs;
+            
+    //         CLR_INT32                   changes;
+
+    //         evalPos = &stack->m_evalStackPos[ -1 ];
+
+    //         ////////////////////////////////////////////////
+    //         // need to read the arguments from the blob
+
+    //         NANOCLR_CHECK_HRESULT(m_parser.Advance( m_res ));
+    //         //
+    //         // Skip value info.
+    //         //
+    //         m_blob += sizeof(CLR_UINT8);
+
+    //         const CLR_RT_DataTypeLookup& dtl = c_CLR_RT_DataTypeLookup[ m_res.m_dt ];
+
+    //         if(dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
+    //         {
+    // //             top   = &stack->PushValue();
+
+    // //             top->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(m_res.m_dt, 0, 1) );
+
+    // //             CLR_UINT32 size = (dtl.m_sizeInBits + 7) / 8;
+
+    // // // // FIXME GJS - the numeric values, what is their endiannes??? In the MSTV code there is a BIG endian fix but it looks like it will not work, so was it ever used?
+    // //             memcpy( &top->NumericByRef(), m_blob, size ); m_blob += size;
+
+
+
+    //             CLR_UINT32 size = (dtl.m_sizeInBits + 7) / 8;
+    //             uint8_t buffer[4];
+
+    // // // FIXME GJS - the numeric values, what is their endiannes??? In the MSTV code there is a BIG endian fix but it looks like it will not work, so was it ever used?
+    //             memcpy( &buffer[0], m_blob, size ); m_blob += size;
+
+    //             evalPos++;
+    //             evalPos[ 0 ].SetInteger( (CLR_INT32)buffer );
+
+    //         }
+
+    //         // done with args reading
+    //         ////////////////////////////////////
+
+    //         evalPos++;
+    //         stack->m_evalStackPos = &evalPos[ +1 ];
+
+    //         changes = target->numArgs;
+    //         NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK( *stack, stack->m_evalStackPos, -changes )); // Check to see if we have enough parameters.
+    //         top = stack->m_evalStackPos;
+
+    //         //
+    //         // We have to insert the 'this' pointer as argument 0, that means moving all the arguments up one slot...
+    //         //
+    //         top--;
+    //         while(--changes > 0)
+    //         {
+    //             top[ 0 ].Assign( top[ -1 ] ); top--;
+    //         }
+    //         top->SetObjectReference( NULL );
+
+    //         // Stack: ... <null> <arg1> <arg2> ... <argN> -> ...
+    //         //            ^
+    //         //            Top points here.
+
+    //         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( top[ 0 ], m_td ));
+
+    //         //
+    //         // This is to flag the fact that we need to copy back the 'this' pointer into our stack.
+    //         //
+    //         // See CLR_RT_StackFrame::Pop()
+    //         //
+    //         stack->m_flags |= CLR_RT_StackFrame::c_ExecutingConstructor;
+
+
+    //         //
+    //         // Ok, creating a ValueType then calls its constructor.
+    //         // But the constructor will try to load the 'this' pointer and since it's a value type, it will be cloned.
+    //         // For the length of the constructor, change the type from an object pointer to a reference.
+    //         //
+    //         // See CLR_RT_StackFrame::Pop()
+    //         //
+    //         if((m_td.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_ValueType)
+    //         {
+    //             if(top[ 0 ].DataType() == DATATYPE_OBJECT)
+    //             {
+    //                 top[ 0 ].ChangeDataType( DATATYPE_BYREF );
+    //             }
+    //             else
+    //             {
+    //                 //
+    //                 // This is to support the optimization on DateTime and TimeSpan:
+    //                 //
+    //                 // These are passed as built-ins. But we need to pass them as a reference,
+    //                 // so push everything down and undo the "ExecutingConstructor" trick.
+    //                 //
+    //                 top = stack->m_evalStackPos++;
+
+    //                 changes = target->numArgs;
+    //                 while(--changes > 0)
+    //                 {
+    //                     top[ 0 ].Assign( top[ -1 ] ); top--;
+    //                 }
+    //                 top[ 0 ].SetReference( top[ -1 ] );
+
+    //                 stack->m_flags &= ~CLR_RT_StackFrame::c_ExecutingConstructor;
+    //             }
+    //         }
+            
+    //         if(FAILED(hr = CLR_RT_StackFrame::Push( th, calleeInst, -1 )))
+    //         {   
+    //             if(hr == CLR_E_NOT_SUPPORTED)
+    //             {
+    //                 // no matter what, we are no longer executing a ctor
+    //                 stack->m_flags &= ~CLR_RT_StackFrame::c_ExecutingConstructor;  
+    //             }
+
+    //             NANOCLR_LEAVE();
+    //         }
+
+    //         // /////////////////////////////////////////////////////////////////////
+
+
+    //         if(numArgs)
+    //         {
+    //             // CLR_RT_SignatureParser          parser; parser.Initialize_MethodSignature( m_assm, target );
+    //             // CLR_RT_SignatureParser::Element res;
+    //             // CLR_RT_HeapBlock*               args = stack->m_arguments;
+
+    //             // if(parser.m_flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
+    //             // {
+    //             //     args->SetObjectReference( NULL );
+
+    //             //     numArgs--;
+    //             //     args++;
+    //             // }
+
+
+    //             // //
+    //             // // Skip return value.
+    //             // //
+    //             // NANOCLR_CHECK_HRESULT(parser.Advance( res ));
+
+    //             // // //
+    //             // // // None of the arguments can be ByRef.
+    //             // // //
+    //             // // {
+    //             // //     CLR_RT_SignatureParser parser2 = parser;
+
+    //             // //     for(;parser2.Available() > 0;)
+    //             // //     {
+    //             // //         NANOCLR_CHECK_HRESULT(parser2.Advance( res ));
+
+    //             // //         if(res.m_fByRef)
+    //             // //         {
+    //             // //             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    //             // //         }
+    //             // //     }
+    //             // // }
+
+    //             // for(CLR_UINT8 i=0; i<numArgs; i++, args++)
+    //             // {
+    //             //     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference( *args, parser ));
+    //             // }
+
+
+    //         }
+    //         //th->m_terminationCallback = NULL; CLR_RT_AttributeParser::ConstructorExecuted;
+    //         //th->m_terminationParameter = &m_lastValue.m_value;
+    //     }
+
+
+    //     // int i= m_mdIdx.Method();
+    //     // //const CLR_RECORD_METHODDEF* md = m_assm->GetMethodDef( i );
+    //     // CLR_RT_MethodDef_Index ctor;
+    //     // ctor.Set( m_assm->m_idx, i );
+
+    //     // if(SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance( m_lastValue.m_value, ctor, NULL )))
+    //     // {
+    //     //     CLR_RT_HeapBlock_Delegate* dlg = m_lastValue.m_value.DereferenceDelegate();
+
+    //     // //    dlg->m_object.SetObjectReference( &m_lastValue.m_value );
+
+    //     //     if(SUCCEEDED(g_CLR_RT_ExecutionEngine.m_cctorThread->PushThreadProcDelegate( dlg )))
+    //     //     {
+    //     //         CLR_RT_StackFrame* stackTop;
+    //     //         CLR_RT_HeapBlock*  args;
+
+                            
+    //     //         stackTop = g_CLR_RT_ExecutionEngine.m_cctorThread->CurrentFrame();
+
+    //     //         args = stackTop->m_arguments;
+
+    //     //         if((stackTop->m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+    //     //         {
+    //     //             ++args;
+    //     //         }
+
+    //     //         args[0].SetInteger    ( 0xAABBCCDD );
+
+
+    //     //         //g_CLR_RT_EventCache.Append_Node( fin );
+    //     //         //m_finalizerThread->m_terminationCallback = CLR_RT_ExecutionEngine::FinalizerTerminationCallback;
+    //     //     }       
+    //     // }
+        res = &m_lastValue;
+
+        m_constructorParsed = true;
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
     else if(m_currentPos < m_fixed_Count + m_named_Count)
     {
+        // Attribute class has named fields
+
         CLR_UINT32 kind; NANOCLR_READ_UNALIGNED_UINT8(kind,m_blob);
 
         m_lastValue.m_name = GetString();
