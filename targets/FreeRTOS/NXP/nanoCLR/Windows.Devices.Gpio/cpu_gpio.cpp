@@ -71,6 +71,7 @@ void Gpio_DebounceHandler(TimerHandle_t xTimer)
 
 void GPIO_Main_IRQHandler( int portIndex, GPIO_Type * portBase )
 {
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	// Get interrupting pins
 	uint32_t intPins = GPIO_PortGetInterruptFlags(portBase);
 
@@ -122,7 +123,7 @@ void GPIO_Main_IRQHandler( int portIndex, GPIO_Type * portBase )
 								}
 
 								// Start Debounce timer
-								xTimerChangePeriodFromISR(pGpio->debounceTimer, pdMS_TO_TICKS(pGpio->debounceMs), pdFALSE);
+								xTimerChangePeriodFromISR(pGpio->debounceTimer, pdMS_TO_TICKS(pGpio->debounceMs), &xHigherPriorityTaskWoken);
 							}
 							else
 							{
@@ -138,6 +139,8 @@ void GPIO_Main_IRQHandler( int portIndex, GPIO_Type * portBase )
 			bitNumber++;
 		} // while
 	}
+
+	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 
     // Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
     // exception return operation might vector to incorrect interrupt 
