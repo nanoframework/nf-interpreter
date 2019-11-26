@@ -74,6 +74,20 @@ void GPIO_Main_IRQHandler( int portIndex, GPIO_Type * portBase )
 	// Get interrupting pins
 	uint32_t intPins = GPIO_PortGetInterruptFlags(portBase);
 
+	// clear the interrupt status
+    GPIO_PortClearInterruptFlags(portBase, intPins);
+
+	if (portIndex % 2) 
+	{
+		// use the upper 16 bits for odd ports
+		intPins >>= 16;
+	} 
+	else 
+	{
+		// use the lower 16 bits for even ports
+		intPins &= 0xFFFF;
+	}
+
 	// This port been initialised ?
 	statePortArray * inputStates = port_array[portIndex];
 	if ( inputStates )
@@ -81,10 +95,9 @@ void GPIO_Main_IRQHandler( int portIndex, GPIO_Type * portBase )
 		uint32_t bitNumber = 0;
 
 		// Handle all pins with pending interrupt
-		uint32_t pins = intPins;
-		while(pins)
+		while(intPins)
 		{
-			if ( pins & 0x01 )
+			if ( intPins & 0x01 )
 			{
 				// Interupt on pin ?
 				gpio_input_state * pGpio = *inputStates[bitNumber];
@@ -121,12 +134,10 @@ void GPIO_Main_IRQHandler( int portIndex, GPIO_Type * portBase )
 				} // if pin setup in nanoFramework
 			} // if interrupt
 
-			pins>>=1;
+			intPins>>=1;
 			bitNumber++;
 		} // while
 	}
-    // clear the interrupt status
-    GPIO_PortClearInterruptFlags(portBase, intPins);
 
     // Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
     // exception return operation might vector to incorrect interrupt 
