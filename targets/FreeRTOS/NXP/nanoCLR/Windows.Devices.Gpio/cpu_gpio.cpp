@@ -135,7 +135,8 @@ void GPIO_Main_IRQHandler( int portIndex, GPIO_Type * portBase )
 #endif
 }
 
-
+extern "C"
+{
 // Gpio ISR handler for GPIO port 1 bits 0-15
 void GPIO1_Combined_0_15_IRQHandler(void)
 {
@@ -152,10 +153,12 @@ void GPIO2_Combined_0_15_IRQHandler(void)
 	GPIO_Main_IRQHandler( 2, GPIO2 );
 }
 // Gpio ISR handler for GPIO port 2 bits 16-31
-void GPIO2_Combined_16_31_IRQHandler(void)
-{
-	GPIO_Main_IRQHandler( 3, GPIO2 );
-}
+
+// TODO: this handler is used to sdcard detect
+// void GPIO2_Combined_16_31_IRQHandler(void)
+// {
+// 	GPIO_Main_IRQHandler( 3, GPIO2 );
+// }
 // Gpio ISR handler for GPIO port 3 bits 0-15
 void GPIO3_Combined_0_15_IRQHandler(void)
 {
@@ -185,6 +188,7 @@ void GPIO5_Combined_0_15_IRQHandler(void)
 void GPIO5_Combined_16_31_IRQHandler(void)
 {
 	GPIO_Main_IRQHandler( 9, GPIO5 );
+}
 }
 
 // Get pointer to gpio_input_state for Gpio pin
