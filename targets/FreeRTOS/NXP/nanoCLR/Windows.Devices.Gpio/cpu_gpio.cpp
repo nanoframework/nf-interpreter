@@ -116,12 +116,6 @@ void GPIO_Main_IRQHandler( int portIndex, GPIO_Type * portBase )
 							{
 								pGpio->waitingDebounce = true;
 
-								if (pGpio->debounceTimer == 0)
-								{
-									// Create timer if it doesn't already exist for this pin
-									pGpio->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void*)pGpio, Gpio_DebounceHandler);
-								}
-
 								// Start Debounce timer
 								xTimerChangePeriodFromISR(pGpio->debounceTimer, pdMS_TO_TICKS(pGpio->debounceMs), &xHigherPriorityTaskWoken);
 							}
@@ -420,6 +414,11 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMillisecond
 	// Set up expected new value for debounce
 	if ( pGpio->debounceMs > 0)
 	{
+		if (pGpio->debounceTimer == 0)
+		{
+			// Create timer if it doesn't already exist for this pin
+			pGpio->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void*)pGpio, Gpio_DebounceHandler);
+		}
 		switch (IntEdge)
 		{
 			case GPIO_INT_NONE:
