@@ -1,4 +1,7 @@
-cmake_minimum_required(VERSION 2.8.2)
+#
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
 
 project(FreeRTOS-download NONE)
 
@@ -9,7 +12,7 @@ ExternalProject_Add(
     FreeRTOS
     PREFIX FreeRTOS
     SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
-    GIT_REPOSITORY https://github.com/aws/amazon-freertos.git
+    GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
     GIT_TAG ${FREERTOS_VERSION_TAG}  # target specified branch
     GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
     TIMEOUT 10

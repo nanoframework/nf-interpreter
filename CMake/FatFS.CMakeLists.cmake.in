@@ -1,0 +1,24 @@
+#
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
+project(FatFS-download NONE)
+
+include(ExternalProject)
+
+# download FatFS source from MateuszKlatecki git repo
+ExternalProject_Add( 
+    FatFS
+    PREFIX FatFS
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
+    GIT_REPOSITORY https://github.com/MateuszKlatecki/fatfs.git
+    GIT_TAG ${FATFS_VERSION_TAG}  # target specified branch
+    GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+    TIMEOUT 10
+    LOG_DOWNLOAD 1
+    # Disable all other steps
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)

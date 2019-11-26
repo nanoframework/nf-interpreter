@@ -125,9 +125,11 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 				NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 			}
 
-			// Make sure GPIO pin doesn't have a GPIO Isr asscoiatted with it otherwise it will not support
-			// faster count frequencies
-			Remove_Gpio_Interrupt((gpio_num_t)pinNumber);
+			// Disable GPIO input pin as we use separate counter
+			CPU_GPIO_DisablePin(pinNumber, GpioPinDriveMode::GpioPinDriveMode_Input, 0);
+
+			// Reserve pin for Counter use
+			CPU_GPIO_ReservePin(pinNumber, true);
 		}
 		else
 		{
@@ -298,6 +300,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 
 		// Clear counter / gpio mapping
 		GpioCounterMap[counterIndex] = -1;
+
+		CPU_GPIO_ReservePin(pinNumber, false);
 	}
 	NANOCLR_NOCLEANUP();
 }

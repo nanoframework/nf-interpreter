@@ -3,6 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(binutils.arm-none-eabi)
+include(binutils.TI_SimpleLink)
 
 # now add the subdirectory for the board
 # try to find board in the targets folder
@@ -187,7 +189,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
         # check if build was requested with a specifc FreeRTOS version
         if(FREERTOS_VERSION_EMPTY)
             # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-            set(FREERTOS_VERSION_TAG "v1.4.8")
+            set(FREERTOS_VERSION_TAG "V10.2.1")
         else()
             # set SVN tag
             set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")
@@ -215,7 +217,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
             FreeRTOS
             PREFIX FreeRTOS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
-            GIT_REPOSITORY https://github.com/aws/amazon-freertos.git
+            GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
             GIT_TAG ${FREERTOS_VERSION_TAG}  # target specified branch
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10

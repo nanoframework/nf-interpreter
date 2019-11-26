@@ -1,0 +1,19 @@
+# Copyright (c) 2019 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+
+parameters:
+  buildDirectory: '$(Build.SourcesDirectory)\build'
+
+steps:
+
+  - task: CMake@1
+    inputs:
+      cmakeArgs: '-G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/toolchain.arm-none-eabi.cmake -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_AssemblyVersion) -DFREERTOS_BOARD=$(BoardName) $(BuildOptions) ..'
+      workingDirectory:  ${{ parameters.buildDirectory }}
+    displayName: Setup build with CMake
+
+  - task: CMake@1
+    inputs:
+      cmakeArgs: '--build ${{ parameters.buildDirectory }} --target all --config MinSizeRel'
+      workingDirectory:  ${{ parameters.buildDirectory }}
+    displayName: Build with CMake

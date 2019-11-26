@@ -132,6 +132,7 @@ macro(ParseNativeAssemblies)
     if(API_nanoFramework.TI.EasyLink)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("nanoFramework.TI.EasyLink")
+    endif()
 
     # nanoFramework.Runtime.Events
     if(API_nanoFramework.Runtime.Events)
