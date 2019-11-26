@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(binutils.arm-none-eabi)
+include(binutils.FreeRTOS)
+
 # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
 set(NO_FREERTOS_SOURCE TRUE)
 if(FREERTOS_SOURCE)

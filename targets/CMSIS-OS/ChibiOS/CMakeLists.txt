@@ -3,6 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(binutils.arm-none-eabi)
+include(binutils.ChibiOS)
 include(STM32_CubePackage)
 
 ########################################################
