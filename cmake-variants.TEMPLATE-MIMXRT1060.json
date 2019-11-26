@@ -31,6 +31,7 @@
         "short": "MIMXRT1060_EVK",
         "settings": {
           "BUILD_VERSION": "0.9.99.999",
+          "CMAKE_TOOLCHAIN_FILE" : "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "C:/nanoFramework_Tools/GNU_ARM_Toolchain/8 2019-q3-update",
           "TARGET_SERIES": "IMXRT10xx",
           "SUPPORT_ANY_BASE_CONVERSION": "ON",

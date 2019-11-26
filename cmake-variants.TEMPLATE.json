@@ -27,6 +27,7 @@
         "short": "<summary-here>",
         "settings": {
           "BUILD_VERSION" : "0.9.99.999",
+          "CMAKE_TOOLCHAIN_FILE" : "CMake/toolchain.<arm-none-eabi-OR-xtensa-esp32-elf>.cmake",
           "TOOLCHAIN_PREFIX" : "<path-to-gcc-toolchain-mind-the-forward-slash>",
           "TOOL_HEX2DFU_PREFIX" : "<path-to-hex2dfu-utility-mind-the-forward-slash>",
           "ESP32_IDF_PATH" : "<path-to-esp32-idf-mind-the-forward-slash>/esp-idf",

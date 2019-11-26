@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(binutils.arm-none-eabi)
+include(binutils.TI_SimpleLink)
+
 # set target base location
 # this has to be set before the class library modules are pulled in
 if(EXISTS ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD})

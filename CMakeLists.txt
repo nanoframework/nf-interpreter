@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.14)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
 
@@ -27,6 +27,7 @@ endif()
 ########################################################
 # path to local CMake modules
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
 
@@ -102,48 +103,20 @@ endif()
 
 #######################
 
+# check for toolchain path (this is required for Windows builds and we are only building on Windows)
+if(NOT DEFINED TOOLCHAIN_PREFIX)
+        message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
+        message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
+        message(STATUS "########################################\n\n")
+        message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
+endif()
 
-##########################################
-# set default toolchain to GCC
-set(TOOLCHAIN GCC)
-# have it lower case too for file names
-string(TOLOWER TOOLCHAIN_LOWER ${TOOLCHAIN})
-##########################################
-
-if(RTOS_CHIBIOS_CHECK)
-
-    # check for toolchain path
-    if(NOT TOOLCHAIN_PREFIX)
-         message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
-         message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
-         message(STATUS "########################################\n\n")
-         message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
+# Set up short path substitution on Windows
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+    if(EXISTS ${CMAKE_SOURCE_DIR}/SetNFRoot.bat)
+        execute_process(COMMAND ${CMAKE_SOURCE_DIR}/SetNFRoot.bat OUTPUT_VARIABLE NFROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(ENV{nfRoot} ${NFROOT})
     endif()
-
-    message(STATUS "\nSetting Toolchain file for ChibiOS \n")
-    # set toolchain file
-    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.ChibiOS.${TOOLCHAIN}.cmake)
-
-    # Set up short path substitution on Windows
-	if(WIN32)
-		if(EXISTS ${CMAKE_SOURCE_DIR}/SetNFRoot.bat)
-    		execute_process(COMMAND ${CMAKE_SOURCE_DIR}/SetNFRoot.bat OUTPUT_VARIABLE NFROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
-			set(ENV{nfRoot} ${NFROOT})
-    	endif()
-    endif()
-
-elseif(RTOS_FREERTOS_CHECK)
-    message(STATUS "\nSetting Toolchain file for FreeRTOS \n")
-    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.${TOOLCHAIN}.cmake)
-    
-elseif(RTOS_FREERTOS_ESP32_CHECK)
-    message(STATUS "\nSetting Toolchain file for FreeRTOS ESP32 \n")
-    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.FreeRtos.ESP32.${TOOLCHAIN}.cmake)
-
-elseif(RTOS_TI_SIMPLELINK_CHECK)
-    message(STATUS "\nSetting Toolchain file for FreeRTOS CC32XX \n")
-    set(CMAKE_TOOLCHAIN_FILE CMake/toolchain.TI_SimpleLink.${TOOLCHAIN}.cmake)
-
 endif()
 
 #########################################
@@ -159,7 +132,6 @@ message(STATUS "")
 message(STATUS "Building nanoFramework version ${PROJECT_VERSION} using build type '${CMAKE_BUILD_TYPE}'.")
 message(STATUS "Source directory is '${PROJECT_SOURCE_DIR}'.")
 message(STATUS "Build  directory is '${PROJECT_BINARY_DIR}'.")
-message(STATUS "Toolchain is '${TOOLCHAIN}'.")
 message(STATUS "")
 #######################
 
@@ -178,15 +150,6 @@ endif()
 #################################################################
 
 if(RTOS_CHIBIOS_CHECK)
-
-    #################################################################
-    # clear CMAKE_C_FLAGS_INIT and CMAKE_CXX_FLAGS_INIT
-    # (this needs to be here and not before because by now
-    # the compiler detection has already occurred)
-    set(CMAKE_C_FLAGS "" CACHE INTERNAL "clear c compiler flags")
-    set(CMAKE_CXX_FLAGS "" CACHE INTERNAL "clear cxx compiler flags")
-    #################################################################
-
 
     #################################################################
     # clear some CMake flavor flags that are being set as default

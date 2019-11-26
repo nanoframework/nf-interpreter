@@ -1,22 +1,9 @@
 #
-# Copyright (c) 2017 The nanoFramework project contributors
+# Copyright (c) 2019 The nanoFramework project contributors
 # See LICENSE file in the project root for full license information.
 #
 
-INCLUDE(CMakeForceCompiler)
-# if( DEFINED CMAKE_CROSSCOMPILING )
-#     # subsequent toolchain loading is not really needed
-#     return()
-# endif()
-
-# check for toolchain path
-# if(NOT TOOLCHAIN_PREFIX)
-# 	message( "tcp ${TOOLCHAIN_PREFIX}" )
-#      message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain")
-#      message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
-#      message(STATUS "########################################\n\n")
-#      message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
-# endif()
+include(CMakeForceCompiler)
 
 # Stop cmake trying to check if compiler works
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY )
@@ -49,7 +36,10 @@ if(NOT CMAKE_CXX_COMPILER)
 endif()
 
 # setup Assembler compiler
-SET_COMPILER_VAR(ASM-ATT_COMPILER as)
+if(NOT CMAKE_ASM_COMPILER)
+    SET_COMPILER_VAR(ASM_COMPILER gcc)
+    SET_COMPILER_VAR(ASM-ATT_COMPILER as)
+endif()
  
 # other toolchain configurations  
 set(CMAKE_OBJCOPY ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-objcopy CACHE INTERNAL "objcopy tool")

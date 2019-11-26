@@ -3,7 +3,6 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in"
