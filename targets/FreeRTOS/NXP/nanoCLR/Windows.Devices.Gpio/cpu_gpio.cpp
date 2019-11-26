@@ -100,7 +100,7 @@ void GPIO_Main_IRQHandler( int portIndex, GPIO_Type * portBase )
 			if ( intPins & 0x01 )
 			{
 				// Interupt on pin ?
-				gpio_input_state * pGpio = *inputStates[bitNumber];
+				gpio_input_state * pGpio = (*inputStates)[bitNumber];
 				// Do we have gpio_input_state setup for this pin ?
 				if (pGpio)
 				{
