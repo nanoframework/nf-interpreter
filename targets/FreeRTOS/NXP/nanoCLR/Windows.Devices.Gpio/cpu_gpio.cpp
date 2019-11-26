@@ -384,26 +384,20 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMillisecond
 
 	pGpio = AllocateGpioInputState(pinNumber);
 
-	// Link ISR ptr supplied and not already set up
-	// CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
-	if ( (Pin_ISR != NULL) && (pGpio->isrPtr == NULL))
-	{
-		// Map nanoFRamework Interrupt edge to NXP edge
-		// NONE=0, EDGE_LOW=1, EDGE_HIGH=2, EDGE_BOTH=3, LEVEL_HIGH=4, LEVEL_LOW
-		const gpio_interrupt_mode_t mapint[6] = { kGPIO_NoIntmode, kGPIO_IntFallingEdge, kGPIO_IntRisingEdge, kGPIO_IntRisingOrFallingEdge, kGPIO_IntHighLevel, kGPIO_IntLowLevel };
+	// Map nanoFRamework Interrupt edge to NXP edge
+	// NONE=0, EDGE_LOW=1, EDGE_HIGH=2, EDGE_BOTH=3, LEVEL_HIGH=4, LEVEL_LOW
+	const gpio_interrupt_mode_t mapint[6] = { kGPIO_NoIntmode, kGPIO_IntFallingEdge, kGPIO_IntRisingEdge, kGPIO_IntRisingOrFallingEdge, kGPIO_IntHighLevel, kGPIO_IntLowLevel };
 
-		// enable interupt mode with correct edge
-		gpio_pin_config_t config = {kGPIO_DigitalInput, 0, mapint[IntEdge] };
-		GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
-		
-		// Enable GPIO pin interrupt
-		IRQn_Type isrNo = (IRQn_Type)(GPIO1_Combined_0_15_IRQn + GetIoPort(pinNumber));
-		NVIC_SetPriority(isrNo, 8U);
-		EnableIRQ(isrNo);
-    	GPIO_PortEnableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
-		GPIO_PortClearInterruptFlags(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
-
-	}
+	// enable interupt mode with correct edge
+	gpio_pin_config_t config = {kGPIO_DigitalInput, 0, mapint[IntEdge] };
+	GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
+	
+	// Enable GPIO pin interrupt
+	IRQn_Type isrNo = (IRQn_Type)(GPIO1_Combined_0_15_IRQn + GetIoPort(pinNumber));
+	NVIC_SetPriority(isrNo, 8U);
+	EnableIRQ(isrNo);
+	GPIO_PortEnableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
+	GPIO_PortClearInterruptFlags(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
 
 	// Initialise Gpio state structure
 	pGpio->isrPtr = Pin_ISR;
