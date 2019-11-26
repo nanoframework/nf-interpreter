@@ -566,19 +566,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnType___SystemType,
     Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN,
     NULL,
-    Library_corlib_native_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2,
-    Library_corlib_native_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2__I4__I4,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    Library_corlib_native_System_Resources_ResourceManager::FindResource___STATIC__I4__STRING__SystemReflectionAssembly,
-    Library_corlib_native_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum,
     NULL,
     NULL,
     NULL,
@@ -907,7 +894,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib", 
-    0x91CE6848,
+    0x76C29CAA,
     method_lookup,
-    { 100, 2, 3, 0 }
+    { 100, 4, 0, 0 }
 };

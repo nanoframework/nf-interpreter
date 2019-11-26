@@ -1,13 +1,13 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) 2019 The nanoFramework project contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#include "CorLib.h"
+
+#include "nf_system_resourcemanager.h"
 
 
-
-HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -65,7 +65,8 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInterna
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2__I4__I4( CLR_RT_StackFrame& stack )
+
+HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -144,7 +145,7 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObjectInterna
     NANOCLR_NOCLEANUP();   
 }
 
-HRESULT Library_corlib_native_System_Resources_ResourceManager::FindResource___STATIC__I4__STRING__SystemReflectionAssembly( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::FindResource___STATIC__I4__STRING__mscorlibSystemReflectionAssembly( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -164,7 +165,7 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::FindResource___S
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -193,8 +194,7 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObject___STAT
     NANOCLR_NOCLEANUP();
 }
 
-
-HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -215,3 +215,4 @@ HRESULT Library_corlib_native_System_Resources_ResourceManager::GetObject___STAT
 
     NANOCLR_NOCLEANUP();
 }
+

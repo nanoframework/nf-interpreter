@@ -108,7 +108,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Reflection_PropertyInfo.cpp
     corlib_native_System_Reflection_RuntimeFieldInfo.cpp
     corlib_native_System_Reflection_RuntimeMethodInfo.cpp
-    corlib_native_System_Resources_ResourceManager.cpp
     corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp
     corlib_native_System_Runtime_Remoting_RemotingServices.cpp
     corlib_native_System_RuntimeType.cpp
@@ -140,7 +139,6 @@ set(NF_CoreCLR_SRCS
     nf_rt_native_nanoFramework_Runtime_Native_Debug.cpp
     nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Power.cpp
-    nf_rt_native_nanoFramework_Runtime_Native_ResourceUtility.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp
     
     # Core stubs

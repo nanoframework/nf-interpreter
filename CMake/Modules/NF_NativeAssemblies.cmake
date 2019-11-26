@@ -13,6 +13,7 @@ option(API_nanoFramework.Devices.Can            "option for nanoFramework.Device
 option(API_nanoFramework.Devices.OneWire        "option for nanoFramework.Devices.OneWire")
 option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
 option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
+option(API_nanoFramework.ResourceManager        "option for nanoFramework.ResourceManager")
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
@@ -102,6 +103,12 @@ macro(ParseNativeAssemblies)
     if(API_nanoFramework.Networking.Sntp)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("nanoFramework.Networking.Sntp")
+    endif()
+
+    # nanoFramework.ResourceManager
+    if(API_nanoFramework.ResourceManager)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.ResourceManager")
     endif()
 
     # nanoFramework.Runtime.Events
