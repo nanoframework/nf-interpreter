@@ -29,7 +29,7 @@ endfunction()
 function(NF_SET_LINKER_OPTIONS TARGET)
 
     # request specs from newlib nano
-    set_property(TARGET ${TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs -Xlinker --gc-sections -Xlinker --sort-section=alignment -Xlinker -print-memory-usage")
+    set_property(TARGET ${TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs --specs=nosys.specs -Xlinker --gc-sections -Xlinker --sort-section=alignment -Xlinker -print-memory-usage")
 
     # set extra linker flags
     set_property(TARGET ${TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${ARGN}")
