@@ -10,6 +10,7 @@ extern "C" {
 #endif
 
 #include <sys/_types.h>
+#include <stddef.h>
 
 /*
  * _gettimeofday primitive (Stub function)
