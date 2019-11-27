@@ -8,7 +8,6 @@
 #include "win_dev_gpio_native_target.h"
 #include "nf_rt_events_native.h"
 
-// #include <timers.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <xdc/runtime/Error.h>
 

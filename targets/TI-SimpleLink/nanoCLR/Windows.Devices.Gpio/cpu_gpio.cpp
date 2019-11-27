@@ -7,7 +7,8 @@
 #include "win_dev_gpio_native_target.h"
 #include "nf_rt_events_native.h"
 
-#include <timers.h>
+#include <ti/sysbios/knl/Clock.h>
+#include <xdc/runtime/Error.h>
 
 #define GPIO_MAX_PINS      16
 #define TOTAL_GPIO_PORTS   ((GPIO_MAX_PINS + 15) / 16)
@@ -15,14 +16,14 @@
 // Gpio input state structure
 struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
 {
-	GPIO_PIN pinNumber;                      // Pin number
-	TimerHandle_t debounceTimer;			 // debounce timer for this Pin
-	GPIO_INTERRUPT_SERVICE_ROUTINE isrPtr;   // Ptr to user ISR or null
-	uint32_t debounceMs;                     // debounce Millsecs, no debonce=0
-	uint8_t  mode;                           // Interrupt mode
-	void *   param;                          // Param to user isr call
-	bool     expected;                       // Expected state for debounce handler
-	bool     waitingDebounce;	    		 // True if waiting for debounce timer to complete
+	GPIO_PIN 		pinNumber;              // Pin number
+	Clock_Handle 	debounceTimer;			// debounce timer for this Pin
+	GPIO_INTERRUPT_SERVICE_ROUTINE isrPtr;	// Ptr to user ISR or null
+	uint32_t 		debounceMs;             // debounce Millsecs, no debonce=0
+	uint8_t  		mode;                   // Interrupt mode
+	void *   		param;                  // Param to user isr call
+	bool     		expected;               // Expected state for debounce handler
+	bool     		waitingDebounce;	    // True if waiting for debounce timer to complete
 };
 
 // Array holds pointers to gpio_input_state for active input pins
@@ -47,7 +48,6 @@ gpio_input_state * AllocateGpioInputState(GPIO_PIN pinNumber)
 	return ptr;
 }
 
-
 // Delete gpio_input_state from array and tidy up ( Timer & ISR handler )
 void DeleteGpioInputState(GPIO_PIN pinNumber)
 {
@@ -58,10 +58,10 @@ void DeleteGpioInputState(GPIO_PIN pinNumber)
 		{	
 			if (pState->debounceTimer != 0)
 			{
-				xTimerDelete(pState->debounceTimer, 100);
+				Clock_delete(&pState->debounceTimer);
 			}
 
-			// Remove interrupt associatted with pin
+			// Remove interrupt associated with pin
 			// it's OK to do always this, no matter if interrupts are enabled or not
 			GPIO_disableInt(pState->pinNumber);
 
@@ -75,25 +75,31 @@ void DeleteGpioInputState(GPIO_PIN pinNumber)
 //
 // Debounce Handler, called when timer is complete
 //
-static void debounceTimer_Callback(TimerHandle_t xTimer)
+static void debounceTimer_Callback(UArg arg)
 {
-	gpio_input_state* pState = (gpio_input_state*)pvTimerGetTimerID(xTimer);
+    int16_t index = (int16_t)arg;
+
+	gpio_input_state * pState = gpioInputState[index];
+
 	if (pState->isrPtr)
 	{
-		bool actual = CPU_GPIO_GetPinState(pState->pinNumber);  // get current pin state
+		// get current pin state
+		bool actual = CPU_GPIO_GetPinState(pState->pinNumber);
 		if (actual == pState->expected)
 		{
 			pState->isrPtr(pState->pinNumber, actual, pState->param);
+
 			if (pState->mode == GPIO_INT_EDGE_BOTH)
-			{ // both edges
-				pState->expected ^= 1; // update expected state
+			{
+				// both edges
+				// update expected state
+				pState->expected ^= 1;
 			}
 		}
 	}
 
 	pState->waitingDebounce = false;
 }
-
 
 // Gpio event callback
 static void GpioEventCallback(uint_least8_t index)
@@ -120,12 +126,26 @@ static void GpioEventCallback(uint_least8_t index)
 					// Timer created yet ?
 					if (pState->debounceTimer == 0)
 					{
-						// Create timer if it doesn't already exist for this pin
-						pState->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void *)pState, debounceTimer_Callback);
+						// setup timer
+						Clock_Params params;
+
+						Clock_Params_init(&params);
+						params.arg = (UArg)index;
+						params.startFlag = false;
+						params.period = 0;
+
+						// Create and start timer
+						pState->debounceTimer = Clock_create(debounceTimer_Callback, pState->debounceMs / Clock_tickPeriod, &params, Error_IGNORE);
+					}
+					else
+					{
+						// timer already exists
+						// set timeout
+						Clock_setTimeout(pState->debounceTimer, pState->debounceMs / Clock_tickPeriod);
 					}
 
-					// Start Debounce timer
-					xTimerChangePeriodFromISR(pState->debounceTimer, pdMS_TO_TICKS(pState->debounceMs), pdFALSE);
+					// start timer
+					Clock_start(pState->debounceTimer);
 				}
 				else
 				{
