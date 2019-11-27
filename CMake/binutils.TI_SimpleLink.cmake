@@ -33,8 +33,8 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
     # (always ARM here)
     target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM ")
 
-    # definitions required for SimpleLink CC32xx SDK
-    target_compile_definitions(${TARGET} PUBLIC -Dgcc -DPTLS_TLS_INDEX=0 -DCC32XX -DBOARD_DISPLAY_USE_UART_ANSI=0 -DBOARD_DISPLAY_USE_LCD=0 -DconfigNUM_THREAD_LOCAL_STORAGE_POINTERS=1 -DSL_PLATFORM_MULTI_THREADED)
+    # definitions required for SimpleLink SDK
+    target_compile_definitions(${TARGET} PUBLIC -Dgcc)
 
     # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
     if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
