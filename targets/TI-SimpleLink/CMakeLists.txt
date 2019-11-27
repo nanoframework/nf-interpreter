@@ -472,6 +472,10 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
 
     endif()
 
+    # need to override the toolchain lib directory
+    set(TOOLCHAIN_INC_DIR ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
+    set(TOOLCHAIN_LIB_DIR ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
+
     # add board folder
     add_subdirectory(${TI_BOARD_DEFINITIONS_LOCATION})
 
