@@ -6,10 +6,11 @@
 include(binutils.arm-none-eabi)
 include(binutils.ChibiOS)
 include(STM32_CubePackage)
+include(nf_utils)
 
 ########################################################
 # check availability of hex2dfu tool if specified
-if(NOT "${TOOL_HEX2DFU_PREFIX}" STREQUAL "")
+if(DEFINED TOOL_HEX2DFU_PREFIX)
     if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe)
         message(STATUS "")
         message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe")
@@ -96,7 +97,9 @@ else()
         message(STATUS "RTOS is: ChibiOS (source from: ${CHIBIOS_SOURCE})")
 
         # check if we already have the sources, no need to copy again
-        if(NOT EXISTS "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/ChibiOS_Source SOURCE_EXISTS)
+
+        if(NOT ${SOURCE_EXISTS})
             file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
         else()
             message(STATUS "Using local cache of ChibiOS source from ${CHIBIOS_SOURCE}")
@@ -181,7 +184,9 @@ if(CHIBIOS_CONTRIB_REQUIRED)
             message(STATUS "ChibiOS-Contrib source from: ${CHIBIOS_CONTRIB_SOURCE}")
 
             # check if we already have the sources, no need to copy again
-            if(NOT EXISTS "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source")
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source SOURCE_EXISTS)
+
+            if(NOT ${SOURCE_EXISTS})
                 file(COPY "${CHIBIOS_CONTRIB_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source")
             else()
                 message(STATUS "Using local cache of ChibiOS-Contrib source from ${CHIBIOS_CONTRIB_SOURCE}")
@@ -272,12 +277,15 @@ if(NF_SECURITY_MBEDTLS)
 
     else()
         # mbedTLS source was specified
+        # message(FATAL_ERROR "${CMAKE_BINARY_DIR}/mbedTLS_Source") 
 
         # sanity check is source path exists
         if(EXISTS "${MBEDTLS_SOURCE}/")
 
             # check if we already have the sources, no need to copy again
-            if(NOT EXISTS "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/mbedTLS_Source SOURCE_EXISTS)
+
+            if(NOT ${SOURCE_EXISTS})
                 message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")
                 file(COPY "${MBEDTLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mbedTLS_Source")
             else()

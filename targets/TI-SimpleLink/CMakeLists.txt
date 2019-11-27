@@ -5,6 +5,7 @@
 
 include(binutils.arm-none-eabi)
 include(binutils.TI_SimpleLink)
+include(nf_utils)
 
 # set target base location
 # this has to be set before the class library modules are pulled in
@@ -95,7 +96,9 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
             message(STATUS "TI SimpleLink CC32xx SDK source from: ${TI_SL_CC32xx_SDK_SOURCE}")
 
             # check if we already have the sources, no need to copy again
-            if(NOT EXISTS "${CMAKE_BINARY_DIR}/TI_SL_CC32xx_SDK_SOURCE")
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_SL_CC32xx_SDK_SOURCE SOURCE_EXISTS)
+
+            if(NOT ${SOURCE_EXISTS})
                 file(COPY "${TI_SL_CC32xx_SDK_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source")
             else()
                 message(STATUS "Using local cache of TI SimpleLink CC32xx SDK source from ${TI_SL_CC32xx_SDK_SOURCE}")
@@ -204,7 +207,9 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
             message(STATUS "RTOS is: FreeRTOS (source from: ${FREERTOS_SOURCE})")
 
             # check if we already have the sources, no need to copy again
-            if(NOT EXISTS "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FreeRTOS_Source SOURCE_EXISTS)
+
+            if(NOT ${SOURCE_EXISTS})
                 file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
             else()
                 message(STATUS "Using local cache of FreeRTOS source from ${FREERTOS_SOURCE}")
