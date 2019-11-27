@@ -3,6 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(nf_utils)
+
 # check if FATFS_SOURCE was specified or if it's empty (default is empty)
 set(NO_FATFS_SOURCE TRUE)
 if(FATFS_SOURCE)
@@ -74,7 +76,9 @@ else()
         message(STATUS "FatFS ${FATFS_VERSION} (source from: ${FATFS_SOURCE})")
 
         # check if we already have the sources, no need to copy again
-        if(NOT EXISTS "${CMAKE_BINARY_DIR}/FatFS_Source")
+        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FatFS_Source SOURCE_EXISTS)
+
+        if(NOT ${SOURCE_EXISTS})
             file(COPY "${FATFS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FatFS_Source")
         else()
             message(STATUS "Using local cache of FatFS source from ${FATFS_SOURCE}")
@@ -176,7 +180,9 @@ else()
         message(STATUS "LWIP ${LWIP_VERSION} (source from: ${LWIP_SOURCE})")
 
         # check if we already have the sources, no need to copy again
-        if(NOT EXISTS "${CMAKE_BINARY_DIR}/LWIP_Source")
+        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/LWIP_Source SOURCE_EXISTS)
+
+        if(NOT ${SOURCE_EXISTS})
             file(COPY "${LWIP_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/LWIP_Source")
         else()
             message(STATUS "Using local cache of LWIP source from ${LWIP_SOURCE}")
