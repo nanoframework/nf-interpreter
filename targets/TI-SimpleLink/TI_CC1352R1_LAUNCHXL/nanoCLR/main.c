@@ -5,13 +5,8 @@
 
 #include <stdint.h>
 #include <nanoCLR_Application.h>
-// // POSIX Header files
-// #include <pthread.h>
-// #include <unistd.h>
 
 // RTOS header files
-//#include "FreeRTOS.h"
-//#include "task.h"
 #include <xdc/std.h>
 #include <xdc/runtime/Error.h>
 #include <ti/sysbios/BIOS.h>
