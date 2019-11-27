@@ -27,6 +27,14 @@ function(NF_SET_LINK_MAP TARGET)
 endfunction()
 
 
+function(NF_SET_LINKER_FILE TARGET LINKER_FILE_NAME)
+
+    # set linker file name
+    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "-Wl,-T${LINKER_FILE_NAME}")
+
+endfunction()
+
+
 function(NF_SET_COMPILER_DEFINITIONS TARGET)
 
     # definition for platform 
