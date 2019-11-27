@@ -5,6 +5,7 @@
 
 include(binutils.arm-none-eabi)
 include(binutils.FreeRTOS)
+include(nf_utils)
 
 # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
 set(NO_FREERTOS_SOURCE TRUE)
@@ -85,7 +86,9 @@ else()
         message(STATUS "RTOS is: FreeRTOS (source from: ${FREERTOS_SOURCE})")
 
         # check if we already have the sources, no need to copy again
-        if(NOT EXISTS "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
+        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FreeRTOS_Source SOURCE_EXISTS)
+
+        if(NOT ${SOURCE_EXISTS})
             file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS")
         else()
             message(STATUS "Using local cache of FreeRTOS source from ${FREERTOS_SOURCE}")
@@ -190,7 +193,9 @@ else()
         message(STATUS "CMSIS ${CMSIS_VERSION} (source from: ${CMSIS_SOURCE})")
 
         # check if we already have the sources, no need to copy again
-        if(NOT EXISTS "${CMAKE_BINARY_DIR}/CMSIS_Source")
+        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/CMSIS_Source SOURCE_EXISTS)
+
+        if(NOT ${SOURCE_EXISTS})
             file(COPY "${CMSIS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/CMSIS_Source")
         else()
             message(STATUS "Using local cache of CMSIS source from ${CMSIS_SOURCE}")
