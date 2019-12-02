@@ -10,9 +10,10 @@
 #include <Board.h>
 #include <gpio.h>
 #include <ti/drivers/dpl/ClockP.h>
+#include <ti/sysbios/knl/Task.h>
 
-#define GLOBAL_LOCK()              vPortEnterCritical();
-#define GLOBAL_UNLOCK()            vPortExitCritical();
+#define GLOBAL_LOCK()               uint32_t taskKey = Task_disable();
+#define GLOBAL_UNLOCK()             Task_restore(taskKey);
 
 // platform dependent delay
 #define PLATFORM_DELAY(milliSecs)   ClockP_usleep(milliSecs * 1000);

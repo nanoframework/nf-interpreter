@@ -45,6 +45,7 @@ add_executable(
     ${NANOCLR_PROJECT_NAME}.elf
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/target_Power.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/CC3220SF_LAUNCHXL.c"
 
     ${COMMON_PROJECT_SOURCES}
@@ -110,7 +111,7 @@ nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 ###############################################
 # add -DUSE_CC3220_ROM_DRV_API to use ROM API #
 ###############################################
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DDeviceFamily_CC3220)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DCC32XX -DDeviceFamily_CC3220 -DPTLS_TLS_INDEX=0 -DBOARD_DISPLAY_USE_UART_ANSI=0 -DBOARD_DISPLAY_USE_LCD=0 -DconfigNUM_THREAD_LOCAL_STORAGE_POINTERS=1 -DSL_PLATFORM_MULTI_THREADED)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)

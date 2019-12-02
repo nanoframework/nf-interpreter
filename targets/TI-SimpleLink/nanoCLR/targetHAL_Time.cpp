@@ -8,20 +8,21 @@
 #include <nanoCLR_Types.h>
 #include <nanoHAL_Time.h>
 #include <target_platform.h>
-#include <FreeRTOS.h>
-#include <timers.h>
+// #include <FreeRTOS.h>
+// #include <timers.h>
 #include <time.h>
+#include <ti/sysbios/hal/Seconds.h>
 
 // Returns the current date time from the RTC 
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
     SYSTEMTIME st;
-    struct timespec tspec;
+    uint32_t t;
 
-    clock_gettime(CLOCK_REALTIME, &tspec);
+    t = Seconds_get();
 
     // Convert from Unix time(year since 1900) to SYSTEMTIME(Years since 1601)
-    int64_t time = ((int64_t)tspec.tv_sec * (int64_t)TIME_CONVERSION__TO_SECONDS) + TIME_UNIX_EPOCH_AS_TICKS;
+    int64_t time = ((int64_t)t * (int64_t)TIME_CONVERSION__TO_SECONDS) + TIME_UNIX_EPOCH_AS_TICKS;
 
     HAL_Time_ToSystemTime(time, &st );
 
@@ -41,7 +42,6 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
 {
     SYSTEMTIME systemTime;
     struct tm newTime;
-    struct timespec tspec;
 
     HAL_Time_ToSystemTime(utcTime, &systemTime);
 
@@ -54,10 +54,8 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
     newTime.tm_sec = (uint32_t)systemTime.wSecond;  // seconds after the minute	 0-59
 
     time_t t = mktime(&newTime);
-    tspec.tv_sec = t;
-    tspec.tv_nsec = 0;
 
-    clock_settime(CLOCK_REALTIME, &tspec);
+    Seconds_set(t);
 }
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )
@@ -124,5 +122,5 @@ const char* HAL_Time_CurrentDateTimeToString()
 
 uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
 {
-    return ((ticks * (uint64_t)configTICK_RATE_HZ) / 1000);
+    return ((ticks * (uint64_t)1000) / Clock_tickPeriod);
 }

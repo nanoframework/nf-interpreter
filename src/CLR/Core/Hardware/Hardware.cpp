@@ -165,6 +165,11 @@ void CLR_HW_Hardware::ProcessActivity()
         eventsCLR |= CLR_RT_ExecutionEngine::c_Event_StorageIo;
     }
 
+    if(events & SYSTEM_EVENT_FLAG_RADIO)
+    {
+        eventsCLR |= CLR_RT_ExecutionEngine::c_Event_Radio;
+    }
+
     if(eventsCLR)
     {
         g_CLR_RT_ExecutionEngine.SignalEvents( eventsCLR );

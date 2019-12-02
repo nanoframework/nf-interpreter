@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.12)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
 
-# set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
+set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
 
 # the following prevents launchin a build in the source tree
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -149,7 +149,7 @@ if(NF_BUILD_RTM)
 endif()
 #################################################################
 
-if(RTOS_CHIBIOS_CHECK)
+if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
 
     #################################################################
     # clear some CMake flavor flags that are being set as default
@@ -482,7 +482,9 @@ if( API_System.Net OR
     else()
         set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
     endif()
-
+else()
+    # need to force SNTP to OFF
+    set(NF_NETWORKING_SNTP FALSE CACHE INTERNAL "SNTP is off as there is no network support")
 endif()
 
 
