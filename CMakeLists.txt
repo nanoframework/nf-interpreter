@@ -791,7 +791,7 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
     endif()
     
     # add common directory for SimpleLink
-    add_subdirectory(targets/TI-SimpleLink)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink)
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
 
