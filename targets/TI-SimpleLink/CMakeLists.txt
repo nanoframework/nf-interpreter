@@ -7,52 +7,6 @@ include(binutils.arm-none-eabi)
 include(binutils.TI_SimpleLink)
 include(nf_utils)
 
-# now add the subdirectory for the board
-# try to find board in the targets folder
-if(EXISTS ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD})
-
-    # add TARGET board directory
-    set(TI_BOARD_DEFINITIONS_LOCATION ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD})
-
-    # board found
-    message(STATUS "Support for target board '${TI_BOARD}' found")
-    message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
-
-else()
-
-    # try to find board in the Community targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TI_BOARD})
-
-        # add TARGET board directory from Community
-        set(TI_BOARD_DEFINITIONS_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TI_BOARD})
-    
-        # board found
-        message(STATUS "Support for target board '${TI_BOARD}' found in Community targets")
-        message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
-
-    else()
-    # board NOT found in targets folder
-        # board NOT found in targets folder
-        message(FATAL_ERROR "\n\nSorry but support for ${TI_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-    endif()
-
-endif()
-
-# set target base location
-# this has to be set before the class library modules are pulled in
-if(EXISTS ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD})
-    # set target base location
-    set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD}")
-    message(STATUS "Support for target board '${TI_BOARD}' found")
-else()
-    # board NOT found
-    # can't continue
-    message(FATAL_ERROR "\n\nSorry but support for ${TI_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-endif()
-
-# Define base path for the class libraries
-set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR")
-
 # add target TI SimpleLink dirs
 add_subdirectory(common)
 add_subdirectory(Include)
@@ -480,9 +434,6 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     # need to override the toolchain lib directory
     set(TOOLCHAIN_INC_DIR ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
     set(TOOLCHAIN_LIB_DIR ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
-
-    # add board folder
-    add_subdirectory(${TI_BOARD_DEFINITIONS_LOCATION})
 
 endif()
 

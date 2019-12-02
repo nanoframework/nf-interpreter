@@ -96,7 +96,7 @@ add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC13x2_26x2SDK)
 add_custom_command(
     TARGET ${NANOCLR_PROJECT_NAME}.elf PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-            ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/TI_CC1352R1_LAUNCHXL/$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:debug>$<$<CONFIG:MinSizeRel>:release>.cfg
+            ${CMAKE_CURRENT_SOURCE_DIR}/$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:debug>$<$<CONFIG:MinSizeRel>:release>.cfg
             ${CMAKE_CURRENT_BINARY_DIR}/$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:debug>$<$<CONFIG:MinSizeRel>:release>.cfg
     COMMENT "Copy TI-RTOS configuration file to build directory" 
 )
