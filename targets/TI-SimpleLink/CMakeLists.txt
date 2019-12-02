@@ -294,7 +294,9 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
             message(STATUS "TI SimpleLink CC13x2_26x2 SDK source from: ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
 
             # check if we already have the sources, no need to copy again
-            if(NOT EXISTS "${CMAKE_BINARY_DIR}/TI_SL_CC13x2_26x2_SDK_SOURCE")
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_SL_CC13x2_26x2_SDK_SOURCE SOURCE_EXISTS)
+
+            if(NOT ${SOURCE_EXISTS})
                 file(COPY "${TI_SL_CC13x2_26x2_SDK_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source")
             else()
                 message(STATUS "Using local cache of TI SimpleLink CC13x2_26x2 SDK source from ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
@@ -404,7 +406,9 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
             message(STATUS "TI XDCTools (source from: ${TI_XDCTOOLS_SOURCE})")
 
             # check if we already have the sources, no need to copy again
-            if(NOT EXISTS "${CMAKE_BINARY_DIR}/TI_XDCTools_Source")
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_XDCTools_Source SOURCE_EXISTS)
+
+            if(NOT ${SOURCE_EXISTS})
                 file(COPY "${TI_XDCTOOLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/TI_XDCTools_Source")
             else()
                 message(STATUS "Using local cache of TI XDCTools source from ${TI_XDCTOOLS_SOURCE}")

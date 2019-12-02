@@ -8,7 +8,7 @@ macro(NF_DIRECTORY_EXISTS_NOT_EMPTY path pathExists)
 
     if(EXISTS "${path}")
 
-        file(GLOB RESULT "${path}")
+        file(GLOB RESULT LIST_DIRECTORIES false "${path}")
         list(LENGTH RESULT RES_LEN)
         if(RES_LEN EQUAL 0)
             # DIR is empty
