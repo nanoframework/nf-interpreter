@@ -133,6 +133,9 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffe
             // NOTE: assuming that the supply voltage is able to cope with half-word programming
             if((endAddress - cursor) >= 2)
             {
+                // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
+                __DSB();
+                
                 *(__IO uint16_t*)cursor = *((uint16_t*)buffer);
 
                 // update flash and buffer pointers by the 'extra' byte that was programmed
@@ -141,9 +144,11 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffe
             }
             else
             {
+                // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
+                __DSB();
+
                 // program single byte
                 *(__IO uint8_t*)cursor = *buffer;
-
                 // update flash pointer by the 'extra' byte that was programmed
                 cursor += 2;
             }
@@ -153,15 +158,15 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffe
             // watchdog will quick-in if execution gets stuck
             success = FLASH_WaitForLastOperation(0);
 
+            // after each program operation disable the PG Bit
+            CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
+
             if(!success)
             {
                 // quit on failure
                 break;
             }
         }
-
-        // after the program operation is completed disable the PG Bit
-        CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
         
         // lock the FLASH
         HAL_FLASH_Lock();
@@ -188,11 +193,6 @@ int flash_lld_isErased(uint32_t startAddress, uint32_t length)
     
     // reached here so the segment must be erased
     return true;
-}
-
-uint8_t flash_lld_getSector(uint32_t address)
-{
-  return (address - FLASH_BASE) / F0_SERIES_SECTOR_SIZE;
 }
 
 int flash_lld_erase(uint32_t address)

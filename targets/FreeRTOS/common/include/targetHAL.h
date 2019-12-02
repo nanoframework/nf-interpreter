@@ -6,12 +6,18 @@
 #ifndef _TARGET_HAL_H_
 #define _TARGET_HAL_H_
 
+#include "FreeRTOS.h"
 #include <target_board.h>
 #include "cmsis_gcc.h"
 
 // global mutex protecting the internal state of the interpreter, including event flags
-#define GLOBAL_LOCK()              portENTER_CRITICAL();
-#define GLOBAL_UNLOCK();           portEXIT_CRITICAL();
+#define GLOBAL_LOCK();      UBaseType_t uxSavedInterruptStatus = 0; \
+                            if (xPortIsInsideInterrupt() == pdTRUE) { \
+                                uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();\
+                            } else { portENTER_CRITICAL(); }
+#define GLOBAL_UNLOCK();    if (xPortIsInsideInterrupt() == pdTRUE) { \
+                                taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus ); \
+                            } else { portEXIT_CRITICAL(); }           
 
 // platform dependent delay
 #define PLATFORM_DELAY(milliSecs)   vTaskDelay(milliSecs / portTICK_PERIOD_MS);

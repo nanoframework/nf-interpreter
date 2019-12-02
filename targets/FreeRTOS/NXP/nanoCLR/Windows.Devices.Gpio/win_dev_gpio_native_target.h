@@ -10,4 +10,10 @@
 
 #include <win_dev_gpio_native.h>
 
+#include "MIMXRT1062.h"
+#include "fsl_gpio.h"
+#include "fsl_gpio_ext.h"
+#undef MIN
+#undef MAX
+
 #endif  //_WIN_DEV_GPIO_NATIVE_TARGET_H_
