@@ -18,24 +18,6 @@
 // need to declare this here as extern
 extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
-// the drive indexes have to be used instead of fixed drive letters because a target can have one or more 
-// and those have to follow the sequence that is used in ChibiOS FatFS wrappers
-// SD Card (or SPI) is 1st and USB MAS is 2nd (if SD Card is enabled)
-// this is also mapped in the FatFS configuration
-#if defined(HAL_USE_SDC)
-
-#define SD_CARD_DRIVE_INDEX             "0:"
-#define SD_CARD_DRIVE_INDEX_NUMERIC     (0)
-
-#endif
-
-#if defined(HAL_USE_SDC)
-
-#define USB_MSD_DRIVE_INDEX             "1:"
-#define USB_MSD_DRIVE_INDEX_NUMERIC     (1)
-
-#endif
-
 ///////////////////////////////////////////
 // code specific to SD Card
 
