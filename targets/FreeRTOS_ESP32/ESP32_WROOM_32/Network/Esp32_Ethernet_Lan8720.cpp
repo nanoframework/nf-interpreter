@@ -33,6 +33,11 @@ extern struct netif * Esp32_find_netif(esp_interface_t esp_if);
 //#define CONFIG_PIN_PHY_POWER		12     // Olimex_POE
 //#define CONFIG_PIN_PHY_POWER		5      // Olimex_gateway revs newer than C
 
+// Uncomment one of these lines to elect alternate clock modes
+#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_IN		// Default
+//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO17_OUT    // Olimex_POE, Olimex_POE-ISO
+//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_OUT     // 
+//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO16_OUT    // 
 
 
 #ifdef CONFIG_PHY_LAN8720
@@ -91,6 +96,7 @@ esp_err_t Esp32_InitialiseEthernet( uint8_t * pMacAdr)
     config.phy_addr = PHY0;
     config.gpio_config = eth_gpio_config_rmii;
     config.tcpip_input = tcpip_adapter_eth_input;
+	config.clock_mode = CONFIG_PHY_CLOCK_MODE;
 
 #ifdef CONFIG_PIN_PHY_POWER
 	config.phy_power_enable = phy_device_power_enable_via_gpio;
