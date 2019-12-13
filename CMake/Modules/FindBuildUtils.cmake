@@ -43,7 +43,7 @@ function(NF_GENERATE_HEX_PACKAGE FILE1 FILE2 OUTPUTFILENAME)
         COMMENT "exporting hex files to one hex file" 
     )
 
-    # need to add a dependency of NANOCLR to NANOBOOTER because DFU util needs bin outputs of both targets
+    # need to add a dependency of NANOCLR to NANOBOOTER because SRECORD util needs hex outputs of both targets
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
 
 endfunction()

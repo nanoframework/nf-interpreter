@@ -197,12 +197,6 @@ nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
 
 if(SRECORD_TOOL_AVAILABLE)
-
-    ####################################################################################################
-    ## when changing the linker file make sure to update the new addresses for the image files below  ##
-    ## DO NOT use the leading 0x notation, just the address in plain hexadecimal formating            ##
-    ####################################################################################################
-
     if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
         NF_GENERATE_HEX_PACKAGE(
             ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.hex
