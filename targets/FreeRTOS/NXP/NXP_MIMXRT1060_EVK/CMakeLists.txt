@@ -195,3 +195,10 @@ nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+
+if(SRECORD_TOOL_AVAILABLE)
+    NF_GENERATE_HEX_PACKAGE(
+        ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.hex
+        ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.hex
+        ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.hex)
+endif()

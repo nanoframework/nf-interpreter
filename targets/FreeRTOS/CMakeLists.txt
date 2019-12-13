@@ -15,6 +15,19 @@ if(FREERTOS_SOURCE)
     endif()
 endif()
 
+if(NOT "${TOOL_SRECORD_PREFIX}" STREQUAL "")
+    if(NOT EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe)
+        message(STATUS "")
+        message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
+        message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
+        message(STATUS "If you don't have this tool download it from hhttps://sourceforge.net/projects/srecord/files/srecord-win32/")
+        message(STATUS "")
+        message(FATAL_ERROR "srec_cat tool not found")
+    else()
+        set(SRECORD_TOOL_AVAILABLE TRUE CACHE INTERNAL "srec_cat tool available")
+    endif()
+endif()
+
 if(NO_FREERTOS_SOURCE)
     # no FreeRTOS source specified, download it from it's repo
     
