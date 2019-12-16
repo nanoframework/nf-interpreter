@@ -3,668 +3,754 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "FreeRTOS.h"
-#include <nanoHAL.h>
 #include "win_dev_serial_native_target.h"
-
-
-
-static void vRwEvent( void * pvParameters );
-
-const size_t xStreamBufferSizeBytes = UART_RX_BUFER_SIZE;
-const size_t xTriggerLevel = 10;
 
 /////////////////////////////////////////////////////////
 // UART PAL strucs delcared in win_dev_serial_native.h //
 /////////////////////////////////////////////////////////
 
-/* Static UART config/data structs. */
-NF_PAL_UART Uart_PAL1;
-NF_PAL_UART Uart_PAL2;
-NF_PAL_UART Uart_PAL3;
-NF_PAL_UART Uart_PAL4;
-NF_PAL_UART Uart_PAL5;
-NF_PAL_UART Uart_PAL6;
-NF_PAL_UART Uart_PAL7;
-NF_PAL_UART Uart_PAL8;
+static LPUART_Type *const lpuart_bases[] = LPUART_BASE_PTRS;
 
-/* Array of pointers to above config UART structs. */
-NF_PAL_UART* Uart_PAL[] {
-    NULL,
-    &Uart_PAL1,
-    &Uart_PAL2,
-    &Uart_PAL3,
-    &Uart_PAL4,
-    &Uart_PAL5,
-    &Uart_PAL6,
-    &Uart_PAL7,
-    &Uart_PAL8
-};
+// Static UART config/data structs. 
+static NF_PAL_UART Uart_PAL1, Uart_PAL2, Uart_PAL3, Uart_PAL4, Uart_PAL5, Uart_PAL6, Uart_PAL7, Uart_PAL8;
 
-/* Interrupt handler invoked when a transmission buffer is completely transfered by DMA */ 
-static void TxEnd(LPUART_Type *base, lpuart_edma_handle_t *handle, status_t status, void *data) 
-{   
-    (void) base;
-    (void) handle;
-    (void) status;
+// Array of pointers to above config UART structs. 
+NF_PAL_UART *const Uart_PAL[]{NULL, &Uart_PAL1, &Uart_PAL2, &Uart_PAL3, &Uart_PAL4, &Uart_PAL5, &Uart_PAL6, &Uart_PAL7, &Uart_PAL8};
 
-    uint8_t uartNum = *(uint8_t *) data;
+// Task firing up event after receiving wanted amount of bytes 
+static void vREvent(void *pvParameters)
+{
+  // This is main UART struct, holding config, handlers, and the rest of variables.d 
+  (void)pvParameters;
+  uint32_t ulNotifiedValue;
 
-    NATIVE_INTERRUPT_START     
+  while (1) 
+  {
+    xTaskNotifyWait(pdFALSE,          // Don't clear bits on entry. 
+                    0xffffffff,       // Clear all bits on exit. 
+                    &ulNotifiedValue, // Stores the notified value. 
+                    portMAX_DELAY);
 
-    BaseType_t xHigherPriorityTaskWoken = pdTRUE;
-
-    xTaskNotifyFromISR( Uart_PAL[uartNum]->xReadTaskToNotify, 0x01, eSetBits, &xHigherPriorityTaskWoken);
-    
-    /* At this point xTaskToNotify should not be NULL as a transmission was in progress. */
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-    
-    NATIVE_INTERRUPT_END
+    // Check is there event from task reading bytes. 
+    if ((ulNotifiedValue & 0x02) != 0) 
+    {
+      Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+    }
+  }
 }
 
-/* Interrupt handler, reads one byte from UART and puts it in the xStreamBuffer. */
-static void UART_Handle(LPUART_Type *base, uint8_t uartNum)
+// Task for transmitting data through blocking uart 
+static void vWEvent(void *pvParameters) 
 {
-    uint32_t status = 0;
-    char byte;
-    BaseType_t xHigherPriorityTaskWoken;
+  uint32_t ulNotifiedValue;
+  uint8_t *uartNum_p = (uint8_t *)pvParameters;
+  uint8_t uartNum = *uartNum_p;
+  NF_PAL_UART *palUart = Uart_PAL[uartNum];
 
-    status = LPUART_GetStatusFlags(base);
+  while (1) 
+  {
+    xTaskNotifyWait(pdFALSE,          // Don't clear bits on entry. 
+                    0xffffffff,       // Clear all bits on exit. 
+                    &ulNotifiedValue, // Stores the notified value. 
+                    portMAX_DELAY);
 
-        if (kLPUART_RxOverrunFlag & status)
-        {
-            /* Clear overrun flag, otherwise the RX does not work. */
-            base->STAT = ((base->STAT & 0x3FE00000U) | LPUART_STAT_OR_MASK);
-        }
-
-        if (kLPUART_RxDataRegFullFlag & status)
-        {
-            if (!xStreamBufferIsFull( Uart_PAL[uartNum]->xReceiveBuffer ))
-            {
-                byte = LPUART_ReadByte(base);
-                xHigherPriorityTaskWoken = pdFALSE; /* Initialised to pdFALSE. */
-                xStreamBufferSendFromISR( Uart_PAL[uartNum]->xReceiveBuffer,
-                                        &byte,
-                                        sizeof(byte),
-                                        &xHigherPriorityTaskWoken);
-            }
-        }
-
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    if ((ulNotifiedValue & 0x01) != 0) 
+    {
+      LPUART_WriteBlocking(lpuart_bases[uartNum], palUart->xfer.data, palUart->xfer.dataSize);
+      Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
+    }
+  }
 }
 
-/*
-    Override of the default MIMXRT1060 UART interrupt routines to simple UART_Handle function, which 
-    reads 1 byte of input data to RTOS stream buffer, if theres buffer overflow it drops data and clears interrupts.
-*/
-extern "C"
+static void UART_Handle(LPUART_Type *base, uint8_t uartNum) 
 {
-    /* LPUART1 is currently used for debugging, disable it or will collide with debugger */
-    /* void LPUART1_IRQHandler(void)
+  NATIVE_INTERRUPT_START
+  uint32_t status;
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  NF_PAL_UART *palUart = Uart_PAL[uartNum];
+
+  status = LPUART_GetStatusFlags(base);
+
+  if (kLPUART_RxOverrunFlag & status) 
+  {
+
+    // Clear overrun flag, otherwise the RX does not work. 
+    base->STAT |= 1U << LPUART_STAT_OR_SHIFT;
+  }
+
+  if (kLPUART_RxDataRegFullFlag & status) 
+  {
+    char byte = LPUART_ReadByte(base);
+    // push char to ring buffer
+    // don't care about the success of the operation, if it's full we are droping the char anyway 
+    palUart->RxRingBuffer.Push((uint8_t)byte);
+
+    // is there a read operation going on? 
+    if (palUart->RxBytesToRead > 0) 
     {
-        RX_Handle(LPUART1);
+      // check if the requested bytes are available in the buffer 
+      if (palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead) 
+      {
+        // reset Rx bytes to read count 
+        palUart->RxBytesToRead = 0;
+
+        // Notify task that we want to receive data. 
+        xTaskNotifyFromISR(palUart->xRTaskToNotify, 0x02, eSetBits, &xHigherPriorityTaskWoken);
+      }
     }
-    */
-    void LPUART2_IRQHandler(void)
-    {
-        UART_Handle(LPUART2, 2);
-    }
-    void LPUART3_IRQHandler(void)
-    {
-        UART_Handle(LPUART3, 3);
-    }
-    void LPUART4_IRQHandler(void)
-    {
-        UART_Handle(LPUART4 ,4);
-    }
-    void LPUART5_IRQHandler(void)
-    {
-        UART_Handle(LPUART5, 5);
-    }
-    void LPUART6_IRQHandler(void)
-    {
-        UART_Handle(LPUART6, 6);
-    }
-    void LPUART7_IRQHandler(void)
-    {
-        UART_Handle(LPUART7, 7);
-    }
-    void LPUART8_IRQHandler(void)
-    {
-        UART_Handle(LPUART8, 8);
-    }
+  }
+
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+  NATIVE_INTERRUPT_END
 }
 
-/* Deinitialize serial port and allocated free memory */
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID( CLR_RT_StackFrame& stack )
+// Override of the default MIMXRT1060 UART interrupt routines to simple UART_Handle function, which
+// reads 1 byte of input data to RTOS stream buffer, if theres buffer overflow it drops data and clears interrupts.
+
+extern "C" 
 {
-    NANOCLR_HEADER();
+// LPUART8 is currently used for debugging, disable it or will collide with debugger 
+// void LPUART1_IRQHandler(void) { UART_Handle(LPUART1, 1); }
+void LPUART2_IRQHandler(void) { UART_Handle(LPUART2, 2); }
+void LPUART3_IRQHandler(void) { UART_Handle(LPUART3, 3); }
+void LPUART4_IRQHandler(void) { UART_Handle(LPUART4, 4); }
+void LPUART5_IRQHandler(void) { UART_Handle(LPUART5, 5); }
+void LPUART6_IRQHandler(void) { UART_Handle(LPUART6, 6); }
+void LPUART7_IRQHandler(void) { UART_Handle(LPUART7, 7); }
+void LPUART8_IRQHandler(void) { UART_Handle(LPUART8, 8); }
+}
+
+// Deinitialize serial port and allocated free memory 
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID(CLR_RT_StackFrame &stack) 
+{
+  NANOCLR_HEADER();
+  {
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    uint8_t uartNum = 0;
+    LPUART_Type *base = NULL;
+
+    uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+    base = lpuart_bases[uartNum];
+
+    // Quit if parameters or device is invalid or out of range 
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || base == NULL) 
     {
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-
-        uint8_t uartNum = 0;
-        LPUART_Type *base = NULL;
-
-        uartNum = pThis[ FIELD___portIndex ].NumericByRef().s4;
-        base = lpuart_bases[uartNum];
-
-        /* Quit if parameters or device is invalid or out of range */
-        if (base == NULL || uartNum > 8) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER); 
-
-        /* Free ring buffers memory */
-        free(Uart_PAL[uartNum]->TxBuffer);
-
-        /* Deinitialize device and delete FreeRTOS idle tasks */
-        LPUART_Deinit(base);   
-        vTaskDelete( Uart_PAL[uartNum]->xReadTaskToNotify );
+      NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-    NANOCLR_NOCLEANUP();
+
+    NF_PAL_UART *palUart = Uart_PAL[uartNum];
+
+    // Free ring buffers memory 
+    free(palUart->TxBuffer);
+    free(palUart->RxBuffer);
+
+    // Deinitialize device and delete FreeRTOS idle tasks 
+    LPUART_Deinit(base);
+    vTaskDelete(palUart->xRTaskToNotify);
+    vTaskDelete(palUart->xWTaskToNotify);
+  }
+  NANOCLR_NOCLEANUP();
 }
 
-/* Initialise a new Serial port, allocate buffer memory and create FreeRTOS idle tasks */
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
+// Initialise a new Serial port, allocate buffer memory and create FreeRTOS idle tasks 
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeInit___VOID(CLR_RT_StackFrame &stack) 
 {
-    NANOCLR_HEADER();
-    {   
-       CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+  NANOCLR_HEADER();
+  {
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
 
-        status_t status = 0;
-        uint8_t uartNum = 0;
-        lpuart_config_t *config = NULL;
-        BaseType_t xReturned = NULL;
-        LPUART_Type *base = NULL;
-        
-        uartNum = pThis[ FIELD___portIndex ].NumericByRef().s4;
-        Uart_PAL[uartNum]->uart_data.uartNum = uartNum;
-        config = &Uart_PAL[uartNum]->uartCfg;
-        base = lpuart_bases[uartNum];
-        
-        /* Quit if parameters or device is invalid or out of range */
-        if (config == NULL || base == NULL || uartNum > 8) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);  
+    status_t status = 0;
+    uint8_t uartNum = 0;
+    lpuart_config_t *config = NULL;
+    LPUART_Type *base = NULL;
 
-        /* Allocate memory for TX circular buffer */
-        Uart_PAL[uartNum]->TxBuffer = (uint8_t *) platform_malloc(UART_TX_BUFER_SIZE * sizeof(uint8_t));
-        if (Uart_PAL[uartNum]->TxBuffer == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+    config = &Uart_PAL[uartNum]->uartCfg;
+    base = lpuart_bases[uartNum];
 
-        /* Initialize TX buffer */
-        Uart_PAL[uartNum]->TxRingBuffer.Initialize(Uart_PAL[uartNum]->TxBuffer, UART_TX_BUFER_SIZE);
-        Uart_PAL[uartNum]->TxOngoingCount = 0;
-        Uart_PAL[uartNum]->WatchChar = 0;
-        
-        /* Allocate stream buffer for RX  */
-        Uart_PAL[uartNum]->xReceiveBuffer = xStreamBufferCreate(xStreamBufferSizeBytes, xTriggerLevel);
-        Uart_PAL[uartNum]->xRxSemaphore = xSemaphoreCreateMutex();
-        
-        /* Get default config structure for initializing given UART peripheral and enable TX, RX */
-        LPUART_GetDefaultConfig(config);
-        config->enableRx = true;
-        config->enableTx = true;
-
-        /* Initialize UART peripheral with default config */
-        status = LPUART_Init(base, config, GetSrcFreq());   
-        if (status != kStatus_Success) NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-               
-        /* Enable RX interrupts */
-        LPUART_EnableInterrupts(base, kLPUART_RxDataRegFullInterruptEnable | kLPUART_RxOverrunInterruptEnable);
-        EnableIRQ((IRQn_Type) (19 + uartNum));
-        NVIC_SetPriority((IRQn_Type) (19 + uartNum), 8U);
-        
-        /* Set lower priority of DMA UART interrupt for FreeRTOS interrupt task to work */
-        NVIC_SetPriority(DMA0_DMA16_IRQn, 10U); 
-
-        /* Initalize DMAMUX and setup channel for LPUART */
-        /* TODO: Implement different mux than LPUART3 */
-        DMAMUX_Init(DMAMUX);
-        DMAMUX_SetSource(DMAMUX, LPUART_TX_DMA_CHANNEL, kDmaRequestMuxLPUART3Tx);
-        DMAMUX_EnableChannel(DMAMUX, LPUART_TX_DMA_CHANNEL);        
-
-        /* Initialize DMA with default config and setup callback handles */
-        EDMA_GetDefaultConfig(&Uart_PAL[uartNum]->edmaCfg);
-        EDMA_Init(DMA0, &Uart_PAL[uartNum]->edmaCfg);
-        EDMA_CreateHandle(&Uart_PAL[uartNum]->g_lpuartTxEdmaHandle, DMA0, LPUART_TX_DMA_CHANNEL);
-        
-         /* FreeRTOS Task needs parameter data survive after this function finish, so write this parameter to Uart_PAL structure. */
-        Uart_PAL[uartNum]->dma_num = uartNum;
-
-        /* UART DMA TX finished handle */
-         LPUART_TransferCreateHandleEDMA(base,
-                                        &Uart_PAL[uartNum]->g_lpuartEdmaHandle, 
-                                        TxEnd, 
-                                        &Uart_PAL[uartNum]->dma_num, 
-                                        &Uart_PAL[uartNum]->g_lpuartTxEdmaHandle, 
-                                        NULL);
-
-        /* Create idle task waiting for read/write. */
-        xReturned = xTaskCreate(vRwEvent,       
-                                "UART Read Event",         
-                                configMINIMAL_STACK_SIZE + 10,    
-                                (void *) Uart_PAL[uartNum],   
-                                tskIDLE_PRIORITY + 5,
-                                &Uart_PAL[uartNum]->xReadTaskToNotify );
-        if (xReturned == errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
-    NANOCLR_NOCLEANUP(); 
-}
-
-/* Set up serial port Configuration */
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeConfig___VOID( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-    {        
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-
-        status_t status = 0;
-        uint8_t uartNum = 0;
-        lpuart_config_t *config = NULL;
-        LPUART_Type *base = NULL;        
-
-        uartNum = pThis[ FIELD___portIndex ].NumericByRef().s4;
-        config = &Uart_PAL[uartNum]->uartCfg;
-        base = lpuart_bases[uartNum];
-
-        if (config == NULL || base == NULL || uartNum > 8) NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-
-        config->baudRate_Bps = (uint32_t)pThis[ FIELD___baudRate ].NumericByRef().s4;
-
-        switch( pThis[ FIELD___dataBits ].NumericByRef().s4 )
-        {
-            default:
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER); break;
-            case 7:
-                config->dataBitsCount = kLPUART_SevenDataBits; break;
-            case 8:
-                config->dataBitsCount = kLPUART_EightDataBits; break;
-        }
-        
-        switch ( pThis[ FIELD___parity ].NumericByRef().s4 )
-        {
-            default:
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER); break;
-            case SerialParity_None:
-                config->parityMode = kLPUART_ParityDisabled; break;
-            case SerialParity_Even:
-                config->parityMode = kLPUART_ParityEven; break;
-            case SerialParity_Odd:
-                config->parityMode = kLPUART_ParityOdd; break;
-        }
-
-        /* TODO: Implement the rest of handshake */
-        switch ( pThis[ FIELD___handshake ].NumericByRef().s4 )
-        {
-            default:
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER); break;
-            case SerialHandshake_None:
-                config->enableRxRTS = false;
-                config->enableTxCTS = false;
-                break;
-            case SerialHandshake_RequestToSend:
-                config->enableRxRTS = true;
-                config->enableTxCTS = false;
-                break;
-         /* case SerialHandshake_RequestToSendXOnXOff: */
-        }
-
-        /* write config to UART peripheral */
-        status = LPUART_Init(base, config, GetSrcFreq());     
-        if (status != kStatus_Success) NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-        pThis = NULL;
-
-        /* Reenable interrupts after setting configuration */
-        /* Disable transmitter */
-        base->CTRL &= ~(1U << 19);
-        /* Disable receiver */
-        base->CTRL &= ~(1U << 18);
-        /* Enable receiver interrupt */        
-        base->CTRL |= 1U << 21; 
-        /* Enable overrun interrupt */
-        // base->CTRL |= 1U << 27; 
-        /* Renable receiver and transmitter */
-        base->CTRL |= 1U << 19;  
-        base->CTRL |=  1U << 18;     
-    }
-    NANOCLR_NOCLEANUP();
-}
-
-/* Write data into buffer */
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeWrite___VOID__SZARRAY_U1( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
+    // Quit if parameters or device is invalid or out of range 
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || config == NULL || base == NULL) 
     {
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);      
-
-        uint8_t * data;
-        uint8_t uartNum = 0;
-        size_t length = 0;
-        
-        if(pThis[ FIELD___disposed ].NumericByRef().u1 != 0) NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        
-        /* Get UART device number */
-        uartNum = pThis[ FIELD___portIndex ].NumericByRef().s4;
-
-        /* Quit if parameters or device is invalid or out of range */
-        if (uartNum > 8) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER); 
-
-        /* dereference the data buffer from the argument */
-        CLR_RT_HeapBlock_Array* dataBuffer = stack.Arg1().DereferenceArray();
-
-        /* get a  the pointer to the array by using the first element of the array */
-        data =dataBuffer->GetFirstElement();
-
-        /* get the size of the buffer */
-        length = dataBuffer->m_numOfElements;
-
-        /* check if there is enough room in the buffer */
-        if(Uart_PAL[uartNum]->TxRingBuffer.Capacity() - Uart_PAL[uartNum]->TxRingBuffer.Length() < length)
-        {
-            /* not enough room in the buffer */
-             NANOCLR_SET_AND_LEAVE(CLR_E_BUFFER_TOO_SMALL);
-        }
-
-        /* push data to buffer */
-        size_t bytesWritten = Uart_PAL[uartNum]->TxRingBuffer.Push(data, length);
-
-        /* check if all requested bytes were written */
-        if(bytesWritten != length)
-        {
-            /* not sure if this is the best exception to throw here... */
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-        }
-        
-        /* need to update the _unstoredBufferLength field in the SerialDeviceOutputStream */
-        /* get pointer to outputStream field */
-        CLR_RT_HeapBlock* outputStream = pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___outputStream].Dereference();
-        /* get pointer to _unstoredBufferLength field and udpate field value */
-        outputStream[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream::FIELD___unstoredBufferLength].NumericByRef().s4 = Uart_PAL[uartNum]->TxRingBuffer.Length();
+      NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-    NANOCLR_NOCLEANUP();
+
+    NF_PAL_UART *palUart = Uart_PAL[uartNum];
+
+    // Allocate memory for TX and RX circular buffer 
+    palUart->TxBuffer = (uint8_t *)malloc(UART_TX_BUFER_SIZE * sizeof(uint8_t));
+    if (palUart->TxBuffer == NULL) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    palUart->RxBuffer = (uint8_t *)malloc(UART_RX_BUFER_SIZE * sizeof(uint8_t));
+    if (palUart->RxBuffer == NULL) 
+    {
+      free(palUart->TxBuffer);
+      NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // Initialize TX and RX buffer 
+    palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART_TX_BUFER_SIZE);
+    palUart->TxOngoingCount = 0;
+    palUart->WatchChar = 0;
+    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_RX_BUFER_SIZE);
+    palUart->RxBytesToRead = 0;
+
+    // Get default config structure for initializing given UART peripheral and enable TX, RX 
+    LPUART_GetDefaultConfig(config);
+    config->enableRx = true;
+    config->enableTx = true;
+
+    // FreeRTOS Task needs parameter data survive after this function finish, so write this parameter to Uart_PAL structure. 
+    palUart->uartNum = uartNum;
+
+    // Enable RX interrupts 
+    EnableIRQ((IRQn_Type)(19 + uartNum));
+    NVIC_SetPriority((IRQn_Type)(19 + uartNum), UART_INTERRUPT_PRIO);
+
+    // Initialize UART peripheral with default config 
+    status = LPUART_Init(base, config, GetSrcFreq());
+    if (status != kStatus_Success) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_IO);
+    }
+
+    // Create idle task waiting for read/write. 
+    BaseType_t xReturned =
+        xTaskCreate(vREvent, "UART Read Event", configMINIMAL_STACK_SIZE, (void *)palUart, configMAX_PRIORITIES - 1, &palUart->xRTaskToNotify);
+    if (xReturned == errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    xReturned = xTaskCreate(vWEvent, "UART Read Event", configMINIMAL_STACK_SIZE, (void *)palUart, configMAX_PRIORITIES, &palUart->xWTaskToNotify);
+    if (xReturned == errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+  }
+  NANOCLR_NOCLEANUP();
 }
 
-/* Store - Send buffer and wait */
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeStore___U4( CLR_RT_StackFrame& stack )
+// Set up serial port Configuration 
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeConfig___VOID(CLR_RT_StackFrame &stack) 
 {
-    NANOCLR_HEADER();
-    {        
-        size_t length = 0;
+  NANOCLR_HEADER();
+  {
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
 
-        CLR_RT_HeapBlock* writeTimeout;
-        int64_t*  timeoutTicks;
-        bool eventResult = true;
-        bool txOk = false;    
+    status_t status = 0;
+    uint8_t uartNum = 0;
+    lpuart_config_t *config = NULL;
+    LPUART_Type *base = NULL;
 
-        uint8_t uartNum = NULL;
-        lpuart_transfer_t xfer;
-        uint32_t timeout;
+    uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+    config = &Uart_PAL[uartNum]->uartCfg;
+    base = lpuart_bases[uartNum];
 
-        /* get a pointer to the managed object instance and check that it's not NULL */
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-
-        uartNum = pThis[ FIELD___portIndex ].NumericByRef().s4;
-
-        if(pThis[ FIELD___disposed ].NumericByRef().u1 != 0) NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-
-        /* Quit if parameters or device is invalid or out of range */
-        if (uartNum > 8) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
-        /* get value for _readtimeout field (pointer!) */
-        writeTimeout = &pThis[ Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___writeTimeout ];
-
-        timeout = (uint32_t) pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___writeTimeout].NumericByRef().u4;
-
-        /* setup timeout */
-        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(*writeTimeout, timeoutTicks));
-
-        /* push dummy length value onto the eval stack */
-        /* this is going to be used to store how many bytes where buffered to Tx */
-        if(stack.m_customState == 1)
-        {
-            stack.PushValueI4(0);
-            /* bump custom state so the read value above is pushed only once */
-            stack.m_customState = 2;
-        }
- 
-        /* check if there is anything the buffer */
-        if(Uart_PAL[uartNum]->TxRingBuffer.Length() > 0)
-        {
-            /* check if there is a TX operation ongoing */
-            if(Uart_PAL[uartNum]->TxOngoingCount == 0)
-            {
-                /* OK to Tx */
-                txOk = true;
-            }
-            else
-            {
-                /* need to wait for the ongoing operation to complete before starting a new one */
-            }
-        }
-
-        if(txOk)
-        {
-            /* Optimize buffer for sequential reading */
-            Uart_PAL[uartNum]->TxRingBuffer.OptimizeSequence();
-
-            /* Get data length available in the buffer */
-            length = Uart_PAL[uartNum]->TxRingBuffer.Length();
-
-            /* Push to the stack how many bytes bytes where buffered for Tx */
-            stack.m_evalStack[1].NumericByRef().s4 = length;
-            
-            /* Set TX ongoing count */
-            Uart_PAL[uartNum]->TxOngoingCount = length;
-
-            /* Set up DMA transfer structure */
-            xfer.data = (uint8_t*) Uart_PAL[uartNum]->TxRingBuffer.Reader();
-            xfer.dataSize = length;
-            
-            /* Initiate DMA transfer to UART peripheral with xfer data structure */
-            LPUART_SendEDMA(lpuart_bases[uartNum], &Uart_PAL[uartNum]->g_lpuartEdmaHandle, &xfer);
-        }        
-
-        while(eventResult)
-        {
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, timeout, CLR_RT_ExecutionEngine::c_Event_SerialPortOut, eventResult));
-            if(eventResult)
-            {
-                /* Event occurred, get from the eval stack how many bytes were buffered to Tx */
-                /* Pop elements from ring buffer, just pop. */
-                Uart_PAL[uartNum]->TxRingBuffer.Pop(Uart_PAL[uartNum]->TxOngoingCount);
-
-                /* reset Tx ongoing count */
-                Uart_PAL[uartNum]->TxOngoingCount = 0;
-                
-                /* Notify the task that the transmission is complete. */
-                length = stack.m_evalStack[1].NumericByRef().s4;
-
-                break;
-            }
-            else
-            {
-                asm("nop");
-                /* NANOCLR_SET_AND_LEAVE( CLR_E_TIMEOUT ); */
-            }
-        }
-        /* pop length/timeout heap block from stack */
-        stack.PopValue();
-        stack.PopValue();       
-
-        stack.SetResult_U4(length);
-        NANOCLR_NOCLEANUP();
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || config == NULL || base == NULL) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_IO);
     }
+
+    config->baudRate_Bps = (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4;
+
+    switch (pThis[FIELD___dataBits].NumericByRef().s4) 
+    {
+    default:
+      NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+      break;
+    case 7:
+      config->dataBitsCount = kLPUART_SevenDataBits;
+      break;
+    case 8:
+      config->dataBitsCount = kLPUART_EightDataBits;
+      break;
+    }
+
+    switch (pThis[FIELD___parity].NumericByRef().s4) 
+    {
+    default:
+      NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+      break;
+    case SerialParity_None:
+      config->parityMode = kLPUART_ParityDisabled;
+      break;
+    case SerialParity_Even:
+      config->parityMode = kLPUART_ParityEven;
+      break;
+    case SerialParity_Odd:
+      config->parityMode = kLPUART_ParityOdd;
+      break;
+    }
+
+    switch (pThis[FIELD___stopBits].NumericByRef().s4) 
+    {
+    default:
+      NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+      break;
+    case SerialStopBitCount_One:
+      config->stopBitCount = kLPUART_OneStopBit;
+      break;
+    case SerialStopBitCount_Two:
+      config->stopBitCount = kLPUART_TwoStopBit;
+      break;
+    }
+
+    // write config to UART peripheral 
+    status = LPUART_Init(base, config, GetSrcFreq());
+    if (status != kStatus_Success) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_IO);
+    }
+
+    // Enable interrupts after setting configuration 
+    // Disable transmitter and receiver 
+    base->CTRL &= ~(1U << 19);
+    base->CTRL &= ~(1U << 18);
+    // Enable receiver interrupt 
+    base->CTRL |= 1U << LPUART_CTRL_RIE_SHIFT;
+    // Enable receiver ovverun interrupt 
+    base->CTRL |= 1U << LPUART_CTRL_ORIE_SHIFT;
+    // Renable transmitter and receiver 
+    base->CTRL |= 1U << 19;
+    base->CTRL |= 1U << 18;
+  }
+  NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeRead___U4__SZARRAY_U1__I4__I4( CLR_RT_StackFrame& stack )
+// Write data into buffer 
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeWrite___VOID__SZARRAY_U1(CLR_RT_StackFrame &stack) 
 {
-    NANOCLR_HEADER();
-    {   
-        
-        CLR_RT_HeapBlock_Array* dataBuffer = NULL;
-        CLR_RT_HeapBlock* pThis = stack.This(); FAULT_ON_NULL(pThis);
-        InputStreamOptions options = InputStreamOptions_None;
+  NANOCLR_HEADER();
+  {
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
 
-        bool eventResult = true;
+    uint8_t *data = NULL;
+    uint8_t uartNum = 0;
+    size_t length = 0;
 
-        size_t read_count = 0;
-        uint8_t uartNum = 0;        
-        uart_data_t * rx_p = NULL;
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
 
-        if(pThis[ FIELD___disposed ].NumericByRef().u1 != 0) NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    // Get UART device number 
+    uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
 
-        uartNum = pThis[ FIELD___portIndex ].NumericByRef().s4;
-        rx_p    = &Uart_PAL[uartNum]->uart_data;
-        
-        /* Dereference the data buffer from the argument */
-        dataBuffer = stack.Arg1().DereferenceArray();
+    // Quit if parameters or device is invalid or out of range 
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0]))) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
 
-        /* Get a the pointer to the array by using the first element of the array */
-        rx_p->out_data = dataBuffer->GetFirstElement();
+    NF_PAL_UART *palUart = Uart_PAL[uartNum];
 
-        /* Get the InputStreamOptions option */
-        /* TODO: Implement transfer options. */  
-        options = (InputStreamOptions)stack.Arg3().NumericByRef().s4;
+    // dereference the data buffer from the argument 
+    CLR_RT_HeapBlock_Array *dataBuffer = stack.Arg1().DereferenceArray();
 
-        /* Get how many bytes are requested to read */
-        read_count = stack.Arg2().NumericByRef().s4;
+    // get a  the pointer to the array by using the first element of the array 
+    data = dataBuffer->GetFirstElement();
 
-        /* Get the length of the data buffer */
-        rx_p->bytes_to_read = dataBuffer->m_numOfElements;
-        
-        /* Zero out bytes received. */
-        rx_p->bytes_received = 0;
+    // get the size of the buffer 
+    length = dataBuffer->m_numOfElements;
 
-        /* Set up timeout. */ 
-        rx_p->timeout = (uint32_t) pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___readTimeout].NumericByRef().u4;
+    // check if there is enough room in the buffer 
+    if (palUart->TxRingBuffer.Capacity() - palUart->TxRingBuffer.Length() < length) 
+    {
+      // not enough room in the buffer 
+      NANOCLR_SET_AND_LEAVE(CLR_E_BUFFER_TOO_SMALL);
+    }
 
-        /* Calculate timeout to FreeRTOS ticks */
-        rx_p->f_timeout = (rx_p->timeout/10000) - 1000;
-        
-        /* Set trigger level (number of bytes after xStreamBuffer function receiving data returns.) */
-        xStreamBufferSetTriggerLevel(Uart_PAL[uartNum]->xReceiveBuffer,
-                                    rx_p->bytes_to_read);
+    // push data to buffer 
+    size_t bytesWritten = palUart->TxRingBuffer.Push(data, length);
 
-        /* We have enough bytes so retrive it directly. */  
-        if (xStreamBufferBytesAvailable( Uart_PAL[uartNum]->xReceiveBuffer) >=  read_count)
-        {   
-            {           
-                rx_p->bytes_received =  xStreamBufferReceive(Uart_PAL[uartNum]->xReceiveBuffer,
-                                                            (void *) rx_p->out_data,
-                                                            rx_p->bytes_to_read,
-                                                            rx_p->f_timeout);
-            }
+    // check if all requested bytes were written 
+    if (bytesWritten != length) 
+    {
+      // not sure if this is the best exception to throw here... 
+      NANOCLR_SET_AND_LEAVE(CLR_E_IO);
+    }
+
+    // need to update the _unstoredBufferLength field in the SerialDeviceOutputStream
+    // get pointer to outputStream field 
+    CLR_RT_HeapBlock *outputStream = pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___outputStream].Dereference();
+    // get pointer to _unstoredBufferLength field and udpate field value 
+    outputStream[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream::FIELD___unstoredBufferLength].NumericByRef().s4 = palUart->TxRingBuffer.Length();
+  }
+  NANOCLR_NOCLEANUP();
+}
+
+// Store - Send buffer and wait 
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeStore___U4(CLR_RT_StackFrame &stack) 
+{
+  NANOCLR_HEADER();
+  {
+    NF_PAL_UART *palUart = NULL;
+
+    size_t length = 0;
+
+    CLR_RT_HeapBlock *writeTimeout;
+    int64_t *timeoutTicks;
+    bool eventResult = true;
+    bool txOk = false;
+
+    // get a pointer to the managed object instance and check that it's not NULL 
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    uint8_t uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+
+    // Quit if parameters or device is invalid or out of range 
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0]))) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    palUart = Uart_PAL[uartNum];
+
+    // as we are transsmiting data, we can discard recive buffer
+    // assuming that we can't RX and TX simultaneously 
+    size_t rx_size = 0;
+    palUart->RxRingBuffer.Push(1);
+    rx_size = palUart->RxRingBuffer.Length();
+    palUart->RxRingBuffer.Pop(rx_size);
+
+    // get value for _readtimeout field (pointer!) 
+    writeTimeout = &pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___writeTimeout];
+
+    // setup timeout 
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(*writeTimeout, timeoutTicks));
+
+    // push dummy length value onto the eval stack
+    // this is going to be used to store how many bytes where buffered to Tx 
+    if (stack.m_customState == 1) 
+    {
+      stack.PushValueI4(0);
+      // bump custom state so the read value above is pushed only once 
+      stack.m_customState = 2;
+    }
+
+    // check if there is anything the buffer 
+    if (palUart->TxRingBuffer.Length() > 0) 
+    {
+      // check if there is a TX operation ongoing 
+      if (palUart->TxOngoingCount == 0) 
+      {
+        // OK to Tx 
+        txOk = true;
+      } 
+      else 
+      {
+        // need to wait for the ongoing operation to complete before starting a new one 
+      }
+    }
+
+    if (txOk) 
+    {
+      // Optimize buffer for sequential reading 
+      palUart->TxRingBuffer.OptimizeSequence();
+
+      // Get data length available in the buffer 
+      length = palUart->TxRingBuffer.Length();
+
+      // Push to the stack how many bytes bytes where buffered for Tx 
+      stack.m_evalStack[1].NumericByRef().s4 = length;
+
+      // Set TX ongoing count 
+      palUart->TxOngoingCount = length;
+
+      // Set transfer structure to nano ring buffer 
+      palUart->xfer.data = (uint8_t *)palUart->TxRingBuffer.Reader();
+      palUart->xfer.dataSize = length;
+      // Notify task that we want to transmit data. 
+      xTaskNotify(palUart->xWTaskToNotify, 0x01, eSetBits);
+    }
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_SerialPortOut, eventResult));
+
+    if (eventResult) 
+    {
+      // Notify the task that the transmission is complete. 
+      // pop elements from ring buffer, just pop 
+      palUart->TxRingBuffer.Pop(palUart->TxOngoingCount);
+
+      // reset Tx ongoing count 
+      palUart->TxOngoingCount = 0;
+
+      length = stack.m_evalStack[1].NumericByRef().s4;
+    } 
+    else 
+    {
+      palUart->TxRingBuffer.Pop(palUart->TxOngoingCount);
+      palUart->TxOngoingCount = 0;
+      NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+    }
+
+    // pop length and timeout heap block from stack 
+    stack.PopValue();
+    stack.PopValue();
+
+    stack.SetResult_U4(length);
+  }
+  NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeRead___U4__SZARRAY_U1__I4__I4(CLR_RT_StackFrame &stack) 
+{
+  NANOCLR_HEADER();
+  {
+    CLR_RT_HeapBlock_Array *dataBuffer = NULL;
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+    int64_t *timeoutTicks;
+    InputStreamOptions options = InputStreamOptions_None;
+    CLR_RT_HeapBlock *readTimeout;
+
+    bool eventResult = true;
+
+    uint8_t uartNum = 0;
+    size_t bytesRead = 0;
+    size_t bytesToRead = 0;
+    size_t dataLength = 0;
+
+    uint8_t *data = NULL;
+
+    size_t count = 0;
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+
+    // Quit if parameters or device is invalid or out of range 
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0]))) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    NF_PAL_UART *palUart = Uart_PAL[uartNum];
+
+    // get how many bytes are requested to read 
+    count = stack.Arg2().NumericByRef().s4;
+
+    // Dereference the data buffer from the argument 
+    dataBuffer = stack.Arg1().DereferenceArray();
+
+    // get a the pointer to the array by using the first element of the array 
+    data = dataBuffer->GetFirstElement();
+
+    // get the length of the data buffer 
+    dataLength = dataBuffer->m_numOfElements;
+
+    // Get the InputStreamOptions option 
+    // TODO: Implement transfer options. 
+    options = (InputStreamOptions)stack.Arg3().NumericByRef().s4;
+
+    // Set up timeout. 
+    readTimeout = &pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___readTimeout];
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(*readTimeout, timeoutTicks));
+
+    // Check what's avaliable in Rx ring buffer 
+    if (palUart->RxRingBuffer.Length() >= count) 
+  {
+      // read from Rx ring buffer 
+      bytesToRead = count;
+
+      // is the read ahead option enabled? 
+      if (options == InputStreamOptions_ReadAhead) {
+
+        // yes, check how many bytes we can store in the buffer argument 
+        if (dataLength < palUart->RxRingBuffer.Length()) {
+          // read as many bytes has the buffer can hold
+          bytesToRead = dataLength;
+        } else {
+          // read everything that's available in the ring buffer
+          bytesToRead = palUart->RxRingBuffer.Length();
         }
-        
-        /* Not enough bytes in buffer, fire task waiting for more data. */
+      }
+
+      // we have enough bytes, skip wait for event 
+      eventResult = false;
+
+      // clear event by getting it 
+      Events_Get(SYSTEM_EVENT_FLAG_COM_IN);
+    } 
+    else 
+    {
+
+      if (stack.m_customState == 1) {
+
+        // not enough bytes available, have to read from UART 
+        palUart->RxBytesToRead = count;
+
+        // clear event by getting it 
+        Events_Get(SYSTEM_EVENT_FLAG_COM_IN);
+
+        // don't read anything from the buffer yet 
+        bytesToRead = 0;
+      }
+    }
+
+    while (eventResult) 
+    {
+      if (stack.m_customState == 1) 
+      {
+        if (bytesToRead > 0) 
+        {
+          // enough bytes available 
+          eventResult = false;
+        } 
         else 
-        {                
-            /* Notify task that we want to receive data. */
-            xTaskNotify( Uart_PAL[uartNum]->xReadTaskToNotify, 0x02, eSetBits);
-
-            /* Wait for event from task. */
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, rx_p->timeout, CLR_RT_ExecutionEngine::c_Event_SerialPortIn, eventResult));
+        {          // need to read from the UART
+                   // update custom state 
+          stack.m_customState = 2;
         }
-
-        /* Timeout! */
-        if (!eventResult)        
+      } 
+      else 
+      {
+        // wait for event 
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_SerialPortIn, eventResult));
+        if (!eventResult)
         {
-            asm("nop");
-            /* NANOCLR_SET_AND_LEAVE( CLR_E_TIMEOUT ); */
+          // event timeout
+          // compute how many bytes to read
+          // considering the InputStreamOptions read ahead option 
+          if (options == InputStreamOptions_ReadAhead)
+          {
+            // yes, check how many bytes we can store in the buffer argument 
+            if (dataLength < palUart->RxRingBuffer.Length()) 
+            {
+              // read as many bytes has the buffer can hold 
+              bytesToRead = dataLength;
+            } 
+            else 
+            {
+              // read everything that's available in the ring buffer 
+              bytesToRead = palUart->RxRingBuffer.Length();
+            }
+          }
+          if (options == InputStreamOptions_Partial) 
+          {
+            // take InputStreamOptions_Partial as default and read requested quantity or what's available 
+            bytesToRead = count;
+
+            if (count > palUart->RxRingBuffer.Length()) {
+              // need to adjust because there aren't enough bytes available 
+              bytesToRead = palUart->RxRingBuffer.Length();
+            }
+          }
+          // If InputStreamOptions is set to None return timeout exception 
+          NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
         }
-
-        /* Return how many bytes were read */
-        stack.SetResult_U4(rx_p->bytes_received);
-
-        (void) options;
-    }    
-    NANOCLR_NOCLEANUP();
-}
-
-/* TODO: Implement watch char. Currently this funtion does nothing. */
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeSetWatchChar___VOID( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-	{
-        /* get a pointer to the managed object instance and check that it's not NULL */
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-
-        /* Choose the driver for this SerialDevice */
-        uint8_t uartNum = (uint8_t)pThis[ FIELD___portIndex ].NumericByRef().s4;
-
-        /* set watch char */
-        Uart_PAL[uartNum]                                                                                                                                                               ->WatchChar = (uint8_t)pThis[ FIELD___watchChar ].NumericByRef().u1;
+      }
     }
-    NANOCLR_NOCLEANUP();
-}
 
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::get_BytesToRead___U4( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();	
+    if (bytesToRead > 0) 
     {
-       
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-       
-        uint8_t uartNum = 0;
-        size_t read_count = 0;
-        
-        if(pThis[ FIELD___disposed ].NumericByRef().u1 != 0) NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-
-        uartNum = pThis[ FIELD___portIndex ].NumericByRef().s4;
-
-        /* Check how many bytes are avaliable in buffer */
-        read_count = xStreamBufferBytesAvailable(Uart_PAL[uartNum]->xReceiveBuffer);
-        
-        stack.SetResult_U4(read_count);
-	}
-	NANOCLR_NOCLEANUP();
-}
-
-/* Return available devices */
-/* TODO: implement checking for available devices */
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
-{
-   NANOCLR_HEADER();
-   {
-       /* declare the device selector string whose max size is "COM1,COM2,COM3,COM4,COM5,COM6,COM7,COM8" + terminator */
-       char deviceSelectorString[ 40 ] = "COM1,COM2,COM3,COM4,COM5,COM6,COM7,COM8";
-
-       /* because the caller is expecting a result to be returned */
-       /* we need set a return result in the stack argument using the a ppropriate SetResult according to the variable type (a string here) */
-       stack.SetResult_String(deviceSelectorString);
-   }
-   NANOCLR_NOCLEANUP_NOLABEL();
-}
-
-/* Task wait for notify from DMA interrupt or notify from read function.
-   When notify comes it fires events to inform nanoFramework that read/write is finished */
-static void vRwEvent(void * pvParameters)
-{
-    /* This is main UART struct, holding config, handlers, and the rest of variables.d */
-    NF_PAL_UART * rx_Uart_PAL = (NF_PAL_UART *) pvParameters;
-    /* UART data struct, holding variables needed for this task, also holding incoming data in xReceiveStream. */
-    uart_data_t * rx_p = &rx_Uart_PAL->uart_data;
-    
-    while(1)
-    {
-        /* Task is in block state until receives event. */
-        xTaskNotifyWait(0x00, 0xffffffff, &rx_Uart_PAL->ulNotifiedValue, portMAX_DELAY);
-
-        /* Check for dma event, if theres is one unblock it. */
-        if ((rx_Uart_PAL->ulNotifiedValue & 0x01) != 0)
-        {
-            /* Send event to nanoFramework that write is complete. */
-            Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
-        }
-        
-        /* Check is there event from task reading bytes. */
-        if ((rx_Uart_PAL->ulNotifiedValue & 0x02) != 0)  
-        {
-            /* If there is read until trigger or timeout and send event to nanoFramework. */
-            rx_p->bytes_received =  xStreamBufferReceive(rx_Uart_PAL->xReceiveBuffer,
-                                                        (void *) rx_p->out_data,
-                                                        rx_p->bytes_to_read,
-                                                        rx_p->f_timeout);
-            Events_Set(SYSTEM_EVENT_FLAG_COM_IN);    
-        }
+      // pop the requested bytes from the ring buffer 
+      bytesRead = palUart->RxRingBuffer.Pop(data, bytesToRead);
     }
-    
-    (void) pvParameters;    
-    vTaskDelete(NULL);
+
+    // pop timeout heap block from stack and return how many bytes were read 
+    stack.PopValue();
+    stack.SetResult_U4(bytesRead);
+  }
+  NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeSetWatchChar___VOID(CLR_RT_StackFrame &stack) 
+{
+  NANOCLR_HEADER();
+  {
+    // get a pointer to the managed object instance and check that it's not NULL 
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Choose the driver for this SerialDevice 
+    uint8_t uartNum = (uint8_t)pThis[FIELD___portIndex].NumericByRef().s4;
+
+    // Quit if parameters or device is invalid or out of range 
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0]))) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    NF_PAL_UART *palUart = Uart_PAL[uartNum];
+
+    // set watch char 
+    palUart->WatchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
+  }
+  NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::get_BytesToRead___U4(CLR_RT_StackFrame &stack) 
+{
+  NANOCLR_HEADER();
+  {
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    uint8_t uartNum = 0;
+    size_t read_count = 0;
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+
+    // Quit if parameters or device is invalid or out of range 
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0]))) 
+    {
+      NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    NF_PAL_UART *palUart = Uart_PAL[uartNum];
+    read_count = palUart->RxBytesToRead;
+
+    stack.SetResult_U4(read_count);
+  }
+  NANOCLR_NOCLEANUP();
+}
+
+// Return available devices 
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::GetDeviceSelector___STATIC__STRING(CLR_RT_StackFrame &stack) 
+{
+  NANOCLR_HEADER();
+  char deviceSelectorString[41] = {0};
+  int len = 0;
+  for (uint8_t i = 1; i < (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])); i++) 
+  {
+    if (Uart_PAL[i] != NULL) 
+    {
+      char com[6] = "COM1,";
+      com[3] = i + '0';
+      len += 5;
+      strcat(deviceSelectorString, com);
+    }
+  }
+  // remove trailing comma 
+  deviceSelectorString[len - 1] = 0;
+
+  // because the caller is expecting a result to be returned 
+  // we need set a return result in the stack argument using the a ppropriate SetResult according to the variable type (a string here) 
+  stack.SetResult_String(deviceSelectorString);
+  NANOCLR_NOCLEANUP_NOLABEL();
 }
