@@ -49,9 +49,8 @@ static void ReadTextWorkingThread(void *arg) {
   }
 
   // read string
-  if (f_gets((TCHAR *)fileIoOperation->Content, readLength, &file)) {
-    threadOperationResult = FR_OK;
-  } else {
+  if (!(f_gets((TCHAR *)fileIoOperation->Content, readLength, &file)))
+  {
     threadOperationResult = (FRESULT)f_error(&file);
   }
 
@@ -85,10 +84,10 @@ static void WriteTextWorkingThread(void *arg) {
     vTaskDelete(NULL);
   }
 
-  if (f_puts(fileIoOperation->Content, &file) == (int)fileIoOperation->ContentLength) {
-    // expected number of bytes written
-    threadOperationResult = FR_OK;
-  }
+  if (f_puts(fileIoOperation->Content, &file) != (int)fileIoOperation->ContentLength) 
+  {
+    threadOperationResult = FR_DISK_ERR;
+  } 
 
   // close file
   f_close(&file);
