@@ -18,7 +18,7 @@ steps:
   - task: ExtractFiles@1
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)\srecord.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\srecord' 
+      destinationFolder: '$(Agent.TempDirectory)' 
     displayName: Extract SRECORD
 
   - task: PowerShell@2
