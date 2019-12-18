@@ -225,7 +225,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__
         CLR_RT_ProtectFromGC gcContent( *bufferArray );
 
         // setup FileIO operation
-        FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(malloc(sizeof(FileOperation)));
+        FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(platform_malloc(sizeof(FileOperation)));
 
         //fileIoOperation->File = file;
         fileIoOperation->FileName = filePath;
@@ -315,7 +315,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
     CLR_RT_ProtectFromGC gcContent(*content);
 
     // setup FileIO operation
-    FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(malloc(sizeof(FileOperation)));
+    FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(platform_malloc(sizeof(FileOperation)));
 
     fileIoOperation->FileName = filePath;
     fileIoOperation->Content = (char *)content->StringText();
@@ -411,7 +411,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___ST
         CLR_RT_HeapBlock_Array* bufferArray = buffer.DereferenceArray();
 
         // setup FileIO operation
-        FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(malloc(sizeof(FileOperation)));
+        FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(platform_malloc(sizeof(FileOperation)));
 
         fileIoOperation->FileName = filePath;
         fileIoOperation->Content = (char*)bufferArray->GetFirstElement();
@@ -509,7 +509,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
     NANOCLR_CHECK_HRESULT(hbText.StoreToReference(stack.Arg1(), 0));
 
     // setup FileIO operation
-    FileOperation *fileIoOperation = (FileOperation *)malloc(sizeof(FileOperation));
+    FileOperation *fileIoOperation = (FileOperation *)platform_malloc(sizeof(FileOperation));
 
     fileIoOperation->FileName = filePath;
     fileIoOperation->Content = (char *)textString->StringText();
