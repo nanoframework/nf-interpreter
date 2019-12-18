@@ -43,7 +43,7 @@ static void ReadTextWorkingThread(void *arg) {
 
   if (threadOperationResult != FR_OK) {
     // free memory
-    free(fileIoOperation);
+    platform_free(fileIoOperation);
     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
     vTaskDelete(NULL);
   }
@@ -58,7 +58,7 @@ static void ReadTextWorkingThread(void *arg) {
   f_close(&file);
 
   // free memory
-  free(fileIoOperation);
+  platform_free(fileIoOperation);
 
   // fire event for FileIO operation complete
   Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
@@ -79,7 +79,7 @@ static void WriteTextWorkingThread(void *arg) {
 
   if (threadOperationResult != FR_OK) {
     // free memory
-    free(fileIoOperation);
+    platform_free(fileIoOperation);
     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
     vTaskDelete(NULL);
   }
@@ -93,7 +93,7 @@ static void WriteTextWorkingThread(void *arg) {
   f_close(&file);
 
   // free memory
-  free(fileIoOperation);
+  platform_free(fileIoOperation);
 
   // fire event for FileIO operation complete
   Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
@@ -115,7 +115,7 @@ static void WriteBinaryWorkingThread(void *arg) {
 
   if (threadOperationResult != FR_OK) {
     // free memory
-    free(fileIoOperation);
+    platform_free(fileIoOperation);
     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
     vTaskDelete(NULL);
   }
@@ -129,7 +129,7 @@ static void WriteBinaryWorkingThread(void *arg) {
   f_close(&file);
 
   // free memory
-  free(fileIoOperation);
+  platform_free(fileIoOperation);
 
   // fire event for FileIO operation complete
   Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
@@ -153,7 +153,7 @@ static void ReadBinaryWorkingThread(void *arg) {
 
   if (threadOperationResult != FR_OK) {
     // free memory
-    free(fileIoOperation);
+    platform_free(fileIoOperation);
     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
     vTaskDelete(NULL);
   }
@@ -167,7 +167,7 @@ static void ReadBinaryWorkingThread(void *arg) {
   // close file
   f_close(&file);
 
-  free(fileIoOperation);
+  platform_free(fileIoOperation);
 
   // fire event for FileIO operation complete
   Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
