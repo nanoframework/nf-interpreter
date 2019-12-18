@@ -271,3 +271,27 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAG
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+
+# if HEX2DFU tool is available pack the binaries into a DFU package
+if(HEX2DFU_TOOL_AVAILABLE)
+
+    ####################################################################################################
+    ## when changing the linker file make sure to update the new addresses for the image files below  ##
+    ## DO NOT use the leading 0x notation, just the address in plain hexadecimal formating            ##
+    ####################################################################################################
+
+    if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+        NF_GENERATE_DFU_PACKAGE(
+            ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000 
+            ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08010000 
+            ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu
+        )
+    else()
+        NF_GENERATE_DFU_PACKAGE(
+            ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000
+            ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08010000 
+            ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu       
+        )
+    endif()
+
+endif()
