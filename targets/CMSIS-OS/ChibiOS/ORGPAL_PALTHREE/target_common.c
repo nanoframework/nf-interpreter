@@ -7,6 +7,7 @@
 #include <nanoHAL_v2.h>
 #include "target_board.h"
 #include "target_common.h"
+#include <platform_target_capabilities.h>
 
 HAL_SYSTEM_CONFIG HalSystemConfig =
 {
