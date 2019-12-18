@@ -227,7 +227,10 @@ HRESULT Library_corlib_native_System_AppDomain::GetAppDomain( CLR_RT_HeapBlock& 
 
     NANOCLR_NOCLEANUP();
 }
+
 #else  //#if defined(NANOCLR_APPDOMAINS)
+
+#if (NANOCLR_REFLECTION == TRUE)
 
 HRESULT Library_corlib_native_System_AppDomain::GetAssemblies___SZARRAY_SystemReflectionAssembly( CLR_RT_StackFrame& stack )
 {
@@ -285,7 +288,6 @@ HRESULT Library_corlib_native_System_AppDomain::LoadInternal___SystemReflectionA
     NANOCLR_NOCLEANUP();
 }
 
-
 HRESULT Library_corlib_native_System_AppDomain::CreateDomain___STATIC__SystemAppDomain__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -305,5 +307,7 @@ HRESULT Library_corlib_native_System_AppDomain::Unload___STATIC__VOID__SystemApp
 
     NANOCLR_NOCLEANUP();
 }
+
+#endif // NANOCLR_REFLECTION
 
 #endif //#if defined(NANOCLR_APPDOMAINS)

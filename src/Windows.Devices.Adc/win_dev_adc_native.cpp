@@ -49,6 +49,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetResolutionInBits___I4,
     Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeInit___VOID,
     NULL,
+    NULL,
     Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::GetDeviceSelector___STATIC__STRING,
     NULL,
     NULL,
@@ -58,7 +59,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Adc =
 {
     "Windows.Devices.Adc", 
-    0xA84B23D2,
+    0xDEDF1136,
     method_lookup,
-    { 100, 1, 3, 1 }
+    { 100, 1, 3, 2 }
 };

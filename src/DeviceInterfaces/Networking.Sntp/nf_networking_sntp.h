@@ -15,9 +15,7 @@
 
 extern "C"
 {
-#ifdef PLATFORM_ESP32
-#include <apps/sntp/sntp.h>
-#elif CC32XX
+#ifdef CC32XX
 #include <targetSimpleLinkCC32xx_Sntp.h>
 #else
 #include <apps/sntp.h>

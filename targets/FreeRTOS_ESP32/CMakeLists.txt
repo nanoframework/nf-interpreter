@@ -3,6 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(nf_utils)
+
 # if mbed TLS is enabled add it to the build
 if(USE_SECURITY_MBEDTLS_OPTION)
 
@@ -30,7 +32,7 @@ if(USE_SECURITY_MBEDTLS_OPTION)
         endif()
 
         # set tag for currently supported version
-        set(MBEDTLS_GIT_TAG "mbedtls-2.14")
+        set(MBEDTLS_GIT_TAG "mbedtls-2.16.3")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
@@ -71,7 +73,9 @@ if(USE_SECURITY_MBEDTLS_OPTION)
         if(EXISTS "${MBEDTLS_SOURCE}/")
 
             # check if we already have the sources, no need to copy again
-            if(NOT EXISTS "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/mbedTLS_Source SOURCE_EXISTS)
+
+            if(NOT ${SOURCE_EXISTS})
                 message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")
                 file(COPY "${MBEDTLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mbedTLS_Source")
             else()

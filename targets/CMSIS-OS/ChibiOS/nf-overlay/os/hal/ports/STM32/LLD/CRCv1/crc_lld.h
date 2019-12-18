@@ -72,12 +72,12 @@ typedef struct CRCDriver {
 // From STMicroelectronics Cube HAL 
 ///////////////////////////////////////////
 
-#if defined(STM32L0xx_MCUCONF)
+#if defined(STM32L0XX)
 // this series uses different names for the buses
 
-#define rccEnableCRC(lp) rccEnableAPB1(RCC_AHBENR_CRCEN, lp)
-#define rccDisableCRC() rccDisableAPB1(RCC_AHBENR_CRCEN)
-#define rccResetCRC() rccResetAPB1(RCC_AHB1RSTR_CRCRST)
+#define rccEnableCRC(lp) rccEnableAHB(RCC_AHBENR_CRCEN, lp)
+#define rccDisableCRC() rccDisableAHB(RCC_AHBENR_CRCEN)
+#define rccResetCRC() rccResetAHB(RCC_AHB1RSTR_CRCRST)
 
 #endif
 

@@ -105,16 +105,17 @@ static void InitSpiBus( spi_host_device_t bus)
     gpio_num_t misoPin  = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, busIndex, 1);
     gpio_num_t clockPin = (gpio_num_t)Esp32_GetMappedDevicePins( DEV_TYPE_SPI, busIndex, 2);
  
-    spi_bus_config_t bus_config 
-    {
-       mosiPin,          // mosi pin
-       misoPin,          // miso pin
-       clockPin,         // Clock
-        -1,              // Quad Write protect
-        -1,              // Quad Hold
-        0,               // Default max transfer size ( 4096 )
-        0
-    };
+	spi_bus_config_t bus_config
+	{
+		mosi_io_num: mosiPin,		// mosi pin
+		miso_io_num : misoPin,      // miso pin
+		sclk_io_num : clockPin,     // Clock
+		quadwp_io_num : -1,         // Quad Write protect
+		quadhd_io_num : -1,         // Quad Hold
+		max_transfer_sz : 0,        // Default max transfer size ( 4096 )
+		flags : 0,					// SPICOMMON_BUSFLAG_* flags
+		intr_flags : 0				// Interrupt flags
+	};
 
     esp_err_t ret =  spi_bus_initialize(bus,  &bus_config, 1);
     if ( ret != ESP_OK )

@@ -24,18 +24,20 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
     // Convert from Unix time(year since 1900) to SYSTEMTIME(Years since 1601)
 	int64_t time = ((int64_t)tv.tv_sec * (int64_t)TIME_CONVERSION__TO_SECONDS) + ((int64_t)tv.tv_usec * (int64_t)TIME_CONVERSION__TO_USECS) + TIME_UNIX_EPOCH_AS_TICKS;
 
-    HAL_Time_ToSystemTime(time, &st );
-
     // zero 'time' fields if date part only is required
     if(datePartOnly)
     {
+        HAL_Time_ToSystemTime(time, &st);
+
         st.wMilliseconds = 0;
         st.wSecond = 0;
         st.wMinute = 0;
         st.wHour = 0;
+
+        time = HAL_Time_ConvertFromSystemTime(&st);
     }
 
-    return HAL_Time_ConvertFromSystemTime( &st );
+    return time;
 };
 
 void HAL_Time_SetUtcTime(uint64_t utcTime)

@@ -11,8 +11,8 @@ $Esp32IdfPathExists = Test-Path $env:ESP32_IDF_PATH -ErrorAction SilentlyContinu
 
 If($Esp32IdfPathExists -eq $False)
 {
-    $url = "https://github.com/espressif/esp-idf/releases/download/v3.1/esp-idf-v3.1.zip"
-    $output = "$zipRoot\esp-idf-v3.1.zip"
+    $url = "https://github.com/espressif/esp-idf/releases/download/v3.3/esp-idf-v3.3.zip"
+    $output = "$zipRoot\esp-idf-v3.3.zip"
 
     # Don't download again if already exists. User can remove from zips to force... 
     if(![System.IO.File]::Exists($output)){ 

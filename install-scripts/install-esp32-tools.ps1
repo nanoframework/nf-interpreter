@@ -50,13 +50,13 @@ If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PATH) -or $force)
 }
 If([string]::IsNullOrEmpty($env:ESP32_LIBS_PATH) -or $force)
 {
-	$env:ESP32_LIBS_PATH=($env:ESP32_TOOLS_PATH+'\libs-v3.1')
+	$env:ESP32_LIBS_PATH=($env:ESP32_TOOLS_PATH+'\libs-v3.3')
 	Write-Host ("Set User Environment ESP32_LIBS_PATH='"+$env:ESP32_LIBS_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_LIBS_PATH", $env:ESP32_LIBS_PATH, "User")
 }
 If([string]::IsNullOrEmpty($env:ESP32_IDF_PATH) -or [string]::IsNullOrEmpty($env:IDF_PATH) -or $force)
 {
-	$env:IDF_PATH=$env:ESP32_IDF_PATH=($env:ESP32_TOOLS_PATH+'\esp-idf-v3.1')
+	$env:IDF_PATH=$env:ESP32_IDF_PATH=($env:ESP32_TOOLS_PATH+'\esp-idf-v3.3')
 	Write-Host ("Set User Environment ESP32_IDF_PATH='"+$env:ESP32_IDF_PATH+"'")
 	Write-Host ("Set User Environment IDF_PATH='"+$env:IDF_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_IDF_PATH", $env:ESP32_IDF_PATH, "User")

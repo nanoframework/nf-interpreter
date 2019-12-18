@@ -95,16 +95,6 @@ In CMakeSettings.json the following variables determine the build tool.
           // "value": "${env.GCCPATH}"   // Standard Visual Studio Install of GCC 6.3.1 
         },
 
-In CMakeSettings.json the VISUAL_STUDIO variable sets up a workaround for a problem with the build system.
-If you use the `add_custom_command` with `POST_BUILD` then the build compiles but does not link due to a 'cmd.exe' not recognized'
-
-        {
-          "name": "VISUAL_STUDIO",
-          "value": "TRUE"
-        },
-To avoid the problem the custom command to copy the build outputs is not run.
- An equivalent of this can be run by executing `CopyBuildOutput.cmd` manually from the command prompt.
-<br>
 <br>
 #### Debugging
 

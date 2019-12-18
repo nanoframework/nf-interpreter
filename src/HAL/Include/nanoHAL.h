@@ -61,7 +61,6 @@
 
 #if defined(_MSC_VER)
 
-#define ADS_PACKED
 #define GNU_PACKED
 
 
@@ -71,7 +70,6 @@
 #elif defined(__GNUC__)
 
 
-#define ADS_PACKED
 #define GNU_PACKED  __attribute__((packed))
 
 
@@ -1730,7 +1728,7 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 //#include <CPU_INTC_decl.h>
 //
 //// Gp I/O driver
-//#include <CPU_GPIO_decl.h>
+#include <CPU_GPIO_decl.h>
 //
 
 

@@ -11,10 +11,10 @@
 #include <win_dev_gpio_native.h>
 
 #include "rom.h" 
-#include "rom_map.h"
+// #include "rom_map.h"
 #include <inc/hw_types.h>
 #include <inc/hw_memmap.h>
-#include <inc/hw_common_reg.h>
+// #include <inc/hw_common_reg.h>
 #include <gpio.h>
 #include <interrupt.h>
 #include <dpl/HwiP.h>

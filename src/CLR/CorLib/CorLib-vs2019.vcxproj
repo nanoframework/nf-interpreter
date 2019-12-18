@@ -30,8 +30,6 @@
     <ClCompile Include="corlib_native_System_Attribute.cpp" />
     <ClCompile Include="corlib_native_System_BitConverter.cpp" />
     <ClCompile Include="corlib_native_System_Collections_ArrayList.cpp" />
-    <ClCompile Include="corlib_native_System_Collections_Queue.cpp" />
-    <ClCompile Include="corlib_native_System_Collections_Stack.cpp" />
     <ClCompile Include="corlib_native_System_Console.cpp" />
     <ClCompile Include="corlib_native_System_Convert.cpp" />
     <ClCompile Include="corlib_native_System_DateTime.cpp" />
@@ -64,8 +62,6 @@
     <ClCompile Include="corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp" />
     <ClCompile Include="corlib_native_System_Runtime_Remoting_RemotingServices.cpp" />
     <ClCompile Include="corlib_native_System_String.cpp" />
-    <ClCompile Include="corlib_native_System_Text_UTF8Decoder.cpp" />
-    <ClCompile Include="corlib_native_System_Text_UTF8Encoding.cpp" />
     <ClCompile Include="corlib_native_System_Threading_AutoResetEvent.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Interlocked.cpp" />
     <ClCompile Include="corlib_native_System_Threading_ManualResetEvent.cpp" />
@@ -156,7 +152,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -169,7 +165,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -183,7 +179,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -200,7 +196,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

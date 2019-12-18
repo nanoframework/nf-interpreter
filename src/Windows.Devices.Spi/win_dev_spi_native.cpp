@@ -38,6 +38,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_win_dev_spi_native_Windows_Devices_Spi_SpiController::GetDeviceSelector___STATIC__STRING,
     NULL,
     NULL,
@@ -66,12 +67,13 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi =
 {
     "Windows.Devices.Spi", 
-    0xBDDC51FB,
+    0xEA555AF2,
     method_lookup,
-    { 100, 1, 3, 0 }
+    { 100, 1, 4, 0 }
 };

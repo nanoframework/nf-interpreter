@@ -18,24 +18,6 @@
 // need to declare this here as extern
 extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
-// the drive indexes have to be used instead of fixed drive letters because a target can have one or more 
-// and those have to follow the sequence that is used in ChibiOS FatFS wrappers
-// SD Card (or SPI) is 1st and USB MAS is 2nd (if SD Card is enabled)
-// this is also mapped in the FatFS configuration
-#if defined(HAL_USE_SDC)
-
-#define SD_CARD_DRIVE_INDEX             "0:"
-#define SD_CARD_DRIVE_INDEX_NUMERIC     (0)
-
-#endif
-
-#if defined(HAL_USE_SDC)
-
-#define USB_MSD_DRIVE_INDEX             "1:"
-#define USB_MSD_DRIVE_INDEX_NUMERIC     (1)
-
-#endif
-
 ///////////////////////////////////////////
 // code specific to SD Card
 
@@ -161,8 +143,8 @@ void SdCardWorkingThread(void const * argument)
     sdcStart(&SD_CARD_DRIVER, &SDC_CFG);
 
     // setup line event in SD Card detect GPIO
-    palEnableLineEvent(LINE_SD_DETECT, PAL_EVENT_MODE_BOTH_EDGES);
-    palSetLineCallback(LINE_SD_DETECT, SdCardDetectCallback, &SD_CARD_DRIVER);
+    palEnableLineEvent(SDCARD_LINE_DETECT, PAL_EVENT_MODE_BOTH_EDGES);
+    palSetLineCallback(SDCARD_LINE_DETECT, SdCardDetectCallback, &SD_CARD_DRIVER);
 
     // init timer
     chVTObjectInit(&sdCardDebounceTimer);
@@ -200,6 +182,8 @@ static FATFS usbMsd_FS;
 __attribute__((noreturn))
 void UsbMsdWorkingThread(void const * argument)
 {
+    (void)argument;
+
     FRESULT err;
 
     usbMsdFileSystemReady = false;
@@ -207,7 +191,7 @@ void UsbMsdWorkingThread(void const * argument)
     // start USB host
     usbhStart(&USB_MSD_DRIVER);
 
-    USBHMassStorageLUNDriver* msBlk = (USBHMassStorageLUNDriver*)argument;
+    USBHMassStorageLUNDriver* msBlk = (USBHMassStorageLUNDriver*)&MSBLKD[0];
 
     for(;;)
     {

@@ -33,6 +33,11 @@ extern struct netif * Esp32_find_netif(esp_interface_t esp_if);
 //#define CONFIG_PIN_PHY_POWER		12     // Olimex_POE
 //#define CONFIG_PIN_PHY_POWER		5      // Olimex_gateway revs newer than C
 
+// Uncomment one of these lines to select alternate clock modes
+#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_IN		// Default
+//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO17_OUT    // Olimex_POE, Olimex_POE-ISO
+//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_OUT     // 
+//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO16_OUT    // 
 
 
 #ifdef CONFIG_PHY_LAN8720
@@ -65,18 +70,18 @@ static void eth_gpio_config_rmii(void)
 #ifdef CONFIG_PIN_PHY_POWER
 static void phy_device_power_enable_via_gpio(bool enable)
 {
-	if (!enable)
-		phy_lan8720_default_ethernet_config.phy_power_enable(false);
+    if (!enable)
+        phy_lan8720_default_ethernet_config.phy_power_enable(false);
 
-	gpio_pad_select_gpio((gpio_num_t)CONFIG_PIN_PHY_POWER);
-	gpio_set_direction((gpio_num_t)CONFIG_PIN_PHY_POWER, GPIO_MODE_OUTPUT);
-	gpio_set_level((gpio_num_t)CONFIG_PIN_PHY_POWER, (int)enable);
+    gpio_pad_select_gpio((gpio_num_t)CONFIG_PIN_PHY_POWER);
+    gpio_set_direction((gpio_num_t)CONFIG_PIN_PHY_POWER, GPIO_MODE_OUTPUT);
+    gpio_set_level((gpio_num_t)CONFIG_PIN_PHY_POWER, (int)enable);
 
-	// Allow the power up/down to take effect, min 300us
-	vTaskDelay(1);
+    // Allow the power up/down to take effect, min 300us
+    vTaskDelay(1);
 
-	if (enable)
-		phy_lan8720_default_ethernet_config.phy_power_enable(true);
+    if (enable)
+        phy_lan8720_default_ethernet_config.phy_power_enable(true);
 }
 #endif
 
@@ -91,9 +96,10 @@ esp_err_t Esp32_InitialiseEthernet( uint8_t * pMacAdr)
     config.phy_addr = PHY0;
     config.gpio_config = eth_gpio_config_rmii;
     config.tcpip_input = tcpip_adapter_eth_input;
+    config.clock_mode = CONFIG_PHY_CLOCK_MODE;
 
 #ifdef CONFIG_PIN_PHY_POWER
-	config.phy_power_enable = phy_device_power_enable_via_gpio;
+    config.phy_power_enable = phy_device_power_enable_via_gpio;
 #endif
     esp_err_t ret = esp_eth_init(&config);
     if(ret != ESP_OK) return ret;
@@ -125,7 +131,7 @@ int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config)
             pNetIf = Esp32_find_netif(ESP_IF_ETH);
             if (pNetIf != NULL) break; 
         }
-	    if (pNetIf != NULL)  return pNetIf->num;
+        if (pNetIf != NULL)  return pNetIf->num;
    }
 
     return SOCK_SOCKET_ERROR; 

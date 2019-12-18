@@ -366,13 +366,13 @@ void SetResult_UINT8( CLR_RT_StackFrame &stackFrame, unsigned char value )
     stackFrame.SetResult( value, DATATYPE_U1 );
 }
 
-void SetResult_UINT16( CLR_RT_StackFrame &stackFrame, signed short value )
+void SetResult_UINT16( CLR_RT_StackFrame &stackFrame, unsigned short value )
 {
     NATIVE_PROFILE_CLR_CORE();
     stackFrame.SetResult( value, DATATYPE_U2 );
 }
 
-void SetResult_UINT32( CLR_RT_StackFrame &stackFrame, signed int value )
+void SetResult_UINT32( CLR_RT_StackFrame &stackFrame, unsigned int value )
 {
     NATIVE_PROFILE_CLR_CORE();
     stackFrame.SetResult( value, DATATYPE_U4 );

@@ -55,6 +55,8 @@ void nanoHAL_Initialize()
 
     Events_Initialize();
 
+    CPU_GPIO_Initialize();
+
     // no PAL events required until now
     //PalEvent_Initialize();
 	
@@ -158,6 +160,8 @@ void nanoHAL_Uninitialize()
     #endif
 
 #endif
+
+    CPU_GPIO_Uninitialize();
 
     Events_Uninitialize();
     

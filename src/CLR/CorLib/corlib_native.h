@@ -24,18 +24,6 @@ struct Library_corlib_native_System_Object
 
 };
 
-// // THIS CLASS IS BUILT INTO mscorlib and we need to offset static fields accordingly
-// struct Library_corlib_native__<PrivateImplementationDetails>
-// {
-//     static const int FIELD_STATIC__DD3AEFEADB1CD615F3017763F1568179FEE640B0 = 0;
-//     static const int FIELD_STATIC__E92B39D8233061927D9ACDE54665E68E7535635A = 1;
-
-
-//     //--//
-
-// };
-//
-
 struct Library_corlib_native_System_ValueType
 {
     NANOCLR_NATIVE_DECLARE(Equals___BOOLEAN__OBJECT);
@@ -120,6 +108,8 @@ struct Library_corlib_native_System_Collections_Hashtable__KeyCollection
 
 };
 
+#if (NANOCLR_REFLECTION == TRUE)
+
 struct Library_corlib_native_System_AppDomain
 {
     static const int FIELD___appDomain = 1;
@@ -136,6 +126,8 @@ struct Library_corlib_native_System_AppDomain
 #endif
 };
 
+#endif // NANOCLR_REFLECTION
+
 struct Library_corlib_native_System_ArgumentException
 {
     static const int FIELD___paramName = 5;
@@ -150,7 +142,9 @@ struct Library_corlib_native_System_Array
     NANOCLR_NATIVE_DECLARE(System_Collections_IList_get_Item___OBJECT__I4);
     NANOCLR_NATIVE_DECLARE(System_Collections_IList_set_Item___VOID__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(get_Length___I4);
+#if (NANOCLR_REFLECTION == TRUE)
     NANOCLR_NATIVE_DECLARE(CreateInstance___STATIC__SystemArray__SystemType__I4);
+#endif // NANOCLR_REFLECTION
     NANOCLR_NATIVE_DECLARE(Copy___STATIC__VOID__SystemArray__I4__SystemArray__I4__I4);
     NANOCLR_NATIVE_DECLARE(Clear___STATIC__VOID__SystemArray__I4__I4);
     NANOCLR_NATIVE_DECLARE(TrySzIndexOf___STATIC__BOOLEAN__SystemArray__I4__I4__OBJECT__BYREF_I4);
@@ -165,13 +159,16 @@ struct Library_corlib_native_System_Array
 struct Library_corlib_native_System_Delegate
 {
     NANOCLR_NATIVE_DECLARE(Equals___BOOLEAN__OBJECT);
-    NANOCLR_NATIVE_DECLARE(GetInvocationList___SZARRAY_SystemDelegate);
-    NANOCLR_NATIVE_DECLARE(get_Method___SystemReflectionMethodInfo);
-    NANOCLR_NATIVE_DECLARE(get_Target___OBJECT);
     NANOCLR_NATIVE_DECLARE(Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
     NANOCLR_NATIVE_DECLARE(Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
     NANOCLR_NATIVE_DECLARE(op_Equality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
     NANOCLR_NATIVE_DECLARE(op_Inequality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
+
+#if (NANOCLR_REFLECTION == TRUE)
+    NANOCLR_NATIVE_DECLARE(GetInvocationList___SZARRAY_SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(get_Method___SystemReflectionMethodInfo);
+    NANOCLR_NATIVE_DECLARE(get_Target___OBJECT);
+#endif // NANOCLR_REFLECTION
 
     //--//
 
@@ -262,47 +259,6 @@ struct Library_corlib_native_System_Collections_ArrayList
     NANOCLR_NATIVE_DECLARE(Insert___VOID__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(RemoveAt___VOID__I4);
     NANOCLR_NATIVE_DECLARE(SetCapacity___VOID__I4);
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_Collections_DictionaryEntry
-{
-    static const int FIELD__Key = 1;
-    static const int FIELD__Value = 2;
-
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_Collections_Queue
-{
-    static const int FIELD___array = 1;
-    static const int FIELD___head = 2;
-    static const int FIELD___tail = 3;
-    static const int FIELD___size = 4;
-
-    NANOCLR_NATIVE_DECLARE(Clear___VOID);
-    NANOCLR_NATIVE_DECLARE(CopyTo___VOID__SystemArray__I4);
-    NANOCLR_NATIVE_DECLARE(Enqueue___VOID__OBJECT);
-    NANOCLR_NATIVE_DECLARE(Dequeue___OBJECT);
-    NANOCLR_NATIVE_DECLARE(Peek___OBJECT);
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_Collections_Stack
-{
-    static const int FIELD___array = 1;
-    static const int FIELD___size = 2;
-
-    NANOCLR_NATIVE_DECLARE(Clear___VOID);
-    NANOCLR_NATIVE_DECLARE(Peek___OBJECT);
-    NANOCLR_NATIVE_DECLARE(Pop___OBJECT);
-    NANOCLR_NATIVE_DECLARE(Push___VOID__OBJECT);
 
     //--//
 
@@ -548,7 +504,9 @@ struct Library_corlib_native_System_Reflection_Assembly
 
     //--//
 
+#if (NANOCLR_REFLECTION == TRUE)
     static HRESULT GetTypeDescriptor( CLR_RT_HeapBlock& arg, CLR_RT_Assembly_Instance& inst );
+#endif // NANOCLR_REFLECTION
 };
 
 struct Library_corlib_native_System_Reflection_AssemblyName
@@ -573,9 +531,10 @@ struct Library_corlib_native_System_Reflection_MethodBase
 
     //--//
 
+#if (NANOCLR_REFLECTION == TRUE)
     static HRESULT GetMethodDescriptor( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& arg, CLR_RT_MethodDef_Instance& inst );
-
     static HRESULT CheckFlags( CLR_RT_StackFrame& stack, CLR_UINT32 mask, CLR_UINT32 flag );
+#endif // NANOCLR_REFLECTION
 };
 
 struct Library_corlib_native_System_Reflection_ConstructorInfo
@@ -594,7 +553,9 @@ struct Library_corlib_native_System_Reflection_FieldInfo
 
     //--//
 
+#if (NANOCLR_REFLECTION == TRUE)
     static HRESULT Initialize( CLR_RT_StackFrame& stack, CLR_RT_FieldDef_Instance& instFD, CLR_RT_TypeDef_Instance& instTD, CLR_RT_HeapBlock*& obj );
+#endif // NANOCLR_REFLECTION
 };
 
 struct Library_corlib_native_System_Reflection_PropertyInfo
@@ -615,7 +576,9 @@ struct Library_corlib_native_System_Reflection_RuntimeFieldInfo
 
     //--//
 
+#if (NANOCLR_REFLECTION == TRUE)
     static bool GetFieldDescriptor( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& arg, CLR_RT_FieldDef_Instance& inst );
+#endif // NANOCLR_REFLECTION
 };
 
 struct Library_corlib_native_System_Reflection_RuntimeMethodInfo
@@ -665,6 +628,8 @@ struct Library_corlib_native_System_Runtime_Versioning_TargetFrameworkAttribute
 
 };
 
+#if (NANOCLR_REFLECTION == TRUE)
+
 struct Library_corlib_native_System_Type
 {
     NANOCLR_NATIVE_DECLARE(get_DeclaringType___SystemType);
@@ -688,7 +653,6 @@ struct Library_corlib_native_System_Type
 
     //--//
 
-    //
     static const int c_BindingFlags_Default              = 0x00000000; // a place holder for no flag specifed
 
     static const int c_BindingFlags_IgnoreCase           = 0x00000001; // Ignore the case of Names while searching
@@ -726,7 +690,9 @@ struct Library_corlib_native_System_Type
     static HRESULT GetFields ( CLR_RT_StackFrame& stack, const char* szText, CLR_UINT32 attr                                        , bool fAllMatches );
     static HRESULT GetMethods( CLR_RT_StackFrame& stack, const char* szText, CLR_UINT32 attr, CLR_RT_HeapBlock* pParams, int iParams, bool fAllMatches );
 };
+#endif // NANOCLR_REFLECTION
 
+#if (NANOCLR_REFLECTION == TRUE)
 struct Library_corlib_native_System_RuntimeType
 {
     NANOCLR_NATIVE_DECLARE(get_Assembly___SystemReflectionAssembly);
@@ -746,6 +712,7 @@ struct Library_corlib_native_System_RuntimeType
     static HRESULT GetTypeDescriptor( CLR_RT_HeapBlock& arg, CLR_RT_TypeDef_Instance& inst );
     static HRESULT GetName( CLR_RT_HeapBlock& arg, bool fFullName, CLR_RT_HeapBlock& res );
 };
+#endif // NANOCLR_REFLECTION
 
 struct Library_corlib_native_System_SByte
 {
@@ -844,40 +811,6 @@ struct Library_corlib_native_System_String
     static HRESULT ConvertToCharArray( const char* szText           , CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_Array*& array, int startIndex, int length );
 };
 
-struct Library_corlib_native_System_Text_StringBuilder
-{
-    static const int FIELD___maxCapacity = 1;
-    static const int FIELD___chunkChars = 2;
-    static const int FIELD___chunkLength = 3;
-    static const int FIELD___chunkPrevious = 4;
-    static const int FIELD___chunkOffset = 5;
-
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_Text_UTF8Decoder
-{
-    NANOCLR_NATIVE_DECLARE(Convert___VOID__SZARRAY_U1__I4__I4__SZARRAY_CHAR__I4__I4__BOOLEAN__BYREF_I4__BYREF_I4__BYREF_BOOLEAN);
-
-    //--//
-
-};
-
-struct Library_corlib_native_System_Text_UTF8Encoding
-{
-    NANOCLR_NATIVE_DECLARE(GetBytes___SZARRAY_U1__STRING);
-    NANOCLR_NATIVE_DECLARE(GetBytes___I4__STRING__I4__I4__SZARRAY_U1__I4);
-    NANOCLR_NATIVE_DECLARE(GetChars___SZARRAY_CHAR__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(GetChars___SZARRAY_CHAR__SZARRAY_U1__I4__I4);
-
-    //--//
-
-    static HRESULT Helper__GetChars(CLR_RT_StackFrame& stack, bool fIndexed);
-
-};
-
 struct Library_corlib_native_System_Threading_WaitHandle
 {
     NANOCLR_NATIVE_DECLARE(WaitOne___BOOLEAN__I4__BOOLEAN);
@@ -954,7 +887,9 @@ struct Library_corlib_native_System_Threading_Thread
     NANOCLR_NATIVE_DECLARE(get_ThreadState___SystemThreadingThreadState);
     NANOCLR_NATIVE_DECLARE(Sleep___STATIC__VOID__I4);
     NANOCLR_NATIVE_DECLARE(get_CurrentThread___STATIC__SystemThreadingThread);
+#if (NANOCLR_REFLECTION == TRUE)
     NANOCLR_NATIVE_DECLARE(GetDomain___STATIC__SystemAppDomain);
+#endif // NANOCLR_REFLECTION
 
     //--//
 

@@ -40,9 +40,7 @@ set(NF_CoreCLR_SRCS
     CLR_RT_HeapBlock_Finalizer.cpp
     CLR_RT_HeapBlock_Lock.cpp
     CLR_RT_HeapBlock_LockRequest.cpp
-    CLR_RT_HeapBlock_Queue.cpp
     CLR_RT_HeapBlock_Node.cpp
-    CLR_RT_HeapBlock_Stack.cpp
     CLR_RT_HeapBlock_String.cpp
     CLR_RT_HeapBlock_Timer.cpp
     CLR_RT_HeapBlock_WaitForObject.cpp
@@ -71,7 +69,7 @@ set(NF_CoreCLR_SRCS
     TypeSystem.cpp
     nanoSupport_CRC32.c
     nanoHAL_SystemInformation.cpp
-    # Various.cpp
+    Various.cpp
 
     # CoreLib
     corlib_native_System_AppDomain.cpp
@@ -79,8 +77,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Attribute.cpp
     corlib_native_System_BitConverter.cpp
     corlib_native_System_Collections_ArrayList.cpp
-    corlib_native_System_Collections_Queue.cpp
-    corlib_native_System_Collections_Stack.cpp
     corlib_native_System_Console.cpp
     corlib_native_System_Convert.cpp
     corlib_native_System_DateTime.cpp
@@ -99,21 +95,11 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Number.cpp
     corlib_native_System_Object.cpp
     corlib_native_System_Random.cpp
-    corlib_native_System_Reflection_Assembly.cpp
     corlib_native_System_Reflection_Binder.cpp
-    corlib_native_System_Reflection_ConstructorInfo.cpp
-    corlib_native_System_Reflection_FieldInfo.cpp
-    corlib_native_System_Reflection_MethodBase.cpp
     corlib_native_System_Reflection_MemberInfo.cpp
-    corlib_native_System_Reflection_PropertyInfo.cpp
-    corlib_native_System_Reflection_RuntimeFieldInfo.cpp
-    corlib_native_System_Reflection_RuntimeMethodInfo.cpp
     corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp
     corlib_native_System_Runtime_Remoting_RemotingServices.cpp
-    corlib_native_System_RuntimeType.cpp
     corlib_native_System_String.cpp
-    corlib_native_System_Text_UTF8Decoder.cpp
-    corlib_native_System_Text_UTF8Encoding.cpp
     corlib_native_System_Threading_AutoResetEvent.cpp
     corlib_native_System_Threading_Interlocked.cpp
     corlib_native_System_Threading_ManualResetEvent.cpp
@@ -122,7 +108,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Threading_Timer.cpp
     corlib_native_System_Threading_WaitHandle.cpp
     corlib_native_System_TimeSpan.cpp
-    corlib_native_System_Type.cpp
     corlib_native_System_ValueType.cpp
     corlib_native_System_WeakReference.cpp
     corlib_native.cpp
@@ -174,6 +159,25 @@ set(NF_CoreCLR_SRCS
     # target specifics
     target_BlockStorage.c
 )
+
+# include System.Reflection API files depending on build option
+if(NF_FEATURE_SUPPORT_REFLECTION)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_Assembly.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_ConstructorInfo.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_FieldInfo.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_MethodBase.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_PropertyInfo.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_RuntimeFieldInfo.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_RuntimeMethodInfo.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_RuntimeType.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_Type.cpp)
+endif()
+
+# include Collection support files depending on build option
+if(API_nanoFramework.System.Collections)
+    list(APPEND NF_CoreCLR_SRCS CLR_RT_HeapBlock_Queue.cpp)
+    list(APPEND NF_CoreCLR_SRCS CLR_RT_HeapBlock_Stack.cpp)
+endif()
 
 # need a conditional include because of ESP32 building network as a library 
 if(NOT USE_SECURITY_MBEDTLS_OPTION)

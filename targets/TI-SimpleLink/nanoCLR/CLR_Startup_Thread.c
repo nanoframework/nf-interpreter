@@ -6,14 +6,17 @@
 #include <nanoCLR_Application.h>
 #include <nanoHAL_v2.h>
 #include <string.h>
+#include <xdc/std.h>
 
-void* CLRStartupThread(void* argument)
+void CLRStartupThread(UArg arg0, UArg arg1)
 {
-  CLR_SETTINGS* clrSettings = (CLR_SETTINGS*)argument;
-  
-  nanoHAL_Initialize_C();
+    (void)arg1;
 
-  ClrStartup(*clrSettings);
+    CLR_SETTINGS* clrSettings = (CLR_SETTINGS*)arg0;
 
-  // nothing to deinitialize or cleanup, so it's safe to return
+    nanoHAL_Initialize_C();
+
+    ClrStartup(*clrSettings);
+
+    // nothing to deinitialize or cleanup, so it's safe to return
 }

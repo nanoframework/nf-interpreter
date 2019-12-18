@@ -8,14 +8,14 @@ steps:
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_AssemblyVersion) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) ..'
+      cmakeArgs: '-G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/toolchain.arm-none-eabi.cmake -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_AssemblyVersion) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) ..'
       workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Setup build with CMake and DFU
     condition: eq(variables['NeedsDFU'], true)
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '-G Ninja -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_AssemblyVersion) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) ..'
+      cmakeArgs: '-G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/toolchain.arm-none-eabi.cmake -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_AssemblyVersion) -DCHIBIOS_BOARD=$(BoardName) $(BuildOptions) ..'
       workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Setup build with CMake without DFU
     condition: eq(variables['NeedsDFU'], false)

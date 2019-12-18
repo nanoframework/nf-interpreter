@@ -751,18 +751,18 @@ void CLR_RT_DUMP::EXCEPTION( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref )
 
     CLR_RT_HeapBlock* obj = Library_corlib_native_System_Exception::GetTarget( ref ); if(!obj) return;
 
-    CLR_Debug::Printf( "    #### Exception " ); CLR_RT_DUMP::TYPE( obj->ObjectCls() ); CLR_Debug::Printf( " - %s (%d) ####\r\n", CLR_RT_DUMP::GETERRORMESSAGE( Library_corlib_native_System_Exception::GetHResult( obj ) ), stack.m_owningThread->m_pid );
+    CLR_Debug::Printf( "    ++++ Exception " ); CLR_RT_DUMP::TYPE( obj->ObjectCls() ); CLR_Debug::Printf( " - %s (%d) ++++\r\n", CLR_RT_DUMP::GETERRORMESSAGE( Library_corlib_native_System_Exception::GetHResult( obj ) ), stack.m_owningThread->m_pid );
 
     msg = Library_corlib_native_System_Exception::GetMessage( obj );
     
-    CLR_Debug::Printf( "    #### Message: %s\r\n", msg == NULL ? "" : msg );
+    CLR_Debug::Printf( "    ++++ Message: %s\r\n", msg == NULL ? "" : msg );
 
     CLR_UINT32                                          depth;
     Library_corlib_native_System_Exception::StackTrace* stackTrace = Library_corlib_native_System_Exception::GetStackTrace( obj, depth ); if(!stackTrace) return;
 
     while(depth-- > 0)
     {
-        CLR_Debug::Printf( "    #### " ); CLR_RT_DUMP::METHOD( stackTrace->m_md ); CLR_Debug::Printf( " [IP: %04x] ####\r\n", stackTrace->m_IP );
+        CLR_Debug::Printf( "    ++++ " ); CLR_RT_DUMP::METHOD( stackTrace->m_md ); CLR_Debug::Printf( " [IP: %04x] ++++\r\n", stackTrace->m_IP );
 
         stackTrace++;
     }

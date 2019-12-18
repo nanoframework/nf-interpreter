@@ -26,8 +26,8 @@ steps:
         targetType: 'inline'
         script: |
             Write-Host "Downloading ESP32 pre-compiled libs..."
-            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.1.zip"
-            $output = "$PSScriptRoot\IDF_libs-v3.1.zip"
+            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.3.zip"
+            $output = "$PSScriptRoot\IDF_libs-v3.3.zip"
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
@@ -35,8 +35,8 @@ steps:
 
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\IDF_libs-v3.1.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs-v3.1'
+      archiveFilePatterns: '$(Agent.TempDirectory)\IDF_libs-v3.3.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs-v3.3'
       cleanDestinationFolder: false
     displayName: Installing ESP32 pre-compiled libs
 
@@ -45,8 +45,8 @@ steps:
         targetType: 'inline'
         script: |
             Write-Host "Downloading ESP32 IDF..."
-            $url = "https://github.com/espressif/esp-idf/releases/download/v3.1/esp-idf-v3.1.zip"
-            $output = "$PSScriptRoot\esp-idf-v3.1.zip"
+            $url = "https://github.com/espressif/esp-idf/releases/download/v3.3/esp-idf-v3.3.zip"
+            $output = "$PSScriptRoot\esp-idf-v3.3.zip"
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
@@ -54,7 +54,7 @@ steps:
 
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-v3.1.zip' 
+      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-v3.3.zip' 
       destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
       cleanDestinationFolder: false
     displayName: Installing Espressif IDF
@@ -83,8 +83,8 @@ steps:
         script: |
             # need to replace forward slash for paths to work with GCC and CMake
             $tempDirPath = "$env:Agent_TempDirectory".Replace('\','/')
-            Write-Host "$("##vso[task.setvariable variable=ESP32_LIBS_PATH]")$tempDirPath/ESP32_Tools/libs-v3.1"
-            Write-Host "$("##vso[task.setvariable variable=ESP32_IDF_PATH]")$tempDirPath/ESP32_Tools/esp-idf-v3.1"
+            Write-Host "$("##vso[task.setvariable variable=ESP32_LIBS_PATH]")$tempDirPath/ESP32_Tools/libs-v3.3"
+            Write-Host "$("##vso[task.setvariable variable=ESP32_IDF_PATH]")$tempDirPath/ESP32_Tools/esp-idf-v3.3"
         errorActionPreference: 'stop'
         failOnStderr: 'true'
     displayName: Adjust paths

@@ -16,6 +16,8 @@ HRESULT Library_corlib_native_System_Delegate::Equals___BOOLEAN__OBJECT( CLR_RT_
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
+#if (NANOCLR_REFLECTION == TRUE)
+
 HRESULT Library_corlib_native_System_Delegate::GetInvocationList___SZARRAY_SystemDelegate( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -109,6 +111,8 @@ HRESULT Library_corlib_native_System_Delegate::get_Target___OBJECT( CLR_RT_Stack
 
     NANOCLR_NOCLEANUP();
 }
+
+#endif // NANOCLR_REFLECTION
 
 HRESULT Library_corlib_native_System_Delegate::Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate( CLR_RT_StackFrame& stack )
 {

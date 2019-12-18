@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 #include <target_BlockStorage.h>
 
@@ -562,9 +563,9 @@ extern "C" {
     // Find the right Device with the corresponding phyiscal address.
     bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress);
     BlockStorageDevice* BlockStorageList_GetFirstDevice();
-    // BlockStorageDevice* BlockStorageList_GetNextDevice(BlockStorageDevice* device);
+    BlockStorageDevice* BlockStorageList_GetNextDevice(BlockStorageDevice* device);
     // returns number of devices has been declared in the system
-    // unsigned int BlockStorageList_GetNumDevices();
+    unsigned int BlockStorageList_GetNumDevices();
 
 #ifdef __cplusplus
 }
@@ -605,8 +606,6 @@ typedef struct CPU_MEMORY_CONFIG
     unsigned char   ExternalBufferEnable;   // 0,1
 
 }CPU_MEMORY_CONFIG;
-
-typedef unsigned int GPIO_PIN;
 
 typedef struct GPIO_FLAG
 {

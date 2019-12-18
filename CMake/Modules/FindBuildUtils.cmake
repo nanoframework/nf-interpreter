@@ -25,13 +25,30 @@ function(NF_GENERATE_DFU_PACKAGE FILE1 ADDRESS1 FILE2 ADDRESS2 OUTPUTFILENAME)
 
 endfunction()
 
-function(NF_GENERATE_BUILD_OUTPUT_FILES TARGET)
+function(NF_GENERATE_HEX_PACKAGE FILE1 FILE2 OUTPUTFILENAME)
 
-#    if(${VISUAL_STUDIO})
-#        # CMAKE command add_custom_Command 'POST_BUILD' currently fails,  "CMD.EXE" not recognised
-#        # Use the CopyBuildOutput.cmd in the VisualStudioDevelopment folder to manually perform the same function
-#        return()
-#    endif()
+    add_custom_command(
+            
+        TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+
+        COMMAND ${TOOL_SRECORD_PREFIX}/srec_cat
+
+        "${FILE1}" -Intel
+        "${FILE2}" -Intel
+        -o "${OUTPUTFILENAME}" -Intel
+        -line-length=44
+
+        WORKING_DIRECTORY ${TOOL_SRECORD_PREFIX} 
+
+        COMMENT "exporting hex files to one hex file" 
+    )
+
+    # need to add a dependency of NANOCLR to NANOBOOTER because SRECORD util needs hex outputs of both targets
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+
+endfunction()
+
+function(NF_GENERATE_BUILD_OUTPUT_FILES TARGET)
 
     # need to remove the .elf suffix from target name
     string(FIND ${TARGET} "." TARGET_EXTENSION_DOT_INDEX)
