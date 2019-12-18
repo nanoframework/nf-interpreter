@@ -22,3 +22,9 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 };
 
 HAL_TARGET_CONFIGURATION  g_TargetConfiguration;
+
+// this target use DFU for updates
+uint32_t GetTargetCapabilities()
+{ 
+    return TargetCapabilities_DfuUpdate; 
+};
