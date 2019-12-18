@@ -1,244 +1,11 @@
 ﻿{
   "configurations": [
     {
-      "name": "ST_STM32F769I_DISCOVERY",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "inheritEnvironments": [
-        "gcc-arm"
-      ],
-      "environments": [
-        {
-          "PATH": "C:\\Windows\\system32;${env.PATH}"
-        }
-      ],
-      "buildRoot": "${workspaceRoot}/build/${name}",
-      "installRoot": "${workspaceRoot}/build/install/${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "-v",
-      "ctestCommandArgs": "",
-      "intelliSenseMode": "linux-gcc-arm",
-      "variables": [
-        {
-          "name": "CMAKE_TOOLCHAIN_FILE",
-          "value": "${workspaceRoot}/CMake/toolchain.arm-none-eabi.cmake"
-        },
-        {
-          "name": "EXECUTABLE_OUTPUT_PATH",
-          "value": "${workspaceRoot}/Build/${name}"
-        },
-        {
-          "name": "TOOLCHAIN_PREFIX",
-          "value": "E:/GNU_Tools_ARM_Embedded/9-2019-q4-major"
-        },
-        {
-          "name": "CMAKE_SYSTEM_NAME",
-          "value": "Generic"
-        },
-        {
-          "name": "BUILD_VERSION",
-          "value": "0.9.99.999"
-        },
-        {
-          "name": "TARGET_SERIES",
-          "value": "STM32F7xx"
-        },
-        {
-          "name": "CHIBIOS_BOARD",
-          "value": "ST_STM32F769I_DISCOVERY"
-        },
-        {
-          "name": "CHIBIOS_SOURCE",
-          "value": "E:/GitHub/ChibiOS"
-        },
-        {
-          "name": "CHIBIOS_VERSION",
-          "value": ""
-        },
-        {
-          "name": "USE_RNG",
-          "value": "ON"
-        },
-        {
-          "name": "TARGET_LIGHT_MATH",
-          "value": "FALSE"
-        },
-        {
-          "name": "TARGET_DP_FLOATINGPOINT",
-          "value": "FALSE"
-        },
-        {
-          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION",
-          "value": "ON"
-        },
-        {
-          "name": "RTOS",
-          "value": "CHIBIOS"
-        },
-        {
-          "name": "SWO_OUTPUT_OPTION",
-          "value": "ON"
-        },
-        {
-          "name": "NF_BUILD_RTM",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_TRACE_ERRORS",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_TRACE_HEADERS",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_TRACE_STATE",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_TRACE_NODATA",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_TRACE_ALL",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_WP_IMPLEMENTS_CRC32",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_FEATURE_DEBUGGER",
-          "value": "ON"
-        },
-        {
-          "name": "NF_FEATURE_RTC",
-          "value": "ON"
-        },
-        {
-          "name": "NF_FEATURE_USE_APPDOMAINS",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_FEATURE_WATCHDOG",
-          "value": "ON"
-        },
-        {
-          "name": "NF_FEATURE_HAS_CONFIG_BLOCK",
-          "value": "ON"
-        },
-        {
-          "name": "NF_FEATURE_HAS_SDCARD",
-          "value": "ON"
-        },
-        {
-          "name": "NF_PLATFORM_NO_CLR_TRACE",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_CLR_NO_IL_INLINE",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_INTEROP_ASSEMBLIES",
-          "value": "OFF"
-        },
-        {
-          "name": "NF_NETWORKING_SNTP",
-          "value": "ON"
-        },
-        {
-          "name": "NF_SECURITY_MBEDTLS",
-          "value": "ON"
-        },
-        {
-          "name": "MBEDTLS_SOURCE",
-          "value": "E:/GitHub/mbedtls"
-        },
-        {
-          "name": "API_nanoFramework.Devices.OneWire",
-          "value": "ON"
-        },
-        {
-          "name": "API_System.Math",
-          "value": "ON"
-        },
-        {
-          "name": "API_System.Net",
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Adc",
-          "value": "ON"
-        },
-        {
-          "name": "API_System.Devices.Dac",
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Gpio",
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.I2c",
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Pwm",
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.SerialCommunication",
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Spi",
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Networking.Sockets",
-          "value": "OFF"
-        },
-        {
-          "name": "API_Windows.Storage",
-          "value": "ON"
-        },
-        {
-          "name": "API_nanoFramework.Devices.Can",
-          "value": "ON"
-        },
-        {
-          "name": "API_Hardware.Esp32",
-          "value": "OFF"
-        },
-        {
-          "name": "API_Hardware.Stm32",
-          "value": "ON"
-        }
-      ]
-    },
-    {
       "name": "ESP32",
       "generator": "Ninja",
       "configurationType": "Debug",
-      "inheritEnvironments": [
-        "gcc-arm"
-      ],
-      "environments": [
-        {
-          // Work around for Ninja not finding Cmd.exe with add_custom_command
-          "PATH": "C:\\Windows\\system32;C:\\Program Files\\Espressif\\ESP-IDF Tools\\mconf-idf;c:\\python27;${env.PATH}",
-
-          // ESP32 paths set up in environment so we can use in variables
-          "ESP32_IDF_VERSION": "v3.3",
-          "ESP32_TOOLS": "C:\\ESP32_TOOLS",
-          "ESP32_IDF": "${env.ESP32_TOOLS}\\esp-idf-${env.ESP32_IDF_VERSION}",
-          "ESP32_LIB": "${env.ESP32_TOOLS}\\libs-${env.ESP32_IDF_VERSION}",
-          "ESP32_MBEDTLS_SOURCE": "${env.ESP32_IDF}/Components/mbedtls/mbedtls",
-
-          "IDF_PATH": "${env.ESP32_IDF}"
-        }
-      ],
+      "inheritEnvironments": [ "gcc-arm" ],
+      "environments": [ { "PATH": "C:\\Windows\\system32;${env.PATH}" } ],
       "buildRoot": "${workspaceRoot}/Build\\${name}",
       "installRoot": "${workspaceRoot}/Build/install/${name}",
       "cmakeCommandArgs": "",
@@ -248,196 +15,238 @@
       "variables": [
         {
           "name": "EXECUTABLE_OUTPUT_PATH",
-          "value": "${workspaceRoot}/Build/${name}"
+          "value": "${workspaceRoot}/Build/${name}",
+          "type": "PATH"
         },
         {
-          "name": "ESP32_TOOLCHAIN_PATH:PATH",
-          "value": "${env.ESP32_TOOLS}"
+          "name": "ESP32_TOOLCHAIN_PATH",
+          "value": "C:/ESP32_TOOLS",
+          "type": "PATH"
         },
         {
-          "name": "TOOLCHAIN_PREFIX:PATH",
-          "value": "${env.ESP32_TOOLS}"
+          "name": "TOOLCHAIN_PREFIX",
+          "value": "C:/ESP32_TOOLS",
+          "type": "PATH"
         },
         {
-          "name": "ESP32_IDF_PATH:PATH",
-          "value": "${env.ESP32_IDF}"
+          "name": "ESP32_IDF_PATH",
+          "value": "C:/ESP32_TOOLS/esp-idf-v3.3",
+          "type": "PATH"
         },
         {
-          "name": "ESP32_LIBS_PATH:PATH",
-          "value": "${env.ESP32_LIB}"
+          "name": "ESP32_LIBS_PATH",
+          "value": "C:/ESP32_TOOLS/libs-v3.3",
+          "type": "PATH"
         },
         {
-          "name": "CMAKE_SYSTEM_NAME:STRING",
-          "value": "Generic"
+          "name": "CMAKE_SYSTEM_NAME",
+          "value": "Generic",
+          "type": "STRING"
         },
         {
-          "name": "GIT_EXECUTABLE:FILEPATH",
-          "value": "${env.VSINSTALLDIR}/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/Git/cmd/git.exe"
+          "name": "GIT_EXECUTABLE",
+          "value": "C:/Program Files/Git/bin/Git.exe",
+          "type": "FILEPATH"
         },
         {
-          "name": "GIT_VERSION_STRING:STRING",
-          "value": "2.19.0"
+          "name": "GIT_VERSION_STRING",
+          "value": "2.19.0",
+          "type": "STRING"
         },
         {
-          "name": "TARGET_SERIES:STRING",
-          "value": "ESP32"
+          "name": "TARGET_SERIES",
+          "value": "ESP32",
+          "type": "STRING"
         },
         {
-          "name": "ESP32_BOARD:STRING",
-          "value": "ESP32_WROOM_32"
+          "name": "ESP32_BOARD",
+          "value": "ESP32_WROOM_32",
+          "type": "STRING"
         },
         {
-          "name": "USE_RNG:BOOL", //option to enable use of true random generator hardware block
-          "value": "ON"
+          "name": "USE_RNG",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "TARGET_LIGHT_MATH:BOOL", //option to build without complex math function
-          "value": "FALSE"
+          "name": "TARGET_LIGHT_MATH",
+          "value": "FALSE",
+          "type": "BOOL"
         },
         {
-          "name": "TARGET_DP_FLOATINGPOINT:BOOL",
-          "value": "TRUE"
+          "name": "TARGET_DP_FLOATINGPOINT",
+          "value": "FALSE",
+          "type": "BOOL"
         },
         {
-          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION:BOOL", //"Option for string conversion to value from base 10 and partial for 16"
-          "value": "FALSE"
+          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION",
+          "value": "FALSE",
+          "type": "BOOL"
         },
         {
-          "name": "RTOS:STRING", //"Selected Operating system
-          "value": "FREERTOS_ESP32"
+          "name": "RTOS",
+          "value": "FREERTOS_ESP32",
+          "type": "STRING"
         },
         {
-          "name": "NF_BUILD_RTM:BOOL", // OFF-default-ON-to-enable-RTM-build
-          "value": "OFF"
+          "name": "NF_BUILD_RTM",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "NF_WP_TRACE_ERRORS:BOOL", //OFF-default-ON-to-enable-trace-error-messages-wire-protocol
-          "value": "OFF"
+          "name": "NF_WP_TRACE_ERRORS",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "NF_WP_TRACE_HEADERS:BOOL", //OFF-default-ON-to-enable-trace-header-messages-wire-protocol
-          "value": "OFF"
+          "name": "NF_WP_TRACE_HEADERS",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "NF_WP_TRACE_STATE:BOOL", //OFF-default-ON-to-enable-trace-state-messages-wire-protocol
-          "value": "OFF"
+          "name": "NF_WP_TRACE_STATE",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "NF_WP_TRACE_NODATA:BOOL", //OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol
-          "value": "OFF"
+          "name": "NF_WP_TRACE_NODATA",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "NF_WP_TRACE_ALL:BOOL", //OFF-default-ON-to-enable-trace-all-messages-wire-protocol
-          "value": "OFF"
+          "name": "NF_WP_TRACE_ALL",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "NF_WP_IMPLEMENTS_CRC32:BOOL", //OFF-default-ON-to-enable-CRC32-wire-protocol
-          "value": "OFF"
+          "name": "NF_WP_IMPLEMENTS_CRC32",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "NF_FEATURE_DEBUGGER:BOOL", //OFF-default-ON-to-include-managed-app-debugging-capability
-          "value": "ON"
+          "name": "NF_FEATURE_DEBUGGER",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "NF_FEATURE_RTC:BOOL", //OFF-default-ON-to-enable-hardware-RTC
-          "value": "ON"
+          "name": "NF_FEATURE_RTC",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "NF_FEATURE_USE_APPDOMAINS:BOOL", //OFF-default-ON-to-enable-support-for-Application-Domains
-          "value": "OFF"
+          "name": "NF_FEATURE_USE_APPDOMAINS",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "NF_FEATURE_WATCHDOG:BOOL", //ON-to-enable-hardware-watchdog-ON-is-default
-          "value": "ON"
+          "name": "NF_FEATURE_WATCHDOG",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "NF_FEATURE_HAS_CONFIG_BLOCK:BOOL", //OFF-default-ON-to-enable-configuration-block-storage
-          "value": "ON"
+          "name": "NF_FEATURE_HAS_CONFIG_BLOCK",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "NF_PLATFORM_NO_CLR_TRACE:BOOL", //OFF-default-ON-to-disable-all-trace-on-CLR
-          "value": "OFF"
+          "name": "NF_PLATFORM_NO_CLR_TRACE",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "NF_CLR_NO_IL_INLINE:BOOL", //OFF-default-ON-to-disable-CLR-IL-inlining
-          "value": "OFF"
+          "name": "NF_CLR_NO_IL_INLINE",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "NF_INTEROP_ASSEMBLIES:BOOL", //OFF-default-ON-to-disable-CLR-IL-inlining
-          "value": "OFF"
+          "name": "NF_INTEROP_ASSEMBLIES",
+          "value": "False",
+          "type": "BOOL"
         },
         {
-          "name": "NF_NETWORKING_SNTP:BOOL", //ON-default-to-add-SNTP-client-requires-networking
-          "value": "ON"
+          "name": "NF_NETWORKING_SNTP",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "NF_SECURITY_MBEDTLS:BOOL",
-          "value": "ON"
+          "name": "NF_SECURITY_MBEDTLS",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "MBEDTLS_SOURCE:PATH", //path-to-mbedtls-source-mind-the-forward-slashes
-          "value": "${env.ESP32_MBEDTLS_SOURCE}"
-        },
-        // LIBRARIES
-        {
-          "name": "API_nanoFramework.Devices.OneWire:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_nanoFramework.Devices.OneWire",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_System.Math:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_System.Math",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_System.Net:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_nanoFramework.ResourceManager",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_nanoFramework.ResourceManager:BOOL",
-          "value": "ON"
+          "name": "API_System.Net",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_Windows.Devices.Adc:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_Windows.Devices.Adc",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_System.Devices.Dac:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_System.Devices.Dac",
+          "value": "False",
+          "type": "BOOL"
         },
         {
-          "name": "API_Windows.Devices.Gpio:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_Windows.Devices.Gpio",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_Windows.Devices.I2c:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_Windows.Devices.I2c",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_Windows.Devices.Pwm:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_Windows.Devices.Pwm",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_Windows.Devices.SerialCommunication:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_Windows.Devices.SerialCommunication",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_Windows.Devices.Spi:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_Windows.Devices.Spi",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_Windows.Devices.Wifi:BOOL",
-          "value": "True"
+          "name": "API_Windows.Devices.Wifi",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_Windows.Networking.Sockets:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
+          "name": "API_Windows.Networking.Sockets",
+          "value": "OFF",
+          "type": "BOOL"
         },
         {
-          "name": "API_Windows.Storage:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_Windows.Storage",
+          "value": "True",
+          "type": "BOOL"
         },
         {
-          "name": "API_Hardware.Esp32:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
+          "name": "API_Hardware.Esp32",
+          "value": "True",
+          "type": "BOOL"
         },
         {
           "name": "NF_FEATURE_USE_SPIFFS",
@@ -446,6 +255,261 @@
         },
         {
           "name": "NF_FEATURE_HAS_SDCARD",
+          "value": "True",
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "name": "STM769IDiscovery",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "gcc-arm" ],
+      "environments": [ { "PATH": "C:\\Windows\\system32;${env.PATH}" } ],
+      "buildRoot": "${env.nfRoot}Build/${name}",
+      "installRoot": "${workspaceRoot}/Build/install/${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "linux-gcc-arm",
+      "variables": [
+        {
+          "name": "EXECUTABLE_OUTPUT_PATH",
+          "value": "${workspaceRoot}/Build/${name}",
+          "type": "STRING"
+        },
+        {
+          "name": "TOOLCHAIN_PREFIX",
+          "value": "${env.GNU_GCC_TOOLCHAIN_PATH}",
+          "type": "PATH"
+        },
+        {
+          "name": "CMAKE_SYSTEM_NAME",
+          "value": "Generic",
+          "type": "STRING"
+        },
+        {
+          "name": "TARGET_SERIES",
+          "value": "STM32F7xx",
+          "type": "STRING"
+        },
+        {
+          "name": "CHIBIOS_BOARD",
+          "value": "ST_STM32F769I_DISCOVERY",
+          "type": "STRING"
+        },
+        {
+          "name": "CHIBIOS_SOURCE",
+          "value": "C:/usr/src/NanoFramework/ChibiOS",
+          "type": "PATH"
+        },
+        {
+          "name": "CHIBIOS_VERSION",
+          "value": "",
+          "type": "STRING"
+        },
+        {
+          "name": "USE_RNG",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "TARGET_LIGHT_MATH",
+          "value": "FALSE",
+          "type": "BOOL"
+        },
+        {
+          "name": "TARGET_DP_FLOATINGPOINT",
+          "value": "FALSE",
+          "type": "BOOL"
+        },
+        {
+          "name": "TARGET_SUPPORT_ANY_BASE_CONVERSION",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "TOOL_HEX2DFU_PREFIX",
+          "value": "${env.HEX2DFU_PATH}",
+          "type": "PATH"
+        },
+        {
+          "name": "RTOS",
+          "value": "CHIBIOS",
+          "type": "STRING"
+        },
+        {
+          "name": "SWO_OUTPUT_OPTION",
+          "value": "TRUE",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_BUILD_RTM",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_WP_TRACE_ERRORS",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_WP_TRACE_HEADERS",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_WP_TRACE_STATE",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_WP_TRACE_NODATA",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_WP_TRACE_ALL",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_WP_IMPLEMENTS_CRC32",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_FEATURE_DEBUGGER",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_FEATURE_RTC",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_FEATURE_USE_APPDOMAINS",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_FEATURE_WATCHDOG",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_FEATURE_HAS_CONFIG_BLOCK",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_FEATURE_HAS_SDCARD",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_PLATFORM_NO_CLR_TRACE",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_CLR_NO_IL_INLINE",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_INTEROP_ASSEMBLIES",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_NETWORKING_SNTP",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_SECURITY_MBEDTLS",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "MBEDTLS_SOURCE",
+          "value": "",
+          "type": "PATH"
+        },
+        {
+          "name": "API_nanoFramework.Devices.OneWire",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.Math",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.Net",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_Windows.Devices.Adc",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.Devices.Dac",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_Windows.Devices.Gpio",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_Windows.Devices.I2c",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_Windows.Devices.Pwm",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_Windows.Devices.SerialCommunication",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_Windows.Devices.Spi",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_Windows.Networking.Sockets",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_Windows.Storage",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_nanoFramework.Devices.Can",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_Hardware.Esp32",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_Hardware.Stm32",
           "value": "True",
           "type": "BOOL"
         }
