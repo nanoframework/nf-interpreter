@@ -283,13 +283,13 @@ if(HEX2DFU_TOOL_AVAILABLE)
     if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
         NF_GENERATE_DFU_PACKAGE(
             ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000 
-            ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08008000 
+            ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08010000 
             ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu
         )
     else()
         NF_GENERATE_DFU_PACKAGE(
-            ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000 
-            ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08004000 
+            ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000
+            ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08010000 
             ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu       
         )
     endif()
