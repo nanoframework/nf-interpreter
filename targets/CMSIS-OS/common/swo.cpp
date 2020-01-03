@@ -12,8 +12,9 @@
     #error "ITM port is not available on Cortex-M0(+) cores. Need to set CMake option SWO_OUTPUT to OFF."
 #else
 
-// number of attempts to write to the ITM port before quit
-#define ITM_WRITE_ATTEMPTS      10
+// number of attempts to write to the ITM port before quitting
+// developer note: this is an arbitrary value from trial & error attempts to get a satisfactory output on ST-Link SWO viewer
+#define ITM_WRITE_ATTEMPTS      20000
 
 extern "C" void SwoInit()
 {
@@ -64,7 +65,7 @@ extern "C" void SwoPrintChar(char c)
     ASSERT((ITM->TER & 1UL               ) != 0UL);
    
     uint32_t retryCounter = ITM_WRITE_ATTEMPTS;
-    bool okToTx = ITM->PORT[0U].u32 == 0UL;
+    bool okToTx = (ITM->PORT[0U].u32 == 1UL);
 
     // wait (with timeout) until ITM port TX buffer is available
     while( !okToTx &&
@@ -77,7 +78,7 @@ extern "C" void SwoPrintChar(char c)
         retryCounter--;
 
         // check again
-        okToTx = (ITM->PORT[0U].u32 == 0UL);
+        okToTx = (ITM->PORT[0U].u32 == 1UL);
     }
 
     if(okToTx)
@@ -107,12 +108,13 @@ __STATIC_INLINE uint32_t GenericPort_Write_CMSIS(int portNum, const char* data, 
     char* p = (char*)data;
     uint32_t counter = 0;
     uint32_t retryCounter;
-    bool okToTx = ITM->PORT[0U].u32 == 0UL;
+    bool okToTx;
 
     while(  *p != '\0' && 
             counter < size )
     {
         retryCounter = ITM_WRITE_ATTEMPTS;
+        okToTx = (ITM->PORT[0U].u32 == 1UL);
 
         // wait (with timeout) until ITM port TX buffer is available
         while( !okToTx &&
@@ -125,7 +127,7 @@ __STATIC_INLINE uint32_t GenericPort_Write_CMSIS(int portNum, const char* data, 
             retryCounter--;
 
             // check again
-            okToTx = (ITM->PORT[0U].u32 == 0UL);
+            okToTx = (ITM->PORT[0U].u32 == 1UL);
         }
 
         if(okToTx)
