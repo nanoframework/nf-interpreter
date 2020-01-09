@@ -344,7 +344,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(void* configurationB
             blockAddressInCopy = configSectorCopy + blockOffset;
             
             // replace config block with new content by replacing memory
-            memcpy(blockAddressInCopy, configSectorCopy, blockSize);
+            memcpy(blockAddressInCopy, configurationBlock, blockSize);
 
             // copy the config block copy back to the config block storage
             success = STM32FlashDriver_Write(NULL, (uint32_t)&__nanoConfig_start__, sizeOfConfigSector, (unsigned char*)configSectorCopy, true);
