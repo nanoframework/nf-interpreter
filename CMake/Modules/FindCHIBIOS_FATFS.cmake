@@ -26,6 +26,7 @@ foreach(SRC_FILE ${FATFS_SRCS})
     set(FATFS_SRC_FILE SRC_FILE -NOTFOUND)
     find_file(FATFS_SRC_FILE ${SRC_FILE}
         PATHS 
+            ${PROJECT_BINARY_DIR}/targets/CMSIS-OS/ChibiOS/FatFS
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/fatfs_bindings
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs/src
 
@@ -40,8 +41,10 @@ if(NF_FEATURE_HAS_USB_MSD)
     # get it from ChibiOS contribution
     list(APPEND CHIBIOS_FATFS_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS-Contrib_Source/os/various/fatfs_bindings/fatfs_diskio.c)
 else()
+    # get it from the targets directory for fixing STM32F7 series Cache issues
+    list(APPEND CHIBIOS_FATFS_SOURCES ${PROJECT_BINARY_DIR}/targets/CMSIS-OS/ChibiOS/FatFS/fatfs_diskio.c)
     # get it from standard ChibiOS
-    list(APPEND CHIBIOS_FATFS_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/fatfs_bindings/fatfs_diskio.c)
+    #list(APPEND CHIBIOS_FATFS_SOURCES ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/fatfs_bindings/fatfs_diskio.c)
 endif()
 
 include(FindPackageHandleStandardArgs)
