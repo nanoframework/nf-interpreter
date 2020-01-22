@@ -128,8 +128,9 @@ DRESULT disk_read (
       return RES_NOTRDY;
     if (mmcStartSequentialRead(&FATFS_HAL_DEVICE, sector))
       return RES_ERROR;
-    cacheBufferFlush(buff, MMCSD_BLOCK_SIZE*count);
     while (count > 0) {
+      // invalidate cache on buffer
+      cacheBufferFlush(buff, MMCSD_BLOCK_SIZE);
       if (mmcSequentialRead(&FATFS_HAL_DEVICE, buff))
         return RES_ERROR;
       buff += MMCSD_BLOCK_SIZE;
@@ -174,9 +175,11 @@ DRESULT disk_write (
         return RES_WRPRT;
     if (mmcStartSequentialWrite(&FATFS_HAL_DEVICE, sector))
         return RES_ERROR;
-    // invalidate cache on buffer
-    cacheBufferFlush(buff, MMCSD_BLOCK_SIZE*count);
-    while (count > 0) {
+      while (count > 0) {
+
+      // invalidate cache on buffer
+      cacheBufferFlush(buff, MMCSD_BLOCK_SIZE);
+
       if (mmcSequentialWrite(&FATFS_HAL_DEVICE, buff))
           return RES_ERROR;
       buff += MMCSD_BLOCK_SIZE;
