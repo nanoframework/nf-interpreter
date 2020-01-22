@@ -129,16 +129,19 @@ DRESULT disk_read (
     if (mmcStartSequentialRead(&FATFS_HAL_DEVICE, sector))
       return RES_ERROR;
     while (count > 0) {
-      // invalidate cache on buffer
-      cacheBufferFlush(buff, MMCSD_BLOCK_SIZE);
       if (mmcSequentialRead(&FATFS_HAL_DEVICE, buff))
         return RES_ERROR;
+      
+      // invalidate cache over read buffer to ensure that content from DMA is read
+      cacheBufferInvalidate(buff, MMCSD_BLOCK_SIZE);
+
       buff += MMCSD_BLOCK_SIZE;
       count--;
     }
+
     if (mmcStopSequentialRead(&FATFS_HAL_DEVICE))
         return RES_ERROR;
-    cacheBufferInvalidate(buff, MMCSD_BLOCK_SIZE*count);
+    
     return RES_OK;
 #else
   case SDC:
@@ -146,6 +149,7 @@ DRESULT disk_read (
       return RES_NOTRDY;
     if (sdcRead(&FATFS_HAL_DEVICE, sector, buff, count))
       return RES_ERROR;
+    // invalidate cache over read buffer to ensure that content from DMA is read
     cacheBufferInvalidate(buff, MMCSD_BLOCK_SIZE*count);
     return RES_OK;
 #endif
@@ -175,9 +179,9 @@ DRESULT disk_write (
         return RES_WRPRT;
     if (mmcStartSequentialWrite(&FATFS_HAL_DEVICE, sector))
         return RES_ERROR;
-      while (count > 0) {
+    while (count > 0) {
 
-      // invalidate cache on buffer
+      // flush DMA buffer to ensure cache coherency
       cacheBufferFlush(buff, MMCSD_BLOCK_SIZE);
 
       if (mmcSequentialWrite(&FATFS_HAL_DEVICE, buff))
@@ -193,7 +197,7 @@ DRESULT disk_write (
     if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
       return RES_NOTRDY;
     // invalidate cache on buffer
-    cacheBufferFlush(buff, MMCSD_BLOCK_SIZE*count);
+    cacheBufferFlush(buff, count);
     if (sdcWrite(&FATFS_HAL_DEVICE, sector, buff, count))
       return RES_ERROR;
 	return RES_OK;
