@@ -7,7 +7,8 @@
 
 #include "hal.h"
 #include "ffconf.h"
-#include "diskio.h"
+#include "ff.h"			  /* Obtains integer types */
+#include "diskio.h"		/* Declarations of disk functions */
 
 #if HAL_USE_MMC_SPI && HAL_USE_SDC
 #error "cannot specify both MMC_SPI and SDC drivers"
@@ -117,7 +118,7 @@ DSTATUS disk_status (
 DRESULT disk_read (
     BYTE pdrv,        /* Physical drive number (0..) */
     BYTE *buff,       /* Data buffer to store read data */
-    DWORD sector,     /* Sector address (LBA) */
+    LBA_t sector,     /* Sector address (LBA) */
     UINT count        /* Number of sectors to read (1..255) */
 )
 {
@@ -166,7 +167,7 @@ DRESULT disk_read (
 DRESULT disk_write (
     BYTE pdrv,        /* Physical drive number (0..) */
     const BYTE *buff, /* Data to be written */
-    DWORD sector,     /* Sector address (LBA) */
+    LBA_t sector,     /* Sector address (LBA) */
     UINT count        /* Number of sectors to write (1..255) */
 )
 {
