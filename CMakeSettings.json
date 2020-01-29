@@ -247,6 +247,10 @@
       "intelliSenseMode": "linux-gcc-arm",
       "variables": [
         {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "CMake/toolchain.xtensa-esp32-elf.cmake"
+        },
+        {
           "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}"
         },
@@ -393,6 +397,14 @@
         },
         {
           "name": "API_nanoFramework.ResourceManager:BOOL",
+          "value": "ON"
+        },
+        {
+          "name": "API_nanoFramework.System.Collections:BOOL",
+          "value": "ON"
+        },
+        {
+          "name": "API_nanoFramework.System.Text:BOOL",
           "value": "ON"
         },
         {
