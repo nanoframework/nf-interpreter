@@ -8,7 +8,7 @@ include(nf_utils)
 # check if FATFS_SOURCE was specified or if it's empty (default is empty)
 set(NO_FATFS_SOURCE TRUE)
 if(FATFS_SOURCE)
-    if(NOT "${FATFS_SOURCE}" STREQUAL "")
+    if(NOT "${FATFS_SOURCE}" STREQUAL "")   
         set(NO_FATFS_SOURCE FALSE)
     endif()
 endif()
@@ -57,13 +57,14 @@ if(NO_FATFS_SOURCE)
         FatFS
         PREFIX FatFS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
-        GIT_REPOSITORY https://github.com/MateuszKlatecki/fatfs.git
+        GIT_REPOSITORY https://github.com/abbrev/fatfs.git #TODO: switch to nF org
         GIT_TAG ${FATFS_VERSION_TAG}  # target specified branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/FatFS_Source/source/ffconf.h
+
         # Disable all other steps
-        INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
     )
@@ -92,8 +93,9 @@ else()
         FatFS
         PREFIX FatFS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/FatFS_Source/source/ffconf.h
+
         # Disable all other steps
-        INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
     )        
