@@ -62,8 +62,9 @@ if(NO_FATFS_SOURCE)
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/FatFS_Source/source/ffconf.h
+
         # Disable all other steps
-        INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
     )
@@ -92,8 +93,9 @@ else()
         FatFS
         PREFIX FatFS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/FatFS_Source/source/ffconf.h
+
         # Disable all other steps
-        INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
     )        
