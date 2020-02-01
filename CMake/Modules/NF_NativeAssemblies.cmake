@@ -27,6 +27,7 @@ option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.Seri
 option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
 option(API_Windows.Networking.Sockets           "option for Windows.Networking.Sockets")
 option(API_Windows.Storage                      "option for Windows.Storage")
+option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 
 
 # Esp32 only
@@ -95,10 +96,10 @@ macro(ParseNativeAssemblies)
         PerformSettingsForApiEntry("nanoFramework.Devices.Can")
     endif()
 
-    # nanoFramework.Graphics.Wpf
-    if(API_nanoFramework.Graphics.Wpf)
+    # nanoFramework.Graphics
+    if(API_nanoFramework.Graphics)
         ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Graphics.Wpf")
+        PerformSettingsForApiEntry("nanoFramework.Graphics")
     endif()
 
     # nanoFramework.Devices.OneWire

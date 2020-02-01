@@ -7,11 +7,12 @@
 
 #include <targetHAL.h>
 #include <nanoCLR_Application.h>
+#include <target_os.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <LaunchCLR.h>
 #include <string.h>
 
-#ifdef GRAPHICS
+#if NANOCLR_GRAPHICS
 extern void GraphicsInitialize();
 #endif
 extern void CLRStartupThread(void const * argument);
@@ -31,7 +32,7 @@ void receiver_task(void *pvParameter)
 // Main task start point
 void main_task(void *pvParameter)
 {
-#ifdef GRAPHICS
+#if NANOCLR_GRAPHICS
 	GraphicsInitialize();
 #endif		
 

@@ -6,14 +6,6 @@
 cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(ASM)
 
-set(NANOBOOTER_PROJECT_NAME "nanoBooter")
-set(NANOCLR_PROJECT_NAME "nanoCLR")
-
-include(Features.CMake)
-
-add_executable(${NANOBOOTER_PROJECT_NAME}.elf)
-add_executable(${NANOCLR_PROJECT_NAME}.elf)
-
 # add header files with common OS definitions and board definitions specific for each image
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h" @ONLY)
@@ -22,15 +14,13 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
 
+set(NANOBOOTER_PROJECT_NAME "nanoBooter")
+set(NANOCLR_PROJECT_NAME "nanoCLR")
+
 find_package(BuildUtils REQUIRED)
 find_package(CHIBIOS REQUIRED)
 find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
-
-if(API_nanoFramework.Graphics.Wpf)
-	GraphicsWpf()
-	GraphicsWpfCompileDefinitions()
-endif()
 
 # packages for nanoFramework libraries
 #######################################
@@ -73,19 +63,26 @@ if(NF_FEATURE_USE_SPIFFS)
     find_package(SPIFFS REQUIRED)
 endif()
 
+
+
 #######################################
 
 add_subdirectory("common")
 add_subdirectory("nanoBooter")
 add_subdirectory("nanoCLR")
 
+# Add STMCube graphics setup
+if(TARGET_NANOCLR_GRAPHICS)     # After include(NF_NativeAssemblies) --   add_subdirectory("nanoCLR")
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7LcdSupport.c" )
+endif()
+
+
 #######################
 # nanoBooter executable
 
-target_sources (
+add_executable(
     # executables for project, project sources
     ${NANOBOOTER_PROJECT_NAME}.elf
-	PUBLIC
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c"
@@ -111,10 +108,9 @@ target_sources (
 #######################
 # nanoCLR executable
 
-target_sources(
+add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
-	PUBLIC
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
 
@@ -155,7 +151,7 @@ target_sources(
     # sources for nanoFramework APIs
     ${TARGET_NANO_APIS_SOURCES}
 
-	${Graphics_Sources}
+    ${Graphics_Sources}
 )
 
 # add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
@@ -242,7 +238,7 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     # includes for SPIFFS
     ${SPIFFS_INCLUDE_DIRS}
 
-	${Graphics_Includes}
+    ${Graphics_Includes}
 )
 
 # set compiler options

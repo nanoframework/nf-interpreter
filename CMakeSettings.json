@@ -59,6 +59,11 @@
           "type": "STRING"
         },
         {
+          "name": "STM32_CUBE_PACKAGE_REQUIRED:BOOL",
+          "value": "OFF",
+          "type": "STRING"
+        },
+        {
           "name": "USE_RNG:BOOL",
           "value": "ON",
           "type": "STRING"
@@ -274,14 +279,44 @@
           "type": "STRING"
         },
         {
-          "name": "API_nanoFramework.Graphics.Wpf:BOOL",
+          "name": "API_nanoFramework.Graphics:BOOL",
           "value": "ON",
           "type": "STRING"
+        },
+        {
+          "name": "GRAPHICS_DISPLAY",
+          "value": "Otm8009a_MIPI_DSI.cpp",
+          "type": "STRING"
+        },
+        {
+          "name": "TOUCHPANEL_DEVICE",
+          "value": "XPT2046.cpp",
+          "type": "STRING"
+        },
+        {
+          "name": "GRAPHICS_DISPLAY_INTERFACE",
+          "value": "MIPI_DSI_To_Display.cpp",
+          "type": "STRING"
+        },
+        {
+          "name": "GRAPHICS_MEMORY",
+          "value": "Graphics_Memory.cpp",
+          "type": "STRING"
+        },
+        {
+          "name": "TOUCHPANEL_INTERFACE",
+          "value": "I2C_To_TouchPanel.cpp",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_MAKE_PROGRAM",
+          "value": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
+          "type": "FILEPATH"
         }
       ]
     },
     {
-      "name": "ESP32",
+      "name": "ESP32_WROOM_32",
       "generator": "Ninja",
       "configurationType": "Debug",
       "inheritEnvironments": [ "gcc-arm" ],
@@ -474,7 +509,7 @@
           "type": "STRING"
         },
         {
-          "name": "API_nanoFramework.Graphics.Wpf:BOOL",
+          "name": "API_nanoFramework.Graphics:BOOL",
           "value": "true",
           "type": "STRING"
         },
@@ -562,6 +597,31 @@
           "name": "NF_FEATURE_HAS_SDCARD",
           "value": "True",
           "type": "BOOL"
+        },
+        {
+          "name": "GRAPHICS_DISPLAY",
+          "value": "ILI9341_240x320_SPI.cpp",
+          "type": "STRING"
+        },
+        {
+          "name": "TOUCHPANEL_DEVICE",
+          "value": "XPT2046.cpp",
+          "type": "STRING"
+        },
+        {
+          "name": "GRAPHICS_DISPLAY_INTERFACE",
+          "value": "Spi_To_Display.cpp",
+          "type": "STRING"
+        },
+        {
+          "name": "GRAPHICS_MEMORY",
+          "value": "Graphics_Memory.cpp",
+          "type": "STRING"
+        },
+        {
+          "name": "TOUCHPANEL_INTERFACE",
+          "value": "Spi_To_TouchPanel.cpp",
+          "type": "STRING"
         }
       ]
     }

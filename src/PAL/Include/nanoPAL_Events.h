@@ -76,7 +76,7 @@ struct PalEventListener : public HAL_DblLinkedNode<PalEventListener>
 
 HRESULT PalEvent_Initialize();
 HRESULT PalEvent_Uninitialize();
-HRESULT PalEvent_Post(uint32_t e, uint32_t param);
+HRESULT PalEvent_Post(unsigned int e, unsigned int param);
 HRESULT PalEvent_Enlist(PalEventListener* listener);
 
 //--//

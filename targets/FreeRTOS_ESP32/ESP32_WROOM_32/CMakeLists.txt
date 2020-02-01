@@ -7,7 +7,6 @@ set(NANOCLR_PROJECT_NAME "nanoCLR")
 add_executable(${NANOCLR_PROJECT_NAME}.elf)	# This is the program we are building, ESP32 has its own pre-built bootloader.bin, so no nanoBooter
 
 ENABLE_LANGUAGE(ASM)
-include(Features.CMake)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
                "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
@@ -27,10 +26,6 @@ find_package(NF_CoreCLR REQUIRED)
 #######################################
 # optional
 
-if(API_nanoFramework.Graphics.Wpf)
-	GraphicsWpf()
-	GraphicsWpfCompileDefinitions()
-endif()
 
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
@@ -63,6 +58,83 @@ add_subdirectory("Lwip")  # lwip must be before IDF
 add_subdirectory("IDF")
 add_subdirectory("Network")
 add_subdirectory("nanoCLR")
+
+
+if(TARGET_NANOCLR_GRAPHICS)     # After include(NF_NativeAssemblies) --   add_subdirectory("nanoCLR")
+   # Add unrelated includes to the graphics library build to enable clean compilation
+   # due to hierachical inclusion of header files
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/HAL/Include")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/CLR/Include")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/CLR/Core")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/Include")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/Lwip")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/WROVER_KIT_V41")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/System.Net")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/CLR/CorLib")
+   list(APPEND Graphics_Includes "${CMAKE_BINARY_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32")
+   list(APPEND Graphics_Includes "${CMAKE_BINARY_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32")
+   list(APPEND Graphics_Includes "${CMAKE_BINARY_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/nanoCLR")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/app_trace/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/app_update/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/bt/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/driver/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/driver/include/driver")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/esp_event/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/esp_ringbuf/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/esp32/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/esp32/include/rom")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/Ethernet/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/fatfs/src")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/freertos/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/freertos/include/freertos")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/heap/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/Log/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/include/apps")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/include/lwip")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/include/lwip/lwip")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/include/lwip/port")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/lwip/src")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/lwip/src/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/lwip/src/include/lwip")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/lwip/src/include/posix")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/port/esp32/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/micro-ecc/micro-ecc")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/newlib/platform_include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/nghttp/nghttp2/lib/includes")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/nghttp/port/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/nvs_flash/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/soc/esp32/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/soc/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/spi_flash/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/spiffs/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/tcpip_adapter/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/tcpip_adapter/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/ulp/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/ulp/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/vfs/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/wear_levelling/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/wpa_supplicant/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/wpa_supplicant/port/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/xtensa-debug-module/include")
+   set(Graphics_Includes ${Graphics_Includes} CACHE INTERNAL "make global")
+
+   # Build UI components as a separate library
+   # Keep getting "Createprocess: file not found" errors in linker.
+   # Appears to be related to the size of the @CMake/nanoclr.rsp file becoming greater than ~31-32K.
+   # This problem goes away for GCC 8.2
+   
+   add_library(GraphicsLib STATIC ${Graphics_Sources})
+   target_include_directories(GraphicsLib PUBLIC ${Graphics_Includes})
+   add_dependencies(${NANOCLR_PROJECT_NAME}.elf GraphicsLib)
+   set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf  APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lGraphicsLib " )
+   target_compile_definitions(GraphicsLib PUBLIC "-DPLATFORM_ESP32 -Werror=unused-parameter" )
+endif()
+
 
 # mbed TLS requires a config file
 if(USE_SECURITY_MBEDTLS_OPTION)
@@ -282,7 +354,7 @@ endif()
 set(GEN_ESP32_BIN_PATH ${EXECUTABLE_OUTPUT_PATH} )
 set(NANOCLR_BIN_FILE ${GEN_ESP32_BIN_PATH}/${NANOCLR_PROJECT_NAME}.bin)
 set(ESPTOOL_PY_FILE ${ESP32_IDF_PATH}/components/esptool_py/esptool/esptool.py )
-set(ESPTOOL_PY_FLAGS "--chip esp32 elf2image --flash_mode \"dio\" --flash_freq \"40m\" --flash_size \"4MB\" " )
+set(ESPTOOL_PY_FLAGS "--trace --chip esp32 elf2image --flash_mode \"dio\" --flash_freq \"40m\" --flash_size \"4MB\" " )
 set(GEN_ESP32PART_PY_FILE ${ESP32_IDF_PATH}/components/partition_table/gen_esp32part.py )
 
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
@@ -290,18 +362,18 @@ add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
 	COMMENT "Generate nanoClr BIN file for deployment" )
     
 # # Create partition table
-add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_16mb.csv ${GEN_ESP32_BIN_PATH}/partitions_16mb.bin
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_8mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_8mb.bin
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_4mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_2mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_2mb.bin
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_graphics_4mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_nanoclr_graphics_4mb.bin
-	COMMENT "Generate Esp32 Partition tables for 2MB, 4MB, 8MB and 16MB flash" )
+#add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+#	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_16mb.csv ${GEN_ESP32_BIN_PATH}/partitions_16mb.bin
+#	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_8mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_8mb.bin
+#	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_4mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
+#	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_2mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_2mb.bin
+#	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_graphics_4mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_nanoclr_graphics_4mb.bin
+#	COMMENT "Generate Esp32 Partition tables for 2MB, 4MB, 8MB and 16MB flash" )
 
 # list partition table
-add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${GEN_ESP32PART_PY_FILE}  ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
-	COMMENT "List flash 4Mb Esp32 Partition tables" )
+#add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+#	COMMAND ${GEN_ESP32PART_PY_FILE}  ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
+#	COMMENT "List flash 4Mb Esp32 Partition tables" )
 
 #message("CMAKE_CXX_FLAGS:${CMAKE_CXX_FLAGS}" )
 #message("CMAKE_EXE_LINKER_FLAGS:${CMAKE_EXE_LINKER_FLAGS}" )

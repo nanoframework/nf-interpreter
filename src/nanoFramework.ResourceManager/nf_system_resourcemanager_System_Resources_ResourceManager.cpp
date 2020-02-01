@@ -7,7 +7,7 @@
 #include "nf_system_resourcemanager.h"
 #include <target_board.h>
 
-#ifdef GRAPHICS
+#if (NANOCLR_GRAPHICS == TRUE)
 #include "Graphics.h"
 #endif
 
@@ -60,7 +60,8 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
                 memcpy( top.DereferenceArray()->GetFirstElement(), buf, size );
             }
             break;
-#ifdef GRAPHICS
+
+#if (NANOCLR_GRAPHICS == TRUE)
 
 		case CLR_RECORD_RESOURCE::RESOURCE_Bitmap:
 		{
