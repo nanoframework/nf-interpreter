@@ -230,7 +230,7 @@
           "PATH": "C:\\Windows\\system32;C:\\Program Files\\Espressif\\ESP-IDF Tools\\mconf-idf;c:\\python27;${env.PATH}",
 
           // ESP32 paths set up in environment so we can use in variables
-          "ESP32_IDF_VERSION": "v3.3",
+          "ESP32_IDF_VERSION": "v3.3.1",
           "ESP32_TOOLS": "C:\\ESP32_TOOLS",
           "ESP32_IDF": "${env.ESP32_TOOLS}\\esp-idf-${env.ESP32_IDF_VERSION}",
           "ESP32_LIB": "${env.ESP32_TOOLS}\\libs-${env.ESP32_IDF_VERSION}",

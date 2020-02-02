@@ -1,6 +1,6 @@
 echo off
 
-SET idfVer=3.3
+SET idfVer=3.3.1
 SET targetDir=c:\Esp32_tools\libs-v%idfVer%
 
 echo Copy IDF libraries to %targetDir%
