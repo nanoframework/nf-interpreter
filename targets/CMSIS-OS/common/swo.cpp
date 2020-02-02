@@ -12,6 +12,10 @@
     #error "ITM port is not available on Cortex-M0(+) cores. Need to set CMake option SWO_OUTPUT to OFF."
 #else
 
+// number of attempts to write to the ITM port before quitting
+// developer note: this is an arbitrary value from trial & error attempts to get a satisfactory output on ST-Link SWO viewer
+#define ITM_WRITE_ATTEMPTS      20000
+
 extern "C" void SwoInit()
 {
     // set SWO pin (PB3) to alternate mode (0 == the status after RESET) 
@@ -57,7 +61,30 @@ extern "C" void SwoInit()
 
 extern "C" void SwoPrintChar(char c)
 {
-    ITM_SendChar(c);
+    ASSERT((ITM->TCR & ITM_TCR_ITMENA_Msk) != 0UL);
+    ASSERT((ITM->TER & 1UL               ) != 0UL);
+   
+    uint32_t retryCounter = ITM_WRITE_ATTEMPTS;
+    bool okToTx = (ITM->PORT[0U].u32 == 1UL);
+
+    // wait (with timeout) until ITM port TX buffer is available
+    while( !okToTx &&
+           (retryCounter > 0) )
+    {
+        // do... nothing
+        __NOP();
+
+        // decrease retry counter
+        retryCounter--;
+
+        // check again
+        okToTx = (ITM->PORT[0U].u32 == 1UL);
+    }
+
+    if(okToTx)
+    {
+        ITM->PORT[0U].u8 = (uint8_t)c;
+    }
 }
 
 extern "C" void SwoPrintString(const char *s)
@@ -75,25 +102,40 @@ __STATIC_INLINE uint32_t GenericPort_Write_CMSIS(int portNum, const char* data, 
 {
     (void)portNum;
 
+    ASSERT((ITM->TCR & ITM_TCR_ITMENA_Msk) != 0UL);
+    ASSERT((ITM->TER & 1UL               ) != 0UL);
+
     char* p = (char*)data;
     uint32_t counter = 0;
+    uint32_t retryCounter;
+    bool okToTx;
 
-    // check if ITM port is enabled before start sending
-    if (((ITM->TCR & ITM_TCR_ITMENA_Msk) != 0UL) &&      /* ITM enabled */
-        ((ITM->TER & 1UL               ) != 0UL)   )     /* ITM Port #0 enabled */
+    while(  *p != '\0' && 
+            counter < size )
     {
-        while(*p != '\0' || counter < size)
+        retryCounter = ITM_WRITE_ATTEMPTS;
+        okToTx = (ITM->PORT[0U].u32 == 1UL);
+
+        // wait (with timeout) until ITM port TX buffer is available
+        while( !okToTx &&
+               (retryCounter > 0) )
         {
-            // wait until TX buffer is available
-            while (ITM->PORT[0U].u32 == 0UL)
-            {
-                __NOP();
-            }
+            // do... nothing
+            __NOP();
 
-            ITM->PORT[0U].u8 = (uint8_t)*p++;
+            // decrease retry counter
+            retryCounter--;
 
-            counter++;
+            // check again
+            okToTx = (ITM->PORT[0U].u32 == 1UL);
         }
+
+        if(okToTx)
+        {
+            ITM->PORT[0U].u8 = (uint8_t)*p++;
+        }
+
+        counter++;
     }
 
     return counter;
