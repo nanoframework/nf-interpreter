@@ -57,7 +57,7 @@ set(GCC_ESP32_LINKER_LD, " -L ${ESP32_IDF_PATH}/components/esp32/ld  -T esp32_ou
 
 set(CMAKE_CXX_FLAGS "" CACHE INTERNAL "")
 
-set(CMAKE_C_FLAGS_DEBUG "-std=gnu99 -Og -ggdb -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Wextra -Werror  -mfix-esp32-psram-cache-issue -DWITH_POSIX -DHAVE_CONFIG_H -DESP_PLATFORM -D IDF_VER=\"v3.3\" -MMD -MP  " CACHE INTERNAL "c compiler flags debug")
+set(CMAKE_C_FLAGS_DEBUG "-std=gnu99 -Og -ggdb -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Wextra -Werror  -mfix-esp32-psram-cache-issue -DWITH_POSIX -DHAVE_CONFIG_H -DESP_PLATFORM -D IDF_VER=\"v3.3.1\" -MMD -MP  " CACHE INTERNAL "c compiler flags debug")
 set(CMAKE_CXX_FLAGS_DEBUG " -Og -ggdb -std=gnu++11 -fno-exceptions -fno-rtti  -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Wextra -Werror  -mfix-esp32-psram-cache-issue -DESP_PLATFORM " CACHE INTERNAL "cxx compiler flags debug")
 
 set(CMAKE_ASM_FLAGS_DEBUG " -g3 -ggdb" CACHE INTERNAL "asm compiler flags debug")
@@ -66,8 +66,8 @@ set(CMAKE_ASM_FLAGS_DEBUG " -g3 -ggdb" CACHE INTERNAL "asm compiler flags debug"
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG " -nostdlib -u call_user_start_cpu0  -Wl,--gc-sections -Wl,-static " CACHE INTERNAL "linker flags debug")
 
 # set release flags
-set(CMAKE_C_FLAGS_RELEASE " -std=gnu99 -Os -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -MMD -MP -Wall -Wextra -Werror  -mfix-esp32-psram-cache-issue -D IDF_VER=\"v3.3\"  " CACHE INTERNAL "c compiler flags release")
-set(CMAKE_C_FLAGS_MINSIZEREL " -std=gnu99 -Os -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -MMD -MP -Wall -Wextra -Werror  -mfix-esp32-psram-cache-issue -D IDF_VER=\"v3.3\"  " CACHE INTERNAL "c compiler flags minsizerel")
+set(CMAKE_C_FLAGS_RELEASE " -std=gnu99 -Os -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -MMD -MP -Wall -Wextra -Werror  -mfix-esp32-psram-cache-issue -D IDF_VER=\"v3.3.1\"  " CACHE INTERNAL "c compiler flags release")
+set(CMAKE_C_FLAGS_MINSIZEREL " -std=gnu99 -Os -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -MMD -MP -Wall -Wextra -Werror  -mfix-esp32-psram-cache-issue -D IDF_VER=\"v3.3.1\"  " CACHE INTERNAL "c compiler flags minsizerel")
 set(CMAKE_CXX_FLAGS_RELEASE " -Os -std=gnu++11 -g3 -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Wextra -Werror -mfix-esp32-psram-cache-issue -DESP_PLATFORM " CACHE INTERNAL "cxx compiler flags release")
 set(CMAKE_CXX_FLAGS_MINSIZEREL " -Os -std=gnu++11 -g3 -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls -nostdlib -Wall -Wextra -Werror  -mfix-esp32-psram-cache-issue -DESP_PLATFORM " CACHE INTERNAL "cxx compiler flags minsizerel")
 
