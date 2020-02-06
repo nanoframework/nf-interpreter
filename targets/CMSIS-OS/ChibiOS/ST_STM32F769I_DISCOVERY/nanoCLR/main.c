@@ -23,6 +23,10 @@
 
 extern uint8_t hal_spiffs_config();
 
+#if NANOCLR_GRAPHICS
+extern void GraphicsInitialize();
+#endif
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here 
@@ -65,6 +69,11 @@ int main(void) {
   hal_spiffs_config();
   #endif
   
+
+#if NANOCLR_GRAPHICS
+  GraphicsInitialize();
+#endif		
+
   // starts the serial driver
   sdStart(&SERIAL_DRIVER, NULL);
 

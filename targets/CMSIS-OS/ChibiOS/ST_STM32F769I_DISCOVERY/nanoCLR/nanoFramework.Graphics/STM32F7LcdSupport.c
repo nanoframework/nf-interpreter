@@ -13,10 +13,11 @@ extern "C" {
 #endif
 
 #include "STM32F7LcdSupport.h"
+#include "Core_cm7.h"
 
-// __________________________________________________
-// Supporting code for the STMf32769-Discovery board
-// __________________________________________________
+    // __________________________________________________
+    // Supporting code for the STMf32769-Discovery board
+    // __________________________________________________
 
     DSI_HandleTypeDef hdsi_discovery;
     static DSI_VidCfgTypeDef hdsivideo_handle;
@@ -36,36 +37,271 @@ extern "C" {
     void STM32F769i_Discovery_LCD_INIT(uint32_t FB_Address)
     {
         uint16_t LayerIndex = 0;
-
+        // Toggle Hardware Reset of the DSI LCD using  its XRES signal (active low)
+        BSP_LCD_Reset();
+        BSP_LCD_MspInit();
         BSP_LCD_InitEx(LCD_ORIENTATION_PORTRAIT);
         BSP_LCD_LayerDefaultInit(LayerIndex, FB_Address);
         BSP_TS_Init();
     }
-
-    uint8_t OTM8009A_Init(uint32_t ColorCoding, uint32_t orientation)
+    void BSP_LCD_MspInit(void)
     {
-        
-        UNUSED(ColorCoding);
-        UNUSED(orientation);
+        __HAL_RCC_LTDC_CLK_ENABLE();             // Enable the LTDC clock
+        __HAL_RCC_LTDC_FORCE_RESET();            // Toggle Sw reset of LTDC IP
+        __HAL_RCC_LTDC_RELEASE_RESET();
+        __HAL_RCC_DMA2D_CLK_ENABLE();            // Enable the DMA2D clock
+        __HAL_RCC_DMA2D_FORCE_RESET();           // Toggle Sw reset of DMA2D IP
+        __HAL_RCC_DMA2D_RELEASE_RESET();
+        __HAL_RCC_DSI_CLK_ENABLE();              // Enable DSI Host and wrapper clocks
+        __HAL_RCC_DSI_FORCE_RESET();             // Soft Reset the DSI Host and wrapper
+        __HAL_RCC_DSI_RELEASE_RESET();
 
-        /* Enable CMD2 to access vendor specific commands                               */
-        /* Enter in command 2 mode and set EXTC to enable address shift function (0x00) */
-        //DSI_IO_WriteCmd(0, (uint8_t*)ShortRegData1);
-        //DSI_IO_WriteCmd(3, (uint8_t*)lcdRegData1);
-
-        ///* Enter ORISE Command 2 */
-        //DSI_IO_WriteCmd(0, (uint8_t*)ShortRegData2); /* Shift address to 0x80 */
-        //DSI_IO_WriteCmd(2, (uint8_t*)lcdRegData2);
-
-        return 0;
+        uint32_t prioritygroup = __NVIC_GetPriorityGrouping();
+        NVIC_SetPriority(LTDC_IRQn, NVIC_EncodePriority(prioritygroup, 3, 0));  // NVIC configuration for LTDC interrupt that is now enabled
+        __NVIC_EnableIRQ(LTDC_IRQn);
+        __NVIC_SetPriority(DMA2D_IRQn, NVIC_EncodePriority(prioritygroup, 3, 0));  // NVIC configuration for DMA2D interrupt that is now enabled
+        __NVIC_EnableIRQ(DMA2D_IRQn);
+        __NVIC_SetPriority(DSI_IRQn, NVIC_EncodePriority(prioritygroup, 3, 0));  // NVIC configuration for DSI interrupt that is now enabled
+        __NVIC_EnableIRQ(DSI_IRQn);
     }
-    
-    void wait_ms(int delay)
+    void BSP_LCD_Reset(void)
     {
-        UNUSED(delay);
+        GPIO_InitTypeDef  gpio_init_structure;
+
+        __HAL_RCC_GPIOJ_CLK_ENABLE();
+
+        /* Configure the GPIO on PJ15 */
+        gpio_init_structure.Pin = GPIO_PIN_15;
+        gpio_init_structure.Mode = GPIO_MODE_OUTPUT_PP;
+        gpio_init_structure.Pull = GPIO_PULLUP;
+        gpio_init_structure.Speed = GPIO_SPEED_HIGH;
+
+        HAL_GPIO_Init(GPIOJ, &gpio_init_structure);
+
+        /* Activate XRES active low */
+        HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_15, GPIO_PIN_RESET);
+
+        wait_ms(20); /* wait 20 ms */
+
+        /* Desactivate XRES */
+        HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_15, GPIO_PIN_SET);
+
+        /* Wait for 10ms after releasing XRES before sending commands */
+        wait_ms(10);
+    }
+    uint8_t BSP_LCD_InitEx()
+    {
+
+        /*************************DSI Initialization***********************************/
+        DSI_PLLInitTypeDef dsiPllInit;
+        static RCC_PeriphCLKInitTypeDef  PeriphClkInitStruct;
+        LTDC_HandleTypeDef  hltdc_discovery;
+
+
+        uint32_t LcdClock = 27429; /*!< LcdClk = 27429 kHz */
+        uint32_t laneByteClk_kHz = 0;
+        /* Base address of DSI Host/Wrapper registers to be set before calling De-Init */
+        hdsi_discovery.Instance = DSI;
+
+        HAL_DSI_DeInit(&(hdsi_discovery));
+
+        dsiPllInit.PLLNDIV = 100;
+        dsiPllInit.PLLIDF = DSI_PLL_IN_DIV5;
+        dsiPllInit.PLLODF = DSI_PLL_OUT_DIV1;
+        laneByteClk_kHz = 62500; /* 500 MHz / 8 = 62.5 MHz = 62500 kHz */
+
+        hdsi_discovery.Init.NumberOfLanes = DSI_TWO_DATA_LANES;          /* Set number of Lanes */
+        hdsi_discovery.Init.TXEscapeCkdiv = laneByteClk_kHz / 15620;      /* TXEscapeCkdiv = f(LaneByteClk)/15.62 = 4 */
+        HAL_DSI_Init(&(hdsi_discovery), &(dsiPllInit));
+        hdsivideo_handle.ColorCoding = LCD_DSI_PIXEL_DATA_FMT_RBG565;
+        hdsivideo_handle.VirtualChannelID = LCD_OTM8009A_ID;
+        hdsivideo_handle.VSPolarity = DSI_VSYNC_ACTIVE_HIGH;
+        hdsivideo_handle.HSPolarity = DSI_HSYNC_ACTIVE_HIGH;
+        hdsivideo_handle.DEPolarity = DSI_DATA_ENABLE_ACTIVE_HIGH;
+        hdsivideo_handle.Mode = DSI_VID_MODE_BURST;                     /* Mode Video burst ie : one LgP per line */
+        hdsivideo_handle.NullPacketSize = 0xFFF;
+        hdsivideo_handle.NumberOfChunks = 0;
+        hdsivideo_handle.PacketSize = 800;                              /* Value depending on display orientation choice portrait/landscape */
+        hdsivideo_handle.HorizontalSyncActive = (OTM8009A_480X800_HSYNC * laneByteClk_kHz) / LcdClock;
+        hdsivideo_handle.HorizontalBackPorch = (OTM8009A_480X800_HBP * laneByteClk_kHz) / LcdClock;
+        hdsivideo_handle.HorizontalLine = ((800 + OTM8009A_480X800_HSYNC + OTM8009A_480X800_HBP + OTM8009A_480X800_HFP) * laneByteClk_kHz) / LcdClock; /* Value depending on display orientation choice portrait/landscape */
+        hdsivideo_handle.VerticalSyncActive = OTM8009A_480X800_VSYNC;
+        hdsivideo_handle.VerticalBackPorch = OTM8009A_480X800_VBP;
+        hdsivideo_handle.VerticalFrontPorch = OTM8009A_480X800_VFP;
+        hdsivideo_handle.VerticalActive = 480;                          /* Value depending on display orientation choice portrait/landscape */
+
+        /* Enable or disable sending LP command while streaming is active in video mode */
+        hdsivideo_handle.LPCommandEnable = DSI_LP_COMMAND_ENABLE; /* Enable sending commands in mode LP (Low Power) */
+        hdsivideo_handle.LPLargestPacketSize = 16;
+        hdsivideo_handle.LPVACTLargestPacketSize = 0;
+
+        /* Specify for each region of the video frame, if the transmission of command in LP mode is allowed in this region */
+        /* while streaming is active in video mode                                                                         */
+        hdsivideo_handle.LPHorizontalFrontPorchEnable = DSI_LP_HFP_ENABLE;   /* Allow sending LP commands during HFP period */
+        hdsivideo_handle.LPHorizontalBackPorchEnable = DSI_LP_HBP_ENABLE;   /* Allow sending LP commands during HBP period */
+        hdsivideo_handle.LPVerticalActiveEnable = DSI_LP_VACT_ENABLE;  /* Allow sending LP commands during VACT period */
+        hdsivideo_handle.LPVerticalFrontPorchEnable = DSI_LP_VFP_ENABLE;   /* Allow sending LP commands during VFP period */
+        hdsivideo_handle.LPVerticalBackPorchEnable = DSI_LP_VBP_ENABLE;   /* Allow sending LP commands during VBP period */
+        hdsivideo_handle.LPVerticalSyncActiveEnable = DSI_LP_VSYNC_ENABLE; /* Allow sending LP commands during VSync = VSA period */
+
+        /* Configure DSI Video mode timings with settings set above */
+        HAL_DSI_ConfigVideoMode(&(hdsi_discovery), &(hdsivideo_handle));
+
+        /*************************End DSI Initialization*******************************/
+
+
+        /************************LTDC Initialization***********************************/
+
+          /* Timing Configuration */
+        hltdc_discovery.Init.HorizontalSync = (OTM8009A_480X800_HSYNC - 1);
+        hltdc_discovery.Init.AccumulatedHBP = (OTM8009A_480X800_HSYNC + OTM8009A_480X800_HBP - 1);
+        hltdc_discovery.Init.AccumulatedActiveW = (800 + OTM8009A_480X800_HSYNC + OTM8009A_480X800_HBP - 1);
+        hltdc_discovery.Init.TotalWidth = (800 + OTM8009A_480X800_HSYNC + OTM8009A_480X800_HBP + OTM8009A_480X800_HFP - 1);
+
+
+        hltdc_discovery.LayerCfg->ImageWidth = 800;         // Initialize the LCD pixel width and pixel height
+        hltdc_discovery.LayerCfg->ImageHeight = 480;
+
+        /** LCD clock configuration
+          * Note: The following values should not be changed as the PLLSAI is also used to clock the USB FS
+          * PLLSAI_VCO Input = HSE_VALUE/PLL_M = 1 Mhz
+          * PLLSAI_VCO Output = PLLSAI_VCO Input * PLLSAIN = 384 Mhz
+          * PLLLCDCLK = PLLSAI_VCO Output/PLLSAIR = 384 MHz / 7 = 54.85 MHz
+          * LTDC clock frequency = PLLLCDCLK / LTDC_PLLSAI_DIVR_2 = 54.85 MHz / 2 = 27.429 MHz
+          */
+        PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
+        PeriphClkInitStruct.PLLSAI.PLLSAIN = 384;
+        PeriphClkInitStruct.PLLSAI.PLLSAIR = 7;
+        PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
+        HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
+
+        /* Background value */
+        hltdc_discovery.Init.Backcolor.Blue = 0;
+        hltdc_discovery.Init.Backcolor.Green = 0;
+        hltdc_discovery.Init.Backcolor.Red = 0;
+        hltdc_discovery.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
+        hltdc_discovery.Instance = LTDC;
+
+        /* Get LTDC Configuration from DSI Configuration */
+        HAL_LTDC_StructInitFromVideoConfig(&(hltdc_discovery), &(hdsivideo_handle));
+
+        /* Initialize the LTDC */
+        HAL_LTDC_Init(&hltdc_discovery);
+
+        /* Enable the DSI host and wrapper after the LTDC initialization
+           To avoid any synchronization issue, the DSI shall be started after enabling the LTDC */
+        HAL_DSI_Start(&hdsi_discovery);
+
+        //////#if !defined(DATA_IN_ExtSDRAM)
+        //////        /* Initialize the SDRAM */
+        //////        BSP_SDRAM_Init();
+        //////#endif /* DATA_IN_ExtSDRAM */
+
+
+        return LCD_OK;
+    }
+    void BSP_LCD_LayerDefaultInit(uint32_t LayerIndex, uint32_t FB_Address)
+    {
+        LCD_LayerCfgTypeDef  Layercfg;
+
+        /* Layer Init */
+        Layercfg.WindowX0 = 0;
+        Layercfg.WindowX1 = 800;
+        Layercfg.WindowY0 = 0;
+        Layercfg.WindowY1 = 480;
+        Layercfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+        Layercfg.FBStartAdress = FB_Address;
+        Layercfg.Alpha = 255;
+        Layercfg.Alpha0 = 0;
+        Layercfg.Backcolor.Blue = 0;
+        Layercfg.Backcolor.Green = 0;
+        Layercfg.Backcolor.Red = 0;
+        Layercfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
+        Layercfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
+        Layercfg.ImageWidth = 800;
+        Layercfg.ImageHeight = 480;
+
+        HAL_LTDC_ConfigLayer(&hltdc_discovery, &Layercfg, LayerIndex);
+
+        DrawProp[LayerIndex].BackColor = LCD_COLOR_WHITE;
+        //     DrawProp[LayerIndex].pFont = &Font24;
+        DrawProp[LayerIndex].TextColor = LCD_COLOR_BLACK;
+    }
+    uint8_t BSP_TS_Init(void)
+    {
+        uint8_t ts_status = TS_OK;
+        uint8_t ts_id1, ts_id2 = 0;
+        /* Note : I2C_Address is un-initialized here, but is not used at all in init function */
+        /* but the prototype of Init() is like that in template and should be respected       */
+
+        /* Initialize the communication channel to sensor (I2C) if necessary */
+        /* that is initialization is done only once after a power up         */
+        ft6x06_ts_drv.Init(I2C_Address);
+
+        ts_id1 = ft6x06_ts_drv.ReadID(TS_I2C_ADDRESS);
+        if (ts_id1 != FT6206_ID_VALUE)
+        {
+            ts_id2 = ft6x06_ts_drv.ReadID(TS_I2C_ADDRESS_A02);
+            I2C_Address = TS_I2C_ADDRESS_A02;
+        }
+        else
+        {
+            I2C_Address = TS_I2C_ADDRESS;
+        }
+
+        /* Scan FT6xx6 TouchScreen IC controller ID register by I2C Read       */
+        /* Verify this is a FT6206 or FT6336G, otherwise this is an error case */
+        if ((ts_id1 == FT6206_ID_VALUE) || (ts_id2 == FT6206_ID_VALUE))
+        {
+            /* Found FT6206 : Initialize the TS driver structure */
+            ts_driver = &ft6x06_ts_drv;
+
+            /* Get LCD chosen orientation */
+            if (800 < 480)
+            {
+                ts_orientation = TS_SWAP_NONE;
+            }
+            else
+            {
+                ts_orientation = TS_SWAP_XY | TS_SWAP_Y;
+            }
+
+            if (ts_status == TS_OK)
+            {
+                /* Software reset the TouchScreen */
+                ts_driver->Reset(I2C_Address);
+
+                /* Calibrate, Configure and Start the TouchScreen driver */
+                ts_driver->Start(I2C_Address);
+
+            } /* of if(ts_status == TS_OK) */
+        }
+        else
+        {
+            ts_status = TS_DEVICE_NOT_FOUND;
+        }
+
+        return (ts_status);
     }
 
-
+    HAL_StatusTypeDef HAL_DSI_DeInit(DSI_HandleTypeDef* hdsi)
+    {
+        if (hdsi == NULL)                                             // Check the DSI handle allocation
+        {
+            return HAL_ERROR;
+        }
+        hdsi->State = HAL_DSI_STATE_BUSY;                             // Change DSI peripheral state
+        __HAL_DSI_WRAPPER_DISABLE(hdsi);                              // Disable the DSI wrapper
+        __HAL_DSI_DISABLE(hdsi);
+        hdsi->Instance->PCTLR &= ~(DSI_PCTLR_CKE | DSI_PCTLR_DEN);    // D-PHY clock and digital disable
+        __HAL_DSI_PLL_DISABLE(hdsi);                                  // Turn off the DSI PLL
+        __HAL_DSI_REG_DISABLE(hdsi);                                  // Disable the regulator
+        HAL_DSI_MspDeInit(hdsi);                                      // DeInit the low level hardware
+        hdsi->ErrorCode = HAL_DSI_ERROR_NONE;                         // Initialise the error code
+        hdsi->State = HAL_DSI_STATE_RESET;                            // Initialize the DSI state
+        __HAL_UNLOCK(hdsi);                                           // Release Lock
+        return HAL_OK;
+    }
     void HAL_SDRAM_MspInit(SDRAM_HandleTypeDef* hsdram)
     {
         UNUSED(hsdram);
@@ -130,16 +366,6 @@ extern "C" {
         uint32_t tmpr1 = 0;
         uint32_t tmpr2 = 0;
 
-        /* Check the parameters */
-        assert_param(IS_FMC_SDRAM_DEVICE(Device));
-        assert_param(IS_FMC_LOADTOACTIVE_DELAY(Timing->LoadToActiveDelay));
-        assert_param(IS_FMC_EXITSELFREFRESH_DELAY(Timing->ExitSelfRefreshDelay));
-        assert_param(IS_FMC_SELFREFRESH_TIME(Timing->SelfRefreshTime));
-        assert_param(IS_FMC_ROWCYCLE_DELAY(Timing->RowCycleDelay));
-        assert_param(IS_FMC_WRITE_RECOVERY_TIME(Timing->WriteRecoveryTime));
-        assert_param(IS_FMC_RP_DELAY(Timing->RPDelay));
-        assert_param(IS_FMC_RCD_DELAY(Timing->RCDDelay));
-        assert_param(IS_FMC_SDRAM_BANK(Bank));
 
         /* Set SDRAM device timing parameters */
         if (Bank != FMC_SDRAM_BANK2)
@@ -189,25 +415,12 @@ extern "C" {
 
         return HAL_OK;
     }
-
     HAL_StatusTypeDef FMC_SDRAM_Init(FMC_SDRAM_TypeDef* Device, FMC_SDRAM_InitTypeDef* Init)
     {
         uint32_t tmpr1 = 0;
         uint32_t tmpr2 = 0;
 
 
-        /* Check the parameters */
-        assert_param(IS_FMC_SDRAM_DEVICE(Device));
-        assert_param(IS_FMC_SDRAM_BANK(Init->SDBank));
-        assert_param(IS_FMC_COLUMNBITS_NUMBER(Init->ColumnBitsNumber));
-        assert_param(IS_FMC_ROWBITS_NUMBER(Init->RowBitsNumber));
-        assert_param(IS_FMC_SDMEMORY_WIDTH(Init->MemoryDataWidth));
-        assert_param(IS_FMC_INTERNALBANK_NUMBER(Init->InternalBankNumber));
-        assert_param(IS_FMC_CAS_LATENCY(Init->CASLatency));
-        assert_param(IS_FMC_WRITE_PROTECTION(Init->WriteProtection));
-        assert_param(IS_FMC_SDCLOCK_PERIOD(Init->SDClockPeriod));
-        assert_param(IS_FMC_READ_BURST(Init->ReadBurst));
-        assert_param(IS_FMC_READPIPE_DELAY(Init->ReadPipeDelay));
 
         /* Set SDRAM bank configuration parameters */
         if (Init->SDBank != FMC_SDRAM_BANK2)
@@ -262,7 +475,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     HAL_StatusTypeDef HAL_SDRAM_Init(SDRAM_HandleTypeDef* hsdram, FMC_SDRAM_TimingTypeDef* Timing)
     {
         /* Check the SDRAM handle parameter */
@@ -275,21 +487,21 @@ extern "C" {
         {
             /* Allocate lock resource and initialize it */
             hsdram->Lock = HAL_UNLOCKED;
-//#if (USE_HAL_SDRAM_REGISTER_CALLBACKS == 1)
-//            if (hsdram->MspInitCallback == NULL)
-//            {
-//                hsdram->MspInitCallback = HAL_SDRAM_MspInit;
-//            }
-//            hsdram->RefreshErrorCallback = HAL_SDRAM_RefreshErrorCallback;
-//            hsdram->DmaXferCpltCallback = HAL_SDRAM_DMA_XferCpltCallback;
-//            hsdram->DmaXferErrorCallback = HAL_SDRAM_DMA_XferErrorCallback;
-//
-//            /* Init the low level hardware */
-//            hsdram->MspInitCallback(hsdram);
-//#else
-            /* Initialize the low level hardware (MSP) */
+            //#if (USE_HAL_SDRAM_REGISTER_CALLBACKS == 1)
+            //            if (hsdram->MspInitCallback == NULL)
+            //            {
+            //                hsdram->MspInitCallback = HAL_SDRAM_MspInit;
+            //            }
+            //            hsdram->RefreshErrorCallback = HAL_SDRAM_RefreshErrorCallback;
+            //            hsdram->DmaXferCpltCallback = HAL_SDRAM_DMA_XferCpltCallback;
+            //            hsdram->DmaXferErrorCallback = HAL_SDRAM_DMA_XferErrorCallback;
+            //
+            //            /* Init the low level hardware */
+            //            hsdram->MspInitCallback(hsdram);
+            //#else
+                        /* Initialize the low level hardware (MSP) */
             HAL_SDRAM_MspInit(hsdram);
-//#endif
+            //#endif
         }
 
         /* Initialize the SDRAM controller state */
@@ -306,12 +518,25 @@ extern "C" {
 
         return HAL_OK;
     }
-    
     HAL_StatusTypeDef FMC_SDRAM_SendCommand(FMC_SDRAM_TypeDef* Device, FMC_SDRAM_CommandTypeDef* Command, uint32_t Timeout)
     {
         UNUSED(Timeout);
         __IO uint32_t tmpr = 0;
         /* Check the parameters */
+#define IS_FMC_SDRAM_DEVICE(__INSTANCE__) ((__INSTANCE__) == FMC_SDRAM_DEVICE)
+#define IS_FMC_COMMAND_MODE(__COMMAND__) (((__COMMAND__) == FMC_SDRAM_CMD_NORMAL_MODE)      || \
+                                          ((__COMMAND__) == FMC_SDRAM_CMD_CLK_ENABLE)       || \
+                                          ((__COMMAND__) == FMC_SDRAM_CMD_PALL)             || \
+                                          ((__COMMAND__) == FMC_SDRAM_CMD_AUTOREFRESH_MODE) || \
+                                          ((__COMMAND__) == FMC_SDRAM_CMD_LOAD_MODE)        || \
+                                          ((__COMMAND__) == FMC_SDRAM_CMD_SELFREFRESH_MODE) || \
+                                          ((__COMMAND__) == FMC_SDRAM_CMD_POWERDOWN_MODE))
+#define IS_FMC_COMMAND_TARGET(__TARGET__) (((__TARGET__) == FMC_SDRAM_CMD_TARGET_BANK1) || \
+                                           ((__TARGET__) == FMC_SDRAM_CMD_TARGET_BANK2) || \
+                                           ((__TARGET__) == FMC_SDRAM_CMD_TARGET_BANK1_2)) 										  
+#define IS_FMC_AUTOREFRESH_NUMBER(__NUMBER__) (((__NUMBER__) > 0) && ((__NUMBER__) <= 16))
+#define IS_FMC_MODE_REGISTER(__CONTENT__) ((__CONTENT__) <= 8191)
+
         assert_param(IS_FMC_SDRAM_DEVICE(Device));
         assert_param(IS_FMC_COMMAND_MODE(Command->CommandMode));
         assert_param(IS_FMC_COMMAND_TARGET(Command->CommandTarget));
@@ -329,7 +554,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     HAL_StatusTypeDef HAL_SDRAM_SendCommand(SDRAM_HandleTypeDef* hsdram, FMC_SDRAM_CommandTypeDef* Command, uint32_t Timeout)
     {
         /* Check the SDRAM controller state */
@@ -356,11 +580,11 @@ extern "C" {
 
         return HAL_OK;
     }
-    
     HAL_StatusTypeDef FMC_SDRAM_ProgramRefreshRate(FMC_SDRAM_TypeDef* Device, uint32_t RefreshRate)
     {
         /* Check the parameters */
         assert_param(IS_FMC_SDRAM_DEVICE(Device));
+#define IS_FMC_REFRESH_RATE(__RATE__) ((__RATE__) <= 8191)
         assert_param(IS_FMC_REFRESH_RATE(RefreshRate));
 
         /* Set the refresh rate in command register */
@@ -368,7 +592,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     HAL_StatusTypeDef HAL_SDRAM_ProgramRefreshRate(SDRAM_HandleTypeDef* hsdram, uint32_t RefreshRate)
     {
         /* Check the SDRAM controller state */
@@ -388,7 +611,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     void BSP_SDRAM_Initialization_sequence(uint32_t RefreshCount)
     {
         __IO uint32_t tmpmrd = 0;
@@ -444,7 +666,6 @@ extern "C" {
         /* Set the device refresh rate */
         HAL_SDRAM_ProgramRefreshRate(&sdramHandle, RefreshCount);
     }
-
     void BSP_SDRAM_MspInit(SDRAM_HandleTypeDef* hsdram, void* Params)
     {
 
@@ -536,12 +757,10 @@ extern "C" {
 
         /* Configure the DMA stream */
         HAL_DMA_Init(&dma_handle);
-
-        /* NVIC configuration for DMA transfer complete interrupt */
-        HAL_NVIC_SetPriority(SDRAM_DMAx_IRQn, 0x0F, 0);
-        HAL_NVIC_EnableIRQ(SDRAM_DMAx_IRQn);
+        uint32_t prioritygroup = __NVIC_GetPriorityGrouping();
+        NVIC_SetPriority(SDRAM_DMAx_IRQn, NVIC_EncodePriority(prioritygroup, 0x0F, 0));  /* NVIC configuration for DMA transfer complete interrupt */
+        __NVIC_EnableIRQ(SDRAM_DMAx_IRQn);
     }
-
     uint8_t BSP_SDRAM_Init(void)
     {
         static uint8_t sdramstatus = SDRAM_ERROR;
@@ -586,7 +805,6 @@ extern "C" {
 
         return sdramstatus;
     }
-
     void HAL_LTDC_MspInit(LTDC_HandleTypeDef* hltdc)
     {
         UNUSED(hltdc);
@@ -662,7 +880,6 @@ extern "C" {
         HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
 
     }
-
     static uint32_t DMA_CalcBaseAndBitshift(DMA_HandleTypeDef* hdma)
     {
         uint32_t stream_number = (((uint32_t)hdma->Instance & 0xFFU) - 16U) / 24U;
@@ -684,7 +901,6 @@ extern "C" {
 
         return hdma->StreamBaseAddress;
     }
-
     static HAL_StatusTypeDef DMA_CheckFifoParam(DMA_HandleTypeDef* hdma)
     {
         HAL_StatusTypeDef status = HAL_OK;
@@ -764,8 +980,6 @@ extern "C" {
 
         return status;
     }
-
-
     HAL_StatusTypeDef HAL_DMA_DeInit(DMA_HandleTypeDef* hdma)
     {
         DMA_Base_Registers* regs;
@@ -964,7 +1178,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     HAL_StatusTypeDef HAL_LTDC_Init(LTDC_HandleTypeDef* hltdc)
     {
         uint32_t tmp, tmp1;
@@ -991,25 +1204,25 @@ extern "C" {
         assert_param(IS_LTDC_DEPOL(hltdc->Init.DEPolarity));
         assert_param(IS_LTDC_PCPOL(hltdc->Init.PCPolarity));
 
-//#if (USE_HAL_LTDC_REGISTER_CALLBACKS == 1)
-//        if (hltdc->State == HAL_LTDC_STATE_RESET)
-//        {
-//            /* Allocate lock resource and initialize it */
-//            hltdc->Lock = HAL_UNLOCKED;
-//
-//            /* Reset the LTDC callback to the legacy weak callbacks */
-//            hltdc->LineEventCallback = HAL_LTDC_LineEventCallback;    /* Legacy weak LineEventCallback    */
-//            hltdc->ReloadEventCallback = HAL_LTDC_ReloadEventCallback;  /* Legacy weak ReloadEventCallback  */
-//            hltdc->ErrorCallback = HAL_LTDC_ErrorCallback;        /* Legacy weak ErrorCallback        */
-//
-//            if (hltdc->MspInitCallback == NULL)
-//            {
-//                hltdc->MspInitCallback = HAL_LTDC_MspInit;
-//            }
-//            /* Init the low level hardware */
-//            hltdc->MspInitCallback(hltdc);
-//        }
-//#else
+        //#if (USE_HAL_LTDC_REGISTER_CALLBACKS == 1)
+        //        if (hltdc->State == HAL_LTDC_STATE_RESET)
+        //        {
+        //            /* Allocate lock resource and initialize it */
+        //            hltdc->Lock = HAL_UNLOCKED;
+        //
+        //            /* Reset the LTDC callback to the legacy weak callbacks */
+        //            hltdc->LineEventCallback = HAL_LTDC_LineEventCallback;    /* Legacy weak LineEventCallback    */
+        //            hltdc->ReloadEventCallback = HAL_LTDC_ReloadEventCallback;  /* Legacy weak ReloadEventCallback  */
+        //            hltdc->ErrorCallback = HAL_LTDC_ErrorCallback;        /* Legacy weak ErrorCallback        */
+        //
+        //            if (hltdc->MspInitCallback == NULL)
+        //            {
+        //                hltdc->MspInitCallback = HAL_LTDC_MspInit;
+        //            }
+        //            /* Init the low level hardware */
+        //            hltdc->MspInitCallback(hltdc);
+        //        }
+        //#else
         if (hltdc->State == HAL_LTDC_STATE_RESET)
         {
             /* Allocate lock resource and initialize it */
@@ -1017,9 +1230,9 @@ extern "C" {
             /* Init the low level hardware */
             HAL_LTDC_MspInit(hltdc);
         }
-//#endif /* USE_HAL_LTDC_REGISTER_CALLBACKS */
+        //#endif /* USE_HAL_LTDC_REGISTER_CALLBACKS */
 
-        /* Change LTDC peripheral state */
+                /* Change LTDC peripheral state */
         hltdc->State = HAL_LTDC_STATE_BUSY;
 
         /* Configure the HS, VS, DE and PC polarity */
@@ -1067,7 +1280,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     HAL_StatusTypeDef HAL_DSI_Start(DSI_HandleTypeDef* hdsi)
     {
         /* Process locked */
@@ -1084,204 +1296,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
-    uint8_t BSP_LCD_InitEx(LCD_OrientationTypeDef orientation)
-    {
-        DSI_PLLInitTypeDef dsiPllInit;
-        static RCC_PeriphCLKInitTypeDef  PeriphClkInitStruct;
-        LTDC_HandleTypeDef  hltdc_discovery;
-
-        uint32_t LcdClock = 27429; /*!< LcdClk = 27429 kHz */
-    //    uint16_t read_id = 0;
-
-        uint32_t laneByteClk_kHz = 0;
-        uint32_t                   VSA; /*!< Vertical start active time in units of lines */
-        uint32_t                   VBP; /*!< Vertical Back Porch time in units of lines */
-        uint32_t                   VFP; /*!< Vertical Front Porch time in units of lines */
-        uint32_t                   VACT; /*!< Vertical Active time in units of lines = imageSize Y in pixels to display */
-        uint32_t                   HSA; /*!< Horizontal start active time in units of lcdClk */
-        uint32_t                   HBP; /*!< Horizontal Back Porch time in units of lcdClk */
-        uint32_t                   HFP; /*!< Horizontal Front Porch time in units of lcdClk */
-        uint32_t                   HACT; /*!< Horizontal Active time in units of lcdClk = imageSize X in pixels to display */
-
-        /* Toggle Hardware Reset of the DSI LCD using
-        * its XRES signal (active low) */
-        BSP_LCD_Reset();
-        BSP_LCD_MspInit();
-
-        /*************************DSI Initialization***********************************/
-
-          /* Base address of DSI Host/Wrapper registers to be set before calling De-Init */
-        hdsi_discovery.Instance = DSI;
-
-        HAL_DSI_DeInit(&(hdsi_discovery));
-
-        dsiPllInit.PLLNDIV = 100;
-        dsiPllInit.PLLIDF = DSI_PLL_IN_DIV5;
-        dsiPllInit.PLLODF = DSI_PLL_OUT_DIV1;
-        laneByteClk_kHz = 62500; /* 500 MHz / 8 = 62.5 MHz = 62500 kHz */
-
-        /* Set number of Lanes */
-        hdsi_discovery.Init.NumberOfLanes = DSI_TWO_DATA_LANES;
-
-        /* TXEscapeCkdiv = f(LaneByteClk)/15.62 = 4 */
-        hdsi_discovery.Init.TXEscapeCkdiv = laneByteClk_kHz / 15620;
-
-        HAL_DSI_Init(&(hdsi_discovery), &(dsiPllInit));
-
-        // Timing parameters for all Video modes
-
-        HACT = 800;
-        VACT = 480;
-
-
-
-        /* The following values are same for portrait and landscape orientations */
-        VSA = OTM8009A_480X800_VSYNC;        /* 12  */
-        VBP = OTM8009A_480X800_VBP;          /* 12  */
-        VFP = OTM8009A_480X800_VFP;          /* 12  */
-        HSA = OTM8009A_480X800_HSYNC;        /* 63  */
-        HBP = OTM8009A_480X800_HBP;          /* 120 */
-        HFP = OTM8009A_480X800_HFP;          /* 120 */
-
-
-        hdsivideo_handle.ColorCoding = LCD_DSI_PIXEL_DATA_FMT_RBG565;
-        hdsivideo_handle.VirtualChannelID = LCD_OTM8009A_ID;
-        hdsivideo_handle.VSPolarity = DSI_VSYNC_ACTIVE_HIGH;
-        hdsivideo_handle.HSPolarity = DSI_HSYNC_ACTIVE_HIGH;
-        hdsivideo_handle.DEPolarity = DSI_DATA_ENABLE_ACTIVE_HIGH;
-        hdsivideo_handle.Mode = DSI_VID_MODE_BURST; /* Mode Video burst ie : one LgP per line */
-        hdsivideo_handle.NullPacketSize = 0xFFF;
-        hdsivideo_handle.NumberOfChunks = 0;
-        hdsivideo_handle.PacketSize = HACT; /* Value depending on display orientation choice portrait/landscape */
-        hdsivideo_handle.HorizontalSyncActive = (HSA * laneByteClk_kHz) / LcdClock;
-        hdsivideo_handle.HorizontalBackPorch = (HBP * laneByteClk_kHz) / LcdClock;
-        hdsivideo_handle.HorizontalLine = ((HACT + HSA + HBP + HFP) * laneByteClk_kHz) / LcdClock; /* Value depending on display orientation choice portrait/landscape */
-        hdsivideo_handle.VerticalSyncActive = VSA;
-        hdsivideo_handle.VerticalBackPorch = VBP;
-        hdsivideo_handle.VerticalFrontPorch = VFP;
-        hdsivideo_handle.VerticalActive = VACT; /* Value depending on display orientation choice portrait/landscape */
-
-        /* Enable or disable sending LP command while streaming is active in video mode */
-        hdsivideo_handle.LPCommandEnable = DSI_LP_COMMAND_ENABLE; /* Enable sending commands in mode LP (Low Power) */
-
-        /* Largest packet size possible to transmit in LP mode in VSA, VBP, VFP regions */
-        /* Only useful when sending LP packets is allowed while streaming is active in video mode */
-        hdsivideo_handle.LPLargestPacketSize = 16;
-
-        /* Largest packet size possible to transmit in LP mode in HFP region during VACT period */
-        /* Only useful when sending LP packets is allowed while streaming is active in video mode */
-        hdsivideo_handle.LPVACTLargestPacketSize = 0;
-
-        /* Specify for each region of the video frame, if the transmission of command in LP mode is allowed in this region */
-        /* while streaming is active in video mode                                                                         */
-        hdsivideo_handle.LPHorizontalFrontPorchEnable = DSI_LP_HFP_ENABLE;   /* Allow sending LP commands during HFP period */
-        hdsivideo_handle.LPHorizontalBackPorchEnable = DSI_LP_HBP_ENABLE;   /* Allow sending LP commands during HBP period */
-        hdsivideo_handle.LPVerticalActiveEnable = DSI_LP_VACT_ENABLE;  /* Allow sending LP commands during VACT period */
-        hdsivideo_handle.LPVerticalFrontPorchEnable = DSI_LP_VFP_ENABLE;   /* Allow sending LP commands during VFP period */
-        hdsivideo_handle.LPVerticalBackPorchEnable = DSI_LP_VBP_ENABLE;   /* Allow sending LP commands during VBP period */
-        hdsivideo_handle.LPVerticalSyncActiveEnable = DSI_LP_VSYNC_ENABLE; /* Allow sending LP commands during VSync = VSA period */
-
-        /* Configure DSI Video mode timings with settings set above */
-        HAL_DSI_ConfigVideoMode(&(hdsi_discovery), &(hdsivideo_handle));
-
-        /*************************End DSI Initialization*******************************/
-
-
-        /************************LTDC Initialization***********************************/
-
-          /* Timing Configuration */
-        hltdc_discovery.Init.HorizontalSync = (HSA - 1);
-        hltdc_discovery.Init.AccumulatedHBP = (HSA + HBP - 1);
-        hltdc_discovery.Init.AccumulatedActiveW = (800 + HSA + HBP - 1);
-        hltdc_discovery.Init.TotalWidth = (800 + HSA + HBP + HFP - 1);
-
-        /* Initialize the LCD pixel width and pixel height */
-        hltdc_discovery.LayerCfg->ImageWidth = 800;
-        hltdc_discovery.LayerCfg->ImageHeight = 480;
-
-        /** LCD clock configuration
-          * Note: The following values should not be changed as the PLLSAI is also used
-          *      to clock the USB FS
-          * PLLSAI_VCO Input = HSE_VALUE/PLL_M = 1 Mhz
-          * PLLSAI_VCO Output = PLLSAI_VCO Input * PLLSAIN = 384 Mhz
-          * PLLLCDCLK = PLLSAI_VCO Output/PLLSAIR = 384 MHz / 7 = 54.85 MHz
-          * LTDC clock frequency = PLLLCDCLK / LTDC_PLLSAI_DIVR_2 = 54.85 MHz / 2 = 27.429 MHz
-          */
-        PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
-        PeriphClkInitStruct.PLLSAI.PLLSAIN = 384;
-        PeriphClkInitStruct.PLLSAI.PLLSAIR = 7;
-        PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
-        HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
-
-        /* Background value */
-        hltdc_discovery.Init.Backcolor.Blue = 0;
-        hltdc_discovery.Init.Backcolor.Green = 0;
-        hltdc_discovery.Init.Backcolor.Red = 0;
-        hltdc_discovery.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
-        hltdc_discovery.Instance = LTDC;
-
-        /* Get LTDC Configuration from DSI Configuration */
-        HAL_LTDC_StructInitFromVideoConfig(&(hltdc_discovery), &(hdsivideo_handle));
-
-        /* Initialize the LTDC */
-        HAL_LTDC_Init(&hltdc_discovery);
-
-        /* Enable the DSI host and wrapper after the LTDC initialization
-           To avoid any synchronization issue, the DSI shall be started after enabling the LTDC */
-        HAL_DSI_Start(&hdsi_discovery);
-
-#if !defined(DATA_IN_ExtSDRAM)
-        /* Initialize the SDRAM */
-        BSP_SDRAM_Init();
-#endif /* DATA_IN_ExtSDRAM */
-
-        /* Initialize the font */
-       // BSP_LCD_SetFont(&LCD_DEFAULT_FONT);
-
-        /************************End LTDC Initialization*******************************/
-
-
-        /***********************OTM8009A Initialization********************************/
-
-          /* Initialize the OTM8009A LCD Display IC Driver (KoD LCD IC Driver)
-          *  depending on configuration set in 'hdsivideo_handle'.
-          */
-        OTM8009A_Init(OTM8009A_FORMAT_RGB888, orientation);
-
-        /***********************End OTM8009A Initialization****************************/
-
-        return LCD_OK;
-    }
-
-    void BSP_LCD_LayerDefaultInit(uint32_t LayerIndex, uint32_t FB_Address)
-    {
-        LCD_LayerCfgTypeDef  Layercfg;
-
-        /* Layer Init */
-        Layercfg.WindowX0 = 0;
-        Layercfg.WindowX1 = 800;
-        Layercfg.WindowY0 = 0;
-        Layercfg.WindowY1 = 480;
-        Layercfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
-        Layercfg.FBStartAdress = FB_Address;
-        Layercfg.Alpha = 255;
-        Layercfg.Alpha0 = 0;
-        Layercfg.Backcolor.Blue = 0;
-        Layercfg.Backcolor.Green = 0;
-        Layercfg.Backcolor.Red = 0;
-        Layercfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
-        Layercfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
-        Layercfg.ImageWidth = 800;
-        Layercfg.ImageHeight = 480;
-
-        HAL_LTDC_ConfigLayer(&hltdc_discovery, &Layercfg, LayerIndex);
-
-        DrawProp[LayerIndex].BackColor = LCD_COLOR_WHITE;
-        //     DrawProp[LayerIndex].pFont = &Font24;
-        DrawProp[LayerIndex].TextColor = LCD_COLOR_BLACK;
-    }
-
     HAL_StatusTypeDef HAL_LTDC_ConfigLayer(LTDC_HandleTypeDef* hltdc, LTDC_LayerCfgTypeDef* pLayerCfg, uint32_t LayerIdx)
     {
 
@@ -1308,7 +1322,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     static void LTDC_SetConfig(LTDC_HandleTypeDef* hltdc, LTDC_LayerCfgTypeDef* pLayerCfg, uint32_t LayerIdx)
     {
         uint32_t tmp;
@@ -1378,7 +1391,6 @@ extern "C" {
         /* Enable LTDC_Layer by setting LEN bit */
         LTDC_LAYER(hltdc, LayerIdx)->CR |= (uint32_t)LTDC_LxCR_LEN;
     }
-
     void HAL_GPIO_WritePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState)
     {
         /* Check the parameters */
@@ -1394,33 +1406,6 @@ extern "C" {
             GPIOx->BSRR = (uint32_t)GPIO_Pin << 16;
         }
     }
-
-    void BSP_LCD_Reset(void)
-    {
-        GPIO_InitTypeDef  gpio_init_structure;
-
-        __HAL_RCC_GPIOJ_CLK_ENABLE();
-
-        /* Configure the GPIO on PJ15 */
-        gpio_init_structure.Pin = GPIO_PIN_15;
-        gpio_init_structure.Mode = GPIO_MODE_OUTPUT_PP;
-        gpio_init_structure.Pull = GPIO_PULLUP;
-        gpio_init_structure.Speed = GPIO_SPEED_HIGH;
-
-        HAL_GPIO_Init(GPIOJ, &gpio_init_structure);
-
-        /* Activate XRES active low */
-        HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_15, GPIO_PIN_RESET);
-
-        wait_ms(20); /* wait 20 ms */
-
-        /* Desactivate XRES */
-        HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_15, GPIO_PIN_SET);
-
-        /* Wait for 10ms after releasing XRES before sending commands */
-        wait_ms(10);
-    }
-
     HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef* PeriphClkInit)
     {
         uint32_t tickstart = 0;
@@ -1493,6 +1478,7 @@ extern "C" {
             tickstart = HAL_GetTick();
 
             /* Wait till PLLI2S is disabled */
+#define __HAL_RCC_GET_FLAG(__FLAG__) (((((((__FLAG__) >> 5) == 1)? RCC->CR :((((__FLAG__) >> 5) == 2) ? RCC->BDCR :((((__FLAG__) >> 5) == 3)? RCC->CSR :RCC->CIR))) & ((uint32_t)1 << ((__FLAG__) & RCC_FLAG_MASK)))!= 0)? 1 : 0)
             while (__HAL_RCC_GET_FLAG(RCC_FLAG_PLLI2SRDY) != RESET)
             {
                 if ((HAL_GetTick() - tickstart) > PLLI2S_TIMEOUT_VALUE)
@@ -1685,163 +1671,6 @@ extern "C" {
         }
         return HAL_OK;
     }
-
-    void BSP_LCD_MspInit(void)
-    {
-        /** @brief Enable the LTDC clock */
-        __HAL_RCC_LTDC_CLK_ENABLE();
-
-        /** @brief Toggle Sw reset of LTDC IP */
-        __HAL_RCC_LTDC_FORCE_RESET();
-        __HAL_RCC_LTDC_RELEASE_RESET();
-
-        /** @brief Enable the DMA2D clock */
-        __HAL_RCC_DMA2D_CLK_ENABLE();
-
-        /** @brief Toggle Sw reset of DMA2D IP */
-        __HAL_RCC_DMA2D_FORCE_RESET();
-        __HAL_RCC_DMA2D_RELEASE_RESET();
-
-        /** @brief Enable DSI Host and wrapper clocks */
-        __HAL_RCC_DSI_CLK_ENABLE();
-
-        /** @brief Soft Reset the DSI Host and wrapper */
-        __HAL_RCC_DSI_FORCE_RESET();
-        __HAL_RCC_DSI_RELEASE_RESET();
-
-        /** @brief NVIC configuration for LTDC interrupt that is now enabled */
-        HAL_NVIC_SetPriority(LTDC_IRQn, 3, 0);
-        HAL_NVIC_EnableIRQ(LTDC_IRQn);
-
-        /** @brief NVIC configuration for DMA2D interrupt that is now enabled */
-        HAL_NVIC_SetPriority(DMA2D_IRQn, 3, 0);
-        HAL_NVIC_EnableIRQ(DMA2D_IRQn);
-
-        /** @brief NVIC configuration for DSI interrupt that is now enabled */
-        HAL_NVIC_SetPriority(DSI_IRQn, 3, 0);
-        HAL_NVIC_EnableIRQ(DSI_IRQn);
-    }
-
-    uint8_t BSP_TS_Init(void)
-    {
-        uint8_t ts_status = TS_OK;
-        uint8_t ts_id1, ts_id2 = 0;
-        /* Note : I2C_Address is un-initialized here, but is not used at all in init function */
-        /* but the prototype of Init() is like that in template and should be respected       */
-
-        /* Initialize the communication channel to sensor (I2C) if necessary */
-        /* that is initialization is done only once after a power up         */
-        ft6x06_ts_drv.Init(I2C_Address);
-
-        ts_id1 = ft6x06_ts_drv.ReadID(TS_I2C_ADDRESS);
-        if (ts_id1 != FT6206_ID_VALUE)
-        {
-            ts_id2 = ft6x06_ts_drv.ReadID(TS_I2C_ADDRESS_A02);
-            I2C_Address = TS_I2C_ADDRESS_A02;
-        }
-        else
-        {
-            I2C_Address = TS_I2C_ADDRESS;
-        }
-
-        /* Scan FT6xx6 TouchScreen IC controller ID register by I2C Read       */
-        /* Verify this is a FT6206 or FT6336G, otherwise this is an error case */
-        if ((ts_id1 == FT6206_ID_VALUE) || (ts_id2 == FT6206_ID_VALUE))
-        {
-            /* Found FT6206 : Initialize the TS driver structure */
-            ts_driver = &ft6x06_ts_drv;
-
-            /* Get LCD chosen orientation */
-            if (800 < 480)
-            {
-                ts_orientation = TS_SWAP_NONE;
-            }
-            else
-            {
-                ts_orientation = TS_SWAP_XY | TS_SWAP_Y;
-            }
-
-            if (ts_status == TS_OK)
-            {
-                /* Software reset the TouchScreen */
-                ts_driver->Reset(I2C_Address);
-
-                /* Calibrate, Configure and Start the TouchScreen driver */
-                ts_driver->Start(I2C_Address);
-
-            } /* of if(ts_status == TS_OK) */
-        }
-        else
-        {
-            ts_status = TS_DEVICE_NOT_FOUND;
-        }
-
-        return (ts_status);
-    }
-
-    void HAL_NVIC_SetPriority(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority)
-    {
-        uint32_t prioritygroup = 0x00;
-
-        /* Check the parameters */
-        assert_param(IS_NVIC_SUB_PRIORITY(SubPriority));
-        assert_param(IS_NVIC_PREEMPTION_PRIORITY(PreemptPriority));
-
-        prioritygroup = NVIC_GetPriorityGrouping();
-
-        NVIC_SetPriority(IRQn, NVIC_EncodePriority(prioritygroup, PreemptPriority, SubPriority));
-    }
-
-    HAL_StatusTypeDef HAL_DSI_DeInit(DSI_HandleTypeDef* hdsi)
-    {
-        /* Check the DSI handle allocation */
-        if (hdsi == NULL)
-        {
-            return HAL_ERROR;
-        }
-
-        /* Change DSI peripheral state */
-        hdsi->State = HAL_DSI_STATE_BUSY;
-
-        /* Disable the DSI wrapper */
-        __HAL_DSI_WRAPPER_DISABLE(hdsi);
-
-        /* Disable the DSI host */
-        __HAL_DSI_DISABLE(hdsi);
-
-        /* D-PHY clock and digital disable */
-        hdsi->Instance->PCTLR &= ~(DSI_PCTLR_CKE | DSI_PCTLR_DEN);
-
-        /* Turn off the DSI PLL */
-        __HAL_DSI_PLL_DISABLE(hdsi);
-
-        /* Disable the regulator */
-        __HAL_DSI_REG_DISABLE(hdsi);
-
-#if (USE_HAL_DSI_REGISTER_CALLBACKS == 1)
-        if (hdsi->MspDeInitCallback == NULL)
-        {
-            hdsi->MspDeInitCallback = HAL_DSI_MspDeInit;
-        }
-        /* DeInit the low level hardware */
-        hdsi->MspDeInitCallback(hdsi);
-#else
-        /* DeInit the low level hardware */
-        HAL_DSI_MspDeInit(hdsi);
-#endif /* USE_HAL_DSI_REGISTER_CALLBACKS */
-
-        /* Initialise the error code */
-        hdsi->ErrorCode = HAL_DSI_ERROR_NONE;
-
-        /* Initialize the DSI state*/
-        hdsi->State = HAL_DSI_STATE_RESET;
-
-        /* Release Lock */
-        __HAL_UNLOCK(hdsi);
-
-        return HAL_OK;
-    }
-
     void HAL_DSI_MspDeInit(DSI_HandleTypeDef* hdsi)
     {
         /* Prevent unused argument(s) compilation warning */
@@ -1850,7 +1679,6 @@ extern "C" {
                   the HAL_DSI_MspDeInit could be implemented in the user file
          */
     }
-
     HAL_StatusTypeDef HAL_DSI_ConfigVideoMode(DSI_HandleTypeDef* hdsi, DSI_VidCfgTypeDef* VidCfg)
     {
         /* Process locked */
@@ -1992,7 +1820,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     void HAL_DSI_MspInit()
     {
         /* Prevent unused argument(s) compilation warning */
@@ -2001,16 +1828,12 @@ extern "C" {
                   the HAL_DSI_MspInit could be implemented in the user file
          */
     }
-
     void HAL_NVIC_DisableIRQ(IRQn_Type IRQn)
     {
-        /* Check the parameters */
-        assert_param(IS_NVIC_DEVICE_IRQ(IRQn));
 
         /* Disable interrupt */
         NVIC_DisableIRQ(IRQn);
     }
-
     void BSP_LCD_MspDeInit(void)
     {
         /** @brief Disable IRQ of LTDC IP */
@@ -2033,7 +1856,6 @@ extern "C" {
         __HAL_RCC_DMA2D_CLK_DISABLE();
         __HAL_RCC_DSI_CLK_DISABLE();
     }
-
     HAL_StatusTypeDef HAL_DSI_Init(DSI_HandleTypeDef* hdsi, DSI_PLLInitTypeDef* PLLInit)
     {
         uint32_t tickstart;
@@ -2161,7 +1983,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     HAL_StatusTypeDef HAL_LTDCEx_StructInitFromVideoConfig(LTDC_HandleTypeDef* hltdc, DSI_VidCfgTypeDef* VidCfg)
     {
         /* Retrieve signal polarities from DSI */
@@ -2188,9 +2009,9 @@ extern "C" {
         return HAL_OK;
     }
 
-//______________________________________________________________________
-// Touch
-//___________________________________________________________________
+    //______________________________________________________________________
+    // Touch
+    //___________________________________________________________________
 
     void ft6x06_Init(uint16_t DeviceAddr)
     {
@@ -2216,7 +2037,6 @@ extern "C" {
             }
         }
     }
-
     uint8_t ft6x06_GetInstance(uint16_t DeviceAddr)
     {
         uint8_t idx = 0;
@@ -2232,19 +2052,16 @@ extern "C" {
 
         return 0xFF;
     }
-
     void ft6x06_Reset(uint16_t DeviceAddr)
     {
         UNUSED(DeviceAddr);
         /* Do nothing */
         /* No software reset sequence available in FT6206 IC */
     }
-
     void TS_IO_Init(void)
     {
         I2Cx_Init(&hI2cAudioHandler);
     }
-
     uint16_t ft6x06_ReadID(uint16_t DeviceAddr)
     {
         /* Initialize I2C link if needed */
@@ -2253,7 +2070,6 @@ extern "C" {
         /* Return the device ID value */
         return (TS_IO_Read(DeviceAddr, FT6206_CHIP_ID_REG));
     }
-
     static uint32_t ft6x06_TS_Configure(uint16_t DeviceAddr)
     {
         uint32_t status = FT6206_STATUS_OK;
@@ -2263,7 +2079,6 @@ extern "C" {
 
         return(status);
     }
-
     void ft6x06_TS_Start(uint16_t DeviceAddr)
     {
 #if (TS_AUTO_CALIBRATION_SUPPORTED == 1)
@@ -2278,7 +2093,6 @@ extern "C" {
         /* Note TS_INT is active low                                                                      */
         ft6x06_TS_DisableIT(DeviceAddr);
     }
-
     uint8_t TS_IO_Read(uint8_t Addr, uint8_t Reg)
     {
         uint8_t read_value = 0;
@@ -2287,7 +2101,6 @@ extern "C" {
 
         return read_value;
     }
-
     uint8_t ft6x06_TS_DetectTouch(uint16_t DeviceAddr)
     {
         volatile uint8_t nbTouch = 0;
@@ -2310,7 +2123,6 @@ extern "C" {
 
         return(nbTouch);
     }
-
     void ft6x06_TS_GetXY(uint16_t DeviceAddr, uint16_t* X, uint16_t* Y)
     {
         uint8_t regAddress = 0;
@@ -2343,7 +2155,6 @@ extern "C" {
             ft6x06_handle.currActiveTouchIdx++;
         }
     }
-
     static HAL_StatusTypeDef I2C_WaitOnFlagUntilTimeout(I2C_HandleTypeDef* hi2c, uint32_t Flag, FlagStatus Status, uint32_t Timeout, uint32_t Tickstart)
     {
         while (__HAL_I2C_GET_FLAG(hi2c, Flag) == Status)
@@ -2365,8 +2176,6 @@ extern "C" {
         }
         return HAL_OK;
     }
-
-
     static void I2C_TransferConfig(I2C_HandleTypeDef* hi2c, uint16_t DevAddress, uint8_t Size, uint32_t Mode, uint32_t Request)
     {
         /* Check the parameters */
@@ -2378,7 +2187,6 @@ extern "C" {
         MODIFY_REG(hi2c->Instance->CR2, ((I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RELOAD | I2C_CR2_AUTOEND | (I2C_CR2_RD_WRN & (uint32_t)(Request >> (31U - I2C_CR2_RD_WRN_Pos))) | I2C_CR2_START | I2C_CR2_STOP)), \
             (uint32_t)(((uint32_t)DevAddress & I2C_CR2_SADD) | (((uint32_t)Size << I2C_CR2_NBYTES_Pos) & I2C_CR2_NBYTES) | (uint32_t)Mode | (uint32_t)Request));
     }
-
     static HAL_StatusTypeDef I2C_WaitOnTXISFlagUntilTimeout(I2C_HandleTypeDef* hi2c, uint32_t Timeout, uint32_t Tickstart)
     {
         while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_TXIS) == RESET)
@@ -2407,7 +2215,6 @@ extern "C" {
         }
         return HAL_OK;
     }
-
     static HAL_StatusTypeDef I2C_RequestMemoryWrite(I2C_HandleTypeDef* hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint32_t Timeout, uint32_t Tickstart)
     {
         I2C_TransferConfig(hi2c, DevAddress, (uint8_t)MemAddSize, I2C_RELOAD_MODE, I2C_GENERATE_START_WRITE);
@@ -2448,8 +2255,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
-
     HAL_StatusTypeDef HAL_I2C_Mem_Write(I2C_HandleTypeDef* hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t* pData, uint16_t Size, uint32_t Timeout)
     {
         uint32_t tickstart;
@@ -2570,8 +2375,6 @@ extern "C" {
             return HAL_BUSY;
         }
     }
-    
-
     void HAL_GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_Init)
     {
         uint32_t position = 0x00;
@@ -2689,16 +2492,6 @@ extern "C" {
             }
         }
     }
-
-    void HAL_NVIC_EnableIRQ(IRQn_Type IRQn)
-    {
-        /* Check the parameters */
-        assert_param(IS_NVIC_DEVICE_IRQ(IRQn));
-
-        /* Enable interrupt */
-        NVIC_EnableIRQ(IRQn);
-    }
-
     static void I2Cx_MspInit(I2C_HandleTypeDef* i2c_handler)
     {
         GPIO_InitTypeDef  gpio_init_structure;
@@ -2733,12 +2526,14 @@ extern "C" {
             DISCOVERY_AUDIO_I2Cx_RELEASE_RESET();
 
             /* Enable and set I2C1 Interrupt to a lower priority */
-            HAL_NVIC_SetPriority(DISCOVERY_AUDIO_I2Cx_EV_IRQn, 0x0F, 0);
-            HAL_NVIC_EnableIRQ(DISCOVERY_AUDIO_I2Cx_EV_IRQn);
+            uint32_t prioritygroup = __NVIC_GetPriorityGrouping();
+            __NVIC_SetPriority(DISCOVERY_AUDIO_I2Cx_EV_IRQn, NVIC_EncodePriority(prioritygroup, 0x0F, 0));  /* NVIC configuration for DMA transfer complete interrupt */
+
+            __NVIC_EnableIRQ(DISCOVERY_AUDIO_I2Cx_EV_IRQn);
 
             /* Enable and set I2C1 Interrupt to a lower priority */
-            HAL_NVIC_SetPriority(DISCOVERY_AUDIO_I2Cx_ER_IRQn, 0x0F, 0);
-            HAL_NVIC_EnableIRQ(DISCOVERY_AUDIO_I2Cx_ER_IRQn);
+            __NVIC_SetPriority(DISCOVERY_AUDIO_I2Cx_ER_IRQn, NVIC_EncodePriority(prioritygroup, 0x0F, 0));  /* NVIC configuration for DMA transfer complete interrupt */
+            __NVIC_EnableIRQ(DISCOVERY_AUDIO_I2Cx_ER_IRQn);
 
         }
         else
@@ -2770,15 +2565,16 @@ extern "C" {
             DISCOVERY_EXT_I2Cx_RELEASE_RESET();
 
             /* Enable and set I2C1 Interrupt to a lower priority */
-            HAL_NVIC_SetPriority(DISCOVERY_EXT_I2Cx_EV_IRQn, 0x0F, 0);
-            HAL_NVIC_EnableIRQ(DISCOVERY_EXT_I2Cx_EV_IRQn);
+            uint32_t prioritygroup = __NVIC_GetPriorityGrouping();
+            __NVIC_SetPriority(DISCOVERY_EXT_I2Cx_EV_IRQn, NVIC_EncodePriority(prioritygroup, 0x0F, 0));  /* NVIC configuration for DMA transfer complete interrupt */
+
+            __NVIC_EnableIRQ(DISCOVERY_EXT_I2Cx_EV_IRQn);
 
             /* Enable and set I2C1 Interrupt to a lower priority */
-            HAL_NVIC_SetPriority(DISCOVERY_EXT_I2Cx_ER_IRQn, 0x0F, 0);
-            HAL_NVIC_EnableIRQ(DISCOVERY_EXT_I2Cx_ER_IRQn);
+            __NVIC_SetPriority(DISCOVERY_EXT_I2Cx_ER_IRQn, NVIC_EncodePriority(prioritygroup, 0x0F, 0));  /* NVIC configuration for DMA transfer complete interrupt */
+            __NVIC_EnableIRQ(DISCOVERY_EXT_I2Cx_ER_IRQn);
         }
     }
-    
     void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
     {
         /* Prevent unused argument(s) compilation warning */
@@ -2788,8 +2584,6 @@ extern "C" {
                   the HAL_I2C_MspInit could be implemented in the user file
          */
     }
-
-
     HAL_StatusTypeDef HAL_I2C_Init(I2C_HandleTypeDef* hi2c)
     {
         /* Check the I2C handle allocation */
@@ -2797,7 +2591,7 @@ extern "C" {
         {
             return HAL_ERROR;
         }
-  
+
         /* Check the parameters */
         assert_param(IS_I2C_ALL_INSTANCE(hi2c->Instance));
         assert_param(IS_I2C_OWN_ADDRESS1(hi2c->Init.OwnAddress1));
@@ -2813,30 +2607,30 @@ extern "C" {
             /* Allocate lock resource and initialize it */
             hi2c->Lock = HAL_UNLOCKED;
 
-////////////#if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
-////////////            /* Init the I2C Callback settings */
-////////////            hi2c->MasterTxCpltCallback = HAL_I2C_MasterTxCpltCallback; /* Legacy weak MasterTxCpltCallback */
-////////////            hi2c->MasterRxCpltCallback = HAL_I2C_MasterRxCpltCallback; /* Legacy weak MasterRxCpltCallback */
-////////////            hi2c->SlaveTxCpltCallback = HAL_I2C_SlaveTxCpltCallback;  /* Legacy weak SlaveTxCpltCallback  */
-////////////            hi2c->SlaveRxCpltCallback = HAL_I2C_SlaveRxCpltCallback;  /* Legacy weak SlaveRxCpltCallback  */
-////////////            hi2c->ListenCpltCallback = HAL_I2C_ListenCpltCallback;   /* Legacy weak ListenCpltCallback   */
-////////////            hi2c->MemTxCpltCallback = HAL_I2C_MemTxCpltCallback;    /* Legacy weak MemTxCpltCallback    */
-////////////            hi2c->MemRxCpltCallback = HAL_I2C_MemRxCpltCallback;    /* Legacy weak MemRxCpltCallback    */
-////////////            hi2c->ErrorCallback = HAL_I2C_ErrorCallback;        /* Legacy weak ErrorCallback        */
-////////////            hi2c->AbortCpltCallback = HAL_I2C_AbortCpltCallback;    /* Legacy weak AbortCpltCallback    */
-////////////            hi2c->AddrCallback = HAL_I2C_AddrCallback;         /* Legacy weak AddrCallback         */
-////////////
-////////////            if (hi2c->MspInitCallback == NULL)
-////////////            {
-////////////                hi2c->MspInitCallback = HAL_I2C_MspInit; /* Legacy weak MspInit  */
-////////////            }
-////////////
-////////////            /* Init the low level hardware : GPIO, CLOCK, CORTEX...etc */
-////////////            hi2c->MspInitCallback(hi2c);
-////////////#else
-            /* Init the low level hardware : GPIO, CLOCK, CORTEX...etc */
+            ////////////#if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
+            ////////////            /* Init the I2C Callback settings */
+            ////////////            hi2c->MasterTxCpltCallback = HAL_I2C_MasterTxCpltCallback; /* Legacy weak MasterTxCpltCallback */
+            ////////////            hi2c->MasterRxCpltCallback = HAL_I2C_MasterRxCpltCallback; /* Legacy weak MasterRxCpltCallback */
+            ////////////            hi2c->SlaveTxCpltCallback = HAL_I2C_SlaveTxCpltCallback;  /* Legacy weak SlaveTxCpltCallback  */
+            ////////////            hi2c->SlaveRxCpltCallback = HAL_I2C_SlaveRxCpltCallback;  /* Legacy weak SlaveRxCpltCallback  */
+            ////////////            hi2c->ListenCpltCallback = HAL_I2C_ListenCpltCallback;   /* Legacy weak ListenCpltCallback   */
+            ////////////            hi2c->MemTxCpltCallback = HAL_I2C_MemTxCpltCallback;    /* Legacy weak MemTxCpltCallback    */
+            ////////////            hi2c->MemRxCpltCallback = HAL_I2C_MemRxCpltCallback;    /* Legacy weak MemRxCpltCallback    */
+            ////////////            hi2c->ErrorCallback = HAL_I2C_ErrorCallback;        /* Legacy weak ErrorCallback        */
+            ////////////            hi2c->AbortCpltCallback = HAL_I2C_AbortCpltCallback;    /* Legacy weak AbortCpltCallback    */
+            ////////////            hi2c->AddrCallback = HAL_I2C_AddrCallback;         /* Legacy weak AddrCallback         */
+            ////////////
+            ////////////            if (hi2c->MspInitCallback == NULL)
+            ////////////            {
+            ////////////                hi2c->MspInitCallback = HAL_I2C_MspInit; /* Legacy weak MspInit  */
+            ////////////            }
+            ////////////
+            ////////////            /* Init the low level hardware : GPIO, CLOCK, CORTEX...etc */
+            ////////////            hi2c->MspInitCallback(hi2c);
+            ////////////#else
+                        /* Init the low level hardware : GPIO, CLOCK, CORTEX...etc */
             HAL_I2C_MspInit(hi2c);
-////////////#endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
+            ////////////#endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
         }
 
         hi2c->State = HAL_I2C_STATE_BUSY;
@@ -2892,13 +2686,11 @@ extern "C" {
 
         return HAL_OK;
     }
-
     HAL_I2C_StateTypeDef HAL_I2C_GetState(I2C_HandleTypeDef* hi2c)
     {
         /* Return I2C handle state */
         return hi2c->State;
     }
-
     static void I2Cx_Init(I2C_HandleTypeDef* i2c_handler)
     {
         if (HAL_I2C_GetState(i2c_handler) == HAL_I2C_STATE_RESET)
@@ -2926,7 +2718,6 @@ extern "C" {
             HAL_I2C_Init(i2c_handler);
         }
     }
-
     void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c)
     {
         /* Prevent unused argument(s) compilation warning */
@@ -2936,7 +2727,6 @@ extern "C" {
                   the HAL_I2C_MspDeInit could be implemented in the user file
          */
     }
-
     HAL_StatusTypeDef HAL_I2C_DeInit(I2C_HandleTypeDef* hi2c)
     {
         /* Check the I2C handle allocation */
@@ -2953,18 +2743,18 @@ extern "C" {
         /* Disable the I2C Peripheral Clock */
         __HAL_I2C_DISABLE(hi2c);
 
-////////////////#if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
-////////////////        if (hi2c->MspDeInitCallback == NULL)
-////////////////        {
-////////////////            hi2c->MspDeInitCallback = HAL_I2C_MspDeInit; /* Legacy weak MspDeInit  */
-////////////////        }
-////////////////
-////////////////        /* DeInit the low level hardware: GPIO, CLOCK, NVIC */
-////////////////        hi2c->MspDeInitCallback(hi2c);
-////////////////#else
-        /* DeInit the low level hardware: GPIO, CLOCK, NVIC */
+        ////////////////#if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
+        ////////////////        if (hi2c->MspDeInitCallback == NULL)
+        ////////////////        {
+        ////////////////            hi2c->MspDeInitCallback = HAL_I2C_MspDeInit; /* Legacy weak MspDeInit  */
+        ////////////////        }
+        ////////////////
+        ////////////////        /* DeInit the low level hardware: GPIO, CLOCK, NVIC */
+        ////////////////        hi2c->MspDeInitCallback(hi2c);
+        ////////////////#else
+                /* DeInit the low level hardware: GPIO, CLOCK, NVIC */
         HAL_I2C_MspDeInit(hi2c);
-//////////////////#endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
+        //////////////////#endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
 
         hi2c->ErrorCode = HAL_I2C_ERROR_NONE;
         hi2c->State = HAL_I2C_STATE_RESET;
@@ -2976,7 +2766,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     static void I2Cx_Error(I2C_HandleTypeDef* i2c_handler, uint8_t Addr)
     {
         /* De-initialize the I2C communication bus */
@@ -2987,7 +2776,6 @@ extern "C" {
 
         UNUSED(Addr);
     }
-
     static HAL_StatusTypeDef I2Cx_WriteMultiple(I2C_HandleTypeDef* i2c_handler, uint8_t Addr, uint16_t Reg, uint16_t MemAddress, uint8_t* Buffer, uint16_t Length)
     {
         HAL_StatusTypeDef status = HAL_OK;
@@ -3002,22 +2790,18 @@ extern "C" {
         }
         return status;
     }
-
     void TS_IO_WriteMultiple(uint8_t Addr, uint8_t Reg, uint8_t* Buffer, uint16_t Length)
     {
         I2Cx_WriteMultiple(&hI2cAudioHandler, Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, Buffer, Length);
     }
-
     void TS_IO_Write(uint8_t Addr, uint8_t Reg, uint8_t Value)
     {
         I2Cx_WriteMultiple(&hI2cAudioHandler, Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&Value, 1);
     }
-
     uint16_t TS_IO_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t* Buffer, uint16_t Length)
     {
         return I2Cx_ReadMultiple(&hI2cAudioHandler, Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, Buffer, Length);
     }
-
     static HAL_StatusTypeDef I2Cx_ReadMultiple(I2C_HandleTypeDef* i2c_handler, uint8_t Addr, uint16_t Reg, uint16_t MemAddress, uint8_t* Buffer, uint16_t Length)
     {
         HAL_StatusTypeDef status = HAL_OK;
@@ -3032,7 +2816,6 @@ extern "C" {
         }
         return status;
     }
-
     static HAL_StatusTypeDef I2C_RequestMemoryRead(I2C_HandleTypeDef* hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint32_t Timeout, uint32_t Tickstart)
     {
         I2C_TransferConfig(hi2c, DevAddress, (uint8_t)MemAddSize, I2C_SOFTEND_MODE, I2C_GENERATE_START_WRITE);
@@ -3073,7 +2856,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     static void I2C_Flush_TXDR(I2C_HandleTypeDef* hi2c)
     {
         /* If a pending TXIS flag is set */
@@ -3089,7 +2871,6 @@ extern "C" {
             __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_TXE);
         }
     }
-
     static HAL_StatusTypeDef I2C_IsAcknowledgeFailed(I2C_HandleTypeDef* hi2c, uint32_t Timeout, uint32_t Tickstart)
     {
         if (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_AF) == SET)
@@ -3138,7 +2919,6 @@ extern "C" {
         }
         return HAL_OK;
     }
-
     static HAL_StatusTypeDef I2C_WaitOnSTOPFlagUntilTimeout(I2C_HandleTypeDef* hi2c, uint32_t Timeout, uint32_t Tickstart)
     {
         while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_STOPF) == RESET)
@@ -3164,7 +2944,6 @@ extern "C" {
         }
         return HAL_OK;
     }
-
     HAL_StatusTypeDef HAL_I2C_Mem_Read(I2C_HandleTypeDef* hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t* pData, uint16_t Size, uint32_t Timeout)
     {
         uint32_t tickstart;
@@ -3285,7 +3064,6 @@ extern "C" {
             return HAL_BUSY;
         }
     }
-
     void ft6x06_TS_EnableIT(uint16_t DeviceAddr)
     {
         uint8_t regValue = 0;
@@ -3294,7 +3072,6 @@ extern "C" {
         /* Set interrupt trigger mode in FT6206_GMODE_REG */
         TS_IO_Write(DeviceAddr, FT6206_GMODE_REG, regValue);
     }
-
     void ft6x06_TS_DisableIT(uint16_t DeviceAddr)
     {
         uint8_t regValue = 0;
@@ -3304,20 +3081,17 @@ extern "C" {
         TS_IO_Write(DeviceAddr, FT6206_GMODE_REG, regValue);
         UNUSED(DeviceAddr);
     }
-
     uint8_t ft6x06_TS_ITStatus(uint16_t DeviceAddr)
     {
         /* Always return 0 as feature not applicable to FT6206 */
         UNUSED(DeviceAddr);
         return 0;
     }
-
     void ft6x06_TS_ClearIT(uint16_t DeviceAddr)
     {
         UNUSED(DeviceAddr);
         /* Nothing to be done here for FT6206 */
     }
-
     static void DSI_ConfigPacketHeader(DSI_TypeDef* DSIx,
         uint32_t ChannelID,
         uint32_t DataType,
@@ -3354,7 +3128,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     HAL_StatusTypeDef HAL_DSI_LongWrite(DSI_HandleTypeDef* hdsi,
         uint32_t ChannelID,
         uint32_t Mode,
@@ -3428,7 +3201,6 @@ extern "C" {
 
         return HAL_OK;
     }
-
     void DSI_IO_WriteCmd(uint32_t NbrParams, uint8_t* pParams)
     {
         if (NbrParams <= 1)
@@ -3439,4 +3211,8 @@ extern "C" {
         {
             HAL_DSI_LongWrite(&hdsi_discovery, LCD_OTM8009A_ID, DSI_DCS_LONG_PKT_WRITE, NbrParams, pParams[NbrParams], pParams);
         }
+    }
+    void wait_ms(int delay)
+    {
+        UNUSED(delay);
     }

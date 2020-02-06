@@ -11,22 +11,18 @@
 
 
 //
-// The OTM8009A, a 16, 777, 216 - color System - on - Chip(SoC) driver LSI designed for smalland medium sizes of
+// The OTM8009A, a 16,777,216 - color System - on - Chip(SoC) driver LSI designed for smalland medium sizes of
 // TFT LCD display, is capable of supporting up to 480xRGBx864(WVGA) in resolution which can be achieved
 // by the integrated RAM for graphic data.The 480 - channel source driver has true 8 - bit resolution,
 // generates 256 Gamma - corrected values by an internal D / A converter.
 // The OTM8009A is able to operate with low IO interface power supply and incorporate with several charge pumps
 // to generate various voltage levels that form an on - chip power management system for gate driverand source driver.
 
-
-#define CommandData(c)   c,(CLR_UINT8 *)(CLR_UINT8[c])  // Macro to simplify visualisation of passing pointer to parameters;
+#define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
 
 struct DisplayDriver g_DisplayDriver;
 extern DisplayInterface g_DisplayInterface;
 
-enum Otm8009A_Orientation : CLR_UINT8
-{
-};
 enum Otm8009A_Command : CLR_UINT8  // One byte commands
 {
     NOP = 0x00,         // NOP command
@@ -204,6 +200,16 @@ enum Otm8009A_Command2 :CLR_UINT16 // Two byte commands - (only available in MIP
 
 };
 
+enum Otm8009A_Orientation_Settings :CLR_UINT16
+{
+    OTM8009A_480X800_HSYNC = 63,       // Horizontal synchronization:
+    OTM8009A_480X800_HBP = 120,       // Horizontal back porch
+    OTM8009A_480X800_HFP = 120,        // Horizontal front porch
+    OTM8009A_480X800_VSYNC = 12,       // Vertical synchronization
+    OTM8009A_480X800_VBP = 12,         // Vertical back porch
+    OTM8009A_480X800_VFP = 12          // Vertical front porch
+};
+
 
 #define OTM8009A_COLMOD_RGB565             0x55
 #define OTM8009A_COLMOD_RGB888             0x77
@@ -292,21 +298,6 @@ CLR_UINT8 ShortRegData49[] = { 0x06 };
 
 bool DisplayDriver::Initialize()
 {
-
-    {
-        /***********************OTM8009A Initialization********************************/
-
-          /* Initialize the OTM8009A LCD Display IC Driver (KoD LCD IC Driver)
-          *  depending on configuration set in 'hdsivideo_handle'.
-          */
-        //   OTM8009A_Init(OTM8009A_FORMAT_RBG565, orientation);
-
-             /***********************End OTM8009A Initialization****************************/
-    }
-
-
-
-
     // Initialize OTM8009A registers
     g_DisplayInterface.SendCommandByte(Otm8009A_Command::SWRESET);
     g_DisplayInterface.DisplayCommandDelay(10);
@@ -316,7 +307,7 @@ bool DisplayDriver::Initialize()
     //   - Write Register 0x00h with parameter 0x80h
     //   - Write Register 0xFFh with parameter 0x80h + 0x09h 
     g_DisplayInterface.SendCommandByteAndData((CLR_UINT8)Otm8009A_Command::NOP, ShortRegData2, 1);
-    g_DisplayInterface.SendCommandByteAndData((CLR_UINT8)Otm8009A_Command2::CMD2ENA1, lcdRegData1, 3);
+    g_DisplayInterface.SendCommandByteAndData((CLR_UINT8)Otm8009A_Command2::CMD2ENA1, lcdRegData1, 4);
 
     // Other  Enable access command 2 registers 
        //   Write Register 0xFF00h with parameter 0x0080h
@@ -499,19 +490,8 @@ bool DisplayDriver::Initialize()
     // Set Pixel color format to RGB565 
     g_DisplayInterface.SendCommandByteAndData((CLR_UINT8)Otm8009A_Command::NOP, ShortRegData37, 1);
 
-    // Send command to configure display in landscape orientation mode. By default the orientation mode is portrait
-    g_DisplayInterface.SendCommandByteAndData((CLR_UINT8)Otm8009A_Command::NOP, ShortRegData39, 1);
 
-    // CASET value(Column Address Set) : X direction LCD GRAM boundaries
-    // depending on LCD orientation modeand PASET value(Page Address Set) : Y direction
-    // LCD GRAM boundaries depending on LCD orientation mode
-    // XS[15:0] = 0x000 = 0, XE[15:0] = 0x31F = 799 for landscape mode : apply to CASET
-    // YS[15:0] = 0x000 = 0, YE[15:0] = 0x31F = 799 for portrait mode : : apply to PASET
-    g_DisplayInterface.SendData(lcdRegData27, 5);
-
-    // XS[15:0] = 0x000 = 0, XE[15:0] = 0x1DF = 479 for portrait mode : apply to CASET
-    // YS[15:0] = 0x000 = 0, YE[15:0] = 0x1DF = 479 for landscape mode : apply to PASET
-    g_DisplayInterface.SendData(lcdRegData28, 5);
+    ChangeOrientation(DisplayOrientation::LANDSCAPE);
 
     //* CABC : Content Adaptive Backlight Control section start >> 
     // Note : defaut is 0 (lowest Brightness), 0xFF is highest Brightness, try 0x7F : intermediate value 
@@ -548,8 +528,8 @@ bool DisplayDriver::Initialize()
 void DisplayDriver::SetupDisplayAttributes()
 {
     // Define the LCD/TFT resolution
-    Attributes.LongerSide = 320;
-    Attributes.ShorterSide = 240;
+    Attributes.LongerSide = 800;
+    Attributes.ShorterSide = 480;
     Attributes.PowerSave = PowerSaveState::NORMAL;
     Attributes.BitsPerPixel = 16;
 
@@ -565,10 +545,6 @@ bool DisplayDriver::Uninitialize()
 bool DisplayDriver::ChangeOrientation(DisplayOrientation newOrientation)
 {
     Attributes.Orientation = newOrientation;
-    //CLR_UINT8  CMD_Memory_Access_Control_Data_Portrait[] = { 0x48 };
-    //CLR_UINT8  CMD_Memory_Access_Control_Data_Portrait180[] = { 0x88 };
-    //CLR_UINT8  CMD_Memory_Access_Control_Data_Landscape[] = { 0xE8 };
-    //CLR_UINT8  CMD_Memory_Access_Control_Data_Landscape180[] = { 0x28 };
 
     switch (newOrientation)
     {
@@ -577,10 +553,8 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation newOrientation)
     case DisplayOrientation::PORTRAIT:
         Attributes.Height = Attributes.LongerSide;
         Attributes.Width = Attributes.ShorterSide;
-        // Change landscape code to suit switch statement
+        
         //      g_DisplayInterface.SendCommandByteAndData(ShortRegData39);
-        //      g_DisplayInterface.SendCommandByteAndData(lcdRegData27);
-        //      g_DisplayInterface.SendCommandByteAndData(lcdRegData28);
         break;
     case DisplayOrientation::PORTRAIT180:
         Attributes.Height = Attributes.LongerSide;
@@ -593,28 +567,33 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation newOrientation)
     case DisplayOrientation::LANDSCAPE:
         Attributes.Height = Attributes.ShorterSide;
         Attributes.Width = Attributes.LongerSide;
-
-        g_DisplayInterface.SendCommandByteAndData((CLR_UINT8)Otm8009A_Command::MADCTR, ShortRegData39, 1);
-        //   g_DisplayInterface.SendCommandByteAndData(lcdRegData27);
-        //   g_DisplayInterface.SendCommandByteAndData(lcdRegData28);
-
+        // CASET value(Column Address Set) : X direction LCD GRAM boundaries
+        // depending on LCD orientation modeand PASET value(Page Address Set) : Y direction
+        // LCD GRAM boundaries depending on LCD orientation mode
+        // XS[15:0] = 0x000 = 0, XE[15:0] = 0x31F = 799 for landscape mode : apply to CASET
+        // YS[15:0] = 0x000 = 0, YE[15:0] = 0x31F = 799 for portrait mode : : apply to PASET
+        // XS[15:0] = 0x000 = 0, XE[15:0] = 0x1DF = 479 for portrait mode : apply to CASET
+        // YS[15:0] = 0x000 = 0, YE[15:0] = 0x1DF = 479 for landscape mode : apply to PASET
+        // Send command to configure display in landscape orientation mode. By default the orientation mode is portrait
+        g_DisplayInterface.SendCommandByteAndData((CLR_UINT8)Otm8009A_Command::NOP, ShortRegData39, 1);
+        g_DisplayInterface.SendData(lcdRegData27, 5);
+        g_DisplayInterface.SendData(lcdRegData28, 5);
         break;
     case DisplayOrientation::LANDSCAPE180:
         Attributes.Height = Attributes.ShorterSide;
         Attributes.Width = Attributes.LongerSide;
 
-        // Change landscape code to suit switch statement
-        //      g_DisplayInterface.SendCommandByteAndData(ShortRegData39);
-        //      g_DisplayInterface.SendCommandByteAndData(lcdRegData27);
-        //      g_DisplayInterface.SendCommandByteAndData(lcdRegData28);
 
         break;
     }
+
 
     return true;
 }
 bool DisplayDriver::SetWindow(CLR_UINT16 x1, CLR_UINT16 y1, CLR_UINT16 x2, CLR_UINT16 y2)
 {
+    // By default the orientation mode is portrait
+
     CLR_UINT16 Addr1, Addr2;
 
     switch (Attributes.Orientation)
@@ -645,27 +624,8 @@ bool DisplayDriver::SetWindow(CLR_UINT16 x1, CLR_UINT16 y1, CLR_UINT16 x2, CLR_U
         break;
     }
 
-
-    //This is wrong, still from ILI9341
-    CLR_UINT8  CMD_Column_Address_Set_Data[4];
-    CMD_Column_Address_Set_Data[0] = (Addr1 >> 8) & 0xFF;
-    CMD_Column_Address_Set_Data[1] = Addr1 & 0xFF;
-    CMD_Column_Address_Set_Data[2] = (Addr2 >> 8) & 0xFF;
-    CMD_Column_Address_Set_Data[3] = Addr2 & 0xFF;
-
-    CLR_UINT8  CMD_Page_Address_Set_Data[4];
-    CMD_Page_Address_Set_Data[0] = (y1 >> 8) & 0xFF;
-    CMD_Page_Address_Set_Data[1] = y1 & 0xFF;
-    CMD_Page_Address_Set_Data[2] = (y2 >> 8) & 0xFF;
-    CMD_Page_Address_Set_Data[3] = y2 & 0xFF;
-
-    ASSERT(CMD_Column_Address_Set_Data[0] = CMD_Column_Address_Set_Data[0])
-        ASSERT(CMD_Page_Address_Set_Data[0] = CMD_Page_Address_Set_Data[0])
-
-        // Fix, code is for ili9641 not otm8009a
-     //   g_DisplayInterface.SendCommandByteAndData(Otm8009A_Command::CASET, CMD_Column_Address_Set_Data, 4);
-     //   g_DisplayInterface.SendCommandByteAndData(Otm8009A_Command::PASET, CMD_Page_Address_Set_Data, 4);
-     //   g_DisplayInterface.SendCommand(Otm8009A_Command::);
+    UNUSED(Addr1);
+    UNUSED(Addr2);
 
         return true;
 }
@@ -734,25 +694,4 @@ CLR_UINT32 DisplayDriver::ConvertColor(CLR_UINT32 color)
     // changes to the InitializeDisplayRegisters() routine and Graphics memory used
     return color;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/////////////
-
 

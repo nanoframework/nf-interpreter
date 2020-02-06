@@ -11,6 +11,9 @@
 
 #define  STM32F769xx
 #include "stm32f7xx.h"
+
+#define NVIC_SetPriority __NVIC_SetPriority  // Fix for undefined in core_cm7.h
+                                             // Chibios must "see" this in another way?
 #include "core_cm7.h"
 
 
@@ -26,48 +29,39 @@ void wait_ms(int);
 
 void assert_failed(uint8_t* file, uint32_t line)
 {
-
     UNUSED(file);
     UNUSED(line);
-
     /* User can add his own implementation to report the file name and line number,
        ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-
        /* Infinite loop */
     while (1)
     {
     }
 }
-
-
-
 typedef enum
 {
     GPIO_PIN_RESET = 0,
     GPIO_PIN_SET
 } GPIO_PinState;
 
-#define GPIO_PIN_0                 ((uint16_t)0x0001U)  /* Pin 0 selected    */
-#define GPIO_PIN_1                 ((uint16_t)0x0002U)  /* Pin 1 selected    */
-#define GPIO_PIN_2                 ((uint16_t)0x0004U)  /* Pin 2 selected    */
-#define GPIO_PIN_3                 ((uint16_t)0x0008U)  /* Pin 3 selected    */
-#define GPIO_PIN_4                 ((uint16_t)0x0010U)  /* Pin 4 selected    */
-#define GPIO_PIN_5                 ((uint16_t)0x0020U)  /* Pin 5 selected    */
-#define GPIO_PIN_6                 ((uint16_t)0x0040U)  /* Pin 6 selected    */
-#define GPIO_PIN_7                 ((uint16_t)0x0080U)  /* Pin 7 selected    */
-#define GPIO_PIN_8                 ((uint16_t)0x0100U)  /* Pin 8 selected    */
-#define GPIO_PIN_9                 ((uint16_t)0x0200U)  /* Pin 9 selected    */
-#define GPIO_PIN_10                ((uint16_t)0x0400U)  /* Pin 10 selected   */
-#define GPIO_PIN_11                ((uint16_t)0x0800U)  /* Pin 11 selected   */
-#define GPIO_PIN_12                ((uint16_t)0x1000U)  /* Pin 12 selected   */
-#define GPIO_PIN_13                ((uint16_t)0x2000U)  /* Pin 13 selected   */
-#define GPIO_PIN_14                ((uint16_t)0x4000U)  /* Pin 14 selected   */
-#define GPIO_PIN_15                ((uint16_t)0x8000U)  /* Pin 15 selected   */\
+#define GPIO_PIN_0                 ((uint16_t)0x0001U)  // Pin 0 selected
+#define GPIO_PIN_1                 ((uint16_t)0x0002U)  // Pin 1 selected
+#define GPIO_PIN_2                 ((uint16_t)0x0004U)  // Pin 2 selected
+#define GPIO_PIN_3                 ((uint16_t)0x0008U)  // Pin 3 selected
+#define GPIO_PIN_4                 ((uint16_t)0x0010U)  // Pin 4 selected
+#define GPIO_PIN_5                 ((uint16_t)0x0020U)  // Pin 5 selected
+#define GPIO_PIN_6                 ((uint16_t)0x0040U)  // Pin 6 selected
+#define GPIO_PIN_7                 ((uint16_t)0x0080U)  // Pin 7 selected
+#define GPIO_PIN_8                 ((uint16_t)0x0100U)  // Pin 8 selected
+#define GPIO_PIN_9                 ((uint16_t)0x0200U)  // Pin 9 selected
+#define GPIO_PIN_10                ((uint16_t)0x0400U)  // Pin 10 selected
+#define GPIO_PIN_11                ((uint16_t)0x0800U)  // Pin 11 selected
+#define GPIO_PIN_12                ((uint16_t)0x1000U)  // Pin 12 selected
+#define GPIO_PIN_13                ((uint16_t)0x2000U)  // Pin 13 selected
+#define GPIO_PIN_14                ((uint16_t)0x4000U)  // Pin 14 selected
+#define GPIO_PIN_15                ((uint16_t)0x8000U)  // Pin 15 selected
+#define GPIO_PIN_All               ((uint16_t)0xFFFFU)  // All pins selected
 
-#define GPIO_PIN_All               ((uint16_t)0xFFFFU)  /* All pins selected */
-
-#define GPIO_AF9_LTDC          ((uint8_t)0x09U)  /* LCD-TFT Alternate Function mapping */
-#define GPIO_AF14_LTDC          ((uint8_t)0x0EU)  /* LCD-TFT Alternate Function mapping */
 
 #define GPIO_GET_INDEX(__GPIOx__)   (uint8_t)(((__GPIOx__) == (GPIOA))? 0U :\
                                               ((__GPIOx__) == (GPIOB))? 1U :\
@@ -83,13 +77,16 @@ typedef enum
 #define GPIO_AF0_MCO           ((uint8_t)0x00U)  /* MCO (MCO1 and MCO2) Alternate Function mapping            */
 #define GPIO_AF0_SWJ           ((uint8_t)0x00U)  /* SWJ (SWD and JTAG) Alternate Function mapping             */
 #define GPIO_AF0_TRACE         ((uint8_t)0x00U)  /* TRACE Alternate Function mapping                          */
+
 #define GPIO_AF1_TIM1          ((uint8_t)0x01U)  /* TIM1 Alternate Function mapping */
 #define GPIO_AF1_TIM2          ((uint8_t)0x01U)  /* TIM2 Alternate Function mapping */
 #define GPIO_AF1_UART5         ((uint8_t)0x01U)  /* UART5 Alternate Function mapping */
 #define GPIO_AF1_I2C4          ((uint8_t)0x01U)  /* I2C4 Alternate Function mapping  */   
+
 #define GPIO_AF2_TIM3          ((uint8_t)0x02U)  /* TIM3 Alternate Function mapping */
 #define GPIO_AF2_TIM4          ((uint8_t)0x02U)  /* TIM4 Alternate Function mapping */
 #define GPIO_AF2_TIM5          ((uint8_t)0x02U)  /* TIM5 Alternate Function mapping */
+
 #define GPIO_AF3_TIM8          ((uint8_t)0x03U)  /* TIM8 Alternate Function mapping  */
 #define GPIO_AF3_TIM9          ((uint8_t)0x03U)  /* TIM9 Alternate Function mapping  */
 #define GPIO_AF3_TIM10         ((uint8_t)0x03U)  /* TIM10 Alternate Function mapping */
@@ -97,22 +94,26 @@ typedef enum
 #define GPIO_AF3_LPTIM1        ((uint8_t)0x03U)  /* LPTIM1 Alternate Function mapping */
 #define GPIO_AF3_CEC           ((uint8_t)0x03U)  /* CEC Alternate Function mapping */
 #define GPIO_AF3_DFSDM1         ((uint8_t)0x03U)  /* DFSDM1 Alternate Function mapping */
+
 #define GPIO_AF4_I2C1          ((uint8_t)0x04U)  /* I2C1 Alternate Function mapping */
 #define GPIO_AF4_I2C2          ((uint8_t)0x04U)  /* I2C2 Alternate Function mapping */
 #define GPIO_AF4_I2C3          ((uint8_t)0x04U)  /* I2C3 Alternate Function mapping */
 #define GPIO_AF4_I2C4          ((uint8_t)0x04U)  /* I2C4 Alternate Function mapping */
 #define GPIO_AF4_CEC           ((uint8_t)0x04U)  /* CEC Alternate Function mapping */
 #define GPIO_AF4_USART1        ((uint8_t)0x04)  /* USART1 Alternate Function mapping */
+
 #define GPIO_AF5_SPI1          ((uint8_t)0x05U)  /* SPI1 Alternate Function mapping        */
 #define GPIO_AF5_SPI2          ((uint8_t)0x05U)  /* SPI2/I2S2 Alternate Function mapping   */
 #define GPIO_AF5_SPI3          ((uint8_t)0x05U)  /* SPI3/I2S3 Alternate Function mapping   */
 #define GPIO_AF5_SPI4          ((uint8_t)0x05U)  /* SPI4 Alternate Function mapping        */
 #define GPIO_AF5_SPI5          ((uint8_t)0x05U)  /* SPI5 Alternate Function mapping        */
 #define GPIO_AF5_SPI6          ((uint8_t)0x05U)  /* SPI6 Alternate Function mapping        */
+
 #define GPIO_AF6_SPI3          ((uint8_t)0x06U)  /* SPI3/I2S3 Alternate Function mapping  */
 #define GPIO_AF6_SAI1          ((uint8_t)0x06U)  /* SAI1 Alternate Function mapping       */
 #define GPIO_AF6_UART4         ((uint8_t)0x06U)   /* UART4 Alternate Function mapping     */   
 #define GPIO_AF6_DFSDM1        ((uint8_t)0x06U)  /* DFSDM1 Alternate Function mapping     */
+
 #define GPIO_AF7_USART1        ((uint8_t)0x07U)  /* USART1 Alternate Function mapping     */
 #define GPIO_AF7_USART2        ((uint8_t)0x07U)  /* USART2 Alternate Function mapping     */
 #define GPIO_AF7_USART3        ((uint8_t)0x07U)  /* USART3 Alternate Function mapping     */
@@ -122,6 +123,7 @@ typedef enum
 #define GPIO_AF7_SPI3          ((uint8_t)0x07U)  /* SPI3 Alternate Function mapping       */
 #define GPIO_AF7_SPI6          ((uint8_t)0x07U)  /* SPI6 Alternate Function mapping       */
 #define GPIO_AF7_DFSDM1         ((uint8_t)0x07U) /* DFSDM1 Alternate Function mapping      */
+
 #define GPIO_AF8_UART4         ((uint8_t)0x08U)  /* UART4 Alternate Function mapping  */
 #define GPIO_AF8_UART5         ((uint8_t)0x08U)  /* UART5 Alternate Function mapping  */
 #define GPIO_AF8_USART6        ((uint8_t)0x08U)  /* USART6 Alternate Function mapping */
@@ -130,6 +132,7 @@ typedef enum
 #define GPIO_AF8_SPDIFRX       ((uint8_t)0x08U)  /* SPIDIF-RX Alternate Function mapping */
 #define GPIO_AF8_SAI2          ((uint8_t)0x08U)  /* SAI2 Alternate Function mapping   */
 #define GPIO_AF8_SPI6          ((uint8_t)0x08U)  /* SPI6 Alternate Function mapping   */  
+
 #define GPIO_AF9_CAN1          ((uint8_t)0x09U)  /* CAN1 Alternate Function mapping    */
 #define GPIO_AF9_CAN2          ((uint8_t)0x09U)  /* CAN2 Alternate Function mapping    */
 #define GPIO_AF9_TIM12         ((uint8_t)0x09U)  /* TIM12 Alternate Function mapping   */
@@ -138,6 +141,8 @@ typedef enum
 #define GPIO_AF9_QUADSPI       ((uint8_t)0x09U)  /* QUADSPI Alternate Function mapping */
 #define GPIO_AF9_LTDC          ((uint8_t)0x09U)  /* LCD-TFT Alternate Function mapping */
 #define GPIO_AF9_FMC           ((uint8_t)0x09U)   /* FMC Alternate Function mapping     */
+#define GPIO_AF9_LTDC          ((uint8_t)0x09U)  /* LCD-TFT Alternate Function mapping */
+
 #define GPIO_AF10_OTG_FS        ((uint8_t)0xAU)  /* OTG_FS Alternate Function mapping */
 #define GPIO_AF10_OTG_HS        ((uint8_t)0xAU)  /* OTG_HS Alternate Function mapping */
 #define GPIO_AF10_QUADSPI       ((uint8_t)0xAU)  /* QUADSPI Alternate Function mapping */
@@ -145,32 +150,59 @@ typedef enum
 #define GPIO_AF10_DFSDM1        ((uint8_t)0x0AU)  /* DFSDM1 Alternate Function mapping  */
 #define GPIO_AF10_SDMMC2        ((uint8_t)0x0AU)  /* SDMMC2 Alternate Function mapping */   
 #define GPIO_AF10_LTDC          ((uint8_t)0x0AU)  /* LCD-TFT Alternate Function mapping */
+
 #define GPIO_AF11_ETH           ((uint8_t)0x0BU)  /* ETHERNET Alternate Function mapping */
 #define GPIO_AF11_CAN3          ((uint8_t)0x0BU)  /* CAN3 Alternate Function mapping     */
 #define GPIO_AF11_SDMMC2        ((uint8_t)0x0BU)  /* SDMMC2 Alternate Function mapping   */
 #define GPIO_AF11_I2C4          ((uint8_t)0x0BU)  /* I2C4 Alternate Function mapping     */   
+
 #define GPIO_AF12_FMC           ((uint8_t)0xCU)  /* FMC Alternate Function mapping                      */
 #define GPIO_AF12_OTG_HS_FS     ((uint8_t)0xCU)  /* OTG HS configured in FS, Alternate Function mapping */
 #define GPIO_AF12_SDMMC1        ((uint8_t)0xCU)  /* SDMMC1 Alternate Function mapping                   */
 #define GPIO_AF12_MDIOS         ((uint8_t)0xCU)  /* SDMMC1 Alternate Function mapping                    */
 #define GPIO_AF12_UART7         ((uint8_t)0xCU)  /* UART7 Alternate Function mapping                     */   
+
 #define GPIO_AF13_DCMI          ((uint8_t)0x0DU)  /* DCMI Alternate Function mapping */
 #define GPIO_AF13_DSI           ((uint8_t)0x0DU)  /* DSI Alternate Function mapping  */
-#define GPIO_AF15_EVENTOUT      ((uint8_t)0x0FU)  /* EVENTOUT Alternate Function mapping */
 #define GPIO_AF14_LTDC          ((uint8_t)0x0EU)  /* LCD-TFT Alternate Function mapping */
+#define GPIO_AF15_EVENTOUT      ((uint8_t)0x0FU)  /* EVENTOUT Alternate Function mapping */
 
 #define  GPIO_SPEED_FREQ_LOW         ((uint32_t)0x00000000U)  /*!< Low speed     */
 #define  GPIO_SPEED_FREQ_MEDIUM      ((uint32_t)0x00000001U)  /*!< Medium speed  */
 #define  GPIO_SPEED_FREQ_HIGH        ((uint32_t)0x00000002U)  /*!< Fast speed    */
 #define  GPIO_SPEED_FREQ_VERY_HIGH   ((uint32_t)0x00000003U)  /*!< High speed    */
-#define  GPIO_SPEED_LOW              GPIO_SPEED_FREQ_LOW
-#define  GPIO_SPEED_MEDIUM           GPIO_SPEED_FREQ_MEDIUM
 #define  GPIO_SPEED_FAST             GPIO_SPEED_FREQ_HIGH
 #define  GPIO_SPEED_HIGH             GPIO_SPEED_FREQ_VERY_HIGH
+#define  GPIO_SPEED_LOW              GPIO_SPEED_FREQ_LOW
+#define  GPIO_SPEED_MEDIUM           GPIO_SPEED_FREQ_MEDIUM
 
+#define  GPIO_MODE_INPUT               ((uint32_t)0x00000000U)   /*!< Input Floating Mode                   */
+#define  GPIO_MODE_OUTPUT_PP           ((uint32_t)0x00000001U)   /*!< Output Push Pull Mode                 */
+#define  GPIO_MODE_OUTPUT_OD           ((uint32_t)0x00000011U)   /*!< Output Open Drain Mode                */
+#define  GPIO_MODE_AF_PP               ((uint32_t)0x00000002U)   /*!< Alternate Function Push Pull Mode     */
+#define  GPIO_MODE_AF_OD               ((uint32_t)0x00000012U)   /*!< Alternate Function Open Drain Mode    */
+#define  GPIO_MODE_ANALOG              ((uint32_t)0x00000003U)   /*!< Analog Mode  */
+
+#define  GPIO_MODE_IT_RISING           ((uint32_t)0x10110000U)   /*!< External Interrupt Mode with Rising edge trigger detection          */
+#define  GPIO_MODE_IT_FALLING          ((uint32_t)0x10210000U)   /*!< External Interrupt Mode with Falling edge trigger detection         */
+#define  GPIO_MODE_IT_RISING_FALLING   ((uint32_t)0x10310000U)   /*!< External Interrupt Mode with Rising/Falling edge trigger detection  */
+
+#define  GPIO_MODE_EVT_RISING          ((uint32_t)0x10120000U)   /*!< External Event Mode with Rising edge trigger detection               */
+#define  GPIO_MODE_EVT_FALLING         ((uint32_t)0x10220000U)   /*!< External Event Mode with Falling edge trigger detection              */
+#define  GPIO_MODE_EVT_RISING_FALLING  ((uint32_t)0x10320000U)   /*!< External Event Mode with Rising/Falling edge trigger detection       */
+
+#define GPIO_NOPULL                    ((uint32_t)0x00000000U)   // No Pull-up or Pull-down activation
+#define GPIO_PULLUP                    ((uint32_t)0x00000001U)   // Pull-up activation
+#define GPIO_PULLDOWN                  ((uint32_t)0x00000002U)   /*!< Pull-down activation                */
+
+#define GPIO_MODE                      ((uint32_t)0x00000003U)
+#define GPIO_MODE_IT                   ((uint32_t)0x00010000U)
+#define GPIO_MODE_EVT                  ((uint32_t)0x00020000U)
+#define GPIO_OUTPUT_TYPE               ((uint32_t)0x00000010U)
+
+#define GPIO_NUMBER                    ((uint32_t)16U)
 
 #define GPIO_PIN_MASK                 ((uint32_t)0x0000FFFFU) /* PIN mask for assert test */
-#define GPIO_AF12_FMC                 ((uint8_t)0xCU)  /* FMC Alternate Function mapping                      */
 #define GET_GPIO_INDEX                GPIO_GET_INDEX
 
 #define IS_GPIO_SPEED(SPEED) (((SPEED) == GPIO_SPEED_LOW)  || ((SPEED) == GPIO_SPEED_MEDIUM) || \
@@ -235,36 +267,7 @@ typedef enum
                           ((AF) == GPIO_AF15_EVENTOUT)  || ((AF) == GPIO_AF13_DCMI)      || \
                           ((AF) == GPIO_AF14_LTDC)      || ((AF) == GPIO_AF13_DSI))
 
-#define  GPIO_MODE_INPUT               ((uint32_t)0x00000000U)   /*!< Input Floating Mode                   */
-#define  GPIO_MODE_OUTPUT_PP           ((uint32_t)0x00000001U)   /*!< Output Push Pull Mode                 */
-#define  GPIO_MODE_OUTPUT_OD           ((uint32_t)0x00000011U)   /*!< Output Open Drain Mode                */
-#define  GPIO_MODE_AF_PP               ((uint32_t)0x00000002U)   /*!< Alternate Function Push Pull Mode     */
-#define  GPIO_MODE_AF_OD               ((uint32_t)0x00000012U)   /*!< Alternate Function Open Drain Mode    */
-#define  GPIO_MODE_ANALOG              ((uint32_t)0x00000003U)   /*!< Analog Mode  */
-
-#define  GPIO_MODE_IT_RISING           ((uint32_t)0x10110000U)   /*!< External Interrupt Mode with Rising edge trigger detection          */
-#define  GPIO_MODE_IT_FALLING          ((uint32_t)0x10210000U)   /*!< External Interrupt Mode with Falling edge trigger detection         */
-#define  GPIO_MODE_IT_RISING_FALLING   ((uint32_t)0x10310000U)   /*!< External Interrupt Mode with Rising/Falling edge trigger detection  */
-
-#define  GPIO_MODE_EVT_RISING          ((uint32_t)0x10120000U)   /*!< External Event Mode with Rising edge trigger detection               */
-#define  GPIO_MODE_EVT_FALLING         ((uint32_t)0x10220000U)   /*!< External Event Mode with Falling edge trigger detection              */
-#define  GPIO_MODE_EVT_RISING_FALLING  ((uint32_t)0x10320000U)   /*!< External Event Mode with Rising/Falling edge trigger detection       */
-
-#define GPIO_NOPULL                    ((uint32_t)0x00000000U)   // No Pull-up or Pull-down activation
-#define GPIO_PULLUP                    ((uint32_t)0x00000001U)   // Pull-up activation
-#define GPIO_PULLDOWN                  ((uint32_t)0x00000002U)   /*!< Pull-down activation                */
-
-#define GPIO_MODE                      ((uint32_t)0x00000003U)
 #define EXTI_MODE                      ((uint32_t)0x10000000U)
-#define GPIO_MODE_IT                   ((uint32_t)0x00010000U)
-#define GPIO_MODE_EVT                  ((uint32_t)0x00020000U)
-#define GPIO_OUTPUT_TYPE               ((uint32_t)0x00000010U)
-
-#define GPIO_NUMBER                    ((uint32_t)16U)
-#define GPIO_SPEED_FREQ_HIGH           ((uint32_t)0x00000002U)  /*!< Fast speed    */
-#define GPIO_SPEED_FAST                GPIO_SPEED_FREQ_HIGH
-#define GPIO_SPEED_FREQ_VERY_HIGH      ((uint32_t)0x00000003U)   //  High speed
-#define GPIO_SPEED_HIGH                GPIO_SPEED_FREQ_VERY_HIGH
 
 typedef struct
 {
@@ -341,7 +344,6 @@ typedef struct
 #define DSI_LP_VSYNC_ENABLE            DSI_VMCR_LPVSAE
 #define DSI_LOOSELY_PACKED_ENABLE      DSI_LCOLCR_LPE
 #define DSI_LOOSELY_PACKED_DISABLE     0x00000000U
-#define RCC_PERIPHCLK_LTDC             ((uint32_t)0x00000008U)
 #define DSI_AUTO_CLK_LANE_CTRL_DISABLE 0x00000000U
 #define DSI_AUTO_CLK_LANE_CTRL_ENABLE  DSI_CLCR_ACR
 #define DSI_RGB565                     0x00000000U /*!< The values 0x00000001 and 0x00000002 can also be used for the RGB565 color mode configuration */
@@ -409,11 +411,13 @@ typedef struct
                                         tmpreg = READ_BIT(RCC->APB2ENR, RCC_APB2ENR_DSIEN);\
                                         UNUSED(tmpreg); \
                                       } while(0)
-#define DSI_DCS_SHORT_PKT_WRITE_P1    ((uint32_t)0x00000015U) /*!< DCS short write, one parameter      */
+#define DSI_DCS_SHORT_PKT_WRITE_P1          ((uint32_t)0x00000015U) /*!< DCS short write, one parameter      */
 #define DSI_DCS_LONG_PKT_WRITE              0x00000039U /*!< DCS long write     */
 #define DSI_GEN_LONG_PKT_WRITE              0x00000029U /*!< Generic long write */
-#define IS_DSI_LONG_WRITE_PACKET_TYPE(MODE)         (((MODE) == DSI_DCS_LONG_PKT_WRITE) || \
-                                                     ((MODE) == DSI_GEN_LONG_PKT_WRITE))
+#define IS_DSI_LONG_WRITE_PACKET_TYPE(MODE) (((MODE) == DSI_DCS_LONG_PKT_WRITE) || ((MODE) == DSI_GEN_LONG_PKT_WRITE))
+
+#define RCC_PERIPHCLK_LTDC  ((uint32_t)0x00000008U)
+
 typedef enum
 {
     HAL_DSI_STATE_RESET = 0x00U,
@@ -432,27 +436,13 @@ typedef struct
                       // This parameter can be any value of @ref DSI_PLL_ODF 
 } DSI_PLLInitTypeDef;
 
-
-
 #define __HAL_UNLOCK(__HANDLE__)  do{ (__HANDLE__)->Lock = HAL_UNLOCKED;  } while (0U)
-
-
-
-
 #define __HAL_RCC_LTDC_FORCE_RESET()         (RCC->APB2RSTR |= (RCC_APB2RSTR_LTDCRST))
 #define __HAL_RCC_DMA2D_FORCE_RESET()        (RCC->AHB1RSTR |= (RCC_AHB1RSTR_DMA2DRST))
 #define __HAL_RCC_DSI_FORCE_RESET()          (RCC->APB2RSTR |= (RCC_APB2RSTR_DSIRST))
 #define __HAL_RCC_LTDC_CLK_DISABLE()         (RCC->APB2ENR &= ~(RCC_APB2ENR_LTDCEN))
 #define __HAL_RCC_DMA2D_CLK_DISABLE()        (RCC->AHB1ENR &= ~(RCC_AHB1ENR_DMA2DEN))
 #define __HAL_RCC_DSI_CLK_DISABLE()          (RCC->APB2ENR &= ~(RCC_APB2ENR_DSIEN))
-
-#define __HAL_RCC_GPIOJ_CLK_ENABLE()   do { \
-                                            __IO uint32_t tmpreg; \
-                                            SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOJEN);\
-                                            /* Delay after an RCC peripheral clock enabling */ \
-                                            tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOJEN);\
-                                            UNUSED(tmpreg); \
-                                          } while(0)
 
 #define HSE_VALUE    ((uint32_t)25000000) /*!< Default value of the External oscillator in Hz */	
 
@@ -477,7 +467,6 @@ typedef struct
 
 
 #define __HAL_RCC_DMA2D_RELEASE_RESET()  (RCC->AHB1RSTR &= ~(RCC_AHB1RSTR_DMA2DRST))
-
 #define __HAL_RCC_DMA2D_CLK_ENABLE()   do { \
                                         __IO uint32_t tmpreg; \
                                         SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_DMA2DEN);\
@@ -487,9 +476,6 @@ typedef struct
                                       } while(0)
 
 #define __HAL_RCC_LTDC_RELEASE_RESET()   (RCC->APB2RSTR &= ~(RCC_APB2RSTR_LTDCRST))
-
-
-
 #define __HAL_RCC_LTDC_CLK_ENABLE()   do { \
                                         __IO uint32_t tmpreg; \
                                         SET_BIT(RCC->APB2ENR, RCC_APB2ENR_LTDCEN);\
@@ -499,7 +485,6 @@ typedef struct
                                       } while(0)
 
 #define PLLSAI_TIMEOUT_VALUE       100U             /* Timeout value fixed to 100 ms */
-
 #define __HAL_RCC_PLLSAI_GET_FLAG() ((RCC->CR & (RCC_CR_PLLSAIRDY)) == (RCC_CR_PLLSAIRDY))
 #define __HAL_RCC_PLLSAI_ENABLE() (RCC->CR |= (RCC_CR_PLLSAION))
 #define __HAL_RCC_PLLSAI_PLLSAICLKDIVR_CONFIG(__PLLSAIDivR__)\
@@ -526,11 +511,8 @@ typedef struct
 
 #define RCC_FLAG_MASK  ((uint8_t)0x1F)
 #define RCC_FLAG_PLLI2SRDY               ((uint8_t)0x3BU)
-#define __HAL_RCC_GET_FLAG(__FLAG__) (((((((__FLAG__) >> 5) == 1)? RCC->CR :((((__FLAG__) >> 5) == 2) ? RCC->BDCR :((((__FLAG__) >> 5) == 3)? RCC->CSR :RCC->CIR))) & ((uint32_t)1 << ((__FLAG__) & RCC_FLAG_MASK)))!= 0)? 1 : 0)
 
 #define __HAL_RCC_PLLI2S_ENABLE() (RCC->CR |= (RCC_CR_PLLI2SON))
-
-
 #define __HAL_RCC_PLLI2S_CONFIG(__PLLI2SN__, __PLLI2SP__, __PLLI2SQ__, __PLLI2SR__)              \
                                (RCC->PLLI2SCFGR = ((__PLLI2SN__) << RCC_PLLI2SCFGR_PLLI2SN_Pos) |\
                                ((__PLLI2SP__) << RCC_PLLI2SCFGR_PLLI2SP_Pos)                    |\
@@ -544,25 +526,14 @@ typedef struct
 #define RCC_SAI2CLKSOURCE_PLLI2S             RCC_DCKCFGR1_SAI2SEL_0
 #define RCC_PERIPHCLK_I2S             ((uint32_t)0x00000001U)
 #define IS_RCC_PLLI2SN_VALUE(VALUE) ((50 <= (VALUE)) && ((VALUE) <= 432))
-#define __HAL_RCC_PLLI2S_DISABLE() (RCC->CR &= ~(RCC_CR_PLLI2SON))
-#define __HAL_RCC_I2C4_CONFIG(__I2C4_CLKSOURCE__) \
-                  MODIFY_REG(RCC->DCKCFGR2, RCC_DCKCFGR2_I2C4SEL, (uint32_t)(__I2C4_CLKSOURCE__))
+#define __HAL_RCC_I2C4_CONFIG(__I2C4_CLKSOURCE__)  MODIFY_REG(RCC->DCKCFGR2, RCC_DCKCFGR2_I2C4SEL, (uint32_t)(__I2C4_CLKSOURCE__))
 #define RCC_PERIPHCLK_I2C4            ((uint32_t)0x00020000U)
-
-#define __HAL_RCC_I2C3_CONFIG(__I2C3_CLKSOURCE__) \
-                  MODIFY_REG(RCC->DCKCFGR2, RCC_DCKCFGR2_I2C3SEL, (uint32_t)(__I2C3_CLKSOURCE__))
+#define __HAL_RCC_I2C3_CONFIG(__I2C3_CLKSOURCE__)  MODIFY_REG(RCC->DCKCFGR2, RCC_DCKCFGR2_I2C3SEL, (uint32_t)(__I2C3_CLKSOURCE__))
 #define RCC_PERIPHCLK_I2C3            ((uint32_t)0x00010000U)
-
-#define __HAL_RCC_I2C2_CONFIG(__I2C2_CLKSOURCE__) \
-                  MODIFY_REG(RCC->DCKCFGR2, RCC_DCKCFGR2_I2C2SEL, (uint32_t)(__I2C2_CLKSOURCE__))
+#define __HAL_RCC_I2C2_CONFIG(__I2C2_CLKSOURCE__)  MODIFY_REG(RCC->DCKCFGR2, RCC_DCKCFGR2_I2C2SEL, (uint32_t)(__I2C2_CLKSOURCE__))
 #define RCC_PERIPHCLK_I2C2            ((uint32_t)0x00008000U)
-
-#define __HAL_RCC_I2C1_CONFIG(__I2C1_CLKSOURCE__) \
-                  MODIFY_REG(RCC->DCKCFGR2, RCC_DCKCFGR2_I2C1SEL, (uint32_t)(__I2C1_CLKSOURCE__))
-
+#define __HAL_RCC_I2C1_CONFIG(__I2C1_CLKSOURCE__)  MODIFY_REG(RCC->DCKCFGR2, RCC_DCKCFGR2_I2C1SEL, (uint32_t)(__I2C1_CLKSOURCE__))
 #define RCC_PERIPHCLK_I2C1            ((uint32_t)0x00004000U)
-
-
 
 typedef enum
 {
@@ -662,9 +633,9 @@ typedef struct
 #define LTDC_PIXEL_FORMAT_AL44            0x00000006U   /*!< AL44 LTDC pixel format     */
 #define LTDC_PIXEL_FORMAT_AL88            0x00000007U   /*!< AL88 LTDC pixel format     */
 #define LTDC_MAX_LAYER_NUMBER             ((uint32_t) 2)
-#define LTDC_BLENDING_FACTOR1_PAxCA    ((uint32_t)0x00000600U)   // Blending factor : Cte Alpha x Pixel Alpha
-#define LTDC_BLENDING_FACTOR2_PAxCA    ((uint32_t)0x00000007U)   // Blending factor : Cte Alpha x Pixel Alpha
-#define LTDC_PCPOLARITY_IPC            ((uint32_t)0x00000000U)   // input pixel clock.
+#define LTDC_BLENDING_FACTOR1_PAxCA       ((uint32_t)0x00000600U)   // Blending factor : Cte Alpha x Pixel Alpha
+#define LTDC_BLENDING_FACTOR2_PAxCA       ((uint32_t)0x00000007U)   // Blending factor : Cte Alpha x Pixel Alpha
+#define LTDC_PCPOLARITY_IPC               ((uint32_t)0x00000000U)   // input pixel clock.
 #define LTDC_DEPOLARITY_AL                0x00000000U   /*!< Data Enable, is active low. */
 #define LTDC_DEPOLARITY_AH                LTDC_GCR_DEPOL            /*!< Data Enable, is active high. */
 #define LTDC_VSPOLARITY_AH                LTDC_GCR_VSPOL            /*!< Vertical Synchronization is active high. */
@@ -1009,10 +980,52 @@ typedef enum
                                             ((REQUEST) == I2C_NO_STARTSTOP))
 #define I2C_FLAG_TXIS                   I2C_ISR_TXIS
 #define I2C_FLAG_TC                     I2C_ISR_TC
+#define __HAL_RCC_GPIOE_CLK_ENABLE()   do { \
+                                        __IO uint32_t tmpreg; \
+                                        SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOEEN);\
+                                        /* Delay after an RCC peripheral clock enabling */ \
+                                        tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOEEN);\
+                                        UNUSED(tmpreg); \
+                                      } while(0)
+#define __HAL_RCC_GPIOD_CLK_ENABLE()   do { \
+                                        __IO uint32_t tmpreg; \
+                                        SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIODEN);\
+                                        /* Delay after an RCC peripheral clock enabling */ \
+                                        tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIODEN);\
+                                        UNUSED(tmpreg); \
+                                      } while(0)
+#define __HAL_RCC_FMC_CLK_ENABLE()   do { \
+                                        __IO uint32_t tmpreg; \
+                                        SET_BIT(RCC->AHB3ENR, RCC_AHB3ENR_FMCEN);\
+                                        /* Delay after an RCC peripheral clock enabling */ \
+                                        tmpreg = READ_BIT(RCC->AHB3ENR, RCC_AHB3ENR_FMCEN);\
+                                        UNUSED(tmpreg); \
+                                      } while(0)
+#define __HAL_RCC_GPIOJ_CLK_ENABLE()   do { \
+                                        __IO uint32_t tmpreg; \
+                                        SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOJEN);\
+                                        /* Delay after an RCC peripheral clock enabling */ \
+                                        tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOJEN);\
+                                        UNUSED(tmpreg); \
+                                      } while(0)
+#define __HAL_RCC_GPIOB_CLK_ENABLE()   do { \
+                                        __IO uint32_t tmpreg; \
+                                        SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOBEN);\
+                                        /* Delay after an RCC peripheral clock enabling */ \
+                                        tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOBEN);\
+                                        UNUSED(tmpreg); \
+                                      } while(0)
 
 #define DISCOVERY_AUDIO_I2Cx                             I2C4
 #define DISCOVERY_EXT_I2Cx                             I2C1
 #define DISCOVERY_I2Cx_TIMING                      ((uint32_t)0x40912732)
+#define DISCOVERY_AUDIO_I2Cx_SCL_GPIO_CLK_ENABLE()       __HAL_RCC_GPIOD_CLK_ENABLE()
+#define DISCOVERY_AUDIO_I2Cx_SDA_GPIO_CLK_ENABLE()       __HAL_RCC_GPIOB_CLK_ENABLE()
+#define DISCOVERY_AUDIO_I2Cx_SDA_GPIO_PORT               GPIOB
+#define DISCOVERY_AUDIO_I2Cx_SCL_GPIO_PORT               GPIOD
+#define DISCOVERY_EXT_I2Cx_SCL_SDA_GPIO_PORT           GPIOB
+#define __HAL_RCC_PLLI2S_ENABLE() (RCC->CR |= (RCC_CR_PLLI2SON))
+#define __HAL_RCC_PLLI2S_DISABLE() (RCC->CR &= ~(RCC_CR_PLLI2SON))
 
 #define I2C_ADDRESSINGMODE_7BIT         (0x00000001U)
 #define I2C_ADDRESSINGMODE_10BIT        (0x00000002U)
@@ -1063,20 +1076,6 @@ typedef enum
                                            UNUSED(tmpreg); \
                                          } while(0)
 #define RCC_I2SCLKSOURCE_PLLI2S          ((uint32_t)0x00000000U)
-#define __HAL_RCC_GPIOB_CLK_ENABLE()     do { \
-                                          __IO uint32_t tmpreg; \
-                                          SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOBEN);\
-                                          /* Delay after an RCC peripheral clock enabling */ \
-                                          tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOBEN);\
-                                          UNUSED(tmpreg); \
-                                         } while(0)
-#define __HAL_RCC_GPIOD_CLK_ENABLE()     do { \
-                                          __IO uint32_t tmpreg; \
-                                          SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIODEN);\
-                                          /* Delay after an RCC peripheral clock enabling */ \
-                                          tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIODEN);\
-                                          UNUSED(tmpreg); \
-                                         } while(0)
 #define __HAL_RCC_SYSCFG_CLK_ENABLE()    do { \
                                          __IO uint32_t tmpreg; \
                                          SET_BIT(RCC->APB2ENR, RCC_APB2ENR_SYSCFGEN);\
@@ -1096,8 +1095,6 @@ typedef enum
 #define DISCOVERY_AUDIO_I2Cx_FORCE_RESET()             __HAL_RCC_I2C4_FORCE_RESET()
 #define DISCOVERY_AUDIO_I2Cx_RELEASE_RESET()           __HAL_RCC_I2C4_RELEASE_RESET()
 #define DISCOVERY_AUDIO_I2Cx_CLK_ENABLE()              __HAL_RCC_I2C4_CLK_ENABLE()
-#define DISCOVERY_AUDIO_I2Cx_SCL_GPIO_CLK_ENABLE()     __HAL_RCC_GPIOD_CLK_ENABLE()
-#define DISCOVERY_EXT_I2Cx_SCL_SDA_GPIO_PORT           GPIOB
 #define DISCOVERY_EXT_I2Cx_SCL_SDA_AF                  GPIO_AF4_I2C1
 #define DISCOVERY_EXT_I2Cx_SCL_PIN                     GPIO_PIN_8 /*!< PB8 */
 #define DISCOVERY_EXT_I2Cx_SDA_PIN                     GPIO_PIN_9 /*!< PB9 */
@@ -1146,13 +1143,6 @@ typedef enum
 #define SDRAM_MODEREG_WRITEBURST_MODE_SINGLE     ((uint16_t)0x0200) 
 #define SDRAM_MEMORY_WIDTH                       FMC_SDRAM_MEM_BUS_WIDTH_32
 
-#define __HAL_RCC_GPIOE_CLK_ENABLE()   do { \
-                                        __IO uint32_t tmpreg; \
-                                        SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOEEN);\
-                                        /* Delay after an RCC peripheral clock enabling */ \
-                                        tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOEEN);\
-                                        UNUSED(tmpreg); \
-                                      } while(0)
 #define __HAL_RCC_GPIOF_CLK_ENABLE()   do { \
                                         __IO uint32_t tmpreg; \
                                         SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOFEN);\
@@ -1189,13 +1179,6 @@ typedef enum
                                         UNUSED(tmpreg); \
                                       } while(0)
 #define __DMAx_CLK_ENABLE                 __HAL_RCC_DMA2_CLK_ENABLE
-#define __HAL_RCC_FMC_CLK_ENABLE()   do { \
-                                        __IO uint32_t tmpreg; \
-                                        SET_BIT(RCC->AHB3ENR, RCC_AHB3ENR_FMCEN);\
-                                        /* Delay after an RCC peripheral clock enabling */ \
-                                        tmpreg = READ_BIT(RCC->AHB3ENR, RCC_AHB3ENR_FMCEN);\
-                                        UNUSED(tmpreg); \
-                                      } while(0)
 
 typedef enum
 {
@@ -1420,7 +1403,7 @@ typedef struct __I2C_HandleTypeDef
 #endif  /* USE_HAL_I2C_REGISTER_CALLBACKS */
 } I2C_HandleTypeDef;
 
-#define FMC_SDRAM_TypeDef              FMC_Bank5_6_TypeDef
+#define FMC_SDRAM_TypeDef                 FMC_Bank5_6_TypeDef
 #define SDRAM_DMAx_CHANNEL                DMA_CHANNEL_0
 #define SDRAM_DMAx_STREAM                 DMA2_Stream0  
 #define SDRAM_DMAx_IRQn                   DMA2_Stream0_IRQn
@@ -1471,16 +1454,14 @@ typedef enum
 #define LCD_DSI_PIXEL_DATA_FMT_RBG565  DSI_RGB565                // DSI packet pixel format chosen is RGB565 : 16 bpp
 
 #define LCD_OTM8009A_ID                (uint32_t) 0 
-#define  OTM8009A_480X800_HBP          ((uint16_t)120)           // Horizontal back porch      
-#define  OTM8009A_480X800_HFP          ((uint16_t)120)           // Horizontal front porch     
-#define  OTM8009A_480X800_VSYNC        ((uint16_t)12)            // Vertical synchronization   
-#define  OTM8009A_480X800_VBP          ((uint16_t)12)            // Vertical back porch        
-#define  OTM8009A_480X800_VFP          ((uint16_t)12)            // Vertical front porch       
-#define  OTM8009A_480X800_HSYNC        ((uint16_t)63)            // Horizontal synchronization: This value is set to limit value mentionned 
-#define OTM8009A_FORMAT_RGB888    ((uint32_t)0x00) /* Pixel format chosen is RGB888 : 24 bpp */
-#define OTM8009A_FORMAT_RBG565    ((uint32_t)0x02) /* Pixel format chosen is RGB565 : 16 bpp */
-uint8_t OTM8009A_Init(uint32_t ColorCoding, uint32_t orientation);
-
+#define OTM8009A_480X800_HBP          ((uint16_t)120)           // Horizontal back porch      
+#define OTM8009A_480X800_HFP          ((uint16_t)120)           // Horizontal front porch     
+#define OTM8009A_480X800_VSYNC        ((uint16_t)12)            // Vertical synchronization   
+#define OTM8009A_480X800_VBP          ((uint16_t)12)            // Vertical back porch        
+#define OTM8009A_480X800_VFP          ((uint16_t)12)            // Vertical front porch       
+#define OTM8009A_480X800_HSYNC        ((uint16_t)63)            // Horizontal synchronization: This value is set to limit value mentionned 
+#define OTM8009A_FORMAT_RGB888        ((uint32_t)0x00)          /* Pixel format chosen is RGB888 : 24 bpp */
+#define OTM8009A_FORMAT_RBG565        ((uint32_t)0x02)          /* Pixel format chosen is RGB565 : 16 bpp */
 
 typedef struct
 {
@@ -1504,9 +1485,6 @@ typedef struct
                                                  tmpreg = READ_BIT((__HANDLE__)->Instance->WCR, DSI_WCR_DSIEN);\
                                                  UNUSED(tmpreg); \
                                                 } while(0U)
-
-
-
 #define RCC_PLLSAIDIVR_2                ((uint32_t)0x00000000U)
 #define RCC_PLLSAIDIVR_4                RCC_DCKCFGR1_PLLSAIDIVR_0
 #define RCC_PLLSAIDIVR_8                RCC_DCKCFGR1_PLLSAIDIVR_1
@@ -1738,7 +1716,6 @@ typedef struct
                                         ((BURST) == DMA_PBURST_INC4)   || \
                                         ((BURST) == DMA_PBURST_INC8)   || \
                                         ((BURST) == DMA_PBURST_INC16))
-#define DISCOVERY_AUDIO_I2Cx_SDA_GPIO_CLK_ENABLE()       __HAL_RCC_GPIOB_CLK_ENABLE()
 
 #define DSI_VID_MODE_NB_PULSES    0U
 #define DSI_VID_MODE_NB_EVENTS    1U
@@ -1805,10 +1782,8 @@ typedef struct
 
 #define IS_I2C_OWN_ADDRESS1(ADDRESS1)             ((ADDRESS1) <= 0x000003FFU)
 #define IS_I2C_OWN_ADDRESS2(ADDRESS2)             ((ADDRESS2) <= (uint16_t)0x00FFU)
-#define IS_I2C_ADDRESSING_MODE(MODE)    (((MODE) == I2C_ADDRESSINGMODE_7BIT) || \
-                                         ((MODE) == I2C_ADDRESSINGMODE_10BIT))
-#define IS_I2C_DUAL_ADDRESS(ADDRESS)    (((ADDRESS) == I2C_DUALADDRESS_DISABLE) || \
-                                         ((ADDRESS) == I2C_DUALADDRESS_ENABLE))
+#define IS_I2C_ADDRESSING_MODE(MODE)    (((MODE) == I2C_ADDRESSINGMODE_7BIT)    || ((MODE) == I2C_ADDRESSINGMODE_10BIT))
+#define IS_I2C_DUAL_ADDRESS(ADDRESS)    (((ADDRESS) == I2C_DUALADDRESS_DISABLE) || ((ADDRESS) == I2C_DUALADDRESS_ENABLE))
 #define I2C_OA2_NOMASK                  ((uint8_t)0x00U)
 #define I2C_OA2_MASK01                  ((uint8_t)0x01U)
 #define I2C_OA2_MASK02                  ((uint8_t)0x02U)
@@ -1827,12 +1802,10 @@ typedef struct
                                          ((MASK) == I2C_OA2_MASK07))
 #define I2C_GENERALCALL_DISABLE         (0x00000000U)
 #define I2C_GENERALCALL_ENABLE          I2C_CR1_GCEN
-#define IS_I2C_GENERAL_CALL(CALL)       (((CALL) == I2C_GENERALCALL_DISABLE) || \
-                                         ((CALL) == I2C_GENERALCALL_ENABLE))
+#define IS_I2C_GENERAL_CALL(CALL)       (((CALL) == I2C_GENERALCALL_DISABLE) || ((CALL) == I2C_GENERALCALL_ENABLE))
 #define I2C_NOSTRETCH_DISABLE           (0x00000000U)
 #define I2C_NOSTRETCH_ENABLE            I2C_CR1_NOSTRETCH
-#define IS_I2C_NO_STRETCH(STRETCH)      (((STRETCH) == I2C_NOSTRETCH_DISABLE) || \
-                                         ((STRETCH) == I2C_NOSTRETCH_ENABLE))
+#define IS_I2C_NO_STRETCH(STRETCH)      (((STRETCH) == I2C_NOSTRETCH_DISABLE) || ((STRETCH) == I2C_NOSTRETCH_ENABLE))
 
 #define FMC_SDRAM_COLUMN_BITS_NUM_8           ((uint32_t)0x00000000U)
 #define FMC_SDRAM_COLUMN_BITS_NUM_9           ((uint32_t)0x00000001U)
@@ -1870,63 +1843,7 @@ typedef struct
 #define FMC_SDRAM_CMD_TARGET_BANK1            FMC_SDCMR_CTB1
 #define FMC_SDRAM_CMD_TARGET_BANK1_2          ((uint32_t)0x00000018U)
 
-#define IS_FMC_COLUMNBITS_NUMBER(COLUMN) (((COLUMN) == FMC_SDRAM_COLUMN_BITS_NUM_8)  || \
-                                          ((COLUMN) == FMC_SDRAM_COLUMN_BITS_NUM_9)  || \
-                                          ((COLUMN) == FMC_SDRAM_COLUMN_BITS_NUM_10) || \
-                                          ((COLUMN) == FMC_SDRAM_COLUMN_BITS_NUM_11))
-#define IS_FMC_ROWBITS_NUMBER(ROW) (((ROW) == FMC_SDRAM_ROW_BITS_NUM_11) || \
-                                    ((ROW) == FMC_SDRAM_ROW_BITS_NUM_12) || \
-                                    ((ROW) == FMC_SDRAM_ROW_BITS_NUM_13))
-#define IS_FMC_SDMEMORY_WIDTH(WIDTH) (((WIDTH) == FMC_SDRAM_MEM_BUS_WIDTH_8)  || \
-                                      ((WIDTH) == FMC_SDRAM_MEM_BUS_WIDTH_16) || \
-                                      ((WIDTH) == FMC_SDRAM_MEM_BUS_WIDTH_32))
-#define IS_FMC_INTERNALBANK_NUMBER(NUMBER) (((NUMBER) == FMC_SDRAM_INTERN_BANKS_NUM_2) || \
-                                            ((NUMBER) == FMC_SDRAM_INTERN_BANKS_NUM_4))
-#define IS_FMC_CAS_LATENCY(LATENCY) (((LATENCY) == FMC_SDRAM_CAS_LATENCY_1) || \
-                                     ((LATENCY) == FMC_SDRAM_CAS_LATENCY_2) || \
-                                     ((LATENCY) == FMC_SDRAM_CAS_LATENCY_3))
-#define IS_FMC_WRITE_PROTECTION(__WRITE__) (((__WRITE__) == FMC_SDRAM_WRITE_PROTECTION_DISABLE) || \
-                                            ((__WRITE__) == FMC_SDRAM_WRITE_PROTECTION_ENABLE))									  
-#define IS_FMC_SDCLOCK_PERIOD(__PERIOD__) (((__PERIOD__) == FMC_SDRAM_CLOCK_DISABLE)  || \
-                                           ((__PERIOD__) == FMC_SDRAM_CLOCK_PERIOD_2) || \
-                                           ((__PERIOD__) == FMC_SDRAM_CLOCK_PERIOD_3))
 
-#define IS_FMC_READ_BURST(__RBURST__) (((__RBURST__) == FMC_SDRAM_RBURST_DISABLE) || \
-                                       ((__RBURST__) == FMC_SDRAM_RBURST_ENABLE))
-
-#define IS_FMC_READPIPE_DELAY(__DELAY__) (((__DELAY__) == FMC_SDRAM_RPIPE_DELAY_0) || \
-                                          ((__DELAY__) == FMC_SDRAM_RPIPE_DELAY_1) || \
-                                          ((__DELAY__) == FMC_SDRAM_RPIPE_DELAY_2))
-
-#define IS_FMC_COMMAND_MODE(__COMMAND__) (((__COMMAND__) == FMC_SDRAM_CMD_NORMAL_MODE)      || \
-                                          ((__COMMAND__) == FMC_SDRAM_CMD_CLK_ENABLE)       || \
-                                          ((__COMMAND__) == FMC_SDRAM_CMD_PALL)             || \
-                                          ((__COMMAND__) == FMC_SDRAM_CMD_AUTOREFRESH_MODE) || \
-                                          ((__COMMAND__) == FMC_SDRAM_CMD_LOAD_MODE)        || \
-                                          ((__COMMAND__) == FMC_SDRAM_CMD_SELFREFRESH_MODE) || \
-                                          ((__COMMAND__) == FMC_SDRAM_CMD_POWERDOWN_MODE))
-#define IS_FMC_COMMAND_TARGET(__TARGET__) (((__TARGET__) == FMC_SDRAM_CMD_TARGET_BANK1) || \
-                                           ((__TARGET__) == FMC_SDRAM_CMD_TARGET_BANK2) || \
-                                           ((__TARGET__) == FMC_SDRAM_CMD_TARGET_BANK1_2)) 										  
-#define IS_FMC_AUTOREFRESH_NUMBER(__NUMBER__) (((__NUMBER__) > 0) && ((__NUMBER__) <= 16))
-#define IS_FMC_MODE_REGISTER(__CONTENT__) ((__CONTENT__) <= 8191)
-#define IS_FMC_REFRESH_RATE(__RATE__) ((__RATE__) <= 8191)
-#define IS_FMC_SDRAM_DEVICE(__INSTANCE__) ((__INSTANCE__) == FMC_SDRAM_DEVICE)
-#define IS_FMC_LOADTOACTIVE_DELAY(__DELAY__) (((__DELAY__) > 0) && ((__DELAY__) <= 16))
-#define IS_FMC_EXITSELFREFRESH_DELAY(__DELAY__) (((__DELAY__) > 0) && ((__DELAY__) <= 16))
-#define IS_FMC_SELFREFRESH_TIME(__TIME__) (((__TIME__) > 0) && ((__TIME__) <= 16))
-#define IS_FMC_ROWCYCLE_DELAY(__DELAY__) (((__DELAY__) > 0) && ((__DELAY__) <= 16))
-#define IS_FMC_WRITE_RECOVERY_TIME(__TIME__) (((__TIME__) > 0) && ((__TIME__) <= 16))
-#define IS_FMC_RP_DELAY(__DELAY__) (((__DELAY__) > 0) && ((__DELAY__) <= 16))
-#define IS_FMC_RCD_DELAY(__DELAY__) (((__DELAY__) > 0) && ((__DELAY__) <= 16))
-#define IS_FMC_SDRAM_BANK(BANK) (((BANK) == FMC_SDRAM_BANK1) || \
-                                 ((BANK) == FMC_SDRAM_BANK2))
-
-
-
-#define IS_NVIC_PREEMPTION_PRIORITY(PRIORITY)  ((PRIORITY) < 0x10U)
-#define IS_NVIC_SUB_PRIORITY(PRIORITY)         ((PRIORITY) < 0x10U)
-#define IS_NVIC_DEVICE_IRQ(IRQ)                ((IRQ) >= 0x00)
 
 typedef struct
 {
@@ -2021,11 +1938,6 @@ HAL_StatusTypeDef HAL_DMA_DeInit(DMA_HandleTypeDef* hdma);
 uint8_t BSP_SDRAM_Init(void);
 void BSP_SDRAM_MspInit(SDRAM_HandleTypeDef* hsdram, void* Params);
 void BSP_SDRAM_Initialization_sequence(uint32_t RefreshCount);
-
-
-void HAL_NVIC_EnableIRQ(IRQn_Type IRQn);
-void HAL_NVIC_SetPriority(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority);
-
 void HAL_GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_Init);
 
 
@@ -2054,7 +1966,6 @@ static HAL_StatusTypeDef I2C_WaitOnFlagUntilTimeout(I2C_HandleTypeDef* hi2c, uin
 
 
 uint8_t BSP_TS_Init(void);
-void TS_IO_Init(void);
 uint8_t  TS_IO_Read(uint8_t Addr, uint8_t Reg);
 uint16_t TS_IO_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t* Buffer, uint16_t Length);
 void TS_IO_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
@@ -2073,8 +1984,9 @@ void HAL_DSI_MspDeInit(DSI_HandleTypeDef* hdsi);
 HAL_StatusTypeDef HAL_DSI_DeInit(DSI_HandleTypeDef* hdsi);
 HAL_StatusTypeDef HAL_DSI_ConfigVideoMode(DSI_HandleTypeDef* hdsi, DSI_VidCfgTypeDef* VidCfg);
 
+void TS_IO_Init(void);
 
-uint8_t BSP_LCD_InitEx(LCD_OrientationTypeDef orientation);
+uint8_t BSP_LCD_InitEx();
 void BSP_LCD_LayerDefaultInit(uint32_t LayerIndex, uint32_t FB_Address);
 void BSP_LCD_MspDeInit(void);
 void BSP_LCD_Reset(void);

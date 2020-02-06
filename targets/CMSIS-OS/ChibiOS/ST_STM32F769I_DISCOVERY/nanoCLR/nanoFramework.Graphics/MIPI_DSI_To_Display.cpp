@@ -16,8 +16,9 @@
 #define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
 
 struct DisplayInterface g_DisplayInterface;
-void STM32F769i_Discovery_LCD_INIT(uint32_t FB_Address);
-void DSI_IO_WriteCmd(uint32_t NbrParams, uint8_t* pParams);
+
+extern void STM32F769i_Discovery_LCD_INIT(uint32_t FB_Address);
+extern void DSI_IO_WriteCmd(uint32_t NbrParams, uint8_t* pParams);
 
 // This is the Display Interface block
 bool DisplayInterface::InitializeDisplayInterface()
