@@ -121,7 +121,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize( CLR_RT_St
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -142,6 +142,10 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes__
     CLR_RT_AttributeEnumerator attributeEnumerator;
     attributeEnumerator.Initialize( fieldDefinition );
 
+    // the return array has two positions for each attribute:
+    // 1st: the attribute type
+    // 2nd: the constructor parameters or NULL, if the attribute has no constructor
+
     // 1st pass: count attributes
     do
     {
@@ -155,10 +159,14 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes__
             // done sweeping attributes
 
             // create the result array
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, count, g_CLR_RT_WellKnownTypes.m_Object ));
+            // (2 positions for each attribute)
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, ( count * 2 ), g_CLR_RT_WellKnownTypes.m_Object ));
 
-            // use this to skip the 2nd pass if no attribute was found
-            if (count == 0) break;
+            // use this to skip to the 2nd pass if no attribute was found
+            if (count == 0)
+            {
+                break;
+            }
 
             // get the pointer to the first element
             returnArray = (CLR_RT_HeapBlock*)top.DereferenceArray()->GetFirstElement();
@@ -174,7 +182,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes__
     // 2nd pass: fill the array with the attributes types, if any
     while(count > 0)
     {
-        // move to the next attribute in the collection, if any
+        // move to the next attribute in the collection, if there is another
         if(attributeEnumerator.Advance())
         {
             CLR_RT_TypeDef_Instance instanceTypeDef;
@@ -186,17 +194,11 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes__
             CLR_RT_AttributeParser parser;
             NANOCLR_CHECK_HRESULT(parser.Initialize( attributeEnumerator ));
 
-
-            // CLR_RT_TypeDef_Index attributeType;
-            // attributeType.Set(instanceTypeDef.Assembly(), instanceTypeDef.Type());
-
-            // // create a new object for the attribute type and put it on the return array
-            // NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, attributeType));
-
             while(true)
             {
                 CLR_RT_AttributeParser::Value* val;
 
+                // parse next attribute, if there is another
                 NANOCLR_CHECK_HRESULT(parser.Next( val ));
 
                 if(val == NULL)
@@ -205,94 +207,40 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes__
                 }
                 else
                 {
+                    // check if this attribute has a default constructor or one with argument
                     if(val->m_mode == CLR_RT_AttributeParser::Value::c_DefaultConstructor)
                     {
+                        // default constructor here
+
+                        // get attribute type
                         returnArray->LoadFromReference(val->m_value);
+
+                        // no parameters for the constructor
+                        returnArray++;
+
+                        // set next position to NULL
+                        returnArray->SetObjectReference( NULL );
                     }
                     else if(val->m_mode == CLR_RT_AttributeParser::Value::c_ConstructorArgument)
                     {
+                        // constructor with argument
+
+                        // get the type for the class object 
                         CLR_RT_MethodDef_Index    md    ; md.Set( parser.m_assm->m_idx, parser.m_mdIdx.Method() );
                         CLR_RT_MethodDef_Instance mdInst; mdInst.InitializeFromIndex( md );
 
                         CLR_RT_TypeDef_Instance cls; 
-                        if(cls.InitializeFromMethod( mdInst ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE); // This is the class to create!
+                        if(cls.InitializeFromMethod( mdInst ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
+                        // create a new object for the attribute type and put it on the return array
+                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(*returnArray, cls));
 
-                        CLR_RT_HeapBlock*           top;
-                        top   = &stack.PushValue();
-                        top->LoadFromReference(val->m_value);
+                        // now the constructor parameter(s)
+                        returnArray++;
 
-                        // const CLR_RECORD_METHODDEF* target  = parser.m_assm->GetMethodDef( md.m_data );
-                        // uint32_t changes = target->numArgs;
-                        // //
-                        // // We have to insert the 'this' pointer as argument 0, that means moving all the arguments up one slot...
-                        // //
-                        // //top--;
-                        // while(--changes > 0)
-                        // {
-                        //     top[ 0 ].Assign( top[ -1 ] ); top--;
-                        // }
-                        // top->SetObjectReference( NULL );
-
-
-                        //
-                        // We have to insert the 'this' pointer as argument 0, that means moving all the arguments up one slot...
-                        //
-                        CLR_RT_HeapBlock* firstArgument = top;
-
-                        memmove( &firstArgument[1], &firstArgument[ 0 ], (CLR_UINT8*)stack.m_evalStackPos - (CLR_UINT8*)firstArgument ); stack.m_evalStackPos++;
-
-                        firstArgument->SetObjectReference( NULL );
-
-                        //--//
-
-                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( firstArgument[ 0 ], cls ));
-
-                        //
-                        // This is to flag the fact that we need to copy back the 'this' pointer into our stack.
-                        //
-                        // See CLR_RT_StackFrame::Pop()
-                        //
-                        stack.m_flags |= CLR_RT_StackFrame::c_ExecutingConstructor;
-
-                        //
-                        // Ok, creating a ValueType then calls its constructor.
-                        // But the constructor will try to load the 'this' pointer and since it's a value type, it will be cloned.
-                        // For the length of the constructor, change the type from an object pointer to a reference.
-                        //
-                        // See CLR_RT_StackFrame::Pop()
-                        //
-                        if((cls.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_ValueType)
-                        {
-                            if(firstArgument[ 0 ].DataType() == DATATYPE_OBJECT)
-                            {
-                                firstArgument[ 0 ].ChangeDataType( DATATYPE_BYREF );
-                            }
-                            else
-                            {
-                                //
-                                // This is to support the optimization on DateTime and TimeSpan:
-                                //
-                                // These are passed as built-ins. But we need to pass them as a reference,
-                                // so push everything down and undo the "ExecutingConstructor" trick.
-                                //
-                                memmove( &firstArgument[ 1 ], &firstArgument[ 0 ], (CLR_UINT8*)stack.m_evalStackPos - (CLR_UINT8*)firstArgument ); stack.m_evalStackPos++;
-
-                                firstArgument[ 1 ].SetReference( firstArgument[ 0 ] );
-
-                                stack.m_flags &= ~CLR_RT_StackFrame::c_ExecutingConstructor;
-                            }
-                        }
-
-                        NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push( stack.m_owningThread, mdInst, -1 ));
-
-                        // if(stack.Callee()->m_flags & CLR_RT_StackFrame::c_CallerIsCompatibleForCall)
-                        // {
-                        //     NANOCLR_SET_AND_LEAVE(S_OK);
-                        // }
-
-                        // NANOCLR_SET_AND_LEAVE(CLR_S_RESTART_EXECUTION);
-     
+                        // load the constructor parameter
+                        // TODO: improve this to be able to handle constuctors with multiple parameters
+                        returnArray->LoadFromReference(val->m_value);
                     }
                 }
             }
