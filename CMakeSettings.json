@@ -105,7 +105,7 @@
         },
         {
           "name": "NF_WP_IMPLEMENTS_CRC32",
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "NF_FEATURE_DEBUGGER",
@@ -335,8 +335,8 @@
           "value": "OFF"
         },
         {
-          "name": "NF_WP_IMPLEMENTS_CRC32:BOOL", //OFF-default-ON-to-enable-CRC32-wire-protocol
-          "value": "OFF"
+          "name": "NF_WP_IMPLEMENTS_CRC32:BOOL", //ON-default-OFF-to-disable-CRC32-wire-protocol
+          "value": "ON"
         },
         {
           "name": "NF_FEATURE_DEBUGGER:BOOL", //OFF-default-ON-to-include-managed-app-debugging-capability
