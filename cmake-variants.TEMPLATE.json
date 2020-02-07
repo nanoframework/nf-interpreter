@@ -59,7 +59,7 @@
           "NF_WP_TRACE_STATE" : "OFF-default-ON-to-enable-trace-state-messages-wire-protocol",
           "NF_WP_TRACE_NODATA" : "OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol",
           "NF_WP_TRACE_ALL" : "OFF-default-ON-to-enable-trace-all-messages-wire-protocol",
-          "NF_WP_IMPLEMENTS_CRC32" : "OFF-default-ON-to-enable-CRC32-wire-protocol",
+          "NF_WP_IMPLEMENTS_CRC32" : "ON-default-OFF-to-disable-CRC32-wire-protocol",
           "NF_FEATURE_DEBUGGER" : "OFF-default-ON-to-include-managed-app-debugging-capability",
           "NF_FEATURE_RTC" : "OFF-default-ON-to-enable-hardware-RTC",
           "NF_FEATURE_USE_APPDOMAINS" : "OFF-default-ON-to-enable-support-for-Application-Domains",
