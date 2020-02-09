@@ -9,7 +9,8 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 
 # set include directories
 if(RTOS_CHIBIOS_CHECK)
-    list(APPEND Windows.Storage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs/src)
+    #list(APPEND Windows.Storage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs/src)
+    list(APPEND Windows.Storage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FatFS_Source/source)
     set( PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common)
 elseif(RTOS_FREERTOS_CHECK)
     list(APPEND Windows.Storage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FatFS_Source/source)

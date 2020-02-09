@@ -49,7 +49,7 @@
             "NF_WP_TRACE_STATE": "OFF",
             "NF_WP_TRACE_NODATA": "OFF",
             "NF_WP_TRACE_ALL": "OFF",
-            "NF_WP_IMPLEMENTS_CRC32": "OFF",
+            "NF_WP_IMPLEMENTS_CRC32": "ON",
             "NF_FEATURE_DEBUGGER": "ON",
             "NF_FEATURE_RTC": "ON",
             "NF_FEATURE_USE_APPDOMAINS": "OFF",

@@ -159,13 +159,6 @@ if(USE_NETWORKING_OPTION)
     endif()
 endif()
 
-# add dependencies from CHIBIOS_FILESYSTEM_COMPONENTS (this is required to make sure that ChibiOS filesystem components are unzip at the proper locations before the build starts)
-# only required if filesystem is ON
-if(USE_FILESYSTEM_OPTION)
-    add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf CHIBIOS_FILESYSTEM_COMPONENTS)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_FILESYSTEM_COMPONENTS)
-endif()
-
 # include common directories
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
