@@ -42,12 +42,12 @@
 // #include "hal_nnnn.h"
 
 // Normal drivers
-#include <hal_stm32_qspi.h>
-#include <hal_stm32_flash.h>
-#include <hal_stm32_crc.h>
-#include <hal_stm32_rng.h>
-#include <hal_stm32_fsmc.h>
-#include <hal_stm32_onewire.h>
+#include "stm32_qspi/hal_stm32_qspi.h"
+#include "stm32_flash/hal_stm32_flash.h"
+#include "stm32_crc/hal_stm32_crc.h"
+#include "stm32_rng/hal_stm32_rng.h"
+#include "stm32_fsmc/hal_stm32_fsmc.h"
+#include "stm32_onewire/hal_stm32_onewire.h"
 
 // Complex drivers
 // #include "hal_nnnn.h"
