@@ -3,10 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_STM32_RNG_H
-#define HAL_STM32_RNG_H
+#ifndef HAL_NF_STM32_RNG_H
+#define HAL_NF_STM32_RNG_H
 
-#if (HAL_USE_STM32_RNG == TRUE)
+#if (HAL_NF_USE_STM32_RNG == TRUE)
 
 #if defined(STM32F0xx_MCUCONF)
 #error "CAN'T ENABLE RNG FOR STM32F0 series"
@@ -81,7 +81,7 @@ extern "C" {
 }
 #endif
 
-#endif /* HAL_USE_STM32_RNG */
+#endif /* HAL_NF_USE_STM32_RNG */
 
-#endif /* HAL_STM32_RNG_H_ */
+#endif /* HAL_NF_STM32_RNG_H_ */
 

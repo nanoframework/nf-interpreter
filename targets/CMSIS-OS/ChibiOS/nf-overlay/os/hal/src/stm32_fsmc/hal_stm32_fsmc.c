@@ -8,7 +8,7 @@
 #include <hal_nf_community.h>
 #include "hal_stm32_fsmc.h"
 
-#if (HAL_USE_FSMC == TRUE)
+#if (HAL_NF_USE_FSMC == TRUE)
 ///////////////////////////////////////////////////////////////////////////////
 // Driver local definitions.                                                 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ void fsmc_start(FSMCDriver *fsmcp) {
       rccResetFSMC();
 #endif
       rccEnableFSMC(FALSE);
-#if HAL_USE_NAND
+#if HAL_NF_USE_NAND
       nvicEnableVector(STM32_FSMC_NUMBER, STM32_FSMC_FSMC1_IRQ_PRIORITY);
 #endif
     }
@@ -118,7 +118,7 @@ void fsmc_stop(FSMCDriver *fsmcp) {
     /* Disables the peripheral.*/
 #if STM32_FSMC_USE_FSMC1
     if (&FSMCD1 == fsmcp) {
-#if HAL_USE_NAND
+#if HAL_NF_USE_NAND
       nvicDisableVector(STM32_FSMC_NUMBER);
 #endif
       rccDisableFSMC();
@@ -146,4 +146,4 @@ CH_IRQ_HANDLER(STM32_FSMC_HANDLER) {
   CH_IRQ_EPILOGUE();
 }
 
-#endif /* HAL_USE_FSMC */
+#endif /* HAL_NF_USE_FSMC */

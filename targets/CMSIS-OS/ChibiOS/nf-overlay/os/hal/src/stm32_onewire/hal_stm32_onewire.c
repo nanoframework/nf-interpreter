@@ -9,7 +9,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_ONEWIRE == TRUE)
+#if (HAL_NF_USE_STM32_ONEWIRE == TRUE)
 
 #include <string.h>
 
@@ -1030,4 +1030,4 @@ bool oneWireFindNext (bool doReset, bool alarmOnly)
     return result;
 }   
 
-#endif /* HAL_USE_STM32_ONEWIRE */
+#endif /* HAL_NF_USE_STM32_ONEWIRE */

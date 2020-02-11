@@ -249,7 +249,8 @@ jobs:
 - job: Build_NXP_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
   # not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
-  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
+  # disable build of this target since it's failing after Azure Pipelin updated git for windows to 2.25
+  condition: false #not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
 
   dependsOn:
   - Check_Build_Options

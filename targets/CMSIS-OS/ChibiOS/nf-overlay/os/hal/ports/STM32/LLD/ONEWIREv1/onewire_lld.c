@@ -8,7 +8,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_ONEWIRE == TRUE)
+#if (HAL_NF_USE_STM32_ONEWIRE == TRUE)
 
 #include <target_nf_devices_onewire_config.h>
 #include <string.h>
@@ -317,4 +317,4 @@ void oneWire_lld_release()
 
 #endif
 
-#endif /* HAL_USE_STM32_ONEWIRE */
+#endif /* HAL_NF_USE_STM32_ONEWIRE */

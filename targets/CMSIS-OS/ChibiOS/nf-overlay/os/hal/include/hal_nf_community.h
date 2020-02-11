@@ -8,37 +8,32 @@
 
 
 // these are for error checks on the configuration header files
-#if !defined(HAL_USE_STM32_FLASH)
-#define HAL_USE_STM32_FLASH                  FALSE
+#if !defined(HAL_NF_USE_STM32_FLASH)
+#define HAL_NF_USE_STM32_FLASH                  FALSE
 #endif
 
-#if !defined(HAL_USE_STM32_CRC)
+#if !defined(HAL_NF_USE_STM32_CRC)
 // the default for this driver is to be included
-#define HAL_USE_STM32_CRC                    TRUE
+#define HAL_NF_USE_STM32_CRC                    TRUE
 #endif
 
-#if !defined(HAL_USE_STM32_RNG)
+#if !defined(HAL_NF_USE_STM32_RNG)
 // the default for this driver is to be included
-#define HAL_USE_STM32_RNG                    TRUE
+#define HAL_NF_USE_STM32_RNG                    TRUE
 #endif
 
-#if !defined(HAL_USE_FSMC)
-#define HAL_USE_FSMC                         FALSE
+#if !defined(HAL_NF_USE_FSMC)
+#define HAL_NF_USE_FSMC                         FALSE
 #endif
 
-#if !defined(HAL_USE_STM32_ONEWIRE)
+#if !defined(HAL_NF_USE_STM32_ONEWIRE)
 // the default for this driver is NOT to be included
-#define HAL_USE_STM32_ONEWIRE                FALSE
+#define HAL_NF_USE_STM32_ONEWIRE                FALSE
 #endif
 
-#if !defined(HAL_USE_STM32_USB_MSD)
+#if !defined(HAL_NF_USE_STM32_QSPI)
 // the default for this driver is NOT to be included
-#define HAL_USE_STM32_USB_MSD                FALSE
-#endif
-
-#if !defined(HAL_USE_STM32_QSPI)
-// the default for this driver is NOT to be included
-#define HAL_USE_STM32_QSPI                   FALSE
+#define HAL_NF_USE_STM32_QSPI                   FALSE
 #endif
 
 // Abstract interfaces
@@ -47,12 +42,12 @@
 // #include "hal_nnnn.h"
 
 // Normal drivers
-#include <hal_stm32_qspi.h>
-#include <hal_stm32_flash.h>
-#include <hal_stm32_crc.h>
-#include <hal_stm32_rng.h>
-#include <hal_stm32_fsmc.h>
-#include <hal_stm32_onewire.h>
+#include "stm32_qspi/hal_stm32_qspi.h"
+#include "stm32_flash/hal_stm32_flash.h"
+#include "stm32_crc/hal_stm32_crc.h"
+#include "stm32_rng/hal_stm32_rng.h"
+#include "stm32_fsmc/hal_stm32_fsmc.h"
+#include "stm32_onewire/hal_stm32_onewire.h"
 
 // Complex drivers
 // #include "hal_nnnn.h"
