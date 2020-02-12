@@ -249,9 +249,6 @@ bool oneWireFindNext (bool doReset, bool alarmOnly)
     bool result = FALSE;
     uint8_t lastcrc8 = 0;
 
-    // clear serial number buffer for new search
-    memset(SerialNum, 0, 8);
-
     // if the last call was the last one 
     if (LastDevice)
     {
@@ -410,6 +407,9 @@ bool oneWireFindFirst (bool doReset, bool alarmOnly)
     LastDiscrepancy = 0;
     LastDevice = FALSE;
     LastFamilyDiscrepancy = 0; 
+
+    // clear serial number buffer for new search
+    memset(SerialNum, 0, 8);
 
     // Call Next and return it's return value;
     return oneWireFindNext(doReset, alarmOnly);
