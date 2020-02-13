@@ -117,7 +117,8 @@ static void InitSpiBus( spi_host_device_t bus)
 		intr_flags : 0				// Interrupt flags
 	};
 
-    esp_err_t ret =  spi_bus_initialize(bus,  &bus_config, 1);
+	// Init with different DMA channel depending on SPI bus
+    esp_err_t ret =  spi_bus_initialize(bus,  &bus_config, bus== HSPI_HOST?1:2 );
     if ( ret != ESP_OK )
     {
         ESP_LOGE( TAG, "Unable to init SPI bus");

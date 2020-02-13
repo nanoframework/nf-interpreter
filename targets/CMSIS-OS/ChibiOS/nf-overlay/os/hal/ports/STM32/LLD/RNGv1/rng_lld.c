@@ -12,7 +12,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_RNG == TRUE)
+#if (HAL_NF_USE_STM32_RNG == TRUE)
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
@@ -125,4 +125,4 @@ void rng_lld_release() {
 
 #endif
 
-#endif /* HAL_USE_STM32_RNG */
+#endif /* HAL_NF_USE_STM32_RNG */

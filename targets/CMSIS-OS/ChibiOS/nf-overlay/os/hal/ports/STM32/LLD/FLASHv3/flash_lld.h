@@ -9,7 +9,7 @@
 #include "stm32_registry.h"
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_FLASH == TRUE)
+#if (HAL_NF_USE_STM32_FLASH == TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver constants.                                                         //
@@ -147,6 +147,6 @@ extern "C" {
 }
 #endif
 
-#endif // HAL_USE_STM32_FLASH
+#endif // HAL_NF_USE_STM32_FLASH
 
 #endif // FLASH_LLD_H

@@ -7,7 +7,7 @@
 #ifndef ONEWIRE_LLD_H
 #define ONEWIRE_LLD_H
 
-#if (HAL_USE_STM32_ONEWIRE == TRUE)
+#if (HAL_NF_USE_STM32_ONEWIRE == TRUE)
 
 #include "hal_uart_lld.h"
 
@@ -133,6 +133,6 @@ extern "C" {
 }
 #endif
 
-#endif /* HAL_USE_STM32_ONEWIRE */
+#endif /* HAL_NF_USE_STM32_ONEWIRE */
 
 #endif /* ONEWIRE_LLD_H */
