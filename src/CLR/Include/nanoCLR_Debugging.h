@@ -264,14 +264,18 @@ struct CLR_DBG_Commands
         unsigned char m_hash   [ 128 ];
     };
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Commands.Debugging_Execution_QueryCLRCapabilities (in managed code) !!! //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     struct Debugging_Execution_QueryCLRCapabilities
     {
-        static const CLR_UINT32 c_CapabilityFlags             = 1;
-        static const CLR_UINT32 c_CapabilityVersion           = 3;
-        static const CLR_UINT32 c_HalSystemInfo               = 5;
-        static const CLR_UINT32 c_ClrInfo                     = 6;
-        static const CLR_UINT32 c_TargetReleaseInfo           = 7;
-        static const CLR_UINT32 c_InteropNativeAssemblies     = 8;
+        static const CLR_UINT32 c_CapabilityFlags               = 1;
+        static const CLR_UINT32 c_CapabilityVersion             = 3;
+        static const CLR_UINT32 c_HalSystemInfo                 = 5;
+        static const CLR_UINT32 c_ClrInfo                       = 6;
+        static const CLR_UINT32 c_TargetReleaseInfo             = 7;
+        static const CLR_UINT32 c_InteropNativeAssemblies       = 8;
+        static const CLR_UINT32 c_InteropNativeAssembliesCount  = 9;
 
         static const CLR_UINT32 c_CapabilityFlags_FloatingPoint             = 0x00000001;
         static const CLR_UINT32 c_CapabilityFlags_SourceLevelDebugging      = 0x00000002;
