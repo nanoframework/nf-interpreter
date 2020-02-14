@@ -29,17 +29,17 @@ bool oneWireInit()
     // TODO: make configurable
     DriverState  = ONEWIRE_STOP;
     UartDriver = NF_ONEWIRE_ESP32_UART_NUM;
-    
+
     uart_config_t uart_config = {
 		.baud_rate = 115200,
 		.data_bits = UART_DATA_8_BITS,
 		.parity    = UART_PARITY_DISABLE,
-		.stop_bits = UART_STOP_BITS_1,
+		.stop_bits = UART_STOP_BITS_1, 
 		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
         .rx_flow_ctrl_thresh = 0,
-        .use_ref_tick = false
+        .use_ref_tick = false,
 	};
-
+    if (gpio_set_direction(gpio_num_t (NF_ONEWIRE_ESP32_UART_TX_PIN), GPIO_MODE_OUTPUT_OD) != ESP_OK) return false;
     if (uart_param_config(UartDriver, &uart_config) != ESP_OK) return false;
 	if (uart_set_pin(UartDriver, NF_ONEWIRE_ESP32_UART_TX_PIN, NF_ONEWIRE_ESP32_UART_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE) != ESP_OK) return false;
 	if (uart_driver_install(UartDriver, UART_FIFO_LEN*2, 0, 0, NULL, 0) != ESP_OK) return false;
@@ -249,9 +249,6 @@ bool oneWireFindNext (bool doReset, bool alarmOnly)
     bool result = FALSE;
     uint8_t lastcrc8 = 0;
 
-    // clear serial number buffer for new search
-    memset(SerialNum, 0, 8);
-
     // if the last call was the last one 
     if (LastDevice)
     {
@@ -410,6 +407,9 @@ bool oneWireFindFirst (bool doReset, bool alarmOnly)
     LastDiscrepancy = 0;
     LastDevice = FALSE;
     LastFamilyDiscrepancy = 0; 
+
+    // clear serial number buffer for new search
+    memset(SerialNum, 0, 8);
 
     // Call Next and return it's return value;
     return oneWireFindNext(doReset, alarmOnly);
