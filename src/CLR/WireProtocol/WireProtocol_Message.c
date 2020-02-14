@@ -151,6 +151,9 @@ int WP_Message_VerifyHeader(WP_Message* message)
         TRACE( TRACE_ERRORS, "Header CRC check failed: computed: 0x%08X; got: 0x%08X\n", computedCrc, message->m_header.m_crcHeader );
         return false;
     }
+#else
+
+    (void)message;
 
 #endif
 
