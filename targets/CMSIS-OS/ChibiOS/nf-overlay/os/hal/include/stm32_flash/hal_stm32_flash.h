@@ -3,10 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_ST_FLASH_H
-#define HAL_ST_FLASH_H
+#ifndef HAL_NF_ST_FLASH_H
+#define HAL_NF_ST_FLASH_H
 
-#if (HAL_USE_STM32_FLASH == TRUE)
+#if (HAL_NF_USE_STM32_FLASH == TRUE)
 
 #include "flash_lld.h"
 
@@ -50,7 +50,7 @@ extern "C" {
 }
 #endif
 
-#endif // HAL_USE_STM32_FLASH
+#endif // HAL_NF_USE_STM32_FLASH
 
-#endif // HAL_ST_FLASH_H
+#endif // HAL_NF_ST_FLASH_H
 

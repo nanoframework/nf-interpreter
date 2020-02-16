@@ -7,7 +7,7 @@ steps:
         targetType: 'inline'
         script: |
             Write-Host "Downloading SRecord..."
-            $url = "https://sourceforge.net/projects/srecord/files/srecord-win32/1.64/srecord-1.64-win32.zip/download"
+            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=srecord-1.64-win32.zip"
             $output = "$env:Agent_TempDirectory\srecord.zip"
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'

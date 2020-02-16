@@ -10,7 +10,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_CRC == TRUE)
+#if (HAL_NF_USE_STM32_CRC == TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver constants.                                                         //
@@ -177,6 +177,6 @@ uint32_t crc_lld_fastCRC32(uint32_t initialCrc, uint8_t data);
 }
 #endif
 
-#endif // HAL_USE_STM32_CRC
+#endif // HAL_NF_USE_STM32_CRC
 
 #endif // CRC_LLD_H

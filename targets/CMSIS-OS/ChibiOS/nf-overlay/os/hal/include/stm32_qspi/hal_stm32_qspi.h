@@ -3,10 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_STM32_QSPI_H
-#define HAL_STM32_QSPI_H
+#ifndef HAL_NF_STM32_QSPI_H
+#define HAL_NF_STM32_QSPI_H
 
-#if (HAL_USE_STM32_QSPI == TRUE)
+#if (HAL_NF_USE_STM32_QSPI == TRUE)
 #if defined(STM32F0xx_MCUCONF)
 #error "CAN'T ENABLE QSPI FOR STM32F0 series"
 #endif
@@ -69,7 +69,7 @@ extern "C" {
 }
 #endif
 
-#endif /* HAL_USE_STM32_QSPI */
+#endif /* HAL_NF_USE_STM32_QSPI */
 
-#endif /* HAL_STM32_QSPI_H_ */
+#endif /* HAL_NF_STM32_QSPI_H_ */
 

@@ -18,7 +18,7 @@
 #include <stm32f7xx_hal.h>
 #endif
 
-#if (HAL_USE_STM32_QSPI == TRUE)
+#if (HAL_NF_USE_STM32_QSPI == TRUE)
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -67,6 +67,6 @@ extern "C" {
 }
 #endif
 
-#endif /* HAL_USE_STM32_QSPI */
+#endif /* HAL_NF_USE_STM32_QSPI */
 
 #endif /* QSPI_LLD_H */

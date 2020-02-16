@@ -7,13 +7,13 @@
 #define _HALCONF_NF_H_
 
 // enables STM32 Flash driver
-#if !defined(HAL_USE_STM32_FLASH) 
-#define HAL_USE_STM32_FLASH         TRUE
+#if !defined(HAL_NF_USE_STM32_FLASH) 
+#define HAL_NF_USE_STM32_FLASH         TRUE
 #endif
 
 // enables STM32 Can driver
-#if !defined(HAL_USE_STM32_CAN) 
-#define HAL_USE_STM32_CAN       TRUE
+#if !defined(HAL_NF_USE_STM32_CAN) 
+#define HAL_NF_USE_STM32_CAN       TRUE
 #endif
 
 #endif // _HALCONF_NF_H_
