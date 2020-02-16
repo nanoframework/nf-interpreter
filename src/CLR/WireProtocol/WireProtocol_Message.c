@@ -10,7 +10,7 @@
 #include "WireProtocol_Message.h"
 
 uint8_t receptionBuffer[sizeof(WP_Packet) + WP_PACKET_SIZE];
-static uint16_t lastOutboundMessage;
+static uint16_t lastOutboundMessage = 65535;
 static uint8_t* marker;
 
 // timeout to receive WP payload before bailing out
@@ -137,20 +137,23 @@ void WP_Message_Release(WP_Message* message)
 
 int WP_Message_VerifyHeader(WP_Message* message)
 {
-    message->m_header.m_crcHeader = 0;
-
 #if defined(WP_IMPLEMENTS_CRC32)
 
-    uint32_t crc = message->m_header.m_crcHeader;
+    uint32_t incommingCrc = message->m_header.m_crcHeader;
+    message->m_header.m_crcHeader = 0;
 
     uint32_t computedCrc = SUPPORT_ComputeCRC((uint8_t*)&message->m_header, sizeof(message->m_header), 0);
-    message->m_header.m_crcHeader = crc;
 
-    if(computedCrc != crc)
+    message->m_header.m_crcHeader = incommingCrc;
+
+    if(computedCrc != incommingCrc)
     {
         TRACE( TRACE_ERRORS, "Header CRC check failed: computed: 0x%08X; got: 0x%08X\n", computedCrc, message->m_header.m_crcHeader );
         return false;
     }
+#else
+
+    (void)message;
 
 #endif
 

@@ -44,7 +44,7 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType( CLR_RT_StackF
 
     pObj = arg0.Dereference();
 
-    if(pObj && pObj->DataType() == DATATYPE_REFLECTION)
+    if(pObj && arg0.DataType() == DATATYPE_REFLECTION)
     {
         idx.m_kind               = REFLECTION_TYPE;
         idx.m_levels             = 0;

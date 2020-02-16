@@ -10,7 +10,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_QSPI == TRUE)
+#if (HAL_NF_USE_STM32_QSPI == TRUE)
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
@@ -95,4 +95,4 @@ OSAL_IRQ_HANDLER(STM32_QUADSPI1_HANDLER) {
     OSAL_IRQ_EPILOGUE();
 }
 
-#endif /* HAL_USE_STM32_QSPI */
+#endif /* HAL_NF_USE_STM32_QSPI */

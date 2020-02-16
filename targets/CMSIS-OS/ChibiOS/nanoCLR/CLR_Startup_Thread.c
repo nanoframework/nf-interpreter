@@ -48,12 +48,12 @@ void CLRStartupThread(void const * argument)
 {
     CLR_SETTINGS* clrSettings = (CLR_SETTINGS*)argument;
 
-    #if (HAL_USE_STM32_CRC == TRUE)
+    #if (HAL_NF_USE_STM32_CRC == TRUE)
     // startup crc
     crcStart(NULL);
     #endif
 
-    #if (HAL_USE_STM32_ONEWIRE == TRUE)
+    #if (HAL_NF_USE_STM32_ONEWIRE == TRUE)
     // startup 1-Wire driver
     oneWireStart();
     #endif

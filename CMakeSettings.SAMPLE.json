@@ -120,7 +120,7 @@
         },
         {
           "name": "NF_WP_IMPLEMENTS_CRC32",
-          "value": "OFF",
+          "value": "ON",
           "type": "BOOL"
         },
         {
@@ -375,7 +375,7 @@
         },
         {
           "name": "NF_WP_IMPLEMENTS_CRC32",
-          "value": "OFF",
+          "value": "ON",
           "type": "BOOL"
         },
         {
