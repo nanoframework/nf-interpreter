@@ -12,21 +12,16 @@
 #include "DisplayInterface.h"
 #include <nanoPAL.h>
 #include <target_platform.h>
+#include <nanoCLR\nanoFramework.Graphics\stm32f769i_discovery_lcd.h>
 
 #define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
 
 struct DisplayInterface g_DisplayInterface;
 
-extern void STM32F769i_Discovery_LCD_INIT(uint32_t FB_Address);
-extern void DSI_IO_WriteCmd(uint32_t NbrParams, uint8_t* pParams);
-
 // This is the Display Interface block
 bool DisplayInterface::InitializeDisplayInterface()
 {
-    uint32_t FB_Address = ((uint32_t)0xC0000000);     // LCD Frame buffer address
-
-    STM32F769i_Discovery_LCD_INIT(FB_Address);
-
+    BSP_LCD_Init();
     return true;
 }
 void DisplayInterface::GetTransferBuffer(CLR_UINT8*& TransferBuffer, CLR_UINT32& TransferBufferSize)

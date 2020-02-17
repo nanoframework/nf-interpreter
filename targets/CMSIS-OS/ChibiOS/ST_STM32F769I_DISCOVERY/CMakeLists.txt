@@ -73,7 +73,27 @@ add_subdirectory("nanoCLR")
 
 # Add STMCube graphics setup
 if(TARGET_NANOCLR_GRAPHICS)     # After include(NF_NativeAssemblies) --   add_subdirectory("nanoCLR")
-   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7LcdSupport.c" )
+   list(APPEND Graphics_Includes "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7Cube_Modified" )
+     list(APPEND Graphics_Includes "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7Cube_Modified/Legacy" )
+
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/stm32f769i_discovery_lcd.c" )
+
+  # list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/otm8009a.c" )
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/adv7533.c" )
+
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/font8.c" )
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/font12.c" )
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/font16.c" )
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/font20.c" )
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/font24.c" )
+
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7Cube_Modified/stm32f7xx_hal_cortex.c" )
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7Cube_Modified/stm32f7xx_hal_gpio.c" )
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7Cube_Modified/stm32f7xx_hal_dsi.c" )
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7Cube_Modified/stm32f7xx_hal_ltdc.c" )
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7Cube_Modified/stm32f7xx_hal_ltdc_ex.c" )
+   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7Cube_Modified/stm32f7xx_hal_rcc_ex.c" )
+list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/STM32F7Cube_Modified/stm32f769i_discovery_sdram.c" )
 endif()
 
 
