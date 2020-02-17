@@ -27,7 +27,7 @@ If($OpenOCDPathExists -eq $False)
     # download zip with OpenOcd tool
     (New-Object Net.WebClient).DownloadFile($url, $output)
 
-    Write-Host "Installing OpenOCD..."
+    Write-Host "Installing OpenOCD @ '$env:ESP32_OPENOCD_PATH'..."
 
     # unzip
     #Expand-Archive $output -DestinationPath $env:ESP32_OPENOCD_PATH
@@ -35,4 +35,8 @@ If($OpenOCDPathExists -eq $False)
 	Expand-Archive $output -DestinationPath "$PSScriptRoot\openocd-esp32"
 	Move-Item -Path ("$PSScriptRoot\openocd-esp32\openocd-esp32\") -Destination $env:ESP32_OPENOCD_PATH
 	Remove-Item "$PSScriptRoot\openocd-esp32" -Force
+}
+else
+{
+    Write-Warning ("Skiping instal of OpenOCD")
 }

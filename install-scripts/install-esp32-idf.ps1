@@ -29,13 +29,17 @@ If($Esp32IdfPathExists -eq $False)
         (New-Object Net.WebClient).DownloadFile($url, $output)
     }
 
-    Write-Host "Installing Espressif IDF..."
+    Write-Host "Installing Espressif IDF @ '$env:ESP32_TOOLS_PATH'..."
 
     # unzip
     Expand-Archive $output -DestinationPath $env:ESP32_TOOLS_PATH
+}
+else
+{
+    Write-Warning ("Skiping instal of Espressif IDF")
 }
 
 Write-Host "Installing python pyserial..."
 # Make sure serial package is installed in python otherwise
 # the esptool.py tool won't run
-python -m pip install pyserial
+python -m pip install pyserial --upgrade pip

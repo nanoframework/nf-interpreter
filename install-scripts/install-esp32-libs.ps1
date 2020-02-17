@@ -29,10 +29,14 @@ If($ESP32LibPathExists -eq $False)
         (New-Object Net.WebClient).DownloadFile($url, $output)
     }
 
-    Write-Host "Installing ESP32 pre-compiled libs..."
+    Write-Host "Installing ESP32 pre-compiled libs @ '$env:ESP32_LIBS_PATH'..."
     
     # unzip libs
     #Expand-7Zip -ArchiveFileName $output -TargetPath $env:ESP32_LIBS_PATH
     #unzip using PowerShell 5+ inbuilt command
     Expand-Archive -Path $output -DestinationPath $env:ESP32_LIBS_PATH
+}
+else
+{
+    Write-Warning ("Skiping instal of ESP32 pre-compiled libs")
 }

@@ -31,11 +31,15 @@ If($XtensaPathExists -eq $False)
         (New-Object Net.WebClient).DownloadFile($url, $output)
     }
 
-    Write-Host "Installing Xtensa ESP32 toolchain..."
+    Write-Host "Installing Xtensa ESP32 toolchain @ '$env:ESP32_TOOLCHAIN_PATH'..."
     
     # unzip toolchain (This used the older of the two Expand-7Zip addons)
     #Expand-7Zip -ArchiveFileName $output -TargetPath $env:ESP32_TOOLCHAIN_PATH
 
     #unzip using PowerShell 5+ inbuilt command
     Expand-Archive -Path $output -DestinationPath $env:ESP32_TOOLCHAIN_PATH
+}
+else
+{
+    Write-Warning ("Skiping instal of Xtensa ESP32 toolchain")
 }
