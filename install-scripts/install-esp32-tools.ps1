@@ -99,7 +99,7 @@ If($filePathExists -eq $False -or $force)
 $buildFolderPath = Resolve-Path $nfRoot\build
 
 $filePathExists = Test-Path "$nfRoot\.vscode\tasks.json" -ErrorAction SilentlyContinue
-$filePathExists=$False
+#$filePathExists=$False
 If($filePathExists -eq $False -or $force)
 {
 	Write-Host ("Create .\.vscode\tasks.json with install paths from .\vscode\tasks.TEMPLATE-ESP32.json")
@@ -118,7 +118,7 @@ If($filePathExists -eq $False -or $force)
 	Set-Content -Path "$nfRoot\.vscode\tasks.json" -Value $tasks 
 }
 $filePathExists = Test-Path "$nfRoot\.vscode\launch.json" -ErrorAction SilentlyContinue
-$filePathExists=$False
+#$filePathExists=$False
 If($filePathExists -eq $False -or $force)
 {
 	Write-Host "Create .\.vscode\launch.json with install paths from .\vscode\launch.TEMPLATE-ESP32.json"
