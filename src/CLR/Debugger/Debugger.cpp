@@ -1141,11 +1141,15 @@ static bool GetInteropNativeAssemblies( uint8_t* &data, int* size, uint32_t star
     // - if 0, adjust to the assemblies count to make the execution backwards compatible 
     // - trim if over the available assembly count
     // (max possible page size is 255)
-    if( count == 0 ||
-        count > 255 ||
-        (count + startIndex) > nativeAssembliesCount)
+    if(startIndex == 0 && count == 0)
     {
         // adjust to the assemblies count to make the execution backwards compatible 
+        count = nativeAssembliesCount;
+    }
+    else if(count > 255 ||
+            count + startIndex > nativeAssembliesCount)
+    {
+        // adjust to the assemblies count so it doesn't overflow 
         count = nativeAssembliesCount - startIndex;
     }
 
@@ -1158,7 +1162,7 @@ static bool GetInteropNativeAssemblies( uint8_t* &data, int* size, uint32_t star
         return false;
     }
 
-    // clear memory
+    // clear buffer memory
     memset(
         interopNativeAssemblies, 
         0, 
@@ -1172,7 +1176,7 @@ static bool GetInteropNativeAssemblies( uint8_t* &data, int* size, uint32_t star
             // we have an assembly at this position
             // check if it's on the requested range
             if( i >= startIndex &&
-                i <= (startIndex + count))
+                i < (startIndex + count))
             {
                 interopNativeAssemblies[index].CheckSum = g_CLR_InteropAssembliesNativeData[i]->m_checkSum;
                 hal_strcpy_s((char*)interopNativeAssemblies[index].AssemblyName, ARRAYSIZE(interopNativeAssemblies[index].AssemblyName), g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);
@@ -1187,8 +1191,10 @@ static bool GetInteropNativeAssemblies( uint8_t* &data, int* size, uint32_t star
         }
     }
 
+    // copy back the buffer 
     data = (uint8_t*)interopNativeAssemblies;
 
+    // set buffer size
     *size = (sizeof(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails) * count);
 
     return true;
