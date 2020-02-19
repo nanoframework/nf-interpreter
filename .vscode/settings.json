@@ -1,0 +1,12 @@
+{
+    "cmake.preferredGenerators": [
+        "Ninja"
+    ],
+    "cmake.generator": "Ninja",
+    "cmake.autoRestartBuild" : true,
+    "cmake.configureSettings": {
+        "CMAKE_MAKE_PROGRAM":"C:/ninja/ninja.exe"
+    },
+    "cmake.cmakePath": "C:/Program Files/cmake/bin/cmake.exe",
+    "cmake.configureOnOpen": false
+}
