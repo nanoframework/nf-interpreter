@@ -1,6 +1,6 @@
 [
   {
     "name": "ESP32 Tools",
-    "toolchainFile": "CMake/toolchain.FreeRtos.ESP32.GCC.cmake"
-  }
+     "toolchainFile": "CMake/toolchain.xtensa-esp32-elf.cmake"
+    }
 ]
