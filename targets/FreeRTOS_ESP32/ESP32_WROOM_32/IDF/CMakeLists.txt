@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+# Fix issue in IDF 3.3.1 where cpu.h gives a compile error
+file(COPY "cpu.h" DESTINATION "${ESP32_IDF_PATH}/components/soc/esp32/include/soc/")
+
 
 list(APPEND COMPONENT_PATH "${ESP32_IDF_PATH}/components")
 #append ESP32 IDF include paths

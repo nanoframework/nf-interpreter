@@ -9,7 +9,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_QSPI == TRUE)
+#if (HAL_NF_USE_STM32_QSPI == TRUE)
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
@@ -60,4 +60,4 @@ void qspiStop(QSPI_HandleTypeDef* qspi)
     osalSysUnlock();
 }
 
-#endif /* HAL_USE_STM32_QSPI */
+#endif /* HAL_NF_USE_STM32_QSPI */
