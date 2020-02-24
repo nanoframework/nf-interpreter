@@ -5,6 +5,7 @@
 
 #include <ch.h>
 #include <hal.h>
+#include <hal_nf_community.h>
 #include <cmsis_os.h>
 
 #include <usbcfg.h>
@@ -35,6 +36,11 @@ int main(void) {
   // The kernel is initialized but not started yet, this means that
   // main() is executing with absolute priority but interrupts are already enabled.
   osKernelInitialize();
+
+  #if (HAL_NF_USE_STM32_CRC == TRUE)
+  // startup crc
+  crcStart(NULL);
+  #endif
 
   //  Initializes a serial-over-USB CDC driver.
   sduObjectInit(&SDU1);
