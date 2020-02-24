@@ -16,15 +16,15 @@ steps:
                 else
                 {
                     # no valid version specified, use the default one
-                    # current default is , this is is "8-2019-q3-update"
-                    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-8-2019-q3-update-win32.7z"
+                    # current default is , this is is "9-2019-q4-major"
+                    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-9-2019-q4-major-win32.7z"
                 }
             }
             else
             {
                 # no version specified, use the default one
-                # current default is , this is is "8-2019-q3-update"
-                $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-8-2019-q3-update-win32.7z"
+                # current default is , this is is "9-2019-q4-major"
+                $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-9-2019-q4-major-win32.7z"
             }
 
             Write-Host "Downloading ARM GNU GCC toolchain $(GccArm_Version)..."
