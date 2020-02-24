@@ -49,6 +49,9 @@
 // enable CAN
 #define HAL_USE_CAN @HAL_USE_CAN_OPTION@
 
+// enable CRC32 module
+#define HAL_NF_USE_STM32_CRC        TRUE
+
 // enable STM32 ONEWIRE (from nf overlay)
 #define HAL_NF_USE_STM32_ONEWIRE @HAL_USE_STM32_ONEWIRE_OPTION@
 
