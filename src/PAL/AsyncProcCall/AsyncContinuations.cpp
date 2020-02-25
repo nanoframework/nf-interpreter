@@ -54,8 +54,9 @@ bool HAL_CONTINUATION::Dequeue_And_Execute()
     // helpfull to make the call to release the global mutext happens 
     bool result;
 
+    HAL_CONTINUATION* ptr = NULL;
     GLOBAL_LOCK();
-    HAL_CONTINUATION* ptr = g_HAL_Continuation_List.ExtractFirstNode();
+    ptr = g_HAL_Continuation_List.ExtractFirstNode();
     GLOBAL_UNLOCK();
 
     if(ptr == NULL )

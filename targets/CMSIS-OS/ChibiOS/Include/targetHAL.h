@@ -11,8 +11,6 @@
 #include <nanoHAL_v2.h>
 #include <hal.h>
 
-#define GLOBAL_LOCK()              chSysLock();
-#define GLOBAL_UNLOCK();           chSysUnlock();
 // platform dependent delay
 #define PLATFORM_DELAY(milliSecs)   osDelay(milliSecs);
 
@@ -74,3 +72,22 @@ extern uint32_t __deployment_start__;
 extern uint32_t __deployment_end__;
 
 #endif //_TARGET_HAL_H_
+extern int my_lock_counter;
+
+#define GLOBAL_LOCK()          \
+	{ \
+		if (port_is_isr_context()) \
+			chSysLockFromISR(); \
+		else \
+			chSysLock();
+
+
+#define GLOBAL_UNLOCK() \
+		if (port_is_isr_context()) \
+			chSysUnlockFromISR(); \
+		else \
+			chSysUnlock(); \
+	}
+
+//#define GLOBAL_LOCK()              chSysLock();
+//#define GLOBAL_UNLOCK();           chSysUnlock();

@@ -67,17 +67,28 @@ static void SdCardDetectCallback(void *arg)
 {
     BaseBlockDevice* bbdp = (BaseBlockDevice*)arg;
 
-    if(chVTIsArmed(&sdCardDebounceTimer))
-    {
-        // there is a debounce timer already running so this change in pin value should be discarded 
-        return;
-    }
+    if (port_is_isr_context()) {
+    	chSysLockFromISR();
+    	if(!chVTIsArmedI(&sdCardDebounceTimer))
+		{
+        	// save current status
+        	sdCardPresent = blkIsInserted(bbdp);
+        	// setup timer
+        	chVTSetI(&sdCardDebounceTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdCardInsertionMonitorCallback, arg);
+		}
+    	chSysUnlockFromISR();
 
-    // save current status
-    sdCardPresent = blkIsInserted(bbdp);
+	} else {
+		if(!chVTIsArmed(&sdCardDebounceTimer))
+		{
 
-    // setup timer
-    chVTSetI(&sdCardDebounceTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdCardInsertionMonitorCallback, arg);
+			// save current status
+			sdCardPresent = blkIsInserted(bbdp);
+
+			// setup timer
+			chVTSet(&sdCardDebounceTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdCardInsertionMonitorCallback, arg);
+		}
+	}
 }
 
 // Card insertion event handler
