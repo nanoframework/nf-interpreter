@@ -230,6 +230,10 @@ macro(ParseNativeAssemblies)
     string(REPLACE ";" "\n    " CLR_RT_NativeAssemblyDataTableEntries "${CLR_RT_NativeAssemblyDataTableEntriesList}")
 
 
+    # get the count of interop assemblies
+    list(LENGTH CLR_RT_NativeAssemblyDataTableEntriesList CLR_RT_NativeAssembliesCount)
+
+
     # configure code file with Interop Assemblies table and...
     configure_file("${PROJECT_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTable.cpp.in"
                     "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
