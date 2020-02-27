@@ -30,6 +30,9 @@ char const* const AccessMemoryModeNames[] = {
 
 //--//
 
+extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
+extern uint16_t g_CLR_InteropAssembliesCount;
+
 BlockStorageDevice* CLR_DBG_Debugger::m_deploymentStorageDevice = NULL;
 
 //--//
@@ -1123,19 +1126,7 @@ static bool GetInteropNativeAssemblies( uint8_t* &data, int* size, uint32_t star
 {
     uint32_t index = 0;
     
-    extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
-
-    uint32_t nativeAssembliesCount = 0;
     CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails* interopNativeAssemblies = NULL;
-
-    // because the Interop assemblies list is assembled during the build we have to count how many are there before allocating memory for the array
-    for ( int i = 0; g_CLR_InteropAssembliesNativeData[i]; i++ )
-    {
-        if (g_CLR_InteropAssembliesNativeData[i] != NULL)
-        {
-            nativeAssembliesCount++;
-        }
-    }
 
     // sanity checks on the requested size
     // - if 0, adjust to the assemblies count to make the execution backwards compatible 
@@ -1144,13 +1135,13 @@ static bool GetInteropNativeAssemblies( uint8_t* &data, int* size, uint32_t star
     if(startIndex == 0 && count == 0)
     {
         // adjust to the assemblies count to make the execution backwards compatible 
-        count = nativeAssembliesCount;
+        count = g_CLR_InteropAssembliesCount;
     }
     else if(count > 255 ||
-            count + startIndex > nativeAssembliesCount)
+            count + startIndex > g_CLR_InteropAssembliesCount)
     {
         // adjust to the assemblies count so it doesn't overflow 
-        count = nativeAssembliesCount - startIndex;
+        count = g_CLR_InteropAssembliesCount - startIndex;
     }
 
     // alloc buffer to hold the requested number of assemblies
@@ -1169,25 +1160,21 @@ static bool GetInteropNativeAssemblies( uint8_t* &data, int* size, uint32_t star
         sizeof(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails) * count);
 
     // fill the array
-    for ( uint32_t i = 0; i < nativeAssembliesCount; i++ )
+    for ( uint32_t i = 0; i < g_CLR_InteropAssembliesCount; i++ )
     {
-        if (g_CLR_InteropAssembliesNativeData[i] != NULL)
+        // check if the assembly at this position it's on the requested range
+        if( i >= startIndex &&
+            i < (startIndex + count))
         {
-            // we have an assembly at this position
-            // check if it's on the requested range
-            if( i >= startIndex &&
-                i < (startIndex + count))
-            {
-                interopNativeAssemblies[index].CheckSum = g_CLR_InteropAssembliesNativeData[i]->m_checkSum;
-                hal_strcpy_s((char*)interopNativeAssemblies[index].AssemblyName, ARRAYSIZE(interopNativeAssemblies[index].AssemblyName), g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);
+            interopNativeAssemblies[index].CheckSum = g_CLR_InteropAssembliesNativeData[i]->m_checkSum;
+            hal_strcpy_s((char*)interopNativeAssemblies[index].AssemblyName, ARRAYSIZE(interopNativeAssemblies[index].AssemblyName), g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);
 
-                NFVersion::Init(interopNativeAssemblies[index].Version,
-                            g_CLR_InteropAssembliesNativeData[i]->m_Version.iMajorVersion, g_CLR_InteropAssembliesNativeData[i]->m_Version.iMinorVersion,
-                            g_CLR_InteropAssembliesNativeData[i]->m_Version.iBuildNumber, g_CLR_InteropAssembliesNativeData[i]->m_Version.iRevisionNumber
-                            );
+            NFVersion::Init(interopNativeAssemblies[index].Version,
+                        g_CLR_InteropAssembliesNativeData[i]->m_Version.iMajorVersion, g_CLR_InteropAssembliesNativeData[i]->m_Version.iMinorVersion,
+                        g_CLR_InteropAssembliesNativeData[i]->m_Version.iBuildNumber, g_CLR_InteropAssembliesNativeData[i]->m_Version.iRevisionNumber
+                        );
 
-                index++;
-            }
+            index++;
         }
     }
 
@@ -1196,41 +1183,6 @@ static bool GetInteropNativeAssemblies( uint8_t* &data, int* size, uint32_t star
 
     // set buffer size
     *size = (sizeof(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails) * count);
-
-    return true;
-}
-
-static bool GetInteropNativeAssembliesCount( uint8_t* &data, int* size )
-{
-    extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
-
-    uint16_t nativeAssembliesCount = 0;
-
-    // because the Interop assemblies list is assembled during the build we have to count how many are there
-    for ( int i = 0; g_CLR_InteropAssembliesNativeData[i]; i++ )
-    {
-        if (g_CLR_InteropAssembliesNativeData[i] != NULL)
-        {
-            nativeAssembliesCount++;
-        }
-    }
-
-    // alloc buffer to hold the count of available assemblies
-    data = (uint8_t*)platform_malloc(sizeof(uint16_t));
-
-    // check for malloc failure
-    if(data == NULL)
-    {
-        return false;
-    }
-
-    // clear buffer
-    memset(data, 0, sizeof(uint16_t));
-
-    // copy the assemblies count
-    memcpy(data, (uint8_t*)&nativeAssembliesCount, sizeof(nativeAssembliesCount));
-
-    *size = sizeof(nativeAssembliesCount);
 
     return true;
 }
@@ -1403,15 +1355,11 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
             break;
 
         case CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_InteropNativeAssembliesCount:
-            if(GetInteropNativeAssembliesCount(data, &size) == true)
-            {
-                // signal need to free memory
-                freeAllocFlag = true;
-            }
-            else
-            {
-                fSuccess = false;
-            }
+            // reusing the struct field to return the assemblies count 
+            // because GCC optimizations prevent using the variable directly
+            reply.u_capsFlags = g_CLR_InteropAssembliesCount;
+            data = (CLR_UINT8*)&reply.u_capsFlags;
+            size = sizeof(reply.u_capsFlags);
             break;
 
         default:
@@ -1429,7 +1377,6 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities( WP_Message* msg
 
     return true;
 }
-
 
 bool CLR_DBG_Debugger::Debugging_Execution_Allocate( WP_Message* msg)
 {
