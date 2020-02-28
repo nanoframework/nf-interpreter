@@ -2,6 +2,15 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
+  - task: Cache@2
+    inputs:
+      key: gccUpdateKey
+      restoreKeys: gccUpdateKey
+      path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+      cacheHitVar: GCC_CACHE_RESTORED
+    condition: eq(variables.GccArm_Version, '')
+    displayName: Cache ARM GCC toolchain
+
   - task: PowerShell@2
     inputs:
         targetType: 'inline'
@@ -33,12 +42,14 @@ steps:
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+    condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     displayName: Downloading ARM GCC toolchain
 
   - task: ExtractFiles@1
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.7z' 
       destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
+    condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     displayName: Extracting ARM GCC toolchain
 
   - script: echo "##vso[task.prependpath]C:\Windows\System32"
