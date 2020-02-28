@@ -180,7 +180,7 @@ bool   CPU_GPIO_Uninitialize()
 	while (pGpio->Next() != NULL)
 	{
 		UnlinkInputState(pGpio);
-		pGpio = pGpio->Next();
+		pGpio = gpioInputList.FirstNode();
 	}
 
 	return true;
