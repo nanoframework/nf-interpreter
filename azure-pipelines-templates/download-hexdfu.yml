@@ -2,24 +2,34 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
+  - task: Cache@2
+    inputs:
+      key: hex2dfuKey
+      restoreKeys: hex2dfuKey
+      path: $(Agent.TempDirectory)/hex2dfu
+      cacheHitVar: HEX2DFU_CACHE_RESTORED
+    condition: eq(variables['NeedsDFU'], true)
+    displayName: Cache HEX2DFU
+
   - task: PowerShell@2
     inputs:
         targetType: 'inline'
         script: |
+            md -Force "$env:Agent_TempDirectory\hex2dfu" | Out-Null
             Write-Host "Downloading hex2dfu..."
             $url = "https://github.com/nanoframework/hex2dfu/releases/latest/download/hex2dfu.exe"
-            $output = "$env:Agent_TempDirectory\hex2dfu.exe"
+            $output = "$env:Agent_TempDirectory\hex2dfu\hex2dfu.exe"
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
-    condition: eq(variables['NeedsDFU'], true)
+    condition: and( eq(variables['NeedsDFU'], true), ne(variables.HEX2DFU_CACHE_RESTORED, 'true'))
     displayName: Install HEX2DFU
 
   - task: PowerShell@2
     inputs:
         targetType: 'inline'
         script: |
-            $newPath = "$env:Agent_TempDirectory".Replace('\','/')
+            $newPath = "$env:Agent_TempDirectory".Replace('\','/') + "/hex2dfu"
             Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$newPath"
         errorActionPreference: 'stop'
         failOnStderr: 'true'
