@@ -221,7 +221,7 @@ bool sdc_lld_is_card_inserted(SDCDriver *sdcp) {
 
   (void)sdcp;
 
-  return !palReadLine(LINE_SD_DETECT);
+  return !palReadLine(LINE_AN1); //NOTE: THIS IS UNLIKELY THE CORRECT PIN!
 }
 
 /**
