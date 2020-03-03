@@ -13,6 +13,6 @@
 
 #include <target_common.h>
 
-#define OEMSYSTEMINFOSTRING "nanoBooter running @ @FREERTOS_BOARD@ built with FREERTOS @FREERTOS_VERSION@"
+#define OEMSYSTEMINFOSTRING "nanoBooter running @ @FREERTOS_BOARD@"
 
 #endif /* _TARGET_BOARD_NANOBOOTER_H_ */
