@@ -87,7 +87,7 @@ void rng_lld_stop() {
 
 
 uint32_t rng_lld_GenerateRandomNumber() {
-  systime_t start = chVTGetSystemTime();
+  systime_t start = chVTGetSystemTimeX();
   systime_t end = start + TIME_MS2I(RNG_TIMEOUT_VALUE);
 
 

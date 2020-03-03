@@ -206,9 +206,10 @@ void SystemState_Clear(SYSTEM_STATE_type state)
 
 bool SystemState_Query(SYSTEM_STATE_type state)
 {
+	bool systemStateCopy = false;
     GLOBAL_LOCK();
 
-    bool systemStateCopy = SystemState_QueryNoLock(state);
+    systemStateCopy = SystemState_QueryNoLock(state);
     
     GLOBAL_UNLOCK();
 

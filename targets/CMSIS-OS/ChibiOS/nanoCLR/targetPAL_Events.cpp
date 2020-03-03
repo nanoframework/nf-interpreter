@@ -34,7 +34,7 @@ bool Events_Uninitialize()
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    chVTResetI(&boolEventsTimer);
+    chVTReset(&boolEventsTimer);
 
     return true;
 }
@@ -99,7 +99,12 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
     if(timerCompleteFlag != NULL)
     {
         // no need to stop the timer even if it's running because the API does it anyway
-        chVTSetI(&boolEventsTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
+    	if (port_is_isr_context()){
+    		chVTSetI(&boolEventsTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
+		}
+		else{
+			chVTSet(&boolEventsTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
+		}
     }
 }
 
