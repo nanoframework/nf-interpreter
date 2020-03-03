@@ -188,6 +188,7 @@ typedef struct ReleaseInfo
     uint8_t InfoString[128];
     uint8_t TargetName[32];
     uint8_t PlatformName[32];
+    uint8_t PlatformInfoString[128];
 
 }ReleaseInfo;
 

@@ -30,6 +30,7 @@ int NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
     memcpy(&releaseInfo->InfoString, OEMSYSTEMINFOSTRING, ARRAYSIZE(OEMSYSTEMINFOSTRING));
     memcpy(&releaseInfo->TargetName, TARGETNAMESTRING, ARRAYSIZE(TARGETNAMESTRING));
     memcpy(&releaseInfo->PlatformName, PLATFORMNAMESTRING, ARRAYSIZE(PLATFORMNAMESTRING));
+    memcpy(&releaseInfo->PlatformInfoString, TARGETINFOSTRING, ARRAYSIZE(TARGETINFOSTRING));
 
     return true;
 }
