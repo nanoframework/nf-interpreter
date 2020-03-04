@@ -14,7 +14,7 @@ struct GraphicsMemory g_GraphicsMemory;
 void GraphicsMemory::GraphicsHeapLocation(CLR_UINT32& graphicsStartingAddress, CLR_UINT32& graphicsMemoryBlockSize)
 {
     // Setup desired size of Graphics memory to reserve
-    graphicsMemoryBlockSize = 2000000;
+    graphicsMemoryBlockSize = 500000;
 
     //To Do : Check if enough memory is available and limit to size available
     //#####

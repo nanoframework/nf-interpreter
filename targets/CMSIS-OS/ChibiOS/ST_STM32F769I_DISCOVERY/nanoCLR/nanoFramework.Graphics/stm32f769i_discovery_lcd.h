@@ -59,8 +59,6 @@
 
 /* Include OTM8009A LCD Driver IC driver code */
 #include "otm8009a.h"
-/* Include ADV7533 HDMI Driver IC driver code */
-#include "adv7533.h"
    
 /////* Include SDRAM Driver */
 ////#include "stm32f769i_discovery_sdram.h"

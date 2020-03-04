@@ -79,7 +79,6 @@ if(TARGET_NANOCLR_GRAPHICS)     # After include(NF_NativeAssemblies) --   add_su
    list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/stm32f769i_discovery_lcd.c" )
 
   # list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/otm8009a.c" )
-   list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/adv7533.c" )
 
    list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/font8.c" )
    list(APPEND Graphics_Sources "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics/font12.c" )

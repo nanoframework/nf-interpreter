@@ -12,7 +12,7 @@
 #include "DisplayInterface.h"
 #include <nanoPAL.h>
 #include <target_platform.h>
-#include <nanoCLR\nanoFramework.Graphics\stm32f769i_discovery_lcd.h>
+#include "stm32f769i_discovery_lcd.h"
 
 #define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
 
