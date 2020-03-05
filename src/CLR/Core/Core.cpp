@@ -79,9 +79,4 @@ CLR_HW_Hardware            g_CLR_HW_Hardware;
 //    { 995, -105 },
 //};
 
-// UNDONE: FIXME: the Arm 3.0 compiler drags in a bunch of ABI methods (for initialization) if struct arrays are not initialized
-CLR_UINT32        g_scratchDebugger         [ sizeof(CLR_DBG_Debugger) ];
-CLR_UINT32        g_scratchDebuggerMessaging[ sizeof(CLR_Messaging) ];
-CLR_DBG_Debugger *g_CLR_DBG_Debugger;
-
 //--//
