@@ -55,26 +55,15 @@ void HAL_FLASH_Lock(void)
 }
 
 bool FLASH_WaitForLastOperation(uint32_t timeout)
-{ 
+{
+    (void)timeout;
+
     // Wait for the FLASH operation to complete by polling on BUSY flag to be reset.
     //  Even if the FLASH operation fails, the BUSY flag will be reset and an error
     //  flag will be set
+    // no need to overload this with a timeout workflow as the watchdog will quick-in if execution gets stuck
 
-    systime_t start = chVTGetSystemTime();
-    systime_t end = start + TIME_MS2I(timeout);
-    
-    while(__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET) 
-    { 
-        // do nothing until the timeout expires
-        if(chVTIsSystemTimeWithin(start, end))
-        {
-            __NOP();
-        }
-        else
-        {
-            return false;
-        }
-    }
+    while(__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET);
     
     if(__HAL_FLASH_GET_FLAG(FLASH_FLAG_ALL_ERRORS) != RESET)
     {
