@@ -220,7 +220,7 @@ void CLR_Debug::Emit( const char *text, int len )
 
             if(CLR_EE_DBG_IS( Enabled ) && !CLR_EE_DBG_IS( Quiet ))
             {
-                CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands::c_Monitor_Message, s_chars, s_buffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+                CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, s_chars, s_buffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
             }
 
             if(HalSystemConfig.DebugTextPort != HalSystemConfig.DebuggerPort)

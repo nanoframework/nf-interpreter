@@ -64,4 +64,4 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] =
     NULL
 };
 
-
+uint16_t g_CLR_InteropAssembliesCount = ARRAYSIZE(g_CLR_InteropAssembliesNativeData) - 1;

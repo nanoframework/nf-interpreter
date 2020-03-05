@@ -53,15 +53,15 @@ BlockStorageDevice* BlockStorageList_GetFirstDevice()
 	return s_primaryDevice;
 }
 
-//BlockStorageDevice* BlockStorageList::GetNextDevice( BlockStorageDevice& device )
-//{ 
-//    return NULL; 
-//}
+BlockStorageDevice* BlockStorageList_GetNextDevice( BlockStorageDevice* device )
+{ 
+    return NULL; 
+}
 
-//unsigned int BlockStorageList::GetNumDevices()            
-//{ 
-//    return 0;  
-//}
+unsigned int BlockStorageList_GetNumDevices()
+{
+	return TARGET_BLOCKSTORAGE_COUNT;
+}
 
 //bool BlockStorageList::FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, unsigned int PhysicalAddress, ByteAddress &SectAddress)
 //{

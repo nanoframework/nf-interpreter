@@ -87,7 +87,21 @@ int mbedtls_base64_decode(unsigned char *dst, size_t dlen, size_t *olen,
 {
 	return 0;
 }
+__nfweak void NFReleaseInfo::Init(
+	NFReleaseInfo& NFReleaseInfo,
+	unsigned short int major,
+	unsigned short int minor,
+	unsigned short int build,
+	unsigned short int revision,
+	const char *info,
+	size_t infoLen,
+	const char *target,
+	size_t targetLen,
+	const char *platform,
+	size_t platformLen)
+{
 
+}
 //const ConfigurationSector g_ConfigurationSector =
 //{
 //    // ConfigurationLength
