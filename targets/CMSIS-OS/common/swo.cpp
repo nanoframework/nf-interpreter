@@ -61,9 +61,6 @@ extern "C" void SwoInit()
 
 extern "C" void SwoPrintChar(char c)
 {
-    ASSERT((ITM->TCR & ITM_TCR_ITMENA_Msk) != 0UL);
-    ASSERT((ITM->TER & 1UL               ) != 0UL);
-   
     uint32_t retryCounter = ITM_WRITE_ATTEMPTS;
     bool okToTx = (ITM->PORT[0U].u32 == 1UL);
 
@@ -98,12 +95,9 @@ extern "C" void SwoPrintString(const char *s)
 
 // this function is heavily based in the CMSIS ITM_SendChar 
 // but with small performance improvements as we are sending a string not individual chars
-__STATIC_INLINE uint32_t GenericPort_Write_CMSIS(int portNum, const char* data, size_t size)
+uint32_t GenericPort_Write_CMSIS(int portNum, const char* data, size_t size)
 {
     (void)portNum;
-
-    ASSERT((ITM->TCR & ITM_TCR_ITMENA_Msk) != 0UL);
-    ASSERT((ITM->TER & 1UL               ) != 0UL);
 
     char* p = (char*)data;
     uint32_t counter = 0;
