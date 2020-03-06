@@ -91,7 +91,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::Nativ
 
 }
 
-HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAlarm___STATIC__mscorlibSystemDateTime( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAlarm___STATIC__SystemDateTime( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 

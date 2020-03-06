@@ -8,7 +8,7 @@
 #include "nf_rt_events_native.h"
 
 
-HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate::Combine___STATIC__mscorlibSystemDelegate__mscorlibSystemDelegate__mscorlibSystemDelegate( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate::Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -19,7 +19,7 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate::C
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate::Remove___STATIC__mscorlibSystemDelegate__mscorlibSystemDelegate__mscorlibSystemDelegate( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate::Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
 
