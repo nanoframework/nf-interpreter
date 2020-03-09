@@ -89,8 +89,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Text =
     "nanoFramework.System.Text",
     0x482137FC,
     method_lookup,
-    ////////////////////////////////////////////////////////////////////////////////////
-    // check if the version bellow matches the one in AssemblyNativeVersion attribute //
-    ////////////////////////////////////////////////////////////////////////////////////
-    { 100, 0, 0, 0 }
+    { 100, 0, 0, 1 }
 };

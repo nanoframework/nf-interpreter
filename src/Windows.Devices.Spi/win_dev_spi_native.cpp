@@ -72,8 +72,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi =
 {
-    "Windows.Devices.Spi", 
+    "Windows.Devices.Spi",
     0xEA555AF2,
     method_lookup,
-    { 100, 1, 4, 0 }
+    { 100, 1, 4, 1 }
 };
