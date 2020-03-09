@@ -8,6 +8,8 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
+#include <chversion.h>
+
 #ifndef _TARGET_OS_H_
 #define _TARGET_OS_H_
 
@@ -18,6 +20,8 @@
 #define VERSION_MINOR @nanoFramework_VERSION_MINOR@U
 #define VERSION_BUILD @nanoFramework_VERSION_PATCH@U
 #define VERSION_REVISION @nanoFramework_VERSION_TWEAK@U
+
+#define TARGETINFOSTRING "@CMAKE_BUILD_TYPE@ build with ChibiOS v" CH_VERSION "." STR(CH_VERSION_MONTH)
 
 #define NANOCLR_LIGHT_MATH @TARGET_LIGHT_MATH@
 #define DP_FLOATINGPOINT @TARGET_DP_FLOATINGPOINT@

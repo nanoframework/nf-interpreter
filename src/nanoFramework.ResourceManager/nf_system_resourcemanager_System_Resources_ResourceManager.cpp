@@ -145,7 +145,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
     NANOCLR_NOCLEANUP();   
 }
 
-HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::FindResource___STATIC__I4__STRING__mscorlibSystemReflectionAssembly( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::FindResource___STATIC__I4__STRING__SystemReflectionAssembly( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -165,7 +165,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::Find
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -194,7 +194,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum__I4__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();

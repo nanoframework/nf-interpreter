@@ -1629,12 +1629,13 @@ struct CLR_RT_AttributeParser
         static const int c_ConstructorArgument = 1;
         static const int c_NamedField          = 2;
         static const int c_NamedProperty       = 3;
+        static const int c_DefaultConstructor  = 4;
 
         int              m_mode;
         CLR_RT_HeapBlock m_value;
 
         int              m_pos;
-        const char*           m_name;
+        const char*      m_name;
     };
 
     //--//
@@ -1643,6 +1644,7 @@ struct CLR_RT_AttributeParser
     CLR_PMETADATA                   m_blob;
 
     CLR_RT_MethodDef_Instance       m_md;
+    CLR_RT_MethodDef_Index          m_mdIdx;
     CLR_RT_TypeDef_Instance         m_td;
     CLR_RT_SignatureParser          m_parser;
     CLR_RT_SignatureParser::Element m_res;
@@ -1651,6 +1653,7 @@ struct CLR_RT_AttributeParser
     int                             m_fixed_Count;
     int                             m_named_Count;
     Value                           m_lastValue;
+    bool                            m_constructorParsed;
 
     //--//
 

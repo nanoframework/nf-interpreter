@@ -34,7 +34,7 @@
 /////////////////////////////////////
 
 //////////////////////////////////////////////
-#define OEMSYSTEMINFOSTRING "nanoCLR running @ @TI_BOARD@ built with TI SL CC13x2_26x2 SDK v3.20.00.68"
+#define OEMSYSTEMINFOSTRING "nanoCLR running @ @TI_BOARD@"
 #define TARGETNAMESTRING "@TI_BOARD@"
 #define PLATFORMNAMESTRING "TI_SL_CC13x2"
 //////////////////////////////////////////////

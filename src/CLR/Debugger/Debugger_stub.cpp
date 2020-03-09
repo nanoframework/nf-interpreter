@@ -21,7 +21,7 @@ __nfweak void CLR_DBG_Debugger::PurgeCache()
 __nfweak HRESULT CLR_DBG_Debugger::CreateInstance()
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    g_CLR_DBG_Debugger = (CLR_DBG_Debugger*)&g_scratchDebugger[0];
+
     NANOCLR_SYSTEM_STUB_RETURN();
 }
 
