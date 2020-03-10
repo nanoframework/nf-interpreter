@@ -159,6 +159,9 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
         {
             break;
         }
+
+        // feed the watchdog...
+        Watchdog_Reset();
     }
 
     return 0;
