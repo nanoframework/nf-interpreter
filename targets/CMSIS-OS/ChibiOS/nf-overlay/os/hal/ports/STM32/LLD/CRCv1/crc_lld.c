@@ -127,7 +127,8 @@ void crc_lld_reset() {
     CRCD1.Instance->CR |= CRC_CR_RESET;
 }
 
-uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
+
+uint32_t __attribute__((optimize("O0"))) crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
 
     int32_t index = 0U;
     uint32_t arg1;
