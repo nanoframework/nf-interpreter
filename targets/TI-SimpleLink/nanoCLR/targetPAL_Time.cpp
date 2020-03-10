@@ -76,9 +76,13 @@ void Time_SetCompare ( uint64_t compareValueTicks )
             // need to subtract the current system time to set when the timer will fire
             compareValueTicks -= HAL_Time_CurrentTime();
             
-            // // no need to stop the timer even if it's running because the API does it anyway
-            // // need to convert from nF ticks to milliseconds and then to FreeRTOS sys ticks to load the timer
-            // xTimerChangePeriod(nextEventTimer, compareValueTicks, 0);
+            if (compareValueTicks == 0) 
+            {
+                // compare value is 0 so dequeue and execute immediately
+                // no need to call the timer
+                HAL_COMPLETION::DequeueAndExec();
+                return;
+            }
 
             Clock_setPeriod(nextEventTimer, compareValueTicks);
             Clock_start(nextEventTimer);
