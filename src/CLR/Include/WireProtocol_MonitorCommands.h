@@ -9,6 +9,7 @@
 
 #include "WireProtocol.h"
 #include "WireProtocol_Message.h"
+#include <nanoPackStruct.h>
 
 //////////////////////////////////////////
 // enums
@@ -156,12 +157,13 @@ typedef struct Monitor_QueryConfiguration_Command
 
 }Monitor_QueryConfiguration_Command;
 
-typedef struct Monitor_UpdateConfiguration_Command
+typedef struct __nfpack Monitor_UpdateConfiguration_Command
 {
     uint32_t Configuration;
     uint32_t BlockIndex;
     uint32_t Length;
     uint32_t Offset;
+    uint32_t Done;
     uint8_t Data[1];
 
 }Monitor_UpdateConfiguration_Command;

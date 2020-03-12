@@ -129,7 +129,7 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
 // Stores the configuration block to the configuration flash sector
 // NOTE: because inserting or removing a configuration block it's very 'RAM expensive' we choose not to support those operations
 // the host debugger will have to be used to manage these operations on the device configuration collection 
-bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset)
+bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset, bool done)
 {
     ByteAddress storageAddress = 0;
     bool requiresEnumeration = FALSE;
@@ -216,7 +216,10 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
     // copy the config block content to the config block storage
     success = iMXRTFlexSPIDriver_Write(NULL, storageAddress, blockSize, (unsigned char*)configurationBlock, false);
 
-    if(success == TRUE && requiresEnumeration)
+    // enumeration is required after we are DONE with SUCCESSFULLY storing all the config chunks
+    requiresEnumeration = (success && done);
+
+    if(requiresEnumeration)
     {
         // free the current allocation(s)
         platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
