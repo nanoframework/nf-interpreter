@@ -38,7 +38,7 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             if(InitialiseNetworkDefaultConfig(networkConfig, 0))
             {
                 // config block created, store it
-                ConfigurationManager_StoreConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0, sizeof(HAL_Configuration_NetworkInterface), 0);
+                ConfigurationManager_StoreConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0, sizeof(HAL_Configuration_NetworkInterface), 0, false);
 
                 // have to enumerate again to pick it up
                 networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManager_FindNetworkConfigurationBlocks((uint32_t)&__nanoConfig_start__, (uint32_t)&__nanoConfig_end__);
@@ -146,7 +146,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(void* configurationBloc
 // NOTE: because inserting or removing a configuration block it's very 'RAM expensive' we choose not to support those operations
 // the host debugger will have to be used to manage these operations on the device configuration collection 
 // it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is used
-__nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset)
+__nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset, bool done)
 {
     ByteAddress storageAddress = 0;
     bool requiresEnumeration = FALSE;
@@ -233,9 +233,6 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
         // set storage address as the start of the flash configuration sector, plus the requested offset
         storageAddress = (ByteAddress)&__nanoConfig_start__ + offset;
 
-        // always enumerate the blocks again after storing it
-        requiresEnumeration = TRUE;
-
         // for save all the block size has to be provided, check that 
         if(blockSize == 0)
         {
@@ -246,7 +243,10 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(void* configurationBl
     // copy the config block content to the config block storage
     success = STM32FlashDriver_Write(NULL, storageAddress, blockSize, (unsigned char*)configurationBlock, true);
 
-    if(success == TRUE && requiresEnumeration)
+    // enumeration is required after we are DONE with SUCCESSFULLY storing all the config chunks
+    requiresEnumeration = (success && done);
+
+    if(requiresEnumeration)
     {
         // free the current allocation(s)
         platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
