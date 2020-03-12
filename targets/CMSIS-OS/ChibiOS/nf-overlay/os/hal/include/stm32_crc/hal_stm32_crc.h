@@ -58,7 +58,7 @@ extern "C" {
   void crcStart(const crcConfig *config);
   void crcStop();
   void crcReset();
-  uint32_t crcCompute(const void* buffer, int size, uint32_t initialCrc);
+  uint32_t crcCompute(const void* buffer, const uint32_t size, const uint32_t initialCrc);
 
 #if (CRC_USE_MUTUAL_EXCLUSION == TRUE)
   void crcAquireModule();

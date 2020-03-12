@@ -6,13 +6,14 @@
 
 #include <nanoHAL_Types.h>
 #include <nanoWeak.h>
+#include <stdint.h>
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // CRC 32 table for use under ZModem protocol, IEEE 802
 // G(x) = x^32+x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1
 //
-static const unsigned int c_CRCTable[256] =
+static const uint32_t c_CRCTable[256] =
 {
 	0x00000000, 0x04C11DB7, 0x09823B6E, 0x0D4326D9, 0x130476DC, 0x17C56B6B, 0x1A864DB2, 0x1E475005,
 	0x2608EDB8, 0x22C9F00F, 0x2F8AD6D6, 0x2B4BCB61, 0x350C9B64, 0x31CD86D3, 0x3C8EA00A, 0x384FBDBD,
@@ -52,14 +53,16 @@ static const unsigned int c_CRCTable[256] =
 // This is declared with GCC weak attribute so it can be replaced with an implementation at target level //
 // Currently this is happening with the STM32 targets as all chips feature a CRC hardware unit           //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-__nfweak unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc)
+__nfweak uint32_t SUPPORT_ComputeCRC(const void* rgBlock, const uint32_t nLength, const uint32_t crc)
 {
     const unsigned char* ptr = (const unsigned char*)rgBlock;
+	int32_t lenght = nLength;
+	uint32_t newCrc = crc;
 
-    while(nLength-- > 0)
+    while(lenght-- > 0)
     {
-        crc = c_CRCTable[((crc >> 24) ^ (*ptr++)) & 0xFF] ^ (crc << 8);
+        newCrc = c_CRCTable[((newCrc >> 24) ^ (*ptr++)) & 0xFF] ^ (newCrc << 8);
     }
 
-    return crc;
+    return newCrc;
 };

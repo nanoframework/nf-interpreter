@@ -11,11 +11,9 @@
 #include <ti/devices/cc32xx/driverlib/crc.h>
 
 // strong implementation of this function specific to the TI Simple Link targets
-unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc)
+uint32_t SUPPORT_ComputeCRC(const void* rgBlock, const uint32_t nLength, const uint32_t crc)
 {
 	MAP_CRCSeedSet(DTHE_BASE, crc);
 
-	crc = MAP_CRCDataProcess(DTHE_BASE, rgBlock, nLength, CRC_CFG_SIZE_8BIT);
-
-    return crc;
+	return MAP_CRCDataProcess(DTHE_BASE, rgBlock, nLength, CRC_CFG_SIZE_8BIT);
 };
