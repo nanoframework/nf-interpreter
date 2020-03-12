@@ -117,8 +117,8 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_GenericEvent
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate
 {
-    NANOCLR_NATIVE_DECLARE(Combine___STATIC__mscorlibSystemDelegate__mscorlibSystemDelegate__mscorlibSystemDelegate);
-    NANOCLR_NATIVE_DECLARE(Remove___STATIC__mscorlibSystemDelegate__mscorlibSystemDelegate__mscorlibSystemDelegate);
+    NANOCLR_NATIVE_DECLARE(Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
 
     //--//
 

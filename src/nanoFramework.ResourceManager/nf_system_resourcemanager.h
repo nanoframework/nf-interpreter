@@ -22,19 +22,19 @@ struct Library_nf_system_resourcemanager_System_Resources_ResourceManager
 
     NANOCLR_NATIVE_DECLARE(GetObjectInternal___OBJECT__I2);
     NANOCLR_NATIVE_DECLARE(GetObjectInternal___OBJECT__I2__I4__I4);
-    NANOCLR_NATIVE_DECLARE(FindResource___STATIC__I4__STRING__mscorlibSystemReflectionAssembly);
-    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum);
+    NANOCLR_NATIVE_DECLARE(FindResource___STATIC__I4__STRING__SystemReflectionAssembly);
+    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum);
 
     //--//
 
-    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum__I4__I4);    
+    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum__I4__I4);    
 
 };
 
 struct Library_nf_system_resourcemanager_nanoFramework_Runtime_Native_ResourceUtility
 {
-    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum);
-    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum__I4__I4);
+    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum);
+    NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum__I4__I4);
 
     //--//
 

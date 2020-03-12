@@ -20,21 +20,18 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_nf_system_resourcemanager_System_Resources_ResourceManager::FindResource___STATIC__I4__STRING__mscorlibSystemReflectionAssembly,
-    Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum,
-    Library_nf_system_resourcemanager_nanoFramework_Runtime_Native_ResourceUtility::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum,
-    Library_nf_system_resourcemanager_nanoFramework_Runtime_Native_ResourceUtility::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__mscorlibSystemEnum__I4__I4,
+    Library_nf_system_resourcemanager_System_Resources_ResourceManager::FindResource___STATIC__I4__STRING__SystemReflectionAssembly,
+    Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum,
+    Library_nf_system_resourcemanager_nanoFramework_Runtime_Native_ResourceUtility::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum,
+    Library_nf_system_resourcemanager_nanoFramework_Runtime_Native_ResourceUtility::GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum__I4__I4,
     NULL,
     NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_ResourceManager =
 {
-    "nanoFramework.ResourceManager", 
-    0xCDF9E76C,
+    "nanoFramework.ResourceManager",
+    0xE31F7E61,
     method_lookup,
-    ////////////////////////////////////////////////////////////////////////////////////
-    // check if the version bellow matches the one in AssemblyNativeVersion attribute //
-    ////////////////////////////////////////////////////////////////////////////////////
-    { 100, 0, 0, 0 }
+    { 100, 0, 0, 1 }
 };

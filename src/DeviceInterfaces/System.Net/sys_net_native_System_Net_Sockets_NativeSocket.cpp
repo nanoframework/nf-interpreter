@@ -739,7 +739,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper( 
         // send/recv/sendto/recvfrom failed
         if(bytes == SOCK_SOCKET_ERROR)
         {
-            CLR_INT32 err = SOCK_getlasterror();
+            CLR_INT32 err = SOCK_getsocklasterror(handle);
             
             if(err != SOCK_EWOULDBLOCK)
             {

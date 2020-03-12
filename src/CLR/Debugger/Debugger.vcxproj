@@ -22,16 +22,6 @@
     <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="Debugger_full.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CorLib\CorLib.vcxproj">
-      <Project>{58e950cc-2ff6-423c-b006-a70a19272f20}</Project>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="Debugger_stub.vcxproj">
-      <Project>{6dabcbf1-245a-4e76-bd36-8bc300c7dd82}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DD397EC4-844B-4B59-A67B-CAD6B46F1F00}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

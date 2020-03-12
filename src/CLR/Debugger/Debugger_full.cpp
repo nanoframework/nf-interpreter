@@ -7,7 +7,7 @@
 #include <nanoCLR_Debugging.h>
 
 #define DEFINE_CMD(cmd)  {  CLR_DBG_Debugger::Debugging_##cmd, CLR_DBG_Commands::c_Debugging_##cmd }
-#define DEFINE_CMD2(cmd) {  CLR_DBG_Debugger::Monitor_##cmd  , CLR_DBG_Commands::c_Monitor_##cmd   }
+#define DEFINE_CMD2(cmd) {  CLR_DBG_Debugger::Monitor_##cmd  , CLR_DBG_Commands_c_Monitor_##cmd    }
 #define DEFINE_CMD3(cmd) { &CLR_DBG_Debugger::Profiling_##cmd, CLR_DBG_Commands::c_Profiling_##cmd }
 
 const CLR_Messaging_CommandHandlerLookup c_Debugger_Lookup_Request[] =

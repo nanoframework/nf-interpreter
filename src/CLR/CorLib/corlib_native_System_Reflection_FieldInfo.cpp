@@ -121,7 +121,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize( CLR_RT_St
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -142,6 +142,10 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes__
     CLR_RT_AttributeEnumerator attributeEnumerator;
     attributeEnumerator.Initialize( fieldDefinition );
 
+    // the return array has two positions for each attribute:
+    // 1st: the attribute type
+    // 2nd: the constructor parameters or NULL, if the attribute has no constructor
+
     // 1st pass: count attributes
     do
     {
@@ -155,10 +159,14 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes__
             // done sweeping attributes
 
             // create the result array
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, count, g_CLR_RT_WellKnownTypes.m_TypeStatic ));
+            // (2 positions for each attribute)
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, ( count * 2 ), g_CLR_RT_WellKnownTypes.m_Object ));
 
-            // use this to skip the 2nd pass if no attribute was found
-            if (count == 0) break;
+            // use this to skip to the 2nd pass if no attribute was found
+            if (count == 0)
+            {
+                break;
+            }
 
             // get the pointer to the first element
             returnArray = (CLR_RT_HeapBlock*)top.DereferenceArray()->GetFirstElement();
@@ -174,23 +182,68 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributes__
     // 2nd pass: fill the array with the attributes types, if any
     while(count > 0)
     {
-        // move to the next attribute in the collection, if any
+        // move to the next attribute in the collection, if there is another
         if(attributeEnumerator.Advance())
         {
             CLR_RT_TypeDef_Instance instanceTypeDef;
-            CLR_RT_HeapBlock*     hbObj;
             
             // get the type def for the current attribute
             attributeEnumerator.GetCurrent(&instanceTypeDef);
 
-            CLR_RT_TypeDef_Index attributeType;
-            attributeType.Set(instanceTypeDef.Assembly(), instanceTypeDef.Type());
+            // setup attribute parser
+            CLR_RT_AttributeParser parser;
+            NANOCLR_CHECK_HRESULT(parser.Initialize( attributeEnumerator ));
 
-            // create a new object for the attribute type and put it on the return array
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, g_CLR_RT_WellKnownTypes.m_TypeStatic));
-            hbObj = returnArray->Dereference();
-            // make sure the reflection is pointing to the attribute type
-            hbObj->SetReflection( attributeType );
+            while(true)
+            {
+                CLR_RT_AttributeParser::Value* val;
+
+                // parse next attribute, if there is another
+                NANOCLR_CHECK_HRESULT(parser.Next( val ));
+
+                if(val == NULL)
+                {
+                    break;
+                }
+                else
+                {
+                    // check if this attribute has a default constructor or one with argument
+                    if(val->m_mode == CLR_RT_AttributeParser::Value::c_DefaultConstructor)
+                    {
+                        // default constructor here
+
+                        // get attribute type
+                        returnArray->LoadFromReference(val->m_value);
+
+                        // no parameters for the constructor
+                        returnArray++;
+
+                        // set next position to NULL
+                        returnArray->SetObjectReference( NULL );
+                    }
+                    else if(val->m_mode == CLR_RT_AttributeParser::Value::c_ConstructorArgument)
+                    {
+                        // constructor with argument
+
+                        // get the type for the class object 
+                        CLR_RT_MethodDef_Index    md    ; md.Set( parser.m_assm->m_idx, parser.m_mdIdx.Method() );
+                        CLR_RT_MethodDef_Instance mdInst; mdInst.InitializeFromIndex( md );
+
+                        CLR_RT_TypeDef_Instance cls; 
+                        if(cls.InitializeFromMethod( mdInst ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+
+                        // create a new object for the attribute type and put it on the return array
+                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(*returnArray, cls));
+
+                        // now the constructor parameter(s)
+                        returnArray++;
+
+                        // load the constructor parameter
+                        // TODO: improve this to be able to handle constuctors with multiple parameters
+                        returnArray->LoadFromReference(val->m_value);
+                    }
+                }
+            }
 
             returnArray++;
             count--;

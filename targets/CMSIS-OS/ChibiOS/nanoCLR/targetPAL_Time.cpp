@@ -64,10 +64,14 @@ void Time_SetCompare ( uint64_t compareValueTicks )
         	// compareValueTicks is in CMSIS ticks (which equals to ms), so we use TIME_MS2I only to round
         	compareValueTicks -= HAL_Time_CurrentSysTicks();
             uint64_t delay = TIME_MS2I(compareValueTicks);
-            // make sure that chVTSet does not get called with zero delay
-            if (delay == 0)
+            
+            // make sure that chVTSet does not get called with zero delay            
+            if (delay == 0) 
             {
-            	delay = 1;
+                // compare value is 0 so dequeue and execute immediately
+                // no need to call the timer
+                HAL_COMPLETION::DequeueAndExec();
+                return;
             }
 
             // no need to stop the timer if it's running because the API does it anyway

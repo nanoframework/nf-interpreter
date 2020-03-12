@@ -74,7 +74,7 @@ struct Library_nf_system_collections_System_Collections_Queue
     static const int FIELD___size = 4;
 
     NANOCLR_NATIVE_DECLARE(Clear___VOID);
-    NANOCLR_NATIVE_DECLARE(CopyTo___VOID__mscorlibSystemArray__I4);
+    NANOCLR_NATIVE_DECLARE(CopyTo___VOID__SystemArray__I4);
     NANOCLR_NATIVE_DECLARE(Enqueue___VOID__OBJECT);
     NANOCLR_NATIVE_DECLARE(Dequeue___OBJECT);
     NANOCLR_NATIVE_DECLARE(Peek___OBJECT);
