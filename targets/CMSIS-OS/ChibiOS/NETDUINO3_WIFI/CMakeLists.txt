@@ -227,7 +227,7 @@ if(HEX2DFU_TOOL_AVAILABLE)
         NF_GENERATE_DFU_PACKAGE(
             ${PROJECT_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin 08000000 
             ${PROJECT_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin 08004000 
-            ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu       
+            ${PROJECT_SOURCE_DIR}/build/nanobooter-nanoclr.dfu
         )
     endif()
 
