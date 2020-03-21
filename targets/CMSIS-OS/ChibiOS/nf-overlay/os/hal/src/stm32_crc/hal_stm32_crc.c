@@ -67,7 +67,7 @@ void crcReset() {
   osalSysUnlock();
 }
 
-uint32_t crcCompute(const void* buffer, int size, uint32_t initialCrc) {
+uint32_t crcCompute(const void* buffer, const uint32_t size, const uint32_t initialCrc) {
 
   return crc_lld_compute(buffer, size, initialCrc);
 }

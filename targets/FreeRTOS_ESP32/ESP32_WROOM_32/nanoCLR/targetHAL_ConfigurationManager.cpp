@@ -651,7 +651,7 @@ bool ConfigurationManager_StoreConfigurationBlockAll(void* configurationBlock, u
 //    true - OK 
 //    false- Error/Not found
 //
-bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset)
+bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset, bool done)
 {
 	bool result = false;
 	bool requiresEnumeration = false;
@@ -662,38 +662,45 @@ bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, Devi
 #endif
 
 	if (configuration == DeviceConfigurationOption_All)
-		return ConfigurationManager_StoreConfigurationBlockAll(configurationBlock, blockSize, offset);
+	{
+		result = ConfigurationManager_StoreConfigurationBlockAll(configurationBlock, blockSize, offset);
 
-	if (configuration == DeviceConfigurationOption_Network)
-	{
-		// set blob size
-		blobSize = sizeof(HAL_Configuration_NetworkInterface);
-	}
-	else if (configuration == DeviceConfigurationOption_Wireless80211Network)
-	{
-		// set blob size
-		blobSize = sizeof(HAL_Configuration_Wireless80211);
-	}
-	else if (configuration == DeviceConfigurationOption_WirelessNetworkAP)
-	{
-		// set blob size
-		blobSize = sizeof(HAL_Configuration_WirelessAP);
-	}
-	else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
-	{
-		// set blob size ( Total size of  X509 certificate )
-		// because X509 certificate has a variable length need to compute the block size in two steps
-		blobSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-		blobSize += ((HAL_Configuration_X509CaRootBundle*)configurationBlock)->CertificateSize;
-
-#ifdef DEBUG_CONFIG
-		ets_printf("StoreConfig x509 blobSize:%d, certsize:%d", blobSize, ((HAL_Configuration_X509CaRootBundle*)configurationBlock)->CertificateSize);
-#endif
+        // enumeration is required after we are DONE with SUCCESSFULLY storing all the config chunks
+        requiresEnumeration = (result && done);
 	}
 	else
 	{
-		// Invalid Config
-		return false;
+		if (configuration == DeviceConfigurationOption_Network)
+		{
+			// set blob size
+			blobSize = sizeof(HAL_Configuration_NetworkInterface);
+		}
+		else if (configuration == DeviceConfigurationOption_Wireless80211Network)
+		{
+			// set blob size
+			blobSize = sizeof(HAL_Configuration_Wireless80211);
+		}
+		else if (configuration == DeviceConfigurationOption_WirelessNetworkAP)
+		{
+			// set blob size
+			blobSize = sizeof(HAL_Configuration_WirelessAP);
+		}
+		else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
+		{
+			// set blob size ( Total size of  X509 certificate )
+			// because X509 certificate has a variable length need to compute the block size in two steps
+			blobSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
+			blobSize += ((HAL_Configuration_X509CaRootBundle*)configurationBlock)->CertificateSize;
+
+	      #ifdef DEBUG_CONFIG
+			ets_printf("StoreConfig x509 blobSize:%d, certsize:%d", blobSize, ((HAL_Configuration_X509CaRootBundle*)configurationBlock)->CertificateSize);
+	      #endif
+		}
+		else
+		{
+			// Invalid Config
+			return false;
+		}
 	}
 
 	// Anything to save
@@ -745,5 +752,5 @@ bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, Dev
 			return FALSE;
 	}
 
-	return ConfigurationManager_StoreConfigurationBlock(configurationBlock, configuration, configurationIndex, blockSize, 0);
+	return ConfigurationManager_StoreConfigurationBlock(configurationBlock, configuration, configurationIndex, blockSize, 0, false);
 }

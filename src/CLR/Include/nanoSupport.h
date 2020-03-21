@@ -6,11 +6,13 @@
 #ifndef _SUPPORT_NANOSUPPORT_H_
 #define _SUPPORT_NANOSUPPORT_H_
 
+#include <stdint.h>
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc);
+uint32_t SUPPORT_ComputeCRC(const void* rgBlock, const uint32_t nLength, const uint32_t crc);
 
 #if defined(__cplusplus)
 }

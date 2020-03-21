@@ -64,7 +64,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Devices_Can =
 {
     "nanoFramework.Devices.Can",
-    0x95BA1EE9,
+    0xF319D40E,
     method_lookup,
     { 100, 0, 5, 0 }
 };

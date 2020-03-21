@@ -30,7 +30,7 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::AddCaCert
     if(g_TargetConfiguration.CertificateStore->Count == 0)
     {
         // not found, add the certificate bundle
-        if(ConfigurationManager_StoreConfigurationBlock(certificateBinary, DeviceConfigurationOption_X509CaRootBundle, configIndex, certificateSize, 0) != TRUE)
+        if(ConfigurationManager_StoreConfigurationBlock(certificateBinary, DeviceConfigurationOption_X509CaRootBundle, configIndex, certificateSize, 0, false) != TRUE)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }

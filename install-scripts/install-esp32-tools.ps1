@@ -117,12 +117,6 @@ If($filePathExists -eq $False -or $force)
 	Set-Content -Path "$nfRoot\cmake-variants.json" -Value $variants 
 }
 
-$filePathExists = Test-Path "$nfRoot\.vscode\cmake-kits.json" -ErrorAction SilentlyContinue
-If($filePathExists -eq $False -or $force)
-{
-	Copy-Item "$nfRoot\.vscode\cmake-kits.TEMPLATE-ESP32.json" -Destination "$nfRoot\.vscode\cmake-kits.json" -Force 
-}
-
 $buildFolderPath = Resolve-Path $nfRoot\build
 
 $filePathExists = Test-Path "$nfRoot\.vscode\tasks.json" -ErrorAction SilentlyContinue

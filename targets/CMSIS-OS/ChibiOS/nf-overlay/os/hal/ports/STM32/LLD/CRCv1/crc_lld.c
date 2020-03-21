@@ -127,10 +127,14 @@ void crc_lld_reset() {
     CRCD1.Instance->CR |= CRC_CR_RESET;
 }
 
-uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
 
-    int32_t index = 0U;
-    uint32_t arg1;
+uint32_t __attribute__((optimize("O0"))) crc_lld_compute(
+    const void* buffer, 
+    const uint32_t size, 
+    const uint32_t initialCrc)
+{
+    uint32_t index = 0U;
+    uint32_t iterations;
     uint32_t crc = 0;
 
     // anything to do here?
@@ -139,11 +143,15 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
         return initialCrc;
     }
 
+    // we'll be reading the buffer in steps of 4 bytes, so the size must be recalculated accordingly
+    iterations = size >> 2;
+
     // get pointer to buffer
     uint8_t* ptr = (uint8_t*)buffer;
 
 #if defined(STM32F1XX) || defined(STM32L1XX) || defined(STM32F2XX) || defined(STM32F4XX)
     uint32_t size_remainder = 0;
+    uint32_t arg1;
 
     // need to reset CRC peripheral if:
     // - CRC initial value is 0 
@@ -172,10 +180,10 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
     size_remainder = size & 3;
 
     // we'll be reading the buffer in steps of 4 bytes, so the size must be recalculated accordingly
-    size = size >> 2;
+    iterations = size >> 2;
 
     // feed data into the CRC calculator
-    for(index = 0U; index < size; index++)
+    for(index = 0U; index < iterations; index++)
     {
         // take the next 4 bytes as if they were a UINT32
         // because the CRC calculation unit expects the bytes in reverse order, reverse the byte order first
@@ -199,7 +207,8 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
     }
 
 #else
-    uint16_t* ptr16 = (uint16_t*)buffer;
+    uint16_t data;
+    __IO uint16_t *pReg;
     
     // need to reset CRC peripheral if:
     // - CRC initial value is 0 
@@ -215,63 +224,39 @@ uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc) {
         WRITE_REG(CRCD1.Instance->INIT, initialCrc);
   #endif 
     }
-    
-    switch (CRCD1.Config->InputDataFormat)
-    {
-        case CRC_INPUTDATA_FORMAT_WORDS:  
-            // Enter 32-bit input data to the CRC calculator
-            for(index = 0; index < size; index++)
-            {
-                arg1 = ((uint32_t*)buffer)[index];
-                CRCD1.Instance->DR = arg1;
-            }
-            break;
-        
-        case CRC_INPUTDATA_FORMAT_BYTES: 
-            // Specific 8-bit input data handling
-            
-            /* Processing time optimization: 4 bytes are entered in a row with a single word write,
-            * last bytes must be carefully fed to the CRC calculator to ensure a correct type
-            * handling by the IP */
-            for(index = 0; index < (size / 4); index++)
-            {
-                CRCD1.Instance->DR = (uint32_t)(((uint32_t)(ptr[4*index])<<24) | ((uint32_t)(ptr[4*index + 1])<<16) | ((uint32_t)(ptr[4*index + 2])<<8) | (uint32_t)(ptr[4*index + 3]));
-            }
 
-            // last bytes specific handling
-            if((size % 4) != 0)
-            {
-                if(size % 4 == 1)
-                {
-                    CRCD1.Instance->DR = ptr[4*index];
-                }
-                if(size % 4 == 2)
-                {
-                    CRCD1.Instance->DR = (uint16_t)((uint16_t)((uint16_t)(ptr[4*index])<<8) | (uint16_t)(ptr[4*index + 1]));
-                }
-                if(size % 4 == 3)
-                {
-                    CRCD1.Instance->DR = (uint16_t)((uint16_t)((uint16_t)(ptr[4*index])<<8) | (uint16_t)(ptr[4*index + 1]));
-                    CRCD1.Instance->DR = ptr[4*index + 2];       
-                }
-            }
-            break;
-        
-        case CRC_INPUTDATA_FORMAT_HALFWORDS: 
-            // Specific 16-bit input data handling
+    // Processing time optimization: 4 bytes are entered in a row with a single word write,
+    // last bytes must be carefully fed to the CRC calculator to ensure a correct type
+    // handling by the IP */
+    for(index = 0; index < iterations; index++)
+    {
+        CRCD1.Instance->DR = ((uint32_t)ptr[4*index] << 24) | \
+                             ((uint32_t)ptr[4*index + 1] << 16) | \
+                             ((uint32_t)ptr[4*index + 2] << 8) | \
+                              (uint32_t)ptr[4*index + 3];
+    }
+
+    // last bytes specific handling
+    if((size % 4) != 0)
+    {
+        if(size % 4 == 1)
+        {
+            *(__IO uint8_t *)(__IO void*)(&CRCD1.Instance->DR) = (uint8_t)ptr[4*index];
+        }
+        if(size % 4 == 2)
+        {
+            data = ((uint16_t)((uint16_t)(ptr[4*index])<<8) | (uint16_t)(ptr[4*index + 1]));
+            pReg = (__IO uint16_t *)(__IO void *)(&CRCD1.Instance->DR);
+            *pReg = data;
+        }
+        if(size % 4 == 3)
+        {
+            data = ((uint16_t)((uint16_t)(ptr[4*index])<<8) | (uint16_t)(ptr[4*index + 1]));
+            pReg = (__IO uint16_t *)(__IO void *)(&CRCD1.Instance->DR);
+            *pReg = data;
             
-            /* Processing time optimization: 2 HalfWords are entered in a row with a single word write,
-            * in case of odd length, last HalfWord must be carefully fed to the CRC calculator to ensure 
-            * a correct type handling by the IP */
-            for(index = 0; index < (size / 2); index++)
-            {
-                CRCD1.Instance->DR = (((uint32_t)(ptr16[2*index])<<16) | (uint32_t)(ptr16[2*index + 1]));
-            }
-            if((size % 2) != 0)
-            {
-                CRCD1.Instance->DR = ptr16[2*index]; 
-            }
-            break;
+            *(__IO uint8_t *)(__IO void *)(&CRCD1.Instance->DR) = (uint8_t)ptr[(4*index) + 2];
+        }
     }
 
     crc = CRCD1.Instance->DR;
