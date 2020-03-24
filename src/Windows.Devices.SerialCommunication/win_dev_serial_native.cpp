@@ -81,7 +81,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_SerialCommunication =
 {
     "Windows.Devices.SerialCommunication",
-    0x5BE1F8A2,
+    0x82260711,
     method_lookup,
     { 100, 1, 1, 1 }
 };

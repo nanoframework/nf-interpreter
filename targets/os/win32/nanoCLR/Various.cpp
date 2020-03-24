@@ -71,7 +71,7 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
 	return true;
 }
 
-bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize)
+bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, bool done)
 {
 	return true;
 }
