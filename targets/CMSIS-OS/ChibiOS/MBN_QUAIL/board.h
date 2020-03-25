@@ -156,6 +156,22 @@
 #define LINE_AN4              		PAL_LINE(GPIOA, 5U)
 #define LINE_AN1                 	PAL_LINE(GPIOA, 6U)
 #define LINE_AN3                	PAL_LINE(GPIOA, 7U)
+
+// The ANx lines are used by the microSD click board to detect the MicroSD
+// _AN1 is when using socket 1
+// _AN2 is when using socket 2
+// _AN3 is when using socket 3
+// _AN4 is when using socket 4
+// Whatever socket is used the LINE_SD_DETECT has to match
+// and the GPIO configs needs to be adjusted
+//   - PIN_MODE has to be set to Input
+//   - PIN_ODR has to be set to High
+//   - PIN_PUPDR has to be set to Floating
+//   - PIN_OTYPE has to be set to Pushpull
+//   - PIN_OSPEED has to be set to High
+//   - PIN_AFIO has to be set to 0
+#define LINE_SD_DETECT             PAL_LINE(GPIOA, 6U)
+
 #define LINE_FLASH_HOLD             PAL_LINE(GPIOA, 8U)
 #define LINE_TX4                	PAL_LINE(GPIOA, 9U)
 #define LINE_RX4                	PAL_LINE(GPIOA, 10U)
@@ -268,7 +284,7 @@
  * PA3  - CS1                    (alternate 14).
  * PA4  - AN2                 (alternate 14).
  * PA5  - AN5                      (input pullup).
- * PA6  - AN1                    (alternate 14).
+ * PA6  - AN1                    (input floating).
  * PA7  - AN3                   (input pullup).
  * PA8  - FLASH_HOLD                  (alternate 4).
  * PA9  - TX4                   (alternate 7).
@@ -285,7 +301,7 @@
                                      PIN_MODE_OUTPUT(GPIOA_CS1) |     		\
                                      PIN_MODE_ANALOG(GPIOA_AN2) |  			\
                                      PIN_MODE_ANALOG(GPIOA_AN4) |           \
-                                     PIN_MODE_ANALOG(GPIOA_AN1) |     		\
+                                     PIN_MODE_INPUT(GPIOA_AN1) |     		\
                                      PIN_MODE_ANALOG(GPIOA_AN3) |        	\
                                      PIN_MODE_OUTPUT(GPIOA_FLASH_HOLD) |   	\
                                      PIN_MODE_ALTERNATE(GPIOA_TX4) |    	\
@@ -349,7 +365,7 @@
                                      PIN_ODR_LOW(GPIOA_CS1) |           \
                                      PIN_ODR_LOW(GPIOA_AN2) |        \
                                      PIN_ODR_LOW(GPIOA_AN4) |             \
-                                     PIN_ODR_LOW(GPIOA_AN1) |           \
+                                     PIN_ODR_HIGH(GPIOA_AN1) |           \
                                      PIN_ODR_LOW(GPIOA_AN3) |          \
                                      PIN_ODR_HIGH(GPIOA_FLASH_HOLD) |         \
                                      PIN_ODR_LOW(GPIOA_TX4) |          \
