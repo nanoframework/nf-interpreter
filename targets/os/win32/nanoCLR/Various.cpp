@@ -71,7 +71,7 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
 	return true;
 }
 
-bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize)
+bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, bool done)
 {
 	return true;
 }
@@ -87,7 +87,21 @@ int mbedtls_base64_decode(unsigned char *dst, size_t dlen, size_t *olen,
 {
 	return 0;
 }
+__nfweak void NFReleaseInfo::Init(
+	NFReleaseInfo& NFReleaseInfo,
+	unsigned short int major,
+	unsigned short int minor,
+	unsigned short int build,
+	unsigned short int revision,
+	const char *info,
+	size_t infoLen,
+	const char *target,
+	size_t targetLen,
+	const char *platform,
+	size_t platformLen)
+{
 
+}
 //const ConfigurationSector g_ConfigurationSector =
 //{
 //    // ConfigurationLength
@@ -588,16 +602,18 @@ static const unsigned int c_CRCTable[256] =
 	0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
 };
 
-unsigned int SUPPORT_ComputeCRC(const void* rgBlock, int nLength, unsigned int crc)
+uint32_t SUPPORT_ComputeCRC(const void* rgBlock, const uint32_t nLength, const uint32_t crc)
 {
-	const unsigned char* ptr = (const unsigned char*)rgBlock;
+    const unsigned char* ptr = (const unsigned char*)rgBlock;
+	int32_t lenght = nLength;
+	uint32_t newCrc = crc;
 
-	while (nLength-- > 0)
-	{
-		crc = c_CRCTable[((crc >> 24) ^ (*ptr++)) & 0xFF] ^ (crc << 8);
-	}
+    while(lenght-- > 0)
+    {
+        newCrc = c_CRCTable[((newCrc >> 24) ^ (*ptr++)) & 0xFF] ^ (newCrc << 8);
+    }
 
-	return crc;
+    return newCrc;
 };
 
 ///////////////////////////////////////////////////////////////

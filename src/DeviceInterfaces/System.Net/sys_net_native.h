@@ -315,7 +315,7 @@ struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509
     static const int FIELD___handle = 7;
     static const int FIELD___sessionHandle = 8;
 
-    NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_mscorlibSystemDateTime__BYREF_mscorlibSystemDateTime);
+    NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime);
 
     //--//
 

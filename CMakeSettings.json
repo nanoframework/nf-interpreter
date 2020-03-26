@@ -105,7 +105,7 @@
         },
         {
           "name": "NF_WP_IMPLEMENTS_CRC32",
-          "value": "OFF"
+          "value": "ON"
         },
         {
           "name": "NF_FEATURE_DEBUGGER",
@@ -230,7 +230,7 @@
           "PATH": "C:\\Windows\\system32;C:\\Program Files\\Espressif\\ESP-IDF Tools\\mconf-idf;c:\\python27;${env.PATH}",
 
           // ESP32 paths set up in environment so we can use in variables
-          "ESP32_IDF_VERSION": "v3.3",
+          "ESP32_IDF_VERSION": "v3.3.1",
           "ESP32_TOOLS": "C:\\ESP32_TOOLS",
           "ESP32_IDF": "${env.ESP32_TOOLS}\\esp-idf-${env.ESP32_IDF_VERSION}",
           "ESP32_LIB": "${env.ESP32_TOOLS}\\libs-${env.ESP32_IDF_VERSION}",
@@ -246,6 +246,10 @@
       "ctestCommandArgs": "",
       "intelliSenseMode": "linux-gcc-arm",
       "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "CMake/toolchain.xtensa-esp32-elf.cmake"
+        },
         {
           "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}"
@@ -331,8 +335,8 @@
           "value": "OFF"
         },
         {
-          "name": "NF_WP_IMPLEMENTS_CRC32:BOOL", //OFF-default-ON-to-enable-CRC32-wire-protocol
-          "value": "OFF"
+          "name": "NF_WP_IMPLEMENTS_CRC32:BOOL", //ON-default-OFF-to-disable-CRC32-wire-protocol
+          "value": "ON"
         },
         {
           "name": "NF_FEATURE_DEBUGGER:BOOL", //OFF-default-ON-to-include-managed-app-debugging-capability
@@ -393,6 +397,14 @@
         },
         {
           "name": "API_nanoFramework.ResourceManager:BOOL",
+          "value": "ON"
+        },
+        {
+          "name": "API_nanoFramework.System.Collections:BOOL",
+          "value": "ON"
+        },
+        {
+          "name": "API_nanoFramework.System.Text:BOOL",
           "value": "ON"
         },
         {

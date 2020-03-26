@@ -1,6 +1,7 @@
 [CmdletBinding(SupportsShouldProcess = $true)]
 param (
 [Parameter(HelpMessage="Please enter the COM port for ESP32 flash utility [e.g. COM1 or /dev/ttyUSB0].",Position=2)][string]$COMPORT,
+[Parameter(HelpMessage="Enter the path to the folder where the tools should be installed.",Position=3)][string]$Path,
 [switch]$force = $false
 )
 
@@ -29,53 +30,79 @@ md -Force "$nfRoot\build" | Out-Null
 #Write-Host $nfRoot
 Write-Host "BOARD_NAME=" $env:BOARD_NAME
 
-Write-Host "Set User Environment Variables ... (can be slow if many Applications running.)"
-If([string]::IsNullOrEmpty($env:ESP32_TOOLS_PATH) -or $force)
+If(-Not [string]::IsNullOrEmpty($Path))
 {
+	# user has requested install on a specific path
+
+	# force update of base path for tools
+	$env:ESP32_TOOLS_PATH = $Path
+	Write-Host ("Set User Environment ESP32_TOOLS_PATH='"+$env:ESP32_TOOLS_PATH+"'")
+	[System.Environment]::SetEnvironmentVariable("ESP32_TOOLS_PATH", $env:ESP32_TOOLS_PATH, "User")
+
+	# set flag to force updating all tool paths
+	$PathSet = $true
+}
+else
+{
+	# no path requested, set to default location
 	$env:ESP32_TOOLS_PATH= 'C:\ESP32_TOOLS'
 	Write-Host ("Set User Environment ESP32_TOOLS_PATH='"+$env:ESP32_TOOLS_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_TOOLS_PATH", $env:ESP32_TOOLS_PATH, "User")
+
+	# clear flag to force updating all tool paths
+	$PathSet = $false
 }
-If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PREFIX) -or $force)
+
+# set env var for all tools paths
+Write-Host "Set User Environment Variables (can be slow if many Applications running)..."
+
+If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PREFIX) -or $PathSet -or $force)
 {
 	$env:ESP32_TOOLCHAIN_PREFIX= ($env:ESP32_TOOLS_PATH)
 	Write-Host ("Set User Environment ESP32_TOOLCHAIN_PREFIX='"+$env:ESP32_TOOLCHAIN_PREFIX+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_TOOLCHAIN_PREFIX", $env:ESP32_TOOLCHAIN_PREFIX, "User")
 }
-If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PATH) -or $force)
+
+If([string]::IsNullOrEmpty($env:ESP32_TOOLCHAIN_PATH) -or $PathSet -or $force)
 {
 	$env:ESP32_TOOLCHAIN_PATH= ($env:ESP32_TOOLS_PATH)
 	Write-Host ("Set User Environment ESP32_TOOLCHAIN_PATH='"+$env:ESP32_TOOLCHAIN_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_TOOLCHAIN_PATH", $env:ESP32_TOOLCHAIN_PATH, "User")
 }
-If([string]::IsNullOrEmpty($env:ESP32_LIBS_PATH) -or $force)
+
+If([string]::IsNullOrEmpty($env:ESP32_LIBS_PATH) -or $PathSet -or $force)
 {
-	$env:ESP32_LIBS_PATH=($env:ESP32_TOOLS_PATH+'\libs-v3.3')
+	$env:ESP32_LIBS_PATH=($env:ESP32_TOOLS_PATH+'\libs-v3.3.1')
 	Write-Host ("Set User Environment ESP32_LIBS_PATH='"+$env:ESP32_LIBS_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_LIBS_PATH", $env:ESP32_LIBS_PATH, "User")
 }
-If([string]::IsNullOrEmpty($env:ESP32_IDF_PATH) -or [string]::IsNullOrEmpty($env:IDF_PATH) -or $force)
+
+If([string]::IsNullOrEmpty($env:ESP32_IDF_PATH) -or [string]::IsNullOrEmpty($env:IDF_PATH) -or $PathSet -or $force)
 {
-	$env:IDF_PATH=$env:ESP32_IDF_PATH=($env:ESP32_TOOLS_PATH+'\esp-idf-v3.3')
+	$env:IDF_PATH=$env:ESP32_IDF_PATH=($env:ESP32_TOOLS_PATH+'\esp-idf-v3.3.1')
 	Write-Host ("Set User Environment ESP32_IDF_PATH='"+$env:ESP32_IDF_PATH+"'")
 	Write-Host ("Set User Environment IDF_PATH='"+$env:IDF_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("ESP32_IDF_PATH", $env:ESP32_IDF_PATH, "User")
 	[System.Environment]::SetEnvironmentVariable("IDF_PATH", $env:IDF_PATH, "User")
 }
-If([string]::IsNullOrEmpty($env:NINJA_PATH) -or $force)
+
+If([string]::IsNullOrEmpty($env:NINJA_PATH) -or $PathSet -or $force)
 {
 	$env:NINJA_PATH= ($env:ESP32_TOOLS_PATH+'\ninja')
 	Write-Host ("Set User Environment NINJA_PATH='"+$env:NINJA_PATH+"'")
 	[System.Environment]::SetEnvironmentVariable("NINJA_PATH", $env:NINJA_PATH, "User")
 }
 
+# call the script for each of the tools
 Invoke-Expression -Command $PSScriptRoot\install-esp32-toolchain.ps1
 Invoke-Expression -Command $PSScriptRoot\install-esp32-libs.ps1
 Invoke-Expression -Command $PSScriptRoot\install-esp32-idf.ps1
 Invoke-Expression -Command $PSScriptRoot\install-ninja.ps1
 Invoke-Expression -Command $PSScriptRoot\install-esp32-openocd.ps1
-	
-Write-Host ("Adding Ninja to the path "+$env:NINJA_PATH)
+
+# add Ninja to the path
+# this call can fail if the script is not run with appropriate permissions
+Write-Host ("Trying to add Ninja to the path "+$env:NINJA_PATH)
 Invoke-Expression -Command "$PSScriptRoot\Set-PathVariable.ps1 -NewLocation $env:NINJA_PATH"
 
 $filePathExists = Test-Path "$nfRoot\cmake-variants.json" -ErrorAction SilentlyContinue
@@ -90,16 +117,10 @@ If($filePathExists -eq $False -or $force)
 	Set-Content -Path "$nfRoot\cmake-variants.json" -Value $variants 
 }
 
-$filePathExists = Test-Path "$nfRoot\.vscode\cmake-kits.json" -ErrorAction SilentlyContinue
-If($filePathExists -eq $False -or $force)
-{
-	Copy-Item "$nfRoot\.vscode\cmake-kits.TEMPLATE-ESP32.json" -Destination "$nfRoot\.vscode\cmake-kits.json" -Force 
-}
-
 $buildFolderPath = Resolve-Path $nfRoot\build
 
 $filePathExists = Test-Path "$nfRoot\.vscode\tasks.json" -ErrorAction SilentlyContinue
-$filePathExists=$False
+#$filePathExists=$False
 If($filePathExists -eq $False -or $force)
 {
 	Write-Host ("Create .\.vscode\tasks.json with install paths from .\vscode\tasks.TEMPLATE-ESP32.json")
@@ -117,8 +138,9 @@ If($filePathExists -eq $False -or $force)
 	}
 	Set-Content -Path "$nfRoot\.vscode\tasks.json" -Value $tasks 
 }
+
 $filePathExists = Test-Path "$nfRoot\.vscode\launch.json" -ErrorAction SilentlyContinue
-$filePathExists=$False
+#$filePathExists=$False
 If($filePathExists -eq $False -or $force)
 {
 	Write-Host "Create .\.vscode\launch.json with install paths from .\vscode\launch.TEMPLATE-ESP32.json"
@@ -130,6 +152,7 @@ If($filePathExists -eq $False -or $force)
 	$launch = $launch.Replace('<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PATH.Replace("\", "/")) 
 	Set-Content -Path "$nfRoot\.vscode\launch.json" -Value $launch 
 }
+
 <#
 .SYNOPSIS
     Install the default ESP32 tools and libraries neede to build nanoFramework, and setup the build environemnt.
@@ -137,6 +160,8 @@ If($filePathExists -eq $False -or $force)
     Power Shell Script to install the default tools to build nanoFramework, including setting the machine path and other environment variables needed for ESP32 DevKitC. Use the -Force paramter to over-write existing Environment variables. 
 .PARAMETER COMPORT
 	The COM port for NANOCLR [e.g. COM1].
+.PARAMETER Path
+	The path to the folder where the tools should be installed.
 .EXAMPLE
    .\install-esp32-tools.ps1 -COMPORT COM19
    Installs the tools for Espressive ESP32 to default path, define required envisonment variables and update VSCode files with paths and set COM19 in tasks.json

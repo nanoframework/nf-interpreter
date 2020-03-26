@@ -27,6 +27,7 @@ int NanoBooter_GetReleaseInfo(ReleaseInfo* releaseInfo)
     memcpy(&releaseInfo->InfoString, OEMSYSTEMINFOSTRING, ARRAYSIZE(OEMSYSTEMINFOSTRING));
     memcpy(&releaseInfo->TargetName, TARGETNAMESTRING, ARRAYSIZE(TARGETNAMESTRING));
     memcpy(&releaseInfo->PlatformName, PLATFORMNAMESTRING, ARRAYSIZE(PLATFORMNAMESTRING));
+    memcpy(&releaseInfo->PlatformInfoString, TARGETINFOSTRING, ARRAYSIZE(TARGETINFOSTRING));
 
     return true;
 }
@@ -261,7 +262,7 @@ int Monitor_UpdateConfiguration(WP_Message* message)
         case DeviceConfigurationOption_Wireless80211Network:
         case DeviceConfigurationOption_X509CaRootBundle:
         case DeviceConfigurationOption_All:
-            if(ConfigurationManager_StoreConfigurationBlock(cmd->Data, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex, cmd->Length, cmd->Offset) == true)
+            if(ConfigurationManager_StoreConfigurationBlock(cmd->Data, (DeviceConfigurationOption)cmd->Configuration, cmd->BlockIndex, cmd->Length, cmd->Offset, cmd->Done) == true)
             {
                 cmdReply.ErrorCode = 0;
                 success = true;

@@ -11,6 +11,7 @@
 #include <nanoPackStruct.h>
 #include <nanoCLR_Types.h>
 #include <nanoCLR_Messaging.h>
+#include <WireProtocol_MonitorCommands.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -77,30 +78,29 @@ struct CLR_DBG_Commands
         unsigned int m_flags;
     };
 
-    struct Monitor_ReadMemory
-    {
-        unsigned int m_address;
-        unsigned int m_length;
-
-        struct Reply
-        {
-            unsigned int  ErrorCode;
-            unsigned char m_data[ 1 ];
-        };
-    };
-
-    struct Monitor_WriteMemory
-    {
-        unsigned int m_address;
-        unsigned int m_length;
-        unsigned char  m_data[ 1 ];
-
-        struct Reply
-        {
-            unsigned int ErrorCode;
-        };        
-    };
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     struct Monitor_Signature
     {        
         unsigned int m_keyIndex;
@@ -108,27 +108,27 @@ struct CLR_DBG_Commands
         unsigned char  m_signature[ 1 ];
     };
 
-    struct Monitor_CheckMemory
-    {
-        unsigned int m_address;
-        unsigned int m_length;
 
-        struct Reply
-        {
-            unsigned int m_crc;
-        };
-    };
 
-    struct Monitor_EraseMemory
-    {
-        unsigned int m_address;
-        unsigned int m_length;
 
-        struct Reply
-        {
-            unsigned int ErrorCode;
-        };        
-    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     struct Monitor_Execute
     {
@@ -264,14 +264,18 @@ struct CLR_DBG_Commands
         unsigned char m_hash   [ 128 ];
     };
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Commands.Debugging_Execution_QueryCLRCapabilities (in managed code) !!! //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     struct Debugging_Execution_QueryCLRCapabilities
     {
-        static const CLR_UINT32 c_CapabilityFlags             = 1;
-        static const CLR_UINT32 c_CapabilityVersion           = 3;
-        static const CLR_UINT32 c_HalSystemInfo               = 5;
-        static const CLR_UINT32 c_ClrInfo                     = 6;
-        static const CLR_UINT32 c_TargetReleaseInfo           = 7;
-        static const CLR_UINT32 c_InteropNativeAssemblies     = 8;
+        static const CLR_UINT32 c_CapabilityFlags               = 1;
+        static const CLR_UINT32 c_CapabilityVersion             = 3;
+        static const CLR_UINT32 c_HalSystemInfo                 = 5;
+        static const CLR_UINT32 c_ClrInfo                       = 6;
+        static const CLR_UINT32 c_TargetReleaseInfo             = 7;
+        static const CLR_UINT32 c_InteropNativeAssemblies       = 8;
+        static const CLR_UINT32 c_InteropNativeAssembliesCount  = 9;
 
         static const CLR_UINT32 c_CapabilityFlags_FloatingPoint             = 0x00000001;
         static const CLR_UINT32 c_CapabilityFlags_SourceLevelDebugging      = 0x00000002;
@@ -1035,7 +1039,7 @@ private:
 
     bool CheckPermission( ByteAddress address, int mode );
 
-    bool AccessMemory( CLR_UINT32 location, unsigned int lengthInBytes, unsigned char* buf, int mode, unsigned int* errorCode );
+    bool AccessMemory( uint32_t location, uint32_t lengthInBytes, uint8_t* buf, uint32_t mode, uint32_t& errorCode );
 
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain*  GetAppDomainFromID ( CLR_UINT32 id );
@@ -1149,9 +1153,7 @@ public:
 
 //--//
 
-extern CLR_UINT32        g_scratchDebugger[];
-extern CLR_UINT32        g_scratchDebuggerMessaging[];
-extern CLR_DBG_Debugger *g_CLR_DBG_Debugger;
+extern CLR_DBG_Debugger* g_CLR_DBG_Debugger;
 
 //--//
 

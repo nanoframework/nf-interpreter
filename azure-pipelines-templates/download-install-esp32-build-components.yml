@@ -2,6 +2,14 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
+  - task: Cache@2
+    inputs:
+      key: esp331ToolsKey
+      restoreKeys: esp331ToolchainKey
+      path: $(Agent.TempDirectory)\ESP32_Tools
+      cacheHitVar: ESP_TOOLS_CACHE_RESTORED
+    displayName: Cache ESP32 tools
+
   - task: PowerShell@2
     inputs:
         targetType: 'inline'
@@ -12,6 +20,7 @@ steps:
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
     displayName: Download xtensa ESP32 toolchain
 
   - task: ExtractFiles@1
@@ -19,6 +28,7 @@ steps:
       archiveFilePatterns: '$(Agent.TempDirectory)\xtensa-esp32-elf-win32.zip' 
       destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
       cleanDestinationFolder: false
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
     displayName: Extracting xtensa ESP32 toolchain
 
   - task: PowerShell@2
@@ -26,18 +36,20 @@ steps:
         targetType: 'inline'
         script: |
             Write-Host "Downloading ESP32 pre-compiled libs..."
-            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.3.zip"
-            $output = "$PSScriptRoot\IDF_libs-v3.3.zip"
+            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.3.1.zip"
+            $output = "$PSScriptRoot\IDF_libs-v3.3.1.zip"
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
     displayName: Downloading ESP32 pre-compiled libs
 
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\IDF_libs-v3.3.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs-v3.3'
+      archiveFilePatterns: '$(Agent.TempDirectory)\IDF_libs-v3.3.1.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs-v3.3.1'
       cleanDestinationFolder: false
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
     displayName: Installing ESP32 pre-compiled libs
 
   - task: PowerShell@2
@@ -45,18 +57,20 @@ steps:
         targetType: 'inline'
         script: |
             Write-Host "Downloading ESP32 IDF..."
-            $url = "https://github.com/espressif/esp-idf/releases/download/v3.3/esp-idf-v3.3.zip"
-            $output = "$PSScriptRoot\esp-idf-v3.3.zip"
+            $url = "https://dl.espressif.com/dl/esp-idf/releases/esp-idf-v3.3.1.zip"
+            $output = "$PSScriptRoot\esp-idf-v3.3.1.zip"
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
     displayName: Downloading ESP32 IDF
 
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-v3.3.zip' 
+      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-v3.3.1.zip' 
       destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
       cleanDestinationFolder: false
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
     displayName: Installing Espressif IDF
 
   # Use Python Version 3.7 and add it to path
@@ -83,8 +97,8 @@ steps:
         script: |
             # need to replace forward slash for paths to work with GCC and CMake
             $tempDirPath = "$env:Agent_TempDirectory".Replace('\','/')
-            Write-Host "$("##vso[task.setvariable variable=ESP32_LIBS_PATH]")$tempDirPath/ESP32_Tools/libs-v3.3"
-            Write-Host "$("##vso[task.setvariable variable=ESP32_IDF_PATH]")$tempDirPath/ESP32_Tools/esp-idf-v3.3"
+            Write-Host "$("##vso[task.setvariable variable=ESP32_LIBS_PATH]")$tempDirPath/ESP32_Tools/libs-v3.3.1"
+            Write-Host "$("##vso[task.setvariable variable=ESP32_IDF_PATH]")$tempDirPath/ESP32_Tools/esp-idf-v3.3.1"
         errorActionPreference: 'stop'
         failOnStderr: 'true'
     displayName: Adjust paths

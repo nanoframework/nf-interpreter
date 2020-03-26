@@ -3,6 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
+cmake_minimum_required(VERSION 3.15)
+
 project(SimpleLinkCC13x2_26x2SDK-download NONE)
 
 include(ExternalProject)

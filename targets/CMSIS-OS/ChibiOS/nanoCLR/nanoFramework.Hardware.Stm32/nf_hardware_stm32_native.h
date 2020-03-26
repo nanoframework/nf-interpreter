@@ -38,7 +38,7 @@ struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemor
 
 struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC
 {
-    NANOCLR_NATIVE_DECLARE(GetAlarm___STATIC__mscorlibSystemDateTime);
+    NANOCLR_NATIVE_DECLARE(GetAlarm___STATIC__SystemDateTime);
     NANOCLR_NATIVE_DECLARE(Native_RTC_SetAlarm___STATIC__VOID__U1__U1__U1__U1);
 
     //--//

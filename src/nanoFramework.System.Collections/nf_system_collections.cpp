@@ -58,8 +58,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_nf_system_collections_System_Collections_Queue::Clear___VOID,
-    Library_nf_system_collections_System_Collections_Queue::CopyTo___VOID__mscorlibSystemArray__I4,
+    Library_nf_system_collections_System_Collections_Queue::CopyTo___VOID__SystemArray__I4,
     Library_nf_system_collections_System_Collections_Queue::Enqueue___VOID__OBJECT,
     NULL,
     Library_nf_system_collections_System_Collections_Queue::Dequeue___OBJECT,
@@ -80,21 +86,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_system_collections_System_Collections_Stack::Push___VOID__OBJECT,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Collections =
 {
-    "nanoFramework.System.Collections", 
-    0xC7167094,
+    "nanoFramework.System.Collections",
+    0x5A31313D,
     method_lookup,
-    ////////////////////////////////////////////////////////////////////////////////////
-    // check if the version bellow matches the one in AssemblyNativeVersion attribute //
-    ////////////////////////////////////////////////////////////////////////////////////
-    { 100, 0, 0, 0 }
+    { 100, 0, 0, 1 }
 };

@@ -13,7 +13,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_RNG == TRUE)
+#if (HAL_NF_USE_STM32_RNG == TRUE)
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -121,6 +121,6 @@ extern "C" {
 }
 #endif
 
-#endif /* HAL_USE_STM32_RNG */
+#endif /* HAL_NF_USE_STM32_RNG */
 
 #endif /* RNG_LLD_H */

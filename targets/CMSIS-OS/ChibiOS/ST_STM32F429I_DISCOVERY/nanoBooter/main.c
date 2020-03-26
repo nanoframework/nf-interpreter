@@ -5,6 +5,7 @@
 
 #include <ch.h>
 #include <hal.h>
+#include <hal_nf_community.h>
 #include <cmsis_os.h>
 
 #include <usbcfg.h>
@@ -36,6 +37,11 @@ int main(void) {
 
   // the following IF is not mandatory, it's just providing a way for a user to 'force'
   // the board to remain in nanoBooter and not launching nanoCLR
+
+  #if (HAL_NF_USE_STM32_CRC == TRUE)
+  // startup crc
+  crcStart(NULL);
+  #endif
 
   // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
   // the user button in this board has a pull-up resistor so the check has to be inverted

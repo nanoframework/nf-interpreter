@@ -11,8 +11,8 @@ $ESP32LibPathExists = Test-Path $env:ESP32_LIBS_PATH -ErrorAction SilentlyContin
 
 If($ESP32LibPathExists -eq $False)
 {
-    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.3.zip"
-    $output = "$zipRoot\IDF_libs-v3.3.zip"
+    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.3.1.zip"
+    $output = "$zipRoot\IDF_libs-v3.3.1.zip"
 
     # Don't download again if already exists. User can remove from zips to force... 
     if(![System.IO.File]::Exists($output)){    
@@ -29,10 +29,14 @@ If($ESP32LibPathExists -eq $False)
         (New-Object Net.WebClient).DownloadFile($url, $output)
     }
 
-    Write-Host "Installing ESP32 pre-compiled libs..."
+    Write-Host "Installing ESP32 pre-compiled libs @ '$env:ESP32_LIBS_PATH'..."
     
     # unzip libs
     #Expand-7Zip -ArchiveFileName $output -TargetPath $env:ESP32_LIBS_PATH
     #unzip using PowerShell 5+ inbuilt command
     Expand-Archive -Path $output -DestinationPath $env:ESP32_LIBS_PATH
+}
+else
+{
+    Write-Warning ("Skiping instal of ESP32 pre-compiled libs")
 }

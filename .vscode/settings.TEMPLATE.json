@@ -1,9 +1,8 @@
 {
     "cmake.preferredGenerators": [
-        "ninja.exe"
+        "Ninja"
     ],
-    "cmake.generator": "ninja.exe",
-    "cmake.useCMakeServer" : true,
+    "cmake.generator": "Ninja",
     "cmake.autoRestartBuild" : true,
     "cmake.configureSettings": {
         "CMAKE_MAKE_PROGRAM":"<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/ninja/ninja.exe"

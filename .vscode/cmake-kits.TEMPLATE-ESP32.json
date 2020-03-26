@@ -1,6 +1,0 @@
-[
-  {
-    "name": "ESP32 Tools",
-    "toolchainFile": "CMake/toolchain.FreeRtos.ESP32.GCC.cmake"
-  }
-]

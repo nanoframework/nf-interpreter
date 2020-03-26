@@ -91,7 +91,7 @@ typedef enum CLR_DBG_Commands_Debugging
 // enum with AccessMemoryErrorCodes
 typedef enum AccessMemoryErrorCodes
 {
-    AccessMemoryErrorCode_NoError                           = 0x0000,       // no error
+    AccessMemoryErrorCode_NoError                           = 0x0001,       // no error
     AccessMemoryErrorCode_PermissionDenied                  = 0x0010,       // permission denied to execute operation
     AccessMemoryErrorCode_FailedToAllocateReadBuffer        = 0x0020,       // failed to allocate buffer for read operation. better check heap
     AccessMemoryErrorCode_RequestedOperationFailed          = 0x0030,       // the requested operation failed

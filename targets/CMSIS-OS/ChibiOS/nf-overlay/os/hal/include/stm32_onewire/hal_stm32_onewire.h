@@ -3,10 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_STM32_ONEWIRE_H
-#define HAL_STM32_ONEWIRE_H
+#ifndef HAL_NF_STM32_ONEWIRE_H
+#define HAL_NF_STM32_ONEWIRE_H
 
-#if (HAL_USE_STM32_ONEWIRE == TRUE)
+#if (HAL_NF_USE_STM32_ONEWIRE == TRUE)
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -112,6 +112,6 @@ extern "C" {
 }
 #endif
 
-#endif /* HAL_USE_STM32_ONEWIRE */
+#endif /* HAL_NF_USE_STM32_ONEWIRE */
 
-#endif /* HAL_STM32_ONEWIRE_H_ */
+#endif /* HAL_NF_STM32_ONEWIRE_H_ */

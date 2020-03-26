@@ -122,7 +122,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
     Events_WaitForEvents_Calls++;
   #endif
 
-    uint64_t expireTimeInTicks  = HAL_Time_CurrentTime() + countsRemaining;
+    uint64_t expireTimeInTicks  = HAL_Time_CurrentSysTicks() + countsRemaining;
     bool runContinuations = true;
 
     while(true)
@@ -135,7 +135,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             return events;
         }
 
-        if(expireTimeInTicks <= HAL_Time_CurrentTime())
+        if(expireTimeInTicks <= HAL_Time_CurrentSysTicks())
         {
             break;
         }
@@ -163,6 +163,9 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
         {
             break;
         }
+
+        // feed the watchdog...
+        Watchdog_Reset();
     }
 
     return 0;

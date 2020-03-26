@@ -30,12 +30,12 @@
         },
         {
           "name": "ESP32_IDF_PATH",
-          "value": "C:/ESP32_TOOLS/esp-idf-v3.3",
+          "value": "C:/ESP32_TOOLS/esp-idf-v3.3.1",
           "type": "PATH"
         },
         {
           "name": "ESP32_LIBS_PATH",
-          "value": "C:/ESP32_TOOLS/libs-v3.3",
+          "value": "C:/ESP32_TOOLS/libs-v3.3.1",
           "type": "PATH"
         },
         {
@@ -120,7 +120,7 @@
         },
         {
           "name": "NF_WP_IMPLEMENTS_CRC32",
-          "value": "OFF",
+          "value": "ON",
           "type": "BOOL"
         },
         {
@@ -375,7 +375,7 @@
         },
         {
           "name": "NF_WP_IMPLEMENTS_CRC32",
-          "value": "OFF",
+          "value": "ON",
           "type": "BOOL"
         },
         {

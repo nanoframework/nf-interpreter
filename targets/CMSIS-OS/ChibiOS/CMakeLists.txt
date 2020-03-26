@@ -214,6 +214,108 @@ if(CHIBIOS_CONTRIB_REQUIRED)
     endif()
 endif()
 
+# include FatFS if SDCard or USB MSD are ON
+if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
+    # check if FATFS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_FATFS_SOURCE TRUE)
+    if(FATFS_SOURCE)
+        if(NOT "${FATFS_SOURCE}" STREQUAL "")   
+            set(NO_FATFS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_FATFS_SOURCE)
+        # FatFS version
+        set(FATFS_VERSION_EMPTY TRUE)
+
+        # check if build was requested with a specifc FatFS version
+        if(DEFINED FATFS_VERSION)
+            if(NOT "${FATFS_VERSION}" STREQUAL "")
+                set(FATFS_VERSION_EMPTY FALSE)
+            endif()
+        endif()
+
+        # check if build was requested with a specifc FatFS version
+        if(FATFS_VERSION_EMPTY)
+            # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
+            set(FATFS_VERSION_TAG "R0.14")
+        else()
+            # set version 
+            set(FATFS_VERSION_TAG "${FATFS_VERSION}")
+        endif()
+
+        message(STATUS "FatFS version is: ${FATFS_VERSION}")
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("${PROJECT_SOURCE_DIR}/CMake/FatFS.CMakeLists.cmake.in"
+        "${CMAKE_BINARY_DIR}/FatFS_Download/CMakeLists.txt")
+
+        # setup CMake project for FatFS download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FatFS_Download")
+
+        # run build on FatFS download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FatFS_Download")
+
+        # add FatFS as external project
+        ExternalProject_Add( 
+            FatFS
+            PREFIX FatFS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
+            GIT_REPOSITORY https://github.com/abbrev/fatfs.git #TODO: switch to nF org
+            GIT_TAG ${FATFS_VERSION_TAG}  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/FatFS_Source/source/ffconf.h
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )
+
+    else()
+        # FatFS source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${FATFS_SOURCE}/")
+            message(STATUS "FatFS ${FATFS_VERSION} (source from: ${FATFS_SOURCE})")
+
+            # check if we already have the sources, no need to copy again
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FatFS_Source SOURCE_EXISTS)
+
+            if(NOT ${SOURCE_EXISTS})
+                file(COPY "${FATFS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FatFS_Source")
+            else()
+                message(STATUS "Using local cache of FatFS source from ${FATFS_SOURCE}")
+            endif()
+        else()
+            message(FATAL_ERROR "Couldn't find FatFS source at ${FATFS_SOURCE}/")
+        endif()
+
+        # add FatFS as external project
+        ExternalProject_Add(
+            FatFS
+            PREFIX FatFS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/FatFS_Source/source/ffconf.h
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )        
+
+        # get source dir for FatFS CMake project
+        ExternalProject_Get_Property(FatFS SOURCE_DIR)
+
+    endif()
+
+endif()
+
 # if mbed TLS is enabled add it to the build
 if(NF_SECURITY_MBEDTLS)
 

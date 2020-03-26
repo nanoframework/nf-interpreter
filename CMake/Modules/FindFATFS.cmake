@@ -6,6 +6,7 @@
 
 # List of the required FatFs include files.
 list(APPEND FATFS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FatFS_Source/source)
+list(APPEND FATFS_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 
 set(FATFS_SRCS
 

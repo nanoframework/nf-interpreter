@@ -32,13 +32,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController::get_PinCount___I4,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -77,6 +70,13 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebounceTimeout___VOID,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___VOID__WindowsDevicesGpioGpioPinValue,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlternateFunction___VOID__I4,
+    Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController::get_PinCount___I4,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -96,8 +96,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Gpio =
 {
-    "Windows.Devices.Gpio", 
-    0x2432E7EB,
-	method_lookup,
-    { 100, 1, 2, 0 }
+    "Windows.Devices.Gpio",
+    0x25180D57,
+    method_lookup,
+    { 100, 1, 2, 1 }
 };

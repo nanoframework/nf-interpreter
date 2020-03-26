@@ -141,16 +141,18 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
 {
     // Since we are going to analyze and update the queue we need to disable interrupts.
     // Interrupt service routines add records to this queue.
-    GLOBAL_LOCK();
-    CLR_UINT32 elemCount = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.NumberOfElements();
+	CLR_UINT32 elemCount = 0;
+	GLOBAL_LOCK();
+    elemCount = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.NumberOfElements();
     GLOBAL_UNLOCK();
 
     // For all elements in the queue
     for ( CLR_UINT32 curElem = 0; curElem < elemCount; curElem++ )
     {
         // Retrieve the element ( actually remove it from the queue )
+    	CLR_HW_Hardware::HalInterruptRecord* testRec = NULL;
         GLOBAL_LOCK();
-        CLR_HW_Hardware::HalInterruptRecord* testRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Pop();
+        testRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Pop();
         GLOBAL_UNLOCK();
         
         // Check if context of this record points to the instance of CLR_RT_HeapBlock_NativeEventDispatcher
@@ -158,8 +160,9 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
         if ( testRec->m_context != this )
         {
             // If it is different from this instance of CLR_RT_HeapBlock_NativeEventDispatcher, thin push it back
-            GLOBAL_LOCK();
-            CLR_HW_Hardware::HalInterruptRecord* newRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Push();
+        	CLR_HW_Hardware::HalInterruptRecord* newRec = NULL;
+        	GLOBAL_LOCK();
+            newRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Push();
             GLOBAL_UNLOCK();
 
             newRec->AssignFrom( *testRec );

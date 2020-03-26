@@ -2,23 +2,32 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
+  - task: Cache@2
+    inputs:
+      key: srecordKey
+      restoreKeys: srecordKey
+      path: $(Agent.TempDirectory)/srecord
+      cacheHitVar: SRECORD_CACHE_RESTORED
+    displayName: Cache SRECORD
+
   - task: PowerShell@2
     inputs:
         targetType: 'inline'
         script: |
             Write-Host "Downloading SRecord..."
-            $url = "https://sourceforge.net/projects/srecord/files/srecord-win32/1.64/srecord-1.64-win32.zip/download"
+            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=srecord-1.64-win32.zip"
             $output = "$env:Agent_TempDirectory\srecord.zip"
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
-    condition: eq(variables['NeedsSRECORD'], true)
+    condition: and( eq(variables['NeedsSRECORD'], true), ne(variables.SRECORD_CACHE_RESTORED, 'true'))
     displayName: Install SRECORD
 
   - task: ExtractFiles@1
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)\srecord.zip' 
       destinationFolder: '$(Agent.TempDirectory)\srecord' 
+    condition: ne(variables.SRECORD_CACHE_RESTORED, 'true')
     displayName: Extract SRECORD
 
   - task: PowerShell@2

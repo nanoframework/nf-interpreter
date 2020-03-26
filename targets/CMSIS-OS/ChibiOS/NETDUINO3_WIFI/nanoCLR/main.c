@@ -5,6 +5,7 @@
 
 #include <ch.h>
 #include <hal.h>
+#include <hal_nf_community.h>
 #include <cmsis_os.h>
 
 #include "usbcfg.h"
@@ -69,6 +70,11 @@ int main(void) {
   // for STM32F4 family if watchdog is enabled can't use standby mode because the IWDG can't be stoped //
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   Watchdog_Init();
+
+  #if (HAL_NF_USE_STM32_CRC == TRUE)
+  // startup crc
+  crcStart(NULL);
+  #endif
 
   //  Initializes a serial-over-USB CDC driver.
   sduObjectInit(&SDU1);

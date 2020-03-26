@@ -130,7 +130,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         if(InitialiseNetworkDefaultConfig(networkConfig, 0))
         {
             // config block created, store it
-            ConfigurationManager_StoreConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0, sizeof(HAL_Configuration_NetworkInterface), 0);
+            ConfigurationManager_StoreConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0, sizeof(HAL_Configuration_NetworkInterface), 0, false);
             
             // have to enumerate again to pick it up
             networkConfigs = (HAL_CONFIGURATION_NETWORK*)ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks();
@@ -359,8 +359,11 @@ uint8_t GetSecurityType(AuthenticationType authentication)
 }
 
 // Stores the configuration block to the file system 
-bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset)
+bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset, bool done)
 {
+    // this platform doesn't need to handle this
+    (void)done;
+
     bool requiresEnumeration = false;
     bool success = false;
 
@@ -470,7 +473,7 @@ bool ConfigurationManager_UpdateConfigurationBlock(void* configurationBlock, Dev
     {
         case DeviceConfigurationOption_Network:
         case DeviceConfigurationOption_Wireless80211Network:
-            return ConfigurationManager_StoreConfigurationBlock(configurationBlock, configuration, configurationIndex, 0, 0);    
+            return ConfigurationManager_StoreConfigurationBlock(configurationBlock, configuration, configurationIndex, 0, 0, false);    
 
         // this configuration option is not supported
         case DeviceConfigurationOption_X509CaRootBundle:

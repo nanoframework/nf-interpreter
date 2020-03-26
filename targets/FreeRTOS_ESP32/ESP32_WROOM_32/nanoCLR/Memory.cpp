@@ -81,4 +81,9 @@ void HeapLocation(unsigned char*& baseAddress, unsigned int& sizeInBytes)
 
 	baseAddress = pManagedHeap;
 	sizeInBytes = managedHeapSize;
+
+
+	// Update System config with Heap location and size
+	HalSystemConfig.RAM1.Size = managedHeapSize;
+	HalSystemConfig.RAM1.Base = (unsigned int)pManagedHeap;
 }

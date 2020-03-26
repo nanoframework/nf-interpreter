@@ -29,3 +29,7 @@ If($NinjaPathExists -eq $False)
     # unzip
     Expand-Archive $output -DestinationPath $env:NINJA_PATH
 }
+else
+{
+    Write-Warning ("Skiping instal of Ninja")
+}

@@ -41,27 +41,27 @@ void halCommunityInit(void) {
 // nanoFramework overlay //
 ///////////////////////////
 
-#if (HAL_USE_STM32_FLASH == TRUE)
+#if (HAL_NF_USE_STM32_FLASH == TRUE)
   stm32FlashInit();
 #endif
 
-#if (HAL_USE_STM32_CRC == TRUE)
+#if (HAL_NF_USE_STM32_CRC == TRUE)
   crcInit();
 #endif
 
-#if (HAL_USE_STM32_RNG == TRUE)
+#if (HAL_NF_USE_STM32_RNG == TRUE)
   rngInit();
 #endif
 
-#if HAL_USE_FSMC
+#if HAL_NF_USE_FSMC
   stm32FsmcInit();
 #endif
 
-#if (HAL_USE_STM32_ONEWIRE == TRUE)
+#if (HAL_NF_USE_STM32_ONEWIRE == TRUE)
   oneWireInit();
 #endif
 
-#if (HAL_USE_STM32_QSPI == TRUE)
+#if (HAL_NF_USE_STM32_QSPI == TRUE)
   qspiInit();
 #endif
 

@@ -11,8 +11,8 @@ $Esp32IdfPathExists = Test-Path $env:ESP32_IDF_PATH -ErrorAction SilentlyContinu
 
 If($Esp32IdfPathExists -eq $False)
 {
-    $url = "https://github.com/espressif/esp-idf/releases/download/v3.3/esp-idf-v3.3.zip"
-    $output = "$zipRoot\esp-idf-v3.3.zip"
+    $url = "https://dl.espressif.com/dl/esp-idf/releases/esp-idf-v3.3.1.zip"
+    $output = "$zipRoot\esp-idf-v3.3.1.zip"
 
     # Don't download again if already exists. User can remove from zips to force... 
     if(![System.IO.File]::Exists($output)){ 
@@ -29,13 +29,17 @@ If($Esp32IdfPathExists -eq $False)
         (New-Object Net.WebClient).DownloadFile($url, $output)
     }
 
-    Write-Host "Installing Espressif IDF..."
+    Write-Host "Installing Espressif IDF @ '$env:ESP32_TOOLS_PATH'..."
 
     # unzip
     Expand-Archive $output -DestinationPath $env:ESP32_TOOLS_PATH
+}
+else
+{
+    Write-Warning ("Skiping instal of Espressif IDF")
 }
 
 Write-Host "Installing python pyserial..."
 # Make sure serial package is installed in python otherwise
 # the esptool.py tool won't run
-python -m pip install pyserial
+python -m pip install pyserial --upgrade pip
