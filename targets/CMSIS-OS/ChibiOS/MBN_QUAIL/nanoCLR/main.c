@@ -19,11 +19,18 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 4096, "ReceiverThread");
 // declare CLRStartup thread here 
 osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread"); 
 
+#if HAL_USE_SDC
+// declare SD Card working thread here 
+osThreadDef(SdCardWorkingThread, osPriorityNormal, 1024, "SDCWT"); 
+#endif
 //  Application entry point.
 int main(void) {
 
@@ -99,6 +106,10 @@ int main(void) {
   // create the CLR Startup thread 
   osThreadCreate(osThread(CLRStartupThread), &clrSettings);
 
+  #if HAL_USE_SDC
+  // creates the SD card working thread 
+  osThreadCreate(osThread(SdCardWorkingThread), NULL);
+  #endif
   // start kernel, after this main() will behave like a thread with priority osPriorityNormal
   osKernelStart();
   

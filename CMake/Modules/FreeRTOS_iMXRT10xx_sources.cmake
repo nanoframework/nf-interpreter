@@ -16,8 +16,8 @@ foreach(SRC_FILE ${FREERTOS_PORT_SRCS})
     find_file(FREERTOS_IMXRT_SRC_FILE ${SRC_FILE}
         PATHS 
 
-            ${PROJECT_BINARY_DIR}/FreeRTOS_Source/FreeRTOS/Source/portable/MemMang
-            ${PROJECT_BINARY_DIR}/FreeRTOS_Source/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1
+            ${PROJECT_BINARY_DIR}/FreeRTOS_Source/portable/MemMang
+            ${PROJECT_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM7/r0p1
  
 
         CMAKE_FIND_ROOT_PATH_BOTH
