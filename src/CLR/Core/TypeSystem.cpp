@@ -4384,7 +4384,8 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
 
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
-    else if(m_currentPos < m_fixed_Count + m_named_Count)
+    else if(m_currentPos < m_fixed_Count + m_named_Count &&
+            !m_constructorParsed )
     {
         // Attribute class has named fields
 
