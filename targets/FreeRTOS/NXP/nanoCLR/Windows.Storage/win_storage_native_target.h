@@ -8,5 +8,6 @@
 #define _WIN_STORAGE_NATIVE_TARGET_H_
 
 #include <win_storage_native.h>
+#include <corlib_native.h>
 
 #endif  //_WIN_STORAGE_NATIVE_TARGET_H_
