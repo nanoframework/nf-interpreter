@@ -30,7 +30,7 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
 	bool     waitingDebounce;	    		 // True if waiting for debounce timer to complete
 };
 
-static HAL_DblLinkedList<gpio_input_state>  gpioInputList; // Doulble LInkedlist for GPIO input status
+static HAL_DblLinkedList<gpio_input_state>  gpioInputList; // Double Linked list for GPIO input status
 static uint16_t pinReserved[TOTAL_GPIO_PORTS];        //  reserved - 1 bit per pin
 
 
@@ -165,9 +165,10 @@ void DeleteInputState(GPIO_PIN pinNumber)
 {
 	gpio_input_state * pState = GetInputState(pinNumber);
 	if (pState)
+	{
 		UnlinkInputState(pState);
+	}
 }
-
 
 bool   CPU_GPIO_Initialize()
 {
@@ -209,8 +210,7 @@ bool   CPU_GPIO_ReservePin(GPIO_PIN pinNumber, bool fReserve)
 		}
 		else
 		{
-
-		pinReserved[port] |= bit;
+			pinReserved[port] |= bit;
 		}
 	}
 	else
@@ -250,23 +250,26 @@ void CPU_GPIO_SetPinState(GPIO_PIN pin, GpioPinValue PinState)
 	palWriteLine(GetIoLine(pin), (int)PinState);
 }
 
-bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE Pin_ISR, void* ISR_Param, GPIO_INT_EDGE IntEdge, GpioPinDriveMode driveMode)
+bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE pin_ISR, void* isr_Param, GPIO_INT_EDGE intEdge, GpioPinDriveMode driveMode)
 {
 	gpio_input_state * pState;
 
 	// Check Input drive mode
 	if (driveMode >= (int)GpioPinDriveMode_Output)
+	{
 		return false;
+	}
 
-	// Set as Input GPIO_INT_EDGE IntEdge, GPIO_RESISTOR ResistorState
+	// Set as Input GPIO_INT_EDGE intEdge, GPIO_RESISTOR ResistorState
 	if (!CPU_GPIO_SetDriveMode(pinNumber, driveMode))
+	{
 		return false;
-
+	}
 	pState = AllocateGpioInputState(pinNumber);
 
 	// Link ISR ptr supplied and not already set up
 	// CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
-	if ((Pin_ISR != NULL) && (pState->isrPtr == NULL))
+	if ((pin_ISR != NULL) && (pState->isrPtr == NULL))
 	{
 		// there are callbacks registered and...
 		// the drive mode is input so need to setup the interrupt
@@ -278,21 +281,21 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMillisecond
 		palSetLineCallback(ioLine, GpioEventCallback, pState);
 	}
 
-	pState->isrPtr = Pin_ISR;
-	pState->mode = IntEdge;
-	pState->param = (void *)ISR_Param;
+	pState->isrPtr = pin_ISR;
+	pState->mode = intEdge;
+	pState->param = (void *)isr_Param;
 	pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
 
-	switch (IntEdge)
+	switch (intEdge)
 	{
 		case GPIO_INT_EDGE_LOW:
 		case GPIO_INT_LEVEL_LOW:
-			pState->expected = false;
+			pState->expected = PAL_LOW;
 			break;
 
 		case GPIO_INT_EDGE_HIGH:
 		case GPIO_INT_LEVEL_HIGH:
-			pState->expected = true;
+			pState->expected = PAL_HIGH;
 			break;
 
 		case GPIO_INT_EDGE_BOTH:
@@ -406,12 +409,14 @@ uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
 {
 	gpio_input_state * ptr = GetInputState(pinNumber);
 	if (ptr)
+	{
 		return ptr->debounceMs;
+	}
 
 	return 0;
 }
 
-bool   CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, int64_t debounceTimeMilliseconds)
+bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds)
 {
 	gpio_input_state * ptr = GetInputState(pinNumber);
 	if (ptr)

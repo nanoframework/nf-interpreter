@@ -368,7 +368,7 @@ void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
 // CPU_GPIO_EnableInputPin
 // Enable input pin
 //
-bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE Pin_ISR, void* ISR_Param, GPIO_INT_EDGE IntEdge, GpioPinDriveMode driveMode)
+bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE pin_ISR, void* isr_Param, GPIO_INT_EDGE intEdge, GpioPinDriveMode driveMode)
 {
 	gpio_input_state * pGpio;
 
@@ -389,7 +389,7 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMillisecond
 	const gpio_interrupt_mode_t mapint[6] = { kGPIO_NoIntmode, kGPIO_IntFallingEdge, kGPIO_IntRisingEdge, kGPIO_IntRisingOrFallingEdge, kGPIO_IntHighLevel, kGPIO_IntLowLevel };
 
 	// enable interupt mode with correct edge
-	gpio_pin_config_t config = {kGPIO_DigitalInput, 0, mapint[IntEdge] };
+	gpio_pin_config_t config = {kGPIO_DigitalInput, 0, mapint[intEdge] };
 	GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
 	
 	// Enable GPIO pin interrupt
@@ -400,9 +400,9 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMillisecond
 	GPIO_PortClearInterruptFlags(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
 
 	// Initialise Gpio state structure
-	pGpio->isrPtr = Pin_ISR;
-	pGpio->mode = IntEdge;
-	pGpio->param = (void *)ISR_Param;
+	pGpio->isrPtr = pin_ISR;
+	pGpio->mode = intEdge;
+	pGpio->param = (void *)isr_Param;
 	pGpio->debounceMs = (uint32_t)(debounceTimeMilliseconds);
 
 	// Set up expected new value for debounce
@@ -413,7 +413,7 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMillisecond
 			// Create timer if it doesn't already exist for this pin
 			pGpio->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void*)pGpio, Gpio_DebounceHandler);
 		}
-		switch (IntEdge)
+		switch (intEdge)
 		{
 			case GPIO_INT_NONE:
 			case GPIO_INT_EDGE_LOW:
@@ -560,7 +560,7 @@ uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
 	return 0;
 }
 
-bool   CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, int64_t debounceTimeMilliseconds)
+bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds)
 {
 	// Check if valid pin number 
 	if (IsValidGpioPin(pinNumber)) 
