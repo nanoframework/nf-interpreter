@@ -24,7 +24,7 @@ static const char* TAG = "Memory";
 
 // You can't go much bigger than this when allocating in normal memory to 
 // get memory in one continous lump.
-#define NORMAL_MEMORY_SIZE (64 * 1024)
+#define NORMAL_MEMORY_SIZE (115 * 1024)
 
 
 // Saved memory allocation for when heap is reset so we can return same value.
