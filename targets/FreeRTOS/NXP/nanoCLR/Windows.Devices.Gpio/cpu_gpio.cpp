@@ -221,7 +221,7 @@ gpio_input_state * AllocateGpioInputState(GPIO_PIN pinNumber)
 
 	if ( port_array[port] == NULL)
 	{
-		port_array[port] = (statePortArray*)malloc(sizeof(statePortArray));
+		port_array[port] = (statePortArray*)platform_malloc(sizeof(statePortArray));
 		if (port_array[port] == NULL ) return NULL;
 
 		memset(port_array[port], 0, sizeof(statePortArray) );
@@ -232,7 +232,7 @@ gpio_input_state * AllocateGpioInputState(GPIO_PIN pinNumber)
 	gpio_input_state * pGpio = (*inputStates)[bit];
 	if (pGpio == NULL)
 	{
-		pGpio = (gpio_input_state *)malloc(sizeof(gpio_input_state));
+		pGpio = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
 		memset(pGpio, 0, sizeof(gpio_input_state));
 		pGpio->pinNumber = pinNumber;
 		(*inputStates)[bit] = pGpio;
@@ -261,7 +261,7 @@ void DeleteInputState(GPIO_PIN pinNumber)
 		gpio_pin_config_t config = {kGPIO_DigitalInput, 0, kGPIO_NoIntmode };
 		GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
 
-		free(pGpio);
+		platform_free(pGpio);
 		(*inputStates)[bit] = NULL;
 	}
 }
@@ -292,7 +292,7 @@ bool   CPU_GPIO_Uninitialize()
 		statePortArray* inputStates = port_array[port];
 		if ( inputStates != NULL )
 		{
-			free(port_array[port]);			// free up inputStates array
+			platform_free(port_array[port]);			// free up inputStates array
 			port_array[port] = NULL;
 		}
 	}

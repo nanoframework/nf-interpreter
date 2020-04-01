@@ -128,13 +128,23 @@ gpio_input_state * GetInputState(GPIO_PIN pinNumber)
 gpio_input_state * AllocateGpioInputState(GPIO_PIN pinNumber)
 {
 	gpio_input_state * ptr = GetInputState(pinNumber);
+	
 	if (ptr == NULL)
 	{
-		ptr = (gpio_input_state *)malloc(sizeof(gpio_input_state));
-		memset(ptr, 0, sizeof(gpio_input_state));
-		ptr->pinNumber = pinNumber;
-		gpioInputList.LinkAtBack(ptr);
+		ptr = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
+
+		// sanity check
+		if(ptr != NULL)
+		{
+			memset(ptr, 0, sizeof(gpio_input_state));
+			ptr->pinNumber = pinNumber;
+
+    		chVTObjectInit(&ptr->debounceTimer);
+
+			gpioInputList.LinkAtBack(ptr);	
+		}
 	}
+
 	return ptr;
 }
 
@@ -147,7 +157,7 @@ void UnlinkInputState(gpio_input_state * pState)
 	palDisableLineEvent(GetIoLine(pState->pinNumber));
 
 	pState->Unlink();
-	free(pState);
+	platform_free(pState);
 }
 
 // Delete gpio_input_state from List and tidy up ( Timer & ISR handler )

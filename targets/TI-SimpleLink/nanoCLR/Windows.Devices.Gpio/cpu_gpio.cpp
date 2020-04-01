@@ -39,7 +39,7 @@ gpio_input_state * AllocateGpioInputState(GPIO_PIN pinNumber)
 	gpio_input_state * ptr = gpioInputState[pinNumber];
 	if (ptr == NULL)
 	{
-		ptr = (gpio_input_state *)malloc(sizeof(gpio_input_state));
+		ptr = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
 		memset(ptr, 0, sizeof(gpio_input_state));
 
 		ptr->pinNumber = pinNumber;
@@ -65,7 +65,7 @@ void DeleteGpioInputState(GPIO_PIN pinNumber)
 			// it's OK to do always this, no matter if interrupts are enabled or not
 			GPIO_disableInt(pState->pinNumber);
 
-			free(pState);
+			platform_free(pState);
 			
 			gpioInputState[pinNumber]  = NULL;
 		}
