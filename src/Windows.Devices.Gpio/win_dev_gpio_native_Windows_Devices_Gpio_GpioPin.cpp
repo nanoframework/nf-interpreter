@@ -5,11 +5,9 @@
 //
 
 #include <targetPAL.h>
+#include <corlib_native.h>
 #include "win_dev_gpio_native_target.h"
 #include "nf_rt_events_native.h"
-
-#include <ti/sysbios/knl/Clock.h>
-#include <xdc/runtime/Error.h>
 
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
@@ -122,8 +120,10 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 {
 	NANOCLR_HEADER();
 	{
-		CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 		bool validPin;
+		CLR_UINT64 debounceTimeoutMilsec;
+
+		CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 		if(pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue ].NumericByRef().u1 != 0)
 		{
@@ -139,8 +139,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 		}
 		else
 		{
-			int64_t debounceTimeoutMilsec = (CLR_INT64_TEMP_CAST) pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___debounceTimeout ].NumericByRefConst().s8 / TIME_CONVERSION__TO_MILLISECONDS;
-			
+			NANOCLR_CHECK_HRESULT( ExtractDebounceTimeSpanValue(pThis[ FIELD___debounceTimeout ], debounceTimeoutMilsec ) );
+
 			validPin = CPU_GPIO_EnableInputPin(pinNumber, debounceTimeoutMilsec, Gpio_Interupt_ISR, (void*)pThis, GPIO_INT_EDGE_BOTH, driveMode);
 		}
 
@@ -171,16 +171,20 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___B
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebounceTimeout___VOID( CLR_RT_StackFrame& stack )
 {
-   NANOCLR_HEADER();
+	NANOCLR_HEADER();
 	{
+		CLR_UINT64 debounceTimeoutMilsec;
+
 		CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-		GPIO_PIN pinNumber = (GPIO_PIN)stack.Arg1().NumericByRef().s4;
+		GPIO_PIN pinNumber = (GPIO_PIN)pThis[ FIELD___pinNumber ].NumericByRefConst().s4;
 
-		int64_t debounceTimeoutMilsec = (CLR_INT64_TEMP_CAST) pThis[ Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___debounceTimeout ].NumericByRefConst().s8 / TIME_CONVERSION__TO_MILLISECONDS;
+		NANOCLR_CHECK_HRESULT( ExtractDebounceTimeSpanValue(pThis[ FIELD___debounceTimeout ], debounceTimeoutMilsec ) );
 
+		// developer note:
+		// the following call will FAIL if the pin hasn't been previously setup as input 
+		// that's OK because the debounce timeout will be eventually set when the pin is configured
 		CPU_GPIO_SetPinDebounce( pinNumber, debounceTimeoutMilsec );
-
 	}
 	NANOCLR_NOCLEANUP();
 }
@@ -237,6 +241,18 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlter
 		int32_t alternateFunction = stack.Arg1().NumericByRef().s4;
 
 		CPU_GPIO_DisablePin( pinNumber, GpioPinDriveMode_Input, alternateFunction);
+	}
+	NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::ExtractDebounceTimeSpanValue( CLR_RT_HeapBlock& timeSpanValue, CLR_UINT64& value )
+{
+    NANOCLR_HEADER();
+	{
+		// debounceTimeout field its a TimeSpan, which is a primitive type stored as an heap block, therefore needs to be accessed indirectly
+		CLR_INT64* debounceValue = Library_corlib_native_System_TimeSpan::GetValuePtr( timeSpanValue ); FAULT_ON_NULL(debounceValue);
+
+		value = *(CLR_UINT64*)debounceValue / TIME_CONVERSION__TO_MILLISECONDS;
 	}
 	NANOCLR_NOCLEANUP();
 }

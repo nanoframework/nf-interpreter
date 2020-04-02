@@ -39,7 +39,7 @@ gpio_input_state * AllocateGpioInputState(GPIO_PIN pinNumber)
 	gpio_input_state * ptr = gpioInputState[pinNumber];
 	if (ptr == NULL)
 	{
-		ptr = (gpio_input_state *)malloc(sizeof(gpio_input_state));
+		ptr = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
 		memset(ptr, 0, sizeof(gpio_input_state));
 
 		ptr->pinNumber = pinNumber;
@@ -65,7 +65,7 @@ void DeleteGpioInputState(GPIO_PIN pinNumber)
 			// it's OK to do always this, no matter if interrupts are enabled or not
 			GPIO_disableInt(pState->pinNumber);
 
-			free(pState);
+			platform_free(pState);
 			
 			gpioInputState[pinNumber]  = NULL;
 		}
@@ -242,7 +242,7 @@ void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
 }
 
 // Enable gpio pin for input
-bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE Pin_ISR, void* ISR_Param, GPIO_INT_EDGE IntEdge, GpioPinDriveMode driveMode)
+bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE pin_ISR, void* isr_Param, GPIO_INT_EDGE intEdge, GpioPinDriveMode driveMode)
 {
 	gpio_input_state * pState;
 
@@ -260,7 +260,7 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMillisecond
 
 	// Link ISR ptr supplied and not already set up
 	// CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
-	if ( (Pin_ISR != NULL) && (pState->isrPtr == NULL))
+	if ( (pin_ISR != NULL) && (pState->isrPtr == NULL))
 	{
            // get current config
             GPIO_PinConfig currentPinConfig;
@@ -279,12 +279,12 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, int64_t debounceTimeMillisecond
 			
 	}
 
-	pState->isrPtr = Pin_ISR;
-	pState->mode = IntEdge;
-	pState->param = (void *)ISR_Param;
+	pState->isrPtr = pin_ISR;
+	pState->mode = intEdge;
+	pState->param = (void *)isr_Param;
 	pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
 
-	switch (IntEdge)
+	switch (intEdge)
 	{
 		case GPIO_INT_EDGE_LOW:
 		case GPIO_INT_LEVEL_LOW:
@@ -428,7 +428,7 @@ uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
 	return 0;
 }
 
-bool   CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, int64_t debounceTimeMilliseconds)
+bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds)
 {
 	if (pinNumber >= GPIO_MAX_PINS) return false;
 
