@@ -30,7 +30,7 @@ SECTIONS
         __init_array_base__ = .;
         KEEP(*(SORT(.init_array.*)))
         KEEP(*(.init_array))
-        __init_array_end = .;
+        __init_array_end__ = .;
         __fini_array_base__ = .;
         KEEP(*(.fini_array))
         KEEP(*(SORT(.fini_array.*)))
