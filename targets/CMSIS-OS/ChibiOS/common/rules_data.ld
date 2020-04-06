@@ -10,11 +10,10 @@ SECTIONS
 {
     .data : ALIGN(4)
     {
-        . = ALIGN(4);
         PROVIDE(_textdata = LOADADDR(.data));
         PROVIDE(_data = .);
-        __textdata_base__ = LOADADDR(.data);
-        __data_base__ = .;
+       __textdata_base__ = LOADADDR(.data);
+       __data_base__ = .;
         *(.data)
         *(.data.*)
         *(.ramtext)
@@ -25,7 +24,6 @@ SECTIONS
 
     .bss (NOLOAD) : ALIGN(4)
     {
-        . = ALIGN(4);
         __bss_base__ = .;
         *(.bss)
         *(.bss.*)

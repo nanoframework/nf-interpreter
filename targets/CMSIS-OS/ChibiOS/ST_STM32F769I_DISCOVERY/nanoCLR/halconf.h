@@ -21,6 +21,7 @@
 #define _CHIBIOS_HAL_CONF_
 #define _CHIBIOS_HAL_CONF_VER_7_1_
 
+#include <target_platform.h>
 #include "mcuconf.h"
 
 /**
@@ -35,6 +36,7 @@
 //this board requires SDCD2 not SDCD1
 #define FATFS_HAL_DEVICE SDCD2
 #endif
+////////
 
 //#define STM32_SDC_SDMMC_50MHZ               TRUE
 
