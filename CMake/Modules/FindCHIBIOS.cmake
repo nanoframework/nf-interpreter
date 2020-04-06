@@ -41,7 +41,7 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/license
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/common/ARMCMx)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt-nil)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/oslib/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/${TARGET_SERIES})
@@ -147,7 +147,7 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
     find_file(CHIBIOS_SRC_FILE ${SRC_FILE}
         PATHS 
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/src
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt-nil
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/src
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/oslib/src
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/common/abstractions/cmsis_os

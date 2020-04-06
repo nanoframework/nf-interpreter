@@ -27,14 +27,14 @@ SECTIONS
 
     .xtors : ALIGN(4)
     {
-        __init_array_start = .;
+        __init_array_base__ = .;
         KEEP(*(SORT(.init_array.*)))
         KEEP(*(.init_array))
         __init_array_end = .;
-        __fini_array_start = .;
+        __fini_array_base__ = .;
         KEEP(*(.fini_array))
         KEEP(*(SORT(.fini_array.*)))
-        __fini_array_end = .;
+        __fini_array_end__ = .;
     } > XTORS_FLASH AT > XTORS_FLASH_LMA
 
     .text : ALIGN(16)
@@ -62,9 +62,9 @@ SECTIONS
     } > VARIOUS_FLASH AT > VARIOUS_FLASH_LMA
 
     .ARM.exidx : {
-        __exidx_start = .;
+        __exidx_base__ = .;
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-        __exidx_end = .;
+        __exidx_end__ = .;
      } > VARIOUS_FLASH AT > VARIOUS_FLASH_LMA
 
     .eh_frame_hdr :
