@@ -121,5 +121,5 @@ INCLUDE rules_code.ld
 /* Data rules inclusion.*/
 INCLUDE rules_data.ld
 
-/* Data rules inclusion.*/
+/* Memory rules inclusion.*/
 INCLUDE rules_memory.ld
