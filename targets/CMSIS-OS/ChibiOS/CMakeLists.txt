@@ -51,7 +51,7 @@ if(NO_CHIBIOS_SOURCE)
     endif()
 
     # ChibiOS version
-    set(CHIBIOS_GIT_TAG "stable_19.1.x")
+    set(CHIBIOS_GIT_TAG "master") #needs to be changed to stable_20.3.x 
     message(STATUS "RTOS is: CHIBIOS (latest available code from ${CHIBIOS_GIT_TAG})")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
