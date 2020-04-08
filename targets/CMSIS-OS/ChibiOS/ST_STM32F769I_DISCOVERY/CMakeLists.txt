@@ -186,9 +186,6 @@ target_include_directories(${NANOBOOTER_PROJECT_NAME}.elf PUBLIC
 
      ${TARGET_CMSIS_NANOBOOTER_INCLUDE_DIRS}
      ${TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS}
-
-    # includes for ChibiOS LwIP
-    ${CHIBIOS_LWIP_INCLUDE_DIRS}
 )
 
 # include directories for nanoCLR
