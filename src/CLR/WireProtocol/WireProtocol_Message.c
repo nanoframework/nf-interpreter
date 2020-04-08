@@ -362,7 +362,7 @@ int WP_Message_Process(WP_Message* message)
                 break;
 
             default:
-                // unknow state
+                // unknown state
                 TRACE0( TRACE_ERRORS, "RxState=UNKNOWN!!\n");
                 return false;
         }
