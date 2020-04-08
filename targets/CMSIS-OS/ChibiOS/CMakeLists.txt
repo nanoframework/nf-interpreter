@@ -47,7 +47,7 @@ if(NO_CHIBIOS_SOURCE)
 
     #  check if Git was found, if not report to user and abort
     if(NOT GIT_EXECUTABLE)
-        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        message(FATAL_ERROR "Could not find Git, make sure you have it installed.")
     endif()
 
     # ChibiOS version
