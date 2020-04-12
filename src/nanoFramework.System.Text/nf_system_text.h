@@ -18,7 +18,6 @@ struct Library_nf_system_text_System_Text_StringBuilder
     static const int FIELD___chunkPrevious = 4;
     static const int FIELD___chunkOffset = 5;
 
-
     //--//
 
 };
@@ -42,7 +41,6 @@ struct Library_nf_system_text_System_Text_UTF8Encoding
 
     static HRESULT Helper__GetChars(CLR_RT_StackFrame& stack, bool fIndexed);
 };
-
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Text;
 
