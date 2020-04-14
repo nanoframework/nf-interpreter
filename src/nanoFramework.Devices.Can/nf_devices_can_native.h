@@ -43,6 +43,17 @@ enum CanMessageFrameType
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
+struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanSettings
+{
+    static const int FIELD___baudRatePrescaler = 1;
+    static const int FIELD___phaseSegment1 = 2;
+    static const int FIELD___phaseSegment2 = 3;
+    static const int FIELD___syncJumpWidth = 4;
+
+    //--//
+
+};
+
 struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController
 {
     static const int FIELD_STATIC__s_eventListener = 0;
@@ -70,7 +81,6 @@ struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanControllerEven
 {
     static const int FIELD___canControllersMap = 1;
 
-
     //--//
 
 };
@@ -79,7 +89,6 @@ struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanControllerMana
 {
     static const int FIELD_STATIC___syncLock = 1;
     static const int FIELD_STATIC__s_controllersCollection = 2;
-
 
     //--//
 
@@ -92,28 +101,14 @@ struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage
     static const int FIELD___frameType = 3;
     static const int FIELD___message = 4;
 
-
     //--//
 
 };
 
 struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessageEvent
 {
-    static const int FIELD__ControllerIndex = 3;
-    static const int FIELD__Event = 4;
-
-
-    //--//
-
-};
-
-struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanSettings
-{
-    static const int FIELD___baudRatePrescaler = 1;
-    static const int FIELD___phaseSegment1 = 2;
-    static const int FIELD___phaseSegment2 = 3;
-    static const int FIELD___syncJumpWidth = 4;
-
+    static const int FIELD__ControllerIndex = 1;
+    static const int FIELD__Event = 2;
 
     //--//
 
