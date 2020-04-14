@@ -47,7 +47,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Devices_Dac =
 {
     "System.Devices.Dac",
-    0x2E69DF01,
+    0x5ED97E79,
     method_lookup,
     { 100, 0, 0, 6 }
 };

@@ -23,7 +23,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Devices_OneWire =
 {
     "nanoFramework.Devices.OneWire",
-    0xC7BEAEBC,
+    0xA5C172BD,
     method_lookup,
     { 100, 0, 3, 4 }
 };

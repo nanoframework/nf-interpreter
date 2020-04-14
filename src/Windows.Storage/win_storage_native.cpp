@@ -105,7 +105,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage =
 {
     "Windows.Storage",
-    0xE6682807,
+    0x5160A7B6,
     method_lookup,
     { 100, 0, 2, 0 }
 };

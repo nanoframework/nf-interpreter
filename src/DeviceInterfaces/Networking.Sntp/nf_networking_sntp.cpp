@@ -21,7 +21,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sntp =
 {
     "nanoFramework.Networking.Sntp",
-    0xB617FDFB,
+    0xE2D9BDED,
     method_lookup,
     { 100, 0, 4, 4 }
 };

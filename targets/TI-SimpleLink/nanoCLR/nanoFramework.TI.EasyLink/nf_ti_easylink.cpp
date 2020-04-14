@@ -51,7 +51,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_TI_EasyLink =
 {
     "nanoFramework.TI.EasyLink",
-    0x28CFF341,
+    0xEC93F5DE,
     method_lookup,
     { 100, 0, 0, 2 }
 };

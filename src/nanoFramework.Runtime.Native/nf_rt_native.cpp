@@ -43,7 +43,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Native =
 {
     "nanoFramework.Runtime.Native",
-    0x6792B404,
+    0xBD754FED,
     method_lookup,
     { 100, 0, 6, 1 }
 };
