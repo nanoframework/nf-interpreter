@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) 2020 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -309,9 +309,15 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
                     // compute directory date
                     fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-                    // get a reference to the dateCreated managed field...
-                    CLR_RT_HeapBlock& dateFieldRef = hbObj[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated ];
-                    CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+                   // get a reference to the dateCreated managed field...
+                    CLR_RT_HeapBlock& timestampFieldRef = hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
+                    // create an instance of <DateTime>
+                    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(timestampFieldRef, g_CLR_RT_WellKnownTypes.m_DateTime));
+                    // get reference to this object
+                    CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();	
+                    // get reference to ticks field
+                    CLR_RT_HeapBlock &dateTimeTickField = hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
+                    CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
                     // ...and set it with the fileInfoTime
                     *pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
 
@@ -506,8 +512,14 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
                         fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
                         // get a reference to the dateCreated managed field...
-                        CLR_RT_HeapBlock& dateFieldRef = hbObj[ Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated ];
-                        CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+                        CLR_RT_HeapBlock& timestampFieldRef = hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
+                        // create an instance of <DateTime>
+                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(timestampFieldRef, g_CLR_RT_WellKnownTypes.m_DateTime));
+                        // get reference to this object
+                        CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();	
+                        // get reference to ticks field
+                        CLR_RT_HeapBlock &dateTimeTickField = hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
+                        CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
                         // ...and set it with the fileInfoTime
                         *pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
 
@@ -762,8 +774,14 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFileNati
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFile[ Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path ], filePath ));
 
             // get a reference to the dateCreated managed field...
-            CLR_RT_HeapBlock& dateFieldRef = storageFile[ Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated ];
-            CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+			CLR_RT_HeapBlock& timestampFieldRef = storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
+			// create an instance of <DateTime>
+			NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(timestampFieldRef, g_CLR_RT_WellKnownTypes.m_DateTime));
+			// get reference to this object
+			CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();	
+			// get reference to ticks field
+			CLR_RT_HeapBlock &dateTimeTickField = hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
+			CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
             // ...and set it with the current DateTime
             *pRes = HAL_Time_CurrentDateTime(false);
 
@@ -799,60 +817,81 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFolderNa
     SYSTEMTIME      fileInfoTime;    
     FRESULT         operationResult;
     char*           folderPath = NULL;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-
-    // get creation collision options
-    options = (CreationCollisionOption)stack.Arg2().NumericByRef().u4;
-        
-    // get a pointer to the path in managed field
-    workingPath = pThis[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ].DereferenceString()->StringText();
-
-    // get a pointer to the desired folder name
-    folderName = stack.Arg1().DereferenceString()->StringText();
-
-    folderPath = (char*)malloc(2 * FF_LFN_BUF + 1);
-
-    // sanity check for successfull malloc
-    if(folderPath == NULL)
     {
-        // failed to allocate memory
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
-    // clear working buffer
-    memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
+        // get creation collision options
+        options = (CreationCollisionOption)stack.Arg2().NumericByRef().u4;
+            
+        // get a pointer to the path in managed field
+        workingPath = pThis[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ].DereferenceString()->StringText();
 
-    // compose folder path
-    CombinePath(folderPath, workingPath, folderName);  
-    
-    //check if folder exists
-    operationResult = f_stat(folderPath, &fileInfo);
+        // get a pointer to the desired folder name
+        folderName = stack.Arg1().DereferenceString()->StringText();
 
-    if (operationResult == FR_OK)
-    {
-        if (options == CreationCollisionOption_FailIfExists)
+        folderPath = (char*)malloc(2 * FF_LFN_BUF + 1);
+
+        // sanity check for successfull malloc
+        if(folderPath == NULL)
         {
-            // folder already exists
-            NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
+            // failed to allocate memory
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
-        else if (options == CreationCollisionOption_ReplaceExisting) 
+
+        // clear working buffer
+        memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
+
+        // compose folder path
+        CombinePath(folderPath, workingPath, folderName);  
+        
+        //check if folder exists
+        operationResult = f_stat(folderPath, &fileInfo);
+
+        if (operationResult == FR_OK)
         {
-            // remove folder
-            operationResult = f_unlink(folderPath);
-            if (operationResult == FR_INVALID_NAME)
+            if (options == CreationCollisionOption_FailIfExists)
             {
-                // Invalid path
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                // folder already exists
+                NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
             }
-            else if (operationResult == FR_DENIED)
+            else if (options == CreationCollisionOption_ReplaceExisting) 
             {
-                //folder is propably not empty
-                //TODO - add recursive deletion of directories and files
+                // remove folder
+                operationResult = f_unlink(folderPath);
+                if (operationResult == FR_INVALID_NAME)
+                {
+                    // Invalid path
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                }
+                else if (operationResult == FR_DENIED)
+                {
+                    //folder is propably not empty
+                    //TODO - add recursive deletion of directories and files
+                    NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+                }
+
+                // create directory
+                operationResult = f_mkdir(folderPath);
+
+                if(operationResult == FR_OK)
+                {
+                    f_stat(folderPath, &fileInfo);              
+                }
+                else
+                {
+                    // failed to create the folder
+                    NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+                }
+            }
+            else if (options == CreationCollisionOption_GenerateUniqueName)
+            {
+                //TODO - add generating unique name
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
-
+        } 
+        else if (operationResult == FR_NO_FILE)
+        {
             // create directory
             operationResult = f_mkdir(folderPath);
 
@@ -866,50 +905,39 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFolderNa
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
         }
-        else if (options == CreationCollisionOption_GenerateUniqueName)
-        {
-            //TODO - add generating unique name
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
-    } 
-    else if (operationResult == FR_NO_FILE)
-    {
-        // create directory
-        operationResult = f_mkdir(folderPath);
 
-        if(operationResult == FR_OK)
-        {
-            f_stat(folderPath, &fileInfo);              
-        }
-        else
-        {
-            // failed to create the folder
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
+        // compose return object
+        // find <StorageFolder> type, don't bother checking the result as it exists for sure
+        g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storageFolderTypeDef );
+
+        // create a <StorageFolder>
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), storageFolderTypeDef));
+        
+        // get a handle to the storage folder
+        storageFolder = stack.TopValue().Dereference();
+
+        // folder name
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], folderName ));
+
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], folderPath ));
+
+        // get the date time details and fill in the managed field
+        // compute directory date
+        fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
+
+        // get a reference to the dateCreated managed field and set it with the fileInfoTime
+        CLR_RT_HeapBlock& timestampFieldRef = storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
+        // create an instance of <DateTime>
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(timestampFieldRef, g_CLR_RT_WellKnownTypes.m_DateTime));
+        // get reference to this object
+        CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();	
+        // get reference to ticks field
+        CLR_RT_HeapBlock &dateTimeTickField = hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
+        CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
+        
+        // ...and set it with the fileInfoTime
+        *pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
     }
-
-    // compose return object
-    // find <StorageFolder> type, don't bother checking the result as it exists for sure
-    g_CLR_RT_TypeSystem.FindTypeDef( "StorageFolder", "Windows.Storage", storageFolderTypeDef );
-
-    // create a <StorageFolder>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), storageFolderTypeDef));
-    
-    // get a handle to the storage folder
-    storageFolder = stack.TopValue().Dereference();
-
-    // folder name
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___name ], folderName ));
-
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[ Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], folderPath ));
-
-    // get the date time details and fill in the managed field
-    // compute directory date
-    fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
-
-    // get a reference to the dateCreated managed field and set it with the fileInfoTime
-    storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated ].NumericByRef().s8 = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
-
     NANOCLR_CLEANUP();
 
     // free buffer memory, if allocated
@@ -1034,8 +1062,6 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 
 	FRESULT     operationResult;
 	char*       folderPath = NULL;
-	
-	CLR_INT64*  pRes;
 
 	// get a pointer to the managed object instance and check that it's not NULL
 	CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
@@ -1098,8 +1124,14 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
             fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
             // get a reference to the dateCreated managed field...
-            CLR_RT_HeapBlock& dateFieldRef = storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
-            pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+			CLR_RT_HeapBlock& timestampFieldRef = storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
+			// create an instance of <DateTime>
+			NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(timestampFieldRef, g_CLR_RT_WellKnownTypes.m_DateTime));
+			// get reference to this object
+			CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();	
+			// get reference to ticks field
+			CLR_RT_HeapBlock &dateTimeTickField = hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
+			CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
             // ...and set it with the fileInfoTime
             *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
         }

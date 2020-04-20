@@ -10,40 +10,9 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 
-struct Library_win_storage_native_Windows_Storage_RemovableDeviceEventArgs
-{
-    static const int FIELD___path = 1;
-    static const int FIELD___event = 2;
-
-
-    //--//
-
-};
-
-struct Library_win_storage_native_Windows_Storage_StorageEventManager
-{
-    static const int FIELD_STATIC__RemovableDeviceInserted = 0;
-    static const int FIELD_STATIC__RemovableDeviceRemoved = 1;
-
-
-    //--//
-
-};
-
-struct Library_win_storage_native_Windows_Storage_StorageEventManager__StorageEvent
-{
-    static const int FIELD__EventType = 3;
-    static const int FIELD__DriveIndex = 4;
-    static const int FIELD__Time = 5;
-
-
-    //--//
-
-};
-
 struct Library_win_storage_native_Windows_Storage_Devices_SDCard
 {
-    static const int FIELD_STATIC___mounted = 2;
+    static const int FIELD_STATIC___mounted = 0;
 
     NANOCLR_NATIVE_DECLARE(MountMMCNative___STATIC__VOID__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(MountSpiNative___STATIC__VOID__I4__I4);
@@ -59,6 +28,34 @@ struct Library_win_storage_native_Windows_Storage_FileIO
     NANOCLR_NATIVE_DECLARE(WriteText___STATIC__VOID__WindowsStorageIStorageFile__STRING);
     NANOCLR_NATIVE_DECLARE(ReadBufferNative___STATIC__VOID__WindowsStorageIStorageFile__BYREF_SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(ReadTextNative___STATIC__VOID__WindowsStorageIStorageFile__BYREF_STRING);
+
+    //--//
+
+};
+
+struct Library_win_storage_native_Windows_Storage_RemovableDeviceEventArgs
+{
+    static const int FIELD___path = 1;
+    static const int FIELD___event = 2;
+
+    //--//
+
+};
+
+struct Library_win_storage_native_Windows_Storage_StorageEventManager
+{
+    static const int FIELD_STATIC__RemovableDeviceInserted = 1;
+    static const int FIELD_STATIC__RemovableDeviceRemoved = 2;
+
+    //--//
+
+};
+
+struct Library_win_storage_native_Windows_Storage_StorageEventManager__StorageEvent
+{
+    static const int FIELD__EventType = 1;
+    static const int FIELD__DriveIndex = 2;
+    static const int FIELD__Time = 3;
 
     //--//
 
@@ -103,7 +100,6 @@ struct Library_win_storage_native_Windows_Storage_StorageProvider
 {
     static const int FIELD___displayName = 1;
     static const int FIELD___id = 2;
-
 
     //--//
 

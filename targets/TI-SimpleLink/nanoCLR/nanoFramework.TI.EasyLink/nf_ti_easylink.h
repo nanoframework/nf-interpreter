@@ -19,6 +19,27 @@
 // EasyLink API Header files
 #include <easylink/EasyLink.h>
 
+struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_TransmitPacket
+{
+    static const int FIELD___address = 1;
+    static const int FIELD___payload = 2;
+
+    //--//
+
+};
+
+struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_ReceivedPacket
+{
+    static const int FIELD___address = 1;
+    static const int FIELD___payload = 2;
+    static const int FIELD___rssi = 3;
+    static const int FIELD___absoluteTime = 4;
+    static const int FIELD___rxTimeout = 5;
+
+    //--//
+
+};
+
 struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
 {
     static const int FIELD___syncLock = 1;
@@ -45,28 +66,6 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
     //--//
 
     static HRESULT UpdateRxAddressFilter( CLR_RT_StackFrame& stack );
-};
-
-struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_ReceivedPacket
-{
-    static const int FIELD___address = 1;
-    static const int FIELD___payload = 2;
-    static const int FIELD___rssi = 3;
-    static const int FIELD___absoluteTime = 4;
-    static const int FIELD___rxTimeout = 5;
-
-
-    //--//
-
-};
-
-struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_TransmitPacket
-{
-    static const int FIELD___address = 1;
-    static const int FIELD___payload = 2;
-
-
-    //--//
 
 };
 

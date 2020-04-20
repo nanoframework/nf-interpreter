@@ -29,41 +29,36 @@ enum GpioChangePolarity
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCount
 {
-	static const int FIELD__Count = 1;
-	static const int FIELD__RelativeTime = 2;
+    static const int FIELD__Count = 1;
+    static const int FIELD__RelativeTime = 2;
 
-
-	//--//
+    //--//
 
 };
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter
 {
-	static const int FIELD___pinNumber = 1;
-	static const int FIELD___inputMode = 2;
-	static const int FIELD___polarity = 3;
-	static const int FIELD___CountActive = 4;
-	static const int FIELD___readTime = 5;
-	static const int FIELD___syncLock = 6;
-	static const int FIELD___disposedValue = 7;
+    static const int FIELD___pinNumber = 1;
+    static const int FIELD___inputMode = 2;
+    static const int FIELD___polarity = 3;
+    static const int FIELD___countActive = 4;
+    static const int FIELD___readTime = 5;
+    static const int FIELD___syncLock = 6;
+    static const int FIELD___disposedValue = 7;
 
-	NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
-	NANOCLR_NATIVE_DECLARE(NativeRead___U8__BOOLEAN);
-	NANOCLR_NATIVE_DECLARE(NativeStart___VOID);
-	NANOCLR_NATIVE_DECLARE(NativeStop___VOID);
-	NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeRead___U8__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeStart___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeStop___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
 
-	//--//
+    //--//
 
 };
 
-
-struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
+struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPinValueChangedEventArgs
 {
-    static const int FIELD_STATIC___syncLock = 0;
-    static const int FIELD_STATIC__s_instance = 1;
-
-    NANOCLR_NATIVE_DECLARE(get_PinCount___I4);
+    static const int FIELD___edge = 1;
 
     //--//
 
@@ -71,7 +66,7 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin
 {
-    static const int FIELD_STATIC__s_eventListener = 2;
+    static const int FIELD_STATIC__s_eventListener = 0;
 
     static const int FIELD___syncLock = 1;
     static const int FIELD___pinNumber = 2;
@@ -94,13 +89,24 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin
 
     //--//
 
+    static HRESULT ExtractDebounceTimeSpanValue( CLR_RT_HeapBlock& timeSpanValue, CLR_UINT64& value );
+};
+
+struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
+{
+    static const int FIELD_STATIC___syncLock = 1;
+    static const int FIELD_STATIC__s_instance = 2;
+
+    NANOCLR_NATIVE_DECLARE(get_PinCount___I4);
+
+    //--//
+
 };
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPinEvent
 {
-    static const int FIELD__PinNumber = 3;
-    static const int FIELD__Edge = 4;
-
+    static const int FIELD__PinNumber = 1;
+    static const int FIELD__Edge = 2;
 
     //--//
 
@@ -109,16 +115,6 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPinEvent
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPinEventListener
 {
     static const int FIELD___pinMap = 1;
-
-
-    //--//
-
-};
-
-struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPinValueChangedEventArgs
-{
-    static const int FIELD___edge = 1;
-
 
     //--//
 

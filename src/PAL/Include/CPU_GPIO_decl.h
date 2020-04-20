@@ -7,6 +7,11 @@
 #ifndef _DRIVERS_GPIO_DECL_H_
 #define _DRIVERS_GPIO_DECL_H_ 1
 
+#if defined (__GNUC__)
+#define __int64 long long
+#endif
+typedef unsigned __int64 CLR_UINT64;
+
 #define GPIO_PIN_NONE               0xFFFFFFFF
 
 #define GPIO_ATTRIBUTE_NONE         0x00
@@ -90,22 +95,22 @@ bool   CPU_GPIO_EnableOutputPin( GPIO_PIN Pin, GpioPinValue InitialState, GpioPi
 //
 // Parameters :-
 //
-// Pin               
+// pinNumber               
 //   The number of the input pin to be enabled.
 // Debounce milisecs
 //   A value you can set to greater than 0 to enable glitch filtering (debouncing) for the number of millissecs
-// PIN_ISR
+// pin_ISR
 //   A pointer to a function that is called when an interrupt is generated.
-// PIN_ISR_Param
+// PIN_isr_Param
 //   A programmer-defined parameter that is passed to the assigned interrupt service routine (ISR).
-// IntEdge
+// intEdge
 //   A value that indicates the transition edge or state on which the interrupt is called.
 // driveMode
 //   A value that specifies the resistor state to be used for the enabled pin, must be a valid input drive mode.
 // Return Value
 //   true if the specified pin was successfully enabled; otherwise, false.
 //
-bool   CPU_GPIO_EnableInputPin( GPIO_PIN Pin, int64_t debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE PIN_ISR, void* ISR_Param, GPIO_INT_EDGE IntEdge, GpioPinDriveMode driveMode );
+bool CPU_GPIO_EnableInputPin( GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE pin_ISR, void* isr_Param, GPIO_INT_EDGE intEdge, GpioPinDriveMode driveMode );
 
 //  Return current gpio pin state
 GpioPinValue   CPU_GPIO_GetPinState    ( GPIO_PIN Pin );
@@ -129,7 +134,7 @@ int32_t  CPU_GPIO_GetPinCount    ();
 
 // Get / Set the pin debounce time in millisecs
 uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN Pin);
-bool   CPU_GPIO_SetPinDebounce(GPIO_PIN Pin, int64_t debounceTimeMilliseconds);
+bool     CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds);
 
 
 // Validate pin and set drive mode
