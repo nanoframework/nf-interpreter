@@ -171,7 +171,7 @@ if(NO_CMSIS_SOURCE)
     # otherwise it won't be available before the actual build step
     configure_file("${PROJECT_SOURCE_DIR}/CMake/CMSIS.CMakeLists.cmake.in"
                 "${CMAKE_BINARY_DIR}/CMSIS_Download/CMakeLists.txt")
-                
+
     # setup CMake project for CMSIS download
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                     RESULT_VARIABLE result
