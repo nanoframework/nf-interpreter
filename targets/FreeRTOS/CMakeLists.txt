@@ -172,8 +172,6 @@ if(NO_CMSIS_SOURCE)
     configure_file("${PROJECT_SOURCE_DIR}/CMake/CMSIS.CMakeLists.cmake.in"
                 "${CMAKE_BINARY_DIR}/CMSIS_Download/CMakeLists.txt")
                 
-    set(ENV{GIT_LFS_SKIP_SMUDGE} 1)
-
     # setup CMake project for CMSIS download
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                     RESULT_VARIABLE result
@@ -184,8 +182,6 @@ if(NO_CMSIS_SOURCE)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
                     RESULT_VARIABLE result
                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMSIS_Download")
-    
-    unset(ENV{GIT_LFS_SKIP_SMUDGE})
 
     # add CMSIS as external project
     ExternalProject_Add( 
