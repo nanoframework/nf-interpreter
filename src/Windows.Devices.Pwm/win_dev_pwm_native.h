@@ -31,7 +31,6 @@ struct Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmControllerManager
     static const int FIELD_STATIC___syncLock = 0;
     static const int FIELD_STATIC__s_controllersCollection = 1;
 
-
     //--//
 
 };

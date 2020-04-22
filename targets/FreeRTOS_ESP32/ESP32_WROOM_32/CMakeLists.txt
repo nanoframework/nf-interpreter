@@ -59,7 +59,7 @@ add_subdirectory("nanoCLR")
 # mbed TLS requires a config file
 if(USE_SECURITY_MBEDTLS_OPTION)
     # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
-	file(TO_CMAKE_PATH "${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h" MBED_CONFILE)
+    file(TO_CMAKE_PATH "${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h" MBED_CONFILE)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${MBED_CONFILE}>\"")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${MBED_CONFILE}>\"")
 endif()
@@ -67,7 +67,11 @@ endif()
 # Build the networking components as a separate library
 # This is done this way to stop "Createprocess: file no found" errors in linker when object input file is greater than 32k
 if(USE_NETWORKING_OPTION)
-    add_library(NetworkLib STATIC ${NF_Networking_SOURCES} ${TARGET_ESP32_NETWORK_SOURCES} ${TARGET_LWIP_SOURCES} ${mbedTLS_SOURCES} )
+    add_library(NetworkLib STATIC ${NF_Networking_SOURCES}
+                                  ${TARGET_ESP32_NETWORK_SOURCES}
+                                  ${TARGET_LWIP_SOURCES}
+                                  ${mbedTLS_SOURCES}
+    )
 endif()
 
 # add dependency for security provider mbedTLS
@@ -124,11 +128,11 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
         set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS " -L${LIBPATH} " )
     endif()
 
-	# Add psram workarounds for newlib
+    # Add psram workarounds for newlib
     if( "${LIBSHORT}" STREQUAL "newlib" )
-	    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libc-psram-workaround.a " )
-	    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libm-psram-workaround.a " )
-	endif()
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libc-psram-workaround.a " )
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libm-psram-workaround.a " )
+    endif()
 
     set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -l${LIBSHORT} " )
     
@@ -136,7 +140,7 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
         set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -u esp_app_desc " )
     endif()
 
-	if( "${LIBSHORT}" STREQUAL "bt" )
+    if( "${LIBSHORT}" STREQUAL "bt" )
         set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${ESP32_IDF_PATH}/components/bt/lib -lbtdm_app " )
     endif()
 
@@ -146,13 +150,13 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
         set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -u __cxa_guard_dummy -u __cxx_fatal_exception  " )
     endif()
 
-	if( "${LIBSHORT}" STREQUAL "esp32" )
+    if( "${LIBSHORT}" STREQUAL "esp32" )
         set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/esp32/libhal.a  " )
-		set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/lib -lcore -lrtc -lnet80211  -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lespnow -lphy -lmesh")
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/lib -lcore -lrtc -lnet80211  -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lespnow -lphy -lmesh")
 	
-		set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L  ${CMAKE_CURRENT_SOURCE_DIR} -T esp32_out.ld ")
-		set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/ld -u ld_include_panic_highint_hdl -T esp32.project.ld -T esp32.rom.ld -T esp32.peripherals.ld -T esp32.rom.libgcc.ld   ")
-	endif()
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L  ${CMAKE_CURRENT_SOURCE_DIR} -T esp32_out.ld ")
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/ld -u ld_include_panic_highint_hdl -T esp32.project.ld -T esp32.rom.ld -T esp32.peripherals.ld -T esp32.rom.libgcc.ld   ")
+    endif()
 
 
     if( "${LIBSHORT}" STREQUAL "freertos" )
@@ -197,7 +201,7 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     # directories for nanoFramework libraries
     ${NF_CoreCLR_INCLUDE_DIRS}
     ${NF_Debugger_INCLUDE_DIRS}
-	${NF_Networking_INCLUDE_DIRS}
+    ${NF_Networking_INCLUDE_DIRS}
 
     # includes for nanoFramework APIs
     ${TARGET_NANO_APIS_INCLUDES}
@@ -264,7 +268,7 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 #set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--verbose ")
 
 # add dependency for networking
-if(USE_SECURITY_MBEDTLS_OPTION)
+if(USE_NETWORKING_OPTION)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf NetworkLib)
 endif()
 
@@ -276,21 +280,26 @@ set(ESPTOOL_PY_FLAGS "--chip esp32 elf2image --flash_mode \"dio\" --flash_freq \
 set(GEN_ESP32PART_PY_FILE ${ESP32_IDF_PATH}/components/partition_table/gen_esp32part.py )
 
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${ESPTOOL_PY_FILE} ${ESPTOOL_PY_FLAGS} -o ${NANOCLR_BIN_FILE}   ${EXECUTABLE_OUTPUT_PATH}/${NANOCLR_PROJECT_NAME}.elf
-	COMMENT "Generate nanoClr BIN file for deployment" )
+    COMMAND ${ESPTOOL_PY_FILE} ${ESPTOOL_PY_FLAGS} -o ${NANOCLR_BIN_FILE}   ${EXECUTABLE_OUTPUT_PATH}/${NANOCLR_PROJECT_NAME}.elf
+    COMMENT "Generate nanoClr BIN file for deployment" )
     
 # # Create partition table
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_16mb.csv ${GEN_ESP32_BIN_PATH}/partitions_16mb.bin
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_8mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_8mb.bin
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_4mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
-	COMMAND ${GEN_ESP32PART_PY_FILE}  --verify  ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_2mb.csv  ${GEN_ESP32_BIN_PATH}/partitions_2mb.bin
-	COMMENT "Generate Esp32 Partition tables for 2MB, 4MB, 8MB and 16MB flash" )
+    COMMAND ${GEN_ESP32PART_PY_FILE} --verify ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_16mb.csv
+                                              ${GEN_ESP32_BIN_PATH}/partitions_16mb.bin
+    COMMAND ${GEN_ESP32PART_PY_FILE} --verify ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_8mb.csv
+                                              ${GEN_ESP32_BIN_PATH}/partitions_8mb.bin
+    COMMAND ${GEN_ESP32PART_PY_FILE} --verify ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_4mb.csv
+                                              ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
+    COMMAND ${GEN_ESP32PART_PY_FILE} --verify ${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_2mb.csv
+                                              ${GEN_ESP32_BIN_PATH}/partitions_2mb.bin
+    COMMENT "Generate Esp32 Partition tables for 2MB, 4MB, 8MB and 16MB flash" )
 
 # list partition table
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${GEN_ESP32PART_PY_FILE}  ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
-	COMMENT "List flash 4Mb Esp32 Partition tables" )
+    COMMAND ${GEN_ESP32PART_PY_FILE}  ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
+    COMMENT "List flash 4Mb Esp32 Partition tables"
+)
 
 #message("CMAKE_CXX_FLAGS:${CMAKE_CXX_FLAGS}" )
 #message("CMAKE_EXE_LINKER_FLAGS:${CMAKE_EXE_LINKER_FLAGS}" )

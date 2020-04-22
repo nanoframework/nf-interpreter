@@ -24,20 +24,6 @@ enum FloatingPoint
     FloatingPoint_DoublePrecisionHardware = 4,
 };
 
-struct Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo
-{
-    NANOCLR_NATIVE_DECLARE(GetSystemVersion___STATIC__VOID__BYREF_I4__BYREF_I4__BYREF_I4__BYREF_I4);
-    NANOCLR_NATIVE_DECLARE(get_OEMString___STATIC__STRING);
-    NANOCLR_NATIVE_DECLARE(get_OEM___STATIC__U1);
-    NANOCLR_NATIVE_DECLARE(get_Model___STATIC__U1);
-    NANOCLR_NATIVE_DECLARE(get_SKU___STATIC__U2);
-    NANOCLR_NATIVE_DECLARE(get_TargetName___STATIC__STRING);
-    NANOCLR_NATIVE_DECLARE(get_Platform___STATIC__STRING);
-    NANOCLR_NATIVE_DECLARE(GetNativeFloatingPointSupport___STATIC__U1);
-
-    //--//
-
-};
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_Debug
 {
     NANOCLR_NATIVE_DECLARE(GC___STATIC__U4__BOOLEAN);
@@ -46,6 +32,7 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_Debug
     //--//
 
 };
+
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint
 {
     NANOCLR_NATIVE_DECLARE(Install___STATIC__VOID__I4__I4);
@@ -63,9 +50,25 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_Power
     //--//
 
 };
+
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc
 {
     NANOCLR_NATIVE_DECLARE(Native_RTC_SetSystemTime___STATIC__BOOLEAN__I4__U1__U1__U1__U1__U1__U1);
+
+    //--//
+
+};
+
+struct Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo
+{
+    NANOCLR_NATIVE_DECLARE(GetSystemVersion___STATIC__VOID__BYREF_I4__BYREF_I4__BYREF_I4__BYREF_I4);
+    NANOCLR_NATIVE_DECLARE(get_OEMString___STATIC__STRING);
+    NANOCLR_NATIVE_DECLARE(get_OEM___STATIC__U1);
+    NANOCLR_NATIVE_DECLARE(get_Model___STATIC__U1);
+    NANOCLR_NATIVE_DECLARE(get_SKU___STATIC__U2);
+    NANOCLR_NATIVE_DECLARE(get_TargetName___STATIC__STRING);
+    NANOCLR_NATIVE_DECLARE(get_Platform___STATIC__STRING);
+    NANOCLR_NATIVE_DECLARE(GetNativeFloatingPointSupport___STATIC__U1);
 
     //--//
 

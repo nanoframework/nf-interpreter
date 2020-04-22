@@ -59,7 +59,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Pwm =
 {
     "Windows.Devices.Pwm",
-    0x84D8B10C,
+    0xBA2E2251,
     method_lookup,
     { 100, 1, 3, 3 }
 };

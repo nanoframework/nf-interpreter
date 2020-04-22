@@ -58,7 +58,6 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings
     static const int FIELD___spiSharingMode = 5;
     static const int FIELD___bitOrder = 6;
 
-
     //--//
 
 };
@@ -79,7 +78,6 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiControllerManager
 {
     static const int FIELD_STATIC__s_syncLock = 0;
     static const int FIELD_STATIC__s_controllersCollection = 1;
-
 
     //--//
 

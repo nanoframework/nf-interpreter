@@ -52,7 +52,7 @@ if(NO_FREERTOS_SOURCE)
     # check if build was requested with a specifc FreeRTOS version
     if(FREERTOS_VERSION_EMPTY)
         # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(FREERTOS_VERSION_TAG "V10.2.1")
+        set(FREERTOS_VERSION_TAG "V10.3.1-kernel-only")
     else()
         # set SVN tag
         set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")

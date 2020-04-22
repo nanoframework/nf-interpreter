@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) 2020 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -114,9 +114,16 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::GetFileFromPathN
             // compute directory date
             fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-            // get a reference to the dateCreated managed field...
-            CLR_RT_HeapBlock& dateFieldRef = storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
-			CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
+			// get a reference to the dateCreated managed field...
+			CLR_RT_HeapBlock& timestampFieldRef = storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
+			// create an instance of <DateTime>
+			NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(timestampFieldRef, g_CLR_RT_WellKnownTypes.m_DateTime));
+			// get reference to this object
+			CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();	
+			// get reference to ticks field
+			CLR_RT_HeapBlock &dateTimeTickField = hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
+			CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
+            
 			// ...and set it with the fileInfoTime
 			*pRes = HAL_Time_ConvertFromSystemTime( &fileInfoTime );
         }

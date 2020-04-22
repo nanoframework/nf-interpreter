@@ -14,20 +14,27 @@
 #include <nanoCLR_Checks.h>
 
 
-struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEvent
-{
-    static const int FIELD_STATIC__CustomEventPosted = 0;
-
-
-    //--//
-
-};
-
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_BaseEvent
 {
     static const int FIELD__Source = 1;
     static const int FIELD__Message = 2;
 
+    //--//
+
+};
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEventArgs
+{
+    static const int FIELD___data1 = 1;
+    static const int FIELD___data2 = 2;
+
+    //--//
+
+};
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEvent
+{
+    static const int FIELD_STATIC__CustomEventPosted = 0;
 
     //--//
 
@@ -39,6 +46,45 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEvent__Cus
     static const int FIELD__Data2 = 4;
     static const int FIELD__Time = 5;
 
+    //--//
+
+};
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventArgs
+{
+    static const int FIELD_STATIC__Empty = 1;
+
+    //--//
+
+};
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink__EventInfo
+{
+    static const int FIELD__EventListener = 1;
+    static const int FIELD__EventFilter = 2;
+    static const int FIELD__EventProcessor = 3;
+    static const int FIELD__Category = 4;
+
+    //--//
+
+};
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink
+{
+    static const int FIELD_STATIC__s_eventSink = 2;
+    static const int FIELD_STATIC__s_eventInfoTable = 3;
+
+    NANOCLR_NATIVE_DECLARE(EventConfig___VOID);
+
+    //--//
+
+};
+
+struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_GenericEvent
+{
+    static const int FIELD__Category = 3;
+    static const int FIELD__Data = 4;
+    static const int FIELD__Time = 5;
 
     //--//
 
@@ -57,61 +103,10 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispa
     NANOCLR_NATIVE_DECLARE(_ctor___VOID__STRING__U8);
 
     //--//
+
     static CLR_RT_ObjectToEvent_Source*             GetEventDispReference( CLR_RT_StackFrame& stack                                  );
     static HRESULT                                  GetEventDispatcher   ( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock_NativeEventDispatcher*& event  );
     static CLR_RT_HeapBlock_NativeEventDispatcher*  GetEventDispatcher   ( CLR_RT_StackFrame& stack                                  );
-};
-
-struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink
-{
-    static const int FIELD_STATIC__s_eventSink = 1;
-    static const int FIELD_STATIC__s_eventInfoTable = 2;
-
-    NANOCLR_NATIVE_DECLARE(EventConfig___VOID);
-
-    //--//
-
-};
-
-struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink__EventInfo
-{
-    static const int FIELD__EventListener = 1;
-    static const int FIELD__EventFilter = 2;
-    static const int FIELD__EventProcessor = 3;
-    static const int FIELD__Category = 4;
-
-
-    //--//
-
-};
-
-struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventArgs
-{
-    static const int FIELD_STATIC__Empty = 3;
-
-
-    //--//
-
-};
-
-struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEventArgs
-{
-    static const int FIELD___data1 = 1;
-    static const int FIELD___data2 = 2;
-
-
-    //--//
-
-};
-
-struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_GenericEvent
-{
-    static const int FIELD__Category = 3;
-    static const int FIELD__Data = 4;
-    static const int FIELD__Time = 5;
-
-
-    //--//
 
 };
 

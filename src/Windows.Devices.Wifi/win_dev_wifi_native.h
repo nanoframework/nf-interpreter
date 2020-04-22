@@ -11,6 +11,17 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 
+struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAvailableNetwork
+{
+    static const int FIELD___bsid = 1;
+    static const int FIELD___ssid = 2;
+    static const int FIELD___rssi = 3;
+    static const int FIELD___networkKind = 4;
+
+    //--//
+
+};
+
 struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter
 {
     static const int FIELD_STATIC__s_eventListener = 0;
@@ -30,25 +41,11 @@ struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter
 
     //--//
 
-    static HRESULT GetNetInterfaceIndex(CLR_RT_StackFrame& stack, int * pNetIndex);
-};
-
-struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAvailableNetwork
-{
-    static const int FIELD___bsid = 1;
-    static const int FIELD___ssid = 2;
-    static const int FIELD___rssi = 3;
-    static const int FIELD___networkKind = 4;
-
-
-    //--//
-
 };
 
 struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiConnectionResult
 {
     static const int FIELD___ConnectionStatus = 1;
-
 
     //--//
 
@@ -56,9 +53,8 @@ struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiConnectionResult
 
 struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiEvent
 {
-    static const int FIELD__EventType = 3;
-    static const int FIELD__Time = 4;
-
+    static const int FIELD__EventType = 1;
+    static const int FIELD__Time = 2;
 
     //--//
 
@@ -68,7 +64,6 @@ struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiEventListener
 {
     static const int FIELD__wifiAdapters = 1;
 
-
     //--//
 
 };
@@ -76,7 +71,6 @@ struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiEventListener
 struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiNetworkReport
 {
     static const int FIELD___wifiNetworks = 1;
-
 
     //--//
 

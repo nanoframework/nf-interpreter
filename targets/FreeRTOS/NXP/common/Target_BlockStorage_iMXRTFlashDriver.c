@@ -21,6 +21,8 @@ bool iMXRTFlexSPIDriver_InitializeDevice(void *context) {
   flexspi_nor_flash_init(FLEXSPI);
   flexspi_nor_enable_quad_mode(FLEXSPI);
 
+  DCACHE_CleanInvalidateByRange(FlexSPI_AMBA_BASE, FLASH_SIZE * 1024);
+
   return true;
 }
 
@@ -55,24 +57,32 @@ bool iMXRTFlexSPIDriver_Write(void *context, ByteAddress startAddress,
     return false;
   }
   portENTER_CRITICAL();
-  uint32_t pagesNum = numBytes / FLASH_PAGE_SIZE;
-
-  if (numBytes % FLASH_PAGE_SIZE) {
-    pagesNum++;
-  }
-
-  for (uint32_t i = 0; i < pagesNum; i++) {   
-    status_t status = flexspi_nor_flash_page_program(
-        FLEXSPI, startAddress - (uint32_t)&__flash_start__ + i * FLASH_PAGE_SIZE,
-        (void *)buffer + i * FLASH_PAGE_SIZE);
+  
+  for (uint32_t i = 0; i < numBytes;) {
+ 
+    uint32_t length = FLASH_PAGE_SIZE;
     
+    uint32_t bytesToEndOfPage = ((startAddress - (uint32_t)&__flash_start__ + i) % FLASH_PAGE_SIZE);
+
+    if (bytesToEndOfPage != 0) {
+      length -= bytesToEndOfPage;
+    }
+
+    if ((i + length) > numBytes) {
+      length = numBytes - i;
+    }
+
+    status_t status = flexspi_nor_flash_program(
+        FLEXSPI, startAddress - (uint32_t)&__flash_start__ + i, 
+        (const uint32_t *)(buffer + i),
+        length);
+
     if (status != kStatus_Success) {
       portEXIT_CRITICAL();
       return false;
     }
-
+    i += length;
   }
-
 
   DCACHE_CleanInvalidateByRange(startAddress, numBytes);
   portEXIT_CRITICAL();
