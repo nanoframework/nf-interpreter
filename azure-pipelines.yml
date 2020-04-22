@@ -267,6 +267,7 @@ jobs:
 
   variables:
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    GIT_LFS_SKIP_SMUDGE: 1
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
