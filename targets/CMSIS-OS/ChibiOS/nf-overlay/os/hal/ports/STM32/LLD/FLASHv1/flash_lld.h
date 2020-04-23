@@ -80,7 +80,6 @@ extern "C" {
   int  flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffer);
   int  flash_lld_isErased(uint32_t startAddress, uint32_t length);
   int  flash_lld_erase(uint32_t address);
-  uint8_t flash_lld_getSector(uint32_t address);
 
 #ifdef __cplusplus
 }

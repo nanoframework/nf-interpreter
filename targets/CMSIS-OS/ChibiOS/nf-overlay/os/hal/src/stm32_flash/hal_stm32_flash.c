@@ -61,10 +61,5 @@ int stm32FlashErase(uint32_t address) {
   return flash_lld_erase(address);
 }
 
-uint8_t stm32FlashGetSector(uint32_t address) {
-  return flash_lld_getSector(address);
-}
-
-
 #endif
 
