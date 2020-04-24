@@ -226,7 +226,8 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributesNa
                         // constructor with argument
 
                         // get the type for the class object 
-                        CLR_RT_MethodDef_Index    md    ; md.Set( parser.m_assm->m_idx, parser.m_mdIdx.Method() );
+                        // the assembly has to be the instance type
+                        CLR_RT_MethodDef_Index    md    ; md.Set( instanceTypeDef.m_assm->m_idx, parser.m_mdIdx.Method() );
                         CLR_RT_MethodDef_Instance mdInst; mdInst.InitializeFromIndex( md );
 
                         CLR_RT_TypeDef_Instance cls; 
