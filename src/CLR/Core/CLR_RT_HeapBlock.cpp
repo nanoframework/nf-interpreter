@@ -549,7 +549,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
                 NANOCLR_CHECK_HRESULT(descSrc.InitializeFromObject( *this  ));
                 NANOCLR_CHECK_HRESULT(descDst.InitializeFromObject( *array )); descDst.GetElementType( descDstSub );
 
-                if(CLR_RT_ExecutionEngine::IsInstanceOf( descSrc, descDstSub ) == false)
+                if(CLR_RT_ExecutionEngine::IsInstanceOf( descSrc, descDstSub, false ) == false)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
