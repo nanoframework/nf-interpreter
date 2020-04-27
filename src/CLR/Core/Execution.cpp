@@ -2682,7 +2682,7 @@ void CLR_RT_ExecutionEngine::SignalEvents( CLR_UINT32 events )
 
 //--//
 
-bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_TypeDescriptor& desc, CLR_RT_TypeDescriptor& descTarget )
+bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_TypeDescriptor& desc, CLR_RT_TypeDescriptor& descTarget, bool isInstInstruction )
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_TypeDef_Instance& inst       = desc      .m_handlerCls;
@@ -2702,7 +2702,9 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_TypeDescriptor& desc, CLR_RT_T
 
     if(desc.m_reflex.m_levels > descTarget.m_reflex.m_levels)
     {
-        if(descTarget.m_reflex.m_levels == 0)
+        if(
+            descTarget.m_reflex.m_levels == 0 &&
+            !isInstInstruction)
         {
             //
             // Casting from <type>[] to System.Array or System.Object is always allowed.
@@ -2773,7 +2775,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf( const CLR_RT_TypeDef_Index& cls, cons
     if(FAILED(desc      .InitializeFromType( cls       ))) return false;
     if(FAILED(descTarget.InitializeFromType( clsTarget ))) return false;
 
-    return IsInstanceOf( desc, descTarget );
+    return IsInstanceOf( desc, descTarget, false );
 }
 
 bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_HeapBlock& ref, const CLR_RT_TypeDef_Index& clsTarget )
@@ -2785,10 +2787,10 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_HeapBlock& ref, const CLR_RT_T
     if(FAILED(desc      .InitializeFromObject( ref       ))) return false;
     if(FAILED(descTarget.InitializeFromType  ( clsTarget ))) return false;
 
-    return IsInstanceOf( desc, descTarget );
+    return IsInstanceOf( desc, descTarget, false );
 }
 
-bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_HeapBlock& obj, CLR_RT_Assembly* assm, CLR_UINT32 token )
+bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_HeapBlock& obj, CLR_RT_Assembly* assm, CLR_UINT32 token, bool isInstInstruction )
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_TypeDescriptor    desc;
@@ -2816,10 +2818,10 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_HeapBlock& obj, CLR_RT_Assembl
         return false;
     }
 
-    return IsInstanceOf( desc, descTarget );
+    return IsInstanceOf( desc, descTarget, isInstInstruction );
 }
 
-HRESULT CLR_RT_ExecutionEngine::CastToType( CLR_RT_HeapBlock& ref, CLR_UINT32 tk, CLR_RT_Assembly* assm, bool fUpdate )
+HRESULT CLR_RT_ExecutionEngine::CastToType( CLR_RT_HeapBlock& ref, CLR_UINT32 tk, CLR_RT_Assembly* assm, bool isInstInstruction )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2828,13 +2830,13 @@ HRESULT CLR_RT_ExecutionEngine::CastToType( CLR_RT_HeapBlock& ref, CLR_UINT32 tk
     {
         ;
     }
-    else if(g_CLR_RT_ExecutionEngine.IsInstanceOf( ref, assm, tk ) == true)
+    else if(g_CLR_RT_ExecutionEngine.IsInstanceOf( ref, assm, tk, isInstInstruction ) == true)
     {
         ;
     }
     else
     {
-        if(fUpdate == false)
+        if(isInstInstruction == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }
