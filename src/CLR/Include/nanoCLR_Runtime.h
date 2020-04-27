@@ -2556,7 +2556,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
     // If thread was sleeping and get too far behind on updating of m_executionCounter
     // Then we make m_executionCounter 4 quantums above m_GlobalExecutionCounter;
-    void BringExecCounterToDate( int iGlobalExecutionCounter, int iDebitForEachRun );
+    void BringExecCounterToDate( int iGlobalExecutionCounter );
 
     void PopEH( CLR_RT_StackFrame* stack, CLR_PMETADATA ip ) { if(m_nestedExceptionsPos) PopEH_Inner( stack, ip ); }
 

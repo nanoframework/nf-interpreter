@@ -1012,7 +1012,7 @@ void CLR_RT_ExecutionEngine::AdjustExecutionCounter( CLR_RT_DblLinkedList &threa
     {
         pThread->m_executionCounter += iUpdateValue;
         // Update m_executionCounter if thread is too behind of m_GlobalExecutionCounter
-        pThread->BringExecCounterToDate( m_GlobalExecutionCounter, pThread->GetQuantumDebit() );
+        pThread->BringExecCounterToDate( m_GlobalExecutionCounter );
     }
     NANOCLR_FOREACH_NODE_END()
 }
@@ -1166,9 +1166,9 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
 
             // If thread is way too much behind on its execution, we cutt off extra credit.
             // We garantee the thread will not be scheduled more than 4 consequitive times.
-            th->BringExecCounterToDate( m_GlobalExecutionCounter, debitForEachRun );
+            th->BringExecCounterToDate( m_GlobalExecutionCounter );
             
-            // Substruct the execution counter by debit value ( for executing thread )
+            // Subtract the execution counter by debit value ( for executing thread )
             th->m_executionCounter -= debitForEachRun;
 
             // Keep the track of lowest execution counter. 
