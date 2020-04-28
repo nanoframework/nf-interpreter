@@ -7,52 +7,6 @@
 #include "stdafx.h"
 #include "nanoPAL_NativeDouble.h"
 
-#include <math.h>
-
-#ifdef WIN32
-#include <float.h>
-
-#define __isnand        _isnan
-#define __isinfd(x)    (!_finite(x))
-
-inline int __signbitd(double x)
-{
-  unsigned char *ptr = (unsigned char*) &x;
-  return (*(ptr + (sizeof(double) - 1)) & 0x80) != 0;
-}
-
-#define rint(x)         floor((x) + 0.5) 
-#define remainder(x,y) ((x) - ((y) * rint((x) / (y))))
-
-#define isgreater(param0,param1) (param0 > param1)
-#define isless(param0,param1)    (param0 < param1)
-
-#elif defined(__GNUC__)
-
-#if !defined( isgreater )
-#define isgreater   __builtin_isgreater
-#endif
-
-#if !defined( isless )
-#define isless      __builtin_isless
-#endif
-
-#if !defined( __isnand )
-#define __isnand    __builtin_isnan
-#endif
-
-#if !defined( __isinfd )
-#define __isinfd    __builtin_isinf
-#endif
-
-#if !defined( __signbitd )
-#define __signbitd  __builtin_signbit
-#endif
-
-#endif
-
-
-
 using namespace System;
 // Summary:
 //     Compares this instance to a specified double-precision floating-point number
