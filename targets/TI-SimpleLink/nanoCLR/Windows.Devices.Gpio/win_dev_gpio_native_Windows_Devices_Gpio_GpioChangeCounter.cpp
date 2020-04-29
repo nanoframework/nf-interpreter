@@ -22,7 +22,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 	NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeRead___U8__BOOLEAN(CLR_RT_StackFrame& stack)
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeRead___WindowsDevicesGpioGpioChangeCount__BOOLEAN( CLR_RT_StackFrame& stack )
 {
 	(void)stack;
 

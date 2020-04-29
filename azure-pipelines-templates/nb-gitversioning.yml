@@ -19,6 +19,8 @@ steps:
   - task: PowerShell@2
     inputs:
         targetType: 'inline'
-        script: Write-Host "$("##vso[task.setvariable variable=NBGV_AssemblyVersion]")0.0.0.$env:System_PullRequest_PullRequestNumber"
+        script: |
+            Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0"
+            Write-Host "$("##vso[task.setvariable variable=NBGV_VersionHeight]")$env:System_PullRequest_PullRequestNumber"
     condition: eq(variables['system.pullrequest.isfork'], true)
     displayName: Set temporary build number

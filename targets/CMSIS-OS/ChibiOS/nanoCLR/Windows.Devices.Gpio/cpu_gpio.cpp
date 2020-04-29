@@ -100,7 +100,9 @@ static void GpioEventCallback(void *arg)
 		// get IoLine from pin number
 		ioline_t ioLine = GetIoLine(pGpio->pinNumber);
 
+		chSysUnlockFromISR();
 		pGpio->isrPtr(pGpio->pinNumber, palReadLine(ioLine), pGpio->param);
+		chSysLockFromISR();
 	}
 
 	chSysUnlockFromISR();

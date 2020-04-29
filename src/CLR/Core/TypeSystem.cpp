@@ -3923,7 +3923,7 @@ bool CLR_RT_TypeSystem::MatchSignatureElement( CLR_RT_SignatureParser::Element& 
         if(FAILED(descLeft .InitializeFromReflection( idxLeft  ))) return false;
         if(FAILED(descRight.InitializeFromReflection( idxRight ))) return false;
 
-        if(!CLR_RT_ExecutionEngine::IsInstanceOf( descRight, descLeft )) return false;
+        if(!CLR_RT_ExecutionEngine::IsInstanceOf( descRight, descLeft, false )) return false;
     }
     else
     {
