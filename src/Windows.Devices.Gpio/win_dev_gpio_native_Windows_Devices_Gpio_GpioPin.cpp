@@ -26,7 +26,7 @@ void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void* param )
 			bool callbacksRegistered = (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks].Dereference() != NULL);
 			if (callbacksRegistered)
 			{
-				// if handle registed then post a managed event with the current pin reading
+				// if handle registered then post a managed event with the current pin reading
 				PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState);
 			}
 		}

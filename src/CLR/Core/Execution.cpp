@@ -1164,8 +1164,8 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             // The value to update m_executionCounter for each run. See comment for GetQuantumDebit for possible values
             int debitForEachRun = th->GetQuantumDebit();
 
-            // If thread is way too much behind on its execution, we cutt off extra credit.
-            // We garantee the thread will not be scheduled more than 4 consequitive times.
+            // If thread is way too much behind on its execution, we cut off extra credit.
+            // We guarantee the thread will not be scheduled more than 4 consecutive times.
             th->BringExecCounterToDate( m_GlobalExecutionCounter );
             
             // Subtract the execution counter by debit value ( for executing thread )

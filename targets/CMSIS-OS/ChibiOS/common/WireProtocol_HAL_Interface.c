@@ -109,7 +109,7 @@ int WP_TransmitMessage(WP_Message* message)
     ///////////////////////////////////////////////////////////
     // change here to write (size) bytes to the output stream
     // preferably with timeout and being able to check 
-    // if the write was sucessfull or at least buffered
+    // if the write was successful or at least buffered
     //////////////////////////////////////////////////////////
 
     TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );

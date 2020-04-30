@@ -23,7 +23,7 @@ static void NextEventTimer_Callback( void* arg )
 
 HRESULT Time_Initialize()
 {
-    // need to setup the timer at boot, but stoped
+    // need to setup the timer at boot, but stopped
     chVTSet(&nextEventTimer, TIME_INFINITE, NextEventTimer_Callback, nextEventCallbackDummyArg);
 
     return S_OK;
@@ -42,7 +42,7 @@ void Time_SetCompare ( uint64_t compareValueTicks )
     if(compareValueTicks == 0)
     {
         // compare value is 0 so dequeue and schedule immediately
-        // can't call chVTSet with 'immidiate delay value', so use value 1 to get it executed ASAP
+        // can't call chVTSet with 'immediate delay value', so use value 1 to get it executed ASAP
         chVTSet(&nextEventTimer, 1, NextEventTimer_Callback, nextEventCallbackDummyArg);
     }
     else if(compareValueTicks == HAL_COMPLETION_IDLE_VALUE)
@@ -54,7 +54,7 @@ void Time_SetCompare ( uint64_t compareValueTicks )
         if (HAL_Time_CurrentSysTicks() >= compareValueTicks)
         { 
             // already missed the event, dequeue and execute immediately
-            // can't call chVTSet with 'immidiate delay value', so use value 1 to get it executed ASAP
+            // can't call chVTSet with 'immediate delay value', so use value 1 to get it executed ASAP
             chVTSet(&nextEventTimer, 1, NextEventTimer_Callback, nextEventCallbackDummyArg);
         }
         else
