@@ -15,4 +15,4 @@
 // port for MOSI pin is: LINE_ARD_D11
 
 // GPIO alternate pin function is 5 (see alternate function mapping table in device datasheet)
-SPI_CONFIG_PINS(2, LINE_ARD_D13, LINE_ARD_D12, LINE_ARD_D11, 5)
+SPI_CONFIG_PINS(2, GPIOA, 12, GPIOB, 14, GPIOB, 15, 5)
