@@ -10,6 +10,7 @@
 #include <target_platform.h>
 // #include <FreeRTOS.h>
 // #include <timers.h>
+#include <ti/sysbios/knl/Clock.h>
 #include <time.h>
 #include <ti/sysbios/hal/Seconds.h>
 
@@ -122,5 +123,6 @@ const char* HAL_Time_CurrentDateTimeToString()
 
 uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
 {
-    return ((ticks * (uint64_t)1000) / Clock_tickPeriod);
+    //return ((ticks * (uint64_t)configTICK_RATE_HZ) / 1000);
+    return ((ticks * (uint64_t)Clock_tickPeriod) / 1000);
 }

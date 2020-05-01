@@ -14,8 +14,9 @@
 #include <string.h>
 
 // RTOS header files
-#include "FreeRTOS.h"
-#include "task.h"
+// #include "FreeRTOS.h"
+// #include "task.h"
+//#include <ti/sysbios/BIOS.h>
 
 #include <ti/drivers/net/wifi/slnetifwifi.h>
 #include <ti/net/slnetsock.h>

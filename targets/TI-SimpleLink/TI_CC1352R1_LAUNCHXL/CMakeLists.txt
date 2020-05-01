@@ -129,6 +129,8 @@ include_directories(
     "${WireProtocol_INCLUDE_DIRS}"
     "${TI_SimpleLink_INCLUDE_DIRS}"
 
+    ${TI_XDCTools_INCLUDE_DIR}
+
     "${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}"
 )
 

@@ -7,6 +7,6 @@
 #define _WIREPROTOCOL_RECEIVERTHREAD_H_
 
 // declaration of RTOS thread
-void* ReceiverThread(void* argument);
+void ReceiverThread(UArg arg0, UArg arg1);
 
 #endif //_WIREPROTOCOL_RECEIVERTHREAD_H_
