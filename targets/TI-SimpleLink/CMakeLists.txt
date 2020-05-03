@@ -82,7 +82,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
             message(STATUS "TI SimpleLink CC32xx SDK source from: ${TI_SL_CC32xx_SDK_SOURCE}")
 
             # check if we already have the sources, no need to copy again
-            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_SL_CC32xx_SDK_SOURCE SOURCE_EXISTS)
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_SL_CC32xx_SDK_SOURCE/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
                 file(COPY "${TI_SL_CC32xx_SDK_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source")
@@ -198,7 +198,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
             message(STATUS "TI XDCTools (source from: ${TI_XDCTOOLS_SOURCE})")
 
             # check if we already have the sources, no need to copy again
-            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_XDCTools_Source SOURCE_EXISTS)
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_XDCTools_Source/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
                 file(COPY "${TI_XDCTOOLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/TI_XDCTools_Source")
@@ -301,7 +301,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
             message(STATUS "TI SimpleLink CC13x2_26x2 SDK source from: ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
 
             # check if we already have the sources, no need to copy again
-            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_SL_CC13x2_26x2_SDK_SOURCE SOURCE_EXISTS)
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_SL_CC13x2_26x2_SDK_SOURCE/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
                 file(COPY "${TI_SL_CC13x2_26x2_SDK_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source")
@@ -417,7 +417,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
             message(STATUS "TI XDCTools (source from: ${TI_XDCTOOLS_SOURCE})")
 
             # check if we already have the sources, no need to copy again
-            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_XDCTools_Source SOURCE_EXISTS)
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_XDCTools_Source/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
                 file(COPY "${TI_XDCTOOLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/TI_XDCTools_Source")
