@@ -11,13 +11,14 @@
 
 WP_Message inboundMessage;
 
-extern Uart_t Uart2;
+//extern Uart_t Uart2;
 // extern UART_HandleTypeDef UartHandle;
 
 int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
 {
+    (void)ptr;
     // save for latter comparison
-    uint16_t requestedSize = *size;
+    //uint16_t requestedSize = *size;
 
     //int readData = 0;
     // sanity check for request of 0 size
@@ -32,8 +33,8 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         //////////////////////////////////////////////////////////
         
         // non blocking read from serial port with 500ms timeout
-        uint16_t read = 0;
-        UartGetBuffer(&Uart2, ptr, requestedSize, &read);
+        //uint16_t read = 0;
+        //UartGetBuffer(&Uart2, ptr, requestedSize, &read);
         // if(HAL_UART_Receive(&UartHandle, ptr, requestedSize, 500) != HAL_OK)
         // {
         //     return false;
@@ -64,7 +65,7 @@ int WP_TransmitMessage(WP_Message* message)
     TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
 
     // write header to uart
-    writeResult = UartPutBuffer(&Uart2, (uint8_t *)&message->m_header, sizeof(message->m_header));
+    //writeResult = UartPutBuffer(&Uart2, (uint8_t *)&message->m_header, sizeof(message->m_header));
     // HAL_UART_Transmit(&UartHandle, (uint8_t *)&message->m_header, sizeof(message->m_header), 500);
 
     if(writeResult == sizeof(message->m_header))
@@ -83,7 +84,7 @@ int WP_TransmitMessage(WP_Message* message)
             // reset flag
             operationResult = false;
 
-            writeResult = UartPutBuffer(&Uart2, (uint8_t *)message->m_payload, message->m_header.m_size);
+            //writeResult = UartPutBuffer(&Uart2, (uint8_t *)message->m_payload, message->m_header.m_size);
             // if(HAL_UART_Transmit(&UartHandle, (uint8_t *)&message->m_payload, message->m_header.m_size, 500) == HAL_OK)
            if(writeResult == message->m_header.m_size)
             {

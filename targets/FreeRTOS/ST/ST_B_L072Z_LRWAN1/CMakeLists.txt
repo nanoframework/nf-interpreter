@@ -21,7 +21,7 @@ set(NANOCLR_PROJECT_NAME "nanoCLR")
 find_package(BuildUtils REQUIRED)
 find_package(FreeRTOS REQUIRED)
 # find_package(CMSIS REQUIRED)
-# find_package(STM32L0_CubePackage REQUIRED)
+find_package(STM32L0_CubePackage REQUIRED)
 find_package(WireProtocol REQUIRED)
 
 ProcessLoRaMacNodePackage()
@@ -87,7 +87,7 @@ add_executable(
 
     ${FREERTOS_SOURCES}
     ${LoRaMacNode_SOURCES}
-    # ${STM32L0_CubePackage_SOURCES}
+    ${STM32L0_CubePackage_SOURCES}
     # ${ChibiOSnfOverlay_SOURCES}
 
     ${WireProtocol_SOURCES}
@@ -113,7 +113,7 @@ add_executable(
 
     ${FREERTOS_SOURCES}
     ${LoRaMacNode_SOURCES}
-    # ${STM32L0_CubePackage_SOURCES}
+    ${STM32L0_CubePackage_SOURCES}
     # ${CHIBIOS_CONTRIB_SOURCES}
     # ${ChibiOSnfOverlay_SOURCES}
 
@@ -132,8 +132,8 @@ add_executable(
 )
 
 # add dependency from LoRaMacNode (this is required to make sure the repos are downloaded before the build starts)
-add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf FreeRTOS STM32L0_CubePackage)
-add_dependencies(${NANOCLR_PROJECT_NAME}.elf FreeRTOS STM32L0_CubePackage)
+add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf STM32L0_CubePackage FreeRTOS )
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf STM32L0_CubePackage FreeRTOS )
 
 # include common directories
 include_directories(
@@ -148,7 +148,7 @@ include_directories(
     ${WireProtocol_INCLUDE_DIRS}
     ${FREERTOS_INCLUDE_DIRS}
     ${LoRaMacNode_INCLUDE_DIRS}
-    # ${STM32L0_CubePackage_INCLUDE_DIRS}
+    ${STM32L0_CubePackage_INCLUDE_DIRS}
     # ${ChibiOSnfOverlay_INCLUDE_DIRS}
     # ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
 

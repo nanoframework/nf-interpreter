@@ -25,7 +25,7 @@
 // #include "Target_BlockStorage_iMXRTFlashDriver.h"
 // #include "CLR_Startup_Thread.h"
 
-// #include "stm32l0xx_hal.h"
+#include "stm32l0xx_hal.h"
 
 #include <board.h>
 
@@ -36,7 +36,7 @@ extern Uart_t Uart2;
 __attribute__((section(".noinit.$SRAM_OC.ucHeap")))
 uint8_t ucHeap[configTOTAL_HEAP_SIZE];
 
-// extern void SystemClock_Config(void);
+extern void SystemClock_Config(void);
 // extern UART_HandleTypeDef UartHandle;
 
 // #define LED_GPIO GPIO1
@@ -44,18 +44,18 @@ uint8_t ucHeap[configTOTAL_HEAP_SIZE];
 
 int main(void)
 {
-    // HAL_Init();
+    HAL_Init();
 
-    // SystemClock_Config();
+    SystemClock_Config();
       
     // DBG_Init();
 
-    // HW_Init();
+    //HW_Init();
 
 
     // Target board initialization
-    BoardInitMcu( );
-    BoardInitPeriph( );
+    // BoardInitMcu( );
+    // BoardInitPeriph( );
     // HAL_Init();
 
     // SystemClock_Config();
