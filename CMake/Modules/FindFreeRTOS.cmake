@@ -27,8 +27,8 @@ include(FREERTOS_${TARGET_SERIES}_GCC_options)
 # message("FreeRTOS board series is ${TARGET_SERIES}") # debug helper
 
 # set include directories for FreeRTOS
-list(APPEND FREERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FreeRTOS_Source/include)
-list(APPEND FREERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM7/r0p1)
+list(APPEND FREERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FREERTOS_Source/include)
+list(APPEND FREERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FREERTOS_Source/portable/GCC/ARM_CM7/r0p1)
 
 # source files and GCC options according to target vendor and series
 
@@ -49,7 +49,7 @@ foreach(SRC_FILE ${FREERTOS_SRCS})
     find_file(FREERTOS_SRC_FILE ${SRC_FILE}
         PATHS
 
-            ${PROJECT_BINARY_DIR}/FreeRTOS_Source
+            ${PROJECT_BINARY_DIR}/FREERTOS_Source
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -60,4 +60,4 @@ endforeach()
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(FREERTOS DEFAULT_MSG FREERTOS_INCLUDE_DIRS FREERTOS_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(FreeRTOS DEFAULT_MSG FREERTOS_INCLUDE_DIRS FREERTOS_SOURCES)

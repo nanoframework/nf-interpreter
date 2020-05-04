@@ -6,9 +6,48 @@
 #ifndef _TARGET_HAL_H_
 #define _TARGET_HAL_H_
 
+#ifdef STM32L072xx
+#include <st_cmsis_defines.h>
+#endif
+
 #include "FreeRTOS.h"
 #include <target_board.h>
-#include "cmsis_gcc.h"
+#include <cmsis_gcc.h>
+
+
+#if (__CORTEX_M == 0)
+
+// FreeRTOS port for Cortex-M0 doesn't implement  xPortIsInsideInterrupt()
+// already asked @ https://github.com/FreeRTOS/FreeRTOS-Kernel/issues/58
+// until that's implemented or a proper workaround suggested we're implementing the code here
+
+#define portINLINE	__inline
+
+#ifndef portFORCE_INLINE
+	#define portFORCE_INLINE inline __attribute__(( always_inline))
+#endif
+
+portFORCE_INLINE static BaseType_t xPortIsInsideInterrupt( void )
+{
+uint32_t ulCurrentInterrupt;
+BaseType_t xReturn;
+
+	/* Obtain the number of the currently executing interrupt. */
+	__asm volatile( "mrs %0, ipsr" : "=r"( ulCurrentInterrupt ) :: "memory" );
+
+	if( ulCurrentInterrupt == 0 )
+	{
+		xReturn = pdFALSE;
+	}
+	else
+	{
+		xReturn = pdTRUE;
+	}
+
+	return xReturn;
+}
+
+#endif
 
 // global mutex protecting the internal state of the interpreter, including event flags
 #define GLOBAL_LOCK();      UBaseType_t uxSavedInterruptStatus = 0; \
