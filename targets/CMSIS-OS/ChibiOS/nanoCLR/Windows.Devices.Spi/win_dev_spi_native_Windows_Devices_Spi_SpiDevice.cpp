@@ -671,6 +671,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
         // see the comments in the SpiDevice() constructor in managed code for details
         uint8_t busIndex = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
 
+        // config GPIO pins used by the SPI peripheral
         // init the PAL struct for this SPI bus and assign the respective driver
         // all this occurs if not already done
         // why do we need this? because several SPIDevice objects can be created associated to the same bus
@@ -680,6 +681,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 1:
                 if(SPI1_PAL.Driver == NULL)
                 {
+                    ConfigPins_SPI1();
+
                     SPI1_PAL.Driver = &SPID1;
                     palSpi = &SPI1_PAL;
                 }
@@ -689,6 +692,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 2:
                 if(SPI2_PAL.Driver == NULL)
                 {
+                    ConfigPins_SPI2();
+                    
                     SPI2_PAL.Driver = &SPID2;
                     palSpi = &SPI2_PAL;
                 }
@@ -698,6 +703,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 3:
                 if(SPI3_PAL.Driver == NULL)
                 {
+                    ConfigPins_SPI3();
+                    
                     SPI3_PAL.Driver = &SPID3;
                     palSpi = &SPI3_PAL;
                 }
@@ -707,6 +714,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 4:
                 if(SPI4_PAL.Driver == NULL)
                 {
+                    ConfigPins_SPI4();
+                    
                     SPI4_PAL.Driver = &SPID4;
                     palSpi = &SPI4_PAL;
                 }
@@ -716,6 +725,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 5:
                 if(SPI5_PAL.Driver == NULL)
                 {
+                    ConfigPins_SPI5();
+                    
                     SPI5_PAL.Driver = &SPID5;
                     palSpi = &SPI5_PAL;
                 }
@@ -725,6 +736,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
             case 6:
                 if(SPI6_PAL.Driver == NULL)
                 {
+                    ConfigPins_SPI6();
+                    
                     SPI6_PAL.Driver = &SPID6;
                     palSpi = &SPI6_PAL;
                 }
