@@ -14,125 +14,6 @@
 #include <nanoHAL_time.h>
 #include <corlib_native.h>
 
-struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration
-{
-    static const int FIELD___configurationIndex = 1;
-    static const int FIELD___id = 2;
-    static const int FIELD___authentication = 3;
-    static const int FIELD___encryption = 4;
-    static const int FIELD___radio = 5;
-    static const int FIELD___password = 6;
-    static const int FIELD___ssid = 7;
-    static const int FIELD___options = 8;
-
-    NANOCLR_NATIVE_DECLARE(GetWireless82011ConfigurationCount___STATIC__I4);
-    NANOCLR_NATIVE_DECLARE(GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
-    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
-
-    //--//
-
-};
-
-struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration
-{
-    static const int FIELD___apConfigurationIndex = 1;
-    static const int FIELD___apId = 2;
-    static const int FIELD___apAuthentication = 3;
-    static const int FIELD___apEncryption = 4;
-    static const int FIELD___apRadio = 5;
-    static const int FIELD___apPassword = 6;
-    static const int FIELD___apSsid = 7;
-    static const int FIELD___options = 8;
-    static const int FIELD___apChannel = 9;
-    static const int FIELD___apMaxConnections = 10;
-
-    NANOCLR_NATIVE_DECLARE(GetWirelessAPConfigurationCount___STATIC__I4);
-    NANOCLR_NATIVE_DECLARE(GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4);
-    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
-    NANOCLR_NATIVE_DECLARE(NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4);
-    NANOCLR_NATIVE_DECLARE(NativeDeauthStation___STATIC__STRING__I4);
-
-    //--//
-
-};
-
-struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
-{
-    static const int FIELD_STATIC__NetworkAddressChanged = 0;
-    static const int FIELD_STATIC__NetworkAvailabilityChanged = 1;
-    static const int FIELD_STATIC__NetworkAPStationChanged = 2;
-
-
-    //--//
-
-};
-
-struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange__NetworkEvent
-{
-    static const int FIELD__EventType = 3;
-    static const int FIELD__Flags = 4;
-    static const int FIELD__Index = 5;
-    static const int FIELD__Data = 6;
-    static const int FIELD__Time = 7;
-
-
-    //--//
-
-};
-
-struct Library_sys_net_native_System_Net_IPAddress
-{
-    static const int FIELD_STATIC__Any = 3;
-    static const int FIELD_STATIC__Loopback = 4;
-
-    static const int FIELD___address = 1;
-    static const int FIELD___family = 2;
-    static const int FIELD___numbers = 3;
-
-
-    //--//
-
-};
-
-struct Library_sys_net_native_System_Net_IPEndPoint
-{
-    static const int FIELD___address = 1;
-    static const int FIELD___port = 2;
-
-
-    //--//
-
-};
-
-struct Library_sys_net_native_System_Net_IPHostEntry
-{
-    static const int FIELD__hostName = 1;
-    static const int FIELD__addressList = 2;
-
-
-    //--//
-
-};
-
-struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAPStationEventArgs
-{
-    static const int FIELD___stationIndex = 1;
-    static const int FIELD___isConnected = 2;
-
-
-    //--//
-
-};
-
-struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityEventArgs
-{
-    static const int FIELD___isAvailable = 1;
-
-
-    //--//
-
-};
-
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 {
     static const int FIELD___interfaceIndex = 1;
@@ -162,12 +43,123 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 
 };
 
+struct Library_sys_net_native_System_Net_IPAddress
+{
+    static const int FIELD_STATIC__Any = 0;
+    static const int FIELD_STATIC__Loopback = 1;
+
+    static const int FIELD___address = 1;
+    static const int FIELD___family = 2;
+    static const int FIELD___numbers = 3;
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_IPEndPoint
+{
+    static const int FIELD___address = 1;
+    static const int FIELD___port = 2;
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_IPHostEntry
+{
+    static const int FIELD__hostName = 1;
+    static const int FIELD__addressList = 2;
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAPStationEventArgs
+{
+    static const int FIELD___stationIndex = 1;
+    static const int FIELD___isConnected = 2;
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityEventArgs
+{
+    static const int FIELD___isAvailable = 1;
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
+{
+    static const int FIELD_STATIC__NetworkAddressChanged = 2;
+    static const int FIELD_STATIC__NetworkAvailabilityChanged = 3;
+    static const int FIELD_STATIC__NetworkAPStationChanged = 4;
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange__NetworkEvent
+{
+    static const int FIELD__EventType = 1;
+    static const int FIELD__Flags = 2;
+    static const int FIELD__Index = 3;
+    static const int FIELD__Data = 4;
+    static const int FIELD__Time = 5;
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration
+{
+    static const int FIELD___configurationIndex = 1;
+    static const int FIELD___id = 2;
+    static const int FIELD___authentication = 3;
+    static const int FIELD___encryption = 4;
+    static const int FIELD___radio = 5;
+    static const int FIELD___password = 6;
+    static const int FIELD___ssid = 7;
+    static const int FIELD___options = 8;
+
+    NANOCLR_NATIVE_DECLARE(GetWireless82011ConfigurationCount___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
+    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
+
+    //--//
+
+};
+
 struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation
 {
     static const int FIELD___macAddress = 1;
     static const int FIELD___rssi = 2;
     static const int FIELD___phyModes = 3;
 
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration
+{
+    static const int FIELD___apConfigurationIndex = 1;
+    static const int FIELD___apId = 2;
+    static const int FIELD___apAuthentication = 3;
+    static const int FIELD___apEncryption = 4;
+    static const int FIELD___apRadio = 5;
+    static const int FIELD___apPassword = 6;
+    static const int FIELD___apSsid = 7;
+    static const int FIELD___options = 8;
+    static const int FIELD___apChannel = 9;
+    static const int FIELD___apMaxConnections = 10;
+
+    NANOCLR_NATIVE_DECLARE(GetWirelessAPConfigurationCount___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4);
+    NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4);
+    NANOCLR_NATIVE_DECLARE(NativeDeauthStation___STATIC__STRING__I4);
 
     //--//
 
@@ -199,17 +191,36 @@ struct Library_sys_net_native_System_Net_Security_SslNative
     static HRESULT InitHelper     ( CLR_RT_StackFrame& stack, bool isServer );
     static HRESULT ThrowOnError   ( CLR_RT_StackFrame& stack, int err       );
     static void    ThrowError     ( CLR_RT_StackFrame& stack, int errorCode );
+};
+
+struct Library_sys_net_native_System_Net_Sockets_Socket
+{
+    static const int FIELD__m_Handle = 1;
+    static const int FIELD__m_fBlocking = 2;
+    static const int FIELD__m_localEndPoint = 3;
+    static const int FIELD__m_recvTimeout = 4;
+    static const int FIELD__m_sendTimeout = 5;
+    static const int FIELD___socketType = 6;
+    static const int FIELD___nonBlockingConnectInProgress = 7;
+    static const int FIELD___nonBlockingConnectRightEndPoint = 8;
+    static const int FIELD___rightEndPoint = 9;
+
+    //--//
 
 };
 
-struct Library_sys_net_native_System_Net_Sockets_NetworkStream
+struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate
 {
-    static const int FIELD___socket = 1;
-    static const int FIELD___socketType = 2;
-    static const int FIELD___remoteEndPoint = 3;
-    static const int FIELD___ownsSocket = 4;
-    static const int FIELD___disposed = 5;
+    static const int FIELD___certificate = 1;
+    static const int FIELD___password = 2;
+    static const int FIELD___issuer = 3;
+    static const int FIELD___subject = 4;
+    static const int FIELD___effectiveDate = 5;
+    static const int FIELD___expirationDate = 6;
+    static const int FIELD___handle = 7;
+    static const int FIELD___sessionHandle = 8;
 
+    NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime);
 
     //--//
 
@@ -221,7 +232,6 @@ struct Library_sys_net_native_System_Net_Security_SslStream
     static const int FIELD___sslContext = 7;
     static const int FIELD___isServer = 8;
 
-
     //--//
 
 };
@@ -230,7 +240,6 @@ struct Library_sys_net_native_System_Net_SocketAddress
 {
     static const int FIELD__m_Buffer = 1;
     static const int FIELD___address = 2;
-
 
     //--//
 
@@ -258,7 +267,7 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
     NANOCLR_NATIVE_DECLARE(ioctl___STATIC__VOID__OBJECT__U4__BYREF_U4);
 
     //--//
-        static HRESULT MarshalSockAddress( struct SOCK_sockaddr* addrDst, CLR_UINT32& addrLenDst, const CLR_RT_HeapBlock& blkEndPointAddress );
+    static HRESULT MarshalSockAddress( struct SOCK_sockaddr* addrDst, CLR_UINT32& addrLenDst, const CLR_RT_HeapBlock& blkEndPointAddress );
     static HRESULT MarshalSockAddress( CLR_RT_HeapBlock& blkDst, const struct SOCK_sockaddr* addrSrc, CLR_UINT32 addrLenSrc );
     static HRESULT SendRecvHelper( CLR_RT_StackFrame& stack, bool fSend, bool fAddress );
     static HRESULT SockOptHelper( CLR_RT_StackFrame& stack, bool fGet );
@@ -278,18 +287,13 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
     static const int DISPOSED_HANDLE = -1;
 };
 
-struct Library_sys_net_native_System_Net_Sockets_Socket
+struct Library_sys_net_native_System_Net_Sockets_NetworkStream
 {
-    static const int FIELD__m_Handle = 1;
-    static const int FIELD__m_fBlocking = 2;
-    static const int FIELD__m_localEndPoint = 3;
-    static const int FIELD__m_recvTimeout = 4;
-    static const int FIELD__m_sendTimeout = 5;
-    static const int FIELD___socketType = 6;
-    static const int FIELD___nonBlockingConnectInProgress = 7;
-    static const int FIELD___nonBlockingConnectRightEndPoint = 8;
-    static const int FIELD___rightEndPoint = 9;
-
+    static const int FIELD___socket = 1;
+    static const int FIELD___socketType = 2;
+    static const int FIELD___remoteEndPoint = 3;
+    static const int FIELD___ownsSocket = 4;
+    static const int FIELD___disposed = 5;
 
     //--//
 
@@ -297,25 +301,7 @@ struct Library_sys_net_native_System_Net_Sockets_Socket
 
 struct Library_sys_net_native_System_Net_Sockets_SocketException
 {
-    static const int FIELD___errorCode = 5;
-
-
-    //--//
-
-};
-
-struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate
-{
-    static const int FIELD___certificate = 1;
-    static const int FIELD___password = 2;
-    static const int FIELD___issuer = 3;
-    static const int FIELD___subject = 4;
-    static const int FIELD___effectiveDate = 5;
-    static const int FIELD___expirationDate = 6;
-    static const int FIELD___handle = 7;
-    static const int FIELD___sessionHandle = 8;
-
-    NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime);
+    static const int FIELD___errorCode = 1;
 
     //--//
 

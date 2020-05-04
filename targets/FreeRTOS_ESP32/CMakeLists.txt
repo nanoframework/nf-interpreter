@@ -73,7 +73,7 @@ if(USE_SECURITY_MBEDTLS_OPTION)
         if(EXISTS "${MBEDTLS_SOURCE}/")
 
             # check if we already have the sources, no need to copy again
-            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/mbedTLS_Source SOURCE_EXISTS)
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/mbedTLS_Source/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
                 message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")

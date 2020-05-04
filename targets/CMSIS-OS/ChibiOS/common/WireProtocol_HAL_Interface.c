@@ -46,8 +46,8 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         // if the requested number of bytes was actually read
         //////////////////////////////////////////////////////////
 
-        // read from serial stream 
-        size_t read = streamRead(&SDU1, ptr, *size); 
+        // read from serial stream with 250ms timeout
+        size_t read = chnReadTimeout(&SDU1, ptr, *size, TIME_MS2I(250)); 
 
         ptr  += read;
         *size -= read;
@@ -78,8 +78,8 @@ int WP_ReceiveBytes(uint8_t* ptr, uint16_t* size)
         // if the requested number of bytes was actually read
         //////////////////////////////////////////////////////////
         
-        // non blocking read from serial port with 100ms timeout
-        volatile size_t read = sdReadTimeout(&SERIAL_DRIVER, ptr, *size, TIME_MS2I(250));
+        // non blocking read from serial port with 250ms timeout
+        volatile size_t read = chnReadTimeout(&SERIAL_DRIVER, ptr, *size, TIME_MS2I(250));
 
         ptr  += read;
         *size -= read;
@@ -109,13 +109,13 @@ int WP_TransmitMessage(WP_Message* message)
     ///////////////////////////////////////////////////////////
     // change here to write (size) bytes to the output stream
     // preferably with timeout and being able to check 
-    // if the write was sucessfull or at least buffered
+    // if the write was successful or at least buffered
     //////////////////////////////////////////////////////////
 
     TRACE( TRACE_HEADERS, "TXMSG: 0x%08X, 0x%08X, 0x%08X\n", message->m_header.m_cmd, message->m_header.m_flags, message->m_header.m_size );
 
     // write header to output stream
-    writeResult = streamWrite(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header));
+    writeResult = chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(250));
 
     if(writeResult == sizeof(message->m_header))
     {
@@ -133,7 +133,7 @@ int WP_TransmitMessage(WP_Message* message)
             // reset flag
             operationResult = false;
 
-            writeResult = streamWrite(&SDU1, message->m_payload, message->m_header.m_size);
+            writeResult = chnWriteTimeout(&SDU1, message->m_payload, message->m_header.m_size, TIME_MS2I(250));
 
             if(writeResult == message->m_header.m_size)
             {

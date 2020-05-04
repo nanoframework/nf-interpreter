@@ -71,7 +71,6 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_ErrorRe
 {
     static const int FIELD___error = 1;
 
-
     //--//
 
 };
@@ -80,16 +79,14 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_PinChan
 {
     static const int FIELD___pinChange = 1;
 
-
     //--//
 
 };
 
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDataEvent
 {
-    static const int FIELD__SerialDeviceIndex = 3;
-    static const int FIELD__Event = 4;
-
+    static const int FIELD__SerialDeviceIndex = 1;
+    static const int FIELD__Event = 2;
 
     //--//
 
@@ -98,7 +95,6 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDataReceivedEventArgs
 {
     static const int FIELD___data = 1;
-
 
     //--//
 
@@ -146,7 +142,6 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     static const int FIELD_STATIC__s_instance = 2;
     static const int FIELD_STATIC__s_deviceCollection = 3;
 
-
     //--//
 
 };
@@ -154,7 +149,6 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceEventListener
 {
     static const int FIELD___serialDevicesMap = 1;
-
 
     //--//
 
@@ -164,7 +158,6 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 {
     static const int FIELD___serialDevice = 1;
 
-
     //--//
 
 };
@@ -173,7 +166,6 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 {
     static const int FIELD___serialDevice = 1;
     static const int FIELD___unstoredBufferLength = 2;
-
 
     //--//
 

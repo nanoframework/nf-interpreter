@@ -4,9 +4,10 @@
 //
 
 #include <nanoHAL.h>
+
 #include <ti/sysbios/knl/Clock.h>
 
-// Converts FreeRTOS Tickcount to .NET ticks (100 nanoseconds)
+// Converts TI RTOS clock tick period to .NET ticks (100 nanoseconds)
 uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) 
 {
     return ((int64_t)sysTicks * (int64_t)Clock_tickPeriod) * 10;

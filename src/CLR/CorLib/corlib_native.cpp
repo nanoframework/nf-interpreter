@@ -33,10 +33,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_corlib_native_System_Reflection_ConstructorInfo::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN,
-    Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT__SZARRAY_OBJECT,
-    NULL,
-    NULL,
     NULL,
     NULL,
     Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJECT__OBJECT,
@@ -600,6 +596,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_corlib_native_System_Reflection_ConstructorInfo::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN,
+    Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT__SZARRAY_OBJECT,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -624,7 +626,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJECT__OBJECT,
     NULL,
     Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnType___SystemType,
-    Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN,
+    NULL,
+    Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN,
     NULL,
     NULL,
     NULL,
@@ -649,7 +652,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_RuntimeType::GetFields___SZARRAY_SystemReflectionFieldInfo__SystemReflectionBindingFlags,
     Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_SystemType,
     Library_corlib_native_System_RuntimeType::GetElementType___SystemType,
-    Library_corlib_native_System_RuntimeType::GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN,
+    NULL,
+    Library_corlib_native_System_RuntimeType::GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN,
     NULL,
     NULL,
     NULL,
@@ -1357,16 +1361,16 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x42B9EEF6,
+    0xE988B5AD,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x3292C917,
+    0xF3FB563C,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 4, 7, 0 }
+    { 100, 4, 8, 0 }
 };

@@ -15,7 +15,7 @@
 
 extern "C"
 {
-#ifdef CC32XX
+#ifdef DeviceFamily_CC3220
 #include <targetSimpleLinkCC32xx_Sntp.h>
 #else
 #include <apps/sntp.h>

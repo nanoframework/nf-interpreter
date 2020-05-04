@@ -6,8 +6,6 @@
 #include "WireProtocol_HAL_Interface.h"
 #include <ti/sysbios/knl/Task.h>
 #include <xdc/std.h>
-// #include <FreeRTOS.h>
-// #include <task.h>
 
 extern WP_Message inboundMessage;
 

@@ -6,8 +6,6 @@
 #ifndef _TARGET_HAL_TIME_H_
 #define _TARGET_HAL_TIME_H_ 1
 
-// #include <FreeRTOS.h>
-// #include <task.h>
 #include <ti/sysbios/knl/Clock.h>
 
 #define HAL_Time_CurrentSysTicks    Clock_getTicks

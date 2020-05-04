@@ -7,7 +7,7 @@ parameters:
 steps:
   - task: CMake@1
     inputs:
-      cmakeArgs: '-G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/toolchain.xtensa-esp32-elf.cmake -DTOOLCHAIN_PREFIX=$(ESP32_TOOLCHAIN_PATH) -DESP32_IDF_PATH=$(ESP32_IDF_PATH) -DESP32_LIBS_PATH=$(ESP32_LIBS_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_AssemblyVersion) -DESP32_BOARD=$(BoardName) $(BuildOptions) ..'
+      cmakeArgs: '-G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/toolchain.xtensa-esp32-elf.cmake -DTOOLCHAIN_PREFIX=$(ESP32_TOOLCHAIN_PATH) -DESP32_IDF_PATH=$(ESP32_IDF_PATH) -DESP32_LIBS_PATH=$(ESP32_LIBS_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version).$(NBGV_VersionHeight) -DESP32_BOARD=$(BoardName) $(BuildOptions) ..'
       workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Setup build with CMake
 

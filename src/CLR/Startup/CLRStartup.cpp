@@ -300,7 +300,7 @@ struct Settings
                 continue;
             }
 
-            // load successfull, mark as deployed
+            // load successful, mark as deployed
             assm->m_flags |= CLR_RT_Assembly::Deployed;
         }
 

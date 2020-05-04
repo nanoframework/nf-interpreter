@@ -268,7 +268,7 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 #set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--verbose ")
 
 # add dependency for networking
-if(USE_SECURITY_MBEDTLS_OPTION)
+if(USE_NETWORKING_OPTION)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf NetworkLib)
 endif()
 

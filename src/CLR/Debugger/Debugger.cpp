@@ -124,6 +124,8 @@ HRESULT CLR_DBG_Debugger::DeleteInstance()
     // free debugger
     platform_free(g_CLR_DBG_Debugger);
 
+    g_CLR_DBG_Debugger = NULL;
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 

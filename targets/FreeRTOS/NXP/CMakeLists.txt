@@ -77,7 +77,7 @@ else()
         message(STATUS "FatFS ${FATFS_VERSION} (source from: ${FATFS_SOURCE})")
 
         # check if we already have the sources, no need to copy again
-        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FatFS_Source SOURCE_EXISTS)
+        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FatFS_Source/ SOURCE_EXISTS)
 
         if(NOT ${SOURCE_EXISTS})
             file(COPY "${FATFS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FatFS_Source")
@@ -182,7 +182,7 @@ else()
         message(STATUS "LWIP ${LWIP_VERSION} (source from: ${LWIP_SOURCE})")
 
         # check if we already have the sources, no need to copy again
-        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/LWIP_Source SOURCE_EXISTS)
+        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/LWIP_Source/ SOURCE_EXISTS)
 
         if(NOT ${SOURCE_EXISTS})
             file(COPY "${LWIP_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/LWIP_Source")

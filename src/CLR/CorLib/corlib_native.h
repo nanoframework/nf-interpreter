@@ -96,8 +96,6 @@ struct Library_corlib_native_System_Reflection_ConstructorInfo
 
 struct Library_corlib_native_System_Reflection_FieldInfo
 {
-
-
     NANOCLR_NATIVE_DECLARE(SetValue___VOID__OBJECT__OBJECT);
     NANOCLR_NATIVE_DECLARE(GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN);
 
@@ -895,10 +893,8 @@ struct Library_corlib_native_System_Reflection_RuntimeFieldInfo
 
 struct Library_corlib_native_System_Reflection_RuntimeMethodInfo
 {
-
-
     NANOCLR_NATIVE_DECLARE(get_ReturnType___SystemType);
-    NANOCLR_NATIVE_DECLARE(GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN);
 
     //--//
 
@@ -952,8 +948,6 @@ struct Library_corlib_native_System_Runtime_Versioning_TargetFrameworkAttribute
 
 struct Library_corlib_native_System_RuntimeType
 {
-
-
     NANOCLR_NATIVE_DECLARE(get_Assembly___SystemReflectionAssembly);
     NANOCLR_NATIVE_DECLARE(get_Name___STRING);
     NANOCLR_NATIVE_DECLARE(get_FullName___STRING);
@@ -963,13 +957,14 @@ struct Library_corlib_native_System_RuntimeType
     NANOCLR_NATIVE_DECLARE(GetFields___SZARRAY_SystemReflectionFieldInfo__SystemReflectionBindingFlags);
     NANOCLR_NATIVE_DECLARE(GetInterfaces___SZARRAY_SystemType);
     NANOCLR_NATIVE_DECLARE(GetElementType___SystemType);
-    NANOCLR_NATIVE_DECLARE(GetCustomAttributes___SZARRAY_OBJECT__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN);
 
     //--//
 
     static HRESULT GetTypeDescriptor( CLR_RT_HeapBlock& arg, CLR_RT_TypeDef_Instance& inst, CLR_UINT32* levels );
     static HRESULT GetTypeDescriptor( CLR_RT_HeapBlock& arg, CLR_RT_TypeDef_Instance& inst );
     static HRESULT GetName( CLR_RT_HeapBlock& arg, bool fFullName, CLR_RT_HeapBlock& res );
+    static HRESULT GetCustomAttributes( CLR_RT_AttributeEnumerator attributeEnumerator, CLR_RT_HeapBlock* &returnArray, int count  );
 };
 
 #endif // NANOCLR_REFLECTION

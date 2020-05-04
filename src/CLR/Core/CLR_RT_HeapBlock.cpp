@@ -5,6 +5,7 @@
 //
 #include "Core.h"
 #include <nanoHAL.h>
+#include <nanoPAL_NativeDouble.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -549,7 +550,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference( CLR_RT_HeapBlock& ref, int size )
                 NANOCLR_CHECK_HRESULT(descSrc.InitializeFromObject( *this  ));
                 NANOCLR_CHECK_HRESULT(descDst.InitializeFromObject( *array )); descDst.GetElementType( descDstSub );
 
-                if(CLR_RT_ExecutionEngine::IsInstanceOf( descSrc, descDstSub ) == false)
+                if(CLR_RT_ExecutionEngine::IsInstanceOf( descSrc, descDstSub, false ) == false)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
@@ -1336,15 +1337,90 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values( const CLR_RT_HeapBlock& left, const 
     #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
             case DATATYPE_R4:
-                if(left.NumericByRefConst().r4 > right.NumericByRefConst().r4) return  1;
-                if(left.NumericByRefConst().r4 < right.NumericByRefConst().r4) return -1;
-                /************************************************************/ return  0;
+
+                // deal with special cases: 
+                // return 0 if the numbers are unordered (either or both are NaN)
+                // this is post processed in interpreter so '1' will turn into '0'
+                if(
+                    __isnand(left.NumericByRefConst().r4) ||
+                    __isnand(right.NumericByRefConst().r4))
+                {
+                    return 1;
+                }
+
+                // The infinite values are equal to themselves.
+                // this is post processed in interpreter so '0' will turn into '1'
+                else if(
+                    __isinfd(left.NumericByRefConst().r4) &&
+                    __isinfd(right.NumericByRefConst().r4))
+                {
+                    return 0;
+                }
+                // all the rest now
+                else
+                {
+                    if(
+                        isgreater(
+                            left.NumericByRefConst().r4, 
+                            right.NumericByRefConst().r4))
+                    {
+                        return  1;
+                    }
+                    else if(
+                        isless(
+                            left.NumericByRefConst().r4, 
+                            right.NumericByRefConst().r4))
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return  0;
+                    }
+                }
 
             case DATATYPE_R8:
 
-                if(left.NumericByRefConst().r8 > right.NumericByRefConst().r8) return  1;
-                if(left.NumericByRefConst().r8 < right.NumericByRefConst().r8) return -1;
-                /************************************************************/ return  0;
+                // deal with special cases: 
+                // return 0 if the numbers are unordered (either or both are NaN)
+                // this is post processed in interpreter so '1' will turn into '0'
+                if(
+                    __isnand((double)left.NumericByRefConst().r8) ||
+                    __isnand((double)right.NumericByRefConst().r8))
+                {
+                    return 1;
+                }
+
+                // The infinite values are equal to themselves.
+                // this is post processed in interpreter so '0' will turn into '1'
+                else if(
+                    __isinfd((double)left.NumericByRefConst().r8) &&
+                    __isinfd((double)right.NumericByRefConst().r8))
+                {
+                    return 0;
+                }
+                // all the rest now
+                else
+                {
+                    if(
+                        isgreater(
+                            (double)left.NumericByRefConst().r8,
+                            (double)right.NumericByRefConst().r8))
+                    {
+                        return  1;
+                    }
+                    else if(
+                        isless(
+                            (double)left.NumericByRefConst().r8,
+                            (double)right.NumericByRefConst().r8))
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return  0;
+                    }
+                }
 
     #else
             case DATATYPE_R4      :

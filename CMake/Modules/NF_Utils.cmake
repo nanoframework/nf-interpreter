@@ -9,9 +9,9 @@
 macro(NF_DIRECTORY_EXISTS_NOT_EMPTY path pathExists)
 
     if(EXISTS "${path}")
-        set(${pathExists} ON)
+        set(${pathExists} TRUE)
     else()
-        set(${pathExists} OFF)
+        set(${pathExists} FALSE)
     endif()
 
 endmacro()

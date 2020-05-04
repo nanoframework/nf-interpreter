@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, Texas Instruments Incorporated
+ * Copyright (c) 2016-2018, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,17 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-STACKSIZE = 0x800;
+/*
+ *  ======== CC3220SF_LAUNCHXL_TIRTOS.lds ========
+ */
+
+STACKSIZE = 1024;
+HEAPSIZE = 0x8000;  /* Size of heap buffer used by HeapMem */
 
 MEMORY
 {
     FLASH_HDR (RX)  : ORIGIN = 0x01000000, LENGTH = 0x7FF
-    FLASH     (RX)  : ORIGIN = 0x01000800, LENGTH = 0x02F000
+    FLASH     (RX)  : ORIGIN = 0x01000800, LENGTH = 0x034800
     SRAM      (RWX) : ORIGIN = 0x20000000, LENGTH = 0x00040000
 }
 
@@ -50,19 +55,22 @@ REGION_ALIAS("REGION_ARM_EXTAB", FLASH);
 
 SECTIONS {
 
-    .dbghdr : ALIGN (2048) {
+    .dbghdr : ALIGN(2048) {
         KEEP (*(.dbghdr))
     } > REGION_HDR
 
-    PROVIDE (_resetVecs_base_address =
-        DEFINED(_resetVecs_base_address) ? _resetVecs_base_address : 0x01000800);
+    PROVIDE (_intvecs_base_address =
+        DEFINED(_intvecs_base_address) ? _intvecs_base_address : 0x01000800);
 
-    .resetVecs (_resetVecs_base_address) : AT (_resetVecs_base_address) {
-        KEEP (*(.resetVecs))
+    .intvecs (_intvecs_base_address) : AT (_intvecs_base_address) {
+        KEEP (*(.intvecs))
     } > REGION_TEXT
 
-    .ramVecs (NOLOAD) : ALIGN(1024) {
-        KEEP (*(.ramVecs))
+    PROVIDE (_vtable_base_address =
+        DEFINED(_vtable_base_address) ? _vtable_base_address : 0x20000000);
+
+    .vtable (_vtable_base_address) (NOLOAD) : {
+        KEEP (*(.vtable))
     } > REGION_DATA
 
     .text : {
@@ -124,25 +132,23 @@ SECTIONS {
         end = __heap_start__;
         _end = end;
         __end = end;
-        KEEP(*(.heap))
+        KEEP (*(.heap))
         __heap_end__ = .;
         __HeapLimit = __heap_end__;
+    } > REGION_HEAP AT> REGION_HEAP
+
+    /* Heap buffer used by HeapMem */
+    .priheap : {
+        . = ALIGN (8);
+        __primary_heap_start__ = .;
+        . += HEAPSIZE;
+        __primary_heap_end__ = .;
     } > REGION_HEAP AT> REGION_HEAP
 
     .stack (NOLOAD) : ALIGN(0x8) {
         _stack = .;
         __stack = .;
-        KEEP(*(.stack))
+        KEEP (*(.stack))
         . += STACKSIZE;
-        _stack_end = .;
-        __stack_end = .;
     } > REGION_STACK AT> REGION_STACK
 }
-
-/* RAM region to be used for the nanoFramework CLR managed heap.*/
-REGION_ALIAS("CLR_MANAGED_HEAP_RAM", SRAM);
-
-/* nanoCLR rules inclusion.*/
-INCLUDE rules_clr.ld
-
-ENTRY(resetISR)

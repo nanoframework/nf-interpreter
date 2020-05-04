@@ -98,10 +98,8 @@ bool CLR_RT_SubThread::ChangeLockRequestCount( int diff )
     }
 }
 
-void CLR_RT_Thread::BringExecCounterToDate( int iGlobalExecutionCounter, int iDebitForEachRun )
+void CLR_RT_Thread::BringExecCounterToDate( int iGlobalExecutionCounter )
 {
-    (void)iDebitForEachRun;
-
     // Normally the condition is false. It becomes true if thread was out of execution for some time.
     // The value of (ThreadPriority::System_Highest + 1) is 33. 
     // 33 for ThreadPriority::Highest gives up to 16 cycles to catch up.

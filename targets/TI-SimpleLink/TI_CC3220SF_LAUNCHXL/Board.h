@@ -9,6 +9,9 @@
 
 #define Board_CC3220SF_LAUNCHXL
 
+#include <ti/drivers/Board.h>
+#include "CC3220SF_LAUNCHXL.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -34,8 +37,8 @@ extern "C" {
  *  and PWM peripherals. In order for those examples to work, these LEDs are
  *  taken out of gpioPinCOnfig[]
  */
-#define Board_GPIO_LED1              CC3220SF_LAUNCHXL_GPIO_LED_D10
-#define Board_GPIO_LED2              CC3220SF_LAUNCHXL_GPIO_LED_D10
+#define Board_GPIO_LED1              CC3220SF_LAUNCHXL_GPIO_LED_D9
+#define Board_GPIO_LED2              CC3220SF_LAUNCHXL_GPIO_LED_D8
 
 #define Board_GPIO_BUTTON0           CC3220SF_LAUNCHXL_GPIO_SW2
 #define Board_GPIO_BUTTON1           CC3220SF_LAUNCHXL_GPIO_SW3

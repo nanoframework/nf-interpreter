@@ -15,7 +15,7 @@
 #define __nfweak __attribute__((weak))
 
 #else
-#error "Unknow platform. Please add definition for weak attribute."
+#error "Unknown platform. Please add definition for weak attribute."
 #endif
 
 #endif // _NANO_WEAK_H_
