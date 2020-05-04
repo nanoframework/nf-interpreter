@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-list(APPEND FREERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FreeRTOS_Source/FreeRTOS/Source/portable/GCC/ARM_CM0)
+list(APPEND FREERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM0)
 
 
 # List of the FreeRTOS generic STM32L0xx startup and CMSIS files.
@@ -19,8 +19,8 @@ foreach(SRC_FILE ${FREERTOS_PORT_SRCS})
     find_file(FREERTOS_STM32L0xx_SRC_FILE ${SRC_FILE}
         PATHS 
 
-            ${PROJECT_BINARY_DIR}/FreeRTOS_Source/FreeRTOS/Source/portable/MemMang
-            ${PROJECT_BINARY_DIR}/FreeRTOS_Source/FreeRTOS/Source/portable/GCC/ARM_CM0
+        ${PROJECT_BINARY_DIR}/FreeRTOS_Source/portable/MemMang
+        ${PROJECT_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM0
  
 
         CMAKE_FIND_ROOT_PATH_BOTH

@@ -2,7 +2,7 @@
 // Copyright (c) 2019 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
-// #include "st_cmsis_defines.h"
+#include "st_cmsis_defines.h"
 #include "stdint.h"
 #include "stdbool.h"
 // #include "cmsis_gcc.h"
