@@ -6,11 +6,12 @@
 #include <stdint.h>
 #include <nanoCLR_Application.h>
 
+// POSIX Header files
+#include <pthread.h>
+#include <unistd.h>
+
 // RTOS header files
-#include <xdc/std.h>
-#include <xdc/runtime/Error.h>
 #include <ti/sysbios/BIOS.h>
-#include <ti/sysbios/knl/Task.h>
 
 // board Header files
 #include <Board.h>
@@ -20,32 +21,20 @@
 // Stack size in bytes
 #define THREADSTACKSIZE   2048
 
-Task_Handle receiverHandle;
-Task_Handle clrHandle;
-
 CLR_SETTINGS clrSettings;
 
-extern void ReceiverThread(UArg arg0, UArg arg1);
-extern void CLRStartupThread(UArg arg0, UArg arg1);
+extern void * mainThread(void *arg); 
 
 int main(void)
 {
-    Task_Params taskParams;
+    pthread_t thread;
+    pthread_attr_t threadAttributes;
+    struct sched_param priorityParameters;
+    
+    int retc;
 
     // Call board init functions
     Board_initGeneral();
-
-    // setup Task thread
-    Task_Params_init(&taskParams);
-    taskParams.stackSize = THREADSTACKSIZE;
-    taskParams.priority = 4;
-
-    // create Receiver
-    receiverHandle = Task_create((Task_FuncPtr)ReceiverThread, &taskParams, Error_IGNORE);
-    if (receiverHandle == NULL)
-    {
-        while (1);
-    }
 
     // CLR settings to launch CLR thread   
     (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
@@ -54,25 +43,23 @@ int main(void)
     clrSettings.WaitForDebugger            = false;
     clrSettings.EnterDebuggerLoopAfterExit = true;
 
-    // setup CLR task
-    taskParams.arg0 = (UArg)&clrSettings;
-    taskParams.stackSize = THREADSTACKSIZE;
-    taskParams.priority = 4;
-    clrHandle = Task_create(CLRStartupThread, &taskParams, Error_IGNORE);
-    if (clrHandle == NULL)
+    // Set priority and stack size attributes
+    pthread_attr_init(&threadAttributes);
+    priorityParameters.sched_priority = 1;
+
+    retc = pthread_attr_setdetachstate(&threadAttributes, PTHREAD_CREATE_DETACHED);
+
+    pthread_attr_setschedparam(&threadAttributes, &priorityParameters);
+    retc |= pthread_attr_setstacksize(&threadAttributes, THREADSTACKSIZE);
+    retc |= pthread_create(&thread, &threadAttributes, mainThread, &clrSettings);
+    if(retc != 0)
     {
-        while (1);
+        while(1)
+        {
+            ;
+        }
     }
 
-    GPIO_init();
-    UART_init();
-    ConfigUART();
-
-    // Switch off all LEDs on board
-    GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
-    GPIO_write(Board_GPIO_LED1, Board_GPIO_LED_OFF);
-    GPIO_write(Board_GPIO_LED2, Board_GPIO_LED_OFF);
-    
     BIOS_start();
 
     return (0);
