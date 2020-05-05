@@ -82,7 +82,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
             message(STATUS "TI SimpleLink CC32xx SDK source from: ${TI_SL_CC32xx_SDK_SOURCE}")
 
             # check if we already have the sources, no need to copy again
-            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_SL_CC32xx_SDK_SOURCE/ SOURCE_EXISTS)
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
                 file(COPY "${TI_SL_CC32xx_SDK_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source")
