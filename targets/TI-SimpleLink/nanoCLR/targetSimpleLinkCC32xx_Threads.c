@@ -679,8 +679,10 @@ void * mainThread(void *arg)
     // initialize the realtime clock
     clock_settime(CLOCK_REALTIME, &ts);
 
-    // Switch off all LEDs on boards
+    // Switch off all LEDs on board
     GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
+    GPIO_write(Board_GPIO_LED1, Board_GPIO_LED_OFF);
+    GPIO_write(Board_GPIO_LED2, Board_GPIO_LED_OFF);
 
     // clear SimpleLink Status
     nF_ControlBlock.Status = 0;
@@ -810,7 +812,7 @@ void * mainThread(void *arg)
     pthread_attr_init(&threadAttributes);
     priorityParams.sched_priority = NF_TASK_PRIORITY;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
-    retc |= pthread_attr_setstacksize(&threadAttributes, 1024);
+    retc |= pthread_attr_setstacksize(&threadAttributes, THREADSTACKSIZE);
     if (retc != 0)
     {
         // failed to set attributes
@@ -833,7 +835,7 @@ void * mainThread(void *arg)
     pthread_attr_init(&threadAttributes);
     priorityParams.sched_priority = NF_TASK_PRIORITY;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
-    retc |= pthread_attr_setstacksize(&threadAttributes, 7168);
+    retc |= pthread_attr_setstacksize(&threadAttributes, THREADSTACKSIZE);
     if (retc != 0)
     {
         // failed to set attributes
