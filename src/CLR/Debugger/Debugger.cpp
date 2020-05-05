@@ -53,6 +53,50 @@ void CLR_DBG_Debugger::Debugger_WaitForCommands()
     }
 }
 
+void CLR_DBG_Debugger::Debugger_Discovery()
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    CLR_INT32 wait_sec = 5;
+
+    CLR_INT64 expire = HAL_Time_CurrentTime() + (wait_sec * TIME_CONVERSION__TO_SECONDS);
+
+    // Send "presence" ping.
+    Monitor_Ping_Command cmd;
+    cmd.m_source = Monitor_Ping_c_Ping_Source_NanoCLR;
+
+    while(true)
+    {
+        CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_Ping, sizeof(cmd), &cmd, WP_Flags_c_NoCaching | WP_Flags_c_NonCritical);
+
+        // if we support soft reboot and the debugger is not stopped then we don't need to connect the debugger
+        if(!CLR_EE_DBG_IS(Stopped) && ::CPU_IsSoftRebootSupported())
+        {
+            break;
+        }
+
+        g_CLR_RT_ExecutionEngine.DebuggerLoop();
+
+        if(CLR_EE_DBG_IS(Enabled))
+        {
+            // Debugger on the other side, let's exit the discovery loop.
+            CLR_Debug::Printf( "Debugger found. Resuming boot sequence.\r\n" );
+            break;
+        }
+
+        CLR_INT64 now = HAL_Time_CurrentTime();
+
+        if(expire < now)
+        {
+            // no response after timeout...
+            CLR_Debug::Printf( "No debugger found...\r\n" );
+            break;
+        }
+    }
+
+    g_CLR_RT_ExecutionEngine.WaitForDebugger();
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 HRESULT CLR_DBG_Debugger::CreateInstance()
@@ -884,9 +928,11 @@ bool CLR_DBG_Debugger::Monitor_Reboot( WP_Message* msg)
         g_CLR_RT_ExecutionEngine.m_iReboot_Options = cmd->m_flags;
     }
 
-    CLR_EE_DBG_SET( RebootPending );
-
     WP_ReplyToCommand(msg, true, false, NULL, 0);
+
+    Events_WaitForEvents( 0, 100 ); // give message a little time to be flushed
+
+    CLR_EE_DBG_SET( RebootPending );
 
     return true;
 }
