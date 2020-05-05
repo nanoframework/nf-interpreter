@@ -57,6 +57,8 @@ struct Settings
         CLR_Debug::Printf( "Started Hardware.\r\n" );
 #endif
 
+        CLR_DBG_Debugger::Debugger_Discovery();
+
         m_fInitialized = true;
 
         NANOCLR_NOCLEANUP();
@@ -111,9 +113,8 @@ struct Settings
         CLR_EE_DBG_CLR(StateResolutionFailed);
 
 #if !defined(BUILD_RTM)
-        CLR_Debug::Printf( "Create TS.\r\n" );
+        CLR_Debug::Printf( "Create Type System.\r\n" );
 #endif
-        //NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( (char*)&__deployment_start__, (char*)&__deployment_end__ ));
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Loading Deployment Assemblies.\r\n" );
@@ -282,10 +283,6 @@ struct Settings
             // we have good Assembly 
             CLR_RT_Assembly* assm;
 
-#if !defined(BUILD_RTM)            
-            CLR_Debug::Printf( "Attaching deployed file.\r\n" );
-#endif
-            
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem 
             if (FAILED(LoadAssembly(header, assm)))
             {
@@ -383,7 +380,6 @@ void ClrStartup(CLR_SETTINGS params)
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Starting...\r\n" );
 #endif
-
 
         HRESULT hr;
 
