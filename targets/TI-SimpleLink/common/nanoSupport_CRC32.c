@@ -13,6 +13,12 @@
 // strong implementation of this function specific to the TI Simple Link targets
 uint32_t SUPPORT_ComputeCRC(const void* rgBlock, const uint32_t nLength, const uint32_t crc)
 {
+	// anything to do here?
+    if(nLength == 0)
+    {
+        return crc;
+    }
+
 	MAP_CRCSeedSet(DTHE_BASE, crc);
 
 	return MAP_CRCDataProcess(DTHE_BASE, rgBlock, nLength, CRC_CFG_SIZE_8BIT);
