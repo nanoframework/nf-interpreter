@@ -32,7 +32,7 @@ endif()
 
 # nF feature: Networking Stack, LWIP included in IDF libs
 if(USE_NETWORKING_OPTION)
-    find_package(NF_NETWORKING REQUIRED)
+    find_package(NF_Networking REQUIRED)
 endif()
 
 # RTC (real time clock) (default is OFF so RTC is NOT included)

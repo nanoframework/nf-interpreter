@@ -37,7 +37,7 @@ endif()
 # nF feature: networking
 if(USE_NETWORKING_OPTION)
     find_package(LWIP REQUIRED)
-    find_package(NF_NETWORKING REQUIRED)
+    find_package(NF_Networking REQUIRED)
 endif()
 
 # nF feature: filesystem
