@@ -411,22 +411,24 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_corlib_native_System_DateTime::get_Day___I4,
-    Library_corlib_native_System_DateTime::get_DayOfWeek___SystemDayOfWeek,
-    Library_corlib_native_System_DateTime::get_DayOfYear___I4,
-    Library_corlib_native_System_DateTime::get_Hour___I4,
-    NULL,
-    Library_corlib_native_System_DateTime::get_Millisecond___I4,
-    Library_corlib_native_System_DateTime::get_Minute___I4,
-    Library_corlib_native_System_DateTime::get_Month___I4,
-    Library_corlib_native_System_DateTime::get_Second___I4,
-    NULL,
-    NULL,
-    Library_corlib_native_System_DateTime::get_Year___I4,
     NULL,
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    Library_corlib_native_System_DateTime::GetDateTimePart___I4__SystemDateTimeDateTimePart,
     NULL,
     Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4,
     NULL,
@@ -1361,7 +1363,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xE988B5AD,
+    0x65E9CC45,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
@@ -1372,5 +1374,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 #endif
 
     method_lookup,
-    { 100, 4, 8, 0 }
+    { 100, 4, 9, 0 }
 };

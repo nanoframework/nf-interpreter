@@ -554,22 +554,13 @@ struct Library_corlib_native_System_DateTime
     static const int FIELD___ticks = 1;
 
     NANOCLR_NATIVE_DECLARE(_ctor___VOID__I4__I4__I4__I4__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(get_Day___I4);
-    NANOCLR_NATIVE_DECLARE(get_DayOfWeek___SystemDayOfWeek);
-    NANOCLR_NATIVE_DECLARE(get_DayOfYear___I4);
-    NANOCLR_NATIVE_DECLARE(get_Hour___I4);
-    NANOCLR_NATIVE_DECLARE(get_Millisecond___I4);
-    NANOCLR_NATIVE_DECLARE(get_Minute___I4);
-    NANOCLR_NATIVE_DECLARE(get_Month___I4);
-    NANOCLR_NATIVE_DECLARE(get_Second___I4);
-    NANOCLR_NATIVE_DECLARE(get_Year___I4);
+    NANOCLR_NATIVE_DECLARE(GetDateTimePart___I4__SystemDateTimeDateTimePart);
     NANOCLR_NATIVE_DECLARE(DaysInMonth___STATIC__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(get_UtcNow___STATIC__SystemDateTime);
     NANOCLR_NATIVE_DECLARE(get_Today___STATIC__SystemDateTime);
 
     //--//
 
-    static CLR_INT64* NewObject  ( CLR_RT_StackFrame& stack );
     static CLR_INT64* GetValuePtr( CLR_RT_StackFrame& stack );
     static CLR_INT64* GetValuePtr( CLR_RT_HeapBlock&  ref   );
 
