@@ -8,15 +8,15 @@
 
 extern "C"
 {
+#include "lwip\init.h"
+#include "lwip\tcpip.h"
+#include "lwip\dns.h"
+#include "lwip\netifapi.h"
 #include "lwip\Netdb.h"
+#include "lwip\tcp.h"
 #include "lwip\Sockets.h"
 #include "lwip\dhcp.h"
-#include "lwip\dns.h"
-#include "lwip\init.h"
 #include "lwip\netif.h"
-#include "lwip\netifapi.h"
-#include "lwip\tcp.h"
-#include "lwip\tcpip.h"
 }
 
 int errorCode;
