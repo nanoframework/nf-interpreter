@@ -30,14 +30,16 @@ int errorCode;
 #define DEBUG_HANDLE_SOCKET_ERROR(t, a)
 #endif
 
-struct netif *netif_find_interface(int num);
+struct netif *
+netif_find_interface(int num);
 
 //
 
 // declaration of function not available in standard lwIP API
 extern "C"
 {
-    extern uint32_t lwip_socket_get_err(int s);
+    extern uint32_t
+    lwip_socket_get_err(int s);
 }
 //--//
 
@@ -52,21 +54,24 @@ static HAL_CONTINUATION PostAvailabilityOnContinuation;
 static HAL_CONTINUATION PostAvailabilityOffContinuation;
 #endif
 
-void LWIP_SOCKETS_Driver::PostAddressChanged(void *arg)
+void
+LWIP_SOCKETS_Driver::PostAddressChanged(void *arg)
 {
     (void)arg;
 
     Network_PostEvent(NetworkEventType_AddressChanged, 0, 0);
 }
 
-void LWIP_SOCKETS_Driver::PostAvailabilityOn(void *arg)
+void
+LWIP_SOCKETS_Driver::PostAvailabilityOn(void *arg)
 {
     (void)arg;
 
     Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkAvailable, 0);
 }
 
-void LWIP_SOCKETS_Driver::PostAvailabilityOff(void *arg)
+void
+LWIP_SOCKETS_Driver::PostAvailabilityOff(void *arg)
 {
     (void)arg;
 
@@ -74,7 +79,8 @@ void LWIP_SOCKETS_Driver::PostAvailabilityOff(void *arg)
 }
 
 #if LWIP_NETIF_LINK_CALLBACK == 1
-void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
+void
+LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
 {
     if (netif_is_link_up(netif))
     {
@@ -92,7 +98,8 @@ void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
 #endif
 
 #if LWIP_NETIF_STATUS_CALLBACK == 1
-void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
+void
+LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 {
     if (!PostAddressChangedContinuation.IsLinked())
         PostAddressChangedContinuation.Enqueue();
@@ -137,13 +144,14 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 }
 #endif
 
-bool LWIP_SOCKETS_Driver::Initialize()
+bool
+LWIP_SOCKETS_Driver::Initialize()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-    struct netif *networkInterface;
+    struct netif *                     networkInterface;
     HAL_Configuration_NetworkInterface networkConfiguration;
-    int interfaceNumber;
+    int                                interfaceNumber;
 
 #if LWIP_NETIF_STATUS_CALLBACK == 1
     PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
@@ -164,8 +172,10 @@ bool LWIP_SOCKETS_Driver::Initialize()
     for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
     {
         // load network interface configuration from storage
-        if (!ConfigurationManager_GetConfigurationBlock((void *)&networkConfiguration,
-                                                        DeviceConfigurationOption_Network, i))
+        if (!ConfigurationManager_GetConfigurationBlock(
+                (void *)&networkConfiguration,
+                DeviceConfigurationOption_Network,
+                i))
         {
             // failed to load configuration
             // FIXME output error?
@@ -229,7 +239,8 @@ bool LWIP_SOCKETS_Driver::Initialize()
     return TRUE;
 }
 
-bool LWIP_SOCKETS_Driver::Uninitialize()
+bool
+LWIP_SOCKETS_Driver::Uninitialize()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -252,33 +263,36 @@ bool LWIP_SOCKETS_Driver::Uninitialize()
     return TRUE;
 }
 
-extern void debug_printf(const char *format, ...);
+extern void
+debug_printf(const char *format, ...);
 
-SOCK_SOCKET LWIP_SOCKETS_Driver::Socket(int family, int type, int protocol)
+SOCK_SOCKET
+LWIP_SOCKETS_Driver::Socket(int family, int type, int protocol)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
     switch (protocol)
     {
-    case SOCK_IPPROTO_TCP:
-        protocol = IPPROTO_TCP;
-        break;
-    case SOCK_IPPROTO_UDP:
-        protocol = IPPROTO_UDP;
-        break;
-    case SOCK_IPPROTO_ICMP:
-        protocol = IP_PROTO_ICMP;
-        break;
+        case SOCK_IPPROTO_TCP:
+            protocol = IPPROTO_TCP;
+            break;
+        case SOCK_IPPROTO_UDP:
+            protocol = IPPROTO_UDP;
+            break;
+        case SOCK_IPPROTO_ICMP:
+            protocol = IP_PROTO_ICMP;
+            break;
 
-    case SOCK_IPPROTO_IGMP:
-        protocol = IP_PROTO_IGMP;
-        break;
+        case SOCK_IPPROTO_IGMP:
+            protocol = IP_PROTO_IGMP;
+            break;
     }
 
     return lwip_socket(family, type, protocol);
 }
 
-int LWIP_SOCKETS_Driver::Bind(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
+int
+LWIP_SOCKETS_Driver::Bind(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -289,7 +303,8 @@ int LWIP_SOCKETS_Driver::Bind(SOCK_SOCKET socket, const SOCK_sockaddr *address, 
     return lwip_bind(socket, (sockaddr *)&addr, addressLen);
 }
 
-int LWIP_SOCKETS_Driver::Connect(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
+int
+LWIP_SOCKETS_Driver::Connect(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -300,32 +315,35 @@ int LWIP_SOCKETS_Driver::Connect(SOCK_SOCKET socket, const SOCK_sockaddr *addres
     return lwip_connect(socket, (sockaddr *)&addr, addressLen);
 }
 
-int LWIP_SOCKETS_Driver::Send(SOCK_SOCKET socket, const char *buf, int len, int flags)
+int
+LWIP_SOCKETS_Driver::Send(SOCK_SOCKET socket, const char *buf, int len, int flags)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
     return lwip_send(socket, (const void *)buf, len, flags);
 }
 
-int LWIP_SOCKETS_Driver::Recv(SOCK_SOCKET socket, char *buf, int len, int flags)
+int
+LWIP_SOCKETS_Driver::Recv(SOCK_SOCKET socket, char *buf, int len, int flags)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeFlag;
 
     switch (flags)
     {
-    case SOCKET_READ_PEEK_OPTION:
-        nativeFlag = MSG_PEEK;
-        break;
-    default:
-        nativeFlag = flags;
-        break;
+        case SOCKET_READ_PEEK_OPTION:
+            nativeFlag = MSG_PEEK;
+            break;
+        default:
+            nativeFlag = flags;
+            break;
     }
 
     return lwip_recv(socket, (void *)buf, len, nativeFlag);
 }
 
-int LWIP_SOCKETS_Driver::Close(SOCK_SOCKET socket)
+int
+LWIP_SOCKETS_Driver::Close(SOCK_SOCKET socket)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -340,14 +358,16 @@ int LWIP_SOCKETS_Driver::Close(SOCK_SOCKET socket)
 #endif
 }
 
-int LWIP_SOCKETS_Driver::Listen(SOCK_SOCKET socket, int backlog)
+int
+LWIP_SOCKETS_Driver::Listen(SOCK_SOCKET socket, int backlog)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
     return lwip_listen(socket, backlog);
 }
 
-SOCK_SOCKET LWIP_SOCKETS_Driver::Accept(SOCK_SOCKET socket, SOCK_sockaddr *address, int *addressLen)
+SOCK_SOCKET
+LWIP_SOCKETS_Driver::Accept(SOCK_SOCKET socket, SOCK_sockaddr *address, int *addressLen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     SOCK_SOCKET ret;
@@ -369,24 +389,25 @@ SOCK_SOCKET LWIP_SOCKETS_Driver::Accept(SOCK_SOCKET socket, SOCK_sockaddr *addre
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::Shutdown(SOCK_SOCKET socket, int how)
+int
+LWIP_SOCKETS_Driver::Shutdown(SOCK_SOCKET socket, int how)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
     return lwip_shutdown(socket, how);
 }
 
-int LWIP_SOCKETS_Driver::GetAddrInfo(const char *nodename, char *servname, const SOCK_addrinfo *hints,
-                                     SOCK_addrinfo **res)
+int
+LWIP_SOCKETS_Driver::GetAddrInfo(const char *nodename, char *servname, const SOCK_addrinfo *hints, SOCK_addrinfo **res)
 {
 #if LWIP_DNS
     NATIVE_PROFILE_PAL_NETWORK();
 
-    SOCK_addrinfo *ai;
-    void *dummyPtr;
-    SOCK_sockaddr_in *sa = NULL;
-    int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
-    struct addrinfo *lwipAddrinfo = NULL;
+    SOCK_addrinfo *   ai;
+    void *            dummyPtr;
+    SOCK_sockaddr_in *sa           = NULL;
+    int               total_size   = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
+    struct addrinfo * lwipAddrinfo = NULL;
 
     if (res == NULL)
         return SOCK_SOCKET_ERROR;
@@ -417,7 +438,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char *nodename, char *servname, const
 #endif
 
         sa->sin_family = AF_INET;
-        sa->sin_port = 0;
+        sa->sin_port   = 0;
 
         /* set up addrinfo */
         ai->ai_family = AF_INET;
@@ -433,7 +454,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char *nodename, char *servname, const
         dummyPtr = sa;
 
         ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
-        ai->ai_addr = (SOCK_sockaddr *)dummyPtr;
+        ai->ai_addr    = (SOCK_sockaddr *)dummyPtr;
 
         *res = ai;
 
@@ -462,8 +483,8 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char *nodename, char *servname, const
         sa = (SOCK_sockaddr_in *)((u8_t *)ai + sizeof(SOCK_addrinfo));
         /* set up sockaddr */
         sa->sin_addr.S_un.S_addr = lwip_sockaddr_in->sin_addr.s_addr;
-        sa->sin_family = lwip_sockaddr_in->sin_family;
-        sa->sin_port = lwip_sockaddr_in->sin_port;
+        sa->sin_family           = lwip_sockaddr_in->sin_family;
+        sa->sin_port             = lwip_sockaddr_in->sin_port;
 
         /* set up addrinfo */
         ai->ai_family = lwipAddrinfo->ai_family;
@@ -479,7 +500,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char *nodename, char *servname, const
         dummyPtr = sa;
 
         ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
-        ai->ai_addr = (SOCK_sockaddr *)dummyPtr;
+        ai->ai_addr    = (SOCK_sockaddr *)dummyPtr;
 
         *res = ai;
 
@@ -493,12 +514,12 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char *nodename, char *servname, const
         // map DNS error with socket errors
         switch (err)
         {
-        case HOST_NOT_FOUND:
-            errorCode = SOCK_HOST_NOT_FOUND;
-            break;
+            case HOST_NOT_FOUND:
+                errorCode = SOCK_HOST_NOT_FOUND;
+                break;
 
-        default:
-            errorCode = SOCK_NO_RECOVERY;
+            default:
+                errorCode = SOCK_NO_RECOVERY;
         }
     }
 
@@ -509,7 +530,8 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char *nodename, char *servname, const
 #endif
 }
 
-void LWIP_SOCKETS_Driver::FreeAddrInfo(SOCK_addrinfo *ai)
+void
+LWIP_SOCKETS_Driver::FreeAddrInfo(SOCK_addrinfo *ai)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -523,21 +545,24 @@ void LWIP_SOCKETS_Driver::FreeAddrInfo(SOCK_addrinfo *ai)
     }
 }
 
-int LWIP_SOCKETS_Driver::Ioctl(SOCK_SOCKET socket, int cmd, int *data)
+int
+LWIP_SOCKETS_Driver::Ioctl(SOCK_SOCKET socket, int cmd, int *data)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
     return lwip_ioctl(socket, cmd, data);
 }
 
-int LWIP_SOCKETS_Driver::GetLastError()
+int
+LWIP_SOCKETS_Driver::GetLastError()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
     return GetNativeError(errorCode);
 }
 
-int LWIP_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
+int
+LWIP_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -547,7 +572,8 @@ int LWIP_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
     return GetNativeError(errorCode);
 }
 
-static int MARSHAL_SOCK_FDSET_TO_FDSET(SOCK_fd_set *sf, fd_set *f)
+static int
+MARSHAL_SOCK_FDSET_TO_FDSET(SOCK_fd_set *sf, fd_set *f)
 {
     if (f != NULL && sf != NULL)
     {
@@ -563,11 +589,12 @@ static int MARSHAL_SOCK_FDSET_TO_FDSET(SOCK_fd_set *sf, fd_set *f)
     return 0;
 }
 
-static void MARSHAL_FDSET_TO_SOCK_FDSET(SOCK_fd_set *sf, fd_set *f)
+static void
+MARSHAL_FDSET_TO_SOCK_FDSET(SOCK_fd_set *sf, fd_set *f)
 {
     if (sf != NULL && f != NULL)
     {
-        int cnt = sf->fd_count;
+        int cnt      = sf->fd_count;
         sf->fd_count = 0;
         for (int i = 0; i < cnt; i++)
         {
@@ -580,8 +607,13 @@ static void MARSHAL_FDSET_TO_SOCK_FDSET(SOCK_fd_set *sf, fd_set *f)
     }
 }
 
-int LWIP_SOCKETS_Driver::Select(int nfds, SOCK_fd_set *readfds, SOCK_fd_set *writefds, SOCK_fd_set *exceptfds,
-                                const SOCK_timeval *timeout)
+int
+LWIP_SOCKETS_Driver::Select(
+    int                 nfds,
+    SOCK_fd_set *       readfds,
+    SOCK_fd_set *       writefds,
+    SOCK_fd_set *       exceptfds,
+    const SOCK_timeval *timeout)
 {
     (void)nfds;
 
@@ -630,7 +662,7 @@ int LWIP_SOCKETS_Driver::Select(int nfds, SOCK_fd_set *readfds, SOCK_fd_set *wri
     // our declaration of SOCK_timeval is dependent of "long" type which is
     // platform dependent so it's not safe to cast it to "timeval"
     timeval timeoutCopy;
-    timeoutCopy.tv_sec = timeout->tv_sec;
+    timeoutCopy.tv_sec  = timeout->tv_sec;
     timeoutCopy.tv_usec = timeout->tv_usec;
 
     ret = select(max_sd, pR, pW, pE, &timeoutCopy);
@@ -642,97 +674,100 @@ int LWIP_SOCKETS_Driver::Select(int nfds, SOCK_fd_set *readfds, SOCK_fd_set *wri
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optname, const char *optval, int optlen)
+int
+LWIP_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optname, const char *optval, int optlen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    int nativeLevel;
-    int nativeOptionName;
-    int nativeIntValue;
-    char *pNativeOptionValue = (char *)optval;
-    struct linger lopt = {0, 0};
+    int           nativeLevel;
+    int           nativeOptionName;
+    int           nativeIntValue;
+    char *        pNativeOptionValue = (char *)optval;
+    struct linger lopt               = {0, 0};
 
     switch (level)
     {
-    case SOCK_IPPROTO_IP:
-        nativeLevel = IPPROTO_IP;
-        nativeOptionName = GetNativeIPOption(optname);
-        break;
-    case SOCK_IPPROTO_TCP:
-        nativeLevel = IPPROTO_TCP;
-        nativeOptionName = GetNativeTcpOption(optname);
-        break;
-    case SOCK_IPPROTO_UDP:
-    case SOCK_IPPROTO_ICMP:
-    case SOCK_IPPROTO_IGMP:
-    case SOCK_IPPROTO_IPV4:
-    case SOCK_SOL_SOCKET:
-        nativeLevel = SOL_SOCKET;
-        nativeOptionName = GetNativeSockOption(optname);
+        case SOCK_IPPROTO_IP:
+            nativeLevel      = IPPROTO_IP;
+            nativeOptionName = GetNativeIPOption(optname);
+            break;
+        case SOCK_IPPROTO_TCP:
+            nativeLevel      = IPPROTO_TCP;
+            nativeOptionName = GetNativeTcpOption(optname);
+            break;
+        case SOCK_IPPROTO_UDP:
+        case SOCK_IPPROTO_ICMP:
+        case SOCK_IPPROTO_IGMP:
+        case SOCK_IPPROTO_IPV4:
+        case SOCK_SOL_SOCKET:
+            nativeLevel      = SOL_SOCKET;
+            nativeOptionName = GetNativeSockOption(optname);
 
-        switch (optname)
-        {
-        // If linger value negative then linger off
-        // otherwise enabled and linger value is number of seconds
-        case SOCK_SOCKO_LINGER: {
-            int lingerValue = *(int *)optval;
-            if (lingerValue >= 0)
+            switch (optname)
             {
-                lopt.l_onoff = 1;
-                lopt.l_linger = abs(lingerValue);
-            }
-            pNativeOptionValue = (char *)&lopt;
-            optlen = sizeof(lopt);
-        }
-        break;
+                // If linger value negative then linger off
+                // otherwise enabled and linger value is number of seconds
+                case SOCK_SOCKO_LINGER:
+                {
+                    int lingerValue = *(int *)optval;
+                    if (lingerValue >= 0)
+                    {
+                        lopt.l_onoff  = 1;
+                        lopt.l_linger = abs(lingerValue);
+                    }
+                    pNativeOptionValue = (char *)&lopt;
+                    optlen             = sizeof(lopt);
+                }
+                break;
 
-        case SOCK_SOCKO_DONTLINGER:
-        case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
-            nativeIntValue = !*(int *)optval;
-            pNativeOptionValue = (char *)&nativeIntValue;
+                case SOCK_SOCKO_DONTLINGER:
+                case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
+                    nativeIntValue     = !*(int *)optval;
+                    pNativeOptionValue = (char *)&nativeIntValue;
+                    break;
+                default:
+                    break;
+            }
             break;
         default:
+            nativeLevel      = 0;
+            nativeOptionName = 0;
             break;
-        }
-        break;
-    default:
-        nativeLevel = 0;
-        nativeOptionName = 0;
-        break;
     }
 
     return lwip_setsockopt(socket, nativeLevel, nativeOptionName, pNativeOptionValue, optlen);
 }
 
-int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, char *optval, int *optlen)
+int
+LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, char *optval, int *optlen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    int nativeLevel;
-    int nativeOptionName;
+    int   nativeLevel;
+    int   nativeOptionName;
     char *pNativeOptval = optval;
-    int ret;
+    int   ret;
 
     switch (level)
     {
-    case SOCK_IPPROTO_IP:
-        nativeLevel = IPPROTO_IP;
-        nativeOptionName = GetNativeIPOption(optname);
-        break;
-    case SOCK_IPPROTO_TCP:
-        nativeLevel = IPPROTO_TCP;
-        nativeOptionName = GetNativeTcpOption(optname);
-        break;
-    case SOCK_IPPROTO_UDP:
-    case SOCK_IPPROTO_ICMP:
-    case SOCK_IPPROTO_IGMP:
-    case SOCK_IPPROTO_IPV4:
-    case SOCK_SOL_SOCKET:
-        nativeLevel = SOL_SOCKET;
-        nativeOptionName = GetNativeSockOption(optname);
-        break;
-    default:
-        nativeLevel = level;
-        nativeOptionName = optname;
-        break;
+        case SOCK_IPPROTO_IP:
+            nativeLevel      = IPPROTO_IP;
+            nativeOptionName = GetNativeIPOption(optname);
+            break;
+        case SOCK_IPPROTO_TCP:
+            nativeLevel      = IPPROTO_TCP;
+            nativeOptionName = GetNativeTcpOption(optname);
+            break;
+        case SOCK_IPPROTO_UDP:
+        case SOCK_IPPROTO_ICMP:
+        case SOCK_IPPROTO_IGMP:
+        case SOCK_IPPROTO_IPV4:
+        case SOCK_SOL_SOCKET:
+            nativeLevel      = SOL_SOCKET;
+            nativeOptionName = GetNativeSockOption(optname);
+            break;
+        default:
+            nativeLevel      = level;
+            nativeOptionName = optname;
+            break;
     }
 
     ret = lwip_getsockopt(socket, nativeLevel, nativeOptionName, pNativeOptval, (u32_t *)optlen);
@@ -741,28 +776,29 @@ int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, 
     {
         switch (level)
         {
-        case SOCK_SOL_SOCKET:
-            switch (optname)
-            {
-            case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
-            case SOCK_SOCKO_DONTLINGER:
-                *optval = !(*(int *)optval != 0);
-                break;
+            case SOCK_SOL_SOCKET:
+                switch (optname)
+                {
+                    case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
+                    case SOCK_SOCKO_DONTLINGER:
+                        *optval = !(*(int *)optval != 0);
+                        break;
 
-            case SOCK_SOCKO_ACCEPTCONNECTION:
-            case SOCK_SOCKO_BROADCAST:
-            case SOCK_SOCKO_KEEPALIVE:
-                *optval = (*(int *)optval != 0);
+                    case SOCK_SOCKO_ACCEPTCONNECTION:
+                    case SOCK_SOCKO_BROADCAST:
+                    case SOCK_SOCKO_KEEPALIVE:
+                        *optval = (*(int *)optval != 0);
+                        break;
+                }
                 break;
-            }
-            break;
         }
     }
 
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
+int
+LWIP_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int ret;
@@ -778,7 +814,8 @@ int LWIP_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name, in
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
+int
+LWIP_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int ret;
@@ -794,12 +831,13 @@ int LWIP_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name, in
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::RecvFrom(SOCK_SOCKET socket, char *buf, int len, int flags, SOCK_sockaddr *from, int *fromlen)
+int
+LWIP_SOCKETS_Driver::RecvFrom(SOCK_SOCKET socket, char *buf, int len, int flags, SOCK_sockaddr *from, int *fromlen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     sockaddr_in addr;
-    sockaddr *pFrom = NULL;
-    int ret;
+    sockaddr *  pFrom = NULL;
+    int         ret;
 
     if (from)
     {
@@ -817,8 +855,8 @@ int LWIP_SOCKETS_Driver::RecvFrom(SOCK_SOCKET socket, char *buf, int len, int fl
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::SendTo(SOCK_SOCKET socket, const char *buf, int len, int flags, const SOCK_sockaddr *to,
-                                int tolen)
+int
+LWIP_SOCKETS_Driver::SendTo(SOCK_SOCKET socket, const char *buf, int len, int flags, const SOCK_sockaddr *to, int tolen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -829,8 +867,8 @@ int LWIP_SOCKETS_Driver::SendTo(SOCK_SOCKET socket, const char *buf, int len, in
     return lwip_sendto(socket, buf, len, flags, (sockaddr *)&addr, (u32_t)tolen);
 }
 
-HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config,
-                                                      uint32_t interfaceIndex)
+HRESULT
+LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -842,8 +880,8 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkI
                  netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber)))
         {
 #if LWIP_IPV6
-            config->IPv4Address = networkInterface->ip_addr.u_addr.ip4.addr;
-            config->IPv4NetMask = networkInterface->netmask.u_addr.ip4.addr;
+            config->IPv4Address        = networkInterface->ip_addr.u_addr.ip4.addr;
+            config->IPv4NetMask        = networkInterface->netmask.u_addr.ip4.addr;
             config->IPv4GatewayAddress = networkInterface->gw.u_addr.ip4.addr;
 
             // FIXME IPV6
@@ -893,8 +931,8 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkI
         }
         else
         {
-            config->IPv4Address = 0;
-            config->IPv4NetMask = 0;
+            config->IPv4Address        = 0;
+            config->IPv4NetMask        = 0;
             config->IPv4GatewayAddress = 0;
         }
     }
@@ -910,8 +948,11 @@ struct dhcp_client_id
     uint8_t clientId[6];
 };
 
-HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(uint32_t interfaceIndex, uint32_t updateFlags,
-                                                        HAL_Configuration_NetworkInterface *config)
+HRESULT
+LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
+    uint32_t                            interfaceIndex,
+    uint32_t                            updateFlags,
+    HAL_Configuration_NetworkInterface *config)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -975,8 +1016,11 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(uint32_t interfaceIndex,
             ip_addr_set_ip4_u32(&gateway, config->IPv4GatewayAddress);
 
             // set interface with our static IP configs
-            netif_set_addr(networkInterface, (const ip4_addr_t *)&ipAddress, (const ip4_addr_t *)&mask,
-                           (const ip4_addr_t *)&gateway);
+            netif_set_addr(
+                networkInterface,
+                (const ip4_addr_t *)&ipAddress,
+                (const ip4_addr_t *)&mask,
+                (const ip4_addr_t *)&gateway);
 
             // we should be polite and let the DHCP server that we are now using a
             // static IP
@@ -1021,308 +1065,312 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(uint32_t interfaceIndex,
     return S_OK;
 }
 
-int LWIP_SOCKETS_Driver::GetNativeTcpOption(int optname)
+int
+LWIP_SOCKETS_Driver::GetNativeTcpOption(int optname)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeOptionName = 0;
 
     switch (optname)
     {
-    case SOCK_TCP_NODELAY:
-        nativeOptionName = TCP_NODELAY;
-        break;
+        case SOCK_TCP_NODELAY:
+            nativeOptionName = TCP_NODELAY;
+            break;
 
-    case SOCK_SOCKO_KEEPALIVE:
-        nativeOptionName = TCP_KEEPALIVE;
-        break;
+        case SOCK_SOCKO_KEEPALIVE:
+            nativeOptionName = TCP_KEEPALIVE;
+            break;
 
-    // allow the C# user to specify LWIP options that our managed enum
-    // doesn't support
-    default:
-        nativeOptionName = optname;
-        break;
+        // allow the C# user to specify LWIP options that our managed enum
+        // doesn't support
+        default:
+            nativeOptionName = optname;
+            break;
     }
     return nativeOptionName;
 }
 
-int LWIP_SOCKETS_Driver::GetNativeSockOption(int optname)
+int
+LWIP_SOCKETS_Driver::GetNativeSockOption(int optname)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeOptionName = 0;
 
     switch (optname)
     {
-    case SOCK_SOCKO_DONTLINGER:
-    case SOCK_SOCKO_LINGER:
-        nativeOptionName = SO_LINGER;
-        break;
-    case SOCK_SOCKO_SENDTIMEOUT:
-        nativeOptionName = SO_SNDTIMEO;
-        break;
-    case SOCK_SOCKO_RECEIVETIMEOUT:
-        nativeOptionName = SO_RCVTIMEO;
-        break;
-    case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
-    case SOCK_SOCKO_REUSEADDRESS:
-        nativeOptionName = SO_REUSEADDR;
-        break;
-    case SOCK_SOCKO_KEEPALIVE:
-        nativeOptionName = SO_KEEPALIVE;
-        break;
-    case SOCK_SOCKO_ERROR:
-        nativeOptionName = SO_ERROR;
-        break;
-    case SOCK_SOCKO_BROADCAST:
-        nativeOptionName = SO_BROADCAST;
-        break;
-    case SOCK_SOCKO_RECEIVEBUFFER:
-        nativeOptionName = SO_RCVBUF;
-        break;
-    case SOCK_SOCKO_SENDBUFFER:
-        nativeOptionName = SO_SNDBUF;
-        break;
-    case SOCK_SOCKO_ACCEPTCONNECTION:
-        nativeOptionName = SO_ACCEPTCONN;
-        break;
-    case SOCK_SOCKO_USELOOPBACK:
-        nativeOptionName = SO_USELOOPBACK;
-        break;
-    case SOCK_SOCKO_DONTROUTE:
-        nativeOptionName = SO_DONTROUTE;
-        break;
-    case SOCK_SOCKO_OUTOFBANDINLINE:
-        nativeOptionName = SO_OOBINLINE;
-        break;
+        case SOCK_SOCKO_DONTLINGER:
+        case SOCK_SOCKO_LINGER:
+            nativeOptionName = SO_LINGER;
+            break;
+        case SOCK_SOCKO_SENDTIMEOUT:
+            nativeOptionName = SO_SNDTIMEO;
+            break;
+        case SOCK_SOCKO_RECEIVETIMEOUT:
+            nativeOptionName = SO_RCVTIMEO;
+            break;
+        case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
+        case SOCK_SOCKO_REUSEADDRESS:
+            nativeOptionName = SO_REUSEADDR;
+            break;
+        case SOCK_SOCKO_KEEPALIVE:
+            nativeOptionName = SO_KEEPALIVE;
+            break;
+        case SOCK_SOCKO_ERROR:
+            nativeOptionName = SO_ERROR;
+            break;
+        case SOCK_SOCKO_BROADCAST:
+            nativeOptionName = SO_BROADCAST;
+            break;
+        case SOCK_SOCKO_RECEIVEBUFFER:
+            nativeOptionName = SO_RCVBUF;
+            break;
+        case SOCK_SOCKO_SENDBUFFER:
+            nativeOptionName = SO_SNDBUF;
+            break;
+        case SOCK_SOCKO_ACCEPTCONNECTION:
+            nativeOptionName = SO_ACCEPTCONN;
+            break;
+        case SOCK_SOCKO_USELOOPBACK:
+            nativeOptionName = SO_USELOOPBACK;
+            break;
+        case SOCK_SOCKO_DONTROUTE:
+            nativeOptionName = SO_DONTROUTE;
+            break;
+        case SOCK_SOCKO_OUTOFBANDINLINE:
+            nativeOptionName = SO_OOBINLINE;
+            break;
 
-    case SOCK_SOCKO_DEBUG:
-        nativeOptionName = SO_DEBUG;
-        break;
+        case SOCK_SOCKO_DEBUG:
+            nativeOptionName = SO_DEBUG;
+            break;
 
-    case SOCK_SOCKO_SENDLOWWATER:
-        nativeOptionName = SO_SNDLOWAT;
-        break;
+        case SOCK_SOCKO_SENDLOWWATER:
+            nativeOptionName = SO_SNDLOWAT;
+            break;
 
-    case SOCK_SOCKO_RECEIVELOWWATER:
-        nativeOptionName = SO_RCVLOWAT;
-        break;
+        case SOCK_SOCKO_RECEIVELOWWATER:
+            nativeOptionName = SO_RCVLOWAT;
+            break;
 
-        //        case SOCK_SOCKO_MAXCONNECTIONS:         //don't support
-    case SOCK_SOCKO_UPDATE_ACCEPT_CTX:
-    case SOCK_SOCKO_UPDATE_CONNECT_CTX:
-        nativeOptionName = 0;
-        break;
+            //        case SOCK_SOCKO_MAXCONNECTIONS:         //don't support
+        case SOCK_SOCKO_UPDATE_ACCEPT_CTX:
+        case SOCK_SOCKO_UPDATE_CONNECT_CTX:
+            nativeOptionName = 0;
+            break;
 
-    // allow the C# user to specify LWIP options that our managed enum
-    // doesn't support
-    default:
-        nativeOptionName = optname;
-        break;
+        // allow the C# user to specify LWIP options that our managed enum
+        // doesn't support
+        default:
+            nativeOptionName = optname;
+            break;
     }
 
     return nativeOptionName;
 }
 
-int LWIP_SOCKETS_Driver::GetNativeIPOption(int optname)
+int
+LWIP_SOCKETS_Driver::GetNativeIPOption(int optname)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeOptionName = 0;
 
     switch (optname)
     {
-    case SOCK_IPO_TTL:
-        nativeOptionName = IP_TTL;
-        break;
-    case SOCK_IPO_TOS:
-        nativeOptionName = IP_TOS;
-        break;
+        case SOCK_IPO_TTL:
+            nativeOptionName = IP_TTL;
+            break;
+        case SOCK_IPO_TOS:
+            nativeOptionName = IP_TOS;
+            break;
 #if LWIP_IGMP
-    case SOCK_IPO_MULTICAST_IF:
-        nativeOptionName = IP_MULTICAST_IF;
-        break;
-    case SOCK_IPO_MULTICAST_TTL:
-        nativeOptionName = IP_MULTICAST_TTL;
-        break;
-    case SOCK_IPO_MULTICAST_LOOP:
-        nativeOptionName = IP_MULTICAST_LOOP;
-        break;
-    case SOCK_IPO_ADD_MEMBERSHIP:
-        nativeOptionName = IP_ADD_MEMBERSHIP;
-        break;
-    case SOCK_IPO_DROP_MEMBERSHIP:
-        nativeOptionName = IP_DROP_MEMBERSHIP;
-        break;
+        case SOCK_IPO_MULTICAST_IF:
+            nativeOptionName = IP_MULTICAST_IF;
+            break;
+        case SOCK_IPO_MULTICAST_TTL:
+            nativeOptionName = IP_MULTICAST_TTL;
+            break;
+        case SOCK_IPO_MULTICAST_LOOP:
+            nativeOptionName = IP_MULTICAST_LOOP;
+            break;
+        case SOCK_IPO_ADD_MEMBERSHIP:
+            nativeOptionName = IP_ADD_MEMBERSHIP;
+            break;
+        case SOCK_IPO_DROP_MEMBERSHIP:
+            nativeOptionName = IP_DROP_MEMBERSHIP;
+            break;
 #else
-    case SOCK_IPO_MULTICAST_IF:
-    case SOCK_IPO_MULTICAST_TTL:
-    case SOCK_IPO_MULTICAST_LOOP:
-    case SOCK_IPO_ADD_MEMBERSHIP:
-    case SOCK_IPO_DROP_MEMBERSHIP:
+        case SOCK_IPO_MULTICAST_IF:
+        case SOCK_IPO_MULTICAST_TTL:
+        case SOCK_IPO_MULTICAST_LOOP:
+        case SOCK_IPO_ADD_MEMBERSHIP:
+        case SOCK_IPO_DROP_MEMBERSHIP:
 #endif
-    case SOCK_IPO_ADD_SOURCE_MEMBERSHIP:
-    case SOCK_IPO_DROP_SOURCE_MEMBERSHIP:
-    case SOCK_IPO_OPTIONS:
-    case SOCK_IPO_HDRINCL:
-    case SOCK_IPO_IP_DONTFRAGMENT:
-    case SOCK_IPO_BLOCK_SOURCE:
-    case SOCK_IPO_UBLOCK_SOURCE:
-    case SOCK_IPO_PACKET_INFO:
-        nativeOptionName = 0;
-        break;
+        case SOCK_IPO_ADD_SOURCE_MEMBERSHIP:
+        case SOCK_IPO_DROP_SOURCE_MEMBERSHIP:
+        case SOCK_IPO_OPTIONS:
+        case SOCK_IPO_HDRINCL:
+        case SOCK_IPO_IP_DONTFRAGMENT:
+        case SOCK_IPO_BLOCK_SOURCE:
+        case SOCK_IPO_UBLOCK_SOURCE:
+        case SOCK_IPO_PACKET_INFO:
+            nativeOptionName = 0;
+            break;
 
-    // allow the C# user to specify LWIP options that our managed enum
-    // doesn't support
-    default:
-        nativeOptionName = optname;
-        break;
+        // allow the C# user to specify LWIP options that our managed enum
+        // doesn't support
+        default:
+            nativeOptionName = optname;
+            break;
     }
 
     return nativeOptionName;
 }
 
-int LWIP_SOCKETS_Driver::GetNativeError(int error)
+int
+LWIP_SOCKETS_Driver::GetNativeError(int error)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int ret;
 
     switch (error)
     {
-    case EINTR:
-        ret = SOCK_EINTR;
-        break;
+        case EINTR:
+            ret = SOCK_EINTR;
+            break;
 
-    case EACCES:
-        ret = SOCK_EACCES;
-        break;
+        case EACCES:
+            ret = SOCK_EACCES;
+            break;
 
-    case EFAULT:
-        ret = SOCK_EFAULT;
-        break;
+        case EFAULT:
+            ret = SOCK_EFAULT;
+            break;
 
-    case EINVAL:
-        ret = SOCK_EINVAL;
-        break;
+        case EINVAL:
+            ret = SOCK_EINVAL;
+            break;
 
-    case EMFILE:
-        ret = SOCK_EMFILE;
-        break;
+        case EMFILE:
+            ret = SOCK_EMFILE;
+            break;
 
-    case EAGAIN:
-    case EBUSY:
-    /* case EWOULDBLOCK: same as EINPROGRESS */
-    case EINPROGRESS:
-        ret = SOCK_EWOULDBLOCK;
-        break;
+        case EAGAIN:
+        case EBUSY:
+        /* case EWOULDBLOCK: same as EINPROGRESS */
+        case EINPROGRESS:
+            ret = SOCK_EWOULDBLOCK;
+            break;
 
-    case EALREADY:
-        ret = SOCK_EALREADY;
-        break;
+        case EALREADY:
+            ret = SOCK_EALREADY;
+            break;
 
-    case ENOTSOCK:
-        ret = SOCK_ENOTSOCK;
-        break;
+        case ENOTSOCK:
+            ret = SOCK_ENOTSOCK;
+            break;
 
-    case EDESTADDRREQ:
-        ret = SOCK_EDESTADDRREQ;
-        break;
+        case EDESTADDRREQ:
+            ret = SOCK_EDESTADDRREQ;
+            break;
 
-    case EMSGSIZE:
-        ret = SOCK_EMSGSIZE;
-        break;
+        case EMSGSIZE:
+            ret = SOCK_EMSGSIZE;
+            break;
 
-    case EPROTOTYPE:
-        ret = SOCK_EPROTOTYPE;
-        break;
+        case EPROTOTYPE:
+            ret = SOCK_EPROTOTYPE;
+            break;
 
-    case ENOPROTOOPT:
-        ret = SOCK_ENOPROTOOPT;
-        break;
+        case ENOPROTOOPT:
+            ret = SOCK_ENOPROTOOPT;
+            break;
 
-    case EPROTONOSUPPORT:
-        ret = SOCK_EPROTONOSUPPORT;
-        break;
-        // TODO nanoframework check why missing
-        // case ESOCKTNOSUPPORT:
-        //     ret = SOCK_ESOCKTNOSUPPORT;
-        //     break;
+        case EPROTONOSUPPORT:
+            ret = SOCK_EPROTONOSUPPORT;
+            break;
+            // TODO nanoframework check why missing
+            // case ESOCKTNOSUPPORT:
+            //     ret = SOCK_ESOCKTNOSUPPORT;
+            //     break;
 
-    case EPFNOSUPPORT:
-        ret = SOCK_EPFNOSUPPORT;
-        break;
+        case EPFNOSUPPORT:
+            ret = SOCK_EPFNOSUPPORT;
+            break;
 
-    case EAFNOSUPPORT:
-        ret = SOCK_EAFNOSUPPORT;
-        break;
+        case EAFNOSUPPORT:
+            ret = SOCK_EAFNOSUPPORT;
+            break;
 
-    case EADDRINUSE:
-        ret = SOCK_EADDRINUSE;
-        break;
+        case EADDRINUSE:
+            ret = SOCK_EADDRINUSE;
+            break;
 
-    case EADDRNOTAVAIL:
-        ret = SOCK_EADDRNOTAVAIL;
-        break;
+        case EADDRNOTAVAIL:
+            ret = SOCK_EADDRNOTAVAIL;
+            break;
 
-    case ENETDOWN:
-        ret = SOCK_ENETDOWN;
-        break;
+        case ENETDOWN:
+            ret = SOCK_ENETDOWN;
+            break;
 
-    case ENETUNREACH:
-        ret = SOCK_ENETUNREACH;
-        break;
+        case ENETUNREACH:
+            ret = SOCK_ENETUNREACH;
+            break;
 
-    case ENETRESET:
-        ret = SOCK_ENETRESET;
-        break;
+        case ENETRESET:
+            ret = SOCK_ENETRESET;
+            break;
 
-    case ECONNABORTED:
-        ret = SOCK_ECONNABORTED;
-        break;
+        case ECONNABORTED:
+            ret = SOCK_ECONNABORTED;
+            break;
 
-    case ECONNRESET:
-        ret = SOCK_ECONNRESET;
-        break;
+        case ECONNRESET:
+            ret = SOCK_ECONNRESET;
+            break;
 
-    case ENOBUFS:
-    case ENOMEM:
-        ret = SOCK_ENOBUFS;
-        break;
+        case ENOBUFS:
+        case ENOMEM:
+            ret = SOCK_ENOBUFS;
+            break;
 
-    case EISCONN:
-        ret = SOCK_EISCONN;
-        break;
+        case EISCONN:
+            ret = SOCK_EISCONN;
+            break;
 
-    case ENOTCONN:
-        ret = SOCK_EISCONN;
-        break;
+        case ENOTCONN:
+            ret = SOCK_EISCONN;
+            break;
 
 #if !defined(__GNUC__) // same as ENOTSOCK for GCC
-    case ESHUTDOWN:
-        ret = SOCK_ESHUTDOWN;
-        break;
+        case ESHUTDOWN:
+            ret = SOCK_ESHUTDOWN;
+            break;
 #endif
 
-    case ETIMEDOUT:
-        ret = SOCK_ETIMEDOUT;
-        break;
+        case ETIMEDOUT:
+            ret = SOCK_ETIMEDOUT;
+            break;
 
-    case ECONNREFUSED:
-        ret = SOCK_ECONNREFUSED;
-        break;
+        case ECONNREFUSED:
+            ret = SOCK_ECONNREFUSED;
+            break;
 
-    case EHOSTDOWN:
-        ret = SOCK_EHOSTDOWN;
-        break;
+        case EHOSTDOWN:
+            ret = SOCK_EHOSTDOWN;
+            break;
 
-    case EHOSTUNREACH:
-        ret = SOCK_EHOSTUNREACH;
-        break;
+        case EHOSTUNREACH:
+            ret = SOCK_EHOSTUNREACH;
+            break;
 
-    case ENODATA:
-        ret = SOCK_NO_DATA;
-        break;
+        case ENODATA:
+            ret = SOCK_NO_DATA;
+            break;
 
-    default:
-        ret = error;
-        break;
+        default:
+            ret = error;
+            break;
     }
 
     return (ret);
@@ -1332,7 +1380,8 @@ int LWIP_SOCKETS_Driver::GetNativeError(int error)
  * Find a network interface by searching for its number
  * Similar to LWIP's netif_find(char *name)
  */
-struct netif *netif_find_interface(int num)
+struct netif *
+netif_find_interface(int num)
 {
     struct netif *networkInterface;
 
