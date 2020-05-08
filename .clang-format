@@ -2,47 +2,48 @@
 # Language:        Cpp
 BasedOnStyle:  Microsoft
 # AccessModifierOffset: -2
-# AlignAfterOpenBracket: Align
-# AlignConsecutiveMacros: false
-# AlignConsecutiveAssignments: false
-# AlignConsecutiveDeclarations: false
-# AlignEscapedNewlines: Right
-# AlignOperands:   true
+AlignAfterOpenBracket: AlwaysBreak
+AlignConsecutiveMacros: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignEscapedNewlines: Left
+AlignOperands: true
 # AlignTrailingComments: true
-# AllowAllArgumentsOnNextLine: true
-# AllowAllConstructorInitializersOnNextLine: true
-# AllowAllParametersOfDeclarationOnNextLine: true
-# AllowShortBlocksOnASingleLine: Never
+AllowAllArgumentsOnNextLine: false
+AllowAllConstructorInitializersOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: Never
 # AllowShortCaseLabelsOnASingleLine: false
 # AllowShortFunctionsOnASingleLine: All
 # AllowShortLambdasOnASingleLine: All
-# AllowShortIfStatementsOnASingleLine: Never
-# AllowShortLoopsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: true
 # AlwaysBreakAfterDefinitionReturnType: None
-# AlwaysBreakAfterReturnType: None
+AlwaysBreakAfterReturnType: All
 # AlwaysBreakBeforeMultilineStrings: false
 # AlwaysBreakTemplateDeclarations: MultiLine
-# BinPackArguments: true
-# BinPackParameters: true
-# BraceWrapping:
-#   AfterCaseLabel:  false
-#   AfterClass:      false
-#   AfterControlStatement: false
-#   AfterEnum:       false
-#   AfterFunction:   false
-#   AfterNamespace:  false
-#   AfterObjCDeclaration: false
-#   AfterStruct:     false
-#   AfterUnion:      false
-#   AfterExternBlock: false
-#   BeforeCatch:     false
-#   BeforeElse:      false
+BinPackArguments: false
+BinPackParameters: false
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+#  BeforeLambdaBody: true  # Needs clang-format >= 11
 #   IndentBraces:    false
 #   SplitEmptyFunction: true
 #   SplitEmptyRecord: true
 #   SplitEmptyNamespace: true
 # BreakBeforeBinaryOperators: None
-# BreakBeforeBraces: Attach
+BreakBeforeBraces: Allman
 # BreakBeforeInheritanceComma: false
 # BreakInheritanceList: BeforeColon
 # BreakBeforeTernaryOperators: true
@@ -79,10 +80,11 @@ BasedOnStyle:  Microsoft
 #     SortPriority:    0
 # IncludeIsMainRegex: '(Test)?$'
 # IncludeIsMainSourceRegex: ''
-# IndentCaseLabels: false
+# IndentCaseBlocks: true  # Needs clang-format >= 11
+IndentCaseLabels: true
 # IndentGotoLabels: true
 # IndentPPDirectives: None
-# IndentWidth:     2
+# IndentWidth: 4  # Included in Microsoft style
 # IndentWrappedFunctionNames: false
 # JavaScriptQuotes: Leave
 # JavaScriptWrapImports: true
@@ -103,9 +105,9 @@ BasedOnStyle:  Microsoft
 # PenaltyBreakTemplateDeclaration: 10
 # PenaltyExcessCharacter: 1000000
 # PenaltyReturnTypeOnItsOwnLine: 60
-# PointerAlignment: Right
+# PointerAlignment: Left  # Included in Microsoft style
 # ReflowComments:  true
-SortIncludes: true
+SortIncludes: false
 # SortUsingDeclarations: true
 # SpaceAfterCStyleCast: false
 # SpaceAfterLogicalNot: false
