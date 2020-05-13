@@ -4,7 +4,7 @@
 #
 
 # execute_process(
-#     COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z
+#     COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/fatfs-0.13_patched.7z
 #     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
 # )
 
