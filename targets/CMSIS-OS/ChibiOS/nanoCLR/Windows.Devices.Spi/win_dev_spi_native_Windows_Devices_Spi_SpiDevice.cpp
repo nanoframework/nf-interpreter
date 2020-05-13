@@ -297,6 +297,12 @@ void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, b
   #if (SPI_SUPPORTS_CIRCULAR == TRUE) 
     llConfig->circular = SPI_USE_CIRCULAR;
   #endif
+
+    //Ensure CS pin is in the correct mode:
+    //TODO: is this in the right place, and how can we ensure it is not already
+    //open (or if it is, warn the user (at least in debug...))
+    palSetPadMode(GPIO_PORT(csPin), csPin % 16, PAL_MODE_OUTPUT_PUSHPULL);
+
     llConfig->end_cb = SpiCallback;
     llConfig->ssport = GPIO_PORT(csPin);
     llConfig->sspad = csPin % 16;

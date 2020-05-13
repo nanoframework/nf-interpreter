@@ -1075,10 +1075,10 @@
                                      PIN_MODE_ALTERNATE(GPIOF_FMC_A3) |     \
                                      PIN_MODE_ALTERNATE(GPIOF_FMC_A4) |     \
                                      PIN_MODE_ALTERNATE(GPIOF_FMC_A5) |     \
-                                     PIN_MODE_OUTPUT(GPIOF_ARD_D3) |         \
-                                     PIN_MODE_ALTERNATE(GPIOF_ARD_D6) |         \
-                                     PIN_MODE_ALTERNATE(GPIOF_ARD_A4) |         \
-                                     PIN_MODE_ALTERNATE(GPIOF_ARD_A5) |         \
+                                     PIN_MODE_INPUT(GPIOF_ARD_D3) |         \
+                                     PIN_MODE_INPUT(GPIOF_ARD_D6) |         \
+                                     PIN_MODE_INPUT(GPIOF_ARD_A4) |         \
+                                     PIN_MODE_INPUT(GPIOF_ARD_A5) |         \
                                      PIN_MODE_INPUT(GPIOF_ARD_A3) |         \
                                      PIN_MODE_ALTERNATE(GPIOF_FMC_SDNRAS) | \
                                      PIN_MODE_ALTERNATE(GPIOF_FMC_A6) |     \
@@ -1123,10 +1123,10 @@
                                      PIN_PUPDR_FLOATING(GPIOF_FMC_A3) |     \
                                      PIN_PUPDR_FLOATING(GPIOF_FMC_A4) |     \
                                      PIN_PUPDR_FLOATING(GPIOF_FMC_A5) |     \
-                                     PIN_PUPDR_FLOATING(GPIOF_ARD_D3) |       \
-                                     PIN_PUPDR_FLOATING(GPIOF_ARD_D6) |       \
-                                     PIN_PUPDR_FLOATING(GPIOF_ARD_A4) |       \
-                                     PIN_PUPDR_FLOATING(GPIOF_ARD_A5) |       \
+                                     PIN_PUPDR_PULLUP(GPIOF_ARD_D3) |       \
+                                     PIN_PUPDR_PULLUP(GPIOF_ARD_D6) |       \
+                                     PIN_PUPDR_PULLUP(GPIOF_ARD_A4) |       \
+                                     PIN_PUPDR_PULLUP(GPIOF_ARD_A5) |       \
                                      PIN_PUPDR_PULLUP(GPIOF_ARD_A3) |       \
                                      PIN_PUPDR_FLOATING(GPIOF_FMC_SDNRAS) | \
                                      PIN_PUPDR_FLOATING(GPIOF_FMC_A6) |     \
@@ -1156,9 +1156,9 @@
                                      PIN_AFIO_AF(GPIOF_FMC_A4, 12U) |       \
                                      PIN_AFIO_AF(GPIOF_FMC_A5, 12U) |       \
                                      PIN_AFIO_AF(GPIOF_ARD_D3, 0U) |        \
-                                     PIN_AFIO_AF(GPIOF_ARD_D6, 5U))
-#define VAL_GPIOF_AFRH              (PIN_AFIO_AF(GPIOF_ARD_A4, 5U) |        \
-                                     PIN_AFIO_AF(GPIOF_ARD_A5, 5U) |        \
+                                     PIN_AFIO_AF(GPIOF_ARD_D6, 0U))
+#define VAL_GPIOF_AFRH              (PIN_AFIO_AF(GPIOF_ARD_A4, 0U) |        \
+                                     PIN_AFIO_AF(GPIOF_ARD_A5, 0U) |        \
                                      PIN_AFIO_AF(GPIOF_ARD_A3, 0U) |        \
                                      PIN_AFIO_AF(GPIOF_FMC_SDNRAS, 12U) |   \
                                      PIN_AFIO_AF(GPIOF_FMC_A6, 12U) |       \
@@ -1537,10 +1537,10 @@
  * PJ14 - WIFI_RST                  (input floating).
  * PJ15 - DSI_RESET                 (input floating).
  */
-#define VAL_GPIOJ_MODER             (PIN_MODE_OUTPUT(GPIOJ_ARD_D4) |         \
-                                     PIN_MODE_OUTPUT(GPIOJ_ARD_D2) |         \
+#define VAL_GPIOJ_MODER             (PIN_MODE_INPUT(GPIOJ_ARD_D4) |         \
+                                     PIN_MODE_INPUT(GPIOJ_ARD_D2) |         \
                                      PIN_MODE_ALTERNATE(GPIOJ_DSI_TE) |     \
-                                     PIN_MODE_OUTPUT(GPIOJ_ARD_D7) |         \
+                                     PIN_MODE_INPUT(GPIOJ_ARD_D7) |         \
                                      PIN_MODE_INPUT(GPIOJ_ARD_D8) |         \
                                      PIN_MODE_OUTPUT(GPIOJ_LED2_GREEN) |    \
                                      PIN_MODE_INPUT(GPIOJ_PIN6) |           \
@@ -1569,10 +1569,10 @@
                                      PIN_OTYPE_PUSHPULL(GPIOJ_LED1_RED) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOJ_WIFI_RST) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOJ_DSI_RESET))
-#define VAL_GPIOJ_OSPEEDR           (PIN_OSPEED_HIGH(GPIOJ_ARD_D4) |     \
-                                     PIN_OSPEED_HIGH(GPIOJ_ARD_D2) |     \
+#define VAL_GPIOJ_OSPEEDR           (PIN_OSPEED_VERYLOW(GPIOJ_ARD_D4) |     \
+                                     PIN_OSPEED_VERYLOW(GPIOJ_ARD_D2) |     \
                                      PIN_OSPEED_VERYLOW(GPIOJ_DSI_TE) |     \
-                                     PIN_OSPEED_HIGH(GPIOJ_ARD_D7) |     \
+                                     PIN_OSPEED_VERYLOW(GPIOJ_ARD_D7) |     \
                                      PIN_OSPEED_VERYLOW(GPIOJ_ARD_D8) |     \
                                      PIN_OSPEED_HIGH(GPIOJ_LED2_GREEN) |    \
                                      PIN_OSPEED_VERYLOW(GPIOJ_PIN6) |       \
@@ -1602,7 +1602,7 @@
                                      PIN_PUPDR_FLOATING(GPIOJ_WIFI_RST) |   \
                                      PIN_PUPDR_FLOATING(GPIOJ_DSI_RESET))
 #define VAL_GPIOJ_ODR               (PIN_ODR_HIGH(GPIOJ_ARD_D4) |           \
-                                     PIN_ODR_LOW(GPIOJ_ARD_D2) |           \
+                                     PIN_ODR_HIGH(GPIOJ_ARD_D2) |           \
                                      PIN_ODR_HIGH(GPIOJ_DSI_TE) |           \
                                      PIN_ODR_HIGH(GPIOJ_ARD_D7) |           \
                                      PIN_ODR_HIGH(GPIOJ_ARD_D8) |           \
