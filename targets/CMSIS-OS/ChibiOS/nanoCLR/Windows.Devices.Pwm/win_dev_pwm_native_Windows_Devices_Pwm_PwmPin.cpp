@@ -923,7 +923,7 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmPin::NativeStart___VOI
             // no channel available for combination pinNumber/timerId provided
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
-        // Sets the pin to the correct pwm alternate function and enables the associated channel
+        // Sets the pin to the correct pwm alternate functin and enables the associated channel
         palSetPadMode(GPIO_PORT(pinNumber), pinNumber % 16, PAL_MODE_ALTERNATE(GetAlternateFunction(timerId)));
         pwmEnableChannel(_drv, channelId,PWM_PERCENTAGE_TO_WIDTH(_drv, dutyCycle));
     }
