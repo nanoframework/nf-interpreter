@@ -6,13 +6,13 @@
 #include "win_dev_spi_native_target.h"
 
 //////////
-// SPI2 //
+// SPI5 //
 //////////
 
-// pin configuration for SPI2
-// port for SCK pin is: LINE_ARD_D13
-// port for MISO pin is: LINE_ARD_D12
-// port for MOSI pin is: LINE_ARD_D11
+// pin configuration for SPI5
+// port for SCK pin is: PF7 (D6)
+// port for MISO pin is: PF8 (A4)
+// port for MOSI pin is: PF9 (A5)
 
 // GPIO alternate pin function is 5 (see alternate function mapping table in device datasheet)
-SPI_CONFIG_PINS(2, GPIOA, 12, GPIOB, 14, GPIOB, 15, 5)
+SPI_CONFIG_PINS(5, GPIOF, 7, GPIOF, 8, GPIOF, 9, 5)
