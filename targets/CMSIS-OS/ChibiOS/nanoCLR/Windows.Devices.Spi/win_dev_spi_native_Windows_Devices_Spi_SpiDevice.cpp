@@ -301,9 +301,7 @@ void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, b
     llConfig->end_cb = SpiCallback;
 
     // make sure the CS pin is properly configured as GPIO, output & pushpull 
-    palSetPadMode( GPIO_PORT(csPin), csPin % 16, \
-                   (PAL_MODE_ALTERNATE(0) | \
-                   PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL) ); \
+    palSetPadMode( GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL) );
 
     // being SPI CS active low, default it to high
     palSetPad(GPIO_PORT(csPin), csPin % 16);
