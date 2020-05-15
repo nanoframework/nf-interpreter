@@ -78,7 +78,7 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(HAL_Configuration_Netw
     if (sl_NetCfgGet(SL_NETCFG_IPV4_STA_ADDR_MODE, &configOptions, &ipLen, (uint8_t *)&ipV4) >= 0)
     {
         // when using DHCP do not use the static settings
-        if(0 != (updateFlags & UpdateOperation_Dns))
+        if(0 != (updateFlags & NetworkInterface_UpdateOperation_Dns))
         {
             // FIXME IPV6
             if(config->AutomaticDNS == 0)
@@ -99,7 +99,7 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(HAL_Configuration_Netw
             }
         }
 
-        if(0 != (updateFlags & UpdateOperation_Dhcp))
+        if(0 != (updateFlags & NetworkInterface_UpdateOperation_Dhcp))
         {
             if(enableDHCP)
             {
@@ -129,21 +129,21 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(HAL_Configuration_Netw
 
         if(enableDHCP)
         {
-            if(0 != (updateFlags & UpdateOperation_DhcpRelease))
+            if(0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRelease))
             {
                 sl_NetCfgSet(SL_NETCFG_IPV4_STA_ADDR_MODE, SL_NETCFG_ADDR_RELEASE_IP_SET, 0, 0); 
             }
-            else if(0 != (updateFlags & UpdateOperation_DhcpRenew))
+            else if(0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
             {
                 //dhcp_renew(networkInterface);
             }
-            else if(0 != (updateFlags & (UpdateOperation_DhcpRelease | UpdateOperation_DhcpRenew)) )
+            else if(0 != (updateFlags & (NetworkInterface_UpdateOperation_DhcpRelease | NetworkInterface_UpdateOperation_DhcpRenew)) )
             {
                 return CLR_E_INVALID_PARAMETER;
             }
         }
 
-        if(0 != (updateFlags & UpdateOperation_Mac))
+        if(0 != (updateFlags & NetworkInterface_UpdateOperation_Mac))
         {
             uint8_t macAddress[SL_MAC_ADDR_LEN];
 
