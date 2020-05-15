@@ -14,6 +14,32 @@
 #include <nanoHAL_time.h>
 #include <corlib_native.h>
 
+// MOVED TO src\PAL\Include\nanoPAL_Sockets.h for convinience
+// typedef enum __nfpack NetworkInterface_UpdateOperation
+// {
+//     NetworkInterface_UpdateOperation_Invalid = 0,
+//     NetworkInterface_UpdateOperation_Dns = 1,
+//     NetworkInterface_UpdateOperation_Dhcp = 2,
+//     NetworkInterface_UpdateOperation_DhcpRenew = 4,
+//     NetworkInterface_UpdateOperation_DhcpRelease = 8,
+//     NetworkInterface_UpdateOperation_Mac = 16,
+// } NetworkInterface_UpdateOperation;
+
+// MOVED TO src\PAL\Include\nanoPAL_Sockets.h for convinience
+// typedef enum __nfpack NetworkChange_NetworkEventType
+// {
+//     NetworkChange_NetworkEventType_Invalid = 0,
+//     NetworkChange_NetworkEventType_AvailabilityChanged = 1,
+//     NetworkChange_NetworkEventType_AddressChanged = 2,
+//     NetworkChange_NetworkEventType_APStationChanged = 3,
+// } NetworkChange_NetworkEventType;
+
+// MOVED TO src\PAL\Include\nanoPAL_Sockets.h for convinience
+// typedef enum __nfpack NetworkChange_NetworkEvents
+// {
+//     NetworkChange_NetworkEvents_NetworkAvailable = 1,
+// } NetworkChange_NetworkEvents;
+
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 {
     static const int FIELD___interfaceIndex = 1;
@@ -103,11 +129,11 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange__NetworkEvent
 {
-    static const int FIELD__EventType = 1;
-    static const int FIELD__Flags = 2;
-    static const int FIELD__Index = 3;
-    static const int FIELD__Data = 4;
-    static const int FIELD__Time = 5;
+    static const int FIELD__EventType = 3;
+    static const int FIELD__Flags = 4;
+    static const int FIELD__Index = 5;
+    static const int FIELD__Data = 6;
+    static const int FIELD__Time = 7;
 
     //--//
 
@@ -301,7 +327,7 @@ struct Library_sys_net_native_System_Net_Sockets_NetworkStream
 
 struct Library_sys_net_native_System_Net_Sockets_SocketException
 {
-    static const int FIELD___errorCode = 1;
+    static const int FIELD___errorCode = 5;
 
     //--//
 
