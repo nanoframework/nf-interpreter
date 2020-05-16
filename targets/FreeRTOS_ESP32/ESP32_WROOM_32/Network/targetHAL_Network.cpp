@@ -34,17 +34,17 @@ __nfweak void InitialiseEthernet()
 
 static void PostAddressChanged(uint netIndex)
 {
-	Network_PostEvent(NetworkEventType_AddressChanged, 0, netIndex);
+	Network_PostEvent(NetworkChange_NetworkEventType_AddressChanged, 0, netIndex);
 }
 
 static void PostAvailabilityOn(uint netIndex)
 {
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, 1, netIndex);
+	Network_PostEvent(NetworkChange_NetworkEventType_AvailabilityChanged, 1, netIndex);
 }
 
 static void PostAvailabilityOff(uint netIndex)
 {
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, 0, netIndex);
+	Network_PostEvent(NetworkChange_NetworkEventType_AvailabilityChanged, 0, netIndex);
 }
 
 static void PostScanComplete(uint netIndex)
@@ -54,7 +54,7 @@ static void PostScanComplete(uint netIndex)
 
 static void PostAPStationChanged(uint connect, uint netInfo)
 {
-	Network_PostEvent(NetworkEventType_APClientChanged, connect, netInfo);
+	Network_PostEvent(NetworkChange_NetworkEventType_APStationChanged, connect, netInfo);
 }
 
 static void initialize_sntp()
