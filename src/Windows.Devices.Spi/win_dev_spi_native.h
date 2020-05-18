@@ -11,32 +11,21 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
+#include <nanoPackStruct.h>
 
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum DataBitOrder
+typedef enum __nfpack DataBitOrder
 {
     DataBitOrder_MSB = 0,
-    DataBitOrder_LSB
-};
+    DataBitOrder_LSB = 1,
+} DataBitOrder;
 
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum SpiModes
+typedef enum __nfpack SpiMode
 {
-    SpiModes_Mode0 = 0,
-    SpiModes_Mode1,
-    SpiModes_Mode2,
-    SpiModes_Mode3
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
+    SpiMode_Mode0 = 0,
+    SpiMode_Mode1 = 1,
+    SpiMode_Mode2 = 2,
+    SpiMode_Mode3 = 3,
+} SpiMode;
 
 struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo
 {

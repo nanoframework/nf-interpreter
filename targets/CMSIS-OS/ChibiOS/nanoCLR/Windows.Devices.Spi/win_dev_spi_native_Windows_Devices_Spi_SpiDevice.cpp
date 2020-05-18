@@ -214,15 +214,15 @@ void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, b
     // SPI mode
     switch (config[ SpiConnectionSettings::FIELD___spiMode ].NumericByRef().s4)
     {
-        case SpiModes_Mode1:
+        case SpiMode_Mode1:
             llConfig->cr1 |= SPI_CR1_CPHA;
             break;
 
-        case SpiModes_Mode2:
+        case SpiMode_Mode2:
             llConfig->cr1 |= SPI_CR1_CPOL;
             break;
 
-        case SpiModes_Mode3:
+        case SpiMode_Mode3:
             llConfig->cr1 |= SPI_CR1_CPHA | SPI_CR1_CPOL;
             break;
 
