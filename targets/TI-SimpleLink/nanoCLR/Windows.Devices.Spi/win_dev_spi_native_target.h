@@ -11,6 +11,8 @@
 #include "Board.h"
 #include <ti/drivers/SPI.h>
 
+#define SPI_ASYNC   1
+
 // struct representing the SPI 
 struct NF_PAL_SPI
 {
@@ -18,6 +20,8 @@ struct NF_PAL_SPI
     SPI_Params          spiParams;
     SPI_Transaction*    transactions;
     uint8_t             transactionCount;
+    SPI_OP_STATUS       status;
+    SPI_Callback        callback;
 };
 
 ///////////////////////////////////////////

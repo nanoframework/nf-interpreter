@@ -6,7 +6,6 @@
 
 #include "win_dev_spi_native.h"
 
-
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
@@ -16,9 +15,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::get_MaxClockFrequency___I4,
-    Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::get_MinClockFrequency___I4,
     NULL,
+    NULL,
+    Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeChipSelectLineCount___I4__I4,
+    Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMaxClockFrequency___I4__I4,
+    Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMinClockFrequency___I4__I4,
     NULL,
     NULL,
     NULL,
@@ -61,6 +62,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN,
     Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN,
     Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID,
+    Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevice___I4__I4,
     NULL,
     NULL,
     NULL,
@@ -72,8 +74,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi =
 {
-    "Windows.Devices.Spi",
-    0x59B5BFC3,
+    "Windows.Devices.Spi", 
+    0x1E6398C8,
     method_lookup,
-    { 100, 1, 4, 1 }
+    { 100, 1, 4, 0 }
 };

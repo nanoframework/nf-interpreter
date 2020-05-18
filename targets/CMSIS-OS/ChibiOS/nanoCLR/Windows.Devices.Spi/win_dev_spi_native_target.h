@@ -10,6 +10,8 @@
 #include <win_dev_spi_native.h>
 #include <hal.h>
 
+#define SPI_ASYNC   1
+
 // struct representing the SPI 
 struct NF_PAL_SPI
 {
@@ -25,8 +27,9 @@ struct NF_PAL_SPI
     uint16_t ReadSize;
 };
 
+/*
 ///////////////////////////////////////////
-// declaration of the the SPI PAL strucs //
+// declaration of the the SPI PAL structs //
 ///////////////////////////////////////////
 #if STM32_SPI_USE_SPI1
     extern NF_PAL_SPI SPI1_PAL;
@@ -46,6 +49,7 @@ struct NF_PAL_SPI
 #if STM32_SPI_USE_SPI6
     extern NF_PAL_SPI SPI6_PAL;
 #endif
+*/
 
 // the following macro defines a function that configures the GPIO pins for an STM32 SPI peripheral
 // it gets called in the Windows_Devices_SPi_SPiDevice::NativeInit function

@@ -1727,30 +1727,13 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 //// Gp I/O driver
 //#include <CPU_INTC_decl.h>
 //
-//// Gp I/O driver
+// Gp I/O driver
 #include <CPU_GPIO_decl.h>
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //
-//// SPI driver
-//#include <CPU_SPI_decl.h>
+// SPI driver
+#include <nanoHAL_Spi.h>
+
 //
 //// External bus interface driver
 //#include <CPU_EBIU_decl.h>
