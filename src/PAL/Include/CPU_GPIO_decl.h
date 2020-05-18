@@ -21,31 +21,25 @@ typedef unsigned __int64 CLR_UINT64;
 #define GPIO_ATTRIBUTE_ALTERNATE_B  0x08
 
 
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioPinDriveMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum GpioPinDriveMode
+// from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
+typedef enum __nfpack GpioPinDriveMode
 {
     GpioPinDriveMode_Input = 0,
-    GpioPinDriveMode_InputPullDown,
-    GpioPinDriveMode_InputPullUp,
-    GpioPinDriveMode_Output,
-    GpioPinDriveMode_OutputOpenDrain,
-    GpioPinDriveMode_OutputOpenDrainPullUp,
-    GpioPinDriveMode_OutputOpenSource,
-    GpioPinDriveMode_OutputOpenSourcePullDown
-};
+    GpioPinDriveMode_InputPullDown = 1,
+    GpioPinDriveMode_InputPullUp = 2,
+    GpioPinDriveMode_Output = 3,
+    GpioPinDriveMode_OutputOpenDrain = 4,
+    GpioPinDriveMode_OutputOpenDrainPullUp = 5,
+    GpioPinDriveMode_OutputOpenSource = 6,
+    GpioPinDriveMode_OutputOpenSourcePullDown = 7,
+} GpioPinDriveMode;
 
-///////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioPinValue (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////
-
-enum GpioPinValue
+// from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
+typedef enum __nfpack GpioPinValue
 {
-	GpioPinValue_Low = 0,
-	GpioPinValue_High,
-};
+    GpioPinValue_Low = 0,
+    GpioPinValue_High = 1,
+} GpioPinValue;
 
 enum GPIO_INT_EDGE
 {

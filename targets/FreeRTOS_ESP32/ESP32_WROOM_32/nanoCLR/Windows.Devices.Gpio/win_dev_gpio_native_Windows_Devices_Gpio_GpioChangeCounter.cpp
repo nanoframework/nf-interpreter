@@ -241,9 +241,18 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 
 		switch (polarity)
 		{
-			case Both:  countRising = true; countFalling = true; break;
-			case Rising:  countRising = true; break;
-			case Falling: countFalling = true; break;
+			case GpioChangePolarity_Both: 
+					countRising = true;
+					countFalling = true;
+					break;
+
+			case GpioChangePolarity_Rising:
+					countRising = true;
+					break;
+
+			case GpioChangePolarity_Falling:
+					countFalling = true;
+					break;
 		}
 
 		if (!InitialiseCounter(counterIndex, pinNumber, countRising, countFalling))
