@@ -138,7 +138,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 
 #if SPI_ASYNC 
             // Check to see if we should run async so as not to hold up other tasks
-            isLongRunningOperation = IsLongRunningOperation(writeSize, readSize, fullDuplex, data16Bits, SPI_GetByteTime(deviceId), (uint32_t&)estimatedDurationMiliseconds);
+            isLongRunningOperation = IsLongRunningOperation(writeSize, readSize, fullDuplex, data16Bits, nanoSPI_GetByteTime(deviceId), (uint32_t&)estimatedDurationMiliseconds);
             if (isLongRunningOperation)
             {
                 // if this is a long running operation, set a timeout equal to the estimated transaction duration in milliseconds
@@ -181,7 +181,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             while (eventResult)
             {
                 // Has it completed ?
-                if (SPI_Op_Status(deviceId) == SPI_OP_COMPLETE)
+                if (nanoSPI_Op_Status(deviceId) == SPI_OP_COMPLETE)
                 {
                     // SPI driver is ready meaning that the SPI transaction(s) is(are) completed
                     break;
