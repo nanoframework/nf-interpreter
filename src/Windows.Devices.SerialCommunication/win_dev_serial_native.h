@@ -9,40 +9,38 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
+#include <nanoPackStruct.h>
 #include <corlib_native.h>
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialHandshake (in managed code) !!! //
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-enum SerialHandshake
+typedef enum __nfpack SerialData
+{
+    SerialData_Chars = 0,
+    SerialData_WatchChar = 1,
+} SerialData;
+
+typedef enum __nfpack SerialHandshake
 {
     SerialHandshake_None = 0,
-    SerialHandshake_RequestToSend,
-    SerialHandshake_RequestToSendXOnXOff,
-    SerialHandshake_XOnXOff
-};
+    SerialHandshake_RequestToSend = 1,
+    SerialHandshake_RequestToSendXOnXOff = 2,
+    SerialHandshake_XOnXOff = 3,
+} SerialHandshake;
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialParity (in managed code) !!! //
-//////////////////////////////////////////////////////////////////////////////////////////////////
-enum SerialParity
+typedef enum __nfpack SerialParity
 {
     SerialParity_None = 0,
-    SerialParity_Even,
-    SerialParity_Mark,
-    SerialParity_Odd,
-    SerialParity_Space
-};
+    SerialParity_Even = 1,
+    SerialParity_Mark = 2,
+    SerialParity_Odd = 3,
+    SerialParity_Space = 4,
+} SerialParity;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialStopBitCount (in managed code) !!! //
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-enum SerialStopBitCount
+typedef enum __nfpack SerialStopBitCount
 {
     SerialStopBitCount_One = 0,
-    SerialStopBitCount_OnePointFive,
-    SerialStopBitCount_Two
-};
+    SerialStopBitCount_OnePointFive = 1,
+    SerialStopBitCount_Two = 2,
+} SerialStopBitCount;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH  Windows.Storage.Streams.InputStreamOptions (in managed code) !!! //
@@ -53,51 +51,6 @@ enum InputStreamOptions
     InputStreamOptions_None = 0,
     InputStreamOptions_Partial,
     InputStreamOptions_ReadAhead
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.SerialCommunication.SerialData (in managed code) !!! //
-////////////////////////////////////////////////////////////////////////////////////////////////
-enum SerialData
-{
-    SerialData_Chars = 0,
-    SerialData_WatchChar,
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
-
-struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_ErrorReceivedEventArgs
-{
-    static const int FIELD___error = 1;
-
-    //--//
-
-};
-
-struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_PinChangedEventArgs
-{
-    static const int FIELD___pinChange = 1;
-
-    //--//
-
-};
-
-struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDataEvent
-{
-    static const int FIELD__SerialDeviceIndex = 1;
-    static const int FIELD__Event = 2;
-
-    //--//
-
-};
-
-struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDataReceivedEventArgs
-{
-    static const int FIELD___data = 1;
-
-    //--//
-
 };
 
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice
