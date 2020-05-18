@@ -417,11 +417,13 @@ bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
 	// Output & input pins any valid drivemode
 	if (GPIO_IS_VALID_OUTPUT_GPIO(pinNumber))
 	{
-		return  (driveMode >= GpioPinDriveMode_Input && driveMode <= GpioPinDriveMode_OutputOpenSourcePullDown);
+		return (
+			driveMode >= GpioPinDriveMode_Output && 
+			driveMode <= GpioPinDriveMode_OutputOpenSourcePullDown);
 	}
 
 	// Input only pins only input drive modes
-	return  (driveMode >= GpioPinDriveMode_Input && driveMode <= GpioPinDriveMode_InputPullUp);
+	return (driveMode <= GpioPinDriveMode_InputPullUp);
 }
 
 uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
