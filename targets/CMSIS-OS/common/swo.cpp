@@ -14,7 +14,7 @@
 
 // number of attempts to write to the ITM port before quitting
 // developer note: this is an arbitrary value from trial & error attempts to get a satisfactory output on ST-Link SWO viewer
-#define ITM_WRITE_ATTEMPTS      20000
+#define ITM_WRITE_ATTEMPTS      10000
 
 extern "C" void SwoInit()
 {

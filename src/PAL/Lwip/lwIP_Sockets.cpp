@@ -59,21 +59,21 @@ void LWIP_SOCKETS_Driver::PostAddressChanged(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AddressChanged, 0, 0);
+	Network_PostEvent(NetworkChange_NetworkEventType_AddressChanged, 0, 0);
 }
 
 void LWIP_SOCKETS_Driver::PostAvailabilityOn(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkAvailable, 0);
+	Network_PostEvent(NetworkChange_NetworkEventType_AvailabilityChanged, NetworkChange_NetworkEvents_NetworkAvailable, 0);
 }
 
 void LWIP_SOCKETS_Driver::PostAvailabilityOff(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkNOTAvailable, 0);
+	Network_PostEvent(NetworkChange_NetworkEventType_AvailabilityChanged, NetworkChange_NetworkEvents_NetworkNOTAvailable, 0);
 }
 
 #if LWIP_NETIF_LINK_CALLBACK == 1
@@ -190,7 +190,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
  		g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
- 		UpdateAdapterConfiguration(i, (UpdateOperation_Dhcp | UpdateOperation_Dns), &networkConfiguration);
+ 		UpdateAdapterConfiguration(i, (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns), &networkConfiguration);
 
  		networkInterface = netif_find_interface(interfaceNumber);
 
@@ -918,7 +918,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
 
 #if LWIP_DNS
     // when using DHCP do not use the static settings
-    if(0 != (updateFlags & UpdateOperation_Dns))
+    if(0 != (updateFlags & NetworkInterface_UpdateOperation_Dns))
     {
         // FIXME IPV6
         if(config->AutomaticDNS == 0)
@@ -945,7 +945,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
 #endif
 
 #if LWIP_DHCP
-    if(0 != (updateFlags & UpdateOperation_Dhcp))
+    if(0 != (updateFlags & NetworkInterface_UpdateOperation_Dhcp))
     {
         if(enableDHCP)
         {
@@ -986,22 +986,22 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
         // also it's NOT possible to renew & release on the same pass, so adding an extra else-if for that
         // just in case it's request from the managed code
 
-        if(0 != (updateFlags & UpdateOperation_DhcpRelease))
+        if(0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRelease))
         {
             dhcp_release(networkInterface);
         }
-        else if(0 != (updateFlags & UpdateOperation_DhcpRenew))
+        else if(0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
         {
             dhcp_renew(networkInterface);
         }
-        else if(0 != (updateFlags & (UpdateOperation_DhcpRelease | UpdateOperation_DhcpRenew)) )
+        else if(0 != (updateFlags & (NetworkInterface_UpdateOperation_DhcpRelease | NetworkInterface_UpdateOperation_DhcpRenew)) )
         {
             return CLR_E_INVALID_PARAMETER;
         }
     }
 #endif
 
-    if(0 != (updateFlags & UpdateOperation_Mac))
+    if(0 != (updateFlags & NetworkInterface_UpdateOperation_Mac))
     {
         memcpy(networkInterface->hwaddr, config->MacAddress, NETIF_MAX_HWADDR_LEN);
         networkInterface->hwaddr_len = NETIF_MAX_HWADDR_LEN;
