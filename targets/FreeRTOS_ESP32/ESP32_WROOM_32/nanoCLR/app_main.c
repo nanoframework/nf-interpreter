@@ -7,10 +7,14 @@
 
 #include <targetHAL.h>
 #include <nanoCLR_Application.h>
+#include <target_os.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <LaunchCLR.h>
 #include <string.h>
 
+#if NANOCLR_GRAPHICS
+extern void GraphicsInitialize();
+#endif
 extern void CLRStartupThread(void const * argument);
 
 // Mutex for GLOBAL_LOCK / GLOBAL_UNLOCK
@@ -28,6 +32,10 @@ void receiver_task(void *pvParameter)
 // Main task start point
 void main_task(void *pvParameter)
 {
+#if NANOCLR_GRAPHICS
+	GraphicsInitialize();
+#endif		
+
   (void)pvParameter;
   
   // CLR settings to launch CLR thread

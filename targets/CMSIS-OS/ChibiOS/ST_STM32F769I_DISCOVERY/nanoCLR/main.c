@@ -24,6 +24,10 @@
 
 extern uint8_t hal_spiffs_config();
 
+#if NANOCLR_GRAPHICS
+extern void GraphicsInitialize();
+#endif
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here 
@@ -87,6 +91,11 @@ int main(void) {
 
   // create the CLR Startup thread 
   osThreadCreate(osThread(CLRStartupThread), &clrSettings);
+
+
+  #if NANOCLR_GRAPHICS
+  GraphicsInitialize();
+  #endif	
 
   #if HAL_USE_SDC
   // creates the SD card working thread 

@@ -71,7 +71,13 @@
             "API_Windows.Devices.Spi": "ON",
             "API_Windows.Networking.Sockets": "OFF",
             "API_Windows.Storage": "ON",
-            "API_Hardware.Esp32": "ON"
+            "API_Hardware.Esp32": "ON",
+            "API_nanoFramework.Graphics": "ON",
+            "GRAPHICS_MEMORY": "Graphics_Memory.cpp",
+            "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp", //ESP32-WROVER-KIT
+            "TOUCHPANEL_DEVICE": "<touch device>.cpp",
+            "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp", //ESP32-WROVER-KIT
+            "TOUCHPANEL_INTERFACE": "<touch interface>.cpp"
           }
       }
     }
