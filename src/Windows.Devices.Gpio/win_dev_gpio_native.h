@@ -12,20 +12,32 @@
 #include <nanoCLR_Checks.h>
 #include <nf_rt_events_native.h>
 
-///////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Gpio.GpioChangePolarity (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////
-
-enum GpioChangePolarity
+typedef enum __nfpack GpioChangePolarity
 {
-	Both = 0,
-	Falling, 
-	Rising
-};
+    GpioChangePolarity_Both = 0,
+    GpioChangePolarity_Falling = 1,
+    GpioChangePolarity_Rising = 2,
+} GpioChangePolarity;
 
+// moved to src\PAL\Include\CPU_GPIO_decl.h for convinience
+// typedef enum __nfpack GpioPinDriveMode
+// {
+//     GpioPinDriveMode_Input = 0,
+//     GpioPinDriveMode_InputPullDown = 1,
+//     GpioPinDriveMode_InputPullUp = 2,
+//     GpioPinDriveMode_Output = 3,
+//     GpioPinDriveMode_OutputOpenDrain = 4,
+//     GpioPinDriveMode_OutputOpenDrainPullUp = 5,
+//     GpioPinDriveMode_OutputOpenSource = 6,
+//     GpioPinDriveMode_OutputOpenSourcePullDown = 7,
+// } GpioPinDriveMode;
 
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
+// moved to src\PAL\Include\CPU_GPIO_decl.h for convinience
+// typedef enum __nfpack GpioPinValue
+// {
+//     GpioPinValue_Low = 0,
+//     GpioPinValue_High = 1,
+// } GpioPinValue;
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCount
 {
@@ -50,14 +62,6 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter
     NANOCLR_NATIVE_DECLARE(NativeStart___VOID);
     NANOCLR_NATIVE_DECLARE(NativeStop___VOID);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
-
-    //--//
-
-};
-
-struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPinValueChangedEventArgs
-{
-    static const int FIELD___edge = 1;
 
     //--//
 
@@ -97,23 +101,6 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
     static const int FIELD_STATIC__s_instance = 2;
 
     NANOCLR_NATIVE_DECLARE(get_PinCount___I4);
-
-    //--//
-
-};
-
-struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPinEvent
-{
-    static const int FIELD__PinNumber = 1;
-    static const int FIELD__Edge = 2;
-
-    //--//
-
-};
-
-struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPinEventListener
-{
-    static const int FIELD___pinMap = 1;
 
     //--//
 
