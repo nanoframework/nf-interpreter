@@ -1148,6 +1148,34 @@ HRESULT CLR_RT_StackFrame::SetupTimeoutFromTicks( CLR_RT_HeapBlock& input, CLR_I
     NANOCLR_NOCLEANUP();
 }
 
+// input HeapBlock is TimeSpan
+HRESULT CLR_RT_StackFrame::SetupTimeoutFromTimeSpan( CLR_RT_HeapBlock& inputTimeSpan, CLR_INT64*& output )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    if(m_customState == 0)
+    {
+        CLR_RT_HeapBlock& ref = PushValueAndClear();
+        CLR_INT64         timeExpire;
+
+		CLR_INT64* debounceValue = Library_corlib_native_System_TimeSpan::GetValuePtr( inputTimeSpan ); FAULT_ON_NULL(debounceValue);
+
+        //
+        // Initialize timeout and save it on the stack.
+        //
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitTimeout( timeExpire, *debounceValue ));
+
+        ref.SetInteger( timeExpire );
+
+        m_customState = 1;
+    }
+
+    output = (CLR_INT64*)&m_evalStack[ 0 ].NumericByRef().s8;
+
+    NANOCLR_NOCLEANUP();
+}
+
 //--//
 
 void CLR_RT_StackFrame::Relocate()
