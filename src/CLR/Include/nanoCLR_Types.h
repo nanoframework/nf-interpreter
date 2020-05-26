@@ -822,7 +822,6 @@ struct CLR_RECORD_VERSION
 struct CLR_RECORD_ASSEMBLY
 {
     static const CLR_UINT32 c_Flags_NeedReboot = 0x00000001;
-    static const CLR_UINT32 c_Flags_Patch      = 0x00000002;
 
     CLR_UINT8          marker[ 8 ];
     //
