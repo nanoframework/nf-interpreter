@@ -1926,6 +1926,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     HRESULT SetResult_String ( const char*            val                   );
 
     HRESULT SetupTimeoutFromTicks( CLR_RT_HeapBlock& input, CLR_INT64*& output );
+    HRESULT SetupTimeoutFromTimeSpan( CLR_RT_HeapBlock& inputTimeSpan, CLR_INT64*& output );
 
     void ConvertResultToBoolean();
     void NegateResult          ();
