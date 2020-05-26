@@ -20,17 +20,18 @@ int8_t Esp32_SPI_DevicePinMap[2][3] =
 //  Serial 
 //  3 devices COM1,COM2, COM3 ( UART_NUM_0, UART_NUM_1, UART_NUM_2 )
 //  Map pins  Tx, RX, RTS, CTS
-//  Set default direct pins
-int8_t Esp32_SERIAL_DevicePinMap[3][4] = 
+//  Set pins to default for UART_NUM_0
+// others assign as NONE because the default pins can be shared with serial flash and PSRAM
+int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max] = 
 {
     // COM 1 - pins 1, 3, 19, 22
     {UART_NUM_0_TXD_DIRECT_GPIO_NUM, UART_NUM_0_RXD_DIRECT_GPIO_NUM, UART_NUM_0_RTS_DIRECT_GPIO_NUM, UART_NUM_0_CTS_DIRECT_GPIO_NUM},
     
-    // COM 2 - 10, 9, 6, 11
-    {UART_NUM_1_TXD_DIRECT_GPIO_NUM, UART_NUM_1_RXD_DIRECT_GPIO_NUM, UART_NUM_1_RTS_DIRECT_GPIO_NUM, UART_NUM_1_CTS_DIRECT_GPIO_NUM},
+    // COM 2 - all set to UART_PIN_NO_CHANGE
+    {UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE},
     
-    // COM3 - 17, 16, 8, 7
-    {UART_NUM_2_TXD_DIRECT_GPIO_NUM, UART_NUM_2_RXD_DIRECT_GPIO_NUM, UART_NUM_2_RTS_DIRECT_GPIO_NUM, UART_NUM_2_CTS_DIRECT_GPIO_NUM}
+    // COM3 - all set to UART_PIN_NO_CHANGE
+    {UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE}
  };
 
 // =============================================
@@ -141,6 +142,35 @@ int  Esp32_GetMappedDevicePinsWithFunction(uint32_t alternateFunction)
 	return Esp32_GetMappedDevicePins(deviceType, deviceIndex, pinIndex);
 }
 
+void Esp32_SetMappedDevicePins( Esp32_MapDeviceType deviceType, int devNumber, int8_t pinIndex, int ioPinNumber)
+{
+    if  ( devNumber >= 0)
+    {
+        switch( deviceType )
+        {
+            case DEV_TYPE_SPI:
+                Esp32_SPI_DevicePinMap[devNumber][pinIndex] = ioPinNumber;
+        
+            case DEV_TYPE_I2C:
+                Esp32_I2C_DevicePinMap[devNumber][pinIndex] = ioPinNumber;
+            
+			case DEV_TYPE_SERIAL:
+				Esp32_SERIAL_DevicePinMap[devNumber][pinIndex] = ioPinNumber;
+			
+			case DEV_TYPE_LED_PWM:
+                Esp32_LED_DevicePinMap[devNumber] = ioPinNumber;
+
+			case DEV_TYPE_ADC:
+				Esp32_ADC_DevicePinMap[pinIndex] = ioPinNumber;
+			
+			case DEV_TYPE_DAC:
+				Esp32_DAC_DevicePinMap[pinIndex] = ioPinNumber;
+
+			default:
+                break;
+        };
+    }
+}
 
 // Esp32_SetMappedDevicePins
 //
@@ -179,7 +209,7 @@ void Esp32_SetMappedDevicePins( uint8_t pin, int32_t alternateFunction )
             break;
 
 		case DEV_TYPE_SERIAL:
-			if (deviceIndex <= 2 && mapping <= 3)
+			if (deviceIndex < UART_NUM_MAX && mapping < Esp32SerialPin_Max)
 			{
 				Esp32_SERIAL_DevicePinMap[deviceIndex][mapping] = pin;
 			}
