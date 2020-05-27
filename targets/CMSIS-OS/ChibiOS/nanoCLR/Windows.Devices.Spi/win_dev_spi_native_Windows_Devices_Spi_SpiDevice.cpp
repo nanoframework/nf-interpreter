@@ -667,7 +667,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
     NANOCLR_HEADER();
 
     uint8_t busIndex;
-    NF_PAL_SPI* palSpi = NULL;
+    NF_PAL_SPI* palSpi;
     int32_t actualFrequency = 0;
     CLR_RT_HeapBlock* pConfig;
     
