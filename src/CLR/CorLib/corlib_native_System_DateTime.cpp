@@ -81,55 +81,61 @@ HRESULT Library_corlib_native_System_DateTime::GetDateTimePart___I4__SystemDateT
     NANOCLR_HEADER();
 
     signed int days;
-    SYSTEMTIME st; 
+    SYSTEMTIME st;
 
     DateTimePart dateTimePart  = (DateTimePart)stack.Arg1().NumericByRef().s4;
 
-    Expand( stack, st );
-    
-    switch (dateTimePart)
+    if( Expand( stack, st ) )
     {
-        case DateTimePart_Year:
-            stack.SetResult_I4( st.wYear );
-            break;
+        switch (dateTimePart)
+        {
+            case DateTimePart_Year:
+                stack.SetResult_I4( st.wYear );
+                break;
 
-        case DateTimePart_Month :
-            stack.SetResult_I4( st.wMonth );
-            break;
+            case DateTimePart_Month :
+                stack.SetResult_I4( st.wMonth );
+                break;
 
-        case DateTimePart_Day:
-            stack.SetResult_I4( st.wDay );
-            break;
+            case DateTimePart_Day:
+                stack.SetResult_I4( st.wDay );
+                break;
 
-        case DateTimePart_DayOfWeek:
-            stack.SetResult_I4( st.wDayOfWeek );
-            break;
+            case DateTimePart_DayOfWeek:
+                stack.SetResult_I4( st.wDayOfWeek );
+                break;
 
-        case DateTimePart_DayOfYear:
-            NANOCLR_CHECK_HRESULT( HAL_Time_AccDaysInMonth( st.wYear, st.wMonth, &days ) );
-            days += st.wDay;
-            stack.SetResult_I4( days );
-            break;
+            case DateTimePart_DayOfYear:
+                NANOCLR_CHECK_HRESULT( HAL_Time_AccDaysInMonth( st.wYear, st.wMonth, &days ) );
+                days += st.wDay;
+                stack.SetResult_I4( days );
+                break;
 
-        case DateTimePart_Hour:
-            stack.SetResult_I4( st.wHour );
-            break;
+            case DateTimePart_Hour:
+                stack.SetResult_I4( st.wHour );
+                break;
 
-        case DateTimePart_Minute:
-            stack.SetResult_I4( st.wMinute );
-            break;
+            case DateTimePart_Minute:
+                stack.SetResult_I4( st.wMinute );
+                break;
 
-        case DateTimePart_Second:
-            stack.SetResult_I4( st.wSecond );
-            break;
+            case DateTimePart_Second:
+                stack.SetResult_I4( st.wSecond );
+                break;
 
-        case DateTimePart_Millisecond:
-            stack.SetResult_I4( st.wMilliseconds );
-            break;
+            case DateTimePart_Millisecond:
+                stack.SetResult_I4( st.wMilliseconds );
+                break;
 
-        default:
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-            break;
+            default:
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+        }
+    }
+    else
+    {
+        // expand call failed for whatever reason
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
     NANOCLR_NOCLEANUP();
@@ -221,6 +227,14 @@ CLR_INT64* Library_corlib_native_System_DateTime::GetValuePtr( CLR_RT_HeapBlock&
         dt = obj->DataType();
     }
 
+    // after dereferencing the object if it's pointing to another Object 
+    // need to do it again because this DateTime instance is most likely boxed
+    if(dt == DATATYPE_OBJECT)
+    {
+        obj = obj->Dereference(); if(!obj) return NULL;
+        dt = obj->DataType();
+    }
+
     if(dt == DATATYPE_DATETIME)
     {
         return (CLR_INT64*)&obj->NumericByRef().s8;
@@ -239,7 +253,7 @@ CLR_INT64* Library_corlib_native_System_DateTime::GetValuePtr( CLR_RT_HeapBlock&
     return NULL;
 }
 
-void Library_corlib_native_System_DateTime::Expand( CLR_RT_StackFrame& stack, SYSTEMTIME& st  )
+bool Library_corlib_native_System_DateTime::Expand( CLR_RT_StackFrame& stack, SYSTEMTIME& st  )
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_INT64* val = GetValuePtr( stack );
@@ -248,7 +262,11 @@ void Library_corlib_native_System_DateTime::Expand( CLR_RT_StackFrame& stack, SY
     {
         CLR_INT64 ticks = *val & s_TickMask;
         HAL_Time_ToSystemTime( ticks, &st );
+
+        return true;
     }
+
+    return false;
 }
 
 // Compress function always creates UTC time.
