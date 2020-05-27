@@ -246,8 +246,6 @@ HRESULT Library_corlib_native_System_AppDomain::GetAssemblies___SZARRAY_SystemRe
     {
         NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
         {
-            if(pASSM->m_header->flags & CLR_RECORD_ASSEMBLY::c_Flags_Patch) continue;
-
             if(pass == 0)
             {
                 count++;

@@ -564,7 +564,7 @@ struct Library_corlib_native_System_DateTime
     static CLR_INT64* GetValuePtr( CLR_RT_StackFrame& stack );
     static CLR_INT64* GetValuePtr( CLR_RT_HeapBlock&  ref   );
 
-    static void Expand  ( CLR_RT_StackFrame& stack,       SYSTEMTIME& st );
+    static bool Expand  ( CLR_RT_StackFrame& stack,       SYSTEMTIME& st );
     static void Compress( CLR_RT_StackFrame& stack, const SYSTEMTIME& st );
 };
 
