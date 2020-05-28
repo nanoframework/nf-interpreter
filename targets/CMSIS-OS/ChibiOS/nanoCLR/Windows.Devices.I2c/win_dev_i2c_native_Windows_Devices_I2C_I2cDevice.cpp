@@ -78,9 +78,7 @@ void GetI2cConfig(CLR_RT_HeapBlock* managedConfig, I2CConfig* llConfig)
     llConfig->clock_speed = busSpeed == I2cBusSpeed_StandardMode ? 100000U : 400000U;
     llConfig->duty_cycle = busSpeed == I2cBusSpeed_StandardMode ? STD_DUTY_CYCLE : FAST_DUTY_CYCLE_2;
 
-    #endif
-
-    #if defined(STM32F7XX) || defined(STM32F3XX) || defined(STM32F0XX) || \
+    #elif defined(STM32F7XX) || defined(STM32F3XX) || defined(STM32F0XX) || \
             defined(STM32L0XX) ||  defined(STM32L4XX) || \
             defined(STM32H7XX) 
 
@@ -91,6 +89,8 @@ void GetI2cConfig(CLR_RT_HeapBlock* managedConfig, I2CConfig* llConfig)
     llConfig->cr1 = 0;
     llConfig->cr2 = 0;
 
+    #else
+        #error Your board is unimplemented. Please provide the needed information for the realtime OS as done above!
     #endif
 
 }
