@@ -442,6 +442,120 @@ endif()
 #################################################################
 
 #############################################
+# handles inclusion of System.Data.Sqlite API
+#############################################
+#TODO: SQLite is not dependent on the target, but this pollutes the file... perhaps it should be a module?
+if(API_System.Data.Sqlite)
+    set(TARGET_SYSTEM_DATA_SQLITE TRUE CACHE INTERNAL "enable support for System.Data.Sqlite API")
+    message(STATUS "Support for System.Data.Sqlite API enabled")
+
+    
+    # check if SQLITE_SOURCE was specified or if it's empty (default is empty)
+    set(NO_SQLITE_SOURCE TRUE)
+
+    if(SQLITE_SOURCE)
+        if(NOT "${SQLITE_SOURCE}" STREQUAL "")
+            set(NO_SQLITE_SOURCE FALSE)
+        endif()
+    endif()
+
+    # set options for SQLite
+    option(ENABLE_TESTING "no testing when building SQLite." OFF)
+
+    if(NO_SQLITE_SOURCE)
+        # no SQLite source specified, download it from it's repo
+
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        # set tag for currently supported version
+        set(SQLITE_GIT_TAG "version-3.32.1")
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("${PROJECT_SOURCE_DIR}/CMake/SQLite.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/SQLite_Download/CMakeLists.txt")
+
+        # setup CMake project for SQLite download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/SQLite_Download")
+
+        # run build on SQLite download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/SQLite_Download")
+
+        # add SQLite as external project
+        ExternalProject_Add(
+            sqlite
+            PREFIX sqlite
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/SQLite_Source
+            GIT_REPOSITORY  https://github.com/sqlite/sqlite
+            GIT_TAG ${SQLITE_GIT_TAG}  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND ""
+        )
+
+    else()
+        # SQLite source was specified
+        # message(FATAL_ERROR "${CMAKE_BINARY_DIR}/SQLite_Source") 
+
+        # sanity check is source path exists
+        if(EXISTS "${SQLITE_SOURCE}/")
+
+            # check if we already have the sources, no need to copy again
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/SQLite_Source/ SOURCE_EXISTS)
+
+            if(NOT ${SOURCE_EXISTS})
+                message(STATUS "SQLite source from: ${SQLITE_SOURCE}")
+                file(COPY "${SQLITE_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SQLITE_Source")
+            else()
+                message(STATUS "Using local cache of SQLite source from ${SQLITE_SOURCE}")
+            endif()
+
+            set(SQLITE_INCLUDE_DIR ${CMAKE_BINARY_DIR}/SQLite_Source/src)
+        else()
+            message(FATAL_ERROR "Couldn't find SQLite source at ${SQLITE_SOURCE}/")
+        endif()
+
+        # add SQLite as external project
+        ExternalProject_Add(
+            SQLite
+            PREFIX SQLite
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/SQLite_Source
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND ""
+        )
+
+            # get source dir for SQLite CMake project
+            ExternalProject_Get_Property(SQLite SOURCE_DIR)
+
+    endif()
+
+
+else()
+    set(TARGET_SYSTEM_DATA_SQLITE FALSE CACHE INTERNAL "DISABLE support for System.Data.Sqlite API")
+    message(STATUS "Support for System.Data.Sqlite API **IS NOT** enabled")
+endif()
+
+#################################################################
+
+#############################################
 # handles inclusion of System.Text API
 #############################################
 
