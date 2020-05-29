@@ -81,6 +81,7 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Convert.cpp
     corlib_native_System_DateTime.cpp
     corlib_native_System_Delegate.cpp
+    corlib_native_System_Diagnostics_Debug.cpp
     corlib_native_System_Diagnostics_Debugger.cpp
     corlib_native_System_Double.cpp
     corlib_native_System_Enum.cpp
