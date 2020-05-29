@@ -28,7 +28,6 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_Debug
 {
     NANOCLR_NATIVE_DECLARE(GC___STATIC__U4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(EnableGCMessages___STATIC__VOID__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(WriteLineNative___STATIC__VOID__STRING__BOOLEAN);
 
     //--//
 

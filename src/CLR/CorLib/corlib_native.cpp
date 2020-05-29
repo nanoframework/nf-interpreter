@@ -454,6 +454,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Delegate::Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate,
     Library_corlib_native_System_Delegate::op_Equality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate,
     Library_corlib_native_System_Delegate::op_Inequality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    Library_corlib_native_System_Diagnostics_Debug::WriteLineNative___STATIC__VOID__STRING__BOOLEAN,
     Library_corlib_native_System_Diagnostics_Debugger::get_IsAttached___STATIC__BOOLEAN,
     Library_corlib_native_System_Diagnostics_Debugger::Break___STATIC__VOID,
     NULL,
@@ -1098,22 +1104,24 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_corlib_native_System_DateTime::get_Day___I4,
-    Library_corlib_native_System_DateTime::get_DayOfWeek___SystemDayOfWeek,
-    Library_corlib_native_System_DateTime::get_DayOfYear___I4,
-    Library_corlib_native_System_DateTime::get_Hour___I4,
-    NULL,
-    Library_corlib_native_System_DateTime::get_Millisecond___I4,
-    Library_corlib_native_System_DateTime::get_Minute___I4,
-    Library_corlib_native_System_DateTime::get_Month___I4,
-    Library_corlib_native_System_DateTime::get_Second___I4,
-    NULL,
-    NULL,
-    Library_corlib_native_System_DateTime::get_Year___I4,
     NULL,
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    Library_corlib_native_System_DateTime::GetDateTimePart___I4__SystemDateTimeDateTimePart,
     NULL,
     Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4,
     NULL,
@@ -1136,6 +1144,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Delegate::Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate,
     Library_corlib_native_System_Delegate::op_Equality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate,
     Library_corlib_native_System_Delegate::op_Inequality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    Library_corlib_native_System_Diagnostics_Debug::WriteLineNative___STATIC__VOID__STRING__BOOLEAN,
     Library_corlib_native_System_Diagnostics_Debugger::get_IsAttached___STATIC__BOOLEAN,
     Library_corlib_native_System_Diagnostics_Debugger::Break___STATIC__VOID,
     NULL,
@@ -1363,16 +1377,16 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x65E9CC45,
+    0x9D93AC29,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0xF3FB563C,
+    0x1F09272F,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 4, 9, 0 }
+    { 100, 4, 10, 0 }
 };

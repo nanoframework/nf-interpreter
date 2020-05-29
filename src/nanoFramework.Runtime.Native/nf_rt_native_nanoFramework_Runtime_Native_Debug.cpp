@@ -51,22 +51,3 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::EnableGCMessage
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
-
-HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::WriteLineNative___STATIC__VOID__STRING__BOOLEAN( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-
-    const char * szText0 = stack.Arg0().RecoverString();
-    bool addLineFeed = (bool)stack.Arg1().NumericByRef().u1;
-
-    if(!szText0) szText0 = "<null>";
-
-    CLR_Debug::Emit( szText0, -1 );
-
-    if(addLineFeed)
-    {
-        CLR_Debug::Emit( "\r\n" , -1 );
-    }
-    
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
