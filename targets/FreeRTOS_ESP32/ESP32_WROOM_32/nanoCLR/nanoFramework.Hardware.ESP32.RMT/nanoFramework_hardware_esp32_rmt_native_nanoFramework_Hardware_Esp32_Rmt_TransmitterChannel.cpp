@@ -30,11 +30,13 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         uint8_t gpio_number = (uint8_t)stack.Arg0().NumericByRef().s1;
         
         auto ch = find_next_channel();
-        if (ch < 0) {
+        if (ch < 0) 
+        {
             hr = CLR_E_DRIVER_NOT_REGISTERED;
             NANOCLR_LEAVE();
         }
-        if (init_channel((rmt_channel_t)ch, (gpio_num_t)gpio_number) != ESP_OK) {
+        if (init_channel((rmt_channel_t)ch, (gpio_num_t)gpio_number) != ESP_OK) 
+        {
             hr = CLR_E_DRIVER_NOT_REGISTERED;
             NANOCLR_LEAVE();
         }
@@ -52,12 +54,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         int32_t channel = (int32_t)stack.Arg0().NumericByRef().s4;
 
         bool retVal = 0; 
-        if (channel < 0) {
+        if (channel < 0) 
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
         {
-            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
@@ -79,12 +83,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         int32_t channel = (int32_t)stack.Arg0().NumericByRef().s4;
 
         bool retVal = 0; 
-        if (channel < 0) {
+        if (channel < 0) 
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
         {
-            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
@@ -106,12 +112,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         int32_t channel = (int32_t)stack.Arg0().NumericByRef().s4;
         bool enabled = (bool)stack.Arg1().NumericByRef().u1;
 
-        if (channel < 0) {
+        if (channel < 0) 
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
         {
-            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
@@ -130,12 +138,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         int32_t channel = (int32_t)stack.Arg0().NumericByRef().s4;
         bool idle_lvl = (bool)stack.Arg1().NumericByRef().u1;
 
-        if(channel < 0) {
+        if(channel < 0) 
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
         {
-            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
@@ -157,12 +167,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         uint16_t low_level = (uint16_t)stack.Arg3().NumericByRef().u2;
         bool carier_lvl = (bool)stack.Arg4().NumericByRef().u1;
 
-        if (channel < 0) {
+        if (channel < 0) 
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
         {
-            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
@@ -190,19 +202,22 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         char* buffer = (char*)data->GetFirstElement();
         uint32_t bufferLength = data->m_numOfElements;
 
-        if (channel < 0) {
+        if (channel < 0)
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
         {
             auto it = registredChannels.find(CHANNEL(channel));
-            if (it == registredChannels.end()) {
+            if (it == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
             
             const auto element_size = sizeof(rmt_item32_t);
-            if (bufferLength % element_size != 0) {
+            if (bufferLength % element_size != 0) 
+            {
                 hr = CLR_E_SERIALIZATION_VIOLATION;
                 NANOCLR_LEAVE();
             }
@@ -227,12 +242,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         int32_t wait_time = (int32_t)stack.Arg1().NumericByRef().s4;
 
         int result = ESP_ERR_TIMEOUT;
-        if (channel < 0) {
+        if (channel < 0) 
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
         {
-            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
@@ -252,16 +269,19 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         FAULT_ON_NULL(pThis);
         int32_t channel = (int32_t)stack.Arg0().NumericByRef().s4;
 
-        if (channel < 0) {
+        if (channel < 0) 
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
-        if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+        if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+        {
             hr = CLR_E_OBJECT_DISPOSED;
             NANOCLR_LEAVE();
         }
 
-        if (rmt_driver_uninstall(CHANNEL(channel)) != ESP_OK) {
+        if (rmt_driver_uninstall(CHANNEL(channel)) != ESP_OK) 
+        {
             hr = CLR_E_PROCESS_EXCEPTION;
         }
         
@@ -279,12 +299,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         int32_t channel = (int32_t)stack.Arg0().NumericByRef().s4;
 
         unsigned char retVal = 0; 
-        if (channel < 0) {
+        if (channel < 0) 
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
         {
-            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
@@ -310,7 +332,8 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
             NANOCLR_LEAVE();
         }
         {
-            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
@@ -331,12 +354,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         int32_t channel = (int32_t)stack.Arg0().NumericByRef().s4;
         u_int8_t clockdiv = (u_int8_t)stack.Arg1().NumericByRef().u1;
 
-        if (channel < 0) {
+        if (channel < 0) 
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
         {
-            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
@@ -355,12 +380,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         int32_t channel = (int32_t)stack.Arg0().NumericByRef().s4;
         bool is80MhzMode (bool)stack.Arg1().NumericByRef().u1;
 
-        if (channel < 0) {
+        if (channel < 0) 
+        {
             hr = CLR_E_INDEX_OUT_OF_RANGE;
             NANOCLR_LEAVE();
         }
         {
-            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) {
+            if (registredChannels.find(CHANNEL(channel)) == registredChannels.end()) 
+            {
                 hr = CLR_E_OBJECT_DISPOSED;
                 NANOCLR_LEAVE();
             }
@@ -370,8 +397,10 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NANOCLR_NOCLEANUP();
 }
 
-esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::init_channel(rmt_channel_t channel, gpio_num_t gpio) {
-    rmt_config_t rmt_tx{
+esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::init_channel(rmt_channel_t channel, gpio_num_t gpio) 
+{
+    rmt_config_t rmt_tx
+    {
         RMT_MODE_TX,
         channel,
         DEFAULT_DEVIDER,
@@ -397,12 +426,14 @@ esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware
     return ESP_OK;
 }
 
-signed int Transmitter::find_next_channel() {
-    for (signed int ch = RMT_CHANNEL_0; ch < RMT_CHANNEL_MAX ; ++ch) {
-        if (registredChannels.find(CHANNEL(ch)) == registredChannels.end()) {
+signed int Transmitter::find_next_channel() 
+{
+    for (signed int ch = RMT_CHANNEL_0; ch < RMT_CHANNEL_MAX ; ++ch) 
+    {
+        if (registredChannels.find(CHANNEL(ch)) == registredChannels.end()) 
+        {
             return ch;
         }
     }
     return -1;
-
 }
