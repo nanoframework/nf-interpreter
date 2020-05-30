@@ -1718,20 +1718,7 @@ bool CLR_RT_Assembly::Resolve_AssemblyRef( bool fOutput )
 
         if(dst->m_target == NULL)
         {
-            bool fExact = true;
-
-            //
-            // Exact matching if this is a patch and the reference is toward the patched assembly.
-            //
-            if(m_header->flags & CLR_RECORD_ASSEMBLY::c_Flags_Patch)
-            {
-                if(!strcmp( szName, m_szName ))
-                {
-                    fExact = true;
-                }
-            }
-
-            CLR_RT_Assembly* target = g_CLR_RT_TypeSystem.FindAssembly( szName, &src->version, fExact );
+            CLR_RT_Assembly* target = g_CLR_RT_TypeSystem.FindAssembly( szName, &src->version, false );
 
             if(target == NULL || (target->m_flags & CLR_RT_Assembly::Resolved) == 0)
             {
@@ -2496,8 +2483,6 @@ HRESULT CLR_RT_AppDomain::GetAssemblies( CLR_RT_HeapBlock& ref )
     {
         NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN( this )
         {
-            if(pASSM->m_header->flags & CLR_RECORD_ASSEMBLY::c_Flags_Patch) continue;
-
             if(pass == 0)
             {
                 count++;
@@ -3296,7 +3281,7 @@ CLR_RT_Assembly* CLR_RT_TypeSystem::FindAssembly( const char* szName, const CLR_
             {
                 return pASSM;
             }
-            // exact match must take into accoutn all numbers
+            // exact match requested: must take into accoutn all numbers in the version
             else if(fExact)
             {
                 if(0 == memcmp( &pASSM->m_header->version, ver, sizeof(*ver) ))
@@ -3304,8 +3289,9 @@ CLR_RT_Assembly* CLR_RT_TypeSystem::FindAssembly( const char* szName, const CLR_
                     return pASSM;
                 }
             }
-            // if excet match is not required but still we have version we will enforce only the first two number because by convention
-            // we increse the minor numbers when native assemblies change CRC
+            // exact match was NOT required but still there version information, 
+            // we will enforce only the first two number because (by convention) 
+            // only the minor field is required to be bumped when native assemblies change CRC
             else if(
                      ver->iMajorVersion == pASSM->m_header->version.iMajorVersion &&
                      ver->iMinorVersion == pASSM->m_header->version.iMinorVersion

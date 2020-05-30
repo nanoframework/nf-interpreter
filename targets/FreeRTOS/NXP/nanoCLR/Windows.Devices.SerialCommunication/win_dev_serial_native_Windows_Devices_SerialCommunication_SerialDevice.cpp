@@ -397,7 +397,6 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
     size_t length = 0;
 
-    CLR_RT_HeapBlock *writeTimeout;
     int64_t *timeoutTicks;
     bool eventResult = true;
     bool txOk = false;
@@ -428,11 +427,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     rx_size = palUart->RxRingBuffer.Length();
     palUart->RxRingBuffer.Pop(rx_size);
 
-    // get value for _readtimeout field (pointer!) 
-    writeTimeout = &pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___writeTimeout];
-
-    // setup timeout 
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(*writeTimeout, timeoutTicks));
+    // setup timeout from _writeTimeout field
+    NANOCLR_CHECK_HRESULT( stack.SetupTimeoutFromTimeSpan(pThis[ FIELD___writeTimeout ], timeoutTicks) );
 
     // push dummy length value onto the eval stack
     // this is going to be used to store how many bytes where buffered to Tx 
@@ -517,7 +513,6 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     FAULT_ON_NULL(pThis);
     int64_t *timeoutTicks;
     InputStreamOptions options = InputStreamOptions_None;
-    CLR_RT_HeapBlock *readTimeout;
 
     bool eventResult = true;
 
@@ -561,9 +556,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     // TODO: Implement transfer options. 
     options = (InputStreamOptions)stack.Arg3().NumericByRef().s4;
 
-    // Set up timeout. 
-    readTimeout = &pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___readTimeout];
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(*readTimeout, timeoutTicks));
+    // setup timeout from _readTimeout field
+    NANOCLR_CHECK_HRESULT( stack.SetupTimeoutFromTimeSpan(pThis[ FIELD___readTimeout ], timeoutTicks));
 
     // Check what's avaliable in Rx ring buffer 
     if (palUart->RxRingBuffer.Length() >= count) 
