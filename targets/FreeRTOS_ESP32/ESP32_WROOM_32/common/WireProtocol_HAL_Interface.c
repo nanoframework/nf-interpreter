@@ -45,7 +45,7 @@ bool WP_Initialise(COM_HANDLE port)
     if ( WP_Port > UART_NUM_2 ) return false;
  
     uart_config_t uart_config = {
-        .baud_rate = 115200,                                 //baudrate
+        .baud_rate = 921600,                                 //baudrate
         .data_bits = UART_DATA_8_BITS,                       //data bit mode
         .parity    = UART_PARITY_DISABLE,                    //parity mode
         .stop_bits = UART_STOP_BITS_1,                       //stop bit mode
