@@ -57,6 +57,10 @@ void nanoHAL_Initialize()
 
     CPU_GPIO_Initialize();
 
+#if (HAL_USE_SPI == TRUE)
+    nanoSPI_Initialize();
+#endif
+
     // no PAL events required until now
     //PalEvent_Initialize();
 	
@@ -91,28 +95,8 @@ void nanoHAL_Uninitialize()
 
     BlockStorageList_UnInitializeDevices();
 
-    // need to be sure that all mutexes for drivers that use them are released
 #if (HAL_USE_SPI == TRUE)
-
-    #if STM32_SPI_USE_SPI1
-    spiReleaseBus(&SPID1);
-    #endif
-    #if STM32_SPI_USE_SPI2
-    spiReleaseBus(&SPID2);
-    #endif
-    #if STM32_SPI_USE_SPI3
-    spiReleaseBus(&SPID3);
-    #endif
-    #if STM32_SPI_USE_SPI4
-    spiReleaseBus(&SPID4);
-    #endif
-    #if STM32_SPI_USE_SPI5
-    spiReleaseBus(&SPID5);
-    #endif
-    #if STM32_SPI_USE_SPI6
-    spiReleaseBus(&SPID6);
-    #endif
-
+    nanoSPI_Uninitialize();
 #endif
 
 #if (HAL_USE_I2C == TRUE)

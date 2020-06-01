@@ -95,12 +95,18 @@ bool   CPU_SPI_Initialize(uint8_t spiBus)
         intr_flags : 0				// Interrupt flags
     };
 
-    // Frist available bus on ESP32 is HSPI_HOST(1)
-    esp_err_t ret = spi_bus_initialize((spi_host_device_t)(spiBus + HSPI_HOST), &bus_config, 1);
+    // First available bus on ESP32 is HSPI_HOST(1)
+    // Try with DMA first
+    esp_err_t ret = spi_bus_initialize((spi_host_device_t)(spiBus + HSPI_HOST), &bus_config, spiBus + HSPI_HOST);
     if (ret != ESP_OK)
     {
-        ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", spiBus, ret);
-        return false;
+        // Try again without DMA
+        esp_err_t ret = spi_bus_initialize((spi_host_device_t)(spiBus + HSPI_HOST), &bus_config, 0);
+        if (ret != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", spiBus, ret);
+            return false;
+        }
     }
 
     return true;

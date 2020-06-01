@@ -658,6 +658,7 @@ bool   CPU_SPI_Uninitialize(uint8_t busIndex)
         case 1:
             spiStop(&SPID1);
             SPI1_PAL.Driver = NULL;
+            spiReleaseBus(&SPID1);
             break;
       #endif
 
@@ -665,6 +666,7 @@ bool   CPU_SPI_Uninitialize(uint8_t busIndex)
         case 2:
             spiStop(&SPID2);
             SPI2_PAL.Driver = NULL;
+            spiReleaseBus(&SPID2);
             break;
       #endif
 
@@ -672,6 +674,7 @@ bool   CPU_SPI_Uninitialize(uint8_t busIndex)
         case 3:
             spiStop(&SPID3);
             SPI3_PAL.Driver = NULL;
+            spiReleaseBus(&SPID3);
             break;
       #endif
 
@@ -679,6 +682,7 @@ bool   CPU_SPI_Uninitialize(uint8_t busIndex)
         case 4:
             spiStop(&SPID4);
             SPI4_PAL.Driver = NULL;
+            spiReleaseBus(&SPID4);
             break;
       #endif
 
@@ -686,6 +690,7 @@ bool   CPU_SPI_Uninitialize(uint8_t busIndex)
         case 5:
             spiStop(&SPID5);
             SPI5_PAL.Driver = NULL;
+            spiReleaseBus(&SPID5);
             break;
       #endif
 
@@ -693,6 +698,7 @@ bool   CPU_SPI_Uninitialize(uint8_t busIndex)
         case 6:
             spiStop(&SPID6);
             SPI6_PAL.Driver = NULL;
+            spiReleaseBus(&SPID6);
             break;
       #endif
 

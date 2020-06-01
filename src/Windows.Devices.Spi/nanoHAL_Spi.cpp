@@ -83,11 +83,13 @@ static bool getDevice(uint32_t handle, uint8_t& spiBus, int& deviceIndex)
 
 // Find a free slot in the device table
 // Return index or -1 if no free slots 
-static int FindFreeDeviceSlotSpi(int spiBus)
+static int FindFreeDeviceSlotSpi(int spiBus, GPIO_PIN cs)
 {
 	for (int deviceIndex = 0; deviceIndex < MAX_SPI_DEVICES; deviceIndex++)
 	{
 		if (spiconfig[spiBus].deviceHandles[deviceIndex] == 0) return deviceIndex;
+		// Check device chip select not already in use
+		if (spiconfig[spiBus].deviceCongfig[deviceIndex].DeviceChipSelect == cs) return -2;
 	}
 	return -1;
 }
@@ -180,7 +182,7 @@ HRESULT nanoSPI_OpenDeviceEx(SPI_DEVICE_CONFIGURATION& spiDeviceConfig, GPIO_PIN
 	if ( !(CPU_SPI_PortsMap() & ( 1 << spiBus)) ) return CLR_E_INVALID_PARAMETER;
 
 	// Check not maximum devices per SPI bus reached
-	if (spiconfig[spiBus].devicesInUse >= MAX_SPI_DEVICES) return CLR_E_TOO_MANY_OPEN_HANDLES;
+	if (spiconfig[spiBus].devicesInUse >= MAX_SPI_DEVICES) return CLR_E_INDEX_OUT_OF_RANGE;
 
 	// Initialise Bus if not already initialised
 	if (!spiconfig[spiBus].spiBusInited)
@@ -195,10 +197,18 @@ HRESULT nanoSPI_OpenDeviceEx(SPI_DEVICE_CONFIGURATION& spiDeviceConfig, GPIO_PIN
 		spiconfig[spiBus].spiBusInited = true;
 	}
 
-	deviceIndex = FindFreeDeviceSlotSpi(spiBus);
-	// Check if device slot available
+	// Find if device slot is available and check 
+	deviceIndex = FindFreeDeviceSlotSpi(spiBus, spiDeviceConfig.DeviceChipSelect);
 	if (deviceIndex < 0)
-			return CLR_E_FAIL;
+	{
+		if (deviceIndex == -1)
+			// No device slots left
+			return CLR_E_INDEX_OUT_OF_RANGE;
+		else
+			// Return NOT_SUPPORTED when Device already in use. Not really any other relevant exception that's
+			// currently raised in managed code
+			return CLR_E_NOT_SUPPORTED;
+	}
 
 	// Add device and get handle
 	deviceHandle = CPU_SPI_Add_Device(spiDeviceConfig);

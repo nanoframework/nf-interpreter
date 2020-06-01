@@ -85,6 +85,9 @@ void nanoHAL_Initialize()
 
 	CPU_GPIO_Initialize();
 
+#if (HAL_USE_SPI == TRUE)
+    nanoSPI_Initialize();
+#endif
     // no PAL events required until now
     //PalEvent_Initialize();
 	
@@ -121,7 +124,11 @@ void nanoHAL_Uninitialize()
  
     BlockStorageList_UnInitializeDevices();
 
-	CPU_GPIO_Uninitialize();
+#if (HAL_USE_SPI == TRUE)
+    nanoSPI_Uninitialize();
+#endif
+
+    CPU_GPIO_Uninitialize();
 
     //PalEvent_Uninitialize();
 

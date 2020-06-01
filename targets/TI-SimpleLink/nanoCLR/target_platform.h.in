@@ -11,6 +11,9 @@
 #ifndef _TARGET_TI_SIMPLELINK_NANOCLR_H_
 #define _TARGET_TI_SIMPLELINK_NANOCLR_H_
 
+// enable SPI
+#define HAL_USE_SPI @HAL_USE_SPI_OPTION@
+
 // enable SNTP app
 #define SL_APP_SNTP         @NF_NETWORKING_SNTP@
 

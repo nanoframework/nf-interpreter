@@ -66,7 +66,6 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiController
 {
     static const int FIELD___syncLock = 1;
     static const int FIELD___controllerId = 2;
-    static const int FIELD__s_deviceCollection = 3;
 
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
@@ -86,10 +85,9 @@ struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiControllerManager
 struct Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice
 {
     static const int FIELD___syncLock = 1;
-    static const int FIELD___spiBus = 2;
-    static const int FIELD___deviceId = 3;
-    static const int FIELD___connectionSettings = 4;
-    static const int FIELD___disposedValue = 5;
+    static const int FIELD___deviceId = 2;
+    static const int FIELD___connectionSettings = 3;
+    static const int FIELD___disposedValue = 4;
 
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN);

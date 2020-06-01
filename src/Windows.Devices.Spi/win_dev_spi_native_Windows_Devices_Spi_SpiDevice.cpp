@@ -83,7 +83,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
         
-        // get bus index and Device index
+        // get device handle saved on open
         uint32_t deviceId = pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::FIELD___deviceId].NumericByRef().u4;
 
         if (stack.m_customState == 0)
@@ -131,10 +131,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 
             // Set up read/write settings for SPI_Write_Read call
             rws = { fullDuplex, 0, dataTransfer16, 0 };
-
-            // protect the buffers from GC so DMA can find them where they are supposed to be
-            CLR_RT_ProtectFromGC gcWriteBuffer( *writeBuffer );
-            CLR_RT_ProtectFromGC gcReadBuffer( *readBuffer );
 
 #if SPI_ASYNC 
             // Check to see if we should run async so as not to hold up other tasks
@@ -225,8 +221,10 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevi
             spiConfig.DataOrder16 = (DataBitOrder)config[SpiConnectionSettings::FIELD___bitOrder].NumericByRef().s4;
             spiConfig.Clock_RateHz = config[SpiConnectionSettings::FIELD___clockFrequency].NumericByRef().s4;
 
+            // Returns deviceID or error if negative 
             NANOCLR_CHECK_HRESULT(nanoSPI_OpenDevice(spiConfig));
 
+            // Return device handle
             stack.SetResult_I4(hr);
         }
         NANOCLR_NOCLEANUP();
