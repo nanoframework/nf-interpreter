@@ -9,7 +9,7 @@
 
 
 
-HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::GC___STATIC__U4__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_GC::Run___STATIC__U4__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -37,7 +37,7 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::GC___STATIC__U4
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::EnableGCMessages___STATIC__VOID__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_GC::EnableGCMessages___STATIC__VOID__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
 
