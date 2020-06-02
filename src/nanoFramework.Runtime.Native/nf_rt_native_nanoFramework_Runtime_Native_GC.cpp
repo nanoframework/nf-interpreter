@@ -9,7 +9,7 @@
 
 
 
-HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::GC___STATIC__U4__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_GC::Run___STATIC__U4__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -37,7 +37,7 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::GC___STATIC__U4
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::EnableGCMessages___STATIC__VOID__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_GC::EnableGCMessages___STATIC__VOID__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -49,24 +49,5 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::EnableGCMessage
     (void)stack;
   #endif
 
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
-
-HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::WriteLineNative___STATIC__VOID__STRING__BOOLEAN( CLR_RT_StackFrame& stack )
-{
-    NANOCLR_HEADER();
-
-    const char * szText0 = stack.Arg0().RecoverString();
-    bool addLineFeed = (bool)stack.Arg1().NumericByRef().u1;
-
-    if(!szText0) szText0 = "<null>";
-
-    CLR_Debug::Emit( szText0, -1 );
-
-    if(addLineFeed)
-    {
-        CLR_Debug::Emit( "\r\n" , -1 );
-    }
-    
     NANOCLR_NOCLEANUP_NOLABEL();
 }

@@ -81,6 +81,7 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Convert.cpp
     corlib_native_System_DateTime.cpp
     corlib_native_System_Delegate.cpp
+    corlib_native_System_Diagnostics_Debug.cpp
     corlib_native_System_Diagnostics_Debugger.cpp
     corlib_native_System_Double.cpp
     corlib_native_System_Enum.cpp
@@ -121,7 +122,7 @@ set(NF_CoreCLR_SRCS
     # Runtime.Native
     nf_rt_native.cpp
     nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp
-    nf_rt_native_nanoFramework_Runtime_Native_Debug.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_GC.cpp
     nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Power.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp

@@ -24,16 +24,6 @@ enum FloatingPoint
     FloatingPoint_DoublePrecisionHardware = 4,
 };
 
-struct Library_nf_rt_native_nanoFramework_Runtime_Native_Debug
-{
-    NANOCLR_NATIVE_DECLARE(GC___STATIC__U4__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(EnableGCMessages___STATIC__VOID__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(WriteLineNative___STATIC__VOID__STRING__BOOLEAN);
-
-    //--//
-
-};
-
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint
 {
     NANOCLR_NATIVE_DECLARE(Install___STATIC__VOID__I4__I4);
@@ -41,7 +31,16 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint
     //--//
 
 };
- 
+
+struct Library_nf_rt_native_nanoFramework_Runtime_Native_GC
+{
+    NANOCLR_NATIVE_DECLARE(Run___STATIC__U4__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(EnableGCMessages___STATIC__VOID__BOOLEAN);
+
+    //--//
+
+};
+
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_Power
 {
     static const int FIELD_STATIC__OnRebootEvent = 0;
