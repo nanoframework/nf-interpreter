@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2020 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
+
 #include "nanoFramework_hardware_esp32_rmt_native.h"
 
 static const CLR_RT_MethodHandler method_lookup[] =
