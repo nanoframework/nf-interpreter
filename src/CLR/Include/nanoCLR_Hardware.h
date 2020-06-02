@@ -8,7 +8,6 @@
 
 #include <nanoCLR_Types.h>
 #include <nanoCLR_Runtime.h>
-//#include <nanoCLR_Graphics.h>
 
 //--//
 

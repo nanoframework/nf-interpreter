@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+set(NANOCLR_PROJECT_NAME "nanoCLR")
+add_executable(${NANOCLR_PROJECT_NAME}.elf)	# This is the program we are building, ESP32 has its own pre-built bootloader.bin, so no nanoBooter
+
 ENABLE_LANGUAGE(ASM)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
@@ -56,6 +59,83 @@ add_subdirectory("IDF")
 add_subdirectory("Network")
 add_subdirectory("nanoCLR")
 
+
+if(NANOCLR_GRAPHICS)     # After include(NF_NativeAssemblies) --   add_subdirectory("nanoCLR")
+   # Add unrelated includes to the graphics library build to enable clean compilation
+   # due to hierachical inclusion of header files
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/HAL/Include")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/CLR/Include")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/CLR/Core")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/Include")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/Lwip")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/WROVER_KIT_V41")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/System.Net")
+   list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/CLR/CorLib")
+   list(APPEND Graphics_Includes "${CMAKE_BINARY_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32")
+   list(APPEND Graphics_Includes "${CMAKE_BINARY_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32")
+   list(APPEND Graphics_Includes "${CMAKE_BINARY_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/nanoCLR")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/app_trace/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/app_update/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/bt/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/driver/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/driver/include/driver")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/esp_event/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/esp_ringbuf/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/esp32/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/esp32/include/rom")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/Ethernet/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/fatfs/src")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/freertos/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/freertos/include/freertos")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/heap/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/Log/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/include/apps")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/include/lwip")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/include/lwip/lwip")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/include/lwip/port")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/lwip/src")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/lwip/src/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/lwip/src/include/lwip")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/lwip/src/include/posix")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/lwip/port/esp32/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/micro-ecc/micro-ecc")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/newlib/platform_include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/nghttp/nghttp2/lib/includes")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/nghttp/port/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/nvs_flash/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/soc/esp32/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/soc/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/spi_flash/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/spiffs/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/tcpip_adapter/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/tcpip_adapter/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/ulp/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/ulp/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/vfs/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/wear_levelling/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/wpa_supplicant/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/wpa_supplicant/port/include")
+   list(APPEND Graphics_Includes "${ESP32_IDF_PATH}/components/xtensa-debug-module/include")
+   set(Graphics_Includes ${Graphics_Includes} CACHE INTERNAL "make global")
+
+   # Build UI components as a separate library
+   # Keep getting "Createprocess: file not found" errors in linker.
+   # Appears to be related to the size of the @CMake/nanoclr.rsp file becoming greater than ~31-32K.
+   # This problem goes away for GCC 8.2
+   
+   add_library(GraphicsLib STATIC ${Graphics_Sources})
+   target_include_directories(GraphicsLib PUBLIC ${Graphics_Includes})
+   add_dependencies(${NANOCLR_PROJECT_NAME}.elf GraphicsLib)
+   set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf  APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lGraphicsLib " )
+   target_compile_definitions(GraphicsLib PUBLIC "-DPLATFORM_ESP32 -Werror=unused-parameter" )
+endif()
+
+
 # mbed TLS requires a config file
 if(USE_SECURITY_MBEDTLS_OPTION)
     # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
@@ -82,9 +162,10 @@ endif()
 #######################
 # nanoCLR executable
 
-add_executable(
+target_sources(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
+	PUBLIC
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c"
@@ -202,6 +283,7 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     ${NF_CoreCLR_INCLUDE_DIRS}
     ${NF_Debugger_INCLUDE_DIRS}
     ${NF_Networking_INCLUDE_DIRS}
+	${Graphics_Includes}
 
     # includes for nanoFramework APIs
     ${TARGET_NANO_APIS_INCLUDES}

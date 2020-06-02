@@ -547,6 +547,15 @@ else()
     set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
 endif()
 
+#################################################################################
+#  Option to include the graphics bitmap primitives
+#################################################################################
+if(API_nanoFramework.Graphics)
+    set(NANOCLR_GRAPHICS TRUE CACHE INTERNAL "Graphics Support")
+else()
+    set(NANOCLR_GRAPHICS FALSE CACHE INTERNAL "No Graphics Support")
+endif()
+
 if(NF_FEATURE_HAS_SDCARD)
     set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_HAS_SDCARD")
 else()

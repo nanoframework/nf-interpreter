@@ -70,7 +70,7 @@
 #define STM32_PLLSAIDIVR_VALUE              2 
 #define STM32_SAI1SEL                       STM32_SAI1SEL_SAIPLL
 #define STM32_SAI2SEL                       STM32_SAI2SEL_SAIPLL
-#define STM32_LCDTFT_REQUIRED               FALSE
+#define STM32_LCDTFT_REQUIRED               TRUE
 #define STM32_USART1SEL                     STM32_USART1SEL_PCLK2
 #define STM32_USART2SEL                     STM32_USART2SEL_PCLK1
 #define STM32_USART3SEL                     STM32_USART3SEL_PCLK1
