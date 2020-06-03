@@ -125,15 +125,21 @@ int  Network_Interface_Connect(int configIndex, const char * ssid, const char * 
 
     if ( GetWirelessConfig(configIndex,  & pWireless) == false )  return SOCK_SOCKET_ERROR;
     
-    pWireless->Flags = WirelessFlags_Enable;
+    pWireless->Options = Wireless80211Configuration_ConfigurationOptions_Enable;
 
     if ( options & NETWORK_CONNECT_RECONNECT)
     {
-        pWireless->Flags |= WirelessFlags_Auto;
+        // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple sintax '|='
+        pWireless->Options = 
+            (Wireless80211Configuration_ConfigurationOptions)
+            (pWireless->Options | Wireless80211Configuration_ConfigurationOptions_AutoConnect);
     }
     else
     {
-        pWireless->Flags ^= WirelessFlags_Auto;
+        // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple sintax '^='
+        pWireless->Options = 
+            (Wireless80211Configuration_ConfigurationOptions)
+            (pWireless->Options ^ Wireless80211Configuration_ConfigurationOptions_AutoConnect);
     }
 
     // Update Wireless structure with new SSID and passphase

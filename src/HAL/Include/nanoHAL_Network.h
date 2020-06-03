@@ -50,11 +50,37 @@ static const unsigned char c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1[] = "XB1";
 // Description: network interface type 
 typedef enum __nfpack NetworkInterfaceType
 {
-    NetworkInterfaceType_Unknown        = 1,
-    NetworkInterfaceType_Ethernet       = 6,
-    NetworkInterfaceType_Wireless80211  = 71,
-    NetworkInterfaceType_WirelessAP     = 72,
-}NetworkInterfaceType;
+    NetworkInterfaceType_Unknown = 1,
+    NetworkInterfaceType_Ethernet = 6,
+    NetworkInterfaceType_Wireless80211 = 71,
+    NetworkInterfaceType_WirelessAP = 72,
+} NetworkInterfaceType;
+
+typedef enum __nfpack Wireless80211Configuration_ConfigurationOptions
+{
+    Wireless80211Configuration_ConfigurationOptions_None = 0,
+    // DISABLE Station or AP
+    Wireless80211Configuration_ConfigurationOptions_Disable = 1,
+    // Enable Station or AP ( Wifi component started & memory allocated )
+    Wireless80211Configuration_ConfigurationOptions_Enable = 2,
+    // Wireless station automatically connects on CLR start
+    Wireless80211Configuration_ConfigurationOptions_AutoConnect = 4 | Wireless80211Configuration_ConfigurationOptions_Enable,
+    // Enable Smart config
+    Wireless80211Configuration_ConfigurationOptions_SmartConfig = 8 | Wireless80211Configuration_ConfigurationOptions_Enable,
+} Wireless80211Configuration_ConfigurationOptions;
+
+typedef enum __nfpack WirelessAPConfiguration_ConfigurationOptions
+{
+    WirelessAPConfiguration_ConfigurationOptions_None = 0,
+    // DISABLE Wireless AP
+    WirelessAPConfiguration_ConfigurationOptions_Disable = 1,
+    // Enable Wireless AP ( Wifi component started & memory allocated )
+    WirelessAPConfiguration_ConfigurationOptions_Enable = 2,
+    // Wireless AP automatically starts on CLR start
+    WirelessAPConfiguration_ConfigurationOptions_AutoStart = 4 | WirelessAPConfiguration_ConfigurationOptions_Enable,
+    // Wireless AP uses hidden SSID
+    WirelessAPConfiguration_ConfigurationOptions_HiddenSSID = 8,
+} WirelessAPConfiguration_ConfigurationOptions;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.AddressMode (in managed code) !!! //
@@ -64,15 +90,15 @@ typedef enum __nfpack NetworkInterfaceType
 // Description: Startup network IP assigning modes
 typedef enum __nfpack AddressMode
 {
-    AddressMode_DHCP       = 0x01,
-    AddressMode_Static     = 0x02,
+    AddressMode_Invalid = 0,
+    AddressMode_DHCP = 1,
+    AddressMode_Static = 2,
 
     ////////////////////////////////////////
     // for this option to be valid 
     // LWIP_AUTOIP (lwIP option) has to be defined
-    AddressMode_AutoIP     = 0x03
-    
-}AddressMode;
+    AddressMode_AutoIP = 3,
+} AddressMode;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.AuthenticationType (in managed code) !!! //
@@ -82,17 +108,16 @@ typedef enum __nfpack AddressMode
 // Description: authentication used in wireless network
 typedef enum __nfpack AuthenticationType
 {
-    AuthenticationType_None     = 0x00,
-    AuthenticationType_EAP      = 0x01,
-    AuthenticationType_PEAP     = 0x02,
-    AuthenticationType_WCN      = 0x03,
-    AuthenticationType_Open     = 0x04,
-    AuthenticationType_Shared   = 0x05,
-    AuthenticationType_WEP      = 0x06,
-    AuthenticationType_WPA      = 0x07,
-    AuthenticationType_WPA2     = 0x08,
-    
-}AuthenticationType;
+    AuthenticationType_None = 0,
+    AuthenticationType_EAP = 1,
+    AuthenticationType_PEAP = 2,
+    AuthenticationType_WCN = 3,
+    AuthenticationType_Open = 4,
+    AuthenticationType_Shared = 5,
+    AuthenticationType_WEP = 6,
+    AuthenticationType_WPA = 7,
+    AuthenticationType_WPA2 = 8,
+} AuthenticationType;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.EncryptionType (in managed code) !!! //
@@ -102,15 +127,14 @@ typedef enum __nfpack AuthenticationType
 // Description: encryption used in wireless network
 typedef enum __nfpack EncryptionType
 {
-    EncryptionType_None         = 0x00,
-    EncryptionType_WEP          = 0x01,
-    EncryptionType_WPA          = 0x02,
-    EncryptionType_WPA2         = 0x03,
-    EncryptionType_WPA_PSK      = 0x04,
-    EncryptionType_WPA2_PSK     = 0x05,
-    EncryptionType_Certificate  = 0x06,
-    
-}EncryptionType;
+    EncryptionType_None = 0,
+    EncryptionType_WEP = 1,
+    EncryptionType_WPA = 2,
+    EncryptionType_WPA2 = 3,
+    EncryptionType_WPA_PSK = 4,
+    EncryptionType_WPA2_PSK = 5,
+    EncryptionType_Certificate = 6,
+} EncryptionType;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.RadioType (in managed code) !!! //
@@ -120,12 +144,12 @@ typedef enum __nfpack EncryptionType
 // Description: type of radio that the wireless network uses
 typedef enum __nfpack RadioType
 {
-    RadioType_NotSpecified  = 0x00,
-    RadioType_802_11a       = 0x01,
-    RadioType_802_11b       = 0x02,
-    RadioType_802_11g       = 0x03,
-    RadioType_802_11n       = 0x04,
-}RadioType;
+    RadioType_NotSpecified = 0,
+    RadioType__802_11a = 1,
+    RadioType__802_11b = 2,
+    RadioType__802_11g = 4,
+    RadioType__802_11n = 8,
+} RadioType;
 
 typedef struct __nfpack HAL_Configuration_NetworkInterface {
 
@@ -183,22 +207,6 @@ typedef struct __nfpack HAL_Configuration_NetworkInterface {
 
 } HAL_Configuration_NetworkInterface;
 
-typedef enum __nfpack WirelessFlags
-{
-    WirelessFlags_None          = 0x00,
-    WirelessFlags_Enable        = 0x01,     // Enable Station or AP ( Wifi component started & memory allocated )
-    WirelessFlags_Auto          = 0x02,     // Wireless station automatically connects on CLR start
-    WirelessFlags_SmartConfig   = 0x04      // Enable Smart config
-} WirelessFlags;
-
-typedef enum __nfpack WirelessAPFlags
-{
-    WirelessAPFlags_None          = 0x00,
-    WirelessAPFlags_Enable        = 0x01,     // Enable Wireless AP ( Wifi component started & memory allocated )
-    WirelessAPFlags_Auto          = 0x02,     // Wireless AP automatically starts on CLR start
-    WirelessAPFlags_Hidden_SSID   = 0x04,     // Wireless AP uses hidden SSID
-} WirelessAPFlags;
-
 typedef struct __nfpack HAL_Configuration_Wireless80211 {
 
     // this is the marker placeholder for this configuration block
@@ -222,8 +230,8 @@ typedef struct __nfpack HAL_Configuration_Wireless80211 {
     // Network password
     uint8_t Password[64];
 
-    // Wireless Flags, depends if wireless Station
-    uint8_t Flags;
+    // Wireless options (flags), depends if wireless Station
+    Wireless80211Configuration_ConfigurationOptions Options;
 
      // Rssi, station only
 
@@ -252,8 +260,8 @@ typedef struct __nfpack HAL_Configuration_WirelessAP {
     // Network password
     uint8_t Password[64];
 
-    // Wireless Flags for AP
-    uint8_t Flags;
+    // Wireless options for AP (flags)
+    WirelessAPConfiguration_ConfigurationOptions Options;
 
     // channel used for AP
     uint8_t Channel; 

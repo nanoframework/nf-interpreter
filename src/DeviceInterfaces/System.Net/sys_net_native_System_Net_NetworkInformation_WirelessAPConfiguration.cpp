@@ -56,7 +56,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     pConfig[FIELD___apAuthentication].SetInteger((CLR_UINT32)config.Authentication);
     pConfig[FIELD___apEncryption].SetInteger((CLR_UINT32)config.Encryption);
     pConfig[FIELD___apRadio].SetInteger((CLR_UINT32)config.Radio);
-    pConfig[FIELD___options].SetInteger((CLR_UINT8)config.Flags);
+    pConfig[FIELD___options].SetInteger((CLR_UINT8)config.Options);
     pConfig[FIELD___apChannel].SetInteger((CLR_UINT8)config.Channel);
     pConfig[FIELD___apMaxConnections].SetInteger((CLR_UINT8)config.MaxConnections);
  
@@ -99,7 +99,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     config.Authentication = (AuthenticationType)pConfig[FIELD___apAuthentication].NumericByRef().u4;
     config.Encryption = (EncryptionType)pConfig[FIELD___apEncryption].NumericByRef().u4;
     config.Radio = (RadioType)pConfig[FIELD___apRadio].NumericByRef().u4;
-    config.Flags = (uint8_t)pConfig[FIELD___options].NumericByRef().u1;
+    config.Options = (WirelessAPConfiguration_ConfigurationOptions)pConfig[FIELD___options].NumericByRef().u1;
     config.Channel = (uint8_t)pConfig[FIELD___apChannel].NumericByRef().u1;
     config.MaxConnections = (uint8_t)pConfig[FIELD___apMaxConnections].NumericByRef().u1;
 
