@@ -45,7 +45,7 @@ wifi_mode_t Esp32_CheckWifiMode()
 			HAL_Configuration_Wireless80211 * pWirelessSta = ConfigurationManager_GetWirelessConfigurationFromId(pCfgSta->SpecificConfigId);
 			if (pWirelessSta != 0 ) 
 			{
-				if ( pWirelessSta->Flags & WirelessFlags_Enable )
+				if ( pWirelessSta->Options & Wireless80211Configuration_ConfigurationOptions_Enable )
 				{
 					mode = WIFI_MODE_STA;
 				}
@@ -64,7 +64,7 @@ wifi_mode_t Esp32_CheckWifiMode()
 			HAL_Configuration_WirelessAP * pWirelessAp = ConfigurationManager_GetWirelessAPConfigurationFromId(pCfgAP->SpecificConfigId);
 			if (pWirelessAp != 0 ) 
 			{
-				if ( pWirelessAp->Flags & WirelessAPFlags_Enable )
+				if ( pWirelessAp->Options & WirelessAPConfiguration_ConfigurationOptions_Enable )
 				{
 					// Use STATION + AP or just AP
 					mode = ( mode == WIFI_MODE_STA)? WIFI_MODE_APSTA : WIFI_MODE_AP;
@@ -181,17 +181,23 @@ int  Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface * pConfig
 	// Wireless station not enabled
 	if ( !(Esp32_GetWifiMode() & WIFI_MODE_STA) ) return SOCK_SOCKET_ERROR;
 
-	if ( !(pWireless->Flags & WirelessFlags_Enable))  return SOCK_SOCKET_ERROR;
+    // sanity check for Wireless station disabled
+	if ( pWireless->Options & Wireless80211Configuration_ConfigurationOptions_Disable )
+    {
+        return SOCK_SOCKET_ERROR;
+    }
 
 	// Connect if Auto connect and we have an ssid
-	if ( (pWireless->Flags & WirelessFlags_Auto) && (hal_strlen_s((const char *)pWireless->Ssid) > 0) )
+	if ( 
+		(pWireless->Options & Wireless80211Configuration_ConfigurationOptions_AutoConnect) &&
+		(hal_strlen_s((const char *)pWireless->Ssid) > 0) )
 	{
 	 	Esp32_Wireless_Connect(pWireless);
 
 		// Maybe remove SmartConfig flag if conected ok
 	}
 
-	if ( pWireless->Flags & WirelessFlags_SmartConfig)
+	if ( pWireless->Options & Wireless80211Configuration_ConfigurationOptions_SmartConfig)
 	{
 		// FIXME
 		// Disable for now, When the smart_config starts it scans for wireless AP
@@ -279,7 +285,7 @@ esp_err_t Esp32_WirelessAP_Configure(HAL_Configuration_NetworkInterface * pConfi
 
 	ap_config.ap.ssid_len = hal_strlen_s((char *)pWireless->Ssid);
     ap_config.ap.channel = pWireless->Channel;
-    ap_config.ap.ssid_hidden = (pWireless->Flags & WirelessAPFlags_Hidden_SSID)? 1 : 0;
+    ap_config.ap.ssid_hidden = (pWireless->Options & WirelessAPConfiguration_ConfigurationOptions_HiddenSSID)? 1 : 0;
 	ap_config.ap.authmode = MapAuthentication(pWireless->Authentication);
 
 	if (hal_strlen_s((char *)ap_config.ap.password) == 0)
