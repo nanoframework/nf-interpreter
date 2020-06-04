@@ -254,6 +254,11 @@
           "type": "BOOL"
         },
         {
+          "name": "NF_FEATURE_USE_LITTLEFS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
           "name": "NF_FEATURE_HAS_SDCARD",
           "value": "True",
           "type": "BOOL"

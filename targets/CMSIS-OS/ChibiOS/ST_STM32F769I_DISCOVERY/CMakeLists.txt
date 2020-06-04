@@ -62,6 +62,12 @@ if(NF_FEATURE_USE_SPIFFS)
     find_package(SPIFFS REQUIRED)
 endif()
 
+# littlefs
+if(NF_FEATURE_USE_LITTLEFS)
+    find_package(STM32F7_CubePackage REQUIRED)
+    find_package(LITTLEFS REQUIRED)
+endif()
+
 #######################################
 
 add_subdirectory("common")
@@ -138,6 +144,9 @@ add_executable(
 
     # sources for SPIFFS
     ${SPIFFS_SOURCES}
+
+    # sources for littlefs
+    ${LITTLEFS_SOURCES}
 
     # sources for nanoFramework APIs
     ${TARGET_NANO_APIS_SOURCES}
@@ -219,6 +228,9 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
 
     # includes for SPIFFS
     ${SPIFFS_INCLUDE_DIRS}
+
+    # includes for littlefs
+    ${LITTLEFS_INCLUDE_DIRS}
 )
 
 # set compiler options

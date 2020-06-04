@@ -18,6 +18,9 @@
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
 #include <hal_spiffs.h>
 #endif
+#if (USE_LITTLEFS_FOR_STORAGE == TRUE)
+#include <hal_littlefs.h>
+#endif
 
 // defining these types here to make it shorter and improve code readability
 typedef Library_win_storage_native_Windows_Storage_StorageFolder StorageFolder;

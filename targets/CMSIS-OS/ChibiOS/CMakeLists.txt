@@ -596,6 +596,106 @@ if(NF_FEATURE_USE_SPIFFS)
 
 endif()
 
+
+# if support for littlefs is enabled add it to the build
+if(NF_FEATURE_USE_LITTLEFS)
+
+    # check if LITTLEFS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_LITTLEFS_SOURCE TRUE)
+
+    if(LITTLEFS_SOURCE)
+        if(NOT "${LITTLEFS_SOURCE}" STREQUAL "")
+            set(NO_LITTLEFS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_LITTLEFS_SOURCE)
+        # no littlefs source specified, download it from it's repo
+
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("${PROJECT_SOURCE_DIR}/CMake/littlefs.CMakeLists.cmake.in"
+                    "${CMAKE_BINARY_DIR}/littlefs_Download/CMakeLists.txt")
+
+        # setup CMake project for littlefs download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/littlefs_Download")
+
+        # run build on littlefs download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/littlefs_Download")
+
+        # add littlefs as external project
+        ExternalProject_Add(
+            LITTLEFS
+            PREFIX LITTLEFS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/littlefs_Source
+            GIT_REPOSITORY  https://github.com/ARMmbed/littlefs
+            GIT_TAG "v2.2.1"  # target latest release
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND ""
+        )
+
+    else()
+        # littlefs source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${LITTLEFS_SOURCE}/")
+
+            # check if we already have the sources, no need to copy again
+            if(NOT EXISTS "${CMAKE_BINARY_DIR}/littlefs_Source")
+                message(STATUS "littlefs source from: ${LITTLEFS_SOURCE}")
+                file(COPY "${LITTLEFS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/littlefs_Source")
+            else()
+                message(STATUS "Using local cache of littlefs source from ${LITTLEFS_SOURCE}")
+            endif()
+
+            set(LITTLEFS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/littlefs_Source)
+            set(LITTLEFS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/littlefs_Source/bd)
+        else()
+            message(FATAL_ERROR "Couldn't find littlefs source at ${LITTLEFS_SOURCE}/")
+        endif()
+
+        # add littlefs as external project
+        ExternalProject_Add(
+            LITTLEFS
+            PREFIX LITTLEFS
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/littlefs_Source
+
+            # Disable all other steps
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND ""
+        )
+
+    endif()
+
+    # get source dir for littlefs CMake project
+    ExternalProject_Get_Property(LITTLEFS SOURCE_DIR)
+
+    set(LITTLEFS_LIBRARIES "${CMAKE_SHARED_LIBRARY_PREFIX}LITTLEFS${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    include_directories(${LITTLEFS_INCLUDE_DIRS})
+
+    add_subdirectory(littlefs)
+
+endif()
+
 # add target ChibiOS dirs
 add_subdirectory(Include)
 add_subdirectory(common)

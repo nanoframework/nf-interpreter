@@ -11,3 +11,6 @@
 
 // includes SPIFFS in storage
 #define USE_SPIFFS_FOR_STORAGE  FALSE
+
+// includes littlefs in storage
+#define USE_LITTLEFS_FOR_STORAGE  FALSE

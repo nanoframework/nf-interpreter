@@ -14,6 +14,9 @@
 // enable SPIFFS
 #define NF_FEATURE_USE_SPIFFS @NF_FEATURE_USE_SPIFFS_OPTION@
 
+// enable littlefs
+#define NF_FEATURE_USE_LITTLEFS @NF_FEATURE_USE_LITTLEFS_OPTION@
+
 // set preference to enable (or not) the RTC subsystem
 #define HAL_USE_RTC @HAL_USE_RTC_OPTION@
 
