@@ -3,10 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-namespace nanoFramework.Targets.STM32F769I_DISCOVERY
+namespace nanoFramework.Targets.ORGPAL_PALTHREE
 {
     /// <summary>
-    /// Enumeration of ADC channels available in STM32F769I_DISCOVERY
+    /// Enumeration of ADC channels available in ORGPAL_PALTHREE
     /// </summary>
     public static class AdcChannels
     {
