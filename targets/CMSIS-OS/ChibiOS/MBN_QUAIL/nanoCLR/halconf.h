@@ -19,7 +19,7 @@
 #define HALCONF_H
 
 #define _CHIBIOS_HAL_CONF_
-#define _CHIBIOS_HAL_CONF_VER_7_0_
+#define _CHIBIOS_HAL_CONF_VER_7_1_
 
 #include <target_platform.h>
 #include "mcuconf.h"
@@ -60,6 +60,13 @@
 // #if !defined(HAL_USE_DAC) || defined(__DOXYGEN__)
 // #define HAL_USE_DAC                         FALSE
 // #endif
+
+/**
+ * @brief   Enables the EFlash subsystem.
+ */
+#if !defined(HAL_USE_EFL) || defined(__DOXYGEN__)
+#define HAL_USE_EFL                         FALSE
+#endif
 
 /**
  * @brief   Enables the GPT subsystem.
@@ -188,6 +195,13 @@
 // #if !defined(HAL_USE_WDG) || defined(__DOXYGEN__)
 // #define HAL_USE_WDG                         FALSE
 // #endif
+
+/**
+ * @brief   Enables the WSPI subsystem.
+ */
+#if !defined(HAL_USE_WSPI) || defined(__DOXYGEN__)
+#define HAL_USE_WSPI                        FALSE
+#endif
 
 /*===========================================================================*/
 /* PAL driver related settings.                                              */
