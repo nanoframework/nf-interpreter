@@ -1,9 +1,22 @@
-#ifndef _SYSTEM_DATA_SQLITE_H_
-#define _SYSTEM_DATA_SQLITE_H_
+//-----------------------------------------------------------------------------
+//
+//                   ** WARNING! ** 
+//    This file was generated automatically by a tool.
+//    Re-running the tool will overwrite this file.
+//    You should copy this file to a custom location
+//    before adding any customization in the copy to
+//    prevent loss of your changes when the tool is
+//    re-run.
+//
+//-----------------------------------------------------------------------------
+
+#ifndef _NF_SYSTEM_DATA_SQLITE_H_
+#define _NF_SYSTEM_DATA_SQLITE_H_
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
+#include <corlib_native.h>
 
 typedef enum __nfpack SQLiteColumnType
 {
@@ -52,7 +65,7 @@ typedef enum __nfpack SQLiteErrorCode
     SQLiteErrorCode_NonExtendedMask = 255,
 } SQLiteErrorCode;
 
-struct Library_System_Data_Sqlite_System_Data_Sqlite_ResultSet
+struct Library_nf_system_data_sqlite_System_Data_Sqlite_ResultSet
 {
     static const int FIELD__<RowCount>k__BackingField = 1;
     static const int FIELD__<ColumnCount>k__BackingField = 2;
@@ -63,7 +76,7 @@ struct Library_System_Data_Sqlite_System_Data_Sqlite_ResultSet
 
 };
 
-struct Library_System_Data_Sqlite_System_Data_Sqlite_SqliteCommand
+struct Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand
 {
     static const int FIELD__disposed = 1;
     static const int FIELD__nativePointer = 2;
@@ -87,6 +100,6 @@ struct Library_System_Data_Sqlite_System_Data_Sqlite_SqliteCommand
 
 };
 
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Data_Sqlite;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Data_Sqlite;
 
-#endif  //_SYSTEM_DATA_SQLITE_H_
+#endif  //_NF_SYSTEM_DATA_SQLITE_H_

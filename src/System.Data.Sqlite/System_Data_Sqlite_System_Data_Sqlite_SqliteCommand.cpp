@@ -1,251 +1,129 @@
-#include "System_Data_Sqlite.h"
-#include "System_Data_Sqlite_System_Data_Sqlite_SqliteCommand.h"
 
-using namespace System_Data_Sqlite::System_Data_Sqlite;
+#include "nf_system_data_sqlite.h"
 
 
-signed int SqliteCommand::NativeOpen( const char* param0, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeOpen___I4__STRING( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)hr;
-    signed int retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-signed int SqliteCommand::NativeClose(  HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeClose___I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)hr;
-    signed int retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-signed int SqliteCommand::NativePrepare( const char* param0, signed int param1,  param2, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativePrepare___I4__STRING__I4__BYREF_I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)param1;
-    (void)param2;
-    (void)hr;
-    signed int retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-const char* SqliteCommand::NativeErrorMessage(  HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeErrorMessage___STRING( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)hr;
-    const char* retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-signed int SqliteCommand::NativeStep( signed int param0, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeStep___I4__I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)hr;
-    signed int retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-signed int SqliteCommand::NativeFinalize( signed int param0, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeFinalize___I4__I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)hr;
-    signed int retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-signed int SqliteCommand::NativeColumnCount( signed int param0, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeColumnCount___I4__I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)hr;
-    signed int retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-const char* SqliteCommand::NativeColumnName( signed int param0, signed int param1, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeColumnName___STRING__I4__I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)param1;
-    (void)hr;
-    const char* retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-signed int SqliteCommand::NativeColumnType( signed int param0, signed int param1, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeColumnType___I4__I4__I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)param1;
-    (void)hr;
-    signed int retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-int64_t SqliteCommand::NativeColumnLong( signed int param0, signed int param1, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeColumnLong___I8__I4__I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)param1;
-    (void)hr;
-    int64_t retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-const char* SqliteCommand::NativeColumnText( signed int param0, signed int param1, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeColumnText___STRING__I4__I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)param1;
-    (void)hr;
-    const char* retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-double SqliteCommand::NativeColumnDouble( signed int param0, signed int param1, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeColumnDouble___R8__I4__I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)param1;
-    (void)hr;
-    double retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-signed int SqliteCommand::NativeColumnBlobLength( signed int param0, signed int param1, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeColumnBlobLength___I4__I4__I4( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)param1;
-    (void)hr;
-    signed int retValue = 0;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
+    NANOCLR_NOCLEANUP();
 }
 
-void SqliteCommand::NativeColumnBlobData( signed int param0, signed int param1, CLR_RT_TypedArray_UINT8 param2, HRESULT &hr )
+HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeColumnBlobData___VOID__I4__I4__SZARRAY_U1( CLR_RT_StackFrame& stack )
 {
+    NANOCLR_HEADER();
 
-    (void)param0;
-    (void)param1;
-    (void)param2;
-    (void)hr;
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-
-    ////////////////////////////////
-    // implementation starts here //
-
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-
+    NANOCLR_NOCLEANUP();
 }
