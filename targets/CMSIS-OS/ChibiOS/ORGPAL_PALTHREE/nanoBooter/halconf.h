@@ -19,7 +19,7 @@
 #define HALCONF_H
 
 #define _CHIBIOS_HAL_CONF_
-#define _CHIBIOS_HAL_CONF_VER_7_0_
+#define _CHIBIOS_HAL_CONF_VER_7_1_
 
 #include "mcuconf.h"
 
@@ -59,10 +59,10 @@
 #endif
 
 /**
- * @brief   Enables the EXT subsystem.
+ * @brief   Enables the EFlash subsystem.
  */
-#if !defined(HAL_USE_EXT) || defined(__DOXYGEN__)
-#define HAL_USE_EXT                          FALSE
+#if !defined(HAL_USE_EFL) || defined(__DOXYGEN__)
+#define HAL_USE_EFL                         FALSE
 #endif
 
 /**
@@ -104,7 +104,7 @@
  * @brief   Enables the MMC_SPI subsystem.
  */
 #if !defined(HAL_USE_MMC_SPI) || defined(__DOXYGEN__)
-#define HAL_USE_MMC_SPI                         FALSE
+#define HAL_USE_MMC_SPI                     FALSE
 #endif
 
 /**
@@ -132,7 +132,7 @@
  * @brief   Enables the SERIAL subsystem.
  */
 #if !defined(HAL_USE_SERIAL) || defined(__DOXYGEN__)
-#define HAL_USE_SERIAL                          FALSE
+#define HAL_USE_SERIAL                      FALSE
 #endif
 
 /**
@@ -148,7 +148,6 @@
 #if !defined(HAL_USE_SIO) || defined(__DOXYGEN__)
 #define HAL_USE_SIO                         FALSE
 #endif
-
 
 /**
  * @brief   Enables the SPI subsystem.
@@ -168,7 +167,7 @@
  * @brief   Enables the UART subsystem.
  */
 #if !defined(HAL_USE_UART) || defined(__DOXYGEN__)
-#define HAL_USE_UART                         FALSE
+#define HAL_USE_UART                        FALSE
 #endif
 
 /**
@@ -311,7 +310,7 @@
  * @brief   Enables the zero-copy API.
  */
 #if !defined(MAC_USE_ZERO_COPY) || defined(__DOXYGEN__)
-#define MAC_USE_ZERO_COPY           FALSE
+#define MAC_USE_ZERO_COPY                   FALSE
 #endif
 
 /**
