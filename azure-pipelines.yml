@@ -365,15 +365,9 @@ jobs:
     condition: succeeded()
     displayName: Install NBGV tool
 
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: nbgv cloud -a -c
-        errorActionPreference: 'silentlyContinue'
-        failOnStderr: 'false'
+  - script: nbgv cloud -a -c
     condition: succeeded()
     displayName: Set build number
-    # condition: ne(variables['system.pullrequest.isfork'], true)
 
   - task: UseRubyVersion@0
     inputs:
@@ -385,7 +379,7 @@ jobs:
   - powershell: |
         gem install github_changelog_generator --quiet --no-document
         # need to call it passing both cache options with full path otherwise it won't work
-        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$(NBGV_Version)"
+        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$env:NBGV_AssemblyVersion"
     condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ), or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')  ) )
     displayName: Generate change log
 
@@ -416,7 +410,7 @@ jobs:
     displayName: Push changelog to GitHub
 
 #######################
-# create or update GitHub release ON tags from release or master branches
+# create or update GitHub release ON tags from master branche or tags
 - job: Publish_Release
   dependsOn:
   - Build_STM32_targets
@@ -425,27 +419,40 @@ jobs:
   - Build_TI_SimpleLink_targets
   - Build_WIN32_nanoCLR
   - Generate_change_log
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
   pool:
     vmImage: 'VS2017-Win2016'
 
   steps:
+  - task: DotNetCoreCLI@2  
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . nbgv
+    displayName: Install NBGV tool
+
+  - script: nbgv cloud -a -c
+    displayName: Set build number
+
   - task: GitHubReleasePublish@1
     inputs:
       githubEndpoint: 'nanoframework'
       githubOwner: 'nanoframework'
       githubRepositoryName: nf-interpreter
-      githubTag: v$(NBGV_Version)
-      githubReleaseTitle: 'nf Interpreter v$(NBGV_Version)'
+      githubTag: v$(NBGV_AssemblyVersion)
+      githubReleaseTitle: 'nf Interpreter v$(NBGV_AssemblyVersion)'
+      githubReleaseNotes: ''
       githubTargetCommitsh: $(Build.SourceVersion)
       githubReleaseDraft: false
-      githubReleasePrerelease: false
+      githubReleasePrerelease: true
       githubReuseDraftOnly: false
       githubReuseRelease: true
       githubEditRelease: false
       githubDeleteEmptyTag: true
-      githubReleaseAsset:
-    condition: and( succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'), not(contains(variables['Build.SourceBranch'], 'preview') ), ne( variables['StartReleaseCandidate'], true ) )
+      githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/**.zip'
+    condition: endsWith(variables['Build.SourceBranch'], 'master')
     displayName: Create/Update GitHub stable release
 
 ##################################
