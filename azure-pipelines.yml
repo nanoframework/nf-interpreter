@@ -93,17 +93,9 @@ jobs:
       git -c http.extraheader="AUTHORIZATION: $auth" fetch --progress origin
       
       git checkout develop
-      
-      cd source
 
       # prepare release and capture output
       $release = nbgv prepare-release
-  
-      # get commit message for the merge
-      $commitMessage = git log -1 --pretty=%B
-
-      # amend commit message to skip build
-      git commit --amend -m "$commitMessage" -m "***NO_CI***" > $null
 
       # push all changes to github
       git -c http.extraheader="AUTHORIZATION: $auth" push --all origin
