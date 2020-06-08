@@ -10,12 +10,52 @@ steps:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(BoardName)' 
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
+      archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_AssemblyVersion).zip'
+      replaceExistingArchive: true
+    # skip task on PR build and when on branch other than master or nf community targets
+    # execute on 'ForceUpload' parameter
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
+    displayName: Zip binary files (release)
+
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(Agent.TempDirectory)
+      Contents: |
+        *.zip
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      flattenFolders: true
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
+    displayName: Collecting deployable artifacts (release)
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(BoardName)' 
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)-preview.$(NBGV_VersionHeight).zip'
       replaceExistingArchive: true
     # skip task on PR build and when on branch other than develop, master or release
     # execute on 'ForceUpload' parameter
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
-    displayName: Zip binary files
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( contains(variables['Build.SourceBranchName'], 'develop'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    displayName: Zip binary files (preview)
+
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(Agent.TempDirectory)
+      Contents: |
+        *.zip
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      flattenFolders: true
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( contains(variables['Build.SourceBranchName'], 'develop'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    displayName: Collecting deployable artifacts (preview)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
+      ArtifactName: $(BoardName)
+      ArtifactType: Container
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
+    displayName: Publish deployables artifacts
 
   - task: PowerShell@2
     inputs:
@@ -32,6 +72,10 @@ steps:
             {
               # this is a build for a community target
               Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-community-targets"
+              # set package name
+              Write-Host "$("##vso[task.setvariable variable=PACKAGE_NAME]")$(BoardName)-$(NBGV_AssemblyVersion)"
+              # set version
+              Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_AssemblyVersion)"
             }
             else
             {
@@ -40,11 +84,19 @@ steps:
               {
                 # this a dev or release branch, publish to Bintray dev repo
                 Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
+                # set package name
+                Write-Host "$("##vso[task.setvariable variable=PACKAGE_NAME]")$(BoardName)-$(NBGV_SimpleVersion)-preview.$(NBGV_VersionHeight)"
+                # set version
+                Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion)-preview.$(NBGV_VersionHeight)"
               }
               else 
               {
                 # this master branch, publish to Bintray stable repo
                 Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images"
+                # set package name
+                Write-Host "$("##vso[task.setvariable variable=PACKAGE_NAME]")$(BoardName)-$(NBGV_AssemblyVersion)"
+                # set version
+                Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_AssemblyVersion)"
               }
             }
         errorActionPreference: 'stop'
@@ -55,12 +107,12 @@ steps:
 
   - task: cURLUploader@2
     inputs:
-      files: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
+      files: '$(Agent.TempDirectory)\$(PACKAGE_NAME).zip'
       authType: 'userAndPass'
       username: 'nfbot'
       password: '$(BinTrayKey)'
       url: 'https://api.bintray.com/'
-      remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
+      remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(PACKAGE_VERSION)/$(PACKAGE_NAME).zip;publish=1'
     # execute on 'ForceUpload' parameter
     condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
     displayName: Upload artifact to Bintray

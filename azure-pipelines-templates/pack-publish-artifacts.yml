@@ -17,11 +17,4 @@ steps:
       flattenFolders: true
     condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
     displayName: Collecting deployable artifacts
-
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
-      ArtifactName: $(BoardName)
-      ArtifactType: Container
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
-    displayName: Publish deployables artifacts
+    
