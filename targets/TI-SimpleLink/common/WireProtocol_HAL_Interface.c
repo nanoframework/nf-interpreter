@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <FreeRTOS.h>
+// #include <FreeRTOS.h>
 #include <ti/drivers/UART.h>
 #include <board.h>
 #include <nanoHAL_v2.h>

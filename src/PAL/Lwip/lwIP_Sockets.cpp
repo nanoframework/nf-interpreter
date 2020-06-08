@@ -59,21 +59,21 @@ void LWIP_SOCKETS_Driver::PostAddressChanged(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AddressChanged, 0, 0);
+	Network_PostEvent(NetworkChange_NetworkEventType_AddressChanged, 0, 0);
 }
 
 void LWIP_SOCKETS_Driver::PostAvailabilityOn(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkAvailable, 0);
+	Network_PostEvent(NetworkChange_NetworkEventType_AvailabilityChanged, NetworkChange_NetworkEvents_NetworkAvailable, 0);
 }
 
 void LWIP_SOCKETS_Driver::PostAvailabilityOff(void* arg)
 {
     (void)arg;
 
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, NetworkEventFlags_NetworkNOTAvailable, 0);
+	Network_PostEvent(NetworkChange_NetworkEventType_AvailabilityChanged, NetworkChange_NetworkEvents_NetworkNOTAvailable, 0);
 }
 
 #if LWIP_NETIF_LINK_CALLBACK == 1
@@ -190,7 +190,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
  		g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
- 		UpdateAdapterConfiguration(i, (UpdateOperation_Dhcp | UpdateOperation_Dns), &networkConfiguration);
+ 		UpdateAdapterConfiguration(i, (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns), &networkConfiguration);
 
  		networkInterface = netif_find_interface(interfaceNumber);
 
@@ -383,6 +383,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char* nodename, char* servname, const
     NATIVE_PROFILE_PAL_NETWORK();
 
     SOCK_addrinfo *ai;
+    void *dummyPtr;
     SOCK_sockaddr_in *sa = NULL;
     int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
     struct addrinfo *lwipAddrinfo = NULL;
@@ -425,8 +426,12 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char* nodename, char* servname, const
             ai->ai_protocol = hints->ai_protocol;
         }
 
+        // need this to keep the compiler happy about the cast to SOCK_sockaddr
+        // which is intended and perfectly safe
+        dummyPtr = sa;
+
         ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
-        ai->ai_addr = (SOCK_sockaddr*)sa;
+        ai->ai_addr = (SOCK_sockaddr*)dummyPtr;
 
         *res = ai;
 
@@ -467,8 +472,12 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(const char* nodename, char* servname, const
             ai->ai_protocol = hints->ai_protocol;
         }
         
+        // need this to keep the compiler happy about the cast to SOCK_sockaddr
+        // which is intended and perfectly safe
+        dummyPtr = sa;
+
         ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
-        ai->ai_addr = (SOCK_sockaddr*)sa;
+        ai->ai_addr = (SOCK_sockaddr*)dummyPtr;
         
         *res = ai;
 
@@ -844,9 +853,15 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkI
 #if LWIP_DNS
 #if LWIP_IPV6
 #if LWIP_VERSION_MAJOR == 2 
-            config->IPv4DNSAddress1 = dns_getserver(0)->u_addr.ip4.addr;
-            config->IPv4DNSAddress2 = dns_getserver(1)->u_addr.ip4.addr;
 
+#if defined(PLATFORM_ESP32)
+			// ESP32 return ip_addr_t instead of ip_addr_t * on statndard lwip
+			config->IPv4DNSAddress1 = dns_getserver(0).u_addr.ip4.addr;
+			config->IPv4DNSAddress2 = dns_getserver(1).u_addr.ip4.addr;
+#else			
+			config->IPv4DNSAddress1 = dns_getserver(0)->u_addr.ip4.addr;
+            config->IPv4DNSAddress2 = dns_getserver(1)->u_addr.ip4.addr;
+#endif
             // FIXME IPV6
             // config->IPv6DNSAddress1 = dns_getserver(0)->u_addr.ip6.addr;
             // config->IPv6DNSAddress2 = dns_getserver(1)->u_addr.ip6.addr;
@@ -903,7 +918,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
 
 #if LWIP_DNS
     // when using DHCP do not use the static settings
-    if(0 != (updateFlags & UpdateOperation_Dns))
+    if(0 != (updateFlags & NetworkInterface_UpdateOperation_Dns))
     {
         // FIXME IPV6
         if(config->AutomaticDNS == 0)
@@ -911,22 +926,26 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
             // user defined DNS addresses
             if(config->IPv4DNSAddress1 != 0)
             {
-                u8_t idx = 0;
-                
-                dns_setserver(idx, (const ip_addr_t *)&config->IPv4DNSAddress1);
+                // need to convert this first
+                ip_addr_t dnsServer;
+                ip_addr_set_ip4_u32(&dnsServer, config->IPv4DNSAddress1);
+
+                dns_setserver(0, &dnsServer);
             }
             if(config->IPv4DNSAddress2 != 0)
             {
-                u8_t idx = 1;
+                // need to convert this first
+                ip_addr_t dnsServer;
+                ip_addr_set_ip4_u32(&dnsServer, config->IPv4DNSAddress2);
 
-                dns_setserver(idx, (const ip_addr_t *)&config->IPv4DNSAddress2);
+                dns_setserver(1, &dnsServer);
             }
         }
     }
 #endif
 
 #if LWIP_DHCP
-    if(0 != (updateFlags & UpdateOperation_Dhcp))
+    if(0 != (updateFlags & NetworkInterface_UpdateOperation_Dhcp))
     {
         if(enableDHCP)
         {
@@ -941,8 +960,18 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
             // stop DHCP
             dhcp_stop(networkInterface);
 
+            // need to convert these first
+            ip_addr_t ipAddress, mask, gateway;
+            ip_addr_set_ip4_u32(&ipAddress, config->IPv4Address);
+            ip_addr_set_ip4_u32(&mask, config->IPv4NetMask);
+            ip_addr_set_ip4_u32(&gateway, config->IPv4GatewayAddress);
+
             // set interface with our static IP configs
-            netif_set_addr(networkInterface, (const ip4_addr_t *) &config->IPv4Address, (const ip4_addr_t *)&config->IPv4NetMask, (const ip4_addr_t *)&config->IPv4GatewayAddress);
+            netif_set_addr(
+                networkInterface,
+                (const ip4_addr_t*)&ipAddress,
+                (const ip4_addr_t*)&mask,
+                (const ip4_addr_t*)&gateway);
 
             // we should be polite and let the DHCP server that we are now using a static IP
             dhcp_inform(networkInterface);
@@ -957,22 +986,22 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration( uint32_t interfaceIndex
         // also it's NOT possible to renew & release on the same pass, so adding an extra else-if for that
         // just in case it's request from the managed code
 
-        if(0 != (updateFlags & UpdateOperation_DhcpRelease))
+        if(0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRelease))
         {
             dhcp_release(networkInterface);
         }
-        else if(0 != (updateFlags & UpdateOperation_DhcpRenew))
+        else if(0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
         {
             dhcp_renew(networkInterface);
         }
-        else if(0 != (updateFlags & (UpdateOperation_DhcpRelease | UpdateOperation_DhcpRenew)) )
+        else if(0 != (updateFlags & (NetworkInterface_UpdateOperation_DhcpRelease | NetworkInterface_UpdateOperation_DhcpRenew)) )
         {
             return CLR_E_INVALID_PARAMETER;
         }
     }
 #endif
 
-    if(0 != (updateFlags & UpdateOperation_Mac))
+    if(0 != (updateFlags & NetworkInterface_UpdateOperation_Mac))
     {
         memcpy(networkInterface->hwaddr, config->MacAddress, NETIF_MAX_HWADDR_LEN);
         networkInterface->hwaddr_len = NETIF_MAX_HWADDR_LEN;

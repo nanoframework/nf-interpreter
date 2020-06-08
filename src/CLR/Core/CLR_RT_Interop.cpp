@@ -39,7 +39,7 @@ HRESULT Interop_Marshal_UINT8( const CLR_RT_StackFrame &stackFrame, unsigned int
     NANOCLR_INTEROP_NOCLEANUP();
 }
 
-HRESULT Interop_Marshal_UINT16( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, signed short &param )         
+HRESULT Interop_Marshal_UINT16( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, unsigned short &param )         
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_INTEROP_CHECK_ARG_TYPE(DATATYPE_I4)
@@ -47,7 +47,7 @@ HRESULT Interop_Marshal_UINT16( const CLR_RT_StackFrame &stackFrame, unsigned in
     NANOCLR_INTEROP_NOCLEANUP();
 }
 
-HRESULT Interop_Marshal_UINT32( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, signed int &param )         
+HRESULT Interop_Marshal_UINT32( const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, unsigned int &param )         
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_INTEROP_CHECK_ARG_TYPE(DATATYPE_I4)
@@ -366,13 +366,13 @@ void SetResult_UINT8( CLR_RT_StackFrame &stackFrame, unsigned char value )
     stackFrame.SetResult( value, DATATYPE_U1 );
 }
 
-void SetResult_UINT16( CLR_RT_StackFrame &stackFrame, signed short value )
+void SetResult_UINT16( CLR_RT_StackFrame &stackFrame, unsigned short value )
 {
     NATIVE_PROFILE_CLR_CORE();
     stackFrame.SetResult( value, DATATYPE_U2 );
 }
 
-void SetResult_UINT32( CLR_RT_StackFrame &stackFrame, signed int value )
+void SetResult_UINT32( CLR_RT_StackFrame &stackFrame, unsigned int value )
 {
     NATIVE_PROFILE_CLR_CORE();
     stackFrame.SetResult( value, DATATYPE_U4 );

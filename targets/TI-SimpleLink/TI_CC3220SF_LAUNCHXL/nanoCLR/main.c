@@ -5,23 +5,25 @@
 
 #include <stdint.h>
 #include <nanoCLR_Application.h>
+
 // POSIX Header files
 #include <pthread.h>
 #include <unistd.h>
 
 // RTOS header files
-#include "FreeRTOS.h"
-#include "task.h"
+#include <ti/sysbios/BIOS.h>
 
 // board Header files
-#include "Board.h"
+#include <Board.h>
 
 //////////////////////////////
 
 // Stack size in bytes
-#define THREADSTACKSIZE   2024
+#define THREADSTACKSIZE   2048
 
-extern void * mainThread(void *arg0);
+CLR_SETTINGS clrSettings;
+
+extern void * mainThread(void *arg); 
 
 int main(void)
 {
@@ -34,8 +36,7 @@ int main(void)
     // Call board init functions
     Board_initGeneral();
 
-    // CLR settings to launch CLR thread
-    CLR_SETTINGS clrSettings;
+    // CLR settings to launch CLR thread   
     (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
     clrSettings.MaxContextSwitches         = 50;
@@ -53,15 +54,13 @@ int main(void)
     retc |= pthread_create(&thread, &threadAttributes, mainThread, &clrSettings);
     if(retc != 0)
     {
-        // pthread_create()
         while(1)
         {
             ;
         }
     }
 
-    // Start the FreeRTOS scheduler
-    vTaskStartScheduler();
+    BIOS_start();
 
     return (0);
 }

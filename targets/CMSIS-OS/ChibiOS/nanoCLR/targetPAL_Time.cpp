@@ -23,7 +23,7 @@ static void NextEventTimer_Callback( void* arg )
 
 HRESULT Time_Initialize()
 {
-    // need to setup the timer at boot, but stoped
+    // need to setup the timer at boot, but stopped
     chVTSet(&nextEventTimer, TIME_INFINITE, NextEventTimer_Callback, nextEventCallbackDummyArg);
 
     return S_OK;
@@ -42,7 +42,7 @@ void Time_SetCompare ( uint64_t compareValueTicks )
     if(compareValueTicks == 0)
     {
         // compare value is 0 so dequeue and schedule immediately
-        // can't call chVTSet with 'immidiate delay value', so use value 1 to get it executed ASAP
+        // can't call chVTSet with 'immediate delay value', so use value 1 to get it executed ASAP
         chVTSet(&nextEventTimer, 1, NextEventTimer_Callback, nextEventCallbackDummyArg);
     }
     else if(compareValueTicks == HAL_COMPLETION_IDLE_VALUE)
@@ -51,21 +51,31 @@ void Time_SetCompare ( uint64_t compareValueTicks )
     }
     else
     {
-        if (HAL_Time_CurrentTime() >= compareValueTicks) 
+        if (HAL_Time_CurrentSysTicks() >= compareValueTicks)
         { 
             // already missed the event, dequeue and execute immediately
-            // can't call chVTSet with 'immidiate delay value', so use value 1 to get it executed ASAP
+            // can't call chVTSet with 'immediate delay value', so use value 1 to get it executed ASAP
             chVTSet(&nextEventTimer, 1, NextEventTimer_Callback, nextEventCallbackDummyArg);
         }
         else
         {
             // compareValueTicks is the time (in sys ticks) that is being requested to fire an HAL_COMPLETION::DequeueAndExec()
             // need to subtract the current system time to set when the timer will fire
-            compareValueTicks -= HAL_Time_CurrentTime();
+        	// compareValueTicks is in CMSIS ticks (which equals to ms), so we use TIME_MS2I only to round
+        	compareValueTicks -= HAL_Time_CurrentSysTicks();
+            uint64_t delay = TIME_MS2I(compareValueTicks);
+            
+            // make sure that chVTSet does not get called with zero delay            
+            if (delay == 0) 
+            {
+                // compare value is 0 so dequeue and execute immediately
+                // no need to call the timer
+                HAL_COMPLETION::DequeueAndExec();
+                return;
+            }
 
             // no need to stop the timer if it's running because the API does it anyway
-            // need to convert from nF ticks to milliseconds and then to ChibiOS sys ticks to load the timer
-            chVTSet(&nextEventTimer, TIME_MS2I(compareValueTicks/ TIME_CONVERSION__TO_MILLISECONDS), NextEventTimer_Callback, nextEventCallbackDummyArg);
+            chVTSet(&nextEventTimer, delay, NextEventTimer_Callback, nextEventCallbackDummyArg);
         }
     }
 }

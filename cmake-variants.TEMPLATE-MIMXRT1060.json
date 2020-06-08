@@ -1,0 +1,67 @@
+{
+  "buildType": {
+    "default": "MinSizeRel",
+    "choices": {
+      "debug": {
+        "short": "Debug",
+        "long": "Emit debug information without performing optimizations",
+        "buildType": "Debug"
+      },
+      "release": {
+        "short": "Release",
+        "long": "Enable optimizations, omit debug info",
+        "buildType": "Release"
+      },
+      "minsize": {
+        "short": "MinSizeRel",
+        "long": "Optimize for smallest binary size",
+        "buildType": "MinSizeRel"
+      },
+      "reldeb": {
+        "short": "RelWithDebInfo",
+        "long": "Perform optimizations AND include debugging information",
+        "buildType": "RelWithDebInfo"
+      }
+    }
+  },
+  "linkage": {
+    "default": "",
+    "choices": {
+      "MIMXRT1060_EVK": {
+        "short": "MIMXRT1060_EVK",
+        "settings": {
+          "BUILD_VERSION": "0.9.99.999",
+          "CMAKE_TOOLCHAIN_FILE" : "CMake/toolchain.arm-none-eabi.cmake",
+          "TOOLCHAIN_PREFIX": "C:/nanoFramework_Tools/GNU_ARM_Toolchain/8 2019-q3-update",					
+          "TOOL_SRECORD_PREFIX" : "c:/nanoFramework_Tools/srecord/",
+          "TARGET_SERIES": "IMXRT10xx",
+          "SUPPORT_ANY_BASE_CONVERSION": "ON",
+          "RTOS": "FREERTOS",
+          "FREERTOS_BOARD": "NXP_MIMXRT1060_EVK",
+          "FREERTOS_VERSION": "v1.4.8",
+          "CMSIS_VERSION": "5.5.1",
+          "FATFS_VERSION": "R0.13c",
+          "LWIP_VERSION": "STABLE-2_0_3_RELEASE",
+          "NF_BUILD_RTM": "OFF",
+          "NF_FEATURE_DEBUGGER": "ON",
+          "NF_FEATURE_HAS_SDCARD": "ON",
+          "NF_FEATURE_RTC": "ON",
+          "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
+          "NF_SECURITY_OPENSSL": "OFF",
+          "API_Windows.Devices.Gpio": "ON",
+          "API_Windows.Devices.Spi": "OFF",
+          "API_Windows.Devices.I2c": "OFF",
+          "API_Windows.Devices.Adc": "OFF",
+          "API_Windows.Devices.Pwm": "OFF",
+          "API_Windows.Devices.Wifi": "OFF",
+          "API_Windows.Devices.SerialCommunication": "ON",
+          "API_nanoFramework.ResourceManager": "ON",
+          "API_nanoFramework.System.Collections": "ON",
+          "API_System.Net": "ON",
+          "API_System.Math": "ON",
+          "API_Windows.Storage": "ON"
+        }
+      }
+    }
+  }
+}

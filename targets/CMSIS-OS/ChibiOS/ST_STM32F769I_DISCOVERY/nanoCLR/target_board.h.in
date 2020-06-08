@@ -12,8 +12,7 @@
 #define _TARGET_BOARD_NANOCLR_H_
 
 #include <target_common.h>
-#include <chversion.h>
 
-#define OEMSYSTEMINFOSTRING "nanoCLR running @ @CHIBIOS_BOARD@ built with ChibiOS v" CH_VERSION "." STR(CH_VERSION_MONTH)
+#define OEMSYSTEMINFOSTRING "nanoCLR running @ @CHIBIOS_BOARD@"
 
 #endif /* _TARGET_BOARD_NANOCLR_H_ */

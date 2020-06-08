@@ -1,6 +1,9 @@
 # Copyright (c) 2018 The nanoFramework project contributors
 # See LICENSE file in the project root for full license information.
 
+# To publish builds of targets in branches other than develop
+# set 'ForceUpload' variable to true on target matrix
+
 steps:
   - task: ArchiveFiles@2
     inputs:
@@ -10,7 +13,8 @@ steps:
       archiveFile: '$(Agent.TempDirectory)\$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip'
       replaceExistingArchive: true
     # skip task on PR build and when on branch other than develop, master or release
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
+    # execute on 'ForceUpload' parameter
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
     displayName: Zip binary files
 
   - task: PowerShell@2
@@ -31,7 +35,7 @@ steps:
             }
             else
             {
-              if( $env:Build_SourceBranchName -eq "develop" -or 
+              if( $env:Build_SourceBranchName -match "^develop*" -or 
                   $env:Build_SourceBranchName -match "^release*" )
               {
                 # this a dev or release branch, publish to Bintray dev repo
@@ -45,8 +49,8 @@ steps:
             }
         errorActionPreference: 'stop'
         failOnStderr: 'true'
-    # skip task on PR build and when on branch other than develop, master or release
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
+    # execute on 'ForceUpload' parameter
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
     displayName: Set Bintray repo path
 
   - task: cURLUploader@2
@@ -57,6 +61,6 @@ steps:
       password: '$(BinTrayKey)'
       url: 'https://api.bintray.com/'
       remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(BoardName)/$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion)/$(BoardName)-$(NBGV_SimpleVersion)$(NBGV_PrereleaseVersion).zip;publish=1'
-    # skip task on PR build and when on branch other than develop, master or release
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) )
+    # execute on 'ForceUpload' parameter
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
     displayName: Upload artifact to Bintray

@@ -866,16 +866,25 @@ BlockStorageDevice* BlockStorageList_GetFirstDevice()
     return NULL;
 }
 
-
-// BlockStorageDevice* BlockStorageList_GetNextDevice(BlockStorageDevice* device)
-// {
-//     return NULL;
-// }
+// returns the next device in BlockStorageList
+BlockStorageDevice* BlockStorageList_GetNextDevice(BlockStorageDevice* device)
+{
+	for(int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    {
+        if(g_BlockStorage.DeviceList[i] == device)
+        {
+			if((i + 1) < TARGET_BLOCKSTORAGE_COUNT){
+				return g_BlockStorage.DeviceList[i + 1];
+			}
+        }
+    }
+    return NULL;
+}
 
 // // returns number of devices has been declared in the system
-// unsigned int BlockStorageList_GetNumDevices()
-// {
-//     return 0;
-// }
+unsigned int BlockStorageList_GetNumDevices()
+{
+    return TARGET_BLOCKSTORAGE_COUNT;
+}
 
 /////////////////////////////////////////////////////

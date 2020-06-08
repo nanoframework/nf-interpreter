@@ -7,6 +7,10 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+__nfweak void CLR_DBG_Debugger::Debugger_Discovery()
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+}
 
 __nfweak void CLR_DBG_Debugger::Debugger_WaitForCommands()
 {
@@ -21,7 +25,7 @@ __nfweak void CLR_DBG_Debugger::PurgeCache()
 __nfweak HRESULT CLR_DBG_Debugger::CreateInstance()
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    g_CLR_DBG_Debugger = (CLR_DBG_Debugger*)&g_scratchDebugger[0];
+
     NANOCLR_SYSTEM_STUB_RETURN();
 }
 
@@ -66,22 +70,25 @@ __nfweak void NFReleaseInfo::Init(
     NFReleaseInfo.PlatformName[ 0 ] = 0;
 
     // fill each one, if it was provided
-    if ( NULL != info )
+    if (NULL != info)
     {
-        len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString));
+        len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString) - 1);
         memcpy(NFReleaseInfo.InfoString, info, len);
+        NFReleaseInfo.InfoString[len] = 0;
     }
 
-    if ( NULL != target )
+    if (NULL != target)
     {
-        len = MIN(targetLen, sizeof(NFReleaseInfo.TargetName));
+        len = MIN(targetLen, sizeof(NFReleaseInfo.TargetName) - 1);
         memcpy(NFReleaseInfo.TargetName, target, len);
+        NFReleaseInfo.TargetName[len] = 0;
     }
 
-    if ( NULL != platform )
+    if (NULL != platform)
     {
-        len = MIN(platformLen, sizeof(NFReleaseInfo.PlatformName));
+        len = MIN(platformLen, sizeof(NFReleaseInfo.PlatformName) - 1);
         memcpy(NFReleaseInfo.PlatformName, platform, len);
+        NFReleaseInfo.PlatformName[len] = 0;
     }
 }
 

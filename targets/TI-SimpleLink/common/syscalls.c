@@ -9,6 +9,9 @@
 extern "C" {
 #endif
 
+#include <sys/_types.h>
+#include <stddef.h>
+
 /*
  * _gettimeofday primitive (Stub function)
  * */
@@ -38,6 +41,28 @@ int _gettimeofday (struct timeval * tp, struct timezone * tzp)
 	}
 
   return 0;
+}
+
+extern _off_t _lseek_r( struct _reent *_r, int fd, _off_t pos, int whence )
+{
+   return 0;
+}
+
+extern _ssize_t _read_r( struct _reent *ptr, int fd, const void *buf, size_t cnt )
+{
+   return cnt;
+}
+
+extern void _kill(int pid, int sig)
+{
+	(void) pid;
+	(void) sig;
+	return;
+}
+
+extern int _getpid(void)
+{
+	return -1;
 }
 
 #ifdef __cplusplus

@@ -7,14 +7,15 @@
 #include "nanoPAL_NativeDouble.h"
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
+
 HRESULT Library_corlib_native_System_Double::CompareTo___STATIC__I4__R8__R8( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     double d = stack.Arg0().NumericByRefConst().r8;
-    double val = stack.Arg0().NumericByRefConst().r8;
-    CLR_UINT32 res = System::Double::CompareTo( d, val );
+    double val = stack.Arg1().NumericByRefConst().r8;
+    CLR_INT32 res = System::Double::CompareTo( d, val );
 
     stack.PushValue().SetInteger( res );
 
@@ -72,7 +73,9 @@ HRESULT Library_corlib_native_System_Double::IsPositiveInfinity___STATIC__BOOLEA
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
+
 #else
+
 HRESULT Library_corlib_native_System_Double::CompareTo___STATIC__I4__R8__R8( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -88,41 +91,22 @@ HRESULT Library_corlib_native_System_Double::CompareTo___STATIC__I4__R8__R8( CLR
 
 HRESULT Library_corlib_native_System_Double::IsInfinity___STATIC__BOOLEAN__R8( CLR_RT_StackFrame& stack )
 {
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    stack.SetResult_Boolean(false);
-
-    NANOCLR_NOCLEANUP_NOLABEL();
+    stack.NotImplementedStub();
 }
 
 HRESULT Library_corlib_native_System_Double::IsNaN___STATIC__BOOLEAN__R8( CLR_RT_StackFrame& stack )
 {
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    stack.SetResult_Boolean(false);
-
-    NANOCLR_NOCLEANUP_NOLABEL();
+    stack.NotImplementedStub();
 }
 
 HRESULT Library_corlib_native_System_Double::IsNegativeInfinity___STATIC__BOOLEAN__R8( CLR_RT_StackFrame& stack )
 {
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    stack.SetResult_Boolean(false);
-
-    NANOCLR_NOCLEANUP_NOLABEL();
+    stack.NotImplementedStub();
 }
 
 HRESULT Library_corlib_native_System_Double::IsPositiveInfinity___STATIC__BOOLEAN__R8( CLR_RT_StackFrame& stack )
 {
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    stack.SetResult_Boolean(false);
-
-    NANOCLR_NOCLEANUP_NOLABEL();
+    stack.NotImplementedStub();
 }
+
 #endif

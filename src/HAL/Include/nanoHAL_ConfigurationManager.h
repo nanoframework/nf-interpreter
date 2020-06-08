@@ -111,7 +111,7 @@ bool ConfigurationManager_GetConfigurationBlock(void* configurationBlock, Device
 
 // StoreConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target 
 // needs to be free to implement the storage of the configuration block as they see fit
-bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset);
+bool ConfigurationManager_StoreConfigurationBlock(void* configurationBlock, DeviceConfigurationOption configuration, uint32_t configurationIndex, uint32_t blockSize, uint32_t offset, bool done);
 
 // UpdateConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target 
 // needs to be free to implement the storage of the configuration block as they see fit

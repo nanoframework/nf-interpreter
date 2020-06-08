@@ -71,13 +71,13 @@ struct Settings
         CLR_Debug::Printf( "Started Hardware.\r\n" );
 #endif
 
-        m_fInitialized = true;
+        CLR_DBG_Debugger::Debugger_Discovery();
 
+        m_fInitialized = true;
 
         NANOCLR_NOCLEANUP();
     }
 
-    
     HRESULT LoadAssembly( const CLR_RECORD_ASSEMBLY* header, CLR_RT_Assembly*& assm )
     {   
         NANOCLR_HEADER();
@@ -95,7 +95,7 @@ struct Settings
             // First verify that check sum in assembly object matches hardcoded check sum. 
             if ( assm->m_header->nativeMethodsChecksum != pNativeAssmData->m_checkSum )
             {
-                CLR_Debug::Printf("***********************************************************************\r\n");
+                CLR_Debug::Printf("\r\n\r\n***********************************************************************\r\n");
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("* ERROR!!!!  Firmware version does not match managed code version!!!! *\r\n");
                 CLR_Debug::Printf("*                                                                     *\r\n");
@@ -193,7 +193,7 @@ struct Settings
 #else     
 
 #if !defined(BUILD_RTM)
-        CLR_Debug::Printf( "Create TS.\r\n" );
+        CLR_Debug::Printf( "Create Type System.\r\n" );
 #endif
 
         NANOCLR_CHECK_HRESULT(LoadKnownAssemblies( nanoCLR_Dat_Start, nanoCLR_Dat_End ));
@@ -359,10 +359,6 @@ struct Settings
             // we have good Assembly 
             CLR_RT_Assembly* assm;
 
-#if !defined(BUILD_RTM)            
-            CLR_Debug::Printf( "Attaching deployed file.\r\n" );
-#endif
-
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem 
             if (FAILED(LoadAssembly( header, assm ) ))
             {   
@@ -375,7 +371,6 @@ struct Settings
         
         NANOCLR_NOCLEANUP();
     }
-
 
     HRESULT LoadDeploymentAssemblies( unsigned int memoryUsage )
     {
@@ -661,9 +656,10 @@ void ClrStartup( CLR_SETTINGS params )
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "\r\nnanoCLR (Build %d.%d.%d.%d)\r\n\r\n", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION );
+        CLR_Debug::Printf( "\r\n%s\r\n\r\n", OEMSYSTEMINFOSTRING );
 #endif
 
-        CLR_RT_Memory::Reset         ();
+        CLR_RT_Memory::Reset();
         
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf( "Starting...\r\n" );

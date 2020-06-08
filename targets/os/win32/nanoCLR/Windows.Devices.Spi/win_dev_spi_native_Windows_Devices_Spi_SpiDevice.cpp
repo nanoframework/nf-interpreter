@@ -7,33 +7,6 @@
 #include "stdafx.h"
 #include "win_dev_spi_native.h"
 
-//SPIConfig spi_cfg;
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum DataBitOrder
-{
-    DataBitOrder_MSB = 0,
-    DataBitOrder_LSB
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-
-enum SpiModes
-{
-    SpiModes_Mode0 = 0,
-    SpiModes_Mode1,
-    SpiModes_Mode2,
-    SpiModes_Mode3
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
-
 // define this type here to make it shorter and improve code readability
 typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings SpiConnectionSettings;
 
@@ -69,13 +42,13 @@ typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings Spi
 
 //     switch (config[ SpiConnectionSettings::FIELD___spiMode ].NumericByRef().s4)
 //     {
-//         case SpiModes_Mode1 :
+//         case SpiMode_Mode1 :
 //             CR1 |= SPI_CR1_CPHA;
 //             break;
-//         case SpiModes_Mode2 :
+//         case SpiMode_Mode2 :
 //             CR1 |= SPI_CR1_CPOL;
 //             break;
-//         case SpiModes_Mode3 :
+//         case SpiMode_Mode3 :
 //             CR1 |= SPI_CR1_CPHA | SPI_CR1_CPOL;
 //             break;
 //         default :   // Default to Mode0 if invalid mode specified

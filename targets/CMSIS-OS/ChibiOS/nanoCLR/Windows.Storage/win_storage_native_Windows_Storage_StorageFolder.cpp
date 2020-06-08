@@ -25,6 +25,10 @@ extern bool sdCardFileSystemReady;
 #if (HAL_USBH_USE_MSD == TRUE)
 extern bool usbMsdFileSystemReady;
 #endif
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+extern bool spiffsFileSystemReady;
+extern spiffs fs;
+#endif
 
 void CombinePath(char * outpath, const char * path1, const char * path2)
 {
@@ -68,7 +72,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
     char* stringBuffer;
     uint32_t driveCount = 0;
     char workingDrive[sizeof(DRIVE_PATH_LENGTH)];
-    uint16_t driveIterator = 0;
+    uint16_t maxDriveCount = 0;
 
     CLR_RT_HeapBlock* storageFolder;
     CLR_RT_TypeDef_Index storageFolderTypeDef;
@@ -76,10 +80,9 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
     CLR_RT_HeapBlock& top   = stack.PushValue();
 
   #if HAL_USE_SDC
-    bool sdCardEnumerated = false;
-  #endif
+    // increase max drive count
+    maxDriveCount++;
 
-  #if HAL_USE_SDC
     // is the SD card file system ready?
     if(sdCardFileSystemReady)
     {
@@ -89,8 +92,9 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
   #endif
 
   #if HAL_USBH_USE_MSD
-    bool usbMsdEnumerated = false;
-
+    // increase max drive count
+    maxDriveCount++;
+    
     // is the USB mass storage device file system ready?
     if(usbMsdFileSystemReady)
     {
@@ -114,37 +118,49 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableSt
 
         // get a pointer to the first object in the array (which is of type <StorageFolder>)
         storageFolder = (CLR_RT_HeapBlock*)top.DereferenceArray()->GetFirstElement();
-
-        // create an instance of <StorageFolder>
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFolder, storageFolderTypeDef));
-
+        
         // loop until we've loaded all the possible drives
         // because we are iterating through an enum, need to use its integer values
-        for(; driveIterator < driveCount; driveIterator++ )
+        for(uint16_t driveIterator = 0; driveIterator < maxDriveCount; driveIterator++ )
         {
             // fill the folder name and path
 
           #if HAL_USE_SDC
-            // is the SD card file system ready?
-            if(sdCardFileSystemReady && !sdCardEnumerated)
+            // SD card has index 0
+            if(driveIterator == SD_CARD_DRIVE_INDEX_NUMERIC)
             {
-                memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
-
-                // flag as enumerated
-                sdCardEnumerated = true;
+                // is the SD card file system ready?
+                if(sdCardFileSystemReady)
+                {
+                    memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                }
+                else
+                {
+                    // SD card file system is not ready and/or no drive is enumerated
+                    continue;
+                }
             }
           #endif
 
           #if HAL_USBH_USE_MSD
-            // is the USB mass storage device file system ready?
-            if(usbMsdFileSystemReady && !usbMsdEnumerated)
+            // USB MSD has index 0 or 1, depending on the us of SD card
+            if(driveIterator == USB_MSD_DRIVE_INDEX_NUMERIC)
             {
-                memcpy(workingDrive, INDEX1_DRIVE_PATH, DRIVE_PATH_LENGTH);
-                
-                // flag as enumerated
-                usbMsdEnumerated = true;
-            }    
+                // is the USB mass storage device file system ready?
+                if(usbMsdFileSystemReady)
+                {
+                    memcpy(workingDrive, INDEX1_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                }
+                else
+                {
+                    // USB mass storage file system is not ready and/or no drive is enumerated
+                    continue;
+                }
+            }
           #endif
+
+            // create an instance of <StorageFolder>
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFolder, storageFolderTypeDef));
 
             // dereference the object in order to reach its fields
             hbObj = storageFolder->Dereference();
@@ -665,7 +681,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
         // ... that the path is the drive root (because SPIFFS doesn't support folders)
       #if (USE_SPIFFS_FOR_STORAGE == TRUE)
         if( (WORKING_DRIVE_IS_INTERNAL_DRIVE) &&
-            (hal_strlen_s(workingPath) == DRIVE_PATH_LENGTH))
+            (hal_strlen_s(workingPath) == DRIVE_PATH_LENGTH - 1))
         {
             // this is the SPIFFS drive
             spiffs_DIR drive;
@@ -714,6 +730,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
                 // and reset the file iterator vars too
                 itemIndex = 0;
                 fileCount = 0;
+                pe = &e;
                 
                 while ((pe = SPIFFS_readdir(&drive, pe)))
                 {

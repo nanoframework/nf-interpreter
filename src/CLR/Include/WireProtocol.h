@@ -152,6 +152,7 @@ typedef enum Monitor_Ping_Source_Flags
 {
     Monitor_Ping_c_Ping_Source_NanoCLR          = 0x00010000,
     Monitor_Ping_c_Ping_Source_NanoBooter       = 0x00010001,
+    Monitor_Ping_c_Ping_Source_Host             = 0x00010002,
 
     Monitor_Ping_c_Ping_DbgFlag_Stop            = 0x00000001,
     Monitor_Ping_c_Ping_DbgFlag_AppExit         = 0x00000004,
@@ -188,6 +189,7 @@ typedef struct ReleaseInfo
     uint8_t InfoString[128];
     uint8_t TargetName[32];
     uint8_t PlatformName[32];
+    uint8_t PlatformInfoString[128];
 
 }ReleaseInfo;
 

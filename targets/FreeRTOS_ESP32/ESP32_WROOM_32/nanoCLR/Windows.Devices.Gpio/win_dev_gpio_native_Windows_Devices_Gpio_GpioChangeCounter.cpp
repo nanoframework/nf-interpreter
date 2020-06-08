@@ -5,6 +5,10 @@
 //
 
 #include "win_dev_gpio_native.h"
+#include <core.h>
+
+typedef Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCount GpioChangeCount;
+typedef Library_corlib_native_System_TimeSpan TimeSpan;
 
 // Map Gpio pin number to 1 of 8 ESP32 counters, -1 = not mapped
 // Each pulse counter is a 16 bit signed value.
@@ -125,9 +129,11 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 				NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 			}
 
-			// Make sure GPIO pin doesn't have a GPIO Isr asscoiatted with it otherwise it will not support
-			// faster count frequencies
-			Remove_Gpio_Interrupt((gpio_num_t)pinNumber);
+			// Disable GPIO input pin as we use separate counter
+			CPU_GPIO_DisablePin(pinNumber, GpioPinDriveMode::GpioPinDriveMode_Input, 0);
+
+			// Reserve pin for Counter use
+			CPU_GPIO_ReservePin(pinNumber, true);
 		}
 		else
 		{
@@ -139,14 +145,17 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 	NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeRead___U8__BOOLEAN(CLR_RT_StackFrame& stack)
+HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeRead___WindowsDevicesGpioGpioChangeCount__BOOLEAN( CLR_RT_StackFrame& stack )
 {
 	NANOCLR_HEADER();
 	{
+		CLR_RT_TypeDef_Index gpioChangeCountTypeDef;
+		CLR_RT_HeapBlock* gpioChangeCount;
+		
 		CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
 		// check if object has been disposed
-		if (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::FIELD___disposedValue].NumericByRef().u1 != 0)
+		if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
 		{
 			NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
 		}
@@ -177,13 +186,29 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 			OverflowCount[counterIndex] = 0;
 		}
 
+		// push return value to stack
+		CLR_RT_HeapBlock& top   = stack.PushValue();
 
-		// Return results
-		// Update the Relative _readTime field (convert micro sec to 100ns ticks)
-		*&pThis[FIELD___readTime].NumericByRef().s8 = (relativeTime * 10);
+		// find <GpioGpioChangeCount> type definition, don't bother checking the result as it exists for sure
+		g_CLR_RT_TypeSystem.FindTypeDef( "GpioChangeCount", "Windows.Devices.Gpio", gpioChangeCountTypeDef );
 
-		// Return value to the managed application
-		stack.SetResult_U8(totalCount);
+		// create an instance of <GpioGpioChangeCount> in the stack
+		NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, gpioChangeCountTypeDef));
+
+		// dereference the <GpioGpioChangeCount> object in order to reach its fields
+		gpioChangeCount = top.Dereference();
+
+		// set fields
+
+		gpioChangeCount[GpioChangeCount::FIELD__Count].NumericByRef().u8 = totalCount;
+
+		// relative time is a TimeSpan, so needs to be access through a pointer
+        CLR_INT64* val = TimeSpan::GetValuePtr( gpioChangeCount[GpioChangeCount::FIELD__RelativeTime] );
+
+		// timespan in milliseconds, but...
+        *val = (CLR_UINT64)relativeTime;
+		// ... need to convert to ticks with this
+        *val *= TIME_CONVERSION__TICKUNITS;
 
 	}
 	NANOCLR_NOCLEANUP();
@@ -216,9 +241,18 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 
 		switch (polarity)
 		{
-			case Both:  countRising = true; countFalling = true; break;
-			case Rising:  countRising = true; break;
-			case Falling: countFalling = true; break;
+			case GpioChangePolarity_Both: 
+					countRising = true;
+					countFalling = true;
+					break;
+
+			case GpioChangePolarity_Rising:
+					countRising = true;
+					break;
+
+			case GpioChangePolarity_Falling:
+					countFalling = true;
+					break;
 		}
 
 		if (!InitialiseCounter(counterIndex, pinNumber, countRising, countFalling))
@@ -298,6 +332,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::Nati
 
 		// Clear counter / gpio mapping
 		GpioCounterMap[counterIndex] = -1;
+
+		CPU_GPIO_ReservePin(pinNumber, false);
 	}
 	NANOCLR_NOCLEANUP();
 }

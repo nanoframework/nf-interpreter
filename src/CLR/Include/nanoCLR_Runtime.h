@@ -1629,12 +1629,13 @@ struct CLR_RT_AttributeParser
         static const int c_ConstructorArgument = 1;
         static const int c_NamedField          = 2;
         static const int c_NamedProperty       = 3;
+        static const int c_DefaultConstructor  = 4;
 
         int              m_mode;
         CLR_RT_HeapBlock m_value;
 
         int              m_pos;
-        const char*           m_name;
+        const char*      m_name;
     };
 
     //--//
@@ -1643,6 +1644,7 @@ struct CLR_RT_AttributeParser
     CLR_PMETADATA                   m_blob;
 
     CLR_RT_MethodDef_Instance       m_md;
+    CLR_RT_MethodDef_Index          m_mdIdx;
     CLR_RT_TypeDef_Instance         m_td;
     CLR_RT_SignatureParser          m_parser;
     CLR_RT_SignatureParser::Element m_res;
@@ -1651,6 +1653,7 @@ struct CLR_RT_AttributeParser
     int                             m_fixed_Count;
     int                             m_named_Count;
     Value                           m_lastValue;
+    bool                            m_constructorParsed;
 
     //--//
 
@@ -1923,6 +1926,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     HRESULT SetResult_String ( const char*            val                   );
 
     HRESULT SetupTimeoutFromTicks( CLR_RT_HeapBlock& input, CLR_INT64*& output );
+    HRESULT SetupTimeoutFromTimeSpan( CLR_RT_HeapBlock& inputTimeSpan, CLR_INT64*& output );
 
     void ConvertResultToBoolean();
     void NegateResult          ();
@@ -2553,7 +2557,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
     // If thread was sleeping and get too far behind on updating of m_executionCounter
     // Then we make m_executionCounter 4 quantums above m_GlobalExecutionCounter;
-    void BringExecCounterToDate( int iGlobalExecutionCounter, int iDebitForEachRun );
+    void BringExecCounterToDate( int iGlobalExecutionCounter );
 
     void PopEH( CLR_RT_StackFrame* stack, CLR_PMETADATA ip ) { if(m_nestedExceptionsPos) PopEH_Inner( stack, ip ); }
 
@@ -2803,11 +2807,11 @@ struct CLR_RT_ExecutionEngine
     static const CLR_UINT32             c_Event_I2cMaster           = 0x00000080;
     static const CLR_UINT32             c_Event_SpiMaster           = 0x00000100;
     static const CLR_UINT32             c_Event_OneWireMaster       = 0x00000200;
+    static const CLR_UINT32             c_Event_Radio               = 0x00000400;
     static const CLR_UINT32             c_Event_AppDomain           = 0x02000000;
     static const CLR_UINT32             c_Event_Socket              = 0x20000000;
     static const CLR_UINT32             c_Event_IdleCPU             = 0x40000000;
     static const CLR_UINT32             c_Event_LowMemory           = 0x80000000; // Wait for a low-memory condition.
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -3104,12 +3108,12 @@ struct CLR_RT_ExecutionEngine
     HRESULT InitTimeout( CLR_INT64& timeExpire, const CLR_INT64& timeout );
     HRESULT InitTimeout( CLR_INT64& timeExpire,       CLR_INT32  timeout );
 
-    static bool IsInstanceOf( CLR_RT_TypeDescriptor&      desc, CLR_RT_TypeDescriptor& descTarget       );
-    static bool IsInstanceOf( const CLR_RT_TypeDef_Index& cls , const CLR_RT_TypeDef_Index& clsTarget   );
-    static bool IsInstanceOf( CLR_RT_HeapBlock&           obj , const CLR_RT_TypeDef_Index& clsTarget   );
-    static bool IsInstanceOf( CLR_RT_HeapBlock&           obj , CLR_RT_Assembly* assm, CLR_UINT32 token );
+    static bool IsInstanceOf( CLR_RT_TypeDescriptor&      desc, CLR_RT_TypeDescriptor& descTarget       , bool isInstInstruction);
+    static bool IsInstanceOf( const CLR_RT_TypeDef_Index& cls , const CLR_RT_TypeDef_Index& clsTarget                           );
+    static bool IsInstanceOf( CLR_RT_HeapBlock&           obj , const CLR_RT_TypeDef_Index& clsTarget                           );
+    static bool IsInstanceOf( CLR_RT_HeapBlock&           obj , CLR_RT_Assembly* assm, CLR_UINT32 token , bool isInstInstruction);
 
-    static HRESULT CastToType( CLR_RT_HeapBlock& ref, CLR_UINT32 tk, CLR_RT_Assembly* assm, bool fUpdate );
+    static HRESULT CastToType( CLR_RT_HeapBlock& ref, CLR_UINT32 tk, CLR_RT_Assembly* assm, bool isInstInstruction );
 
     void DebuggerLoop();
 

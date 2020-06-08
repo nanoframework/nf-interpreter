@@ -9,7 +9,7 @@
 #include "stm32_registry.h"
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_FLASH == TRUE)
+#if (HAL_NF_USE_STM32_FLASH == TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver constants.                                                         //
@@ -44,16 +44,12 @@ typedef struct SMT32FlashDriver {
 #define FLASH                       ((FLASH_TypeDef *) FLASH_R_BASE)
 #define HAL_IS_BIT_SET(REG, BIT)    (((REG) & (BIT)) != RESET)
 
-#define FLASH_FLAG_EOP                 FLASH_SR_EOP            /*!< FLASH End of Operation flag               */
-#define FLASH_FLAG_OPERR               FLASH_SR_SOP            /*!< FLASH operation Error flag                */
-#define FLASH_FLAG_WRPERR              FLASH_SR_WRPERR         /*!< FLASH Write protected error flag          */
-#define FLASH_FLAG_PGAERR              FLASH_SR_PGAERR         /*!< FLASH Programming Alignment error flag    */
-#define FLASH_FLAG_PGPERR              FLASH_SR_PGPERR         /*!< FLASH Programming Parallelism error flag  */
-#define FLASH_FLAG_PGSERR              FLASH_SR_PGSERR         /*!< FLASH Programming Sequence error flag     */
-#if defined(FLASH_SR_RDERR)
-#define FLASH_FLAG_RDERR               FLASH_SR_RDERR          /*!< Read Protection error flag (PCROP)        */
-#endif /* FLASH_SR_RDERR */
-#define FLASH_FLAG_BSY                 FLASH_SR_BSY            /*!< FLASH Busy flag                           */ 
+#define FLASH_FLAG_BSY             FLASH_SR_BSY            //!< FLASH Busy flag
+#define FLASH_FLAG_PGERR           FLASH_SR_PGERR          //!< FLASH Programming error flag
+#define FLASH_FLAG_WRPERR          FLASH_SR_WRPERR         //!< FLASH Write protected error flag
+#define FLASH_FLAG_EOP             FLASH_SR_EOP            //!< FLASH End of Operation flag
+
+#define FLASH_FLAG_ALL_ERRORS     ( FLASH_FLAG_WRPERR | FLASH_FLAG_PGERR )
 
 // FLASH_Program_Parallelism FLASH Program Parallelism
 #define FLASH_PSIZE_BYTE           ((uint32_t)0x00000000U)
@@ -84,12 +80,11 @@ extern "C" {
   int  flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t* buffer);
   int  flash_lld_isErased(uint32_t startAddress, uint32_t length);
   int  flash_lld_erase(uint32_t address);
-  uint8_t flash_lld_getSector(uint32_t address);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // HAL_USE_STM32_FLASH
+#endif // HAL_NF_USE_STM32_FLASH
 
 #endif // FLASH_LLD_H

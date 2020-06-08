@@ -248,13 +248,13 @@ typedef struct SOCK_sockaddr {
 
 CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr)==(16), SOCK_SOCKADDR)
 
-typedef ADS_PACKED struct GNU_PACKED SOCK_in_addr{  
-    ADS_PACKED union GNU_PACKED {    
-        ADS_PACKED struct GNU_PACKED {      
+typedef struct GNU_PACKED SOCK_in_addr{  
+    union GNU_PACKED {    
+        struct GNU_PACKED {      
             u_char s_b1,s_b2,s_b3,s_b4;    
         } S_un_b;    
         
-        ADS_PACKED struct GNU_PACKED {      
+        struct GNU_PACKED {      
             u_short s_w1,s_w2;    
         } S_un_w;    
         
@@ -262,7 +262,7 @@ typedef ADS_PACKED struct GNU_PACKED SOCK_in_addr{
     } S_un;
 } SOCK_in_addr;
 
-typedef ADS_PACKED struct GNU_PACKED SOCK_sockaddr_in {
+typedef struct GNU_PACKED SOCK_sockaddr_in {
         short   sin_family;
         u_short sin_port;
         SOCK_in_addr sin_addr;
@@ -359,15 +359,15 @@ typedef struct SOCK_timeval {
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkInterface.UpdateOperation (in managed code) !!! //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum UpdateOperation
+typedef enum __nfpack NetworkInterface_UpdateOperation
 {
-    UpdateOperation_Invalid =       0x00,
-    UpdateOperation_Dns =           0x01,
-    UpdateOperation_Dhcp =          0x02,
-    UpdateOperation_DhcpRenew =     0x04,
-    UpdateOperation_DhcpRelease =   0x08,
-    UpdateOperation_Mac =           0x10,
-};
+    NetworkInterface_UpdateOperation_Invalid = 0,
+    NetworkInterface_UpdateOperation_Dns = 1,
+    NetworkInterface_UpdateOperation_Dhcp = 2,
+    NetworkInterface_UpdateOperation_DhcpRenew = 4,
+    NetworkInterface_UpdateOperation_DhcpRelease = 8,
+    NetworkInterface_UpdateOperation_Mac = 16,
+} NetworkInterface_UpdateOperation;
 
 #define SOCK_NETWORKCONFIGURATION_INTERFACETYPE_UNKNOWN        0
 #define SOCK_NETWORKCONFIGURATION_INTERFACETYPE_ETHERNET       6
@@ -528,13 +528,13 @@ void Network_Interface_Deauth_Station(uint16_t index);
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkChange.NetworkEventType (in managed code) !!! //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum NetworkEventType
+typedef enum __nfpack NetworkChange_NetworkEventType
 {
-    NetworkEventType_Invalid = 0,
-    NetworkEventType_AvailabilityChanged = 1,
-    NetworkEventType_AddressChanged = 2,
-    NetworkEventType_APClientChanged = 3,
-};
+    NetworkChange_NetworkEventType_Invalid = 0,
+    NetworkChange_NetworkEventType_AvailabilityChanged = 1,
+    NetworkChange_NetworkEventType_AddressChanged = 2,
+    NetworkChange_NetworkEventType_APStationChanged = 3,
+} NetworkChange_NetworkEventType;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.WiFi.WiFiEventType (in managed code) !!! //
@@ -550,11 +550,11 @@ enum WiFiEventType
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkChange.NetworkEventFlags (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum NetworkEventFlags
+typedef enum __nfpack NetworkChange_NetworkEvents
 {
-    NetworkEventFlags_NetworkNOTAvailable = 0x00,
-    NetworkEventFlags_NetworkAvailable = 0x01,
-};
+    NetworkChange_NetworkEvents_NetworkNOTAvailable = 0,
+    NetworkChange_NetworkEvents_NetworkAvailable = 1,
+} NetworkChange_NetworkEvents;
 
 void Network_PostEvent(unsigned int eventType, unsigned int flags, unsigned int index);
 

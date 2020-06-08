@@ -9,7 +9,7 @@
 #include "stm32_registry.h"
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_FLASH == TRUE)
+#if (HAL_NF_USE_STM32_FLASH == TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver constants.                                                         //
@@ -68,6 +68,10 @@ typedef enum
 
 #define FLASH_SIZE                (uint32_t)((*((uint32_t *)FLASHSIZE_BASE)&0xFFFF) * 1024U)
 #define FLASH_PAGE_SIZE           ((uint32_t)128U)  /*!< FLASH Page Size in bytes */
+
+#define FLASH_FLAG_ALL_ERRORS  (  FLASH_FLAG_WRPERR  | FLASH_FLAG_PGAERR  | FLASH_FLAG_SIZERR | \
+                                  FLASH_FLAG_OPTVERR | FLASH_FLAG_RDERR   | FLASH_FLAG_FWWERR | \
+                                  FLASH_FLAG_NOTZEROERR )
 
 /**
   * @brief  Get the specified FLASH flag status. 
@@ -143,6 +147,6 @@ extern "C" {
 }
 #endif
 
-#endif // HAL_USE_STM32_FLASH
+#endif // HAL_NF_USE_STM32_FLASH
 
 #endif // FLASH_LLD_H

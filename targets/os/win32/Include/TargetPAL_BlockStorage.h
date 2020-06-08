@@ -260,7 +260,6 @@
 // //   V     Byte indicating if the block is valid (a.k.a. bad)
 // //   E     Bytes typically used for by a NAND driver for ECC
 // //
-// ADS_PACKED 
 // struct GNU_PACKED SectorMetadata
 // {
 //     unsigned long dwReserved1; // Used by the FAL to hold the logical to physical sector mapping information.

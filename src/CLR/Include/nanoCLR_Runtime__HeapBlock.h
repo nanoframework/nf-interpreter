@@ -2368,11 +2368,12 @@ private:
     __inline void SetSize ( CLR_INT32 size                ) { ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_ArrayList__FIELD___size  ].SetInteger        ( size  ); }
 };
 
+#if (NANOCLR_SYSTEM_COLLECTIONS == TRUE)
 
-#define Library_corlib_native_System_Collections_Queue__FIELD___array 1
-#define Library_corlib_native_System_Collections_Queue__FIELD___head  2
-#define Library_corlib_native_System_Collections_Queue__FIELD___tail  3
-#define Library_corlib_native_System_Collections_Queue__FIELD___size  4
+#define Library_nf_system_collections_System_Collections_Queue__FIELD___array 1
+#define Library_nf_system_collections_System_Collections_Queue__FIELD___head  2
+#define Library_nf_system_collections_System_Collections_Queue__FIELD___tail  3
+#define Library_nf_system_collections_System_Collections_Queue__FIELD___size  4
 
 struct CLR_RT_HeapBlock_Queue : public CLR_RT_HeapBlock
 {
@@ -2387,7 +2388,7 @@ public:
 
     //--//
 
-    __inline CLR_INT32 GetSize() { return ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Queue__FIELD___size ].NumericByRef().s4; }
+    __inline CLR_INT32 GetSize() { return ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Queue__FIELD___size ].NumericByRef().s4; }
 
 private:
 
@@ -2396,19 +2397,19 @@ private:
 
     static HRESULT ObjArrayMemcpy( CLR_RT_HeapBlock_Array* arraySrc, int indexSrc, CLR_RT_HeapBlock_Array* arrayDst, int indexDst, int length );
 
-    __inline CLR_RT_HeapBlock_Array* GetArray() { return ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Queue__FIELD___array ].DereferenceArray(); }
-    __inline CLR_INT32                  Head () { return ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Queue__FIELD___head  ].NumericByRef().s4;  }
-    __inline CLR_INT32               GetTail () { return ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Queue__FIELD___tail  ].NumericByRef().s4;  }
+    __inline CLR_RT_HeapBlock_Array* GetArray() { return ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Queue__FIELD___array ].DereferenceArray(); }
+    __inline CLR_INT32                  Head () { return ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Queue__FIELD___head  ].NumericByRef().s4;  }
+    __inline CLR_INT32               GetTail () { return ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Queue__FIELD___tail  ].NumericByRef().s4;  }
     
-    __inline void SetArray( CLR_RT_HeapBlock_Array* array ) { ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Queue__FIELD___array ].SetObjectReference( array ); }
-    __inline void SetHead ( CLR_INT32 head                ) { ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Queue__FIELD___head  ].SetInteger        ( head  ); }
-    __inline void SetTail ( CLR_INT32 tail                ) { ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Queue__FIELD___tail  ].SetInteger        ( tail  ); }
-    __inline void SetSize ( CLR_INT32 size                ) { ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Queue__FIELD___size  ].SetInteger        ( size  ); }
+    __inline void SetArray( CLR_RT_HeapBlock_Array* array ) { ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Queue__FIELD___array ].SetObjectReference( array ); }
+    __inline void SetHead ( CLR_INT32 head                ) { ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Queue__FIELD___head  ].SetInteger        ( head  ); }
+    __inline void SetTail ( CLR_INT32 tail                ) { ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Queue__FIELD___tail  ].SetInteger        ( tail  ); }
+    __inline void SetSize ( CLR_INT32 size                ) { ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Queue__FIELD___size  ].SetInteger        ( size  ); }
 };
 
 
-#define Library_corlib_native_System_Collections_Stack__FIELD___array 1
-#define Library_corlib_native_System_Collections_Stack__FIELD___size  2
+#define Library_nf_system_collections_System_Collections_Stack__FIELD___array 1
+#define Library_nf_system_collections_System_Collections_Stack__FIELD___size  2
 
 struct CLR_RT_HeapBlock_Stack : public CLR_RT_HeapBlock
 {
@@ -2421,18 +2422,20 @@ public:
 
     //--//
 
-    __inline CLR_INT32 GetSize() { return ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Stack__FIELD___size ].NumericByRef().s4; }
+    __inline CLR_INT32 GetSize() { return ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Stack__FIELD___size ].NumericByRef().s4; }
 
 protected:
 
     // Keep in-sync with _defaultCapacity in System.Collections.Stack class in Stack.cs
     static const CLR_INT32 c_DefaultCapacity = 4;
 
-    __inline CLR_RT_HeapBlock_Array* GetArray() { return ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Stack__FIELD___array ].DereferenceArray(); }
+    __inline CLR_RT_HeapBlock_Array* GetArray() { return ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Stack__FIELD___array ].DereferenceArray(); }
     
-    __inline void SetArray( CLR_RT_HeapBlock_Array* array ) { ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Stack__FIELD___array ].SetObjectReference( array ); }
-    __inline void SetSize ( CLR_INT32 size                ) { ((CLR_RT_HeapBlock*)this)[ Library_corlib_native_System_Collections_Stack__FIELD___size  ].SetInteger        ( size  ); }
+    __inline void SetArray( CLR_RT_HeapBlock_Array* array ) { ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Stack__FIELD___array ].SetObjectReference( array ); }
+    __inline void SetSize ( CLR_INT32 size                ) { ((CLR_RT_HeapBlock*)this)[ Library_nf_system_collections_System_Collections_Stack__FIELD___size  ].SetInteger        ( size  ); }
 };
+
+#endif // (NANOCLR_SYSTEM_COLLECTIONS == TRUE)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

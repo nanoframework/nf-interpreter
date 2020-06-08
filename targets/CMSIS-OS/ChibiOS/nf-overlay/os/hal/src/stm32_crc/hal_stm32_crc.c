@@ -11,7 +11,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_CRC == TRUE)
+#if (HAL_NF_USE_STM32_CRC == TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver local definitions.                                                 //
@@ -67,7 +67,7 @@ void crcReset() {
   osalSysUnlock();
 }
 
-uint32_t crcCompute(const void* buffer, int size, uint32_t initialCrc) {
+uint32_t crcCompute(const void* buffer, const uint32_t size, const uint32_t initialCrc) {
 
   return crc_lld_compute(buffer, size, initialCrc);
 }

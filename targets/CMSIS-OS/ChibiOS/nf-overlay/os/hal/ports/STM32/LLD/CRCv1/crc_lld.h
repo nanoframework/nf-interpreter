@@ -10,7 +10,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_CRC == TRUE)
+#if (HAL_NF_USE_STM32_CRC == TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver constants.                                                         //
@@ -72,12 +72,12 @@ typedef struct CRCDriver {
 // From STMicroelectronics Cube HAL 
 ///////////////////////////////////////////
 
-#if defined(STM32L0xx_MCUCONF)
+#if defined(STM32L0XX)
 // this series uses different names for the buses
 
-#define rccEnableCRC(lp) rccEnableAPB1(RCC_AHBENR_CRCEN, lp)
-#define rccDisableCRC() rccDisableAPB1(RCC_AHBENR_CRCEN)
-#define rccResetCRC() rccResetAPB1(RCC_AHB1RSTR_CRCRST)
+#define rccEnableCRC(lp) rccEnableAHB(RCC_AHBENR_CRCEN, lp)
+#define rccDisableCRC() rccDisableAHB(RCC_AHBENR_CRCEN)
+#define rccResetCRC() rccResetAHB(RCC_AHB1RSTR_CRCRST)
 
 #endif
 
@@ -163,7 +163,7 @@ extern "C" {
   void crc_lld_start(const crcConfig *config);
   void crc_lld_stop();
   void crc_lld_reset();
-  uint32_t crc_lld_compute(const void* buffer, int size, uint32_t initialCrc);
+  uint32_t crc_lld_compute(const void* buffer, const uint32_t size, const uint32_t initialCrc);
 
 #if (CRC_USE_MUTUAL_EXCLUSION == TRUE)
   void crc_lld_aquire();
@@ -177,6 +177,6 @@ uint32_t crc_lld_fastCRC32(uint32_t initialCrc, uint8_t data);
 }
 #endif
 
-#endif // HAL_USE_STM32_CRC
+#endif // HAL_NF_USE_STM32_CRC
 
 #endif // CRC_LLD_H

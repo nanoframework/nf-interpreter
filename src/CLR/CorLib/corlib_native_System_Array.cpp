@@ -53,6 +53,8 @@ HRESULT Library_corlib_native_System_Array::get_Length___I4( CLR_RT_StackFrame& 
     NANOCLR_NOCLEANUP();
 }
 
+#if (NANOCLR_REFLECTION == TRUE)
+
 HRESULT Library_corlib_native_System_Array::CreateInstance___STATIC__SystemArray__SystemType__I4( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -67,6 +69,8 @@ HRESULT Library_corlib_native_System_Array::CreateInstance___STATIC__SystemArray
 
     NANOCLR_NOCLEANUP();
 }
+
+#endif // NANOCLR_REFLECTION 
 
 HRESULT Library_corlib_native_System_Array::Copy___STATIC__VOID__SystemArray__I4__SystemArray__I4__I4( CLR_RT_StackFrame& stack )
 {

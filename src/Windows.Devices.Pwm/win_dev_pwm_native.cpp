@@ -31,6 +31,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::NativeSetDesiredFrequency___U4__U4,
     NULL,
     NULL,
+    NULL,
     Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::GetDeviceSelector___STATIC__STRING,
     NULL,
     NULL,
@@ -57,8 +58,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Pwm =
 {
-    "Windows.Devices.Pwm", 
-    0x8E93FB40,
+    "Windows.Devices.Pwm",
+    0xBA2E2251,
     method_lookup,
-    { 100, 1, 3, 1 }
+    { 100, 1, 3, 3 }
 };

@@ -7,41 +7,6 @@
 #include "stdafx.h"
 #include "nanoPAL_NativeDouble.h"
 
-#include <math.h>
-
-#ifdef WIN32
-#include <float.h>
-
-#define __isnand        _isnan
-#define __isinfd(x)    (!_finite(x))
-
-inline int __signbitd(double x)
-{
-  unsigned char *ptr = (unsigned char*) &x;
-  return (*(ptr + (sizeof(double) - 1)) & 0x80) != 0;
-}
-
-#define rint(x)         floor((x) + 0.5) 
-#define remainder(x,y) ((x) - ((y) * rint((x) / (y))))
-
-#define isgreater(param0,param1) (param0 > param1)
-#define isless(param0,param1)    (param0 < param1)
-
-#elif __GNUC__ && !defined( isgreater ) // newer versions include this macro already in math.h
-
-#define isgreater(param0,param1) (param0 > param1)
-#define isless(param0,param1)    (param0 < param1)
-
-#elif defined(arm) || defined(__arm)
-
-#define __isnand   __ARM_isnan
-#define __isinfd   __ARM_isinf
-#define __signbitd __ARM_signbit
-
-#endif
-
-
-
 using namespace System;
 // Summary:
 //     Compares this instance to a specified double-precision floating-point number
@@ -68,31 +33,47 @@ using namespace System;
 //         This instance is a number and value is not a number (System.Double.NaN).
 int32_t System::Double::CompareTo( double d, double val )
 {
-
     if (__isnand(d))
     {
-       // Instance is not a number
-       if (__isnand(val)) 
-          return 0; // value is not a number
-       else 
-          return -1; //value is a number
+        // Instance is not a number
+        if (__isnand(val))
+        {
+            // value is not a number
+            return 0;
+        }
+        else 
+        {
+            //value is a number
+            return -1;
+        }
     }
     else
     {
-      // Instance is a number
-      if (__isnand(val)) 
-        // value is not a number
-        return 1; 
+        // Instance is a number
+        if (__isnand(val)) 
+        {
+            // value is not a number
+            return 1; 
+        }
     }
-    if ((__signbitd(d) == __signbitd(val)) && (__isinfd(d) == __isinfd(val)))
-      // either both are Positive or both are Negative Infinity
-      return 0;
+
+    if ( __isinfd(d) && __isinfd(val) )
+    {
+        // both are Infinity
+        return 0;
+    }
+
     if (isgreater(d,val))
-      // this instance is greater than value
-      return 1;
+    {
+        // this instance is greater than value
+        return 1;
+    }
+
     if (isless(d,val))
-      // this instance is less than value
-      return -1;
+    {
+        // this instance is less than value
+        return -1;
+    }
       
     // assume values are equal as all other options have been checked.
     return 0;

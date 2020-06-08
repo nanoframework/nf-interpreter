@@ -5,6 +5,7 @@
 
 #include <ch.h>
 #include <hal.h>
+#include <hal_nf_community.h>
 #include <cmsis_os.h>
 
 #include <serialcfg.h>
@@ -26,9 +27,21 @@ __IO uint32_t vectorTable[48] __attribute__((section(".RAMVectorTable")));
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 1024, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 512, "ReceiverThread");
 // declare CLRStartup thread here 
-osThreadDef(CLRStartupThread, osPriorityNormal, 3072, "CLRStartupThread"); 
+osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread"); 
+
+// configuration for debugger serial port
+// dev notes:
+// conservative baud rate value as 921600 has a high error percentage on baud rate clocking
+// OVER8 bit on CR1 to further decrease baud rate clocking error 
+static const SerialConfig uartConfig =
+{
+  460800,
+  USART_CR1_OVER8,
+  USART_CR2_STOP1_BITS,
+  0
+};
 
 //  Application entry point.
 int main(void) {
@@ -60,8 +73,13 @@ int main(void) {
   // start watchdog
   Watchdog_Init();
 
+  #if (HAL_NF_USE_STM32_CRC == TRUE)
+  // startup crc
+  crcStart(NULL);
+  #endif
+
   // starts the serial driver
-  sdStart(&SERIAL_DRIVER, NULL);
+  sdStart(&SERIAL_DRIVER, &uartConfig);
 
   // create the receiver thread
   osThreadCreate(osThread(ReceiverThread), NULL);

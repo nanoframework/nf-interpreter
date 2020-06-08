@@ -50,6 +50,7 @@ CMake/Modules/FindINTEROP*.cmake
 .vs/*
 !.vs/launch.vs.SAMPLE.json
 !.vs/tasks.vs.SAMPLE.json
+**/ipch/*
 
 # Visual C++ cache files
 *.VC.db

@@ -1718,20 +1718,7 @@ bool CLR_RT_Assembly::Resolve_AssemblyRef( bool fOutput )
 
         if(dst->m_target == NULL)
         {
-            bool fExact = true;
-
-            //
-            // Exact matching if this is a patch and the reference is toward the patched assembly.
-            //
-            if(m_header->flags & CLR_RECORD_ASSEMBLY::c_Flags_Patch)
-            {
-                if(!strcmp( szName, m_szName ))
-                {
-                    fExact = true;
-                }
-            }
-
-            CLR_RT_Assembly* target = g_CLR_RT_TypeSystem.FindAssembly( szName, &src->version, fExact );
+            CLR_RT_Assembly* target = g_CLR_RT_TypeSystem.FindAssembly( szName, &src->version, false );
 
             if(target == NULL || (target->m_flags & CLR_RT_Assembly::Resolved) == 0)
             {
@@ -2496,8 +2483,6 @@ HRESULT CLR_RT_AppDomain::GetAssemblies( CLR_RT_HeapBlock& ref )
     {
         NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN( this )
         {
-            if(pASSM->m_header->flags & CLR_RECORD_ASSEMBLY::c_Flags_Patch) continue;
-
             if(pass == 0)
             {
                 count++;
@@ -3296,7 +3281,7 @@ CLR_RT_Assembly* CLR_RT_TypeSystem::FindAssembly( const char* szName, const CLR_
             {
                 return pASSM;
             }
-            // exact match must take into accoutn all numbers
+            // exact match requested: must take into accoutn all numbers in the version
             else if(fExact)
             {
                 if(0 == memcmp( &pASSM->m_header->version, ver, sizeof(*ver) ))
@@ -3304,8 +3289,9 @@ CLR_RT_Assembly* CLR_RT_TypeSystem::FindAssembly( const char* szName, const CLR_
                     return pASSM;
                 }
             }
-            // if excet match is not required but still we have version we will enforce only the first two number because by convention
-            // we increse the minor numbers when native assemblies change CRC
+            // exact match was NOT required but still there version information, 
+            // we will enforce only the first two number because (by convention) 
+            // only the minor field is required to be bumped when native assemblies change CRC
             else if(
                      ver->iMajorVersion == pASSM->m_header->version.iMajorVersion &&
                      ver->iMinorVersion == pASSM->m_header->version.iMinorVersion
@@ -3923,7 +3909,7 @@ bool CLR_RT_TypeSystem::MatchSignatureElement( CLR_RT_SignatureParser::Element& 
         if(FAILED(descLeft .InitializeFromReflection( idxLeft  ))) return false;
         if(FAILED(descRight.InitializeFromReflection( idxRight ))) return false;
 
-        if(!CLR_RT_ExecutionEngine::IsInstanceOf( descRight, descLeft )) return false;
+        if(!CLR_RT_ExecutionEngine::IsInstanceOf( descRight, descLeft, false )) return false;
     }
     else
     {
@@ -4299,6 +4285,8 @@ HRESULT CLR_RT_AttributeParser::Initialize( const CLR_RT_AttributeEnumerator& en
     m_currentPos  = 0;
     m_fixed_Count = m_md.m_target->numArgs - 1;
     m_named_Count = -1;
+    m_constructorParsed = false;
+    m_mdIdx = en.m_match;
 
     NANOCLR_NOCLEANUP();
 }
@@ -4313,18 +4301,80 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
         NANOCLR_READ_UNALIGNED_UINT16(m_named_Count,m_blob);
     }
 
-    if(m_currentPos < m_fixed_Count)
+    if( m_fixed_Count == 0 && 
+        m_named_Count == 0 &&
+        !m_constructorParsed )
     {
+        // Attribute class has no fields, no properties and only default constructor
+
+        m_lastValue.m_mode = Value::c_DefaultConstructor;
+        m_lastValue.m_name = NULL;
+
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( m_lastValue.m_value, m_td ));
+
+        res = &m_lastValue;
+
+        m_constructorParsed = true;
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
+
+    }
+    else if((m_currentPos < m_fixed_Count) &&
+            !m_constructorParsed )
+    {
+        // Attribute class has a constructor
+
         m_lastValue.m_mode = Value::c_ConstructorArgument;
         m_lastValue.m_name = NULL;
 
+        ////////////////////////////////////////////////
+        // need to read the arguments from the blob
+
+        NANOCLR_CHECK_HRESULT(m_parser.Advance( m_res ));
         //
-        // attribute contructor support is currently not implemented
+        // Skip value info.
         //
-        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        m_blob += sizeof(CLR_UINT8);
+
+        const CLR_RT_DataTypeLookup& dtl = c_CLR_RT_DataTypeLookup[ m_res.m_dt ];
+
+        if(dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
+        {
+            // size of value
+            CLR_UINT32 size = dtl.m_sizeInBytes;
+
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(m_lastValue.m_value, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+
+            // need to setup reflection and data type Id to properly setup the object
+            m_lastValue.m_value.SetReflection(*dtl.m_cls);
+
+            m_lastValue.m_value.SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(m_res.m_dt, 0, 1) );
+
+            // because this is a numeric object, performa a raw copy of the numeric value data from the blob to the return value 
+            memcpy( (CLR_UINT8*)&m_lastValue.m_value.NumericByRef(), m_blob, size ); m_blob += size;
+        }
+        else if(m_res.m_dt == DATATYPE_STRING)
+        {
+            CLR_UINT32 tk; NANOCLR_READ_UNALIGNED_UINT16(tk,m_blob);
+
+            CLR_RT_HeapBlock_String::CreateInstance( m_lastValue.m_value, CLR_TkFromType( TBL_Strings, tk ), m_assm );
+        }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        res = &m_lastValue;
+
+        m_constructorParsed = true;
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
-    else if(m_currentPos < m_fixed_Count + m_named_Count)
+    else if(m_currentPos < m_fixed_Count + m_named_Count &&
+            !m_constructorParsed )
     {
+        // Attribute class has named fields
+
         CLR_UINT32 kind; NANOCLR_READ_UNALIGNED_UINT8(kind,m_blob);
 
         m_lastValue.m_name = GetString();
@@ -4347,7 +4397,9 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
             m_lastValue.m_mode = Value::c_NamedProperty;
 
             //
-            //attribute contructor support is currently not implemented
+            // it's supposed to reach here when there is an attribute contructor
+            // but that is already handled upwards
+            // leaving this here waiting for a special case that hits here (if there is one...)
             //
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
@@ -4357,7 +4409,6 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
         res = NULL;
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
-
 
     NANOCLR_CHECK_HRESULT(m_parser.Advance( m_res ));
 
@@ -4386,11 +4437,13 @@ HRESULT CLR_RT_AttributeParser::Next( Value*& res )
 
         if(dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
         {
+            // need to setup reflection and data type Id to properly setup the object
+            m_lastValue.m_value.SetReflection(m_res.m_cls);
+
             m_lastValue.m_value.SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(m_res.m_dt, 0, 1) );
 
-            CLR_UINT32 size = (dtl.m_sizeInBits + 7) / 8;
+            CLR_UINT32 size = dtl.m_sizeInBytes;
 
-// FIXME GJS - the numeric values, what is their endiannes??? In the MSTV code there is a BIG endian fix but it looks like it will not work, so was it ever used?
             memcpy( &m_lastValue.m_value.NumericByRef(), m_blob, size ); m_blob += size;
         }
         else if(m_res.m_dt == DATATYPE_STRING)
@@ -4417,4 +4470,3 @@ const char* CLR_RT_AttributeParser::GetString()
 
     return m_assm->GetString( tk );
 }
-

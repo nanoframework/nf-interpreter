@@ -6,6 +6,9 @@
 #ifndef _TARGET_HAL_TIME_H_
 #define _TARGET_HAL_TIME_H_ 1
 
+#include  <sys/time.h>
+#include  <time.h>
+
 #include <esp32_os.h>
 
 #define HAL_Time_CurrentSysTicks    xTaskGetTickCount

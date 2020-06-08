@@ -8,7 +8,8 @@
 #include <nanoHAL.h>
 #include "Esp32_os.h"
 #include "LWIP_Sockets.h"
-#include "apps/sntp/sntp.h"
+#include "apps/sntp.h"
+#include <target_lwip_sntp_opts.h>
 
 extern "C" void set_signal_sock_function( void (*funcPtr)() );
 
@@ -33,17 +34,17 @@ __nfweak void InitialiseEthernet()
 
 static void PostAddressChanged(uint netIndex)
 {
-	Network_PostEvent(NetworkEventType_AddressChanged, 0, netIndex);
+	Network_PostEvent(NetworkChange_NetworkEventType_AddressChanged, 0, netIndex);
 }
 
 static void PostAvailabilityOn(uint netIndex)
 {
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, 1, netIndex);
+	Network_PostEvent(NetworkChange_NetworkEventType_AvailabilityChanged, 1, netIndex);
 }
 
 static void PostAvailabilityOff(uint netIndex)
 {
-	Network_PostEvent(NetworkEventType_AvailabilityChanged, 0, netIndex);
+	Network_PostEvent(NetworkChange_NetworkEventType_AvailabilityChanged, 0, netIndex);
 }
 
 static void PostScanComplete(uint netIndex)
@@ -53,7 +54,7 @@ static void PostScanComplete(uint netIndex)
 
 static void PostAPStationChanged(uint connect, uint netInfo)
 {
-	Network_PostEvent(NetworkEventType_APClientChanged, connect, netInfo);
+	Network_PostEvent(NetworkChange_NetworkEventType_APStationChanged, connect, netInfo);
 }
 
 static void initialize_sntp()

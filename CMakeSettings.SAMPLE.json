@@ -14,11 +14,6 @@
       "intelliSenseMode": "linux-gcc-arm",
       "variables": [
         {
-          "name": "VISUAL_STUDIO",
-          "value": "TRUE",
-          "type": "STRING"
-        },
-        {
           "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}",
           "type": "PATH"
@@ -35,12 +30,12 @@
         },
         {
           "name": "ESP32_IDF_PATH",
-          "value": "C:/ESP32_TOOLS/esp-idf-v3.1",
+          "value": "C:/ESP32_TOOLS/esp-idf-v3.3.1",
           "type": "PATH"
         },
         {
           "name": "ESP32_LIBS_PATH",
-          "value": "C:/ESP32_TOOLS/libs-v3.1",
+          "value": "C:/ESP32_TOOLS/libs-v3.3.1",
           "type": "PATH"
         },
         {
@@ -71,6 +66,11 @@
         {
           "name": "USE_RNG",
           "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "TARGET_LIGHT_MATH",
+          "value": "FALSE",
           "type": "BOOL"
         },
         {
@@ -120,7 +120,7 @@
         },
         {
           "name": "NF_WP_IMPLEMENTS_CRC32",
-          "value": "OFF",
+          "value": "ON",
           "type": "BOOL"
         },
         {
@@ -180,6 +180,11 @@
         },
         {
           "name": "API_System.Math",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_nanoFramework.ResourceManager",
           "value": "True",
           "type": "BOOL"
         },
@@ -269,11 +274,6 @@
       "intelliSenseMode": "linux-gcc-arm",
       "variables": [
         {
-          "name": "VISUAL_STUDIO",
-          "value": "TRUE",
-          "type": "STRING"
-        },
-        {
           "name": "EXECUTABLE_OUTPUT_PATH",
           "value": "${workspaceRoot}/Build/${name}",
           "type": "STRING"
@@ -311,6 +311,11 @@
         {
           "name": "USE_RNG",
           "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "TARGET_LIGHT_MATH",
+          "value": "FALSE",
           "type": "BOOL"
         },
         {
@@ -370,7 +375,7 @@
         },
         {
           "name": "NF_WP_IMPLEMENTS_CRC32",
-          "value": "OFF",
+          "value": "ON",
           "type": "BOOL"
         },
         {

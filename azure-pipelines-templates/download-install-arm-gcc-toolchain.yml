@@ -2,30 +2,30 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
+  - task: Cache@2
+    inputs:
+      key: gccUpdateKey
+      restoreKeys: gccUpdateKey
+      path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+      cacheHitVar: GCC_CACHE_RESTORED
+    condition: eq(variables.GccArm_Version, '')
+    displayName: Cache ARM GCC toolchain
+
   - task: PowerShell@2
     inputs:
         targetType: 'inline'
         script: |
 
+            # this is the default GNU GCC ARM version
+            $gccVersion = "8-2019-q3-update"
+
             if("$(GccArm_Version)" -ne "")
             {
-                if("$(GccArm_Version)" -eq "5-2016-q3-update")
-                {
-                    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-5-2016-q3-update-win32.7z"
-                }
-                else
-                {
-                    # no valid version specified, use the default one
-                    # current default is , this is is "8-2019-q3-update"
-                    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-8-2019-q3-update-win32.7z"
-                }
+                # specific version requested, replace default one
+                $gccVersion = "$(GccArm_Version)"
             }
-            else
-            {
-                # no version specified, use the default one
-                # current default is , this is is "8-2019-q3-update"
-                $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-8-2019-q3-update-win32.7z"
-            }
+
+            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-$gccVersion-win32.7z"
 
             Write-Host "Downloading ARM GNU GCC toolchain $(GccArm_Version)..."
 
@@ -33,12 +33,14 @@ steps:
             (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+    condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     displayName: Downloading ARM GCC toolchain
 
   - task: ExtractFiles@1
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.7z' 
       destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
+    condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     displayName: Extracting ARM GCC toolchain
 
   - script: echo "##vso[task.prependpath]C:\Windows\System32"

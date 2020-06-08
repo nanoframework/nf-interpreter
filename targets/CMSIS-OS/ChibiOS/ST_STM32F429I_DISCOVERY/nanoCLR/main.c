@@ -5,6 +5,7 @@
 
 #include <ch.h>
 #include <hal.h>
+#include <hal_nf_community.h>
 #include <cmsis_os.h>
 
 #include "usbcfg.h"
@@ -66,6 +67,11 @@ int main(void) {
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   Watchdog_Init();
 
+  #if (HAL_NF_USE_STM32_CRC == TRUE)
+  // startup crc
+  crcStart(NULL);
+  #endif
+
   // config and init external memory
   // this has to be called after osKernelInitialize, otherwise an hard fault will occur
   Target_ExternalMemoryInit();
@@ -77,7 +83,7 @@ int main(void) {
   // Activates the USB driver and then the USB bus pull-up on D+.
   // Note, a delay is inserted in order to not have to disconnect the cable after a reset
   usbDisconnectBus(serusbcfg.usbp);
-  chThdSleepMilliseconds(1500);
+  chThdSleepMilliseconds(100);
   usbStart(serusbcfg.usbp, &usbcfg);
   usbConnectBus(serusbcfg.usbp);
 

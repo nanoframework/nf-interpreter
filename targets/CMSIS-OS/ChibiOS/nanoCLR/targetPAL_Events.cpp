@@ -34,7 +34,7 @@ bool Events_Uninitialize()
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    chVTResetI(&boolEventsTimer);
+    chVTReset(&boolEventsTimer);
 
     return true;
 }
@@ -99,7 +99,12 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
     if(timerCompleteFlag != NULL)
     {
         // no need to stop the timer even if it's running because the API does it anyway
-        chVTSetI(&boolEventsTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
+    	if (port_is_isr_context()){
+    		chVTSetI(&boolEventsTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
+		}
+		else{
+			chVTSet(&boolEventsTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
+		}
     }
 }
 
@@ -113,7 +118,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
     Events_WaitForEvents_Calls++;
 #endif
 
-    uint64_t expireTimeInTicks  = HAL_Time_CurrentTime() + countsRemaining;
+    uint64_t expireTimeInTicks  = HAL_Time_CurrentSysTicks() + countsRemaining;
     bool runContinuations = true;
 
     while(true)
@@ -126,7 +131,7 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             return events;
         }
 
-        if(expireTimeInTicks <= HAL_Time_CurrentTime())
+        if(expireTimeInTicks <= HAL_Time_CurrentSysTicks())
         {
             break;
         }
@@ -154,6 +159,9 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
         {
             break;
         }
+
+        // feed the watchdog...
+        Watchdog_Reset();
     }
 
     return 0;

@@ -37,6 +37,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 #include <nanoHAL_v2.h>
+#include <targetHAL.h>
 
 #include "lwip/opt.h"
 #include "lwip/mem.h"
@@ -81,6 +82,7 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 void sys_mbox_free(sys_mbox_t *mbox)
 {
     msg_t msgp;
+    GLOBAL_LOCK();
 
     // check for messages waiting 
     // If there are messages still present in the
@@ -95,6 +97,7 @@ void sys_mbox_free(sys_mbox_t *mbox)
         // breaks execution to ensure developer is aware that this function needs a strong implementation at platform level
         __asm volatile("BKPT #0\n");	
 	}
+    GLOBAL_UNLOCK();
 
     // ...free memory from mailbox
     platform_free(*mbox);

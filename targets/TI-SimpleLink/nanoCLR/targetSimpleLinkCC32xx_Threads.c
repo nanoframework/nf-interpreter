@@ -12,10 +12,6 @@
 #include <unistd.h>
 #include <string.h>
 
-// RTOS header files
-#include "FreeRTOS.h"
-#include "task.h"
-
 // TI-RTOS Header files
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/net/wifi/simplelink.h>
@@ -29,6 +25,7 @@
 #include <targetHAL.h>
 #include <nanoCLR_Application.h>
 #include <WireProtocol_ReceiverThread.h>
+#include <CLR_Startup_Thread.h>
 #include <targetSimpleLinkCC32xx_Threads.h>
 #include <targetSimpleLinkCC32xx_LinkLocalTask.h>
 #include <targetSimpleLinkCC32xx_ProvisioningTask.h>
@@ -37,8 +34,6 @@
 extern void Status_callback();
 extern void Link_callback(bool linkUp);
 
-extern void * CLRStartupThread(void *arg0);
-extern void * ReceiverThread(void *arg0);
 extern void sntp_init(void);
 
 // other externals
@@ -684,8 +679,10 @@ void * mainThread(void *arg)
     // initialize the realtime clock
     clock_settime(CLOCK_REALTIME, &ts);
 
-    // Switch off all LEDs on boards
+    // Switch off all LEDs on board
     GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
+    GPIO_write(Board_GPIO_LED1, Board_GPIO_LED_OFF);
+    GPIO_write(Board_GPIO_LED2, Board_GPIO_LED_OFF);
 
     // clear SimpleLink Status
     nF_ControlBlock.Status = 0;
@@ -813,9 +810,9 @@ void * mainThread(void *arg)
 
     // receiver thread
     pthread_attr_init(&threadAttributes);
-    priorityParams.sched_priority = NF_TASK_PRIORITY + 1;
+    priorityParams.sched_priority = NF_TASK_PRIORITY;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
-    retc |= pthread_attr_setstacksize(&threadAttributes, 2048);
+    retc |= pthread_attr_setstacksize(&threadAttributes, THREADSTACKSIZE);
     if (retc != 0)
     {
         // failed to set attributes
@@ -838,7 +835,7 @@ void * mainThread(void *arg)
     pthread_attr_init(&threadAttributes);
     priorityParams.sched_priority = NF_TASK_PRIORITY;
     retc = pthread_attr_setschedparam(&threadAttributes, &priorityParams);
-    retc |= pthread_attr_setstacksize(&threadAttributes, 5116);
+    retc |= pthread_attr_setstacksize(&threadAttributes, THREADSTACKSIZE);
     if (retc != 0)
     {
         // failed to set attributes
@@ -892,14 +889,14 @@ void vApplicationMallocFailedHook()
 //! \return none
 //!
 //*****************************************************************************
-void vApplicationStackOverflowHook(TaskHandle_t pxTask,
-                                   char *pcTaskName)
-{
-    //Handle FreeRTOS Stack Overflow
-    while(1)
-    {
-    }
-}
+// void vApplicationStackOverflowHook(TaskHandle_t pxTask,
+//                                    char *pcTaskName)
+// {
+//     //Handle FreeRTOS Stack Overflow
+//     while(1)
+//     {
+//     }
+// }
 
 void vApplicationTickHook(void)
 {

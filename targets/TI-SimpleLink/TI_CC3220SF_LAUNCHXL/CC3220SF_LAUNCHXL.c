@@ -355,9 +355,9 @@ const uint_least8_t I2C_count = CC3220SF_LAUNCHXL_I2CCOUNT;
 #include <ti/drivers/I2S.h>
 #include <ti/drivers/i2s/I2SCC32XX.h>
 
-I2SCC32XX_Object i2sCC3220SObjects[CC3220S_LAUNCHXL_I2SCOUNT];
+I2SCC32XX_Object i2sCC3220SFObjects[CC3220SF_LAUNCHXL_I2SCOUNT];
 
-const I2SCC32XX_HWAttrs i2sCC3220SHWAttrs[CC3220S_LAUNCHXL_I2SCOUNT] = {
+const I2SCC32XX_HWAttrs i2sCC3220SFHWAttrs[CC3220SF_LAUNCHXL_I2SCOUNT] = {
     {
       .pinSD1           =  I2SCC32XX_PIN_50_SD1,
       .pinSD0           =  I2SCC32XX_PIN_64_SD0,
@@ -370,14 +370,14 @@ const I2SCC32XX_HWAttrs i2sCC3220SHWAttrs[CC3220S_LAUNCHXL_I2SCOUNT] = {
     }
 };
 
-const I2S_Config I2S_config[CC3220S_LAUNCHXL_I2SCOUNT] = {
+const I2S_Config I2S_config[CC3220SF_LAUNCHXL_I2SCOUNT] = {
     {
-        .object = &i2sCC3220SObjects[CC3220S_LAUNCHXL_I2S0],
-        .hwAttrs = &i2sCC3220SHWAttrs[CC3220S_LAUNCHXL_I2S0]
+        .object = &i2sCC3220SFObjects[CC3220SF_LAUNCHXL_I2S0],
+        .hwAttrs = &i2sCC3220SFHWAttrs[CC3220SF_LAUNCHXL_I2S0]
     }
 };
 
-const uint_least8_t I2S_count = CC3220S_LAUNCHXL_I2SCOUNT;
+const uint_least8_t I2S_count = CC3220SF_LAUNCHXL_I2SCOUNT;
 
 /*
  *  =============================== Power ===============================

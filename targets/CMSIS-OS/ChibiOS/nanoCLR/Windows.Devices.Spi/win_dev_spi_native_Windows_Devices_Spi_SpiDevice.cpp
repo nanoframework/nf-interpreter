@@ -214,15 +214,15 @@ void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, b
     // SPI mode
     switch (config[ SpiConnectionSettings::FIELD___spiMode ].NumericByRef().s4)
     {
-        case SpiModes_Mode1:
+        case SpiMode_Mode1:
             llConfig->cr1 |= SPI_CR1_CPHA;
             break;
 
-        case SpiModes_Mode2:
+        case SpiMode_Mode2:
             llConfig->cr1 |= SPI_CR1_CPOL;
             break;
 
-        case SpiModes_Mode3:
+        case SpiMode_Mode3:
             llConfig->cr1 |= SPI_CR1_CPHA | SPI_CR1_CPOL;
             break;
 
@@ -231,7 +231,7 @@ void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, b
     }
 
     // compute baud rate of SPI peripheral according to the requested frequency
-    llConfig->cr1 |= ComputeBaudRate(busIndex, config[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4, (int32_t&)actualFrequency);
+    llConfig->cr1 |= ComputeBaudRate(busIndex, config[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4, actualFrequency);
 
     // set data transfer length according to SPI connection settings and...
     // ... buffer data size. Have to use the shortest one.
@@ -297,7 +297,16 @@ void GetSPIConfig(int busIndex, CLR_RT_HeapBlock* config, SPIConfig* llConfig, b
   #if (SPI_SUPPORTS_CIRCULAR == TRUE) 
     llConfig->circular = SPI_USE_CIRCULAR;
   #endif
+
     llConfig->end_cb = SpiCallback;
+
+    // make sure the CS pin is properly configured as GPIO, output & pushpull 
+    palSetPadMode( GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL) );
+
+    // being SPI CS active low, default it to high
+    palSetPad(GPIO_PORT(csPin), csPin % 16);
+
+    // set port&pad for CS pin
     llConfig->ssport = GPIO_PORT(csPin);
     llConfig->sspad = csPin % 16;
 }
@@ -656,90 +665,111 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+
+    uint8_t busIndex;
+    NF_PAL_SPI* palSpi;
+    int32_t actualFrequency = 0;
+    CLR_RT_HeapBlock* pConfig;
+    
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+    
+    // get a pointer to the managed spi connectionSettings object instance
+    pConfig = pThis[ FIELD___connectionSettings ].Dereference();
+    
+    // get bus index
+    // this is coded with a multiplication, need to perform and int division to get the number
+    // see the comments in the SpiDevice() constructor in managed code for details
+    busIndex = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
+
+    // config GPIO pins used by the SPI peripheral
+    // init the PAL struct for this SPI bus and assign the respective driver
+    // all this occurs if not already done
+    // why do we need this? because several SPIDevice objects can be created associated to the same bus
+    switch (busIndex)
     {
-        NF_PAL_SPI* palSpi = NULL;
-        int32_t actualFrequency;
-        
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
-        // get a pointer to the managed spi connectionSettings object instance
-        CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
-        
-        // get bus index
-        // this is coded with a multiplication, need to perform and int division to get the number
-        // see the comments in the SpiDevice() constructor in managed code for details
-        uint8_t busIndex = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
+      #if STM32_SPI_USE_SPI1
+        case 1:
+            if(SPI1_PAL.Driver == NULL)
+            {
+                ConfigPins_SPI1();
 
-        // init the PAL struct for this SPI bus and assign the respective driver
-        // all this occurs if not already done
-        // why do we need this? because several SPIDevice objects can be created associated to the same bus
-        switch (busIndex)
-        {
-    #if STM32_SPI_USE_SPI1
-            case 1:
-                if(SPI1_PAL.Driver == NULL)
-                {
-                    SPI1_PAL.Driver = &SPID1;
-                    palSpi = &SPI1_PAL;
-                }
-                break;
-    #endif
-    #if STM32_SPI_USE_SPI2
-            case 2:
-                if(SPI2_PAL.Driver == NULL)
-                {
-                    SPI2_PAL.Driver = &SPID2;
-                    palSpi = &SPI2_PAL;
-                }
-                break;
-    #endif
-    #if STM32_SPI_USE_SPI3
-            case 3:
-                if(SPI3_PAL.Driver == NULL)
-                {
-                    SPI3_PAL.Driver = &SPID3;
-                    palSpi = &SPI3_PAL;
-                }
-                break;
-    #endif
-    #if STM32_SPI_USE_SPI4
-            case 4:
-                if(SPI4_PAL.Driver == NULL)
-                {
-                    SPI4_PAL.Driver = &SPID4;
-                    palSpi = &SPI4_PAL;
-                }
-                break;
-    #endif
-    #if STM32_SPI_USE_SPI5
-            case 5:
-                if(SPI5_PAL.Driver == NULL)
-                {
-                    SPI5_PAL.Driver = &SPID5;
-                    palSpi = &SPI5_PAL;
-                }
-                break;
-    #endif
-    #if STM32_SPI_USE_SPI6
-            case 6:
-                if(SPI6_PAL.Driver == NULL)
-                {
-                    SPI6_PAL.Driver = &SPID6;
-                    palSpi = &SPI6_PAL;
-                }
-                break;
-    #endif
-            default:
-                // this SPI bus is not valid
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-                break;
-        }
+                SPI1_PAL.Driver = &SPID1;
+                palSpi = &SPI1_PAL;
+            }
+            break;
+      #endif
 
-        // compute rough estimate on the time to tx/rx a byte (in milliseconds)
-        ComputeBaudRate(busIndex, pConfig[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4, (int32_t&)actualFrequency);
-        palSpi->ByteTime = (1.0 / actualFrequency) * 1000;
+      #if STM32_SPI_USE_SPI2
+        case 2:
+            if(SPI2_PAL.Driver == NULL)
+            {
+                ConfigPins_SPI2();
+                
+                SPI2_PAL.Driver = &SPID2;
+                palSpi = &SPI2_PAL;
+            }
+            break;
+      #endif
+
+      #if STM32_SPI_USE_SPI3
+        case 3:
+            if(SPI3_PAL.Driver == NULL)
+            {
+                ConfigPins_SPI3();
+                
+                SPI3_PAL.Driver = &SPID3;
+                palSpi = &SPI3_PAL;
+            }
+            break;
+      #endif
+
+      #if STM32_SPI_USE_SPI4
+        case 4:
+            if(SPI4_PAL.Driver == NULL)
+            {
+                ConfigPins_SPI4();
+                
+                SPI4_PAL.Driver = &SPID4;
+                palSpi = &SPI4_PAL;
+            }
+            break;
+      #endif
+
+      #if STM32_SPI_USE_SPI5
+        case 5:
+            if(SPI5_PAL.Driver == NULL)
+            {
+                ConfigPins_SPI5();
+                
+                SPI5_PAL.Driver = &SPID5;
+                palSpi = &SPI5_PAL;
+            }
+            break;
+      #endif
+
+      #if STM32_SPI_USE_SPI6
+        case 6:
+            if(SPI6_PAL.Driver == NULL)
+            {
+                ConfigPins_SPI6();
+                
+                SPI6_PAL.Driver = &SPID6;
+                palSpi = &SPI6_PAL;
+            }
+            break;
+      #endif
+
+        default:
+            // this SPI bus is not valid
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            break;
     }
+
+    // compute rough estimate on the time to tx/rx a byte (in milliseconds)
+    ComputeBaudRate(busIndex, pConfig[ SpiConnectionSettings::FIELD___clockFrequency ].NumericByRef().s4, actualFrequency);
+    palSpi->ByteTime = (1.0 / actualFrequency) * 1000.0;
+
     NANOCLR_NOCLEANUP();
 }
 

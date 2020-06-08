@@ -6,7 +6,7 @@
 #include "hal.h"
 #include <hal_nf_community.h>
 
-#if (HAL_USE_STM32_FLASH == TRUE)
+#if (HAL_NF_USE_STM32_FLASH == TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver local definitions.                                                 //
@@ -60,11 +60,6 @@ int stm32FlashErase(uint32_t address) {
 
   return flash_lld_erase(address);
 }
-
-uint8_t stm32FlashGetSector(uint32_t address) {
-  return flash_lld_getSector(address);
-}
-
 
 #endif
 

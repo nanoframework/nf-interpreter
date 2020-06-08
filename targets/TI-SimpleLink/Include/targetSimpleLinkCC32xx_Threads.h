@@ -9,15 +9,13 @@
 
 #include <ti/drivers/net/wifi/simplelink.h>
 
-/* POSIX Header files */
+// POSIX Header files
 #include <semaphore.h>
 #include <pthread.h>
 #include <time.h>
 #include <mqueue.h>
 
 #include <stdlib.h>
-// #include <string.h>
-// #include <stdint.h>
 
 
 #define SL_STOP_TIMEOUT         (200)

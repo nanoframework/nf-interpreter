@@ -55,6 +55,8 @@ void nanoHAL_Initialize()
 
     Events_Initialize();
 
+    CPU_GPIO_Initialize();
+
     // no PAL events required until now
     //PalEvent_Initialize();
 	
@@ -159,6 +161,8 @@ void nanoHAL_Uninitialize()
 
 #endif
 
+    CPU_GPIO_Uninitialize();
+
     Events_Uninitialize();
     
     HAL_CONTINUATION::Uninitialize();
@@ -202,9 +206,10 @@ void SystemState_Clear(SYSTEM_STATE_type state)
 
 bool SystemState_Query(SYSTEM_STATE_type state)
 {
+	bool systemStateCopy = false;
     GLOBAL_LOCK();
 
-    bool systemStateCopy = SystemState_QueryNoLock(state);
+    systemStateCopy = SystemState_QueryNoLock(state);
     
     GLOBAL_UNLOCK();
 

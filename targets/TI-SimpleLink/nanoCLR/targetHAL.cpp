@@ -9,7 +9,7 @@
 #include <target_platform.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
-#include <FreeRTOS.h>
+// #include <FreeRTOS.h>
 
 //
 //  Reboot handlers clean up on reboot
@@ -69,6 +69,8 @@ void nanoHAL_Initialize()
 
     Events_Initialize();
 
+    CPU_GPIO_Initialize();
+
     // no PAL events required until now
     //PalEvent_Initialize();
 	
@@ -100,6 +102,8 @@ void nanoHAL_Uninitialize()
 
     // TODO need to call this but it's preventing the debug session from starting
     //Network_Uninitialize();
+
+    CPU_GPIO_Uninitialize();
 
     Events_Uninitialize();
 

@@ -16,6 +16,8 @@
 #include <nanoHAL_Power.h>
 #include <nanoHAL_ConfigurationManager.h>
 
+typedef uint32_t GPIO_PIN;
+
 typedef enum SYSTEM_STATE
 {
     SYSTEM_STATE_ISR,
@@ -52,16 +54,13 @@ typedef enum SLEEP_LEVEL
 //#define SYSTEM_EVENT_FLAG_TONE_BUFFER_EMPTY         0x00002000
 #define SYSTEM_EVENT_FLAG_SOCKET                    0x00004000
 #define SYSTEM_EVENT_FLAG_ONEWIRE_MASTER            0x00008000
+#define SYSTEM_EVENT_FLAG_RADIO                     0x00010000
+
 //#define SYSTEM_EVENT_FLAG_SPI                       0x00008000
 //#define SYSTEM_EVENT_FLAG_OEM_RESERVED_1            0x00020000
 //#define SYSTEM_EVENT_FLAG_OEM_RESERVED_2            0x00040000
 //#define SYSTEM_EVENT_FLAG_UNUSED_0x00080000         0x00080000
 //#define SYSTEM_EVENT_FLAG_UNUSED_0x00100000         0x00100000
-
-
-
-
-
 
 
 //#define SYSTEM_EVENT_FLAG_UNUSED_0x00200000         0x00200000
@@ -89,6 +88,7 @@ typedef enum SLEEP_LEVEL
 #define EVENT_WIFI        50
 #define EVENT_CAN         60
 #define EVENT_STORAGE     70
+#define EVENT_RADIO       80
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
