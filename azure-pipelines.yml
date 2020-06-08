@@ -372,6 +372,7 @@ jobs:
       command: custom
       custom: tool
       arguments: install --tool-path . nbgv
+    condition: succeeded()
     displayName: Install NBGV tool
 
   - task: PowerShell@2
@@ -380,6 +381,7 @@ jobs:
         script: nbgv cloud -a -c
         errorActionPreference: 'silentlyContinue'
         failOnStderr: 'false'
+    condition: succeeded()
     displayName: Set build number
     # condition: ne(variables['system.pullrequest.isfork'], true)
 
@@ -387,13 +389,14 @@ jobs:
     inputs:
       versionSpec: '>= 2.7' 
       addToPath: true
+    condition: succeeded()
 
   # generate change log including future version
   - powershell: |
         gem install github_changelog_generator --quiet --no-document
         # need to call it passing both cache options with full path otherwise it won't work
         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$(NBGV_Version)"
-    condition: or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
+    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ), or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ), ne( variables['StartReleaseCandidate'], true ) )
     displayName: Generate change log
 
   # generate change log without future version
@@ -401,8 +404,26 @@ jobs:
         gem install github_changelog_generator --quiet --no-document
         # need to call it passing both cache options with full path otherwise it won't work
         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
-    condition: not( or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) 
+    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ), not( or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ), ne( variables['StartReleaseCandidate'], true ) )
     displayName: Generate change log
+
+  # push new changelog to GitHub repo
+  - powershell: |
+        git config --global gc.auto 0
+        git config --global user.name nfbot
+        git config --global user.email nanoframework@outlook.com
+        git config --global core.autocrlf true
+
+        git add CHANGELOG.md
+        git commit -m "Update CHANGELOG" -m"***NO_CI***"
+
+        # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+        # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+
+        git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
+    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ), not( startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+    displayName: Push changelog to GitHub
 
 #######################
 # create or update GitHub release ON tags from release or master branches
