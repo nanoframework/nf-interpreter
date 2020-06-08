@@ -385,22 +385,22 @@ jobs:
 
   - task: UseRubyVersion@0
     inputs:
-      versionSpec: '>= 2.4' 
+      versionSpec: '>= 2.7' 
       addToPath: true
 
   # generate change log including future version
-  - script: |
-        gem install bundler
-        bundle install --retry=3 --jobs=4
-        gem install github_changelog_generator
-        bundle exec github_changelog_generator --token $(GitHubToken) --future-release "v$(NBGV_Version)"
+  - powershell: |
+        gem install github_changelog_generator --quiet --no-document
+        # need to call it passing both cache options with full path otherwise it won't work
+        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$(NBGV_Version)"
     condition: or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
     displayName: Generate change log
 
-  # generate change log including future version
-  - script: |
-        gem install github_changelog_generator
-        bundle exec github_changelog_generator --token $(GitHubToken)
+  # generate change log without future version
+  - powershell: |
+        gem install github_changelog_generator --quiet --no-document
+        # need to call it passing both cache options with full path otherwise it won't work
+        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
     condition: not( or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) 
     displayName: Generate change log
 
