@@ -244,9 +244,7 @@ jobs:
 #################
 # NXP
 - job: Build_NXP_targets
-  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  # not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
-  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
+  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
@@ -353,7 +351,7 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), not( and( eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) ) )
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -388,7 +386,7 @@ jobs:
         gem install github_changelog_generator --quiet --no-document
         # need to call it passing both cache options with full path otherwise it won't work
         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$(NBGV_Version)"
-    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ), or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ), ne( variables['StartReleaseCandidate'], true ) )
+    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ), or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')  ) )
     displayName: Generate change log
 
   # generate change log without future version
@@ -396,7 +394,7 @@ jobs:
         gem install github_changelog_generator --quiet --no-document
         # need to call it passing both cache options with full path otherwise it won't work
         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
-    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ), not( or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ), ne( variables['StartReleaseCandidate'], true ) )
+    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ), not( or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ) ) )
     displayName: Generate change log
 
   # push new changelog to GitHub repo
@@ -414,7 +412,7 @@ jobs:
         $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
 
         git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
-    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ), not( startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ) )
     displayName: Push changelog to GitHub
 
 #######################
@@ -423,6 +421,7 @@ jobs:
   dependsOn:
   - Build_STM32_targets
   - Build_ESP32_targets
+  - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_WIN32_nanoCLR
   - Generate_change_log
@@ -458,7 +457,8 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_WIN32_nanoCLR
-  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
+  - Generate_change_log
+  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'), failed('Generate_change_log'))
 
   pool:
     vmImage: 'VS2017-Win2016'
