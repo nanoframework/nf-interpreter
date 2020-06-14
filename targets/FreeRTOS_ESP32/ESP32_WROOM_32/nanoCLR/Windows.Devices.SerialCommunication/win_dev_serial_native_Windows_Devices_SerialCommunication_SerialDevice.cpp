@@ -228,7 +228,7 @@ void UartTxWorkerTask(void *pvParameters)
 bool IsLongRunningOperation(uint32_t bufferSize, uint32_t baudRate, uint32_t& estimatedDurationMiliseconds)
 {
     // simplifying calculation assuming worst case values for stop bits
-    estimatedDurationMiliseconds = ((8 + 2) * bufferSize) / baudRate;
+    estimatedDurationMiliseconds = ((8 + 2) * bufferSize * 1000) / baudRate;
 
     if(estimatedDurationMiliseconds > CLR_RT_Thread::c_TimeQuantum_Milliseconds)
     {
