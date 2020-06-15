@@ -16,6 +16,17 @@
 #define  I2C2_DATA      25
 #define  I2C2_CLOCK     26
 
+// UART defines
+// number of pins required to configure an UART
+enum Esp32SerialPin
+{
+    Esp32SerialPin_Tx,
+    Esp32SerialPin_Rx,
+    Esp32SerialPin_Rts,
+    Esp32SerialPin_Cts,
+    Esp32SerialPin_Max,
+};
+
 enum Esp32_MapDeviceType
 {
     DEV_TYPE_GPIO,
@@ -32,5 +43,6 @@ int  Esp32_GetMappedDevicePins(Esp32_MapDeviceType DevType, int DevNumber, int P
 int  Esp32_GetMappedDevicePinsWithFunction(uint32_t alternateFunction);
 
 void Esp32_SetMappedDevicePins( uint8_t pin, int32_t alternateFunction );
+void Esp32_SetMappedDevicePins( Esp32_MapDeviceType devType, int devNumber, int8_t pinIndex, int ioPinNumber );
 
 #endif //_ESP32_DEVICEMAPPING_
