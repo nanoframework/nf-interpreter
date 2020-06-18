@@ -5,7 +5,7 @@
 
 name: "Check clang-format"
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   format:
@@ -14,6 +14,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    
+    - uses: jwalton/gh-find-current-pr@v1
+      id: findPr
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    # This will echo "Your PR is 7", or be skipped if there is no current PR.
+    - name: "Output PR"
+      run: echo "Your PR is ${PR}"
+      if: success() && steps.findPr.outputs.number
+      env:
+        PR: ${{ steps.findPr.outputs.pr }}
+
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
@@ -25,7 +38,7 @@ jobs:
 
     - name: "Format Codes"
       run: |
-        SRC=$(git show --pretty=format:'' --name-only)
+        SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD $BRANCH) | grep -E "\.\(c\|h\|hpp\|cpp\)\$")
         clang-format-10 -i -style=file $SRC
     
     - name: Check diff
@@ -36,12 +49,11 @@ jobs:
       uses: peter-evans/create-pull-request@v2
       with:
         commit-message: "Automated fix of code style using project clang-format rules."
-        title: "Fix code style for ${{ github.ref }}"
+        title: "Fix code style for ${{ github.repository }}/${PR}"
         assignees: "${{ github.actor }}"
-        branch: "auto-pr/clang-format/${{ github.ref }}"
+        branch: "auto-pr/clang-format/${PR}"
 
     - name: Check outputs
-      if: failure()
       run: |
         echo "Pull Request Number - ${{ env.PULL_REQUEST_NUMBER }}"
         echo "Submitted PR with code style fixes - ${{ steps.cpr.outputs.pull-request-number }}"
