@@ -31,7 +31,7 @@ jobs:
 
     - name: "Format Codes"
       run: |
-        SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD ${{ github.ref }}) | grep -E "\.\(c\|h\|hpp\|cpp\)\$")
+        SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD ${{ github.sha }}) | grep -E "\.\(c\|h\|hpp\|cpp\)\$")
         clang-format-10 -i -style=file $SRC
     
     - name: Check diff
