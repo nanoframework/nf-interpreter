@@ -1,0 +1,44 @@
+name: "Auto clang-format"
+
+on:
+  push:
+    paths-ignore:
+      - '*.md'
+      - '*/*.md'
+      - '*/*/*.md'
+      - '*/*/*/*.md'
+      - '.gitignore'
+      - '*.yml'
+      - '*/*.yml'
+
+jobs:
+  format:
+    name: "Auto clang-format"
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: "Install clang-format-10"
+      run: |
+        sudo apt-get update
+        sudo apt-get install clang-format-10
+
+    - name: "Format source files"
+      run: |
+        SRC=$(git ls-tree --full-tree -r HEAD | grep -e "\.\(c\|h\|hpp\|cpp\)\$" | cut -f 2)
+        clang-format-10 -i -style=file $SRC
+
+    - name: Commit files
+      run: |
+        git config --local user.email "nanoframework@outlook.com"
+        git config --local user.name "nfbot"
+        git diff --exit-code HEAD || git commit -a --amend --no-edit
+
+    - name: Push changes
+      run: |
+        git remote add token https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git
+        git push token HEAD:${GITHUB_REF} --force-with-lease=${GITHUB_REF}:${GITHUB_SHA}
