@@ -33,7 +33,7 @@ jobs:
       run: |
         SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD ${{ github.sha }}) | grep -E "\.\(c\|h\|hpp\|cpp\)\$")
 
-        if $SRC
+        if [-z "$SRC" ]
         then
           clang-format-10 -i -style=file $SRC
         fi
