@@ -32,13 +32,18 @@ jobs:
     - name: "Format Codes"
       run: |
         SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD ${{ github.sha }}) | grep -E "\.\(c\|h\|hpp\|cpp\)\$")
-        clang-format-10 -i -style=file $SRC
+
+        if $SRC
+        then
+          clang-format-10 -i -style=file $SRC
+        fi
     
     - name: Check diff
-      run: git diff --exit-code HEAD
+      id: HasDiff
+      run: ::set-output name=diff::$(git diff --exit-code HEAD)
     
     - name: Create Pull Request
-      if: failure()
+      if: success() && steps.HasDiff.outputs.diff
       uses: peter-evans/create-pull-request@v2
       with:
         commit-message: "Automated fix of code style using project clang-format rules."
