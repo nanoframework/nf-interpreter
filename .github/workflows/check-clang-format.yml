@@ -33,13 +33,20 @@ jobs:
       run: |
         SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD ${{ github.sha }}) | grep -E "\.\(c\|h\|hpp\|cpp\)\$")
 
+        echo "source files to check format:"
+        echo "$SRC"
+
         if [-z "$SRC" ]
         then
-          clang-format-10 -i -style=file $SRC
+          echo "running clang-format..."
+          clang-format-10 -style=file -i $SRC
+        else
+          echo "no source files to check"
         fi
     
     - name: Check diff
       id: HasDiff
+      if: success()
       run: ::set-output name=diff::$(git diff --exit-code HEAD)
     
     - name: Create Pull Request
@@ -54,6 +61,7 @@ jobs:
         PR: ${{ steps.findPr.outputs.pr }}
 
     - name: Check outputs
+      if: success()
       run: |
         echo "Pull Request Number - ${{ env.PULL_REQUEST_NUMBER }}"
         echo "Submitted PR with code style fixes - ${{ steps.cpr.outputs.pull-request-number }}"
