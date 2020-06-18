@@ -14,22 +14,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
     
     - uses: jwalton/gh-find-current-pr@v1
       id: findPr
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
-    # This will echo "Your PR is 7", or be skipped if there is no current PR.
-    - name: "Output PR"
-      run: echo "Your PR is ${PR}"
-      if: success() && steps.findPr.outputs.number
-      env:
-        PR: ${{ steps.findPr.outputs.pr }}
-
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
 
     - name: "Install clang-format-10"
       run: |
@@ -38,7 +31,7 @@ jobs:
 
     - name: "Format Codes"
       run: |
-        SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD $BRANCH) | grep -E "\.\(c\|h\|hpp\|cpp\)\$")
+        SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD ${{ github.ref }}) | grep -E "\.\(c\|h\|hpp\|cpp\)\$")
         clang-format-10 -i -style=file $SRC
     
     - name: Check diff
@@ -52,6 +45,8 @@ jobs:
         title: "Fix code style for ${{ github.repository }}/${PR}"
         assignees: "${{ github.actor }}"
         branch: "auto-pr/clang-format/${PR}"
+      env:
+        PR: ${{ steps.findPr.outputs.pr }}
 
     - name: Check outputs
       run: |
