@@ -1,0 +1,47 @@
+#
+# Copyright (c) 2020 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+#
+
+name: "Check clang-format"
+
+on: [push, pull_request]
+
+jobs:
+  format:
+    name: "Check clang-format"
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: "Install clang-format-10"
+      run: |
+        sudo apt-get update
+        sudo apt-get install clang-format-10
+
+    - name: "Format Codes"
+      run: |
+        SRC=$(git show --pretty=format:'' --name-only)
+        clang-format-10 -i -style=file $SRC
+    
+    - name: Check diff
+      run: git diff --exit-code HEAD
+    
+    - name: Create Pull Request
+      if: failure()
+      uses: peter-evans/create-pull-request@v2
+      with:
+        commit-message: "Automated fix of code style using project clang-format rules."
+        title: "Fix code style for ${{ github.ref }}"
+        assignees: "${{ github.actor }}"
+        branch: "auto-pr/clang-format/${{ github.ref }}"
+
+    - name: Check outputs
+      if: failure()
+      run: |
+        echo "Pull Request Number - ${{ env.PULL_REQUEST_NUMBER }}"
+        echo "Submitted PR with code style fixes - ${{ steps.cpr.outputs.pull-request-number }}"
