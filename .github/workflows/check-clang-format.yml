@@ -10,8 +10,8 @@ on:
     branches: 
       - "master"
       - "develop"
-      - develop/*"
-      - release/*"
+      - "develop/*"
+      - "release/*"
 
 jobs:
 
@@ -51,9 +51,11 @@ jobs:
       run: |
         SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD origin/${{ github.event.pull_request.base.ref }}) | grep -E ".c$|.h$|.cpp$")
 
-        for changed_file in $SRC; do
-          clang-format-10 -style=file -i ${changed_file}
-        done
+        if [ -n "${SRC-unset}" ]; then
+          for changed_file in $SRC; do
+            clang-format-10 -style=file -i ${changed_file}
+          done
+        fi
 
     - name: 'Check diff'
       id: HasDiff
