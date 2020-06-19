@@ -1,7 +1,12 @@
-name: "Auto clang-format"
+name: "Auto format source code"
 
 on:
   push:
+    branches: 
+      - "develop"
+      - "master"
+      - "release/*"
+      
     paths-ignore:
       - '*.md'
       - '*/*.md'
@@ -13,7 +18,7 @@ on:
 
 jobs:
   format:
-    name: "Auto clang-format"
+    name: "Format source code files"
 
     runs-on: ubuntu-latest
 
@@ -29,8 +34,10 @@ jobs:
 
     - name: "Format source files"
       run: |
-        SRC=$(git ls-tree --full-tree -r HEAD | grep -e "\.\(c\|h\|hpp\|cpp\)\$" | cut -f 2)
-        clang-format-10 -i -style=file $SRC
+        SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD HEAD~1) | grep -e "\.\(c\|h\|hpp\|cpp\)\$" | cut -f 2)
+        if [ -n "$SRC" ]; then
+          clang-format-10 -i -style=file $SRC
+        fi
 
     - name: Commit files
       run: |
