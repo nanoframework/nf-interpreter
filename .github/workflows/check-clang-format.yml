@@ -3,65 +3,99 @@
 # See LICENSE file in the project root for full license information.
 #
 
-name: "Check clang-format"
+name: "Check code style"
 
-on: [pull_request]
+on:
+  pull_request:
+    branches: 
+      - "master"
+      - "develop"
+      - develop/*"
+      - release/*"
 
 jobs:
+
   format:
-    name: "Check clang-format"
-
     runs-on: ubuntu-latest
-
+    name: "clang-format"
     steps:
 
-    - uses: actions/checkout@v2
+    # need to check all repo to make sure all branches are there
+    # setting ref to PR SHA to checkout pull request HEAD commit instead of merge commit
+    - name: 'Checkout PR'
+      uses: actions/checkout@v2
       with:
-        fetch-depth: 2
-    
-    - uses: jwalton/gh-find-current-pr@v1
-      id: findPr
-      with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
 
-    - name: "Install clang-format-10"
+    - uses: juliangruber/find-pull-request-action@v1
+      id: GetPR
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    
+    # Checkout branch for code style fixes
+    # new branch from PR originating branch 
+    - name: 'Create work branch'
+      id: WorkBranch
+      run: |
+        name="nfbot/clang-format-fix/${{ github.event.pull_request.head.ref }}"
+        echo "::set-output name=name::$name"
+        git checkout -b $name origin/${{ github.event.pull_request.head.ref }}
+
+    - name: 'Install clang-format-10'
       run: |
         sudo apt-get update
         sudo apt-get install clang-format-10
-
-    - name: "Format Codes"
-      run: |
-        SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD ${{ github.sha }}) | grep -E "\.\(c\|h\|hpp\|cpp\)\$")
-
-        echo "source files to check format:"
-        echo "$SRC"
-
-        if [-z "$SRC" ]
-        then
-          echo "running clang-format..."
-          clang-format-10 -style=file -i $SRC
-        else
-          echo "no source files to check"
-        fi
     
-    - name: Check diff
+    - name: 'Run clang-format'
+      run: |
+        SRC=$(git diff --name-only --diff-filter=d $(git merge-base HEAD origin/${{ github.event.pull_request.base.ref }}) | grep -E ".c$|.h$|.cpp$")
+
+        for changed_file in $SRC; do
+          clang-format-10 -style=file -i ${changed_file}
+        done
+
+    - name: 'Check diff'
       id: HasDiff
       if: success()
-      run: ::set-output name=diff::$(git diff --exit-code HEAD)
+      run: echo "::set-output name=diff::$(git diff --exit-code HEAD)"
     
-    - name: Create Pull Request
+    - name: 'Commit changes'
       if: success() && steps.HasDiff.outputs.diff
-      uses: peter-evans/create-pull-request@v2
-      with:
-        commit-message: "Automated fix of code style using project clang-format rules."
-        title: "Fix code style for ${{ github.repository }}/${PR}"
-        assignees: "${{ github.actor }}"
-        branch: "auto-pr/clang-format/${PR}"
-      env:
-        PR: ${{ steps.findPr.outputs.pr }}
-
-    - name: Check outputs
-      if: success()
       run: |
-        echo "Pull Request Number - ${{ env.PULL_REQUEST_NUMBER }}"
-        echo "Submitted PR with code style fixes - ${{ steps.cpr.outputs.pull-request-number }}"
+        # configure git and setup identity
+        git config --global gc.auto 0
+        git config --global core.autocrlf true
+        git config --global user.name nfbot
+        git config --global user.email nanoframework@outlook.com
+        
+        # commit changed files
+        git add -A
+        git commit -m "Automated code style fixes."
+        
+        # push to new branch
+        git push --set-upstream origin ${{ steps.WorkBranch.outputs.name }}
+
+    - name: 'Create Pull Request'
+      id: CreatePR
+      if: success() && steps.HasDiff.outputs.diff
+      uses: repo-sync/pull-request@v2
+      with:
+        source_branch: "nfbot/clang-format-fix/${{ github.event.pull_request.head.ref }}"
+        destination_branch: "${{ github.event.pull_request.head.ref }}"
+        pr_body: "Automated fix of code style using project clang-format rules.\r\nYou can review and make changes or simply merge this PR to apply the fixes."
+        pr_title: "Code style fixes for ${{ github.repository }} PR#${{ steps.GetPR.outputs.number }}"
+        pr_assignee: ${{ github.actor }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 'Output PR details'
+      uses: thollander/actions-comment-pull-request@master
+      if: success() && steps.HasDiff.outputs.diff
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        message: "There where issues with the code style on the source files.\r\nA PR was submitted with the code style fixes. See ${{ steps.CreatePR.outputs.pr_url }}."
+
+    # if there are fixes to be made, exit with error to force the check to fail
+    - name: 'Report failure'
+      if: success() && steps.HasDiff.outputs.diff
+      run: exit 1
