@@ -8,13 +8,15 @@ on:
       - "release/*"
       
     paths-ignore:
-      - '*.md'
-      - '*/*.md'
-      - '*/*/*.md'
-      - '*/*/*/*.md'
+      - '**.md'
+      - '**.txt'
+      - '**.yml'
+      - '**.json'
+      - '**.in'
+      - '**.cmake'
+      - '.clang-format'
       - '.gitignore'
-      - '*.yml'
-      - '*/*.yml'
+      - '.gitmodules'
 
 jobs:
   format:
