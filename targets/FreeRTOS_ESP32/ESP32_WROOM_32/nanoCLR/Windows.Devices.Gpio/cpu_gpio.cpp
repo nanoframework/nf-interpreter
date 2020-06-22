@@ -91,6 +91,19 @@ void DeleteInputState(GPIO_PIN pinNumber)
 		UnlinkInputState(pState);
 }
 
+void Esp_Gpio_fire_event(gpio_input_state* pState)
+{
+	bool actual = CPU_GPIO_GetPinState(pState->pinNumber);  // get current pin state
+	if (actual == pState->expected)
+	{
+		pState->isrPtr(pState->pinNumber, actual, pState->param);
+		if (pState->mode == GPIO_INT_EDGE_BOTH)
+		{ // both edges
+			pState->expected ^= 1; // update expected state
+		}
+	}
+}
+
 //
 // Debounce Handler, called when timer is complete
 //
@@ -99,15 +112,7 @@ void Esp_Gpio_DebounceHandler(TimerHandle_t xTimer)
 	gpio_input_state* pState = (gpio_input_state*)pvTimerGetTimerID(xTimer);
 	if (pState->isrPtr)
 	{
-		bool actual = CPU_GPIO_GetPinState(pState->pinNumber);  // get current pin state
-		if (actual == pState->expected)
-		{
-			pState->isrPtr(pState->pinNumber, actual, pState->param);
-			if (pState->mode == GPIO_INT_EDGE_BOTH)
-			{ // both edges
-				pState->expected ^= 1; // update expected state
-			}
-		}
+		Esp_Gpio_fire_event(pState);
 	}
 
 	pState->waitingDebounce = false;
@@ -211,31 +216,32 @@ static void gpio_isr(void * arg)
 {
 	NATIVE_INTERRUPT_START
 
-	gpio_input_state * pGpio = (gpio_input_state *)arg;;
+	gpio_input_state * pState = (gpio_input_state *)arg;;
 
 	// Ignore any pin changes during debounce
-	if (pGpio->waitingDebounce) return;
+	if (pState->waitingDebounce) return;
 
 	// If user ISR available then call it
-	if (pGpio->isrPtr)
+	if (pState->isrPtr)
 	{
-		if (pGpio->debounceMs > 0)
+		if (pState->debounceMs > 0)
 		{
-			pGpio->waitingDebounce = true;
+			pState->waitingDebounce = true;
 
-			if (pGpio->debounceTimer == 0)
+			if (pState->debounceTimer == 0)
 			{
 				// Create timer if it doesn't already exist for this pin
-				pGpio->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void*)pGpio, Esp_Gpio_DebounceHandler);
+				pState->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void*)pState, Esp_Gpio_DebounceHandler);
 			}
 
-			// Start Debounce timer
-			xTimerChangePeriodFromISR(pGpio->debounceTimer, pdMS_TO_TICKS(pGpio->debounceMs), pdFALSE);
+			// Start Debounce timer (minimum 1 freeRtos tick(10ms) )
+			int ticks = pdMS_TO_TICKS(pState->debounceMs);
+			if (ticks == 0) ticks = 1;
+			xTimerChangePeriodFromISR(pState->debounceTimer, ticks, pdFALSE);
 		}
 		else
 		{
-			bool PinState = gpio_get_level((gpio_num_t)pGpio->pinNumber) == 1;
-			pGpio->isrPtr(pGpio->pinNumber, PinState, pGpio->param);
+			Esp_Gpio_fire_event(pState);
 		}
 	}
 
@@ -414,12 +420,11 @@ bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
 {
 	if (!GPIO_IS_VALID_GPIO(pinNumber)) return false;
 
-	// Output & input pins any valid drivemode
+	// Input & Output pins use any valid drivemode. 
+	// Note: all output pins are also input pins
 	if (GPIO_IS_VALID_OUTPUT_GPIO(pinNumber))
 	{
-		return (
-			driveMode >= GpioPinDriveMode_Output && 
-			driveMode <= GpioPinDriveMode_OutputOpenSourcePullDown);
+		return (driveMode <= GpioPinDriveMode_OutputOpenSourcePullDown);
 	}
 
 	// Input only pins only input drive modes
