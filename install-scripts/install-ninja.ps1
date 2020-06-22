@@ -13,7 +13,7 @@ If($NinjaPathExists -eq $False)
 {
     Write-Host "Downloading Ninja..."
 
-    $url = "https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip"
+    $url = "https://github.com/ninja-build/ninja/releases/download/v1.10.0/ninja-win.zip"
     $output = "$zipRoot\ninja.zip"
      # Stop security tripping us up
     [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
@@ -31,5 +31,5 @@ If($NinjaPathExists -eq $False)
 }
 else
 {
-    Write-Warning ("Skiping instal of Ninja")
+    Write-Warning ("Skipping install of Ninja")
 }
