@@ -125,13 +125,31 @@ jobs:
     condition: eq( variables['StartReleaseCandidate'], true )
     displayName: NBGV prepare release
 
-#################
-# STM32
-- job: Build_STM32_targets
+##############################
+- job: Check_Code_Style
   condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
+
+  pool:
+    vmImage: 'windows-latest'
+
+  steps:
+  - checkout: self
+    fetchDepth: 1
+
+  - template: azure-pipelines-templates/download-install-llvm.yml
+  - template: azure-pipelines-templates/check-code-style.yml
+
+#################
+# STM32
+- job: Build_STM32_targets
+  condition: and( succeeded(), not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ) )
+
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -193,10 +211,11 @@ jobs:
 #################
 # ESP32 targets
 - job: Build_ESP32_targets
-  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded(), not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ) )
 
   dependsOn:
   - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -237,10 +256,11 @@ jobs:
 #################
 # NXP
 - job: Build_NXP_targets
-  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded(), not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ) )
 
   dependsOn:
   - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -277,10 +297,11 @@ jobs:
 #################
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
-  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded(), not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ) )
 
   dependsOn:
   - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -318,10 +339,11 @@ jobs:
 #################
 # WIN32 
 - job: Build_WIN32_nanoCLR
-  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded(), not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ) )
 
   dependsOn:
   - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'VS2017-Win2016'
