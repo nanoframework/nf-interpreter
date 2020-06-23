@@ -101,7 +101,7 @@ steps:
 
           # commit changed files
           git add -A > $null
-          git commit -m "Automated code style fixes." > $null
+          git commit -m "Code style fixes" -m "Automated fixes for code style." > $null
       
           "Pushing changes..." | Write-Host -ForegroundColor White
 
@@ -129,7 +129,7 @@ steps:
               'OK' | Write-Host -ForegroundColor Green
 
               # PR submitted, add a comment
-              $codeStyleFixesComment = @{body="There where issues with the code style on the source files.`nA PR was submitted with the code style fixes. See $($result.url)."} | ConvertTo-Json
+              $codeStyleFixesComment = @{body="There where issues with the code style on the source files.`nA PR was submitted with the code style fixes. See $($result.html_url)."} | ConvertTo-Json
               Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
           }
           catch 
