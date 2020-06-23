@@ -10,6 +10,9 @@ excluded_files:
 # Any typos we should ignore?
 excluded_words:
   - nanoFramework
+  - llvm
+  - vso
+  - autocrlf
   - uart
   - gpio
   - csharp
