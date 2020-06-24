@@ -10,6 +10,9 @@ steps:
       failOnStderr: false
       targetType: 'inline'
       script: |
+        # need this to remove definition of redirect stdErr (only on Azure Pipelines image fo VS2019)
+        $env:GIT_REDIRECT_STDERR = '2>&1'
+
         # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
         # 'encoded token' is the Base64 of the string "nfbot:personal-token"
         $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
@@ -100,13 +103,10 @@ steps:
           "Commit changes..." | Write-Host -ForegroundColor White
 
           # commit changed files
-          git add -A > $null
+          git add -A 2>&1
           git commit -m "Code style fixes" -m "Automated fixes for code style." > $null
       
           "Pushing changes..." | Write-Host -ForegroundColor White
-
-          # need this to remove definition of redirect stdErr (only on Azure Pipelines image fo VS2019)
-          $env:GIT_REDIRECT_STDERR = '2>&1'
 
           # push to nf-interpreter repo
           git -c http.extraheader="AUTHORIZATION: $auth" push --porcelain --set-upstream origin "$branchName"
@@ -129,7 +129,7 @@ steps:
               'OK' | Write-Host -ForegroundColor Green
 
               # PR submitted, add a comment
-              $codeStyleFixesComment = @{body="There where issues with the code style on the source files.`nA PR was submitted with the code style fixes. See $($result.html_url)."} | ConvertTo-Json
+              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`nA PR was submitted with the code style fixes. Please review and merge the changes. See $($result.html_url)."} | ConvertTo-Json
               Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
           }
           catch 
@@ -146,7 +146,7 @@ steps:
 
               # most likely this is a permissions issue because the base repo is read only or protected
               # report to user
-              $codeStyleFixesComment = @{body="There where issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/nanoframework/nf-interpreter/tree/$branchName."} | ConvertTo-Json
+              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/nanoframework/nf-interpreter/tree/$branchName."} | ConvertTo-Json
               $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
 
               throw "Error starting PR: $responseBody"

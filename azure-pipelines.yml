@@ -145,7 +145,7 @@ jobs:
 #################
 # STM32
 - job: Build_STM32_targets
-  condition: ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
@@ -211,7 +211,7 @@ jobs:
 #################
 # ESP32 targets
 - job: Build_ESP32_targets
-  condition: ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
@@ -256,7 +256,7 @@ jobs:
 #################
 # NXP
 - job: Build_NXP_targets
-  condition: ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
@@ -297,7 +297,7 @@ jobs:
 #################
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
-  condition: ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
@@ -339,7 +339,7 @@ jobs:
 #################
 # WIN32 
 - job: Build_WIN32_nanoCLR
-  condition: ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
