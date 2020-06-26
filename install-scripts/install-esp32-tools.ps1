@@ -49,71 +49,19 @@ Invoke-Expression "$PSScriptRoot\install-esp32-idf.ps1 $commandArgs"
 Invoke-Expression "$PSScriptRoot\install-ninja.ps1 $commandArgs"
 Invoke-Expression "$PSScriptRoot\install-esp32-openocd.ps1 $commandArgs"
 
-#Set location of nf-interpreter top-level
-$nfRoot = "$PSScriptRoot\.."
-
-$filePathExists = Test-Path "$nfRoot\cmake-variants.json" -ErrorAction SilentlyContinue
-If ($filePathExists -eq $False -or $force) {
-	"Create .\cmake-variants.json with install paths from .\cmake-variants.TEMPLATE-ESP32.json" | Write-Host -ForegroundColor White
-	
-	Copy-Item "$nfRoot\cmake-variants.TEMPLATE-ESP32.json" -Destination "$nfRoot\cmake-variants.json" -Force 
-	$variants = (Get-Content "$nfRoot\cmake-variants.json")
-	$variants = $variants.Replace('<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>', $env:ESP32_IDF_PATH.ToString().Replace("\", "/")) 
-	$variants = $variants.Replace('<absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>', $env:ESP32_LIBS_PATH.ToString().Replace("\", "/"))
-	$variants = $variants.Replace('<absolute-path-to-the-toolchain-prefix-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PREFIX.ToString().Replace("\", "/"))  
-	Set-Content -Path "$nfRoot\cmake-variants.json" -Value $variants 
-}
-
-# create build folder if necessary
-mkdir -Force "$nfRoot\build" | Out-Null
-$buildFolderPath = Resolve-Path $nfRoot\build
-
-$filePathExists = Test-Path "$nfRoot\.vscode\tasks.json" -ErrorAction SilentlyContinue
-#$filePathExists=$False
-If ($filePathExists -eq $False -or $force) {
-	"Create .\.vscode\tasks.json with install paths from .\vscode\tasks.TEMPLATE-ESP32.json" | Write-Host -ForegroundColor White
-
-	Copy-Item "$nfRoot\.vscode\tasks.TEMPLATE-ESP32.json" -Destination "$nfRoot\.vscode\tasks.json" -Force  
-	$tasks = (Get-Content "$nfRoot\.vscode\tasks.json")
-	$tasks = $tasks.Replace('<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>', $env:ESP32_IDF_PATH.ToString().Replace("\", "/")) 
-	$tasks = $tasks.Replace('<absolute-path-to-the-bootloader-folder-mind-the-forward-slashes>', $env:ESP32_LIBS_PATH.ToString().Replace("\", "/"))
-	$tasks = $tasks.Replace('<absolute-path-to-the-nanoframework-folder-mind-the-forward-slashes>', $buildFolderPath.ToString().Replace("\", "/"))  
-	$tasks = $tasks.Replace('<absolute-path-to-the-toolchain-prefix-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PREFIX.ToString().Replace("\", "/"))  
-	
-	# Update the COMPORT placeholder if the paramter is supplied.
-	If (![string]::IsNullOrEmpty($COMPORT)) {
-		$tasks = $tasks.Replace('<COMPORT>', $env:NANOCLR_COMPORT.ToString()) 
-	}
-	Set-Content -Path "$nfRoot\.vscode\tasks.json" -Value $tasks 
-}
-
-$filePathExists = Test-Path "$nfRoot\.vscode\launch.json" -ErrorAction SilentlyContinue
-#$filePathExists=$False
-If ($filePathExists -eq $False -or $force) {
-	"Create .\.vscode\launch.json with install paths from .\vscode\launch.TEMPLATE-ESP32.json" | Write-Host -ForegroundColor White
-
-	Copy-Item "$nfRoot\.vscode\launch.TEMPLATE-ESP32.json" -Destination "$nfRoot\.vscode\launch.json" -Force
-	
-	$launch = (Get-Content "$nfRoot\.vscode\launch.json")
-	$launch = $launch.Replace('<absolute-path-to-the-build-folder-mind-the-forward-slashes>', $buildFolderPath.ToString().Replace("\", "/")) 
-	$launch = $launch.Replace('<absolute-path-to-esp32-openocd-mind-the-forward-slashes>', $env:ESP32_OPENOCD_PATH.Replace("\", "/")) 
-	$launch = $launch.Replace('<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>', $env:ESP32_TOOLCHAIN_PATH.Replace("\", "/")) 
-	Set-Content -Path "$nfRoot\.vscode\launch.json" -Value $launch 
-}
-
 <#
 .SYNOPSIS
-    Install the default ESP32 tools and libraries needed to build nanoFramework, and setup the build environemnt.
+    Install the default ESP32 tools and libraries needed to build nanoFramework, and setup the build environment.
 .DESCRIPTION
 	Power Shell Script to install the default tools to build nanoFramework, including setting the machine path and other environment variables needed for ESP32 WROOM 32.
-	Use the -Force paramter to overwrite existing Environment variables.
-.PARAMETER COMPORT
+	Use the -Force parameter to overwrite existing Environment variables.
+.PARAMETER COMPort
 	The COM port for NANOCLR [e.g. COM1].
 .PARAMETER Path
 	The path to the folder where the tools should be installed.
 .EXAMPLE
    .\install-esp32-tools.ps1 -COMPORT COM19
-   Installs the tools for Espressif ESP32 to default path, define required envisonment variables and update VSCode files with paths and set COM19 in tasks.json
+   Installs the tools for Espressif ESP32 to default path, define required environment variables and update VSCode files with paths and set COM19 in tasks.json
 .NOTES
     Tested on Windows 10
     Author:  nanoFramework Contributors

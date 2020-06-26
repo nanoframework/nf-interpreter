@@ -43,10 +43,10 @@ Invoke-Expression "$PSScriptRoot\install-openocd.ps1 $commandArgs"
 
 <#
 .SYNOPSIS
-    Install the default tools to build nanoFramework for STM32 and setup build environemnt.
+    Install the default tools to build nanoFramework for STM32 and setup build environment.
 .DESCRIPTION
 	Power Shell Script to install the default tools to build nanoFramework, including setting the machine path and other environment variables needed for STM32
-	Use the -Force paramter to overwrite existing Environment variables. 
+	Use the -Force parameter to overwrite existing Environment variables. 
 .EXAMPLE
    .\install-stm32-tools.ps1 
    Install the tools for STM32 to default path, define required environment variables
