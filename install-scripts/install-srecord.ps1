@@ -1,7 +1,7 @@
 # Copyright (c) 2020 The nanoFramework project contributors
 # See LICENSE file in the project root for full license information.
 
-# This PS installs the xtensa ESP32 toolchain from Espressif downloads repository 
+# This PS installs srecord tool
 
 [CmdletBinding(SupportsShouldProcess = $true)]
 param (
@@ -35,53 +35,42 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
         $Path = 'C:\nftools'
     }
 
-    $finalPath = $Path + "\xtensa-esp32-elf"
-
-    # check if path already exists
-    $xtensaPathExists = Test-Path $finalPath -ErrorAction SilentlyContinue
-}
-else {
-    # check if path already exists
-    $xtensaPathExists = Test-Path $Path -ErrorAction SilentlyContinue
+    # append the tool path
+    $Path = $Path + "\srecord"
 }
 
-If ($xtensaPathExists -eq $False -or $force) {
-    # Download xtensa ESP32 toolchain and install
+# check if path already exists
+$ninjaPathExists = Test-Path $Path -ErrorAction SilentlyContinue
 
-    $url = "https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip"
-    $output = "$zipRoot\xtensa-esp32-elf-win32.zip"
-    
+If ($ninjaPathExists -eq $False -or $force) {
+    $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=srecord-1.64-win32.zip"
+    $output = "$zipRoot\srecord.zip"
+   
     # Don't download again if already exists
     if (![System.IO.File]::Exists($output) -or $force) {
-        "Downloading Xtensa ESP32 toolchain..." | Write-Host -ForegroundColor White -NoNewline
+        "Downloading SRecord..." | Write-Host -ForegroundColor White -NoNewline
 
         # Stop security tripping us up
         [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 
-        # download zip with toolchain
+        # download zip with Ninja tool
         (New-Object Net.WebClient).DownloadFile($url, $output)
-        
+
         "OK" | Write-Host -ForegroundColor Green
     }
 
     # unzip to install path, if not on Azure
     if ($IsAzurePipelines -eq $False) {
-        "Installing Xtensa ESP32 toolchain @ '$Path'..." | Write-Host -ForegroundColor White -NoNewline
+        "Installing SRecord..." | Write-Host -ForegroundColor White -NoNewline
 
-        #unzip using PowerShell 5+ inbuilt command
-        Expand-Archive -Path $output -DestinationPath $Path
+        # unzip tool
+        Expand-Archive $output -DestinationPath $Path > $null
 
         "OK" | Write-Host -ForegroundColor Green
-
-        # set path destination after expand operation
-        $Path = $finalPath
     }
 }
 else {
-    "Skipping instal of Xtensa ESP32 toolchain" | Write-Host -ForegroundColor Yellow
-
-    # set path destination after expand operation
-    $Path = $finalPath
+    "Skipping install of SRecord" | Write-Host -ForegroundColor Yellow
 }
 
 # set env variable, if not on Azure
@@ -89,9 +78,16 @@ if ($IsAzurePipelines -eq $False) {
     # need to replace forward slash for paths to work with GCC and CMake
     $Path = "$Path".Replace('\', '/')
 
-    $env:ESP32_TOOLCHAIN_PATH = $Path
+    $env:SRECORD_PATH = $Path
     # this call can fail if the script is not run with appropriate permissions
-    [System.Environment]::SetEnvironmentVariable("ESP32_TOOLCHAIN_PATH", $env:ESP32_TOOLCHAIN_PATH, "User")
+    [System.Environment]::SetEnvironmentVariable("SRECORD_PATH", $env:SRECORD_PATH, "User")
 
-    "Set User Environment ESP32_TOOLCHAIN_PATH='" + $env:ESP32_TOOLCHAIN_PATH + "'" | Write-Host -ForegroundColor Yellow
+    "Set User Environment SRECORD_PATH='" + $env:SRECORD_PATH + "'" | Write-Host -ForegroundColor Yellow
+}
+
+# on Azure, adjust SRecord path
+if ($IsAzurePipelines -eq $True) {
+    # need to replace forward slash for paths to work with GCC and CMake
+    $newPath = "$env:Agent_TempDirectory".Replace('\', '/')
+    Write-Host "$("##vso[task.setvariable variable=SRECORD_PATH]")$newPath"
 }

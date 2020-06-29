@@ -6,8 +6,9 @@
 /build/
 /build/.gitkeep
 
-# ignore cmake-variants file (will change frequently per user/board setup, use should derive content from cmake-variants.TEMPLATE.json)
-cmake-variants.json
+# ignore cmake-variants file (will change per user/board setup, developers should derive content from cmake-variants.TEMPLATE.json)
+/cmake-variants.json
+.vscode/cmake-variants.json
 
 # ignore any content inside the Interop assemblies folder
 InteropAssemblies/*
@@ -15,7 +16,7 @@ InteropAssemblies/*
 !InteropAssemblies/README.md
 
 # Visual Studio Code
-# ignore C/C++ launch file (will change frequently per user/board setup, use should derive content from launch.TEMPLATE.json)
+# ignore C/C++ launch file (will change frequently per user/board setup, developers should derive content from launch.TEMPLATE.json)
 .vscode/launch.json
 .vscode/.cmaketools.json
 .vscode/settings.json

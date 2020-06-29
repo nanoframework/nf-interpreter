@@ -5,7 +5,7 @@
             "name": "name the launch configuration 1 (booter) here",
             "type": "cppdbg",
             "request": "launch",
-            "miDebuggerPath": "<path-to-gdb-inside-the-gcc-toolchain-mind-the-forward-slash>",
+            "miDebuggerPath": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>",
             "targetArchitecture": "ARM",
             "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoBooter.elf",
 
@@ -24,8 +24,8 @@
             ],
 
             "launchCompleteCommand": "exec-continue",
-            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
-            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
+            "debugServerPath": "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
             "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
             "filterStderr": true,
             "externalConsole": true,
@@ -41,7 +41,7 @@
             "name": "name the launch configuration 2 (CLR) here",
             "type": "cppdbg",
             "request": "launch",
-            "miDebuggerPath": "<path-to-gdb-inside-the-gcc-toolchain-mind-the-forward-slash>",
+            "miDebuggerPath": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>",
             "targetArchitecture": "ARM",
             "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf",
 
@@ -60,8 +60,8 @@
             ],
 
             "launchCompleteCommand": "exec-continue",
-            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
-            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
+            "debugServerPath": "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
             "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
             "filterStderr": true,
             "externalConsole": true,
@@ -89,7 +89,7 @@
                 {"description":"" , "text" : "continue", "ignoreFailures": true }
             ],
 
-            "miDebuggerPath": "<path-to-gdb-inside-the-gcc-toolchain-mind-the-forward-slash>",
+            "miDebuggerPath": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>",
             "targetArchitecture": "ARM",
             "program": "${workspaceRoot}/build/nanoCLR.elf",
 
