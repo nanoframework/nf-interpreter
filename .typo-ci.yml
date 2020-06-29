@@ -1,0 +1,25 @@
+dictionaries:
+  - en
+  - en_GB
+
+# Any files/folders we should ignore?
+excluded_files:
+  - ".typo-ci.yml"
+  - ".gitignore"
+
+# Any typos we should ignore?
+excluded_words:
+  - nanoFramework
+  - llvm
+  - vso
+  - autocrlf
+  - uart
+  - gpio
+  - csharp
+  - dotnet
+  - spi
+  - i2c
+  - pwm
+  
+# Would you like filenames to also be spellchecked?
+spellcheck_filenames: true

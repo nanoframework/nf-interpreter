@@ -38,11 +38,11 @@ jobs:
       else
       {
         # get commit details, if this is a PR
-        if($env:Build_SourceBranch -like "refs/pull*")
+        if($env:Build_Reason -eq 'PullRequest')
         {
           $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
 
-          if( ($commit.commit.author.name -eq "nfbot") -and (($commit.commit.message -like "*[version update]*") -or ($commit.commit.message -like "***NO_CI***")) )
+          if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
           {
             echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"  
           }
@@ -53,14 +53,7 @@ jobs:
         }
         else
         {
-          if($commit.commit.message -like "***NO_CI***")
-          {
-            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"  
-          }
-          else
-          {
-            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
-          }
+          echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
         }
       }
 
@@ -93,17 +86,9 @@ jobs:
       git -c http.extraheader="AUTHORIZATION: $auth" fetch --progress origin
       
       git checkout develop
-      
-      cd source
 
       # prepare release and capture output
       $release = nbgv prepare-release
-  
-      # get commit message for the merge
-      $commitMessage = git log -1 --pretty=%B
-
-      # amend commit message to skip build
-      git commit --amend -m "$commitMessage" -m "***NO_CI***" > $null
 
       # push all changes to github
       git -c http.extraheader="AUTHORIZATION: $auth" push --all origin
@@ -140,13 +125,31 @@ jobs:
     condition: eq( variables['StartReleaseCandidate'], true )
     displayName: NBGV prepare release
 
-#################
-# STM32
-- job: Build_STM32_targets
-  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+##############################
+- job: Check_Code_Style
+  condition: ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true )
 
   dependsOn:
   - Check_Build_Options
+
+  pool:
+    vmImage: 'windows-latest'
+
+  steps:
+  - checkout: self
+    fetchDepth: 1
+
+  - template: azure-pipelines-templates/download-install-llvm.yml
+  - template: azure-pipelines-templates/check-code-style.yml
+
+#################
+# STM32
+- job: Build_STM32_targets
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -165,7 +168,7 @@ jobs:
         NeedsDFU: true
       ORGPAL_PALTHREE:
         BoardName: ORGPAL_PALTHREE
-        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DCHIBIOS_CONTRIB_REQUIRED=ON -DSTM32_CUBE_PACKAGE_REQUIRED=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_USB_MSD=ON -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_USE_SPIFFS=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Devices.Dac=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Windows.Storage=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DCHIBIOS_CONTRIB_REQUIRED=ON -DSTM32_CUBE_PACKAGE_REQUIRED=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_USB_MSD=ON -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_USE_SPIFFS=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Devices.Dac=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Windows.Storage=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
         NeedsDFU: true
       ST_STM32F429I_DISCOVERY:
@@ -176,7 +179,7 @@ jobs:
       ST_NUCLEO64_F091RC:
         BoardName: ST_NUCLEO64_F091RC
         BuildOptions: -DTARGET_SERIES=STM32F0xx -DRTOS=CHIBIOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON
-        GccArm_Version: 5-2016-q3-update
+        GccArm_Version:
         NeedsDFU: false
       ST_STM32F769I_DISCOVERY:
         BoardName: ST_STM32F769I_DISCOVERY
@@ -208,10 +211,11 @@ jobs:
 #################
 # ESP32 targets
 - job: Build_ESP32_targets
-  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -252,12 +256,11 @@ jobs:
 #################
 # NXP
 - job: Build_NXP_targets
-  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  # not( and( eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) )
-  condition: not( and( startsWith(variables['Build.SourceBranch'], 'refs/pull'), eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) ))
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -294,10 +297,11 @@ jobs:
 #################
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
-  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -335,10 +339,11 @@ jobs:
 #################
 # WIN32 
 - job: Build_WIN32_nanoCLR
-  condition: not( eq( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
   - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -361,7 +366,76 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), not( and( eq(variables['Build.RequestedForId'], 'nfbot'), contains(variables['Build.SourceVersionMessage'], '[version update]') ) ) )
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  steps:
+  - task: DotNetCoreCLI@2  
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . nbgv
+    condition: succeeded()
+    displayName: Install NBGV tool
+
+  - script: nbgv cloud -a -c
+    condition: succeeded()
+    displayName: Set build number
+
+  - task: UseRubyVersion@0
+    inputs:
+      versionSpec: '>= 2.7' 
+      addToPath: true
+    condition: succeeded()
+
+  # generate change log including future version
+  - powershell: |
+        gem install github_changelog_generator --quiet --no-document
+        # need to call it passing both cache options with full path otherwise it won't work
+        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$env:NBGV_AssemblyVersion"
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')  ) )
+    displayName: Generate change log
+
+  # generate change log without future version
+  - powershell: |
+        gem install github_changelog_generator --quiet --no-document
+        # need to call it passing both cache options with full path otherwise it won't work
+        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), not( or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ) ) )
+    displayName: Generate change log
+
+  # push new changelog to GitHub repo
+  - powershell: |
+        git config --global gc.auto 0
+        git config --global user.name nfbot
+        git config --global user.email nanoframework@outlook.com
+        git config --global core.autocrlf true
+
+        git add CHANGELOG.md
+        git commit -m "Update CHANGELOG" -m"***NO_CI***"
+
+        # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+        # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+
+        git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
+    displayName: Push changelog to GitHub
+
+#######################
+# create or update GitHub release ON tags from master branche or tags
+- job: Publish_Release
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  - Build_NXP_targets
+  - Build_TI_SimpleLink_targets
+  - Build_WIN32_nanoCLR
+  - Generate_change_log
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Generate_change_log'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
   pool:
     vmImage: 'VS2017-Win2016'
@@ -374,66 +448,26 @@ jobs:
       arguments: install --tool-path . nbgv
     displayName: Install NBGV tool
 
-  - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: nbgv cloud -a -c
-        errorActionPreference: 'silentlyContinue'
-        failOnStderr: 'false'
+  - script: nbgv cloud -a -c
     displayName: Set build number
-    # condition: ne(variables['system.pullrequest.isfork'], true)
 
-  - task: UseRubyVersion@0
-    inputs:
-      versionSpec: '>= 2.4' 
-      addToPath: true
-
-  # generate change log including future version
-  - script: |
-        gem install bundler
-        bundle install --retry=3 --jobs=4
-        gem install github_changelog_generator
-        bundle exec github_changelog_generator --token $(GitHubToken) --future-release "v$(NBGV_Version)"
-    condition: or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') )
-    displayName: Generate change log
-
-  # generate change log including future version
-  - script: |
-        gem install github_changelog_generator
-        bundle exec github_changelog_generator --token $(GitHubToken)
-    condition: not( or( eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) 
-    displayName: Generate change log
-
-#######################
-# create or update GitHub release ON tags from release or master branches
-- job: Publish_Release
-  dependsOn:
-  - Build_STM32_targets
-  - Build_ESP32_targets
-  - Build_TI_SimpleLink_targets
-  - Build_WIN32_nanoCLR
-  - Generate_change_log
-
-  pool:
-    vmImage: 'VS2017-Win2016'
-
-  steps:
   - task: GitHubReleasePublish@1
     inputs:
       githubEndpoint: 'nanoframework'
       githubOwner: 'nanoframework'
       githubRepositoryName: nf-interpreter
-      githubTag: v$(NBGV_Version)
-      githubReleaseTitle: 'nf Interpreter v$(NBGV_Version)'
+      githubTag: v$(NBGV_AssemblyVersion)
+      githubReleaseTitle: 'nf Interpreter v$(NBGV_AssemblyVersion)'
+      githubReleaseNotes: 'Check the [changelog]($(Build.Repository.Uri)/blob/$(Build.SourceBranchName)/CHANGELOG.md).<br><br>Download images from our Bintray repo. See the available images [here](https://github.com/nanoframework/nf-interpreter/tree/master#firmware-for-reference-boards).'
       githubTargetCommitsh: $(Build.SourceVersion)
       githubReleaseDraft: false
-      githubReleasePrerelease: false
+      githubReleasePrerelease: true
       githubReuseDraftOnly: false
       githubReuseRelease: true
-      githubEditRelease: false
+      githubEditRelease: true
       githubDeleteEmptyTag: true
-      githubReleaseAsset:
-    condition: and( succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'), not(contains(variables['Build.SourceBranch'], 'preview') ), ne( variables['StartReleaseCandidate'], true ) )
+      githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+    condition: endsWith(variables['Build.SourceBranch'], 'master')
     displayName: Create/Update GitHub stable release
 
 ##################################
@@ -445,7 +479,8 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_WIN32_nanoCLR
-  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'))
+  - Generate_change_log
+  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'), failed('Generate_change_log'))
 
   pool:
     vmImage: 'VS2017-Win2016'
