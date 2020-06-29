@@ -2,13 +2,13 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-  # - task: Cache@2
-  #   inputs:
-  #     key: esp331ToolsKey
-  #     restoreKeys: esp331ToolchainKey
-  #     path: $(Agent.TempDirectory)\ESP32_Tools
-  #     cacheHitVar: ESP_TOOLS_CACHE_RESTORED
-  #   displayName: Cache ESP32 tools
+  - task: Cache@2
+    inputs:
+      key: '3-3-1 | esp331ToolsKey'
+      restoreKeys: esp331ToolchainKey
+      path: $(Agent.TempDirectory)\ESP32_Tools
+      cacheHitVar: ESP_TOOLS_CACHE_RESTORED
+    displayName: Cache ESP32 tools
 
   - task: PowerShell@2
     condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
