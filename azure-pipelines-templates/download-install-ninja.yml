@@ -4,24 +4,19 @@
 steps:
   - task: Cache@2
     inputs:
-      key: ninjaKey
+      key: '1-10-0 | ninjaKey'
       restoreKeys: ninjaKey
       path: $(Agent.TempDirectory)/ninja
       cacheHitVar: NINJA_CACHE_RESTORED
     displayName: Cache Ninja
 
   - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            Write-Host "Downloading Ninja..."
-            $url = "https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip"
-            $output = "$PSScriptRoot\ninja.zip"
-            (New-Object Net.WebClient).DownloadFile($url, $output)
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
     condition: ne(variables.NINJA_CACHE_RESTORED, 'true')
     displayName: Download Ninja
+    inputs:
+        targetType: 'filePath'
+        filePath: 'install-scripts\install-ninja.ps1'
+        failOnStderr: 'true'
 
   - task: ExtractFiles@1
     inputs:

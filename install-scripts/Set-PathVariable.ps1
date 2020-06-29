@@ -1,28 +1,26 @@
- ## Based on Hahndorf's awesome collection of PowerShell scripts.
- ## https://github.com/hahndorf/hacops
- [CmdletBinding(SupportsShouldProcess = $true)]
+## Based on Hahndorf's awesome collection of PowerShell scripts.
+## https://github.com/hahndorf/hacops
+
+[CmdletBinding(SupportsShouldProcess = $true)]
 Param(
-    [parameter(Mandatory=$true)]
+    [parameter(Mandatory = $true)]
     [string]$NewLocation)
 
-Begin
-{
+Begin {
 
-# requires –runasadministrator
+    # requires –runasadministrator
 
     $regPath = "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
     $hklm = [Microsoft.Win32.Registry]::LocalMachine
 
-    Function GetOldPath()
-    {     
+    Function GetOldPath() {     
         $regKey = $hklm.OpenSubKey($regPath, $FALSE)
         $envpath = $regKey.GetValue("Path", "", [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
         return $envPath
     }
 }
 
-Process
-{
+Process {
     # Win32API error codes
     $ERROR_SUCCESS = 0
     $ERROR_DUP_NAME = 34 
@@ -30,8 +28,7 @@ Process
 
     $NewLocation = $NewLocation.Trim();
 
-    If ($NewLocation -eq "" -or $NewLocation -eq $null)
-    {
+    If ($NewLocation -eq "" -or $NewLocation -eq $null) {
         Exit $ERROR_INVALID_DATA
     }
    
@@ -40,17 +37,16 @@ Process
 
     # check whether the new location is already in the path
     $parts = $oldPath.split(";")
-    If ($parts -contains $NewLocation)
-    {
-        Write-Warning ("The new location is already in the path ('"+$NewLocation+"')")
+    If ($parts -contains $NewLocation) {
+        Write-Warning ("The new location is already in the path ('" + $NewLocation + "')")
         Exit $ERROR_DUP_NAME        
     }
 
     # build the new path, make sure we don't have double semicolons
     $newPath = $oldPath + ";" + $NewLocation
-    $newPath = $newPath -replace ";;",";"
+    $newPath = $newPath -replace ";;", ";"
 
-    if ($pscmdlet.ShouldProcess("%Path%", "Set $newPath")){
+    if ($pscmdlet.ShouldProcess("%Path%", "Set $newPath")) {
         # add to the current session
         $env:path += ";$NewLocation"
         # save into registry
