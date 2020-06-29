@@ -127,7 +127,7 @@ jobs:
 
 ##############################
 - job: Check_Code_Style
-  condition: and( ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), eq(variables['Build.Reason'], 'PullRequest') )
+  condition: ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true )
 
   dependsOn:
   - Check_Build_Options

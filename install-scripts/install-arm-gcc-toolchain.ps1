@@ -15,6 +15,7 @@ if ([string]::IsNullOrEmpty($Version)) {
     $Version = "8-2019-q3-update"
 }
 
+
 # check if running on Azure Pipelines by looking at this two environment variables
 $IsAzurePipelines = $env:Agent_HomeDirectory -and $env:Build_BuildNumber
 
@@ -55,6 +56,8 @@ If ($gnuGccPathExists -eq $False -or $force) {
 
     # Don't download again if already exists
     if (![System.IO.File]::Exists($output) -or $force) {
+        "Download URL is: '$url'" | Write-Host -ForegroundColor White
+
         "Downloading ARM GNU GCC toolchain..." | Write-Host -ForegroundColor White -NoNewline
 
         # Stop security tripping us up
