@@ -12,7 +12,7 @@ param (
 
 # set default GNU GCC version
 if ([string]::IsNullOrEmpty($Version)) {
-    $Version = "8-2019-q3-update"
+    $Version = "9-2020-q2-update"
 }
 
 

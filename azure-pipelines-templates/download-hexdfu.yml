@@ -2,14 +2,14 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-  # - task: Cache@2
-  #   inputs:
-  #     key: hex2dfuKey
-  #     restoreKeys: hex2dfuKey
-  #     path: $(Agent.TempDirectory)/hex2dfu
-  #     cacheHitVar: HEX2DFU_CACHE_RESTORED
-  #   condition: eq(variables['NeedsDFU'], true)
-  #   displayName: Cache HEX2DFU
+  - task: Cache@2
+    inputs:
+      key: '1-0 | hex2dfuKey'
+      restoreKeys: hex2dfuKey
+      path: $(Agent.TempDirectory)/hex2dfu
+      cacheHitVar: HEX2DFU_CACHE_RESTORED
+    condition: eq(variables['NeedsDFU'], true)
+    displayName: Cache HEX2DFU
 
   - task: PowerShell@2
     condition: and( eq(variables['NeedsDFU'], true), ne(variables.HEX2DFU_CACHE_RESTORED, 'true'))
