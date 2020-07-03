@@ -47,6 +47,9 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
 else {
     # check if path already exists
     $esp32IdfPathExists = Test-Path $Path -ErrorAction SilentlyContinue
+    
+    # need this here for the replacements ahead
+    $finalPath = $Path
 }
 
 If ($esp32IdfPathExists -eq $False -or $force) {
@@ -74,10 +77,10 @@ If ($esp32IdfPathExists -eq $False -or $force) {
         Expand-Archive -Path $output -DestinationPath $Path
 
         "OK" | Write-Host -ForegroundColor Green
-        
-        # set path destination after expand operation
-        $Path = $finalPath
     }
+    
+    # set path destination after expand operation
+    $Path = $finalPath
 }
 else {
     "Skipping install of Espressif IDF" | Write-Host -ForegroundColor Yellow

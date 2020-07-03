@@ -14,6 +14,8 @@ $IsAzurePipelines = $env:Agent_HomeDirectory -and $env:Build_BuildNumber
 
 if ($IsAzurePipelines) {
     $zipRoot = "$env:Agent_TempDirectory"
+
+    $Path = "$env:Agent_TempDirectory\ESP32_Tools"
 }
 else {
     #Set location of nf-interpreter top-level
@@ -43,6 +45,9 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
 else {
     # check if path already exists
     $xtensaPathExists = Test-Path $Path -ErrorAction SilentlyContinue
+    
+    # need this here for the replacements ahead
+    $finalPath = $Path
 }
 
 If ($xtensaPathExists -eq $False -or $force) {
