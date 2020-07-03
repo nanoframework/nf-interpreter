@@ -13,10 +13,11 @@
 
 // need to declare this as external to be picked up by mbed TLS platform_time
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-time_t nf_get_unix_epoch();
+    time_t nf_get_unix_epoch();
 
 #ifdef __cplusplus
 }
@@ -184,15 +185,13 @@ time_t nf_get_unix_epoch();
 #define MBEDTLS_AES_ROM_TABLES
 
 /* Save some RAM by adjusting to your exact needs */
-#define MBEDTLS_PSK_MAX_LEN    16 /* 128-bits keys are generally enough */
+#define MBEDTLS_PSK_MAX_LEN 16 /* 128-bits keys are generally enough */
 
 /*
  * Use only CCM_8 ciphersuites, and
  * save ROM and a few bytes of RAM by specifying our own ciphersuite list
  */
-#define MBEDTLS_SSL_CIPHERSUITES                        \
-        MBEDTLS_TLS_PSK_WITH_AES_256_CCM_8,             \
-        MBEDTLS_TLS_PSK_WITH_AES_128_CCM_8
+#define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_PSK_WITH_AES_256_CCM_8, MBEDTLS_TLS_PSK_WITH_AES_128_CCM_8
 
 ////////////////////////////////////////////////////////////////////////////
 // This define depends on the platform having a hardware random generator.
