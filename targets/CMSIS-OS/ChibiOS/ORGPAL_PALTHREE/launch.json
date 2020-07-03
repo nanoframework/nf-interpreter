@@ -42,8 +42,8 @@
                 "moduleLoad": false,
                 "trace": false,
                 "engineLogging": false,
-                "programOutput": false,
-                "exceptions": false
+                "programOutput": true,
+                "exceptions": true
             },
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
@@ -94,8 +94,8 @@
                 "moduleLoad": false,
                 "trace": false,
                 "engineLogging": false,
-                "programOutput": false,
-                "exceptions": false
+                "programOutput": true,
+                "exceptions": true
             },
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
