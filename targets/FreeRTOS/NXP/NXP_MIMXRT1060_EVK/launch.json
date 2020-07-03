@@ -79,8 +79,8 @@
         "moduleLoad": false,
         "trace": false,
         "engineLogging": false,
-        "programOutput": false,
-        "exceptions": false
+        "programOutput": true,
+        "exceptions": true
       }
     }
   ]

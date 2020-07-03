@@ -36,8 +36,8 @@
                 "moduleLoad": false,
                 "trace": false,
                 "engineLogging": false,
-                "programOutput": false,
-                "exceptions": false
+                "programOutput": true,
+                "exceptions": true
             },
             "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
             "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f board/ti_cc3220sf_launchpad.cfg",

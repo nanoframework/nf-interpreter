@@ -96,8 +96,8 @@
                 "trace": false,
                 "traceResponse": false,
                 "engineLogging": false,
-                "programOutput": false,
-                "exceptions": false,
+                "programOutput": true,
+                "exceptions": true,
                 "moduleLoad": false
             }
         },
@@ -137,8 +137,8 @@
                 "trace": false,
                 "traceResponse": false,
                 "engineLogging": false,
-                "programOutput": false,
-                "exceptions": false,
+                "programOutput": true,
+                "exceptions": true,
                 "moduleLoad": false
             }
         }

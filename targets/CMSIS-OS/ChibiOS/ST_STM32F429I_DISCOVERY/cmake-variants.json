@@ -40,7 +40,6 @@
           "SUPPORT_ANY_BASE_CONVERSION": "ON",
           "NF_FEATURE_DEBUGGER": "ON",
           "NF_FEATURE_RTC": "ON",
-          "NF_FEATURE_HAS_SDCARD": "ON",
           "SWO_OUTPUT": "OFF",
           "NF_BUILD_RTM": "OFF",
           "API_System.Math": "ON",

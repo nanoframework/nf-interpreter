@@ -26,6 +26,11 @@
                 },
                 {
                     "text": "monitor reset halt"
+                },
+                {
+                    "text": "set output-radix 16",
+                    "description": "set the default numeric base to 16",
+                    "ignoreFailures": false
                 }
             ],
             "customLaunchSetupCommands": [
@@ -40,8 +45,8 @@
                 "moduleLoad": false,
                 "trace": false,
                 "engineLogging": false,
-                "programOutput": false,
-                "exceptions": false
+                "programOutput": true,
+                "exceptions": true
             },
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
@@ -76,6 +81,11 @@
                 },
                 {
                     "text": "monitor reset halt"
+                },
+                {
+                    "text": "set output-radix 16",
+                    "description": "set the default numeric base to 16",
+                    "ignoreFailures": false
                 }
             ],
             "customLaunchSetupCommands": [
@@ -90,8 +100,8 @@
                 "moduleLoad": false,
                 "trace": false,
                 "engineLogging": false,
-                "programOutput": false,
-                "exceptions": false
+                "programOutput": true,
+                "exceptions": true
             },
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
