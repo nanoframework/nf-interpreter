@@ -54,6 +54,7 @@
           "SPIFFS_SOURCE": "<path-to-local-SPIFFS-source-mind-the-forward-slash>",
           "SWO_OUTPUT": "OFF-default-ON-to-enable-ARM-CortexM-Single-Wire-Output",
           "FATFS_VERSION": "<valid-fatfs-version-if-empty-use-default-set-cmake>",
+          "FATFS_SOURCE": "<path-to-local-FATFS-source-mind-the-forward-slash>",
           "LWIP_VERSION": "<valid-lwip-version-if-empty-use-default-set-cmake>",
           "NF_BUILD_RTM": "OFF-default-ON-to-enable-RTM-build",
           "NF_WP_TRACE_ERRORS": "OFF-default-ON-to-enable-trace-error-messages-wire-protocol",
