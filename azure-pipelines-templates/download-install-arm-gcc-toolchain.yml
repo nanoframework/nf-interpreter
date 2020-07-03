@@ -3,13 +3,13 @@
 
 steps:
   - task: Cache@2
+    condition: eq(variables.GccArm_Version, '')
+    displayName: Cache ARM GCC toolchain
     inputs:
       key: '9-2020-q2-update | gccUpdateKey'
       restoreKeys: gccUpdateKey
       path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
       cacheHitVar: GCC_CACHE_RESTORED
-    condition: eq(variables.GccArm_Version, '')
-    displayName: Cache ARM GCC toolchain
 
   - task: PowerShell@2
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
@@ -18,7 +18,7 @@ steps:
         targetType: 'filePath'
         filePath: 'install-scripts\install-arm-gcc-toolchain.ps1'
         arguments: '-Version "$(GccArm_Version)"'
-        failOnStderr: 'true'
+        failOnStderr: true
 
   - task: ExtractFiles@1
     displayName: Extracting ARM GCC toolchain
