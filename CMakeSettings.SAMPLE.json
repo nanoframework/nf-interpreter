@@ -160,8 +160,8 @@
         },
         {
           "name": "NF_INTEROP_ASSEMBLIES",
-          "value": "False",
-          "type": "BOOL"
+          "value": "Assembly1_Namespace Assembly2_Namespace",
+          "type": "STRING"
         },
         {
           "name": "NF_NETWORKING_SNTP",
@@ -420,8 +420,8 @@
         },
         {
           "name": "NF_INTEROP_ASSEMBLIES",
-          "value": "OFF",
-          "type": "BOOL"
+          "value": "Assembly1_Namespace Assembly2_Namespace",
+          "type": "STRING"
         },
         {
           "name": "NF_NETWORKING_SNTP",

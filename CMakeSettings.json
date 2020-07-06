@@ -141,7 +141,7 @@
         },
         {
           "name": "NF_INTEROP_ASSEMBLIES",
-          "value": "OFF"
+          "value": ""
         },
         {
           "name": "NF_NETWORKING_SNTP",
@@ -367,8 +367,8 @@
           "value": "OFF"
         },
         {
-          "name": "NF_INTEROP_ASSEMBLIES:BOOL", //OFF-default-ON-to-disable-CLR-IL-inlining
-          "value": "OFF"
+          "name": "NF_INTEROP_ASSEMBLIES:STRING", //empty-to-NOT-include-any-interop-assemblies
+          "value": ""
         },
         {
           "name": "NF_NETWORKING_SNTP:BOOL", //ON-default-to-add-SNTP-client-requires-networking
