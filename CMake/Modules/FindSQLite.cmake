@@ -4,7 +4,7 @@
 #
 
 
-# List of the required FatFs include files.
+# List of the required Sqlite include files.
 list(APPEND SQLITE_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/SQLite_Source/src)
 list(APPEND SQLITE_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 
