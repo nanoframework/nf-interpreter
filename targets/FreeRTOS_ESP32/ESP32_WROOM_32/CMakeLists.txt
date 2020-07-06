@@ -286,7 +286,7 @@ set(GEN_ESP32PART_PY_FILE ${ESP32_IDF_PATH}/components/partition_table/gen_esp32
 
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
     COMMAND ${ESPTOOL_PY_FILE} ${ESPTOOL_PY_FLAGS} -o ${NANOCLR_BIN_FILE}   ${EXECUTABLE_OUTPUT_PATH}/${NANOCLR_PROJECT_NAME}.elf
-    COMMENT "Generate nanoClr BIN file for deployment" )
+    COMMENT "Generate nanoCLR BIN file for deployment" )
     
 # # Create partition table
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
