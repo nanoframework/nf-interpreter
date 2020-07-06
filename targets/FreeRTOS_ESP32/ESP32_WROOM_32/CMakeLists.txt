@@ -272,6 +272,11 @@ if(USE_NETWORKING_OPTION)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf NetworkLib)
 endif()
 
+# need to tweak this in case this path variable is empty
+if(NOT EXECUTABLE_OUTPUT_PATH)
+    set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build)
+endif()
+
 # Create bin file from elf
 set(GEN_ESP32_BIN_PATH ${EXECUTABLE_OUTPUT_PATH} )
 set(NANOCLR_BIN_FILE ${GEN_ESP32_BIN_PATH}/${NANOCLR_PROJECT_NAME}.bin)
