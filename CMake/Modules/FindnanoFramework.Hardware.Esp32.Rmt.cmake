@@ -21,13 +21,11 @@ set(nanoFramework.Hardware.Esp32.Rmt_SRCS
     nanoFramework_hardware_esp32_rmt_native.cpp
 
 
-    nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtCommand.cpp
     nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel.cpp
 
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Esp32.Rmt_SRCS})
-
     set(nanoFramework.Hardware.Esp32.Rmt_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(nanoFramework.Hardware.Esp32.Rmt_SRC_FILE ${SRC_FILE}
         PATHS
@@ -36,8 +34,8 @@ foreach(SRC_FILE ${nanoFramework.Hardware.Esp32.Rmt_SRCS})
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
-# message("${SRC_FILE} >> ${nanoFramework.Hardware.Esp32.Rmt_SRC_FILE}") # debug helper
-list(APPEND nanoFramework.Hardware.Esp32.Rmt_SOURCES ${nanoFramework.Hardware.Esp32.Rmt_SRC_FILE})
+    # message("${SRC_FILE} >> ${nanoFramework.Hardware.Esp32.Rmt_SRC_FILE}") # debug helper
+    list(APPEND nanoFramework.Hardware.Esp32.Rmt_SOURCES ${nanoFramework.Hardware.Esp32.Rmt_SRC_FILE})
 endforeach()
 
 include(FindPackageHandleStandardArgs)
