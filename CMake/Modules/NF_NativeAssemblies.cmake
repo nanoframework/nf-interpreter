@@ -31,6 +31,7 @@ option(API_Windows.Storage                      "option for Windows.Storage")
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
+option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
 
 
 # Stm32 only
@@ -84,6 +85,12 @@ macro(ParseNativeAssemblies)
     if(API_Hardware.Esp32)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
+    endif()
+
+    # nanoFramework.Hardware.Esp32.Rmt
+    if(API_nanoFramework.Hardware.Esp32.Rmt)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
     endif()
 
     # Hardware.Stm32
