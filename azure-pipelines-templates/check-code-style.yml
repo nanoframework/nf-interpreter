@@ -130,7 +130,7 @@ steps:
               'OK' | Write-Host -ForegroundColor Green
 
               # PR submitted, add a comment
-              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`nA PR was submitted with the code style fixes. Please review and merge the changes. See $($result.html_url)."} | ConvertTo-Json
+              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`nA PR was submitted with the code style fixes. Please review and merge the changes. See $($result.html_url).`n`nMake sure you are using the project code style. Check the details [here](https://docs.nanoframework.net/content/contributing/cxx-coding-style.html)."} | ConvertTo-Json
               Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
           }
           catch 
