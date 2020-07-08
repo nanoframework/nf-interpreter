@@ -667,7 +667,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
     NANOCLR_HEADER();
 
     uint8_t busIndex;
-    NF_PAL_SPI* palSpi;
+    NF_PAL_SPI* palSpi = NULL;
     int32_t actualFrequency = 0;
     CLR_RT_HeapBlock* pConfig;
     
@@ -763,7 +763,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
         default:
             // this SPI bus is not valid
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-            break;
     }
 
     // compute rough estimate on the time to tx/rx a byte (in milliseconds)
