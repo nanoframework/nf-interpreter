@@ -106,8 +106,6 @@ extern "C"
 #define MBEDTLS_ARC4_C
 #define MBEDTLS_ASN1_PARSE_C
 
-#define MBEDTLS_ASN1_WRITE_C
-
 #define MBEDTLS_BASE64_C
 
 #define MBEDTLS_BIGNUM_C
@@ -124,8 +122,6 @@ extern "C"
 #define MBEDTLS_DES_C
 #define MBEDTLS_DHM_C
 #define MBEDTLS_ECDH_C
-
-#define MBEDTLS_ECDSA_C
 
 #define MBEDTLS_ECP_C
 
@@ -179,19 +175,7 @@ extern "C"
 
 #define MBEDTLS_XTEA_C
 
-#define MBEDTLS_TLS_DEFAULT_ALLOW_SHA1_IN_KEY_EXCHANGE
-
-/* Save RAM at the expense of ROM */
 #define MBEDTLS_AES_ROM_TABLES
-
-/* Save some RAM by adjusting to your exact needs */
-#define MBEDTLS_PSK_MAX_LEN 16 /* 128-bits keys are generally enough */
-
-/*
- * Use only CCM_8 ciphersuites, and
- * save ROM and a few bytes of RAM by specifying our own ciphersuite list
- */
-#define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_PSK_WITH_AES_256_CCM_8, MBEDTLS_TLS_PSK_WITH_AES_128_CCM_8
 
 ////////////////////////////////////////////////////////////////////////////
 // This define depends on the platform having a hardware random generator.
