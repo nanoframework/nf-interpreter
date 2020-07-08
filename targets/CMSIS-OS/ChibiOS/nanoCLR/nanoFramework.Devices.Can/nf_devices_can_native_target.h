@@ -13,7 +13,7 @@
 
 
 // struct representing the CAN 
-struct NF_PAL_CAN
+typedef struct
 {
     CANDriver*  Driver;
     CANConfig   Configuration;
@@ -21,7 +21,7 @@ struct NF_PAL_CAN
 
     HAL_RingBuffer<CANRxFrame> MsgRingBuffer;
     CANRxFrame* MsgBuffer;
-};
+} NF_PAL_CAN;
 
 ///////////////////////////////////////////
 // declaration of the CAN PAL strucs     //

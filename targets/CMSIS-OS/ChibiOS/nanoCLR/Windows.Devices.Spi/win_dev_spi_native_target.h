@@ -11,7 +11,7 @@
 #include <hal.h>
 
 // struct representing the SPI 
-struct NF_PAL_SPI
+typedef struct
 {
     SPIDriver*  Driver;
     SPIConfig   Configuration;
@@ -23,7 +23,7 @@ struct NF_PAL_SPI
 
     uint8_t* ReadBuffer;
     uint16_t ReadSize;
-};
+} NF_PAL_SPI;
 
 ///////////////////////////////////////////
 // declaration of the the SPI PAL strucs //

@@ -796,6 +796,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeInit___V
         busIndex,
         pConfig[SpiConnectionSettings::FIELD___clockFrequency].NumericByRef().s4,
         actualFrequency);
+
     palSpi->ByteTime = (1.0 / actualFrequency) * 1000.0;
 
     NANOCLR_NOCLEANUP();

@@ -11,7 +11,7 @@
 #include <hal.h>
 
 // struct representing the UART 
-struct NF_PAL_UART
+typedef struct
 {
     UARTDriver* UartDriver;
     UARTConfig Uart_cfg;
@@ -25,7 +25,7 @@ struct NF_PAL_UART
     uint16_t RxBytesToRead;
 
     uint8_t WatchChar;
-};
+} NF_PAL_UART;
 
 
 ////////////////////////////////////////////

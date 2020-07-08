@@ -115,93 +115,94 @@ bool IsLongRunningOperation(uint16_t writeSize, uint16_t readSize, float byteTim
 HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
+
+    NF_PAL_I2C* palI2c = NULL;
+    CLR_RT_HeapBlock* pConfig;
+    uint8_t busIndex;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+    
+    // get a pointer to the managed I2C connectionSettings object instance
+    pConfig = pThis[ FIELD___connectionSettings ].Dereference();
+
+    // get bus index
+    // this is coded with a multiplication, need to perform and int division to get the number
+    // see the comments in the I2cDevice() constructor in managed code for details
+    busIndex = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
+
+    // config GPIO pins used by the I2C peripheral
+    // init the PAL struct for this I2C bus and assign the respective driver
+    // all this occurs if not already done
+    // why do we need to check if this is already done? because several I2cDevice objects can be created associated to the same bus just using different addresses
+    switch (busIndex)
     {
-        NF_PAL_I2C* palI2c = NULL;
+#if STM32_I2C_USE_I2C1
+        case 1:
+            if(I2C1_PAL.Driver == NULL)
+            {
+                ConfigPins_I2C1();
 
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-       
-        // get a pointer to the managed I2C connectionSettings object instance
-        CLR_RT_HeapBlock* pConfig = pThis[ FIELD___connectionSettings ].Dereference();
+                I2C1_PAL.Driver = &I2CD1;
+                palI2c = &I2C1_PAL;
+            }
+            break;
+#endif
+#if STM32_I2C_USE_I2C2
+        case 2:
+            if(I2C2_PAL.Driver == NULL)
+            {
+                ConfigPins_I2C2();
 
-        // get bus index
-        // this is coded with a multiplication, need to perform and int division to get the number
-        // see the comments in the I2cDevice() constructor in managed code for details
-        uint8_t busIndex = (uint8_t)(pThis[ FIELD___deviceId ].NumericByRef().s4 / 1000);
+                I2C2_PAL.Driver = &I2CD2;
+                palI2c = &I2C2_PAL;
+            }
+            break;
+#endif
+#if STM32_I2C_USE_I2C3
+        case 3:
+            if(I2C3_PAL.Driver == NULL)
+            {
+                ConfigPins_I2C3();
 
-        // config GPIO pins used by the I2C peripheral
-        // init the PAL struct for this I2C bus and assign the respective driver
-        // all this occurs if not already done
-        // why do we need to check if this is already done? because several I2cDevice objects can be created associated to the same bus just using different addresses
-        switch (busIndex)
-        {
-    #if STM32_I2C_USE_I2C1
-            case 1:
-                if(I2C1_PAL.Driver == NULL)
-                {
-                    ConfigPins_I2C1();
+                I2C3_PAL.Driver = &I2CD3;
+                palI2c = &I2C3_PAL;
+            }
+            break;
+#endif
+#if STM32_I2C_USE_I2C4
+        case 4:
+            if(I2C4_PAL.Driver == NULL)
+            {
+                ConfigPins_I2C4();
 
-                    I2C1_PAL.Driver = &I2CD1;
-                    palI2c = &I2C1_PAL;
-                }
-                break;
-    #endif
-    #if STM32_I2C_USE_I2C2
-            case 2:
-                if(I2C2_PAL.Driver == NULL)
-                {
-                    ConfigPins_I2C2();
+                I2C4_PAL.Driver = &I2CD4;
+                palI2c = &I2C4_PAL;
+            }
+            break;
+#endif
 
-                    I2C2_PAL.Driver = &I2CD2;
-                    palI2c = &I2C2_PAL;
-                }
-                break;
-    #endif
-    #if STM32_I2C_USE_I2C3
-            case 3:
-                if(I2C3_PAL.Driver == NULL)
-                {
-                    ConfigPins_I2C3();
-
-                    I2C3_PAL.Driver = &I2CD3;
-                    palI2c = &I2C3_PAL;
-                }
-                break;
-    #endif
-    #if STM32_I2C_USE_I2C4
-            case 4:
-                if(I2C4_PAL.Driver == NULL)
-                {
-                    ConfigPins_I2C4();
-
-                    I2C4_PAL.Driver = &I2CD4;
-                    palI2c = &I2C4_PAL;
-                }
-                break;
-    #endif
-
-            default:
-                // this I2C bus is not valid
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-                break;
-        }
-
-        // Get a general low-level I2C configuration, depending on user's managed parameters
-        GetI2cConfig(pConfig, &palI2c->Configuration);
-
-        // compute rough estimate on the time to tx/rx a byte (in milliseconds)
-        if((I2cBusSpeed)pConfig[ I2cConnectionSettings::FIELD___busSpeed ].NumericByRef().s4 == I2cBusSpeed_StandardMode)
-        {
-            // 100kbit/s: this is roughly 0.10ms per byte, give or take
-            palI2c->ByteTime = 0.1;
-        }
-        else
-        {
-            // 400kbit/s: this is roughly 0.02ms per byte, give or take
-            palI2c->ByteTime = 0.02;
-        }
-
+        default:
+            // this I2C bus is not valid
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            break;
     }
+
+    // Get a general low-level I2C configuration, depending on user's managed parameters
+    GetI2cConfig(pConfig, &palI2c->Configuration);
+
+    // compute rough estimate on the time to tx/rx a byte (in milliseconds)
+    if((I2cBusSpeed)pConfig[ I2cConnectionSettings::FIELD___busSpeed ].NumericByRef().s4 == I2cBusSpeed_StandardMode)
+    {
+        // 100kbit/s: this is roughly 0.10ms per byte, give or take
+        palI2c->ByteTime = 0.1;
+    }
+    else
+    {
+        // 400kbit/s: this is roughly 0.02ms per byte, give or take
+        palI2c->ByteTime = 0.02;
+    }
+
     NANOCLR_NOCLEANUP();
 }
 

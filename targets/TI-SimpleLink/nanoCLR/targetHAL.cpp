@@ -11,6 +11,15 @@
 #include <nanoHAL_ConfigurationManager.h>
 // #include <FreeRTOS.h>
 
+#if (HAL_USE_I2C == TRUE)
+#include <ti/drivers/I2C.h>
+#include <win_dev_i2c_native_target.h>
+#endif
+#if (HAL_USE_SPI == TRUE)
+#include <ti/drivers/SPI.h>
+#include <win_dev_spi_native_target.h>
+#endif
+
 //
 //  Reboot handlers clean up on reboot
 //
@@ -73,7 +82,15 @@ void nanoHAL_Initialize()
 
     // no PAL events required until now
     //PalEvent_Initialize();
-	
+
+#if (HAL_USE_I2C == TRUE)
+    I2C1_PAL.i2c = NULL;
+#endif
+
+#if (HAL_USE_SPI == TRUE)
+    SPI1_PAL.masterSpi = NULL;
+#endif
+
 	// Init Networking
 	Network_Initialize();
     
@@ -104,6 +121,14 @@ void nanoHAL_Uninitialize()
     //Network_Uninitialize();
 
     CPU_GPIO_Uninitialize();
+
+#if (HAL_USE_I2C == TRUE)
+    I2C_close(I2C1_PAL.i2c);
+#endif
+
+#if (HAL_USE_SPI == TRUE)
+    SPI_close(SPI1_PAL.masterSpi);
+#endif
 
     Events_Uninitialize();
 

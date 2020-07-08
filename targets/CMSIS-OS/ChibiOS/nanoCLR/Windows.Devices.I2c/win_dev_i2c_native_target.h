@@ -10,7 +10,7 @@
 #include <hal.h>
 
 // struct representing the I2C 
-struct NF_PAL_I2C
+typedef struct NF_PAL_I2C_
 {
     I2CDriver*  Driver;
     I2CConfig   Configuration;
@@ -23,7 +23,7 @@ struct NF_PAL_I2C
 
     uint8_t* ReadBuffer;
     uint8_t  ReadSize;
-};
+} NF_PAL_I2C;
 
 ///////////////////////////////////////////
 // declaration of the the I2C PAL strucs //

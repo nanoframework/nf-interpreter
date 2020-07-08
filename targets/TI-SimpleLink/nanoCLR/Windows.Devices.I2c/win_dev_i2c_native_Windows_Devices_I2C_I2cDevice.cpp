@@ -75,7 +75,6 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeDispose_
     NANOCLR_HEADER();
 
     uint8_t busIndex;
-    NF_PAL_I2C* palI2c = NULL;
     bool disposeController = false;
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -96,7 +95,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeDispose_
         {
             case 1:
                 // deactivates the I2C peripheral
-                I2C_close(palI2c->i2c);
+                I2C_close(I2C1_PAL.i2c);
                 I2C1_PAL.i2c == NULL;
                 break;
 
