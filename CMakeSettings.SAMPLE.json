@@ -20,12 +20,12 @@
         },
         {
           "name": "ESP32_TOOLCHAIN_PATH",
-          "value": "C:/ESP32_TOOLS",
+          "value": "C:/ESP32_TOOLS/xtensa-esp32-elf",
           "type": "PATH"
         },
         {
           "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/ESP32_TOOLS",
+          "value": "C:/ESP32_TOOLS/xtensa-esp32-elf",
           "type": "PATH"
         },
         {
