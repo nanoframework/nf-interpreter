@@ -72,7 +72,7 @@ If ($gnuGccPathExists -eq $False -or $force) {
     # unzip to install path, if not on Azure
     if ($IsAzurePipelines -eq $False) {
         # Install 7Zip4PowerShell module from PSGallery if not already installed
-        Install-Module -Name 7Zip4Powershell -RequiredVersion -Scope CurrentUser
+        Install-Module -Name 7Zip4Powershell -RequiredVersion 1.10.0 -Scope CurrentUser
 
         "Installing ARM GNU GCC toolchain..." | Write-Host -ForegroundColor White -NoNewline
 
