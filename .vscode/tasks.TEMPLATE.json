@@ -80,6 +80,6 @@
       "type": "promptString",
       "default": "COM1",
       "description": "COM port of the ESP32 device."
-    },
+    }
   ]
 }
