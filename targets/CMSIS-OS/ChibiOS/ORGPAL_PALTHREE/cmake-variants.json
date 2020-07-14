@@ -22,8 +22,8 @@
   "linkage": {
     "default": "",
     "choices": {
-      "ST_STM32F769I_DISCOVERY": {
-        "short": "ST_STM32F769I_DISCOVERY",
+      "ORGPAL_PALTHREE": {
+        "short": "ORGPAL_PALTHREE",
         "settings": {
           "BUILD_VERSION": "0.9.99.999",
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
@@ -32,7 +32,7 @@
           "RTOS": "CHIBIOS",
           "TARGET_SERIES": "STM32F7xx",
           "CHIBIOS_SOURCE": "",
-          "CHIBIOS_BOARD": "ST_STM32F769I_DISCOVERY",
+          "CHIBIOS_BOARD": "ORGPAL_PALTHREE",
           "CHIBIOS_CONTRIB_REQUIRED": "OFF",
           "CHIBIOS_CONTRIB_SOURCE": "",
           "STM32_CUBE_PACKAGE_REQUIRED": "ON",
