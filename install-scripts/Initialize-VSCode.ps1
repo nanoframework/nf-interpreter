@@ -74,7 +74,7 @@ function Main {
 
             $settings | ConvertTo-Json -depth 32 | Out-File $filePath -Encoding UTF8 -Force
 
-            CleanJsonPatterns($filePath)
+            Repair-Patterns($filePath)
         }
     }
 
