@@ -65,6 +65,7 @@ function Update-Paths {
     if($env:ESP32_LIBS_PATH)
     {
         $content = $content -replace $esp32LibsFolderPattern, $env:ESP32_LIBS_PATH.Replace('\', '/')
+        $content = $content -replace $esp32BootloaderFolderPattern, $env:ESP32_LIBS_PATH.Replace('\', '/')
     }
 
     if($env:ESP32_IDF_PATH)
@@ -77,7 +78,6 @@ function Update-Paths {
         $content = $content -replace $srecordPattern, $env:SRECORD_PATH.Replace('\', '/')
     }
 
-    $content = $content -replace $esp32BootloaderFolderPattern, $env:ESP32_LIBS_PATH.Replace('\', '/')
     $content = $content -replace $repoRootPattern, $(Get-RepoPath).Replace('\', '/')
     $content = $content -replace $buildFolderPattern, "$(Get-RepoPath)\build".Replace('\', '/')
 
