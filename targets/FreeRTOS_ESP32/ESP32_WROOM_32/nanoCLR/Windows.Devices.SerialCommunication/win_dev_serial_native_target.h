@@ -25,6 +25,7 @@ typedef struct
     uint8_t *               RxBuffer;
     uint16_t                RxBytesToRead;
 
+    bool                    IsLongRunning;
 } NF_PAL_UART;
 
 #endif //_WIN_DEV_SERIAL_NATIVE_TARGET_H_

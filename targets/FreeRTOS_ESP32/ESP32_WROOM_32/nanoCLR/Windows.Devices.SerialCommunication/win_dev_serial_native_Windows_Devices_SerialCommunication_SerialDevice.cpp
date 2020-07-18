@@ -78,11 +78,6 @@ void UnitializePalUart(NF_PAL_UART *palUart)
         }
 
         palUart->UartEventTask = NULL;
-
-        Esp32_SetMappedDevicePins(DEV_TYPE_SERIAL, palUart->UartNum, Esp32SerialPin_Tx, UART_PIN_NO_CHANGE);
-        Esp32_SetMappedDevicePins(DEV_TYPE_SERIAL, palUart->UartNum, Esp32SerialPin_Rx, UART_PIN_NO_CHANGE);
-        Esp32_SetMappedDevicePins(DEV_TYPE_SERIAL, palUart->UartNum, Esp32SerialPin_Rts, UART_PIN_NO_CHANGE);
-        Esp32_SetMappedDevicePins(DEV_TYPE_SERIAL, palUart->UartNum, Esp32SerialPin_Cts, UART_PIN_NO_CHANGE);
     }
 }
 
@@ -460,6 +455,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
             case SerialHandshake_XOnXOff:
                 EnableXonXoff = true;
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
                 break;
         }
 
@@ -609,7 +605,6 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
     NF_PAL_UART *palUart = NULL;
 
-    bool        isLongRunningOperation = false;
     uint32_t    estimatedDurationMiliseconds;
     size_t      length = 0;
     uart_port_t uart_num;
@@ -637,11 +632,14 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // check if this is a long running operation
-    isLongRunningOperation = IsLongRunningOperation(
-        palUart->TxRingBuffer.Length(),
-        (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
-        (uint32_t &)estimatedDurationMiliseconds);
+    if (stack.m_customState == 0)
+    {
+        // check if this is a long running operation
+        palUart->IsLongRunning = IsLongRunningOperation(
+            palUart->TxRingBuffer.Length(),
+            (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
+            (uint32_t&)estimatedDurationMiliseconds);
+    }
 
     // check if there is anything the buffer
     if (palUart->TxRingBuffer.Length() > 0)
@@ -666,7 +664,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // get data length available in the buffer
         length = palUart->TxRingBuffer.Length();
 
-        if (isLongRunningOperation)
+        if (palUart->IsLongRunning)
         {
             // setup timeout
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTimeSpan(pThis[FIELD___writeTimeout], timeoutTicks));
@@ -712,7 +710,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
     while (eventResult)
     {
-        if (!isLongRunningOperation)
+        if (!palUart->IsLongRunning)
         {
             // this is not a long running operation so nothing to do here
             break;
@@ -743,7 +741,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
     }
 
-    if (isLongRunningOperation)
+    if (palUart->IsLongRunning)
     {
         // pop length heap block from stack
         stack.PopValue();
