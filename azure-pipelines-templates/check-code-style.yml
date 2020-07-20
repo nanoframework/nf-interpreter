@@ -6,6 +6,7 @@ steps:
   - task: PowerShell@2
     name: Check_Code_Style
     displayName: Check code style
+    condition: eq(variables['Build.Reason'], 'PullRequest')
     inputs:
       failOnStderr: false
       targetType: 'inline'
@@ -129,7 +130,7 @@ steps:
               'OK' | Write-Host -ForegroundColor Green
 
               # PR submitted, add a comment
-              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`nA PR was submitted with the code style fixes. Please review and merge the changes. See $($result.html_url)."} | ConvertTo-Json
+              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`nA PR was submitted with the code style fixes. Please review and merge the changes. See $($result.html_url).`n`nMake sure you are using the project code style. Check the details [here](https://docs.nanoframework.net/content/contributing/cxx-coding-style.html)."} | ConvertTo-Json
               Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
           }
           catch 
@@ -155,3 +156,11 @@ steps:
           # force the check to fail
           throw "Code style check failed"
         }
+
+  - task: PowerShell@2
+    name: Check_Code_Style_SKIP
+    displayName: Check code style (SKIP)
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      targetType: 'inline'
+      script: exit 0

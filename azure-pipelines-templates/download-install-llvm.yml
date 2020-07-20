@@ -3,6 +3,8 @@
 
 steps:
   - task: PowerShell@2
+    displayName: Downloading LLVM 10.0
+    condition: eq(variables['Build.Reason'], 'PullRequest')
     inputs:
         targetType: 'inline'
         script: |
@@ -11,13 +13,14 @@ steps:
           (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
-    displayName: Downloading LLVM 10.0
 
   - task: ExtractFiles@1
+    displayName: Install LLVM 10
+    condition: eq(variables['Build.Reason'], 'PullRequest')
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)\LLVM-10.0.0-win64.exe' 
       destinationFolder: '$(Agent.TempDirectory)\llvm'
-    displayName: Install LLVM 10
   
   - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\llvm\bin"
     displayName: Add LLVM to PATH
+    condition: eq(variables['Build.Reason'], 'PullRequest')

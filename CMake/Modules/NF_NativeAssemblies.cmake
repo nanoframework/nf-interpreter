@@ -31,6 +31,7 @@ option(API_Windows.Storage                      "option for Windows.Storage")
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
+option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
 
 
 # Stm32 only
@@ -84,6 +85,12 @@ macro(ParseNativeAssemblies)
     if(API_Hardware.Esp32)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
+    endif()
+
+    # nanoFramework.Hardware.Esp32.Rmt
+    if(API_nanoFramework.Hardware.Esp32.Rmt)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
     endif()
 
     # Hardware.Stm32
@@ -313,8 +320,13 @@ macro(ParseInteropAssemblies)
     # check if there are any Interop assemblies to be added
     if(NF_INTEROP_ASSEMBLIES)
 
+        # need to split define containing assembly namespaces
+        # for Windows buids this is a string with the namespaces separated by an whitespace
+        # e.g.: "NF_INTEROP_ASSEMBLIES": "Assembly1_Namespace Assembly2_Namespace"
+        separate_arguments(INTEROP_ASSEMBLIES_LIST NATIVE_COMMAND ${NF_INTEROP_ASSEMBLIES})
+
         # loop through each Interop assembly and add it to the build
-        foreach(assembly ${NF_INTEROP_ASSEMBLIES})
+        foreach(assembly ${INTEROP_ASSEMBLIES_LIST})
             PerformSettingsForInteropEntry(${assembly})
         endforeach()
        

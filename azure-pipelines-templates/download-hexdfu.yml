@@ -4,7 +4,7 @@
 steps:
   - task: Cache@2
     inputs:
-      key: hex2dfuKey
+      key: '1-0 | hex2dfuKey'
       restoreKeys: hex2dfuKey
       path: $(Agent.TempDirectory)/hex2dfu
       cacheHitVar: HEX2DFU_CACHE_RESTORED
@@ -12,18 +12,12 @@ steps:
     displayName: Cache HEX2DFU
 
   - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            md -Force "$env:Agent_TempDirectory\hex2dfu" | Out-Null
-            Write-Host "Downloading hex2dfu..."
-            $url = "https://github.com/nanoframework/hex2dfu/releases/latest/download/hex2dfu.exe"
-            $output = "$env:Agent_TempDirectory\hex2dfu\hex2dfu.exe"
-            (New-Object Net.WebClient).DownloadFile($url, $output)
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
     condition: and( eq(variables['NeedsDFU'], true), ne(variables.HEX2DFU_CACHE_RESTORED, 'true'))
     displayName: Install HEX2DFU
+    inputs:
+        targetType: 'filePath'
+        filePath: 'install-scripts\install-nf-hex2dfu.ps1'
+        failOnStderr: 'true'
 
   - task: PowerShell@2
     inputs:

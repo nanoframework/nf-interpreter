@@ -3,45 +3,29 @@
 
 steps:
   - task: Cache@2
+    condition: eq(variables.GccArm_Version, '')
+    displayName: Cache ARM GCC toolchain
     inputs:
-      key: gccUpdateKey
+      key: '9-2020-q2-update | gccUpdateKey'
       restoreKeys: gccUpdateKey
       path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
       cacheHitVar: GCC_CACHE_RESTORED
-    condition: eq(variables.GccArm_Version, '')
-    displayName: Cache ARM GCC toolchain
 
   - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-
-            # this is the default GNU GCC ARM version
-            $gccVersion = "8-2019-q3-update"
-
-            if("$(GccArm_Version)" -ne "")
-            {
-                # specific version requested, replace default one
-                $gccVersion = "$(GccArm_Version)"
-            }
-
-            $url = "https://bintray.com/nfbot/internal-build-tools/download_file?file_path=gcc-arm-none-eabi-$gccVersion-win32.7z"
-
-            Write-Host "Downloading ARM GNU GCC toolchain $(GccArm_Version)..."
-
-            $output = "$PSScriptRoot\gcc-arm.7z"
-            (New-Object Net.WebClient).DownloadFile($url, $output)
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     displayName: Downloading ARM GCC toolchain
+    inputs:
+        targetType: 'filePath'
+        filePath: 'install-scripts\install-arm-gcc-toolchain.ps1'
+        arguments: '-Version "$(GccArm_Version)"'
+        failOnStderr: true
 
   - task: ExtractFiles@1
+    displayName: Extracting ARM GCC toolchain
+    condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.7z' 
       destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
-    condition: ne(variables.GCC_CACHE_RESTORED, 'true')
-    displayName: Extracting ARM GCC toolchain
 
   - script: echo "##vso[task.prependpath]C:\Windows\System32"
     displayName: Tweak PATH to reach cmd
