@@ -10,4 +10,4 @@
 
 // #define SPI_ASYNC   1
 
-#endif  //_WIN_DEV_SPI_NATIVE_TARGET_H_
+#endif //_WIN_DEV_SPI_NATIVE_TARGET_H_

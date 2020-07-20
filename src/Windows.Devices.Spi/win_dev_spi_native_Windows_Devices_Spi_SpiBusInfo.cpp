@@ -5,7 +5,8 @@
 
 #include "win_dev_spi_native_target.h"
 
-HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeChipSelectLineCount___I4__I4(CLR_RT_StackFrame& stack)
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeChipSelectLineCount___I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -14,7 +15,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeChipSel
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMaxClockFrequency___I4__I4(CLR_RT_StackFrame& stack)
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMaxClockFrequency___I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -23,7 +25,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMaxCloc
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMinClockFrequency___I4__I4(CLR_RT_StackFrame& stack)
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMinClockFrequency___I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
