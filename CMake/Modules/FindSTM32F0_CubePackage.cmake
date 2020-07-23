@@ -4,12 +4,37 @@
 #
 
 # set include directories
-list(APPEND STM32F0_CubePackage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Drivers/STM32F0xx_HAL_Driver/Inc")
+list(APPEND STM32F0_CubePackage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Drivers/STM32F0xx_HAL_Driver/Inc)
+list(APPEND STM32F0_CubePackage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Drivers/CMSIS/Device/ST/STM32F0xx/Include)
+list(APPEND STM32F0_CubePackage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Drivers/CMSIS/Include)
+list(APPEND STM32F0_CubePackage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Drivers/BSP/STM32F0xx_Nucleo)
+list(APPEND STM32F0_CubePackage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Middlewares/Third_Party/FreeRTOS/Source/Include)
+list(APPEND STM32F0_CubePackage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS)
+list(APPEND STM32F0_CubePackage_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0)
+
+# and here the GCC options tuned for the target series 
+include(FREERTOS_${TARGET_SERIES}_GCC_options)
 
 # source files
 set(STM32F0_CubePackage_SRCS
 
-    # add HAL files here as required
+    # cmsis_os.c
+
+    stm32f0xx_hal.c
+    stm32f0xx_hal_cortex.c
+    stm32f0xx_hal_crc.c
+    stm32f0xx_hal_crc_ex.c
+    stm32f0xx_hal_dma.c
+    stm32f0xx_hal_gpio.c
+    stm32f0xx_hal_flash.c
+    stm32f0xx_hal_flash_ex.c
+    stm32f0xx_hal_pwr.c
+    stm32f0xx_hal_pwr_ex.c
+    stm32f0xx_hal_rcc.c
+    stm32f0xx_hal_rcc_ex.c
+    stm32f0xx_hal_rtc.c
+    stm32f0xx_hal_uart.c
+    stm32f0xx_hal_uart_ex.c
 )
 
 foreach(SRC_FILE ${STM32F0_CubePackage_SRCS})
@@ -17,7 +42,9 @@ foreach(SRC_FILE ${STM32F0_CubePackage_SRCS})
     find_file(STM32F0_CubePackage_SRC_FILE ${SRC_FILE}
         PATHS 
 
-        "${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Drivers/STM32F0xx_HAL_Driver/Src"
+        ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS
+
+        ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Drivers/STM32F0xx_HAL_Driver/Src
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -25,6 +52,10 @@ foreach(SRC_FILE ${STM32F0_CubePackage_SRCS})
     list(APPEND STM32F0_CubePackage_SOURCES ${STM32F0_CubePackage_SRC_FILE})
 endforeach()
 
+# unset these warnings as errors because we don't want to have to patch these source files
+set_source_files_properties( ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
+set_source_files_properties( ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_cortex.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
+set_source_files_properties( ${PROJECT_BINARY_DIR}/STM32F0_CubePackage_Source/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
 
 include(FindPackageHandleStandardArgs)
 

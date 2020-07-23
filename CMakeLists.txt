@@ -714,6 +714,13 @@ elseif(RTOS_FREERTOS_CHECK)
         # add TARGET board directory
         add_subdirectory("targets/FreeRTOS/NXP/${FREERTOS_BOARD}")
 
+    elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/${FREERTOS_BOARD})
+          # board found
+          message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
+
+          # add TARGET board directory
+          add_subdirectory("targets/FreeRTOS/ST/${FREERTOS_BOARD}")  
+
     else()
 
         # try to find board in the Community targets folder
@@ -723,6 +730,13 @@ elseif(RTOS_FREERTOS_CHECK)
 
             # add TARGET board directory from Community
             add_subdirectory("targets-community/FreeRTOS/NXP/${FREERTOS_BOARD}")
+
+        elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/ST/${FREERTOS_BOARD})
+            # board found
+            message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
+
+            # add TARGET board directory from Community
+            add_subdirectory("targets-community/FreeRTOS/ST/${FREERTOS_BOARD}")
 
         else()
         # board NOT found in targets folder

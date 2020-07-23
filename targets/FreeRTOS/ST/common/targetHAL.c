@@ -9,6 +9,9 @@
 #include <nanoWeak.h>
 #include <platform_target_capabilities.h>
 
+#include <FreeRTOS.h>
+#include <task.h>
+
 void HAL_AssertEx()
 {
     __asm volatile ("bkpt ");
@@ -24,6 +27,11 @@ void HARD_Breakpoint()
 };
 
 #endif  // !defined(BUILD_RTM)
+
+uint32_t HAL_GetTick(void)
+{
+  return xTaskGetTickCount();
+}
 
 // Provides information whether the configuration block storage requires erase command before sending the update command
 // The 'weak' implementation for NXP targets is true

@@ -9,7 +9,7 @@
 
 # check if the series name is supported 
 
-set(FREERTOS_SUPPORTED_SERIES IMXRT10xx STM32L0xx CACHE INTERNAL "supported series names for FreeRTOS")
+set(FREERTOS_SUPPORTED_SERIES IMXRT10xx STM32F0xx STM32L0xx CACHE INTERNAL "supported series names for FreeRTOS")
 
 list(FIND FREERTOS_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 
@@ -20,15 +20,15 @@ if(TARGET_SERIES_NAME_INDEX EQUAL -1)
 endif()
 
 # including here the CMake files for the source files specific to the target series
-include(FREERTOS_${TARGET_SERIES}_sources)
+include(FreeRTOS_${TARGET_SERIES}_sources)
 # and here the GCC options tuned for the target series 
-include(FREERTOS_${TARGET_SERIES}_GCC_options)
+include(FreeRTOS_${TARGET_SERIES}_GCC_options)
 
 # message("FreeRTOS board series is ${TARGET_SERIES}") # debug helper
 
 # set include directories for FreeRTOS
-list(APPEND FREERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FREERTOS_Source/include)
-list(APPEND FREERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FREERTOS_Source/portable/GCC/ARM_CM7/r0p1)
+list(APPEND FreeRTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FreeRTOS_Source/include)
+list(APPEND FreeRTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM7/r0p1)
 
 # source files and GCC options according to target vendor and series
 
@@ -49,15 +49,15 @@ foreach(SRC_FILE ${FREERTOS_SRCS})
     find_file(FREERTOS_SRC_FILE ${SRC_FILE}
         PATHS
 
-            ${PROJECT_BINARY_DIR}/FREERTOS_Source
+            ${PROJECT_BINARY_DIR}/FreeRTOS_Source
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
     # message("${SRC_FILE} >> ${FREERTOS_SRC_FILE}") # debug helper
-    list(APPEND FREERTOS_SOURCES ${FREERTOS_SRC_FILE})
+    list(APPEND FreeRTOS_SOURCES ${FREERTOS_SRC_FILE})
 endforeach()
 
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(FreeRTOS DEFAULT_MSG FREERTOS_INCLUDE_DIRS FREERTOS_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(FreeRTOS DEFAULT_MSG FreeRTOS_INCLUDE_DIRS FreeRTOS_SOURCES)

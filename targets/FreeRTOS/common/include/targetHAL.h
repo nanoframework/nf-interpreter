@@ -6,12 +6,14 @@
 #ifndef _TARGET_HAL_H_
 #define _TARGET_HAL_H_
 
-#ifdef STM32L072xx
+#if defined(STM32L072xx) || defined(STM32F091xx)
 #include <st_cmsis_defines.h>
 #endif
 
 #include "FreeRTOS.h"
 #include <target_board.h>
+
+
 #include <cmsis_gcc.h>
 
 

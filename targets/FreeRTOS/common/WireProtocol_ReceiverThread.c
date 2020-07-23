@@ -9,26 +9,28 @@
 
 extern WP_Message inboundMessage;
 
-void WP_Message_Initialize(WP_Message* a);
-void WP_Message_PrepareReception(WP_Message* a);
-void WP_Message_Process(WP_Message* a);
+void WP_Message_Initialize(WP_Message *a);
+void WP_Message_PrepareReception(WP_Message *a);
+void WP_Message_Process(WP_Message *a);
 
+TaskHandle_t xReceiverThreadHandle;
 
-void ReceiverThread(void * argument)
+void ReceiverThread(void *argument)
 {
-  (void)argument;
+    (void)argument;
 
-  // loop forever
-  while (1) {
+    // loop forever
+    while (1)
+    {
 
-    WP_Message_Initialize(&inboundMessage);
-    WP_Message_PrepareReception(&inboundMessage);
+        WP_Message_Initialize(&inboundMessage);
+        WP_Message_PrepareReception(&inboundMessage);
 
-    WP_Message_Process(&inboundMessage);
+        WP_Message_Process(&inboundMessage);
 
-    // Allow other tasks a chance to run
-    taskYIELD();
-  }
+        // Allow other tasks a chance to run
+        taskYIELD();
+    }
 
-  // nothing to deinitialize or cleanup, so it's safe to return
+    // nothing to deinitialize or cleanup, so it's safe to return
 }

@@ -6,7 +6,6 @@
 # include FreeRTOS project
 
 macro(IncludeFreeRTOS)
-
     # check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
     set(NO_FREERTOS_SOURCE TRUE)
     if(FREERTOS_SOURCE)
@@ -15,7 +14,7 @@ macro(IncludeFreeRTOS)
         endif()
     endif()
 
-    if(FREERTOS_SOURCE)
+    if(NO_FREERTOS_SOURCE)
         # no FreeRTOS source specified, download it from nanoFramework fork
 
         # check for Git (needed here for advanced warning to user if it's not installed)
