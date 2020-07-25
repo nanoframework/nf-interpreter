@@ -64,8 +64,8 @@ void UnitializePalUart(NF_PAL_UART *palUart)
         platform_free(palUart->TxBuffer);
 
         // null all pointers
-        palUart->RxBuffer     = NULL;
-        palUart->TxBuffer     = NULL;
+        palUart->RxBuffer = NULL;
+        palUart->TxBuffer = NULL;
         palUart->SerialDevice = NULL;
 
         // delete driver
@@ -96,12 +96,12 @@ void uart_event_task(void *pvParameters)
     NF_PAL_UART *palUart = (NF_PAL_UART *)pvParameters;
 
     uart_event_t event;
-    bool         run = true;
-    bool         readData;
-    int32_t      watchCharPos;
-    int32_t      readCount;
-    size_t       bufferedSize;
-    uint8_t *    buffer;
+    bool run = true;
+    bool readData;
+    int32_t watchCharPos;
+    int32_t readCount;
+    size_t bufferedSize;
+    uint8_t *buffer;
 
     while (run)
     {
@@ -109,7 +109,7 @@ void uart_event_task(void *pvParameters)
         if (xQueueReceive(palUart->UartEventQueue, &event, (portTickType)portMAX_DELAY))
         {
             // reset vars
-            readData     = false;
+            readData = false;
             watchCharPos = -1;
 
             // deal with event type
@@ -273,9 +273,9 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 {
     NANOCLR_HEADER();
 
-    char        task_name[16];
+    char task_name[16];
     uart_port_t uart_num;
-    esp_err_t   esp_err;
+    esp_err_t esp_err;
 
     NF_PAL_UART *palUart;
 
@@ -314,10 +314,10 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_BUFER_SIZE);
 
     // set/reset all the rest
-    palUart->SerialDevice   = stack.This();
-    palUart->UartNum        = uart_num;
+    palUart->SerialDevice = stack.This();
+    palUart->UartNum = uart_num;
     palUart->TxOngoingCount = 0;
-    palUart->RxBytesToRead  = 0;
+    palUart->RxBytesToRead = 0;
 
     // Install driver
     esp_err = uart_driver_install(
@@ -443,14 +443,14 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 break;
 
             case SerialHandshake_RequestToSend:
-                uart_config.flow_ctrl           = UART_HW_FLOWCTRL_RTS;
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
                 uart_config.rx_flow_ctrl_thresh = 122;
                 break;
 
             case SerialHandshake_RequestToSendXOnXOff:
-                uart_config.flow_ctrl           = UART_HW_FLOWCTRL_RTS;
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
                 uart_config.rx_flow_ctrl_thresh = 122;
-                EnableXonXoff                   = true;
+                EnableXonXoff = true;
                 break;
 
             case SerialHandshake_XOnXOff:
@@ -492,8 +492,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 
         // Map to currently assigned pins
-        int txPin  = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Tx);
-        int rxPin  = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Rx);
+        int txPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Tx);
+        int rxPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Rx);
         int rtsPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Rts);
         int ctsPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Cts);
 
@@ -533,7 +533,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         NF_PAL_UART *palUart = NULL;
 
         uint8_t *data;
-        size_t   length = 0;
+        size_t length = 0;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
@@ -605,13 +605,13 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
     NF_PAL_UART *palUart = NULL;
 
-    uint32_t    estimatedDurationMiliseconds;
-    size_t      length = 0;
+    uint32_t estimatedDurationMiliseconds;
+    size_t length = 0;
     uart_port_t uart_num;
 
     int64_t *timeoutTicks;
-    bool     eventResult = true;
-    bool     txOk        = false;
+    bool eventResult = true;
+    bool txOk = false;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -638,7 +638,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         palUart->IsLongRunning = IsLongRunningOperation(
             palUart->TxRingBuffer.Length(),
             (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
-            (uint32_t&)estimatedDurationMiliseconds);
+            (uint32_t &)estimatedDurationMiliseconds);
     }
 
     // check if there is anything the buffer
@@ -765,20 +765,20 @@ HRESULT IRAM_ATTR
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array *dataBuffer;
-    NF_PAL_UART *           palUart = NULL;
+    NF_PAL_UART *palUart = NULL;
 
     uint8_t *data;
-    size_t   dataLength = 0;
+    size_t dataLength = 0;
 
-    size_t count       = 0;
-    size_t bytesRead   = 0;
+    size_t count = 0;
+    size_t bytesRead = 0;
     size_t bytesToRead = 0;
 
     InputStreamOptions options = InputStreamOptions_None;
-    uart_port_t        uart_num;
+    uart_port_t uart_num;
 
     int64_t *timeoutTicks;
-    bool     eventResult = true;
+    bool eventResult = true;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -943,7 +943,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_HEADER();
 
     uart_port_t uart_num;
-    uint8_t     watchChar;
+    uint8_t watchChar;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -974,7 +974,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_HEADER();
 
     NF_PAL_UART *palUart = NULL;
-    uart_port_t  uart_num;
+    uart_port_t uart_num;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
