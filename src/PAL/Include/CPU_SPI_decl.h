@@ -36,7 +36,7 @@ typedef enum __nfpack SpiMode
 
 typedef enum __nfpack SpiBusMode
 {
-    SpiBusMode_slave  = 0,
+    SpiBusMode_slave = 0,
     SpiBusMode_master = 1
 } SpiBusMode;
 
@@ -50,13 +50,13 @@ enum SPI_OP_STATUS
 
 struct SPI_DEVICE_CONFIGURATION
 {
-    uint32_t     Spi_Bus;          // SPi bus thats connected to device
-    SpiBusMode   BusMode;          // Slave or master(default)
-    GPIO_PIN     DeviceChipSelect; // GPIO pin used for device Chip select
-    bool         ChipSelectActive; // False = LOW active,      True = HIGH active
-    SpiMode      Spi_Mode;         // SPI mode 0 -> 3
-    bool         MD16bits;         // True = SPI data takes the form of 16-bit words otherwise 8-bit words.
-    DataBitOrder DataOrder16;      // Data order for 16 bit operation
+    uint32_t Spi_Bus;          // SPi bus thats connected to device
+    SpiBusMode BusMode;        // Slave or master(default)
+    GPIO_PIN DeviceChipSelect; // GPIO pin used for device Chip select
+    bool ChipSelectActive;     // False = LOW active,      True = HIGH active
+    SpiMode Spi_Mode;          // SPI mode 0 -> 3
+    bool MD16bits;             // True = SPI data takes the form of 16-bit words otherwise 8-bit words.
+    DataBitOrder DataOrder16;  // Data order for 16 bit operation
 
     // Master Only
     uint32_t Clock_RateHz;   // Master - SPI bus clock frequency, in hertz (Hz).
@@ -66,10 +66,10 @@ struct SPI_DEVICE_CONFIGURATION
 
 struct SPI_WRITE_READ_SETTINGS
 {
-    bool         fullDuplex;      // Full duplex opertaion
-    int          readOffset;      // Read offset on half duplex read ( from end of write )
-    bool         Bits16ReadWrite; // True if a 16bit operation
-    SPI_Callback callback;        // NUll is operation is Synchronous
+    bool fullDuplex;       // Full duplex opertaion
+    int readOffset;        // Read offset on half duplex read ( from end of write )
+    bool Bits16ReadWrite;  // True if a 16bit operation
+    SPI_Callback callback; // NUll is operation is Synchronous
 };
 
 #define CPU_SPI_ERROR_PARAM   -1
@@ -98,24 +98,24 @@ bool CPU_SPI_Remove_Device(uint32_t deviceHandle);
 // Write / read 8 bit data to device specified by handle
 // return result 0=S_OK, CLR_E_BUSY async operation and operation still running or another error code
 HRESULT CPU_SPI_nWrite_nRead(
-    uint32_t                  deviceHandle,
+    uint32_t deviceHandle,
     SPI_DEVICE_CONFIGURATION &sdev,
-    SPI_WRITE_READ_SETTINGS & swrs,
-    uint8_t *                 writePtr,
-    int32_t                   writeSize,
-    uint8_t *                 readPtr,
-    int32_t                   readSize);
+    SPI_WRITE_READ_SETTINGS &swrs,
+    uint8_t *writePtr,
+    int32_t writeSize,
+    uint8_t *readPtr,
+    int32_t readSize);
 
 // Write / read 16 bit data to device specified by handle
 // return result 0=S_OK, CLR_E_BUSY async operation and operation still running or another error code
 HRESULT CPU_SPI_nWrite16_nRead16(
-    uint32_t                  deviceHandle,
+    uint32_t deviceHandle,
     SPI_DEVICE_CONFIGURATION &sdev,
-    SPI_WRITE_READ_SETTINGS & swrs,
-    uint16_t *                writePtr,
-    int32_t                   writeSize,
-    uint16_t *                readPtr,
-    int32_t                   readSize);
+    SPI_WRITE_READ_SETTINGS &swrs,
+    uint16_t *writePtr,
+    int32_t writeSize,
+    uint16_t *readPtr,
+    int32_t readSize);
 
 // Return status of current SPI operation
 // Used to find status of an Async SPI call

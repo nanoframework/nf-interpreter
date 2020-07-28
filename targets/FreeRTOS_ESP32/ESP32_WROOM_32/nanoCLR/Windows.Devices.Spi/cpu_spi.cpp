@@ -120,9 +120,9 @@ bool CPU_SPI_Uninitialize(uint8_t spiBus)
 // Convert from SPI_DEVICE_CONFIGURATION to spi_device_interface_config_t used for ESP33
 spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
-    int     csPin   = spiDeviceConfig.DeviceChipSelect;
+    int csPin = spiDeviceConfig.DeviceChipSelect;
     uint8_t spiMode = spiDeviceConfig.Spi_Mode;
-    int     clockHz = spiDeviceConfig.Clock_RateHz;
+    int clockHz = spiDeviceConfig.Clock_RateHz;
 
     // if clock frequency is unset use the maximum frequency
     if (clockHz == 0)
@@ -204,13 +204,13 @@ uint32_t CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 // return S_OK=Successful, Async started=CLR_BUSY, Error=CLR_E_OUT_OF_MEMORY, CLR_E_INVALID_PARAMETER, CLR_E_FAIL
 //
 HRESULT CPU_SPI_nWrite_nRead(
-    uint32_t                  deviceHandle,
+    uint32_t deviceHandle,
     SPI_DEVICE_CONFIGURATION &sdev,
-    SPI_WRITE_READ_SETTINGS & wrc,
-    uint8_t *                 writeData,
-    int32_t                   writeSize,
-    uint8_t *                 readData,
-    int32_t                   readSize)
+    SPI_WRITE_READ_SETTINGS &wrc,
+    uint8_t *writeData,
+    int32_t writeSize,
+    uint8_t *readData,
+    int32_t readSize)
 {
     (void)sdev;
 
@@ -244,7 +244,7 @@ HRESULT CPU_SPI_nWrite_nRead(
         else
         {
             // for Halfduplex its the length of both items
-            MaxElementlength  = writeSize + readSize;
+            MaxElementlength = writeSize + readSize;
             int MaxDatalength = MaxElementlength;
             if (wrc.Bits16ReadWrite)
                 MaxDatalength *= 2;
@@ -262,13 +262,13 @@ HRESULT CPU_SPI_nWrite_nRead(
         spi_transaction_t trans_desc;
 
         trans_desc.flags = 0;
-        trans_desc.cmd   = 0;
-        trans_desc.addr  = 0;
+        trans_desc.cmd = 0;
+        trans_desc.addr = 0;
         // length - Full duplex is total length, half duplex the TX length
         trans_desc.length = databitLength * MaxElementlength;
         // rxlength - Full duplex is same as length or 0, half duplex is read length
-        trans_desc.rxlength  = 0;
-        trans_desc.user      = NULL;
+        trans_desc.rxlength = 0;
+        trans_desc.user = NULL;
         trans_desc.tx_buffer = writeData;
         trans_desc.rx_buffer = readDataBuffer;
 
@@ -336,13 +336,13 @@ HRESULT CPU_SPI_nWrite_nRead(
 
 // Performs a read/write operation on 16-bit word data.
 HRESULT CPU_SPI_nWrite16_nRead16(
-    uint32_t                  deviceHandle,
+    uint32_t deviceHandle,
     SPI_DEVICE_CONFIGURATION &sdev,
-    SPI_WRITE_READ_SETTINGS & swrs,
-    uint16_t *                writePtr,
-    int32_t                   writeSize,
-    uint16_t *                readPtr,
-    int32_t                   readSize)
+    SPI_WRITE_READ_SETTINGS &swrs,
+    uint16_t *writePtr,
+    int32_t writeSize,
+    uint16_t *readPtr,
+    int32_t readSize)
 {
     swrs.Bits16ReadWrite = true;
     return CPU_SPI_nWrite_nRead(deviceHandle, sdev, swrs, (uint8_t *)writePtr, writeSize, (uint8_t *)readPtr, readSize);
@@ -368,8 +368,8 @@ uint32_t CPU_SPI_PortsMap()
 void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clockPin, GPIO_PIN &misoPin, GPIO_PIN &mosiPin)
 {
     clockPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, 2);
-    misoPin  = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, 1);
-    mosiPin  = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, 0);
+    misoPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, 1);
+    mosiPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, 0);
 }
 
 // Return SPI minimum clock frequency

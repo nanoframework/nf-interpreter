@@ -23,18 +23,18 @@ void nano_spi_callback(int busIndex)
 // estimate the time required to perform the SPI transaction
 // TODO doesn't take into account of full duplex or sequential ( assumes sequential at the moment )
 bool IsLongRunningOperation(
-    uint32_t  writeSize,
-    uint32_t  readSize,
-    bool      fullDuplex,
-    bool      bufferIs16bits,
-    float     byteTime,
+    uint32_t writeSize,
+    uint32_t readSize,
+    bool fullDuplex,
+    bool bufferIs16bits,
+    float byteTime,
     uint32_t &estimatedDurationMiliseconds)
 {
     if (bufferIs16bits)
     {
         // double the buffers size
         writeSize = 2 * writeSize;
-        readSize  = 2 * readSize;
+        readSize = 2 * readSize;
     }
 
     if (fullDuplex)
@@ -71,22 +71,22 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::
 
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer(
     CLR_RT_StackFrame &stack,
-    bool               data16Bits)
+    bool data16Bits)
 {
     NANOCLR_HEADER();
     {
-        unsigned char *         writeData = NULL;
-        unsigned char *         readData  = NULL;
-        int                     writeSize = 0;
-        int                     readSize  = 0;
+        unsigned char *writeData = NULL;
+        unsigned char *readData = NULL;
+        int writeSize = 0;
+        int readSize = 0;
         SPI_WRITE_READ_SETTINGS rws;
 
 #if SPI_ASYNC
-        bool             isLongRunningOperation;
-        uint32_t         estimatedDurationMiliseconds;
+        bool isLongRunningOperation;
+        uint32_t estimatedDurationMiliseconds;
         CLR_RT_HeapBlock hbTimeout;
-        CLR_INT64 *      timeout;
-        bool             eventResult = true;
+        CLR_INT64 *timeout;
+        bool eventResult = true;
 #endif
 
         // get a pointer to the managed object instance and check that it's not NULL
@@ -247,13 +247,13 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevi
                     .Dereference();
 
             // bus zero based
-            spiConfig.BusMode          = SpiBusMode_master;
-            spiConfig.Spi_Bus          = (stack.Arg1().NumericByRef().s4 - 1);
+            spiConfig.BusMode = SpiBusMode_master;
+            spiConfig.Spi_Bus = (stack.Arg1().NumericByRef().s4 - 1);
             spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
             ;
             spiConfig.ChipSelectActive = true; // TODO - is this something we would like to expose to managed code
-            spiConfig.Spi_Mode         = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
-            spiConfig.DataOrder16  = (DataBitOrder)config[SpiConnectionSettings::FIELD___bitOrder].NumericByRef().s4;
+            spiConfig.Spi_Mode = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
+            spiConfig.DataOrder16 = (DataBitOrder)config[SpiConnectionSettings::FIELD___bitOrder].NumericByRef().s4;
             spiConfig.Clock_RateHz = config[SpiConnectionSettings::FIELD___clockFrequency].NumericByRef().s4;
 
             // Returns deviceID or error if negative

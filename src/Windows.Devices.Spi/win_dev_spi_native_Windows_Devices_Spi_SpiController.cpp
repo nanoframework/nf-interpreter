@@ -13,9 +13,9 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiController::GetDeviceS
         uint32_t spiCount = CPU_SPI_PortsCount();
 
         // Length of string requird to return availble names
-        uint32_t spiMaxStringLength   = spiCount * 5;
-        char *   deviceSelectorString = (char *)platform_malloc(spiMaxStringLength + 1);
-        deviceSelectorString[0]       = 0; // terminate in case no buses
+        uint32_t spiMaxStringLength = spiCount * 5;
+        char *deviceSelectorString = (char *)platform_malloc(spiMaxStringLength + 1);
+        deviceSelectorString[0] = 0; // terminate in case no buses
 
         char busNum[2] = "1";
 

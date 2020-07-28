@@ -21,12 +21,12 @@
 // struct representing the SPI
 struct NF_PAL_SPI
 {
-    SPI_Handle       masterSpi;
-    SPI_Params       spiParams;
+    SPI_Handle masterSpi;
+    SPI_Params spiParams;
     SPI_Transaction *transactions;
-    uint8_t          transactionCount;
-    SPI_OP_STATUS    status;
-    SPI_Callback     callback;
+    uint8_t transactionCount;
+    SPI_OP_STATUS status;
+    SPI_Callback callback;
 };
 
 /////////////////////////////////////////////////////
@@ -69,14 +69,14 @@ void GetSPIConfig(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPI_WRITE_REA
     spiParams.mode = SPI_SLAVE;
 
     spiParams.transferCallbackFxn = SpiCallback;
-    spiParams.dataSize            = wrc.Bits16ReadWrite ? 16 : 8;
-    spiParams.bitRate             = spiDeviceConfig.Clock_RateHz;
+    spiParams.dataSize = wrc.Bits16ReadWrite ? 16 : 8;
+    spiParams.bitRate = spiDeviceConfig.Clock_RateHz;
 
     spiParams.transferMode = SPI_MODE_CALLBACK;
 
     SPI1_PAL.masterSpi = SPI_open(Board_SPI_SLAVE, &spiParams);
 
-    SPI1_PAL.status   = SPI_OP_READY;
+    SPI1_PAL.status = SPI_OP_READY;
     SPI1_PAL.callback = wrc.callback;
 }
 
@@ -117,13 +117,13 @@ void CPU_SPI_Uninitialize(int bus)
 // TODO The SPI driver in TI-RTOS doesn't handle the Chip select
 // TODO This needs to be added to this driver
 HRESULT CPU_SPI_nWrite_nRead(
-    uint32_t                  deviceHandle,
+    uint32_t deviceHandle,
     SPI_DEVICE_CONFIGURATION &sdev,
-    SPI_WRITE_READ_SETTINGS & wrc,
-    uint8_t *                 writeData,
-    int32_t                   writeSize,
-    uint8_t *                 readData,
-    int32_t                   readSize)
+    SPI_WRITE_READ_SETTINGS &wrc,
+    uint8_t *writeData,
+    int32_t writeSize,
+    uint8_t *readData,
+    int32_t readSize)
 {
     (void)deviceHandle;
 
@@ -136,13 +136,13 @@ HRESULT CPU_SPI_nWrite_nRead(
         if (wrc.fullDuplex)
         {
             // we'll be doing this on a single transaction
-            SPI1_PAL.transactions     = (SPI_Transaction *)platform_malloc(sizeof(SPI_Transaction));
+            SPI1_PAL.transactions = (SPI_Transaction *)platform_malloc(sizeof(SPI_Transaction));
             SPI1_PAL.transactionCount = 1;
         }
         else
         {
             // sequential io we need two transactions
-            SPI1_PAL.transactions     = (SPI_Transaction *)platform_malloc(sizeof(SPI_Transaction) * 2);
+            SPI1_PAL.transactions = (SPI_Transaction *)platform_malloc(sizeof(SPI_Transaction) * 2);
             SPI1_PAL.transactionCount = 2;
         }
 
@@ -198,13 +198,13 @@ HRESULT CPU_SPI_nWrite_nRead(
 
 // Performs a read/write operation on 16-bit word data.
 HRESULT CPU_SPI_nWrite16_nRead16(
-    uint32_t                  deviceHandle,
+    uint32_t deviceHandle,
     SPI_DEVICE_CONFIGURATION &sdev,
-    SPI_WRITE_READ_SETTINGS & swrs,
-    uint16_t *                writePtr,
-    int32_t                   writeSize,
-    uint16_t *                readPtr,
-    int32_t                   readSize)
+    SPI_WRITE_READ_SETTINGS &swrs,
+    uint16_t *writePtr,
+    int32_t writeSize,
+    uint16_t *readPtr,
+    int32_t readSize)
 {
     swrs.Bits16ReadWrite = true;
     return CPU_SPI_nWrite_nRead(deviceHandle, sdev, swrs, (uint8_t *)writePtr, writeSize, (uint8_t *)readPtr, readSize);

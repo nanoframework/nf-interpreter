@@ -73,7 +73,7 @@ void nanoHAL_Initialize()
 
     // clear managed heap region
     unsigned char *heapStart = NULL;
-    unsigned int   heapSize  = 0;
+    unsigned int heapSize = 0;
 
     ::HeapLocation(heapStart, heapSize);
     memset(heapStart, 0, heapSize);

@@ -16,12 +16,12 @@
 
 struct nanoSPI_BusConfig
 {
-    bool                     spiBusInited;
-    int8_t                   devicesInUse;
+    bool spiBusInited;
+    int8_t devicesInUse;
     SPI_DEVICE_CONFIGURATION deviceCongfig[MAX_SPI_DEVICES];
-    uint32_t                 deviceHandles[MAX_SPI_DEVICES];
-    SPI_OP_STATUS            spiStatus;
-    float                    byteTime;
+    uint32_t deviceHandles[MAX_SPI_DEVICES];
+    SPI_OP_STATUS spiStatus;
+    float byteTime;
 };
 
 // Called on CLR startup
@@ -41,9 +41,9 @@ HRESULT nanoSPI_OpenDevice(SPI_DEVICE_CONFIGURATION &Configuration);
 // only possible of first device open
 HRESULT nanoSPI_OpenDeviceEx(
     SPI_DEVICE_CONFIGURATION &Configuration,
-    GPIO_PIN                  altMsk,
-    GPIO_PIN                  altMiso,
-    GPIO_PIN                  altMosi);
+    GPIO_PIN altMsk,
+    GPIO_PIN altMiso,
+    GPIO_PIN altMosi);
 
 // Close SPI device
 // When last device closed bus is closed
@@ -61,12 +61,12 @@ float nanoSPI_GetByteTime(uint32_t handle);
 //  -1 = SPI error  (null callback)
 //  -2 = Unable to queue operation( queue full )
 HRESULT nanoSPI_Write_Read(
-    uint32_t                 handle,
+    uint32_t handle,
     SPI_WRITE_READ_SETTINGS &settings,
-    uint8_t *                writeData,
-    int32_t                  writeSize,
-    uint8_t *                readData,
-    int32_t                  readSize);
+    uint8_t *writeData,
+    int32_t writeSize,
+    uint8_t *readData,
+    int32_t readSize);
 
 // Return status of last async operation
 SPI_OP_STATUS nanoSPI_Op_Status(uint32_t handle);
@@ -75,11 +75,11 @@ SPI_OP_STATUS nanoSPI_Op_Status(uint32_t handle);
 // result = -1 Busy  ( wait for bus to be released )
 // callback called on job completion
 HRESULT nanoSPI_start_nWrite_nRead(
-    uint32_t                 handle,
+    uint32_t handle,
     SPI_WRITE_READ_SETTINGS &settings,
-    uint8_t *                writeData,
-    int32_t                  writeSize,
-    uint8_t *                readData,
-    int32_t                  readSize);
+    uint8_t *writeData,
+    int32_t writeSize,
+    uint8_t *readData,
+    int32_t readSize);
 
 #endif // _NANOHAL_SPI_H_
