@@ -16,9 +16,9 @@
 // struct representing the SPI
 struct NF_PAL_SPI
 {
-    int        BusIndex;
+    int BusIndex;
     SPIDriver *Driver;
-    SPIConfig  Configuration;
+    SPIConfig Configuration;
 
     SPI_Callback Callback;
 
@@ -157,9 +157,9 @@ static void SpiCallback(SPIDriver *spip)
 uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFrequency)
 {
     uint16_t divider = 0;
-    int32_t  maxSpiFrequency;
-    int32_t  requestedFrequency = config.Clock_RateHz;
-    int      busIndex           = config.Spi_Bus;
+    int32_t maxSpiFrequency;
+    int32_t requestedFrequency = config.Clock_RateHz;
+    int busIndex = config.Spi_Bus;
 
 #if defined(STM32L0XX)
 
@@ -369,7 +369,7 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
 
     // set port&pad for CS pin
     llConfig->ssport = GPIO_PORT(csPin);
-    llConfig->sspad  = csPin % 16;
+    llConfig->sspad = csPin % 16;
 }
 
 // Performs a read/write operation on 8-bit word data.
@@ -393,18 +393,18 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
 // return S_OK=Successful, Async started=CLR_BUSY, Error=CLR_E_OUT_OF_MEMORY, CLR_E_INVALID_PARAMETER, CLR_E_FAIL
 //
 HRESULT CPU_SPI_nWrite_nRead(
-    uint32_t                  deviceHandle,
+    uint32_t deviceHandle,
     SPI_DEVICE_CONFIGURATION &sdev,
-    SPI_WRITE_READ_SETTINGS & wrc,
-    uint8_t *                 writeBuffer,
-    int32_t                   writeSize,
-    uint8_t *                 readBuffer,
-    int32_t                   readSize)
+    SPI_WRITE_READ_SETTINGS &wrc,
+    uint8_t *writeBuffer,
+    int32_t writeSize,
+    uint8_t *readBuffer,
+    int32_t readSize)
 {
     NANOCLR_HEADER();
     {
         NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
-        bool        sync   = (wrc.callback == 0); // If callback then use aync operation
+        bool sync = (wrc.callback == 0); // If callback then use aync operation
 
         // Save width of transfer
         palSpi->BufferIs16bits = wrc.Bits16ReadWrite;
@@ -575,7 +575,7 @@ HRESULT CPU_SPI_nWrite_nRead(
 
 SPI_OP_STATUS CPU_SPI_Op_Status(uint32_t deviceHandle)
 {
-    NF_PAL_SPI *  palSpi = (NF_PAL_SPI *)deviceHandle;
+    NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
     SPI_OP_STATUS os;
 
     switch (palSpi->Driver->state)
@@ -760,7 +760,7 @@ void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &
 {
     (void)spi_bus;
 
-    clk  = (GPIO_PIN)-1;
+    clk = (GPIO_PIN)-1;
     miso = (GPIO_PIN)-1;
     mosi = (GPIO_PIN)-1;
 }

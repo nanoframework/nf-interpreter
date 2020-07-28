@@ -226,14 +226,14 @@ template <class T> class HAL_DblLinkedList
     void Initialize()
     {
         m_first = Tail();
-        m_null  = NULL;
-        m_last  = Head();
+        m_null = NULL;
+        m_last = Head();
     }
 
     int NumOfNodes()
     {
-        T * ptr;
-        T * ptrNext;
+        T *ptr;
+        T *ptrNext;
         int num = 0;
 
         for (ptr = FirstNode(); (ptrNext = ptr->Next()) != NULL; ptr = ptrNext)
@@ -370,17 +370,17 @@ template <typename T> class Hal_Queue_UnknownSize
     size_t m_writer;
     size_t m_reader;
     size_t m_size;
-    bool   m_full;
-    T *    m_data;
+    bool m_full;
+    T *m_data;
 
   public:
     void Initialize(T *data, size_t size)
     {
         m_writer = 0;
         m_reader = 0;
-        m_size   = size;
-        m_data   = data;
-        m_full   = false;
+        m_size = size;
+        m_data = data;
+        m_full = false;
     }
 
     size_t NumberOfElements()
@@ -455,7 +455,7 @@ template <typename T> class Hal_Queue_UnknownSize
     T *Push(size_t &nElements)
     {
         size_t oldWriter = m_writer;
-        size_t max       = 0;
+        size_t max = 0;
 
         if (m_full || (nElements == 0))
         {
@@ -483,7 +483,7 @@ template <typename T> class Hal_Queue_UnknownSize
     T *Pop(size_t &nElements)
     {
         size_t oldReader = m_reader;
-        size_t max       = 0;
+        size_t max = 0;
 
         if (nElements == 0)
             return NULL;
@@ -526,17 +526,17 @@ template <typename T> class HAL_RingBuffer
     size_t _capacity;
     size_t _write_index;
     size_t _read_index;
-    T *    _buffer;
+    T *_buffer;
 
   public:
     void Initialize(T *data, size_t size)
     {
         _dataSize = sizeof(T);
 
-        _capacity    = (size * _dataSize);
+        _capacity = (size * _dataSize);
         _write_index = 0;
-        _read_index  = 0;
-        _size        = 0;
+        _read_index = 0;
+        _size = 0;
 
         _buffer = data;
     }
@@ -678,7 +678,7 @@ template <typename T> class HAL_RingBuffer
         {
             // reset the read/write index
             _write_index = 0;
-            _read_index  = 0;
+            _read_index = 0;
         }
 
         return (lengthToRead / _dataSize);
@@ -715,7 +715,7 @@ template <typename T> class HAL_RingBuffer
         {
             size_t chunk1Size = _capacity - _read_index;
             size_t chunk2Size = lengthToRead - chunk1Size;
-            _read_index       = chunk2Size;
+            _read_index = chunk2Size;
         }
 
         // update ring buffer size
@@ -727,7 +727,7 @@ template <typename T> class HAL_RingBuffer
         {
             // reset the read/write index
             _write_index = 0;
-            _read_index  = 0;
+            _read_index = 0;
         }
 
         return (lengthToRead / _dataSize);
@@ -778,7 +778,7 @@ template <typename T> class HAL_RingBuffer
         }
 
         // adjust indexes
-        _read_index  = 0;
+        _read_index = 0;
         _write_index = _size;
     }
 

@@ -55,7 +55,7 @@ __nfweak bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 __nfweak uint32_t CPU_SPI_PortsCount()
 {
     uint32_t count = 0;
-    uint32_t map   = CPU_SPI_PortsMap();
+    uint32_t map = CPU_SPI_PortsMap();
 
     while (map > 0)
     {
@@ -72,8 +72,8 @@ __nfweak void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clockPin, GPIO_PIN &mi
     (void)spi_bus;
 
     clockPin = GPIO_PIN_NONE;
-    misoPin  = GPIO_PIN_NONE;
-    mosiPin  = GPIO_PIN_NONE;
+    misoPin = GPIO_PIN_NONE;
+    mosiPin = GPIO_PIN_NONE;
 }
 
 //
@@ -82,7 +82,7 @@ __nfweak void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clockPin, GPIO_PIN &mi
 //  return true = handle valid
 static bool getDevice(uint32_t handle, uint8_t &spiBus, int &deviceIndex)
 {
-    int type    = handle >> 16 & 0x00ff;
+    int type = handle >> 16 & 0x00ff;
     deviceIndex = handle & 0x00ff;
 
     spiBus = GetBusFromHandle(handle);
@@ -183,9 +183,9 @@ HRESULT nanoSPI_ReserveBusPins(int spiBus, bool reserve)
 // Specify alternate pins for SPI or -1 for use default for bus
 HRESULT nanoSPI_OpenDeviceEx(
     SPI_DEVICE_CONFIGURATION &spiDeviceConfig,
-    GPIO_PIN                  altMsk,
-    GPIO_PIN                  altMiso,
-    GPIO_PIN                  altMosi)
+    GPIO_PIN altMsk,
+    GPIO_PIN altMiso,
+    GPIO_PIN altMosi)
 {
     // Use alternate pins if defined
     // TODO params
@@ -247,7 +247,7 @@ HRESULT nanoSPI_OpenDeviceEx(
     }
 
     // Add next Device - Copy device config, save handle, increment number devices on bus
-    nanoSPI_BusConfig *pBusConfig          = &spiconfig[spiBus];
+    nanoSPI_BusConfig *pBusConfig = &spiconfig[spiBus];
     pBusConfig->deviceCongfig[deviceIndex] = spiDeviceConfig;
     pBusConfig->deviceHandles[deviceIndex] = deviceHandle;
 
@@ -268,7 +268,7 @@ HRESULT nanoSPI_OpenDeviceEx(
 HRESULT nanoSPI_CloseDevice(uint32_t handle)
 {
     uint8_t spiBus;
-    int     deviceIndex;
+    int deviceIndex;
 
     if (!getDevice(handle, spiBus, deviceIndex))
         return CLR_E_INVALID_PARAMETER;
@@ -310,15 +310,15 @@ float nanoSPI_GetByteTime(uint32_t handle)
 // Write and/or read data to device on SPi bus
 //
 HRESULT nanoSPI_Write_Read(
-    uint32_t                 handle,
+    uint32_t handle,
     SPI_WRITE_READ_SETTINGS &swrs,
-    uint8_t *                writePtr,
-    int32_t                  wsize,
-    uint8_t *                readPtr,
-    int32_t                  readSize)
+    uint8_t *writePtr,
+    int32_t wsize,
+    uint8_t *readPtr,
+    int32_t readSize)
 {
     uint8_t spiBus;
-    int     deviceIndex;
+    int deviceIndex;
 
     if (!getDevice(handle, spiBus, deviceIndex))
         return CLR_E_INVALID_PARAMETER;
@@ -336,7 +336,7 @@ HRESULT nanoSPI_Write_Read(
 SPI_OP_STATUS nanoSPI_Op_Status(uint32_t handle)
 {
     uint8_t spiBus;
-    int     deviceIndex;
+    int deviceIndex;
 
     getDevice(handle, spiBus, deviceIndex);
     return CPU_SPI_Op_Status(spiconfig[spiBus].deviceHandles[deviceIndex]);
