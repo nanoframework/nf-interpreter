@@ -15,30 +15,30 @@ typedef void (*SPI_Callback)(int busIndex);
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////
-enum DataBitOrder
+typedef enum __nfpack DataBitOrder
 {
     DataBitOrder_MSB = 0,
-    DataBitOrder_LSB
-};
+    DataBitOrder_LSB = 1
+} DataBitOrder;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.Spi.SpiMode (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////
 
 // SPI mode
-enum SpiModes
+typedef enum __nfpack SpiMode
 {
-    SpiModes_Mode0 = 0,
-    SpiModes_Mode1,
-    SpiModes_Mode2,
-    SpiModes_Mode3
-};
+    SpiMode_Mode0 = 0,
+    SpiMode_Mode1 = 1,
+    SpiMode_Mode2 = 2,
+    SpiMode_Mode3 = 3
+} SpiMode;
 
-enum SpiBusMode
+typedef enum __nfpack SpiBusMode
 {
     SpiBusMode_slave  = 0,
     SpiBusMode_master = 1
-};
+} SpiBusMode;
 
 // Async operation status
 enum SPI_OP_STATUS
@@ -54,7 +54,7 @@ struct SPI_DEVICE_CONFIGURATION
     SpiBusMode   BusMode;          // Slave or master(default)
     GPIO_PIN     DeviceChipSelect; // GPIO pin used for device Chip select
     bool         ChipSelectActive; // False = LOW active,      True = HIGH active
-    SpiModes     SpiMode;          // SPI mode 0 -> 3
+    SpiMode      Spi_Mode;         // SPI mode 0 -> 3
     bool         MD16bits;         // True = SPI data takes the form of 16-bit words otherwise 8-bit words.
     DataBitOrder DataOrder16;      // Data order for 16 bit operation
 

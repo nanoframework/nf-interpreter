@@ -121,7 +121,7 @@ bool CPU_SPI_Uninitialize(uint8_t spiBus)
 spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
     int     csPin   = spiDeviceConfig.DeviceChipSelect;
-    uint8_t spiMode = spiDeviceConfig.SpiMode;
+    uint8_t spiMode = spiDeviceConfig.Spi_Mode;
     int     clockHz = spiDeviceConfig.Clock_RateHz;
 
     // if clock frequency is unset use the maximum frequency

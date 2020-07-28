@@ -16,7 +16,7 @@
 enum DataBitOrder
 {
     DataBitOrder_MSB = 0,
-    DataBitOrder_LSB
+    DataBitOrder_LSB = 1
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -25,10 +25,10 @@ enum DataBitOrder
 
 enum SpiModes
 {
-    SpiModes_Mode0 = 0,
-    SpiModes_Mode1,
-    SpiModes_Mode2,
-    SpiModes_Mode3
+    SpiMode_Mode0 = 0,
+    SpiMode_Mode1 = 1,
+    SpiMode_Mode2 = 2,
+    SpiMode_Mode3 = 3
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -69,13 +69,13 @@ typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings Spi
 
 //     switch (config[ SpiConnectionSettings::FIELD___spiMode ].NumericByRef().s4)
 //     {
-//         case SpiModes_Mode1 :
+//         case SpiMode_Mode1 :
 //             CR1 |= SPI_CR1_CPHA;
 //             break;
-//         case SpiModes_Mode2 :
+//         case SpiMode_Mode2 :
 //             CR1 |= SPI_CR1_CPOL;
 //             break;
-//         case SpiModes_Mode3 :
+//         case SpiMode_Mode3 :
 //             CR1 |= SPI_CR1_CPHA | SPI_CR1_CPOL;
 //             break;
 //         default :   // Default to Mode0 if invalid mode specified

@@ -252,7 +252,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevi
             spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
             ;
             spiConfig.ChipSelectActive = true; // TODO - is this something we would like to expose to managed code
-            spiConfig.SpiMode          = (SpiModes)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
+            spiConfig.Spi_Mode         = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
             spiConfig.DataOrder16  = (DataBitOrder)config[SpiConnectionSettings::FIELD___bitOrder].NumericByRef().s4;
             spiConfig.Clock_RateHz = config[SpiConnectionSettings::FIELD___clockFrequency].NumericByRef().s4;
 
