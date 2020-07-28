@@ -306,17 +306,17 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
     int csPin = config.DeviceChipSelect;
 
     // SPI mode
-    switch (config.SpiMode)
+    switch (config.Spi_Mode)
     {
-        case SpiModes_Mode1:
+        case SpiMode_Mode1:
             llConfig->cr1 |= SPI_CR1_CPHA;
             break;
 
-        case SpiModes_Mode2:
+        case SpiMode_Mode2:
             llConfig->cr1 |= SPI_CR1_CPOL;
             break;
 
-        case SpiModes_Mode3:
+        case SpiMode_Mode3:
             llConfig->cr1 |= SPI_CR1_CPHA | SPI_CR1_CPOL;
             break;
 

@@ -49,7 +49,7 @@ void SpiCallback(SPI_Handle handle, SPI_Transaction *transaction)
         // no more transactions
         // fire callback for SPI transaction complete
         SPI1_PAL.status = SPI_OP_COMPLETE;
-        transaction->callback(0);
+        SPI1_PAL.callback(0);
     }
 
     NATIVE_INTERRUPT_END
@@ -62,7 +62,7 @@ void GetSPIConfig(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPI_WRITE_REA
 
     // Open SPI as slave (default)
     SPI_Params_init(&spiParams);
-    spiParams.frameFormat = (SPI_FrameFormat)spiDeviceConfig.SpiMode;
+    spiParams.frameFormat = (SPI_FrameFormat)spiDeviceConfig.Spi_Mode;
 
     // default to slave
     // spiParams.mode = spiDeviceConfig.BusMode == SpiBusMode_master ? SPI_MASTER : SPI_SLAVE;
