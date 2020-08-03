@@ -29,9 +29,10 @@ __nfweak bool CPU_SPI_Initialize(uint8_t bus)
     (void)bus;
     return true;
 }
-__nfweak void CPU_SPI_Uninitialize(uint8_t bus)
+__nfweak bool CPU_SPI_Uninitialize(uint8_t bus)
 {
     (void)bus;
+    return true;
 }
 __nfweak SPI_OP_STATUS CPU_SPI_Op_Status(uint32_t deviceHandle)
 {

@@ -86,11 +86,12 @@ bool CPU_SPI_Initialize(uint8_t bus)
     return true;
 }
 
-void CPU_SPI_Uninitialize(uint8_t bus)
+bool CPU_SPI_Uninitialize(uint8_t bus)
 {
     (void)bus;
 
     SPI_close(SPI1_PAL.masterSpi);
+    return true;
 }
 
 // Performs a read/write operation on 8-bit word data.
