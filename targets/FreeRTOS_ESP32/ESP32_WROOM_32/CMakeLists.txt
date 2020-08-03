@@ -79,6 +79,9 @@ if(USE_SECURITY_MBEDTLS_OPTION)
     add_dependencies(NetworkLib mbedTLS)
 endif()
 
+# Add Library for all NanoFramework Api
+add_library(NanoApiLib STATIC ${TARGET_NANO_APIS_SOURCES} )
+
 #######################
 # nanoCLR executable
 
@@ -102,9 +105,6 @@ add_executable(
     ${NF_CoreCLR_SOURCES}
     ${NF_Debugger_SOURCES}
     ${NF_Diagnostics_SOURCES}
-  
-    # # sources for nanoFramework APIs
-    ${TARGET_NANO_APIS_SOURCES}
 )
 
 # Add link flags
@@ -113,6 +113,8 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 if(USE_SECURITY_MBEDTLS_OPTION)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf NetworkLib)
 endif()
+
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf NanoApiLib)
 
 #message( "project libs:${PROJECT_LINK_LIBS} " )
 set(LIBPATHSAVE "")
@@ -166,10 +168,11 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
 
 endforeach( IDF_libraries )
 
-
 if(USE_NETWORKING_OPTION)
     set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lNetworkLib " )
 endif()
+
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive  -L${CMAKE_CURRENT_BINARY_DIR} -lNanoApiLib -Wl,--no-whole-archive " )
 
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -lgcc -lstdc++ -lgcov -Wl,--end-group -Wl,-EL  ")
 
@@ -225,8 +228,22 @@ if(USE_NETWORKING_OPTION)
     set_target_properties(NetworkLib PROPERTIES COMPILE_FLAGS " -w " )
 endif()
 
+ target_include_directories(NanoApiLib PUBLIC
+    # directories for nanoFramework libraries
+    ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
+    ${NF_CoreCLR_INCLUDE_DIRS}
+
+    ${TARGET_ESP32_IDF_INCLUDES}
+
+    # includes for nanoFramework APIs
+    ${TARGET_NANO_APIS_INCLUDES}
+)
+
 # set platform for NanoClr
 target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32 " )
+
+# set platform for NanoApiLib
+target_compile_definitions(NanoApiLib PUBLIC "-DPLATFORM_ESP32 " )
 
 # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
 if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
