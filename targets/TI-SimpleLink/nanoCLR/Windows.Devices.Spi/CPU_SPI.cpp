@@ -80,13 +80,13 @@ void GetSPIConfig(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPI_WRITE_REA
     SPI1_PAL.callback = wrc.callback;
 }
 
-bool CPU_SPI_Initialize(int bus)
+bool CPU_SPI_Initialize(uint8_t bus)
 {
     (void)bus;
     return true;
 }
 
-void CPU_SPI_Uninitialize(int bus)
+void CPU_SPI_Uninitialize(uint8_t bus)
 {
     (void)bus;
 

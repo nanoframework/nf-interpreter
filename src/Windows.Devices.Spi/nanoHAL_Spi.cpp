@@ -24,12 +24,12 @@ nanoSPI_BusConfig spiconfig[NUM_SPI_BUSES];
 
 // Define weak functions for some optional PAL functions
 // so low level implementations don't require them.
-__nfweak bool CPU_SPI_Initialize(int bus)
+__nfweak bool CPU_SPI_Initialize(uint8_t bus)
 {
     (void)bus;
     return true;
 }
-__nfweak void CPU_SPI_Uninitialize(int bus)
+__nfweak void CPU_SPI_Uninitialize(uint8_t bus)
 {
     (void)bus;
 }
