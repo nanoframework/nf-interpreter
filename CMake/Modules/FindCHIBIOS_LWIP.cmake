@@ -5,7 +5,7 @@
 
 # extract LwIP source files
 execute_process(
-    COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2-patched.7z
+    COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
 )
 
@@ -222,9 +222,9 @@ add_custom_target( CHIBIOS_NETWORK_COMPONENTS ALL )
 
 add_custom_command(TARGET CHIBIOS_NETWORK_COMPONENTS
 PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2-patched.7z
+    COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-    DEPENDS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2-patched.7z
+    DEPENDS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
 
     VERBATIM
 )
