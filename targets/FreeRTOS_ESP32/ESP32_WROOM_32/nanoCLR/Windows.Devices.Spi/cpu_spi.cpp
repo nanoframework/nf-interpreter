@@ -56,6 +56,27 @@
 // Tag for ESP32 logging
 static const char *TAG = "SpiDevice";
 
+// struct representing the SPI transaction per bus
+struct NF_PAL_SPI
+{
+    spi_transaction_t trans;
+
+    int BusIndex;
+    SPI_OP_STATUS status;   // Current status 
+    SPI_Callback callback;
+
+    int32_t writeSize;
+    int32_t readSize;
+    int32_t readOffset;
+
+    bool fullDuplex;
+    unsigned char* originalReadData;
+    unsigned char* readDataBuffer;
+};
+
+NF_PAL_SPI nf_pal_spi[2];
+
+
 // Remove device from bus
 // return true of OK, false = error
 bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
@@ -64,6 +85,7 @@ bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 }
 
 // Initialise the physical SPI bus
+// Bus index 0 or 1
 // return true of successful, false if error
 bool CPU_SPI_Initialize(uint8_t spiBus)
 {
@@ -99,21 +121,60 @@ bool CPU_SPI_Initialize(uint8_t spiBus)
         esp_err_t ret = spi_bus_initialize((spi_host_device_t)(spiBus + HSPI_HOST), &bus_config, 0);
         if (ret != ESP_OK)
         {
-            ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", spiBus, ret);
+            ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", spiBus + HSPI_HOST, ret);
             return false;
         }
     }
 
+    nf_pal_spi[spiBus].BusIndex = spiBus;
+    nf_pal_spi[spiBus].status = SPI_OP_STATUS::SPI_OP_READY;
+    
     return true;
 }
 
 // Uninitialise the bus
 bool CPU_SPI_Uninitialize(uint8_t spiBus)
 {
-    if (spi_bus_free((spi_host_device_t)(spiBus)) != ESP_OK)
+    esp_err_t ret = spi_bus_free((spi_host_device_t)(spiBus + HSPI_HOST));
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", spiBus + HSPI_HOST, ret);
         return false;
+    }
 
     return true;
+}
+
+// Callback when a transaction has completed
+static void IRAM_ATTR spi_trans_ready(spi_transaction_t* trans)
+{
+    NF_PAL_SPI* pnf_pal_spi = (NF_PAL_SPI * )trans->user;
+
+    if (pnf_pal_spi != &nf_pal_spi[0] && pnf_pal_spi != &nf_pal_spi[1]) 
+        return;
+
+    pnf_pal_spi->status = SPI_OP_STATUS::SPI_OP_COMPLETE;
+
+    // Finish up half duplex, copy read data and deallocate buffer
+    if (!pnf_pal_spi->fullDuplex)
+    {
+        if (pnf_pal_spi->readSize)
+         {
+             // Copy the read data from allocated buffer
+             memcpy(pnf_pal_spi->originalReadData, pnf_pal_spi->readDataBuffer + pnf_pal_spi->writeSize + pnf_pal_spi->readOffset,
+                    pnf_pal_spi->readSize - pnf_pal_spi->readOffset);
+
+             heap_caps_free(pnf_pal_spi->readDataBuffer);
+         }
+     }
+
+    // fire callback for SPI transaction complete
+    // only if callback set
+     SPI_Callback callback = (SPI_Callback)pnf_pal_spi->callback;
+     if (callback)
+        callback(pnf_pal_spi->BusIndex);
+
+
 }
 
 //
@@ -130,7 +191,6 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
         clockHz = CPU_SPI_MaxClockFrequency(spiDeviceConfig.Spi_Bus);
     }
 
-    // ets_printf( "Spi config cspin:%d spiMode:%d bitorder:%d clockHz:%d\n", csPin, spiMode, bitOrder, clockHz);
     uint32_t flags =
         (spiDeviceConfig.DataOrder16 == DataBitOrder_LSB) ? (SPI_DEVICE_TXBIT_LSBFIRST | SPI_DEVICE_RXBIT_LSBFIRST) : 0;
 
@@ -153,7 +213,7 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
         flags,   // SPI_DEVICE flags
         1,       // Queue size
         0,       // Callback before
-        0,       // Callback after
+        spi_trans_ready, // Callback after transaction complete
     };
 
     return dev_config;
@@ -179,7 +239,7 @@ uint32_t CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
         ESP_LOGE(TAG, "Unable to init SPI device, esp_err %d", ret);
         return 0;
     }
-
+ 
     return (uint32_t)deviceHandle;
 }
 
@@ -217,7 +277,7 @@ HRESULT CPU_SPI_nWrite_nRead(
     NANOCLR_HEADER();
     {
         unsigned char *readDataBuffer = NULL;
-        // bool async = (wrc.callback != 0);
+        bool async = (wrc.callback != 0);
         esp_err_t ret;
 
         // get data bit length
@@ -249,7 +309,7 @@ HRESULT CPU_SPI_nWrite_nRead(
             if (wrc.Bits16ReadWrite)
                 MaxDatalength *= 2;
 
-            if (readSize)
+            if (readSize) // Any read data then use alternative buffer with write & read data
             {
                 // Allocate a new read buffer to include total length(DMA capable)
                 readDataBuffer = (unsigned char *)heap_caps_malloc(MaxDatalength, MALLOC_CAP_DMA);
@@ -258,59 +318,68 @@ HRESULT CPU_SPI_nWrite_nRead(
             }
         }
 
+        NF_PAL_SPI* pnf_pal_spi = &nf_pal_spi[sdev.Spi_Bus];
+
+        pnf_pal_spi->writeSize = writeSize;
+        pnf_pal_spi->readSize = readSize;
+        pnf_pal_spi->originalReadData = readData;
+        pnf_pal_spi->readDataBuffer = readDataBuffer;
+        pnf_pal_spi->fullDuplex = wrc.fullDuplex;
+        pnf_pal_spi->readOffset = wrc.readOffset; // dummy bytes between write & read on half duplex
+        pnf_pal_spi->callback = wrc.callback;
+
         // Set up SPI Transaction
-        spi_transaction_t trans_desc;
+        spi_transaction_t * pTrans = &pnf_pal_spi->trans;
 
-        trans_desc.flags = 0;
-        trans_desc.cmd = 0;
-        trans_desc.addr = 0;
+        pTrans->flags = 0;
+        pTrans->cmd = 0;
+        pTrans->addr = 0;
         // length - Full duplex is total length, half duplex the TX length
-        trans_desc.length = databitLength * MaxElementlength;
+        pTrans->length = databitLength * MaxElementlength;
         // rxlength - Full duplex is same as length or 0, half duplex is read length
-        trans_desc.rxlength = 0;
-        trans_desc.user = NULL;
-        trans_desc.tx_buffer = writeData;
-        trans_desc.rx_buffer = readDataBuffer;
-
-        /*
-            // Esp32 doesn't have a async mode yet
-            // This is the start of added that support, not sure if its required
-            if (async)
+        pTrans->rxlength = 0;
+        pTrans->user = (void*)pnf_pal_spi;
+        pTrans->tx_buffer = writeData;
+        pTrans->rx_buffer = readDataBuffer;
+        
+        // Start asynchronous SPI transaction
+        if (async)
+        {
+            pnf_pal_spi->callback = wrc.callback;
+            
+            ret = spi_device_queue_trans((spi_device_handle_t)deviceHandle, pTrans, portMAX_DELAY);
+            if (ret != ESP_OK)
             {
+                // Error so free up buffer if Half duplex
+                if (!wrc.fullDuplex) heap_caps_free(readDataBuffer);
 
-                ret = spi_device_queue_trans((spi_device_handle_t)deviceHandle, &trans_desc, portMAX_DELAY);
-                if (ret != ESP_OK)
+                switch (ret)
                 {
-                    if (!wrc.fullDuplex) heap_caps_free(readDataBuffer);
+                    case ESP_ERR_NO_MEM:
+                        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
 
-                    switch (ret)
-                    {
-                        case ESP_ERR_NO_MEM:
-                            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                    case ESP_ERR_INVALID_ARG:
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
-                        case ESP_ERR_INVALID_ARG:
-                            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
-                        default:
-                        case ESP_ERR_INVALID_STATE:
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-                    }
+                    default:
+                    case ESP_ERR_INVALID_STATE:
+                        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                 }
-
-                // There is no callback etc with ESP32 IDF so we need to start a task to wait for operation to complete
-           on this device
-
-
-
-                // Return Busy to indicate aync call started and callback will be called on completion
-                NANOCLR_SET_AND_LEAVE(CLR_E_BUSY);
             }
-            else
-        */
+
+            pnf_pal_spi->status = SPI_OP_STATUS::SPI_OP_RUNNING;
+
+            // Return Busy to indicate ASync call started and callback will be called on completion
+            NANOCLR_SET_AND_LEAVE(CLR_E_BUSY);
+        }
+        else
         {
             // Synchronous SPI operation
             // Use Polling method to start and wait to complete(quickest)
-            ret = spi_device_polling_transmit((spi_device_handle_t)deviceHandle, &trans_desc);
+            ret = spi_device_polling_transmit((spi_device_handle_t)deviceHandle, pTrans);
+
+            pnf_pal_spi->status = SPI_OP_STATUS::SPI_OP_COMPLETE;
+
             if (ret != ESP_OK)
             {
                 if (!wrc.fullDuplex)
@@ -318,16 +387,16 @@ HRESULT CPU_SPI_nWrite_nRead(
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             }
 
-            // Finish up half duplex
-            if (!wrc.fullDuplex)
-            {
-                if (readSize)
-                {
-                    // Copy the read data
-                    memcpy(readData, readDataBuffer + writeSize + wrc.readOffset, readSize - wrc.readOffset);
-                    heap_caps_free(readDataBuffer);
-                }
-            }
+            //// Finish up half duplex ( now done in callback)
+            //if (!wrc.fullDuplex)
+            //{
+            //    if (readSize)
+            //    {
+            //        // Copy the read data
+            //        memcpy(readData, readDataBuffer + writeSize + wrc.readOffset, readSize - wrc.readOffset);
+            //        heap_caps_free(readDataBuffer);
+            //    }
+            //}
         }
     }
 
@@ -349,12 +418,14 @@ HRESULT CPU_SPI_nWrite16_nRead16(
 }
 
 // Return status of current SPI operation
-// Used to find status of an Async SPI call ( Not supported ), just return complete
-SPI_OP_STATUS CPU_SPI_OP_STATUS(uint32_t deviceHandle)
+// Used to find status of an Async SPI call 
+SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle)
 {
     (void)deviceHandle;
 
-    return SPI_OP_STATUS::SPI_OP_COMPLETE;
+    NF_PAL_SPI* pnf_pal_spi = &nf_pal_spi[spi_bus];
+
+    return pnf_pal_spi->status;
 }
 
 // Return map of available SPI buses as a bit map
@@ -377,15 +448,15 @@ uint32_t CPU_SPI_MinClockFrequency(uint32_t spi_bus)
 {
     (void)spi_bus;
 
-    // TODO check what is minimum ( min clock that can be configured on chip)
+    // TODO check what is minimum ( Min clock that can be configured on chip)
     return 20000000 / 256;
 }
 
 // Return SPI maximum clock frequency
 //
 // Maximum frequency will depend on current configuration
-// If using native spi pins then max is 80mhz
-// if spi pins are routed over gpio maxtrix then 40mhz half duplex 26mhz full
+// If using native SPI pins then maximum is 80mhz
+// if SPI pins are routed over GPIO matrix then 40mhz half duplex 26mhz full
 
 uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus)
 {

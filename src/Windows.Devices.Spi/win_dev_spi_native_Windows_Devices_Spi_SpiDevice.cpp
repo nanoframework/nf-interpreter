@@ -10,7 +10,6 @@
 // define this type here to make it shorter and improve code readability
 typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings SpiConnectionSettings;
 
-#if SPI_ASYNC
 void nano_spi_callback(int busIndex)
 {
     (void)busIndex;
@@ -18,7 +17,6 @@ void nano_spi_callback(int busIndex)
     // fire event for SPI transaction complete
     Events_Set(SYSTEM_EVENT_FLAG_SPI_MASTER);
 }
-#endif
 
 // estimate the time required to perform the SPI transaction
 // TODO doesn't take into account of full duplex or sequential ( assumes sequential at the moment )
@@ -81,13 +79,11 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
         int readSize = 0;
         SPI_WRITE_READ_SETTINGS rws;
 
-#if SPI_ASYNC
         bool isLongRunningOperation;
         uint32_t estimatedDurationMiliseconds;
         CLR_RT_HeapBlock hbTimeout;
         CLR_INT64 *timeout;
         bool eventResult = true;
-#endif
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
@@ -146,7 +142,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             // Set up read/write settings for SPI_Write_Read call
             rws = {fullDuplex, 0, dataTransfer16, 0};
 
-#if SPI_ASYNC
             // Check to see if we should run async so as not to hold up other tasks
             isLongRunningOperation = IsLongRunningOperation(
                 writeSize,
@@ -155,10 +150,15 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                 data16Bits,
                 nanoSPI_GetByteTime(deviceId),
                 (uint32_t &)estimatedDurationMiliseconds);
+
             if (isLongRunningOperation)
             {
                 // if this is a long running operation, set a timeout equal to the estimated transaction duration in
                 // milliseconds this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() below
+                
+                // Use twice the estimated Duration as timeout
+                estimatedDurationMiliseconds *= 2;
+
                 hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
 
                 // if m_customState == 0 then push timeout on to eval stack[0] then move to m_customState = 1
@@ -174,7 +174,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                 // Set callback for async calls to nano spi
                 rws.callback = nano_spi_callback;
             }
-#endif
+
             // Start SPI transfer
             // We can ask for async transfer by setting callback but it depends if underlying supports it
             // return of CLR_E_BUSY means async started
@@ -186,17 +186,15 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                 (uint8_t *)readData,
                 (int32_t)readSize);
 
-#if SPI_ASYNC
             // Async transfer started, go to custom 2 state ( wait completion )
             if (hr == CLR_E_BUSY)
             {
                 stack.m_customState = 2;
             }
-#endif
         }
 
-#if SPI_ASYNC
-        // Waiting for Aync operation to complete
+ 
+        // Waiting for Async operation to complete
         if (stack.m_customState == 2)
         {
             // Get timeout from eval stack we set up
@@ -217,6 +215,13 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                     *timeout,
                     CLR_RT_ExecutionEngine::c_Event_SpiMaster,
                     eventResult));
+
+                if (!eventResult)
+                {
+                    // Timeout
+                    NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+                }
+
             }
 
             // pop timeout heap block from stack
@@ -225,8 +230,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             // null pointers and vars
             pThis = NULL;
         }
-#endif
     }
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -241,7 +246,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevi
             CLR_RT_HeapBlock *pThis = stack.This();
             FAULT_ON_NULL(pThis);
 
-            // Get reference to manage code spi settings
+            // Get reference to manage code SPI settings
             CLR_RT_HeapBlock *config =
                 pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::FIELD___connectionSettings]
                     .Dereference();
@@ -250,14 +255,14 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevi
             spiConfig.BusMode = SpiBusMode_master;
             spiConfig.Spi_Bus = (stack.Arg1().NumericByRef().s4 - 1);
             spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
-            ;
-            spiConfig.ChipSelectActive = true; // TODO - is this something we would like to expose to managed code
+            spiConfig.ChipSelectActive = false; // TODO - is this something we would like to expose to managed code
             spiConfig.Spi_Mode = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
             spiConfig.DataOrder16 = (DataBitOrder)config[SpiConnectionSettings::FIELD___bitOrder].NumericByRef().s4;
             spiConfig.Clock_RateHz = config[SpiConnectionSettings::FIELD___clockFrequency].NumericByRef().s4;
 
             // Returns deviceID or error if negative
-            NANOCLR_CHECK_HRESULT(nanoSPI_OpenDevice(spiConfig));
+            hr = nanoSPI_OpenDevice(spiConfig);
+            NANOCLR_CHECK_HRESULT(hr);
 
             // Return device handle
             stack.SetResult_I4(hr);

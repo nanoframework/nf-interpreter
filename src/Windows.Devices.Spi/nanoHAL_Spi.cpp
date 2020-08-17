@@ -8,9 +8,9 @@
 //
 // Logical SPI device access
 //
+#include <nanoHAL.h>
 #include <targetPAL.h>
 
-//#include <targetHAL.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
@@ -34,9 +34,11 @@ __nfweak bool CPU_SPI_Uninitialize(uint8_t bus)
     (void)bus;
     return true;
 }
-__nfweak SPI_OP_STATUS CPU_SPI_Op_Status(uint32_t deviceHandle)
+__nfweak SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle)
 {
+    (void)spi_bus;
     (void)deviceHandle;
+
     return SPI_OP_STATUS::SPI_OP_COMPLETE;
 }
 
@@ -52,6 +54,7 @@ __nfweak bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
     return true;
 };
 
+//
 // Number of SPI buses available
 __nfweak uint32_t CPU_SPI_PortsCount()
 {
@@ -78,7 +81,7 @@ __nfweak void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clockPin, GPIO_PIN &mi
 }
 
 //
-//  Find the Bus / Device ptr base on handle
+//  Find the Bus / Device ptr from the handle
 //
 //  return true = handle valid
 static bool getDevice(uint32_t handle, uint8_t &spiBus, int &deviceIndex)
@@ -141,6 +144,18 @@ void nanoSPI_Uninitialize()
             }
         }
     }
+}
+
+SPI_OP_STATUS nanoSPI_Op_Status(uint32_t handle)
+{
+    uint8_t spiBus;
+    int deviceIndex;
+
+    getDevice(handle, spiBus, deviceIndex);
+
+    SPI_OP_STATUS status = CPU_SPI_OP_Status(spiBus, spiconfig[spiBus].deviceHandles[deviceIndex]);
+
+    return status;
 }
 
 // Open SPI bus / device using device configuration
@@ -252,9 +267,10 @@ HRESULT nanoSPI_OpenDeviceEx(
     pBusConfig->deviceCongfig[deviceIndex] = spiDeviceConfig;
     pBusConfig->deviceHandles[deviceIndex] = deviceHandle;
 
-    // Compute rough estimate on the time to tx/rx a byte (in milliseconds)
+    // Compute rough estimate on the time to tx/rx a byte (in milliseconds) 
     // Used to compute length of time for each IO to see if this is a long running operation
-    pBusConfig->byteTime = (1.0 / spiDeviceConfig.Clock_RateHz) * 1000;
+    // Store for each device as each device could use a different bit rate
+    pBusConfig->byteTime[deviceIndex] = (1.0 / spiDeviceConfig.Clock_RateHz) * 1000 * 8;
 
     pBusConfig->devicesInUse++;
 
@@ -263,8 +279,9 @@ HRESULT nanoSPI_OpenDeviceEx(
 }
 
 //  SPI_CloseDevice
+//  SPI_CloseDevice
 //
-//  Close device on spi bus
+//  Close device on SPI bus
 //
 HRESULT nanoSPI_CloseDevice(uint32_t handle)
 {
@@ -302,9 +319,12 @@ HRESULT nanoSPI_CloseDevice(uint32_t handle)
 //
 float nanoSPI_GetByteTime(uint32_t handle)
 {
-    uint8_t spiBus = GetBusFromHandle(handle);
+    uint8_t spiBus;
+    int  deviceIndex;
 
-    return spiconfig[spiBus].byteTime;
+    getDevice(handle, spiBus, deviceIndex);
+
+    return spiconfig[spiBus].byteTime[deviceIndex];
 }
 
 //
@@ -334,11 +354,3 @@ HRESULT nanoSPI_Write_Read(
         readSize);
 }
 
-SPI_OP_STATUS nanoSPI_Op_Status(uint32_t handle)
-{
-    uint8_t spiBus;
-    int deviceIndex;
-
-    getDevice(handle, spiBus, deviceIndex);
-    return CPU_SPI_Op_Status(spiconfig[spiBus].deviceHandles[deviceIndex]);
-}

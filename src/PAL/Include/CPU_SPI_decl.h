@@ -41,12 +41,12 @@ typedef enum __nfpack SpiBusMode
 } SpiBusMode;
 
 // Async operation status
-enum SPI_OP_STATUS
+typedef enum __nfpack SPI_OP_STATUS
 {
     SPI_OP_READY,   // Bus ready for new operation
     SPI_OP_RUNNING, // operation still running
     SPI_OP_COMPLETE // Last operation complete
-};
+} SPI_OP_STATUS;
 
 struct SPI_DEVICE_CONFIGURATION
 {
@@ -85,6 +85,10 @@ bool CPU_SPI_Initialize(uint8_t bus);
 // Unintialise spi bus, called after last device removed (optional)
 bool CPU_SPI_Uninitialize(uint8_t bus);
 
+// Return status of current SPI operation
+// Used to find status of an Async SPI call
+SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle);
+
 // Add a device to SPi Bus (Optional)
 // Returns a device handle.  Returns 0 if error
 // deviceHandle is a reference to underlying OS handle/address of device. If not required then return
@@ -116,10 +120,6 @@ HRESULT CPU_SPI_nWrite16_nRead16(
     int32_t writeSize,
     uint16_t *readPtr,
     int32_t readSize);
-
-// Return status of current SPI operation
-// Used to find status of an Async SPI call
-SPI_OP_STATUS CPU_SPI_Op_Status(uint32_t deviceHandle);
 
 // Return bit map of available SPI buses
 // bit 0 - SPI1

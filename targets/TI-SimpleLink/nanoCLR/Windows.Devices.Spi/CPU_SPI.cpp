@@ -213,8 +213,9 @@ HRESULT CPU_SPI_nWrite16_nRead16(
 
 // Return status of current SPI operation
 // Used to find status of an Async SPI call ( Not supported ), just return complete
-SPI_OP_STATUS CPU_SPI_OP_STATUS(uint32_t deviceHandle)
+SPI_OP_STATUS CPU_SPI_OP_STATUS(uint8_t spi_bus, uint32_t deviceHandle)
 {
+    (void)spi_bud;
     (void)deviceHandle;
 
     return SPI1_PAL.status;

@@ -573,8 +573,10 @@ HRESULT CPU_SPI_nWrite_nRead(
     NANOCLR_NOCLEANUP();
 }
 
-SPI_OP_STATUS CPU_SPI_Op_Status(uint32_t deviceHandle)
+SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle)
 {
+    (void)spi_bus;
+
     NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
     SPI_OP_STATUS os;
 
