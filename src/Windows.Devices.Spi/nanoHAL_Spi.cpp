@@ -200,7 +200,7 @@ HRESULT nanoSPI_ReserveBusPins(int spiBus, bool reserve)
 // Specify alternate pins for SPI or -1 for use default for bus
 HRESULT nanoSPI_OpenDeviceEx(
     SPI_DEVICE_CONFIGURATION &spiDeviceConfig,
-    uint32_t& handle,
+    uint32_t &handle,
     GPIO_PIN altMsk,
     GPIO_PIN altMiso,
     GPIO_PIN altMosi)
@@ -269,7 +269,7 @@ HRESULT nanoSPI_OpenDeviceEx(
     pBusConfig->deviceCongfig[deviceIndex] = spiDeviceConfig;
     pBusConfig->deviceHandles[deviceIndex] = deviceHandle;
 
-    // Compute rough estimate on the time to tx/rx a byte (in milliseconds) 
+    // Compute rough estimate on the time to tx/rx a byte (in milliseconds)
     // Used to compute length of time for each IO to see if this is a long running operation
     // Store for each device as each device could use a different bit rate
     pBusConfig->byteTime[deviceIndex] = (1.0 / spiDeviceConfig.Clock_RateHz) * 1000 * 8;
@@ -324,7 +324,7 @@ HRESULT nanoSPI_CloseDevice(uint32_t handle)
 float nanoSPI_GetByteTime(uint32_t handle)
 {
     uint8_t spiBus;
-    int  deviceIndex;
+    int deviceIndex;
 
     getDevice(handle, spiBus, deviceIndex);
 
@@ -357,4 +357,3 @@ HRESULT nanoSPI_Write_Read(
         readPtr,
         readSize);
 }
-

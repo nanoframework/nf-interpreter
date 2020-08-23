@@ -41,7 +41,7 @@ HRESULT nanoSPI_OpenDevice(SPI_DEVICE_CONFIGURATION &Configuration, uint32_t &ha
 // only possible of first device open
 HRESULT nanoSPI_OpenDeviceEx(
     SPI_DEVICE_CONFIGURATION &Configuration,
-    uint32_t& handle,
+    uint32_t &handle,
     GPIO_PIN altMsk,
     GPIO_PIN altMiso,
     GPIO_PIN altMosi);

@@ -155,7 +155,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             {
                 // if this is a long running operation, set a timeout equal to the estimated transaction duration in
                 // milliseconds this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() below
-                
+
                 // Use twice the estimated Duration as timeout
                 estimatedDurationMiliseconds *= 2;
 
@@ -193,7 +193,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             }
         }
 
- 
         // Waiting for Async operation to complete
         if (stack.m_customState == 2)
         {
@@ -221,7 +220,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                     // Timeout
                     NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
                 }
-
             }
 
             // pop timeout heap block from stack
