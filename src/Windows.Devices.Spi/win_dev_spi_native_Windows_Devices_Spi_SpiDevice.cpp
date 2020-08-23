@@ -260,12 +260,14 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevi
             spiConfig.DataOrder16 = (DataBitOrder)config[SpiConnectionSettings::FIELD___bitOrder].NumericByRef().s4;
             spiConfig.Clock_RateHz = config[SpiConnectionSettings::FIELD___clockFrequency].NumericByRef().s4;
 
-            // Returns deviceID or error if negative
-            hr = nanoSPI_OpenDevice(spiConfig);
+            // Returns handle to device
+            uint32_t handle;
+
+            hr = nanoSPI_OpenDevice(spiConfig, handle);
             NANOCLR_CHECK_HRESULT(hr);
 
             // Return device handle
-            stack.SetResult_I4(hr);
+            stack.SetResult_I4(handle);
         }
         NANOCLR_NOCLEANUP();
     }

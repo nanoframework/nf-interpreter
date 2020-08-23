@@ -15,6 +15,7 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 
+// Create a handle built from device type, SPI bus number and device index
 #define CreateSpiHandle(spiBus, deviceIndex) ((CPU_DEVICE_TYPE_SPI << 16) + (spiBus << 8) + deviceIndex)
 
 #define GetBusFromHandle(handle) ((handle >> 8) & 0x00ff);
@@ -161,9 +162,9 @@ SPI_OP_STATUS nanoSPI_Op_Status(uint32_t handle)
 // Open SPI bus / device using device configuration
 // Register GPIO pins as in use
 // Return handle ( index to device on bus), negative = error
-HRESULT nanoSPI_OpenDevice(SPI_DEVICE_CONFIGURATION &Configuration)
+HRESULT nanoSPI_OpenDevice(SPI_DEVICE_CONFIGURATION &Configuration, uint32_t &handle)
 {
-    return nanoSPI_OpenDeviceEx(Configuration, GPIO_PIN_NONE, GPIO_PIN_NONE, GPIO_PIN_NONE);
+    return nanoSPI_OpenDeviceEx(Configuration, handle, GPIO_PIN_NONE, GPIO_PIN_NONE, GPIO_PIN_NONE);
 }
 
 // Reserve SPI bus pins
@@ -199,6 +200,7 @@ HRESULT nanoSPI_ReserveBusPins(int spiBus, bool reserve)
 // Specify alternate pins for SPI or -1 for use default for bus
 HRESULT nanoSPI_OpenDeviceEx(
     SPI_DEVICE_CONFIGURATION &spiDeviceConfig,
+    uint32_t& handle,
     GPIO_PIN altMsk,
     GPIO_PIN altMiso,
     GPIO_PIN altMosi)
@@ -274,8 +276,10 @@ HRESULT nanoSPI_OpenDeviceEx(
 
     pBusConfig->devicesInUse++;
 
-    // Return unique generated handle
-    return CreateSpiHandle(spiBus, deviceIndex);
+    // Return unique generated device handle
+    handle = CreateSpiHandle(spiBus, deviceIndex);
+
+    return S_OK;
 }
 
 //  SPI_CloseDevice

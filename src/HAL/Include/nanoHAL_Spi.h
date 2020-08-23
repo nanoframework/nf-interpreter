@@ -34,13 +34,14 @@ void nanoSPI_Uninitialize();
 
 // Open SPI bus / device using device configuration
 // Register GPIO pins as in use
-// Return handle ( index to device on bus), negative = error
-HRESULT nanoSPI_OpenDevice(SPI_DEVICE_CONFIGURATION &Configuration);
+// Return result, if S_OK then handle returned in handle
+HRESULT nanoSPI_OpenDevice(SPI_DEVICE_CONFIGURATION &Configuration, uint32_t &handle);
 
 // Specify alternate pins or -1 for default, Needed ?
 // only possible of first device open
 HRESULT nanoSPI_OpenDeviceEx(
     SPI_DEVICE_CONFIGURATION &Configuration,
+    uint32_t& handle,
     GPIO_PIN altMsk,
     GPIO_PIN altMiso,
     GPIO_PIN altMosi);

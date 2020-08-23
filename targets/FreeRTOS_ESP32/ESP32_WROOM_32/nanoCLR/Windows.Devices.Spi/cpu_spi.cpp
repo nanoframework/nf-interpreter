@@ -72,6 +72,7 @@ struct NF_PAL_SPI
     bool fullDuplex;
     unsigned char* originalReadData;
     unsigned char* readDataBuffer;
+    unsigned char* writeDataBuffer;     
 };
 
 NF_PAL_SPI nf_pal_spi[2];
@@ -162,8 +163,10 @@ static void IRAM_ATTR spi_trans_ready(spi_transaction_t* trans)
          {
              // Copy the read data from allocated buffer
              memcpy(pnf_pal_spi->originalReadData, pnf_pal_spi->readDataBuffer + pnf_pal_spi->writeSize + pnf_pal_spi->readOffset,
-                    pnf_pal_spi->readSize - pnf_pal_spi->readOffset);
+                    pnf_pal_spi->readSize);
 
+             // free up buffers use to spoof half duplex transaction while running full duplex
+             heap_caps_free(pnf_pal_spi->writeDataBuffer);
              heap_caps_free(pnf_pal_spi->readDataBuffer);
          }
      }
@@ -276,6 +279,7 @@ HRESULT CPU_SPI_nWrite_nRead(
 
     NANOCLR_HEADER();
     {
+        unsigned char* writeDataBuffer = NULL;
         unsigned char *readDataBuffer = NULL;
         bool async = (wrc.callback != 0);
         esp_err_t ret;
@@ -294,27 +298,37 @@ HRESULT CPU_SPI_nWrite_nRead(
         if (wrc.fullDuplex)
         {
             // for full duplex just use largest element
-            // TODO : There may be a problem with read data overwritting passed read buff if write size > read size
+            // TODO : There may be a problem with read data overwriting passed read buff if write size > read size
             // !!!!!!
-            //        May for this case we should always allocate a separate buffer for transafer
+            //        May for this case we should always allocate a separate buffer for transfer
             MaxElementlength = (readSize > writeSize) ? readSize : writeSize;
 
             readDataBuffer = readData;
         }
         else
         {
-            // for Halfduplex its the length of both items
+            // for Half-duplex its the length of both items
             MaxElementlength = writeSize + readSize;
-            int MaxDatalength = MaxElementlength;
-            if (wrc.Bits16ReadWrite)
-                MaxDatalength *= 2;
+            if (readSize) 
+                MaxElementlength += wrc.readOffset;
+
+            int maxByteDatalength = (wrc.Bits16ReadWrite) ? MaxElementlength * 2 : MaxElementlength ;
 
             if (readSize) // Any read data then use alternative buffer with write & read data
             {
-                // Allocate a new read buffer to include total length(DMA capable)
-                readDataBuffer = (unsigned char *)heap_caps_malloc(MaxDatalength, MALLOC_CAP_DMA);
+                // Allocate a new write and read buffers to spoof half duplex operation using full duplex so we can use DMA.
+                // length included write data, any dummy bytes(readOffset) and read data size
+                writeDataBuffer = (unsigned char*)heap_caps_malloc(maxByteDatalength, MALLOC_CAP_DMA);
+                if (writeDataBuffer == 0)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+
+                readDataBuffer = (unsigned char *)heap_caps_malloc(maxByteDatalength, MALLOC_CAP_DMA);
                 if (readDataBuffer == 0)
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+
+                memset(writeDataBuffer, 0, maxByteDatalength);
+                memcpy(writeDataBuffer, writeData, writeSize);
+                writeData = writeDataBuffer;
             }
         }
 
@@ -324,6 +338,7 @@ HRESULT CPU_SPI_nWrite_nRead(
         pnf_pal_spi->readSize = readSize;
         pnf_pal_spi->originalReadData = readData;
         pnf_pal_spi->readDataBuffer = readDataBuffer;
+        pnf_pal_spi->writeDataBuffer = writeDataBuffer;
         pnf_pal_spi->fullDuplex = wrc.fullDuplex;
         pnf_pal_spi->readOffset = wrc.readOffset; // dummy bytes between write & read on half duplex
         pnf_pal_spi->callback = wrc.callback;
@@ -351,7 +366,12 @@ HRESULT CPU_SPI_nWrite_nRead(
             if (ret != ESP_OK)
             {
                 // Error so free up buffer if Half duplex
-                if (!wrc.fullDuplex) heap_caps_free(readDataBuffer);
+                if (!wrc.fullDuplex && readSize != 0)
+                {
+                    // Clean up
+                    heap_caps_free(writeDataBuffer);
+                    heap_caps_free(readDataBuffer);
+                }
 
                 switch (ret)
                 {
@@ -382,21 +402,16 @@ HRESULT CPU_SPI_nWrite_nRead(
 
             if (ret != ESP_OK)
             {
-                if (!wrc.fullDuplex)
+                if (!wrc.fullDuplex && readSize != 0)
+                {
+                    heap_caps_free(writeDataBuffer);
                     heap_caps_free(readDataBuffer);
+                }
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             }
 
-            //// Finish up half duplex ( now done in callback)
-            //if (!wrc.fullDuplex)
-            //{
-            //    if (readSize)
-            //    {
-            //        // Copy the read data
-            //        memcpy(readData, readDataBuffer + writeSize + wrc.readOffset, readSize - wrc.readOffset);
-            //        heap_caps_free(readDataBuffer);
-            //    }
-            //}
+            // Finish up half duplex, done in callback
+            // frees buffer and copies read data
         }
     }
 
