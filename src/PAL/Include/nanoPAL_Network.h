@@ -11,7 +11,8 @@
 #ifdef PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT
 #define SOCKETS_MAX_COUNT                PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT
 #else
-#define SOCKETS_MAX_COUNT                1 // required to have at least one for array init
+// required to have at least one for array init
+#error "PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT no defined at target or platform level"
 #endif
 
 #ifdef PLATFORM_DEPENDENT__SOCKETS_MAX_SEND_LENGTH
