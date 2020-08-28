@@ -41,8 +41,8 @@ void ConfigUART()
     uartParams.readDataMode = UART_DATA_BINARY;
     uartParams.readEcho = UART_ECHO_OFF;
     uartParams.baudRate = 921600;
-    uartParams.readTimeout   = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
-    uartParams.writeTimeout   = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
+    uartParams.readTimeout = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
+    uartParams.writeTimeout = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
 
     uart = UART_open(Board_UART0, &uartParams);
 
