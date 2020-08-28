@@ -6,6 +6,7 @@
 #include <ti/drivers/UART.h>
 #include <board.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
+#include <ti/drivers/dpl/ClockP.h>
 
 extern UART_Handle uart;
 
@@ -17,6 +18,9 @@ SemaphoreP_Handle uartMutex;
 // The clean alternative would be to add the GCC attribute used in those functions, but that's not our code to touch.
 
 void dummyFunction(void) __attribute__((used));
+
+// UART operations timeout 
+#define UART_TIMEOUT_MILLISECONDS       500000
 
 // Never called.
 void dummyFunction(void) {
@@ -35,7 +39,9 @@ void ConfigUART()
     uartParams.writeDataMode = UART_DATA_BINARY;
     uartParams.readDataMode = UART_DATA_BINARY;
     uartParams.readEcho = UART_ECHO_OFF;
-    uartParams.baudRate = 921600;
+    uartParams.baudRate = 115200;
+    uartParams.readTimeout   = UART_TIMEOUT_MILLISECONDS / ClockP_tickPeriod; // Default tick period is 10us
+    uartParams.writeTimeout   = UART_TIMEOUT_MILLISECONDS / ClockP_tickPeriod; // Default tick period is 10us
 
     uart = UART_open(Board_UART0, &uartParams);
 
