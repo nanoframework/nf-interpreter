@@ -6,7 +6,7 @@
 #include <ti/drivers/UART.h>
 #include <board.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
-#include <ti/drivers/dpl/ClockP.h>
+#include <ti/sysbios/knl/Clock.h>
 
 extern UART_Handle uart;
 
@@ -40,9 +40,9 @@ void ConfigUART()
     uartParams.writeDataMode = UART_DATA_BINARY;
     uartParams.readDataMode = UART_DATA_BINARY;
     uartParams.readEcho = UART_ECHO_OFF;
-    uartParams.baudRate = 115200;
-    uartParams.readTimeout = UART_TIMEOUT_MILLISECONDS / ClockP_tickPeriod;  // Default tick period is 10us
-    uartParams.writeTimeout = UART_TIMEOUT_MILLISECONDS / ClockP_tickPeriod; // Default tick period is 10us
+    uartParams.baudRate = 921600;
+    uartParams.readTimeout   = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
+    uartParams.writeTimeout   = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
 
     uart = UART_open(Board_UART0, &uartParams);
 
