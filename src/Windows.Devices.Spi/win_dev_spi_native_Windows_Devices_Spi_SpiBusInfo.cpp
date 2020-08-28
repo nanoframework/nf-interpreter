@@ -5,7 +5,6 @@
 
 #include "win_dev_spi_native_target.h"
 
-
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeChipSelectLineCount___I4(
     CLR_RT_StackFrame &stack)
 {
@@ -14,9 +13,10 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeChipSel
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-		int32_t controllerID = pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
+        int32_t controllerID =
+            pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
 
-		stack.SetResult_I4(CPU_SPI_ChipSelectLineCount(controllerID));
+        stack.SetResult_I4(CPU_SPI_ChipSelectLineCount(controllerID));
     }
     NANOCLR_NOCLEANUP();
 }
@@ -29,7 +29,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMaxCloc
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-		int32_t controllerID = pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
+        int32_t controllerID =
+            pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
 
         stack.SetResult_I4(CPU_SPI_MaxClockFrequency(controllerID));
     }
@@ -44,7 +45,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMinCloc
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-		int32_t controllerID = pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
+        int32_t controllerID =
+            pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
 
         stack.SetResult_I4(CPU_SPI_MinClockFrequency(controllerID));
     }
