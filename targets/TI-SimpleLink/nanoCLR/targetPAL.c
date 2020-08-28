@@ -6,6 +6,7 @@
 #include <ti/drivers/UART.h>
 #include <board.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
+#include <ti/sysbios/knl/Clock.h>
 
 extern UART_Handle uart;
 
@@ -18,8 +19,12 @@ SemaphoreP_Handle uartMutex;
 
 void dummyFunction(void) __attribute__((used));
 
+// UART operations timeout
+#define UART_TIMEOUT_MILLISECONDS 500000
+
 // Never called.
-void dummyFunction(void) {
+void dummyFunction(void)
+{
     vTaskSwitchContext();
     localProgramStart();
 }
@@ -36,31 +41,35 @@ void ConfigUART()
     uartParams.readDataMode = UART_DATA_BINARY;
     uartParams.readEcho = UART_ECHO_OFF;
     uartParams.baudRate = 921600;
+    uartParams.readTimeout = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
+    uartParams.writeTimeout = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
 
     uart = UART_open(Board_UART0, &uartParams);
 
     if (uart == NULL)
     {
         // UART_open() failed
-        while (1);
+        while (1)
+            ;
     }
 
     uartMutex = SemaphoreP_createBinary(1);
     if (uartMutex == NULL)
     {
         // failed to create semaphore
-        while (1);
-    }    
+        while (1)
+            ;
+    }
 }
 
 void __error__(char *pcFilename, unsigned long ulLine)
 {
-  //
-  // Something horrible happened! You need to look
-  // at file "pcFilename" at line "ulLine" to see
-  // what error is being reported.
-  //
-  while(1)
-  {
-  }
+    //
+    // Something horrible happened! You need to look
+    // at file "pcFilename" at line "ulLine" to see
+    // what error is being reported.
+    //
+    while (1)
+    {
+    }
 }
