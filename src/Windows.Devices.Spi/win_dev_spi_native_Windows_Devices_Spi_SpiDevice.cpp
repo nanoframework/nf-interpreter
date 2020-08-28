@@ -245,7 +245,9 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevi
             CLR_RT_HeapBlock *pThis = stack.This();
             FAULT_ON_NULL(pThis);
 
-            controllerID = pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
+            controllerID = pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId]
+                               .NumericByRef()
+                               .s4;
 
             // Get reference to manage code SPI settings
             CLR_RT_HeapBlock *config =
