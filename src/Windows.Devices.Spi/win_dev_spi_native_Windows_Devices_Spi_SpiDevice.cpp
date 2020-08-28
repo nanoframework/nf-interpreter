@@ -233,16 +233,19 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevice___I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevice___I4(CLR_RT_StackFrame &stack)
 {
     {
         NANOCLR_HEADER();
         {
+            int32_t controllerID;
             SPI_DEVICE_CONFIGURATION spiConfig;
 
             // get a pointer to the managed object instance and check that it's not NULL
             CLR_RT_HeapBlock *pThis = stack.This();
             FAULT_ON_NULL(pThis);
+
+            controllerID = pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
 
             // Get reference to manage code SPI settings
             CLR_RT_HeapBlock *config =
@@ -251,7 +254,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevi
 
             // bus zero based
             spiConfig.BusMode = SpiBusMode_master;
-            spiConfig.Spi_Bus = (stack.Arg1().NumericByRef().s4 - 1);
+            spiConfig.Spi_Bus = controllerID;
             spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
             spiConfig.ChipSelectActive = false; // TODO - is this something we would like to expose to managed code
             spiConfig.Spi_Mode = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
