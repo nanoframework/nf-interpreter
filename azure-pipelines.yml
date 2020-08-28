@@ -4,8 +4,9 @@ trigger:
   paths:
     exclude: [ "doc", "*.md", ".gitignore", "README.md" ]
 
-# no pr config, we want to trigger builds for all PRs on all branches
-
+pr:
+  autoCancel: true
+    
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
   repositories:
