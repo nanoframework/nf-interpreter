@@ -11,8 +11,8 @@ const BlockRange BlockRange1[] =
 {
     // the last block is reserved for Customer Configuration Area and Bootloader Backdoor configuration
     // so we don't take it into account for the map
-    { BlockRange_BLOCKTYPE_CODE          ,   0  , 19 },           // 0x00000000 nanoCLR
-    { BlockRange_BLOCKTYPE_DEPLOYMENT    ,   20 , 42 },           // 0x00028000 deployment
+    { BlockRange_BLOCKTYPE_CODE          ,   0  , 21 },           // 0x00000000 nanoCLR
+    { BlockRange_BLOCKTYPE_DEPLOYMENT    ,   22 , 42 },           // 0x0002C000 deployment
 };
 
 const BlockRegionInfo BlockRegions[] = 

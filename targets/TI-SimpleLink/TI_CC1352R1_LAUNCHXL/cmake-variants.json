@@ -32,6 +32,8 @@
           "TARGET_SERIES": "CC13x2_26x2",
           "TI_BOARD": "TI_CC1352R1_LAUNCHXL",
           "TI_SL_CC13x2_26x2_SDK_SOURCE": "",
+          "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
+          "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
           "SUPPORT_ANY_BASE_CONVERSION": "OFF",
           "NF_FEATURE_DEBUGGER": "ON",
           "NF_FEATURE_RTC": "ON",

@@ -8,6 +8,8 @@
 #include <ti/drivers/dpl/SemaphoreP.h>
 #include <ti/sysbios/knl/Clock.h>
 
+#include <ti_drivers_config.h>
+
 extern UART_Handle uart;
 
 SemaphoreP_Handle uartMutex;
@@ -44,7 +46,7 @@ void ConfigUART()
     uartParams.readTimeout = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
     uartParams.writeTimeout = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
 
-    uart = UART_open(Board_UART0, &uartParams);
+    uart = UART_open(UART0, &uartParams);
 
     if (uart == NULL)
     {

@@ -13,7 +13,7 @@
 #include <ti/sysbios/knl/Task.h>
 
 // board Header files
-#include <Board.h>
+#include <ti_drivers_config.h>
 
 //////////////////////////////
 
@@ -69,10 +69,20 @@ int main(void)
     ConfigUART();
 
     // Switch off all LEDs on board
-    GPIO_write(Board_GPIO_RLED, Board_GPIO_LED_OFF);
-    GPIO_write(Board_GPIO_GLED, Board_GPIO_LED_OFF);
+    GPIO_write(CONFIG_GPIO_RLED, CONFIG_LED_OFF);
+    GPIO_write(CONFIG_GPIO_GLED, CONFIG_LED_OFF);
     
     BIOS_start();
 
     return (0);
+}
+
+///////////////////////////////////////////////////////////////////////
+// need this dummy implementation here (started with SDK 4.20.01.04) //
+///////////////////////////////////////////////////////////////////////
+void __attribute__ ((naked)) _exit(int code)
+{
+	(void)code;
+
+	for (;;);
 }
