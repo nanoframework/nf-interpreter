@@ -18,7 +18,7 @@
 //////////////////////////////
 
 // Stack size in bytes
-#define THREADSTACKSIZE   2048
+#define THREADSTACKSIZE 2048
 
 Task_Handle receiverHandle;
 Task_Handle clrHandle;
@@ -44,14 +44,15 @@ int main(void)
     receiverHandle = Task_create((Task_FuncPtr)ReceiverThread, &taskParams, Error_IGNORE);
     if (receiverHandle == NULL)
     {
-        while (1);
+        while (1)
+            ;
     }
 
-    // CLR settings to launch CLR thread   
+    // CLR settings to launch CLR thread
     (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
-    clrSettings.MaxContextSwitches         = 50;
-    clrSettings.WaitForDebugger            = false;
+    clrSettings.MaxContextSwitches = 50;
+    clrSettings.WaitForDebugger = false;
     clrSettings.EnterDebuggerLoopAfterExit = true;
 
     // setup CLR task
@@ -61,7 +62,8 @@ int main(void)
     clrHandle = Task_create(CLRStartupThread, &taskParams, Error_IGNORE);
     if (clrHandle == NULL)
     {
-        while (1);
+        while (1)
+            ;
     }
 
     GPIO_init();
@@ -71,7 +73,7 @@ int main(void)
     // Switch off all LEDs on board
     GPIO_write(CONFIG_GPIO_RLED, CONFIG_LED_OFF);
     GPIO_write(CONFIG_GPIO_GLED, CONFIG_LED_OFF);
-    
+
     BIOS_start();
 
     return (0);
@@ -80,9 +82,10 @@ int main(void)
 ///////////////////////////////////////////////////////////////////////
 // need this dummy implementation here (started with SDK 4.20.01.04) //
 ///////////////////////////////////////////////////////////////////////
-void __attribute__ ((naked)) _exit(int code)
+void __attribute__((naked)) _exit(int code)
 {
-	(void)code;
+    (void)code;
 
-	for (;;);
+    for (;;)
+        ;
 }
