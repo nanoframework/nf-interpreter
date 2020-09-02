@@ -65,6 +65,36 @@ add_custom_command(
     COMMENT "Generate configuration files" 
 )
 
+######################################
+
+# need to copy the configuration file to the build directory
+# because the obj files resulting from TI-RTOS build are placed in the same directory as the configuration file
+if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+    set(TI_RTOS_CONFIG_FILE ti-rtos-debug.cfg)
+else()
+    set(TI_RTOS_CONFIG_FILE ti-rtos-release.cfg)
+endif()
+
+# need to use a specific target because TARGET dependency PRE_BUILT doesn't work on NINJA build files
+
+add_custom_target(
+    COPY_TIRTOS_CONFIG
+
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_SOURCE_DIR}/${TI_RTOS_CONFIG_FILE}
+            ${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}
+    COMMENT "Copy TI-RTOS configuration file to build directory" 
+)
+
+add_custom_target(
+    TIRTOS_CONFIG
+
+	COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:CC1352 -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_CC13X2 " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+
+    COMMENT "Generate TI-RTOS configuration" 
+)
+
 #######################
 # nanoCLR executable
 
@@ -120,31 +150,8 @@ target_link_libraries(
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf TI_SysConfig)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf TI_XDCTools)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC13x2_26x2SDK)
-
-######################################
-
-# need to copy the configuration file to the build directory
-# because the obj files resulting from TI-RTOS build are placed in the same directory as the configuration file
-if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    set(TI_RTOS_CONFIG_FILE ti-rtos-debug.cfg)
-else()
-    set(TI_RTOS_CONFIG_FILE ti-rtos-release.cfg)
-endif()
-
-add_custom_command(
-    TARGET ${NANOCLR_PROJECT_NAME}.elf PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_CURRENT_SOURCE_DIR}/${TI_RTOS_CONFIG_FILE}
-            ${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}
-    COMMENT "Copy TI-RTOS configuration file to build directory" 
-)
-
-add_custom_command(
-    TARGET ${NANOCLR_PROJECT_NAME}.elf PRE_BUILD
-	COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:CC1352P1F3 -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions "-DDeviceFamily_CC13X2" "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Generate TI-RTOS configuration" 
-)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf COPY_TIRTOS_CONFIG)
+add_dependencies(${NANOCLR_PROJECT_NAME}.elf TIRTOS_CONFIG)
 
 #############################
 
