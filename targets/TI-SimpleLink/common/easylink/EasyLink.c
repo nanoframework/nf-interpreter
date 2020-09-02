@@ -30,6 +30,9 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// need this here as we are importing it from the SDK
+// clang-format off
+
 /***** Includes *****/
 #include "EasyLink.h"
 #include "ti_easylink_config.h"
@@ -2263,3 +2266,6 @@ EasyLink_Status EasyLink_getIeeeAddr(uint8_t *ieeeAddr)
 
     return status;
 }
+
+// need this here as we are importing it from the SDK
+// clang-format on

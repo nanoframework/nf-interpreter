@@ -136,6 +136,8 @@ Packet structure:
 
 */
 
+// need this here as we are importing it from the SDK
+// clang-format off
 
 //*****************************************************************************
 #ifndef Easylink__include
@@ -686,3 +688,6 @@ extern EasyLink_Status EasyLink_getCtrl(EasyLink_CtrlOption Ctrl,
 //! @}
 //
 //*****************************************************************************
+
+// need this here as we are importing it from the SDK
+// clang-format on
