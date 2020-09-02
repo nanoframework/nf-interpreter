@@ -148,10 +148,11 @@ target_link_libraries(
 
 # add dependency from TI SimpleLink CC13x2_26x2 SDK, TI SysConfig and XDCTools (this is required to make sure that those repos are downloaded before the build starts)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf TI_SysConfig)
-add_dependencies(${NANOCLR_PROJECT_NAME}.elf TI_XDCTools)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC13x2_26x2SDK)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf COPY_TIRTOS_CONFIG)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf TIRTOS_CONFIG)
+add_dependencies(TIRTOS_CONFIG TI_XDCTools)
+add_dependencies(TIRTOS_CONFIG COPY_TIRTOS_CONFIG)
 
 #############################
 
