@@ -811,17 +811,17 @@ EasyLink_Status EasyLink_init(EasyLink_Params *params)
     EasyLink_cmdPropCs.commandNo = CMD_PROP_CS;
     EasyLink_cmdPropCs.rssiThr = EASYLINK_CS_RSSI_THRESHOLD_DBM;
     EasyLink_cmdPropCs.startTrigger.triggerType = TRIG_NOW;
-    EasyLink_cmdPropCs.condition
-        .rule = COND_STOP_ON_TRUE; // Stop next command if this command returned TRUE,
-                                   // End causes for the CMD_PROP_CS command:
-                                   // Observed channel state Busy with csConf.busyOp = 1: PROP_DONE_BUSY        TRUE
-                                   // 0bserved channel state Idle with csConf.idleOp = 1: PROP_DONE_IDLE        FALSE
-                                   // Timeout trigger observed with channel state Busy: PROP_DONE_BUSY        TRUE
-                                   // Timeout trigger observed with channel state Idle: PROP_DONE_IDLE        FALSE
-                                   // Timeout trigger observed with channel state Invalid and csConf.timeoutRes = 0:
-                                   // PROP_DONE_BUSYTIMEOUT TRUE Timeout trigger observed with channel state Invalid and
-                                   // csConf.timeoutRes = 1: PROP_DONE_IDLETIMEOUT FALSE Received CMD_STOP after command
-                                   // started:                                       PROP_DONE_STOPPED     FALSE
+    EasyLink_cmdPropCs.condition.rule =
+        COND_STOP_ON_TRUE; // Stop next command if this command returned TRUE,
+                           // End causes for the CMD_PROP_CS command:
+                           // Observed channel state Busy with csConf.busyOp = 1: PROP_DONE_BUSY        TRUE
+                           // 0bserved channel state Idle with csConf.idleOp = 1: PROP_DONE_IDLE        FALSE
+                           // Timeout trigger observed with channel state Busy: PROP_DONE_BUSY        TRUE
+                           // Timeout trigger observed with channel state Idle: PROP_DONE_IDLE        FALSE
+                           // Timeout trigger observed with channel state Invalid and csConf.timeoutRes = 0:
+                           // PROP_DONE_BUSYTIMEOUT TRUE Timeout trigger observed with channel state Invalid and
+                           // csConf.timeoutRes = 1: PROP_DONE_IDLETIMEOUT FALSE Received CMD_STOP after command
+                           // started:                                       PROP_DONE_STOPPED     FALSE
     EasyLink_cmdPropCs.csConf.bEnaRssi = 0x1;                     // Enable RSSI as a criterion
     EasyLink_cmdPropCs.csConf.busyOp = 0x1;                       // End carrier sense on channel Busy
     EasyLink_cmdPropCs.csConf.idleOp = 0x0;                       // Continue carrier sense on channel Idle
