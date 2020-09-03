@@ -14,6 +14,7 @@
 
 // board Header files
 #include <ti_drivers_config.h>
+#include <ti/drivers/gpio/GPIOCC26XX.h>
 
 //////////////////////////////
 
@@ -24,6 +25,22 @@ Task_Handle receiverHandle;
 Task_Handle clrHandle;
 
 CLR_SETTINGS clrSettings;
+
+// this define has to match the one in cpu_gpio.cpp
+#define GPIO_MAX_PINS      16
+
+// these are declared in cpu_gpio.cpp
+extern GPIO_PinConfig gpioPinConfigs[GPIO_MAX_PINS];
+extern GPIO_CallbackFxn gpioCallbackFunctions[GPIO_MAX_PINS];
+
+// this has to be define in a C file, otherwise the linker can't replace the weak one declared in the SDK driver library
+const GPIOCC26XX_Config GPIOCC26XX_config = {
+    .pinConfigs = (GPIO_PinConfig *)gpioPinConfigs,
+    .callbacks = (GPIO_CallbackFxn *)gpioCallbackFunctions,
+    .numberOfPinConfigs = GPIO_MAX_PINS,
+    .numberOfCallbacks = GPIO_MAX_PINS,
+    .intPriority = (~0)
+};
 
 extern void ReceiverThread(UArg arg0, UArg arg1);
 extern void CLRStartupThread(UArg arg0, UArg arg1);
@@ -69,10 +86,6 @@ int main(void)
     GPIO_init();
     UART_init();
     ConfigUART();
-
-    // Switch off all LEDs on board
-    GPIO_write(CONFIG_GPIO_RLED, CONFIG_LED_OFF);
-    GPIO_write(CONFIG_GPIO_GLED, CONFIG_LED_OFF);
 
     BIOS_start();
 
