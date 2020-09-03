@@ -27,7 +27,7 @@ Task_Handle clrHandle;
 CLR_SETTINGS clrSettings;
 
 // this define has to match the one in cpu_gpio.cpp
-#define GPIO_MAX_PINS      16
+#define GPIO_MAX_PINS 16
 
 // these are declared in cpu_gpio.cpp
 extern GPIO_PinConfig gpioPinConfigs[GPIO_MAX_PINS];
@@ -39,8 +39,7 @@ const GPIOCC26XX_Config GPIOCC26XX_config = {
     .callbacks = (GPIO_CallbackFxn *)gpioCallbackFunctions,
     .numberOfPinConfigs = GPIO_MAX_PINS,
     .numberOfCallbacks = GPIO_MAX_PINS,
-    .intPriority = (~0)
-};
+    .intPriority = (~0)};
 
 extern void ReceiverThread(UArg arg0, UArg arg1);
 extern void CLRStartupThread(UArg arg0, UArg arg1);
