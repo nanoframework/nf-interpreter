@@ -13,12 +13,6 @@ const DMA      = scripting.addModule("/ti/drivers/DMA");
 const RTOS     = scripting.addModule("/ti/drivers/RTOS");
 const UART     = scripting.addModule("/ti/drivers/UART", {}, false);
 const UART1    = UART.addInstance();
-const Button   = scripting.addModule("/ti/drivers/apps/Button", {}, false);
-const Button1  = Button.addInstance();
-const Button2  = Button.addInstance();
-const LED      = scripting.addModule("/ti/drivers/apps/LED", {}, false);
-const LED1     = LED.addInstance();
-const LED2     = LED.addInstance();
 const easylink = scripting.addModule("/ti/easylink/easylink");
 
 /**
@@ -27,28 +21,11 @@ const easylink = scripting.addModule("/ti/easylink/easylink");
 CCFG.forceVddr          = true;
 CCFG.ccfgTemplate.$name = "ti_devices_CCFGTemplate0";
 
-UART1.$name               = "UART0";
 UART1.$hardware           = system.deviceData.board.components.XDS110UART;
+UART1.$name               = "UART0";
 UART1.txPinInstance.$name = "CONFIG_PIN_0";
 UART1.rxPinInstance.$name = "CONFIG_PIN_1";
-
-Button1.$hardware                 = system.deviceData.board.components["BTN-1"];
-Button1.$name                     = "CONFIG_BUTTON_1";
-Button1.gpioPin.$name             = "CONFIG_GPIO_0";
-Button1.gpioPin.pinInstance.$name = "CONFIG_PIN_4";
-
-Button2.$hardware                 = system.deviceData.board.components["BTN-2"];
-Button2.$name                     = "CONFIG_BUTTON_2";
-Button2.gpioPin.$name             = "CONFIG_GPIO_1";
-Button2.gpioPin.pinInstance.$name = "CONFIG_PIN_5";
-
-LED1.$hardware                 = system.deviceData.board.components.LED_RED;
-LED1.$name                     = "CONFIG_GPIO_RLED";
-LED1.gpioPin.pinInstance.$name = "CONFIG_PIN_2";
-
-LED2.$name                     = "CONFIG_GPIO_GLED";
-LED2.$hardware                 = system.deviceData.board.components.LED_GREEN;
-LED2.gpioPin.pinInstance.$name = "CONFIG_PIN_3";
+UART1.uart.$assign        = "UART0";
 
 easylink.EasyLink_Phy_5kbpsSlLr                                    = true;
 easylink.defaultPhy                                                = "EasyLink_Phy_5kbpsSlLr";
@@ -65,10 +42,5 @@ easylink.radioConfigEasylinkPhy200kbps2gfsk.codeExportConfig.$name = "ti_devices
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-UART1.uart.$suggestSolution              = "UART0";
-UART1.uart.txPin.$suggestSolution        = "boosterpack.4";
-UART1.uart.rxPin.$suggestSolution        = "boosterpack.3";
-Button1.gpioPin.gpioPin.$suggestSolution = "boosterpack.13";
-Button2.gpioPin.gpioPin.$suggestSolution = "boosterpack.12";
-LED1.gpioPin.gpioPin.$suggestSolution    = "boosterpack.39";
-LED2.gpioPin.gpioPin.$suggestSolution    = "boosterpack.40";
+UART1.uart.txPin.$suggestSolution = "boosterpack.4";
+UART1.uart.rxPin.$suggestSolution = "boosterpack.3";
