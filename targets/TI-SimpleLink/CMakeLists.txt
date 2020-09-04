@@ -256,7 +256,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
             message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
         endif()
 
-        set(TI_SL_CC13x2_26x2_SDK_TAG "4.20.01.04")
+        set(TI_SL_CC13x2_26x2_SDK_TAG "4.20.01.04" CACHE INTERNAL "TI CC13x2_26x2 SDK tag")
         message(STATUS "TI SimpleLink CC13x2_26x2 SDK (latest available code from v${TI_SL_CC13x2_26x2_SDK_TAG})")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
@@ -296,6 +296,8 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
 
     else()
         # TI SimpleLink CC13x2_26x2 SDK source was specified
+
+        set(TI_SL_CC13x2_26x2_SDK_TAG "XX.XX.XX.XX" CACHE INTERNAL "TI CC13x2_26x2 SDK tag")
 
         # sanity check is source path exists
         if(EXISTS "${TI_SL_CC13x2_26x2_SDK_SOURCE}/")
