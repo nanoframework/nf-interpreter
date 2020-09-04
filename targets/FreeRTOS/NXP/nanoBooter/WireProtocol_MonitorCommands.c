@@ -141,7 +141,7 @@ int Monitor_WriteMemory(WP_Message* message)
     // nanoBooter_OnStateChange(State_MemoryWrite, (void*)cmd->m_address);
 
     // assume at RAM, directly use the original address 
-    AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write, &cmdReply.ErrorCode);
+    AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write, &cmdReply);
   
     WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
 
@@ -176,7 +176,7 @@ int Monitor_EraseMemory(WP_Message* message)
     // TODO: not sure if we really need this
     // nanoBooter_OnStateChange( State_MemoryErase, (void*)cmd->m_address );
     
-    AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase, &cmdReply.ErrorCode);
+    AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase, &cmdReply);
 
     WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
         
@@ -268,7 +268,7 @@ int Monitor_CheckMemory(WP_Message* message)
     CLR_DBG_Commands_Monitor_CheckMemory_Reply cmdReply;
     uint32_t errorCode;
 
-    ret = AccessMemory(cmd->address, cmd->length, (uint8_t*)&cmdReply.crc, AccessMemory_Check, &errorCode);
+    ret = AccessMemory(cmd->address, cmd->length, (uint8_t*)&cmdReply, AccessMemory_Check, &errorCode);
 
     WP_ReplyToCommand(message, ret, false, &cmdReply, sizeof(cmdReply));
 
