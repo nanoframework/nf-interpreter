@@ -13,6 +13,8 @@
 
 #include <target_os.h>
 
+#define TARGETINFOSTRING "@CMAKE_BUILD_TYPE@ build with TI SL CC32xx SDK v3.10.00.04"
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // The following addresses and sizes should be filled in according to the SoC data-sheet
 // they also must be coherent with what's in the linker file for nanoBooter and nanoCLR
