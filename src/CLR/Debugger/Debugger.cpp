@@ -3118,8 +3118,8 @@ bool CLR_DBG_Debugger::Debugging_Resolve_AppDomain(WP_Message *msg)
     CLR_UINT32 numAssemblies = 0;
     CLR_DBG_Commands::Debugging_Resolve_AppDomain::Reply *cmdReply;
     CLR_UINT8
-        buf[sizeof(CLR_DBG_Commands::Debugging_Resolve_AppDomain::Reply) +
-            sizeof(CLR_RT_Assembly_Index) * CLR_RT_TypeSystem::c_MaxAssemblies];
+    buf[sizeof(CLR_DBG_Commands::Debugging_Resolve_AppDomain::Reply) +
+        sizeof(CLR_RT_Assembly_Index) * CLR_RT_TypeSystem::c_MaxAssemblies];
     size_t count;
     const char *name;
     CLR_RT_Assembly_Index *pAssemblyIndex;
