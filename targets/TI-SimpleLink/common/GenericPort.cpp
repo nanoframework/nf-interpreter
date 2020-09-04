@@ -23,15 +23,15 @@ extern "C" uint32_t DebuggerPort_WriteProxy(const char *format, ...)
     va_list arg;
     uint32_t chars = 0;
 
-    if( CLR_EE_DBG_IS_NOT( Enabled ) )
+    if (CLR_EE_DBG_IS_NOT(Enabled))
     {
-        if(SemaphoreP_pend(uartMutex, UART2_WAIT_FOREVER) == SemaphoreP_OK)
+        if (SemaphoreP_pend(uartMutex, UART2_WAIT_FOREVER) == SemaphoreP_OK)
         {
-            va_start( arg, format );
+            va_start(arg, format);
 
-            chars = CLR_Debug::PrintfV( format, arg );
+            chars = CLR_Debug::PrintfV(format, arg);
 
-            va_end( arg );
+            va_end(arg);
 
             SemaphoreP_post(uartMutex);
         }
@@ -40,21 +40,16 @@ extern "C" uint32_t DebuggerPort_WriteProxy(const char *format, ...)
     return chars;
 }
 
-uint32_t GenericPort_Write( int portNum, const char* data, size_t size )
+uint32_t GenericPort_Write(int portNum, const char *data, size_t size)
 {
     (void)portNum;
     size_t bytesWritten;
 
-    if( CLR_EE_DBG_IS_NOT( Enabled ) )
+    if (CLR_EE_DBG_IS_NOT(Enabled))
     {
         // debugger port is NOT in use, OK to output to UART
         // send characters directly to the UART port
-        UART2_writeTimeout(
-            uart, 
-            data, 
-            size, 
-            &bytesWritten, 
-            UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod);
+        UART2_writeTimeout(uart, data, size, &bytesWritten, UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod);
 
         return bytesWritten;
     }

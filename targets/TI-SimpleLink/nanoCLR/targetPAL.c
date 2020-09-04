@@ -7,7 +7,6 @@
 #include <board.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
 
-
 #include <ti_drivers_config.h>
 
 extern UART2_Handle uart;

@@ -10,7 +10,7 @@
 
 static Clock_Handle nextEventTimer;
 
-static void NextEventTimer_Callback( UArg arg )
+static void NextEventTimer_Callback(UArg arg)
 {
     (void)arg;
 
@@ -39,23 +39,23 @@ HRESULT Time_Uninitialize()
     return S_OK;
 }
 
-void Time_SetCompare ( uint64_t compareValueTicks )
+void Time_SetCompare(uint64_t compareValueTicks)
 {
-    if(compareValueTicks == 0)
+    if (compareValueTicks == 0)
     {
-        // compare value is 0 so dequeue and schedule immediately 
+        // compare value is 0 so dequeue and schedule immediately
         HAL_COMPLETION::DequeueAndExec();
     }
-    else if(compareValueTicks == HAL_COMPLETION_IDLE_VALUE)
+    else if (compareValueTicks == HAL_COMPLETION_IDLE_VALUE)
     {
         // wait for infinity, don't need to do anything here
         return;
-    }    
+    }
     else
     {
-        if (HAL_Time_CurrentSysTicks() >= compareValueTicks) 
-        { 
-            // already missed the event, dequeue and execute immediately 
+        if (HAL_Time_CurrentSysTicks() >= compareValueTicks)
+        {
+            // already missed the event, dequeue and execute immediately
             HAL_COMPLETION::DequeueAndExec();
         }
         else
@@ -63,11 +63,11 @@ void Time_SetCompare ( uint64_t compareValueTicks )
             // need to stop the timer, in case it's running
             Clock_stop(nextEventTimer);
 
-            // compareValueTicks is the time (in sys ticks) that is being requested to fire an HAL_COMPLETION::DequeueAndExec()
-            // need to subtract the current system time to set when the timer will fire
+            // compareValueTicks is the time (in sys ticks) that is being requested to fire an
+            // HAL_COMPLETION::DequeueAndExec() need to subtract the current system time to set when the timer will fire
             compareValueTicks -= HAL_Time_CurrentSysTicks();
-            
-            if (compareValueTicks == 0) 
+
+            if (compareValueTicks == 0)
             {
                 // compare value is 0 so dequeue and execute immediately
                 // no need to call the timer
@@ -76,7 +76,7 @@ void Time_SetCompare ( uint64_t compareValueTicks )
             }
 
             // need to convert from milliseconds to ticks
-            Clock_setPeriod(nextEventTimer, compareValueTicks/ Clock_tickPeriod );
+            Clock_setPeriod(nextEventTimer, compareValueTicks / Clock_tickPeriod);
             Clock_start(nextEventTimer);
         }
     }
