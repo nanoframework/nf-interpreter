@@ -580,7 +580,7 @@ bool CLR_DBG_Debugger::CheckPermission( ByteAddress address, int mode )
     return hasPermission;
 }
 
-bool CLR_DBG_Debugger::AccessMemory( uint32_t location, uint32_t lengthInBytes, uint8_t* buf, uint32_t mode, uint32_t& errorCode )
+void CLR_DBG_Debugger::AccessMemory( uint32_t location, uint32_t lengthInBytes, uint8_t* buf, uint32_t mode, uint32_t* errorCode )
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     TRACE("AccessMemory( 0x%08X, 0x%08x, 0x%08X, %s)\n", location, lengthInBytes, buf, AccessMemoryModeNames[mode] );
@@ -588,7 +588,7 @@ bool CLR_DBG_Debugger::AccessMemory( uint32_t location, uint32_t lengthInBytes, 
     bool proceed = false;
 
     // reset error code
-    errorCode = AccessMemoryErrorCode_RequestedOperationFailed;
+    *errorCode = AccessMemoryErrorCode_RequestedOperationFailed;
 
     //--//
     unsigned int iRegion, iRange;
@@ -637,10 +637,10 @@ bool CLR_DBG_Debugger::AccessMemory( uint32_t location, uint32_t lengthInBytes, 
                     TRACE0("=> Permission check failed!\n");
                     
                     // set error code
-                    errorCode = AccessMemoryErrorCode_PermissionDenied;
+                    *errorCode = AccessMemoryErrorCode_PermissionDenied;
 
                     // done here
-                    return false;
+                    return;
                 }
 
                 switch(mode)
@@ -663,10 +663,10 @@ bool CLR_DBG_Debugger::AccessMemory( uint32_t location, uint32_t lengthInBytes, 
                                     TRACE0( "=> Failed to allocate data buffer\n");
                                                         
                                     // set error code
-                                    errorCode = AccessMemoryErrorCode_PermissionDenied;
+                                    *errorCode = AccessMemoryErrorCode_PermissionDenied;
 
                                     // done here
-                                    return false;
+                                    return;
                                 }
                             }
 
@@ -704,7 +704,7 @@ bool CLR_DBG_Debugger::AccessMemory( uint32_t location, uint32_t lengthInBytes, 
 
                 if(!proceed)
                 {
-                    return false;
+                    return;
                 }
 
                 accessLenInBytes -= NumOfBytes;
@@ -762,7 +762,7 @@ bool CLR_DBG_Debugger::AccessMemory( uint32_t location, uint32_t lengthInBytes, 
         if((sectAddr <ramStartAddress) || (sectAddr >=ramEndAddress) || (sectAddrEnd >ramEndAddress) )
         {
             TRACE(" Invalid address %x and range %x Ram Start %x, Ram end %x\r\n", sectAddr, lengthInBytes, ramStartAddress, ramEndAddress);
-            return false;
+            return;
         }
         else
       #endif
@@ -796,9 +796,7 @@ bool CLR_DBG_Debugger::AccessMemory( uint32_t location, uint32_t lengthInBytes, 
 
     TRACE0( "=> SUCCESS\n");
 
-    errorCode = AccessMemoryErrorCode_NoError;
-
-    return true;
+    *errorCode = AccessMemoryErrorCode_NoError;
 }
 
 bool CLR_DBG_Debugger::Monitor_ReadMemory( WP_Message* msg)
@@ -832,7 +830,7 @@ bool CLR_DBG_Debugger::Monitor_ReadMemory( WP_Message* msg)
         // clear allocated memory
         memset(buffer, 0, allocationSize);
 
-        g_CLR_DBG_Debugger->AccessMemory( cmd->address, len, (buffer + sizeof(uint32_t)), AccessMemory_Read, errorCode );
+        g_CLR_DBG_Debugger->AccessMemory( cmd->address, len, (buffer + sizeof(uint32_t)), AccessMemory_Read, &errorCode );
 
         WP_ReplyToCommand( msg, true, false, buffer, allocationSize );
 
@@ -853,7 +851,7 @@ bool CLR_DBG_Debugger::Monitor_WriteMemory( WP_Message* msg)
     CLR_DBG_Commands_Monitor_WriteMemory* cmd = (CLR_DBG_Commands_Monitor_WriteMemory*)msg->m_payload;
     CLR_DBG_Commands_Monitor_WriteMemory_Reply cmdReply;
 
-    g_CLR_DBG_Debugger->AccessMemory( cmd->address, cmd->length, cmd->data, AccessMemory_Write, cmdReply.ErrorCode );
+    g_CLR_DBG_Debugger->AccessMemory( cmd->address, cmd->length, cmd->data, AccessMemory_Write, &cmdReply );
 
     WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
 
@@ -868,7 +866,7 @@ bool CLR_DBG_Debugger::Monitor_CheckMemory( WP_Message* msg)
     CLR_DBG_Commands_Monitor_CheckMemory_Reply  cmdReply;
     uint32_t errorCode;
 
-    g_CLR_DBG_Debugger->AccessMemory( cmd->address, cmd->length, (unsigned char*)&cmdReply.crc, AccessMemory_Check, errorCode );
+    g_CLR_DBG_Debugger->AccessMemory( cmd->address, cmd->length, (unsigned char*)&cmdReply, AccessMemory_Check, &errorCode );
 
     WP_ReplyToCommand( msg, true, false, &cmdReply, sizeof(cmdReply) );
 
@@ -882,7 +880,7 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory( WP_Message* msg)
     CLR_DBG_Commands_Monitor_EraseMemory* cmd = (CLR_DBG_Commands_Monitor_EraseMemory*)msg->m_payload;
     CLR_DBG_Commands_Monitor_EraseMemory_Reply cmdReply;
 
-    g_CLR_DBG_Debugger->AccessMemory( cmd->address, cmd->length, NULL, AccessMemory_Erase, cmdReply.ErrorCode );
+    g_CLR_DBG_Debugger->AccessMemory( cmd->address, cmd->length, NULL, AccessMemory_Erase, &cmdReply );
 
     WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
 

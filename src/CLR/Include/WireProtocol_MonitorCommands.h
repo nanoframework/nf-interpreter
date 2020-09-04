@@ -117,23 +117,11 @@ typedef struct CLR_DBG_Commands_Monitor_CheckMemory
 
 }CLR_DBG_Commands_Monitor_CheckMemory;
 
-typedef struct CLR_DBG_Commands_Monitor_CheckMemory_Reply
-{
-    uint32_t crc;
-    
-}CLR_DBG_Commands_Monitor_CheckMemory_Reply;
+typedef uint32_t CLR_DBG_Commands_Monitor_CheckMemory_Reply;
 
-typedef struct CLR_DBG_Commands_Monitor_EraseMemory_Reply
-{
-    uint32_t ErrorCode;
+typedef uint32_t CLR_DBG_Commands_Monitor_EraseMemory_Reply;
 
-}CLR_DBG_Commands_Monitor_EraseMemory_Reply;
-
-typedef struct CLR_DBG_Commands_Monitor_WriteMemory_Reply
-{
-    uint32_t ErrorCode;
-
-}CLR_DBG_Commands_Monitor_WriteMemory_Reply;
+typedef uint32_t CLR_DBG_Commands_Monitor_WriteMemory_Reply;
 
 typedef struct MemoryMap_Range
 {

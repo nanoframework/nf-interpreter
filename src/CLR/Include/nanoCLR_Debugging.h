@@ -1040,7 +1040,7 @@ private:
 
     bool CheckPermission( ByteAddress address, int mode );
 
-    bool AccessMemory( uint32_t location, uint32_t lengthInBytes, uint8_t* buf, uint32_t mode, uint32_t& errorCode );
+    void AccessMemory( uint32_t location, uint32_t lengthInBytes, uint8_t* buf, uint32_t mode, uint32_t* errorCode );
 
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain*  GetAppDomainFromID ( CLR_UINT32 id );
