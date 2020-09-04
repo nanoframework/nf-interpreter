@@ -120,8 +120,7 @@ void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow 
         // As only one timer running at a time we will just save it
         saveTimerCompleteFlag = timerCompleteFlag;
 
-        // need to convert from milliseconds to ticks
-        Clock_setPeriod(boolEventsTimer, millisecondsFromNow * (1000 / Clock_tickPeriod));
+        Clock_setPeriod(boolEventsTimer, millisecondsFromNow);
         Clock_start(boolEventsTimer);
     }
 }

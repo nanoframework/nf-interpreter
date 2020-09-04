@@ -11,8 +11,8 @@
 const CCFG     = scripting.addModule("/ti/devices/CCFG");
 const DMA      = scripting.addModule("/ti/drivers/DMA");
 const RTOS     = scripting.addModule("/ti/drivers/RTOS");
-const UART     = scripting.addModule("/ti/drivers/UART", {}, false);
-const UART1    = UART.addInstance();
+const UART2    = scripting.addModule("/ti/drivers/UART2", {}, false);
+const UART21   = UART2.addInstance();
 const easylink = scripting.addModule("/ti/easylink/easylink");
 
 /**
@@ -21,11 +21,11 @@ const easylink = scripting.addModule("/ti/easylink/easylink");
 CCFG.forceVddr          = true;
 CCFG.ccfgTemplate.$name = "ti_devices_CCFGTemplate0";
 
-UART1.$hardware           = system.deviceData.board.components.XDS110UART;
-UART1.$name               = "UART0";
-UART1.txPinInstance.$name = "CONFIG_PIN_0";
-UART1.rxPinInstance.$name = "CONFIG_PIN_1";
-UART1.uart.$assign        = "UART0";
+UART21.$hardware           = system.deviceData.board.components.XDS110UART;
+UART21.$name               = "UART0";
+UART21.txPinInstance.$name = "CONFIG_PIN_2";
+UART21.rxPinInstance.$name = "CONFIG_PIN_3";
+UART21.uart.$assign        = "UART0";
 
 easylink.EasyLink_Phy_5kbpsSlLr                                    = true;
 easylink.defaultPhy                                                = "EasyLink_Phy_5kbpsSlLr";
@@ -42,5 +42,5 @@ easylink.radioConfigEasylinkPhy200kbps2gfsk.codeExportConfig.$name = "ti_devices
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-UART1.uart.txPin.$suggestSolution = "boosterpack.4";
-UART1.uart.rxPin.$suggestSolution = "boosterpack.3";
+UART21.uart.txPin.$suggestSolution = "boosterpack.4";
+UART21.uart.rxPin.$suggestSolution = "boosterpack.3";

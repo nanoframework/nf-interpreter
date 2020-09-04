@@ -75,7 +75,8 @@ void Time_SetCompare ( uint64_t compareValueTicks )
                 return;
             }
 
-            Clock_setPeriod(nextEventTimer, compareValueTicks);
+            // need to convert from milliseconds to ticks
+            Clock_setPeriod(nextEventTimer, compareValueTicks/ Clock_tickPeriod );
             Clock_start(nextEventTimer);
         }
     }

@@ -3,14 +3,14 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <ti/drivers/UART.h>
+#include <ti/drivers/UART2.h>
 #include <board.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
-#include <ti/sysbios/knl/Clock.h>
+
 
 #include <ti_drivers_config.h>
 
-extern UART_Handle uart;
+extern UART2_Handle uart;
 
 SemaphoreP_Handle uartMutex;
 
@@ -20,9 +20,6 @@ SemaphoreP_Handle uartMutex;
 // The clean alternative would be to add the GCC attribute used in those functions, but that's not our code to touch.
 
 void dummyFunction(void) __attribute__((used));
-
-// UART operations timeout
-#define UART_TIMEOUT_MILLISECONDS 500000
 
 // Never called.
 void dummyFunction(void)
@@ -34,19 +31,17 @@ void dummyFunction(void)
 // configure UART
 void ConfigUART()
 {
-    UART_Params uartParams;
+    UART2_Params uartParams;
 
     // Create a UART with data processing off
-    UART_Params_init(&uartParams);
+    UART2_Params_init(&uartParams);
 
-    uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.readDataMode = UART_DATA_BINARY;
-    uartParams.readEcho = UART_ECHO_OFF;
+    uartParams.writeMode = UART2_Mode_BLOCKING;
+    uartParams.readMode = UART2_Mode_BLOCKING;
     uartParams.baudRate = 921600;
-    uartParams.readTimeout = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
-    uartParams.writeTimeout = UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod;
+    uartParams.readReturnMode = UART2_ReadReturnMode_FULL;
 
-    uart = UART_open(UART0, &uartParams);
+    uart = UART2_open(UART0, &uartParams);
 
     if (uart == NULL)
     {
