@@ -49,7 +49,7 @@ int main(void)
     Task_Params taskParams;
 
     // Call board init functions
-    Board_initGeneral();
+    Board_init();
 
     // setup Task thread
     Task_Params_init(&taskParams);
@@ -83,7 +83,6 @@ int main(void)
     }
 
     GPIO_init();
-    UART_init();
     ConfigUART();
 
     BIOS_start();
