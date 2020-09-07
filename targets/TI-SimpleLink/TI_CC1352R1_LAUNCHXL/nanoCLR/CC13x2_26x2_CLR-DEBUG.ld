@@ -1,42 +1,38 @@
 /*
- @file      cc26x2r1f.lds
- @brief     CC26x2R1F rev2 linker configuration file for GNU compiler.
-
- Revised    $Date$
- Revision   $Revision$
-
- This file is auto-generated.
-
-  Copyright (C) 2017 Texas Instruments Incorporated - http:www.ti.com/
-
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
-
-    Neither the name of Texas Instruments Incorporated nor the names of
-    its contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2017-2020, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+/*
+ *  ======== CC1352R1_LAUNCHXL_TIRTOS.lds ========
+ *  Default Linker script for the Texas Instruments CC1352R1
+ */
 
 STACKSIZE = 2048;
 HEAPSIZE = 0x3000; /* Size of heap buffer used by HeapMem */
@@ -44,7 +40,7 @@ HEAPSIZE = 0x3000; /* Size of heap buffer used by HeapMem */
 MEMORY
 {
     /* original flash LENGTH was 0x00057fa8 */
-    FLASH (RX)      : ORIGIN = 0x00000000, LENGTH = 0x00038000
+    FLASH (RX)      : ORIGIN = 0x00000000, LENGTH = 0x0003C000
     /*
      * Customer Configuration Area and Bootloader Backdoor configuration in
      * flash, 40 bytes
@@ -101,29 +97,49 @@ SECTIONS {
      * DMA channels must always be allocated at a fixed offset from the DMA base address.
      * --------- DO NOT MODIFY -----------
      */
+    DMA_UART0_RX_CONTROL_TABLE_ENTRY_ADDRESS  = (UDMACC26XX_CONFIG_BASE + 0x10);
+    DMA_UART0_TX_CONTROL_TABLE_ENTRY_ADDRESS  = (UDMACC26XX_CONFIG_BASE + 0x20);
     DMA_SPI0_RX_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x30);
     DMA_SPI0_TX_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x40);
+    DMA_UART1_RX_CONTROL_TABLE_ENTRY_ADDRESS  = (UDMACC26XX_CONFIG_BASE + 0x50);
+    DMA_UART1_TX_CONTROL_TABLE_ENTRY_ADDRESS  = (UDMACC26XX_CONFIG_BASE + 0x60);
     DMA_ADC_PRI_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x70);
     DMA_GPT0A_PRI_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x90);
     DMA_SPI1_RX_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x100);
     DMA_SPI1_TX_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x110);
 
+    DMA_UART0_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x210);
+    DMA_UART0_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x220);
     DMA_SPI0_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x230);
     DMA_SPI0_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x240);
+    DMA_UART1_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x250);
+    DMA_UART1_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x260);
     DMA_ADC_ALT_CONTROL_TABLE_ENTRY_ADDRESS     = (UDMACC26XX_CONFIG_BASE + 0x270);
     DMA_GPT0A_ALT_CONTROL_TABLE_ENTRY_ADDRESS   = (UDMACC26XX_CONFIG_BASE + 0x290);
     DMA_SPI1_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x300);
     DMA_SPI1_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS = (UDMACC26XX_CONFIG_BASE + 0x310);
 
     /*
-     * Allocate SPI0, SPI1, ADC, and GPTimer0 DMA descriptors at absolute addresses.
+     * Allocate UART0, UART1, SPI0, SPI1, ADC, and GPTimer0 DMA descriptors at absolute addresses.
      * --------- DO NOT MODIFY -----------
      */
+    UDMACC26XX_uart0RxControlTableEntry_is_placed = 0;
+    .dmaUart0RxControlTableEntry DMA_UART0_RX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_UART0_RX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaUart0RxControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_uart0TxControlTableEntry_is_placed = 0;
+    .dmaUart0TxControlTableEntry DMA_UART0_TX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_UART0_TX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaUart0TxControlTableEntry)} > REGION_DATA
+
     UDMACC26XX_dmaSpi0RxControlTableEntry_is_placed = 0;
     .dmaSpi0RxControlTableEntry DMA_SPI0_RX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI0_RX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi0RxControlTableEntry)} > REGION_DATA
 
     UDMACC26XX_dmaSpi0TxControlTableEntry_is_placed = 0;
     .dmaSpi0TxControlTableEntry DMA_SPI0_TX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI0_TX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi0TxControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_uart1RxControlTableEntry_is_placed = 0;
+    .dmaUart1RxControlTableEntry DMA_UART1_RX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_UART1_RX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaUart1RxControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_uart1TxControlTableEntry_is_placed = 0;
+    .dmaUart1TxControlTableEntry DMA_UART1_TX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_UART1_TX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaUart1TxControlTableEntry)} > REGION_DATA
 
     UDMACC26XX_dmaADCPriControlTableEntry_is_placed = 0;
     .dmaADCPriControlTableEntry DMA_ADC_PRI_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_ADC_PRI_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaADCPriControlTableEntry)} > REGION_DATA
@@ -137,11 +153,23 @@ SECTIONS {
     UDMACC26XX_dmaSpi1TxControlTableEntry_is_placed = 0;
     .dmaSpi1TxControlTableEntry DMA_SPI1_TX_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI1_TX_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi1TxControlTableEntry)} > REGION_DATA
 
+    UDMACC26XX_uart0RxAltControlTableEntry_is_placed = 0;
+    .dmaUart0RxAltControlTableEntry DMA_UART0_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_UART0_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaUart0RxAltControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_uart0TxAltControlTableEntry_is_placed = 0;
+    .dmaUart0TxAltControlTableEntry DMA_UART0_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_UART0_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaUart0TxAltControlTableEntry)} > REGION_DATA
+
     UDMACC26XX_dmaSpi0RxAltControlTableEntry_is_placed = 0;
     .dmaSpi0RxAltControlTableEntry DMA_SPI0_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI0_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi0RxAltControlTableEntry)} > REGION_DATA
 
     UDMACC26XX_dmaSpi0TxAltControlTableEntry_is_placed = 0;
     .dmaSpi0TxAltControlTableEntry DMA_SPI0_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_SPI0_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaSpi0TxAltControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_uart1RxAltControlTableEntry_is_placed = 0;
+    .dmaUart1RxAltControlTableEntry DMA_UART1_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_UART1_RX_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaUart1RxAltControlTableEntry)} > REGION_DATA
+
+    UDMACC26XX_uart1TxAltControlTableEntry_is_placed = 0;
+    .dmaUart1TxAltControlTableEntry DMA_UART1_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_UART1_TX_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaUart1TxAltControlTableEntry)} > REGION_DATA
 
     UDMACC26XX_dmaADCAltControlTableEntry_is_placed = 0;
     .dmaADCAltControlTableEntry DMA_ADC_ALT_CONTROL_TABLE_ENTRY_ADDRESS (NOLOAD) : AT (DMA_ADC_ALT_CONTROL_TABLE_ENTRY_ADDRESS) {*(.dmaADCAltControlTableEntry)} > REGION_DATA
@@ -190,6 +218,7 @@ SECTIONS {
     .rodata : {
         *(.rodata)
         *(.rodata.*)
+        *(.rodata_*)
     } > REGION_TEXT AT> REGION_TEXT
 
     .data : ALIGN(4) {
@@ -210,7 +239,6 @@ SECTIONS {
     .ARM.extab : {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
     } > REGION_ARM_EXTAB AT> REGION_ARM_EXTAB
-
 
     .nvs (NOLOAD) : ALIGN(0x2000) {
         *(.nvs)

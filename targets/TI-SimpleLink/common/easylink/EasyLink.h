@@ -82,6 +82,7 @@ code. The EasyLink_Status code are:
 - EasyLink_Status_Rx_Timeout
 - EasyLink_Status_Busy_Error
 - EasyLink_Status_Aborted
+- EasyLink_Status_Cmd_Rejected
 
 # Power Management #
 The TI-RTOS power management framework will try to put the device into the most
@@ -135,6 +136,8 @@ Packet structure:
 
 */
 
+// need this here as we are importing it from the SDK
+// clang-format off
 
 //*****************************************************************************
 #ifndef Easylink__include
@@ -155,11 +158,12 @@ extern "C"
 #include <stdint.h>
 #include <ti/drivers/rf/RF.h>
 #include <stdlib.h>
-#include "easylink_config.h"
-#include "Board.h"
+#include "ti_easylink_config.h"
+#include "ti_drivers_config.h"
+#include "ti_radio_config.h"
 
 //! \brief EasyLink API Version
-#define EASYLINK_API_VERSION "EasyLink-v2.60.00"
+#define EASYLINK_API_VERSION "EasyLink-v3.10.01"
 
 //! \brief defines the Tx/Rx Max Address Size
 #define EASYLINK_MAX_ADDR_SIZE              8
@@ -192,7 +196,8 @@ typedef enum
     EasyLink_Status_Rx_Timeout      = 7, //!< Rx Error
     EasyLink_Status_Rx_Buffer_Error = 8, //!< Rx Buffer Error
     EasyLink_Status_Busy_Error      = 9, //!< Busy Error
-    EasyLink_Status_Aborted         = 10 //!< Command stopped or aborted
+    EasyLink_Status_Aborted         = 10, //!< Command stopped or aborted
+    EasyLink_Status_Cmd_Rejected    = 11, //!< Command Rejected by RF Driver (Scheduling conflict)
 } EasyLink_Status;
 
 
@@ -238,12 +243,36 @@ typedef enum
     EasyLink_Ctrl_AsyncRx_TimeOut = 3,   //!< Relative time in ticks from Async
                                          //!< Rx start to TimeOut. A value of
                                          //!< 0 means no timeout
-
-    EasyLink_Ctrl_Test_Tone = 4,         //!< Enable/Disable Test mode for Tone
-    EasyLink_Ctrl_Test_Signal = 5,       //!< Enable/Disable Test mode for Signal
-    EasyLink_Ctrl_Rx_Test_Tone = 6,      //!< Enable/Disable Rx Test mode for Tone
+    EasyLink_Ctrl_Cmd_Priority = 4,      //!< Set the command priority with a value
+                                         //!< from EasyLink_Priority
+    EasyLink_Ctrl_Test_Tone = 5,         //!< Enable/Disable Test mode for Tone
+    EasyLink_Ctrl_Test_Signal = 6,       //!< Enable/Disable Test mode for Signal
+    EasyLink_Ctrl_Rx_Test_Tone = 7,      //!< Enable/Disable Rx Test mode for Tone
 } EasyLink_CtrlOption;
 
+//! \brief Activity table
+//!
+//! +--------------+--------------------------------------+
+//! |  Activity    |           Priority                   |
+//! +--------------+------------+------------+------------+
+//! |              |  Normal    |    High    |   Urgent   |
+//! | TX           | 0X03090000 | 0X03090001 | 0X03090002 |
+//! | RX           | 0X03070000 | 0X03070001 | 0X03070002 |
+//! +--------------+--------------------------------------+
+//!
+typedef enum{
+    EasyLink_Activity_Tx = 0x309,        //!< Activity code for the Tx operation
+    EasyLink_Activity_Rx = 0x307,        //!< Activity code for the Rx operation
+}EasyLink_Activity;
+
+//! \brief Transmit and Receive Command Priority - These are only applicable in
+//! a multi-client use-case
+typedef enum{
+    EasyLink_Priority_Normal = 0x0,
+    EasyLink_Priority_High   = 0x1,
+    EasyLink_Priority_Urgent = 0x2,
+    EasyLink_Priority_NEntries
+}EasyLink_Priority;
 
 //! \brief EasyLink 32-bit Random number generator function type used in the
 //! clear channel assessment algorithm.
@@ -266,8 +295,8 @@ typedef struct
     RF_Mode *RF_pProp;                 //!< Pointer to RF Mode Command
 
     union{
-#if (defined Board_CC1352P1_LAUNCHXL)  || (defined Board_CC1352P_2_LAUNCHXL)  || \
-    (defined Board_CC1352P_4_LAUNCHXL)
+#if ((defined LAUNCHXL_CC1352P1) || (defined LAUNCHXL_CC1352P_2) || \
+     (defined LAUNCHXL_CC1352P_4))
         rfc_CMD_PROP_RADIO_DIV_SETUP_PA_t *RF_pCmdPropRadioDivSetup;
 #else
         rfc_CMD_PROP_RADIO_DIV_SETUP_t *RF_pCmdPropRadioDivSetup;
@@ -294,7 +323,6 @@ typedef struct
         uint8_t dstAddr[8];              //!<  Destination address
         uint32_t absTime;                //!< Absolute time to Tx packet (0 for immediate)
                                          //!< Layer will use last SeqNum used + 1
-
         uint8_t len;                     //!< Payload Length
         uint8_t payload[EASYLINK_MAX_DATA_LENGTH];       //!< Payload
 } EasyLink_TxPacket;
@@ -307,7 +335,6 @@ typedef struct
         uint32_t absTime;                //!< Absolute time to turn on Rx when passed
                                          //!< (0 for immediate), Or Absolute time that packet was Rx
                                          //!< when returned.
-
         uint32_t rxTimeout;              //!< Relative time in ticks from Rx start to Rx TimeOut
                                          //!< a value of 0 means no timeout
         uint8_t len;                     //!< length of RX'ed packet
@@ -661,3 +688,6 @@ extern EasyLink_Status EasyLink_getCtrl(EasyLink_CtrlOption Ctrl,
 //! @}
 //
 //*****************************************************************************
+
+// need this here as we are importing it from the SDK
+// clang-format on
