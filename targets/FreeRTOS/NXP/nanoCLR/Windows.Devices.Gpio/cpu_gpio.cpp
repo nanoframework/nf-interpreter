@@ -447,8 +447,6 @@ bool CPU_GPIO_EnableInputPin(
 
         // disable interrupt
         GPIO_PortDisableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
-        // remove callback
-        GPIO_setCallback(pState->pinConfigIndex, NULL);
 
         // clear parameters & configs
         pState->isrPtr = NULL;
