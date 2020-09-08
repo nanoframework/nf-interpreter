@@ -1,0 +1,58 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TI_CC1352R1_LAUNCHXL nanoCLR",
+            "type": "cppdbg",
+            "request": "launch",
+            "MIMode": "gdb",
+            "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",
+            "targetArchitecture": "ARM",
+            "program": "${workspaceRoot}/build/nanoCLR.elf",
+            "setupCommands": [
+              {
+                "text": "target extended-remote localhost:3333"
+              },
+              {
+                "text": "monitor reset_config none separate"
+              },
+              {
+                "text": "monitor reset halt"
+              },
+              {
+                "text": "monitor flash write_image erase \"<path-to-the-repo-root-mind-the-forward-slash>/build/nanoCLR.hex\" "
+            },
+              {
+                "text": "file <path-to-the-repo-root-mind-the-forward-slash>/build/nanoCLR.elf"
+            },
+              {
+                "text": "set output-radix 16",
+                "description": "set the default numeric base to 16",
+                "ignoreFailures": false
+              }
+            ],
+            "customLaunchSetupCommands": [
+              {
+                "text": "monitor reset_config none separate"
+              },
+              {
+                "text": "monitor reset halt"
+              }
+            ],
+            "logging": {
+              "moduleLoad": false,
+              "trace": false,
+              "engineLogging": false,
+              "programOutput": true,
+              "exceptions": true
+            },
+            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f board/ti_cc13x2_launchpad.cfg",
+            "serverStarted": "Listening on port 3333 for gdb connections",
+            "filterStderr": true,
+            "externalConsole": false,
+            "stopAtEntry": true,
+            "cwd": "${cwd}"
+          }
+    ]
+}
