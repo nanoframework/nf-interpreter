@@ -247,12 +247,12 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeOpenDevi
 
             // Get reference to manage code SPI controller
             CLR_RT_HeapBlock *controller =
-                pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::FIELD___spiController]
-                    .Dereference();
+                pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::FIELD___spiController].Dereference();
 
-            controllerID = controller[Library_win_dev_spi_native_Windows_Devices_Spi_SpiController::FIELD___controllerId]
-                               .NumericByRef()
-                               .s4;
+            controllerID =
+                controller[Library_win_dev_spi_native_Windows_Devices_Spi_SpiController::FIELD___controllerId]
+                    .NumericByRef()
+                    .s4;
             // Get reference to manage code SPI settings
             CLR_RT_HeapBlock *config =
                 pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::FIELD___connectionSettings]
