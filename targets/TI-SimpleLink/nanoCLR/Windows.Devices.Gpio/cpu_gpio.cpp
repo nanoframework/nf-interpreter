@@ -65,7 +65,7 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
     void *param;
 
     // expected state for debounce handler
-    bool expected;
+    uint_fast8_t expected;
 
     // flag for waiting for debounce timer to complete
     bool waitingDebounce;
@@ -86,6 +86,25 @@ gpio_input_state *GetInputState(GPIO_PIN pinNumber)
     while (pState->Next() != NULL)
     {
         if (pState->pinNumber == pinNumber)
+        {
+            return pState;
+        }
+
+        pState = pState->Next();
+    }
+
+    return NULL;
+}
+
+// Get pointer to gpio_input_state for GPIO pin
+// return NULL if not found
+gpio_input_state *GetInputStateByConfigIndex(uint8_t pinConfigIndex)
+{
+    gpio_input_state *pState = gpioInputList.FirstNode();
+
+    while (pState->Next() != NULL)
+    {
+        if (pState->pinConfigIndex == pinConfigIndex)
         {
             return pState;
         }
@@ -157,7 +176,7 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
                 gpioInputList.LinkAtBack(pState);
 
                 // set the pin number in the config array
-                gpioPinConfigs[index] = pinNumber | GPIO_CFG_IN_NOPULL | GPIO_CFG_IN_INT_NONE;
+                gpioPinConfigs[index] = pinNumber | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS;
             }
         }
     }
@@ -203,41 +222,33 @@ void DeleteGpioInputState(GPIO_PIN pinNumber)
 //
 // Debounce Handler, called when timer is complete
 //
-static void debounceTimer_Callback(UArg arg)
+static void DebounceTimerCallback(UArg arg)
 {
-    int16_t index = (int16_t)arg;
+    NATIVE_INTERRUPT_START
 
-    gpio_input_state *pState = GetInputState(index);
+    gpio_input_state *pState = GetInputStateByConfigIndex((int16_t)arg);
 
     if (pState)
     {
-        if (pState->isrPtr)
+        // get current pin state
+        uint_fast8_t pinState = GPIO_read(pState->pinConfigIndex);
+
+        if (pinState == pState->expected)
         {
-            // get current pin state
-            bool actual = CPU_GPIO_GetPinState(pState->pinNumber);
-            if (actual == pState->expected)
-            {
-                pState->isrPtr(pState->pinNumber, actual, pState->param);
-
-                if (pState->mode == GPIO_INT_EDGE_BOTH)
-                {
-                    // both edges
-                    // update expected state
-                    pState->expected ^= 1;
-                }
-            }
+            // post a managed event with the current pin reading
+            pState->isrPtr(pState->pinNumber, pinState);
         }
-    }
 
-    pState->waitingDebounce = false;
+        pState->waitingDebounce = false;
+    }
 }
 
-// Gpio event callback
+// GPIO event callback
 static void GpioEventCallback(uint_least8_t index)
 {
     NATIVE_INTERRUPT_START
 
-    gpio_input_state *pState = GetInputState(index);
+    gpio_input_state *pState = GetInputStateByConfigIndex(index);
 
     // Any pin set up here ?
     if (pState != NULL)
@@ -245,49 +256,28 @@ static void GpioEventCallback(uint_least8_t index)
         // Ignore any pin changes during debounce timeout
         if (!pState->waitingDebounce)
         {
-            // If calling ISR available then call it
-            if (pState->isrPtr)
+            uint_fast8_t pinState = GPIO_read(pState->pinConfigIndex);
+
+            // Debounce time set ?
+            if (pState->debounceMs > 0)
             {
-                // Debounce time set ?
-                if (pState->debounceMs > 0)
-                {
-                    // Yes, set up debounce timer
-                    pState->waitingDebounce = true;
+                // Yes, set up debounce timer
+                pState->waitingDebounce = true;
 
-                    // Timer created yet ?
-                    if (pState->debounceTimer == 0)
-                    {
-                        // setup timer
-                        Clock_Params params;
+                // store expected state
+                pState->expected = pinState;
 
-                        Clock_Params_init(&params);
-                        params.arg = (UArg)index;
-                        params.startFlag = false;
-                        params.period = 0;
+                // timer already exists
+                // set timeout as we are using a one-shot timer
+                Clock_setTimeout(pState->debounceTimer, pState->debounceMs * 1000 / Clock_tickPeriod);
 
-                        // Create and start timer
-                        pState->debounceTimer = Clock_create(
-                            debounceTimer_Callback,
-                            pState->debounceMs / Clock_tickPeriod,
-                            &params,
-                            Error_IGNORE);
-                    }
-                    else
-                    {
-                        // timer already exists
-                        // set timeout
-                        Clock_setTimeout(pState->debounceTimer, pState->debounceMs / Clock_tickPeriod);
-                    }
-
-                    // start timer
-                    Clock_start(pState->debounceTimer);
-                }
-                else
-                {
-                    // No debounce so just call ISR with current pin state
-                    uint_fast8_t pinState = GPIO_read(pState->pinConfigIndex);
-                    pState->isrPtr(pState->pinNumber, pinState, pState->param);
-                }
+                // start timer
+                Clock_start(pState->debounceTimer);
+            }
+            else
+            {
+                // No debounce so just post a managed event with the current pin reading
+                pState->isrPtr(pState->pinNumber, pinState);
             }
         }
     }
@@ -377,11 +367,11 @@ int32_t CPU_GPIO_GetPinCount()
 GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN pinNumber)
 {
     // get index of pin in config array
-    uint8_t index = FindPinConfig(pinNumber);
+    uint8_t pinConfigIndex = FindPinConfig(pinNumber);
 
-    if (index >= 0)
+    if (pinConfigIndex >= 0)
     {
-        return (GpioPinValue)GPIO_read(index);
+        return (GpioPinValue)GPIO_read(pinConfigIndex);
     }
 }
 
@@ -389,22 +379,22 @@ GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN pinNumber)
 void CPU_GPIO_SetPinState(GPIO_PIN pinNumber, GpioPinValue pinState)
 {
     // get index of pin in config array
-    uint8_t index = FindPinConfig(pinNumber);
+    uint8_t pinConfigIndex = FindPinConfig(pinNumber);
 
-    if (index >= 0)
+    if (pinConfigIndex >= 0)
     {
-        GPIO_write(index, pinState);
+        GPIO_write(pinConfigIndex, pinState);
     }
 }
 
 // Toggle pin state
 void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
 {
-    uint8_t index = FindPinConfig(pinNumber);
+    uint8_t pinConfigIndex = FindPinConfig(pinNumber);
 
-    if (index >= 0)
+    if (pinConfigIndex >= 0)
     {
-        GPIO_toggle(index);
+        GPIO_toggle(pinConfigIndex);
     }
 }
 
@@ -412,8 +402,8 @@ void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
 bool CPU_GPIO_EnableInputPin(
     GPIO_PIN pinNumber,
     CLR_UINT64 debounceTimeMilliseconds,
-    GPIO_INTERRUPT_SERVICE_ROUTINE pin_ISR,
-    void *isr_Param,
+    GPIO_INTERRUPT_SERVICE_ROUTINE pinISR,
+    void *isrParam,
     GPIO_INT_EDGE intEdge,
     GpioPinDriveMode driveMode)
 {
@@ -434,7 +424,7 @@ bool CPU_GPIO_EnableInputPin(
 
     // Link ISR ptr supplied and not already set up
     // CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
-    if ((pin_ISR != NULL) && (pState->isrPtr == NULL))
+    if (pinISR != NULL && (pState->isrPtr == NULL))
     {
         // get current config
         GPIO_PinConfig currentPinConfig;
@@ -442,33 +432,80 @@ bool CPU_GPIO_EnableInputPin(
 
         // set interrupt on both edges
         GPIO_setConfig(pState->pinConfigIndex, currentPinConfig | GPIO_CFG_IN_INT_BOTH_EDGES);
+        // set callback
         GPIO_setCallback(pState->pinConfigIndex, GpioEventCallback);
+        // enable INT
+        GPIO_enableInt(pState->pinConfigIndex);
+
+        // store parameters & configs
+        pState->isrPtr = pinISR;
+        pState->mode = intEdge;
+        pState->param = isrParam;
+        pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+
+        // create timer if not there yet
+        if (pState->debounceMs > 0 && pState->debounceTimer == NULL)
+        {
+            // setup timer
+            Clock_Params params;
+
+            Clock_Params_init(&params);
+            params.arg = (UArg)pState->pinConfigIndex;
+            params.startFlag = FALSE;
+            // period it's 0 because we are using a one-shot timer
+            params.period = 0;
+
+            // create timer
+            // set timeout as we are using a one-shot timer
+            pState->debounceTimer = Clock_create(
+                DebounceTimerCallback,
+                pState->debounceMs * 1000 / Clock_tickPeriod,
+                &params,
+                Error_IGNORE);
+        }
+
+        switch (intEdge)
+        {
+            case GPIO_INT_EDGE_LOW:
+            case GPIO_INT_LEVEL_LOW:
+                pState->expected = false;
+                break;
+
+            case GPIO_INT_EDGE_HIGH:
+            case GPIO_INT_LEVEL_HIGH:
+                pState->expected = true;
+                break;
+
+            case GPIO_INT_EDGE_BOTH:
+                // Use inverse of current pin state
+                pState->expected = !CPU_GPIO_GetPinState(pState->pinConfigIndex);
+                break;
+
+            default:
+                break;
+        }
     }
-
-    pState->isrPtr = pin_ISR;
-    pState->mode = intEdge;
-    pState->param = (void *)isr_Param;
-    pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
-
-    switch (intEdge)
+    else if (pinISR == NULL && (pState->isrPtr != NULL))
     {
-        case GPIO_INT_EDGE_LOW:
-        case GPIO_INT_LEVEL_LOW:
-            pState->expected = false;
-            break;
+        // there is no managed handler setup anymore
+        // remove INT handler
 
-        case GPIO_INT_EDGE_HIGH:
-        case GPIO_INT_LEVEL_HIGH:
-            pState->expected = true;
-            break;
+        // get current config
+        GPIO_PinConfig currentPinConfig;
+        GPIO_getConfig(pState->pinConfigIndex, &currentPinConfig);
 
-        case GPIO_INT_EDGE_BOTH:
-            // Use inverse of current pin state
-            pState->expected = !CPU_GPIO_GetPinState(pinNumber);
-            break;
+        // disable interrupt
+        GPIO_disableInt(pState->pinConfigIndex);
+        // remove callback
+        GPIO_setCallback(pState->pinConfigIndex, NULL);
+        // remove interrupt config
+        GPIO_setConfig(pState->pinConfigIndex, currentPinConfig | GPIO_CFG_IN_INT_NONE);
 
-        default:
-            break;
+        // clear parameters & configs
+        pState->isrPtr = NULL;
+        pState->mode = GPIO_INT_NONE;
+        pState->param = NULL;
+        pState->debounceMs = 0;
     }
 
     return true;
@@ -493,16 +530,16 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, Gpi
     DeleteGpioInputState(pinNumber);
 
     // get free slot in pin config array
-    uint8_t index = FindFreePinConfig();
+    uint8_t pinConfigIndex = FindFreePinConfig();
 
-    if (index >= 0)
+    if (pinConfigIndex >= 0)
     {
         // found a free slot!
 
         // set the pin number in the config array
-        gpioPinConfigs[index] = pinNumber | PIN_GPIO_OUTPUT_EN;
+        gpioPinConfigs[pinConfigIndex] = pinNumber | GPIO_CFG_OUT_STD;
 
-        if (CPU_GPIO_SetDriveMode(index, driveMode) == false)
+        if (CPU_GPIO_SetDriveMode(pinConfigIndex, driveMode) == false)
         {
             return false;
         }
@@ -519,17 +556,17 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_
 {
     GLOBAL_LOCK();
 
-    uint8_t index = FindPinConfig(pinNumber);
+    uint8_t pinConfigIndex = FindPinConfig(pinNumber);
 
-    if (index >= 0)
+    if (pinConfigIndex >= 0)
     {
         DeleteGpioInputState(pinNumber);
 
-        CPU_GPIO_SetDriveMode(index, driveMode);
+        CPU_GPIO_SetDriveMode(pinConfigIndex, driveMode);
 
         if (alternateFunction)
         {
-            GPIO_setConfig(index, alternateFunction);
+            GPIO_setConfig(pinConfigIndex, alternateFunction);
         }
 
         GLOBAL_UNLOCK();
@@ -541,39 +578,40 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_
 // Set drive mode
 // pinNumber is the index of the corresponding PIN config in array
 // return true if ok
-bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
+bool CPU_GPIO_SetDriveMode(GPIO_PIN pinConfigIndex, GpioPinDriveMode driveMode)
 {
-    // disable interrupt as default
-    GPIO_disableInt(pinNumber);
+    // get current config
+    GPIO_PinConfig currentPinConfig;
+    GPIO_getConfig(pinConfigIndex, &currentPinConfig);
 
     switch (driveMode)
     {
         case GpioPinDriveMode_Input:
-            GPIO_setConfig(pinNumber, GPIO_CFG_IN_NOPULL);
+            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_IN_NOPULL);
             break;
 
         case GpioPinDriveMode_InputPullDown:
-            GPIO_setConfig(pinNumber, GPIO_CFG_IN_PD);
+            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_IN_PD);
             break;
 
         case GpioPinDriveMode_InputPullUp:
-            GPIO_setConfig(pinNumber, GPIO_CFG_IN_PU);
+            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_IN_PU);
             break;
 
         case GpioPinDriveMode_Output:
-            GPIO_setConfig(pinNumber, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_MED | GPIO_CFG_OUT_LOW);
+            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_MED);
             break;
 
         case GpioPinDriveMode_OutputOpenDrain:
-            GPIO_setConfig(pinNumber, GPIO_CFG_OUT_OD_NOPULL);
+            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_OD_NOPULL);
             break;
 
         case GpioPinDriveMode_OutputOpenDrainPullUp:
-            GPIO_setConfig(pinNumber, GPIO_CFG_OUT_OD_PU);
+            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_OD_PU);
             break;
 
         case GpioPinDriveMode_OutputOpenSourcePullDown:
-            GPIO_setConfig(pinNumber, GPIO_CFG_OUT_OD_PD);
+            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_OD_PD);
             break;
 
         default:
@@ -615,9 +653,12 @@ bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMillisec
 {
     gpio_input_state *pState = GetInputState(pinNumber);
 
-    _ASSERTE(pState == NULL);
-
-    pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+    // can only change the debounce in pin state if the pin has already been configured as input
+    // if not, doesn't matter, because the new debounce will be used next time it's required
+    if (pState != NULL)
+    {
+        pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+    }
 
     return true;
 }
