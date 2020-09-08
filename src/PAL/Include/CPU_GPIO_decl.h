@@ -59,7 +59,7 @@ enum GPIO_INT_EDGE
 // };
 
 
-typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)( GPIO_PIN Pin, bool PinState, void* Param );
+typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)( GPIO_PIN pin, bool pinState );
 
 bool   CPU_GPIO_Initialize     ();
 bool   CPU_GPIO_Uninitialize   ();

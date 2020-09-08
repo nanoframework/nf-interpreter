@@ -12,27 +12,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void* param )
+void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState)
 {
-	NATIVE_INTERRUPT_START
-
-	CLR_RT_HeapBlock *pThis = (CLR_RT_HeapBlock *)param;
-	if (pThis != NULL)
-	{
-		// check if object has been disposed
-		if (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue].NumericByRef().u1 == 0)
-		{
-			// flag to determine if there are any callbacks registered in managed code
-			bool callbacksRegistered = (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks].Dereference() != NULL);
-			if (callbacksRegistered)
-			{
-				// if handle registered then post a managed event with the current pin reading
-				PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState);
-			}
-		}
-	}
-
-	NATIVE_INTERRUPT_END
+	// if handle registered then post a managed event with the current pin reading
+	PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState);
 }
 
 HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___WindowsDevicesGpioGpioPinValue( CLR_RT_StackFrame& stack )
@@ -122,6 +105,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 	{
 		bool validPin;
 		CLR_UINT64 debounceTimeoutMilsec;
+		bool callbacksRegistered = false;
 
 		CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis);
 
@@ -140,8 +124,18 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDrive
 		else
 		{
 			NANOCLR_CHECK_HRESULT( ExtractDebounceTimeSpanValue(pThis[ FIELD___debounceTimeout ], debounceTimeoutMilsec ) );
+			
+			// flag to determine if there are any callbacks registered in managed code
+			// this is use to determine if there is any need to setup and process INT handler
+			callbacksRegistered = (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks].Dereference() != NULL);
 
-			validPin = CPU_GPIO_EnableInputPin(pinNumber, debounceTimeoutMilsec, Gpio_Interupt_ISR, (void*)pThis, GPIO_INT_EDGE_BOTH, driveMode);
+			validPin = CPU_GPIO_EnableInputPin(
+				pinNumber, 
+				debounceTimeoutMilsec, 
+				callbacksRegistered ? Gpio_Interupt_ISR : NULL,
+				NULL,
+				GPIO_INT_EDGE_BOTH, 
+				driveMode);
 		}
 
 		if (!validPin)

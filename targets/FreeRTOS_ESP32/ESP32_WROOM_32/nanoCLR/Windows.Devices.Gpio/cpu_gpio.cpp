@@ -96,9 +96,11 @@ void Esp_Gpio_fire_event(gpio_input_state* pState)
 	bool actual = CPU_GPIO_GetPinState(pState->pinNumber);  // get current pin state
 	if (actual == pState->expected)
 	{
-		pState->isrPtr(pState->pinNumber, actual, pState->param);
+		pState->isrPtr(pState->pinNumber, actual);
+
 		if (pState->mode == GPIO_INT_EDGE_BOTH)
-		{ // both edges
+		{ 
+			// both edges
 			pState->expected ^= 1; // update expected state
 		}
 	}
@@ -221,34 +223,36 @@ static void gpio_isr(void * arg)
 	// Ignore any pin changes during debounce
 	if (pState->waitingDebounce) return;
 
-	// If user ISR available then call it
-	if (pState->isrPtr)
+	if (pState->debounceMs > 0)
 	{
-		if (pState->debounceMs > 0)
-		{
-			pState->waitingDebounce = true;
+		pState->waitingDebounce = true;
 
-			if (pState->debounceTimer == 0)
-			{
-				// Create timer if it doesn't already exist for this pin
-				pState->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void*)pState, Esp_Gpio_DebounceHandler);
-			}
-
-			// Start Debounce timer (minimum 1 freeRtos tick(10ms) )
-			int ticks = pdMS_TO_TICKS(pState->debounceMs);
-			if (ticks == 0) ticks = 1;
-			xTimerChangePeriodFromISR(pState->debounceTimer, ticks, pdFALSE);
-		}
-		else
+		if (pState->debounceTimer == 0)
 		{
-			Esp_Gpio_fire_event(pState);
+			// Create timer if it doesn't already exist for this pin
+			pState->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void*)pState, Esp_Gpio_DebounceHandler);
 		}
+
+		// Start Debounce timer (minimum 1 freeRtos tick(10ms) )
+		int ticks = pdMS_TO_TICKS(pState->debounceMs);
+		if (ticks == 0) ticks = 1;
+		xTimerChangePeriodFromISR(pState->debounceTimer, ticks, pdFALSE);
+	}
+	else
+	{
+		Esp_Gpio_fire_event(pState);
 	}
 
 	NATIVE_INTERRUPT_END
 }
 
-bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE pin_ISR, void* isr_Param, GPIO_INT_EDGE intEdge, GpioPinDriveMode driveMode)
+bool CPU_GPIO_EnableInputPin(
+	GPIO_PIN pinNumber, 
+	CLR_UINT64 debounceTimeMilliseconds, 
+	GPIO_INTERRUPT_SERVICE_ROUTINE pinISR, 
+	void* isr_Param, 
+	GPIO_INT_EDGE intEdge, 
+	GpioPinDriveMode driveMode)
 {
 	esp_err_t ret;
 	gpio_input_state * pState;
@@ -265,7 +269,9 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMillisec
 
 	// Link ISR ptr supplied and not already set up
 	// CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
-	if ( (pin_ISR != NULL) && (pState->isrPtr == NULL))
+    if (
+        pinISR != NULL && 
+        (pState->isrPtr == NULL))
 	{
 		ret = gpio_isr_handler_add((gpio_num_t)pinNumber, gpio_isr, (void *)pState);
 		if (ret != ESP_OK)
@@ -278,32 +284,51 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMillisec
 		// NONE=0, EDGE_LOW=1, EDGE_HIGH=2, EDGE_BOTH=3, LEVEL_HIGH=4, LEVEL_LOW
 		uint8_t mapint[6] = { GPIO_INTR_DISABLE, GPIO_INTR_NEGEDGE ,GPIO_INTR_POSEDGE, GPIO_INTR_ANYEDGE, GPIO_INTR_HIGH_LEVEL, GPIO_INTR_LOW_LEVEL };
 		gpio_set_intr_type((gpio_num_t)pinNumber, (gpio_int_type_t)mapint[intEdge]);
+
+	
+		// store parameters & configs
+		pState->isrPtr = pinISR;
+		pState->mode = intEdge;
+		pState->param = (void *)isr_Param;
+		pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+
+		switch (intEdge)
+		{
+			case GPIO_INT_EDGE_LOW:
+			case GPIO_INT_LEVEL_LOW:
+				pState->expected = false;
+				break;
+
+			case GPIO_INT_EDGE_HIGH:
+			case GPIO_INT_LEVEL_HIGH:
+				pState->expected = true;
+				break;
+
+			case GPIO_INT_EDGE_BOTH:
+				pState->expected = !CPU_GPIO_GetPinState(pinNumber);  // Use not current state  
+				break;
+
+			default:
+				break;
+		}
+
 	}
+    else if (
+        pinISR == NULL && 
+        (pState->isrPtr != NULL))
+    {
+        // there is no managed handler setup anymore
+        // remove INT handler 
 
-	pState->isrPtr = pin_ISR;
-	pState->mode = intEdge;
-	pState->param = (void *)isr_Param;
-	pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+        // remove callback
+		gpio_isr_handler_remove((gpio_num_t)pState->pinNumber);
 
-	switch (intEdge)
-	{
-		case GPIO_INT_EDGE_LOW:
-		case GPIO_INT_LEVEL_LOW:
-			pState->expected = false;
-			break;
-
-		case GPIO_INT_EDGE_HIGH:
-		case GPIO_INT_LEVEL_HIGH:
-			pState->expected = true;
-			break;
-
-		case GPIO_INT_EDGE_BOTH:
-			pState->expected = !CPU_GPIO_GetPinState(pinNumber);  // Use not current state  
-			break;
-
-		default:
-			break;
-	}
+        // clear parameters & configs
+        pState->isrPtr = NULL;
+        pState->mode = GPIO_INT_NONE;
+        pState->param = NULL;
+        pState->debounceMs = 0;
+    }
 
 	return true;
 }
@@ -315,7 +340,10 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMillisec
 // driveMode    -   Drive mode and resistors
 // return       -   True if succesful, false invalid pin, pin not putput, invalid drive mode for ouptput
 //
-bool  CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, GpioPinDriveMode driveMode)
+bool  CPU_GPIO_EnableOutputPin(
+	GPIO_PIN pinNumber, 
+	GpioPinValue InitialState, 
+	GpioPinDriveMode driveMode)
 {
 	// check not an output drive mode
 	if (driveMode < (int)GpioPinDriveMode_Output) return false;

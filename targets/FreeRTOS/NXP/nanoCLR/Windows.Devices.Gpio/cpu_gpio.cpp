@@ -53,16 +53,16 @@ static uint16_t pinReserved[TOTAL_GPIO_PORTS];
 void Gpio_DebounceHandler(TimerHandle_t xTimer)
 {
 	gpio_input_state* pGpio = (gpio_input_state*)pvTimerGetTimerID(xTimer);
-	if (pGpio->isrPtr)
+
+	bool actual =(GpioPinValue)GPIO_PinRead(GPIO_BASE(pGpio->pinNumber), GPIO_PIN(pGpio->pinNumber));
+
+	if (actual == pGpio->expected)
 	{
-		bool actual =(GpioPinValue)GPIO_PinRead(GPIO_BASE(pGpio->pinNumber), GPIO_PIN(pGpio->pinNumber));
-		if (actual == pGpio->expected)
-		{
-			pGpio->isrPtr(pGpio->pinNumber, actual, pGpio->param);
-			if (pGpio->mode == GPIO_INT_EDGE_BOTH)
-			{ // both edges
-				pGpio->expected ^= 1; // update expected state
-			}
+		pGpio->isrPtr(pGpio->pinNumber, actual);
+		
+		if (pGpio->mode == GPIO_INT_EDGE_BOTH)
+		{ // both edges
+			pGpio->expected ^= 1; // update expected state
 		}
 	}
 
@@ -102,28 +102,25 @@ void GPIO_Main_IRQHandler( int portIndex, GPIO_Type * portBase )
 			{
 				// Interupt on pin ?
 				gpio_input_state * pGpio = (*inputStates)[bitNumber];
+				
 				// Do we have gpio_input_state setup for this pin ?
 				if (pGpio)
 				{
 					// Ignore any pin changes during debounce
 					if (!pGpio->waitingDebounce) 
 					{
-						// If user ISR available then call it
-						if (pGpio->isrPtr)
+						// If debounce timer defined then first wait for it to expire
+						if (pGpio->debounceMs > 0)
 						{
-                            // If debounce timer defined then first wait for it to expire
-							if (pGpio->debounceMs > 0)
-							{
-								pGpio->waitingDebounce = true;
+							pGpio->waitingDebounce = true;
 
-								// Start Debounce timer
-								xTimerChangePeriodFromISR(pGpio->debounceTimer, pdMS_TO_TICKS(pGpio->debounceMs), &xHigherPriorityTaskWoken);
-							}
-							else
-							{
-								GpioPinValue PinState = (GpioPinValue)GPIO_PinRead(GPIO_BASE(pGpio->pinNumber), GPIO_PIN(pGpio->pinNumber));
-								pGpio->isrPtr(pGpio->pinNumber, PinState, pGpio->param);
-							}
+							// Start Debounce timer
+							xTimerChangePeriodFromISR(pGpio->debounceTimer, pdMS_TO_TICKS(pGpio->debounceMs), &xHigherPriorityTaskWoken);
+						}
+						else
+						{
+							GpioPinValue PinState = (GpioPinValue)GPIO_PinRead(GPIO_BASE(pGpio->pinNumber), GPIO_PIN(pGpio->pinNumber));
+							pGpio->isrPtr(pGpio->pinNumber, PinState);
 						}
 					}
 				} // if pin setup in nanoFramework
@@ -368,9 +365,15 @@ void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
 // CPU_GPIO_EnableInputPin
 // Enable input pin
 //
-bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds, GPIO_INTERRUPT_SERVICE_ROUTINE pin_ISR, void* isr_Param, GPIO_INT_EDGE intEdge, GpioPinDriveMode driveMode)
+bool CPU_GPIO_EnableInputPin(
+	GPIO_PIN pinNumber, 
+	CLR_UINT64 debounceTimeMilliseconds, 
+	GPIO_INTERRUPT_SERVICE_ROUTINE pinISR, 
+	void* isrParam, 
+	GPIO_INT_EDGE intEdge, 
+	GpioPinDriveMode driveMode)
 {
-	gpio_input_state * pGpio;
+    gpio_input_state * pGpio;
 
 	// Check if valid pin number 
 	if (!IsValidGpioPin(pinNumber)) return false;
@@ -384,53 +387,76 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMillisec
 
 	pGpio = AllocateGpioInputState(pinNumber);
 
-	// Map nanoFRamework Interrupt edge to NXP edge
-	// NONE=0, EDGE_LOW=1, EDGE_HIGH=2, EDGE_BOTH=3, LEVEL_HIGH=4, LEVEL_LOW
-	const gpio_interrupt_mode_t mapint[6] = { kGPIO_NoIntmode, kGPIO_IntFallingEdge, kGPIO_IntRisingEdge, kGPIO_IntRisingOrFallingEdge, kGPIO_IntHighLevel, kGPIO_IntLowLevel };
+    if (
+        pinISR != NULL && 
+        (pState->isrPtr == NULL))
 
-	// enable interupt mode with correct edge
-	gpio_pin_config_t config = {kGPIO_DigitalInput, 0, mapint[intEdge] };
-	GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
-	
-	// Enable GPIO pin interrupt
-	IRQn_Type isrNo = (IRQn_Type)(GPIO1_Combined_0_15_IRQn + GetIoPort(pinNumber));
-	NVIC_SetPriority(isrNo, 8U);
-	EnableIRQ(isrNo);
-	GPIO_PortEnableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
-	GPIO_PortClearInterruptFlags(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
+		// Map nanoFRamework Interrupt edge to NXP edge
+		// NONE=0, EDGE_LOW=1, EDGE_HIGH=2, EDGE_BOTH=3, LEVEL_HIGH=4, LEVEL_LOW
+		const gpio_interrupt_mode_t mapint[6] = { kGPIO_NoIntmode, kGPIO_IntFallingEdge, kGPIO_IntRisingEdge, kGPIO_IntRisingOrFallingEdge, kGPIO_IntHighLevel, kGPIO_IntLowLevel };
 
-	// Initialise Gpio state structure
-	pGpio->isrPtr = pin_ISR;
-	pGpio->mode = intEdge;
-	pGpio->param = (void *)isr_Param;
-	pGpio->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+		// enable interupt mode with correct edge
+		gpio_pin_config_t config = {kGPIO_DigitalInput, 0, mapint[intEdge] };
+		GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
+		
+		// Enable GPIO pin interrupt
+		IRQn_Type isrNo = (IRQn_Type)(GPIO1_Combined_0_15_IRQn + GetIoPort(pinNumber));
+		NVIC_SetPriority(isrNo, 8U);
+		EnableIRQ(isrNo);
+		GPIO_PortEnableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
+		GPIO_PortClearInterruptFlags(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
 
-	// Set up expected new value for debounce
-	if ( pGpio->debounceMs > 0)
-	{
-		if (pGpio->debounceTimer == 0)
+		// store parameters & configs
+		pGpio->isrPtr = pinISR;
+		pGpio->mode = intEdge;
+		pGpio->param = (void *)isrParam;
+		pGpio->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+
+		// Set up expected new value for debounce
+		if ( pGpio->debounceMs > 0)
 		{
-			// Create timer if it doesn't already exist for this pin
-			pGpio->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void*)pGpio, Gpio_DebounceHandler);
-		}
-		switch (intEdge)
-		{
-			case GPIO_INT_NONE:
-			case GPIO_INT_EDGE_LOW:
-			case GPIO_INT_LEVEL_LOW:
-				pGpio->expected = false;
-				break;
+			if (pGpio->debounceTimer == 0)
+			{
+				// Create timer if it doesn't already exist for this pin
+				pGpio->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void*)pGpio, Gpio_DebounceHandler);
+			}
+			switch (intEdge)
+			{
+				case GPIO_INT_NONE:
+				case GPIO_INT_EDGE_LOW:
+				case GPIO_INT_LEVEL_LOW:
+					pGpio->expected = false;
+					break;
 
-			case GPIO_INT_EDGE_HIGH:
-			case GPIO_INT_LEVEL_HIGH:
-				pGpio->expected = true;
-				break;
+				case GPIO_INT_EDGE_HIGH:
+				case GPIO_INT_LEVEL_HIGH:
+					pGpio->expected = true;
+					break;
 
-			case GPIO_INT_EDGE_BOTH:
-				pGpio->expected = !CPU_GPIO_GetPinState(pinNumber);  // Use NOT current state  
-				break;
+				case GPIO_INT_EDGE_BOTH:
+					pGpio->expected = !CPU_GPIO_GetPinState(pinNumber);  // Use NOT current state  
+					break;
+			}
 		}
 	}
+    else if (
+        pinISR == NULL && 
+        (pState->isrPtr != NULL))
+    {
+        // there is no managed handler setup anymore
+        // remove INT handler 
+
+        // disable interrupt
+		GPIO_PortDisableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
+        // remove callback
+        GPIO_setCallback(pState->pinConfigIndex, NULL);
+
+        // clear parameters & configs
+        pState->isrPtr = NULL;
+        pState->mode = GPIO_INT_NONE;
+        pState->param = NULL;
+        pState->debounceMs = 0;
+    }
 
  	return true;
 }
@@ -442,7 +468,10 @@ bool CPU_GPIO_EnableInputPin(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMillisec
 // driveMode    -   Drive mode and resistors
 // return       -   True if succesful, false invalid pin, pin not putput, invalid drive mode for ouptput
 //
-bool  CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, GpioPinDriveMode driveMode)
+bool  CPU_GPIO_EnableOutputPin(
+	GPIO_PIN pinNumber, 
+	GpioPinValue InitialState, 
+	GpioPinDriveMode driveMode)
 {
 	// Check if valid pin number 
 	if (!IsValidGpioPin(pinNumber)) return false;
