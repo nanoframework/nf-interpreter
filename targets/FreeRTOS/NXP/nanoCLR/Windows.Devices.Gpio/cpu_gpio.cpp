@@ -59,7 +59,7 @@ void Gpio_DebounceHandler(TimerHandle_t xTimer)
         pState->isrPtr(pState->pinNumber, actual);
 
         if (pState->mode == GPIO_INT_EDGE_BOTH)
-        {                         // both edges
+        {                          // both edges
             pState->expected ^= 1; // update expected state
         }
     }
