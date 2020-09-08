@@ -50,21 +50,21 @@ static uint16_t pinReserved[TOTAL_GPIO_PORTS];
 
 void Gpio_DebounceHandler(TimerHandle_t xTimer)
 {
-    gpio_input_state *pGpio = (gpio_input_state *)pvTimerGetTimerID(xTimer);
+    gpio_input_state *pState = (gpio_input_state *)pvTimerGetTimerID(xTimer);
 
-    bool actual = (GpioPinValue)GPIO_PinRead(GPIO_BASE(pGpio->pinNumber), GPIO_PIN(pGpio->pinNumber));
+    bool actual = (GpioPinValue)GPIO_PinRead(GPIO_BASE(pState->pinNumber), GPIO_PIN(pState->pinNumber));
 
-    if (actual == pGpio->expected)
+    if (actual == pState->expected)
     {
-        pGpio->isrPtr(pGpio->pinNumber, actual);
+        pState->isrPtr(pState->pinNumber, actual);
 
-        if (pGpio->mode == GPIO_INT_EDGE_BOTH)
+        if (pState->mode == GPIO_INT_EDGE_BOTH)
         {                         // both edges
-            pGpio->expected ^= 1; // update expected state
+            pState->expected ^= 1; // update expected state
         }
     }
 
-    pGpio->waitingDebounce = false;
+    pState->waitingDebounce = false;
 }
 
 void GPIO_Main_IRQHandler(int portIndex, GPIO_Type *portBase)
@@ -99,30 +99,30 @@ void GPIO_Main_IRQHandler(int portIndex, GPIO_Type *portBase)
             if (intPins & 0x01)
             {
                 // Interupt on pin ?
-                gpio_input_state *pGpio = (*inputStates)[bitNumber];
+                gpio_input_state *pState = (*inputStates)[bitNumber];
 
                 // Do we have gpio_input_state setup for this pin ?
-                if (pGpio)
+                if (pState)
                 {
                     // Ignore any pin changes during debounce
-                    if (!pGpio->waitingDebounce)
+                    if (!pState->waitingDebounce)
                     {
                         // If debounce timer defined then first wait for it to expire
-                        if (pGpio->debounceMs > 0)
+                        if (pState->debounceMs > 0)
                         {
-                            pGpio->waitingDebounce = true;
+                            pState->waitingDebounce = true;
 
                             // Start Debounce timer
                             xTimerChangePeriodFromISR(
-                                pGpio->debounceTimer,
-                                pdMS_TO_TICKS(pGpio->debounceMs),
+                                pState->debounceTimer,
+                                pdMS_TO_TICKS(pState->debounceMs),
                                 &xHigherPriorityTaskWoken);
                         }
                         else
                         {
                             GpioPinValue PinState =
-                                (GpioPinValue)GPIO_PinRead(GPIO_BASE(pGpio->pinNumber), GPIO_PIN(pGpio->pinNumber));
-                            pGpio->isrPtr(pGpio->pinNumber, PinState);
+                                (GpioPinValue)GPIO_PinRead(GPIO_BASE(pState->pinNumber), GPIO_PIN(pState->pinNumber));
+                            pState->isrPtr(pState->pinNumber, PinState);
                         }
                     }
                 } // if pin setup in nanoFramework
@@ -230,15 +230,15 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
 
     statePortArray *inputStates = port_array[port];
 
-    gpio_input_state *pGpio = (*inputStates)[bit];
-    if (pGpio == NULL)
+    gpio_input_state *pState = (*inputStates)[bit];
+    if (pState == NULL)
     {
-        pGpio = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
-        memset(pGpio, 0, sizeof(gpio_input_state));
-        pGpio->pinNumber = pinNumber;
-        (*inputStates)[bit] = pGpio;
+        pState = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
+        memset(pState, 0, sizeof(gpio_input_state));
+        pState->pinNumber = pinNumber;
+        (*inputStates)[bit] = pState;
     }
-    return pGpio;
+    return pState;
 }
 
 // Delete gpio_input_state from List and tidy up ( Timer & ISR handler )
@@ -251,19 +251,19 @@ void DeleteInputState(GPIO_PIN pinNumber)
     if (inputStates == NULL)
         return;
 
-    gpio_input_state *pGpio = (*inputStates)[bit];
-    if (pGpio)
+    gpio_input_state *pState = (*inputStates)[bit];
+    if (pState)
     {
-        if (pGpio->debounceTimer != 0)
+        if (pState->debounceTimer != 0)
         {
-            xTimerDelete(pGpio->debounceTimer, 100);
+            xTimerDelete(pState->debounceTimer, 100);
         }
 
         // Remove interrupt associatted with pin
         gpio_pin_config_t config = {kGPIO_DigitalInput, 0, kGPIO_NoIntmode};
         GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
 
-        platform_free(pGpio);
+        platform_free(pState);
         (*inputStates)[bit] = NULL;
     }
 }
@@ -379,7 +379,7 @@ bool CPU_GPIO_EnableInputPin(
     GPIO_INT_EDGE intEdge,
     GpioPinDriveMode driveMode)
 {
-    gpio_input_state *pGpio;
+    gpio_input_state *pState;
 
     // Check if valid pin number
     if (!IsValidGpioPin(pinNumber))
@@ -392,7 +392,7 @@ bool CPU_GPIO_EnableInputPin(
     if (!CPU_GPIO_SetDriveMode(pinNumber, driveMode))
         return false;
 
-    pGpio = AllocateGpioInputState(pinNumber);
+    pState = AllocateGpioInputState(pinNumber);
 
     if (pinISR != NULL && (pState->isrPtr == NULL))
 
@@ -418,34 +418,34 @@ bool CPU_GPIO_EnableInputPin(
     GPIO_PortClearInterruptFlags(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
 
     // store parameters & configs
-    pGpio->isrPtr = pinISR;
-    pGpio->mode = intEdge;
-    pGpio->param = (void *)isrParam;
-    pGpio->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+    pState->isrPtr = pinISR;
+    pState->mode = intEdge;
+    pState->param = (void *)isrParam;
+    pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
 
     // Set up expected new value for debounce
-    if (pGpio->debounceMs > 0)
+    if (pState->debounceMs > 0)
     {
-        if (pGpio->debounceTimer == 0)
+        if (pState->debounceTimer == 0)
         {
             // Create timer if it doesn't already exist for this pin
-            pGpio->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void *)pGpio, Gpio_DebounceHandler);
+            pState->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void *)pState, Gpio_DebounceHandler);
         }
         switch (intEdge)
         {
             case GPIO_INT_NONE:
             case GPIO_INT_EDGE_LOW:
             case GPIO_INT_LEVEL_LOW:
-                pGpio->expected = false;
+                pState->expected = false;
                 break;
 
             case GPIO_INT_EDGE_HIGH:
             case GPIO_INT_LEVEL_HIGH:
-                pGpio->expected = true;
+                pState->expected = true;
                 break;
 
             case GPIO_INT_EDGE_BOTH:
-                pGpio->expected = !CPU_GPIO_GetPinState(pinNumber); // Use NOT current state
+                pState->expected = !CPU_GPIO_GetPinState(pinNumber); // Use NOT current state
                 break;
         }
     }
