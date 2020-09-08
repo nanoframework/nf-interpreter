@@ -395,69 +395,69 @@ bool CPU_GPIO_EnableInputPin(
     pState = AllocateGpioInputState(pinNumber);
 
     if (pinISR != NULL && (pState->isrPtr == NULL))
-	{
-		// enable interupt mode with correct edge
-		gpio_pin_config_t config = {kGPIO_DigitalInput, 0, kGPIO_IntRisingOrFallingEdge};
-		GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
+    {
+        // enable interupt mode with correct edge
+        gpio_pin_config_t config = {kGPIO_DigitalInput, 0, kGPIO_IntRisingOrFallingEdge};
+        GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
 
-		// Enable GPIO pin interrupt
-		IRQn_Type isrNo = (IRQn_Type)(GPIO1_Combined_0_15_IRQn + GetIoPort(pinNumber));
-		NVIC_SetPriority(isrNo, 8U);
-		EnableIRQ(isrNo);
-		GPIO_PortEnableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
-		GPIO_PortClearInterruptFlags(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
+        // Enable GPIO pin interrupt
+        IRQn_Type isrNo = (IRQn_Type)(GPIO1_Combined_0_15_IRQn + GetIoPort(pinNumber));
+        NVIC_SetPriority(isrNo, 8U);
+        EnableIRQ(isrNo);
+        GPIO_PortEnableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
+        GPIO_PortClearInterruptFlags(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
 
-		// store parameters & configs
-		pState->isrPtr = pinISR;
-		pState->mode = intEdge;
-		pState->param = (void *)isrParam;
-		pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+        // store parameters & configs
+        pState->isrPtr = pinISR;
+        pState->mode = intEdge;
+        pState->param = (void *)isrParam;
+        pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
 
-		// Set up expected new value for debounce
-		if (pState->debounceMs > 0)
-		{
-			if (pState->debounceTimer == 0)
-			{
-				// Create timer if it doesn't already exist for this pin
-				pState->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void *)pState, Gpio_DebounceHandler);
-			}
-			switch (intEdge)
-			{
-				case GPIO_INT_NONE:
-				case GPIO_INT_EDGE_LOW:
-				case GPIO_INT_LEVEL_LOW:
-					pState->expected = false;
-					break;
+        // Set up expected new value for debounce
+        if (pState->debounceMs > 0)
+        {
+            if (pState->debounceTimer == 0)
+            {
+                // Create timer if it doesn't already exist for this pin
+                pState->debounceTimer = xTimerCreate("debounce", 100, pdFALSE, (void *)pState, Gpio_DebounceHandler);
+            }
+            switch (intEdge)
+            {
+                case GPIO_INT_NONE:
+                case GPIO_INT_EDGE_LOW:
+                case GPIO_INT_LEVEL_LOW:
+                    pState->expected = false;
+                    break;
 
-				case GPIO_INT_EDGE_HIGH:
-				case GPIO_INT_LEVEL_HIGH:
-					pState->expected = true;
-					break;
+                case GPIO_INT_EDGE_HIGH:
+                case GPIO_INT_LEVEL_HIGH:
+                    pState->expected = true;
+                    break;
 
-				case GPIO_INT_EDGE_BOTH:
-					pState->expected = !CPU_GPIO_GetPinState(pinNumber); // Use NOT current state
-					break;
-			}
-		}
-	}
-	else if (pinISR == NULL && (pState->isrPtr != NULL))
-	{
-		// there is no managed handler setup anymore
-		// remove INT handler
+                case GPIO_INT_EDGE_BOTH:
+                    pState->expected = !CPU_GPIO_GetPinState(pinNumber); // Use NOT current state
+                    break;
+            }
+        }
+    }
+    else if (pinISR == NULL && (pState->isrPtr != NULL))
+    {
+        // there is no managed handler setup anymore
+        // remove INT handler
 
-		// disable interrupt
-		GPIO_PortDisableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
-		// remove callback
-		GPIO_setCallback(pState->pinConfigIndex, NULL);
+        // disable interrupt
+        GPIO_PortDisableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
+        // remove callback
+        GPIO_setCallback(pState->pinConfigIndex, NULL);
 
-		// clear parameters & configs
-		pState->isrPtr = NULL;
-		pState->mode = GPIO_INT_NONE;
-		pState->param = NULL;
-		pState->debounceMs = 0;
-	}
+        // clear parameters & configs
+        pState->isrPtr = NULL;
+        pState->mode = GPIO_INT_NONE;
+        pState->param = NULL;
+        pState->debounceMs = 0;
+    }
 
-return true;
+    return true;
 }
 
 // Enable an output pin
