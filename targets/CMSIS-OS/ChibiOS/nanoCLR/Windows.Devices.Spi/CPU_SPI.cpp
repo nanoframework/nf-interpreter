@@ -10,27 +10,9 @@
 #include <string.h>
 #include <targetPAL.h>
 
-#include <win_dev_spi_native.h>
+#include <win_dev_spi_native_target.h>
 #include <hal.h>
 
-// struct representing the SPI
-struct NF_PAL_SPI
-{
-    int BusIndex;
-    SPIDriver *Driver;
-    SPIConfig Configuration;
-
-    SPI_Callback Callback;
-
-    bool SequentialTxRx;
-    bool BufferIs16bits;
-
-    uint8_t *WriteBuffer;
-    uint16_t WriteSize;
-
-    uint8_t *ReadBuffer;
-    uint16_t ReadSize;
-};
 
 /////////////////////////////////////////////////////
 // SPI PAL strucs declared in win_dev_spi_native.h //
@@ -80,7 +62,7 @@ static void CompleteTranfer(NF_PAL_SPI *palSpi)
     }
 }
 
-// Callback used when a aysnc opertion completes
+// Callback used when a async opertion completes
 static void SpiCallback(SPIDriver *spip)
 {
     (void)spip;
@@ -605,12 +587,13 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
     // init the PAL struct for this SPI bus and assign the respective driver
     // all this occurs if not already done
     // why do we need this? because several SPIDevice objects can be created associated to the same bus
-    switch (busIndex)
+    switch (busIndex + 1)
     {
 #if STM32_SPI_USE_SPI1
         case 1:
             if (SPI1_PAL.Driver == NULL)
             {
+                ConfigPins_SPI1();
                 SPI1_PAL.Driver = &SPID1;
             }
             break;
@@ -619,6 +602,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 2:
             if (SPI2_PAL.Driver == NULL)
             {
+                ConfigPins_SPI2();
                 SPI2_PAL.Driver = &SPID2;
             }
             break;
@@ -627,6 +611,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 3:
             if (SPI3_PAL.Driver == NULL)
             {
+                ConfigPins_SPI3();
                 SPI3_PAL.Driver = &SPID3;
             }
             break;
@@ -635,6 +620,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 4:
             if (SPI4_PAL.Driver == NULL)
             {
+                ConfigPins_SPI4();
                 SPI4_PAL.Driver = &SPID4;
             }
             break;
@@ -643,6 +629,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 5:
             if (SPI5_PAL.Driver == NULL)
             {
+                ConfigPins_SPI5();
                 SPI5_PAL.Driver = &SPID5;
             }
             break;
@@ -651,6 +638,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 6:
             if (SPI6_PAL.Driver == NULL)
             {
+                ConfigPins_SPI6();
                 SPI6_PAL.Driver = &SPID6;
             }
             break;
@@ -666,7 +654,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
 bool CPU_SPI_Uninitialize(uint8_t busIndex)
 {
     // get the PAL struct for the SPI bus
-    switch (busIndex)
+    switch (busIndex + 1)
     {
 #if STM32_SPI_USE_SPI1
         case 1:

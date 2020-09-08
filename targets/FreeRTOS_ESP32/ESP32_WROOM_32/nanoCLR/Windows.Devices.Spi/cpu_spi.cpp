@@ -233,9 +233,12 @@ uint32_t CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
     // Add device to bus
     spi_device_handle_t deviceHandle;
 
-    // First available bus on ESP32 is HSPI_HOST(1), so add one
+    // Bus index
+    int spiBusIndex = (spiDeviceConfig.Spi_Bus - 1);
+
+    // First available bus on ESP32 is HSPI_HOST(1)
     esp_err_t ret =
-        spi_bus_add_device((spi_host_device_t)(spiDeviceConfig.Spi_Bus + HSPI_HOST), &dev_config, &deviceHandle);
+        spi_bus_add_device((spi_host_device_t)(spiBusIndex + HSPI_HOST), &dev_config, &deviceHandle);
     if (ret != ESP_OK)
     {
         ESP_LOGE(TAG, "Unable to init SPI device, esp_err %d", ret);
