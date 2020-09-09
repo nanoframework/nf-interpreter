@@ -13,7 +13,9 @@
 #include <ti/drivers/PIN.h>
 
 #define GPIO_MAX_PINS    16
-#define TOTAL_GPIO_PORTS ((GPIO_MAX_PINS + 15) / 16)
+
+// SimpleLink doesn't follow the port&pin design pattern, there are no ports, just GPIO pins
+#define TOTAL_GPIO_PORTS 1
 
 #define EMPTY_PIN 0xFFFF
 
@@ -74,8 +76,9 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
 // Double Linked list for GPIO input status
 static HAL_DblLinkedList<gpio_input_state> gpioInputList;
 
-// Array of bits for saving reserved state
-static uint16_t pinReserved[TOTAL_GPIO_PORTS];
+// array to store reserved state of GPIO pins
+// not need to use this because we already keep track of the pins with the gpioPinConfigs 
+//static uint8_t pinReserved[TOTAL_GPIO_PORTS];
 
 // Get pointer to gpio_input_state for GPIO pin
 // return NULL if not found
@@ -135,6 +138,7 @@ int8_t FindPinConfig(GPIO_PIN pinNumber)
 {
     for (uint8_t index = 0; index < GPIO_MAX_PINS; index++)
     {
+        // need to mask the gpioPinConfigs item to get only the 8 LSbits where the pin number is stored
         if ((uint8_t)gpioPinConfigs[index] == pinNumber)
         {
             // found a free slot!
@@ -153,31 +157,18 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
 
     if (pState == NULL)
     {
-        // no input state for this GPIO
-        // check if there is room at the pinf config array
-        uint8_t index = FindFreePinConfig();
+        // found a free slot!
+        pState = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
 
-        if (index >= 0)
+        // sanity check
+        if (pState != NULL)
         {
-            // found a free slot!
-            pState = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
+            memset(pState, 0, sizeof(gpio_input_state));
 
-            // sanity check
-            if (pState != NULL)
-            {
-                memset(pState, 0, sizeof(gpio_input_state));
+            // store the pin number
+            pState->pinNumber = pinNumber;
 
-                // store the pin number
-                pState->pinNumber = pinNumber;
-
-                // store the index of the pin config
-                pState->pinConfigIndex = index;
-
-                gpioInputList.LinkAtBack(pState);
-
-                // set the pin number in the config array
-                gpioPinConfigs[index] = pinNumber | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS;
-            }
+            gpioInputList.LinkAtBack(pState);
         }
     }
 
@@ -197,9 +188,6 @@ void UnlinkInputState(gpio_input_state *pState)
 
     // remove callback
     gpioCallbackFunctions[pState->pinConfigIndex] = NULL;
-
-    // clear pin config
-    gpioPinConfigs[pState->pinConfigIndex] = GPIO_DO_NOT_CONFIG | EMPTY_PIN;
 
     // unlink from list
     pState->Unlink();
@@ -299,9 +287,6 @@ bool CPU_GPIO_Initialize()
     // clear callbacks
     memset(gpioCallbackFunctions, 0, sizeof(gpioCallbackFunctions));
 
-    // Make sure all pins are not reserved
-    memset(pinReserved, 0, sizeof(pinReserved));
-
     return true;
 }
 
@@ -319,42 +304,49 @@ bool CPU_GPIO_Uninitialize()
 // Set/reset reserved state of pin
 bool CPU_GPIO_ReservePin(GPIO_PIN pinNumber, bool fReserve)
 {
-    // Check if valid pin number 0 - 15
-    // TODO get this define from the SDK as the number is wrong
-    // for CC13x2 there are 32 possible GPIO pins
-    if (pinNumber >= GPIO_MAX_PINS)
+    // Check if this is a valid GPIO pin
+    if (pinNumber >= GPIO_PINS_COUNT)
     {
         return false;
     }
 
-    int port = pinNumber >> 4, bit = 1 << (pinNumber & 0x0F);
-
     GLOBAL_LOCK();
+
+    uint8_t index = FindPinConfig(pinNumber);
 
     if (fReserve)
     {
-        if (pinReserved[port] & bit)
+        if (index < 0)
         {
-            GLOBAL_UNLOCK();
-            return false; // already reserved
-        }
+            // pin already in use
 
-        pinReserved[port] |= bit;
+            GLOBAL_UNLOCK();
+
+            return false;
+        }
+        else
+        {
+            // pin not being used, get the next free slot
+            index = FindFreePinConfig();
+
+            // reserve pin
+            gpioPinConfigs[index] = pinNumber;
+        }
     }
     else
     {
-        pinReserved[port] &= ~bit;
+        gpioPinConfigs[index] == GPIO_DO_NOT_CONFIG | EMPTY_PIN;
     }
 
     GLOBAL_UNLOCK();
+
     return true;
 }
 
 // Return if Pin is reserved
-bool CPU_GPIO_PinIsBusy(GPIO_PIN pin)
+bool CPU_GPIO_PinIsBusy(GPIO_PIN pinNumber)
 {
-    int port = pin >> 4, sh = pin & 0x0F;
-    return (pinReserved[port] >> sh) & 1;
+    return (FindPinConfig(pinNumber) >= 0);
 }
 
 // Return maximum number of pins
@@ -416,6 +408,13 @@ bool CPU_GPIO_EnableInputPin(
     }
 
     pState = AllocateGpioInputState(pinNumber);
+
+    // get the index of this GPIO in pin config array
+    // and store it
+    pState->pinConfigIndex = FindPinConfig(pinNumber);
+   
+    // set default input config for GPIO pin
+    gpioPinConfigs[pState->pinConfigIndex] |= PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS;
 
     if (!CPU_GPIO_SetDriveMode(pState->pinConfigIndex, driveMode))
     {
@@ -530,26 +529,19 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, Gpi
     DeleteGpioInputState(pinNumber);
 
     // get free slot in pin config array
-    uint8_t pinConfigIndex = FindFreePinConfig();
+    uint8_t pinConfigIndex = FindPinConfig(pinNumber);
 
-    if (pinConfigIndex >= 0)
+    // set the GPIO pin as output
+    gpioPinConfigs[pinConfigIndex] |= GPIO_CFG_OUT_STD;
+
+    if (CPU_GPIO_SetDriveMode(pinConfigIndex, driveMode) == false)
     {
-        // found a free slot!
-
-        // set the pin number in the config array
-        gpioPinConfigs[pinConfigIndex] = pinNumber | GPIO_CFG_OUT_STD;
-
-        if (CPU_GPIO_SetDriveMode(pinConfigIndex, driveMode) == false)
-        {
-            return false;
-        }
-
-        CPU_GPIO_SetPinState(pinNumber, InitialState);
-
-        return true;
+        return false;
     }
 
-    return false;
+    CPU_GPIO_SetPinState(pinNumber, InitialState);
+
+    return true;
 }
 
 void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_t alternateFunction)

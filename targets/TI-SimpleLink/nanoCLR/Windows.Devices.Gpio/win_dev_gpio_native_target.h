@@ -9,6 +9,7 @@
 #define _WIN_DEV_GPIO_NATIVE_TARGET_H_
 
 #include <win_dev_gpio_native.h>
+#include <target_windows_devices_gpio.h>
 
 #include "rom.h" 
 // #include "rom_map.h"
