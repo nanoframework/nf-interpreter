@@ -12,7 +12,7 @@
 #include <ti/drivers/gpio/GPIOCC26XX.h>
 #include <ti/drivers/PIN.h>
 
-#define GPIO_MAX_PINS    16
+#define GPIO_MAX_PINS 16
 
 // SimpleLink doesn't follow the port&pin design pattern, there are no ports, just GPIO pins
 #define TOTAL_GPIO_PORTS 1
@@ -77,8 +77,8 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
 static HAL_DblLinkedList<gpio_input_state> gpioInputList;
 
 // array to store reserved state of GPIO pins
-// not need to use this because we already keep track of the pins with the gpioPinConfigs 
-//static uint8_t pinReserved[TOTAL_GPIO_PORTS];
+// not need to use this because we already keep track of the pins with the gpioPinConfigs
+// static uint8_t pinReserved[TOTAL_GPIO_PORTS];
 
 // Get pointer to gpio_input_state for GPIO pin
 // return NULL if not found
@@ -412,7 +412,7 @@ bool CPU_GPIO_EnableInputPin(
     // get the index of this GPIO in pin config array
     // and store it
     pState->pinConfigIndex = FindPinConfig(pinNumber);
-   
+
     // set default input config for GPIO pin
     gpioPinConfigs[pState->pinConfigIndex] |= PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS;
 
