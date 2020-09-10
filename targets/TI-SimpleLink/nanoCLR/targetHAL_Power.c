@@ -5,6 +5,8 @@
 
 #include <nanoHAL_v2.h>
 
+uint32_t WakeupReasonStore;
+
 // CPU sleep is not currently implemented in this target
 inline void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents){ (void)level; (void)wakeEvents; };
 
