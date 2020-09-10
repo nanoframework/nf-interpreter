@@ -93,6 +93,7 @@ int main(void)
     }
 
     GPIO_init();
+    ADC_init();
     ConfigUART();
 
     BIOS_start();

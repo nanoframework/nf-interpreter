@@ -9,6 +9,8 @@
  * Import the modules used in this configuration.
  */
 const CCFG     = scripting.addModule("/ti/devices/CCFG");
+const ADC      = scripting.addModule("/ti/drivers/ADC", {}, false);
+const ADC1     = ADC.addInstance();
 const DMA      = scripting.addModule("/ti/drivers/DMA");
 const RTOS     = scripting.addModule("/ti/drivers/RTOS");
 const UART2    = scripting.addModule("/ti/drivers/UART2", {}, false);
@@ -20,6 +22,10 @@ const easylink = scripting.addModule("/ti/easylink/easylink");
  */
 CCFG.forceVddr          = true;
 CCFG.ccfgTemplate.$name = "ti_devices_CCFGTemplate0";
+
+ADC1.$name                = "ADC_0";
+ADC1.samplingDuration     = "170 us";
+ADC1.adcPinInstance.$name = "CONFIG_PIN_0";
 
 UART21.$hardware           = system.deviceData.board.components.XDS110UART;
 UART21.$name               = "UART0";
@@ -42,5 +48,7 @@ easylink.radioConfigEasylinkPhy200kbps2gfsk.codeExportConfig.$name = "ti_devices
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
+ADC1.adc.$suggestSolution          = "ADC0";
+ADC1.adc.adcPin.$suggestSolution   = "boosterpack.2";
 UART21.uart.txPin.$suggestSolution = "boosterpack.4";
 UART21.uart.rxPin.$suggestSolution = "boosterpack.3";
