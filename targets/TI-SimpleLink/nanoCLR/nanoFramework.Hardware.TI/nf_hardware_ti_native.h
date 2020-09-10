@@ -14,8 +14,10 @@
 #include <ti_drivers_config.h>
 #include <ti/drivers/Power.h>
 #include <ti/drivers/pin/PINCC26XX.h>
+// clang-format off
 #include DeviceFamily_constructPath(inc/hw_prcm.h)
 #include DeviceFamily_constructPath(driverlib/sys_ctrl.h)
+// clang-format on
 
 typedef enum __nfpack Power_PinPullUpDown
 {
@@ -33,12 +35,12 @@ typedef enum __nfpack Power_PinWakeupEdge
 
 struct Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power
 {
-    NANOCLR_NATIVE_DECLARE(ConfigureWakeupFromGpioPin___STATIC__VOID__SZARRAY_nanoFrameworkHardwareTIPowerPinWakeupConfig);
+    NANOCLR_NATIVE_DECLARE(
+        ConfigureWakeupFromGpioPin___STATIC__VOID__SZARRAY_nanoFrameworkHardwareTIPowerPinWakeupConfig);
     NANOCLR_NATIVE_DECLARE(get_SourceOfReset___STATIC__nanoFrameworkHardwareTIPowerResetSource);
     NANOCLR_NATIVE_DECLARE(NativeEnterShutdownMode___STATIC__VOID);
 
     //--//
-
 };
 
 struct Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power__PinWakeupConfig
@@ -48,9 +50,8 @@ struct Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power__PinWakeupC
     static const int FIELD___pinPullUpDown = 3;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_TI;
 
-#endif  //_NF_HARDWARE_TI_NATIVE_H_
+#endif //_NF_HARDWARE_TI_NATIVE_H_

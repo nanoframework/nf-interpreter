@@ -15,9 +15,12 @@
 
 // board Header files
 #include <ti_drivers_config.h>
+
 #include <ti/drivers/gpio/GPIOCC26XX.h>
+// clang-format off
 #include DeviceFamily_constructPath(inc/hw_prcm.h)
 #include DeviceFamily_constructPath(driverlib/sys_ctrl.h)
+// clang-format on
 
 //////////////////////////////
 
