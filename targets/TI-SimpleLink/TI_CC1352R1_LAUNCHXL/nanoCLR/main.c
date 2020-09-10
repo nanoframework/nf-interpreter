@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <nanoCLR_Application.h>
+#include <nanoHAL_v2.h>
 
 // RTOS header files
 #include <xdc/std.h>
@@ -14,7 +15,12 @@
 
 // board Header files
 #include <ti_drivers_config.h>
+
 #include <ti/drivers/gpio/GPIOCC26XX.h>
+// clang-format off
+#include DeviceFamily_constructPath(inc/hw_prcm.h)
+#include DeviceFamily_constructPath(driverlib/sys_ctrl.h)
+// clang-format on
 
 //////////////////////////////
 
@@ -47,6 +53,10 @@ extern void CLRStartupThread(UArg arg0, UArg arg1);
 int main(void)
 {
     Task_Params taskParams;
+
+    // get and store reset reason
+    // must be called before PIN_init()
+    WakeupReasonStore = SysCtrlResetSourceGet();
 
     // Call board init functions
     Board_init();
