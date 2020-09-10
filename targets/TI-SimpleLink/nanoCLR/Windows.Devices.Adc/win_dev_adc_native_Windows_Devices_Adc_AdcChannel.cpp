@@ -6,9 +6,6 @@
 
 #include "win_dev_adc_native_target.h"
 
-// // this has to be an array because ChibiOS ADC API expects that
-// static adcsample_t sampleBuffer[1 * 1];
-
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -25,6 +22,7 @@
 #pragma GCC diagnostic pop
 #endif
 
+extern const ADC_Config ADC_config[];
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadValue___I4( CLR_RT_StackFrame& stack )
 {
@@ -43,21 +41,37 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
         ADC_Params_init(&params);
         ADC_Handle adcHandler = ADC_open(channelNumber, &params); FAULT_ON_NULL(adcHandler);
 
+        // sanity check
+        if (adcHandler == NULL)
+        {
+           NANOCLR_SET_AND_LEAVE(CLR_E_FAIL); 
+        }
+
         int_fast16_t res = ADC_convert(adcHandler, &adcValue0);
+
+        // close ADC
+        ADC_close(adcHandler);
 
         if (res == ADC_STATUS_SUCCESS) 
         {
-            adcValue0MicroVolt = ADC_convertRawToMicroVolts(adcHandler, adcValue0);
+            // get the raw value converted to micro volts
+            adcValue0MicroVolt = ADC_convertToMicroVolts(adcHandler, adcValue0);
+
+            // after the conversion need to get the value has if it was the raw one
+            // the multiplier is 4096 (corresponding to 12bits)
+            double rawValue = (adcValue0MicroVolt / (double)((ADCCC26XX_HWAttrs*)ADC_config[channelNumber].hwAttrs)->refVoltage) * 4096;
+
+            // load back to integer to return a proper value
+            adcValue0 = rawValue;
+
+            // set result with reading value
+            stack.SetResult_I4(adcValue0);
         }
         else
         {
+            // read operation failed
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
-        
-
-        ADC_close(adcHandler);
-
-        stack.SetResult_I4(adcValue0MicroVolt);
     }
     NANOCLR_NOCLEANUP();
 }
