@@ -22,6 +22,7 @@ set(nanoFramework.Hardware.TI_SRCS
 
 
     nf_hardware_ti_native_nanoFramework_Hardware_TI_Power.cpp
+    nf_hardware_ti_native_nanoFramework_Hardware_TI_Utilities.cpp
 
 )
 
