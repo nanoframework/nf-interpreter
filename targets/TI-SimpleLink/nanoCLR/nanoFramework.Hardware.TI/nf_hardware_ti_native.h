@@ -61,7 +61,6 @@ struct Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Utilities
     NANOCLR_NATIVE_DECLARE(NativeGetIeeeAddress___STATIC__SZARRAY_U1);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_TI;
