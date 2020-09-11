@@ -14,6 +14,8 @@
 #include <ti_drivers_config.h>
 #include <ti/drivers/Power.h>
 #include <ti/drivers/pin/PINCC26XX.h>
+#include <EasyLink.h>
+
 // clang-format off
 #include DeviceFamily_constructPath(inc/hw_prcm.h)
 #include DeviceFamily_constructPath(driverlib/sys_ctrl.h)
@@ -50,6 +52,16 @@ struct Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power__PinWakeupC
     static const int FIELD___pinPullUpDown = 3;
 
     //--//
+};
+
+struct Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Utilities
+{
+    static const int FIELD_STATIC___deviceIeeeAddress = 0;
+
+    NANOCLR_NATIVE_DECLARE(NativeGetIeeeAddress___STATIC__SZARRAY_U1);
+
+    //--//
+
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_TI;
