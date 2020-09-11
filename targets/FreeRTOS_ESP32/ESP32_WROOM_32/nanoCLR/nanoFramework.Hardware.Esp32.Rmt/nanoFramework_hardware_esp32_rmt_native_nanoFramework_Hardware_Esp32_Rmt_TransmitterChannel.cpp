@@ -36,7 +36,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     // this is always true, as we are currently only supporting this clock mode
     ::RMT.conf_ch[(rmt_channel_t)channel].conf1.ref_always_on = true;
 
-    if (InitChannel((rmt_channel_t)channel, (gpio_num_t)gpio_number) != ESP_OK)
+    if (InitTxChannel((rmt_channel_t)channel, (gpio_num_t)gpio_number) != ESP_OK)
     {
         hr = CLR_E_DRIVER_NOT_REGISTERED;
         NANOCLR_LEAVE();
@@ -360,7 +360,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    InitChannel(rmt_channel_t channel, gpio_num_t gpio)
+    InitTxChannel(rmt_channel_t channel, gpio_num_t gpio)
 {
     rmt_config_t rmt_tx{
         RMT_MODE_TX,
@@ -369,12 +369,15 @@ esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware
         gpio,
         1,
         {false, 38000, 50, RMT_CARRIER_LEVEL_HIGH, false, RMT_IDLE_LEVEL_LOW, true}};
+
     auto err = rmt_config(&rmt_tx);
     if (err != ESP_OK)
         return err;
+    
     err = rmt_driver_install(channel, 0, 0);
     if (err != ESP_OK)
         return err;
+    
     registredChannels.emplace(std::piecewise_construct, std::forward_as_tuple(channel), std::forward_as_tuple());
     return ESP_OK;
 }

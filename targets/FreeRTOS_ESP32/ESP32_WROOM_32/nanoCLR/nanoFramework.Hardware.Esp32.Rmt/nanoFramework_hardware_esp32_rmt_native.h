@@ -32,6 +32,22 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     //--//
 };
 
+struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel
+{
+    static const int FIELD___channel = 1;
+
+    NANOCLR_NATIVE_DECLARE(NativeInit___I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeStart___VOID__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeStop___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeGetNext___BOOLEAN__BYREF_nanoFrameworkHardwareEsp32RmtRmtCommand);
+    NANOCLR_NATIVE_DECLARE(NativeEnable___VOID__BOOLEAN__U1);
+    NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
+    
+    //--//
+
+    static esp_err_t InitRxChannel(rmt_channel_t channel, gpio_num_t gpio);
+};
+
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel
 {
     static const int FIELD___channel             = 1;
@@ -61,7 +77,7 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     static std::map<rmt_channel_t, std::vector<rmt_item32_t>> registredChannels;
 
     static CLR_INT32 FindNextChannel();
-    static esp_err_t InitChannel(rmt_channel_t channel, gpio_num_t gpio);
+    static esp_err_t InitTxChannel(rmt_channel_t channel, gpio_num_t gpio);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Rmt;
