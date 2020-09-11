@@ -10,14 +10,16 @@
 #include "Board.h"
 #include <ti/drivers/SPI.h>
 
-// struct representing the SPI
-typedef struct
+// struct representing the SPI 
+struct NF_PAL_SPI
 {
-    SPI_Handle masterSpi;
-    SPI_Params spiParams;
-    SPI_Transaction *transactions;
-    uint8_t transactionCount;
-} NF_PAL_SPI;
+    SPI_Handle          masterSpi;
+    SPI_Params          spiParams;
+    SPI_Transaction*    transactions;
+    uint8_t             transactionCount;
+    SPI_OP_STATUS       status;
+    SPI_Callback        callback;
+};
 
 ///////////////////////////////////////////
 // declaration of the the SPI PAL strucs //

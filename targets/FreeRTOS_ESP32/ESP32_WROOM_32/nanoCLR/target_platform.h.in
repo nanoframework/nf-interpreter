@@ -11,17 +11,13 @@
 #ifndef _TARGET_ESP32_NANOCLR_H_
 #define _TARGET_ESP32_NANOCLR_H_
 
+// enable SPI
+#define HAL_USE_SPI @HAL_USE_SPI_OPTION@
 
 // set when SD card is enabled
 #define HAL_USE_SDC @HAL_USE_SDC_OPTION@
 #if defined(HAL_USE_SDC)
-
 #define SDC_MAX_OPEN_FILES	5
-
-
-
 #endif
-
-
 
 #endif /* _TARGET_ESP32_NANOCLR_H_ */

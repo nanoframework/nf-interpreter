@@ -107,26 +107,7 @@ void nanoHAL_Initialize()
 #endif
 
 #if (HAL_USE_SPI == TRUE)
-
-#if STM32_SPI_USE_SPI1
-    SPI1_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI2
-    SPI2_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI3
-    SPI3_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI4
-    SPI4_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI5
-    SPI5_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI6
-    SPI6_PAL.Driver = NULL;
-#endif
-
+    nanoSPI_Initialize();
 #endif
 
 #if (HAL_USE_UART == TRUE)
@@ -193,6 +174,10 @@ void nanoHAL_Uninitialize()
     // - all mutexes for drivers that use them are released
     // - all drivers are stopped
 
+#if (HAL_USE_SPI == TRUE)
+    nanoSPI_Uninitialize();
+#endif
+
 #if (HAL_USE_CAN == TRUE)
 
 #if STM32_CAN_USE_CAN1
@@ -229,33 +214,7 @@ void nanoHAL_Uninitialize()
 #endif
 
 #if (HAL_USE_SPI == TRUE)
-
-#if STM32_SPI_USE_SPI1
-    spiReleaseBus(&SPID1);
-    spiStop(&SPID1);
-#endif
-#if STM32_SPI_USE_SPI2
-    spiReleaseBus(&SPID2);
-    spiStop(&SPID2);
-#endif
-#if STM32_SPI_USE_SPI3
-    spiReleaseBus(&SPID3);
-    spiStop(&SPID3);
-    SPI3_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI4
-    spiReleaseBus(&SPID4);
-    spiStop(&SPID4);
-#endif
-#if STM32_SPI_USE_SPI5
-    spiReleaseBus(&SPID5);
-    spiStop(&SPID5);
-#endif
-#if STM32_SPI_USE_SPI6
-    spiReleaseBus(&SPID6);
-    spiStop(&SPID6);
-#endif
-
+    nanoSPI_Uninitialize();
 #endif
 
 #if (HAL_USE_UART == TRUE)

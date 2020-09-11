@@ -18,7 +18,8 @@ list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/Windows.D
 
 # source files
 set(Windows.Devices.Spi_SRCS
-
+    cpu_spi.cpp
+    nanoHAL_spi.cpp
     win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo.cpp
     win_dev_spi_native_Windows_Devices_Spi_SpiController.cpp
     win_dev_spi_native_Windows_Devices_Spi_SpiDevice.cpp
