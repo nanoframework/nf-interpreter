@@ -41,8 +41,8 @@
           "NF_FEATURE_SUPPORT_REFLECTION": "ON",
           "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
           "NF_FEATURE_HAS_SDCARD": "ON",
-          "API_System.Net": "ON",
-          "NF_SECURITY_MBEDTLS": "ON",
+          "API_System.Net": "OFF",
+          "NF_SECURITY_MBEDTLS": "OFF",
           "MBEDTLS_SOURCE": "",
           "API_nanoFramework.ResourceManager": "ON",
           "API_nanoFramework.System.Collections": "ON",
@@ -57,8 +57,8 @@
           "API_Windows.Devices.Spi": "ON",
           "API_Windows.Networking.Sockets": "OFF",
           "API_Windows.Storage": "ON",
-          "API_Hardware.Esp32": "ON",
-          "API_nanoFramework.Hardware.Esp32.Rmt": "ON"
+          "API_Hardware.Esp32": "OFF",
+          "API_nanoFramework.Hardware.Esp32.Rmt": "OFF"
         }
       }
     }

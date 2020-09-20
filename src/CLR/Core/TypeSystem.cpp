@@ -2690,6 +2690,10 @@ static const TypeIndexLookup c_TypeIndexLookup[] =
 
     TIL( "Windows.Devices.I2c"              , "I2cTransferResult"             , m_I2cTransferResult                                    ),
 
+#if (HAL_USE_ESP32_RMT_OPTION == TRUE)
+    TIL( "nanoFramework.Hardware.Esp32.Rmt" , "RmtCommand"                    , m_RmtCommand                                    ),
+#endif
+
 #undef TIL
 };
 
