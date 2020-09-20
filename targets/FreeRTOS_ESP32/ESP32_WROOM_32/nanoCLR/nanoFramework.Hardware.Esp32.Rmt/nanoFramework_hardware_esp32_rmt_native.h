@@ -17,9 +17,9 @@
 #include <rmt.h>
 
 // Reduce line lengths
-#define ManagedRmtCommand  Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtCommand 
-#define RmtChannel Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel
-#define CHANNEL(channel) static_cast<rmt_channel_t>(channel)
+#define ManagedRmtCommand Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtCommand
+#define RmtChannel        Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel
+#define CHANNEL(channel)  static_cast<rmt_channel_t>(channel)
 
 typedef enum __nfpack SourceClock
 {
@@ -29,8 +29,8 @@ typedef enum __nfpack SourceClock
 
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtCommand
 {
-    static const int FIELD___level0    = 1;
-    static const int FIELD___level1    = 2;
+    static const int FIELD___level0 = 1;
+    static const int FIELD___level1 = 2;
     static const int FIELD___duration0 = 3;
     static const int FIELD___duration1 = 4;
 
@@ -52,9 +52,16 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
 
     //--//
 
-    static HRESULT CreateRmtArrayOnStack( CLR_RT_StackFrame& stack, CLR_INT32 numItems,  CLR_RT_TypeDef_Index & rmtCommandTypeDef, CLR_RT_HeapBlock ** arrayDataPtr );
-    static HRESULT CreateRmtElement( rmt_item32_t *rmtItem, CLR_RT_HeapBlock * returnArray, CLR_RT_TypeDef_Index & rmtCommandTypeDef);
-   
+    static HRESULT CreateRmtArrayOnStack(
+        CLR_RT_StackFrame &stack,
+        CLR_INT32 numItems,
+        CLR_RT_TypeDef_Index &rmtCommandTypeDef,
+        CLR_RT_HeapBlock **arrayDataPtr);
+    static HRESULT CreateRmtElement(
+        rmt_item32_t *rmtItem,
+        CLR_RT_HeapBlock *returnArray,
+        CLR_RT_TypeDef_Index &rmtCommandTypeDef);
+
     static esp_err_t InitRxChannel(rmt_channel_t channel, gpio_num_t gpio, int32_t rmtBufferSize, int32_t clockDiv);
 };
 

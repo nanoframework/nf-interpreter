@@ -6,13 +6,13 @@
 #include <cstring>
 #include "nanoFramework_hardware_esp32_rmt_native.h"
 
-#define DEFAULT_DIVIDER  4
+#define DEFAULT_DIVIDER 4
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeInit___VOID__I4( CLR_RT_StackFrame& stack )
+    NativeInit___VOID__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    uint8_t   gpio_number;
+    uint8_t gpio_number;
     CLR_INT32 channel;
 
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -43,12 +43,12 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeGetIdleLevel___BOOLEAN( CLR_RT_StackFrame& stack )
+    NativeGetIdleLevel___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     int32_t channel;
-    bool    retVal = 0;
+    bool retVal = 0;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -68,12 +68,12 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeGetIsChannelIdle___BOOLEAN( CLR_RT_StackFrame& stack )
+    NativeGetIsChannelIdle___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     int32_t channel;
-    bool    retVal = 0;
+    bool retVal = 0;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -93,12 +93,12 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeSetIsChannelIdle___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
+    NativeSetIsChannelIdle___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     int32_t channel;
-    bool    enabled;
+    bool enabled;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -117,17 +117,17 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeSetIdleLevel___VOID__BOOLEAN( CLR_RT_StackFrame& stack )
+    NativeSetIdleLevel___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     int32_t channel;
-    bool    idle_lvl;
+    bool idle_lvl;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
-    channel  = (int32_t)pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
+    channel = (int32_t)pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
     idle_lvl = (bool)stack.Arg1().NumericByRef().u1;
 
     if (!RmtChannel::CheckChannel(channel))
@@ -141,23 +141,23 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeSetCarrierMode___VOID( CLR_RT_StackFrame& stack )
+    NativeSetCarrierMode___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    int32_t  channel;
-    bool     carier_en;
+    int32_t channel;
+    bool carier_en;
     uint16_t high_lvl;
     uint16_t low_level;
-    bool     carier_lvl;
+    bool carier_lvl;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
-    channel    = (int32_t)pThis[RmtChannel::FIELD___channel].NumericByRefConst().s4;
-    carier_en  = (bool)pThis[FIELD___carrierEnabled].NumericByRefConst().u1;
-    high_lvl   = (uint16_t)pThis[FIELD___carrierHighDuration].NumericByRefConst().s2;
-    low_level  = (uint16_t)pThis[FIELD___carrierLowDuration].NumericByRefConst().s2;
+    channel = (int32_t)pThis[RmtChannel::FIELD___channel].NumericByRefConst().s4;
+    carier_en = (bool)pThis[FIELD___carrierEnabled].NumericByRefConst().u1;
+    high_lvl = (uint16_t)pThis[FIELD___carrierHighDuration].NumericByRefConst().s2;
+    low_level = (uint16_t)pThis[FIELD___carrierLowDuration].NumericByRefConst().s2;
     carier_lvl = (bool)pThis[FIELD___carrierLevel].NumericByRefConst().u1;
 
     if (!RmtChannel::CheckChannel(channel))
@@ -166,19 +166,19 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     }
 
     {
-        auto &ch                = ::RMT.conf_ch[(rmt_channel_t)channel];
-        ch.conf0.carrier_en     = carier_en;
+        auto &ch = ::RMT.conf_ch[(rmt_channel_t)channel];
+        ch.conf0.carrier_en = carier_en;
         ch.conf0.carrier_out_lv = (uint32_t)carier_lvl;
-        auto &cdc               = ::RMT.carrier_duty_ch[(rmt_channel_t)channel];
-        cdc.high                = high_lvl;
-        cdc.low                 = low_level;
+        auto &cdc = ::RMT.carrier_duty_ch[(rmt_channel_t)channel];
+        cdc.high = high_lvl;
+        cdc.low = low_level;
     }
 
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeWriteItems___U4__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame& stack )
+    NativeWriteItems___U4__SZARRAY_U1__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -186,12 +186,12 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     FAULT_ON_NULL(pThis);
 
     {
-        int32_t channel      = (int32_t)pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
-        bool    wait_tx_done = (bool)stack.Arg2().NumericByRef().u1;
+        int32_t channel = (int32_t)pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
+        bool wait_tx_done = (bool)stack.Arg2().NumericByRef().u1;
 
-        CLR_RT_HeapBlock_Array *data         = stack.Arg1().DereferenceArray();
-        char *                  buffer       = (char *)data->GetFirstElement();
-        uint32_t                bufferLength = data->m_numOfElements;
+        CLR_RT_HeapBlock_Array *data = stack.Arg1().DereferenceArray();
+        char *buffer = (char *)data->GetFirstElement();
+        uint32_t bufferLength = data->m_numOfElements;
 
         auto it = RmtChannel::registredChannels.find(CHANNEL(channel));
         if (it == RmtChannel::registredChannels.end())
@@ -217,7 +217,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeWaitTxDone___U4__I4( CLR_RT_StackFrame& stack )
+    NativeWaitTxDone___U4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -244,7 +244,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeDispose___VOID( CLR_RT_StackFrame& stack )
+    NativeDispose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -271,7 +271,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeGetSourceClock___BOOLEAN( CLR_RT_StackFrame& stack )
+    NativeGetSourceClock___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -296,7 +296,6 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NANOCLR_NOCLEANUP();
 }
 
-
 esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
     InitTxChannel(rmt_channel_t channel, gpio_num_t gpio)
 {
@@ -311,13 +310,14 @@ esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware
     auto err = rmt_config(&rmt_tx);
     if (err != ESP_OK)
         return err;
-    
+
     err = rmt_driver_install(channel, 0, 0);
     if (err != ESP_OK)
         return err;
-    
-    RmtChannel::registredChannels.emplace(std::piecewise_construct, std::forward_as_tuple(channel), std::forward_as_tuple());
+
+    RmtChannel::registredChannels.emplace(
+        std::piecewise_construct,
+        std::forward_as_tuple(channel),
+        std::forward_as_tuple());
     return ESP_OK;
 }
-
-
