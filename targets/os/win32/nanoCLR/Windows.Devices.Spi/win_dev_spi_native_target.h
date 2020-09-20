@@ -8,4 +8,4 @@
 
 #include <win_dev_spi_native.h>
 
-#endif //_WIN_DEV_SPI_NATIVE_TARGET_H_
+#endif  //_WIN_DEV_SPI_NATIVE_TARGET_H_
