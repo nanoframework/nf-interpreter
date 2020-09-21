@@ -14,16 +14,46 @@
 #include <nanoHAL_time.h>
 #include <corlib_native.h>
 
-// MOVED TO src\PAL\Include\nanoPAL_Sockets.h for convinience
-// typedef enum __nfpack NetworkInterface_UpdateOperation
+// MOVED TO src\HAL\Include\nanoHAL_Network.h for convinience
+// typedef enum __nfpack AddressMode
 // {
-//     NetworkInterface_UpdateOperation_Invalid = 0,
-//     NetworkInterface_UpdateOperation_Dns = 1,
-//     NetworkInterface_UpdateOperation_Dhcp = 2,
-//     NetworkInterface_UpdateOperation_DhcpRenew = 4,
-//     NetworkInterface_UpdateOperation_DhcpRelease = 8,
-//     NetworkInterface_UpdateOperation_Mac = 16,
-// } NetworkInterface_UpdateOperation;
+//     AddressMode_Invalid = 0,
+//     AddressMode_DHCP = 1,
+//     AddressMode_Static = 2,
+//     AddressMode_AutoIP = 3,
+// } AddressMode;
+
+// MOVED TO src\HAL\Include\nanoHAL_Network.h for convinience
+// typedef enum __nfpack AuthenticationType
+// {
+//     AuthenticationType_None = 0,
+//     AuthenticationType_EAP = 1,
+//     AuthenticationType_PEAP = 2,
+//     AuthenticationType_WCN = 3,
+//     AuthenticationType_Open = 4,
+//     AuthenticationType_Shared = 5,
+//     AuthenticationType_WEP = 6,
+//     AuthenticationType_WPA = 7,
+//     AuthenticationType_WPA2 = 8,
+// } AuthenticationType;
+
+// MOVED TO src\HAL\Include\nanoHAL_Network.h for convinience
+// typedef enum __nfpack EncryptionType
+// {
+//     EncryptionType_None = 0,
+//     EncryptionType_WEP = 1,
+//     EncryptionType_WPA = 2,
+//     EncryptionType_WPA2 = 3,
+//     EncryptionType_WPA_PSK = 4,
+//     EncryptionType_WPA2_PSK = 5,
+//     EncryptionType_Certificate = 6,
+// } EncryptionType;
+
+// MOVED TO src\PAL\Include\nanoPAL_Sockets.h for convinience
+// typedef enum __nfpack NetworkChange_NetworkEvents
+// {
+//     NetworkChange_NetworkEvents_NetworkAvailable = 1,
+// } NetworkChange_NetworkEvents;
 
 // MOVED TO src\PAL\Include\nanoPAL_Sockets.h for convinience
 // typedef enum __nfpack NetworkChange_NetworkEventType
@@ -35,10 +65,54 @@
 // } NetworkChange_NetworkEventType;
 
 // MOVED TO src\PAL\Include\nanoPAL_Sockets.h for convinience
-// typedef enum __nfpack NetworkChange_NetworkEvents
+// typedef enum __nfpack NetworkInterface_UpdateOperation
 // {
-//     NetworkChange_NetworkEvents_NetworkAvailable = 1,
-// } NetworkChange_NetworkEvents;
+//     NetworkInterface_UpdateOperation_Invalid = 0,
+//     NetworkInterface_UpdateOperation_Dns = 1,
+//     NetworkInterface_UpdateOperation_Dhcp = 2,
+//     NetworkInterface_UpdateOperation_DhcpRenew = 4,
+//     NetworkInterface_UpdateOperation_DhcpRelease = 8,
+//     NetworkInterface_UpdateOperation_Mac = 16,
+// } NetworkInterface_UpdateOperation;
+
+// MOVED TO src\HAL\Include\nanoHAL_Network.h for convinience
+// typedef enum __nfpack NetworkInterfaceType
+// {
+//     NetworkInterfaceType_Unknown = 1,
+//     NetworkInterfaceType_Ethernet = 6,
+//     NetworkInterfaceType_Wireless80211 = 71,
+//     NetworkInterfaceType_WirelessAP = 72,
+// } NetworkInterfaceType;
+
+// MOVED TO src\HAL\Include\nanoHAL_Network.h for convinience
+// typedef enum __nfpack RadioType
+// {
+//     RadioType_NotSpecified = 0,
+//     RadioType__802_11a = 1,
+//     RadioType__802_11b = 2,
+//     RadioType__802_11g = 4,
+//     RadioType__802_11n = 8,
+// } RadioType;
+
+// MOVED TO src\HAL\Include\nanoHAL_Network.h for convinience
+// typedef enum __nfpack Wireless80211Configuration_ConfigurationOptions
+// {
+//     Wireless80211Configuration_ConfigurationOptions_None = 0,
+//     Wireless80211Configuration_ConfigurationOptions_Disable = 1,
+//     Wireless80211Configuration_ConfigurationOptions_Enable = 2,
+//     Wireless80211Configuration_ConfigurationOptions_AutoConnect = 6,
+//     Wireless80211Configuration_ConfigurationOptions_SmartConfig = 10,
+// } Wireless80211Configuration_ConfigurationOptions;
+
+// MOVED TO src\HAL\Include\nanoHAL_Network.h for convinience
+// typedef enum __nfpack WirelessAPConfiguration_ConfigurationOptions
+// {
+//     WirelessAPConfiguration_ConfigurationOptions_None = 0,
+//     WirelessAPConfiguration_ConfigurationOptions_Disable = 1,
+//     WirelessAPConfiguration_ConfigurationOptions_Enable = 2,
+//     WirelessAPConfiguration_ConfigurationOptions_AutoStart = 6,
+//     WirelessAPConfiguration_ConfigurationOptions_HiddenSSID = 8,
+// } WirelessAPConfiguration_ConfigurationOptions;
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 {

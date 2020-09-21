@@ -20,12 +20,12 @@
         },
         {
           "name": "ESP32_TOOLCHAIN_PATH",
-          "value": "C:/ESP32_TOOLS",
+          "value": "C:/ESP32_TOOLS/xtensa-esp32-elf",
           "type": "PATH"
         },
         {
           "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/ESP32_TOOLS",
+          "value": "C:/ESP32_TOOLS/xtensa-esp32-elf",
           "type": "PATH"
         },
         {
@@ -160,8 +160,8 @@
         },
         {
           "name": "NF_INTEROP_ASSEMBLIES",
-          "value": "False",
-          "type": "BOOL"
+          "value": "Assembly1_Namespace Assembly2_Namespace",
+          "type": "STRING"
         },
         {
           "name": "NF_NETWORKING_SNTP",
@@ -420,8 +420,8 @@
         },
         {
           "name": "NF_INTEROP_ASSEMBLIES",
-          "value": "OFF",
-          "type": "BOOL"
+          "value": "Assembly1_Namespace Assembly2_Namespace",
+          "type": "STRING"
         },
         {
           "name": "NF_NETWORKING_SNTP",

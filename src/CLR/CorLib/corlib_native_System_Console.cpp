@@ -17,7 +17,7 @@ HRESULT Library_corlib_native_System_Console::OutNative___STATIC__VOID__STRING__
 #if defined(_WIN32)
     return stack.NotImplementedStub();
 #else
-    NANOCLR_CHECK_HRESULT(Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::WriteLineNative___STATIC__VOID__STRING__BOOLEAN( stack ));
+    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Diagnostics_Debug::WriteLineNative___STATIC__VOID__STRING__BOOLEAN( stack ));
 #endif
 
     NANOCLR_NOCLEANUP();    

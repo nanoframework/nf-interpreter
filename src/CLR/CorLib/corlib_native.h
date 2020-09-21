@@ -564,7 +564,7 @@ struct Library_corlib_native_System_DateTime
     static CLR_INT64* GetValuePtr( CLR_RT_StackFrame& stack );
     static CLR_INT64* GetValuePtr( CLR_RT_HeapBlock&  ref   );
 
-    static void Expand  ( CLR_RT_StackFrame& stack,       SYSTEMTIME& st );
+    static bool Expand  ( CLR_RT_StackFrame& stack,       SYSTEMTIME& st );
     static void Compress( CLR_RT_StackFrame& stack, const SYSTEMTIME& st );
 };
 
@@ -597,6 +597,14 @@ struct Library_corlib_native_System_Delegate
     //--//
 
     static CLR_RT_HeapBlock_Delegate* GetLastDelegate( CLR_RT_HeapBlock_Delegate* dlg );
+};
+
+struct Library_corlib_native_System_Diagnostics_Debug
+{
+    NANOCLR_NATIVE_DECLARE(WriteLineNative___STATIC__VOID__STRING__BOOLEAN);
+
+    //--//
+
 };
 
 struct Library_corlib_native_System_Diagnostics_Debugger

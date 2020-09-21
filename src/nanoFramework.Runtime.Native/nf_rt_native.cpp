@@ -10,15 +10,9 @@
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
-    Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::GC___STATIC__U4__BOOLEAN,
-    Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::EnableGCMessages___STATIC__VOID__BOOLEAN,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    Library_nf_rt_native_nanoFramework_Runtime_Native_Debug::WriteLineNative___STATIC__VOID__STRING__BOOLEAN,
     Library_nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint::Install___STATIC__VOID__I4__I4,
+    Library_nf_rt_native_nanoFramework_Runtime_Native_GC::Run___STATIC__U4__BOOLEAN,
+    Library_nf_rt_native_nanoFramework_Runtime_Native_GC::EnableGCMessages___STATIC__VOID__BOOLEAN,
     NULL,
     NULL,
     NULL,
@@ -46,7 +40,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Native =
 {
     "nanoFramework.Runtime.Native",
-    0x210110C2,
+    0x2307A8F3,
     method_lookup,
-    { 100, 0, 6, 2 }
+    { 100, 0, 8, 0 }
 };

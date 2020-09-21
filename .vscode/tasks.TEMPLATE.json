@@ -1,0 +1,85 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Install nanoFramework tools",
+      "type": "shell",
+      "group": "none",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "command": "install-scripts\\install-nf-tools.ps1 -TargetSeries ${input:targetSeries} -Path '${input:toolsPath}' "
+    },
+    {
+      "label": "Flash nanoCLR to ESP32",
+      "type": "shell",
+      "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"${input:comPort}\" --baud 921600 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 <absolute-path-to-the-esp32-bootloader-folder-mind-the-forward-slashes>/bootloader.bin 0x10000 <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.bin 0x8000 <absolute-path-to-the-build-folder-mind-the-forward-slashes>/partitions_4mb.bin",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Erase ESP32 flash",
+      "type": "shell",
+      "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"${input:comPort}\" --baud 921600 --before \"default_reset\" --after \"hard_reset\" erase_flash",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash MIMXRT1060",
+      "type": "shell",
+      "command": "C:/nxp/MCUXpressoIDE_10.2.1_795/ide/bin/crt_emu_cm_redlink.exe",
+      "options": {
+        "cwd": "${workspaceFolder}/Build"
+      },
+      "args": [
+        "-pMIMXRT1062xxxxA",
+        "--vendor=NXP",
+        "--flash-dir=C:/nxp/MCUXpressoIDE_10.2.1_795/ide/bin/Flash",
+        "--flash-driver=MIMXRT1060_SFDP_QSPI.cfx",
+        "--flash-load=nanoBooter.elf",
+        "--rst"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "toolsPath",
+      "type": "promptString",
+      "default": "C:\nftools",
+      "description": "Path where to install the tools."
+    },
+    {
+      "id": "targetSeries",
+      "type": "pickString",
+      "description": "Series of the target to install the tools for.",
+      "options": [
+        "ESP32",
+        "STM32",
+        "NXP",
+        "TI"
+      ]
+    },
+    {
+      "id": "comPort",
+      "type": "promptString",
+      "default": "COM1",
+      "description": "COM port of the ESP32 device."
+    }
+  ]
+}

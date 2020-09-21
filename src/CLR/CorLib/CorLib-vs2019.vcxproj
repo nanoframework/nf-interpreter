@@ -34,6 +34,7 @@
     <ClCompile Include="corlib_native_System_Convert.cpp" />
     <ClCompile Include="corlib_native_System_DateTime.cpp" />
     <ClCompile Include="corlib_native_System_Delegate.cpp" />
+    <ClCompile Include="corlib_native_System_Diagnostics_Debug.cpp" />
     <ClCompile Include="corlib_native_System_Diagnostics_Debugger.cpp" />
     <ClCompile Include="corlib_native_System_Double.cpp" />
     <ClCompile Include="corlib_native_System_Enum.cpp" />

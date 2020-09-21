@@ -7,7 +7,7 @@ parameters:
 steps:
   - task: CMake@1
     inputs:
-      cmakeArgs: '-G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/toolchain.xtensa-esp32-elf.cmake -DTOOLCHAIN_PREFIX=$(ESP32_TOOLCHAIN_PATH) -DESP32_IDF_PATH=$(ESP32_IDF_PATH) -DESP32_LIBS_PATH=$(ESP32_LIBS_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version).$(NBGV_VersionHeight) -DESP32_BOARD=$(BoardName) $(BuildOptions) ..'
+      cmakeArgs: '-G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/toolchain.xtensa-esp32-elf.cmake -DTOOLCHAIN_PREFIX=$(ESP32_TOOLCHAIN_PATH) -DESP32_IDF_PATH=$(ESP32_IDF_PATH) -DESP32_LIBS_PATH=$(ESP32_LIBS_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DESP32_BOARD=$(BoardName) $(BuildOptions) ..'
       workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Setup build with CMake
 
@@ -17,16 +17,16 @@ steps:
       workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Build with CMake
 
+  # because of permission issues (the python script isn't allowed to write on the output folder)
+  # we need to perform these steps by calling directly the python scripts
   - task: PythonScript@0
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.3.1\components\esptool_py\esptool\esptool.py'
-      arguments: '--chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB -o ${{ parameters.buildDirectory }}\nanoCLR.bin ${{ parameters.buildDirectory }}\targets\FreeRTOS_ESP32\$(BoardName)\nanoCLR.elf'
+      arguments: '--chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB -o ${{ parameters.buildDirectory }}\nanoCLR.bin ${{ parameters.buildDirectory }}\nanoCLR.elf'
     condition: succeeded()
     displayName: Generate nanoCLR bin file for deployment
 
-  # because of permission issues (the python script isn't allowed to write on the output folder)
-  # we need to perform these steps by calling directly the python scripts
   - task: PythonScript@0
     inputs:
       scriptSource: 'filePath'

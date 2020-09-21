@@ -1,96 +1,55 @@
+# Copyright (c) 2020 The nanoFramework project contributors
+# See LICENSE file in the project root for full license information.
+
 [CmdletBinding(SupportsShouldProcess = $true)]
 param (
-[Parameter(HelpMessage="Enter the path to the folder where the tools should be installed.",Position=2)][string]$Path,
-[switch]$force = $false
+    [Parameter(HelpMessage = "Enter the path to the folder where the tools should be installed.")][string]$Path,
+    [switch]$force = $false
 )
 
-# set board name
-$BOARD_NAME = "STM32"
+# need this check here as the path can be passed with an empty string
+if ([string]::IsNullOrEmpty($Path) -or $force) {
 
-[Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
-
-Write-Host "Install Tools to build nanoCLR into default folders and configure json files ..."
-$env:BOARD_NAME = $BOARD_NAME
-$env:NANOCLR_COMPORT = $COMPORT
-
-if($psISE) { $PSScriptRoot = Split-Path -Path $psISE.CurrentFile.FullPath} #In case running in psISE
-if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent } # or older PS
-
-#Set location of nf-interpreter
-$nfRoot = "$PSScriptRoot\.."
-
-# create build folder if necessary
-md -Force "$nfRoot\build" | Out-Null
-
-Write-Host "BOARD_NAME=" $env:BOARD_NAME
-
-If(-Not [string]::IsNullOrEmpty($Path))
-{
-	# user has requested install on a specific path
-
-	# force update of base path for tools
-	$env:STM32_TOOLS_PATH = $Path
-	Write-Host ("Set User Environment STM32_TOOLS_PATH='"+$env:STM32_TOOLS_PATH+"'")
-	[System.Environment]::SetEnvironmentVariable("STM32_TOOLS_PATH", $env:STM32_TOOLS_PATH, "User")
-
-	$env:GNU_GCC_TOOLCHAIN_PATH=($env:STM32_TOOLS_PATH+'\9-2019-q4-update')
-	Write-Host ("Set User Environment GNU_GCC_TOOLCHAIN_PATH='"+$env:GNU_GCC_TOOLCHAIN_PATH+"'")
-	[System.Environment]::SetEnvironmentVariable("GNU_GCC_TOOLCHAIN_PATH", $env:GNU_GCC_TOOLCHAIN_PATH, "User")
-
-	# set flag to force updating all tool paths
-	$PathSet = $true
-}
-else
-{
-	# no path requested, set to default location
-	
-	# force update of base path for path
-	$env:STM32_TOOLS_PATH = 'C:\mytools'
-	Write-Host ("Set User Environment STM32_TOOLS_PATH='"+$env:STM32_TOOLS_PATH+"'")
-	[System.Environment]::SetEnvironmentVariable("STM32_TOOLS_PATH", $env:STM32_TOOLS_PATH, "User")
-
-	$env:GNU_GCC_TOOLCHAIN_PATH='C:\GNU_Tools_ARM_Embedded\9-2019-q4-update'
-	Write-Host ("Set User Environment GNU_GCC_TOOLCHAIN_PATH='"+$env:GNU_GCC_TOOLCHAIN_PATH+"'")
-	[System.Environment]::SetEnvironmentVariable("GNU_GCC_TOOLCHAIN_PATH", $env:GNU_GCC_TOOLCHAIN_PATH, "User")
-
-	# clear flag to force updating all tool paths
-	$PathSet = $false
+    # check if there is already a path set
+    if($env:NF_TOOLS_PATH)
+    {
+        $Path = $env:NF_TOOLS_PATH
+    }
+    else {
+        $Path = "C:\nftools"        
+    }
 }
 
-If([string]::IsNullOrEmpty($env:HEX2DFU_PATH) -or $PathSet -or $force)
-{
-	$env:HEX2DFU_PATH= ($env:STM32_TOOLS_PATH+'\hex2dfu')
-	Write-Host ("Set User Environment HEX2DFU_PATH='"+$env:HEX2DFU_PATH+"'")
-	[System.Environment]::SetEnvironmentVariable("HEX2DFU_PATH", $env:HEX2DFU_PATH, "User")
-}
+# set environment variable
+$env:NF_TOOLS_PATH = $Path
 
-If([string]::IsNullOrEmpty($env:NINJA_PATH) -or $PathSet -or $force)
-{
-	$env:NINJA_PATH= ($env:STM32_TOOLS_PATH+'\ninja')
-	Write-Host ("Set User Environment NINJA_PATH='"+$env:NINJA_PATH+"'")
-	[System.Environment]::SetEnvironmentVariable("NINJA_PATH", $env:NINJA_PATH, "User")
-}
+"Set User Environment NF_TOOLS_PATH='" + $Path + "'" | Write-Host -ForegroundColor White
+[System.Environment]::SetEnvironmentVariable("NF_TOOLS_PATH", $Path, "User")
 
-# get build matrix (Not used anymore)
-#Invoke-Expression -Command $PSScriptRoot\get-stm32-targets-to-build.ps1
+# this call can fail if the script is not run with appropriate permissions
+[System.Environment]::SetEnvironmentVariable("NF_TOOLS_PATH", $Path, "Machine")
+
+# need to pass the 'force' switch?
+if ($force) {
+    $commandArgs = " -force"
+}
 
 # install tools and utilities
-Invoke-Expression -Command $PSScriptRoot\install-arm-gcc-toolchain.ps1
-Invoke-Expression -Command $PSScriptRoot\install-ninja.ps1
-Invoke-Expression -Command $PSScriptRoot\install-nf-hex2dfu.ps1
-
-# add Ninja to the path
-# this call can fail if the script is not run with appropriate permissions
-[System.Environment]::SetEnvironmentVariable("NINJA_PATH", $env:NINJA_PATH, "User")
+Invoke-Expression $PSScriptRoot\install-cmake.ps1
+Invoke-Expression "$PSScriptRoot\install-arm-gcc-toolchain.ps1 $commandArgs"
+Invoke-Expression "$PSScriptRoot\install-ninja.ps1 $commandArgs"
+Invoke-Expression "$PSScriptRoot\install-nf-hex2dfu.ps1 $commandArgs"
+Invoke-Expression "$PSScriptRoot\install-openocd.ps1 $commandArgs"
 
 <#
 .SYNOPSIS
-    Install the default tools to build nanoFramework for STM32 and setup build environemnt.
+    Install the default tools to build nanoFramework for STM32 and setup build environment.
 .DESCRIPTION
-    Power Shell Script to install the default tools to build nano Framework, including setting the machine path and other environment variables needed for STM32
+	Power Shell Script to install the default tools to build nanoFramework, including setting the machine path and other environment variables needed for STM32
+	Use the -Force parameter to overwrite existing Environment variables. 
 .EXAMPLE
    .\install-stm32-tools.ps1 
-   Install the tools for STM32 to default path, define required environment variables and update VSCode files with paths and set COM19 in tasks.json
+   Install the tools for STM32 to default path, define required environment variables
 .NOTES
     Tested on Windows 10
     Author:  nanoFramework Contributors

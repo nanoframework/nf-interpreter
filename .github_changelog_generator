@@ -10,5 +10,4 @@ enhancement_labels=Type: enhancement
 bug_labels=Type: bug
 merge_prefix=**Documentation and other chores:**
 unreleased_label=**Changes available only in 'Preview' images:**
-issue_line_labels=Area: ESP32,Area: STM32-ChibiOS,Area: WIN32,Area: Interpreter,Area: Common libs,Breaking-Change,documentation
 author=false
