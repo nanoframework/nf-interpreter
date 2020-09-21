@@ -104,7 +104,7 @@ add_executable(
 # Add link flags
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--start-group ")
 
-if(USE_NETWORKING_OPTION)
+if(USE_SECURITY_MBEDTLS_OPTION)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf NetworkLib)
 endif()
 
