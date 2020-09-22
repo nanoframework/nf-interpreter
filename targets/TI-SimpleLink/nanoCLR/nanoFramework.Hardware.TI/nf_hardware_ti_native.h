@@ -37,12 +37,13 @@ typedef enum __nfpack Power_PinWakeupEdge
 
 struct Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power
 {
-    NANOCLR_NATIVE_DECLARE(
-        ConfigureWakeupFromGpioPin___STATIC__VOID__SZARRAY_nanoFrameworkHardwareTIPowerPinWakeupConfig);
+    NANOCLR_NATIVE_DECLARE(ConfigureWakeupFromGpioPin___STATIC__VOID__SZARRAY_nanoFrameworkHardwareTIPowerPinWakeupConfig);
     NANOCLR_NATIVE_DECLARE(get_SourceOfReset___STATIC__nanoFrameworkHardwareTIPowerResetSource);
     NANOCLR_NATIVE_DECLARE(NativeEnterShutdownMode___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(NativeEnterStandbyMode___STATIC__VOID__SystemTimeSpan);
 
     //--//
+
 };
 
 struct Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power__PinWakeupConfig
