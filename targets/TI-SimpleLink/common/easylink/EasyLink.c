@@ -30,9 +30,12 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// need this here as we are importing it from the SDK
+// clang-format off
+
 /***** Includes *****/
 #include "EasyLink.h"
-#include "easylink_config.h"
+#include "ti_easylink_config.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -44,15 +47,9 @@
 #include <dmm/dmm_rfmap.h>
 #endif //USE_DMM
 
-#include "Board.h"
-
 /* TI Drivers */
-#ifdef Board_SYSCONFIG_PREVIEW
-#include <smartrf_settings/smartrf_settings.h>
-#else
-#include <smartrf_settings/smartrf_settings.h>
-#include <smartrf_settings/smartrf_settings_predefined.h>
-#endif
+#include <ti_drivers_config.h>
+#include <ti_radio_config.h>
 
 /* BIOS Header files */
 #include <ti/sysbios/knl/Clock.h>
@@ -74,8 +71,8 @@
 #include DeviceFamily_constructPath(inc/hw_ccfg_simple_struct.h)
 
 union setupCmd_t{
-#if (defined Board_CC1352P1_LAUNCHXL)  || (defined Board_CC1352P_2_LAUNCHXL)  || \
-    (defined Board_CC1352P_4_LAUNCHXL)
+#if ((defined LAUNCHXL_CC1352P1) || (defined LAUNCHXL_CC1352P_2) || \
+     (defined LAUNCHXL_CC1352P_4))
     rfc_CMD_PROP_RADIO_DIV_SETUP_PA_t divSetup;
 #else
     rfc_CMD_PROP_RADIO_DIV_SETUP_t divSetup;
@@ -83,6 +80,8 @@ union setupCmd_t{
     rfc_CMD_PROP_RADIO_SETUP_t setup;
 };
 
+// Enable Activity profiling
+// #define EASYLINK_ACTIVITY_PROFILING
 //Primary IEEE address location
 #define EASYLINK_PRIMARY_IEEE_ADDR_LOCATION   (FCFG1_BASE + FCFG1_O_MAC_15_4_0)
 //Secondary IEEE address location
@@ -209,6 +208,9 @@ static bool rfModeMultiClient = EASYLINK_ENABLE_MULTI_CLIENT;
 //Async Rx timeout value
 static uint32_t asyncRxTimeOut = EASYLINK_ASYNC_RX_TIMEOUT;
 
+// Current Command Priority
+static uint32_t cmdPriority = EasyLink_Priority_Normal;
+
 //local commands, contents will be defined by modulation type
 static union setupCmd_t EasyLink_cmdPropRadioSetup;
 static rfc_CMD_FS_t EasyLink_cmdFs;
@@ -239,6 +241,10 @@ static Semaphore_Handle busyMutex;
 //Handle for last Async command, which is needed by EasyLink_abort
 static RF_CmdHandle asyncCmdHndl = EASYLINK_RF_CMD_HANDLE_INVALID;
 
+// Command schedule parameters, needed by the DMM to schedule commands in a
+// multi-client setup
+static RF_ScheduleCmdParams schParams_prop;
+
 /* Set Default parameters structure */
 static const EasyLink_Params EasyLink_defaultParams = EASYLINK_PARAM_CONFIG;
 
@@ -253,6 +259,12 @@ static bool isAddrSizeValid(uint8_t ui8AddrSize)
 void EasyLink_Params_init(EasyLink_Params *params)
 {
     *params = EasyLink_defaultParams;
+}
+
+// Generate the activity table value
+static uint32_t genActivityTableValue(EasyLink_Activity activity, EasyLink_Priority priority)
+{
+    return((activity << 16) | priority);
 }
 
 //Create an Advanced Tx command from a Tx Command
@@ -284,6 +296,10 @@ static void txDoneCallback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
     else if ( (e & RF_EventCmdAborted) || (e & RF_EventCmdCancelled) || (e & RF_EventCmdPreempted) )
     {
         status = EasyLink_Status_Aborted;
+    }
+    else if(e == (RF_EventCmdCancelled | RF_EventCmdPreempted))
+    {
+        status = EasyLink_Status_Cmd_Rejected;
     }
     else
     {
@@ -368,12 +384,19 @@ static uint32_t calculateCmdTime(EasyLink_TxPacket *txPacket)
 //Callback for Clear Channel Assessment Done
 static void ccaDoneCallback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 {
-    RF_ScheduleCmdParams schParams_prop;
     EasyLink_Status status        = EasyLink_Status_Tx_Error;
     RF_Op* pCmd                   = RF_getCmdOp(h, ch);
     bool bCcaRunAgain             = false;
     static uint8_t be             = EASYLINK_MIN_CCA_BACKOFF_WINDOW;
     static uint32_t backOffTime;
+
+    schParams_prop.startTime    = 0U;
+    schParams_prop.startType    = RF_StartNotSpecified;
+    schParams_prop.allowDelay   = RF_AllowDelayNone;
+    schParams_prop.endTime      = 0U;
+    schParams_prop.endType      = RF_EndNotSpecified;
+    schParams_prop.duration     = 0U;
+    schParams_prop.activityInfo = genActivityTableValue(EasyLink_Activity_Tx, (EasyLink_Priority)cmdPriority);
 
     asyncCmdHndl = EASYLINK_RF_CMD_HANDLE_INVALID;
 
@@ -425,7 +448,8 @@ static void ccaDoneCallback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
                 // for a clear channel (CCA) before sending a packet
                 if(rfModeMultiClient)
                 {
-                    schParams_prop.priority = RF_PriorityHigh;
+                    schParams_prop.startTime    = pCmd->startTime;
+                    schParams_prop.startType    = RF_StartAbs;
                     asyncCmdHndl = RF_scheduleCmd(rfHandle, (RF_Op*)&EasyLink_cmdPropCs,
                                                   &schParams_prop, ccaDoneCallback, EASYLINK_RF_EVENT_MASK);
                 }
@@ -449,13 +473,20 @@ static void ccaDoneCallback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
 
     }
-    else if ( (e & RF_EventCmdAborted) || (e & RF_EventCmdCancelled ) || (e & RF_EventCmdPreempted ) )
+    else if ((e & RF_EventCmdAborted)   || (e & RF_EventCmdCancelled) || (e & RF_EventCmdPreempted))
     {
         //Release now so user callback can call EasyLink API's
         Semaphore_post(busyMutex);
         // Reset the number of retries
         be = EASYLINK_MIN_CCA_BACKOFF_WINDOW;
-        status = EasyLink_Status_Aborted;
+        if(e == (RF_EventCmdCancelled | RF_EventCmdPreempted))
+        {
+            status = EasyLink_Status_Cmd_Rejected;
+        }
+        else
+        {
+            status = EasyLink_Status_Aborted;
+        }
     }
     else
     {
@@ -547,7 +578,14 @@ static void rxDoneCallback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         //Release now so user callback can call EasyLink API's
         Semaphore_post(busyMutex);
         asyncCmdHndl = EASYLINK_RF_CMD_HANDLE_INVALID;
-        status = EasyLink_Status_Aborted;
+        if(e == (RF_EventCmdCancelled | RF_EventCmdPreempted))
+        {
+            status = EasyLink_Status_Cmd_Rejected;
+        }
+        else
+        {
+            status = EasyLink_Status_Aborted;
+        }
     }
 
     if (rxCb != NULL)
@@ -570,6 +608,14 @@ static EasyLink_Status enableTestMode(EasyLink_CtrlOption mode)
     //this function exits
     static rfc_CMD_TX_TEST_t txTestCmd = {0};
     static rfc_CMD_RX_TEST_t rxTestCmd = {0};
+
+    schParams_prop.startTime    = 0U;
+    schParams_prop.startType    = RF_StartNotSpecified;
+    schParams_prop.allowDelay   = RF_AllowDelayNone;
+    schParams_prop.endTime      = 0U;
+    schParams_prop.endType      = RF_EndNotSpecified;
+    schParams_prop.duration     = 0U;
+    schParams_prop.activityInfo = genActivityTableValue(EasyLink_Activity_Rx, (EasyLink_Priority)cmdPriority);
 
     if((!configured) || suspended)
     {
@@ -625,9 +671,17 @@ static EasyLink_Status enableTestMode(EasyLink_CtrlOption mode)
         txTestCmd.endTrigger.triggerType = TRIG_NEVER;
 
         /* Post command and store Cmd Handle for future abort */
-        asyncCmdHndl = RF_postCmd(rfHandle, (RF_Op*)&txTestCmd,
-                                  RF_PriorityNormal, asyncCmdCallback,
-                                  EASYLINK_RF_EVENT_MASK);
+        if(rfModeMultiClient)
+        {
+            asyncCmdHndl = RF_scheduleCmd(rfHandle, (RF_Op*)&txTestCmd,
+                        &schParams_prop, asyncCmdCallback, EASYLINK_RF_EVENT_MASK);
+        }
+        else
+        {
+            asyncCmdHndl = RF_postCmd(rfHandle, (RF_Op*)&txTestCmd,
+                                      RF_PriorityNormal, asyncCmdCallback,
+                                      EASYLINK_RF_EVENT_MASK);
+        }
 
         /* Has command completed? */
         uint16_t count = 0;
@@ -667,9 +721,18 @@ static EasyLink_Status enableTestMode(EasyLink_CtrlOption mode)
         rxTestCmd.endTrigger.triggerType = TRIG_NEVER;
 
         /* Post command and store Cmd Handle for future abort */
-        asyncCmdHndl = RF_postCmd(rfHandle, (RF_Op*)&rxTestCmd,
-                                  RF_PriorityNormal, asyncCmdCallback,
-                                  EASYLINK_RF_EVENT_MASK);
+        if(rfModeMultiClient)
+        {
+            asyncCmdHndl = RF_scheduleCmd(rfHandle, (RF_Op*)&rxTestCmd,
+                &schParams_prop, txDoneCallback, EASYLINK_RF_EVENT_MASK);
+        }
+        else
+        {
+            asyncCmdHndl = RF_postCmd(rfHandle, (RF_Op*)&rxTestCmd,
+                                      RF_PriorityNormal, asyncCmdCallback,
+                                      EASYLINK_RF_EVENT_MASK);
+        }
+
         if(EasyLink_CmdHandle_isValid(asyncCmdHndl))
         {
             status = EasyLink_Status_Success;
@@ -682,6 +745,19 @@ static EasyLink_Status enableTestMode(EasyLink_CtrlOption mode)
 
     return status;
 }
+
+#if defined(EASYLINK_ACTIVITY_PROFILING)
+uint32_t numCmdFlush = 0U;
+static void activityPreemptCb(xdc_UArg arg)
+{
+    if(arg)
+    {
+        /* Flush all commands from the queue */
+        (void)RF_flushCmd((RF_Handle)arg, RF_CMDHANDLE_FLUSH_ALL, RF_ABORT_PREEMPTION);
+        numCmdFlush++;
+    }
+}
+#endif // EASYLINK_ACTIVITY_PROFILING
 
 EasyLink_Status EasyLink_init(EasyLink_Params *params)
 {
@@ -715,7 +791,10 @@ EasyLink_Status EasyLink_init(EasyLink_Params *params)
             rfParams.nClientEventMask = EasyLink_params.nClientEventMask;
         }
 
+        rfParams.nID = RF_STACK_ID_EASYLINK;
         rfParamsConfigured = 1;
+        // Initialize the schedule parameters
+        RF_ScheduleCmdParams_init(&schParams_prop);
     }
 
     // Assign the random number generator function pointer to the global
@@ -786,6 +865,11 @@ EasyLink_Status EasyLink_init(EasyLink_Params *params)
                 useDivRadioSetup= false;
                 rfConfigOk = true;
             }
+            else if((ChipInfo_ChipFamilyIs_CC13x2_CC26x2()) && (ChipInfo_GetChipType() != CHIP_TYPE_CC1312))
+            {
+                useDivRadioSetup= true;
+                rfConfigOk = true;
+            }
         break;
 
         case EasyLink_Phy_2_4_200kbps2gfsk:
@@ -802,6 +886,11 @@ EasyLink_Status EasyLink_init(EasyLink_Params *params)
                 useDivRadioSetup= false;
                 rfConfigOk = true;
             }
+            else if((ChipInfo_ChipFamilyIs_CC13x2_CC26x2()) && (ChipInfo_GetChipType() != CHIP_TYPE_CC1312))
+            {
+                useDivRadioSetup= true;
+                rfConfigOk = true;
+            }
         break;
 
         case EasyLink_Phy_5kbpsSlLr:
@@ -809,7 +898,7 @@ EasyLink_Status EasyLink_init(EasyLink_Params *params)
             {
                 useDivRadioSetup= true;
                 rfConfigOk = true;
-#if (defined Board_CC1352P_4_LAUNCHXL)
+#if (defined LAUNCHXL_CC1352P_4)
                 // CC1352P-4 SLR operates at 433.92 MHz
                 EasyLink_cmdFs.frequency = 0x01B1;
                 EasyLink_cmdFs.fractFreq = 0xEB9A;
@@ -821,14 +910,13 @@ EasyLink_Status EasyLink_init(EasyLink_Params *params)
             if((ChipInfo_GetChipType() == CHIP_TYPE_CC1312) || (ChipInfo_GetChipType() == CHIP_TYPE_CC1352) ||
                (ChipInfo_GetChipType() == CHIP_TYPE_CC1352P))
             {
-#if !defined(Board_CC1352P_4_LAUNCHXL)
+#if !defined(LAUNCHXL_CC1352P_4)
                 // This mode is not supported in the 433 MHz band
                 useDivRadioSetup= true;
                 rfConfigOk = true;
 #endif
             }
             break;
-
 
         default:  // Invalid PHY setting
             rfConfigOk = false;
@@ -882,8 +970,8 @@ EasyLink_Status EasyLink_init(EasyLink_Params *params)
     // Copy the PHY settings to the EasyLink PHY variable
     if(useDivRadioSetup)
     {
-#if (defined Board_CC1352P1_LAUNCHXL)  || (defined Board_CC1352P_2_LAUNCHXL)  || \
-    (defined Board_CC1352P_4_LAUNCHXL)
+#if ((defined LAUNCHXL_CC1352P1) || (defined LAUNCHXL_CC1352P_2) || \
+     (defined LAUNCHXL_CC1352P_4))
         memcpy(&EasyLink_cmdPropRadioSetup.divSetup, (rfSetting->RF_uCmdPropRadio.RF_pCmdPropRadioDivSetup), sizeof(rfc_CMD_PROP_RADIO_DIV_SETUP_PA_t));
 #else
         memcpy(&EasyLink_cmdPropRadioSetup.divSetup, (rfSetting->RF_uCmdPropRadio.RF_pCmdPropRadioDivSetup), sizeof(rfc_CMD_PROP_RADIO_DIV_SETUP_t));
@@ -975,9 +1063,27 @@ EasyLink_Status EasyLink_init(EasyLink_Params *params)
     EasyLink_cmdPropRxAdv.pQueue = &dataQueue;
     EasyLink_cmdPropRxAdv.pOutput = (uint8_t*)&rxStatistics;
 
-    //Set the frequency
-    RF_runCmd(rfHandle, (RF_Op*)&EasyLink_cmdFs, RF_PriorityNormal, 0, //asyncCmdCallback,
-            EASYLINK_RF_EVENT_MASK);
+    if (rfModeMultiClient)
+    {
+        /* Set params */
+        schParams_prop.startTime    = 0U;
+        schParams_prop.startType    = RF_StartNotSpecified;
+        schParams_prop.allowDelay   = RF_AllowDelayNone;
+        schParams_prop.endTime      = 0U;
+        schParams_prop.endType      = RF_EndNotSpecified;
+        schParams_prop.duration     = 0U;
+        schParams_prop.activityInfo = genActivityTableValue(EasyLink_Activity_Tx, (EasyLink_Priority)cmdPriority);
+
+        //Set the frequency
+        (void)RF_runScheduleCmd(rfHandle, (RF_Op*)&EasyLink_cmdFs, &schParams_prop, 0, //asyncCmdCallback,
+                EASYLINK_RF_EVENT_MASK);
+    }
+    else
+    {
+        //Set the frequency
+        (void)RF_runCmd(rfHandle, (RF_Op*)&EasyLink_cmdFs, RF_PriorityNormal, 0, //asyncCmdCallback,
+                EASYLINK_RF_EVENT_MASK);
+    }
 
     //Create a semaphore for blocking commands
     Semaphore_Params semParams;
@@ -1006,8 +1112,24 @@ EasyLink_Status EasyLink_init(EasyLink_Params *params)
 
     configured = 1;
 
-    return EasyLink_Status_Success;
+#if defined(EASYLINK_ACTIVITY_PROFILING)
+/* 10 ms interrupt period based on 10us clock tick */
+#define EASYLINK_ACTIVITY_PROFILING_PREEMPT_TIMEOUT  (1000)
 
+    static Clock_Handle EasyLink_activityClock = NULL;
+
+    /* Create a clock instance to periodically flush all RF commands */
+    Clock_Params clkparams;
+    Clock_Params_init(&clkparams);
+    clkparams.startFlag = FALSE;
+    clkparams.period    = EASYLINK_ACTIVITY_PROFILING_PREEMPT_TIMEOUT;
+    clkparams.arg       = (xdc_UArg)rfHandle;
+    EasyLink_activityClock = Clock_create((Clock_FuncPtr)activityPreemptCb,
+                                          EASYLINK_ACTIVITY_PROFILING_PREEMPT_TIMEOUT, &clkparams, NULL);
+    Clock_start(EasyLink_activityClock);
+#endif // EASYLINK_ACTIVITY_PROFILING
+
+    return EasyLink_Status_Success;
 }
 
 EasyLink_Status EasyLink_setFrequency(uint32_t ui32Frequency)
@@ -1033,6 +1155,15 @@ EasyLink_Status EasyLink_setFrequency(uint32_t ui32Frequency)
     EasyLink_cmdFs.frequency = centerFreq;
     EasyLink_cmdFs.fractFreq = fractFreq;
 
+    /* Set params */
+    schParams_prop.startTime    = 0U;
+    schParams_prop.startType    = RF_StartNotSpecified;
+    schParams_prop.allowDelay   = RF_AllowDelayNone;
+    schParams_prop.endTime      = 0U;
+    schParams_prop.endType      = RF_EndNotSpecified;
+    schParams_prop.duration     = 0U;
+    schParams_prop.activityInfo = genActivityTableValue(EasyLink_Activity_Tx, (EasyLink_Priority)cmdPriority);
+
 #if (!defined(DeviceFamily_CC26X0R2) && !defined(DeviceFamily_CC26X0))
     /* If the command type is CMD_PROP_RADIO_DIV_SETUP then set the center frequency
      * to the same band as the FS command
@@ -1041,15 +1172,35 @@ EasyLink_Status EasyLink_setFrequency(uint32_t ui32Frequency)
        (EasyLink_cmdPropRadioSetup.divSetup.centerFreq != centerFreq))
     {
         EasyLink_cmdPropRadioSetup.divSetup.centerFreq = centerFreq;
-        /* Run the Setup Command */
-        (void)RF_runCmd(rfHandle, (RF_Op*)&EasyLink_cmdPropRadioSetup,
-                  RF_PriorityNormal, 0, EASYLINK_RF_EVENT_MASK);
+
+        if (rfModeMultiClient)
+        {
+            /* Run the Setup Command */
+            (void)RF_runScheduleCmd(rfHandle, (RF_Op*)&EasyLink_cmdPropRadioSetup,
+                      &schParams_prop, 0, EASYLINK_RF_EVENT_MASK);
+        }
+        else
+        {
+            /* Run the Setup Command */
+            (void)RF_runCmd(rfHandle, (RF_Op*)&EasyLink_cmdPropRadioSetup,
+                      RF_PriorityNormal, 0, EASYLINK_RF_EVENT_MASK);
+        }
     }
 #endif
 
-    /* Run command */
-    RF_EventMask result = RF_runCmd(rfHandle, (RF_Op*)&EasyLink_cmdFs,
-            RF_PriorityNormal, 0, EASYLINK_RF_EVENT_MASK);
+    RF_EventMask result;
+    if (rfModeMultiClient)
+    {
+        /* Run command */
+        result = RF_runScheduleCmd(rfHandle, (RF_Op*)&EasyLink_cmdFs,
+                &schParams_prop, 0, EASYLINK_RF_EVENT_MASK);
+    }
+    else
+    {
+        /* Run command */
+        result = RF_runCmd(rfHandle, (RF_Op*)&EasyLink_cmdFs,
+                RF_PriorityNormal, 0, EASYLINK_RF_EVENT_MASK);
+    }
 
     if((result & RF_EventLastCmdDone) && (EasyLink_cmdFs.status == DONE_OK))
     {
@@ -1090,11 +1241,11 @@ EasyLink_Status EasyLink_setRfPower(int8_t i8TxPowerDbm)
         return EasyLink_Status_Busy_Error;
     }
 
-#if (defined Board_CC1310_LAUNCHXL)    || (defined Board_CC1350_LAUNCHXL)     || \
-    (defined Board_CC1350STK)          || (defined Board_CC1350_LAUNCHXL_433) || \
-    (defined Board_CC1312R1_LAUNCHXL)  || (defined Board_CC1352R1_LAUNCHXL)   || \
-    (defined Board_CC1352P1_LAUNCHXL)  || (defined Board_CC1352P_2_LAUNCHXL)  || \
-    (defined Board_CC1352P_4_LAUNCHXL) || (defined Board_CC2640R2_LAUNCHXL)
+#if (defined CONFIG_CC1352R1F3RGZ)     || (defined CONFIG_CC1312R1F3RGZ)     || \
+    (defined CONFIG_CC2652R1FRGZ)      || (defined CONFIG_CC1312R1_LAUNCHXL) || \
+    (defined CONFIG_CC1352R1_LAUNCHXL) || (defined CONFIG_CC26X2R1_LAUNCHXL) || \
+    (defined LAUNCHXL_CC1352P1)        || (defined LAUNCHXL_CC1352P_2)       || \
+    (defined LAUNCHXL_CC1352P_4)
 
     RF_TxPowerTable_Entry *rfPowerTable = NULL;
     RF_TxPowerTable_Value newValue;
@@ -1121,14 +1272,12 @@ EasyLink_Status EasyLink_setRfPower(int8_t i8TxPowerDbm)
     if((newValue.paType == RF_TxPowerTable_DefaultPA) &&
        (i8TxPowerDbm == rfPowerTable[rfPowerTableSize-2].power))
     {
-#if !(defined Board_CC2640R2_LAUNCHXL)
         //Release the busyMutex
         Semaphore_post(busyMutex);
         // The desired power level is set to the maximum supported under the
         // default PA settings, but the boost mode (CCFG_FORCE_VDDR_HH) is not
         // turned on
         return EasyLink_Status_Config_Error;
-#endif
     }
 #else
     // dummy read to avoid build warnings
@@ -1217,11 +1366,11 @@ EasyLink_Status EasyLink_getRfPower(int8_t *pi8TxPowerDbm)
         return EasyLink_Status_Config_Error;
     }
 
-#if (defined Board_CC1310_LAUNCHXL)    || (defined Board_CC1350_LAUNCHXL)     || \
-    (defined Board_CC1350STK)          || (defined Board_CC1350_LAUNCHXL_433) || \
-    (defined Board_CC1312R1_LAUNCHXL)  || (defined Board_CC1352R1_LAUNCHXL)   || \
-    (defined Board_CC1352P1_LAUNCHXL)  || (defined Board_CC1352P_2_LAUNCHXL)  || \
-    (defined Board_CC1352P_4_LAUNCHXL) || (defined Board_CC2640R2_LAUNCHXL)
+#if (defined CONFIG_CC1352R1F3RGZ)     || (defined CONFIG_CC1312R1F3RGZ)     || \
+    (defined CONFIG_CC2652R1FRGZ)      || (defined CONFIG_CC1312R1_LAUNCHXL) || \
+    (defined CONFIG_CC1352R1_LAUNCHXL) || (defined CONFIG_CC26X2R1_LAUNCHXL) || \
+    (defined LAUNCHXL_CC1352P1)        || (defined LAUNCHXL_CC1352P_2)       || \
+    (defined LAUNCHXL_CC1352P_4)
 
     uint8_t rfPowerTableSize = 0;
     RF_TxPowerTable_Entry *rfPowerTable = NULL;
@@ -1244,9 +1393,7 @@ EasyLink_Status EasyLink_getRfPower(int8_t *pi8TxPowerDbm)
         if((currValue.paType == RF_TxPowerTable_DefaultPA) &&
            (txPowerDbm == rfPowerTable[rfPowerTableSize-2].power))
         {
-#if !(defined Board_CC2640R2_LAUNCHXL)
             txPowerDbm = rfPowerTable[rfPowerTableSize-3].power;
-#endif
         }
 #else
         // dummy read to avoid build warnings
@@ -1305,9 +1452,16 @@ EasyLink_Status EasyLink_getAbsTime(uint32_t *pui32AbsTime)
 EasyLink_Status EasyLink_transmit(EasyLink_TxPacket *txPacket)
 {
     EasyLink_Status status = EasyLink_Status_Tx_Error;
-    RF_ScheduleCmdParams schParams_prop;
     RF_CmdHandle cmdHdl;
     uint32_t cmdTime;
+
+    schParams_prop.startTime    = 0U;
+    schParams_prop.startType    = RF_StartNotSpecified;
+    schParams_prop.allowDelay   = RF_AllowDelayNone;
+    schParams_prop.endTime      = 0U;
+    schParams_prop.endType      = RF_EndNotSpecified;
+    schParams_prop.duration     = 0U;
+    schParams_prop.activityInfo = genActivityTableValue(EasyLink_Activity_Tx, (EasyLink_Priority)cmdPriority);
 
     if ( (!configured) || suspended)
     {
@@ -1322,7 +1476,6 @@ EasyLink_Status EasyLink_transmit(EasyLink_TxPacket *txPacket)
     {
         return EasyLink_Status_Busy_Error;
     }
-
 
     if(useIeeeHeader)
     {
@@ -1361,20 +1514,27 @@ EasyLink_Status EasyLink_transmit(EasyLink_TxPacket *txPacket)
         EasyLink_cmdPropTxAdv.startTrigger.triggerType = TRIG_ABSTIME;
         EasyLink_cmdPropTxAdv.startTrigger.pastTrig = 1;
         EasyLink_cmdPropTxAdv.startTime = txPacket->absTime;
-        schParams_prop.endTime = EasyLink_cmdPropTxAdv.startTime + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.startTime = txPacket->absTime;
+        schParams_prop.startType = RF_StartAbs;
+        schParams_prop.duration  = EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endTime   = EasyLink_cmdPropTxAdv.startTime + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endType   = RF_EndAbs;
     }
     else
     {
         EasyLink_cmdPropTxAdv.startTrigger.triggerType = TRIG_NOW;
         EasyLink_cmdPropTxAdv.startTrigger.pastTrig = 1;
-        EasyLink_cmdPropTxAdv.startTime = 0;
-        schParams_prop.endTime = RF_getCurrentTime() + EasyLink_ms_To_RadioTime(cmdTime);
+        EasyLink_cmdPropTxAdv.startTime = 0U;
+        schParams_prop.startTime = 0U;
+        schParams_prop.startType = RF_StartNotSpecified;
+        schParams_prop.duration  = EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endTime   = RF_getCurrentTime() + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endType   = RF_EndAbs;
     }
 
     // Send packet
     if(rfModeMultiClient)
     {
-        schParams_prop.priority = RF_PriorityHigh;
         cmdHdl = RF_scheduleCmd(rfHandle, (RF_Op*)&EasyLink_cmdPropTxAdv,
                     &schParams_prop, 0, EASYLINK_RF_EVENT_MASK);
     }
@@ -1387,7 +1547,11 @@ EasyLink_Status EasyLink_transmit(EasyLink_TxPacket *txPacket)
     // Wait for Command to complete
     RF_EventMask result = RF_pendCmd(rfHandle, cmdHdl, EASYLINK_RF_EVENT_MASK);
 
-    if (result & RF_EventLastCmdDone)
+    if (result == (RF_EventCmdCancelled | RF_EventCmdPreempted))
+    {
+        status = EasyLink_Status_Cmd_Rejected;
+    }
+    else if (result & RF_EventLastCmdDone)
     {
         status = EasyLink_Status_Success;
     }
@@ -1401,8 +1565,15 @@ EasyLink_Status EasyLink_transmit(EasyLink_TxPacket *txPacket)
 EasyLink_Status EasyLink_transmitAsync(EasyLink_TxPacket *txPacket, EasyLink_TxDoneCb cb)
 {
     EasyLink_Status status = EasyLink_Status_Tx_Error;
-    RF_ScheduleCmdParams schParams_prop;
     uint32_t cmdTime;
+
+    schParams_prop.startTime    = 0U;
+    schParams_prop.startType    = RF_StartNotSpecified;
+    schParams_prop.allowDelay   = RF_AllowDelayNone;
+    schParams_prop.endTime      = 0U;
+    schParams_prop.endType      = RF_EndNotSpecified;
+    schParams_prop.duration     = 0U;
+    schParams_prop.activityInfo = genActivityTableValue(EasyLink_Activity_Tx, (EasyLink_Priority)cmdPriority);
 
     //Check if not configure or already an Async command being performed
     if ( (!configured) || suspended)
@@ -1463,20 +1634,27 @@ EasyLink_Status EasyLink_transmitAsync(EasyLink_TxPacket *txPacket, EasyLink_TxD
         EasyLink_cmdPropTxAdv.startTrigger.triggerType = TRIG_ABSTIME;
         EasyLink_cmdPropTxAdv.startTrigger.pastTrig = 1;
         EasyLink_cmdPropTxAdv.startTime = txPacket->absTime;
-        schParams_prop.endTime = EasyLink_cmdPropTxAdv.startTime + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.startTime = txPacket->absTime;
+        schParams_prop.startType = RF_StartAbs;
+        schParams_prop.duration  = EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endTime   = EasyLink_cmdPropTxAdv.startTime + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endType   = RF_EndAbs;
     }
     else
     {
         EasyLink_cmdPropTxAdv.startTrigger.triggerType = TRIG_NOW;
         EasyLink_cmdPropTxAdv.startTrigger.pastTrig = 1;
         EasyLink_cmdPropTxAdv.startTime = 0;
-        schParams_prop.endTime = RF_getCurrentTime() + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.startTime = 0U;
+        schParams_prop.startType = RF_StartNotSpecified;
+        schParams_prop.duration  = EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endTime   = RF_getCurrentTime() + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endType   = RF_EndAbs;
     }
 
     // Send packet
     if(rfModeMultiClient)
     {
-        schParams_prop.priority = RF_PriorityHigh;
         asyncCmdHndl = RF_scheduleCmd(rfHandle, (RF_Op*)&EasyLink_cmdPropTxAdv,
             &schParams_prop, txDoneCallback, EASYLINK_RF_EVENT_MASK);
     }
@@ -1499,8 +1677,15 @@ EasyLink_Status EasyLink_transmitAsync(EasyLink_TxPacket *txPacket, EasyLink_TxD
 EasyLink_Status EasyLink_transmitCcaAsync(EasyLink_TxPacket *txPacket, EasyLink_TxDoneCb cb)
 {
     EasyLink_Status status = EasyLink_Status_Tx_Error;
-    RF_ScheduleCmdParams schParams_prop;
     uint32_t cmdTime;
+
+    schParams_prop.startTime    = 0U;
+    schParams_prop.startType    = RF_StartNotSpecified;
+    schParams_prop.allowDelay   = RF_AllowDelayNone;
+    schParams_prop.endTime      = 0U;
+    schParams_prop.endType      = RF_EndNotSpecified;
+    schParams_prop.duration     = 0U;
+    schParams_prop.activityInfo = genActivityTableValue(EasyLink_Activity_Tx, (EasyLink_Priority)cmdPriority);
 
     //Check if not configure or already an Async command being performed, or
     //if a random number generator function is not provided
@@ -1566,20 +1751,27 @@ EasyLink_Status EasyLink_transmitCcaAsync(EasyLink_TxPacket *txPacket, EasyLink_
         EasyLink_cmdPropCs.startTrigger.triggerType = TRIG_ABSTIME;
         EasyLink_cmdPropCs.startTrigger.pastTrig = 1;
         EasyLink_cmdPropCs.startTime = txPacket->absTime;
-        schParams_prop.endTime = EasyLink_cmdPropCs.startTime + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.startTime  = txPacket->absTime;
+        schParams_prop.startType  = RF_StartAbs;
+        schParams_prop.duration   = EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endTime    = EasyLink_cmdPropCs.startTime + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endType    = RF_EndAbs;
     }
     else
     {
         EasyLink_cmdPropCs.startTrigger.triggerType = TRIG_NOW;
         EasyLink_cmdPropCs.startTrigger.pastTrig = 1;
         EasyLink_cmdPropCs.startTime = 0;
-        schParams_prop.endTime = RF_getCurrentTime() + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.startTime  = 0;
+        schParams_prop.startType  = RF_StartNotSpecified;
+        schParams_prop.duration   = EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endTime    = RF_getCurrentTime() + EasyLink_ms_To_RadioTime(cmdTime);
+        schParams_prop.endType    = RF_EndAbs;
     }
 
     // Check for a clear channel (CCA) before sending a packet
     if(rfModeMultiClient)
     {
-        schParams_prop.priority = RF_PriorityHigh;
         asyncCmdHndl = RF_scheduleCmd(rfHandle, (RF_Op*)&EasyLink_cmdPropCs,
             &schParams_prop, ccaDoneCallback, EASYLINK_RF_EVENT_MASK);
     }
@@ -1605,7 +1797,14 @@ EasyLink_Status EasyLink_receive(EasyLink_RxPacket *rxPacket)
     RF_EventMask result;
     rfc_dataEntryGeneral_t *pDataEntry;
     RF_CmdHandle rx_cmd;
-    RF_ScheduleCmdParams schParams_prop;
+
+    schParams_prop.startTime    = 0U;
+    schParams_prop.startType    = RF_StartNotSpecified;
+    schParams_prop.allowDelay   = RF_AllowDelayNone;
+    schParams_prop.endTime      = 0U;
+    schParams_prop.endType      = RF_EndNotSpecified;
+    schParams_prop.duration     = 0U;
+    schParams_prop.activityInfo = genActivityTableValue(EasyLink_Activity_Rx, (EasyLink_Priority)cmdPriority);
 
     if ( (!configured) || suspended)
     {
@@ -1631,12 +1830,16 @@ EasyLink_Status EasyLink_receive(EasyLink_RxPacket *rxPacket)
         EasyLink_cmdPropRxAdv.startTrigger.triggerType = TRIG_ABSTIME;
         EasyLink_cmdPropRxAdv.startTrigger.pastTrig = 1;
         EasyLink_cmdPropRxAdv.startTime = rxPacket->absTime;
+        schParams_prop.startTime  = rxPacket->absTime;
+        schParams_prop.startType  = RF_StartAbs;
     }
     else
     {
         EasyLink_cmdPropRxAdv.startTrigger.triggerType = TRIG_NOW;
         EasyLink_cmdPropRxAdv.startTrigger.pastTrig = 1;
         EasyLink_cmdPropRxAdv.startTime = 0;
+        schParams_prop.startTime  = 0U;
+        schParams_prop.startType  = RF_StartNotSpecified;
     }
 
     if (rxPacket->rxTimeout != 0)
@@ -1644,12 +1847,16 @@ EasyLink_Status EasyLink_receive(EasyLink_RxPacket *rxPacket)
         EasyLink_cmdPropRxAdv.endTrigger.triggerType = TRIG_ABSTIME;
         EasyLink_cmdPropRxAdv.endTrigger.pastTrig = 1;
         EasyLink_cmdPropRxAdv.endTime = RF_getCurrentTime() + rxPacket->rxTimeout;
+        schParams_prop.endTime    = EasyLink_cmdPropRxAdv.endTime;
+        schParams_prop.endType    = RF_EndAbs;
     }
     else
     {
         EasyLink_cmdPropRxAdv.endTrigger.triggerType = TRIG_NEVER;
         EasyLink_cmdPropRxAdv.endTrigger.pastTrig = 1;
         EasyLink_cmdPropRxAdv.endTime = 0;
+        schParams_prop.endTime    = 0U;
+        schParams_prop.endType    = RF_EndNotSpecified;
     }
 
     //Clear the Rx statistics structure
@@ -1657,10 +1864,6 @@ EasyLink_Status EasyLink_receive(EasyLink_RxPacket *rxPacket)
 
     if(rfModeMultiClient)
     {
-        /* assume high priority */
-        schParams_prop.priority = RF_PriorityHigh;
-        schParams_prop.endTime = EasyLink_cmdPropRxAdv.endTime;
-
         rx_cmd = RF_scheduleCmd(rfHandle, (RF_Op*)&EasyLink_cmdPropRxAdv,
                     &schParams_prop, 0, EASYLINK_RF_EVENT_MASK);
     }
@@ -1730,6 +1933,10 @@ EasyLink_Status EasyLink_receive(EasyLink_RxPacket *rxPacket)
             status = EasyLink_Status_Rx_Error;
         }
     }
+    else if (result == (RF_EventCmdCancelled | RF_EventCmdPreempted))
+    {
+        status = EasyLink_Status_Cmd_Rejected;
+    }
 
     //Release the busyMutex
     Semaphore_post(busyMutex);
@@ -1741,7 +1948,14 @@ EasyLink_Status EasyLink_receiveAsync(EasyLink_ReceiveCb cb, uint32_t absTime)
 {
     EasyLink_Status status = EasyLink_Status_Rx_Error;
     rfc_dataEntryGeneral_t *pDataEntry;
-    RF_ScheduleCmdParams schParams_prop;
+
+    schParams_prop.startTime    = 0U;
+    schParams_prop.startType    = RF_StartNotSpecified;
+    schParams_prop.allowDelay   = RF_AllowDelayNone;
+    schParams_prop.endTime      = 0U;
+    schParams_prop.endType      = RF_EndNotSpecified;
+    schParams_prop.duration     = 0U;
+    schParams_prop.activityInfo = genActivityTableValue(EasyLink_Activity_Rx, (EasyLink_Priority)cmdPriority);
 
     //Check if not configure of already an Async command being performed
     if ( (!configured) || suspended)
@@ -1774,12 +1988,16 @@ EasyLink_Status EasyLink_receiveAsync(EasyLink_ReceiveCb cb, uint32_t absTime)
         EasyLink_cmdPropRxAdv.startTrigger.triggerType = TRIG_ABSTIME;
         EasyLink_cmdPropRxAdv.startTrigger.pastTrig = 1;
         EasyLink_cmdPropRxAdv.startTime = absTime;
+        schParams_prop.startTime  = absTime;
+        schParams_prop.startType  = RF_StartAbs;
     }
     else
     {
         EasyLink_cmdPropRxAdv.startTrigger.triggerType = TRIG_NOW;
         EasyLink_cmdPropRxAdv.startTrigger.pastTrig = 1;
         EasyLink_cmdPropRxAdv.startTime = 0;
+        schParams_prop.startTime  = 0U;
+        schParams_prop.startType  = RF_StartNotSpecified;
     }
 
     if (asyncRxTimeOut != 0)
@@ -1787,12 +2005,16 @@ EasyLink_Status EasyLink_receiveAsync(EasyLink_ReceiveCb cb, uint32_t absTime)
         EasyLink_cmdPropRxAdv.endTrigger.triggerType = TRIG_ABSTIME;
         EasyLink_cmdPropRxAdv.endTrigger.pastTrig = 1;
         EasyLink_cmdPropRxAdv.endTime = RF_getCurrentTime() + asyncRxTimeOut;
+        schParams_prop.endTime    = EasyLink_cmdPropRxAdv.endTime;
+        schParams_prop.endType    = RF_EndAbs;
     }
     else
     {
         EasyLink_cmdPropRxAdv.endTrigger.triggerType = TRIG_NEVER;
         EasyLink_cmdPropRxAdv.endTrigger.pastTrig = 1;
         EasyLink_cmdPropRxAdv.endTime = 0;
+        schParams_prop.endTime    = 0U;
+        schParams_prop.endType    = RF_EndNotSpecified;
     }
 
     //Clear the Rx statistics structure
@@ -1800,10 +2022,6 @@ EasyLink_Status EasyLink_receiveAsync(EasyLink_ReceiveCb cb, uint32_t absTime)
 
     if(rfModeMultiClient)
     {
-        /* assume high priority */
-        schParams_prop.priority = RF_PriorityHigh;
-        schParams_prop.endTime = EasyLink_cmdPropRxAdv.endTime;
-
         asyncCmdHndl = RF_scheduleCmd(rfHandle, (RF_Op*)&EasyLink_cmdPropRxAdv,
                     &schParams_prop, rxDoneCallback, EASYLINK_RF_EVENT_MASK);
     }
@@ -1953,6 +2171,13 @@ EasyLink_Status EasyLink_setCtrl(EasyLink_CtrlOption Ctrl, uint32_t ui32Value)
             asyncRxTimeOut = ui32Value;
             status = EasyLink_Status_Success;
             break;
+        case EasyLink_Ctrl_Cmd_Priority:
+            if(ui32Value < EasyLink_Priority_NEntries)
+            {
+                cmdPriority = (EasyLink_Priority)ui32Value;
+                status = EasyLink_Status_Success;
+            }
+            break;
         case EasyLink_Ctrl_Test_Tone:
             status = enableTestMode(EasyLink_Ctrl_Test_Tone);
             break;
@@ -1987,6 +2212,10 @@ EasyLink_Status EasyLink_getCtrl(EasyLink_CtrlOption Ctrl, uint32_t* pui32Value)
             break;
         case EasyLink_Ctrl_AsyncRx_TimeOut:
             *pui32Value = asyncRxTimeOut;
+            status = EasyLink_Status_Success;
+            break;
+        case EasyLink_Ctrl_Cmd_Priority:
+            *pui32Value = cmdPriority;
             status = EasyLink_Status_Success;
             break;
         case EasyLink_Ctrl_Test_Tone:
@@ -2037,3 +2266,6 @@ EasyLink_Status EasyLink_getIeeeAddr(uint8_t *ieeeAddr)
 
     return status;
 }
+
+// need this here as we are importing it from the SDK
+// clang-format on

@@ -4,8 +4,9 @@ trigger:
   paths:
     exclude: [ "doc", "*.md", ".gitignore", "README.md" ]
 
-# no pr config, we want to trigger builds for all PRs on all branches
-
+pr:
+  autoCancel: true
+    
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
   repositories:
@@ -308,13 +309,14 @@ jobs:
 
   strategy:
     matrix:
-      TI_CC3220SF_LAUNCHXL:
-        BoardName: TI_CC3220SF_LAUNCHXL
-        BuildOptions: -DTARGET_SERIES=CC32xx -DRTOS=TI_SIMPLELINK -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
-        GccArm_Version:
+      # disabled: waiting to update SDK to latest version with Sys Config
+      # TI_CC3220SF_LAUNCHXL:
+      #   BoardName: TI_CC3220SF_LAUNCHXL
+      #   BuildOptions: -DTARGET_SERIES=CC32xx -DRTOS=TI_SIMPLELINK -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+      #   GccArm_Version:
       TI_CC1352R1_LAUNCHXL:
         BoardName: TI_CC1352R1_LAUNCHXL
-        BuildOptions: -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SIMPLELINK -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_Windows.Devices.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.Adc=OFF -DAPI_nanoFramework.TI.EasyLink=ON
+        BuildOptions: -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SIMPLELINK -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_Windows.Devices.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.TI.EasyLink=ON -DAPI_nanoFramework.Hardware.TI=ON
         GccArm_Version:
 
   variables:
@@ -480,7 +482,8 @@ jobs:
   - Build_TI_SimpleLink_targets
   - Build_WIN32_nanoCLR
   - Generate_change_log
-  condition: or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'), failed('Generate_change_log'))
+  - Check_Code_Style
+  condition: and(ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true), or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'), failed('Generate_change_log')))
 
   pool:
     vmImage: 'VS2017-Win2016'

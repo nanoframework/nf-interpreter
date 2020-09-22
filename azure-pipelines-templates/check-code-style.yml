@@ -153,6 +153,9 @@ steps:
               throw "Error starting PR: $responseBody"
           }
 
+          # set variable to skip build failure report on Discord
+          echo "##vso[task.setvariable variable=CODE_STYLE_CHECK_FAILED;isOutput=true]true"
+
           # force the check to fail
           throw "Code style check failed"
         }

@@ -40,6 +40,7 @@ option(API_Hardware.Stm32                       "option for Hardware.Stm32")
 
 # TI CC13xxCC26xx
 option(API_nanoFramework.TI.EasyLink            "option for nanoFramework.TI.EasyLink API")
+option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardware.TI API")
 
 
 #################################################################
@@ -146,6 +147,12 @@ macro(ParseNativeAssemblies)
     if(API_nanoFramework.TI.EasyLink)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("nanoFramework.TI.EasyLink")
+    endif()
+
+    # nanoFramework.Hardware.TI
+    if(API_nanoFramework.Hardware.TI)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Hardware.TI")
     endif()
 
     # nanoFramework.Runtime.Events

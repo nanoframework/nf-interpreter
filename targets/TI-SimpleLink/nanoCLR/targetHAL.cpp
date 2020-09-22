@@ -83,6 +83,10 @@ void nanoHAL_Initialize()
 
     CPU_GPIO_Initialize();
 
+#if (HAL_USE_SPI == TRUE)
+    nanoSPI_Initialize();
+#endif
+
     // no PAL events required until now
     // PalEvent_Initialize();
 
@@ -122,6 +126,10 @@ void nanoHAL_Uninitialize()
 
     // TODO need to call this but it's preventing the debug session from starting
     // Network_Uninitialize();
+
+#if (HAL_USE_SPI == TRUE)
+    nanoSPI_Uninitialize();
+#endif
 
     CPU_GPIO_Uninitialize();
 
