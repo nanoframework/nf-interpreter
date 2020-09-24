@@ -100,7 +100,8 @@ HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::NativeEnt
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::NativeEnterStandbyMode___STATIC__VOID__SystemTimeSpan( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::
+    NativeEnterStandbyMode___STATIC__VOID__SystemTimeSpan(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -112,7 +113,7 @@ HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::NativeEnt
     FAULT_ON_NULL(standbyDuration);
 
     standbyDurationMilsec = *(CLR_UINT64 *)standbyDuration / TIME_CONVERSION__TO_SECONDS;
-    
+
     ClockP_sleep(standbyDurationMilsec);
 
     NANOCLR_NOCLEANUP();
