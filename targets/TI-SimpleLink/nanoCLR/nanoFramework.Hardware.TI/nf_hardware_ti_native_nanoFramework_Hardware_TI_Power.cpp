@@ -116,5 +116,12 @@ HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::
 
     ClockP_sleep(standbyDurationMilsec);
 
+    // need to reset the CPU after waking from standby
+    CPU_Reset();
+
+    //////////////////////////////////////
+    // THE EXECUTION NEVER REACHES HERE //
+    //////////////////////////////////////
+
     NANOCLR_NOCLEANUP();
 }
