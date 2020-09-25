@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 // stdafx.cpp : source file that includes just the standard includes

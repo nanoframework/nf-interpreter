@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (c) 2020 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Copyright (c) 2016-2018, Texas Instruments Incorporated
 // See LICENSE file in the project root for full license information.
 //
