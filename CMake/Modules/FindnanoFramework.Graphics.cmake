@@ -2,15 +2,15 @@
 # Copyright (c) 2019 The nanoFramework project contributors
 # See LICENSE file in the project root for full license information.
  
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Events")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/PAL/include")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Gif")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Jpeg")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Native")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Core")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Displays")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Devices")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Events")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/include")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Gif")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Jpeg")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Native")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Core")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Displays")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Devices")
 
  set (  nanoFramework.Graphics_SRCS
         nanoPAL_Events_functions.cpp
@@ -86,13 +86,9 @@ list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/
         nanoFramework_Graphics_nanoFramework_UI_DisplayControl.cpp
         nanoFramework_Graphics_nanoFramework_UI_Font.cpp
         
-        
         TouchPanel.cpp
         Gestures.cpp
         Ink.cpp
-        
-        # Byte reader
-        Various.cpp
         
         #Common Display/Touch Code
         "${GRAPHICS_DISPLAY}"
@@ -131,12 +127,8 @@ foreach(SRC_FILE ${nanoFramework.Graphics_SRCS})
            message( "___________________________________________________________________________")
         endif()
 
-    list(APPEND Graphics_Sources ${nanoFramework.Graphics_SRC_FILE} )
+    list(APPEND nanoFramework.Graphics_SOURCES ${nanoFramework.Graphics_SRC_FILE} )
 endforeach()
 
-# make var global
-set(Graphics_Sources  "${Graphics_Sources}"  CACHE INTERNAL "make global")
-set(Graphics_Includes "${Graphics_Includes}" CACHE INTERNAL "make global")
-
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(nanoFramework.Graphics DEFAULT_MSG Graphics_Includes Graphics_Sources)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(nanoFramework.Graphics DEFAULT_MSG nanoFramework.Graphics_INCLUDE_DIRS nanoFramework.Graphics_SOURCES)

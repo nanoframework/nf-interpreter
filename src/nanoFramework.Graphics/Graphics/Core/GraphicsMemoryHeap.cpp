@@ -32,26 +32,31 @@ CLR_UINT8* graphicsHeapBeginAddress;
 CLR_UINT8* graphicsHeapEndAddress;
 const int blockHeaderSize = sizeof(struct BlockHeader);
 
-void GraphicsMemoryHeap::Initialize()
+bool GraphicsMemoryHeap::Initialize()
 {
     GraphicsMemory gm;
-    gm.GraphicsHeapLocation(graphicsHeapBeginAddress, graphicsHeapEndAddress);
-    CLR_UINT32 SizeInBytes = graphicsHeapEndAddress - graphicsHeapBeginAddress;
 
-    memset(graphicsHeapBeginAddress, 0, SizeInBytes);
+    if ( gm.GraphicsHeapLocation(graphicsHeapBeginAddress, graphicsHeapEndAddress) )
+    {
+        CLR_UINT32 SizeInBytes = graphicsHeapEndAddress - graphicsHeapBeginAddress;
 
-    ptrfirstBlockHeader = (BlockHeader*)graphicsHeapBeginAddress;
-    ptrlastBlockHeader = (struct BlockHeader*) ((CLR_UINT32)graphicsHeapEndAddress - blockHeaderSize);
+        memset(graphicsHeapBeginAddress, 0, SizeInBytes);
 
-    ptrfirstBlockHeader->dataLength = SizeInBytes - 2 * blockHeaderSize;        // Allow for first and last block headers
-    ptrfirstBlockHeader->next = ptrlastBlockHeader;
-    ptrfirstBlockHeader->prev = NOT_APPLICABLE;                                 // bottom of heap
-    ptrfirstBlockHeader->status = blockFree;
+        ptrfirstBlockHeader = (BlockHeader*)graphicsHeapBeginAddress;
+        ptrlastBlockHeader = (struct BlockHeader*) ((CLR_UINT32)graphicsHeapEndAddress - blockHeaderSize);
 
-    ptrlastBlockHeader->dataLength = 0;
-    ptrlastBlockHeader->next = NOT_APPLICABLE;                                  // end of heap
-    ptrlastBlockHeader->prev = ptrfirstBlockHeader;
-    ptrlastBlockHeader->status = heapEnd;
+        ptrfirstBlockHeader->dataLength = SizeInBytes - 2 * blockHeaderSize;        // Allow for first and last block headers
+        ptrfirstBlockHeader->next = ptrlastBlockHeader;
+        ptrfirstBlockHeader->prev = NOT_APPLICABLE;                                 // bottom of heap
+        ptrfirstBlockHeader->status = blockFree;
+
+        ptrlastBlockHeader->dataLength = 0;
+        ptrlastBlockHeader->next = NOT_APPLICABLE;                                  // end of heap
+        ptrlastBlockHeader->prev = ptrfirstBlockHeader;
+        ptrlastBlockHeader->status = heapEnd;
+        return true;
+    }
+    return false;
 }
 void* GraphicsMemoryHeap::Allocate(CLR_UINT32 requestedSize)
 {

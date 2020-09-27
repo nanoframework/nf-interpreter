@@ -1,4 +1,8 @@
-﻿
+﻿//
+// Copyright (c) 2020 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
+
 #include "Display.h"
 #include "DisplayInterface.h"
 #include "TouchDevice.h"
@@ -14,6 +18,7 @@ extern TouchInterface g_TouchInterface;
 
 extern GraphicsMemoryHeap g_GraphicsMemoryHeap;
 
+/*
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,17 +26,22 @@ extern "C" {
 
     extern "C"
     {
-        void GraphicsInitialize()
-        {
-            g_GraphicsMemoryHeap.Initialize();
+*/
+        // void GraphicsInitialize()
+        // {
+        //     if (g_GraphicsMemoryHeap.Initialize())
+        //     {
+        //         g_DisplayInterface.Initialize();
+        //         g_DisplayDriver.Initialize();
 
-            g_DisplayInterface.Initialize();
-            g_DisplayDriver.Initialize();
-
-            //g_TouchInterface.Initialize();
-            //g_TouchDevice.Initialize();
-        }
+        //         //g_TouchInterface.Initialize();
+        //         //g_TouchDevice.Initialize();
+        //     }
+        // }
+/*
 #ifdef __cplusplus
     }
 }
+
 #endif
+*/

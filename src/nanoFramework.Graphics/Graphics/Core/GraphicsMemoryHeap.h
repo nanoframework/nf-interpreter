@@ -12,12 +12,12 @@
 
 struct GraphicsMemoryHeap
 {
-    void  Initialize();
+    bool  Initialize();
     void* Allocate(CLR_UINT32 len);
     bool  Release(void* pHeapBlock);
 };
 struct GraphicsMemory
 {
-    void GraphicsHeapLocation( CLR_UINT8*&BaseAddress, CLR_UINT8*&SizeInBytes);
+    bool GraphicsHeapLocation( CLR_UINT8*&BaseAddress, CLR_UINT8*&SizeInBytes);
 };
 #endif  // _GraphicsMemoryHeap_H

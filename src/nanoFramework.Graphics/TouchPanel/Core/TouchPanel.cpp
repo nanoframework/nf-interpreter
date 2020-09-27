@@ -453,10 +453,9 @@ TouchPoint* TouchPanelDriver::AddTouchPoint(CLR_UINT16 source, CLR_UINT16 x, CLR
     return &point;
 }
 
-void TouchPanelDriver::TouchIsrProc(GPIO_PIN pin, bool pinState, void* context)
+void TouchPanelDriver::TouchIsrProc(GPIO_PIN pin, bool pinState)
 {
-    if (pin == 0) {}; // Avoid unused parameter for now, maybe we need to use the pin in future? 
-    if (context == NULL) {}; // Avoid unused parameter for now, maybe we need to use the context in future? 
+    (void)pin;
 
     // Question does this method work?
     if (pinState == g_TouchPanel_Sampling_Settings.ActivePinStateForTouchDown)

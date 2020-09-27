@@ -11,8 +11,6 @@
 #include "nanoPAL_AsyncProcCalls_decl.h"
 #include "TouchPanel.h"
 
-typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)(GPIO_PIN Pin, bool PinState, void* Param);
-
 struct TouchPointDevice
 {
     int x;

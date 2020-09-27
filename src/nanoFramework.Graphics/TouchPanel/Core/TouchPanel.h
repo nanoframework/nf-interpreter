@@ -195,7 +195,7 @@ public:
 private:
     static  HRESULT GetTouchPoint(CLR_UINT32* flags, TouchPoint** point);
 
-    static void TouchIsrProc(GPIO_PIN pin, bool pinState, void* context);
+    static void TouchIsrProc(GPIO_PIN pin, bool pinState);
     static void TouchCompletion(void* arg);
     void TouchPanelCalibratePoint(CLR_INT32 UncalX, CLR_INT32 UncalY, CLR_INT32* pCalX, CLR_INT32* pCalY);
 

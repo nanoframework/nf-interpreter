@@ -28,19 +28,48 @@ struct GraphicsMemory g_GraphicsMemory;
 // So if an application uses external memory, it is responsible for all management of the external SPI RAM.
 // coordinating buffer usage, preventing corruption, etc.
 
-void GraphicsMemory::GraphicsHeapLocation(CLR_UINT8*& graphicsStartingAddress, CLR_UINT8*& graphicsEndingAddress)
-{
-//    CLR_INT32 graphicsMemoryBlockSize = 2000000;
-    CLR_INT32 graphicsMemoryBlockSize = 2000000;
+static CLR_UINT8* heapStartingAddress = 0;
+static CLR_UINT8* heapEndingAddress = 0;
 
-    CLR_INT32 spiramMaxSize = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
+bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT8*& graphicsStartingAddress, CLR_UINT8*& graphicsEndingAddress)
+{
+    CLR_INT32 graphicsMemoryBlockSize = 2000000;
+    CLR_INT32 memoryCaps = MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM;
+
+    if ( heapStartingAddress != 0)
+    {
+        graphicsStartingAddress = heapStartingAddress;
+        graphicsEndingAddress = heapEndingAddress;
+        return true;
+    }
+
+    // Get Largest free block in SPIRam
+    CLR_INT32 spiramMaxSize = heap_caps_get_largest_free_block(memoryCaps);
+    if ( spiramMaxSize == 0)
+    {
+        // No SpiRam, try and allocate small block in normal ram to keep allocator happy for
+        // people tryig to run graphics on boards without Spiram
+        // Should be able to use with small screens 
+        memoryCaps ^= MALLOC_CAP_SPIRAM;
+        
+        // TODO , improve 
+        //spiramMaxSize = heap_caps_get_largest_free_block(memoryCaps);
+        spiramMaxSize = 32*1024;
+    }
+
     if (spiramMaxSize < graphicsMemoryBlockSize)                        // limit the size to what is available
     {
         graphicsMemoryBlockSize = spiramMaxSize;
     }
-    graphicsStartingAddress = (CLR_UINT8*)heap_caps_malloc(graphicsMemoryBlockSize, MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
+    graphicsStartingAddress = (CLR_UINT8*)heap_caps_malloc(graphicsMemoryBlockSize, memoryCaps);
+    ASSERT(graphicsStartingAddress != NULL);
     graphicsEndingAddress = (CLR_UINT8*)(graphicsStartingAddress + graphicsMemoryBlockSize);
 
+    // Save where we allocated it for restarts
+    heapStartingAddress = graphicsStartingAddress;
+    heapEndingAddress = graphicsEndingAddress;
+
+    return true;
 }
 
 #endif  // _GRAPHICS_MEMORY_SETUP_
