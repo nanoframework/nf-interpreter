@@ -1,7 +1,6 @@
 #include "nf_sys_io_filesystem.h"
 
-static const CLR_RT_MethodHandler method_lookup[] =
-{
+static const CLR_RT_MethodHandler method_lookup[] = {
     NULL,
     NULL,
     NULL,
@@ -61,9 +60,4 @@ static const CLR_RT_MethodHandler method_lookup[] =
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem =
-{
-    "System.IO.FileSystem",
-    0xC981DC3F,
-    method_lookup,
-    { 1, 0, 0, 0 }
-};
+    {"System.IO.FileSystem", 0xC981DC3F, method_lookup, {1, 0, 0, 0}};

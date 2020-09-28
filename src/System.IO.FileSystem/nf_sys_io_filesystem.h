@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
+//                   ** WARNING! **
 //    This file was generated automatically by a tool.
 //    Re-running the tool will overwrite this file.
 //    You should copy this file to a custom location
@@ -30,7 +30,6 @@ struct Library_nf_sys_io_filesystem_System_IO_FileStream
     static const int FIELD___path = 9;
 
     //--//
-
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_NativeFile
@@ -42,7 +41,6 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeFile
     NANOCLR_NATIVE_DECLARE(SetAttributesNative___STATIC__VOID__STRING__U1);
 
     //--//
-
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_NativeFileStream
@@ -53,7 +51,6 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeFileStream
     NANOCLR_NATIVE_DECLARE(GetLengthNative___I8__STRING__STRING);
 
     //--//
-
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_Path
@@ -63,9 +60,8 @@ struct Library_nf_sys_io_filesystem_System_IO_Path
     static const int FIELD_STATIC__m_illegalCharacters = 2;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem;
 
-#endif  //_NF_SYS_IO_FILESYSTEM_H_
+#endif //_NF_SYS_IO_FILESYSTEM_H_
