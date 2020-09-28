@@ -86,6 +86,7 @@
           "API_nanoFramework.ResourceManager": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.System.Collections": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.System.Text": "OFF-default-ON-to-add-this-API",
+          "API_System.IO.FileSystem" : "OFF-default-ON-to-add-this-API",
           "API_System.Math": "OFF-default-ON-to-add-this-API",
           "API_System.Net": "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Adc": "OFF-default-ON-to-add-this-API",
