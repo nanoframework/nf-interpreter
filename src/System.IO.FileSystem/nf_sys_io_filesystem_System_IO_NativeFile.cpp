@@ -15,16 +15,16 @@
 #include <ff.h>
 #include <nanoHAL_Windows_Storage.h>
 
-void CombinePathAndName2(char * outpath, const char * path1, const char * path2)
+void CombinePathAndName2(char *outpath, const char *path1, const char *path2)
 {
-	strcat(outpath, path1);
-	
-	// Add "\" to path if required
-	if (outpath[hal_strlen_s(outpath) - 1] != '\\')
-	{
-		strcat(outpath, "\\");
-	}
-	strcat(outpath, path2);
+    strcat(outpath, path1);
+
+    // Add "\" to path if required
+    if (outpath[hal_strlen_s(outpath) - 1] != '\\')
+    {
+        strcat(outpath, "\\");
+    }
+    strcat(outpath, path2);
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::ExistsNative___STATIC__BOOLEAN__STRING__STRING(
@@ -32,19 +32,21 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::ExistsNative___STATIC
 {
     NANOCLR_HEADER();
     {
-        const char* workingPath = stack.Arg0.RecoverString(); FAULT_ON_NULL(workingPath);
-        const char* fileName = stack.Arg0.RecoverString(); FAULT_ON_NULL(fileName);
-        
-        bool exists = false; 
+        const char *workingPath = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(workingPath);
+        const char *fileName = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(fileName);
 
-        FRESULT         operationResult;
-        char*           filePath = NULL;
+        bool exists = false;
+
+        FRESULT operationResult;
+        char *filePath = NULL;
 
         // setup file path
-        filePath = (char*)platform_malloc(2 * FF_LFN_BUF + 1);
+        filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
         // sanity check for successfull malloc
-        if(filePath == NULL)
+        if (filePath == NULL)
         {
             // failed to allocate memory
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -59,9 +61,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::ExistsNative___STATIC
         // change directory
         operationResult = f_chdir(workingPath);
 
-        if(operationResult != FR_OK)
+        if (operationResult != FR_OK)
         {
-            if(operationResult == FR_INVALID_DRIVE)
+            if (operationResult == FR_INVALID_DRIVE)
             {
                 // invalid drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -74,11 +76,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::ExistsNative___STATIC
         }
         else
         {
-            FILINFO fno; 
+            FILINFO fno;
 
             operationResult = f_stat(filePath, &fno);
 
-            if(operationResult == FR_OK)
+            if (operationResult == FR_OK)
             {
                 exists = true;
             }
@@ -93,13 +95,12 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::ExistsNative___STATIC
         }
 
         // free buffer memory, if allocated
-        if(filePath != NULL)
+        if (filePath != NULL)
         {
             platform_free(filePath);
         }
 
         stack.SetResult_Boolean(exists);
-
     }
     NANOCLR_NOCLEANUP();
 }
@@ -109,8 +110,10 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::MoveNative___STATIC__
 {
     NANOCLR_HEADER();
     {
-        const char* filePathSrc = stack.Arg0.RecoverString(); FAULT_ON_NULL(filePathSrc);
-        const char* filePathDest = stack.Arg0.RecoverString(); FAULT_ON_NULL(filePathDest);
+        const char *filePathSrc = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(filePathSrc);
+        const char *filePathDest = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(filePathDest);
 
         // rename file
         FRESULT operationResult = f_rename(filePathSrc, filePathDest);
@@ -132,8 +135,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::MoveNative___STATIC__
 HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::DeleteNative___STATIC__VOID__STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    {   
-        const char* filePath = stack.Arg0.RecoverString(); FAULT_ON_NULL(filePath);
+    {
+        const char *filePath = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(filePath);
 
         // Delete file
         FRESULT operationResult = f_unlink(filePath);
@@ -152,7 +156,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::GetAttributesNative__
 {
     NANOCLR_HEADER();
     {
-        const char* filePath = stack.Arg0.RecoverString(); FAULT_ON_NULL(filePath);
+        const char *filePath = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(filePath);
         CLR_UINT8 attributes = 0xFF;
 
         FILINFO fno;
@@ -160,7 +165,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::GetAttributesNative__
         // Get infos about file
         FRESULT operationResult = f_stat(filePath, &fno);
 
-        if(operationResult == FR_OK)
+        if (operationResult == FR_OK)
         {
             attributes = fno.fattrib;
         }
@@ -183,13 +188,14 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFile::SetAttributesNative__
 {
     NANOCLR_HEADER();
     {
-        const char* filePath = stack.Arg0.RecoverString(); FAULT_ON_NULL(filePath);
+        const char *filePath = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(filePath);
         CLR_UINT8 attributes = stack.Arg1.NumericByRef().u1;
 
         // Get infos about file
         FRESULT operationResult = f_chmod(filePath, attributes, 0xFF);
 
-        if(operationResult != FR_OK)
+        if (operationResult != FR_OK)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }

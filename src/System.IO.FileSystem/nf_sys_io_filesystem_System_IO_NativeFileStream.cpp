@@ -15,16 +15,16 @@
 #include <ff.h>
 #include <nanoHAL_Windows_Storage.h>
 
-void CombinePathAndName(char * outpath, const char * path1, const char * path2)
+void CombinePathAndName(char *outpath, const char *path1, const char *path2)
 {
-	strcat(outpath, path1);
-	
-	// Add "\" to path if required
-	if (outpath[hal_strlen_s(outpath) - 1] != '\\')
-	{
-		strcat(outpath, "\\");
-	}
-	strcat(outpath, path2);
+    strcat(outpath, path1);
+
+    // Add "\" to path if required
+    if (outpath[hal_strlen_s(outpath) - 1] != '\\')
+    {
+        strcat(outpath, "\\");
+    }
+    strcat(outpath, path2);
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::OpenFileNative___VOID__STRING__STRING__I4(
@@ -32,20 +32,22 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::OpenFileNative_
 {
     NANOCLR_HEADER();
     {
-        const char* workingPath = stack.Arg0.RecoverString(); FAULT_ON_NULL(workingPath);
-        const char* fileName = stack.Arg1.RecoverString(); FAULT_ON_NULL(fileName);
+        const char *workingPath = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(workingPath);
+        const char *fileName = stack.Arg1.RecoverString();
+        FAULT_ON_NULL(fileName);
         CLR_INT32 mode = stack.Arg2.NumericByRef().s4;
 
-        FIL             file; 
-        FRESULT         operationResult;
-        CLR_UINT8       modeFlags = 0;
-        char*           filePath = NULL;
+        FIL file;
+        FRESULT operationResult;
+        CLR_UINT8 modeFlags = 0;
+        char *filePath = NULL;
 
         // setup file path
-        filePath = (char*)platform_malloc(2 * FF_LFN_BUF + 1);
+        filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
         // sanity check for successfull malloc
-        if(filePath == NULL)
+        if (filePath == NULL)
         {
             // failed to allocate memory
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -60,9 +62,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::OpenFileNative_
         // change directory
         operationResult = f_chdir(workingPath);
 
-        if(operationResult != FR_OK)
+        if (operationResult != FR_OK)
         {
-            if(operationResult == FR_INVALID_DRIVE)
+            if (operationResult == FR_INVALID_DRIVE)
             {
                 // invalid drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -76,7 +78,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::OpenFileNative_
         else
         {
             // compute mode flags from FileMode
-            switch(mode)
+            switch (mode)
             {
                 case FileMode_CreateNew:
                     modeFlags = FA_CREATE_NEW;
@@ -110,21 +112,19 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::OpenFileNative_
             operationResult = f_open(&file, filePath, modeFlags);
 
             // process operation result according to creation options
-            if( (operationResult == FR_EXIST) && 
-                (mode == FileMode_CreateNew))
+            if ((operationResult == FR_EXIST) && (mode == FileMode_CreateNew))
             {
                 // file already exists
                 NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
             }
 
-            if( (operationResult == FR_NO_FILE) &&
-                ((mode == FileMode_Open) || (mode == FileMode_Truncate)))
+            if ((operationResult == FR_NO_FILE) && ((mode == FileMode_Open) || (mode == FileMode_Truncate)))
             {
                 // file doesn't exist
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
 
-            if(operationResult == FR_OK)
+            if (operationResult == FR_OK)
             {
                 // file created (or opened) succesfully
                 // OK to close it
@@ -138,7 +138,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::OpenFileNative_
         }
 
         // free buffer memory, if allocated
-        if(filePath != NULL)
+        if (filePath != NULL)
         {
             platform_free(filePath);
         }
@@ -151,23 +151,25 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::ReadNative___I4
 {
     NANOCLR_HEADER();
     {
-        const char* workingPath = stack.Arg0.RecoverString(); FAULT_ON_NULL(workingPath);
-        const char* fileName = stack.Arg1.RecoverString(); FAULT_ON_NULL(fileName);
+        const char *workingPath = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(workingPath);
+        const char *fileName = stack.Arg1.RecoverString();
+        FAULT_ON_NULL(fileName);
         CLR_INT64 position = stack.Arg2.NumericByRef().s8;
-        unsigned char* buffer = stack.Arg3.GetBuffer();
+        unsigned char *buffer = stack.Arg3.GetBuffer();
         CLR_INT32 length = stack.Arg4.NumericByRef().s4;
-        
-        CLR_INT32 readCount = 0; 
 
-        FIL             file; 
-        FRESULT         operationResult;
-        char*           filePath = NULL;
+        CLR_INT32 readCount = 0;
+
+        FIL file;
+        FRESULT operationResult;
+        char *filePath = NULL;
 
         // setup file path
-        filePath = (char*)platform_malloc(2 * FF_LFN_BUF + 1);
+        filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
         // sanity check for successfull malloc
-        if(filePath == NULL)
+        if (filePath == NULL)
         {
             // failed to allocate memory
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -182,9 +184,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::ReadNative___I4
         // change directory
         operationResult = f_chdir(workingPath);
 
-        if(operationResult != FR_OK)
+        if (operationResult != FR_OK)
         {
-            if(operationResult == FR_INVALID_DRIVE)
+            if (operationResult == FR_INVALID_DRIVE)
             {
                 // invalid drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -200,24 +202,24 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::ReadNative___I4
             // open file
             operationResult = f_open(&file, filePath, FA_READ);
 
-            if(operationResult == FR_OK)
+            if (operationResult == FR_OK)
             {
-                operationResult = f_lseek(&file, position);     // Change to actual position
-                if(operationResult != FR_OK)
+                operationResult = f_lseek(&file, position); // Change to actual position
+                if (operationResult != FR_OK)
                 {
                     // failed to change position
                     NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
                 }
 
                 // If there is not as much data to read as asked, shorten the length
-                if((f_size(&file) - position) < length)
+                if ((f_size(&file) - position) < length)
                 {
                     length = f_size(&file) - position;
                 }
 
                 // file opened succesfully
                 operationResult = f_read(&file, buffer, length, &readCount);
-                if(operationResult != FR_OK)
+                if (operationResult != FR_OK)
                 {
                     // Failed to write to file
                     NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
@@ -234,7 +236,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::ReadNative___I4
         }
 
         // free buffer memory, if allocated
-        if(filePath != NULL)
+        if (filePath != NULL)
         {
             platform_free(filePath);
         }
@@ -249,21 +251,23 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::WriteNative___V
 {
     NANOCLR_HEADER();
     {
-        const char* workingPath = stack.Arg0.RecoverString(); FAULT_ON_NULL(workingPath);
-        const char* fileName = stack.Arg1.RecoverString(); FAULT_ON_NULL(fileName);
+        const char *workingPath = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(workingPath);
+        const char *fileName = stack.Arg1.RecoverString();
+        FAULT_ON_NULL(fileName);
         CLR_INT64 position = stack.Arg2.NumericByRef().s8;
-        const unsigned char* buffer = stack.Arg3.GetBuffer();
+        const unsigned char *buffer = stack.Arg3.GetBuffer();
         const CLR_INT32 length = stack.Arg4.NumericByRef().s4;
 
-        FIL             file; 
-        FRESULT         operationResult;
-        char*           filePath = NULL;
+        FIL file;
+        FRESULT operationResult;
+        char *filePath = NULL;
 
         // setup file path
-        filePath = (char*)platform_malloc(2 * FF_LFN_BUF + 1);
+        filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
         // sanity check for successfull malloc
-        if(filePath == NULL)
+        if (filePath == NULL)
         {
             // failed to allocate memory
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -278,9 +282,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::WriteNative___V
         // change directory
         operationResult = f_chdir(workingPath);
 
-        if(operationResult != FR_OK)
+        if (operationResult != FR_OK)
         {
-            if(operationResult == FR_INVALID_DRIVE)
+            if (operationResult == FR_INVALID_DRIVE)
             {
                 // invalid drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -296,10 +300,10 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::WriteNative___V
             // open file
             operationResult = f_open(&file, filePath, FA_WRITE);
 
-            if(operationResult == FR_OK)
+            if (operationResult == FR_OK)
             {
-                operationResult = f_lseek(&file, position);     // Change to actual position
-                if(operationResult != FR_OK)
+                operationResult = f_lseek(&file, position); // Change to actual position
+                if (operationResult != FR_OK)
                 {
                     // failed to change position
                     NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
@@ -308,7 +312,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::WriteNative___V
                 // file opened succesfully
                 CLR_UINT32 written = 0;
                 operationResult = f_write(&file, buffer, length, &written);
-                if(operationResult != FR_OK)
+                if (operationResult != FR_OK)
                 {
                     // Failed to write to file
                     NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
@@ -325,7 +329,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::WriteNative___V
         }
 
         // free buffer memory, if allocated
-        if(filePath != NULL)
+        if (filePath != NULL)
         {
             platform_free(filePath);
         }
@@ -340,18 +344,20 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::GetLengthNative
     {
         CLR_INT64 length = 0;
 
-        const char* workingPath = stack.Arg0.RecoverString(); FAULT_ON_NULL(workingPath);
-        const char* fileName = stack.Arg1.RecoverString(); FAULT_ON_NULL(fileName);
+        const char *workingPath = stack.Arg0.RecoverString();
+        FAULT_ON_NULL(workingPath);
+        const char *fileName = stack.Arg1.RecoverString();
+        FAULT_ON_NULL(fileName);
 
-        FIL             file; 
-        FRESULT         operationResult;
-        char*           filePath = NULL;
+        FIL file;
+        FRESULT operationResult;
+        char *filePath = NULL;
 
         // setup file path
-        filePath = (char*)platform_malloc(2 * FF_LFN_BUF + 1);
+        filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
         // sanity check for successfull malloc
-        if(filePath == NULL)
+        if (filePath == NULL)
         {
             // failed to allocate memory
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -366,9 +372,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::GetLengthNative
         // change directory
         operationResult = f_chdir(workingPath);
 
-        if(operationResult != FR_OK)
+        if (operationResult != FR_OK)
         {
-            if(operationResult == FR_INVALID_DRIVE)
+            if (operationResult == FR_INVALID_DRIVE)
             {
                 // invalid drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -384,7 +390,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::GetLengthNative
             // open file
             operationResult = f_open(&file, filePath, FA_OPEN_EXISTING);
 
-            if(operationResult == FR_OK)
+            if (operationResult == FR_OK)
             {
                 // file opened succesfully
                 length = f_size(&file);
@@ -400,7 +406,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::GetLengthNative
         }
 
         // free buffer memory, if allocated
-        if(filePath != NULL)
+        if (filePath != NULL)
         {
             platform_free(filePath);
         }
