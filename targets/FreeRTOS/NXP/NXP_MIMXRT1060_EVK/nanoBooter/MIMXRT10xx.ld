@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) 2008 - 2013 Code Red Technologies Ltd. All rights reserved.
 // Portions Copyright (c) 2013-2019 NXP Semiconductors. All rights reserved.
 // See LICENSE file in the project root for full license information.

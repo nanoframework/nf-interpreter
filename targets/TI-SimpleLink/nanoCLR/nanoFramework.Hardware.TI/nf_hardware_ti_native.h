@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -41,6 +41,7 @@ struct Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power
         ConfigureWakeupFromGpioPin___STATIC__VOID__SZARRAY_nanoFrameworkHardwareTIPowerPinWakeupConfig);
     NANOCLR_NATIVE_DECLARE(get_SourceOfReset___STATIC__nanoFrameworkHardwareTIPowerResetSource);
     NANOCLR_NATIVE_DECLARE(NativeEnterShutdownMode___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(NativeEnterStandbyMode___STATIC__VOID__SystemTimeSpan);
 
     //--//
 };

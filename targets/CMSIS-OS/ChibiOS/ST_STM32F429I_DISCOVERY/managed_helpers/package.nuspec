@@ -18,7 +18,7 @@
     <projectUrl>https://github.com/nanoframework</projectUrl>
     <iconUrl>https://secure.gravatar.com/avatar/97d0e092247f0716db6d4b47b7d1d1ad</iconUrl>
     <licenseUrl>https://github.com/nanoframework/nf-interpreter/blob/develop/LICENSE.md</licenseUrl>
-    <copyright>Copyright (c) 2019 The nanoFramework project contributors</copyright>
+    <copyright>Copyright (c) .NET Foundation and Contributors</copyright>
     <references></references>
     <tags>nanoFramework, nano Framework, NETNF, NETMF, Micro Framework, STM32, .net, STM32F429I </tags>
   </metadata>

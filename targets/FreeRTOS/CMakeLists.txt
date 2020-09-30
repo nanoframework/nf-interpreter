@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -52,7 +52,7 @@ if(NO_FREERTOS_SOURCE)
     # check if build was requested with a specifc FreeRTOS version
     if(FREERTOS_VERSION_EMPTY)
         # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(FREERTOS_VERSION_TAG "V10.3.1-kernel-only")
+        set(FREERTOS_VERSION_TAG "V10.4.1-kernel-only")
     else()
         # set SVN tag
         set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")
