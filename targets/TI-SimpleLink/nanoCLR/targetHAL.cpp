@@ -11,13 +11,16 @@
 #include <nanoHAL_ConfigurationManager.h>
 // #include <FreeRTOS.h>
 
-#if (HAL_USE_I2C == TRUE)
+#if (HAL_USE_I2C_OPTION == TRUE)
 #include <ti/drivers/I2C.h>
 #include <win_dev_i2c_native_target.h>
 #endif
-#if (HAL_USE_SPI == TRUE)
+#if (HAL_USE_SPI_OPTION == TRUE)
 #include <ti/drivers/SPI.h>
 #include <win_dev_spi_native_target.h>
+#endif
+#if (HAL_USE_SPI == ON)
+#include <easylink/EasyLink.h>
 #endif
 
 //
@@ -83,18 +86,18 @@ void nanoHAL_Initialize()
 
     CPU_GPIO_Initialize();
 
-#if (HAL_USE_SPI == TRUE)
+#if (HAL_USE_SPI_OPTION == TRUE)
     nanoSPI_Initialize();
 #endif
 
     // no PAL events required until now
     // PalEvent_Initialize();
 
-#if (HAL_USE_I2C == TRUE)
+#if (HAL_USE_I2C_OPTION == TRUE)
     I2C1_PAL.i2c = NULL;
 #endif
 
-#if (HAL_USE_SPI == TRUE)
+#if (HAL_USE_SPI_OPTION == TRUE)
     SPI1_PAL.masterSpi = NULL;
 #endif
 
@@ -127,18 +130,22 @@ void nanoHAL_Uninitialize()
     // TODO need to call this but it's preventing the debug session from starting
     // Network_Uninitialize();
 
-#if (HAL_USE_SPI == TRUE)
+#if (HAL_USE_SPI_OPTION == TRUE)
     nanoSPI_Uninitialize();
 #endif
 
     CPU_GPIO_Uninitialize();
 
-#if (HAL_USE_I2C == TRUE)
+#if (HAL_USE_I2C_OPTION == TRUE)
     I2C_close(I2C1_PAL.i2c);
 #endif
 
-#if (HAL_USE_SPI == TRUE)
+#if (HAL_USE_SPI_OPTION == TRUE)
     SPI_close(SPI1_PAL.masterSpi);
+#endif
+
+#if (HAL_USE_EASYLINK == ON)
+    EasyLink_abort();
 #endif
 
     Events_Uninitialize();

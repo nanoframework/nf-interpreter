@@ -18,9 +18,12 @@
 #define SL_APP_SNTP         @NF_NETWORKING_SNTP@
 
 // enable I2C
-#define HAL_USE_I2C @API_Windows.Devices.I2c@
+#define HAL_USE_I2C @HAL_USE_I2C_OPTION@
 
 // enable SPI
-#define HAL_USE_SPI @API_Windows.Devices.Spi@
+#define HAL_USE_SPI @HAL_USE_SPI_OPTION@
+
+// enable EasyLink
+#define HAL_USE_EASYLINK @API_nanoFramework.TI.EasyLink@
 
 #endif /* _TARGET_TI_SIMPLELINK_NANOCLR_H_ */
