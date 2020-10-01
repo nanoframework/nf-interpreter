@@ -76,8 +76,6 @@ static const CLR_RT_MethodHandler method_lookup[] = {
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
         NativeInit___VOID__I4,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
