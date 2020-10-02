@@ -42,7 +42,7 @@
           "CHIBIOS_CONTRIB_REQUIRED": "OFF-default-ON-to-include_ChibiOS-Contrib-repository-in-the-build",
           "CHIBIOS_CONTRIB_SOURCE": "<path-to-local-ChibiOS-contrib-source-mind-the-forward-slash>",
           "FREERTOS_BOARD": "<valid-freertos-board-name-from-boards-collection>",
-          "FREERTOS_VERSION": "<valid-freertos-version-if-empty-use-default-set-cmake>",
+          "RTOS_VERSION": "<valid-rtos-git-branch-if-empty-use-default-cmake-setting>",
           "FREERTOS_SOURCE": "<path-to-freertos-source-mind-the-forward-slash>",
           "CMSIS_SOURCE": "<path-to-cmsis-source-mind-the-forward-slash>",
           "CMSIS_VERSION": "<valid-cmsis-version-if-empty-use-default-set-cmake>",
