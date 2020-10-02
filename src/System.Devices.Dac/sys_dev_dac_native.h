@@ -23,7 +23,6 @@ struct Library_sys_dev_dac_native_System_Device_Dac_DacController
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
-
 };
 
 struct Library_sys_dev_dac_native_System_Device_Dac_DacChannel
@@ -37,7 +36,6 @@ struct Library_sys_dev_dac_native_System_Device_Dac_DacChannel
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID__BOOLEAN);
 
     //--//
-
 };
 
 struct Library_sys_dev_dac_native_System_Device_Dac_DacControllerManager
@@ -46,9 +44,8 @@ struct Library_sys_dev_dac_native_System_Device_Dac_DacControllerManager
     static const int FIELD_STATIC__s_controllersCollection = 1;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Dac;
 
-#endif  //_SYS_DEV_DAC_NATIVE_H_
+#endif //_SYS_DEV_DAC_NATIVE_H_
