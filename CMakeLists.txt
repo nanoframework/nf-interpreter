@@ -701,6 +701,37 @@ elseif(RTOS_FREERTOS_CHECK)
     add_subdirectory(targets/FreeRTOS)
 
 #######################
+# FreeRTOS ESP32
+elseif(RTOS_FREERTOS_ESP32_CHECK)
+
+    if("${TARGET_SERIES}" STREQUAL "ESP32")
+        message(STATUS "Platform ESP32 target board: ${RTOS_TARGET_BOARD}")
+
+        if(API_nanoFramework.Hardware.Esp32.Rmt)
+            set(HAL_USE_ESP32_RMT_OPTION TRUE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
+        else()
+            set(HAL_USE_ESP32_RMT_OPTION FALSE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
+        endif()
+
+        # check watchdog feature
+        # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
+        # becuase the build system can't honour that preference
+        if(NOT NF_FEATURE_WATCHDOG)
+        message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
+        endif()
+
+        # Define base path for the class libraries
+        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${RTOS_TARGET_BOARD}/nanoCLR")
+
+        add_subdirectory(targets/FreeRTOS_ESP32)
+
+        # set target base location
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${RTOS_TARGET_BOARD}")
+ 		add_subdirectory(targets/FreeRTOS_ESP32/${RTOS_TARGET_BOARD})
+
+    endif()
+
+#######################
 # TI_SIMPLELINK
 elseif(RTOS_TI_SIMPLELINK_CHECK)
 
