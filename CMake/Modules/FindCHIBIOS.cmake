@@ -40,7 +40,7 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/license)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/ports/common/ARMCMx)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${RTOS_TARGET_BOARD})
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/oslib/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/rt/include)
@@ -58,10 +58,10 @@ if(NOT CHIBIOS_CONTRIB_REQUIRED)
 endif()
 
 # append include directory for boards in the nanoFramework ChibiOS 'overlay'
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${RTOS_TARGET_BOARD})
 
 # append include directory for boards in the nanoFramework ChibiOS 'overlay' provideded by the community
-list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${RTOS_TARGET_BOARD})
 
 #
 list(APPEND CHIBIOS_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/common/ext/CMSIS/TI/${TARGET_SERIES})
@@ -155,19 +155,19 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
 
             # the following hint order is for the board.c file, it has to match the search order of the main CMake otherwise we'll pick one that is the pair
             # this path hint is for OEM boards for which the board file(s) are probably located directly in the "target" folder along with remaining files
-            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}
+            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD}
          
             # this path hint is for the alternative boards folder in the nanoFramework ChibiOS 'overlay'
-            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD}
+            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${RTOS_TARGET_BOARD}
             
             # this path hint is for the usual location of the board.c file
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD}
+            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${RTOS_TARGET_BOARD}
 
             # this path hint is for the alternative boards folder in the nanoFramework ChibiOS 'overlay' provideded by the community
-            ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD}
+            ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${RTOS_TARGET_BOARD}
 
             # this path hint is for Community provided boards that are located directly in the "targets-community" folder
-            ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}
+            ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

@@ -667,29 +667,29 @@ if(RTOS_CHIBIOS_CHECK)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD})
 
         # board found
-        message(STATUS "Support for target board '${CHIBIOS_BOARD}' found")
-        message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
+        message(STATUS "Support for target board '${RTOS_TARGET_BOARD}' found")
+        message(STATUS "${RTOS_TARGET_BOARD_DEFINITIONS_LOCATION}")
 
         # add TARGET board directory
-        add_subdirectory("${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+        add_subdirectory("${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD}")
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD})
             # board found
-            message(STATUS "Support for target board '${CHIBIOS_BOARD}' found in Community targets")
-            message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
+            message(STATUS "Support for target board '${RTOS_TARGET_BOARD}' found in Community targets")
+            message(STATUS "${RTOS_TARGET_BOARD_DEFINITIONS_LOCATION}")
 
             # add TARGET board directory from Community
-            add_subdirectory("targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+            add_subdirectory("targets-community/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD}")
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${RTOS_TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
 
     endif()
@@ -707,27 +707,27 @@ elseif(RTOS_FREERTOS_CHECK)
    
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${RTOS_TARGET_BOARD})
         # board found
-        message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
+        message(STATUS "Support for target board '${RTOS_TARGET_BOARD}' found")
 
         # add TARGET board directory
-        add_subdirectory("targets/FreeRTOS/NXP/${FREERTOS_BOARD}")
+        add_subdirectory("targets/FreeRTOS/NXP/${RTOS_TARGET_BOARD}")
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${RTOS_TARGET_BOARD})
             # board found
-            message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
+            message(STATUS "Support for target board '${RTOS_TARGET_BOARD}' found in Community targets")
 
             # add TARGET board directory from Community
-            add_subdirectory("targets-community/FreeRTOS/NXP/${FREERTOS_BOARD}")
+            add_subdirectory("targets-community/FreeRTOS/NXP/${RTOS_TARGET_BOARD}")
 
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${FREERTOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${RTOS_TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
 
     endif()
@@ -771,31 +771,31 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD})
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${RTOS_TARGET_BOARD})
 
         # set target base location
-        set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD}")
+        set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${RTOS_TARGET_BOARD}")
 
         # board found
-        message(STATUS "Support for target board '${TI_BOARD}' found")
-        message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
+        message(STATUS "Support for target board '${RTOS_TARGET_BOARD}' found")
+        message(STATUS "${RTOS_TARGET_BOARD_DEFINITIONS_LOCATION}")
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TI_BOARD})
+        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${RTOS_TARGET_BOARD})
 
             # set target base location
-            set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TI_BOARD}")
+            set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${RTOS_TARGET_BOARD}")
         
             # board found
-            message(STATUS "Support for target board '${TI_BOARD}' found in Community targets")
-            message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
+            message(STATUS "Support for target board '${RTOS_TARGET_BOARD}' found in Community targets")
+            message(STATUS "${RTOS_TARGET_BOARD_DEFINITIONS_LOCATION}")
 
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${TI_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${RTOS_TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
 
     endif()

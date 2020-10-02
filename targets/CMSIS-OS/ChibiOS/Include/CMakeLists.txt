@@ -12,8 +12,8 @@ set(TARGET_CHIBIOS_COMMON_INCLUDE_DIRS ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS} CAC
 # add header with target platform definitions
 if(CHIBIOS_COMMUNITY_TARGET)
     configure_file("${CMAKE_SOURCE_DIR}/CMake/ChibiOS_target_os.h.in"
-                    "${CMAKE_BINARY_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/target_os.h" @ONLY)
+                    "${CMAKE_BINARY_DIR}/targets-community/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD}/target_os.h" @ONLY)
 else()
     configure_file("${CMAKE_SOURCE_DIR}/CMake/ChibiOS_target_os.h.in"
-                    "${CMAKE_BINARY_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/target_os.h" @ONLY)
+                    "${CMAKE_BINARY_DIR}/targets/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD}/target_os.h" @ONLY)
 endif()

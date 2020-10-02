@@ -421,18 +421,18 @@ endif()
 
 # set target base location
 # this has to be set before the class library modules are pulled in
-if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD})
     # set target base location
-    set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+    set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD}")
 else()
     # try to find board in the Community targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD})
         # set target base location
-        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD}")
     else()
         # board NOT found in targets folder
         # can't continue
-        message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        message(FATAL_ERROR "\n\nSorry but support for ${RTOS_TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
     endif()
 endif()
 
@@ -445,47 +445,47 @@ include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
 set(CHIBIOS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
 
 # start search in nanoFramework ChibiOS 'overlay' folder
-if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
+if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${RTOS_TARGET_BOARD})
     # board found
     # if it's on nF overlay board.c and board.h exist there for sure
-    set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")
+    set(RTOS_TARGET_BOARD_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")
 else()
     # board NOT found in ChibiOS 'overlay'
 
     # try to find it in the target boards
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD})
         # board found
         # check if the board definition files are available at the target folder
-        if( EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.c AND
-            EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.h)
+        if( EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD}/board.c AND
+            EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD}/board.h)
             # definition files found
-            set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from target folder" CACHE INTERNAL "Location of board definition files")
+            set(RTOS_TARGET_BOARD_DEFINITIONS_LOCATION "Board definition files taken from target folder" CACHE INTERNAL "Location of board definition files")
 
         else()
             # board.c and board.h are NOT in the target folder, try to find them in the official distribution
 
-            if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
+            if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${RTOS_TARGET_BOARD})
                 # board found
                 # if it's on the ChibiOS official distribution board.c and board.h exist here for sure
-                set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from official ChibiOS distribution" CACHE INTERNAL "Location of board definition files")
+                set(RTOS_TARGET_BOARD_DEFINITIONS_LOCATION "Board definition files taken from official ChibiOS distribution" CACHE INTERNAL "Location of board definition files")
 
             else()
                 # board NOT found in official distribution
                 # quit now as there is no were else to search for these
-                message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${CHIBIOS_BOARD} in the available list of ChibiOS supported boards...\n\n")
+                message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${RTOS_TARGET_BOARD} in the available list of ChibiOS supported boards...\n\n")
 
             endif()
         endif()
 
     else()
         # try to find board in the Community targets folder
-        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${RTOS_TARGET_BOARD})
             # set flag for this being a community board
             set(CHIBIOS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
         else()
             # board NOT found in official distribution
             # quit now as there is no were else to search for these
-            message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${CHIBIOS_BOARD} in the available list of ChibiOS supported boards...\n\n")
+            message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${RTOS_TARGET_BOARD} in the available list of ChibiOS supported boards...\n\n")
         endif()
 
     endif()

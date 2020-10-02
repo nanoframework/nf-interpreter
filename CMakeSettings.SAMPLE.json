@@ -294,7 +294,7 @@
           "type": "STRING"
         },
         {
-          "name": "CHIBIOS_BOARD",
+          "name": "RTOS_TARGET_BOARD",
           "value": "ST_STM32F769I_DISCOVERY",
           "type": "STRING"
         },

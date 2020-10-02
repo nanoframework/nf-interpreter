@@ -13,6 +13,6 @@
 
 #include <target_common.h>
 
-#define OEMSYSTEMINFOSTRING "nanoBooter running @ @CHIBIOS_BOARD@"
+#define OEMSYSTEMINFOSTRING "nanoBooter running @ @RTOS_TARGET_BOARD@"
 
 #endif /* _TARGET_BOARD_NANOBOOTER_H_ */

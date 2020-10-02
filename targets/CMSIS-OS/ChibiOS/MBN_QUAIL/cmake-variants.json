@@ -32,7 +32,7 @@
           "RTOS": "CHIBIOS",
           "TARGET_SERIES": "STM32F4xx",
           "CHIBIOS_SOURCE": "",
-          "CHIBIOS_BOARD": "MBN_QUAIL",
+          "RTOS_TARGET_BOARD": "MBN_QUAIL",
           "CHIBIOS_CONTRIB_REQUIRED": "OFF",
           "CHIBIOS_CONTRIB_SOURCE": "",
           "STM32_CUBE_PACKAGE_REQUIRED": "OFF",

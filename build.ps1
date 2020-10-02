@@ -52,7 +52,7 @@ If ($Target -eq "MBN_QUAIL" -or
     }
 
     # CMake prep
-    $cmakePrep = " -G Ninja -DCMAKE_TOOLCHAIN_FILE=""CMake/toolchain.arm-none-eabi.cmake"" -DTOOLCHAIN_PREFIX=""$env:GNU_GCC_TOOLCHAIN_PATH"" -DCMAKE_BUILD_TYPE=Debug -DBUILD_VERSION=9.9.99.99 -DCHIBIOS_BOARD=$Target $cmakeOptions .."
+    $cmakePrep = " -G Ninja -DCMAKE_TOOLCHAIN_FILE=""CMake/toolchain.arm-none-eabi.cmake"" -DTOOLCHAIN_PREFIX=""$env:GNU_GCC_TOOLCHAIN_PATH"" -DCMAKE_BUILD_TYPE=Debug -DBUILD_VERSION=9.9.99.99 -DRTOS_TARGET_BOARD=$Target $cmakeOptions .."
 }
 elseif ($Target -eq "ESP32_WROOM_32") {
 
@@ -80,7 +80,7 @@ elseif ($Target -eq "TI_CC1352R1_LAUNCHXL") {
     }
 
     # CMake prep
-    $cmakePrep = " -G Ninja -DCMAKE_TOOLCHAIN_FILE=""CMake/toolchain.arm-none-eabi.cmake"" -DTOOLCHAIN_PREFIX=""$env:GNU_GCC_TOOLCHAIN_PATH"" -DCMAKE_BUILD_TYPE=Debug -DBUILD_VERSION=9.99.999 -DTI_BOARD=$Target $cmakeOptions .." 
+    $cmakePrep = " -G Ninja -DCMAKE_TOOLCHAIN_FILE=""CMake/toolchain.arm-none-eabi.cmake"" -DTOOLCHAIN_PREFIX=""$env:GNU_GCC_TOOLCHAIN_PATH"" -DCMAKE_BUILD_TYPE=Debug -DBUILD_VERSION=9.99.999 -DRTOS_TARGET_BOARD=$Target $cmakeOptions .." 
 }
 elseif ($Target -eq "NXP_MIMXRT1060_EVK") {
     # TODO
@@ -135,14 +135,14 @@ elseif ($Target -eq "GHI_FEZ_CERB40_NF" -or
     }
 
     # CMake prep
-    $cmakePrep = " -G Ninja -DCMAKE_TOOLCHAIN_FILE=""CMake/toolchain.arm-none-eabi.cmake"" -DTOOLCHAIN_PREFIX=""$env:GNU_GCC_TOOLCHAIN_PATH"" -DCMAKE_BUILD_TYPE=Debug -DBUILD_VERSION=9.9.99.99 -DCHIBIOS_BOARD=$Target $cmakeOptions .."
+    $cmakePrep = " -G Ninja -DCMAKE_TOOLCHAIN_FILE=""CMake/toolchain.arm-none-eabi.cmake"" -DTOOLCHAIN_PREFIX=""$env:GNU_GCC_TOOLCHAIN_PATH"" -DCMAKE_BUILD_TYPE=Debug -DBUILD_VERSION=9.9.99.99 -DRTOS_TARGET_BOARD=$Target $cmakeOptions .."
 }
 elseif ($Target -eq "TI_CC1352P1_LAUNCHXL") {
     # community targets with TI CC13xx
     $cmakeOptions = " -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SIMPLELINK -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_Windows.Devices.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.Adc=OFF -DAPI_nanoFramework.TI.EasyLink=ON"
 
     # CMake prep
-    $cmakePrep = " -G Ninja -DCMAKE_TOOLCHAIN_FILE=""CMake/toolchain.arm-none-eabi.cmake"" -DTOOLCHAIN_PREFIX=""$env:GNU_GCC_TOOLCHAIN_PATH"" -DCMAKE_BUILD_TYPE=Debug -DBUILD_VERSION=9.9.99.99 -DCHIBIOS_BOARD=$Target $cmakeOptions .."
+    $cmakePrep = " -G Ninja -DCMAKE_TOOLCHAIN_FILE=""CMake/toolchain.arm-none-eabi.cmake"" -DTOOLCHAIN_PREFIX=""$env:GNU_GCC_TOOLCHAIN_PATH"" -DCMAKE_BUILD_TYPE=Debug -DBUILD_VERSION=9.9.99.99 -DRTOS_TARGET_BOARD=$Target $cmakeOptions .."
 }
 else {
     Write-Error "Unknown target name."
