@@ -693,74 +693,12 @@ if(RTOS_CHIBIOS_CHECK)
         endif()
 
     endif()
-#######################
-# FreeRTOS
-elseif(RTOS_FREERTOS_CHECK)
-
-    add_subdirectory(targets/FreeRTOS)
 
 #######################
 # FreeRTOS
 elseif(RTOS_FREERTOS_CHECK)
 
     add_subdirectory(targets/FreeRTOS)
-   
-    # now add the subdirectory for the board
-    # try to find board in the targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${RTOS_TARGET_BOARD})
-        # board found
-        message(STATUS "Support for target board '${RTOS_TARGET_BOARD}' found")
-
-        # add TARGET board directory
-        add_subdirectory("targets/FreeRTOS/NXP/${RTOS_TARGET_BOARD}")
-
-    else()
-
-        # try to find board in the Community targets folder
-        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${RTOS_TARGET_BOARD})
-            # board found
-            message(STATUS "Support for target board '${RTOS_TARGET_BOARD}' found in Community targets")
-
-            # add TARGET board directory from Community
-            add_subdirectory("targets-community/FreeRTOS/NXP/${RTOS_TARGET_BOARD}")
-
-        else()
-        # board NOT found in targets folder
-            # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${RTOS_TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-        endif()
-
-    endif()
-#######################
-# FreeRTOS ESP32
-elseif(RTOS_FREERTOS_ESP32_CHECK)
-
-    if("${TARGET_SERIES}" STREQUAL "ESP32")
-        message(STATUS "Platform ESP32 target board: ${RTOS_TARGET_BOARD}")
-
-        if(API_nanoFramework.Hardware.Esp32.Rmt)
-            set(HAL_USE_ESP32_RMT_OPTION TRUE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
-        else()
-            set(HAL_USE_ESP32_RMT_OPTION FALSE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
-        endif()
-
-        # check watchdog feature
-        # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
-        # becuase the build system can't honour that preference
-        if(NOT NF_FEATURE_WATCHDOG)
-        message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
-        endif()
-
-        # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${RTOS_TARGET_BOARD}/nanoCLR")
-
-        add_subdirectory(targets/FreeRTOS_ESP32)
-
-        # set target base location
-        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${RTOS_TARGET_BOARD}")
- 		add_subdirectory(targets/FreeRTOS_ESP32/${RTOS_TARGET_BOARD})
-
-    endif()
 
 #######################
 # TI_SIMPLELINK
