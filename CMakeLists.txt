@@ -693,11 +693,6 @@ if(RTOS_CHIBIOS_CHECK)
         endif()
 
     endif()
-#######################
-# FreeRTOS
-elseif(RTOS_FREERTOS_CHECK)
-
-    add_subdirectory(targets/FreeRTOS)
 
 #######################
 # FreeRTOS
