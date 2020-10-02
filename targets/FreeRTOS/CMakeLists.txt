@@ -81,7 +81,7 @@ if(NO_FREERTOS_SOURCE)
         PREFIX FreeRTOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
         GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-        GIT_TAG ${FREERTOS_VERSION_TAG}  # target specified branch
+        GIT_TAG ${RTOS_VERSION}  # target specified branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
