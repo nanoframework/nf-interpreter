@@ -22,7 +22,7 @@ NF_PAL_DAC Dac2_1_PAL;
 NF_PAL_DAC Dac2_2_PAL;
 #endif
 
-HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeOpenChannel___VOID__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeOpenChannel___VOID__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     
@@ -114,7 +114,7 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeOpenC
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeGetChannelCount___I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeGetChannelCount___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     int channelCount;
@@ -140,7 +140,7 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeGetCh
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeGetResolutionInBits___I4( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeGetResolutionInBits___I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -150,7 +150,7 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeGetRe
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeInit___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeInit___VOID( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
 
@@ -176,7 +176,7 @@ HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::NativeInit_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_dac_native_System_Devices_Dac_DacController::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {

@@ -10,7 +10,7 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 
-struct Library_sys_dev_dac_native_System_Devices_Dac_DacController
+struct Library_sys_dev_dac_native_System_Device_Dac_DacController
 {
     static const int FIELD___syncLock = 1;
     static const int FIELD___controllerId = 2;
@@ -26,7 +26,7 @@ struct Library_sys_dev_dac_native_System_Devices_Dac_DacController
 
 };
 
-struct Library_sys_dev_dac_native_System_Devices_Dac_DacChannel
+struct Library_sys_dev_dac_native_System_Device_Dac_DacChannel
 {
     static const int FIELD___syncLock = 1;
     static const int FIELD___channelNumber = 2;
@@ -40,7 +40,7 @@ struct Library_sys_dev_dac_native_System_Devices_Dac_DacChannel
 
 };
 
-struct Library_sys_dev_dac_native_System_Devices_Dac_DacControllerManager
+struct Library_sys_dev_dac_native_System_Device_Dac_DacControllerManager
 {
     static const int FIELD_STATIC___syncLock = 0;
     static const int FIELD_STATIC__s_controllersCollection = 1;
@@ -49,6 +49,6 @@ struct Library_sys_dev_dac_native_System_Devices_Dac_DacControllerManager
 
 };
 
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Devices_Dac;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Dac;
 
 #endif  //_SYS_DEV_DAC_NATIVE_H_

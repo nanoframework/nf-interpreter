@@ -55,7 +55,7 @@
           "API_Windows.Devices.Pwm": "ON",
           "API_Windows.Devices.SerialCommunication": "ON",
           "API_Windows.Devices.Adc": "ON",
-          "API_Windows.Devices.Dac": "ON",
+          "API_Windows.Device.Dac": "ON",
           "API_System.Net": "ON",
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Devices.Can": "ON",

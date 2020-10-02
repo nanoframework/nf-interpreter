@@ -499,10 +499,10 @@ else()
 endif()
 
 
-if(API_System.Devices.Dac)
-    set(HAL_USE_DAC_OPTION TRUE CACHE INTERNAL "HAL DAC for System.Devices.Dac")
+if(API_System.Device.Dac)
+    set(HAL_USE_DAC_OPTION TRUE CACHE INTERNAL "HAL DAC for System.Device.Dac")
 else()
-    set(HAL_USE_DAC_OPTION FALSE CACHE INTERNAL "HAL DAC for System.Devices.Dac")
+    set(HAL_USE_DAC_OPTION FALSE CACHE INTERNAL "HAL DAC for System.Device.Dac")
 endif()
 
 

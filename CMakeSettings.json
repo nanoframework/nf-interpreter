@@ -172,7 +172,7 @@
           "value": "ON"
         },
         {
-          "name": "API_System.Devices.Dac",
+          "name": "API_System.Device.Dac",
           "value": "ON"
         },
         {
@@ -412,7 +412,7 @@
           "value": "ON"
         },
         {
-          "name": "API_System.Devices.Dac:BOOL", //OFF-default-ON-to-add-this-API
+          "name": "API_System.Device.Dac:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
