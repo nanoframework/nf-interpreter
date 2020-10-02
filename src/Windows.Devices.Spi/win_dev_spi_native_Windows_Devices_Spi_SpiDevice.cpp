@@ -209,11 +209,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                 }
 
                 // non-blocking wait allowing other threads to run while we wait for the Spi transaction to complete
-                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(
-                    stack.m_owningThread,
-                    *timeout,
-                    CLR_RT_ExecutionEngine::c_Event_SpiMaster,
-                    eventResult));
+                NANOCLR_CHECK_HRESULT(
+                    g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_SpiMaster, eventResult));
 
                 if (!eventResult)
                 {
