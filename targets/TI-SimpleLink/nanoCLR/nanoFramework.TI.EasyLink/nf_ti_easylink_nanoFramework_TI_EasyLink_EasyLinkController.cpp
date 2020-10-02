@@ -277,7 +277,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Rec
     while(eventResult)
     {
         // non-blocking wait allowing other threads to run while we wait for the receive operation to complete
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_Radio, eventResult ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeoutTicks, Event_Radio, eventResult ));
 
         // set to NULL and protect from GC
         hbObj.SetObjectReference( NULL );
@@ -511,7 +511,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Tra
     while(eventResult)
     {
         // non-blocking wait allowing other threads to run while we wait for the transmit operation to complete
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_Radio, eventResult ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeoutTicks, Event_Radio, eventResult ));
     
         if(eventResult)
         {
