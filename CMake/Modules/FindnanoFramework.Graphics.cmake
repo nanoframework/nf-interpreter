@@ -74,7 +74,6 @@ list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoF
         transupp.c
         Graphics.cpp
         GraphicsDriver.cpp
-        GraphicsInitialize.cpp
         GraphicsMemoryHeap.cpp
         
         nanoFramework_Graphics.cpp

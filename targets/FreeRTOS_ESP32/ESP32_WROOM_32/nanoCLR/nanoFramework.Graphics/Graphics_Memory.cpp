@@ -1,4 +1,5 @@
-// Copyright (c) 2017 The nanoFramework project contributors
+//
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -52,9 +53,8 @@ bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT8*& graphicsStartingAddress, C
         // Should be able to use with small screens 
         memoryCaps ^= MALLOC_CAP_SPIRAM;
         
-        // TODO , improve 
-        //spiramMaxSize = heap_caps_get_largest_free_block(memoryCaps);
-        spiramMaxSize = 32*1024;
+        // TODO: Have a parameter to govern this size as it may be enough for small display
+        spiramMaxSize = 16*1024;
     }
 
     if (spiramMaxSize < graphicsMemoryBlockSize)                        // limit the size to what is available

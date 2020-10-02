@@ -1,3 +1,8 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+
 #include "nanoFramework_Graphics.h"
 
 static const CLR_RT_MethodHandler method_lookup[] =

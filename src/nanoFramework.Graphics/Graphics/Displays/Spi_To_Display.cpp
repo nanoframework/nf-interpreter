@@ -31,15 +31,13 @@ void DisplayInterface::Initialize(SpiDisplayConfig& config)
     SPI_DEVICE_CONFIGURATION spiConfig;
    
     spiConfig.BusMode = SpiBusMode::SpiBusMode_master;
-    spiConfig.Spi_Bus = config.spiBus;                          // SPI1
+    spiConfig.Spi_Bus = config.spiBus;                          
     spiConfig.DeviceChipSelect = config.chipSelect;
     spiConfig.ChipSelectActive = false; 
     spiConfig.Spi_Mode =  SpiMode::SpiMode_Mode0;
-    spiConfig.DataOrder16 = DataBitOrder::DataBitOrder_LSB;
-
-    // TODO To increase freq we need to use half duplex on low level or set NO DUMMY flag
-    // Currently an issue in ESP32 low level restricting it for these pins
-    spiConfig.Clock_RateHz = 1 * 1000 * 1000;      // Clock speed, divisors of 80MHz, in Hz.
+    spiConfig.DataOrder16 = DataBitOrder::DataBitOrder_MSB;
+    
+    spiConfig.Clock_RateHz = 40 * 1000 * 1000;      // Spi clock speed.
 
     HRESULT hr = nanoSPI_OpenDevice(spiConfig, SpiDeviceHandle);
     ASSERT(hr == ESP_OK);
@@ -138,8 +136,8 @@ void DisplayInterface::SendBytes(CLR_UINT8 *data, CLR_UINT32 length)
     wrc.fullDuplex = false;
     wrc.readOffset = 0;
 
-    // Theoretically, we could do work asynchroonously and continue to work, but this would require
-    // double buffereing.
+    // Theoretically, we could do work this asynchronously and continue to work, but this would require
+    // double buffering.
 
     // Start a synchronous read / write spi job
     nanoSPI_Write_Read( SpiDeviceHandle, wrc, data, length, NULL, 0);

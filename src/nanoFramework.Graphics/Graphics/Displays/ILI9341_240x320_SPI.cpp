@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -17,15 +17,13 @@ display data of 240RGBx320 dots, and power supply circuit.
 ILI9341 supports parallel 8-/9-/16-/18-bit data bus MCU interface, 6-/16-/18-bit data bus RGB interface and
 3-/4-line serial peripheral interface (SPI).
 
-
 ILI9341 supports full color, 8-color display mode and sleep mode for precise power control by software.
 
 Power saving mode:
    1. Sleep
    2. Deep standby
 
-This implementation was initially written for 16 bit colour, SPI interface of a ESP32-WROVER-KIT-v4.1
-
+This implementation was initially written for 16 bit colour.
 */
 
 
@@ -73,8 +71,8 @@ enum ILI9341_CMD : CLR_UINT8
     Power_On_Sequence = 0xED,
     Enable_3G = 0xF2,
     Pump_Ratio_Control = 0xF7
-
 };
+
 enum ILI9341_Orientation : CLR_UINT8
 {
     MADCTL_MH = 0x04, // sets the Horizontal Refresh, 0=Left-Right and 1=Right-Left
@@ -85,6 +83,7 @@ enum ILI9341_Orientation : CLR_UINT8
 
     MADCTL_BGR = 0x08 // Blue-Green-Red pixel order
 };
+
 bool DisplayDriver::Initialize()
 {
     // Initialize ILI9341 registers
@@ -125,11 +124,11 @@ bool DisplayDriver::Initialize()
     g_DisplayInterface.SendCommand(1,NOP);          // End of sequence
     OS_DELAY(20);                                   // Send Sleep Out command to display : no parameter
 
-
     SetDefaultOrientation();
 
     return true;
 }
+
 void DisplayDriver::SetupDisplayAttributes()
 {
     // Define the LCD/TFT resolution
@@ -140,24 +139,27 @@ void DisplayDriver::SetupDisplayAttributes()
     g_DisplayInterface.GetTransferBuffer(Attributes.TransferBuffer, Attributes.TransferBufferSize);
     return;
 }
+
 void DisplayDriver::SetDefaultOrientation()
 {
     Attributes.Height = Attributes.ShorterSide;
     Attributes.Width = Attributes.LongerSide;
     g_DisplayInterface.SendCommand(2, Memory_Access_Control, 0xE8); // Landscape
 }
+
 bool DisplayDriver::Uninitialize()
 {
     Clear();
     // Anything else to Uninitialize?
     return TRUE;
 }
+
 void DisplayDriver::PowerSave(PowerSaveState powerState)
 {
     switch (powerState)
     {
     default:
-        // illegal fall through to Power on
+        // Illegal fall through to Power on
     case PowerSaveState::NORMAL:
         g_DisplayInterface.SendCommand(3,POWER_STATE, 0x00,0x00);  // leave sleep mode
         break;
@@ -167,6 +169,7 @@ void DisplayDriver::PowerSave(PowerSaveState powerState)
     }
     return;
 }
+
 void DisplayDriver::Clear()
 {
     //reset the cursor pos to the begining
@@ -174,6 +177,7 @@ void DisplayDriver::Clear()
     return;
 
 }
+
 void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
 {
     _ASSERTE(brightness >= 0 && brightness <= 100);
@@ -181,6 +185,7 @@ void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
     return;
 
 }
+
 void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[])
 {
     // With the current design the Colour data is packed into the lower two bytes of each data array element
@@ -234,18 +239,22 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
     }
     return;
 }
+
 CLR_UINT32 DisplayDriver::PixelsPerWord()
 {
     return (32 / Attributes.BitsPerPixel);
 }
+
 CLR_UINT32 DisplayDriver::WidthInWords()
 {
     return ((Attributes.Width + (PixelsPerWord() - 1)) / PixelsPerWord());
 }
+
 CLR_UINT32 DisplayDriver::SizeInWords()
 {
     return (WidthInWords() * Attributes.Height);
 }
+
 CLR_UINT32 DisplayDriver::SizeInBytes()
 {
     return (SizeInWords() * sizeof(CLR_UINT32));
