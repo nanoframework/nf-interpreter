@@ -7,7 +7,7 @@
 #include <nanoPAL_events.h>
 // #include <stdbool.h>
 
-volatile uint32_t systemEvents;
+static uint32_t systemEvents;
 
 set_Event_Callback g_Event_Callback = NULL;
 void *g_Event_Callback_Arg = NULL;
@@ -47,20 +47,20 @@ __nfweak uint32_t Events_Get(uint32_t eventsOfInterest)
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
+    // ... clear the requested flags atomically
+    // give the caller notice of just the events they asked for ( and were cleared already )
+#ifdef __CM0_CMSIS_VERSION
     // get the requested flags from system events state and...
     uint32_t returnEvents = (systemEvents & eventsOfInterest);
 
-    // ... clear the requested flags atomically
-#ifdef __CM0_CMSIS_VERSION
     GLOBAL_LOCK();
     systemEvents &= ~eventsOfInterest;
     GLOBAL_UNLOCK();
-#else
-    __atomic_fetch_nand(&systemEvents, eventsOfInterest, __ATOMIC_RELAXED);
-#endif
 
-    // give the caller notice of just the events they asked for ( and were cleared already )
     return returnEvents;
+#else
+    return __atomic_fetch_and(&systemEvents, ~eventsOfInterest, __ATOMIC_RELAXED) & eventsOfInterest;
+#endif
 }
 
 __nfweak uint32_t Events_MaskedRead(uint32_t eventsOfInterest)
