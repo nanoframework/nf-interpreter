@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2020 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -19,10 +19,9 @@ list(APPEND nanoFramework.Hardware.Esp32.Rmt_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/
 set(nanoFramework.Hardware.Esp32.Rmt_SRCS
 
     nanoFramework_hardware_esp32_rmt_native.cpp
-
-
+    nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel.cpp
     nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel.cpp
-
+    nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Esp32.Rmt_SRCS})

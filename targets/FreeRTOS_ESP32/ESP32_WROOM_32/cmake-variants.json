@@ -43,7 +43,7 @@
           "NF_FEATURE_HAS_SDCARD": "ON",
           "API_System.Net": "ON",
           "NF_SECURITY_MBEDTLS": "ON",
-          "MBEDTLS_SOURCE": "<path-to-mbedtls-source-mind-the-forward-slashes>",
+          "MBEDTLS_SOURCE": "",
           "API_nanoFramework.ResourceManager": "ON",
           "API_nanoFramework.System.Collections": "ON",
           "API_nanoFramework.System.Text": "ON",

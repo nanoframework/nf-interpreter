@@ -1,14 +1,18 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
 #include <nanoCLR_Types.h>
 #include <nanoCLR_Runtime.h>
-#include <ti/drivers/UART.h>
+#include <ti/drivers/UART2.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
+#include <ti/sysbios/knl/Clock.h>
 
-extern UART_Handle uart;
+// UART operations timeout
+#define UART_TIMEOUT_MILLISECONDS 500000
+
+extern UART2_Handle uart;
 extern SemaphoreP_Handle uartMutex;
 
 // developer note:
@@ -19,15 +23,15 @@ extern "C" uint32_t DebuggerPort_WriteProxy(const char *format, ...)
     va_list arg;
     uint32_t chars = 0;
 
-    if( CLR_EE_DBG_IS_NOT( Enabled ) )
+    if (CLR_EE_DBG_IS_NOT(Enabled))
     {
-        if(SemaphoreP_pend(uartMutex, UART_WAIT_FOREVER) == SemaphoreP_OK)
+        if (SemaphoreP_pend(uartMutex, UART2_WAIT_FOREVER) == SemaphoreP_OK)
         {
-            va_start( arg, format );
+            va_start(arg, format);
 
-            chars = CLR_Debug::PrintfV( format, arg );
+            chars = CLR_Debug::PrintfV(format, arg);
 
-            va_end( arg );
+            va_end(arg);
 
             SemaphoreP_post(uartMutex);
         }
@@ -36,17 +40,18 @@ extern "C" uint32_t DebuggerPort_WriteProxy(const char *format, ...)
     return chars;
 }
 
-uint32_t GenericPort_Write( int portNum, const char* data, size_t size )
+uint32_t GenericPort_Write(int portNum, const char *data, size_t size)
 {
     (void)portNum;
+    size_t bytesWritten;
 
-    if( CLR_EE_DBG_IS_NOT( Enabled ) )
+    if (CLR_EE_DBG_IS_NOT(Enabled))
     {
         // debugger port is NOT in use, OK to output to UART
         // send characters directly to the UART port
-        UART_write(uart, data, size);
+        UART2_writeTimeout(uart, data, size, &bytesWritten, UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod);
 
-        return size;
+        return bytesWritten;
     }
 
     return (uint32_t)size;

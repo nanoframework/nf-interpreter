@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -9,42 +9,24 @@
 #include <win_dev_spi_native.h>
 #include <hal.h>
 
-// struct representing the SPI
-typedef struct
+// struct representing the SPI bus
+struct NF_PAL_SPI
 {
+    int BusIndex;
     SPIDriver *Driver;
     SPIConfig Configuration;
-    float ByteTime;
+
+    SPI_Callback Callback;
+
     bool SequentialTxRx;
+    bool BufferIs16bits;
 
     uint8_t *WriteBuffer;
     uint16_t WriteSize;
 
     uint8_t *ReadBuffer;
     uint16_t ReadSize;
-} NF_PAL_SPI;
-
-///////////////////////////////////////////
-// declaration of the the SPI PAL strucs //
-///////////////////////////////////////////
-#if STM32_SPI_USE_SPI1
-extern NF_PAL_SPI SPI1_PAL;
-#endif
-#if STM32_SPI_USE_SPI2
-extern NF_PAL_SPI SPI2_PAL;
-#endif
-#if STM32_SPI_USE_SPI3
-extern NF_PAL_SPI SPI3_PAL;
-#endif
-#if STM32_SPI_USE_SPI4
-extern NF_PAL_SPI SPI4_PAL;
-#endif
-#if STM32_SPI_USE_SPI5
-extern NF_PAL_SPI SPI5_PAL;
-#endif
-#if STM32_SPI_USE_SPI6
-extern NF_PAL_SPI SPI6_PAL;
-#endif
+};
 
 // the following macro defines a function that configures the GPIO pins for an STM32 SPI peripheral
 // it gets called in the Windows_Devices_SPi_SPiDevice::NativeInit function

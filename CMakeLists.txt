@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -807,44 +807,13 @@ if(RTOS_CHIBIOS_CHECK)
         endif()
 
     endif()
-#######################
-# FreeRTOS
-elseif(RTOS_FREERTOS_CHECK)
-
-    add_subdirectory(targets/FreeRTOS)
 
 #######################
 # FreeRTOS
 elseif(RTOS_FREERTOS_CHECK)
 
     add_subdirectory(targets/FreeRTOS)
-   
-    # now add the subdirectory for the board
-    # try to find board in the targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
-        # board found
-        message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
 
-        # add TARGET board directory
-        add_subdirectory("targets/FreeRTOS/NXP/${FREERTOS_BOARD}")
-
-    else()
-
-        # try to find board in the Community targets folder
-        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
-            # board found
-            message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
-
-            # add TARGET board directory from Community
-            add_subdirectory("targets-community/FreeRTOS/NXP/${FREERTOS_BOARD}")
-
-        else()
-        # board NOT found in targets folder
-            # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${FREERTOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-        endif()
-
-    endif()
 #######################
 # FreeRTOS ESP32
 elseif(RTOS_FREERTOS_ESP32_CHECK)
@@ -852,8 +821,14 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
     if("${TARGET_SERIES}" STREQUAL "ESP32")
         message(STATUS "Platform ESP32 target board: ${ESP32_BOARD}")
 
+        if(API_nanoFramework.Hardware.Esp32.Rmt)
+            set(HAL_USE_ESP32_RMT_OPTION TRUE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
+        else()
+            set(HAL_USE_ESP32_RMT_OPTION FALSE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
+        endif()
+
         # check watchdog feature
-        # EPS32 build has watchdog enabled by default, so setting it to OFF doens't make sense 
+        # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
         # becuase the build system can't honour that preference
         if(NOT NF_FEATURE_WATCHDOG)
         message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")

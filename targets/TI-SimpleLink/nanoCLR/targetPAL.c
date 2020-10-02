@@ -1,13 +1,15 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
-#include <ti/drivers/UART.h>
+#include <ti/drivers/UART2.h>
 #include <board.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
 
-extern UART_Handle uart;
+#include <ti_drivers_config.h>
+
+extern UART2_Handle uart;
 
 SemaphoreP_Handle uartMutex;
 
@@ -19,7 +21,8 @@ SemaphoreP_Handle uartMutex;
 void dummyFunction(void) __attribute__((used));
 
 // Never called.
-void dummyFunction(void) {
+void dummyFunction(void)
+{
     vTaskSwitchContext();
     localProgramStart();
 }
@@ -27,40 +30,42 @@ void dummyFunction(void) {
 // configure UART
 void ConfigUART()
 {
-    UART_Params uartParams;
+    UART2_Params uartParams;
 
     // Create a UART with data processing off
-    UART_Params_init(&uartParams);
+    UART2_Params_init(&uartParams);
 
-    uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.readDataMode = UART_DATA_BINARY;
-    uartParams.readEcho = UART_ECHO_OFF;
+    uartParams.writeMode = UART2_Mode_BLOCKING;
+    uartParams.readMode = UART2_Mode_BLOCKING;
     uartParams.baudRate = 921600;
+    uartParams.readReturnMode = UART2_ReadReturnMode_FULL;
 
-    uart = UART_open(Board_UART0, &uartParams);
+    uart = UART2_open(UART0, &uartParams);
 
     if (uart == NULL)
     {
         // UART_open() failed
-        while (1);
+        while (1)
+            ;
     }
 
     uartMutex = SemaphoreP_createBinary(1);
     if (uartMutex == NULL)
     {
         // failed to create semaphore
-        while (1);
-    }    
+        while (1)
+            ;
+    }
 }
 
 void __error__(char *pcFilename, unsigned long ulLine)
 {
-  //
-  // Something horrible happened! You need to look
-  // at file "pcFilename" at line "ulLine" to see
-  // what error is being reported.
-  //
-  while(1)
-  {
-  }
+    //
+    // Something horrible happened! You need to look
+    // at file "pcFilename" at line "ulLine" to see
+    // what error is being reported.
+    //
+    while (1)
+    {
+    }
 }

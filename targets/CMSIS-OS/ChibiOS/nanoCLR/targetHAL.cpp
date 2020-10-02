@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -9,6 +9,7 @@
 #include <nanoHAL_Time.h>
 #include <nanoHAL_Types.h>
 #include <target_platform.h>
+#include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
 
@@ -107,26 +108,7 @@ void nanoHAL_Initialize()
 #endif
 
 #if (HAL_USE_SPI == TRUE)
-
-#if STM32_SPI_USE_SPI1
-    SPI1_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI2
-    SPI2_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI3
-    SPI3_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI4
-    SPI4_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI5
-    SPI5_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI6
-    SPI6_PAL.Driver = NULL;
-#endif
-
+    nanoSPI_Initialize();
 #endif
 
 #if (HAL_USE_UART == TRUE)
@@ -193,6 +175,10 @@ void nanoHAL_Uninitialize()
     // - all mutexes for drivers that use them are released
     // - all drivers are stopped
 
+#if (HAL_USE_SPI == TRUE)
+    nanoSPI_Uninitialize();
+#endif
+
 #if (HAL_USE_CAN == TRUE)
 
 #if STM32_CAN_USE_CAN1
@@ -229,33 +215,7 @@ void nanoHAL_Uninitialize()
 #endif
 
 #if (HAL_USE_SPI == TRUE)
-
-#if STM32_SPI_USE_SPI1
-    spiReleaseBus(&SPID1);
-    spiStop(&SPID1);
-#endif
-#if STM32_SPI_USE_SPI2
-    spiReleaseBus(&SPID2);
-    spiStop(&SPID2);
-#endif
-#if STM32_SPI_USE_SPI3
-    spiReleaseBus(&SPID3);
-    spiStop(&SPID3);
-    SPI3_PAL.Driver = NULL;
-#endif
-#if STM32_SPI_USE_SPI4
-    spiReleaseBus(&SPID4);
-    spiStop(&SPID4);
-#endif
-#if STM32_SPI_USE_SPI5
-    spiReleaseBus(&SPID5);
-    spiStop(&SPID5);
-#endif
-#if STM32_SPI_USE_SPI6
-    spiReleaseBus(&SPID6);
-    spiStop(&SPID6);
-#endif
-
+    nanoSPI_Uninitialize();
 #endif
 
 #if (HAL_USE_UART == TRUE)
@@ -301,51 +261,4 @@ void nanoHAL_Uninitialize()
 
     HAL_CONTINUATION::Uninitialize();
     HAL_COMPLETION ::Uninitialize();
-}
-
-volatile int32_t SystemStates[SYSTEM_STATE_TOTAL_STATES];
-
-void SystemState_SetNoLock(SYSTEM_STATE_type state)
-{
-    SystemStates[state]++;
-}
-
-void SystemState_ClearNoLock(SYSTEM_STATE_type state)
-{
-    SystemStates[state]--;
-}
-
-bool SystemState_QueryNoLock(SYSTEM_STATE_type state)
-{
-    return (SystemStates[state] > 0) ? true : false;
-}
-
-void SystemState_Set(SYSTEM_STATE_type state)
-{
-    GLOBAL_LOCK();
-
-    SystemState_SetNoLock(state);
-
-    GLOBAL_UNLOCK();
-}
-
-void SystemState_Clear(SYSTEM_STATE_type state)
-{
-    GLOBAL_LOCK();
-
-    SystemState_ClearNoLock(state);
-
-    GLOBAL_UNLOCK();
-}
-
-bool SystemState_Query(SYSTEM_STATE_type state)
-{
-    bool systemStateCopy = false;
-    GLOBAL_LOCK();
-
-    systemStateCopy = SystemState_QueryNoLock(state);
-
-    GLOBAL_UNLOCK();
-
-    return systemStateCopy;
 }

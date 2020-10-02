@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -9,9 +9,9 @@ include(CMakeForceCompiler)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY )
 
 # set toolchain directories
-set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf/bin)
+set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/bin)
 set(TOOLCHAIN_INC_DIR ${ESP32_IDF_PATH}/components/newlib/include)
-set(TOOLCHAIN_LIB_DIR ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf/xtensa-esp32-elf/lib)
+set(TOOLCHAIN_LIB_DIR ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf/lib)
 
 # the name of the operating system for which CMake is to build
 set(CMAKE_SYSTEM_NAME Generic)

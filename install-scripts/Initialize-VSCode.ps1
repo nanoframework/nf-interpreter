@@ -1,4 +1,4 @@
-# Copyright (c) 2020 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
 # This PS configures Visual Studio Code to use with nanoFramework:
@@ -74,7 +74,7 @@ function Main {
 
             $settings | ConvertTo-Json -depth 32 | Out-File $filePath -Encoding UTF8 -Force
 
-            CleanJsonPatterns($filePath)
+            Repair-Patterns($filePath)
         }
     }
 
