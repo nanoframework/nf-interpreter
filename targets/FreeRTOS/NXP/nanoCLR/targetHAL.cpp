@@ -6,6 +6,7 @@
 #include <nanoPAL.h>
 #include <nanoHAL_Time.h>
 #include <nanoHAL_Types.h>
+#include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
 

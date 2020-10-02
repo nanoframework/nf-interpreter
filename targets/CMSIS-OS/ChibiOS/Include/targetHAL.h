@@ -66,7 +66,6 @@ extern uint32_t __nanoConfig_end__;
 extern uint32_t __deployment_start__;
 extern uint32_t __deployment_end__;
 
-#endif //_TARGET_HAL_H_
 extern int my_lock_counter;
 
 #define GLOBAL_LOCK()                                                                                                  \
@@ -82,6 +81,8 @@ extern int my_lock_counter;
     else                                                                                                               \
         chSysUnlock();                                                                                                 \
     }
+
+#endif //_TARGET_HAL_H_
 
 //#define GLOBAL_LOCK()              chSysLock();
 //#define GLOBAL_UNLOCK();           chSysUnlock();

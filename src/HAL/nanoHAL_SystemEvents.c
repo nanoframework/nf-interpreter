@@ -5,6 +5,7 @@
 
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
+#include <targetHAL.h>
 
 volatile int32_t SystemStates[SYSTEM_STATE_TOTAL_STATES];
 
@@ -27,12 +28,24 @@ __nfweak bool SystemState_QueryNoLock(SYSTEM_STATE_type state)
 
 __nfweak void SystemState_Set(SYSTEM_STATE_type state)
 {
+#ifdef __CM0_CMSIS_VERSION
+    GLOBAL_LOCK();
+    SystemState_SetNoLock(state);
+    GLOBAL_UNLOCK();
+#else
     __atomic_fetch_add(&SystemStates[state], 1, __ATOMIC_RELAXED);
+#endif
 }
 
 __nfweak void SystemState_Clear(SYSTEM_STATE_type state)
 {
+#ifdef __CM0_CMSIS_VERSION
+    GLOBAL_LOCK();
+    SystemState_ClearNoLock(state);
+    GLOBAL_UNLOCK();
+#else
     __atomic_fetch_sub(&SystemStates[state], 1, __ATOMIC_RELAXED);
+#endif
 }
 
 __nfweak bool SystemState_Query(SYSTEM_STATE_type state)

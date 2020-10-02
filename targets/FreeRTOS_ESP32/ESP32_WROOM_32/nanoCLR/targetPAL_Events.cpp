@@ -14,65 +14,20 @@ uint64_t CPU_MillisecondsToTicks(uint64_t ticks);
 // timer for bool events
 static TimerHandle_t boolEventsTimer;
 
-volatile uint32_t systemEvents;
-
 static void local_Events_SetBoolTimer_Callback(TimerHandle_t xTimer);
 
-set_Event_Callback g_Event_Callback = NULL;
-void *g_Event_Callback_Arg = NULL;
-
-bool Events_Initialize()
+bool Events_Initialize_Platform()
 {
-    NATIVE_PROFILE_PAL_EVENTS();
-
-    // init events atomically
-    __atomic_clear(&systemEvents, __ATOMIC_RELAXED);
-
     boolEventsTimer = xTimerCreate("boolEventsTimer", 10, pdFALSE, (void *)0, local_Events_SetBoolTimer_Callback);
 
     return true;
 }
 
-bool Events_Uninitialize()
+bool Events_Uninitialize_Platform()
 {
-    NATIVE_PROFILE_PAL_EVENTS();
-
     xTimerDelete(boolEventsTimer, 0);
 
     return true;
-}
-
-void Events_Set(uint32_t events)
-{
-    NATIVE_PROFILE_PAL_EVENTS();
-
-    // set events atomically
-    __atomic_fetch_or(&systemEvents, events, __ATOMIC_RELAXED);
-
-    if (g_Event_Callback != NULL)
-    {
-        g_Event_Callback(g_Event_Callback_Arg);
-    }
-}
-
-uint32_t Events_Get(uint32_t eventsOfInterest)
-{
-    NATIVE_PROFILE_PAL_EVENTS();
-
-    // get the requested flags from system events state and...
-    uint32_t returnEvents = (systemEvents & eventsOfInterest);
-
-    // ... clear the requested flags atomically
-    __atomic_fetch_nand(&systemEvents, eventsOfInterest, __ATOMIC_RELAXED);
-
-    // give the caller notice of just the events they asked for ( and were cleared already )
-    return returnEvents;
-}
-
-uint32_t Events_MaskedRead(uint32_t eventsOfInterest)
-{
-    NATIVE_PROFILE_PAL_EVENTS();
-    return (systemEvents & eventsOfInterest);
 }
 
 static void local_Events_SetBoolTimer_Callback(TimerHandle_t xTimer)
@@ -81,14 +36,6 @@ static void local_Events_SetBoolTimer_Callback(TimerHandle_t xTimer)
 
     bool *timerCompleteFlag = (bool *)pvTimerGetTimerID(xTimer);
     *timerCompleteFlag = true;
-}
-
-void Events_SetCallback(set_Event_Callback pfn, void *arg)
-{
-    NATIVE_PROFILE_PAL_EVENTS();
-
-    g_Event_Callback = pfn;
-    g_Event_Callback_Arg = arg;
 }
 
 void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
