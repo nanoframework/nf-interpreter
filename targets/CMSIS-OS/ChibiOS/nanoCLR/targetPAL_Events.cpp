@@ -15,8 +15,8 @@ uint64_t CPU_MillisecondsToTicks(uint64_t ticks);
 static virtual_timer_t boolEventsTimer;
 uint32_t systemEvents;
 
-set_Event_Callback g_Event_Callback     = NULL;
-void*              g_Event_Callback_Arg = NULL;
+set_Event_Callback g_Event_Callback = NULL;
+void *g_Event_Callback_Arg = NULL;
 
 bool Events_Initialize()
 {
@@ -37,20 +37,20 @@ bool Events_Uninitialize()
     return true;
 }
 
-void Events_Set( uint32_t events )
+void Events_Set(uint32_t events)
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
     // set events atomically
     __atomic_fetch_or(&systemEvents, events, __ATOMIC_RELAXED);
 
-    if( g_Event_Callback != NULL )
+    if (g_Event_Callback != NULL)
     {
-        g_Event_Callback( g_Event_Callback_Arg );
+        g_Event_Callback(g_Event_Callback_Arg);
     }
 }
 
-uint32_t Events_Get( uint32_t eventsOfInterest )
+uint32_t Events_Get(uint32_t eventsOfInterest)
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
@@ -59,80 +59,90 @@ uint32_t Events_Get( uint32_t eventsOfInterest )
 
     // ... clear the requested flags atomically
     __atomic_fetch_nand(&systemEvents, eventsOfInterest, __ATOMIC_RELAXED);
-    
+
     // give the caller notice of just the events they asked for ( and were cleared already )
     return returnEvents;
 }
 
-uint32_t Events_MaskedRead( uint32_t eventsOfInterest )
+uint32_t Events_MaskedRead(uint32_t eventsOfInterest)
 {
     NATIVE_PROFILE_PAL_EVENTS();
     return (systemEvents & eventsOfInterest);
 }
 
-static void local_Events_SetBoolTimer_Callback( void* arg )
+static void local_Events_SetBoolTimer_Callback(void *arg)
 {
     NATIVE_PROFILE_PAL_EVENTS();
-    bool* timerCompleteFlag = (bool*)arg;
+    bool *timerCompleteFlag = (bool *)arg;
 
     *timerCompleteFlag = true;
 }
 
-void Events_SetCallback( set_Event_Callback pfn, void* arg )
+void Events_SetCallback(set_Event_Callback pfn, void *arg)
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    g_Event_Callback     = pfn;
+    g_Event_Callback = pfn;
     g_Event_Callback_Arg = arg;
 }
 
-void Events_SetBoolTimer( bool* timerCompleteFlag, uint32_t millisecondsFromNow )
+void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    if(timerCompleteFlag != NULL)
+    if (timerCompleteFlag != NULL)
     {
         // no need to stop the timer even if it's running because the API does it anyway
-    	if (port_is_isr_context()){
-    		chVTSetI(&boolEventsTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
-		}
-		else{
-			chVTSet(&boolEventsTimer, TIME_MS2I(millisecondsFromNow), local_Events_SetBoolTimer_Callback, timerCompleteFlag);
-		}
+        if (port_is_isr_context())
+        {
+            chVTSetI(
+                &boolEventsTimer,
+                TIME_MS2I(millisecondsFromNow),
+                local_Events_SetBoolTimer_Callback,
+                timerCompleteFlag);
+        }
+        else
+        {
+            chVTSet(
+                &boolEventsTimer,
+                TIME_MS2I(millisecondsFromNow),
+                local_Events_SetBoolTimer_Callback,
+                timerCompleteFlag);
+        }
     }
 }
 
-uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeoutMilliseconds )
+uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeoutMilliseconds)
 {
     // schedule an interrupt for this far in the future
     // timeout is in milliseconds, need to convert to ticks
-    uint64_t countsRemaining = CPU_MillisecondsToTicks( timeoutMilliseconds );
+    uint64_t countsRemaining = CPU_MillisecondsToTicks(timeoutMilliseconds);
 
 #if defined(HAL_PROFILE_ENABLED)
     Events_WaitForEvents_Calls++;
 #endif
 
-    uint64_t expireTimeInTicks  = HAL_Time_CurrentSysTicks() + countsRemaining;
+    uint64_t expireTimeInTicks = HAL_Time_CurrentSysTicks() + countsRemaining;
     bool runContinuations = true;
 
-    while(true)
+    while (true)
     {
         EVENTS_HEART_BEAT;
 
-        uint32_t events = Events_MaskedRead( wakeupSystemEvents );
-        if(events)
+        uint32_t events = Events_MaskedRead(wakeupSystemEvents);
+        if (events)
         {
             return events;
         }
 
-        if(expireTimeInTicks <= HAL_Time_CurrentSysTicks())
+        if (expireTimeInTicks <= HAL_Time_CurrentSysTicks())
         {
             break;
         }
 
         // first check and possibly run any continuations
         // but only if we have slept after stalling
-        if(runContinuations && !SystemState_QueryNoLock(SYSTEM_STATE_NO_CONTINUATIONS))
+        if (runContinuations && !SystemState_QueryNoLock(SYSTEM_STATE_NO_CONTINUATIONS))
         {
             // if we stall on time, don't check again until after we sleep
             runContinuations = HAL_CONTINUATION::Dequeue_And_Execute();
@@ -142,14 +152,14 @@ uint32_t Events_WaitForEvents( uint32_t powerLevel, uint32_t wakeupSystemEvents,
             // try stalled continuations again after sleeping
             runContinuations = true;
 
-            HAL_COMPLETION::WaitForInterrupts(expireTimeInTicks, powerLevel, wakeupSystemEvents );          
+            HAL_COMPLETION::WaitForInterrupts(expireTimeInTicks, powerLevel, wakeupSystemEvents);
         }
 
         // no events, pass control to the OS
         osThreadYield();
 
         // check if reboot or exit flags were set when the other OS threads executed
-        if(CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))
+        if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))
         {
             break;
         }
