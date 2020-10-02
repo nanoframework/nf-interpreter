@@ -58,7 +58,7 @@ endif()
 # list of supported RTOSes
 # when adding a new RTOS add the corresponding string below AND...
 # ... also on the compare block below
-set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" "FREERTOS_ESP32" "TI_SIMPLELINK" CACHE INTERNAL "supported RTOS options")
+set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" "FREERTOS_ESP32" "TI_SIMPLELINK" "AZURERTOS" CACHE INTERNAL "supported RTOS options")
 
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
@@ -71,6 +71,7 @@ string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
 string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
 string(COMPARE EQUAL "FREERTOS_ESP32" "${RTOS}" RTOS_FREERTOS_ESP32_CHECK)
 string(COMPARE EQUAL "TI_SIMPLELINK" "${RTOS}" RTOS_TI_SIMPLELINK_CHECK)
+string(COMPARE EQUAL "AZURERTOS" "${RTOS}" RTOS_AZURERTOS_CHECK)
 
 ##########################################################################
 
@@ -79,6 +80,7 @@ if(RTOS_FREERTOS_CHECK)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
     set(RTOS_TI_SIMPLELINK_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_AZURERTOS_CHECK FALSE)
 endif()
 
 if(RTOS_FREERTOS_ESP32_CHECK)
@@ -86,6 +88,7 @@ if(RTOS_FREERTOS_ESP32_CHECK)
     set(RTOS_FREERTOS_ESP32_CHECK TRUE)
     set(RTOS_TI_SIMPLELINK_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_AZURERTOS_CHECK FALSE)
 endif()
 
 if(RTOS_CHIBIOS_CHECK)
@@ -93,10 +96,20 @@ if(RTOS_CHIBIOS_CHECK)
     set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
     set(RTOS_TI_SIMPLELINK_CHECK FALSE)
+    set(RTOS_AZURERTOS_CHECK FALSE)
 endif()
 
 if(RTOS_TI_SIMPLELINK_CHECK)
     set(RTOS_TI_SIMPLELINK_CHECK TRUE)
+    set(RTOS_FREERTOS_CHECK FALSE)
+    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
+    set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_AZURERTOS_CHECK FALSE)
+endif()
+
+if(RTOS_AZURERTOS_CHECK)
+    set(RTOS_AZURERTOS_CHECK TRUE)
+    set(RTOS_TI_SIMPLELINK_CHECK FALSE)
     set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
@@ -693,11 +706,7 @@ if(RTOS_CHIBIOS_CHECK)
         endif()
 
     endif()
-#######################
-# FreeRTOS
-elseif(RTOS_FREERTOS_CHECK)
 
-    add_subdirectory(targets/FreeRTOS)
 
 #######################
 # FreeRTOS
@@ -804,5 +813,47 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink)
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
+
+#######################
+# AzureRTOS
+elseif(RTOS_AZURERTOS_CHECK)
+
+    # Define base path for the class libraries
+    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/AzureRTOS/nanoCLR")
+
+    # now add the subdirectory for the board
+    # try to find board in the targets folder
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/AzureRTOS/${AZURERTOS_BOARD})
+
+        # set target base location
+        set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets/AzureRTOS/${AZURERTOS_BOARD}")
+
+        # board found
+        message(STATUS "Support for target board '${AZURERTOS_BOARD}' found")
+        message(STATUS "${AZURERTOS_BOARD_DEFINITIONS_LOCATION}")
+
+    else()
+
+        # try to find board in the Community targets folder
+        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/AzureRTOS/${AZURERTOS_BOARD})
+
+            # set target base location
+            set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets-community/AzureRTOS/${AZURERTOS_BOARD}")
+        
+            # board found
+            message(STATUS "Support for target board '${AZURERTOS_BOARD}' found in Community targets")
+            message(STATUS "${AZURERTOS_BOARD_DEFINITIONS_LOCATION}")
+
+        else()
+        # board NOT found in targets folder
+            # board NOT found in targets folder
+            message(FATAL_ERROR "\n\nSorry but support for ${AZURERTOS_BOARD} target is not available...\n\You can wait for it to be added or you might want to contribute and start working on a PR for it.\n\n")
+        endif()
+
+    endif()
+    
+    # add TARGET board directory
+    add_subdirectory(${TARGET_BASE_LOCATION})
+
 
 endif()

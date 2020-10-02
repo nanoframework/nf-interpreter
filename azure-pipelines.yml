@@ -339,6 +339,47 @@ jobs:
   - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
 #################
+# Azure RTOS
+- job: Build_AZURE-RTOS_targets
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  strategy:
+    matrix:
+      STM32L4_L4+:
+        BoardName: STM32L4_L4+
+        BuildOptions: -DTARGET_SERIES=STM32 -DRTOS=AZURERTOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=OFF -DNF_FEATURE_HAS_SDCARD=OFF -DAPI_System.Math=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=OFF -DAPI_Windows.Devices.Gpio=OFF -DAPI_System.Net=OFF -DAPI_Windows.Storage=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_nanoFramework.ResourceManager=OFF -DAPI_nanoFramework.System.Collections=OFF -DAPI_nanoFramework.System.Text=OFF
+        GccArm_Version: 
+        NeedsSRECORD: true
+
+  variables:
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    GIT_LFS_SKIP_SMUDGE: 1
+
+  steps:
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+
+  - template: azure-pipelines-templates/download-install-ninja.yml
+  
+  - template: azure-pipelines-templates/download-srecord.yml
+
+  - template: azure-pipelines-templates/build-azurertos.yml
+
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+
+  - template: azure-pipelines-templates/publish-bintray.yml
+
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+#################
 # WIN32 
 - job: Build_WIN32_nanoCLR
   condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
