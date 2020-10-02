@@ -1,7 +1,6 @@
 #include "nf_system_data_sqlite.h"
 
-static const CLR_RT_MethodHandler method_lookup[] =
-{
+static const CLR_RT_MethodHandler method_lookup[] = {
     NULL,
     NULL,
     NULL,
@@ -51,9 +50,4 @@ static const CLR_RT_MethodHandler method_lookup[] =
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Data_Sqlite =
-{
-    "nanoFramework.System.Data.Sqlite",
-    0x86272AD6,
-    method_lookup,
-    { 1, 0, 0, 0 }
-};
+    {"nanoFramework.System.Data.Sqlite", 0x86272AD6, method_lookup, {1, 0, 0, 0}};
