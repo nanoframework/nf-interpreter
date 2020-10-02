@@ -48,7 +48,7 @@
           "value": "ST_STM32F769I_DISCOVERY"
         },
         {
-          "name": "CHIBIOS_SOURCE",
+          "name": "RTOS_SOURCE_FOLDER",
           "value": "E:/GitHub/ChibiOS"
         },
         {

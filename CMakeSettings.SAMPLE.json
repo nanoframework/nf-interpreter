@@ -299,7 +299,7 @@
           "type": "STRING"
         },
         {
-          "name": "CHIBIOS_SOURCE",
+          "name": "RTOS_SOURCE_FOLDER",
           "value": "C:/usr/src/NanoFramework/ChibiOS",
           "type": "PATH"
         },
