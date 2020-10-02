@@ -23,14 +23,6 @@
 
 #define LPCSTR const char *
 
-// these macros are to be used at entry/exit of native interrupt handlers
-#define NATIVE_INTERRUPT_START                                                                                         \
-    SystemState_SetNoLock(SYSTEM_STATE_ISR);                                                                           \
-    SystemState_SetNoLock(SYSTEM_STATE_NO_CONTINUATIONS);
-#define NATIVE_INTERRUPT_END                                                                                           \
-    SystemState_ClearNoLock(SYSTEM_STATE_NO_CONTINUATIONS);                                                            \
-    SystemState_ClearNoLock(SYSTEM_STATE_ISR);
-
 #if !defined(BUILD_RTM)
 
 #define HARD_BREAKPOINT() HARD_Breakpoint()

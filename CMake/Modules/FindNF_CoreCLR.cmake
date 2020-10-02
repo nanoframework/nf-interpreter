@@ -145,6 +145,7 @@ set(NF_CoreCLR_SRCS
     # HAL
     nanoHAL_Time.cpp
     nanoHAL_Watchdog.c
+    nanoHAL_SystemEvents.c
     
     # PAL
     nanoPAL_BlockStorage.c

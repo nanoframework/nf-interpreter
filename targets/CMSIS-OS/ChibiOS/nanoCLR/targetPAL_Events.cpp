@@ -22,10 +22,8 @@ bool Events_Initialize()
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    // init events
-    GLOBAL_LOCK();
-    systemEvents = 0;
-    GLOBAL_UNLOCK();
+    // init events atomically
+    __atomic_clear(&systemEvents, __ATOMIC_RELAXED);
 
     return true;
 }
@@ -43,10 +41,8 @@ void Events_Set( uint32_t events )
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    // set events
-    GLOBAL_LOCK();
-    systemEvents |= events;
-    GLOBAL_UNLOCK();
+    // set events atomically
+    __atomic_fetch_or(&systemEvents, events, __ATOMIC_RELAXED);
 
     if( g_Event_Callback != NULL )
     {
@@ -62,9 +58,7 @@ uint32_t Events_Get( uint32_t eventsOfInterest )
     uint32_t returnEvents = (systemEvents & eventsOfInterest);
 
     // ... clear the requested flags atomically
-    GLOBAL_LOCK();
-    systemEvents &= ~eventsOfInterest;
-    GLOBAL_UNLOCK();
+    __atomic_fetch_nand(&systemEvents, eventsOfInterest, __ATOMIC_RELAXED);
     
     // give the caller notice of just the events they asked for ( and were cleared already )
     return returnEvents;
