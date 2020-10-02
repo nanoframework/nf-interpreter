@@ -31,7 +31,7 @@
           "TOOL_HEX2DFU_PREFIX": "<path-to-hex2dfu-utility-mind-the-forward-slash>",
           "ESP32_IDF_PATH": "<path-to-esp32-idf-mind-the-forward-slash>/esp-idf",
           "ESP32_LIBS_PATH": "<path-to-esp32-libraries-mind-the-forward-slash>/libs",
-          "ESP32_BOARD": "ESP32_WROOM_32",
+          "RTOS_TARGET_BOARD": "ESP32_WROOM_32",
           "EXECUTABLE_OUTPUT_PATH": "${workspaceRoot}/build",
           "TARGET_SERIES": "<series-name-of-the-target-chip-STM32F0xx-STM32F4xx-STM32F7xx-ESP32-CC32xx>",
           "USE_RNG": "<ON-default-for-using-hardware-true-random-generator-unit>",

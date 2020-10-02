@@ -736,7 +736,7 @@ elseif(RTOS_FREERTOS_CHECK)
 elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     if("${TARGET_SERIES}" STREQUAL "ESP32")
-        message(STATUS "Platform ESP32 target board: ${ESP32_BOARD}")
+        message(STATUS "Platform ESP32 target board: ${RTOS_TARGET_BOARD}")
 
         if(API_nanoFramework.Hardware.Esp32.Rmt)
             set(HAL_USE_ESP32_RMT_OPTION TRUE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
@@ -752,13 +752,13 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         endif()
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}/nanoCLR")
+        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${RTOS_TARGET_BOARD}/nanoCLR")
 
         add_subdirectory(targets/FreeRTOS_ESP32)
 
         # set target base location
-        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}")
- 		add_subdirectory(targets/FreeRTOS_ESP32/${ESP32_BOARD})
+        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${RTOS_TARGET_BOARD}")
+ 		add_subdirectory(targets/FreeRTOS_ESP32/${RTOS_TARGET_BOARD})
 
     endif()
 

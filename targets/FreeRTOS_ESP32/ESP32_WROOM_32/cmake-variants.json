@@ -32,7 +32,7 @@
           "ESP32_LIBS_PATH": "<absolute-path-to-the-ESP32-libs-folder-mind-the-forward-slashes>",
           "EXECUTABLE_OUTPUT_PATH": "${workspaceRoot}/build",
           "TARGET_SERIES": "ESP32",
-          "ESP32_BOARD": "ESP32_WROOM_32",
+          "RTOS_TARGET_BOARD": "ESP32_WROOM_32",
           "USE_FPU": "TRUE",
           "RTOS": "FREERTOS_ESP32",
           "NF_BUILD_RTM": "OFF",

@@ -287,7 +287,7 @@
           "value": "ESP32"
         },
         {
-          "name": "ESP32_BOARD:STRING",
+          "name": "RTOS_TARGET_BOARD:STRING",
           "value": "ESP32_WROOM_32"
         },
         {

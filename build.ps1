@@ -62,7 +62,7 @@ elseif ($Target -eq "ESP32_WROOM_32") {
     $cmakeOptions = " -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DAPI_Windows.Storage=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON"
 
     # CMake prep
-    $cmakePrep = " -G Ninja -DCMAKE_TOOLCHAIN_FILE=""CMake/toolchain.xtensa-esp32-elf.cmake"" -DTOOLCHAIN_PREFIX=""$env:ESP32_TOOLCHAIN_PATH"" -DESP32_IDF_PATH=""$env:ESP32_IDF_PATH"" -DESP32_LIBS_PATH=""$env:ESP32_LIBS_PATH"" -DCMAKE_BUILD_TYPE=Debug -DBUILD_VERSION=9.99.999 -DESP32_BOARD=$Target $cmakeOptions .."
+    $cmakePrep = " -G Ninja -DCMAKE_TOOLCHAIN_FILE=""CMake/toolchain.xtensa-esp32-elf.cmake"" -DTOOLCHAIN_PREFIX=""$env:ESP32_TOOLCHAIN_PATH"" -DESP32_IDF_PATH=""$env:ESP32_IDF_PATH"" -DESP32_LIBS_PATH=""$env:ESP32_LIBS_PATH"" -DCMAKE_BUILD_TYPE=Debug -DBUILD_VERSION=9.99.999 -DRTOS_TARGET_BOARD=$Target $cmakeOptions .."
 }
 elseif ($Target -eq "TI_CC3220SF_LAUNCHXL") {
     # TODO    
