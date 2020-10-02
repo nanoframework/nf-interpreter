@@ -152,7 +152,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
         if(result == SOCK_EWOULDBLOCK || result == SOCK_TRY_AGAIN)
         {
             // non-blocking - allow other threads to run while we wait for socket activity
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_Socket, fRes ));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, Event_Socket, fRes ));
         }
         else
         {
@@ -215,7 +215,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
         if(result == SOCK_EWOULDBLOCK || result == SOCK_TRY_AGAIN)
         {
             // non-blocking - allow other threads to run while we wait for socket activity
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_Socket, fRes ));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, Event_Socket, fRes ));
 
             if(result < 0) break;
         }
@@ -384,7 +384,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::ReadWriteHelper( C
             }
 
             // non-blocking - allow other threads to run while we wait for socket activity
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_Socket, fRes ));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, Event_Socket, fRes ));
 
             // timeout expired 
             if(!fRes)

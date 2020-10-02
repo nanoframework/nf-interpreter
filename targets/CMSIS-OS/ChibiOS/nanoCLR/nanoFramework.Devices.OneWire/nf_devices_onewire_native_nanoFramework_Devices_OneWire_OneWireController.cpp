@@ -136,7 +136,7 @@ HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireC
         }
 
         // non-blocking wait allowing other threads to run while we wait for the 1-Wire operations to complete
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_OneWireMaster, eventResult ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, Event_OneWireMaster, eventResult ));
     }
 
     if(eventResult)
@@ -219,7 +219,7 @@ HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireC
         }
 
         // non-blocking wait allowing other threads to run while we wait for the 1-Wire operations to complete
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_OneWireMaster, eventResult ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, Event_OneWireMaster, eventResult ));
     }
 
     if(eventResult)

@@ -168,7 +168,7 @@ HRESULT Library_corlib_native_System_AppDomain::Unload___STATIC__VOID__SystemApp
 
         _ASSERTE(CLR_EE_IS(UnloadingAppDomain));
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_AppDomain, fRes ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, Event_AppDomain, fRes ));
     }
 
     if(!fRes) NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);

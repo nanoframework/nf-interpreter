@@ -166,7 +166,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::getaddrinfo___ST
             if(socketError == SOCK_EWOULDBLOCK)
             {
                 // non-blocking - allow other threads to run while we wait for handle activity
-                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_Socket, fRes ));
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, Event_Socket, fRes ));
             }
             else
             {
@@ -372,7 +372,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::poll___STATIC__B
 
         if(res != 0) break;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_Socket, fRes ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, Event_Socket, fRes ));
     }
 
     stack.PopValue(); //timer
@@ -679,7 +679,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper( 
             if(ret != 0) break;
 
             // non-blocking - allow other threads to run while we wait for handle activity
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_Socket, fRes ));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, Event_Socket, fRes ));
         }
 
         // timeout expired

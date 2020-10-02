@@ -475,7 +475,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
       xTaskNotify(palUart->xWTaskToNotify, 0x01, eSetBits);
     }
 
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_SerialPortOut, eventResult));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortOut, eventResult));
 
     if (eventResult) 
     {
@@ -618,7 +618,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
       else 
       {
         // wait for event 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, CLR_RT_ExecutionEngine::c_Event_SerialPortIn, eventResult));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortIn, eventResult));
         if (!eventResult)
         {
           // event timeout

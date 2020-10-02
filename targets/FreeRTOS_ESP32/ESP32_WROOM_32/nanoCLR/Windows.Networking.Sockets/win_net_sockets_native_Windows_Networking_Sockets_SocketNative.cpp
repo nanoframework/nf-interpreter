@@ -394,7 +394,7 @@ HRESULT Library_win_net_sockets_native_Windows_Networking_Sockets_SocketNative::
 //             if(ret != 0) break;
 
 //             // non-blocking - allow other threads to run while we wait for handle activity
-//             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_Socket, fRes ));
+//             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, Event_Socket, fRes ));
 //         }
 
 //         // timeout expired

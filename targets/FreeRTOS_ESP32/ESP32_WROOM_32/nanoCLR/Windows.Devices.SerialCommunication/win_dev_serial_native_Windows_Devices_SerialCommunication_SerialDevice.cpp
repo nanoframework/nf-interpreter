@@ -720,7 +720,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(
             stack.m_owningThread,
             *timeoutTicks,
-            CLR_RT_ExecutionEngine::c_Event_SerialPortOut,
+            Event_SerialPortOut,
             eventResult));
 
         if (eventResult)
@@ -883,7 +883,7 @@ HRESULT IRAM_ATTR
             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(
                 stack.m_owningThread,
                 *timeoutTicks,
-                CLR_RT_ExecutionEngine::c_Event_SerialPortIn,
+                Event_SerialPortIn,
                 eventResult));
 
             if (!eventResult)

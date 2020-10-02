@@ -212,7 +212,7 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
                 NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(
                     stack.m_owningThread,
                     *timeout,
-                    CLR_RT_ExecutionEngine::c_Event_SpiMaster,
+                    Event_SpiMaster,
                     eventResult));
 
                 if (!eventResult)
