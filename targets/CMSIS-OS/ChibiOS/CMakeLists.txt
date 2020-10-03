@@ -51,7 +51,7 @@ if(NO_RTOS_SOURCE_FOLDER)
     endif()
 
     # ChibiOS version
-    set(CHIBIOS_GIT_TAG "stable_19.1.x")
+    set(RTOS_VERSION "stable_19.1.x")
     message(STATUS "RTOS is: CHIBIOS (latest available code from ${CHIBIOS_GIT_TAG})")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
@@ -75,7 +75,7 @@ if(NO_RTOS_SOURCE_FOLDER)
         PREFIX ChibiOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
         GIT_REPOSITORY  https://github.com/nanoframework/chibios
-        GIT_TAG ${CHIBIOS_GIT_TAG}  # target specified branch
+        GIT_TAG ${RTOS_VERSION}  # target specified branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
