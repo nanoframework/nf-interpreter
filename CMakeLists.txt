@@ -707,39 +707,12 @@ if(RTOS_CHIBIOS_CHECK)
 
     endif()
 
-
 #######################
 # FreeRTOS
 elseif(RTOS_FREERTOS_CHECK)
 
     add_subdirectory(targets/FreeRTOS)
-   
-    # now add the subdirectory for the board
-    # try to find board in the targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
-        # board found
-        message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
 
-        # add TARGET board directory
-        add_subdirectory("targets/FreeRTOS/NXP/${FREERTOS_BOARD}")
-
-    else()
-
-        # try to find board in the Community targets folder
-        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
-            # board found
-            message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
-
-            # add TARGET board directory from Community
-            add_subdirectory("targets-community/FreeRTOS/NXP/${FREERTOS_BOARD}")
-
-        else()
-        # board NOT found in targets folder
-            # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${FREERTOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-        endif()
-
-    endif()
 #######################
 # FreeRTOS ESP32
 elseif(RTOS_FREERTOS_ESP32_CHECK)
@@ -854,6 +827,5 @@ elseif(RTOS_AZURERTOS_CHECK)
     
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
-
 
 endif()
