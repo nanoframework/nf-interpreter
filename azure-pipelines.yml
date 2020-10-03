@@ -340,7 +340,7 @@ jobs:
 
 #################
 # Azure RTOS
-- job: Build_AZURE-RTOS_targets
+- job: Build_AZURE_RTOS_targets
   condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
 
   dependsOn:
