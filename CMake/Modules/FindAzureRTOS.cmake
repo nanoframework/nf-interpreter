@@ -9,7 +9,7 @@
 
 # check if the series name is supported 
 
-set(AZURERTOS_SUPPORTED_SERIES STM32L4_L4+ CACHE INTERNAL "supported series names for AzureRTOS")
+set(AZURERTOS_SUPPORTED_SERIES "STM32L4xx" CACHE INTERNAL "supported series names for AzureRTOS")
 
 list(FIND AZURERTOS_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 
