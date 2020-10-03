@@ -820,7 +820,7 @@ elseif(RTOS_AZURERTOS_CHECK)
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${AZURERTOS_BOARD} target is not available...\n\You can wait for it to be added or you might want to contribute and start working on a PR for it.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${AZURERTOS_BOARD} target is not available...\n\nYou can wait for it to be added or you might want to contribute and start working on a PR for it.\n\n")
         endif()
 
     endif()
