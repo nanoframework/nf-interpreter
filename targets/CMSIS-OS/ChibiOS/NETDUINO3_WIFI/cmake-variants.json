@@ -31,7 +31,7 @@
           "TOOL_HEX2DFU_PREFIX": "<absolute-path-to-hex2dfu-mind-the-forward-slashes>",
           "RTOS": "CHIBIOS",
           "TARGET_SERIES": "STM32F4xx",
-          "CHIBIOS_SOURCE": "",
+          "RTOS_SOURCE_FOLDER": "",
           "CHIBIOS_BOARD": "NETDUINO3_WIFI",
           "CHIBIOS_CONTRIB_REQUIRED": "OFF",
           "CHIBIOS_CONTRIB_SOURCE": "",
