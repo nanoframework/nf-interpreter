@@ -31,7 +31,7 @@
           "TOOL_HEX2DFU_PREFIX": "<absolute-path-to-hex2dfu-mind-the-forward-slashes>",
           "RTOS": "CHIBIOS",
           "TARGET_SERIES": "STM32F7xx",
-          "CHIBIOS_SOURCE": "",
+          "RTOS_SOURCE_FOLDER": "",
           "CHIBIOS_BOARD": "ST_STM32F769I_DISCOVERY",
           "CHIBIOS_CONTRIB_REQUIRED": "OFF",
           "CHIBIOS_CONTRIB_SOURCE": "",
