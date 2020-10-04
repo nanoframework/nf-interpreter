@@ -43,7 +43,7 @@ if(NO_RTOS_SOURCE_FOLDER)
 
     # AZURERTOS version
     set(RTOS_VERSION "master") #TODO: use the master branch for the moment, but we should use a tag, e.g. V6.1_rel
-    message(STATUS "RTOS is: AZURERTOS (latest available code from ${AZURERTOS_GIT_TAG})")
+    message(STATUS "RTOS is: AZURERTOS (latest available code from tag/branch ${RTOS_VERSION})")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
@@ -66,7 +66,7 @@ if(NO_RTOS_SOURCE_FOLDER)
         PREFIX AzureRTOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/AzureRTOS_Source
         GIT_REPOSITORY  https://github.com/azure-rtos/threadx
-        GIT_TAG ${AZURERTOS_GIT_TAG}  # target specified branch
+        GIT_TAG ${RTOS_VERSION}  # target specified branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
@@ -344,7 +344,7 @@ endif()
 # TODO: Overlay custom stuff on top of released source.
 
 # (default is OFF so STM Cube package is NOT included)
-option(STM32_CUBE_PACKAGE_REQUIRED "option to include STM Cube package in the build") #TODO: this might be required for the L4 board, but we dont have it. 
+option(STM32_CUBE_PACKAGE_REQUIRED "option to include STM Cube package in the build")
 if(STM32_CUBE_PACKAGE_REQUIRED)
     ProcessSTM32CubePackage()
 endif()
