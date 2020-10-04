@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -96,6 +96,32 @@ HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::NativeEnt
     NANOCLR_HEADER();
 
     Power_shutdown(0, 0);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::
+    NativeEnterStandbyMode___STATIC__VOID__SystemTimeSpan(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_UINT64 standbyDurationMilsec;
+
+    // debounceTimeout field its a TimeSpan, which is a primitive type stored as an heap block, therefore needs to
+    // be accessed indirectly
+    CLR_INT64 *standbyDuration = Library_corlib_native_System_TimeSpan::GetValuePtr(stack.Arg0());
+    FAULT_ON_NULL(standbyDuration);
+
+    standbyDurationMilsec = *(CLR_UINT64 *)standbyDuration / TIME_CONVERSION__TO_SECONDS;
+
+    ClockP_sleep(standbyDurationMilsec);
+
+    // need to reset the CPU after waking from standby
+    CPU_Reset();
+
+    //////////////////////////////////////
+    // THE EXECUTION NEVER REACHES HERE //
+    //////////////////////////////////////
 
     NANOCLR_NOCLEANUP();
 }

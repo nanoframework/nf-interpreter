@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -717,11 +717,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 
         // non-blocking wait allowing other threads to run while we wait for the Tx operation to complete
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(
-            stack.m_owningThread,
-            *timeoutTicks,
-            CLR_RT_ExecutionEngine::c_Event_SerialPortOut,
-            eventResult));
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortOut, eventResult));
 
         if (eventResult)
         {
@@ -880,11 +877,9 @@ HRESULT IRAM_ATTR
         else
         {
             // wait for event
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(
-                stack.m_owningThread,
-                *timeoutTicks,
-                CLR_RT_ExecutionEngine::c_Event_SerialPortIn,
-                eventResult));
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine
+                    .WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortIn, eventResult));
 
             if (!eventResult)
             {

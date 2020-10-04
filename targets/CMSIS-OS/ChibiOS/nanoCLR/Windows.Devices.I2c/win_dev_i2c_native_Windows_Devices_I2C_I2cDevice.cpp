@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -521,11 +521,8 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::
             }
 
             // non-blocking wait allowing other threads to run while we wait for the I2C transaction to complete
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(
-                stack.m_owningThread,
-                *timeout,
-                CLR_RT_ExecutionEngine::c_Event_I2cMaster,
-                eventResult));
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_I2cMaster, eventResult));
         }
 
         if (isLongRunningOperation)

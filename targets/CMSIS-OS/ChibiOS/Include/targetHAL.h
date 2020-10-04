@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -22,14 +22,6 @@
 #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT MEMP_NUM_NETCONN
 
 #define LPCSTR const char *
-
-// these macros are to be used at entry/exit of native interrupt handlers
-#define NATIVE_INTERRUPT_START                                                                                         \
-    SystemState_SetNoLock(SYSTEM_STATE_ISR);                                                                           \
-    SystemState_SetNoLock(SYSTEM_STATE_NO_CONTINUATIONS);
-#define NATIVE_INTERRUPT_END                                                                                           \
-    SystemState_ClearNoLock(SYSTEM_STATE_NO_CONTINUATIONS);                                                            \
-    SystemState_ClearNoLock(SYSTEM_STATE_ISR);
 
 #if !defined(BUILD_RTM)
 
@@ -74,7 +66,6 @@ extern uint32_t __nanoConfig_end__;
 extern uint32_t __deployment_start__;
 extern uint32_t __deployment_end__;
 
-#endif //_TARGET_HAL_H_
 extern int my_lock_counter;
 
 #define GLOBAL_LOCK()                                                                                                  \
@@ -90,6 +81,8 @@ extern int my_lock_counter;
     else                                                                                                               \
         chSysUnlock();                                                                                                 \
     }
+
+#endif //_TARGET_HAL_H_
 
 //#define GLOBAL_LOCK()              chSysLock();
 //#define GLOBAL_UNLOCK();           chSysUnlock();

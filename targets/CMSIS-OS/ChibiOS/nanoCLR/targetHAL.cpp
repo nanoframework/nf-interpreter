@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -9,6 +9,7 @@
 #include <nanoHAL_Time.h>
 #include <nanoHAL_Types.h>
 #include <target_platform.h>
+#include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
 #include <nanoHAL_Graphics.h>
@@ -275,51 +276,4 @@ void nanoHAL_Uninitialize()
 
     HAL_CONTINUATION::Uninitialize();
     HAL_COMPLETION ::Uninitialize();
-}
-
-volatile int32_t SystemStates[SYSTEM_STATE_TOTAL_STATES];
-
-void SystemState_SetNoLock(SYSTEM_STATE_type state)
-{
-    SystemStates[state]++;
-}
-
-void SystemState_ClearNoLock(SYSTEM_STATE_type state)
-{
-    SystemStates[state]--;
-}
-
-bool SystemState_QueryNoLock(SYSTEM_STATE_type state)
-{
-    return (SystemStates[state] > 0) ? true : false;
-}
-
-void SystemState_Set(SYSTEM_STATE_type state)
-{
-    GLOBAL_LOCK();
-
-    SystemState_SetNoLock(state);
-
-    GLOBAL_UNLOCK();
-}
-
-void SystemState_Clear(SYSTEM_STATE_type state)
-{
-    GLOBAL_LOCK();
-
-    SystemState_ClearNoLock(state);
-
-    GLOBAL_UNLOCK();
-}
-
-bool SystemState_Query(SYSTEM_STATE_type state)
-{
-    bool systemStateCopy = false;
-    GLOBAL_LOCK();
-
-    systemStateCopy = SystemState_QueryNoLock(state);
-
-    GLOBAL_UNLOCK();
-
-    return systemStateCopy;
 }

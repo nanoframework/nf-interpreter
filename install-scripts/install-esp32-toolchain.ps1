@@ -1,4 +1,4 @@
-# Copyright (c) 2020 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
 # This PS installs the xtensa ESP32 toolchain from Espressif downloads repository 
