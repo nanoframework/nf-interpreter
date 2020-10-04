@@ -32,6 +32,8 @@
           "TARGET_SERIES": "STM32L4xx",
           "AZURERTOS_BOARD": "ST_B_L475E_IOT01A",
           "RTOS_SOURCE_FOLDER": "",
+          "STM32_CUBE_PACKAGE_REQUIRED": "OFF",
+          "STM32_CUBE_PACKAGE_SOURCE": "",
           "SUPPORT_ANY_BASE_CONVERSION": "ON",
           "NF_FEATURE_DEBUGGER": "ON",
           "NF_FEATURE_RTC": "OFF",
