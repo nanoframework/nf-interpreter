@@ -22,15 +22,15 @@ if(DEFINED TOOL_HEX2DFU_PREFIX)
     endif()
 endif()
 
-# check if AZURERTOS_SOURCE was specified or if it's empty (default is empty)
-set(NO_AZURERTOS_SOURCE TRUE)
-if(AZURERTOS_SOURCE)
-    if(NOT "${AZURERTOS_SOURCE}" STREQUAL "")
-        set(NO_AZURERTOS_SOURCE FALSE)
+# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_RTOS_SOURCE_FOLDER TRUE)
+if(RTOS_SOURCE_FOLDER)
+    if(NOT "${RTOS_SOURCE_FOLDER}" STREQUAL "")
+        set(NO_RTOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
-if(NO_AZURERTOS_SOURCE)
+if(NO_RTOS_SOURCE_FOLDER)
     # no AZURERTOS source specified, download it from it's repo
 
     # check for Git (needed here for advanced warning to user if it's not installed)
@@ -42,7 +42,7 @@ if(NO_AZURERTOS_SOURCE)
     endif()
 
     # AZURERTOS version
-    set(AZURERTOS_GIT_TAG "master") #TODO: use the master branch for the moment, but we should use a tag, e.g. V6.1_rel
+    set(RTOS_VERSION "master") #TODO: use the master branch for the moment, but we should use a tag, e.g. V6.1_rel
     message(STATUS "RTOS is: AZURERTOS (latest available code from ${AZURERTOS_GIT_TAG})")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
@@ -84,21 +84,21 @@ else()
     # AzureRTOS source was specified
 
     # sanity check is source path exists
-    if(EXISTS "${AZURERTOS_SOURCE}/")
-        message(STATUS "RTOS is: AzureRTOS (source from: ${AZURERTOS_SOURCE})")
+    if(EXISTS "${RTOS_SOURCE_FOLDER}/")
+        message(STATUS "RTOS is: AzureRTOS (source from: ${RTOS_SOURCE_FOLDER})")
 
         # check if we already have the sources, no need to copy again
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/AzureRTOS_Source/ SOURCE_EXISTS)
 
         if(NOT ${SOURCE_EXISTS})
-            file(COPY "${AZURERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/AzureRTOS_Source")
+            file(COPY "${RTOS_SOURCE_FOLDER}/" DESTINATION "${CMAKE_BINARY_DIR}/AzureRTOS_Source")
         else()
-            message(STATUS "Using local cache of AzureRTOS source from ${AZURERTOS_SOURCE}")
+            message(STATUS "Using local cache of AzureRTOS source from ${RTOS_SOURCE_FOLDER}")
         endif()
 
         set(AZURERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/AzureRTOS_Source/include)
     else()
-        message(FATAL_ERROR "Couldn't find AzureRTOS source at ${AZURERTOS_SOURCE}/")
+        message(FATAL_ERROR "Couldn't find AzureRTOS source at ${RTOS_SOURCE_FOLDER}/")
     endif()
 
     # add AzureRTOS as external project

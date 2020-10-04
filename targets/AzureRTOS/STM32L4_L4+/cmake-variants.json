@@ -31,7 +31,7 @@
           "RTOS": "AZURERTOS",
           "TARGET_SERIES": "STM32",
           "AZURERTOS_BOARD": "STM32L4_L4+",
-          "AZURERTOS_SOURCE": "",
+          "RTOS_SOURCE_FOLDER": "",
           "SUPPORT_ANY_BASE_CONVERSION": "ON",
           "NF_FEATURE_DEBUGGER": "ON",
           "NF_FEATURE_RTC": "OFF",

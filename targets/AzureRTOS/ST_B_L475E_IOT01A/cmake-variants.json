@@ -31,7 +31,7 @@
           "RTOS": "AZURERTOS",
           "TARGET_SERIES": "STM32L4xx",
           "AZURERTOS_BOARD": "ST_B_L475E_IOT01A",
-          "AZURERTOS_SOURCE": "",
+          "RTOS_SOURCE_FOLDER": "",
           "SUPPORT_ANY_BASE_CONVERSION": "ON",
           "NF_FEATURE_DEBUGGER": "ON",
           "NF_FEATURE_RTC": "OFF",
