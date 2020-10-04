@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -38,8 +38,10 @@ CLR_UINT32 laneByteClk_kHz = 62500;               // 500 MHz / 8 = 62.5 MHz = 62
 CLR_UINT32 lcd_x_size = 800;
 CLR_UINT32 lcd_y_size = 480;
 
-void DisplayInterface::Initialize()
+void DisplayInterface::Initialize(DisplayInterfaceConfig& config)
 {
+    (void)config;
+    
     DsiRegister = DSI;          // Base address of DSI Host/Wrapper registers
     LtdcRegister = LTDC;        // Base addres of LTDC registers
     LTDC_Layer_Register = (LTDC_Layer_TypeDef*)((CLR_UINT32)LTDC + 0x84U); // Base address of layer registers (layer 0)

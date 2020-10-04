@@ -8,19 +8,28 @@
 
 #include "nanoCLR_Types.h"
 
-// Config for by display
-struct SpiDisplayConfig
+// DIsplay configuration
+union DisplayInterfaceConfig
 {
-    CLR_INT8    spiBus;
-    GPIO_PIN    chipSelect;
-    GPIO_PIN    dataCommand;
-    GPIO_PIN    reset;
-    GPIO_PIN    backLight;
+    struct 
+    {
+        CLR_INT8    spiBus;
+        GPIO_PIN    chipSelect;
+        GPIO_PIN    dataCommand;
+        GPIO_PIN    reset;
+        GPIO_PIN    backLight;
+    } Spi;
+    struct 
+    {
+        CLR_INT8    i2cBus;
+        CLR_INT8    address;
+    } I2c;
 };
+
 
 struct DisplayInterface
 {
-    void Initialize(SpiDisplayConfig& config);
+    void Initialize(DisplayInterfaceConfig& config);
     void GetTransferBuffer(CLR_UINT8*& BufferAddress, CLR_UINT32& sizeInBytes);
     void ClearFrameBuffer();
     void WriteToFrameBuffer(CLR_UINT8 command, CLR_UINT8 data[], CLR_UINT32 dataCount);

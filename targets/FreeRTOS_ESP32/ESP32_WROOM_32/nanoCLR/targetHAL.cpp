@@ -10,30 +10,13 @@
 #include <target_platform.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_Graphics.h>
 
 void Storage_Initialize();
 void Storage_Uninitialize();
 
 extern "C" void FixUpHalSystemConfig();
 extern "C" void FixUpBlockRegionInfo();
-
-#if NANOCLR_GRAPHICS
-// TODO this block should be in header somewhere
-#include "Display.h"
-#include "DisplayInterface.h"
-#include "TouchDevice.h"
-#include "TouchInterface.h"
-#include "GraphicsMemoryHeap.h"
-#include "Graphics.h"
-
-extern DisplayInterface g_DisplayInterface;
-extern DisplayDriver g_DisplayDriver;
-
-extern TouchDevice g_TouchDevice;
-extern TouchInterface g_TouchInterface;
-
-extern GraphicsMemoryHeap g_GraphicsMemoryHeap;
-#endif
 
 //
 //  Reboot handlers clean up on reboot
@@ -115,21 +98,24 @@ void nanoHAL_Initialize()
 
 #if NANOCLR_GRAPHICS
     // Initialise Graphics after devices initialised
-    SpiDisplayConfig displayConfig 
-    {
-        // Wrover board config
-        1,                  // Spi Bus
-        GPIO_NUM_22,        // CS_1     GPIO22   CS
-        GPIO_NUM_21,        // D/CX_1   GPIO21   D/C
-        GPIO_NUM_18,        // RST_1   GPIO18   RESET
-        GPIO_NUM_5          // GPIO5   Backlight
-    };
+    DisplayInterfaceConfig displayConfig;
+
+    displayConfig.Spi.spiBus = 1;                   // Spi Bus
+    displayConfig.Spi.chipSelect = GPIO_NUM_22;     // CS_1     GPIO22   CS
+    displayConfig.Spi.dataCommand = GPIO_NUM_21;    // D/CX_1   GPIO21   D/C
+    displayConfig.Spi.reset = GPIO_NUM_18;          // RST_1   GPIO18   RESET
+    displayConfig.Spi.backLight = GPIO_NUM_5;       // GPIO5   Backlight
 
     g_DisplayInterface.Initialize(displayConfig);
     g_DisplayDriver.Initialize();
 
     //g_TouchInterface.Initialize();
     //g_TouchDevice.Initialize();
+
+    PalEvent_Initialize();
+    //Gesture_Initialize();
+    //Ink_Initialize();
+
 #endif	
 
     // no PAL events required until now

@@ -26,13 +26,13 @@ CLR_INT16 OutputBufferSize;
 CLR_UINT8 SpiBuffer[SPI_MAX_TRANSFER_SIZE];
 
 // Display Interface
-void DisplayInterface::Initialize(SpiDisplayConfig& config)
+void DisplayInterface::Initialize(DisplayInterfaceConfig& config)
 {
     SPI_DEVICE_CONFIGURATION spiConfig;
    
     spiConfig.BusMode = SpiBusMode::SpiBusMode_master;
-    spiConfig.Spi_Bus = config.spiBus;                          
-    spiConfig.DeviceChipSelect = config.chipSelect;
+    spiConfig.Spi_Bus = config.Spi.spiBus;                          
+    spiConfig.DeviceChipSelect = config.Spi.chipSelect;
     spiConfig.ChipSelectActive = false; 
     spiConfig.Spi_Mode =  SpiMode::SpiMode_Mode0;
     spiConfig.DataOrder16 = DataBitOrder::DataBitOrder_MSB;
@@ -46,9 +46,9 @@ void DisplayInterface::Initialize(SpiDisplayConfig& config)
         // TODO Reserve Pins
 
         // Save pin numbers
-        LcdReset = config.reset;        
-        LcdDC = config.dataCommand;    
-        LcdBacklight = config.backLight;
+        LcdReset = config.Spi.reset;        
+        LcdDC = config.Spi.dataCommand;    
+        LcdBacklight = config.Spi.backLight;
 
         // Initialize non-SPI GPIOs
         CPU_GPIO_SetDriveMode(LcdDC, GpioPinDriveMode::GpioPinDriveMode_Output);

@@ -11,7 +11,6 @@
 
 extern TouchPanelDriver g_TouchPanelDriver;
 
-
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfiguration::GetTouchPoints___STATIC__VOID__BYREF_I4__SZARRAY_I2__SZARRAY_I2(CLR_RT_StackFrame& stack)
 {
     NANOCLR_HEADER();

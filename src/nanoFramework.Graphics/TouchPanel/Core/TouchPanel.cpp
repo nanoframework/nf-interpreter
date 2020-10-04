@@ -10,7 +10,6 @@
 #include "TouchInterface.h"
 #include <nanoPAL_Events.h>
 
-
 #define ONE_MHZ  1000000
 #define abs(a) (((a) < 0) ? -(a) : (a))
 #define sign(a) (((a) < 0) ? -1 : 1)

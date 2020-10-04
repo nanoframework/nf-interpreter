@@ -54,7 +54,7 @@ bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT8*& graphicsStartingAddress, C
         memoryCaps ^= MALLOC_CAP_SPIRAM;
         
         // TODO: Have a parameter to govern this size as it may be enough for small display
-        spiramMaxSize = 16*1024;
+        spiramMaxSize = 20*1024;
     }
 
     if (spiramMaxSize < graphicsMemoryBlockSize)                        // limit the size to what is available
