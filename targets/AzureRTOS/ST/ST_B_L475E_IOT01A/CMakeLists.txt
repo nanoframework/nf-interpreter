@@ -191,11 +191,11 @@ if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
 endif()
 
 # set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
+#nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
 
 # set linker options
-nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
+#nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # add other linker flags
