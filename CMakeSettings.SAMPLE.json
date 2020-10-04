@@ -199,7 +199,7 @@
           "type": "BOOL"
         },
         {
-          "name": "API_System.Devices.Dac",
+          "name": "API_System.Device.Dac",
           "value": "False",
           "type": "BOOL"
         },
@@ -299,7 +299,7 @@
           "type": "STRING"
         },
         {
-          "name": "CHIBIOS_SOURCE",
+          "name": "RTOS_SOURCE_FOLDER",
           "value": "C:/usr/src/NanoFramework/ChibiOS",
           "type": "PATH"
         },
@@ -459,7 +459,7 @@
           "type": "BOOL"
         },
         {
-          "name": "API_System.Devices.Dac",
+          "name": "API_System.Device.Dac",
           "value": "False",
           "type": "BOOL"
         },

@@ -15,7 +15,7 @@ include(ExternalProject)
         PREFIX RTXRTOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/RTXRTOS_Source
         GIT_REPOSITORY  https://github.com/ARM-software/CMSIS_5
-        GIT_TAG master  # target master branch
+        GIT_TAG ${RTOS_VERSION}  # target master branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1

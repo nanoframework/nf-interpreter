@@ -7,11 +7,11 @@ include(binutils.arm-none-eabi)
 include(binutils.FreeRTOS)
 include(nf_utils)
 
-# check if FREERTOS_SOURCE was specified or if it's empty (default is empty)
-set(NO_FREERTOS_SOURCE TRUE)
-if(FREERTOS_SOURCE)
-    if(NOT "${FREERTOS_SOURCE}" STREQUAL "")
-        set(NO_FREERTOS_SOURCE FALSE)
+# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_RTOS_SOURCE_FOLDER TRUE)
+if(RTOS_SOURCE_FOLDER)
+    if(NOT "${RTOS_SOURCE_FOLDER}" STREQUAL "")
+        set(NO_RTOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
@@ -28,7 +28,7 @@ if(NOT "${TOOL_SRECORD_PREFIX}" STREQUAL "")
     endif()
 endif()
 
-if(NO_FREERTOS_SOURCE)
+if(NO_RTOS_SOURCE_FOLDER)
     # no FreeRTOS source specified, download it from it's repo
     
     # check for Git (needed here for advanced warning to user if it's not installed)
@@ -81,7 +81,7 @@ if(NO_FREERTOS_SOURCE)
         PREFIX FreeRTOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
         GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-        GIT_TAG ${FREERTOS_VERSION_TAG}  # target specified branch
+        GIT_TAG ${RTOS_VERSION}  # target specified branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
@@ -95,21 +95,21 @@ else()
     # FreeRTOS source was specified
 
     # sanity check is source path exists
-    if(EXISTS "${FREERTOS_SOURCE}/")
-        message(STATUS "RTOS is: FreeRTOS (source from: ${FREERTOS_SOURCE})")
+    if(EXISTS "${RTOS_SOURCE_FOLDER}/")
+        message(STATUS "RTOS is: FreeRTOS (source from: ${RTOS_SOURCE_FOLDER})")
 
         # check if we already have the sources, no need to copy again
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FreeRTOS_Source/ SOURCE_EXISTS)
 
         if(NOT ${SOURCE_EXISTS})
-            file(COPY "${FREERTOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS")
+            file(COPY "${RTOS_SOURCE_FOLDER}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS")
         else()
-            message(STATUS "Using local cache of FreeRTOS source from ${FREERTOS_SOURCE}")
+            message(STATUS "Using local cache of FreeRTOS source from ${RTOS_SOURCE_FOLDER}")
         endif()
 
         set(FREERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/include)
     else()
-        message(FATAL_ERROR "Couldn't find FreeRTOS source at ${FREERTOS_SOURCE}/")
+        message(FATAL_ERROR "Couldn't find FreeRTOS source at ${RTOS_SOURCE_FOLDER}/")
     endif()
 
     # add FreeRTOS as external project

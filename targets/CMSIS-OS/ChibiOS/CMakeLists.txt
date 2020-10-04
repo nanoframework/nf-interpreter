@@ -23,11 +23,11 @@ if(DEFINED TOOL_HEX2DFU_PREFIX)
     endif()
 endif()
 
-# check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
-set(NO_CHIBIOS_SOURCE TRUE)
-if(CHIBIOS_SOURCE)
-    if(NOT "${CHIBIOS_SOURCE}" STREQUAL "")
-        set(NO_CHIBIOS_SOURCE FALSE)
+# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_RTOS_SOURCE_FOLDER TRUE)
+if(RTOS_SOURCE_FOLDER)
+    if(NOT "${RTOS_SOURCE_FOLDER}" STREQUAL "")
+        set(NO_RTOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
@@ -39,7 +39,7 @@ if(CHIBIOS_CONTRIB_SOURCE)
     endif()
 endif()
 
-if(NO_CHIBIOS_SOURCE)
+if(NO_RTOS_SOURCE_FOLDER)
     # no CHIBIOS source specified, download it from it's repo
 
     # check for Git (needed here for advanced warning to user if it's not installed)
@@ -51,7 +51,7 @@ if(NO_CHIBIOS_SOURCE)
     endif()
 
     # ChibiOS version
-    set(CHIBIOS_GIT_TAG "stable_19.1.x")
+    set(RTOS_VERSION "stable_19.1.x")
     message(STATUS "RTOS is: CHIBIOS (latest available code from ${CHIBIOS_GIT_TAG})")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
@@ -75,7 +75,7 @@ if(NO_CHIBIOS_SOURCE)
         PREFIX ChibiOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
         GIT_REPOSITORY  https://github.com/nanoframework/chibios
-        GIT_TAG ${CHIBIOS_GIT_TAG}  # target specified branch
+        GIT_TAG ${RTOS_VERSION}  # target specified branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
@@ -93,21 +93,21 @@ else()
     # ChibiOS source was specified
 
     # sanity check is source path exists
-    if(EXISTS "${CHIBIOS_SOURCE}/")
-        message(STATUS "RTOS is: ChibiOS (source from: ${CHIBIOS_SOURCE})")
+    if(EXISTS "${RTOS_SOURCE_FOLDER}/")
+        message(STATUS "RTOS is: ChibiOS (source from: ${RTOS_SOURCE_FOLDER})")
 
         # check if we already have the sources, no need to copy again
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/ChibiOS_Source/ SOURCE_EXISTS)
 
         if(NOT ${SOURCE_EXISTS})
-            file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+            file(COPY "${RTOS_SOURCE_FOLDER}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
         else()
-            message(STATUS "Using local cache of ChibiOS source from ${CHIBIOS_SOURCE}")
+            message(STATUS "Using local cache of ChibiOS source from ${RTOS_SOURCE_FOLDER}")
         endif()
 
         set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
     else()
-        message(FATAL_ERROR "Couldn't find ChibiOS source at ${CHIBIOS_SOURCE}/")
+        message(FATAL_ERROR "Couldn't find ChibiOS source at ${RTOS_SOURCE_FOLDER}/")
     endif()
 
     # add ChibiOS as external project
