@@ -791,41 +791,6 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
 # AzureRTOS
 elseif(RTOS_AZURERTOS_CHECK)
 
-    # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/AzureRTOS/nanoCLR")
-
-    # now add the subdirectory for the board
-    # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/AzureRTOS/${AZURERTOS_BOARD})
-
-        # set target base location
-        set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets/AzureRTOS/${AZURERTOS_BOARD}")
-
-        # board found
-        message(STATUS "Support for target board '${AZURERTOS_BOARD}' found")
-        #message(STATUS "${AZURERTOS_BOARD_DEFINITIONS_LOCATION}")
-
-    else()
-
-        # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/AzureRTOS/${AZURERTOS_BOARD})
-
-            # set target base location
-            set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets-community/AzureRTOS/${AZURERTOS_BOARD}")
-        
-            # board found
-            message(STATUS "Support for target board '${AZURERTOS_BOARD}' found in Community targets")
-            #message(STATUS "${AZURERTOS_BOARD_DEFINITIONS_LOCATION}")
-
-        else()
-        # board NOT found in targets folder
-            # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${AZURERTOS_BOARD} target is not available...\n\nYou can wait for it to be added or you might want to contribute and start working on a PR for it.\n\n")
-        endif()
-
-    endif()
-    
-    # add TARGET board directory
-    add_subdirectory(${TARGET_BASE_LOCATION})
+    add_subdirectory(targets/AzureRTOS)
 
 endif()
