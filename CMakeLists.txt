@@ -803,7 +803,7 @@ elseif(RTOS_AZURERTOS_CHECK)
 
         # board found
         message(STATUS "Support for target board '${AZURERTOS_BOARD}' found")
-        message(STATUS "${AZURERTOS_BOARD_DEFINITIONS_LOCATION}")
+        #message(STATUS "${AZURERTOS_BOARD_DEFINITIONS_LOCATION}")
 
     else()
 
@@ -815,7 +815,7 @@ elseif(RTOS_AZURERTOS_CHECK)
         
             # board found
             message(STATUS "Support for target board '${AZURERTOS_BOARD}' found in Community targets")
-            message(STATUS "${AZURERTOS_BOARD_DEFINITIONS_LOCATION}")
+            #message(STATUS "${AZURERTOS_BOARD_DEFINITIONS_LOCATION}")
 
         else()
         # board NOT found in targets folder
