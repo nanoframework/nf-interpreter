@@ -9,7 +9,7 @@
 
 # check if the series name is supported 
 
-set(AZURERTOS_SUPPORTED_SERIES "STM32L4xx" CACHE INTERNAL "supported series names for AzureRTOS")
+set(AZURERTOS_SUPPORTED_SERIES STM32L4xx CACHE INTERNAL "supported series names for AzureRTOS")
 
 list(FIND AZURERTOS_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 
@@ -24,7 +24,7 @@ include(AZURERTOS_${TARGET_SERIES}_sources)
 # and here the GCC options tuned for the target series 
 include(AZURERTOS_${TARGET_SERIES}_GCC_options)
 
-# message("AzureRTOS board series is ${TARGET_SERIES}") # debug helper
+message("AzureRTOS board series is ${TARGET_SERIES}") # debug helper
 
 # set include directories for AzureRTOS
 list(APPEND AZURERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/AzureRTOS_Source/include)
@@ -52,7 +52,7 @@ foreach(SRC_FILE ${AZURERTOS_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${AZURERTOS_SRC_FILE}") # debug helper
+    message("${SRC_FILE} >> ${AZURERTOS_SRC_FILE}") # debug helper
     list(APPEND AZURERTOS_SOURCES ${AZURERTOS_SRC_FILE})
 endforeach()
 
