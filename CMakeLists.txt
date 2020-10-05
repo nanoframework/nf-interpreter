@@ -67,7 +67,7 @@ endif()
 # list of supported RTOSes
 # when adding a new RTOS add the corresponding string below AND...
 # ... also on the compare block below
-set(RTOS_SUPPORTED "ChibiOS" "FreeRTOS" "FreeRTOS_ESP32" "TI_SimpleLink" CACHE INTERNAL "supported RTOS options")
+set(RTOS_SUPPORTED "ChibiOS" "FreeRTOS" "FreeRTOS_ESP32" "TI_SimpleLink" "AzureRTOS" CACHE INTERNAL "supported RTOS options")
 
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
@@ -80,6 +80,7 @@ string(COMPARE EQUAL "ChibiOS" ${RTOS}  RTOS_CHIBIOS_CHECK)
 string(COMPARE EQUAL "FreeRTOS" ${RTOS} RTOS_FREERTOS_CHECK)
 string(COMPARE EQUAL "FreeRTOS_ESP32" ${RTOS} RTOS_FREERTOS_ESP32_CHECK)
 string(COMPARE EQUAL "TI_SimpleLink" ${RTOS} RTOS_TI_SIMPLELINK_CHECK)
+string(COMPARE EQUAL "AzureRTOS" ${RTOS} RTOS_AZURERTOS_CHECK)
 
 ##########################################################################
 
@@ -88,6 +89,7 @@ if(RTOS_FREERTOS_CHECK)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
     set(RTOS_TI_SIMPLELINK_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_AZURERTOS_CHECK FALSE)
 endif()
 
 if(RTOS_FREERTOS_ESP32_CHECK)
@@ -95,6 +97,7 @@ if(RTOS_FREERTOS_ESP32_CHECK)
     set(RTOS_FREERTOS_ESP32_CHECK TRUE)
     set(RTOS_TI_SIMPLELINK_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_AZURERTOS_CHECK FALSE)
 endif()
 
 if(RTOS_CHIBIOS_CHECK)
@@ -102,10 +105,20 @@ if(RTOS_CHIBIOS_CHECK)
     set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
     set(RTOS_TI_SIMPLELINK_CHECK FALSE)
+    set(RTOS_AZURERTOS_CHECK FALSE)
 endif()
 
 if(RTOS_TI_SIMPLELINK_CHECK)
     set(RTOS_TI_SIMPLELINK_CHECK TRUE)
+    set(RTOS_FREERTOS_CHECK FALSE)
+    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
+    set(RTOS_CHIBIOS_CHECK FALSE)
+    set(RTOS_AZURERTOS_CHECK FALSE)
+endif()
+
+if(RTOS_AZURERTOS_CHECK)
+    set(RTOS_AZURERTOS_CHECK TRUE)
+    set(RTOS_TI_SIMPLELINK_CHECK FALSE)
     set(RTOS_FREERTOS_CHECK FALSE)
     set(RTOS_FREERTOS_ESP32_CHECK FALSE)
     set(RTOS_CHIBIOS_CHECK FALSE)
@@ -898,5 +911,11 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink)
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
+
+#######################
+# AzureRTOS
+elseif(RTOS_AZURERTOS_CHECK)
+
+    add_subdirectory(targets/AzureRTOS)
 
 endif()
