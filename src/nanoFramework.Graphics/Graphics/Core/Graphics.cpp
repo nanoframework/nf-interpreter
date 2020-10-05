@@ -48,7 +48,7 @@ int CLR_GFX_BitmapDescription::GetWidthInWords() const
 
 int CLR_GFX_BitmapDescription::GetTotalSize() const
 {
-    //compressed 1bpp bitmaps are not currently supported.
+    // compressed 1bpp bitmaps are not currently supported.
     _ASSERTE((m_flags & CLR_GFX_BitmapDescription::c_Compressed) == 0);
 
     if (m_bitsPerPixel == CLR_GFX_BitmapDescription::c_NativeBpp)
@@ -58,15 +58,15 @@ int CLR_GFX_BitmapDescription::GetTotalSize() const
     return GetWidthInWords() * m_height * sizeof(CLR_UINT32);
 }
 
-HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock& ref, const CLR_GFX_BitmapDescription& bm)
+HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock &ref, const CLR_GFX_BitmapDescription &bm)
 {
     NANOCLR_HEADER();
 
-    CLR_GFX_Bitmap* bitmap;
+    CLR_GFX_Bitmap *bitmap;
     int size;
     size = sizeof(CLR_GFX_Bitmap) + bm.GetTotalSize();
 
-    bitmap = (CLR_GFX_Bitmap*)g_GraphicsMemoryHeap.Allocate(size);
+    bitmap = (CLR_GFX_Bitmap *)g_GraphicsMemoryHeap.Allocate(size);
 
     ref.SetInteger((CLR_UINT32)bitmap);
     ref.PerformBoxingIfNeeded();
@@ -79,43 +79,51 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock& ref, const CLR_GFX_Bitm
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock& ref, const CLR_UINT8* data, const CLR_UINT32 size, const CLR_UINT8 type)
+HRESULT CLR_GFX_Bitmap::CreateInstance(
+    CLR_RT_HeapBlock &ref,
+    const CLR_UINT8 *data,
+    const CLR_UINT32 size,
+    const CLR_UINT8 type)
 {
     HRESULT hr;
 
     switch (type)
     {
-    case CLR_GFX_BitmapDescription::c_TypeJpeg:
-        hr = CreateInstanceJpeg(ref, data, size);
-        break;
-    case CLR_GFX_BitmapDescription::c_TypeGif:
-        hr = CreateInstanceGif(ref, data, size);
-        break;
-    case CLR_GFX_BitmapDescription::c_TypeBmp:
-        hr = CreateInstanceBmp(ref, data, size);
-        break;
-    default:
-        // Unknown / unsupported types
-        hr = CLR_E_NOT_SUPPORTED;
+        case CLR_GFX_BitmapDescription::c_TypeJpeg:
+            hr = CreateInstanceJpeg(ref, data, size);
+            break;
+        case CLR_GFX_BitmapDescription::c_TypeGif:
+            hr = CreateInstanceGif(ref, data, size);
+            break;
+        case CLR_GFX_BitmapDescription::c_TypeBmp:
+            hr = CreateInstanceBmp(ref, data, size);
+            break;
+        default:
+            // Unknown / unsupported types
+            hr = CLR_E_NOT_SUPPORTED;
     }
     return hr;
 }
 
-HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock& ref, const CLR_UINT8* data, CLR_UINT32 size, CLR_RT_Assembly* assm)
+HRESULT CLR_GFX_Bitmap::CreateInstance(
+    CLR_RT_HeapBlock &ref,
+    const CLR_UINT8 *data,
+    CLR_UINT32 size,
+    CLR_RT_Assembly *assm)
 {
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock refUncompressed;
     refUncompressed.SetObjectReference(NULL);
-    CLR_GFX_Bitmap* bitmap;
-    CLR_GFX_Bitmap* bitmapNative;
-    const CLR_GFX_BitmapDescription* bm;
+    CLR_GFX_Bitmap *bitmap;
+    CLR_GFX_Bitmap *bitmapNative;
+    const CLR_GFX_BitmapDescription *bm;
     CLR_GFX_BitmapDescription bmUncompressed;
     CLR_GFX_BitmapDescription bmNative;
     CLR_UINT16 flags;
     bool unpinAssm = false;
 
-    bm = (const CLR_GFX_BitmapDescription*)data;
+    bm = (const CLR_GFX_BitmapDescription *)data;
 
     data += sizeof(CLR_GFX_BitmapDescription);
     size -= sizeof(CLR_GFX_BitmapDescription);
@@ -138,9 +146,9 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock& ref, const CLR_UINT8* d
     if ((bm->m_flags & CLR_GFX_BitmapDescription::c_Compressed) != 0)
     {
         /* When loading a Windows BMP, GIF, or JPEG file, it is converted in-place to the native BPP.
-         * When loading a compressed nanoCLR Bitmap from a resource file, two bitmaps are needed to decompress, then convert.
-         * This fragments the heap and wastes space until the next garbage collection is done.
-         * When using the SimpleHeap, there is no relocation, so decompressing into a temp bitmap into the simpleheap wastes
+         * When loading a compressed nanoCLR Bitmap from a resource file, two bitmaps are needed to decompress, then
+         * convert. This fragments the heap and wastes space until the next garbage collection is done. When using the
+         * SimpleHeap, there is no relocation, so decompressing into a temp bitmap into the simpleheap wastes
          * memory 6.25% the size of the 16bpp bitmap that's saved.
          */
 
@@ -159,7 +167,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock& ref, const CLR_UINT8* d
 
         bitmap->Decompress(data, size);
 
-        data = (CLR_UINT8*)bitmap->m_palBitmap.data;
+        data = (CLR_UINT8 *)bitmap->m_palBitmap.data;
         bm = &bitmap->m_bm;
     }
 
@@ -177,7 +185,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock& ref, const CLR_UINT8* d
 
         NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(ref, bitmapNative));
 
-        bitmapNative->ConvertToNative(bm, (CLR_UINT32*)data);
+        bitmapNative->ConvertToNative(bm, (CLR_UINT32 *)data);
     }
 
     NANOCLR_CLEANUP();
@@ -194,10 +202,10 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock& ref, const CLR_UINT8* d
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(const CLR_RT_HeapBlock& ref, CLR_GFX_Bitmap*& bitmap)
+HRESULT CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(const CLR_RT_HeapBlock &ref, CLR_GFX_Bitmap *&bitmap)
 {
     HRESULT hr;
-    CLR_RT_HeapBlock* blob;
+    CLR_RT_HeapBlock *blob;
 
     blob = ref.Dereference();
     if (!blob)
@@ -206,33 +214,33 @@ HRESULT CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(const CLR_RT_HeapBlock&
     }
     switch (blob->DataType())
     {
-    case DATATYPE_BINARY_BLOB_HEAD:
-        bitmap = (CLR_GFX_Bitmap*)(((CLR_RT_HeapBlock_BinaryBlob*)blob)->GetData());
-        hr = S_OK;
-        break;
-    case DATATYPE_VALUETYPE:
-        if (blob->IsBoxed() && blob[1].DataType() == DATATYPE_U4)
-        {
-            bitmap = (CLR_GFX_Bitmap*)(void*)(blob[1].NumericByRefConst().u4);
+        case DATATYPE_BINARY_BLOB_HEAD:
+            bitmap = (CLR_GFX_Bitmap *)(((CLR_RT_HeapBlock_BinaryBlob *)blob)->GetData());
             hr = S_OK;
-        }
-        else
-        {
-            hr = CLR_E_WRONG_TYPE;       //We were somehow passed an invalid boxed value.
-        }
-        break;
-    default:
-        hr = CLR_E_WRONG_TYPE;
-        break;
+            break;
+        case DATATYPE_VALUETYPE:
+            if (blob->IsBoxed() && blob[1].DataType() == DATATYPE_U4)
+            {
+                bitmap = (CLR_GFX_Bitmap *)(void *)(blob[1].NumericByRefConst().u4);
+                hr = S_OK;
+            }
+            else
+            {
+                hr = CLR_E_WRONG_TYPE; // We were somehow passed an invalid boxed value.
+            }
+            break;
+        default:
+            hr = CLR_E_WRONG_TYPE;
+            break;
     }
     return hr;
 }
 
-HRESULT CLR_GFX_Bitmap::CreateInstanceBmp(CLR_RT_HeapBlock& ref, const CLR_UINT8* data, const CLR_UINT32 size)
+HRESULT CLR_GFX_Bitmap::CreateInstanceBmp(CLR_RT_HeapBlock &ref, const CLR_UINT8 *data, const CLR_UINT32 size)
 {
     NANOCLR_HEADER();
 
-    CLR_GFX_Bitmap* bitmap = NULL;
+    CLR_GFX_Bitmap *bitmap = NULL;
     CLR_GFX_BitmapDescription bm;
     BmpDecoder decoder;
 
@@ -254,12 +262,12 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceBmp(CLR_RT_HeapBlock& ref, const CLR_UINT8
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_GFX_Bitmap::DeleteInstance(CLR_RT_HeapBlock& ref)
+HRESULT CLR_GFX_Bitmap::DeleteInstance(CLR_RT_HeapBlock &ref)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock* blob;
-    CLR_GFX_Bitmap* bitmap;
+    CLR_RT_HeapBlock *blob;
+    CLR_GFX_Bitmap *bitmap;
 
     blob = ref.Dereference();
 
@@ -270,24 +278,24 @@ HRESULT CLR_GFX_Bitmap::DeleteInstance(CLR_RT_HeapBlock& ref)
 
     switch (blob->DataType())
     {
-    case DATATYPE_BINARY_BLOB_HEAD:
-        ((CLR_RT_HeapBlock_BinaryBlob*)blob)->Release(false);
-        break;
-    case DATATYPE_VALUETYPE:
-        if (blob->IsBoxed() && blob[1].DataType() == DATATYPE_U4)
-        {
-            bitmap = (CLR_GFX_Bitmap*)(blob[1].NumericByRefConst().u4);
-            g_GraphicsMemoryHeap.Release(bitmap);
-        }
-        else
-        {
-            //We were somehow passed an invalid boxed value.
+        case DATATYPE_BINARY_BLOB_HEAD:
+            ((CLR_RT_HeapBlock_BinaryBlob *)blob)->Release(false);
+            break;
+        case DATATYPE_VALUETYPE:
+            if (blob->IsBoxed() && blob[1].DataType() == DATATYPE_U4)
+            {
+                bitmap = (CLR_GFX_Bitmap *)(blob[1].NumericByRefConst().u4);
+                g_GraphicsMemoryHeap.Release(bitmap);
+            }
+            else
+            {
+                // We were somehow passed an invalid boxed value.
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+            break;
+        default:
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-        }
-        break;
-    default:
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-        break;
+            break;
     }
 
     ref.SetObjectReference(NULL);
@@ -295,12 +303,12 @@ HRESULT CLR_GFX_Bitmap::DeleteInstance(CLR_RT_HeapBlock& ref)
     NANOCLR_NOCLEANUP();
 }
 
-void CLR_GFX_Bitmap::Decompress(const CLR_UINT8* data, CLR_UINT32 size)
+void CLR_GFX_Bitmap::Decompress(const CLR_UINT8 *data, CLR_UINT32 size)
 {
     CLR_UINT32 mask = 0xffffffff;
     CLR_UINT32 cBitsDst = 32;
-    CLR_UINT32* pd = (CLR_UINT32*)m_palBitmap.data;
-    CLR_UINT32* pbyteDst = pd;
+    CLR_UINT32 *pd = (CLR_UINT32 *)m_palBitmap.data;
+    CLR_UINT32 *pbyteDst = pd;
     CLR_UINT32 cBitsScanLine = m_bm.m_width;
     CLR_UINT32 cLines = m_bm.m_height;
     CLR_UINT32 cBytes = size;
@@ -317,7 +325,8 @@ void CLR_GFX_Bitmap::Decompress(const CLR_UINT8* data, CLR_UINT32 size)
         if (fRun)
         {
             dSrc = (b & CLR_GFX_BitmapDescription::c_CompressedRunSet) ? 0xffffffff : 0x0;
-            cBitsTotal = (b & CLR_GFX_BitmapDescription::c_CompressedRunLengthMask) + CLR_GFX_BitmapDescription::c_CompressedRunOffset;
+            cBitsTotal = (b & CLR_GFX_BitmapDescription::c_CompressedRunLengthMask) +
+                         CLR_GFX_BitmapDescription::c_CompressedRunOffset;
         }
         else
         {
@@ -366,9 +375,9 @@ void CLR_GFX_Bitmap::Decompress(const CLR_UINT8* data, CLR_UINT32 size)
     }
 }
 
-CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT16& opacity, void* param)
+CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
-    ConvertToNativeHelperParam* myParam = (ConvertToNativeHelperParam*)param;
+    ConvertToNativeHelperParam *myParam = (ConvertToNativeHelperParam *)param;
     if (flags & PAL_GFX_Bitmap::c_SetPixels_NewRow)
     {
         myParam->srcCur1BppWord = myParam->srcFirstWord;
@@ -386,12 +395,12 @@ CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT1
     return color;
 }
 
-CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative16BppHelper(CLR_UINT32 flags, CLR_UINT16& opacity, void* param)
+CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative16BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
-    ConvertToNativeHelperParam* myParam = (ConvertToNativeHelperParam*)param;
+    ConvertToNativeHelperParam *myParam = (ConvertToNativeHelperParam *)param;
     if (flags & PAL_GFX_Bitmap::c_SetPixels_NewRow)
     {
-        myParam->srcCur16BppPixel = (CLR_UINT16*)myParam->srcFirstWord;
+        myParam->srcCur16BppPixel = (CLR_UINT16 *)myParam->srcFirstWord;
         myParam->srcFirstWord += myParam->srcWidthInWords;
     }
     CLR_UINT32 color16 = *(myParam->srcCur16BppPixel);
@@ -414,7 +423,7 @@ CLR_UINT32 CLR_GFX_Bitmap::GetPixel(int xPos, int yPos) const
     return GraphicsDriver::GetPixel(m_palBitmap, xPos, yPos);
 }
 
-void CLR_GFX_Bitmap::ConvertToNative(const CLR_GFX_BitmapDescription* bmSrc, CLR_UINT32* dataSrc)
+void CLR_GFX_Bitmap::ConvertToNative(const CLR_GFX_BitmapDescription *bmSrc, CLR_UINT32 *dataSrc)
 {
     GFX_Rect rect;
     rect.left = 0;
@@ -434,12 +443,12 @@ void CLR_GFX_Bitmap::ConvertToNative(const CLR_GFX_BitmapDescription* bmSrc, CLR
 #endif
     switch (bmSrc->m_bitsPerPixel)
     {
-    case 1:
-        SetPixelsHelper(rect, config, (GFX_SetPixelsCallback)&ConvertToNative1BppHelper, &param);
-        break;
-    case 16:
-        SetPixelsHelper(rect, config, (GFX_SetPixelsCallback)&ConvertToNative16BppHelper, &param);
-        break;
+        case 1:
+            SetPixelsHelper(rect, config, (GFX_SetPixelsCallback)&ConvertToNative1BppHelper, &param);
+            break;
+        case 16:
+            SetPixelsHelper(rect, config, (GFX_SetPixelsCallback)&ConvertToNative16BppHelper, &param);
+            break;
     }
 #if __GNUC__ > 6
 #pragma GCC diagnostic pop
@@ -450,7 +459,7 @@ void CLR_GFX_Bitmap::Bitmap_Initialize()
 {
     m_palBitmap.width = m_bm.m_width;
     m_palBitmap.height = m_bm.m_height;
-    m_palBitmap.data = (CLR_UINT32*)&this[1];
+    m_palBitmap.data = (CLR_UINT32 *)&this[1];
     m_palBitmap.transparentColor = PAL_GFX_Bitmap::c_InvalidColor;
 
     PAL_GFX_Bitmap::ResetClipping(m_palBitmap);
@@ -465,7 +474,7 @@ void CLR_GFX_Bitmap::Clear()
     g_GraphicsDriver.Clear(m_palBitmap);
 }
 
-void CLR_GFX_Bitmap::SetClipping(GFX_Rect& rc)
+void CLR_GFX_Bitmap::SetClipping(GFX_Rect &rc)
 {
     //
     // Make sure the clip rect is smaller than the bitmap.
@@ -501,48 +510,79 @@ void CLR_GFX_Bitmap::SetPixel(int xPos, int yPos, CLR_UINT32 color)
     GraphicsDriver::SetPixel(m_palBitmap, xPos, yPos, color);
 }
 
-void CLR_GFX_Bitmap::DrawEllipse(const GFX_Pen& pen, const GFX_Brush& brush, int x, int y, int radiusX, int radiusY)
+void CLR_GFX_Bitmap::DrawEllipse(const GFX_Pen &pen, const GFX_Brush &brush, int x, int y, int radiusX, int radiusY)
 {
     GraphicsDriver::DrawEllipse(m_palBitmap, pen, brush, x, y, radiusX, radiusY);
 }
 
-void CLR_GFX_Bitmap::DrawImage(const GFX_Rect& dst, const CLR_GFX_Bitmap& bitmapSrc, const GFX_Rect& src, CLR_UINT16 opacity)
+void CLR_GFX_Bitmap::DrawImage(
+    const GFX_Rect &dst,
+    const CLR_GFX_Bitmap &bitmapSrc,
+    const GFX_Rect &src,
+    CLR_UINT16 opacity)
 {
     GraphicsDriver::DrawImage(m_palBitmap, dst, bitmapSrc.m_palBitmap, src, opacity);
 }
 
-void CLR_GFX_Bitmap::RotateImage(int angle, const GFX_Rect& dst, const CLR_GFX_Bitmap& bitmapSrc, const GFX_Rect& src, CLR_UINT16 opacity)
+void CLR_GFX_Bitmap::RotateImage(
+    int angle,
+    const GFX_Rect &dst,
+    const CLR_GFX_Bitmap &bitmapSrc,
+    const GFX_Rect &src,
+    CLR_UINT16 opacity)
 {
     GraphicsDriver::RotateImage(angle, m_palBitmap, dst, bitmapSrc.m_palBitmap, src, opacity);
 }
 
-void CLR_GFX_Bitmap::DrawLine(const GFX_Pen& pen, int x0, int y0, int x1, int y1)
+void CLR_GFX_Bitmap::DrawLine(const GFX_Pen &pen, int x0, int y0, int x1, int y1)
 {
     GraphicsDriver::DrawLine(m_palBitmap, pen, x0, y0, x1, y1);
 }
 
-void CLR_GFX_Bitmap::DrawRectangle(const GFX_Pen& pen, const GFX_Brush& brush, const GFX_Rect& rectangle)
+void CLR_GFX_Bitmap::DrawRectangle(const GFX_Pen &pen, const GFX_Brush &brush, const GFX_Rect &rectangle)
 {
     GraphicsDriver::DrawRectangle(m_palBitmap, pen, brush, rectangle);
 }
 
-void CLR_GFX_Bitmap::DrawRoundedRectangle(const GFX_Pen& pen, const GFX_Brush& brush, const GFX_Rect& rectangle, int radiusX, int radiusY)
+void CLR_GFX_Bitmap::DrawRoundedRectangle(
+    const GFX_Pen &pen,
+    const GFX_Brush &brush,
+    const GFX_Rect &rectangle,
+    int radiusX,
+    int radiusY)
 {
     GraphicsDriver::DrawRoundedRectangle(m_palBitmap, pen, brush, rectangle, radiusX, radiusY);
 }
 
-void CLR_GFX_Bitmap::SetPixelsHelper(const GFX_Rect& rect, CLR_UINT32 config, GFX_SetPixelsCallback callback, void* param)
+void CLR_GFX_Bitmap::SetPixelsHelper(
+    const GFX_Rect &rect,
+    CLR_UINT32 config,
+    GFX_SetPixelsCallback callback,
+    void *param)
 {
     GraphicsDriver::SetPixelsHelper(m_palBitmap, rect, config, callback, param);
 }
 
-void CLR_GFX_Bitmap::DrawText(LPCSTR str, CLR_GFX_Font& font, CLR_UINT32 color, int x, int y)
+void CLR_GFX_Bitmap::DrawText(LPCSTR str, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y)
 {
     // This is not implemented: need vectors for text orientation as parameters, and these need to be transformed.
     font.StringOut(str, -1, CLR_GFX_Font::c_DefaultKerning, this, x, y, color);
 }
 
-HRESULT CLR_GFX_Bitmap::DrawTextInRect(LPCSTR& szText, int& xRelStart, int& yRelStart, int& renderWidth, int& renderHeight, CLR_GFX_Bitmap* bm, int x, int y, int width, int height, CLR_UINT32 dtFlags, CLR_UINT32 color, CLR_GFX_Font* font)
+HRESULT CLR_GFX_Bitmap::DrawTextInRect(
+    LPCSTR &szText,
+    int &xRelStart,
+    int &yRelStart,
+    int &renderWidth,
+    int &renderHeight,
+    CLR_GFX_Bitmap *bm,
+    int x,
+    int y,
+    int width,
+    int height,
+    CLR_UINT32 dtFlags,
+    CLR_UINT32 color,
+    CLR_GFX_Font *font)
 {
     NANOCLR_HEADER();
 
@@ -566,7 +606,8 @@ HRESULT CLR_GFX_Bitmap::DrawTextInRect(LPCSTR& szText, int& xRelStart, int& yRel
     alignment = dtFlags & CLR_GFX_Bitmap::c_DrawText_AlignmentMask;
     trimming = dtFlags & CLR_GFX_Bitmap::c_DrawText_TrimmingMask;
 
-    if (((dtFlags & CLR_GFX_Bitmap::c_DrawText_TruncateAtBottom) && (trimming != CLR_GFX_Bitmap::c_DrawText_TrimmingNone)) ||
+    if (((dtFlags & CLR_GFX_Bitmap::c_DrawText_TruncateAtBottom) &&
+         (trimming != CLR_GFX_Bitmap::c_DrawText_TrimmingNone)) ||
         (alignment == CLR_GFX_Bitmap::c_DrawText_AlignmentUnused) ||
         (trimming == CLR_GFX_Bitmap::c_DrawText_TrimmingUnused))
     {
@@ -578,7 +619,9 @@ HRESULT CLR_GFX_Bitmap::DrawTextInRect(LPCSTR& szText, int& xRelStart, int& yRel
 
     dHeight = height - yRelStart;
     dHeightLine = nHeight + nSkip;
-    cLineAvailable = (dHeight + nSkip + ((dtFlags & CLR_GFX_Bitmap::c_DrawText_TruncateAtBottom) ? dHeightLine - 1 : 0)) / dHeightLine;
+    cLineAvailable =
+        (dHeight + nSkip + ((dtFlags & CLR_GFX_Bitmap::c_DrawText_TruncateAtBottom) ? dHeightLine - 1 : 0)) /
+        dHeightLine;
 
     renderWidth = 0;
     renderHeight = yRelStart;
@@ -601,11 +644,18 @@ HRESULT CLR_GFX_Bitmap::DrawTextInRect(LPCSTR& szText, int& xRelStart, int& yRel
             renderWidth = xRelStart + totWidth;
         renderHeight += dHeightLine;
 
-        //If we didn't make it...(disregarding any trailing spaces)
+        // If we didn't make it...(disregarding any trailing spaces)
         if ((trimming != CLR_GFX_Bitmap::c_DrawText_TrimmingNone) && (cLineAvailable == 0) && szTextNext[0] != 0)
         {
             font->CountCharactersInWidth(szEllipsis, -1, 65536, ellipsisWidth, fWordWrap, szTextNext, num);
-            font->CountCharactersInWidth(szText, -1, width - xRelStart - ellipsisWidth, totWidth, (trimming == CLR_GFX_Bitmap::c_DrawText_TrimmingWordEllipsis), szTextNext, num);
+            font->CountCharactersInWidth(
+                szText,
+                -1,
+                width - xRelStart - ellipsisWidth,
+                totWidth,
+                (trimming == CLR_GFX_Bitmap::c_DrawText_TrimmingWordEllipsis),
+                szTextNext,
+                num);
 
             totWidth += ellipsisWidth;
             fDrawEllipsis = true;
@@ -622,9 +672,19 @@ HRESULT CLR_GFX_Bitmap::DrawTextInRect(LPCSTR& szText, int& xRelStart, int& yRel
 
         if (bm)
         {
-            /***************/ xRelStart = font->StringOut(szText, num, CLR_GFX_Font::c_DefaultKerning, bm, x + xRelStart, y + yRelStart, color) - x;
+            /***************/ xRelStart =
+                font->StringOut(szText, num, CLR_GFX_Font::c_DefaultKerning, bm, x + xRelStart, y + yRelStart, color) -
+                x;
             if (fDrawEllipsis)
-                xRelStart = font->StringOut(szEllipsis, -1, CLR_GFX_Font::c_DefaultKerning, bm, x + xRelStart, y + yRelStart, color) - x;
+                xRelStart = font->StringOut(
+                                szEllipsis,
+                                -1,
+                                CLR_GFX_Font::c_DefaultKerning,
+                                bm,
+                                x + xRelStart,
+                                y + yRelStart,
+                                color) -
+                            x;
         }
 
         szText = szTextNext;
@@ -643,24 +703,26 @@ HRESULT CLR_GFX_Bitmap::DrawTextInRect(LPCSTR& szText, int& xRelStart, int& yRel
     NANOCLR_NOCLEANUP();
 }
 
-
-
-HRESULT CLR_GFX_Bitmap::GetBitmap(CLR_RT_HeapBlock* pThis, bool fForWrite, CLR_GFX_Bitmap*& bitmap)
+HRESULT CLR_GFX_Bitmap::GetBitmap(CLR_RT_HeapBlock *pThis, bool fForWrite, CLR_GFX_Bitmap *&bitmap)
 {
     NANOCLR_HEADER();
 
-    if (pThis) pThis = pThis->Dereference(); FAULT_ON_NULL(pThis);
+    if (pThis)
+        pThis = pThis->Dereference();
+    FAULT_ON_NULL(pThis);
 
-    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], bitmap));
+    NANOCLR_CHECK_HRESULT(
+        CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], bitmap));
 
-    if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_ReadOnly) && fForWrite) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_Compressed)) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_ReadOnly) && fForWrite)
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_Compressed))
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_GFX_Bitmap::GetBitmap(CLR_RT_StackFrame& stack, bool fForWrite, CLR_GFX_Bitmap*& bitmap)
+HRESULT CLR_GFX_Bitmap::GetBitmap(CLR_RT_StackFrame &stack, bool fForWrite, CLR_GFX_Bitmap *&bitmap)
 {
     return GetBitmap(&stack.Arg0(), fForWrite, bitmap);
 }
-

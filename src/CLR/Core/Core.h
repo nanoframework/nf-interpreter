@@ -22,4 +22,3 @@
 #include <nanoCLR_Runtime__HeapBlock.h>
 
 #endif // _NANOCLR_CORE_H_
-

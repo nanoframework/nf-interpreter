@@ -19,4 +19,3 @@
 #endif // !defined(_WIN32)
 
 #endif
-
