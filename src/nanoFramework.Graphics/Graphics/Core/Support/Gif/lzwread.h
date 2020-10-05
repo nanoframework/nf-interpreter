@@ -10,7 +10,6 @@
 #include "Graphics.h"
 #include "lzw.h"
 
-
 /*****************************************************************************
 LZWIO - abstraction of the input and output buffers, used to allow
 the caller to do buffer management in whatever fashion is appropriate.
@@ -27,14 +26,13 @@ struct LZWIO
         m_fNeedOutput = true;
     }
 
-    const unsigned char* m_pbIn;
-    int              m_cbIn;          // Description of the input buffer
-    unsigned char* m_pbOut;
-    int              m_cbOut;         // Description of the output buffer
-    bool             m_fNeedInput;    // Set when input required
-    bool             m_fNeedOutput;   // Set when output space required
+    const unsigned char *m_pbIn;
+    int m_cbIn; // Description of the input buffer
+    unsigned char *m_pbOut;
+    int m_cbOut;        // Description of the output buffer
+    bool m_fNeedInput;  // Set when input required
+    bool m_fNeedOutput; // Set when output space required
 };
-
 
 /*****************************************************************************
 The decompressor class - an LZWState and an LZWIO, the latter being
@@ -42,7 +40,7 @@ public.
 ******************************************************************* JohnBo **/
 struct LZWDecompressor : private LZWState, public LZWIO
 {
-public:
+  public:
     inline void LZWDecompressorInit(unsigned char bcodeSize)
     {
         m_chPrev = 0;
@@ -71,7 +69,8 @@ public:
     stream or after a terminal error, otherwise it returns true. */
     inline bool FProcess(void)
     {
-        if (m_fEnded || m_fError) return false;
+        if (m_fEnded || m_fError)
+            return false;
         LZW_ASSERT(!m_fNeedInput && !m_fNeedOutput);
         LZW_ASSERT(m_pbIn != NULL && m_pbOut != NULL);
         LZW_ASSERT(m_cbIn >= 0 && m_cbOut >= 0);
@@ -79,8 +78,14 @@ public:
     }
 
     /* Has an error been encountered? */
-    inline bool FLZWError(void) const { return m_fError; }
-    inline bool FLZWEOF(void) const { return m_fEnded; }
+    inline bool FLZWError(void) const
+    {
+        return m_fError;
+    }
+    inline bool FLZWEOF(void) const
+    {
+        return m_fEnded;
+    }
 
     /* Reset the decompressor state.  This API is provided so the same object
     can be used to decompress multiple images within a GIF stream.  The
@@ -88,24 +93,23 @@ public:
     correctly. */
     void Reset(unsigned char bcodeSize);
 
-protected:
-
-private:
+  protected:
+  private:
     /* Constants. */
     enum
     {
-        lengthShift = (32 - 12),     // Where a token length is stored in the value
+        lengthShift = (32 - 12), // Where a token length is stored in the value
     };
 
     /* PRIVATE DATA */
-    unsigned char   m_chPrev;     // The first character of the previous token
-    bool            m_fEnded;     // Set after the zero length block has been seen
-    bool            m_fError;     // A terminal error has been encountered
+    unsigned char m_chPrev; // The first character of the previous token
+    bool m_fEnded;          // Set after the zero length block has been seen
+    bool m_fError;          // A terminal error has been encountered
 
     /* The input buffer. */
-    int             m_iInput;     // Input bits
-    int             m_cbInput;    // Count of pending input bits
-    int             m_iTokenPrev; // The previous output token
+    int m_iInput;     // Input bits
+    int m_cbInput;    // Count of pending input bits
+    int m_iTokenPrev; // The previous output token
 
     /* The token table. */
     TokenValue m_rgtoken[ctokens];
@@ -126,8 +130,7 @@ private:
         m_itokenLast = WEOD();
         /* Only the generated tokens can be cleared - the others must be left
         untouched. */
-        memset(m_rgtoken + WClear(), 0,
-            (ctokens - WClear()) * sizeof m_rgtoken[0]);
+        memset(m_rgtoken + WClear(), 0, (ctokens - WClear()) * sizeof m_rgtoken[0]);
     }
 
     /* Accessors on TokenValues.  These define the format of a token value, it is
@@ -143,7 +146,7 @@ private:
 
     static inline int IPrev(TokenValue tokenValue)
     {
-        return (tokenValue >> 8)& (ctokens - 1);
+        return (tokenValue >> 8) & (ctokens - 1);
     }
 
     static unsigned char Ch(TokenValue tokenValue)
@@ -158,12 +161,10 @@ private:
         return ch + (1U << lengthShift);
     }
 
-    static inline TokenValue NextToken(int iTokenPrev, TokenValue tokenPrev,
-        unsigned char ch)
+    static inline TokenValue NextToken(int iTokenPrev, TokenValue tokenPrev, unsigned char ch)
     {
         LZW_ASSERT(iTokenPrev < ctokens);
-        return ((tokenPrev + (1U << lengthShift)) & (0xFFFU << lengthShift)) +
-            (iTokenPrev << 8) + ch;
+        return ((tokenPrev + (1U << lengthShift)) & (0xFFFU << lengthShift)) + (iTokenPrev << 8) + ch;
     }
 };
 

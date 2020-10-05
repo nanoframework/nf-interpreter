@@ -8,9 +8,9 @@
 #include "Gif.h"
 #include "lzwread.h"
 
-// Initialization routine for GifDecoder struct. When it's finished, 
+// Initialization routine for GifDecoder struct. When it's finished,
 // the header field would be loaded already.
-HRESULT GifDecoder::GifInitDecompress( const CLR_UINT8* src, CLR_UINT32 srcSize )
+HRESULT GifDecoder::GifInitDecompress(const CLR_UINT8 *src, CLR_UINT32 srcSize)
 {
     NANOCLR_HEADER();
 
@@ -19,11 +19,11 @@ HRESULT GifDecoder::GifInitDecompress( const CLR_UINT8* src, CLR_UINT32 srcSize 
     isTransparentColorUnique = false;
 
     // set up the CLR_RT_ByteArrayReader
-    NANOCLR_CHECK_HRESULT(source.Init( (CLR_UINT8*)src, srcSize ));
+    NANOCLR_CHECK_HRESULT(source.Init((CLR_UINT8 *)src, srcSize));
 
-    NANOCLR_CHECK_HRESULT(source.Read( &header, sizeof(GifFileHeader) ));
+    NANOCLR_CHECK_HRESULT(source.Read(&header, sizeof(GifFileHeader)));
 
-    if (memcmp( header.signature, "GIF87a", 6 ) && memcmp( header.signature, "GIF89a", 6 ))
+    if (memcmp(header.signature, "GIF87a", 6) && memcmp(header.signature, "GIF89a", 6))
     {
         // Unrecognized signature
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -43,7 +43,7 @@ HRESULT GifDecoder::GifInitDecompress( const CLR_UINT8* src, CLR_UINT32 srcSize 
 // Takes in the output buffer, and do the decompression.
 // Note that the output buffer _must_ be at least of size widthInBytes*height
 // Also, GifInitDecompress() _must_ be called BEFORE GifStartDecompress()
-HRESULT GifDecoder::GifStartDecompress( CLR_GFX_Bitmap* bitmap )
+HRESULT GifDecoder::GifStartDecompress(CLR_GFX_Bitmap *bitmap)
 {
     NANOCLR_HEADER();
 
@@ -57,8 +57,7 @@ HRESULT GifDecoder::GifStartDecompress( CLR_GFX_Bitmap* bitmap )
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    if (bitmap->m_bm.m_width != header.LogicScreenWidth || 
-        bitmap->m_bm.m_height != header.LogicScreenHeight)
+    if (bitmap->m_bm.m_width != header.LogicScreenWidth || bitmap->m_bm.m_height != header.LogicScreenHeight)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -67,45 +66,47 @@ HRESULT GifDecoder::GifStartDecompress( CLR_GFX_Bitmap* bitmap )
 
     while (true)
     {
-       CLR_UINT8 chunkType = 0;
+        CLR_UINT8 chunkType = 0;
 
-        //Read in the chunk type.
-        NANOCLR_CHECK_HRESULT(source.Read1Byte( &chunkType ));
+        // Read in the chunk type.
+        NANOCLR_CHECK_HRESULT(source.Read1Byte(&chunkType));
 
-        switch(chunkType)
+        switch (chunkType)
         {
-        case 0x2C:  //Image Chunk
-            NANOCLR_SET_AND_LEAVE(ProcessImageChunk()); // We're done after reading in the first frame (no multi-frame support)
-            break;
-
-        case 0x3B:  //Terminator Chunk
-            NANOCLR_SET_AND_LEAVE(S_OK);
-            break;
-
-        case 0x21:  //Extension
-            //Read in the extension chunk type.
-            NANOCLR_CHECK_HRESULT(source.Read1Byte( &chunkType ));
-
-            switch(chunkType)
-            {
-            case 0xF9:
-                NANOCLR_CHECK_HRESULT(ProcessGraphicControlChunk());
+            case 0x2C: // Image Chunk
+                NANOCLR_SET_AND_LEAVE(
+                    ProcessImageChunk()); // We're done after reading in the first frame (no multi-frame support)
                 break;
 
-            case 0xFE: // Comment Chunk
-            case 0x01: // Plain Text Chunk
-            case 0xFF: // APplication Extension Chunk
-                NANOCLR_CHECK_HRESULT(ProcessUnwantedChunk()); // We don't care about any of these chunks, so just jump past it
+            case 0x3B: // Terminator Chunk
+                NANOCLR_SET_AND_LEAVE(S_OK);
                 break;
 
+            case 0x21: // Extension
+                // Read in the extension chunk type.
+                NANOCLR_CHECK_HRESULT(source.Read1Byte(&chunkType));
+
+                switch (chunkType)
+                {
+                    case 0xF9:
+                        NANOCLR_CHECK_HRESULT(ProcessGraphicControlChunk());
+                        break;
+
+                    case 0xFE: // Comment Chunk
+                    case 0x01: // Plain Text Chunk
+                    case 0xFF: // APplication Extension Chunk
+                        NANOCLR_CHECK_HRESULT(
+                            ProcessUnwantedChunk()); // We don't care about any of these chunks, so just jump past it
+                        break;
+
+                    default:
+                        // Unknown chunk type
+                        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                }
+                break;
             default:
                 // Unknown chunk type
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            }
-            break;
-        default:
-            // Unknown chunk type
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
     }
 
@@ -114,12 +115,12 @@ HRESULT GifDecoder::GifStartDecompress( CLR_GFX_Bitmap* bitmap )
 
 struct ProcessImageChunkHelperParam
 {
-    LZWDecompressor* lzwDec;
+    LZWDecompressor *lzwDec;
     bool flushing;
     int usedDecBufferSize;
     int currentDecBufferIndex;
 
-    GifDecoder* decoder;
+    GifDecoder *decoder;
 
     bool needInit;
     bool done;
@@ -129,11 +130,10 @@ HRESULT GifDecoder::ProcessImageChunk()
 {
     NANOCLR_HEADER();
 
-    LZWDecompressor* lzwDec = NULL;
+    LZWDecompressor *lzwDec = NULL;
     GifImageDescriptor currentImageDescriptor;
 
-    NANOCLR_CHECK_HRESULT(source.Read( &currentImageDescriptor, sizeof(GifImageDescriptor) ));
-
+    NANOCLR_CHECK_HRESULT(source.Read(&currentImageDescriptor, sizeof(GifImageDescriptor)));
 
     // If the image descriptor's width and height is different from the ones specified in the header,
     // we'll bail. Also, we ignore the imagedescriptor's top and left, and assume it's 0, 0 always.
@@ -154,21 +154,21 @@ HRESULT GifDecoder::ProcessImageChunk()
         // If there's a local color table, then overwrite the global color table (if there was one)
         // Note that we're taking a shortcut here to simply overwrite the global table because
         // we don't support multi-frames/animated Gif.
-        colorTableSize = 1 << ((currentImageDescriptor.localcolortablesize)+1);
+        colorTableSize = 1 << ((currentImageDescriptor.localcolortablesize) + 1);
 
         NANOCLR_CHECK_HRESULT(ReadColorTable());
     }
 
     if (colorTableSize == 0)
     {
-        // We don't have a valid color table (global or local) 
+        // We don't have a valid color table (global or local)
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
     // Read the codesize from the file.  The GIF decoder needs this to begin.
     CLR_UINT8 lzwCodeSize;
 
-    NANOCLR_CHECK_HRESULT(source.Read1Byte( &lzwCodeSize ));
+    NANOCLR_CHECK_HRESULT(source.Read1Byte(&lzwCodeSize));
 
     if ((lzwCodeSize < 2) || (lzwCodeSize > 8))
     {
@@ -178,9 +178,10 @@ HRESULT GifDecoder::ProcessImageChunk()
 
     // Create a LZW decompressor object based on lzw code size
     // We Allocate the LZWDecompressor on the heap, rather than the stack, since it contains a 16kb token table.
-    lzwDec = (LZWDecompressor*)CLR_RT_Memory::Allocate( sizeof(LZWDecompressor) );  CHECK_ALLOCATION(lzwDec);
+    lzwDec = (LZWDecompressor *)CLR_RT_Memory::Allocate(sizeof(LZWDecompressor));
+    CHECK_ALLOCATION(lzwDec);
 
-    lzwDec->LZWDecompressorInit( lzwCodeSize );
+    lzwDec->LZWDecompressorInit(lzwCodeSize);
 
     GFX_Rect rect;
     rect.left = 0;
@@ -197,19 +198,24 @@ HRESULT GifDecoder::ProcessImageChunk()
     param.done = false;
     param.currentDecBufferIndex = 0;
 
-    output->SetPixelsHelper( rect, PAL_GFX_Bitmap::c_SetPixelsConfig_NoClip | PAL_GFX_Bitmap::c_SetPixelsConfig_NoClipChecks, (GFX_SetPixelsCallback)&ProcessImageChunkHelper, &param );
-    
+    output->SetPixelsHelper(
+        rect,
+        PAL_GFX_Bitmap::c_SetPixelsConfig_NoClip | PAL_GFX_Bitmap::c_SetPixelsConfig_NoClipChecks,
+        (GFX_SetPixelsCallback)&ProcessImageChunkHelper,
+        &param);
+
     NANOCLR_CLEANUP();
 
     // If we successfully allocated the decompressor, we need to release it.
-    if (lzwDec) CLR_RT_Memory::Release( lzwDec );
+    if (lzwDec)
+        CLR_RT_Memory::Release(lzwDec);
 
     NANOCLR_CLEANUP_END();
 }
 
-void GifDecoder::SetupFlushing( void* p )
+void GifDecoder::SetupFlushing(void *p)
 {
-    ProcessImageChunkHelperParam* param = (ProcessImageChunkHelperParam*)p;
+    ProcessImageChunkHelperParam *param = (ProcessImageChunkHelperParam *)p;
     param->flushing = true;
     param->usedDecBufferSize = param->decoder->decBufferSize - param->lzwDec->m_cbOut;
     param->currentDecBufferIndex = 0;
@@ -217,9 +223,9 @@ void GifDecoder::SetupFlushing( void* p )
 
 // Returns true if there are no more inputs to decode (i.e. we're done), false if otherwise
 // Note that it'll return true if we ran into some error condition as well.
-bool GifDecoder::DecodeUntilFlush( void* p )
+bool GifDecoder::DecodeUntilFlush(void *p)
 {
-    ProcessImageChunkHelperParam* param = (ProcessImageChunkHelperParam*)p;
+    ProcessImageChunkHelperParam *param = (ProcessImageChunkHelperParam *)p;
 
     ASSERT(param->flushing == false);
 
@@ -227,33 +233,37 @@ bool GifDecoder::DecodeUntilFlush( void* p )
     {
         if (param->lzwDec->m_fNeedOutput == true)
         {
-            if (param->needInit == false) SetupFlushing( param );
+            if (param->needInit == false)
+                SetupFlushing(param);
 
-            param->lzwDec->m_pbOut       = param->decoder->decBuffer;
-            param->lzwDec->m_cbOut       = param->decoder->decBufferSize;
+            param->lzwDec->m_pbOut = param->decoder->decBuffer;
+            param->lzwDec->m_cbOut = param->decoder->decBufferSize;
             param->lzwDec->m_fNeedOutput = false;
 
-            if (param->needInit == false) return false;
+            if (param->needInit == false)
+                return false;
         }
 
         if (param->lzwDec->m_fNeedInput == true)
         {
-            // The decompressor needs more input, we'll read in the next 
+            // The decompressor needs more input, we'll read in the next
             // data block, and populate the fields accordingly.
-			CLR_UINT8 blockSize;
+            CLR_UINT8 blockSize;
             HRESULT hr;
 
-            if (FAILED(hr = param->decoder->source.Read1Byte( &blockSize ))) return true;
+            if (FAILED(hr = param->decoder->source.Read1Byte(&blockSize)))
+                return true;
 
             if (blockSize > 0) // we have a valid block
             {
-                const CLR_UINT8* sourceCurPos = param->decoder->source.source;
+                const CLR_UINT8 *sourceCurPos = param->decoder->source.source;
 
                 // Advance the marker for the stream
-                if (FAILED(hr = param->decoder->source.Skip( blockSize ))) return true;
+                if (FAILED(hr = param->decoder->source.Skip(blockSize)))
+                    return true;
 
-                param->lzwDec->m_pbIn       = sourceCurPos;
-                param->lzwDec->m_cbIn       = blockSize;
+                param->lzwDec->m_pbIn = sourceCurPos;
+                param->lzwDec->m_cbIn = blockSize;
                 param->lzwDec->m_fNeedInput = false;
             }
             else
@@ -261,7 +271,7 @@ bool GifDecoder::DecodeUntilFlush( void* p )
                 // We've reached the end of the data subblocks, flush out the already decompressed data and leave
                 if (param->needInit == false)
                 {
-                    SetupFlushing( param );
+                    SetupFlushing(param);
                 }
                 return true;
             }
@@ -271,18 +281,17 @@ bool GifDecoder::DecodeUntilFlush( void* p )
 
         if (param->lzwDec->FProcess() == false)
         {
-            SetupFlushing( param );
+            SetupFlushing(param);
             return true;
         }
     }
-
 }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-CLR_UINT32 GifDecoder::ProcessImageChunkHelper( int x,int y, CLR_UINT32 flags, CLR_UINT16& opacity, void* param )
+CLR_UINT32 GifDecoder::ProcessImageChunkHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
-    ProcessImageChunkHelperParam* myParam = (ProcessImageChunkHelperParam*)param;
+    ProcessImageChunkHelperParam *myParam = (ProcessImageChunkHelperParam *)param;
 
     // If we're not already in the middle of a flushing, try to decode more data
     if (myParam->flushing == false)
@@ -293,7 +302,7 @@ CLR_UINT32 GifDecoder::ProcessImageChunkHelper( int x,int y, CLR_UINT32 flags, C
             return PAL_GFX_Bitmap::c_InvalidColor;
         }
 
-        if (DecodeUntilFlush( myParam ) == true)
+        if (DecodeUntilFlush(myParam) == true)
         {
             myParam->done = true;
 
@@ -307,7 +316,6 @@ CLR_UINT32 GifDecoder::ProcessImageChunkHelper( int x,int y, CLR_UINT32 flags, C
 
     if (flags & PAL_GFX_Bitmap::c_SetPixels_NewRow)
     {
-
     }
 
     opacity = PAL_GFX_Bitmap::c_OpacityOpaque;
@@ -315,7 +323,7 @@ CLR_UINT32 GifDecoder::ProcessImageChunkHelper( int x,int y, CLR_UINT32 flags, C
 
     myParam->currentDecBufferIndex++;
 
-    if(myParam->currentDecBufferIndex == myParam->usedDecBufferSize)
+    if (myParam->currentDecBufferIndex == myParam->usedDecBufferSize)
     {
         myParam->flushing = false;
     }
@@ -329,8 +337,8 @@ HRESULT GifDecoder::ProcessGraphicControlChunk()
 {
     NANOCLR_HEADER();
 
-    NANOCLR_CHECK_HRESULT(source.Read( &gce, sizeof(GifGraphicControlExtension) ));
-    
+    NANOCLR_CHECK_HRESULT(source.Read(&gce, sizeof(GifGraphicControlExtension)));
+
     if (gce.transparentcolorflag)
     {
         int count = colorTableSize;
@@ -351,7 +359,7 @@ HRESULT GifDecoder::ProcessGraphicControlChunk()
             count--;
             if (count <= 0)
             {
-               NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
         }
 
@@ -360,7 +368,7 @@ HRESULT GifDecoder::ProcessGraphicControlChunk()
         output->m_palBitmap.transparentColor = transparentColor;
     }
 
-    NANOCLR_CHECK_HRESULT(source.Skip( 1 )); // skip the block terminator
+    NANOCLR_CHECK_HRESULT(source.Skip(1)); // skip the block terminator
 
     NANOCLR_NOCLEANUP();
 }
@@ -373,26 +381,25 @@ HRESULT GifDecoder::ProcessUnwantedChunk()
 
     do // if we went pass the end of source, Read1Byte() or Skip() will complain and exit
     {
-        NANOCLR_CHECK_HRESULT(source.Read1Byte( &blockSize ));
-        NANOCLR_CHECK_HRESULT(source.Skip( blockSize ));
-    } 
-    while (blockSize > 0); // Keep reading data subblocks until we reach a terminator block (0x00)
+        NANOCLR_CHECK_HRESULT(source.Read1Byte(&blockSize));
+        NANOCLR_CHECK_HRESULT(source.Skip(blockSize));
+    } while (blockSize > 0); // Keep reading data subblocks until we reach a terminator block (0x00)
 
     NANOCLR_NOCLEANUP();
 }
 
-// These functions Read in the 24bit RGB values from the source and 
+// These functions Read in the 24bit RGB values from the source and
 // convert/store it as the native color format in the colorTable[]
 HRESULT GifDecoder::ReadColorTable()
 {
     NANOCLR_HEADER();
 
     // Record the first entry in the source stream
-    GifPaletteEntry* curEntry = (GifPaletteEntry*)source.source;
+    GifPaletteEntry *curEntry = (GifPaletteEntry *)source.source;
 
-    // Advance the marker for source first 
+    // Advance the marker for source first
     // (note that colorTableSize is filled in for us before the call of this function)
-    NANOCLR_CHECK_HRESULT(source.Skip( colorTableSize * sizeof(GifPaletteEntry) ));
+    NANOCLR_CHECK_HRESULT(source.Skip(colorTableSize * sizeof(GifPaletteEntry)));
 
     // Since we're looping through all the colorTable entries already, we'll use
     // this chance to find a unique transparent color, if possible
@@ -403,9 +410,8 @@ HRESULT GifDecoder::ReadColorTable()
 
     for (int i = 0; i < colorTableSize; i++)
     {
-        colorTable[i] =  ((CLR_UINT32)curEntry->red   )        | 
-                        (((CLR_UINT32)curEntry->green ) <<  8) | 
-                        (((CLR_UINT32)curEntry->blue  ) << 16) ;
+        colorTable[i] =
+            ((CLR_UINT32)curEntry->red) | (((CLR_UINT32)curEntry->green) << 8) | (((CLR_UINT32)curEntry->blue) << 16);
         if (colorTable[i] == transparentColor)
         {
             isTransparentColorUnique = false;
