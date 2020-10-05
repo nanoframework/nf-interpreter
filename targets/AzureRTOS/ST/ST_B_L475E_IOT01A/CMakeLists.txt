@@ -8,8 +8,8 @@ ENABLE_LANGUAGE(ASM)
 # add header files with common OS definitions and board definitions specific for each image
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
-# configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
-#                 "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
+                 "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
  
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
@@ -183,10 +183,10 @@ nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    #nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32L475VGTx_CLR.ld)
-    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32L475VGTx_CLR.ld)
+    #nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32L475VGTx_CLR-DEBUG.ld)
+    nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32L475VGTx_CLR-DEBUG.ld)
     else()
-    #nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32L475VGTx_CLR.ld)
+    #nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/STM32L475VGTx_CLR.ld)
     nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/STM32L475VGTx_CLR.ld)
 endif()
 
