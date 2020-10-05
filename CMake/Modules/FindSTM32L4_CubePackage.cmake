@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -10,6 +10,9 @@ list(APPEND STM32L4_CubePackage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/STM32L4_Cube
 set(STM32_CubePackage_SRCS
 
     # add HAL files here as required
+    
+    # SPIFFS
+    STM32L4xx_hal_qspi.c
 )
 
 foreach(SRC_FILE ${STM32L4_CubePackage_SRCS})
