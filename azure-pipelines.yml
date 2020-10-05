@@ -468,6 +468,41 @@ jobs:
   - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
 #################
+# Azure RTOS
+- job: Build_Azure_RTOS_targets
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  strategy:
+    matrix:
+      ST_B_L475E_IOT01A:
+        BoardName: ST_B_L475E_IOT01A
+        BuildOptions: -DTARGET_SERIES=STM32L4xx -DRTOS=AZURERTOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=OFF -DNF_FEATURE_HAS_SDCARD=OFF -DAPI_System.Math=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=OFF -DAPI_Windows.Devices.Gpio=OFF -DAPI_System.Net=OFF -DAPI_Windows.Storage=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_nanoFramework.ResourceManager=OFF -DAPI_nanoFramework.System.Collections=OFF -DAPI_nanoFramework.System.Text=OFF
+        GccArm_Version: 
+        NeedsDFU: true
+        NeedsSRECORD: true
+
+  variables:
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+
+  steps:
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+  - template: azure-pipelines-templates/download-install-ninja.yml
+  - template: azure-pipelines-templates/download-hexdfu.yml
+  - template: azure-pipelines-templates/download-srecord.yml
+  - template: azure-pipelines-templates/build-azurertos.yml
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+  - template: azure-pipelines-templates/publish-bintray.yml
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+#################
 # WIN32 
 - job: Build_WIN32_nanoCLR
   condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)) )
@@ -605,8 +640,9 @@ jobs:
   - Build_ESP32_targets
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
+  - Build_Azure_RTOS_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Build_Azure_RTOS_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
   pool:
     vmImage: 'windows-2019'
@@ -672,10 +708,11 @@ jobs:
   - Build_ESP32_targets
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
+  - Build_Azure_RTOS_targets
   - Build_WIN32_nanoCLR
   - Generate_change_log
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Generate_change_log'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Build_Azure_RTOS_targets'), succeeded('Generate_change_log'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
   pool:
     vmImage: 'windows-2019'
@@ -718,10 +755,11 @@ jobs:
   - Build_ESP32_targets
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
+  - Build_Azure_RTOS_targets
   - Build_WIN32_nanoCLR
   - Generate_change_log
   - Check_Code_Style
-  condition: and(ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true), or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'), failed('Generate_change_log')))
+  condition: and(ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true), or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_Azure_RTOS_targets'), failed('Build_WIN32_nanoCLR'), failed('Generate_change_log')))
 
   pool:
     vmImage: 'windows-2019'
