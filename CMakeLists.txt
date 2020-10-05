@@ -882,4 +882,10 @@ else()
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
 
+#######################
+# AzureRTOS
+elseif(RTOS_AZURERTOS_CHECK)
+
+    add_subdirectory(targets/AzureRTOS)
+
 endif()
