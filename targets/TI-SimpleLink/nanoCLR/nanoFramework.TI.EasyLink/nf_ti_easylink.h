@@ -9,6 +9,8 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoHAL.h>
+#include <nanoPAL_Events.h>
+#include <corlib_native.h>
 
 // TI-RTOS Header files
 #include <ti/drivers/rf/RF.h>
@@ -57,11 +59,11 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(UpdateRxAddressFilterNative___VOID);
     NANOCLR_NATIVE_DECLARE(InitNative___U1);
-    NANOCLR_NATIVE_DECLARE(ReceiveNative___U1__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__I4);
+    NANOCLR_NATIVE_DECLARE(ReceiveNative___U1__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__SystemTimeSpan);
     NANOCLR_NATIVE_DECLARE(SetConfigurationNative___U1__nanoFrameworkTIEasyLinkControlOption__U4);
     NANOCLR_NATIVE_DECLARE(SetFrequencyNative___U1__U4);
     NANOCLR_NATIVE_DECLARE(SetRfPowerNative___U1__I1);
-    NANOCLR_NATIVE_DECLARE(TransmitNative___U1__nanoFrameworkTIEasyLinkTransmitPacket__I4__I4);
+    NANOCLR_NATIVE_DECLARE(TransmitNative___U1__nanoFrameworkTIEasyLinkTransmitPacket__SystemTimeSpan__SystemTimeSpan);
 
     //--//
 
