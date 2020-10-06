@@ -668,8 +668,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
             // the failure it's already on the return result
         }
 
-        if( (latestOperationStatus != EasyLink_Status_Success) &&
-            (latestOperationStatus != EasyLink_Status_Aborted))
+        if ((latestOperationStatus != EasyLink_Status_Success) && (latestOperationStatus != EasyLink_Status_Aborted))
         {
             // abort EasyLink operation
             EasyLink_abort();

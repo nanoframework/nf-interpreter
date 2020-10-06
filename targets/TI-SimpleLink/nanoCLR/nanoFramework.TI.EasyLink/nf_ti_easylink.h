@@ -27,7 +27,6 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_TransmitPacket
     static const int FIELD___payload = 2;
 
     //--//
-
 };
 
 struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_ReceivedPacket
@@ -39,7 +38,6 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_ReceivedPacket
     static const int FIELD___rxTimeout = 5;
 
     //--//
-
 };
 
 struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
@@ -67,10 +65,9 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
 
     //--//
 
-    static HRESULT UpdateRxAddressFilter( CLR_RT_StackFrame& stack );
-
+    static HRESULT UpdateRxAddressFilter(CLR_RT_StackFrame &stack);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_TI_EasyLink;
 
-#endif  //_NF_TI_EASYLINK_H_
+#endif //_NF_TI_EASYLINK_H_
