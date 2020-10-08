@@ -2,7 +2,7 @@
  * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
  * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
  * @cliArgs --board "/ti/boards/CC1352R1_LAUNCHXL" --product "simplelink_cc13x2_26x2_sdk@4.20.01.04"
- * @versions {"data":"2020052512","timestamp":"2020052512","tool":"1.5.0+1397","templates":"2020052512"}
+ * @versions {"data":"2020090214","timestamp":"2020090214","tool":"1.6.0+1543","templates":"2020090214"}
  */
 
 /**
@@ -37,8 +37,9 @@ easylink.EasyLink_Phy_5kbpsSlLr                                    = true;
 easylink.defaultPhy                                                = "EasyLink_Phy_5kbpsSlLr";
 easylink.EasyLink_Phy_50kbps2gfsk                                  = true;
 easylink.EasyLink_Phy_200kbps2gfsk                                 = true;
+easylink.EasyLink_Phy_Custom                                       = false;
+easylink.addrFilters                                               = "";
 easylink.enableAddrFilter                                          = false;
-easylink.radioConfigEasylinkPhyCustom.codeExportConfig.$name       = "ti_devices_radioconfig_code_export_param0";
 easylink.radioConfigEasylinkPhy5kbpssllr.codeExportConfig.$name    = "ti_devices_radioconfig_code_export_param1";
 easylink.radioConfigEasylinkPhy50kbps2gfsk.codeExportConfig.$name  = "ti_devices_radioconfig_code_export_param2";
 easylink.radioConfigEasylinkPhy200kbps2gfsk.codeExportConfig.$name = "ti_devices_radioconfig_code_export_param3";
