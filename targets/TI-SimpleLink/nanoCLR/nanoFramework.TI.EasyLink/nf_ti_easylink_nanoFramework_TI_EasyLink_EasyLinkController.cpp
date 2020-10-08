@@ -10,23 +10,20 @@
 typedef Library_nf_ti_easylink_nanoFramework_TI_EasyLink_TransmitPacket TransmitPacket;
 typedef Library_nf_ti_easylink_nanoFramework_TI_EasyLink_ReceivedPacket ReceivedPacket;
 
+#define RADIO_EVENT_ALL       0xFFFFFFFF
+#define RADIO_EVENT_TX_PACKET (uint32_t)(1 << 0)
+#define RADIO_EVENT_RX        (uint32_t)(1 << 1)
+#define RADIO_EVENT_ABORT     (uint32_t)(1 << 2)
+
 static EasyLink_RxPacket latestRxPacket;
+static EasyLink_TxPacket packetToTx;
 static EasyLink_Status latestOperationStatus;
 static EasyLink_Params easyLink_params;
 
-static Task_Handle abortEasyLinkTask;
-
-// Task to abort EasyLink
-static void AbortEasyLink(UArg arg0, UArg arg1)
-{
-    (void)arg0;
-    (void)arg1;
-
-    latestOperationStatus = EasyLink_abort();
-
-    // fire event for EasyLink init completed
-    Events_Set(SYSTEM_EVENT_FLAG_RADIO);
-}
+// developer note: these are NOT static so they are visible during debug
+Task_Struct easyLinkTask;
+Event_Struct radioOperationEvent;
+Event_Handle radioOperationEventHandle;
 
 // handler for TX operation done
 static void TxDone(EasyLink_Status status)
@@ -52,6 +49,71 @@ static void RxDone(EasyLink_RxPacket *rxPacket, EasyLink_Status status)
     }
 
     // fire event for Rx completed
+    Events_Set(SYSTEM_EVENT_FLAG_RADIO);
+}
+
+// EasyLink Task
+void EasyLinkTask(UArg arg0, UArg arg1)
+{
+    (void)arg0;
+    (void)arg1;
+
+    // init EasyLink
+    latestOperationStatus = EasyLink_init(&easyLink_params);
+
+    if (latestOperationStatus == EasyLink_Status_Success)
+    {
+        // EasyLink init successfull
+        // OK to proceed
+
+        // fire CLR event
+        Events_Set(SYSTEM_EVENT_FLAG_RADIO);
+
+        while (1)
+        {
+            // wait for RADIO events
+            uint32_t events = Event_pend(radioOperationEventHandle, 0, RADIO_EVENT_ALL, BIOS_WAIT_FOREVER);
+
+            if (events & RADIO_EVENT_TX_PACKET)
+            {
+                // set priority for the transmission
+                EasyLink_setCtrl(EasyLink_Ctrl_Cmd_Priority, (uint32_t)EasyLink_Priority_Normal);
+
+                // start async transmission
+                latestOperationStatus = EasyLink_transmitAsync(&packetToTx, TxDone);
+
+                if (latestOperationStatus != EasyLink_Status_Success)
+                {
+                    // something went wrong!
+                    // fire CLR event
+                    Events_Set(SYSTEM_EVENT_FLAG_RADIO);
+                }
+            }
+
+            if (events & RADIO_EVENT_RX)
+            {
+                // start async receive
+                latestOperationStatus = EasyLink_receiveAsync(RxDone, 0);
+
+                if (latestOperationStatus != EasyLink_Status_Success)
+                {
+                    // something went wrong!
+                    // fire CLR event
+                    Events_Set(SYSTEM_EVENT_FLAG_RADIO);
+                }
+            }
+
+            if (events & RADIO_EVENT_ABORT)
+            {
+                latestOperationStatus = EasyLink_abort();
+
+                // fire CLR event
+                Events_Set(SYSTEM_EVENT_FLAG_RADIO);
+            }
+        }
+    }
+
+    // fire event for EasyLink abort completed
     Events_Set(SYSTEM_EVENT_FLAG_RADIO);
 }
 
@@ -171,8 +233,6 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Dis
 {
     NANOCLR_HEADER();
 
-    Task_Params taskParams;
-
     CLR_RT_HeapBlock hbTimeout;
     CLR_INT64 *timeoutTicks;
     CLR_INT32 timeout_ms;
@@ -188,26 +248,8 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Dis
 
     if (stack.m_customState == 1)
     {
-        // setup Task thread
-        Task_Params_init(&taskParams);
-        taskParams.stackSize = 512;
-        taskParams.priority = 4;
-
-        // create task
-        abortEasyLinkTask = Task_create((Task_FuncPtr)AbortEasyLink, &taskParams, Error_IGNORE);
-        if (abortEasyLinkTask == NULL)
-        {
-            // store result
-            latestOperationStatus = EasyLink_Status_Aborted;
-
-            // prevent event from being processed
-            eventResult = false;
-        }
-        else
-        {
-            // bump custom state
-            stack.m_customState = 2;
-        }
+        // bump custom state
+        stack.m_customState = 2;
     }
 
     while (eventResult)
@@ -216,7 +258,9 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Dis
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_Radio, eventResult));
 
-        Task_delete(&abortEasyLinkTask);
+        Task_destruct(&easyLinkTask);
+
+        Event_destruct(&radioOperationEvent);
 
         if (eventResult)
         {
@@ -251,50 +295,91 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Ini
     uint8_t i = 0;
     EasyLink_PhyType phyType = (EasyLink_PhyType)0;
 
+    Task_Params taskParams;
+
+    CLR_RT_HeapBlock hbTimeout;
+    CLR_INT64 *timeoutTicks;
+    CLR_INT32 timeout_ms;
+    bool eventResult = true;
+
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
-    // initialize the EasyLink parameters to their default values
-    EasyLink_Params_init(&easyLink_params);
+    // set timeout
+    // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
+    hbTimeout.SetInteger((CLR_INT64)-1);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
-    // get managed Phy Type
-    phyType = (EasyLink_PhyType)(pThis[FIELD___phyType].NumericByRef().u1);
-
-    // check if this PHY config is supported
-    while (i < EasyLink_numSupportedPhys)
+    if (stack.m_customState == 1)
     {
-        if (EasyLink_supportedPhys[i].EasyLink_phyType == phyType)
+        // initialize the EasyLink parameters to their default values
+        EasyLink_Params_init(&easyLink_params);
+
+        // get managed Phy Type
+        phyType = (EasyLink_PhyType)(pThis[FIELD___phyType].NumericByRef().u1);
+
+        // check if this PHY config is supported
+        while (i < EasyLink_numSupportedPhys)
         {
-            break;
+            if (EasyLink_supportedPhys[i].EasyLink_phyType == phyType)
+            {
+                break;
+            }
+            i++;
         }
-        i++;
-    }
 
-    if (i == EasyLink_numSupportedPhys)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-    }
-
-    easyLink_params.ui32ModType = phyType;
-
-    // try to start EasyLink
-    latestOperationStatus = EasyLink_init(&easyLink_params);
-
-    if (latestOperationStatus != EasyLink_Status_Success)
-    {
-        // something went wrong
-        // call abort to force any TX/RX operation that could be lingering
-        EasyLink_abort();
-
-        // try again
-        latestOperationStatus = EasyLink_init(&easyLink_params);
-
-        // need to setup Rx address, if any is set
-        if (latestOperationStatus == EasyLink_Status_Success)
+        if (i == EasyLink_numSupportedPhys)
         {
-            UpdateRxAddressFilter(stack);
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
+
+        easyLink_params.ui32ModType = phyType;
+
+        // Create event used internally for state changes
+        Event_Params eventParam;
+        Event_Params_init(&eventParam);
+        Event_construct(&radioOperationEvent, &eventParam);
+        radioOperationEventHandle = Event_handle(&radioOperationEvent);
+
+        // setup Task thread
+        Task_Params_init(&taskParams);
+        taskParams.stackSize = 1024;
+        taskParams.priority = 4;
+
+        // create task
+        Task_construct(&easyLinkTask, EasyLinkTask, &taskParams, NULL);
+
+        // bump custom state
+        stack.m_customState = 2;
     }
+
+    while (eventResult)
+    {
+        // non-blocking wait allowing other threads to run while we wait for the receive operation to complete
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_Radio, eventResult));
+
+        if (eventResult)
+        {
+            // event occurred!!
+            if (latestOperationStatus == EasyLink_Status_Success)
+            {
+                // need to setup Rx address, if any is set
+                UpdateRxAddressFilter(stack);
+            }
+        }
+        else
+        {
+            // timeout occurred
+            // nothing else that can be done here
+        }
+
+        // done here
+        break;
+    }
+
+    // pop timeout heap block from stack
+    stack.PopValue();
 
     // return operation status
     stack.SetResult_U1(latestOperationStatus);
@@ -362,19 +447,10 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
     if (stack.m_customState == 1)
     {
         // enter receive mode
-        latestOperationStatus = EasyLink_receiveAsync(RxDone, 0);
-        if (latestOperationStatus != EasyLink_Status_Success)
-        {
-            // fail to start
+        Event_post(radioOperationEventHandle, RADIO_EVENT_RX);
 
-            // prevent event from being processed
-            eventResult = false;
-        }
-        else
-        {
-            // bump custom state
-            stack.m_customState = 2;
-        }
+        // bump custom state
+        stack.m_customState = 2;
     }
 
     while (eventResult)
@@ -545,7 +621,6 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
     CLR_UINT64 dueTimeMiliseconds;
     CLR_INT64 *timeoutTicks;
     uint32_t absTime;
-    EasyLink_TxPacket txPacket = {{0}, 0, 0, {0}};
     bool eventResult = true;
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -596,20 +671,23 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
         packet = stack.Arg1().Dereference();
         FAULT_ON_NULL(packet);
 
+        // clear packet
+        memset(&packetToTx, 0, sizeof(EasyLink_TxPacket));
+
         // dereference the payload buffer
         payloadBuffer = packet[TransmitPacket::FIELD___payload].DereferenceArray();
 
         // get payload length
-        txPacket.len = payloadBuffer->m_numOfElements;
+        packetToTx.len = payloadBuffer->m_numOfElements;
 
         // copy buffer to packet
-        memcpy(txPacket.payload, payloadBuffer->GetFirstElement(), txPacket.len);
+        memcpy(packetToTx.payload, payloadBuffer->GetFirstElement(), packetToTx.len);
 
         // dereference the address buffer
         address = packet[TransmitPacket::FIELD___address].DereferenceArray();
 
         // copy buffer to packet
-        memcpy(txPacket.dstAddr, address->GetFirstElement(), address->m_numOfElements);
+        memcpy(packetToTx.dstAddr, address->GetFirstElement(), address->m_numOfElements);
 
         // get dueTime managed parameter
 
@@ -623,29 +701,17 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
         if (dueTimeMiliseconds > 0)
         {
             EasyLink_getAbsTime(&absTime);
-            txPacket.absTime = absTime + EasyLink_ms_To_RadioTime(dueTimeMiliseconds);
-        }
-        else
-        {
-            // Set Tx absolute time to current time + 100ms
-            txPacket.absTime = absTime + EasyLink_ms_To_RadioTime(100);
+            packetToTx.absTime = absTime + EasyLink_ms_To_RadioTime(dueTimeMiliseconds);
         }
 
-        // start transmission
-        latestOperationStatus = EasyLink_transmitAsync(&txPacket, TxDone);
+        // set priority for the transmission
+        EasyLink_setCtrl(EasyLink_Ctrl_Cmd_Priority, (uint32_t)EasyLink_Priority_Normal);
 
-        if (latestOperationStatus != EasyLink_Status_Success)
-        {
-            // fail to start
+        // signal event to start transmission
+        Event_post(radioOperationEventHandle, RADIO_EVENT_TX_PACKET);
 
-            // prevent event from being processed
-            eventResult = false;
-        }
-        else
-        {
-            // bump custom state
-            stack.m_customState = 2;
-        }
+        // bump custom state
+        stack.m_customState = 2;
     }
 
     while (eventResult)
@@ -671,7 +737,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
         if ((latestOperationStatus != EasyLink_Status_Success) && (latestOperationStatus != EasyLink_Status_Aborted))
         {
             // abort EasyLink operation
-            EasyLink_abort();
+            Event_post(radioOperationEventHandle, RADIO_EVENT_ABORT);
         }
 
         // done here
