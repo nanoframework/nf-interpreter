@@ -14,6 +14,9 @@
 
 // TI-RTOS Header files
 #include <ti/drivers/rf/RF.h>
+#include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/knl/Semaphore.h>
+#include <ti/sysbios/knl/Event.h>
 
 // Board Header files
 #include <Board.h>
