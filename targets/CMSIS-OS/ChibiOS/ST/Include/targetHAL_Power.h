@@ -7,9 +7,9 @@
 #define _TARGET_HAL_POWER_H_ 1
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-
 
 #ifdef __cplusplus
 }

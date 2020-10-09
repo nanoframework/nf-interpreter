@@ -8,6 +8,6 @@
 
 #include <cmsis_os.h>
 
-#define HAL_Time_CurrentSysTicks           osKernelSysTick
+#define HAL_Time_CurrentSysTicks osKernelSysTick
 
 #endif //_TARGET_HAL_TIME_H_
