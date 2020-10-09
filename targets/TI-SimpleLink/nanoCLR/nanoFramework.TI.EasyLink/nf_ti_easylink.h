@@ -9,9 +9,14 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoHAL.h>
+#include <nanoPAL_Events.h>
+#include <corlib_native.h>
 
 // TI-RTOS Header files
 #include <ti/drivers/rf/RF.h>
+#include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/knl/Semaphore.h>
+#include <ti/sysbios/knl/Event.h>
 
 // Board Header files
 #include <Board.h>
@@ -25,7 +30,6 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_TransmitPacket
     static const int FIELD___payload = 2;
 
     //--//
-
 };
 
 struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_ReceivedPacket
@@ -37,7 +41,6 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_ReceivedPacket
     static const int FIELD___rxTimeout = 5;
 
     //--//
-
 };
 
 struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
@@ -57,18 +60,17 @@ struct Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(UpdateRxAddressFilterNative___VOID);
     NANOCLR_NATIVE_DECLARE(InitNative___U1);
-    NANOCLR_NATIVE_DECLARE(ReceiveNative___U1__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__I4);
+    NANOCLR_NATIVE_DECLARE(ReceiveNative___U1__BYREF_nanoFrameworkTIEasyLinkReceivedPacket__SystemTimeSpan);
     NANOCLR_NATIVE_DECLARE(SetConfigurationNative___U1__nanoFrameworkTIEasyLinkControlOption__U4);
     NANOCLR_NATIVE_DECLARE(SetFrequencyNative___U1__U4);
     NANOCLR_NATIVE_DECLARE(SetRfPowerNative___U1__I1);
-    NANOCLR_NATIVE_DECLARE(TransmitNative___U1__nanoFrameworkTIEasyLinkTransmitPacket__I4__I4);
+    NANOCLR_NATIVE_DECLARE(TransmitNative___U1__nanoFrameworkTIEasyLinkTransmitPacket__SystemTimeSpan__SystemTimeSpan);
 
     //--//
 
-    static HRESULT UpdateRxAddressFilter( CLR_RT_StackFrame& stack );
-
+    static HRESULT UpdateRxAddressFilter(CLR_RT_StackFrame &stack);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_TI_EasyLink;
 
-#endif  //_NF_TI_EASYLINK_H_
+#endif //_NF_TI_EASYLINK_H_
