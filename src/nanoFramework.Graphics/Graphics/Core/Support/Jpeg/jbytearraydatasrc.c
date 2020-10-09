@@ -1,3 +1,9 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+
 // a byte array data source for the JPEG decoder implemented according to the structure of 
 // jpeg_source_mgr
 
