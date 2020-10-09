@@ -94,8 +94,8 @@ list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoF
         "${TOUCHPANEL_DEVICE}"
         
         #Target board Display/Touch Code
+        Graphics_Memory.cpp
         "${GRAPHICS_DISPLAY_INTERFACE}"
-        "${GRAPHICS_MEMORY}"
         "${TOUCHPANEL_INTERFACE}"
 )
 

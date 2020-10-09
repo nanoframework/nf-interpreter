@@ -176,10 +176,6 @@
           "value": "ON"
         },
         {
-          "name": "GRAPHICS_MEMORY",
-          "value": "Graphics_Memory.cpp"
-        },
-        {
           "name": "GRAPHICS_DISPLAY",
           "value": "Otm8009a_DSI_Video_Mode.cpp"
         },
