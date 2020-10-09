@@ -8,5 +8,4 @@
 
 #include <cmsis_os.h>
 
-
 #endif //_TARGET_PAL_TIME_H_
