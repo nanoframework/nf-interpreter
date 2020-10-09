@@ -18,7 +18,7 @@ set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(BuildUtils REQUIRED)
-find_package(CHIBIOS REQUIRED)
+find_package(ChibiOS REQUIRED)
 find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
 
@@ -44,7 +44,7 @@ endif()
 # nF feature: networking
 if(USE_NETWORKING_OPTION)
     find_package(CHIBIOS_LWIP REQUIRED)
-    find_package(NF_NETWORKING REQUIRED)
+    find_package(NF_Networking REQUIRED)
 endif()
 
 # nF feature: filesystem
@@ -82,7 +82,9 @@ add_executable(
     # need to add configuration manager to allow get/store configuration blocks
     "${PROJECT_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c"
 
-    ${COMMON_PROJECT_SOURCES}
+    ${TARGET_CHIBIOS_COMMON_SOURCES}
+    #${TARGET_ST_COMMON_SOURCES}
+    #${TARGET_ST_NANOBOOTER_SOURCES}
     ${NANOBOOTER_PROJECT_SOURCES}
 
     ${TARGET_CMSIS_COMMON_SOURCES}
@@ -105,7 +107,8 @@ add_executable(
     ${NANOCLR_PROJECT_NAME}.elf
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
-    # the next one is required is the target implements and it's using external memory
+
+    # the next one is required by the target as it implements external memory
     "${CMAKE_CURRENT_SOURCE_DIR}/target_external_memory.c"
 
     ${COMMON_PROJECT_SOURCES}
@@ -116,6 +119,9 @@ add_executable(
     
     ${TARGET_CHIBIOS_COMMON_SOURCES}
     ${TARGET_CHIBIOS_NANOCLR_SOURCES}
+    #${TARGET_ST_COMMON_SOURCES}
+    #${TARGET_ST_NANOCLR_SOURCES}
+    #${NANOCLR_PROJECT_SOURCES}
 
     ${CHIBIOS_SOURCES}
     ${CHIBIOS_CONTRIB_SOURCES}
@@ -127,7 +133,7 @@ add_executable(
     "${NF_CoreCLR_SOURCES}"
     "${NF_Debugger_SOURCES}"
     "${NF_Diagnostics_SOURCES}"
-    
+
     # sources for ChibiOS FatFS
     "${CHIBIOS_FATFS_SOURCES}"
 
@@ -143,7 +149,7 @@ add_executable(
     "${TARGET_NANO_APIS_SOURCES}"
 )
 
-# add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
+# add dependency from the RTOS (this is required to make sure the RTOS repo is downloaded before the build starts)
 add_dependencies(${NANOBOOTER_PROJECT_NAME}.elf ChibiOS)
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf ChibiOS)
 
@@ -170,6 +176,7 @@ include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/common
+
     ${PROJECT_SOURCE_DIR}/src/CLR/Core
     ${PROJECT_SOURCE_DIR}/src/CLR/Include
     ${PROJECT_SOURCE_DIR}/src/HAL/Include
@@ -212,14 +219,14 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     "${NF_CoreCLR_INCLUDE_DIRS}"
     "${NF_Debugger_INCLUDE_DIRS}"
     "${NF_Diagnostics_INCLUDE_DIRS}"
-    
+
     # includes for nanoFramework APIs
     "${TARGET_NANO_APIS_INCLUDES}"
 
-    # includes for ChibiOS FatFS
+    # includes for FatFS
     "${CHIBIOS_FATFS_INCLUDE_DIRS}"
 
-    # includes for ChibiOS LwIP
+    # includes for LwIP
     "${CHIBIOS_LWIP_INCLUDE_DIRS}"
 
     # incudes for Networking and TLS
