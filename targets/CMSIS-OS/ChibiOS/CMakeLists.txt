@@ -1,11 +1,6 @@
     # Define base path for the class libraries
     set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/ST/nanoCLR")
 
-    add_subdirectory(targets/CMSIS-OS/ChibiOS)
-    add_subdirectory(targets/CMSIS-OS/common)
-    add_subdirectory(targets/CMSIS-OS/common/Include)
-    add_subdirectory(targets/CMSIS-OS/nanoBooter)
-    add_subdirectory(targets/CMSIS-OS/nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
