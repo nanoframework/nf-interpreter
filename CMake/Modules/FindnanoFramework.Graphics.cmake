@@ -1,6 +1,7 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
+#
  
 list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Events")
 list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/include")
