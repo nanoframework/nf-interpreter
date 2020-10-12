@@ -1,5 +1,57 @@
 # Changelog
 
+## [v1.5.0.101](https://github.com/nanoframework/nf-interpreter/tree/v1.5.0.101) (2020-10-12)
+
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.4.2.1...v1.5.0.101)
+
+**Implemented enhancements:**
+
+- Adjust configuration of TI\_CC1352R1\_LAUNCHXL [\#1727](https://github.com/nanoframework/nf-interpreter/pull/1727)
+- Rework TI EasyLink [\#1726](https://github.com/nanoframework/nf-interpreter/pull/1726)
+- Work TI SimpleLink [\#1725](https://github.com/nanoframework/nf-interpreter/pull/1725)
+- Bring DAC native layer inline with managed [\#1718](https://github.com/nanoframework/nf-interpreter/pull/1718)
+- Move events from CLR\_RT\_ExecutionEngine to a separate enum [\#1714](https://github.com/nanoframework/nf-interpreter/pull/1714)
+- Rework system state and PAL events [\#1710](https://github.com/nanoframework/nf-interpreter/pull/1710)
+- Update Hardware.TI assembly [\#1703](https://github.com/nanoframework/nf-interpreter/pull/1703)
+- Add implementation for Hardware.TI.Utilities class [\#1700](https://github.com/nanoframework/nf-interpreter/pull/1700)
+- Add support for nanoFramework.Hardware.TI assembly [\#1698](https://github.com/nanoframework/nf-interpreter/pull/1698)
+- Work on CPU GPIO [\#1696](https://github.com/nanoframework/nf-interpreter/pull/1696)
+- Rework Debugger::AccessMemory [\#1693](https://github.com/nanoframework/nf-interpreter/pull/1693)
+- Increase CLR block size in debug configuration [\#1690](https://github.com/nanoframework/nf-interpreter/pull/1690)
+- Add launch and cmake-variants templates to TI targets [\#1689](https://github.com/nanoframework/nf-interpreter/pull/1689)
+- Update cmake-variants.TEMPLATE.json [\#1687](https://github.com/nanoframework/nf-interpreter/pull/1687)
+- Improve code for SPI NativeInit [\#1676](https://github.com/nanoframework/nf-interpreter/pull/1676)
+- Minor tweaks on targets launch config and cmake variants [\#1671](https://github.com/nanoframework/nf-interpreter/pull/1671)
+- Improve GPIO events for ESP32 [\#1660](https://github.com/nanoframework/nf-interpreter/pull/1660)
+- Rework ESP32 serial update [\#1658](https://github.com/nanoframework/nf-interpreter/pull/1658)
+
+**Fixed bugs:**
+
+- Fix Timeout.InfiniteTimeSpan [\#1724](https://github.com/nanoframework/nf-interpreter/pull/1724)
+- Fix PAL events getter [\#1715](https://github.com/nanoframework/nf-interpreter/pull/1715)
+- Fix nanoHAL\_Uninitialize for TI SimpleLink [\#1709](https://github.com/nanoframework/nf-interpreter/pull/1709)
+- Update RMT interface so its now correct [\#1708](https://github.com/nanoframework/nf-interpreter/pull/1708)
+- Update checksum to match RMT assembly [\#1707](https://github.com/nanoframework/nf-interpreter/pull/1707)
+- Fix return value from ADC Read [\#1699](https://github.com/nanoframework/nf-interpreter/pull/1699)
+- Improvements on GPIO layer for TI SimpleLink [\#1697](https://github.com/nanoframework/nf-interpreter/pull/1697)
+- Several fixes with lastest CC13x2\_26x2 SDK [\#1695](https://github.com/nanoframework/nf-interpreter/pull/1695)
+- Rework CPU GPIO for TI SimpleLink [\#1692](https://github.com/nanoframework/nf-interpreter/pull/1692)
+- Fix UART timeouts configuration [\#1688](https://github.com/nanoframework/nf-interpreter/pull/1688)
+- ESP32 Serial Native-store hang fix [\#1683](https://github.com/nanoframework/nf-interpreter/pull/1683)
+- Various fixes in install scripts [\#1681](https://github.com/nanoframework/nf-interpreter/pull/1681)
+- Fix target name ORGPAL\_PALTHREE on cmake-variants [\#1680](https://github.com/nanoframework/nf-interpreter/pull/1680)
+- Fix json format on tasks template [\#1679](https://github.com/nanoframework/nf-interpreter/pull/1679)
+- Improve HAL Initialize/Uninitialize [\#1677](https://github.com/nanoframework/nf-interpreter/pull/1677)
+- Update mbedTLS config [\#1675](https://github.com/nanoframework/nf-interpreter/pull/1675)
+- Fix ChibiOS vectors section alignment [\#1669](https://github.com/nanoframework/nf-interpreter/pull/1669)
+
+**Documentation and other chores:**
+
+- Update mscorlib declaration [\#1706](https://github.com/nanoframework/nf-interpreter/pull/1706)
+- Fix wake-up from standby [\#1704](https://github.com/nanoframework/nf-interpreter/pull/1704)
+- Rework mbedTLS for ESP32 [\#1685](https://github.com/nanoframework/nf-interpreter/pull/1685)
+- Update mbedTLS to 2.23.0 [\#1672](https://github.com/nanoframework/nf-interpreter/pull/1672)
+
 ## [v1.4.2.1](https://github.com/nanoframework/nf-interpreter/tree/v1.4.2.1) (2020-06-08)
 
 [Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.3.2...v1.4.2.1)
@@ -9,6 +61,7 @@
 - Add ORGPAL3 target [\#1654](https://github.com/nanoframework/nf-interpreter/pull/1654)
 - Remove c\_Flags\_Patch from CLR\_RECORD\_ASSEMBLY [\#1644](https://github.com/nanoframework/nf-interpreter/pull/1644)
 - Add SetupTimeoutFromTimeSpan [\#1643](https://github.com/nanoframework/nf-interpreter/pull/1643)
+- First Preview of graphics [\#1641](https://github.com/nanoframework/nf-interpreter/pull/1641)
 - Update SerialCommunication assembly to include enums from managed [\#1640](https://github.com/nanoframework/nf-interpreter/pull/1640)
 - Update SPI declaration [\#1639](https://github.com/nanoframework/nf-interpreter/pull/1639)
 - Update Devices.Gpio declaration [\#1638](https://github.com/nanoframework/nf-interpreter/pull/1638)
@@ -603,6 +656,7 @@
 - Replace path for mscorlib.pe [\#288](https://github.com/nanoframework/nf-interpreter/pull/288)
 - Improve error reporting detail [\#286](https://github.com/nanoframework/nf-interpreter/pull/286)
 - Fix ComputeAssemblyHash [\#279](https://github.com/nanoframework/nf-interpreter/pull/279)
+- Moved nanoCLR\_ParseOptions file to src folder [\#277](https://github.com/nanoframework/nf-interpreter/pull/277)
 - Enable Target\_GetReleaseInfo [\#267](https://github.com/nanoframework/nf-interpreter/pull/267)
 - Enable GetClrReleaseInfo in Debugger [\#266](https://github.com/nanoframework/nf-interpreter/pull/266)
 - Revert types to well known defined types [\#251](https://github.com/nanoframework/nf-interpreter/pull/251)
