@@ -88,7 +88,9 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${CHIBIOS_H7_SRC_FILE}") # debug helper
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${CHIBIOS_H7_SRC_FILE}") # debug helper
+    endif()
     list(APPEND CHIBIOS_SOURCES ${CHIBIOS_H7_SRC_FILE})
 endforeach()
 
