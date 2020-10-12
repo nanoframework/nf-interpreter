@@ -8,7 +8,9 @@ cmake_minimum_required(VERSION 3.15)
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
 
-set(CMAKE_VERBOSE_MAKEFILE 1)  # debug helper
+if (BUILD_VERBOSE)
+    set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE) # debug helper
+endif()
 
 # the following prevents launchin a build in the source tree
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
