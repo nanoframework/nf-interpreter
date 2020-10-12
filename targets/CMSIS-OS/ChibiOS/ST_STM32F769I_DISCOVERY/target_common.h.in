@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -12,6 +12,8 @@
 #define _TARGET_COMMON_H_
 
 #include <target_os.h>
+#include <target_lwipopts.h>
+#include <nf_lwipopts_sntp.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // The following addresses and sizes should be filled in according to the SoC data-sheet

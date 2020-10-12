@@ -1,0 +1,55 @@
+{
+  "buildType": {
+    "default": "debug",
+    "choices": {
+      "debug": {
+        "short": "Debug",
+        "long": "Emit debug information without performing optimizations",
+        "buildType": "Debug"
+      },
+      "minsize": {
+        "short": "MinSizeRel",
+        "long": "Optimize for smallest binary size",
+        "buildType": "MinSizeRel"
+      },
+      "reldeb": {
+        "short": "RelWithDebInfo",
+        "long": "Perform optimizations AND include debugging information",
+        "buildType": "RelWithDebInfo"
+      }
+    }
+  },
+  "linkage": {
+    "default": "",
+    "choices": {
+      "TI_CC3220SF_LAUNCHXL": {
+        "short": "TI_CC3220SF_LAUNCHXL",
+        "settings": {
+          "BUILD_VERSION": "0.9.99.999",
+          "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
+          "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
+          "RTOS": "TI_SIMPLELINK",
+          "TARGET_SERIES": "CC32xx",
+          "TI_BOARD": "TI_CC3220SF_LAUNCHXL",
+          "TI_SL_CC32xx_SDK_SOURCE": "",
+          "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+          "NF_FEATURE_DEBUGGER": "ON",
+          "NF_FEATURE_RTC": "ON",
+          "NF_FEATURE_HAS_SDCARD": "OFF",
+          "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
+          "NF_BUILD_RTM": "OFF",
+          "API_System.Math": "ON",
+          "API_Windows.Devices.Gpio": "ON",
+          "API_Windows.Devices.Spi": "ON",
+          "API_Windows.Devices.I2c": "ON",
+          "API_Windows.Devices.Pwm": "ON",
+          "API_Windows.Devices.SerialCommunication": "OFF",
+          "API_System.Net": "ON",
+          "API_nanoFramework.ResourceManager": "OFF",
+          "API_nanoFramework.System.Collections": "ON",
+          "API_nanoFramework.System.Text": "ON"
+        }
+      }
+    }
+  }
+}

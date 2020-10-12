@@ -48,7 +48,7 @@
           "value": "ST_STM32F769I_DISCOVERY"
         },
         {
-          "name": "CHIBIOS_SOURCE",
+          "name": "RTOS_SOURCE_FOLDER",
           "value": "E:/GitHub/ChibiOS"
         },
         {
@@ -141,7 +141,7 @@
         },
         {
           "name": "NF_INTEROP_ASSEMBLIES",
-          "value": "OFF"
+          "value": ""
         },
         {
           "name": "NF_NETWORKING_SNTP",
@@ -172,7 +172,7 @@
           "value": "ON"
         },
         {
-          "name": "API_System.Devices.Dac",
+          "name": "API_System.Device.Dac",
           "value": "ON"
         },
         {
@@ -367,8 +367,8 @@
           "value": "OFF"
         },
         {
-          "name": "NF_INTEROP_ASSEMBLIES:BOOL", //OFF-default-ON-to-disable-CLR-IL-inlining
-          "value": "OFF"
+          "name": "NF_INTEROP_ASSEMBLIES:STRING", //empty-to-NOT-include-any-interop-assemblies
+          "value": ""
         },
         {
           "name": "NF_NETWORKING_SNTP:BOOL", //ON-default-to-add-SNTP-client-requires-networking
@@ -412,7 +412,7 @@
           "value": "ON"
         },
         {
-          "name": "API_System.Devices.Dac:BOOL", //OFF-default-ON-to-add-this-API
+          "name": "API_System.Device.Dac:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {

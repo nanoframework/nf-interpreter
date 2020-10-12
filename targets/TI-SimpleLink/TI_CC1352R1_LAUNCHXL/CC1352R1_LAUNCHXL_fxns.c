@@ -42,7 +42,6 @@
 
 #include <ti/devices/cc13x2_cc26x2/driverlib/ioc.h>
 #include <ti/devices/cc13x2_cc26x2/driverlib/cpu.h>
-#include <ti/drivers/rf/RF.h>
 #include <ti/drivers/pin/PINCC26XX.h>
 
 #include <ti/drivers/Board.h>
@@ -57,12 +56,13 @@ void CC1352R1_LAUNCHXL_sendExtFlashByte(PIN_Handle pinHandle, uint8_t byte)
     /* SPI Flash CS */
     PIN_setOutputValue(pinHandle, IOID_20, 0);
 
-    for (i = 0; i < 8; i++) {
-        PIN_setOutputValue(pinHandle, IOID_10, 0);  /* SPI Flash CLK */
+    for (i = 0; i < 8; i++)
+    {
+        PIN_setOutputValue(pinHandle, IOID_10, 0); /* SPI Flash CLK */
 
         /* SPI Flash MOSI */
         PIN_setOutputValue(pinHandle, IOID_9, (byte >> (7 - i)) & 0x01);
-        PIN_setOutputValue(pinHandle, IOID_10, 1);  /* SPI Flash CLK */
+        PIN_setOutputValue(pinHandle, IOID_10, 1); /* SPI Flash CLK */
 
         /*
          * Waste a few cycles to keep the CLK high for at
@@ -72,8 +72,8 @@ void CC1352R1_LAUNCHXL_sendExtFlashByte(PIN_Handle pinHandle, uint8_t byte)
         CPUdelay(8);
     }
 
-    PIN_setOutputValue(pinHandle, IOID_10, 0);  /* CLK */
-    PIN_setOutputValue(pinHandle, IOID_20, 1);  /* CS */
+    PIN_setOutputValue(pinHandle, IOID_10, 0); /* CLK */
+    PIN_setOutputValue(pinHandle, IOID_20, 1); /* CS */
 
     /*
      * Keep CS high at least 40 us
@@ -89,10 +89,8 @@ void CC1352R1_LAUNCHXL_wakeUpExtFlash(void)
 {
     PIN_Config extFlashPinTable[] = {
         /* SPI Flash CS */
-        IOID_20 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL |
-                PIN_INPUT_DIS | PIN_DRVSTR_MED,
-        PIN_TERMINATE
-    };
+        IOID_20 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_INPUT_DIS | PIN_DRVSTR_MED,
+        PIN_TERMINATE};
     PIN_State extFlashPinState;
     PIN_Handle extFlashPinHandle = PIN_open(&extFlashPinState, extFlashPinTable);
 
@@ -125,18 +123,14 @@ void CC1352R1_LAUNCHXL_shutDownExtFlash(void)
 
     PIN_Config extFlashPinTable[] = {
         /* SPI Flash CS*/
-        IOID_20 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL |
-                PIN_INPUT_DIS | PIN_DRVSTR_MED,
+        IOID_20 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_INPUT_DIS | PIN_DRVSTR_MED,
         /* SPI Flash CLK */
-        IOID_10 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL |
-                PIN_INPUT_DIS | PIN_DRVSTR_MED,
+        IOID_10 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_INPUT_DIS | PIN_DRVSTR_MED,
         /* SPI Flash MOSI */
-        IOID_9 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL |
-                PIN_INPUT_DIS | PIN_DRVSTR_MED,
+        IOID_9 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_INPUT_DIS | PIN_DRVSTR_MED,
         /* SPI Flash MISO */
         IOID_8 | PIN_INPUT_EN | PIN_PULLDOWN,
-        PIN_TERMINATE
-    };
+        PIN_TERMINATE};
     PIN_State extFlashPinState;
     PIN_Handle extFlashPinHandle = PIN_open(&extFlashPinState, extFlashPinTable);
 

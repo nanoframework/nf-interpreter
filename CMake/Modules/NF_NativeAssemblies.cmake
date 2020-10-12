@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -19,7 +19,7 @@ option(API_nanoFramework.System.Text            "option for nanoFramework.System
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
-option(API_System.Devices.Dac                   "option for System.Devices.Dac API")
+option(API_System.Device.Dac                   "option for System.Device.Dac API")
 option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
 option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
 option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
@@ -31,6 +31,7 @@ option(API_Windows.Storage                      "option for Windows.Storage")
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
+option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
 
 
 # Stm32 only
@@ -38,6 +39,7 @@ option(API_Hardware.Stm32                       "option for Hardware.Stm32")
 
 # TI CC13xxCC26xx
 option(API_nanoFramework.TI.EasyLink            "option for nanoFramework.TI.EasyLink API")
+option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardware.TI API")
 
 
 #################################################################
@@ -84,6 +86,12 @@ macro(ParseNativeAssemblies)
     if(API_Hardware.Esp32)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
+    endif()
+
+    # nanoFramework.Hardware.Esp32.Rmt
+    if(API_nanoFramework.Hardware.Esp32.Rmt)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
     endif()
 
     # Hardware.Stm32
@@ -134,6 +142,12 @@ macro(ParseNativeAssemblies)
         PerformSettingsForApiEntry("nanoFramework.TI.EasyLink")
     endif()
 
+    # nanoFramework.Hardware.TI
+    if(API_nanoFramework.Hardware.TI)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("nanoFramework.Hardware.TI")
+    endif()
+
     # nanoFramework.Runtime.Events
     if(API_nanoFramework.Runtime.Events)
         ##### API name here (doted name)
@@ -166,10 +180,10 @@ macro(ParseNativeAssemblies)
         PerformSettingsForApiEntry("Windows.Devices.Adc")
     endif()
 
-    # System.Devices.Dac
-    if(API_System.Devices.Dac)
+    # System.Device.Dac
+    if(API_System.Device.Dac)
         ##### API name here (doted name)
-        PerformSettingsForApiEntry("System.Devices.Dac")
+        PerformSettingsForApiEntry("System.Device.Dac")
     endif()
 
     # Windows.Devices.Gpio
@@ -313,8 +327,13 @@ macro(ParseInteropAssemblies)
     # check if there are any Interop assemblies to be added
     if(NF_INTEROP_ASSEMBLIES)
 
+        # need to split define containing assembly namespaces
+        # for Windows buids this is a string with the namespaces separated by an whitespace
+        # e.g.: "NF_INTEROP_ASSEMBLIES": "Assembly1_Namespace Assembly2_Namespace"
+        separate_arguments(INTEROP_ASSEMBLIES_LIST NATIVE_COMMAND ${NF_INTEROP_ASSEMBLIES})
+
         # loop through each Interop assembly and add it to the build
-        foreach(assembly ${NF_INTEROP_ASSEMBLIES})
+        foreach(assembly ${INTEROP_ASSEMBLIES_LIST})
             PerformSettingsForInteropEntry(${assembly})
         endforeach()
        

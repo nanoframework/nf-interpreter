@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -15,8 +15,6 @@
 #define VERSION_MINOR @nanoFramework_VERSION_MINOR@U
 #define VERSION_BUILD @nanoFramework_VERSION_PATCH@U
 #define VERSION_REVISION @nanoFramework_VERSION_TWEAK@U
-
-#define TARGETINFOSTRING "@CMAKE_BUILD_TYPE@ build with TI SL CC32xx SDK v3.10.00.04"
 
 #define NANOCLR_LIGHT_MATH @TARGET_LIGHT_MATH@
 #define DP_FLOATINGPOINT @TARGET_DP_FLOATINGPOINT@

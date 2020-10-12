@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -7,8 +7,8 @@ function(NF_SET_OPTIMIZATION_OPTIONS TARGET)
 
     target_compile_options(${TARGET} PRIVATE
         $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-        $<$<CONFIG:Release>:-O3>
-        $<$<CONFIG:MinSizeRel>:-Os>
+        $<$<CONFIG:Release>:-O3 -flto -fuse-linker-plugin -fno-fat-lto-objects>
+        $<$<CONFIG:MinSizeRel>:-Os -flto -fuse-linker-plugin -fno-fat-lto-objects>
         $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
     )
 

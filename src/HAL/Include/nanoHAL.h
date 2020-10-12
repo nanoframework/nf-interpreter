@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -18,18 +18,16 @@
 /***************************************************/
 // Keep in sync with the nanoCLR_Runtime__HeapBlock.h
 
-#define HAL_FLOAT_SHIFT         10
-#define HAL_FLOAT_PRECISION     1000
+#define HAL_FLOAT_SHIFT     10
+#define HAL_FLOAT_PRECISION 1000
 
-#define HAL_DOUBLE_SHIFT        16
-#define HAL_DOUBLE_PRECISION    10000
+#define HAL_DOUBLE_SHIFT     16
+#define HAL_DOUBLE_PRECISION 10000
 
 /************************************************/
 #else
 #include <math.h>
 #endif
-
-
 
 #include <nanoHAL_Power.h>
 #include <nanoHAL_Time.h>
@@ -58,74 +56,13 @@
 #define NATIVE_PROFILE_CLR_IOPORT()
 #define NATIVE_PROFILE_CLR_IO()
 
-
 #if defined(_MSC_VER)
 
 #define GNU_PACKED
 
-
-
-
-
 #elif defined(__GNUC__)
 
-
-#define GNU_PACKED  __attribute__((packed))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#define GNU_PACKED __attribute__((packed))
 
 #else
 !ERROR
@@ -133,593 +70,130 @@
 
 //--//
 
-
-
-
-
-
-
-
-
-
-
-
-
+//--//
 
 //--//
 
-
-
 //--//
 
-
-
-
-
-
-
-//--//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#define TRANSPORT_SHIFT             8
-#define TRANSPORT_MASK              (0xFF << TRANSPORT_SHIFT)
-#define PORT_NUMBER_MASK            0x00FF
+#define TRANSPORT_SHIFT  8
+#define TRANSPORT_MASK   (0xFF << TRANSPORT_SHIFT)
+#define PORT_NUMBER_MASK 0x00FF
 
 // Macro to extract the transport type from a COM_HANDLE
-#define ExtractTransport(x)         ((unsigned int)(x) & TRANSPORT_MASK)
+#define ExtractTransport(x) ((unsigned int)(x)&TRANSPORT_MASK)
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
-#define ExtractEventFromTransport(x) (ExtractTransport(x) == USART_TRANSPORT     ? SYSTEM_EVENT_FLAG_COM_IN: \
-                                      ExtractTransport(x) == SOCKET_TRANSPORT    ? SYSTEM_EVENT_FLAG_SOCKET: \
-                                      ExtractTransport(x) == GENERIC_TRANSPORT   ? SYSTEM_EVENT_FLAG_GENERIC_PORT: \
-                                      ExtractTransport(x) == DEBUG_TRANSPORT     ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY: \
-                                      ExtractTransport(x) == MESSAGING_TRANSPORT ? SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY: \
-                                      0) \
+#define ExtractEventFromTransport(x)                                                                                   \
+    (ExtractTransport(x) == USART_TRANSPORT                                                                            \
+         ? SYSTEM_EVENT_FLAG_COM_IN                                                                                    \
+         : ExtractTransport(x) == SOCKET_TRANSPORT                                                                     \
+               ? SYSTEM_EVENT_FLAG_SOCKET                                                                              \
+               : ExtractTransport(x) == GENERIC_TRANSPORT                                                              \
+                     ? SYSTEM_EVENT_FLAG_GENERIC_PORT                                                                  \
+                     : ExtractTransport(x) == DEBUG_TRANSPORT                                                          \
+                           ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY                                                       \
+                           : ExtractTransport(x) == MESSAGING_TRANSPORT ? SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY : 0)
 
-#define USART_TRANSPORT             (1 << TRANSPORT_SHIFT)
+#define USART_TRANSPORT (1 << TRANSPORT_SHIFT)
 //#define COM_NULL                    ((COM_HANDLE)(USART_TRANSPORT))
 
-#define USB_TRANSPORT               (2 << TRANSPORT_SHIFT)
+#define USB_TRANSPORT (2 << TRANSPORT_SHIFT)
 //#define USB_CONTROLLER_SHIFT        5
 //#define USB_CONTROLLER_MASK         0xE0
 //#define USB_STREAM_MASK             0x00FF
 //#define USB_STREAM_INDEX_MASK       0x001F
 
-#define SOCKET_TRANSPORT            (3 << TRANSPORT_SHIFT)
-#define COM_SOCKET_DBG              ((COM_HANDLE)(SOCKET_TRANSPORT + 1))
+#define SOCKET_TRANSPORT (3 << TRANSPORT_SHIFT)
+#define COM_SOCKET_DBG   ((COM_HANDLE)(SOCKET_TRANSPORT + 1))
 
-#define DEBUG_TRANSPORT             (4 << TRANSPORT_SHIFT)
+#define DEBUG_TRANSPORT (4 << TRANSPORT_SHIFT)
 
+#define MESSAGING_TRANSPORT (7 << TRANSPORT_SHIFT)
 
-
-
-
-
-
-#define MESSAGING_TRANSPORT         (7 << TRANSPORT_SHIFT)
-
-#define GENERIC_TRANSPORT           (8 << TRANSPORT_SHIFT)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#define GENERIC_TRANSPORT (8 << TRANSPORT_SHIFT)
 
 // Creates a COM_HANDLE value for a platform specific port number
-#define ConvertCOM_DebugHandle(x)    ((COM_HANDLE)((x) + DEBUG_TRANSPORT     + 1))
+#define ConvertCOM_DebugHandle(x) ((COM_HANDLE)((x) + DEBUG_TRANSPORT + 1))
 
 // Extracts a Socket transport port id from a SOCKET_TRASNPORT COM_HANDLE
-#define ConvertCOM_SockPort(x)      (((x) & PORT_NUMBER_MASK) - 1)
+#define ConvertCOM_SockPort(x) (((x)&PORT_NUMBER_MASK) - 1)
 
 typedef unsigned int FLASH_WORD;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-typedef void (*LOGGING_CALLBACK)(const char* text);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+typedef void (*LOGGING_CALLBACK)(const char *text);
 
 // //--//
 
 // //--//
 
-
-
+//--//
 
 //--//
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //--//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//--//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 template <class T> class HAL_DblLinkedList;
 
 template <class T> class HAL_DblLinkedNode
 {
-    T* m_nextNode;
-    T* m_prevNode;
+    T *m_nextNode;
+    T *m_prevNode;
 
     friend class HAL_DblLinkedList<T>;
 
-public:
+  public:
     void Initialize()
     {
         m_nextNode = NULL;
         m_prevNode = NULL;
     }
 
-    T* Next() const { return m_nextNode; }
-    T* Prev() const { return m_prevNode; }
+    T *Next() const
+    {
+        return m_nextNode;
+    }
+    T *Prev() const
+    {
+        return m_prevNode;
+    }
 
-    void SetNext( T* next ) { m_nextNode = next; }
-    void SetPrev( T* prev ) { m_prevNode = prev; }
+    void SetNext(T *next)
+    {
+        m_nextNode = next;
+    }
+    void SetPrev(T *prev)
+    {
+        m_prevNode = prev;
+    }
 
-    bool IsLinked() const { return m_nextNode != NULL; }
+    bool IsLinked() const
+    {
+        return m_nextNode != NULL;
+    }
 
     //--//
 
     void RemoveFromList()
     {
-        T* next = m_nextNode;
-        T* prev = m_prevNode;
+        T *next = m_nextNode;
+        T *prev = m_prevNode;
 
-        if(prev) prev->m_nextNode = next;
-        if(next) next->m_prevNode = prev;
+        if (prev)
+            prev->m_nextNode = next;
+        if (next)
+            next->m_prevNode = prev;
     }
 
     void Unlink()
     {
-        T* next = m_nextNode;
-        T* prev = m_prevNode;
+        T *next = m_nextNode;
+        T *prev = m_prevNode;
 
-        if(prev) prev->m_nextNode = next;
-        if(next) next->m_prevNode = prev;
+        if (prev)
+            prev->m_nextNode = next;
+        if (next)
+            next->m_prevNode = prev;
 
         m_nextNode = NULL;
         m_prevNode = NULL;
@@ -728,8 +202,8 @@ public:
 
 //--//
 
-// The use of offsetof below throwns an "invalid offset warning" because CLR_RT_StackFrame is not POD type 
-// C+17 is the first standard that allow this, so until we are using it we have to disable it to keep GCC happy 
+// The use of offsetof below throwns an "invalid offset warning" because CLR_RT_StackFrame is not POD type
+// C+17 is the first standard that allow this, so until we are using it we have to disable it to keep GCC happy
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -739,30 +213,30 @@ public:
 template <class T> class HAL_DblLinkedList
 {
     //
-    // Logically, a list starts with a HAL_DblLinkedNode with only the Next() set and ends with a node with only Prev() set.
-    // This can be collapsed to have the two nodes overlap.
+    // Logically, a list starts with a HAL_DblLinkedNode with only the Next() set and ends with a node with only Prev()
+    // set. This can be collapsed to have the two nodes overlap.
     //
-    T* m_first;
-    T* m_null;
-    T* m_last;
+    T *m_first;
+    T *m_null;
+    T *m_last;
 
     //--//
 
-public:
+  public:
     void Initialize()
     {
         m_first = Tail();
-        m_null  = NULL;
-        m_last  = Head();
+        m_null = NULL;
+        m_last = Head();
     }
 
     int NumOfNodes()
     {
-        T*  ptr;
-        T*  ptrNext;
+        T *ptr;
+        T *ptrNext;
         int num = 0;
 
-        for(ptr = FirstNode(); (ptrNext = ptr->Next()) != NULL; ptr = ptrNext)
+        for (ptr = FirstNode(); (ptrNext = ptr->Next()) != NULL; ptr = ptrNext)
         {
             num++;
         }
@@ -772,21 +246,43 @@ public:
 
     //--//
 
-    T* FirstNode() const { return m_first          ; }
-    T* LastNode () const { return m_last           ; }
-    bool           IsEmpty  () const { return m_first == Tail(); }
+    T *FirstNode() const
+    {
+        return m_first;
+    }
+    T *LastNode() const
+    {
+        return m_last;
+    }
+    bool IsEmpty() const
+    {
+        return m_first == Tail();
+    }
 
-    T* FirstValidNode() const { T* res = m_first; return res->Next() ? res : NULL; }
-    T* LastValidNode () const { T* res = m_last ; return res->Prev() ? res : NULL; }
+    T *FirstValidNode() const
+    {
+        T *res = m_first;
+        return res->Next() ? res : NULL;
+    }
+    T *LastValidNode() const
+    {
+        T *res = m_last;
+        return res->Prev() ? res : NULL;
+    }
 
-    T* Head() const { return (T*)((size_t)&m_first - offsetof(T, m_nextNode)); }
-    T* Tail() const { return (T*)((size_t)&m_last  - offsetof(T, m_prevNode)); }
+    T *Head() const
+    {
+        return (T *)((size_t)&m_first - offsetof(T, m_nextNode));
+    }
+    T *Tail() const
+    {
+        return (T *)((size_t)&m_last - offsetof(T, m_prevNode));
+    }
 
     //--//
 
-private:
-
-    void Insert( T* prev, T* next, T* node )
+  private:
+    void Insert(T *prev, T *next, T *node)
     {
         node->m_nextNode = next;
         node->m_prevNode = prev;
@@ -795,12 +291,12 @@ private:
         prev->m_nextNode = node;
     }
 
-public:
+  public:
 #if defined(_DEBUG)
-    bool Exists( T* searchNode )
+    bool Exists(T *searchNode)
     {
-        T* node = FirstValidNode();
-        while( node != NULL && node != searchNode )
+        T *node = FirstValidNode();
+        while (node != NULL && node != searchNode)
         {
             if (node == node->Next())
             {
@@ -808,54 +304,56 @@ public:
             }
             node = node->Next();
         }
-        return (node == NULL? false: true);
+        return (node == NULL ? false : true);
     }
 #endif
 
-    void InsertBeforeNode( T* node, T* nodeNew )
+    void InsertBeforeNode(T *node, T *nodeNew)
     {
-        if(node && nodeNew && node != nodeNew)
+        if (node && nodeNew && node != nodeNew)
         {
             nodeNew->RemoveFromList();
 
-            Insert( node->Prev(), node, nodeNew );
+            Insert(node->Prev(), node, nodeNew);
         }
     }
 
-    void InsertAfterNode( T* node, T* nodeNew )
+    void InsertAfterNode(T *node, T *nodeNew)
     {
-        if(node && nodeNew && node != nodeNew)
+        if (node && nodeNew && node != nodeNew)
         {
             nodeNew->RemoveFromList();
 
-            Insert( node, node->Next(), nodeNew );
+            Insert(node, node->Next(), nodeNew);
         }
     }
 
-    void LinkAtFront( T* node )
+    void LinkAtFront(T *node)
     {
-        InsertAfterNode( Head(), node );
+        InsertAfterNode(Head(), node);
     }
 
-    void LinkAtBack( T* node )
+    void LinkAtBack(T *node)
     {
-        InsertBeforeNode( Tail(), node );
+        InsertBeforeNode(Tail(), node);
     }
 
-    T* ExtractFirstNode()
+    T *ExtractFirstNode()
     {
-        T* node = FirstValidNode();
+        T *node = FirstValidNode();
 
-        if(node) node->Unlink();
+        if (node)
+            node->Unlink();
 
         return node;
     }
 
-    T* ExtractLastNode()
+    T *ExtractLastNode()
     {
-        T* node = LastValidNode();
+        T *node = LastValidNode();
 
-        if(node) node->Unlink();
+        if (node)
+            node->Unlink();
 
         return node;
     }
@@ -867,109 +365,32 @@ public:
 
 //--//
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 template <typename T> class Hal_Queue_UnknownSize
 {
     size_t m_writer;
     size_t m_reader;
     size_t m_size;
-    bool   m_full;
-    T*     m_data;
+    bool m_full;
+    T *m_data;
 
-public:
-    void Initialize( T* data, size_t size )
+  public:
+    void Initialize(T *data, size_t size)
     {
         m_writer = 0;
         m_reader = 0;
-        m_size   = size;
-        m_data   = data;
-        m_full   = false;
+        m_size = size;
+        m_data = data;
+        m_full = false;
     }
 
     size_t NumberOfElements()
     {
-        if(m_writer < m_reader) return m_size + m_writer - m_reader;
-        else if(m_full)         return m_size;
-        else                    return m_writer - m_reader;
+        if (m_writer < m_reader)
+            return m_size + m_writer - m_reader;
+        else if (m_full)
+            return m_size;
+        else
+            return m_writer - m_reader;
     }
 
     bool IsEmpty()
@@ -982,112 +403,133 @@ public:
         return m_full;
     }
 
-    T* operator[](int index)
+    T *operator[](int index)
     {
-        if(index < 0 || index >= NumberOfElements()) return NULL;
+        if (index < 0 || index >= NumberOfElements())
+            return NULL;
 
         return &m_data[(m_reader + index) % m_size];
     }
 
-    T* Push()
+    T *Push()
     {
-        size_t oldWriter  = m_writer;
+        size_t oldWriter = m_writer;
 
-        if(m_full) return NULL;
+        if (m_full)
+            return NULL;
 
-        m_writer++;  if(m_writer == m_size) m_writer = 0;
+        m_writer++;
+        if (m_writer == m_size)
+            m_writer = 0;
 
-        if(m_writer == m_reader) m_full = true;
+        if (m_writer == m_reader)
+            m_full = true;
 
         return &m_data[oldWriter];
     }
 
-    T* Peek()
+    T *Peek()
     {
-        if(m_writer == m_reader && !m_full) return NULL;
+        if (m_writer == m_reader && !m_full)
+            return NULL;
 
         return &m_data[m_reader];
     }
 
-    T* Pop()
+    T *Pop()
     {
         size_t oldReader = m_reader;
 
-        if(m_reader == m_writer && !m_full) return (T*)NULL;
+        if (m_reader == m_writer && !m_full)
+            return (T *)NULL;
 
-        m_reader++;  if(m_reader == m_size) m_reader = 0;
+        m_reader++;
+        if (m_reader == m_size)
+            m_reader = 0;
 
         m_full = false;
 
         return &m_data[oldReader];
     }
 
-    T* Push( size_t &nElements )
+    T *Push(size_t &nElements)
     {
-        size_t oldWriter  = m_writer;
+        size_t oldWriter = m_writer;
         size_t max = 0;
 
-        if(m_full || (nElements == 0))
+        if (m_full || (nElements == 0))
         {
             nElements = 0;
             return NULL;
         }
 
-        if(m_writer < m_reader) max = m_reader - m_writer;
-        else                    max = m_size   - m_writer;
+        if (m_writer < m_reader)
+            max = m_reader - m_writer;
+        else
+            max = m_size - m_writer;
 
-        nElements = (max < nElements? max: nElements);
+        nElements = (max < nElements ? max : nElements);
 
-        m_writer += nElements; if(m_writer == m_size) m_writer = 0;
+        m_writer += nElements;
+        if (m_writer == m_size)
+            m_writer = 0;
 
-        if(m_writer == m_reader) m_full = true;
+        if (m_writer == m_reader)
+            m_full = true;
 
         return &m_data[oldWriter];
     }
 
-    T* Pop( size_t &nElements )
+    T *Pop(size_t &nElements)
     {
         size_t oldReader = m_reader;
         size_t max = 0;
 
-        if(nElements == 0) return NULL;
+        if (nElements == 0)
+            return NULL;
 
-        if((m_reader == m_writer) && !m_full)
+        if ((m_reader == m_writer) && !m_full)
         {
             nElements = 0;
             // reset the reader/writer to maximize push potential
-            m_reader  = 0;
-            m_writer  = 0;
+            m_reader = 0;
+            m_writer = 0;
             return NULL;
         }
 
-        if(m_writer <= m_reader) max = m_size   - m_reader;
-        else                     max = m_writer - m_reader;
+        if (m_writer <= m_reader)
+            max = m_size - m_reader;
+        else
+            max = m_writer - m_reader;
 
-        nElements = (max < nElements? max: nElements);
+        nElements = (max < nElements ? max : nElements);
 
-        m_reader += nElements; if(m_reader == m_size) m_reader = 0;
+        m_reader += nElements;
+        if (m_reader == m_size)
+            m_reader = 0;
 
         m_full = false;
 
         return &m_data[oldReader];
     }
 
-    T* Storage() { return m_data; }
+    T *Storage()
+    {
+        return m_data;
+    }
 };
 
-template<typename T> class HAL_RingBuffer 
+template <typename T> class HAL_RingBuffer
 {
     size_t _dataSize;
     size_t _size;
     size_t _capacity;
     size_t _write_index;
     size_t _read_index;
-    T * _buffer;
+    T *_buffer;
 
-public:
-
-    void Initialize(T* data, size_t size)
+  public:
+    void Initialize(T *data, size_t size)
     {
         _dataSize = sizeof(T);
 
@@ -1099,28 +541,35 @@ public:
         _buffer = data;
     }
 
-    size_t Capacity() { return (_capacity / _dataSize); }
+    size_t Capacity()
+    {
+        return (_capacity / _dataSize);
+    }
 
-    size_t Length() { return (_size / _dataSize); }
+    size_t Length()
+    {
+        return (_size / _dataSize);
+    }
 
     // Push a single element to the buffer.
     size_t Push(const T data)
     {
         // check for buffer full
-        if(_size == _capacity)
+        if (_size == _capacity)
         {
             // buffer full
             return 0;
         }
 
-        T* destination = _buffer;
+        T *destination = _buffer;
         destination += _write_index;
 
         *destination = data;
         _write_index += _dataSize;
-        
+
         // check if we are the end of the capacity
-        if (_write_index == _capacity) _write_index = 0;
+        if (_write_index == _capacity)
+            _write_index = 0;
 
         // update ring buffer size
         _size += _dataSize;
@@ -1129,21 +578,22 @@ public:
     }
 
     // Push N elements to the buffer.
-    size_t Push(const T* data, size_t length)
+    size_t Push(const T *data, size_t length)
     {
         size_t lengthToWrite = 0;
 
         // sanity check for 0 length
-        if (length == 0) return 0;
+        if (length == 0)
+            return 0;
 
         // check for buffer full
-        if(_size == _capacity)
+        if (_size == _capacity)
         {
             // buffer full
             return 0;
         }
 
-        if( (length * _dataSize) < (_capacity - _size))
+        if ((length * _dataSize) < (_capacity - _size))
         {
             lengthToWrite = (length * _dataSize);
         }
@@ -1157,9 +607,10 @@ public:
         {
             memcpy(_buffer + _write_index, data, lengthToWrite);
             _write_index += lengthToWrite;
-           
+
             // check if we are the end of the capacity
-            if (_write_index == _capacity) _write_index = 0;
+            if (_write_index == _capacity)
+                _write_index = 0;
         }
         // need to memcpy in two chunks
         else
@@ -1180,15 +631,16 @@ public:
     }
 
     // Pop N elements from ring buffer returning them in the data argument.
-    size_t Pop(T* data, size_t length)
+    size_t Pop(T *data, size_t length)
     {
         size_t lengthToRead = 0;
 
         // sanity check for 0 length
-        if (length == 0) return 0;
+        if (length == 0)
+            return 0;
 
         // check for buffer empty
-        if(_size == 0)
+        if (_size == 0)
         {
             return 0;
         }
@@ -1202,7 +654,8 @@ public:
             _read_index += lengthToRead;
 
             // check if we are at end of capacity
-            if (_read_index == _capacity) _read_index = 0;
+            if (_read_index == _capacity)
+                _read_index = 0;
         }
         // need to memcpy in two steps
         else
@@ -1221,7 +674,7 @@ public:
 
         // check for optimization to improve sequential push
         // buffer has to be empty and read and write indexes coincide
-        if(_size == 0 && (_write_index == _read_index))
+        if (_size == 0 && (_write_index == _read_index))
         {
             // reset the read/write index
             _write_index = 0;
@@ -1237,10 +690,11 @@ public:
         size_t lengthToRead = 0;
 
         // sanity check for 0 length
-        if (length == 0) return 0;
+        if (length == 0)
+            return 0;
 
         // check for buffer empty
-        if(_size == 0)
+        if (_size == 0)
         {
             return 0;
         }
@@ -1253,7 +707,8 @@ public:
             _read_index += lengthToRead;
 
             // check if we are at end of capacity
-            if (_read_index == _capacity) _read_index = 0;
+            if (_read_index == _capacity)
+                _read_index = 0;
         }
         // need to memcpy in two steps
         else
@@ -1268,7 +723,7 @@ public:
 
         // check for optimization to improve sequential push
         // buffer has to be empty and read and write indexes coincide
-        if(_size == 0 && (_write_index == _read_index))
+        if (_size == 0 && (_write_index == _read_index))
         {
             // reset the read/write index
             _write_index = 0;
@@ -1281,10 +736,12 @@ public:
     void OptimizeSequence()
     {
         // no elements, so there is nothing to optimize
-        if(_size == 0) return;
-     
+        if (_size == 0)
+            return;
+
         // read index is already at index 0, so there is nothing to optimize
-        if(_read_index == 0) return;
+        if (_read_index == 0)
+            return;
 
         // can move data in a single memcpy
         if (_read_index < _write_index)
@@ -1298,15 +755,15 @@ public:
         {
             // buffer looks like this
             // |xxxx......xxxxxx|
-            
+
             // store size of tail
             size_t tailSize = _write_index - (1 * _dataSize);
 
             // 1st move tail to temp buffer (need to malloc first)
-            T* tempBuffer = (T*)platform_malloc(tailSize);
-            
+            T *tempBuffer = (T *)platform_malloc(tailSize);
+
             memcpy(tempBuffer, _buffer, tailSize);
-            
+
             // store size of remaining buffer
             size_t headSize = _capacity - _read_index;
 
@@ -1325,148 +782,17 @@ public:
         _write_index = _size;
     }
 
-    T* Reader() { return _buffer + _read_index; }
+    T *Reader()
+    {
+        return _buffer + _read_index;
+    }
 };
 
 //--//
 
 //#include <..\Initialization\MasterConfig.h>
 
-
-
-
-
-
 //--//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // hal cleanup for CLR reboot
 
@@ -1481,224 +807,9 @@ void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler);
 
 //--//
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //--//
 
-
-
 //--//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //--//
 
@@ -1727,30 +838,13 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 //// Gp I/O driver
 //#include <CPU_INTC_decl.h>
 //
-//// Gp I/O driver
+// Gp I/O driver
 #include <CPU_GPIO_decl.h>
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //
-//// SPI driver
-//#include <CPU_SPI_decl.h>
+// SPI driver
+#include <nanoHAL_Spi.h>
+
 //
 //// External bus interface driver
 //#include <CPU_EBIU_decl.h>
@@ -1773,15 +867,12 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 //// Power API
 //#include <Power_decl.h>
 
-
-
 //
 // Chipset
 //
 /////////////////////////////////////////////////////////////////////
 
 //#include <drivers.h>
-
 
 // platform_selector.h (from MasterConfig.h)
 
@@ -1791,15 +882,15 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 #define GLOBAL_UNLOCK()
 
 #if defined(_DEBUG)
-#define ASSERT_IRQ_MUST_BE_ON()    ASSERT(!HAL_Windows_HasGlobalLock())
+#define ASSERT_IRQ_MUST_BE_ON() ASSERT(!HAL_Windows_HasGlobalLock())
 #else
 #define ASSERT_IRQ_MUST_BE_ON()
 #endif
 
-#elif defined(__arm__)  | defined(PLATFORM_ESP32)
+#elif defined(__arm__) | defined(PLATFORM_ESP32)
 // nothing to define here just to help the nanoCLR VS project to build hapilly
 #else
 #error Unsupported platform
 #endif
 
-#endif  // _NANOHAL_H_
+#endif // _NANOHAL_H_

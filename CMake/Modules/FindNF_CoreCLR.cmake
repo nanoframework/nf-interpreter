@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -145,9 +145,11 @@ set(NF_CoreCLR_SRCS
     # HAL
     nanoHAL_Time.cpp
     nanoHAL_Watchdog.c
+    nanoHAL_SystemEvents.c
     
     # PAL
     nanoPAL_BlockStorage.c
+    nanoPAL_Events.cpp
     nanoPAL_NativeDouble.cpp
     nanoPAL_Network_stubs.cpp
     nanoPAL_PerformanceCounters_stubs.cpp
@@ -234,6 +236,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${PROJECT_SOURCE_DIR}/src/PAL
             ${PROJECT_SOURCE_DIR}/src/PAL/BlockStorage
             ${PROJECT_SOURCE_DIR}/src/PAL/Double
+            ${PROJECT_SOURCE_DIR}/src/PAL/Events
 
             # PAL stubs
             ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall

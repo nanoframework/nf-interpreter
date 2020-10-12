@@ -1,4 +1,4 @@
-# Copyright (c) 2018 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
 parameters:
@@ -17,16 +17,16 @@ steps:
       workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Build with CMake
 
+  # because of permission issues (the python script isn't allowed to write on the output folder)
+  # we need to perform these steps by calling directly the python scripts
   - task: PythonScript@0
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.3.1\components\esptool_py\esptool\esptool.py'
-      arguments: '--chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB -o ${{ parameters.buildDirectory }}\nanoCLR.bin ${{ parameters.buildDirectory }}\targets\FreeRTOS_ESP32\$(BoardName)\nanoCLR.elf'
+      arguments: '--chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB -o ${{ parameters.buildDirectory }}\nanoCLR.bin ${{ parameters.buildDirectory }}\nanoCLR.elf'
     condition: succeeded()
     displayName: Generate nanoCLR bin file for deployment
 
-  # because of permission issues (the python script isn't allowed to write on the output folder)
-  # we need to perform these steps by calling directly the python scripts
   - task: PythonScript@0
     inputs:
       scriptSource: 'filePath'

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -9,32 +9,43 @@
 #include "FreeRTOS.h"
 #include <target_board.h>
 #include "cmsis_gcc.h"
+// TODO
+// #include <lwipopts.h>
 
 // global mutex protecting the internal state of the interpreter, including event flags
-#define GLOBAL_LOCK();      UBaseType_t uxSavedInterruptStatus = 0; \
-                            if (xPortIsInsideInterrupt() == pdTRUE) { \
-                                uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();\
-                            } else { portENTER_CRITICAL(); }
-#define GLOBAL_UNLOCK();    if (xPortIsInsideInterrupt() == pdTRUE) { \
-                                taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus ); \
-                            } else { portEXIT_CRITICAL(); }           
+#define GLOBAL_LOCK()                                                                                                  \
+    ;                                                                                                                  \
+    UBaseType_t uxSavedInterruptStatus = 0;                                                                            \
+    if (xPortIsInsideInterrupt() == pdTRUE)                                                                            \
+    {                                                                                                                  \
+        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();                                                        \
+    }                                                                                                                  \
+    else                                                                                                               \
+    {                                                                                                                  \
+        portENTER_CRITICAL();                                                                                          \
+    }
+#define GLOBAL_UNLOCK()                                                                                                \
+    ;                                                                                                                  \
+    if (xPortIsInsideInterrupt() == pdTRUE)                                                                            \
+    {                                                                                                                  \
+        taskEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);                                                            \
+    }                                                                                                                  \
+    else                                                                                                               \
+    {                                                                                                                  \
+        portEXIT_CRITICAL();                                                                                           \
+    }
 
 // platform dependent delay
-#define PLATFORM_DELAY(milliSecs)   vTaskDelay(milliSecs / portTICK_PERIOD_MS);
+#define PLATFORM_DELAY(milliSecs) vTaskDelay(milliSecs / portTICK_PERIOD_MS);
 
 // Definitions for Sockets/Network
-#define GLOBAL_LOCK_SOCKETS(x)       
+#define GLOBAL_LOCK_SOCKETS(x)
 
-#define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT    16
+// TODO
+// get number of sockets from lwIP options
+// #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT MEMP_NUM_NETCONN
 
-#define LPCSTR  const char*
-
-
-// these macros are to be used at entry/exit of native interrupt handlers
-#define NATIVE_INTERRUPT_START  SystemState_SetNoLock( SYSTEM_STATE_ISR              );   \
-                                SystemState_SetNoLock( SYSTEM_STATE_NO_CONTINUATIONS );
-#define NATIVE_INTERRUPT_END    SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS ); \
-                                SystemState_ClearNoLock( SYSTEM_STATE_ISR              );
+#define LPCSTR const char *
 
 // TODO: Doesn't seem to be defined anywhere, used  clr corlib math
 #define INT32 int32_t
@@ -43,7 +54,7 @@
 
 #if !defined(BUILD_RTM)
 
-#define HARD_BREAKPOINT()     HARD_Breakpoint()
+#define HARD_BREAKPOINT() HARD_Breakpoint()
 
 // #if defined(_DEBUG)
 // #define DEBUG_HARD_BREAKPOINT()     HARD_Breakpoint()
@@ -56,7 +67,7 @@
 // #define HARD_BREAKPOINT()
 // #define DEBUG_HARD_BREAKPOINT()
 
-#endif  // !defined(BUILD_RTM)
+#endif // !defined(BUILD_RTM)
 
 #define NANOCLR_STOP() CPU_Reset();
 
@@ -67,11 +78,11 @@
 // The implementation should is to be provided by each target at target_common.h.in                //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #if defined(BUILD_RTM)
-    #define EVENTS_HEART_BEAT
+#define EVENTS_HEART_BEAT
 #else
-    #ifndef EVENTS_HEART_BEAT
-    #define EVENTS_HEART_BEAT __asm__ __volatile__ ("nop")
-    #endif // EVENTS_HEART_BEAT
+#ifndef EVENTS_HEART_BEAT
+#define EVENTS_HEART_BEAT __asm__ __volatile__("nop")
+#endif // EVENTS_HEART_BEAT
 #endif
 
 extern int HeapBegin;

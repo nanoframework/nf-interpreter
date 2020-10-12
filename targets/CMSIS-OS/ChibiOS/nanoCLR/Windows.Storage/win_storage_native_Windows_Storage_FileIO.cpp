@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -26,51 +26,51 @@ typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
 //////////////////////////////////////////
 enum FileOperationResult
 {
-    FileOperationResult_OK              = 0,
-    FileOperationResult_Error           = 10,
-    FileOperationResult_NoFile          = 20,
-    FileOperationResult_InvalidDrive    = 30,
+    FileOperationResult_OK = 0,
+    FileOperationResult_Error = 10,
+    FileOperationResult_NoFile = 20,
+    FileOperationResult_InvalidDrive = 30,
 };
 
 //////////////////////////////////////////
 
 struct FileOperation
 {
-  #if (HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE)
-    FIL*            FatFile;
-  #endif
-  #if USE_SPIFFS_FOR_STORAGE
-    spiffs_file*    SpiffsFile;
-  #endif
-    char*           Content;
-    uint32_t        ContentLength;
+#if (HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE)
+    FIL *FatFile;
+#endif
+#if USE_SPIFFS_FOR_STORAGE
+    spiffs_file *SpiffsFile;
+#endif
+    char *Content;
+    uint32_t ContentLength;
 };
 
 // this is the FileIO working thread
 // because FatFS is supposed to be atomic we won't have any concurrent threads
-static thread_t* fileIoWorkingThread;
+static thread_t *fileIoWorkingThread;
 
 // ReadText working thread
 static THD_FUNCTION(ReadTextWorkingThread, arg)
 {
     FileOperationResult opResult = FileOperationResult_OK;
 
-    FileOperation*  fileIoOperation = (FileOperation*)arg;
+    FileOperation *fileIoOperation = (FileOperation *)arg;
 
     // need an extra one for the terminator
     uint32_t readLength = fileIoOperation->ContentLength + 1;
 
-  #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
-    if(fileIoOperation->FatFile != NULL)
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+    if (fileIoOperation->FatFile != NULL)
     {
         // read string
-        if(f_gets((TCHAR*)fileIoOperation->Content, readLength, fileIoOperation->FatFile))
+        if (f_gets((TCHAR *)fileIoOperation->Content, readLength, fileIoOperation->FatFile))
         {
             // operation succesfull
         }
         else
         {
-            switch((FRESULT)f_error(fileIoOperation->FatFile))
+            switch ((FRESULT)f_error(fileIoOperation->FatFile))
             {
                 case FR_NO_FILE:
                     opResult = FileOperationResult_NoFile;
@@ -79,7 +79,7 @@ static THD_FUNCTION(ReadTextWorkingThread, arg)
                 case FR_INVALID_DRIVE:
                     opResult = FileOperationResult_InvalidDrive;
                     break;
-                
+
                 default:
                     opResult = FileOperationResult_Error;
                     break;
@@ -91,13 +91,13 @@ static THD_FUNCTION(ReadTextWorkingThread, arg)
 
         // free memory
         platform_free(fileIoOperation->FatFile);
-
     }
-  #endif
-  #if USE_SPIFFS_FOR_STORAGE
-    if(fileIoOperation->SpiffsFile != NULL)
+#endif
+#if USE_SPIFFS_FOR_STORAGE
+    if (fileIoOperation->SpiffsFile != NULL)
     {
-        uint32_t bytesRead = SPIFFS_read(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength);
+        uint32_t bytesRead =
+            SPIFFS_read(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength);
 
         if (bytesRead == fileIoOperation->ContentLength)
         {
@@ -115,7 +115,7 @@ static THD_FUNCTION(ReadTextWorkingThread, arg)
         // free memory
         platform_free(fileIoOperation->SpiffsFile);
     }
-  #endif
+#endif
 
     // free memory
     platform_free(fileIoOperation);
@@ -131,18 +131,18 @@ static THD_FUNCTION(WriteTextWorkingThread, arg)
 {
     FileOperationResult opResult = FileOperationResult_OK;
 
-    FileOperation*  fileIoOperation = (FileOperation*)arg;
+    FileOperation *fileIoOperation = (FileOperation *)arg;
 
-  #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
-    if(fileIoOperation->FatFile != NULL)
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+    if (fileIoOperation->FatFile != NULL)
     {
-        if(f_puts(fileIoOperation->Content, fileIoOperation->FatFile) == (int)fileIoOperation->ContentLength)
+        if (f_puts(fileIoOperation->Content, fileIoOperation->FatFile) == (int)fileIoOperation->ContentLength)
         {
             // expected number of bytes written
         }
         else
         {
-            switch((FRESULT)f_error(fileIoOperation->FatFile))
+            switch ((FRESULT)f_error(fileIoOperation->FatFile))
             {
                 case FR_NO_FILE:
                     opResult = FileOperationResult_NoFile;
@@ -151,7 +151,7 @@ static THD_FUNCTION(WriteTextWorkingThread, arg)
                 case FR_INVALID_DRIVE:
                     opResult = FileOperationResult_InvalidDrive;
                     break;
-                
+
                 default:
                     opResult = FileOperationResult_Error;
                     break;
@@ -163,13 +163,13 @@ static THD_FUNCTION(WriteTextWorkingThread, arg)
 
         // free memory
         platform_free(fileIoOperation->FatFile);
-
     }
-  #endif
-  #if USE_SPIFFS_FOR_STORAGE
-    if(fileIoOperation->SpiffsFile != NULL)
+#endif
+#if USE_SPIFFS_FOR_STORAGE
+    if (fileIoOperation->SpiffsFile != NULL)
     {
-        if (SPIFFS_write(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength) < 0)
+        if (SPIFFS_write(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength) <
+            0)
         {
             // failed to write expected number of bytes
             opResult = FileOperationResult_Error;
@@ -181,13 +181,13 @@ static THD_FUNCTION(WriteTextWorkingThread, arg)
         // free memory
         platform_free(fileIoOperation->SpiffsFile);
     }
-  #endif
+#endif
 
     platform_free(fileIoOperation);
 
     // fire event for FileIO operation complete
     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
-  
+
     chThdExit((msg_t)opResult);
 }
 
@@ -196,23 +196,23 @@ static THD_FUNCTION(WriteBinaryWorkingThread, arg)
 {
     FileOperationResult opResult = FileOperationResult_OK;
 
-    FileOperation*  fileIoOperation = (FileOperation*)arg;
+    FileOperation *fileIoOperation = (FileOperation *)arg;
 
-  #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
-    if(fileIoOperation->FatFile != NULL)
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+    if (fileIoOperation->FatFile != NULL)
     {
-        UINT        bytesWritten;
+        UINT bytesWritten;
 
-        FRESULT operationResult = f_write(fileIoOperation->FatFile, fileIoOperation->Content, fileIoOperation->ContentLength, &bytesWritten);
+        FRESULT operationResult =
+            f_write(fileIoOperation->FatFile, fileIoOperation->Content, fileIoOperation->ContentLength, &bytesWritten);
 
-        if( (operationResult == FR_OK) && 
-            (bytesWritten == fileIoOperation->ContentLength))
+        if ((operationResult == FR_OK) && (bytesWritten == fileIoOperation->ContentLength))
         {
             // expected number of bytes written
         }
         else
         {
-            switch((FRESULT)f_error(fileIoOperation->FatFile))
+            switch ((FRESULT)f_error(fileIoOperation->FatFile))
             {
                 case FR_NO_FILE:
                     opResult = FileOperationResult_NoFile;
@@ -221,7 +221,7 @@ static THD_FUNCTION(WriteBinaryWorkingThread, arg)
                 case FR_INVALID_DRIVE:
                     opResult = FileOperationResult_InvalidDrive;
                     break;
-                
+
                 default:
                     opResult = FileOperationResult_Error;
                     break;
@@ -233,13 +233,13 @@ static THD_FUNCTION(WriteBinaryWorkingThread, arg)
 
         // free memory
         platform_free(fileIoOperation->FatFile);
-
     }
-  #endif
-  #if USE_SPIFFS_FOR_STORAGE
-    if(fileIoOperation->SpiffsFile != NULL)
+#endif
+#if USE_SPIFFS_FOR_STORAGE
+    if (fileIoOperation->SpiffsFile != NULL)
     {
-        if (SPIFFS_write(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength) < 0)
+        if (SPIFFS_write(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength) <
+            0)
         {
             // failed to write expected number of bytes
             opResult = FileOperationResult_Error;
@@ -251,14 +251,14 @@ static THD_FUNCTION(WriteBinaryWorkingThread, arg)
         // free memory
         platform_free(fileIoOperation->SpiffsFile);
     }
-  #endif
+#endif
 
     // free memory
     platform_free(fileIoOperation);
 
     // fire event for FileIO operation complete
     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
-  
+
     chThdExit((msg_t)opResult);
 }
 
@@ -267,25 +267,25 @@ static THD_FUNCTION(ReadBinaryWorkingThread, arg)
 {
     FileOperationResult opResult = FileOperationResult_OK;
 
-    FileOperation*  fileIoOperation = (FileOperation*)arg;
+    FileOperation *fileIoOperation = (FileOperation *)arg;
 
-  #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
-    if(fileIoOperation->FatFile != NULL)
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+    if (fileIoOperation->FatFile != NULL)
     {
         UINT bytesRead;
 
-        FileOperation*  fileIoOperation = (FileOperation*)arg;
+        FileOperation *fileIoOperation = (FileOperation *)arg;
 
-        FRESULT operationResult = f_read(fileIoOperation->FatFile, fileIoOperation->Content, fileIoOperation->ContentLength, &bytesRead);
+        FRESULT operationResult =
+            f_read(fileIoOperation->FatFile, fileIoOperation->Content, fileIoOperation->ContentLength, &bytesRead);
 
-        if( (operationResult == FR_OK) && 
-            (bytesRead == fileIoOperation->ContentLength))
+        if ((operationResult == FR_OK) && (bytesRead == fileIoOperation->ContentLength))
         {
             // expected number of bytes read
         }
         else
         {
-            switch((FRESULT)f_error(fileIoOperation->FatFile))
+            switch ((FRESULT)f_error(fileIoOperation->FatFile))
             {
                 case FR_NO_FILE:
                     opResult = FileOperationResult_NoFile;
@@ -294,7 +294,7 @@ static THD_FUNCTION(ReadBinaryWorkingThread, arg)
                 case FR_INVALID_DRIVE:
                     opResult = FileOperationResult_InvalidDrive;
                     break;
-                
+
                 default:
                     opResult = FileOperationResult_Error;
                     break;
@@ -306,13 +306,13 @@ static THD_FUNCTION(ReadBinaryWorkingThread, arg)
 
         // free memory
         platform_free(fileIoOperation->FatFile);
-
     }
-  #endif
-  #if USE_SPIFFS_FOR_STORAGE
-    if(fileIoOperation->SpiffsFile != NULL)
+#endif
+#if USE_SPIFFS_FOR_STORAGE
+    if (fileIoOperation->SpiffsFile != NULL)
     {
-        uint32_t bytesRead = SPIFFS_read(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength);
+        uint32_t bytesRead =
+            SPIFFS_read(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength);
 
         if (bytesRead == fileIoOperation->ContentLength)
         {
@@ -330,95 +330,97 @@ static THD_FUNCTION(ReadBinaryWorkingThread, arg)
         // free memory
         platform_free(fileIoOperation->SpiffsFile);
     }
-  #endif
+#endif
 
     // free memory
     platform_free(fileIoOperation);
 
     // fire event for FileIO operation complete
     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
-  
+
     chThdExit((msg_t)opResult);
 }
 
 ////////////////////////////////////////////////
 // Developer notes:
-// Depending on the content size these operations have the potential to be a long running ones as the string or buffer is written to the storage.
-// Despite we are not (yet!) async this is better handled by spawning a thread where the actual data transfer occurs and not blocking the execution.
-// The underlying RTOS inheritably takes care of making this happen "in the background".
-// When the operation is completed a CLR event is fired and the thread execution resumes.
-// Being hard to estimate the expected duration of the operation (depends on storage hardware, CPU clock, transfer speed, etc)
-// the timeout is set to an infinite timeout
-// the catch is that the working thread MUST ALWAYS return at some point
+// Depending on the content size these operations have the potential to be a long running ones as the string or buffer
+// is written to the storage. Despite we are not (yet!) async this is better handled by spawning a thread where the
+// actual data transfer occurs and not blocking the execution. The underlying RTOS inheritably takes care of making this
+// happen "in the background". When the operation is completed a CLR event is fired and the thread execution resumes.
+// Being hard to estimate the expected duration of the operation (depends on storage hardware, CPU clock, transfer
+// speed, etc) the timeout is set to an infinite timeout the catch is that the working thread MUST ALWAYS return at some
+// point
 ////////////////////////////////////////////////
 
-HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__VOID__WindowsStorageIStorageFile__SZARRAY_U1( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_FileIO::
+    WriteBytes___STATIC__VOID__WindowsStorageIStorageFile__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array* bufferArray;
+    CLR_RT_HeapBlock_Array *bufferArray;
 
-    CLR_RT_HeapBlock    hbTimeout;
-    CLR_INT64*          timeout;
-    bool                eventResult = true;
+    CLR_RT_HeapBlock hbTimeout;
+    CLR_INT64 *timeout;
+    bool eventResult = true;
 
     char workingDrive[DRIVE_LETTER_LENGTH];
-    const char*         filePath;
-    char*               workingBuffer = NULL;
-    FileOperation*      fileIoOperation;
+    const char *filePath;
+    char *workingBuffer = NULL;
+    FileOperation *fileIoOperation;
 
-    char*               buffer;
-    uint32_t            bufferLength;
+    char *buffer;
+    uint32_t bufferLength;
 
-  #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
-    FIL*                fatFile = NULL;
-    FRESULT             operationResult;
-  #endif
-  #if (USE_SPIFFS_FOR_STORAGE == TRUE)
-    spiffs_file*        spiffsFile = NULL;
-  #endif
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+    FIL *fatFile = NULL;
+    FRESULT operationResult;
+#endif
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs_file *spiffsFile = NULL;
+#endif
 
     // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
     // get a pointer to the buffer
     bufferArray = stack.Arg1().DereferenceArray();
 
-    buffer = (char*)bufferArray->GetFirstElement();
+    buffer = (char *)bufferArray->GetFirstElement();
 
     bufferLength = bufferArray->m_numOfElements;
 
     // get a pointer to the file path
-    filePath = pThis[ StorageFile::FIELD___path ].DereferenceString()->StringText();
+    filePath = pThis[StorageFile::FIELD___path].DereferenceString()->StringText();
 
     // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
     hbTimeout.SetInteger((CLR_INT64)-1);
 
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
-    
-    if(stack.m_customState == 1)
-    {   
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+
+    if (stack.m_customState == 1)
+    {
         // copy the first 2 letters of the path for the drive
         // path is 'D:\folder\file.txt', so we need 'D:'
         memcpy(workingDrive, filePath, DRIVE_LETTER_LENGTH);
 
-        if(WORKING_DRIVE_IS_INTERNAL_DRIVE)
+        if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-          #if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
             // SPIFFS drive workflow
 
             // create file struct
-            spiffsFile = (spiffs_file*)platform_malloc(sizeof(spiffs_file));
+            spiffsFile = (spiffs_file *)platform_malloc(sizeof(spiffs_file));
             // check allocation
-            if(spiffsFile == NULL)
+            if (spiffsFile == NULL)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
 
             // get file name removing the drive letter
-            workingBuffer = (char*)platform_malloc(SPIFFS_OBJ_NAME_LEN);
+            workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
             // sanity check for successfull malloc
-            if(workingBuffer == NULL)
+            if (workingBuffer == NULL)
             {
                 // failed to allocate memory
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -426,22 +428,22 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__
             memcpy(workingBuffer, (filePath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
             *spiffsFile = SPIFFS_open(&fs, workingBuffer, SPIFFS_TRUNC | SPIFFS_RDWR, 0);
-            if(*spiffsFile < 0)
+            if (*spiffsFile < 0)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
 
-          #endif
+#endif
         }
         else
         {
-          #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
             // FatFS workflow
 
             // create file struct
-            fatFile = (FIL*)platform_malloc(sizeof(FIL));
+            fatFile = (FIL *)platform_malloc(sizeof(FIL));
             // check allocation
-            if(fatFile == NULL)
+            if (fatFile == NULL)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
@@ -449,66 +451,72 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__
             // open file (which is supposed to already exist)
             // need to use FA_OPEN_ALWAYS because we are writting the file content from start
             operationResult = f_open(fatFile, filePath, FA_OPEN_ALWAYS | FA_WRITE);
-            
-            if(operationResult != FR_OK)
+
+            if (operationResult != FR_OK)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
 
-          #endif
+#endif
         }
 
         // protect the content buffer from GC so the working thread can access those
-        CLR_RT_ProtectFromGC gcContent( *bufferArray );
+        CLR_RT_ProtectFromGC gcContent(*bufferArray);
 
         // setup FileIO operation
-        fileIoOperation = (FileOperation*)platform_malloc(sizeof(FileOperation));
+        fileIoOperation = (FileOperation *)platform_malloc(sizeof(FileOperation));
 
-      #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
         fileIoOperation->FatFile = fatFile;
-      #endif
-      #if USE_SPIFFS_FOR_STORAGE
+#endif
+#if USE_SPIFFS_FOR_STORAGE
         fileIoOperation->SpiffsFile = spiffsFile;
-      #endif
+#endif
 
         fileIoOperation->Content = buffer;
         fileIoOperation->ContentLength = bufferLength;
 
         // spawn working thread to perform the write transaction
-        fileIoWorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(2048),
-                                    "STWT", NORMALPRIO, WriteBinaryWorkingThread, fileIoOperation);
+        fileIoWorkingThread = chThdCreateFromHeap(
+            NULL,
+            THD_WORKING_AREA_SIZE(2048),
+            "STWT",
+            NORMALPRIO,
+            WriteBinaryWorkingThread,
+            fileIoOperation);
 
-        if(fileIoWorkingThread == NULL)
+        if (fileIoWorkingThread == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
 
         // bump custom state
         stack.m_customState = 2;
-
     }
 
-    while(eventResult)
+    while (eventResult)
     {
         // non-blocking wait allowing other threads to run while we wait for the write operation to complete
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_StorageIo, eventResult ));
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_StorageIo, eventResult));
 
-        if(eventResult)
+        if (eventResult)
         {
             // event occurred
 
-            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to the heap, otherwise it won't be returned
+            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to
+            // the heap, otherwise it won't be returned
             FileOperationResult result = (FileOperationResult)chThdWait(fileIoWorkingThread);
 
-            if(result == FileOperationResult_Error)
+            if (result == FileOperationResult_Error)
             {
-                NANOCLR_SET_AND_LEAVE( CLR_E_FILE_IO );
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
-            else if(result == FileOperationResult_NoFile)
+            else if (result == FileOperationResult_NoFile)
             {
-                NANOCLR_SET_AND_LEAVE( CLR_E_FILE_NOT_FOUND );
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
-            else if(result == FileOperationResult_InvalidDrive)
+            else if (result == FileOperationResult_InvalidDrive)
             {
                 // failed to change drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -519,7 +527,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__
         }
         else
         {
-            NANOCLR_SET_AND_LEAVE( CLR_E_TIMEOUT );
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
         }
     }
 
@@ -528,7 +536,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__
 
     NANOCLR_CLEANUP();
 
-    if(workingBuffer != NULL)
+    if (workingBuffer != NULL)
     {
         platform_free(workingBuffer);
     }
@@ -536,66 +544,68 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteBytes___STATIC__
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__VOID__WindowsStorageIStorageFile__STRING( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__VOID__WindowsStorageIStorageFile__STRING(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_String* content;
+    CLR_RT_HeapBlock_String *content;
 
-    CLR_RT_HeapBlock    hbTimeout;
-    CLR_INT64*          timeout;
-    bool                eventResult = true;
+    CLR_RT_HeapBlock hbTimeout;
+    CLR_INT64 *timeout;
+    bool eventResult = true;
 
     char workingDrive[DRIVE_LETTER_LENGTH];
-    const char*         filePath;
-    char*               workingBuffer = NULL;
-    FileOperation*      fileIoOperation;
+    const char *filePath;
+    char *workingBuffer = NULL;
+    FileOperation *fileIoOperation;
 
-  #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
-    FIL*                fatFile = NULL;
-    FRESULT             operationResult;
-  #endif
-  #if (USE_SPIFFS_FOR_STORAGE == TRUE)
-    spiffs_file*        spiffsFile = NULL;
-  #endif
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+    FIL *fatFile = NULL;
+    FRESULT operationResult;
+#endif
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs_file *spiffsFile = NULL;
+#endif
 
     // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
-        
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
     // get a pointer to the content
     content = stack.Arg1().DereferenceString();
 
     // get a pointer to the file path
-    filePath = pThis[ StorageFile::FIELD___path ].DereferenceString()->StringText();
+    filePath = pThis[StorageFile::FIELD___path].DereferenceString()->StringText();
 
     // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
     hbTimeout.SetInteger((CLR_INT64)-1);
 
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
-    
-    if(stack.m_customState == 1)
-    {   
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+
+    if (stack.m_customState == 1)
+    {
         // copy the first 2 letters of the path for the drive
         // path is 'D:\folder\file.txt', so we need 'D:'
         memcpy(workingDrive, filePath, DRIVE_LETTER_LENGTH);
 
-        if(WORKING_DRIVE_IS_INTERNAL_DRIVE)
+        if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-          #if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
             // SPIFFS drive workflow
 
             // create file struct
-            spiffsFile = (spiffs_file*)platform_malloc(sizeof(spiffs_file));
+            spiffsFile = (spiffs_file *)platform_malloc(sizeof(spiffs_file));
             // check allocation
-            if(spiffsFile == NULL)
+            if (spiffsFile == NULL)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
 
             // get file name removing the drive letter
-            workingBuffer = (char*)platform_malloc(SPIFFS_OBJ_NAME_LEN);
+            workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
             // sanity check for successfull malloc
-            if(workingBuffer == NULL)
+            if (workingBuffer == NULL)
             {
                 // failed to allocate memory
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -603,22 +613,22 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
             memcpy(workingBuffer, (filePath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
             *spiffsFile = SPIFFS_open(&fs, workingBuffer, SPIFFS_TRUNC | SPIFFS_RDWR, 0);
-            if(*spiffsFile < 0)
+            if (*spiffsFile < 0)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
 
-          #endif
+#endif
         }
         else
         {
-          #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
             // FatFS workflow
 
             // create file struct
-            fatFile = (FIL*)platform_malloc(sizeof(FIL));
+            fatFile = (FIL *)platform_malloc(sizeof(FIL));
             // check allocation
-            if(fatFile == NULL)
+            if (fatFile == NULL)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
@@ -626,36 +636,41 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
             // open file (which is supposed to already exist)
             // need to use FA_OPEN_ALWAYS because we are writting the file content from start
             operationResult = f_open(fatFile, filePath, FA_OPEN_ALWAYS | FA_WRITE);
-            
-            if(operationResult != FR_OK)
+
+            if (operationResult != FR_OK)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
 
-          #endif
+#endif
         }
 
         // protect the content buffer from GC so the working thread can access those
-        CLR_RT_ProtectFromGC gcContent( *content );
+        CLR_RT_ProtectFromGC gcContent(*content);
 
         // setup FileIO operation
-        fileIoOperation = (FileOperation*)platform_malloc(sizeof(FileOperation));
+        fileIoOperation = (FileOperation *)platform_malloc(sizeof(FileOperation));
 
-      #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
         fileIoOperation->FatFile = fatFile;
-      #endif
-      #if USE_SPIFFS_FOR_STORAGE
+#endif
+#if USE_SPIFFS_FOR_STORAGE
         fileIoOperation->SpiffsFile = spiffsFile;
-      #endif
+#endif
 
-        fileIoOperation->Content = (char*)content->StringText();
+        fileIoOperation->Content = (char *)content->StringText();
         fileIoOperation->ContentLength = hal_strlen_s(fileIoOperation->Content);
 
         // spawn working thread to perform the write transaction
-        fileIoWorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(2048),
-                                    "STWT", NORMALPRIO, WriteTextWorkingThread, fileIoOperation);
+        fileIoWorkingThread = chThdCreateFromHeap(
+            NULL,
+            THD_WORKING_AREA_SIZE(2048),
+            "STWT",
+            NORMALPRIO,
+            WriteTextWorkingThread,
+            fileIoOperation);
 
-        if(fileIoWorkingThread == NULL)
+        if (fileIoWorkingThread == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
@@ -664,27 +679,29 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
         stack.m_customState = 2;
     }
 
-    while(eventResult)
+    while (eventResult)
     {
         // non-blocking wait allowing other threads to run while we wait for the write operation to complete
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_StorageIo, eventResult ));
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_StorageIo, eventResult));
 
-        if(eventResult)
+        if (eventResult)
         {
             // event occurred
 
-            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to the heap, otherwise it won't be returned
+            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to
+            // the heap, otherwise it won't be returned
             FileOperationResult result = (FileOperationResult)chThdWait(fileIoWorkingThread);
 
-            if(result == FileOperationResult_Error)
+            if (result == FileOperationResult_Error)
             {
-                NANOCLR_SET_AND_LEAVE( CLR_E_FILE_IO );
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
-            else if(result == FileOperationResult_NoFile)
+            else if (result == FileOperationResult_NoFile)
             {
-                NANOCLR_SET_AND_LEAVE( CLR_E_FILE_NOT_FOUND );
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
-            else if(result == FileOperationResult_InvalidDrive)
+            else if (result == FileOperationResult_InvalidDrive)
             {
                 // failed to change drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -695,7 +712,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
         }
         else
         {
-            NANOCLR_SET_AND_LEAVE( CLR_E_TIMEOUT );
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
         }
     }
 
@@ -704,7 +721,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
 
     NANOCLR_CLEANUP();
 
-    if(workingBuffer != NULL)
+    if (workingBuffer != NULL)
     {
         platform_free(workingBuffer);
     }
@@ -712,62 +729,64 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___STATIC__VOID__WindowsStorageIStorageFile__BYREF_SZARRAY_U1( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_FileIO::
+    ReadBufferNative___STATIC__VOID__WindowsStorageIStorageFile__BYREF_SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    
-    CLR_RT_HeapBlock    hbTimeout;
-    CLR_INT64*          timeout;
-    bool                eventResult = true;
-    uint32_t            fileSize = 0;
+
+    CLR_RT_HeapBlock hbTimeout;
+    CLR_INT64 *timeout;
+    bool eventResult = true;
+    uint32_t fileSize = 0;
 
     char workingDrive[DRIVE_LETTER_LENGTH];
-    const char*         filePath;
-    char*               workingBuffer = NULL;
-    FileOperation*      fileIoOperation;
+    const char *filePath;
+    char *workingBuffer = NULL;
+    FileOperation *fileIoOperation;
 
-  #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
-    FIL*                fatFile = NULL;
-    FRESULT             operationResult;
-  #endif
-  #if (USE_SPIFFS_FOR_STORAGE == TRUE)
-    spiffs_file*        spiffsFile = NULL;
-  #endif
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+    FIL *fatFile = NULL;
+    FRESULT operationResult;
+#endif
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs_file *spiffsFile = NULL;
+#endif
 
     // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
 
     // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
     hbTimeout.SetInteger((CLR_INT64)-1);
 
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
     // get a pointer to the file path
-    filePath = pThis[ StorageFile::FIELD___path ].DereferenceString()->StringText();
-   
-    if(stack.m_customState == 1)
+    filePath = pThis[StorageFile::FIELD___path].DereferenceString()->StringText();
+
+    if (stack.m_customState == 1)
     {
         // copy the first 2 letters of the path for the drive
         // path is 'D:\folder\file.txt', so we need 'D:'
         memcpy(workingDrive, filePath, DRIVE_LETTER_LENGTH);
 
-        if(WORKING_DRIVE_IS_INTERNAL_DRIVE)
+        if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-          #if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
             // SPIFFS drive workflow
 
             // create file struct
-            spiffsFile = (spiffs_file*)platform_malloc(sizeof(spiffs_file));
+            spiffsFile = (spiffs_file *)platform_malloc(sizeof(spiffs_file));
             // check allocation
-            if(spiffsFile == NULL)
+            if (spiffsFile == NULL)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
 
             // get file name removing the drive letter
-            workingBuffer = (char*)platform_malloc(SPIFFS_OBJ_NAME_LEN);
+            workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
             // sanity check for successfull malloc
-            if(workingBuffer == NULL)
+            if (workingBuffer == NULL)
             {
                 // failed to allocate memory
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -775,7 +794,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___ST
             memcpy(workingBuffer, (filePath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
             *spiffsFile = SPIFFS_open(&fs, workingBuffer, SPIFFS_RDONLY, 0);
-            if(*spiffsFile < 0)
+            if (*spiffsFile < 0)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
@@ -787,70 +806,76 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___ST
             // we are only interested in the file size
             fileSize = fileInfo.size;
 
-          #endif
+#endif
         }
         else
         {
-          #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
             // FatFS workflow
 
             // create file struct
-            fatFile = (FIL*)platform_malloc(sizeof(FIL));
+            fatFile = (FIL *)platform_malloc(sizeof(FIL));
             // check allocation
-            if(fatFile == NULL)
+            if (fatFile == NULL)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
 
             // open file (which is supposed to already exist)
             operationResult = f_open(fatFile, filePath, FA_OPEN_EXISTING | FA_READ);
-            
-            if(operationResult != FR_OK)
+
+            if (operationResult != FR_OK)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
 
             // get file details
-            FILINFO fileInfo; 
+            FILINFO fileInfo;
             f_stat(filePath, &fileInfo);
 
             // we are only interested in the file size
             fileSize = fileInfo.fsize;
 
-          #endif
+#endif
         }
 
         CLR_RT_HeapBlock buffer;
-        buffer.SetObjectReference( NULL );
-        CLR_RT_ProtectFromGC gc2( buffer );
+        buffer.SetObjectReference(NULL);
+        CLR_RT_ProtectFromGC gc2(buffer);
 
         // create a new byte array with the appropriate size (and type)
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( buffer, (CLR_INT32)fileSize, g_CLR_RT_WellKnownTypes.m_UInt8 ));
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_HeapBlock_Array::CreateInstance(buffer, (CLR_INT32)fileSize, g_CLR_RT_WellKnownTypes.m_UInt8));
 
         // store this to the argument passed byref
-        NANOCLR_CHECK_HRESULT(buffer.StoreToReference( stack.Arg1(), 0 ));
+        NANOCLR_CHECK_HRESULT(buffer.StoreToReference(stack.Arg1(), 0));
 
         // get a pointer to the buffer array to improve readability on the code ahead
-        CLR_RT_HeapBlock_Array* bufferArray = buffer.DereferenceArray();
+        CLR_RT_HeapBlock_Array *bufferArray = buffer.DereferenceArray();
 
         // setup FileIO operation
-        fileIoOperation = (FileOperation*)platform_malloc(sizeof(FileOperation));
+        fileIoOperation = (FileOperation *)platform_malloc(sizeof(FileOperation));
 
-      #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
         fileIoOperation->FatFile = fatFile;
-      #endif
-      #if USE_SPIFFS_FOR_STORAGE
+#endif
+#if USE_SPIFFS_FOR_STORAGE
         fileIoOperation->SpiffsFile = spiffsFile;
-      #endif
+#endif
 
-        fileIoOperation->Content = (char*)bufferArray->GetFirstElement();
+        fileIoOperation->Content = (char *)bufferArray->GetFirstElement();
         fileIoOperation->ContentLength = bufferArray->m_numOfElements;
 
         // spawn working thread to perform the read transaction
-        fileIoWorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(2048),
-                                    "STRB", NORMALPRIO, ReadBinaryWorkingThread, fileIoOperation);
+        fileIoWorkingThread = chThdCreateFromHeap(
+            NULL,
+            THD_WORKING_AREA_SIZE(2048),
+            "STRB",
+            NORMALPRIO,
+            ReadBinaryWorkingThread,
+            fileIoOperation);
 
-        if(fileIoWorkingThread == NULL)
+        if (fileIoWorkingThread == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
@@ -859,27 +884,29 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___ST
         stack.m_customState = 2;
     }
 
-    while(eventResult)
+    while (eventResult)
     {
         // non-blocking wait allowing other threads to run while we wait for the write operation to complete
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_StorageIo, eventResult ));
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_StorageIo, eventResult));
 
-        if(eventResult)
+        if (eventResult)
         {
             // event occurred
 
-            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to the heap, otherwise it won't be returned
+            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to
+            // the heap, otherwise it won't be returned
             FileOperationResult result = (FileOperationResult)chThdWait(fileIoWorkingThread);
 
-            if(result == FileOperationResult_Error)
+            if (result == FileOperationResult_Error)
             {
-                NANOCLR_SET_AND_LEAVE( CLR_E_FILE_IO );
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
-            else if(result == FileOperationResult_NoFile)
+            else if (result == FileOperationResult_NoFile)
             {
-                NANOCLR_SET_AND_LEAVE( CLR_E_FILE_NOT_FOUND );
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
-            else if(result == FileOperationResult_InvalidDrive)
+            else if (result == FileOperationResult_InvalidDrive)
             {
                 // failed to change drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -890,7 +917,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___ST
         }
         else
         {
-            NANOCLR_SET_AND_LEAVE( CLR_E_TIMEOUT );
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
         }
     }
 
@@ -899,7 +926,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___ST
 
     NANOCLR_CLEANUP();
 
-    if(workingBuffer != NULL)
+    if (workingBuffer != NULL)
     {
         platform_free(workingBuffer);
     }
@@ -907,62 +934,64 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadBufferNative___ST
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STATIC__VOID__WindowsStorageIStorageFile__BYREF_STRING( CLR_RT_StackFrame& stack )
+HRESULT Library_win_storage_native_Windows_Storage_FileIO::
+    ReadTextNative___STATIC__VOID__WindowsStorageIStorageFile__BYREF_STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock    hbTimeout;
-    CLR_INT64*          timeout;
-    bool                eventResult = true;
-    uint32_t            fileSize = 0;
+    CLR_RT_HeapBlock hbTimeout;
+    CLR_INT64 *timeout;
+    bool eventResult = true;
+    uint32_t fileSize = 0;
 
     char workingDrive[DRIVE_LETTER_LENGTH];
-    const char*         filePath;
-    char*               workingBuffer = NULL;
-    FileOperation*      fileIoOperation;
+    const char *filePath;
+    char *workingBuffer = NULL;
+    FileOperation *fileIoOperation;
 
-  #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
-    FIL*                fatFile = NULL;
-    FRESULT             operationResult;
-  #endif
-  #if (USE_SPIFFS_FOR_STORAGE == TRUE)
-    spiffs_file*        spiffsFile = NULL;
-  #endif
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+    FIL *fatFile = NULL;
+    FRESULT operationResult;
+#endif
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs_file *spiffsFile = NULL;
+#endif
 
     // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
 
     // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
     hbTimeout.SetInteger((CLR_INT64)-1);
 
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks( hbTimeout, timeout ));
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
     // get a pointer to the file path
-    filePath = pThis[ StorageFile::FIELD___path ].DereferenceString()->StringText();
-   
-    if(stack.m_customState == 1)
+    filePath = pThis[StorageFile::FIELD___path].DereferenceString()->StringText();
+
+    if (stack.m_customState == 1)
     {
         // copy the first 2 letters of the path for the drive
         // path is 'D:\folder\file.txt', so we need 'D:'
         memcpy(workingDrive, filePath, DRIVE_LETTER_LENGTH);
 
-        if(WORKING_DRIVE_IS_INTERNAL_DRIVE)
+        if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-          #if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
             // SPIFFS drive workflow
 
             // create file struct
-            spiffsFile = (spiffs_file*)platform_malloc(sizeof(spiffs_file));
+            spiffsFile = (spiffs_file *)platform_malloc(sizeof(spiffs_file));
             // check allocation
-            if(spiffsFile == NULL)
+            if (spiffsFile == NULL)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
 
             // get file name removing the drive letter
-            workingBuffer = (char*)platform_malloc(SPIFFS_OBJ_NAME_LEN);
+            workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
             // sanity check for successfull malloc
-            if(workingBuffer == NULL)
+            if (workingBuffer == NULL)
             {
                 // failed to allocate memory
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -970,7 +999,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
             memcpy(workingBuffer, (filePath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
             *spiffsFile = SPIFFS_open(&fs, workingBuffer, SPIFFS_RDONLY, 0);
-            if(*spiffsFile < 0)
+            if (*spiffsFile < 0)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
@@ -982,71 +1011,76 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
             // we are only interested in the file size
             fileSize = fileInfo.size;
 
-          #endif
+#endif
         }
         else
         {
-          #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
             // FatFS workflow
 
             // create file struct
-            fatFile = (FIL*)platform_malloc(sizeof(FIL));
+            fatFile = (FIL *)platform_malloc(sizeof(FIL));
             // check allocation
-            if(fatFile == NULL)
+            if (fatFile == NULL)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
 
             // open file (which is supposed to already exist)
             operationResult = f_open(fatFile, filePath, FA_OPEN_EXISTING | FA_READ);
-            
-            if(operationResult != FR_OK)
+
+            if (operationResult != FR_OK)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
 
             // get file details
-            FILINFO fileInfo; 
+            FILINFO fileInfo;
             f_stat(filePath, &fileInfo);
 
             // we are only interested in the file size
             fileSize = fileInfo.fsize;
 
-          #endif
+#endif
         }
 
         // create a new string object with the appropriate size
-        CLR_RT_HeapBlock  hbText;
-        hbText.SetObjectReference( NULL );
-        CLR_RT_ProtectFromGC gc( hbText );
+        CLR_RT_HeapBlock hbText;
+        hbText.SetObjectReference(NULL);
+        CLR_RT_ProtectFromGC gc(hbText);
 
-        CLR_RT_HeapBlock_String* textString = CLR_RT_HeapBlock_String::CreateInstance( hbText, (CLR_UINT32)fileSize );
+        CLR_RT_HeapBlock_String *textString = CLR_RT_HeapBlock_String::CreateInstance(hbText, (CLR_UINT32)fileSize);
         FAULT_ON_NULL(textString);
 
         // store this to the argument passed byref
-        NANOCLR_CHECK_HRESULT(hbText.StoreToReference( stack.Arg1(), 0 ));
+        NANOCLR_CHECK_HRESULT(hbText.StoreToReference(stack.Arg1(), 0));
 
         // get a pointer to the buffer array to improve readability on the code ahead
         hbText.DereferenceString();
 
         // setup FileIO operation
-        fileIoOperation = (FileOperation*)platform_malloc(sizeof(FileOperation));
+        fileIoOperation = (FileOperation *)platform_malloc(sizeof(FileOperation));
 
-      #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
+#if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
         fileIoOperation->FatFile = fatFile;
-      #endif
-      #if USE_SPIFFS_FOR_STORAGE
+#endif
+#if USE_SPIFFS_FOR_STORAGE
         fileIoOperation->SpiffsFile = spiffsFile;
-      #endif
+#endif
 
-        fileIoOperation->Content = (char*)textString->StringText();
+        fileIoOperation->Content = (char *)textString->StringText();
         fileIoOperation->ContentLength = fileSize;
 
         // spawn working thread to perform the read transaction
-        fileIoWorkingThread = chThdCreateFromHeap(NULL, THD_WORKING_AREA_SIZE(2048),
-                                    "STRT", NORMALPRIO, ReadTextWorkingThread, fileIoOperation);
+        fileIoWorkingThread = chThdCreateFromHeap(
+            NULL,
+            THD_WORKING_AREA_SIZE(2048),
+            "STRT",
+            NORMALPRIO,
+            ReadTextWorkingThread,
+            fileIoOperation);
 
-        if(fileIoWorkingThread == NULL)
+        if (fileIoWorkingThread == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
@@ -1055,27 +1089,29 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
         stack.m_customState = 2;
     }
 
-    while(eventResult)
+    while (eventResult)
     {
         // non-blocking wait allowing other threads to run while we wait for the write operation to complete
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents( stack.m_owningThread, *timeout, CLR_RT_ExecutionEngine::c_Event_StorageIo, eventResult ));
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_StorageIo, eventResult));
 
-        if(eventResult)
+        if (eventResult)
         {
             // event occurred
 
-            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to the heap, otherwise it won't be returned
+            // ChibiOS requirement: need to call chThdWait on working thread in order to have it's memory released to
+            // the heap, otherwise it won't be returned
             FileOperationResult result = (FileOperationResult)chThdWait(fileIoWorkingThread);
 
-            if(result == FileOperationResult_Error)
+            if (result == FileOperationResult_Error)
             {
-                NANOCLR_SET_AND_LEAVE( CLR_E_FILE_IO );
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
-            else if(result == FileOperationResult_NoFile)
+            else if (result == FileOperationResult_NoFile)
             {
-                NANOCLR_SET_AND_LEAVE( CLR_E_FILE_NOT_FOUND );
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
-            else if(result == FileOperationResult_InvalidDrive)
+            else if (result == FileOperationResult_InvalidDrive)
             {
                 // failed to change drive
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -1086,7 +1122,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
         }
         else
         {
-            NANOCLR_SET_AND_LEAVE( CLR_E_TIMEOUT );
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
         }
     }
 
@@ -1095,7 +1131,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::ReadTextNative___STAT
 
     NANOCLR_CLEANUP();
 
-    if(workingBuffer != NULL)
+    if (workingBuffer != NULL)
     {
         platform_free(workingBuffer);
     }

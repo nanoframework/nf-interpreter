@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -119,6 +119,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
             set(NO_TI_XDCTOOLS_SOURCE FALSE)
         endif()
     endif()
+
     if(NO_TI_XDCTOOLS_SOURCE)
         # no TI XDCTools source specified, download it from it's repo
         
@@ -188,7 +189,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
 
         # get source dir for TI XDCTools CMake project
         ExternalProject_Get_Property(TI_XDCTools SOURCE_DIR)
-        set(TI_XDCTools_INCLUDE_DIR "${CMAKE_BINARY_DIR}/TI_XDCTools_Source/packages" PARENT_SCOPE)
+        set(TI_XDCTools_INCLUDE_DIR ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/packages/ PARENT_SCOPE)
 
     else()
         # TI XDCTools source was specified
@@ -223,7 +224,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
 
         # get source dir for TI XDCTools CMake project
         ExternalProject_Get_Property(TI_XDCTools SOURCE_DIR)
-        set(TI_XDCTools_INCLUDE_DIR ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/packages PARENT_SCOPE)
+        set(TI_XDCTools_INCLUDE_DIR ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/packages/ PARENT_SCOPE)
 
     endif()
 
@@ -255,8 +256,8 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
             message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
         endif()
 
-        message(STATUS "TI SimpleLink CC13x2_26x2 SDK (latest available code from v3.20.00.68")
-        set(TI_SL_CC13x2_26x2_SDK_TAG "3.20.00.68")
+        set(TI_SL_CC13x2_26x2_SDK_TAG "4.20.01.04" CACHE INTERNAL "TI CC13x2_26x2 SDK tag")
+        message(STATUS "TI SimpleLink CC13x2_26x2 SDK (latest available code from v${TI_SL_CC13x2_26x2_SDK_TAG})")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
@@ -296,12 +297,14 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     else()
         # TI SimpleLink CC13x2_26x2 SDK source was specified
 
+        set(TI_SL_CC13x2_26x2_SDK_TAG "XX.XX.XX.XX" CACHE INTERNAL "TI CC13x2_26x2 SDK tag")
+
         # sanity check is source path exists
         if(EXISTS "${TI_SL_CC13x2_26x2_SDK_SOURCE}/")
             message(STATUS "TI SimpleLink CC13x2_26x2 SDK source from: ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
 
             # check if we already have the sources, no need to copy again
-            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_SL_CC13x2_26x2_SDK_SOURCE/ SOURCE_EXISTS)
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
                 file(COPY "${TI_SL_CC13x2_26x2_SDK_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source")
@@ -309,7 +312,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
                 message(STATUS "Using local cache of TI SimpleLink CC13x2_26x2 SDK source from ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
             endif()
 
-            set(SimpleLinkCC13x2_26x2SDK_INCLUDE_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SdkS_Source/ti/devices/cc32xx)
+            set(SimpleLinkCC13x2_26x2SDK_INCLUDE_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SdkS_Source/ti/devices/cc13x2_cc26x2)
         else()
             message(FATAL_ERROR "Couldn't find TI SimpleLink CC13x2_26x2 SDK source at ${TI_SL_CC13x2_26x2_SDK_SOURCE}/")
         endif()
@@ -330,6 +333,123 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
         ExternalProject_Get_Property(SimpleLinkCC13x2_26x2SDK SOURCE_DIR)
     endif()
     
+    # check if TI_SYSCONFIG_SOURCE was specified or if it's empty (default is empty)
+    set(NO_TI_SYSCONFIG_SOURCE TRUE)
+    if(TI_SYSCONFIG_SOURCE)
+        if(NOT "${TI_SYSCONFIG_SOURCE}" STREQUAL "")
+            set(NO_TI_SYSCONFIG_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_TI_SYSCONFIG_SOURCE)
+        # no TI SysConfig source specified, download it from it's repo
+        
+        # check for Git (needed here for advanced warning to user if it's not installed)
+        find_package(Git)
+
+        #  check if Git was found, if not report to user and abort
+        if(NOT GIT_EXECUTABLE)
+            message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
+        endif()
+
+        # TI SysConfig version
+        set(TI_SYSCONFIG_VERSION_EMPTY TRUE)
+
+        # check if build was requested with a specifc TI SysConfig version
+        if(DEFINED TI_SYSCONFIG_VERSION)
+            if(NOT "${TI_SYSCONFIG_VERSION}" STREQUAL "")
+                set(TI_SYSCONFIG_VERSION_EMPTY FALSE)
+            endif()
+        endif()
+
+        # TI SysConfig version
+        set(TI_SYSCONFIG_VERSION_EMPTY TRUE)
+
+        # check if build was requested with a specifc TI SysConfig version
+        if(TI_SYSCONFIG_VERSION_EMPTY)
+            # no TI SysConfig version actualy specified, must be empty which is fine, we'll default to a known good version
+            set(TI_SYSCONFIG_VERSION_TAG "1.5.0")
+        else()
+            # set Git tag
+            set(TI_SYSCONFIG_VERSION_TAG "${TI_SYSCONFIG_VERSION}")
+        endif()
+
+        message(STATUS "TI SysConfig ${TI_SYSCONFIG_VERSION} from GitHub repo")
+
+        # need to setup a separate CMake project to download the code from the GitHub repository
+        # otherwise it won't be available before the actual build step
+        configure_file("${PROJECT_SOURCE_DIR}/CMake/TI_SysConfig.CMakeLists.cmake.in"
+        "${CMAKE_BINARY_DIR}/TI_SysConfig_Download/CMakeLists.txt")
+
+        # setup CMake project for TI SysConfig download
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/TI_SysConfig_Download")
+
+        # run build on TI SysConfig download CMake project to perform the download
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/TI_SysConfig_Download")
+
+        # add TI SysConfig as external project
+        ExternalProject_Add(
+            TI_SysConfig
+            PREFIX TI_SysConfig
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/TI_SysConfig_Source
+            GIT_REPOSITORY  https://github.com/nanoframework/TI_SysConfig
+            GIT_TAG ${TI_SYSCONFIG_VERSION_TAG}  # target specified branch
+            GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+            TIMEOUT 10
+            LOG_DOWNLOAD 1
+        
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )  
+
+        # get source dir for TI SysConfig CMake project
+        ExternalProject_Get_Property(TI_SysConfig SOURCE_DIR)
+        set(TI_SysConfig_INCLUDE_DIR ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/packages PARENT_SCOPE)
+
+    else()
+        # TI SysConfig source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${TI_SYSCONFIG_SOURCE}/")
+            message(STATUS "TI SysConfig (source from: ${TI_SYSCONFIG_SOURCE})")
+
+            # check if we already have the sources, no need to copy again
+            NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/TI_SysConfig_Source/ SOURCE_EXISTS)
+
+            if(NOT ${SOURCE_EXISTS})
+                file(COPY "${TI_SYSCONFIG_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/TI_SysConfig_Source")
+            else()
+                message(STATUS "Using local cache of TI SysConfig source from ${TI_SYSCONFIG_SOURCE}")
+            endif()
+
+        else()
+            message(FATAL_ERROR "Couldn't find TI SysConfig source at ${TI_SYSCONFIG_SOURCE}/")
+        endif()
+
+        # add TI SysConfig as external project
+        ExternalProject_Add(
+            TI_SysConfig
+            PREFIX TI_SysConfig
+            SOURCE_DIR ${CMAKE_BINARY_DIR}/TI_SysConfig_Source
+            # Disable all other steps
+            INSTALL_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+        )        
+
+        # get source dir for TI SysConfig CMake project
+        ExternalProject_Get_Property(TI_SysConfig SOURCE_DIR)
+        set(TI_SysConfig_INCLUDE_DIR "${CMAKE_BINARY_DIR}/TI_SysConfig_Source/packages" PARENT_SCOPE)
+
+    endif()
+
+        
     # check if TI_XDCTOOLS_SOURCE was specified or if it's empty (default is empty)
     set(NO_TI_XDCTOOLS_SOURCE TRUE)
     if(TI_XDCTOOLS_SOURCE)
@@ -337,7 +457,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
             set(NO_TI_XDCTOOLS_SOURCE FALSE)
         endif()
     endif()
-
+    
     if(NO_TI_XDCTOOLS_SOURCE)
         # no TI XDCTools source specified, download it from it's repo
         
@@ -407,7 +527,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
 
         # get source dir for TI XDCTools CMake project
         ExternalProject_Get_Property(TI_XDCTools SOURCE_DIR)
-        set(TI_XDCTools_INCLUDE_DIR ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/packages PARENT_SCOPE)
+        set(TI_XDCTools_INCLUDE_DIR ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/packages/ PARENT_SCOPE)
 
     else()
         # TI XDCTools source was specified
@@ -442,7 +562,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
 
         # get source dir for TI XDCTools CMake project
         ExternalProject_Get_Property(TI_XDCTools SOURCE_DIR)
-        set(TI_XDCTools_INCLUDE_DIR "${CMAKE_BINARY_DIR}/TI_XDCTools_Source/packages" PARENT_SCOPE)
+        set(TI_XDCTools_INCLUDE_DIR ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/packages/ PARENT_SCOPE)
 
     endif()
 

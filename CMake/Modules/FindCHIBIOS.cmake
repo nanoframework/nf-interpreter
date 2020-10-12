@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -9,7 +9,7 @@
 
 # check if the series name is supported 
 
-set(CHIBIOS_STM_SUPPORTED_SERIES "STM32F0xx" "STM32F4xx" "STM32F7xx" "STM32H7xx" "TICC3200" CACHE INTERNAL "supported STM series names for ChibiOS")
+set(CHIBIOS_STM_SUPPORTED_SERIES "STM32F0xx" "STM32F4xx" "STM32F7xx" "STM32H7xx" "TICC3200" "STM32L4xx" CACHE INTERNAL "supported STM series names for ChibiOS")
 set(CHIBIOS_TI_SUPPORTED_SERIES "TICC3200" CACHE INTERNAL "supported TI series names for ChibiOS")
 
 list(FIND CHIBIOS_STM_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
@@ -171,11 +171,13 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-     #message("${SRC_FILE} >> ${CHIBIOS_SRC_FILE}") # debug helper
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${CHIBIOS_SRC_FILE}") # debug helper
+    endif()
     list(APPEND CHIBIOS_SOURCES ${CHIBIOS_SRC_FILE})
 endforeach()
 
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(CHIBIOS DEFAULT_MSG CHIBIOS_INCLUDE_DIRS CHIBIOS_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ChibiOS DEFAULT_MSG CHIBIOS_INCLUDE_DIRS CHIBIOS_SOURCES)

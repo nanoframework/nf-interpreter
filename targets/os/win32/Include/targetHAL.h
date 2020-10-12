@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -8,26 +8,29 @@
 
 // #include <nanoHAL_Power.h>
 
+// set min possible number of sockets
+#define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT 1
+
 #if defined(_WIN32)
 #define NANOCLR_STOP() ::DebugBreak()
-#pragma warning( error : 4706 ) // error C4706: assignment within conditional expression
+#pragma warning(error : 4706) // error C4706: assignment within conditional expression
 #endif
 
 #if !defined(BUILD_RTM)
 
 inline void __cdecl HARD_Breakpoint()
 {
-    if(::IsDebuggerPresent())
+    if (::IsDebuggerPresent())
     {
         ::DebugBreak();
     }
 }
 
-#define HARD_BREAKPOINT()     HARD_Breakpoint()
+#define HARD_BREAKPOINT() HARD_Breakpoint()
 
 inline bool Target_ConfigUpdateRequiresErase()
-{ 
-	return true;
+{
+    return true;
 }
 
 // #if defined(_DEBUG)
@@ -41,19 +44,21 @@ inline bool Target_ConfigUpdateRequiresErase()
 // #define HARD_BREAKPOINT()
 // #define DEBUG_HARD_BREAKPOINT()
 
-#endif  // !defined(BUILD_RTM)
+#endif // !defined(BUILD_RTM)
 
-
-inline bool Target_HasNanoBooter() { return false; };
+inline bool Target_HasNanoBooter()
+{
+    return false;
+};
 
 inline uint32_t GetPlatformCapabilities()
-{ 
-    return 0; 
+{
+    return 0;
 };
 
 inline uint32_t GetTargetCapabilities()
 {
-    return 0; 
+    return 0;
 };
 
 #endif //_TARGET_HAL_H_

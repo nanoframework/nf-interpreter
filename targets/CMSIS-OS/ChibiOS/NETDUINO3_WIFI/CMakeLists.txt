@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -17,7 +17,7 @@ set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(BuildUtils REQUIRED)
-find_package(CHIBIOS REQUIRED)
+find_package(ChibiOS REQUIRED)
 find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
 

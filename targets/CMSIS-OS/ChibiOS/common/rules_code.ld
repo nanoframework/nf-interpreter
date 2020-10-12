@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) 2006..2015 Giovanni Di Sirio.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -20,7 +20,7 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-    .vectors : ALIGN(16)
+    .vectors : ALIGN(1024)
     {
         KEEP(*(.vectors))
     } > VECTORS_FLASH AT > VECTORS_FLASH_LMA

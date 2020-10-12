@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -17,10 +17,6 @@ set(nanoFramework.TI.EasyLink_SRCS
     
     # source files for EasyLink
     EasyLink.c
-    easylink_config.c
-
-    smartrf_settings.c
-    smartrf_settings_predefined.c
 
     # targetEasyLinkCC13xx_CC26xx_RadioTask.c
 
@@ -36,8 +32,6 @@ foreach(SRC_FILE ${nanoFramework.TI.EasyLink_SRCS})
 
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
-            ${TARGET_BASE_LOCATION}/smartrf_settings
-            ${TARGET_BASE_LOCATION}/easylink
             ${PROJECT_SOURCE_DIR}/src/nanoFramework.TI.EasyLink
             ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/common/easylink
             ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR
