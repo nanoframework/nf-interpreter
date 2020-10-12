@@ -44,6 +44,7 @@ steps:
       sourceFolder: $(Agent.TempDirectory)
       Contents: |
         *.zip
+        '$(BoardName)-$(NBGV_AssemblyVersion)-preview.zip'
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(BoardName)'
       flattenFolders: true
     condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( contains(variables['Build.SourceBranchName'], 'develop'), contains(variables['Build.SourceBranchName'], 'release') ) ) )

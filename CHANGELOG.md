@@ -1,8 +1,8 @@
 # Changelog
 
-## [**Changes available only in 'Preview' images:**](https://github.com/nanoframework/nf-interpreter/tree/HEAD)
+## [v1.4.2.1](https://github.com/nanoframework/nf-interpreter/tree/v1.4.2.1) (2020-06-08)
 
-[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.3.2...HEAD)
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.3.2...v1.4.2.1)
 
 **Implemented enhancements:**
 
