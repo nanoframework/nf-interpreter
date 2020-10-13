@@ -17,7 +17,7 @@ set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(BuildUtils REQUIRED)
-find_package(CHIBIOS REQUIRED)
+find_package(ChibiOS REQUIRED)
 find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
 

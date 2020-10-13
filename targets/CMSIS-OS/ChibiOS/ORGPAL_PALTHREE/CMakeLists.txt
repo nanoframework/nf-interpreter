@@ -18,7 +18,7 @@ set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(BuildUtils REQUIRED)
-find_package(CHIBIOS REQUIRED)
+find_package(ChibiOS REQUIRED)
 find_package(ChibiOSnfOverlay REQUIRED)
 find_package(WireProtocol REQUIRED)
 
@@ -44,7 +44,7 @@ endif()
 # nF feature: networking
 if(USE_NETWORKING_OPTION)
     find_package(CHIBIOS_LWIP REQUIRED)
-    find_package(NF_NETWORKING REQUIRED)
+    find_package(NF_Networking REQUIRED)
 endif()
 
 # nF feature: filesystem
