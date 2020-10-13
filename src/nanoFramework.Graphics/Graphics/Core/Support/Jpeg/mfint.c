@@ -1,3 +1,10 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// Original work Copyright (c) 1994-1998, Thomas G. Lane
+// Original work Copyright (c) 1996 Intel Corporation.
+// See LICENSE file in the project root for full license information.
+//
+
 /***************************************************************************
 *
 *                INTEL Corporation Proprietary Information

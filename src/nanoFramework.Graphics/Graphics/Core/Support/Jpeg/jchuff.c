@@ -1,3 +1,9 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// Original work Copyright (c) 1994-1998, Thomas G. Lane
+// See LICENSE file in the project root for full license information.
+//
+
 /*
  * jchuff.c
  *

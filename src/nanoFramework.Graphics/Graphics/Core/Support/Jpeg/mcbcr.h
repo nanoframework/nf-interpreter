@@ -1,3 +1,8 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+
 #ifndef MCBCR_H
 #define MCBCR_H 1
 
