@@ -12,6 +12,7 @@
 #include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_Graphics.h>
 
 #if (HAL_USE_CAN == TRUE)
 #include <nf_devices_can_native_target.h>
@@ -67,14 +68,15 @@ void nanoHAL_Initialize()
     ::HeapLocation(heapStart, heapSize);
     memset(heapStart, 0, heapSize);
 
+#if NANOCLR_GRAPHICS
+    g_GraphicsMemoryHeap.Initialize();
+#endif	
+
     ConfigurationManager_Initialize();
 
     Events_Initialize();
 
     CPU_GPIO_Initialize();
-
-    // no PAL events required until now
-    // PalEvent_Initialize();
 
 #if (HAL_USE_CAN == TRUE)
 
@@ -138,6 +140,19 @@ void nanoHAL_Initialize()
     Uart8_PAL.UartDriver = NULL;
 #endif
 
+#endif
+
+#if NANOCLR_GRAPHICS
+    DisplayInterfaceConfig config; // not used for DSI display
+    g_DisplayInterface.Initialize(config);
+    g_DisplayDriver.Initialize();
+
+    // g_TouchInterface.Initialize();
+    // g_TouchDevice.Initialize();
+
+    // PalEvent_Initialize();
+    //Gesture_Initialize();
+    //Ink_Initialize();
 #endif
 
     // Initialise Network Stack

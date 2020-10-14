@@ -2816,8 +2816,12 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System", "WeakReference", m_WeakReference),
 
     TIL("Microsoft.SPOT", "SerializationHintsAttribute", m_SerializationHintsAttribute),
-
     TIL("Microsoft.SPOT.Hardware", "WatchdogException", m_WatchdogException),
+
+    TIL("nanoFramework.UI", "Bitmap", m_Bitmap),
+    TIL("nanoFramework.UI", "Font", m_Font),
+    TIL("nanoFramework.Touch", "TouchEvent", m_TouchEvent),
+    TIL("nanoFramework.Touch", "TouchInput", m_TouchInput),
 
     TIL("System.Net.NetworkInformation", "NetworkInterface", m_NetworkInterface),
     TIL("System.Net.NetworkInformation", "Wireless80211Configuration", m_Wireless80211Configuration),

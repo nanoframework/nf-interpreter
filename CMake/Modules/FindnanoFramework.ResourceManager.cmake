@@ -8,6 +8,11 @@
 list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
 list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.ResourceManager")
 
+if(API_nanoFramework.Graphics)
+list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core")
+list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Displays")
+endif()
+
 
 # source files
 set(nanoFramework.ResourceManager_SRCS

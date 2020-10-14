@@ -1551,6 +1551,11 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_WeakReference;
 
     CLR_RT_TypeDef_Index m_SerializationHintsAttribute;
+    CLR_RT_TypeDef_Index m_Bitmap;
+    CLR_RT_TypeDef_Index m_Font;
+
+    CLR_RT_TypeDef_Index m_TouchEvent;
+    CLR_RT_TypeDef_Index m_TouchInput;
 
     CLR_RT_TypeDef_Index m_NetworkInterface;
     CLR_RT_TypeDef_Index m_Wireless80211Configuration;

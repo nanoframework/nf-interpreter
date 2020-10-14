@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+set(NANOCLR_PROJECT_NAME "nanoCLR")
+add_executable(${NANOCLR_PROJECT_NAME}.elf)	# This is the program we are building, ESP32 has its own pre-built bootloader.bin, so no nanoBooter
+
 ENABLE_LANGUAGE(ASM)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
@@ -56,6 +59,10 @@ add_subdirectory("IDF")
 add_subdirectory("Network")
 add_subdirectory("nanoCLR")
 
+#if(NANOCLR_GRAPHICS)
+#add_subdirectory("Graphics")
+#endif()
+
 # mbed TLS requires a config file
 if(USE_SECURITY_MBEDTLS_OPTION)
     # # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
@@ -79,9 +86,10 @@ add_library(NanoApiLib STATIC ${TARGET_NANO_APIS_SOURCES} )
 #######################
 # nanoCLR executable
 
-add_executable(
+target_sources(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
+	PUBLIC
 
     "${CMAKE_CURRENT_SOURCE_DIR}/target_common.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c"
@@ -199,6 +207,7 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     ${NF_CoreCLR_INCLUDE_DIRS}
     ${NF_Debugger_INCLUDE_DIRS}
     ${NF_Networking_INCLUDE_DIRS}
+	${Graphics_Includes}
 
     # includes for nanoFramework APIs
     ${TARGET_NANO_APIS_INCLUDES}
