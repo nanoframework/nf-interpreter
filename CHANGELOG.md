@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.5.0.103](https://github.com/nanoframework/nf-interpreter/tree/v1.5.0.103) (2020-10-14)
+
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.5.0.101...v1.5.0.103)
+
+**Implemented enhancements:**
+
+- Graphics ready for merge [\#1721](https://github.com/nanoframework/nf-interpreter/pull/1721)
+
+**Documentation and other chores:**
+
+- Update Windows.Devices.Spi declaration [\#1732](https://github.com/nanoframework/nf-interpreter/pull/1732)
+
 ## [v1.5.0.101](https://github.com/nanoframework/nf-interpreter/tree/v1.5.0.101) (2020-10-12)
 
 [Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.4.2.1...v1.5.0.101)
@@ -24,6 +36,7 @@
 - Minor tweaks on targets launch config and cmake variants [\#1671](https://github.com/nanoframework/nf-interpreter/pull/1671)
 - Improve GPIO events for ESP32 [\#1660](https://github.com/nanoframework/nf-interpreter/pull/1660)
 - Rework ESP32 serial update [\#1658](https://github.com/nanoframework/nf-interpreter/pull/1658)
+- Rework SPI to detach it allowing reuse by several devices [\#1637](https://github.com/nanoframework/nf-interpreter/pull/1637)
 
 **Fixed bugs:**
 
@@ -47,6 +60,7 @@
 
 **Documentation and other chores:**
 
+- Release release-v1.5.0 [\#1731](https://github.com/nanoframework/nf-interpreter/pull/1731)
 - Update mscorlib declaration [\#1706](https://github.com/nanoframework/nf-interpreter/pull/1706)
 - Fix wake-up from standby [\#1704](https://github.com/nanoframework/nf-interpreter/pull/1704)
 - Rework mbedTLS for ESP32 [\#1685](https://github.com/nanoframework/nf-interpreter/pull/1685)
@@ -61,7 +75,6 @@
 - Add ORGPAL3 target [\#1654](https://github.com/nanoframework/nf-interpreter/pull/1654)
 - Remove c\_Flags\_Patch from CLR\_RECORD\_ASSEMBLY [\#1644](https://github.com/nanoframework/nf-interpreter/pull/1644)
 - Add SetupTimeoutFromTimeSpan [\#1643](https://github.com/nanoframework/nf-interpreter/pull/1643)
-- First Preview of graphics [\#1641](https://github.com/nanoframework/nf-interpreter/pull/1641)
 - Update SerialCommunication assembly to include enums from managed [\#1640](https://github.com/nanoframework/nf-interpreter/pull/1640)
 - Update SPI declaration [\#1639](https://github.com/nanoframework/nf-interpreter/pull/1639)
 - Update Devices.Gpio declaration [\#1638](https://github.com/nanoframework/nf-interpreter/pull/1638)
@@ -98,7 +111,6 @@
 - Extract AssertBlockStorage to it's own function [\#1472](https://github.com/nanoframework/nf-interpreter/pull/1472)
 - Enable support for multiple block storage devices [\#1466](https://github.com/nanoframework/nf-interpreter/pull/1466)
 - Add support for new ResourceManager class lib [\#1459](https://github.com/nanoframework/nf-interpreter/pull/1459)
-- Implement working GetCustomAttributes [\#1429](https://github.com/nanoframework/nf-interpreter/pull/1429)
 
 **Fixed bugs:**
 
@@ -164,7 +176,6 @@
 - Add serial configuration to STM32F091 [\#1468](https://github.com/nanoframework/nf-interpreter/pull/1468)
 - Improvements in STM32 flash driver V1 [\#1467](https://github.com/nanoframework/nf-interpreter/pull/1467)
 - Fix time accuracy [\#1465](https://github.com/nanoframework/nf-interpreter/pull/1465)
-- Fix terminators on NFReleaseInfo strings [\#1464](https://github.com/nanoframework/nf-interpreter/pull/1464)
 - Fix for GetStorageFilesNative when using SPIFFS [\#1462](https://github.com/nanoframework/nf-interpreter/pull/1462)
 - Fix support for SRAM [\#1460](https://github.com/nanoframework/nf-interpreter/pull/1460)
 
@@ -208,6 +219,7 @@
 
 **Fixed bugs:**
 
+- Fix terminators on NFReleaseInfo strings [\#1464](https://github.com/nanoframework/nf-interpreter/pull/1464)
 - Improve valid image check to account for ITCM access devices [\#1457](https://github.com/nanoframework/nf-interpreter/pull/1457)
 
 **Documentation and other chores:**
@@ -229,6 +241,7 @@
 - Improvements in Monitor\_FlashSectorMap [\#1447](https://github.com/nanoframework/nf-interpreter/pull/1447)
 - Improvements in block storage API [\#1446](https://github.com/nanoframework/nf-interpreter/pull/1446)
 - Add full type name to System::Double [\#1439](https://github.com/nanoframework/nf-interpreter/pull/1439)
+- Implement working GetCustomAttributes [\#1429](https://github.com/nanoframework/nf-interpreter/pull/1429)
 - Rework SSL code [\#1427](https://github.com/nanoframework/nf-interpreter/pull/1427)
 - Fix configuration manager initialization [\#1425](https://github.com/nanoframework/nf-interpreter/pull/1425)
 - Add GPIO ChangeCounter [\#1421](https://github.com/nanoframework/nf-interpreter/pull/1421)
@@ -656,7 +669,6 @@
 - Replace path for mscorlib.pe [\#288](https://github.com/nanoframework/nf-interpreter/pull/288)
 - Improve error reporting detail [\#286](https://github.com/nanoframework/nf-interpreter/pull/286)
 - Fix ComputeAssemblyHash [\#279](https://github.com/nanoframework/nf-interpreter/pull/279)
-- Moved nanoCLR\_ParseOptions file to src folder [\#277](https://github.com/nanoframework/nf-interpreter/pull/277)
 - Enable Target\_GetReleaseInfo [\#267](https://github.com/nanoframework/nf-interpreter/pull/267)
 - Enable GetClrReleaseInfo in Debugger [\#266](https://github.com/nanoframework/nf-interpreter/pull/266)
 - Revert types to well known defined types [\#251](https://github.com/nanoframework/nf-interpreter/pull/251)
