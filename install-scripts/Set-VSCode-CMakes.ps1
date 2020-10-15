@@ -90,7 +90,7 @@ function Set-VSCode-CMakes {
             $object = ($choice | Get-Member -MemberType NoteProperty)
             
             # need to grab the name to be used as key
-            $key = $object.Name
+            $key = $object.Name.ToString()
             
             # now add it, use with force, in case this to update the value
             $cmakeVariants.linkage.choices | Add-Member -MemberType NoteProperty -Name $key -Value $choice."$key" -Force
