@@ -43,6 +43,7 @@
           "NF_FEATURE_RTC": "ON",
           "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
           "API_Windows.Devices.Gpio": "ON",
+          "API_System.Device.Gpio": "ON",
           "API_Windows.Devices.Spi": "OFF",
           "API_Windows.Devices.I2c": "OFF",
           "API_Windows.Devices.Adc": "OFF",

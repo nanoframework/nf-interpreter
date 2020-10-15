@@ -508,6 +508,13 @@ else()
 endif()
 
 
+if(API_System.Device.Gpio)
+    set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for System.Device.Gpio")
+else()
+    set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for System.Device.Gpio")
+endif()
+
+
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
 else()
@@ -577,6 +584,7 @@ endif()
 # include nanoFramework.Runtime.Events API
 if( API_nanoFramework.Devices.OneWire OR 
     API_System.Net OR
+    API_System.Device.Gpio OR
     API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
     API_Windows.Networking.Sockets OR

@@ -19,7 +19,8 @@ option(API_nanoFramework.System.Text            "option for nanoFramework.System
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
-option(API_System.Device.Dac                   "option for System.Device.Dac API")
+option(API_System.Device.Dac                    "option for System.Device.Dac API")
+option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
 option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
 option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
 option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
@@ -191,6 +192,12 @@ macro(ParseNativeAssemblies)
     if(API_System.Device.Dac)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("System.Device.Dac")
+    endif()
+
+    # System.Device.Gpio
+    if(API_System.Device.Gpio)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("System.Device.Gpio")
     endif()
 
     # Windows.Devices.Gpio

@@ -6,20 +6,15 @@
 
 #include <targetPAL.h>
 #include <corlib_native.h>
-#include "win_dev_gpio_native_target.h"
+#include "sys_dev_gpio_native_target.h"
 #include "nf_rt_events_native.h"
+#include "sys_dev_gpio_native.h"
 
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
+// declared here as external
+// the implementation will be moved here when Windows.Devices.Gpio is removed
+extern void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState);
 
-//  move this to sys_dev_gpio_native_System_Device_Gpio_GpioPin when Windows.Devices.Gpio is removed
-void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState)
-{
-    // if handle registered then post a managed event with the current pin reading
-    PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState);
-}
-
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___WindowsDevicesGpioGpioPinValue(
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Read___SystemDeviceGpioPinValue(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -27,8 +22,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___Windows
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        if (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue].NumericByRef().u1 !=
-            0)
+        if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
@@ -40,7 +34,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Read___Windows
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Toggle___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -48,8 +42,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
         FAULT_ON_NULL(pThis);
 
         // check if object has been disposed
-        if (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue].NumericByRef().u1 !=
-            0)
+        if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
@@ -75,7 +68,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID(
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::DisposeNative___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -92,8 +85,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::
-    NativeIsDriveModeSupported___BOOLEAN__WindowsDevicesGpioGpioPinDriveMode(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::
+    NativeIsDriveModeSupported___BOOLEAN__SystemDeviceGpioPinMode(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -110,8 +103,8 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::
-    NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeSetDriveMode___VOID__SystemDeviceGpioPinMode(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -122,8 +115,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        if (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue].NumericByRef().u1 !=
-            0)
+        if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
@@ -141,9 +133,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::
 
             // flag to determine if there are any callbacks registered in managed code
             // this is use to determine if there is any need to setup and process INT handler
-            callbacksRegistered =
-                (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___callbacks].Dereference() !=
-                 NULL);
+            callbacksRegistered = (pThis[FIELD___callbacks].Dereference() != NULL);
 
             validPin = CPU_GPIO_EnableInputPin(
                 pinNumber,
@@ -165,19 +155,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___BOOLEAN__I4(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-        GPIO_PIN pinNumber = (GPIO_PIN)stack.Arg1().NumericByRef().s4;
-
-        // Return value to the managed application
-        stack.SetResult_Boolean(CPU_GPIO_ReservePin(pinNumber, true));
-    }
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
-
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebounceTimeout___VOID(
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeSetDebounceTimeout___VOID(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -199,7 +177,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebou
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___VOID__WindowsDevicesGpioGpioPinValue(
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::WriteNative___VOID__SystemDeviceGpioPinValue(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -208,8 +186,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
         FAULT_ON_NULL(pThis);
 
         // check if object has been disposed
-        if (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue].NumericByRef().u1 !=
-            0)
+        if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
@@ -235,7 +212,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlternateFunction___VOID__I4(
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeSetAlternateFunction___VOID__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -244,8 +221,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlter
         FAULT_ON_NULL(pThis);
 
         // check if object has been disposed
-        if (pThis[Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::FIELD___disposedValue].NumericByRef().u1 !=
-            0)
+        if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
@@ -261,7 +237,19 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetAlter
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::ExtractDebounceTimeSpanValue(
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeInit___BOOLEAN__I4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        GPIO_PIN pinNumber = (GPIO_PIN)stack.Arg1().NumericByRef().s4;
+
+        // Return value to the managed application
+        stack.SetResult_Boolean(CPU_GPIO_ReservePin(pinNumber, true));
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::ExtractDebounceTimeSpanValue(
     CLR_RT_HeapBlock &timeSpanValue,
     CLR_UINT64 &value)
 {

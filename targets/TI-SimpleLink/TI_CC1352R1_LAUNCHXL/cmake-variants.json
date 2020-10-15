@@ -41,6 +41,7 @@
           "NF_BUILD_RTM": "OFF",
           "API_System.Math": "ON",
           "API_Windows.Devices.Gpio": "ON",
+          "API_System.Device.Gpio": "ON",
           "API_Windows.Devices.Spi": "OFF",
           "API_Windows.Devices.I2c": "OFF",
           "API_Windows.Devices.Pwm": "OFF",
