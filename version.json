@@ -4,6 +4,10 @@
   "assemblyVersion": {
     "precision": "revision"
   },
+  "semVer1NumericIdentifierPadding": 3,
+  "nuGetPackageVersion": {
+    "semVer": 2.0
+  },
   "publicReleaseRefSpec": [
     "^refs/heads/master$",
     "^refs/heads/v\\d+(?:\\.\\d+)?$"
@@ -19,7 +23,7 @@
   },
   "release": {
     "branchName": "release-v{version}",
-    "versionIncrement": "revision",
+    "versionIncrement": "build",
     "firstUnstableTag": "preview"
   }
 }
