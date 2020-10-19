@@ -10,7 +10,11 @@ steps:
         script: |
             if($env:PackageName -eq $null)
             {
-              Write-Host "$("##vso[task.setvariable variable=PackageName]")$env:TargetName"
+              Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$env:TargetName"
+            }
+            else
+            {
+              Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$env:PackageName"
             }
         errorActionPreference: 'stop'
         failOnStderr: 'true'

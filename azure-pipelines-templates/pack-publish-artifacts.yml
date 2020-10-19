@@ -13,7 +13,7 @@ steps:
         *.hex
         *.s19
         *.dfu
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(PackageName)'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
     condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
     displayName: Collecting deployable artifacts
