@@ -1,0 +1,16 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+
+  - task: PowerShell@2
+    displayName: Set target publish package name
+    inputs:
+        targetType: 'inline'
+        script: |
+            if($env:PackageName -eq $null)
+            {
+              Write-Host "$("##vso[task.setvariable variable=PackageName]")$env:TargetName"
+            }
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'

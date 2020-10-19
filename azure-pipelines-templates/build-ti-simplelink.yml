@@ -8,7 +8,7 @@ steps:
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '-G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/toolchain.arm-none-eabi.cmake -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version) -DTI_BOARD=$(BoardName) $(BuildOptions) ..'
+      cmakeArgs: '-G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/toolchain.arm-none-eabi.cmake -DTOOLCHAIN_PREFIX=$(GNU_GCC_TOOLCHAIN_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_Version).$(NBGV_VersionHeight) -DTI_BOARD=$(TargetName) $(BuildOptions) ..'
       workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Setup build with CMake
 

@@ -14,7 +14,7 @@ steps:
       Write-host "Files changed:"
       $commit.files | % {$_.filename}
 
-      if ( $commit.files.filename -like "*$(BoardName)/managed_helpers*" )
+      if ( $commit.files.filename -like "*$(TargetName)/managed_helpers*" )
       {
         echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
 
@@ -37,7 +37,7 @@ steps:
   - task: NuGetCommand@2
     inputs:
       command: 'custom' 
-      arguments: 'pack targets\CMSIS-OS\ChibiOS\$(BoardName)\managed_helpers\package.nuspec -Version $(PACKAGE_NUGET_VERSION)'
+      arguments: 'pack targets\CMSIS-OS\ChibiOS\$(TargetName)\managed_helpers\package.nuspec -Version $(PACKAGE_NUGET_VERSION)'
     condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
     displayName: Pack managed helpers NuGet
 
