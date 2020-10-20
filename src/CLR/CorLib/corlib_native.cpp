@@ -328,6 +328,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN,
     NULL,
     NULL,
@@ -1036,6 +1037,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN,
     NULL,
     NULL,
@@ -1409,18 +1411,18 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x14A112A6,
+    0x5B91B419,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x09DDE96D,
+    0x13B1386D,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 5, 0, 0 }
+    { 100, 5, 0, 1 }
 };
 
 // clang-format on
