@@ -488,6 +488,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Reflection_Assembly::LoadInternal___STATIC__SystemReflectionAssembly__STRING__BOOLEAN__I4__I4__I4__I4,
     Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemReflectionAssembly__SZARRAY_U1,
     NULL,
+    Library_corlib_native_System_Enum::HasFlag___BOOLEAN__SystemEnum,
     NULL,
     Library_corlib_native_System_GC::AnyPendingFinalizers___STATIC__BOOLEAN,
     NULL,
@@ -1175,6 +1176,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_corlib_native_System_Enum::HasFlag___BOOLEAN__SystemEnum,
     NULL,
     Library_corlib_native_System_GC::AnyPendingFinalizers___STATIC__BOOLEAN,
     NULL,
@@ -1411,18 +1413,18 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x5B91B419,
+    0x7F15FC30,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x13B1386D,
+    0xB2C71FC2,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 5, 0, 1 }
+    { 100, 5, 0, 2 }
 };
 
 // clang-format on
