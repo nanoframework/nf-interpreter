@@ -672,7 +672,6 @@ struct Library_corlib_native_System_Enum
     NANOCLR_NATIVE_DECLARE(HasFlag___BOOLEAN__SystemEnum);
 
     //--//
-
 };
 
 struct Library_corlib_native_System_GC
