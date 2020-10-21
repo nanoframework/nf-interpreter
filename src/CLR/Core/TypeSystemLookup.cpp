@@ -6,6 +6,8 @@
 #include "Core.h"
 #include "corhdr_private.h"
 
+// clang-format off
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define DT_NA    CLR_RT_DataTypeLookup::c_NA
@@ -90,7 +92,7 @@ const CLR_RT_DataTypeLookup c_CLR_RT_DataTypeLookup[] =
     { DT_NA                                                                   , DT_NA, DT_NA, DT_T(FREEBLOCK           ), DT_CNV(END      ), NULL                       , DT_NOREL(CLR_RT_HeapBlock                                 ) DT_OPT_NAME(FREEBLOCK           ) }, // DATATYPE_FREEBLOCK
     { DT_NA                                                                   , DT_NA, DT_NA, DT_T(CACHEDBLOCK         ), DT_CNV(END      ), NULL                       , DT_NOREL(CLR_RT_HeapBlock_Node                            ) DT_OPT_NAME(CACHEDBLOCK         ) }, // DATATYPE_CACHEDBLOCK
     { DT_REF                                                                  , DT_NA, DT_NA, DT_T(ASSEMBLY            ), DT_CNV(END      ), NULL                       , DT_REL  (CLR_RT_Assembly               ::Relocate         ) DT_OPT_NAME(ASSEMBLY            ) }, // DATATYPE_ASSEMBLY
-    { DT_REF                                                           | DT_MT, DT_NA, DT_BL, DT_T(WEAKCLASS           ), DT_CNV(END      ), NULL                       , DT_REL  (CLR_RT_HeapBlock_WeakReference::Relocate         ) DT_OPT_NAME(WEAKCLASS           ) }, // DATATYPE_WEAKCLASS
+    { DT_REF                                                           | DT_MT, DT_NA, DT_BL, DT_T(WEAKCLASS           ), DT_CNV(END      ), DT_CLS(m_WeakReference    ), DT_REL  (CLR_RT_HeapBlock_WeakReference::Relocate         ) DT_OPT_NAME(WEAKCLASS           ) }, // DATATYPE_WEAKCLASS
     {                                                                    DT_MT, DT_NA, DT_NA, DT_T(REFLECTION          ), DT_CNV(END      ), NULL                       , DT_NOREL(CLR_RT_HeapBlock                                 ) DT_OPT_NAME(REFLECTION          ) }, // DATATYPE_REFLECTION
     {                                                                    DT_MT, DT_NA, DT_NA, DT_T(ARRAY_BYREF         ), DT_CNV(END      ), NULL                       , DT_REL  (CLR_RT_HeapBlock              ::Relocate_ArrayRef) DT_OPT_NAME(ARRAY_BYREF         ) }, // DATATYPE_ARRAY_BYREF
     { DT_REF                                                           | DT_MT, DT_NA, DT_BL, DT_T(DELEGATE_HEAD       ), DT_CNV(END      ), NULL                       , DT_REL  (CLR_RT_HeapBlock_Delegate     ::Relocate         ) DT_OPT_NAME(DELEGATE_HEAD       ) }, // DATATYPE_DELEGATE_HEAD
@@ -1772,3 +1774,4 @@ const CLR_RT_LogicalOpcodeLookup c_CLR_RT_LogicalOpcodeLookup[] =
     OPDEF(Unsupported           , VAL_NONE       ),    // LO_Unsupported               = 0x40,
 };
 
+// clang-format on
