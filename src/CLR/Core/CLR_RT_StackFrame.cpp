@@ -166,7 +166,7 @@ HRESULT CLR_RT_StackFrame::Push( CLR_RT_Thread* th, const CLR_RT_MethodDef_Insta
 
     if(md->numLocals)
     {        
-        g_CLR_RT_ExecutionEngine.InitializeLocals( stack->m_locals, assm, md );
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeLocals( stack->m_locals, assm, md ));
     }
 
     {
