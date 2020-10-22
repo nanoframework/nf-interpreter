@@ -244,6 +244,11 @@ void CPU_GPIO_SetPinState(GPIO_PIN pin, GpioPinValue PinState)
     palWriteLine(GetIoLine(pin), (int)PinState);
 }
 
+void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
+{
+    palToggleLine(GetIoLine(pinNumber));
+}
+
 bool CPU_GPIO_EnableInputPin(
     GPIO_PIN pinNumber,
     CLR_UINT64 debounceTimeMilliseconds,
