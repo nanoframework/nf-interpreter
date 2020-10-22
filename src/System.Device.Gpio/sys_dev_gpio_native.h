@@ -50,9 +50,8 @@ struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin
     static const int FIELD___pinMode = 3;
     static const int FIELD___debounceTimeout = 4;
     static const int FIELD___callbacks = 5;
-    static const int FIELD___lastOutputValue = 6;
-    static const int FIELD___lastInputValue = 7;
-    static const int FIELD___disposedValue = 8;
+    static const int FIELD___lastInputValue = 6;
+    static const int FIELD___disposedValue = 7;
 
     NANOCLR_NATIVE_DECLARE(Read___SystemDeviceGpioPinValue);
     NANOCLR_NATIVE_DECLARE(Toggle___VOID);

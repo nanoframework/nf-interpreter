@@ -213,6 +213,15 @@ void CPU_GPIO_SetPinState(GPIO_PIN pin, GpioPinValue PinState)
     gpio_set_level((gpio_num_t)pin, (uint32_t)PinState);
 }
 
+// Toggle pin state
+void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
+{
+    // platform DOES NOT support toggle
+    // need to do it "the hard way"
+    GpioPinValue newState = (GpioPinValue)(gpio_get_level((gpio_num_t)pinNumber) ^ GpioPinValue_High);
+    gpio_set_level((gpio_num_t)pinNumber, (uint32_t)newState);
+}
+
 // ISR called by IDF
 static void gpio_isr(void *arg)
 {

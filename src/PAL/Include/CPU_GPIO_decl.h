@@ -129,6 +129,17 @@ GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN Pin);
 //  Set state of output gpio pin
 void CPU_GPIO_SetPinState(GPIO_PIN Pin, GpioPinValue PinState);
 
+//
+// CPU_GPIO_TogglePinState
+//
+// Parameters :-
+//
+// pinNumber
+//   The number of the output pin for which the state is to be toggled.
+// Return Value
+//
+void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber);
+
 //  Check if pin is already reserved
 //  Returns true if pin is already reserved
 bool CPU_GPIO_PinIsBusy(GPIO_PIN Pin);

@@ -55,16 +55,13 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Toggle___VOID(CL
         // sanity check for drive mode set to output so we don't mess up writing to an input pin
         if (driveMode >= GpioPinDriveMode_Output)
         {
-            // Not all lower level API offer a 'toggle', so need to rely on the last output value field and toggle that
-            // one
-            GpioPinValue newState =
-                (GpioPinValue)(GpioPinValue_High ^ (GpioPinValue)pThis[FIELD___lastOutputValue].NumericByRef().s4);
+            CPU_GPIO_TogglePinState(pinNumber);
 
-            // ...write back to the GPIO...
-            CPU_GPIO_SetPinState(pinNumber, newState);
-
-            // ... and finally store it
-            pThis[FIELD___lastOutputValue].NumericByRef().s4 = newState;
+            // fire event, only if there are callbacks registered
+            if (pThis[FIELD___callbacks].Dereference() != NULL)
+            {
+                PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)CPU_GPIO_GetPinState(pinNumber));
+            }
         }
     }
     NANOCLR_NOCLEANUP();
@@ -282,8 +279,11 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Write(CLR_RT_Hea
     {
         CPU_GPIO_SetPinState(pinNumber, (GpioPinValue)pinValue);
 
-        // store the output value in the field
-        gpioPin[FIELD___lastOutputValue].NumericByRef().s4 = pinValue;
+        // fire event if there are callbacks registered
+        if (gpioPin[FIELD___callbacks].Dereference() != NULL)
+        {
+            PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinValue);
+        }
     }
     else
     {
