@@ -66,7 +66,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::SetPinMod
 
     GPIO_PIN pinNumber;
     GpioPinDriveMode driveMode;
-    bool validPin;
+    CLR_RT_HeapBlock *gpioPin = NULL;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -79,19 +79,15 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::SetPinMod
     pinNumber = (GPIO_PIN)stack.Arg1().NumericByRef().s4;
     driveMode = (GpioPinDriveMode)stack.Arg2().NumericByRef().s4;
 
-    if (driveMode >= (int)GpioPinDriveMode_Output)
+    // try to get GpioPin object
+    GetGpioPin(pinNumber, stack, gpioPin);
+
+    if (gpioPin == NULL)
     {
-        validPin = CPU_GPIO_EnableOutputPin(pinNumber, GpioPinValue_Low, (GpioPinDriveMode)driveMode);
-    }
-    else
-    {
-        validPin = CPU_GPIO_EnableInputPin(pinNumber, -1, NULL, NULL, GPIO_INT_EDGE_BOTH, (GpioPinDriveMode)driveMode);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
-    if (!validPin)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
+    NANOCLR_CHECK_HRESULT(GpioPin::SetPinMode(gpioPin, driveMode));
 
     NANOCLR_NOCLEANUP();
 }
@@ -101,6 +97,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeRea
     NANOCLR_HEADER();
 
     GPIO_PIN pinNumber;
+    bool pinValue;
     CLR_RT_HeapBlock *gpioPin = NULL;
 
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -121,8 +118,10 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeRea
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
-    // read pin and set result
-    stack.SetResult_U1(CPU_GPIO_GetPinState(pinNumber));
+    NANOCLR_CHECK_HRESULT(GpioPin::Read(gpioPin, pinValue));
+
+    // set result
+    stack.SetResult_I4(pinValue);
 
     NANOCLR_NOCLEANUP();
 }
@@ -155,11 +154,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeWri
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
-    // write to pin
-    CPU_GPIO_SetPinState(pinNumber, state);
-
-    // store the output value in the field
-    gpioPin[GpioPin::FIELD___lastOutputValue].NumericByRef().s4 = state;
+    NANOCLR_CHECK_HRESULT(GpioPin::Write(gpioPin, state));
 
     NANOCLR_NOCLEANUP();
 }

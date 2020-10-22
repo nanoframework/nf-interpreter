@@ -11,6 +11,7 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
+#include <CPU_GPIO_decl.h>
 
 typedef enum __nfpack PinEventTypes
 {
@@ -31,6 +32,7 @@ typedef enum __nfpack PinEventTypes
 //     PinMode_OutputOpenSource = 6,
 //     PinMode_OutputOpenSourcePullDown = 7,
 // } PinMode;
+typedef GpioPinDriveMode PinMode;
 
 struct Library_sys_dev_gpio_native_System_Device_Gpio_PinValue
 {
@@ -39,10 +41,41 @@ struct Library_sys_dev_gpio_native_System_Device_Gpio_PinValue
     //--//
 };
 
+struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin
+{
+    static const int FIELD_STATIC__s_gpioPinEventManager = 0;
+
+    static const int FIELD___syncLock = 1;
+    static const int FIELD___pinNumber = 2;
+    static const int FIELD___pinMode = 3;
+    static const int FIELD___debounceTimeout = 4;
+    static const int FIELD___callbacks = 5;
+    static const int FIELD___lastOutputValue = 6;
+    static const int FIELD___lastInputValue = 7;
+    static const int FIELD___disposedValue = 8;
+
+    NANOCLR_NATIVE_DECLARE(Read___SystemDeviceGpioPinValue);
+    NANOCLR_NATIVE_DECLARE(Toggle___VOID);
+    NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeIsPinModeSupported___BOOLEAN__SystemDeviceGpioPinMode);
+    NANOCLR_NATIVE_DECLARE(NativeSetPinMode___VOID__SystemDeviceGpioPinMode);
+    NANOCLR_NATIVE_DECLARE(NativeInit___BOOLEAN__I4);
+    NANOCLR_NATIVE_DECLARE(NativeSetDebounceTimeout___VOID);
+    NANOCLR_NATIVE_DECLARE(WriteNative___VOID__SystemDeviceGpioPinValue);
+    NANOCLR_NATIVE_DECLARE(NativeSetAlternateFunction___VOID__I4);
+
+    //--//
+
+    static HRESULT ExtractDebounceTimeSpanValue(CLR_RT_HeapBlock &timeSpanValue, CLR_UINT64 &value);
+    static HRESULT SetPinMode(CLR_RT_HeapBlock *gpioPin, GpioPinDriveMode pinMode);
+    static HRESULT Write(CLR_RT_HeapBlock *gpioPin, bool pinValue);
+    static HRESULT Read(CLR_RT_HeapBlock *gpioPin, bool &pinValue);
+};
+
 struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioController
 {
-    static const int FIELD_STATIC__s_GpioPins = 0;
-    static const int FIELD_STATIC___syncLock = 1;
+    static const int FIELD_STATIC__s_GpioPins = 1;
+    static const int FIELD_STATIC___syncLock = 2;
 
     static const int FIELD___disposedValue = 1;
     static const int FIELD___NumberingScheme_k__BackingField = 2;
@@ -58,34 +91,6 @@ struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioController
     //--//
 
     static void GetGpioPin(CLR_INT32 index, CLR_RT_StackFrame &stack, CLR_RT_HeapBlock *&gpioPin);
-};
-
-struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin
-{
-    static const int FIELD_STATIC__s_gpioPinEventManager = 2;
-
-    static const int FIELD___syncLock = 1;
-    static const int FIELD___pinNumber = 2;
-    static const int FIELD___driveMode = 3;
-    static const int FIELD___debounceTimeout = 4;
-    static const int FIELD___callbacks = 5;
-    static const int FIELD___lastOutputValue = 6;
-    static const int FIELD___lastInputValue = 7;
-    static const int FIELD___disposedValue = 8;
-
-    NANOCLR_NATIVE_DECLARE(Read___SystemDeviceGpioPinValue);
-    NANOCLR_NATIVE_DECLARE(Toggle___VOID);
-    NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
-    NANOCLR_NATIVE_DECLARE(NativeIsDriveModeSupported___BOOLEAN__SystemDeviceGpioPinMode);
-    NANOCLR_NATIVE_DECLARE(NativeSetDriveMode___VOID__SystemDeviceGpioPinMode);
-    NANOCLR_NATIVE_DECLARE(NativeSetDebounceTimeout___VOID);
-    NANOCLR_NATIVE_DECLARE(WriteNative___VOID__SystemDeviceGpioPinValue);
-    NANOCLR_NATIVE_DECLARE(NativeSetAlternateFunction___VOID__I4);
-    NANOCLR_NATIVE_DECLARE(NativeInit___BOOLEAN__I4);
-
-    //--//
-
-    static HRESULT ExtractDebounceTimeSpanValue(CLR_RT_HeapBlock &timeSpanValue, CLR_UINT64 &value);
 };
 
 struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioPinBundle

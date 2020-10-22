@@ -45,8 +45,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Toggle___VOID,
     NULL,
     Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::DisposeNative___VOID,
-    Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeIsDriveModeSupported___BOOLEAN__SystemDeviceGpioPinMode,
-    Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeSetDriveMode___VOID__SystemDeviceGpioPinMode,
+    Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeIsPinModeSupported___BOOLEAN__SystemDeviceGpioPinMode,
+    Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeSetPinMode___VOID__SystemDeviceGpioPinMode,
     Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeInit___BOOLEAN__I4,
     Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeSetDebounceTimeout___VOID,
     Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::WriteNative___VOID__SystemDeviceGpioPinValue,
@@ -100,9 +100,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Gpio =
 {
     "System.Device.Gpio",
-    0xB88842A6,
+    0xB6D0ACC1,
     method_lookup,
-    { 100, 1, 0, 1 }
+    { 100, 1, 0, 3 }
 };
 
 // clang-format on
