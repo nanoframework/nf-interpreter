@@ -167,7 +167,6 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::WriteNative___VO
         GpioPinValue state = (GpioPinValue)stack.Arg1().NumericByRef().s4;
 
         NANOCLR_CHECK_HRESULT(Write(pThis, state));
-
     }
     NANOCLR_NOCLEANUP();
 }
@@ -225,7 +224,9 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::ExtractDebounceT
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::SetPinMode(CLR_RT_HeapBlock *gpioPin, GpioPinDriveMode pinMode)
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::SetPinMode(
+    CLR_RT_HeapBlock *gpioPin,
+    GpioPinDriveMode pinMode)
 {
     NANOCLR_HEADER();
 
