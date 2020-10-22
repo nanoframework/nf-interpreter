@@ -67,7 +67,7 @@ struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin
 
     static HRESULT ExtractDebounceTimeSpanValue(CLR_RT_HeapBlock &timeSpanValue, CLR_UINT64 &value);
     static HRESULT SetPinMode(CLR_RT_HeapBlock *gpioPin, GpioPinDriveMode pinMode);
-    static HRESULT Write(CLR_RT_HeapBlock *gpioPin, bool pinValue);
+    static HRESULT Write(CLR_RT_HeapBlock *gpioPin, GpioPinValue pinValue);
     static HRESULT Read(CLR_RT_HeapBlock *gpioPin, bool &pinValue);
 };
 
