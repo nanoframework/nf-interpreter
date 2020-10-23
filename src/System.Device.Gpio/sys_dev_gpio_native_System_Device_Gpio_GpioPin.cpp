@@ -10,6 +10,9 @@
 #include "nf_rt_events_native.h"
 #include "sys_dev_gpio_native.h"
 
+// just make it shorter and readable
+typedef Library_sys_dev_gpio_native_System_Device_Gpio_PinValue PinValue;
+
 // declared here as external
 // the implementation will be moved here when Windows.Devices.Gpio is removed
 extern void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState);
@@ -151,20 +154,27 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::WriteNative___VO
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    GpioPinValue state;
+
+    CLR_RT_HeapBlock *pinValue;
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // check if object has been disposed
+    if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
     {
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        // check if object has been disposed
-        if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-
-        GpioPinValue state = (GpioPinValue)stack.Arg1().NumericByRef().s4;
-
-        NANOCLR_CHECK_HRESULT(Write(pThis, state));
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
+
+    // get PinValue object from parameter
+    pinValue = stack.Arg1().Dereference();
+
+    // access value field inside PinValue
+    state = (GpioPinValue)pinValue[PinValue::FIELD___value].NumericByRef().u1;
+
+    NANOCLR_CHECK_HRESULT(Write(pThis, state));
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -267,17 +277,15 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::SetPinMode(
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Write(CLR_RT_HeapBlock *gpioPin, bool pinValue)
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Write(CLR_RT_HeapBlock *gpioPin, GpioPinValue pinValue)
 {
-    NANOCLR_HEADER();
-
     GPIO_PIN pinNumber = (GPIO_PIN)gpioPin[FIELD___pinNumber].NumericByRefConst().s4;
     GpioPinDriveMode driveMode = (GpioPinDriveMode)gpioPin[FIELD___pinMode].NumericByRefConst().s4;
 
     // sanity check for drive mode set to output so we don't mess up writing to an input pin
     if ((driveMode >= GpioPinDriveMode_Output))
     {
-        CPU_GPIO_SetPinState(pinNumber, (GpioPinValue)pinValue);
+        CPU_GPIO_SetPinState(pinNumber, pinValue);
 
         // fire event if there are callbacks registered
         if (gpioPin[FIELD___callbacks].Dereference() != NULL)
@@ -287,10 +295,10 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Write(CLR_RT_Hea
     }
     else
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        return CLR_E_INVALID_PARAMETER;
     }
 
-    NANOCLR_NOCLEANUP();
+    return S_OK;
 }
 
 HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Read(CLR_RT_HeapBlock *gpioPin, bool &pinValue)

@@ -211,9 +211,21 @@ GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN pin)
 }
 
 // Set Pin state
-void CPU_GPIO_SetPinState(GPIO_PIN pin, GpioPinValue PinState)
+void CPU_GPIO_SetPinState(GPIO_PIN pinNumber, GpioPinValue pinState)
 {
-    gpio_set_level((gpio_num_t)pin, (uint32_t)PinState);
+    // need to store pin state
+    int port = pinNumber >> 4, bit = 1 << (pinNumber & 0x0F);
+
+    if (pinState == GpioPinValue_High)
+    {
+        pinStateStore[port] |= bit;
+    }
+    else
+    {
+        pinStateStore[port] &= ~bit;
+    }
+
+    gpio_set_level((gpio_num_t)pinNumber, (uint32_t)pinState);
 }
 
 // Toggle pin state
