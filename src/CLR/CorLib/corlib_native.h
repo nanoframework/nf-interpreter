@@ -963,7 +963,6 @@ struct Library_corlib_native_System_SpanByte
     static const int FIELD___length = 3;
 
     //--//
-
 };
 
 struct Library_corlib_native_System_Threading_AutoResetEvent
