@@ -497,6 +497,9 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig
 {
     (void)configurationIndex;
 
+    // zero memory
+    memset(pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
+
     uint16_t macAddressLen = SL_MAC_ADDR_LEN;
 
     memset(pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
