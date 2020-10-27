@@ -522,6 +522,13 @@ else()
 endif()
 
 
+if(API_System.Device.I2c)
+    set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for System.Device.I2c")
+else()
+    set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for System.Device.I2c")
+endif()
+
+
 if(API_Windows.Devices.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
 else()

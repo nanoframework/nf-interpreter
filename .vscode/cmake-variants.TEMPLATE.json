@@ -93,6 +93,7 @@
           "API_Windows.Devices.Gpio": "OFF-default-ON-to-add-this-API",
           "API_System.Device.Gpio": "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.I2c": "OFF-default-ON-to-add-this-API",
+          "API_System.Device.I2c": "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Pwm": "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.SerialCommunication": "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Spi": "OFF-default-ON-to-add-this-API",
