@@ -21,6 +21,7 @@ option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
 option(API_System.Device.Dac                    "option for System.Device.Dac API")
 option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
+option(API_System.Device.I2c                    "option for System.Device.I2c API")
 option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
 option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
 option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
@@ -210,6 +211,12 @@ macro(ParseNativeAssemblies)
     if(API_Windows.Devices.I2c)
         ##### API name here (doted name)
         PerformSettingsForApiEntry("Windows.Devices.I2c")
+    endif()
+
+	# System.Device.I2c
+    if(API_System.Device.I2c)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("System.Device.I2c")
     endif()
 
     # Windows.Devices.Pwm

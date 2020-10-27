@@ -44,6 +44,7 @@
           "API_System.Device.Gpio": "ON",
           "API_Windows.Devices.Spi": "OFF",
           "API_Windows.Devices.I2c": "OFF",
+          "API_System.Device.I2c": "OFF",
           "API_Windows.Devices.Pwm": "OFF",
           "API_Windows.Devices.Adc": "ON",
           "API_Windows.Devices.SerialCommunication": "OFF",

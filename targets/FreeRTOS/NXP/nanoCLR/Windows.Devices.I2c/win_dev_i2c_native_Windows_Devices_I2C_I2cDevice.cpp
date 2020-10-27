@@ -32,7 +32,7 @@ typedef Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings I2c
 
 
 
-static i2c_structure_t *I2C_ChoosePeripheralStructure(uint8_t busIndex)
+i2c_structure_t *I2C_ChoosePeripheralStructure(uint8_t busIndex)
 {
     if(busIndex == 1)
     {
@@ -53,7 +53,7 @@ static i2c_structure_t *I2C_ChoosePeripheralStructure(uint8_t busIndex)
 } 
 
 
-static void I2C_InitPins(uint8_t busIndex)
+void I2C_InitPins(uint8_t busIndex)
 {
     switch(busIndex)
     {
@@ -82,7 +82,7 @@ static void I2C_InitPins(uint8_t busIndex)
 }
 
 
-static void I2C_InitClocks(void)
+void I2C_InitClocks(void)
 {
     CLOCK_EnableClock(kCLOCK_Iomuxc);
     CLOCK_SetMux(kCLOCK_Lpi2cMux, 0);
@@ -90,7 +90,7 @@ static void I2C_InitClocks(void)
 }
 
 
-static status_t I2C_WriteProcedure(uint8_t busIndex, i2c_structure_t *pI2Cx)
+status_t I2C_WriteProcedure(uint8_t busIndex, i2c_structure_t *pI2Cx)
 {
     status_t i2cStatus = kStatus_Fail;
     i2cStatus = LPI2C_MasterStart(i2cBaseAddress[busIndex], pI2Cx->slaveAddress, kLPI2C_Write);
@@ -108,7 +108,7 @@ static status_t I2C_WriteProcedure(uint8_t busIndex, i2c_structure_t *pI2Cx)
 }
 
 
-static status_t I2C_ReadProcedure(uint8_t busIndex, i2c_structure_t *pI2Cx)
+status_t I2C_ReadProcedure(uint8_t busIndex, i2c_structure_t *pI2Cx)
 {
     status_t i2cStatus = kStatus_Fail;
     i2cStatus = LPI2C_MasterStart(i2cBaseAddress[busIndex], pI2Cx->slaveAddress, kLPI2C_Write);
