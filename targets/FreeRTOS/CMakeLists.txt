@@ -20,7 +20,7 @@ if(NOT "${TOOL_SRECORD_PREFIX}" STREQUAL "")
         message(STATUS "")
         message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
         message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
-        message(STATUS "If you don't have this tool download it from hhttps://sourceforge.net/projects/srecord/files/srecord-win32/")
+        message(STATUS "If you don't have this tool download it from https://sourceforge.net/projects/srecord/files/srecord-win32/")
         message(STATUS "")
         message(FATAL_ERROR "srec_cat tool not found")
     else()
@@ -58,7 +58,7 @@ if(NO_RTOS_SOURCE_FOLDER)
         set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")
     endif()
 
-    message(STATUS "RTOS is: FreeRTOS ${FREERTOS_VERSION} from GitHub repo")
+    message(STATUS "RTOS is: FreeRTOS ${FREERTOS_VERSION_TAG} from GitHub repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
@@ -165,7 +165,7 @@ if(NO_CMSIS_SOURCE)
         set(CMSIS_GIT_TAG "${CMSIS_VERSION}")
     endif()            
 
-    message(STATUS "CMSIS v${CMSIS_VERSION} from GitHub repo")
+    message(STATUS "CMSIS v${CMSIS_GIT_TAG} from GitHub repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
@@ -203,7 +203,7 @@ else()
 
     # sanity check is source path exists
     if(EXISTS "${CMSIS_SOURCE}/")
-        message(STATUS "CMSIS ${CMSIS_VERSION} (source from: ${CMSIS_SOURCE})")
+        message(STATUS "CMSIS (source from: ${CMSIS_SOURCE})")
 
         # check if we already have the sources, no need to copy again
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/CMSIS_Source/ SOURCE_EXISTS)

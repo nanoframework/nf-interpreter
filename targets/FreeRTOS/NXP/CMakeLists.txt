@@ -35,7 +35,7 @@ if(NO_FATFS_SOURCE)
         set(FATFS_VERSION_TAG "${FATFS_VERSION}")
     endif()
 
-    message(STATUS "FatFS version is: ${FATFS_VERSION}")
+    message(STATUS "FatFS version is: ${FATFS_VERSION_TAG}")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
@@ -74,7 +74,7 @@ else()
 
     # sanity check is source path exists
     if(EXISTS "${FATFS_SOURCE}/")
-        message(STATUS "FatFS ${FATFS_VERSION} (source from: ${FATFS_SOURCE})")
+        message(STATUS "FatFS (source from: ${FATFS_SOURCE})")
 
         # check if we already have the sources, no need to copy again
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FatFS_Source/ SOURCE_EXISTS)
@@ -142,7 +142,7 @@ if(NO_LWIP_SOURCE)
         set(LWIP_GIT_TAG "${LWIP_VERSION}")
     endif()            
 
-    message(STATUS "LWIP ${LWIP_VERSION} from savannah.nongnu.org repo")
+    message(STATUS "LWIP ${LWIP_GIT_TAG} from savannah.nongnu.org repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
@@ -179,7 +179,7 @@ else()
 
     # sanity check is source path exists
     if(EXISTS "${LWIP_SOURCE}/")
-        message(STATUS "LWIP ${LWIP_VERSION} (source from: ${LWIP_SOURCE})")
+        message(STATUS "LWIP (source from: ${LWIP_SOURCE})")
 
         # check if we already have the sources, no need to copy again
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/LWIP_Source/ SOURCE_EXISTS)
