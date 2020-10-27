@@ -181,7 +181,7 @@ if(CHIBIOS_CONTRIB_REQUIRED)
 
         # sanity check is source path exists
         if(EXISTS "${CHIBIOS_CONTRIB_SOURCE}/")
-            message(STATUS "ChibiOS-Contrib source from: ${CHIBIOS_CONTRIB_SOURCE}")
+            message(STATUS "ChibiOS-Contrib (source from: ${CHIBIOS_CONTRIB_SOURCE})")
 
             # check if we already have the sources, no need to copy again
             NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source/ SOURCE_EXISTS)
@@ -244,7 +244,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
             set(FATFS_VERSION_TAG "${FATFS_VERSION}")
         endif()
 
-        message(STATUS "FatFS version is: ${FATFS_VERSION}")
+        message(STATUS "FatFS version is: ${FATFS_VERSION_TAG}")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
@@ -283,7 +283,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 
         # sanity check is source path exists
         if(EXISTS "${FATFS_SOURCE}/")
-            message(STATUS "FatFS ${FATFS_VERSION} (source from: ${FATFS_SOURCE})")
+            message(STATUS "FatFS source from: ${FATFS_SOURCE})")
 
             # check if we already have the sources, no need to copy again
             NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FatFS_Source/ SOURCE_EXISTS)
@@ -345,6 +345,8 @@ if(NF_SECURITY_MBEDTLS)
         # set tag for currently supported version
         set(MBEDTLS_GIT_TAG "mbedtls-2.23.0")
 
+        message(STATUS "mbdeTls version is: ${MBEDTLS_GIT_TAG}")
+
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
         configure_file("${PROJECT_SOURCE_DIR}/CMake/mbedTLS.CMakeLists.cmake.in"
@@ -388,7 +390,7 @@ if(NF_SECURITY_MBEDTLS)
             NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/mbedTLS_Source/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
-                message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")
+                message(STATUS "mbedTLS (source from: ${MBEDTLS_SOURCE})")
                 file(COPY "${MBEDTLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mbedTLS_Source")
             else()
                 message(STATUS "Using local cache of mbedTLS source from ${MBEDTLS_SOURCE}")
