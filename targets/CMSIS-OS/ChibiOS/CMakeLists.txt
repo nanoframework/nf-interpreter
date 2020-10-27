@@ -345,7 +345,7 @@ if(NF_SECURITY_MBEDTLS)
         # set tag for currently supported version
         set(MBEDTLS_GIT_TAG "mbedtls-2.23.0")
 
-        message(STATUS "mbdeTls version is: ${MBEDTLS_GIT_TAG}")
+        message(STATUS "mbedTLS version is: ${MBEDTLS_GIT_TAG}")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
