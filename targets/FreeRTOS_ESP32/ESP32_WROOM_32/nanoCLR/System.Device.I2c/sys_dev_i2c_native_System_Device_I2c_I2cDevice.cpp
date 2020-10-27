@@ -71,6 +71,9 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
+        // get a pointer to the managed spi connectionSettings object instance
+        pConfig = pThis[FIELD___connectionSettings].Dereference();
+
         // get bus index
         // subtract 1 to get ESP32 bus number
         i2c_port_t bus = (i2c_port_t)(pConfig[I2cConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);

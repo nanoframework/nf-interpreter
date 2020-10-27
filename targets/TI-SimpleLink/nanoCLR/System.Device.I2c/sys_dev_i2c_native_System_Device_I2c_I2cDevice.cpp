@@ -117,8 +117,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemSpanByte__SystemSpanByte(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
+    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemSpanByte__SystemSpanByte(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -130,8 +130,10 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeTransmit__
         bool eventResult = true;
         uint32_t estimatedDurationMiliseconds;
 
+        CLR_RT_HeapBlock *writeSpanByte;
+        CLR_RT_HeapBlock *readSpanByte;
         CLR_RT_HeapBlock_Array *writeBuffer = NULL;
-        CLR_RT_HeapBlock_Array *readBuffer;
+        CLR_RT_HeapBlock_Array *readBuffer = NULL;
         CLR_RT_HeapBlock *result;
 
         // get a pointer to the managed object instance and check that it's not NULL
@@ -172,7 +174,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeTransmit__
             // nothing to write, have to zero this
             palI2c->i2cTransaction.writeCount = 0;
         }
-        
+
         readSpanByte = stack.Arg2().Dereference();
         if (readSpanByte != NULL)
         {

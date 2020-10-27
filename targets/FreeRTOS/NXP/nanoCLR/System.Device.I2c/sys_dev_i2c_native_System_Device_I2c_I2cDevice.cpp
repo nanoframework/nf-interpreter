@@ -22,7 +22,8 @@ typedef struct
     int rxSize;
 } i2c_structure_t;
 
-i2c_structure_t i2c1, i2c2, i2c3;
+extern i2c_structure_t i2c1, i2c2, i2c3;
+
 uint8_t I2C1_DeviceCounter;
 uint8_t I2C2_DeviceCounter;
 uint8_t I2C3_DeviceCounter;

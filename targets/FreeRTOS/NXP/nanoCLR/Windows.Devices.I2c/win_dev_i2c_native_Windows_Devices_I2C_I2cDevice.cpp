@@ -4,6 +4,7 @@
 //
 
 #include <string.h>
+#include <win_dev_i2c_native.h>
 #include "win_dev_i2c_native_target.h"
 
 /* Select USB1 PLL (480 MHz) as master lpi2c clock source */
@@ -22,6 +23,7 @@ typedef struct
     uint8_t *rxBuffer;
     int rxSize;
 } i2c_structure_t;
+
 i2c_structure_t i2c1, i2c2, i2c3;
 
 static LPI2C_Type *i2cBaseAddress[] = LPI2C_BASE_PTRS;
@@ -126,7 +128,7 @@ status_t I2C_ReadProcedure(uint8_t busIndex, i2c_structure_t *pI2Cx)
     return i2cStatus;
 }
 
-static status_t I2cTransferStatusCheck(status_t i2cStatus)
+status_t I2cTransferStatusCheck(status_t i2cStatus)
 {
     if (i2cStatus == kStatus_Success)
     {
@@ -150,7 +152,7 @@ static status_t I2cTransferStatusCheck(status_t i2cStatus)
     }
 }
 
-static void I2C_ClearBuffers(i2c_structure_t *pI2Cx)
+void I2C_ClearBuffers(i2c_structure_t *pI2Cx)
 {
     pI2Cx->txBuffer = 0;
     pI2Cx->txSize = 0;
