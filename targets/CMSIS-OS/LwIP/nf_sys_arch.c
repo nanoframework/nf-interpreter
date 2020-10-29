@@ -212,6 +212,11 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
     return result;
 }
 
+err_t sys_mbox_trypost_fromisr(sys_mbox_t *q, void *msg)
+{
+  return sys_mbox_trypost(q, msg);
+}
+
 /*
   Blocks the thread until a message arrives in the mailbox, but does
   not block the thread longer than "timeout" milliseconds (similar to
@@ -313,29 +318,6 @@ void sys_arch_unprotect(sys_prot_t pval)
     (void) pval;
     osMutexRelease(lwip_sys_mutex);
 }
-
-#if LWIP_NETCONN_SEM_PER_THREAD
-
-/////////////////////////////////////////////////////////
-// NEEDS to be implementated at platform level
-// CMSIS RTOS API doesn't have a decent API to tackle
-/////////////////////////////////////////////////////////
-
-// sys_sem_t* sys_arch_netconn_sem_get(void)
-// {
-//     return 0;
-// }
-
-// void sys_arch_netconn_sem_alloc(void)
-// {
-// }
-
-// void sys_arch_netconn_sem_free(void)
-// {
-// }
-
-#endif // LWIP_NETCONN_SEM_PER_THREAD
-
 
 ////////////////////////////////////////////////////
 // nanoFramework "hack" extending LwIP original code
