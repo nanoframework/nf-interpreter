@@ -661,6 +661,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
     CLR_UINT32 offset = stack.Arg2().NumericByRef().u4;
     CLR_UINT32 count = stack.Arg3().NumericByRef().u4;
     CLR_INT32 flags = stack.Arg4().NumericByRef().s4;
+    CLR_INT64 sendRecvTimeout = stack.Arg5().NumericByRef().s4;
     CLR_RT_HeapBlock hbTimeout;
 
     CLR_INT64 *timeout;
@@ -685,9 +686,15 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
     if (offset + count > arrData->m_numOfElements)
         NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
 
-    // Infinite Timeout
-    // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
-    hbTimeout.SetInteger((CLR_INT64)-1);
+    if (sendRecvTimeout == -1)
+    {
+        // Infinite Timeout
+        hbTimeout.SetInteger(sendRecvTimeout);
+    }
+    else
+    {
+        hbTimeout.SetInteger(sendRecvTimeout * TIME_CONVERSION__TO_MILLISECONDS);
+    }
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
     //
