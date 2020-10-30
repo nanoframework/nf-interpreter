@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-//                   ** WARNING! **
+//                   ** WARNING! ** 
 //    This file was generated automatically by a tool.
 //    Re-running the tool will overwrite this file.
 //    You should copy this file to a custom location
@@ -27,8 +27,7 @@ void CombinePathAndName(char *outpath, const char *path1, const char *path2)
     strcat(outpath, path2);
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::OpenFileNative___VOID__STRING__STRING__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID__STRING__STRING__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -146,8 +145,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::OpenFileNative_
     NANOCLR_CLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::ReadNative___I4__STRING__STRING__I8__SZARRAY_U1__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRING__STRING__I8__SZARRAY_U1__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -246,8 +244,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::ReadNative___I4
     NANOCLR_CLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::WriteNative___VOID__STRING__STRING__I8__SZARRAY_U1__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__STRING__STRING__I8__SZARRAY_U1__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
@@ -337,8 +334,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::WriteNative___V
     NANOCLR_CLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::GetLengthNative___I8__STRING__STRING(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8__STRING__STRING( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
     {
