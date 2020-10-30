@@ -306,6 +306,9 @@ if(NF_FEATURE_HAS_SDCARD)
     # force inclusion of Windows.Storage API
     set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
 
+    # force inclusion of System.IO.FileSystem API
+    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
+
     message(STATUS "Support for SD Card is included")
 else()
     message(STATUS "Support for SD Card IS NOT included")
@@ -330,6 +333,9 @@ if(NF_FEATURE_HAS_USB_MSD)
 
     # force inclusion of Windows.Storage API
     set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
+
+    # force inclusion of System.IO.FileSystem API
+    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
     message(STATUS "Support for USB Mass Storage is included")
 else()
@@ -622,7 +628,8 @@ if( API_nanoFramework.Devices.OneWire OR
     API_Windows.Devices.SerialCommunication OR
     API_Windows.Networking.Sockets OR
     API_nanoFramework.Devices.Can OR
-    API_Windows.Storage)
+    API_Windows.Storage OR
+    API._System.IO.FileSystem)
 
     # these APIs requires nanoFramework.Runtime.Events
     set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")

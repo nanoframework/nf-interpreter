@@ -47,6 +47,7 @@
           "NF_SECURITY_MBEDTLS": "ON",
           "SWO_OUTPUT": "OFF",
           "NF_BUILD_RTM": "OFF",
+          "API_System.IO.FileSystem": "ON",
           "API_System.Math": "ON",
           "API_Hardware.Stm32": "ON",
           "API_Windows.Devices.Gpio": "ON",
