@@ -201,8 +201,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 pI2Cx->txSize = writeBuffer->m_numOfElements;
             }
         }
-        
-        if ( writeBuffer == NULL )
+
+        if (writeBuffer == NULL)
         {
             pI2Cx->txBuffer = NULL;
             pI2Cx->txSize = 0;
@@ -219,8 +219,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 pI2Cx->rxSize = readBuffer->m_numOfElements;
             }
         }
-        
-        if ( readBuffer == NULL )
+
+        if (readBuffer == NULL)
         {
             pI2Cx->rxBuffer = NULL;
             pI2Cx->rxSize = 0;
