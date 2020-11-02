@@ -128,7 +128,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         if (writeSpanByte != NULL)
         {
             writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
-            if ( writeBuffer != NULL)
+            if (writeBuffer != NULL)
             {
                 // grab the pointer to the array by getting the first element of the array
                 writeData = writeBuffer->GetFirstElement();
@@ -142,7 +142,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         if (readSpanByte != 0)
         {
             readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
-            if ( readBuffer != NULL)
+            if (readBuffer != NULL)
             {
                 // grab the pointer to the array by getting the first element of the array
                 readData = readBuffer->GetFirstElement();
@@ -215,7 +215,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
             // set the bytes transferred field
             result[I2cTransferResult::FIELD___bytesTransferred].SetInteger((CLR_UINT32)(writeSize + readSize));
-         }
+        }
     }
     NANOCLR_NOCLEANUP();
 }
