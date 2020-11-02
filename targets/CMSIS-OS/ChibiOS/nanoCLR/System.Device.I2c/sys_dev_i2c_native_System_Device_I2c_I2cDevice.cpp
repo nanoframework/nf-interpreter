@@ -359,11 +359,14 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         {
             // get buffer
             writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
-
-            // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
-            palI2c->WriteSize = writeBuffer->m_numOfElements;
+            if (byteArray != NULL)
+            {
+                // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
+                palI2c->WriteSize = writeBuffer->m_numOfElements;
+            }
         }
-        else
+
+        if (writeBuffer == NULL)
         {
             // nothing to write, have to zero this
             palI2c->WriteSize = 0;
@@ -374,11 +377,14 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         {
             // get buffer
             readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
-
-            // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
-            palI2c->ReadSize = readBuffer->m_numOfElements;
+            if (readBuffer != NULL)
+            {
+                // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
+                palI2c->ReadSize = readBuffer->m_numOfElements;
+            }
         }
-        else
+
+        if (readBuffer == NULL)
         {
             // nothing to read, have to zero this
             palI2c->ReadSize = 0;
