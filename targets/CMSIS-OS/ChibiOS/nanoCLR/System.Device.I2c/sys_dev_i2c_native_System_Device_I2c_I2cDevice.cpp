@@ -359,7 +359,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         {
             // get buffer
             writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
-            if (byteArray != NULL)
+            if (writeBuffer != NULL)
             {
                 // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
                 palI2c->WriteSize = writeBuffer->m_numOfElements;
