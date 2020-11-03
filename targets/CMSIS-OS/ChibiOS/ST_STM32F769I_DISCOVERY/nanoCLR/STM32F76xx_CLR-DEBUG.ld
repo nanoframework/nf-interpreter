@@ -132,6 +132,9 @@ INCLUDE rules_code.ld
 /* Data rules inclusion.*/
 INCLUDE rules_data.ld
 
+/* Memory rules inclusion.*/
+INCLUDE rules_memory.ld
+
 /* nanoCLR rules inclusion.*/
 INCLUDE rules_clr.ld
 

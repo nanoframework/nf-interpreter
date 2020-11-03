@@ -37,6 +37,9 @@ void nanoHAL_Network_Initialize()
     {
         // build lwIP configuration 
         struct lwipthread_opts lwipOptions;
+        
+        // init config
+        memset(&lwipOptions, 0, sizeof(lwipOptions));
 
         // grab MAC address
         lwipOptions.macaddress = (uint8_t *)networkConfig.MacAddress;

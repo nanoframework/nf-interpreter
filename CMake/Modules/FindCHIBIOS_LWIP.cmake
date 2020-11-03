@@ -5,12 +5,12 @@
 
 # extract LwIP source files
 execute_process(
-    COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z
+    COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
 )
 
 # List of the required lwIp include files.
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Lwip)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include)
@@ -80,9 +80,6 @@ set(LWIP_SRCS
     
 	# bindings
 	nf_lwipthread.c
-	
-	# platform implementations
-	platform_sys_arch.c
 
     #extras
     evtimer.c
@@ -195,7 +192,6 @@ foreach(SRC_FILE ${LWIP_SRCS})
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif/ppp/polarssl
 
             ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
-            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/Lwip
 
             # APPS:
             ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/snmp
@@ -222,9 +218,9 @@ add_custom_target( CHIBIOS_NETWORK_COMPONENTS ALL )
 
 add_custom_command(TARGET CHIBIOS_NETWORK_COMPONENTS
 PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z
+    COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-    DEPENDS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.0.3-patched.7z
+    DEPENDS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
 
     VERBATIM
 )
