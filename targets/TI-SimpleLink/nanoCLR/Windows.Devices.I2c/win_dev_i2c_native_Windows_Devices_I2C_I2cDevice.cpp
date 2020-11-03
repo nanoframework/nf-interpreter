@@ -229,7 +229,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::
                 // managed stack
                 CLR_RT_HeapBlock &top = stack.PushValueAndClear();
                 NANOCLR_CHECK_HRESULT(
-                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_I2cTransferResult));
+                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_I2cTransferResult_old));
                 result = top.Dereference();
                 FAULT_ON_NULL(result);
 

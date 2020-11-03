@@ -2838,7 +2838,8 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
 
     TIL("System.Net.Sockets", "SocketException", m_SocketException),
 
-    TIL("Windows.Devices.I2c", "I2cTransferResult", m_I2cTransferResult),
+    TIL("System.Device.I2c", "I2cTransferResult", m_I2cTransferResult),
+    TIL("Windows.Devices.I2c", "I2cTransferResult", m_I2cTransferResult_old),
 
 #if (HAL_USE_ESP32_RMT_OPTION == TRUE)
     TIL("nanoFramework.Hardware.Esp32.Rmt", "RmtCommand", m_RmtCommand),

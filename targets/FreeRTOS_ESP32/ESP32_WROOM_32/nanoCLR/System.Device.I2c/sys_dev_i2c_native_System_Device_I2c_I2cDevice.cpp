@@ -128,24 +128,28 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         if (writeSpanByte != NULL)
         {
             writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+            if (writeBuffer != NULL)
+            {
+                // grab the pointer to the array by getting the first element of the array
+                writeData = writeBuffer->GetFirstElement();
 
-            // grab the pointer to the array by getting the first element of the array
-            writeData = writeBuffer->GetFirstElement();
-
-            // get the size of the buffer by reading the number of elements in the HeapBlock array
-            writeSize = writeBuffer->m_numOfElements;
+                // get the size of the buffer by reading the number of elements in the HeapBlock array
+                writeSize = writeBuffer->m_numOfElements;
+            }
         }
 
         readSpanByte = stack.Arg2().Dereference();
-        if (readSpanByte != NULL)
+        if (readSpanByte != 0)
         {
             readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
+            if (readBuffer != NULL)
+            {
+                // grab the pointer to the array by getting the first element of the array
+                readData = readBuffer->GetFirstElement();
 
-            // grab the pointer to the array by getting the first element of the array
-            readData = readBuffer->GetFirstElement();
-
-            // get the size of the buffer by reading the number of elements in the HeapBlock array
-            readSize = readBuffer->m_numOfElements;
+                // get the size of the buffer by reading the number of elements in the HeapBlock array
+                readSize = readBuffer->m_numOfElements;
+            }
         }
 
         i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -211,12 +215,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
             // set the bytes transferred field
             result[I2cTransferResult::FIELD___bytesTransferred].SetInteger((CLR_UINT32)(writeSize + readSize));
-
-            if (readSize > 0)
-            {
-                // because this was a Read transaction, need to copy from DMA buffer to managed buffer
-                memcpy(readBuffer->GetFirstElement(), &readData[0], readSize);
-            }
         }
     }
     NANOCLR_NOCLEANUP();
