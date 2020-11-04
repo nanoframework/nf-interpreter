@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2020 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -27,17 +27,17 @@ set(System.IO.FileSystem_SRCS
 )
 
 foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
-
     set(System.IO.FileSystem_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(System.IO.FileSystem_SRC_FILE ${SRC_FILE}
         PATHS
-	        "${BASE_PATH_FOR_THIS_MODULE}"
-	        "${TARGET_BASE_LOCATION}"
+	        ${BASE_PATH_FOR_THIS_MODULE}
+	        ${TARGET_BASE_LOCATION}
+            ${PROJECT_SOURCE_DIR}/src/System.IO.FileSystem
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
-# message("${SRC_FILE} >> ${System.IO.FileSystem_SRC_FILE}") # debug helper
-list(APPEND System.IO.FileSystem_SOURCES ${System.IO.FileSystem_SRC_FILE})
+    # message("${SRC_FILE} >> ${System.IO.FileSystem_SRC_FILE}") # debug helper
+    list(APPEND System.IO.FileSystem_SOURCES ${System.IO.FileSystem_SRC_FILE})
 endforeach()
 
 include(FindPackageHandleStandardArgs)
