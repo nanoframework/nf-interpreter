@@ -175,7 +175,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetAttributesNative___STATI
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
         }
 
-        stack.setResult_U1(attributes);
+        stack.SetResult_U1(attributes);
     }
     NANOCLR_NOCLEANUP();
 }
