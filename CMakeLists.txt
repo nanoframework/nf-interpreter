@@ -629,7 +629,7 @@ if( API_nanoFramework.Devices.OneWire OR
     API_Windows.Networking.Sockets OR
     API_nanoFramework.Devices.Can OR
     API_Windows.Storage OR
-    API._System.IO.FileSystem)
+    API_System.IO.FileSystem)
 
     # these APIs requires nanoFramework.Runtime.Events
     set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
