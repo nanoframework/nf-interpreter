@@ -31,9 +31,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
 {
     NANOCLR_HEADER();
     {
-        const char *workingPath = stack.Arg0.RecoverString();
+        const char *workingPath = stack.Arg0().RecoverString();
         FAULT_ON_NULL(workingPath);
-        const char *fileName = stack.Arg0.RecoverString();
+        const char *fileName = stack.Arg0().RecoverString();
         FAULT_ON_NULL(fileName);
 
         bool exists = false;
@@ -108,9 +108,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::MoveNative___STATIC__VOID__
 {
     NANOCLR_HEADER();
     {
-        const char *filePathSrc = stack.Arg0.RecoverString();
+        const char *filePathSrc = stack.Arg0().RecoverString();
         FAULT_ON_NULL(filePathSrc);
-        const char *filePathDest = stack.Arg0.RecoverString();
+        const char *filePathDest = stack.Arg0().RecoverString();
         FAULT_ON_NULL(filePathDest);
 
         // rename file
@@ -134,7 +134,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::DeleteNative___STATIC__VOID
 {
     NANOCLR_HEADER();
     {
-        const char *filePath = stack.Arg0.RecoverString();
+        const char *filePath = stack.Arg0().RecoverString();
         FAULT_ON_NULL(filePath);
 
         // Delete file
@@ -153,7 +153,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetAttributesNative___STATI
 {
     NANOCLR_HEADER();
     {
-        const char *filePath = stack.Arg0.RecoverString();
+        const char *filePath = stack.Arg0().RecoverString();
         FAULT_ON_NULL(filePath);
         CLR_UINT8 attributes = 0xFF;
 
@@ -184,9 +184,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::SetAttributesNative___STATI
 {
     NANOCLR_HEADER();
     {
-        const char *filePath = stack.Arg0.RecoverString();
+        const char *filePath = stack.Arg0().RecoverString();
         FAULT_ON_NULL(filePath);
-        CLR_UINT8 attributes = stack.Arg1.NumericByRef().u1;
+        CLR_UINT8 attributes = stack.Arg1().NumericByRef().u1;
 
         // Get infos about file
         FRESULT operationResult = f_chmod(filePath, attributes, 0xFF);

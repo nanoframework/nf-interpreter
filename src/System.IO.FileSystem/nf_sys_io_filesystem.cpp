@@ -1,5 +1,7 @@
 #include "nf_sys_io_filesystem.h"
 
+// clang-format off
+
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
@@ -66,3 +68,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem =
     method_lookup,
     { 1, 0, 0, 0 }
 };
+
+// clang-format on

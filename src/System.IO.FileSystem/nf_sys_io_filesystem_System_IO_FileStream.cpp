@@ -31,11 +31,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
 {
     NANOCLR_HEADER();
     {
-        const char *workingPath = stack.Arg0.RecoverString();
+        const char *workingPath = stack.Arg0().RecoverString();
         FAULT_ON_NULL(workingPath);
-        const char *fileName = stack.Arg1.RecoverString();
+        const char *fileName = stack.Arg1().RecoverString();
         FAULT_ON_NULL(fileName);
-        CLR_INT32 mode = stack.Arg2.NumericByRef().s4;
+        CLR_INT32 mode = stack.Arg2().NumericByRef().s4;
 
         FIL file;
         FRESULT operationResult;
@@ -149,13 +149,13 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
 {
     NANOCLR_HEADER();
     {
-        const char *workingPath = stack.Arg0.RecoverString();
+        const char *workingPath = stack.Arg0().RecoverString();
         FAULT_ON_NULL(workingPath);
-        const char *fileName = stack.Arg1.RecoverString();
+        const char *fileName = stack.Arg1().RecoverString();
         FAULT_ON_NULL(fileName);
-        CLR_INT64 position = stack.Arg2.NumericByRef().s8;
-        unsigned char *buffer = stack.Arg3.GetBuffer();
-        CLR_INT32 length = stack.Arg4.NumericByRef().s4;
+        CLR_INT64 position = stack.Arg2().NumericByRef().s8;
+        unsigned char *buffer = stack.Arg3().GetBuffer();
+        CLR_INT32 length = stack.Arg4().NumericByRef().s4;
 
         CLR_INT32 readCount = 0;
 
@@ -248,13 +248,13 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
 {
     NANOCLR_HEADER();
     {
-        const char *workingPath = stack.Arg0.RecoverString();
+        const char *workingPath = stack.Arg0().RecoverString();
         FAULT_ON_NULL(workingPath);
-        const char *fileName = stack.Arg1.RecoverString();
+        const char *fileName = stack.Arg1().RecoverString();
         FAULT_ON_NULL(fileName);
-        CLR_INT64 position = stack.Arg2.NumericByRef().s8;
-        const unsigned char *buffer = stack.Arg3.GetBuffer();
-        const CLR_INT32 length = stack.Arg4.NumericByRef().s4;
+        CLR_INT64 position = stack.Arg2().NumericByRef().s8;
+        const unsigned char *buffer = stack.Arg3().GetBuffer();
+        const CLR_INT32 length = stack.Arg4().NumericByRef().s4;
 
         FIL file;
         FRESULT operationResult;
@@ -340,9 +340,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
     {
         CLR_INT64 length = 0;
 
-        const char *workingPath = stack.Arg0.RecoverString();
+        const char *workingPath = stack.Arg0().RecoverString();
         FAULT_ON_NULL(workingPath);
-        const char *fileName = stack.Arg1.RecoverString();
+        const char *fileName = stack.Arg1().RecoverString();
         FAULT_ON_NULL(fileName);
 
         FIL file;
