@@ -142,7 +142,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
             platform_free(filePath);
         }
     }
-    NANOCLR_CLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRING__STRING__I8__SZARRAY_U1__I4( CLR_RT_StackFrame& stack )
@@ -154,10 +154,12 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
         const char *fileName = stack.Arg1().RecoverString();
         FAULT_ON_NULL(fileName);
         CLR_INT64 position = stack.Arg2().NumericByRef().s8;
-        unsigned char *buffer = stack.Arg3().GetBuffer();
+        CLR_RT_HeapBlock_Array* pArray = stack.Arg3().DereferenceArray();
+        FAULT_ON_NULL_ARG(pArray);
+        unsigned char *buffer = pArray->GetFirstElement();
         CLR_INT32 length = stack.Arg4().NumericByRef().s4;
 
-        CLR_INT32 readCount = 0;
+        CLR_UINT32 readCount = 0;
 
         FIL file;
         FRESULT operationResult;
@@ -241,7 +243,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
 
         stack.SetResult_I4(readCount);
     }
-    NANOCLR_CLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__STRING__STRING__I8__SZARRAY_U1__I4( CLR_RT_StackFrame& stack )
@@ -253,7 +255,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
         const char *fileName = stack.Arg1().RecoverString();
         FAULT_ON_NULL(fileName);
         CLR_INT64 position = stack.Arg2().NumericByRef().s8;
-        const unsigned char *buffer = stack.Arg3().GetBuffer();
+        CLR_RT_HeapBlock_Array* pArray = stack.Arg3().DereferenceArray();
+        FAULT_ON_NULL_ARG(pArray);
+        unsigned char *buffer = pArray->GetFirstElement();
         const CLR_INT32 length = stack.Arg4().NumericByRef().s4;
 
         FIL file;
@@ -331,7 +335,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
             platform_free(filePath);
         }
     }
-    NANOCLR_CLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8__STRING__STRING( CLR_RT_StackFrame& stack )
@@ -409,5 +413,5 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
 
         stack.SetResult_I8(length);
     }
-    NANOCLR_CLEANUP();
+    NANOCLR_NOCLEANUP();
 }
