@@ -15,3 +15,8 @@ macro(NF_DIRECTORY_EXISTS_NOT_EMPTY path pathExists)
     endif()
 
 endmacro()
+
+# define the base path for the library modules
+macro(SET_BASE_PATH_FOR_LIBRARIES_MODULES path)
+    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES ${path})
+endmacro()
