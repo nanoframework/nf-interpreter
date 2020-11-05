@@ -7,6 +7,9 @@ include(binutils.arm-none-eabi)
 include(binutils.FreeRTOS)
 include(nf_utils)
 
+# Define PLATFORM base path
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+
 # check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
 set(NO_RTOS_SOURCE_FOLDER TRUE)
 if(RTOS_SOURCE_FOLDER)

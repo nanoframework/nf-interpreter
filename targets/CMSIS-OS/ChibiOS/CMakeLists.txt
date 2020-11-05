@@ -8,6 +8,9 @@ include(binutils.ChibiOS)
 include(STM32_CubePackage)
 include(nf_utils)
 
+# Define PLATFORM base path
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+
 ########################################################
 # check availability of hex2dfu tool if specified
 if(DEFINED TOOL_HEX2DFU_PREFIX)
