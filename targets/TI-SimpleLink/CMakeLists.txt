@@ -7,6 +7,9 @@ include(binutils.arm-none-eabi)
 include(binutils.TI_SimpleLink)
 include(nf_utils)
 
+# Define PLATFORM base path
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+
 # add target TI SimpleLink dirs
 add_subdirectory(common)
 add_subdirectory(Include)

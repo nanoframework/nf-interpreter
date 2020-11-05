@@ -7,6 +7,9 @@ include(binutils.arm-none-eabi)
 include(binutils.FreeRTOS)
 include(nf_utils)
 
+# Define PLATFORM base path
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+
 # check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
 set(NO_RTOS_SOURCE_FOLDER TRUE)
 if(RTOS_SOURCE_FOLDER)
@@ -247,7 +250,7 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
     message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
 
     # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
 
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
@@ -264,7 +267,7 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/${FREERTOS_BOARD})
     message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
 
     # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
 
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/${FREERTOS_BOARD})
@@ -283,7 +286,7 @@ else()
         message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
 
         # set target base location
         set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
@@ -300,7 +303,7 @@ else()
         message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
 
         # set target base location
         set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/ST/${FREERTOS_BOARD})

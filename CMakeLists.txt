@@ -33,6 +33,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
+include(nf_utils)
 
 ######################################################
 # set build type to release if not specified otherwise
@@ -682,9 +683,10 @@ endif()
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
 
-    # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
 
+    # Define base path for the class libraries
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR)
+    
     add_subdirectory(targets/CMSIS-OS/ChibiOS)
     add_subdirectory(targets/CMSIS-OS/common)
     add_subdirectory(targets/CMSIS-OS/common/Include)
@@ -747,7 +749,7 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         endif()
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}/nanoCLR")
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}/nanoCLR)
 
         add_subdirectory(targets/FreeRTOS_ESP32)
 
@@ -762,7 +764,7 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 elseif(RTOS_TI_SIMPLELINK_CHECK)
 
     # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR")
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder

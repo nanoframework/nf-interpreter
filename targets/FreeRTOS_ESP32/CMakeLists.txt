@@ -4,3 +4,6 @@
 #
 
 include(nf_utils)
+
+# Define PLATFORM base path
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
