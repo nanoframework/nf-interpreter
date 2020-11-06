@@ -18,3 +18,24 @@ __nfweak uint32_t GetTargetCapabilities()
 {
     return 0;
 }
+
+// Information on whether updating a configuration block requires previous erase.
+// Implemented as "weak" to allow it to be replaced with "hard" implementation at target level.
+__nfweak bool Target_ConfigUpdateRequiresErase()
+{
+    return true;
+}
+
+// Information on whether the target has a proprietary bootloader
+// Implemented as "weak" to allow it to be replaced with "hard" implementation at target level.
+__nfweak bool Target_HasProprietaryBooter()
+{
+    return false;
+}
+
+// Information on whether the target is capable of IFU
+// Implemented as "weak" to allow it to be replaced with "hard" implementation at target level.
+__nfweak bool Target_IFUCapable()
+{
+    return false;
+}

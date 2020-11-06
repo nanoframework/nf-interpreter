@@ -63,7 +63,6 @@ extern "C"
     // Information on whether updating a configuration block requires previous erase.
     // This is relevant for targets that store the configuration block in flash,
     // which requires erasing before changing the content.
-    // No default implementation provided to make sure the platform/target esplicitly declares it
     bool Target_ConfigUpdateRequiresErase();
 
     // Information on whether the target implements nano booter
@@ -71,11 +70,9 @@ extern "C"
     bool Target_HasNanoBooter();
 
     // Information on whether the target has a proprietary bootloader
-    // No default implementation provided to make sure the platform/target esplicitly declares it
     bool Target_HasProprietaryBooter();
 
     // Information on whether the target is capable of IFU
-    // No default implementation provided to make sure the platform/target esplicitly declares it
     bool Target_IFUCapable();
 
 #ifdef __cplusplus

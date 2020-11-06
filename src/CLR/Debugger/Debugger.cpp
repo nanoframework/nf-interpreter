@@ -63,7 +63,7 @@ void CLR_DBG_Debugger::Debugger_Discovery()
 
     // Send "presence" ping.
     Monitor_Ping_Command cmd;
-    cmd.m_source = Monitor_Ping_c_Ping_Source_NanoCLR;
+    cmd.Source = Monitor_Ping_c_Ping_Source_NanoCLR;
 
     while (true)
     {
@@ -381,27 +381,45 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
         Monitor_Ping_Command *cmd = (Monitor_Ping_Command *)msg->m_payload;
 
         // default is to stop the debugger (backwards compatibility)
-        fStopOnBoot = (cmd != NULL) && (cmd->m_dbg_flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
+        fStopOnBoot = (cmd != NULL) && (cmd->Flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
 
-        cmdReply.m_source = Monitor_Ping_c_Ping_Source_NanoCLR;
+        cmdReply.Source = Monitor_Ping_c_Ping_Source_NanoCLR;
 
-        cmdReply.m_dbg_flags = CLR_EE_DBG_IS(StateProgramExited) != 0 ? Monitor_Ping_c_Ping_DbgFlag_AppExit : 0;
+        // now fill in the flags
+        cmdReply.Flags = CLR_EE_DBG_IS(StateProgramExited) != 0 ? Monitor_Ping_c_Ping_DbgFlag_AppExit : 0;
 
 #if defined(WP_IMPLEMENTS_CRC32)
-        cmdReply.m_dbg_flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;
+        cmdReply.Flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;
 #endif
 
         // Wire Protocol packet size
 #if (WP_PACKET_SIZE == 512)
-        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_0512;
+        cmdReply.Flags |= Monitor_Ping_c_PacketSize_0512;
 #elif (WP_PACKET_SIZE == 256)
-        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_0256;
+        cmdReply.Flags |= Monitor_Ping_c_PacketSize_0256;
 #elif (WP_PACKET_SIZE == 128)
-        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_0128;
+        cmdReply.Flags |= Monitor_Ping_c_PacketSize_0128;
 #elif (WP_PACKET_SIZE == 1024)
-        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_1024;
+        cmdReply.Flags |= Monitor_Ping_c_PacketSize_1024;
 #endif
 
+        // capability flags
+        if (::Target_HasProprietaryBooter())
+        {
+            cmdReply.Flags |= Monitor_Ping_c_HasProprietaryBooter;
+        }
+
+        if (::Target_IFUCapable())
+        {
+            cmdReply.Flags |= Monitor_Ping_c_IFUCapable;
+        }
+
+        if (::Target_ConfigUpdateRequiresErase())
+        {
+            cmdReply.Flags |= Monitor_Ping_c_ConfigBlockRequiresErase;
+        }
+
+        // done, send reply
         WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
     }
     else
@@ -409,7 +427,7 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
         Monitor_Ping_Reply *cmdReply = (Monitor_Ping_Reply *)msg->m_payload;
 
         // default is to stop the debugger (backwards compatibility)
-        fStopOnBoot = (cmdReply != NULL) && (cmdReply->m_dbg_flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
+        fStopOnBoot = (cmdReply != NULL) && (cmdReply->Flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
     }
 
     if (CLR_EE_DBG_IS_MASK(StateInitialize, StateMask))
