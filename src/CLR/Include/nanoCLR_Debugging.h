@@ -200,10 +200,20 @@ struct CLR_DBG_Commands
         static const CLR_UINT32 c_CapabilityFlags_ThreadCreateEx            = 0x00000400;
         static const CLR_UINT32 c_CapabilityFlags_ConfigBlockRequiresErase  = 0x00000800;
         static const CLR_UINT32 c_CapabilityFlags_HasNanoBooter             = 0x00001000;
-        static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_0       = 0x00010000;
-        static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_1       = 0x00020000;
-        static const CLR_UINT32 c_CapabilityFlags_TargetCapabiliy_0         = 0x00040000;
-        static const CLR_UINT32 c_CapabilityFlags_TargetCapabiliy_1         = 0x00080000;
+        static const CLR_UINT32 c_CapabilityFlags_HasProprietaryBooter      = 0x00002000;
+        static const CLR_UINT32 c_CapabilityFlags_IFUCapable                = 0x00004000;
+
+        static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_0       = 0x01000000;
+        static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_1       = 0x02000000;
+        static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_2       = 0x04000000;
+        static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_3       = 0x08000000;
+        static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_Mask    = 0x0F000000;
+
+        static const CLR_UINT32 c_CapabilityFlags_TargetCapabiliy_0         = 0x10000000;
+        static const CLR_UINT32 c_CapabilityFlags_TargetCapabiliy_1         = 0x20000000;
+        static const CLR_UINT32 c_CapabilityFlags_TargetCapabiliy_2         = 0x40000000;
+        static const CLR_UINT32 c_CapabilityFlags_TargetCapabiliy_3         = 0x80000000;
+        static const CLR_UINT32 c_CapabilityFlags_TargetCapabiliy_Mask      = 0xF0000000;
 
         CLR_UINT32 m_cmd;
 

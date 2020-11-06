@@ -1396,13 +1396,11 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
 
             reply.u_capsFlags |=
                 (::GetPlatformCapabilities() &
-                 (CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_PlatformCapabiliy_0 |
-                  CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_PlatformCapabiliy_1));
+                 CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_PlatformCapabiliy_Mask);
 
             reply.u_capsFlags |=
                 (::GetTargetCapabilities() &
-                 (CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_TargetCapabiliy_0 |
-                  CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_TargetCapabiliy_1));
+                 CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_TargetCapabiliy_Mask);
 
             data = (CLR_UINT8 *)&reply.u_capsFlags;
             size = sizeof(reply.u_capsFlags);
