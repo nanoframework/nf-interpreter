@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <nanoWeak.h>
 
+#include <nanoHAL_Capabilites.h>
 #include <nanoHAL_Network.h>
 #include <nanoHAL_Power.h>
 #include <nanoHAL_ConfigurationManager.h>
@@ -367,11 +368,9 @@ extern "C"
 {
 #endif
 
-    bool Target_HasNanoBooter();
+    // Implementation of hardware breakpoint.
+    // Required to make the processor to enter debug state and allowing debug tools to investigate system state.
     void HARD_Breakpoint();
-    bool Target_ConfigUpdateRequiresErase();
-    uint32_t GetPlatformCapabilities();
-    uint32_t GetTargetCapabilities();
 
 #ifdef __cplusplus
 }
