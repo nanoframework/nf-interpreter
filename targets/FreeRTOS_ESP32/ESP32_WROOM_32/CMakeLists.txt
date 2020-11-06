@@ -19,6 +19,7 @@ configure_file("${CMAKE_SOURCE_DIR}/CMake/ESP32_target_os.h.in"
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
 find_package(WireProtocol REQUIRED)
+find_package(nanoHALCore REQUIRED)
 
 # packages for nanoFramework libraries
 # mandatory 
@@ -102,6 +103,7 @@ target_sources(
     ${TARGET_ESP32_NANOCLR_SOURCES}
 
     ${WireProtocol_SOURCES}
+    ${nanoHALCore_SOURCES}
 
     # sources for nanoFramework libraries
     ${NF_CoreCLR_SOURCES}
@@ -194,6 +196,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
 
     ${WireProtocol_INCLUDE_DIRS}
+    ${nanoHALCore_INCLUDE_DIRS}
 
     ${TARGET_ESP32_IDF_INCLUDES}
 )

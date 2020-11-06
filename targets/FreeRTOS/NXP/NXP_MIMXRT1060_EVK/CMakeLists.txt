@@ -19,6 +19,7 @@ find_package(BuildUtils REQUIRED)
 find_package(FreeRTOS REQUIRED)
 find_package(CMSIS REQUIRED)
 find_package(WireProtocol REQUIRED)
+find_package(nanoHALCore REQUIRED)
 
 # packages for nanoFramework libraries
 #######################################
@@ -71,6 +72,7 @@ add_executable(
     ${FREERTOS_SOURCES}
 
     ${WireProtocol_SOURCES}
+    ${nanoHALCore_SOURCES}
 )
 
 #######################
@@ -91,6 +93,7 @@ add_executable(
     ${FREERTOS_SOURCES}
 
     ${WireProtocol_SOURCES}
+    ${nanoHALCore_SOURCES}
 
     # sources for nanoFramework libraries
     "${NF_CoreCLR_SOURCES}"
@@ -131,6 +134,7 @@ include_directories(
     ${WireProtocol_INCLUDE_DIRS}
     ${FREERTOS_INCLUDE_DIRS}
     ${CMSIS_INCLUDE_DIRS}
+    ${nanoHALCore_INCLUDE_DIRS}
 )
 
 # include directories for nanoBooter

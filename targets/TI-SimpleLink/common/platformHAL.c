@@ -10,42 +10,34 @@
 void HAL_AssertEx()
 {
     __asm__("BKPT");
-    while(true) { /*nop*/ }
+    while (true)
+    { /*nop*/
+    }
 }
 
 #if !defined(BUILD_RTM)
 
-void HARD_Breakpoint() 
+void HARD_Breakpoint()
 {
     __asm__("BKPT");
-    while(true) { /*nop*/ }
+    while (true)
+    { /*nop*/
+    }
 };
 
-#endif  // !defined(BUILD_RTM)
-
+#endif // !defined(BUILD_RTM)
 
 // Provides information whether the configuration block storage requires erase command before sending the update command
 // The 'weak' implementation for TI SimpleLink targets is false
 // If a target implements the store differently it has to provide a 'strong' implementation of this.
-__nfweak bool Target_ConfigUpdateRequiresErase()
-{
-    return false;
-};
+__nfweak TARGET_CONFIG_UPDATE_REQUIRES_ERASE(false);
 
-bool Target_HasNanoBooter()
-{ 
-    return false; 
-};
-
-// declarations of platform capabilities
-uint32_t GetPlatformCapabilities()
-{ 
-    return 0; 
-};
+// TI SimpleLink targets do not implement nanoBooter
+__nfweak TARGET_HAS_NANOBOOTER(false);
 
 // declarations of target capabilities
+// TI SimpleLink targets don't declare any target capability
 // If a target has something to declare it has to provide a 'strong' implementation of this.
-__nfweak uint32_t GetTargetCapabilities()
-{ 
-    return 0; 
-};
+__nfweak GET_TARGET_CAPABILITIES(0);
+
+inline TARGET_IFU_CAPABLE(false);

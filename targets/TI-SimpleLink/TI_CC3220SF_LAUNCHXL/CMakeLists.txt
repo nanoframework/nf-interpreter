@@ -16,6 +16,7 @@ set(NANOCLR_PROJECT_NAME "nanoCLR")
 find_package(BuildUtils REQUIRED)
 find_package(TI_SimpleLink REQUIRED)
 find_package(WireProtocol REQUIRED)
+find_package(nanoHALCore REQUIRED)
 
 # packages for nanoFramework libraries
 #######################################
@@ -57,6 +58,7 @@ add_executable(
     ${TI_SimpleLink_SOURCES}
 
     ${WireProtocol_SOURCES}
+    ${nanoHALCore_SOURCES}
 
     # sources for nanoFramework libraries
     ${NF_CoreCLR_SOURCES}
@@ -132,8 +134,9 @@ include_directories(
     "${PROJECT_SOURCE_DIR}/src/PAL/Include"
 
     "${WireProtocol_INCLUDE_DIRS}"
-    "${TI_SimpleLink_INCLUDE_DIRS}"
+    ${nanoHALCore_INCLUDE_DIRS}
 
+    "${TI_SimpleLink_INCLUDE_DIRS}"
     ${TI_XDCTools_INCLUDE_DIR}
 
     "${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}"

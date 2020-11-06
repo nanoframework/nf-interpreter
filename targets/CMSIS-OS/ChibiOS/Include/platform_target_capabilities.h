@@ -11,21 +11,22 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-// this platform doesn't have any declared capabilities
+    // the targets of this platform can declate these capabilities
+    typedef enum TargetCapabilities
+    {
+        // JTAG update capable
+        // using Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_TargetCapability_0
+        TargetCapabilities_JtagUpdate = 0x10000000,
 
-// the targets of this platform can declate these capabilities
-typedef enum TargetCapabilities
-{
-    // JTAG update
-    TargetCapabilities_JtagUpdate   = 0x00000000,
+        // DFU update capable
+        // using Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_TargetCapability_1
+        TargetCapabilities_DfuUpdate = 0x20000000,
 
-    // DFU update
-    TargetCapabilities_DfuUpdate    = 0x00040000,
-
-}TargetCapabilities;
+    } TargetCapabilities;
 
 #ifdef __cplusplus
 }
