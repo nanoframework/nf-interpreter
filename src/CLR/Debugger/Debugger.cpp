@@ -955,8 +955,8 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
 
     if (NULL != cmd)
     {
-        if (CLR_DBG_Commands::Monitor_Reboot::c_EnterBootloader ==
-            (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterBootloader))
+        if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
+            (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
         {
             WP_ReplyToCommand(msg, true, false, NULL, 0);
 
