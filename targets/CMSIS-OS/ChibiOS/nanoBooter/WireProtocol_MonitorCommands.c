@@ -161,7 +161,7 @@ int Monitor_Reboot(WP_Message *message)
     if (cmd != NULL)
     {
         // only reset if we are not trying to get into the bootloader
-        if ((cmd->m_flags & Monitor_Reboot_c_EnterBootloader) != Monitor_Reboot_c_EnterBootloader)
+        if ((cmd->m_flags & Monitor_Reboot_c_EnterNanoBooter) != Monitor_Reboot_c_EnterNanoBooter)
         {
             // RESET CPU
             // because ChibiOS relies on CMSIS it's recommended to make use of the CMSIS API
