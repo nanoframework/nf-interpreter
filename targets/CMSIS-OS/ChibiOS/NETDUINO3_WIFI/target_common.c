@@ -24,3 +24,4 @@ HAL_TARGET_CONFIGURATION g_TargetConfiguration;
 
 // this target uses DFU for updates
 inline GET_TARGET_CAPABILITIES(TargetCapabilities_DfuUpdate);
+inline TARGET_HAS_PROPRITARY_BOOTER(true);

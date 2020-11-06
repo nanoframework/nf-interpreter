@@ -67,22 +67,22 @@ int Monitor_Ping(WP_Message *message)
     if ((message->m_header.m_flags & WP_Flags_c_Reply) == 0)
     {
         Monitor_Ping_Reply cmdReply;
-        cmdReply.m_source = Monitor_Ping_c_Ping_Source_NanoBooter;
-        cmdReply.m_dbg_flags = 0;
+        cmdReply.Source = Monitor_Ping_c_Ping_Source_NanoBooter;
+        cmdReply.Flags = 0;
 
 #if defined(WP_IMPLEMENTS_CRC32)
-        cmdReply.m_dbg_flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;
+        cmdReply.Flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;
 #endif
 
 // Wire Protocol packet size
 #if (WP_PACKET_SIZE == 512)
-        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_0512;
+        cmdReply.Flags |= Monitor_Ping_c_PacketSize_0512;
 #elif (WP_PACKET_SIZE == 256)
-        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_0256;
+        cmdReply.Flags |= Monitor_Ping_c_PacketSize_0256;
 #elif (WP_PACKET_SIZE == 128)
-        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_0128;
+        cmdReply.Flags |= Monitor_Ping_c_PacketSize_0128;
 #elif (WP_PACKET_SIZE == 1024)
-        cmdReply.m_dbg_flags |= Monitor_Ping_c_PacketSize_1024;
+        cmdReply.Flags |= Monitor_Ping_c_PacketSize_1024;
 #endif
 
         WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));

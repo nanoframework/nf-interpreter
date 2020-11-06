@@ -57,20 +57,18 @@ typedef enum MemoryMap_Options
 // typedefs
 
 // structure for Monitor Ping Reply
-// backwards compatible with .NETMF
 typedef struct Monitor_Ping_Reply
 {
-    uint32_t m_source;
-    uint32_t m_dbg_flags;
+    uint32_t Source;
+    uint32_t Flags;
 
 } Monitor_Ping_Reply;
 
 // structure for command Monitor Ping
-// backwards compatible with .NETMF
 typedef struct Monitor_Ping_Command
 {
-    uint32_t m_source;
-    uint32_t m_dbg_flags;
+    uint32_t Source;
+    uint32_t Flags;
 
 } Monitor_Ping_Command;
 

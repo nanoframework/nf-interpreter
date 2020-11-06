@@ -28,9 +28,7 @@ void HARD_Breakpoint()
 #endif // !defined(BUILD_RTM)
 
 // provide platform level "weak" implementations for all capabilities
-__nfweak TARGET_CONFIG_UPDATE_REQUIRES_ERASE(true);
 __nfweak TARGET_HAS_NANOBOOTER(true);
-__nfweak TARGET_HAS_PROPRITARY_BOOTER(false);
 __nfweak TARGET_IFU_CAPABLE(false);
 
 // STM32 default capabiliy is JTAG update

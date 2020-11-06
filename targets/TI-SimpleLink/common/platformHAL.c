@@ -28,12 +28,10 @@ void HARD_Breakpoint()
 #endif // !defined(BUILD_RTM)
 
 // Provides information whether the configuration block storage requires erase command before sending the update command
-// The 'weak' implementation for TI SimpleLink targets is false
-// If a target implements the store differently it has to provide a 'strong' implementation of this.
-__nfweak TARGET_CONFIG_UPDATE_REQUIRES_ERASE(false);
+inline TARGET_CONFIG_UPDATE_REQUIRES_ERASE(false);
 
 // TI SimpleLink targets do not implement nanoBooter
-__nfweak TARGET_HAS_NANOBOOTER(false);
+inline TARGET_HAS_NANOBOOTER(false);
 
 // declarations of target capabilities
 // TI SimpleLink targets don't declare any target capability

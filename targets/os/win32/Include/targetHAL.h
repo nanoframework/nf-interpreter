@@ -51,6 +51,16 @@ inline bool Target_HasNanoBooter()
     return false;
 };
 
+inline bool Target_IFUCapable()
+{
+    return false;
+};
+
+inline bool Target_HasProprietaryBooter()
+{
+    return false;
+};
+
 inline uint32_t GetPlatformCapabilities()
 {
     return 0;

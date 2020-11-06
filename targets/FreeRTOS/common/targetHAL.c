@@ -29,12 +29,8 @@ void HARD_Breakpoint()
 
 #endif // !defined(BUILD_RTM)
 
-// The 'weak' implementation for NXP targets is true
-// If a target implements the store differently it has to provide a 'strong' implementation of this.
-__nfweak TARGET_CONFIG_UPDATE_REQUIRES_ERASE(true);
-
 // NXP targets implement nanoBooter
-__nfweak TARGET_HAS_NANOBOOTER(true);
+inline TARGET_HAS_NANOBOOTER(true);
 
 // NXP targets don't declare any target capability
 __nfweak GET_TARGET_CAPABILITIES(0);

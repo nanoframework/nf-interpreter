@@ -200,9 +200,12 @@ struct CLR_DBG_Commands
         static const CLR_UINT32 c_CapabilityFlags_Profiling_Calls           = 0x00000100;
         static const CLR_UINT32 c_CapabilityFlags_ThreadCreateEx            = 0x00000400;
         static const CLR_UINT32 c_CapabilityFlags_ConfigBlockRequiresErase  = 0x00000800;
+
+        /////////////////////////////////////////////////////////////////////////////////
+        // THIS FLAG IS DEPRECATED AND WILL BE REMOVED IN A FUTURE VERSION 
+        // USE Monitor_Ping_Source_Flags INSTEAD
         static const CLR_UINT32 c_CapabilityFlags_HasNanoBooter             = 0x00001000;
-        static const CLR_UINT32 c_CapabilityFlags_HasProprietaryBooter      = 0x00002000;
-        static const CLR_UINT32 c_CapabilityFlags_IFUCapable                = 0x00004000;
+        /////////////////////////////////////////////////////////////////////////////////
 
         static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_0       = 0x01000000;
         static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_1       = 0x02000000;
