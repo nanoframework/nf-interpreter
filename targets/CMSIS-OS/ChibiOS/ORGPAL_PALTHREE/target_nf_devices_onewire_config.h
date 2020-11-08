@@ -16,7 +16,7 @@
 ///////////
 
 // enable USART4
-#define NF_ONEWIRE_STM32_UART_USE_USART4    TRUE
+#define NF_ONEWIRE_STM32_UART_USE_USART4    FALSE
 
 // buffers size
 // tx buffer size: 32 bytes
