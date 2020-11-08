@@ -16,7 +16,8 @@
 // TX pin: is GPIOB_09
 // port for RX pin is: GPIOB
 // RX pin: is GPIOB_08
-// GPIO alternate pin function is 9 (see "Table 9. STM32F405xx and STM32F407xx alternate function mapping" in STM32F405xx/STM32F407xx datasheet)
+// GPIO alternate pin function is 9 (see "Table 9. STM32F405xx and STM32F407xx alternate function mapping" in
+// STM32F405xx/STM32F407xx datasheet)
 CAN_CONFIG_PINS(1, GPIOB, GPIOB, 9, 8, 9)
 
 // buffer
@@ -34,7 +35,8 @@ CAN_INIT(1, CAN1_RX_BUFFER_SIZE)
 // TX pin: is GPIOB_06
 // port for RX pin is: GPIOB
 // RX pin: is GPIOB_05
-// GPIO alternate pin function is 9 (see "Table 9. STM32F405xx and STM32F407xx alternate function mapping" in STM32F405xx/STM32F407xx datasheet)
+// GPIO alternate pin function is 9 (see "Table 9. STM32F405xx and STM32F407xx alternate function mapping" in
+// STM32F405xx/STM32F407xx datasheet)
 CAN_CONFIG_PINS(2, GPIOB, GPIOB, 6, 5, 9)
 
 // buffer
