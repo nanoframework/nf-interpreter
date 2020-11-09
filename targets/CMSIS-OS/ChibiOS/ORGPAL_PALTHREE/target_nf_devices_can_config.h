@@ -3,4 +3,4 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// THIS BOARD DOES NOT HAVE ONEWIRE SUPPORT.
+// THIS BOARD DOES NOT HAVE CAN SUPPORT.
