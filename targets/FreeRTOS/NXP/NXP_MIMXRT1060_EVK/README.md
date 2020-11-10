@@ -39,7 +39,7 @@ Pre-configured cmake-variants.json for this board
           "TOOLCHAIN_PREFIX": "C:/nanoFramework_Tools/GNU_ARM_Toolchain/7 2018-q2-update",
           "TARGET_SERIES": "IMXRT10xx",
           "RTOS": "FREERTOS",
-          "FREERTOS_BOARD": "NXP_MIMXRT1060_EVK",
+          "TARGET_BOARD": "NXP_MIMXRT1060_EVK",
           "FREERTOS_VERSION": "v1.4.8",
           "CMSIS_VERSION": "5.4.0",
           "FATFS_VERSION": "R0.13c",

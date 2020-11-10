@@ -5,8 +5,8 @@
 
 
 # set include directories
-list(APPEND nanoFramework.System.Text_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND nanoFramework.System.Text_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.System.Text")
+list(APPEND nanoFramework.System.Text_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/HAL/Include")
+list(APPEND nanoFramework.System.Text_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Text")
 
 # source files
 set(nanoFramework.System.Text_SRCS
@@ -23,7 +23,7 @@ foreach(SRC_FILE ${nanoFramework.System.Text_SRCS})
         PATHS
 
             # path for source files of this module
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.System.Text
+            ${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Text
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

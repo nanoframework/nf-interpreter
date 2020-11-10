@@ -5,12 +5,12 @@
 
 
 # set include directories
-list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.ResourceManager")
+list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/HAL/Include")
+list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.ResourceManager")
 
 if(API_nanoFramework.Graphics)
-list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core")
-list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Displays")
+list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core")
+list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Displays")
 endif()
 
 
@@ -29,7 +29,7 @@ foreach(SRC_FILE ${nanoFramework.ResourceManager_SRCS})
         PATHS
 
             # path for source files of this module
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.ResourceManager
+            ${CMAKE_SOURCE_DIR}/src/nanoFramework.ResourceManager
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

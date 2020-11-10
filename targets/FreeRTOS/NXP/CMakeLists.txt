@@ -39,7 +39,7 @@ if(NO_FATFS_SOURCE)
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
-    configure_file("${PROJECT_SOURCE_DIR}/CMake/FatFS.CMakeLists.cmake.in"
+    configure_file("${CMAKE_SOURCE_DIR}/CMake/FatFS.CMakeLists.cmake.in"
     "${CMAKE_BINARY_DIR}/FatFS_Download/CMakeLists.txt")
 
     # setup CMake project for FatFS download
@@ -62,7 +62,7 @@ if(NO_FATFS_SOURCE)
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
-        INSTALL_COMMAND "${CMAKE_COMMAND}" -E remove "${PROJECT_BINARY_DIR}/FatFS_Source/source/ffconf.h"
+        INSTALL_COMMAND "${CMAKE_COMMAND}" -E remove "${CMAKE_BINARY_DIR}/FatFS_Source/source/ffconf.h"
 
         # Disable all other steps
         CONFIGURE_COMMAND ""
@@ -93,7 +93,7 @@ else()
         FatFS
         PREFIX FatFS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
-        INSTALL_COMMAND "${CMAKE_COMMAND}" -E remove "${PROJECT_BINARY_DIR}/FatFS_Source/source/ffconf.h"
+        INSTALL_COMMAND "${CMAKE_COMMAND}" -E remove "${CMAKE_BINARY_DIR}/FatFS_Source/source/ffconf.h"
 
         # Disable all other steps
         CONFIGURE_COMMAND ""
@@ -146,7 +146,7 @@ if(NO_LWIP_SOURCE)
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
-    configure_file("${PROJECT_SOURCE_DIR}/CMake/LWIP.CMakeLists.cmake.in"
+    configure_file("${CMAKE_SOURCE_DIR}/CMake/LWIP.CMakeLists.cmake.in"
                 "${CMAKE_BINARY_DIR}/LWIP_Download/CMakeLists.txt")
 
     # setup CMake project for LWIP download

@@ -32,7 +32,7 @@
           "TARGET_SERIES": "STM32F0xx",
           "RTOS": "CHIBIOS",
           "RTOS_SOURCE_FOLDER": "",
-          "CHIBIOS_BOARD": "ST_NUCLEO64_F091RC",
+          "TARGET_BOARD": "ST_NUCLEO64_F091RC",
           "CHIBIOS_CONTRIB_REQUIRED": "OFF",
           "CHIBIOS_CONTRIB_SOURCE": "",
           "STM32_CUBE_PACKAGE_REQUIRED": "OFF",

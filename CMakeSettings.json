@@ -56,7 +56,7 @@
           "value": ""
         },
         {
-          "name": "CHIBIOS_BOARD",
+          "name": "TARGET_BOARD",
           "value": "ST_STM32F769I_DISCOVERY"
         },
         {
@@ -259,7 +259,7 @@
           "value": "ESP32"
         },
         {
-          "name": "ESP32_BOARD:STRING",
+          "name": "TARGET_BOARD:STRING",
           "value": "ESP32_WROOM_32"
         },
         {

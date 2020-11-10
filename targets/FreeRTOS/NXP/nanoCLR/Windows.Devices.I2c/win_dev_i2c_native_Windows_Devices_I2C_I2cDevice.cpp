@@ -4,7 +4,6 @@
 //
 
 #include <string.h>
-#include <win_dev_i2c_native.h>
 #include "win_dev_i2c_native_target.h"
 
 /* Select USB1 PLL (480 MHz) as master lpi2c clock source */

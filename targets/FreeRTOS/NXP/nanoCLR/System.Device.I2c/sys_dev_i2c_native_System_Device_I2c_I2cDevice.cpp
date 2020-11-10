@@ -169,8 +169,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
         CLR_RT_HeapBlock *writeSpanByte;
         CLR_RT_HeapBlock *readSpanByte;
-        CLR_RT_HeapBlock_Array *writeBuffer;
-        CLR_RT_HeapBlock_Array *readBuffer;
+        CLR_RT_HeapBlock_Array *writeBuffer = NULL;
+        CLR_RT_HeapBlock_Array *readBuffer = NULL;
         CLR_RT_HeapBlock *result;
         CLR_RT_HeapBlock *pConfig;
 

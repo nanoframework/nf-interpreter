@@ -8,12 +8,12 @@ set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.De
 
 
 # set include directories
-list(APPEND System.Device.Gpio_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND System.Device.Gpio_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND System.Device.Gpio_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND System.Device.Gpio_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND System.Device.Gpio_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
+list(APPEND System.Device.Gpio_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+list(APPEND System.Device.Gpio_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND System.Device.Gpio_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.Device.Gpio_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND System.Device.Gpio_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.Device.Gpio)
+list(APPEND System.Device.Gpio_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Gpio)
 
 # source files
 set(System.Device.Gpio_SRCS
@@ -39,13 +39,13 @@ foreach(SRC_FILE ${System.Device.Gpio_SRCS})
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/System.Device.Gpio
+            ${CMAKE_SOURCE_DIR}/src/System.Device.Gpio
 
             # core source files
-            ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/InterruptHandler
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/Hardware
+            ${CMAKE_SOURCE_DIR}/src/PAL/AsyncProcCall
+            ${CMAKE_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher
+            ${CMAKE_SOURCE_DIR}/src/CLR/Core/InterruptHandler
+            ${CMAKE_SOURCE_DIR}/src/CLR/Core/Hardware
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )

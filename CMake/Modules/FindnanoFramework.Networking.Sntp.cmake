@@ -5,9 +5,10 @@
 
 
 # set include directories
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip)
-list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp")
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip)
+list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
 
 # source files
@@ -24,7 +25,7 @@ foreach(SRC_FILE ${nanoFramework.Networking.Sntp_SRCS})
         PATHS
 
             # path for source files of this module
-            ${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
+            ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

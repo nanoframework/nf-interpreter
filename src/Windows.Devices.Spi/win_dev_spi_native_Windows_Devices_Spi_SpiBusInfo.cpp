@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_spi_native_target.h"
+#include <win_dev_spi_native.h>
 
 HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeChipSelectLineCount___I4(
     CLR_RT_StackFrame &stack)

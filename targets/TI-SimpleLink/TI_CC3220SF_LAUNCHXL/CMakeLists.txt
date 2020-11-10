@@ -72,23 +72,23 @@ add_executable(
 target_link_libraries(
     ${NANOCLR_PROJECT_NAME}.elf
 
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/drivers/lib/drivers_cc32xx.am4g
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/drivers/net/wifi/gcc/rtos/simplelink.a
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/ti/dpl/lib/dpl_cc32xx.am4g
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/drivers/lib/drivers_cc32xx.am4g
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/drivers/net/wifi/gcc/rtos/simplelink.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/ti/dpl/lib/dpl_cc32xx.am4g
 
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/drivers/net/wifi/slnetif/gcc/Release/slnetifwifi.a
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/net/utils/gcc/Release/net_utils.a
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/net/lib/gcc/m4/slnetsock_release.a
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/net/sntp/lib/gcc/m4/sntp_release.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/drivers/net/wifi/slnetif/gcc/Release/slnetifwifi.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/net/utils/gcc/Release/net_utils.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/net/lib/gcc/m4/slnetsock_release.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/net/sntp/lib/gcc/m4/sntp_release.a
 
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/devices/cc32xx/driverlib/gcc/Release/driverlib.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/ti/devices/cc32xx/driverlib/gcc/Release/driverlib.a
     
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/nofp/libc_nano.a
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/nofp/libm.a
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/nofp/libnosys.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/nofp/libc_nano.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/nofp/libm.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/nofp/libnosys.a
 
     # need to add this a second time otherwise we'll get undefined references
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/ti/dpl/lib/dpl_cc32xx.am4g
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/ti/dpl/lib/dpl_cc32xx.am4g
 
 )
 
@@ -116,7 +116,7 @@ add_custom_command(
 
 add_custom_command(
     TARGET ${NANOCLR_PROJECT_NAME}.elf PRE_BUILD
-    COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source\;${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages\;" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4 -p ti.platforms.simplelink:CC3220SF -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions "-DDeviceFamily_CC3220" "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
+    COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source\;${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages\;" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4 -p ti.platforms.simplelink:CC3220SF -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions "-DDeviceFamily_CC3220" "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generate TI-RTOS configuration" 
 )
@@ -128,10 +128,10 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/common"
-    "${PROJECT_SOURCE_DIR}/src/CLR/Core"
-    "${PROJECT_SOURCE_DIR}/src/CLR/Include"
-    "${PROJECT_SOURCE_DIR}/src/HAL/Include"
-    "${PROJECT_SOURCE_DIR}/src/PAL/Include"
+    "${CMAKE_SOURCE_DIR}/src/CLR/Core"
+    "${CMAKE_SOURCE_DIR}/src/CLR/Include"
+    "${CMAKE_SOURCE_DIR}/src/HAL/Include"
+    "${CMAKE_SOURCE_DIR}/src/PAL/Include"
 
     "${WireProtocol_INCLUDE_DIRS}"
     ${nanoHALCore_INCLUDE_DIRS}

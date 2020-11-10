@@ -5,7 +5,7 @@
 
 
 # List of the required FatFs include files.
-list(APPEND FATFS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/FatFS_Source/source)
+list(APPEND FATFS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/FatFS_Source/source)
 list(APPEND FATFS_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 
 set(FATFS_SRCS
@@ -19,7 +19,7 @@ foreach(SRC_FILE ${FATFS_SRCS})
     set(FATFS_SRC_FILE SRC_FILE -NOTFOUND)
     find_file(FATFS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${PROJECT_BINARY_DIR}/FatFS_Source/source
+            ${CMAKE_BINARY_DIR}/FatFS_Source/source
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

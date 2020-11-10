@@ -4,7 +4,7 @@
 #
 
 # set include directories
-list(APPEND STM32H7_CubePackage_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/STM32H7_CubePackage_Source/Drivers/STM32H7xx_HAL_Driver/Inc")
+list(APPEND STM32H7_CubePackage_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/STM32H7_CubePackage_Source/Drivers/STM32H7xx_HAL_Driver/Inc")
 
 # source files
 set(STM32H7_CubePackage_SRCS
@@ -20,7 +20,7 @@ foreach(SRC_FILE ${STM32H7_CubePackage_SRCS})
     find_file(STM32H7_CubePackage_SRC_FILE ${SRC_FILE}
         PATHS 
 
-        "${PROJECT_BINARY_DIR}/STM32H7_CubePackage_Source/Drivers/STM32H7xx_HAL_Driver/Src"
+        "${CMAKE_BINARY_DIR}/STM32H7_CubePackage_Source/Drivers/STM32H7xx_HAL_Driver/Src"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

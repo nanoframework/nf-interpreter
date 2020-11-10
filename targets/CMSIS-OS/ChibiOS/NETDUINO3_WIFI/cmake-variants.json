@@ -32,7 +32,7 @@
           "RTOS": "CHIBIOS",
           "TARGET_SERIES": "STM32F4xx",
           "RTOS_SOURCE_FOLDER": "",
-          "CHIBIOS_BOARD": "NETDUINO3_WIFI",
+          "TARGET_BOARD": "NETDUINO3_WIFI",
           "CHIBIOS_CONTRIB_REQUIRED": "OFF",
           "CHIBIOS_CONTRIB_SOURCE": "",
           "STM32_CUBE_PACKAGE_REQUIRED": "OFF",

@@ -26,7 +26,7 @@ foreach(SRC_FILE ${src_spiffs})
     find_file(SPIFFS_SRC_FILE ${SRC_FILE}
         PATHS
 
-            "${PROJECT_BINARY_DIR}/SPIFFS_Source/src"
+            "${CMAKE_BINARY_DIR}/SPIFFS_Source/src"
             "${TARGET_BASE_LOCATION}"
 
         CMAKE_FIND_ROOT_PATH_BOTH

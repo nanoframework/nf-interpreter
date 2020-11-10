@@ -5,8 +5,8 @@
 
 
 # set include directories
-list(APPEND nanoFramework.System.Collections_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND nanoFramework.System.Collections_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.System.Collections")
+list(APPEND nanoFramework.System.Collections_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/HAL/Include")
+list(APPEND nanoFramework.System.Collections_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Collections")
 
 
 # the following CLR support files are required and added to the build by FindNF_CoreCLR.cmake
@@ -28,7 +28,7 @@ foreach(SRC_FILE ${nanoFramework.System.Collections_SRCS})
         PATHS
 
             # path for source files of this module
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.System.Collections
+            ${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Collections
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

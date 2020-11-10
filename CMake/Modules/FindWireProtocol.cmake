@@ -39,7 +39,7 @@ endif()
 message(STATUS "Wire Protocol TRACE_MASK is '${WP_TRACE_MASK}'") # debug helper
 
 # set include directories for Wire Protocol
-list(APPEND WireProtocol_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
+list(APPEND WireProtocol_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 
 # source files for Wire Protocol
 set(WireProtocol_SRCS
@@ -56,8 +56,8 @@ foreach(SRC_FILE ${WireProtocol_SRCS})
     set(WireProtocol_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(WireProtocol_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${PROJECT_SOURCE_DIR}/src/CLR/WireProtocol
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core
+            ${CMAKE_SOURCE_DIR}/src/CLR/WireProtocol
+            ${CMAKE_SOURCE_DIR}/src/CLR/Core
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

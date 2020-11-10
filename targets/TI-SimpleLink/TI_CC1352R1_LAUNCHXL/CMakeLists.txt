@@ -3,39 +3,18 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(binutils.common)
+include(binutils.TI_SimpleLink)
+
 ENABLE_LANGUAGE(ASM)
 
-# add header files with common OS definitions and board definitions specific for each image
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
-                "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
-                "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
- 
-set(NANOCLR_PROJECT_NAME "nanoCLR")
-
-find_package(BuildUtils REQUIRED)
-find_package(TI_SimpleLink REQUIRED)
-find_package(WireProtocol REQUIRED)
-find_package(nanoHALCore REQUIRED)
-
-# packages for nanoFramework libraries
-#######################################
-# mandatory 
-find_package(NF_CoreCLR REQUIRED)
-
-#######################################
-# optional
-
-# nF feature: debugger
-if(NF_FEATURE_DEBUGGER)
-    find_package(NF_Debugger REQUIRED)
-    find_package(NF_Diagnostics REQUIRED)
-endif()
+# add packages
+NF_ADD_COMMON_PACKAGES()
+NF_ADD_PLATFORM_PACKAGES()
 
 #######################################
 
 add_subdirectory("common")
-# add_subdirectory("nanoBooter")
 add_subdirectory("nanoCLR")
 
 #######################################
@@ -61,7 +40,7 @@ add_custom_command(
     DEPENDS
     ${CMAKE_CURRENT_BINARY_DIR}/TI_CC1352R1_LAUNCHXL.syscfg
 
-    COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.bat -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc TI_CC1352R1_LAUNCHXL.syscfg
+    COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.bat -s "${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc TI_CC1352R1_LAUNCHXL.syscfg
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generate configuration files" 
 )
@@ -90,7 +69,7 @@ add_custom_target(
 add_custom_target(
     TIRTOS_CONFIG
 
-	COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:CC1352 -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_CC13X2 " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
+	COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source\;${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:CC1352 -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_CC13X2 " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 
     COMMENT "Generate TI-RTOS configuration" 
@@ -105,47 +84,54 @@ add_executable(
 
     # ${CMAKE_CURRENT_SOURCE_DIR}/ccfg.c
     ${CMAKE_CURRENT_SOURCE_DIR}/target_common.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/target_Power.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/CC1352R1_LAUNCHXL_fxns.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/target_Power.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/CC1352R1_LAUNCHXL_fxns.c
 
-    ${COMMON_PROJECT_SOURCES}
-    ${NANOCLR_PROJECT_SOURCES}
+    # ${COMMON_PROJECT_SOURCES}
+    # ${NANOCLR_PROJECT_SOURCES}
     
-    ${TARGET_TI_SimpleLink_COMMON_SOURCES}
+    # ${TARGET_TI_SimpleLink_COMMON_SOURCES}
 
-    ${TARGET_TI_SimpleLink_NANOCLR_SOURCES}
+    # ${TARGET_TI_SimpleLink_NANOCLR_SOURCES}
 
-    ${TARGET_TI_SimpleLink_SOURCES}
+    # ${TARGET_TI_SimpleLink_SOURCES}
 
-    ${WireProtocol_SOURCES}
-    ${nanoHALCore_SOURCES}
+    # ${WireProtocol_SOURCES}
+    # ${nanoHALCore_SOURCES}
 
-    ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
-    ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
-    ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
-    ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
+    # ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
+    # ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
+    # ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
+    # ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
 
-    # sources for nanoFramework libraries
-    ${NF_CoreCLR_SOURCES}
-    ${NF_Debugger_SOURCES}
-    ${NF_Diagnostics_SOURCES}
+    # # sources for nanoFramework libraries
+    # ${NF_CoreCLR_SOURCES}
+    # ${NF_Debugger_SOURCES}
+    # ${NF_Diagnostics_SOURCES}
 
-    # sources for nanoFramework APIs
-    ${TARGET_NANO_APIS_SOURCES}
+    # # sources for nanoFramework APIs
+    # ${TARGET_NANO_APIS_SOURCES}
 )
+
+NF_ADD_COMMON_SOURCES(${NANOCLR_PROJECT_NAME})
+NF_ADD_PLATFORM_SOURCES(${NANOCLR_PROJECT_NAME})
+
+# include directories for nanoCLR
+NF_ADD_COMMON_INCLUDE_DIRECTORIES(${NANOCLR_PROJECT_NAME})
+NF_ADD_PLATFORM_INCLUDE_DIRECTORIES(${NANOCLR_PROJECT_NAME})
 
 target_link_libraries(
     ${NANOCLR_PROJECT_NAME}.elf
 
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/display/lib/display.am4fg
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/grlib/lib/gcc/m4f/grlib.a
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/drivers/rf/lib/rf_multiMode_cc13x2.am4fg
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/drivers/lib/drivers_cc13x2.am4fg
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/devices/cc13x2_cc26x2/driverlib/bin/gcc/driverlib.lib
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/ti/dpl/lib/dpl_cc13x2.am4fg
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/display/lib/display.am4fg
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/grlib/lib/gcc/m4f/grlib.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/drivers/rf/lib/rf_multiMode_cc13x2.am4fg
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/drivers/lib/drivers_cc13x2.am4fg
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/devices/cc13x2_cc26x2/driverlib/bin/gcc/driverlib.lib
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/ti/dpl/lib/dpl_cc13x2.am4fg
     
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libm.a
-    ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libnosys.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libm.a
+    ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libnosys.a
 )
 
 # add dependency from TI SimpleLink CC13x2_26x2 SDK, TI SysConfig and XDCTools (this is required to make sure that those repos are downloaded before the build starts)
@@ -159,41 +145,41 @@ add_dependencies(TIRTOS_CONFIG COPY_TIRTOS_CONFIG)
 #############################
 
 # include common directories
-include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/common
-    ${PROJECT_SOURCE_DIR}/src/CLR/Core
-    ${PROJECT_SOURCE_DIR}/src/CLR/Include
-    ${PROJECT_SOURCE_DIR}/src/HAL/Include
-    ${PROJECT_SOURCE_DIR}/src/PAL/Include
+# include_directories(
+#     # ${CMAKE_CURRENT_BINARY_DIR}
+#     # ${CMAKE_CURRENT_SOURCE_DIR}
+#     # ${CMAKE_CURRENT_SOURCE_DIR}/common
+#     # ${CMAKE_SOURCE_DIR}/src/CLR/Core
+#     # ${CMAKE_SOURCE_DIR}/src/CLR/Include
+#     # ${CMAKE_SOURCE_DIR}/src/HAL/Include
+#     # ${CMAKE_SOURCE_DIR}/src/PAL/Include
 
-    ${WireProtocol_INCLUDE_DIRS}
-    ${nanoHALCore_INCLUDE_DIRS}
+#     # ${WireProtocol_INCLUDE_DIRS}
+#     # ${nanoHALCore_INCLUDE_DIRS}
     
-    ${TI_SimpleLink_INCLUDE_DIRS}
-    ${TI_XDCTools_INCLUDE_DIR}
+#     ${TI_SimpleLink_INCLUDE_DIRS}
+#     ${TI_XDCTools_INCLUDE_DIR}
 
-    ${CMAKE_CURRENT_BINARY_DIR}/syscfg
+#     ${CMAKE_CURRENT_BINARY_DIR}/syscfg
 
-    ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
-)
+#     ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
+# )
 
-# include directories for nanoCLR
-target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
-    ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
-    ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
+# # include directories for nanoCLR
+# target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
+#     ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
+#     ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR
 
-    ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS}
+#     ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS}
 
-    # directories for nanoFramework libraries
-    ${NF_CoreCLR_INCLUDE_DIRS}
-    ${NF_Debugger_INCLUDE_DIRS}
-    ${NF_Diagnostics_INCLUDE_DIRS}
+#     # directories for nanoFramework libraries
+#     ${NF_CoreCLR_INCLUDE_DIRS}
+#     ${NF_Debugger_INCLUDE_DIRS}
+#     ${NF_Diagnostics_INCLUDE_DIRS}
     
-    # includes for nanoFramework APIs
-    ${TARGET_NANO_APIS_INCLUDES}
-)
+#     # includes for nanoFramework APIs
+#     ${TARGET_NANO_APIS_INCLUDES}
+# )
 
 # set compiler options
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)

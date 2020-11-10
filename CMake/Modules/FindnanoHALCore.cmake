@@ -6,7 +6,7 @@
 # set include directories for nanoHAL Core
 
 # include directories for nanoHAL Core
-list(APPEND nanoHALCore_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
+list(APPEND nanoHALCore_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
 list(APPEND nanoHALCore_INCLUDE_DIRS ${BASE_PATH_FOR_PLATFORM}/Include)
 
 # source files for nanoHAL Core
@@ -23,13 +23,13 @@ foreach(SRC_FILE ${nanoHALCore_SRCS})
         PATHS 
             
             # Core
-            ${PROJECT_SOURCE_DIR}/src/HAL
+            ${CMAKE_SOURCE_DIR}/src/HAL
 
             # target
             ${BASE_PATH_FOR_PLATFORM}/common
 
             # target
-            "${TARGET_BASE_LOCATION}"
+            ${TARGET_BASE_LOCATION}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

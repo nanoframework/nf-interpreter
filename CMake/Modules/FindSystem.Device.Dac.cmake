@@ -8,12 +8,12 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.D
 
 
 # set include directories
-list(APPEND System.Device.Dac_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND System.Device.Dac_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND System.Device.Dac_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND System.Device.Dac_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND System.Device.Dac_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
+list(APPEND System.Device.Dac_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+list(APPEND System.Device.Dac_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND System.Device.Dac_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.Device.Dac_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND System.Device.Dac_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.Device.Dac)
+list(APPEND System.Device.Dac_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Dac)
 
 
 # source files
@@ -32,7 +32,7 @@ foreach(SRC_FILE ${System.Device.Dac_SRCS})
         PATHS 
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/System.Device.Dac
+            ${CMAKE_SOURCE_DIR}/src/System.Device.Dac
             
         CMAKE_FIND_ROOT_PATH_BOTH
     )

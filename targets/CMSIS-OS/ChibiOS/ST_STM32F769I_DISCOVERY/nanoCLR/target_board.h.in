@@ -13,7 +13,7 @@
 
 #include <target_common.h>
 
-#define OEMSYSTEMINFOSTRING "nanoCLR running @ @CHIBIOS_BOARD@"
+#define OEMSYSTEMINFOSTRING "nanoCLR running @ @TARGET_BOARD@"
 
 #define NANOCLR_GRAPHICS @NANOCLR_GRAPHICS@
 
