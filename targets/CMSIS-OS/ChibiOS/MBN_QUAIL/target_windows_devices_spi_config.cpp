@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_spi_native_target.h"
+#include <Windows.Devices.Spi/win_dev_spi_native_target.h>
 
 //////////
 // SPI1 //

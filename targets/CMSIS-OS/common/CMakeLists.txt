@@ -7,12 +7,12 @@
 
 # if SWO opting add source file
 if(SWO_OUTPUT_OPTION)
-    list(APPEND TARGET_CMSIS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/swo.cpp")
+    list(APPEND TARGET_CMSIS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/swo.cpp)
 endif()
 
 # include syscalls dummy calls, if needed
 if(NOT RTOS_CHIBIOS_CHECK)
-    list(APPEND TARGET_CMSIS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/syscalls.c")
+    list(APPEND TARGET_CMSIS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/syscalls.c)
 endif()
 
 # make var global

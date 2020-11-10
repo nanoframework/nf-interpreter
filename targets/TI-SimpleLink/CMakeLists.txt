@@ -44,7 +44,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/SimpleLinkCC32xxSdk.CMakeLists.cmake.in"
+        configure_file("${CMAKE_SOURCE_DIR}/CMake/SimpleLinkCC32xxSdk.CMakeLists.cmake.in"
                     "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Download/CMakeLists.txt")
 
         # setup CMake project for TI SimpleLink CC32xx SDK download
@@ -160,7 +160,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/TI_XDCTools.CMakeLists.cmake.in"
+        configure_file("${CMAKE_SOURCE_DIR}/CMake/TI_XDCTools.CMakeLists.cmake.in"
         "${CMAKE_BINARY_DIR}/TI_XDCTools_Download/CMakeLists.txt")
 
         # setup CMake project for TI XDCTools download
@@ -232,8 +232,8 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     endif()
 
     # need to override the toolchain lib directory
-    set(TOOLCHAIN_INC_DIR ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
-    set(TOOLCHAIN_LIB_DIR ${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
+    set(TOOLCHAIN_INC_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
+    set(TOOLCHAIN_LIB_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
     
 ############################################
 elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
@@ -264,7 +264,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/SimpleLinkCC13x2_26x2Sdk.CMakeLists.cmake.in"
+        configure_file("${CMAKE_SOURCE_DIR}/CMake/SimpleLinkCC13x2_26x2Sdk.CMakeLists.cmake.in"
                     "${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Download/CMakeLists.txt")
 
         # setup CMake project for TI SimpleLink CC13x2_26x2 SDK download
@@ -381,7 +381,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/TI_SysConfig.CMakeLists.cmake.in"
+        configure_file("${CMAKE_SOURCE_DIR}/CMake/TI_SysConfig.CMakeLists.cmake.in"
         "${CMAKE_BINARY_DIR}/TI_SysConfig_Download/CMakeLists.txt")
 
         # setup CMake project for TI SysConfig download
@@ -498,7 +498,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/TI_XDCTools.CMakeLists.cmake.in"
+        configure_file("${CMAKE_SOURCE_DIR}/CMake/TI_XDCTools.CMakeLists.cmake.in"
         "${CMAKE_BINARY_DIR}/TI_XDCTools_Download/CMakeLists.txt")
 
         # setup CMake project for TI XDCTools download
@@ -570,7 +570,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     endif()
 
     # need to override the toolchain lib directory
-    set(TOOLCHAIN_INC_DIR ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
-    set(TOOLCHAIN_LIB_DIR ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
+    set(TOOLCHAIN_INC_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
+    set(TOOLCHAIN_LIB_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
 
 endif()

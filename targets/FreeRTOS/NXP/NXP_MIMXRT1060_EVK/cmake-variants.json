@@ -32,7 +32,7 @@
           "TARGET_SERIES": "IMXRT10xx",
           "SUPPORT_ANY_BASE_CONVERSION": "ON",
           "RTOS": "FREERTOS",
-          "FREERTOS_BOARD": "NXP_MIMXRT1060_EVK",
+          "TARGET_BOARD": "NXP_MIMXRT1060_EVK",
           "FREERTOS_VERSION": "",
           "CMSIS_VERSION": "",
           "FATFS_VERSION": "",

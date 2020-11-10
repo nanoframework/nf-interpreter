@@ -5,19 +5,19 @@
 
 # extract LwIP source files
 execute_process(
-    COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
+    COMMAND ${CMAKE_COMMAND} -E tar xf ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/
 )
 
 # List of the required lwIp include files.
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/netif)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/posix)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/various)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/various/lwip_bindings)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/netif)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/posix)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
 set(LWIP_SRCS
 
@@ -182,26 +182,26 @@ foreach(SRC_FILE ${LWIP_SRCS})
     set(LWIP_SRC_FILE SRC_FILE -NOTFOUND)
     find_file(LWIP_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv4
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv6
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/api
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif/ppp
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif/ppp/polarssl
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/various
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv4
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv6
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/api
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif/ppp
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif/ppp/polarssl
 
-            ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
+            ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
 
             # APPS:
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/snmp
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/httpd
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/lwiperf
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/sntp
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/mdns
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/netbiosns
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/tftp
-            ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/mqtt
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/snmp
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/httpd
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/lwiperf
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/sntp
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/mdns
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/netbiosns
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/tftp
+            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/mqtt
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -218,9 +218,9 @@ add_custom_target( CHIBIOS_NETWORK_COMPONENTS ALL )
 
 add_custom_command(TARGET CHIBIOS_NETWORK_COMPONENTS
 PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/
-    DEPENDS ${PROJECT_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
+    COMMAND ${CMAKE_COMMAND} -E tar xf ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/
+    DEPENDS ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip-2.1.2.7z
 
     VERBATIM
 )

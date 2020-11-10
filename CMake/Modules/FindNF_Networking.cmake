@@ -4,13 +4,13 @@
 #
 
 # set include directories for nanoFramework network
-list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets)
-list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl)
-list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Lwip)
-list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
+list(APPEND NF_Networking_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets)
+list(APPEND NF_Networking_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
+list(APPEND NF_Networking_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Lwip)
+list(APPEND NF_Networking_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
 if(USE_SECURITY_MBEDTLS_OPTION)
-    list(APPEND NF_Networking_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Com/sockets/ssl/mbedTLS)
+    list(APPEND NF_Networking_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS)
 endif()
 
 # source files for nanoFramework Networking
@@ -63,12 +63,12 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
     find_file(NF_Networking_SRC_FILE ${SRC_FILE}
         PATHS
 
-            ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets
-            ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
+            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets
+            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl
 
-            ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
 
-            ${PROJECT_SOURCE_DIR}/src/PAL/Lwip
+            ${CMAKE_SOURCE_DIR}/src/PAL/Lwip
             ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
  
         CMAKE_FIND_ROOT_PATH_BOTH
@@ -78,7 +78,7 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
 endforeach()
 
 if(USE_SECURITY_MBEDTLS_OPTION)
-    set(NF_Security_Search_Path "${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS")
+    set(NF_Security_Search_Path "${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS")
 endif()
 
 if(USE_SECURITY_MBEDTLS_OPTION)
@@ -89,7 +89,7 @@ if(USE_SECURITY_MBEDTLS_OPTION)
         find_file(NF_Networking_SRC_FILE ${SRC_FILE}
             PATHS 
 
-                ${PROJECT_SOURCE_DIR}/src/PAL/COM/sockets/ssl
+                ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl
                 ${NF_Security_Search_Path}
     
             CMAKE_FIND_ROOT_PATH_BOTH

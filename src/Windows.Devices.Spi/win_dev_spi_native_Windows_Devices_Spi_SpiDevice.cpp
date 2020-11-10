@@ -5,7 +5,7 @@
 
 #include <string.h>
 #include <targetPAL.h>
-#include "win_dev_spi_native_target.h"
+#include <win_dev_spi_native.h>
 
 // define this type here to make it shorter and improve code readability
 typedef Library_win_dev_spi_native_Windows_Devices_Spi_SpiConnectionSettings SpiConnectionSettings;

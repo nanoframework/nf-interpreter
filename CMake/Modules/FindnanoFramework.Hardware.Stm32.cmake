@@ -9,10 +9,10 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFram
 
 
 # set include directories
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
+# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/CLR/Core")
+# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/CLR/Include")
+# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/HAL/Include")
+# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/PAL/Include")
 list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
 
 

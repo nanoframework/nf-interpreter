@@ -4,8 +4,8 @@
 #
 
 # set include directories
-list(APPEND System.Net_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND System.Net_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/System.Net")
+list(APPEND System.Net_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/HAL/Include")
+list(APPEND System.Net_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/System.Net")
 
 # source files
 set(System.Net_SRCS
@@ -34,7 +34,7 @@ foreach(SRC_FILE ${System.Net_SRCS})
     find_file(System.Net_SRC_FILE ${SRC_FILE}
         PATHS
 
-            "${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/System.Net"
+            "${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/System.Net"
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

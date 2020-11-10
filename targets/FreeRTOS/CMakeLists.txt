@@ -65,7 +65,7 @@ if(NO_RTOS_SOURCE_FOLDER)
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
-    configure_file("${PROJECT_SOURCE_DIR}/CMake/FreeRTOS.CMakeLists.cmake.in"
+    configure_file("${CMAKE_SOURCE_DIR}/CMake/FreeRTOS.CMakeLists.cmake.in"
     "${CMAKE_BINARY_DIR}/FreeRTOS_Download/CMakeLists.txt")
 
     # setup CMake project for FreeRTOS download
@@ -172,7 +172,7 @@ if(NO_CMSIS_SOURCE)
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
-    configure_file("${PROJECT_SOURCE_DIR}/CMake/CMSIS.CMakeLists.cmake.in"
+    configure_file("${CMAKE_SOURCE_DIR}/CMake/CMSIS.CMakeLists.cmake.in"
                 "${CMAKE_BINARY_DIR}/CMSIS_Download/CMakeLists.txt")
 
     # setup CMake project for CMSIS download
@@ -244,79 +244,79 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/common)
 # try to find board in the targets folder
 # and set target base location and base path for class libs
 # this has to be set before the class library modules are pulled in
-if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
+if(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/${TARGET_BOARD})
 
     # board found
-    message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
+    message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
 
     # set target base location
-    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
+    set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/${TARGET_BOARD})
 
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/NXP)
 
     # add TARGET board directory
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/NXP/${FREERTOS_BOARD})
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/NXP/${TARGET_BOARD})
 
 # try to find board in the targets folder
-elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/${FREERTOS_BOARD})
+elseif(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/${TARGET_BOARD})
 
     # board found
-    message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
+    message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
 
     # set target base location
-    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/${FREERTOS_BOARD})
+    set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/${TARGET_BOARD})
 
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST)
 
     # add TARGET board directory
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST/${FREERTOS_BOARD})
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST/${TARGET_BOARD})
 
 else()
 
     # try to find NXP board in the Community targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${TARGET_BOARD})
 
         # board found
-        message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
+        message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${TARGET_BOARD})
 
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/NXP)
 
         # add TARGET board directory from Community
-        add_subdirectory(${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
+        add_subdirectory(${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${TARGET_BOARD})
 
     # try to find STM board in the Community targets folder
-    elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/ST/${FREERTOS_BOARD})
+    elseif(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/ST/${TARGET_BOARD})
 
         # board found
-        message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
+        message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/ST/${FREERTOS_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/ST/${TARGET_BOARD})
 
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST)
 
         # add TARGET board directory from Community
-        add_subdirectory(${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/ST/${FREERTOS_BOARD})
+        add_subdirectory(${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/ST/${TARGET_BOARD})
 
     else()
 
         # board NOT found in targets folder
-        message(FATAL_ERROR "\n\nSorry but support for ${FREERTOS_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
 
     endif()
 

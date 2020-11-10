@@ -17,7 +17,7 @@ if(RTOS_FREERTOS_ESP32_CHECK)
  
 else()
 
-    list(APPEND mbedTLS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/mbedTLS_Source/include)
+    list(APPEND mbedTLS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/mbedTLS_Source/include)
 
 endif()
 
@@ -37,7 +37,7 @@ endif(ENABLE_ZLIB_SUPPORT)
 if(RTOS_FREERTOS_ESP32_CHECK)
     set(MBEDTLS_PATH ${ESP32_IDF_PATH}/components/mbedtls/mbedtls/library)
 else()
-    set(MBEDTLS_PATH ${PROJECT_BINARY_DIR}/mbedTLS_Source/library)
+    set(MBEDTLS_PATH ${CMAKE_BINARY_DIR}/mbedTLS_Source/library)
 endif()
 
 set(src_crypto
@@ -117,8 +117,8 @@ foreach(SRC_FILE ${src_crypto})
 endforeach()
 
 # unset this warning as error required for this source file
-SET_SOURCE_FILES_PROPERTIES( ${PROJECT_BINARY_DIR}/mbedTLS_Source/library/hmac_drbg.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
-SET_SOURCE_FILES_PROPERTIES( ${PROJECT_BINARY_DIR}/mbedTLS_Source/library/x509_crt.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
+SET_SOURCE_FILES_PROPERTIES( ${CMAKE_BINARY_DIR}/mbedTLS_Source/library/hmac_drbg.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
+SET_SOURCE_FILES_PROPERTIES( ${CMAKE_BINARY_DIR}/mbedTLS_Source/library/x509_crt.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
 
 set(src_x509
     certs.c

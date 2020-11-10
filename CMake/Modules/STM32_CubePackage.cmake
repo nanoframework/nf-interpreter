@@ -34,7 +34,7 @@ macro(ProcessSTM32CubePackage)
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/STM32.CubePackage.CMakeLists.cmake.in"
+        configure_file("${CMAKE_SOURCE_DIR}/CMake/STM32.CubePackage.CMakeLists.cmake.in"
                     "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}-CubePackage_Download/CMakeLists.txt")
 
         # setup CMake project for STM32_CubePackage download

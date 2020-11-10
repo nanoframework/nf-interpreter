@@ -4,7 +4,7 @@
 //
 
 #include <string.h>
-#include "win_dev_i2c_native_target.h"
+#include <win_dev_i2c_native_target.h>
 
 typedef Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings I2cConnectionSettings;
 

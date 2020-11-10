@@ -65,16 +65,95 @@ macro(PerformSettingsForApiEntry apiNamespace)
     find_package(${apiNamespace} REQUIRED)
 
     # append include directories to list with includes for all the APIs
-    list(APPEND TARGET_NANO_APIS_INCLUDES "${${apiNamespace}_INCLUDE_DIRS}")
-    list(REMOVE_DUPLICATES TARGET_NANO_APIS_INCLUDES)
+    list(APPEND NF_NativeAssemblies_INCLUDE_DIRS "${${apiNamespace}_INCLUDE_DIRS}")
+    list(REMOVE_DUPLICATES NF_NativeAssemblies_INCLUDE_DIRS)
 
     # append source files to list wiht source files for all the APIs
-    list(APPEND TARGET_NANO_APIS_SOURCES "${${apiNamespace}_SOURCES}")
-    list(REMOVE_DUPLICATES TARGET_NANO_APIS_SOURCES)
+    list(APPEND NF_NativeAssemblies_SOURCES "${${apiNamespace}_SOURCES}")
+    list(REMOVE_DUPLICATES NF_NativeAssemblies_SOURCES)
 
 endmacro()
 #################################################################
 
+##############################################################################
+# macro to perform individual settings to add an Interop assembly to the build
+macro(PerformSettingsForInteropEntry interopAssemblyName)
+    
+    # namespace with '_' replacing '.'
+    string(REPLACE "." "_" interopAssemblyNameWithoutDots "${interopAssemblyName}")
+
+    # list this option
+    list(APPEND interopAssemblyList "${interopAssemblyName}")
+
+    # append to list of declaration for Interop Assemblies table
+    list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_${interopAssemblyNameWithoutDots};")
+
+    # append to list of entries for Interop Assemblies table
+    list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_${interopAssemblyNameWithoutDots},")
+
+    # find the module
+    find_package("INTEROP-${interopAssemblyName}" REQUIRED)
+
+    #########
+    # because Interop assemblies are considered and treated as like any CLR assembly we add them to the same lists
+    #########
+
+    # append include directories to list with includes for all the APIs
+    list(APPEND NF_NativeAssemblies_INCLUDE_DIRS "${${interopAssemblyName}_INCLUDE_DIRS}")
+    list(REMOVE_DUPLICATES NF_NativeAssemblies_INCLUDE_DIRS)
+
+    # append source files to list wiht source files for all the APIs
+    list(APPEND NF_NativeAssemblies_SOURCES "${${interopAssemblyName}_SOURCES}")
+    list(REMOVE_DUPLICATES NF_NativeAssemblies_SOURCES)
+
+endmacro()
+
+#################################################################
+# macro that adds the requested Interop assemblies to the build
+# requiremens to add an Interop assemble:
+# 1) add it's namespace to the NF_INTEROP_ASSEMBLIES CMake options
+# 2) have the corresponding CMake module in the Modules folder (mind the correct naming)
+macro(ParseInteropAssemblies)
+
+    # check if there are any Interop assemblies to be added
+    if(NF_INTEROP_ASSEMBLIES)
+
+        # need to split define containing assembly namespaces
+        # for Windows buids this is a string with the namespaces separated by an whitespace
+        # e.g.: "NF_INTEROP_ASSEMBLIES": "Assembly1_Namespace Assembly2_Namespace"
+        separate_arguments(INTEROP_ASSEMBLIES_LIST NATIVE_COMMAND ${NF_INTEROP_ASSEMBLIES})
+
+        # loop through each Interop assembly and add it to the build
+        foreach(assembly ${INTEROP_ASSEMBLIES_LIST})
+            PerformSettingsForInteropEntry(${assembly})
+        endforeach()
+       
+    endif()
+
+    # output the list of Interop assemblies included
+    list(LENGTH interopAssemblyList interopAssemblyListLenght)
+
+    if(interopAssemblyListLenght GREATER 0)
+        
+        # APIs included
+        message(STATUS "")
+        message(STATUS " *** Interop assemblies included ***")
+        message(STATUS "")
+
+        foreach(entry ${interopAssemblyList})
+            message(STATUS " ${entry}")
+        endforeach(entry ${})
+        
+        message(STATUS "")
+        message(STATUS " ***  end of Interop assemblies  ***")
+        message(STATUS "")
+
+    else()
+        # no Interop assemblies were included
+        message(STATUS " *** NO Interop assemblies included ***")    
+    endif()
+
+endmacro()
 
 ############################################################################################
 # WHEN ADDING A NEW API add the corresponding block below 
@@ -83,7 +162,7 @@ endmacro()
 # 2. change the call to PerformSettingsForApiEntry() macro with the API name (doted naming)
 ############################################################################################
 
-macro(ParseNativeAssemblies)
+# macro(ParseNativeAssemblies)
 
     # Hardware.Esp32
     if(API_Hardware.Esp32)
@@ -270,15 +349,10 @@ macro(ParseNativeAssemblies)
 
 
     # configure code file with Interop Assemblies table and...
-    configure_file("${PROJECT_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTable.cpp.in"
+    configure_file("${CMAKE_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTable.cpp.in"
                     "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
     # ... now add Interop Assemblies table to ChibiOS nanoCLR sources list
-    list(APPEND TARGET_NANO_APIS_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
-
-    # make the vars global
-    set(TARGET_NANO_APIS_INCLUDES ${TARGET_NANO_APIS_INCLUDES} CACHE INTERNAL "make global")
-    set(TARGET_NANO_APIS_SOURCES ${TARGET_NANO_APIS_SOURCES} CACHE INTERNAL "make global")
-
+    list(APPEND NF_NativeAssemblies_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
 
     # output the list of APIs included
     list(LENGTH apiListing apiListingLenght)
@@ -303,84 +377,8 @@ macro(ParseNativeAssemblies)
         message(STATUS " *** NO APIs included ***")    
     endif()
 
-endmacro()
+    include(FindPackageHandleStandardArgs)
 
-##############################################################################
-# macro to perform individual settings to add an Interop assembly to the build
-macro(PerformSettingsForInteropEntry interopAssemblyName)
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_NativeAssemblies DEFAULT_MSG NF_NativeAssemblies_INCLUDE_DIRS NF_NativeAssemblies_SOURCES)
     
-    # namespace with '_' replacing '.'
-    string(REPLACE "." "_" interopAssemblyNameWithoutDots "${interopAssemblyName}")
-
-    # list this option
-    list(APPEND interopAssemblyList "${interopAssemblyName}")
-
-    # append to list of declaration for Interop Assemblies table
-    list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_${interopAssemblyNameWithoutDots};")
-
-    # append to list of entries for Interop Assemblies table
-    list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_${interopAssemblyNameWithoutDots},")
-
-    # find the module
-    find_package("INTEROP-${interopAssemblyName}" REQUIRED)
-
-    #########
-    # because Interop assemblies are considered and treated as like any CLR assembly we add them to the same lists
-    #########
-
-    # append include directories to list with includes for all the APIs
-    list(APPEND TARGET_NANO_APIS_INCLUDES "${${interopAssemblyName}_INCLUDE_DIRS}")
-    list(REMOVE_DUPLICATES TARGET_NANO_APIS_INCLUDES)
-
-    # append source files to list wiht source files for all the APIs
-    list(APPEND TARGET_NANO_APIS_SOURCES "${${interopAssemblyName}_SOURCES}")
-    list(REMOVE_DUPLICATES TARGET_NANO_APIS_SOURCES)
-
-endmacro()
-
-#################################################################
-# macro that adds the requested Interop assemblies to the build
-# requiremens to add an Interop assemble:
-# 1) add it's namespace to the NF_INTEROP_ASSEMBLIES CMake options
-# 2) have the corresponding CMake module in the Modules folder (mind the correct naming)
-macro(ParseInteropAssemblies)
-
-    # check if there are any Interop assemblies to be added
-    if(NF_INTEROP_ASSEMBLIES)
-
-        # need to split define containing assembly namespaces
-        # for Windows buids this is a string with the namespaces separated by an whitespace
-        # e.g.: "NF_INTEROP_ASSEMBLIES": "Assembly1_Namespace Assembly2_Namespace"
-        separate_arguments(INTEROP_ASSEMBLIES_LIST NATIVE_COMMAND ${NF_INTEROP_ASSEMBLIES})
-
-        # loop through each Interop assembly and add it to the build
-        foreach(assembly ${INTEROP_ASSEMBLIES_LIST})
-            PerformSettingsForInteropEntry(${assembly})
-        endforeach()
-       
-    endif()
-
-    # output the list of Interop assemblies included
-    list(LENGTH interopAssemblyList interopAssemblyListLenght)
-
-    if(interopAssemblyListLenght GREATER 0)
-        
-        # APIs included
-        message(STATUS "")
-        message(STATUS " *** Interop assemblies included ***")
-        message(STATUS "")
-
-        foreach(entry ${interopAssemblyList})
-            message(STATUS " ${entry}")
-        endforeach(entry ${})
-        
-        message(STATUS "")
-        message(STATUS " ***  end of Interop assemblies  ***")
-        message(STATUS "")
-
-    else()
-        # no Interop assemblies were included
-        message(STATUS " *** NO Interop assemblies included ***")    
-    endif()
-
-endmacro()
+# endmacro()

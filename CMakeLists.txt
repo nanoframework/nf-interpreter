@@ -53,7 +53,7 @@ string(TIMESTAMP BUILD_TIMESTAMP UTC)
 #######################
 # handle RTOSes choice
 
-if("${RTOS}" STREQUAL "")
+if(${RTOS} STREQUAL "")
     # no RTOS selected, defaulting to ChibiOS
     set(RTOS "CHIBIOS")
 endif()
@@ -70,10 +70,10 @@ else()
     message(STATUS "\nSetting RTOS to ${RTOS}\n")
 endif()
 
-string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
-string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
-string(COMPARE EQUAL "FREERTOS_ESP32" "${RTOS}" RTOS_FREERTOS_ESP32_CHECK)
-string(COMPARE EQUAL "TI_SIMPLELINK" "${RTOS}" RTOS_TI_SIMPLELINK_CHECK)
+string(COMPARE EQUAL "CHIBIOS" ${RTOS}  RTOS_CHIBIOS_CHECK)
+string(COMPARE EQUAL "FREERTOS" ${RTOS} RTOS_FREERTOS_CHECK)
+string(COMPARE EQUAL "FREERTOS_ESP32" ${RTOS} RTOS_FREERTOS_ESP32_CHECK)
+string(COMPARE EQUAL "TI_SIMPLELINK" ${RTOS} RTOS_TI_SIMPLELINK_CHECK)
 
 ##########################################################################
 
@@ -131,11 +131,14 @@ if(NOT BUILD_VERSION)
 endif()
 project(nanoFramework VERSION ${BUILD_VERSION})
 
+set(NANOBOOTER_PROJECT_NAME "nanoBooter")
+set(NANOCLR_PROJECT_NAME "nanoCLR")
+
 #######################
 message(STATUS "")
 message(STATUS "Building nanoFramework version ${PROJECT_VERSION} using build type '${CMAKE_BUILD_TYPE}'.")
-message(STATUS "Source directory is '${PROJECT_SOURCE_DIR}'.")
-message(STATUS "Build  directory is '${PROJECT_BINARY_DIR}'.")
+message(STATUS "Source directory is '${CMAKE_SOURCE_DIR}'.")
+message(STATUS "Build  directory is '${CMAKE_BINARY_DIR}'.")
 message(STATUS "")
 #######################
 
@@ -683,41 +686,38 @@ endif()
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
 
-
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR)
     
     add_subdirectory(targets/CMSIS-OS/ChibiOS)
     add_subdirectory(targets/CMSIS-OS/common)
     add_subdirectory(targets/CMSIS-OS/common/Include)
-    add_subdirectory(targets/CMSIS-OS/nanoBooter)
-    add_subdirectory(targets/CMSIS-OS/nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
 
         # board found
-        message(STATUS "Support for target board '${CHIBIOS_BOARD}' found")
+        message(STATUS "Support for target board '${TARGET_BOARD}' found")
         message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
         # add TARGET board directory
-        add_subdirectory("${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+        add_subdirectory(${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
             # board found
-            message(STATUS "Support for target board '${CHIBIOS_BOARD}' found in Community targets")
+            message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
             message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
             # add TARGET board directory from Community
-            add_subdirectory("targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+            add_subdirectory(targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
 
     endif()
@@ -732,8 +732,8 @@ elseif(RTOS_FREERTOS_CHECK)
 # FreeRTOS ESP32
 elseif(RTOS_FREERTOS_ESP32_CHECK)
 
-    if("${TARGET_SERIES}" STREQUAL "ESP32")
-        message(STATUS "Platform ESP32 target board: ${ESP32_BOARD}")
+    if(${TARGET_SERIES} STREQUAL "ESP32")
+        message(STATUS "Platform ESP32 target board: ${TARGET_BOARD}")
 
         if(API_nanoFramework.Hardware.Esp32.Rmt)
             set(HAL_USE_ESP32_RMT_OPTION TRUE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
@@ -749,13 +749,13 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         endif()
 
         # Define base path for the class libraries
-        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}/nanoCLR)
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}/nanoCLR)
 
         add_subdirectory(targets/FreeRTOS_ESP32)
 
         # set target base location
-        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}")
- 		add_subdirectory(targets/FreeRTOS_ESP32/${ESP32_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD})
+ 		add_subdirectory(targets/FreeRTOS_ESP32/${TARGET_BOARD})
 
     endif()
 
@@ -764,35 +764,35 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 elseif(RTOS_TI_SIMPLELINK_CHECK)
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD})
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TARGET_BOARD})
 
         # set target base location
-        set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD}")
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TARGET_BOARD})
 
         # board found
-        message(STATUS "Support for target board '${TI_BOARD}' found")
+        message(STATUS "Support for target board '${TARGET_BOARD}' found")
         message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TI_BOARD})
+        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TARGET_BOARD})
 
             # set target base location
-            set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TI_BOARD}")
+            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TARGET_BOARD})
         
             # board found
-            message(STATUS "Support for target board '${TI_BOARD}' found in Community targets")
+            message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
             message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
 
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${TI_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
 
     endif()

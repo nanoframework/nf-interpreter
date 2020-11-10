@@ -24,7 +24,7 @@
 #include <win_dev_spi_native_target.h>
 #endif
 #if (HAL_USE_UART == TRUE)
-#include "win_dev_serial_native_target.h"
+#include <win_dev_serial_native_target.h>
 #endif
 
 // global mutex protecting the internal state of the interpreter, including event flags
@@ -70,7 +70,7 @@ void nanoHAL_Initialize()
 
 #if NANOCLR_GRAPHICS
     g_GraphicsMemoryHeap.Initialize();
-#endif	
+#endif
 
     ConfigurationManager_Initialize();
 
@@ -151,8 +151,8 @@ void nanoHAL_Initialize()
     // g_TouchDevice.Initialize();
 
     // PalEvent_Initialize();
-    //Gesture_Initialize();
-    //Ink_Initialize();
+    // Gesture_Initialize();
+    // Ink_Initialize();
 #endif
 
     // Initialise Network Stack

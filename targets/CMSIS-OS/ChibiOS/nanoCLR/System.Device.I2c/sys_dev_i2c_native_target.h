@@ -12,7 +12,6 @@
 #include <targetPAL.h>
 #include <nanoHAL.h>
 #include <sys_dev_i2c_native.h>
-#include <sys_dev_i2c_native_target.h>
 
 // struct representing the I2C
 typedef struct NF_PAL_I2C_
