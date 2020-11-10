@@ -105,6 +105,28 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
 
     )
 
+    target_link_libraries(
+        ${NANOCLR_PROJECT_NAME}.elf
+    
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/display/lib/display.am4fg
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/grlib/lib/gcc/m4f/grlib.a
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/drivers/rf/lib/rf_multiMode_cc13x2.am4fg
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/drivers/lib/drivers_cc13x2.am4fg
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/devices/cc13x2_cc26x2/driverlib/bin/gcc/driverlib.lib
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/ti/dpl/lib/dpl_cc13x2.am4fg
+        
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libm.a
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libnosys.a
+    )
+    
+    # add dependency from TI SimpleLink CC13x2_26x2 SDK, TI SysConfig and XDCTools (this is required to make sure that those repos are downloaded before the build starts)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf TI_SysConfig)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC13x2_26x2SDK)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf COPY_TIRTOS_CONFIG)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf TIRTOS_CONFIG)
+    add_dependencies(TIRTOS_CONFIG TI_XDCTools)
+    add_dependencies(TIRTOS_CONFIG COPY_TIRTOS_CONFIG)
+    
 endmacro()
 
 # Add TI SimpleLink platform target sources to a specific CMake target
@@ -123,7 +145,6 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
         target_sources(${TARGET}.elf PUBLIC
 
             ${CMAKE_CURRENT_SOURCE_DIR}/target_Power.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/CC1352R1_LAUNCHXL_fxns.c
 
             ${TARGET_TI_SimpleLink_COMMON_SOURCES}
             ${TARGET_TI_SimpleLink_NANOCLR_SOURCES}
@@ -137,5 +158,67 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
         )
 
     endif()
+
+endmacro()
+
+# Add TI SimpleLink sys config steps
+# To be called from target CMakeList.txt
+macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
+
+    # copy Sys Config file to build directory
+    add_custom_command(
+        OUTPUT
+        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_BOARD}.syscfg
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_BOARD}.syscfg
+                ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_BOARD}.syscfg
+        COMMENT "Copy TI-RTOS configuration file to build directory" 
+    )
+
+    # execute Sys Config with configuration file
+    add_custom_command(
+        OUTPUT 
+        ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
+        ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
+        ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
+        ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
+
+        DEPENDS
+        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_BOARD}.syscfg
+
+        COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.bat -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${TARGET_BOARD}.syscfg
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generate configuration files" 
+    )
+
+    ######################################
+
+    # need to copy the configuration file to the build directory
+    # because the obj files resulting from TI-RTOS build are placed in the same directory as the configuration file
+    if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+        set(TI_RTOS_CONFIG_FILE ti-rtos-debug.cfg)
+    else()
+        set(TI_RTOS_CONFIG_FILE ti-rtos-release.cfg)
+    endif()
+
+    # need to use a specific target because TARGET dependency PRE_BUILT doesn't work on NINJA build files
+
+    add_custom_target(
+        COPY_TIRTOS_CONFIG
+
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/${TI_RTOS_CONFIG_FILE}
+                ${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}
+        COMMENT "Copy TI-RTOS configuration file to build directory" 
+    )
+
+    add_custom_target(
+        TIRTOS_CONFIG
+    
+        COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${TI_DEVICE} -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_${TI_DEVICE_FAMILY} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    
+        COMMENT "Generate TI-RTOS configuration" 
+    )
 
 endmacro()

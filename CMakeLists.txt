@@ -775,7 +775,7 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found")
-        message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
+        message(STATUS "${TARGET_BASE_LOCATION}")
 
     else()
 
@@ -787,7 +787,7 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
         
             # board found
             message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
-            message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
+            message(STATUS "${TARGET_BASE_LOCATION}")
 
         else()
         # board NOT found in targets folder
