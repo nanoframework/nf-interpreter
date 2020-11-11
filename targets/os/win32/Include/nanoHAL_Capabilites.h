@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoHAL.h>
+#ifndef _NANOHAL_CAPABILITIES_H_
+#define _NANOHAL_CAPABILITIES_H_ 1
 
-bool g_fDoNotUninitializeDebuggerPort = false;
+#endif // _NANOHAL_CAPABILITIES_H_

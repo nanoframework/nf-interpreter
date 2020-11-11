@@ -20,67 +20,72 @@ osThreadDef(ReceiverThread, osPriorityHigh, 512, "ReceiverThread");
 // configuration for debugger serial port
 // dev notes:
 // conservative baud rate value as 921600 has a high error percentage on baud rate clocking
-// OVER8 bit on CR1 to further decrease baud rate clocking error 
-static const SerialConfig uartConfig =
-{
-  460800,
-  USART_CR1_OVER8,
-  USART_CR2_STOP1_BITS,
-  0
-};
+// OVER8 bit on CR1 to further decrease baud rate clocking error
+static const SerialConfig uartConfig = {460800, USART_CR1_OVER8, USART_CR2_STOP1_BITS, 0};
 
 // Application entry point.
-int main(void) {
+int main(void)
+{
+    // HAL initialization, this also initializes the configured device drivers
+    // and performs the board-specific initializations.
+    halInit();
 
-  // HAL initialization, this also initializes the configured device drivers
-  // and performs the board-specific initializations.
-  halInit();
+    // init boot clipboard
+    InitBootClipboard();
 
-  // the following IF is not mandatory, it's just providing a way for a user to 'force'
-  // the board to remain in nanoBooter and not launching nanoCLR
+    // the following IF is not mandatory, it's just providing a way for a user to 'force'
+    // the board to remain in nanoBooter and not launching nanoCLR
 
-  // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
-  if (palReadPad(GPIOC, GPIOC_BUTTON))
-  {
-    // check for valid CLR image at address contiguous to nanoBooter
-    // this target DOES NOT have configuration block, so we need to use the __nanoImage_end__ address here
-    if(CheckValidCLRImage((uint32_t)&__nanoImage_end__))
+    // check if there is a request to remain on nanoBooter
+    if (!IsToRemainInBooter())
     {
-      // there seems to be a valid CLR image
-      // launch nanoCLR
-      LaunchCLR((uint32_t)&__nanoImage_end__);
+        // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
+        if (palReadPad(GPIOC, GPIOC_BUTTON))
+        {
+            // check for valid CLR image at address contiguous to nanoBooter
+            // this target DOES NOT have configuration block, so we need to use the __nanoImage_end__ address here
+            if (CheckValidCLRImage((uint32_t)&__nanoImage_end__))
+            {
+                // there seems to be a valid CLR image
+                // launch nanoCLR
+                LaunchCLR((uint32_t)&__nanoImage_end__);
+            }
+        }
     }
-  }
 
-  // The kernel is initialized but not started yet, this means that
-  // main() is executing with absolute priority but interrupts are already enabled.
-  osKernelInitialize();
+    // The kernel is initialized but not started yet, this means that
+    // main() is executing with absolute priority but interrupts are already enabled.
+    osKernelInitialize();
 
-  #if (HAL_NF_USE_STM32_CRC == TRUE)
-  // startup crc
-  crcStart(NULL);
-  #endif
+#if (HAL_NF_USE_STM32_CRC == TRUE)
+    // startup crc
+    crcStart(NULL);
+#endif
 
-  // starts the serial driver
-  sdStart(&SERIAL_DRIVER, &uartConfig);
+    // starts the serial driver
+    sdStart(&SERIAL_DRIVER, &uartConfig);
 
-  // create the receiver thread
-  osThreadCreate(osThread(ReceiverThread), NULL);
+    // create the receiver thread
+    osThreadCreate(osThread(ReceiverThread), NULL);
 
-  // start kernel, after this main() will behave like a thread with priority osPriorityNormal
-  osKernelStart();
+    // start kernel, after this main() will behave like a thread with priority osPriorityNormal
+    osKernelStart();
 
-  // initialize block storage list and devices
-  // in CLR this is called in nanoHAL_Initialize()
-  // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
-  BlockStorageList_Initialize();
-  BlockStorage_AddDevices();
+    // initialize block storage list and devices
+    // in CLR this is called in nanoHAL_Initialize()
+    // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
+    BlockStorageList_Initialize();
+    BlockStorage_AddDevices();
 
-  //  Normal main() thread
-  while (true) {
-    palClearPad(GPIOA, GPIOA_LED_GREEN);
-    osDelay(500);
-    palSetPad(GPIOA, GPIOA_LED_GREEN);
-    osDelay(500);
-  }
+    // report successfull nanoBooter execution
+    ReportSuccessfullNanoBooter();
+
+    //  Normal main() thread
+    while (true)
+    {
+        palClearPad(GPIOA, GPIOA_LED_GREEN);
+        osDelay(500);
+        palSetPad(GPIOA, GPIOA_LED_GREEN);
+        osDelay(500);
+    }
 }

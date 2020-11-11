@@ -20,3 +20,6 @@ INCLUDE rules_memory.ld
 
 /* nanoCLR rules inclusion.*/
 INCLUDE rules_clr.ld
+
+/* boot clipboard rules inclusion.*/
+INCLUDE rules_bootclipboard.ld

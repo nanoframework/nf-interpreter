@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <nanoSupport.h>
+#include "nanoVersion.h"
 
 #if !defined(_WIN32)
 #include <target_common.h>
@@ -185,18 +186,6 @@ typedef enum Monitor_Ping_Source_Flags
     Monitor_Ping_c_ConfigBlockRequiresErase =   0x00040000,
 
 }Monitor_Ping_Source_Flags;
-
-
-// structure to hold 'standard' version information
-// equivalent with .NETMF MFVersion
-typedef struct VersionInfo
-{
-    unsigned short usMajor;
-    unsigned short usMinor;
-    unsigned short usBuild;
-    unsigned short usRevision;
-
-}VersionInfo;
 
 // structure to hold nanoFramework release information
 // equivalent with .NETMF MfReleaseInfo

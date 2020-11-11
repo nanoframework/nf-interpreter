@@ -36,6 +36,7 @@
           "USE_FPU": "TRUE",
           "RTOS": "FREERTOS_ESP32",
           "NF_BUILD_RTM": "OFF",
+          "NF_TARGET_HAS_NANOBOOTER": "OFF",
           "NF_FEATURE_DEBUGGER": "ON",
           "NF_FEATURE_RTC": "ON",
           "NF_FEATURE_SUPPORT_REFLECTION": "ON",

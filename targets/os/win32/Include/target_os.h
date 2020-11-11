@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoHAL.h>
+#ifndef _TARGET_OS_H_
+#define _TARGET_OS_H_ 1
 
-bool g_fDoNotUninitializeDebuggerPort = false;
+#endif // _TARGET_OS_H_

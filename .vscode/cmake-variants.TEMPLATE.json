@@ -57,6 +57,7 @@
           "FATFS_SOURCE": "<path-to-local-FATFS-source-mind-the-forward-slash>",
           "LWIP_VERSION": "<valid-lwip-version-if-empty-use-default-set-cmake>",
           "NF_BUILD_RTM": "OFF-default-ON-to-enable-RTM-build",
+          "NF_TARGET_HAS_NANOBOOTER": "ON-default-OFF-to-signal-that-target-does-not-have-nanoBooter",
           "NF_WP_TRACE_ERRORS": "OFF-default-ON-to-enable-trace-error-messages-wire-protocol",
           "NF_WP_TRACE_HEADERS": "OFF-default-ON-to-enable-trace-header-messages-wire-protocol",
           "NF_WP_TRACE_STATE": "OFF-default-ON-to-enable-trace-state-messages-wire-protocol",

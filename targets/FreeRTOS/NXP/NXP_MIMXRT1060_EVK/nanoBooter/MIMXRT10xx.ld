@@ -20,8 +20,9 @@ MEMORY
   CONFIG_FLASH (r) : ORIGIN = 0x60010000, LENGTH = 0x10000 /* 64k bytes space reserved for configuration block */  
   DEPLOYMENT_FLASH (r) : ORIGIN = 0x60200000, LENGTH = 0x100000 /* 1M bytes */  
   SRAM_DTC (rwx) : ORIGIN = 0x20000000, LENGTH = 0x20000 /* 128K bytes (alias RAM) */  
-  SRAM_ITC (rwx) : ORIGIN = 0x0, LENGTH = 0x20000 /* 128K bytes (alias RAM2) */  
+  SRAM_ITC (rwx) : ORIGIN = 0x30, LENGTH = 0x20000-0x30 /* 128K - 48 bytes (alias RAM2) */  
   SRAM_OC (rwx) : ORIGIN = 0x20200000, LENGTH = 0xc0000 /* 768K bytes (alias RAM3) */  
+  BOOTCLPBRD (rwx) : ORIGIN = 0x0, LENGTH = 0x30 /* 48bytes */  
   BOARD_SDRAM (rwx) : ORIGIN = 0x80000000, LENGTH = 0x2000000 /* 32M bytes (alias RAM4) */  
 }
 
@@ -34,9 +35,9 @@ MEMORY
   __base_RAM = 0x20000000 ; /* RAM */  
   __top_SRAM_DTC = 0x20000000 + 0x20000 ; /* 128K bytes */  
   __top_RAM = 0x20000000 + 0x20000 ; /* 128K bytes */  
-  __base_SRAM_ITC = 0x0  ; /* SRAM_ITC */  
+  __base_SRAM_ITC = 0x30  ; /* SRAM_ITC */  
   __base_RAM2 = 0x0 ; /* RAM2 */  
-  __top_SRAM_ITC = 0x0 + 0x20000 ; /* 128K bytes */  
+  __top_SRAM_ITC = 0x30 + 0x20000 - 0x30; /* 128K - 48 bytes */  
   __top_RAM2 = 0x0 + 0x20000 ; /* 128K bytes */  
   __base_SRAM_OC = 0x20200000  ; /* SRAM_OC */  
   __base_RAM3 = 0x20200000 ; /* RAM3 */  
@@ -46,6 +47,8 @@ MEMORY
   __base_RAM4 = 0x80000000 ; /* RAM4 */  
   __top_BOARD_SDRAM = 0x80000000 + 0x2000000 ; /* 32M bytes */  
   __top_RAM4 = 0x80000000 + 0x2000000 ; /* 32M bytes */  
+  __base_BOARD_SDRAM = 0x0  ; /* @ SRAM_ITC */  
+  __top_BOARD_SDRAM = 0x30; /* 48 bytes */  
 
 __flash_start__         = ORIGIN(BOARD_FLASH);
 __nanoImage_start__     = ORIGIN(BOARD_FLASH);
@@ -299,6 +302,13 @@ SECTIONS
         . = ALIGN(4);
         _vStackTop = . + _StackSize;
     } > SRAM_DTC
+
+    /* Boot clipboard section */
+    .boot_clipboard_section (NOLOAD) :
+    {
+        . = ORIGIN(BOOTCLPBRD);
+        KEEP(*(.boot_clipboard*))
+    } > BOOTCLPBRD
 
     /* Provide basic symbols giving location and size of main text
      * block, including initial values of RW data sections. Note that

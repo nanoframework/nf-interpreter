@@ -29,9 +29,6 @@ void HARD_Breakpoint()
 
 #endif // !defined(BUILD_RTM)
 
-// NXP targets implement nanoBooter
-inline TARGET_HAS_NANOBOOTER(true);
-
 // NXP targets don't declare any target capability
 __nfweak GET_TARGET_CAPABILITIES(0);
 

@@ -799,8 +799,6 @@ template <typename T> class HAL_RingBuffer
 void nanoHAL_Initialize();
 void nanoHAL_Uninitialize();
 
-void HAL_EnterBooterMode();
-
 typedef void (*ON_SOFT_REBOOT_HANDLER)(void);
 
 void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler);

@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <nanoWeak.h>
+#include <target_common.h>
 
 // ready to use default implementations to be used at platform level
 
@@ -26,12 +27,6 @@
 
 #define TARGET_CONFIG_UPDATE_REQUIRES_ERASE(option)                                                                    \
     bool Target_ConfigUpdateRequiresErase()                                                                            \
-    {                                                                                                                  \
-        return option;                                                                                                 \
-    }
-
-#define TARGET_HAS_NANOBOOTER(option)                                                                                  \
-    bool Target_HasNanoBooter()                                                                                        \
     {                                                                                                                  \
         return option;                                                                                                 \
     }
