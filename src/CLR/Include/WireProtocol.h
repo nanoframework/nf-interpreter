@@ -185,6 +185,9 @@ typedef enum Monitor_Ping_Source_Flags
     // This flag indicates that the device requires that the configuration block to be erased before updating it.
     Monitor_Ping_c_ConfigBlockRequiresErase =   0x00040000,
 
+    // This flag indicates that the device has nanoBooter.
+    Monitor_Ping_c_HasNanoBooter =              0x00080000,
+
 }Monitor_Ping_Source_Flags;
 
 // structure to hold nanoFramework release information

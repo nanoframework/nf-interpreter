@@ -404,6 +404,11 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
 #endif
 
         // capability flags
+        if (::Target_HasNanoBooter())
+        {
+            cmdReply.Flags |= Monitor_Ping_c_HasNanoBooter;
+        }
+
         if (::Target_HasProprietaryBooter())
         {
             cmdReply.Flags |= Monitor_Ping_c_HasProprietaryBooter;
