@@ -362,6 +362,19 @@ else()
 endif()
 
 #################################################################
+# target has nanoBooter 
+# (default is ON so target device HAS nanoBooter)
+option(NF_TARGET_HAS_NANOBOOTER "option to signal if target implements nanoBooter" ON)
+
+if(NF_TARGET_HAS_NANOBOOTER)
+    set(NF_TARGET_HAS_NANOBOOTER TRUE CACHE INTERNAL "Option for nanoBooter implementation")
+    message(STATUS "Target implements nanoBooter")
+else()
+    set(NF_TARGET_HAS_NANOBOOTER FALSE CACHE INTERNAL "Option for nanoBooter implementation")
+    message(STATUS "Target DOES NOT implement nanoBooter")
+endif()
+
+#################################################################
 
 if(RTOS_CHIBIOS_CHECK)
 

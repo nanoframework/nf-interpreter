@@ -16,6 +16,8 @@
 #include <nanoHAL_Network.h>
 #include <nanoHAL_Power.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include "nanoHAL_Boot.h"
+#include <nanoVersion.h>
 
 typedef uint32_t GPIO_PIN;
 

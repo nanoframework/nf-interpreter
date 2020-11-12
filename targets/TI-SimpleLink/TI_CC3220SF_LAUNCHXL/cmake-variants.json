@@ -33,6 +33,7 @@
           "TARGET_BOARD": "TI_CC3220SF_LAUNCHXL",
           "TI_SL_CC32xx_SDK_SOURCE": "",
           "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+          "NF_TARGET_HAS_NANOBOOTER": "OFF",
           "NF_FEATURE_DEBUGGER": "ON",
           "NF_FEATURE_RTC": "ON",
           "NF_FEATURE_HAS_SDCARD": "OFF",

@@ -969,6 +969,8 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
+    bool success = true;
+
     CLR_DBG_Commands::Monitor_Reboot *cmd = (CLR_DBG_Commands::Monitor_Reboot *)msg->m_payload;
 
     if (NULL != cmd)
@@ -976,17 +978,21 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
         if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
             (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
         {
-            WP_ReplyToCommand(msg, true, false, NULL, 0);
-
-            Events_WaitForEvents(0, 100); // give message a little time to be flushed
-
-            HAL_EnterBooterMode();
+            success = RequestToLaunchNanoBooter();
+        }
+        else if (
+            CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
+            (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter))
+        {
+            success = RequestToLaunchProprietaryBootloader();
         }
 
         g_CLR_RT_ExecutionEngine.m_iReboot_Options = cmd->m_flags;
     }
 
-    WP_ReplyToCommand(msg, true, false, NULL, 0);
+    Events_WaitForEvents(0, 100); // give message a little time to be flushed
+
+    WP_ReplyToCommand(msg, success, false, NULL, 0);
 
     Events_WaitForEvents(0, 100); // give message a little time to be flushed
 

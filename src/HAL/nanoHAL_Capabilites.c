@@ -39,3 +39,12 @@ __nfweak bool Target_IFUCapable()
 {
     return false;
 }
+
+inline bool Target_HasNanoBooter()
+{
+#if (TARGET_HAS_NANOBOOTER == TRUE)
+    return true;
+#else
+    return false;
+#endif
+}

@@ -35,6 +35,7 @@
           "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
           "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
           "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+          "NF_TARGET_HAS_NANOBOOTER": "OFF",
           "NF_FEATURE_DEBUGGER": "ON",
           "NF_FEATURE_RTC": "ON",
           "NF_FEATURE_HAS_SDCARD": "OFF",

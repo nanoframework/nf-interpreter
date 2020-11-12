@@ -12,7 +12,7 @@
         __clr_managed_heap_end__ = .;
         PROVIDE(HeapEnd = .);
     } > CLR_MANAGED_HEAP_RAM
-
+    
     /* RAM space reserved for the vector table */
     .RAMVectorTable (NOLOAD) : ALIGN(4)
     {

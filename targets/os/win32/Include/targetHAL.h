@@ -71,4 +71,14 @@ inline uint32_t GetTargetCapabilities()
     return 0;
 };
 
+inline bool RequestToLaunchProprietaryBootloader()
+{
+    return false;
+};
+
+inline bool RequestToLaunchNanoBooter()
+{
+    return false;
+};
+
 #endif //_TARGET_HAL_H_

@@ -30,9 +30,6 @@ inline void HARD_Breakpoint()
 // ESP32 stores configuration blocks using its non-volatile storage therefore no erase is required.
 inline TARGET_CONFIG_UPDATE_REQUIRES_ERASE(false);
 
-// ESP32 doesn't implement nanoBooter
-inline TARGET_HAS_NANOBOOTER(false);
-
 // ESP32 targets don't declare any target capability
 inline GET_TARGET_CAPABILITIES(0);
 

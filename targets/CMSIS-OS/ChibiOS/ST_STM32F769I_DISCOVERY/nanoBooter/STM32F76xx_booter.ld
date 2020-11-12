@@ -25,11 +25,12 @@ MEMORY
     ram0        : org = 0x20020000, len = 384k    /* SRAM1 + SRAM2 */
     ram1        : org = 0x20020000, len = 368k    /* SRAM1 */
     ram2        : org = 0x2007C000, len = 16k     /* SRAM2 */
-    ram3        : org = 0x20000000, len = 128k    /* DTCM-RAM */
+    ram3        : org = 0x20000030, len = 128k-48 /* DTCM-RAM */
     ram4        : org = 0x00000000, len = 16k     /* ITCM-RAM */
     ram5        : org = 0x40024000, len = 4k      /* BCKP SRAM */
     ram6        : org = 0x00000000, len = 0
     ram7        : org = 0x00000000, len = 0
+    bootclpbrd   : org = 0x20000000, len = 48      /* boot clipboard area */
 }
 
 /* For each data/text section two region are defined, a virtual region
@@ -76,6 +77,8 @@ REGION_ALIAS("BSS_RAM", ram3);
 /* RAM region to be used for the default heap.*/
 REGION_ALIAS("HEAP_RAM", ram0);
 
+/* RAM region to be used for the boot clipboard.*/
+REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
 
 /* rules inclusion.*/
 INCLUDE rules_stacks.ld
@@ -123,3 +126,6 @@ INCLUDE rules_data.ld
 
 /* Memory rules inclusion.*/
 INCLUDE rules_memory.ld
+
+/* boot clipboard rules inclusion.*/
+INCLUDE rules_bootclipboard.ld

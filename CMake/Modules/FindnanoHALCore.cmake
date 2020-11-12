@@ -14,6 +14,7 @@ set(nanoHALCore_SRCS
 
     # Core
     nanoHAL_Capabilites.c
+    nanoHAL_Boot.c
 
 )
 # message("BASE_PATH_FOR_PLATFORM >> ${BASE_PATH_FOR_PLATFORM}") # debug helper

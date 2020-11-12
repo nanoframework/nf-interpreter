@@ -5,8 +5,4 @@
 
 #include <nanoHAL.h>
 
-void HAL_EnterBooterMode()
-{
-}
-
 bool g_fDoNotUninitializeDebuggerPort = false;

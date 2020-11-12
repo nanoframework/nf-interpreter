@@ -176,12 +176,17 @@ int Monitor_Reboot(WP_Message *message)
 
     if (cmd != NULL)
     {
-        // only reset if we are not trying to get into the bootloader
-        if ((cmd->m_flags & Monitor_Reboot_c_EnterNanoBooter) != Monitor_Reboot_c_EnterNanoBooter)
+        if (Monitor_Reboot_c_NormalReboot == (cmd->m_flags & Monitor_Reboot_c_NormalReboot))
         {
-            // RESET CPU
+            // RESET CPU to load nanoCLR
             // because ChibiOS relies on CMSIS it's recommended to make use of the CMSIS API
             NVIC_SystemReset();
+        }
+        else if (Monitor_Reboot_c_EnterProprietaryBooter == (cmd->m_flags & Monitor_Reboot_c_EnterProprietaryBooter))
+        {
+            // request to load proprietary bootloader
+            // OK to call directly as this will launch the bootloader only if the target has support for it
+            LaunchProprietaryBootloader();
         }
     }
 

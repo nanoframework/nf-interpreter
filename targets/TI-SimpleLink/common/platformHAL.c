@@ -30,9 +30,6 @@ void HARD_Breakpoint()
 // Provides information whether the configuration block storage requires erase command before sending the update command
 inline TARGET_CONFIG_UPDATE_REQUIRES_ERASE(false);
 
-// TI SimpleLink targets do not implement nanoBooter
-inline TARGET_HAS_NANOBOOTER(false);
-
 // declarations of target capabilities
 // TI SimpleLink targets don't declare any target capability
 // If a target has something to declare it has to provide a 'strong' implementation of this.
