@@ -17,14 +17,17 @@
 // enums
 
 // structure for Monitor Reboot options
-// backwards compatible with .NETMF
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.RebootOptions (in managed code) !!! //
+// CONSTANTS VALUES NEED TO BE 'FLAG' TYPE                                                             //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef enum Monitor_Reboot_Options
 {
     Monitor_Reboot_c_NormalReboot           = 0,
     Monitor_Reboot_c_EnterNanoBooter        = 1,
     Monitor_Reboot_c_ClrRebootOnly          = 2,
     Monitor_Reboot_c_ClrStopDebugger        = 4,
-    Monitor_Reboot_c_EnterProprietaryBooter = 5
+    Monitor_Reboot_c_EnterProprietaryBooter = 8
 } Monitor_Reboot_Options;
 
 // structure for Access Memory operations

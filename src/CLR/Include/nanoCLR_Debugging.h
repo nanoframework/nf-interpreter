@@ -50,6 +50,7 @@ struct CLR_DBG_Commands
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.RebootOptions (in managed code) !!! //
+    // CONSTANTS VALUES NEED TO BE 'FLAG' TYPE                                                             //
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     struct Monitor_Reboot
     {
@@ -57,7 +58,7 @@ struct CLR_DBG_Commands
         static const unsigned int c_EnterNanoBooter         = 1;
         static const unsigned int c_ClrOnly                 = 2;
         static const unsigned int c_WaitForDebugger         = 4;
-        static const unsigned int c_EnterProprietaryBooter  = 5;
+        static const unsigned int c_EnterProprietaryBooter  = 8;
 
         unsigned int m_flags;
     };
