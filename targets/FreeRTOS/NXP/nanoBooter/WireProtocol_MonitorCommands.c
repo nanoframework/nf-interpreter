@@ -87,6 +87,10 @@ int Monitor_Ping(WP_Message *message)
 #elif (WP_PACKET_SIZE == 1024)
         cmdReply.Flags |= Monitor_Ping_c_PacketSize_1024;
 #endif
+        if (Target_HasNanoBooter())
+        {
+            cmdReply.Flags |= Monitor_Ping_c_HasNanoBooter;
+        }
 
         if (Target_HasProprietaryBooter())
         {
