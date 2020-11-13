@@ -6,7 +6,9 @@
 #ifndef _NANOHAL_GRAPHICS_H_
 #define _NANOHAL_GRAPHICS_H_ 1
 
-#if NANOCLR_GRAPHICS
+#include <target_platform.g>
+
+#if (NANOCLR_GRAPHICS == TRUE)
 #include "Display.h"
 #include "DisplayInterface.h"
 #include "TouchDevice.h"
