@@ -10,7 +10,7 @@
 #include "hal_stm32_fsmc"
 #include <hal_nf_community.h>
 
-#if (HAL_NF_USE_NAND == TRUE)
+#if (STM32_USE_FSMC_NAND == TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver constants.                                                         //
@@ -214,6 +214,6 @@ extern "C" {
 }
 #endif
 
-#endif // HAL_NF_USE_NAND 
+#endif // STM32_USE_FSMC_NAND 
 
 #endif // HAL_NAND_LLD_H_ 

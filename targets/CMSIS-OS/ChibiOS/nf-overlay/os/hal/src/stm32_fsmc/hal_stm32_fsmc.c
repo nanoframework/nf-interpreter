@@ -95,7 +95,7 @@ void fsmc_start(FSMCDriver *fsmcp) {
       rccResetFSMC();
 #endif
       rccEnableFSMC(FALSE);
-#if HAL_NF_USE_NAND
+#if STM32_USE_FSMC_NAND
       nvicEnableVector(STM32_FSMC_NUMBER, STM32_FSMC_FSMC1_IRQ_PRIORITY);
 #endif
     }
@@ -118,7 +118,7 @@ void fsmc_stop(FSMCDriver *fsmcp) {
     /* Disables the peripheral.*/
 #if STM32_FSMC_USE_FSMC1
     if (&FSMCD1 == fsmcp) {
-#if HAL_NF_USE_NAND
+#if STM32_USE_FSMC_NAND
       nvicDisableVector(STM32_FSMC_NUMBER);
 #endif
       rccDisableFSMC();

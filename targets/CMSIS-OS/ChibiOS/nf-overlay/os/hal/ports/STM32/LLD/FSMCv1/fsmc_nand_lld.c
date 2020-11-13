@@ -7,7 +7,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_NF_USE_NAND == TRUE)
+#if (STM32_USE_FSMC_NAND == TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver local definitions.                                                 //
@@ -472,4 +472,4 @@ uint8_t nand_lld_read_status(NANDDriver *nandp) {
   return status & 0xFF;
 }
 
-#endif // HAL_NF_USE_NAND
+#endif // STM32_USE_FSMC_NAND

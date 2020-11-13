@@ -330,6 +330,20 @@ extern "C" {
 }
 #endif
 
+#else
+
+#if !defined(STM32_USE_FSMC_NAND)
+// the default for this driver is NOT to be included
+#define STM32_USE_FSMC_NAND                    FALSE
+#endif
+#if !defined(STM32_USE_FSMC_SDRAM)
+// the default for this driver is NOT to be included
+#define STM32_USE_FSMC_SDRAM                    FALSE
+#endif
+#if !defined(STM32_USE_FSMC_SRAM)
+// the default for this driver is NOT to be included
+#define STM32_USE_FSMC_SRAM                    FALSE
+#endif
 #endif /* HAL_NF_USE_FSMC */
 
 #endif /* HAL_NF_FSMC_H_ */

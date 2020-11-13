@@ -67,9 +67,7 @@ typedef struct SMT32FlashDriver {
 // External declarations.                                                    //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if STM32FLASH_USE_FLASH
 SMT32FlashDriver STM32FLASH;
-#endif
 
 #ifdef __cplusplus
 extern "C" {
