@@ -11,12 +11,6 @@
 
 //--//
 
-#if NATIVE_PROFILE_PAL & NATIVE_PROFILE_PAL_ASYNC_PROC_CALL__flag
-    #define NATIVE_PROFILE_PAL_ASYNC_PROC_CALL() Native_Profiler profiler_obj
-#else
-    #define NATIVE_PROFILE_PAL_ASYNC_PROC_CALL()
-#endif
-
 typedef void (*HAL_CALLBACK_FPN)( void* arg );
 
 struct HAL_CALLBACK
