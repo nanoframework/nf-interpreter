@@ -4,9 +4,7 @@
 //
 
 #include "FreeRTOS.h"
-#include "stdint.h"
-#include "stddef.h"
-#include <string.h>
+#include <nanoCLR_Headers.h>
 
 void *platform_malloc(size_t size)
 {
@@ -20,13 +18,14 @@ void platform_free(void *ptr)
 
 typedef struct A_BLOCK_LINK
 {
-	struct A_BLOCK_LINK *pxNextFreeBlock;	/*<< The next free block in the list. */
-	size_t xBlockSize;						/*<< The size of the free block. */
+    struct A_BLOCK_LINK *pxNextFreeBlock; /*<< The next free block in the list. */
+    size_t xBlockSize;                    /*<< The size of the free block. */
 } BlockLink_t;
 
-#define heapBITS_PER_BYTE ( ( size_t ) 8 )
-static const size_t xHeapStructSize	= ( sizeof( BlockLink_t ) + ( ( size_t ) ( portBYTE_ALIGNMENT - 1 ) ) ) & ~( ( size_t ) portBYTE_ALIGNMENT_MASK );
-static size_t	xBlockAllocatedBit = ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 );
+#define heapBITS_PER_BYTE ((size_t)8)
+static const size_t xHeapStructSize =
+    (sizeof(BlockLink_t) + ((size_t)(portBYTE_ALIGNMENT - 1))) & ~((size_t)portBYTE_ALIGNMENT_MASK);
+static size_t xBlockAllocatedBit = ((size_t)1) << ((sizeof(size_t) * heapBITS_PER_BYTE) - 1);
 
 static size_t mem_size(void *pv)
 {
@@ -36,7 +35,7 @@ static size_t mem_size(void *pv)
     if (pv != NULL)
     {
         /* The memory being freed will have an BlockLink_t structure immediately
-		before it. */
+        before it. */
         puc -= xHeapStructSize;
 
         /* This casting is to keep the compiler from issuing warnings. */

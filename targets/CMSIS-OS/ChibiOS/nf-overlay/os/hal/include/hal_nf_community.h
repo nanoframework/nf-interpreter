@@ -6,34 +6,38 @@
 #ifndef HAL_NF_COMMUNITY_H
 #define HAL_NF_COMMUNITY_H
 
-
 // these are for error checks on the configuration header files
 #if !defined(HAL_NF_USE_STM32_FLASH)
-#define HAL_NF_USE_STM32_FLASH                  FALSE
+#define HAL_NF_USE_STM32_FLASH FALSE
 #endif
 
 #if !defined(HAL_NF_USE_STM32_CRC)
 // the default for this driver is to be included
-#define HAL_NF_USE_STM32_CRC                    TRUE
+#define HAL_NF_USE_STM32_CRC TRUE
 #endif
 
 #if !defined(HAL_NF_USE_STM32_RNG)
 // the default for this driver is to be included
-#define HAL_NF_USE_STM32_RNG                    TRUE
+#define HAL_NF_USE_STM32_RNG TRUE
 #endif
 
 #if !defined(HAL_NF_USE_FSMC)
-#define HAL_NF_USE_FSMC                         FALSE
+#define HAL_NF_USE_FSMC FALSE
 #endif
 
 #if !defined(HAL_NF_USE_STM32_ONEWIRE)
 // the default for this driver is NOT to be included
-#define HAL_NF_USE_STM32_ONEWIRE                FALSE
+#define HAL_NF_USE_STM32_ONEWIRE FALSE
 #endif
 
 #if !defined(HAL_NF_USE_STM32_QSPI)
 // the default for this driver is NOT to be included
-#define HAL_NF_USE_STM32_QSPI                   FALSE
+#define HAL_NF_USE_STM32_QSPI FALSE
+#endif
+
+#if !defined(HAL_USE_USBH)
+// the default for this driver is NOT to be included
+#define HAL_USE_USBH FALSE
 #endif
 
 // Abstract interfaces
@@ -77,14 +81,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-  void halCommunityInit(void);
+    void halCommunityInit(void);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif // HAL_NF_COMMUNITY_H
-

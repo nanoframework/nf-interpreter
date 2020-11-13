@@ -9,10 +9,7 @@
 #ifndef _WIREPROTOCOL_H_
 #define _WIREPROTOCOL_H_
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <string.h>
+#include <nanoCLR_Headers.h>
 #include <nanoSupport.h>
 #include "nanoVersion.h"
 

@@ -36,9 +36,7 @@
  *  RF callback function for antenna switching.
  */
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <nanoCLR_Headers.h>
 
 #include <ti/devices/cc13x2_cc26x2/driverlib/ioc.h>
 #include <ti/devices/cc13x2_cc26x2/driverlib/cpu.h>

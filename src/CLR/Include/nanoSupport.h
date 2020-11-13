@@ -6,13 +6,14 @@
 #ifndef _SUPPORT_NANOSUPPORT_H_
 #define _SUPPORT_NANOSUPPORT_H_
 
-#include <stdint.h>
+#include <nanoCLR_Headers.h>
 
 #if defined(__cplusplus)
-extern "C" {
+extern "C"
+{
 #endif
 
-uint32_t SUPPORT_ComputeCRC(const void* rgBlock, const uint32_t nLength, const uint32_t crc);
+    uint32_t SUPPORT_ComputeCRC(const void *rgBlock, const uint32_t nLength, const uint32_t crc);
 
 #if defined(__cplusplus)
 }

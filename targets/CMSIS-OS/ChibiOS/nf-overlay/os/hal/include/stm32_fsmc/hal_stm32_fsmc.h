@@ -9,6 +9,16 @@
 
 #if (HAL_NF_USE_FSMC == TRUE)
 
+#if !defined(STM32_USE_FSMC_NAND)
+#define STM32_USE_FSMC_NAND FALSE
+#endif
+#if !defined(STM32_USE_FSMC_SDRAM)
+#define STM32_USE_FSMC_SDRAM FALSE
+#endif
+#if !defined(STM32_USE_FSMC_SRAM)
+#define STM32_USE_FSMC_SRAM FALSE
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // Driver constants.                                                         //
 ///////////////////////////////////////////////////////////////////////////////
@@ -225,6 +235,10 @@ typedef struct
 #define FSMC_BCR_WFDIS ((uint32_t)1 << 21)
 #endif
 
+#include <fsmc_nand_lld.h>
+#include <fsmc_sdram_lld.h>
+#include <fsmc_sram_lld.h>
+
 /*===========================================================================*/
 /* Driver pre-compile time settings.                                         */
 /*===========================================================================*/
@@ -239,6 +253,19 @@ typedef struct
  */
 #if !defined(STM32_FSMC_USE_FSMC1)
 #define STM32_FSMC_USE_FSMC1 FALSE
+#endif
+
+//  NAND driver enable switch.
+// If set to @p TRUE the support for NAND1 is included.
+
+#if !defined(STM32_NAND_USE_FSMC_NAND1)
+#define STM32_NAND_USE_FSMC_NAND1 FALSE
+#endif
+
+// NAND driver enable switch.
+// If set to @p TRUE the support for NAND2 is included.
+#if !defined(STM32_NAND_USE_FSMC_NAND2)
+#define STM32_NAND_USE_FSMC_NAND2 FALSE
 #endif
 
 /** @} */
@@ -332,18 +359,10 @@ extern "C"
 
 #else
 
-#if !defined(STM32_USE_FSMC_NAND)
-// the default for this driver is NOT to be included
-#define STM32_USE_FSMC_NAND FALSE
-#endif
-#if !defined(STM32_USE_FSMC_SDRAM)
-// the default for this driver is NOT to be included
+#define STM32_USE_FSMC_NAND  FALSE
 #define STM32_USE_FSMC_SDRAM FALSE
-#endif
-#if !defined(STM32_USE_FSMC_SRAM)
-// the default for this driver is NOT to be included
-#define STM32_USE_FSMC_SRAM FALSE
-#endif
+#define STM32_USE_FSMC_SRAM  FALSE
+
 #endif /* HAL_NF_USE_FSMC */
 
 #endif /* HAL_NF_FSMC_H_ */

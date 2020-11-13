@@ -6,8 +6,7 @@
 #ifndef _NANOHAL_CONFIG_MANAGER_H_
 #define _NANOHAL_CONFIG_MANAGER_H_ 1
 
-#include <nanoWeak.h>
-#include <stdint.h>
+#include <nanoCLR_Headers.h>
 #include <nanoHAL_Network.h>
 
 #ifdef __cplusplus

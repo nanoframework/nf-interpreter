@@ -24,13 +24,13 @@ typedef struct
 ///////////////////////////////////////////
 // declaration of the CAN PAL strucs     //
 ///////////////////////////////////////////
-#if STM32_CAN_USE_CAN1
+#if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
 extern NF_PAL_CAN Can1_PAL;
 #endif
-#if STM32_CAN_USE_CAN2
+#if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
 extern NF_PAL_CAN Can2_PAL;
 #endif
-#if STM32_CAN_USE_CAN3
+#if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
 extern NF_PAL_CAN Can3_PAL;
 #endif
 

@@ -18,10 +18,6 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 extern uint8_t hal_spiffs_config();
 
 // need to declare the Receiver thread here

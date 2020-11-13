@@ -5,43 +5,42 @@
 //
 
 #include <nanoHAL.h>
+#include <target_platform.h>
 
 //
-//  Allocate Memory for Managed heap 
-//  
+//  Allocate Memory for Managed heap
+//
 //  if spiRam is available then use all available ram - SPI_ALLOW_FREE
 //
 //  if no spiRam or spiRam malloc fails then malloc from normal ram
 //
-//  The CLR calls this multiple times. Once memory is allocated return the same memory for all 
+//  The CLR calls this multiple times. Once memory is allocated return the same memory for all
 //  subsequent calls.
 
-
-static const char* TAG = "Memory";
+static const char *TAG = "Memory";
 
 // Space to leave free in spiRam
 // If running with Graphics then leave 2MB free
 // No graphics then 256KB free for something else
-#if NANOCLR_GRAPHICS
+#if (NANOCLR_GRAPHICS == TRUE)
 #define SPI_ALLOW_FREE (2 * 1024 * 1024)
 #else
 #define SPI_ALLOW_FREE (256 * 1024)
 #endif
 
-// You can't go much bigger than this when allocating in normal memory to 
+// You can't go much bigger than this when allocating in normal memory to
 // get memory in one continuous lump.
 #define NORMAL_MEMORY_SIZE (115 * 1024)
 
-
 // Saved memory allocation for when heap is reset so we can return same value.
-unsigned char* pManagedHeap = NULL;
-size_t         managedHeapSize = 0;
+unsigned char *pManagedHeap = NULL;
+size_t managedHeapSize = 0;
 
 //
 //	Return the location and size of the managed heap
 //  If called a 2nd time then always return same value
 //
-void HeapLocation(unsigned char*& baseAddress, unsigned int& sizeInBytes)
+void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
 {
     NATIVE_PROFILE_PAL_HEAP();
 
@@ -59,14 +58,16 @@ void HeapLocation(unsigned char*& baseAddress, unsigned int& sizeInBytes)
         {
             // Allocate heap from SPIRAM
             managedHeapSize = spiramMaxSize - SPI_ALLOW_FREE;
-            pManagedHeap = (unsigned char *)heap_caps_malloc(managedHeapSize, MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
+            pManagedHeap = (unsigned char *)heap_caps_malloc(
+                managedHeapSize,
+                MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
             if (pManagedHeap)
             {
                 ESP_LOGI(TAG, "Managed heap allocated, spiRam size:%d max:%d", managedHeapSize, spiramMaxSize);
-            }	
+            }
         }
 
-        while(pManagedHeap == NULL)
+        while (pManagedHeap == NULL)
         {
             // Allocate heap from Internal RAM
             pManagedHeap = (unsigned char *)heap_caps_malloc(managedHeapSize, MALLOC_CAP_8BIT | MALLOC_CAP_32BIT);

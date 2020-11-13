@@ -3,10 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <ff.h>
 #include "win_storage_native_target.h"
-#include <Target_Windows_Storage.h>
-#include <nanoHAL_Windows_Storage.h>
 
 // flags for file system ready
 extern bool sdCardFileSystemReady;

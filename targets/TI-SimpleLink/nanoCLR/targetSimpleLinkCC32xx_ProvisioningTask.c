@@ -5,8 +5,7 @@
 //
 
 /* standard includes */
-#include <stdlib.h>
-#include <string.h>
+#include <nanoCLR_Headers.h>
 
 /* driverlib Header files */
 #include <ti/devices/cc32xx/inc/hw_types.h>
@@ -32,36 +31,36 @@
 #include <time.h>
 
 /* In msecs. Used to detect good/bad sl_start() */
-#define ASYNC_EVT_TIMEOUT                       (5000) 
-/*In sec. Used for connecting to stored profile */ 
-#define PROFILE_ASYNC_EVT_TIMEOUT                       (5)     
-#define LED_TOGGLE_CONFIGURATION_TIMEOUT        (1000)  /* In msecs */
-#define LED_TOGGLE_CONFIRMATION_TIMEOUT     (500)   /* In msecs */
-#define LED_TOGGLE_CONNECTION_TIMEOUT       (250)   /* In msecs */
+#define ASYNC_EVT_TIMEOUT (5000)
+/*In sec. Used for connecting to stored profile */
+#define PROFILE_ASYNC_EVT_TIMEOUT        (5)
+#define LED_TOGGLE_CONFIGURATION_TIMEOUT (1000) /* In msecs */
+#define LED_TOGGLE_CONFIRMATION_TIMEOUT  (500)  /* In msecs */
+#define LED_TOGGLE_CONNECTION_TIMEOUT    (250)  /* In msecs */
 /* Provisioning inactivity timeout in seconds */
-#define PROVISIONING_INACTIVITY_TIMEOUT         (600)   
+#define PROVISIONING_INACTIVITY_TIMEOUT (600)
 
-#define ROLE_SELECTION_BY_SL                            (0xFF)
+#define ROLE_SELECTION_BY_SL (0xFF)
 
 /* OCP register used to store device role when coming out of hibernate */
-#define OCP_REGISTER_INDEX              (0)
+#define OCP_REGISTER_INDEX (0)
 /* if ocpRegOffset is set -> AP role, otherwise -> STATION role    */
-#define OCP_REGISTER_OFFSET             (10)    
+#define OCP_REGISTER_OFFSET (10)
 
 /*!
  *  \brief  Provisioning modes
  */
 typedef enum
 {
-    PrvsnMode_AP,       /* AP provisioning (AP role) */
-    PrvsnMode_SC,       /* Smart Config provisioning (STA role) */
-    PrvsnMode_APSC      /* AP + Smart Config provisioning (AP role) */
-}PrvsnMode;
+    PrvsnMode_AP,  /* AP provisioning (AP role) */
+    PrvsnMode_SC,  /* Smart Config provisioning (STA role) */
+    PrvsnMode_APSC /* AP + Smart Config provisioning (AP role) */
+} PrvsnMode;
 
 /** By default, setting the provisioning mode to AP + Smart Config.
  * Other values could be PrvsnMode_SC or PrvsnMode_AP
  */
-#define PROVISIONING_MODE   PrvsnMode_APSC
+#define PROVISIONING_MODE PrvsnMode_APSC
 
 /*!
  *  \brief  Provisioning status
@@ -70,26 +69,26 @@ typedef enum
 {
     PrvsnStatus_Stopped,
     PrvsnStatus_InProgress
-}PrvsnStatus;
+} PrvsnStatus;
 
 /*
  *  \brief  Application state's context
  */
-typedef struct  _Provisioning_AppContext_t_
+typedef struct _Provisioning_AppContext_t_
 {
-    PrvnState currentState;        /* Current state of provisioning */
-    uint32_t pendingEvents;             /* Events pending to be processed */
-/* SimpleLink's role - STATION/AP/P2P */
-    uint8_t role;                           
-/* SimpleLink's default role, try not to change this */
-    uint8_t defaultRole;                    
-    PrvsnMode provisioningMode;       /* Provisioning Mode */
-    PrvsnStatus provisioningStatus;   /* */
+    PrvnState currentState; /* Current state of provisioning */
+    uint32_t pendingEvents; /* Events pending to be processed */
+                            /* SimpleLink's role - STATION/AP/P2P */
+    uint8_t role;
+    /* SimpleLink's default role, try not to change this */
+    uint8_t defaultRole;
+    PrvsnMode provisioningMode;     /* Provisioning Mode */
+    PrvsnStatus provisioningStatus; /* */
 
-    uint32_t asyncEvtTimeout;               /* Timeout value*/
+    uint32_t asyncEvtTimeout; /* Timeout value*/
 
-    uint32_t ledToggleTimeout;          /* Timeout value */
-}Provisioning_AppContext;
+    uint32_t ledToggleTimeout; /* Timeout value */
+} Provisioning_AppContext;
 
 /*!
  *  \brief  Function pointer to the event handler
@@ -101,11 +100,9 @@ typedef int32_t (*fptr_EventHandler)(void);
  */
 typedef struct
 {
-    fptr_EventHandler p_evtHndl;    /* Pointer to the event handler */
-    PrvnState nextState;           /* Next state of provisioning */
-}s_TblEntry;
-
-
+    fptr_EventHandler p_evtHndl; /* Pointer to the event handler */
+    PrvnState nextState;         /* Next state of provisioning */
+} s_TblEntry;
 
 /****************************************************************************
                       LOCAL FUNCTION PROTOTYPES
@@ -168,7 +165,7 @@ static int32_t ConfigureSimpleLinkToDefaultState(void);
 //*****************************************************************************
 //
 //! \brief This function starts the SimpleLink in the configured role.
-//!        The device notifies the host asynchronously 
+//!        The device notifies the host asynchronously
 //!        when the initialization is
 //!        completed
 //!
@@ -293,120 +290,118 @@ timer_t gLedTimer;
 /*!
  *  \brief   Application lookup/transition table
  */
-const s_TblEntry gProvisioningTransitionTable[PrvnState_Max][PrvnEvent_Max] =
-{
+const s_TblEntry gProvisioningTransitionTable[PrvnState_Max][PrvnEvent_Max] = {
     /* PrvnState_Init */
     {
         /* Event: PrvnEvent_Triggered */
-        {provisioningStart, PrvnState_Idle                    },
+        {provisioningStart, PrvnState_Idle},
         /* Event: PrvnEvent_Started */
-        {ReportError, PrvnState_Error                         },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_StartFailed */
-        {ReportError, PrvnState_Error                         },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_ConfirmationSuccess */
         /* special case where confirmation is received after application is
-        restarted and NWP is still in provisioning */           
-       {ReportSM, PrvnState_Completed                         },
+        restarted and NWP is still in provisioning */
+        {ReportSM, PrvnState_Completed},
         /* in this case, need to move to COMPLETED state */
         /* Event: PrvnEvent_ConfirmationFailed */
-        {ReportError, PrvnState_Error                         },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Stopped */
         /* in case of auto provisioning */
-        {ReportSM, PrvnState_Init                             },
+        {ReportSM, PrvnState_Init},
         /* Event: PrvnEvent_WaitForConn */
-        {ReportSM, PrvnState_Error                            },
+        {ReportSM, PrvnState_Error},
         /* Event: PrvnEvent_Timeout */
-        {ReportError, PrvnState_Error                         },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Error */
-        {ReportError, PrvnState_Error                         },
+        {ReportError, PrvnState_Error},
     },
     /* PrvnState_Idle */
     {
         /* Event: PrvnEvent_Triggered */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Started */
-        {HandleStrtdEvt, PrvnState_WaitForConfirmation         },
+        {HandleStrtdEvt, PrvnState_WaitForConfirmation},
         /* Event: PrvnEvent_StartFailed */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_ConfirmationSuccess */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_ConfirmationFailed */
-        {ReportError, PrvnState_Error                          },
-        /* Event: PrvnEvent_Stopped */ 
-        {ReportSM, PrvnState_Init                              },
+        {ReportError, PrvnState_Error},
+        /* Event: PrvnEvent_Stopped */
+        {ReportSM, PrvnState_Init},
         /* Event: PrvnEvent_WaitForConn */
-        {ReportSM, PrvnState_Error                             },
-        /* Event: PrvnEvent_Timeout */ 
-        {ReportError, PrvnState_Error                          },
+        {ReportSM, PrvnState_Error},
+        /* Event: PrvnEvent_Timeout */
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Error */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
     },
     /* PrvnState_WaitForConfirmation */
     {
         /* Event: PrvnEvent_Triggered */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Started */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_StartFailed */
-        {ReportSM, PrvnState_Idle                              },
+        {ReportSM, PrvnState_Idle},
         /* Event: PrvnEvent_ConfirmationSuccess */
-        {ReportSM, PrvnState_Completed                         },
+        {ReportSM, PrvnState_Completed},
         /* Event: PrvnEvent_ConfirmationFailed */
-        {ReportSM, PrvnState_WaitForConfirmation               },
+        {ReportSM, PrvnState_WaitForConfirmation},
         /* Event: PrvnEvent_Stopped */
-        {ReportSM, PrvnState_Init                              },
+        {ReportSM, PrvnState_Init},
         /* Event: PrvnEvent_WaitForConn */
-        {ReportSM, PrvnState_Error                             },
-        /* Event: PrvnEvent_Timeout */ 
-        {ReportError, PrvnState_Error                          },
+        {ReportSM, PrvnState_Error},
+        /* Event: PrvnEvent_Timeout */
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Error */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
     },
     /* PrvnState_Completed */
     {
         /* Event: PrvnEvent_Triggered */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Started */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_StartFailed */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_ConfirmationSuccess */
-        {ReportError, PrvnState_Error                          }, 
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_ConfirmationFailed */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Stopped */
-        {ReportSuccess, PrvnState_Init                         },
+        {ReportSuccess, PrvnState_Init},
         /* Event: PrvnEvent_WaitForConn */
         /* this state should cover cases where
         feedback failed but profile exists */
-        {WaitForConn, PrvnState_Init                           },
+        {WaitForConn, PrvnState_Init},
         /* Event: PrvnEvent_Timeout */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Error */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
     },
     /* PrvnState_Error */
     {
         /* Event: PrvnEvent_Triggered */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Started */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_StartFailed */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_ConfirmationSuccess */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_ConfirmationFailed */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Stopped */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_WaitForConn */
-        {ReportSM, PrvnState_Error                             },
+        {ReportSM, PrvnState_Error},
         /* Event: PrvnEvent_Timeout */
-        {ReportError, PrvnState_Error                          },
+        {ReportError, PrvnState_Error},
         /* Event: PrvnEvent_Error */
-        {ReportError, PrvnState_Error                          },
-    }
-};
+        {ReportError, PrvnState_Error},
+    }};
 
 Provisioning_CB Provisioning_ControlBlock;
 
@@ -423,8 +418,7 @@ Provisioning_CB Provisioning_ControlBlock;
 //! \return None
 //!
 //****************************************************************************
-void SimpleLinkInitCallback(uint32_t status,
-                            SlDeviceInitInfo_t *DeviceInitInfo)
+void SimpleLinkInitCallback(uint32_t status, SlDeviceInitInfo_t *DeviceInitInfo)
 {
     Provisioning_AppContext *const pCtx = &gAppCtx;
 
@@ -435,20 +429,20 @@ void SimpleLinkInitCallback(uint32_t status,
     /** While provisioning is ongoing, the appropriate role is choosen by the
      * device itself, and host can remain agnostic to these details
      */
-    if(pCtx->role == ROLE_SELECTION_BY_SL)
+    if (pCtx->role == ROLE_SELECTION_BY_SL)
     {
         SignalProvisioningEvent(PrvnEvent_Started);
     }
     else
     {
         /* Either trigger an error/started event here */
-        if(pCtx->role == status)
+        if (pCtx->role == status)
         {
             SignalProvisioningEvent(PrvnEvent_Started);
         }
         else
         {
-        //    UART_PRINT("[Provisioning task] But the intended role is %s \n\r", \
+            //    UART_PRINT("[Provisioning task] But the intended role is %s \n\r", \
         //                (0 == pCtx->role) ? "Station" : \
         //                ((2 == pCtx->role) ? "AP" : "P2P"));
             SignalProvisioningEvent(PrvnEvent_Error);
@@ -516,16 +510,19 @@ void provisioningInit(void)
      * Other values could be PrvsnMode_SC or PrvsnMode_AP
      */
     pCtx->provisioningMode = PROVISIONING_MODE;
-    switch(pCtx->provisioningMode)
+    switch (pCtx->provisioningMode)
     {
-    case PrvsnMode_APSC: pCtx->defaultRole = ROLE_AP;
-        break;
+        case PrvsnMode_APSC:
+            pCtx->defaultRole = ROLE_AP;
+            break;
 
-    case PrvsnMode_AP: pCtx->defaultRole = ROLE_AP;
-        break;
+        case PrvsnMode_AP:
+            pCtx->defaultRole = ROLE_AP;
+            break;
 
-    case PrvsnMode_SC: pCtx->defaultRole = ROLE_STA;
-        break;
+        case PrvsnMode_SC:
+            pCtx->defaultRole = ROLE_STA;
+            break;
     }
 
     /* Provisioning has not started yet */
@@ -555,21 +552,17 @@ int32_t provisioningStart(void)
     /* in case host triggered provisioning - need to stop it explicitly */
     configOpt = SL_DEVICE_GENERAL_VERSION;
     configLen = sizeof(ver);
-    retVal =
-        sl_DeviceGet(SL_DEVICE_GENERAL, &configOpt, &configLen,
-                     (uint8_t *)(&ver));
-    if(SL_RET_CODE_PROVISIONING_IN_PROGRESS == retVal)
+    retVal = sl_DeviceGet(SL_DEVICE_GENERAL, &configOpt, &configLen, (uint8_t *)(&ver));
+    if (SL_RET_CODE_PROVISIONING_IN_PROGRESS == retVal)
     {
         // UART_PRINT(
         //     "[Provisioning task] Provisioning is already running,"
         //     " stopping it...\r\n");
-        retVal =
-            sl_WlanProvisioning(SL_WLAN_PROVISIONING_CMD_STOP,ROLE_STA,0,NULL,
-                                0);
+        retVal = sl_WlanProvisioning(SL_WLAN_PROVISIONING_CMD_STOP, ROLE_STA, 0, NULL, 0);
 
-        /* return  SL_RET_CODE_PROVISIONING_IN_PROGRESS to indicate the SM 
+        /* return  SL_RET_CODE_PROVISIONING_IN_PROGRESS to indicate the SM
             to stay in the same state*/
-        return(SL_RET_CODE_PROVISIONING_IN_PROGRESS);
+        return (SL_RET_CODE_PROVISIONING_IN_PROGRESS);
     }
 
     /*
@@ -578,12 +571,12 @@ int32_t provisioningStart(void)
      */
     retVal = ConfigureSimpleLinkToDefaultState();
 
-    if(retVal < 0)
+    if (retVal < 0)
     {
         // UART_PRINT(
         //     "[Provisioning task] Failed to configure the device in its default "
         //     "state \n\r");
-        return(retVal);
+        return (retVal);
     }
 
     // UART_PRINT(
@@ -598,13 +591,13 @@ int32_t provisioningStart(void)
     StartLedEvtTimer(pCtx->ledToggleTimeout);
 
     retVal = InitSimplelink(pCtx->defaultRole);
-    if(retVal < 0)
+    if (retVal < 0)
     {
         // UART_PRINT("[Provisioning task] Failed to initialize the device\n\r");
-        return(retVal);
+        return (retVal);
     }
 
-    return(retVal);
+    return (retVal);
 }
 
 //*****************************************************************************
@@ -619,15 +612,15 @@ int32_t provisioningStart(void)
 static int32_t provisioningAppTask(void)
 {
     Provisioning_AppContext *const pCtx = &gAppCtx;
-    s_TblEntry   *pEntry = NULL;
+    s_TblEntry *pEntry = NULL;
     uint16_t eventIdx = 0;
     int32_t retVal = 0;
 
-    for(eventIdx = 0; eventIdx < PrvnEvent_Max; eventIdx++)
+    for (eventIdx = 0; eventIdx < PrvnEvent_Max; eventIdx++)
     {
-        if(0 != (pCtx->pendingEvents & (1 << eventIdx)))
+        if (0 != (pCtx->pendingEvents & (1 << eventIdx)))
         {
-            if(eventIdx != PrvnEvent_Triggered)
+            if (eventIdx != PrvnEvent_Triggered)
             {
                 /** Events received - Stop the respective timer if its still
                  * running
@@ -635,35 +628,32 @@ static int32_t provisioningAppTask(void)
                 StopAsyncEvtTimer();
             }
 
-            pEntry =
-                (s_TblEntry *)&gProvisioningTransitionTable[pCtx->currentState]
-                [
-                    eventIdx];
-            if(NULL != pEntry->p_evtHndl)
+            pEntry = (s_TblEntry *)&gProvisioningTransitionTable[pCtx->currentState][eventIdx];
+            if (NULL != pEntry->p_evtHndl)
             {
                 /* no state transition is required */
                 retVal = pEntry->p_evtHndl();
-                if(retVal == SL_RET_CODE_PROVISIONING_IN_PROGRESS)              
+                if (retVal == SL_RET_CODE_PROVISIONING_IN_PROGRESS)
                 {
                     pCtx->pendingEvents &= ~(1 << eventIdx);
                     continue;
                 }
-                else if(retVal < 0)
+                else if (retVal < 0)
                 {
                     // UART_PRINT(
                     //     "[Provisioning task]"
                     //     " Event handler failed, error=%d\n\r",
                     //     retVal);
-                    while(1)            /*this is to let other tasks recover by
-                                        mcu reset, e.g. in case of switching 
-                                        to AP mode */
+                    while (1) /*this is to let other tasks recover by
+                              mcu reset, e.g. in case of switching
+                              to AP mode */
                     {
                         usleep(1000);
                     }
                 }
             }
 
-            if(pEntry->nextState != pCtx->currentState)
+            if (pEntry->nextState != pCtx->currentState)
             {
                 pCtx->currentState = pEntry->nextState;
             }
@@ -672,7 +662,7 @@ static int32_t provisioningAppTask(void)
         }
 
         /* No more events to handle. Break.! */
-        if(0 == pCtx->pendingEvents)
+        if (0 == pCtx->pendingEvents)
         {
             break;
         }
@@ -680,7 +670,7 @@ static int32_t provisioningAppTask(void)
 
     usleep(1000);
 
-    return(0);
+    return (0);
 }
 
 //*****************************************************************************
@@ -713,20 +703,20 @@ static int32_t ConfigureSimpleLinkToDefaultState(void)
     int32_t ret = -1;
     int32_t mode = -1;
 
-    memset(&RxFilterIdMask,0,sizeof(SlWlanRxFilterOperationCommandBuff_t));
+    memset(&RxFilterIdMask, 0, sizeof(SlWlanRxFilterOperationCommandBuff_t));
 
     /* Start Simplelink - Blocking mode */
     mode = sl_Start(0, 0, 0);
-    if(SL_RET_CODE_DEV_ALREADY_STARTED != mode)
+    if (SL_RET_CODE_DEV_ALREADY_STARTED != mode)
     {
         ASSERT_ON_ERROR(mode);
     }
 
     /* If the device is not in AP mode, try configuring it in AP mode
-       in case device is already started 
+       in case device is already started
        (got SL_RET_CODE_DEV_ALREADY_STARTED error code), then mode would remain
        -1 and in this case we do not know the role. Move to AP role anyway  */
-    if(ROLE_AP != mode)
+    if (ROLE_AP != mode)
     {
         /* Switch to AP role and restart */
         ret = sl_WlanSetMode(ROLE_AP);
@@ -739,15 +729,14 @@ static int32_t ConfigureSimpleLinkToDefaultState(void)
         ASSERT_ON_ERROR(ret);
 
         /* Check if the device is in AP again */
-        if(ROLE_AP != ret)
+        if (ROLE_AP != ret)
         {
-            return(ret);
+            return (ret);
         }
     }
 
     /* Set connection policy to Auto (no AutoProvisioning)  */
-    ret = sl_WlanPolicySet(SL_WLAN_POLICY_CONNECTION,
-                           SL_WLAN_CONNECTION_POLICY(1, 0, 0, 0), NULL, 0);
+    ret = sl_WlanPolicySet(SL_WLAN_POLICY_CONNECTION, SL_WLAN_CONNECTION_POLICY(1, 0, 0, 0), NULL, 0);
     ASSERT_ON_ERROR(ret);
 
     /* Remove all profiles */
@@ -755,14 +744,12 @@ static int32_t ConfigureSimpleLinkToDefaultState(void)
     ASSERT_ON_ERROR(ret);
 
     /* Enable DHCP client */
-    ret = sl_NetCfgSet(SL_NETCFG_IPV4_STA_ADDR_MODE,SL_NETCFG_ADDR_DHCP,0,0);
+    ret = sl_NetCfgSet(SL_NETCFG_IPV4_STA_ADDR_MODE, SL_NETCFG_ADDR_DHCP, 0, 0);
     ASSERT_ON_ERROR(ret);
 
     /* Disable IPV6 */
     ifBitmap = 0;
-    ret =
-        sl_NetCfgSet(SL_NETCFG_IF, SL_NETCFG_IF_STATE, sizeof(ifBitmap),
-                     (uint8_t *)&ifBitmap);
+    ret = sl_NetCfgSet(SL_NETCFG_IF, SL_NETCFG_IF_STATE, sizeof(ifBitmap), (uint8_t *)&ifBitmap);
     ASSERT_ON_ERROR(ret);
 
     /* Disable scan */
@@ -774,9 +761,7 @@ static int32_t ConfigureSimpleLinkToDefaultState(void)
        Number between 0-15, as dB offset from max power - 0 will
        set max power */
     ucPower = 0;
-    ret = sl_WlanSet(SL_WLAN_CFG_GENERAL_PARAM_ID,
-                     SL_WLAN_GENERAL_PARAM_OPT_STA_TX_POWER, 1,
-                     (uint8_t *)&ucPower);
+    ret = sl_WlanSet(SL_WLAN_CFG_GENERAL_PARAM_ID, SL_WLAN_GENERAL_PARAM_OPT_STA_TX_POWER, 1, (uint8_t *)&ucPower);
     ASSERT_ON_ERROR(ret);
 
     /* Set PM policy to normal */
@@ -789,22 +774,23 @@ static int32_t ConfigureSimpleLinkToDefaultState(void)
 
     /* Remove  all 64 filters (8*8) */
     memset(RxFilterIdMask.FilterBitmap, 0xFF, 8);
-    ret = sl_WlanSet(SL_WLAN_RX_FILTERS_ID,
-                     SL_WLAN_RX_FILTER_REMOVE,
-                     sizeof(SlWlanRxFilterOperationCommandBuff_t),
-                     (uint8_t *)&RxFilterIdMask);
+    ret = sl_WlanSet(
+        SL_WLAN_RX_FILTERS_ID,
+        SL_WLAN_RX_FILTER_REMOVE,
+        sizeof(SlWlanRxFilterOperationCommandBuff_t),
+        (uint8_t *)&RxFilterIdMask);
     ASSERT_ON_ERROR(ret);
 
     ret = sl_Stop(SL_STOP_TIMEOUT);
     ASSERT_ON_ERROR(ret);
 
-    return(ret);
+    return (ret);
 }
 
 //*****************************************************************************
 //
 //! \brief This function starts the SimpleLink in the configured role.
-//!         The device notifies the host asynchronously 
+//!         The device notifies the host asynchronously
 //!         when the initialization is
 //!      completed
 //!
@@ -829,7 +815,7 @@ static int32_t InitSimplelink(uint8_t const role)
     retVal = StartAsyncEvtTimer(pCtx->asyncEvtTimeout);
     ASSERT_ON_ERROR(retVal);
 
-    return(retVal);
+    return (retVal);
 }
 
 //*****************************************************************************
@@ -850,7 +836,7 @@ static int32_t HandleStrtdEvt(void)
     /** If provisioning has already started, don't do anything here
      * The state-machine shall keep waiting for the provisioning status
      */
-    if(PrvsnStatus_Stopped == pCtx->provisioningStatus)
+    if (PrvsnStatus_Stopped == pCtx->provisioningStatus)
     {
         SlDeviceVersion_t firmwareVersion = {0};
 
@@ -860,9 +846,7 @@ static int32_t HandleStrtdEvt(void)
         /* Get the device's version-information */
         ucConfigOpt = SL_DEVICE_GENERAL_VERSION;
         ucConfigLen = sizeof(firmwareVersion);
-        retVal = sl_DeviceGet(SL_DEVICE_GENERAL, &ucConfigOpt, \
-                              &ucConfigLen,
-                              (unsigned char *)(&firmwareVersion));
+        retVal = sl_DeviceGet(SL_DEVICE_GENERAL, &ucConfigOpt, &ucConfigLen, (unsigned char *)(&firmwareVersion));
         ASSERT_ON_ERROR(retVal);
 
         // UART_PRINT("[Provisioning task] Host Driver Version: %s\n\r",
@@ -889,8 +873,7 @@ static int32_t HandleStrtdEvt(void)
         //     "[Provisioning task] in mode %d (0 = AP, 1 = SC, 2 = AP+SC)\r\n",
         //     pCtx->provisioningMode);
 
-        retVal = sl_WlanProvisioning(pCtx->provisioningMode, ROLE_STA,
-                                     PROVISIONING_INACTIVITY_TIMEOUT, NULL,0);
+        retVal = sl_WlanProvisioning(pCtx->provisioningMode, ROLE_STA, PROVISIONING_INACTIVITY_TIMEOUT, NULL, 0);
         ASSERT_ON_ERROR(retVal);
 
         pCtx->provisioningStatus = PrvsnStatus_InProgress;
@@ -899,7 +882,7 @@ static int32_t HandleStrtdEvt(void)
         //     "be provisioned..!! \r\n");
     }
 
-    return(retVal);
+    return (retVal);
 }
 
 //*****************************************************************************
@@ -917,7 +900,7 @@ static int32_t StartAsyncEvtTimer(uint32_t timeout)
 
     pCtx->asyncEvtTimeout = timeout;
     Platform_TimerStart(pCtx->asyncEvtTimeout, gAsyncEventTimer, 0);
-    return(0);
+    return (0);
 }
 
 //*****************************************************************************
@@ -933,13 +916,13 @@ static int32_t StopAsyncEvtTimer(void)
 {
     Provisioning_AppContext *const pCtx = &gAppCtx;
 
-    if(0 != pCtx->asyncEvtTimeout)
+    if (0 != pCtx->asyncEvtTimeout)
     {
         Platform_TimerStop(gAsyncEventTimer);
         pCtx->asyncEvtTimeout = 0;
     }
 
-    return(0);
+    return (0);
 }
 
 //*****************************************************************************
@@ -956,9 +939,9 @@ static int32_t ReportError(void)
     Provisioning_AppContext *const pCtx = &gAppCtx;
     uint16_t eventIdx = 0;
 
-    for(eventIdx = 0; eventIdx < PrvnEvent_Max; eventIdx++)
+    for (eventIdx = 0; eventIdx < PrvnEvent_Max; eventIdx++)
     {
-        if(0 != (pCtx->pendingEvents & (1 << eventIdx)))
+        if (0 != (pCtx->pendingEvents & (1 << eventIdx)))
         {
             break;
         }
@@ -967,7 +950,7 @@ static int32_t ReportError(void)
     // UART_PRINT("[Provisioning task]"
     // " Unexpected SM: State = %d, Event = %d\n\r",\
     //            pCtx->currentState, eventIdx);
-    return(-1);
+    return (-1);
 }
 
 //*****************************************************************************
@@ -984,21 +967,21 @@ static int32_t ReportSM(void)
     Provisioning_AppContext *const pCtx = &gAppCtx;
     uint16_t eventIdx = 0;
 
-    for(eventIdx = 0; eventIdx < PrvnEvent_Max; eventIdx++)
+    for (eventIdx = 0; eventIdx < PrvnEvent_Max; eventIdx++)
     {
-        if(0 != (pCtx->pendingEvents & (1 << eventIdx)))
+        if (0 != (pCtx->pendingEvents & (1 << eventIdx)))
         {
             break;
         }
     }
 
-    if(PrvnEvent_Stopped == eventIdx)
+    if (PrvnEvent_Stopped == eventIdx)
     {
         StopLedEvtTimer();
         GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
     }
 
-    return(0);
+    return (0);
 }
 
 //*****************************************************************************
@@ -1026,10 +1009,8 @@ static int32_t ReportSuccess(void)
     /* Get the device's IP address */
     ipLen = sizeof(SlNetCfgIpV4Args_t);
     ConfigOpt = 0;
-    retVal =
-        sl_NetCfgGet(SL_NETCFG_IPV4_STA_ADDR_MODE,&ConfigOpt,&ipLen,
-                     (uint8_t *)&ipV4);
-    if(retVal == 0)
+    retVal = sl_NetCfgGet(SL_NETCFG_IPV4_STA_ADDR_MODE, &ConfigOpt, &ipLen, (uint8_t *)&ipV4);
+    if (retVal == 0)
     {
         // UART_PRINT("[Provisioning task] IP address is %d.%d.%d.%d\n\r", \
         //            SL_IPV4_BYTE(ipV4.Ip,3),  \
@@ -1046,7 +1027,7 @@ static int32_t ReportSuccess(void)
     /* signal to report server task */
     sem_post(&Provisioning_ControlBlock.provisioningConnDoneToOtaServerSignal);
 
-    return(0);
+    return (0);
 }
 
 //*****************************************************************************
@@ -1075,15 +1056,15 @@ static int32_t WaitForConn(void)
     //     retVal = sem_timedwait(&Provisioning_ControlBlock.connectionAsyncEvent,
     //                            &ts);
     //                            /* freertos return -1 in case of timeout */
-    //     if((retVal == 116) || (retVal == -1))           
+    //     if((retVal == 116) || (retVal == -1))
     //     {
     //         UART_PRINT(
     //             "[Provisioning task] Cannot connect to AP or profile does"
     //             " not exist\n\r");
     //         GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
-    //          /* this state is set so that PrvnEvent_Triggered 
+    //          /* this state is set so that PrvnEvent_Triggered
     //          would invoke provisioning again */
-    //         pCtx->currentState = PrvnState_Init;               
+    //         pCtx->currentState = PrvnState_Init;
     //         SignalProvisioningEvent(PrvnEvent_Triggered);
 
     //         return(0);
@@ -1092,7 +1073,7 @@ static int32_t WaitForConn(void)
 
     // UART_PRINT("[Provisioning task] Connection to AP succeeded\n\r");
 
-    return(ReportSuccess());
+    return (ReportSuccess());
 }
 
 //*****************************************************************************
@@ -1118,7 +1099,7 @@ static int32_t validateLocalLinkConnection(SlWlanMode_e *deviceRole)
 
     retVal = sl_Start(0, 0, 0);
     /* when calibration fails, reboot is required */
-    if(SL_ERROR_CALIB_FAIL == retVal)           
+    if (SL_ERROR_CALIB_FAIL == retVal)
     {
         mcuReboot();
     }
@@ -1133,37 +1114,36 @@ static int32_t validateLocalLinkConnection(SlWlanMode_e *deviceRole)
      *       check for IP_ACQUIRED to indicate NWP is running
      * 4) if not set, procede with STATION role
      */
-    if(retVal == ROLE_AP)
+    if (retVal == ROLE_AP)
     {
         *deviceRole = ROLE_AP;
         ocpRegVal = MAP_PRCMOCRRegisterRead(OCP_REGISTER_INDEX);
         ocpRegVal &= (1 << OCP_REGISTER_OFFSET);
-        if(ocpRegVal)
+        if (ocpRegVal)
         {
-            if(IS_IP_ACQUIRED(nF_ControlBlock.Status))
+            if (IS_IP_ACQUIRED(nF_ControlBlock.Status))
             {
-                return(0);
+                return (0);
             }
             else
             {
                 clock_gettime(CLOCK_REALTIME, &ts);
                 ts.tv_sec += PROFILE_ASYNC_EVT_TIMEOUT;
 
-                retVal = sem_timedwait(
-                    &Provisioning_ControlBlock.connectionAsyncEvent, &ts);
-                     /* freertos return -1 in case of timeout */
-                if((retVal == 116) || (retVal == -1))                  
+                retVal = sem_timedwait(&Provisioning_ControlBlock.connectionAsyncEvent, &ts);
+                /* freertos return -1 in case of timeout */
+                if ((retVal == 116) || (retVal == -1))
                 {
                     // UART_PRINT("[Provisioning task] AP role failed to initialize\n\r");
                     GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
                     retVal = -1;
                 }
-                return(retVal);
+                return (retVal);
             }
         }
     }
 
-    if(retVal != ROLE_STA)
+    if (retVal != ROLE_STA)
     {
         retVal = sl_WlanSetMode(ROLE_STA);
         ASSERT_ON_ERROR(retVal);
@@ -1172,7 +1152,7 @@ static int32_t validateLocalLinkConnection(SlWlanMode_e *deviceRole)
         ASSERT_ON_ERROR(retVal);
 
         retVal = sl_Start(0, 0, 0);
-        if(retVal < 0 || (retVal != ROLE_STA))
+        if (retVal < 0 || (retVal != ROLE_STA))
         {
             ASSERT_ON_ERROR(retVal);
         }
@@ -1181,17 +1161,16 @@ static int32_t validateLocalLinkConnection(SlWlanMode_e *deviceRole)
 
     *deviceRole = ROLE_STA;
 
-    while(((!IS_IPV6L_ACQUIRED(nF_ControlBlock.Status) ||
-            !IS_IPV6G_ACQUIRED(nF_ControlBlock.Status)) &&
+    while (((!IS_IPV6L_ACQUIRED(nF_ControlBlock.Status) || !IS_IPV6G_ACQUIRED(nF_ControlBlock.Status)) &&
             !IS_IP_ACQUIRED(nF_ControlBlock.Status)) ||
-            !IS_CONNECTED(nF_ControlBlock.Status))
+           !IS_CONNECTED(nF_ControlBlock.Status))
     {
         clock_gettime(CLOCK_REALTIME, &ts);
         ts.tv_sec += PROFILE_ASYNC_EVT_TIMEOUT;
 
         retVal = sem_timedwait(&Provisioning_ControlBlock.connectionAsyncEvent, &ts);
         // freertos return -1 in case of timeout
-        if((retVal == 116) || (retVal == -1))           
+        if ((retVal == 116) || (retVal == -1))
         {
             // UART_PRINT(
             //     "[Provisioning task] Cannot connect to AP or"
@@ -1199,7 +1178,7 @@ static int32_t validateLocalLinkConnection(SlWlanMode_e *deviceRole)
             GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
             retVal = -1;
 
-            return(retVal);
+            return (retVal);
         }
     }
 
@@ -1209,9 +1188,9 @@ static int32_t validateLocalLinkConnection(SlWlanMode_e *deviceRole)
     ipLen = sizeof(SlNetCfgIpV4Args_t);
     ConfigOpt = 0;
     sl_NetCfgGet(SL_NETCFG_IPV4_STA_ADDR_MODE, &ConfigOpt, &ipLen, (uint8_t *)&ipV4);
-    if(retVal < 0)
+    if (retVal < 0)
     {
-        return(retVal);
+        return (retVal);
     }
 
     // UART_PRINT("[Provisioning task] IP address is %d.%d.%d.%d\n\r", \
@@ -1220,7 +1199,7 @@ static int32_t validateLocalLinkConnection(SlWlanMode_e *deviceRole)
     //            SL_IPV4_BYTE(ipV4.Ip,1),  \
     //            SL_IPV4_BYTE(ipV4.Ip,0));
 
-    return(0);
+    return (0);
 }
 
 //*****************************************************************************
@@ -1234,12 +1213,11 @@ static int32_t validateLocalLinkConnection(SlWlanMode_e *deviceRole)
 //*****************************************************************************
 static void NotifyReturnToFactoryImage(void)
 {
-    if(((HWREG(HIB3P3_BASE + 0x00000418) & (1 << 7)) != 0) &&
-       ((HWREG(0x4402F0C8) & 0x01) != 0))
+    if (((HWREG(HIB3P3_BASE + 0x00000418) & (1 << 7)) != 0) && ((HWREG(0x4402F0C8) & 0x01) != 0))
     {
         // UART_PRINT("Return To Factory Image successful, Do a power cycle(POR)"
         //            " of the device using switch SW1-Reset\n\r");
-        while(1)
+        while (1)
         {
             ;
         }
@@ -1264,7 +1242,7 @@ int16_t SignalProvisioningEvent(PrvnEvent event)
     Provisioning_AppContext *const pCtx = &gAppCtx;
     pCtx->pendingEvents |= (1 << event);
 
-    return(0);
+    return (0);
 }
 
 //*****************************************************************************
@@ -1280,7 +1258,7 @@ PrvnState GetProvisioningState()
 {
     Provisioning_AppContext *const pCtx = &gAppCtx;
 
-    return(pCtx->currentState);
+    return (pCtx->currentState);
 }
 
 //*****************************************************************************
@@ -1299,7 +1277,7 @@ int32_t StartLedEvtTimer(uint32_t timeout)
     pCtx->ledToggleTimeout = timeout;
     Platform_TimerStart(pCtx->ledToggleTimeout, gLedTimer, 1);
 
-    return(0);
+    return (0);
 }
 
 //*****************************************************************************
@@ -1315,13 +1293,13 @@ int32_t StopLedEvtTimer(void)
 {
     Provisioning_AppContext *const pCtx = &gAppCtx;
 
-    if(0 != pCtx->ledToggleTimeout)
+    if (0 != pCtx->ledToggleTimeout)
     {
         Platform_TimerStop(gLedTimer);
         pCtx->ledToggleTimeout = 0;
     }
 
-    return(0);
+    return (0);
 }
 
 //*****************************************************************************
@@ -1346,40 +1324,35 @@ int32_t provisioningStop(void)
     /* check if provisioning is running */
     configOpt = SL_DEVICE_GENERAL_VERSION;
     configLen = sizeof(ver);
-    retVal =
-        sl_DeviceGet(SL_DEVICE_GENERAL, &configOpt, &configLen,
-                     (uint8_t *)(&ver));
-    if(SL_RET_CODE_PROVISIONING_IN_PROGRESS == retVal)
+    retVal = sl_DeviceGet(SL_DEVICE_GENERAL, &configOpt, &configLen, (uint8_t *)(&ver));
+    if (SL_RET_CODE_PROVISIONING_IN_PROGRESS == retVal)
     {
         // UART_PRINT(
         //     "[Provisioning task]  Provisioning is already running, "
         //     "stopping it...\r\n");
-        retVal =
-            sl_WlanProvisioning(SL_WLAN_PROVISIONING_CMD_STOP,ROLE_STA,0,NULL,
-                                0);
+        retVal = sl_WlanProvisioning(SL_WLAN_PROVISIONING_CMD_STOP, ROLE_STA, 0, NULL, 0);
 
         /* wait for the stopped event to arrive - wait for PrvnState_Init */
         do
         {
             provisioningState = GetProvisioningState();
             usleep(1000);
-        }
-        while(provisioningState != PrvnState_Init);
+        } while (provisioningState != PrvnState_Init);
 
         pCtx->provisioningStatus = PrvsnStatus_Stopped;
 
         retVal = SL_RET_CODE_PROVISIONING_IN_PROGRESS;
     }
-    else if(retVal < 0)
+    else if (retVal < 0)
     {
-        return(retVal);
+        return (retVal);
     }
     else
     {
         retVal = 0;
     }
 
-    return(retVal);
+    return (retVal);
 }
 
 //*****************************************************************************
@@ -1391,22 +1364,22 @@ int32_t provisioningStop(void)
 //! \return None
 //!
 //****************************************************************************
-void * provisioningTask(void *pvParameters)
+void *provisioningTask(void *pvParameters)
 {
     int32_t retVal = -1;
-    Provisioning_AppContext         *const pCtx = &gAppCtx;
+    Provisioning_AppContext *const pCtx = &gAppCtx;
     SlWlanMode_e deviceRole;
     SlFsControl_t FsControl;
     int32_t status;
 
     /* Check the wakeup source. If first time entry or wakeup from HIB */
-    if(MAP_PRCMSysResetCauseGet() == 0)
+    if (MAP_PRCMSysResetCauseGet() == 0)
     {
-        //UART_PRINT("[Provisioning task] Wake up on Power ON\n\r");
+        // UART_PRINT("[Provisioning task] Wake up on Power ON\n\r");
     }
-    else if(MAP_PRCMSysResetCauseGet() == PRCM_HIB_EXIT)
+    else if (MAP_PRCMSysResetCauseGet() == PRCM_HIB_EXIT)
     {
-        //UART_PRINT("[Provisioning task] Woken up from Hibernate\n\r");
+        // UART_PRINT("[Provisioning task] Woken up from Hibernate\n\r");
     }
 
     /*
@@ -1458,12 +1431,12 @@ void * provisioningTask(void *pvParameters)
     flash and connect immediately
      * 2) check if pending commit and set commit the bundle
      * 3) On failure, reset the MCU to rollback */
-	 /* it means OtaArchive is in
-		 SL_FS_BUNDLE_STATE_PENDING_COMMIT */
-		 // if(OtaArchive_GetPendingCommit())           
+    /* it means OtaArchive is in
+        SL_FS_BUNDLE_STATE_PENDING_COMMIT */
+    // if(OtaArchive_GetPendingCommit())
     // {/* validation of new ota bundle failed,
     //     reverting to previous bundle */
-    //     if(retVal != 0)                 
+    //     if(retVal != 0)
     //     {
     //         /* rollback is not required for production devices
     //         - but it is not harmfull */
@@ -1484,7 +1457,7 @@ void * provisioningTask(void *pvParameters)
     //     }
     //     /* validation of new ota bundle succeeded,
     //     commit the new ota bundle */
-    //     else            
+    //     else
     //     {
     //         //UART_PRINT(
     //             // "[Provisioning task] committing new ota download... \n\r");
@@ -1502,46 +1475,42 @@ void * provisioningTask(void *pvParameters)
     //     }
     // }
 
-    if(deviceRole == ROLE_STA)
+    if (deviceRole == ROLE_STA)
     {
-		/* it means a connection to AP has been established,
-		no need to trigger provisioning */
-		if(retVal == 0)
+        /* it means a connection to AP has been established,
+        no need to trigger provisioning */
+        if (retVal == 0)
         {
             GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_ON);
 
-			/* signal to linklocal task */
-			sem_post(&Provisioning_ControlBlock.provisioningDoneSignal);
+            /* signal to linklocal task */
+            sem_post(&Provisioning_ControlBlock.provisioningDoneSignal);
 
-			/* signal to report server task */
-			sem_post(
-                &Provisioning_ControlBlock.
-                provisioningConnDoneToOtaServerSignal);
+            /* signal to report server task */
+            sem_post(&Provisioning_ControlBlock.provisioningConnDoneToOtaServerSignal);
         }
-		/* it means a connection to AP failed, trigger provisioning */
-		else if(retVal < 0)
+        /* it means a connection to AP failed, trigger provisioning */
+        else if (retVal < 0)
         {
             SignalProvisioningEvent(PrvnEvent_Triggered);
         }
     }
-	/* it means device is initialized as AP, no need to trigger provisioning */
-	if((retVal == 0) && (deviceRole == ROLE_AP))
+    /* it means device is initialized as AP, no need to trigger provisioning */
+    if ((retVal == 0) && (deviceRole == ROLE_AP))
     {
         GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_ON);
 
-		/* signal to linklocal task */
-		sem_post(&Provisioning_ControlBlock.provisioningDoneSignal);
+        /* signal to linklocal task */
+        sem_post(&Provisioning_ControlBlock.provisioningDoneSignal);
 
-		/* signal to report server task */
-		sem_post(
-            &Provisioning_ControlBlock.provisioningConnDoneToOtaServerSignal);
+        /* signal to report server task */
+        sem_post(&Provisioning_ControlBlock.provisioningConnDoneToOtaServerSignal);
     }
 
     do
     {
         retVal = provisioningAppTask();
-    }
-	while(!retVal);  /* Exit on failure */
+    } while (!retVal); /* Exit on failure */
 
-    return(0);
+    return (0);
 }

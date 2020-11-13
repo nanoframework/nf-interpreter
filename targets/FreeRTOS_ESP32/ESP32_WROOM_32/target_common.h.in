@@ -11,7 +11,7 @@
 #ifndef _TARGET_COMMON_H_
 #define _TARGET_COMMON_H_
 
-#include <target_os.h>
+#include "target_os.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // The following addresses and sizes should be filled in according to the SoC data-sheet
@@ -33,6 +33,10 @@
 #define TARGETNAMESTRING "ESP32_WROOM_32"
 #define PLATFORMNAMESTRING "ESP32"
 //////////////////////////////////////////////
+
+/////////////////////////////////////
+#define PLATFORM_HAS_RNG       TRUE
+/////////////////////////////////////
 
 /////////////////////////////////////
 // #define EVENTS_HEART_BEAT

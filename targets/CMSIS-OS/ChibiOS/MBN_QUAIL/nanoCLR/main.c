@@ -19,9 +19,6 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 4096, "ReceiverThread");
 // declare CLRStartup thread here

@@ -367,10 +367,10 @@ endif()
 option(NF_TARGET_HAS_NANOBOOTER "option to signal if target implements nanoBooter" ON)
 
 if(NF_TARGET_HAS_NANOBOOTER)
-    set(NF_TARGET_HAS_NANOBOOTER TRUE CACHE INTERNAL "Option for nanoBooter implementation")
+    set(TARGET_HAS_NANOBOOTER TRUE CACHE INTERNAL "Option for nanoBooter implementation")
     message(STATUS "Target implements nanoBooter")
 else()
-    set(NF_TARGET_HAS_NANOBOOTER FALSE CACHE INTERNAL "Option for nanoBooter implementation")
+    set(TARGET_HAS_NANOBOOTER FALSE CACHE INTERNAL "Option for nanoBooter implementation")
     message(STATUS "Target DOES NOT implement nanoBooter")
 endif()
 
@@ -596,9 +596,9 @@ else()
 endif()
 
 if(NF_FEATURE_HAS_USB_MSD)
-    set(HAL_USBH_USE_MSDC_OPTION TRUE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
+    set(HAL_USBH_USE_MSD_OPTION TRUE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
 else()
-    set(HAL_USBH_USE_MSDC_OPTION FALSE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
+    set(HAL_USBH_USE_MSD_OPTION FALSE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
 endif()
 
 #################################################################
@@ -747,12 +747,6 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     if(${TARGET_SERIES} STREQUAL "ESP32")
         message(STATUS "Platform ESP32 target board: ${TARGET_BOARD}")
-
-        if(API_nanoFramework.Hardware.Esp32.Rmt)
-            set(HAL_USE_ESP32_RMT_OPTION TRUE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
-        else()
-            set(HAL_USE_ESP32_RMT_OPTION FALSE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
-        endif()
 
         # check watchdog feature
         # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 

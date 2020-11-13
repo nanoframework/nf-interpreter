@@ -14,9 +14,7 @@
 #include <pthread.h>
 #include <time.h>
 
-#include <stdlib.h>
-// #include <string.h>
-// #include <stdint.h>
+#include <nanoCLR_Headers.h>
 
 /*!
  *  \brief  Provisioning events
@@ -33,7 +31,7 @@ typedef enum
     PrvnEvent_Timeout,
     PrvnEvent_Error,
     PrvnEvent_Max,
-}PrvnEvent;
+} PrvnEvent;
 
 /*!
  *  \brief  Provisioning states
@@ -46,15 +44,14 @@ typedef enum
     PrvnState_Completed,
     PrvnState_Error,
     PrvnState_Max
-}PrvnState;
+} PrvnState;
 
 typedef struct Provisioning_ControlBlock_t
 {
     sem_t connectionAsyncEvent;
     sem_t provisioningDoneSignal;
     sem_t provisioningConnDoneToOtaServerSignal;
-}Provisioning_CB;
-
+} Provisioning_CB;
 
 /****************************************************************************
                       GLOBAL VARIABLES
@@ -140,6 +137,6 @@ int32_t provisioningStop(void);
 //! \return None
 //!
 //****************************************************************************
-void * provisioningTask(void *pvParameters);
+void *provisioningTask(void *pvParameters);
 
 #endif //_SIMPLELINK_CC32XX_PROVISIONING_TASK_H_

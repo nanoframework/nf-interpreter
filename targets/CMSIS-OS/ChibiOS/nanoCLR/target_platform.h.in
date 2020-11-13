@@ -28,6 +28,6 @@
 #define HAL_USE_CAN                 @HAL_USE_CAN_OPTION@
 #define HAL_NF_USE_STM32_CRC        TRUE
 #define HAL_NF_USE_STM32_ONEWIRE    @HAL_USE_STM32_ONEWIRE_OPTION@
-#define HAL_USBH_USE_MSD            @HAL_USBH_USE_MSDC_OPTION@
+#define HAL_USBH_USE_MSD            @HAL_USBH_USE_MSD_OPTION@
 
 #endif /* _TARGET_PLATFORM_H_ */
