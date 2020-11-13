@@ -11,64 +11,78 @@
 
 //--//
 
-typedef void (*HAL_CALLBACK_FPN)( void* arg );
+typedef void (*HAL_CALLBACK_FPN)(void *arg);
 
 struct HAL_CALLBACK
 {
-public:
+  public:
     HAL_CALLBACK_FPN EntryPoint;
-    void*            Argument;
+    void *Argument;
 
-public:
-    void Initialize( HAL_CALLBACK_FPN EntryPoint, void* Argument )
+  public:
+    void Initialize(HAL_CALLBACK_FPN EntryPoint, void *Argument)
     {
         this->EntryPoint = EntryPoint;
-        this->Argument   = Argument;
+        this->Argument = Argument;
     }
 
-    void SetArgument( void* Argument )
+    void SetArgument(void *Argument)
     {
         this->Argument = Argument;
     }
 
-    HAL_CALLBACK_FPN GetEntryPoint() const { return this->EntryPoint; }
-    void*            GetArgument  () const { return this->Argument  ; }
+    HAL_CALLBACK_FPN GetEntryPoint() const
+    {
+        return this->EntryPoint;
+    }
+    void *GetArgument() const
+    {
+        return this->Argument;
+    }
 
     void Execute() const
     {
         HAL_CALLBACK_FPN EntryPoint = this->EntryPoint;
-        void*            Argument   = this->Argument; 
+        void *Argument = this->Argument;
 
-        if(EntryPoint)
+        if (EntryPoint)
         {
-            EntryPoint( Argument );
+            EntryPoint(Argument);
         }
     }
 };
 
-
 struct HAL_CONTINUATION : public HAL_DblLinkedNode<HAL_CONTINUATION>
 {
 
-private:
+  private:
     HAL_CALLBACK Callback;
 
-public:
-    void InitializeCallback( HAL_CALLBACK_FPN EntryPoint, void* Argument = NULL );
+  public:
+    void InitializeCallback(HAL_CALLBACK_FPN EntryPoint, void *Argument = NULL);
 
-    void SetArgument( void* Argument )
+    void SetArgument(void *Argument)
     {
-        Callback.SetArgument( Argument );
+        Callback.SetArgument(Argument);
     }
 
-    HAL_CALLBACK_FPN GetEntryPoint() const { return Callback.GetEntryPoint(); }
-    void*            GetArgument  () const { return Callback.GetArgument  (); }
+    HAL_CALLBACK_FPN GetEntryPoint() const
+    {
+        return Callback.GetEntryPoint();
+    }
+    void *GetArgument() const
+    {
+        return Callback.GetArgument();
+    }
 
-    void Execute() const { Callback.Execute(); }
+    void Execute() const
+    {
+        Callback.Execute();
+    }
 
     bool IsLinked();
     void Enqueue();
-    void Abort  ();
+    void Abort();
 
     //--//
 
@@ -84,30 +98,30 @@ public:
 struct HAL_COMPLETION : public HAL_CONTINUATION
 {
     uint64_t EventTimeTicks;
-    bool   ExecuteInISR;
+    bool ExecuteInISR;
 
 #if defined(_DEBUG)
     uint64_t Start_RTC_Ticks;
 #endif
 
-    void InitializeForISR( HAL_CALLBACK_FPN EntryPoint, void* Argument = NULL )
+    void InitializeForISR(HAL_CALLBACK_FPN EntryPoint, void *Argument = NULL)
     {
         ExecuteInISR = true;
 
-        InitializeCallback( EntryPoint, Argument );
+        InitializeCallback(EntryPoint, Argument);
     }
 
-    void InitializeForUserMode( HAL_CALLBACK_FPN EntryPoint, void* Argument = NULL )
+    void InitializeForUserMode(HAL_CALLBACK_FPN EntryPoint, void *Argument = NULL)
     {
         ExecuteInISR = false;
 
-        InitializeCallback( EntryPoint, Argument );
+        InitializeCallback(EntryPoint, Argument);
     }
 
-    void EnqueueTicks               ( uint64_t eventTimeTicks        );
-    void EnqueueDelta64             ( uint64_t miliSecondsFromNow    );
-    void EnqueueDelta               ( uint32_t miliSecondsFromNow        );
-    
+    void EnqueueTicks(uint64_t eventTimeTicks);
+    void EnqueueDelta64(uint64_t miliSecondsFromNow);
+    void EnqueueDelta(uint32_t miliSecondsFromNow);
+
     void Abort();
 
     void Execute();
@@ -120,7 +134,7 @@ struct HAL_COMPLETION : public HAL_CONTINUATION
 
     static void DequeueAndExec();
 
-    static void WaitForInterrupts( uint64_t expireTimeInSysTicks, uint32_t sleepLevel, uint64_t wakeEvents );
+    static void WaitForInterrupts(uint64_t expireTimeInSysTicks, uint32_t sleepLevel, uint64_t wakeEvents);
 };
 
 //--//
