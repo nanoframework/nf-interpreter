@@ -4,8 +4,6 @@
 //
 
 #include <nanoHAL_v2.h>
-#include <nanoWeak.h>
-#include <stdbool.h>
 
 void HAL_AssertEx()
 {

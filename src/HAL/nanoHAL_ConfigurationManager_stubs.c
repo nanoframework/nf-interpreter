@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <string.h>
 #include <nanoHAL_v2.h>
 
 __nfweak void ConfigurationManager_Initialize(){};

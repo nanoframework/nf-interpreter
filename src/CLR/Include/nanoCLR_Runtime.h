@@ -1575,9 +1575,7 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_I2cTransferResult;
     CLR_RT_TypeDef_Index m_I2cTransferResult_old;
 
-#if (HAL_USE_ESP32_RMT_OPTION == TRUE)
     CLR_RT_TypeDef_Index m_RmtCommand;
-#endif
 
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_WellKnownTypes);
 };

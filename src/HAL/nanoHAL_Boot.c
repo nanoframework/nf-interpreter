@@ -37,15 +37,15 @@ void InitBootClipboard()
     data->BooterVersion.usMinor = VERSION_MINOR;
     data->BooterVersion.usBuild = VERSION_BUILD;
     data->BooterVersion.usRevision = VERSION_REVISION;
+#endif
 
-#elif I_AM_NANOCLR
+#ifdef I_AM_NANOCLR
 
     // building nanoBooter, set version
     data->CLRVersion.usMajor = VERSION_MAJOR;
     data->CLRVersion.usMinor = VERSION_MINOR;
     data->CLRVersion.usBuild = VERSION_BUILD;
     data->CLRVersion.usRevision = VERSION_REVISION;
-
 #endif
 
 #endif // TARGET_HAS_NANOBOOTER

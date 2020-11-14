@@ -1366,7 +1366,7 @@ int LWIP_SOCKETS_Driver::GetNativeError(int error)
 struct netif *netif_find_interface(int num)
 {
 
-#if LWIP_SINGLE_NETIF
+#ifdef LWIP_SINGLE_NETIF
     // there is a single network interface
 
     // sanity check for interface other than 0

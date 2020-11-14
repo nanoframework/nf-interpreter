@@ -8,6 +8,8 @@
 
 #include <nf_lwipopts_sntp.h>
 
+#define NO_SYS                          0
+
 /*
    ------------------------------------
    ---------- Memory options ----------

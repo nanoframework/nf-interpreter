@@ -20,12 +20,14 @@ in IDE, clock_64b_t will switch to double type automatically. only support IAR a
 
 #if ((defined(__ICCARM__)) || (defined(__GNUC__)))
 
-#if (__ARMVFP__ >= __ARMFPV5__) && \
-    (__ARM_FP == 0xE) /*0xe implies support for half, single and double precision operations*/
-typedef double clock_64b_t;
-#else
+//////////////////////////////////////////////
+// WRONG CHECK HERE __ARMVFP__ DOESN'T EXIST
+// #if (__ARMVFP__ >= __ARMFPV5__) &&
+//    (__ARM_FP == 0xE) /*0xe implies support for half, single and double precision operations*/
+// typedef double clock_64b_t;
+//#else
 typedef uint64_t clock_64b_t;
-#endif
+//#endif
 
 #elif defined(__CC_ARM) || defined(__ARMCC_VERSION)
 
@@ -889,9 +891,10 @@ uint32_t CLOCK_GetPllFreq(clock_pll_t pll)
     switch (pll)
     {
         case kCLOCK_PllArm:
-            freq = ((freq * ((CCM_ANALOG->PLL_ARM & CCM_ANALOG_PLL_ARM_DIV_SELECT_MASK) >>
-                             CCM_ANALOG_PLL_ARM_DIV_SELECT_SHIFT)) >>
-                    1U);
+            freq =
+                ((freq * ((CCM_ANALOG->PLL_ARM & CCM_ANALOG_PLL_ARM_DIV_SELECT_MASK) >>
+                          CCM_ANALOG_PLL_ARM_DIV_SELECT_SHIFT)) >>
+                 1U);
             break;
         case kCLOCK_PllSys:
             /* PLL output frequency = Fref * (DIV_SELECT + NUM/DENOM). */
@@ -1216,7 +1219,7 @@ bool CLOCK_EnableUsbhs1PhyPllClock(clock_usb_phy_src_t src, uint32_t freq)
 {
     (void)src;
     (void)freq;
-    
+
     const clock_usb_pll_config_t g_ccmConfigUsbPll = {.loopDivider = 0U};
     CLOCK_InitUsb2Pll(&g_ccmConfigUsbPll);
     USBPHY2->CTRL &= ~USBPHY_CTRL_SFTRST_MASK; /* release PHY from reset */

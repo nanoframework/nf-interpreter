@@ -3,8 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <nanoCLR_Headers.h>
 #include <cmsis_gcc.h>
 #include <nanoHAL_v2.h>
 #include <platform_target_capabilities.h>

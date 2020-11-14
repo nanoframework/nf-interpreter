@@ -7,11 +7,7 @@
 #ifndef _NANOHAL_H_
 #define _NANOHAL_H_ 1
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdarg.h>
-#include <nanoWeak.h>
+#include <nanoCLR_Headers.h>
 #include <nanoHAL_v2.h>
 
 #if defined(PLATFORM_EMULATED_FLOATINGPOINT)

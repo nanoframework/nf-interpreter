@@ -164,7 +164,9 @@ endif()
 target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32 " )
 
 # set platform for NanoApiLib
-target_compile_definitions(NanoApiLib PUBLIC "-DPLATFORM_ESP32 " )
+# ESP32 has FPU
+target_compile_definitions(NanoApiLib PUBLIC "-DPLATFORM_ESP32 -DUSE_FPU=TRUE ")
+
 
 # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
 if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)

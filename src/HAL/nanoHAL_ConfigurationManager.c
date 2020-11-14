@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <string.h>
 #include <nanoHAL_v2.h>
 #include <nanoHAL_Network.h>
 

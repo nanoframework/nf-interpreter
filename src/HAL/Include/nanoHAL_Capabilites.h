@@ -6,10 +6,12 @@
 #ifndef _NANOHAL_CAPABILITIES_H_
 #define _NANOHAL_CAPABILITIES_H_ 1
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <nanoWeak.h>
-#include <target_common.h>
+#include <nanoCLR_Headers.h>
+#include <target_os.h>
+
+#ifndef TARGET_HAS_NANOBOOTER
+#error "Can't find definition for TARGET_HAS_NANOBOOTER. Check the inclusion of 'target_os.h'"
+#endif
 
 // ready to use default implementations to be used at platform level
 

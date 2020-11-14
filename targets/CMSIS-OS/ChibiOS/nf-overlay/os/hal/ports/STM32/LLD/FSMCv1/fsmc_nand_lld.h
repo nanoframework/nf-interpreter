@@ -7,7 +7,7 @@
 #ifndef HAL_NAND_LLD_H_
 #define HAL_NAND_LLD_H_
 
-#include "hal_stm32_fsmc"
+#include <stm32_registry.h>
 #include <hal_nf_community.h>
 
 #if (STM32_USE_FSMC_NAND == TRUE)
@@ -32,14 +32,14 @@
 //  NAND driver enable switch.
 // If set to @p TRUE the support for NAND1 is included.
 
-#if !defined(STM32_NAND_USE_NAND1)
-#define STM32_NAND_USE_NAND1 FALSE
+#if !defined(STM32_NAND_USE_FSMC_NAND1)
+#define STM32_NAND_USE_FSMC_NAND1 FALSE
 #endif
 
 // NAND driver enable switch.
 // If set to @p TRUE the support for NAND2 is included.
-#if !defined(STM32_NAND_USE_NAND2)
-#define STM32_NAND_USE_NAND2 FALSE
+#if !defined(STM32_NAND_USE_FSMC_NAND2)
+#define STM32_NAND_USE_FSMC_NAND2 FALSE
 #endif
 
 // NAND DMA error hook.
@@ -225,6 +225,11 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
+
+#else
+
+#define STM32_NAND_USE_FSMC_NAND1 FALSE
+#define STM32_NAND_USE_FSMC_NAND2 FALSE
 
 #endif // STM32_USE_FSMC_NAND
 

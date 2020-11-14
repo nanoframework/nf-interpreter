@@ -7,7 +7,7 @@
 #define LWIPTHREAD_H
 
 #include <stdint.h>
-#include "lwipopts.h"
+#include "lwip/opt.h"
 
 /**
  *  @brief   Startup network assigning modes.

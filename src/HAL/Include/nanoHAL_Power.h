@@ -6,12 +6,7 @@
 #ifndef _NANOHAL_POWER_H_
 #define _NANOHAL_POWER_H_ 1
 
-#include <stdbool.h>
-#include <stdio.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <nanoCLR_Headers.h>
 
 typedef enum PowerLevel
 {
@@ -20,15 +15,19 @@ typedef enum PowerLevel
     PowerLevel__Sleep,
     PowerLevel__DeepSleep,
     PowerLevel__Off
-}PowerLevel_type;
+} PowerLevel_type;
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-// this is used to store the CPU wakeup reason
-// a target implementation can use it or not
-// if it's used suggest to add the variable at targetHAL_Power.c 
-extern uint32_t WakeupReasonStore;
+    // this is used to store the CPU wakeup reason
+    // a target implementation can use it or not
+    // if it's used suggest to add the variable at targetHAL_Power.c
+    extern uint32_t WakeupReasonStore;
 
-bool CPU_IsSoftRebootSupported();
+    bool CPU_IsSoftRebootSupported();
 
 #ifdef __cplusplus
 }

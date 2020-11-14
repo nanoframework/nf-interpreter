@@ -6,14 +6,14 @@
 #ifndef _NANOHAL_BOOT_H_
 #define _NANOHAL_BOOT_H_ 1
 
-#include <stdint.h>
-#include <string.h>
-#include <stdbool.h>
-#include <nanoWeak.h>
+#include <nanoCLR_Headers.h>
 #include <nanoPackStruct.h>
 #include <nanoVersion.h>
 #include <target_os.h>
-#include <target_common.h>
+
+#ifndef TARGET_HAS_NANOBOOTER
+#error "Can't find definition for TARGET_HAS_NANOBOOTER. Check the inclusion of 'target_os.h'"
+#endif
 
 // magic value to mark the limits of the boot clipboard data area
 #define BOOTCLIPBOARD_MAGIC_MARKER 0x4F41A583

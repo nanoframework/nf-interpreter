@@ -12,16 +12,16 @@ typedef Library_corlib_native_System_SpanByte SpanByte;
 /////////////////////////////////////////////////////
 // I2C PAL strucs declared in win_dev_i2c_native.h //
 /////////////////////////////////////////////////////
-#if STM32_I2C_USE_I2C1
+#if (STM32_I2C_USE_I2C1 == TRUE)
 uint8_t I2C1_DeviceCounter;
 #endif
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
 uint8_t I2C2_DeviceCounter;
 #endif
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
 uint8_t I2C3_DeviceCounter;
 #endif
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
 uint8_t I2C4_DeviceCounter;
 #endif
 
@@ -116,7 +116,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
     // the same bus just using different addresses
     switch (busIndex)
     {
-#if STM32_I2C_USE_I2C1
+#if (STM32_I2C_USE_I2C1 == TRUE)
         case 1:
             if (I2C1_PAL.Driver == NULL)
             {
@@ -130,7 +130,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
             }
             break;
 #endif
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
         case 2:
             if (I2C2_PAL.Driver == NULL)
             {
@@ -144,7 +144,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
             }
             break;
 #endif
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
         case 3:
             if (I2C3_PAL.Driver == NULL)
             {
@@ -158,7 +158,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
             }
             break;
 #endif
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
         case 4:
             if (I2C4_PAL.Driver == NULL)
             {
@@ -219,7 +219,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
     // get the driver for the I2C bus
     switch (busIndex)
     {
-#if STM32_I2C_USE_I2C1
+#if (STM32_I2C_USE_I2C1 == TRUE)
         case 1:
             // remove device
             I2C1_DeviceCounter--;
@@ -235,7 +235,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
             break;
 #endif
 
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
         case 2:
             // remove device
             I2C2_DeviceCounter--;
@@ -252,7 +252,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
             break;
 #endif
 
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
         case 3:
             // remove device
             I2C3_DeviceCounter--;
@@ -268,7 +268,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
             break;
 #endif
 
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
         case 4:
             // remove device
             I2C4_DeviceCounter--;
@@ -327,22 +327,22 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         // get the driver for the I2C bus
         switch (busIndex)
         {
-#if STM32_I2C_USE_I2C1
+#if (STM32_I2C_USE_I2C1 == TRUE)
             case 1:
                 palI2c = &I2C1_PAL;
                 break;
 #endif
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
             case 2:
                 palI2c = &I2C2_PAL;
                 break;
 #endif
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
             case 3:
                 palI2c = &I2C3_PAL;
                 break;
 #endif
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
             case 4:
                 palI2c = &I2C4_PAL;
                 break;

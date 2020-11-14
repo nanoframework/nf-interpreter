@@ -7,15 +7,17 @@
 #define _HALCONF_NF_H_
 
 // enables STM32 Flash driver
-#if !defined(HAL_NF_USE_STM32_FLASH) 
-#define HAL_NF_USE_STM32_FLASH         TRUE
+#if !defined(HAL_NF_USE_STM32_FLASH)
+#define HAL_NF_USE_STM32_FLASH TRUE
 #endif
 
 // Enable graphics low level hardware on STM32F769
 
-#if !defined(HAL_DSI_MODULE_ENABLED) 
-#define HAL_DSI_MODULE_ENABLED         TRUE
+#if !defined(HAL_DSI_MODULE_ENABLED)
+#define HAL_DSI_MODULE_ENABLED TRUE
 #endif
 
-#endif // _HALCONF_NF_H_
+// enable USB MSD (from ChibiOS Contrib)
+#define HAL_USBH_USE_MSD FALSE
 
+#endif // _HALCONF_NF_H_

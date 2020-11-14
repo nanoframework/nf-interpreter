@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <ff.h>
 #include "win_storage_native_target.h"
 
 extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);

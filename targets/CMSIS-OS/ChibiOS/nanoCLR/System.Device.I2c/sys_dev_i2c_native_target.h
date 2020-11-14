@@ -8,7 +8,6 @@
 
 #include <ch.h>
 #include <hal.h>
-#include <string.h>
 #include <targetPAL.h>
 #include <nanoHAL.h>
 #include <sys_dev_i2c_native.h>
@@ -32,16 +31,16 @@ typedef struct NF_PAL_I2C_
 ///////////////////////////////////////////
 // declaration of the the I2C PAL strucs //
 ///////////////////////////////////////////
-#if STM32_I2C_USE_I2C1
+#if (STM32_I2C_USE_I2C1 == TRUE)
 extern NF_PAL_I2C I2C1_PAL;
 #endif
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
 extern NF_PAL_I2C I2C2_PAL;
 #endif
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
 extern NF_PAL_I2C I2C3_PAL;
 #endif
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
 extern NF_PAL_I2C I2C4_PAL;
 #endif
 

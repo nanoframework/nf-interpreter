@@ -4,7 +4,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 #include <hal.h>
 #include <hal_nf_community.h>
 
@@ -13,12 +12,13 @@
 #include <target_nf_devices_onewire_config.h>
 #include <string.h>
 
-#if !NF_ONEWIRE_STM32_UART_USE_USART1 && !NF_ONEWIRE_STM32_UART_USE_USART2 &&  \
-    !NF_ONEWIRE_STM32_UART_USE_USART3 && !NF_ONEWIRE_STM32_UART_USE_USART4 &&  \
-    !NF_ONEWIRE_STM32_UART_USE_USART5 && !NF_ONEWIRE_STM32_UART_USE_USART6 &&  \
-    !NF_ONEWIRE_STM32_UART_USE_USART7 && !NF_ONEWIRE_STM32_UART_USE_USART8
+#if !defined(NF_ONEWIRE_STM32_UART_USE_USART1) && !defined(NF_ONEWIRE_STM32_UART_USE_USART2) &&                        \
+    !defined(NF_ONEWIRE_STM32_UART_USE_USART3) && !defined(NF_ONEWIRE_STM32_UART_USE_USART4) &&                        \
+    !defined(NF_ONEWIRE_STM32_UART_USE_USART5) && !defined(NF_ONEWIRE_STM32_UART_USE_USART6) &&                        \
+    !defined(NF_ONEWIRE_STM32_UART_USE_USART7) && !defined(NF_ONEWIRE_STM32_UART_USE_USART8)
 
-#error "1-Wire driver activated but no USART/UART peripheral assigned. Make sure to assign it @ target_nf_devices_onewire_config.h"
+#error                                                                                                                 \
+    "1-Wire driver activated but no USART/UART peripheral assigned. Make sure to assign it @ target_nf_devices_onewire_config.h"
 #endif
 
 /*===========================================================================*/
@@ -36,7 +36,6 @@ ONEWIREDriver ONEWIRED1;
 /* Driver local variables and types.                                         */
 /*===========================================================================*/
 
-
 /*===========================================================================*/
 /* Driver local functions.                                                   */
 /*===========================================================================*/
@@ -45,36 +44,35 @@ void uartSetSpeed(uint32_t speed)
 {
     // stop UART, better do this before changing configuration
     uartStop(ONEWIRED1.UartDriver);
-    
+
     // default UART config
     ONEWIRED1.UartConfig.speed = speed;
 
     uartStart(ONEWIRED1.UartDriver, &ONEWIRED1.UartConfig);
 }
 
-
 /*===========================================================================*/
 /* Driver interrupt handlers.                                                */
 /*===========================================================================*/
 
-static void TxEnd(UARTDriver *uartp) 
+static void TxEnd(UARTDriver *uartp)
 {
-    (void) uartp;
+    (void)uartp;
 
-    //NATIVE_INTERRUPT_START
+    // NATIVE_INTERRUPT_START
 
-    //chSysLockFromISR();
+    // chSysLockFromISR();
     chBSemSignalI(&ONEWIRED1.TxCompleted);
     // chSysUnlockFromISR();
 
-    //NATIVE_INTERRUPT_END
+    // NATIVE_INTERRUPT_END
 }
 
 static void RxEnd(UARTDriver *uartp)
-{  
-    (void) uartp;
+{
+    (void)uartp;
 
-    //NATIVE_INTERRUPT_START
+    // NATIVE_INTERRUPT_START
 
     // chSysLockFromISR();
     chBSemSignalI(&ONEWIRED1.RxCompleted);
@@ -85,8 +83,8 @@ static void RxEnd(UARTDriver *uartp)
 
 static void RxErr(UARTDriver *uartp, uartflags_t e)
 {
-  (void) uartp;
-  (void) e;
+    (void)uartp;
+    (void)e;
 }
 
 /*===========================================================================*/
@@ -98,9 +96,10 @@ static void RxErr(UARTDriver *uartp, uartflags_t e)
  *
  * @notapi
  */
-void oneWire_lld_init(void) {
-    
-    ONEWIRED1.State  = ONEWIRE_STOP;
+void oneWire_lld_init(void)
+{
+
+    ONEWIRED1.State = ONEWIRE_STOP;
 
     // reset UART config
     memset(&ONEWIRED1.UartConfig, 0, sizeof(ONEWIRED1.UartConfig));
@@ -114,65 +113,65 @@ void oneWire_lld_init(void) {
     // half duplex mode
     ONEWIRED1.UartConfig.cr3 = USART_CR3_HDSEL;
 
-    #if (ONEWIRE_USE_MUTUAL_EXCLUSION == TRUE)
+#if (ONEWIRE_USE_MUTUAL_EXCLUSION == TRUE)
     osalMutexObjectInit(&ONEWIRED1.Lock);
-    #endif   
-
+#endif
 }
 
-void oneWire_lld_start() {
+void oneWire_lld_start()
+{
 
     // set UART according to target config
     // configure UART pins
     // set buffers
-#if NF_ONEWIRE_STM32_UART_USE_USART1
+#ifdef NF_ONEWIRE_STM32_UART_USE_USART1
     ConfigPins_UART1();
     ONEWIRED1.UartDriver = &UARTD1;
     ONEWIRED1.TxBuffer = Uart1_TxBuffer;
     ONEWIRED1.RxBuffer = Uart1_RxBuffer;
 #endif
-#if NF_ONEWIRE_STM32_UART_USE_USART2
+#ifdef NF_ONEWIRE_STM32_UART_USE_USART2
     ConfigPins_UART2();
     ONEWIRED1.UartDriver = &UARTD2;
     ONEWIRED1.TxBuffer = Uart2_TxBuffer;
     ONEWIRED1.RxBuffer = Uart2_RxBuffer;
 #endif
-#if NF_ONEWIRE_STM32_UART_USE_USART3
+#ifdef NF_ONEWIRE_STM32_UART_USE_USART3
     ConfigPins_UART3();
     ONEWIRED1.UartDriver = &UARTD3;
     ONEWIRED1.TxBuffer = Uart3_TxBuffer;
     ONEWIRED1.RxBuffer = Uart3_RxBuffer;
 #endif
-#if NF_ONEWIRE_STM32_UART_USE_USART4
+#ifdef NF_ONEWIRE_STM32_UART_USE_USART4
     ConfigPins_UART4();
     ONEWIRED1.UartDriver = &UARTD4;
     ONEWIRED1.TxBuffer = Uart4_TxBuffer;
     ONEWIRED1.RxBuffer = Uart4_RxBuffer;
 #endif
-#if NF_ONEWIRE_STM32_UART_USE_USART5
+#ifdef NF_ONEWIRE_STM32_UART_USE_USART5
     ConfigPins_UART5();
     ONEWIRED1.UartDriver = &UARTD5;
     ONEWIRED1.TxBuffer = Uart5_TxBuffer;
     ONEWIRED1.RxBuffer = Uart5_RxBuffer;
 #endif
-#if NF_ONEWIRE_STM32_UART_USE_USART6
+#ifdef NF_ONEWIRE_STM32_UART_USE_USART6
     ConfigPins_UART6();
     ONEWIRED1.UartDriver = &UARTD6;
     ONEWIRED1.TxBuffer = Uart6_TxBuffer;
     ONEWIRED1.RxBuffer = Uart6_RxBuffer;
 #endif
-#if NF_ONEWIRE_STM32_UART_USE_USART7
+#ifdef NF_ONEWIRE_STM32_UART_USE_USART7
     ConfigPins_UART7();
     ONEWIRED1.UartDriver = &UARTD7;
     ONEWIRED1.TxBuffer = Uart7_TxBuffer;
     ONEWIRED1.RxBuffer = Uart7_RxBuffer;
 #endif
-#if NF_ONEWIRE_STM32_UART_USE_USART8
+#ifdef NF_ONEWIRE_STM32_UART_USE_USART8
     ConfigPins_UART8();
     ONEWIRED1.UartDriver = &UARTD8;
     ONEWIRED1.TxBuffer = Uart8_TxBuffer;
     ONEWIRED1.RxBuffer = Uart8_RxBuffer;
-#endif    
+#endif
 
     uartSetSpeed(9600);
 
@@ -180,8 +179,9 @@ void oneWire_lld_start() {
     ONEWIRED1.State = ONEWIRE_READY;
 }
 
-void oneWire_lld_stop() {
-     
+void oneWire_lld_stop()
+{
+
     // stop UART
     uartStop(ONEWIRED1.UartDriver);
 
@@ -189,7 +189,7 @@ void oneWire_lld_stop() {
     ONEWIRED1.State = ONEWIRE_STOP;
 }
 
-uint8_t oneWire_lld_TouchReset(void) 
+uint8_t oneWire_lld_TouchReset(void)
 {
     ONEWIRED1.TxBuffer[0] = 0xf0;
     ONEWIRED1.RxBuffer[0] = 0;
@@ -200,15 +200,15 @@ uint8_t oneWire_lld_TouchReset(void)
 
     // set UART baud rate to 9600bps (required to send the RESET condition to the 1-Wire bus)
     uartSetSpeed(9600);
-        
+
     chBSemReset(&ONEWIRED1.TxCompleted, TRUE);
     chBSemReset(&ONEWIRED1.RxCompleted, TRUE);
-    uartStartReceive (ONEWIRED1.UartDriver, 1 , &ONEWIRED1.RxBuffer[0]);	
-    uartStartSend (ONEWIRED1.UartDriver, 1, &ONEWIRED1.TxBuffer[0]);
+    uartStartReceive(ONEWIRED1.UartDriver, 1, &ONEWIRED1.RxBuffer[0]);
+    uartStartSend(ONEWIRED1.UartDriver, 1, &ONEWIRED1.TxBuffer[0]);
     chThdSleepMilliseconds(10);
-    chBSemWait (&ONEWIRED1.TxCompleted);
-    chBSemWait (&ONEWIRED1.RxCompleted);
-  
+    chBSemWait(&ONEWIRED1.TxCompleted);
+    chBSemWait(&ONEWIRED1.RxCompleted);
+
     // invalidate cache over read buffer to ensure that content from DMA is read
     // (only required for Cortex-M7)
     cacheBufferInvalidate(&ONEWIRED1.RxBuffer[0], 1);
@@ -231,12 +231,12 @@ bool oneWire_lld_TouchBit(bool sendbit)
 
     chBSemReset(&ONEWIRED1.RxCompleted, TRUE);
     chBSemReset(&ONEWIRED1.TxCompleted, TRUE);
-    uartStartReceive (ONEWIRED1.UartDriver, 1 , &ONEWIRED1.RxBuffer[0]);
+    uartStartReceive(ONEWIRED1.UartDriver, 1, &ONEWIRED1.RxBuffer[0]);
     uartStartSend(ONEWIRED1.UartDriver, 1, &ONEWIRED1.TxBuffer[0]);
     chThdSleepMilliseconds(0.1);
-    chBSemWait (&ONEWIRED1.TxCompleted);
-    chBSemWait (&ONEWIRED1.RxCompleted);
-  
+    chBSemWait(&ONEWIRED1.TxCompleted);
+    chBSemWait(&ONEWIRED1.RxCompleted);
+
     // invalidate cache over read buffer to ensure that content from DMA is read
     // (only required for Cortex-M7)
     cacheBufferInvalidate(&ONEWIRED1.RxBuffer[0], 1);
@@ -250,15 +250,15 @@ uint8_t oneWire_lld_TouchByte(uint8_t sendbyte)
     uint8_t send_mask = 0x01, result = 0;
     uint8_t i = 0;
 
-    // send byte     
-    while (send_mask) 
+    // send byte
+    while (send_mask)
     {
-        if (sendbyte & send_mask) 
+        if (sendbyte & send_mask)
         {
             // if transmit bit is 1
             ONEWIRED1.TxBuffer[i] = IWIRE_WR1;
-        }  
-        else 
+        }
+        else
         {
             // if transmit bit is 0
             ONEWIRED1.TxBuffer[i] = IWIRE_WR0;
@@ -267,9 +267,8 @@ uint8_t oneWire_lld_TouchByte(uint8_t sendbyte)
         i++;
 
         // rotates the position mask transmit bit
-        send_mask<<=1;
+        send_mask <<= 1;
     };
-
 
     // flush DMA buffer to ensure cache coherency
     // (only required for Cortex-M7)
@@ -277,11 +276,11 @@ uint8_t oneWire_lld_TouchByte(uint8_t sendbyte)
 
     chBSemReset(&ONEWIRED1.RxCompleted, TRUE);
     chBSemReset(&ONEWIRED1.TxCompleted, TRUE);
-    uartStartReceive (ONEWIRED1.UartDriver, 8 , &ONEWIRED1.RxBuffer[0]);
-    uartStartSend (ONEWIRED1.UartDriver, 8, &ONEWIRED1.TxBuffer[0]);
+    uartStartReceive(ONEWIRED1.UartDriver, 8, &ONEWIRED1.RxBuffer[0]);
+    uartStartSend(ONEWIRED1.UartDriver, 8, &ONEWIRED1.TxBuffer[0]);
     chThdSleepMilliseconds(0.1);
-    chBSemWait (&ONEWIRED1.TxCompleted);
-    chBSemWait (&ONEWIRED1.RxCompleted);
+    chBSemWait(&ONEWIRED1.TxCompleted);
+    chBSemWait(&ONEWIRED1.RxCompleted);
 
     // invalidate cache over read buffer to ensure that content from DMA is read
     // (only required for Cortex-M7)
@@ -290,14 +289,14 @@ uint8_t oneWire_lld_TouchByte(uint8_t sendbyte)
     // reset send mask to interpret the reply
     send_mask = 0x01;
 
-    for (uint32_t i = 0;  i < 8; i++) 
+    for (uint32_t i = 0; i < 8; i++)
     {
-        if (ONEWIRED1.RxBuffer[i] == 0xff) 
+        if (ONEWIRED1.RxBuffer[i] == 0xff)
         {
             result |= send_mask;
         }
 
-        send_mask<<=1;
+        send_mask <<= 1;
     }
 
     return result;
