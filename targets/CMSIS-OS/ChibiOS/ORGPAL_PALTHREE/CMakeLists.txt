@@ -76,8 +76,8 @@ if(USE_SECURITY_MBEDTLS_OPTION)
 endif()
 
 # set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf -DUSE_RTOS=0 -DUSBH_DEBUG_MULTI_HOST=0)
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DUSE_RTOS=0 -DUSBH_DEBUG_MULTI_HOST=0)
+nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf -DUSBH_DEBUG_MULTI_HOST=0)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DUSBH_DEBUG_MULTI_HOST=0)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
