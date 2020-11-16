@@ -97,6 +97,28 @@ macro(NF_ADD_PLATFORM_PACKAGES)
 
 endmacro()
 
+# Add FreeRTOS platform dependencies to a specific CMake target
+# To be called from target CMakeList.txt
+macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
+
+    # sources specific to nanoBooter
+    if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
+
+        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
+        add_dependencies(${TARGET}.elf FreeRTOS CMSIS)
+
+    endif()
+
+    # sources specific to nanoCRL
+    if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
+    
+        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
+        add_dependencies(${TARGET}.elf FreeRTOS CMSIS LWIP)
+
+    endif()
+
+endmacro()
+
 # Add FreeRTOS platform include directories to a specific CMake target
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
@@ -162,9 +184,6 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     # sources specific to nanoBooter
     if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
-        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
-        add_dependencies(${TARGET}.elf FreeRTOS CMSIS)
-
         target_sources(${TARGET}.elf PUBLIC
             
             ${TARGET_NXP_NANOBOOTER_SOURCES}
@@ -178,9 +197,6 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
     # sources specific to nanoCRL
     if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
-    
-        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
-        add_dependencies(${TARGET}.elf FreeRTOS CMSIS LWIP)
 
         target_sources(${TARGET}.elf PUBLIC
 

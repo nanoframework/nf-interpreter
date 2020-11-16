@@ -90,6 +90,20 @@ macro(NF_ADD_PLATFORM_PACKAGES)
 
 endmacro()
 
+# Add TI SimpleLink platform dependencies to a specific CMake target
+# To be called from target CMakeList.txt
+macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
+    
+    # add dependency from TI SimpleLink CC13x2_26x2 SDK, TI SysConfig and XDCTools (this is required to make sure that those repos are downloaded before the build starts)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf TI_SysConfig)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC13x2_26x2SDK)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf COPY_TIRTOS_CONFIG)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf TIRTOS_CONFIG)
+    add_dependencies(TIRTOS_CONFIG TI_XDCTools)
+    add_dependencies(TIRTOS_CONFIG COPY_TIRTOS_CONFIG)
+
+endmacro()
+
 # Add TI SimpleLink platform include directories to a specific CMake target
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
@@ -118,14 +132,6 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
         ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libm.a
         ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libnosys.a
     )
-    
-    # add dependency from TI SimpleLink CC13x2_26x2 SDK, TI SysConfig and XDCTools (this is required to make sure that those repos are downloaded before the build starts)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf TI_SysConfig)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf SimpleLinkCC13x2_26x2SDK)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf COPY_TIRTOS_CONFIG)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf TIRTOS_CONFIG)
-    add_dependencies(TIRTOS_CONFIG TI_XDCTools)
-    add_dependencies(TIRTOS_CONFIG COPY_TIRTOS_CONFIG)
     
 endmacro()
 
