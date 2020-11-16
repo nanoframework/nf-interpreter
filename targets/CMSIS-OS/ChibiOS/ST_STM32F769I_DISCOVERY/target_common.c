@@ -22,35 +22,6 @@ HAL_SYSTEM_CONFIG HalSystemConfig = {
 
 HAL_TARGET_CONFIGURATION g_TargetConfiguration;
 
-// this target can use both JTAG and DFU for updates
-inline GET_TARGET_CAPABILITIES(TargetCapabilities_JtagUpdate | TargetCapabilities_DfuUpdate);
-inline TARGET_HAS_PROPRITARY_BOOTER(true);
-
-bool LaunchProprietaryBootloader()
-{
-    //volatile uint32_t DFU_BOOTLOADER_ADDRESS = 0x1FFF0000;
-
-    // disable all interrupts in ChibiOS
-    chSysDisable();
-
-    // // Disable RCC, set it to default (after reset) settings
-    // // Internal clock, no PLL, etc
-    // RCC_DeInit();
-
-    // // enable SYSCFG clock
-    // RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-
-    // // disable systick timer and reset it to default values
-    // SysTick->CTRL = 0;
-    // SysTick->LOAD = 0;
-    // SysTick->VAL = 0;
-
-    // SYSCFG->MEMRMP = SYSCFG_MemoryRemap_SystemFlash;
-
-    // // clear any pending interrupts to make sure we are jumping straight to nanoCLR ResetHandler
-    // SCB->ICSR &= SCB_ICSR_PENDSVCLR_Msk;
-
-    // StartApplication(SYSMEM_ADDR);
-
-    return true;
-}
+// this target can use JTAG for updates
+inline GET_TARGET_CAPABILITIES(TargetCapabilities_JtagUpdate);
+inline TARGET_HAS_PROPRITARY_BOOTER(false);
