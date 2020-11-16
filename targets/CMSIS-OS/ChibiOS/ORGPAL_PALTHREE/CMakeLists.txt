@@ -29,6 +29,8 @@ add_executable(
     ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c
 )
 
+NF_ADD_PLATFORM_DEPENDENCIES(${NANOBOOTER_PROJECT_NAME})
+
 NF_ADD_COMMON_SOURCES(${NANOBOOTER_PROJECT_NAME})
 NF_ADD_PLATFORM_SOURCES(${NANOBOOTER_PROJECT_NAME})
 
@@ -46,6 +48,8 @@ add_executable(
     # the next one is required is the target implements and it's using external memory
     ${CMAKE_CURRENT_SOURCE_DIR}/target_external_memory.c
 )
+
+NF_ADD_PLATFORM_DEPENDENCIES(${NANOCLR_PROJECT_NAME})
 
 NF_ADD_COMMON_SOURCES(${NANOCLR_PROJECT_NAME})
 NF_ADD_PLATFORM_SOURCES(${NANOCLR_PROJECT_NAME})
@@ -72,8 +76,8 @@ if(USE_SECURITY_MBEDTLS_OPTION)
 endif()
 
 # set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf -DUSE_RTOS=0 -DUSBH_DEBUG_MULTI_HOST=0)
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DUSE_RTOS=0 -DUSBH_DEBUG_MULTI_HOST=0)
+nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf -DUSBH_DEBUG_MULTI_HOST=0)
+nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DUSBH_DEBUG_MULTI_HOST=0)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)

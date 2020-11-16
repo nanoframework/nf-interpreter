@@ -4,13 +4,13 @@
 #
 
 # set include directories
+list(APPEND STM32F7_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32F7_CubePackage_Source/Drivers/CMSIS/Device/ST/STM32F7xx/Include)
 list(APPEND STM32F7_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32F7_CubePackage_Source/Drivers/STM32F7xx_HAL_Driver/Inc)
 
 # source files
 set(STM32F7_CubePackage_SRCS
 
     # add HAL files here as required
-    stm32f7xx_hal_rcc.c
 
     # SPIFFS
     stm32f7xx_hal_dma.c
