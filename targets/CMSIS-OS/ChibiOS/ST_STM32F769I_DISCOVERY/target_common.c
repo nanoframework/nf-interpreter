@@ -24,4 +24,4 @@ HAL_TARGET_CONFIGURATION g_TargetConfiguration;
 
 // this target can use JTAG for updates
 inline GET_TARGET_CAPABILITIES(TargetCapabilities_JtagUpdate);
-inline TARGET_HAS_PROPRITARY_BOOTER(false);
+inline TARGET_HAS_PROPRIETARY_BOOTER(false);

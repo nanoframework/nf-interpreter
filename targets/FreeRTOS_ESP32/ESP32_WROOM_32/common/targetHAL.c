@@ -34,6 +34,6 @@ inline TARGET_CONFIG_UPDATE_REQUIRES_ERASE(false);
 inline GET_TARGET_CAPABILITIES(0);
 
 // ESP32 has a proprietatry bootloader
-inline TARGET_HAS_PROPRITARY_BOOTER(true);
+inline TARGET_HAS_PROPRIETARY_BOOTER(true);
 
 inline TARGET_IFU_CAPABLE(false);
