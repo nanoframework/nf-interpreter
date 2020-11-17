@@ -105,6 +105,7 @@ int main(void)
 
     while (true)
     {
+        palToggleLine(LINE_LD2);
         osDelay(100);
     }
 }

@@ -49,9 +49,8 @@ int main(void)
     // check if there is a request to remain on nanoBooter
     if (!IsToRemainInBooter())
     {
-        // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
-        // the user button in this board has a pull-up resistor so the check has to be inverted
-        //if (!palReadPad(GPIOA, GPIOA_BUTTON))
+        // if T1 switch is pressed, skip the check for a valid CLR image and remain in booter
+        if (palReadLine(LINE_T1))
         {
             // we are checking for a valid image right after the configuration block
             if (CheckValidCLRImage((uint32_t)&__nanoConfig_end__))
@@ -92,7 +91,7 @@ int main(void)
     //  Normal main() thread
     while (true)
     {
-        palTogglePad(GPIOE, GPIOE_LD1);
-        osDelay(250);
+        palToggleLine(LINE_LD1);
+        osDelay(125);
     }
 }

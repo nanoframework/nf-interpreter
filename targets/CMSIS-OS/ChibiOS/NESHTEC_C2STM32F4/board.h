@@ -155,8 +155,9 @@
  * IO lines assignments.
  */
 
-#define LINE_LD1           PAL_LINE(GPIOD, 7U)
-#define LINE_LD2           PAL_LINE(GPIOE, 12U)
+#define LINE_T1            PAL_LINE(GPIOA, 5U)
+#define LINE_LD1           PAL_LINE(GPIOE, 12U)
+#define LINE_LD2           PAL_LINE(GPIOD, 7U)
 
 /*
  * I/O ports initial setup, this configuration is established soon after reset
