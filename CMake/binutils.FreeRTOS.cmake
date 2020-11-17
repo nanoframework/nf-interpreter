@@ -165,12 +165,12 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
+    # add header files with common OS definitions and board definitions 
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
+                ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
+
     # sources common to both builds
     target_sources(${TARGET}.elf PUBLIC
-
-        # add header files with common OS definitions and board definitions 
-        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                    ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
     
         ${TARGET_CMSIS_COMMON_SOURCES}
         
