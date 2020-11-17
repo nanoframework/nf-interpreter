@@ -33,7 +33,7 @@
         return option;                                                                                                 \
     }
 
-#define TARGET_HAS_PROPRIETARY_BOOTER(option)                                                                           \
+#define TARGET_HAS_PROPRIETARY_BOOTER(option)                                                                          \
     bool Target_HasProprietaryBooter()                                                                                 \
     {                                                                                                                  \
         return option;                                                                                                 \
