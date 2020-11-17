@@ -195,16 +195,12 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
-    # add header files with common OS definitions and board definitions specific for each image
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h @ONLY)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
-
     # sources common to both builds
     target_sources(${TARGET}.elf PUBLIC
+
+        # add header files with common OS definitions and board definitions
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
+                    ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
     
         ${TARGET_CMSIS_COMMON_SOURCES}
         
@@ -219,6 +215,10 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     # sources specific to nanoBooter
     if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
+        # add header file for board definition
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
+                    ${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h @ONLY)
+
         target_sources(${TARGET}.elf PUBLIC
             
             ${TARGET_CHIBIOS_NANOBOOTER_SOURCES}
@@ -232,6 +232,9 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
     # sources specific to nanoCRL
     if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
+
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
+                    ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
 
         target_sources(${TARGET}.elf PUBLIC
 
