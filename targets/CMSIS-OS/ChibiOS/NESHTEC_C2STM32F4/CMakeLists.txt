@@ -26,7 +26,7 @@ add_executable(
     ${NANOBOOTER_PROJECT_NAME}.elf
 
     # need to add configuration manager to allow get/store configuration blocks
-    ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c
+    ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c
 )
 
 NF_ADD_COMMON_SOURCES(${NANOBOOTER_PROJECT_NAME})
