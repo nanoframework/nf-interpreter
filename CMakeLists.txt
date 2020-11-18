@@ -695,6 +695,16 @@ endif()
 
 #################################################################
 
+#################################################################
+# Baudrate for serial communication 
+option(NF_FEATURE_WATCHDOG "option to use hardware watchdog" ON)
+
+if(TARGET_SERIAL_BAUDRATE)
+    message(STATUS "Baudrate for serial communication was set to ${TARGET_SERIAL_BAUDRATE}.")
+endif()
+
+#################################################################
+
 #######################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
