@@ -176,17 +176,17 @@ int Monitor_Reboot(WP_Message *message)
 
     if (cmd != NULL)
     {
-        if (Monitor_Reboot_c_NormalReboot == (cmd->m_flags & Monitor_Reboot_c_NormalReboot))
-        {
-            // RESET CPU to load nanoCLR
-            // because we are using CMSIS it's recommended to make use of the CMSIS API
-            NVIC_SystemReset();
-        }
-        else if (Monitor_Reboot_c_EnterProprietaryBooter == (cmd->m_flags & Monitor_Reboot_c_EnterProprietaryBooter))
+        if (Monitor_Reboot_c_EnterProprietaryBooter == (cmd->m_flags & Monitor_Reboot_c_EnterProprietaryBooter))
         {
             // request to load proprietary bootloader
             // OK to call directly as this will launch the bootloader only if the target has support for it
             LaunchProprietaryBootloader();
+        }
+        else
+        {
+            // RESET CPU to load nanoCLR
+            // because we are using CMSIS it's recommended to make use of the CMSIS API
+            NVIC_SystemReset();
         }
     }
 
