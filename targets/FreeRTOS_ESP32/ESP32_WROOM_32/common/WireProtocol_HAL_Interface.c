@@ -9,6 +9,14 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol_HAL_interface.h>
 
+////////////////////////////////////////////////////////////////////
+// Baudrate for the serial port                                   //
+// Can be overriden by the build parameter TARGET_SERIAL_BAUDRATE //
+////////////////////////////////////////////////////////////////////
+#ifndef TARGET_SERIAL_BAUDRATE
+#define TARGET_SERIAL_BAUDRATE 921600
+#endif
+
 WP_Message inboundMessage;
 
 bool WP_Initialise(COM_HANDLE port);
@@ -45,12 +53,18 @@ bool WP_Initialise(COM_HANDLE port)
         return false;
 
     uart_config_t uart_config = {
-        .baud_rate = 921600,                   // baudrate
-        .data_bits = UART_DATA_8_BITS,         // data bit mode
-        .parity = UART_PARITY_DISABLE,         // parity mode
-        .stop_bits = UART_STOP_BITS_1,         // stop bit mode
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE, // hardware flow control(cts/rts)
-        .rx_flow_ctrl_thresh = 120,            // flow control threshold
+        // baudrate
+        .baud_rate = TARGET_SERIAL_BAUDRATE,
+        // baudrate
+        .data_bits = UART_DATA_8_BITS,
+        // parity mode
+        .parity = UART_PARITY_DISABLE,
+        // stop bit mode
+        .stop_bits = UART_STOP_BITS_1,
+        // hardware flow control(cts/rts)
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        // flow control threshold
+        .rx_flow_ctrl_thresh = 120,
     };
 
     uart_param_config(WP_Port, &uart_config);
