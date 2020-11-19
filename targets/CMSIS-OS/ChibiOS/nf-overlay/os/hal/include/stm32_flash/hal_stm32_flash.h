@@ -25,7 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Driver data structures and types.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#define FLASH_ERASED_WORD        0x0FFFFFFFFU
+#define FLASH_ERASED_WORD 0x0FFFFFFFFU
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver macros.                                                            //
@@ -36,15 +36,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-  void stm32FlashInit(void);
-  void stm32FlashObjectInit(STM32FlashDriver* flash);
-  void stm32FlashReadBytes(uint32_t startAddress, uint32_t length, uint8_t* buffer);
-  int  stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t* buffer);
-  int  stm32FlashIsErased(uint32_t startAddress, uint32_t length);
-  int  stm32FlashErase(uint32_t address);
+    void stm32FlashInit(void);
+    void stm32FlashObjectInit(STM32FlashDriver *flash);
+    void stm32FlashReadBytes(uint32_t startAddress, uint32_t length, uint8_t *buffer);
+    int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
+    int stm32FlashIsErased(uint32_t startAddress, uint32_t length);
+    int stm32FlashErase(uint32_t address);
 
 #ifdef __cplusplus
 }
@@ -53,4 +54,3 @@ extern "C" {
 #endif // HAL_NF_USE_STM32_FLASH
 
 #endif // HAL_NF_ST_FLASH_H
-
