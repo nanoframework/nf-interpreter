@@ -33,7 +33,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     {
         const char *workingPath = stack.Arg0().RecoverString();
         FAULT_ON_NULL(workingPath);
-        const char *fileName = stack.Arg0().RecoverString();
+        const char *fileName = stack.Arg1().RecoverString();
         FAULT_ON_NULL(fileName);
 
         bool exists = false;
@@ -110,7 +110,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::MoveNative___STATIC__VOID__
     {
         const char *filePathSrc = stack.Arg0().RecoverString();
         FAULT_ON_NULL(filePathSrc);
-        const char *filePathDest = stack.Arg0().RecoverString();
+        const char *filePathDest = stack.Arg1().RecoverString();
         FAULT_ON_NULL(filePathDest);
 
         // rename file
