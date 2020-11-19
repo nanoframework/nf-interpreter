@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
+//                   ** WARNING! **
 //    This file was generated automatically by a tool.
 //    Re-running the tool will overwrite this file.
 //    You should copy this file to a custom location
@@ -27,7 +27,8 @@ void CombinePathAndName(char *outpath, const char *path1, const char *path2)
     strcat(outpath, path2);
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID__STRING__STRING__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID__STRING__STRING__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -145,7 +146,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRING__STRING__I8__SZARRAY_U1__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRING__STRING__I8__SZARRAY_U1__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -154,7 +156,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
         const char *fileName = stack.Arg2().RecoverString();
         FAULT_ON_NULL(fileName);
         CLR_INT64 position = stack.Arg3().NumericByRef().s8;
-        CLR_RT_HeapBlock_Array* pArray = stack.Arg4().DereferenceArray();
+        CLR_RT_HeapBlock_Array *pArray = stack.Arg4().DereferenceArray();
         FAULT_ON_NULL_ARG(pArray);
         unsigned char *buffer = pArray->GetFirstElement();
         CLR_INT32 length = stack.Arg5().NumericByRef().s4;
@@ -246,7 +248,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__STRING__STRING__I8__SZARRAY_U1__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__STRING__STRING__I8__SZARRAY_U1__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -255,7 +258,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
         const char *fileName = stack.Arg2().RecoverString();
         FAULT_ON_NULL(fileName);
         CLR_INT64 position = stack.Arg3().NumericByRef().s8;
-        CLR_RT_HeapBlock_Array* pArray = stack.Arg4().DereferenceArray();
+        CLR_RT_HeapBlock_Array *pArray = stack.Arg4().DereferenceArray();
         FAULT_ON_NULL_ARG(pArray);
         unsigned char *buffer = pArray->GetFirstElement();
         const CLR_INT32 length = stack.Arg5().NumericByRef().s4;
@@ -338,7 +341,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8__STRING__STRING( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8__STRING__STRING(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
