@@ -1,4 +1,4 @@
-# Driver for SMT32 internal flash
+# Driver for STM32 internal flash
 
 This driver enables **nanoFramework** to access the internal flash for STM32 parts taking care of the low level details and implementation specifics.
 
