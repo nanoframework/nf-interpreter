@@ -20,7 +20,7 @@ jobs:
 ##############################
 - job: Check_Build_Options
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-latest'
 
   steps:
   - checkout: self
@@ -154,7 +154,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
@@ -214,7 +214,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-latest'
 
   # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
   strategy:
@@ -260,7 +260,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
@@ -295,7 +295,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
@@ -333,7 +333,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-latest'
 
   steps:
   - task: NuGetToolInstaller@0
@@ -356,7 +356,7 @@ jobs:
   condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-latest'
 
   steps:
   - task: DotNetCoreCLI@2  
@@ -425,7 +425,7 @@ jobs:
   condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Generate_change_log'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-latest'
 
   steps:
   - task: DotNetCoreCLI@2  
@@ -471,7 +471,7 @@ jobs:
   condition: and(ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true), or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'), failed('Generate_change_log')))
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-latest'
 
   steps:
 
