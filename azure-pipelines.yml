@@ -333,7 +333,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-latest'
+    vmImage: 'VS2017-Win2016'
 
   steps:
   - task: NuGetToolInstaller@0
