@@ -12,8 +12,8 @@
 #define _TARGET_COMMON_H_
 
 #include <target_os.h>
-// #include <target_lwipopts.h>
-// #include <nf_lwipopts_sntp.h>
+#include <target_lwipopts.h>
+#include <nf_lwipopts_sntp.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // The following addresses and sizes should be filled in according to the SoC data-sheet
