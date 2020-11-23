@@ -27,7 +27,7 @@ The start address of nanoCLR (it's vector table) is defined in the linker file (
 
 Because the STM32F0 series don't have the SCB->VTOR register that allows offsetting the vector table another approach as to be taken: copy the vector table to a RAM location and remap the memory mode using SYSCFG->CFGR1. This is accomplished by reserving in RAM0 region the required space (in the linker file) and by performing the copy of the vector table right after the nanoCLR starts. This code block is located in main() right after the call to halInit(). 
 
-If porting this reference board to another SMT32F0 (or L0) series make sure this piece of code is kept there.
+If porting this reference board to another STM32F0 (or L0) series make sure this piece of code is kept there.
 
 
 

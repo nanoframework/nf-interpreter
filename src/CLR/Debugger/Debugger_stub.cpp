@@ -5,7 +5,6 @@
 //
 #include <nanoCLR_Runtime.h>
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 __nfweak void CLR_DBG_Debugger::Debugger_Discovery()
 {
@@ -37,7 +36,11 @@ __nfweak HRESULT CLR_DBG_Debugger::DeleteInstance()
     NANOCLR_SYSTEM_STUB_RETURN();
 }
 
-__nfweak void CLR_DBG_Debugger::BroadcastEvent( unsigned int cmd, unsigned int payloadSize, unsigned char* payload, unsigned int flags )
+__nfweak void CLR_DBG_Debugger::BroadcastEvent(
+    unsigned int cmd,
+    unsigned int payloadSize,
+    unsigned char *payload,
+    unsigned int flags)
 {
     (void)cmd;
     (void)payloadSize;
@@ -48,26 +51,26 @@ __nfweak void CLR_DBG_Debugger::BroadcastEvent( unsigned int cmd, unsigned int p
 }
 
 __nfweak void NFReleaseInfo::Init(
-    NFReleaseInfo& NFReleaseInfo, 
-    unsigned short int major, 
-    unsigned short int minor, 
-    unsigned short int build, 
-    unsigned short int revision, 
-    const char *info, 
+    NFReleaseInfo &NFReleaseInfo,
+    unsigned short int major,
+    unsigned short int minor,
+    unsigned short int build,
+    unsigned short int revision,
+    const char *info,
     size_t infoLen,
-    const char *target, 
+    const char *target,
     size_t targetLen,
-    const char *platform, 
+    const char *platform,
     size_t platformLen)
 {
     size_t len;
 
-    NFVersion::Init( NFReleaseInfo.Version, major, minor, build, revision );
-    
+    NFVersion::Init(NFReleaseInfo.Version, major, minor, build, revision);
+
     // better set these to empty strings, in case there is nothing to fill in
-    NFReleaseInfo.InfoString[ 0 ] = 0;
-    NFReleaseInfo.TargetName[ 0 ] = 0;
-    NFReleaseInfo.PlatformName[ 0 ] = 0;
+    NFReleaseInfo.InfoString[0] = 0;
+    NFReleaseInfo.TargetName[0] = 0;
+    NFReleaseInfo.PlatformName[0] = 0;
 
     // fill each one, if it was provided
     if (NULL != info)
@@ -92,7 +95,7 @@ __nfweak void NFReleaseInfo::Init(
     }
 }
 
-__nfweak bool SOCKETS_DbgInitialize( int ComPortNum )
+__nfweak bool SOCKETS_DbgInitialize(int ComPortNum)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
@@ -100,7 +103,7 @@ __nfweak bool SOCKETS_DbgInitialize( int ComPortNum )
     return true;
 }
 
-__nfweak bool SOCKETS_DbgUninitialize( int ComPortNum )
+__nfweak bool SOCKETS_DbgUninitialize(int ComPortNum)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 

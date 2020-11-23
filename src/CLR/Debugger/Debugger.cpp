@@ -541,6 +541,17 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
     return true;
 }
 
+bool CLR_DBG_Debugger::Monitor_TargetInfo(WP_Message *msg)
+{
+    Monitor_TargetInfo_Reply cmdReply;
+
+    bool fOK = nanoBooter_GetTargetInfo(&cmdReply.m_TargetInfo) == true;
+
+    WP_ReplyToCommand(msg, fOK, false, &cmdReply, sizeof(cmdReply));
+
+    return true;
+}
+
 //--//
 
 bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
