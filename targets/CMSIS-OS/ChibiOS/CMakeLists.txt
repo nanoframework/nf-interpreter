@@ -66,13 +66,10 @@ if(NO_RTOS_SOURCE_FOLDER)
     # check if build was requested with a specifc ChibiOS version
     if(RTOS_VERSION_EMPTY)
         # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(RTOS_VERSION_TAG "stable_20.3.x")
-    else()
-        # set SVN tag
-        set(RTOS_VERSION_TAG "${RTOS_VERSION}")
+        set(RTOS_VERSION "stable_20.3.x")
     endif()
 
-    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION_TAG} from nanoFramwwork GitHub repo")
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from nanoFramwwork GitHub repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
@@ -95,7 +92,7 @@ if(NO_RTOS_SOURCE_FOLDER)
         PREFIX ChibiOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
         GIT_REPOSITORY  https://github.com/nanoframework/chibios
-        GIT_TAG ${RTOS_VERSION_TAG}  # target specified branch
+        GIT_TAG ${RTOS_VERSION}  # target specified branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1

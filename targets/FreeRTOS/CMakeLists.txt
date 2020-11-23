@@ -55,13 +55,10 @@ if(NO_RTOS_SOURCE_FOLDER)
     # check if build was requested with a specifc FreeRTOS version
     if(RTOS_VERSION_EMPTY)
         # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(RTOS_VERSION_TAG "V10.4.1-kernel-only")
-    else()
-        # set SVN tag
-        set(RTOS_VERSION_TAG "${RTOS_VERSION}")
+        set(RTOS_VERSION "V10.4.1-kernel-only")
     endif()
 
-    message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION_TAG} from GitHub repo")
+    message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} from GitHub repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
@@ -84,7 +81,7 @@ if(NO_RTOS_SOURCE_FOLDER)
         PREFIX FreeRTOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS_Source
         GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-        GIT_TAG ${RTOS_VERSION_TAG}  # target specified branch
+        GIT_TAG ${RTOS_VERSION}  # target specified branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
