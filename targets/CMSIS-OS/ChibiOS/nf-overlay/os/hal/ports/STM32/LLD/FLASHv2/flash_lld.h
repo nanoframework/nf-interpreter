@@ -31,13 +31,13 @@
 // From STMicroelectronics Cube HAL
 // HAL Status structures definition
 
-typedef struct SMT32FlashDriver
+typedef struct STM32FlashDriver
 {
 
     // pointer to the FLASH Registers
     FLASH_TypeDef *flash;
 
-} SMT32FlashDriver;
+} STM32FlashDriver;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Driver macros.                                                            //

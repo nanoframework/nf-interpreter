@@ -97,6 +97,28 @@ macro(NF_ADD_PLATFORM_PACKAGES)
 
 endmacro()
 
+# Add FreeRTOS platform dependencies to a specific CMake target
+# To be called from target CMakeList.txt
+macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
+
+    # sources specific to nanoBooter
+    if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
+
+        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
+        add_dependencies(${TARGET}.elf FreeRTOS CMSIS)
+
+    endif()
+
+    # sources specific to nanoCRL
+    if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
+    
+        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
+        add_dependencies(${TARGET}.elf FreeRTOS CMSIS LWIP)
+
+    endif()
+
+endmacro()
+
 # Add FreeRTOS platform include directories to a specific CMake target
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
@@ -143,14 +165,10 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
-    # add header files with common OS definitions and board definitions specific for each image
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h @ONLY)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
+    # add header files with common OS definitions and board definitions 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
-             
+                ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
+
     # sources common to both builds
     target_sources(${TARGET}.elf PUBLIC
     
@@ -162,8 +180,9 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     # sources specific to nanoBooter
     if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
-        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
-        add_dependencies(${TARGET}.elf FreeRTOS CMSIS)
+        # add header files with common OS definitions and board definitions 
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
+                    ${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h @ONLY)
 
         target_sources(${TARGET}.elf PUBLIC
             
@@ -178,9 +197,10 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
     # sources specific to nanoCRL
     if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
-    
-        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
-        add_dependencies(${TARGET}.elf FreeRTOS CMSIS LWIP)
+
+        # add header files with common OS definitions and board definitions 
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
+                    ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
 
         target_sources(${TARGET}.elf PUBLIC
 
