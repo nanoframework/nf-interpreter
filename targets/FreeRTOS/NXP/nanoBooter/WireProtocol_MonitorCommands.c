@@ -17,24 +17,6 @@
 
 #define FLASH_ERASED_WORD 0xFFFFFFFF
 
-//////////////////////////////////////////////////////////////////////
-// helper functions
-
-int NanoBooter_GetReleaseInfo(ReleaseInfo *releaseInfo)
-{
-    releaseInfo->version.usMajor = VERSION_MAJOR;
-    releaseInfo->version.usMinor = VERSION_MINOR;
-    releaseInfo->version.usBuild = VERSION_BUILD;
-    releaseInfo->version.usRevision = VERSION_REVISION;
-
-    memcpy(&releaseInfo->InfoString, OEMSYSTEMINFOSTRING, ARRAYSIZE(OEMSYSTEMINFOSTRING));
-    memcpy(&releaseInfo->TargetName, TARGETNAMESTRING, ARRAYSIZE(TARGETNAMESTRING));
-    memcpy(&releaseInfo->PlatformName, PLATFORMNAMESTRING, ARRAYSIZE(PLATFORMNAMESTRING));
-    memcpy(&releaseInfo->PlatformInfoString, TARGETINFOSTRING, ARRAYSIZE(TARGETINFOSTRING));
-
-    return true;
-}
-
 static int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode)
 {
     // reset error code
@@ -108,20 +90,6 @@ int Monitor_Ping(WP_Message *message)
         }
 
         WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
-    }
-
-    return true;
-}
-
-int Monitor_OemInfo(WP_Message *message)
-{
-    if ((message->m_header.m_flags & WP_Flags_c_Reply) == 0)
-    {
-        Monitor_OemInfo_Reply cmdReply;
-
-        bool fOK = NanoBooter_GetReleaseInfo(&cmdReply.m_releaseInfo) == true;
-
-        WP_ReplyToCommand(message, fOK, false, &cmdReply, sizeof(cmdReply));
     }
 
     return true;

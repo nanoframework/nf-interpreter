@@ -87,6 +87,7 @@ typedef enum CLR_DBG_Commands_Monitor
     CLR_DBG_Commands_c_Monitor_OemInfo             = 0x0000000E,
     CLR_DBG_Commands_c_Monitor_QueryConfiguration  = 0x0000000F,
     CLR_DBG_Commands_c_Monitor_UpdateConfiguration = 0x00000010,
+    CLR_DBG_Commands_c_Monitor_TargetInfo          = 0x00000020,
 }CLR_DBG_Commands_Monitor;
 
 // structure for Wire Protocol packet
@@ -199,6 +200,19 @@ typedef struct ReleaseInfo
     uint8_t PlatformInfoString[128];
 
 }ReleaseInfo;
+
+// structure to hold nanoFramework Target information
+typedef struct TargetInfo
+{
+
+    VersionInfo BooterVersion;
+    VersionInfo ClrVersion;
+    uint8_t InfoString[128];
+    uint8_t TargetName[32];
+    uint8_t PlatformName[32];
+    uint8_t PlatformInfoString[128];
+
+}TargetInfo;
 
 // structure for Wire Protocol command handler lookup
 typedef struct CommandHandlerLookup
