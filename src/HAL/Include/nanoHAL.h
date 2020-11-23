@@ -843,6 +843,10 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 #include <nanoHAL_Spi.h>
 
 //
+// I2C driver
+#include <nanoHAL_I2c.h>
+
+//
 //// External bus interface driver
 //#include <CPU_EBIU_decl.h>
 //

@@ -100,12 +100,12 @@ void nanoHAL_Initialize()
     // Initialise Graphics after devices initialised
     DisplayInterfaceConfig displayConfig;
 
-    // Define SPI display configuration for Wrover
-    displayConfig.Spi.spiBus = 1;                // Spi Bus
-    displayConfig.Spi.chipSelect = GPIO_NUM_22;  // CS_1     GPIO22   CS
-    displayConfig.Spi.dataCommand = GPIO_NUM_21; // D/CX_1   GPIO21   D/C
-    displayConfig.Spi.reset = GPIO_NUM_18;       // RST_1    GPIO18   RESET
-    displayConfig.Spi.backLight = GPIO_NUM_5;    // GPIO5    Backlight
+    displayConfig.Spi.spiBus = 1;                   // Spi Bus
+    // Define SPI display configuration for Wrover or any other using same pins
+    displayConfig.Spi.chipSelect = GPIO_NUM_22;     // CS_1     GPIO22   CS
+    displayConfig.Spi.dataCommand = GPIO_NUM_21;    // D/CX_1   GPIO21   D/C
+    displayConfig.Spi.reset = GPIO_NUM_18;          // RST_1    GPIO18   RESET
+    displayConfig.Spi.backLight = GPIO_NUM_5;       // GPIO5    Backlight
 
     g_DisplayInterface.Initialize(displayConfig);
     g_DisplayDriver.Initialize();
