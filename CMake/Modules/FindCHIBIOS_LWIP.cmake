@@ -87,91 +87,6 @@ set(LWIP_SRCS
     # netif
     ethernet.c
     slipif.c
-
-    # 6LoWPAN
-    # lowpan6.c
-
-    # PPP
-    auth.c
-	ccp.c
-	chap-md5.c
-	chap_ms.c
-	chap-new.c
-	demand.c
-	eap.c
-	ecp.c
-	eui64.c
-	fsm.c
-	ipcp.c
-	ipv6cp.c
-	lcp.c
-	magic.c
-	mppe.c
-	multilink.c
-	ppp.c
-	pppapi.c
-	pppcrypt.c
-	pppoe.c
-	pppol2tp.c
-	pppos.c
-	upap.c
-	utils.c
-    vj.c
-    
-    # PPP SSL
-	arc4.c
-	des.c
-	md4.c
-	md5.c
-	sha1.c
-
-    # APPS!
-
-    # SNMPv2c agent
-    # snmp_asn1.c
-	# snmp_core.c
-	# snmp_mib2.c
-	# snmp_mib2_icmp.c
-	# snmp_mib2_interfaces.c
-	# snmp_mib2_ip.c
-	# snmp_mib2_snmp.c
-	# snmp_mib2_system.c
-	# snmp_mib2_tcp.c
-	# snmp_mib2_udp.c
-	# snmp_msg.c
-	# snmpv3.c
-	# snmp_netconn.c
-	# snmp_pbuf_stream.c
-	# snmp_raw.c
-	# snmp_scalar.c
-	# snmp_table.c
-	# snmp_threadsync.c
-	# snmp_traps.c
-	# snmpv3_mbedtls.c
-	# snmpv3_dummy.c
-
-    # http server
-    # fs.c
-    # httpd.c
-
-    # iperf server
-    # lwiperf.c
-
-	# SNTP client
-	# this one is added below if NF_NETWORKING_SNTP option is ON
-    # sntp.c
-
-    # MDNS responder
-    mdns.c
-
-    # NetBIOS server
-    # netbiosns.c
-
-    # TFTP server
-    # tftp_server.c
-
-    # MQTT client
-    # mqtt.c
 )
 
 if(NF_NETWORKING_SNTP)
@@ -188,20 +103,11 @@ foreach(SRC_FILE ${LWIP_SRCS})
             ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/core/ipv6
             ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/api
             ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif/ppp
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/netif/ppp/polarssl
 
             ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
 
             # APPS:
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/snmp
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/httpd
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/lwiperf
             ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/sntp
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/mdns
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/netbiosns
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/tftp
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/apps/mqtt
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

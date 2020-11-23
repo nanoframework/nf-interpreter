@@ -24,4 +24,4 @@ HAL_TARGET_CONFIGURATION g_TargetConfiguration;
 
 // this target can use both JTAG and DFU for updates
 inline GET_TARGET_CAPABILITIES(TargetCapabilities_JtagUpdate | TargetCapabilities_DfuUpdate);
-inline TARGET_HAS_PROPRITARY_BOOTER(true);
+inline TARGET_HAS_PROPRIETARY_BOOTER(true);

@@ -32,6 +32,6 @@ void HARD_Breakpoint()
 __nfweak GET_TARGET_CAPABILITIES(0);
 
 // NXP doesn't have a proprietatry bootloader
-inline TARGET_HAS_PROPRITARY_BOOTER(false);
+inline TARGET_HAS_PROPRIETARY_BOOTER(false);
 
 inline TARGET_IFU_CAPABLE(false);

@@ -111,6 +111,43 @@ macro(NF_ADD_PLATFORM_PACKAGES)
         find_package(SPIFFS REQUIRED)
     endif()
 
+    if(STM32_CUBE_PACKAGE_REQUIRED)
+        find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED)
+    endif()
+     
+endmacro()
+
+# Add ChibiOS platform dependencies to a specific CMake target
+# To be called from target CMakeList.txt
+macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
+
+    # add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
+    add_dependencies(${TARGET}.elf ChibiOS)
+
+    if(STM32_CUBE_PACKAGE_REQUIRED)
+        add_dependencies(${TARGET}.elf ${TARGET_STM32_CUBE_PACKAGE}_CubePackage)
+    endif()
+
+    # specific to nanoCRL
+    if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
+
+        # add dependencies from CHIBIOS_NETWORK_COMPONENTS (this is required to make sure that ChibiOS network components are unzip at the proper locations before the build starts)
+        # only required if networking is ON
+        if(USE_NETWORKING_OPTION)
+            add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
+
+            # add dependency for security provider mbedTLS
+            if(USE_SECURITY_MBEDTLS_OPTION)
+                add_dependencies(${NANOCLR_PROJECT_NAME}.elf mbedTLS)
+            endif()
+        endif()
+
+        if(NF_FEATURE_USE_SPIFFS)
+            add_dependencies(${NANOCLR_PROJECT_NAME}.elf SPIFFS)
+        endif()
+
+    endif()
+
 endmacro()
 
 # Add ChibiOS platform include directories to a specific CMake target
@@ -122,7 +159,7 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
         ${CHIBIOS_INCLUDE_DIRS}
         ${ChibiOSnfOverlay_INCLUDE_DIRS}
         ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-        ${STM32F7_CubePackage_INCLUDE_DIRS}
+        ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
         ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
         ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
         ${CHIBIOS_LWIP_INCLUDE_DIRS}
@@ -158,14 +195,10 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
-    # add header files with common OS definitions and board definitions specific for each image
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h @ONLY)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
+    # add header files with common OS definitions and board definitions
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
-             
+                ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
+
     # sources common to both builds
     target_sources(${TARGET}.elf PUBLIC
     
@@ -173,12 +206,18 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
         
         ${TARGET_CHIBIOS_COMMON_SOURCES}
 
+        ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
+
         ${CHIBIOS_SOURCES}
         ${ChibiOSnfOverlay_SOURCES}
     )
 
     # sources specific to nanoBooter
     if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
+
+        # add header file for board definition
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
+                    ${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h @ONLY)
 
         target_sources(${TARGET}.elf PUBLIC
             
@@ -194,16 +233,8 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     # sources specific to nanoCRL
     if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
 
-        # add dependencies from CHIBIOS_NETWORK_COMPONENTS (this is required to make sure that ChibiOS network components are unzip at the proper locations before the build starts)
-        # only required if networking is ON
-        if(USE_NETWORKING_OPTION)
-            add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
-
-            # add dependency for security provider mbedTLS
-            if(USE_SECURITY_MBEDTLS_OPTION)
-                add_dependencies(${NANOCLR_PROJECT_NAME}.elf mbedTLS)
-            endif()
-        endif()
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
+                    ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
 
         target_sources(${TARGET}.elf PUBLIC
 
@@ -212,14 +243,9 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
             ${CHIBIOS_FATFS_SOURCES}
             ${CHIBIOS_LWIP_SOURCES}
             ${SPIFFS_SOURCES}
-
-            ${STM32F7_CubePackage_SOURCES}
         )
 
     endif()
-
-    # add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
-    add_dependencies(${TARGET}.elf ChibiOS)
 
     # mbed TLS requires a config file
     if(USE_SECURITY_MBEDTLS_OPTION)
