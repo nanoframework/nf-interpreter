@@ -133,49 +133,6 @@ void DisplayInterface::SendCommand(CLR_UINT8 arg_count, ...)
     }
 }
 
-// void DisplayInterface::SendCommand2(CLR_UINT8 arg_count, ...)
-// {
-//     va_list ap;
-//     va_start(ap, arg_count);
-
-//     // First byte is the command
-//     CLR_UINT8 command = va_arg(ap, int);
-//     CPU_GPIO_SetPinState(LcdDC, GpioPinValue_Low); // Command mode
-//     SendBytes(&command, 1);
-
-//     CPU_GPIO_SetPinState(LcdDC, GpioPinValue_High); // Data mode
-
-//     int parameterCount = arg_count - 1;
-//     if (parameterCount)
-//     {
-//         if ( CommandMode == 1)
-//         {
-//             CPU_GPIO_SetPinState(LcdDC, GpioPinValue_Low); // Command mode
-
-//             for (int i = 0; i < parameterCount; i++)
-//             {
-//                 command = va_arg(ap, int);
-//                 SendBytes(&command, 1);
-//             }
-
-//             // All command & parameters use D/C signal
-//             CPU_GPIO_SetPinState(LcdDC, GpioPinValue_High); // Data mode
-//         }
-//         else
-//         {
-//             // Following bytes are data related to the command
-//             CLR_UINT8 parameters[parameterCount];
-//             for (int i = 0; i < parameterCount; i++)
-//             {
-//                 parameters[i] = va_arg(ap, int);
-//             }
-
-//             SendBytes(parameters, parameterCount);
-//         }
-//     }
-//     return;
-// }
-
 void DisplayInterface::DisplayBacklight(bool on) // true = on
 {
     if (on)
