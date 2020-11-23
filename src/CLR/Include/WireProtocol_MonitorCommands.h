@@ -7,9 +7,9 @@
 #ifndef _WIREPROTOCOL_COMMANDS_H_
 #define _WIREPROTOCOL_COMMANDS_H_
 
+#include <nanoHAL_v2.h>
 #include "WireProtocol.h"
 #include "WireProtocol_Message.h"
-#include <nanoPackStruct.h>
 
 // clang-format off
 
@@ -81,6 +81,13 @@ typedef struct Monitor_OemInfo_Reply
     ReleaseInfo m_releaseInfo;
 
 } Monitor_OemInfo_Reply;
+
+// structure with reply for Target information command
+typedef struct Monitor_TargetInfo_Reply
+{
+    TargetInfo m_TargetInfo;
+
+} Monitor_TargetInfo_Reply;
 
 typedef struct CLR_DBG_Commands_Monitor_ReadMemory
 {
@@ -183,6 +190,11 @@ extern "C"
     int Monitor_CheckMemory(WP_Message *message);
     int Monitor_MemoryMap(WP_Message *message);
     int Monitor_FlashSectorMap(WP_Message *message);
+    int Monitor_TargetInfo(WP_Message *message);
+
+    // helper functions
+    int nanoBooter_GetTargetInfo(TargetInfo *targetInfo);
+    int NanoBooter_GetReleaseInfo(ReleaseInfo *releaseInfo);
 
 #ifdef __cplusplus
 }
