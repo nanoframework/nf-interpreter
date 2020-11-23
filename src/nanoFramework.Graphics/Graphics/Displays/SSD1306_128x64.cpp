@@ -123,7 +123,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
     {
         case PORTRAIT:
         case PORTRAIT180:
-        return false;
+            return false;
 
         case LANDSCAPE:
         case LANDSCAPE180:
