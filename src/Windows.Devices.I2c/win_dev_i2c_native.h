@@ -22,14 +22,14 @@ enum I2cSharingMode
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cTransferStatus (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////
-//  enum I2cTransferStatus
-// {
-//     I2cTransferStatus_FullTransfer = 0,
-//     I2cTransferStatus_ClockStretchTimeout,
-//     I2cTransferStatus_PartialTransfer,
-//     I2cTransferStatus_SlaveAddressNotAcknowledged,
-//     I2cTransferStatus_UnknownError
-// };
+ enum I2cTransferStatus
+{
+    I2cTransferStatus_FullTransfer = 0,
+    I2cTransferStatus_ClockStretchTimeout,
+    I2cTransferStatus_PartialTransfer,
+    I2cTransferStatus_SlaveAddressNotAcknowledged,
+    I2cTransferStatus_UnknownError
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cBusSpeed (in managed code) !!!       //

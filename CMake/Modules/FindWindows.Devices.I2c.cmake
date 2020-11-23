@@ -19,8 +19,6 @@ list(APPEND Windows.Devices.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/Windows.Dev
 # source files
 set(Windows.Devices.I2c_SRCS
 
-    cpu_i2c.cpp
-    nanoHAL_i2c.cpp
     win_dev_i2c_native.cpp
     win_dev_i2c_native_Windows_Devices_I2C_I2cDevice.cpp
     win_dev_i2c_native_Windows_Devices_I2c_I2cController.cpp
@@ -38,7 +36,7 @@ foreach(SRC_FILE ${Windows.Devices.I2c_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    message("${SRC_FILE} >> ${Windows.Devices.I2c_SRC_FILE}") # debug helper
+    # message("${SRC_FILE} >> ${Windows.Devices.I2c_SRC_FILE}") # debug helper
     list(APPEND Windows.Devices.I2c_SOURCES ${Windows.Devices.I2c_SRC_FILE})
 endforeach()
 
