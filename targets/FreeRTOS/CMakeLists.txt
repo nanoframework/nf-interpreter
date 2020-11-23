@@ -43,25 +43,22 @@ if(NO_RTOS_SOURCE_FOLDER)
     endif()
 
     # FreeRTOS version
-    set(FREERTOS_VERSION_EMPTY TRUE)
+    set(RTOS_VERSION_EMPTY TRUE)
 
     # check if build was requested with a specifc FreeRTOS version
-    if(DEFINED FREERTOS_VERSION)
-        if(NOT "${FREERTOS_VERSION}" STREQUAL "")
-            set(FREERTOS_VERSION_EMPTY FALSE)
+    if(DEFINED RTOS_VERSION)
+        if(NOT "${RTOS_VERSION}" STREQUAL "")
+            set(RTOS_VERSION_EMPTY FALSE)
         endif()
     endif()
 
     # check if build was requested with a specifc FreeRTOS version
-    if(FREERTOS_VERSION_EMPTY)
+    if(RTOS_VERSION_EMPTY)
         # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(FREERTOS_VERSION_TAG "V10.4.1-kernel-only")
-    else()
-        # set SVN tag
-        set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")
+        set(RTOS_VERSION "V10.4.1-kernel-only")
     endif()
 
-    message(STATUS "RTOS is: FreeRTOS ${FREERTOS_VERSION_TAG} from GitHub repo")
+    message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} from GitHub repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step

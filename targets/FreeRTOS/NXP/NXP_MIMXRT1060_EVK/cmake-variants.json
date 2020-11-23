@@ -33,7 +33,7 @@
           "SUPPORT_ANY_BASE_CONVERSION": "ON",
           "RTOS": "FREERTOS",
           "TARGET_BOARD": "NXP_MIMXRT1060_EVK",
-          "FREERTOS_VERSION": "",
+          "RTOS_VERSION": "",
           "CMSIS_VERSION": "",
           "FATFS_VERSION": "",
           "LWIP_VERSION": "",
