@@ -33,7 +33,7 @@ typedef enum Monitor_Reboot_Options
 // structure for Access Memory operations
 typedef enum AccessMemory_Operations
 {
-    // check if memory space is erased
+    // compute CRC32 of the of a block of data starting at a given address
     AccessMemory_Check                      = 0x00,
 
     // read block of data starting at a given address

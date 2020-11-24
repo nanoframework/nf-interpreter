@@ -32,11 +32,13 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
             return iMXRTFlexSPIDriver_EraseBlock(NULL, location);
 
         case AccessMemory_Check:
-            return iMXRTFlexSPIDriver_IsBlockErased(NULL, location, lengthInBytes);
+            // compute CRC32 of the memory segment
+            *(unsigned int *)buffer = SUPPORT_ComputeCRC((uint32_t *)location, lengthInBytes, 0);
+            // done here
+            return true;
 
         case AccessMemory_Read:
             return iMXRTFlexSPIDriver_Read(NULL, location, lengthInBytes, buffer);
-            ;
 
         default:
             // default return is FALSE

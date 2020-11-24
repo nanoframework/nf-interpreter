@@ -10,6 +10,18 @@
 
 #if !defined(_WIN32)
 
+// dummy implementation to allow build of nanoCLR
+__nfweak int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode)
+{
+    (void)location;
+    (void)lengthInBytes;
+    (void)buffer;
+    (void)mode;
+    (void)errorCode;
+
+    return 0;
+}
+
 //////////////////////////////////////////////////
 
 int Monitor_Ping(WP_Message *message)

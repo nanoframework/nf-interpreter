@@ -31,9 +31,10 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
             return stm32FlashErase(location);
 
         case AccessMemory_Check:
-            // use FLASH driver to check is FLASH segment is erased
-            // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
-            return stm32FlashIsErased(location, lengthInBytes);
+            // compute CRC32 of the memory segment
+            *(unsigned int *)buffer = SUPPORT_ComputeCRC((uint32_t *)location, lengthInBytes, 0);
+            // done here
+            return true;
 
         case AccessMemory_Read:
             // use FLASH driver to perform read operation
