@@ -193,6 +193,7 @@ extern "C"
     int Monitor_TargetInfo(WP_Message *message);
 
     // helper functions
+    int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode);
     int nanoBooter_GetTargetInfo(TargetInfo *targetInfo);
     int NanoBooter_GetReleaseInfo(ReleaseInfo *releaseInfo);
 
